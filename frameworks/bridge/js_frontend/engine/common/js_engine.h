@@ -174,16 +174,6 @@ public:
         instanceName_ = name;
     }
 
-    void SetDialogCallback(const DialogCallback callback)
-    {
-        dialogCallback_ = callback;
-    }
-
-    DialogCallback GetDialogCallback() const
-    {
-        return dialogCallback_;
-    }
-
     void AddExtraNativeObject(const std::string& key, void* value)
     {
         extraNativeObject_[key] = value;
@@ -230,7 +220,6 @@ private:
     std::string instanceName_;
 
     std::unordered_map<std::string, void*> extraNativeObject_;
-    DialogCallback dialogCallback_;
 };
 
 } // namespace OHOS::Ace::Framework

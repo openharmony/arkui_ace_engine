@@ -37,6 +37,8 @@ public:
     static void GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle);
     static void SetIteamSize(const JSCallbackInfo& args);
     static void SetAlignStyle(int32_t value);
+    static void JsOnRequestPopupData(const JSCallbackInfo& args);
+    static void JsOnPopupSelected(const JSCallbackInfo& args);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_INDEXER_H

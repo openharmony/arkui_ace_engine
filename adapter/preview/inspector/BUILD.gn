@@ -43,6 +43,7 @@ template("ace_inspector") {
       "inspect_list_item_group.cpp",
       "inspect_marquee.cpp",
       "inspect_menu.cpp",
+      "inspect_navigation_bar.cpp",
       "inspect_node.cpp",
       "inspect_option.cpp",
       "inspect_panel.cpp",

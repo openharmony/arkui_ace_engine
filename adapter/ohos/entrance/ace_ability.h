@@ -23,12 +23,11 @@
 #include "ability_loader.h"
 #include "touch_event.h"
 #include "want.h"
+#include "window.h"
 
 namespace OHOS::Ace {
-using DialogCallback = std::function<void(std::string event, std::string param)>;
-void showDialog(OHOS::sptr<OHOS::Window> window, std::string jsBoudle, std::string param, DialogCallback callback);
 
-class AceAbility final : public OHOS::AppExecFwk::Ability {
+class AceAbility final : public OHOS::AppExecFwk::Ability, public OHOS::Rosen::IWindowChangeListener {
 public:
     AceAbility()
     {
@@ -44,7 +43,7 @@ public:
     void OnForeground(const OHOS::AAFwk::Want& want) override;
     void OnBackground() override;
     void OnBackPressed() override;
-    bool OnTouchEvent(const TouchEvent &touchEvent) override;
+    void OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
     void OnRestoreAbilityState(const OHOS::AppExecFwk::PacMap& inState) override;
     void OnSaveAbilityState(OHOS::AppExecFwk::PacMap& outState) override;
@@ -58,6 +57,9 @@ public:
     bool OnRestoreData(OHOS::AAFwk::WantParams& restoreData) override;
     void OnCompleteContinuation(int result) override;
     void OnRemoteTerminated() override;
+
+    // override Rosen::IWindowChangeListener virtual callback function
+    void OnSizeChange(OHOS::Rosen::Rect rect) override;
 
 private:
     static int32_t instanceId_;

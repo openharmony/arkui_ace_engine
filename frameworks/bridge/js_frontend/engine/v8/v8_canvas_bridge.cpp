@@ -273,6 +273,8 @@ void V8CanvasBridge::HandleContext(
         { "getJsonData", v8::Function::New(ctx, GetJsonData, v8::Local<v8::Value>(), 1).ToLocalChecked() },
         { "transferFromImageBitmap",
             v8::Function::New(ctx, TransferFromImageBitmap, v8::Local<v8::Value>(), 1).ToLocalChecked() },
+        { "drawBitmapMesh",
+            v8::Function::New(ctx, DrawBitmapMesh, v8::Local<v8::Value>(), 4).ToLocalChecked() },
     };
     for (const auto& iter : contextTable) {
         renderContext_->Set(ctx, v8::String::NewFromUtf8(ctx->GetIsolate(), iter.first).ToLocalChecked(), iter.second)
@@ -1829,6 +1831,38 @@ void V8CanvasBridge::TransferFromImageBitmap(const v8::FunctionCallbackInfo<v8::
     auto offscreenCanvas = birdge->GetOffscreenCanvas();
     auto task = [offscreenCanvas](const RefPtr<CanvasTaskPool>& pool) {
         pool->TransferFromImageBitmap(offscreenCanvas);
+    };
+    PushTaskToPage(ctx, args.Holder(), task);
+}
+
+void V8CanvasBridge::DrawBitmapMesh(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
+    if (args.Length() != 4) {
+        return;
+    }
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::HandleScope handleScope(isolate);
+    auto ctx = isolate->GetCurrentContext();
+
+    auto object = args[0]->ToObject(ctx).ToLocalChecked();
+    int32_t id = object->Get(ctx, v8::String::NewFromUtf8(isolate, "__bridgeId").ToLocalChecked())
+        .ToLocalChecked()->Int32Value(ctx).ToChecked();
+    int32_t bridgeId = id < 0 ? 0 : id;
+    auto mesh = GetDashValue(args, 1);
+    double column = args[2]->Int32Value(ctx).ToChecked();
+    double row = args[3]->Int32Value(ctx).ToChecked();
+    auto page = static_cast<RefPtr<JsAcePage>*>(isolate->GetData(V8EngineInstance::RUNNING_PAGE));
+    if (!page) {
+        return;
+    }
+    RefPtr<V8OffscreenCanvasBridge> birdge = AceType::DynamicCast<V8OffscreenCanvasBridge>(
+        (*page)->GetOffscreenCanvasBridgeById(bridgeId));
+    if (!birdge) {
+        return;
+    }
+    auto offscreenCanvas = birdge->GetOffscreenCanvas();
+    auto task = [offscreenCanvas, mesh, column, row](const RefPtr<CanvasTaskPool>& pool) {
+        pool->DrawBitmapMesh(offscreenCanvas, mesh, (int)column, (int)row);
     };
     PushTaskToPage(ctx, args.Holder(), task);
 }

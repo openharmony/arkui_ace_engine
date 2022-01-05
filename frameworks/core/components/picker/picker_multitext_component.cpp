@@ -57,7 +57,8 @@ void PickerMultiTextComponent::OnColumnsBuilding()
     }
 }
 
-std::string PickerMultiTextComponent::GetSelectedObject(bool isColumnChange, const std::string& changeColumnTag) const
+std::string PickerMultiTextComponent::GetSelectedObject(bool isColumnChange,
+    const std::string& changeColumnTag, int32_t status) const
 {
     if (isColumnChange) {
         auto column = GetColumn(changeColumnTag);
@@ -65,8 +66,8 @@ std::string PickerMultiTextComponent::GetSelectedObject(bool isColumnChange, con
             LOGE("can not get the changed column.");
             return "";
         }
-        return std::string("{\"column\":") + changeColumnTag + ",\"newValue\":\"" +
-            column->GetCurrentText() + "\",\"newSelected\":" + std::to_string(column->GetCurrentIndex()) + "}";
+        return std::string("{\"column\":") + changeColumnTag + ",\"newValue\":" +
+            column->GetCurrentText() + ",\"newSelected\":" + std::to_string(column->GetCurrentIndex()) + "}";
     }
 
     std::string result = "{\"newValue\":[";
@@ -86,7 +87,7 @@ std::string PickerMultiTextComponent::GetSelectedObject(bool isColumnChange, con
         }
         result.append(std::to_string(selectedIndexes_[index]));
     }
-    result.append("]}");
+    result.append(",\"status\":").append(std::to_string(status)).append("]}");
     return result;
 }
 

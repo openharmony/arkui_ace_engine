@@ -18,6 +18,9 @@
 
 #include "frameworks/core/components/shape/render_shape_container.h"
 #include "frameworks/core/pipeline/layers/transform_layer.h"
+#include "core/components/custom_paint/offscreen_canvas.h"
+#include "core/components/shape/flutter_render_shape.h"
+#include "core/pipeline/layers/picture_layer.h"
 
 namespace OHOS::Ace {
 
@@ -27,7 +30,10 @@ class FlutterRenderShapeContainer : public RenderShapeContainer {
 public:
     RenderLayer GetRenderLayer() override;
     void Paint(RenderContext& context, const Offset& offset) override;
-
+    void BitmapMesh(RenderContext& context, const Offset& offset);
+    void DrawBitmapMesh(SkBitmap& bitmap, int column, int row,
+        const float* vertices, const int* colors, const SkPaint* paint);
+    RefPtr<FlutterRenderShape> GetShapeChild(const RefPtr<RenderNode>& node);
     bool IsRepaintBoundary() const override
     {
         return true;
@@ -35,6 +41,11 @@ public:
 
 private:
     RefPtr<Flutter::TransformLayer> transformLayer_;
+    SkCanvas* skCanvas_;
+    // Flutter::PictureLayer pictureLayer_;
+    SkBitmap skOffBitmap_;
+    std::unique_ptr<SkCanvas> skOffCanvas_;
+
 };
 
 } // namespace OHOS::Ace

@@ -40,12 +40,18 @@ ohos_shared_library("mediaquery") {
     deps -= [ "$ace_root/build:libace" ]
     deps += [ "$ace_root/adapter/preview/build:libace_engine_windows" ]
     configs = [ ":mediaquery_config" ]
-    defines = [ "_USE_MATH_DEFINES" ]
+    defines = [
+      "_USE_MATH_DEFINES",
+      "WINDOWS_PLATFORM",
+    ]
   } else if (use_mac) {
     deps -= [ "$ace_root/build:libace" ]
     deps += [ "$ace_root/adapter/preview/build:libace_engine_mac" ]
     configs = [ ":mediaquery_config" ]
-    defines = [ "_USE_MATH_DEFINES" ]
+    defines = [
+      "_USE_MATH_DEFINES",
+      "MAC_PLATFORM",
+    ]
   }
 
   relative_install_dir = "module"

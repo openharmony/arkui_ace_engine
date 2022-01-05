@@ -20,6 +20,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
+#include "core/common/container.h"
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
 #include "core/components/button/button_theme.h"
@@ -32,6 +33,7 @@
 #include "core/components/gesture_listener/gesture_listener_component.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/picker/picker_base_element.h"
+#include "core/components/picker/picker_theme.h"
 #include "core/components/picker/render_picker_base.h"
 #include "core/components/triangle/triangle_component.h"
 
@@ -93,7 +95,7 @@ bool PickerDate::IsLeapYear(uint32_t year)
     return (year % 4 == 0); // other case, leap year equal that can divided by 4.
 }
 
-std::string PickerDate::ToString(bool jsonFormat) const
+std::string PickerDate::ToString(bool jsonFormat, int32_t status) const
 {
     if (!jsonFormat) {
         DateTime date;
@@ -104,7 +106,7 @@ std::string PickerDate::ToString(bool jsonFormat) const
     }
 
     return std::string("{\"year\":") + std::to_string(year_) + ",\"month\":" + std::to_string(month_) +
-           ",\"day\":" + std::to_string(day_) + "}";
+           ",\"day\":" + std::to_string(day_) + ",\"status\":" + std::to_string(status) + "}";
 }
 
 uint32_t PickerDate::ToDays() const
@@ -162,7 +164,7 @@ PickerTime PickerTime::Current()
     return time;
 }
 
-std::string PickerTime::ToString(bool jsonFormat, bool hasSecond) const
+std::string PickerTime::ToString(bool jsonFormat, bool hasSecond, int32_t status) const
 {
     if (!jsonFormat) {
         if (!hasSecond) {
@@ -175,11 +177,12 @@ std::string PickerTime::ToString(bool jsonFormat, bool hasSecond) const
 
     if (!hasSecond) {
         // use json format chars
-        return std::string("{\"hour\":") + std::to_string(hour_) + ",\"minute\":" + std::to_string(minute_) + "}";
+        return std::string("{\"hour\":") + std::to_string(hour_) + ",\"minute\":" + std::to_string(minute_) +
+            ",\"status\":" + std::to_string(status) + "}";
     }
     // use json format chars
     return std::string("{\"hour\":") + std::to_string(hour_) + ",\"minute\":" + std::to_string(minute_) +
-           ",\"second\":" + std::to_string(second_) + "}";
+            ",\"second\":" + std::to_string(second_) + ",\"status\":" + std::to_string(status) + "}";
 }
 
 PickerDateTime PickerDateTime::Current()
@@ -190,7 +193,7 @@ PickerDateTime PickerDateTime::Current()
     return dateTime;
 }
 
-std::string PickerDateTime::ToString(bool jsonFormat) const
+std::string PickerDateTime::ToString(bool jsonFormat, int32_t status) const
 {
     if (!jsonFormat) {
         return date_.ToString(jsonFormat);
@@ -200,7 +203,8 @@ std::string PickerDateTime::ToString(bool jsonFormat) const
            ",\"month\":" + std::to_string(date_.GetMonth()) +
            ",\"day\":" + std::to_string(date_.GetDay()) +
            ",\"hour\":" + std::to_string(time_.GetHour()) +
-           ",\"minute\":" + std::to_string(time_.GetMinute()) + "}";
+           ",\"minute\":" + std::to_string(time_.GetMinute()) +
+           ",\"status\":" + std::to_string(status) + "}";
 }
 
 RefPtr<RenderNode> PickerBaseComponent::CreateRenderNode()
@@ -309,6 +313,7 @@ void PickerBaseComponent::ShowDialog(const RefPtr<StackElement>& stack, bool dis
 
 bool PickerBaseComponent::HideDialog()
 {
+    CloseDialog();
     if (!isDialog_) {
         return false;
     }
@@ -330,6 +335,69 @@ bool PickerBaseComponent::HideDialog()
     dialogShowed_ = false;
     ClearAccessibilityNodes();
     return true;
+}
+
+void PickerBaseComponent::OpenDialog(DialogProperties& properties)
+{
+    if (!isCreateDialogComponent_) {
+        return;
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        return;
+    }
+    auto context = container->GetPipelineContext();
+    if (!context) {
+        return;
+    }
+
+    auto executor = context->GetTaskExecutor();
+    if (!executor) {
+        return;
+    }
+
+    executor->PostTask(
+        [context, dialogProperties = properties, weak = WeakClaim(this)]() mutable {
+            const auto& picker = weak.Upgrade();
+            if (context && picker) {
+                picker->dialogComponent_ = context->ShowDialog(dialogProperties, false);
+            }
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void PickerBaseComponent::CloseDialog()
+{
+    if (!isCreateDialogComponent_) {
+        return;
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        return;
+    }
+    auto context = container->GetPipelineContext();
+    if (!context) {
+        return;
+    }
+    const auto& lastStack = context->GetLastStack();
+    if (!lastStack) {
+        return;
+    }
+    auto executor = context->GetTaskExecutor();
+    if (!executor) {
+        return;
+    }
+    executor->PostTask(
+        [lastStack, dialogComponent = dialogComponent_]() {
+            if (!lastStack || !dialogComponent) {
+                return;
+            }
+            auto dialogId = dialogComponent->GetDialogId();
+            lastStack->PopDialog(dialogId);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void PickerBaseComponent::OnTitleBuilding()
@@ -538,7 +606,7 @@ void PickerBaseComponent::InitializeButtons(
     auto buttonFocusColor = theme_->GetFocusColor();
     buttonTextStyle.SetTextColor(buttonFocusColor);
 
-    if (isDialog_ && hasButtons_) {
+    if (isDialog_ || isCreateDialogComponent_) {
         RefPtr<BoxComponent> topPaddingBox = AceType::MakeRefPtr<BoxComponent>();
         topPaddingBox->SetWidth(theme_->GetButtonTopPadding().Value(), theme_->GetButtonTopPadding().Unit());
         topPaddingBox->SetHeight(theme_->GetButtonTopPadding().Value(), theme_->GetButtonTopPadding().Unit());
@@ -646,6 +714,10 @@ void PickerBaseComponent::Initialize(
 {
     if (!themeManager) {
         return;
+    }
+
+    if (!theme_) {
+        theme_ = themeManager->GetTheme<PickerTheme>();
     }
     accessibilityManager_ = accessibilityManager;
     OnColumnsBuilding();

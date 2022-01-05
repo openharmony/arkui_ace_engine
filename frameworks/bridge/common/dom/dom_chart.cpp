@@ -54,6 +54,11 @@ void DOMChart::SetChartAttrOptions(const ChartOptions& chartOptions)
 void DOMChart::SetChartAttrDatasets(const std::vector<MainChart>& datasets)
 {
     chartDatasets_ = datasets;
+    isResetPosition_ = false;
+    position_ = 0;
+    seriesNum_ = 0;
+    lineData_.clear();
+    isSetFirst_ = false;
 }
 
 void DOMChart::SetChartAttrSegments(const std::vector<Segment>& segments)

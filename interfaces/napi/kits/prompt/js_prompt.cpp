@@ -151,138 +151,122 @@ struct PromptAsyncContext {
     std::string callbackSuccessString;
     std::string callbackCancelString;
     std::string callbackCompleteString;
+    napi_deferred deferred = nullptr;
+    napi_ref callbackRef = nullptr;
 };
 
 static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 {
-    size_t argc = 1;
-    napi_value argv = nullptr;
+    size_t requireArgc = 1;
+    size_t argc = 2;
+    napi_value argv[3] = { 0 };
     napi_value thisVar = nullptr;
     void* data = nullptr;
-    napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
-
+    napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
+    NAPI_ASSERT(env, argc >= requireArgc, "requires 1 parameter");
     auto asyncContext = new PromptAsyncContext();
     asyncContext->env = env;
-    napi_value successFunc = nullptr;
-    napi_value cancelFunc = nullptr;
-    napi_value completeFunc = nullptr;
-    size_t ret = 0;
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, argv, &valueType);
-    if (valueType == napi_object) {
-        napi_get_named_property(env, argv, "title", &asyncContext->titleNApi);
-        napi_get_named_property(env, argv, "message", &asyncContext->messageNApi);
-        napi_get_named_property(env, argv, "buttons", &asyncContext->buttonsNApi);
-        napi_get_named_property(env, argv, "autoCancel", &asyncContext->autoCancel);
-        napi_get_named_property(env, argv, "success", &successFunc);
-        napi_get_named_property(env, argv, "cancel", &cancelFunc);
-        napi_get_named_property(env, argv, "complete", &completeFunc);
-
-        napi_typeof(env, asyncContext->titleNApi, &valueType);
-        if (valueType == napi_string) {
-            size_t titleLen = GetParamLen(asyncContext->titleNApi);
-            std::unique_ptr<char[]> titleChar = std::make_unique<char[]>(titleLen);
-            napi_get_value_string_utf8(env, asyncContext->titleNApi, titleChar.get(), titleLen, &ret);
-            asyncContext->titleString = titleChar.get();
-        } else if (valueType == napi_object) {
-            int32_t id = 0;
-            int32_t type = 0;
-            std::vector<std::string> params;
-            if (ParseResourceParam(env, asyncContext->titleNApi, id, type, params)) {
-                ParseString(id, type, params, asyncContext->titleString);
-            }
-        }
-        napi_typeof(env, asyncContext->messageNApi, &valueType);
-        if (valueType == napi_string) {
-            size_t messageLen = GetParamLen(asyncContext->messageNApi) + 1;
-            std::unique_ptr<char[]> messageChar = std::make_unique<char[]>(messageLen);
-            napi_get_value_string_utf8(env, asyncContext->messageNApi, messageChar.get(), messageLen, &ret);
-            asyncContext->messageString = messageChar.get();
-        } else if (valueType == napi_object) {
-            int32_t id = 0;
-            int32_t type = 0;
-            std::vector<std::string> params;
-            if (ParseResourceParam(env, asyncContext->messageNApi, id, type, params)) {
-                ParseString(id, type, params, asyncContext->messageString);
-            }
-        }
-        bool isBool = false;
-        napi_is_array(env, asyncContext->buttonsNApi, &isBool);
-        napi_typeof(env, asyncContext->buttonsNApi, &valueType);
-        if (valueType == napi_object && isBool) {
-            uint32_t buttonsLen = 0;
-            napi_value buttonArray = nullptr;
-            napi_value textNApi = nullptr;
-            napi_value colorNApi = nullptr;
-
-            uint32_t index = 0;
-            napi_get_array_length(env, asyncContext->buttonsNApi, &buttonsLen);
-            int buttonsLenInt = buttonsLen;
-            if (buttonsLenInt > SHOW_DIALOG_BUTTON_NUM_MAX) {
-                buttonsLenInt = SHOW_DIALOG_BUTTON_NUM_MAX;
-                LOGE("Supports 1 - 3 buttons");
-            }
-            for (int j = 0; j < buttonsLenInt; j++) {
-                napi_get_element(env, asyncContext->buttonsNApi, index, &buttonArray);
-                index++;
-                napi_get_named_property(env, buttonArray, "text", &textNApi);
-                napi_get_named_property(env, buttonArray, "color", &colorNApi);
-                std::string textString;
-                std::string colorString;
-                napi_typeof(env, textNApi, &valueType);
-                if (valueType == napi_string) {
-                    size_t textLen = GetParamLen(textNApi) + 1;
-                    std::unique_ptr<char[]> text = std::make_unique<char[]>(textLen);
-                    napi_get_value_string_utf8(env, textNApi, text.get(), textLen, &ret);
-                    textString = text.get();
+    for (size_t i = 0; i < argc; i++) {
+        size_t ret = 0;
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, argv[i], &valueType);
+        if ((i == 0) && (valueType == napi_object)) {
+            napi_get_named_property(env, argv[0], "title", &asyncContext->titleNApi);
+            napi_get_named_property(env, argv[0], "message", &asyncContext->messageNApi);
+            napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
+            napi_get_named_property(env, argv[0], "autoCancel", &asyncContext->autoCancel);
+            napi_typeof(env, asyncContext->titleNApi, &valueType);
+            if (valueType == napi_string) {
+                size_t titleLen = GetParamLen(asyncContext->titleNApi);
+                std::unique_ptr<char[]> titleChar = std::make_unique<char[]>(titleLen);
+                napi_get_value_string_utf8(env, asyncContext->titleNApi, titleChar.get(), titleLen, &ret);
+                asyncContext->titleString = titleChar.get();
+            } else if (valueType == napi_object) {
+                int32_t id = 0;
+                int32_t type = 0;
+                std::vector<std::string> params;
+                if (ParseResourceParam(env, asyncContext->titleNApi, id, type, params)) {
+                    ParseString(id, type, params, asyncContext->titleString);
                 }
-                napi_typeof(env, colorNApi, &valueType);
-                if (valueType == napi_string) {
-                    size_t colorLen = GetParamLen(colorNApi) + 1;
-                    std::unique_ptr<char[]> color = std::make_unique<char[]>(colorLen);
-                    napi_get_value_string_utf8(env, colorNApi, color.get(), colorLen, &ret);
-                    colorString = color.get();
-                }
-                ButtonInfo buttonInfo = {
-                    .text = textString,
-                    .textColor = colorString
-                };
-                asyncContext->buttons.emplace_back(buttonInfo);
             }
-        }
+            napi_typeof(env, asyncContext->messageNApi, &valueType);
+            if (valueType == napi_string) {
+                size_t messageLen = GetParamLen(asyncContext->messageNApi) + 1;
+                std::unique_ptr<char[]> messageChar = std::make_unique<char[]>(messageLen);
+                napi_get_value_string_utf8(env, asyncContext->messageNApi, messageChar.get(), messageLen, &ret);
+                asyncContext->messageString = messageChar.get();
+            } else if (valueType == napi_object) {
+                int32_t id = 0;
+                int32_t type = 0;
+                std::vector<std::string> params;
+                if (ParseResourceParam(env, asyncContext->messageNApi, id, type, params)) {
+                    ParseString(id, type, params, asyncContext->messageString);
+                }
+            }
+            bool isBool = false;
+            napi_is_array(env, asyncContext->buttonsNApi, &isBool);
+            napi_typeof(env, asyncContext->buttonsNApi, &valueType);
+            if (valueType == napi_object && isBool) {
+                uint32_t buttonsLen = 0;
+                napi_value buttonArray = nullptr;
+                napi_value textNApi = nullptr;
+                napi_value colorNApi = nullptr;
 
-        napi_typeof(env, asyncContext->autoCancel, &valueType);
-        if (valueType == napi_boolean) {
-            napi_get_value_bool(env, asyncContext->autoCancel, &asyncContext->autoCancelBool);
-        }
-
-        napi_typeof(env, successFunc, &valueType);
-        if (valueType == napi_function) {
-            napi_create_reference(env, successFunc, 1, &asyncContext->callbackSuccess);
-        }
-
-        napi_typeof(env, cancelFunc, &valueType);
-        if (valueType == napi_function) {
-            napi_create_reference(env, cancelFunc, 1, &asyncContext->callbackCancel);
-        }
-
-        napi_typeof(env, completeFunc, &valueType);
-        if (valueType == napi_function) {
-            napi_create_reference(env, completeFunc, 1, &asyncContext->callbackComplete);
-        }
-        if (asyncContext->callbackSuccess) {
-            asyncContext->callbacks.emplace("success");
-        }
-        if (asyncContext->callbackCancel) {
-            asyncContext->callbacks.emplace("cancel");
-        }
-        if (asyncContext->callbackComplete) {
-            asyncContext->callbacks.emplace("complete");
+                uint32_t index = 0;
+                napi_get_array_length(env, asyncContext->buttonsNApi, &buttonsLen);
+                int buttonsLenInt = buttonsLen;
+                if (buttonsLenInt > SHOW_DIALOG_BUTTON_NUM_MAX) {
+                    buttonsLenInt = SHOW_DIALOG_BUTTON_NUM_MAX;
+                    LOGE("Supports 1 - 3 buttons");
+                }
+                for (int j = 0; j < buttonsLenInt; j++) {
+                    napi_get_element(env, asyncContext->buttonsNApi, index, &buttonArray);
+                    index++;
+                    napi_get_named_property(env, buttonArray, "text", &textNApi);
+                    napi_get_named_property(env, buttonArray, "color", &colorNApi);
+                    std::string textString;
+                    std::string colorString;
+                    napi_typeof(env, textNApi, &valueType);
+                    if (valueType == napi_string) {
+                        size_t textLen = GetParamLen(textNApi) + 1;
+                        std::unique_ptr<char[]> text = std::make_unique<char[]>(textLen);
+                        napi_get_value_string_utf8(env, textNApi, text.get(), textLen, &ret);
+                        textString = text.get();
+                    }
+                    napi_typeof(env, colorNApi, &valueType);
+                    if (valueType == napi_string) {
+                        size_t colorLen = GetParamLen(colorNApi) + 1;
+                        std::unique_ptr<char[]> color = std::make_unique<char[]>(colorLen);
+                        napi_get_value_string_utf8(env, colorNApi, color.get(), colorLen, &ret);
+                        colorString = color.get();
+                    }
+                    ButtonInfo buttonInfo = {
+                        .text = textString,
+                        .textColor = colorString
+                    };
+                    asyncContext->buttons.emplace_back(buttonInfo);
+                }
+            }
+            napi_typeof(env, asyncContext->autoCancel, &valueType);
+            if (valueType == napi_boolean) {
+                napi_get_value_bool(env, asyncContext->autoCancel, &asyncContext->autoCancelBool);
+            }
+        } else if (valueType == napi_function) {
+            napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
+        } else {
+            NAPI_ASSERT(env, false, "type mismatch");
         }
     }
-
+    napi_value result = nullptr;
+    if (asyncContext->callbackRef == nullptr) {
+        napi_create_promise(env, &asyncContext->deferred, &result);
+    } else {
+        napi_get_undefined(env, &result);
+    }
     napi_value resource = nullptr;
     napi_create_string_utf8(env, "JSPromptShowDialog", NAPI_AUTO_LENGTH, &resource);
+    asyncContext->callbacks.emplace("success");
+    asyncContext->callbacks.emplace("cancel");
     napi_create_async_work(
         env, nullptr, resource, [](napi_env env, void* data) {},
         [](napi_env env, napi_status status, void* data) {
@@ -291,66 +275,53 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_jsEngine(env, (void**)&jsEngine);
             auto callBack = [env, asyncContext](int32_t callbackType, int32_t successType) {
                 napi_value ret;
-                napi_value callback = nullptr;
                 napi_value successIndex = nullptr;
                 napi_create_int32(env, successType, &successIndex);
                 napi_value indexObj = nullptr;
                 napi_create_object(env, &indexObj);
                 napi_set_named_property(env, indexObj, "index", successIndex);
+                napi_value result[2] = { 0 };
+                napi_create_object(env, &result[1]);
+                napi_set_named_property(env, result[1], "index", successIndex);
+                bool dialogResult = true;
                 switch (callbackType) {
                     case 0:
-                        if (asyncContext->callbackSuccess) {
-                            napi_get_reference_value(env, asyncContext->callbackSuccess, &callback);
-                            napi_call_function(env, nullptr, callback, 1, &indexObj, &ret);
-                            napi_delete_reference(env, asyncContext->callbackSuccess);
-                        }
+                         napi_get_undefined(env, &result[0]);
+                         dialogResult = true;
                         break;
                     case 1:
-                        if (asyncContext->callbackCancel) {
-                            napi_value result = nullptr;
-                            napi_value returnObj = nullptr;
-                            napi_create_object(env, &returnObj);
-                            asyncContext->callbackCancelString = "cancel";
-                            napi_create_string_utf8(
-                                env, asyncContext->callbackCancelString.c_str(), NAPI_AUTO_LENGTH, &result);
-                            napi_get_reference_value(env, asyncContext->callbackCancel, &callback);
-                            napi_call_function(env, nullptr, callback, 1, &result, &ret);
-                            napi_delete_reference(env, asyncContext->callbackCancel);
-                        }
-                        break;
-                    case 2:
-                        if (asyncContext->callbackComplete) {
-                            napi_value result = nullptr;
-                            napi_value returnObj = nullptr;
-                            napi_create_object(env, &returnObj);
-                            asyncContext->callbackCompleteString = "Complete";
-                            napi_create_string_utf8(
-                                env, asyncContext->callbackCompleteString.c_str(), NAPI_AUTO_LENGTH, &result);
-                            napi_get_reference_value(env, asyncContext->callbackComplete, &callback);
-                            napi_call_function(env, nullptr, callback, 1, &result, &ret);
-                            napi_delete_reference(env, asyncContext->callbackComplete);
-                        }
-                        napi_delete_async_work(env, asyncContext->work);
-                        delete asyncContext;
-                        break;
-                    default:
-                        napi_delete_async_work(env, asyncContext->work);
-                        delete asyncContext;
+                        napi_value message = nullptr;
+                        napi_create_string_utf8(env, "cancal", strlen("cancal"), &message);
+                        napi_create_error(env, nullptr, message, &result[0]);
+                        dialogResult = false;
                         break;
                 }
+                if (asyncContext->deferred) {
+                    if (dialogResult) {
+                        napi_resolve_deferred(env, asyncContext->deferred, result[1]);
+                    } else {
+                        napi_reject_deferred(env, asyncContext->deferred, result[0]);
+                    }
+                } else {
+                    napi_value callback = nullptr;
+                    napi_get_reference_value(env, asyncContext->callbackRef, &callback);
+                    napi_call_function(env, nullptr, callback, sizeof(result) / sizeof(result[0]), result, &ret);
+                    napi_delete_reference(env, asyncContext->callbackRef);
+                }
+                napi_delete_async_work(env, asyncContext->work);
+                delete asyncContext;
             };
             jsEngine->GetFrontend()->ShowDialog(asyncContext->titleString, asyncContext->messageString,
                 asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
         },
         (void*)asyncContext, &asyncContext->work);
     napi_queue_async_work(env, asyncContext->work);
-    return nullptr;
+    return result;
 }
 
 struct ShowActionMenuAsyncContext {
     napi_env env = nullptr;
     napi_async_work work = nullptr;
-
     napi_value titleNApi = nullptr;
     napi_value buttonsNApi = nullptr;
     napi_ref callbackSuccess = nullptr;
@@ -358,126 +329,114 @@ struct ShowActionMenuAsyncContext {
     napi_ref callbackComplete = nullptr;
     std::string titleString;
     std::vector<ButtonInfo> buttons;
-
     std::string callbackSuccessString;
     std::string callbackFailString;
     std::string callbackCompleteString;
+    napi_deferred deferred = nullptr;
+    napi_ref callbackRef = nullptr;
 };
 
 static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 {
-    size_t argc = 1;
-    napi_value argv = nullptr;
+    size_t requireArgc = 1;
+    size_t argc = 2;
+    napi_value argv[3] = { 0 };
     napi_value thisVar = nullptr;
     void* data = nullptr;
-    napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
-
+    napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
+    NAPI_ASSERT(env, argc >= requireArgc, "requires 1 parameter");
     auto asyncContext = new ShowActionMenuAsyncContext();
     asyncContext->env = env;
-    napi_value successFunc = nullptr;
-    napi_value failFunc = nullptr;
-    napi_value completeFunc = nullptr;
-    size_t ret = 0;
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, argv, &valueType);
-    if (valueType == napi_object) {
-        napi_get_named_property(env, argv, "title", &asyncContext->titleNApi);
-        napi_get_named_property(env, argv, "buttons", &asyncContext->buttonsNApi);
-        napi_get_named_property(env, argv, "success", &successFunc);
-        napi_get_named_property(env, argv, "fail", &failFunc);
-        napi_get_named_property(env, argv, "complete", &completeFunc);
-
-        napi_typeof(env, asyncContext->titleNApi, &valueType);
-        if (valueType == napi_string) {
-            size_t titleLen = GetParamLen(asyncContext->titleNApi) + 1;
-            std::unique_ptr<char[]> titleChar = std::make_unique<char[]>(titleLen);
-            napi_get_value_string_utf8(env, asyncContext->titleNApi, titleChar.get(), titleLen, &ret);
-            asyncContext->titleString = titleChar.get();
-        } else if (valueType == napi_object) {
-            int32_t id = 0;
-            int32_t type = 0;
-            std::vector<std::string> params;
-            if (ParseResourceParam(env, asyncContext->titleNApi, id, type, params)) {
-                ParseString(id, type, params, asyncContext->titleString);
-            }
-        }
-        bool isBool = false;
-        napi_is_array(env, asyncContext->buttonsNApi, &isBool);
-        napi_typeof(env, asyncContext->buttonsNApi, &valueType);
-        if (valueType == napi_object && isBool) {
-            uint32_t buttonsLen = 0;
-            napi_value buttonArray = nullptr;
-            napi_value textNApi = nullptr;
-            napi_value colorNApi = nullptr;
-
-            uint32_t index = 0;
-            napi_get_array_length(env, asyncContext->buttonsNApi, &buttonsLen);
-            int buttonsLenInt = buttonsLen;
-            if (buttonsLenInt > SHOW_ACTION_MENU_BUTTON_NUM_MAX) {
-                asyncContext->callbackFailString = "enableAlertBeforeBackPage:buttons is invalid";
-                asyncContext->callbackCompleteString = "enableAlertBeforeBackPage:buttons is invalid";
-            }
-            for (int j = 0; j < buttonsLenInt; j++) {
-                napi_get_element(env, asyncContext->buttonsNApi, index, &buttonArray);
-                index++;
-                napi_get_named_property(env, buttonArray, "text", &textNApi);
-                napi_get_named_property(env, buttonArray, "color", &colorNApi);
-                std::string textString;
-                std::string colorString;
-                napi_typeof(env, textNApi, &valueType);
-                if (valueType == napi_string) {
-                    size_t textLen = GetParamLen(textNApi) + 1;
-                    char text[textLen + 1];
-                    napi_get_value_string_utf8(env, textNApi, text, textLen, &ret);
-                    textString = text;
-                } else if (valueType == napi_object) {
-                    int32_t id = 0;
-                    int32_t type = 0;
-                    std::vector<std::string> params;
-                    if (ParseResourceParam(env, textNApi, id, type, params)) {
-                        ParseString(id, type, params, textString);
-                    }
+    for (size_t i = 0; i < argc; i++) {
+        size_t ret = 0;
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, argv[i], &valueType);
+        if ((i == 0) && (valueType == napi_object)) {
+            napi_get_named_property(env, argv[0], "title", &asyncContext->titleNApi);
+            napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
+            napi_typeof(env, asyncContext->titleNApi, &valueType);
+            if (valueType == napi_string) {
+                size_t titleLen = GetParamLen(asyncContext->titleNApi) + 1;
+                std::unique_ptr<char[]> titleChar = std::make_unique<char[]>(titleLen);
+                napi_get_value_string_utf8(env, asyncContext->titleNApi, titleChar.get(), titleLen, &ret);
+                asyncContext->titleString = titleChar.get();
+            } else if (valueType == napi_object) {
+                int32_t id = 0;
+                int32_t type = 0;
+                std::vector<std::string> params;
+                if (ParseResourceParam(env, asyncContext->titleNApi, id, type, params)) {
+                    ParseString(id, type, params, asyncContext->titleString);
                 }
-                napi_typeof(env, colorNApi, &valueType);
-                if (valueType == napi_string) {
-                    size_t colorLen = GetParamLen(colorNApi) + 1;
-                    char color[colorLen + 1];
-                    napi_get_value_string_utf8(env, colorNApi, color, colorLen, &ret);
-                    colorString = color;
-                } else if (valueType == napi_object) {
-                    int32_t id = 0;
-                    int32_t type = 0;
-                    std::vector<std::string> params;
-                    if (ParseResourceParam(env, colorNApi, id, type, params)) {
-                        ParseString(id, type, params, colorString);
-                    }
-                }
-                ButtonInfo buttonInfo = {
-                    .text = textString,
-                    .textColor = colorString
-                };
-                asyncContext->buttons.emplace_back(buttonInfo);
             }
+            bool isBool = false;
+            napi_is_array(env, asyncContext->buttonsNApi, &isBool);
+            napi_typeof(env, asyncContext->buttonsNApi, &valueType);
+            if (valueType == napi_object && isBool) {
+                uint32_t buttonsLen = 0;
+                napi_value buttonArray = nullptr;
+                napi_value textNApi = nullptr;
+                napi_value colorNApi = nullptr;
+                uint32_t index = 0;
+                napi_get_array_length(env, asyncContext->buttonsNApi, &buttonsLen);
+                int buttonsLenInt = buttonsLen;
+                if (buttonsLenInt > SHOW_ACTION_MENU_BUTTON_NUM_MAX) {
+                    buttonsLenInt = SHOW_ACTION_MENU_BUTTON_NUM_MAX;
+                    LOGE("Supports 1 - 6 buttons");
+                }
+                for (int j = 0; j < buttonsLenInt; j++) {
+                    napi_get_element(env, asyncContext->buttonsNApi, index, &buttonArray);
+                    index++;
+                    napi_get_named_property(env, buttonArray, "text", &textNApi);
+                    napi_get_named_property(env, buttonArray, "color", &colorNApi);
+                    std::string textString;
+                    std::string colorString;
+                    napi_typeof(env, textNApi, &valueType);
+                    if (valueType == napi_string) {
+                        size_t textLen = GetParamLen(textNApi) + 1;
+                        char text[textLen + 1];
+                        napi_get_value_string_utf8(env, textNApi, text, textLen, &ret);
+                        textString = text;
+                    } else if (valueType == napi_object) {
+                        int32_t id = 0;
+                        int32_t type = 0;
+                        std::vector<std::string> params;
+                        if (ParseResourceParam(env, textNApi, id, type, params)) {
+                            ParseString(id, type, params, textString);
+                        }
+                    }
+                    napi_typeof(env, colorNApi, &valueType);
+                    if (valueType == napi_string) {
+                        size_t colorLen = GetParamLen(colorNApi) + 1;
+                        char color[colorLen + 1];
+                        napi_get_value_string_utf8(env, colorNApi, color, colorLen, &ret);
+                        colorString = color;
+                    } else if (valueType == napi_object) {
+                        int32_t id = 0;
+                        int32_t type = 0;
+                        std::vector<std::string> params;
+                        if (ParseResourceParam(env, colorNApi, id, type, params)) {
+                            ParseString(id, type, params, colorString);
+                        }
+                    }
+                    ButtonInfo buttonInfo = {
+                        .text = textString,
+                        .textColor = colorString
+                    };
+                    asyncContext->buttons.emplace_back(buttonInfo);
+                }
+            }
+        } else if (valueType == napi_function) {
+            napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
+        } else {
+            NAPI_ASSERT(env, false, "type mismatch");
         }
-
-        napi_typeof(env, successFunc, &valueType);
-        if (valueType == napi_function) {
-            napi_create_reference(env, successFunc, 1, &asyncContext->callbackSuccess);
-        }
-
-        napi_typeof(env, failFunc, &valueType);
-        if (valueType == napi_function) {
-            napi_create_reference(env, failFunc, 1, &asyncContext->callbackFail);
-        }
-
-        napi_typeof(env, completeFunc, &valueType);
-        if (valueType == napi_function) {
-            napi_create_reference(env, completeFunc, 1, &asyncContext->callbackComplete);
-        }
-    } else {
-        return nullptr;
     }
-
+    napi_value result = nullptr;
+    if (asyncContext->callbackRef == nullptr) {
+        napi_create_promise(env, &asyncContext->deferred, &result);
+    } else {
+        napi_get_undefined(env, &result);
+    }
     napi_value resource = nullptr;
     napi_create_string_utf8(env, "JSPromptShowActionMenu", NAPI_AUTO_LENGTH, &resource);
     napi_create_async_work(
@@ -486,74 +445,50 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             ShowActionMenuAsyncContext* asyncContext = (ShowActionMenuAsyncContext*)data;
             OHOS::Ace::Framework::JsEngine* jsEngine = nullptr;
             napi_get_jsEngine(env, (void**)&jsEngine);
-            napi_value ret;
-            napi_value callback = nullptr;
-            if (!asyncContext->callbackFailString.empty()) {
-                if (asyncContext->callbackFail) {
-                    napi_value returnObj = GetReturnObj(env, asyncContext->callbackFailString);
-                    napi_get_reference_value(env, asyncContext->callbackFail, &callback);
-                    napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                    napi_delete_reference(env, asyncContext->callbackFail);
+            auto callBack = [env, asyncContext](int32_t callbackType, int32_t successType) {
+                napi_value ret;
+                napi_value successIndex = nullptr;
+                napi_create_int32(env, successType, &successIndex);
+                asyncContext->callbackSuccessString = "showActionMenu:ok";
+                napi_value indexObj = GetReturnObj(env, asyncContext->callbackSuccessString);
+                napi_set_named_property(env, indexObj, "index", successIndex);
+                napi_value result[2] = { 0 };
+                napi_create_object(env, &result[1]);
+                napi_set_named_property(env, result[1], "index", successIndex);
+                bool dialogResult = true;
+                switch (callbackType) {
+                    case 0:
+                        napi_get_undefined(env, &result[0]);
+                        dialogResult = true;
+                        break;
+                    case 1:
+                        napi_value message = nullptr;
+                        napi_create_string_utf8(env, "cancal", strlen("cancal"), &message);
+                        napi_create_error(env, nullptr, message, &result[0]);
+                        dialogResult = false;
+                        break;
                 }
-                if (asyncContext->callbackComplete) {
-                    napi_value returnObj = GetReturnObj(env, asyncContext->callbackCompleteString);
-                    napi_get_reference_value(env, asyncContext->callbackComplete, &callback);
-                    napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                    napi_delete_reference(env, asyncContext->callbackComplete);
+                if (asyncContext->deferred) {
+                    if (dialogResult) {
+                        napi_resolve_deferred(env, asyncContext->deferred, result[1]);
+                    } else {
+                        napi_reject_deferred(env, asyncContext->deferred, result[0]);
+                    }
+                } else {
+                    napi_value callback = nullptr;
+                    napi_get_reference_value(env, asyncContext->callbackRef, &callback);
+                    napi_call_function(env, nullptr, callback, sizeof(result) / sizeof(result[0]), result, &ret);
+                    napi_delete_reference(env, asyncContext->callbackRef);
                 }
                 napi_delete_async_work(env, asyncContext->work);
                 delete asyncContext;
-            } else {
-                auto callBack = [env, asyncContext](int32_t callbackType, int32_t successType) {
-                    napi_value ret;
-                    napi_value callback = nullptr;
-                    napi_value successIndex = nullptr;
-                    napi_create_int32(env, successType, &successIndex);
-                    asyncContext->callbackSuccessString = "showActionMenu:ok";
-                    napi_value indexObj = GetReturnObj(env, asyncContext->callbackSuccessString);
-                    napi_set_named_property(env, indexObj, "tapIndex", successIndex);
-                    switch (callbackType) {
-                        case 0:
-                            if (asyncContext->callbackSuccess) {
-                                napi_get_reference_value(env, asyncContext->callbackSuccess, &callback);
-                                napi_call_function(env, nullptr, callback, 1, &indexObj, &ret);
-                                napi_delete_reference(env, asyncContext->callbackSuccess);
-                            }
-                            if (asyncContext->callbackComplete) {
-                                napi_get_reference_value(env, asyncContext->callbackComplete, &callback);
-                                napi_call_function(env, nullptr, callback, 1, &indexObj, &ret);
-                                napi_delete_reference(env, asyncContext->callbackComplete);
-                            }
-                            break;
-                        case 1:
-                            if (asyncContext->callbackFail) {
-                                asyncContext->callbackFailString = "showActionMenu:fail cancel";
-                                napi_value returnObj = GetReturnObj(env, asyncContext->callbackFailString);
-                                napi_get_reference_value(env, asyncContext->callbackFail, &callback);
-                                napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                                napi_delete_reference(env, asyncContext->callbackFail);
-                            }
-                            if (asyncContext->callbackComplete) {
-                                asyncContext->callbackCompleteString = "showActionMenu:fail cancel";
-                                napi_value returnObj = GetReturnObj(env, asyncContext->callbackCompleteString);
-                                napi_get_reference_value(env, asyncContext->callbackComplete, &callback);
-                                napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                                napi_delete_reference(env, asyncContext->callbackComplete);
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                    napi_delete_async_work(env, asyncContext->work);
-                    delete asyncContext;
-                };
-                jsEngine->GetFrontend()->ShowActionMenu(
-                    asyncContext->titleString, asyncContext->buttons, std::move(callBack));
-            }
+            };
+            jsEngine->GetFrontend()->ShowActionMenu(
+                asyncContext->titleString, asyncContext->buttons, std::move(callBack));
         },
         (void*)asyncContext, &asyncContext->work);
     napi_queue_async_work(env, asyncContext->work);
-    return nullptr;
+    return result;
 }
 
 static napi_value PromptExport(napi_env env, napi_value exports)

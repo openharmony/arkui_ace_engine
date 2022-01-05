@@ -246,6 +246,23 @@ bool JsonValue::Put(const char* key, double value)
     return true;
 }
 
+bool JsonValue::Replace(const char* key, double value)
+{
+    if (key == nullptr) {
+        return false;
+    }
+
+    cJSON* child = cJSON_CreateNumber(value);
+    if (child == nullptr) {
+        return false;
+    }
+    if (!cJSON_ReplaceItemInObject(object_, key, child)) {
+        cJSON_Delete(child);
+        return false;
+    }
+    return true;
+}
+
 bool JsonValue::Put(const char* key, bool value)
 {
     if (key == nullptr) {
@@ -257,6 +274,23 @@ bool JsonValue::Put(const char* key, bool value)
         return false;
     }
     cJSON_AddItemToObject(object_, key, child);
+    return true;
+}
+
+bool JsonValue::Replace(const char* key, bool value)
+{
+    if (key == nullptr) {
+        return false;
+    }
+
+    cJSON* child = cJSON_CreateBool(value);
+    if (child == nullptr) {
+        return false;
+    }
+    if (!cJSON_ReplaceItemInObject(object_, key, child)) {
+        cJSON_Delete(child);
+        return false;
+    }
     return true;
 }
 

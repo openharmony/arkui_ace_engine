@@ -228,6 +228,67 @@ void JSIndexer::JsOnSelected(const JSCallbackInfo& args)
     }
 }
 
+void JSIndexer::JsOnRequestPopupData(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto requestPopupData =
+            [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]
+            (std::shared_ptr<V2::IndexerEventInfo> info) {
+                    std::vector<std::string> popupData;
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, popupData);
+                    auto params = ConvertToJSValues(info->GetSelectedIndex());
+                    JSRef<JSArray> result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+                    if (result.IsEmpty()) {
+                        LOGE("Error calling onRequestPopupData result is empty.");
+                        return popupData;
+                    }
+
+                    if (!result->IsArray()) {
+                        LOGE("Error calling onRequestPopupData result is not array.");
+                        return popupData;
+                    }
+
+                    for (size_t i = 0; i < result->Length(); i++) {
+                        if (result->GetValueAt(i)->IsString()) {
+                            auto item = result->GetValueAt(i);
+                            popupData.emplace_back(item->ToString());
+                        } else {
+                            LOGE("Error calling onRequestPopupData index %{public}zu is not string.", i);
+                        }
+                    }
+                    return popupData;
+            };
+
+        auto indexerComponent =
+            AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+        if (indexerComponent) {
+            indexerComponent->SetRequestPopupDataFunc(requestPopupData);
+        }
+    }
+}
+
+void JSIndexer::JsOnPopupSelected(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onPopupSelected = EventMarker(
+            [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto eventInfo = TypeInfoHelper::DynamicCast<V2::IndexerEventInfo>(info);
+                if (!eventInfo) {
+                    return;
+                }
+                auto params = ConvertToJSValues(eventInfo->GetSelectedIndex());
+                func->Call(JSRef<JSObject>(), params.size(), params.data());
+            });
+
+        auto indexerComponent =
+            AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+        if (indexerComponent) {
+            indexerComponent->SetPopupSelectedEvent(onPopupSelected);
+        }
+    }
+}
+
 void JSIndexer::GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
@@ -298,6 +359,8 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("popupFont", &JSIndexer::SetPopupFont);
     JSClass<JSIndexer>::StaticMethod("itemSize", &JSIndexer::SetIteamSize, opt);
     JSClass<JSIndexer>::StaticMethod("alignStyle", &JSIndexer::SetAlignStyle, opt);
+    JSClass<JSIndexer>::StaticMethod("onRequestPopupData", &JSIndexer::JsOnRequestPopupData, opt);
+    JSClass<JSIndexer>::StaticMethod("onPopupSelected", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::Inherit<JSContainerBase>();
     JSClass<JSIndexer>::Inherit<JSViewAbstract>();
     JSClass<JSIndexer>::Bind(globalObj);

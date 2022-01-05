@@ -56,6 +56,7 @@ const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
 const int32_t MAX_READ_TEXT_LENGTH = 4096;
 const std::regex URI_PARTTEN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
 using std::shared_ptr;
+static int32_t globalNodeId = 100000;
 
 RefPtr<JsAcePage> GetStagingPage(const shared_ptr<JsRuntime>& runtime)
 {
@@ -2106,6 +2107,34 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
         return JsiListBridge::JsGetCurrentOffset(runtime, nodeId);
     } else if (std::strcmp(methodName.c_str(), "getState") == 0) {
         return JsiImageAnimatorBridge::JsGetState(runtime, nodeId);
+    }  else if (std::strcmp(methodName.c_str(), "addChild") == 0) {
+        auto sPage = GetStagingPage(runtime);
+        if (sPage == nullptr) {
+            return runtime->NewUndefined();
+        }
+
+        int32_t childNodeId = 0;
+        std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(arguments);
+        if (argsValue && argsValue->IsArray()) {
+            std::unique_ptr<JsonValue> cNodeId = argsValue->GetArrayItem(0)->GetValue("__nodeId");
+            if (cNodeId && cNodeId->IsNumber()) {
+                childNodeId = cNodeId->GetInt();
+            }
+        }
+        auto domDocument = sPage->GetDomDocument();
+        if (domDocument) {
+            RefPtr<DOMNode> node = domDocument->GetDOMNodeById(childNodeId);
+            if(node == nullptr) {
+                LOGE("node is nullptr");
+                return runtime->NewUndefined();
+            }
+            auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node->GetTag(), childNodeId, nodeId);
+            sPage->PushCommand(command);
+            if (!sPage->CheckPageCreated() && sPage->GetCommandSize() > FRAGMENT_SIZE) {
+                sPage->FlushCommands();
+            }
+        }
+        return runtime->NewUndefined();
     } else {
         page->PushCommand(Referenced::MakeRefPtr<JsCommandCallDomElementMethod>(nodeId, methodName, arguments));
     }
@@ -2310,6 +2339,173 @@ shared_ptr<JsValue> JsErrorLogPrint(const shared_ptr<JsRuntime>& runtime, const 
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     return JsLogPrint(runtime, JsLogLevel::ERROR, std::move(argv), argc);
+}
+
+int GetNodeId(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg)
+{
+    int32_t id = 0;
+    auto nodeId = arg->GetProperty(runtime, "__nodeId");
+    if (nodeId && nodeId->IsInt32(runtime)) {
+        id = nodeId->ToInt32(runtime);
+    }
+    id = id < 0 ? 0 : id;
+    return id;
+}
+
+shared_ptr<JsValue> JsSetAttribute(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (argc != 2) {
+        LOGE("the argc is error");
+        return runtime->NewUndefined();
+    }
+    auto page = GetStagingPage(runtime);
+    if (page == nullptr) {
+        LOGE("GetStagingPage return nullptr");
+        return runtime->NewUndefined();
+    }
+    if (!argv[0]->IsString(runtime) || !argv[1]->IsString(runtime)) {
+        LOGE("args is not string ");
+        return runtime->NewUndefined();
+    }
+    shared_ptr<JsValue> attr = runtime->NewObject();
+    attr->SetProperty(runtime, argv[0], argv[1]);
+
+    int32_t nodeId = GetNodeId(runtime, thisObj);
+    auto command = Referenced::MakeRefPtr<JsCommandUpdateDomElementAttrs>(nodeId);
+    if (SetDomAttributes(runtime, attr, *command)) {
+        page->ReserveShowCommand(command);
+    }
+    page->PushCommand(command);
+    return runtime->NewUndefined();
+}
+
+shared_ptr<JsValue> JsSetStyle(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (argc != 2) {
+        LOGE("the argc is error");
+        return runtime->NewBoolean(false);
+    }
+    auto page = GetStagingPage(runtime);
+    if (page == nullptr) {
+        LOGE("GetStagingPage return nullptr");
+        return runtime->NewBoolean(false);
+    }
+    if (!argv[0]->IsString(runtime) || !argv[1]->IsString(runtime)) {
+        LOGE("args is not string ");
+        return runtime->NewBoolean(false);
+    }
+    shared_ptr<JsValue> style = runtime->NewObject();
+    style->SetProperty(runtime, argv[0], argv[1]);
+
+    int32_t nodeId = GetNodeId(runtime, thisObj);
+    auto command = Referenced::MakeRefPtr<JsCommandUpdateDomElementStyles>(nodeId);
+    SetDomStyle(runtime, style, *command);
+    page->PushCommand(command);
+    return runtime->NewBoolean(true);
+}
+
+shared_ptr<JsValue> JsAppendChild(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    auto page = GetStagingPage(runtime);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return runtime->NewUndefined();
+    }
+    int32_t id = GetNodeId(runtime, argv[0]);
+    auto domDocument = page->GetDomDocument();
+    if (domDocument) {
+        RefPtr<DOMNode> node = domDocument->GetDOMNodeById(id);
+        if (node == nullptr) {
+            LOGE("node is nullptr");
+            return runtime->NewUndefined();
+        }
+        int32_t parentNodeId = GetNodeId(runtime, thisObj);
+        auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node->GetTag(), node->GetNodeId(), parentNodeId);
+        page->PushCommand(command);
+        if (!page->CheckPageCreated() && page->GetCommandSize() > FRAGMENT_SIZE) {
+            page->FlushCommands();
+        }
+    }
+    return runtime->NewUndefined();
+}
+
+int32_t CreateDomElement(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (argc != 1) {
+        LOGE("the argc is error");
+        return -1;
+    }
+    auto page = GetStagingPage(runtime);
+    if (page == nullptr) {
+        LOGE("GetStagingPage return nullptr");
+        return -1;
+    }
+    int32_t nodeId = ++globalNodeId;
+    std::string tag = argv[0]->ToString(runtime);
+    auto command = Referenced::MakeRefPtr<JsCommandCreateDomElement>(tag.c_str(), nodeId);
+    page->PushCommand(command);
+    if (!page->CheckPageCreated() && page->GetCommandSize() > FRAGMENT_SIZE) {
+        page->FlushCommands();
+    }
+    return  globalNodeId;
+}
+
+shared_ptr<JsValue> JsFocus(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    auto page = GetStagingPage(runtime);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return runtime->NewUndefined();
+    }
+    if (page->CheckPageCreated()) {
+        GetFrontendDelegate(runtime)->TriggerPageUpdate(page->GetPageId(), true);
+    }
+    return runtime->NewUndefined();
+}
+
+shared_ptr<JsValue> JsAnimate(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    auto page = GetStagingPage(runtime);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return runtime->NewUndefined();
+    }
+    int32_t nodeId = GetNodeId(runtime, thisObj);
+    std::string arguments = argv[0]->ToString(runtime);
+    shared_ptr<JsValue> resultValue = runtime->NewUndefined();
+    resultValue = JsiAnimationBridgeUtils::CreateAnimationContext(runtime, page->GetPageId(), nodeId);
+    auto animationBridge = AceType::MakeRefPtr<JsiAnimationBridge>(runtime, resultValue, nodeId);
+    auto task = AceType::MakeRefPtr<JsiAnimationBridgeTaskCreate>(runtime, animationBridge, arguments);
+    page->PushCommand(Referenced::MakeRefPtr<JsCommandAnimation>(nodeId, task));
+    return runtime->NewUndefined();
+}
+
+shared_ptr<JsValue> JsGetBoundingClientRect(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    int32_t nodeId = GetNodeId(runtime, thisObj);
+    return JsiComponentApiBridge::JsGetBoundingRect(runtime, nodeId);
+}
+
+shared_ptr<JsValue> JsCreateElement(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    int32_t newNodeId = CreateDomElement(runtime, thisObj, argv, argc);
+    shared_ptr<JsValue> node = runtime->NewObject();
+    node->SetProperty(runtime, "__nodeId", runtime->NewInt32(newNodeId));
+    node->SetProperty(runtime, "setAttribute", runtime->NewFunction(JsSetAttribute));
+    node->SetProperty(runtime, "setStyle", runtime->NewFunction(JsSetStyle));
+    node->SetProperty(runtime, "addChild", runtime->NewFunction(JsAppendChild));
+    node->SetProperty(runtime, "focus", runtime->NewFunction(JsFocus));
+    node->SetProperty(runtime, "animate", runtime->NewFunction(JsAnimate));
+    node->SetProperty(runtime, "getBoundingClientRect", runtime->NewFunction(JsGetBoundingClientRect));
+    return node;
 }
 
 // native implementation for js function: perfutil.print()
@@ -2631,6 +2827,16 @@ void JsiEngineInstance::RegisterConsoleModule(ArkNativeEngine* engine)
     nativeGlobal->SetProperty("console", console);
 }
 
+void JsiEngineInstance::RegisterDocumentModule()
+{
+    ACE_SCOPED_TRACE("JsiEngine::RegisterDocumentModule");
+    LOGD("JsiEngineInstance RegisterDocumentModule");
+    shared_ptr<JsValue> global = runtime_->GetGlobal();
+    shared_ptr<JsValue> domObj = runtime_->NewObject();
+    domObj->SetProperty(runtime_, "createElement",runtime_->NewFunction(JsCreateElement));
+    global->SetProperty(runtime_, "dom", domObj);
+}
+
 void JsiEngineInstance::RegisterPerfUtilModule()
 {
     ACE_SCOPED_TRACE("JsiEngine::RegisterPerfUtilModule");
@@ -2699,6 +2905,7 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
 
     RegisterAceModule();
     RegisterConsoleModule();
+    RegisterDocumentModule();
     RegisterPerfUtilModule();
     RegisterHiViewModule();
     RegisterI18nPluralRulesModule();

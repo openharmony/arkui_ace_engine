@@ -38,6 +38,7 @@ void RenderQrcode::Update(const RefPtr<Component>& component)
         value_ = value_.substr(QRCODE_START_INDEX, QRCODE_VALUE_MAX_LENGTH);
     }
     color_ = qrcode_->GetQrcodeColor();
+    backgroundColor_ = qrcode_->GetBackgroundColor();
 }
 
 void RenderQrcode::PerformLayout()

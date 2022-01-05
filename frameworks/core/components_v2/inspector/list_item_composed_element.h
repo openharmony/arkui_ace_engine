@@ -32,7 +32,7 @@ public:
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
     std::string GetSticky() const;
-    std::string GetEditMode() const;
+    std::string GetEditable() const;
 
     AceType::IdType GetTargetTypeId() const override
     {

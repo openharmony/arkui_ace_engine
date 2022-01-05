@@ -32,6 +32,7 @@ namespace {
 
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
+constexpr Dimension INNER_PADDING = 0.0_vp;
 
 } // namespace
 
@@ -80,7 +81,11 @@ void JSTextInput::InitDefaultStyle()
     textInputComponent->SetErrorBorderColor(theme->GetErrorBorderColor());
 
     RefPtr<Decoration> decoration = AceType::MakeRefPtr<Decoration>();
-    decoration->SetPadding(theme->GetPadding());
+    // Need to update when UX of PC supported.
+    auto edge = theme->GetPadding();
+    edge.SetTop(INNER_PADDING);
+    edge.SetBottom(INNER_PADDING);
+    decoration->SetPadding(edge);
     decoration->SetBackgroundColor(theme->GetBgColor());
     decoration->SetBorderRadius(theme->GetBorderRadius());
     const auto& boxDecoration = boxComponent->GetBackDecoration();
@@ -107,6 +112,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("caretColor", &JSTextInput::SetCaretColor);
     JSClass<JSTextInput>::StaticMethod("maxLength", &JSTextInput::SetMaxLength);
     JSClass<JSTextInput>::StaticMethod("height", &JSTextInput::JsHeight);
+    JSClass<JSTextInput>::StaticMethod("padding", &JSTextInput::JsPadding);
     JSClass<JSTextInput>::StaticMethod("fontSize", &JSTextInput::SetFontSize);
     JSClass<JSTextInput>::StaticMethod("fontColor", &JSTextInput::SetTextColor);
     JSClass<JSTextInput>::StaticMethod("fontWeight", &JSTextInput::SetFontWeight);
@@ -172,6 +178,46 @@ void JSTextInput::SetType(const JSCallbackInfo& info)
     TextInputType textInputType = static_cast<TextInputType>(info[0]->ToNumber<int32_t>());
     component->SetTextInputType(textInputType);
     component->SetObscure(textInputType == TextInputType::VISIBLE_PASSWORD);
+}
+
+void JSTextInput::JsPadding(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
+        LOGE("arg is not a string, number or object.");
+        return;
+    }
+    Edge padding;
+    if (info[0]->IsNumber()) {
+        Dimension edgeValue;
+        if (ParseJsDimensionVp(info[0], edgeValue)) {
+            padding = Edge(edgeValue);
+        }
+    }
+    if (info[0]->IsObject()) {
+        auto object = JsonUtil::ParseJsonString(info[0]->ToString());
+        if (!object) {
+            LOGE("Js Parse object failed. argsPtr is null.");
+            return;
+        }
+        if (object->Contains("top") || object->Contains("bottom") || object->Contains("left") ||
+            object->Contains("right")) {
+            Dimension left = Dimension(0.0, DimensionUnit::VP);
+            Dimension top = Dimension(0.0, DimensionUnit::VP);
+            Dimension right = Dimension(0.0, DimensionUnit::VP);
+            Dimension bottom = Dimension(0.0, DimensionUnit::VP);
+            ParseJsonDimensionVp(object->GetValue("left"), left);
+            ParseJsonDimensionVp(object->GetValue("top"), top);
+            ParseJsonDimensionVp(object->GetValue("right"), right);
+            ParseJsonDimensionVp(object->GetValue("bottom"), bottom);
+            padding = Edge(left, top, right, bottom);
+        }
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
+    if (component) {
+        auto decoration = component->GetDecoration();
+        decoration->SetPadding(padding);
+    }
 }
 
 void JSTextInput::SetPlaceholderColor(const JSCallbackInfo& info)

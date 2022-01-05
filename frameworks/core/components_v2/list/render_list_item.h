@@ -64,6 +64,11 @@ public:
         return component_;
     }
 
+    int32_t GetEditMode() const
+    {
+        return component_->GetEditMode();
+    }
+
 private:
     void CreateDeleteButton();
 

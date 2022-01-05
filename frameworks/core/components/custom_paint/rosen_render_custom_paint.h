@@ -37,6 +37,8 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
 
     void TransferFromImageBitmap(const RefPtr<OffscreenCanvas>& offscreenCanvas) override;
+    void DrawBitmapMesh(const RefPtr<OffscreenCanvas>& offscreenCanvas,
+        const std::vector<double>& mesh, int32_t column, int32_t row) override;
     std::string ToDataURL(const std::string& args) override;
     void SetAntiAlias(bool isEnabled) override;
     void FillRect(const Offset& offset, const Rect& rect) override;

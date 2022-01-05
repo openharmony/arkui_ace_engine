@@ -244,6 +244,15 @@ void Animator::SetTempo(float tempo)
     tempo_ = tempo;
 }
 
+void Animator::ApplyOption(const AnimationOption& option)
+{
+    SetDuration(option.GetDuration());
+    SetStartDelay(option.GetDelay());
+    SetIteration(option.GetIteration());
+    SetTempo(option.GetTempo());
+    SetAnimationDirection(option.GetAnimationDirection());
+}
+
 void Animator::SetAnimationDirection(AnimationDirection direction)
 {
     CHECK_RUN_ON(UI);

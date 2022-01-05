@@ -239,6 +239,7 @@ void RenderPercentageDataPanel::Update(const RefPtr<Component>& component)
     segments_ = dataPanelComponent->GetSegments();
     totalValue_ = dataPanelComponent->GetTotalValue();
     maxValue_ = dataPanelComponent->GetMaxValue();
+    panelType_ = dataPanelComponent->GetPanelType();
     if (!animationInitialized_) {
         auto springProperty = AceType::MakeRefPtr<SpringProperty>(1.0f, 100.0f, 15.0f);
         auto springAnimation = AceType::MakeRefPtr<SpringAnimation>(springProperty);

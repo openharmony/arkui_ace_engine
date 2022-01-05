@@ -110,6 +110,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 #ifndef WEARABLE_PRODUCT
@@ -125,6 +126,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #endif
@@ -634,6 +636,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSAnimator::JSBind(globalObj);
     JSText::JSBind(globalObj);
     JSDatePicker::JSBind(globalObj);
+    JSDatePickerDialog::JSBind(globalObj);
     JSSpan::JSBind(globalObj);
     JSButton::JSBind(globalObj);
     JSCanvas::JSBind(globalObj);
@@ -656,6 +659,8 @@ void JsRegisterViews(BindingTarget globalObj)
     JSProgress::JSBind(globalObj);
     JSSwiper::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
+    JSTextTimer::JSBind(globalObj);
+    JSTextTimerController::JSBind(globalObj);
     JSSlidingPanel::JSBind(globalObj);
     JSNavigation::JSBind(globalObj);
     JSNavigator::JSBind(globalObj);
@@ -663,6 +668,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSIfElse::JSBind(globalObj);
     JSEnvironment::JSBind(globalObj);
     JSViewContext::JSBind(globalObj);
+    JSViewStackProcessor::JSBind(globalObj);
     JSFlexImpl::JSBind(globalObj);
     JSScroll::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
@@ -731,6 +737,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSGauge::JSBind(globalObj);
     JSHyperlink::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
+    JSTextPickerDialog::JSBind(globalObj);
 
     JSObjectTemplate toggleType;
     toggleType.Constant("Checkbox", 0);

@@ -190,6 +190,11 @@ public:
         return maxValue_;
     }
 
+    ChartType GetDataPanelType() const
+    {
+        return panelType_;
+    }
+
 protected:
     void PrepareAnimation() override;
 
@@ -211,6 +216,7 @@ protected:
     double animationPercent_ = 0.0;
 
 private:
+    ChartType panelType_ = ChartType::PROGRESS;
     double startDegree_ = 0.0;
     double sweepDegree_ = 360.0;
     std::vector<Segment> segments_;

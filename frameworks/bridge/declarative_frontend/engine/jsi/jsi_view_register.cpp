@@ -111,6 +111,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_piece.h"
@@ -120,6 +121,7 @@
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 
@@ -626,7 +628,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Tabs", JSTabs::JSBind },
     { "TabContent", JSTabContent::JSBind },
     { "TextPicker", JSTextPicker::JSBind },
+    { "TextPickerDialog", JSTextPickerDialog::JSBind },
     { "DatePicker", JSDatePicker::JSBind },
+    { "DatePickerDialog", JSDatePickerDialog::JSBind },
     { "PageTransitionEnter", JSPageTransition::JSBind },
     { "PageTransitionExit", JSPageTransition::JSBind },
     { "RowSplit", JSRowSplit::JSBind },
@@ -680,7 +684,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "VideoController", JSVideoController::JSBind },
     { "Search", JSSearch::JSBind },
     { "Sheet", JSSheet::JSBind },
-    { "JSClipboard", JSClipboard::JSBind }
+    { "JSClipboard", JSClipboard::JSBind },
+    { "TextTimer", JSTextTimer::JSBind },
+    { "TextTimerController", JSTextTimerController::JSBind }
 };
 
 void RegisterAllModule(BindingTarget globalObj)
@@ -699,6 +705,7 @@ void RegisterAllModule(BindingTarget globalObj)
     JSRenderingContextSettings::JSBind(globalObj);
     JSAbilityComponentController::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
+    JSTextTimerController::JSBind(globalObj);
     for (auto& iter : bindFuncs) {
         iter.second(globalObj);
     }
@@ -723,6 +730,8 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
         JSVideoController::JSBind(globalObj);
     } else if ((*func).first == "Grid") {
         JSColumn::JSBind(globalObj);
+    } else if ((*func).first == "TextTimer") {
+        JSTextTimerController::JSBind(globalObj);
     }
 
     (*func).second(globalObj);
@@ -788,6 +797,7 @@ void JsRegisterViews(BindingTarget globalObj)
 
     JSEnvironment::JSBind(globalObj);
     JSViewContext::JSBind(globalObj);
+    JSViewStackProcessor::JSBind(globalObj);
     JSTouchHandler::JSBind(globalObj);
     JSPanHandler::JSBind(globalObj);
     JSGesture::JSBind(globalObj);

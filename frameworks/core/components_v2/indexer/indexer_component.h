@@ -20,6 +20,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
 #include "core/components_v2/indexer/indexer_item_component.h"
+#include "core/components_v2/indexer/popup_list_component.h"
 #include "core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace::V2 {
@@ -28,6 +29,7 @@ inline constexpr int32_t INDEXER_INVALID_INDEX = -1;
 inline constexpr int32_t INDEXER_ITEM_MAX_COUNT = 29; // [indexer], default max count
 inline constexpr uint8_t DEFAULT_OPACITY = 255;
 inline constexpr uint8_t ZERO_OPACITY = 0;
+inline constexpr double POPUP_LIST_OPACITY = 1.0;
 inline const std::u16string INDEXER_STR_DOT = StringUtils::Str8ToStr16("•");
 inline const std::u16string INDEXER_STR_DOT_EX = StringUtils::Str8ToStr16(".");
 inline const std::u16string INDEXER_STR_SHARP = StringUtils::Str8ToStr16("#");
@@ -41,17 +43,17 @@ inline constexpr double ZERO_OPACITY_IN_PERCENT = 0.0;
 // data for list mode
 inline constexpr double INDEXER_LIST_ITEM_TEXT_SIZE = 12.0; // list mode, font size (FP)
 inline constexpr uint32_t INDEXER_LIST_COLOR = 0x99000000;
-inline constexpr uint32_t INDEXER_LIST_ACTIVE_COLOR = 0xFF0A59F7;
+inline constexpr uint32_t INDEXER_LIST_ACTIVE_COLOR = 0xFF254FF7;
 inline constexpr double INDEXER_DEFAULT_PADDING_X = 10.0;
 inline constexpr double INDEXER_DEFAULT_PADDING_Y = 16.0;
 inline constexpr double BUBBLE_BOX_SIZE = 56.0;
 inline constexpr double BUBBLE_BOX_RADIUS = 16.0;
 inline constexpr double BUBBLE_FONT_SIZE = 24.0;
-inline constexpr Dimension BUBBLE_POSITION_X = 96.0_vp;
+inline constexpr Dimension BUBBLE_POSITION_X = 48.0_vp;
 inline constexpr Dimension BUBBLE_POSITION_Y = 96.0_vp;
 inline constexpr uint32_t BUBBLE_FONT_COLOR = 0xFF254FF7;
 inline constexpr uint32_t BUBBLE_BG_COLOR = 0xFFF1F3F5;
-inline constexpr double INDEXER_ITEM_SIZE = 16.0;      // circle mode, item size (VP)
+inline constexpr double INDEXER_ITEM_SIZE = 24.0;      // circle mode, item size (VP)
 inline constexpr double INDEXER_ITEM_TEXT_SIZE = 12.0; // circle, mode font size (VP)
 // data for circle mode
 inline constexpr int32_t INDEXER_COLLAPSE_ITEM_COUNT = 4;
@@ -71,6 +73,8 @@ class ACE_EXPORT IndexerComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(IndexerComponent, ComponentGroup);
 
 public:
+    using OnRequestPopupDataFunc = std::function<std::vector<std::string>(std::shared_ptr<IndexerEventInfo>)>;
+
     IndexerComponent(const std::vector<std::string>& label, int32_t selectedIndex, bool bubble = true)
         : selectedIndex_(selectedIndex), bubbleEnabled_(bubble)
     {
@@ -81,6 +85,7 @@ public:
         BuildIndexerAlphabet();
         InitIndexerItemStyle();
         BuildIndexerItems();
+        BuildPopupList();
     }
 
     ~IndexerComponent() override = default;
@@ -233,6 +238,36 @@ public:
         return alignStyle_;
     }
 
+    void SetRequestPopupDataFunc(const OnRequestPopupDataFunc& func)
+    {
+        requestPopupDataEvent_ = func;
+        popupListEnabled_ = true;
+    }
+
+    const OnRequestPopupDataFunc& GetRequestPopupDataFunc() const
+    {
+        return requestPopupDataEvent_;
+    }
+
+    void SetPopupListEnabled(bool enable)
+    {
+        popupListEnabled_ = enable;
+    }
+
+    bool IsPopupListEnabled()
+    {
+        return popupListEnabled_;
+    }
+
+    void SetPopupSelectedEvent(const EventMarker& event)
+    {
+        if (popupList_) {
+            popupList_->SetPopupSelectedEvent(event);
+        } else {
+            LOGW("Not popup list component");
+        }
+    }
+
 protected:
     // init data
     void FormatLabelAlphabet();
@@ -241,6 +276,7 @@ protected:
     void InitIndexerItemStyle();
     void BuildIndexerItems();
     void BuildBubbleBox();
+    void BuildPopupList();
     void BuildTextItem(const std::u16string& strSection, const std::u16string& strLabel, int32_t itemType = 0);
     void UpdateTextStyle();
 
@@ -256,6 +292,7 @@ protected:
     std::list<RefPtr<IndexerItemComponent>> listItem_;
     RefPtr<Decoration> bubbleBack_;
     RefPtr<TextComponent> bubbleText_;
+    RefPtr<PopupListComponent> popupList_;
 
     int32_t itemCount_ = INDEXER_ITEM_MAX_COUNT;    // actual indexer item
     int32_t maxShowCount_ = INDEXER_ITEM_MAX_COUNT; // max item shown on screen
@@ -265,9 +302,10 @@ protected:
     Dimension itemSize_;
     bool hasCollapseItem_ = false;
     bool bubbleEnabled_ = true;
-
+    bool popupListEnabled_ = false;
 private:
     EventMarker selectedEvent_;
+    OnRequestPopupDataFunc requestPopupDataEvent_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_INDEXER_COMPONENT_H

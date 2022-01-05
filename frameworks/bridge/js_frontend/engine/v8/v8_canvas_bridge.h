@@ -98,6 +98,7 @@ public:
     static void TransferFromImageBitmap(const v8::FunctionCallbackInfo<v8::Value>& args);
     // support to read inner json data by lottie
     static void GetJsonData(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void DrawBitmapMesh(const v8::FunctionCallbackInfo<v8::Value>& args);
 
     // getter and setter
     static void FillStyleGetter(const v8::FunctionCallbackInfo<v8::Value>& info);

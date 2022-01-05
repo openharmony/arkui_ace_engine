@@ -29,6 +29,7 @@ class RosenRenderShape : public RenderShape {
 public:
     void Paint(RenderContext& context, const Offset& offset) override;
     Size CalcSize() override;
+    void PaintOnCanvas(SkCanvas* skCanvas, const Offset& offset);
 
 private:
     Size CreateRect();

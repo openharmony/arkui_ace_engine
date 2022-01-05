@@ -164,12 +164,6 @@ public:
     void RebuildAllPages() override;
 
     void GetPluginsUsed(std::string& data) override;
-    void SetDialogCallback(DialogCallback callback) override
-    {
-        if (jsEngine_) {
-            jsEngine_->SetDialogCallback(callback);
-        }
-    }
 
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);

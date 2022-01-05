@@ -64,11 +64,6 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
 
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
 {
-    LOGI("Initialize UIContentImpl using rosen window start.");
-}
-
-void UIContentImpl::Initialize(OHOS::Window* window, const std::string& url, NativeValue* storage)
-{
     window_ = window;
     startUrl_ = url;
     if (!context_) {
@@ -154,12 +149,6 @@ void UIContentImpl::Initialize(OHOS::Window* window, const std::string& url, Nat
     auto flutterAceView = Platform::FlutterAceView::CreateView(instanceId_);
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window_);
 
-    // set window id
-    auto context = container->GetPipelineContext();
-    if (context != nullptr && window_ != nullptr) {
-        context->SetWindowId(window_->GetID());
-    }
-
     // set view
     Platform::AceContainer::SetView(flutterAceView, config_.Density(), config_.Width(), config_.Height());
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, config_.Width(), config_.Height(), config_.Orientation());
@@ -205,20 +194,15 @@ bool UIContentImpl::ProcessBackPressed()
     return Platform::AceContainer::OnBackPressed(instanceId_);
 }
 
-bool UIContentImpl::ProcessTouchEvent(const OHOS::TouchEvent& touchEvent)
-{
-    LOGI("UIContent ProcessTouchEvent");
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    if (container) {
-        auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
-        return Platform::FlutterAceView::DispatchTouchEvent(aceView, touchEvent);
-    }
-    return false;
-}
-
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
     LOGI("UIContent ProcessPointerEvent");
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (container) {
+        auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
+        Platform::FlutterAceView::DispatchTouchEvent(aceView, pointerEvent);
+        return true;
+    }
     return false;
 }
 

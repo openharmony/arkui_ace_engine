@@ -28,6 +28,8 @@ class NativeCurveHelper;
 //    By(m) = 3m(1-m)^2*y0_ + 3m^2*y1_ + m^3
 // in function MoveInternal, assume time as Bx(m), we let Bx(m) approaching time, and we can get m and the output By(m)
 class ACE_EXPORT CubicCurve : public Curve {
+    DECLARE_ACE_TYPE(CubicCurve, Curve);
+
 public:
     CubicCurve(float x0, float y0, float x1, float y1);
     ~CubicCurve() override = default;

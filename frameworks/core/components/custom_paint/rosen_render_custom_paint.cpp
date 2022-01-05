@@ -1294,4 +1294,10 @@ void RosenRenderCustomPaint::WebGLUpdate()
     }
 }
 
+void RosenRenderCustomPaint::DrawBitmapMesh(const RefPtr<OffscreenCanvas>& offscreenCanvas,
+    const std::vector<double>& mesh, int32_t column, int32_t row)
+{
+    LOGD("RosenRenderCustomPaint::DrawBitmapMesh");
+}
+
 } // namespace OHOS::Ace

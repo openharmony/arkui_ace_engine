@@ -1183,6 +1183,12 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
 #endif
 
         positionParam_ = renderComponent->GetPositionParam();
+        if (!NearEqual(flexWeight_, renderComponent->GetFlexWeight())) {
+            auto parentFlex = GetParent().Upgrade();
+            if (parentFlex) {
+                parentFlex->MarkNeedLayout();
+            }
+        }
         flexWeight_ = renderComponent->GetFlexWeight();
         displayIndex_ = renderComponent->GetDisplayIndex();
         isIgnored_ = renderComponent->IsIgnored();
@@ -1818,9 +1824,14 @@ void RenderNode::SetIsPaintGeometryTransition(bool isPaintGeometryTransition)
     isPaintGeometryTransition_ = isPaintGeometryTransition;
 }
 
+void RenderNode::SetPaintOutOfParent(bool isPaintOutOfParent)
+{
+    isPaintOutOfParent_ = isPaintOutOfParent;
+}
+
 bool RenderNode::IsPaintOutOfParent()
 {
-    return isPaintGeometryTransition_;
+    return isPaintGeometryTransition_ || isPaintOutOfParent_;
 }
 
 void RenderNode::UpdatePosition()
@@ -1844,8 +1855,8 @@ void RenderNode::SetDepth(int32_t depth)
 
 void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail)
 {
-#ifdef ENABLE_ROSEN_BACKEND
     isHeadRenderNode_ = isHead;
+#ifdef ENABLE_ROSEN_BACKEND
     isTailRenderNode_ = isTail;
     if (isHead && !rsNode_) {
         // create RSNode in first node of JSview
@@ -1935,6 +1946,18 @@ std::shared_ptr<RSNode> RenderNode::CreateRSNode() const
 #else
     return nullptr;
 #endif
+}
+
+void RenderNode::OnStatusStyleChanged(StyleState state)
+{
+    LOGD("start %{public}s", AceType::TypeName(this));
+    if (isHeadRenderNode_) {
+        return;
+    }
+    RefPtr<RenderNode> parent = parent_.Upgrade();
+    if (parent) {
+        parent->OnStatusStyleChanged(state);
+    }
 }
 
 } // namespace OHOS::Ace

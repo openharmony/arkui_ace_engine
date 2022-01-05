@@ -44,6 +44,10 @@ public:
 
     bool CanUpdate(const RefPtr<Component>& newComponent) override
     {
+        const auto context = renderNode_->GetContext().Upgrade();
+        if (context && context->GetIsDeclarative()) {
+            return Element::CanUpdate(newComponent);
+        }
         return (newComponent == customComponent_) && Element::CanUpdate(newComponent);
     }
 

@@ -429,6 +429,7 @@ protected:
     bool showCounter_ = false; // Whether show counter, 10/100 means maxlength is 100 and 10 has been inputted.
     bool overCount_ = false;   // Whether count of text is over limit.
     bool obscure_ = false;     // Obscure the text, for example, password.
+    bool passwordRecord_ = true;   // Record the status of password display or non-display.
     bool enabled_ = true;      // Whether input is disable of enable.
     bool needFade_ = false;    // Fade in/out text when overflow.
     bool blockRightShade_ = false;
@@ -486,6 +487,7 @@ private:
     void CursorMoveDown();
     void CursorMoveOnClick(const Offset& offset);
     void UpdateRemoteEditing(bool needFireChangeEvent = true);
+    void UpdateObscure(const RefPtr<TextFieldComponent>& textField);
     void UpdateFormatters();
     void UpdateFocusStyles();
     void UpdateIcon(const RefPtr<TextFieldComponent>& textField);

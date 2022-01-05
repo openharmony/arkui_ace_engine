@@ -35,6 +35,7 @@ public:
     std::unique_ptr<JsonValue> GetValues() const;
     std::string GetMax() const;
     std::string GetCloseEffect() const;
+    std::string GetDataPanelType() const;
 
 private:
     RefPtr<RenderPercentageDataPanel> GetRenderPercentageDataPanel() const;

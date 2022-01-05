@@ -19,6 +19,7 @@
 #include <regex>
 #include <string>
 
+#include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
@@ -44,6 +45,10 @@ constexpr int32_t TOAST_TIME_DEFAULT = 1500; // ms
 constexpr int32_t MAX_PAGE_ID_SIZE = sizeof(uint64_t) * 8;
 constexpr int32_t NANO_TO_MILLI = 1000000; // nanosecond to millisecond
 constexpr int32_t TO_MILLI = 1000;         // second to millisecond
+constexpr int32_t CALLBACK_ERRORCODE_SUCCESS = 0;
+constexpr int32_t CALLBACK_ERRORCODE_CANCEL = 1;
+constexpr int32_t CALLBACK_ERRORCODE_COMPLETE = 2;
+constexpr int32_t CALLBACK_DATACODE_ZERO = 0;
 
 const char MANIFEST_JSON[] = "manifest.json";
 const char FILE_TYPE_JSON[] = ".json";
@@ -589,7 +594,21 @@ void FrontendDelegateDeclarative::OnNewRequest(const std::string& data)
 
 void FrontendDelegateDeclarative::CallPopPage()
 {
-    PopPage();
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto& currentPage = pageRouteStack_.back();
+    if (!pageRouteStack_.empty() && currentPage.isAlertBeforeBackPage) {
+        backUri_ = "";
+        taskExecutor_->PostTask(
+            [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
+                isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
+                    if (context) {
+                        context->ShowDialog(dialogProperties, isRightToLeft);
+                    }
+                },
+            TaskExecutor::TaskType::UI);
+    } else {
+        PopPage();
+    }
 }
 
 void FrontendDelegateDeclarative::ResetStagingPage()
@@ -736,7 +755,21 @@ void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::str
 
 void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string& params)
 {
-    BackWithTarget(PageTarget(uri), params);
+    auto& currentPage = pageRouteStack_.back();
+    if (currentPage.isAlertBeforeBackPage) {
+        backUri_ = uri;
+        backParam_ = params;
+        taskExecutor_->PostTask(
+            [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
+                isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
+                    if (context) {
+                        context->ShowDialog(dialogProperties, isRightToLeft);
+                    }
+                },
+            TaskExecutor::TaskType::UI);
+    } else {
+        BackWithTarget(PageTarget(uri), params);
+    }
 }
 
 void FrontendDelegateDeclarative::Push(const PageTarget& target, const std::string& params)
@@ -985,7 +1018,8 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
         BackEndEventManager<void(int32_t)>::GetInstance().BindBackendEvent(
             successEventMarker, [callback, taskExecutor = taskExecutor_](int32_t successType) {
                 taskExecutor->PostTask(
-                    [callback, successType]() { callback(0, successType); }, TaskExecutor::TaskType::JS);
+                    [callback, successType]() { callback(CALLBACK_ERRORCODE_SUCCESS, successType); },
+                    TaskExecutor::TaskType::JS);
             });
         callbackMarkers.emplace(COMMON_SUCCESS, successEventMarker);
     }
@@ -994,7 +1028,8 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
         auto cancelEventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
             cancelEventMarker, [callback, taskExecutor = taskExecutor_] {
-                taskExecutor->PostTask([callback]() { callback(1, 0); }, TaskExecutor::TaskType::JS);
+                taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
+                    TaskExecutor::TaskType::JS);
             });
         callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
     }
@@ -1003,7 +1038,8 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
         auto completeEventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
             completeEventMarker, [callback, taskExecutor = taskExecutor_] {
-                taskExecutor->PostTask([callback]() { callback(2, 0); }, TaskExecutor::TaskType::JS);
+                taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_COMPLETE, CALLBACK_DATACODE_ZERO); },
+                    TaskExecutor::TaskType::JS);
             });
         callbackMarkers.emplace(COMMON_COMPLETE, completeEventMarker);
     }
@@ -1018,6 +1054,105 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
     pipelineContextHolder_.Get()->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
 }
 
+void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
+    std::function<void(int32_t, int32_t)>&& callback)
+{
+    std::unordered_map<std::string, EventMarker> callbackMarkers;
+    auto successEventMarker = BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker();
+    BackEndEventManager<void(int32_t)>::GetInstance().BindBackendEvent(
+        successEventMarker, [callback, number = button.size(), taskExecutor = taskExecutor_](int32_t successType) {
+            taskExecutor->PostTask(
+                [callback, number, successType]() {
+                    // if callback index is larger than button's number, cancel button is selected
+                    if (static_cast<size_t>(successType) == number) {
+                            callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO);
+                    } else {
+                        callback(CALLBACK_ERRORCODE_SUCCESS, successType);
+                    }
+                },
+            TaskExecutor::TaskType::JS);
+        });
+    callbackMarkers.emplace(COMMON_SUCCESS, successEventMarker);
+
+    auto cancelEventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
+    BackEndEventManager<void()>::GetInstance().BindBackendEvent(
+        cancelEventMarker, [callback, taskExecutor = taskExecutor_] {
+            taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
+                TaskExecutor::TaskType::JS);
+        });
+    callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
+
+    DialogProperties dialogProperties = {
+        .title = title,
+        .autoCancel = true,
+        .isMenu = true,
+        .buttons = button,
+        .callbacks = std::move(callbackMarkers),
+    };
+    ButtonInfo buttonInfo = {
+        .text = Localization::GetInstance()->GetEntryLetters("common.cancel"),
+        .textColor = ""
+    };
+    dialogProperties.buttons.emplace_back(buttonInfo);
+    pipelineContextHolder_.Get()->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
+}
+
+void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(const std::string& message,
+    std::function<void(int32_t)>&& callback)
+{
+    if (!taskExecutor_) {
+        LOGE("task executor is null.");
+        return;
+    }
+    std::unordered_map<std::string, EventMarker> callbackMarkers;
+    auto pipelineContext = pipelineContextHolder_.Get();
+    auto successEventMarker = BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker();
+    BackEndEventManager<void(int32_t)>::GetInstance().BindBackendEvent(successEventMarker,
+        [weak = AceType::WeakClaim(this), callback, taskExecutor = taskExecutor_](int32_t successType) {
+            taskExecutor->PostTask(
+                [weak, callback, successType]() {
+                    callback(successType);
+                    if (!successType) {
+                        LOGI("dialog choose cancel button, can not back");
+                        return;
+                    }
+                    auto delegate = weak.Upgrade();
+                    if (!delegate) {
+                        return;
+                    }
+                    delegate->BackWithTarget(PageTarget(delegate->backUri_), delegate->backParam_);
+                },
+                TaskExecutor::TaskType::JS);
+        });
+    callbackMarkers.emplace(COMMON_SUCCESS, successEventMarker);
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (pageRouteStack_.empty()) {
+        LOGE("page stack is null.");
+        return;
+    }
+
+    auto& currentPage = pageRouteStack_.back();
+    currentPage.isAlertBeforeBackPage = true;
+    currentPage.dialogProperties = {
+        .content = message,
+        .autoCancel = false,
+        .buttons = { { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" },
+            { .text = Localization::GetInstance()->GetEntryLetters("common.ok"), .textColor = "" } },
+        .callbacks = std::move(callbackMarkers),
+    };
+}
+
+void FrontendDelegateDeclarative::DisableAlertBeforeBackPage()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (pageRouteStack_.empty()) {
+        LOGE("page stack is null.");
+        return;
+    }
+    auto& currentPage = pageRouteStack_.back();
+    currentPage.isAlertBeforeBackPage = false;
+}
 
 Rect FrontendDelegateDeclarative::GetBoundingRectData(NodeId nodeId)
 {

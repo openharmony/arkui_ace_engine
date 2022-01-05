@@ -36,6 +36,7 @@ public:
     std::string GetDividerColor() const;
     std::string GetStrokeWidth() const;
     std::string GetDividerLineCap() const;
+    std::string ConvertLineCapToString(LineCap cap) const;
 
     AceType::IdType GetTargetTypeId() const override
     {

@@ -46,14 +46,16 @@ void PickerTextComponent::OnColumnsBuilding()
     column->SetCurrentIndex(selectedIndex_);
 }
 
-std::string PickerTextComponent::GetSelectedObject(bool isColumnChange, const std::string& changeColumnTag) const
+std::string PickerTextComponent::GetSelectedObject(bool isColumnChange,
+    const std::string& changeColumnTag, int32_t status) const
 {
     if (isColumnChange) {
         LOGW("text picker has no column change event.");
         return "";
     }
-    return std::string("{\"newValue\":\"") +
-        selectedValue_ + "\",\"newSelected\":" + std::to_string(selectedIndex_) + "}";
+    return std::string("{\"newValue\":") + selectedValue_ +
+        ",\"newSelected\":" + std::to_string(selectedIndex_) +
+        ",\"status\":" + std::to_string(status) + "}";
 }
 
 void PickerTextComponent::OnSelectedSaving()
@@ -69,7 +71,7 @@ void PickerTextComponent::OnSelectedSaving()
 
 void PickerTextComponent::HandleSelectedChange()
 {
-    if (!IsDialogShowed()) {
+    if (!IsDialogShowed() && !GetIsCreateDialogComponent()) {
         return;
     }
     auto column = GetColumn(PICKER_TEXT_COLUMN);
@@ -84,7 +86,7 @@ void PickerTextComponent::HandleSelectedChange()
 
 void PickerTextComponent::HandleRangeChange()
 {
-    if (!IsDialogShowed()) {
+    if (!IsDialogShowed() && !GetIsCreateDialogComponent()) {
         return;
     }
 
@@ -94,13 +96,9 @@ void PickerTextComponent::HandleRangeChange()
         return;
     }
 
-    auto backupIndex = selectedIndex_;
-    auto backupValue = selectedValue_;
-    OnSelectedSaving();
     OnColumnsBuilding();
+    OnSelectedSaving();
     column->HandleChangeCallback(true, false);
-    selectedIndex_ = backupIndex;
-    selectedValue_ = backupValue;
 }
 
 } // namespace OHOS::Ace

@@ -169,11 +169,9 @@ void AceContainer::InitializeFrontend()
         return;
     }
     ACE_DCHECK(frontend_);
-    if (aceAbility_) {
-        std::shared_ptr<AppExecFwk::AbilityInfo> info = aceAbility_->GetAbilityInfo();
-        if (info && info->isLauncherAbility) {
-            frontend_->DisallowPopLastPage();
-        }
+    std::shared_ptr<AppExecFwk::AbilityInfo> info = aceAbility_->GetAbilityInfo();
+    if (info && info->isLauncherAbility) {
+        frontend_->DisallowPopLastPage();
     }
     frontend_->Initialize(type_, taskExecutor_);
 }
@@ -512,6 +510,7 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
     }
     auto front = container->GetFrontend();
     if (front) {
+        LOGI("RunPage content=[%{private}s]", content.c_str());
         front->RunPage(pageId, content, params);
         return true;
     }
@@ -755,16 +754,5 @@ void AceContainer::SetWindowStyle(int32_t instanceId, WindowModal windowModal, C
     }
     container->SetWindowModal(windowModal);
     container->SetColorScheme(colorScheme);
-}
-void AceContainer::SetDialogCallback(int32_t instanceId, DialogCallback callback)
-{
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    if (!container) {
-        return;
-    }
-    auto front = container->GetFrontend();
-    if (front && front->GetType() == FrontendType::JS) {
-        front->SetDialogCallback(callback);
-    }
 }
 } // namespace OHOS::Ace::Platform

@@ -61,6 +61,10 @@ void RenderDisplay::Update(const RefPtr<Component>& component)
         animator_->Play();
     }
 
+    if (display->HasStateAttributeList()) {
+        stateAttributeList_ = display->GetStateAttributeList();
+    }
+    OnStatusStyleChanged(StyleState::NORMAL);
     SetShadow(display->GetShadow());
     MarkNeedLayout();
 }
@@ -104,8 +108,10 @@ void RenderDisplay::GetOpacityCallbacks()
 void RenderDisplay::Dump()
 {
     if (DumpLog::GetInstance().GetDumpFile()) {
-        DumpLog::GetInstance().AddDesc(std::string("Display: ").append(visible_ == VisibleType::VISIBLE ? "visible" :
-            visible_ == VisibleType::INVISIBLE ? "invisible" : "gone"));
+        DumpLog::GetInstance().AddDesc(
+            std::string("Display: ")
+                .append(visible_ == VisibleType::VISIBLE ? "visible"
+                                                         : visible_ == VisibleType::INVISIBLE ? "invisible" : "gone"));
         DumpLog::GetInstance().AddDesc(std::string("Opacity: ").append(std::to_string(animatableOpacity_.GetValue())));
     }
 }
@@ -202,6 +208,36 @@ void RenderDisplay::CreateAppearingAnimation(uint8_t opacity, int32_t limit)
     });
     animator_->AddInterpolator(appearingAnimation_);
     animator_->SetDuration(std::min(duration_, limit));
+}
+
+void RenderDisplay::OnStatusStyleChanged(StyleState componentState)
+{
+    RenderNode::OnStatusStyleChanged(componentState);
+    if (stateAttributeList_ == nullptr) {
+        return;
+    }
+
+    bool updated = false;
+    for (RefPtr<StateAttributeBase<DisplayStateAttribute>> attribute : *stateAttributeList_) {
+        if (attribute->stateName_ != componentState) {
+            continue;
+        }
+
+        updated = true;
+        switch (attribute->id_) {
+            case DisplayStateAttribute::OPACITY: {
+                auto opacityState =
+                    AceType::DynamicCast<StateAttributeValue<DisplayStateAttribute, AnimatableDouble>>(attribute);
+                if (!pendingAppearing_) {
+                    animatableOpacity_ = opacityState->value_;
+                }
+                opacity_ = static_cast<uint8_t>(round(animatableOpacity_.GetValue() * UINT8_MAX));
+            } break;
+        }
+    }
+    if (updated) {
+        MarkNeedLayout();
+    }
 }
 
 } // namespace OHOS::Ace

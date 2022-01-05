@@ -54,7 +54,7 @@ void ManifestWidgetGroup::WidgetParse(const std::unique_ptr<JsonValue>& root)
             }
         }
     } else {
-        LOGE("Widget Format is invalid");
+        LOGW("Widget Format is invalid");
     }
 }
 

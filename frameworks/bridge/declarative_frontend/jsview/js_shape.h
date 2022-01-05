@@ -44,6 +44,7 @@ public:
     static void SetStrokeWidth(const JSCallbackInfo& info);
     static void SetAntiAlias(bool antiAlias);
     static void SetStrokeDashArray(const JSCallbackInfo& info);
+    static void SetBitmapMesh(const JSCallbackInfo& info);
 
 private:
     static void InitBox(const JSCallbackInfo& info);
