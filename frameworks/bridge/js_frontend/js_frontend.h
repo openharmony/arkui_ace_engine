@@ -81,6 +81,12 @@ public:
         std::vector<uint8_t>&& data) const override;
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override;
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void RunNativeEngineLoop() override
+    {
+        if (jsEngine_) {
+            jsEngine_->RunNativeEngineLoop();
+        }
+    }
     void TransferJsResponseDataPreview(int32_t callbackId, int32_t code, ResponseData responseData) const;
 #endif
     void TransferJsPluginGetError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;

@@ -24,6 +24,7 @@
 #include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_helpers.h"
+#include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
@@ -37,7 +38,7 @@ const char COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW[] = "loadDocument(new";
 const char LEFT_PARENTTHESIS[] = "(";
 constexpr int32_t LOAD_DOCUMENT_STR_LENGTH = 16;
 #endif
-}
+} // namespace
 
 QJSDeclarativeEngine::~QJSDeclarativeEngine()
 {
@@ -166,8 +167,7 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         std::string commonsJsContent;
         if (engineInstance_->GetDelegate()->GetAssetContent("commons.js", commonsJsContent)) {
             auto commonsJsResult = QJSDeclarativeEngineInstance::EvalBuf(
-                ctx, commonsJsContent.c_str(), commonsJsContent.length(),
-                "commons.js", JS_EVAL_TYPE_GLOBAL);
+                ctx, commonsJsContent.c_str(), commonsJsContent.length(), "commons.js", JS_EVAL_TYPE_GLOBAL);
             if (commonsJsResult == -1) {
                 LOGE("fail to excute load commonsjs script");
                 return;
@@ -176,8 +176,7 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         std::string vendorsJsContent;
         if (engineInstance_->GetDelegate()->GetAssetContent("vendors.js", vendorsJsContent)) {
             auto vendorsJsResult = QJSDeclarativeEngineInstance::EvalBuf(
-                ctx, vendorsJsContent.c_str(), vendorsJsContent.length(),
-                "vendors.js", JS_EVAL_TYPE_GLOBAL);
+                ctx, vendorsJsContent.c_str(), vendorsJsContent.length(), "vendors.js", JS_EVAL_TYPE_GLOBAL);
             if (vendorsJsResult == -1) {
                 LOGE("fail to excute load vendorsjs script");
                 return;
@@ -240,13 +239,20 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
 }
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-void QJSDeclarativeEngine::ReplaceJSContent(std::string& jsContent, const std::string componentName)
+void QJSDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::string componentName)
 {
-    // replace the component name of loadDocument from current js content.
-    std::string::size_type loadDocomentPos = jsContent.find(COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW);
-    std::string::size_type position = 0;
+    // replace the component name in the last loadDocument from current js content.
+    std::string::size_type loadDocomentPos = 0;
+    std::string::size_type lastLoadDocomentPos = 0;
+    while ((loadDocomentPos = preContent_.find(COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW, loadDocomentPos)) !=
+           std::string::npos) {
+        lastLoadDocomentPos = loadDocomentPos;
+        loadDocomentPos++;
+    }
+
+    std::string::size_type position = lastLoadDocomentPos + LOAD_DOCUMENT_STR_LENGTH;
     std::string::size_type finalPostion = 0;
-    while ((position = jsContent.find(LEFT_PARENTTHESIS, position)) != std::string::npos) {
+    while ((position = preContent_.find(LEFT_PARENTTHESIS, position)) != std::string::npos) {
         if (position > loadDocomentPos + LOAD_DOCUMENT_STR_LENGTH) {
             finalPostion = position;
             break;
@@ -255,7 +261,15 @@ void QJSDeclarativeEngine::ReplaceJSContent(std::string& jsContent, const std::s
     }
     std::string dstReplaceStr = COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW;
     dstReplaceStr += " " + componentName;
-    jsContent.replace(loadDocomentPos, finalPostion - loadDocomentPos, dstReplaceStr);
+    preContent_.replace(lastLoadDocomentPos, finalPostion - lastLoadDocomentPos, dstReplaceStr);
+
+    auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(engineInstance_->GetQJSContext()));
+    if (instance == nullptr) {
+        LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
+        return;
+    }
+
+    instance->GetDelegate()->Replace(url, "");
 }
 #endif
 RefPtr<Component> QJSDeclarativeEngine::GetNewComponentWithJsCode(const std::string& jsCode)
@@ -383,7 +397,6 @@ void QJSDeclarativeEngine::OnConfigurationUpdated(const std::string& data)
     js_std_loop(engineInstance_->GetQJSContext());
 }
 
-
 bool QJSDeclarativeEngine::OnStartContinuation()
 {
     JSContext* ctx = engineInstance_->GetQJSContext();
@@ -457,7 +470,6 @@ bool QJSDeclarativeEngine::OnRestoreData(const std::string& data)
     js_std_loop(engineInstance_->GetQJSContext());
     return (result == "true");
 }
-
 
 void QJSDeclarativeEngine::TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval)
 {
@@ -533,10 +545,7 @@ void QJSDeclarativeEngine::FireSyncEvent(const std::string& eventId, const std::
     LOGW("QJSDeclarativeEngine FireSyncEvent is unusable");
 }
 
-void QJSDeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
-{
-
-}
+void QJSDeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId) {}
 
 void QJSDeclarativeEngine::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher)
 {
