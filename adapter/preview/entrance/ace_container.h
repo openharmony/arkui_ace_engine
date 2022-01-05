@@ -68,6 +68,8 @@ public:
 
     void Destroy() override;
 
+    void DestroyView() override;
+
     int32_t GetInstanceId() const override
     {
         return instanceId_;
@@ -188,7 +190,6 @@ private:
     RefPtr<AssetManager> assetManager_;
     RefPtr<PlatformResRegister> resRegister_;
     RefPtr<PipelineContext> pipelineContext_;
-    RefPtr<Framework::JsEngine> jsEngine_;
     RefPtr<Frontend> frontend_;
     RefPtr<PlatformBridge> messageBridge_;
     FrontendType type_ { FrontendType::JSON };
