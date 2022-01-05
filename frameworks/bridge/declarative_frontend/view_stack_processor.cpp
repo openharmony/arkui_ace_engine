@@ -100,6 +100,22 @@ RefPtr<PopupComponentV2> ViewStackProcessor::GetPopupComponent(bool createNewCom
 }
 #endif
 
+RefPtr<MenuComponent> ViewStackProcessor::GetMenuComponent(bool createNewComponent)
+{
+    auto& wrappingComponentsMap = componentsStack_.top();
+    if (wrappingComponentsMap.find("menu") != wrappingComponentsMap.end()) {
+        return AceType::DynamicCast<MenuComponent>(wrappingComponentsMap["menu"]);
+    }
+
+    if (!createNewComponent) {
+        return nullptr;
+    }
+
+    RefPtr<MenuComponent> menuComponent = AceType::MakeRefPtr<OHOS::Ace::MenuComponent>(GenerateId(), "menu");
+    wrappingComponentsMap.emplace("menu", menuComponent);
+    return menuComponent;
+}
+
 RefPtr<PositionedComponent> ViewStackProcessor::GetPositionedComponent()
 {
     auto& wrappingComponentsMap = componentsStack_.top();
@@ -575,6 +591,10 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
                 coverageComponent->AppendChild(popupComponent);
             }
 #endif
+            auto menuComponent = GetMenuComponent(false);
+            if (menuComponent) {
+                coverageComponent->AppendChild(menuComponent);
+            }
         }
     }
 

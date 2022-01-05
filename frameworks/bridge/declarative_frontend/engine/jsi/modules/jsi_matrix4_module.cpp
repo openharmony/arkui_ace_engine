@@ -59,6 +59,14 @@ shared_ptr<JsValue> ConvertToJSValue(const shared_ptr<JsRuntime>& runtime, const
     return result;
 }
 
+double ConvertToDouble(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value, double defaultValue)
+{
+    if (value == nullptr || !value->IsNumber(runtime)) {
+        return defaultValue;
+    }
+    return value->ToDouble(runtime);
+}
+
 }
 
 shared_ptr<JsValue> Init(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -147,11 +155,11 @@ shared_ptr<JsValue> Translate(const shared_ptr<JsRuntime>& runtime, const shared
     auto matrixArray = thisObj->GetProperty(runtime, MATRIX_4X4);
     auto matrix = ConvertToMatrix(runtime, matrixArray);
     auto dxJSValue = argv[0]->GetProperty(runtime, "x");
-    double dx = dxJSValue->ToDouble(runtime);
+    double dx = ConvertToDouble(runtime, dxJSValue, 0.0);
     auto dyJSValue = argv[0]->GetProperty(runtime, "y");
-    double dy = dyJSValue->ToDouble(runtime);
+    double dy = ConvertToDouble(runtime, dyJSValue, 0.0);
     auto dzJSValue = argv[0]->GetProperty(runtime, "z");
-    double dz = dzJSValue->ToDouble(runtime);
+    double dz = ConvertToDouble(runtime, dzJSValue, 0.0);
 
     matrix = Matrix4::CreateTranslate(static_cast<float>(dx), static_cast<float>(dy), static_cast<float>(dz)) * matrix;
     thisObj->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, matrix));
@@ -173,15 +181,15 @@ shared_ptr<JsValue> Scale(const shared_ptr<JsRuntime>& runtime, const shared_ptr
     auto matrixArray = thisObj->GetProperty(runtime, MATRIX_4X4);
     auto matrix = ConvertToMatrix(runtime, matrixArray);
     auto dxJSValue = argv[0]->GetProperty(runtime, "x");
-    double dx = dxJSValue->ToDouble(runtime);
+    double dx = ConvertToDouble(runtime, dxJSValue, 1.0);
     auto dyJSValue = argv[0]->GetProperty(runtime, "y");
-    double dy = dyJSValue->ToDouble(runtime);
+    double dy = ConvertToDouble(runtime, dyJSValue, 1.0);
     auto dzJSValue = argv[0]->GetProperty(runtime, "z");
-    double dz = dzJSValue->ToDouble(runtime);
+    double dz = ConvertToDouble(runtime, dzJSValue, 1.0);
     auto centerXJSValue = argv[0]->GetProperty(runtime, "centerX");
-    double centerX = centerXJSValue->ToDouble(runtime);
+    double centerX = ConvertToDouble(runtime, centerXJSValue, 0.0);
     auto centerYJSValue = argv[0]->GetProperty(runtime, "centerY");
-    double centerY = centerYJSValue->ToDouble(runtime);
+    double centerY = ConvertToDouble(runtime, centerYJSValue, 0.0);
 
     auto scaleMatrix = Matrix4::CreateScale(dx, dy, dz);
     if (!NearZero(centerX) || !NearZero(centerY)) {
@@ -210,17 +218,17 @@ shared_ptr<JsValue> Rotate(const shared_ptr<JsRuntime>& runtime, const shared_pt
     auto matrixArray = thisObj->GetProperty(runtime, MATRIX_4X4);
     auto matrix = ConvertToMatrix(runtime, matrixArray);
     auto dxJSValue = argv[0]->GetProperty(runtime, "x");
-    double dx = dxJSValue->ToDouble(runtime);
+    double dx = ConvertToDouble(runtime, dxJSValue, 0.0);
     auto dyJSValue = argv[0]->GetProperty(runtime, "y");
-    double dy = dyJSValue->ToDouble(runtime);
+    double dy = ConvertToDouble(runtime, dyJSValue, 0.0);
     auto dzJSValue = argv[0]->GetProperty(runtime, "z");
-    double dz = dzJSValue->ToDouble(runtime);
+    double dz = ConvertToDouble(runtime, dzJSValue, 0.0);
     auto angleJSValue = argv[0]->GetProperty(runtime, "angle");
-    double angle = angleJSValue->ToDouble(runtime);
+    double angle = ConvertToDouble(runtime, angleJSValue, 0.0);
     auto centerXJSValue = argv[0]->GetProperty(runtime, "centerX");
-    double centerX = centerXJSValue->ToDouble(runtime);
+    double centerX = ConvertToDouble(runtime, centerXJSValue, 0.0);
     auto centerYJSValue = argv[0]->GetProperty(runtime, "centerY");
-    double centerY = centerYJSValue->ToDouble(runtime);
+    double centerY = ConvertToDouble(runtime, centerYJSValue, 0.0);
 
     auto rotateMatrix = Matrix4::CreateRotate(angle, dx, dy, dz);
     if (!NearZero(centerX) || !NearZero(centerY)) {
@@ -249,10 +257,10 @@ shared_ptr<JsValue> TransformPoint(const shared_ptr<JsRuntime>& runtime, const s
     auto matrix = ConvertToMatrix(runtime, thisObj->GetProperty(runtime, MATRIX_4X4));
 
     auto pointXJSValue = argv[0]->GetProperty(runtime, 0);
-    double pointX = pointXJSValue->ToDouble(runtime);
+    double pointX = ConvertToDouble(runtime, pointXJSValue, 0.0);
 
     auto pointYJSValue = argv[0]->GetProperty(runtime, 1);
-    double pointY = pointYJSValue->ToDouble(runtime);
+    double pointY = ConvertToDouble(runtime, pointYJSValue, 0.0);
 
     Point point { pointX, pointY };
     Point target = matrix * point;
