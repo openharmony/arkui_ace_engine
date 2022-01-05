@@ -468,8 +468,7 @@ void QJSDeclarativeEngineInstance::FreeGroupJsBridge()
 
 bool QJSDeclarativeEngineInstance::InitAceModules(const char* start, size_t length, const char* fileName)
 {
-    JSContext* ctx = GetQJSContext();
-    QJSHandleScope handleScope(ctx);
+    QJSContext::Scope scp(context_);
     if (start == nullptr || length == 0 || fileName == nullptr) {
         LOGE("Failed to init Ace modules, start, end or fileName can not be null!");
         return false;

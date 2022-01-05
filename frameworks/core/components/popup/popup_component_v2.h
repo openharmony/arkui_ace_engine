@@ -43,6 +43,11 @@ public:
         message_ = message;
     }
 
+    std::string GetMessage() const
+    {
+        return message_;
+    }
+
     const EventMarker& GetOnStateChange() const
     {
         return onStateChange_;
@@ -61,14 +66,29 @@ public:
         primaryButtonProperties_ = properties;
     }
 
+    std::string GetPrimaryButtonValue() const
+    {
+        return primaryButtonProperties_.value;
+    }
+
     void SetSecondaryButtonProperties(const ButtonProperties& properties)
     {
         secondaryButtonProperties_ = properties;
     }
 
+    std::string GetSecondaryButtonValue() const
+    {
+        return secondaryButtonProperties_.value;
+    }
+
     void SetPlacementOnTop(bool placementOnTop)
     {
         placementOnTop_ = placementOnTop;
+    }
+
+    bool GetPlacementOnTop() const
+    {
+        return placementOnTop_;
     }
 
     void SetCustomComponent(const RefPtr<Component>& customComponent)
@@ -98,7 +118,7 @@ private:
     RefPtr<Component> customComponent_;
     WeakPtr<PipelineContext> context_;
 
-    ButtonProperties primaryButtonProperties_; // first button.
+    ButtonProperties primaryButtonProperties_;   // first button.
     ButtonProperties secondaryButtonProperties_; // second button.
 };
 

@@ -257,6 +257,14 @@ public:
         return popupParam_;
     }
 
+    bool IsShow() const
+    {
+        if (popupParam_) {
+            return popupParam_->IsShow();
+        }
+        return true;
+    }
+
 private:
     RefPtr<PopupParam> popupParam_;
     RefPtr<PopupController> popupController_;

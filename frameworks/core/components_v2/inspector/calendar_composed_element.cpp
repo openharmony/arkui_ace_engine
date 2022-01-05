@@ -26,7 +26,7 @@ using CalendarJsonFunc = std::function<std::unique_ptr<JsonValue>(const Calendar
 
 const std::unordered_map<std::string, std::function<std::string(const CalendarComposedElement&)>> CREATE_JSON_MAP {
     { "showLunar", [](const CalendarComposedElement& inspector) { return inspector.GetShowLunar(); } },
-    { "ShowHoliday", [](const CalendarComposedElement& inspector) { return inspector.GetShowHoliday(); } },
+    { "showHoliday", [](const CalendarComposedElement& inspector) { return inspector.GetShowHoliday(); } },
     { "needSlide", [](const CalendarComposedElement& inspector) { return inspector.GetNeedSlide(); } },
     { "startOfWeek", [](const CalendarComposedElement& inspector) { return inspector.GetStartOfWeek(); } },
     { "direction", [](const CalendarComposedElement& inspector) { return inspector.GetAxis(); } },
@@ -80,14 +80,14 @@ std::string CalendarComposedElement::GetStartOfWeek() const
 {
     auto renderCalendar = GetRenderCalendar();
     auto startDayOfWeek = renderCalendar ? renderCalendar->GetStartDayOfWeek() : 6;
-    return std::to_string(startDayOfWeek);
+    return ConvertWeekToString(std::to_string(startDayOfWeek));
 }
 
 std::string CalendarComposedElement::GetOffDay() const
 {
     auto renderCalendar = GetRenderCalendar();
     auto offday = renderCalendar ? renderCalendar->GetOffdays() : "";
-    return offday;
+    return ConvertOffDayToString(offday);
 }
 
 std::unique_ptr<JsonValue> CalendarComposedElement::GetCurrentDayStyle() const
@@ -124,7 +124,74 @@ std::string CalendarComposedElement::GetAxis() const
 {
     auto renderCalendar = GetRenderCalendar();
     auto axis = renderCalendar ? renderCalendar->GetAxis() : Axis::HORIZONTAL;
+    switch (axis) {
+        case Axis::VERTICAL:
+            return "Axis.Vertical";
+        case Axis::HORIZONTAL:
+        default:
+            return "Axis.Horizontal";
+    }
     return ConvertAxisToString(axis);
+}
+
+std::string CalendarComposedElement::ConvertWeekToString(std::string week) const
+{
+    if (week == "0") {
+        return "Mon";
+    } else if (week == "1") {
+        return "Tue";
+    } else if (week == "2") {
+        return "Wed";
+    } else if (week == "3") {
+        return "Thur";
+    } else if (week == "4") {
+        return "Fri";
+    } else if (week == "5") {
+        return "Sat";
+    } else if (week == "6") {
+        return "Sun";
+    } else {
+        return "Sun";
+    }
+}
+
+std::string CalendarComposedElement::ConvertOffDayToString(std::string offDay) const
+{
+    std::string result = "Sun|Sat";
+    if (!offDay.empty()) {
+        offDay = offDay.substr(0, offDay.size() - 1);
+        auto data = SplitString(offDay, ",");
+        result = ConvertOffDayFamily(data);
+    }
+    return result;
+}
+
+std::vector<std::string> CalendarComposedElement::SplitString(const std::string& s, const std::string& c) const
+{
+    std::vector<std::string> v;
+    std::string::size_type pos1, pos2;
+    pos1 = 0;
+    pos2 = s.find(c);
+    while (std::string::npos != pos2) {
+        v.push_back(s.substr(pos1, pos2 - pos1));
+        pos1 = pos2 + c.size();
+        pos2 = s.find(c, pos1);
+    }
+    if (pos1 != s.length()) {
+        v.push_back(s.substr(pos1));
+    }
+    return v;
+}
+
+std::string CalendarComposedElement::ConvertOffDayFamily(const std::vector<std::string>& data) const
+{
+    std::string result = "";
+    for (const auto& item : data) {
+        result += ConvertWeekToString(item);
+        result += "|";
+    }
+    result = result.substr(0, result.size() - 1);
+    return result;
 }
 
 RefPtr<RenderCalendar> CalendarComposedElement::GetRenderCalendar() const

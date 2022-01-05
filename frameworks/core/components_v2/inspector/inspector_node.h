@@ -187,6 +187,8 @@ public:
     virtual std::unique_ptr<JsonValue> GetSweepGradient() const = 0;
     virtual std::unique_ptr<JsonValue> GetRadialGradient() const = 0;
 
+    // bindpopup
+    virtual std::string GetBindPopup() const = 0;
     // auto test
     virtual bool GetClickable() const = 0;
     virtual bool GetCheckable() const = 0;

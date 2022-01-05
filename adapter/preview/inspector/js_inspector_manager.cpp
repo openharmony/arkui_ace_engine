@@ -42,6 +42,7 @@
 #include "adapter/preview/inspector/inspect_list_item_group.h"
 #include "adapter/preview/inspector/inspect_marquee.h"
 #include "adapter/preview/inspector/inspect_menu.h"
+#include "adapter/preview/inspector/inspect_navigation_bar.h"
 #include "adapter/preview/inspector/inspect_option.h"
 #include "adapter/preview/inspector/inspect_panel.h"
 #include "adapter/preview/inspector/inspect_picker.h"
@@ -219,7 +220,7 @@ void JsInspectorManager::AssembleDefaultJSONTree(std::string& jsonStr)
         { DOM_NODE_TAG_LIST_ITEM_GROUP, &InspectNodeCreator<InspectListItemGroup> },
         { DOM_NODE_TAG_MARQUEE, &InspectNodeCreator<InspectMarquee> },
         { DOM_NODE_TAG_MENU, &InspectNodeCreator<InspectMenu> },
-        { DOM_NODE_TAG_NAVIGATION_BAR, &InspectNodeCreator<InspectMenu> },
+        { DOM_NODE_TAG_NAVIGATION_BAR, &InspectNodeCreator<InspectNavigationBar> },
         { DOM_NODE_TAG_OPTION, &InspectNodeCreator<InspectOption> },
         { DOM_NODE_TAG_PANEL, &InspectNodeCreator<InspectPanel> },
         { DOM_NODE_TAG_PICKER_DIALOG, &InspectNodeCreator<InspectPickerDialog> },
