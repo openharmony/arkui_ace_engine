@@ -120,7 +120,7 @@ bool NavigationContainerComponent::NeedSection() const
     return isSupportDeviceType && isWideScreen;
 }
 
-void NavigationContainerComponent::Build(const WeakPtr<PipelineContext>& context)
+void NavigationContainerComponent::Build(const WeakPtr<PipelineContext>& context, int32_t menuCount)
 {
     if (!declaration_) {
         return;
@@ -132,7 +132,7 @@ void NavigationContainerComponent::Build(const WeakPtr<PipelineContext>& context
     auto originalContent = AceType::MakeRefPtr<ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::FLEX_START, content);
     RefPtr<ColumnComponent> fixPart = AceType::MakeRefPtr<ColumnComponent>(
         FlexAlign::FLEX_START, FlexAlign::FLEX_START, std::list<RefPtr<OHOS::Ace::Component>>());
-    fixPart->AppendChild(NavigationBarBuilder(declaration_, "navigationBar", direction_).Build(context));
+    fixPart->AppendChild(NavigationBarBuilder(declaration_, "navigationBar", direction_).Build(context, menuCount));
     fixPart->AppendChild(AceType::MakeRefPtr<FlexItemComponent>(1.0, 1.0, 0.0, originalContent));
     tabController_ = TabController::GetController(GetGlobalTabControllerId());
     fixPart->AppendChild(NavigationContainerComponent::BuildToolBar(declaration_, tabController_));

@@ -95,13 +95,24 @@ public:
     {
         return declaration_;
     }
-    void Build(const WeakPtr<PipelineContext>& context);
+    void Build(const WeakPtr<PipelineContext>& context, int32_t menuCount);
+
+    void SetMenuCount(int32_t menuCount)
+    {
+        menuCount_ = menuCount;
+    }
+
+    int32_t GetMenuCount() const
+    {
+        return menuCount_;
+    }
 
 private:
     bool NeedSection() const;
 
     RefPtr<NavigationDeclaration> declaration_;
     RefPtr<TabController> tabController_;
+    int32_t menuCount_ = 0;
 };
 
 } // namespace OHOS::Ace

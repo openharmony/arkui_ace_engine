@@ -83,6 +83,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("hideToolBar", &JSNavigation::SetHideToolBar, opt);
     JSClass<JSNavigation>::StaticMethod("toolBar", &JSNavigation::SetToolBar);
     JSClass<JSNavigation>::StaticMethod("menus", &JSNavigation::SetMenus);
+    JSClass<JSNavigation>::StaticMethod("menuCount", &JSNavigation::SetMenuCount);
     JSClass<JSNavigation>::StaticMethod("onTitleModeChanged", &JSNavigation::SetOnTitleModeChanged);
     JSClass<JSNavigation>::Inherit<JSContainerBase>();
     JSClass<JSNavigation>::Inherit<JSViewAbstract>();
@@ -232,6 +233,15 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
         }
     } else {
         LOGE("arg is not [String|Function].");
+    }
+}
+
+void JSNavigation::SetMenuCount(int32_t menuCount)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
+    if (navigationContainer) {
+        navigationContainer->SetMenuCount(menuCount);
     }
 }
 
