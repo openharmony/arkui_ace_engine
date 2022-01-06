@@ -107,6 +107,7 @@ class MockRenderContext : public RenderContext {
 public:
     void Repaint(const RefPtr<RenderNode>& node) override {};
     void PaintChild(const RefPtr<RenderNode>& child, const Offset& offset) override {};
+    void Restore() override {};
 };
 
 RefPtr<RenderContext> RenderContext::Create()

@@ -120,9 +120,9 @@ template("ace_core_source_set") {
       "components/declaration/text/text_declaration.cpp",
       "components/declaration/textarea/textarea_declaration.cpp",
       "components/declaration/textfield/textfield_declaration.cpp",
+      "components/declaration/texttimer/texttimer_declaration.cpp",
       "components/declaration/web/web_declaration.cpp",
       "components/declaration/xcomponent/xcomponent_declaration.cpp",
-      "components/declaration/texttimer/texttimer_declaration.cpp",
 
       # gestures
       "gestures/click_recognizer.cpp",
@@ -149,8 +149,8 @@ template("ace_core_source_set") {
       "gestures/pan_gesture.cpp",
       "gestures/pinch_gesture.cpp",
       "gestures/rotation_gesture.cpp",
-      "gestures/tap_gesture.cpp",
       "gestures/slide_gesture.cpp",
+      "gestures/tap_gesture.cpp",
 
       # event
       "event/back_end_event_manager.cpp",
@@ -200,8 +200,7 @@ template("ace_core_source_set") {
       sources += [ "common/connect_server_manager.cpp" ]
     }
 
-    if (defined(config.hdc_register_support) &&
-        config.hdc_register_support) {
+    if (defined(config.hdc_register_support) && config.hdc_register_support) {
       sources += [ "common/hdc_register.cpp" ]
     }
 
@@ -293,6 +292,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/text_field:ace_core_components_text_field_$platform",
       "$ace_root/frameworks/core/components/text_overlay:ace_core_components_text_overlay_$platform",
       "$ace_root/frameworks/core/components/text_span:ace_core_components_text_span_$platform",
+      "$ace_root/frameworks/core/components/texttimer:ace_core_components_texttimer_$platform",
       "$ace_root/frameworks/core/components/theme:ace_core_components_theme_$platform",
       "$ace_root/frameworks/core/components/tip:ace_core_components_tip_$platform",
       "$ace_root/frameworks/core/components/toast:ace_core_components_toast_$platform",

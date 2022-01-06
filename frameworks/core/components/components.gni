@@ -86,12 +86,14 @@ template("build_component") {
         cflags_cc += invoker.cflags_cc
       }
 
-      if (defined(config.enable_rosen_backend) && config.enable_rosen_backend && defined(invoker.rosen_sources)) {
+      if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
+          defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
         configs += [ "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config" ]
       }
 
-      if (defined(config.enable_standard_input) && config.enable_standard_input) {
+      if (defined(config.enable_standard_input) &&
+          config.enable_standard_input) {
         if (defined(invoker.standard_input_sources)) {
           sources += invoker.standard_input_sources
         }

@@ -20,6 +20,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
+#include "core/common/container.h"
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
 #include "core/components/button/button_theme.h"

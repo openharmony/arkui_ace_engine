@@ -16,10 +16,6 @@
 #include "frameworks/base/log/log_wrapper.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 
-#include <iostream>
-#include <memory>
-#include <sys/stat.h>
-
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -58,6 +54,7 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
 void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
+        JSNApi::StopDebugger(libPath_.c_str());
         JSNApi::DestroyJSVM(vm_);
         vm_ = nullptr;
     }

@@ -35,7 +35,7 @@
 #include "core/pipeline/base/rosen_render_context.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
-#include "core/components/text_field/on_text_changed_listener_impl.h"
+//#include "core/components/text_field/on_text_changed_listener_impl.h"
 #endif
 
 namespace OHOS::Ace {
@@ -613,14 +613,14 @@ void RosenRenderTextField::ComputeOffsetAfterLayout()
     }
 
 #if defined(ENABLE_STANDARD_INPUT)
-    auto globalOffset = GetGlobalOffset();
-    MiscServices::CursorInfo cursorInfo {
-        .left = caretRect_.Left() + globalOffset.GetX(),
-        .top = caretRect_.Top() + globalOffset.GetY(),
-        .width = caretRect_.Width(),
-        .height = caretRect_.Height()
-    };
-    MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
+//    auto globalOffset = GetGlobalOffset();
+//    MiscServices::CursorInfo cursorInfo {
+//        .left = caretRect_.Left() + globalOffset.GetX(),
+//        .top = caretRect_.Top() + globalOffset.GetY(),
+//        .width = caretRect_.Width(),
+//        .height = caretRect_.Height()
+//    };
+//    MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
 #endif
 }
 

@@ -282,6 +282,7 @@ void JSDatePickerDialog::CreateDatePicker(RefPtr<Component> &component, const JS
     datePicker->SetIsDialog(false);
     datePicker->SetIsCreateDialogComponent(true);
     datePicker->SetShowLunar(isLunar);
+
     component = datePicker;
 }
 

@@ -32,7 +32,7 @@ ark_engine = {
 }
 js_engines += [ ark_engine ]
 
-disable_gpu = false
+disable_gpu = true
 use_external_icu = "shared"
 use_curl_download = true
 ohos_standard_fontmgr = true

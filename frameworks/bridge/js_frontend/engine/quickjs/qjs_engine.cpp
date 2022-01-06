@@ -76,6 +76,7 @@ constexpr int32_t ARGS_FULL_WINDOW_LENGTH = 2;
 constexpr int32_t ARGS_READ_RESOURCE_LENGTH = 2;
 constexpr int32_t MAX_READ_TEXT_LENGTH = 4096;
 const std::regex URI_PARTTEN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
+
 static int32_t globalNodeId = 100000;
 
 int32_t CallEvalBuf(

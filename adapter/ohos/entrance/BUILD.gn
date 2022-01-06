@@ -41,10 +41,11 @@ template("ace_ohos_standard_source_set") {
       defines += [ "_ARM64_" ]
     }
 
-    configs = [
-      "$ace_root:ace_config",
-      "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config",
-    ]
+    configs = [ "$ace_root:ace_config" ]
+
+    if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
+      configs += [ "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config" ]
+    }
 
     include_dirs = [
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/featureAbility",
@@ -76,12 +77,12 @@ template("ace_ohos_standard_source_set") {
       "aafwk_standard:ability_manager",
       "aafwk_standard:base",
       "aafwk_standard:want",
-      "napi:ace_napi",
       "appexecfwk_standard:appexecfwk_base",
       "appexecfwk_standard:appexecfwk_core",
       "appexecfwk_standard:fmskit_native",
       "appexecfwk_standard:libeventhandler",
       "ipc:ipc_core",
+      "napi:ace_napi",
       "native_appdatamgr:native_dataability",
       "native_appdatamgr:native_rdb",
     ]

@@ -54,8 +54,7 @@ bool IsRosenBackendEnabled()
     if (access(DISABLE_ROSEN_FILE_PATH, F_OK) == 0) {
         return false;
     }
-    return (system::GetParameter("persist.ace.rosen.backend.enabled", "1") == "1" &&
-            system::GetParameter("debug.ace.rosen.backend.enabled", "1") == "1");
+    return true;
 #else
     return false;
 #endif

@@ -213,6 +213,7 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     if (posPreview != std::string::npos) {
         std::string::size_type pos = preContent_.find(COMPONENT_PREVIEW_LOAD_DOCUMENT);
         if (pos != std::string::npos) {
+            LOGE("js file do not have loadDocument,");
             jsContent = preContent_;
         }
     } else {
@@ -243,9 +244,9 @@ void QJSDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::s
 {
     // replace the component name in the last loadDocument from current js content.
     std::string::size_type loadDocomentPos = 0;
-    std::string::size_type lastLoadDocomentPos = 0;
-    while ((loadDocomentPos = preContent_.find(COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW, loadDocomentPos)) !=
-           std::string::npos) {
+    std::string::size_type  lastLoadDocomentPos = 0;
+    while ((loadDocomentPos = preContent_.find(COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW, loadDocomentPos))
+           != std::string::npos) {
         lastLoadDocomentPos = loadDocomentPos;
         loadDocomentPos++;
     }
@@ -507,10 +508,8 @@ void QJSDeclarativeEngine::TimerCallJs(const std::string& callbackId, bool isInt
     }
     std::vector<JSValue> jsargv = ModuleManager::GetInstance()->GetCallbackArray(std::stoi(callbackId), isInterval);
     if (jsargv.empty()) {
-        LOGI("jsargv is empty");
         JS_Call(ctx, jsFunc, JS_UNDEFINED, 0, nullptr);
     } else {
-        LOGI("jsargv's size is %{private}zu", jsargv.size());
         JSValue* argv = new JSValue[jsargv.size()];
         uint32_t index = 0;
         while (index < jsargv.size()) {

@@ -496,6 +496,10 @@ void PipelineContext::FlushRender()
     UpdateNodesNeedDrawOnPixelMap();
 
     auto context = RenderContext::Create();
+    if (transparentHole_.IsValid()) {
+        LOGD("Hole: set transparentHole_ in FlushRender");
+        context->SetClipHole(transparentHole_);
+    }
     if (!dirtyRenderNodes_.empty()) {
         decltype(dirtyRenderNodes_) dirtyNodes(std::move(dirtyRenderNodes_));
         for (const auto& dirtyNode : dirtyNodes) {

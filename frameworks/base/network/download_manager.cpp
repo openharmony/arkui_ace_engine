@@ -62,8 +62,13 @@ public:
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_USERAGENT, "libcurl-agent/1.0");
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_URL, url.c_str());
 #ifdef WINDOWS_PLATFORM
-        ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_SSL_VERIFYPEER, 0L);
-        ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_SSL_VERIFYHOST, 0L);
+        const char* fileName = "../../resources/cacert.pem";
+        std::unique_ptr<FILE, decltype(&fclose)> file(fopen(fileName, "rb"), fclose);
+        if (file) {
+            ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_CAINFO, fileName);
+        } else {
+            LOGE("There is no CA certificate file for previewer to download https resource.");
+        }
 #endif
 
         CURLcode result = curl_easy_perform(handle.get());

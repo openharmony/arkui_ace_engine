@@ -142,6 +142,7 @@ const std::string AceAbility::PAGE_URI = "url";
 const std::string AceAbility::CONTINUE_PARAMS_KEY = "__remoteData";
 
 REGISTER_AA(AceAbility)
+
 void AceAbility::OnStart(const Want& want)
 {
     Ability::OnStart(want);
@@ -161,7 +162,13 @@ void AceAbility::OnStart(const Want& want)
             auto script = localeInfo->getScript();
             AceApplicationInfo::GetInstance().SetLocale((language == nullptr) ? "" : language,
                 (region == nullptr) ? "" : region, (script == nullptr) ? "" : script, "");
-        }
+        } else {
+	   LOGW("localeInfo is null.");
+	   AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
+	}
+    } else {
+       LOGW("resourceManager is null.");
+       AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
     }
 
     auto packagePathStr = GetBundleCodePath();
@@ -305,7 +312,11 @@ void AceAbility::OnStart(const Want& want)
             rsUiDirector->Init();
             LOGI("Init Rosen Backend");
         }
+    } else {
+        LOGI("not Init Rosen Backend");
     }
+#else
+    LOGI("no macro Init Rosen Backend");
 #endif
 
     // run page.

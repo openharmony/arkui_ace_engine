@@ -65,6 +65,10 @@ public:
     using SlipFactorSetting = std::function<void(double)>;
     ~RenderNode() override = default;
 
+    static void MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole, bool needFlush);
+
+    static void MarkWholeRender(const WeakPtr<RenderNode>& nodeWeak, bool needFlush);
+
     void SetZIndex(int32_t zIndex)
     {
         zIndex_ = zIndex;
@@ -1001,8 +1005,6 @@ public:
     bool IsPaintOutOfParent();
     void UpdatePosition();
 
-    virtual void ClipHole(RenderContext& context, const Offset& offset);
-
     void SetHasSubWindow(bool hasSubWindow)
     {
         hasSubWindow_ = hasSubWindow;
@@ -1042,6 +1044,16 @@ public:
     void SetInspectorNode(const RefPtr<V2::InspectorNode>& inspectorNode)
     {
         inspector_ = inspectorNode;
+    }
+
+    virtual void SetNeedClip(bool needClip)
+    {
+        needClip_ = needClip;
+    }
+
+    bool GetNeedClip()
+    {
+        return needClip_;
     }
 
 protected:
@@ -1132,6 +1144,7 @@ protected:
     void MarkNeedSyncGeometryProperties();
 
     bool hasSubWindow_ = false;
+    bool needClip_ = false;
     WeakPtr<PipelineContext> context_;
     Size viewPort_;
     Point globalPoint_;

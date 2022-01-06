@@ -30,6 +30,7 @@
 
 #include "mouse_event.h"
 #include "touch_event.h"
+#include "window.h"
 #include "window_manager.h"
 
 namespace OHOS::Ace::Platform {

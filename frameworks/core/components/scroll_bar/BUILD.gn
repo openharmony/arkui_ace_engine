@@ -15,11 +15,11 @@ import("//foundation/ace/ace_engine/frameworks/core/components/components.gni")
 
 build_component("scroll_bar") {
   sources = [
-    "scroll_bar_component.cpp",
-    "scroll_bar_element.cpp",
     "flutter_render_scroll_bar.cpp",
     "render_scroll_bar.cpp",
     "render_scroll_bar_creator.cpp",
+    "scroll_bar_component.cpp",
+    "scroll_bar_element.cpp",
     "scroll_bar_proxy.cpp",
   ]
   rosen_sources = [ "rosen_render_scroll_bar.cpp" ]

@@ -326,7 +326,6 @@ JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
     }
     runtime_.reset();
     runtime_ = nullptr;
-
     JsiDeclarativeUtils::SetCurrentState(JsErrorType::DESTROY_PAGE_ERROR, instanceId_, "", nullptr);
 }
 
@@ -798,6 +797,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
         nativeEngine_->SetPackagePath(packagePath);
     }
+
     RegisterWorker();
     return result;
 }
