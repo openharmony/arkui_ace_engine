@@ -947,13 +947,16 @@ void RenderFlex::ResizeByItem(const RefPtr<RenderNode>& item, double &allocatedS
     }
 
     crossSize_ = std::max(crossSize_, GetCrossSize(item));
+    // Semi relative and variable allocatedSize is used for grid container.
     if ((item->GetPositionType() == PositionType::SEMI_RELATIVE) &&
         (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)) {
         allocatedSize_ = std::max(allocatedSize_, mainSize);
         allocatedSize = mainSize;
     } else {
         allocatedSize_ += mainSize;
+        allocatedSize_ += space_;
         allocatedSize += mainSize;
+        allocatedSize += space_;
     }
 }
 

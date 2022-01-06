@@ -32,6 +32,7 @@ public:
 
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
+    std::string GetBackgroundColor() const override;
 
     std::string GetValue() const;
     std::string GetQrcodeColor() const;

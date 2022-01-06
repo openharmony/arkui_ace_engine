@@ -35,6 +35,7 @@ public:
     std::string GetButtonType() const;
     std::string GetStateEffect() const;
     std::string GetLabel() const;
+    std::string GetFontSize() const;
     std::string GetBackgroundColor() const override;
     std::string ConvertButtonTypeToString(ButtonType buttonType) const;
 
@@ -42,6 +43,9 @@ public:
     {
         return ButtonElement::TypeId();
     }
+    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
+    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
+    void DeleteChildWithSlot(int32_t slot) override;
 
 private:
     RefPtr<RenderButton> GetRenderButton() const;

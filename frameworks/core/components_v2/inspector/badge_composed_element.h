@@ -36,6 +36,7 @@ public:
     std::string GetMaxCount(void) const;
     std::string GetBadgePosition(void) const;
     std::string GetLabel(void) const;
+    std::string GetStyle() const;
 
 private:
     OHOS::Ace::RefPtr<OHOS::Ace::RenderBadge> GetRenderBadge() const;

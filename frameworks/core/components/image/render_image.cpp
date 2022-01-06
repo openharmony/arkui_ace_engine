@@ -83,6 +83,7 @@ void RenderImage::Update(const RefPtr<Component>& component)
     if (fillColor.has_value()) {
         inComingSource.SetFillColor(fillColor.value());
     }
+    border_ = image->GetBorder();
     // this value is used for update frequency with same image source info.
     LOGD("sourceInfo %{public}s", sourceInfo_.ToString().c_str());
     LOGD("inComingSource %{public}s", inComingSource.ToString().c_str());

@@ -37,6 +37,11 @@ public:
     void PerformLayout() override;
     bool UpdateGroupValue(const std::string& groupValue);
 
+    RefPtr<RadioComponent<std::string>> GetRadioComponent() const
+    {
+        return component_;
+    }
+
 protected:
     double innerCircleRadius_ = 0.0;
     double outCircleRadius_ = 0.0;

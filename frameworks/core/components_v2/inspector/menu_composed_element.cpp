@@ -49,7 +49,7 @@ std::unique_ptr<JsonValue> MenuComposedElement::ToJsonObject() const
 
 std::unique_ptr<JsonValue> MenuComposedElement::GetValues() const
 {
-    auto jsonDashArray = JsonUtil::CreateArray(true);
+    auto jsonDashArray = JsonUtil::CreateArray(false);
     auto menuElement = GetContentElement<MenuElement>(MenuElement::TypeId());
     if (menuElement) {
         auto options = menuElement->GetSelectOptions();

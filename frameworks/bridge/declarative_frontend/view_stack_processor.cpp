@@ -341,8 +341,13 @@ void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomV
     }
     wrappingComponentsMap.emplace("main", component);
     componentsStack_.push(wrappingComponentsMap);
+    std::string name;
+    auto composedComponent = AceType::DynamicCast<ComposedComponent>(component);
+    if (composedComponent) {
+        name = composedComponent->GetName();
+    }
     auto tag = component->GetInspectorTag();
-    CreateInspectorComposedComponent(tag.empty() ? AceType::TypeName(component) : tag);
+    CreateInspectorComposedComponent(tag.empty() ? (name.empty() ? AceType::TypeName(component) : name) : tag);
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component) &&

@@ -241,6 +241,11 @@ public:
         return Size();
     }
 
+    Border GetImageComponentBorder()
+    {
+        return border_;
+    }
+
 protected:
     void ApplyImageFit(Rect& srcRect, Rect& dstRect);
     void ApplyContain(Rect& srcRect, Rect& dstRect, const Size& rawPicSize, const Size& imageComponentSize);
@@ -351,6 +356,7 @@ protected:
     ImageSourceInfo sourceInfo_;
     void* pixmapRawPtr_ = nullptr;
     bool syncMode_ = false;
+    Border border_;
 };
 
 } // namespace OHOS::Ace

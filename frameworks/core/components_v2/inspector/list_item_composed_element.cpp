@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/components_v2/list/list_item_component.h"
 #include "core/components_v2/list/render_list_item.h"
 
 namespace OHOS::Ace::V2 {
@@ -25,7 +26,7 @@ namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const ListItemComposedElement&)>> CREATE_JSON_MAP {
     { "sticky", [](const ListItemComposedElement& inspector) { return inspector.GetSticky(); } },
-    { "editMode", [](const ListItemComposedElement& inspector) { return inspector.GetEditMode(); } }
+    { "editable", [](const ListItemComposedElement& inspector) { return inspector.GetEditable(); } }
 };
 
 }
@@ -36,9 +37,8 @@ void ListItemComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(
         std::string("sticky: ").append(GetSticky()));
     DumpLog::GetInstance().AddDesc(
-        std::string("editMode: ").append(GetEditMode()));
+        std::string("editable: ").append(GetEditable()));
 }
-
 
 std::unique_ptr<JsonValue> ListItemComposedElement::ToJsonObject() const
 {
@@ -57,34 +57,36 @@ std::string ListItemComposedElement::GetSticky() const
     }
     auto renderListItem = AceType::DynamicCast<RenderListItem>(node);
     if (renderListItem) {
-        return renderListItem->GetSticky() == StickyMode::NONE ? "Sticky.None" : "Sticky.Normal";
+        auto stikyMode = renderListItem->GetSticky();
+        if (stikyMode == StickyMode::NORMAL) {
+            return "Sticky.Normal";
+        } else if (stikyMode == StickyMode::OPACITY) {
+            return "Sticky.Opacity";
+        }
     }
     return "Sticky.None";
 }
 
-std::string ListItemComposedElement::GetEditMode() const
+std::string ListItemComposedElement::GetEditable() const
 {
     auto node = GetInspectorNode(ListItemElement::TypeId(), true);
     if (!node) {
-        return "EditMode.None";
+        return "false";
     }
     auto renderListItem = AceType::DynamicCast<RenderListItem>(node);
-    if (!renderListItem) {
-        return "EditMode.None";
-    }
-    if (renderListItem->IsDeletable()) {
-        if (renderListItem->IsMovable()) {
-            return "EditMode.Deletable | EditMode.Movable";
-        } else {
-            return "EditMode.Deletable";
-        }
-    } else {
-        if (renderListItem->IsMovable()) {
+    if (renderListItem) {
+        auto editMode = renderListItem->GetEditMode();
+        if (editMode == EditMode::NONE) {
+            return "false";
+        } else if (editMode == EditMode::MOVABLE) {
             return "EditMode.Movable";
-        } else {
-            return "EditMode.None";
+        } else if (editMode == EditMode::DELETABLE) {
+            return "EditMode.Deletable";
+        } else if (editMode == (EditMode::DELETABLE | EditMode::MOVABLE)) {
+            return "true";
         }
     }
+    return "false";
 }
 
 } // namespace OHOS::Ace::V2
