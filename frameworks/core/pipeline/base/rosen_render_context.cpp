@@ -16,7 +16,7 @@
 #include "core/pipeline/base/rosen_render_context.h"
 
 #include "core/components/plugin/render_plugin.h"
-#include "render_service_client/core/ui/rs_canvas_node.h"
+#include "render_service_client/core/ui/rs_node.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
@@ -129,9 +129,8 @@ void RosenRenderContext::StartRecording()
 
 void RosenRenderContext::StopRecordingIfNeeded()
 {
-    auto rsCanvasNode = RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
-    if (rosenCanvas_ && rsCanvasNode) {
-        rsCanvasNode->FinishRecording();
+    if (rosenCanvas_ && rsNode_) {
+        rsNode_->FinishRecording();
         rosenCanvas_ = nullptr;
     }
 
@@ -172,12 +171,9 @@ void RosenRenderContext::InitContext(
     LOGD("InitContext with width %{public}lf height %{public}lf", rect.Width(), rect.Height());
     rsNode_ = rsNode;
     estimatedRect_ = rect + initialOffset;
-    if (rsNode_ == nullptr) {
-        return;
-    }
-    rsNode_->ClearChildren();
-    if (auto rsCanvasNode = rsNode_->ReinterpretCastTo<Rosen::RSCanvasNode>()) {
-        rosenCanvas_ = rsCanvasNode->BeginRecording(
+    if (rsNode_) {
+        rsNode_->ClearChildren();
+        rosenCanvas_ = rsNode_->BeginRecording(
             rsNode_->GetStagingProperties().GetFrameWidth(), rsNode_->GetStagingProperties().GetFrameHeight());
     }
 }
