@@ -69,7 +69,8 @@ shared_ptr<JsValue> CurvesInterpolate(const shared_ptr<JsRuntime>& runtime, cons
 shared_ptr<JsValue> CurvesInit(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    thisObj->SetProperty(runtime, CURVE_INTERPOLATE, runtime->NewFunction(CurvesInterpolate));
+    auto curveObj = runtime->NewObject();
+    curveObj->SetProperty(runtime, CURVE_INTERPOLATE, runtime->NewFunction(CurvesInterpolate));
     if (argc != 1 && argc != 0) {
         LOGE("CurvesInit args count is invalid");
         return runtime->NewNull();
@@ -95,15 +96,16 @@ shared_ptr<JsValue> CurvesInit(const shared_ptr<JsRuntime>& runtime, const share
 
     page->AddCurve(curveString, curve);
     int32_t pageId = page->GetPageId();
-    thisObj->SetProperty(runtime, "__pageId", runtime->NewInt32(pageId));
-    thisObj->SetProperty(runtime, "__curveString", runtime->NewString(curveString));
-    return thisObj;
+    curveObj->SetProperty(runtime, "__pageId", runtime->NewInt32(pageId));
+    curveObj->SetProperty(runtime, "__curveString", runtime->NewString(curveString));
+    return curveObj;
 }
 
 shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, std::string& curveString)
 {
-    thisObj->SetProperty(runtime, CURVE_INTERPOLATE, runtime->NewFunction(CurvesInterpolate));
+    auto curveObj = runtime->NewObject();
+    curveObj->SetProperty(runtime, CURVE_INTERPOLATE, runtime->NewFunction(CurvesInterpolate));
     if (argc != 4) {
         LOGE("CurvesBezier or Spring curve args count is invalid");
         return runtime->NewNull();
@@ -134,9 +136,9 @@ shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shar
     }
     page->AddCurve(customCurve, curve);
     int32_t pageId = page->GetPageId();
-    thisObj->SetProperty(runtime, "__pageId", runtime->NewInt32(pageId));
-    thisObj->SetProperty(runtime, "__curveString", runtime->NewString(customCurve));
-    return thisObj;
+    curveObj->SetProperty(runtime, "__pageId", runtime->NewInt32(pageId));
+    curveObj->SetProperty(runtime, "__curveString", runtime->NewString(customCurve));
+    return curveObj;
 }
 
 shared_ptr<JsValue> CurvesBezier(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
