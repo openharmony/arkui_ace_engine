@@ -25,9 +25,7 @@ ohos_unittest("FlutterRenderPluginTest") {
 
   include_dirs = [ "//third_party/flutter/engine/" ]
 
-  sources = [
-    "flutter_render_plugin_test.cpp",
-  ]
+  sources = [ "flutter_render_plugin_test.cpp" ]
 
   configs = [ "$ace_root:ace_test_config" ]
 
@@ -84,9 +82,7 @@ ohos_unittest("PluginCallBackClientTest") {
 ohos_unittest("PluginComponentTest") {
   module_out_path = module_output_path
 
-  sources = [
-    "plugin_component_test.cpp",
-  ]
+  sources = [ "plugin_component_test.cpp" ]
 
   configs = [ "$ace_root:ace_test_config" ]
 
@@ -119,9 +115,7 @@ ohos_unittest("PluginComponentTest") {
 ohos_unittest("PluginElementTest") {
   module_out_path = module_output_path
 
-  sources = [
-    "plugin_element_test.cpp",
-  ]
+  sources = [ "plugin_element_test.cpp" ]
 
   configs = [ "$ace_root:ace_test_config" ]
 
@@ -156,9 +150,7 @@ ohos_unittest("PluginManagerDelegateTest") {
 
   include_dirs = [ "//third_party/flutter/engine/" ]
 
-  sources = [
-    "plugin_manager_delegate_test.cpp",
-  ]
+  sources = [ "plugin_manager_delegate_test.cpp" ]
 
   configs = [ "$ace_root:ace_test_config" ]
 
@@ -193,9 +185,7 @@ ohos_unittest("PluginManagerResourceTest") {
 
   include_dirs = [ "//third_party/flutter/engine/" ]
 
-  sources = [
-    "plugin_manager_resource_test.cpp",
-  ]
+  sources = [ "plugin_manager_resource_test.cpp" ]
 
   configs = [ "$ace_root:ace_test_config" ]
 
@@ -276,9 +266,7 @@ ohos_unittest("PluginWindowTest") {
 ohos_unittest("RenderPluginTest") {
   module_out_path = module_output_path
 
-  sources = [
-    "render_plugin_test.cpp",
-  ]
+  sources = [ "render_plugin_test.cpp" ]
 
   configs = [ "$ace_root:ace_test_config" ]
 

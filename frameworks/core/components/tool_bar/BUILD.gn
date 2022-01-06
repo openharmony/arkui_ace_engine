@@ -18,12 +18,12 @@ build_component("tool_bar") {
     "flutter_render_tool_bar.cpp",
     "flutter_render_tool_bar_item.cpp",
     "render_tool_bar.cpp",
+    "render_tool_bar_creator.cpp",
     "render_tool_bar_item.cpp",
+    "render_tool_bar_item_creator.cpp",
     "tool_bar_component.cpp",
     "tool_bar_item_component.cpp",
     "tool_bar_item_element.cpp",
-    "render_tool_bar_creator.cpp",
-    "render_tool_bar_item_creator.cpp",
   ]
   rosen_sources = [
     "rosen_render_tool_bar.cpp",

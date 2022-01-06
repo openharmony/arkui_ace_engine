@@ -293,6 +293,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/text_overlay:ace_core_components_text_overlay_$platform",
       "$ace_root/frameworks/core/components/text_span:ace_core_components_text_span_$platform",
       "$ace_root/frameworks/core/components/texttimer:ace_core_components_texttimer_$platform",
+      "$ace_root/frameworks/core/components/texttimer:ace_core_components_texttimer_$platform",
       "$ace_root/frameworks/core/components/theme:ace_core_components_theme_$platform",
       "$ace_root/frameworks/core/components/tip:ace_core_components_tip_$platform",
       "$ace_root/frameworks/core/components/toast:ace_core_components_toast_$platform",
@@ -305,7 +306,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/tween:ace_core_components_tween_$platform",
       "$ace_root/frameworks/core/components/watch_slider:ace_core_components_watch_slider_$platform",
       "$ace_root/frameworks/core/components/wrap:ace_core_components_wrap_$platform",
-      "$ace_root/frameworks/core/components/texttimer:ace_core_components_texttimer_$platform",
     ]
 
     deps += [
@@ -315,8 +315,8 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_v2/indexer:ace_core_components_indexer_v2_$platform",
       "$ace_root/frameworks/core/components_v2/inspector:ace_core_components_inspector_v2_$platform",
       "$ace_root/frameworks/core/components_v2/list:ace_core_components_list_v2_$platform",
-      "$ace_root/frameworks/core/components_v2/swiper:ace_core_components_swiper_v2_$platform",
       "$ace_root/frameworks/core/components_v2/pattern_lock:ace_core_components_pattern_lock_$platform",
+      "$ace_root/frameworks/core/components_v2/swiper:ace_core_components_swiper_v2_$platform",
     ]
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {

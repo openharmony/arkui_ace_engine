@@ -23,7 +23,8 @@ ohos_unittest("ui_service_stub_test") {
 
   sources = [ "ui_service_stub_test.cpp" ]
 
-  configs = [ "//foundation/ace/ace_engine/services/uiservice:uiservicems_config"]
+  configs =
+      [ "//foundation/ace/ace_engine/services/uiservice:uiservicems_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]

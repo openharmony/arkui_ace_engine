@@ -74,10 +74,10 @@ group("unittest") {
       "rating:unittest",
 
       #"select:unittest",
+      "plugin:unittest",
       "tabbar:unittest",
       "text_field:unittest",
       "text_select:unittest",
-      "plugin:unittest",
     ]
   }
 }

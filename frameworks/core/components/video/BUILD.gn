@@ -38,8 +38,8 @@ build_component("video") {
 
     deps = [
       "//foundation/graphic/standard:libwmclient",
-      "//foundation/windowmanager/wm:libwmutil",
       "//foundation/windowmanager/wm:libwm",
+      "//foundation/windowmanager/wm:libwmutil",
     ]
 
     external_deps = [ "ipc:ipc_core" ]

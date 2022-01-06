@@ -27,29 +27,29 @@ ohos_shared_library("plugincomponent") {
   ]
 
   sources = [
+    "js_plugin_callback.cpp",
+    "js_plugin_callback_mgr.cpp",
     "js_plugin_component.cpp",
     "js_plugin_util.cpp",
     "js_plugin_want.cpp",
-    "js_plugin_callback.cpp",
-    "js_plugin_callback_mgr.cpp",
   ]
 
   deps = [
     "$ace_root/build:libace",
     "$ace_root/build:libace_engine_declarative",
-    "//foundation/ace/napi/:ace_napi",
-    "//foundation/aafwk/standard/interfaces/innerkits/base:base",
-    "//utils/native/base:utils",
     "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
+    "//foundation/aafwk/standard/interfaces/innerkits/base:base",
     "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
+    "//foundation/ace/napi/:ace_napi",
+    "//utils/native/base:utils",
   ]
 
   external_deps = [
-    "hiviewdfx_hilog_native:libhilog",
-    "aafwk_standard:want",
     "aafwk_standard:base",
+    "aafwk_standard:want",
     "appexecfwk_standard:appexecfwk_base",
     "appexecfwk_standard:appexecfwk_core",
+    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]
 

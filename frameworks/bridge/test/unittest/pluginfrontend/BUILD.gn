@@ -19,9 +19,7 @@ module_output_path = "ace_engine_full/jsplugin"
 ohos_unittest("PluginFrontendDelegateTest") {
   module_out_path = module_output_path
 
-  sources = [
-    "plugin_frontend_delegate_test.cpp",
-  ]
+  sources = [ "plugin_frontend_delegate_test.cpp" ]
 
   configs = [
     ":config_domnode_test",
@@ -45,9 +43,7 @@ ohos_unittest("PluginFrontendDelegateTest") {
 ohos_unittest("PluginFrontendTest") {
   module_out_path = module_output_path
 
-  sources = [
-    "plugin_frontend_test.cpp",
-  ]
+  sources = [ "plugin_frontend_test.cpp" ]
 
   configs = [
     ":config_domnode_test",

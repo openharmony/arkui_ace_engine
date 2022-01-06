@@ -432,11 +432,11 @@ template("flutter_engine_shell") {
           "$flutter_root/engine/flutter/shell/platform/ohos/ohos_surface_gl.cc",
         ]
 
-        deps += ["//foundation/graphic/standard/prebuilts/librarys/gpu:gpu_libs"]
+        deps +=
+            [ "//foundation/graphic/standard/prebuilts/librarys/gpu:gpu_libs" ]
 
-        include_dirs += [
-          "//foundation/graphic/standard/prebuilts/librarys/gpu/include"
-        ]
+        include_dirs +=
+            [ "//foundation/graphic/standard/prebuilts/librarys/gpu/include" ]
       }
       deps += [
         "//foundation/graphic/standard:libvsync_client",
@@ -465,8 +465,8 @@ template("flutter_engine_shell") {
       ]
 
       aosp_deps = [
-       "shared_library:libEGL",
-       "shared_library:libGLESv2",
+        "shared_library:libEGL",
+        "shared_library:libGLESv2",
       ]
 
       if (defined(config.use_agp_vsync) && config.use_agp_vsync) {

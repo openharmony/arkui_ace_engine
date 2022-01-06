@@ -846,8 +846,9 @@ template("ace_skia_core") {
         ]
       } else {
         if (is_standard_system) {
-          deps =
-            [ "//foundation/graphic/standard/prebuilts/librarys/gpu:gpu_libs" ]
+          deps = [
+            "//foundation/graphic/standard/prebuilts/librarys/gpu:gpu_libs",
+          ]
         } else {
           aosp_deps = [
             "shared_library:libEGL",
@@ -1454,8 +1455,9 @@ template("ace_gpu") {
       if (!defined(config.disable_gpu) || !config.disable_gpu) {
         # Ohos or Android platform
         if (is_standard_system) {
-          deps =
-              [ "//foundation/graphic/standard/prebuilts/librarys/gpu:gpu_libs" ]
+          deps = [
+            "//foundation/graphic/standard/prebuilts/librarys/gpu:gpu_libs",
+          ]
         } else {
           aosp_deps = [
             "shared_library:libEGL",
