@@ -60,10 +60,14 @@ public:
     void OnActive() override;
 
     template<class T>
-    RefPtr<T> GetContentElement(IdType typeId) const
+    RefPtr<T> GetContentElement(IdType typeId, bool isFindAll = true) const
     {
         auto child = children_.empty() ? nullptr : children_.front();
         while (child) {
+		    auto inspectorComposedElement = AceType::DynamicCast<InspectorComposedElement>(child);
+            if (inspectorComposedElement && !isFindAll) {
+                return nullptr;
+            }
             if (AceType::TypeId(child) == typeId) {
                 return AceType::DynamicCast<T>(child);
             }
@@ -88,6 +92,7 @@ public:
     // dimension settings
     std::string GetWidth() const override;
     std::string GetHeight() const override;
+    std::unique_ptr<JsonValue> GetSize() const override;
     std::unique_ptr<JsonValue> GetPadding() const override;
     Dimension GetMargin(OHOS::Ace::AnimatableType type) const override;
     std::unique_ptr<JsonValue> GetAllMargin() const override;
@@ -117,6 +122,7 @@ public:
 
     // border settings
     Border GetBorder() const override;
+    std::unique_ptr<JsonValue> GetUnifyBorder() const override;
     std::string GetBorderStyle() const override;
     std::string GetBorderWidth() const override;
     std::string GetBorderColor() const override;
@@ -165,7 +171,7 @@ public:
     double GetHueRotate() const override;
 
     // shape clip
-    bool GetClip() const override;
+    std::string GetClip() const override;
     std::unique_ptr<JsonValue> GetMask() const override;
 
     // grid setting
@@ -180,6 +186,14 @@ public:
 
     std::unique_ptr<JsonValue> GetOverlay() const override;
 
+    // color gradient
+    std::unique_ptr<JsonValue> GetLinearGradient() const override;
+    std::unique_ptr<JsonValue> GetSweepGradient() const override;
+    std::unique_ptr<JsonValue> GetRadialGradient() const override;
+    void GetColorsAndRepeating(std::unique_ptr<JsonValue>& resultJson, const Gradient& gradient) const;
+
+	// bindpopup
+    virtual std::string GetBindPopup() const override;
     virtual AceType::IdType GetTargetTypeId() const
     {
         return AceType::TypeId(this);

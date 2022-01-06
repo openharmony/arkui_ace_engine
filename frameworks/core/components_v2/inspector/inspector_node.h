@@ -84,6 +84,7 @@ public:
     // dimension settings
     virtual std::string GetWidth() const = 0;
     virtual std::string GetHeight() const = 0;
+    virtual std::unique_ptr<JsonValue> GetSize() const = 0;
     virtual std::unique_ptr<JsonValue> GetPadding() const = 0;
     virtual Dimension GetMargin(OHOS::Ace::AnimatableType type) const = 0;
     virtual std::unique_ptr<JsonValue> GetAllMargin() const = 0;
@@ -113,6 +114,7 @@ public:
 
     // border settings
     virtual Border GetBorder() const = 0;
+    virtual std::unique_ptr<JsonValue> GetUnifyBorder() const = 0;
     virtual std::string GetBorderStyle() const = 0;
     virtual std::string GetBorderWidth() const = 0;
     virtual std::string GetBorderColor() const = 0;
@@ -161,7 +163,7 @@ public:
     virtual double GetHueRotate() const = 0;
 
     // shape clip
-    virtual bool GetClip() const = 0;
+    virtual std::string GetClip() const = 0;
     virtual std::unique_ptr<JsonValue> GetMask() const = 0;
 
     // grid setting
@@ -180,6 +182,13 @@ public:
 
     virtual std::pair<Rect, Offset> GetCurrentRectAndOrigin() const = 0;
 
+    // color gradient
+    virtual std::unique_ptr<JsonValue> GetLinearGradient() const = 0;
+    virtual std::unique_ptr<JsonValue> GetSweepGradient() const = 0;
+    virtual std::unique_ptr<JsonValue> GetRadialGradient() const = 0;
+
+    // bindpopup
+    virtual std::string GetBindPopup() const = 0;
     // auto test
     virtual bool GetClickable() const = 0;
     virtual bool GetCheckable() const = 0;

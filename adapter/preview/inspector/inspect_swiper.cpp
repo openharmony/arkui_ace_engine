@@ -35,7 +35,9 @@ void InspectSwiper::PackAttrAndStyle()
     attrs_.insert(std::make_pair("vertical", "false"));
     attrs_.insert(std::make_pair("disabled", "false"));
     attrs_.insert(std::make_pair("focusable", "true"));
-
+    attrs_.insert(std::make_pair("cachedsize", "-1"));
+    attrs_.insert(std::make_pair("scrolleffect", "spring"));
+    attrs_.insert(std::make_pair("displaymode", "stretch"));
     // add for the styles
     DeviceType deviceType = SystemProperties::GetDeviceType();
     if (deviceType == DeviceType::PHONE) {

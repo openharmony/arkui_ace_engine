@@ -28,6 +28,7 @@ const std::unordered_map<std::string, std::function<std::string(const ButtonComp
     { "type", [](const ButtonComposedElement& inspector) { return inspector.GetButtonType(); } },
     { "stateEffect", [](const ButtonComposedElement& inspector) { return inspector.GetStateEffect(); } },
     { "label", [](const ButtonComposedElement& inspector) { return inspector.GetLabel(); } },
+    { "fontSize", [](const ButtonComposedElement& inspector) { return inspector.GetFontSize(); } },
 };
 
 void ButtonComposedElement::Dump()
@@ -78,6 +79,20 @@ std::string ButtonComposedElement::GetLabel() const
     return render->GetTextData();
 }
 
+std::string ButtonComposedElement::GetFontSize() const
+{
+    auto node = GetInspectorNode(TextElement::TypeId());
+    if (!node) {
+        return "";
+    }
+    auto render = AceType::DynamicCast<RenderText>(node);
+    if (!render) {
+        return "";
+    }
+    auto fontSize = render ? render->GetTextStyle().GetFontSize() : Dimension();
+    return std::to_string(static_cast<int32_t>(fontSize.ConvertToVp()));
+}
+
 std::string ButtonComposedElement::GetBackgroundColor() const
 {
     auto renderButton = GetRenderButton();
@@ -116,6 +131,43 @@ std::string ButtonComposedElement::ConvertButtonTypeToString(ButtonType buttonTy
             LOGD("input do not match any ButtonType");
     }
     return result;
+}
+
+void ButtonComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto buttonElement = GetContentElement<ButtonElement>(ButtonElement::TypeId());
+    if (!buttonElement) {
+        LOGE("get GetButtonElement failed");
+        return;
+    }
+    buttonElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    buttonElement->MarkDirty();
+    LOGD("button AddChildWithSlot");
+}
+
+void ButtonComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto buttonElement = GetContentElement<ButtonElement>(ButtonElement::TypeId());
+    if (!buttonElement) {
+        LOGE("get GetButtonElement failed");
+        return;
+    }
+    auto child = buttonElement->GetChildBySlot(slot);
+    buttonElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    buttonElement->MarkDirty();
+    LOGD("button UpdateChildWithSlot");
+}
+
+void ButtonComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto buttonElement = GetContentElement<ButtonElement>(ButtonElement::TypeId());
+    if (!buttonElement) {
+        LOGE("get GetButtonElement failed");
+        return;
+    }
+    buttonElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    buttonElement->MarkDirty();
+    LOGD("button DeleteChildWithSlot");
 }
 
 } // namespace OHOS::Ace::V2

@@ -14,10 +14,10 @@
  */
 
 #include <unordered_map>
-
 #include "core/components_v2/inspector/badge_composed_element.h"
 
 #include "base/log/dump_log.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
 
@@ -25,7 +25,8 @@ const std::unordered_map<std::string, std::function<std::string(const BadgeCompo
     { "count", [](const BadgeComposedElement& inspector) { return inspector.GetCount(); } },
     { "maxCount", [](const BadgeComposedElement& inspector) { return inspector.GetMaxCount(); } },
     { "position", [](const BadgeComposedElement& inspector) { return inspector.GetBadgePosition(); } },
-    { "value", [](const BadgeComposedElement& inspector) { return inspector.GetLabel(); } }
+    { "value", [](const BadgeComposedElement& inspector) { return inspector.GetLabel(); } },
+    { "style", [](const BadgeComposedElement& inspector) { return inspector.GetStyle(); } }
 };
 
 void BadgeComposedElement::Dump()
@@ -40,6 +41,8 @@ void BadgeComposedElement::Dump()
         std::string("maxCount: ").append(GetMaxCount()));
     DumpLog::GetInstance().AddDesc(
         std::string("value: ").append(GetLabel()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("style: ").append(GetStyle()));
 }
 
 std::unique_ptr<OHOS::Ace::JsonValue> BadgeComposedElement::ToJsonObject() const
@@ -86,6 +89,22 @@ std::string BadgeComposedElement::GetLabel(void) const
     auto renderBadge = GetRenderBadge();
     std::string label =  renderBadge ? renderBadge->GetBadgeComponent()->GetBadgeLabel() : "";
     return label;
+}
+
+std::string BadgeComposedElement::GetStyle() const
+{
+    auto render = GetRenderBadge();
+    auto jsonValue = JsonUtil::Create(false);
+    if (render) {
+        auto style = render->GetBadgeComponent();
+        if (style) {
+            jsonValue->Put("color", ConvertColorToString(style->GetBadgeTextColor()).c_str());
+            jsonValue->Put("fontSize", style->GetBadgeFontSize().ToString().c_str());
+            jsonValue->Put("badgeColor", ConvertColorToString(style->GetBadgeColor()).c_str());
+            jsonValue->Put("badgeSize", style->GetBadgeCicleSize().ToString().c_str());
+        }
+    }
+    return jsonValue->ToString();
 }
 
 OHOS::Ace::RefPtr<OHOS::Ace::RenderBadge> BadgeComposedElement::GetRenderBadge() const

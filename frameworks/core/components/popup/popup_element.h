@@ -30,6 +30,14 @@ public:
 
     void PerformBuild() override;
 
+    bool IsShow() const
+    {
+        if (popup_) {
+            return popup_->IsShow();
+        }
+        return false;
+    }
+
     virtual void OnStateChange(bool isVisible) {}
 
 protected:

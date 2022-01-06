@@ -32,6 +32,10 @@ const std::unordered_map<std::string, std::function<std::string(const GridCompos
     { "scrollBarColor", [](const GridComposedElement& inspector) { return inspector.GetScrollBarColor(); } },
     { "scrollBarWidth", [](const GridComposedElement& inspector) { return inspector.GetScrollBarWidth(); } },
     { "scrollBar", [](const GridComposedElement& inspector) { return inspector.GetScrollBar(); } },
+    { "editMode", [](const GridComposedElement& inspector) { return inspector.GetGridEditMode(); } },
+    { "maxCount", [](const GridComposedElement& inspector) { return inspector.GetGridMaxCount(); } },
+    { "minCount", [](const GridComposedElement& inspector) { return inspector.GetGridMinCount(); } },
+    { "cellLength", [](const GridComposedElement& inspector) { return inspector.GetGridCellLength(); } },
 };
 
 }
@@ -47,6 +51,14 @@ void GridComposedElement::Dump()
         std::string("columnsGap: ").append(GetColumnsGap()));
     DumpLog::GetInstance().AddDesc(
         std::string("rowsGap: ").append(GetRowsGap()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("editMode: ").append(GetGridEditMode()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("maxCount: ").append(GetGridMaxCount()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("minCount: ").append(GetGridMinCount()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("cellLength: ").append(GetGridCellLength()));
 }
 
 std::unique_ptr<JsonValue> GridComposedElement::ToJsonObject() const
@@ -62,10 +74,7 @@ std::string GridComposedElement::GetColumnsTemplate() const
 {
     auto node = GetInspectorNode(GridLayoutElement::TypeId());
     if (!node) {
-        node = GetInspectorNode(V2::GridElement::TypeId());
-        if (!node) {
-            return "1fr";
-        }
+        return "1fr";
     }
     auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
     if (renderGrip) {
@@ -78,10 +87,7 @@ std::string GridComposedElement::GetRowsTemplate() const
 {
     auto node = GetInspectorNode(GridLayoutElement::TypeId());
     if (!node) {
-        node = GetInspectorNode(V2::GridElement::TypeId());
-        if (!node) {
-            return "1fr";
-        }
+        return "1fr";
     }
     auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
     if (renderGrip) {
@@ -94,10 +100,7 @@ std::string GridComposedElement::GetColumnsGap() const
 {
     auto node = GetInspectorNode(GridLayoutElement::TypeId());
     if (!node) {
-        node = GetInspectorNode(V2::GridElement::TypeId());
-        if (!node) {
-            return "0";
-        }
+        return "0";
     }
     auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
     if (renderGrip) {
@@ -110,10 +113,7 @@ std::string GridComposedElement::GetRowsGap() const
 {
     auto node = GetInspectorNode(GridLayoutElement::TypeId());
     if (!node) {
-        node = GetInspectorNode(V2::GridElement::TypeId());
-        if (!node) {
-            return "0";
-        }
+        return "0";
     }
     auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
     if (renderGrip) {
@@ -126,10 +126,7 @@ std::string GridComposedElement::GetScrollBarWidth() const
 {
     auto node = GetInspectorNode(GridLayoutElement::TypeId());
     if (!node) {
-        node = GetInspectorNode(V2::GridElement::TypeId());
-        if (!node) {
-            return "";
-        }
+        return "";
     }
     auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
     if (renderGrip) {
@@ -142,10 +139,7 @@ std::string GridComposedElement::GetScrollBarColor() const
 {
     auto node = GetInspectorNode(GridLayoutElement::TypeId());
     if (!node) {
-        node = GetInspectorNode(V2::GridElement::TypeId());
-        if (!node) {
-            return "";
-        }
+        return "";
     }
     auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
     if (renderGrip) {
@@ -158,29 +152,78 @@ std::string GridComposedElement::GetScrollBar() const
 {
     auto node = GetInspectorNode(GridLayoutElement::TypeId());
     if (!node) {
-        node = GetInspectorNode(V2::GridElement::TypeId());
-        if (!node) {
-            return "BarState::Off";
-        }
+        return "BarState.Off";
     }
     auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
     if (renderGrip) {
         return DisplayModeToString(renderGrip->GetScrollBar());
     }
-    return "BarState::Off";
+    return "BarState.Off";
+}
+
+std::string GridComposedElement::GetGridEditMode() const
+{
+    auto node = GetInspectorNode(GridLayoutElement::TypeId());
+    if (!node) {
+        return "false";
+    }
+    auto renderGrip = AceType::DynamicCast<GridLayoutComponent>(node);
+    if (renderGrip) {
+        return ConvertBoolToString(renderGrip->GetEditMode());
+    }
+    return "false";
+}
+
+std::string GridComposedElement::GetGridMaxCount() const
+{
+    auto node = GetInspectorNode(GridLayoutElement::TypeId());
+    if (!node) {
+        return "1";
+    }
+    auto renderGrip = AceType::DynamicCast<GridLayoutComponent>(node);
+    if (renderGrip) {
+        return std::to_string(renderGrip->GetMaxCount());
+    }
+    return "1";
+}
+
+std::string GridComposedElement::GetGridMinCount() const
+{
+    auto node = GetInspectorNode(GridLayoutElement::TypeId());
+    if (!node) {
+        return "1";
+    }
+    auto renderGrip = AceType::DynamicCast<GridLayoutComponent>(node);
+    if (renderGrip) {
+        return std::to_string(renderGrip->GetMinCount());
+    }
+    return "1";
+}
+
+std::string GridComposedElement::GetGridCellLength() const
+{
+    auto node = GetInspectorNode(GridLayoutElement::TypeId());
+    if (!node) {
+        return "0";
+    }
+    auto renderGrip = AceType::DynamicCast<GridLayoutComponent>(node);
+    if (renderGrip) {
+        return std::to_string(renderGrip->GetCellLength());
+    }
+    return "0";
 }
 
 std::string GridComposedElement::DisplayModeToString(DisplayMode displayMode) const
 {
     switch (displayMode) {
         case DisplayMode::OFF:
-            return "BarState::Off";
+            return "BarState.Off";
         case DisplayMode::AUTO:
-            return "BarState::Auto";
+            return "BarState.Auto";
         case DisplayMode::ON:
-            return "BarState::On";
+            return "BarState.On";
     }
-    return "BarState::Off";
+    return "BarState.Off";
 }
 
 void GridComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)

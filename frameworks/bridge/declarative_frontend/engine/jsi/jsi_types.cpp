@@ -152,6 +152,15 @@ size_t JsiArray::Length() const
 JsiObject::JsiObject() : JsiType() {}
 JsiObject::JsiObject(panda::Local<panda::ObjectRef> val) : JsiType(val) {}
 
+bool JsiObject::IsUndefined() const
+{
+    if (GetHandle().IsEmpty()) {
+        return true;
+    } else {
+        return GetHandle()->IsUndefined();
+    }
+}
+
 JsiRef<JsiArray> JsiObject::GetPropertyNames() const
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());

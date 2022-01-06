@@ -41,10 +41,15 @@ public:
     {
         return color_;
     }
+    const Color& GetBackgroundColor() const
+    {
+        return backgroundColor_;
+    }
 
 protected:
     std::string value_;
     Color color_ = Color::BLACK;
+    Color backgroundColor_ = Color::WHITE;
     double width_ = 0.0;
     double height_ = 0.0;
     RefPtr<QrcodeComponent> qrcode_;

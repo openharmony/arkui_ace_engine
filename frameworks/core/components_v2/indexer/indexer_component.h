@@ -74,6 +74,7 @@ public:
     IndexerComponent(const std::vector<std::string>& label, int32_t selectedIndex, bool bubble = true)
         : selectedIndex_(selectedIndex), bubbleEnabled_(bubble)
     {
+        valueArray_ = label;
         indexerLabel_ = GetU16StrVector(label);
         itemSize_ = Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP);
         selectedBgColor_ = Color(INDEXER_ACTIVE_BG_COLOR);
@@ -233,6 +234,10 @@ public:
         return alignStyle_;
     }
 
+    std::vector<std::string> GetArrayValue() const
+    {
+        return valueArray_;
+    }
 protected:
     // init data
     void FormatLabelAlphabet();
@@ -247,6 +252,7 @@ protected:
     std::vector<std::u16string> indexerLabel_;  // user input sections
     std::vector<std::u16string> sectionsLocal_; // actual sections, exclude dot
     std::vector<std::u16string> labelLocal_;    // sections shown on the screen with dot inside
+    std::vector<std::string> valueArray_;
     TextStyle normalStyle_;
     TextStyle activeStyle_;
     TextStyle bubbleStyle_;

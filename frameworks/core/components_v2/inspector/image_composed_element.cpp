@@ -25,8 +25,16 @@
 namespace OHOS::Ace::V2 {
 namespace {
 
+// NONE translate to Solid
+const char* BORDER_STYLE[] = {
+    "BorderStyle.Solid",
+    "BorderStyle.Dashed",
+    "BorderStyle.Dotted",
+    "BorderStyle.Solid",
+};
+
 const std::unordered_map<std::string, std::function<std::string(const ImageComposedElement&)>> CREATE_JSON_MAP {
-    { "uri", [](const ImageComposedElement& inspector) { return inspector.GetUri(); } },
+    { "src", [](const ImageComposedElement& inspector) { return inspector.GetSrc(); } },
     { "alt", [](const ImageComposedElement& inspector) { return inspector.GetAlt(); } },
     { "objectFit", [](const ImageComposedElement& inspector) { return inspector.GetObjectFit(); } },
     { "objectRepeat", [](const ImageComposedElement& inspector) { return inspector.GetObjectRepeat(); } },
@@ -41,7 +49,7 @@ const std::unordered_map<std::string, std::function<std::string(const ImageCompo
 void ImageComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
-    DumpLog::GetInstance().AddDesc(std::string("uri: ").append(GetUri()));
+    DumpLog::GetInstance().AddDesc(std::string("src: ").append(GetSrc()));
     DumpLog::GetInstance().AddDesc(std::string("alt: ").append(GetAlt()));
     DumpLog::GetInstance().AddDesc(std::string("objectFit: ").append(GetObjectFit()));
     DumpLog::GetInstance().AddDesc(std::string("objectRepeat: ").append(GetObjectRepeat()));
@@ -60,10 +68,18 @@ std::unique_ptr<JsonValue> ImageComposedElement::ToJsonObject() const
     return resultJson;
 }
 
-std::string ImageComposedElement::GetUri() const
+std::string ImageComposedElement::GetSrc() const
 {
     auto renderImage = GetRenderImage();
-    return renderImage ? renderImage->GetImageSrc() : "";
+    if (!renderImage) {
+        return "";
+    }
+    auto imageSrc = renderImage->GetImageSrc();
+    while (imageSrc.find("\\") != std::string::npos) {
+        auto num = imageSrc.find("\\");
+        imageSrc.replace(num, 1, "/");
+    }
+    return imageSrc;
 }
 
 std::string ImageComposedElement::GetAlt() const
@@ -77,15 +93,51 @@ std::string ImageComposedElement::GetObjectFit() const
     auto renderImage = GetRenderImage();
     auto imageFit =
         renderImage ? renderImage->GetImageFit() : ImageFit::COVER;
-    return ConvertWrapImageFitToString(imageFit);
+    std::string result = "";
+    switch (imageFit) {
+        case ImageFit::COVER:
+            result = "ImageFit.Cover";
+            break;
+        case ImageFit::FILL:
+            result = "ImageFit.Fill";
+            break;
+        case ImageFit::CONTAIN:
+            result = "ImageFit.Contain";
+            break;
+        case ImageFit::NONE:
+            result = "ImageFit.None";
+            break;
+        case ImageFit::SCALEDOWN:
+            result = "ImageFit.ScaleDown";
+            break;
+        default:
+            LOGD("input do not match any ImageFit");
+    }
+    return result;
 }
 
 std::string ImageComposedElement::GetObjectRepeat() const
 {
     auto renderImage = GetRenderImage();
-    auto imageRepeat =
-        renderImage ? renderImage->GetImageRepeat() : ImageRepeat::NOREPEAT;
-    return ConvertWrapImageRepeatToString(imageRepeat);
+    auto imageRepeat = renderImage ? renderImage->GetImageRepeat() : ImageRepeat::NOREPEAT;
+    std::string result = "";
+    switch (imageRepeat) {
+        case ImageRepeat::NOREPEAT:
+            result = "ImageRepeat.NoRepeat";
+            break;
+        case ImageRepeat::REPEAT:
+            result = "ImageRepeat.XY";
+            break;
+        case ImageRepeat::REPEATX:
+            result = "ImageRepeat.X";
+            break;
+        case ImageRepeat::REPEATY:
+            result = "ImageRepeat.Y";
+            break;
+        default:
+            LOGD("input do not match any ImageRepeat");
+    }
+    return result;
 }
 
 std::string ImageComposedElement::GetInterpolation() const
@@ -120,6 +172,34 @@ std::string ImageComposedElement::GetsyncMode() const
         return "false";
     }
     return ConvertBoolToString(renderImage->GetImageSyncMode());
+}
+
+std::string ImageComposedElement::GetBorderStyle() const
+{
+    auto border = GetRenderImage()->GetImageComponentBorder();
+    int32_t style = static_cast<int32_t>(border.Left().GetBorderStyle());
+    return BORDER_STYLE[style];
+}
+
+std::string ImageComposedElement::GetBorderWidth() const
+{
+    auto border = GetRenderImage()->GetImageComponentBorder();
+    return border.Left().GetWidth().ToString();
+}
+
+std::string ImageComposedElement::GetBorderColor() const
+{
+    auto border = GetRenderImage()->GetImageComponentBorder();
+    return border.Left().GetColor().ColorToString();
+}
+
+std::string ImageComposedElement::GetBorderRadius() const
+{
+    auto radius = GetRenderImage()->GetImageComponentBorder().TopLeftRadius().GetX();
+    if (radius.Value() == 0.0) {
+        return "0.0vp";
+    }
+    return radius.ToString();
 }
 
 RefPtr<RenderImage> ImageComposedElement::GetRenderImage() const

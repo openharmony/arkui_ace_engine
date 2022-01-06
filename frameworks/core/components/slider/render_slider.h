@@ -116,6 +116,11 @@ public:
         return mode_;
     }
 
+    Axis GetDirection() const
+    {
+        return direction_;
+    }
+
     bool GetShowSteps() const
     {
         return showSteps_;

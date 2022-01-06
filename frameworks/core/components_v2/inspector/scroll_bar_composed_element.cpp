@@ -93,4 +93,40 @@ RefPtr<RenderScrollBar> ScrollBarComposedElement::GetRenderScrollBar() const
     return nullptr;
 }
 
+void ScrollBarComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto scrollBarElement = GetContentElement<ScrollBarElement>(ScrollBarElement::TypeId());
+    if (!scrollBarElement) {
+        LOGE("get GetScrollBarElement failed");
+        return;
+    }
+    scrollBarElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    scrollBarElement->MarkDirty();
+    LOGD("scrollBar AddChildWithSlot");
+}
+
+void ScrollBarComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto scrollBarElement = GetContentElement<ScrollBarElement>(ScrollBarElement::TypeId());
+    if (!scrollBarElement) {
+        LOGE("get GetScrollBarElement failed");
+        return;
+    }
+    auto child = scrollBarElement->GetChildBySlot(slot);
+    scrollBarElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    scrollBarElement->MarkDirty();
+    LOGD("scrollBar UpdateChildWithSlot");
+}
+
+void ScrollBarComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto scrollBarElement = GetContentElement<ScrollBarElement>(ScrollBarElement::TypeId());
+    if (!scrollBarElement) {
+        LOGE("get GetScrollBarElement failed");
+        return;
+    }
+    scrollBarElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    scrollBarElement->MarkDirty();
+    LOGD("scrollBar DeleteChildWithSlot");
+}
 } // namespace OHOS::Ace::V2

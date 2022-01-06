@@ -26,7 +26,8 @@ namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const QrcodeComposedElement&)>> CREATE_JSON_MAP {
     { "value", [](const QrcodeComposedElement& inspector) { return inspector.GetValue(); } },
-    { "qrcodeColor", [](const QrcodeComposedElement& inspector) { return inspector.GetQrcodeColor(); } },
+    { "color", [](const QrcodeComposedElement& inspector) { return inspector.GetQrcodeColor(); } },
+    { "backgroundColor", [](const QrcodeComposedElement& inspector) { return inspector.GetBackgroundColor(); } },
 };
 
 } // namespace
@@ -58,6 +59,13 @@ std::string QrcodeComposedElement::GetQrcodeColor() const
 {
     auto renderQrcode = GetRenderQrcode();
     auto color = renderQrcode ? renderQrcode->GetQrcodeColor() : Color::BLACK;
+    return ConvertColorToString(color);
+}
+
+std::string QrcodeComposedElement::GetBackgroundColor() const
+{
+    auto renderQrcode = GetRenderQrcode();
+    auto color = renderQrcode ? renderQrcode->GetBackgroundColor() : Color::WHITE;
     return ConvertColorToString(color);
 }
 

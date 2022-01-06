@@ -63,8 +63,8 @@ void RenderList::Update(const RefPtr<Component>& component)
 
     // Start index should be updated only for the first time
     if (startIndex_ == INITIAL_CHILD_INDEX) {
-        auto initialIndex = component_->GetInitialIndex();
-        startIndex_ = initialIndex > 0 ? initialIndex : 0;
+        initialIndex_ = component_->GetInitialIndex();
+        startIndex_ = initialIndex_ > 0 ? initialIndex_ : 0;
     }
 
     const auto& divider = component_->GetItemDivider();
