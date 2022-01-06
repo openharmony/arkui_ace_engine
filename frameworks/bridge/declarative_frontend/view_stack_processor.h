@@ -32,6 +32,7 @@
 #include "frameworks/core/components/focusable/focusable_component.h"
 #include "frameworks/core/components/gesture_listener/gesture_component.h"
 #include "frameworks/core/components/gesture_listener/gesture_listener_component.h"
+#include "frameworks/core/components/menu/menu_component.h"
 #include "frameworks/core/components/mouse_listener/mouse_listener_component.h"
 #include "frameworks/core/components/navigation_bar/navigation_container_component.h"
 #include "frameworks/core/components/page_transition/page_transition_component.h"
@@ -76,6 +77,7 @@ public:
     RefPtr<PageTransitionComponent> GetPageTransitionComponent();
     RefPtr<CoverageComponent> GetCoverageComponent();
     void ClearPageTransitionComponent();
+    RefPtr<MenuComponent> GetMenuComponent(bool createNewComponent = true);
 #ifndef WEARABLE_PRODUCT
     RefPtr<PopupComponentV2> GetPopupComponent(bool createNewComponent = true);
 #endif

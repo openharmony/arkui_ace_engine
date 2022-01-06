@@ -1638,7 +1638,11 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
-    auto menuComponent = AceType::MakeRefPtr<OHOS::Ace::MenuComponent>("", "menu");
+    ViewStackProcessor::GetInstance()->GetCoverageComponent();
+    auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
+    if (!menuComponent) {
+        return;
+    }
     auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
     RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
     tapGesture->SetOnActionId([weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent)](const GestureEvent& info) {
@@ -1650,7 +1654,6 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
         showDialog("", info.GetGlobalLocation());
     });
     click->SetOnClick(tapGesture);
-    ViewStackProcessor::GetInstance()->Push(menuComponent);
     auto menuTheme = GetTheme<SelectTheme>();
     menuComponent->SetTheme(menuTheme);
 
@@ -1713,8 +1716,6 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 
         menuComponent->AppendOption(optionComponent);
     }
-
-    ViewStackProcessor::GetInstance()->Pop();
 }
 
 void JSViewAbstract::JsPadding(const JSCallbackInfo& info)
