@@ -40,7 +40,7 @@ public:
     std::string GetInterpolation() const;
     std::string GetRenderMode() const;
     std::string GetSourceSize() const;
-    std::string GetsyncMode() const;
+    std::string GetSyncLoad() const;
 
     std::string GetBorderStyle() const override;
     std::string GetBorderWidth() const override;
