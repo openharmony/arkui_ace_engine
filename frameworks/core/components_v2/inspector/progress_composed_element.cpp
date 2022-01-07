@@ -29,10 +29,12 @@ const std::unordered_map<std::string, std::function<std::string(const ProgressCo
     { "value", [](const ProgressComposedElement& inspector) { return inspector.GetValue(); } },
     { "total", [](const ProgressComposedElement& inspector) { return inspector.GetTotal(); } },
     { "style", [](const ProgressComposedElement& inspector) { return inspector.GetStyle(); } },
-    { "color", [](const ProgressComposedElement& inspector) { return inspector.GetColor(); } },
-    { "strokeWidth", [](const ProgressComposedElement& inspector) { return inspector.GetStrokeWidth(); } },
-    { "scaleCount", [](const ProgressComposedElement& inspector) { return inspector.GetScaleCount(); } },
-    { "scaleWidth", [](const ProgressComposedElement& inspector) { return inspector.GetScaleWidth(); } }
+    { "color", [](const ProgressComposedElement& inspector) { return inspector.GetColor(); } }
+};
+
+using JsonFuncType = std::function<std::unique_ptr<JsonValue>(const ProgressComposedElement&)>;
+const std::unordered_map<std::string, JsonFuncType> CREATE_JSON_JSON_VALUE_MAP {
+    { "circularStyle", [](const ProgressComposedElement& inspector) { return inspector.GetCircularStyle(); } }
 };
 
 } // namespace
@@ -44,9 +46,6 @@ void ProgressComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(std::string("total: ").append(GetTotal()));
     DumpLog::GetInstance().AddDesc(std::string("style: ").append(GetStyle()));
     DumpLog::GetInstance().AddDesc(std::string("color: ").append(GetColor()));
-    DumpLog::GetInstance().AddDesc(std::string("strokeWidth: ").append(GetStrokeWidth()));
-    DumpLog::GetInstance().AddDesc(std::string("scaleCount: ").append(GetScaleCount()));
-    DumpLog::GetInstance().AddDesc(std::string("scaleWidth: ").append(GetScaleWidth()));
 }
 
 std::unique_ptr<JsonValue> ProgressComposedElement::ToJsonObject() const
@@ -54,6 +53,9 @@ std::unique_ptr<JsonValue> ProgressComposedElement::ToJsonObject() const
     auto resultJson = InspectorComposedElement::ToJsonObject();
     for (const auto& value : CREATE_JSON_MAP) {
         resultJson->Put(value.first.c_str(), value.second(*this).c_str());
+    }
+    for (const auto& value : CREATE_JSON_JSON_VALUE_MAP) {
+        resultJson->Put(value.first.c_str(), value.second(*this));
     }
     return resultJson;
 }
@@ -104,34 +106,20 @@ std::string ProgressComposedElement::GetColor() const
     return "";
 }
 
-std::string ProgressComposedElement::GetStrokeWidth() const
+std::unique_ptr<JsonValue> ProgressComposedElement::GetCircularStyle() const
 {
     auto renderProgress = GetRenderProgress();
-    if (renderProgress) {
-        Dimension strokeWidth = renderProgress->GetProgressComponent()->GetTrackThickness();
-        return strokeWidth.ToString();
+    auto jsonCircularStyle = JsonUtil::Create(true);
+    if (!renderProgress) {
+        return jsonCircularStyle;
     }
-    return "";
-}
-
-std::string ProgressComposedElement::GetScaleCount() const
-{
-    auto renderProgress = GetRenderProgress();
-    if (renderProgress) {
-        auto scaleCount = renderProgress->GetProgressComponent()->GetScaleNumber();
-        return std::to_string(scaleCount);
-    }
-    return "";
-}
-
-std::string ProgressComposedElement::GetScaleWidth() const
-{
-    auto renderProgress = GetRenderProgress();
-    if (renderProgress) {
-        Dimension scaleWidth = renderProgress->GetProgressComponent()->GetScaleWidth();
-        return scaleWidth.ToString();
-    }
-    return "";
+    Dimension strokeWidth = renderProgress->GetProgressComponent()->GetTrackThickness();
+    jsonCircularStyle->Put("strokeWidth", strokeWidth.ToString().c_str());
+    auto scaleCount = renderProgress->GetProgressComponent()->GetScaleNumber();
+    jsonCircularStyle->Put("scaleCount", std::to_string(scaleCount).c_str());
+    Dimension scaleWidth = renderProgress->GetProgressComponent()->GetScaleWidth();
+    jsonCircularStyle->Put("scaleWidth", scaleWidth.ToString().c_str());
+    return jsonCircularStyle;
 }
 
 RefPtr<RenderProgress> ProgressComposedElement::GetRenderProgress() const
