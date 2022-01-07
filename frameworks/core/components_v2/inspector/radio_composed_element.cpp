@@ -48,7 +48,7 @@ std::unique_ptr<JsonValue> RadioComposedElement::ToJsonObject() const
 std::string RadioComposedElement::GetValue() const
 {
     auto render = GetRenderRadio();
-    auto value = render ? render->GetRadioComponent()->GetGroupValue() : "";
+    auto value = render ? render->GetRadioComponent()->GetValue() : "";
     auto group = render ? render->GetRadioComponent()->GetGroupName() : "";
     auto resultJson = JsonUtil::Create(true);
     resultJson->Put("value", value.c_str());

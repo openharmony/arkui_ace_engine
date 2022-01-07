@@ -25,17 +25,17 @@ namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const NavigationComposedElement&)>>
     CREATE_JSON_STRING_MAP {
-        { "navigationTitle",
+        { "title",
             [](const NavigationComposedElement& inspector) { return inspector.GetNavigationTitle(); } },
-        { "navigationSubTitle",
+        { "subtitle",
             [](const NavigationComposedElement& inspector) { return inspector.GetNavigationSubTitle(); } }
     };
 
 const std::unordered_map<std::string, std::function<bool(const NavigationComposedElement&)>>
     CREATE_JSON_BOOL_MAP {
-        { "hideNavigationBackButton",
+        { "hideBackButton",
             [](const NavigationComposedElement& inspector) { return inspector.GetHideNavigationBackButton(); } },
-        { "hideNavigationBar",
+        { "hideTitleBar",
             [](const NavigationComposedElement& inspector) { return inspector.GetHideNavigationBar(); } }
     };
 

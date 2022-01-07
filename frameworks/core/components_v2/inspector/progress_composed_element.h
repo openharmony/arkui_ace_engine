@@ -36,9 +36,7 @@ public:
     std::string GetTotal() const;
     std::string GetStyle() const;
     std::string GetColor() const;
-    std::string GetStrokeWidth() const;
-    std::string GetScaleCount() const;
-    std::string GetScaleWidth() const;
+    std::unique_ptr<JsonValue> GetCircularStyle() const;
 
 private:
     RefPtr<RenderProgress> GetRenderProgress() const;
