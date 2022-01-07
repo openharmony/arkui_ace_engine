@@ -114,7 +114,7 @@ std::string ImageComposedElement::GetSourceSize() const
 std::string ImageComposedElement::GetSyncLoad() const
 {
     auto renderImage = GetRenderImage();
-    if(!renderImage) {
+    if (!renderImage) {
         return "false";
     }
     return ConvertBoolToString(renderImage->GetImageSyncMode());
