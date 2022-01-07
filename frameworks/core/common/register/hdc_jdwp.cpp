@@ -28,11 +28,13 @@ HdcJdwpSimulator::HdcJdwpSimulator(uv_loop_t *loopIn, const std::string pkgName)
 
 HdcJdwpSimulator::~HdcJdwpSimulator()
 {
-    if (ctxPoint_ != nullptr && loop_ && !uv_is_closing((uv_handle_t *)&ctxPoint_->pipe)) {
-        uv_close((uv_handle_t *)&ctxPoint_->pipe, nullptr);
-    }
-    if (ctxPoint_->hasNewFd && loop_ && !uv_is_closing((uv_handle_t *)&ctxPoint_->newFd)) {
-        uv_close((uv_handle_t *)&ctxPoint_->newFd, nullptr);
+    if (ctxPoint_ != nullptr && loop_ != nullptr) {
+        if (!uv_is_closing((uv_handle_t *)&ctxPoint_->pipe)) {
+            uv_close((uv_handle_t *)&ctxPoint_->pipe, nullptr);
+        }
+        if (ctxPoint_->hasNewFd && !uv_is_closing((uv_handle_t *)&ctxPoint_->newFd)) {
+            uv_close((uv_handle_t *)&ctxPoint_->newFd, nullptr);
+        }
     }
     delete ctxPoint_;
     ctxPoint_ = nullptr;
@@ -43,6 +45,8 @@ HdcJdwpSimulator::~HdcJdwpSimulator()
 void HdcJdwpSimulator::FinishWriteCallback(uv_write_t *req, int status)
 {
     LOGI("FinishWriteCallback:%{public}d error:%{public}s", status, uv_err_name(status));
+    delete[]((uint8_t *)req->data);
+    delete req;
 }
 
 RetErrCode HdcJdwpSimulator::SendToStream(uv_stream_t *handleStream, const uint8_t *buf,
@@ -60,9 +64,9 @@ RetErrCode HdcJdwpSimulator::SendToStream(uv_stream_t *handleStream, const uint8
         return RetErrCode::ERR_GENERIC;
     }
     if (memcpy_s(pDynBuf, bufLen, buf, bufLen)) {
+        LOGE("HdcJdwpSimulator::SendToStream memcpy fail.");
         delete[] pDynBuf;
         pDynBuf = nullptr;
-        LOGE("HdcJdwpSimulator::SendToStream memcpy fail.");
         return RetErrCode::ERR_BUF_ALLOC;
     }
 
@@ -87,12 +91,8 @@ RetErrCode HdcJdwpSimulator::SendToStream(uv_stream_t *handleStream, const uint8
         LOGI("SendToStream buf:%{public}s", pDynBuf);
         uv_write(reqWrite, handleStream, &bfr, 1, (uv_write_cb)finishCallback);
         ret = RetErrCode::SUCCESS;
-        delete reqWrite;
-        reqWrite = nullptr;
         break;
     }
-    delete[] pDynBuf;
-    pDynBuf = nullptr;
     return ret;
 }
 
