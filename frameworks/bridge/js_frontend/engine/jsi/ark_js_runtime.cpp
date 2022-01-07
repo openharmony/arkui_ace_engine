@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/base/log/log_wrapper.h"
+#include "frameworks/base/utils/system_properties.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
@@ -39,6 +40,7 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
     LOGI("Ark: create jsvm");
     RuntimeOption option;
     option.SetGcType(RuntimeOption::GC_TYPE::GEN_GC);
+    option.SetArkProperties(SystemProperties::GetArkProperties());
     const int64_t poolSize = 0x10000000;  // 256M
     option.SetGcPoolSize(poolSize);
     option.SetLogLevel(RuntimeOption::LOG_LEVEL::ERROR);

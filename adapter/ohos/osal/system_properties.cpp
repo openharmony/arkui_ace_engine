@@ -73,6 +73,11 @@ void SystemProperties::InitDeviceType(DeviceType)
     // Do nothing, no need to store type here, use system property at 'GetDeviceType' instead.
 }
 
+int SystemProperties::GetArkProperties()
+{
+    return system::GetIntParameter<int>("persist.ark.properties", -1);
+}
+
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
