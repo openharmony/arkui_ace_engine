@@ -17,6 +17,8 @@
 #include "base/log/log.h"
 namespace OHOS::Ace {
 
+uint8_t *HdcJdwpSimulator::pDynBuf = nullptr;
+
 HdcJdwpSimulator::HdcJdwpSimulator(uv_loop_t *loopIn, const std::string pkgName)
 {
     loop_ = loopIn;
@@ -40,11 +42,15 @@ HdcJdwpSimulator::~HdcJdwpSimulator()
     ctxPoint_ = nullptr;
     delete connect_;
     connect_ = nullptr;
+    delete []pDynBuf;
+    pDynBuf = nullptr;
 }
 
 void HdcJdwpSimulator::FinishWriteCallback(uv_write_t *req, int status)
 {
     LOGI("FinishWriteCallback:%{public}d error:%{public}s", status, uv_err_name(status));
+    delete[]((uint8_t *)req->data);
+    delete req;
 }
 
 RetErrCode HdcJdwpSimulator::SendToStream(uv_stream_t *handleStream, const uint8_t *buf,
@@ -56,14 +62,12 @@ RetErrCode HdcJdwpSimulator::SendToStream(uv_stream_t *handleStream, const uint8
         LOGE("HdcJdwpSimulator::SendToStream wrong bufLen.");
         return RetErrCode::ERR_GENERIC;
     }
-    uint8_t *pDynBuf = new uint8_t[bufLen];
+    pDynBuf = new uint8_t[bufLen];
     if (pDynBuf == nullptr) {
         LOGE("HdcJdwpSimulator::SendToStream new pDynBuf fail.");
         return RetErrCode::ERR_GENERIC;
     }
     if (memcpy_s(pDynBuf, bufLen, buf, bufLen)) {
-        delete[] pDynBuf;
-        pDynBuf = nullptr;
         LOGE("HdcJdwpSimulator::SendToStream memcpy fail.");
         return RetErrCode::ERR_BUF_ALLOC;
     }
@@ -71,8 +75,6 @@ RetErrCode HdcJdwpSimulator::SendToStream(uv_stream_t *handleStream, const uint8
     uv_write_t *reqWrite = new uv_write_t();
     if (reqWrite == nullptr) {
         LOGE("HdcJdwpSimulator::SendToStream alloc reqWrite fail.");
-        delete[] pDynBuf;
-        pDynBuf = nullptr;
         return RetErrCode::ERR_GENERIC;
     }
     uv_buf_t bfr;
@@ -89,12 +91,8 @@ RetErrCode HdcJdwpSimulator::SendToStream(uv_stream_t *handleStream, const uint8
         LOGI("SendToStream buf:%{public}s", pDynBuf);
         uv_write(reqWrite, handleStream, &bfr, 1, (uv_write_cb)finishCallback);
         ret = RetErrCode::SUCCESS;
-        delete reqWrite;
-        reqWrite = nullptr;
         break;
     }
-    delete[] pDynBuf;
-    pDynBuf = nullptr;
     return ret;
 }
 
@@ -155,8 +153,6 @@ bool HdcJdwpSimulator::Connect()
     string jdwpCtrlName = "\0jdwp-control";
     if (!ctxPoint_) {
         LOGE("MallocContext failed");
-        delete connect_;
-        connect_ = nullptr;
         return false;
     }
     connect_->data = ctxPoint_;
