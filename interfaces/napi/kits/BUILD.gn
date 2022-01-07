@@ -20,6 +20,7 @@ group("napi_group") {
     "$ace_root/interfaces/napi/kits/device:device",
     "$ace_root/interfaces/napi/kits/grid:grid",
     "$ace_root/interfaces/napi/kits/media_query:mediaquery",
+    "$ace_root/interfaces/napi/kits/plugincomponent:plugincomponent",
     "$ace_root/interfaces/napi/kits/prompt:prompt",
     "$ace_root/interfaces/napi/kits/router:router",
   ]

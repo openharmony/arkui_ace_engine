@@ -80,8 +80,8 @@ std::string SpanComposedElement::GetDeclaration() const
     auto renderTextSpan = GetRenderTextSpan();
     auto textDecoration = renderTextSpan ? renderTextSpan->GetSpanStyle().GetTextDecoration() : TextDecoration::NONE;
     auto textDecorationColor = renderTextSpan ? renderTextSpan->GetSpanStyle().GetTextDecorationColor() : Color::BLACK;
-    jsonSpanDeclaration->Put("Type", ConvertWrapTextDecorationToStirng(textDecoration).c_str());
-    jsonSpanDeclaration->Put("Color", ConvertColorToString(textDecorationColor).c_str());
+    jsonSpanDeclaration->Put("type", ConvertWrapTextDecorationToStirng(textDecoration).c_str());
+    jsonSpanDeclaration->Put("color", ConvertColorToString(textDecorationColor).c_str());
     return jsonSpanDeclaration->ToString();
 }
 

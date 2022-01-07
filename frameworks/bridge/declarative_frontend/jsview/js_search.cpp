@@ -279,6 +279,12 @@ void JSSearch::Create(const JSCallbackInfo& info)
         textFieldComponent->SetPlaceholder(tip);
     }
 
+    auto controllerObj = param->GetProperty("controller");
+    JSSearchController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSSearchController>();
+    if (jsController) {
+        jsController->SetController(textFieldComponent->GetTextFieldController());
+    }
+
     auto icon = param->GetProperty("icon");
     if (!icon->IsNull() && icon->IsString()) {
         auto src = icon->ToString();
@@ -481,6 +487,35 @@ void JSSearch::SetOnPaste(const JSCallbackInfo& info)
         LOGW("Failed(OnPaste) to bind event");
     }
     info.ReturnSelf();
+}
+
+void JSSearchController::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSSearchController>::Declare("SearchController");
+    JSClass<JSSearchController>::Method("caretPosition", &JSSearchController::CaretPosition);
+    JSClass<JSSearchController>::Bind(globalObj, JSSearchController::Constructor, JSSearchController::Destructor);
+}
+
+void JSSearchController::Constructor(const JSCallbackInfo& args)
+{
+    auto scroller = Referenced::MakeRefPtr<JSSearchController>();
+    scroller->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(scroller));
+}
+
+void JSSearchController::Destructor(JSSearchController* scroller)
+{
+    if (scroller != nullptr) {
+        scroller->DecRefCount();
+    }
+}
+
+void JSSearchController::CaretPosition(int32_t caretPosition)
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        controller->CaretPosition(caretPosition);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

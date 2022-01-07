@@ -288,9 +288,11 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/swiper:ace_core_components_swiper_$platform",
       "$ace_root/frameworks/core/components/tab_bar:ace_core_components_tab_bar_$platform",
       "$ace_root/frameworks/core/components/text:ace_core_components_text_$platform",
+      "$ace_root/frameworks/core/components/text_clock:ace_core_components_text_clock_$platform",
       "$ace_root/frameworks/core/components/text_field:ace_core_components_text_field_$platform",
       "$ace_root/frameworks/core/components/text_overlay:ace_core_components_text_overlay_$platform",
       "$ace_root/frameworks/core/components/text_span:ace_core_components_text_span_$platform",
+      "$ace_root/frameworks/core/components/texttimer:ace_core_components_texttimer_$platform",
       "$ace_root/frameworks/core/components/texttimer:ace_core_components_texttimer_$platform",
       "$ace_root/frameworks/core/components/theme:ace_core_components_theme_$platform",
       "$ace_root/frameworks/core/components/tip:ace_core_components_tip_$platform",
@@ -313,6 +315,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_v2/indexer:ace_core_components_indexer_v2_$platform",
       "$ace_root/frameworks/core/components_v2/inspector:ace_core_components_inspector_v2_$platform",
       "$ace_root/frameworks/core/components_v2/list:ace_core_components_list_v2_$platform",
+      "$ace_root/frameworks/core/components_v2/pattern_lock:ace_core_components_pattern_lock_$platform",
       "$ace_root/frameworks/core/components_v2/swiper:ace_core_components_swiper_v2_$platform",
     ]
 
@@ -327,8 +330,8 @@ template("ace_core_source_set") {
         "$ace_root/frameworks/core/components/rich_text:ace_core_components_rich_text_$platform",
         "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform",
       ]
-      sources += [ "common/form_manager.cpp" ]
     }
+    sources += [ "common/form_manager.cpp" ]
 
     # xcomponent components supports phone, TV and wearable except PC Preview
     if (defined(config.xcomponent_components_support) &&
@@ -339,6 +342,25 @@ template("ace_core_source_set") {
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       deps += [ "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform" ]
+    }
+
+    if (defined(config.plugin_components_support) &&
+        config.plugin_components_support) {
+      if (!use_mingw_win && !use_mac) {
+        deps += [ "$ace_root/frameworks/core/components/plugin:ace_core_components_plugin_$platform" ]
+        deps += [ "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native" ]
+
+        external_deps = [
+          "aafwk_standard:base",
+          "aafwk_standard:want",
+          "appexecfwk_standard:appexecfwk_base",
+          "appexecfwk_standard:appexecfwk_core",
+          "appexecfwk_standard:libeventhandler",
+        ]
+      }
+    }
+    if (!use_mingw_win && !use_mac) {
+      sources += [ "common/plugin_manager.cpp" ]
     }
 
     if (!is_wearable_product) {

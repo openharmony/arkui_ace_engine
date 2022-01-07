@@ -39,11 +39,6 @@ public:
 
     void Update(const RefPtr<Component>& component) override;
 
-    bool IsRepaintBoundary() const override
-    {
-        return true;
-    }
-
     void SetDiameter(double diameter)
     {
         diameter_ = diameter;

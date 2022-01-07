@@ -80,12 +80,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchPoint& event)
         return;
     }
 
-    if (fingers_ == 1) {
-        globalPoint_ = Point(touchUpPoint_.x, touchUpPoint_.y);
-    } else {
-        globalPoint_ = Point(event.x, event.y);
-    }
-
+    globalPoint_ = Point(event.x, event.y);
     touchPoints_.erase(itr);
 
     if (state_ == DetectState::READY) {
@@ -124,9 +119,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchPoint& event)
 
 void PanRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
 {
-    if (fingers_ == 1) {
-        touchUpPoint_ = event;
-    }
     LOGD("pan recognizer receives touch move event");
     auto itr = touchPoints_.find(event.id);
     if (itr == touchPoints_.end()) {

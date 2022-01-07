@@ -18,8 +18,8 @@ build_component("texttimer") {
     "flutter_render_texttimer.cpp",
     "render_texttimer.cpp",
     "render_texttimer_creator.cpp",
-    "rosen_render_texttimer.cpp",
     "texttimer_component.cpp",
     "texttimer_element.cpp",
   ]
+  rosen_sources = [ "rosen_render_texttimer.cpp" ]
 }

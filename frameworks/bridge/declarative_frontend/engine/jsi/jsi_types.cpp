@@ -162,6 +162,15 @@ bool JsiArray::IsArray() const
 JsiObject::JsiObject() : JsiType() {}
 JsiObject::JsiObject(panda::Local<panda::ObjectRef> val) : JsiType(val) {}
 
+bool JsiObject::IsUndefined() const
+{
+    if (GetHandle().IsEmpty()) {
+        return true;
+    } else {
+        return GetHandle()->IsUndefined();
+    }
+}
+
 JsiRef<JsiArray> JsiObject::GetPropertyNames() const
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
@@ -175,6 +184,15 @@ JsiRef<JsiValue> JsiObject::GetProperty(const char* prop) const
     auto value = GetHandle()->Get(runtime->GetEcmaVm(), stringRef);
     auto func = JsiValue(value);
     auto refValue =  JsiRef<JsiValue>(func);
+    return refValue;
+}
+
+JsiRef<JsiValue> JsiObject::ToJsonObject(const char* value) const
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto vm = runtime->GetEcmaVm();
+    auto valueRef = JsiValueConvertor::toJsiValue<std::string>(value);
+    auto refValue = JsiRef<JsiValue>::Make(JSON::Parse(vm, valueRef));
     return refValue;
 }
 

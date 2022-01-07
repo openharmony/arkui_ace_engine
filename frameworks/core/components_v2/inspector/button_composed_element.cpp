@@ -133,4 +133,41 @@ std::string ButtonComposedElement::ConvertButtonTypeToString(ButtonType buttonTy
     return result;
 }
 
+void ButtonComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto buttonElement = GetContentElement<ButtonElement>(ButtonElement::TypeId());
+    if (!buttonElement) {
+        LOGE("get GetButtonElement failed");
+        return;
+    }
+    buttonElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    buttonElement->MarkDirty();
+    LOGD("button AddChildWithSlot");
+}
+
+void ButtonComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto buttonElement = GetContentElement<ButtonElement>(ButtonElement::TypeId());
+    if (!buttonElement) {
+        LOGE("get GetButtonElement failed");
+        return;
+    }
+    auto child = buttonElement->GetChildBySlot(slot);
+    buttonElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    buttonElement->MarkDirty();
+    LOGD("button UpdateChildWithSlot");
+}
+
+void ButtonComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto buttonElement = GetContentElement<ButtonElement>(ButtonElement::TypeId());
+    if (!buttonElement) {
+        LOGE("get GetButtonElement failed");
+        return;
+    }
+    buttonElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    buttonElement->MarkDirty();
+    LOGD("button DeleteChildWithSlot");
+}
+
 } // namespace OHOS::Ace::V2

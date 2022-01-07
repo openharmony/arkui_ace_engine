@@ -53,9 +53,23 @@ std::string PickerTextComponent::GetSelectedObject(bool isColumnChange,
         LOGW("text picker has no column change event.");
         return "";
     }
-    return std::string("{\"newValue\":") + selectedValue_ +
-        ",\"newSelected\":" + std::to_string(selectedIndex_) +
-        ",\"status\":" + std::to_string(status) + "}";
+    auto container = Container::Current();
+    if (!container) {
+        return "";
+    }
+    auto context = container->GetPipelineContext();
+    if (!context) {
+        return "";
+    }
+    if (context->GetIsDeclarative()) {
+        return std::string("{\"value\":") + "\"" + selectedValue_ + "\"" +
+            ",\"index\":" + std::to_string(selectedIndex_) +
+            ",\"status\":" + std::to_string(status) + "}";
+    } else {
+        return std::string("{\"newValue\":") + "\"" + selectedValue_ + "\"" +
+            ",\"newSelected\":" + std::to_string(selectedIndex_) +
+            ",\"status\":" + std::to_string(status) + "}";
+    }
 }
 
 void PickerTextComponent::OnSelectedSaving()

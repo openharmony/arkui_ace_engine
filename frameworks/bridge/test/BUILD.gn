@@ -66,6 +66,7 @@ group("unittest") {
       "unittest/jsfrontend/marquee:unittest",
       "unittest/jsfrontend/slider:unittest",
       "unittest/jsfrontend/video:unittest",
+      "unittest/pluginfrontend:unittest",
     ]
   }
 }

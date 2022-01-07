@@ -27,9 +27,10 @@ enum class MouseAction : int32_t {
     PRESS = 1,
     RELEASE = 2,
     MOVE = 3,
-    HOVER_ENTER = 4,
-    HOVER_MOVE = 5,
-    HOVER_EXIT = 6,
+    HOVER = 4,
+    HOVER_ENTER,
+    HOVER_MOVE,
+    HOVER_EXIT,
 };
 
 enum class MouseState : int32_t {
@@ -61,6 +62,7 @@ struct MouseEvent final {
     int32_t pressedButtons = 0; // combined by MouseButtons
     TimeStamp time;
     int64_t deviceId = 0;
+    SourceType sourceType = SourceType::NONE;
 
     Offset GetOffset() const
     {
@@ -92,7 +94,8 @@ struct MouseEvent final {
                 .button = button,
                 .pressedButtons = pressedButtons,
                 .time = time,
-                .deviceId = deviceId };
+                .deviceId = deviceId,
+                .sourceType = sourceType };
         }
 
         return { .x = x / scale,
@@ -108,7 +111,8 @@ struct MouseEvent final {
             .button = button,
             .pressedButtons = pressedButtons,
             .time = time,
-            .deviceId = deviceId };
+            .deviceId = deviceId,
+            .sourceType = sourceType };
     }
 
     TouchPoint CreateTouchPoint() const
@@ -126,7 +130,14 @@ struct MouseEvent final {
 
         int32_t id = GetId();
 
-        return { .id = id, .x = x, .y = y, .type = type, .time = time, .size = 0.0, .deviceId = deviceId };
+        return { .id = id,
+            .x = x,
+            .y = y,
+            .type = type,
+            .time = time,
+            .size = 0.0,
+            .deviceId = deviceId,
+            .sourceType = sourceType };
     }
 
     MouseEvent operator-(const Offset& offset) const
@@ -144,8 +155,66 @@ struct MouseEvent final {
             .button = button,
             .pressedButtons = pressedButtons,
             .time = time,
-            .deviceId = deviceId };
+            .deviceId = deviceId,
+            .sourceType = sourceType };
     }
+};
+
+class MouseInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(MouseInfo, BaseEventInfo);
+
+public:
+    MouseInfo() : BaseEventInfo("onMouse") {}
+    ~MouseInfo() override = default;
+
+    void SetButton(MouseButton button)
+    {
+        button_ = button;
+    }
+
+    MouseButton GetButton() const
+    {
+        return button_;
+    }
+
+    void SetAction(MouseAction action)
+    {
+        action_ = action;
+    }
+
+    MouseAction GetAction() const
+    {
+        return action_;
+    }
+
+    MouseInfo& SetGlobalLocation(const Offset& globalLocation)
+    {
+        globalLocation_ = globalLocation;
+        return *this;
+    }
+    MouseInfo& SetLocalLocation(const Offset& localLocation)
+    {
+        localLocation_ = localLocation;
+        return *this;
+    }
+
+    const Offset& GetLocalLocation() const
+    {
+        return localLocation_;
+    }
+    const Offset& GetGlobalLocation() const
+    {
+        return globalLocation_;
+    }
+
+private:
+    MouseButton button_ = MouseButton::NONE_BUTTON;
+    MouseAction action_ = MouseAction::NONE;
+    // global position at which the touch point contacts the screen.
+    Offset globalLocation_;
+    // Different from global location, The local location refers to the location of the contact point relative to the
+    // current node which has the recognizer.
+    Offset localLocation_;
 };
 
 class MouseEventTarget : public virtual AceType {

@@ -15,8 +15,8 @@
 
 #include "core/pipeline/base/flutter_render_context.h"
 
+#include "core/components/plugin/render_plugin.h"
 #include "core/pipeline/base/render_node.h"
-#include "core/pipeline/layers/offset_layer.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -64,7 +64,7 @@ void FlutterRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Off
     if (child->GetRenderLayer()) {
         StopRecordingIfNeeded();
         std::string name = AceType::TypeName(child);
-        if (name != "FlutterRenderForm") {
+        if (name != "FlutterRenderForm" && name != "FlutterRenderPlugin") {
             if (child->NeedRender()) {
                 FlutterRenderContext context;
                 auto pipelineContext = child->GetContext().Upgrade();
@@ -88,27 +88,52 @@ void FlutterRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Off
             return;
         }
         Offset pos = rect.GetOffset();
-        if (name != "FlutterRenderForm") {
+        if (name != "FlutterRenderForm" && name != "FlutterRenderPlugin") {
             layer->SetOffset(pos.GetX(), pos.GetY());
         } else {
-            auto renderPost = child->GetGlobalOffset();
-            auto context = child->GetContext().Upgrade();
-            if (context) {
-                auto density = context->GetDensity();
-                auto parent = child->GetParent();
-                if (!NearZero(density)) {
-                    if (parent.Upgrade() && parent.Upgrade()->GetRenderLayer()) {
-                        layer->SetOffset(renderPost.GetX() / density - renderPost.GetX(),
-                            renderPost.GetY() / density - renderPost.GetY());
-                    } else {
-                        layer->SetOffset(pos.GetX() / density, pos.GetY() / density);
-                    }
-                }
-            }
+            SetOffSet(child, layer, pos, name);
         }
         containerLayer_->AddChildren(AceType::Claim(layer));
     } else {
         child->RenderWithContext(*this, rect.GetOffset());
+    }
+}
+
+void FlutterRenderContext::SetOffSet(
+    const RefPtr<RenderNode>& child, OffsetLayer* layer, const Offset& pos, const std::string name)
+{
+    if (!child || !layer) {
+        LOGE("child is nullptr, or layer is nullptr");
+        return;
+    }
+
+    auto renderPost = child->GetGlobalOffset();
+    auto context = child->GetContext().Upgrade();
+    if (context) {
+        auto density = context->GetDensity();
+        auto parent = child->GetParent();
+        Offset pluginOffset = {0, 0};
+        if (!NearZero(density)) {
+            if (parent.Upgrade() && parent.Upgrade()->GetRenderLayer()) {
+                layer->SetOffset(renderPost.GetX() / density - renderPost.GetX(),
+                    renderPost.GetY() / density - renderPost.GetY());
+            } else {
+                layer->SetOffset(pos.GetX() / density, pos.GetY() / density);
+                pluginOffset = {pos.GetX() / density, pos.GetY() / density};
+            }
+        }
+        // plugin offset
+        if (name == "FlutterRenderPlugin") {
+            auto renderPlugin = AceType::DynamicCast<RenderPlugin>(child);
+            if (!renderPlugin) {
+                return;
+            }
+            auto pluginContext = renderPlugin->GetPluginPipelineContext();
+            if (!pluginContext) {
+                return;
+            }
+            pluginContext->SetPluginOffset(pluginOffset);
+        }
     }
 }
 

@@ -156,9 +156,8 @@ public:
     void SetOpacityForState(double opacity, const AnimationOption& animationOption = AnimationOption(),
         StyleState state = StyleState::NORMAL)
     {
-        opacity_ = AnimatableDouble(opacity, animationOption);
         GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<DisplayStateAttribute, AnimatableDouble>>(
-            state, DisplayStateAttribute::OPACITY, opacity_));
+            state, DisplayStateAttribute::OPACITY, AnimatableDouble(opacity, animationOption)));
     }
 private:
     VisibleType visible_ = VisibleType::VISIBLE;

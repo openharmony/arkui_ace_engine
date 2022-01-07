@@ -79,6 +79,7 @@ public:
     {
         return runningCardId_;
     }
+    bool Dump(const std::vector<std::string>& params);
 
 private:
     RefPtr<CardFrontend> frontend_;

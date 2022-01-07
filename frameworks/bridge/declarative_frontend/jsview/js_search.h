@@ -18,6 +18,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "frameworks/core/components/text_field/text_field_controller.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -36,6 +37,25 @@ public:
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
+};
+
+class JSSearchController final : public Referenced {
+public:
+    JSSearchController() = default;
+    ~JSSearchController() override = default;
+
+    static void JSBind(BindingTarget globalObj);
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSSearchController* scroller);
+    void CaretPosition(int32_t caretPosition);
+    void SetController(const RefPtr<TextFieldController>& controller)
+    {
+        controller_ = controller;
+    }
+
+private:
+    WeakPtr<TextFieldController> controller_;
+    ACE_DISALLOW_COPY_AND_MOVE(JSSearchController);
 };
 
 } // namespace OHOS::Ace::Framework

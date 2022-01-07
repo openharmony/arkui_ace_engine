@@ -18,5 +18,8 @@ build_component("clock") {
     "clock_component.cpp",
     "flutter_render_clock.cpp",
     "render_clock.cpp",
+    "render_clock_creator.cpp",
   ]
+
+  rosen_sources = [ "rosen_render_clock.cpp" ]
 }

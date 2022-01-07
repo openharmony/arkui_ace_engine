@@ -15,6 +15,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
@@ -34,6 +35,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_checkbox.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
@@ -82,6 +85,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
@@ -101,6 +105,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_select.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sheet.h"
@@ -114,6 +119,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text_clock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
@@ -592,6 +598,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"Refresh", JSRefresh::JSBind},
     {"Shape", JSShape::JSBind},
     {"Path", JSPath::JSBind},
+    {"PatternLock", JSPatternLock::JSBind},
+    {"PatternLockController", JSPatternLockController::JSBind},
     {"Circle", JSCircle::JSBind},
     {"Line", JSLine::JSBind},
     {"Polygon", JSPolygon::JSBind},
@@ -615,6 +623,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"AbilityComponent", JSAbilityComponent::JSBind},
     {"TextArea", JSTextArea::JSBind},
     {"TextInput", JSTextInput::JSBind},
+    {"TextClock", JSTextClock::JSBind},
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     {"QRCode", JSQRCode::JSBind},
 #ifdef FORM_SUPPORTED
@@ -662,9 +671,15 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"AbilityController", JSAbilityComponentController::JSBind},
     {"VideoController", JSVideoController::JSBind},
     {"Search", JSSearch::JSBind},
+    {"Select", JSSelect::JSBind},
     {"Sheet", JSSheet::JSBind},
     {"TextTimer", JSTextTimer::JSBind},
-    {"TextTimerController", JSTextTimerController::JSBind}
+    {"SearchController", JSSearchController::JSBind },
+    {"TextAreaController", JSTextAreaController::JSBind },
+    {"TextInputController", JSTextInputController::JSBind},
+    {"TextTimerController", JSTextTimerController::JSBind},
+    {"Checkbox", JSCheckbox::JSBind},
+    {"CheckboxGroup", JSCheckboxGroup::JSBind}
 };
 
 void RegisterAllModule(BindingTarget globalObj)
@@ -740,9 +755,10 @@ void JsRegisterViews(BindingTarget globalObj)
     JSTouchHandler::JSBind(globalObj);
     JSPanHandler::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);
-    JsGridDragFunction::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
+
+    JSProfiler::JSBind(globalObj);
 
     auto delegate =
         static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));

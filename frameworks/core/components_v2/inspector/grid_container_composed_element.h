@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_GRIDCONTAINER_COMPOSED_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_GRIDCONTAINER_COMPOSED_ELEMENT_H
 
+#include "core/components/box/box_element.h"
 #include "core/components/common/layout/grid_container_info.h"
 #include "core/components_v2/inspector/column_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
@@ -42,6 +43,10 @@ public:
     {
         return GridContainerComposedElement::TypeId();
     }
+
+    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
+    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
+    void DeleteChildWithSlot(int32_t slot) override;
 };
 
 } // namespace OHOS::Ace

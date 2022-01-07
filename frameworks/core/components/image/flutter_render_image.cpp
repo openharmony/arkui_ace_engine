@@ -360,22 +360,23 @@ void FlutterRenderImage::FetchImageObject()
 void FlutterRenderImage::UpdateSharedMemoryImage(const RefPtr<PipelineContext>& context)
 {
     auto sharedImageManager = context->GetSharedImageManager();
-    if (sharedImageManager) {
-        if (sharedImageManager->IsResourceToReload(ImageLoader::RemovePathHead(sourceInfo_.GetSrc()))) {
-            // This case means that the imageSrc to load is a memory image and its data is not ready.
-            // If run [GetImageSize] here, there will be an unexpected [OnLoadFail] callback from [ImageProvider].
-            // When the data is ready, [SharedImageManager] done [AddImageData], [GetImageSize] will be run.
-            return;
-        }
-        auto nameOfSharedImage = ImageLoader::RemovePathHead(sourceInfo_.GetSrc());
-        if (sharedImageManager->AddProviderToReloadMap(nameOfSharedImage, AceType::WeakClaim(this))) {
-            return;
-        }
-        // this is when current picName is not found in [ProviderMapToReload], indicating that image data of this
-        // image may have been written to [SharedImageMap], so return the [MemoryImageProvider] and start loading
-        if (sharedImageManager->FindImageInSharedImageMap(nameOfSharedImage, AceType::WeakClaim(this))) {
-            return;
-        }
+    if (!sharedImageManager) {
+        LOGE("sharedImageManager is null when image try loading memory image, sourceInfo_: %{private}s",
+            sourceInfo_.ToString().c_str());
+        return;
+    }
+    auto nameOfSharedImage = ImageLoader::RemovePathHead(sourceInfo_.GetSrc());
+    if (sharedImageManager->IsResourceToReload(nameOfSharedImage)) {
+        // This case means that the image to load is a memory image and its data is not ready.
+        // Add [this] to [providerMapToReload_] so that it will be notified to start loading image.
+        // When the data is ready, [SharedImageManager] will call [UpdateData] in [AddImageData].
+        sharedImageManager->AddProviderToReloadMap(nameOfSharedImage, AceType::WeakClaim(this));
+        return;
+    }
+    // this is when current picName is not found in [ProviderMapToReload], indicating that image data of this
+    // image may have been written to [SharedImageMap], so start loading
+    if (sharedImageManager->FindImageInSharedImageMap(nameOfSharedImage, AceType::WeakClaim(this))) {
+        return;
     }
 }
 
@@ -639,7 +640,7 @@ void FlutterRenderImage::CanvasDrawImageRect(
         PaintBgImage(paint, offset, canvas);
         return;
     }
-    if (!image_) {
+    if (!image_ || !image_->image()) {
         imageDataNotReady_ = true;
         LOGI("image data is not ready, rawImageSize_: %{public}s, image source: %{private}s",
             rawImageSize_.ToString().c_str(), sourceInfo_.ToString().c_str());
@@ -760,7 +761,7 @@ void FlutterRenderImage::DrawImageOnCanvas(
 
 bool FlutterRenderImage::VerifySkImageDataFromPixmap(const RefPtr<PixelMap>& pixmap) const
 {
-    if (!image_) {
+    if (!image_ || !image_->image()) {
         LOGE("image data made from pixmap is null");
         return false;
     }
@@ -1128,7 +1129,7 @@ void FlutterRenderImage::ClearRenderObject()
 
 bool FlutterRenderImage::IsSourceWideGamut() const
 {
-    if (sourceInfo_.IsSvg() || !image_) {
+    if (sourceInfo_.IsSvg() || !image_ || !image_->image()) {
         return false;
     }
     return ImageProvider::IsWideGamut(image_->image()->refColorSpace());

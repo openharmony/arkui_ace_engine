@@ -18,6 +18,7 @@
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
 #include "bridge/common/accessibility/js_accessibility_manager.h"
+#include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "core/components/common/layout/constants.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
@@ -80,6 +81,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
@@ -93,6 +95,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_select.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sheet.h"
@@ -107,6 +110,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text_clock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
@@ -121,6 +125,7 @@
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/declarative_frontend/jsview/js_web.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 #endif
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
@@ -133,6 +138,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
+#include "core/components_v2/inspector/inspector.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -174,6 +180,14 @@ static JSValue JsLoadDocument(JSContext* ctx, JSValueConst new_target, int argc,
     page->SetDeclarativeOnPageAppearCallback([view]() { view->FireOnShow(); });
     page->SetDeclarativeOnPageDisAppearCallback([view]() { view->FireOnHide(); });
     page->SetDeclarativeOnPageRefreshCallback([view]() { view->MarkNeedUpdate(); });
+
+    if (page->IsUsePluginComponent()) {
+        LOGI("Load Document UsePluginComponent");
+        if (!page->GetPluginComponentJsonData().empty()) {
+            view->ExecuteUpdateWithValueParams(page->GetPluginComponentJsonData());
+        }
+    }
+
     return JS_UNDEFINED;
 }
 
@@ -194,7 +208,7 @@ static JSValue JsGetInspectorTree(JSContext* ctx, JSValueConst new_target, int a
         return JS_ThrowSyntaxError(ctx, "pipeline is null");
     }
 
-    auto nodeInfos = pipelineContext->GetInspectorTree();
+    auto nodeInfos = V2::Inspector::GetInspectorTree(pipelineContext);
     JSValue result = JS_NewString(ctx, nodeInfos.c_str());
     return result;
 }
@@ -220,7 +234,7 @@ static JSValue JsGetInspectorByKey(JSContext* ctx, JSValueConst new_target, int 
     }
     ScopedString targetString(ctx, argv[0]);
     std::string key = targetString.get();
-    auto resultStr = pipelineContext->GetInspectorNodeByKey(key);
+    auto resultStr = V2::Inspector::GetInspectorNodeByKey(pipelineContext, key);
     JSValue result = JS_NewString(ctx, resultStr.c_str());
     return result;
 }
@@ -255,7 +269,169 @@ static JSValue JsSendEventByKey(JSContext* ctx, JSValueConst new_target, int arg
     ScopedString targetParam(ctx, argv[2]);
     std::string params = targetParam.get();
 
-    auto result = pipelineContext->SendEventByKey(key, action, params);
+    auto result = V2::Inspector::SendEventByKey(pipelineContext, key, action, params);
+    return JS_NewBool(ctx, result);
+}
+
+static TouchPoint GetTouchPointFromJS(JSContext* ctx, JSValue value)
+{
+    TouchPoint touchPoint;
+
+    auto type = JS_GetPropertyStr(ctx, value, "type");
+    auto iType = static_cast<int32_t>(TouchType::UNKNOWN);
+    JS_ToInt32(ctx, &iType, type);
+    touchPoint.type = static_cast<TouchType>(iType);
+
+    auto id = JS_GetPropertyStr(ctx, value, "id");
+    JS_ToInt32(ctx, &touchPoint.id, id);
+
+    auto x = JS_GetPropertyStr(ctx, value, "x");
+    double dx;
+    JS_ToFloat64(ctx, &dx, x);
+    touchPoint.x = dx;
+
+    auto y = JS_GetPropertyStr(ctx, value, "y");
+    double dy;
+    JS_ToFloat64(ctx, &dy, y);
+    touchPoint.y = dy;
+
+    touchPoint.time = std::chrono::high_resolution_clock::now();
+
+    return touchPoint;
+}
+
+static JSValue JsSendTouchEvent(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    if (argc != 1) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, it is supposed to have 1 arguments");
+    }
+
+    if (!JS_IsObject(argv[0])) {
+        return JS_ThrowSyntaxError(ctx, "input value must be object");
+    }
+
+    QJSContext::Scope scp(ctx);
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        return JS_ThrowSyntaxError(ctx, "pipeline is null");
+    }
+    TouchPoint touchPoint = GetTouchPointFromJS(ctx, argv[0]);
+    auto result = pipelineContext->GetTaskExecutor()->PostTask(
+        [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); }, TaskExecutor::TaskType::UI);
+
+    return JS_NewBool(ctx, result);
+}
+
+static V2::JsKeyEvent GetKeyEventFromJS(JSContext* ctx, JSValue value)
+{
+    V2::JsKeyEvent event;
+    auto jsType = JS_GetPropertyStr(ctx, value, "type");
+    auto type = static_cast<int32_t>(KeyAction::UNKNOWN);
+    JS_ToInt32(ctx, &type, jsType);
+    event.action = static_cast<KeyAction>(type);
+
+    auto jsKeyCode = JS_GetPropertyStr(ctx, value, "keyCode");
+    auto code = static_cast<int32_t>(KeyCode::UNKNOWN);
+    JS_ToInt32(ctx, &code, jsKeyCode);
+    event.code = static_cast<KeyCode>(code);
+
+    auto jsKeySource = JS_GetPropertyStr(ctx, value, "keySource");
+    JS_ToInt32(ctx, &event.sourceDevice, jsKeySource);
+
+    auto jsDeviceId = JS_GetPropertyStr(ctx, value, "deviceId");
+    JS_ToInt32(ctx, &event.deviceId, jsDeviceId);
+
+    auto jsMetaKey = JS_GetPropertyStr(ctx, value, "metaKey");
+    JS_ToInt32(ctx, &event.metaKey, jsMetaKey);
+
+    auto jsTimestamp = JS_GetPropertyStr(ctx, value, "timestamp");
+    JS_ToInt64(ctx, &event.timeStamp, jsTimestamp);
+
+    return event;
+}
+
+static JSValue JsSendKeyEvent(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    if (argc != 1) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, it is supposed to have 1 arguments");
+    }
+
+    if (!JS_IsObject(argv[0])) {
+        return JS_ThrowSyntaxError(ctx, "input value must be object");
+    }
+
+    QJSContext::Scope scp(ctx);
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        return JS_ThrowSyntaxError(ctx, "pipeline is null");
+    }
+    auto keyEvent = GetKeyEventFromJS(ctx, argv[0]);
+    auto result = V2::Inspector::SendKeyEvent(pipelineContext, keyEvent);
+    return JS_NewBool(ctx, result);
+}
+
+static MouseEvent GetMouseEventFromJS(JSContext* ctx, JSValue value)
+{
+    MouseEvent mouseEvent;
+
+    auto type = JS_GetPropertyStr(ctx, value, "action");
+    auto iType = static_cast<int32_t>(MouseAction::NONE);
+    JS_ToInt32(ctx, &iType, type);
+    mouseEvent.action = static_cast<MouseAction>(iType);
+
+    auto button = JS_GetPropertyStr(ctx, value, "button");
+    auto iButton = static_cast<int32_t>(MouseButton::NONE_BUTTON);
+    JS_ToInt32(ctx, &iButton, button);
+    mouseEvent.button = static_cast<MouseButton>(iButton);
+
+    auto x = JS_GetPropertyStr(ctx, value, "x");
+    double dx;
+    JS_ToFloat64(ctx, &dx, x);
+    mouseEvent.x = dx;
+    mouseEvent.deltaX = mouseEvent.x;
+
+    auto y = JS_GetPropertyStr(ctx, value, "y");
+    double dy;
+    JS_ToFloat64(ctx, &dy, y);
+    mouseEvent.y = dy;
+    mouseEvent.deltaY = mouseEvent.y;
+
+    mouseEvent.time = std::chrono::high_resolution_clock::now();
+    mouseEvent.sourceType = SourceType::MOUSE;
+    return mouseEvent;
+}
+
+static JSValue JsSendMouseEvent(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    if (argc != 1) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, it is supposed to have 1 arguments");
+    }
+
+    if (!JS_IsObject(argv[0])) {
+        return JS_ThrowSyntaxError(ctx, "input value must be object");
+    }
+
+    QJSContext::Scope scp(ctx);
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        return JS_ThrowSyntaxError(ctx, "pipeline is null");
+    }
+    auto mouseEvent = GetMouseEventFromJS(ctx, argv[0]);
+    auto result = pipelineContext->GetTaskExecutor()->PostTask(
+        [pipelineContext, mouseEvent]() { pipelineContext->OnMouseEvent(mouseEvent); }, TaskExecutor::TaskType::UI);
+
     return JS_NewBool(ctx, result);
 }
 
@@ -616,6 +792,9 @@ void JsRegisterViews(BindingTarget globalObj)
     QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorTree, "getInspectorTree", 0);
     QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorByKey, "getInspectorByKey", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsSendEventByKey, "sendEventByKey", 3);
+    QJSUtils::DefineGlobalFunction(ctx, JsSendTouchEvent, "sendTouchEvent", 1);
+    QJSUtils::DefineGlobalFunction(ctx, JsSendKeyEvent, "sendKeyEvent", 1);
+    QJSUtils::DefineGlobalFunction(ctx, JsSendMouseEvent, "sendMouseEvent", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsDumpMemoryStats, "dumpMemoryStats", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsGetI18nResource, "$s", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsGetMediaResource, "$m", 1);
@@ -692,8 +871,14 @@ void JsRegisterViews(BindingTarget globalObj)
     JSDataPanel::JSBind(globalObj);
     JSBadge::JSBind(globalObj);
     JSTextArea::JSBind(globalObj);
+    JSTextAreaController::JSBind(globalObj);
     JSTextInput::JSBind(globalObj);
+    JSTextInputController::JSBind(globalObj);
+    JSTextClock::JSBind(globalObj);
     JSMarquee::JSBind(globalObj);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    JSPlugin::JSBind(globalObj);
+#endif
     JSSheet::JSBind(globalObj);
 #if defined(FORM_SUPPORTED)
     JSForm::JSBind(globalObj);
@@ -701,6 +886,8 @@ void JsRegisterViews(BindingTarget globalObj)
     JSRect::JSBind(globalObj);
     JSShape::JSBind(globalObj);
     JSSearch::JSBind(globalObj);
+    JSSearchController::JSBind(globalObj);
+    JSSelect::JSBind(globalObj);
     JSPath::JSBind(globalObj);
     JSCircle::JSBind(globalObj);
     JSLine::JSBind(globalObj);
@@ -737,6 +924,8 @@ void JsRegisterViews(BindingTarget globalObj)
     JSGauge::JSBind(globalObj);
     JSHyperlink::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
+    JSPatternLock::JSBind(globalObj);
+    JSPatternLockController::JSBind(globalObj);
     JSTextPickerDialog::JSBind(globalObj);
 
     JSObjectTemplate toggleType;
@@ -761,7 +950,8 @@ void JsRegisterViews(BindingTarget globalObj)
     JSShareData::JSBind(globalObj);
 
     JsDragFunction::JSBind(globalObj);
-    JsGridDragFunction::JSBind(globalObj);
+
+    JSProfiler::JSBind(globalObj);
 
     JSObjectTemplate mainAxisAlign;
     mainAxisAlign.Constant("Start", 1);

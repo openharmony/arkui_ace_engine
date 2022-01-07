@@ -51,4 +51,11 @@ void TextFieldController::Delete()
     textField->Delete();
 }
 
+void TextFieldController::CaretPosition(int32_t caretPosition)
+{
+    if (setCaretPosition_) {
+        setCaretPosition_(caretPosition);
+    }
+}
+
 }  // namespace OHOS::Ace

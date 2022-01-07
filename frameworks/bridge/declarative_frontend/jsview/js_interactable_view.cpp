@@ -81,8 +81,8 @@ void JSInteractableView::JsOnHover(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Execute(info);
         };
-        auto mouseComponent = ViewStackProcessor::GetInstance()->GetMouseListenerComponent();
-        mouseComponent->SetOnHoverId(onHoverId);
+        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        box->SetOnHoverId(onHoverId);
     }
 }
 
@@ -136,6 +136,17 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
     }
 }
 
+void JSInteractableView::JsOnDoubleClick(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        auto tapGesture = GetTapGesture(info, 2);
+        if (tapGesture) {
+            click->SetOnClick(tapGesture);
+        }
+    }
+}
+
 EventMarker JSInteractableView::GetClickEventMarker(const JSCallbackInfo& info)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
@@ -158,7 +169,8 @@ EventMarker JSInteractableView::GetClickEventMarker(const JSCallbackInfo& info)
     return onClickId;
 }
 
-RefPtr<Gesture> JSInteractableView::GetTapGesture(const JSCallbackInfo& info)
+RefPtr<Gesture> JSInteractableView::GetTapGesture(
+    const JSCallbackInfo& info, int32_t countNum, int32_t fingerNum)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     if (!inspector) {
@@ -166,7 +178,7 @@ RefPtr<Gesture> JSInteractableView::GetTapGesture(const JSCallbackInfo& info)
         return nullptr;
     }
     auto impl = inspector->GetInspectorFunctionImpl();
-    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(countNum, fingerNum);
     RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
     tapGesture->SetOnActionId(
         [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](GestureEvent& info) {
@@ -271,4 +283,46 @@ EventMarker JSInteractableView::GetEventMarker(const JSCallbackInfo& info, const
     return eventMarker;
 }
 
+void JSInteractableView::JsRemoteMessage(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0 || !info[0]->IsObject()) {
+        LOGE("plugincomponent construct param is empty or type is not Object.");
+        return;
+    }
+
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    // Parse action
+    auto actionValue = obj->GetProperty("action");
+    std::string action;
+    if (actionValue->IsString()) {
+        action = actionValue->ToString();
+    }
+    // Parse ability
+    auto abilityValue = obj->GetProperty("ability");
+    std::string ability;
+    if (abilityValue->IsString()) {
+        ability = abilityValue->ToString();
+    }
+    // Parse params
+    auto paramsObj = obj->GetProperty("params");
+    if (paramsObj->IsObject()) {
+        auto ability = paramsObj->ToString();
+    }
+
+    auto eventMarker = [action, ability, paramsObj]() {
+        if (action.compare("message") == 0) {
+            // onCall
+        } else if (action.compare("route") == 0) {
+            // onCreate
+        } else {
+            LOGE("action is error.");
+        }
+    };
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
+    tapGesture->SetOnActionId([eventMarker](const GestureEvent& info) {
+        eventMarker();
+    });
+    auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    click->SetOnClick(tapGesture);
+}
 } // namespace OHOS::Ace::Framework

@@ -29,6 +29,7 @@ public:
 
     std::shared_ptr<RSNode> CreateRSNode() const override;
     void Paint(RenderContext& context, const Offset& offset) override;
+    void FinishRender(const std::unique_ptr<DrawDelegate>& delegate, const Rect& dirty) override;
     void SyncGeometryProperties() override;
 
     BridgeType GetBridgeType() const override

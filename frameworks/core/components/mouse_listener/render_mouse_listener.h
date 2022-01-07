@@ -61,7 +61,7 @@ public:
         }
     }
 
-    bool HandleMouseHoverEvent(MouseState mouseState) override;
+    void HandleMouseHoverEvent(MouseState mouseState) override;
 
 protected:
     void OnMouseTestHit(const Offset& coordinateOffset, MouseTestResult& result) override;

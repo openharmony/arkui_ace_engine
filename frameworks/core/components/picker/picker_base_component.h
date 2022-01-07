@@ -18,6 +18,7 @@
 
 #include "base/utils/system_properties.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/common/container.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/common/rotation/rotation_controller.h"
 #include "core/components/dialog/dialog_component.h"

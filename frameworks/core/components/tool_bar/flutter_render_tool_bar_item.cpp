@@ -28,11 +28,6 @@ constexpr Dimension TOOL_BAR_FOCUS_DEL_SIZE = 8.0_vp;
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderToolBarItem::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderToolBarItem>();
-}
-
 RenderLayer FlutterRenderToolBarItem::GetRenderLayer()
 {
     if (!clipLayer_) {

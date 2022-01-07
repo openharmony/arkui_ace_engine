@@ -19,11 +19,6 @@ namespace OHOS::Ace {
 
 using namespace Flutter;
 
-RefPtr<RenderNode> RenderToolBar::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderToolBar>();
-}
-
 RenderLayer FlutterRenderToolBar::GetRenderLayer()
 {
     if (!layer_) {

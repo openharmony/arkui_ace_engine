@@ -47,10 +47,26 @@ public:
         callbacks_.push_back(std::move(callback));
     }
 
+    void OnShow()
+    {
+        onShow_ = true;
+    }
+
+    void OnHide()
+    {
+        onShow_ = false;
+    }
+
+    bool IsHide() const
+    {
+        return !onShow_;
+    }
+
 private:
     std::unique_ptr<PlatformWindow> platformWindow_;
     std::list<AceVsyncCallback> callbacks_;
     bool isRequestVsync_ = false;
+    bool onShow_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(Window);
 };

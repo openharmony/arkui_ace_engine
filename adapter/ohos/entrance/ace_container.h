@@ -18,6 +18,8 @@
 
 #include <memory>
 
+#include "ability_context.h"
+
 #include "adapter/ohos/entrance/ace_ability.h"
 #include "adapter/ohos/entrance/platform_event_callback.h"
 #include "base/resource/asset_manager.h"
@@ -34,6 +36,8 @@ class AceContainer : public Container, public JsMessageDispatcher {
 public:
     AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AppExecFwk::Ability* aceAbility,
         std::unique_ptr<PlatformEventCallback> callback);
+    AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AbilityRuntime::Context* context,
+                 std::unique_ptr<PlatformEventCallback> callback);
     ~AceContainer() override = default;
 
     void Initialize() override;
@@ -199,6 +203,7 @@ public:
 private:
     void InitializeFrontend();
     void InitializeCallback();
+    void InitializeTask();
 
     void AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height);
     int32_t instanceId_ = 0;
@@ -215,6 +220,7 @@ private:
     ColorScheme colorScheme_ { ColorScheme::FIRST_VALUE };
     ResourceInfo resourceInfo_;
     OHOS::AppExecFwk::Ability* aceAbility_ = nullptr;
+    OHOS::AbilityRuntime::Context* context_ = nullptr;
     void* sharedRuntime_ = nullptr;
     int32_t pageId_ = 0;
 

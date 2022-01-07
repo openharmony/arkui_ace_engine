@@ -245,6 +245,26 @@ public:
         useBoxWrap_ = useBoxWrap;
     }
 
+    bool IsUsePluginComponent() const
+    {
+        return usePluginComponent_;
+    }
+
+    void SetUsePluginComponent(bool usePluginComponent)
+    {
+        usePluginComponent_ = usePluginComponent;
+    }
+
+    const std::string& GetPluginComponentJsonData() const
+    {
+        return pluginComponentJsonData_;
+    }
+
+    void SetPluginComponentJsonData(const std::string& pluginComponentJsonData)
+    {
+        pluginComponentJsonData_ = pluginComponentJsonData;
+    }
+
     void AddNodeEvent(int32_t nodeId, const std::string& actionType, const std::string& eventAction);
 
     std::string GetNodeEventAction(int32_t nodeId, const std::string& actionType);
@@ -352,6 +372,8 @@ private:
     RefPtr<RevSourceMap> appMap_;
     bool useLiteStyle_ = false;
     bool useBoxWrap_ = false;
+    bool usePluginComponent_ = false;
+    std::string pluginComponentJsonData_;
 
     std::vector<RefPtr<JsCommand>> jsCommands_;
     std::vector<NodeId> dirtyNodesOrderedByTime_;

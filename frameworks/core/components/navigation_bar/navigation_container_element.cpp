@@ -71,7 +71,7 @@ void NavigationContainerElement::PerformBuild()
     if (animationOption.GetDuration() != 0) {
         declaration->animationOption = animationOption;
     }
-    navigationContainer->Build(context_);
+    navigationContainer->Build(context_, navigationContainer->GetMenuCount());
     ComponentGroupElement::PerformBuild();
 
     auto tabController = navigationContainer->GetTabController();

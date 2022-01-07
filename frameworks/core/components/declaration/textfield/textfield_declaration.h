@@ -33,6 +33,7 @@ struct TextFieldAttribute : Attribute {
     bool isValueUpdated = false;
     std::string value;
     std::string placeholder;
+    std::string inputFilter;
     TextSelection selection;
     Dimension widthReserved;
     // Obscure the text, for example, password.
@@ -158,6 +159,18 @@ public:
     bool SetSpecializedEvent(int32_t pageId, const std::string& eventId, const std::string& event) override;
     void CallSpecializedMethod(const std::string& method, const std::string& args) override;
     void OnRequestFocus(bool shouldFocus) override;
+
+    const std::string& GetInputFilter() const
+    {
+        auto& attribute = static_cast<TextFieldAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
+        return attribute.inputFilter;
+    }
+
+    void SetInputFilter(const std::string& inputFilter)
+    {
+        auto& attribute = MaybeResetAttribute<TextFieldAttribute>(AttributeTag::SPECIALIZED_ATTR);
+        attribute.inputFilter = inputFilter;
+    }
 
     const std::string& GetValue() const
     {

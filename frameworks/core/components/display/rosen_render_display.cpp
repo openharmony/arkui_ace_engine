@@ -17,6 +17,7 @@
 
 #include "render_service_client/core/animation/rs_transition.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
 
@@ -53,6 +54,9 @@ void RosenRenderDisplay::Paint(RenderContext& context, const Offset& offset)
     LOGD("Paint");
     if (visible_ == VisibleType::VISIBLE) {
         RenderNode::Paint(context, offset);
+    }
+    if (auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode()) {
+        rsNode->SetVisible(RenderDisplay::GetVisible());
     }
 }
 

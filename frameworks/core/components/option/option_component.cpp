@@ -17,6 +17,7 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
+#include "core/common/container.h"
 #include "core/components/box/box_component.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/flex/flex_item_component.h"
@@ -78,21 +79,42 @@ bool OptionComponent::Initialize(const RefPtr<AccessibilityManager>& manager)
         AppendChild(icon_);
     }
 
-    TextStyle textStyle = text_->GetTextStyle();
-    std::vector<std::string> fontFamilies;
-    StringUtils::StringSpliter(GetFontFamily(), ',', fontFamilies);
-    if (!fontFamilies.empty()) {
-        textStyle.SetFontFamilies(fontFamilies);
+    auto container = Container::Current();
+    if (!container) {
+        return false;
     }
-    textStyle.SetFontSize(GetFontSize());
-    textStyle.SetFontWeight(GetFontWeight());
-    textStyle.SetTextDecoration(GetTextDecoration());
-    if (GetDisabled() && theme_) {
-        textStyle.SetTextColor(theme_->GetFocusedTextDisableColor());
-    } else if (GetSelected() && theme_) {
-        textStyle.SetTextColor(theme_->GetSelectedColorText());
+    auto context = container->GetPipelineContext();
+    if (!context) {
+        return false;
+    }
+    TextStyle textStyle;
+    if (context->GetIsDeclarative()) {
+        if (GetSelected()) {
+            textStyle = GetSelectedTextStyle();
+            text_->SetTextStyle(textStyle);
+        } else {
+            textStyle = GetTextStyle();
+            text_->SetTextStyle(textStyle);
+        }
+        textStyle.SetTextDecoration(GetTextDecoration());
+        text_->SetData(value_);
     } else {
-        textStyle.SetTextColor(GetFontColor());
+        textStyle = text_->GetTextStyle();
+        std::vector<std::string> fontFamilies;
+        StringUtils::StringSpliter(GetFontFamily(), ',', fontFamilies);
+        if (!fontFamilies.empty()) {
+            textStyle.SetFontFamilies(fontFamilies);
+        }
+        textStyle.SetFontSize(GetFontSize());
+        textStyle.SetFontWeight(GetFontWeight());
+        textStyle.SetTextDecoration(GetTextDecoration());
+        if (GetDisabled() && theme_) {
+            textStyle.SetTextColor(theme_->GetFocusedTextDisableColor());
+        } else if (GetSelected() && theme_) {
+            textStyle.SetTextColor(theme_->GetSelectedColorText());
+        } else {
+            textStyle.SetTextColor(GetFontColor());
+        }
     }
     textStyle.SetAllowScale(IsAllowScale());
     double minFontSize = (SystemProperties::GetDeviceType() == DeviceType::TV ?
@@ -111,7 +133,6 @@ bool OptionComponent::Initialize(const RefPtr<AccessibilityManager>& manager)
     text_->SetTextStyle(textStyle);
     text_->SetFocusColor(textStyle.GetTextColor());
     AppendChild(text_);
-
     SetNode((!manager ? nullptr
                   : manager->CreateAccessibilityNode("option", StringUtils::StringToInt(GetId()), GetParentId(), -1)));
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)

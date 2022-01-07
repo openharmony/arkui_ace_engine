@@ -24,11 +24,12 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/select_popup/select_popup_component.h"
 #include "core/components/text/text_component.h"
+#include "core/components_v2/common/common_def.h"
 #include "core/pipeline/base/sole_child_component.h"
 
 namespace OHOS::Ace {
 
-class SelectComponent : public SoleChildComponent {
+class ACE_EXPORT SelectComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(SelectComponent, SoleChildComponent);
 
 public:
@@ -325,6 +326,25 @@ public:
     {
         return nodeId_;
     }
+
+    const TextStyle& GetSelectStyle() const
+    {
+        return theme_->GetTitleStyle();
+    }
+
+    void SetSelectStyle(const TextStyle& style)
+    {
+        theme_->SetTitleStyle(style);
+    }
+
+    void SetTheme(const RefPtr<SelectTheme>& theme)
+    {
+        if (popup_) {
+            popup_->SetTheme(theme);
+        }
+        theme_ = theme;
+    }
+    ACE_DEFINE_COMPONENT_EVENT(OnSelected, void(int32_t));
 
 private:
     bool disabled_ { false };

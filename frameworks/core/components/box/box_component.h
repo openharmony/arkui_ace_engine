@@ -25,6 +25,8 @@
 namespace OHOS::Ace {
 
 using OnDragFunc = std::function<void(const RefPtr<DragEvent>& info)>;
+using OnHoverCallback = std::function<void(bool)>;
+using OnMouseCallback = std::function<void(MouseInfo& info)>;
 
 enum class BoxStateAttribute {
     ASPECT_RATIO,
@@ -188,6 +190,26 @@ public:
         onDropId_ = std::make_unique<OnDragFunc>(onDropId);
     }
 
+    void SetOnHoverId(const OnHoverCallback& onHoverId)
+    {
+        onHoverId_ = onHoverId;
+    }
+
+    OnHoverCallback GetOnHoverId() const
+    {
+        return onHoverId_;
+    }
+
+    void SetOnMouseId(const OnMouseCallback& onMouseId)
+    {
+        onMouseId_ = onMouseId;
+    }
+
+    OnMouseCallback GetOnMouseId() const
+    {
+        return onMouseId_;
+    }
+
     RefPtr<Gesture> GetOnClick() const
     {
         return onClickId_;
@@ -196,6 +218,16 @@ public:
     void SetOnClick(const RefPtr<Gesture>& onClickId)
     {
         onClickId_ = onClickId;
+    }
+
+    RefPtr<Gesture> GetOnDoubleClick() const
+    {
+        return onDoubleClickId_;
+    }
+
+    void SetOnDoubleClick(const RefPtr<Gesture>& onDoubleClickId)
+    {
+        onDoubleClickId_ = onDoubleClickId;
     }
 
     void AddGesture(GesturePriority priority, RefPtr<Gesture> gesture)
@@ -283,8 +315,7 @@ public:
             state, BoxStateAttribute::HEIGHT, AnimatableDimension(height, option)));
     }
 
-    void SetColorForState(
-        const Color& color, const AnimationOption& option, StyleState state)
+    void SetColorForState(const Color& color, const AnimationOption& option, StyleState state)
     {
         GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(
             state, BoxStateAttribute::COLOR, AnimatableColor(color, option)));
@@ -330,7 +361,10 @@ private:
     std::unique_ptr<OnDragFunc> onDragMoveId_;
     std::unique_ptr<OnDragFunc> onDragLeaveId_;
     std::unique_ptr<OnDragFunc> onDropId_;
+    OnHoverCallback onHoverId_;
+    OnMouseCallback onMouseId_;
     RefPtr<Gesture> onClickId_;
+    RefPtr<Gesture> onDoubleClickId_;
     std::array<RefPtr<Gesture>, 3> gestures_;
     EventMarker onDomDragEnterId_;
     EventMarker onDomDragOverId_;

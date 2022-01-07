@@ -293,6 +293,25 @@ var TouchType;
   TouchType[TouchType["Cancel"] = 3] = "Cancel";
 })(TouchType || (TouchType = {}));
 
+var MouseButton;
+(function (MouseButton) {
+  MouseButton[MouseButton["None"] = 0] = "None";
+  MouseButton[MouseButton["Left"] = 1] = "Left";
+  MouseButton[MouseButton["Right"] = 2] = "Right";
+  MouseButton[MouseButton["Middle"] = 4] = "Middle";
+  MouseButton[MouseButton["Back"] = 8] = "Back";
+  MouseButton[MouseButton["Forward"] = 16] = "Forward";
+})(MouseButton || (MouseButton = {}));
+
+var MouseAction;
+(function (MouseAction) {
+  MouseAction[MouseAction["None"] = 0] = "None";
+  MouseAction[MouseAction["Press"] = 1] = "Press";
+  MouseAction[MouseAction["Release"] = 2] = "Release";
+  MouseAction[MouseAction["Move"] = 3] = "Move";
+  MouseAction[MouseAction["Hover"] = 4] = "Hover";
+})(MouseAction || (MouseAction = {}));
+
 var KeyType;
 (function (KeyType) {
   KeyType[KeyType["Down"] = 0] = "Down";
@@ -572,6 +591,12 @@ var DialogAlignment;
   DialogAlignment[DialogAlignment["Center"] = 1] = "Center";
   DialogAlignment[DialogAlignment["Bottom"] = 2] = "Bottom";
   DialogAlignment[DialogAlignment["Default"] = 3] = "Default";
+  DialogAlignment[DialogAlignment["TopStart"] = 4] = "TopStart";
+  DialogAlignment[DialogAlignment["TopEnd"] = 5] = "TopEnd";
+  DialogAlignment[DialogAlignment["CenterStart"] = 6] = "CenterStart";
+  DialogAlignment[DialogAlignment["CenterEnd"] = 7] = "CenterEnd";
+  DialogAlignment[DialogAlignment["BottomStart"] = 8] = "BottomStart";
+  DialogAlignment[DialogAlignment["BottomEnd"] = 9] = "BottomEnd";
 })(DialogAlignment || (DialogAlignment = {}));
 
 var EditMode;

@@ -63,8 +63,8 @@ void RenderList::Update(const RefPtr<Component>& component)
 
     // Start index should be updated only for the first time
     if (startIndex_ == INITIAL_CHILD_INDEX) {
-        auto initialIndex = component_->GetInitialIndex();
-        startIndex_ = initialIndex > 0 ? initialIndex : 0;
+        initialIndex_ = component_->GetInitialIndex();
+        startIndex_ = initialIndex_ > 0 ? initialIndex_ : 0;
     }
 
     const auto& divider = component_->GetItemDivider();
@@ -1347,7 +1347,7 @@ void RenderList::CreateDragDropRecognizer()
                 renderList->GetUpdateBuilderFuncId()(Dimension(point.GetX()), Dimension(point.GetY()));
             }
 
-            auto targetRenderlist = renderList->FindTargetRenderList(pipelineContext, info);
+            auto targetRenderlist = renderList->FindTargetRenderNode<V2::RenderList>(pipelineContext, info);
             auto preTargetRenderlist = renderList->GetPreTargetRenderList();
 
             if (preTargetRenderlist == targetRenderlist) {
@@ -1358,8 +1358,12 @@ void RenderList::CreateDragDropRecognizer()
                         renderList->insertItemIndex_ =
                             static_cast<int32_t>(targetRenderlist->GetIndexByListItem(newListItem));
                     }
-                    (targetRenderlist->GetOnItemDragMove())(dragInfo,
-                        static_cast<int32_t>(renderList->selectedItemIndex_), renderList->insertItemIndex_);
+                    if (targetRenderlist == renderList) {
+                        (targetRenderlist->GetOnItemDragMove())(dragInfo,
+                            static_cast<int32_t>(renderList->selectedItemIndex_), renderList->insertItemIndex_);
+                    } else {
+                        (targetRenderlist->GetOnItemDragMove())(dragInfo, -1, renderList->insertItemIndex_);
+                    }
                 }
                 return;
             }
@@ -1397,10 +1401,12 @@ void RenderList::CreateDragDropRecognizer()
             auto stackElement = pipelineContext->GetLastStack();
             stackElement->PopComponent();
 
-            ACE_DCHECK(renderList->GetPreTargetRenderList() == renderList->FindTargetRenderList(pipelineContext, info));
+            ACE_DCHECK(renderList->GetPreTargetRenderList() ==
+                renderList->FindTargetRenderNode<V2::RenderList>(pipelineContext, info));
             auto targetRenderlist = renderList->GetPreTargetRenderList();
 
             if (!targetRenderlist) {
+                (renderList->GetOnItemDrop())(dragInfo, static_cast<int32_t>(renderList->selectedItemIndex_), -1, true);
                 renderList->SetPreTargetRenderList(nullptr);
                 renderList->selectedDragItem_->SetHidden(false);
                 renderList->MarkNeedLayout();
@@ -1415,8 +1421,12 @@ void RenderList::CreateDragDropRecognizer()
                     renderList->insertItemIndex_ =
                         static_cast<int32_t>(targetRenderlist->GetIndexByListItem(newListItem));
                 }
-                (targetRenderlist->GetOnItemDrop())(dragInfo,
-                    static_cast<int32_t>(renderList->selectedItemIndex_), renderList->insertItemIndex_, true);
+                if (targetRenderlist == renderList) {
+                    (targetRenderlist->GetOnItemDrop())(dragInfo,
+                        static_cast<int32_t>(renderList->selectedItemIndex_), renderList->insertItemIndex_, true);
+                } else {
+                    (targetRenderlist->GetOnItemDrop())(dragInfo, -1, renderList->insertItemIndex_, true);
+                }
             }
             renderList->SetPreTargetRenderList(nullptr);
         });
@@ -1456,24 +1466,6 @@ RefPtr<RenderListItem> RenderList::FindCurrentListItem(const Point& point)
         }
     }
     return nullptr;
-}
-
-RefPtr<RenderList> RenderList::FindTargetRenderList(const RefPtr<PipelineContext> context, const GestureEvent& info)
-{
-    if (!context) {
-        return nullptr;
-    }
-
-    auto pageRenderNode = context->GetLastPageRender();
-    if (!pageRenderNode) {
-        return nullptr;
-    }
-
-    auto targetRenderNode = pageRenderNode->FindDropChild(info.GetGlobalPoint(), info.GetGlobalPoint());
-    if (!targetRenderNode) {
-        return nullptr;
-    }
-    return AceType::DynamicCast<RenderList>(targetRenderNode);
 }
 
 } // namespace OHOS::Ace::V2

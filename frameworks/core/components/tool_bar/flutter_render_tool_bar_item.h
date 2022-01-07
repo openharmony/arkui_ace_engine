@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_FLUTTER_RENDER_TOOL_BAR_ITEM_H
 
 #include "flutter/lib/ui/painting/canvas.h"
-
 #include "core/components/tool_bar/render_tool_bar_item.h"
 #include "core/pipeline/layers/clip_layer.h"
 #include "core/pipeline/layers/picture_layer.h"

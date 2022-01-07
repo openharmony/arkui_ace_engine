@@ -37,6 +37,34 @@ void RenderCheckbox::Update(const RefPtr<Component>& component)
         return;
     }
 
+    auto context = context_.Upgrade();
+    if (context->GetIsDeclarative()) {
+        component_ = checkbox;
+        auto checkboxList = checkbox->GetCheckboxList();
+        size_t count = 0;
+        isGroup_ = !checkboxList.empty();
+        if (isGroup_) {
+            for(auto& item : checkboxList) {
+                if (item->GetValue()) {
+                    count++;
+                }
+            }
+            if (count == checkboxList.size()) {
+                checkbox->SetValue(true);
+            } else {
+                checkbox->SetValue(false);
+            }
+        }
+
+        checkbox->SetGroupValueUpdateHandler([weak = AceType::WeakClaim(this)](bool checked) {
+            LOGI("group value changed checked  ==== %{public}d", checked);
+            auto renderCheckbox = weak.Upgrade();
+            if (renderCheckbox && renderCheckbox->UpdateGroupValue(checked)) {
+                renderCheckbox->MarkNeedRender();
+            }
+        });
+    }
+
     if (!controller_) {
         controller_ = AceType::MakeRefPtr<Animator>(GetContext());
         auto weak = AceType::WeakClaim(this);
@@ -61,6 +89,28 @@ void RenderCheckbox::Update(const RefPtr<Component>& component)
     UpdateAccessibilityAttr();
 }
 
+bool RenderCheckbox::UpdateGroupValue(const bool groupValue)
+{
+    bool needRender = false;
+
+    if (!groupValue) {
+        checked_ = false;
+        needRender = true;
+        UpdateUIStatus();
+        UpdateAnimation();
+        controller_->Play();
+    } else if (groupValue) {
+        checked_ = true;
+        needRender = true;
+        UpdateAnimation();
+        controller_->Play();
+    }
+    if (onChange_) {
+        onChange_(checked_);
+    }
+    return needRender;
+}
+
 void RenderCheckbox::UpdateAccessibilityAttr()
 {
     auto accessibilityNode = GetAccessibilityNode().Upgrade();
@@ -82,6 +132,15 @@ void RenderCheckbox::UpdateAccessibilityAttr()
 
 void RenderCheckbox::HandleClick()
 {
+    auto context = context_.Upgrade();
+    if (context->GetIsDeclarative()) {
+        if (component_ && isGroup_) {
+            component_->SetMember(checked_);
+        } else if (component_->GetGroup()) {
+            component_->SetValue(checked_);
+            component_->GetGroup()->SetGroupStatus();
+        }
+        }
     UpdateAnimation();
     if (controller_) {
         controller_->Play();

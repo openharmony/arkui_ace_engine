@@ -15,7 +15,7 @@
 
 #include "core/components/form/sub_container.h"
 
-#include "adapter/aosp/entrance/java/jni/file_asset_provider.h"  // TODO: should not deps on adapter
+#include "adapter/ohos/entrance/file_asset_provider.h"
 #include "frameworks/core/common/flutter/flutter_asset_manager.h"
 #include "frameworks/core/common/flutter/flutter_task_executor.h"
 #include "frameworks/core/components/form/form_element.h"
@@ -249,6 +249,15 @@ void SubContainer::UpdateCard(const std::string content)
     if (allowUpdate_) {
         frontend_->UpdateData(std::move(content));
     }
+}
+
+bool SubContainer::Dump(const std::vector<std::string>& params)
+{
+    if (pipelineContext_) {
+        pipelineContext_->Dump(params);
+        return true;
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace

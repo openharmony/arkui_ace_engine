@@ -14,11 +14,13 @@
  */
 
 #include "base/utils/system_properties.h"
-#include "core/common/ace_application_info.h"
+
+#include <unistd.h>
 
 #include "parameters.h"
 
 #include "base/log/log.h"
+#include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -28,6 +30,7 @@ const char PROPERTY_DEVICE_TYPE_DEFAULT[] = "default";
 const char PROPERTY_DEVICE_TYPE_TV[] = "tv";
 const char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 const char PROPERTY_DEVICE_TYPE_CAR[] = "car";
+const char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
@@ -42,12 +45,15 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 bool IsTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.enabled", "0") == "1" ||
-        system::GetParameter("debug.ace.trace.enabled", "0") == "1");
+            system::GetParameter("debug.ace.trace.enabled", "0") == "1");
 }
 
 bool IsRosenBackendEnabled()
 {
 #ifdef ENABLE_ROSEN_BACKEND
+    if (access(DISABLE_ROSEN_FILE_PATH, F_OK) == 0) {
+        return false;
+    }
     return true;
 #else
     return false;
@@ -57,7 +63,7 @@ bool IsRosenBackendEnabled()
 bool IsAccessibilityEnabled()
 {
     return (system::GetParameter("persist.ace.testmode.enabled", "0") == "1" ||
-        system::GetParameter("debug.ace.testmode.enabled", "0") == "1");
+            system::GetParameter("debug.ace.testmode.enabled", "0") == "1");
 }
 
 } // namespace
@@ -72,7 +78,7 @@ bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 int32_t SystemProperties::deviceWidth_ = 0;
 int32_t SystemProperties::deviceHeight_ = 0;
-double SystemProperties::resolution_ = 2.0; // 2.0 for WGR
+double SystemProperties::resolution_ = 1.0;
 DeviceType SystemProperties::deviceType_ { DeviceType::UNKNOWN };
 DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
 std::string SystemProperties::brand_ = INVALID_PARAM;
@@ -116,8 +122,8 @@ void SystemProperties::InitDeviceTypeBySystemProperty()
     }
 }
 
-void SystemProperties::InitDeviceInfo(int32_t deviceWidth, int32_t deviceHeight, int32_t orientation,
-    double resolution, bool isRound)
+void SystemProperties::InitDeviceInfo(
+    int32_t deviceWidth, int32_t deviceHeight, int32_t orientation, double resolution, bool isRound)
 {
     // SetDeviceOrientation should be earlier than deviceWidth/deviceHeight init.
     SetDeviceOrientation(orientation);

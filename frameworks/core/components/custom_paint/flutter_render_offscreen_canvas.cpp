@@ -17,13 +17,7 @@
 
 #include <cmath>
 #include <sstream>
-#include "base/i18n/localization.h"
-#include "base/log/log.h"
-#include "base/utils/string_utils.h"
-#include "core/components/common/painter/flutter_decoration_painter.h"
-#include "core/components/font/constants_converter.h"
-#include "core/components/font/flutter_font_collection.h"
-#include "core/image/image_provider.h"
+
 #include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
@@ -40,6 +34,14 @@
 #include "third_party/skia/include/utils/SkBase64.h"
 #include "third_party/skia/include/utils/SkParsePath.h"
 
+#include "base/i18n/localization.h"
+#include "base/log/log.h"
+#include "base/utils/string_utils.h"
+#include "core/components/common/painter/flutter_decoration_painter.h"
+#include "core/components/font/constants_converter.h"
+#include "core/components/font/flutter_font_collection.h"
+#include "core/image/image_provider.h"
+
 namespace OHOS::Ace {
 namespace {
 constexpr double HANGING_PERCENT = 0.8;
@@ -49,7 +51,7 @@ template<typename T, typename N>
         int64_t index = BinarySearchFindIndex(map, length, key);
         return index != -1 ? map[index].value : defaultValue;
     }
-}
+
 constexpr double DEFAULT_QUALITY = 0.92;
 constexpr int32_t MAX_LENGTH = 2048 * 2048;
 const std::string UNSUPPORTED = "data:image/png";
@@ -99,12 +101,7 @@ const LinearEnumMapNode<CompositeOperation, SkBlendMode> SK_BLEND_MODE_TABLE[] =
     { CompositeOperation::XOR, SkBlendMode::kXor },
 };
 constexpr size_t BLEND_MODE_SIZE = ArraySize(SK_BLEND_MODE_TABLE);
-
-RefPtr<OffscreenCanvas> RenderOffscreenCanvas::Create(const WeakPtr<PipelineContext>& context,
-    int32_t width, int32_t height)
-{
-    return AceType::MakeRefPtr<FlutterRenderOffscreenCanvas>(context, width, height);
-}
+} // namespace
 
 FlutterRenderOffscreenCanvas::FlutterRenderOffscreenCanvas(const WeakPtr<PipelineContext>& context,
     int32_t width, int32_t height)
@@ -1638,5 +1635,4 @@ void FlutterRenderOffscreenCanvas::SetColorFilter(float matrix[20])
     imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
 }
-
 }

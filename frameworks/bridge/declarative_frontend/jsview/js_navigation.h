@@ -32,6 +32,7 @@ public:
     static void SetHideToolBar(bool hide);
     static void SetToolBar(const JSCallbackInfo& info);
     static void SetMenus(const JSCallbackInfo& info);
+    static void SetMenuCount(int32_t menuCount);
     static void SetOnTitleModeChanged(const JSCallbackInfo& info);
 };
 

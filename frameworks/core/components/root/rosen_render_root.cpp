@@ -53,6 +53,17 @@ void RosenRenderRoot::SyncGeometryProperties()
     rsNode->SetFrame(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
 }
 
+void RosenRenderRoot::FinishRender(const std::unique_ptr<DrawDelegate>& delegate, const Rect& dirty)
+{
+    if (delegate) {
+        if (!GetRSNode()) {
+            SyncRSNodeBoundary(true, true);
+        }
+        auto rsNode = GetRSNode();
+        delegate->DrawRSFrame(rsNode, dirty);
+    }
+}
+
 std::shared_ptr<RSNode> RosenRenderRoot::CreateRSNode() const
 {
     return OHOS::Rosen::RSRootNode::Create();

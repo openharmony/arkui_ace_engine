@@ -42,10 +42,6 @@
 #include "core/pipeline/base/render_layer.h"
 #include "core/pipeline/pipeline_context.h"
 
-namespace OHOS::Rosen {
-class RSNode;
-}
-
 namespace OHOS::Ace {
 
 extern const Dimension FOCUS_BOUNDARY;
@@ -526,11 +522,7 @@ public:
 
     virtual bool IsRepaintBoundary() const
     {
-#ifdef ENABLE_ROSEN_BACKEND
         return IsHeadRenderNode();
-#else
-        return false;
-#endif
     }
 
     virtual const std::list<RefPtr<RenderNode>>& GetChildren() const
@@ -553,7 +545,12 @@ public:
 
     virtual bool MouseHoverTest(const Point& parentLocalPoint);
 
-    virtual bool HandleMouseHoverEvent(MouseState mouseState);
+    virtual bool MouseDetect(const Point& globalPoint, const Point& parentLocalPoint, MouseHoverTestList& result,
+        WeakPtr<RenderNode>& hoverNode);
+
+    virtual void HandleMouseHoverEvent(const MouseState mouseState) {}
+
+    virtual void HandleMouseEvent(const MouseEvent& event) {}
 
     virtual bool RotationMatchTest(const RefPtr<RenderNode>& requestRenderNode);
 
@@ -734,6 +731,14 @@ public:
         }
     }
 
+    virtual WeakPtr<RenderNode> CheckHoverNode()
+    {
+        return nullptr;
+    }
+    virtual void MouseHoverEnterTest() {}
+    virtual void MouseHoverExitTest() {}
+    virtual void AnimateMouseHoverEnter() {}
+    virtual void AnimateMouseHoverExit() {}
     virtual void OnCancelPressAnimation() {}
     virtual void OnMouseHoverEnterAnimation() {}
     virtual void OnMouseHoverExitAnimation() {}
@@ -821,9 +826,24 @@ public:
         isIgnored_ = ignore;
     }
 
-    void SetGlobalPoint(Point point)
+    void SetGlobalPoint(const Point& point)
     {
         globalPoint_ = point;
+    }
+
+    const Point& GetGlobalPoint()
+    {
+        return globalPoint_;
+    }
+
+    void SetCoordinatePoint(const Point& point)
+    {
+        coordinatePoint_ = point;
+    }
+
+    const Point& GetCoordinatePoint()
+    {
+        return coordinatePoint_;
     }
 
     bool IsTouchable() const
@@ -896,8 +916,6 @@ public:
     {}
     virtual void OnPreDraw() {}
 
-    RefPtr<RenderNode> FindDropChild(const Point& globalPoint, const Point& parentLocalPoint);
-
     template<typename T>
     RefPtr<T> FindChildNodeOfClass(const Point& globalPoint, const Point& parentLocalPoint)
     {
@@ -934,6 +952,21 @@ public:
             }
         }
         return nullptr;
+    }
+
+    template<typename T>
+    RefPtr<T> FindTargetRenderNode(const RefPtr<PipelineContext> context, const GestureEvent& info)
+    {
+        if (!context) {
+            return nullptr;
+        }
+
+        auto pageRenderNode = context->GetLastPageRender();
+        if (!pageRenderNode) {
+            return nullptr;
+        }
+
+        return pageRenderNode->FindChildNodeOfClass<T>(info.GetGlobalPoint(), info.GetGlobalPoint());
     }
 
     void SaveExplicitAnimationOption(const AnimationOption& option);
@@ -984,7 +1017,10 @@ public:
 
     // mark JSview boundary, create/destroy RSNode if need
     void SyncRSNodeBoundary(bool isHead, bool isTail);
-    const std::shared_ptr<RSNode>& GetRSNode() const { return rsNode_; }
+    const std::shared_ptr<RSNode>& GetRSNode() const
+    {
+        return rsNode_;
+    }
     // sync geometry properties to ROSEN backend
     virtual void SyncGeometryProperties();
 
@@ -1027,8 +1063,6 @@ protected:
     virtual void OnMouseTestHit(const Offset& coordinateOffset, MouseTestResult& result) {}
     virtual void OnMouseHoverEnterTest() {}
     virtual void OnMouseHoverExitTest() {}
-    virtual void MouseHoverEnterTest() {}
-    virtual void MouseHoverExitTest() {}
 
     void PrepareLayout();
 
@@ -1093,7 +1127,7 @@ protected:
     bool IsHeadRenderNode() const
     {
 #ifdef ENABLE_ROSEN_BACKEND
-        return isHeadRenderNode_;
+        return SystemProperties::GetRosenBackendEnabled() ? isHeadRenderNode_ : false;
 #else
         return false;
 #endif
@@ -1114,10 +1148,11 @@ protected:
     WeakPtr<PipelineContext> context_;
     Size viewPort_;
     Point globalPoint_;
+    Point coordinatePoint_;
     WeakPtr<V2::InspectorNode> inspector_;
     WeakPtr<AccessibilityNode> accessibilityNode_;
 
-    Rect touchRect_;    // Self touch rect
+    Rect touchRect_;                  // Self touch rect
     std::vector<Rect> touchRectList_; // Self and all children touch rect
     std::vector<DimensionRect> responseRegion_;
     std::vector<Rect> responseRegionList_;
@@ -1164,7 +1199,7 @@ private:
 
     void SetPositionInternal(const Offset& offset);
     bool InLayoutTransition() const;
-        // Sync view hierarchy to RSNode
+    // Sync view hierarchy to RSNode
     void RSNodeAddChild(const RefPtr<RenderNode>& child);
     void MarkParentNeedRender() const;
 

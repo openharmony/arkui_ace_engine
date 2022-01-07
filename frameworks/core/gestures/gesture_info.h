@@ -293,8 +293,7 @@ struct FingerInfo {
     Offset localLocation_;
 };
 
-class ItemDragInfo : public BaseEventInfo, public AceType {
-    DECLARE_ACE_TYPE(ItemDragInfo, BaseEventInfo, AceType);
+class ItemDragInfo : public BaseEventInfo {
 public:
     ItemDragInfo() : BaseEventInfo("itemDrag") {}
     ~ItemDragInfo() = default;

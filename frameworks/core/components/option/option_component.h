@@ -350,6 +350,42 @@ public:
         return customComponent_;
     }
 
+    const TextStyle& GetTextStyle() const
+    {
+        return textStyle_;
+    }
+    void SetTextStyle(const TextStyle& style)
+    {
+        textStyle_ = style;
+    }
+
+    const TextStyle& GetSelectedTextStyle() const
+    {
+        return selectedTextStyle_;
+    }
+    void SetSelectedTextStyle(const TextStyle& style)
+    {
+        selectedTextStyle_ = style;
+    }
+
+    const Color& GetBackgroundColor() const
+    {
+        return backgroundColor_;
+    }
+    void SetBackgroundColor(const Color& backgroundColor)
+    {
+        backgroundColor_ = backgroundColor;
+    }
+
+    const Color& GetSelectedBackgroundColor() const
+    {
+        return selectedBackgroundColor_;
+    }
+    void SetSelectedBackgroundColor(const Color& backgroundColor)
+    {
+        selectedBackgroundColor_ = backgroundColor;
+    }
+
 private:
     // used for inspector node in PC preview
     const std::vector<std::pair<std::string, std::string>> GetAttr()
@@ -382,10 +418,16 @@ private:
     std::function<void(std::size_t)> clickedCallback_;
     std::function<void(std::size_t)> modifiedCallback_;
     std::function<void()> customizedCallback_;
+
     std::string lastText_;
     ComposeId id_ = "-1";
     EventMarker clickEvent_;
     EventMarker clickEventForToolBarItem_;
+
+    TextStyle textStyle_;
+    TextStyle selectedTextStyle_;
+    Color backgroundColor_ = Color::TRANSPARENT;
+    Color selectedBackgroundColor_ = Color::GRAY;
 
     RefPtr<AccessibilityNode> node_;
     int32_t parentId_ = -1;

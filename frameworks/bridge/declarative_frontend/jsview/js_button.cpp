@@ -207,6 +207,9 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     }
     ViewStackProcessor::GetInstance()->Push(buttonComponent);
     JSInteractableView::SetFocusNode(true);
+
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    boxComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
 }
 
 void JSButton::CreateWithChild(const JSCallbackInfo& info)

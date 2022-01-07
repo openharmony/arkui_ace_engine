@@ -18,11 +18,16 @@
 
 #include "core/pipeline/layers/layer.h"
 
+namespace OHOS::Rosen {
+class RSNode;
+}
+
 namespace OHOS::Ace {
 
 class DrawDelegate {
 public:
     using DoDrawFrame = std::function<void(RefPtr<Flutter::Layer>&, const Rect&)>;
+    using DoDrawRSFrame = std::function<void(std::shared_ptr<Rosen::RSNode>&, const Rect&)>;
     using DoDrawLastFrame = std::function<void(const Rect&)>;
 
     DrawDelegate() = default;
@@ -32,6 +37,13 @@ public:
     {
         if (doDrawFrameCallback_) {
             doDrawFrameCallback_(rootLayer, dirty);
+        }
+    }
+
+    void DrawRSFrame(std::shared_ptr<Rosen::RSNode>& node, const Rect& dirty)
+    {
+        if (doDrawRSFrameCallback_) {
+            doDrawRSFrameCallback_(node, dirty);
         }
     }
 
@@ -47,6 +59,11 @@ public:
         doDrawFrameCallback_ = doFrameCallback;
     }
 
+    void SetDrawRSFrameCallback(DoDrawRSFrame&& doRSFrameCallback)
+    {
+        doDrawRSFrameCallback_ = doRSFrameCallback;
+    }
+
     void SetDrawFrameRepeatCallback(DoDrawLastFrame&& doFrameCallback)
     {
         doDrawLastFrameCallback_ = doFrameCallback;
@@ -54,6 +71,7 @@ public:
 
 private:
     DoDrawFrame doDrawFrameCallback_;
+    DoDrawRSFrame doDrawRSFrameCallback_;
     DoDrawLastFrame doDrawLastFrameCallback_;
 };
 

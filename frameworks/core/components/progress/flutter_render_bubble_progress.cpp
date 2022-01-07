@@ -29,11 +29,6 @@ constexpr Color LIGHT_COLOR = Color(0xFF8A8A8A);
 
 } // namespace
 
-RefPtr<RenderNode> RenderBubbleProgress::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderBubbleProgress>();
-}
-
 void FlutterRenderBubbleProgress::Paint(RenderContext& context, const Offset& offset)
 {
     auto canvas = ScopedCanvas::Create(context);

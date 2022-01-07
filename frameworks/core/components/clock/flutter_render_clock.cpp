@@ -37,16 +37,6 @@ constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
 
 } // namespace
 
-RefPtr<RenderNode> RenderClock::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderClock>();
-}
-
-RefPtr<RenderNode> RenderClockHand::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderClockHand>();
-}
-
 void FlutterRenderClock::Paint(RenderContext& context, const Offset& offset)
 {
     auto renderOffset = paintOffset_ + offset;

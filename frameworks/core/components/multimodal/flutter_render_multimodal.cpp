@@ -39,11 +39,6 @@ const char ELLIPSIS[] = "...";
 
 } // namespace
 
-RefPtr<RenderNode> RenderMultimodal::Create()
-{
-    return MakeRefPtr<FlutterRenderMultimodal>();
-}
-
 void FlutterRenderMultimodal::Paint(RenderContext& context, const Offset& offset)
 {
     RenderNode::Paint(context, offset);

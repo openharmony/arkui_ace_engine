@@ -21,17 +21,46 @@
 namespace OHOS::Ace {
 namespace {
 
-constexpr int32_t MULTI_FINGER_TIMEOUT = 300;
-constexpr int32_t MULTI_TAP_TIMEOUT = 300;
-constexpr int32_t MULTI_TAP_SLOP = 100;
+int32_t MULTI_FINGER_TIMEOUT = 300;
+constexpr int32_t MULTI_FINGER_TIMEOUT_TOUCH = 300;
+constexpr int32_t MULTI_FINGER_TIMEOUT_MOUSE = 300;
+int32_t MULTI_TAP_TIMEOUT = 300;
+constexpr int32_t MULTI_TAP_TIMEOUT_TOUCH = 300;
+constexpr int32_t MULTI_TAP_TIMEOUT_MOUSE = 500;
+int32_t MULTI_TAP_SLOP = 100;
+constexpr int32_t MULTI_TAP_SLOP_TOUCH = 100;
+constexpr int32_t MULTI_TAP_SLOP_MOUSE = 15;
 #ifndef WEARABLE_PRODUCT
-constexpr double MAX_THRESHOLD = 20.0;
+double MAX_THRESHOLD = 20.0;
+constexpr double MAX_THRESHOLD_TOUCH = 20.0;
 #else
 constexpr double MAX_THRESHOLD = 12.0;
+constexpr double MAX_THRESHOLD_TOUCH = 12.0;
 #endif
+constexpr int32_t MAX_THRESHOLD_MOUSE = 15;
 constexpr int32_t MAX_TAP_FINGERS = 10;
 
 } // namespace
+
+void ClickRecognizer::InitGlobalValue(SourceType sourceType)
+{
+    switch(sourceType) {
+        case SourceType::TOUCH:
+            MULTI_FINGER_TIMEOUT = MULTI_FINGER_TIMEOUT_TOUCH;
+            MULTI_TAP_TIMEOUT = MULTI_TAP_TIMEOUT_TOUCH;
+            MULTI_TAP_SLOP = MULTI_TAP_SLOP_TOUCH;
+            MAX_THRESHOLD = MAX_THRESHOLD_TOUCH;
+            break;
+        case SourceType::MOUSE:
+            MULTI_FINGER_TIMEOUT = MULTI_FINGER_TIMEOUT_MOUSE;
+            MULTI_TAP_TIMEOUT = MULTI_TAP_TIMEOUT_MOUSE;
+            MULTI_TAP_SLOP = MULTI_TAP_SLOP_MOUSE;
+            MAX_THRESHOLD = MAX_THRESHOLD_MOUSE;
+            break;
+        default:
+            LOGI("Unrecognized input source type: %{public}d", sourceType);
+    }
+}
 
 void ClickRecognizer::OnAccepted()
 {
@@ -61,6 +90,7 @@ void ClickRecognizer::OnRejected()
 
 void ClickRecognizer::HandleTouchDownEvent(const TouchPoint& event)
 {
+    InitGlobalValue(event.sourceType);
     LOGD("click recognizer receives touch down event, begin to detect click event");
     if (fingers_ > MAX_TAP_FINGERS) {
         return;
@@ -105,6 +135,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchPoint& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchPoint& event)
 {
+    InitGlobalValue(event.sourceType);
     LOGD("click recognizer receives touch up event");
     if (pointsCount_ > fingers_) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -160,6 +191,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchPoint& event)
 
 void ClickRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
 {
+    InitGlobalValue(event.sourceType);
     LOGD("click recognizer receives touch move event");
     auto itr = touchPoints_.find(event.id);
     if (itr == touchPoints_.end()) {
@@ -175,6 +207,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchPoint& event)
 {
+    InitGlobalValue(event.sourceType);
     LOGD("click recognizer receives touch cancel event");
     Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
 }

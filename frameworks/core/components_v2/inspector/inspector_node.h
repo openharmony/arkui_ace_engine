@@ -84,6 +84,7 @@ public:
     // dimension settings
     virtual std::string GetWidth() const = 0;
     virtual std::string GetHeight() const = 0;
+    virtual std::unique_ptr<JsonValue> GetSize() const = 0;
     virtual std::unique_ptr<JsonValue> GetPadding() const = 0;
     virtual Dimension GetMargin(OHOS::Ace::AnimatableType type) const = 0;
     virtual std::unique_ptr<JsonValue> GetAllMargin() const = 0;
@@ -113,6 +114,7 @@ public:
 
     // border settings
     virtual Border GetBorder() const = 0;
+    virtual std::unique_ptr<JsonValue> GetUnifyBorder() const = 0;
     virtual std::string GetBorderStyle() const = 0;
     virtual std::string GetBorderWidth() const = 0;
     virtual std::string GetBorderColor() const = 0;
@@ -179,6 +181,11 @@ public:
     virtual void UpdateEventTarget(BaseEventInfo& info) const = 0;
 
     virtual std::pair<Rect, Offset> GetCurrentRectAndOrigin() const = 0;
+
+    // color gradient
+    virtual std::unique_ptr<JsonValue> GetLinearGradient() const = 0;
+    virtual std::unique_ptr<JsonValue> GetSweepGradient() const = 0;
+    virtual std::unique_ptr<JsonValue> GetRadialGradient() const = 0;
 
     // auto test
     virtual bool GetClickable() const = 0;

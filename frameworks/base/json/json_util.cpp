@@ -232,6 +232,11 @@ bool JsonValue::Put(const char* key, int32_t value)
     return true;
 }
 
+bool JsonValue::Put(const char* key, int64_t value)
+{
+    return Put(key, static_cast<double>(value));
+}
+
 bool JsonValue::Put(const char* key, double value)
 {
     if (key == nullptr) {

@@ -15,6 +15,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
@@ -73,6 +74,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
@@ -82,6 +84,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
@@ -96,6 +99,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_select.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sheet.h"
@@ -109,6 +113,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text_clock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
@@ -124,6 +129,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
+#include "core/components_v2/inspector/inspector.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -332,7 +338,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::EcmaVM* vm, panda::Loc
         LOGE("pipeline is null");
         return panda::JSValueRef::Undefined(vm);
     }
-    auto nodeInfos = pipelineContext->GetInspectorTree();
+    auto nodeInfos = V2::Inspector::GetInspectorTree(pipelineContext);
     return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
 }
 
@@ -359,7 +365,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::EcmaVM* vm, panda::Lo
     }
 
     std::string key = args[0]->ToString(vm)->ToString();
-    auto resultStr = pipelineContext->GetInspectorNodeByKey(key);
+    auto resultStr = V2::Inspector::GetInspectorNodeByKey(pipelineContext, key);
     return panda::StringRef::NewFromUtf8(vm, resultStr.c_str());
 }
 
@@ -388,7 +394,160 @@ panda::Local<panda::JSValueRef> JsSendEventByKey(panda::EcmaVM* vm, panda::Local
     std::string key = args[0]->ToString(vm)->ToString();
     auto action = args[1]->Int32Value(vm);
     auto params = args[2]->ToString(vm)->ToString();
-    auto result = pipelineContext->SendEventByKey(key, action, params);
+    auto result = V2::Inspector::SendEventByKey(pipelineContext, key, action, params);
+    return panda::BooleanRef::New(vm, result);
+}
+
+static TouchPoint GetTouchPointFromJS(const JsiObject& value)
+{
+    TouchPoint touchPoint;
+
+    auto type = value->GetProperty("type");
+    touchPoint.type = static_cast<TouchType>(type->ToNumber<int32_t>());
+
+    auto id = value->GetProperty("id");
+    touchPoint.id = id->ToNumber<int32_t>();
+
+    auto x = value->GetProperty("x");
+    touchPoint.x = x->ToNumber<float>();
+
+    auto y = value->GetProperty("y");
+    touchPoint.y = y->ToNumber<float>();
+
+    touchPoint.time = std::chrono::high_resolution_clock::now();
+
+    return touchPoint;
+}
+
+panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
+    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+{
+    if (vm == nullptr) {
+        LOGE("The EcmaVM is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (argc < 1 || !args[0]->IsObject()) {
+        LOGE("The arg is wrong, must have one object argument");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext == nullptr) {
+        LOGE("pipelineContext==nullptr");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    JsiObject obj(args[0]);
+    TouchPoint touchPoint = GetTouchPointFromJS(obj);
+    auto result = pipelineContext->GetTaskExecutor()->PostTask(
+        [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); }, TaskExecutor::TaskType::UI);
+    return panda::BooleanRef::New(vm, result);
+}
+
+static V2::JsKeyEvent GetKeyEventFromJS(const JsiObject& value)
+{
+    V2::JsKeyEvent keyEvent;
+    auto type = value->GetProperty("type");
+    keyEvent.action = static_cast<KeyAction>(type->ToNumber<int32_t>());
+
+    auto jsKeyCode = value->GetProperty("keyCode");
+    keyEvent.code = static_cast<KeyCode>(jsKeyCode->ToNumber<int32_t>());
+
+    auto jsKeySource = value->GetProperty("keySource");
+    keyEvent.sourceDevice = jsKeySource->ToNumber<int32_t>();
+
+    auto jsDeviceId = value->GetProperty("deviceId");
+    keyEvent.deviceId = jsDeviceId->ToNumber<int32_t>();
+
+    auto jsMetaKey = value->GetProperty("metaKey");
+    keyEvent.metaKey = jsMetaKey->ToNumber<int32_t>();
+
+    auto jsTimestamp = value->GetProperty("timestamp");
+    keyEvent.timeStamp = jsTimestamp->ToNumber<int64_t>();
+
+    return keyEvent;
+}
+
+panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
+    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+{
+    if (vm == nullptr) {
+        LOGE("The EcmaVM is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (argc < 1 || !args[0]->IsObject()) {
+        LOGE("The arg is wrong, must have one object argument");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext == nullptr) {
+        LOGE("pipelineContext==nullptr");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    JsiObject obj(args[0]);
+    auto result = V2::Inspector::SendKeyEvent(pipelineContext, GetKeyEventFromJS(obj));
+    return panda::BooleanRef::New(vm, result);
+}
+
+static MouseEvent GetMouseEventFromJS(const JsiObject& value)
+{
+    MouseEvent mouseEvent;
+
+    auto action = value->GetProperty("action");
+    mouseEvent.action = static_cast<MouseAction>(action->ToNumber<int32_t>());
+
+    auto button = value->GetProperty("button");
+    mouseEvent.button = static_cast<MouseButton>(button->ToNumber<int32_t>());
+
+    auto x = value->GetProperty("x");
+    mouseEvent.x = x->ToNumber<float>();
+    mouseEvent.deltaX = mouseEvent.x;
+
+    auto y = value->GetProperty("y");
+    mouseEvent.y = y->ToNumber<float>();
+    mouseEvent.deltaY = mouseEvent.y;
+
+    mouseEvent.time = std::chrono::high_resolution_clock::now();
+    mouseEvent.sourceType = SourceType::MOUSE;
+    return mouseEvent;
+}
+
+panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
+    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+{
+    if (vm == nullptr) {
+        LOGE("The EcmaVM is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (argc < 1 || !args[0]->IsObject()) {
+        LOGE("The arg is wrong, must have one object argument");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext == nullptr) {
+        LOGE("pipelineContext==nullptr");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    JsiObject obj(args[0]);
+    MouseEvent mouseEvent = GetMouseEventFromJS(obj);
+    auto result = pipelineContext->GetTaskExecutor()->PostTask(
+        [pipelineContext, mouseEvent]() { pipelineContext->OnMouseEvent(mouseEvent); }, TaskExecutor::TaskType::UI);
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -643,8 +802,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "AbilityComponent", JSAbilityComponent::JSBind },
     { "TextArea", JSTextArea::JSBind },
     { "TextInput", JSTextInput::JSBind },
+    { "TextClock", JSTextClock::JSBind },
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     { "QRCode", JSQRCode::JSBind },
+    { "PluginComponent", JSPlugin::JSBind },
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
 #endif
@@ -683,9 +844,15 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind},
     { "VideoController", JSVideoController::JSBind },
     { "Search", JSSearch::JSBind },
+    { "Select", JSSelect::JSBind },
+    { "SearchController", JSSearchController::JSBind },
     { "Sheet", JSSheet::JSBind },
     { "JSClipboard", JSClipboard::JSBind },
+    { "PatternLock", JSPatternLock::JSBind },
+    { "PatternLockController", JSPatternLockController::JSBind },
     { "TextTimer", JSTextTimer::JSBind },
+    { "TextAreaController", JSTextAreaController::JSBind },
+    { "TextInputController", JSTextInputController::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind }
 };
 
@@ -705,6 +872,9 @@ void RegisterAllModule(BindingTarget globalObj)
     JSRenderingContextSettings::JSBind(globalObj);
     JSAbilityComponentController::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
+    JSTextInputController::JSBind(globalObj);
+    JSTextAreaController::JSBind(globalObj);
+    JSSearchController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
     for (auto& iter : bindFuncs) {
         iter.second(globalObj);
@@ -732,6 +902,12 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
         JSColumn::JSBind(globalObj);
     } else if ((*func).first == "TextTimer") {
         JSTextTimerController::JSBind(globalObj);
+    } else if ((*func).first == "TextInput") {
+        JSTextInputController::JSBind(globalObj);
+    } else if ((*func).first == "TextArea") {
+        JSTextAreaController::JSBind(globalObj);
+    } else if ((*func).first == "Search") {
+        JSSearchController::JSBind(globalObj);
     }
 
     (*func).second(globalObj);
@@ -775,6 +951,12 @@ void JsRegisterViews(BindingTarget globalObj)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorByKey, nullptr));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendEventByKey"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendEventByKey, nullptr));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendTouchEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendTouchEvent, nullptr));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendKeyEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendKeyEvent, nullptr));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendMouseEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendMouseEvent, nullptr));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "vp2px"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Vp2Px, nullptr));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2vp"),
@@ -803,11 +985,12 @@ void JsRegisterViews(BindingTarget globalObj)
     JSGesture::JSBind(globalObj);
     JSPanGestureOption::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);
-    JsGridDragFunction::JSBind(globalObj);
     JSCustomDialogController::JSBind(globalObj);
     JSShareData::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
+
+    JSProfiler::JSBind(globalObj);
 
     auto delegate = JsGetFrontendDelegate();
     std::string jsModules;

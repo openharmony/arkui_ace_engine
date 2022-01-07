@@ -25,6 +25,7 @@ template("ace_inspector") {
     sources = [
       "inspect_badge.cpp",
       "inspect_button.cpp",
+      "inspect_camera.cpp",
       "inspect_canvas.cpp",
       "inspect_chart.cpp",
       "inspect_dialog.cpp",

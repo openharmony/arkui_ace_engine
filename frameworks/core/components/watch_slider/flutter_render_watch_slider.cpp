@@ -28,11 +28,6 @@ constexpr Dimension DEFAULT_PADDING = 3.0_vp;
 
 } // namespace
 
-RefPtr<RenderNode> RenderWatchSlider::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderWatchSlider>();
-}
-
 void FlutterRenderWatchSlider::Paint(RenderContext& context, const Offset& offset)
 {
     UpdatePosition(offset);

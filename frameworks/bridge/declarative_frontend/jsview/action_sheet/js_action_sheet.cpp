@@ -25,12 +25,12 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
-
 const DimensionOffset ACTION_SHEET_OFFSET_DEFAULT = DimensionOffset(0.0_vp, -40.0_vp);
-
-const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
-    DialogAlignment::BOTTOM, DialogAlignment::DEFAULT };
-
+const std::vector<DialogAlignment> DIALOG_ALIGNMENT = {
+    DialogAlignment::TOP, DialogAlignment::CENTER, DialogAlignment::BOTTOM, DialogAlignment::DEFAULT,
+    DialogAlignment::TOP_START, DialogAlignment::TOP_END, DialogAlignment::CENTER_START,
+    DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START, DialogAlignment::BOTTOM_END
+};
 } // namespace
 
 ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)

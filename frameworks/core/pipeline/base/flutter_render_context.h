@@ -25,6 +25,7 @@
 #include "core/pipeline/base/render_context.h"
 #include "core/pipeline/base/render_layer.h"
 #include "core/pipeline/layers/container_layer.h"
+#include "core/pipeline/layers/offset_layer.h"
 #include "core/pipeline/layers/picture_layer.h"
 
 namespace OHOS::Ace {
@@ -82,6 +83,8 @@ public:
 
 private:
     void StartRecording();
+    void SetOffSet(
+        const RefPtr<RenderNode>& child, Flutter::OffsetLayer* layer, const Offset& pos, const std::string name);
 
     fml::RefPtr<flutter::PictureRecorder> recorder_;
     fml::RefPtr<flutter::Canvas> canvas_;

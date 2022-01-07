@@ -20,6 +20,7 @@ build_component("form") {
     "form_element.cpp",
     "form_window.cpp",
     "render_form.cpp",
+    "render_form_creator.cpp",
     "resource/form_manager_delegate.cpp",
     "resource/form_manager_resource.cpp",
     "sub_container.cpp",
@@ -34,4 +35,5 @@ build_component("form") {
       "ipc:ipc_core",
     ]
   }
+  rosen_sources = [ "rosen_render_form.cpp" ]
 }

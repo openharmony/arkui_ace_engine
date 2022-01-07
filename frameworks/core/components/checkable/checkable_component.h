@@ -316,6 +316,102 @@ class ACE_EXPORT CheckboxComponent : public CheckableComponent, public Checkable
 public:
     explicit CheckboxComponent(const RefPtr<CheckboxTheme>& theme);
     ~CheckboxComponent() override = default;
+    void SetGroupName(const std::string groupName)
+    {
+        groupName_ = groupName;
+    }
+
+    std::string GetGroupName() const
+    {
+        return groupName_;
+    }
+
+    void SetGroup(const RefPtr<CheckboxComponent>& groupComponent)
+    {
+        group_ = groupComponent;
+    }
+
+    RefPtr<CheckboxComponent> GetGroup() const
+    {
+        return group_;
+    }
+
+    void SetCheckboxName(const std::string checkboxName)
+    {
+        checkboxName_ = checkboxName;
+    }
+
+    std::string GetCheckboxName() const
+    {
+        return checkboxName_;
+    }
+
+    void SetBelongGroup(const std::string group)
+    {
+        belongGroup_ = group;
+    }
+
+    std::string GetBelongGroup() const
+    {
+        return belongGroup_;
+    }
+
+    void SetGroupValueUpdateHandler(const std::function<void(bool)>& value)
+    {
+        groupValueUpdateHandler_ = value;
+    }
+
+    void UpdateRenderChecked(bool checked)
+    {
+        if (groupValueUpdateHandler_) {
+            groupValueUpdateHandler_(checked);
+        }
+    }
+
+    void AddCheckbox(RefPtr<CheckboxComponent> checkboxComponent)
+    {
+        checkboxList_.push_back(checkboxComponent);
+    }
+
+    void SetMember(bool isAllSelect)
+    {
+        for(auto& item : checkboxList_) {
+            if (item->GetValue() != isAllSelect) {
+                continue;
+            }
+            item->SetValue(isAllSelect);
+            item->UpdateRenderChecked(isAllSelect);
+        }
+    }
+
+    void SetGroupStatus()
+    {
+        size_t count = 0;
+        for(auto& item : checkboxList_) {
+            if (item->GetValue()) {
+                ++count;
+            }
+        }
+
+        if (count == checkboxList_.size()) {
+            UpdateRenderChecked(true);
+        } else {
+            UpdateRenderChecked(false);
+        }
+    }
+
+    std::list<RefPtr<CheckboxComponent>> GetCheckboxList()
+    {
+        return checkboxList_;
+    }
+
+private:
+    std::list<RefPtr<CheckboxComponent>> checkboxList_;
+    RefPtr<CheckboxComponent> group_;
+    std::string groupName_ = "";
+    std::string checkboxName_ = "";
+    std::string belongGroup_ = "";
+    std::function<void(bool)> groupValueUpdateHandler_;
 };
 
 class ACE_EXPORT SwitchComponent : public CheckableComponent, public CheckableValue<bool> {

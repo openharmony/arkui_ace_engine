@@ -31,9 +31,10 @@ public:
     {}
     ~NavigationBarBuilder() override = default;
 
-    RefPtr<Component> Build(const WeakPtr<PipelineContext>& context)
+    RefPtr<Component> Build(const WeakPtr<PipelineContext>& context, int32_t menuCount)
     {
         context_ = context;
+        menuCount_ = menuCount;
         RefPtr<Component> navigationBar;
         if (declaration_->titleMode == NavigationTitleMode::MINI) {
             navigationBar = BuildMiniLayer();
@@ -66,6 +67,7 @@ private:
     RefPtr<ComposedComponent> titleComposed_;
     RefPtr<ComposedComponent> subTitleComposed_;
     EventMarker backClickMarker_;
+    int32_t menuCount_ = 0;
 };
 } // namespace OHOS::Ace
 

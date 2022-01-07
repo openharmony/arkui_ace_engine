@@ -16,7 +16,6 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 
 #include "base/log/log.h"
-#include "core/gestures/click_recognizer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 
 namespace OHOS::Ace::Framework {
@@ -71,6 +70,28 @@ void JsClickFunction::Execute(const GestureEvent& info)
 
     LOGD("globalOffset.GetX() = %lf, globalOffset.GetY() = %lf, localOffset.GetX() = %lf, localOffset.GetY() = %lf",
         globalOffset.GetX(), globalOffset.GetY(), localOffset.GetX(), localOffset.GetY());
+
+    JSRef<JSVal> param = obj;
+    JsFunction::ExecuteJS(1, &param);
+}
+
+void JsClickFunction::Execute(const MouseInfo& info)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty<int32_t>("button", static_cast<int32_t>(info.GetButton()));
+    obj->SetProperty<int32_t>("action", static_cast<int32_t>(info.GetAction()));
+    Offset globalOffset = info.GetGlobalLocation();
+    Offset localOffset = info.GetLocalLocation();
+    obj->SetProperty<double>("screenX", SystemProperties::Px2Vp(globalOffset.GetX()));
+    obj->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalOffset.GetY()));
+    obj->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
+    obj->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
+    obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+    auto target = CreateEventTargetObject(info);
+    obj->SetPropertyObject("target", target);
+
+    LOGD("button = %d, action = %d, globalOffset = (%lf, %lf), localOffset = (%lf, %lf),", info.GetButton(),
+        info.GetAction(), globalOffset.GetX(), globalOffset.GetY(), localOffset.GetX(), localOffset.GetY());
 
     JSRef<JSVal> param = obj;
     JsFunction::ExecuteJS(1, &param);

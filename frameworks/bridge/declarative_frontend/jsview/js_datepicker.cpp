@@ -268,6 +268,8 @@ void JSDatePickerDialog::CreateDatePicker(RefPtr<Component> &component, const JS
     auto startDate = paramObj->GetProperty("start");
     auto endDate = paramObj->GetProperty("end");
     auto selectedDate = paramObj->GetProperty("selected");
+    auto lunar = paramObj->GetProperty("lunar");
+    bool isLunar = lunar->ToBoolean();
     if (startDate->IsObject()) {
         datePicker->SetStartDate(ParseDate(startDate));
     }
@@ -277,9 +279,10 @@ void JSDatePickerDialog::CreateDatePicker(RefPtr<Component> &component, const JS
     if (selectedDate->IsObject()) {
         datePicker->SetSelectedDate(ParseDate(selectedDate));
     }
-
     datePicker->SetIsDialog(false);
     datePicker->SetIsCreateDialogComponent(true);
+    datePicker->SetShowLunar(isLunar);
+
     component = datePicker;
 }
 
@@ -287,12 +290,14 @@ void JSDatePickerDialog::CreateTimePicker(RefPtr<Component> &component, const JS
 {
     auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
     auto selectedTime = paramObj->GetProperty("selected");
+    auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
+    bool isUseMilitaryTime = useMilitaryTime->ToBoolean();
     if (selectedTime->IsObject()) {
         timePicker->SetSelectedTime(ParseTime(selectedTime));
     }
-
     timePicker->SetIsDialog(false);
     timePicker->SetIsCreateDialogComponent(true);
+    timePicker->SetHour24(isUseMilitaryTime);
     component = timePicker;
 }
 

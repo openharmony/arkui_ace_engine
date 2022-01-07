@@ -36,6 +36,7 @@ template("ace_base_source_set") {
       "geometry/transform_util.cpp",
       "json/json_util.cpp",
       "log/ace_trace.cpp",
+      "log/ace_tracker.cpp",
       "log/dump_log.cpp",
       "memory/memory_monitor.cpp",
       "thread/background_task_executor.cpp",

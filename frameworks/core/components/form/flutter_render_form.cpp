@@ -21,14 +21,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> RenderForm::Create()
-{
-    LOGE("create render form");
-    auto render = AceType::MakeRefPtr<FlutterRenderForm>();
-    LOGE("create render form render:%p", AceType::RawPtr(render));
-    return render;
-}
-
 std::unique_ptr<DrawDelegate> FlutterRenderForm::GetDrawDelegate()
 {
     auto darwDelegate = std::make_unique<DrawDelegate>();

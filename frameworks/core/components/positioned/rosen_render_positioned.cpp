@@ -26,7 +26,12 @@ void RosenRenderPositioned::Update(const RefPtr<Component>& component)
     auto rsNode = GetRSNode();
     if (context && rsNode) {
         auto dipScale = context->GetDipScale();
-        rsNode->SetFramePosition({ left_.ConvertToPx(dipScale), top_.ConvertToPx(dipScale) });
+        if(hasLeft_){
+            rsNode->SetFramePositionX(left_.ConvertToPx(dipScale));
+        }
+        if(hasTop_){
+            rsNode->SetFramePositionY(top_.ConvertToPx(dipScale));
+        }
     }
 }
 

@@ -117,6 +117,7 @@ class JsiObject : public JsiType<panda::ObjectRef> {
 public:
     JsiObject();
     JsiObject(panda::Local<panda::ObjectRef> val);
+    bool IsUndefined() const;
     ~JsiObject() override = default;
     enum InternalFieldIndex { INSTANCE = 0 };
 
@@ -128,6 +129,7 @@ public:
 
     JsiRef<JsiArray> GetPropertyNames() const;
     JsiRef<JsiValue> GetProperty(const char* prop) const;
+    JsiRef<JsiValue> ToJsonObject(const char* value) const;
 
     template<typename T>
     void SetProperty(const char* prop, const T value) const;

@@ -19,8 +19,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/core/pipeline/base/component.h"
 #include "frameworks/core/gestures/tap_gesture.h"
+#include "frameworks/core/pipeline/base/component.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -29,6 +29,7 @@ public:
     static void JsOnTouch(const JSCallbackInfo& args);
     static void JsOnPan(const JSCallbackInfo& args);
     static void JsOnClick(const JSCallbackInfo& info);
+    static void JsOnDoubleClick(const JSCallbackInfo& info);
     static void JsTouchable(const JSCallbackInfo& info);
     static void JsOnHover(const JSCallbackInfo& args);
     static EventMarker GetClickEventMarker(const JSCallbackInfo& info);
@@ -41,11 +42,13 @@ public:
 
     static void JsOnDelete(const JSCallbackInfo& info);
     static void JsOnAccessibility(const JSCallbackInfo& info);
+    static void JsRemoteMessage(const JSCallbackInfo& info);
 
     static void UpdateEventTarget(NodeId nodeId, BaseEventInfo& info);
 
 private:
-    static RefPtr<Gesture> GetTapGesture(const JSCallbackInfo& info);
+    static RefPtr<Gesture> GetTapGesture(
+        const JSCallbackInfo& info, int32_t countNum = DEFAULT_TAP_COUNTS, int32_t fingerNum = DEFAULT_TAP_FINGERS);
     static EventMarker GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys);
 }; // class JSInteractableView
 

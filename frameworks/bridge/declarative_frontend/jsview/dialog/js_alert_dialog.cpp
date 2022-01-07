@@ -26,10 +26,11 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
-
-const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
-    DialogAlignment::BOTTOM, DialogAlignment::DEFAULT };
-
+const std::vector<DialogAlignment> DIALOG_ALIGNMENT = {
+    DialogAlignment::TOP, DialogAlignment::CENTER, DialogAlignment::BOTTOM, DialogAlignment::DEFAULT,
+    DialogAlignment::TOP_START, DialogAlignment::TOP_END, DialogAlignment::CENTER_START,
+    DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START, DialogAlignment::BOTTOM_END
+};
 } // namespace
 
 void ParseButtonObj(

@@ -260,6 +260,18 @@ public:
     void SetEditingStyle(const TextStyle& style);
     const TextStyle& GetEditingStyle() const;
 
+    void SetInputFilter(const std::string& inputFilter);
+    const std::string& GetInputFilter() const;
+
+    void SetOnError(const std::function<void(const std::string&)>& value)
+    {
+        OnError_ = value;
+    }
+    const std::function<void(const std::string&)>& GetOnError() const
+    {
+        return OnError_;
+    }
+
     ACE_DEFINE_COMPONENT_EVENT(OnChange, void(std::string));
 
     ACE_DEFINE_COMPONENT_EVENT(OnEditChanged, void(bool));
@@ -274,6 +286,7 @@ public:
 
 private:
     RefPtr<TextFieldDeclaration> declaration_;
+    std::function<void(const std::string&)> OnError_;
 };
 
 } // namespace OHOS::Ace

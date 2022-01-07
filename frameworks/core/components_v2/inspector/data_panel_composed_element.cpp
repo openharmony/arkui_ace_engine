@@ -62,7 +62,7 @@ std::unique_ptr<JsonValue> DataPanelComposedElement::GetValues() const
 {
     auto render = GetRenderPercentageDataPanel();
     if (render) {
-        auto jsonDashArray = JsonUtil::CreateArray(true);
+        auto jsonDashArray = JsonUtil::CreateArray(false);
         auto Segments = render->GetSegments();
         for (size_t i = 0; i < Segments.size(); ++i) {
             auto index = std::to_string(i);

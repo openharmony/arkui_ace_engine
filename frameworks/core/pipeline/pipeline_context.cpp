@@ -25,6 +25,7 @@
 #endif
 
 #include "base/log/ace_trace.h"
+#include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -65,8 +66,8 @@
 #include "core/components/stage/stage_component.h"
 #include "core/components/stage/stage_element.h"
 #include "core/components/theme/app_theme.h"
-#include "core/components_v2/inspector/shape_composed_element.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
+#include "core/components_v2/inspector/shape_composed_element.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/factories/flutter_render_factory.h"
@@ -81,20 +82,6 @@ constexpr char JS_THREAD_NAME[] = "JS";
 constexpr char UI_THREAD_NAME[] = "UI";
 constexpr int32_t DEFAULT_VIEW_SCALE = 1;
 constexpr uint32_t DEFAULT_MODAL_COLOR = 0x00000000;
-
-const char INSPECTOR_TYPE[] = "$type";
-const char INSPECTOR_ROOT[] = "root";
-const char INSPECTOR_WIDTH[] = "width";
-const char INSPECTOR_HEIGHT[] = "height";
-const char INSPECTOR_RESOLUTION[] = "$resolution";
-const char INSPECTOR_CHILDREN[] = "$children";
-const char INSPECTOR_ID[] = "$ID";
-const char INSPECTOR_RECT[] = "$rect";
-const char INSPECTOR_Z_INDEX[] = "$z-index";
-const char INSPECTOR_ATTRS[] = "$attrs";
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-const char INSPECTOR_DEBUGLINE[] = "$debugLine";
-#endif
 
 PipelineContext::TimeProvider g_defaultTimeProvider = []() -> uint64_t {
     struct timespec ts;
@@ -119,41 +106,6 @@ Rect GetGlobalRect(const RefPtr<Element>& element)
 void ThreadStuckTask(int32_t seconds)
 {
     std::this_thread::sleep_for(std::chrono::seconds(seconds));
-}
-
-RefPtr<V2::InspectorComposedElement> GetInspectorByKey(RefPtr<RootElement>& root, const std::string& key)
-{
-    std::queue<RefPtr<Element>> elements;
-    elements.push(root);
-    RefPtr<V2::InspectorComposedElement> inspectorElement;
-    while (!elements.empty()) {
-        auto current = elements.front();
-        elements.pop();
-        inspectorElement = AceType::DynamicCast<V2::InspectorComposedElement>(current);
-        if (inspectorElement != nullptr) {
-            if (key == inspectorElement->GetKey()) {
-                return inspectorElement;
-            }
-        }
-        const auto& children = current->GetChildren();
-        for (auto& child : children) {
-            elements.push(child);
-        }
-    }
-    return nullptr;
-}
-
-void DumpElementTree(int32_t depth, RefPtr<Element> element,
-    std::map<int32_t, std::list<RefPtr<Element>>>& depthElementMap)
-{
-    if (element->GetChildren().empty()) {
-        return;
-    }
-    const auto& children = element->GetChildren();
-    depthElementMap[depth].insert(depthElementMap[depth].end(), children.begin(), children.end());
-    for (auto& depthElement: children) {
-        DumpElementTree(depth + 1, depthElement, depthElementMap);
-    }
 }
 
 } // namespace
@@ -238,6 +190,7 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 
 void PipelineContext::FlushMessages()
 {
+    ACE_FUNCTION_TRACK();
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
         rsUIDirector_->SendMessages();
@@ -247,8 +200,9 @@ void PipelineContext::FlushMessages()
 
 void PipelineContext::FlushBuild()
 {
-    ACE_FUNCTION_TRACE();
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
+    ACE_FUNCTION_TRACE();
 
     isRebuildFinished_ = false;
     if (dirtyElements_.empty()) {
@@ -297,6 +251,7 @@ void PipelineContext::FlushPredictLayout(int64_t targetTimestamp)
 void PipelineContext::FlushFocus()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     if (dirtyFocusNode_) {
         dirtyFocusNode_->RequestFocusImmediately();
         dirtyFocusNode_.Reset();
@@ -325,6 +280,7 @@ void PipelineContext::FlushFocus()
 
 void PipelineContext::FireVisibleChangeEvent()
 {
+    ACE_FUNCTION_TRACK();
     auto accessibilityManager = GetAccessibilityManager();
     if (accessibilityManager) {
         accessibilityManager->TriggerVisibleChangeEvent();
@@ -455,6 +411,7 @@ void PipelineContext::CreateGeometryTransition()
 void PipelineContext::FlushLayout()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
     if (dirtyLayoutNodes_.empty()) {
@@ -520,6 +477,7 @@ void PipelineContext::CorrectPosition()
 void PipelineContext::FlushRender()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
     if (dirtyRenderNodes_.empty() && dirtyRenderNodesInOverlay_.empty() && !needForcedRefresh_) {
@@ -591,6 +549,7 @@ void PipelineContext::FlushRender()
 void PipelineContext::FlushRenderFinish()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
     if (!needPaintFinishNodes_.empty()) {
@@ -604,6 +563,7 @@ void PipelineContext::FlushRenderFinish()
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
     flushAnimationTimestamp_ = nanoTimestamp;
     isFlushingAnimation_ = true;
@@ -623,6 +583,7 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 void PipelineContext::FlushPostAnimation()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
     if (postAnimationFlushListeners_.empty()) {
@@ -649,6 +610,7 @@ void PipelineContext::FlushPageUpdateTasks()
 void PipelineContext::FlushAnimationTasks()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     if (animationCallback_) {
         taskExecutor_->PostTask(animationCallback_, TaskExecutor::TaskType::JS);
     }
@@ -682,6 +644,7 @@ void PipelineContext::ProcessPreFlush()
 void PipelineContext::ProcessPostFlush()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
     if (postFlushListeners_.empty()) {
@@ -718,8 +681,8 @@ RefPtr<Element> PipelineContext::SetupRootElement()
         rootStage->SetMainStackSize(MainStackSize::LAST_CHILD_HEIGHT);
     }
 
-    auto stack = AceType::MakeRefPtr<StackComponent>(Alignment::TOP_LEFT, StackFit::INHERIT,
-        Overflow::OBSERVABLE, std::list<RefPtr<Component>>());
+    auto stack = AceType::MakeRefPtr<StackComponent>(
+        Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, std::list<RefPtr<Component>>());
     auto overlay = AceType::MakeRefPtr<OverlayComponent>(std::list<RefPtr<Component>>());
     overlay->SetTouchable(false);
     stack->AppendChild(rootStage);
@@ -1379,6 +1342,16 @@ void PipelineContext::OnTouchEvent(const TouchPoint& point)
             touchRestrict.UpdateForbiddenType(TouchRestrict::LONG_PRESS);
         }
         eventManager_.TouchTest(scalePoint, rootElement_->GetRenderNode(), touchRestrict);
+
+        for (size_t i = 0; i < touchPluginPipelineContext_.size(); i++) {
+            auto pipelineContext = touchPluginPipelineContext_[i].Upgrade();
+            if (!pipelineContext || !pipelineContext->rootElement_) {
+                continue;
+            }
+            auto pluginPoint = point.UpdateScalePoint(viewScale_, pipelineContext->pluginOffset_.GetX(),
+                pipelineContext->pluginOffset_.GetY(), point.id + (int32_t)i + 1);
+            pipelineContext->OnTouchEvent(pluginPoint);
+        }
     }
     if (scalePoint.type == TouchType::MOVE) {
         isMoving_ = true;
@@ -1387,6 +1360,18 @@ void PipelineContext::OnTouchEvent(const TouchPoint& point)
         SetIsKeyEvent(false);
     }
     eventManager_.DispatchTouchEvent(scalePoint);
+
+    if (scalePoint.type != TouchType::DOWN) {
+        for (size_t i = 0; i < touchPluginPipelineContext_.size(); i++) {
+            auto pipelineContext = touchPluginPipelineContext_[i].Upgrade();
+            if (!pipelineContext || !pipelineContext->rootElement_) {
+                continue;
+            }
+            auto pluginPoint = point.UpdateScalePoint(viewScale_, pipelineContext->pluginOffset_.GetX(),
+                pipelineContext->pluginOffset_.GetY(), point.id + (int32_t)i + 1);
+            pipelineContext->eventManager_.DispatchTouchEvent(pluginPoint);
+        }
+    }
 }
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
@@ -1420,63 +1405,17 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     LOGD("OnMouseEvent: x=%{public}f, y=%{public}f, type=%{public}d. button=%{public}d, pressbutton=%{public}d}",
         event.x, event.y, event.action, event.button, event.pressedButtons);
 
-    auto touchPoint = event.CreateTouchPoint();
     if ((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
             event.action == MouseAction::MOVE) &&
         (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
+        auto touchPoint = event.CreateTouchPoint();
         OnTouchEvent(touchPoint);
     }
+
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     eventManager_.MouseTest(scaleEvent, rootElement_->GetRenderNode());
     eventManager_.DispatchMouseEvent(scaleEvent);
-    int32_t preHoverId = hoverNodeId_;
-    std::list<RefPtr<RenderNode>> preHoverNodes;
-    preHoverNodes.assign(hoverNodes_.begin(), hoverNodes_.end());
-    // clear current hover node id and list.
-    hoverNodeId_ = DEFAULT_HOVER_ENTER_ANIMATION_ID;
-    hoverNodes_.clear();
-    eventManager_.MouseHoverTest(scaleEvent, rootElement_->GetRenderNode());
-    if (preHoverId != hoverNodeId_) {
-        // Send Hover Exit Animation event to preHoverNodes.
-        for (const auto& exitNode : preHoverNodes) {
-            exitNode->OnMouseHoverExitAnimation();
-        }
-        // Send Hover Enter Animation event to curHoverNodes.
-        for (const auto& enterNode : hoverNodes_) {
-            enterNode->OnMouseHoverEnterAnimation();
-        }
-    } else {
-        HandleMouseInputEvent(event);
-    }
-    if (touchPoint.type == TouchType::DOWN) {
-        for (const auto& enterNode : hoverNodes_) {
-            enterNode->OnMouseClickDownAnimation();
-        }
-    }
-    if (touchPoint.type == TouchType::UP) {
-        for (const auto& enterNode : hoverNodes_) {
-            enterNode->OnMouseClickUpAnimation();
-        }
-    }
-}
-
-void PipelineContext::HandleMouseInputEvent(const MouseEvent& event)
-{
-    if (event.action == MouseAction::HOVER_EXIT) {
-        for (const auto& exitNode : hoverNodes_) {
-            exitNode->OnMouseHoverExitAnimation();
-        }
-    }
-    if (event.action == MouseAction::PRESS) {
-        for (const auto& exitNode : hoverNodes_) {
-            exitNode->StopMouseHoverAnimation();
-        }
-    }
-    if (event.action == MouseAction::HOVER_ENTER) {
-        for (const auto& enterNode : hoverNodes_) {
-            enterNode->OnMouseHoverEnterAnimation();
-        }
-    }
+    eventManager_.DispatchMouseHoverEvent(scaleEvent);
 }
 
 void PipelineContext::AddToHoverList(const RefPtr<RenderNode>& node)
@@ -1542,7 +1481,19 @@ void PipelineContext::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+    if (onVsyncProfiler_) {
+        AceTracker::Start();
+    }
+    FlushVsync(nanoTimestamp, frameCount);
+    if (onVsyncProfiler_) {
+        onVsyncProfiler_(AceTracker::Stop());
+    }
+}
 
+void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
 #if defined(ENABLE_NATIVE_VIEW)
     if (frameCount_ < 2) {
         frameCount_++;
@@ -1553,7 +1504,6 @@ void PipelineContext::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
         rsUIDirector_->SetTimeStamp(nanoTimestamp);
     }
 #endif
-
     if (isSurfaceReady_) {
         FlushAnimation(GetTimeFromExternalTimer());
         FlushPipelineWithoutAnimation();
@@ -1816,7 +1766,15 @@ void PipelineContext::SetRootRect(double width, double height) const
 void PipelineContext::SetRootBgColor(const Color& color)
 {
     rootBgColor_ = color;
+    if (!themeManager_) {
+        LOGE("PipelineContext::SetRootBgColor:themeManager_ is nullptr!");
+        return;
+    }
     auto appTheme = themeManager_->GetTheme<AppTheme>();
+    if (!appTheme) {
+        LOGE("GetTheme failed!");
+        return;
+    }
     appTheme->SetBackgroundColor(color);
     if (rootElement_) {
         auto renderRoot = DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
@@ -2063,6 +2021,7 @@ void PipelineContext::Destroy()
     themeManager_.Reset();
     sharedImageManager_.Reset();
     window_->Destroy();
+    touchPluginPipelineContext_.clear();
     LOGI("PipelineContext::Destroy end.");
 }
 
@@ -2228,6 +2187,7 @@ void PipelineContext::SetMultimodalSubscriber(const RefPtr<MultimodalSubscriber>
 void PipelineContext::OnShow()
 {
     onShow_ = true;
+    window_->OnShow();
     auto multiModalScene = multiModalManager_->GetCurrentMultiModalScene();
     if (multiModalScene) {
         multiModalScene->Resume();
@@ -2260,6 +2220,7 @@ void PipelineContext::OnShow()
 void PipelineContext::OnHide()
 {
     onShow_ = false;
+    window_->OnHide();
     auto multiModalScene = multiModalManager_->GetCurrentMultiModalScene();
     if (multiModalScene) {
         multiModalScene->Hide();
@@ -2496,6 +2457,7 @@ void PipelineContext::AddDeactivateElement(const int32_t id, const RefPtr<Elemen
 void PipelineContext::ClearDeactivateElements()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
     for (auto iter = deactivateElements_.begin(); iter != deactivateElements_.end();) {
         auto element = iter->second;
         RefPtr<RenderNode> render = element ? element->GetRenderNode() : nullptr;
@@ -2593,7 +2555,8 @@ bool PipelineContext::ProcessDragEvent(int action, double windowX, double window
     Point localPoint(windowX, windowY);
 
     if (action == DragEventAction::ACTION_DRAG_LOCATION) {
-        auto targetRenderBox = AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, localPoint));
+        auto targetRenderBox =
+            AceType::DynamicCast<RenderBox>(renderNode->FindChildNodeOfClass<RenderBox>(globalPoint, localPoint));
         auto preTargetRenderBox = AceType::DynamicCast<RenderBox>(GetPreTargetRenderNode());
 
         if (targetRenderBox == preTargetRenderBox) {
@@ -2612,7 +2575,8 @@ bool PipelineContext::ProcessDragEvent(int action, double windowX, double window
 
         return targetRenderBox ? true : false;
     } else if (action == DragEventAction::ACTION_DROP) {
-        auto targetRenderBox = AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, localPoint));
+        auto targetRenderBox =
+            AceType::DynamicCast<RenderBox>(renderNode->FindChildNodeOfClass<RenderBox>(globalPoint, localPoint));
 
         if (targetRenderBox && targetRenderBox->GetOnDrop()) {
             (targetRenderBox->GetOnDrop())(event);
@@ -2627,8 +2591,13 @@ bool PipelineContext::ProcessDragEvent(int action, double windowX, double window
 void PipelineContext::FlushWindowBlur()
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
 
     if (!updateWindowBlurRegionHandler_) {
+        return;
+    }
+
+    if (IsJsPlugin()) {
         return;
     }
 
@@ -2751,8 +2720,8 @@ bool PipelineContext::Animate(const AnimationOption& option, const RefPtr<Curve>
     return CloseImplicitAnimation();
 }
 
-void PipelineContext::OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-    const std::function<void()>& finishCallBack)
+void PipelineContext::OpenImplicitAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!SystemProperties::GetRosenBackendEnabled()) {
@@ -2901,7 +2870,7 @@ bool PipelineContext::GetIsDeclarative() const
 {
     RefPtr<Frontend> front = GetFrontend();
     if (front) {
-        return front->GetType() == FrontendType::DECLARATIVE_JS;
+        return (front->GetType() == FrontendType::DECLARATIVE_JS || front->GetType() == FrontendType::JS_PLUGIN);
     }
     return false;
 }
@@ -3055,6 +3024,22 @@ bool PipelineContext::IsVisibleChangeNodeExists(NodeId index) const
     return accessibilityManager->IsVisibleChangeNodeExists(index);
 }
 
+void PipelineContext::SetTouchPipeline(WeakPtr<PipelineContext> context)
+{
+    auto result = std::find(touchPluginPipelineContext_.begin(), touchPluginPipelineContext_.end(), context);
+    if (result == touchPluginPipelineContext_.end()) {
+        touchPluginPipelineContext_.emplace_back(context);
+    }
+}
+
+void PipelineContext::RemoveTouchPipeline(WeakPtr<PipelineContext> context)
+{
+    auto result = std::find(touchPluginPipelineContext_.begin(), touchPluginPipelineContext_.end(), context);
+    if (result != touchPluginPipelineContext_.end()) {
+        touchPluginPipelineContext_.erase(result);
+    }
+}
+
 void PipelineContext::PostAsyncEvent(TaskExecutor::Task&& task)
 {
     if (taskExecutor_) {
@@ -3078,178 +3063,6 @@ void PipelineContext::SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector>
 #ifdef ENABLE_ROSEN_BACKEND
     rsUIDirector_ = rsUIDirector;
 #endif
-}
-
-std::string PipelineContext::GetInspectorNodeByKey(const std::string& key)
-{
-    auto inspectorElement = GetInspectorByKey(rootElement_, key);
-    if (inspectorElement == nullptr) {
-        LOGE("no inspector with key:%s is found", key.c_str());
-        return "";
-    }
-
-    auto jsonNode = JsonUtil::Create(true);
-    jsonNode->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
-    jsonNode->Put(INSPECTOR_ID, std::stoi(inspectorElement->GetId()));
-    jsonNode->Put(INSPECTOR_Z_INDEX, inspectorElement->GetZIndex());
-    jsonNode->Put(INSPECTOR_RECT, inspectorElement->GetRenderRect().ToBounds().c_str());
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    std::string debugLine = inspectorElement->GetDebugLine();
-    jsonNode->Put(INSPECTOR_DEBUGLINE, debugLine.c_str());
-#endif
-    auto jsonObject = inspectorElement->ToJsonObject();
-    jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
-    return jsonNode->ToString();
-}
-
-std::string PipelineContext::GetInspectorTree()
-{
-    auto jsonRoot = JsonUtil::Create(true);
-    jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
-
-    float scale = GetViewScale();
-    double rootHeight = GetRootHeight();
-    double rootWidth = GetRootWidth();
-    jsonRoot->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
-    jsonRoot->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
-    jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
-
-    auto root = AceType::DynamicCast<Element>(rootElement_);
-    if (root == nullptr) {
-        return jsonRoot->ToString();
-    }
-
-    std::map<int32_t, std::list<RefPtr<Element>>> depthElementMap;
-    depthElementMap[0].emplace_back(root);
-    DumpElementTree(1, root, depthElementMap);
-
-    size_t height = 0;
-    std::unordered_map<int32_t, std::vector<std::pair<RefPtr<Element>, std::string>>> elementJSONInfoMap;
-    for (int depth = depthElementMap.size(); depth > 0; depth--) {
-        const auto& depthElements = depthElementMap[depth];
-        for (const auto& element: depthElements) {
-            auto inspectorElement = AceType::DynamicCast<V2::InspectorComposedElement>(element);
-            if (inspectorElement == nullptr) {
-                continue;
-            }
-
-            auto jsonNode = JsonUtil::Create(true);
-            jsonNode->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
-            jsonNode->Put(INSPECTOR_ID, std::stoi(inspectorElement->GetId()));
-            jsonNode->Put(INSPECTOR_Z_INDEX, inspectorElement->GetZIndex());
-            jsonNode->Put(INSPECTOR_RECT, inspectorElement->GetRenderRect().ToBounds().c_str());
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-            std::string debugLine = inspectorElement->GetDebugLine();
-            jsonNode->Put(INSPECTOR_DEBUGLINE, debugLine.c_str());
-#endif
-            auto jsonObject = inspectorElement->ToJsonObject();
-            jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
-            auto shapeComposedElement = AceType::DynamicCast<V2::ShapeComposedElement>(element);
-            if (shapeComposedElement != nullptr) {
-                int type = StringUtils::StringToInt(shapeComposedElement->GetShapeType());
-                jsonNode->Replace(INSPECTOR_TYPE, SHAPE_TYPE_STRINGS[type]);
-            }
-            if (!element->GetChildren().empty()) {
-                if (height > 0) {
-                    auto jsonNodeArray = JsonUtil::CreateArray(true);
-                    auto childNodeJSONVec = elementJSONInfoMap[height - 1];
-                    for (auto iter = childNodeJSONVec.begin(); iter != childNodeJSONVec.end(); iter++) {
-                        auto parent = iter->first->GetElementParent().Upgrade();
-                        while (parent) {
-                            if (AceType::TypeName(parent) == AceType::TypeName(element) &&
-                                parent->GetRetakeId() == element->GetRetakeId()) {
-                                auto childJSONValue = JsonUtil::ParseJsonString(iter->second);
-                                jsonNodeArray->Put(childJSONValue);
-                                break;
-                            } else {
-                                parent = parent->GetElementParent().Upgrade();
-                            }
-                        }
-                    }
-                    if (jsonNodeArray->GetArraySize()) {
-                        jsonNode->Put(INSPECTOR_CHILDREN, jsonNodeArray);
-                    }
-                }
-            }
-            elementJSONInfoMap[height].emplace_back(element, jsonNode->ToString());
-        }
-        if (elementJSONInfoMap.find(height) != elementJSONInfoMap.end()) {
-            height++;
-        }
-    }
-
-    auto jsonNodeArray = JsonUtil::CreateArray(true);
-    auto firstDepthNodeVec = elementJSONInfoMap[elementJSONInfoMap.size() - 1];
-    for (const auto& nodeJSONInfo: firstDepthNodeVec) {
-        auto nodeJSONValue = JsonUtil::ParseJsonString(nodeJSONInfo.second);
-        jsonNodeArray->Put(nodeJSONValue);
-    }
-    jsonRoot->Put(INSPECTOR_CHILDREN, jsonNodeArray);
-    return jsonRoot->ToString();
-}
-
-bool PipelineContext::SendEventByKey(const std::string& key, int action, const std::string& params)
-{
-    auto inspectorElement = GetInspectorByKey(rootElement_, key);
-    if (inspectorElement == nullptr) {
-        LOGE("no inspector with key:%s is found", key.c_str());
-        return false;
-    }
-
-    Rect rect = inspectorElement->GetRenderRect();
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), rect, action, params, inspectorElement]() {
-            auto context = weak.Upgrade();
-            if (!context) {
-                return;
-            }
-
-            TouchPoint point {
-                .x = static_cast<float>(rect.Left() + rect.Width() / 2),
-                .y = static_cast<float>(rect.Top() + rect.Height() / 2),
-                .type = TouchType::DOWN,
-                .time = std::chrono::high_resolution_clock::now()
-            };
-            context->OnTouchEvent(point);
-
-            switch (action) {
-                case static_cast<int>(AceAction::ACTION_CLICK): {
-                    TouchPoint upPoint {
-                        .x = point.x,
-                        .y = point.y,
-                        .type = TouchType::UP,
-                        .time = std::chrono::high_resolution_clock::now()
-                    };
-                    context->OnTouchEvent(upPoint);
-                    break;
-                }
-                case static_cast<int>(AceAction::ACTION_LONG_CLICK): {
-                    CancelableCallback<void()> inspectorTimer;
-                    auto&& callback = [weak, point]() {
-                        auto refPtr = weak.Upgrade();
-                        if (refPtr) {
-                            TouchPoint upPoint {
-                                .x = point.x,
-                                .y = point.y,
-                                .type = TouchType::UP,
-                                .time = std::chrono::high_resolution_clock::now()
-                            };
-                            refPtr->OnTouchEvent(upPoint);
-                        }
-                    };
-                    inspectorTimer.Reset(callback);
-                    auto taskExecutor =
-                        SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-                    taskExecutor.PostDelayedTask(inspectorTimer, 1000);
-                    break;
-                }
-                default:
-                    break;
-            }
-        },
-        TaskExecutor::TaskType::UI);
-
-    return true;
 }
 
 const std::shared_ptr<OHOS::Rosen::RSUIDirector>& PipelineContext::GetRSUIDirector()

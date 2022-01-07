@@ -26,13 +26,11 @@
 
 namespace OHOS::Ace {
 
-using OnGridDragEnterFunc = std::function<void(const RefPtr<ItemDragInfo>& info)>;
-using OnGridDragMoveFunc =
-    std::function<void(const RefPtr<ItemDragInfo>& info, int32_t itemIndex, int32_t insertIndex)>;
-using OnGridDragLeaveFunc = std::function<void(const RefPtr<ItemDragInfo>& info, int32_t itemIndex)>;
-using OnGridDragStartFunc = std::function<RefPtr<Component>(const RefPtr<ItemDragInfo>& info, int32_t itemIndex)>;
-using OnGridDropFunc =
-    std::function<void(const RefPtr<ItemDragInfo>& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess)>;
+using OnGridDragEnterFunc = std::function<void(const ItemDragInfo&)>;
+using OnGridDragMoveFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t)>;
+using OnGridDragLeaveFunc = std::function<void(const ItemDragInfo&, int32_t)>;
+using OnGridDragStartFunc = std::function<RefPtr<Component>(const ItemDragInfo&, int32_t)>;
+using OnGridDropFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>;
 
 class ACE_EXPORT GridLayoutComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(GridLayoutComponent, ComponentGroup);
@@ -226,6 +224,16 @@ public:
         return cellLength_;
     }
 
+    void SetSupportAnimation(bool supportAnimation)
+    {
+        supportAnimation_ = supportAnimation;
+    }
+
+    bool GetSupportAnimation()
+    {
+        return supportAnimation_;
+    }
+
     void SetOnGridDragEnterId(const OnGridDragEnterFunc& onGridDragEnterId);
     void SetOnGridDragMoveId(const OnGridDragMoveFunc& onGridDragMoveId);
     void SetOnGridDragLeaveId(const OnGridDragLeaveFunc& onGridDragLeaveId);
@@ -246,6 +254,7 @@ private:
     int32_t rowCount_ = 1;
     bool isDeclarative_ = false;
     int32_t cacheCount_ = 1;
+    bool supportAnimation_ = false;
 
     std::string columnsArgs_;
     std::string rowsArgs_;

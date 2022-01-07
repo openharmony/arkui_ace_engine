@@ -960,7 +960,8 @@ void RosenRenderImage::UpdateLoadSuccessState()
     if ((!sourceInfo_.IsSvg() && currentFrameCount == 1) || (currentFrameCount > 1 && curSourceInfo_ != sourceInfo_)) {
         FireLoadEvent(imageSizeForEvent_);
     }
-    if (currentFrameCount > 1 && curSourceInfo_ != sourceInfo_) {
+    // alt_image has empty imageAlt_, then mark the parent needs render
+    if ((currentFrameCount > 1 && curSourceInfo_ != sourceInfo_) || imageAlt_.empty()) {
         auto parent = GetParent().Upgrade();
         if (parent) {
             parent->MarkNeedRender();

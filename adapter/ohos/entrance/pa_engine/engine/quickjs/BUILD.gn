@@ -71,6 +71,12 @@ template("js_pa_engine_qjs") {
       "qjs_pa_engine_loader.cpp",
     ]
 
+    if (target_cpu == "arm64") {
+      defines += [ "_ARM64_" ]
+    } else if (target_cpu == "arm") {
+      defines += [ "_ARM_" ]
+    }
+
     if (use_js_debug) {
       deps += [ "//third_party/quickjs:qjs_debugger" ]
       defines += [ "ENABLE_JS_DEBUG" ]

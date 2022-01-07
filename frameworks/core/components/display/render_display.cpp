@@ -118,7 +118,7 @@ void RenderDisplay::Dump()
 
 bool RenderDisplay::GetVisible() const
 {
-    return RenderNode::GetVisible() && visible_ == VisibleType::VISIBLE;
+    return RenderNode::GetVisible() && (visible_ == VisibleType::VISIBLE);
 }
 
 void RenderDisplay::OnOpacityDisappearingCallback()

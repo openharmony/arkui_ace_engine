@@ -35,6 +35,7 @@
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/frontend.h"
+#include "core/common/plugin_manager.h"
 
 namespace OHOS {
 namespace Ace {
@@ -215,7 +216,7 @@ void AceAbility::OnStart(const Want& want)
         container->SetResourceConfiguration(aceResCfg);
         container->SetPackagePathStr(resPath);
     }
-
+    PluginManager::GetInstance().SetAceAbility(this);
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(abilityId_);
     OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();

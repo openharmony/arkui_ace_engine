@@ -33,7 +33,7 @@ public:
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
 
-    std::string GetUri() const;
+    std::string GetSrc() const;
     std::string GetAlt() const;
     std::string GetObjectFit() const;
     std::string GetObjectRepeat() const;
@@ -41,6 +41,11 @@ public:
     std::string GetRenderMode() const;
     std::string GetSourceSize() const;
     std::string GetsyncMode() const;
+
+    std::string GetBorderStyle() const override;
+    std::string GetBorderWidth() const override;
+    std::string GetBorderColor() const override;
+    std::string GetBorderRadius() const override;
 
     AceType::IdType GetTargetTypeId() const override
     {

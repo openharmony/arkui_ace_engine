@@ -19,10 +19,10 @@
 #include <functional>
 #include <optional>
 
+#include "base/geometry/dimension_rect.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
-#include "base/geometry/dimension_rect.h"
 #include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -31,8 +31,12 @@
 #include "core/components/theme/theme_manager.h"
 #include "core/components/transform/transform_component.h"
 #include "core/pipeline/base/component.h"
+#include "frameworks/core/gestures/tap_gesture.h"
 
 namespace OHOS::Ace::Framework {
+
+constexpr int32_t DEFAULT_TAP_FINGERS = 1;
+constexpr int32_t DEFAULT_TAP_COUNTS = 1;
 
 enum class ResourceType : uint32_t {
     COLOR = 10001,
@@ -102,6 +106,8 @@ public:
     static void JsGridOffset(const JSCallbackInfo& info);
     static void JsUseSizeType(const JSCallbackInfo& Info);
     static void JsHoverEffect(const JSCallbackInfo& info);
+    static void JsOnDoubleClick(const JSCallbackInfo& info);
+    static void JsOnMouse(const JSCallbackInfo& info);
 
     // response region
     static void JsResponseRegion(const JSCallbackInfo& info);
@@ -118,8 +124,8 @@ public:
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
 
-    static bool ParseJsonDimension(const std::unique_ptr<JsonValue>& jsonValue, Dimension& result,
-        DimensionUnit defaultUnit);
+    static bool ParseJsonDimension(
+        const std::unique_ptr<JsonValue>& jsonValue, Dimension& result, DimensionUnit defaultUnit);
     static bool ParseJsonDimensionVp(const std::unique_ptr<JsonValue>& jsonValue, Dimension& result);
     static bool ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue, double& result);
     static bool ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue, Color& result);
@@ -176,6 +182,7 @@ public:
     static void JsMask(const JSCallbackInfo& info);
 
     static void JsKey(const std::string& text);
+    static void JsId(const std::string& id);
 
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
@@ -205,6 +212,8 @@ protected:
     /**
      * box properties setter
      */
+    static RefPtr<Gesture> GetTapGesture(
+        const JSCallbackInfo& info, int32_t countNum = DEFAULT_TAP_COUNTS, int32_t fingerNum = DEFAULT_TAP_FINGERS);
     static RefPtr<Decoration> GetFrontDecoration();
     static RefPtr<Decoration> GetBackDecoration();
     static const Border& GetBorder();

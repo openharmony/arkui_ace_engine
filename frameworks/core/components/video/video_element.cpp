@@ -64,6 +64,12 @@ const char* SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 constexpr int32_t WINDOW_HEIGHT_DEFAULT = 1;
 constexpr int32_t WINDOW_WIDTH_DEFAULT = 1;
+
+#ifdef ENABLE_ROSEN_BACKEND
+constexpr int32_t STATUS_BAR_HEIGHT = 110;
+constexpr int32_t VIDEO_DEFLATE_HEIGHT = 40;
+#endif
+
 #else
 constexpr float ILLEGAL_SPEED = 0.0f;
 #endif
@@ -104,6 +110,13 @@ VideoElement::~VideoElement()
         }
     }
     ReleasePlatformResource();
+
+#ifdef ENABLE_ROSEN_BACKEND
+    if (previewWindow_) {
+        previewWindow_->Hide();
+        previewWindow_->Destroy();
+    }
+#endif
 }
 
 void VideoElement::PerformBuild()
@@ -244,11 +257,13 @@ void VideoElement::CreateMediaPlayer()
     if (mediaPlayer_ != nullptr) {
         return;
     }
+#ifndef ENABLE_ROSEN_BACKEND
     subWindow_ = CreateSubwindow();
     if (subWindow_ == nullptr) {
         LOGE("Create subwindow failed");
         return;
     }
+#endif
 
     mediaPlayer_ = OHOS::Media::PlayerFactory::CreatePlayer();
     if (mediaPlayer_ == nullptr) {
@@ -280,7 +295,24 @@ void VideoElement::PreparePlayer()
         return;
     }
     RegistMediaPlayerEvent();
-    auto producerSurface = subWindow_->GetSurface();
+
+    sptr<Surface> producerSurface;
+#ifdef ENABLE_ROSEN_BACKEND
+    if (previewWindow_ == nullptr) {
+        sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
+        option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_LAUNCHING);
+        option->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+        previewWindow_ = Rosen::Window::Create("video_window", option);
+    }
+    if (previewWindow_ == nullptr || previewWindow_->GetSurfaceNode() == nullptr) {
+        return;
+    }
+    producerSurface = previewWindow_->GetSurfaceNode()->GetSurface();
+    previewWindow_->Show();
+#else
+    producerSurface = subWindow_->GetSurface();
+#endif
+
     if (producerSurface == nullptr) {
         LOGE("producerSurface is nullptr");
         return;
@@ -399,17 +431,60 @@ void VideoElement::Prepare(const WeakPtr<Element>& parent)
         }
     }
     isElementPrepared_ = true;
+
+#ifdef ENABLE_ROSEN_BACKEND
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->AddPageTransitionListener([weak = AceType::WeakClaim(this)](const TransitionEvent& event,
+                                           const WeakPtr<PageElement>& in, const WeakPtr<PageElement>& out) {
+        auto video = weak.Upgrade();
+        if (!video) {
+            return;
+        }
+        if (event == TransitionEvent::POP_START) {
+            if (video->previewWindow_) {
+                video->previewWindow_->Hide();
+                video->previewWindow_->Destroy();
+            }
+        }
+    });
+#endif
 }
 
 void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto context = context_.Upgrade();
+    if (context == nullptr) {
+        LOGE("context is nullptr");
+        return;
+    }
+    float viewScale = context->GetViewScale();
+
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!previewWindow_) {
+        return;
+    }
+    if (renderNode_) {
+        Offset offset = renderNode_->GetGlobalOffset();
+        previewWindow_->MoveTo(
+            (int32_t)(offset.GetX() * viewScale), (int32_t)((offset.GetY() + STATUS_BAR_HEIGHT) * viewScale));
+    }
+    int32_t height = textureHeight;
+    if (needControls_ && theme_) {
+        height -= theme_->GetBtnSize().Height();
+        height -= theme_->GetBtnEdge().Top().Value();
+        height -= theme_->GetBtnEdge().Bottom().Value();
+        height -= VIDEO_DEFLATE_HEIGHT;
+    }
+    previewWindow_->Resize(textureWidth * viewScale, height * viewScale);
+    if (!hidden_) {
+        previewWindow_->Show();
+    }
+#else
     if (subWindow_ != nullptr) {
-        auto context = context_.Upgrade();
-        if (context == nullptr) {
-            LOGE("context is nullptr");
-            return;
-        }
         int32_t height = textureHeight;
         if (needControls_) {
             height -= theme_->GetBtnSize().Height();
@@ -419,7 +494,6 @@ void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_
         if (height <= 0) {
             height = textureHeight;
         }
-        float viewScale = context->GetViewScale();
         subWindow_->Resize(textureWidth * viewScale, height * viewScale);
         LOGI("SetSubWindowSize width: %{public}f, height: %{public}f", textureWidth * viewScale, height * viewScale);
 
@@ -429,6 +503,8 @@ void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_
             LOGI("SubWindow move X: %{public}f, Y: %{public}f", offset.GetX() * viewScale, offset.GetY() * viewScale);
         }
     }
+#endif
+
 #else
     if (texture_) {
         texture_->OnSize(textureId, textureWidth, textureHeight);
@@ -449,6 +525,27 @@ void VideoElement::HiddenChange(bool hidden)
         pastPlayingStatus_ = false;
         Start();
     }
+
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!previewWindow_) {
+        return;
+    }
+    hidden_ = hidden;
+    if (hidden) {
+        if (isPlaying_) {
+            pastPlayingStatus_ = isPlaying_;
+            Pause();
+        }
+        previewWindow_->Hide();
+    } else {
+        if (pastPlayingStatus_) {
+            isPlaying_ = !pastPlayingStatus_;
+            pastPlayingStatus_ = false;
+            Start();
+        }
+        previewWindow_->Show();
+    }
+#endif
 }
 
 void VideoElement::PrepareMultiModalEvent()

@@ -111,4 +111,45 @@ std::string GridContainerComposedElement::GetMarginLeft() const
     return "-";
 }
 
+void GridContainerComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto boxElement = GetContentElement<BoxElement>(BoxElement::TypeId());
+    if (!boxElement) {
+        LOGE("get GetBoxElement failed");
+        return;
+    }
+    boxElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    boxElement->MarkDirty();
+    LOGD("gridContainer AddChildWithSlot");
+}
+
+void GridContainerComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto boxElement = GetContentElement<BoxElement>(BoxElement::TypeId());
+    if (!boxElement) {
+        LOGE("get GetBoxElement failed");
+        return;
+    }
+    auto child = boxElement->GetChildBySlot(slot);
+    if (!child) {
+        LOGE("boxElement get GetChildBySlot failed");
+        return;
+    }
+    boxElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    boxElement->MarkDirty();
+    LOGD("gridContainer UpdateChildWithSlot");
+}
+
+void GridContainerComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto boxElement = GetContentElement<BoxElement>(BoxElement::TypeId());
+    if (!boxElement) {
+        LOGE("get GetBoxElement failed");
+        return;
+    }
+    boxElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    boxElement->MarkDirty();
+    LOGD("gridContainer DeleteChildWithSlot");
+}
+
 } // namespace OHOS::Ace::V2

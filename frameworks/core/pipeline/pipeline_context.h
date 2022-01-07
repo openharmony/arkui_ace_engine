@@ -648,6 +648,16 @@ public:
         return isJsCard_;
     }
 
+    void SetIsJsPlugin(bool isJsPlugin)
+    {
+        isJsPlugin_ = isJsPlugin;
+    }
+
+    bool IsJsPlugin() const
+    {
+        return isJsPlugin_;
+    }
+
     void RefreshRootBgColor() const;
     void AddToHoverList(const RefPtr<RenderNode>& node);
 
@@ -711,8 +721,7 @@ public:
 
     bool CloseImplicitAnimation();
 
-    void AddKeyFrame(float fraction, const RefPtr<Curve>& curve,
-        const std::function<void()>& propertyCallback);
+    void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback);
 
     void AddKeyFrame(float fraction, const std::function<void()>& propertyCallback);
 
@@ -891,7 +900,7 @@ public:
     {
         surfaceChangedCallbackMap_.erase(callbackId);
     }
-    void StartSystemDrag(const std::string &str, const RefPtr<PixelMap>& pixmap);
+    void StartSystemDrag(const std::string& str, const RefPtr<PixelMap>& pixmap);
     void InitDragListener();
     bool ProcessDragEvent(int action, double windowX, double windowY, const std::string& data);
     void SetPreTargetRenderNode(const RefPtr<RenderNode>& preTargetRenderNode);
@@ -936,6 +945,19 @@ public:
         return isHoleValid_;
     }
 
+    void SetPluginOffset(const Offset& offset)
+    {
+        pluginOffset_ = offset;
+    }
+
+    Offset GetPluginOffset() const
+    {
+        return pluginOffset_;
+    }
+
+    void SetTouchPipeline(WeakPtr<PipelineContext> context);
+    void RemoveTouchPipeline(WeakPtr<PipelineContext> context);
+
     bool IsRebuildFinished() const
     {
         return isRebuildFinished_;
@@ -943,15 +965,20 @@ public:
 
     void SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector);
 
-    std::string GetInspectorNodeByKey(const std::string& key);
-
-    std::string GetInspectorTree();
-
-    bool SendEventByKey(const std::string& key, int action, const std::string& params);
-
     const std::shared_ptr<OHOS::Rosen::RSUIDirector>& GetRSUIDirector();
 
+    void SetOnVsyncProfiler(const std::function<void(const std::string&)> callback)
+    {
+        onVsyncProfiler_ = callback;
+    }
+
+    void ResetOnVsyncProfiler()
+    {
+        onVsyncProfiler_ = nullptr;
+    }
+
 private:
+    void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     void FlushPipelineWithoutAnimation();
     void FlushLayout();
     void FlushGeometryProperties();
@@ -973,7 +1000,6 @@ private:
     void FlushWindowBlur();
     void MakeThreadStuck(const std::vector<std::string>& params) const;
     void DumpFrontend() const;
-    void HandleMouseInputEvent(const MouseEvent& event);
     void ExitAnimation();
     void CreateGeometryTransition();
     void CorrectPosition();
@@ -1113,6 +1139,7 @@ private:
     bool isKeyEvent_ = false;
     bool needWindowBlurRegionRefresh_ = false;
     bool isJsCard_ = false;
+    bool isJsPlugin_ = false;
     bool useLiteStyle_ = false;
     bool isFirstLoaded_ = true;
     uint64_t flushAnimationTimestamp_ = 0;
@@ -1152,8 +1179,14 @@ private:
 
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
+
+    std::vector<WeakPtr<PipelineContext>> touchPluginPipelineContext_;
+    Offset pluginOffset_ { 0, 0 };
+
     bool isRebuildFinished_ = false;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
+
+    std::function<void(const std::string&)> onVsyncProfiler_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

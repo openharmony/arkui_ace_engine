@@ -486,29 +486,35 @@ void DOMNode::ResetDefaultStyles()
 
 void DOMNode::UpdatePseudoStyleByStatus(int32_t status, bool isBackendChange)
 {
-    // first:use status as the key, search the complete matched;
-    // second:if first do not matched any, calculate the max value of key & status, select the max value one.
     std::unordered_map<std::string, std::string> matchedStyleMap;
-    auto matchedStyle = pseudoClassStyleMap_.find(status);
-    if (matchedStyle != pseudoClassStyleMap_.end()) {
-        matchedStyleMap = matchedStyle->second;
-    } else {
-        uint32_t maxAndResult = 0;
-        uint32_t maxValueKey = pseudoClassStyleMap_.begin()->first;
-        // status & map key, select the max result one
-        for (const auto& pseudoClass : pseudoClassStyleMap_) {
-            uint32_t key = pseudoClass.first;
-            uint32_t andResult = key & status;
-            if (andResult > maxAndResult) {
-                maxAndResult = andResult;
-                maxValueKey = key;
+    do {
+        if (pseudoClassStyleMap_.empty()) {
+            break;
+        }
+        // first:use status as the key, search the complete matched;
+        // second:if first do not matched any, calculate the max value of key & status, select the max value one.
+        auto matchedStyle = pseudoClassStyleMap_.find(status);
+        if (matchedStyle != pseudoClassStyleMap_.end()) {
+            matchedStyleMap = matchedStyle->second;
+        } else {
+            uint32_t maxAndResult = 0;
+            uint32_t maxValueKey = pseudoClassStyleMap_.begin()->first;
+            // status & map key, select the max result one
+            for (const auto& pseudoClass : pseudoClassStyleMap_) {
+                uint32_t key = pseudoClass.first;
+                uint32_t andResult = key & status;
+                if (andResult > maxAndResult) {
+                    maxAndResult = andResult;
+                    maxValueKey = key;
+                }
+            }
+            // if matched style except none pseudo style
+            auto iter = pseudoClassStyleMap_.find(maxValueKey);
+            if (maxAndResult > 0 && iter != pseudoClassStyleMap_.end()) {
+                matchedStyleMap = iter->second;
             }
         }
-        // if matched style except none pseudo style
-        if (maxAndResult > 0) {
-            matchedStyleMap = pseudoClassStyleMap_.find(maxValueKey)->second;
-        }
-    }
+    } while (0);
 
     ResetDefaultStyles();
     ResetInitializedStyle();
@@ -1191,10 +1197,6 @@ void DOMNode::SetCustomAnimationStyleUpdate(bool enable)
 void DOMNode::CompositeComponents()
 {
     std::vector<RefPtr<SingleChild>> components;
-    // Only fixed position has position component
-    if (positionComponent_ && GetPosition() == PositionType::FIXED) {
-        components.emplace_back(positionComponent_);
-    }
     if (flexItemComponent_) {
         // Update flex item after PrepareSpecializedComponent to make sure sub class has finished prepare.
         UpdateFlexItemComponent();
@@ -1253,6 +1255,11 @@ void DOMNode::CompositeComponents()
         Component::MergeRSNode(mainComponent);
     } else {
         Component::MergeRSNode(components, mainComponent);
+    }
+    // Only fixed position has position component
+    if (positionComponent_ && GetPosition() == PositionType::FIXED) {
+        components.emplace(components.begin(), positionComponent_);
+        Component::MergeRSNode(positionComponent_);
     }
 
     // First, composite all common components.

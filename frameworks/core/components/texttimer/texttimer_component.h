@@ -55,7 +55,7 @@ public:
 
     RefPtr<TextTimerController> GetTextTimerController() const;
 
-    ACE_DEFINE_COMPONENT_EVENT(OnTimer, void(double, double));
+    ACE_DEFINE_COMPONENT_EVENT(OnTimer, void(uint64_t, uint64_t));
 
 private:
     RefPtr<TextComponent> textComponent_;

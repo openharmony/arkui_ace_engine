@@ -49,20 +49,6 @@ void RenderPositioned::Update(const RefPtr<Component>& component)
     if (updatePositionFunc_) {
         updatePositionFunc_(updatePosition);
     }
-
-    updatePositionFunction_ = positioned->GetUpdatePositionFunc();
-    auto func = [weak = AceType::WeakClaim(this)](const RefPtr<ItemDragInfo>& info) {
-        auto renderPosition = weak.Upgrade();
-        if (!renderPosition) {
-            return;
-        }
-        renderPosition->SetTop(Dimension(info->GetY()));
-        renderPosition->SetLeft(Dimension(info->GetX()));
-    };
-    if (updatePositionFunction_) {
-        updatePositionFunction_(func);
-    }
-
     MarkNeedLayout();
 }
 

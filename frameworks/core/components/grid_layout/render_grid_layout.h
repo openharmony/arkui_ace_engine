@@ -16,16 +16,24 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_GRID_LAYOUT_RENDER_GRID_LAYOUT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_GRID_LAYOUT_RENDER_GRID_LAYOUT_H
 
+#include <atomic>
 #include <functional>
 #include <map>
+#include <mutex>
 #include <vector>
 
+#include "core/animation/animation.h"
+#include "core/animation/animator.h"
+#include "core/animation/scroll_motion.h"
+#include "core/animation/spring_motion.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/grid_layout/grid_layout_component.h"
 #include "core/components/positioned/positioned_component.h"
 #include "core/components/stack/stack_element.h"
+#include "core/gestures/drag_recognizer.h"
 #include "core/gestures/gesture_info.h"
+#include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -35,9 +43,81 @@ constexpr int32_t DEFAULT_FINGERS = 1;
 constexpr int32_t DEFAULT_DURATION = 150;
 constexpr int32_t DEFAULT_DISTANCE = 0;
 
+constexpr int32_t DRAG_LEAVE = -1;
+constexpr int32_t DRAG_ENTER = 1;
+constexpr int32_t NONE = 0;
+constexpr double ITEM_ANIMATION_DURATION = 300.0;
+
+constexpr double GRID_SPRING_MASS = 1.0;
+constexpr double GRID_SPRING_STIFF = 228.0;
+constexpr double GRID_SPRING_DAMP = 30.0;
+constexpr double GRID_SPRING_DAMP_INC = 0;
+constexpr double GRID_SPRING_SLIDE_LIMIT = 20.0;
+
 }; // namespace
 
-using OnItemDragFunc = std::function<void(const RefPtr<ItemDragInfo>& info)>;
+enum class GridLayoutAnimationAct {
+    ANIMATION_NONE = 0,
+    ANIMATION_DRAG_MOVE,
+    ANIMATION_DRAG_DROP,
+    ANIMATION_RESTORE_SCENCE,
+};
+
+enum class GridSpringGravitationDirect {
+    SPRING_NONE = 0,
+    SPRING_TO_LEFT,
+    SPRING_TO_RIGHT,
+    SPRING_TO_UP,
+    SPRING_TO_DOWN,
+};
+
+enum class GridSlideDirect {
+    SLIDE_NODE = 0,
+    SLIDE_HORIZON,
+    SLIDE_VERTICAL,
+};
+
+enum class GridSlideStatus {
+    SLIDE_NONE = 0,
+    SLIDE_START,
+    SLIDE_SLIDING,
+    SLIDE_SPRING_START,
+};
+
+class GridItemIndexPosition {
+public:
+    GridItemIndexPosition(int32_t rowIndex, int32_t colIndex) : rowIndex_(rowIndex), colIndex_(colIndex) {}
+    ~GridItemIndexPosition() = default;
+    GridItemIndexPosition(const GridItemIndexPosition& r)
+    {
+        rowIndex_ = r.rowIndex_;
+        colIndex_ = r.colIndex_;
+    }
+    GridItemIndexPosition operator=(const GridItemIndexPosition& r)
+    {
+        if (this != &r) {
+            rowIndex_ = r.rowIndex_;
+            colIndex_ = r.colIndex_;
+        }
+        return *this;
+    }
+    bool operator==(const GridItemIndexPosition& data)
+    {
+        return (data.rowIndex_ == rowIndex_) && (data.colIndex_ == colIndex_);
+    }
+    bool operator!=(const GridItemIndexPosition& data)
+    {
+        return !(*this == data);
+    }
+
+    int32_t rowIndex_;
+    int32_t colIndex_;
+};
+
+using OnItemDragFunc = std::function<void(const Dimension&, const Dimension&)>;
+using OnAnimationCallJSFunc = std::function<void()>;
+using OnCallJSDropFunc = std::function<void()>;
+
 class RenderGridLayout : public RenderNode {
     DECLARE_ACE_TYPE(RenderGridLayout, RenderNode);
 
@@ -158,9 +238,6 @@ protected:
 
     std::vector<double> ParseAutoFill(const std::vector<std::string>& strs, double size, double gap);
 
-    template<typename T>
-    RefPtr<T> FindTargetRenderNode(const RefPtr<PipelineContext> context, const GestureEvent& info);
-
     void SetPreTargetRenderGrid(const RefPtr<RenderGridLayout>& preTargetRenderGrid)
     {
         preTargetRenderGrid_ = preTargetRenderGrid;
@@ -191,35 +268,44 @@ protected:
         return lastLongPressPoint_;
     }
 
-    void ClearDragInfo();
+    void ClearPartDragInfo();
+    void ClearAllDragInfo();
     void CalIsVertical();
     void RegisterLongPressedForItems();
     void CreateDragDropRecognizer();
-    void ActionStart(const RefPtr<ItemDragInfo>& info, RefPtr<Component> customComponent);
+    void ActionStart(const ItemDragInfo& info, RefPtr<Component> customComponent);
     void PanOnActionUpdate(const GestureEvent& info);
     void PanOnActionEnd(const GestureEvent& info);
-    void OnDragEnter(const RefPtr<ItemDragInfo>& info);
-    void OnDragLeave(const RefPtr<ItemDragInfo>& info);
-    void OnDragMove(const RefPtr<ItemDragInfo>& info);
-    bool OnDrop(const RefPtr<ItemDragInfo>& info);
-    void ImpDragStart(const RefPtr<ItemDragInfo>& info);
-    bool ImpDropInGrid(const RefPtr<ItemDragInfo>& info);
+    void OnDragEnter(const ItemDragInfo& info);
+    void OnDragLeave(const ItemDragInfo& info);
+    void OnDragMove(const ItemDragInfo& info);
+    bool OnDrop(const ItemDragInfo& info);
+    void ImpDragStart(const ItemDragInfo& info);
+    bool ImpDropInGrid(const ItemDragInfo& info);
 
-    void OnCallSubDragEnter(const RefPtr<ItemDragInfo>& info);
-    void OnCallSubDragLeave(const RefPtr<ItemDragInfo>& info);
+    void ImpDragMove(const ItemDragInfo& info);
+    void ImpDragLeaveMainGrid(const ItemDragInfo& info);
+    void ImpDragLeaveSubGrid(const ItemDragInfo& info);
+    void ImpDragEnterMainGrid(const ItemDragInfo& info);
+    void ImpDragEnterSubGrid(const ItemDragInfo& info);
+    void ImpDragEnterMainGridUpdate();
+    void OnCallSubDragEnter(const ItemDragInfo& info);
+    void OnCallSubDragLeave(const ItemDragInfo& info);
 
     // Check whether the item is currently allowed to be inserted
     bool CouldBeInserted();
     bool NeedBeLarger();
     bool NeedBeSmaller();
     void BackGridMatrix();
-    void RestoreScene();
+    void RestoreScene(const ItemDragInfo& info);
 
     int32_t CountItemInGrid();
-    // dragLeave -1;dragEnter 1; none 0;
-    void InitialDynamicGridProp(int32_t dragLeaveOrEnter = 0);
+    int32_t CountItemInRow(const std::map<int32_t, std::map<int32_t, int32_t>>::iterator& rowGrid);
+    void ResetItemPosition();
+    void InitialDynamicGridProp(int32_t dragLeaveOrEnter = NONE);
     void PerformLayoutForEditGrid();
-    bool CalDragCell(const RefPtr<ItemDragInfo>& info);
+    void PerformLayoutForStaticGrid();
+    bool CalDragCell(const ItemDragInfo& info);
     bool CalDragRowIndex(double dragRelativelyY, int32_t& dragRowIndex);
     bool CalDragColumIndex(double dragRelativelyX, int32_t& dragColIndex);
     void MoveItems();
@@ -238,7 +324,7 @@ protected:
     void MoveWhenWithInsertCellButWithItemInDragCellDragAfterInsert();
 
     void FakeRemoveDragItem();
-
+    void FakeRemoveDragItemUpdate();
     // it should be cells which has item in
     bool MoveItemsForward(int32_t fromRow, int32_t fromColum, int32_t toRow, int32_t toColum);
 
@@ -258,6 +344,64 @@ protected:
     void CalculateVerticalSize(std::vector<double>& cols, std::vector<double>& rows, int32_t dragLeaveOrEnter);
     void CalculateHorizontalSize(std::vector<double>& cols, std::vector<double>& rows, int32_t dragLeaveOrEnter);
     void UpdateCollectionInfo(std::vector<double> cols, std::vector<double> rows);
+    void ClearSpringSlideData();
+    void CreateSlideRecognizer();
+    void HandleSlideStart(const TouchEventInfo& info);
+    void HandleSlideUpdate(const TouchEventInfo& info);
+    void HandleSlideEnd(const TouchEventInfo& info);
+    bool CheckLongPress();
+    bool MayStartToSlide(const TouchEventInfo& info);
+    void UpdateSlideStatus(GridSlideStatus status);
+    GridSlideStatus GetSlideStatus();
+    Point GetPointFromTouchInfo(const TouchEventInfo& info);
+    void MoveRelativeDistance(double& dx, double& dy);
+    void CreateSpringController();
+    Point GetSpringStartPoint();
+    Point GetSpringEndPoint();
+    void StartSpringAnimation(const Point& startPoint, const Point& endPoint);
+    void FinishedSpringAnimation();
+    void UpdateSprintAnimationPosition(double offset);
+    void BackupSpringItemsData();
+    void GetMotionPosition(const Point& startPoint, const Point& endPoint, double& start, double& end);
+    void CalcSlideDirect(const Point& curPos);
+    void CalcSpringGravitationDirect();
+
+    void TriggerMoveEventForJS(const ItemDragInfo& info);
+    void TriggerDropEventForJS(const ItemDragInfo& info, int32_t insertIndex, bool successed);
+    void InitAnimationController(const WeakPtr<PipelineContext>& context);
+    bool AddNodeAnimationToController(int32_t itemIndex, int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan);
+    void AddNodeAnimationToControllerForDrop(
+        const RefPtr<RenderNode>& item, const Point& startPoint, const Point& endPoint);
+    bool AddFlexAnimationToController(const ItemDragInfo& info);
+    void PrepareAnimationController(const std::string& key);
+    void StartAnimationController(GridLayoutAnimationAct animationAct, const OnAnimationCallJSFunc& func);
+    void StopAnimationController();
+    Point CalcChildPosition(
+        const RefPtr<RenderNode>& child, int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan);
+    Point CalcDragChildStartPosition(const ItemDragInfo& info);
+    Point CalcDragChildEndPosition(int32_t rowIndex, int32_t colIndex);
+    void FinishedAnimationController(const std::string& key);
+    void RegisterAnimationFinishedFunc(const std::string& key, std::function<void()> func);
+    void CalcRestoreScenePosition(const ItemDragInfo& info);
+    void ParseRestoreScenePosition(
+        const std::map<int32_t, std::map<int32_t, int32_t>>& data, std::map<int32_t, GridItemIndexPosition>& info);
+    int32_t GetDragPosRowIndex()
+    {
+        return dragPosRowIndex_;
+    }
+    int32_t GetDragPosColumnIndex()
+    {
+        return dragPosColumnIndex_;
+    }
+    void StartFlexController(const Point& endPoint, bool includeSubGrid = false);
+    void FinishedFlexController();
+    void FinishedFlexControllerForSubGrid();
+    void CloseFlexComponent();
+    void UpdateFlexComponenPosition(const Point& pos);
+    void RegisterDropJSEvent(const ItemDragInfo& info, int32_t insertIndex, bool successed);
+    void RegisterDropJSFunc(const OnCallJSDropFunc& func);
+    void CallDropJSFunc();
+    bool CheckAnimation();
 
     bool isVertical_ = false;
     bool updateFlag_ = false;
@@ -357,6 +501,7 @@ protected:
 
     WeakPtr<RenderNode> dragingItemRenderNode_;
     WeakPtr<RenderGridLayout> subGrid_;
+    WeakPtr<RenderGridLayout> mainGrid_;
     RefPtr<GridLayoutComponent> component_;
 
     OnGridDragEnterFunc OnGridDragEnterFunc_;
@@ -368,6 +513,37 @@ protected:
     OnItemDragFunc updatePosition_;
     Point lastGlobalPoint_;
     Point lastLongPressPoint_;
+    Point startGlobalPoint_;
+    bool isExistComponent_ = false;
+
+    GridLayoutAnimationAct animationAct_;
+    RefPtr<Animator> animationController_;
+    RefPtr<Animator> flexController_;
+    bool supportAnimation_ = true;
+    bool needRunAnimation_ = false;
+    std::map<std::string, std::function<void()>> animationFinishedFuncList_;
+    std::mutex animationLock_;
+    OnAnimationCallJSFunc jsMoveFunc_ = nullptr;
+    OnAnimationCallJSFunc jsDropFunc_ = nullptr;
+    OnAnimationCallJSFunc restoreScenceFunc_ = nullptr;
+    std::map<int32_t, Point> gridItemPosition_;
+    std::list<RefPtr<RenderNode>> animationItemList_;
+    std::atomic<bool> runFlexAnimation_;
+    std::atomic<bool> triggerJSDrop_;
+    std::vector<OnCallJSDropFunc> dropJSFuncList_;
+    std::mutex dropJSFuncListLock_;
+
+    RefPtr<RawRecognizer> slideRecognizer_;
+    GridSpringGravitationDirect gravitationDirect_ = GridSpringGravitationDirect::SPRING_NONE;
+    GridSlideDirect slideDirect_ = GridSlideDirect::SLIDE_NODE;
+    std::atomic<GridSlideStatus> slideStatus_;
+    Point slideStartPoint_;
+    Point slidePriPoint_;
+    Point slideCurPoint_;
+    Point slideDistance_;
+    RefPtr<Animator> springController_;
+    RefPtr<SpringMotion> springMotion_;
+    std::vector<Offset> springStartPosition_;
 };
 
 } // namespace OHOS::Ace

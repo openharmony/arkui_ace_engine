@@ -96,6 +96,11 @@ public:
         return startIndex_;
     }
 
+    double GetIndex() const
+    {
+        return initialIndex_;
+    }
+
     bool GetDirection() const
     {
         return vertical_;
@@ -267,6 +272,7 @@ protected:
     static constexpr size_t INITIAL_CHILD_INDEX = INVALID_CHILD_INDEX - 1;
 
     size_t startIndex_ = INITIAL_CHILD_INDEX;
+    size_t initialIndex_ = INITIAL_CHILD_INDEX;
     std::list<RefPtr<RenderListItem>> items_;
 
     double spaceWidth_ = 0.0;
@@ -333,7 +339,6 @@ private:
 
     void CreateDragDropRecognizer();
     RefPtr<RenderListItem> FindCurrentListItem(const Point& point);
-    RefPtr<RenderList> FindTargetRenderList(const RefPtr<PipelineContext> context, const GestureEvent& info);
 
     RefPtr<GestureRecognizer> dragDropGesture_;
     RefPtr<RenderList> preTargetRenderList_;

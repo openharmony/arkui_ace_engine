@@ -22,7 +22,6 @@
 
 namespace OHOS::Ace {
 
-using UpdatePositionFunction = std::function<void(const std::function<void(const RefPtr<ItemDragInfo>& info)>&)>;
 class PositionedComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(PositionedComponent, SoleChildComponent);
 
@@ -177,16 +176,6 @@ public:
         updatePositionFunc_ = updatePositionFunc;
     }
 
-    const UpdatePositionFunction& GetUpdatePositionFunc() const
-    {
-        return updatePositionFuncId_;
-    }
-
-    void SetUpdatePositionFunc(const UpdatePositionFunction& updatePositionFuncId)
-    {
-        updatePositionFuncId_ = updatePositionFuncId;
-    }
-
 private:
     Dimension bottom_;
     Dimension left_;
@@ -204,7 +193,6 @@ private:
     bool isAutoFocus_ = false;
 
     UpdatePositionFunc updatePositionFunc_;
-    UpdatePositionFunction updatePositionFuncId_;
 };
 
 } // namespace OHOS::Ace

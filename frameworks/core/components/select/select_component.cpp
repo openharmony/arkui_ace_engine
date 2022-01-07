@@ -16,6 +16,7 @@
 #include "core/components/select/select_component.h"
 
 #include "base/utils/string_utils.h"
+#include "core/common/container.h"
 #include "core/components/clip/clip_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/list/list_component.h"
@@ -80,21 +81,38 @@ bool SelectComponent::Initialize()
     space->SetPadding(spaceEdge);
     space->SetChild(icon);
 
-    TextStyle textStyle = tipText_->GetTextStyle();
+    auto container = Container::Current();
+    if (!container) {
+        return false;
+    }
+    auto context = container->GetPipelineContext();
+    if (!context) {
+        return false;
+    }
+    TextStyle textStyle;
+    if (context->GetIsDeclarative()) {
+        textStyle = GetSelectStyle();
+        if (disabled_) {
+            textStyle.SetTextColor(theme_->GetDisabledColor());
+        }
+    } else {
+        textStyle = tipText_->GetTextStyle();
+        textStyle.SetFontSize(theme_->GetFontSize());
+        textStyle.SetFontWeight(theme_->GetFontWeight());
+        if (disabled_) {
+            textStyle.SetTextColor(theme_->GetDisabledColor());
+        } else {
+            textStyle.SetTextColor(theme_->GetFontColor());
+        }
+        std::vector<std::string> fontFamilies;
+        StringUtils::StringSpliter(theme_->GetFontFamily(), ',', fontFamilies);
+        if (!fontFamilies.empty()) {
+            textStyle.SetFontFamilies(fontFamilies);
+        }
+    }
+
     textStyle.SetAllowScale(theme_->IsAllowScale());
     textStyle.SetTextDecoration(theme_->GetTextDecoration());
-    textStyle.SetFontSize(theme_->GetFontSize());
-    textStyle.SetFontWeight(theme_->GetFontWeight());
-    if (disabled_) {
-        textStyle.SetTextColor(theme_->GetDisabledColor());
-    } else {
-        textStyle.SetTextColor(theme_->GetFontColor());
-    }
-    std::vector<std::string> fontFamilies;
-    StringUtils::StringSpliter(theme_->GetFontFamily(), ',', fontFamilies);
-    if (!fontFamilies.empty()) {
-        textStyle.SetFontFamilies(fontFamilies);
-    }
     textStyle.SetMaxLines(SELECT_ITSELF_TEXT_LINES);
     textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
     tipText_->SetTextStyle(textStyle);
@@ -128,7 +146,6 @@ bool SelectComponent::Initialize()
     boxComponent_ = box;
     boxComponent_->SetMouseAnimationType(HoverAnimationType::OPACITY);
     SetChild(box);
-
     return true;
 }
 

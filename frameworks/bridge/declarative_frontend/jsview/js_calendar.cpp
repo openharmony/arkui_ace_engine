@@ -85,6 +85,14 @@ void JSCalendar::SetCalendarData(
         LOGE("component is not valid");
         return;
     }
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    if (obj->IsUndefined()) {
+        LOGE("obj is undefined");
+        return;
+    }
+#endif
+
     auto yearValue = obj->GetProperty("year");
     auto monthValue = obj->GetProperty("month");
     auto arrayValue = obj->GetProperty("data");

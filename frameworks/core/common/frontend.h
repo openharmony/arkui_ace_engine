@@ -43,7 +43,7 @@ struct WindowConfig {
     double designWidthScale = 0.0;
 };
 
-enum class FrontendType { JSON, JS, JS_CARD, DECLARATIVE_JS };
+enum class FrontendType { JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN };
 
 class ACE_EXPORT Frontend : public AceType {
     DECLARE_ACE_TYPE(Frontend, AceType);
@@ -179,6 +179,9 @@ public:
     virtual void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) {};
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {};
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    virtual void RunNativeEngineLoop() {};
+#endif
 
     // Disallow pop last page
     void DisallowPopLastPage()

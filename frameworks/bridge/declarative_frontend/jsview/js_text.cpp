@@ -439,6 +439,9 @@ void JSText::Create(const JSCallbackInfo& info)
     textStyle.SetAllowScale(false);
     textStyle.SetFontSize(DEFAULT_FONT_SZIE);
     textComponent->SetTextStyle(std::move(textStyle));
+
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    boxComponent->SetMouseAnimationType(HoverAnimationType::BOARD);
 }
 
 RefPtr<TextComponentV2> JSText::GetComponent()

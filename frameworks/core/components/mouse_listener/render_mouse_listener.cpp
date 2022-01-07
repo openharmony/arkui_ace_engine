@@ -45,13 +45,11 @@ void RenderMouseListener::OnMouseTestHit(const Offset& coordinateOffset, MouseTe
     result.emplace_back(recognizer_);
 }
 
-bool RenderMouseListener::HandleMouseHoverEvent(MouseState mouseState)
+void RenderMouseListener::HandleMouseHoverEvent(MouseState mouseState)
 {
     if (recognizer_) {
         recognizer_->HandleHoverEvent(mouseState);
-        return true;
     }
-    return false;
 }
 
 } // namespace OHOS::Ace

@@ -32,6 +32,12 @@
 #include "window_manager.h"
 #endif
 
+#ifdef ENABLE_ROSEN_BACKEND
+#include "foundation/windowmanager/interfaces/innerkits/wm/window.h"
+#include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
+#endif
+
 namespace OHOS::Ace {
 
 constexpr double VIDEO_CHILD_COMMON_FLEX_GROW = 1.0;
@@ -189,6 +195,11 @@ private:
     std::shared_ptr<OHOS::Media::Player> mediaPlayer_ = nullptr;
     ::OHOS::sptr<::OHOS::Subwindow> subWindow_ = nullptr;
     std::shared_ptr<MediaPlayerCallback> mediaPlayerCallback_ = nullptr;
+#endif
+
+#ifdef ENABLE_ROSEN_BACKEND
+    bool hidden_ = false;
+    sptr<Rosen::Window> previewWindow_;
 #endif
 };
 

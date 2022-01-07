@@ -100,6 +100,10 @@ void SelectElement::PerformBuild()
         onChangeCallback_ = AceAsyncEvent<void(const std::string&)>::Create(component->GetOnChanged(), context_);
     }
 
+    if (component->GetOnSelected()) {
+        onSelected_ = *component->GetOnSelected();
+    }
+
     dataComponent_ = component;
 
     auto focusNode = AceType::DynamicCast<FocusNode>(this);
@@ -249,6 +253,10 @@ void SelectElement::HandleOptionClickedEvent(std::size_t index)
     if (onChangeCallback_) {
         std::string param = std::string("\"change\",{\"newValue\":\"").append(option->GetValue().append("\"},null"));
         onChangeCallback_(param);
+    }
+
+    if (onSelected_) {
+        onSelected_(index);
     }
 }
 

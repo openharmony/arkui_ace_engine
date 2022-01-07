@@ -22,7 +22,8 @@ namespace OHOS::Ace {
 
 class Element;
 
-class TextFieldController : public AceType {
+class ACE_EXPORT TextFieldController : public AceType {
+    DECLARE_ACE_TYPE(TextFieldController, AceType);
 public:
     void SetHandler(WeakPtr<Element> element)
     {
@@ -34,8 +35,16 @@ public:
     void ShowError(const std::string& errorText);
     void Delete();
 
+    void CaretPosition(int32_t caretPosition);
+
+    void SetCaretPosition(std::function<void(const int32_t)> setCaretPosition)
+    {
+        setCaretPosition_ = setCaretPosition;
+    }
+
 private:
     WeakPtr<Element> element_;
+    std::function<void(const int32_t)> setCaretPosition_;
 };
 
 } // namespace OHOS::Ace

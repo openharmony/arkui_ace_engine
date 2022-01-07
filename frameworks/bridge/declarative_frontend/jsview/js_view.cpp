@@ -102,6 +102,14 @@ ViewFunctions::ViewFunctions(JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFun
         LOGD("onBackPress is not a function");
     }
 
+    JSRef<JSVal> jsUpdateWithValueParamsFunc = jsObject->GetProperty("updateWithValueParams");
+    if (jsUpdateWithValueParamsFunc->IsFunction()) {
+        LOGD("updateWithValueParams is a function");
+        jsUpdateWithValueParamsFunc_ = JSRef<JSFunc>::Cast(jsUpdateWithValueParamsFunc);
+    } else {
+        LOGD("updateWithValueParams is not a function");
+    }
+
     jsRenderFunc_ = jsRenderFunction;
 }
 
@@ -175,6 +183,11 @@ void ViewFunctions::ExecuteHide()
     ExecuteFunction(jsOnHideFunc_, "onPageHide");
 }
 
+void ViewFunctions::ExecuteUpdateWithValueParams(const std::string& jsonData)
+{
+    ExecuteFunctionWithParams(jsUpdateWithValueParamsFunc_, "updateWithValueParams", jsonData);
+}
+
 bool ViewFunctions::ExecuteOnBackPress()
 {
     auto ret = ExecuteFunctionWithReturn(jsBackPressFunc_, "onBackPress");
@@ -191,7 +204,7 @@ void ViewFunctions::ExecuteFunction(JSWeak<JSFunc>& func, const char* debugInfo)
         LOGD("View doesn't have %{public}s() method!", debugInfo);
         return;
     }
-
+    ACE_SCOPED_TRACE("%s", debugInfo);
     JSRef<JSVal> jsObject = jsObject_.Lock();
     func.Lock()->Call(jsObject);
 }
@@ -203,13 +216,31 @@ JSRef<JSVal> ViewFunctions::ExecuteFunctionWithReturn(JSWeak<JSFunc>& func, cons
         LOGD("View doesn't have %{public}s() method!", debugInfo);
         return JSRef<JSVal>::Make();
     }
-
+    ACE_SCOPED_TRACE("%s", debugInfo);
     JSRef<JSVal> jsObject = jsObject_.Lock();
     JSRef<JSVal> result = func.Lock()->Call(jsObject);
     if (result.IsEmpty()) {
         LOGE("Error calling %{public}s", debugInfo);
     }
     return result;
+}
+
+void ViewFunctions::ExecuteFunctionWithParams(JSWeak<JSFunc>& func, const char* debugInfo, const std::string& jsonData)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    if (func.IsEmpty()) {
+        LOGD("View doesn't have %{public}s() method!", debugInfo);
+        return;
+    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSVal> param = obj->ToJsonObject(jsonData.c_str());
+
+    JSRef<JSVal> jsObject = jsObject_.Lock();
+    JSRef<JSVal> result = func.Lock()->Call(jsObject, 1, &param);
+    if (result.IsEmpty()) {
+        LOGE("Error calling %{public}s", debugInfo);
+    }
 }
 
 void ViewFunctions::Destroy(JSView* parentCustomView)
