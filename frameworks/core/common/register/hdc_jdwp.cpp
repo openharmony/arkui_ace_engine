@@ -43,6 +43,8 @@ HdcJdwpSimulator::~HdcJdwpSimulator()
 void HdcJdwpSimulator::FinishWriteCallback(uv_write_t *req, int status)
 {
     LOGI("FinishWriteCallback:%{public}d error:%{public}s", status, uv_err_name(status));
+    delete[]((uint8_t *)req->data);
+    delete req;
 }
 
 RetErrCode HdcJdwpSimulator::SendToStream(uv_stream_t *handleStream, const uint8_t *buf,
@@ -87,12 +89,8 @@ RetErrCode HdcJdwpSimulator::SendToStream(uv_stream_t *handleStream, const uint8
         LOGI("SendToStream buf:%{public}s", pDynBuf);
         uv_write(reqWrite, handleStream, &bfr, 1, (uv_write_cb)finishCallback);
         ret = RetErrCode::SUCCESS;
-        delete reqWrite;
-        reqWrite = nullptr;
         break;
     }
-    delete[] pDynBuf;
-    pDynBuf = nullptr;
     return ret;
 }
 
