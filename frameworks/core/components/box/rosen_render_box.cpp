@@ -90,7 +90,6 @@ RosenRenderBox::RosenRenderBox()
 void RosenRenderBox::Update(const RefPtr<Component>& component)
 {
     RenderBox::Update(component);
-    SyncDecorationToRSNode();
 
     // use render image to render background image
     if (backDecoration_) {
@@ -967,7 +966,6 @@ void RosenRenderBox::SyncDecorationToRSNode()
         }
         // background color
         backgroundColor = backDecoration_->GetBackgroundColor().GetValue();
-        UpdateBackgroundImage(backDecoration_->GetImage());
         // shadow
         if (!backDecoration_->GetShadows().empty()) {
             shadowRadius = backDecoration_->GetShadows().front().GetBlurRadius();
@@ -1018,7 +1016,6 @@ void RosenRenderBox::OnAttachContext()
     }
     backDecoration_->SetContextAndCallback(context_, [weak = WeakClaim(this)] {
         if (auto renderBox = weak.Upgrade()) {
-            renderBox->SyncDecorationToRSNode();
             renderBox->OnAnimationCallback();
         }
     });
@@ -1028,7 +1025,6 @@ void RosenRenderBox::OnAttachContext()
     frontDecoration_->SetContextAndCallback(context_, [weak = WeakClaim(this)] {
         auto renderBox = weak.Upgrade();
         if (renderBox) {
-            renderBox->SyncDecorationToRSNode();
             renderBox->OnAnimationCallback();
         }
     });
