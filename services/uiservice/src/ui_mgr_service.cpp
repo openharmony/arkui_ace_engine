@@ -195,7 +195,7 @@ int UIMgrService::HandleRegister(const AAFwk::Want& want, const sptr<IUIService>
         callbackMap_.erase(keyStr);
     }
     callbackMap_.emplace(keyStr, uiService);
-    HILOG_INFO("UIMgrService::HandleRegister called end callbackMap_.size() %{public}d", callbackMap_.size());
+    HILOG_INFO("UIMgrService::HandleRegister called end callbackMap_.size() %{public}zu", callbackMap_.size());
     return NO_ERROR;
 }
 
