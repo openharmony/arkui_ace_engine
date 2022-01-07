@@ -27,7 +27,6 @@ public:
     explicit HdcJdwpSimulator(uv_loop_t *loopIn, string pkgName);
     ~HdcJdwpSimulator();
     bool Connect();
-    static uint8_t *pDynBuf;
     uv_loop_t *loop_;
 
 protected:
