@@ -65,13 +65,13 @@ void RosenRenderDisplay::OnRSTransition(TransitionType type, unsigned long long 
     if (type == TransitionType::APPEARING) {
         if (pendingTransitionAppearing_ && hasAppearTransition_) {
             pendingTransitionAppearing_ = false;
-            Rosen::RSPropertyNode::NotifyTransition(
+            Rosen::RSNode::NotifyTransition(
                 { Rosen::RSTransitionEffect(Rosen::RSTransitionEffectType::FADE_IN) }, rsNodeId);
         } else {
             pendingTransitionAppearing_ = true;
         }
     } else if (type == TransitionType::DISAPPEARING && hasDisappearTransition_) {
-        Rosen::RSPropertyNode::NotifyTransition(
+        Rosen::RSNode::NotifyTransition(
             { Rosen::RSTransitionEffect(Rosen::RSTransitionEffectType::FADE_OUT) }, rsNodeId);
     }
 }
