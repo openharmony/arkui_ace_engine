@@ -36,6 +36,35 @@ public:
     void PerformLayout() override;
     void OnPaintFinish() override;
 
+#ifdef OHOS_STANDARD_SYSTEM
+    using XComponentHiddenChangeEvent = std::function<void(bool)>;
+
+    void SetHidden(bool hidden, bool inRecursion) override;
+
+    void OnAppShow() override
+    {
+        LOGI("RenderXComponent: window OnAppShow.");
+        RenderNode::OnAppShow();
+        if (xcomponentHiddenChangeEvent_) {
+            xcomponentHiddenChangeEvent_(false);
+        }
+    }
+
+    void OnAppHide() override
+    {
+        LOGI("RenderXComponent: window OnAppHidden.");
+        RenderNode::OnAppHide();
+        if (xcomponentHiddenChangeEvent_) {
+            xcomponentHiddenChangeEvent_(true);
+        }
+    }
+
+    void SetXComponentHiddenChange(XComponentHiddenChangeEvent &&xcomponentHiddenChangeEvent)
+    {
+        xcomponentHiddenChangeEvent_ = std::move(xcomponentHiddenChangeEvent);
+    }
+#endif
+
     void PushTask(const TaskFunction& func);
 
     void SetDelegate(const RefPtr<XComponentDelegate>& delegate)
@@ -69,6 +98,9 @@ protected:
     NativeXComponent* nativeXComponent_ = nullptr;
     WeakPtr<NativeXComponentImpl> nativeXComponentImpl_;
     XComponentSizeChangeEvent xcomponentSizeChangeEvent_;
+#ifdef OHOS_STANDARD_SYSTEM
+    XComponentHiddenChangeEvent xcomponentHiddenChangeEvent_;
+#endif
 
     Offset position_;
     Size drawSize_;

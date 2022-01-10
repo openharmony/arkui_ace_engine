@@ -74,6 +74,44 @@ private:
     WeakPtr<RenderXComponent> renderNode_;
 };
 
+class XComponentController : public virtual AceType {
+    DECLARE_ACE_TYPE(XComponentController, AceType);
+
+public:
+    uint64_t GetSurfaceId()
+    {
+        return surfaceId_;
+    }
+
+public:
+    void AddXComponentController(const RefPtr<XComponentController>& xcomponentController)
+    {
+        auto it = std::find(controllers_.begin(), controllers_.end(), xcomponentController);
+        if (it != controllers_.end()) {
+            LOGW("Controller is already existed");
+            return;
+        }
+        controllers_.emplace_back(xcomponentController);
+    }
+
+    uint64_t surfaceId_ = 0;
+
+    void RemoveXComponentController(const RefPtr<XComponentController>& xcomponentController)
+    {
+        if (xcomponentController) {
+            controllers_.remove(xcomponentController);
+        }
+    }
+
+    void Clear()
+    {
+        controllers_.clear();
+    }
+
+private:
+    std::list<RefPtr<XComponentController>> controllers_;
+};
+
 // A component can show different native view.
 class ACE_EXPORT XComponentComponent : public RenderComponent {
     DECLARE_ACE_TYPE(XComponentComponent, RenderComponent);
@@ -204,6 +242,16 @@ public:
         texture_ = texture;
     }
 
+    RefPtr<XComponentController> GetXComponentController() const
+    {
+        return xcomponentController_;
+    }
+
+    void SetXComponentController(const RefPtr<XComponentController>& xcomponentController)
+    {
+        xcomponentController_ = xcomponentController;
+    }
+
 private:
     RefPtr<XComponentDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -211,6 +259,7 @@ private:
     ErrorCallback errorCallback_ = nullptr;
     RefPtr<XComponentDelegate> delegate_;
     RefPtr<XComponentTaskPool> pool_;
+    RefPtr<XComponentController> xcomponentController_;
     std::string type_;
     int64_t textureId_ = -1;
     int32_t nodeId_ = -1;

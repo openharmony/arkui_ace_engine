@@ -134,4 +134,43 @@ void JsiXComponentBridge::HandleContext(const shared_ptr<JsRuntime>& runtime, No
     hasPluginLoaded_ = true;
     return;
 }
+
+#ifdef OHOS_STANDARD_SYSTEM
+shared_ptr<JsValue> JsiXComponentBridge::JsGetXComponentSurfaceId(const shared_ptr<JsRuntime>& runtime, NodeId nodeId)
+{
+    if (!runtime) {
+        LOGE("JsGetXComponentSurfaceId failed. runtime is null.");
+        return nullptr;
+    }
+    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (!engine) {
+        LOGE("JsGetXComponentSurfaceId failed. engine is null.");
+        return runtime->NewUndefined();
+    }
+    auto page = engine->GetRunningPage();
+    if (!page) {
+        LOGE("JsGetXComponentSurfaceId failed. page is null.");
+        return runtime->NewUndefined();
+    }
+    uint64_t surfaceId = 0;
+    auto task = [nodeId, page, &surfaceId]() {
+        auto domDoc = page->GetDomDocument();
+        if (!domDoc) {
+            return;
+        }
+        auto domXComponent = AceType::DynamicCast<DOMXComponent>(domDoc->GetDOMNodeById(nodeId));
+        if (!domXComponent) {
+            return;
+        }
+        surfaceId = domXComponent->GetSurfaceId();
+    };
+    auto delegate = engine->GetFrontendDelegate();
+    if (!delegate) {
+        LOGE("JsGetXComponentSurfaceId failed. delegate is null.");
+        return runtime->NewUndefined();
+    }
+    delegate->PostSyncTaskToPage(task);
+    return runtime->NewString(std::to_string(surfaceId));
+}
+#endif
 } // namespace OHOS::Ace::Framework
