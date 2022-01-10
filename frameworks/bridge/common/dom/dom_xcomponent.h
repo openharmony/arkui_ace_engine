@@ -20,7 +20,7 @@
 #include "frameworks/bridge/common/dom/dom_node.h"
 
 namespace OHOS::Ace::Framework {
-class DOMXComponent final : public DOMNode {
+class ACE_EXPORT DOMXComponent final : public DOMNode {
     DECLARE_ACE_TYPE(DOMXComponent, DOMNode);
 
 public:
@@ -31,6 +31,10 @@ public:
     {
         return xComponentChild_;
     }
+
+#ifdef OHOS_STANDARD_SYSTEM
+    uint64_t GetSurfaceId() const;
+#endif
 
 protected:
     void PrepareSpecializedComponent() override;

@@ -19,6 +19,7 @@
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
+#include "frameworks/bridge/common/dom/dom_xcomponent.h"
 #include "frameworks/bridge/js_frontend/engine/common/base_xcomponent_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
 #include "frameworks/core/components/common/properties/decoration.h"
@@ -42,6 +43,10 @@ public:
     {
         return renderContext_;
     }
+
+#ifdef OHOS_STANDARD_SYSTEM
+    static shared_ptr<JsValue> JsGetXComponentSurfaceId(const shared_ptr<JsRuntime>& runtime, NodeId nodeId);
+#endif
 
 private:
     shared_ptr<JsValue> renderContext_;
