@@ -40,6 +40,7 @@ void SliderComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(std::string("max: ").append(GetMax()));
     DumpLog::GetInstance().AddDesc(std::string("min: ").append(GetMin()));
     DumpLog::GetInstance().AddDesc(std::string("step: ").append(GetStep()));
+    DumpLog::GetInstance().AddDesc(std::string("reverse: ").append(GetReverse()));
     DumpLog::GetInstance().AddDesc(std::string("blockColor: ").append(GetBlockColor()));
     DumpLog::GetInstance().AddDesc(std::string("trackColor: ").append(GetTrackColor()));
     DumpLog::GetInstance().AddDesc(std::string("selectedColor: ").append(GetSelectedColor()));
@@ -65,11 +66,12 @@ std::unique_ptr<JsonValue> SliderComposedElement::GetConstructor() const
     jsonValue->Put("min", GetMin().c_str());
     jsonValue->Put("step", GetStep().c_str());
     jsonValue->Put("style", GetStyle().c_str());
+    jsonValue->Put("reverse", GetReverse().c_str());
     jsonValue->Put("blockColor", GetBlockColor().c_str());
     jsonValue->Put("trackColor", GetTrackColor().c_str());
     jsonValue->Put("selectedColor", GetSelectedColor().c_str());
-    jsonValue->Put("showSteps", GetShowTips().c_str());
-    jsonValue->Put("showTips", GetSliderDirection().c_str());
+    jsonValue->Put("showSteps", GetShowSteps().c_str());
+    jsonValue->Put("showTips", GetShowTips().c_str());
     return jsonValue;
 }
 
@@ -135,6 +137,15 @@ std::string SliderComposedElement::GetStyle() const
         }
     }
     return "SliderStyle.OutSet";
+}
+
+std::string SliderComposedElement::GetReverse() const
+{
+    auto renderSlider = GetRenderSlider();
+    if (renderSlider) {
+        return ConvertBoolToString(renderSlider->GetIsReverse());
+    }
+    return "false";
 }
 
 std::string SliderComposedElement::GetBlockColor() const

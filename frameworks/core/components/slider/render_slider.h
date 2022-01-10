@@ -131,6 +131,11 @@ public:
         return showTips_;
     }
 
+    bool GetIsReverse() const
+    {
+        return isReverse_;
+    }
+
     std::function<void(const std::string&)> GetOnMovedEndId() const
     {
         return onMoveEnd_;

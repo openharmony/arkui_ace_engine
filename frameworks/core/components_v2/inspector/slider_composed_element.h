@@ -38,6 +38,7 @@ public:
     std::string GetMin() const;
     std::string GetStep() const;
     std::string GetStyle() const;
+    std::string GetReverse() const;
     std::string GetBlockColor() const;
     std::string GetTrackColor() const;
     std::string GetSelectedColor() const;
