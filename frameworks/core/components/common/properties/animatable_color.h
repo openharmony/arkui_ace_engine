@@ -63,7 +63,6 @@ public:
 
     AnimatableColor& operator=(const AnimatableColor& newColor)
     {
-        LOGD("Current Value: %x, new value: %x", GetValue(), newColor.GetValue());
         SetAnimationOption(newColor.GetAnimationOption());
         auto pipelineContext = context_.Upgrade();
         if (!pipelineContext || !animationCallback_) {

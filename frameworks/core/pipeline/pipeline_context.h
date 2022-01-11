@@ -501,11 +501,15 @@ public:
     {
         return multiModalManager_;
     }
+#endif
+
+    void SetWindowOnShow();
+
+    void SetWindowOnHide();
 
     void OnShow();
 
     void OnHide();
-#endif
 
     void MarkForcedRefresh()
     {

@@ -38,14 +38,11 @@ AnimatableDimension& AnimatableDimension::operator=(const AnimatableDimension& n
     }
     AnimationOption explicitAnim = pipelineContext->GetExplicitAnimationOption();
     if (explicitAnim.IsValid()) {
-        LOGD("Animatable assign with explicit animation, duration: %{public}d", explicitAnim.GetDuration());
         SetAnimationOption(explicitAnim);
         AnimateTo(newDimension.Value());
     } else if (animationOption_.IsValid()) {
-        LOGD("Animatable assign with implicit animation, duration: %{public}d", animationOption_.GetDuration());
         AnimateTo(newDimension.Value());
     } else {
-        LOGD("Animatable assign without animation.");
         ResetController();
         SetValue(newDimension.Value());
     }
