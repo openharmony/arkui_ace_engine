@@ -28,6 +28,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_page.h"
+#include "core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/include/js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
@@ -59,6 +60,8 @@ public:
     static std::unique_ptr<JsonValue> GetI18nStringResource(
         const std::string& targetStringKey, const std::string& targetStringValue);
     static std::string GetMediaResource(const std::string& targetFileName);
+
+    RefPtr<FrontendDelegate> GetFrontendDelegate() const;
 
     static RefPtr<JsAcePage> GetRunningPage(const shared_ptr<JsRuntime>& runtime);
     static RefPtr<JsAcePage> GetStagingPage(const shared_ptr<JsRuntime>& runtime);
@@ -184,7 +187,7 @@ public:
     // Fire SyncEvent on JS
     void FireSyncEvent(const std::string& eventId, const std::string& param) override;
 
-    void FireExternalEvent(const std::string& componentId, const uint32_t nodeId) override {}
+    void FireExternalEvent(const std::string& componentId, const uint32_t nodeId) override;
 
     // Timer callback
     void TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval) override;
@@ -231,6 +234,11 @@ public:
         }
     }
 
+    const shared_ptr<JsValue>& GetRenderContext() const
+    {
+        return renderContext_;
+    }
+
 private:
     bool CallAppFunc(const std::string& appFuncName);
 
@@ -240,14 +248,21 @@ private:
 
     void TimerCallJs(const std::string& callbackId) const;
 
+    void InitXComponent();
+
     void RegisterWorker();
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
 
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 
+    RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
+
+    NativeXComponent *nativeXComponent_ = nullptr;
+
     int32_t instanceId_ = 0;
     void* runtime_ = nullptr;
+    shared_ptr<JsValue> renderContext_;
 
     ArkNativeEngine* nativeEngine_ = nullptr;
 

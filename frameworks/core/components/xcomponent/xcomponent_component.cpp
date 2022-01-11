@@ -35,6 +35,7 @@ XComponentComponent::XComponentComponent(const std::string& type) : type_(type)
     }
     pool_ = AceType::MakeRefPtr<XComponentTaskPool>();
     pool_->component_ = AceType::WeakClaim(this);
+    xcomponentController_ = AceType::MakeRefPtr<XComponentController>();
 }
 
 RefPtr<RenderNode> XComponentComponent::CreateRenderNode()

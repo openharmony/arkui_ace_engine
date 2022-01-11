@@ -18,7 +18,16 @@
 
 #include "core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "core/components/xcomponent/resource/native_texture.h"
+#include "core/components/xcomponent/xcomponent_component.h"
 #include "core/pipeline/base/render_element.h"
+
+#ifdef OHOS_STANDARD_SYSTEM
+#include "display_type.h"
+#include "foundation/windowmanager/interfaces/innerkits/wm/window.h"
+#include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
+#include "surface_utils.h"
+#endif
 
 namespace OHOS::Ace {
 class XComponentComponent;
@@ -60,6 +69,16 @@ private:
     bool hasSendDestroyEvent_ = false;
     bool isExternalResource_ = false;
     RefPtr<NativeTexture> texture_;
+
+#ifdef OHOS_STANDARD_SYSTEM
+    void CreateSurface();
+    void OnXComponentHiddenChange(bool hidden);
+
+    bool hidden_ = false;
+    sptr<Rosen::Window> previewWindow_;
+    static std::unordered_map<std::string, uint64_t> surfaceIdMap_;
+    RefPtr<XComponentController> xcomponentController_;
+#endif
 };
 } // namespace OHOS::Ace
 
