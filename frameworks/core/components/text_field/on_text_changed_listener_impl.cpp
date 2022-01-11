@@ -24,33 +24,20 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
         return;
     }
 
-    auto renderTextField = field_.Upgrade();
-    if (!renderTextField) {
-        return;
-    }
-
-    auto context = renderTextField->GetContext().Upgrade();
-    if (!context) {
-        return;
-    }
-
-    auto taskExecutor = context->GetTaskExecutor();
-    if (!taskExecutor) {
-        return;
-    }
-
-    taskExecutor->PostTask(
-        [renderTextField, text] {
-            if (renderTextField) {
-                auto value = renderTextField->GetEditingValue();
-                auto textEditingValue = std::make_shared<TextEditingValue>();
-                textEditingValue->text =
-                    value.GetBeforeSelection() + StringUtils::Str16ToStr8(text) + value.GetAfterSelection();
-                textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + text.length());
-                renderTextField->UpdateEditingValue(textEditingValue, true);
-            }
-        },
-        TaskExecutor::TaskType::UI);
+    auto task = [textField = field_, text] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            LOGE("text field is null");
+            return;
+        }
+        auto value = client->GetEditingValue();
+        auto textEditingValue = std::make_shared<TextEditingValue>();
+        textEditingValue->text =
+            value.GetBeforeSelection() + StringUtils::Str16ToStr8(text) + value.GetAfterSelection();
+        textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + text.length());
+        client->UpdateEditingValue(textEditingValue, true);
+    };
+    PostTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
@@ -61,37 +48,22 @@ void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
         return;
     }
 
-    auto renderTextField = field_.Upgrade();
-    if (!renderTextField) {
-        return;
-    }
-
-    auto context = renderTextField->GetContext().Upgrade();
-    if (!context) {
-        return;
-    }
-
-    auto taskExecutor = context->GetTaskExecutor();
-    if (!taskExecutor) {
-        return;
-    }
-
-    taskExecutor->PostTask(
-        [renderTextField, length] {
-            if (!renderTextField) {
-                return;
-            }
-            auto value = renderTextField->GetEditingValue();
-            auto start = value.selection.GetStart();
-            auto end = value.selection.GetEnd();
-
-            auto textEditingValue = std::make_shared<TextEditingValue>();
-            textEditingValue->text = value.text;
-            textEditingValue->UpdateSelection(start, end);
-            textEditingValue->Delete(start, start == end ? end + length : end);
-            renderTextField->UpdateEditingValue(textEditingValue, true);
-        },
-        TaskExecutor::TaskType::UI);
+    auto task = [textField = field_, length] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            LOGE("text field is null");
+            return;
+        }
+        auto value = client->GetEditingValue();
+        auto start = value.selection.GetStart();
+        auto end = value.selection.GetEnd();
+        auto textEditingValue = std::make_shared<TextEditingValue>();
+        textEditingValue->text = value.text;
+        textEditingValue->UpdateSelection(start, end);
+        textEditingValue->Delete(start, start == end ? end + length : end);
+        client->UpdateEditingValue(textEditingValue, true);
+    };
+    PostTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::DeleteForward(int32_t length)
@@ -102,64 +74,36 @@ void OnTextChangedListenerImpl::DeleteForward(int32_t length)
         return;
     }
 
-    auto renderTextField = field_.Upgrade();
-    if (!renderTextField) {
-        return;
-    }
-
-    auto context = renderTextField->GetContext().Upgrade();
-    if (!context) {
-        return;
-    }
-
-    auto taskExecutor = context->GetTaskExecutor();
-    if (!taskExecutor) {
-        return;
-    }
-
-    taskExecutor->PostTask(
-        [renderTextField, length] {
-            if (renderTextField) {
-                auto value = renderTextField->GetEditingValue();
-                auto start = value.selection.GetStart();
-                auto end = value.selection.GetEnd();
-                auto textEditingValue = std::make_shared<TextEditingValue>();
-                textEditingValue->text = value.text;
-                textEditingValue->UpdateSelection(start, end);
-                if (start > 0 && end > 0) {
-                    textEditingValue->Delete(start == end ? start - length : start, end);
-                }
-                renderTextField->UpdateEditingValue(textEditingValue, true);
-            }
-        },
-        TaskExecutor::TaskType::UI);
+    auto task = [textField = field_, length] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            LOGE("text field is null");
+            return;
+        }
+        auto value = client->GetEditingValue();
+        auto start = value.selection.GetStart();
+        auto end = value.selection.GetEnd();
+        auto textEditingValue = std::make_shared<TextEditingValue>();
+        textEditingValue->text = value.text;
+        textEditingValue->UpdateSelection(start, end);
+        if (start > 0 && end > 0) {
+            textEditingValue->Delete(start == end ? start - length : start, end);
+        }
+        client->UpdateEditingValue(textEditingValue, true);
+    };
+    PostTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
 {
     LOGI("[OnTextChangedListenerImpl] SetKeyboardStatus status: %{public}d", status);
-    auto renderTextField = field_.Upgrade();
-    if (!renderTextField) {
-        return;
-    }
-
-    auto context = renderTextField->GetContext().Upgrade();
-    if (!context) {
-        return;
-    }
-
-    auto taskExecutor = context->GetTaskExecutor();
-    if (!taskExecutor) {
-        return;
-    }
-
-    taskExecutor->PostTask(
-        [renderTextField, status] {
-            if (renderTextField) {
-                renderTextField->SetInputMethodStatus(status);
-            }
-        },
-        TaskExecutor::TaskType::UI);
+    auto task = [textField = field_, status] {
+        auto client = textField.Upgrade();
+        if (client) {
+            client->SetInputMethodStatus(status);
+        }
+    };
+    PostTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::SendKeyEventFromInputMethod(const MiscServices::KeyEvent& event) {}
@@ -173,72 +117,83 @@ void OnTextChangedListenerImpl::SendKeyboardInfo(const MiscServices::KeyboardInf
 void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatus status)
 {
     LOGI("[OnTextChangedListenerImpl] HandleKeyboardStatus status: %{public}d", status);
-    if (status == MiscServices::KeyboardStatus::NONE) {
-        return;
-    }
-
-    auto renderTextField = field_.Upgrade();
-    if (!renderTextField) {
-        return;
-    }
-
-    auto context = renderTextField->GetContext().Upgrade();
-    if (!context) {
-        return;
-    }
-
-    auto taskExecutor = context->GetTaskExecutor();
-    if (!taskExecutor) {
-        return;
-    }
-
-    bool currentStatus = (status == MiscServices::KeyboardStatus::SHOW);
-    taskExecutor->PostTask(
-        [renderTextField, currentStatus] {
-            if (renderTextField) {
-                if (currentStatus) {
-                    renderTextField->SetInputMethodStatus(true);
-                } else {
-                    MiscServices::InputMethodController::GetInstance()->Close();
-                    renderTextField->SetInputMethodStatus(false);
-                }
-            }
-        },
-        TaskExecutor::TaskType::UI);
+    SetKeyboardStatus(status == MiscServices::KeyboardStatus::SHOW);
 }
 
 void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey functionKey)
 {
-    LOGI("[OnTextChangedListenerImpl] HandleFunctionKey functionKey: %{public}d", functionKey);
+    auto task = [textField = field_, functionKey] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            LOGE("text field is null");
+            return;
+        }
+        switch (functionKey) {
+            case MiscServices::FunctionKey::CONFIRM:
+                client->PerformDefaultAction();
+                break;
+            case MiscServices::FunctionKey::NONE:
+            default:
+                LOGE("FunctionKey is not support: %{public}d", functionKey);
+                break;
+        }
+    };
+    PostTaskToUI(task);
+}
+
+void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
+{
+    auto task = [textField = field_, direction] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            return;
+        }
+        switch (direction) {
+            case MiscServices::Direction::UP:
+                client->CursorMoveUp();
+                break;
+            case MiscServices::Direction::DOWN:
+                client->CursorMoveDown();
+                break;
+            case MiscServices::Direction::LEFT:
+                client->CursorMoveLeft();
+                break;
+            case MiscServices::Direction::RIGHT:
+                client->CursorMoveRight();
+                break;
+            default:
+                LOGE("direction is not support: %{public}d", direction);
+                break;
+        }
+    };
+    PostTaskToUI(task);
+}
+
+void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
+{
+    if (!task) {
+        LOGE("task is empty");
+        return;
+    }
     auto renderTextField = field_.Upgrade();
     if (!renderTextField) {
+        LOGE("text field is null");
         return;
     }
 
     auto context = renderTextField->GetContext().Upgrade();
     if (!context) {
+        LOGE("context is null");
         return;
     }
 
     auto taskExecutor = context->GetTaskExecutor();
     if (!taskExecutor) {
+        LOGE("task executor is null");
         return;
     }
 
-    switch (functionKey) {
-        case MiscServices::FunctionKey::CONFIRM:
-            taskExecutor->PostTask(
-                [renderTextField] {
-                    if (renderTextField) {
-                        renderTextField->PerformDefaultAction();
-                    }
-                },
-                TaskExecutor::TaskType::UI);
-            break;
-        case MiscServices::FunctionKey::NONE:
-        default:
-            break;
-    }
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
 } // namespace OHOS::Ace

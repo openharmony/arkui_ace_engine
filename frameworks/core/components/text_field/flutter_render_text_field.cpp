@@ -1043,9 +1043,8 @@ int32_t FlutterRenderTextField::GetCursorPositionForMoveUp()
         return 0;
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() - PreferredLineHeight();
-    return static_cast<int32_t>(
-        paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.Left(), caretRect_.Top() + verticalOffset)
-            .position - 1);
+    return static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(
+        caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset).position);
 }
 
 int32_t FlutterRenderTextField::GetCursorPositionForMoveDown()
@@ -1054,9 +1053,8 @@ int32_t FlutterRenderTextField::GetCursorPositionForMoveDown()
         return 0;
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() + PreferredLineHeight();
-    return static_cast<int32_t>(
-        paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.Left(), caretRect_.Top() + verticalOffset)
-            .position - 1);
+    return static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(
+        caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset).position);
 }
 
 int32_t FlutterRenderTextField::GetCursorPositionForClick(const Offset& offset)

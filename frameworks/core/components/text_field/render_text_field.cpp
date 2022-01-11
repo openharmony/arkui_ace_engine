@@ -1412,7 +1412,7 @@ void RenderTextField::FireSelectChangeIfNeeded(const TextEditingValue& newValue,
     }
 }
 
-void RenderTextField::CursorMoveLeft(const CursorMoveSkip skip)
+void RenderTextField::CursorMoveLeft(CursorMoveSkip skip)
 {
     if (skip != CursorMoveSkip::CHARACTER) {
         // Not support yet.
@@ -1425,9 +1425,10 @@ void RenderTextField::CursorMoveLeft(const CursorMoveSkip skip)
         value.MoveLeft();
         SetEditingValue(std::move(value));
     }
+    MarkNeedLayout();
 }
 
-void RenderTextField::CursorMoveRight(const CursorMoveSkip skip)
+void RenderTextField::CursorMoveRight(CursorMoveSkip skip)
 {
     if (skip != CursorMoveSkip::CHARACTER) {
         // Not support yet.
@@ -1442,6 +1443,7 @@ void RenderTextField::CursorMoveRight(const CursorMoveSkip skip)
         value.MoveRight();
         SetEditingValue(std::move(value));
     }
+    MarkNeedLayout();
 }
 
 void RenderTextField::CursorMoveUp()
@@ -1453,6 +1455,7 @@ void RenderTextField::CursorMoveUp()
     auto value = GetEditingValue();
     value.MoveToPosition(GetCursorPositionForMoveUp());
     SetEditingValue(std::move(value));
+    MarkNeedLayout();
 }
 
 void RenderTextField::CursorMoveDown()
@@ -1464,6 +1467,7 @@ void RenderTextField::CursorMoveDown()
     auto value = GetEditingValue();
     value.MoveToPosition(GetCursorPositionForMoveDown());
     SetEditingValue(std::move(value));
+    MarkNeedLayout();
 }
 
 void RenderTextField::CursorMoveOnClick(const Offset& offset)

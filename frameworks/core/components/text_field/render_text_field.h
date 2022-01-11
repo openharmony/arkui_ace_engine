@@ -70,6 +70,14 @@ enum class CursorPositionType {
     NORMAL,
 };
 
+// Currently only CHARACTER.
+enum class CursorMoveSkip {
+    CHARACTER, // Smallest code unit.
+    WORDS,
+    SIBLING_SPACE,
+    PARAGRAPH,
+};
+
 class RenderTextField : public RenderNode, public TextInputClient, public ValueChangeObserver {
     DECLARE_ACE_TYPE(RenderTextField, RenderNode, TextInputClient, ValueChangeObserver);
 public:
@@ -106,6 +114,10 @@ public:
     const TextEditingValue& GetEditingValue() const;
     const TextEditingValue& GetPreEditingValue() const;
     void Delete(int32_t start, int32_t end);
+    void CursorMoveLeft(CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
+    void CursorMoveRight(CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
+    void CursorMoveUp();
+    void CursorMoveDown();
 
     void SetInputFilter(const std::string& inputFilter)
     {
@@ -478,22 +490,10 @@ protected:
     Offset textOffsetForShowCaret_;
 
 private:
-    // Currently only CHARACTER.
-    enum class CursorMoveSkip {
-        CHARACTER, // Smallest code unit.
-        WORDS,
-        SIBLING_SPACE,
-        PARAGRAPH,
-    };
-
     void SetCallback(const RefPtr<TextFieldComponent>& textField);
     void StartPressAnimation(bool isPressDown);
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
-    void CursorMoveLeft(CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
-    void CursorMoveRight(CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
-    void CursorMoveUp();
-    void CursorMoveDown();
     void CursorMoveOnClick(const Offset& offset);
     void UpdateRemoteEditing(bool needFireChangeEvent = true);
     void UpdateObscure(const RefPtr<TextFieldComponent>& textField);
