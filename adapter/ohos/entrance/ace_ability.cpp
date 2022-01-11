@@ -512,6 +512,7 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect)
 {
     uint32_t width = rect.width_;
     uint32_t height = rect.height_;
+    LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u", width, height);
 #ifdef ENABLE_ROSEN_BACKEND
     auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
     if (context) {
