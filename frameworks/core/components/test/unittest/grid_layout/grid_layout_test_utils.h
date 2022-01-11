@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 namespace {
-
+constexpr int32_t INIT_VALUE_UT_TEST = -2;
 class MockRenderBox final : public RenderBox {
     DECLARE_ACE_TYPE(MockRenderBox, RenderBox);
 
@@ -115,8 +115,8 @@ private:
     bool onDragMove_ = false;
     bool onDragLeave_ = false;
     bool onDragStart_ = false;
-    int32_t itemIndex_ = -2; 
-    int32_t insertIndex_ = -2;
+    int32_t itemIndex_ = INIT_VALUE_UT_TEST;
+    int32_t insertIndex_ = INIT_VALUE_UT_TEST;
 };
 
 } // namespace
@@ -125,7 +125,9 @@ class GridLayoutTestUtils {
 public:
     static void PrintNodeInfo(const RefPtr<RenderNode>& node);
     static RefPtr<Component> CreateComponent(FlexDirection direction, std::string rows, std::string cols);
+    static RefPtr<Component> CreateDragComponent(std::string rows, std::string cols);
     static RefPtr<RenderNode> CreateRenderItem(int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan);
+    static RefPtr<RenderNode> CreateDragRenderItem();
 };
 
 } // namespace OHOS::Ace

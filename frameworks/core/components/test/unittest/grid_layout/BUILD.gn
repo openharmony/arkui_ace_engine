@@ -43,7 +43,6 @@ ohos_unittest("RenderGridLayoutTest") {
   }
 }
 
-
 ohos_unittest("RenderGridLayoutAnimationTest") {
   module_out_path = module_output_path
 
@@ -69,8 +68,8 @@ ohos_unittest("RenderGridLayoutAnimationTest") {
 
 group("unittest") {
   testonly = true
-  deps = [ 
+  deps = [
+    ":RenderGridLayoutAnimationTest",
     ":RenderGridLayoutTest",
-    ":RenderGridLayoutAnimationTest"
   ]
 }

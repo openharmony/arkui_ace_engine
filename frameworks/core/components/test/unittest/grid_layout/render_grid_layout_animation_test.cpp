@@ -34,6 +34,7 @@ constexpr double MOVE_STEP_SIZE_TEST = 20.0;
 constexpr int64_t EVENT_WAIT_MILLSECOND_TEST = 50;
 constexpr int64_t USEC_TIMES_TEST = 1000000000;
 constexpr int64_t USEC_WAIT_SECOND_TEST = 1000;
+
 }
 
 int64_t GetTickCountText()
@@ -80,8 +81,6 @@ void RenderGridLayoutAnimationTest::TearDownTestCase() {}
 void RenderGridLayoutAnimationTest::SetUp()
 {
     mockContext_ = MockRenderCommon::GetMockContext();
-   // mockContext_->OnSurfaceChanged(1080, 2244);
-
     renderNode_ = AceType::MakeRefPtr<RenderGridLayout>();
     renderNode_->Attach(mockContext_);
     coordinateOffset_.Reset();
@@ -137,12 +136,12 @@ bool RenderGridLayoutAnimationTest::GetDragDropRecognizer()
 
 void RenderGridLayoutAnimationTest::SetDragDropEvent(const RefPtr<GridLayoutComponent>& component)
 {
-    component->SetOnGridDragEnterId([](const RefPtr<ItemDragInfo>& info){});
-    component->SetOnGridDragMoveId([](const RefPtr<ItemDragInfo>& info, int32_t itemIndex, int32_t insertIndex){});
-    component->SetOnGridDragLeaveId([](const RefPtr<ItemDragInfo>& info, int32_t itemIndex){});
-    component->SetOnGridDragStartId([](const RefPtr<ItemDragInfo>& info, int32_t itemIndex){return nullptr;});
+    component->SetOnGridDragEnterId([](const ItemDragInfo& info) {});
+    component->SetOnGridDragMoveId([](const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex) {});
+    component->SetOnGridDragLeaveId([](const ItemDragInfo& info, int32_t itemIndex) {});
+    component->SetOnGridDragStartId([](const ItemDragInfo& info, int32_t itemIndex) {return nullptr;});
     component->SetOnGridDropId(
-        [](const RefPtr<ItemDragInfo>& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess){});
+        [](const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {});
 }
 
 bool RenderGridLayoutAnimationTest::CreateGrid(bool isVertical, bool isSpringRecognizer)
@@ -269,11 +268,13 @@ void RenderGridLayoutAnimationTest::MockDragTouchEventUp(TouchPoint& info)
 
 void RenderGridLayoutAnimationTest::WaitAndMockVsync(int64_t waitFor)
 {
+    constexpr int64_t RUNNING_TIME_STEP_TEST = 16;
+    constexpr int64_t USLEEP_TIME_TEST = 16000;
     int64_t runningTime = 0;
     do {
-        runningTime += 16;
+        runningTime += RUNNING_TIME_STEP_TEST;
         mockContext_->OnVsyncEvent(GetTickCountText(), 0);
-        usleep(16000);
+        usleep(USLEEP_TIME_TEST);
     } while (runningTime < waitFor);
     mockContext_->OnVsyncEvent(GetTickCountText(), 0);
 }
