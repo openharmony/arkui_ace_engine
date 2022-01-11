@@ -164,9 +164,13 @@ void JSTextInput::Create(const JSCallbackInfo& info)
     }
 
     auto controllerObj = paramObject->GetProperty("controller");
-    JSTextInputController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextInputController>();
-    if (jsController) {
-        jsController->SetController(textInputComponent->GetTextFieldController());
+    if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+        JSTextAreaController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextAreaController>();
+        if (jsController) {
+            jsController->SetController(textAreaComponent->GetTextFieldController());
+        }
+    } else {
+        LOGI("controller is nullptr");
     }
 
 }

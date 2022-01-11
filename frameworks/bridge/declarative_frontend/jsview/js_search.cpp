@@ -279,10 +279,14 @@ void JSSearch::Create(const JSCallbackInfo& info)
         textFieldComponent->SetPlaceholder(tip);
     }
 
-    auto controllerObj = param->GetProperty("controller");
-    JSSearchController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSSearchController>();
-    if (jsController) {
-        jsController->SetController(textFieldComponent->GetTextFieldController());
+    auto controllerObj = paramObject->GetProperty("controller");
+    if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+        JSTextAreaController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextAreaController>();
+        if (jsController) {
+            jsController->SetController(textAreaComponent->GetTextFieldController());
+        }
+    } else {
+        LOGI("controller is nullptr");
     }
 
     auto icon = param->GetProperty("icon");

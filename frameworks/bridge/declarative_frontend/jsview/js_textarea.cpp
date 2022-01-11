@@ -152,9 +152,13 @@ void JSTextArea::Create(const JSCallbackInfo& info)
     }
 
     auto controllerObj = paramObject->GetProperty("controller");
-    JSTextAreaController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextAreaController>();
-    if (jsController) {
-        jsController->SetController(textAreaComponent->GetTextFieldController());
+    if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+        JSTextAreaController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextAreaController>();
+        if (jsController) {
+            jsController->SetController(textAreaComponent->GetTextFieldController());
+        }
+    } else {
+        LOGI("controller is nullptr");
     }
 }
 
