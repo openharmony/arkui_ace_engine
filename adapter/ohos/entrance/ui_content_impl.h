@@ -45,6 +45,10 @@ public:
     void UnFocus() override;
     void Destroy() override;
 
+    // distribute
+    void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) override;
+    const std::string& GetContentInfo() const override;
+
     // UI content event process
     bool ProcessBackPressed() override;
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
