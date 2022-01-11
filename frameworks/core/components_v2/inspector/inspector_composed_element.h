@@ -60,10 +60,14 @@ public:
     void OnActive() override;
 
     template<class T>
-    RefPtr<T> GetContentElement(IdType typeId) const
+    RefPtr<T> GetContentElement(IdType typeId, bool isFindAll = true) const
     {
         auto child = children_.empty() ? nullptr : children_.front();
         while (child) {
+            auto inspectorComposedElement = AceType::DynamicCast<InspectorComposedElement>(child);
+            if (inspectorComposedElement && !isFindAll) {
+                return nullptr;
+            }
             if (AceType::TypeId(child) == typeId) {
                 return AceType::DynamicCast<T>(child);
             }
@@ -188,6 +192,8 @@ public:
     std::unique_ptr<JsonValue> GetRadialGradient() const override;
     void GetColorsAndRepeating(std::unique_ptr<JsonValue>& resultJson, const Gradient& gradient) const;
 
+    // bindpopup
+    virtual std::string GetBindPopup() const override;
     virtual AceType::IdType GetTargetTypeId() const
     {
         return AceType::TypeId(this);
@@ -239,6 +245,7 @@ protected:
     RefPtr<AccessibilityNode> accessibilityNode_;
     bool accessibilityEnabled_ = false;
     RefPtr<AccessibilityNode> GetAccessibilityNode() const;
+
 private:
     std::string key_;
 };

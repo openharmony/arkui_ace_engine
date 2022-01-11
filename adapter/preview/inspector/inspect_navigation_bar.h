@@ -19,14 +19,14 @@
 #include "adapter/preview/inspector/inspect_node.h"
 
 namespace OHOS::Ace::Framework {
-    class InspectNavigationBar : public InspectNode {
-        DECLARE_ACE_TYPE(InspectNavigationBar, InspectNode);
+class InspectNavigationBar : public InspectNode {
+    DECLARE_ACE_TYPE(InspectNavigationBar, InspectNode);
 
-    public:
-        InspectNavigationBar(NodeId nodeId, const std::string& nodeName);
-        ~InspectNavigationBar() override = default;
-        void PackAttrAndStyle() override;
-    };
+public:
+    InspectNavigationBar(NodeId nodeId, const std::string& nodeName);
+    ~InspectNavigationBar() override = default;
+    void PackAttrAndStyle() override;
+};
 } // namespace OHOS::Ace::Framework
 
 #endif // FOUNDATION_ACE_ADAPTER_PREVIEW_INSPECTOR_INSPECT_NAVIGATION_BAR_H

@@ -32,6 +32,42 @@ public:
     bool IsDeclarative();
     void OnStateChange(bool isVisible) override;
 
+    std::string GetMessage() const
+    {
+        auto popupComponentV2 = AceType::DynamicCast<PopupComponentV2>(popup_);
+        if (popupComponentV2) {
+            return popupComponentV2->GetMessage();
+        }
+        return "";
+    }
+
+    bool GetPlacementOnTop()
+    {
+        auto popupComponentV2 = AceType::DynamicCast<PopupComponentV2>(popup_);
+        if (popupComponentV2) {
+            return popupComponentV2->GetPlacementOnTop();
+        }
+        return false;
+    }
+
+    std::string GetPrimaryButtonValue() const
+    {
+        auto popupComponentV2 = AceType::DynamicCast<PopupComponentV2>(popup_);
+        if (popupComponentV2) {
+            return popupComponentV2->GetPrimaryButtonValue();
+        }
+        return "";
+    }
+
+    std::string GetSecondaryButtonValue() const
+    {
+        auto popupComponentV2 = AceType::DynamicCast<PopupComponentV2>(popup_);
+        if (popupComponentV2) {
+            return popupComponentV2->GetSecondaryButtonValue();
+        }
+        return "";
+    }
+
     bool CanUpdate(const RefPtr<Component>& newComponent) override
     {
         return Element::CanUpdate(newComponent);

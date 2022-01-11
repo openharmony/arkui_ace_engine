@@ -14,9 +14,9 @@
  */
 
 #include <unordered_map>
+#include "core/components_v2/inspector/badge_composed_element.h"
 
 #include "base/log/dump_log.h"
-#include "core/components_v2/inspector/badge_composed_element.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
