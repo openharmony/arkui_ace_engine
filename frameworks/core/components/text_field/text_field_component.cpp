@@ -718,13 +718,6 @@ void TextFieldComponent::SetOnSearch(const EventMarker& onSearch)
     declaration_->SetOnSearch(onSearch);
 }
 
-void TextFieldComponent::SetDeclaration(const RefPtr<TextFieldDeclaration>& declaration)
-{
-    if (declaration) {
-        declaration_ = declaration;
-    }
-}
-
 void TextFieldComponent::SetPlaceHoldStyle(const TextStyle& style)
 {
     declaration_->SetPlaceHoldStyle(style);

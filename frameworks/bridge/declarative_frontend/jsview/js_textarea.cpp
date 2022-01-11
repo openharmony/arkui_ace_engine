@@ -131,6 +131,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
 void JSTextArea::Create(const JSCallbackInfo& info)
 {
     RefPtr<TextFieldComponent> textAreaComponent = AceType::MakeRefPtr<TextFieldComponent>();
+    textAreaComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     textAreaComponent->SetTextInputType(TextInputType::MULTILINE);
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
 
@@ -482,9 +483,8 @@ void JSTextAreaController::Destructor(JSTextAreaController* scroller)
 
 void JSTextAreaController::CaretPosition(int32_t caretPosition)
 {
-    auto controller = controller_.Upgrade();
-    if (controller) {
-        controller->CaretPosition(caretPosition);
+    if (controller_) {
+        controller_->CaretPosition(caretPosition);
     }
 }
 
