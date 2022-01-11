@@ -33,8 +33,10 @@ public:
     void SetKeyboardStatus(bool status) override;
     void SendKeyEventFromInputMethod(const MiscServices::KeyEvent& event) override;
     void SendKeyboardInfo(const MiscServices::KeyboardInfo& info) override;
+    void MoveCursor(MiscServices::Direction direction) override;
 
 private:
+    void PostTaskToUI(const std::function<void()>& task);
     void HandleKeyboardStatus(MiscServices::KeyboardStatus status);
     void HandleFunctionKey(MiscServices::FunctionKey functionKey);
 
