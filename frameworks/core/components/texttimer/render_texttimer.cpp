@@ -181,11 +181,8 @@ void RenderTextTimer::Tick(uint64_t duration)
         tmp_value = (inputCount_ >= elapsedTime_) ? (inputCount_ - elapsedTime_) : 0;
     }
 
-    if ((isCountDown_ && tmp_value <= 0) ||
-        ((!isCountDown_) && (inputCount_ > 0) && (tmp_value > inputCount_))) {
+    if (isCountDown_ && tmp_value <= 0) {
         HandlePause();
-        elapsedTime_ = isCountDown_ ? inputCount_ : 0;
-        UpdateValue(elapsedTime_);
         return;
     }
 
@@ -215,7 +212,7 @@ void RenderTextTimer::HandleReset()
     if (scheduler_ && scheduler_->IsActive()) {
         scheduler_->Stop();
     }
-    elapsedTime_ = isCountDown_ ? inputCount_ : 0;
-    UpdateValue(elapsedTime_);
+    elapsedTime_ = 0;
+    UpdateValue(isCountDown_ ? inputCount_ : 0);
 }
 } // namespace OHOS::Ace
