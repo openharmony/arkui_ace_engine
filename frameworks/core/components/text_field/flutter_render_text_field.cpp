@@ -255,7 +255,7 @@ void FlutterRenderTextField::PaintIcon(const Offset& offset, RenderContext& cont
 
 void FlutterRenderTextField::PaintSelection(SkCanvas* canvas) const
 {
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE) {
+    if (SystemProperties::GetDeviceType() != DeviceType::PHONE && SystemProperties::GetDeviceType() != DeviceType::CAR) {
         return;
     }
     using namespace Constants;

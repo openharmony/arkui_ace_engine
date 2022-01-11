@@ -333,6 +333,9 @@ protected:
     void OnHiddenChanged(bool hidden) override;
     void OnClick(const ClickInfo& clickInfo);
     void OnLongPress(const LongPressInfo& longPressInfo);
+    void OnTouchDown(const TouchEventInfo& info);
+    void OnTouchMove(const TouchEventInfo& info);
+    void HandleMouseEvent(const MouseEvent& event) override;
 
     void StartTwinkling();
     void StopTwinkling();

@@ -367,6 +367,15 @@ void RenderTextField::PerformLayout()
     HandleDeviceOrientationChange();
 }
 
+void RenderTextField::HandleMouseEvent(const MouseEvent& event) 
+{
+    if (MouseButton::RIGHT_BUTTON == event.button) {
+        Offset rightClickOffset = event.GetOffset();
+        bool singleHandle = (GetEditingValue().selection.GetStart() == GetEditingValue().selection.GetEnd());
+        ShowTextOverlay(rightClickOffset, singleHandle);
+    }
+}
+
 void RenderTextField::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
@@ -405,7 +414,14 @@ void RenderTextField::OnTouchTestHit(
         rawRecognizer_->SetOnTouchDown([weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto textField = weak.Upgrade();
             if (textField) {
-                textField->StartPressAnimation(true);
+                textField->OnTouchDown(info);
+            }
+        });
+
+        rawRecognizer_->SetOnTouchMove([weak = WeakClaim(this)](const TouchEventInfo& info) {
+            auto textField = weak.Upgrade();
+            if (textField) {
+                textField->OnTouchMove(info);
             }
         });
 
@@ -425,6 +441,35 @@ void RenderTextField::OnTouchTestHit(
     }
     rawRecognizer_->SetTouchRestrict(touchRestrict);
     result.emplace_back(rawRecognizer_);
+}
+
+void RenderTextField::OnTouchDown(const TouchEventInfo& info)
+{
+    if (info.GetTouches().empty()) {
+        LOGE("touch info is null.");
+        return;
+    }
+
+    auto touchInfo = info.GetTouches().front();
+    UpdateStartSelection(DEFAULT_SELECT_INDEX, touchInfo.GetGlobalLocation(), true, false);
+    StartPressAnimation(true);
+}
+
+void RenderTextField::OnTouchMove(const TouchEventInfo& info)
+{
+    if (info.GetTouches().empty()) {
+        LOGE("touch info is null.");
+        return;
+    }
+
+    auto touchInfo = info.GetTouches().front();
+    int32_t start = GetEditingValue().selection.baseOffset;
+    int32_t end = GetCursorPositionForClick(touchInfo.GetGlobalLocation());
+    UpdateSelection(start, end);
+    if (showCursor_) {
+        showCursor_ = false;
+    }
+    MarkNeedRender();
 }
 
 void RenderTextField::StartPressAnimation(bool pressDown)
@@ -481,11 +526,20 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     ShowError("", false);
 
     UpdateStartSelection(DEFAULT_SELECT_INDEX, globalPosition, true, false);
-    ShowTextOverlay(globalPosition, true);
 
     auto context = GetContext().Upgrade();
     if (context) {
         context->SetClickPosition(GetGlobalOffset() + Size(0, GetLayoutSize().Height()));
+    }
+
+    auto lastStack = GetLastStack();
+    if (lastStack) {
+        lastStack->PopTextOverlay();
+    }
+
+    StartTwinkling();
+    if (!showCursor_) {
+        showCursor_ = true;
     }
 }
 
@@ -541,16 +595,11 @@ void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
 
 void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHandle)
 {
-    auto context = context_.Upgrade();
-    if (context->GetIsDeclarative()) {
-        StartTwinkling();
-        return;
-    }
     if (!isVisible_) {
         return;
     }
 
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE) {
+    if (SystemProperties::GetDeviceType() != DeviceType::PHONE && SystemProperties::GetDeviceType() != DeviceType::CAR) {
         StartTwinkling();
         return;
     }
@@ -622,6 +671,8 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
     textOverlay_->SetShareButtonMarker(onShare_);
     textOverlay_->SetSearchButtonMarker(onSearch_);
     textOverlay_->SetContext(context_);
+
+    PushTextOverlayToStack();
 
     // Add the Animation
     InitAnimation();
