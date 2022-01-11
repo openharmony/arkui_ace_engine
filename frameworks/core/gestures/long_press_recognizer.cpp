@@ -37,6 +37,7 @@ void LongPressRecognizer::OnAccepted()
     }
 
     SetFingerList(touchMap_, coordinateOffset_, fingerList_);
+    SendCallbackMsg(onActionUpdate_, false);
     SendCallbackMsg(onAction_, false);
     if (repeat_) {
         StartRepeatTimer();
@@ -95,6 +96,7 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
+        SendCallbackMsg(onActionUpdate_, false);
         SendCallbackMsg(onActionEnd_, false);
         Reset();
     } else {
@@ -150,6 +152,7 @@ void LongPressRecognizer::HandleOverdueDeadline()
         LOGI("this gesture is long press, try to accept it");
         state_ = DetectState::DETECTED;
         Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+        SendCallbackMsg(onActionUpdate_, false);
     } else {
         LOGW("the state is not detecting for accept long press gesture");
     }

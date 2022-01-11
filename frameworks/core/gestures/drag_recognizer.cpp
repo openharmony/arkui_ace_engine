@@ -48,7 +48,7 @@ void DragRecognizer::OnAccepted(size_t touchId)
         startInfo.SetGlobalLocation(firstPoint.GetOffset())
             .SetLocalLocation(firstPoint.GetOffset() - coordinateOffset_);
         startInfo.SetTimeStamp(firstPoint.time);
-        onDragStart_(startInfo);
+        AsyncCallback(onDragStart_, startInfo);
     }
     if (onDragUpdate_) {
         const auto& currentPoint = dragInfo.velocityTracker_.GetCurrentTrackPoint();
@@ -60,7 +60,7 @@ void DragRecognizer::OnAccepted(size_t touchId)
             .SetGlobalLocation(currentPoint.GetOffset())
             .SetLocalLocation(currentPoint.GetOffset() - coordinateOffset_);
         updateInfo.SetTimeStamp(currentPoint.time);
-        onDragUpdate_(updateInfo);
+        AsyncCallback(onDragUpdate_, updateInfo);
     }
 }
 
@@ -94,11 +94,11 @@ void DragRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
     DragFingersInfo dragFingerInfo(axis_);
-    auto result = dragFingers_.try_emplace(event.id, dragFingerInfo);
+    auto result = dragFingers_.insert_or_assign(event.id, dragFingerInfo);
 
     auto& dragInfo = result.first->second;
     if (dragInfo.states_ == DetectState::READY) {
-        GestureReferee::GetInstance().AddGestureRecognizer(event.id, AceType::Claim(this));
+        AddToReferee(event.id, Claim(this));
         dragInfo.dragOffset_.Reset();
         dragInfo.velocityTracker_.Reset();
         dragInfo.velocityTracker_.UpdateTouchPoint(event);
@@ -123,10 +123,12 @@ void DragRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     if (dragInfo.states_ == DetectState::DETECTED) {
         if (onDragUpdate_) {
             DragUpdateInfo info(event.id);
+
             info.SetDelta(dragInfo.velocityTracker_.GetDelta())
                 .SetMainDelta(dragInfo.velocityTracker_.GetMainAxisDeltaPos())
                 .SetGlobalLocation(event.GetOffset())
                 .SetLocalLocation(event.GetOffset() - coordinateOffset_);
+
             info.SetTimeStamp(event.time);
             onDragUpdate_(info);
             if (onDragUpdateNotifyCall_) {
@@ -146,7 +148,7 @@ void DragRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         LOGD("handle move event, the drag offset is %{public}lf, axis is %{public}d", dragOffsetInMainAxis, axis_);
         if (IsDragGestureAccept(dragOffsetInMainAxis)) {
             LOGD("this gesture is drag, try to accept it");
-            GestureReferee::GetInstance().Adjudicate(event.id, AceType::Claim(this), GestureDisposal::ACCEPT);
+            Accept(event.id);
         }
     } else {
         LOGD("state is ready, need to use touch down event to trigger, state is %{public}d", dragInfo.states_);
@@ -189,16 +191,19 @@ void DragRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         }
         if (onDragEndNotifyCall_) {
             DragEndInfo endInfo(event.id);
+
             endInfo.SetVelocity(dragInfo.velocityTracker_.GetVelocity())
                 .SetMainVelocity(dragInfo.velocityTracker_.GetMainAxisVelocity())
                 .SetGlobalLocation(event.GetOffset())
                 .SetLocalLocation(event.GetOffset() - coordinateOffset_);
+
             endInfo.SetTimeStamp(event.time);
             onDragEndNotifyCall_(event.GetOffset().GetX(), event.GetOffset().GetY(), endInfo);
+            AsyncCallback(onDragEnd_, endInfo);
         }
     } else if (dragInfo.states_ == DetectState::DETECTING) {
         LOGD("this gesture is not drag, try to reject it");
-        GestureReferee::GetInstance().Adjudicate(event.id, AceType::Claim(this), GestureDisposal::REJECT);
+        Reject(event.id);
     }
     dragInfo.states_ = DetectState::READY;
 }
@@ -215,11 +220,11 @@ void DragRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     auto& dragInfo = iter->second;
     if (dragInfo.states_ == DetectState::DETECTED) {
         if (onDragCancel_) {
-            onDragCancel_();
+            AsyncCallback(onDragCancel_);
         }
     } else if (dragInfo.states_ == DetectState::DETECTING) {
         LOGD("cancel drag gesture detect, try to reject it");
-        GestureReferee::GetInstance().Adjudicate(event.id, AceType::Claim(this), GestureDisposal::REJECT);
+        Reject(event.id);
     }
     dragInfo.states_ = DetectState::READY;
 }
@@ -244,4 +249,17 @@ bool DragRecognizer::IsDragGestureAccept(double offset) const
     return false;
 }
 
+void DragRecognizer::Accept(size_t touchId)
+{
+    std::set<size_t> ids;
+    ids.insert(touchId);
+    BatchAdjudicate(ids, Claim(this), GestureDisposal::ACCEPT);
+}
+
+void DragRecognizer::Reject(size_t touchId)
+{
+    std::set<size_t> ids;
+    ids.insert(touchId);
+    BatchAdjudicate(ids, Claim(this), GestureDisposal::REJECT);
+}
 } // namespace OHOS::Ace

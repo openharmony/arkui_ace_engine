@@ -25,7 +25,7 @@
 namespace OHOS::Ace {
 
 // ExclusiveRecognizer identifies gesture exclusive.
-class ExclusiveRecognizer : public MultiFingersRecognizer {
+class ACE_EXPORT ExclusiveRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(ExclusiveRecognizer, MultiFingersRecognizer);
 
 public:

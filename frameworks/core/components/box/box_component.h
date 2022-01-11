@@ -21,6 +21,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/gestures/gesture_info.h"
+#include "core/gestures/gesture_group.h"
 #include "core/gestures/raw_recognizer.h"
 
 namespace OHOS::Ace {
@@ -177,12 +178,17 @@ public:
 
     void AddGesture(GesturePriority priority, RefPtr<Gesture> gesture)
     {
-        gestures_[static_cast<int32_t>(priority)] = gesture;
+        if (gesturePriority_ != priority || gestureHierarchy_.empty()) {
+            gestureHierarchy_.emplace_back(priority, std::vector<RefPtr<Gesture>>());
+            gesturePriority_ = priority;
+        }
+
+        gestureHierarchy_.back().second.push_back(std::move(gesture));
     }
 
-    const std::array<RefPtr<Gesture>, 3>& GetGestures() const
+    const std::vector<std::pair<GesturePriority, std::vector<RefPtr<Gesture>>>>& GetGestureHierarchy() const
     {
-        return gestures_;
+        return gestureHierarchy_;
     }
 
     const EventMarker& GetOnDomDragEnter() const
@@ -333,7 +339,11 @@ private:
     OnTouchEventCallback onTouchMoveId_;
     RefPtr<Gesture> onClickId_;
     RefPtr<Gesture> onLongPressId_;
-    std::array<RefPtr<Gesture>, 3> gestures_;
+    RefPtr<Gesture> onDoubleClickId_;
+    GesturePriority gesturePriority_ = GesturePriority::Low;
+    RefPtr<Gesture> capturingGesture_;
+    std::vector<RefPtr<Gesture>> gestures_;
+    std::vector<std::pair<GesturePriority, std::vector<RefPtr<Gesture>>>> gestureHierarchy_;
     EventMarker onDomDragEnterId_;
     EventMarker onDomDragOverId_;
     EventMarker onDomDragLeaveId_;

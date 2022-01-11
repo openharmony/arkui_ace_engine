@@ -24,6 +24,7 @@
 #include "core/event/touch_event.h"
 #include "core/gestures/drag_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
+#include "core/gestures/timeout_recognizer.h"
 #include "core/pipeline/base/related_node.h"
 #include "core/pipeline/base/render_node.h"
 
@@ -100,9 +101,12 @@ public:
 
     void SetCoordinateOffset(const Offset& offset) const
     {
-        if (dragRecognizer_) {
+        if (timeoutRecognizer_) {
+            timeoutRecognizer_->SetCoordinateOffset(offset);
+        } else if (dragRecognizer_) {
             dragRecognizer_->SetCoordinateOffset(offset);
         }
+
         if (rawRecognizer_) {
             rawRecognizer_->SetCoordinateOffset(offset);
         }
@@ -139,8 +143,8 @@ public:
     }
     bool HandleEvent(const TouchEvent& event) override
     {
-        if (dragRecognizer_) {
-            dragRecognizer_->HandleEvent(event);
+        if (timeoutRecognizer_) {
+            timeoutRecognizer_->HandleEvent(event);
         }
         if (rawRecognizer_) {
             return rawRecognizer_->HandleEvent(event);
@@ -259,6 +263,7 @@ private:
     DragCancelRefreshCallback dragCancelCallback_;
     WatchFixCallback watchFixCallback_;
     Axis axis_;
+    RefPtr<TimeoutRecognizer> timeoutRecognizer_;
     RefPtr<DragRecognizer> dragRecognizer_;
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<Animator> controller_;

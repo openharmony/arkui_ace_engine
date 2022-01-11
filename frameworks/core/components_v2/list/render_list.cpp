@@ -533,6 +533,16 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
     return true;
 }
 
+bool RenderList::TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
+    TouchTestResult& result)
+{
+    if (GetVisible() && fixedMainSize_ && scrollable_ && scrollable_->Available()) {
+        result.emplace_back(scrollable_);
+    }
+
+    return RenderNode::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+}
+
 void RenderList::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
@@ -554,7 +564,6 @@ void RenderList::OnTouchTestHit(
     }
 
     scrollable_->SetCoordinateOffset(coordinateOffset);
-    result.emplace_back(scrollable_);
 }
 
 double RenderList::ApplyLayoutParam()
