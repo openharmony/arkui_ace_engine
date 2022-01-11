@@ -236,6 +236,17 @@ void UIContentImpl::Destroy()
     Platform::AceContainer::DestroyContainer(instanceId_);
 }
 
+void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
+{
+    LOGI("UIContent Restore: mock %{public}s", contentInfo.c_str());
+}
+
+const std::string& UIContentImpl::GetContentInfo() const
+{
+    LOGI("UIContent GetContentInfo: mock");
+    return "contentInfo";
+}
+
 bool UIContentImpl::ProcessBackPressed()
 {
     LOGI("UIContent ProcessBackPressed");
