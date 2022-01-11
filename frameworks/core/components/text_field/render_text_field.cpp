@@ -599,7 +599,7 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
         return;
     }
 
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE && 
+    if (SystemProperties::GetDeviceType() != DeviceType::PHONE &&
         SystemProperties::GetDeviceType() != DeviceType::CAR) {
         StartTwinkling();
         return;
