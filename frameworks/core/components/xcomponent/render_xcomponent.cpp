@@ -79,6 +79,13 @@ void RenderXComponent::PerformLayout()
                      Size::INFINITE_SIZE :
                      (GetLayoutParam().GetMaxSize().Height()));
     SetLayoutSize(drawSize_);
+
+#ifdef OHOS_STANDARD_SYSTEM
+    if (xcomponentSizeChangeEvent_ && (!drawSize_.IsHeightInfinite())) {
+        xcomponentSizeChangeEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
+    }
+#endif
+
     SetNeedLayout(false);
     MarkNeedRender();
 }
@@ -88,6 +95,12 @@ void RenderXComponent::OnPaintFinish()
     position_ = GetGlobalOffset();
     NativeXComponentOffset(position_.GetX(), position_.GetY());
 
+#ifdef OHOS_STANDARD_SYSTEM
+    if (xcomponentSizeChangeEvent_ && (!drawSize_.IsHeightInfinite())) {
+        xcomponentSizeChangeEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
+    }
+#endif
+
     auto xcomponent = delegate_->GetXComponent().Upgrade();
     if (std::strcmp(xcomponent->GetXComponentType().c_str(), "texture") == 0) {
         return;
@@ -96,6 +109,16 @@ void RenderXComponent::OnPaintFinish()
     CreateXComponentPlatformResource();
     UpdateXComponentLayout();
 }
+
+#ifdef OHOS_STANDARD_SYSTEM
+void RenderXComponent::SetHidden(bool hidden, bool inRecursion)
+{
+    RenderNode::SetHidden(hidden, inRecursion);
+    if (xcomponentHiddenChangeEvent_) {
+        xcomponentHiddenChangeEvent_(hidden);
+    }
+}
+#endif
 
 void RenderXComponent::CreateXComponentPlatformResource()
 {

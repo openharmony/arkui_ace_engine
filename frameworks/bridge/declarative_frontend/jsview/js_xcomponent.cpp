@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -52,6 +53,15 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     xcomponentComponent->SetId(id->ToString());
     xcomponentComponent->SetXComponentType(type->ToString());
     xcomponentComponent->SetLibraryName(libraryname->ToString());
+
+    auto controllerObj = paramObject->GetProperty("controller");
+    if (controllerObj->IsObject()) {
+        auto controller = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSXComponentController>();
+        if (controller) {
+            xcomponentComponent->SetXComponentController(controller->GetController());
+        }
+    }
+
     ViewStackProcessor::GetInstance()->Push(xcomponentComponent);
 }
 

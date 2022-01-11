@@ -40,4 +40,21 @@ void DOMXComponent::PrepareSpecializedComponent()
 
     xComponentChild_->SetDeclaration(xcomponentDeclaration);
 }
+
+#ifdef OHOS_STANDARD_SYSTEM
+uint64_t DOMXComponent::GetSurfaceId() const
+{
+    if (!xComponentChild_) {
+        LOGE("GetSurfaceId failed, The xComponent is not created.");
+        return 0;
+    }
+    const auto& controller = xComponentChild_->GetXComponentController();
+    if (!controller) {
+        LOGE("GetSurfaceId failed, controller is null.");
+        return 0;
+    }
+    auto surfaceId = controller->GetSurfaceId();
+    return surfaceId;
+}
+#endif
 } // namespace OHOS::Ace::Framework
