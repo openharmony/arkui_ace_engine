@@ -248,7 +248,8 @@ void RosenRenderTextField::PaintIcon(const Offset& offset, RenderContext& contex
 
 void RosenRenderTextField::PaintSelection(SkCanvas* canvas) const
 {
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE && SystemProperties::GetDeviceType() != DeviceType::CAR) {
+    if (SystemProperties::GetDeviceType() != DeviceType::PHONE && 
+        SystemProperties::GetDeviceType() != DeviceType::CAR) {
         return;
     }
     using namespace Constants;

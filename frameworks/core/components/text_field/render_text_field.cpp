@@ -367,7 +367,7 @@ void RenderTextField::PerformLayout()
     HandleDeviceOrientationChange();
 }
 
-void RenderTextField::HandleMouseEvent(const MouseEvent& event) 
+void RenderTextField::HandleMouseEvent(const MouseEvent& event)
 {
     if (MouseButton::RIGHT_BUTTON == event.button) {
         Offset rightClickOffset = event.GetOffset();
@@ -599,7 +599,8 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
         return;
     }
 
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE && SystemProperties::GetDeviceType() != DeviceType::CAR) {
+    if (SystemProperties::GetDeviceType() != DeviceType::PHONE && 
+        SystemProperties::GetDeviceType() != DeviceType::CAR) {
         StartTwinkling();
         return;
     }
