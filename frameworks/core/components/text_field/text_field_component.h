@@ -252,8 +252,6 @@ public:
 
     bool IsValueUpdated() const;
 
-    void SetDeclaration(const RefPtr<TextFieldDeclaration>& declaration);
-
     void SetPlaceHoldStyle(const TextStyle& style);
     const TextStyle& GetPlaceHoldStyle() const;
 
