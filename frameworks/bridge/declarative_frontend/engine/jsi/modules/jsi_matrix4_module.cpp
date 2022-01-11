@@ -88,26 +88,6 @@ shared_ptr<JsValue> Init(const shared_ptr<JsRuntime>& runtime, const shared_ptr<
     return thisObj;
 }
 
-shared_ptr<JsValue> Identity(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
-    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    thisObj->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, Matrix4::CreateIdentity()));
-    return thisObj;
-}
-
-shared_ptr<JsValue> Copy(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
-    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    auto matrix = ConvertToMatrix(runtime, thisObj->GetProperty(runtime, MATRIX_4X4));
-    // create new object
-    shared_ptr<JsValue> other = runtime->NewObject();
-    // init functions
-    InitMatrix4Module(runtime, other);
-    // update matrix4x4
-    other->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, matrix));
-    return other;
-}
-
 shared_ptr<JsValue> Combine(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
@@ -270,18 +250,46 @@ shared_ptr<JsValue> TransformPoint(const shared_ptr<JsRuntime>& runtime, const s
     return result;
 }
 
+shared_ptr<JsValue> Copy(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    auto matrix = ConvertToMatrix(runtime, thisObj->GetProperty(runtime, MATRIX_4X4));
+    // create new object
+    shared_ptr<JsValue> other = runtime->NewObject();
+    // init functions
+    InitMatrix4Module(runtime, other);
+    // update matrix4x4
+    other->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, matrix));
+    other->SetProperty(runtime, MATRIX_COPY, runtime->NewFunction(Copy));
+    other->SetProperty(runtime, MATRIX_COMBINE, runtime->NewFunction(Combine));
+    other->SetProperty(runtime, MATRIX_INVERT, runtime->NewFunction(Invert));
+    other->SetProperty(runtime, MATRIX_TRANSLATE, runtime->NewFunction(Translate));
+    other->SetProperty(runtime, MATRIX_SCALE, runtime->NewFunction(Scale));
+    other->SetProperty(runtime, MATRIX_ROTATE, runtime->NewFunction(Rotate));
+    other->SetProperty(runtime, MATRIX_TRANSFORM_POINT, runtime->NewFunction(TransformPoint));
+    return other;
+}
+
+shared_ptr<JsValue> Identity(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    shared_ptr<JsValue> matrixObj = runtime->NewObject();
+    matrixObj->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, Matrix4::CreateIdentity()));
+    matrixObj->SetProperty(runtime, MATRIX_COPY, runtime->NewFunction(Copy));
+    matrixObj->SetProperty(runtime, MATRIX_COMBINE, runtime->NewFunction(Combine));
+    matrixObj->SetProperty(runtime, MATRIX_INVERT, runtime->NewFunction(Invert));
+    matrixObj->SetProperty(runtime, MATRIX_TRANSLATE, runtime->NewFunction(Translate));
+    matrixObj->SetProperty(runtime, MATRIX_SCALE, runtime->NewFunction(Scale));
+    matrixObj->SetProperty(runtime, MATRIX_ROTATE, runtime->NewFunction(Rotate));
+    matrixObj->SetProperty(runtime, MATRIX_TRANSFORM_POINT, runtime->NewFunction(TransformPoint));
+    return matrixObj;
+}
+
 void InitMatrix4Module(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& moduleObj)
 {
     moduleObj->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, Matrix4::CreateIdentity()));
     moduleObj->SetProperty(runtime, MATRIX_INIT, runtime->NewFunction(Init));
     moduleObj->SetProperty(runtime, MATRIX_IDENTITY, runtime->NewFunction(Identity));
-    moduleObj->SetProperty(runtime, MATRIX_COPY, runtime->NewFunction(Copy));
-    moduleObj->SetProperty(runtime, MATRIX_COMBINE, runtime->NewFunction(Combine));
-    moduleObj->SetProperty(runtime, MATRIX_INVERT, runtime->NewFunction(Invert));
-    moduleObj->SetProperty(runtime, MATRIX_TRANSLATE, runtime->NewFunction(Translate));
-    moduleObj->SetProperty(runtime, MATRIX_SCALE, runtime->NewFunction(Scale));
-    moduleObj->SetProperty(runtime, MATRIX_ROTATE, runtime->NewFunction(Rotate));
-    moduleObj->SetProperty(runtime, MATRIX_TRANSFORM_POINT, runtime->NewFunction(TransformPoint));
 }
 
 } // namespace OHOS::Ace::Framework
