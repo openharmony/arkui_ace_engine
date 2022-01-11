@@ -39,6 +39,86 @@ public:
     ~MockRenderGridLayoutItem() override = default;
 };
 
+class GridDragEventResult {
+public:
+    explicit GridDragEventResult() {};
+    ~GridDragEventResult() = default;
+    void SetLongPress(bool longPress)
+    {
+        longPress_ = longPress;
+    }
+    bool GetLongPress() const
+    {
+        return longPress_;
+    }
+    void SetOnDrop(bool onDrop)
+    {
+        onDrop_ = onDrop;
+    }
+    bool GetOnDrop() const
+    {
+        return onDrop_;
+    }
+    void SetOnDragEnter(bool onDragEnter)
+    {
+        onDragEnter_ = onDragEnter;
+    }
+    bool GetOnDragEnter() const
+    {
+        return onDragEnter_;
+    }
+    void SetOnDragMove(bool onDragMove)
+    {
+        onDragMove_ = onDragMove;
+    }
+    bool GetOnDragMove() const
+    {
+        return onDragMove_;
+    }
+    void SetOnDragLeave(bool onDragLeave)
+    {
+        onDragLeave_ = onDragLeave;
+    }
+    bool GetOnDragLeave() const
+    {
+        return onDragLeave_;
+    }
+    void SetOnDragStart(bool onDragStart)
+    {
+        onDragStart_ = onDragStart;
+    }
+    bool GetOnDragStart() const
+    {
+        return onDragStart_;
+    }
+    void SetDropItemIndex(int32_t itemIndex)
+    {
+        itemIndex_ = itemIndex;
+    }
+    int32_t GetDropItemIndex()
+    {
+        return itemIndex_ ;
+    }
+    void SetDropInsertIndex(int32_t insertIndex)
+    {
+        insertIndex_ = insertIndex;
+    }
+    int32_t GetDropInsertIndex()
+    {
+        return insertIndex_;
+    }
+
+private:
+    bool longPress_ = false;
+    bool onDrop_ = false;
+    bool onDragEnter_ = false;
+    bool onDragMove_ = false;
+    bool onDragLeave_ = false;
+    bool onDragStart_ = false;
+    int32_t itemIndex_ = -2; 
+    int32_t insertIndex_ = -2;
+};
+
 } // namespace
 
 class GridLayoutTestUtils {

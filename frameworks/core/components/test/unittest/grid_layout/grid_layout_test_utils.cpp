@@ -58,4 +58,37 @@ RefPtr<RenderNode> GridLayoutTestUtils::CreateRenderItem(int32_t row, int32_t co
     return item;
 }
 
+RefPtr<RenderNode> GridLayoutTestUtils::CreateDragRenderItem()
+{
+    RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<BoxComponent>();
+    RefPtr<RenderBox> renderBox = AceType::MakeRefPtr<MockRenderBox>();
+    boxComponent->SetWidth(50.0);
+    boxComponent->SetHeight(50.0);
+    renderBox->Update(boxComponent);
+    RefPtr<RenderGridLayoutItem> item = AceType::MakeRefPtr<MockRenderGridLayoutItem>();
+    item->AddChild(renderBox);
+    return item;
+}
+
+RefPtr<Component> GridLayoutTestUtils::CreateDragComponent(std::string rows, std::string cols)
+{
+    std::list<RefPtr<Component>> children;
+    RefPtr<GridLayoutComponent> component = AceType::MakeRefPtr<GridLayoutComponent>(children);
+    component->SetSupportAnimation(false);
+    component->SetEditMode(true);
+    if (!rows.empty()){
+        component->SetHeight(150.0);
+    }
+    if (!cols.empty()){
+        component->SetWidth(150.0);
+    }
+    component->SetRowsArgs(rows);
+    component->SetColumnsArgs(cols);
+    component->SetMaxCount(5);
+    component->SetMinCount(1);
+    component->SetCellLength(50);
+
+    return component;
+}
+
 } // namespace OHOS::Ace

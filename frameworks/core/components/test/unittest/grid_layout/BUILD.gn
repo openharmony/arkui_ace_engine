@@ -43,7 +43,34 @@ ohos_unittest("RenderGridLayoutTest") {
   }
 }
 
+
+ohos_unittest("RenderGridLayoutAnimationTest") {
+  module_out_path = module_output_path
+
+  sources = [
+    "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_common.cpp",
+    "grid_layout_test_utils.cpp",
+    "render_grid_layout_animation_test.cpp",
+  ]
+
+  configs = [ "$ace_root:ace_test_config" ]
+
+  deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
+
+  if (!is_standard_system) {
+    subsystem_name = "ace"
+    part_name = "ace_engine_full"
+  } else {
+    subsystem_name = "ace"
+    part_name = "ace_engine_standard"
+  }
+}
+
 group("unittest") {
   testonly = true
-  deps = [ ":RenderGridLayoutTest" ]
+  deps = [ 
+    ":RenderGridLayoutTest",
+    ":RenderGridLayoutAnimationTest"
+  ]
 }
