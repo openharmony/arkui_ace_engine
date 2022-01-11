@@ -2625,6 +2625,24 @@ JSModuleDef* InitAceModules(JSContext* ctx)
     return jsModule;
 }
 
+JSValue JsCallNativeHandler(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    if (argc != 2 || argv == nullptr || !JS_IsString(argv[0]) || !JS_IsString(argv[1])) {
+        LOGE("JsCallNativeHandler: invalid parameters");
+        return JS_NULL;
+    }
+
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (instance == nullptr) {
+        return JS_NULL;
+    }
+
+    ScopedString event(ctx, argv[0]);
+    ScopedString params(ctx, argv[1]);
+    instance->GetDelegate()->CallNativeHandler(event.str(), params.str());
+    return JS_NULL;
+}
+
 void InitJsConsoleObject(JSContext* ctx, const JSValue& globalObj)
 {
     JSValue console, aceConsole;
@@ -2645,6 +2663,8 @@ void InitJsConsoleObject(JSContext* ctx, const JSValue& globalObj)
     JS_SetPropertyStr(ctx, aceConsole, "warn", JS_NewCFunction(ctx, JsWarnLogPrint, "warn", 1));
     JS_SetPropertyStr(ctx, aceConsole, "error", JS_NewCFunction(ctx, JsErrorLogPrint, "error", 1));
     JS_SetPropertyStr(ctx, globalObj, "aceConsole", aceConsole);
+    JS_SetPropertyStr(ctx, globalObj, "callNativeHandler",
+        JS_NewCFunction(ctx, JsCallNativeHandler, "callNativeHandler", 1));
 }
 
 void InitJsDocumentObject(JSContext* ctx, const JSValue& globalObj)

@@ -60,6 +60,7 @@ using OnCompleteContinuationCallBack = std::function<void(int32_t code)>;
 using OnRemoteTerminatedCallBack = std::function<void(void)>;
 using OnSaveDataCallBack = std::function<void(std::string& data)>;
 using OnRestoreDataCallBack = std::function<bool(const std::string& data)>;
+using CallNativeHandlerCallback = std::function<void(const std::string& event, const std::string& params)>;
 
 struct PageInfo {
     int32_t pageId = -1;
@@ -136,6 +137,7 @@ struct FrontendDelegateImplBuilder {
     OnActiveCallBack onActiveCallBack;
     OnInactiveCallBack onInactiveCallBack;
     OnMemoryLevelCallBack onMemoryLevelCallBack;
+    CallNativeHandlerCallback callNativeHandler;
     void* ability;
 };
 
@@ -264,6 +266,7 @@ public:
     void Clear() override;
     int32_t GetStackSize() const override;
     void GetState(int32_t& index, std::string& name, std::string& path) override;
+    std::string GetParams() override;
     void TriggerPageUpdate(int32_t pageId, bool directExecute = false) override;
 
     void PostJsTask(std::function<void()>&& task) override;
@@ -364,6 +367,8 @@ public:
 
     void RebuildAllPages();
 
+    void CallNativeHandler(const std::string& event, const std::string& params) override;
+
 private:
     int32_t GenerateNextPageId();
     void RecyclePageId(int32_t pageId);
@@ -414,12 +419,14 @@ private:
 
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;
+    int32_t pageId_ = -1;
     bool isRouteStackFull_ = false;
     bool isStagingPageExist_ = false;
     std::string mainPagePath_;
     std::string backUri_;
     std::vector<PageInfo> pageRouteStack_;
     std::unordered_map<int32_t, RefPtr<JsAcePage>> pageMap_;
+    std::unordered_map<int32_t, std::string> pageParamMap_;
     std::unordered_map<int32_t, std::string> jsCallBackResult_;
     WeakPtr<JsAcePage> currentReadyPage_;
 
@@ -449,6 +456,7 @@ private:
     RefPtr<GroupJsBridge> groupJsBridge_;
 
     RefPtr<TaskExecutor> taskExecutor_;
+    CallNativeHandlerCallback callNativeHandler_;
 
     PipelineContextHolder pipelineContextHolder_;
 

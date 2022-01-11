@@ -23,7 +23,7 @@
 #include "ability_loader.h"
 #include "core/event/touch_event.h"
 #include "want.h"
-#include "window.h"
+#include "wm/window.h"
 
 namespace OHOS::Ace {
 

@@ -78,8 +78,9 @@ const char* GetDeclarativeSharedLibrary(bool isArkApp)
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AppExecFwk::Ability* aceAbility,
-    std::unique_ptr<PlatformEventCallback> callback)
-    : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), aceAbility_(aceAbility)
+    std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner)
+    : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), aceAbility_(aceAbility),
+      useCurrentEventRunner_(useCurrentEventRunner)
 {
     ACE_DCHECK(callback);
     InitializeTask();
@@ -87,8 +88,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AbilityRuntime::Context* context,
-                           std::unique_ptr<PlatformEventCallback> callback)
-    : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), context_(context)
+                           std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner)
+    : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), context_(context),
+      useCurrentEventRunner_(useCurrentEventRunner)
 {
     ACE_DCHECK(callback);
     InitializeTask();
@@ -98,7 +100,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
 void AceContainer::InitializeTask()
 {
     auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-    flutterTaskExecutor->InitPlatformThread();
+    flutterTaskExecutor->InitPlatformThread(useCurrentEventRunner_);
     taskExecutor_ = flutterTaskExecutor;
     // No need to create JS Thread for DECLARATIVE_JS
     if (type_ == FrontendType::DECLARATIVE_JS) {
@@ -464,10 +466,11 @@ void AceContainer::InitializeCallback()
 }
 
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName,
-    OHOS::AppExecFwk::Ability* aceAbility, std::unique_ptr<PlatformEventCallback> callback)
+    OHOS::AppExecFwk::Ability* aceAbility, std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner)
 {
     Container::InitForThread(INSTANCE_ID_PLATFORM);
-    auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, isArkApp, aceAbility, std::move(callback));
+    auto aceContainer = AceType::MakeRefPtr<AceContainer>(
+        instanceId, type, isArkApp, aceAbility, std::move(callback), useCurrentEventRunner);
     AceEngine::Get().AddContainer(instanceId, aceContainer);
 
     HdcRegister::Get().StartHdcRegister();
@@ -519,6 +522,28 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
     }
     std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
     container->AttachView(std::move(window), view, density, width, height);
+}
+
+void AceContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow)
+{
+    if (uiWindow == nullptr) {
+        return;
+    }
+
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    if (!container) {
+        return;
+    }
+    container->SetUIWindowInner(uiWindow);
+}
+
+sptr<OHOS::Rosen::Window> AceContainer::GetUIWindow(int32_t instanceId)
+{
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    if (!container) {
+        return nullptr;
+    }
+    return container->GetUIWindowInner();
 }
 
 bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string& content, const std::string& params)
@@ -751,6 +776,16 @@ void AceContainer::AttachView(
     AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_);
 }
 
+void AceContainer::SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow)
+{
+    uiWindow_ = uiWindow;
+}
+
+sptr<OHOS::Rosen::Window> AceContainer::GetUIWindowInner() const
+{
+    return uiWindow_;
+}
+
 void AceContainer::SetFontScale(int32_t instanceId, float fontScale)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -774,4 +809,17 @@ void AceContainer::SetWindowStyle(int32_t instanceId, WindowModal windowModal, C
     container->SetWindowModal(windowModal);
     container->SetColorScheme(colorScheme);
 }
+
+void AceContainer::SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        return;
+    }
+    auto front = container->GetFrontend();
+    if (front && front->GetType() == FrontendType::JS) {
+        front->SetDialogCallback(callback);
+    }
+}
+
 } // namespace OHOS::Ace::Platform

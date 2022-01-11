@@ -80,7 +80,6 @@ template("ace_bridge_engine") {
       deps += [ "$ace_root/${pa_engine_path}/engine:js_pa_engine_${engine_name}_$platform" ]
     }
 
-    deps += [ "$ace_root/build:libace" ]
     subsystem_name = "ace"
     part_name = ace_engine_part
   }

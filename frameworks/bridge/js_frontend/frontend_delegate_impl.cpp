@@ -91,7 +91,8 @@ FrontendDelegateImpl::FrontendDelegateImpl(const FrontendDelegateImplBuilder& bu
       requestAnimationCallback_(builder.requestAnimationCallback), jsCallback_(builder.jsCallback),
       manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
       jsAccessibilityManager_(AccessibilityNodeManager::Create()),
-      mediaQueryInfo_(AceType::MakeRefPtr<MediaQueryInfo>()), taskExecutor_(builder.taskExecutor)
+      mediaQueryInfo_(AceType::MakeRefPtr<MediaQueryInfo>()), taskExecutor_(builder.taskExecutor),
+      callNativeHandler_(builder.callNativeHandler)
 {}
 
 FrontendDelegateImpl::~FrontendDelegateImpl()
@@ -701,6 +702,15 @@ void FrontendDelegateImpl::GetState(int32_t& index, std::string& name, std::stri
     }
 }
 
+std::string FrontendDelegateImpl::GetParams()
+{
+    if (pageParamMap_.find(pageId_) != pageParamMap_.end()) {
+        return pageParamMap_.find(pageId_)->second;
+    } else {
+        return "";
+    }
+}
+
 void FrontendDelegateImpl::TriggerPageUpdate(int32_t pageId, bool directExecute)
 {
     auto page = GetPage(pageId);
@@ -1082,6 +1092,11 @@ std::string FrontendDelegateImpl::GetAssetPath(const std::string& url)
 void FrontendDelegateImpl::LoadPage(int32_t pageId, const std::string& url, bool isMainPage, const std::string& params)
 {
     LOGD("FrontendDelegateImpl LoadPage[%{private}d]: %{private}s.", pageId, url.c_str());
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        pageId_ = pageId;
+        pageParamMap_[pageId] = params;
+    }
     if (pageId == INVALID_PAGE_ID) {
         LOGE("FrontendDelegateImpl, invalid page id");
         EventReport::SendPageRouterException(PageRouterExcepType::LOAD_PAGE_ERR, url);
@@ -1288,6 +1303,7 @@ void FrontendDelegateImpl::OnPopToPageSuccess(const std::string& url)
         }
         OnPageDestroy(pageRouteStack_.back().pageId);
         pageMap_.erase(pageRouteStack_.back().pageId);
+        pageParamMap_.erase(pageRouteStack_.back().pageId);
         pageRouteStack_.pop_back();
     }
     if (isRouteStackFull_) {
@@ -1348,6 +1364,7 @@ int32_t FrontendDelegateImpl::OnPopPageSuccess()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     pageMap_.erase(pageRouteStack_.back().pageId);
+    pageParamMap_.erase(pageRouteStack_.back().pageId);
     pageRouteStack_.pop_back();
     if (isRouteStackFull_) {
         isRouteStackFull_ = false;
@@ -1422,6 +1439,7 @@ int32_t FrontendDelegateImpl::OnClearInvisiblePagesSuccess()
     for (const auto& info : pageRouteStack_) {
         OnPageDestroy(info.pageId);
         pageMap_.erase(info.pageId);
+        pageParamMap_.erase(info.pageId);
     }
     pageRouteStack_.clear();
     int32_t resPageId = pageInfo.pageId;
@@ -1458,6 +1476,7 @@ void FrontendDelegateImpl::OnReplacePageSuccess(const RefPtr<JsAcePage>& page, c
     AddPageLocked(page);
     if (!pageRouteStack_.empty()) {
         pageMap_.erase(pageRouteStack_.back().pageId);
+        pageParamMap_.erase(pageRouteStack_.back().pageId);
         pageRouteStack_.pop_back();
     }
     pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url });
@@ -1520,6 +1539,11 @@ void FrontendDelegateImpl::ReplacePage(const RefPtr<JsAcePage>& page, const std:
 void FrontendDelegateImpl::LoadReplacePage(int32_t pageId, const std::string& url, const std::string& params)
 {
     LOGD("FrontendDelegateImpl LoadReplacePage[%{private}d]: %{private}s.", pageId, url.c_str());
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        pageId_ = pageId;
+        pageParamMap_[pageId] = params;
+    }
     if (pageId == INVALID_PAGE_ID) {
         LOGE("FrontendDelegateImpl, invalid page id");
         EventReport::SendPageRouterException(PageRouterExcepType::REPLACE_PAGE_ERR, url);
@@ -1834,6 +1858,13 @@ void FrontendDelegateImpl::PushJsCallbackToRenderNode(NodeId id, double ratio,
         }
     };
     taskExecutor_->PostTask(uiPushTask, TaskExecutor::TaskType::UI);
+}
+
+void FrontendDelegateImpl::CallNativeHandler(const std::string& event, const std::string& params)
+{
+    if (callNativeHandler_ != nullptr) {
+        callNativeHandler_(event, params);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

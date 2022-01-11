@@ -26,8 +26,6 @@
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
-#include "window.h"
-
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
@@ -163,9 +161,9 @@ void AceAbility::OnStart(const Want& want)
             AceApplicationInfo::GetInstance().SetLocale((language == nullptr) ? "" : language,
                 (region == nullptr) ? "" : region, (script == nullptr) ? "" : script, "");
         } else {
-	   LOGW("localeInfo is null.");
-	   AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
-	}
+           LOGW("localeInfo is null.");
+           AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
+        }
     } else {
        LOGW("resourceManager is null.");
        AceApplicationInfo::GetInstance().SetLocale("", "", "", "");

@@ -23,7 +23,10 @@ if (is_standard_system) {
 ohos_unittest("PluginManagerTest") {
   module_out_path = module_output_path
 
-  include_dirs = [ "//third_party/flutter/engine/" ]
+  include_dirs = [
+    "//foundation/windowmanager/interfaces/innerkits",
+    "//third_party/flutter/engine/",
+  ]
 
   sources = [ "plugin_manager_test.cpp" ]
 

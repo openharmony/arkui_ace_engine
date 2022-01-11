@@ -452,6 +452,13 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
         }
         jsEngine->JsCallback(callbackId, args);
     };
+
+    builder.callNativeHandler = [this](const std::string& event, const std::string& params) {
+        if (dialogCallback_ != nullptr) {
+            dialogCallback_(event, params);
+        }
+    };
+
     builder.taskExecutor = taskExecutor;
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateImpl>(builder);
     if (disallowPopLastPage_) {
