@@ -235,9 +235,7 @@ void AceContainer::OnShow(int32_t instanceId)
     if (!context) {
         return;
     }
-#ifndef WEARABLE_PRODUCT
     context->OnShow();
-#endif
 }
 
 void AceContainer::OnHide(int32_t instanceId)
@@ -254,14 +252,11 @@ void AceContainer::OnHide(int32_t instanceId)
             taskExecutor->PostTask([front]() { front->TriggerGarbageCollection(); }, TaskExecutor::TaskType::JS);
         }
     }
-
     auto context = container->GetPipelineContext();
     if (!context) {
         return;
     }
-#ifndef WEARABLE_PRODUCT
     context->OnHide();
-#endif
 }
 
 void AceContainer::OnActive(int32_t instanceId)
@@ -275,6 +270,12 @@ void AceContainer::OnActive(int32_t instanceId)
     if (front) {
         front->OnActive();
     }
+    // TODO: remove it after ability fix onshow lifecyle.
+    auto context = container->GetPipelineContext();
+    if (!context) {
+        return;
+    }
+    context->SetWindowOnShow();
 }
 
 void AceContainer::OnInactive(int32_t instanceId)
@@ -288,6 +289,12 @@ void AceContainer::OnInactive(int32_t instanceId)
     if (front) {
         front->OnInactive();
     }
+    // TODO: remove it after ability fix onshow lifecyle.
+    auto context = container->GetPipelineContext();
+    if (!context) {
+        return;
+    }
+    context->SetWindowOnHide();
 }
 
 bool AceContainer::OnStartContinuation(int32_t instanceId)

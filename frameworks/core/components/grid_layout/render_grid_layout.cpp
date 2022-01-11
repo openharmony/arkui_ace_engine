@@ -515,7 +515,7 @@ void RenderGridLayout::UpdateAccessibilityAttr()
 {
     auto refPtr = accessibilityNode_.Upgrade();
     if (!refPtr) {
-        LOGE("GetAccessibilityNode failed.");
+        LOGI("accessibility node is not enabled.");
         return;
     }
     auto collectionInfo = refPtr->GetCollectionInfo();

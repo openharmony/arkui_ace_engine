@@ -122,14 +122,7 @@ void ViewFunctions::ExecuteRender()
 
     auto func = jsRenderFunc_.Lock();
     JSRef<JSVal> jsThis = jsObject_.Lock();
-    JSRef<JSVal> res = func->Call(jsThis);
-    if (!res.IsEmpty()) {
-        jsRenderResult_ = res;
-    }
-
-    if (jsRenderResult_.IsEmpty()) {
-        LOGE("Result of render function is empty!");
-    }
+    jsRenderResult_ = func->Call(jsThis);
 }
 
 void ViewFunctions::ExecuteAppear()
@@ -248,7 +241,7 @@ void ViewFunctions::Destroy(JSView* parentCustomView)
     LOGD("Destroy");
     // Might be called from parent view, before any result has been produced??
     if (jsRenderResult_.IsEmpty()) {
-        LOGI("ViewFunctions::Destroy() -> no previous render result to delete");
+        LOGD("ViewFunctions::Destroy() -> no previous render result to delete");
         return;
     }
 
@@ -341,7 +334,6 @@ RefPtr<OHOS::Ace::PageTransitionComponent> JSView::BuildPageTransitionComponent(
 
 RefPtr<OHOS::Ace::Component> JSView::InternalRender(const RefPtr<Component>& parent)
 {
-    LOGD("JSView: InternalRender");
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     needsUpdate_ = false;
     if (!jsViewFunction_) {

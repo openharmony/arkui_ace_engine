@@ -1184,7 +1184,6 @@ void PipelineContext::AddNeedRebuildFocusElement(const RefPtr<Element>& focusEle
         LOGW("focusElement is null");
         return;
     }
-    LOGD("schedule rebuild focus element for %{public}s", AceType::TypeName(focusElement));
     needRebuildFocusElement_.emplace(focusElement);
 }
 
@@ -1212,7 +1211,6 @@ void PipelineContext::AddNeedRenderFinishNode(const RefPtr<RenderNode>& renderNo
         LOGW("renderNode is null");
         return;
     }
-    LOGD("schedule render for %{public}s", AceType::TypeName(renderNode));
     needPaintFinishNodes_.emplace(renderNode);
 }
 
@@ -2182,6 +2180,18 @@ void PipelineContext::SetAnimationCallback(AnimationCallback&& callback)
 void PipelineContext::SetMultimodalSubscriber(const RefPtr<MultimodalSubscriber>& multimodalSubscriber)
 {
     multiModalManager_->SetMultimodalSubscriber(multimodalSubscriber);
+}
+
+void PipelineContext::SetWindowOnShow()
+{
+    window_->OnShow();
+    window_->RequestFrame();
+}
+
+void PipelineContext::SetWindowOnHide()
+{
+    window_->RequestFrame();
+    window_->OnHide();
 }
 
 void PipelineContext::OnShow()
