@@ -26,7 +26,7 @@
     do {                                                                                                    \
         if (OHOS::Ace::LogWrapper::JudgeLevel(OHOS::Ace::LogLevel::level)) {                                \
             OHOS::Ace::LogWrapper::PrintLog(OHOS::Ace::LogDomain::FRAMEWORK, OHOS::Ace::LogLevel::level,    \
-                "[%{private}-20s(%{private}s)] " fmt, OHOS::Ace::LogWrapper::GetBriefFileName(__FILE__),    \
+                "[%{public}-20s(%{public}s)] " fmt, OHOS::Ace::LogWrapper::GetBriefFileName(__FILE__),    \
                 __FUNCTION__, ##__VA_ARGS__);                                                               \
         }                                                                                                   \
     } while (0)

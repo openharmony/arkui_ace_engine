@@ -286,7 +286,7 @@ void RosenRenderImage::Update(const RefPtr<Component>& component)
     imageLoadingStatus_ = (sourceInfo_ != curSourceInfo_) ? ImageLoadingStatus::UPDATING : imageLoadingStatus_;
     UpdateRenderAltImage(component);
     if (proceedPreviousLoading_ && !sourceInfo_.IsSvg()) {
-        LOGI("Proceed previous loading, imageSrc is %{private}s, image loading status: %{private}d",
+        LOGI("Proceed previous loading, imageSrc is %{private}s, image loading status: %{public}d",
             sourceInfo_.ToString().c_str(), imageLoadingStatus_);
         return;
     }

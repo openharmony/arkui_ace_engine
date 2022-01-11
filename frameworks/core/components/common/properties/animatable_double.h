@@ -85,14 +85,11 @@ public:
         }
         AnimationOption explicitAnim = context->GetExplicitAnimationOption();
         if (explicitAnim.IsValid()) {
-            LOGD("Animatable assign with explicit animation, duration: %{public}d", explicitAnim.GetDuration());
             SetAnimationOption(explicitAnim);
             AnimateTo(newValue.GetValue());
         } else if (animationOption_.IsValid()) {
-            LOGD("Animatable assign with implicit animation, duration: %{public}d", explicitAnim.GetDuration());
             AnimateTo(newValue.GetValue());
         } else {
-            LOGD("Animatable assign without animation.");
             ResetController();
             SetValue(newValue.GetValue());
         }

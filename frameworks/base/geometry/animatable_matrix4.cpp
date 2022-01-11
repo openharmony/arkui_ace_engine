@@ -39,14 +39,11 @@ AnimatableMatrix4& AnimatableMatrix4::operator=(const AnimatableMatrix4& newMatr
     }
     AnimationOption explicitAnim = pipelineContext->GetExplicitAnimationOption();
     if (explicitAnim.IsValid()) {
-        LOGD("Animatable assign with explicit animation, duration: %{public}d", explicitAnim.GetDuration());
         SetAnimationOption(explicitAnim);
         AnimateTo(newMatrix4);
     } else if (animationOption_.IsValid()) {
-        LOGD("Animatable assign with implicit animation, duration: %{public}d", animationOption_.GetDuration());
         AnimateTo(newMatrix4);
     } else {
-        LOGD("Animatable assign without animation.");
         ResetController();
         Matrix4& matrix4 = *this;
         matrix4 = newMatrix4;
