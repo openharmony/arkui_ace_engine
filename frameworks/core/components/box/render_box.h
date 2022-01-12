@@ -279,6 +279,7 @@ private:
 
     RefPtr<GestureRecognizer> onClick_;
     RefPtr<GestureRecognizer> onDoubleClick_;
+    RefPtr<GestureRecognizer> onLongPress_;
     RefPtr<RawRecognizer> touchRecognizer_;
     RefPtr<StateAttributeList<BoxStateAttribute>> stateAttributeList_;
     OnHoverCallback onHover_;

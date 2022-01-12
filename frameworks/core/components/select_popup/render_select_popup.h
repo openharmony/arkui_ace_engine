@@ -113,6 +113,7 @@ private:
     bool screenHorizontal_ = false;
     bool screenVertical_ = false;
     bool animationCreated_ = false;
+    bool isContextMenu_ = false;
     double normalPadding_ = 0.0;
     RefPtr<SelectTheme> theme_;
 

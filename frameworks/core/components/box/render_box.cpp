@@ -82,6 +82,11 @@ void RenderBox::Update(const RefPtr<Component>& component)
             onClick_ = tapGesture->CreateRecognizer(context_);
             onClick_->SetIsExternalGesture(true);
         }
+        auto longPressGesture = box->GetOnLongPress();
+        if (longPressGesture) {
+            onLongPress_ = longPressGesture->CreateRecognizer(context_);
+            onLongPress_->SetIsExternalGesture(true);
+        }
         auto dcGesture = box->GetOnDoubleClick();
         if (dcGesture) {
             onDoubleClick_ = dcGesture->CreateRecognizer(context_);
@@ -678,6 +683,7 @@ void RenderBox::ClearRenderObject()
     onDrop_ = nullptr;
     onClick_ = nullptr;
     onDoubleClick_ = nullptr;
+    onLongPress_ = nullptr;
 }
 
 BackgroundImagePosition RenderBox::GetBackgroundPosition() const
@@ -1399,6 +1405,9 @@ void RenderBox::OnTouchTestHit(
     }
     if (onDoubleClick_) {
         result.emplace_back(onDoubleClick_);
+    }
+    if (onLongPress_) {
+        result.emplace_back(onLongPress_);
     }
     if (dragDropGesture_) {
         result.emplace_back(dragDropGesture_);

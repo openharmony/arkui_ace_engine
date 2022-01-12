@@ -86,6 +86,7 @@ void RenderSelectPopup::Update(const RefPtr<Component>& component)
     verticalSpacing_ = popup->GetVerticalSpacing();
     contentSpacing_ = popup->GetContentSpacing();
     isFullScreen_ = popup->IsFullScreen();
+    isContextMenu_ = popup->IsContextMenu();
     MarkNeedLayout();
 }
 

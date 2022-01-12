@@ -52,6 +52,11 @@ enum class ResourceType : uint32_t {
     RAWFILE = 30000
 };
 
+enum class ResponseType : int32_t {
+    RIGHT_CLICK = 0,
+    LONGPRESS,
+};
+
 class JSViewAbstract {
 public:
     static void SetPadding(const Dimension& value);
@@ -84,6 +89,7 @@ public:
     static void JsBackgroundImageSize(const JSCallbackInfo& info);
     static void JsBackgroundImagePosition(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
+    static void JsBindContextMenu(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
     static void JsMargin(const JSCallbackInfo& info);

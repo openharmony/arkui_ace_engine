@@ -657,6 +657,12 @@ var NavigationTitleMode;
   NavigationTitleMode[NavigationTitleMode["Mini"] = 2] = "Mini";
 })(NavigationTitleMode || (NavigationTitleMode = {}));
 
+var ResponseType;
+(function (ResponseType) {
+  ResponseType[ResponseType["RightClick"] = 0] = "RightClick";
+  ResponseType[ResponseType["LongPress"] = 1] = "LongPress";
+})(ResponseType || (ResponseType = {}));
+
 var HoverEffect;
 (function (HoverEffect) {
   HoverEffect[HoverEffect["Auto"] = 4] = "Auto";
