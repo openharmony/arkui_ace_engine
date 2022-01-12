@@ -208,6 +208,11 @@ public:
         return betweenItemAndBuilder_;
     }
 
+    size_t CalculateSelectedIndex(
+        const RefPtr<RenderList> targetRenderlist, const GestureEvent& info, Size& selectedItemSize);
+    size_t CalculateInsertIndex(
+        const RefPtr<RenderList> targetRenderlist, const GestureEvent& info, Size selectedItemSize);
+
 protected:
     void UpdateAccessibilityAttr();
     bool HandleActionScroll(bool forward);

@@ -1056,6 +1056,9 @@ public:
         return needClip_;
     }
 
+    RefPtr<RenderNode> FindDropChild(const Point& globalPoint, const Point& parentLocalPoint);
+    static constexpr size_t DEFAULT_INDEX = -1;
+
 protected:
     explicit RenderNode(bool takeBoundary = false);
     virtual void ClearRenderObject();
