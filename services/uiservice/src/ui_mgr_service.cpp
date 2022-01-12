@@ -68,6 +68,8 @@ public:
     {
         flutterAceView_ = flutterAceView;
     }
+    ~UIMgrServiceInputEventConsumer() override = default;
+
     void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override
     {
         if (flutterAceView_ != nullptr) {
