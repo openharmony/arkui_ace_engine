@@ -24,6 +24,10 @@
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+constexpr int32_t CUSTOM_FULL_WINDOW_LENGTH = 3;
+constexpr int32_t ARGS_FULL_WINDOW_LENGTH = 2;
+} // namespace
 
 ModuleManager* ModuleManager::GetInstance()
 {
@@ -31,15 +35,257 @@ ModuleManager* ModuleManager::GetInstance()
     return &instance;
 }
 
+JSValue AppGetInfo(JSContext* ctx, JSValue value, int32_t argc, JSValueConst* argv)
+{
+    auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (instance == nullptr) {
+        LOGE("Can not cast Context to QJSDelcarativeEngineInstance object.");
+        return JS_NULL;
+    }
+    auto delegate = instance->GetDelegate();
+    if (!delegate) {
+        LOGE("get frontend delegate failed");
+        return JS_NULL;
+    }
+    JSValue appInfo = JS_NewObject(ctx);
+    auto appId = delegate->GetAppID();
+    auto appName = delegate->GetAppName();
+    auto versionName = delegate->GetVersionName();
+    auto versionCode = delegate->GetVersionCode();
+    JS_SetPropertyStr(ctx, appInfo, "appID", JS_NewString(ctx, appId.c_str()));
+    JS_SetPropertyStr(ctx, appInfo, "appName", JS_NewString(ctx, appName.c_str()));
+    JS_SetPropertyStr(ctx, appInfo, "versionName", JS_NewString(ctx, versionName.c_str()));
+    JS_SetPropertyStr(ctx, appInfo, "versionCode", JS_NewInt32(ctx, versionCode));
+    return appInfo;
+}
+
+JSValue AppTerminate(JSContext* ctx, JSValue value, int32_t argc, JSValueConst* argv)
+{
+    auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (instance == nullptr) {
+        LOGE("Can not cast Context to QJSDelcarativeEngineInstance object.");
+        return JS_NULL;
+    }
+    auto delegate = instance->GetDelegate();
+    if (!delegate) {
+        LOGE("get frontend delegate failed");
+        return JS_NULL;
+    }
+    auto pipelineContext = instance->GetPipelineContext(ctx);
+    if (!pipelineContext) {
+        LOGE("get frontend pipelineContext failed");
+        return JS_NULL;
+    }
+    auto uiTaskExecutor = delegate->GetUiTask();
+    WeakPtr<PipelineContext> pipelineContextWeak(pipelineContext);
+    uiTaskExecutor.PostTask([pipelineContextWeak]() mutable {
+        auto pipelineContext = pipelineContextWeak.Upgrade();
+        if (pipelineContext) {
+            pipelineContext->Finish();
+        }
+    });
+    return JS_NULL;
+}
+
+void ParseFullWindowParams(JSContext* ctx, JSValue params, std::string& duration)
+{
+    JSPropertyEnum* tab = nullptr;
+    uint32_t paramLen = 0;
+    if (JS_IsObject(params)) {
+        JS_GetOwnPropertyNames(ctx, &tab, &paramLen, params, JS_GPN_STRING_MASK);
+        const char* jsDurationKey = JS_AtomToCString(ctx, tab[0].atom);
+        if (jsDurationKey == nullptr) {
+            JS_FreeAtom(ctx, tab[0].atom);
+            js_free(ctx, tab);
+            LOGE("jsDurationKey is null.");
+            return;
+        }
+        if (std::strcmp(jsDurationKey, "duration") == 0) {
+            JSValue valObject = JS_GetProperty(ctx, params, tab[0].atom);
+            if (JS_IsString(valObject) || JS_IsNumber(valObject)) {
+                ScopedString styleVal(ctx, valObject);
+                const char* valDuration = styleVal.get();
+                duration = valDuration;
+            }
+            JS_FreeValue(ctx, valObject);
+        }
+        JS_FreeAtom(ctx, tab[0].atom);
+        JS_FreeCString(ctx, jsDurationKey);
+    }
+    js_free(ctx, tab);
+}
+
+JSValue AppRequestFullWindow(JSContext* ctx, JSValue value, int32_t argc, JSValueConst* argv)
+{
+    JSPropertyEnum* pTab = nullptr;
+    uint32_t len = 0;
+    int32_t duration = -1;
+    if (JS_IsObject(value) && JS_IsArray(ctx, value)) {
+        JS_GetOwnPropertyNames(ctx, &pTab, &len, value, JS_GPN_STRING_MASK);
+        if (len < ARGS_FULL_WINDOW_LENGTH) {
+            LOGW("RequestFullWindow: invalid callback value");
+            js_free(ctx, pTab);
+            return JS_NULL;
+        }
+        if (len == CUSTOM_FULL_WINDOW_LENGTH) {
+            JSValue jsDuration = JS_GetProperty(ctx, value, pTab[0].atom);
+            std::string valDuration;
+            ParseFullWindowParams(ctx, jsDuration, valDuration);
+            if (!valDuration.empty()) {
+                duration = StringToInt(valDuration);
+            }
+            if (duration < 0) {
+                duration = -1;
+            }
+            JS_FreeValue(ctx, jsDuration);
+        }
+        js_free(ctx, pTab);
+    }
+    auto instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
+    WeakPtr<PipelineContext> pipelineContextWeak = instance->GetDelegate()->GetPipelineContext();
+    auto uiTaskExecutor = instance->GetDelegate()->GetUiTask();
+    uiTaskExecutor.PostTask([pipelineContextWeak, duration]() mutable {
+        auto pipelineContext = pipelineContextWeak.Upgrade();
+        if (pipelineContext) {
+            pipelineContext->RequestFullWindow(duration);
+        }
+    });
+    return JS_NULL;
+}
+
+JSValue AppSetImageCacheCount(JSContext* ctx, JSValue value, int32_t argc, JSValueConst* argv)
+{
+    auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (instance == nullptr) {
+        LOGE("Can not cast Context to QJSDelcarativeEngineInstance object.");
+        return JS_NULL;
+    }
+    auto delegate = instance->GetDelegate();
+    if (!delegate) {
+        LOGE("get frontend delegate failed");
+        return JS_NULL;
+    }
+    auto pipelineContext = instance->GetPipelineContext(ctx);
+    if (!pipelineContext) {
+        LOGE("get frontend pipelineContext failed");
+        return JS_NULL;
+    }
+    auto uiTaskExecutor = delegate->GetUiTask();
+    WeakPtr<PipelineContext> pipelineContextWeak(pipelineContext);
+    int32_t size;
+    JS_ToInt32(ctx, &size, argv[0]);
+    size = size > 0 ? size : 0;
+    uiTaskExecutor.PostTask([pipelineContextWeak, size]() mutable {
+        auto pipelineContext = pipelineContextWeak.Upgrade();
+        if (pipelineContext) {
+            auto imageCache = pipelineContext->GetImageCache();
+            if (imageCache) {
+                imageCache->SetCapacity(size);
+            } else {
+                LOGW("image cache is null");
+            }
+        }
+    });
+    return JS_NULL;
+}
+
+JSValue AppSetImageRawDataCacheSize(JSContext* ctx, JSValue value, int32_t argc, JSValueConst* argv)
+{
+    auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (instance == nullptr) {
+        LOGE("Can not cast Context to QJSDelcarativeEngineInstance object.");
+        return JS_NULL;
+    }
+    auto delegate = instance->GetDelegate();
+    if (!delegate) {
+        LOGE("get frontend delegate failed");
+        return JS_NULL;
+    }
+    auto pipelineContext = instance->GetPipelineContext(ctx);
+    if (!pipelineContext) {
+        LOGE("get frontend pipelineContext failed");
+        return JS_NULL;
+    }
+    auto uiTaskExecutor = delegate->GetUiTask();
+    WeakPtr<PipelineContext> pipelineContextWeak(pipelineContext);
+    int32_t size;
+    JS_ToInt32(ctx, &size, argv[0]);
+    size = size > 0 ? size : 0;
+    uiTaskExecutor.PostTask([pipelineContextWeak, size]() mutable {
+        auto pipelineContext = pipelineContextWeak.Upgrade();
+        if (pipelineContext) {
+            auto imageCache = pipelineContext->GetImageCache();
+            if (imageCache) {
+                imageCache->SetCapacity(size);
+            } else {
+                LOGW("image cache is null");
+            }
+        }
+    });
+    return JS_NULL;
+}
+
+JSValue AppSetImageFileCacheSize(JSContext* ctx, JSValue value, int32_t argc, JSValueConst* argv)
+{
+    auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (instance == nullptr) {
+        LOGE("Can not cast Context to QJSDelcarativeEngineInstance object.");
+        return JS_NULL;
+    }
+    auto delegate = instance->GetDelegate();
+    if (!delegate) {
+        LOGE("get frontend delegate failed");
+        return JS_NULL;
+    }
+    auto pipelineContext = instance->GetPipelineContext(ctx);
+    if (!pipelineContext) {
+        LOGE("get frontend pipelineContext failed");
+        return JS_NULL;
+    }
+    auto uiTaskExecutor = delegate->GetUiTask();
+    WeakPtr<PipelineContext> pipelineContextWeak(pipelineContext);
+    int32_t size;
+    JS_ToInt32(ctx, &size, argv[0]);
+    size = size > 0 ? size : 0;
+    uiTaskExecutor.PostTask([pipelineContextWeak, size]() mutable {
+        auto pipelineContext = pipelineContextWeak.Upgrade();
+        if (pipelineContext) {
+            auto imageCache = pipelineContext->GetImageCache();
+            if (imageCache) {
+                imageCache->SetCacheFileLimit(size);
+            } else {
+                LOGW("image cache is null");
+            }
+        }
+    });
+    return JS_NULL;
+}
+
+void InitAppModule(JSContext* ctx, JSValue& moduleObj)
+{
+    JS_SetPropertyStr(ctx, moduleObj, APP_GET_INFO, JS_NewCFunction(ctx, AppGetInfo, APP_GET_INFO, 0));
+    JS_SetPropertyStr(ctx, moduleObj, APP_TERMINATE, JS_NewCFunction(ctx, AppTerminate, APP_TERMINATE, 0));
+    JS_SetPropertyStr(ctx, moduleObj, APP_REQUEST_FULL_WINDOW,
+        JS_NewCFunction(ctx, AppRequestFullWindow, APP_REQUEST_FULL_WINDOW, 1));
+    JS_SetPropertyStr(ctx, moduleObj, APP_SET_IMAGE_CACHE_COUNT,
+        JS_NewCFunction(ctx, AppSetImageCacheCount, APP_SET_IMAGE_CACHE_COUNT, 1));
+    JS_SetPropertyStr(ctx, moduleObj, APP_SET_IMAGE_RAWDATA_CACHE_SIZE,
+        JS_NewCFunction(ctx, AppSetImageRawDataCacheSize, APP_SET_IMAGE_RAWDATA_CACHE_SIZE, 1));
+    JS_SetPropertyStr(ctx, moduleObj, APP_SET_IMAGE_FILE_CACHE_SIZE,
+        JS_NewCFunction(ctx, AppSetImageFileCacheSize, APP_SET_IMAGE_FILE_CACHE_SIZE, 1));
+}
+
 bool ModuleManager::InitModule(JSContext* ctx, const std::string& moduleName, JSValue& jsObject)
 {
-    static const std::unordered_map<std::string, void (*)(JSContext* ctx, JSValue& jsObject)> MODULE_LIST = {
+    static const std::unordered_map<std::string, void (*)(JSContext * ctx, JSValue & jsObject)> MODULE_LIST = {
         { "system.router", [](JSContext* ctx, JSValue& jsObject) { InitRouterModule(ctx, jsObject); } },
         { "ohos.router", [](JSContext* ctx, JSValue& jsObject) { InitRouterModule(ctx, jsObject); } },
         { "system.curves", [](JSContext* ctx, JSValue& jsObject) { InitCurvesModule(ctx, jsObject); } },
         { "ohos.curves", [](JSContext* ctx, JSValue& jsObject) { InitCurvesModule(ctx, jsObject); } },
         { "system.matrix4", [](JSContext* ctx, JSValue& jsObject) { InitMatrix4Module(ctx, jsObject); } },
         { "ohos.matrix4", [](JSContext* ctx, JSValue& jsObject) { InitMatrix4Module(ctx, jsObject); } },
+        { "system.app", [](JSContext* ctx, JSValue& jsObject) { InitAppModule(ctx, jsObject); } },
+        { "ohos.app", [](JSContext* ctx, JSValue& jsObject) { InitAppModule(ctx, jsObject); } },
     };
     auto iter = MODULE_LIST.find(moduleName);
     if (iter != MODULE_LIST.end()) {
