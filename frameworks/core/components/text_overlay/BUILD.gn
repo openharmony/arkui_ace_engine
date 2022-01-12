@@ -17,7 +17,10 @@ build_component("text_overlay") {
   sources = [
     "flutter_render_text_overlay.cpp",
     "render_text_overlay.cpp",
+    "render_text_overlay_creator.cpp",
     "text_overlay_component.cpp",
     "text_overlay_element.cpp",
   ]
+
+  rosen_sources = [ "rosen_render_text_overlay.cpp" ]
 }

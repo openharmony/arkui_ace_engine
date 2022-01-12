@@ -40,11 +40,6 @@ constexpr double FIXED_OFFSET = 18.0;
 
 } // namespace
 
-RefPtr<RenderNode> RenderTextOverlay::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderTextOverlay>();
-}
-
 void FlutterRenderTextOverlay::Paint(RenderContext& context, const Offset& offset)
 {
     if (!showOption_.showStartHandle && !showOption_.showEndHandle) {
