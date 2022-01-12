@@ -2571,14 +2571,14 @@ bool PipelineContext::ProcessDragEvent(int action, double windowX, double window
 
         if (targetRenderBox == preTargetRenderBox) {
             if (targetRenderBox && targetRenderBox->GetOnDragMove()) {
-                (targetRenderBox->GetOnDragMove())(event);
+                (targetRenderBox->GetOnDragMove())(event, json->ToString());
             }
         } else {
             if (preTargetRenderBox && preTargetRenderBox->GetOnDragLeave()) {
-                (preTargetRenderBox->GetOnDragLeave())(event);
+                (preTargetRenderBox->GetOnDragLeave())(event, json->ToString());
             }
             if (targetRenderBox && targetRenderBox->GetOnDragEnter()) {
-                (targetRenderBox->GetOnDragEnter())(event);
+                (targetRenderBox->GetOnDragEnter())(event, json->ToString());
             }
             SetPreTargetRenderNode(targetRenderBox);
         }
@@ -2589,7 +2589,7 @@ bool PipelineContext::ProcessDragEvent(int action, double windowX, double window
             AceType::DynamicCast<RenderBox>(renderNode->FindChildNodeOfClass<RenderBox>(globalPoint, localPoint));
 
         if (targetRenderBox && targetRenderBox->GetOnDrop()) {
-            (targetRenderBox->GetOnDrop())(event);
+            (targetRenderBox->GetOnDrop())(event, json->ToString());
         }
         SetPreTargetRenderNode(nullptr);
         return targetRenderBox ? true : false;

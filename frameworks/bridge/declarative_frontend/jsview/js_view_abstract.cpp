@@ -2573,74 +2573,109 @@ void JSViewAbstract::Pop()
     ViewStackProcessor::GetInstance()->Pop();
 }
 
-void JSViewAbstract::JsOnDrag(const JSCallbackInfo& info)
+void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onDragId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragFunc)](
-                            const RefPtr<DragEvent>& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute(info);
-        };
-        auto drag = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        drag->SetOnDragId(onDragId);
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind onDrag event due to info is not function");
+        return;
     }
+    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+                        const RefPtr<DragEvent>& info, const std::string &extraParams) -> RefPtr<Component> {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
+        auto ret = func->Execute(info, extraParams);
+        if (!ret->IsObject()) {
+            LOGE("builder param is not an object.");
+            return nullptr;
+        }
+
+        auto builderObj = JSRef<JSObject>::Cast(ret);
+        auto builder = builderObj->GetProperty("builder");
+        if (!builder->IsFunction()) {
+            LOGE("builder param is not a function.");
+            return nullptr;
+        }
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        if (!builderFunc) {
+            LOGE("builder function is null.");
+            return nullptr;
+        }
+        // use another VSP instance while executing the builder function
+        ScopedViewStackProcessor builderViewStackProcessor;
+        builderFunc->Execute();
+        RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
+        if (!customComponent) {
+            LOGE("Custom component is null.");
+            return nullptr;
+        }
+        return customComponent;
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragStartId(onDragStartId);
 }
 
 void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
-                                 const RefPtr<DragEvent>& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute(info);
-        };
-        auto dragEnter = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        dragEnter->SetOnDragEnterId(onDragEnterId);
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind onDragEnter event due to info is not function");
+        return;
     }
+    RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
+                            const RefPtr<DragEvent>& info, const std::string &extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Execute(info, extraParams);
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragEnterId(onDragEnterId);
 }
 
 void JSViewAbstract::JsOnDragMove(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
-                                const RefPtr<DragEvent>& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute(info);
-        };
-        auto dragMove = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        dragMove->SetOnDragMoveId(onDragMoveId);
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind onDragMove event due to info is not function");
+        return;
     }
+    RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
+                            const RefPtr<DragEvent>& info, const std::string &extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Execute(info, extraParams);
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragMoveId(onDragMoveId);
 }
 
 void JSViewAbstract::JsOnDragLeave(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
-                                 const RefPtr<DragEvent>& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute(info);
-        };
-        auto dragLeave = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        dragLeave->SetOnDragLeaveId(onDragLeaveId);
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind onDragLeave event due to info is not function");
+        return;
     }
+    RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
+                            const RefPtr<DragEvent>& info, const std::string &extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Execute(info, extraParams);
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragLeaveId(onDragLeaveId);
 }
 
 void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
-                            const RefPtr<DragEvent>& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute(info);
-        };
-        auto drop = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        drop->SetOnDropId(onDropId);
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind onDrop event due to info is not function");
+        return;
     }
+    RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
+                        const RefPtr<DragEvent>& info, const std::string &extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Execute(info, extraParams);
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDropId(onDropId);
 }
 
 void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
@@ -3411,7 +3446,7 @@ void JSViewAbstract::JSBind()
 #endif
 
     JSClass<JSViewAbstract>::StaticMethod("bindMenu", &JSViewAbstract::JsBindMenu);
-    JSClass<JSViewAbstract>::StaticMethod("onDrag", &JSViewAbstract::JsOnDrag);
+    JSClass<JSViewAbstract>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
     JSClass<JSViewAbstract>::StaticMethod("onDragEnter", &JSViewAbstract::JsOnDragEnter);
     JSClass<JSViewAbstract>::StaticMethod("onDragMove", &JSViewAbstract::JsOnDragMove);
     JSClass<JSViewAbstract>::StaticMethod("onDragLeave", &JSViewAbstract::JsOnDragLeave);

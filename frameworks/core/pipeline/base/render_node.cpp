@@ -717,6 +717,43 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     return dispatchSuccess || beforeSize != endSize;
 }
 
+RefPtr<RenderNode> RenderNode::FindDropChild(const Point& globalPoint, const Point& parentLocalPoint)
+{
+    Point transformPoint = GetTransformPoint(parentLocalPoint);
+    if (!InTouchRectList(transformPoint, GetTouchRectList())) {
+        return nullptr;
+    }
+
+    const auto localPoint = transformPoint - GetPaintRect().GetOffset();
+    const auto& children = GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        if (!child->GetVisible()) {
+            continue;
+        }
+        if (child->InterceptTouchEvent()) {
+            continue;
+        }
+
+        auto target = child->FindDropChild(globalPoint, localPoint);
+        if (target) {
+            return target;
+        }
+    }
+
+    for (auto& rect : GetTouchRectList()) {
+        if (touchable_ && rect.IsInRegion(transformPoint)) {
+            RefPtr<RenderNode> renderNode = AceType::Claim<RenderNode>(this);
+            auto renderBox = AceType::DynamicCast<RenderBox>(renderNode);
+            if (renderBox && renderBox->GetOnDrop()) {
+                return renderNode;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 void RenderNode::MouseTest(const Point& globalPoint, const Point& parentLocalPoint, MouseTestResult& result)
 {
     LOGD("MouseTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",

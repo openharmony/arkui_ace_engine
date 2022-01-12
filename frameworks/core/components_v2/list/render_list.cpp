@@ -1468,4 +1468,53 @@ RefPtr<RenderListItem> RenderList::FindCurrentListItem(const Point& point)
     return nullptr;
 }
 
+size_t RenderList::CalculateSelectedIndex(
+    const RefPtr<RenderList> targetRenderlist, const GestureEvent& info, Size& selectedItemSize)
+{
+    auto listItem = targetRenderlist->FindTargetRenderNode<RenderListItem>(context_.Upgrade(), info);
+    if (listItem) {
+        selectedItemSize = listItem->GetLayoutSize();
+        return targetRenderlist->GetIndexByListItem(listItem);
+    }
+
+    return DEFAULT_INDEX;
+}
+
+size_t RenderList::CalculateInsertIndex(
+    const RefPtr<RenderList> targetRenderlist, const GestureEvent& info, Size selectedItemSize)
+{
+    if (targetRenderlist->TotalCount() == 0) {
+        return 0;
+    }
+
+    auto listItem = targetRenderlist->FindTargetRenderNode<RenderListItem>(context_.Upgrade(), info);
+    if (!listItem) {
+        GestureEvent newEvent = info;
+        while (!listItem) {
+            if (FindTargetRenderNode<V2::RenderList>(context_.Upgrade(), newEvent) != targetRenderlist) {
+                break;
+            }
+            double newX = vertical_ ?
+                newEvent.GetGlobalPoint().GetX() : newEvent.GetGlobalPoint().GetX() - selectedItemSize.Width();
+            double newY = vertical_ ?
+                newEvent.GetGlobalPoint().GetY() - selectedItemSize.Height() : newEvent.GetGlobalPoint().GetY();
+            newEvent.SetGlobalPoint(Point(newX, newY));
+            listItem = targetRenderlist->FindTargetRenderNode<RenderListItem>(context_.Upgrade(), newEvent);
+        }
+        if (!listItem) {
+            return 0;
+        }
+        if (static_cast<int32_t>(targetRenderlist->GetIndexByListItem(listItem)) > -1) {
+            return targetRenderlist->GetIndexByListItem(listItem) + 1;
+        }
+        return DEFAULT_INDEX;
+    }
+
+    if (static_cast<int32_t>(targetRenderlist->GetIndexByListItem(listItem)) > -1) {
+        return targetRenderlist->GetIndexByListItem(listItem);
+    }
+
+    return DEFAULT_INDEX;
+}
+
 } // namespace OHOS::Ace::V2

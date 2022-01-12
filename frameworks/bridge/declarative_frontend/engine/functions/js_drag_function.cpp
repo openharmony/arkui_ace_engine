@@ -82,7 +82,6 @@ public:
         JSClass<JsDragEvent>::CustomMethod("getY", &JsDragEvent::GetY);
         JSClass<JsDragEvent>::CustomMethod("getDescription", &JsDragEvent::GetDescription);
         JSClass<JsDragEvent>::CustomMethod("setDescription", &JsDragEvent::SetDescription);
-        JSClass<JsDragEvent>::CustomMethod("setPixmap", &JsDragEvent::SetPixmap);
         JSClass<JsDragEvent>::Bind(globalObj, &JsDragEvent::Constructor, &JsDragEvent::Destructor);
     }
 
@@ -121,15 +120,6 @@ public:
     {
         if (args[0]->IsString()) {
             dragEvent_->SetDescription(args[0]->ToString());
-        }
-    }
-
-    void SetPixmap(const JSCallbackInfo& args)
-    {
-        if (args[0]->IsObject()) {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-            dragEvent_->SetPixmap(CreatePixelMapFromNapiValue(args[0]));
-#endif
         }
     }
 
@@ -173,11 +163,12 @@ void JsDragFunction::Execute()
     JsFunction::Execute();
 }
 
-void JsDragFunction::Execute(const RefPtr<DragEvent>& info)
+JSRef<JSVal> JsDragFunction::Execute(const RefPtr<DragEvent>& info, const std::string &extraParams)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(CreateDragEvent(info));
-    JSRef<JSVal> param = obj;
-    JsFunction::ExecuteJS(1, &param);
+    JSRef<JSVal> dragInfo = JSRef<JSObject>::Cast(CreateDragEvent(info));
+    JSRef<JSVal> jsonInfo = JSRef<JSVal>::Make(ToJSValue(extraParams));
+    JSRef<JSVal> params[] = { dragInfo, jsonInfo };
+    return JsFunction::ExecuteJS(2, params);
 }
 
 JSRef<JSVal> JsDragFunction::ItemDragStartExecute(const ItemDragInfo& info, int32_t itemIndex)

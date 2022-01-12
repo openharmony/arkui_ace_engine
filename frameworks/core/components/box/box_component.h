@@ -24,7 +24,8 @@
 
 namespace OHOS::Ace {
 
-using OnDragFunc = std::function<void(const RefPtr<DragEvent>& info)>;
+using OnDragFunc = std::function<RefPtr<Component>(const RefPtr<DragEvent>&, const std::string&)>;
+using OnDropFunc = std::function<void(const RefPtr<DragEvent>&, const std::string&)>;
 using OnHoverCallback = std::function<void(bool)>;
 using OnMouseCallback = std::function<void(MouseInfo& info)>;
 
@@ -115,58 +116,6 @@ public:
         animationType_ = animationType;
     }
 
-    OnDragFunc GetOnDragId() const
-    {
-        if (!onDragId_) {
-            return nullptr;
-        }
-        return *onDragId_;
-    }
-
-    void SetOnDragId(const OnDragFunc& onDragId)
-    {
-        onDragId_ = std::make_unique<OnDragFunc>(onDragId);
-    }
-
-    OnDragFunc GetOnDragEnterId() const
-    {
-        if (!onDragEnterId_) {
-            return nullptr;
-        }
-        return *onDragEnterId_;
-    }
-
-    void SetOnDragEnterId(const OnDragFunc& onDragEnterId)
-    {
-        onDragEnterId_ = std::make_unique<OnDragFunc>(onDragEnterId);
-    }
-
-    OnDragFunc GetOnDragLeaveId() const
-    {
-        if (!onDragLeaveId_) {
-            return nullptr;
-        }
-        return *onDragLeaveId_;
-    }
-
-    OnDragFunc GetOnDragMoveId() const
-    {
-        if (!onDragMoveId_) {
-            return nullptr;
-        }
-        return *onDragMoveId_;
-    }
-
-    void SetOnDragMoveId(const OnDragFunc& onDragMoveId)
-    {
-        onDragMoveId_ = std::make_unique<OnDragFunc>(onDragMoveId);
-    }
-
-    void SetOnDragLeaveId(const OnDragFunc& onDragLeaveId)
-    {
-        onDragLeaveId_ = std::make_unique<OnDragFunc>(onDragLeaveId);
-    }
-
     void SetInspectorDirection(TextDirection direction)
     {
         inspectorDirection_ = direction;
@@ -175,19 +124,6 @@ public:
     TextDirection GetInspectorDirection() const
     {
         return inspectorDirection_;
-    }
-
-    OnDragFunc GetOnDropId() const
-    {
-        if (!onDropId_) {
-            return nullptr;
-        }
-        return *onDropId_;
-    }
-
-    void SetOnDropId(const OnDragFunc& onDropId)
-    {
-        onDropId_ = std::make_unique<OnDragFunc>(onDropId);
     }
 
     void SetOnHoverId(const OnHoverCallback& onHoverId)
@@ -351,16 +287,66 @@ public:
             MakeRefPtr<StateAttributeValue<BoxStateAttribute, Gradient>>(state, BoxStateAttribute::GRADIENT, value));
     }
 
+    OnDragFunc GetOnDragStartId() const
+    {
+        return onDragStartId_;
+    }
+
+    void SetOnDragStartId(const OnDragFunc& onDragStartId)
+    {
+        onDragStartId_ = onDragStartId;
+    }
+
+    OnDropFunc GetOnDragEnterId() const
+    {
+        return onDragEnterId_;
+    }
+
+    void SetOnDragEnterId(const OnDropFunc& onDragEnterId)
+    {
+        onDragEnterId_ = onDragEnterId;
+    }
+
+    OnDropFunc GetOnDragMoveId() const
+    {
+        return onDragMoveId_;
+    }
+
+    void SetOnDragMoveId(const OnDropFunc& onDragMoveId)
+    {
+        onDragMoveId_ = onDragMoveId;
+    }
+
+    OnDropFunc GetOnDragLeaveId() const
+    {
+        return onDragLeaveId_;
+    }
+
+    void SetOnDragLeaveId(const OnDropFunc& onDragLeaveId)
+    {
+        onDragLeaveId_ = onDragLeaveId;
+    }
+
+    OnDropFunc GetOnDropId() const
+    {
+        return onDropId_;
+    }
+
+    void SetOnDropId(const OnDropFunc& onDropId)
+    {
+        onDropId_ = onDropId;
+    }
+
 private:
     RefPtr<Decoration> backDecoration_;
     RefPtr<Decoration> frontDecoration_;
     bool decorationUpdateFlag_ = false;
     HoverAnimationType animationType_ = HoverAnimationType::NONE;
-    std::unique_ptr<OnDragFunc> onDragId_;
-    std::unique_ptr<OnDragFunc> onDragEnterId_;
-    std::unique_ptr<OnDragFunc> onDragMoveId_;
-    std::unique_ptr<OnDragFunc> onDragLeaveId_;
-    std::unique_ptr<OnDragFunc> onDropId_;
+    OnDragFunc onDragStartId_;
+    OnDropFunc onDragEnterId_;
+    OnDropFunc onDragMoveId_;
+    OnDropFunc onDragLeaveId_;
+    OnDropFunc onDropId_;
     OnHoverCallback onHoverId_;
     OnMouseCallback onMouseId_;
     RefPtr<Gesture> onClickId_;

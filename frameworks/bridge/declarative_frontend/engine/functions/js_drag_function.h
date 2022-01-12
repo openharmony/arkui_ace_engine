@@ -39,6 +39,7 @@ public:
     void ItemDragMoveExecute(const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex);
     void ItemDragLeaveExecute(const ItemDragInfo& info, int32_t itemIndex);
     void ItemDropExecute(const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess);
+    JSRef<JSVal> Execute(const RefPtr<DragEvent>& info, const std::string& extraParams);
 
 private:
     JSRef<JSObject> CreateDragEvent(const RefPtr<DragEvent>& info);

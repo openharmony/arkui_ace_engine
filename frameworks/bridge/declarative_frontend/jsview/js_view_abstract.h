@@ -158,7 +158,7 @@ public:
     static void SetVisibility(int value);
     static void Pop();
 
-    static void JsOnDrag(const JSCallbackInfo& info);
+    static void JsOnDragStart(const JSCallbackInfo& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);
