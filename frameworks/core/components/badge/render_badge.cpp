@@ -135,6 +135,7 @@ void RenderBadge::PerformLayout()
     if (!GetChildren().empty()) {
         auto child = GetChildren().front();
         child->Layout(innerLayoutParam);
+        child->SetPosition(badgeChildInitialOffset_);
         maxWidth = std::max(maxWidth, child->GetLayoutSize().Width() + paddingSize.Width());
         maxHeight = std::max(maxHeight, child->GetLayoutSize().Height() + paddingSize.Height());
     }
