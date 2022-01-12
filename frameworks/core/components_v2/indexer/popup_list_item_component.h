@@ -21,7 +21,6 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/box/box_component.h"
-#include "core/components/display/display_component.h"
 #include "core/components/text/text_component.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/pipeline/base/component_group.h"
@@ -29,6 +28,7 @@
 namespace OHOS::Ace::V2 {
 inline constexpr double POPUP_BOX_SIZE = 56.0;
 inline constexpr double POPUP_FONT_SIZE = 24.0;
+inline constexpr double POPUP_ZERO_SIZE = 0.0;
 inline constexpr uint32_t POPUP_BG_COLOR = 0xFFF1F3F5;
 inline constexpr uint32_t POPUP_FONT_COLOR = 0xFF254FF7;
 inline constexpr double POPUP_BG_OPACITY = 0.9;

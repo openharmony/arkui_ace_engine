@@ -76,7 +76,6 @@ public:
 
     void SetClicked(bool clicked)
     {
-        LOGD("[indexer] SetClicked clicked:%d", clicked);
         bool preClicked = clicked_;
         clicked_ = clicked;
         if (clicked_ != preClicked) {

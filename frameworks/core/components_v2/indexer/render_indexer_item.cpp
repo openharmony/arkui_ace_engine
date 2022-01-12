@@ -27,12 +27,12 @@ constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 
 RefPtr<RenderNode> RenderIndexerItem::Create()
 {
+    LOGI("[indexer] RenderIndexerItem Create");
     return AceType::MakeRefPtr<RenderIndexerItem>();
 }
 
 void RenderIndexerItem::Update(const RefPtr<Component>& component)
 {
-    LOGD("[indexer] Update RenderIndexerItem");
     RefPtr<IndexerItemComponent> itemComponent = AceType::DynamicCast<IndexerItemComponent>(component);
     if (itemComponent) {
         sectionIndex_ = itemComponent->GetSectionIndex();

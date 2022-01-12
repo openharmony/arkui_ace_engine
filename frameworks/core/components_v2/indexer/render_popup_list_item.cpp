@@ -88,7 +88,7 @@ void RenderPopupListItem::PerformLayout()
 void RenderPopupListItem::UpdateBoxSelected()
 {
     if (!renderBox_ || !boxComponent_) {
-        LOGD("box is nullptr");
+        LOGE("box is nullptr");
         return;
     }
 
@@ -101,13 +101,14 @@ void RenderPopupListItem::UpdateBoxSelected()
 void RenderPopupListItem::UpdateBoxNormal()
 {
     if (!renderBox_ || !boxComponent_) {
-        LOGD("box is nullptr");
+        LOGE("box is nullptr");
         return;
     }
 
-    boxComponent_->SetColor(Color(POPUP_BG_COLOR).BlendOpacity(POPUP_BG_OPACITY));
+    boxComponent_->SetColor(Color::TRANSPARENT);
     boxComponent_->SetDecorationUpdateFlag(true);
     renderBox_->Update(boxComponent_);
     renderBox_->PerformLayout();
 }
+
 } // namespace OHOS::Ace::V2

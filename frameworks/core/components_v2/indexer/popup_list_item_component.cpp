@@ -21,11 +21,13 @@
 namespace OHOS::Ace::V2 {
 RefPtr<Element> PopupListItemComponent::CreateElement()
 {
+    LOGI("[indexer] PopupListItemComponent::CreateElement");
     return AceType::MakeRefPtr<PopupListItemElement>();
 }
 
 RefPtr<RenderNode> PopupListItemComponent::CreateRenderNode()
 {
+    LOGI("[indexer] PopupListItemComponent::CreateRenderNode");
     return RenderPopupListItem::Create();
 }
 
@@ -42,7 +44,7 @@ void PopupListItemComponent::BuildItem()
     if (!boxDecoration_) {
         boxDecoration_ = AceType::MakeRefPtr<Decoration>();
     }
-    boxDecoration_->SetBackgroundColor(Color(POPUP_BG_COLOR).BlendOpacity(POPUP_BG_OPACITY));
+    boxDecoration_->SetBackgroundColor(Color::TRANSPARENT);
     boxComponent_->SetBackDecoration(boxDecoration_);
 
     if (!boxText_) {

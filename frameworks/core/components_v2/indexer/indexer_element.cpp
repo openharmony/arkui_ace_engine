@@ -22,7 +22,7 @@ void IndexerElement::PerformBuild()
 {
     RefPtr<IndexerComponent> indexer = AceType::DynamicCast<IndexerComponent>(component_);
     if (indexer) {
-        LOGD("[indexer] PerformBuild: Build Indexer");
+        LOGI("[indexer] PerformBuild: Build Indexer");
         ComponentGroupElement::PerformBuild();
     }
 }
