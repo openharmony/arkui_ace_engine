@@ -626,6 +626,9 @@ void FlutterRenderTextField::ComputeOffsetAfterLayout()
         .height = caretRect_.Height()
     };
     MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
+    auto value = GetEditingValue();
+    MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
+        StringUtils::Str8ToStr16(value.text), value.selection.GetStart(), value.selection.GetEnd());
 #endif
 }
 

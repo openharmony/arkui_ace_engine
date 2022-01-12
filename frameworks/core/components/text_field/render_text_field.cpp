@@ -1477,6 +1477,7 @@ void RenderTextField::CursorMoveLeft(CursorMoveSkip skip)
         value.MoveLeft();
         SetEditingValue(std::move(value));
     }
+    cursorPositionType_ = CursorPositionType::NONE;
     MarkNeedLayout();
 }
 
@@ -1495,6 +1496,7 @@ void RenderTextField::CursorMoveRight(CursorMoveSkip skip)
         value.MoveRight();
         SetEditingValue(std::move(value));
     }
+    cursorPositionType_ = CursorPositionType::NONE;
     MarkNeedLayout();
 }
 
@@ -1507,6 +1509,7 @@ void RenderTextField::CursorMoveUp()
     auto value = GetEditingValue();
     value.MoveToPosition(GetCursorPositionForMoveUp());
     SetEditingValue(std::move(value));
+    cursorPositionType_ = CursorPositionType::NONE;
     MarkNeedLayout();
 }
 
@@ -1519,6 +1522,7 @@ void RenderTextField::CursorMoveDown()
     auto value = GetEditingValue();
     value.MoveToPosition(GetCursorPositionForMoveDown());
     SetEditingValue(std::move(value));
+    cursorPositionType_ = CursorPositionType::NONE;
     MarkNeedLayout();
 }
 
