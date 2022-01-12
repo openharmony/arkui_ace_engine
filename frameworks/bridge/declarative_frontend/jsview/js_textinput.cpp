@@ -140,7 +140,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
 void JSTextInput::Create(const JSCallbackInfo& info)
 {
     RefPtr<TextFieldComponent> textInputComponent = AceType::MakeRefPtr<TextFieldComponent>();
-
+    textInputComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     // default type is text, default action is done.
     textInputComponent->SetTextInputType(TextInputType::TEXT);
     textInputComponent->SetAction(TextInputAction::DONE);
@@ -164,11 +164,14 @@ void JSTextInput::Create(const JSCallbackInfo& info)
     }
 
     auto controllerObj = paramObject->GetProperty("controller");
-    JSTextInputController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextInputController>();
-    if (jsController) {
-        jsController->SetController(textInputComponent->GetTextFieldController());
+    if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+        JSTextInputController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextInputController>();
+        if (jsController) {
+            jsController->SetController(textInputComponent->GetTextFieldController());
+        }
+    } else {
+        LOGI("controller is nullptr");
     }
-
 }
 
 void JSTextInput::SetType(const JSCallbackInfo& info)
@@ -579,9 +582,8 @@ void JSTextInputController::Destructor(JSTextInputController* scroller)
 
 void JSTextInputController::CaretPosition(int32_t caretPosition)
 {
-    auto controller = controller_.Upgrade();
-    if (controller) {
-        controller->CaretPosition(caretPosition);
+    if (controller_) {
+        controller_->CaretPosition(caretPosition);
     }
 }
 

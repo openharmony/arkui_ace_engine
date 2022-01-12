@@ -268,25 +268,29 @@ void JSSearch::Create(const JSCallbackInfo& info)
 
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto value = param->GetProperty("value");
-    if (!value->IsNull() && value->IsString()) {
+    if (!value->IsUndefined() && value->IsString()) {
         auto key = value->ToString();
         textFieldComponent->SetValue(key);
     }
 
     auto placeholde = param->GetProperty("placeholder");
-    if (!placeholde->IsNull() && placeholde->IsString()) {
+    if (!placeholde->IsUndefined() && placeholde->IsString()) {
         auto tip = placeholde->ToString();
         textFieldComponent->SetPlaceholder(tip);
     }
 
     auto controllerObj = param->GetProperty("controller");
-    JSSearchController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSSearchController>();
-    if (jsController) {
-        jsController->SetController(textFieldComponent->GetTextFieldController());
+    if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+        JSSearchController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSSearchController>();
+        if (jsController) {
+            jsController->SetController(textFieldComponent->GetTextFieldController());
+        }
+    } else {
+        LOGI("controller is nullptr");
     }
 
     auto icon = param->GetProperty("icon");
-    if (!icon->IsNull() && icon->IsString()) {
+    if (!icon->IsUndefined() && icon->IsString()) {
         auto src = icon->ToString();
         textFieldComponent->SetIconImage(src);
     }
