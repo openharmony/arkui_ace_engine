@@ -2064,6 +2064,10 @@ RefPtr<ThemeConstants> DOMNode::GetThemeConstants() const
 Color DOMNode::ParseColor(const std::string& value, uint32_t maskAlpha) const
 {
     auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGW("themeConstants is null, return Transparent color.");
+        return Color::TRANSPARENT;
+    }
     auto&& noRefFunc = [&value, maskAlpha = maskAlpha]() { return Color::FromString(value, maskAlpha); };
     auto&& idRefFunc = [constants = themeConstants](uint32_t refId) { return constants->GetColor(refId); };
     return ParseThemeReference<Color>(value, noRefFunc, idRefFunc, Color::TRANSPARENT);
@@ -2072,6 +2076,10 @@ Color DOMNode::ParseColor(const std::string& value, uint32_t maskAlpha) const
 double DOMNode::ParseDouble(const std::string& value) const
 {
     auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGW("themeConstants is null, return 0.");
+        return 0.0;
+    }
     auto&& noRefFunc = [&value]() { return StringUtils::StringToDouble(value); };
     auto&& idRefFunc = [constants = themeConstants](uint32_t refId) { return constants->GetDouble(refId); };
     return ParseThemeReference<double>(value, noRefFunc, idRefFunc, 0.0);
@@ -2080,6 +2088,10 @@ double DOMNode::ParseDouble(const std::string& value) const
 Dimension DOMNode::ParseDimension(const std::string& value) const
 {
     auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGW("themeConstants is null, return 0 dimension.");
+        return Dimension();
+    }
     auto&& noRefFunc = [&value]() { return StringUtils::StringToDimension(value); };
     auto&& idRefFunc = [constants = themeConstants](uint32_t refId) { return constants->GetDimension(refId); };
     return ParseThemeReference<Dimension>(value, noRefFunc, idRefFunc, Dimension());
@@ -2088,6 +2100,10 @@ Dimension DOMNode::ParseDimension(const std::string& value) const
 Dimension DOMNode::ParseLineHeight(const std::string& value) const
 {
     auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGW("themeConstants is null, return 0 line height.");
+        return Dimension();
+    }
     const auto& parseResult = ThemeUtils::ParseThemeIdReference(value, GetThemeConstants());
     if (!parseResult.parseSuccess) {
         return StringUtils::StringToDimension(value);
@@ -2107,6 +2123,10 @@ std::vector<std::string> DOMNode::ParseFontFamilies(const std::string& value) co
     std::string fontFamily;
 
     auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGW("themeConstants is null, return empty font families.");
+        return fontFamilies;
+    }
     auto&& idRefFunc = [constants = themeConstants](uint32_t refId) { return constants->GetString(refId); };
 
     while (getline(stream, fontFamily, ',')) {

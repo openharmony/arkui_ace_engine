@@ -527,11 +527,17 @@ LayoutParam RenderGridScroll::MakeInnerLayoutParam(
     double mainLen = 0.0;
     double crossLen = 0.0;
     for (int32_t i = 0; i < mainSpan; ++i) {
-        mainLen += GetSize(gridCells_.at(main + i).at(cross));
+        if (gridCells_.find(main + i) != gridCells_.end() &&
+            gridCells_.at(main + i).find(cross) != gridCells_.at(main + i).end()) {
+            mainLen += GetSize(gridCells_.at(main + i).at(cross));
+        }
     }
     mainLen += (mainSpan - 1) * (*mainGap_);
     for (int32_t i = 0; i < crossSpan; ++i) {
-        crossLen += GetSize(gridCells_.at(main).at(cross + i), false);
+        if (gridCells_.find(main) != gridCells_.end() &&
+            gridCells_.at(main).find(cross + i) != gridCells_.at(main).end()) {
+            crossLen += GetSize(gridCells_.at(main).at(cross + i), false);
+        }
     }
     crossLen += (crossSpan - 1) * (*crossGap_);
 

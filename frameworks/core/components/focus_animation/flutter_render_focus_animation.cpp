@@ -69,6 +69,9 @@ void FlutterRenderFocusAnimation::Paint(RenderContext& context, const Offset& of
         LOGE("pipeline context is nullptr");
         return;
     }
+    if (pipelineContext->IsJsCard()) {
+        return;
+    }
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE && !pipelineContext->IsKeyEvent()) {
         return;
     }

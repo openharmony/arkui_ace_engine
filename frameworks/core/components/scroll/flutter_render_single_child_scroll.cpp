@@ -25,15 +25,24 @@ namespace OHOS::Ace {
 RenderLayer FlutterRenderSingleChildScroll::GetRenderLayer()
 {
     if (!layer_) {
-        layer_ = AceType::MakeRefPtr<Flutter::ClipLayer>(0.0, GetLayoutParam().GetMaxSize().Width(), 0.0,
-            GetLayoutParam().GetMaxSize().Height(), Flutter::Clip::HARD_EDGE);
+        // layer should add parent padding size to avoid clip
+        auto maxWidth = viewPort_.Width();
+        auto maxHeight = viewPort_.Height();
+        auto parent = GetParent().Upgrade();
+        if (parent) {
+            auto parentBox = AceType::DynamicCast<RenderBox>(parent);
+            if (parentBox) {
+                maxWidth += parentBox->GetPaddingSize().Width();
+                maxHeight += parentBox->GetPaddingSize().Height();
+            }
+        }
+        layer_ = AceType::MakeRefPtr<Flutter::ClipLayer>(0.0, maxWidth, 0.0, maxHeight, Flutter::Clip::HARD_EDGE);
     }
     return AceType::RawPtr(layer_);
 }
 
 void FlutterRenderSingleChildScroll::Paint(RenderContext& context, const Offset& offset)
 {
-    layer_->SetClip(0.0, viewPort_.Width(), 0.0, viewPort_.Height(), Flutter::Clip::HARD_EDGE);
     RenderNode::Paint(context, offset);
 
     const auto renderContext = static_cast<FlutterRenderContext*>(&context);
