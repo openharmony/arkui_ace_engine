@@ -264,8 +264,6 @@ private:
     void* runtime_ = nullptr;
     shared_ptr<JsValue> renderContext_;
 
-    ArkNativeEngine* nativeEngine_ = nullptr;
-
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };
 
