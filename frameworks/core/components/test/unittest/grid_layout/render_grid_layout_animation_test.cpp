@@ -34,7 +34,6 @@ constexpr double MOVE_STEP_SIZE_TEST = 20.0;
 constexpr int64_t EVENT_WAIT_MILLSECOND_TEST = 50;
 constexpr int64_t USEC_TIMES_TEST = 1000000000;
 constexpr int64_t USEC_WAIT_SECOND_TEST = 1000;
-
 }
 
 int64_t GetTickCountText()
