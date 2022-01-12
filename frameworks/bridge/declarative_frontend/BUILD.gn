@@ -273,6 +273,8 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_proxyclass",
     ]
 
+    include_dirs = [ "//foundation/windowmanager/interfaces/innerkits" ]
+
     if (platform == "windows" || platform == "mac") {
       deps += [ ":gen_obj_src_js_mock_system_plugin" ]
     }

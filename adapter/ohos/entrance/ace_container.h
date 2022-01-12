@@ -30,14 +30,14 @@
 #include "core/common/js_message_dispatcher.h"
 
 namespace OHOS::Ace::Platform {
-class AceContainer : public Container, public JsMessageDispatcher {
+class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
 public:
     AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AppExecFwk::Ability* aceAbility,
-        std::unique_ptr<PlatformEventCallback> callback);
+        std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner = false);
     AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AbilityRuntime::Context* context,
-                 std::unique_ptr<PlatformEventCallback> callback);
+                 std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner = false);
     ~AceContainer() override = default;
 
     void Initialize() override;
@@ -175,7 +175,8 @@ public:
     }
 
     static void CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName,
-        OHOS::AppExecFwk::Ability* aceAbility, std::unique_ptr<PlatformEventCallback> callback);
+        OHOS::AppExecFwk::Ability* aceAbility, std::unique_ptr<PlatformEventCallback> callback,
+        bool useCurrentEventRunner = false);
 
     static void DestroyContainer(int32_t instanceId);
     static bool RunPage(int32_t instanceId, int32_t pageId, const std::string& content, const std::string& params);
@@ -194,11 +195,15 @@ public:
     static void OnNewRequest(int32_t instanceId, const std::string& data);
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
     static void SetView(AceView* view, double density, int32_t width, int32_t height);
+    static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
+    static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static void SetFontScale(int32_t instanceId, float fontScale);
     static void SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme);
 
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
+
+    static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
 
 private:
     void InitializeFrontend();
@@ -206,6 +211,8 @@ private:
     void InitializeTask();
 
     void AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height);
+    void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
+    sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
     int32_t instanceId_ = 0;
     AceView* aceView_ = nullptr;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -223,6 +230,8 @@ private:
     OHOS::AbilityRuntime::Context* context_ = nullptr;
     void* sharedRuntime_ = nullptr;
     int32_t pageId_ = 0;
+    bool useCurrentEventRunner_ = false;
+    sptr<OHOS::Rosen::Window> uiWindow_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };

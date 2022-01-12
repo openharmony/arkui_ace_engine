@@ -30,7 +30,10 @@ build_component("plugin") {
   rosen_sources = [ "rosen_render_plugin.cpp" ]
 
   if (is_standard_system && !use_mingw_win && !use_mac) {
-    include_dirs = [ "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager/include" ]
+    include_dirs = [
+      "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager/include",
+      "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
+    ]
 
     deps = [
       "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
@@ -39,6 +42,9 @@ build_component("plugin") {
       "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+      "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
+      "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
+      "//foundation/windowmanager/wm:libwm",
     ]
 
     external_deps = [

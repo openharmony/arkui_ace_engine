@@ -363,6 +363,8 @@ template("ace_core_source_set") {
       sources += [ "common/plugin_manager.cpp" ]
     }
 
+    include_dirs = [ "//foundation/windowmanager/interfaces/innerkits" ]
+
     if (!is_wearable_product) {
       deps += [
         "$ace_root/frameworks/core/components/camera:ace_core_components_camera_$platform",

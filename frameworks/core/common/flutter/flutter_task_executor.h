@@ -38,7 +38,7 @@ public:
     FlutterTaskExecutor() = default;
     ~FlutterTaskExecutor() final;
     // Must call this method on platform thread
-    void InitPlatformThread();
+    void InitPlatformThread(bool useCurrentEventRunner = false);
     void InitJsThread(bool newThread = true);
     void InitOtherThreads(const flutter::TaskRunners& taskRunners);
 

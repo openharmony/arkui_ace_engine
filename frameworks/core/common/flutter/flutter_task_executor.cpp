@@ -104,10 +104,10 @@ FlutterTaskExecutor::~FlutterTaskExecutor()
         platformRunner_, [rawPtr] { std::unique_ptr<fml::Thread> jsThread(rawPtr); }, 0);
 }
 
-void FlutterTaskExecutor::InitPlatformThread()
+void FlutterTaskExecutor::InitPlatformThread(bool useCurrentEventRunner)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    platformRunner_ = flutter::PlatformTaskRunner::CurrentTaskRunner();
+    platformRunner_ = flutter::PlatformTaskRunner::CurrentTaskRunner(useCurrentEventRunner);
 #else
     fml::MessageLoop::EnsureInitializedForCurrentThread();
     platformRunner_ = fml::MessageLoop::GetCurrent().GetTaskRunner();

@@ -16,4 +16,5 @@ uiservice_files = [
   "//foundation/ace/ace_engine/services/uiservice/src/ui_service_mgr_stub.cpp",
   "//foundation/ace/ace_engine/services/uiservice/src/ui_mgr_service.cpp",
   "//foundation/ace/ace_engine/services/uiservice/src/ui_service_proxy.cpp",
+  "//foundation/ace/ace_engine/services/uiservice/src/dialog_callback_proxy.cpp",
 ]

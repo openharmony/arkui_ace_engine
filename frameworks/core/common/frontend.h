@@ -25,6 +25,8 @@
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/base/utils/resource_configuration.h"
 
+using FrontendDialogCallback = std::function<void(const std::string& event, const std::string& param)>;
+
 namespace OHOS::Ace {
 
 #ifndef WEARABLE_PRODUCT
@@ -189,8 +191,14 @@ public:
         disallowPopLastPage_ = true;
     }
 
+    virtual void SetDialogCallback(FrontendDialogCallback callback)
+    {
+        dialogCallback_ = callback;
+    }
+
 protected:
     bool disallowPopLastPage_ = false;
+    FrontendDialogCallback dialogCallback_ = nullptr;
 };
 
 } // namespace OHOS::Ace

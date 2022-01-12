@@ -173,5 +173,95 @@ int UIServiceMgrProxy::ReturnRequest(const AAFwk::Want& want, const std::string&
     }
     return reply.ReadInt32();
 }
+
+int UIServiceMgrProxy::ShowDialog(const std::string& name,
+                                  const std::string& params,
+                                  OHOS::Rosen::WindowType windowType,
+                                  int x,
+                                  int y,
+                                  int width,
+                                  int height,
+                                  const sptr<OHOS::Ace::IDialogCallback>& dialogCallback)
+{
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(dataParcel)) {
+        return UI_SERVICE_PROXY_INNER_ERR;
+    }
+
+    if (!dataParcel.WriteString(name)) {
+        HILOG_ERROR("fail to WriteString name");
+        return INVALID_DATA;
+    }
+
+    if (!dataParcel.WriteString(params)) {
+        HILOG_ERROR("fail to WriteString params");
+        return INVALID_DATA;
+    }
+
+    if (!dataParcel.WriteUint32(static_cast<uint32_t>(windowType))) {
+        HILOG_ERROR("fail to WriteUInt32 windowType");
+        return INVALID_DATA;
+    }
+
+    if (!dataParcel.WriteInt32(x)) {
+        HILOG_ERROR("fail to WriteInt32 x");
+        return INVALID_DATA;
+    }
+
+    if (!dataParcel.WriteInt32(y)) {
+        HILOG_ERROR("fail to WriteInt32 y");
+        return INVALID_DATA;
+    }
+    if (!dataParcel.WriteInt32(width)) {
+        HILOG_ERROR("fail to WriteInt32 width");
+        return INVALID_DATA;
+    }
+    if (!dataParcel.WriteInt32(height)) {
+        HILOG_ERROR("fail to WriteInt32 height");
+        return INVALID_DATA;
+    }
+
+    if (dialogCallback == nullptr) {
+        HILOG_ERROR("dialogCallback is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    if (!dataParcel.WriteParcelable(dialogCallback->AsObject())) {
+        HILOG_ERROR("dialogCallback error");
+        return ERR_INVALID_VALUE;
+    }
+
+    int error = Remote()->SendRequest(IUIServiceMgr::SHOW_DIALOG, dataParcel, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Request fail, error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int UIServiceMgrProxy::CancelDialog(int id)
+{
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(dataParcel)) {
+        return UI_SERVICE_PROXY_INNER_ERR;
+    }
+
+    if (!dataParcel.WriteInt32(id)) {
+        HILOG_ERROR("fail to WriteString id");
+        return INVALID_DATA;
+    }
+
+    int error = Remote()->SendRequest(IUIServiceMgr::CANCEL_DIALOG, dataParcel, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Request fail, error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
 }  // namespace Ace
 }  // namespace OHOS

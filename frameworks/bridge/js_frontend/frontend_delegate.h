@@ -183,6 +183,8 @@ public:
         disallowPopLastPage_ = true;
     }
 
+    virtual void CallNativeHandler(const std::string& event, const std::string& params) {}
+
 protected:
     RefPtr<AssetManager> assetManager_;
     bool disallowPopLastPage_ = false;

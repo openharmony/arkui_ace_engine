@@ -14,11 +14,13 @@
  */
 
 #include "ui_service_mgr_client.h"
-#include "string_ex.h"
+
+#include "dialog_callback_stub.h"
 #include "hilog_wrapper.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "if_system_ability_manager.h"
+#include "string_ex.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {
@@ -109,6 +111,55 @@ ErrCode UIServiceMgrClient::ReturnRequest(const AAFwk::Want& want, const std::st
     }
     sptr<IUIServiceMgr> doms = iface_cast<IUIServiceMgr>(remoteObject_);
     return doms->ReturnRequest(want, source, data, extraData);
+}
+
+ErrCode UIServiceMgrClient::ShowDialog(const std::string& name,
+                                       const std::string& params,
+                                       OHOS::Rosen::WindowType windowType,
+                                       int x,
+                                       int y,
+                                       int width,
+                                       int height,
+                                       DialogCallback callback)
+{
+    if (remoteObject_ == nullptr) {
+        ErrCode err = Connect();
+        if (err != ERR_OK) {
+            HILOG_ERROR("%{private}s:fail to connect UIMgrService", __func__);
+            return UI_SERVICE_NOT_CONNECTED;
+        }
+    }
+
+    const sptr<DialogCallbackStub> dialogCallbackStub(new (std::nothrow)DialogCallbackStub(callback));
+    sptr<IUIServiceMgr> doms = iface_cast<IUIServiceMgr>(remoteObject_);
+    if (doms == nullptr) {
+        HILOG_ERROR("doms is nullptr");
+        return UI_SERVICE_GET_PROXY_FAILED;
+    }
+    return doms->ShowDialog(name, params, windowType, x, y, width, height, dialogCallbackStub);
+}
+
+ErrCode UIServiceMgrClient::CancelDialog(int32_t id)
+{
+    if (id < 0) {
+        HILOG_INFO("invalid parameter");
+        return UI_SERVICE_INVALID_PARAMETER;
+    }
+
+    if (remoteObject_ == nullptr) {
+        ErrCode err = Connect();
+        if (err != ERR_OK) {
+            HILOG_ERROR("%{private}s:fail to connect UIMgrService", __func__);
+            return UI_SERVICE_NOT_CONNECTED;
+        }
+    }
+
+    sptr<IUIServiceMgr> doms = iface_cast<IUIServiceMgr>(remoteObject_);
+    if (doms == nullptr) {
+        HILOG_ERROR("doms is nullptr");
+        return UI_SERVICE_GET_PROXY_FAILED;
+    }
+    return doms->CancelDialog(id);
 }
 
 /**

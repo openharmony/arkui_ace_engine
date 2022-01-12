@@ -46,6 +46,13 @@ config("uiservicems_config") {
     "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager/include",
     "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
     "${innerkits_path}/want/include",
+    "//foundation/windowmanager/interfaces/innerkits",
+    "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
+    "//third_party/icu/icu4c/source/common",
+    "//third_party/icu/icu4c/source/i18n",
+    "//third_party/icu/icu4c/source/ohos",
+    "//third_party/icu/icu4c/source",
+    "//base/global/i18n_standard/frameworks/intl/include",
   ]
   cflags = []
   if (target_cpu == "arm") {
@@ -53,30 +60,74 @@ config("uiservicems_config") {
   }
 }
 
+template("uiservice_static") {
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    defines += invoker.defines
+    cflags_cc += invoker.cflags_cc
+
+    sources = uiservice_files
+    configs = [
+      ":uiservicems_config",
+      "$ace_root:ace_config",
+      "$ace_flutter_engine_root:flutter_config",
+    ]
+
+    deps = [
+      "${innerkits_path}/want:want",
+      "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
+      "//foundation/aafwk/standard/interfaces/innerkits/base:base",
+      "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
+      "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base:appexecfwk_base",
+      "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_core:appexecfwk_core",
+      "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler:libeventhandler",
+      "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
+      "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
+      "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+      "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
+      "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
+      "//foundation/windowmanager/wm:libwm",
+      "//third_party/icu/icu4c:shared_icui18n",
+      "//third_party/icu/icu4c:shared_icuuc",
+      "//utils/native/base:utils",
+    ]
+
+    deps += [ "$ace_root/build:libace" ]
+
+    external_deps = [
+      "hiviewdfx_hilog_native:libhilog",
+      "ipc:ipc_core",
+    ]
+  }
+}
+
+foreach(item, ace_platforms) {
+  platform = item.name
+  if (platform == "ohos") {
+    # generate uiservice_static lib
+    uiservice_static("uiservice_static_" + item.name) {
+      defines = []
+      config = {
+      }
+
+      if (defined(item.config)) {
+        config = item.config
+      }
+
+      if (defined(config.defines)) {
+        defines = config.defines
+      }
+
+      if (defined(config.cflags_cc)) {
+        cflags_cc = config.cflags_cc
+      }
+    }
+  }
+}
+
 ohos_shared_library("uiservice") {
-  sources = uiservice_files
-
-  configs = [ ":uiservicems_config" ]
-
-  deps = [
-    "${innerkits_path}/want:want",
-    "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-    "//foundation/aafwk/standard/interfaces/innerkits/base:base",
-    "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base:appexecfwk_base",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_core:appexecfwk_core",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler:libeventhandler",
-    "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
-    "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//utils/native/base:utils",
-  ]
-
-  external_deps = [
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
-  ]
-
+  deps = [ ":uiservice_static_ohos" ]
+  part_name = ace_engine_part
   subsystem_name = "ace"
-  part_name = "ace_engine_standard"
 }

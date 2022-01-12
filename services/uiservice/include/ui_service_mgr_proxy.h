@@ -44,6 +44,17 @@ public:
     virtual int ReturnRequest(const AAFwk::Want& want, const std::string& source, const std::string& data,
         const std::string& extraData);
 
+    virtual int ShowDialog(const std::string& name,
+                           const std::string& params,
+                           OHOS::Rosen::WindowType windowType,
+                           int x,
+                           int y,
+                           int width,
+                           int height,
+                           const sptr<OHOS::Ace::IDialogCallback>& dialogCallback);
+
+    virtual int CancelDialog(int id);
+
 private:
     bool WriteInterfaceToken(MessageParcel& data);
 
