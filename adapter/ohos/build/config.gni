@@ -32,7 +32,12 @@ ark_engine = {
 }
 js_engines += [ ark_engine ]
 
-disable_gpu = true
+if ("${product_name}" == "rk3566" || "${product_name}" == "rk3568" ||
+    "${product_name}" == "Hi3516DV300") {
+  disable_gpu = true
+} else {
+  disable_gpu = true
+}
 use_external_icu = "shared"
 use_curl_download = true
 ohos_standard_fontmgr = true
