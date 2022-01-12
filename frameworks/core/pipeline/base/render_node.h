@@ -1017,6 +1017,7 @@ public:
 
     // mark JSview boundary, create/destroy RSNode if need
     void SyncRSNodeBoundary(bool isHead, bool isTail);
+    void SyncRSNode(std::shared_ptr<RSNode> rsNode);
     const std::shared_ptr<RSNode>& GetRSNode() const
     {
         return rsNode_;

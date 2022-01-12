@@ -1096,7 +1096,8 @@ Offset RenderNode::GetGlobalOffset() const
 Offset RenderNode::GetPaintOffset() const
 {
     auto renderNode = parent_.Upgrade();
-    return (renderNode && !IsHeadRenderNode()) ? GetPosition() + renderNode->GetPaintOffset() : GetPosition();
+    bool isNotHead = !IsHeadRenderNode() || (renderNode ? (renderNode->rsNode_ == rsNode_) : false);
+    return (renderNode && isNotHead) ? GetPosition() + renderNode->GetPaintOffset() : GetPosition();
 }
 
 Offset RenderNode::GetGlobalOffsetExternal() const
@@ -1858,9 +1859,19 @@ void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail)
     if (isHead && !rsNode_) {
         // create RSNode in first node of JSview
         rsNode_ = CreateRSNode();
-    } else if (!isHead && rsNode_) {
-        // destroy unneeded RSNode
-        rsNode_ = nullptr;
+    }
+#endif
+}
+
+void RenderNode::SyncRSNode(std::shared_ptr<RSNode> rsNode)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    rsNode_ = rsNode;
+    if (!isTailRenderNode_) {
+        const auto& children = GetChildren();
+        for (const auto& item : children) {
+            item->SyncRSNode(rsNode);
+        }
     }
 #endif
 }
