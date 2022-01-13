@@ -175,7 +175,7 @@ public:
     void MouseHoverExitTest() override;
     void AnimateMouseHoverEnter() override;
     void AnimateMouseHoverExit() override;
-    void HandleMouseEvent(const MouseEvent& event) override;
+    bool HandleMouseEvent(const MouseEvent& event) override;
     void HandleMouseHoverEvent(MouseState mouseState) override;
     WeakPtr<RenderNode> CheckHoverNode() override;
 

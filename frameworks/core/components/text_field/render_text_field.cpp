@@ -367,13 +367,14 @@ void RenderTextField::PerformLayout()
     HandleDeviceOrientationChange();
 }
 
-void RenderTextField::HandleMouseEvent(const MouseEvent& event)
+bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
 {
     if (MouseButton::RIGHT_BUTTON == event.button) {
         Offset rightClickOffset = event.GetOffset();
         bool singleHandle = (GetEditingValue().selection.GetStart() == GetEditingValue().selection.GetEnd());
         ShowTextOverlay(rightClickOffset, singleHandle);
     }
+    return false;
 }
 
 void RenderTextField::OnTouchTestHit(

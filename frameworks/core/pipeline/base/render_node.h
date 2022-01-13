@@ -550,7 +550,10 @@ public:
 
     virtual void HandleMouseHoverEvent(const MouseState mouseState) {}
 
-    virtual void HandleMouseEvent(const MouseEvent& event) {}
+    virtual bool HandleMouseEvent(const MouseEvent& event)
+    {
+        return false;
+    }
 
     virtual bool RotationMatchTest(const RefPtr<RenderNode>& requestRenderNode);
 
