@@ -35,7 +35,7 @@ ohos_unittest("RenderGridLayoutTest") {
   deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
   subsystem_name = "ace"
-  part_name = "ace_engine_part"
+  part_name = ace_engine_part
 }
 
 ohos_unittest("RenderGridLayoutAnimationTest") {
@@ -53,7 +53,7 @@ ohos_unittest("RenderGridLayoutAnimationTest") {
   deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
   subsystem_name = "ace"
-  part_name = "ace_engine_part"
+  part_name = ace_engine_part
 }
 
 group("unittest") {
