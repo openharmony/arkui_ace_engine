@@ -34,13 +34,8 @@ ohos_unittest("RenderGridLayoutTest") {
 
   deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
-  if (!is_standard_system) {
-    subsystem_name = "ace"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "ace"
-    part_name = "ace_engine_standard"
-  }
+  subsystem_name = "ace"
+  part_name = "ace_engine_part"
 }
 
 ohos_unittest("RenderGridLayoutAnimationTest") {
@@ -57,13 +52,8 @@ ohos_unittest("RenderGridLayoutAnimationTest") {
 
   deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
-  if (!is_standard_system) {
-    subsystem_name = "ace"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "ace"
-    part_name = "ace_engine_standard"
-  }
+  subsystem_name = "ace"
+  part_name = "ace_engine_part"
 }
 
 group("unittest") {
