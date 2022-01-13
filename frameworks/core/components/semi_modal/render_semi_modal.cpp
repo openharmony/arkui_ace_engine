@@ -177,6 +177,15 @@ void RenderSemiModal::PerformLayout()
 void RenderSemiModal::InnerLayout()
 {
     // Not first layout, use blankHeight_ control all children's size and layout.
+
+    // update blankHeight_ when device orientation changed
+    if (orientation_ != SystemProperties::GetDevcieOrientation()) {
+        updateMinBlank_ = true;
+        UpdateMinBlankHeight();
+        blankHeight_ = UpdateTargetBlankHeight(blankHeight_);
+        orientation_ = SystemProperties::GetDevcieOrientation();
+    }
+
     auto maxSize = GetLayoutParam().GetMaxSize();
     auto boxForContent = GetChildren().back();
     if (updateDefaultBlank_) {
@@ -501,24 +510,30 @@ void RenderSemiModal::HandleDragStart(const Offset& startPoint)
     dragStartBlankHeight_ = blankHeight_;
 }
 
+double RenderSemiModal::UpdateTargetBlankHeight(double oldHeight)
+{
+    if (oldHeight < minBlankHeight_) {
+        oldHeight = minBlankHeight_;
+    }
+
+    // Do not drag to make page content height <= zero
+    double maxBlankHeight = GetLayoutSize().Height() - navigationHeight_ - CONTENT_MIN_TOLERANCE;
+    if (dragBar_) {
+        maxBlankHeight -= dragBar_->GetLayoutSize().Height();
+    }
+    if (oldHeight > maxBlankHeight) {
+        oldHeight = maxBlankHeight;
+    }
+    return oldHeight;
+}
+
 void RenderSemiModal::HandleDragUpdate(const Offset& currentPoint)
 {
     if (!canHandleDrag_ || isAnimating_) {
         return;
     }
     double targetBlankHeight = dragStartBlankHeight_ + currentPoint.GetY() - dragStartPoint_.GetY();
-    if (targetBlankHeight < minBlankHeight_) {
-        targetBlankHeight = minBlankHeight_;
-    }
-    // Do not drag to make page content height <= zero.
-    double maxBlankHeight = GetLayoutSize().Height() - navigationHeight_ - CONTENT_MIN_TOLERANCE;
-    if (dragBar_) {
-        maxBlankHeight -= dragBar_->GetLayoutSize().Height();
-    }
-    if (targetBlankHeight > maxBlankHeight) {
-        targetBlankHeight = maxBlankHeight;
-    }
-    blankHeight_ = targetBlankHeight;
+    blankHeight_ = UpdateTargetBlankHeight(targetBlankHeight);
     UpdateDragImg();
     MarkNeedLayout();
 }

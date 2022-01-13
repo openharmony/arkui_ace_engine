@@ -81,6 +81,7 @@ private:
     void InnerLayout();
     bool IsPageReady() const;
     void MovePage(double delta);
+    double UpdateTargetBlankHeight(double oldHeight);
 
     RefPtr<RenderNode> boxForBlank_;
     RefPtr<ClickRecognizer> clickDetector_;
@@ -111,6 +112,7 @@ private:
     double inputHeight_ = 0.0;
     bool hasInputHeight_ = false;
     double maxWidth_ = 0.0;
+    DeviceOrientation orientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
 };
 
 } // namespace OHOS::Ace
