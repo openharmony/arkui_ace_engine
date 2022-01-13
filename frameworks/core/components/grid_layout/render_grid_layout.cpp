@@ -848,6 +848,10 @@ void RenderGridLayout::PerformLayout()
     }
     if (editMode_) {
         PerformLayoutForEditGrid();
+        if (needResetItemPosition_) {
+            ResetItemPosition();
+            needResetItemPosition_ = false;
+        }
     } else {
         PerformLayoutForStaticGrid();
     }
@@ -911,7 +915,7 @@ void RenderGridLayout::RestoreScene(const ItemDragInfo& info)
     needRestoreScene_ = true;
     if (supportAnimation_) {
         CalcRestoreScenePosition(info);
-        if (needRunAnimation_) {
+        if (needRunAnimation_.load()) {
             StartAnimationController(GridLayoutAnimationAct::ANIMATION_RESTORE_SCENCE, nullptr);
         }
     }
@@ -1262,7 +1266,7 @@ bool RenderGridLayout::ImpDropInGrid(const ItemDragInfo& info)
             Point endPoint = CalcDragChildEndPosition(curInsertRowIndex_, curInsertColumnIndex_);
             RegisterDropJSEvent(info, insertIndex, result);
 
-            if (needRunAnimation_) {
+            if (needRunAnimation_.load()) {
                 StartAnimationController(GridLayoutAnimationAct::ANIMATION_DRAG_DROP, nullptr);
             }
 
@@ -1294,7 +1298,7 @@ void RenderGridLayout::ImpDragMove(const ItemDragInfo& info)
         LOGD("%{public}s couldn be inserted.", __PRETTY_FUNCTION__);
         if (CalDragCell(info)) {
             MoveItems();
-            if (needRunAnimation_) {
+            if (needRunAnimation_.load()) {
                 StartAnimationController(GridLayoutAnimationAct::ANIMATION_DRAG_MOVE, nullptr);
             }
         }
@@ -1329,7 +1333,7 @@ void RenderGridLayout::ImpDragLeaveMainGrid(const ItemDragInfo& info)
     }
     FakeRemoveDragItem();
     ClearPartDragInfo();
-    if (supportAnimation_ && needRunAnimation_) {
+    if (supportAnimation_ && needRunAnimation_.load()) {
         StartAnimationController(GridLayoutAnimationAct::ANIMATION_DRAG_MOVE, [weak = WeakClaim(this)]() {
             auto renderGrid = weak.Upgrade();
             if (renderGrid) {
@@ -1356,9 +1360,8 @@ void RenderGridLayout::ImpDragLeaveSubGrid(const ItemDragInfo& info)
     if (isDynamicGrid_ && NeedBeSmaller()) {
         // BeSmaller
         InitialDynamicGridProp(DRAG_LEAVE);
-        SetLayoutSize(GetLayoutParam().Constrain(Size(colSize_, rowSize_)));
         if (rightToLeft_) {
-            ResetItemPosition();
+            needResetItemPosition_ = true;
         }
     }
     RestoreScene(info);
@@ -1372,7 +1375,7 @@ void RenderGridLayout::ImpDragEnterMainGrid(const ItemDragInfo& info)
     LOGD("%{public}s drag reEnter_ the maingrid.", __PRETTY_FUNCTION__);
     isInMainGrid_ = true;
     reEnter_ = true;
-    if (supportAnimation_ && needRunAnimation_) {
+    if (supportAnimation_ && needRunAnimation_.load()) {
         StartAnimationController(GridLayoutAnimationAct::ANIMATION_DRAG_MOVE, [weak = WeakClaim(this)]() {
             auto renderGrid = weak.Upgrade();
             if (renderGrid) {
@@ -1466,6 +1469,7 @@ void RenderGridLayout::ImpDragStart(const ItemDragInfo& info)
     isInMainGrid_ = true;
     ClearSpringSlideData();
     BackGridMatrix();
+    isDragging_.store(true);
     auto itemRender = dragingItemRenderNode_.Upgrade();
     if (itemRender) {
         startGlobalPoint_.SetX(itemRender->GetGlobalOffset().GetX());
@@ -1944,10 +1948,9 @@ void RenderGridLayout::FakeRemoveDragItem()
     int32_t endColum = -1;
     bool ret = CalTheFirstEmptyCell(endRow, endColum, true);
     if (!ret) {
-        endRow = rowCount_;
-        endColum = colCount_;
+        endRow = rowCount_ - 1;
+        endColum = colCount_ - 1;
     }
-    GetPreviousGird(endRow, endColum);
     if (curInsertRowIndex_ == endRow && curInsertColumnIndex_ == endColum) {
         UpdateMatrixByIndexStrong(CELL_EMPTY, curInsertRowIndex_, curInsertColumnIndex_);
         curInsertRowIndex_ = -1;
@@ -1955,9 +1958,12 @@ void RenderGridLayout::FakeRemoveDragItem()
     } else {
         int32_t startRow = curInsertRowIndex_;
         int32_t startColum = curInsertColumnIndex_;
+        if (ret) {
+            GetPreviousGird(endRow, endColum);
+        }
         GetNextGrid(startRow, startColum);
         if (MoveItemsBackward(startRow, startColum, endRow, endColum)) {
-            if (supportAnimation_) {
+            if (supportAnimation_ && needRunAnimation_.load()) {
                 std::string key(__FUNCTION__);
                 RegisterAnimationFinishedFunc(key, [weak = WeakClaim(this), rowIndex = endRow, colIndex = endColum]() {
                     auto renderGrid = weak.Upgrade();
@@ -1973,6 +1979,11 @@ void RenderGridLayout::FakeRemoveDragItem()
                 curInsertColumnIndex_ = -1;
                 UpdateMatrixByIndexStrong(CELL_EMPTY, endRow, endColum);
             }
+        } else {
+            if (supportAnimation_ && needRunAnimation_.load()) {
+                std::string key(__FUNCTION__);
+                PrepareAnimationController(key);
+            }
         }
     }
 }
@@ -1986,10 +1997,7 @@ void RenderGridLayout::FakeRemoveDragItemUpdate()
             ResetItemPosition();
         }
     }
-    isDragChangeLayout_ = true;
-    MarkNeedLayout();
 }
-
 
 bool RenderGridLayout::MoveItemsForward(int32_t fromRow, int32_t fromColum, int32_t toRow, int32_t toColum)
 {
@@ -2116,7 +2124,7 @@ void RenderGridLayout::UpdateCurInsertPos(int32_t curInsertRow, int32_t curInser
 {
     curInsertRowIndex_ = curInsertRow;
     curInsertColumnIndex_ = curInsertColum;
-    UpdateMatrixByIndexStrong(-2, curInsertRowIndex_, curInsertColumnIndex_);
+    UpdateMatrixByIndexStrong(CELL_FOR_INSERT, curInsertRowIndex_, curInsertColumnIndex_);
 }
 
 int32_t RenderGridLayout::CalIndexForItemByRowAndColum(int32_t row, int32_t colum)
@@ -2241,7 +2249,7 @@ bool RenderGridLayout::AddNodeAnimationToController(
     }
     if (gridLayoutItem) {
         if (gridLayoutItem->AnimationAddInterpolator(animationRef)) {
-            needRunAnimation_ = true;
+            needRunAnimation_.store(true);
             animationItemList_.emplace_back(item);
         }
     }
@@ -2285,7 +2293,7 @@ void RenderGridLayout::AddNodeAnimationToControllerForDrop(
     }
     if (gridLayoutItem) {
         if (gridLayoutItem->AnimationAddInterpolator(animationRef)) {
-            needRunAnimation_ = true;
+            needRunAnimation_.store(true);
             animationItemList_.emplace_back(itemTmp);
         }
     }
@@ -2299,7 +2307,7 @@ void RenderGridLayout::PrepareAnimationController(const std::string& key)
         return;
     }
 
-    needRunAnimation_ = true;
+    needRunAnimation_.store(true);
     animationController_->SetDuration(ITEM_ANIMATION_DURATION);
     animationController_->ClearStopListeners();
     animationController_->AddStopListener([weak = AceType::WeakClaim(this), key]() {
@@ -2315,7 +2323,7 @@ void RenderGridLayout::StartAnimationController(GridLayoutAnimationAct animation
     LOGD("%{public}s called.", __FUNCTION__);
     if (needRunAnimation_) {
         animationAct_ = animationAct;
-        needRunAnimation_ = false;
+        needRunAnimation_.store(false);
         switch (animationAct_) {
             case GridLayoutAnimationAct::ANIMATION_DRAG_MOVE:
                 jsMoveFunc_ = func;
@@ -2460,13 +2468,13 @@ bool RenderGridLayout::CheckAnimation()
         if (itemDragEntered_) {
             auto mainGrid = mainGrid_.Upgrade();
             if (mainGrid) {
-                return mainGrid->isExistComponent_;
+                return mainGrid->isDragging_.load();
             }
         } else {
             return false;
         }
     } else {
-        return isExistComponent_;
+        return isDragging_.load();
     }
     return false;
 }
@@ -2529,7 +2537,11 @@ void RenderGridLayout::StartFlexController(const Point& endPoint, bool includeSu
         });
 
     flexController_->AddInterpolator(animationRef);
-    flexController_->SetDuration(ITEM_ANIMATION_DURATION);
+    if (isExistComponent_) {
+        flexController_->SetDuration(ITEM_ANIMATION_DURATION);
+    } else {
+        flexController_->SetDuration(ITEM_ANIMATION_DURATION_NO);
+    }
     flexController_->ClearStopListeners();
     flexController_->AddStopListener([weak = AceType::WeakClaim(this), includeSubGrid]() {
         auto renderGrid = weak.Upgrade();
@@ -2575,6 +2587,7 @@ void RenderGridLayout::CloseFlexComponent()
         stackElement->PopComponent();
         isExistComponent_ = false;
     }
+    isDragging_.store(false);
 }
 
 void RenderGridLayout::UpdateFlexComponenPosition(const Point& pos)
@@ -2703,8 +2716,8 @@ bool RenderGridLayout::MayStartToSlide(const TouchEventInfo& info)
 
 bool RenderGridLayout::CheckLongPress()
 {
-    if (animationAct_ != GridLayoutAnimationAct::ANIMATION_NONE || itemLongPressed_ ||
-        isExistComponent_ || itemDragStarted_ || GetChildren().empty()) {
+    if (animationAct_ != GridLayoutAnimationAct::ANIMATION_NONE || itemLongPressed_ || isDragging_.load() ||
+        itemDragStarted_ || GetChildren().empty()) {
         return true;
     } else {
         return false;
@@ -2795,14 +2808,13 @@ void RenderGridLayout::StartSpringAnimation(const Point& startPoint, const Point
             renderGrid->UpdateSprintAnimationPosition(position);
         }
     });
-
-    springController_->PlayMotion(springMotion_);
     springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
         auto renderGrid = weak.Upgrade();
         if (renderGrid) {
             renderGrid->FinishedSpringAnimation();
         }
     });
+    springController_->PlayMotion(springMotion_);
 }
 
 void RenderGridLayout::FinishedSpringAnimation()

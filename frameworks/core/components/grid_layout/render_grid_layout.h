@@ -47,6 +47,7 @@ constexpr int32_t DRAG_LEAVE = -1;
 constexpr int32_t DRAG_ENTER = 1;
 constexpr int32_t NONE = 0;
 constexpr double ITEM_ANIMATION_DURATION = 300.0;
+constexpr double ITEM_ANIMATION_DURATION_NO = 40.0;
 
 constexpr double GRID_SPRING_MASS = 1.0;
 constexpr double GRID_SPRING_STIFF = 228.0;
@@ -372,7 +373,6 @@ protected:
     bool AddNodeAnimationToController(int32_t itemIndex, int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan);
     void AddNodeAnimationToControllerForDrop(
         const RefPtr<RenderNode>& item, const Point& startPoint, const Point& endPoint);
-    bool AddFlexAnimationToController(const ItemDragInfo& info);
     void PrepareAnimationController(const std::string& key);
     void StartAnimationController(GridLayoutAnimationAct animationAct, const OnAnimationCallJSFunc& func);
     void StopAnimationController();
@@ -428,6 +428,7 @@ protected:
     std::string scrollBarColor_;
     DisplayMode displayMode_ = DisplayMode::OFF;
     bool rightToLeft_ = false;
+    bool needResetItemPosition_ = false;
     // Map structure: [rowIndex - (columnIndex, index)]
     std::map<int32_t, std::map<int32_t, int32_t>> gridMatrix_;
     // Map structure: [rowIndex - columnIndex - (width, height)]
@@ -515,12 +516,13 @@ protected:
     Point lastLongPressPoint_;
     Point startGlobalPoint_;
     bool isExistComponent_ = false;
+    std::atomic<bool> isDragging_;
 
-    GridLayoutAnimationAct animationAct_;
+    GridLayoutAnimationAct animationAct_ = GridLayoutAnimationAct::ANIMATION_NONE;
     RefPtr<Animator> animationController_;
     RefPtr<Animator> flexController_;
     bool supportAnimation_ = true;
-    bool needRunAnimation_ = false;
+    std::atomic<bool> needRunAnimation_;
     std::map<std::string, std::function<void()>> animationFinishedFuncList_;
     std::mutex animationLock_;
     OnAnimationCallJSFunc jsMoveFunc_ = nullptr;

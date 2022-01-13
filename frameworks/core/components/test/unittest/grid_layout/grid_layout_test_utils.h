@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 namespace {
-
+constexpr int32_t INIT_VALUE_UT_TEST = -2;
 class MockRenderBox final : public RenderBox {
     DECLARE_ACE_TYPE(MockRenderBox, RenderBox);
 
@@ -39,13 +39,95 @@ public:
     ~MockRenderGridLayoutItem() override = default;
 };
 
+class GridDragEventResult {
+public:
+    explicit GridDragEventResult() {};
+    ~GridDragEventResult() = default;
+    void SetLongPress(bool longPress)
+    {
+        longPress_ = longPress;
+    }
+    bool GetLongPress() const
+    {
+        return longPress_;
+    }
+    void SetOnDrop(bool onDrop)
+    {
+        onDrop_ = onDrop;
+    }
+    bool GetOnDrop() const
+    {
+        return onDrop_;
+    }
+    void SetOnDragEnter(bool onDragEnter)
+    {
+        onDragEnter_ = onDragEnter;
+    }
+    bool GetOnDragEnter() const
+    {
+        return onDragEnter_;
+    }
+    void SetOnDragMove(bool onDragMove)
+    {
+        onDragMove_ = onDragMove;
+    }
+    bool GetOnDragMove() const
+    {
+        return onDragMove_;
+    }
+    void SetOnDragLeave(bool onDragLeave)
+    {
+        onDragLeave_ = onDragLeave;
+    }
+    bool GetOnDragLeave() const
+    {
+        return onDragLeave_;
+    }
+    void SetOnDragStart(bool onDragStart)
+    {
+        onDragStart_ = onDragStart;
+    }
+    bool GetOnDragStart() const
+    {
+        return onDragStart_;
+    }
+    void SetDropItemIndex(int32_t itemIndex)
+    {
+        itemIndex_ = itemIndex;
+    }
+    int32_t GetDropItemIndex()
+    {
+        return itemIndex_ ;
+    }
+    void SetDropInsertIndex(int32_t insertIndex)
+    {
+        insertIndex_ = insertIndex;
+    }
+    int32_t GetDropInsertIndex()
+    {
+        return insertIndex_;
+    }
+
+private:
+    bool longPress_ = false;
+    bool onDrop_ = false;
+    bool onDragEnter_ = false;
+    bool onDragMove_ = false;
+    bool onDragLeave_ = false;
+    bool onDragStart_ = false;
+    int32_t itemIndex_ = INIT_VALUE_UT_TEST;
+    int32_t insertIndex_ = INIT_VALUE_UT_TEST;
+};
+
 } // namespace
 
 class GridLayoutTestUtils {
 public:
     static void PrintNodeInfo(const RefPtr<RenderNode>& node);
     static RefPtr<Component> CreateComponent(FlexDirection direction, std::string rows, std::string cols);
+    static RefPtr<Component> CreateDragComponent(std::string rows, std::string cols);
     static RefPtr<RenderNode> CreateRenderItem(int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan);
+    static RefPtr<RenderNode> CreateDragRenderItem();
 };
 
 } // namespace OHOS::Ace
