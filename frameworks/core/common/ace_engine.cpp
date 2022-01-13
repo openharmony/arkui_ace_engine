@@ -15,6 +15,10 @@
 
 #include "core/common/ace_engine.h"
 
+#include <csignal>
+#include <cstdio>
+
+#include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/memory/memory_monitor.h"
 #include "base/thread/background_task_executor.h"
@@ -23,14 +27,54 @@
 
 namespace OHOS::Ace {
 namespace {
+constexpr int32_t ELEMENT_ID = 54;
+constexpr int32_t RENDER_ID = 55;
+constexpr int32_t LAYER_ID = 56;
+constexpr int32_t FOCUS_ID = 57;
 
 std::unique_ptr<AceEngine> g_aceEngine;
+
+void HandleSignal(int signo)
+{
+    LOGI("HandleSignal signal: %{public}d", signo);
+    std::vector<std::string> params;
+    switch (signo) {
+        case ELEMENT_ID:
+            params.emplace_back("-element");
+            break;
+        case RENDER_ID:
+            params.emplace_back("-render");
+            break;
+        case LAYER_ID:
+            params.emplace_back("-layer");
+            break;
+        case FOCUS_ID:
+            params.emplace_back("-focus");
+            break;
+        default:
+            return;
+    }
+    auto fd = fopen("/data/arkui_dump.log", "w");
+    if (fd == nullptr) {
+        LOGE("HandleSignal signal failed due to fd is null");
+        return;
+    }
+
+    DumpLog::DumpFile fp(fd, &fclose);
+    DumpLog::GetInstance().SetDumpFile(std::move(fp));
+    AceEngine::Get().Dump(params);
+}
 
 }
 
 AceEngine::AceEngine()
 {
     watchDog_ = AceType::MakeRefPtr<WatchDog>();
+    // TODO: Remove it after dump cmd ready.
+    signal(ELEMENT_ID, HandleSignal);
+    signal(RENDER_ID, HandleSignal);
+    signal(LAYER_ID, HandleSignal);
+    signal(FOCUS_ID, HandleSignal);
 }
 
 AceEngine& AceEngine::Get()

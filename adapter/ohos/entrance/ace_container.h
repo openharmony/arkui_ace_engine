@@ -201,8 +201,8 @@ public:
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
     static void SetFontScale(int32_t instanceId, float fontScale);
     static void SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme);
-    static const std::string& RestoreRouterStack(int32_t instanceId, const std::string& contentInfo);
-    static const std::string& GetContentInfo(int32_t instanceId);
+    static std::string RestoreRouterStack(int32_t instanceId, const std::string& contentInfo);
+    static std::string GetContentInfo(int32_t instanceId);
 
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);

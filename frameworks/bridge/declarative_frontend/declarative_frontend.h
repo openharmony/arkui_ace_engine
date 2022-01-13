@@ -147,8 +147,8 @@ public:
     void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) override;
 
     // distribute
-    const std::string& RestoreRouterStack(const std::string& contentInfo) override;
-    const std::string& GetContentInfo() const override;
+    std::string RestoreRouterStack(const std::string& contentInfo) override;
+    std::string GetContentInfo() const override;
 
     void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data);
 

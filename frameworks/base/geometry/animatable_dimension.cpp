@@ -32,7 +32,6 @@ AnimatableDimension& AnimatableDimension::operator=(const AnimatableDimension& n
     SetAnimationOption(newDimension.GetAnimationOption());
     auto pipelineContext = context_.Upgrade();
     if (!animationCallback_ || !pipelineContext) {
-        LOGD("Animatable assign without animation due to null callback or context");
         SetValue(newDimension.Value());
         return *this;
     }

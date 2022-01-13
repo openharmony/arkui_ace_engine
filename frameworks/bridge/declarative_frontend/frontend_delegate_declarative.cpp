@@ -1967,7 +1967,7 @@ RefPtr<PipelineContext> FrontendDelegateDeclarative::GetPipelineContext()
     return pipelineContextHolder_.Get();
 }
 
-const std::string& FrontendDelegateDeclarative::RestoreRouterStack(const std::string& contentInfo)
+std::string FrontendDelegateDeclarative::RestoreRouterStack(const std::string& contentInfo)
 {
     auto routerStack = JsonUtil::ParseJsonString(contentInfo);
     if (!routerStack->IsValid() || !routerStack->IsArray()) {
@@ -1990,7 +1990,7 @@ const std::string& FrontendDelegateDeclarative::RestoreRouterStack(const std::st
     return mainPagePath_;
 }
 
-const std::string& FrontendDelegateDeclarative::GetContentInfo()
+std::string FrontendDelegateDeclarative::GetContentInfo()
 {
     auto jsonRouterStack = JsonUtil::CreateArray(true);
     for (size_t index = 0; index < pageRouteStack_.size(); ++index) {
