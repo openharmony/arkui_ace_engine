@@ -27,7 +27,6 @@ constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 
 RefPtr<RenderNode> RenderIndexerItem::Create()
 {
-    LOGI("[indexer] RenderIndexerItem Create");
     return AceType::MakeRefPtr<RenderIndexerItem>();
 }
 

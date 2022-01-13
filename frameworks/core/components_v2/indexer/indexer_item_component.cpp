@@ -22,7 +22,6 @@
 namespace OHOS::Ace::V2 {
 RefPtr<RenderNode> IndexerItemComponent::CreateRenderNode()
 {
-    LOGI("[indexer] CreateRenderNode ");
     return RenderIndexerItem::Create();
 }
 

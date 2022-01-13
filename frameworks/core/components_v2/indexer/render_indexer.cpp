@@ -279,7 +279,6 @@ void RenderIndexer::HandleTouchMove(const TouchEventInfo& info)
 bool RenderIndexer::TouchTest(const Point& globalPoint, const Point& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    LOGI("[indexer] TouchTest");
     if (GetDisableTouchEvent() || disabled_) {
         return false;
     }
@@ -346,8 +345,6 @@ bool RenderIndexer::TouchTest(const Point& globalPoint, const Point& parentLocal
 void RenderIndexer::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    LOGI("[indexer] OnTouchTestHit");
-
     if (touchRecognizer_) {
         touchRecognizer_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(touchRecognizer_);
@@ -356,8 +353,6 @@ void RenderIndexer::OnTouchTestHit(
 
 void RenderIndexer::HandleTouched(const Offset& touchPosition)
 {
-    LOGI("[indexer] HandleTouched");
-
     int32_t index = GetTouchedItemIndex(touchPosition);
     if (index > -1) {
         MoveSectionWithIndexer(index);

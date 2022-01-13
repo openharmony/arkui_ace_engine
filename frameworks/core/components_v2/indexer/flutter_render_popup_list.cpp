@@ -21,7 +21,6 @@
 namespace OHOS::Ace::V2 {
 RefPtr<RenderNode> RenderPopupList::Create()
 {
-    LOGI("[indexer] RenderPopupList Create");
     return AceType::MakeRefPtr<FlutterRenderPopupList>();
 }
 

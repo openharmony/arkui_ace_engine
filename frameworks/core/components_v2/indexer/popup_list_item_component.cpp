@@ -21,13 +21,11 @@
 namespace OHOS::Ace::V2 {
 RefPtr<Element> PopupListItemComponent::CreateElement()
 {
-    LOGI("[indexer] PopupListItemComponent::CreateElement");
     return AceType::MakeRefPtr<PopupListItemElement>();
 }
 
 RefPtr<RenderNode> PopupListItemComponent::CreateRenderNode()
 {
-    LOGI("[indexer] PopupListItemComponent::CreateRenderNode");
     return RenderPopupListItem::Create();
 }
 

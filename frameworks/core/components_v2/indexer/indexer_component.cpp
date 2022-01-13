@@ -24,13 +24,11 @@
 namespace OHOS::Ace::V2 {
 RefPtr<Element> IndexerComponent::CreateElement()
 {
-    LOGI("[indexer] CreateElement ");
     return AceType::MakeRefPtr<IndexerElement>();
 }
 
 RefPtr<RenderNode> IndexerComponent::CreateRenderNode()
 {
-    LOGI("[indexer] CreateRenderNode");
     RefPtr<RenderIndexer> renderNode =  AceType::MakeRefPtr<RenderIndexer>();
     renderNode->SetFocusIndex(selectedIndex_);
     return renderNode;
