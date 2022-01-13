@@ -455,6 +455,9 @@ void V8AnimationBridge::JsCreateAnimation(const RefPtr<JsAcePage>& page, const s
         tweenOption.SetDelay(iterDelay->second);
     }
     tweenOption.SetIteration(iterations);
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        tweenOption.SetAllowRunningAsynchronously(true);
+    }
     if (!page) {
         LOGE("JsCreateAnimation failed, Page is null.");
         return;

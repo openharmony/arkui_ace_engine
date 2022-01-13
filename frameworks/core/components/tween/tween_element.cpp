@@ -1050,6 +1050,7 @@ void TweenElement::ApplyOptions(RefPtr<Animator>& controller, TweenOption& optio
     controller->SetFillMode(option.GetFillMode());
     controller->SetTempo(option.GetTempo());
     controller->SetAnimationDirection(option.GetAnimationDirection());
+    controller->SetAllowRunningAsynchronously(option.GetAllowRunningAsynchronously());
 
     for (const auto& [type, animation] : option.GetAnimatables()) {
         if (option.GetCurve()) {
