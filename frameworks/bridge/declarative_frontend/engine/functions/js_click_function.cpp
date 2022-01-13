@@ -45,6 +45,7 @@ void JsClickFunction::Execute(const ClickInfo& info)
     obj->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
     obj->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+    obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
 
@@ -65,6 +66,7 @@ void JsClickFunction::Execute(const GestureEvent& info)
     obj->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
     obj->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+    obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
 
@@ -91,6 +93,7 @@ void JsClickFunction::Execute(MouseInfo& info)
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     obj->SetPropertyObject(
         "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
+    obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->Wrap<MouseInfo>(&info);

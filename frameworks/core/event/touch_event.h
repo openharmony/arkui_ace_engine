@@ -82,11 +82,10 @@ struct TouchPoint final {
     TouchPoint UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const
     {
         if (NearZero(scale)) {
-            return { pointId, x- offsetX, y- offsetY, type, time, size, force, deviceId };
+            return { pointId, x - offsetX, y - offsetY, type, time, size, force, deviceId };
         }
         return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, type, time, size, force, deviceId };
     }
-
 };
 
 class TouchCallBackInfo : public BaseEventInfo {
@@ -203,15 +202,17 @@ public:
     {
         return size_;
     }
-    void SetDeviceId(int64_t deviceId)
+
+    void SetTouchDeviceId(int64_t deviceId)
     {
-        deviceId_ = deviceId;
+        touchDeviceId_ = deviceId;
     }
 
-    int64_t GetDeviceId() const
+    int64_t GetTouchDeviceId() const
     {
-        return deviceId_;
+        return touchDeviceId_;
     }
+
     void SetForce(float force)
     {
         force_ = force;
@@ -244,7 +245,7 @@ private:
     double size_ = 0.0;
 
     // input device id
-    int64_t deviceId_ = 0;
+    int64_t touchDeviceId_ = 0;
 
     // touch pressure
     float force_ = 0.0f;

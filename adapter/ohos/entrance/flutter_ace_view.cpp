@@ -45,6 +45,8 @@ void GetEventDevice(int32_t sourceType, E& event)
         case OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN:
             event.sourceType = SourceType::TOUCH;
         case OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD:
+            event.sourceType = SourceType::TOUCH_PAD;
+            break;
         case OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE:
             event.sourceType = SourceType::MOUSE;
         default:

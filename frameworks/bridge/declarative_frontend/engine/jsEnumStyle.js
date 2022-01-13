@@ -696,3 +696,10 @@ var DialogStatus;
   DialogStatus[DialogStatus["Cancel"] = 1] = "Cancel";
   DialogStatus[DialogStatus["Update"] = 2] = "Update";
 })(DialogStatus || (DialogStatus = {}));
+
+var SourceType;
+(function (SourceType) {
+  SourceType[SourceType["Unknown"] = 0] = "Unknown";
+  SourceType[SourceType["Mouse"] = 1] = "Mouse";
+  SourceType[SourceType["TouchScreen"] = 2] = "TouchScreen";
+})(SourceType || (SourceType = {}));

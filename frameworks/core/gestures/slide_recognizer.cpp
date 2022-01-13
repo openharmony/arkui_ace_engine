@@ -43,11 +43,8 @@ double ChangeValueRange(double value)
 
 void SlideRecognizer::OnAccepted()
 {
-    SendCallbackMsg(onActionStart_);
-
     if (slidingEnd_) {
         LOGD("slide gesture recognizer has sliding end event when waiting to be accepted");
-        SendCallbackMsg(onActionEnd_);
         Reset();
     } else if (slidingCancel_) {
         SendCancelMsg();
@@ -130,7 +127,6 @@ void SlideRecognizer::HandleTouchUpEvent(const TouchPoint& event)
 
     if (static_cast<int32_t>(touchPoints_.size()) <= fingers_) {
         if (refereeState_ == RefereeState::SUCCEED) {
-            SendCallbackMsg(onActionEnd_);
             double averageSpeed = 0.0;
             bool isAvalible = true;
             for (const auto& element : distanceData) {
@@ -203,7 +199,6 @@ void SlideRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
         }
     } else if (state_ == DetectState::DETECTED && refereeState_ == RefereeState::SUCCEED) {
         resultAngle_ = ChangeValueRange(currentAngle_ - initialAngle_);
-        SendCallbackMsg(onActionUpdate_);
     }
 }
 
@@ -281,6 +276,8 @@ void SlideRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         info.SetGlobalPoint(globalPoint_);
         info.SetAngle(resultAngle_);
         info.SetSpeed(resultSpeed_);
+        info.SetSourceDevice(deviceType_);
+        info.SetDeviceId(deviceId_);
         (*callback)(info);
     }
 }
