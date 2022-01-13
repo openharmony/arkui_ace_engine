@@ -337,6 +337,16 @@ public:
         onDropId_ = onDropId;
     }
 
+    RefPtr<Gesture> GetOnLongPress() const
+    {
+        return onLongPressId_;
+    }
+
+    void SetOnLongPress(const RefPtr<Gesture>& onLongPressId)
+    {
+        onLongPressId_ = onLongPressId;
+    }
+    
 private:
     RefPtr<Decoration> backDecoration_;
     RefPtr<Decoration> frontDecoration_;
@@ -351,6 +361,7 @@ private:
     OnMouseCallback onMouseId_;
     RefPtr<Gesture> onClickId_;
     RefPtr<Gesture> onDoubleClickId_;
+    RefPtr<Gesture> onLongPressId_;
     std::array<RefPtr<Gesture>, 3> gestures_;
     EventMarker onDomDragEnterId_;
     EventMarker onDomDragOverId_;

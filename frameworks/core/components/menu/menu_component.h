@@ -94,6 +94,7 @@ public:
     {
         return targetCallback_;
     }
+
     void SetTargetCallback(const std::function<void(const ComposeId&, const Offset&)>& targetCallback)
     {
         targetCallback_ = targetCallback;
@@ -145,6 +146,19 @@ public:
     void SetIsBindTarget(bool isBindTarget) {}
     const RefPtr<SelectPopupComponent>& GetPopup() const;
 
+    void SetContextMenu(bool isContextMenu)
+    {
+        isContextMenu_ = isContextMenu;
+        if (popup_) {
+            popup_->SetIsContextMenu(isContextMenu);
+        }
+    }
+
+    bool IsContextMenu()
+    {
+        return isContextMenu_;
+    }
+
 private:
     RefPtr<SelectPopupComponent> popup_ = AceType::MakeRefPtr<SelectPopupComponent>();
     std::function<void(const ComposeId&, const Offset&)> targetCallback_;
@@ -153,6 +167,9 @@ private:
     MenuStatus menuShow_ = MenuStatus::INIT;
     Offset popupPosition_ = Offset(0, 0);
     TextStyle textStyle_ = TextStyle();
+
+    // This is mardked by contextMenu
+    bool isContextMenu_ = false;
 };
 
 } // namespace OHOS::Ace

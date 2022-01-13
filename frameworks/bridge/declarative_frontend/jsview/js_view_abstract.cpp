@@ -38,6 +38,7 @@
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/menu/menu_component.h"
 #include "core/components/option/option_component.h"
+#include "core/gestures/long_press_gesture.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
@@ -50,6 +51,8 @@ constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
+constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
+constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
 constexpr double EPSILON = 0.000002f;
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 
@@ -3368,6 +3371,84 @@ void JSViewAbstract::JsAccessibilityImportance(const std::string& importance)
     inspector->SetAccessibilityImportance(importance);
 }
 
+void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
+{
+    ViewStackProcessor::GetInstance()->GetCoverageComponent();
+    auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
+    if (!menuComponent) {
+        return;
+    }
+    menuComponent->SetContextMenu(true);
+    int32_t responseType = static_cast<int32_t>(ResponseType::LONGPRESS);
+    if (info.Length() == 2 && info[1]->IsNumber()) {
+        responseType = info[1]->ToNumber<int32_t>();
+        LOGI("Set the responseType is %d.", responseType);
+    }
+
+    if (responseType == static_cast<int32_t>(ResponseType::RIGHT_CLICK)) {
+        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        box->SetOnMouseId([weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent)](MouseInfo& info) {
+            auto refPtr = weak.Upgrade();
+            if (!refPtr) {
+                return;
+            }
+            if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
+                auto showMenu = refPtr->GetTargetCallback();
+                showMenu("", info.GetGlobalLocation());
+            }
+        });
+    } else if (responseType == static_cast<int32_t>(ResponseType::LONGPRESS)) {
+        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        RefPtr<Gesture> longGesture =
+            AceType::MakeRefPtr<LongPressGesture>(DEFAULT_LONG_PRESS_FINGER, false, DEFAULT_LONG_PRESS_DURATION);
+        longGesture->SetOnActionId([weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent)](const GestureEvent& info) {
+            auto refPtr = weak.Upgrade();
+            if (!refPtr) {
+                return;
+            }
+            auto showMenu = refPtr->GetTargetCallback();
+            showMenu("", info.GetGlobalLocation());
+        });
+        box->SetOnLongPress(longGesture);
+    } else {
+        LOGE("The arg responseType is invalid.");
+        return;
+    }
+    auto menuTheme = GetTheme<SelectTheme>();
+    menuComponent->SetTheme(menuTheme);
+
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[0]);
+
+        auto builder = menuObj->GetProperty("builder");
+        if (!builder->IsFunction()) {
+            LOGE("builder param is not a function.");
+            return;
+        }
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        if (!builderFunc) {
+            LOGE("builder function is null.");
+            return;
+        }
+        // use another VSP instance while executing the builder function
+        ScopedViewStackProcessor builderViewStackProcessor;
+        builderFunc->Execute();
+        auto customComponent = ViewStackProcessor::GetInstance()->Finish();
+        if (!customComponent) {
+            LOGE("Custom component is null.");
+            return;
+        }
+
+        auto optionTheme = GetTheme<SelectTheme>();
+        auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
+        optionComponent->SetCustomComponent(customComponent);
+        menuComponent->AppendOption(optionComponent);
+    } else {
+        LOGE("Param is invalid");
+        return;
+    }
+}
+
 void JSViewAbstract::JSBind()
 {
     JSClass<JSViewAbstract>::Declare("JSViewAbstract");
@@ -3446,6 +3527,7 @@ void JSViewAbstract::JSBind()
 #endif
 
     JSClass<JSViewAbstract>::StaticMethod("bindMenu", &JSViewAbstract::JsBindMenu);
+    JSClass<JSViewAbstract>::StaticMethod("bindContextMenu", &JSViewAbstract::JsBindContextMenu);
     JSClass<JSViewAbstract>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
     JSClass<JSViewAbstract>::StaticMethod("onDragEnter", &JSViewAbstract::JsOnDragEnter);
     JSClass<JSViewAbstract>::StaticMethod("onDragMove", &JSViewAbstract::JsOnDragMove);
