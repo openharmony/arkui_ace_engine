@@ -96,6 +96,13 @@ void FocusNode::DumpFocusTree(int32_t depth)
 
 bool FocusNode::RequestFocusImmediately()
 {
+    auto renderNode = GetRenderNode(AceType::Claim(this));
+    if (renderNode) {
+        auto context = renderNode->GetContext().Upgrade();
+        if (context && context->IsJsCard()) {
+            return false;
+        }
+    }
     if (IsCurrentFocus()) {
         return true;
     }
@@ -217,7 +224,7 @@ bool FocusNode::OnKeyEvent(const KeyEvent& keyEvent)
             return false;
         }
         onKeyEventCallback_(event);
-        return event->IsStopPropagation() ? true : false;
+        return event->IsStopPropagation();
     }
     return false;
 }

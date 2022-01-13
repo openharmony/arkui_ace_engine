@@ -2159,7 +2159,9 @@ void PipelineContext::SetUseRootAnimation(bool useRoot)
 
 void PipelineContext::RegisterFont(const std::string& familyName, const std::string& familySrc)
 {
-    fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this));
+    if (fontManager_) {
+        fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this));
+    }
 }
 
 void PipelineContext::TryLoadImageInfo(

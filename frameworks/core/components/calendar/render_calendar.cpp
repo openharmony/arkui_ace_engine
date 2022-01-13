@@ -119,7 +119,7 @@ void RenderCalendar::PerformLayout()
         layoutSize = Size(
             std::max(maxSize.Width(), calendarMinSize.Width()), std::max(maxSize.Height(), calendarMinSize.Height()));
     }
-    if (SystemProperties::GetDeviceType() == DeviceType::TV) {
+    if (SystemProperties::GetDeviceType() == DeviceType::TV && !cardCalendar_) {
         SetLayoutSize(layoutSize);
     } else if (maxSize.IsInfinite()) {
         SetLayoutSize({ context->GetRootWidth(), context->GetRootHeight() });
