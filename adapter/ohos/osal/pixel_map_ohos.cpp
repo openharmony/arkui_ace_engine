@@ -157,17 +157,13 @@ void* PixelMapOhos::GetRawPixelMapPtr() const
 
 std::string PixelMapOhos::GetId()
 {
-    if (pixmap_) {
-        return pixmap_->GetId();
-    }
+    // TODO: media should generate Id of each [PixelMap] to distinguish different objects
     return std::string();
 }
 
 std::string PixelMapOhos::GetModifyId()
 {
-    if (pixmap_) {
-        return pixmap_->GetModifyId();
-    }
+    // TODO: media should generate ModifyId of [PixelMap] to distinguish [PixelMap] object after different operations
     return std::string();
 }
 

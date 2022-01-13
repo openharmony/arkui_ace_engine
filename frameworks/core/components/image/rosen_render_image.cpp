@@ -396,6 +396,8 @@ void RosenRenderImage::ProcessPixmapForPaint()
 #ifndef GPU_DISABLED
         skImage = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
             imagePixmap, true, imagePixmap.colorSpace(), true);
+#else
+        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
 #endif
     }
     image_ = std::move(skImage);

@@ -350,15 +350,14 @@ void JSImage::Create(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-
     std::string src;
-    auto usePixMap = ParseJsMedia(info[0], src);
+    auto noPixMap = ParseJsMedia(info[0], src);
     RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(src);
     imageComponent->SetUseSkiaSvg(false);
     ViewStackProcessor::GetInstance()->Push(imageComponent);
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
     boxComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
-    if (usePixMap) {
+    if (noPixMap) {
         return;
     }
 
