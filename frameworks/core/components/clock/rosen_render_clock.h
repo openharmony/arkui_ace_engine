@@ -40,9 +40,9 @@ public:
     ~RosenRenderClockHand() override = default;
 
     void Paint(RenderContext& context, const Offset& offset) override;
+    void PerformLayout() override;
     void RequestRenderForNextSecond() override;
-    void RenderHand(RenderContext& context, const Offset& offset,
-        const RefPtr<RenderImage>& renderHand, double rotateAngle);
+    void LayoutHand(const Offset& offset, const RefPtr<RenderImage>& renderHand, double rotateAngle);
 
     bool IsRepaintBoundary() const override
     {
