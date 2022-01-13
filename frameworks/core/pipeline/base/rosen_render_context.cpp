@@ -16,6 +16,7 @@
 #include "core/pipeline/base/rosen_render_context.h"
 
 #include "core/components/plugin/render_plugin.h"
+#include "core/pipeline/base/render_sub_container.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -93,12 +94,12 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
             }
         }
         Offset pos = rect.GetOffset();
-        if (name == "RosenRenderPlugin") {
-            auto renderPlugin = AceType::DynamicCast<RenderPlugin>(child);
+        if (name == "RosenRenderPlugin" || name == "RosenRenderForm") {
+            auto renderPlugin = AceType::DynamicCast<RenderSubContainer>(child);
             if (!renderPlugin) {
                 return;
             }
-            auto pluginContext = renderPlugin->GetPluginPipelineContext();
+            auto pluginContext = renderPlugin->GetSubPipelineContext();
             if (!pluginContext) {
                 return;
             }

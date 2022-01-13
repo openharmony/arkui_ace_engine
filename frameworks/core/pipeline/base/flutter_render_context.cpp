@@ -17,6 +17,7 @@
 
 #include "core/components/plugin/render_plugin.h"
 #include "core/pipeline/base/render_node.h"
+#include "core/pipeline/base/render_sub_container.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -123,12 +124,12 @@ void FlutterRenderContext::SetOffSet(
             }
         }
         // plugin offset
-        if (name == "FlutterRenderPlugin") {
-            auto renderPlugin = AceType::DynamicCast<RenderPlugin>(child);
+        if (name == "FlutterRenderPlugin" || name == "FlutterRenderForm") {
+            auto renderPlugin = AceType::DynamicCast<RenderSubContainer>(child);
             if (!renderPlugin) {
                 return;
             }
-            auto pluginContext = renderPlugin->GetPluginPipelineContext();
+            auto pluginContext = renderPlugin->GetSubPipelineContext();
             if (!pluginContext) {
                 return;
             }

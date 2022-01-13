@@ -59,7 +59,7 @@ bool RenderPlugin::TouchTest(const Point& globalPoint,
 {
     auto context = GetContext().Upgrade();
     if (context) {
-        auto pluginContext = GetPluginPipelineContext();
+        auto pluginContext = GetSubPipelineContext();
         if (pluginContext) {
             double x = globalPoint.GetX() - pluginContext->GetPluginOffset().GetX();
             double y = globalPoint.GetY() - pluginContext->GetPluginOffset().GetY();

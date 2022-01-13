@@ -66,6 +66,11 @@ void SubContainer::Destroy()
         return;
     }
 
+    auto outPipelineContext = outSidePipelineContext_.Upgrade();
+    if (outPipelineContext) {
+        outPipelineContext->RemoveTouchPipeline(WeakPtr<PipelineContext>(pipelineContext_));
+    }
+
     assetManager_.Reset();
     pipelineContext_.Reset();
 }
@@ -128,7 +133,7 @@ void SubContainer::RunCard(const int64_t id, const std::string path, const std::
 
     frontend_->ResetPageLoadState();
 
-    LOGD("run card path:%{private}s, module:%{private}s, data:%{private}s", path.c_str(), module.c_str(), data.c_str());
+    LOGI("run card path:%{private}s, module:%{private}s, data:%{private}s", path.c_str(), module.c_str(), data.c_str());
     RefPtr<FlutterAssetManager> flutterAssetManager;
     flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
 

@@ -17,16 +17,17 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FORM_RENDER_FORM_H
 
 #include "core/components/form/form_component.h"
-#include "core/pipeline/base/render_node.h"
+#include "core/components/form/sub_container.h"
+#include "core/pipeline/base/render_sub_container.h"
 
 namespace OHOS::Ace {
 
-class RenderForm : public RenderNode {
-DECLARE_ACE_TYPE(RenderForm, RenderNode);
+class RenderForm : public RenderSubContainer {
+DECLARE_ACE_TYPE(RenderForm, RenderSubContainer);
 
 public:
     static RefPtr<RenderNode> Create();
-    RenderForm() : RenderNode(false) {}
+
     ~RenderForm() override = default;
 
     void Update(const RefPtr<Component>& component) override;
@@ -38,10 +39,28 @@ public:
     }
     virtual void RemoveChildren() {}
 
+    bool TouchTest(const Point& globalPoint,
+        const Point& parentLocalPoint, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
+
+    void SetSubContainer(const WeakPtr<SubContainer>& container)
+    {
+        subContainer_ = container;
+    }
+
+    RefPtr<PipelineContext> GetSubPipelineContext() override
+    {
+        auto context = subContainer_.Upgrade();
+        if (context) {
+            return context->GetPipelineContext();
+        }
+        return nullptr;
+    }
+
 private:
     Dimension rootWidht_ = 0.0_vp;
     Dimension rootHeight_ = 0.0_vp;
     Size drawSize_;
+    WeakPtr<SubContainer> subContainer_;
 };
 
 } // namespace OHOS::Ace
