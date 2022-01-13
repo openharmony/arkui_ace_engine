@@ -22,7 +22,6 @@
 #include "core/pipeline/layers/clip_layer.h"
 
 namespace OHOS::Ace::V2 {
-
 class FlutterRenderPopupList : public RenderPopupList {
     DECLARE_ACE_TYPE(V2::FlutterRenderPopupList, RenderPopupList);
 
@@ -39,7 +38,5 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(FlutterRenderPopupList);
 };
-
 } // namespace OHOS::Ace::V2
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_FLUTTER_RENDER_POPUP_LIST_H

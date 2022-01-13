@@ -54,5 +54,4 @@ void PopupListComponent::BuildBackground()
 
     AppendChild(boxComponent);
 }
-
 } // namespace OHOS::Ace

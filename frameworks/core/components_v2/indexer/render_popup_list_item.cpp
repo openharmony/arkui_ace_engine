@@ -110,5 +110,4 @@ void RenderPopupListItem::UpdateBoxNormal()
     renderBox_->Update(boxComponent_);
     renderBox_->PerformLayout();
 }
-
 } // namespace OHOS::Ace::V2

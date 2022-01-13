@@ -25,7 +25,6 @@
 #include "core/components_v2/indexer/popup_list_item_component.h"
 
 namespace OHOS::Ace::V2 {
-
 constexpr double VIEW_PORT_SCALE = 3.0;
 
 void RenderPopupList::Update(const RefPtr<Component>& component)
@@ -220,9 +219,9 @@ void RenderPopupList::CalTouchPoint(const Point& globalPoint, int32_t& selected)
     selected = INVALID_POPUP_SELECTED;
     std::list<RefPtr<RenderPopupListItem>>::iterator iter;
     int32_t index = 0;
-    for (iter = items_.begin(); iter != items_.end(); iter++) {
+    for (iter = items_.begin(); iter != items_.end(); ++iter) {
         auto renderItem = *iter;
-        std::unique_ptr<Rect> rect = std::make_unique<Rect>(renderItem->GetGlobalOffset(), 
+        std::unique_ptr<Rect> rect = std::make_unique<Rect>(renderItem->GetGlobalOffset(),
                                         renderItem->GetLayoutSize());
         if (rect->IsInRegion(globalPoint)) {
             selected = index + startIndex_;
@@ -451,5 +450,4 @@ void RenderPopupList::SetEdgeEffectAttribute()
         }
     }
 }
-
 } // namespace OHOS::Ace::V2

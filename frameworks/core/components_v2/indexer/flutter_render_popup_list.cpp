@@ -19,7 +19,6 @@
 #include "core/pipeline/base/scoped_canvas_state.h"
 
 namespace OHOS::Ace::V2 {
-
 RefPtr<RenderNode> RenderPopupList::Create()
 {
     LOGI("[indexer] RenderPopupList Create");
@@ -55,5 +54,4 @@ void FlutterRenderPopupList::Paint(RenderContext& context, const Offset& offset)
         PaintChild(child, context, offset);
     }
 }
-
 } // namespace OHOS::Ace::V2

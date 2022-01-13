@@ -22,6 +22,7 @@
 namespace OHOS::Ace::V2 {
 namespace {
 constexpr Dimension FOCUS_PADDING = 2.0_vp;
+constexpr int32_t PADDIN_SIZE = 2;
 } // namespace
 
 RefPtr<RenderNode> RenderIndexer::Create()
@@ -552,7 +553,7 @@ void RenderIndexer::HandleFocusAnimation(const Size& size, const Offset& offset)
 
     double focusPadding = NormalizeToPx(FOCUS_PADDING);
     context->ShowFocusAnimation(
-        RRect::MakeRRect(Rect(Offset(), size - Size(focusPadding, focusPadding) * 2), focusPadding, focusPadding),
+        RRect::MakeRRect(Rect(Offset(), size - Size(focusPadding, focusPadding) * PADDIN_SIZE), focusPadding, focusPadding),
         Color::BLUE, offset + Offset(focusPadding, focusPadding));
 }
 
@@ -636,7 +637,7 @@ void RenderIndexer::OnRequestPopupData(int32_t selected)
             // switch bubble style
             if (popupData.size() == 0) {
                 popupListEnabled_ = false;
-            }else {
+            } else {
                 popupListEnabled_ = true;
             }
         }
