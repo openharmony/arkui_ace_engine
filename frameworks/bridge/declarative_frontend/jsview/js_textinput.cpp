@@ -144,6 +144,7 @@ void JSTextInput::Create(const JSCallbackInfo& info)
     // default type is text, default action is done.
     textInputComponent->SetTextInputType(TextInputType::TEXT);
     textInputComponent->SetAction(TextInputAction::DONE);
+    textInputComponent->SetInspectorTag("TextInput");
     ViewStackProcessor::GetInstance()->Push(textInputComponent);
     InitDefaultStyle();
 
