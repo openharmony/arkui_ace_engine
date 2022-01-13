@@ -26,7 +26,8 @@ namespace OHOS::Ace {
 class BoxComponentHelper {
 public:
     static void SetBorderColor(
-        const RefPtr<Decoration>& decoration, const Color& color, const AnimationOption& option = AnimationOption())
+        const RefPtr<Decoration> decoration, const Color& color,
+        const AnimationOption& option = AnimationOption())
     {
         if (!decoration) {
             return;
@@ -43,7 +44,15 @@ public:
         decoration->SetBorder(border);
     }
 
-    static void SetBorderRadius(const RefPtr<Decoration>& decoration, const Dimension& radius,
+    static Color GetBorderColor(const RefPtr<Decoration> decoration)
+    {
+        if (decoration == nullptr) {
+            return Color();
+        }
+        return decoration->GetBorder().Left().GetColor();
+    }
+
+    static void SetBorderRadius(const RefPtr<Decoration> decoration, const Dimension& radius,
         const AnimationOption& option = AnimationOption())
     {
         if (!decoration) {
@@ -54,7 +63,19 @@ public:
         decoration->SetBorder(border);
     }
 
-    static void SetBorderStyle(const RefPtr<Decoration>& decoration, BorderStyle style)
+    static Radius GetBorderRadius(const RefPtr<Decoration> decoration)
+    {
+        if (decoration == nullptr) {
+            return Radius(0.0);
+        }
+        Border border = decoration->GetBorder();
+        if (!border.HasRadius()) {
+            return Radius(0.0);
+        }
+        return border.TopLeftRadius();
+    }
+
+    static void SetBorderStyle(const RefPtr<Decoration> decoration, const BorderStyle& style)
     {
         if (!decoration) {
             return;
@@ -71,8 +92,18 @@ public:
         decoration->SetBorder(border);
     }
 
+    static BorderStyle GetBorderStyle(const RefPtr<Decoration> decoration)
+    {
+        if (decoration == nullptr) {
+            return BorderStyle::NONE;
+        }
+        Border border = decoration->GetBorder();
+        return border.Left().GetBorderStyle();
+    }
+
     static void SetBorderWidth(
-        const RefPtr<Decoration>& decoration, const Dimension& width, const AnimationOption& option = AnimationOption())
+        const RefPtr<Decoration> decoration, const Dimension& width,
+        const AnimationOption& option = AnimationOption())
     {
         if (!decoration) {
             return;
@@ -80,6 +111,14 @@ public:
         Border border = decoration->GetBorder();
         border.SetWidth(width, option);
         decoration->SetBorder(border);
+    }
+
+    static Dimension GetBorderWidth(const RefPtr<Decoration> decoration)
+    {
+        if (decoration == nullptr) {
+            return Dimension(0);
+        }
+        return decoration->GetBorder().Left().GetWidth();
     }
 };
 

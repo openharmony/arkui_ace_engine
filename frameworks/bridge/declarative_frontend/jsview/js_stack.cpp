@@ -105,22 +105,7 @@ void JSStack::SetWidth(const JSCallbackInfo& info)
 
 void JSStack::SetWidth(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
-    if (!ConvertFromJSValue(jsValue, value)) {
-        LOGE("args can not set width");
-        return;
-    }
-
-    if (LessNotEqual(value.Value(), 0.0)) {
-        return;
-    }
-    auto stackProcessor = ViewStackProcessor::GetInstance();
-    auto box = stackProcessor->GetBoxComponent();
-    if (!stackProcessor->IsVisualStateSet()) {
-        box->SetWidth(value, stackProcessor->GetImplicitAnimationOption());
-    } else {
-        box->SetWidthForState(value, stackProcessor->GetImplicitAnimationOption(), stackProcessor->GetVisualState());
-    }
+    JSViewAbstract::JsWidth(jsValue);
 
     auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (stack) {
@@ -144,23 +129,7 @@ void JSStack::SetHeight(const JSCallbackInfo& info)
 
 void JSStack::SetHeight(const JSRef<JSVal>& jsValue)
 {
-    Dimension value;
-    if (!ConvertFromJSValue(jsValue, value)) {
-        LOGE("args can not set height");
-        return;
-    }
-
-    if (LessNotEqual(value.Value(), 0.0)) {
-        return;
-    }
-    auto stackProcessor = ViewStackProcessor::GetInstance();
-    auto box = stackProcessor->GetBoxComponent();
-    if (!stackProcessor->IsVisualStateSet()) {
-        box->SetHeight(value, stackProcessor->GetImplicitAnimationOption());
-    } else {
-        box->SetHeightForState(value, stackProcessor->GetImplicitAnimationOption(), stackProcessor->GetVisualState());
-    }
-
+    JSViewAbstract::JsHeight(jsValue);
     auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (stack) {
         if (stack->GetMainStackSize() == MainStackSize::MAX || stack->GetMainStackSize() == MainStackSize::MAX_X) {

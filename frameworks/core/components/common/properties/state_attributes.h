@@ -20,23 +20,23 @@
 
 namespace OHOS::Ace {
 
-enum class StyleState {
-    NOTSET = 0,
-    NORMAL,
-    PRESSED,
-    DISABLED
-};
+constexpr int VISUAL_STATE_COUNT = 5; // Count of valid enums below (without UNDEFINED)
 
-// Classes below (StateAttributeList) owned by Components
-// and passed to RenderNodes for execution
+enum class VisualState {
+    NORMAL = 0,
+    FOCUSED,
+    PRESSED,
+    DISABLED,
+    HOVER,
+    NOTSET,
+};
 
 template<class AttributeID>
 class StateAttributeBase : public virtual AceType {
     DECLARE_ACE_TYPE(StateAttributeBase<AttributeID>, AceType);
 public:
-    StateAttributeBase(StyleState state, AttributeID id) : stateName_(state), id_(id) {}
+    StateAttributeBase(AttributeID id) : id_(id) {}
     virtual ~StateAttributeBase() {}
-    StyleState stateName_;
     AttributeID id_;
 };
 
@@ -44,15 +44,49 @@ template<class AttributeID, class Attribute>
 class StateAttributeValue : public StateAttributeBase<AttributeID> {
     DECLARE_ACE_TYPE(StateAttributeValue, StateAttributeBase<AttributeID>);
 public:
-    StateAttributeValue(StyleState state, AttributeID id, Attribute value)
-        : StateAttributeBase<AttributeID>(state, id), value_(value)
+    StateAttributeValue(AttributeID id, Attribute value)
+        : StateAttributeBase<AttributeID>(id), value_(value)
     {}
     virtual ~StateAttributeValue() {}
     Attribute value_;
 };
 
 template<class AttributeID>
-class StateAttributeList : public Referenced, public std::list<RefPtr<StateAttributeBase<AttributeID>>> {};
+class StateAttributes : public Referenced {
+public:
+    bool HasAttribute(AttributeID attribute, VisualState state)
+    {
+        int stateIdx = static_cast<int>(state);
+        for (auto attrItem : stateAttrs_[stateIdx]) {
+            if (attrItem->id_ == attribute) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    template<class AttributeType>
+    void AddAttribute(AttributeID attribute, AttributeType value, VisualState state)
+    {
+        int stateIdx = static_cast<int>(state);
+        stateAttrs_[stateIdx].push_back(
+            MakeRefPtr<StateAttributeValue<AttributeID, AttributeType>>(attribute, value));
+    }
+
+    const std::vector<RefPtr<StateAttributeBase<AttributeID>>>& GetAttributesForState(VisualState state)
+    {
+        int stateIdx = static_cast<int>(state);
+        return stateAttrs_[stateIdx];
+    }
+
+private:
+    // stateAttrs_ is an array with every entry pointing to
+    // vector of Attributes for one of the states.
+    // array[0] -> vector of attributes for state "normal"
+    // array[1] -> vector of attributes for state "focuse"
+    // ...
+    std::array<std::vector<RefPtr<StateAttributeBase<AttributeID>>>, VISUAL_STATE_COUNT> stateAttrs_;
+};
 
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_COMMON_STATE_ATTRUBUTES_H

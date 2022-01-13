@@ -81,25 +81,6 @@ public:
     void SetRadiusState(bool state);
     void SetMinWidth(const Dimension& width);
     void SetRectRadius(const Dimension& radius);
-
-    void SetHeightForState(const Dimension& height, const AnimationOption& option, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<ButtonStateAttribute, AnimatableDimension>>(
-            state, ButtonStateAttribute::HEIGHT, AnimatableDimension(height, option)));
-    }
-
-    void SetWidthForState(const Dimension& width, const AnimationOption& option, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<ButtonStateAttribute, AnimatableDimension>>(
-            state, ButtonStateAttribute::WIDTH, AnimatableDimension(width, option)));
-    }
-
-    void SetRectRadiusForState(const Dimension& radius, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<ButtonStateAttribute, Dimension>>(
-            state, ButtonStateAttribute::RADIUS, radius));
-    };
-
     void SetProgressDiameter(const Dimension& diameter);
     void SetBackgroundColor(const Color& color);
     void SetClickedColor(const Color& color);
@@ -109,13 +90,6 @@ public:
     void SetProgressColor(const Color& color);
     void SetProgressFocusColor(const Color& color);
     void SetFocusAnimationColor(const Color& color);
-
-    void SetColorForState(const Color& color, StyleState state)
-    {
-        GetStateAttributeList()->push_back(
-            MakeRefPtr<StateAttributeValue<ButtonStateAttribute, Color>>(state, ButtonStateAttribute::COLOR, color));
-    }
-
     void SetBorderEdge(const BorderEdge& borderEdge);
     void SetClickedEventId(const EventMarker& eventId);
     void SetClickFunction(std::function<void()>&& clickCallback);
@@ -193,15 +167,15 @@ public:
 
     uint32_t Compare(const RefPtr<Component>& component) const override;
 
-    RefPtr<StateAttributeList<ButtonStateAttribute>> GetStateAttributeList()
+    RefPtr<StateAttributes<ButtonStateAttribute>> GetStateAttributes()
     {
         if (stateAttributeList_ == nullptr) {
-            stateAttributeList_ = MakeRefPtr<StateAttributeList<ButtonStateAttribute>>();
+            stateAttributeList_ = MakeRefPtr<StateAttributes<ButtonStateAttribute>>();
         }
         return stateAttributeList_;
     }
 
-    bool HasStateAttributeList()
+    bool HasStateAttributes()
     {
         return stateAttributeList_ != nullptr;
     }
@@ -217,7 +191,7 @@ private:
     uint32_t layoutFlag_ = 0;
     // for custom button type
     std::array<Radius, 4> radii_ = { Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp) };
-    RefPtr<StateAttributeList<ButtonStateAttribute>> stateAttributeList_;
+    RefPtr<StateAttributes<ButtonStateAttribute>> stateAttributeList_;
 };
 
 class ButtonBuilder {

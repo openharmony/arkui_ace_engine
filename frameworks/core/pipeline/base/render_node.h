@@ -579,7 +579,7 @@ public:
         }
     }
 
-    virtual void OnStatusStyleChanged(StyleState state);
+    virtual void OnStatusStyleChanged(VisualState state);
 
     Offset GetOffsetFromOrigin(const Offset& offset) const;
 

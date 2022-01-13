@@ -123,32 +123,24 @@ public:
     RefPtr<Component> GetNewComponent();
     RefPtr<V2::InspectorComposedComponent> GetInspectorComposedComponent() const;
 
-    void SetVisualState(const std::string& state)
+    void SetVisualState(VisualState state)
     {
-        if (state == "pressed") {
-            visualState_ = StyleState::PRESSED;
-        } else if (state == "disabled") {
-            visualState_ = StyleState::DISABLED;
-        } else if (state == "normal") {
-            visualState_ = StyleState::NORMAL;
-        } else {
-            visualState_ = StyleState::NOTSET;
-        }
+        visualState_ = state;
     }
 
-    StyleState GetVisualState()
+    VisualState GetVisualState()
     {
         return visualState_;
     }
 
     bool IsVisualStateSet()
     {
-        return visualState_ != StyleState::NOTSET;
+        return visualState_ != VisualState::NOTSET;
     }
 
     void ClearVisualState()
     {
-        visualState_ = StyleState::NOTSET;
+        visualState_ = VisualState::NOTSET;
     }
 
 
@@ -187,7 +179,7 @@ private:
     std::stack<int32_t> parentIdStack_;
 
     AnimationOption implicitAnimationOption_;
-    StyleState visualState_ = StyleState::NOTSET;
+    VisualState visualState_ = VisualState::NOTSET;
 
     static thread_local int32_t composedElementId_;
 

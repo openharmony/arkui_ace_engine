@@ -172,10 +172,10 @@ void RenderButton::HandleTouchEvent(bool isTouch)
 {
     isClicked_ = isTouch;
     if (isClicked_) {
-        OnStatusStyleChanged(StyleState::PRESSED);
+        OnStatusStyleChanged(VisualState::PRESSED);
         isMoveEventValid_ = true;
     } else {
-        OnStatusStyleChanged(StyleState::NORMAL);
+        OnStatusStyleChanged(VisualState::NORMAL);
     }
     if (isMoveEventValid_ || isWatch_) {
         PlayTouchAnimation();
@@ -196,7 +196,7 @@ void RenderButton::HandleMoveEvent(const TouchEventInfo& info)
     if ((moveDeltaX < 0 || moveDeltaX > buttonSize_.Width()) || (moveDeltaY < 0 || moveDeltaY > buttonSize_.Height())) {
         isClicked_ = false;
         MarkNeedRender();
-        OnStatusStyleChanged(StyleState::NORMAL);
+        OnStatusStyleChanged(VisualState::NORMAL);
         isMoveEventValid_ = false;
     }
 }
@@ -411,7 +411,7 @@ void RenderButton::Update(const RefPtr<Component>& component)
     SetAccessibilityText(button->GetAccessibilityText());
     UpdateDownloadStyles(button);
 
-    OnStatusStyleChanged(disabled_ ? StyleState::DISABLED : StyleState::NORMAL);
+    OnStatusStyleChanged(disabled_ ? VisualState::DISABLED : VisualState::NORMAL);
     MarkNeedLayout();
 }
 
@@ -757,31 +757,19 @@ void RenderButton::PlayFocusAnimation(bool isFocus)
     }
 }
 
-void RenderButton::OnStatusStyleChanged(StyleState state)
+void RenderButton::OnStatusStyleChanged(const VisualState state)
 {
     RenderNode::OnStatusStyleChanged(state);
-    if (buttonComponent_ == nullptr || !buttonComponent_->HasStateAttributeList()) {
+    if (buttonComponent_ == nullptr || !buttonComponent_->HasStateAttributes()) {
         return;
     }
 
-    bool color_defined = false;
-    bool default_color_defined = false;
-    bool border_radius_defined = false;
-    bool default_border_radius_defined = false;
-    bool updated = false;
-
-    for (auto attribute : *buttonComponent_->GetStateAttributeList()) {
-        if (attribute->stateName_ != state) {
-            continue;
-        }
-        updated = true;
+    for (auto attribute : buttonComponent_->GetStateAttributes()->GetAttributesForState(state)) {
         switch (attribute->id_) {
             case ButtonStateAttribute::COLOR: {
-                color_defined = true;
-                default_color_defined = default_color_defined || attribute->stateName_ == StyleState::NORMAL;
-
-                auto colorState = AceType::DynamicCast<StateAttributeValue<ButtonStateAttribute, Color>>(attribute);
-                if (attribute->stateName_ == StyleState::PRESSED) {
+                auto colorState = AceType::DynamicCast<StateAttributeValue<ButtonStateAttribute, AnimatableColor>>
+                    (attribute);
+                if (state == VisualState::PRESSED) {
                     SetClickedColor(colorState->value_);
                 } else {
                     buttonComponent_->SetBackgroundColor(colorState->value_);
@@ -789,10 +777,6 @@ void RenderButton::OnStatusStyleChanged(StyleState state)
             } break;
 
             case ButtonStateAttribute::RADIUS: {
-                border_radius_defined = true;
-                default_border_radius_defined =
-                    default_border_radius_defined || attribute->stateName_ == StyleState::NORMAL;
-
                 auto radiusState =
                     AceType::DynamicCast<StateAttributeValue<ButtonStateAttribute, Dimension>>(attribute);
                 buttonComponent_->SetRectRadius(radiusState->value_);
@@ -812,9 +796,7 @@ void RenderButton::OnStatusStyleChanged(StyleState state)
                 width_ = valueState->value_;
             } break;
         }
-        if (updated) {
-            MarkNeedLayout();
-        }
     }
+    MarkNeedLayout();
 }
 } // namespace OHOS::Ace

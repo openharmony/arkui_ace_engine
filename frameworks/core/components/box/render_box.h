@@ -63,7 +63,7 @@ public:
         });
     }
 
-    void OnStatusStyleChanged(StyleState state) override;
+    void OnStatusStyleChanged(VisualState state) override;
     void UpdateStyleFromRenderNode(PropertyAnimatableType type) override;
 
     const Color& GetColor() const override
@@ -281,7 +281,7 @@ private:
     RefPtr<GestureRecognizer> onDoubleClick_;
     RefPtr<GestureRecognizer> onLongPress_;
     RefPtr<RawRecognizer> touchRecognizer_;
-    RefPtr<StateAttributeList<BoxStateAttribute>> stateAttributeList_;
+    RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_;
     OnHoverCallback onHover_;
     OnMouseCallback onMouse_;
     TextDirection inspectorDirection_ { TextDirection::LTR };
