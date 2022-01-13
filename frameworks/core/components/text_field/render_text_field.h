@@ -335,7 +335,7 @@ protected:
     void OnLongPress(const LongPressInfo& longPressInfo);
     void OnTouchDown(const TouchEventInfo& info);
     void OnTouchMove(const TouchEventInfo& info);
-    void HandleMouseEvent(const MouseEvent& event) override;
+    bool HandleMouseEvent(const MouseEvent& event) override;
 
     void StartTwinkling();
     void StopTwinkling();

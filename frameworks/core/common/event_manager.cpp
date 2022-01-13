@@ -132,7 +132,9 @@ bool EventManager::DispatchMouseEvent(const MouseEvent& event)
         for (const auto& wp : mouseHoverTestResults_) {
             auto hoverNode = wp.Upgrade();
             if (hoverNode) {
-                hoverNode->HandleMouseEvent(event);
+                if (hoverNode->HandleMouseEvent(event)) {
+                    break;
+                }
             }
         }
         return true;

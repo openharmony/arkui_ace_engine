@@ -936,18 +936,20 @@ void RenderBox::StopMouseHoverAnimation()
     }
 }
 
-void RenderBox::HandleMouseEvent(const MouseEvent& event)
+bool RenderBox::HandleMouseEvent(const MouseEvent& event)
 {
     if (onMouse_) {
-        MouseInfo info;
-        info.SetButton(event.button);
-        info.SetAction(event.action);
-        info.SetGlobalLocation(Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY()));
-        info.SetLocalLocation(Offset(GetGlobalPoint().GetX(), GetGlobalPoint().GetY()));
-        info.SetTimeStamp(event.time);
-        info.SetDeviceId(event.deviceId);
-        onMouse_(info);
+        return false;
     }
+    MouseInfo info;
+    info.SetButton(event.button);
+    info.SetAction(event.action);
+    info.SetGlobalLocation(Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY()));
+    info.SetLocalLocation(Offset(GetGlobalPoint().GetX(), GetGlobalPoint().GetY()));
+    info.SetTimeStamp(event.time);
+    info.SetDeviceId(event.deviceId);
+    onMouse_(info);
+    return info.IsStopPropagation() ? true : false;
 }
 
 ColorPropertyAnimatable::SetterMap RenderBox::GetColorPropertySetterMap()
