@@ -938,7 +938,7 @@ void RenderBox::StopMouseHoverAnimation()
 
 bool RenderBox::HandleMouseEvent(const MouseEvent& event)
 {
-    if (onMouse_) {
+    if (!onMouse_) {
         return false;
     }
     MouseInfo info;
@@ -948,6 +948,7 @@ bool RenderBox::HandleMouseEvent(const MouseEvent& event)
     info.SetLocalLocation(Offset(GetGlobalPoint().GetX(), GetGlobalPoint().GetY()));
     info.SetTimeStamp(event.time);
     info.SetDeviceId(event.deviceId);
+    info.SetSourceDevice(event.sourceType);
     onMouse_(info);
     return info.IsStopPropagation() ? true : false;
 }

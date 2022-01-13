@@ -52,6 +52,7 @@ void ClickRecognizer::InitGlobalValue(SourceType sourceType)
             MAX_THRESHOLD = MAX_THRESHOLD_TOUCH;
             break;
         case SourceType::MOUSE:
+        case SourceType::TOUCH_PAD:
             MULTI_FINGER_TIMEOUT = MULTI_FINGER_TIMEOUT_MOUSE;
             MULTI_TAP_TIMEOUT = MULTI_TAP_TIMEOUT_MOUSE;
             MULTI_TAP_SLOP = MULTI_TAP_SLOP_MOUSE;
@@ -74,6 +75,8 @@ void ClickRecognizer::OnAccepted()
         ClickInfo info(touchPoint.id);
         info.SetTimeStamp(touchPoint.time);
         info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(touchPoint.GetOffset() - coordinateOffset_);
+        info.SetSourceDevice(deviceType_);
+        info.SetDeviceId(deviceId_);
         onClick_(info);
     }
 
@@ -284,6 +287,8 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
             touchPoint = touchPoints_.begin()->second;
         }
         info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(touchPoint.GetOffset() - coordinateOffset_);
+        info.SetSourceDevice(deviceType_);
+        info.SetDeviceId(deviceId_);
         (*onAction)(info);
     }
 }
