@@ -127,7 +127,8 @@ bool EventManager::DispatchRotationEvent(
 
 bool EventManager::DispatchMouseEvent(const MouseEvent& event)
 {
-    if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE) {
+    if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE ||
+        event.action == MouseAction::MOVE) {
         LOGD("RenderBox::HandleMouseEvent, button is %{public}d, action is %{public}d", event.button, event.action);
         for (const auto& wp : mouseHoverTestResults_) {
             auto hoverNode = wp.Upgrade();
