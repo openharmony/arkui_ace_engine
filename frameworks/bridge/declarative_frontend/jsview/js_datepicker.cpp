@@ -51,7 +51,7 @@ void JSDatePicker::Create(const JSCallbackInfo& info)
     }
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    DatePickerType pickerType = DatePickerType::TIME;
+    DatePickerType pickerType = DatePickerType::DATE;
     auto type = paramObject->GetProperty("type");
     if (type->IsNumber()) {
         pickerType = static_cast<DatePickerType>(type->ToNumber<int32_t>());
@@ -221,7 +221,7 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     }
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    DatePickerType pickerType = DatePickerType::TIME;
+    DatePickerType pickerType = DatePickerType::DATE;
     auto type = paramObject->GetProperty("type");
     if (type->IsNumber()) {
         pickerType = static_cast<DatePickerType>(type->ToNumber<int32_t>());
