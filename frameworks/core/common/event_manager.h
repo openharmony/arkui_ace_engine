@@ -19,6 +19,8 @@
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/rotation_event.h"
@@ -55,6 +57,9 @@ public:
     bool DispatchMouseEvent(const MouseEvent& event);
     bool DispatchMouseHoverEvent(const MouseEvent& event);
 
+    void AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode);
+    bool DispatchAxisEvent(const AxisEvent& event);
+
     void ClearResults();
 
 private:
@@ -64,6 +69,7 @@ private:
     MouseHoverTestList mouseHoverTestResultsPre_;
     WeakPtr<RenderNode> mouseHoverNodePre_;
     WeakPtr<RenderNode> mouseHoverNode_;
+    WeakPtr<RenderNode> axisNode_;
 };
 
 } // namespace OHOS::Ace

@@ -136,17 +136,6 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
     }
 }
 
-void JSInteractableView::JsOnDoubleClick(const JSCallbackInfo& info)
-{
-    if (info[0]->IsFunction()) {
-        auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        auto tapGesture = GetTapGesture(info, 2);
-        if (tapGesture) {
-            click->SetOnClick(tapGesture);
-        }
-    }
-}
-
 EventMarker JSInteractableView::GetClickEventMarker(const JSCallbackInfo& info)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();

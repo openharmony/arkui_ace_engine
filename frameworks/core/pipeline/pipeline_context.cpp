@@ -1416,6 +1416,15 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     eventManager_.DispatchMouseHoverEvent(scaleEvent);
 }
 
+void PipelineContext::OnAxisEvent(const AxisEvent& event)
+{
+    LOGI("OnAxisEvent: x=%{public}f, y=%{public}f, horizontalAxis=%{public}f, verticalAxis=%{public}f", event.x,
+        event.y, event.horizontalAxis, event.verticalAxis);
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    eventManager_.AxisTest(scaleEvent, rootElement_->GetRenderNode());
+    eventManager_.DispatchAxisEvent(scaleEvent);
+}
+
 void PipelineContext::AddToHoverList(const RefPtr<RenderNode>& node)
 {
     CHECK_RUN_ON(UI);

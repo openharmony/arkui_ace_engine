@@ -59,6 +59,7 @@ public:
     void RegisterTouchEventCallback(TouchEventCallback&& callback) override;
     void RegisterKeyEventCallback(KeyEventCallback&& callback) override;
     void RegisterMouseEventCallback(MouseEventCallback&& callback) override;
+    void RegisterAxisEventCallback(AxisEventCallback&& callback) override;
     void RegisterRotationEventCallback(RotationEventCallBack&& callback) override;
     void RegisterCardViewPositionCallback(CardViewPositionCallBack&& callback) override {}
     void RegisterCardViewAccessibilityParamsCallback(CardViewAccessibilityParamsCallback&& callback) override {}
@@ -73,6 +74,8 @@ public:
     void ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     void ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
+    void ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     bool ProcessKeyEvent(
         int32_t keyCode, int32_t keyAction, int32_t repeatTime, int64_t timeStamp = 0, int64_t timeStampStart = 0);
@@ -166,6 +169,7 @@ private:
     std::unique_ptr<flutter::OhosShellHolder> shell_holder_;
     TouchEventCallback touchEventCallback_;
     MouseEventCallback mouseEventCallback_;
+    AxisEventCallback axisEventCallback_;
     RotationEventCallBack rotationEventCallBack_;
     ViewChangeCallback viewChangeCallback_;
     DensityChangeCallback densityChangeCallback_;

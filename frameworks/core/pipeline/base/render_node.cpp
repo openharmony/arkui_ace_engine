@@ -40,6 +40,7 @@
 #include "core/components/transform/render_transform.h"
 #include "core/components_v2/list/render_list.h"
 #include "core/event/ace_event_helper.h"
+#include "core/event/axis_event.h"
 #include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace {
@@ -86,7 +87,7 @@ void RenderNode::MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole, 
     }
     LOGI("Hole: MarkTreeRender %{public}s", AceType::TypeName(Referenced::RawPtr(root)));
     bool subMeetHole = meetHole;
-    for (auto child: root->GetChildren()) {
+    for (auto child : root->GetChildren()) {
         MarkTreeRender(child, subMeetHole, needFlush);
     }
     meetHole = subMeetHole;
@@ -819,6 +820,48 @@ bool RenderNode::MouseDetect(const Point& globalPoint, const Point& parentLocalP
     }
     auto endSize = hoverList.size();
     return beforeSize != endSize;
+}
+
+bool RenderNode::AxisDetect(const Point& globalPoint, const Point& parentLocalPoint, WeakPtr<RenderNode>& axisNode,
+    const AxisDirection direction)
+{
+    LOGD("AxisDetect: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
+        GetTypeName(), GetTouchRect().Left(), GetTouchRect().Top(), GetTouchRect().Width(), GetTouchRect().Height());
+    if (disabled_) {
+        return false;
+    }
+
+    Point transformPoint = GetTransformPoint(parentLocalPoint);
+    if (!InTouchRectList(transformPoint, GetTouchRectList())) {
+        return false;
+    }
+
+    const auto localPoint = transformPoint - GetPaintRect().GetOffset();
+    const auto& sortedChildren = SortChildrenByZIndex(GetChildren());
+    for (auto iter = sortedChildren.rbegin(); iter != sortedChildren.rend(); ++iter) {
+        auto& child = *iter;
+        if (!child->GetVisible() || child->disabled_) {
+            continue;
+        }
+        child->AxisDetect(globalPoint, localPoint, axisNode, direction);
+    }
+
+    for (auto& rect : GetTouchRectList()) {
+        if (touchable_ && rect.IsInRegion(transformPoint)) {
+            if (!axisNode.Upgrade()) {
+                axisNode = CheckAxisNode();
+                if (axisNode.Upgrade() && !(axisNode.Upgrade()->isScrollable(direction))) {
+                    axisNode = nullptr;
+                }
+            }
+            // Calculates the coordinate offset in this node.
+            globalPoint_ = globalPoint;
+            auto offset = globalPoint - localPoint;
+            coordinatePoint_ = Point(offset.GetX(), offset.GetY());
+            break;
+        }
+    }
+    return true;
 }
 
 bool RenderNode::MouseHoverTest(const Point& parentLocalPoint)

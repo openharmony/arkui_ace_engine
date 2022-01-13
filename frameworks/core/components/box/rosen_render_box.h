@@ -71,6 +71,9 @@ public:
     double GetBoundsWidth();
     double GetBoundsHeight();
 
+    void AnimateMouseHoverEnter() override;
+    void AnimateMouseHoverExit() override;
+
 protected:
     virtual bool MaybeRelease() override;
 

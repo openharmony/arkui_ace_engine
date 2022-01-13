@@ -17,6 +17,7 @@
 
 #include <cmath>
 
+#include "animation/rs_animation_timing_protocol.h"
 #include "flutter/common/task_runners.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
@@ -36,6 +37,12 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr int32_t DOUBLE_WIDTH = 2;
+constexpr int32_t HOVER_ANIMATION_DURATION = 250;
+constexpr float SCALE_DEFAULT = 1.0;
+constexpr float SCALE_CHANGED = 1.05;
+const Color BOARD_CHANGED = Color::FromRGBO(0, 0, 0, 0.05);
+const Rosen::RSAnimationTimingCurve SCALE_ANIMATION_TIMING_CURVE =
+    Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f);
 
 } // namespace
 
@@ -45,13 +52,11 @@ RosenRenderBox::RosenRenderBox()
     if (!currentDartState) {
         return;
     }
-    renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(
-        currentDartState->GetSkiaUnrefQueue(),
-        currentDartState->GetIOManager(),
-        currentDartState->GetTaskRunners().GetIOTaskRunner());
+    renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(currentDartState->GetSkiaUnrefQueue(),
+        currentDartState->GetIOManager(), currentDartState->GetTaskRunners().GetIOTaskRunner());
 
-    uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)] (
-        ImageSourceInfo sourceInfo, const fml::RefPtr<flutter::CanvasImage>& image) {
+    uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)](
+                                 ImageSourceInfo sourceInfo, const fml::RefPtr<flutter::CanvasImage>& image) {
         auto renderBox = weak.Upgrade();
         if (!renderBox) {
             LOGE("renderBox upgrade fail when image load success. callback image source info: %{private}s",
@@ -62,7 +67,7 @@ RosenRenderBox::RosenRenderBox()
     };
 
     imageObjSuccessCallback_ = [weak = AceType::WeakClaim(this)](
-        ImageSourceInfo info, const RefPtr<ImageObject>& imageObj) {
+                                   ImageSourceInfo info, const RefPtr<ImageObject>& imageObj) {
         auto renderBox = weak.Upgrade();
         if (!renderBox) {
             LOGE("renderBox upgrade fail when image object is ready. callback image source info: %{private}s",
@@ -79,7 +84,7 @@ RosenRenderBox::RosenRenderBox()
         }
     };
 
-    onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)] (CancelableTask task) {
+    onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)](CancelableTask task) {
         auto renderBox = weak.Upgrade();
         if (renderBox) {
             renderBox->SetFetchImageObjBackgroundTask(task);
@@ -139,23 +144,9 @@ void RosenRenderBox::FetchImageData()
         if (image_) {
             return;
         }
-        ImageSourceInfo inComingSource(
-            borderSrc_,
-            Dimension(-1),
-            Dimension(-1),
-            InternalResource::ResourceId::NO_ID
-        );
-        ImageProvider::FetchImageObject(
-            inComingSource,
-            imageObjSuccessCallback_,
-            uploadSuccessCallback_,
-            failedCallback_,
-            GetContext(),
-            false,
-            false,
-            true,
-            renderTaskHolder_,
-            onPostBackgroundTask_);
+        ImageSourceInfo inComingSource(borderSrc_, Dimension(-1), Dimension(-1), InternalResource::ResourceId::NO_ID);
+        ImageProvider::FetchImageObject(inComingSource, imageObjSuccessCallback_, uploadSuccessCallback_,
+            failedCallback_, GetContext(), false, false, true, renderTaskHolder_, onPostBackgroundTask_);
     }
 }
 
@@ -163,8 +154,8 @@ void RosenRenderBox::ImageObjReady(const RefPtr<ImageObject>& imageObj)
 {
     imageObj_ = imageObj;
     if (imageObj_) {
-        imageObj_->UploadToGpuForRender(GetContext(), renderTaskHolder_, uploadSuccessCallback_, failedCallback_,
-            Size(0, 0), false, false);
+        imageObj_->UploadToGpuForRender(
+            GetContext(), renderTaskHolder_, uploadSuccessCallback_, failedCallback_, Size(0, 0), false, false);
     }
 }
 
@@ -264,7 +255,6 @@ void RosenRenderBox::PerformLayout()
 #endif
 }
 
-
 void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
 {
     if (backDecoration_ && backDecoration_->GetImage() && renderImage_ &&
@@ -281,8 +271,8 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
     if (useLiteStyle_) {
         Size maxSize;
         maxSize.SetWidth(paintSize_.Width() > GetPaintRect().Width() ? paintSize_.Width() : GetPaintRect().Width());
-        maxSize.SetHeight(paintSize_.Height() > GetPaintRect().Height() ?
-            paintSize_.Height() : GetPaintRect().Height());
+        maxSize.SetHeight(
+            paintSize_.Height() > GetPaintRect().Height() ? paintSize_.Height() : GetPaintRect().Height());
         paintSize.SetSize(maxSize);
     }
     SkRRect outerRRect =
@@ -315,8 +305,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         auto context = context_.Upgrade();
         if (context->GetIsDeclarative()) {
             RosenDecorationPainter::PaintGrayScale(outerRRect, canvas, frontDecoration_->GetGrayScale(), bgColor);
-            RosenDecorationPainter::PaintBrightness(
-                outerRRect, canvas, frontDecoration_->GetBrightness(), bgColor);
+            RosenDecorationPainter::PaintBrightness(outerRRect, canvas, frontDecoration_->GetBrightness(), bgColor);
             RosenDecorationPainter::PaintContrast(outerRRect, canvas, frontDecoration_->GetContrast(), bgColor);
             RosenDecorationPainter::PaintSaturate(outerRRect, canvas, frontDecoration_->GetSaturate(), bgColor);
             RosenDecorationPainter::PaintInvert(outerRRect, canvas, frontDecoration_->GetInvert(), bgColor);
@@ -427,8 +416,7 @@ void RosenRenderBox::SyncGeometryProperties()
     }
 }
 
-SkRRect RosenRenderBox::GetBoxRRect(
-    const Offset& offset, const Border& border, double shrinkFactor, bool isRound)
+SkRRect RosenRenderBox::GetBoxRRect(const Offset& offset, const Border& border, double shrinkFactor, bool isRound)
 {
     SkRRect rRect;
     SkRect skRect {};
@@ -1056,6 +1044,88 @@ void RosenRenderBox::OnAttachContext()
             renderBox->OnAnimationCallback();
         }
     });
+}
+
+void RosenRenderBox::AnimateMouseHoverEnter()
+{
+    LOGD("RosenRenderBox::AnimateMouseHoverEnter in. animationType_ = %{public}d", animationType_);
+    if (animationType_ == HoverAnimationType::SCALE) {
+        isHoveredScale = true;
+        auto rsNode = GetRSNode();
+        rsNode->SetScale(SCALE_DEFAULT);
+
+        Rosen::RSAnimationTimingProtocol protocol;
+        protocol.SetDuration(HOVER_ANIMATION_DURATION);
+        RSNode::Animate(
+            protocol, SCALE_ANIMATION_TIMING_CURVE,
+            [rsNode]() {
+                if (rsNode) {
+                    rsNode->SetScale(SCALE_CHANGED);
+                }
+            },
+            []() {});
+    } else if (animationType_ == HoverAnimationType::BOARD) {
+        ResetController(controllerExit_);
+        if (!controllerEnter_) {
+            controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
+        }
+        if (!backDecoration_) {
+            backDecoration_ = AceType::MakeRefPtr<Decoration>();
+        }
+        if (!colorAnimationEnter_) {
+            colorAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
+        }
+        CreateColorAnimation(colorAnimationEnter_, hoverColorBegin_, BOARD_CHANGED);
+        controllerEnter_->ClearInterpolators();
+        controllerEnter_->AddInterpolator(colorAnimationEnter_);
+        controllerEnter_->SetDuration(HOVER_ANIMATION_DURATION);
+        controllerEnter_->SetFillMode(FillMode::FORWARDS);
+        controllerEnter_->Play();
+        isHoveredBoard = true;
+    } else {
+        return;
+    }
+}
+
+void RosenRenderBox::AnimateMouseHoverExit()
+{
+    LOGI("RosenRenderBox::AnimateMouseHoverExit in. animationType_ = %{public}d", animationType_);
+    if (animationType_ == HoverAnimationType::SCALE) {
+        isHoveredBoard = true;
+        auto rsNode = GetRSNode();
+        rsNode->SetScale(SCALE_CHANGED);
+
+        Rosen::RSAnimationTimingProtocol protocol;
+        protocol.SetDuration(HOVER_ANIMATION_DURATION);
+        RSNode::Animate(
+            protocol, SCALE_ANIMATION_TIMING_CURVE,
+            [rsNode]() {
+                if (rsNode) {
+                    rsNode->SetScale(SCALE_DEFAULT);
+                }
+            },
+            []() {});
+    } else if (animationType_ == HoverAnimationType::BOARD) {
+        ResetController(controllerEnter_);
+        if (!controllerExit_) {
+            controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
+        }
+        if (!backDecoration_) {
+            backDecoration_ = AceType::MakeRefPtr<Decoration>();
+        }
+        if (!colorAnimationExit_) {
+            colorAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
+        }
+        LOGD("AnimateMouseHoverExit hoverColor_.GetValue() = %{public}x, hoverColorBegin_.GetValue() = %{public}x",
+            hoverColor_.GetValue(), hoverColorBegin_.GetValue());
+        CreateColorAnimation(colorAnimationExit_, hoverColor_, hoverColorBegin_);
+        controllerExit_->ClearInterpolators();
+        controllerExit_->AddInterpolator(colorAnimationExit_);
+        controllerExit_->SetDuration(HOVER_ANIMATION_DURATION);
+        controllerExit_->Play();
+        controllerExit_->SetFillMode(FillMode::FORWARDS);
+        isHoveredBoard = false;
+    }
 }
 
 } // namespace OHOS::Ace

@@ -165,11 +165,7 @@ void AceContainer::InitializeFrontend()
 
 void AceContainer::RunNativeEngineLoop()
 {
-    taskExecutor_->PostTask(
-        [frontend = frontend_]() {
-          frontend->RunNativeEngineLoop();
-        },
-        TaskExecutor::TaskType::JS);
+    taskExecutor_->PostTask([frontend = frontend_]() { frontend->RunNativeEngineLoop(); }, TaskExecutor::TaskType::JS);
 }
 
 void AceContainer::InitializeCallback()
@@ -213,6 +209,17 @@ void AceContainer::InitializeCallback()
             [context, event]() { context->OnMouseEvent(event); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
+
+    auto&& axisEventCallback = [weak](const AxisEvent& event) {
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(
+            [context, event]() { context->OnAxisEvent(event); }, TaskExecutor::TaskType::UI);
+    };
+    aceView_->RegisterAxisEventCallback(axisEventCallback);
 
     auto&& rotationEventCallback = [weak](const RotationEvent& event) {
         auto context = weak.Upgrade();

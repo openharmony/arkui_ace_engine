@@ -3558,7 +3558,6 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("key", &JSViewAbstract::JsKey);
     JSClass<JSViewAbstract>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSViewAbstract>::StaticMethod("hoverEffect", &JSViewAbstract::JsHoverEffect);
-    JSClass<JSViewAbstract>::StaticMethod("onDoubleClick", &JSViewAbstract::JsOnDoubleClick);
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
@@ -4042,17 +4041,6 @@ RefPtr<Gesture> JSViewAbstract::GetTapGesture(const JSCallbackInfo& info, int32_
             func->Execute(info);
         });
     return tapGesture;
-}
-
-void JSViewAbstract::JsOnDoubleClick(const JSCallbackInfo& info)
-{
-    if (info[0]->IsFunction()) {
-        auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        auto tapGesture = GetTapGesture(info, 2);
-        if (tapGesture) {
-            click->SetOnDoubleClick(tapGesture);
-        }
-    }
 }
 
 void JSViewAbstract::JsOnMouse(const JSCallbackInfo& args)

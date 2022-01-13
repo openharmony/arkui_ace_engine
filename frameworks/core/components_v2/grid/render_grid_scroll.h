@@ -34,9 +34,9 @@ namespace OHOS::Ace::V2 {
 
 class GridEventInfo : public BaseEventInfo, public EventToJSONStringAdapter {
     DECLARE_RELATIONSHIP_OF_CLASSES(GridEventInfo, BaseEventInfo, EventToJSONStringAdapter);
+
 public:
-    GridEventInfo(int32_t scrollIndex) : BaseEventInfo("grid"), scrollIndex_(scrollIndex)
-    {}
+    GridEventInfo(int32_t scrollIndex) : BaseEventInfo("grid"), scrollIndex_(scrollIndex) {}
 
     ~GridEventInfo() = default;
 
@@ -48,7 +48,6 @@ public:
     }
 
 private:
-
     int32_t scrollIndex_ = 0;
 };
 
@@ -138,6 +137,12 @@ public:
         return useScrollable_ == SCROLLABLE::VERTICAL ? Offset(0, lastOffset_) : Offset(lastOffset_, 0);
     }
 
+    void HandleAxisEvent(const AxisEvent& event) override;
+
+    bool isScrollable(AxisDirection direction) override;
+
+    WeakPtr<RenderNode> CheckAxisNode() override;
+
 protected:
     int32_t GetItemMainIndex(const RefPtr<RenderNode>& child, bool isMain) const;
     void SetMainSize(Size& dst, const Size& src);
@@ -167,8 +172,8 @@ protected:
     double CalculateBlankOfEnd();
     double SupplyItems(int32_t mainIndex, int32_t itemIndex = -1, bool needPosition = true);
     bool Rank(int32_t mainIndex, int32_t itemIndex = -1);
-    bool GetItemPropsByIndex(int32_t index, int32_t& itemMain, int32_t& itemCross, int32_t& itemMainSpan,
-        int32_t& itemCrossSpan);
+    bool GetItemPropsByIndex(
+        int32_t index, int32_t& itemMain, int32_t& itemCross, int32_t& itemMainSpan, int32_t& itemCrossSpan);
 
     void DealCache(int32_t start, int32_t end);
     void DeleteItems(int32_t index, bool isTail);

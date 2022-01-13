@@ -27,6 +27,7 @@
 #include "core/components/text_field/render_text_field.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/components_v2/list/render_list.h"
+#include "core/event/axis_event.h"
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/pan_recognizer.h"
 #include "core/gestures/sequenced_recognizer.h"
@@ -86,11 +87,6 @@ void RenderBox::Update(const RefPtr<Component>& component)
         if (longPressGesture) {
             onLongPress_ = longPressGesture->CreateRecognizer(context_);
             onLongPress_->SetIsExternalGesture(true);
-        }
-        auto dcGesture = box->GetOnDoubleClick();
-        if (dcGesture) {
-            onDoubleClick_ = dcGesture->CreateRecognizer(context_);
-            onDoubleClick_->SetIsExternalGesture(true);
         }
 
         onDragStart_ = box->GetOnDragStartId();
@@ -233,8 +229,8 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
         positionedComponent->SetLeft(Dimension(GetGlobalOffset().GetX()));
         SetLocalPoint(info.GetGlobalPoint() - GetGlobalOffset());
 
-        auto updatePosition = [renderBox = AceType::Claim(this)](const std::function<void(const Dimension&,
-            const Dimension&)>& func) {
+        auto updatePosition = [renderBox = AceType::Claim(this)](
+                                  const std::function<void(const Dimension&, const Dimension&)>& func) {
             if (!renderBox) {
                 return;
             }
@@ -409,7 +405,6 @@ void RenderBox::UpdateBackDecoration(const RefPtr<Decoration>& newDecoration)
     backDecoration_->SetWindowBlurProgress(newDecoration->GetWindowBlurProgress());
     backDecoration_->SetWindowBlurStyle(newDecoration->GetWindowBlurStyle());
     backDecoration_->SetShadows(newDecoration->GetShadows());
-    backDecoration_->SetBackgroundColor(newDecoration->GetBackgroundColor());
     backDecoration_->SetGrayScale(newDecoration->GetGrayScale());
     backDecoration_->SetBrightness(newDecoration->GetBrightness());
     backDecoration_->SetContrast(newDecoration->GetContrast());
@@ -417,6 +412,11 @@ void RenderBox::UpdateBackDecoration(const RefPtr<Decoration>& newDecoration)
     backDecoration_->SetInvert(newDecoration->GetInvert());
     backDecoration_->SetColorBlend(newDecoration->GetColorBlend());
     backDecoration_->SetSepia(newDecoration->GetSepia());
+    if (isHoveredBoard) {
+        backDecoration_->SetBackgroundColor(hoverColor_);
+    } else {
+        backDecoration_->SetBackgroundColor(newDecoration->GetBackgroundColor());
+    }
 }
 
 void RenderBox::UpdateFrontDecoration(const RefPtr<Decoration>& newDecoration)
@@ -682,7 +682,6 @@ void RenderBox::ClearRenderObject()
     onDragLeave_ = nullptr;
     onDrop_ = nullptr;
     onClick_ = nullptr;
-    onDoubleClick_ = nullptr;
     onLongPress_ = nullptr;
 }
 
@@ -853,6 +852,7 @@ void RenderBox::MouseHoverEnterTest()
         CreateFloatAnimation(scaleAnimationEnter_, 1.0, 1.05);
         controllerEnter_->ClearInterpolators();
         controllerEnter_->AddInterpolator(scaleAnimationEnter_);
+        isHoveredScale = true;
     } else if (animationType_ == HoverAnimationType::BOARD) {
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
@@ -863,6 +863,7 @@ void RenderBox::MouseHoverEnterTest()
         CreateColorAnimation(colorAnimationEnter_, hoverColorBegin_, Color::FromRGBO(0, 0, 0, 0.05));
         controllerEnter_->ClearInterpolators();
         controllerEnter_->AddInterpolator(colorAnimationEnter_);
+        isHoveredBoard = true;
     } else {
         return;
     }
@@ -899,6 +900,7 @@ void RenderBox::MouseHoverExitTest()
         CreateFloatAnimation(scaleAnimationExit_, begin, 1.0);
         controllerExit_->ClearInterpolators();
         controllerExit_->AddInterpolator(scaleAnimationExit_);
+        isHoveredScale = false;
     } else if (animationType_ == HoverAnimationType::BOARD) {
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
@@ -911,6 +913,7 @@ void RenderBox::MouseHoverExitTest()
         CreateColorAnimation(colorAnimationExit_, hoverColor_, hoverColorBegin_);
         controllerExit_->ClearInterpolators();
         controllerExit_->AddInterpolator(colorAnimationExit_);
+        isHoveredBoard = false;
     } else {
         return;
     }
@@ -950,7 +953,7 @@ bool RenderBox::HandleMouseEvent(const MouseEvent& event)
     info.SetDeviceId(event.deviceId);
     info.SetSourceDevice(event.sourceType);
     onMouse_(info);
-    return info.IsStopPropagation() ? true : false;
+    return info.IsStopPropagation();
 }
 
 ColorPropertyAnimatable::SetterMap RenderBox::GetColorPropertySetterMap()
@@ -1405,9 +1408,6 @@ void RenderBox::OnTouchTestHit(
 
     if (onClick_) {
         result.emplace_back(onClick_);
-    }
-    if (onDoubleClick_) {
-        result.emplace_back(onDoubleClick_);
     }
     if (onLongPress_) {
         result.emplace_back(onLongPress_);

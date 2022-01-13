@@ -88,7 +88,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AbilityRuntime::Context* context,
-                           std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner)
+    std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner)
     : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), context_(context),
       useCurrentEventRunner_(useCurrentEventRunner)
 {
@@ -428,6 +428,12 @@ void AceContainer::InitializeCallback()
             [context, event]() { context->OnMouseEvent(event); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
+ 
+    auto&& axisEventCallback = [context = pipelineContext_](const AxisEvent& event) {
+        context->GetTaskExecutor()->PostTask(
+            [context, event]() { context->OnAxisEvent(event); }, TaskExecutor::TaskType::UI);
+    };
+    aceView_->RegisterAxisEventCallback(axisEventCallback);
 
     auto&& rotationEventCallback = [context = pipelineContext_](const RotationEvent& event) {
         bool result = false;

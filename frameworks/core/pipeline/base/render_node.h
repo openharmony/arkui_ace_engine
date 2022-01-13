@@ -36,6 +36,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_v2/extensions/events/event_extensions.h"
 #include "core/components_v2/inspector/inspector_node.h"
+#include "core/event/axis_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/drag_recognizer.h"
 #include "core/pipeline/base/render_context.h"
@@ -548,12 +549,17 @@ public:
     virtual bool MouseDetect(const Point& globalPoint, const Point& parentLocalPoint, MouseHoverTestList& result,
         WeakPtr<RenderNode>& hoverNode);
 
+    virtual bool AxisDetect(const Point& globalPoint, const Point& parentLocalPoint, WeakPtr<RenderNode>& axisNode,
+        const AxisDirection direction);
+
     virtual void HandleMouseHoverEvent(const MouseState mouseState) {}
 
     virtual bool HandleMouseEvent(const MouseEvent& event)
     {
         return false;
     }
+
+    virtual void HandleAxisEvent(const AxisEvent& event) {}
 
     virtual bool RotationMatchTest(const RefPtr<RenderNode>& requestRenderNode);
 
@@ -734,6 +740,10 @@ public:
         }
     }
 
+    virtual WeakPtr<RenderNode> CheckAxisNode()
+    {
+        return nullptr;
+    }
     virtual WeakPtr<RenderNode> CheckHoverNode()
     {
         return nullptr;
@@ -748,6 +758,11 @@ public:
     virtual void OnMouseClickDownAnimation() {}
     virtual void OnMouseClickUpAnimation() {}
     virtual void StopMouseHoverAnimation() {}
+    virtual bool isScrollable(AxisDirection direction)
+    {
+        return false;
+    }
+
     virtual void OnVisibleChanged() {}
 
     void CreateMouseAnimation(RefPtr<KeyframeAnimation<Color>>& animation, const Color& from, const Color& to);

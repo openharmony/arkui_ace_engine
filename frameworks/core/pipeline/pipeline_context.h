@@ -210,6 +210,9 @@ public:
     // Called by view when mouse event received.
     void OnMouseEvent(const MouseEvent& event);
 
+    // Called by view when axis event received.
+    void OnAxisEvent(const AxisEvent& event);
+
     // Called by container when rotation event received.
     // if return false, then this event needs platform to handle it.
     bool OnRotationEvent(const RotationEvent& event) const;

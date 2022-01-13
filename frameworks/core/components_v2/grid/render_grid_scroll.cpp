@@ -769,7 +769,7 @@ bool RenderGridScroll::Rank(int32_t mainIndex, int32_t itemIndex)
             itemCrossSpan = GetItemSpan(item->second, useScrollable_ == SCROLLABLE::HORIZONTAL);
         } else {
             if (!getChildSpanByIndex_(itemIndex, useScrollable_ == SCROLLABLE::HORIZONTAL, itemMain, itemCross,
-                itemMainSpan, itemCrossSpan)) {
+                    itemMainSpan, itemCrossSpan)) {
                 return false;
             }
         }
@@ -996,7 +996,7 @@ int32_t RenderGridScroll::GetStartingItem(int32_t first)
     int32_t itemCrossSpan = -1;
     while (index > 0) {
         if (getChildSpanByIndex_(
-            index, useScrollable_ == SCROLLABLE::HORIZONTAL, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
+                index, useScrollable_ == SCROLLABLE::HORIZONTAL, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
             LOGD("index %d %d,  %d,  %d,  %d", index, itemMain, itemCross, itemMainSpan, itemCrossSpan);
             if (itemCross == 0) {
                 firstIndex = index;
@@ -1319,7 +1319,7 @@ bool RenderGridScroll::GetItemPropsByIndex(
         itemCrossSpan = GetItemSpan(item->second, useScrollable_ == SCROLLABLE::HORIZONTAL);
     } else {
         if (!getChildSpanByIndex_(itemIndex, useScrollable_ == SCROLLABLE::HORIZONTAL, itemMain, itemCross,
-            itemMainSpan, itemCrossSpan)) {
+                itemMainSpan, itemCrossSpan)) {
             LOGW("Not valid.");
             return false;
         }
@@ -1445,6 +1445,45 @@ void RenderGridScroll::OnPredictLayout(int64_t targetTimestamp)
     } else {
         loadingIndex_ = -1;
     }
+}
+
+bool RenderGridScroll::isScrollable(AxisDirection direction)
+{
+    if (isVertical_) {
+        if (direction == AxisDirection::UP && reachHead_) {
+            return false;
+        } else if (direction == AxisDirection::DOWN && reachTail_) {
+            return false;
+        } else if (direction == AxisDirection::NONE) {
+            return false;
+        }
+    } else {
+        if (direction == AxisDirection::LEFT && reachHead_) {
+            return false;
+        } else if (direction == AxisDirection::RIGHT && reachTail_) {
+            return false;
+        } else if (direction == AxisDirection::NONE) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void RenderGridScroll::HandleAxisEvent(const AxisEvent& event)
+{
+    double degree = 0.0f;
+    if (!NearZero(event.horizontalAxis)) {
+        degree = event.horizontalAxis;
+    } else if (!NearZero(event.verticalAxis)) {
+        degree = event.verticalAxis;
+    }
+    double offset = SystemProperties::Vp2Px(DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP * degree / MOUSE_WHEEL_DEGREES);
+    UpdateScrollPosition(-offset, SCROLL_FROM_ROTATE);
+}
+
+WeakPtr<RenderNode> RenderGridScroll::CheckAxisNode()
+{
+    return AceType::WeakClaim<RenderNode>(this);
 }
 
 } // namespace OHOS::Ace::V2

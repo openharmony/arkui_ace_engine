@@ -94,6 +94,12 @@ void FlutterAceView::RegisterMouseEventCallback(MouseEventCallback&& callback)
     mouseEventCallback_ = std::move(callback);
 }
 
+void FlutterAceView::RegisterAxisEventCallback(AxisEventCallback&& callback)
+{
+    ACE_DCHECK(callback);
+    axisEventCallback_ = std::move(callback);
+}
+
 void FlutterAceView::RegisterRotationEventCallback(RotationEventCallBack&& callback)
 {
     ACE_DCHECK(callback);

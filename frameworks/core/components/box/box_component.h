@@ -156,16 +156,6 @@ public:
         onClickId_ = onClickId;
     }
 
-    RefPtr<Gesture> GetOnDoubleClick() const
-    {
-        return onDoubleClickId_;
-    }
-
-    void SetOnDoubleClick(const RefPtr<Gesture>& onDoubleClickId)
-    {
-        onDoubleClickId_ = onDoubleClickId;
-    }
-
     void AddGesture(GesturePriority priority, RefPtr<Gesture> gesture)
     {
         gestures_[static_cast<int32_t>(priority)] = gesture;
@@ -360,7 +350,6 @@ private:
     OnHoverCallback onHoverId_;
     OnMouseCallback onMouseId_;
     RefPtr<Gesture> onClickId_;
-    RefPtr<Gesture> onDoubleClickId_;
     RefPtr<Gesture> onLongPressId_;
     std::array<RefPtr<Gesture>, 3> gestures_;
     EventMarker onDomDragEnterId_;

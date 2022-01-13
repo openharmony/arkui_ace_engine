@@ -25,6 +25,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/image/render_image.h"
+#include "core/event/axis_event.h"
 #include "core/gestures/raw_recognizer.h"
 
 namespace OHOS::Ace {
@@ -237,6 +238,10 @@ public:
 
     RefPtr<RenderBox> FindTargetRenderBox(const RefPtr<PipelineContext> context, const GestureEvent& info);
 
+    void ResetController(RefPtr<Animator>& controller);
+    void CreateColorAnimation(
+        RefPtr<KeyframeAnimation<Color>>& colorAnimation, const Color& beginValue, const Color& endValue);
+
 protected:
     void ClearRenderObject() override;
 
@@ -259,11 +264,10 @@ protected:
     Color hoverColor_ = Color::TRANSPARENT;
     float scale_ = 1.0f;
     bool isZoom = false;
+    bool isHoveredBoard = false;
+    bool isHoveredScale = false;
 
 private:
-    void ResetController(RefPtr<Animator>& controller);
-    void CreateColorAnimation(
-        RefPtr<KeyframeAnimation<Color>>& colorAnimation, const Color& beginValue, const Color& endValue);
     void UpdateBackDecoration(const RefPtr<Decoration>& newDecoration);
     void UpdateFrontDecoration(const RefPtr<Decoration>& newDecoration);
 
@@ -278,7 +282,6 @@ private:
     std::array<RefPtr<GestureRecognizer>, MAX_GESTURE_SIZE> recognizers_;
 
     RefPtr<GestureRecognizer> onClick_;
-    RefPtr<GestureRecognizer> onDoubleClick_;
     RefPtr<GestureRecognizer> onLongPress_;
     RefPtr<RawRecognizer> touchRecognizer_;
     RefPtr<StateAttributeList<BoxStateAttribute>> stateAttributeList_;
