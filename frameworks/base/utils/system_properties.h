@@ -219,6 +219,8 @@ public:
         return pxNum * resolution_;
     }
 
+    static int GetArkProperties();
+
 private:
     static bool traceEnabled_;
     static bool accessibilityEnabled_;
