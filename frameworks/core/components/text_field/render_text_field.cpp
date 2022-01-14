@@ -1693,12 +1693,22 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
         if (codeValue >= NUMBER_CODE_START && codeValue <= NUMBER_CODE_END) {
             appendElement = std::to_string(codeValue - NUMBER_CODE_DIFF);
         } else if (codeValue >= LETTER_CODE_START && codeValue <= LETTER_CODE_END) {
-            int32_t letterCode =
+            if (!isCtrlDown_) {
+                int32_t letterCode =
                 isShiftDown_ ? (codeValue + UPPER_CASE_LETTER_DIFF) : (codeValue + LOWER_CASE_LETTER_DIFF);
-            appendElement = static_cast<char>(letterCode);
-            isShiftDown_ = false;
+                appendElement = static_cast<char>(letterCode);
+                isShiftDown_ = false;
+            } else {
+                if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_A)) {
+                    HandleOnCopyAll(nullptr);
+                    isCtrlDown_ = false;
+                }
+            }
         } else if (codeValue == LEFT_SHIFT_CODE || codeValue == RIGHT_SHIFT_CODE) {
             isShiftDown_ = true;
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_LEFT) ||
+            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_RIGHT)) {
+            isCtrlDown_ = true;
         }
     }
     if (appendElement.empty()) {
