@@ -56,7 +56,11 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
 #else
         std::string prefix = "/system/lib/module/";
 #endif
+#ifdef OHOS_STANDARD_SYSTEM
+        std::string napiPluginName = "multimedia/libimage.z.so";
+#else
         std::string napiPluginName = "multimedia/libimage_napi.z.so";
+#endif
         auto napiPluginPath = prefix.append(napiPluginName);
         void* handle = dlopen(napiPluginPath.c_str(), RTLD_LAZY);
         if (handle == nullptr) {
