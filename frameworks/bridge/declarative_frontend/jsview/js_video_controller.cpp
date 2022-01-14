@@ -20,6 +20,12 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+
+const std::vector<SeekMode> SEEK_MODE = { SeekMode::SEEK_PREVIOUS_SYNC, SeekMode::SEEK_NEXT_SYNC,
+    SeekMode::SEEK_CLOSEST_SYNC, SeekMode::SEEK_CLOSEST };
+
+} // namespace
 
 void JSVideoController::JSBind(BindingTarget globalObj)
 {
@@ -76,14 +82,19 @@ void JSVideoController::Stop(const JSCallbackInfo& args)
 
 void JSVideoController::SetCurrentTime(const JSCallbackInfo& args)
 {
-    int32_t value = 0;
+    float value = 0;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], value)) {
         LOGE("JSVideoController::SetCurrentTime: Invalid params");
         return;
     }
 
+    SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC;
+    if (args.Length() > 1 && args[1]->IsNumber()) {
+        seekMode = SEEK_MODE[args[1]->ToNumber<int32_t>()];
+    }
+
     if (videoController_) {
-        videoController_->SeekTo(value);
+        videoController_->SeekTo(value, seekMode);
     }
 }
 

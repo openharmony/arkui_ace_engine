@@ -122,6 +122,7 @@ protected:
     ImageObjectPosition imagePosition_;
     double alignmentX_ = 0.0;
     double alignmentY_ = 0.0;
+    double controlsHeight_ = 0.0;
 
 private:
     void CalculateFitContain();
@@ -130,6 +131,7 @@ private:
     void CalculateFitNone();
     void CalculateFitScaleDown();
     void ApplyObjectPosition();
+    void InitControlsHeight(const RefPtr<Component>& component);
     HiddenChangeEvent hiddenChangeEvent_;
     TextureSizeChangeEvent textureSizeChangeEvent_;
     TextureOffsetChangeEvent textureOffsetChangeEvent_;
