@@ -109,7 +109,6 @@ void AceContainer::InitializeTask()
         flutterTaskExecutor->InitJsThread();
         taskExecutor_->PostTask([id = instanceId_]() { Container::InitForThread(id); }, TaskExecutor::TaskType::JS);
     }
-    SystemProperties::SetDeclarativeFrontend(type_ == FrontendType::DECLARATIVE_JS);
 }
 
 void AceContainer::Initialize()
