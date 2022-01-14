@@ -750,6 +750,14 @@ public:
         }
         SetZIndex(index);
     }
+
+    void UpdateRectWithChildRect()
+    {
+        if (children_.empty()) {
+            return;
+        }
+        SetRect(Children_.front()->GetRect());
+    }
 #endif
 
 protected:

@@ -96,6 +96,8 @@ const char INSPECTOR_STYLES[] = "$styles";
 const char INSPECTOR_INNER_DEBUGLINE[] = "debugLine";
 const char INSPECTOR_DEBUGLINE[] = "$debugLine";
 
+std::list<std::string> specialComponentNameV1 = {"dialog", "panel"};
+
 } // namespace
 
 
@@ -451,6 +453,11 @@ void JsInspectorManager::ClearContainer()
 
 std::string JsInspectorManager::UpdateNodeRectStrInfo(const RefPtr<AccessibilityNode> node)
 {
+    auto it = std::find(specialComponentNameV1.begin(), specialComponentNameV1.end(), node->GetTag());
+    if (it != specialComponentNameV1.end()) {
+        node->UpdateRectWithChildRect();
+    }
+
     PositionInfo positionInfo = {0, 0, 0, 0};
     if (node->GetTag() == DOM_NODE_TAG_SPAN) {
         positionInfo = {

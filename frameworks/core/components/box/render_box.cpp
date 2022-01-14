@@ -536,13 +536,6 @@ void RenderBox::OnPaintFinish()
     node->SetHeight(size.Height());
     node->SetLeft(globalOffset.GetX());
     node->SetTop(globalOffset.GetY());
-    if (node->GetTag() == "inspectDialog") {
-        auto parent = node->GetParentNode();
-        parent->SetTop(node->GetTop());
-        parent->SetLeft(node->GetLeft());
-        parent->SetWidth(node->GetWidth());
-        parent->SetHeight(node->GetHeight());
-    }
 #endif
 }
 
