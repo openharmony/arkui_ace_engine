@@ -540,6 +540,7 @@ private:
     int32_t initIndex_ = 0;
     bool isOverlayFocus_ = false;
     bool isShiftDown_ = false;
+    bool isCtrlDown_ = false;
     bool hasFocus_ = false;
     double fontScale_ = 1.0;
     bool isSingleHandle_ = false;

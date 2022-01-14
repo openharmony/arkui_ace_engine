@@ -398,13 +398,8 @@ bool FlutterAceView::ProcessKeyEvent(
         return false;
     }
 
-    auto keyEvents = keyEventRecognizer_.GetKeyEvents(keyCode, keyAction, repeatTime, timeStamp, timeStampStart);
-    // First distributes special events.
-    // Because the platform receives a raw event, the identified special event processing result is ignored
-    if (keyEvents.size() > 1) {
-        keyEventCallback_(keyEvents.back());
-    }
-    return keyEventCallback_(keyEvents.front());
+    KeyEvent keyEvent = keyEventTransfer_.GetKeyEvent(keyCode, keyAction, repeatTime, timeStamp, timeStampStart);
+    return keyEventCallback_(keyEvent);
 }
 
 void FlutterAceView::ProcessIdleEvent(int64_t deadline)

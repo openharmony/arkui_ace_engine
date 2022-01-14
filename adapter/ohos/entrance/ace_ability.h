@@ -43,6 +43,8 @@ public:
     void OnForeground(const OHOS::AAFwk::Want& want) override;
     void OnBackground() override;
     void OnBackPressed() override;
+    void OnKeyUp(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    void OnKeyDown(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
     void OnRestoreAbilityState(const OHOS::AppExecFwk::PacMap& inState) override;

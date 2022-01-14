@@ -394,6 +394,38 @@ void AceAbility::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent
     flutterAceView->DispatchTouchEvent(flutterAceView, pointerEvent);
 }
 
+void AceAbility::OnKeyUp(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    LOGI("AceAbility::OnKeyUp called,keyEvent info: keyCode is %{private}d,\
+        keyAction is %{public}d, keyActionTime is %{public}d",
+        keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
+    auto flutterAceView = static_cast<Platform::FlutterAceView*>(
+        Platform::AceContainer::GetContainer(abilityId_)->GetView());
+    if (!flutterAceView) {
+        LOGI("flutterAceView is null, keyboard event does not take effect");
+        return;
+    }
+    int32_t repeatTime = 0;  // TODO:repeatTime need to be rebuild
+    flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent->GetKeyCode(), keyEvent->GetKeyAction(),
+                                    repeatTime, keyEvent->GetActionTime(), keyEvent->GetActionStartTime());
+}
+
+void AceAbility::OnKeyDown(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    LOGI("AceAbility::OnKeyDown called,keyEvent info: keyCode is %{private}d,\
+        keyAction is %{public}d, keyActionTime is %{public}d",
+        keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
+    auto flutterAceView = static_cast<Platform::FlutterAceView*>(
+        Platform::AceContainer::GetContainer(abilityId_)->GetView());
+    if (!flutterAceView) {
+        LOGI("flutterAceView is null, keyboard event does not take effect");
+        return;
+    }
+    int32_t repeatTime = 0;  // TODO:repeatTime need to be rebuild
+    flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent->GetKeyCode(), keyEvent->GetKeyAction(),
+                                    repeatTime, keyEvent->GetActionTime(), keyEvent->GetActionStartTime());
+}
+
 void AceAbility::OnNewWant(const Want& want)
 {
     LOGI("AceAbility::OnNewWant called ");

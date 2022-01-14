@@ -267,7 +267,17 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
-    LOGI("UIContent ProcessKeyEvent");
+    LOGI("AceAbility::OnKeyUp called,touchEvent info: keyCode is %{private}d,\
+        keyAction is %{public}d, keyActionTime is %{public}d",
+        touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (container) {
+        auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
+        int32_t repeatTime = 0;
+        Platform::FlutterAceView::DispatchKeyEvent(aceView, touchEvent->GetKeyCode(), touchEvent->GetKeyAction(),
+            repeatTime, touchEvent->GetActionTime(), touchEvent->GetActionStartTime());
+        return true;
+    }
     return false;
 }
 

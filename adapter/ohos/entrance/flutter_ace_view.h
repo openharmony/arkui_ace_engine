@@ -27,6 +27,7 @@
 #include "core/common/ace_view.h"
 #include "core/common/platform_res_register.h"
 #include "core/event/key_event_recognizer.h"
+#include "core/event/key_event_transfer.h"
 
 #include "mouse_event.h"
 #include "touch_event.h"
@@ -181,6 +182,7 @@ private:
     RefPtr<PlatformResRegister> resRegister_;
     KeyEventCallback keyEventCallback_;
     KeyEventRecognizer keyEventRecognizer_;
+    KeyEventTransfer keyEventTransfer_;
     // mark the touch event's state, HORIZONTAL_STATE: the event should send to platform, VERTICAL_STATE: should not
     enum class EventState { INITIAL_STATE, HORIZONTAL_STATE, VERTICAL_STATE };
 
