@@ -391,7 +391,9 @@ void RenderButton::Update(const RefPtr<Component>& component)
     width_ = buttonComponent_->GetWidth();
     height_ = buttonComponent_->GetHeight();
     layoutFlag_ = button->GetLayoutFlag();
-    clickedColor_ = button->GetClickedColor();
+    // No animation happens on first setting, will animate from background color on click
+    clickedColor_ = AnimatableColor(button->GetBackgroundColor());
+    backgroundColor_.SetValue(button->GetBackgroundColor().GetValue());
     stateEffect_ = button->GetStateEffect();
     isWatch_ = (SystemProperties::GetDeviceType() == DeviceType::WATCH);
     isTv_ = (SystemProperties::GetDeviceType() == DeviceType::TV);
@@ -767,12 +769,19 @@ void RenderButton::OnStatusStyleChanged(const VisualState state)
     for (auto attribute : buttonComponent_->GetStateAttributes()->GetAttributesForState(state)) {
         switch (attribute->id_) {
             case ButtonStateAttribute::COLOR: {
-                auto colorState = AceType::DynamicCast<StateAttributeValue<ButtonStateAttribute, AnimatableColor>>
-                    (attribute);
+                auto colorState =
+                    AceType::DynamicCast<StateAttributeValue<ButtonStateAttribute, AnimatableColor>>(attribute);
                 if (state == VisualState::PRESSED) {
-                    SetClickedColor(colorState->value_);
+                    LOGD("Click color start %{public}x  end %{public}x", backgroundColor_.GetValue(),
+                        colorState->value_.GetValue());
+                    SetClickedColor(backgroundColor_);  // starting animation color
+                    clickedColor_ = colorState->value_; // End color
+                    setClickColor_ = true;
                 } else {
-                    buttonComponent_->SetBackgroundColor(colorState->value_);
+                    LOGD("background color start %{public}x  end %{public}x", clickedColor_.GetValue(),
+                        colorState->value_.GetValue());
+                    backgroundColor_.SetValue(clickedColor_.GetValue()); // Start value
+                    backgroundColor_ = colorState->value_; // End value and animate
                 }
             } break;
 

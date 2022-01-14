@@ -63,6 +63,18 @@ public:
                 renderButton->MarkNeedLayout();
             }
         });
+        backgroundColor_.SetContextAndCallback(context_, [weak = WeakClaim(this)] {
+            auto renderButton = weak.Upgrade();
+            if (renderButton) {
+                renderButton->MarkNeedLayout();
+            }
+        });
+        clickedColor_.SetContextAndCallback(context_, [weak = WeakClaim(this)] {
+            auto renderButton = weak.Upgrade();
+            if (renderButton) {
+                renderButton->MarkNeedLayout();
+            }
+        });
     }
 
     void HandleFocusEvent(bool isFocus);
@@ -81,7 +93,8 @@ public:
 
     void SetClickedColor(const Color& clickColor)
     {
-        clickedColor_ = clickColor;
+        // do not trigger animation
+        clickedColor_.SetValue(clickColor.GetValue());
         setClickColor_ = true;
     }
 
@@ -177,7 +190,8 @@ protected:
     Color progressColor_;
     Color progressFocusColor_;
     Color defaultClickedColor_;
-    Color clickedColor_;
+    AnimatableColor clickedColor_;
+    AnimatableColor backgroundColor_;
     BorderEdge borderEdge_;
     std::function<void(const ClickInfo&)> onClickWithInfo_;
     std::function<void()> onClick_;
