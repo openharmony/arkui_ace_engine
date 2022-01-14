@@ -168,7 +168,7 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
 
     // create ace_view
     auto flutterAceView =
-        Platform::FlutterAceView::CreateView(instanceId_, container->GetSettings().usePlatformAsUIThread);
+        Platform::FlutterAceView::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window_);
 
     int32_t width = window_->GetRect().width_;
