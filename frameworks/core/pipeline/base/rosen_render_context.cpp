@@ -75,7 +75,6 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
         rsNode_->AddChild(childRSNode, -1);
         std::string name = AceType::TypeName(child);
         if (name != "RosenRenderForm" && name != "RosenRenderPlugin") {
-            StopRecordingIfNeeded();
             if (child->NeedRender()) {
                 RosenRenderContext context;
                 auto pipelineContext = child->GetContext().Upgrade();
