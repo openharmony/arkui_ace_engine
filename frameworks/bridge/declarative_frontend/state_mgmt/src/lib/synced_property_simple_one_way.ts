@@ -47,8 +47,8 @@ class SynchedPropertySimpleOneWay<T> extends ObservedPropertySimpleAbstract<T> {
     }
 
     console.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
-    this.notifyHasChanged(newValue);
     this.wrappedValue_ = newValue;
+    this.notifyHasChanged(newValue);
   }
 
   /**
