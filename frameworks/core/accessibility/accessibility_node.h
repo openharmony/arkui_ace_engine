@@ -756,7 +756,7 @@ public:
         if (children_.empty()) {
             return;
         }
-        SetRect(Children_.front()->GetRect());
+        SetRect(children_.front()->GetRect());
     }
 #endif
 
