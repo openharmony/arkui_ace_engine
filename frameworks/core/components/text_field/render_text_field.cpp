@@ -369,11 +369,26 @@ void RenderTextField::PerformLayout()
 
 bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
 {
+    if (MouseButton::LEFT_BUTTON == event.button && MouseAction::PRESS == event.action) {
+        UpdateStartSelection(DEFAULT_SELECT_INDEX, event.GetOffset(), true, false);
+    }
+
+    if (MouseButton::LEFT_BUTTON == event.button && MouseAction::MOVE == event.action) {
+        int32_t start = GetEditingValue().selection.baseOffset;
+        int32_t end = GetCursorPositionForClick(event.GetOffset());
+        UpdateSelection(start, end);
+        if (showCursor_) {
+            showCursor_ = false;
+        }
+        MarkNeedRender();
+    }
+
     if (MouseButton::RIGHT_BUTTON == event.button) {
         Offset rightClickOffset = event.GetOffset();
         bool singleHandle = (GetEditingValue().selection.GetStart() == GetEditingValue().selection.GetEnd());
         ShowTextOverlay(rightClickOffset, singleHandle);
     }
+    
     return false;
 }
 
@@ -415,14 +430,7 @@ void RenderTextField::OnTouchTestHit(
         rawRecognizer_->SetOnTouchDown([weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto textField = weak.Upgrade();
             if (textField) {
-                textField->OnTouchDown(info);
-            }
-        });
-
-        rawRecognizer_->SetOnTouchMove([weak = WeakClaim(this)](const TouchEventInfo& info) {
-            auto textField = weak.Upgrade();
-            if (textField) {
-                textField->OnTouchMove(info);
+                textField->StartPressAnimation(true);
             }
         });
 
@@ -442,35 +450,6 @@ void RenderTextField::OnTouchTestHit(
     }
     rawRecognizer_->SetTouchRestrict(touchRestrict);
     result.emplace_back(rawRecognizer_);
-}
-
-void RenderTextField::OnTouchDown(const TouchEventInfo& info)
-{
-    if (info.GetTouches().empty()) {
-        LOGE("touch info is null.");
-        return;
-    }
-
-    auto touchInfo = info.GetTouches().front();
-    UpdateStartSelection(DEFAULT_SELECT_INDEX, touchInfo.GetGlobalLocation(), true, false);
-    StartPressAnimation(true);
-}
-
-void RenderTextField::OnTouchMove(const TouchEventInfo& info)
-{
-    if (info.GetTouches().empty()) {
-        LOGE("touch info is null.");
-        return;
-    }
-
-    auto touchInfo = info.GetTouches().front();
-    int32_t start = GetEditingValue().selection.baseOffset;
-    int32_t end = GetCursorPositionForClick(touchInfo.GetGlobalLocation());
-    UpdateSelection(start, end);
-    if (showCursor_) {
-        showCursor_ = false;
-    }
-    MarkNeedRender();
 }
 
 void RenderTextField::StartPressAnimation(bool pressDown)
