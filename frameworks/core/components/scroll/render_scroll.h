@@ -91,8 +91,7 @@ public:
 
     bool IsScrollStop() const
     {
-        return (scrollable_ ? scrollable_->IsMotionStop() : true) &&
-               (animator_ ? (!animator_->IsRunning()) : true);
+        return (scrollable_ ? scrollable_->IsMotionStop() : true) && (animator_ ? (!animator_->IsRunning()) : true);
     }
 
     bool CanScrollVertically(const Offset& delta);
@@ -204,6 +203,12 @@ public:
     {
         return isFromRotate_;
     }
+
+    void HandleAxisEvent(const AxisEvent& event) override;
+
+    bool isScrollable(AxisDirection direction) override;
+
+    WeakPtr<RenderNode> CheckAxisNode() override;
 
 protected:
     explicit RenderScroll();

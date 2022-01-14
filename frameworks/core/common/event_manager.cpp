@@ -16,6 +16,8 @@
 #include "core/common/event_manager.h"
 
 #include "base/log/ace_trace.h"
+#include "base/utils/utils.h"
+#include "core/event/axis_event.h"
 #include "core/gestures/gesture_referee.h"
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/base/render_node.h"
@@ -108,23 +110,6 @@ void EventManager::MouseTest(const MouseEvent& event, const RefPtr<RenderNode>& 
         mouseHoverTestResults_.size());
 }
 
-bool EventManager::DispatchRotationEvent(
-    const RotationEvent& event, const RefPtr<RenderNode>& renderNode, const RefPtr<RenderNode>& requestFocusNode)
-{
-    if (!renderNode) {
-        LOGW("renderNode is null.");
-        return false;
-    }
-
-    if (requestFocusNode && renderNode->RotationMatchTest(requestFocusNode)) {
-        LOGD("RotationMatchTest: dispatch rotation to request node.");
-        return requestFocusNode->RotationTestForward(event);
-    } else {
-        LOGD("RotationMatchTest: dispatch rotation to statck render node.");
-        return renderNode->RotationTest(event);
-    }
-}
-
 bool EventManager::DispatchMouseEvent(const MouseEvent& event)
 {
     if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE ||
@@ -148,21 +133,15 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
 {
     auto hoverNodeCur = mouseHoverNode_.Upgrade();
     auto hoverNodePre = mouseHoverNodePre_.Upgrade();
-    if (event.button != MouseButton::NONE_BUTTON) {
-        if (event.action == MouseAction::PRESS) {
-            if (hoverNodeCur) {
-                hoverNodeCur->StopMouseHoverAnimation();
-                hoverNodeCur->OnMouseClickDownAnimation();
-            }
-        } else if (event.action == MouseAction::RELEASE) {
-            if (hoverNodeCur) {
-                hoverNodeCur->StopMouseHoverAnimation();
-                hoverNodeCur->OnMouseClickUpAnimation();
-            }
-        } else {
-            LOGE("Unknow mouse hover event: MouseButton: %{public}d, MouseAction: %{public}d", event.button,
-                event.action);
-            return false;
+    if (event.action == MouseAction::PRESS) {
+        if (hoverNodeCur) {
+            hoverNodeCur->StopMouseHoverAnimation();
+            hoverNodeCur->OnMouseClickDownAnimation();
+        }
+    } else if (event.action == MouseAction::RELEASE) {
+        if (hoverNodeCur) {
+            hoverNodeCur->StopMouseHoverAnimation();
+            hoverNodeCur->OnMouseClickUpAnimation();
         }
     } else {
         if (hoverNodeCur != hoverNodePre) {
@@ -195,6 +174,59 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
         }
     }
     return true;
+}
+
+void EventManager::AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode)
+{
+    if (!renderNode) {
+        LOGW("renderNode is null.");
+        return;
+    }
+    const Point point { event.x, event.y };
+    AxisDirection direction = AxisDirection::NONE;
+    if (!NearZero(event.verticalAxis)) {
+        if (LessNotEqual(event.verticalAxis, 0.0f)) {
+            direction = AxisDirection::UP;
+        } else {
+            direction = AxisDirection::DOWN;
+        }
+    }
+    if (!NearZero(event.horizontalAxis)) {
+        if (LessNotEqual(event.horizontalAxis, 0.0f)) {
+            direction = AxisDirection::LEFT;
+        } else {
+            direction = AxisDirection::RIGHT;
+        }
+    }
+    WeakPtr<RenderNode> axisNode = nullptr;
+    renderNode->AxisDetect(point, point, axisNode, direction);
+    axisNode_ = axisNode;
+}
+
+bool EventManager::DispatchAxisEvent(const AxisEvent& event)
+{
+    auto responseNode = axisNode_.Upgrade();
+    if (responseNode) {
+        responseNode->HandleAxisEvent(event);
+    }
+    return true;
+}
+
+bool EventManager::DispatchRotationEvent(
+    const RotationEvent& event, const RefPtr<RenderNode>& renderNode, const RefPtr<RenderNode>& requestFocusNode)
+{
+    if (!renderNode) {
+        LOGW("renderNode is null.");
+        return false;
+    }
+
+    if (requestFocusNode && renderNode->RotationMatchTest(requestFocusNode)) {
+        LOGD("RotationMatchTest: dispatch rotation to request node.");
+        return requestFocusNode->RotationTestForward(event);
+    } else {
+        LOGD("RotationMatchTest: dispatch rotation to statck render node.");
+        return renderNode->RotationTest(event);
+    }
 }
 
 void EventManager::ClearResults()

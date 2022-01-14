@@ -112,7 +112,6 @@ public:
     static void JsGridOffset(const JSCallbackInfo& info);
     static void JsUseSizeType(const JSCallbackInfo& Info);
     static void JsHoverEffect(const JSCallbackInfo& info);
-    static void JsOnDoubleClick(const JSCallbackInfo& info);
     static void JsOnMouse(const JSCallbackInfo& info);
 
     // response region
