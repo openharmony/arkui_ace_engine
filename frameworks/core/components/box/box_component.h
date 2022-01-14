@@ -216,65 +216,17 @@ public:
         return geometryTransitionId_;
     }
 
-    RefPtr<StateAttributeList<BoxStateAttribute>> GetStateAttributeList()
+    RefPtr<StateAttributes<BoxStateAttribute>> GetStateAttributes()
     {
         if (stateAttributeList_ == nullptr) {
-            stateAttributeList_ = MakeRefPtr<StateAttributeList<BoxStateAttribute>>();
+            stateAttributeList_ = MakeRefPtr<StateAttributes<BoxStateAttribute>>();
         }
         return stateAttributeList_;
     }
-
-    bool HasStateAttributeList()
+ 
+    bool HasStateAttributes()
     {
         return stateAttributeList_ != nullptr;
-    }
-
-    void SetWidthForState(const Dimension& width, const AnimationOption& option, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(
-            state, BoxStateAttribute::WIDTH, AnimatableDimension(width, option)));
-    }
-
-    void SetHeightForState(const Dimension& height, const AnimationOption& option, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(
-            state, BoxStateAttribute::HEIGHT, AnimatableDimension(height, option)));
-    }
-
-    void SetColorForState(const Color& color, const AnimationOption& option, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(
-            state, BoxStateAttribute::COLOR, AnimatableColor(color, option)));
-    }
-
-    void SetBorderColorForState(const Color& color, const AnimationOption& option, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(
-            state, BoxStateAttribute::BORDER_COLOR, AnimatableColor(color, option)));
-    }
-
-    void SetBorderRadiusForState(const Dimension& radius, const AnimationOption& option, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(
-            state, BoxStateAttribute::BORDER_RADIUS, AnimatableDimension(radius, option)));
-    }
-
-    void SetBorderStyleForState(BorderStyle style, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, BorderStyle>>(
-            state, BoxStateAttribute::BORDER_STYLE, style));
-    }
-
-    void SetBorderWidthForState(const Dimension& width, const AnimationOption& option, StyleState state)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(
-            state, BoxStateAttribute::BORDER_WIDTH, AnimatableDimension(width, option)));
-    }
-
-    void SetGradientForState(const Gradient& value, StyleState state)
-    {
-        GetStateAttributeList()->push_back(
-            MakeRefPtr<StateAttributeValue<BoxStateAttribute, Gradient>>(state, BoxStateAttribute::GRADIENT, value));
     }
 
     OnDragFunc GetOnDragStartId() const
@@ -358,7 +310,7 @@ private:
     EventMarker onDomDragDropId_;
     std::string geometryTransitionId_;
     TextDirection inspectorDirection_ { TextDirection::LTR };
-    RefPtr<StateAttributeList<BoxStateAttribute>> stateAttributeList_ = nullptr;
+    RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_ = nullptr;
 };
 
 } // namespace OHOS::Ace

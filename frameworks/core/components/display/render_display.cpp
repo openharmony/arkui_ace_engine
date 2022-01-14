@@ -61,10 +61,10 @@ void RenderDisplay::Update(const RefPtr<Component>& component)
         animator_->Play();
     }
 
-    if (display->HasStateAttributeList()) {
-        stateAttributeList_ = display->GetStateAttributeList();
+    if (display->HasStateAttributes()) {
+        stateAttributeList_ = display->GetStateAttributes();
     }
-    OnStatusStyleChanged(StyleState::NORMAL);
+    OnStatusStyleChanged(VisualState::NORMAL);
     SetShadow(display->GetShadow());
     MarkNeedLayout();
 }
@@ -210,7 +210,7 @@ void RenderDisplay::CreateAppearingAnimation(uint8_t opacity, int32_t limit)
     animator_->SetDuration(std::min(duration_, limit));
 }
 
-void RenderDisplay::OnStatusStyleChanged(StyleState componentState)
+void RenderDisplay::OnStatusStyleChanged(VisualState componentState)
 {
     RenderNode::OnStatusStyleChanged(componentState);
     if (stateAttributeList_ == nullptr) {
@@ -218,11 +218,7 @@ void RenderDisplay::OnStatusStyleChanged(StyleState componentState)
     }
 
     bool updated = false;
-    for (RefPtr<StateAttributeBase<DisplayStateAttribute>> attribute : *stateAttributeList_) {
-        if (attribute->stateName_ != componentState) {
-            continue;
-        }
-
+    for (auto& attribute : stateAttributeList_->GetAttributesForState(componentState)) {
         updated = true;
         switch (attribute->id_) {
             case DisplayStateAttribute::OPACITY: {

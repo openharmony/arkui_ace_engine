@@ -2036,7 +2036,7 @@ std::shared_ptr<RSNode> RenderNode::CreateRSNode() const
 #endif
 }
 
-void RenderNode::OnStatusStyleChanged(StyleState state)
+void RenderNode::OnStatusStyleChanged(VisualState state)
 {
     LOGD("start %{public}s", AceType::TypeName(this));
     if (isHeadRenderNode_) {

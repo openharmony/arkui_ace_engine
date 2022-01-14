@@ -121,10 +121,10 @@ void RenderBox::Update(const RefPtr<Component>& component)
 
         auto gestures = box->GetGestures();
         UpdateGestureRecognizer(gestures);
-        if (box->HasStateAttributeList()) {
-            stateAttributeList_ = box->GetStateAttributeList();
+        if (box->HasStateAttributes()) {
+            stateAttributeList_ = box->GetStateAttributes();
         }
-        OnStatusStyleChanged(disabled_ ? StyleState::DISABLED : StyleState::NORMAL);
+        OnStatusStyleChanged(disabled_ ? VisualState::DISABLED : VisualState::NORMAL);
         auto wp = AceType::WeakClaim(this);
         touchRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
         touchRecognizer_->SetOnTouchDown([wp](const TouchEventInfo&) {
@@ -153,9 +153,9 @@ void RenderBox::Update(const RefPtr<Component>& component)
 void RenderBox::HandleTouchEvent(bool isTouchDown)
 {
     if (isTouchDown) {
-        OnStatusStyleChanged(StyleState::PRESSED);
+        OnStatusStyleChanged(VisualState::PRESSED);
     } else {
-        OnStatusStyleChanged(StyleState::NORMAL);
+        OnStatusStyleChanged(VisualState::NORMAL);
     }
 }
 
@@ -1455,21 +1455,17 @@ bool RenderBox::ExistGestureRecognizer()
     return false;
 }
 
-void RenderBox::OnStatusStyleChanged(StyleState componentState)
+void RenderBox::OnStatusStyleChanged(const VisualState state)
 {
-    RenderBoxBase::OnStatusStyleChanged(componentState);
+    RenderBoxBase::OnStatusStyleChanged(state);
 
     if (stateAttributeList_ == nullptr) {
         return;
     }
 
-    LOGD("state %{public}d  attr count %{public}llu", componentState.c_str(), stateAttributeList_->size());
+    LOGD("state %{public}d  attr count %{public}llu", state, stateAttributeList_->size());
     bool updated = false;
-    for (const auto& attribute : *stateAttributeList_) {
-        if (attribute->stateName_ != componentState) {
-            continue;
-        }
-
+    for (auto& attribute : stateAttributeList_->GetAttributesForState(state)) {
         updated = true;
         switch (attribute->id_) {
             case BoxStateAttribute::COLOR: {
@@ -1503,8 +1499,8 @@ void RenderBox::OnStatusStyleChanged(StyleState componentState)
             case BoxStateAttribute::BORDER_WIDTH: {
                 auto widthState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
-                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf", attribute->stateName_,
-                    widthState->value_.Value());
+                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf",
+                    state, widthState->value_.Value());
                 BoxComponentHelper::SetBorderWidth(GetBackDecoration(), widthState->value_);
             } break;
 
@@ -1516,9 +1512,10 @@ void RenderBox::OnStatusStyleChanged(StyleState componentState)
             } break;
 
             case BoxStateAttribute::WIDTH: {
-                auto valueState = AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, Dimension>>(attribute);
-                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf", attribute->stateName_,
-                    valueState->value_.Value());
+                auto valueState =
+                    AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
+                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf",
+                    state, valueState->value_.Value());
                 width_ = valueState->value_;
             } break;
 
@@ -1539,7 +1536,7 @@ void RenderBox::OnStatusStyleChanged(StyleState componentState)
 
             case BoxStateAttribute::GRADIENT: {
                 auto gradientState = AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, Gradient>>(attribute);
-                LOGD("Setting Gradient state %{public}d", attribute->stateName_);
+                LOGD("Setting Gradient state %{public}d", state);
                 GetBackDecoration()->SetGradient(gradientState->value_);
             } break;
         }

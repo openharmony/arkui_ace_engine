@@ -140,25 +140,19 @@ public:
         return duration_;
     }
 
-    RefPtr<StateAttributeList<DisplayStateAttribute>> GetStateAttributeList()
+    RefPtr<StateAttributes<DisplayStateAttribute>> GetStateAttributes()
     {
         if (stateAttributeList_ == nullptr) {
-            stateAttributeList_ = MakeRefPtr<StateAttributeList<DisplayStateAttribute>>();
+            stateAttributeList_ = MakeRefPtr<StateAttributes<DisplayStateAttribute>>();
         }
         return stateAttributeList_;
     }
 
-    bool HasStateAttributeList()
+    bool HasStateAttributes()
     {
         return stateAttributeList_ != nullptr;
     }
 
-    void SetOpacityForState(double opacity, const AnimationOption& animationOption = AnimationOption(),
-        StyleState state = StyleState::NORMAL)
-    {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<DisplayStateAttribute, AnimatableDouble>>(
-            state, DisplayStateAttribute::OPACITY, AnimatableDouble(opacity, animationOption)));
-    }
 private:
     VisibleType visible_ = VisibleType::VISIBLE;
     Shadow shadow_;
@@ -169,7 +163,7 @@ private:
     bool hasAppearTransition_ = false;
     bool disableLayer_ = false;
     int32_t duration_ = 0;
-    RefPtr<StateAttributeList<DisplayStateAttribute>> stateAttributeList_ = nullptr;
+    RefPtr<StateAttributes<DisplayStateAttribute>> stateAttributeList_ = nullptr;
 };
 
 } // namespace OHOS::Ace
