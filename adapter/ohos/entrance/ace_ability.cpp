@@ -32,6 +32,7 @@
 #include "adapter/ohos/entrance/utils.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
+#include "core/common/container_scope.h"
 #include "core/common/frontend.h"
 #include "core/common/plugin_manager.h"
 
@@ -305,8 +306,9 @@ void AceAbility::OnStart(const Want& want)
 
             rsUiDirector->SetSurfaceNodeSize(width, height);
             rsUiDirector->SetUITaskRunner(
-                [taskExecutor = Platform::AceContainer::GetContainer(abilityId_)->GetTaskExecutor()]
+                [taskExecutor = Platform::AceContainer::GetContainer(abilityId_)->GetTaskExecutor(), id = abilityId_]
                     (const std::function<void()>& task) {
+                        ContainerScope scope(id);
                         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
                     });
             if (context != nullptr) {

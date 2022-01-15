@@ -369,7 +369,7 @@ void RenderNode::RenderWithContext(RenderContext& context, const Offset& offset)
     }
     pendingDispatchLayoutReady_ = false;
     if (GetHasSubWindow() || !GetNeedClip()) {
-        LOGI("Hole: meet subwindow node or no need clip");
+        LOGD("Hole: meet subwindow node or no need clip");
         if (context.GetNeedRestoreHole()) {
             context.Restore();
             context.SetNeedRestoreHole(false);

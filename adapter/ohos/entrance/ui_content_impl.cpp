@@ -193,8 +193,9 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
             rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
             rsUiDirector->SetSurfaceNodeSize(width, height);
             rsUiDirector->SetUITaskRunner(
-                [taskExecutor = container->GetTaskExecutor()]
+                [taskExecutor = container->GetTaskExecutor(), id = instanceId_]
                     (const std::function<void()>& task) {
+                        ContainerScope scope(id);
                         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
                     });
             auto context = container->GetPipelineContext();

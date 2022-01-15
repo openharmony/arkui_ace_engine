@@ -512,7 +512,6 @@ void AceContainer::InitializeCallback()
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName,
     OHOS::AppExecFwk::Ability* aceAbility, std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner)
 {
-    Container::InitForThread(INSTANCE_ID_PLATFORM);
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(
         instanceId, type, isArkApp, aceAbility, std::move(callback), useCurrentEventRunner);
     AceEngine::Get().AddContainer(instanceId, aceContainer);

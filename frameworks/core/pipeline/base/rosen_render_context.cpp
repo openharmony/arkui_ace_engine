@@ -79,7 +79,6 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
             if (child->NeedRender()) {
                 RosenRenderContext context;
                 auto pipelineContext = child->GetContext().Upgrade();
-                LOGI("Hole: child canvas render");
                 auto transparentHole = pipelineContext->GetTransparentHole();
                 if (transparentHole.IsValid() && child->GetNeedClip()) {
                     Offset childOffset = rect.GetOffset();
