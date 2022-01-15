@@ -146,6 +146,7 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
     isMute_ = videoComponent->IsMute();
     src_ = videoComponent->GetSrc();
     poster_ = videoComponent->GetPoster();
+    posterImage_ = videoComponent->GetPosterImage();
     isFullScreen_ = videoComponent->IsFullscreen();
     direction_ = videoComponent->GetDirection();
     startTime_ = videoComponent->GetStartTime();
@@ -474,9 +475,18 @@ void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_
 #endif
 }
 
+bool VideoElement::HasPlayer() const
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    return mediaPlayer_ != nullptr;
+#else
+    return player_ != nullptr;
+#endif
+}
+
 void VideoElement::HiddenChange(bool hidden)
 {
-    if (isPlaying_ && hidden && player_) {
+    if (isPlaying_ && hidden && HasPlayer()) {
         pastPlayingStatus_ = isPlaying_;
         Pause();
         return;
@@ -1302,7 +1312,16 @@ const RefPtr<Component> VideoElement::CreateControl()
 
 const RefPtr<Component> VideoElement::CreatePoster()
 {
-    auto image = AceType::MakeRefPtr<ImageComponent>(poster_);
+    RefPtr<ImageComponent> image;
+    if (IsDeclarativePara()) {
+        image = posterImage_;
+    } else {
+        image = AceType::MakeRefPtr<ImageComponent>(poster_);
+    }
+    if (!image) {
+        LOGE("create poster image fail");
+        return nullptr;
+    }
     image->SetImageFit(imageFit_);
     image->SetImageObjectPosition(imagePosition_);
     image->SetFitMaxSize(true);
@@ -1323,6 +1342,11 @@ const RefPtr<Component> VideoElement::CreateChild()
 #ifndef OHOS_STANDARD_SYSTEM
         columnChildren.emplace_back(AceType::MakeRefPtr<FlexItemComponent>(VIDEO_CHILD_COMMON_FLEX_GROW,
             VIDEO_CHILD_COMMON_FLEX_SHRINK, VIDEO_CHILD_COMMON_FLEX_BASIS, CreatePoster()));
+#else
+#ifdef ENABLE_ROSEN_BACKEND
+        columnChildren.emplace_back(AceType::MakeRefPtr<FlexItemComponent>(VIDEO_CHILD_COMMON_FLEX_GROW,
+            VIDEO_CHILD_COMMON_FLEX_SHRINK, VIDEO_CHILD_COMMON_FLEX_BASIS, CreatePoster()));
+#endif
 #endif
         if (needControls_) {
             columnChildren.emplace_back(CreateControl());
