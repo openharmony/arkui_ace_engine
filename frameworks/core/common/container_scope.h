@@ -23,7 +23,7 @@ namespace OHOS::Ace {
 class ACE_EXPORT ContainerScope {
 
 public:
-    ContainerScope(int32_t id)
+    explicit ContainerScope(int32_t id)
     {
         restoreId_ = Container::CurrentId();
         Container::UpdateCurrent(id);
@@ -35,7 +35,7 @@ public:
     }
 
 private:
-    int32_t restoreId_;
+    int32_t restoreId_ = INSTANCE_ID_UNDEFINED;
 
     ACE_DISALLOW_COPY_AND_MOVE(ContainerScope);
 };
