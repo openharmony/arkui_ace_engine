@@ -37,6 +37,7 @@
 #include "core/animation/shared_transition_controller.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container_scope.h"
 #include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
@@ -124,7 +125,8 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
 {
     frontendType_ = frontend->GetType();
     RegisterEventHandler(frontend->GetEventHandler());
-    auto&& vsyncCallback = [weak = AceType::WeakClaim(this)](const uint64_t nanoTimestamp, const uint32_t frameCount) {
+    auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](const uint64_t nanoTimestamp, const uint32_t frameCount) {
+        ContainerScope scope(instanceId);
         auto context = weak.Upgrade();
         if (context) {
             context->OnVsyncEvent(nanoTimestamp, frameCount);

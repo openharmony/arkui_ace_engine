@@ -30,6 +30,11 @@ namespace {
 constexpr uint32_t MAX_BUFFER_SIZE = 4000;
 constexpr uint32_t MAX_TIME_SIZE = 32;
 const char* const LOGLEVELNAME[] = { "DEBUG", "INFO", "WARNING", "ERROR", "FATAL" };
+#ifdef ACE_PRIVATE_LOG
+const bool ENABLE_SEC_LOG = false;
+#else
+const bool ENABLE_SEC_LOG = true;
+#endif
 
 const char* LOG_TAGS[] = {
     "Ace",
@@ -72,7 +77,7 @@ void LogWrapper::PrintLog(LogDomain domain, LogLevel level, const char* fmt, va_
     std::string newFmt(fmt);
 
     char buf[MAX_BUFFER_SIZE];
-    if (vsnprintfp_s(buf, sizeof(buf), sizeof(buf) - 1, true, newFmt.c_str(), args) < 0 && errno == EINVAL) {
+    if (vsnprintfp_s(buf, sizeof(buf), sizeof(buf) - 1, ENABLE_SEC_LOG, newFmt.c_str(), args) < 0 && errno == EINVAL) {
         return;
     }
 
@@ -93,6 +98,11 @@ void LogWrapper::PrintLog(LogDomain domain, LogLevel level, const char* fmt, va_
 #endif
     printf("%s %s\r\n", timeBuf, buf);
     fflush(stdout);
+}
+
+int32_t LogWrapper::GetId()
+{
+    return 0;
 }
 
 } // namespace OHOS::Ace

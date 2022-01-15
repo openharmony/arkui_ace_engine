@@ -27,6 +27,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container_scope.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/event/axis_event.h"
@@ -479,12 +480,19 @@ bool FlutterAceView::IsLastPage() const
         return false;
     }
 
+    ContainerScope scope(instanceId_);
     auto context = container->GetPipelineContext();
     if (!context) {
         return false;
     }
+    auto taskExecutor = context->GetTaskExecutor();
 
-    return context->IsLastPage();
+    bool isLastPage = false;
+    if (taskExecutor) {
+        taskExecutor->PostSyncTask(
+            [context, &isLastPage]() { isLastPage = context->IsLastPage(); }, TaskExecutor::TaskType::UI);
+    }
+    return isLastPage;
 }
 
 uint32_t FlutterAceView::GetBackgroundColor()

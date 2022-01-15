@@ -26,6 +26,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/hdc_register.h"
@@ -107,13 +108,13 @@ void AceContainer::InitializeTask()
         GetSettings().useUIAsJSThread = true;
     } else {
         flutterTaskExecutor->InitJsThread();
-        taskExecutor_->PostTask([id = instanceId_]() { Container::InitForThread(id); }, TaskExecutor::TaskType::JS);
     }
     SystemProperties::SetDeclarativeFrontend(type_ == FrontendType::DECLARATIVE_JS);
 }
 
 void AceContainer::Initialize()
 {
+    ContainerScope scope(instanceId_);
     // For DECLARATIVE_JS frontend use UI as JS Thread, so InitializeFrontend after UI thread created.
     if (type_ != FrontendType::DECLARATIVE_JS) {
         InitializeFrontend();
@@ -122,6 +123,7 @@ void AceContainer::Initialize()
 
 void AceContainer::Destroy()
 {
+    ContainerScope scope(instanceId_);
     if (pipelineContext_ && taskExecutor_) {
         if (taskExecutor_) {
             // 1. Destroy Pipeline on UI thread.
@@ -146,6 +148,7 @@ void AceContainer::Destroy()
 
 void AceContainer::DestroyView()
 {
+    ContainerScope scope(instanceId_);
     if (aceView_ != nullptr) {
         delete aceView_;
         aceView_ = nullptr;
@@ -215,6 +218,7 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
         return false;
     }
 
+    ContainerScope scope(instanceId);
     auto context = container->GetPipelineContext();
     if (!context) {
         return false;
@@ -229,6 +233,7 @@ void AceContainer::OnShow(int32_t instanceId)
         return;
     }
 
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (front) {
         front->OnShow();
@@ -246,6 +251,7 @@ void AceContainer::OnHide(int32_t instanceId)
     if (!container) {
         return;
     }
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (front) {
         front->OnHide();
@@ -268,6 +274,7 @@ void AceContainer::OnActive(int32_t instanceId)
         return;
     }
 
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (front) {
         front->OnActive();
@@ -287,6 +294,7 @@ void AceContainer::OnInactive(int32_t instanceId)
         return;
     }
 
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (front) {
         front->OnInactive();
@@ -306,6 +314,8 @@ bool AceContainer::OnStartContinuation(int32_t instanceId)
         LOGI("container is null, OnStartContinuation failed.");
         return false;
     }
+
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (!front) {
         LOGI("front is null, OnStartContinuation failed.");
@@ -322,6 +332,8 @@ std::string AceContainer::OnSaveData(int32_t instanceId)
         LOGI("container is null, OnSaveData failed.");
         return result;
     }
+
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (!front) {
         LOGI("front is null, OnSaveData failed.");
@@ -338,6 +350,8 @@ bool AceContainer::OnRestoreData(int32_t instanceId, const std::string& data)
         LOGI("container is null, OnRestoreData failed.");
         return false;
     }
+
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (!front) {
         LOGI("front is null, OnRestoreData failed.");
@@ -353,6 +367,8 @@ void AceContainer::OnCompleteContinuation(int32_t instanceId, int result)
         LOGI("container is null, OnCompleteContinuation failed.");
         return;
     }
+
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (!front) {
         LOGI("front is null, OnCompleteContinuation failed.");
@@ -368,6 +384,8 @@ void AceContainer::OnRemoteTerminated(int32_t instanceId)
         LOGI("container is null, OnRemoteTerminated failed.");
         return;
     }
+
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (!front) {
         LOGI("front is null, OnRemoteTerminated failed.");
@@ -383,6 +401,8 @@ void AceContainer::OnConfigurationUpdated(int32_t instanceId, const std::string&
         LOGI("container is null, OnConfigurationUpdated failed.");
         return;
     }
+
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (!front) {
         LOGI("front is null, OnConfigurationUpdated failed.");
@@ -398,6 +418,7 @@ void AceContainer::OnNewRequest(int32_t instanceId, const std::string& data)
         return;
     }
 
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (front) {
         front->OnNewRequest(data);
@@ -409,13 +430,15 @@ void AceContainer::InitializeCallback()
     ACE_FUNCTION_TRACE();
 
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
-    auto&& touchEventCallback = [context = pipelineContext_](const TouchPoint& event) {
+    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchPoint& event) {
+        ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, event]() { context->OnTouchEvent(event); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterTouchEventCallback(touchEventCallback);
 
-    auto&& keyEventCallback = [context = pipelineContext_](const KeyEvent& event) {
+    auto&& keyEventCallback = [context = pipelineContext_, id = instanceId_](const KeyEvent& event) {
+        ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
             [context, event, &result]() { result = context->OnKeyEvent(event); }, TaskExecutor::TaskType::UI);
@@ -423,19 +446,22 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterKeyEventCallback(keyEventCallback);
 
-    auto&& mouseEventCallback = [context = pipelineContext_](const MouseEvent& event) {
+    auto&& mouseEventCallback = [context = pipelineContext_, id = instanceId_](const MouseEvent& event) {
+        ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, event]() { context->OnMouseEvent(event); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
  
-    auto&& axisEventCallback = [context = pipelineContext_](const AxisEvent& event) {
+    auto&& axisEventCallback = [context = pipelineContext_, id = instanceId_](const AxisEvent& event) {
+        ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, event]() { context->OnAxisEvent(event); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 
-    auto&& rotationEventCallback = [context = pipelineContext_](const RotationEvent& event) {
+    auto&& rotationEventCallback = [context = pipelineContext_, id = instanceId_](const RotationEvent& event) {
+        ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
             [context, event, &result]() { result = context->OnRotationEvent(event); }, TaskExecutor::TaskType::UI);
@@ -443,21 +469,24 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterRotationEventCallback(rotationEventCallback);
 
-    auto&& viewChangeCallback = [context = pipelineContext_](int32_t width, int32_t height) {
+    auto&& viewChangeCallback = [context = pipelineContext_, id = instanceId_](int32_t width, int32_t height) {
+        ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(
             [context, width, height]() { context->OnSurfaceChanged(width, height); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
 
-    auto&& densityChangeCallback = [context = pipelineContext_](double density) {
+    auto&& densityChangeCallback = [context = pipelineContext_, id = instanceId_](double density) {
+        ContainerScope scope(id);
         ACE_SCOPED_TRACE("DensityChangeCallback(%lf)", density);
         context->GetTaskExecutor()->PostTask(
             [context, density]() { context->OnSurfaceDensityChanged(density); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterDensityChangeCallback(densityChangeCallback);
 
-    auto&& systemBarHeightChangeCallback = [context = pipelineContext_](double statusBar, double navigationBar) {
+    auto&& systemBarHeightChangeCallback = [context = pipelineContext_, id = instanceId_](double statusBar, double navigationBar) {
+        ContainerScope scope(id);
         ACE_SCOPED_TRACE("SystemBarHeightChangeCallback(%lf, %lf)", statusBar, navigationBar);
         context->GetTaskExecutor()->PostTask(
             [context, statusBar, navigationBar]() { context->OnSystemBarHeightChanged(statusBar, navigationBar); },
@@ -465,13 +494,15 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterSystemBarHeightChangeCallback(systemBarHeightChangeCallback);
 
-    auto&& surfaceDestroyCallback = [context = pipelineContext_]() {
+    auto&& surfaceDestroyCallback = [context = pipelineContext_, id = instanceId_]() {
+        ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context]() { context->OnSurfaceDestroyed(); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
 
-    auto&& idleCallback = [context = pipelineContext_](int64_t deadline) {
+    auto&& idleCallback = [context = pipelineContext_, id = instanceId_](int64_t deadline) {
+        ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, deadline]() { context->OnIdle(deadline); }, TaskExecutor::TaskType::UI);
     };
@@ -481,13 +512,13 @@ void AceContainer::InitializeCallback()
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName,
     OHOS::AppExecFwk::Ability* aceAbility, std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner)
 {
-    Container::InitForThread(INSTANCE_ID_PLATFORM);
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(
         instanceId, type, isArkApp, aceAbility, std::move(callback), useCurrentEventRunner);
     AceEngine::Get().AddContainer(instanceId, aceContainer);
 
     HdcRegister::Get().StartHdcRegister();
     aceContainer->Initialize();
+    ContainerScope scope(instanceId);
     auto front = aceContainer->GetFrontend();
     if (front) {
         front->UpdateState(Frontend::State::ON_CREATE);
@@ -565,6 +596,7 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
     if (!container) {
         return false;
     }
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (front) {
         LOGI("RunPage content=[%{private}s]", content.c_str());
@@ -580,6 +612,7 @@ bool AceContainer::PushPage(int32_t instanceId, const std::string& content, cons
     if (!container) {
         return false;
     }
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (front) {
         front->PushPage(content, params);
@@ -594,6 +627,7 @@ bool AceContainer::UpdatePage(int32_t instanceId, int32_t pageId, const std::str
     if (!container) {
         return false;
     }
+    ContainerScope scope(instanceId);
     auto context = container->GetPipelineContext();
     if (!context) {
         return false;
@@ -615,6 +649,7 @@ void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, st
         return;
     }
 
+    ContainerScope scope(instanceId_);
     taskExecutor_->PostTask(
         [front, callbackId, errorCode, errorMessage = std::move(errorMessage)]() mutable {
             front->TransferJsPluginGetError(callbackId, errorCode, std::move(errorMessage));
@@ -624,6 +659,7 @@ void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, st
 
 bool AceContainer::Dump(const std::vector<std::string>& params)
 {
+    ContainerScope scope(instanceId_);
     if (aceView_ && aceView_->Dump(params)) {
         return true;
     }
@@ -637,6 +673,7 @@ bool AceContainer::Dump(const std::vector<std::string>& params)
 
 void AceContainer::TriggerGarbageCollection()
 {
+    ContainerScope scope(instanceId_);
 #if !defined(OHOS_PLATFORM) || !defined(ENABLE_NATIVE_VIEW)
     // GPU and IO thread is standalone while disable native view
     taskExecutor_->PostTask([] { PurgeMallocCache(); }, TaskExecutor::TaskType::GPU);
@@ -693,7 +730,12 @@ void AceContainer::AttachView(
     ACE_DCHECK(state != nullptr);
     auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
     flutterTaskExecutor->InitOtherThreads(state->GetTaskRunners());
-    taskExecutor_->PostTask([id = instanceId_]() { Container::InitForThread(id); }, TaskExecutor::TaskType::UI);
+    if (GetSettings().usePlatformAsUIThread) {
+        Container::SetScopeNotify([](int32_t id) {
+            flutter::UIDartState::Current()->SetCurInstance(id);
+        });
+    }
+    ContainerScope scope(instanceId);
     if (type_ == FrontendType::DECLARATIVE_JS) {
         // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
         flutterTaskExecutor->InitJsThread(false);
@@ -717,12 +759,13 @@ void AceContainer::AttachView(
     pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
     InitializeCallback();
 
-    auto&& finishEventHandler = [weak = WeakClaim(this)] {
+    auto&& finishEventHandler = [weak = WeakClaim(this), instanceId] {
         auto container = weak.Upgrade();
         if (!container) {
             LOGE("FinishEventHandler container is null!");
             return;
         }
+        ContainerScope scope(instanceId);
         auto context = container->GetPipelineContext();
         if (!context) {
             LOGE("FinishEventHandler context is null!");
@@ -741,12 +784,13 @@ void AceContainer::AttachView(
     };
     pipelineContext_->SetFinishEventHandler(finishEventHandler);
 
-    auto&& setStatusBarEventHandler = [weak = WeakClaim(this)](const Color& color) {
+    auto&& setStatusBarEventHandler = [weak = WeakClaim(this), instanceId](const Color& color) {
         auto container = weak.Upgrade();
         if (!container) {
             LOGE("StatusBarEventHandler container is null!");
             return;
         }
+        ContainerScope scope(instanceId);
         auto context = container->GetPipelineContext();
         if (!context) {
             LOGE("StatusBarEventHandler context is null!");
@@ -805,6 +849,7 @@ void AceContainer::SetFontScale(int32_t instanceId, float fontScale)
     if (!container) {
         return;
     }
+    ContainerScope scope(instanceId);
     auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
         LOGE("fail to set font style due to context is null");
@@ -819,6 +864,7 @@ void AceContainer::SetWindowStyle(int32_t instanceId, WindowModal windowModal, C
     if (!container) {
         return;
     }
+    ContainerScope scope(instanceId);
     container->SetWindowModal(windowModal);
     container->SetColorScheme(colorScheme);
 }

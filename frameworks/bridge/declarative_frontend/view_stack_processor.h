@@ -149,7 +149,7 @@ private:
 
     bool ShouldPopImmediately();
 
-#ifdef ACE_DEBUG
+#ifdef ACE_DEBUG_LOG
     // Dump view stack comtent
     void DumpStack();
 #endif

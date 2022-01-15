@@ -147,7 +147,8 @@ public:
     static int32_t CurrentId();
     static RefPtr<Container> Current();
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
-    static void InitForThread(int32_t id);
+    static void SetScopeNotify(std::function<void(int32_t)>&& notify);
+    static void UpdateCurrent(int32_t id);
 
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
@@ -156,6 +157,7 @@ protected:
 
 private:
     static thread_local int32_t currentId_;
+    static std::function<void(int32_t)> updateScopeNotify_;
     std::string moduleName_;
     Settings settings_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);

@@ -28,6 +28,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
@@ -3676,13 +3677,14 @@ void V8Engine::SetPostTask()
     LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
     std::weak_ptr<V8NativeEngine> weakNativeEngine(nativeEngine_);
-    auto&& postTask = [weakDelegate, weakNativeEngine](bool needSync) {
+    auto&& postTask = [weakDelegate, weakNativeEngine, id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([weakNativeEngine, needSync]() {
+        delegate->PostJsTask([weakNativeEngine, needSync, id]() {
+            ContainerScope scope(id);
             auto nativeEngine = weakNativeEngine.lock();
             if (!nativeEngine) {
                 LOGE("native v8 engine weak pointer invalid");

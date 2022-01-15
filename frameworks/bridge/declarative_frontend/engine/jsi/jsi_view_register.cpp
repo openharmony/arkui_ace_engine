@@ -133,14 +133,15 @@
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
-#include "core/components_v2/inspector/inspector.h"
+#include "frameworks/core/common/container.h"
+#include "frameworks/core/components_v2/inspector/inspector.h"
 
 namespace OHOS::Ace::Framework {
 
 panda::Local<panda::JSValueRef> JsLoadDocument(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
     const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
 {
-    LOGD("Load Document");
+    LOGI("Load Document start");
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
@@ -154,10 +155,10 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::EcmaVM* vm, panda::Local<p
     JSView* view = static_cast<JSView*>(obj->GetNativePointerField(0));
 
     auto runtime = JsiDeclarativeEngineInstance::GetJsRuntime();
-    auto page = JsiDeclarativeEngineInstance::GetStagingPage(runtime);
-    JsiDeclarativeEngineInstance::RootViewHandle(runtime, obj);
+    auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
+    JsiDeclarativeEngineInstance::RootViewHandle(obj);
 
-    LOGD("Load Document setting root view");
+    LOGI("Load Document setting root view, page[%{public}d]", page->GetPageId());
     auto rootComponent = view->CreateComponent();
     std::list<RefPtr<Component>> stackChildren;
     stackChildren.emplace_back(rootComponent);
@@ -270,11 +271,7 @@ panda::Local<panda::JSValueRef> JsGetMediaResource(panda::EcmaVM* vm, panda::Loc
 
 RefPtr<FrontendDelegate> JsGetFrontendDelegate()
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    if (!runtime) {
-        return nullptr;
-    }
-    auto engineInstance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
+    auto engineInstance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
     if (engineInstance == nullptr) {
         LOGE("engineInstance is null!");
         return nullptr;

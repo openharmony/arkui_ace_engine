@@ -42,6 +42,10 @@ public:
 
     void AddTaskObserver(Task&& callback) {}
     void RemoveTaskObserver() {}
+    Task WrapTaskWithTraceId(Task&& task, int32_t id) const final
+    {
+        return std::move(task);
+    }
 
 private:
     bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const final

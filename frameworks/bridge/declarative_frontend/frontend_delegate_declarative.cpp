@@ -1243,7 +1243,7 @@ void FrontendDelegateDeclarative::LoadPage(
         pageParamMap_[pageId] = params;
     }
     auto url = target.url;
-    LOGI("FrontendDelegateDeclarative LoadPage[%{private}d]: %{private}s.", pageId, url.c_str());
+    LOGI("FrontendDelegateDeclarative %{private}p LoadPage[%{public}d]: %{public}s.", this, pageId, url.c_str());
     if (pageId == INVALID_PAGE_ID) {
         LOGE("FrontendDelegateDeclarative, invalid page id");
         EventReport::SendPageRouterException(PageRouterExcepType::LOAD_PAGE_ERR, url);

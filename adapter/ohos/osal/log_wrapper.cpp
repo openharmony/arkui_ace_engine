@@ -19,6 +19,10 @@
 
 #include "hilog/log.h"
 
+#ifdef ACE_INSTANCE_LOG
+#include "core/common/container.h"
+#endif
+
 extern "C" {
 int HiLogPrintArgs(LogType type, LogLevel level, unsigned int domain, const char* tag, const char* fmt, va_list ap);
 }
@@ -62,8 +66,24 @@ char LogWrapper::GetSeparatorCharacter()
 
 void LogWrapper::PrintLog(LogDomain domain, LogLevel level, const char* fmt, va_list args)
 {
+#ifdef ACE_PRIVATE_LOG
+    std::string newFmt(fmt);
+    ReplaceFormatString("{private}", "{public}", newFmt);
+    HiLogPrintArgs(LOG_TYPES[static_cast<uint32_t>(domain)], LOG_LEVELS[static_cast<uint32_t>(level)],
+        LOG_DOMAINS[static_cast<uint32_t>(domain)], LOG_TAGS[static_cast<uint32_t>(domain)], newFmt.c_str(), args);
+#else
     HiLogPrintArgs(LOG_TYPES[static_cast<uint32_t>(domain)], LOG_LEVELS[static_cast<uint32_t>(level)],
         LOG_DOMAINS[static_cast<uint32_t>(domain)], LOG_TAGS[static_cast<uint32_t>(domain)], fmt, args);
+#endif
+}
+
+int32_t LogWrapper::GetId()
+{
+#ifdef ACE_INSTANCE_LOG
+    return Container::CurrentId();
+#else
+    return 0;
+#endif
 }
 
 } // namespace OHOS::Ace

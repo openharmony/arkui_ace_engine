@@ -32,6 +32,7 @@
 #include "adapter/ohos/entrance/utils.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
+#include "core/common/container_scope.h"
 #include "core/common/frontend.h"
 #include "core/common/plugin_manager.h"
 
@@ -146,7 +147,12 @@ void AceAbility::OnStart(const Want& want)
     Ability::OnStart(want);
     LOGI("AceAbility::OnStart called");
 
-    SetHwIcuDirectory();
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        LOGI("Initialize for current process.");
+        SetHwIcuDirectory();
+        Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+    });
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     auto resourceManager = GetResourceManager();
@@ -300,8 +306,9 @@ void AceAbility::OnStart(const Want& want)
 
             rsUiDirector->SetSurfaceNodeSize(width, height);
             rsUiDirector->SetUITaskRunner(
-                [taskExecutor = Platform::AceContainer::GetContainer(abilityId_)->GetTaskExecutor()]
+                [taskExecutor = Platform::AceContainer::GetContainer(abilityId_)->GetTaskExecutor(), id = abilityId_]
                     (const std::function<void()>& task) {
+                        ContainerScope scope(id);
                         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
                     });
             if (context != nullptr) {

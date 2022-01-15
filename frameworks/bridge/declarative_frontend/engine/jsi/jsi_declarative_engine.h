@@ -53,7 +53,7 @@ public:
     // add Console object to worker
     void InitConsoleModule(ArkNativeEngine* engine);
 
-    static void RootViewHandle(const shared_ptr<JsRuntime>& runtime, panda::Local<panda::ObjectRef> value);
+    static void RootViewHandle(panda::Local<panda::ObjectRef> value);
     void DestroyRootViewHandle(int32_t pageId);
     void DestroyAllRootViewHandle();
 
@@ -63,8 +63,8 @@ public:
 
     RefPtr<FrontendDelegate> GetFrontendDelegate() const;
 
-    static RefPtr<JsAcePage> GetRunningPage(const shared_ptr<JsRuntime>& runtime);
-    static RefPtr<JsAcePage> GetStagingPage(const shared_ptr<JsRuntime>& runtime);
+    static RefPtr<JsAcePage> GetRunningPage(int32_t instanceId);
+    static RefPtr<JsAcePage> GetStagingPage(int32_t instanceId);
     static void PostJsTask(const shared_ptr<JsRuntime>&, std::function<void()>&& task);
     static void TriggerPageUpdate(const shared_ptr<JsRuntime>&);
     static RefPtr<PipelineContext> GetPipelineContext(const shared_ptr<JsRuntime>& runtime);
@@ -122,6 +122,25 @@ public:
         isDebugMode_ = isDebugMode;
     }
 
+    static void AddEngineInstance(int32_t id, WeakPtr<JsiDeclarativeEngineInstance> instance)
+    {
+        engineInstaneMap_.emplace(id, instance);
+    }
+
+    static RefPtr<JsiDeclarativeEngineInstance> GetEngineInstance(int32_t id)
+    {
+        auto iter = engineInstaneMap_.find(id);
+        if (iter != engineInstaneMap_.end()) {
+            return iter->second.Upgrade();
+        }
+        return nullptr;
+    }
+
+    static void RemoveEngineInstance(int32_t id)
+    {
+        engineInstaneMap_.erase(id);
+    }
+
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global
@@ -148,6 +167,7 @@ private:
     RefPtr<JsAcePage> stagingPage_;
 
     static thread_local shared_ptr<JsRuntime> runtime_;
+    static std::unordered_map<int32_t, WeakPtr<JsiDeclarativeEngineInstance>> engineInstaneMap_;
     RefPtr<FrontendDelegate> frontendDelegate_;
     WeakPtr<JsMessageDispatcher> dispatcher_;
     int32_t instanceId_ = 0;

@@ -46,8 +46,7 @@ RefPtr<JsAcePage> GetCurrentPage()
     auto page = QJSDeclarativeEngineInstance::GetRunningPage(context);
     return page;
 #elif USE_ARK_ENGINE
-    auto runtime = JsiDeclarativeEngineInstance::GetJsRuntime();
-    auto page = JsiDeclarativeEngineInstance::GetStagingPage(runtime);
+    auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
     return page;
 #endif
 }

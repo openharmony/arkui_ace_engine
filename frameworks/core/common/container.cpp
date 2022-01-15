@@ -20,6 +20,7 @@
 namespace OHOS::Ace {
 
 thread_local int32_t Container::currentId_ = INSTANCE_ID_UNDEFINED;
+std::function<void(int32_t)> Container::updateScopeNotify_;
 
 int32_t Container::CurrentId()
 {
@@ -40,10 +41,17 @@ RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
     return nullptr;
 }
 
-void Container::InitForThread(int32_t id)
+void Container::SetScopeNotify(std::function<void(int32_t)>&& notify)
 {
-    LOGI("InitForThread id:%{public}d", id);
+    updateScopeNotify_ = std::move(notify);
+}
+
+void Container::UpdateCurrent(int32_t id)
+{
     currentId_ = id;
+    if (updateScopeNotify_) {
+        updateScopeNotify_(id);
+    }
 }
 
 } // namespace OHOS::Ace
