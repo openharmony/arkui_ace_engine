@@ -89,7 +89,7 @@ template("gen_sa_dialog_js") {
     source = target_out_dir + "/default/manifest.json"
   }
 
-  group("dialog_js_files_etc") {
+  group("dialog_picker_js_files_etc") {
     deps = [
       ":dialog_js_files_app",
       ":dialog_js_files_index",

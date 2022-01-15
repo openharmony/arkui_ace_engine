@@ -23,9 +23,17 @@
 #include "string_ex.h"
 #include "system_ability_definition.h"
 
+// external dependence
+#include "ability_manager_client.h"
+#include "display_manager.h"
+
 namespace OHOS {
 namespace Ace {
 constexpr int UI_MGR_SERVICE_SA_ID = 7001;
+constexpr int UI_DIALOG_PICKER_WIDTH = 519 * 2; // 519 vp
+constexpr int UI_DIALOG_PICKER_HEIGHT = 256 * 2; // 256 vp
+constexpr int UI_DEFAULT_WIDTH = 2560;
+constexpr int UI_DEFAULT_HEIGHT = 1600;
 std::shared_ptr<UIServiceMgrClient> UIServiceMgrClient::instance_ = nullptr;
 std::mutex UIServiceMgrClient::mutex_;
 
@@ -162,6 +170,60 @@ ErrCode UIServiceMgrClient::CancelDialog(int32_t id)
     return doms->CancelDialog(id);
 }
 
+ErrCode UIServiceMgrClient::ShowAppPickerDialog(const AAFwk::Want& want,
+                                                const std::vector<AppExecFwk::AbilityInfo>& abilityInfos)
+{
+    if (abilityInfos.size() == 0) {
+        HILOG_INFO("abilityInfos size is zero");
+        return UI_SERVICE_INVALID_PARAMETER;
+    }
+
+    // get windows size
+    const int32_t half = 2;
+    int32_t offsetX = 0;
+    int32_t offsetY = 0;
+    int32_t width = UI_DIALOG_PICKER_WIDTH;
+    int32_t height = UI_DIALOG_PICKER_HEIGHT;
+    auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (display != nullptr) {
+        offsetX = (display->GetWidth() - width) / half;
+        offsetY = display->GetHeight() - height;
+    } else {
+        offsetX = (UI_DEFAULT_WIDTH - width) / half;
+        offsetY = UI_DEFAULT_HEIGHT - height;
+    }
+    HILOG_DEBUG("share dialog position: width:%{public}d, height:%{public}d, offsetX:%{public}d, offsetY:%{public}d",
+        width, height, offsetX, offsetY);
+
+    const std::string param = GetPickerDialogParam(want, abilityInfos);
+    HILOG_DEBUG("share dialog js param: %{public}s", param.c_str());
+
+    const std::string jsBundleName = "dialog_picker_service";
+    return ShowDialog(jsBundleName, param, OHOS::Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW, offsetX, offsetY,
+        width, height, [want](int32_t id, const std::string& event, const std::string& params) mutable {
+            HILOG_DEBUG("dialog callback: event: %{public}s, params: %{public}s", event.c_str(), params.c_str());
+            if (event == "SHARE_EVENT") {
+                std::string bundleName;
+                std::string abilityName;
+                auto pos = params.find(";");
+                if (pos != std::string::npos) {
+                    bundleName = params.substr(0, pos);
+                    abilityName = params.substr(pos + 1, params.length() - (pos + 1));
+                }
+                AAFwk::Want shareWant = want;
+                shareWant.SetAction("");
+                shareWant.SetElementName(bundleName, abilityName);
+                auto abilityClient = AAFwk::AbilityManagerClient::GetInstance();
+                if (abilityClient != nullptr) {
+                    HILOG_INFO("dialog callback: start ability elementName: %{public}s-%{public}s",
+                        bundleName.c_str(), abilityName.c_str());
+                    abilityClient->StartAbility(shareWant);
+                }
+            }
+            Ace::UIServiceMgrClient::GetInstance()->CancelDialog(id);
+        });
+}
+
 /**
  * Connect ui_service manager service.
  *
@@ -185,6 +247,40 @@ ErrCode UIServiceMgrClient::Connect()
     }
     HILOG_DEBUG("connect UIMgrService success");
     return ERR_OK;
+}
+
+const std::string UIServiceMgrClient::GetPickerDialogParam(
+    const AAFwk::Want& want, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos) const
+{
+    std::string param = "{"; // json head
+    param += "\"previewCard\": { \"type\": \"";
+    param += want.GetType();
+    param += "\", \"icon\": \"";
+    param += "";
+    param += "\", \"mainText\": \"";
+    param += "";
+    param += "\", \"subText\": \"";
+    param += "";
+    param += "\"},";
+    param += "\"hapList\": [";
+    for (int i = 0; i < (int)abilityInfos.size(); i++) {
+        const auto& abilityInfo = abilityInfos[i];
+        param += "{ \"name\": \"";
+        param += abilityInfo.label; // or int32_t abilityInfo.labelId
+        param += "\", \"icon\": \"";
+        param += abilityInfo.iconPath; // or int32_t abilityInfo.iconId
+        param += "\", \"bundle\": \"";
+        param += abilityInfo.bundleName;
+        param += "\", \"ability\": \"";
+        param += abilityInfo.name;
+        param += "\" }";
+        if (i != (int)abilityInfos.size() - 1) {
+            param += ",";
+        }
+    }
+    param += "]";
+    param += "}"; // json tail
+    return param;
 }
 }  // namespace Ace
 }  // namespace OHOS

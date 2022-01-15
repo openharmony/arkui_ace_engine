@@ -93,6 +93,8 @@ template("uiservice_static") {
       "//utils/native/base:utils",
     ]
 
+    deps += [ "//foundation/ace/ace_engine/services/uiservice/dialog_ui/dialog_picker/js:dialog_picker_js_files_etc" ]
+
     deps += [ "$ace_root/build:libace" ]
 
     external_deps = [
