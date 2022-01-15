@@ -27,6 +27,13 @@
 
 namespace OHOS::Ace {
 
+enum class SeekMode {
+    SEEK_PREVIOUS_SYNC = 0, // sync to keyframes before the time point.
+    SEEK_NEXT_SYNC, // sync to keyframes after the time point.
+    SEEK_CLOSEST_SYNC, // sync to closest keyframes.
+    SEEK_CLOSEST, // seek to frames closest the time point.
+};
+
 class VideoController : public virtual AceType {
     DECLARE_ACE_TYPE(VideoController, AceType);
 
@@ -34,7 +41,7 @@ public:
     using StartImpl = std::function<void()>;
     using PauseImpl = std::function<void()>;
     using StopImpl = std::function<void()>;
-    using SeekToImpl = std::function<void(uint32_t)>;
+    using SeekToImpl = std::function<void(float, SeekMode)>;
     using RequestFullscreenImpl = std::function<void(bool)>;
     using ExitFullscreenImpl = std::function<void(bool)>;
 
@@ -59,10 +66,10 @@ public:
         }
     }
 
-    void SeekTo(uint32_t pos)
+    void SeekTo(float pos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC)
     {
         if (seekToImpl_) {
-            seekToImpl_(pos);
+            seekToImpl_(pos, seekMode);
         }
     }
 

@@ -703,3 +703,11 @@ var SourceType;
   SourceType[SourceType["Mouse"] = 1] = "Mouse";
   SourceType[SourceType["TouchScreen"] = 2] = "TouchScreen";
 })(SourceType || (SourceType = {}));
+
+var SeekMode;
+(function (SeekMode) {
+  SeekMode[SeekMode["PreviousSync"] = 0] = "PreviousSync";
+  SeekMode[SeekMode["NextSync"] = 1] = "NextSync";
+  SeekMode[SeekMode["ClosestSync"] = 2] = "ClosestSync";
+  SeekMode[SeekMode["Closest"] = 3] = "Closest";
+})(SeekMode || (SeekMode = {}));

@@ -16,6 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_ROSEN_RENDER_TEXTURE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_ROSEN_RENDER_TEXTURE_H
 
+#ifdef OHOS_STANDARD_SYSTEM
+#include "surface.h"
+#endif
+
 #include "core/components/video/render_texture.h"
 
 namespace OHOS::Ace {
@@ -37,6 +41,10 @@ public:
     void UpdateOpacity(uint8_t opacity) override;
     void DumpTree(int32_t depth) override;
     void SetIsAddGaussianFuzzy(bool isAddGaussianFuzzy) override;
+
+#ifdef OHOS_STANDARD_SYSTEM
+    OHOS::sptr<OHOS::Surface> GetSurface();
+#endif
 
 private:
     void AddGaussianFuzzy(RenderContext& context, const Offset& offset);

@@ -76,7 +76,7 @@ void ScrollBarProxy::NotifyScrollableNode(double distance, const WeakPtr<RenderS
             continue;
         }
         auto scrollable = weakScrollableNode.Upgrade();
-        if (!CheckScrollable(scrollable)) {
+        if (!scrollable || !CheckScrollable(scrollable)) {
             LOGE("Node is not scrollable node.");
             continue;
         }
@@ -95,7 +95,7 @@ void ScrollBarProxy::NotifyScrollableNode(double distance, const WeakPtr<RenderS
         auto scrollableAxis = GetScrollableAxis(scrollable);
         if (scrollableAxis != Axis::FREE && scrollBarAxis != Axis::FREE && scrollableAxis != scrollBarAxis) {
             LOGE("Axis of ScrollBar and Scroll is not match.");
-            return;
+            continue;
         }
 
         double value = 0.0;
@@ -118,8 +118,14 @@ void ScrollBarProxy::NotifyScrollableNode(double distance, const WeakPtr<RenderS
 void ScrollBarProxy::NotifyScrollBar(const WeakPtr<RenderNode>& weakScrollableNode) const
 {
     auto scrollable = weakScrollableNode.Upgrade();
-    if (!CheckScrollable(scrollable)) {
+    if (!scrollable || !CheckScrollable(scrollable)) {
         LOGE("Node is not scrollable node.");
+        return;
+    }
+
+    auto scrollableChild = scrollable->GetLastChild();
+    if (!scrollableChild) {
+        LOGE("child of scrollable node is null");
         return;
     }
 
@@ -132,11 +138,9 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<RenderNode>& weakScrollableNo
         auto scrollBarChild = scrollBar->GetLastChild();
         if (!scrollBarChild) {
             LOGE("ScrollBar has no child.");
-            return;
+            continue;
         }
         auto scrollBarAxis = scrollBar->GetAxis();
-
-        auto scrollableChild = scrollable->GetLastChild();
         Axis scrollableAxis = Axis::NONE;
         Offset scrollableChildPosition = scrollableChild->GetPosition();
         Size scrollableSize = scrollable->GetLayoutSize();
@@ -147,7 +151,7 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<RenderNode>& weakScrollableNo
 
         if (scrollBarAxis != Axis::FREE && scrollableAxis != Axis::FREE && scrollBarAxis != scrollableAxis) {
             LOGE("Axis of ScrollBar and Scroll is not match.");
-            return;
+            continue;
         }
 
         Offset position;
