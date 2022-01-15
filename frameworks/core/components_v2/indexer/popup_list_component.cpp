@@ -15,7 +15,6 @@
 
 #include "core/components_v2/indexer/popup_list_component.h"
 
-#include "core/components/common/properties/shadow_config.h"
 #include "core/components_v2/indexer/popup_list_element.h"
 #include "core/components_v2/indexer/render_popup_list.h"
 
@@ -28,5 +27,29 @@ RefPtr<Element> PopupListComponent::CreateElement()
 RefPtr<RenderNode> PopupListComponent::CreateRenderNode()
 {
     return RenderPopupList::Create();
+}
+
+void PopupListComponent::BuildBackground()
+{
+    RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<BoxComponent>();
+    boxComponent->SetFlex(BoxFlex::FLEX_NO);
+    boxComponent->SetAlignment(Alignment::CENTER);
+    boxComponent->SetWidth(POPUP_ZERO_SIZE, DimensionUnit::VP);
+    boxComponent->SetHeight(POPUP_ZERO_SIZE, DimensionUnit::VP);
+
+    Border border;
+    Radius radiusTop = Radius(Dimension(POPUP_BOX_RADIUS_SIZE, DimensionUnit::VP));
+    Radius radiusBottom = Radius(Dimension(POPUP_BORDER_RADIUS_SIZE, DimensionUnit::VP));
+    border.SetTopLeftRadius(radiusTop);
+    border.SetTopRightRadius(radiusTop);
+    border.SetBottomLeftRadius(radiusBottom);
+    border.SetBottomRightRadius(radiusBottom);
+
+    RefPtr<Decoration> boxDecoration = AceType::MakeRefPtr<Decoration>();
+    boxDecoration->SetBorder(border);
+    boxDecoration->SetBackgroundColor(Color(POPUP_BG_COLOR).BlendOpacity(POPUP_BG_OPACITY));
+    boxComponent->SetBackDecoration(boxDecoration);
+
+    AppendChild(boxComponent);
 }
 } // namespace OHOS::Ace

@@ -16,7 +16,6 @@
 #include "core/components_v2/indexer/indexer_component.h"
 
 #include "core/components/arc/arc_component.h"
-#include "core/components/common/properties/shadow_config.h"
 #include "core/components/text/text_component.h"
 #include "core/components_v2/indexer/indexer_element.h"
 #include "core/components_v2/indexer/render_indexer.h"
@@ -25,7 +24,6 @@
 namespace OHOS::Ace::V2 {
 RefPtr<Element> IndexerComponent::CreateElement()
 {
-    LOGI("[indexer] CreateElement ");
     return AceType::MakeRefPtr<IndexerElement>();
 }
 
@@ -90,25 +88,28 @@ void IndexerComponent::BuildBubbleBox()
     RefPtr<BoxComponent> bubble = AceType::MakeRefPtr<BoxComponent>();
     bubble->SetFlex(BoxFlex::FLEX_NO);
     bubble->SetAlignment(Alignment::CENTER);
-    Radius radius = Radius(Dimension(BUBBLE_BOX_SIZE_CIRCLE, DimensionUnit::VP) * HALF);
+    bubble->SetWidth(BUBBLE_BOX_SIZE, DimensionUnit::VP);
+    bubble->SetHeight(BUBBLE_BOX_SIZE, DimensionUnit::VP);
+
     if (!bubbleBack_) {
         bubbleBack_ = AceType::MakeRefPtr<Decoration>();
     }
-
-    // for shadow blur region
-    bubble->SetWidth(BUBBLE_BOX_SIZE, DimensionUnit::VP);
-    bubble->SetHeight(BUBBLE_BOX_SIZE, DimensionUnit::VP);
-    radius = Radius(Dimension(BUBBLE_BOX_RADIUS, DimensionUnit::VP));
+    Radius radius = Radius(Dimension(BUBBLE_BOX_RADIUS, DimensionUnit::VP));
+    Border border;
+    border.SetBorderRadius(radius);
+    bubbleBack_->SetBorder(border);
     bubbleBack_->SetBackgroundColor(Color(BUBBLE_BG_COLOR).BlendOpacity(NINETY_OPACITY_IN_PERCENT));
-
-    bubbleBack_->SetBorderRadius(radius);
     bubble->SetBackDecoration(bubbleBack_);
-    bubbleText_ = AceType::MakeRefPtr<TextComponent>(StringUtils::Str16ToStr8(INDEXER_STR_SHARP));
+
+    if (!bubbleText_) {
+        bubbleText_ = AceType::MakeRefPtr<TextComponent>(StringUtils::Str16ToStr8(INDEXER_STR_SHARP));
+    }
     bubbleText_->SetTextStyle(bubbleStyle_);
     bubble->SetChild(bubbleText_);
+
     RefPtr<DisplayComponent> displayComponent = AceType::MakeRefPtr<DisplayComponent>(bubble);
     displayComponent->SetOpacity(ZERO_OPACITY);
-    displayComponent->SetShadow(ShadowConfig::DefaultShadowL);
+
     AppendChild(displayComponent);
     nonItemCount_++;
 }
@@ -123,8 +124,7 @@ void IndexerComponent::BuildPopupList()
         popupList_ = AceType::MakeRefPtr<PopupListComponent>();
     }
     RefPtr<DisplayComponent> displayComponent = AceType::MakeRefPtr<DisplayComponent>(popupList_);
-    displayComponent->SetOpacity(POPUP_LIST_OPACITY);
-    displayComponent->SetShadow(ShadowConfig::DefaultShadowL);
+    displayComponent->SetOpacity(ZERO_OPACITY);
 
     AppendChild(displayComponent);
     nonItemCount_++;
@@ -160,6 +160,7 @@ void IndexerComponent::BuildIndexerItems()
         std::u16string strItem = labelLocal_[i];
         BuildTextItem(sectionsLocal_[i], strItem);
     }
+
     LOGI("[indexer] BuildIndexerItems, itemCount_:%{public}d", itemCount_);
 }
 
