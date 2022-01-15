@@ -32,7 +32,7 @@ const std::unordered_map<std::string, std::function<std::string(const SelectComp
     { "fontColor", [](const SelectComposedElement& inspector) { return inspector.GetFontColor(); } },
     { "selectedOptionBgColor", [](const SelectComposedElement& inspector) { return inspector.GetSelectBgColor(); } },
     { "selectedOptionFont", [](const SelectComposedElement& inspector) { return inspector.GetSelectFont(); } },
-    { "selectedOptionFontColor", [](const SelectComposedElement& inspector) 
+    { "selectedOptionFontColor", [](const SelectComposedElement& inspector)
         { return inspector.GetSelectFontColor(); } },
     { "optionBgColor", [](const SelectComposedElement& inspector) { return inspector.GetOptionBgColor(); } },
     { "optionFont", [](const SelectComposedElement& inspector) { return inspector.GetOptionFont(); } },
@@ -100,7 +100,7 @@ std::string SelectComposedElement::GetSelected() const
     auto render = GetRenderSelect();
     if (render) {
         if (render->GetSelectComponent()) {
-            return std::to_string(render->GetSelectComponent()->GetSelected());    
+            return std::to_string(render->GetSelectComponent()->GetSelected());
         }
     }
     return "";
