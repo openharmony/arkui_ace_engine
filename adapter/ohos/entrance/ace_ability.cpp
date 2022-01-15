@@ -413,8 +413,12 @@ void AceAbility::OnKeyUp(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
         return;
     }
     int32_t repeatTime = 0;  // TODO:repeatTime need to be rebuild
-    flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent->GetKeyCode(), keyEvent->GetKeyAction(),
+    auto result = flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent->GetKeyCode(), keyEvent->GetKeyAction(),
                                     repeatTime, keyEvent->GetActionTime(), keyEvent->GetActionStartTime());
+    if (!result) {
+        LOGI("AceAbility::OnKeyUp: passed to Ability to process");
+        Ability::OnKeyUp(keyEvent);
+    }
 }
 
 void AceAbility::OnKeyDown(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -429,8 +433,12 @@ void AceAbility::OnKeyDown(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
         return;
     }
     int32_t repeatTime = 0;  // TODO:repeatTime need to be rebuild
-    flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent->GetKeyCode(), keyEvent->GetKeyAction(),
+    auto result = flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent->GetKeyCode(), keyEvent->GetKeyAction(),
                                     repeatTime, keyEvent->GetActionTime(), keyEvent->GetActionStartTime());
+    if (!result) {
+        LOGI("AceAbility::OnKeyDown: passed to Ability to process");
+        Ability::OnKeyDown(keyEvent);
+    }
 }
 
 void AceAbility::OnNewWant(const Want& want)
