@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_SELECT_COMPOSED_ELEMENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_SELECT_COMPOSED_ELEMENT_H
+
 #include "core/components/select/render_select.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
@@ -47,4 +50,6 @@ private:
     std::string GetTextStyle(TextStyle textStyle) const;
 };
 
-}
+} // namespace OHOS::Ace::V2
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_SELECT_COMPOSED_ELEMENT_H

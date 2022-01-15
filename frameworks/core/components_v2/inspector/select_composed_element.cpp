@@ -15,8 +15,6 @@
 
 #include "core/components_v2/inspector/select_composed_element.h"
 
-#include <unordered_map>
-
 #include "core/components/select/select_element.h"
 #include "core/components_v2/inspector/utils.h"
 
