@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "ability_info.h"
 #include "iremote_object.h"
 #include "dialog_callback_interface.h"
 #include "ui_service_interface.h"
@@ -60,6 +61,8 @@ public:
 
     ErrCode CancelDialog(int32_t id);
 
+    ErrCode ShowAppPickerDialog(const AAFwk::Want& want, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos);
+
 private:
     /**
      * Connect UIService manager service.
@@ -67,6 +70,9 @@ private:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode Connect();
+
+    const std::string GetPickerDialogParam(
+        const AAFwk::Want& want, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos) const;
 
     static std::mutex mutex_;
     static std::shared_ptr<UIServiceMgrClient> instance_;

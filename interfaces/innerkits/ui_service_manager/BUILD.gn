@@ -21,7 +21,9 @@ config("uiservice_manager_public_config") {
     "//utils/native/base/include",
     "//utils/system/safwk/native/include",
     "//foundation/aafwk/standard/frameworks/kits/ability/native/include",
+    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
     "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include/",
     "//foundation/aafwk/standard/services/uiservicemgr/include",
     "${innerkits_path}/want/include",
     "//foundation/graphic/standard/rosen/modules/render_service_client/core",
@@ -72,6 +74,7 @@ ohos_shared_library("ui_service_mgr") {
   ]
 
   external_deps = [
+    "aafwk_standard:ability_manager",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]
