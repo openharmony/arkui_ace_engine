@@ -2210,7 +2210,7 @@ void PipelineContext::SetWindowOnHide()
 void PipelineContext::OnShow()
 {
     onShow_ = true;
-    window_->OnShow();
+    SetWindowOnShow();
     auto multiModalScene = multiModalManager_->GetCurrentMultiModalScene();
     if (multiModalScene) {
         multiModalScene->Resume();
@@ -2243,7 +2243,7 @@ void PipelineContext::OnShow()
 void PipelineContext::OnHide()
 {
     onShow_ = false;
-    window_->OnHide();
+    SetWindowOnHide();
     auto multiModalScene = multiModalManager_->GetCurrentMultiModalScene();
     if (multiModalScene) {
         multiModalScene->Hide();
