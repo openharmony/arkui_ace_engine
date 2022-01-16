@@ -122,6 +122,7 @@ private:
     void PrepareMultiModalEvent();
     bool SubscribeMultiModal();
     bool UnSubscribeMultiModal();
+    bool HasPlayer() const;
 
     bool isSubscribeMultimodal_ = false;
     RefPtr<VideoTheme> theme_;
@@ -136,6 +137,7 @@ private:
     bool isMute_ = false;
     std::string src_;
     std::string poster_;
+    RefPtr<ImageComponent> posterImage_;
     uint32_t duration_ = 0;
     uint32_t currentPos_ = 0;
     bool isPlaying_ = false;

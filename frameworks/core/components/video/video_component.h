@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/utils/utils.h"
+#include "core/components/image/image_component.h"
 #include "core/components/video/resource/player.h"
 #include "core/components/video/resource/texture.h"
 #include "core/components/video/texture_component.h"
@@ -162,6 +163,16 @@ public:
     void SetPoster(const std::string& poster)
     {
         poster_ = poster;
+    }
+
+    const RefPtr<ImageComponent>& GetPosterImage() const
+    {
+        return posterImage_;
+    }
+
+    void SetPosterImage(const RefPtr<ImageComponent>& posterImage)
+    {
+        posterImage_ = posterImage;
     }
 
     bool NeedControls() const
@@ -414,6 +425,7 @@ private:
     EventMarker fullscreenChangeEventId_;
     FullscreenEvent fullscreenEvent_;
 
+    RefPtr<ImageComponent> posterImage_;
     RefPtr<VideoController> videoController_;
     WeakPtr<Player> player_;
     WeakPtr<Texture> texture_;
