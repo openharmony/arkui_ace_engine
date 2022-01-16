@@ -37,8 +37,8 @@ build_component("xcomponent") {
     deps = [
       "//foundation/graphic/standard:libsurface",
       "//foundation/graphic/standard:libwmclient",
+      "//foundation/windowmanager/utils:libwmutil",
       "//foundation/windowmanager/wm:libwm",
-      "//foundation/windowmanager/wm:libwmutil",
     ]
 
     external_deps = [ "ipc:ipc_core" ]
