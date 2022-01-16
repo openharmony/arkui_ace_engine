@@ -259,6 +259,11 @@ public:
         return maxLength_;
     }
 
+    const std::string GetTextInputFilter() const
+    {
+        return inputFilter_;
+    }
+
     void SetTextOverlayPushed(bool hasTextOverlayPushed)
     {
         hasTextOverlayPushed_ = hasTextOverlayPushed;

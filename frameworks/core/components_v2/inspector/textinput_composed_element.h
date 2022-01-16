@@ -50,6 +50,7 @@ public:
     std::string GetTextInputFontWeight() const;
     std::string GetTextInputFontFamily() const;
     std::string GetTextMaxLength() const;
+    std::string GetTextInputFilter() const;
 
 private:
     RefPtr<RenderTextField> GetRenderTextField() const;
