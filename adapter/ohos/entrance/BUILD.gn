@@ -65,6 +65,7 @@ template("ace_ohos_standard_source_set") {
       "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
+      "//foundation/windowmanager/dm:libdm",
       "//foundation/windowmanager/wm:libwm",
       "//third_party/zlib:libz",
     ]

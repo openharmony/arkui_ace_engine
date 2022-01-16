@@ -16,6 +16,7 @@
 #include "adapter/ohos/entrance/ace_ability.h"
 
 #include "ability_process.h"
+#include "dm/display_manager.h"
 #include "display_type.h"
 #include "init_data.h"
 #include "res_config.h"
@@ -235,6 +236,15 @@ void AceAbility::OnStart(const Want& want)
     int32_t width = window->GetRect().width_;
     int32_t height = window->GetRect().height_;
     LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", width, height);
+
+    // get density
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (defaultDisplay) {
+        density_ = defaultDisplay->GetVirtualPixelRatio();
+        LOGI("AceAbility: Default display density set: %{public}f", density_);
+    } else {
+        LOGI("AceAbility: Default display is null, set density failed. Use default density: %{public}f", density_);
+    }
 
     flutter::ViewportMetrics metrics;
     metrics.physical_width = width;

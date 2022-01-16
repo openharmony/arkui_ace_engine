@@ -333,7 +333,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config)
         flutter::ViewportMetrics metrics;
         metrics.physical_width = config.Width();
         metrics.physical_height = config.Height();
-        metrics.device_pixel_ratio = 2.0f; // temporary use 2.0 for debug device, should get from window
+        metrics.device_pixel_ratio = config.Density();
         Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
         Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation());
     }
