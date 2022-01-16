@@ -110,6 +110,14 @@ public:
         return resolution_;
     }
 
+    /*
+     * Set resolution of device.
+     */
+    static void SetResolution(double resolution)
+    {
+        resolution_ = resolution;
+    }
+
     static bool GetIsScreenRound()
     {
         return isRound_;

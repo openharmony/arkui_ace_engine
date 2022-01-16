@@ -245,6 +245,7 @@ void AceAbility::OnStart(const Want& want)
     } else {
         LOGI("AceAbility: Default display is null, set density failed. Use default density: %{public}f", density_);
     }
+    SystemProperties::SetResolution(density_);
 
     flutter::ViewportMetrics metrics;
     metrics.physical_width = width;
