@@ -284,7 +284,6 @@ void AceContainer::OnActive(int32_t instanceId)
     if (!context) {
         return;
     }
-    context->SetWindowOnShow();
 }
 
 void AceContainer::OnInactive(int32_t instanceId)
@@ -304,7 +303,6 @@ void AceContainer::OnInactive(int32_t instanceId)
     if (!context) {
         return;
     }
-    context->SetWindowOnHide();
 }
 
 bool AceContainer::OnStartContinuation(int32_t instanceId)
