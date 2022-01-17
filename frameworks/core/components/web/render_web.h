@@ -36,6 +36,24 @@ public:
     void PerformLayout() override;
     void OnAttachContext() override;
 
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+    void OnAppShow() override
+    {
+        RenderNode::OnAppShow();
+        if (delegate_) {
+            delegate_->ShowWebView();
+        }
+    }
+
+    void OnAppHide() override
+    {
+        RenderNode::OnAppHide();
+        if (delegate_) {
+            delegate_->HideWebView();
+        }
+    }
+#endif
+
     void SetDelegate(const RefPtr<WebDelegate>& delegate)
     {
         delegate_ = delegate;

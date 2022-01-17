@@ -23,6 +23,9 @@ namespace OHOS::Ace::Framework {
 void JSWebController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWebController>::Declare("WebController");
+    JSClass<JSWebController>::CustomMethod("loadUrl", &JSWebController::LoadUrl);
+    JSClass<JSWebController>::CustomMethod("evaluateJavaScript", &JSWebController::ExecuteTypeScript);
+    JSClass<JSWebController>::CustomMethod("loadDataWithBaseURL", &JSWebController::LoadDataWithBaseUrl);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
 }
 
@@ -46,6 +49,63 @@ void JSWebController::Reload() const
 {
     if (webController_) {
         webController_->Reload();
+    }
+}
+
+void JSWebController::LoadUrl(const JSCallbackInfo& args)
+{
+    std::string url;
+    if (args.Length() < 1 || !ConvertFromJSValue(args[0], url)) {
+        return;
+    }
+    if (webController_) {
+        webController_->LoadUrl(url);
+    }
+}
+
+void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)
+{
+    std::string jscode;
+    if (args.Length() < 1 || !ConvertFromJSValue(args[0], jscode)) {
+        return;
+    }
+    if (webController_) {
+        webController_->ExecuteTypeScript(jscode);
+    }
+}
+
+void JSWebController::LoadDataWithBaseUrl(const JSCallbackInfo& args)
+{
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+
+        std::string baseUrl;
+        if (!ConvertFromJSValue(obj->GetProperty("baseUrl"), baseUrl)) {
+            return;
+        }
+
+        std::string data;
+        if (!ConvertFromJSValue(obj->GetProperty("data"), data)) {
+            return;
+        }
+
+        std::string mimeType;
+        if (!ConvertFromJSValue(obj->GetProperty("mimeType"), mimeType)) {
+            return;
+        }
+
+        std::string encoding;
+        if (!ConvertFromJSValue(obj->GetProperty("encoding"), encoding)) {
+            return;
+        }
+
+        std::string historyUrl;
+        if (!ConvertFromJSValue(obj->GetProperty("historyUrl"), historyUrl)) {
+            return;
+        }
+        if (webController_) {
+            webController_->LoadDataWithBaseUrl(baseUrl, data, mimeType, encoding, historyUrl);
+        }
     }
 }
 } // namespace OHOS::Ace::Framework

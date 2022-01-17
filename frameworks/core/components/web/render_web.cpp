@@ -42,7 +42,11 @@ void RenderWeb::OnAttachContext()
         // web component is displayed in full screen by default.
         drawSize_ = Size(pipelineContext->GetRootWidth(), pipelineContext->GetRootHeight());
         position_ = Offset(0, 0);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+        delegate_->InitOHOSWeb(context_);
+#else
         delegate_->CreatePlatformResource(drawSize_, position_, context_);
+#endif
     }
 }
 
