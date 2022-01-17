@@ -391,7 +391,7 @@ uint32_t FlutterRenderButton::GetStateColor()
         return Color().GetValue();
     }
     if (!buttonComponent_->GetStateEffect()) {
-        return buttonComponent_->GetBackgroundColor().GetValue();
+        return backgroundColor_.GetValue();
     }
     if (needHoverColor_) {
         return buttonComponent_->GetHoverColor().GetValue();
@@ -402,7 +402,7 @@ uint32_t FlutterRenderButton::GetStateColor()
     if (needFocusColor_) {
         return buttonComponent_->GetFocusColor().GetValue();
     }
-    Color backgroundColor = buttonComponent_->GetBackgroundColor();
+    Color backgroundColor = backgroundColor_;
     if (NeedClickedColor(backgroundColor)) {
         return isClicked_ ? clickedColor_.GetValue() : backgroundColor.GetValue();
     }
