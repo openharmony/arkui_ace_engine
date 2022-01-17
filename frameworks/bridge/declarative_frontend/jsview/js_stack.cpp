@@ -176,6 +176,7 @@ void JSStack::JSBind(BindingTarget globalObj)
     JSClass<JSStack>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSStack>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSStack>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSStack>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSStack>::Inherit<JSContainerBase>();
     JSClass<JSStack>::Inherit<JSViewAbstract>();
     JSClass<JSStack>::Bind<>(globalObj);

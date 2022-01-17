@@ -153,6 +153,16 @@ void SwiperComponent::SetClickEventId(const EventMarker& clickEventId)
     declaration_->SetClickEventId(clickEventId);
 }
 
+const EventMarker& SwiperComponent::GetRemoteMessageEventId() const
+{
+    return declaration_->GetRemoteMessageEventId();
+}
+
+void SwiperComponent::SetRemoteMessageEventId(const EventMarker& eventId)
+{
+    declaration_->SetRemoteMessageEventId(eventId);
+}
+
 void SwiperComponent::SetDuration(double duration)
 {
     declaration_->SetDuration(duration);

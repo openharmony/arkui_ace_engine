@@ -35,6 +35,7 @@ void ButtonDeclaration::InitSpecialized()
     AddSpecializedAttribute(DeclarationConstants::DEFAULT_BUTTON_ATTR);
     AddSpecializedStyle(DeclarationConstants::DEFAULT_BUTTON_STYLE);
     AddSpecializedEvent(DeclarationConstants::DEFAULT_BUTTON_EVENT);
+    AddSpecializedRemoteMessageEvent(DeclarationConstants::DEFAULT_BUTTON_EVENT);
     AddSpecializedMethod(DeclarationConstants::DEFAULT_BUTTON_METHOD);
 }
 

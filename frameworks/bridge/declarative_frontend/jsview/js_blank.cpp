@@ -49,6 +49,7 @@ void JSBlank::JSBind(BindingTarget globalObj)
     JSClass<JSBlank>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSBlank>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSBlank>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSBlank>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
     JSClass<JSBlank>::Inherit<JSViewAbstract>();
     JSClass<JSBlank>::Bind<>(globalObj);

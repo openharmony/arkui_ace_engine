@@ -66,7 +66,7 @@ void JSPlugin::Create(const JSCallbackInfo& info)
     ViewStackProcessor::GetInstance()->Push(plugin, false);
 }
 
-void JSPlugin::SetSize(const JSCallbackInfo& info)
+void JSPlugin::JsSize(const JSCallbackInfo& info)
 {
     if (info.Length() == 0) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
@@ -141,7 +141,7 @@ void JSPlugin::JSBind(BindingTarget globalObj)
     JSClass<JSPlugin>::Declare("PluginComponent");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSPlugin>::StaticMethod("create", &JSPlugin::Create, opt);
-    JSClass<JSPlugin>::StaticMethod("size", &JSPlugin::SetSize, opt);
+    JSClass<JSPlugin>::StaticMethod("size", &JSPlugin::JsSize, opt);
 
     JSClass<JSPlugin>::StaticMethod("onComplete", &JSPlugin::JsOnComplete);
     JSClass<JSPlugin>::StaticMethod("onError", &JSPlugin::JsOnError);

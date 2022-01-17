@@ -1348,8 +1348,8 @@ void PipelineContext::OnTouchEvent(const TouchPoint& point)
             if (!pipelineContext || !pipelineContext->rootElement_) {
                 continue;
             }
-            auto pluginPoint = point.UpdateScalePoint(viewScale_, pipelineContext->pluginOffset_.GetX(),
-                pipelineContext->pluginOffset_.GetY(), point.id + (int32_t)i + 1);
+            auto pluginPoint = point.UpdateScalePoint(viewScale_, pipelineContext->GetPluginEventOffset().GetX(),
+                pipelineContext->GetPluginEventOffset().GetY(), point.id + (int32_t)i + 1);
             pipelineContext->OnTouchEvent(pluginPoint);
         }
     }
@@ -1367,8 +1367,8 @@ void PipelineContext::OnTouchEvent(const TouchPoint& point)
             if (!pipelineContext || !pipelineContext->rootElement_) {
                 continue;
             }
-            auto pluginPoint = point.UpdateScalePoint(viewScale_, pipelineContext->pluginOffset_.GetX(),
-                pipelineContext->pluginOffset_.GetY(), point.id + (int32_t)i + 1);
+            auto pluginPoint = point.UpdateScalePoint(viewScale_, pipelineContext->GetPluginEventOffset().GetX(),
+                pipelineContext->GetPluginEventOffset().GetY(), point.id + (int32_t)i + 1);
             pipelineContext->eventManager_.DispatchTouchEvent(pluginPoint);
         }
     }

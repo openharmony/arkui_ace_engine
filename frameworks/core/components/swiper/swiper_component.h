@@ -108,6 +108,8 @@ public:
     void SetRotationEventId(const EventMarker& rotationEventId);
     const EventMarker& GetClickEventId() const;
     void SetClickEventId(const EventMarker& clickEventId);
+    const EventMarker& GetRemoteMessageEventId() const;
+    void SetRemoteMessageEventId(const EventMarker& eventId);
 
     RefPtr<SwiperController> GetSwiperController() const;
     const RefPtr<RotationController>& GetRotationController() const;

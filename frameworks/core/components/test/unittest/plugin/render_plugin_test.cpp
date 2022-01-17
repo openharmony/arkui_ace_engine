@@ -22,6 +22,7 @@
 #undef private
 #undef protected
 #include "core/components/plugin/plugin_component.h"
+#include "frameworks/base/geometry/point.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -104,7 +105,7 @@ HWTEST_F(RenderPluginTest, RenderPluginPerformLayout001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. Perform Layout.
-     * @tc.expected: step3. Perform Layout correct.
+     * @tc.expected: step3. Perform Layout correctly.
      */
     renderPlugin->PerformLayout();
     EXPECT_EQ(renderPlugin->NeedLayout(), false);
@@ -128,10 +129,33 @@ HWTEST_F(RenderPluginTest, RenderPluginPerformLayout002, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Perform Layout.
-     * @tc.expected: step2. Perform Layout return.
+     * @tc.expected: step2. Perform Layout correctly.
      */
     renderPlugin->PerformLayout();
     EXPECT_EQ(renderPlugin->NeedLayout(), false);
     EXPECT_EQ(renderPlugin->NeedRender(), false);
+}
+
+/**
+ * @tc.name: RenderPluginTouchTest001
+ * @tc.desc: Verify the TouchTest Interface of RenderPlugin work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPluginTest, RenderPluginTouchTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a RenderPlugin.
+     */
+    RefPtr<RenderPlugin> renderPlugin = AceType::MakeRefPtr<RenderPlugin>();
+    EXPECT_TRUE(renderPlugin != nullptr);
+
+    /**
+     * @tc.steps: step2. Touch Test.
+     * @tc.expected: step2. Touch Test correctly.
+     */
+    Point globalPoint, parentLocalPoint;
+    TouchRestrict touchRestrict;
+    TouchTestResult result;
+    EXPECT_EQ(renderPlugin->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result), true);
 }
 } // namespace OHOS::Ace

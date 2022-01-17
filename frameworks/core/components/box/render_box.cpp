@@ -83,6 +83,19 @@ void RenderBox::Update(const RefPtr<Component>& component)
             onClick_ = tapGesture->CreateRecognizer(context_);
             onClick_->SetIsExternalGesture(true);
         }
+        if (!box->GetRemoteMessageEvent().IsEmpty() && !tapGesture) {
+            onClick_ = AceType::MakeRefPtr<ClickRecognizer>();
+        }
+        auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(onClick_);
+        if (clickRecognizer) {
+            auto weak = AceType::WeakClaim(this);
+            clickRecognizer->SetRemoteMessage([weak](const ClickInfo& info) {
+                auto client = weak.Upgrade();
+                if (client) {
+                    client->HandleRemoteMessage(info);
+                }
+            });
+        }
         auto longPressGesture = box->GetOnLongPress();
         if (longPressGesture) {
             onLongPress_ = longPressGesture->CreateRecognizer(context_);
@@ -109,6 +122,10 @@ void RenderBox::Update(const RefPtr<Component>& component)
         }
         if (!box->GetOnDomDragDrop().IsEmpty()) {
             onDomDragDrop_ = AceAsyncEvent<void(const DragEndInfo&)>::Create(box->GetOnDomDragDrop(), context_);
+        }
+        if (!box->GetRemoteMessageEvent().IsEmpty()) {
+            remoteMessageEvent_ = AceAsyncEvent<void(const std::shared_ptr<ClickInfo>&)>::Create(
+                box->GetRemoteMessageEvent(), context_);
         }
 
         auto context = GetContext().Upgrade();
@@ -1412,6 +1429,9 @@ void RenderBox::OnTouchTestHit(
     if (onLongPress_) {
         result.emplace_back(onLongPress_);
     }
+    if (onLongPress_) {
+        result.emplace_back(onLongPress_);
+    }
     if (dragDropGesture_) {
         result.emplace_back(dragDropGesture_);
     }
@@ -1453,6 +1473,13 @@ bool RenderBox::ExistGestureRecognizer()
     }
 
     return false;
+}
+
+void RenderBox::HandleRemoteMessage(const ClickInfo& clickInfo)
+{
+    if (remoteMessageEvent_) {
+        remoteMessageEvent_(std::make_shared<ClickInfo>(clickInfo));
+    }
 }
 
 void RenderBox::OnStatusStyleChanged(const VisualState state)

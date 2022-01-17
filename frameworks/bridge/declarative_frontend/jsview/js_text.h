@@ -45,6 +45,7 @@ public:
     static void SetBaselineOffset(const JSCallbackInfo& info);
     static void SetDecoration(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
+    static void JsRemoteMessage(const JSCallbackInfo& info);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

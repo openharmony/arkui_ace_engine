@@ -51,7 +51,10 @@ private:
     void RunPluginContainer();
     void InitEvent(const RefPtr<PluginComponent>& component);
     void SplitString(const std::string& str, char tag, std::vector<std::string>& strList);
-    std::string GetPackagePath(const WeakPtr<PluginElement>& weak, const RequestPluginInfo& info) const;
+    std::string GetPackagePath(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const;
+    std::string GetPackagePathByWant(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const;
+    std::string GetPackagePathByAbsolutePath(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const;
+    void GetModuleNameByWant(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const;
 
 private:
     RefPtr<PluginSubContainer> pluginSubContainer_;

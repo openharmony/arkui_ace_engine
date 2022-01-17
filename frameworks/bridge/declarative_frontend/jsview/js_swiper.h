@@ -52,6 +52,7 @@ protected:
     static void SetDisableSwipe(bool disable);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnClick(const JSCallbackInfo& info);
+    static void JsRemoteMessage(const JSCallbackInfo& info);
 };
 
 class JSSwiperController final : public Referenced {

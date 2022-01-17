@@ -151,6 +151,17 @@ void JSButton::SetStateEffect(bool stateEffect)
     }
 }
 
+void JSButton::JsRemoteMessage(const JSCallbackInfo& info)
+{
+    EventMarker remoteMessageEventId;
+    JSInteractableView::JsRemoteMessage(info, remoteMessageEventId);
+    auto stack = ViewStackProcessor::GetInstance();
+    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    if (buttonComponent) {
+        buttonComponent->SetRemoteMessageEventId(remoteMessageEventId);
+    }
+}
+
 void JSButton::JSBind(BindingTarget globalObj)
 {
     JSClass<JSButton>::Declare("Button");
@@ -162,6 +173,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("type", &JSButton::SetType, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("stateEffect", &JSButton::SetStateEffect, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("onClick", &JSButton::JsOnClick);
+    JSClass<JSButton>::StaticMethod("remoteMessage", &JSButton::JsRemoteMessage);
     JSClass<JSButton>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSButton>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSButton>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);

@@ -163,7 +163,8 @@ bool RenderText::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     const auto localPoint = parentLocalPoint - GetPaintRect().GetOffset();
     Offset localOffset = Offset(localPoint.GetX(), localPoint.GetY());
     // If span of touch position has click event, need add click detector.
-    if (!GetEventMarker(GetTouchPosition(localOffset), GestureType::CLICK).IsEmpty()) {
+    if (!GetEventMarker(GetTouchPosition(localOffset), GestureType::CLICK).IsEmpty()||
+        !GetEventMarker(GetTouchPosition(localOffset), GestureType::REMOTE_MESSAGE).IsEmpty()) {
         needClickDetector_ = true;
     }
     // If span of touch position has long press event, need add long press detector.
@@ -251,6 +252,12 @@ void RenderText::OnTouchTestHit(
                 auto text = weak.Upgrade();
                 if (text) {
                     text->HandleClick(info);
+                }
+            });
+            clickDetector_->SetRemoteMessage([weak = WeakClaim(this)](const ClickInfo& info) {
+                auto text = weak.Upgrade();
+                if (text) {
+                    text->HandleRemoteMessage(info);
                 }
             });
         }
@@ -353,6 +360,28 @@ void RenderText::HandleClick(const ClickInfo& info)
     auto onClick = AceAsyncEvent<void(const ClickInfo&)>::Create(clickMarker, context_);
     if (onClick) {
         onClick(info);
+    }
+}
+
+void RenderText::HandleRemoteMessage(const ClickInfo& info)
+{
+    auto clickPosition = info.GetLocalLocation();
+    auto clickMarker = GetEventMarker(GetTouchPosition(clickPosition), GestureType::REMOTE_MESSAGE);
+    // If span has not click event, use click event of text.
+    if (text_ && clickMarker.IsEmpty()) {
+        auto declaration = text_->GetDeclaration();
+        if (declaration) {
+            auto& gestureEvent =
+                static_cast<CommonGestureEvent&>(declaration->GetEvent(EventTag::COMMON_REMOTE_MESSAGE_GRESURE_EVENT));
+            if (gestureEvent.IsValid() && !gestureEvent.click.eventMarker.IsEmpty()) {
+                clickMarker = gestureEvent.click.eventMarker;
+            }
+        }
+    }
+
+    auto remoteMessage = AceAsyncEvent<void(const ClickInfo&)>::Create(clickMarker, context_);
+    if (remoteMessage) {
+        remoteMessage(info);
     }
 }
 

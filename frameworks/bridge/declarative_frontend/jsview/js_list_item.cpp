@@ -84,6 +84,7 @@ void JSListItem::JSBind(BindingTarget globalObj)
     JSClass<JSListItem>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSListItem>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSListItem>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSListItem>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
     JSClass<JSListItem>::Inherit<JSContainerBase>();
     JSClass<JSListItem>::Inherit<JSViewAbstract>();

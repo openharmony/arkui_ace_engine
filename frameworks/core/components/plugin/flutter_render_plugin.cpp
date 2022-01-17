@@ -17,7 +17,6 @@
 
 #include "core/components/plugin/render_plugin.h"
 #include "core/pipeline/base/render_node.h"
-#include "core/pipeline/layers/clip_layer.h"
 #include "core/pipeline/layers/transform_layer.h"
 
 namespace OHOS::Ace {
@@ -28,7 +27,8 @@ std::unique_ptr<DrawDelegate> FlutterRenderPlugin::GetDrawDelegate()
 
     darwDelegate->SetDrawFrameCallback([this](RefPtr<Flutter::Layer>& layer, const Rect& dirty) {
         if (!layer_) {
-            layer_ = AceType::MakeRefPtr<Flutter::OffsetLayer>();
+            layer_ = AceType::MakeRefPtr<Flutter::ClipLayer>(
+                0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Flutter::Clip::HARD_EDGE);
         }
         layer_->AddChildren(layer);
         layer->SetParent(layer_);
@@ -50,13 +50,11 @@ void FlutterRenderPlugin::RemoveChildren()
 
 void FlutterRenderPlugin::NotifyPaintFinish()
 {
-    auto renderPost = GetGlobalOffset();
     auto context = GetContext().Upgrade();
     if (context) {
-        auto density = context->GetDensity();
-        if (density > 0) {
-            layer_->SetOffset(
-                renderPost.GetX() / density - renderPost.GetX(), renderPost.GetY() / density - renderPost.GetY());
+        auto pluginContext = GetSubPipelineContext();
+        if (pluginContext) {
+            layer_->SetOffset(pluginContext->GetPluginOffset().GetX(), pluginContext->GetPluginOffset().GetY());
         }
     }
 }

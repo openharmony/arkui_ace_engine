@@ -79,7 +79,9 @@ public:
 
     void HandleFocusEvent(bool isFocus);
     void HandleClickEvent(const ClickInfo& info);
+    void HandleRemoteMessageEvent(const ClickInfo& info);
     void HandleClickEvent();
+    void HandleRemoteMessageEvent();
     void DisplayFocusAnimation();
     void PlayFocusAnimation(bool isFocus);
     void AnimateMouseHoverEnter() override;

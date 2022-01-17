@@ -21,7 +21,6 @@
 
 #include "adapter/ohos/entrance/ace_ability.h"
 #include "base/utils/macros.h"
-#include "base/utils/noncopyable.h"
 #include "base/utils/singleton.h"
 #include "core/components/plugin/plugin_sub_container.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
@@ -29,7 +28,6 @@
 namespace OHOS::Ace {
 class ACE_EXPORT PluginManager final : public Singleton<PluginManager> {
     DECLARE_SINGLETON(PluginManager);
-
 public:
     void AddPluginSubContainer(int64_t pluginId, const RefPtr<PluginSubContainer>& pluginSubContainer);
     void RemovePluginSubContainer(int64_t pluginId);
@@ -56,6 +54,8 @@ public:
     {
         return aceAbility_;
     };
+
+    ErrCode StartAbility(const std::string& bundleName, const std::string& abilityName, const std::string& params);
 
 private:
     std::mutex mutex_;

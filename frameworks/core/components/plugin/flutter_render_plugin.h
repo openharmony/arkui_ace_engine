@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_FLUTTER_RENDER_PLUGIN_H
 
 #include "core/components/plugin/render_plugin.h"
-#include "core/pipeline/layers/offset_layer.h"
+#include "core/pipeline/layers/clip_layer.h"
 
 namespace OHOS::Ace {
 class FlutterRenderPlugin : public RenderPlugin {
@@ -33,7 +33,7 @@ public:
     void NotifyPaintFinish() override;
 
 private:
-    RefPtr<Flutter::OffsetLayer> layer_;
+    RefPtr<Flutter::ClipLayer> layer_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_FLUTTER_RENDER_PLUGIN_H

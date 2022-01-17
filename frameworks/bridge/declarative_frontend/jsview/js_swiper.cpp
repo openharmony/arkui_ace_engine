@@ -51,6 +51,15 @@ void JSSwiper::Create(const JSCallbackInfo& info)
     JSInteractableView::SetFocusNode(true);
 }
 
+void JSSwiper::JsRemoteMessage(const JSCallbackInfo& info)
+{
+    EventMarker remoteMessageEventId;
+    JSInteractableView::JsRemoteMessage(info, remoteMessageEventId);
+    auto stack = ViewStackProcessor::GetInstance();
+    auto swiperComponent = AceType::DynamicCast<SwiperComponent>(stack->GetMainComponent());
+    swiperComponent->SetRemoteMessageEventId(remoteMessageEventId);
+}
+
 void JSSwiper::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSwiper>::Declare("Swiper");
@@ -75,6 +84,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSSwiper>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSwiper>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSSwiper>::StaticMethod("remoteMessage", &JSSwiper::JsRemoteMessage);
     JSClass<JSSwiper>::StaticMethod("onClick", &JSSwiper::SetOnClick);
     JSClass<JSSwiper>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSwiper>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);

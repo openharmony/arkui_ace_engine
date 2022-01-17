@@ -75,6 +75,11 @@ void TextSpanComponent::SetOnClick(const EventMarker& onClick)
     declaration_->SetClickEvent(onClick);
 }
 
+void TextSpanComponent::SetRemoteMessageEventId(const EventMarker& eventId)
+{
+    declaration_->SetRemoteMessageEvent(eventId);
+}
+
 void TextSpanComponent::SetDeclaration(const RefPtr<SpanDeclaration>& declaration)
 {
     if (declaration) {

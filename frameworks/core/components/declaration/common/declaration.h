@@ -117,6 +117,7 @@ public:
     void BindPipelineContext(const WeakPtr<PipelineContext>& pipelineContext);
     void ResetDefaultStyles();
     void SetClickEvent(const EventMarker& onClick);
+    void SetRemoteMessageEvent(const EventMarker& remoteMessage);
 
     void SetOnSetAttribute(const OnSetAttributeFunc& onSetAttribute)
     {
@@ -443,6 +444,7 @@ protected:
     void AddSpecializedAttribute(std::shared_ptr<Attribute>&& specializedAttribute);
     void AddSpecializedStyle(std::shared_ptr<Style>&& specializedStyle);
     void AddSpecializedEvent(std::shared_ptr<Event>&& specializedEvent);
+    void AddSpecializedRemoteMessageEvent(std::shared_ptr<Event>&& specializedEvent);
     void AddSpecializedMethod(std::shared_ptr<Method>&& specializedMethod);
 
     static void SetBackgroundImagePosition(const std::string& value, Declaration& declaration);

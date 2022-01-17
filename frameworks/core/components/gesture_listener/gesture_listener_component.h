@@ -49,6 +49,16 @@ public:
         onClickId_ = onClickId;
     }
 
+    const EventMarker& GetRemoteMessageId() const
+    {
+        return remoteMessage_;
+    }
+    
+    void SetRemoteMessageId(const EventMarker& remoteMessage)
+    {
+        remoteMessage_ = remoteMessage;
+    }
+
     const EventMarker& GetOnDoubleClickId() const
     {
         return onDoubleClickId_;
@@ -222,6 +232,7 @@ public:
     }
 
 private:
+    EventMarker remoteMessage_;
     EventMarker onClickId_;
     EventMarker onDoubleClickId_;
     EventMarker onLongPressId_;

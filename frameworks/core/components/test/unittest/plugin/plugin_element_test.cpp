@@ -44,7 +44,8 @@ RefPtr<PipelineContext> PluginElementTest::GetPipelineContext(const RefPtr<Plugi
     auto platformWindow = PlatformWindow::Create(nullptr);
     auto window = std::make_unique<Window>(std::move(platformWindow));
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-    taskExecutor->InitJsThread(false);
+    taskExecutor->InitPlatformThread();
+    taskExecutor->InitJsThread(true);
     auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     return AceType::MakeRefPtr<PipelineContext>(
@@ -118,6 +119,7 @@ HWTEST_F(PluginElementTest, PluginElementInitEvent001, TestSize.Level1)
     auto pipelineContext = PluginElementTest::GetPipelineContext(pluginFrontend);
     PluginManagerDelegate pluginManagerDelegate(pipelineContext);
     element.pluginSubContainer_ = AceType::MakeRefPtr<PluginSubContainer>(pipelineContext);
+
     /**
      * @tc.steps: step2. InitEvent.
      * @tc.expected: step2. InitEvent success.
@@ -130,5 +132,179 @@ HWTEST_F(PluginElementTest, PluginElementInitEvent001, TestSize.Level1)
     EXPECT_EQ(pluginComponent->GetOnCompleteEventId().GetData().eventId, "eventId");
     EXPECT_EQ(pluginComponent->GetOnErrorEvent().GetData().eventId, "eventId");
     element.InitEvent(pluginComponent);
+    EXPECT_TRUE(element.onCompleteEvent_ != nullptr);
+    EXPECT_TRUE(element.onErrorEvent_ != nullptr);
+}
+
+/**
+ * @tc.name: PluginElementPrepare001
+ * @tc.desc: Verify the Prepare Interface of PluginElement work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PluginElementTest, PluginElementPrepare001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a PluginElement.
+     */
+    PluginElement element;
+
+    // for element destory
+    RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
+    auto pipelineContext = PluginElementTest::GetPipelineContext(pluginFrontend);
+    PluginManagerDelegate pluginManagerDelegate(pipelineContext);
+    element.pluginSubContainer_ = AceType::MakeRefPtr<PluginSubContainer>(pipelineContext);
+
+    /**
+     * @tc.steps: step2. Prepare.
+     * @tc.expected: step2. Prepare success.
+     */
+    WeakPtr<Element> parent = WeakPtr<Element>();
+    element.Prepare(parent);
+    EXPECT_TRUE(element.pluginManagerBridge_ != nullptr);
+}
+
+/**
+ * @tc.name: PluginElementGetPackagePath001
+ * @tc.desc: Verify the GetPackagePath Interface of PluginElement work correctly app bundleName or abilityName is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PluginElementTest, PluginElementGetPackagePath001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a PluginElement.
+     */
+    PluginElement element;
+
+    // for element destory
+    RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
+    auto pipelineContext = PluginElementTest::GetPipelineContext(pluginFrontend);
+    PluginManagerDelegate pluginManagerDelegate(pipelineContext);
+    element.pluginSubContainer_ = AceType::MakeRefPtr<PluginSubContainer>(pipelineContext);
+
+    /**
+     * @tc.steps: step2. Get Package Path.
+     * @tc.expected: step2. Get Package Path correctly.
+     */
+    RefPtr<PluginElement> elementParam = Referenced::MakeRefPtr<PluginElement>();
+    elementParam->context_ = PluginElementTest::GetPipelineContext(pluginFrontend);
+    elementParam->pluginSubContainer_ = AceType::MakeRefPtr<PluginSubContainer>(pipelineContext);
+    RefPtr<PluginComponent> pluginComponent = AceType::MakeRefPtr<PluginComponent>();
+    EXPECT_TRUE(pluginComponent != nullptr);
+    const EventMarker eventMaker("eventId");
+    pluginComponent->SetOnCompleteEventId(eventMaker);
+    pluginComponent->SetOnErrorEventId(eventMaker);
+    elementParam->InitEvent(pluginComponent);
+    EXPECT_TRUE(elementParam->onCompleteEvent_ != nullptr);
+    EXPECT_TRUE(elementParam->onErrorEvent_ != nullptr);
+    RequestPluginInfo info;
+    info.bundleName = "";
+    EXPECT_EQ(element.GetPackagePath(elementParam, info), "");
+}
+
+/**
+ * @tc.name: PluginElementGetPackagePath002
+ * @tc.desc: Verify the GetPackagePath Interface of PluginElement work correctly app bundleName or abilityName is not
+ *           empty and strList size is one.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PluginElementTest, PluginElementGetPackagePath002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a PluginElement.
+     */
+    PluginElement element;
+
+    // for element destory
+    RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
+    auto pipelineContext = PluginElementTest::GetPipelineContext(pluginFrontend);
+    PluginManagerDelegate pluginManagerDelegate(pipelineContext);
+    element.pluginSubContainer_ = AceType::MakeRefPtr<PluginSubContainer>(pipelineContext);
+
+    /**
+     * @tc.steps: step2. Get Package Path.
+     * @tc.expected: step2. Get Package Path correctly.
+     */
+    RefPtr<PluginElement> elementParam = Referenced::MakeRefPtr<PluginElement>();
+    elementParam->context_ = PluginElementTest::GetPipelineContext(pluginFrontend);
+    elementParam->pluginSubContainer_ = AceType::MakeRefPtr<PluginSubContainer>(pipelineContext);
+    RefPtr<PluginComponent> pluginComponent = AceType::MakeRefPtr<PluginComponent>();
+    EXPECT_TRUE(pluginComponent != nullptr);
+    const EventMarker eventMaker("eventId");
+    pluginComponent->SetOnCompleteEventId(eventMaker);
+    pluginComponent->SetOnErrorEventId(eventMaker);
+    elementParam->InitEvent(pluginComponent);
+    EXPECT_TRUE(elementParam->onCompleteEvent_ != nullptr);
+    EXPECT_TRUE(elementParam->onErrorEvent_ != nullptr);
+    RequestPluginInfo info;
+    info.bundleName = "bundleName";
+    EXPECT_EQ(element.GetPackagePath(elementParam, info), "");
+}
+
+/**
+ * @tc.name: PluginElementGetPackagePath003
+ * @tc.desc: Verify the GetPackagePath Interface of PluginElement work correctly app bundleName or abilityName is not
+ *           empty and strList size over one.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PluginElementTest, PluginElementGetPackagePath003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a PluginElement.
+     */
+    PluginElement element;
+
+    // for element destory
+    RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
+    auto pipelineContext = PluginElementTest::GetPipelineContext(pluginFrontend);
+    PluginManagerDelegate pluginManagerDelegate(pipelineContext);
+    element.pluginSubContainer_ = AceType::MakeRefPtr<PluginSubContainer>(pipelineContext);
+
+    /**
+     * @tc.steps: step2. Get Package Path.
+     * @tc.expected: step2. Get Package Path correctly.
+     */
+    RefPtr<PluginElement> elementParam = Referenced::MakeRefPtr<PluginElement>();
+    elementParam->context_ = PluginElementTest::GetPipelineContext(pluginFrontend);
+    elementParam->pluginSubContainer_ = AceType::MakeRefPtr<PluginSubContainer>(pipelineContext);
+    RefPtr<PluginComponent> pluginComponent = AceType::MakeRefPtr<PluginComponent>();
+    EXPECT_TRUE(pluginComponent != nullptr);
+    const EventMarker eventMaker("eventId");
+    pluginComponent->SetOnCompleteEventId(eventMaker);
+    pluginComponent->SetOnErrorEventId(eventMaker);
+    elementParam->InitEvent(pluginComponent);
+    EXPECT_TRUE(elementParam->onCompleteEvent_ != nullptr);
+    EXPECT_TRUE(elementParam->onErrorEvent_ != nullptr);
+    RequestPluginInfo info;
+    info.bundleName = "bundleName/bundleName";
+    EXPECT_EQ(element.GetPackagePath(elementParam, info), "");
+}
+
+/**
+ * @tc.name: PluginElementGetPackagePath003
+ * @tc.desc: Verify the GetPackagePath Interface of PluginElement work correctly pluginElement Upgrade fail
+ *           empty and strList size over one.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PluginElementTest, PluginElementGetPackagePath004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a PluginElement.
+     */
+    PluginElement element;
+
+    // for element destory
+    RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
+    auto pipelineContext = PluginElementTest::GetPipelineContext(pluginFrontend);
+    PluginManagerDelegate pluginManagerDelegate(pipelineContext);
+    element.pluginSubContainer_ = AceType::MakeRefPtr<PluginSubContainer>(pipelineContext);
+
+    /**
+     * @tc.steps: step2. Get Package Path.
+     * @tc.expected: step2. Get Package Path correctly.
+     */
+    WeakPtr<PluginElement> elementParam = WeakPtr<PluginElement>();
+    RequestPluginInfo info;
+    info.bundleName = "bundleName";
+    EXPECT_EQ(element.GetPackagePath(elementParam, info), "");
 }
 } // namespace OHOS::Ace

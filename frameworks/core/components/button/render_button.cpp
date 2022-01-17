@@ -95,14 +95,24 @@ void RenderButton::Initialize()
     clickRecognizer_ = AceType::MakeRefPtr<ClickRecognizer>();
     clickRecognizer_->SetOnClick([wp](const ClickInfo& info) {
         auto button = wp.Upgrade();
-        if (!button) {
-            return;
+        if (button) {
+            const auto context = button->GetContext().Upgrade();
+            if (context && context->GetIsDeclarative()) {
+                button->HandleClickEvent(info);
+            } else {
+                button->HandleClickEvent();
+            }
         }
-        const auto context = button->GetContext().Upgrade();
-        if (context && context->GetIsDeclarative()) {
-            button->HandleClickEvent(info);
-        } else {
-            button->HandleClickEvent();
+    });
+    clickRecognizer_->SetRemoteMessage([wp](const ClickInfo& info) {
+        auto button = wp.Upgrade();
+        if (button) {
+            const auto context = button->GetContext().Upgrade();
+            if (context && context->GetIsDeclarative()) {
+                button->HandleRemoteMessageEvent(info);
+            } else {
+                button->HandleRemoteMessageEvent();
+            }
         }
     });
 }
@@ -214,6 +224,19 @@ void RenderButton::HandleClickEvent(const ClickInfo& info)
     PlayClickAnimation();
 }
 
+void RenderButton::HandleRemoteMessageEvent(const ClickInfo& info)
+{
+    if (!buttonComponent_) {
+        return;
+    }
+    auto onRemoteMessagekWithInfo =
+        AceAsyncEvent<void(const ClickInfo&)>::Create(buttonComponent_->GetRemoteMessageEventId(), context_);
+    if (onRemoteMessagekWithInfo) {
+        onRemoteMessagekWithInfo(info);
+    }
+    PlayClickAnimation();
+}
+
 void RenderButton::HandleClickEvent()
 {
     if (!buttonComponent_) {
@@ -222,6 +245,18 @@ void RenderButton::HandleClickEvent()
     auto onClick = AceAsyncEvent<void()>::Create(buttonComponent_->GetClickedEventId(), context_);
     if (onClick) {
         onClick();
+    }
+    PlayClickAnimation();
+}
+
+void RenderButton::HandleRemoteMessageEvent()
+{
+    if (!buttonComponent_) {
+        return;
+    }
+    auto onRemoteMessage = AceAsyncEvent<void()>::Create(buttonComponent_->GetRemoteMessageEventId(), context_);
+    if (onRemoteMessage) {
+        onRemoteMessage();
     }
     PlayClickAnimation();
 }

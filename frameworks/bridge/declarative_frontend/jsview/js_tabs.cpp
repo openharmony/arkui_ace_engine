@@ -213,6 +213,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSTabs>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSTabs>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSTabs>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSTabs>::Inherit<JSContainerBase>();
     JSClass<JSTabs>::Bind<>(globalObj);
 }

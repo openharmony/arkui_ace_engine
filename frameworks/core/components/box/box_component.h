@@ -279,6 +279,16 @@ public:
         onDropId_ = onDropId;
     }
 
+    const EventMarker& GetRemoteMessageEvent() const
+    {
+        return remoteMessageId_;
+    }
+
+    void SetRemoteMessageEvent(const EventMarker& eventId)
+    {
+        remoteMessageId_ = eventId;
+    }
+
     RefPtr<Gesture> GetOnLongPress() const
     {
         return onLongPressId_;
@@ -311,6 +321,7 @@ private:
     std::string geometryTransitionId_;
     TextDirection inspectorDirection_ { TextDirection::LTR };
     RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_ = nullptr;
+    EventMarker remoteMessageId_;
 };
 
 } // namespace OHOS::Ace
