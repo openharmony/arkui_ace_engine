@@ -48,6 +48,7 @@ void RosenRenderTexture::Update(const RefPtr<Component>& component)
 
 void RosenRenderTexture::Paint(RenderContext& context, const Offset& offset)
 {
+    SyncGeometryProperties();
 #ifdef OHOS_PLATFORM
     const auto renderContext = static_cast<RosenRenderContext*>(&context);
     auto rsNode = std::static_pointer_cast<OHOS::Rosen::RSSurfaceNode>(renderContext->GetRSNode());
