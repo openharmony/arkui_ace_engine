@@ -944,11 +944,12 @@ bool RenderBox::HandleMouseEvent(const MouseEvent& event)
     if (!onMouse_) {
         return false;
     }
+    
     MouseInfo info;
     info.SetButton(event.button);
     info.SetAction(event.action);
-    info.SetGlobalLocation(Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY()));
-    info.SetLocalLocation(Offset(GetGlobalPoint().GetX(), GetGlobalPoint().GetY()));
+    info.SetGlobalLocation(event.GetOffset());
+    info.SetLocalLocation(event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY()));
     info.SetTimeStamp(event.time);
     info.SetDeviceId(event.deviceId);
     info.SetSourceDevice(event.sourceType);
