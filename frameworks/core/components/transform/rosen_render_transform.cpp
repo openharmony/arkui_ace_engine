@@ -108,15 +108,12 @@ void RosenRenderTransform::OnAttachContext()
 void RosenRenderTransform::SyncGeometryProperties()
 {
     RenderNode::SyncGeometryProperties();
-    if (auto rsNode = GetRSNode()) {
-        SyncOriginToRsNode(rsNode);
-    }
+    UpdateTransformLayer();
 }
 
 void RosenRenderTransform::Update(const RefPtr<Component>& component)
 {
     RenderTransform::Update(component);
-    UpdateTransformLayer();
 }
 
 Point RosenRenderTransform::GetTransformPoint(const Point& point)
