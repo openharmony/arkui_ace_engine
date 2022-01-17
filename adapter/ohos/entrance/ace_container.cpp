@@ -109,7 +109,6 @@ void AceContainer::InitializeTask()
     } else {
         flutterTaskExecutor->InitJsThread();
     }
-    SystemProperties::SetDeclarativeFrontend(type_ == FrontendType::DECLARATIVE_JS);
 }
 
 void AceContainer::Initialize()

@@ -72,7 +72,6 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type)
     if (type != FrontendType::DECLARATIVE_JS) {
         flutterTaskExecutor->InitJsThread();
     }
-    SystemProperties::SetDeclarativeFrontend(type_ == FrontendType::DECLARATIVE_JS);
     taskExecutor_ = flutterTaskExecutor;
 }
 
