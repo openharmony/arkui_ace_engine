@@ -30,6 +30,7 @@ namespace {
 
 constexpr double MIDDLE_ZONE_FLEX_GROW = 1.0;
 constexpr double MIDDLE_ZONE_FLEX_SHRINK = 1.0;
+constexpr double MENU_DEFAULT_HEIGHT = 56.0;
 
 } // namespace
 
@@ -189,7 +190,14 @@ bool NavigationBarBuilder::AddMenu(const RefPtr<ComponentGroup>& container)
     bool hasRoom = true;
     uint32_t mostShowInBarSize = menuCount_ > 0 ? menuCount_ : theme_->GetMostMenuItemCountInBar();
     bool needAddPadding = false;
-    auto menu = AceType::MakeRefPtr<MenuComponent>("navigationMenu", "navigationMenu");
+    menu_ = AceType::MakeRefPtr<MenuComponent>("", "navigationMenu");
+    auto ctx = context_.Upgrade();
+    if (ctx) {
+        auto themeManager = ctx->GetThemeManager();
+        if (themeManager) {
+            menu_->SetTheme(themeManager->GetTheme<SelectTheme>());
+        }
+    }
     auto menusSize = declaration_->menuItems.size();
     for (const auto& menuItem : declaration_->menuItems) {
         hasRoom = hasRoom && ((showInBarSize < mostShowInBarSize - 1) ||
@@ -206,23 +214,60 @@ bool NavigationBarBuilder::AddMenu(const RefPtr<ComponentGroup>& container)
                 GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "optionButton", optionButton));
             needAddPadding = true;
         } else {
-            auto optionComponent = AceType::MakeRefPtr<OptionComponent>();
-            optionComponent->SetText(AceType::MakeRefPtr<TextComponent>(menuItem->value));
-            optionComponent->SetValue(menuItem->value);
-            optionComponent->SetIcon(AceType::MakeRefPtr<ImageComponent>(menuItem->icon));
-            optionComponent->SetClickEvent(menuItem->action);
-            menu->AppendOption(optionComponent);
+            AddOption(menuItem);
         }
     }
-    if (menu->GetOptionCount() > 0) {
+    if (menu_->GetOptionCount() > 0) {
         // add collapse menu
         IconImage moreIcon(theme_->GetMoreResourceId(), menuIconSize_, menuIconSize_);
         moreIcon.image->SetColor(theme_->GetMenuIconColor());
-        auto moreButton = BuildIconButton(theme_, menuZoneSize_, menuZoneSize_, moreIcon);
-        container->AppendChild(GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "moreButton", moreButton));
-        container->AppendChild(menu);
+        moreButton_ = BuildIconButton(theme_, menuZoneSize_, menuZoneSize_, moreIcon);
+        container->AppendChild(GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "moreButton", moreButton_));
+        container->AppendChild(menu_);
     }
-    return showInBarSize > 0 || menu->GetOptionCount() > 0;
+    BindMoreButtonClickEvent();
+    return showInBarSize > 0 || menu_->GetOptionCount() > 0;
+}
+
+void NavigationBarBuilder::AddOption(const RefPtr<ToolBarItem>& menuItem)
+{
+    auto optionComponent = AceType::MakeRefPtr<OptionComponent>();
+    auto ctx = context_.Upgrade();
+    if (ctx) {
+        auto themeManager = ctx->GetThemeManager();
+        if (themeManager) {
+            optionComponent->InitTheme(themeManager);
+        }
+    }
+    optionComponent->SetText(AceType::MakeRefPtr<TextComponent>(menuItem->value));
+    optionComponent->SetValue(menuItem->value);
+    optionComponent->SetIcon(AceType::MakeRefPtr<ImageComponent>(menuItem->icon));
+    optionComponent->SetClickEvent(menuItem->action);
+    menu_->AppendOption(optionComponent);
+}
+
+void NavigationBarBuilder::BindMoreButtonClickEvent()
+{
+    if (!moreButton_) {
+        return;
+    }
+    EventMarker clickEventId([menu = menu_, context = context_](const BaseEventInfo* info) {
+        if (!menu) {
+            return;
+        }
+        auto showMenuFunc = menu->GetTargetCallback();
+        if (!showMenuFunc) {
+            return;
+        }
+        auto ctx = context.Upgrade();
+        if (!ctx) {
+            return;
+        }
+        double morePopupOffsetX = 0.0;
+        morePopupOffsetX = ctx->GetStageRect().Width();
+        showMenuFunc("", Offset(morePopupOffsetX, MENU_DEFAULT_HEIGHT));
+    });
+    moreButton_->SetClickedEventId(clickEventId);
 }
 
 } // namespace OHOS::Ace
