@@ -53,6 +53,7 @@ build_component("inspector_v2") {
     "scroll_bar_composed_element.cpp",
     "scroll_composed_element.cpp",
     "search_composed_element.cpp",
+    "select_composed_element.cpp",
     "shape_composed_element.cpp",
     "shape_container_composed_element.cpp",
     "sheet_composed_element.cpp",
