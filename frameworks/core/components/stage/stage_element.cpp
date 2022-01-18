@@ -190,6 +190,13 @@ void StageElement::PopToPage(int32_t pageId)
     MarkDirty();
 }
 
+void StageElement::RestorePopPage(const RefPtr<Component>& newComponent)
+{
+    operation_ = StackOperation::RESTORE;
+    newComponent_ = newComponent;
+    MarkDirty();
+}
+
 bool StageElement::CanReplacePage()
 {
     if (!CanRouterPage()) {
@@ -228,6 +235,10 @@ void StageElement::PerformBuild()
     switch (operation_) {
         case StackOperation::NONE:
             break;
+        case StackOperation::RESTORE: {
+            RestorePop();
+            break;
+        }
         case StackOperation::PUSH_PAGE: {
             PerformPushPage();
             auto render = GetRenderNode();
@@ -502,6 +513,14 @@ void StageElement::PerformPop()
         }
         pendingOperation_ = operation_;
     }
+}
+
+void StageElement::RestorePop()
+{
+    // add page before current page and run pop
+    auto newChild = UpdateChildWithSlot(nullptr, newComponent_, -2, GetRenderSlot());
+    operation_ = StackOperation::POP;
+    PerformPop();
 }
 
 void StageElement::PerformReplace()

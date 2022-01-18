@@ -65,6 +65,7 @@ using CallNativeHandlerCallback = std::function<void(const std::string& event, c
 struct PageInfo {
     int32_t pageId = -1;
     std::string url;
+    bool isRestore = false;
     bool isAlertBeforeBackPage = false;
     DialogProperties dialogProperties;
 };

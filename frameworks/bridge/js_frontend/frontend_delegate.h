@@ -73,6 +73,16 @@ public:
         return "";
     }
 
+    // distribute
+    virtual const std::string& RestoreRouterStack(const std::string& contentInfo)
+    {
+        return "";
+    }
+    virtual const std::string& GetContentInfo() const
+    {
+        return "";
+    }
+
     virtual void TriggerPageUpdate(int32_t pageId, bool directExecute = false) = 0;
 
     // posting js task from jsengine
