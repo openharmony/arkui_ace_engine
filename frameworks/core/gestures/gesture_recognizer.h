@@ -180,6 +180,9 @@ protected:
     std::unique_ptr<GestureEventFunc> onActionEnd_;
     std::unique_ptr<GestureEventNoParameter> onActionCancel_;
 
+    int64_t deviceId_ = 0;
+    SourceType deviceType_ = SourceType::NONE;
+
 private:
     WeakPtr<GestureRecognizer> gestureGroup_;
 };

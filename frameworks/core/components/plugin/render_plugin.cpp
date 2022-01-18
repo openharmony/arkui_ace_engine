@@ -35,7 +35,7 @@ void RenderPlugin::Update(const RefPtr<Component>& component)
     }
 
     if (rootWidht.IsValid() && rootHeight.IsValid()) {
-        drawSize_ = Size(NormalizeToPx(rootWidht), NormalizeToPx(rootHeight));
+        drawSize_ = Size(NormalizePercentToPx(rootWidht, false), NormalizePercentToPx(rootHeight, true));
     }
     rootWidht_ = rootWidht;
     rootHeight_ = rootHeight;
@@ -59,10 +59,10 @@ bool RenderPlugin::TouchTest(const Point& globalPoint,
 {
     auto context = GetContext().Upgrade();
     if (context) {
-        auto pluginContext = GetPluginPipelineContext();
+        auto pluginContext = GetSubPipelineContext();
         if (pluginContext) {
-            double x = globalPoint.GetX() - pluginContext->GetPluginOffset().GetX();
-            double y = globalPoint.GetY() - pluginContext->GetPluginOffset().GetY();
+            double x = globalPoint.GetX() - pluginContext->GetPluginEventOffset().GetX();
+            double y = globalPoint.GetY() - pluginContext->GetPluginEventOffset().GetY();
             if (x <= rootWidht_.Value() && y <= rootHeight_.Value()) {
                 context->SetTouchPipeline(WeakPtr<PipelineContext>(pluginContext));
             }

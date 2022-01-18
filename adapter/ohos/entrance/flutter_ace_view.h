@@ -27,6 +27,7 @@
 #include "core/common/ace_view.h"
 #include "core/common/platform_res_register.h"
 #include "core/event/key_event_recognizer.h"
+#include "core/event/key_event_transfer.h"
 
 #include "mouse_event.h"
 #include "touch_event.h"
@@ -37,12 +38,13 @@ namespace OHOS::Ace::Platform {
 
 using ReleaseCallback = std::function<void()>;
 
-class FlutterAceView : public AceView, public Referenced {
+class ACE_FORCE_EXPORT FlutterAceView : public AceView, public Referenced {
 public:
     FlutterAceView() = default;
     explicit FlutterAceView(int32_t id) : instanceId_(id) {}
     ~FlutterAceView() override = default;
-    static FlutterAceView* CreateView(int32_t instanceId, bool usePlatfromThread = false);
+    static FlutterAceView* CreateView(
+        int32_t instanceId, bool useCurrentEventRunner = false, bool usePlatfromThread = false);
     static void SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen::Window> window);
     static void SurfaceChanged(FlutterAceView* view, int32_t width, int32_t height, int32_t orientation);
     static void SetViewportMetrics(FlutterAceView* view, const flutter::ViewportMetrics& metrics);
@@ -58,6 +60,7 @@ public:
     void RegisterTouchEventCallback(TouchEventCallback&& callback) override;
     void RegisterKeyEventCallback(KeyEventCallback&& callback) override;
     void RegisterMouseEventCallback(MouseEventCallback&& callback) override;
+    void RegisterAxisEventCallback(AxisEventCallback&& callback) override;
     void RegisterRotationEventCallback(RotationEventCallBack&& callback) override;
     void RegisterCardViewPositionCallback(CardViewPositionCallBack&& callback) override {}
     void RegisterCardViewAccessibilityParamsCallback(CardViewAccessibilityParamsCallback&& callback) override {}
@@ -72,6 +75,8 @@ public:
     void ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     void ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
+    void ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     bool ProcessKeyEvent(
         int32_t keyCode, int32_t keyAction, int32_t repeatTime, int64_t timeStamp = 0, int64_t timeStampStart = 0);
@@ -165,6 +170,7 @@ private:
     std::unique_ptr<flutter::OhosShellHolder> shell_holder_;
     TouchEventCallback touchEventCallback_;
     MouseEventCallback mouseEventCallback_;
+    AxisEventCallback axisEventCallback_;
     RotationEventCallBack rotationEventCallBack_;
     ViewChangeCallback viewChangeCallback_;
     DensityChangeCallback densityChangeCallback_;
@@ -176,6 +182,7 @@ private:
     RefPtr<PlatformResRegister> resRegister_;
     KeyEventCallback keyEventCallback_;
     KeyEventRecognizer keyEventRecognizer_;
+    KeyEventTransfer keyEventTransfer_;
     // mark the touch event's state, HORIZONTAL_STATE: the event should send to platform, VERTICAL_STATE: should not
     enum class EventState { INITIAL_STATE, HORIZONTAL_STATE, VERTICAL_STATE };
 

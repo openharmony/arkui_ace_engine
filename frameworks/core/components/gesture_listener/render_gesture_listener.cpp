@@ -58,6 +58,7 @@ void RenderGestureListener::Update(const RefPtr<Component>& component)
     RenderProxy::Update(component);
     auto gestureComponent = AceType::DynamicCast<GestureListenerComponent>(component);
     ACE_DCHECK(gestureComponent);
+    SetRemoteMessageCallback(gestureComponent);
     SetOnClickCallback(gestureComponent);
     SetOnDoubleClickCallback(gestureComponent);
     SetOnLongPressCallback(gestureComponent);
@@ -175,6 +176,26 @@ void RenderGestureListener::SetOnClickCallback(const RefPtr<GestureListenerCompo
     clickRecognizer_->SetIsExternalGesture(true);
 }
 
+void RenderGestureListener::SetRemoteMessageCallback(const RefPtr<GestureListenerComponent>& component)
+{
+    const auto& remoteMessageId = component->GetRemoteMessageId();
+    if (remoteMessageId.IsEmpty()) {
+        LOGE("RenderGestureListener::SetRemoteMessageCallback remoteMessageId IsEmpty");
+        return;
+    }
+    SetRemoteMessageCallback(AceAsyncEvent<void(const ClickInfo&)>::Create(remoteMessageId, context_));
+    if (!remoteMessageId.GetCatchMode()) {
+        static const int32_t bubbleModeVersion = 6;
+        auto pipeline = context_.Upgrade();
+        if (pipeline && pipeline->GetMinPlatformVersion() >= bubbleModeVersion) {
+            clickRecognizer_->SetUseCatchMode(false);
+            return;
+        }
+    }
+    clickRecognizer_->SetUseCatchMode(true);
+    clickRecognizer_->SetIsExternalGesture(true);
+}
+
 void RenderGestureListener::SetOnDoubleClickCallback(const RefPtr<GestureListenerComponent>& component)
 {
     const auto& onDoubleClickId = component->GetOnDoubleClickId();
@@ -227,6 +248,18 @@ void RenderGestureListener::SetOnPinchCancelCallback(const RefPtr<GestureListene
         return;
     }
     SetOnPinchCancelCallback(AceAsyncEvent<void()>::Create(onPinchCancelId, context_));
+}
+
+void RenderGestureListener::SetRemoteMessageCallback(const ClickCallback& callback)
+{
+    if (callback) {
+        if (!clickRecognizer_) {
+            clickRecognizer_ = AceType::MakeRefPtr<ClickRecognizer>();
+        }
+        clickRecognizer_->SetRemoteMessage(callback);
+    } else {
+        LOGE("fail to set remote message callback due to callback is nullptr");
+    }
 }
 
 void RenderGestureListener::SetOnClickCallback(const ClickCallback& callback)

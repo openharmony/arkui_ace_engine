@@ -36,6 +36,7 @@ public:
     static void SetTextCase(int32_t value);
     static void SetDecoration(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
+    static void JsRemoteMessage(const JSCallbackInfo& info);
 
     static RefPtr<TextSpanComponent> GetComponent();
 };

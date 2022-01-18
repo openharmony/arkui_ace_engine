@@ -367,6 +367,31 @@ void RenderTextField::PerformLayout()
     HandleDeviceOrientationChange();
 }
 
+bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
+{
+    if (MouseButton::LEFT_BUTTON == event.button && MouseAction::PRESS == event.action) {
+        UpdateStartSelection(DEFAULT_SELECT_INDEX, event.GetOffset(), true, false);
+    }
+
+    if (MouseButton::LEFT_BUTTON == event.button && MouseAction::MOVE == event.action) {
+        int32_t start = GetEditingValue().selection.baseOffset;
+        int32_t end = GetCursorPositionForClick(event.GetOffset());
+        UpdateSelection(start, end);
+        if (showCursor_) {
+            showCursor_ = false;
+        }
+        MarkNeedRender();
+    }
+
+    if (MouseButton::RIGHT_BUTTON == event.button) {
+        Offset rightClickOffset = event.GetOffset();
+        bool singleHandle = (GetEditingValue().selection.GetStart() == GetEditingValue().selection.GetEnd());
+        ShowTextOverlay(rightClickOffset, singleHandle);
+    }
+    
+    return false;
+}
+
 void RenderTextField::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
@@ -481,11 +506,20 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     ShowError("", false);
 
     UpdateStartSelection(DEFAULT_SELECT_INDEX, globalPosition, true, false);
-    ShowTextOverlay(globalPosition, true);
 
     auto context = GetContext().Upgrade();
     if (context) {
         context->SetClickPosition(GetGlobalOffset() + Size(0, GetLayoutSize().Height()));
+    }
+
+    auto lastStack = GetLastStack();
+    if (lastStack) {
+        lastStack->PopTextOverlay();
+    }
+
+    StartTwinkling();
+    if (!showCursor_) {
+        showCursor_ = true;
     }
 }
 
@@ -541,16 +575,12 @@ void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
 
 void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHandle)
 {
-    auto context = context_.Upgrade();
-    if (context->GetIsDeclarative()) {
-        StartTwinkling();
-        return;
-    }
     if (!isVisible_) {
         return;
     }
 
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE) {
+    if (SystemProperties::GetDeviceType() != DeviceType::PHONE &&
+        SystemProperties::GetDeviceType() != DeviceType::CAR) {
         StartTwinkling();
         return;
     }
@@ -622,6 +652,8 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
     textOverlay_->SetShareButtonMarker(onShare_);
     textOverlay_->SetSearchButtonMarker(onSearch_);
     textOverlay_->SetContext(context_);
+
+    PushTextOverlayToStack();
 
     // Add the Animation
     InitAnimation();
@@ -1412,7 +1444,7 @@ void RenderTextField::FireSelectChangeIfNeeded(const TextEditingValue& newValue,
     }
 }
 
-void RenderTextField::CursorMoveLeft(const CursorMoveSkip skip)
+void RenderTextField::CursorMoveLeft(CursorMoveSkip skip)
 {
     if (skip != CursorMoveSkip::CHARACTER) {
         // Not support yet.
@@ -1425,9 +1457,11 @@ void RenderTextField::CursorMoveLeft(const CursorMoveSkip skip)
         value.MoveLeft();
         SetEditingValue(std::move(value));
     }
+    cursorPositionType_ = CursorPositionType::NONE;
+    MarkNeedLayout();
 }
 
-void RenderTextField::CursorMoveRight(const CursorMoveSkip skip)
+void RenderTextField::CursorMoveRight(CursorMoveSkip skip)
 {
     if (skip != CursorMoveSkip::CHARACTER) {
         // Not support yet.
@@ -1442,6 +1476,8 @@ void RenderTextField::CursorMoveRight(const CursorMoveSkip skip)
         value.MoveRight();
         SetEditingValue(std::move(value));
     }
+    cursorPositionType_ = CursorPositionType::NONE;
+    MarkNeedLayout();
 }
 
 void RenderTextField::CursorMoveUp()
@@ -1453,6 +1489,8 @@ void RenderTextField::CursorMoveUp()
     auto value = GetEditingValue();
     value.MoveToPosition(GetCursorPositionForMoveUp());
     SetEditingValue(std::move(value));
+    cursorPositionType_ = CursorPositionType::NONE;
+    MarkNeedLayout();
 }
 
 void RenderTextField::CursorMoveDown()
@@ -1464,6 +1502,8 @@ void RenderTextField::CursorMoveDown()
     auto value = GetEditingValue();
     value.MoveToPosition(GetCursorPositionForMoveDown());
     SetEditingValue(std::move(value));
+    cursorPositionType_ = CursorPositionType::NONE;
+    MarkNeedLayout();
 }
 
 void RenderTextField::CursorMoveOnClick(const Offset& offset)
@@ -1693,12 +1733,22 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
         if (codeValue >= NUMBER_CODE_START && codeValue <= NUMBER_CODE_END) {
             appendElement = std::to_string(codeValue - NUMBER_CODE_DIFF);
         } else if (codeValue >= LETTER_CODE_START && codeValue <= LETTER_CODE_END) {
-            int32_t letterCode =
+            if (!isCtrlDown_) {
+                int32_t letterCode =
                 isShiftDown_ ? (codeValue + UPPER_CASE_LETTER_DIFF) : (codeValue + LOWER_CASE_LETTER_DIFF);
-            appendElement = static_cast<char>(letterCode);
-            isShiftDown_ = false;
+                appendElement = static_cast<char>(letterCode);
+                isShiftDown_ = false;
+            } else {
+                if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_A)) {
+                    HandleOnCopyAll(nullptr);
+                    isCtrlDown_ = false;
+                }
+            }
         } else if (codeValue == LEFT_SHIFT_CODE || codeValue == RIGHT_SHIFT_CODE) {
             isShiftDown_ = true;
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_LEFT) ||
+            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_RIGHT)) {
+            isCtrlDown_ = true;
         }
     }
     if (appendElement.empty()) {

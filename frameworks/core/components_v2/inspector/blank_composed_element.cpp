@@ -24,7 +24,7 @@ namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const BlankComposedElement&)>> CREATE_JSON_MAP {
     { "min", [](const BlankComposedElement& inspector) { return inspector.GetMin(); } },
-    { "color", [](const BlankComposedElement& inspector) { return inspector.GetBackgroundColor(); } }
+    { "color", [](const BlankComposedElement& inspector) { return inspector.GetColor(); } }
 };
 
 }
@@ -32,8 +32,8 @@ const std::unordered_map<std::string, std::function<std::string(const BlankCompo
 void BlankComposedElement::Dump()
 {
     DumpLog::GetInstance().AddDesc(std::string("blank_composed_element"));
-    DumpLog::GetInstance().AddDesc(
-        std::string("min: ").append(GetMin()));
+    DumpLog::GetInstance().AddDesc(std::string("min: ").append(GetMin()));
+    DumpLog::GetInstance().AddDesc(std::string("color: ").append(GetColor()));
 }
 
 std::unique_ptr<JsonValue> BlankComposedElement::ToJsonObject() const
@@ -50,6 +50,15 @@ std::string BlankComposedElement::GetMin() const
     auto renderFlexItem = GetRenderFlexItem();
     auto min = renderFlexItem ? renderFlexItem->GetFlexBasis().ToString() : "0.0";
     return min;
+}
+
+std::string BlankComposedElement::GetColor() const
+{
+    std::string color = GetBackgroundColor();
+    if (color.empty() || color == "NONE") {
+        color = "0x00000000";
+    }
+    return color;
 }
 
 RefPtr<RenderFlexItem> BlankComposedElement::GetRenderFlexItem() const

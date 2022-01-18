@@ -74,6 +74,14 @@ void FlutterRenderTextSpan::UpdateTouchRegions(std::map<int32_t, std::map<Gestur
             }
         }
 
+        auto& remoteMessageEvent = static_cast<CommonGestureEvent&>(declaration->GetEvent(
+            EventTag::COMMON_REMOTE_MESSAGE_GRESURE_EVENT));
+        if (remoteMessageEvent.IsValid()) {
+            if (!remoteMessageEvent.click.eventMarker.IsEmpty()) {
+                markersMap.try_emplace(GestureType::REMOTE_MESSAGE, remoteMessageEvent.click.eventMarker);
+            }
+        }
+
         auto& rawEvent = static_cast<CommonRawEvent&>(declaration->GetEvent(EventTag::COMMON_RAW_EVENT));
         if (rawEvent.IsValid()) {
             if (!rawEvent.touchStart.eventMarker.IsEmpty()) {

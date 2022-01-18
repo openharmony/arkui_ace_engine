@@ -36,6 +36,7 @@
 
 #include "base/log/log.h"
 #include "base/thread/background_task_executor.h"
+#include "core/common/container_scope.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -47,6 +48,15 @@ inline std::string GenJsThreadName()
 {
     static std::atomic<uint32_t> instanceCount { 1 };
     return std::string("jsThread-") + std::to_string(instanceCount.fetch_add(1, std::memory_order_relaxed));
+}
+
+TaskExecutor::Task WrapTaskWithContainer(TaskExecutor::Task&& task, int32_t id)
+{
+    auto wrappedTask = [originTask = std::move(task), id]() {
+        ContainerScope scope(id);
+        originTask();
+    };
+    return wrappedTask;
 }
 
 bool PostTaskToTaskRunner(const fml::RefPtr<fml::TaskRunner>& taskRunner, TaskExecutor::Task&& task, uint32_t delayTime)
@@ -104,10 +114,10 @@ FlutterTaskExecutor::~FlutterTaskExecutor()
         platformRunner_, [rawPtr] { std::unique_ptr<fml::Thread> jsThread(rawPtr); }, 0);
 }
 
-void FlutterTaskExecutor::InitPlatformThread()
+void FlutterTaskExecutor::InitPlatformThread(bool useCurrentEventRunner)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    platformRunner_ = flutter::PlatformTaskRunner::CurrentTaskRunner();
+    platformRunner_ = flutter::PlatformTaskRunner::CurrentTaskRunner(useCurrentEventRunner);
 #else
     fml::MessageLoop::EnsureInitializedForCurrentThread();
     platformRunner_ = fml::MessageLoop::GetCurrent().GetTaskRunner();
@@ -156,23 +166,31 @@ void FlutterTaskExecutor::InitOtherThreads(const flutter::TaskRunners& taskRunne
 
 bool FlutterTaskExecutor::OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const
 {
+    int32_t currentId = Container::CurrentId();
+    TaskExecutor::Task wrappedTask = currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId) : std::move(task);
+
     switch (type) {
         case TaskType::PLATFORM:
-            return PostTaskToTaskRunner(platformRunner_, std::move(task), delayTime);
+            return PostTaskToTaskRunner(platformRunner_, std::move(wrappedTask), delayTime);
         case TaskType::UI:
-            return PostTaskToTaskRunner(uiRunner_, std::move(task), delayTime);
+            return PostTaskToTaskRunner(uiRunner_, std::move(wrappedTask), delayTime);
         case TaskType::IO:
-            return PostTaskToTaskRunner(ioRunner_, std::move(task), delayTime);
+            return PostTaskToTaskRunner(ioRunner_, std::move(wrappedTask), delayTime);
         case TaskType::GPU:
-            return PostTaskToTaskRunner(gpuRunner_, std::move(task), delayTime);
+            return PostTaskToTaskRunner(gpuRunner_, std::move(wrappedTask), delayTime);
         case TaskType::JS:
-            return PostTaskToTaskRunner(jsRunner_, std::move(task), delayTime);
+            return PostTaskToTaskRunner(jsRunner_, std::move(wrappedTask), delayTime);
         case TaskType::BACKGROUND:
             // Ignore delay time
-            return BackgroundTaskExecutor::GetInstance().PostTask(std::move(task));
+            return BackgroundTaskExecutor::GetInstance().PostTask(std::move(wrappedTask));
         default:
             return false;
     }
+}
+
+TaskExecutor::Task FlutterTaskExecutor::WrapTaskWithTraceId(Task&& task, int32_t id) const
+{
+    return WrapTaskWithContainer(std::move(task), id);
 }
 
 bool FlutterTaskExecutor::WillRunOnCurrentThread(TaskType type) const

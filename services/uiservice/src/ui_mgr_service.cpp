@@ -14,12 +14,24 @@
  */
 
 #include "ui_mgr_service.h"
-#include "string_ex.h"
+
+#include <atomic>
+
+#include "adapter/ohos/entrance/ace_application_info.h"
+#include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/flutter_ace_view.h"
+#include "adapter/ohos/entrance/utils.h"
+
 #include "hilog_wrapper.h"
 #include "if_system_ability_manager.h"
+#include "init_data.h"
 #include "ipc_skeleton.h"
+#include "locale_config.h"
+#include "res_config.h"
+#include "string_ex.h"
 #include "system_ability_definition.h"
 #include "ui_service_mgr_errors.h"
+#include "wm/window.h"
 
 namespace OHOS {
 namespace Ace {
@@ -38,6 +50,221 @@ UIMgrService::UIMgrService()
 UIMgrService::~UIMgrService()
 {
     callbackMap_.clear();
+}
+
+static std::atomic<int32_t> gDialogId = 0;
+
+class UIMgrServiceWindowChangeListener : public Rosen::IWindowChangeListener {
+public:
+    void OnSizeChange(OHOS::Rosen::Rect rect) override
+    {
+        HILOG_INFO("UIMgrServiceWindowChangeListener size change");
+    }
+};
+
+class UIMgrServiceInputEventConsumer : public MMI::IInputEventConsumer {
+public:
+    explicit UIMgrServiceInputEventConsumer(Ace::Platform::FlutterAceView* flutterAceView)
+    {
+        flutterAceView_ = flutterAceView;
+    }
+    ~UIMgrServiceInputEventConsumer() override = default;
+
+    void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override
+    {
+        if (flutterAceView_ != nullptr) {
+            flutterAceView_->DispatchTouchEvent(flutterAceView_, pointerEvent);
+        }
+    }
+    void OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const override {}
+    void OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const override {}
+
+private:
+    Ace::Platform::FlutterAceView* flutterAceView_ = nullptr;
+};
+
+using AcePlatformFinish = std::function<void()>;
+class AcePlatformEventCallback final : public Ace::Platform::PlatformEventCallback {
+public:
+    explicit AcePlatformEventCallback(AcePlatformFinish onFinish) : onFinish_(onFinish) {}
+
+    ~AcePlatformEventCallback() = default;
+
+    virtual void OnFinish() const
+    {
+        LOGI("AcePlatformEventCallback OnFinish");
+        if (onFinish_) {
+            onFinish_();
+        }
+    }
+
+    virtual void OnStatusBarBgColorChanged(uint32_t color)
+    {
+        LOGI("AcePlatformEventCallback OnStatusBarBgColorChanged");
+    }
+
+private:
+    AcePlatformFinish onFinish_;
+};
+
+void UIMgrService::InitResourceManager()
+{
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    if (resourceManager == nullptr) {
+        HILOG_ERROR("InitResourceManager create resourceManager failed");
+        return;
+    }
+
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    UErrorCode status = U_ZERO_ERROR;
+    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
+    resConfig->SetLocaleInfo(locale);
+    if (resConfig->GetLocaleInfo() != nullptr) {
+        HILOG_DEBUG("InitResourceManager language: %{public}s, script: %{public}s, region: %{public}s,",
+            resConfig->GetLocaleInfo()->getLanguage(),
+            resConfig->GetLocaleInfo()->getScript(),
+            resConfig->GetLocaleInfo()->getCountry());
+    } else {
+        HILOG_ERROR("InitResourceManager language: GetLocaleInfo is null.");
+    }
+    resourceManager->UpdateResConfig(*resConfig);
+    resourceManager_ = resourceManager;
+}
+
+int UIMgrService::ShowDialog(const std::string& name,
+                             const std::string& params,
+                             OHOS::Rosen::WindowType windowType,
+                             int x,
+                             int y,
+                             int width,
+                             int height,
+                             const sptr<OHOS::Ace::IDialogCallback>& dialogCallback)
+{
+    HILOG_INFO("Show dialog in service start");
+    if (handler_ == nullptr) {
+        HILOG_ERROR("Show dialog failed! handler is nullptr");
+        return UI_SERVICE_HANDLER_IS_NULL;
+    }
+
+    int32_t dialogId = gDialogId.fetch_add(1, std::memory_order_relaxed);
+    sptr<OHOS::Rosen::Window> dialogWindow = nullptr;
+    auto showDialogCallback = [&]() {
+        SetHwIcuDirectory();
+        InitResourceManager();
+
+        std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+        if (resourceManager_ != nullptr) {
+            resourceManager_->GetResConfig(*resConfig);
+            auto localeInfo = resConfig->GetLocaleInfo();
+            Ace::Platform::AceApplicationInfoImpl::GetInstance().SetResourceManager(resourceManager_);
+            if (localeInfo != nullptr) {
+                auto language = localeInfo->getLanguage();
+                auto region = localeInfo->getCountry();
+                auto script = localeInfo->getScript();
+                Ace::AceApplicationInfo::GetInstance().SetLocale((language == nullptr) ? "" : language,
+                    (region == nullptr) ? "" : region, (script == nullptr) ? "" : script, "");
+            }
+        }
+
+        std::string resPath;
+        // create container
+        Ace::Platform::AceContainer::CreateContainer(dialogId, Ace::FrontendType::JS, false, "", nullptr,
+            std::make_unique<AcePlatformEventCallback>([]() {}), true);
+        auto container = Ace::Platform::AceContainer::GetContainer(dialogId);
+        if (!container) {
+            HILOG_ERROR("container is null, set configuration failed.");
+        } else {
+            auto aceResCfg = container->GetResourceConfiguration();
+            aceResCfg.SetOrientation(Ace::SystemProperties::GetDevcieOrientation());
+            aceResCfg.SetDensity(Ace::SystemProperties::GetResolution());
+            aceResCfg.SetDeviceType(Ace::SystemProperties::GetDeviceType());
+            container->SetResourceConfiguration(aceResCfg);
+            container->SetPackagePathStr(resPath);
+        }
+
+        Ace::Platform::AceContainer::SetDialogCallback(dialogId,
+            [callback = dialogCallback, id = dialogId](const std::string& event, const std::string& params) {
+                HILOG_INFO("Dialog callback from service");
+                callback->OnDialogCallback(id, event, params);
+            });
+
+        // create view.
+        auto flutterAceView = Ace::Platform::FlutterAceView::CreateView(dialogId, true);
+
+        sptr<OHOS::Rosen::WindowOption> option = new OHOS::Rosen::WindowOption();
+        option->SetWindowRect({ x, y, width, height });
+        option->SetWindowType(windowType);
+        std::string windowName = "system_dialog_window";
+        windowName += std::to_string(dialogId);
+        dialogWindow = OHOS::Rosen::Window::Create(windowName, option);
+
+        // register surface change callback
+        OHOS::sptr<OHOS::Rosen::IWindowChangeListener> listener = new UIMgrServiceWindowChangeListener();
+        dialogWindow->RegisterWindowChangeListener(listener);
+
+        std::shared_ptr<MMI::IInputEventConsumer> inputEventListener =
+            std::make_shared<UIMgrServiceInputEventConsumer>(flutterAceView);
+        dialogWindow->AddInputEventListener(inputEventListener);
+
+        Ace::Platform::FlutterAceView::SurfaceCreated(flutterAceView, dialogWindow);
+
+        // set metrics
+        int32_t windowWidth = dialogWindow->GetRect().width_;
+        int32_t windowHeight = dialogWindow->GetRect().height_;
+        HILOG_INFO("Show dialog: windowConfig: width: %{public}d, height: %{public}d", windowWidth, windowHeight);
+
+        flutter::ViewportMetrics metrics;
+        metrics.physical_width = windowWidth;
+        metrics.physical_height = windowHeight;
+        metrics.device_pixel_ratio = density_;
+        Ace::Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
+
+        std::string packagePathStr = "/system/etc/SADialog/";
+        std::vector<std::string> assetBasePathStr = { name + "/" };
+        Ace::Platform::AceContainer::AddAssetPath(dialogId, packagePathStr, assetBasePathStr);
+
+        // set view
+        Ace::Platform::AceContainer::SetView(flutterAceView, density_, windowWidth, windowHeight);
+        Ace::Platform::AceContainer::SetUIWindow(dialogId, dialogWindow);
+        Ace::Platform::FlutterAceView::SurfaceChanged(flutterAceView, windowWidth, windowHeight, 0);
+
+        // run page.
+        Ace::Platform::AceContainer::RunPage(
+            dialogId, Ace::Platform::AceContainer::GetContainer(dialogId)->GeneratePageId(), "", params);
+    };
+
+    if (!handler_->PostSyncTask(showDialogCallback)) {
+        HILOG_ERROR("Post sync task error");
+        return UI_SERVICE_POST_TASK_FAILED;
+    }
+
+    int32_t windowWidth = dialogWindow->GetRect().width_;
+    int32_t windowHeight = dialogWindow->GetRect().height_;
+    int32_t windowx = dialogWindow->GetRect().posX_;
+    int32_t windowy = dialogWindow->GetRect().posY_;
+    HILOG_INFO("Show dialog: size: width: %{public}d, height: %{public}d, pos: x: %{public}d, y: %{public}d",
+        windowWidth, windowHeight, windowx, windowy);
+    dialogWindow->Show();
+    dialogWindow->MoveTo(windowx, windowy);
+    dialogWindow->Resize(windowWidth, windowHeight);
+
+    HILOG_INFO("Show dialog in service end");
+    return NO_ERROR;
+}
+
+int UIMgrService::CancelDialog(int id)
+{
+    auto cancelDialogCallback = [id]() {
+        auto dialogWindow = Platform::AceContainer::GetUIWindow(id);
+        dialogWindow->Destroy();
+        Platform::AceContainer::DestroyContainer(id);
+    };
+
+    if (!handler_->PostTask(cancelDialogCallback)) {
+        return UI_SERVICE_POST_TASK_FAILED;
+    }
+
+    return NO_ERROR;
 }
 
 void UIMgrService::OnStart()

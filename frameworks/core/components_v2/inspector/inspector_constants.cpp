@@ -264,4 +264,8 @@ ACE_EXPORT extern const char TEXTAREA_ETS_TAG[] = "TextArea";
 ACE_EXPORT extern const char TEXTINPUT_COMPONENT_TAG[] = "TextInput";
 ACE_EXPORT extern const char TEXTINPUT_ETS_TAG[] = "TextInput";
 
+// select
+ACE_EXPORT extern const char SELECT_COMPONENT_TAG[] = "SelectComponent";
+ACE_EXPORT extern const char SELECT_ETS_TAG[] = "Select";
+
 } // namespace OHOS::Ace::V2

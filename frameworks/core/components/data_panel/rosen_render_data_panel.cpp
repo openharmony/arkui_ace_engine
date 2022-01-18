@@ -232,7 +232,7 @@ void PaintProgressFilterMask(SkCanvas* canvas, ArcData arcData)
     filterPaint.setStrokeCap(SkPaint::kButt_Cap);
     filterPaint.setStrokeWidth(thickness);
     filterPaint.setStyle(SkPaint::kStroke_Style);
-    filterPaint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, SHADOW_BLUR_RADIUS));
+    // filterPaint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, SHADOW_BLUR_RADIUS));
     SkRect rect = SkRect::MakeXYWH(center.GetX() - radius + thickness / 2, center.GetY() - radius + thickness / 2,
         radius * 2 - thickness, radius * 2 - thickness);
     double startAngle = arcData.startAngle;
@@ -242,7 +242,7 @@ void PaintProgressFilterMask(SkCanvas* canvas, ArcData arcData)
     startCirclePaint.setStyle(SkPaint::kStrokeAndFill_Style);
     startCirclePaint.setAntiAlias(true);
     startCirclePaint.setColor(arcData.startColor.ChangeAlpha(101).GetValue());
-    startCirclePaint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, SHADOW_BLUR_RADIUS));
+    // startCirclePaint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, SHADOW_BLUR_RADIUS));
     SkPath startCircleArch;
     SkRect startCircleArchRect =
         SkRect::MakeXYWH(center.GetX() - thickness / 2, center.GetY() - radius, thickness, thickness);
@@ -276,7 +276,7 @@ void PaintProgressFilterMask(SkCanvas* canvas, ArcData arcData)
     endCirclePaint.setStyle(SkPaint::kStrokeAndFill_Style);
     endCirclePaint.setAntiAlias(true);
     endCirclePaint.setColor(arcData.endColor.ChangeAlpha(101).GetValue());
-    endCirclePaint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, SHADOW_BLUR_RADIUS));
+    // endCirclePaint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, SHADOW_BLUR_RADIUS));
     SkPath endCircleArch;
     endCircleArch.addArc(startCircleArchRect, 90.0, -180.0);
     canvas->rotate(startAngle + QUARTER_CIRCLE, center.GetX(), center.GetY());
@@ -305,7 +305,7 @@ void PaintRainbowFilterMask(SkCanvas* canvas, double factor, const std::vector<S
     filterPaint.setStrokeCap(SkPaint::kButt_Cap);
     filterPaint.setStrokeWidth(thickness);
     filterPaint.setStyle(SkPaint::kStroke_Style);
-    filterPaint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, SHADOW_BLUR_RADIUS));
+    // filterPaint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, SHADOW_BLUR_RADIUS));
     SkRect rect = SkRect::MakeXYWH(center.GetX() - radius + thickness / 2, center.GetY() - radius + thickness / 2,
         radius * 2 - thickness, radius * 2 - thickness);
     double startAngle = arcData.startAngle;
@@ -351,7 +351,7 @@ void PaintRainbowFilterMask(SkCanvas* canvas, double factor, const std::vector<S
     endCirclePaint.setStyle(SkPaint::kStrokeAndFill_Style);
     endCirclePaint.setAntiAlias(true);
     endCirclePaint.setColor(segments[segments.size() - 1].GetEndColor().ChangeAlpha(101).GetValue());
-    endCirclePaint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, SHADOW_BLUR_RADIUS));
+    // endCirclePaint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, SHADOW_BLUR_RADIUS));
     SkPath endCircleArch;
     endCircleArch.addArc(startCircleArchRect, 90.0, -180.0);
     canvas->rotate(startAngle + QUARTER_CIRCLE, center.GetX(), center.GetY());

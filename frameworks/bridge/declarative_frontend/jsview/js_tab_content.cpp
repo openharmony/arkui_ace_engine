@@ -174,6 +174,7 @@ void JSTabContent::JSBind(BindingTarget globalObj)
     JSClass<JSTabContent>::StaticMethod("width", &JSTabContent::SetTabContentWidth, opt);
     JSClass<JSTabContent>::StaticMethod("height", &JSTabContent::SetTabContentHeight, opt);
     JSClass<JSTabContent>::StaticMethod("size", &JSTabContent::SetTabContentSize, opt);
+    JSClass<JSTabContent>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSTabContent>::Inherit<JSContainerBase>();
     JSClass<JSTabContent>::Bind<>(globalObj);
 }

@@ -32,12 +32,6 @@
 #include "window_manager.h"
 #endif
 
-#ifdef ENABLE_ROSEN_BACKEND
-#include "foundation/windowmanager/interfaces/innerkits/wm/window.h"
-#include "render_service_client/core/ui/rs_node.h"
-#include "render_service_client/core/ui/rs_surface_node.h"
-#endif
-
 namespace OHOS::Ace {
 
 constexpr double VIDEO_CHILD_COMMON_FLEX_GROW = 1.0;
@@ -64,7 +58,7 @@ public:
     void Start();
     void Pause();
     void Stop();
-    void SetCurrentTime(uint32_t currentPos);
+    void SetCurrentTime(float currentPos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC);
     void FullScreen();
     void ExitFullScreen();
     void SetVolume(float volume);
@@ -128,6 +122,7 @@ private:
     void PrepareMultiModalEvent();
     bool SubscribeMultiModal();
     bool UnSubscribeMultiModal();
+    bool HasPlayer() const;
 
     bool isSubscribeMultimodal_ = false;
     RefPtr<VideoTheme> theme_;
@@ -142,6 +137,7 @@ private:
     bool isMute_ = false;
     std::string src_;
     std::string poster_;
+    RefPtr<ImageComponent> posterImage_;
     uint32_t duration_ = 0;
     uint32_t currentPos_ = 0;
     bool isPlaying_ = false;
@@ -195,11 +191,6 @@ private:
     std::shared_ptr<OHOS::Media::Player> mediaPlayer_ = nullptr;
     ::OHOS::sptr<::OHOS::Subwindow> subWindow_ = nullptr;
     std::shared_ptr<MediaPlayerCallback> mediaPlayerCallback_ = nullptr;
-#endif
-
-#ifdef ENABLE_ROSEN_BACKEND
-    bool hidden_ = false;
-    sptr<Rosen::Window> previewWindow_;
 #endif
 };
 

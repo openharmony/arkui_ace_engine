@@ -337,6 +337,16 @@ public:
         }
     }
 
+    void SetAllowRunningAsynchronously(bool allowRunningAsynchronously)
+    {
+        allowRunningAsynchronously_ = allowRunningAsynchronously;
+    }
+
+    bool GetAllowRunningAsynchronously()
+    {
+        return allowRunningAsynchronously_;
+    }
+
 private:
     template<class T, class U>
     void ClearListeners(const std::map<T, RefPtr<Animation<U>>>& animations)
@@ -369,6 +379,7 @@ private:
     double maxScaleXY_ = -1.0;
     float tempo_ = 1.0f;
     MotionPathOption motionPathOption_;
+    bool allowRunningAsynchronously_ = false;
 };
 
 } // namespace OHOS::Ace

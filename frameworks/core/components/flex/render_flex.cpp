@@ -290,6 +290,10 @@ void RenderFlex::PerformLayoutInWeightMode()
         }
     }
     maxMainSize -= allocatedSize_;
+    // if remain size less than zero, adjust it to zero
+    if (!useOldLayoutVersion_ && LessNotEqual(maxMainSize, 0.0)) {
+        maxMainSize = 0.0;
+    }
     // totalFlexWeight_ is guard in InitFlexProperties() so it won't be zero
     auto spacePerWeight = maxMainSize / totalFlexWeight_;
     bool isExceed = false;
@@ -305,7 +309,8 @@ void RenderFlex::PerformLayoutInWeightMode()
             auto childFlexSize = spacePerWeight * child->GetFlexWeight();
             auto flexItem = AceType::DynamicCast<RenderFlexItem>(child);
             if (flexItem) {
-                innerLayout = MakeConstrainedLayoutParam(childFlexSize, flexItem->GetNormalizedConstraints(), false);
+                innerLayout = MakeConstrainedLayoutParam(
+                    childFlexSize, flexItem->GetNormalizedConstraints(), false, !useOldLayoutVersion_);
             } else {
                 innerLayout = MakeLayoutParamWithLimit(childFlexSize, childFlexSize, false);
             }
@@ -805,6 +810,7 @@ void RenderFlex::RelayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, double
     }
     flexItem->Layout(innerLayout);
     allocatedFlexSpace += flexSize;
+    allocatedSize_ -= space_;
     double allocatedSize = allocatedSize_;
     ResizeByItem(flexItem, allocatedSize);
     CheckBaselineProperties(flexItem, baselineProps);

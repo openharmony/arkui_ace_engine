@@ -261,6 +261,7 @@ void JSFlexImpl::JSBind(BindingTarget globalObj)
     JSClass<JSFlexImpl>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSFlexImpl>::StaticMethod("onPan", &JSInteractableView::JsOnPan);
     JSClass<JSFlexImpl>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSFlexImpl>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSFlexImpl>::Inherit<JSContainerBase>();
     JSClass<JSFlexImpl>::Inherit<JSViewAbstract>();
     JSClass<JSFlexImpl>::Bind<>(globalObj);

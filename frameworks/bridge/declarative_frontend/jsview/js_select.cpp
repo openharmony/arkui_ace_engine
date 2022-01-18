@@ -65,6 +65,9 @@ void JSSelect::Create(const JSCallbackInfo& info)
             optionComponent->SetTheme(optionTheme);
             optionComponent->SetText(textComponent);
             optionComponent->SetIcon(iconComponent);
+            optionComponent->SetTextStyle(optionTheme->GetTitleStyle());
+            optionComponent->SetSelectedTextStyle(optionTheme->GetTitleStyle());
+            optionComponent->SetSelectedBackgroundColor(optionTheme->GetSelectedColor());
             optionComponent->SetValue(value);
             selectComponent->AppendSelectOption(optionComponent);
         }
@@ -115,16 +118,13 @@ void JSSelect::Selected(int value)
         return;
     }
     auto option = popup->GetSelectOptions();
-    if (value < 0 || value > option.size()) {
+    if (value < 0 || value > static_cast<int32_t>(option.size())) {
         return;
     }
 
     auto tipText = selectComponent->GetTipText();
     auto optionComponent = selectComponent->GetSelectOption(value);
     optionComponent->SetSelected(true);
-    if (!(optionComponent && optionComponent->GetSelected())) {
-        return;
-    }
 
     auto optionText = optionComponent->GetText();
     if (!optionText) {

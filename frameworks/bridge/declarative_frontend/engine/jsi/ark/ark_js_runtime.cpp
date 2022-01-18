@@ -15,6 +15,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_runtime.h"
 
 #include "base/log/log.h"
+#include "base/utils/system_properties.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_value.h"
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -36,6 +37,7 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
 {
     RuntimeOption option;
     option.SetGcType(RuntimeOption::GC_TYPE::GEN_GC);
+    option.SetArkProperties(SystemProperties::GetArkProperties());
     const int64_t poolSize = 0x10000000;  // 256M
     option.SetGcPoolSize(poolSize);
     option.SetLogLevel(RuntimeOption::LOG_LEVEL::ERROR);

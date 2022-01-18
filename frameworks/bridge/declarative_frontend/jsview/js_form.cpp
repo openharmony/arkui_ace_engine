@@ -77,6 +77,8 @@ void JSForm::Create(const JSCallbackInfo& info)
 #endif
     form->SetInspectorTag("FormComponent");
     ViewStackProcessor::GetInstance()->Push(form, false);
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    boxComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
 }
 
 void JSForm::SetSize(const JSCallbackInfo& info)

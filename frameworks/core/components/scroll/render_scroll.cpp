@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 /*
  * Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
  * Description: Implement RenderScroll.
@@ -22,7 +21,9 @@
 
 #include "core/components/scroll/render_scroll.h"
 
+#include "base/geometry/axis.h"
 #include "core/animation/curve_animation.h"
+#include "core/components/scroll/scrollable.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -639,14 +640,14 @@ void RenderScroll::ResetScrollable()
         }
         scrollable_->SetScrollableNode(AceType::WeakClaim(this));
     }
-    scrollable_->SetNotifyScrollOverCallBack([weak = AceType::WeakClaim(this)] (double velocity) {
+    scrollable_->SetNotifyScrollOverCallBack([weak = AceType::WeakClaim(this)](double velocity) {
         auto scroll = weak.Upgrade();
         if (!scroll) {
             return;
         }
         scroll->ProcessScrollOverCallback(velocity);
     });
-    scrollable_->SetWatchFixCallback([weak = AceType::WeakClaim(this)] (double final, double current) {
+    scrollable_->SetWatchFixCallback([weak = AceType::WeakClaim(this)](double final, double current) {
         auto scroll = weak.Upgrade();
         if (scroll) {
             return scroll->GetFixPositionOnWatch(final, current);
@@ -1064,6 +1065,53 @@ void RenderScroll::UpdateTouchRect()
             touchRect_.SetLeft(touchRect_.Left() - scrollBarPosition);
         }
     }
+}
+
+bool RenderScroll::isScrollable(AxisDirection direction)
+{
+    if (axis_ == Axis::VERTICAL) {
+        if (direction == AxisDirection::UP && IsAtTop()) {
+            return false;
+        } else if (direction == AxisDirection::DOWN && IsAtBottom()) {
+            return false;
+        } else if (direction == AxisDirection::NONE) {
+            return false;
+        }
+    } else {
+        if (direction == AxisDirection::LEFT && IsAtTop()) {
+            return false;
+        } else if (direction == AxisDirection::RIGHT && IsAtBottom()) {
+            return false;
+        } else if (direction == AxisDirection::NONE) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void RenderScroll::HandleAxisEvent(const AxisEvent& event)
+{
+    double degree = 0.0f;
+    if (!NearZero(event.horizontalAxis)) {
+        degree = event.horizontalAxis;
+    } else if (!NearZero(event.verticalAxis)) {
+        degree = event.verticalAxis;
+    }
+    double offset = SystemProperties::Vp2Px(DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP * degree / MOUSE_WHEEL_DEGREES);
+    Offset delta;
+    if (axis_ == Axis::VERTICAL) {
+        delta.SetX(0.0);
+        delta.SetY(offset);
+    } else {
+        delta.SetX(offset);
+        delta.SetY(0.0);
+    }
+    UpdateOffset(delta, SCROLL_FROM_ROTATE);
+}
+
+WeakPtr<RenderNode> RenderScroll::CheckAxisNode()
+{
+    return AceType::WeakClaim<RenderNode>(this);
 }
 
 } // namespace OHOS::Ace

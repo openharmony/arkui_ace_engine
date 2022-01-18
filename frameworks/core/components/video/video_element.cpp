@@ -49,6 +49,11 @@
 #include "display_type.h"
 #include "surface.h"
 #include "window_manager.h"
+
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components/video/rosen_render_texture.h"
+#endif
+
 #endif
 
 namespace OHOS::Ace {
@@ -64,16 +69,25 @@ const char* SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 constexpr int32_t WINDOW_HEIGHT_DEFAULT = 1;
 constexpr int32_t WINDOW_WIDTH_DEFAULT = 1;
-
-#ifdef ENABLE_ROSEN_BACKEND
-constexpr int32_t STATUS_BAR_HEIGHT = 110;
-constexpr int32_t VIDEO_DEFLATE_HEIGHT = 40;
-#endif
-
 #else
 constexpr float ILLEGAL_SPEED = 0.0f;
 #endif
 constexpr int32_t COMPATIBLE_VERSION = 5;
+
+#ifdef OHOS_STANDARD_SYSTEM
+OHOS::Media::PlayerSeekMode ConvertToMediaSeekMode(SeekMode seekMode)
+{
+    OHOS::Media::PlayerSeekMode mode = OHOS::Media::SEEK_PREVIOUS_SYNC;
+    if (seekMode == SeekMode::SEEK_NEXT_SYNC) {
+        mode = OHOS::Media::SEEK_NEXT_SYNC;
+    } else if (seekMode == SeekMode::SEEK_CLOSEST_SYNC) {
+        mode = OHOS::Media::SEEK_CLOSEST_SYNC;
+    } else if (seekMode == SeekMode::SEEK_CLOSEST) {
+        mode = OHOS::Media::SEEK_CLOSEST;
+    }
+    return mode;
+}
+#endif
 
 } // namespace
 
@@ -110,13 +124,6 @@ VideoElement::~VideoElement()
         }
     }
     ReleasePlatformResource();
-
-#ifdef ENABLE_ROSEN_BACKEND
-    if (previewWindow_) {
-        previewWindow_->Hide();
-        previewWindow_->Destroy();
-    }
-#endif
 }
 
 void VideoElement::PerformBuild()
@@ -139,6 +146,7 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
     isMute_ = videoComponent->IsMute();
     src_ = videoComponent->GetSrc();
     poster_ = videoComponent->GetPoster();
+    posterImage_ = videoComponent->GetPosterImage();
     isFullScreen_ = videoComponent->IsFullscreen();
     direction_ = videoComponent->GetDirection();
     startTime_ = videoComponent->GetStartTime();
@@ -298,17 +306,12 @@ void VideoElement::PreparePlayer()
 
     sptr<Surface> producerSurface;
 #ifdef ENABLE_ROSEN_BACKEND
-    if (previewWindow_ == nullptr) {
-        sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
-        option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_LAUNCHING);
-        option->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-        previewWindow_ = Rosen::Window::Create("video_window", option);
+    if (renderNode_) {
+        auto rosenTexture = AceType::DynamicCast<RosenRenderTexture>(renderNode_);
+        if (rosenTexture) {
+            producerSurface = rosenTexture->GetSurface();
+        }
     }
-    if (previewWindow_ == nullptr || previewWindow_->GetSurfaceNode() == nullptr) {
-        return;
-    }
-    producerSurface = previewWindow_->GetSurfaceNode()->GetSurface();
-    previewWindow_->Show();
 #else
     producerSurface = subWindow_->GetSurface();
 #endif
@@ -336,11 +339,12 @@ void VideoElement::PreparePlayer()
     }
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     auto videoElement = WeakClaim(this);
-    uiTaskExecutor.PostSyncTask([&videoElement] {
+    Size videoSize = Size(mediaPlayer_->GetVideoWidth(), mediaPlayer_->GetVideoHeight());
+    uiTaskExecutor.PostSyncTask([&videoElement, videoSize] {
         auto video = videoElement.Upgrade();
         if (video) {
-            video->OnPrepared(0.0, 0.0, false, 0, 0, true);
-            LOGI("Video OnPrepared");
+            LOGI("Video OnPrepared video size: %{public}s", videoSize.ToString().c_str());
+            video->OnPrepared(videoSize.Width(), videoSize.Height(), false, 0, 0, true);
         }
     });
 }
@@ -431,60 +435,19 @@ void VideoElement::Prepare(const WeakPtr<Element>& parent)
         }
     }
     isElementPrepared_ = true;
-
-#ifdef ENABLE_ROSEN_BACKEND
-    auto context = context_.Upgrade();
-    if (!context) {
-        return;
-    }
-    context->AddPageTransitionListener([weak = AceType::WeakClaim(this)](const TransitionEvent& event,
-                                           const WeakPtr<PageElement>& in, const WeakPtr<PageElement>& out) {
-        auto video = weak.Upgrade();
-        if (!video) {
-            return;
-        }
-        if (event == TransitionEvent::POP_START) {
-            if (video->previewWindow_) {
-                video->previewWindow_->Hide();
-                video->previewWindow_->Destroy();
-            }
-        }
-    });
-#endif
 }
 
 void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    auto context = context_.Upgrade();
-    if (context == nullptr) {
-        LOGE("context is nullptr");
-        return;
-    }
-    float viewScale = context->GetViewScale();
 
-#ifdef ENABLE_ROSEN_BACKEND
-    if (!previewWindow_) {
-        return;
-    }
-    if (renderNode_) {
-        Offset offset = renderNode_->GetGlobalOffset();
-        previewWindow_->MoveTo(
-            (int32_t)(offset.GetX() * viewScale), (int32_t)((offset.GetY() + STATUS_BAR_HEIGHT) * viewScale));
-    }
-    int32_t height = textureHeight;
-    if (needControls_ && theme_) {
-        height -= theme_->GetBtnSize().Height();
-        height -= theme_->GetBtnEdge().Top().Value();
-        height -= theme_->GetBtnEdge().Bottom().Value();
-        height -= VIDEO_DEFLATE_HEIGHT;
-    }
-    previewWindow_->Resize(textureWidth * viewScale, height * viewScale);
-    if (!hidden_) {
-        previewWindow_->Show();
-    }
-#else
+#ifndef ENABLE_ROSEN_BACKEND
     if (subWindow_ != nullptr) {
+        auto context = context_.Upgrade();
+        if (!context) {
+            LOGE("context is nullptr");
+            return;
+        }
         int32_t height = textureHeight;
         if (needControls_) {
             height -= theme_->GetBtnSize().Height();
@@ -494,6 +457,7 @@ void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_
         if (height <= 0) {
             height = textureHeight;
         }
+        float viewScale = context->GetViewScale();
         subWindow_->Resize(textureWidth * viewScale, height * viewScale);
         LOGI("SetSubWindowSize width: %{public}f, height: %{public}f", textureWidth * viewScale, height * viewScale);
 
@@ -512,9 +476,18 @@ void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_
 #endif
 }
 
+bool VideoElement::HasPlayer() const
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    return mediaPlayer_ != nullptr;
+#else
+    return player_ != nullptr;
+#endif
+}
+
 void VideoElement::HiddenChange(bool hidden)
 {
-    if (isPlaying_ && hidden && player_) {
+    if (isPlaying_ && hidden && HasPlayer()) {
         pastPlayingStatus_ = isPlaying_;
         Pause();
         return;
@@ -525,27 +498,6 @@ void VideoElement::HiddenChange(bool hidden)
         pastPlayingStatus_ = false;
         Start();
     }
-
-#ifdef ENABLE_ROSEN_BACKEND
-    if (!previewWindow_) {
-        return;
-    }
-    hidden_ = hidden;
-    if (hidden) {
-        if (isPlaying_) {
-            pastPlayingStatus_ = isPlaying_;
-            Pause();
-        }
-        previewWindow_->Hide();
-    } else {
-        if (pastPlayingStatus_) {
-            isPlaying_ = !pastPlayingStatus_;
-            pastPlayingStatus_ = false;
-            Start();
-        }
-        previewWindow_->Show();
-    }
-#endif
 }
 
 void VideoElement::PrepareMultiModalEvent()
@@ -772,11 +724,11 @@ void VideoElement::SetMethodCall(const RefPtr<VideoComponent>& videoComponent)
                 }
             });
         });
-        videoController->SetSeekToImpl([weak = WeakClaim(this), uiTaskExecutor](uint32_t pos) {
-            uiTaskExecutor.PostTask([weak, pos]() {
+        videoController->SetSeekToImpl([weak = WeakClaim(this), uiTaskExecutor](float pos, SeekMode seekMode) {
+            uiTaskExecutor.PostTask([weak, pos, seekMode]() {
                 auto videoElement = weak.Upgrade();
                 if (videoElement) {
-                    videoElement->SetCurrentTime(pos);
+                    videoElement->SetCurrentTime(pos, seekMode);
                 }
             });
         });
@@ -1361,7 +1313,16 @@ const RefPtr<Component> VideoElement::CreateControl()
 
 const RefPtr<Component> VideoElement::CreatePoster()
 {
-    auto image = AceType::MakeRefPtr<ImageComponent>(poster_);
+    RefPtr<ImageComponent> image;
+    if (IsDeclarativePara()) {
+        image = posterImage_;
+    } else {
+        image = AceType::MakeRefPtr<ImageComponent>(poster_);
+    }
+    if (!image) {
+        LOGE("create poster image fail");
+        return nullptr;
+    }
     image->SetImageFit(imageFit_);
     image->SetImageObjectPosition(imagePosition_);
     image->SetFitMaxSize(true);
@@ -1382,6 +1343,11 @@ const RefPtr<Component> VideoElement::CreateChild()
 #ifndef OHOS_STANDARD_SYSTEM
         columnChildren.emplace_back(AceType::MakeRefPtr<FlexItemComponent>(VIDEO_CHILD_COMMON_FLEX_GROW,
             VIDEO_CHILD_COMMON_FLEX_SHRINK, VIDEO_CHILD_COMMON_FLEX_BASIS, CreatePoster()));
+#else
+#ifdef ENABLE_ROSEN_BACKEND
+        columnChildren.emplace_back(AceType::MakeRefPtr<FlexItemComponent>(VIDEO_CHILD_COMMON_FLEX_GROW,
+            VIDEO_CHILD_COMMON_FLEX_SHRINK, VIDEO_CHILD_COMMON_FLEX_BASIS, CreatePoster()));
+#endif
 #endif
         if (needControls_) {
             columnChildren.emplace_back(CreateControl());
@@ -1569,12 +1535,12 @@ void VideoElement::Stop()
     isStop_ = true;
 }
 
-void VideoElement::SetCurrentTime(uint32_t currentPos)
+void VideoElement::SetCurrentTime(float currentPos, SeekMode seekMode)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    if (mediaPlayer_ != nullptr && currentPos >= 0 && currentPos < duration_) {
+    if (mediaPlayer_ != nullptr && GreatOrEqual(currentPos, 0.0) && LessNotEqual(currentPos, duration_)) {
         LOGI("Video Seek");
-        mediaPlayer_->Seek(currentPos * MILLISECONDS_TO_SECONDS, OHOS::Media::SEEK_PREVIOUS_SYNC);
+        mediaPlayer_->Seek(currentPos * MILLISECONDS_TO_SECONDS, ConvertToMediaSeekMode(seekMode));
     }
 #else
     if (currentPos >= 0 && currentPos < duration_ && player_) {

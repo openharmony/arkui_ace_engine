@@ -24,4 +24,23 @@ build_component("xcomponent") {
     "xcomponent_component.cpp",
     "xcomponent_element.cpp",
   ]
+
+  if (is_standard_system && !use_mingw_win && !use_mac) {
+    include_dirs = [
+      "//drivers/peripheral/display/interfaces/include",
+      "//foundation/multimedia/media_standard/interfaces/innerkits/native/include",
+      "//foundation/graphic/standard/interfaces/innerkits/wmclient",
+      "//foundation/graphic/standard/interfaces/innerkits/wm",
+      "//foundation/graphic/standard/interfaces/innerkits/surface",
+    ]
+
+    deps = [
+      "//foundation/graphic/standard:libsurface",
+      "//foundation/graphic/standard:libwmclient",
+      "//foundation/windowmanager/utils:libwmutil",
+      "//foundation/windowmanager/wm:libwm",
+    ]
+
+    external_deps = [ "ipc:ipc_core" ]
+  }
 }

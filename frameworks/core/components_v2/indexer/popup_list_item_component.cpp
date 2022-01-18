@@ -42,7 +42,7 @@ void PopupListItemComponent::BuildItem()
     if (!boxDecoration_) {
         boxDecoration_ = AceType::MakeRefPtr<Decoration>();
     }
-    boxDecoration_->SetBackgroundColor(Color(POPUP_BG_COLOR).BlendOpacity(POPUP_BG_OPACITY));
+    boxDecoration_->SetBackgroundColor(Color::TRANSPARENT);
     boxComponent_->SetBackDecoration(boxDecoration_);
 
     if (!boxText_) {

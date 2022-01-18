@@ -66,7 +66,7 @@ public:
     }
 
 private:
-    WeakPtr<TextFieldController> controller_;
+    RefPtr<TextFieldController> controller_;
     ACE_DISALLOW_COPY_AND_MOVE(JSTextInputController);
 };
 

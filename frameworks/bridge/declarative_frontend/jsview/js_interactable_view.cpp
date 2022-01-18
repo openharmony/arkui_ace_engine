@@ -27,6 +27,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include "core/common/plugin_manager.h"
+#endif
 
 namespace OHOS::Ace::Framework {
 
@@ -136,17 +139,6 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
     }
 }
 
-void JSInteractableView::JsOnDoubleClick(const JSCallbackInfo& info)
-{
-    if (info[0]->IsFunction()) {
-        auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        auto tapGesture = GetTapGesture(info, 2);
-        if (tapGesture) {
-            click->SetOnClick(tapGesture);
-        }
-    }
-}
-
 EventMarker JSInteractableView::GetClickEventMarker(const JSCallbackInfo& info)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
@@ -188,6 +180,18 @@ RefPtr<Gesture> JSInteractableView::GetTapGesture(
             }
             func->Execute(info);
         });
+    return tapGesture;
+}
+
+RefPtr<Gesture> JSInteractableView::GetRemoteMessageTapGesture(const JSCallbackInfo& info)
+{
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
+    RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto eventCallback = GetRemoteMessageEventCallback(info);
+    tapGesture->SetOnActionId([func = std::move(eventCallback)]
+        (const GestureEvent& info) {
+        func();
+    });
     return tapGesture;
 }
 
@@ -283,46 +287,94 @@ EventMarker JSInteractableView::GetEventMarker(const JSCallbackInfo& info, const
     return eventMarker;
 }
 
-void JSInteractableView::JsRemoteMessage(const JSCallbackInfo& info)
+void JSInteractableView::JsCommonRemoteMessage(const JSCallbackInfo& info)
+{
+    if (info.Length() != 0 && info[0]->IsObject()) {
+        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        EventMarker remoteMessageEventId;
+        JsRemoteMessage(info, remoteMessageEventId);
+        box->SetRemoteMessageEvent(remoteMessageEventId);
+    }
+}
+
+void JSInteractableView::JsRemoteMessage(const JSCallbackInfo& info, EventMarker& eventMarker)
 {
     if (info.Length() == 0 || !info[0]->IsObject()) {
-        LOGE("plugincomponent construct param is empty or type is not Object.");
+        LOGE("RemoteMessage JSCallbackInfo param is empty or type is not Object.");
         return;
     }
 
+    auto eventCallback = GetRemoteMessageEventCallback(info);
+    eventMarker = EventMarker(
+        [func = std::move(eventCallback)](BaseEventInfo* info) {
+            auto touchInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+            if (touchInfo && touchInfo->GetType().compare("onClick") == 0) {
+                func();
+            }
+        });
+}
+
+std::function<void()> JSInteractableView::GetRemoteMessageEventCallback(const JSCallbackInfo& info)
+{
     auto obj = JSRef<JSObject>::Cast(info[0]);
-    // Parse action
     auto actionValue = obj->GetProperty("action");
     std::string action;
     if (actionValue->IsString()) {
         action = actionValue->ToString();
     }
-    // Parse ability
     auto abilityValue = obj->GetProperty("ability");
     std::string ability;
     if (abilityValue->IsString()) {
         ability = abilityValue->ToString();
     }
-    // Parse params
     auto paramsObj = obj->GetProperty("params");
+    std::string params;
     if (paramsObj->IsObject()) {
-        auto ability = paramsObj->ToString();
+        params = paramsObj->ToString();
     }
-
-    auto eventMarker = [action, ability, paramsObj]() {
+    auto eventCallback = [action, ability, params]() {
+        LOGE("JSInteractableView::JsRemoteMessage. eventMarker");
         if (action.compare("message") == 0) {
             // onCall
         } else if (action.compare("route") == 0) {
-            // onCreate
+            // startAbility
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+            std::vector<std::string> strList;
+            SplitString(ability, '/', strList);
+            if (strList.size() <= 1) {
+                LOGE("App bundleName or abilityName is empty.");
+                return;
+            }
+            int32_t result = PluginManager::GetInstance().StartAbility(strList[0], strList[1], params);
+            if (result != 0) {
+                LOGE("JSInteractableView::JsRemoteMessage: Failed to start the APP %{public}s.", ability.c_str());
+            }
+#else
+            LOGE("JSInteractableView::JsRemoteMessage: Unsupport Windows and Mac platforms to start APP.");
+#endif
         } else {
-            LOGE("action is error.");
+            LOGE("action's name is not message or route.");
         }
     };
-    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
-    tapGesture->SetOnActionId([eventMarker](const GestureEvent& info) {
-        eventMarker();
-    });
-    auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    click->SetOnClick(tapGesture);
+
+    return eventCallback;
+}
+
+void JSInteractableView::SplitString(const std::string& str, char tag, std::vector<std::string>& strList)
+{
+    std::string subStr;
+    for (size_t i = 0; i < str.length(); i++) {
+        if (tag == str[i]) {
+            if (!subStr.empty()) {
+                strList.push_back(subStr);
+                subStr.clear();
+            }
+        } else {
+            subStr.push_back(str[i]);
+        }
+    }
+    if (!subStr.empty()) {
+        strList.push_back(subStr);
+    }
 }
 } // namespace OHOS::Ace::Framework

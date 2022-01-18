@@ -546,9 +546,7 @@ RefPtr<Component> DialogComponent::GenerateComposed(
                 accessibilityManager->CreateSpecializedNode(name, composedId, dialogTweenComposedId_);
             } else {
                 dialogTweenComposedId_ = composedId;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-                accessibilityManager->CreateSpecializedNode("inspectDialog", composedId, customDialogId_);
-#else
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
                 accessibilityManager->CreateSpecializedNode(name, composedId, -1);
 #endif
             }

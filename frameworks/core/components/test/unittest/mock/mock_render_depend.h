@@ -251,6 +251,14 @@ RefPtr<RenderNode> RenderText::Create()
 
 void RenderPositioned::Update(const RefPtr<Component>& component) {};
 
+void RenderPositioned::SetLeft(const Dimension& left) {}
+
+void RenderPositioned::SetTop(const Dimension& top) {}
+
+void RenderPositioned::SetRight(const Dimension& right) {}
+
+void RenderPositioned::SetBottom(const Dimension& bottom) {}
+
 SharedTransitionController::SharedTransitionController(const WeakPtr<PipelineContext>& context) {};
 void SharedTransitionController::RegisterTransitionListener() {};
 bool SharedTransitionController::HasSharedTransition(TransitionEvent event)

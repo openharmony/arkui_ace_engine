@@ -26,6 +26,7 @@
 #include "event_runner.h"
 #include "hilog_wrapper.h"
 #include "iremote_object.h"
+#include "resource_manager.h"
 #include "system_ability.h"
 #include "ui_service_mgr_stub.h"
 #include "uri.h"
@@ -55,6 +56,17 @@ public:
     virtual int ReturnRequest(const AAFwk::Want& want, const std::string& source, const std::string& data,
         const std::string& extraData) override;
 
+    virtual int ShowDialog(const std::string& name,
+                           const std::string& params,
+                           OHOS::Rosen::WindowType windowType,
+                           int x,
+                           int y,
+                           int width,
+                           int height,
+                           const sptr<OHOS::Ace::IDialogCallback>& dialogCallback) override;
+
+    virtual int CancelDialog(int id) override;
+
     /**
      * GetEventHandler, get the ui_service manager service's handler.
      *
@@ -67,6 +79,7 @@ private:
     bool CheckCallBackFromMap(const std::string& key);
     int HandleRegister(const AAFwk::Want& want,  const sptr<IUIService>& uiService);
     int HandleUnregister(const AAFwk::Want& want);
+    void InitResourceManager();
     std::string GetCallBackKeyStr(const AAFwk::Want& want);
     std::shared_ptr<EventRunner> eventLoop_;
     std::shared_ptr<EventHandler> handler_;
@@ -76,6 +89,8 @@ private:
 
     const std::string PUSH_STRING = "PUSH";
     const std::string REQUEST_STRING = "REQUEST";
+    float density_ = 2.0f; // 2.0 for wgr, 3.0 for phone
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager_ = nullptr;
 };
 }  // namespace Ace
 }  // namespace OHOS

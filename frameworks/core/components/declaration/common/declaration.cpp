@@ -368,6 +368,11 @@ void Declaration::AddCommonEvent(EventTag tag)
                 declaration.events_.try_emplace(
                     EventTag::COMMON_GESTURE_EVENT, DeclarationConstants::DEFAULT_GESTURE_EVENT);
             } },
+        { EventTag::COMMON_REMOTE_MESSAGE_GRESURE_EVENT,
+            [](Declaration& declaration) {
+                declaration.events_.try_emplace(
+                    EventTag::COMMON_REMOTE_MESSAGE_GRESURE_EVENT, DeclarationConstants::DEFAULT_GESTURE_EVENT);
+            } },
         { EventTag::COMMON_FOCUS_EVENT,
             [](Declaration& declaration) {
                 declaration.events_.try_emplace(
@@ -435,6 +440,11 @@ void Declaration::AddSpecializedStyle(std::shared_ptr<Style>&& specializedStyle)
 void Declaration::AddSpecializedEvent(std::shared_ptr<Event>&& specializedEvent)
 {
     events_.try_emplace(EventTag::SPECIALIZED_EVENT, std::move(specializedEvent));
+}
+
+void Declaration::AddSpecializedRemoteMessageEvent(std::shared_ptr<Event>&& specializedEvent)
+{
+    events_.try_emplace(EventTag::SPECIALIZED_REMOTE_MESSAGE_EVENT, std::move(specializedEvent));
 }
 
 void Declaration::AddSpecializedMethod(std::shared_ptr<Method>&& specializedMethod)
@@ -3258,6 +3268,18 @@ void Declaration::SetClickEvent(const EventMarker& onClick)
     auto& gestureEvent = MaybeResetEvent<CommonGestureEvent>(EventTag::COMMON_GESTURE_EVENT);
     if (gestureEvent.IsValid()) {
         gestureEvent.click.eventMarker = onClick;
+        gestureEvent.click.eventMarker.SetCatchMode(false);
+        gestureEvent.click.isRefreshed = true;
+    }
+}
+
+void Declaration::SetRemoteMessageEvent(const EventMarker& remoteMessage)
+{
+    LOGI("Declaration::SetRemoteMessageEvent");
+    auto& gestureEvent = MaybeResetEvent<CommonGestureEvent>(EventTag::COMMON_REMOTE_MESSAGE_GRESURE_EVENT);
+    if (gestureEvent.IsValid()) {
+        LOGI("Declaration::SetRemoteMessageEvent IsValid");
+        gestureEvent.click.eventMarker = remoteMessage;
         gestureEvent.click.eventMarker.SetCatchMode(false);
         gestureEvent.click.isRefreshed = true;
     }

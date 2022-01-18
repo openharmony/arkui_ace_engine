@@ -27,6 +27,8 @@ bool GestureRecognizer::HandleEvent(const TouchPoint& point)
             HandleTouchMoveEvent(point);
             break;
         case TouchType::DOWN:
+            deviceId_ = point.deviceId;
+            deviceType_ = point.sourceType;
             HandleTouchDownEvent(point);
             break;
         case TouchType::UP:

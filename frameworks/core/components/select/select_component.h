@@ -244,8 +244,13 @@ public:
         if (!popup_) {
             return nullptr;
         }
-
+        selected_ = index;
         return popup_->GetSelectOption(index);
+    }
+
+    std::size_t GetSelected() const
+    {
+        return selected_;
     }
 
     void ClearAllOptions()
@@ -346,6 +351,11 @@ public:
     }
     ACE_DEFINE_COMPONENT_EVENT(OnSelected, void(int32_t));
 
+    RefPtr<SelectPopupComponent> GetSelectPopupComponent() const
+    {
+        return popup_;
+    }
+
 private:
     bool disabled_ { false };
     bool clicked_ { false };
@@ -356,7 +366,7 @@ private:
     RefPtr<SelectTheme> theme_;
     std::function<void()> flushRefreshCallback_;
     Color backgroundColor_ = Color::TRANSPARENT;
-
+    std::size_t selected_ = 0;
     // used for inspector node in PC preview
     int32_t nodeId_ = -1;
 

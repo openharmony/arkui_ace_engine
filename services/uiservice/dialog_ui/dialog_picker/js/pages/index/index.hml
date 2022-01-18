@@ -1,0 +1,27 @@
+<div class="container">
+<!--    <panel id="simplepanel" class="sharePannel" dragbar="true" type="foldable" mode="full" fullheight="256vp" halfheight="256vp" onsizechange="changeSize">-->
+    <div class="share">
+        <div class="shareCard">
+            <div class="shareInfo">
+                <image class="shareIcon" src="{{previewCard.icon}}"></image>
+                <div class="shareText">
+                    <text class="mainText">{{previewCard.mainText}}</text>
+                    <text class="subText">{{previewCard.subText}}</text>
+                </div>
+            </div>
+            <div class="shareButton">
+                <text class="button1" >{{previewCard.button1}}</text>
+                <text class="button2" >{{previewCard.button2}}</text>
+            </div>
+        </div>
+        <swiper class="swiper">
+            <div class="shareAppSelect" for="shareHapList">
+                <div class="shareApp" for="{{$item}}" onClick="onShare({{$item}})">
+                    <image class="AppIcon" src="{{$item.icon}}"></image>
+                    <text class="AppName">{{$item.name}}</text>
+                </div>
+            </div>
+        </swiper>
+    </div>
+<!--    </panel>-->
+</div>

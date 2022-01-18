@@ -268,6 +268,13 @@ void FormElement::CreateCardContainer()
     auto key = info.ToString();
     FormManager::GetInstance().AddNonmatchedContainer(key, subContainer_);
 
+    auto formNode = AceType::DynamicCast<RenderForm>(renderNode_);
+    if (!formNode) {
+        LOGE("form node is null.");
+        return;
+    }
+    formNode->SetSubContainer(subContainer_);
+
     subContainer_->AddFormAcquireCallback([weak = WeakClaim(this)](size_t id) {
         auto element = weak.Upgrade();
         auto uiTaskExecutor =

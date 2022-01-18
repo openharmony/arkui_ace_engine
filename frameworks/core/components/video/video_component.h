@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/utils/utils.h"
+#include "core/components/image/image_component.h"
 #include "core/components/video/resource/player.h"
 #include "core/components/video/resource/texture.h"
 #include "core/components/video/texture_component.h"
@@ -27,6 +28,13 @@
 
 namespace OHOS::Ace {
 
+enum class SeekMode {
+    SEEK_PREVIOUS_SYNC = 0, // sync to keyframes before the time point.
+    SEEK_NEXT_SYNC, // sync to keyframes after the time point.
+    SEEK_CLOSEST_SYNC, // sync to closest keyframes.
+    SEEK_CLOSEST, // seek to frames closest the time point.
+};
+
 class VideoController : public virtual AceType {
     DECLARE_ACE_TYPE(VideoController, AceType);
 
@@ -34,7 +42,7 @@ public:
     using StartImpl = std::function<void()>;
     using PauseImpl = std::function<void()>;
     using StopImpl = std::function<void()>;
-    using SeekToImpl = std::function<void(uint32_t)>;
+    using SeekToImpl = std::function<void(float, SeekMode)>;
     using RequestFullscreenImpl = std::function<void(bool)>;
     using ExitFullscreenImpl = std::function<void(bool)>;
 
@@ -59,10 +67,10 @@ public:
         }
     }
 
-    void SeekTo(uint32_t pos)
+    void SeekTo(float pos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC)
     {
         if (seekToImpl_) {
-            seekToImpl_(pos);
+            seekToImpl_(pos, seekMode);
         }
     }
 
@@ -155,6 +163,16 @@ public:
     void SetPoster(const std::string& poster)
     {
         poster_ = poster;
+    }
+
+    const RefPtr<ImageComponent>& GetPosterImage() const
+    {
+        return posterImage_;
+    }
+
+    void SetPosterImage(const RefPtr<ImageComponent>& posterImage)
+    {
+        posterImage_ = posterImage;
     }
 
     bool NeedControls() const
@@ -407,6 +425,7 @@ private:
     EventMarker fullscreenChangeEventId_;
     FullscreenEvent fullscreenEvent_;
 
+    RefPtr<ImageComponent> posterImage_;
     RefPtr<VideoController> videoController_;
     WeakPtr<Player> player_;
     WeakPtr<Texture> texture_;

@@ -45,6 +45,7 @@ void JsClickFunction::Execute(const ClickInfo& info)
     obj->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
     obj->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+    obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
 
@@ -65,6 +66,7 @@ void JsClickFunction::Execute(const GestureEvent& info)
     obj->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
     obj->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+    obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
 
@@ -75,9 +77,11 @@ void JsClickFunction::Execute(const GestureEvent& info)
     JsFunction::ExecuteJS(1, &param);
 }
 
-void JsClickFunction::Execute(const MouseInfo& info)
+void JsClickFunction::Execute(MouseInfo& info)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> obj = objectTemplate->NewInstance();
     obj->SetProperty<int32_t>("button", static_cast<int32_t>(info.GetButton()));
     obj->SetProperty<int32_t>("action", static_cast<int32_t>(info.GetAction()));
     Offset globalOffset = info.GetGlobalLocation();
@@ -87,13 +91,17 @@ void JsClickFunction::Execute(const MouseInfo& info)
     obj->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
     obj->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+    obj->SetPropertyObject(
+        "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
+    obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
+    obj->Wrap<MouseInfo>(&info);
 
     LOGD("button = %d, action = %d, globalOffset = (%lf, %lf), localOffset = (%lf, %lf),", info.GetButton(),
         info.GetAction(), globalOffset.GetX(), globalOffset.GetY(), localOffset.GetX(), localOffset.GetY());
 
-    JSRef<JSVal> param = obj;
+    JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);
     JsFunction::ExecuteJS(1, &param);
 }
 

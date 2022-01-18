@@ -31,6 +31,8 @@ UIServiceMgrStub::UIServiceMgrStub()
     requestFuncMap_[PUSH] = &UIServiceMgrStub::PushInner;
     requestFuncMap_[REQUEST] = &UIServiceMgrStub::RequestInner;
     requestFuncMap_[RETURN_REQUEST] = &UIServiceMgrStub::ReturnRequestInner;
+    requestFuncMap_[SHOW_DIALOG] = &UIServiceMgrStub::ShowDialogInner;
+    requestFuncMap_[CANCEL_DIALOG] = &UIServiceMgrStub::CancelDialogInner;
 }
 
 UIServiceMgrStub::~UIServiceMgrStub()
@@ -127,6 +129,29 @@ int UIServiceMgrStub::ReturnRequestInner(MessageParcel& data, MessageParcel& rep
     const std::string& dataStr = data.ReadString();
     const std::string& extraData = data.ReadString();
     int32_t result = ReturnRequest(*want, source, dataStr, extraData);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int UIServiceMgrStub::ShowDialogInner(MessageParcel &data, MessageParcel &reply)
+{
+    const std::string& name = data.ReadString();
+    const std::string& params = data.ReadString();
+    auto windowType = static_cast<OHOS::Rosen::WindowType>(data.ReadUint32());
+    int x = data.ReadInt32();
+    int y = data.ReadInt32();
+    int width = data.ReadInt32();
+    int height = data.ReadInt32();
+    auto dialogCallback = iface_cast<OHOS::Ace::IDialogCallback>(data.ReadParcelable<IRemoteObject>());
+    int32_t result = ShowDialog(name, params, windowType, x, y, width, height, dialogCallback);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int UIServiceMgrStub::CancelDialogInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t id = data.ReadInt32();
+    int32_t result = CancelDialog(id);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

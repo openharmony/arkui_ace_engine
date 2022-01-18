@@ -16,12 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_RENDER_POPUP_LIST_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_RENDER_POPUP_LIST_H
 
-#include <functional>
-#include <limits>
-#include <list>
-
-#include "core/animation/bilateral_spring_adapter.h"
-#include "core/animation/simple_spring_chain.h"
 #include "core/components/scroll/scroll_edge_effect.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_v2/indexer/indexer_event_info.h"
@@ -31,10 +25,12 @@
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace::V2 {
-namespace {
-    constexpr int32_t INVALID_POPUP_SELECTED = -1;
-    constexpr int32_t MAX_POPUP_DATA_COUNT = 5;             // not support scroll now.
-}
+inline constexpr size_t INVALID_POPUP_INDEX = std::numeric_limits<size_t>::max();
+inline constexpr int32_t INVALID_POPUP_SELECTED = -1;
+inline constexpr size_t POPUP_ITEM_VIEW_MAX_COUNT = 5;                // not support scroll now.
+inline constexpr int32_t POPUP_ITEM_VIEW_LAST_POS = POPUP_ITEM_VIEW_MAX_COUNT - 1;
+inline constexpr int32_t POPUP_ITEM_VIEW_CONTENT_MAX_COUNT = 7;
+inline constexpr int32_t POPUP_ITEM_DATA_MAX_COUNT = 50;               // the part which over 50 abandoned immediate
 
 class RenderPopupList : public RenderNode {
     DECLARE_ACE_TYPE(V2::RenderPopupList, RenderNode);
@@ -50,30 +46,50 @@ public:
     void PerformLayout() override;
     virtual bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
         TouchTestResult& result) override;
-
-    template<class T>
-    T MakeValue(double mainValue, double crossValue) const
-    {
-        return vertical_ ? T(crossValue, mainValue) : T(mainValue, crossValue);
-    }
-
-    double GetMainAxis(const Offset& size) const
-    {
-        return vertical_ ? size.GetY() : size.GetX();
-    }
+    void OnTouchTestHit(
+        const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
     void OnRequestPopupDataSelected(std::vector<std::string>& data);
     void OnPopupSelected(int32_t selected) const;
 
-private:
-    bool IsValidDisplay();
-    void CalTouchPoint(const Point& globalPoint, int32_t& selected);
+protected:
+    std::list<RefPtr<RenderPopupListItem>> items_;
+    RefPtr<RenderBox> renderBox_;
 
-    bool vertical_ = true;
+private:
+    void CalTouchPoint(const Point& globalPoint, int32_t& selected);
+    double ApplyLayoutParam();
+    double LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam);
+    RefPtr<RenderPopupListItem> RequestAndLayoutNewItem(size_t index, const LayoutParam& layoutParam);
+    void CalculateMainScrollExtent(double curMainPos);
+    void SetItemsPosition();
+    double GetCurrentPosition() const;
+    bool IsOutOfBoundary() const;
+    
+    // receive callback of srcoll and update position
+    void AdjustOffset(Offset& delta, int32_t source);
+    bool UpdateScrollPosition(double offset, int32_t source);
+
+    // scroll effect
+    void ResetEdgeEffect();
+    void SetEdgeEffectAttribute();
+
+    size_t startIndex_ = 0;
     int32_t popupSelected_ = INVALID_POPUP_SELECTED;
-    RefPtr<RawRecognizer> rawRecognizer_;
+    bool reachStart_ = false;
+    bool reachEnd_ = false;
+    bool isOutOfBoundary_ = false;
+    double viewPortHeight_ = 0.0;
+    double viewPortWidth_ = 0.0;
+    double startMainPos_ = 0.0;
+    double endMainPos_ = 0.0;
+    double currentOffset_ = 0.0;
+    double mainScrollExtent_ = 0.0;
+    RefPtr<Scrollable> scrollable_;
+    RefPtr<ScrollEdgeEffect> scrollEffect_;
     RefPtr<PopupListComponent> component_;
-    std::list<RefPtr<RenderPopupListItem>> listItem_;
+    RefPtr<BoxComponent> boxComponent_;
+    std::vector<std::string> datas_;
 
     OnPopupSelectedFunc popupSelectedEventFun_;
 

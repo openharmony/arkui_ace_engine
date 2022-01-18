@@ -237,7 +237,7 @@ void PluginElement::RunPluginContainer()
     }
     pluginNode->SetPluginSubContainer(pluginSubContainer_);
 
-    uiTaskExecutor.PostTask([pluginSubContainerId = pluginSubContainerId_, weak, plugin] {
+    uiTaskExecutor.PostTask([weak, plugin] {
         auto pluginElement = weak.Upgrade();
         if (!pluginElement) {
             LOGE("pluginElement is nullptr.");
@@ -259,7 +259,7 @@ void PluginElement::RunPluginContainer()
             pluginElement->HandleOnErrorEvent("1", "package path is empty.");
             return;
         }
-        container->RunPlugin(pluginSubContainerId, packagePathStr, info.pluginName, plugin->GetData());
+        container->RunPlugin(packagePathStr, info.moduleName, info.source, plugin->GetData());
     });
 }
 
@@ -268,50 +268,126 @@ RefPtr<RenderNode> PluginElement::CreateRenderNode()
     return RenderPlugin::Create();
 }
 
-std::string PluginElement::GetPackagePath(const WeakPtr<PluginElement>& weak, const RequestPluginInfo& info) const
+std::string PluginElement::GetPackagePath(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const
+{
+    std::string packagePathStr;
+    size_t pos = info.pluginName.rfind(".js");
+    if (info.pluginName.front() == '/' && pos != std::string::npos) {
+        packagePathStr = GetPackagePathByAbsolutePath(weak, info);
+    } else {
+        packagePathStr = GetPackagePathByWant(weak, info);
+    }
+
+    return packagePathStr;
+}
+
+std::string PluginElement::GetPackagePathByAbsolutePath(
+    const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const
 {
     std::string packagePathStr;
     auto pluginElement = weak.Upgrade();
-    if (pluginElement) {
-        std::vector<std::string> strList;
-        pluginElement->SplitString(info.bundleName, '/', strList);
-        if (strList.empty()) {
-            LOGE("App bundleName or abilityName is empty.");
-            pluginElement->HandleOnErrorEvent("1", "App bundleName is empty");
-            return packagePathStr;
-        }
+    if (!pluginElement) {
+        return packagePathStr;
+    }
 
-        auto bms = PluginComponentManager::GetInstance()->GetBundleManager();
-        if (!bms) {
-            LOGE("Bms bundleManager is nullptr.");
-            pluginElement->HandleOnErrorEvent("1", "Bms bundleManager is nullptr.");
-            return packagePathStr;
-        }
-
-        if (strList.size() == 1) {
-            AppExecFwk::BundleInfo bundleInfo;
-            bool ret = bms->GetBundleInfo(strList[0], AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo);
-            if (!ret) {
-                LOGE("Bms get bundleName failed!");
-                pluginElement->HandleOnErrorEvent("1", "Bms get bundleName failed!");
-                return packagePathStr;
-            }
-            packagePathStr = bundleInfo.applicationInfo.entryDir + "/";
+    std::string assets = "assets/js/";
+    size_t posAssets = info.pluginName.rfind(assets);
+    if (posAssets != std::string::npos) {
+        packagePathStr = info.pluginName.substr(0, posAssets);
+        size_t posModule = info.pluginName.find("/", posAssets + assets.size());
+        if (posModule != std::string::npos) {
+            info.moduleName = info.pluginName.substr(posAssets + assets.size(), posModule-(posAssets + assets.size()));
+            info.source = info.pluginName.substr(posModule);
         } else {
-            AAFwk::Want want;
-            AppExecFwk::AbilityInfo abilityInfo;
-            AppExecFwk::ElementName element("", strList[0], strList[1]);
-            want.SetElement(element);
-            bool ret = bms->QueryAbilityInfo(want, abilityInfo);
-            if (!ret) {
-                LOGE("Bms get abilityInfo failed!");
-                pluginElement->HandleOnErrorEvent("1", "Bms get bundleName failed!");
-                return packagePathStr;
-            }
-            packagePathStr = abilityInfo.applicationInfo.codePath + "/" + abilityInfo.package + "/";
+            info.moduleName = "/";
+            info.source = info.pluginName.substr(posAssets + assets.size());
         }
+    } else {
+        size_t pos = info.pluginName.rfind("/");
+        packagePathStr = info.pluginName.substr(0, pos+1);
+        info.source = info.pluginName.substr(pos+1);
+        info.moduleName = "/";
     }
     return packagePathStr;
+}
+
+std::string PluginElement::GetPackagePathByWant(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const
+{
+    std::string packagePathStr;
+    auto pluginElement = weak.Upgrade();
+    if (!pluginElement) {
+        return packagePathStr;
+    }
+
+    std::vector<std::string> strList;
+    pluginElement->SplitString(info.bundleName, '/', strList);
+    if (strList.empty()) {
+        LOGE("App bundleName or abilityName is empty.");
+        pluginElement->HandleOnErrorEvent("1", "App bundleName is empty");
+        return packagePathStr;
+    }
+
+    auto bms = PluginComponentManager::GetInstance()->GetBundleManager();
+    if (!bms) {
+        LOGE("Bms bundleManager is nullptr.");
+        pluginElement->HandleOnErrorEvent("1", "Bms bundleManager is nullptr.");
+        return packagePathStr;
+    }
+
+    if (strList.size() == 1) {
+        AppExecFwk::BundleInfo bundleInfo;
+        bool ret = bms->GetBundleInfo(strList[0], AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo);
+        if (!ret) {
+            LOGE("Bms get bundleName failed!");
+            pluginElement->HandleOnErrorEvent("1", "Bms get bundleName failed!");
+            return packagePathStr;
+        }
+        packagePathStr = bundleInfo.applicationInfo.entryDir + "/";
+    } else {
+        AAFwk::Want want;
+        AppExecFwk::AbilityInfo abilityInfo;
+        AppExecFwk::ElementName element("", strList[0], strList[1]);
+        want.SetElement(element);
+        bool ret = bms->QueryAbilityInfo(want, abilityInfo);
+        if (!ret) {
+            LOGE("Bms get abilityInfo failed!");
+            pluginElement->HandleOnErrorEvent("1", "Bms get bundleName failed!");
+            return packagePathStr;
+        }
+        packagePathStr = abilityInfo.applicationInfo.codePath + "/" + abilityInfo.package + "/";
+    }
+    GetModuleNameByWant(weak, info);
+
+    return packagePathStr;
+}
+
+void PluginElement::GetModuleNameByWant(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const
+{
+    auto pluginElement = weak.Upgrade();
+    if (!pluginElement) {
+        return;
+    }
+
+    std::vector<std::string> strList;
+    pluginElement->SplitString(info.pluginName, '&', strList);
+    if (strList.empty()) {
+        LOGE("Template source is empty.");
+        pluginElement->HandleOnErrorEvent("1", "Template source is empty.");
+        return;
+    }
+    if (strList.size() == 1) {
+        if (info.pluginName.rfind(".js") != std::string::npos) {
+            info.moduleName = "default";
+            info.source = info.pluginName;
+        } else {
+            info.moduleName = info.pluginName;
+        }
+    } else {
+        if (strList[0].rfind(".js") != std::string::npos) {
+            info.source = strList[1];
+        }
+        info.moduleName = strList[0];
+    }
 }
 
 void PluginElement::SplitString(const std::string& str, char tag, std::vector<std::string>& strList)

@@ -43,6 +43,11 @@ public:
     std::unique_ptr<JsonValue> GetWeekStyle() const;
     std::unique_ptr<JsonValue> GetWorkStateStyle() const;
     std::string GetAxis() const;
+    std::string ConvertWeekToString(std::string week) const;
+    std::string ConvertOffDayToString(std::string offDay) const;
+    std::vector<std::string> SplitString(const std::string& s, const std::string& c) const;
+    std::string ConvertOffDayFamily(const std::vector<std::string>& data) const;
+
 private:
     RefPtr<RenderCalendar> GetRenderCalendar() const;
     std::unique_ptr<JsonValue> ConvertThemeToDayStyle(const CalendarThemeStructure& theme) const;

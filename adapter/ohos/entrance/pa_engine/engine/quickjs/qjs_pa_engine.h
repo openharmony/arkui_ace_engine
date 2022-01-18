@@ -180,6 +180,10 @@ private:
     void LoadLibrary();
     void UnloadLibrary();
 
+    void RegisterWorker();
+    void RegisterInitWorkerFunc();
+    void RegisterAssetFunc();
+
     RefPtr<QjsPaEngineInstance> engineInstance_;
     int32_t instanceId_ = 0;
     QuickJSNativeEngine* nativeEngine_ = nullptr;

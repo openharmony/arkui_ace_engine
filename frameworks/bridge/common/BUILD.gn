@@ -153,6 +153,11 @@ template("bridge_common") {
       ]
     }
 
+    if (defined(config.web_components_support) &&
+        config.web_components_support) {
+      sources += [ "dom/dom_web.cpp" ]
+    }
+
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   }
 }

@@ -114,7 +114,7 @@ protected:
     int64_t textureId_ = INVALID_TEXTURE;
     Size drawSize_;   // size of draw area
     Size sourceSize_; // size of source
-#ifdef OHOS_STANDARD_SYSTEM
+#if (defined OHOS_STANDARD_SYSTEM) && (!defined ENABLE_ROSEN_BACKEND)
     ImageFit imageFit_ = ImageFit::FILL;
 #else
     ImageFit imageFit_ = ImageFit::CONTAIN;
@@ -122,6 +122,7 @@ protected:
     ImageObjectPosition imagePosition_;
     double alignmentX_ = 0.0;
     double alignmentY_ = 0.0;
+    double controlsHeight_ = 0.0;
 
 private:
     void CalculateFitContain();
@@ -130,6 +131,7 @@ private:
     void CalculateFitNone();
     void CalculateFitScaleDown();
     void ApplyObjectPosition();
+    void InitControlsHeight(const RefPtr<Component>& component);
     HiddenChangeEvent hiddenChangeEvent_;
     TextureSizeChangeEvent textureSizeChangeEvent_;
     TextureOffsetChangeEvent textureOffsetChangeEvent_;

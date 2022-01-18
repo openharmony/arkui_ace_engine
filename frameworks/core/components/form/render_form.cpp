@@ -56,4 +56,21 @@ void RenderForm::PerformLayout()
     MarkNeedRender();
 }
 
+bool RenderForm::TouchTest(const Point& globalPoint,
+    const Point& parentLocalPoint, const TouchRestrict& touchRestrict, TouchTestResult& result)
+{
+    auto context = GetContext().Upgrade();
+    if (context) {
+        auto pluginContext = GetSubPipelineContext();
+        if (pluginContext) {
+            double x = globalPoint.GetX() - pluginContext->GetPluginOffset().GetX();
+            double y = globalPoint.GetY() - pluginContext->GetPluginOffset().GetY();
+            if (x <= rootWidht_.Value() && y <= rootHeight_.Value()) {
+                context->SetTouchPipeline(WeakPtr<PipelineContext>(pluginContext));
+            }
+        }
+    }
+    return true;
+}
+
 }; // namespace OHOS::Ace

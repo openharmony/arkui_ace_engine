@@ -18,11 +18,12 @@
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/ui/rs_texture_node.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
 #endif
 
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
+#include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "core/components/display/render_display.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -47,12 +48,10 @@ void RosenRenderTexture::Update(const RefPtr<Component>& component)
 
 void RosenRenderTexture::Paint(RenderContext& context, const Offset& offset)
 {
+    SyncGeometryProperties();
 #ifdef OHOS_PLATFORM
     const auto renderContext = static_cast<RosenRenderContext*>(&context);
-    auto rsNode = std::static_pointer_cast<OHOS::Rosen::RSTextureNode>(renderContext->GetRSNode());
-
-    OHOS::Rosen::RectF drawRect(alignmentX_, alignmentY_, drawSize_.Width(), drawSize_.Height());
-    rsNode->UpdateTexture(textureId_, false, drawRect);
+    auto rsNode = std::static_pointer_cast<OHOS::Rosen::RSSurfaceNode>(renderContext->GetRSNode());
 
     if (IsAddGaussianFuzzy()) {
         AddGaussianFuzzy(context, offset);
@@ -71,9 +70,8 @@ void RosenRenderTexture::SyncGeometryProperties()
         return;
     }
     Offset paintOffset = GetPaintOffset();
-    Size paintSize = GetLayoutSize();
-    rsNode->SetFrame(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
-    rsNode->SetBounds(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
+    rsNode->SetBounds(paintOffset.GetX() + alignmentX_, paintOffset.GetY() + alignmentY_,
+        drawSize_.Width(), drawSize_.Height() - controlsHeight_);
 }
 
 void RosenRenderTexture::InitGaussianFuzzyParas()
@@ -164,7 +162,18 @@ void RosenRenderTexture::DumpTree(int32_t depth)
 
 std::shared_ptr<RSNode> RosenRenderTexture::CreateRSNode() const
 {
-    return OHOS::Rosen::RSTextureNode::Create();
+    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig;
+    return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+}
+
+OHOS::sptr<OHOS::Surface> RosenRenderTexture::GetSurface()
+{
+    auto surfaceNode = OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(GetRSNode());
+    if (surfaceNode) {
+        auto surface = surfaceNode->GetSurface();
+        return surface;
+    }
+    return nullptr;
 }
 
 } // namespace OHOS::Ace

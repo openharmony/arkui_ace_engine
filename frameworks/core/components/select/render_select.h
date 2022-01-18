@@ -39,6 +39,11 @@ public:
         }
     }
 
+    RefPtr<SelectComponent> GetSelectComponent() const
+    {
+        return data_;
+    }
+
     void SetFocusCallback(const std::function<void()>& value)
     {
         onFocusCallback_ = value;

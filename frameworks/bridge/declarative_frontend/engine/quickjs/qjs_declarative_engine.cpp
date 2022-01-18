@@ -22,6 +22,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
+#include "core/common/container_scope.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_helpers.h"
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
@@ -91,13 +92,14 @@ void QJSDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_](bool needSync) {
+    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_, id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([nativeEngine, needSync]() {
+        delegate->PostJsTask([nativeEngine, needSync, id]() {
+            ContainerScope scope(id);
             if (nativeEngine == nullptr) {
                 return;
             }

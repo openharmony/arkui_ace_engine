@@ -21,8 +21,10 @@
 #include <ipc_types.h>
 #include <iremote_broker.h>
 
+#include "dialog_callback_interface.h"
 #include "ui_service_interface.h"
 #include "uri.h"
+#include "wm/window.h"
 
 namespace OHOS {
 namespace Ace {
@@ -51,6 +53,17 @@ public:
     virtual int ReturnRequest(const AAFwk::Want& want, const std::string& source,  const std::string& data,
         const std::string& extraData) = 0;
 
+    virtual int ShowDialog(const std::string& name,
+                           const std::string& params,
+                           OHOS::Rosen::WindowType windowType,
+                           int x,
+                           int y,
+                           int width,
+                           int height,
+                           const sptr<OHOS::Ace::IDialogCallback>& dialogCallback) = 0;
+
+    virtual int CancelDialog(int id) = 0;
+
     enum {
         // ipc id 1-1000 for kit
         // ipc id for RegisterCallBack (1)
@@ -60,6 +73,8 @@ public:
         PUSH,
         REQUEST,
         RETURN_REQUEST,
+        SHOW_DIALOG,
+        CANCEL_DIALOG,
     };
 };
 }  // namespace Ace

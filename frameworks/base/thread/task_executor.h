@@ -69,6 +69,34 @@ public:
     }
 
     /**
+     * Post a task to the specified thread with a trace id.
+     *
+     * @param task Task which need execution.
+     * @param type FrontendType of task, used to specify the thread.
+     * @param id The id to trace the task.
+     * @return Returns 'true' whether task has been post successfully.
+     */
+    bool PostTaskWithTraceId(Task&& task, TaskType type, int32_t id) const
+    {
+        Task wrappedTask = WrapTaskWithTraceId(std::move(task), id);
+        return PostDelayedTask(std::move(wrappedTask), type, 0);
+    }
+
+    /**
+     * Post a task to the specified thread.
+     *
+     * @param task Task which need execution.
+     * @param type FrontendType of task, used to specify the thread.
+     * @param id The id to trace the task.
+     * @return Returns 'true' if task has been posted successfully.
+     */
+    bool PostTaskWithTraceId(const Task& task, TaskType type, int32_t id) const
+    {
+        Task wrappedTask = WrapTaskWithTraceId(Task(task), id);
+        return PostDelayedTask(std::move(wrappedTask), type, 0);
+    }
+
+    /**
      * Post a delayed task to the specified thread.
      * Never allow to post a background delayed task.
      *
@@ -172,6 +200,7 @@ protected:
     TaskExecutor() = default;
 
     virtual bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const = 0;
+    virtual Task WrapTaskWithTraceId(Task&& task, int32_t id) const = 0;
 
 #ifdef ACE_DEBUG
     virtual bool OnPreSyncTask(TaskType type) const

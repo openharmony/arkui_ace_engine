@@ -160,6 +160,16 @@ public:
         return isMenu_;
     }
 
+    bool IsContextMenu() const
+    {
+        return isContextMenu_;
+    }
+
+    void SetIsContextMenu(bool isContextMenu)
+    {
+        isContextMenu_ = isContextMenu;
+    }
+
     const Dimension& GetHorizontalSpacing() const
     {
         return theme_->GetHorizontalSpacing();
@@ -281,6 +291,7 @@ private:
     Offset selectLeftTop_;
     Offset selectRightBottom_;
     bool isMenu_ = false;
+    bool isContextMenu_ = false;
     std::vector<RefPtr<OptionComponent>> options_;
     std::string title_;
     RefPtr<SelectTheme> theme_;

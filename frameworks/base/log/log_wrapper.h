@@ -22,16 +22,24 @@
 
 #include "base/utils/macros.h"
 
-#define PRINT_LOG(level, fmt, ...)                                                                          \
-    do {                                                                                                    \
-        if (OHOS::Ace::LogWrapper::JudgeLevel(OHOS::Ace::LogLevel::level)) {                                \
-            OHOS::Ace::LogWrapper::PrintLog(OHOS::Ace::LogDomain::FRAMEWORK, OHOS::Ace::LogLevel::level,    \
-                "[%{private}-20s(%{private}s)] " fmt, OHOS::Ace::LogWrapper::GetBriefFileName(__FILE__),    \
-                __FUNCTION__, ##__VA_ARGS__);                                                               \
-        }                                                                                                   \
+#ifdef ACE_INSTANCE_LOG
+#define ACE_FMT_PREFIX "[%{private}s(%{private}s)-(%{public}d)] "
+#define ACE_LOG_ID ,OHOS::Ace::LogWrapper::GetId()
+#else
+#define ACE_FMT_PREFIX "[%{private}s(%{private}s)] "
+#define ACE_LOG_ID
+#endif
+
+#define PRINT_LOG(level, fmt, ...)                                                                              \
+    do {                                                                                                        \
+        if (OHOS::Ace::LogWrapper::JudgeLevel(OHOS::Ace::LogLevel::level)) {                                    \
+            OHOS::Ace::LogWrapper::PrintLog(OHOS::Ace::LogDomain::FRAMEWORK, OHOS::Ace::LogLevel::level,        \
+                ACE_FMT_PREFIX fmt, OHOS::Ace::LogWrapper::GetBriefFileName(__FILE__), __FUNCTION__ ACE_LOG_ID, \
+                ##__VA_ARGS__);                                                                                 \
+        }                                                                                                       \
     } while (0)
 
-#ifdef ACE_DEBUG
+#ifdef ACE_DEBUG_LOG
 #define LOGD(fmt, ...) PRINT_LOG(DEBUG, fmt, ##__VA_ARGS__)
 #else
 #define LOGD(fmt, ...)
@@ -99,6 +107,13 @@ public:
         }
     }
 
+    static void ReplaceFormatString(const std::string& prefix, const std::string& replace, std::string& str)
+    {
+        for (auto pos = str.find(prefix, 0); pos != std::string::npos; pos = str.find(prefix, pos)) {
+            str.replace(pos, prefix.size(), replace);
+        }
+    }
+
     static void PrintLog(LogDomain domain, LogLevel level, const char* fmt, ...)
         __attribute__((__format__(os_log, 3, 4)))
     {
@@ -111,6 +126,7 @@ public:
     // MUST implement these interface on each platform.
     static char GetSeparatorCharacter();
     static void PrintLog(LogDomain domain, LogLevel level, const char* fmt, va_list args);
+    static int32_t GetId();
 
 private:
     LogWrapper() = delete;

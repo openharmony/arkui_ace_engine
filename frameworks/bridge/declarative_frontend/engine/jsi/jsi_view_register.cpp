@@ -54,6 +54,12 @@
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
 #endif
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef WEB_SUPPORTED
+#include "frameworks/bridge/declarative_frontend/jsview/js_web.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
+#endif
+#endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_gesture.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
@@ -127,16 +133,21 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
+#endif
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
-#include "core/components_v2/inspector/inspector.h"
+#include "frameworks/core/common/container.h"
+#include "frameworks/core/components_v2/inspector/inspector.h"
 
 namespace OHOS::Ace::Framework {
 
 panda::Local<panda::JSValueRef> JsLoadDocument(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
     const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
 {
-    LOGD("Load Document");
+    LOGI("Load Document start");
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
@@ -150,10 +161,10 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::EcmaVM* vm, panda::Local<p
     JSView* view = static_cast<JSView*>(obj->GetNativePointerField(0));
 
     auto runtime = JsiDeclarativeEngineInstance::GetJsRuntime();
-    auto page = JsiDeclarativeEngineInstance::GetStagingPage(runtime);
-    JsiDeclarativeEngineInstance::RootViewHandle(runtime, obj);
+    auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
+    JsiDeclarativeEngineInstance::RootViewHandle(obj);
 
-    LOGD("Load Document setting root view");
+    LOGI("Load Document setting root view, page[%{public}d]", page->GetPageId());
     auto rootComponent = view->CreateComponent();
     std::list<RefPtr<Component>> stackChildren;
     stackChildren.emplace_back(rootComponent);
@@ -266,11 +277,7 @@ panda::Local<panda::JSValueRef> JsGetMediaResource(panda::EcmaVM* vm, panda::Loc
 
 RefPtr<FrontendDelegate> JsGetFrontendDelegate()
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    if (!runtime) {
-        return nullptr;
-    }
-    auto engineInstance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
+    auto engineInstance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
     if (engineInstance == nullptr) {
         LOGE("engineInstance is null!");
         return nullptr;
@@ -810,11 +817,21 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "FormComponent", JSForm::JSBind },
 #endif
 #endif
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef WEB_SUPPORTED
+    { "Web", JSWeb::JSBind },
+    { "WebController", JSWebController::JSBind },
+#endif
+#endif
 #ifndef WEARABLE_PRODUCT
     { "Camera", JSCamera::JSBind },
     { "Piece", JSPiece::JSBind },
     { "Rating", JSRating::JSBind },
     { "Video", JSVideo::JSBind },
+#endif
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    { "XComponent", JSXComponent::JSBind },
+    { "XComponentController", JSXComponentController::JSBind },
 #endif
     { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
@@ -876,6 +893,11 @@ void RegisterAllModule(BindingTarget globalObj)
     JSTextAreaController::JSBind(globalObj);
     JSSearchController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef WEB_SUPPORTED
+    JSWebController::JSBind(globalObj);
+#endif
+#endif
     for (auto& iter : bindFuncs) {
         iter.second(globalObj);
     }
@@ -908,6 +930,12 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
         JSTextAreaController::JSBind(globalObj);
     } else if ((*func).first == "Search") {
         JSSearchController::JSBind(globalObj);
+    } else if ((*func).first == "Web") {
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef WEB_SUPPORTED
+        JSWebController::JSBind(globalObj);
+#endif
+#endif
     }
 
     (*func).second(globalObj);

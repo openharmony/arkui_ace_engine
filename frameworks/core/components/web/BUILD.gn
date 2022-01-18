@@ -13,15 +13,37 @@
 
 import("//foundation/ace/ace_engine/frameworks/core/components/components.gni")
 
+if (is_standard_system && !use_mingw_win && !use_mac) {
+  config("ohos_web_config") {
+    include_dirs = [
+      "//utils/native/base/include",
+      "//foundation/windowmanager/interfaces/innerkits/wm",
+      "//foundation/web/webview/interfaces/innerkits/ohos_webview",
+      "//foundation/appexecfwk/standard/kits/appkit/native/app/include",
+    ]
+  }
+}
+
 build_component("web") {
   sources = [
     "flutter_render_web.cpp",
     "render_web.cpp",
     "render_web_creator.cpp",
+    "resource/web_client_impl.cpp",
     "resource/web_delegate.cpp",
     "resource/web_resource.cpp",
     "web_component.cpp",
     "web_element.cpp",
   ]
   rosen_sources = [ "rosen_render_web.cpp" ]
+
+  if (is_standard_system && !use_mingw_win && !use_mac) {
+    configs = [ ":ohos_web_config" ]
+    deps = [
+      "//foundation/appexecfwk/standard/kits:appkit_native",
+      "//foundation/web/webview/ohos_webview:libwebview",
+      "//foundation/windowmanager/wm:libwm",
+      "//foundation/windowmanager/wm:libwmutil",
+    ]
+  }
 }

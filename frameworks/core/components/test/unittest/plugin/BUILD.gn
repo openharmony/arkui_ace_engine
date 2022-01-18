@@ -216,19 +216,9 @@ ohos_unittest("PluginSubContainerTest") {
   deps = [
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
-    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
-    "//foundation/aafwk/standard/services/abilitymgr:abilityms",
-    "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
-    "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
   ]
 
-  external_deps = [
-    "aafwk_standard:want",
-    "appexecfwk_standard:appexecfwk_base",
-    "appexecfwk_standard:appexecfwk_core",
-    "ipc:ipc_core",
-  ]
+  external_deps = [ "aafwk_standard:want" ]
 
   if (!is_standard_system) {
     subsystem_name = "ace"

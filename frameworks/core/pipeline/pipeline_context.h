@@ -210,6 +210,9 @@ public:
     // Called by view when mouse event received.
     void OnMouseEvent(const MouseEvent& event);
 
+    // Called by view when axis event received.
+    void OnAxisEvent(const AxisEvent& event);
+
     // Called by container when rotation event received.
     // if return false, then this event needs platform to handle it.
     bool OnRotationEvent(const RotationEvent& event) const;
@@ -501,11 +504,15 @@ public:
     {
         return multiModalManager_;
     }
+#endif
+
+    void SetWindowOnShow();
+
+    void SetWindowOnHide();
 
     void OnShow();
 
     void OnHide();
-#endif
 
     void MarkForcedRefresh()
     {
@@ -955,6 +962,16 @@ public:
         return pluginOffset_;
     }
 
+    void SetPluginEventOffset(const Offset& offset)
+    {
+        pluginEventOffset_ = offset;
+    }
+
+    Offset GetPluginEventOffset() const
+    {
+        return pluginEventOffset_;
+    }
+
     void SetTouchPipeline(WeakPtr<PipelineContext> context);
     void RemoveTouchPipeline(WeakPtr<PipelineContext> context);
 
@@ -1182,6 +1199,7 @@ private:
 
     std::vector<WeakPtr<PipelineContext>> touchPluginPipelineContext_;
     Offset pluginOffset_ { 0, 0 };
+    Offset pluginEventOffset_ { 0, 0 };
 
     bool isRebuildFinished_ = false;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;

@@ -25,10 +25,13 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/image/render_image.h"
+#include "core/gestures/click_recognizer.h"
+#include "core/event/axis_event.h"
 #include "core/gestures/raw_recognizer.h"
 
 namespace OHOS::Ace {
 
+using UpdateBuilderFunc = std::function<void(const Dimension&, const Dimension&)>;
 constexpr int32_t MAX_GESTURE_SIZE = 3;
 
 class ACE_EXPORT RenderBox : public RenderBoxBase {
@@ -62,7 +65,7 @@ public:
         });
     }
 
-    void OnStatusStyleChanged(StyleState state) override;
+    void OnStatusStyleChanged(VisualState state) override;
     void UpdateStyleFromRenderNode(PropertyAnimatableType type) override;
 
     const Color& GetColor() const override
@@ -174,29 +177,29 @@ public:
     void MouseHoverExitTest() override;
     void AnimateMouseHoverEnter() override;
     void AnimateMouseHoverExit() override;
-    void HandleMouseEvent(const MouseEvent& event) override;
+    bool HandleMouseEvent(const MouseEvent& event) override;
     void HandleMouseHoverEvent(MouseState mouseState) override;
     WeakPtr<RenderNode> CheckHoverNode() override;
 
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
-    const OnDragFunc& GetOnDragEnter() const
+    const OnDropFunc& GetOnDragEnter() const
     {
         return onDragEnter_;
     }
 
-    const OnDragFunc& GetOnDragMove() const
+    const OnDropFunc& GetOnDragMove() const
     {
         return onDragMove_;
     }
 
-    const OnDragFunc& GetOnDragLeave() const
+    const OnDropFunc& GetOnDragLeave() const
     {
         return onDragLeave_;
     }
 
-    const OnDragFunc& GetOnDrop() const
+    const OnDropFunc& GetOnDrop() const
     {
         return onDrop_;
     }
@@ -204,7 +207,26 @@ public:
     void AddRecognizerToResult(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result);
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void SetLocalPoint(const Point& localPoint)
+    {
+        localPoint_ = localPoint;
+    }
+
+    const Point& GetLocalPoint() const
+    {
+        return localPoint_;
+    }
+
+    const UpdateBuilderFunc& GetUpdateBuilderFuncId() const
+    {
+        return updateBuilder_;
+    }
+
+    void SetUpdateBuilderFuncId(const UpdateBuilderFunc& updateBuilder)
+    {
+        updateBuilder_ = updateBuilder;
+    }
+
     void SetPreTargetRenderBox(const RefPtr<RenderBox>& preTargetRenderBox)
     {
         preTargetRenderBox_ = preTargetRenderBox;
@@ -214,7 +236,12 @@ public:
     {
         return preTargetRenderBox_;
     }
-#endif
+
+    RefPtr<RenderBox> FindTargetRenderBox(const RefPtr<PipelineContext> context, const GestureEvent& info);
+
+    void ResetController(RefPtr<Animator>& controller);
+    void CreateColorAnimation(
+        RefPtr<KeyframeAnimation<Color>>& colorAnimation, const Color& beginValue, const Color& endValue);
 
 protected:
     void ClearRenderObject() override;
@@ -238,15 +265,13 @@ protected:
     Color hoverColor_ = Color::TRANSPARENT;
     float scale_ = 1.0f;
     bool isZoom = false;
+    bool isHoveredBoard = false;
+    bool isHoveredScale = false;
 
 private:
-    void ResetController(RefPtr<Animator>& controller);
-    void CreateColorAnimation(
-        RefPtr<KeyframeAnimation<Color>>& colorAnimation, const Color& beginValue, const Color& endValue);
     void UpdateBackDecoration(const RefPtr<Decoration>& newDecoration);
     void UpdateFrontDecoration(const RefPtr<Decoration>& newDecoration);
-    void CreateDragDropRecognizer();
-
+    void HandleRemoteMessage(const ClickInfo& clickInfo);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     void CalculateScale(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size);
     void CalculateRotate(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size);
@@ -257,24 +282,36 @@ private:
     // 0 - low priority gesture, 1 - high priority gesture, 2 - parallel priority gesture
     std::array<RefPtr<GestureRecognizer>, MAX_GESTURE_SIZE> recognizers_;
 
-    RefPtr<GestureRecognizer> dragDropGesture_;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    RefPtr<RenderBox> preTargetRenderBox_;
-#endif
-    OnDragFunc onDrag_;
-    OnDragFunc onDragEnter_;
-    OnDragFunc onDragMove_;
-    OnDragFunc onDragLeave_;
-    OnDragFunc onDrop_;
     RefPtr<GestureRecognizer> onClick_;
-    RefPtr<GestureRecognizer> onDoubleClick_;
+    RefPtr<GestureRecognizer> onLongPress_;
     RefPtr<RawRecognizer> touchRecognizer_;
-    RefPtr<StateAttributeList<BoxStateAttribute>> stateAttributeList_;
+    RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_;
     OnHoverCallback onHover_;
     OnMouseCallback onMouse_;
     TextDirection inspectorDirection_ { TextDirection::LTR };
-}; // class RenderBox
 
+    // Drag event
+    void CreateDragDropRecognizer();
+    void PanOnActionStart(const GestureEvent& info);
+    void PanOnActionUpdate(const GestureEvent& info);
+    void PanOnActionEnd(const GestureEvent& info);
+    void SetSelectedIndex(const GestureEvent& info);
+    void SetInsertIndex(const RefPtr<RenderBox>& targetRenderBox, const GestureEvent& info);
+    RefPtr<GestureRecognizer> dragDropGesture_;
+    OnDragFunc onDragStart_;
+    OnDropFunc onDragEnter_;
+    OnDropFunc onDragMove_;
+    OnDropFunc onDragLeave_;
+    OnDropFunc onDrop_;
+    Point localPoint_;
+    UpdateBuilderFunc updateBuilder_;
+    RefPtr<RenderBox> preTargetRenderBox_;
+    RefPtr<RenderBox> initialRenderBox_;
+    Size selectedItemSize_;
+    size_t selectedIndex_ = DEFAULT_INDEX;
+    size_t insertIndex_ = DEFAULT_INDEX;
+    std::function<void(const std::shared_ptr<ClickInfo>&)> remoteMessageEvent_;
+}; // class RenderBox
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_RENDER_BOX_H

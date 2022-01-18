@@ -38,6 +38,7 @@ const std::unordered_map<std::string, std::function<std::string(const TextInputC
     { "fontWeight", [](const TextInputComposedElement& inspector) { return inspector.GetTextInputFontWeight(); } },
     { "fontFamily", [](const TextInputComposedElement& inspector) { return inspector.GetTextInputFontFamily(); } },
     { "maxLength", [](const TextInputComposedElement& inspector) { return inspector.GetTextMaxLength(); } },
+    { "inputFilter", [](const TextInputComposedElement& inspector) { return inspector.GetTextInputFilter(); } },
 };
 
 } // namespace
@@ -58,6 +59,7 @@ void TextInputComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(std::string("fontWeight: ").append(GetTextInputFontWeight()));
     DumpLog::GetInstance().AddDesc(std::string("fontFamily: ").append(GetTextInputFontFamily()));
     DumpLog::GetInstance().AddDesc(std::string("maxLength: ").append(GetTextMaxLength()));
+    DumpLog::GetInstance().AddDesc(std::string("inputFilter: ").append(GetTextInputFilter()));
 }
 
 std::unique_ptr<JsonValue> TextInputComposedElement::ToJsonObject() const
@@ -270,5 +272,13 @@ std::string TextInputComposedElement::ConvertFontFamily(const std::vector<std::s
     return result;
 }
 
+std::string TextInputComposedElement::GetTextInputFilter() const
+{
+    auto render = GetRenderTextField();
+    if (render) {
+        return render->GetTextInputFilter();
+    }
+    return "";
+}
 
 } // namespace OHOS::Ace::V2

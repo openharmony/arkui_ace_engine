@@ -44,6 +44,8 @@ private:
     int RequestInner(MessageParcel& data, MessageParcel& reply);
     int ReturnRequestInner(MessageParcel& data, MessageParcel& reply);
     using RequestFuncType = int (UIServiceMgrStub ::*)(MessageParcel& data, MessageParcel& reply);
+    int ShowDialogInner(MessageParcel& data, MessageParcel& reply);
+    int CancelDialogInner(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, RequestFuncType> requestFuncMap_;
 };
 }  // namespace Ace

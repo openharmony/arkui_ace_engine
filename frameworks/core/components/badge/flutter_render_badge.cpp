@@ -34,7 +34,7 @@ void FlutterRenderBadge::Paint(RenderContext& context, const Offset& offset)
     if (!badgeChild) {
         return;
     }
-    context.PaintChild(badgeChild, offset + badgeChildInitialOffset_);
+    context.PaintChild(badgeChild, offset);
     if (showMessage_) {
         DrawBadge(context, offset);
         if ((!textData_.empty() || badge_->GetMessageCount() > 0) && showMessage_ &&

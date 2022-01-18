@@ -20,6 +20,7 @@
 #include "core/components/video/resource/player.h"
 #include "core/components/video/resource/texture.h"
 #include "core/components/video/video_component_v2.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -58,9 +59,17 @@ void JSVideo::Create(const JSCallbackInfo& info)
     }
 
     JSRef<JSVal> previewUriValue = videoObj->GetProperty("previewUri");
-    if (previewUriValue->IsString()) {
-        videoComponent->SetPoster(previewUriValue->ToString());
+    std::string previewUri;
+    auto noPixMap = ParseJsMedia(previewUriValue, previewUri);
+    RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(previewUri);
+    imageComponent->SetUseSkiaSvg(false);
+    videoComponent->SetPoster(previewUri);
+    if (!noPixMap) {
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+        imageComponent->SetPixmap(CreatePixelMapFromNapiValue(previewUriValue));
+#endif
     }
+    videoComponent->SetPosterImage(imageComponent);
 
     auto controllerObj = videoObj->GetProperty("controller");
     if (controllerObj->IsObject()) {
@@ -283,6 +292,7 @@ void JSVideo::JSBind(BindingTarget globalObj)
     JSClass<JSVideo>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSVideo>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSVideo>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSVideo>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
     JSClass<JSVideo>::Inherit<JSViewAbstract>();
     // override method

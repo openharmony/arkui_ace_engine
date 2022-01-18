@@ -16,8 +16,10 @@
 #include "core/image/image_object.h"
 
 #include "base/thread/background_task_executor.h"
+#include "core/common/container_scope.h"
 #include "core/components/image/render_image.h"
 #include "core/image/flutter_image_cache.h"
+
 namespace OHOS::Ace {
 
 std::string ImageObject::GenerateCacheKey(const std::string& src, Size targetImageSize)
@@ -108,8 +110,9 @@ void StaticImageObject::UploadToGpuForRender(
     bool forceResize,
     bool syncMode)
 {
-    auto task = [ context, renderTaskHolder, successCallback, failedCallback,
-                    imageSize, forceResize, skData = skData_, imageSource = imageSource_] () mutable {
+    auto task = [context, renderTaskHolder, successCallback, failedCallback, imageSize, forceResize, skData = skData_,
+                    imageSource = imageSource_, id = Container::CurrentId()]() mutable {
+        ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
             LOGE("pipline context has been released.");

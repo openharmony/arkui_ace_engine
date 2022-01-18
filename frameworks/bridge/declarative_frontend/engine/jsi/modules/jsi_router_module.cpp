@@ -19,6 +19,7 @@
 #include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
+#include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -55,6 +56,7 @@ std::string ParseRouteParams(const shared_ptr<JsRuntime>& runtime, const shared_
 shared_ptr<JsValue> PagePush(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
+    LOGI("PagePush Start");
     if (argc != 1) {
         LOGE("PagePush args count is invalid");
         return runtime->NewNull();
@@ -62,7 +64,7 @@ shared_ptr<JsValue> PagePush(const shared_ptr<JsRuntime>& runtime, const shared_
 
     std::string uri = ParseRouteUrl(runtime, argv[0], ROUTE_KEY_URI);
     std::string params = ParseRouteParams(runtime, argv[0], ROUTE_KEY_PARAMS);
-    auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
+    auto instance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
     if (instance == nullptr) {
         LOGE("get jsi engine instance failed");
         return runtime->NewNull();
@@ -75,6 +77,7 @@ shared_ptr<JsValue> PagePush(const shared_ptr<JsRuntime>& runtime, const shared_
 shared_ptr<JsValue> PageReplace(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
+    LOGI("PageReplace Start");
     if (argc != 1) {
         LOGE("PageReplace args count is invalid");
         return runtime->NewNull();
@@ -82,7 +85,7 @@ shared_ptr<JsValue> PageReplace(const shared_ptr<JsRuntime>& runtime, const shar
 
     std::string uri = ParseRouteUrl(runtime, argv[0], ROUTE_KEY_URI);
     std::string params = ParseRouteParams(runtime, argv[0], ROUTE_KEY_PARAMS);
-    auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
+    auto instance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
     if (instance == nullptr) {
         LOGE("get jsi engine instance failed");
         return runtime->NewNull();
@@ -95,6 +98,7 @@ shared_ptr<JsValue> PageReplace(const shared_ptr<JsRuntime>& runtime, const shar
 shared_ptr<JsValue> PageBack(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
+    LOGI("PageBack Start");
     if (argc != 1 && argc != 0) {
         LOGE("PageBack args count is invalid");
         return runtime->NewNull();
@@ -106,7 +110,7 @@ shared_ptr<JsValue> PageBack(const shared_ptr<JsRuntime>& runtime, const shared_
         uri = ParseRouteUrl(runtime, argv[0], ROUTE_KEY_URI);
         params = ParseRouteParams(runtime, argv[0], ROUTE_KEY_PARAMS);
     }
-    auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
+    auto instance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
     if (instance == nullptr) {
         LOGE("get jsi engine instance failed");
         return runtime->NewNull();
@@ -119,7 +123,8 @@ shared_ptr<JsValue> PageBack(const shared_ptr<JsRuntime>& runtime, const shared_
 shared_ptr<JsValue> PageClear(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
+    LOGI("PageClear Start");
+    auto instance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
     if (instance == nullptr) {
         LOGE("get jsi engine instance failed");
         return runtime->NewNull();
@@ -132,7 +137,8 @@ shared_ptr<JsValue> PageClear(const shared_ptr<JsRuntime>& runtime, const shared
 shared_ptr<JsValue> PageGetLength(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
+    LOGI("PageGetLength Start");
+    auto instance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
     if (instance == nullptr) {
         LOGE("get jsi engine instance failed");
         return runtime->NewNull();
@@ -145,7 +151,8 @@ shared_ptr<JsValue> PageGetLength(const shared_ptr<JsRuntime>& runtime, const sh
 shared_ptr<JsValue> PageGetState(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
+    LOGI("PageGetState Start");
+    auto instance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
     if (instance == nullptr) {
         LOGE("get jsi engine instance failed");
         return runtime->NewNull();
@@ -165,7 +172,8 @@ shared_ptr<JsValue> PageGetState(const shared_ptr<JsRuntime>& runtime, const sha
 shared_ptr<JsValue> PageGetParams(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
+    LOGI("PageGetParams Start");
+    auto instance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
     if (instance == nullptr) {
         LOGE("get jsi engine instance failed");
         return runtime->NewNull();

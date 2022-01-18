@@ -134,6 +134,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
@@ -908,6 +909,7 @@ void JsRegisterViews(BindingTarget globalObj)
 #endif
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     JSXComponent::JSBind(globalObj);
+    JSXComponentController::JSBind(globalObj);
 #endif
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);

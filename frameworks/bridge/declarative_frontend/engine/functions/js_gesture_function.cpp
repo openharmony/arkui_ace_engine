@@ -47,6 +47,7 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     gestureInfoObj->SetProperty<double>("localY", SystemProperties::Px2Vp(info.GetLocalLocation().GetY()));
     gestureInfoObj->SetProperty<double>("pinchCenterX", SystemProperties::Px2Vp(info.GetPinchCenter().GetX()));
     gestureInfoObj->SetProperty<double>("pinchCenterY", SystemProperties::Px2Vp(info.GetPinchCenter().GetY()));
+    gestureInfoObj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
 
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info.GetFingerList();

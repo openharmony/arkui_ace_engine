@@ -35,6 +35,7 @@ public:
 
     bool GetVisible() const override;
 
+    void SetRemoteMessageCallback(const ClickCallback& callback);
     void SetOnClickCallback(const ClickCallback& callback);
     void SetOnDoubleClickCallback(const ClickCallback& callback);
     void SetOnLongPressCallback(const OnLongPress& callback);
@@ -48,6 +49,7 @@ protected:
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
 private:
+    void SetRemoteMessageCallback(const RefPtr<GestureListenerComponent>& component);
     void SetOnClickCallback(const RefPtr<GestureListenerComponent>& component);
     void SetOnDoubleClickCallback(const RefPtr<GestureListenerComponent>& component);
     void SetOnLongPressCallback(const RefPtr<GestureListenerComponent>& component);

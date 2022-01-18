@@ -27,7 +27,6 @@ void InspectNavigationBar::PackAttrAndStyle()
     attrs_.insert(std::make_pair("type", "normal"));
     attrs_.insert(std::make_pair("backenabled", "false"));
 
-
     // add for the styles
     styles_.insert(std::make_pair("background-repeat", "repeat"));
     styles_.insert(std::make_pair("opacity", "1"));

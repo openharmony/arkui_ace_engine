@@ -19,6 +19,7 @@
 #include <list>
 
 #include "core/pipeline/base/composed_component.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
@@ -31,62 +32,6 @@ class ComposedElement;
 namespace OHOS::Ace::Framework {
 
 class JSView;
-
-class ViewFunctions : public AceType {
-    DECLARE_ACE_TYPE(ViewFunctions, AceType);
-
-public:
-    ViewFunctions(JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction);
-    ~ViewFunctions()
-    {
-        LOGD("Destroy: ViewFunctions");
-    }
-
-    void Destroy(JSView* parentCustomView);
-
-    void ExecuteRender();
-    void ExecuteAppear();
-    void ExecuteDisappear();
-    void ExecuteAboutToBeDeleted();
-    void ExecuteAboutToRender();
-    void ExecuteOnRenderDone();
-    void ExecuteTransition();
-    bool ExecuteOnBackPress();
-    void ExecuteShow();
-    void ExecuteHide();
-    void ExecuteUpdateWithValueParams(const std::string& jsonData);
-
-    bool HasPageTransition() const;
-
-    void ExecuteFunction(JSWeak<JSFunc>& func, const char* debugInfo);
-    void ExecuteFunctionWithParams(JSWeak<JSFunc>& func, const char* debugInfo, const std::string& jsonData);
-    JSRef<JSVal> ExecuteFunctionWithReturn(JSWeak<JSFunc>& func, const char* debugInfo);
-
-    void SetContext(const JSExecutionContext& context)
-    {
-        context_ = context;
-    }
-
-private:
-    JSWeak<JSVal> jsObject_;
-    JSWeak<JSFunc> jsAppearFunc_;
-    JSWeak<JSFunc> jsDisappearFunc_;
-    JSWeak<JSFunc> jsAboutToRenderFunc_;
-    JSWeak<JSFunc> jsAboutToBeDeletedFunc_;
-    JSWeak<JSFunc> jsRenderDoneFunc_;
-    JSWeak<JSFunc> jsAboutToBuildFunc_;
-    JSWeak<JSFunc> jsBuildDoneFunc_;
-    JSWeak<JSFunc> jsRenderFunc_;
-    JSWeak<JSFunc> jsTransitionFunc_;
-    JSWeak<JSVal> jsRenderResult_;
-
-    JSWeak<JSFunc> jsOnHideFunc_;
-    JSWeak<JSFunc> jsOnShowFunc_;
-    JSWeak<JSFunc> jsBackPressFunc_;
-    JSWeak<JSFunc> jsUpdateWithValueParamsFunc_;
-
-    JSExecutionContext context_;
-};
 
 class JSView : public JSViewAbstract, public Referenced {
 public:

@@ -159,6 +159,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("scrollBar", &JSScroll::SetScrollBar, opt);
     JSClass<JSScroll>::StaticMethod("scrollBarColor", &JSScroll::SetScrollBarColor, opt);
     JSClass<JSScroll>::StaticMethod("scrollBarWidth", &JSScroll::SetScrollBarWidth, opt);
+    JSClass<JSScroll>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSScroll>::Inherit<JSContainerBase>();
     JSClass<JSScroll>::Inherit<JSViewAbstract>();
     JSClass<JSScroll>::Bind<>(globalObj);

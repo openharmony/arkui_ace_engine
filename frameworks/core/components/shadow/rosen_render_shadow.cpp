@@ -26,7 +26,7 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr uint8_t SHADOW_COLOR_ALPHA = 77;
-constexpr float SHADOW_BLUR_RADIUS = 20.0f;
+// constexpr float SHADOW_BLUR_RADIUS = 20.0f;
 constexpr Dimension SHADOW_OFFSET = 10.0_vp;
 
 } // namespace
@@ -56,7 +56,7 @@ void RosenRenderShadow::Paint(RenderContext& context, const Offset& offset)
     SkPaint paint;
     paint.setColor(SkColorSetARGB(SHADOW_COLOR_ALPHA, 0, 0, 0));
     paint.setStyle(SkPaint::Style::kStrokeAndFill_Style);
-    paint.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, SHADOW_BLUR_RADIUS));
+    // paint.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, SHADOW_BLUR_RADIUS));
     SkRect rect = SkRect::MakeXYWH(offset_.GetX(), offset_.GetY(), rrect_.Width(), rrect_.Height());
     canvas->clipRRect(SkRRect::MakeRectXY(rect, radiusX, radiusY), SkClipOp::kDifference, true);
     rect = SkRect::MakeXYWH(

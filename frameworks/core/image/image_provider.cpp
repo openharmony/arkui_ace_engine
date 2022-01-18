@@ -20,10 +20,12 @@
 #include "third_party/skia/include/core/SkStream.h"
 
 #include "base/thread/background_task_executor.h"
+#include "core/common/container_scope.h"
 #include "core/components/image/flutter_render_image.h"
 #include "core/event/ace_event_helper.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_object.h"
+
 namespace OHOS::Ace {
 namespace {
 
@@ -45,8 +47,9 @@ void ImageProvider::FetchImageObject(
     RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
     OnPostBackgroundTask onBackgroundTaskPostCallback)
 {
-    auto task = [ context, imageInfo, successCallback, failedCallback, useSkiaSvg, renderTaskHolder,
-        uploadSuccessCallback, needAutoResize] () mutable {
+    auto task = [context, imageInfo, successCallback, failedCallback, useSkiaSvg, renderTaskHolder,
+                    uploadSuccessCallback, needAutoResize, id = Container::CurrentId()]() mutable {
+        ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
             LOGE("pipline context has been released. imageInfo: %{private}s", imageInfo.ToString().c_str());
@@ -62,11 +65,11 @@ void ImageProvider::FetchImageObject(
             imageObj = GeneraterAceImageObject(imageInfo, pipelineContext, useSkiaSvg);
         }
         if (!imageObj) { // if it fails to generate an image object, trigger fail callback.
-            taskExecutor->PostTask([failedCallback, imageInfo] { failedCallback(imageInfo); },
-                TaskExecutor::TaskType::UI);
+            taskExecutor->PostTask(
+                [failedCallback, imageInfo] { failedCallback(imageInfo); }, TaskExecutor::TaskType::UI);
             return;
         }
-        taskExecutor->PostTask([ successCallback, imageInfo, imageObj ] () { successCallback(imageInfo, imageObj); },
+        taskExecutor->PostTask([successCallback, imageInfo, imageObj]() { successCallback(imageInfo, imageObj); },
             TaskExecutor::TaskType::UI);
         bool canStartUploadImageObj = !needAutoResize && (imageObj->GetFrameCount() == 1);
         if (canStartUploadImageObj) {
@@ -161,7 +164,8 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(
     uint64_t svgThemeColor,
     OnPostBackgroundTask onBackgroundTaskPostCallback)
 {
-    auto task = [ src, successCallback, failedCallback, context, svgThemeColor ] {
+    auto task = [src, successCallback, failedCallback, context, svgThemeColor, id = Container::CurrentId()] {
+        ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
             LOGW("render image or pipeline has been released. src: %{private}s", src.c_str());
@@ -207,7 +211,8 @@ void ImageProvider::GetSVGImageDOMAsyncFromData(
     uint64_t svgThemeColor,
     OnPostBackgroundTask onBackgroundTaskPostCallback)
 {
-    auto task = [ skData, successCallback, failedCallback, context, svgThemeColor ] {
+    auto task = [skData, successCallback, failedCallback, context, svgThemeColor, id = Container::CurrentId()] {
+        ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
             LOGW("render image or pipeline has been released.");
@@ -396,18 +401,20 @@ sk_sp<SkImage> ImageProvider::GetSkImage(
 void ImageProvider::TryLoadImageInfo(const RefPtr<PipelineContext>& context, const std::string& src,
     std::function<void(bool, int32_t, int32_t)>&& loadCallback)
 {
-    BackgroundTaskExecutor::GetInstance().PostTask([src, callback = std::move(loadCallback), context]() {
-        auto taskExecutor = context->GetTaskExecutor();
-        if (!taskExecutor) {
-            return;
-        }
-        auto image = ImageProvider::GetSkImage(src, context);
-        if (image) {
-            callback(true, image->width(), image->height());
-            return;
-        }
-        callback(false, 0, 0);
-    });
+    BackgroundTaskExecutor::GetInstance().PostTask(
+        [src, callback = std::move(loadCallback), context, id = Container::CurrentId()]() {
+            ContainerScope scope(id);
+            auto taskExecutor = context->GetTaskExecutor();
+            if (!taskExecutor) {
+                return;
+            }
+            auto image = ImageProvider::GetSkImage(src, context);
+            if (image) {
+                callback(true, image->width(), image->height());
+                return;
+            }
+            callback(false, 0, 0);
+        });
 }
 
 bool ImageProvider::IsWideGamut(const sk_sp<SkColorSpace>& colorSpace)

@@ -21,13 +21,20 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/ace_view.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_runtime.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_value.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_group_js_bridge.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_timer_module.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_api_perf.h"
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 
@@ -308,6 +315,8 @@ std::map<std::string, std::string> JsiDeclarativeEngineInstance::mediaResourceFi
 
 std::unique_ptr<JsonValue> JsiDeclarativeEngineInstance::currentConfigResourceData_;
 
+std::unordered_map<int32_t, WeakPtr<JsiDeclarativeEngineInstance>> JsiDeclarativeEngineInstance::engineInstaneMap_;
+
 thread_local shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::runtime_;
 
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
@@ -568,15 +577,10 @@ void JsiDeclarativeEngineInstance::InitGroupJsBridge()
 
 thread_local std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> JsiDeclarativeEngineInstance::rootViewMap_;
 
-void JsiDeclarativeEngineInstance::RootViewHandle(
-    const shared_ptr<JsRuntime>& runtime, panda::Local<panda::ObjectRef> value)
+void JsiDeclarativeEngineInstance::RootViewHandle(panda::Local<panda::ObjectRef> value)
 {
     LOGD("RootViewHandle");
-    if (runtime == nullptr) {
-        LOGE("jsRuntime is nullptr");
-        return;
-    }
-    RefPtr<JsAcePage> page = JsiDeclarativeEngineInstance::GetStagingPage(runtime);
+    RefPtr<JsAcePage> page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
     if (page != nullptr) {
         auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
         if (!arkRuntime) {
@@ -653,14 +657,20 @@ std::string JsiDeclarativeEngineInstance::GetMediaResource(const std::string& ta
     return std::string();
 }
 
-RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetRunningPage(const shared_ptr<JsRuntime>& runtime)
+RefPtr<FrontendDelegate> GetFrontendDelegate(const shared_ptr<JsRuntime>& runtime)
 {
-    LOGD("GetRunningPage");
-    if (runtime == nullptr) {
-        LOGE("jsRuntime is nullptr");
+    if (!runtime) {
+        LOGE("JsRuntime is null, cannot get frontend delegate!");
         return nullptr;
     }
     auto engineInstance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
+    return engineInstance->GetFrontendDelegate();
+}
+
+RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetRunningPage(int32_t instanceId)
+{
+    auto engineInstance = JsiDeclarativeEngineInstance::GetEngineInstance(instanceId);
+    LOGD("GetRunningPage id:%{public}d instance:%{public}p", instanceId, RawPtr(engineInstance));
     if (engineInstance == nullptr) {
         LOGE("engineInstance is nullptr");
         return nullptr;
@@ -668,14 +678,10 @@ RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetRunningPage(const shared_ptr<
     return engineInstance->GetRunningPage();
 }
 
-RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetStagingPage(const shared_ptr<JsRuntime>& runtime)
+RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetStagingPage(int32_t instanceId)
 {
-    LOGD("GetStagingPage");
-    if (runtime == nullptr) {
-        LOGE("jsRuntime is nullptr");
-        return nullptr;
-    }
-    auto engineInstance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
+    auto engineInstance = JsiDeclarativeEngineInstance::GetEngineInstance(instanceId);
+    LOGD("GetStagingPage id:%{public}d instance:%{public}p", instanceId, RawPtr(engineInstance));
     if (engineInstance == nullptr) {
         LOGE("engineInstance is nullptr");
         return nullptr;
@@ -741,11 +747,20 @@ JsiDeclarativeEngine::~JsiDeclarativeEngine()
     CHECK_RUN_ON(JS);
     LOG_DESTROY();
 
+    XComponentClient::GetInstance().SetRegisterCallbackToNull();
+    XComponentClient::GetInstance().SetJSValCallToNull();
+
     engineInstance_->GetDelegate()->RemoveTaskObserver();
+    JsiDeclarativeEngineInstance::RemoveEngineInstance(instanceId_);
 
     if (!runtime_ && nativeEngine_ != nullptr) {
         nativeEngine_->CancelCheckUVLoop();
         delete nativeEngine_;
+    }
+
+    if (nativeXComponent_) {
+        delete nativeXComponent_;
+        nativeXComponent_ = nullptr;
     }
 }
 
@@ -756,6 +771,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     LOGI("JsiDeclarativeEngine Initialize");
     ACE_DCHECK(delegate);
     engineInstance_ = AceType::MakeRefPtr<JsiDeclarativeEngineInstance>(delegate, instanceId_);
+    JsiDeclarativeEngineInstance::AddEngineInstance(instanceId_, engineInstance_);
     auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime_);
     std::shared_ptr<ArkJSRuntime> arkRuntime;
     EcmaVM* vm = nullptr;
@@ -795,7 +811,8 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     nativeEngine_->CheckUVLoop();
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
-        nativeEngine_->SetPackagePath(packagePath);
+        auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
+        arkNativeEngine->SetPackagePath(packagePath);
     }
 
     RegisterWorker();
@@ -806,13 +823,14 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_](bool needSync) {
+    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_, id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([nativeEngine, needSync]() {
+        delegate->PostJsTask([nativeEngine, needSync, id]() {
+            ContainerScope scope(id);
             if (nativeEngine == nullptr) {
                 return;
             }
@@ -881,7 +899,7 @@ void JsiDeclarativeEngine::RegisterWorker()
 void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadJs");
-    LOGD("JsiDeclarativeEngine LoadJs");
+    LOGI("JsiDeclarativeEngine %{private}p LoadJs page:%{public}d", RawPtr(engineInstance_), page->GetPageId());
     ACE_DCHECK(engineInstance_);
     engineInstance_->SetStagingPage(page);
     if (isMainPage) {
@@ -960,7 +978,7 @@ void JsiDeclarativeEngine::UpdateRunningPage(const RefPtr<JsAcePage>& page)
 
 void JsiDeclarativeEngine::UpdateStagingPage(const RefPtr<JsAcePage>& page)
 {
-    LOGD("JsiDeclarativeEngine UpdateStagingPage");
+    LOGI("JsiDeclarativeEngine UpdateStagingPage %{public}d", page->GetPageId());
     ACE_DCHECK(engineInstance_);
     engineInstance_->SetStagingPage(page);
 }
@@ -1010,6 +1028,100 @@ void JsiDeclarativeEngine::FireSyncEvent(const std::string& eventId, const std::
     if (!engineInstance_->FireJsEvent(callBuf.c_str())) {
         LOGE("Js Engine FireSyncEvent FAILED!");
     }
+}
+
+void JsiDeclarativeEngine::InitXComponent()
+{
+    ACE_DCHECK(engineInstance_);
+
+    nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
+    nativeXComponent_ = new NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
+}
+
+void JsiDeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
+{
+    CHECK_RUN_ON(JS);
+    InitXComponent();
+    RefPtr<XComponentComponent> xcomponent;
+    OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponent(xcomponent);
+    if (!xcomponent) {
+        LOGE("FireExternalEvent xcomponent is null.");
+        return;
+    }
+    auto textureId = static_cast<int64_t>(xcomponent->GetTextureId());
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("FireExternalEvent Current container null");
+        return;
+    }
+    auto nativeView = static_cast<AceView*>(container->GetView());
+    if (!nativeView) {
+        LOGE("FireExternalEvent nativeView null");
+        return;
+    }
+    auto nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+    if (!nativeWindow) {
+        LOGE("FireExternalEvent nativeWindow invalid");
+        return;
+    }
+    nativeXComponentImpl_->SetSurface(nativeWindow);
+    nativeXComponentImpl_->SetXComponentId(xcomponent->GetId());
+
+    auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
+    if (arkNativeEngine == nullptr) {
+        LOGE("FireExternalEvent arkNativeEngine is nullptr");
+        return;
+    }
+
+    std::string arguments;
+    auto arkObjectRef = arkNativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true,
+                                                          arguments, NATIVE_XCOMPONENT_OBJ,
+                                                          reinterpret_cast<void*>(nativeXComponent_));
+
+    if (arkObjectRef.CheckException()) {
+        LOGE("LoadModuleByName failed.");
+        return;
+    }
+
+    auto runtime = engineInstance_->GetJsRuntime();
+    renderContext_ = runtime->NewObject();
+    auto renderContext = std::static_pointer_cast<ArkJSValue>(renderContext_);
+    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    LocalScope scope(pandaRuntime->GetEcmaVm());
+    Local<ObjectRef> objXComp = arkObjectRef->ToObject(pandaRuntime->GetEcmaVm());
+    if (objXComp.CheckException()) {
+        LOGE("Get local object failed.");
+        return;
+    }
+    renderContext->SetValue(pandaRuntime, objXComp);
+
+    auto objContext = JsiObject(objXComp);
+    JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
+    auto getJSValCallback = [obj](JSRef<JSVal>& jsVal) {
+        jsVal = obj;
+        return true;
+    };
+    XComponentClient::GetInstance().RegisterJSValCallback(getJSValCallback);
+
+    auto task = [weak = WeakClaim(this), xcomponent]() {
+        auto pool = xcomponent->GetTaskPool();
+        if (!pool) {
+            return;
+        }
+        auto bridge = weak.Upgrade();
+        if (bridge) {
+            pool->NativeXComponentInit(
+                bridge->nativeXComponent_, AceType::WeakClaim(AceType::RawPtr(bridge->nativeXComponentImpl_)));
+        }
+    };
+
+    auto delegate = engineInstance_->GetDelegate();
+    if (!delegate) {
+        LOGE("Delegate is null");
+        return;
+    }
+    delegate->PostSyncTaskToPage(task);
 }
 
 void JsiDeclarativeEngine::TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval)

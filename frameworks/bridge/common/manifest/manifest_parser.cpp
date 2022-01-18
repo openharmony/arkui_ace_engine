@@ -70,7 +70,7 @@ void ManifestParser::Parse(const std::string& contents)
 
 void ManifestParser::Printer()
 {
-#ifdef ACE_DEBUG
+#ifdef ACE_DEBUG_LOG
     LOGD("appinfo:{");
     LOGD("  Icon:%{private}s", manifestAppInfo_->GetIcon().c_str());
     LOGD("  LogLevel:%{public}s", manifestAppInfo_->GetLogLevel().c_str());
@@ -89,16 +89,6 @@ void ManifestParser::Printer()
     }
     LOGD("}");
 
-    if (manifestWidget_->GetWidgetNum() > 0) {
-        LOGD("widgets:{");
-        for (const auto& widget : manifestWidget_->GetWidgetList()) {
-            LOGD("  {");
-            LOGD("    WidgetName:%{public}s", widget.second->GetWidgetName().c_str());
-            LOGD("    WidgetPath:%{public}s", widget.second->GetWidgetPath().c_str());
-            LOGD("  }");
-        }
-        LOGD("}");
-    }
     manifestWindow_->PrintInfo();
 #endif
 }

@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <fstream>
 
+#include "pointer_event.h"
+
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -25,8 +27,10 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container_scope.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/image/image_cache.h"
@@ -44,11 +48,16 @@ void GetEventDevice(int32_t sourceType, E& event)
     switch (sourceType) {
         case OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN:
             event.sourceType = SourceType::TOUCH;
+            break;
         case OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD:
+            event.sourceType = SourceType::TOUCH_PAD;
+            break;
         case OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE:
             event.sourceType = SourceType::MOUSE;
+            break;
         default:
             event.sourceType = SourceType::NONE;
+            break;
     }
 }
 
@@ -164,9 +173,30 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
     events.time = time;
 }
 
+void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event)
+{
+    int32_t pointerID = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    bool ret = pointerEvent->GetPointerItem(pointerID, item);
+    if (!ret) {
+        LOGE("get pointer item failed.");
+        return;
+    }
+
+    event.x = item.GetLocalX();
+    event.y = item.GetLocalY();
+    event.horizontalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
+    event.verticalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
+    int32_t orgDevice = pointerEvent->GetSourceType();
+    GetEventDevice(orgDevice, event);
+
+    std::chrono::microseconds micros(item.GetDownTime());
+    TimeStamp time(micros);
+    event.time = time;
+}
 } // namespace
 
-FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool usePlatfromThread)
+FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatfromThread)
 {
     FlutterAceView* aceSurface = new Platform::FlutterAceView(instanceId);
     flutter::Settings settings;
@@ -178,6 +208,7 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool usePlatfromT
     settings.enable_software_rendering = true;
 #endif
     settings.platform_as_ui_thread = usePlatfromThread;
+    settings.use_current_event_runner = useCurrentEventRunner;
     LOGI("software render: %{public}s", settings.enable_software_rendering ? "true" : "false");
     LOGI("use platform as ui thread: %{public}s", settings.platform_as_ui_thread ? "true" : "false");
     settings.idle_notification_callback = [aceSurface](int64_t deadline) {
@@ -245,13 +276,20 @@ void FlutterAceView::SetViewportMetrics(FlutterAceView* view, const flutter::Vie
 
 void FlutterAceView::DispatchTouchEvent(FlutterAceView* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    LOGD("FlutterAceView::DispatchTouchEvent SourceType = %{public}d", pointerEvent->GetSourceType());
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         // mouse event
-        LOGD("DispatchTouchEvent MouseEvent");
-        view->ProcessMouseEvent(pointerEvent);
+        if (pointerEvent->GetPointerAction() >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
+            pointerEvent->GetPointerAction() <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
+            LOGD("ProcessAxisEvent");
+            view->ProcessAxisEvent(pointerEvent);
+        } else {
+            LOGD("ProcessMouseEvent");
+            view->ProcessMouseEvent(pointerEvent);
+        }
     } else {
         // touch event
-        LOGD("DispatchTouchEvent TouchEvent");
+        LOGD("ProcessTouchEvent");
         view->ProcessTouchEvent(pointerEvent);
     }
 }
@@ -293,6 +331,12 @@ void FlutterAceView::RegisterMouseEventCallback(MouseEventCallback&& callback)
     mouseEventCallback_ = std::move(callback);
 }
 
+void FlutterAceView::RegisterAxisEventCallback(AxisEventCallback&& callback)
+{
+    ACE_DCHECK(callback);
+    axisEventCallback_ = std::move(callback);
+}
+
 void FlutterAceView::RegisterRotationEventCallback(RotationEventCallBack&& callback)
 {
     ACE_DCHECK(callback);
@@ -330,10 +374,21 @@ void FlutterAceView::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>&
 {
     MouseEvent event;
     ConvertMouseEvent(pointerEvent, event);
-    LOGD("ProcessMouseEvent event");
+    LOGD("ProcessMouseEvent");
 
     if (mouseEventCallback_) {
         mouseEventCallback_(event);
+    }
+}
+
+void FlutterAceView::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    AxisEvent event;
+    ConvertAxisEvent(pointerEvent, event);
+    LOGD("ProcessAxisEvent");
+
+    if (axisEventCallback_) {
+        axisEventCallback_(event);
     }
 }
 
@@ -344,13 +399,8 @@ bool FlutterAceView::ProcessKeyEvent(
         return false;
     }
 
-    auto keyEvents = keyEventRecognizer_.GetKeyEvents(keyCode, keyAction, repeatTime, timeStamp, timeStampStart);
-    // First distributes special events.
-    // Because the platform receives a raw event, the identified special event processing result is ignored
-    if (keyEvents.size() > 1) {
-        keyEventCallback_(keyEvents.back());
-    }
-    return keyEventCallback_(keyEvents.front());
+    KeyEvent keyEvent = keyEventTransfer_.GetKeyEvent(keyCode, keyAction, repeatTime, timeStamp, timeStampStart);
+    return keyEventCallback_(keyEvent);
 }
 
 void FlutterAceView::ProcessIdleEvent(int64_t deadline)
@@ -430,12 +480,19 @@ bool FlutterAceView::IsLastPage() const
         return false;
     }
 
+    ContainerScope scope(instanceId_);
     auto context = container->GetPipelineContext();
     if (!context) {
         return false;
     }
+    auto taskExecutor = context->GetTaskExecutor();
 
-    return context->IsLastPage();
+    bool isLastPage = false;
+    if (taskExecutor) {
+        taskExecutor->PostSyncTask(
+            [context, &isLastPage]() { isLastPage = context->IsLastPage(); }, TaskExecutor::TaskType::UI);
+    }
+    return isLastPage;
 }
 
 uint32_t FlutterAceView::GetBackgroundColor()

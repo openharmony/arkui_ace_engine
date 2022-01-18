@@ -15,6 +15,10 @@
 
 #include "core/components/video/render_texture.h"
 
+#include "core/components/theme/theme_manager.h"
+#include "core/components/video/video_component.h"
+#include "core/components/video/video_theme.h"
+
 namespace OHOS::Ace {
 
 RenderTexture::RenderTexture() : RenderNode(true) {}
@@ -27,13 +31,51 @@ void RenderTexture::Update(const RefPtr<Component>& component)
     }
 
     textureId_ = texture->GetTextureId();
-    sourceSize_ = Size(static_cast<double>(texture->GetSrcWidth()), static_cast<double>(texture->GetSrcHeight()));
-#ifndef OHOS_STANDARD_SYSTEM
+    auto sourceSize = Size(static_cast<double>(texture->GetSrcWidth()), static_cast<double>(texture->GetSrcHeight()));
+    if (sourceSize.IsValid()) {
+        sourceSize_ = sourceSize;
+    }
+#if (!defined OHOS_STANDARD_SYSTEM) || (defined ENABLE_ROSEN_BACKEND)
     imageFit_ = texture->GetFit();
 #endif
     imagePosition_ = texture->GetImagePosition();
+    InitControlsHeight(component);
 
     MarkNeedLayout();
+}
+
+void RenderTexture::InitControlsHeight(const RefPtr<Component>& component)
+{
+    controlsHeight_ = 0.0;
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("context is null");
+        return;
+    }
+
+    auto themeManager = context->GetThemeManager();
+    if (!themeManager) {
+        LOGE("theme manager is null");
+        return;
+    }
+
+    auto videoTheme = themeManager->GetTheme<VideoTheme>();
+    if (!videoTheme) {
+        LOGE("video theme is null");
+        return;
+    }
+
+    auto videoComponent = AceType::DynamicCast<VideoComponent>(component);
+    if (!videoComponent) {
+        LOGI("component is not video");
+        return;
+    }
+
+    if (videoComponent->NeedControls()) {
+        controlsHeight_ += videoTheme->GetBtnSize().Height();
+        controlsHeight_ += NormalizeToPx(videoTheme->GetBtnEdge().Top());
+        controlsHeight_ += NormalizeToPx(videoTheme->GetBtnEdge().Bottom());
+    }
 }
 
 void RenderTexture::SetHidden(bool hidden, bool inRecursion)

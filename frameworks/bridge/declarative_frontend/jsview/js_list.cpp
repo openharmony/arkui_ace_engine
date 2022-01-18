@@ -138,6 +138,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onItemDragMove", &JSList::ItemDragMoveCallback);
     JSClass<JSList>::StaticMethod("onItemDragLeave", &JSList::ItemDragLeaveCallback);
     JSClass<JSList>::StaticMethod("onItemDrop", &JSList::ItemDropCallback);
+    JSClass<JSList>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
     JSClass<JSList>::Inherit<JSContainerBase>();
     JSClass<JSList>::Inherit<JSViewAbstract>();

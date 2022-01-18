@@ -62,6 +62,8 @@ void PanRecognizer::HandleTouchDownEvent(const TouchPoint& event)
         return;
     }
 
+    deviceId_ = event.deviceId;
+    deviceType_ = event.sourceType;
     touchPoints_[event.id] = event;
 
     if (state_ == DetectState::READY) {
@@ -232,6 +234,8 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         info.SetOffsetX(averageDistance_.GetX());
         info.SetOffsetY(averageDistance_.GetY());
         info.SetGlobalPoint(globalPoint_);
+        info.SetDeviceId(deviceId_);
+        info.SetSourceDevice(deviceType_);
         (*callback)(info);
     }
 }

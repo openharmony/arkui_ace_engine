@@ -33,6 +33,7 @@
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 
 namespace OHOS::Ace {
@@ -87,7 +88,12 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
         return;
     }
     LOGI("Initialize UIContentImpl start.");
-    SetHwIcuDirectory();
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        LOGI("Initialize for current process.");
+        SetHwIcuDirectory();
+        Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+    });
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     auto resourceManager = context_->GetResourceManager();
@@ -153,6 +159,7 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     container->GetSettings().SetUsingSharedRuntime(true);
     container->SetSharedRuntime(runtime_);
     container->Initialize();
+    ContainerScope scope(instanceId_);
     auto front = container->GetFrontend();
     if (front) {
         front->UpdateState(Frontend::State::ON_CREATE);
@@ -168,7 +175,7 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
 
     // create ace_view
     auto flutterAceView =
-        Platform::FlutterAceView::CreateView(instanceId_, container->GetSettings().usePlatformAsUIThread);
+        Platform::FlutterAceView::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window_);
 
     int32_t width = window_->GetRect().width_;
@@ -186,8 +193,9 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
             rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
             rsUiDirector->SetSurfaceNodeSize(width, height);
             rsUiDirector->SetUITaskRunner(
-                [taskExecutor = container->GetTaskExecutor()]
+                [taskExecutor = container->GetTaskExecutor(), id = instanceId_]
                     (const std::function<void()>& task) {
+                        ContainerScope scope(id);
                         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
                     });
             auto context = container->GetPipelineContext();
@@ -236,6 +244,17 @@ void UIContentImpl::Destroy()
     Platform::AceContainer::DestroyContainer(instanceId_);
 }
 
+void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
+{
+    LOGI("UIContent Restore: mock %{public}s", contentInfo.c_str());
+}
+
+const std::string& UIContentImpl::GetContentInfo() const
+{
+    LOGI("UIContent GetContentInfo: mock");
+    return "contentInfo";
+}
+
 bool UIContentImpl::ProcessBackPressed()
 {
     LOGI("UIContent ProcessBackPressed");
@@ -256,7 +275,17 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
-    LOGI("UIContent ProcessKeyEvent");
+    LOGI("AceAbility::OnKeyUp called,touchEvent info: keyCode is %{private}d,\
+        keyAction is %{public}d, keyActionTime is %{public}d",
+        touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (container) {
+        auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
+        int32_t repeatTime = 0;
+        Platform::FlutterAceView::DispatchKeyEvent(aceView, touchEvent->GetKeyCode(), touchEvent->GetKeyAction(),
+            repeatTime, touchEvent->GetActionTime(), touchEvent->GetActionStartTime());
+        return true;
+    }
     return false;
 }
 
@@ -304,7 +333,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config)
         flutter::ViewportMetrics metrics;
         metrics.physical_width = config.Width();
         metrics.physical_height = config.Height();
-        metrics.device_pixel_ratio = 2.0f; // temporary use 2.0 for debug device, should get from window
+        metrics.device_pixel_ratio = config.Density();
         Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
         Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation());
     }

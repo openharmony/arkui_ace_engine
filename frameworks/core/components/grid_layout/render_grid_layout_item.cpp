@@ -131,7 +131,7 @@ void RenderGridLayoutItem::InitAnimationController(const WeakPtr<PipelineContext
 {
     if (!animationController_) {
         animationController_ = AceType::MakeRefPtr<Animator>(context);
-        animationController_->SetDuration(300);
+        animationController_->SetDuration(ITEM_ANIMATION_DURATION);
     }
 }
 

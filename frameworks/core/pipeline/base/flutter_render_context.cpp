@@ -17,6 +17,7 @@
 
 #include "core/components/plugin/render_plugin.h"
 #include "core/pipeline/base/render_node.h"
+#include "core/pipeline/base/render_sub_container.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -68,7 +69,6 @@ void FlutterRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Off
             if (child->NeedRender()) {
                 FlutterRenderContext context;
                 auto pipelineContext = child->GetContext().Upgrade();
-                LOGI("Hole: child canvas render");
                 auto transparentHole = pipelineContext->GetTransparentHole();
                 if (transparentHole.IsValid() && child->GetNeedClip()) {
                     Offset childOffset = rect.GetOffset();
@@ -100,7 +100,7 @@ void FlutterRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Off
 }
 
 void FlutterRenderContext::SetOffSet(
-    const RefPtr<RenderNode>& child, OffsetLayer* layer, const Offset& pos, const std::string name)
+    const RefPtr<RenderNode>& child, OffsetLayer* layer, const Offset& pos, const std::string& name)
 {
     if (!child || !layer) {
         LOGE("child is nullptr, or layer is nullptr");
@@ -117,21 +117,24 @@ void FlutterRenderContext::SetOffSet(
             if (parent.Upgrade() && parent.Upgrade()->GetRenderLayer()) {
                 layer->SetOffset(renderPost.GetX() / density - renderPost.GetX(),
                     renderPost.GetY() / density - renderPost.GetY());
+                pluginOffset = {renderPost.GetX() / density - renderPost.GetX(),
+                    renderPost.GetY() / density - renderPost.GetY()};
             } else {
                 layer->SetOffset(pos.GetX() / density, pos.GetY() / density);
                 pluginOffset = {pos.GetX() / density, pos.GetY() / density};
             }
         }
         // plugin offset
-        if (name == "FlutterRenderPlugin") {
-            auto renderPlugin = AceType::DynamicCast<RenderPlugin>(child);
+        if (name == "FlutterRenderPlugin" || name == "FlutterRenderForm") {
+            auto renderPlugin = AceType::DynamicCast<RenderSubContainer>(child);
             if (!renderPlugin) {
                 return;
             }
-            auto pluginContext = renderPlugin->GetPluginPipelineContext();
+            auto pluginContext = renderPlugin->GetSubPipelineContext();
             if (!pluginContext) {
                 return;
             }
+            pluginContext->SetPluginEventOffset(renderPost);
             pluginContext->SetPluginOffset(pluginOffset);
         }
     }

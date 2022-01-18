@@ -59,12 +59,8 @@ int PluginComponentManager::Request(
         std::string jsonStr;
         auto packagePathStr = GetPackagePath(want);
         GetTemplatePathFromJsonFile(packagePathStr, name, jsonPath, jsonStr);
-        if (jsonStr.empty() || jsonPath.empty()) {
-            pluginTemplate.SetSource(name);
-        } else {
-            pluginTemplate.SetSource(jsonStr);
-        }
-        pluginTemplate.SetAbility(want.GetElement().GetBundleName());
+        pluginTemplate.SetSource(jsonStr);
+        pluginTemplate.SetAbility(want.GetElement().GetBundleName() + "/" + want.GetElement().GetAbilityName());
 
         for (auto iter = listener_->GetPluginComponentCallBack().begin();
             iter != listener_->GetPluginComponentCallBack().end();) {
@@ -129,15 +125,11 @@ void PluginComponentManager::UIServiceListener::OnPushCallBack(const AAFwk::Want
         std::string jsonStr;
         auto packagePathStr = PluginComponentManager::GetInstance()->GetPackagePath(want);
         PluginComponentManager::GetInstance()->GetTemplatePathFromJsonFile(packagePathStr, name, jsonPath, jsonStr);
-        if (jsonStr.empty() || jsonPath.empty()) {
-            pluginTemplate.SetSource(name);
-        } else {
-            pluginTemplate.SetSource(jsonStr);
-        }
+        pluginTemplate.SetSource(jsonStr);
     } else {
         pluginTemplate.SetSource(name);
     }
-    pluginTemplate.SetAbility(want.GetElement().GetBundleName());
+    pluginTemplate.SetAbility(want.GetElement().GetBundleName() + "/" + want.GetElement().GetAbilityName());
 
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto &callback : callbackVec_) {
@@ -167,7 +159,7 @@ void PluginComponentManager::UIServiceListener::OnReturnRequest(
         if (iter->second == CallBackType::RequestCallBack && iter->first != nullptr) {
             PluginComponentTemplate pluginTemplate;
             pluginTemplate.SetSource(source);
-            pluginTemplate.SetAbility(want.GetElement().GetBundleName());
+            pluginTemplate.SetAbility(want.GetElement().GetBundleName() + "/" + want.GetElement().GetAbilityName());
             iter->first->OnRequestCallBack(pluginTemplate, data, extraData);
             callbackVec_.erase(iter++);
         } else {
@@ -179,13 +171,10 @@ void PluginComponentManager::UIServiceListener::OnReturnRequest(
 bool PluginComponentManager::GetTemplatePathFromJsonFile(
     const std::string& packagePathStr, const std::string& pluginName, const std::string& jsonPath, std::string& jsonStr)
 {
-    std::string external = std::string("assets/js/external.json");
-    if (!pluginName.empty()) {
-        external = "assets/js/" + pluginName + "/external.json";
-    }
+    std::string external = std::string("/external.json");
     auto externalPath = packagePathStr + external;
     if (!jsonPath.empty()) {
-        externalPath = packagePathStr + jsonPath + "/external.json";
+        externalPath = jsonPath;
     }
     char realPath[PATH_MAX] = { 0x00 };
     if (realpath(externalPath.c_str(), realPath) == nullptr) {
@@ -222,7 +211,14 @@ bool PluginComponentManager::GetTemplatePathFromJsonFile(
     }
 
     std::string jsonString(jsonStream.get(), jsonStream.get() + size);
-    jsonStr = jsonString;
+    if (pluginName.empty()) {
+        jsonStr = jsonString;
+    } else {
+        auto rootJson = JsonUtil::ParseJsonString(jsonString);
+        if (rootJson) {
+            jsonStr = rootJson->GetString(pluginName);
+        }
+    }
 
     return true;
 }

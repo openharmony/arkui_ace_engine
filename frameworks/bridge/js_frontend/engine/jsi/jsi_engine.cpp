@@ -27,6 +27,7 @@
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_api_perf.h"
@@ -2094,6 +2095,10 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
             return bridge->GetRenderContext();
         }
         return runtime->NewUndefined();
+#ifdef OHOS_STANDARD_SYSTEM
+    } else if (std::strcmp(methodName.c_str(), "getXComponentSurfaceId") == 0) {
+        return JsiXComponentBridge::JsGetXComponentSurfaceId(runtime, nodeId);
+#endif
     }
 
     shared_ptr<JsValue> resultValue = runtime->NewUndefined();
@@ -2716,6 +2721,25 @@ void JsiEngineInstance::RegisterAceModule()
     }
 }
 
+shared_ptr<JsValue> JsCallNativeHandler(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (argc != 2 || !argv[0]->IsString(runtime) || !argv[1]->IsString(runtime)) {
+        LOGE("JsCallNativeHandler: invalid parameters");
+        return runtime->NewNull();
+    }
+
+    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (engine == nullptr) {
+        return runtime->NewNull();
+    }
+
+    std::string event = argv[0]->ToString(runtime);
+    std::string params = argv[1]->ToString(runtime);
+    engine->GetDelegate()->CallNativeHandler(event, params);
+    return runtime->NewNull();
+}
+
 void JsiEngineInstance::RegisterConsoleModule()
 {
     ACE_SCOPED_TRACE("JsiEngine::RegisterConsoleModule");
@@ -2739,6 +2763,7 @@ void JsiEngineInstance::RegisterConsoleModule()
     aceConsoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(JsWarnLogPrint));
     aceConsoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(JsErrorLogPrint));
     global->SetProperty(runtime_, "aceConsole", aceConsoleObj);
+    global->SetProperty(runtime_, "callNativeHandler", runtime_->NewFunction(JsCallNativeHandler));
 }
 
 std::string GetLogContent(NativeEngine* nativeEngine, NativeCallbackInfo* info)
@@ -3024,16 +3049,17 @@ void JsiEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_](bool needSync) {
+    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_, id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([nativeEngine, needSync]() {
+        delegate->PostJsTask([nativeEngine, needSync, id]() {
             if (nativeEngine == nullptr) {
                 return;
             }
+            ContainerScope scope(id);
             nativeEngine->Loop(LOOP_NOWAIT, needSync);
         });
     };

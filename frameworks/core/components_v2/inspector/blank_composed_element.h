@@ -33,6 +33,7 @@ public:
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
     std::string GetMin() const;
+    std::string GetColor() const;
 private:
     RefPtr<RenderFlexItem> GetRenderFlexItem() const;
 };

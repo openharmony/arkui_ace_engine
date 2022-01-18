@@ -17,20 +17,22 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_ACE_EVENTS_H
 
 #include <chrono>
+#include <cstdint>
 #include <string>
 
 #include "base/geometry/dimension_offset.h"
+#include "base/geometry/dimension_rect.h"
 #include "base/memory/type_info_base.h"
 #include "base/utils/type_definition.h"
-#include "base/geometry/dimension_rect.h"
 
 namespace OHOS::Ace {
 
 enum class SourceType : int32_t {
     NONE = 0,
-    TOUCH = 1,
-    MOUSE = 2,
-    KEYBOARD = 3
+    MOUSE = 1,
+    TOUCH = 2,
+    TOUCH_PAD = 3,
+    KEYBOARD = 4
 };
 
 struct EventTarget final {
@@ -85,6 +87,16 @@ public:
     {
         deviceId_ = deviceId;
     }
+
+    SourceType GetSourceDevice() const
+    {
+        return deviceType_;
+    }
+    void SetSourceDevice(SourceType deviceType)
+    {
+        deviceType_ = deviceType;
+    }
+
     bool IsStopPropagation() const
     {
         return stopPropagation_;
@@ -100,6 +112,7 @@ protected:
     // The origin event time stamp.
     TimeStamp timeStamp_;
     EventTarget target_;
+    SourceType deviceType_ = SourceType::NONE;
     int64_t deviceId_ = 0;
     bool stopPropagation_ = false;
 };

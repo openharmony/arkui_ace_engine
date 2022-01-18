@@ -18,15 +18,15 @@
 
 #include "core/components/plugin/plugin_component.h"
 #include "core/components/plugin/plugin_sub_container.h"
-#include "core/pipeline/base/render_node.h"
+#include "core/pipeline/base/render_sub_container.h"
 
 namespace OHOS::Ace {
-class RenderPlugin : public RenderNode {
-DECLARE_ACE_TYPE(RenderPlugin, RenderNode);
+class RenderPlugin : public RenderSubContainer {
+DECLARE_ACE_TYPE(RenderPlugin, RenderSubContainer);
 
 public:
     static RefPtr<RenderNode> Create();
-    RenderPlugin() : RenderNode(false) {}
+
     virtual ~RenderPlugin() override = default;
 
     void Update(const RefPtr<Component>& component) override;
@@ -43,7 +43,7 @@ public:
         pluginContainer_ = container;
     }
 
-    RefPtr<PipelineContext> GetPluginPipelineContext()
+    RefPtr<PipelineContext> GetSubPipelineContext() override
     {
         auto context = pluginContainer_.Upgrade();
         if (context) {

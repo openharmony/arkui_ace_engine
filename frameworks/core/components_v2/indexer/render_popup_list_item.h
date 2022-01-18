@@ -17,10 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_RENDER_POPUP_LIST_ITEM_H
 
 #include "core/components_v2/indexer/popup_list_item_component.h"
-#include "core/components/display/render_display.h"
 #include "core/components/box/render_box.h"
 #include "core/components/text/render_text.h"
-#include "core/gestures/long_press_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace::V2 {
@@ -33,6 +31,7 @@ public:
     RenderPopupListItem() = default;
     ~RenderPopupListItem() override = default;
 
+    // override
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
 

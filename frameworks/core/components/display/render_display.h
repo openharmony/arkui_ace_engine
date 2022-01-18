@@ -91,11 +91,25 @@ public:
 
     bool GetVisible() const override;
 
-    void OnStatusStyleChanged(StyleState state) override;
+    void OnStatusStyleChanged(VisualState style) override;
 
     void OnTransition(TransitionType type, int32_t id) override;
 
     bool HasDisappearingTransition(int32_t nodeId) override;
+
+    RefPtr<StateAttributes<DisplayStateAttribute>> GetStateAttributes()
+    {
+        if (stateAttributeList_ == nullptr) {
+            stateAttributeList_ = MakeRefPtr<StateAttributes<DisplayStateAttribute>>();
+        }
+        return stateAttributeList_;
+    }
+
+
+    bool HasStateAttributes()
+    {
+        return stateAttributeList_ != nullptr;
+    }
 
 protected:
     void OnOpacityAnimationCallback();
@@ -119,7 +133,7 @@ protected:
     WeakPtr<DisplayComponent> displayComponent_;
     RefPtr<CurveAnimation<uint8_t>> appearingAnimation_;
     RefPtr<Animator> animator_;
-    RefPtr<StateAttributeList<DisplayStateAttribute>> stateAttributeList_;
+    RefPtr<StateAttributes<DisplayStateAttribute>> stateAttributeList_;
 };
 
 } // namespace OHOS::Ace

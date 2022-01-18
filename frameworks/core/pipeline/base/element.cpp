@@ -372,6 +372,9 @@ RefPtr<Element> Element::InflateComponent(const RefPtr<Component>& newComponent,
     if (retakeElement) {
         retakeElement->SetNewComponent(newComponent);
         retakeElement->Mount(AceType::Claim(this), slot, renderSlot);
+        if (auto node = retakeElement->GetRenderNode()) {
+            node->SyncRSNode(node->GetRSNode());
+        }
         return retakeElement;
     }
 

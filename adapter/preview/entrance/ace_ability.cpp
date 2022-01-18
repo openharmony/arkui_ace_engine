@@ -159,6 +159,11 @@ bool AceAbility::DispatchBackPressedEvent()
 
 AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
 {
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        LOGI("Initialize for current process.");
+        Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+    });
     if (runArgs_.formsEnabled) {
         LOGI("CreateContainer with JS_CARD frontend");
         AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS_CARD);

@@ -130,7 +130,7 @@ std::string GenerateSummaryBody(
 } // namespace
 
 #if defined(USE_CLANG_COVERAGE) || defined(CLANG_COVERAGE)
-std::stack<JSContext*> QJSHandleScope::qjsHandleScopeStack_;
+std::stack<QJSHandleScope*> QJSHandleScope::qjsHandleScopeStack_;
 #else
 thread_local std::stack<QJSHandleScope*> QJSHandleScope::qjsHandleScopeStack_;
 #endif

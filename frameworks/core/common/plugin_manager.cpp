@@ -15,6 +15,7 @@
 
 #include "core/common/plugin_manager.h"
 
+#include "ability_manager_client.h"
 #include "base/log/log.h"
 
 namespace OHOS::Ace {
@@ -84,5 +85,16 @@ int64_t PluginManager::GetPluginSubContainerId()
         return 0;
     }
     return pluginSubContainerMap_.rbegin()->first + 1;
+}
+
+ErrCode PluginManager::StartAbility(
+    const std::string& bundleName, const std::string& abilityName, const std::string& params)
+{
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", bundleName, abilityName);
+    want.SetElement(element);
+    want.SetParam("params", params);
+    ErrCode error = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want);
+    return error;
 }
 } // namespace OHOS::Ace

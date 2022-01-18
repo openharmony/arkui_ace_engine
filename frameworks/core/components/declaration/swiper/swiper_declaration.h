@@ -304,6 +304,18 @@ public:
         event.clickEventId = clickEventId;
     }
 
+    const EventMarker& GetRemoteMessageEventId() const
+    {
+        auto& event = static_cast<SwiperEvent&>(GetEvent(EventTag::SPECIALIZED_REMOTE_MESSAGE_EVENT));
+        return event.clickEventId;
+    }
+
+    void SetRemoteMessageEventId(const EventMarker& eventId)
+    {
+        auto& event = MaybeResetEvent<SwiperEvent>(EventTag::SPECIALIZED_REMOTE_MESSAGE_EVENT);
+        event.clickEventId = eventId;
+    }
+
     void SetAnimationFinishEventId(const EventMarker& animationFinishEventId)
     {
         auto& event = MaybeResetEvent<SwiperEvent>(EventTag::SPECIALIZED_EVENT);

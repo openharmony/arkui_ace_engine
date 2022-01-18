@@ -13,15 +13,22 @@
  * limitations under the License.
  */
 
-#include "base/image/pixel_map.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_RENDER_SUB_CONTAINER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_RENDER_SUB_CONTAINER_H
 
-#include "base/log/log_wrapper.h"
+#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 
-RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
-{
-    return nullptr;
-}
+class RenderSubContainer : public RenderNode {
+    DECLARE_ACE_TYPE(RenderSubContainer, RenderNode);
+
+public:
+    RenderSubContainer() : RenderNode(false) {}
+
+    virtual RefPtr<PipelineContext> GetSubPipelineContext() = 0;
+};
 
 } // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_RENDER_SUB_CONTAINER_H

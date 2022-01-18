@@ -19,10 +19,16 @@
 #include <iomanip>
 #include <sstream>
 
+#include "base/json/json_util.h"
 #include "base/log/log.h"
+#include "core/components/web/web_event.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/back_end_event_manager.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+#include "application_env.h"
+#include "webview_adapter_helper.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -78,8 +84,7 @@ void WebDelegate::Stop()
         LOGI("fail to get context");
         return;
     }
-    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
-        TaskExecutor::TaskType::PLATFORM);
+    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
         UnregisterEvent();
     } else {
@@ -139,6 +144,64 @@ void WebDelegate::CreatePlatformResource(
     InitWebEvent();
 }
 
+void WebDelegate::LoadUrl(std::string url)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), url]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->LoadURL(url);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::ExecuteTypeScript(std::string jscode)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), jscode]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->ExecuteJavaScript(jscode);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::LoadDataWithBaseUrl(
+    std::string baseUrl, std::string data, std::string mimeType, std::string encoding, std::string historyUrl)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), baseUrl, data, mimeType, encoding, historyUrl]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->LoadDataWithBaseURL(baseUrl, data, mimeType, encoding, historyUrl);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::CreatePluginResource(
     const Size& size, const Offset& position, const WeakPtr<PipelineContext>& context)
 {
@@ -159,9 +222,9 @@ void WebDelegate::CreatePluginResource(
         OnError(NTC_ERROR, "fail to call WebDelegate::Create due to context is null");
         return;
     }
-    context_  = context;
-    auto platformTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(),
-                                                         TaskExecutor::TaskType::PLATFORM);
+    context_ = context;
+    auto platformTaskExecutor =
+        SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     auto resRegister = pipelineContext->GetPlatformResRegister();
     auto weakRes = AceType::WeakClaim(AceType::RawPtr(resRegister));
     platformTaskExecutor.PostTask([weakWeb = AceType::WeakClaim(this), weakRes, size, position] {
@@ -194,17 +257,13 @@ void WebDelegate::CreatePluginResource(
         OHOS::Ace::Framework::DelegateClient::GetInstance().GetWebPageUrl(pageUrl, pageId);
 
         std::stringstream paramStream;
-        paramStream << NTC_PARAM_WEB << WEB_PARAM_EQUALS << webDelegate->id_ << WEB_PARAM_AND
-                    << NTC_PARAM_WIDTH << WEB_PARAM_EQUALS
-                    << size.Width() * context->GetViewScale() << WEB_PARAM_AND
-                    << NTC_PARAM_HEIGHT << WEB_PARAM_EQUALS
-                    << size.Height() * context->GetViewScale() << WEB_PARAM_AND
-                    << NTC_PARAM_LEFT << WEB_PARAM_EQUALS
-                    << position.GetX() * context->GetViewScale() << WEB_PARAM_AND
-                    << NTC_PARAM_TOP << WEB_PARAM_EQUALS
-                    << position.GetY() * context->GetViewScale() << WEB_PARAM_AND
-                    << NTC_PARAM_SRC << WEB_PARAM_EQUALS << webCom->GetSrc() << WEB_PARAM_AND
-                    << NTC_PARAM_PAGE_URL << WEB_PARAM_EQUALS << pageUrl;
+        paramStream << NTC_PARAM_WEB << WEB_PARAM_EQUALS << webDelegate->id_ << WEB_PARAM_AND << NTC_PARAM_WIDTH
+                    << WEB_PARAM_EQUALS << size.Width() * context->GetViewScale() << WEB_PARAM_AND << NTC_PARAM_HEIGHT
+                    << WEB_PARAM_EQUALS << size.Height() * context->GetViewScale() << WEB_PARAM_AND << NTC_PARAM_LEFT
+                    << WEB_PARAM_EQUALS << position.GetX() * context->GetViewScale() << WEB_PARAM_AND << NTC_PARAM_TOP
+                    << WEB_PARAM_EQUALS << position.GetY() * context->GetViewScale() << WEB_PARAM_AND << NTC_PARAM_SRC
+                    << WEB_PARAM_EQUALS << webCom->GetSrc() << WEB_PARAM_AND << NTC_PARAM_PAGE_URL << WEB_PARAM_EQUALS
+                    << pageUrl;
 
         std::string param = paramStream.str();
         webDelegate->id_ = resRegister->CreateResource(WEB_CREATE, param);
@@ -232,22 +291,171 @@ void WebDelegate::InitWebEvent()
         return;
     }
     if (!webCom->GetPageStartedEventId().IsEmpty()) {
-        onPageStarted_ =
-            AceAsyncEvent<void(const std::string&)>::Create(webCom->GetPageStartedEventId(), context_);
+        onPageStarted_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetPageStartedEventId(), context_);
     }
     if (!webCom->GetPageFinishedEventId().IsEmpty()) {
-        onPageFinished_ =
-            AceAsyncEvent<void(const std::string&)>::Create(webCom->GetPageFinishedEventId(), context_);
+        onPageFinished_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetPageFinishedEventId(), context_);
     }
     if (!webCom->GetPageErrorEventId().IsEmpty()) {
-        onPageError_ =
-            AceAsyncEvent<void(const std::string&)>::Create(webCom->GetPageErrorEventId(), context_);
+        onPageError_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetPageErrorEventId(), context_);
     }
     if (!webCom->GetMessageEventId().IsEmpty()) {
-        onMessage_ =
-            AceAsyncEvent<void(const std::string&)>::Create(webCom->GetMessageEventId(), context_);
+        onMessage_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetMessageEventId(), context_);
     }
 }
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context)
+{
+    state_ = State::CREATING;
+    // load webview so
+    if (!WebViewHelper::Instance().Init()) {
+        LOGE("Fail to init WebViewHelper");
+        return;
+    }
+
+    auto webCom = webComponent_;
+    if (!webCom) {
+        state_ = State::CREATEFAILED;
+        OnError(NTC_ERROR, "fail to call WebDelegate::Create due to webComponent is null");
+        return;
+    }
+    context_ = context;
+    auto pipelineContext = context.Upgrade();
+    if (!pipelineContext) {
+        state_ = State::CREATEFAILED;
+        OnError(NTC_ERROR, "fail to call WebDelegate::Create due to context is null");
+        return;
+    }
+    state_ = State::CREATED;
+
+    if (!isCreateWebView_) {
+        isCreateWebView_ = true;
+        InitWebViewWithWindow();
+    }
+
+    SetWebCallBack();
+    onPageFinishedV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetPageFinishedEventId(), pipelineContext);
+    onRequestFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetRequestFocusEventId(), pipelineContext);
+}
+
+void WebDelegate::SetWebCallBack()
+{
+    auto webController = webComponent_->GetController();
+    if (webController) {
+        auto context = context_.Upgrade();
+        if (!context) {
+            return;
+        }
+        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        webController->SetLoadUrltImpl([weak = WeakClaim(this), uiTaskExecutor](std::string url) {
+            uiTaskExecutor.PostTask([weak, url]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->LoadUrl(url);
+                }
+            });
+        });
+        webController->SetExecuteTypeScriptImpl([weak = WeakClaim(this), uiTaskExecutor](std::string jscode) {
+            uiTaskExecutor.PostTask([weak, jscode]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->ExecuteTypeScript(jscode);
+                }
+            });
+        });
+        webController->SetLoadDataWithBaseUrlImpl(
+            [weak = WeakClaim(this), uiTaskExecutor](std::string baseUrl, std::string data, std::string mimeType,
+                std::string encoding, std::string historyUrl) {
+                uiTaskExecutor.PostTask([weak, baseUrl, data, mimeType, encoding, historyUrl]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->LoadDataWithBaseUrl(baseUrl, data, mimeType, encoding, historyUrl);
+                    }
+                });
+            });
+    }
+}
+
+void WebDelegate::InitWebViewWithWindow()
+{
+    LOGI("Create webview with window");
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            WebViewInitArgs initArgs;
+            std::string app_path = GetDataPath();
+            if (!app_path.empty()) {
+                initArgs.webcore_args_to_add.push_back(std::string("--user-data-dir=").append(app_path));
+            }
+
+            delegate->window_ = delegate->CreateWindow();
+            if (!delegate->window_) {
+                return;
+            }
+            delegate->webview_ =
+                WebViewAdapterHelper::Instance().CreateWebView(delegate->window_.GetRefPtr(), initArgs);
+            if (delegate->webview_ == nullptr) {
+                delegate->window_ = nullptr;
+                LOGE("fail to get webview instance");
+                return;
+            }
+            auto component = delegate->webComponent_;
+            if (!component) {
+                return;
+            }
+            bool isJsEnabled = component->GetJsEnabled();
+            bool isContentAccessEnabled = component->GetContentAccessEnabled();
+            bool isFileAccessEnabled = component->GetFileAccessEnabled();
+
+            auto webviewClient = std::make_shared<WebClientImpl>();
+            webviewClient->SetWebDelegate(weak);
+            delegate->webview_->SetWebViewClient(webviewClient);
+            std::shared_ptr<WebSettings> setting = delegate->webview_->GetSettings();
+            setting->SetDomStorageEnabled(true);
+            setting->SetJavaScriptCanOpenWindowsAutomatically(true);
+            setting->SetJavaScriptEnabled(isJsEnabled);
+            setting->SetAllowFileAccessFromFileURLs(true);
+            setting->SetAllowFileAccess(isFileAccessEnabled);
+            setting->SetAllowContentAccess(isContentAccessEnabled);
+            setting->SetBlockNetworkImage(false);
+            setting->SetLoadsImagesAutomatically(true);
+
+            delegate->webview_->LoadURL(component->GetSrc());
+            delegate->window_->Show();
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+sptr<Rosen::Window> WebDelegate::CreateWindow()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return nullptr;
+    }
+    float scale = context->GetViewScale();
+
+    constexpr int DEFAULT_HEIGHT = 1600;
+    int DEFAULT_HEIGHT_WITHOUT_SYSTEM_BAR = (int)(scale * context->GetRootHeight());
+    int DEFAULT_STATUS_BAR_HEIGHT = (DEFAULT_HEIGHT - DEFAULT_HEIGHT_WITHOUT_SYSTEM_BAR) / 2;
+    constexpr int DEFAULT_LEFT = 0;
+    int DEFAULT_TOP = DEFAULT_STATUS_BAR_HEIGHT;
+    int DEFAULT_WIDTH = (int)(scale * context->GetRootWidth());
+    sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
+    option->SetWindowRect({ DEFAULT_LEFT, DEFAULT_TOP, DEFAULT_WIDTH, DEFAULT_HEIGHT_WITHOUT_SYSTEM_BAR });
+    auto window = Rosen::Window::Create("ohos_web_window", option);
+    return window;
+}
+#endif
 
 void WebDelegate::RegisterWebEvent()
 {
@@ -259,41 +467,36 @@ void WebDelegate::RegisterWebEvent()
     if (resRegister == nullptr) {
         return;
     }
-    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_PAGESTART),
-                               [weak = WeakClaim(this)](const std::string& param) {
-                auto delegate = weak.Upgrade();
-                if (delegate) {
-                    delegate->OnPageStarted(param);
-                }
-            });
-    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_PAGEFINISH),
-                               [weak = WeakClaim(this)](const std::string& param) {
-                auto delegate = weak.Upgrade();
-                if (delegate) {
-                    delegate->OnPageFinished(param);
-                }
-            });
-    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_PAGEERROR),
-                               [weak = WeakClaim(this)](const std::string& param) {
-                auto delegate = weak.Upgrade();
-                if (delegate) {
-                    delegate->OnPageError(param);
-                }
-            });
-    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_ROUTERPUSH),
-                               [weak = WeakClaim(this)](const std::string& param) {
-                auto delegate = weak.Upgrade();
-                if (delegate) {
-                    delegate->OnRouterPush(param);
-                }
-            });
-    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_ONMESSAGE),
-                               [weak = WeakClaim(this)](const std::string& param) {
-                auto delegate = weak.Upgrade();
-                if (delegate) {
-                    delegate->OnMessage(param);
-                }
-            });
+    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_PAGESTART), [weak = WeakClaim(this)](const std::string& param) {
+        auto delegate = weak.Upgrade();
+        if (delegate) {
+            delegate->OnPageStarted(param);
+        }
+    });
+    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_PAGEFINISH), [weak = WeakClaim(this)](const std::string& param) {
+        auto delegate = weak.Upgrade();
+        if (delegate) {
+            delegate->OnPageFinished(param);
+        }
+    });
+    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_PAGEERROR), [weak = WeakClaim(this)](const std::string& param) {
+        auto delegate = weak.Upgrade();
+        if (delegate) {
+            delegate->OnPageError(param);
+        }
+    });
+    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_ROUTERPUSH), [weak = WeakClaim(this)](const std::string& param) {
+        auto delegate = weak.Upgrade();
+        if (delegate) {
+            delegate->OnRouterPush(param);
+        }
+    });
+    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_ONMESSAGE), [weak = WeakClaim(this)](const std::string& param) {
+        auto delegate = weak.Upgrade();
+        if (delegate) {
+            delegate->OnMessage(param);
+        }
+    });
 }
 
 // upper ui componnet which inherite from WebComponent
@@ -372,8 +575,7 @@ void WebDelegate::OnPageStarted(const std::string& param)
 {
     if (onPageStarted_) {
         std::string paramStart = std::string(R"(")").append(param).append(std::string(R"(")"));
-        std::string urlParam =
-            std::string(R"("pagestart",{"url":)").append(paramStart.append("},null"));
+        std::string urlParam = std::string(R"("pagestart",{"url":)").append(paramStart.append("},null"));
         onPageStarted_(urlParam);
     }
 }
@@ -382,9 +584,19 @@ void WebDelegate::OnPageFinished(const std::string& param)
 {
     if (onPageFinished_) {
         std::string paramFinish = std::string(R"(")").append(param).append(std::string(R"(")"));
-        std::string urlParam =
-            std::string(R"("pagefinish",{"url":)").append(paramFinish.append("},null"));
+        std::string urlParam = std::string(R"("pagefinish",{"url":)").append(paramFinish.append("},null"));
         onPageFinished_(urlParam);
+    }
+    // ace 2.0
+    if (onPageFinishedV2_) {
+        onPageFinishedV2_(std::make_shared<LoadWebPageFinishEvent>(param));
+    }
+}
+
+void WebDelegate::OnRequestFocus()
+{
+    if (onRequestFocusV2_) {
+        onRequestFocusV2_(std::make_shared<LoadWebRequestFocusEvent>(""));
     }
 }
 
@@ -395,25 +607,22 @@ void WebDelegate::OnPageError(const std::string& param)
         std::string url = GetUrlStringParam(param, NTC_PARAM_URL);
         std::string description = GetStringParam(param, NTC_PARAM_DESCRIPTION);
 
-        std::string paramUrl = std::string(R"(")").append(url)
-                                                  .append(std::string(R"(")"))
-                                                  .append(",");
+        std::string paramUrl = std::string(R"(")").append(url).append(std::string(R"(")")).append(",");
 
-        std::string paramErrorCode = std::string(R"(")").append(NTC_PARAM_ERROR_CODE)
-                                                        .append(std::string(R"(")"))
-                                                        .append(":")
-                                                        .append(std::to_string(errorCode))
-                                                        .append(",");
+        std::string paramErrorCode = std::string(R"(")")
+                                         .append(NTC_PARAM_ERROR_CODE)
+                                         .append(std::string(R"(")"))
+                                         .append(":")
+                                         .append(std::to_string(errorCode))
+                                         .append(",");
 
-        std::string paramDesc = std::string(R"(")").append(NTC_PARAM_DESCRIPTION)
-                                                   .append(std::string(R"(")"))
-                                                   .append(":")
-                                                   .append(std::string(R"(")")
-                                                   .append(description)
-                                                   .append(std::string(R"(")")));
-        std::string errorParam = std::string(R"("error",{"url":)")
-                                           .append((paramUrl + paramErrorCode + paramDesc)
-                                           .append("},null"));
+        std::string paramDesc = std::string(R"(")")
+                                    .append(NTC_PARAM_DESCRIPTION)
+                                    .append(std::string(R"(")"))
+                                    .append(":")
+                                    .append(std::string(R"(")").append(description).append(std::string(R"(")")));
+        std::string errorParam =
+            std::string(R"("error",{"url":)").append((paramUrl + paramErrorCode + paramDesc).append("},null"));
         onPageError_(errorParam);
     }
 }
@@ -422,12 +631,10 @@ void WebDelegate::OnMessage(const std::string& param)
 {
     std::string removeQuotes;
     removeQuotes = param;
-    removeQuotes.erase(std::remove(removeQuotes.begin(), removeQuotes.end(), '\"'),
-                       removeQuotes.end());
+    removeQuotes.erase(std::remove(removeQuotes.begin(), removeQuotes.end(), '\"'), removeQuotes.end());
     if (onMessage_) {
         std::string paramMessage = std::string(R"(")").append(removeQuotes).append(std::string(R"(")"));
-        std::string messageParam =
-                std::string(R"("message",{"message":)").append(paramMessage.append("},null"));
+        std::string messageParam = std::string(R"("message",{"message":)").append(paramMessage.append("},null"));
         onMessage_(messageParam);
     }
 }
@@ -477,7 +684,7 @@ void WebDelegate::BindPopPageSuccessMethod()
                 if (delegate) {
                     delegate->CallPopPageSuccessPageUrl(url);
                 }
-        });
+            });
     }
 }
 

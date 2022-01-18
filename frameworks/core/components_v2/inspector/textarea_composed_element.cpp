@@ -36,6 +36,7 @@ const std::unordered_map<std::string, std::function<std::string(const TextareaCo
     { "fontStyle", [](const TextareaComposedElement& inspector) { return inspector.GetTextFontStyle(); } },
     { "fontWeight", [](const TextareaComposedElement& inspector) { return inspector.GetTextFontWeight(); } },
     { "fontFamily", [](const TextareaComposedElement& inspector) { return inspector.GetTextFontFamily(); } },
+    { "inputFilter", [](const TextareaComposedElement& inspector) { return inspector.GetTextInputFilter(); } },
 };
 
 } // namespace
@@ -54,6 +55,7 @@ void TextareaComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(std::string("fontStyle: ").append(GetTextFontStyle()));
     DumpLog::GetInstance().AddDesc(std::string("fontWeight: ").append(GetTextFontWeight()));
     DumpLog::GetInstance().AddDesc(std::string("fontFamily: ").append(GetTextFontFamily()));
+    DumpLog::GetInstance().AddDesc(std::string("inputFilter: ").append(GetTextInputFilter()));
 }
 
 std::unique_ptr<JsonValue> TextareaComposedElement::ToJsonObject() const
@@ -227,6 +229,15 @@ std::string TextareaComposedElement::ConvertFontFamily(const std::vector<std::st
     }
     result = result.substr(0, result.size() - 1);
     return result;
+}
+
+std::string TextareaComposedElement::GetTextInputFilter() const
+{
+    auto render = GetRenderTextField();
+    if (render) {
+        return render->GetTextInputFilter();
+    }
+    return "";
 }
 
 } // namespace OHOS::Ace::V2

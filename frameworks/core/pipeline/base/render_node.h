@@ -36,6 +36,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_v2/extensions/events/event_extensions.h"
 #include "core/components_v2/inspector/inspector_node.h"
+#include "core/event/axis_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/drag_recognizer.h"
 #include "core/pipeline/base/render_context.h"
@@ -548,9 +549,17 @@ public:
     virtual bool MouseDetect(const Point& globalPoint, const Point& parentLocalPoint, MouseHoverTestList& result,
         WeakPtr<RenderNode>& hoverNode);
 
+    virtual bool AxisDetect(const Point& globalPoint, const Point& parentLocalPoint, WeakPtr<RenderNode>& axisNode,
+        const AxisDirection direction);
+
     virtual void HandleMouseHoverEvent(const MouseState mouseState) {}
 
-    virtual void HandleMouseEvent(const MouseEvent& event) {}
+    virtual bool HandleMouseEvent(const MouseEvent& event)
+    {
+        return false;
+    }
+
+    virtual void HandleAxisEvent(const AxisEvent& event) {}
 
     virtual bool RotationMatchTest(const RefPtr<RenderNode>& requestRenderNode);
 
@@ -576,7 +585,7 @@ public:
         }
     }
 
-    virtual void OnStatusStyleChanged(StyleState state);
+    virtual void OnStatusStyleChanged(VisualState state);
 
     Offset GetOffsetFromOrigin(const Offset& offset) const;
 
@@ -731,6 +740,10 @@ public:
         }
     }
 
+    virtual WeakPtr<RenderNode> CheckAxisNode()
+    {
+        return nullptr;
+    }
     virtual WeakPtr<RenderNode> CheckHoverNode()
     {
         return nullptr;
@@ -745,6 +758,11 @@ public:
     virtual void OnMouseClickDownAnimation() {}
     virtual void OnMouseClickUpAnimation() {}
     virtual void StopMouseHoverAnimation() {}
+    virtual bool isScrollable(AxisDirection direction)
+    {
+        return false;
+    }
+
     virtual void OnVisibleChanged() {}
 
     void CreateMouseAnimation(RefPtr<KeyframeAnimation<Color>>& animation, const Color& from, const Color& to);
@@ -1017,6 +1035,7 @@ public:
 
     // mark JSview boundary, create/destroy RSNode if need
     void SyncRSNodeBoundary(bool isHead, bool isTail);
+    void SyncRSNode(std::shared_ptr<RSNode> rsNode);
     const std::shared_ptr<RSNode>& GetRSNode() const
     {
         return rsNode_;
@@ -1055,6 +1074,9 @@ public:
     {
         return needClip_;
     }
+
+    RefPtr<RenderNode> FindDropChild(const Point& globalPoint, const Point& parentLocalPoint);
+    static constexpr size_t DEFAULT_INDEX = -1;
 
 protected:
     explicit RenderNode(bool takeBoundary = false);

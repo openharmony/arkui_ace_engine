@@ -54,6 +54,7 @@
 #include "core/components_v2/inspector/scroll_bar_composed_element.h"
 #include "core/components_v2/inspector/scroll_composed_element.h"
 #include "core/components_v2/inspector/search_composed_element.h"
+#include "core/components_v2/inspector/select_composed_element.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
 #include "core/components_v2/inspector/shape_container_composed_element.h"
 #include "core/components_v2/inspector/sheet_composed_element.h"
@@ -187,7 +188,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { TEXTAREA_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::TextareaComposedElement>(id); } },
     { TEXTINPUT_COMPONENT_TAG,
-        [](const std::string& id) {return AceType::MakeRefPtr<V2::TextInputComposedElement>(id); } }
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::TextInputComposedElement>(id); } },
+    { SELECT_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::SelectComposedElement>(id); } }
 };
 
 } // namespace
@@ -248,7 +251,8 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { MENU_COMPONENT_TAG, MENU_ETS_TAG },
     { MENU_TAG, MENU_ETS_TAG },
     { TEXTAREA_COMPONENT_TAG, TEXTAREA_ETS_TAG },
-    { TEXTINPUT_COMPONENT_TAG, TEXTINPUT_ETS_TAG }
+    { TEXTINPUT_COMPONENT_TAG, TEXTINPUT_ETS_TAG },
+    { SELECT_COMPONENT_TAG, SELECT_ETS_TAG }
 };
 
 RefPtr<Element> InspectorComposedComponent::CreateElement()

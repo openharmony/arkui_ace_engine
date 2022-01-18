@@ -168,46 +168,6 @@ void JSImage::SetBorder(const Border& border)
     }
 }
 
-void JSImage::SetBorderRadius(const Dimension& value)
-{
-    Border border = GetBorder();
-    border.SetBorderRadius(Radius(value));
-    SetBorder(border);
-}
-
-void JSImage::SetBorderStyle(int32_t style)
-{
-    BorderStyle borderStyle = BorderStyle::SOLID;
-
-    if (static_cast<int32_t>(BorderStyle::SOLID) == style) {
-        borderStyle = BorderStyle::SOLID;
-    } else if (static_cast<int32_t>(BorderStyle::DASHED) == style) {
-        borderStyle = BorderStyle::DASHED;
-    } else if (static_cast<int32_t>(BorderStyle::DOTTED) == style) {
-        borderStyle = BorderStyle::DOTTED;
-    } else {
-        borderStyle = BorderStyle::NONE;
-    }
-
-    BorderEdge edge = GetLeftBorderEdge();
-    edge.SetStyle(borderStyle);
-    auto stack = ViewStackProcessor::GetInstance();
-    auto box = stack->GetBoxComponent();
-    if (!stack->IsVisualStateSet()) {
-        SetBorderEdge(edge);
-    } else {
-        box->SetBorderStyleForState(borderStyle, stack->GetVisualState());
-    }
-}
-
-void JSImage::SetBorderColor(const Color& color)
-{
-    SetLeftBorderColor(color);
-    SetTopBorderColor(color);
-    SetRightBorderColor(color);
-    SetBottomBorderColor(color);
-}
-
 void JSImage::SetLeftBorderColor(const Color& color)
 {
     BorderEdge edge = GetLeftBorderEdge();
@@ -236,14 +196,6 @@ void JSImage::SetBottomBorderColor(const Color& color)
     SetBottomBorderEdge(edge);
 }
 
-void JSImage::SetBorderWidth(const Dimension& value)
-{
-    SetLeftBorderWidth(value);
-    SetTopBorderWidth(value);
-    SetRightBorderWidth(value);
-    SetBottomBorderWidth(value);
-}
-
 void JSImage::SetLeftBorderWidth(const Dimension& value)
 {
     BorderEdge edge = GetLeftBorderEdge();
@@ -270,26 +222,6 @@ void JSImage::SetBottomBorderWidth(const Dimension& value)
     BorderEdge edge = GetBottomBorderEdge();
     edge.SetWidth(value);
     SetBottomBorderEdge(edge);
-}
-
-void JSImage::JsBorderColor(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    Color borderColor;
-    if (!ParseJsColor(info[0], borderColor)) {
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto box = stack->GetBoxComponent();
-    if (!stack->IsVisualStateSet()) {
-        SetBorderColor(borderColor);
-    } else {
-        AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-        box->SetBorderColorForState(borderColor, option, stack->GetVisualState());
-    }
 }
 
 void JSImage::OnComplete(const JSCallbackInfo& args)
@@ -350,95 +282,20 @@ void JSImage::Create(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-
     std::string src;
-    auto usePixMap = ParseJsMedia(info[0], src);
+    auto noPixMap = ParseJsMedia(info[0], src);
     RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(src);
     imageComponent->SetUseSkiaSvg(false);
     ViewStackProcessor::GetInstance()->Push(imageComponent);
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
     boxComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
-    if (usePixMap) {
+    if (noPixMap) {
         return;
     }
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     imageComponent->SetPixmap(CreatePixelMapFromNapiValue(info[0]));
 #endif
-}
-
-void JSImage::JsBorderWidth(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    Dimension borderWidth;
-    if (!ParseJsDimensionVp(info[0], borderWidth)) {
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto box = stack->GetBoxComponent();
-    if (!stack->IsVisualStateSet()) {
-        SetBorderWidth(borderWidth);
-    } else {
-        AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-        box->SetBorderWidthForState(borderWidth, option, stack->GetVisualState());
-    }
-}
-
-void JSImage::JsBorderRadius(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    Dimension borderRadius;
-    if (!ParseJsDimensionVp(info[0], borderRadius)) {
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto box = stack->GetBoxComponent();
-    if (!stack->IsVisualStateSet()) {
-        SetBorderRadius(borderRadius);
-    } else {
-        AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-        box->SetBorderRadiusForState(borderRadius, option, stack->GetVisualState());
-    }
-}
-
-void JSImage::JsBorder(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not a object.");
-        return;
-    }
-
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-        info.SetReturnValue(info.This());
-        return;
-    }
-    Dimension width = Dimension(0.0, DimensionUnit::VP);
-    Dimension radius = Dimension(0.0, DimensionUnit::VP);
-    ParseJsonDimensionVp(argsPtrItem->GetValue("width"), width);
-    ParseJsonDimensionVp(argsPtrItem->GetValue("radius"), radius);
-    auto borderStyle = argsPtrItem->GetInt("style", static_cast<int32_t>(BorderStyle::SOLID));
-    LOGD("JsBorder width = %lf unit = %d, radius = %lf unit = %d, borderStyle = %d", width.Value(), width.Unit(),
-        radius.Value(), radius.Unit(), borderStyle);
-    Color color;
-    if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
-        SetBorderColor(color);
-    }
-    SetBorderStyle(borderStyle);
-    SetBorderWidth(width);
-    SetBorderRadius(radius);
-    info.SetReturnValue(info.This());
 }
 
 void JSImage::SetSourceSize(const JSCallbackInfo& info)
@@ -530,11 +387,11 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("renderMode", &JSImage::SetImageRenderMode, opt);
     JSClass<JSImage>::StaticMethod("objectRepeat", &JSImage::SetImageRepeat, opt);
     JSClass<JSImage>::StaticMethod("interpolation", &JSImage::SetImageInterpolation, opt);
-    JSClass<JSImage>::StaticMethod("borderStyle", &JSImage::SetBorderStyle, opt);
-    JSClass<JSImage>::StaticMethod("borderColor", &JSImage::JsBorderColor);
-    JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
-    JSClass<JSImage>::StaticMethod("borderWidth", &JSImage::JsBorderWidth);
-    JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
+    JSClass<JSImage>::StaticMethod("borderStyle", &JSViewAbstract::SetBorderStyle, opt);
+    JSClass<JSImage>::StaticMethod("borderColor", &JSViewAbstract::JsBorderColor);
+    JSClass<JSImage>::StaticMethod("border", &JSViewAbstract::JsBorder);
+    JSClass<JSImage>::StaticMethod("borderWidth", &JSViewAbstract::JsBorderWidth);
+    JSClass<JSImage>::StaticMethod("borderRadius", &JSViewAbstract::JsBorderRadius);
     JSClass<JSImage>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSImage>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSImage>::StaticMethod("autoResize", &JSImage::SetAutoResize);
@@ -544,11 +401,11 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSImage>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSImage>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSImage>::StaticMethod("onDoubleClick", &JSInteractableView::JsOnDoubleClick);
     JSClass<JSImage>::StaticMethod("onComplete", &JSImage::OnComplete);
     JSClass<JSImage>::StaticMethod("onError", &JSImage::OnError);
     JSClass<JSImage>::StaticMethod("onFinish", &JSImage::OnFinish);
     JSClass<JSImage>::StaticMethod("syncLoad", &JSImage::SetSyncLoad);
+    JSClass<JSImage>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSImage>::Inherit<JSViewAbstract>();
     // override method
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);

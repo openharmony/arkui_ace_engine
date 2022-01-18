@@ -21,19 +21,17 @@
 
 namespace OHOS::Ace {
 class RosenRenderPlugin : public RenderPlugin {
-DECLARE_ACE_TYPE(RosenRenderPlugin, RenderPlugin);
+    DECLARE_ACE_TYPE(RosenRenderPlugin, RenderPlugin);
 
 public:
     RosenRenderPlugin() = default;
     ~RosenRenderPlugin() override = default;
-
 
     std::unique_ptr<DrawDelegate> GetDrawDelegate() override;
 
     void RemoveChildren() override;
 
     void NotifyPaintFinish() override;
-private:
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_ROSEN_RENDER_PLUGIN_H

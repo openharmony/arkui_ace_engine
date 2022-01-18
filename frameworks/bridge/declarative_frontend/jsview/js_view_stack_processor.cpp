@@ -35,7 +35,8 @@ void JSViewStackProcessor::JSVisualState(const JSCallbackInfo& info)
         return;
     }
     std::string state = info[0]->ToString();
-    ViewStackProcessor::GetInstance()->SetVisualState(state);
+    VisualState visualState = JSViewStackProcessor::StringToVisualState(state);
+    ViewStackProcessor::GetInstance()->SetVisualState(visualState);
 }
 
 // public static emthods exposed to JS
@@ -46,6 +47,27 @@ void JSViewStackProcessor::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSViewStackProcessor>::StaticMethod("visualState", JSVisualState, opt);
     JSClass<JSViewStackProcessor>::Bind<>(globalObj);
+}
+
+VisualState JSViewStackProcessor::StringToVisualState(const std::string& stateString)
+{
+    if (stateString == "normal") {
+        return VisualState::NORMAL;
+    }
+    if (stateString == "focused") {
+        return VisualState::FOCUSED;
+    }
+    if (stateString == "pressed") {
+        return VisualState::PRESSED;
+    }
+    if (stateString == "disables") {
+        return VisualState::DISABLED;
+    }
+    if (stateString == "hover") {
+        return VisualState::HOVER;
+    }
+    LOGE("Unknown visual state \"%s\", resetting to UNDEFINED", stateString.c_str());
+    return VisualState::NOTSET;
 }
 
 } // namespace OHOS::Ace::Framework

@@ -64,11 +64,11 @@ void RosenRenderClock::PerformLayout()
         Offset center = paintOffset_ + Offset(drawSize_.Width() / 2.0, drawSize_.Height() / 2.0);
         int i = 0;
         for (const auto& renderDigit : digitRenderNodes_) {
+            renderDigit->Layout(textLayoutParam);
             auto halfDigitWidth = renderDigit->GetLayoutSize().Width() / 2.0;
             auto halfDigitHeight = renderDigit->GetLayoutSize().Height() / 2.0;
             auto digitOffset = Offset(center.GetX() + sin(radians_[i]) * innerRadius - halfDigitWidth,
                                       center.GetY() - cos(radians_[i]) * innerRadius - halfDigitHeight);
-            renderDigit->Layout(textLayoutParam);
             renderDigit->SetPosition(digitOffset);
             ++i;
         }
@@ -77,7 +77,7 @@ void RosenRenderClock::PerformLayout()
     LayoutParam layoutParam = GetLayoutParam();
     layoutParam.SetMaxSize(drawSize_);
     renderClockHand_->Layout(layoutParam);
-
+    renderClockHand_->MarkNeedRender();
     paintOffset_ = Alignment::GetAlignPosition(GetLayoutSize(), drawSize_, Alignment::CENTER);
 }
 
@@ -88,13 +88,12 @@ void RosenRenderClock::RenderDigit(RenderContext& context, const Offset& offset)
     }
 }
 
-void RosenRenderClockHand::RenderHand(RenderContext& context, const Offset& offset,
+void RosenRenderClockHand::LayoutHand(const Offset& offset,
     const RefPtr<RenderImage>& renderHand, double rotateAngle)
 {
     renderHand->SetRotate(rotateAngle);
     renderHand->SetPosition(offset);
     renderHand->MarkNeedRender();
-    context.PaintChild(renderHand, {});
 }
 
 void RosenRenderClockHand::RequestRenderForNextSecond()
@@ -144,6 +143,7 @@ void RosenRenderClockHand::RequestRenderForNextSecond()
                 bool needRender = !(renderClockHand->GetHidden() || !renderClockHand->GetVisible());
                 if (needRender) {
                     renderClockHand->MarkNeedRender();
+                    renderClockHand->MarkNeedLayout();
                     return;
                 }
             },
@@ -153,8 +153,9 @@ void RosenRenderClockHand::RequestRenderForNextSecond()
     pipelineContext->AddNodesToNotifyOnPreDraw(Claim(this));
 }
 
-void RosenRenderClockHand::Paint(RenderContext& context, const Offset& offset)
+void RosenRenderClockHand::PerformLayout()
 {
+    RenderClockHand::PerformLayout();
     auto timeOfNow = GetTimeOfNow(hoursWest_);
     // case [10] means that time travels from light to dark, case [01] means that time travels from dark to light
     uint8_t dayNightStatus = (static_cast<uint8_t>(isDay_) << 1) | static_cast<uint8_t>(IsDayTime(timeOfNow));
@@ -188,12 +189,17 @@ void RosenRenderClockHand::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     auto clockSize = GetLayoutSize();
-    auto handOffset = offset + Offset((clockSize.Width() - renderHourHand_->GetLayoutSize().Width()) / 2.0, 0.0);
-    Offset rotateCenter = offset + Offset(clockSize.Width() / 2.0, clockSize.Height() / 2.0);
+    auto handOffset = Offset((clockSize.Width() - renderHourHand_->GetLayoutSize().Width()) / 2.0, 0.0);
+    LayoutHand(handOffset, renderMinuteHand_, timeOfNow.minute_ * MINUTE_ANGLE_UNIT);
+    LayoutHand(handOffset, renderHourHand_, timeOfNow.hour12_ * HOUR_ANGLE_UNIT);
+    LayoutHand(handOffset, renderSecondHand_, timeOfNow.second_ * SECOND_ANGLE_UNIT);
+}
 
-    RenderHand(context, handOffset, renderMinuteHand_, timeOfNow.minute_ * MINUTE_ANGLE_UNIT);
-    RenderHand(context, handOffset, renderHourHand_, timeOfNow.hour12_ * HOUR_ANGLE_UNIT);
-    RenderHand(context, handOffset, renderSecondHand_, timeOfNow.second_ * SECOND_ANGLE_UNIT);
+void RosenRenderClockHand::Paint(RenderContext& context, const Offset& offset)
+{
+    context.PaintChild(renderMinuteHand_, offset);
+    context.PaintChild(renderHourHand_, offset);
+    context.PaintChild(renderSecondHand_, offset);
 }
 
 void RosenRenderClockHand::OnAppShow()

@@ -147,6 +147,8 @@ void RenderClock::Update(const RefPtr<Component>& component)
         InternalResource::ResourceId::FA_BLACK_CLOCK_WIDGET_SECOND));
 
     renderClockHand_->SetHoursWest(declaration_->GetHoursWest());
+    // update accessibility text when hour changed
+    UpdateAccessibilityInfo(timeOfNow.hour24_, timeOfNow.minute_);
     renderClockHand_->Attach(GetContext());
     renderClockHand_->SetOnHourCallback(
         AceAsyncEvent<void(const std::string&)>::Create(declaration_->GetOnHourChangeEvent(), context_));

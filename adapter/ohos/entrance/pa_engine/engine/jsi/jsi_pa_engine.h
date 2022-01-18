@@ -59,6 +59,9 @@ public:
     void SetArkNativeEngine(ArkNativeEngine* nativeEngine);
     ArkNativeEngine* GetArkNativeEngine() const;
 
+    // add Console object to worker
+    void RegisterConsoleModule(ArkNativeEngine* engine);
+
     bool GetBlockWaiting() const
     {
         return blockWaiting_;
@@ -173,6 +176,10 @@ private:
     void StartService();
     void StartData();
     void StartForm(const OHOS::AAFwk::Want& want);
+
+    void RegisterWorker();
+    void RegisterInitWorkerFunc();
+    void RegisterAssetFunc();
 
     int32_t instanceId_ = 0;
     ArkNativeEngine* nativeEngine_ = nullptr;

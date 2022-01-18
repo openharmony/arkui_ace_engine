@@ -90,11 +90,6 @@ bool Scheduler::Animate(const AnimationOption& option, const RefPtr<Curve>& curv
         return false;
     }
 
-    if (!context->GetIsDeclarative()) {
-        LOGD("Failed to animate asynchronously, context is not declarative!");
-        return false;
-    }
-
     return context->Animate(option, curve, propertyCallback, finishCallBack);
 }
 
@@ -107,11 +102,6 @@ void Scheduler::OpenImplicitAnimation(const AnimationOption& option, const RefPt
         return;
     }
 
-    if (!context->GetIsDeclarative()) {
-        LOGD("Failed to open implicit animation, context is not declarative!");
-        return;
-    }
-
     return context->OpenImplicitAnimation(option, curve, finishCallBack);
 }
 
@@ -120,11 +110,6 @@ bool Scheduler::CloseImplicitAnimation()
     auto context = context_.Upgrade();
     if (context == nullptr) {
         LOGE("Failed to close implicit animation, context is null!");
-        return false;
-    }
-
-    if (!context->GetIsDeclarative()) {
-        LOGD("Failed to close implicit animation, context is not declarative!");
         return false;
     }
 
@@ -140,11 +125,6 @@ void Scheduler::AddKeyFrame(
         return;
     }
 
-    if (!context->GetIsDeclarative()) {
-        LOGD("Failed to add keyframe,, context is not declarative!");
-        return;
-    }
-
     return context->AddKeyFrame(fraction, curve, propertyCallback);
 }
 
@@ -153,11 +133,6 @@ void Scheduler::AddKeyFrame(float fraction, const std::function<void()>& propert
     auto context = context_.Upgrade();
     if (context == nullptr) {
         LOGE("Failed to add keyframe, context is null!");
-        return;
-    }
-
-    if (!context->GetIsDeclarative()) {
-        LOGD("Failed to add keyframe, context is not declarative!");
         return;
     }
 

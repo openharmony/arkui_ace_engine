@@ -37,6 +37,7 @@
 #include "core/animation/shared_transition_controller.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container_scope.h"
 #include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
@@ -124,7 +125,8 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
 {
     frontendType_ = frontend->GetType();
     RegisterEventHandler(frontend->GetEventHandler());
-    auto&& vsyncCallback = [weak = AceType::WeakClaim(this)](const uint64_t nanoTimestamp, const uint32_t frameCount) {
+    auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](const uint64_t nanoTimestamp, const uint32_t frameCount) {
+        ContainerScope scope(instanceId);
         auto context = weak.Upgrade();
         if (context) {
             context->OnVsyncEvent(nanoTimestamp, frameCount);
@@ -1184,7 +1186,6 @@ void PipelineContext::AddNeedRebuildFocusElement(const RefPtr<Element>& focusEle
         LOGW("focusElement is null");
         return;
     }
-    LOGD("schedule rebuild focus element for %{public}s", AceType::TypeName(focusElement));
     needRebuildFocusElement_.emplace(focusElement);
 }
 
@@ -1212,7 +1213,6 @@ void PipelineContext::AddNeedRenderFinishNode(const RefPtr<RenderNode>& renderNo
         LOGW("renderNode is null");
         return;
     }
-    LOGD("schedule render for %{public}s", AceType::TypeName(renderNode));
     needPaintFinishNodes_.emplace(renderNode);
 }
 
@@ -1348,8 +1348,8 @@ void PipelineContext::OnTouchEvent(const TouchPoint& point)
             if (!pipelineContext || !pipelineContext->rootElement_) {
                 continue;
             }
-            auto pluginPoint = point.UpdateScalePoint(viewScale_, pipelineContext->pluginOffset_.GetX(),
-                pipelineContext->pluginOffset_.GetY(), point.id + (int32_t)i + 1);
+            auto pluginPoint = point.UpdateScalePoint(viewScale_, pipelineContext->GetPluginEventOffset().GetX(),
+                pipelineContext->GetPluginEventOffset().GetY(), point.id + (int32_t)i + 1);
             pipelineContext->OnTouchEvent(pluginPoint);
         }
     }
@@ -1367,8 +1367,8 @@ void PipelineContext::OnTouchEvent(const TouchPoint& point)
             if (!pipelineContext || !pipelineContext->rootElement_) {
                 continue;
             }
-            auto pluginPoint = point.UpdateScalePoint(viewScale_, pipelineContext->pluginOffset_.GetX(),
-                pipelineContext->pluginOffset_.GetY(), point.id + (int32_t)i + 1);
+            auto pluginPoint = point.UpdateScalePoint(viewScale_, pipelineContext->GetPluginEventOffset().GetX(),
+                pipelineContext->GetPluginEventOffset().GetY(), point.id + (int32_t)i + 1);
             pipelineContext->eventManager_.DispatchTouchEvent(pluginPoint);
         }
     }
@@ -1416,6 +1416,15 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     eventManager_.MouseTest(scaleEvent, rootElement_->GetRenderNode());
     eventManager_.DispatchMouseEvent(scaleEvent);
     eventManager_.DispatchMouseHoverEvent(scaleEvent);
+}
+
+void PipelineContext::OnAxisEvent(const AxisEvent& event)
+{
+    LOGI("OnAxisEvent: x=%{public}f, y=%{public}f, horizontalAxis=%{public}f, verticalAxis=%{public}f", event.x,
+        event.y, event.horizontalAxis, event.verticalAxis);
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    eventManager_.AxisTest(scaleEvent, rootElement_->GetRenderNode());
+    eventManager_.DispatchAxisEvent(scaleEvent);
 }
 
 void PipelineContext::AddToHoverList(const RefPtr<RenderNode>& node)
@@ -2161,7 +2170,9 @@ void PipelineContext::SetUseRootAnimation(bool useRoot)
 
 void PipelineContext::RegisterFont(const std::string& familyName, const std::string& familySrc)
 {
-    fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this));
+    if (fontManager_) {
+        fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this));
+    }
 }
 
 void PipelineContext::TryLoadImageInfo(
@@ -2184,10 +2195,22 @@ void PipelineContext::SetMultimodalSubscriber(const RefPtr<MultimodalSubscriber>
     multiModalManager_->SetMultimodalSubscriber(multimodalSubscriber);
 }
 
+void PipelineContext::SetWindowOnShow()
+{
+    window_->OnShow();
+    window_->RequestFrame();
+}
+
+void PipelineContext::SetWindowOnHide()
+{
+    window_->RequestFrame();
+    window_->OnHide();
+}
+
 void PipelineContext::OnShow()
 {
     onShow_ = true;
-    window_->OnShow();
+    SetWindowOnShow();
     auto multiModalScene = multiModalManager_->GetCurrentMultiModalScene();
     if (multiModalScene) {
         multiModalScene->Resume();
@@ -2220,7 +2243,7 @@ void PipelineContext::OnShow()
 void PipelineContext::OnHide()
 {
     onShow_ = false;
-    window_->OnHide();
+    SetWindowOnHide();
     auto multiModalScene = multiModalManager_->GetCurrentMultiModalScene();
     if (multiModalScene) {
         multiModalScene->Hide();
@@ -2561,14 +2584,14 @@ bool PipelineContext::ProcessDragEvent(int action, double windowX, double window
 
         if (targetRenderBox == preTargetRenderBox) {
             if (targetRenderBox && targetRenderBox->GetOnDragMove()) {
-                (targetRenderBox->GetOnDragMove())(event);
+                (targetRenderBox->GetOnDragMove())(event, json->ToString());
             }
         } else {
             if (preTargetRenderBox && preTargetRenderBox->GetOnDragLeave()) {
-                (preTargetRenderBox->GetOnDragLeave())(event);
+                (preTargetRenderBox->GetOnDragLeave())(event, json->ToString());
             }
             if (targetRenderBox && targetRenderBox->GetOnDragEnter()) {
-                (targetRenderBox->GetOnDragEnter())(event);
+                (targetRenderBox->GetOnDragEnter())(event, json->ToString());
             }
             SetPreTargetRenderNode(targetRenderBox);
         }
@@ -2579,7 +2602,7 @@ bool PipelineContext::ProcessDragEvent(int action, double windowX, double window
             AceType::DynamicCast<RenderBox>(renderNode->FindChildNodeOfClass<RenderBox>(globalPoint, localPoint));
 
         if (targetRenderBox && targetRenderBox->GetOnDrop()) {
-            (targetRenderBox->GetOnDrop())(event);
+            (targetRenderBox->GetOnDrop())(event, json->ToString());
         }
         SetPreTargetRenderNode(nullptr);
         return targetRenderBox ? true : false;

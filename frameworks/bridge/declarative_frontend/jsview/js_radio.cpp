@@ -230,6 +230,7 @@ void JSRadio::OnChange(const JSCallbackInfo& args)
 
 void JSRadio::JsOnClick(const JSCallbackInfo& args)
 {
+    // TODO: Add click info.
     if (JSViewBindEvent(&CheckableComponent::SetOnClick, args)) {
     } else {
         LOGW("Failed to bind event");

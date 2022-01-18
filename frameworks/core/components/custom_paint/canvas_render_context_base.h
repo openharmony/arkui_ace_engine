@@ -37,7 +37,7 @@ public:
 
     virtual void Detach() = 0;
 
-    virtual void SetBitMapPtr(char* bitMapPtr) = 0;
+    virtual void SetBitMapPtr(char* bitMapPtr, int bitMapWidth, int bitMapHeight) = 0;
 
     virtual uint64_t CreateTexture() = 0;
 

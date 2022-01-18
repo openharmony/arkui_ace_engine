@@ -38,6 +38,7 @@
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/menu/menu_component.h"
 #include "core/components/option/option_component.h"
+#include "core/gestures/long_press_gesture.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
@@ -50,6 +51,8 @@ constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
+constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
+constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
 constexpr double EPSILON = 0.000002f;
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 
@@ -578,10 +581,17 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
 
     auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
     auto stack = ViewStackProcessor::GetInstance();
+    auto option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
-        display->SetOpacity(opacity, stack->GetImplicitAnimationOption());
+        display->SetOpacity(opacity, option);
     } else {
-        display->SetOpacityForState(opacity, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+        display->GetStateAttributes()->AddAttribute<AnimatableDouble>(DisplayStateAttribute::OPACITY,
+            AnimatableDouble(opacity, option), stack->GetVisualState());
+        if (!display->GetStateAttributes()->
+            HasAttribute(DisplayStateAttribute::OPACITY, VisualState::NORMAL)) {
+            display->GetStateAttributes()->AddAttribute<AnimatableDouble>(DisplayStateAttribute::OPACITY,
+                AnimatableDouble(display->GetOpacity(), option), VisualState::NORMAL);
+        }
     }
 }
 
@@ -836,10 +846,17 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
 
     auto stack = ViewStackProcessor::GetInstance();
     auto box = stack->GetBoxComponent();
+    auto option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
-        box->SetWidth(value, stack->GetImplicitAnimationOption());
+        box->SetWidth(value, option);
     } else {
-        box->SetWidthForState(value, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+        box->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::WIDTH,
+            AnimatableDimension(value, option), stack->GetVisualState());
+        if (!box->GetStateAttributes()->
+            HasAttribute(BoxStateAttribute::WIDTH, VisualState::NORMAL)) {
+            box->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::WIDTH,
+                AnimatableDimension(box->GetWidth(), option), VisualState::NORMAL);
+        }
     }
     return true;
 }
@@ -876,10 +893,17 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
 
     auto stack = ViewStackProcessor::GetInstance();
     auto box = stack->GetBoxComponent();
+    auto option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
-        box->SetHeight(value, stack->GetImplicitAnimationOption());
+        box->SetHeight(value, option);
     } else {
-        box->SetHeightForState(value, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+        box->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::HEIGHT,
+            AnimatableDimension(value, option), stack->GetVisualState());
+        if (!box->GetStateAttributes()->
+            HasAttribute(BoxStateAttribute::HEIGHT, VisualState::NORMAL)) {
+            box->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::HEIGHT,
+                AnimatableDimension(box->GetHeight(), option), VisualState::NORMAL);
+        }
     }
     return true;
 }
@@ -1465,11 +1489,19 @@ void JSViewAbstract::JsBorderColor(const JSCallbackInfo& info)
     }
 
     auto stack = ViewStackProcessor::GetInstance();
+    auto option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
-        BoxComponentHelper::SetBorderColor(GetBackDecoration(), borderColor, stack->GetImplicitAnimationOption());
+        BoxComponentHelper::SetBorderColor(GetBackDecoration(), borderColor, option);
     } else {
         auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
-        boxComponent->SetBorderColorForState(borderColor, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+        boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(BoxStateAttribute::BORDER_COLOR,
+            AnimatableColor(borderColor, option), stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->
+            HasAttribute(BoxStateAttribute::BORDER_COLOR, VisualState::NORMAL)) {
+            auto c = BoxComponentHelper::GetBorderColor(GetBackDecoration());
+            boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(BoxStateAttribute::BORDER_COLOR,
+                AnimatableColor(c, option), VisualState::NORMAL);
+        }
     }
 }
 
@@ -1486,10 +1518,18 @@ void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
 
     auto stack = ViewStackProcessor::GetInstance();
     auto boxComponent = stack->GetBoxComponent();
+    auto option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
-        boxComponent->SetColor(backgroundColor, stack->GetImplicitAnimationOption());
+        boxComponent->SetColor(backgroundColor, option);
     } else {
-        boxComponent->SetColorForState(backgroundColor, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+        boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(BoxStateAttribute::COLOR,
+            AnimatableColor(backgroundColor, option), stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->
+            HasAttribute(BoxStateAttribute::COLOR, VisualState::NORMAL)) {
+            Color c = boxComponent->GetColor();
+            boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(BoxStateAttribute::COLOR,
+                AnimatableColor(c, option), VisualState::NORMAL);
+        }
     }
 }
 
@@ -1800,7 +1840,14 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
         if (!stack->IsVisualStateSet()) {
             BoxComponentHelper::SetBorderWidth(GetBackDecoration(), width, option);
         } else {
-            boxComponent->SetBorderWidthForState(width, option, stack->GetVisualState());
+            boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>
+                (BoxStateAttribute::BORDER_WIDTH, AnimatableDimension(width, option), stack->GetVisualState());
+            if (!boxComponent->GetStateAttributes()->
+                HasAttribute(BoxStateAttribute::BORDER_WIDTH, VisualState::NORMAL)) {
+                boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_WIDTH,
+                    AnimatableDimension(BoxComponentHelper::GetBorderWidth(GetBackDecoration()), option),
+                    VisualState::NORMAL);
+            }
         }
     }
     Color color;
@@ -1808,7 +1855,14 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
         if (!stack->IsVisualStateSet()) {
             BoxComponentHelper::SetBorderColor(GetBackDecoration(), color, option);
         } else {
-            boxComponent->SetBorderColorForState(color, option, stack->GetVisualState());
+            boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(BoxStateAttribute::BORDER_COLOR,
+                AnimatableColor(color, option), stack->GetVisualState());
+            if (!boxComponent->GetStateAttributes()->
+                HasAttribute(BoxStateAttribute::BORDER_COLOR, VisualState::NORMAL)) {
+                Color c = BoxComponentHelper::GetBorderColor(GetBackDecoration());
+                boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>
+                    (BoxStateAttribute::BORDER_COLOR, AnimatableColor(c, option), VisualState::NORMAL);
+            }
         }
     }
     Dimension radius;
@@ -1816,12 +1870,19 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
         if (!stack->IsVisualStateSet()) {
             BoxComponentHelper::SetBorderRadius(GetBackDecoration(), radius, option);
         } else {
-            boxComponent->SetBorderRadiusForState(radius, option, stack->GetVisualState());
+            boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_RADIUS,
+                AnimatableDimension(radius, option), stack->GetVisualState());
+            if (!boxComponent->GetStateAttributes()->
+                HasAttribute(BoxStateAttribute::BORDER_RADIUS, VisualState::NORMAL)) {
+                boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_RADIUS,
+                    AnimatableDimension(BoxComponentHelper::GetBorderRadius(GetBackDecoration()).GetX(), option),
+                    VisualState::NORMAL);
+            }
         }
     }
     if (argsPtrItem->Contains("style")) {
         auto borderStyle = argsPtrItem->GetInt("style", static_cast<int32_t>(BorderStyle::SOLID));
-        SetBorderStyle(borderStyle); // takes care of visualStyle
+        SetBorderStyle(borderStyle);
     }
     info.ReturnSelf();
 }
@@ -1837,11 +1898,20 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();
+    AnimationOption option = stack->GetImplicitAnimationOption();
     if (!ViewStackProcessor::GetInstance()->IsVisualStateSet()) {
-        BoxComponentHelper::SetBorderWidth(GetBackDecoration(), borderWidth, stack->GetImplicitAnimationOption());
+        BoxComponentHelper::SetBorderWidth(GetBackDecoration(), borderWidth, option);
     } else {
         auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
-        boxComponent->SetBorderWidthForState(borderWidth, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+        boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>
+            (BoxStateAttribute::BORDER_WIDTH, AnimatableDimension(borderWidth, option), stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->
+            HasAttribute(BoxStateAttribute::BORDER_WIDTH, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+                BoxStateAttribute::BORDER_WIDTH,
+                AnimatableDimension(BoxComponentHelper::GetBorderWidth(GetBackDecoration()), option),
+                VisualState::NORMAL);
+        }
     }
 }
 
@@ -1856,12 +1926,19 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();
+    AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
-        SetBorderRadius(borderRadius, stack->GetImplicitAnimationOption());
+        SetBorderRadius(borderRadius, option);
     } else {
         auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
-        boxComponent->SetBorderRadiusForState(
-            borderRadius, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+        boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_RADIUS,
+            AnimatableDimension(borderRadius, option), stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->
+            HasAttribute(BoxStateAttribute::BORDER_RADIUS, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_RADIUS,
+            AnimatableDimension(
+                BoxComponentHelper::GetBorderRadius(GetBackDecoration()).GetX(), option), VisualState::NORMAL);
+        }
     }
 }
 
@@ -2573,74 +2650,109 @@ void JSViewAbstract::Pop()
     ViewStackProcessor::GetInstance()->Pop();
 }
 
-void JSViewAbstract::JsOnDrag(const JSCallbackInfo& info)
+void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onDragId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragFunc)](
-                            const RefPtr<DragEvent>& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute(info);
-        };
-        auto drag = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        drag->SetOnDragId(onDragId);
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind onDrag event due to info is not function");
+        return;
     }
+    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+                        const RefPtr<DragEvent>& info, const std::string &extraParams) -> RefPtr<Component> {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
+        auto ret = func->Execute(info, extraParams);
+        if (!ret->IsObject()) {
+            LOGE("builder param is not an object.");
+            return nullptr;
+        }
+
+        auto builderObj = JSRef<JSObject>::Cast(ret);
+        auto builder = builderObj->GetProperty("builder");
+        if (!builder->IsFunction()) {
+            LOGE("builder param is not a function.");
+            return nullptr;
+        }
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        if (!builderFunc) {
+            LOGE("builder function is null.");
+            return nullptr;
+        }
+        // use another VSP instance while executing the builder function
+        ScopedViewStackProcessor builderViewStackProcessor;
+        builderFunc->Execute();
+        RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
+        if (!customComponent) {
+            LOGE("Custom component is null.");
+            return nullptr;
+        }
+        return customComponent;
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragStartId(onDragStartId);
 }
 
 void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
-                                 const RefPtr<DragEvent>& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute(info);
-        };
-        auto dragEnter = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        dragEnter->SetOnDragEnterId(onDragEnterId);
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind onDragEnter event due to info is not function");
+        return;
     }
+    RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
+                            const RefPtr<DragEvent>& info, const std::string &extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Execute(info, extraParams);
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragEnterId(onDragEnterId);
 }
 
 void JSViewAbstract::JsOnDragMove(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
-                                const RefPtr<DragEvent>& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute(info);
-        };
-        auto dragMove = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        dragMove->SetOnDragMoveId(onDragMoveId);
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind onDragMove event due to info is not function");
+        return;
     }
+    RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
+                            const RefPtr<DragEvent>& info, const std::string &extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Execute(info, extraParams);
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragMoveId(onDragMoveId);
 }
 
 void JSViewAbstract::JsOnDragLeave(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
-                                 const RefPtr<DragEvent>& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute(info);
-        };
-        auto dragLeave = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        dragLeave->SetOnDragLeaveId(onDragLeaveId);
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind onDragLeave event due to info is not function");
+        return;
     }
+    RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
+                            const RefPtr<DragEvent>& info, const std::string &extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Execute(info, extraParams);
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragLeaveId(onDragLeaveId);
 }
 
 void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
-                            const RefPtr<DragEvent>& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute(info);
-        };
-        auto drop = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        drop->SetOnDropId(onDropId);
+    if (!info[0]->IsFunction()) {
+        LOGE("fail to bind onDrop event due to info is not function");
+        return;
     }
+    RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
+                        const RefPtr<DragEvent>& info, const std::string &extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Execute(info, extraParams);
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDropId(onDropId);
 }
 
 void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
@@ -2793,7 +2905,13 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
         }
     } else {
         auto boxComponent = stack->GetBoxComponent();
-        boxComponent->SetGradientForState(lineGradient, stack->GetVisualState());
+        boxComponent->GetStateAttributes()->AddAttribute<Gradient>
+            (BoxStateAttribute::GRADIENT, lineGradient, stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->
+            HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(BoxStateAttribute::GRADIENT,
+                GetBackDecoration()->GetGradient(), VisualState::NORMAL);
+        }
     }
 }
 
@@ -2859,7 +2977,13 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
         }
     } else {
         auto boxComponent = stack->GetBoxComponent();
-        boxComponent->SetGradientForState(radialGradient, stack->GetVisualState());
+        boxComponent->GetStateAttributes()->AddAttribute<Gradient>
+            (BoxStateAttribute::GRADIENT, radialGradient, stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->
+            HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(BoxStateAttribute::GRADIENT,
+                GetBackDecoration()->GetGradient(), VisualState::NORMAL);
+        }
     }
 }
 
@@ -2938,7 +3062,13 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
         }
     } else {
         auto boxComponent = stack->GetBoxComponent();
-        boxComponent->SetGradientForState(sweepGradient, stack->GetVisualState());
+        boxComponent->GetStateAttributes()->AddAttribute<Gradient>
+            (BoxStateAttribute::GRADIENT, sweepGradient, stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->
+            HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(BoxStateAttribute::GRADIENT,
+                GetBackDecoration()->GetGradient(), VisualState::NORMAL);
+        }
     }
 }
 
@@ -3333,6 +3463,84 @@ void JSViewAbstract::JsAccessibilityImportance(const std::string& importance)
     inspector->SetAccessibilityImportance(importance);
 }
 
+void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
+{
+    ViewStackProcessor::GetInstance()->GetCoverageComponent();
+    auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);
+    if (!menuComponent) {
+        return;
+    }
+    menuComponent->SetContextMenu(true);
+    int32_t responseType = static_cast<int32_t>(ResponseType::LONGPRESS);
+    if (info.Length() == 2 && info[1]->IsNumber()) {
+        responseType = info[1]->ToNumber<int32_t>();
+        LOGI("Set the responseType is %d.", responseType);
+    }
+
+    if (responseType == static_cast<int32_t>(ResponseType::RIGHT_CLICK)) {
+        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        box->SetOnMouseId([weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent)](MouseInfo& info) {
+            auto refPtr = weak.Upgrade();
+            if (!refPtr) {
+                return;
+            }
+            if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
+                auto showMenu = refPtr->GetTargetCallback();
+                showMenu("", info.GetGlobalLocation());
+            }
+        });
+    } else if (responseType == static_cast<int32_t>(ResponseType::LONGPRESS)) {
+        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        RefPtr<Gesture> longGesture =
+            AceType::MakeRefPtr<LongPressGesture>(DEFAULT_LONG_PRESS_FINGER, false, DEFAULT_LONG_PRESS_DURATION);
+        longGesture->SetOnActionId([weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent)](const GestureEvent& info) {
+            auto refPtr = weak.Upgrade();
+            if (!refPtr) {
+                return;
+            }
+            auto showMenu = refPtr->GetTargetCallback();
+            showMenu("", info.GetGlobalLocation());
+        });
+        box->SetOnLongPress(longGesture);
+    } else {
+        LOGE("The arg responseType is invalid.");
+        return;
+    }
+    auto menuTheme = GetTheme<SelectTheme>();
+    menuComponent->SetTheme(menuTheme);
+
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[0]);
+
+        auto builder = menuObj->GetProperty("builder");
+        if (!builder->IsFunction()) {
+            LOGE("builder param is not a function.");
+            return;
+        }
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        if (!builderFunc) {
+            LOGE("builder function is null.");
+            return;
+        }
+        // use another VSP instance while executing the builder function
+        ScopedViewStackProcessor builderViewStackProcessor;
+        builderFunc->Execute();
+        auto customComponent = ViewStackProcessor::GetInstance()->Finish();
+        if (!customComponent) {
+            LOGE("Custom component is null.");
+            return;
+        }
+
+        auto optionTheme = GetTheme<SelectTheme>();
+        auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
+        optionComponent->SetCustomComponent(customComponent);
+        menuComponent->AppendOption(optionComponent);
+    } else {
+        LOGE("Param is invalid");
+        return;
+    }
+}
+
 void JSViewAbstract::JSBind()
 {
     JSClass<JSViewAbstract>::Declare("JSViewAbstract");
@@ -3411,7 +3619,8 @@ void JSViewAbstract::JSBind()
 #endif
 
     JSClass<JSViewAbstract>::StaticMethod("bindMenu", &JSViewAbstract::JsBindMenu);
-    JSClass<JSViewAbstract>::StaticMethod("onDrag", &JSViewAbstract::JsOnDrag);
+    JSClass<JSViewAbstract>::StaticMethod("bindContextMenu", &JSViewAbstract::JsBindContextMenu);
+    JSClass<JSViewAbstract>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
     JSClass<JSViewAbstract>::StaticMethod("onDragEnter", &JSViewAbstract::JsOnDragEnter);
     JSClass<JSViewAbstract>::StaticMethod("onDragMove", &JSViewAbstract::JsOnDragMove);
     JSClass<JSViewAbstract>::StaticMethod("onDragLeave", &JSViewAbstract::JsOnDragLeave);
@@ -3441,7 +3650,6 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("key", &JSViewAbstract::JsKey);
     JSClass<JSViewAbstract>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSViewAbstract>::StaticMethod("hoverEffect", &JSViewAbstract::JsHoverEffect);
-    JSClass<JSViewAbstract>::StaticMethod("onDoubleClick", &JSViewAbstract::JsOnDoubleClick);
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
@@ -3504,7 +3712,13 @@ void JSViewAbstract::SetBorderStyle(int32_t style)
         BoxComponentHelper::SetBorderStyle(GetBackDecoration(), borderStyle);
     } else {
         auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
-        boxComponent->SetBorderStyleForState(borderStyle, stack->GetVisualState());
+        boxComponent->GetStateAttributes()->AddAttribute<BorderStyle>
+            (BoxStateAttribute::BORDER_STYLE, borderStyle, stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->
+            HasAttribute(BoxStateAttribute::BORDER_STYLE, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<BorderStyle>(BoxStateAttribute::BORDER_STYLE,
+                BoxComponentHelper::GetBorderStyle(GetBackDecoration()), VisualState::NORMAL);
+        }
     }
 }
 
@@ -3925,17 +4139,6 @@ RefPtr<Gesture> JSViewAbstract::GetTapGesture(const JSCallbackInfo& info, int32_
             func->Execute(info);
         });
     return tapGesture;
-}
-
-void JSViewAbstract::JsOnDoubleClick(const JSCallbackInfo& info)
-{
-    if (info[0]->IsFunction()) {
-        auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        auto tapGesture = GetTapGesture(info, 2);
-        if (tapGesture) {
-            click->SetOnDoubleClick(tapGesture);
-        }
-    }
 }
 
 void JSViewAbstract::JsOnMouse(const JSCallbackInfo& args)

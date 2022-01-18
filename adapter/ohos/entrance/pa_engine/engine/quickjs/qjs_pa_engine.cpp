@@ -38,6 +38,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/backend.h"
+#include "core/common/container_scope.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/back_end_event_manager.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
@@ -404,7 +405,10 @@ bool QjsPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     LoadLibrary();
     nativeEngine_ = new QuickJSNativeEngine(runtime, context, static_cast<void*>(this));
     ACE_DCHECK(delegate);
-    delegate->AddTaskObserver([nativeEngine = nativeEngine_]() { nativeEngine->Loop(LOOP_NOWAIT); });
+    delegate->AddTaskObserver([nativeEngine = nativeEngine_, id = instanceId_]() {
+        ContainerScope scope(id);
+        nativeEngine->Loop(LOOP_NOWAIT);
+    });
 
     engineInstance_ = AceType::MakeRefPtr<QjsPaEngineInstance>(delegate, instanceId_);
     bool ret = engineInstance_->InitJsEnv(runtime, context, GetExtraNativeObject());
@@ -412,6 +416,7 @@ bool QjsPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
 #endif
+    RegisterWorker();
     return ret;
 }
 
@@ -419,13 +424,14 @@ void QjsPaEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_](bool needSync) {
+    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_, id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([nativeEngine, needSync]() {
+        delegate->PostJsTask([nativeEngine, needSync, id]() {
+            ContainerScope scope(id);
             if (nativeEngine == nullptr) {
                 return;
             }
@@ -433,6 +439,73 @@ void QjsPaEngine::SetPostTask(NativeEngine* nativeEngine)
         });
     };
     nativeEngine_->SetPostTask(postTask);
+}
+
+void QjsPaEngine::RegisterInitWorkerFunc()
+{
+    auto&& initWorkerFunc = [weak = AceType::WeakClaim(this)](NativeEngine* nativeEngine) {
+        LOGI("WorkerCore RegisterInitWorkerFunc called");
+        auto paEngine = weak.Upgrade();
+        if (nativeEngine == nullptr) {
+            LOGE("nativeEngine is nullptr");
+            return;
+        }
+        auto qjsNativeEngine = static_cast<QuickJSNativeEngine*>(nativeEngine);
+        if (qjsNativeEngine == nullptr) {
+            LOGE("qjsNativeEngine is nullptr");
+            return;
+        }
+
+        JSContext* ctx = qjsNativeEngine->GetContext();
+        if (ctx == nullptr) {
+            LOGE("ctx is nullptr");
+            return;
+        }
+
+        // Create a stack-allocated handle scope.
+        Framework::QJSHandleScope handleScope(ctx);
+
+        // Note: default 256KB is not enough
+        JS_SetMaxStackSize(ctx, Framework::MAX_STACK_SIZE);
+
+        JSValue globalObj = JS_GetGlobalObject(ctx);
+        InitJsConsoleObject(ctx, globalObj);
+        JS_FreeValue(ctx, globalObj);
+
+        for (const auto& [key, value] : paEngine->GetExtraNativeObject()) {
+            auto nativeObjectInfo = std::make_unique<NativeObjectInfo>();
+            nativeObjectInfo->nativeObject = value;
+            JSValue abilityValue = JS_NewExternal(
+                ctx, nativeObjectInfo.release(),
+                [](JSContext* ctx, void* data, void* hint) {
+                    std::unique_ptr<NativeObjectInfo> info(static_cast<NativeObjectInfo*>(data));
+                },
+                nullptr);
+            JS_SetPropertyStr(ctx, globalObj, key.c_str(), abilityValue);
+        }
+    };
+    nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
+}
+
+void QjsPaEngine::RegisterAssetFunc()
+{
+    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
+    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content) {
+        LOGI("WorkerCore RegisterAssetFunc called");
+        auto delegate = weakDelegate.Upgrade();
+        if (delegate == nullptr) {
+            LOGE("delegate is nullptr");
+            return;
+        }
+        delegate->GetResourceData(uri, content);
+    };
+    nativeEngine_->SetGetAssetFunc(assetFunc);
+}
+
+void QjsPaEngine::RegisterWorker()
+{
+    RegisterInitWorkerFunc();
+    RegisterAssetFunc();
 }
 
 QjsPaEngine::~QjsPaEngine()

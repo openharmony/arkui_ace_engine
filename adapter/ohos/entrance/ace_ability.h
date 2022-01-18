@@ -23,7 +23,7 @@
 #include "ability_loader.h"
 #include "core/event/touch_event.h"
 #include "want.h"
-#include "window.h"
+#include "wm/window.h"
 
 namespace OHOS::Ace {
 
@@ -43,6 +43,8 @@ public:
     void OnForeground(const OHOS::AAFwk::Want& want) override;
     void OnBackground() override;
     void OnBackPressed() override;
+    void OnKeyUp(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    void OnKeyDown(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
     void OnRestoreAbilityState(const OHOS::AppExecFwk::PacMap& inState) override;

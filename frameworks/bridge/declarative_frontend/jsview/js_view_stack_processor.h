@@ -26,6 +26,7 @@ public:
     ~JSViewStackProcessor() = default;
 
     static void JSBind(BindingTarget globalObj);
+    static VisualState StringToVisualState(const std::string& stateString);
 
 private:
     /**

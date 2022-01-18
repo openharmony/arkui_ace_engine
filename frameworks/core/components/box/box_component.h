@@ -24,7 +24,8 @@
 
 namespace OHOS::Ace {
 
-using OnDragFunc = std::function<void(const RefPtr<DragEvent>& info)>;
+using OnDragFunc = std::function<RefPtr<Component>(const RefPtr<DragEvent>&, const std::string&)>;
+using OnDropFunc = std::function<void(const RefPtr<DragEvent>&, const std::string&)>;
 using OnHoverCallback = std::function<void(bool)>;
 using OnMouseCallback = std::function<void(MouseInfo& info)>;
 
@@ -115,58 +116,6 @@ public:
         animationType_ = animationType;
     }
 
-    OnDragFunc GetOnDragId() const
-    {
-        if (!onDragId_) {
-            return nullptr;
-        }
-        return *onDragId_;
-    }
-
-    void SetOnDragId(const OnDragFunc& onDragId)
-    {
-        onDragId_ = std::make_unique<OnDragFunc>(onDragId);
-    }
-
-    OnDragFunc GetOnDragEnterId() const
-    {
-        if (!onDragEnterId_) {
-            return nullptr;
-        }
-        return *onDragEnterId_;
-    }
-
-    void SetOnDragEnterId(const OnDragFunc& onDragEnterId)
-    {
-        onDragEnterId_ = std::make_unique<OnDragFunc>(onDragEnterId);
-    }
-
-    OnDragFunc GetOnDragLeaveId() const
-    {
-        if (!onDragLeaveId_) {
-            return nullptr;
-        }
-        return *onDragLeaveId_;
-    }
-
-    OnDragFunc GetOnDragMoveId() const
-    {
-        if (!onDragMoveId_) {
-            return nullptr;
-        }
-        return *onDragMoveId_;
-    }
-
-    void SetOnDragMoveId(const OnDragFunc& onDragMoveId)
-    {
-        onDragMoveId_ = std::make_unique<OnDragFunc>(onDragMoveId);
-    }
-
-    void SetOnDragLeaveId(const OnDragFunc& onDragLeaveId)
-    {
-        onDragLeaveId_ = std::make_unique<OnDragFunc>(onDragLeaveId);
-    }
-
     void SetInspectorDirection(TextDirection direction)
     {
         inspectorDirection_ = direction;
@@ -175,19 +124,6 @@ public:
     TextDirection GetInspectorDirection() const
     {
         return inspectorDirection_;
-    }
-
-    OnDragFunc GetOnDropId() const
-    {
-        if (!onDropId_) {
-            return nullptr;
-        }
-        return *onDropId_;
-    }
-
-    void SetOnDropId(const OnDragFunc& onDropId)
-    {
-        onDropId_ = std::make_unique<OnDragFunc>(onDropId);
     }
 
     void SetOnHoverId(const OnHoverCallback& onHoverId)
@@ -218,16 +154,6 @@ public:
     void SetOnClick(const RefPtr<Gesture>& onClickId)
     {
         onClickId_ = onClickId;
-    }
-
-    RefPtr<Gesture> GetOnDoubleClick() const
-    {
-        return onDoubleClickId_;
-    }
-
-    void SetOnDoubleClick(const RefPtr<Gesture>& onDoubleClickId)
-    {
-        onDoubleClickId_ = onDoubleClickId;
     }
 
     void AddGesture(GesturePriority priority, RefPtr<Gesture> gesture)
@@ -290,81 +216,103 @@ public:
         return geometryTransitionId_;
     }
 
-    RefPtr<StateAttributeList<BoxStateAttribute>> GetStateAttributeList()
+    RefPtr<StateAttributes<BoxStateAttribute>> GetStateAttributes()
     {
         if (stateAttributeList_ == nullptr) {
-            stateAttributeList_ = MakeRefPtr<StateAttributeList<BoxStateAttribute>>();
+            stateAttributeList_ = MakeRefPtr<StateAttributes<BoxStateAttribute>>();
         }
         return stateAttributeList_;
     }
-
-    bool HasStateAttributeList()
+ 
+    bool HasStateAttributes()
     {
         return stateAttributeList_ != nullptr;
     }
 
-    void SetWidthForState(const Dimension& width, const AnimationOption& option, StyleState state)
+    OnDragFunc GetOnDragStartId() const
     {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(
-            state, BoxStateAttribute::WIDTH, AnimatableDimension(width, option)));
+        return onDragStartId_;
     }
 
-    void SetHeightForState(const Dimension& height, const AnimationOption& option, StyleState state)
+    void SetOnDragStartId(const OnDragFunc& onDragStartId)
     {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(
-            state, BoxStateAttribute::HEIGHT, AnimatableDimension(height, option)));
+        onDragStartId_ = onDragStartId;
     }
 
-    void SetColorForState(const Color& color, const AnimationOption& option, StyleState state)
+    OnDropFunc GetOnDragEnterId() const
     {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(
-            state, BoxStateAttribute::COLOR, AnimatableColor(color, option)));
+        return onDragEnterId_;
     }
 
-    void SetBorderColorForState(const Color& color, const AnimationOption& option, StyleState state)
+    void SetOnDragEnterId(const OnDropFunc& onDragEnterId)
     {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(
-            state, BoxStateAttribute::BORDER_COLOR, AnimatableColor(color, option)));
+        onDragEnterId_ = onDragEnterId;
     }
 
-    void SetBorderRadiusForState(const Dimension& radius, const AnimationOption& option, StyleState state)
+    OnDropFunc GetOnDragMoveId() const
     {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(
-            state, BoxStateAttribute::BORDER_RADIUS, AnimatableDimension(radius, option)));
+        return onDragMoveId_;
     }
 
-    void SetBorderStyleForState(BorderStyle style, StyleState state)
+    void SetOnDragMoveId(const OnDropFunc& onDragMoveId)
     {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, BorderStyle>>(
-            state, BoxStateAttribute::BORDER_STYLE, style));
+        onDragMoveId_ = onDragMoveId;
     }
 
-    void SetBorderWidthForState(const Dimension& width, const AnimationOption& option, StyleState state)
+    OnDropFunc GetOnDragLeaveId() const
     {
-        GetStateAttributeList()->push_back(MakeRefPtr<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(
-            state, BoxStateAttribute::BORDER_WIDTH, AnimatableDimension(width, option)));
+        return onDragLeaveId_;
     }
 
-    void SetGradientForState(const Gradient& value, StyleState state)
+    void SetOnDragLeaveId(const OnDropFunc& onDragLeaveId)
     {
-        GetStateAttributeList()->push_back(
-            MakeRefPtr<StateAttributeValue<BoxStateAttribute, Gradient>>(state, BoxStateAttribute::GRADIENT, value));
+        onDragLeaveId_ = onDragLeaveId;
     }
 
+    OnDropFunc GetOnDropId() const
+    {
+        return onDropId_;
+    }
+
+    void SetOnDropId(const OnDropFunc& onDropId)
+    {
+        onDropId_ = onDropId;
+    }
+
+    const EventMarker& GetRemoteMessageEvent() const
+    {
+        return remoteMessageId_;
+    }
+
+    void SetRemoteMessageEvent(const EventMarker& eventId)
+    {
+        remoteMessageId_ = eventId;
+    }
+
+    RefPtr<Gesture> GetOnLongPress() const
+    {
+        return onLongPressId_;
+    }
+
+    void SetOnLongPress(const RefPtr<Gesture>& onLongPressId)
+    {
+        onLongPressId_ = onLongPressId;
+    }
+    
 private:
     RefPtr<Decoration> backDecoration_;
     RefPtr<Decoration> frontDecoration_;
     bool decorationUpdateFlag_ = false;
     HoverAnimationType animationType_ = HoverAnimationType::NONE;
-    std::unique_ptr<OnDragFunc> onDragId_;
-    std::unique_ptr<OnDragFunc> onDragEnterId_;
-    std::unique_ptr<OnDragFunc> onDragMoveId_;
-    std::unique_ptr<OnDragFunc> onDragLeaveId_;
-    std::unique_ptr<OnDragFunc> onDropId_;
+    OnDragFunc onDragStartId_;
+    OnDropFunc onDragEnterId_;
+    OnDropFunc onDragMoveId_;
+    OnDropFunc onDragLeaveId_;
+    OnDropFunc onDropId_;
     OnHoverCallback onHoverId_;
     OnMouseCallback onMouseId_;
     RefPtr<Gesture> onClickId_;
-    RefPtr<Gesture> onDoubleClickId_;
+    RefPtr<Gesture> onLongPressId_;
     std::array<RefPtr<Gesture>, 3> gestures_;
     EventMarker onDomDragEnterId_;
     EventMarker onDomDragOverId_;
@@ -372,7 +320,8 @@ private:
     EventMarker onDomDragDropId_;
     std::string geometryTransitionId_;
     TextDirection inspectorDirection_ { TextDirection::LTR };
-    RefPtr<StateAttributeList<BoxStateAttribute>> stateAttributeList_ = nullptr;
+    RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_ = nullptr;
+    EventMarker remoteMessageId_;
 };
 
 } // namespace OHOS::Ace

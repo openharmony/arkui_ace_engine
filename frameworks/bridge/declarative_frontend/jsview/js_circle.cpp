@@ -81,6 +81,7 @@ void JSCircle::JSBind(BindingTarget globalObj)
     JSClass<JSCircle>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSCircle>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSCircle>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSCircle>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
     JSClass<JSCircle>::Inherit<JSShapeAbstract>();
     JSClass<JSCircle>::Bind(globalObj, JSCircle::ConstructorCallback, JSCircle::DestructorCallback);

@@ -19,28 +19,29 @@
 #include <list>
 
 #include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
-#include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
-#include "core/components/common/properties/scroll_bar.h"
 #include "core/components_v2/common/common_def.h"
-#include "core/components_v2/indexer/popup_list_item_component.h"
-#include "core/components_v2/list/list_position_controller.h"
 #include "core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace::V2 {
+inline constexpr double POPUP_BOX_RADIUS_SIZE = 0.0;
+inline constexpr double POPUP_BORDER_RADIUS_SIZE = 12.0;
+
 class ACE_EXPORT PopupListComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(V2::PopupListComponent, ComponentGroup)
 
 public:
-    PopupListComponent() = default;
+    PopupListComponent()
+    {
+        BuildBackground();
+    };
     ~PopupListComponent() = default;
 
     RefPtr<RenderNode> CreateRenderNode() override;
     RefPtr<Element> CreateElement() override;
 
-    ACE_DEFINE_COMPONENT_PROP(Space, Dimension, 1.0_vp);
     ACE_DEFINE_COMPONENT_PROP(Direction, Axis, Axis::VERTICAL);
+    ACE_DEFINE_COMPONENT_PROP(EdgeEffect, EdgeEffect, EdgeEffect::SPRING);
 
     void SetPopupSelectedEvent(const EventMarker& event)
     {
@@ -53,6 +54,8 @@ public:
     }
 
 private:
+    void BuildBackground();
+
     EventMarker popupSelectedEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PopupListComponent);

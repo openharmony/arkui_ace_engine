@@ -657,6 +657,12 @@ var NavigationTitleMode;
   NavigationTitleMode[NavigationTitleMode["Mini"] = 2] = "Mini";
 })(NavigationTitleMode || (NavigationTitleMode = {}));
 
+var ResponseType;
+(function (ResponseType) {
+  ResponseType[ResponseType["RightClick"] = 0] = "RightClick";
+  ResponseType[ResponseType["LongPress"] = 1] = "LongPress";
+})(ResponseType || (ResponseType = {}));
+
 var HoverEffect;
 (function (HoverEffect) {
   HoverEffect[HoverEffect["Auto"] = 4] = "Auto";
@@ -690,3 +696,18 @@ var DialogStatus;
   DialogStatus[DialogStatus["Cancel"] = 1] = "Cancel";
   DialogStatus[DialogStatus["Update"] = 2] = "Update";
 })(DialogStatus || (DialogStatus = {}));
+
+var SourceType;
+(function (SourceType) {
+  SourceType[SourceType["Unknown"] = 0] = "Unknown";
+  SourceType[SourceType["Mouse"] = 1] = "Mouse";
+  SourceType[SourceType["TouchScreen"] = 2] = "TouchScreen";
+})(SourceType || (SourceType = {}));
+
+var SeekMode;
+(function (SeekMode) {
+  SeekMode[SeekMode["PreviousSync"] = 0] = "PreviousSync";
+  SeekMode[SeekMode["NextSync"] = 1] = "NextSync";
+  SeekMode[SeekMode["ClosestSync"] = 2] = "ClosestSync";
+  SeekMode[SeekMode["Closest"] = 3] = "Closest";
+})(SeekMode || (SeekMode = {}));

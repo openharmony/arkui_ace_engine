@@ -27,13 +27,11 @@
 #include "core/components/flex/flex_item_element.h"
 #include "core/components/flex/render_flex_item.h"
 #include "core/components/popup/popup_element_v2.h"
-#include "core/components/tab_bar/tabs_element.h"
 #include "core/components/text/render_text.h"
 #include "core/components/text/text_element.h"
 #include "core/components/transform/transform_element.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_v2/inspector/tab_content_composed_element.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/composed_component.h"
@@ -111,6 +109,7 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
     { "height", [](const InspectorNode& inspector) { return inspector.GetHeight(); } },
     { "align", [](const InspectorNode& inspector) { return inspector.GetAlign(); } },
     { "direction", [](const InspectorNode& inspector) { return inspector.GetDirectionStr(); } },
+    { "bindPopup", [](const InspectorNode& inspector) { return inspector.GetBindPopup(); } }
 };
 
 const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP {
@@ -611,13 +610,7 @@ std::string InspectorComposedElement::GetRect() const
 {
     std::string strRec;
     Rect rect = GetRenderRect();
-    Rect parentRect;
-    if (IsHaveElement(TabContentItemElement::TypeId())) {
-        parentRect = GetParentRect(TabsElement::TypeId());
-    }
-    else {
-        parentRect = GetParentRect();
-    }
+    Rect parentRect = GetParentRect();
     rect = rect.Constrain(parentRect);
     strRec = std::to_string(rect.Left())
                  .append(",")
@@ -637,33 +630,6 @@ Rect InspectorComposedElement::GetParentRect() const
     }
     Rect parentRect = parent->GetRenderRect();
     return parentRect;
-}
-
-Rect InspectorComposedElement::GetParentRect(IdType TypeId) const
-{
-    auto parent = GetElementParent().Upgrade();
-    while (parent) {
-        if (AceType::TypeId(parent) == TypeId) {
-            return parent->GetRenderRect();
-        }
-        parent = parent->GetElementParent().Upgrade();
-    }
-    return Rect();
-}
-
-bool InspectorComposedElement::IsHaveElement(IdType TypeId) const
-{
-    if (GetTargetTypeId() == TypeId) {
-        return true;
-    }
-    auto parent = GetElementParent().Upgrade();
-    while (parent) {
-        if (AceType::TypeId(parent) == TypeId) {
-            return true;
-        }
-        parent = parent->GetElementParent().Upgrade();
-    }
-    return false;
 }
 
 double InspectorComposedElement::GetAspectRatio() const
@@ -1303,6 +1269,40 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetUseAlign() const
     jsonValue->Put("edge", ConvertSideToString(render->GetUseAlignSide()).c_str());
     jsonValue->Put("offset", render->GetUseAlignOffset().ToString().c_str());
     return jsonValue;
+}
+
+std::string InspectorComposedElement::GetBindPopup() const
+{
+    auto resultJson = JsonUtil::Create(false);
+    auto coverageElement = GetContentElement<ComponentGroupElement>(ComponentGroupElement::TypeId(), false);
+    RefPtr<PopupElementV2> popupElement = nullptr;
+    if (coverageElement) {
+        for (const auto& element : coverageElement->GetChildren()) {
+            if (AceType::DynamicCast<PopupElementV2>(element)) {
+                popupElement = AceType::DynamicCast<PopupElementV2>(element);
+            }
+        }
+    }
+    if (!popupElement) {
+        return "";
+    }
+    std::string show;
+    if (popupElement->IsShow()) {
+        show = "true";
+    } else {
+        show = "false";
+    }
+    auto popupJson = JsonUtil::Create(false);
+    popupJson->Put("message", popupElement->GetMessage().c_str());
+    popupJson->Put("placementOnTop", popupElement->GetPlacementOnTop());
+    auto primaryButtonJson = JsonUtil::Create(false);
+    primaryButtonJson->Put("value", popupElement->GetPrimaryButtonValue().c_str());
+    auto secondaryButtonJson = JsonUtil::Create(false);
+    secondaryButtonJson->Put("value", popupElement->GetSecondaryButtonValue().c_str());
+
+    popupJson->Put("primaryButton", primaryButtonJson);
+    popupJson->Put("secondaryButton", secondaryButtonJson);
+    return show + ", " + popupJson->ToString();
 }
 
 void InspectorComposedElement::UpdateEventTarget(BaseEventInfo& info) const

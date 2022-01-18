@@ -42,6 +42,7 @@
 #include "adapter/preview/inspector/inspect_list_item_group.h"
 #include "adapter/preview/inspector/inspect_marquee.h"
 #include "adapter/preview/inspector/inspect_menu.h"
+#include "adapter/preview/inspector/inspect_navigation_bar.h"
 #include "adapter/preview/inspector/inspect_option.h"
 #include "adapter/preview/inspector/inspect_panel.h"
 #include "adapter/preview/inspector/inspect_picker.h"
@@ -94,6 +95,8 @@ const char INSPECTOR_ATTRS[] = "$attrs";
 const char INSPECTOR_STYLES[] = "$styles";
 const char INSPECTOR_INNER_DEBUGLINE[] = "debugLine";
 const char INSPECTOR_DEBUGLINE[] = "$debugLine";
+
+std::list<std::string> specialComponentNameV1 = {"dialog", "panel"};
 
 } // namespace
 
@@ -219,7 +222,7 @@ void JsInspectorManager::AssembleDefaultJSONTree(std::string& jsonStr)
         { DOM_NODE_TAG_LIST_ITEM_GROUP, &InspectNodeCreator<InspectListItemGroup> },
         { DOM_NODE_TAG_MARQUEE, &InspectNodeCreator<InspectMarquee> },
         { DOM_NODE_TAG_MENU, &InspectNodeCreator<InspectMenu> },
-        { DOM_NODE_TAG_NAVIGATION_BAR, &InspectNodeCreator<InspectMenu> },
+        { DOM_NODE_TAG_NAVIGATION_BAR, &InspectNodeCreator<InspectNavigationBar> },
         { DOM_NODE_TAG_OPTION, &InspectNodeCreator<InspectOption> },
         { DOM_NODE_TAG_PANEL, &InspectNodeCreator<InspectPanel> },
         { DOM_NODE_TAG_PICKER_DIALOG, &InspectNodeCreator<InspectPickerDialog> },
@@ -450,6 +453,11 @@ void JsInspectorManager::ClearContainer()
 
 std::string JsInspectorManager::UpdateNodeRectStrInfo(const RefPtr<AccessibilityNode> node)
 {
+    auto it = std::find(specialComponentNameV1.begin(), specialComponentNameV1.end(), node->GetTag());
+    if (it != specialComponentNameV1.end()) {
+        node->UpdateRectWithChildRect();
+    }
+
     PositionInfo positionInfo = {0, 0, 0, 0};
     if (node->GetTag() == DOM_NODE_TAG_SPAN) {
         positionInfo = {

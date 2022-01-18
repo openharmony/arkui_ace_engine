@@ -29,6 +29,7 @@ struct WebAttribute : Attribute {
 struct WebEvent : Event {
     EventMarker pageStartEventId;
     EventMarker pageFinishEventId;
+    EventMarker requestFocusEventId;
     EventMarker pageErrorEventId;
     EventMarker messageEventId;
 };
@@ -82,6 +83,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.pageFinishEventId;
+    }
+
+    void SetRequestFocusEventId(const EventMarker& requestFocusEventId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.requestFocusEventId = requestFocusEventId;
+    }
+
+    const EventMarker& GetRequestFocusEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.requestFocusEventId;
     }
 
     void SetPageErrorEventId(const EventMarker& pageErrorEventId)

@@ -16,6 +16,7 @@
 #include "adapter/ohos/entrance/ace_ability.h"
 
 #include "ability_process.h"
+#include "dm/display_manager.h"
 #include "display_type.h"
 #include "init_data.h"
 #include "res_config.h"
@@ -26,14 +27,13 @@
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
-#include "window.h"
-
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
+#include "core/common/container_scope.h"
 #include "core/common/frontend.h"
 #include "core/common/plugin_manager.h"
 
@@ -148,7 +148,12 @@ void AceAbility::OnStart(const Want& want)
     Ability::OnStart(want);
     LOGI("AceAbility::OnStart called");
 
-    SetHwIcuDirectory();
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        LOGI("Initialize for current process.");
+        SetHwIcuDirectory();
+        Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+    });
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     auto resourceManager = GetResourceManager();
@@ -163,9 +168,9 @@ void AceAbility::OnStart(const Want& want)
             AceApplicationInfo::GetInstance().SetLocale((language == nullptr) ? "" : language,
                 (region == nullptr) ? "" : region, (script == nullptr) ? "" : script, "");
         } else {
-	   LOGW("localeInfo is null.");
-	   AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
-	}
+           LOGW("localeInfo is null.");
+           AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
+        }
     } else {
        LOGW("resourceManager is null.");
        AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
@@ -231,6 +236,16 @@ void AceAbility::OnStart(const Want& want)
     int32_t width = window->GetRect().width_;
     int32_t height = window->GetRect().height_;
     LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", width, height);
+
+    // get density
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (defaultDisplay) {
+        density_ = defaultDisplay->GetVirtualPixelRatio();
+        LOGI("AceAbility: Default display density set: %{public}f", density_);
+    } else {
+        LOGI("AceAbility: Default display is null, set density failed. Use default density: %{public}f", density_);
+    }
+    SystemProperties::SetResolution(density_);
 
     flutter::ViewportMetrics metrics;
     metrics.physical_width = width;
@@ -302,8 +317,9 @@ void AceAbility::OnStart(const Want& want)
 
             rsUiDirector->SetSurfaceNodeSize(width, height);
             rsUiDirector->SetUITaskRunner(
-                [taskExecutor = Platform::AceContainer::GetContainer(abilityId_)->GetTaskExecutor()]
+                [taskExecutor = Platform::AceContainer::GetContainer(abilityId_)->GetTaskExecutor(), id = abilityId_]
                     (const std::function<void()>& task) {
+                        ContainerScope scope(id);
                         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
                     });
             if (context != nullptr) {
@@ -394,6 +410,46 @@ void AceAbility::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent
         return;
     }
     flutterAceView->DispatchTouchEvent(flutterAceView, pointerEvent);
+}
+
+void AceAbility::OnKeyUp(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    LOGI("AceAbility::OnKeyUp called,keyEvent info: keyCode is %{private}d,\
+        keyAction is %{public}d, keyActionTime is %{public}d",
+        keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
+    auto flutterAceView = static_cast<Platform::FlutterAceView*>(
+        Platform::AceContainer::GetContainer(abilityId_)->GetView());
+    if (!flutterAceView) {
+        LOGI("flutterAceView is null, keyboard event does not take effect");
+        return;
+    }
+    int32_t repeatTime = 0;  // TODO:repeatTime need to be rebuild
+    auto result = flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent->GetKeyCode(), keyEvent->GetKeyAction(),
+                                    repeatTime, keyEvent->GetActionTime(), keyEvent->GetActionStartTime());
+    if (!result) {
+        LOGI("AceAbility::OnKeyUp: passed to Ability to process");
+        Ability::OnKeyUp(keyEvent);
+    }
+}
+
+void AceAbility::OnKeyDown(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    LOGI("AceAbility::OnKeyDown called,keyEvent info: keyCode is %{private}d,\
+        keyAction is %{public}d, keyActionTime is %{public}d",
+        keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
+    auto flutterAceView = static_cast<Platform::FlutterAceView*>(
+        Platform::AceContainer::GetContainer(abilityId_)->GetView());
+    if (!flutterAceView) {
+        LOGI("flutterAceView is null, keyboard event does not take effect");
+        return;
+    }
+    int32_t repeatTime = 0;  // TODO:repeatTime need to be rebuild
+    auto result = flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent->GetKeyCode(), keyEvent->GetKeyAction(),
+                                    repeatTime, keyEvent->GetActionTime(), keyEvent->GetActionStartTime());
+    if (!result) {
+        LOGI("AceAbility::OnKeyDown: passed to Ability to process");
+        Ability::OnKeyDown(keyEvent);
+    }
 }
 
 void AceAbility::OnNewWant(const Want& want)
@@ -512,6 +568,7 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect)
 {
     uint32_t width = rect.width_;
     uint32_t height = rect.height_;
+    LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u", width, height);
 #ifdef ENABLE_ROSEN_BACKEND
     auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
     if (context) {

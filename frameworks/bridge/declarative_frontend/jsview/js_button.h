@@ -42,6 +42,7 @@ public:
     static void JsHeight(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsSize(const JSCallbackInfo& info);
+    static void JsRemoteMessage(const JSCallbackInfo& info);
 
 public:
     static void JSBind(BindingTarget globalObj);

@@ -211,6 +211,7 @@ template("declarative_js_engine") {
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
       "jsview/js_view_context.cpp",
+      "jsview/js_view_functions.cpp",
       "jsview/js_view_stack_processor.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
       "sharedata/js_share_data.cpp",
@@ -229,17 +230,20 @@ template("declarative_js_engine") {
       ]
     }
 
-    if (defined(config.advance_components_support) &&
-        config.advance_components_support) {
+    if (defined(config.xcomponent_components_support) &&
+        config.xcomponent_components_support) {
+      sources += [
+        "jsview/js_xcomponent.cpp",
+        "jsview/js_xcomponent_controller.cpp",
+      ]
+    }
+
+    if (defined(config.web_components_support) &&
+        config.web_components_support) {
       sources += [
         "jsview/js_web.cpp",
         "jsview/js_web_controller.cpp",
       ]
-    }
-
-    if (defined(config.xcomponent_components_support) &&
-        config.xcomponent_components_support) {
-      sources += [ "jsview/js_xcomponent.cpp" ]
     }
 
     if (defined(config.form_components_support) &&
@@ -249,7 +253,18 @@ template("declarative_js_engine") {
 
     if (defined(config.plugin_components_support) &&
         config.plugin_components_support) {
-      sources += [ "jsview/js_plugin.cpp" ]
+      if (!use_mingw_win && !use_mac) {
+        deps = [
+          "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
+          "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
+        ]
+
+        external_deps = [
+          "aafwk_standard:ability_manager",
+          "aafwk_standard:want",
+        ]
+        sources += [ "jsview/js_plugin.cpp" ]
+      }
     }
 
     if (defined(config.use_build_in_js_engine) &&
@@ -269,6 +284,8 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
     ]
+
+    include_dirs = [ "//foundation/windowmanager/interfaces/innerkits" ]
 
     if (platform == "windows" || platform == "mac") {
       deps += [ ":gen_obj_src_js_mock_system_plugin" ]

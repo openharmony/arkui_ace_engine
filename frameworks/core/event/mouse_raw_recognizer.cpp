@@ -54,6 +54,7 @@ MouseEventInfo MouseRawRecognizer::CreateMouseEventInfo(const MouseEvent& event)
     info.SetMouseGlobalInfo(event);
     info.SetMouseLocationInfo(event - coordinateOffset_);
     info.SetTimeStamp(event.time);
+    info.SetSourceDevice(event.sourceType);
     info.SetDeviceId(event.deviceId);
     return info;
 }

@@ -22,10 +22,10 @@
 
 #include "core/animation/bilateral_spring_adapter.h"
 #include "core/animation/simple_spring_chain.h"
+#include "core/components/positioned/positioned_component.h"
 #include "core/components/scroll/scroll_edge_effect.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_v2/list/list_component.h"
-#include "core/components/positioned/positioned_component.h"
 #include "core/components_v2/list/render_list_item.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
@@ -207,6 +207,17 @@ public:
     {
         return betweenItemAndBuilder_;
     }
+
+    size_t CalculateSelectedIndex(
+        const RefPtr<RenderList> targetRenderlist, const GestureEvent& info, Size& selectedItemSize);
+    size_t CalculateInsertIndex(
+        const RefPtr<RenderList> targetRenderlist, const GestureEvent& info, Size selectedItemSize);
+
+    void HandleAxisEvent(const AxisEvent& event) override;
+
+    bool isScrollable(AxisDirection direction) override;
+
+    WeakPtr<RenderNode> CheckAxisNode() override;
 
 protected:
     void UpdateAccessibilityAttr();

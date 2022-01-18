@@ -81,6 +81,7 @@ void JSEllipse::JSBind(BindingTarget globalObj)
     JSClass<JSEllipse>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSEllipse>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSEllipse>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSEllipse>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
     JSClass<JSEllipse>::Inherit<JSShapeAbstract>();
     JSClass<JSEllipse>::Bind(globalObj, JSEllipse::ConstructorCallback, JSEllipse::DestructorCallback);

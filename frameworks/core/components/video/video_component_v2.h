@@ -45,10 +45,10 @@ public:
         }
     }
 
-    void SeekTo(uint32_t pos)
+    void SeekTo(float pos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC)
     {
         for (const auto& item : controllers_) {
-            item->SeekTo(pos);
+            item->SeekTo(pos, seekMode);
         }
     }
 

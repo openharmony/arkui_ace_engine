@@ -16,7 +16,8 @@
 #include "core/pipeline/base/rosen_render_context.h"
 
 #include "core/components/plugin/render_plugin.h"
-#include "render_service_client/core/ui/rs_node.h"
+#include "core/pipeline/base/render_sub_container.h"
+#include "render_service_client/core/ui/rs_canvas_node.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
@@ -75,11 +76,9 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
         rsNode_->AddChild(childRSNode, -1);
         std::string name = AceType::TypeName(child);
         if (name != "RosenRenderForm" && name != "RosenRenderPlugin") {
-            StopRecordingIfNeeded();
             if (child->NeedRender()) {
                 RosenRenderContext context;
                 auto pipelineContext = child->GetContext().Upgrade();
-                LOGI("Hole: child canvas render");
                 auto transparentHole = pipelineContext->GetTransparentHole();
                 if (transparentHole.IsValid() && child->GetNeedClip()) {
                     Offset childOffset = rect.GetOffset();
@@ -93,12 +92,12 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
             }
         }
         Offset pos = rect.GetOffset();
-        if (name == "RosenRenderPlugin") {
-            auto renderPlugin = AceType::DynamicCast<RenderPlugin>(child);
+        if (name == "RosenRenderPlugin" || name == "RosenRenderForm") {
+            auto renderPlugin = AceType::DynamicCast<RenderSubContainer>(child);
             if (!renderPlugin) {
                 return;
             }
-            auto pluginContext = renderPlugin->GetPluginPipelineContext();
+            auto pluginContext = renderPlugin->GetSubPipelineContext();
             if (!pluginContext) {
                 return;
             }
@@ -129,8 +128,9 @@ void RosenRenderContext::StartRecording()
 
 void RosenRenderContext::StopRecordingIfNeeded()
 {
-    if (rosenCanvas_ && rsNode_) {
-        rsNode_->FinishRecording();
+    auto rsCanvasNode = RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
+    if (rosenCanvas_ && rsCanvasNode) {
+        rsCanvasNode->FinishRecording();
         rosenCanvas_ = nullptr;
     }
 
@@ -171,9 +171,12 @@ void RosenRenderContext::InitContext(
     LOGD("InitContext with width %{public}lf height %{public}lf", rect.Width(), rect.Height());
     rsNode_ = rsNode;
     estimatedRect_ = rect + initialOffset;
-    if (rsNode_) {
-        rsNode_->ClearChildren();
-        rosenCanvas_ = rsNode_->BeginRecording(
+    if (rsNode_ == nullptr) {
+        return;
+    }
+    rsNode_->ClearChildren();
+    if (auto rsCanvasNode = rsNode_->ReinterpretCastTo<Rosen::RSCanvasNode>()) {
+        rosenCanvas_ = rsCanvasNode->BeginRecording(
             rsNode_->GetStagingProperties().GetFrameWidth(), rsNode_->GetStagingProperties().GetFrameHeight());
     }
 }

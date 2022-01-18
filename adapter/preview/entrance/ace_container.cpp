@@ -26,6 +26,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/ace_view.h"
+#include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/platform_bridge.h"
@@ -71,14 +72,12 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type)
     if (type != FrontendType::DECLARATIVE_JS) {
         flutterTaskExecutor->InitJsThread();
     }
-    SystemProperties::SetDeclarativeFrontend(type_ == FrontendType::DECLARATIVE_JS);
     taskExecutor_ = flutterTaskExecutor;
-    taskExecutor_->PostTask([instanceId]() { Container::InitForThread(instanceId); }, TaskExecutor::TaskType::JS);
-    taskExecutor_->PostTask([instanceId]() { Container::InitForThread(instanceId); }, TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::Initialize()
 {
+    ContainerScope scope(instanceId_);
     if (type_ != FrontendType::DECLARATIVE_JS) {
         InitializeFrontend();
     }
@@ -86,6 +85,7 @@ void AceContainer::Initialize()
 
 void AceContainer::Destroy()
 {
+    ContainerScope scope(instanceId_);
     LOGI("AceContainer::Destroy begin");
     if (!pipelineContext_) {
         LOGE("no context find in %{private}d container", instanceId_);
@@ -165,11 +165,7 @@ void AceContainer::InitializeFrontend()
 
 void AceContainer::RunNativeEngineLoop()
 {
-    taskExecutor_->PostTask(
-        [frontend = frontend_]() {
-          frontend->RunNativeEngineLoop();
-        },
-        TaskExecutor::TaskType::JS);
+    taskExecutor_->PostTask([frontend = frontend_]() { frontend->RunNativeEngineLoop(); }, TaskExecutor::TaskType::JS);
 }
 
 void AceContainer::InitializeCallback()
@@ -179,7 +175,8 @@ void AceContainer::InitializeCallback()
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
 
     auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
-    auto&& touchEventCallback = [weak](const TouchPoint& event) {
+    auto&& touchEventCallback = [weak, id = instanceId_](const TouchPoint& event) {
+        ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
             LOGE("context is nullptr");
@@ -190,7 +187,8 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterTouchEventCallback(touchEventCallback);
 
-    auto&& keyEventCallback = [weak](const KeyEvent& event) {
+    auto&& keyEventCallback = [weak, id = instanceId_](const KeyEvent& event) {
+        ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
             LOGE("context is nullptr");
@@ -203,7 +201,8 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterKeyEventCallback(keyEventCallback);
 
-    auto&& mouseEventCallback = [weak](const MouseEvent& event) {
+    auto&& mouseEventCallback = [weak, id = instanceId_](const MouseEvent& event) {
+        ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
             LOGE("context is nullptr");
@@ -214,7 +213,20 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
 
-    auto&& rotationEventCallback = [weak](const RotationEvent& event) {
+    auto&& axisEventCallback = [weak, id = instanceId_](const AxisEvent& event) {
+        ContainerScope scope(id);
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(
+            [context, event]() { context->OnAxisEvent(event); }, TaskExecutor::TaskType::UI);
+    };
+    aceView_->RegisterAxisEventCallback(axisEventCallback);
+
+    auto&& rotationEventCallback = [weak, id = instanceId_](const RotationEvent& event) {
+        ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
             LOGE("context is nullptr");
@@ -227,7 +239,8 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterRotationEventCallback(rotationEventCallback);
 
-    auto&& cardViewPositionCallback = [weak](int id, float offsetX, float offsetY) {
+    auto&& cardViewPositionCallback = [weak, instanceId = instanceId_](int id, float offsetX, float offsetY) {
+        ContainerScope scope(instanceId);
         auto context = weak.Upgrade();
         if (context == nullptr) {
             LOGE("context is nullptr");
@@ -239,7 +252,8 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterCardViewPositionCallback(cardViewPositionCallback);
 
-    auto&& cardViewParamsCallback = [weak](const std::string& key, bool focus) {
+    auto&& cardViewParamsCallback = [weak, id = instanceId_](const std::string& key, bool focus) {
+        ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
             LOGE("context is nullptr");
@@ -251,7 +265,8 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterCardViewAccessibilityParamsCallback(cardViewParamsCallback);
 
-    auto&& viewChangeCallback = [weak](int32_t width, int32_t height) {
+    auto&& viewChangeCallback = [weak, id = instanceId_](int32_t width, int32_t height) {
+        ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
             LOGE("context is nullptr");
@@ -263,7 +278,8 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
 
-    auto&& densityChangeCallback = [weak](double density) {
+    auto&& densityChangeCallback = [weak, id = instanceId_](double density) {
+        ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
             LOGE("context is nullptr");
@@ -275,7 +291,8 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterDensityChangeCallback(densityChangeCallback);
 
-    auto&& systemBarHeightChangeCallback = [weak](double statusBar, double navigationBar) {
+    auto&& systemBarHeightChangeCallback = [weak, id = instanceId_](double statusBar, double navigationBar) {
+        ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
             LOGE("context is nullptr");
@@ -288,7 +305,8 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterSystemBarHeightChangeCallback(systemBarHeightChangeCallback);
 
-    auto&& surfaceDestroyCallback = [weak]() {
+    auto&& surfaceDestroyCallback = [weak, id = instanceId_]() {
+        ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
             LOGE("context is nullptr");
@@ -299,7 +317,8 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
 
-    auto&& idleCallback = [weak](int64_t deadline) {
+    auto&& idleCallback = [weak, id = instanceId_](int64_t deadline) {
+        ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
             LOGE("context is nullptr");
@@ -317,6 +336,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type)
     std::call_once(onceFlag_, [] {
         FlutterEngineRegisterHandleTouchEventCallback([](std::unique_ptr<flutter::PointerDataPacket>& packet) -> bool {
             auto container = AceContainer::GetContainerInstance(0);
+            ContainerScope scope(0);
             if (!container || !container->GetAceView() || !packet) {
                 return false;
             }
@@ -324,10 +344,11 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type)
         });
     });
 #endif
-    Container::InitForThread(INSTANCE_ID_PLATFORM);
+
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type);
     AceEngine::Get().AddContainer(aceContainer->GetInstanceId(), aceContainer);
     aceContainer->Initialize();
+    ContainerScope scope(instanceId);
     auto front = aceContainer->GetFrontend();
     if (front) {
         front->UpdateState(Frontend::State::ON_CREATE);
@@ -361,6 +382,8 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
     if (!container) {
         return false;
     }
+
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (front) {
         auto type = front->GetType();
@@ -378,6 +401,7 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
 
 void AceContainer::UpdateResourceConfiguration(const std::string& jsonStr)
 {
+    ContainerScope scope(instanceId_);
     uint32_t updateFlags = 0;
     auto resConfig = resourceInfo_.GetResourceConfiguration();
     if (!resConfig.UpdateFromJsonString(jsonStr, updateFlags) || !updateFlags) {
@@ -425,6 +449,7 @@ void AceContainer::NativeOnConfigurationUpdated(int32_t instanceId)
     if (!container) {
         return;
     }
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (!front) {
         return;
@@ -461,6 +486,7 @@ void AceContainer::FetchResponse(const ResponseData responseData, const int32_t 
         LOGE("FetchResponse container is null!");
         return;
     }
+    ContainerScope scope(instanceId_);
     auto front = container->GetFrontend();
     auto type = container->GetType();
     if (type == FrontendType::JS) {
@@ -486,6 +512,8 @@ void AceContainer::CallCurlFunction(const RequestData requestData, const int32_t
         LOGE("CallCurlFunction container is null!");
         return;
     }
+
+    ContainerScope scope(instanceId_);
     taskExecutor_->PostTask(
         [container, requestData, callbackId]() mutable {
             ResponseData responseData;
@@ -504,6 +532,7 @@ void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, st
         return;
     }
 
+    ContainerScope scope(instanceId_);
     taskExecutor_->PostTask(
         [front, callbackId, errorCode, errorMessage = std::move(errorMessage)]() mutable {
             front->TransferJsPluginGetError(callbackId, errorCode, std::move(errorMessage));
@@ -513,6 +542,7 @@ void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, st
 
 bool AceContainer::Dump(const std::vector<std::string>& params)
 {
+    ContainerScope scope(instanceId_);
     if (aceView_ && aceView_->Dump(params)) {
         return true;
     }
@@ -530,6 +560,7 @@ void AceContainer::AddRouterChangeCallback(int32_t instanceId, const OnRouterCha
     if (!container) {
         return;
     }
+    ContainerScope scope(instanceId);
     if (!container->pipelineContext_) {
         LOGE("container pipelineContext not init");
         return;
@@ -574,6 +605,7 @@ void AceContainer::SetResourcesPathAndThemeStyle(int32_t instanceId, const std::
     if (!container) {
         return;
     }
+    ContainerScope scope(instanceId);
     auto resConfig = container->resourceInfo_.GetResourceConfiguration();
     resConfig.SetColorMode(static_cast<OHOS::Ace::ColorMode>(colorMode));
     container->resourceInfo_.SetResourceConfiguration(resConfig);
@@ -584,6 +616,7 @@ void AceContainer::SetResourcesPathAndThemeStyle(int32_t instanceId, const std::
 
 void AceContainer::UpdateColorMode(ColorMode newColorMode)
 {
+    ContainerScope scope(instanceId_);
     auto resConfig = resourceInfo_.GetResourceConfiguration();
 
     OHOS::Ace::ColorMode colorMode = static_cast<OHOS::Ace::ColorMode>(newColorMode);
@@ -647,6 +680,7 @@ void AceContainer::SetView(FlutterAceView* view, double density, int32_t width, 
 void AceContainer::AttachView(
     std::unique_ptr<Window> window, FlutterAceView* view, double density, int32_t width, int32_t height)
 {
+    ContainerScope scope(instanceId_);
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
 
@@ -654,7 +688,6 @@ void AceContainer::AttachView(
     ACE_DCHECK(state != nullptr);
     auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
     flutterTaskExecutor->InitOtherThreads(state->GetTaskRunners());
-    taskExecutor_->PostTask([id = instanceId_]() { Container::InitForThread(id); }, TaskExecutor::TaskType::UI);
     if (type_ == FrontendType::DECLARATIVE_JS) {
         // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
         flutterTaskExecutor->InitJsThread(false);
@@ -730,6 +763,7 @@ void AceContainer::AttachView(
 
 void AceContainer::InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs)
 {
+    ContainerScope scope(instanceId);
     SystemProperties::InitDeviceInfo(runArgs.deviceWidth, runArgs.deviceHeight,
         runArgs.deviceConfig.orientation == DeviceOrientation::PORTRAIT ? 0 : 1, runArgs.deviceConfig.density,
         runArgs.isRound);

@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,6 +36,7 @@ public:
     void RegisterTouchEventCallback(TouchEventCallback&& callback) override;
     void RegisterKeyEventCallback(KeyEventCallback&& callback) override;
     void RegisterMouseEventCallback(MouseEventCallback&& callback) override;
+    void RegisterAxisEventCallback(AxisEventCallback&& callback) override;
     void RegisterRotationEventCallback(RotationEventCallBack&& callback) override;
 
     void Launch() override;
@@ -153,6 +155,7 @@ private:
 
     TouchEventCallback touchEventCallback_;
     MouseEventCallback mouseEventCallback_;
+    AxisEventCallback axisEventCallback_;
     RotationEventCallBack rotationEventCallBack_;
     CardViewPositionCallBack cardViewPositionCallBack_;
     CardViewAccessibilityParamsCallback cardViewAccessibilityParamsCallback_;

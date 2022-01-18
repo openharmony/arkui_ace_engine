@@ -37,7 +37,7 @@ public:
     void Execute();
     void Execute(const ClickInfo& info);
     void Execute(const GestureEvent& info);
-    void Execute(const MouseInfo& info);
+    void Execute(MouseInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

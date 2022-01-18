@@ -390,6 +390,20 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
     }
 }
 
+void JSText::JsRemoteMessage(const JSCallbackInfo& info)
+{
+    EventMarker remoteMessageEventId;
+    JSInteractableView::JsRemoteMessage(info, remoteMessageEventId);
+    auto click = ViewStackProcessor::GetInstance()->GetClickGestureListenerComponent();
+    if (click) {
+        click->SetRemoteMessageId(remoteMessageEventId);
+    }
+    auto textComponent = GetComponent();
+    if (textComponent) {
+        textComponent->SetRemoteMessageEvent(remoteMessageEventId);
+    }
+}
+
 void JSText::JSBind(BindingTarget globalObj)
 {
     JSClass<JSText>::Declare("Text");
@@ -416,6 +430,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSText>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSText>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSText>::StaticMethod("remoteMessage", &JSText::JsRemoteMessage);
     JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);

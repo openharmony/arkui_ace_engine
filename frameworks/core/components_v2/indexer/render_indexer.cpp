@@ -22,6 +22,7 @@
 namespace OHOS::Ace::V2 {
 namespace {
 constexpr Dimension FOCUS_PADDING = 2.0_vp;
+constexpr int32_t PADDIN_SIZE = 2;
 } // namespace
 
 RefPtr<RenderNode> RenderIndexer::Create()
@@ -50,21 +51,47 @@ RenderIndexer::RenderIndexer()
             sp->HandleTouchMove(info);
         }
     });
+}
 
-    // register this listener for consuming the drag events.
-    dragRecognizer_ = AceType::MakeRefPtr<VerticalDragRecognizer>();
-    dragRecognizer_->SetOnDragStart([weakIndex = AceType::WeakClaim(this)](const DragStartInfo& info) {
-        auto indexer = weakIndex.Upgrade();
-        if (indexer) {
-            indexer->HandleDragStart();
+void RenderIndexer::Update(const RefPtr<Component>& component)
+{
+    RefPtr<IndexerComponent> indexerComponent = AceType::DynamicCast<IndexerComponent>(component);
+    if (!indexerComponent) {
+        LOGE("[indexer] Update Get component failed");
+        EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
+        return;
+    }
+    nonItemCount_ = indexerComponent->GetNonItemCount();
+    bubbleEnabled_ = indexerComponent->IsBubbleEnabled();
+    popupListEnabled_ = indexerComponent->IsPopupListEnabled();
+    bubbleText_ = indexerComponent->GetBubbleTextComponent();
+    focusedItem_ = indexerComponent->GetSelectedIndex();
+    alignStyle_ = indexerComponent->GetAlignStyle();
+    color_ = indexerComponent->GetBubbleBackgroundColor();
+    valueArray_ = indexerComponent->GetArrayValue();
+
+    // update item information
+    auto context = GetContext().Upgrade();
+    if (context) {
+        itemSize_ = context->NormalizeToPx(indexerComponent->GetItemSize());
+    }
+    itemSizeRender_ = itemSize_;
+    itemCount_ = indexerComponent->GetItemCount();
+    LOGI("[indexer] Init data, itemSizeRender_:%{public}lf, itemCount_:%{public}d", itemSizeRender_, itemCount_);
+
+    if (IsValidBubbleBox() && !bubbleBox_->GetChildren().empty()) {
+        auto text = AceType::DynamicCast<RenderText>(bubbleBox_->GetChildren().front());
+        auto item = GetSpecificItem(focusedItem_);
+        if (bubbleText_ && text && item) {
+            bubbleText_->SetData(item->GetSectionText());
+            text->Update(bubbleText_);
+            text->PerformLayout();
         }
-    });
-    dragRecognizer_->SetOnDragEnd([weakIndex = AceType::WeakClaim(this)](const DragEndInfo& info) {
-        auto indexer = weakIndex.Upgrade();
-        if (indexer) {
-            indexer->HandleDragEnd();
-        }
-    });
+    }
+    MarkNeedLayout();
+    selectedEventFun_ = AceAsyncEvent<void(const std::shared_ptr<IndexerEventInfo>&)>::
+        Create(indexerComponent->GetSelectedEvent(), context_);
+    requestPopupDataEventFun_ = indexerComponent->GetRequestPopupDataFunc();
 }
 
 void RenderIndexer::PerformLayout()
@@ -91,13 +118,12 @@ void RenderIndexer::PerformLayout()
     }
 
     InitFocusedItem();
-
     LayoutParam childrenLayout;
     childrenLayout.SetMinSize(Size(0.0, 0.0));
-
     for (const auto& item : GetChildren()) {
         item->Layout(childrenLayout);
     }
+
     // then set the position of children
     Offset position;
     int32_t count = 0;
@@ -114,25 +140,40 @@ void RenderIndexer::PerformLayout()
     double indexerWidth = paddingX_ + itemSizeRender_ + paddingX_;
     double indexerHeight = paddingY_ + count * itemSizeRender_ + paddingY_;
     SetLayoutSize(Size(indexerWidth, indexerHeight));
+    // layout bubble and popup list.
     LayoutPopup();
 }
 
-bool RenderIndexer::IsValidPopupList()
+void RenderIndexer::UpdateItems()
 {
-    if (!bubbleEnabled_ || !popupListEnabled_ || GetChildren().empty()) {
-        return false;
+    if (nonItemCount_ + items_.size() == GetChildren().size()) {
+        LOGI("[indexer] no need update Items");
+        return;
     }
-   if (!popupListDisplay_) {
-        popupListDisplay_ = AceType::DynamicCast<RenderDisplay>(GetChildren().back());
-        if (!popupListDisplay_ || popupListDisplay_->GetChildren().empty()) {
-            return false;
-        }
-        popupList_ = AceType::DynamicCast<RenderPopupList>(popupListDisplay_->GetChildren().front());
-        if (!popupList_) {
-            return false;
+    items_.clear();
+    for (auto item : GetChildren()) {
+        if (AceType::InstanceOf<RenderIndexerItem>(item)) {
+            items_.push_back(item);
         }
     }
-    return true;
+    LOGI("[indexer] items nums : %{public}d", static_cast<int32_t>(items_.size()));
+}
+
+void RenderIndexer::InitFocusedItem()
+{
+    for (auto item : items_) {
+        RefPtr<RenderIndexerItem> indexerItem = AceType::DynamicCast<RenderIndexerItem>(item);
+        if (indexerItem) {
+            indexerItem->SetClicked(false);
+        }
+    }
+
+    if (focusedItem_ >= 0) {
+        auto item = GetSpecificItem(focusedItem_);
+        if (item) {
+            item->SetClicked(true);
+        }
+    }
 }
 
 void RenderIndexer::LayoutPopup()
@@ -164,83 +205,21 @@ void RenderIndexer::LayoutPopup()
     }
 }
 
-void RenderIndexer::Update(const RefPtr<Component>& component)
-{
-    RefPtr<IndexerComponent> indexerComponent = AceType::DynamicCast<IndexerComponent>(component);
-    if (!indexerComponent) {
-        LOGE("[indexer] Update Get component failed");
-        EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
-        return;
-    }
-    nonItemCount_ = indexerComponent->GetNonItemCount();
-    bubbleEnabled_ = indexerComponent->IsBubbleEnabled();
-    popupListEnabled_ = indexerComponent->IsPopupListEnabled();
-    bubbleText_ = indexerComponent->GetBubbleTextComponent();
-    focusedItem_ = indexerComponent->GetSelectedIndex();
-    alignStyle_ = indexerComponent->GetAlignStyle();
-    color_ = indexerComponent->GetBubbleBackgroundColor();
-    valueArray_ = indexerComponent->GetArrayValue();
-
-    // update item information
-    auto context = GetContext().Upgrade();
-    if (context) {
-        itemSize_ = context->NormalizeToPx(indexerComponent->GetItemSize());
-    }
-    itemSizeRender_ = itemSize_;
-    itemCount_ = indexerComponent->GetItemCount();
-
-    if (IsValidBubbleBox() && !bubbleBox_->GetChildren().empty()) {
-        auto text = AceType::DynamicCast<RenderText>(bubbleBox_->GetChildren().front());
-        auto item = GetSpecificItem(focusedItem_);
-        if (bubbleText_ && text && item) {
-            bubbleText_->SetData(item->GetSectionText());
-            text->Update(bubbleText_);
-            text->PerformLayout();
-        }
-    }
-    MarkNeedLayout();
-    selectedEventFun_ = AceAsyncEvent<void(const std::shared_ptr<IndexerEventInfo>&)>::
-        Create(indexerComponent->GetSelectedEvent(), context_);
-    requestPopupDataEventFun_ = indexerComponent->GetRequestPopupDataFunc();
-}
-
-
-void RenderIndexer::UpdateItems()
-{
-    if (nonItemCount_ + items_.size() == GetChildren().size()) {
-        LOGD("[indexer] no need update Items");
-        return;
-    }
-    items_.clear();
-    for (auto item : GetChildren()) {
-        if (AceType::InstanceOf<RenderIndexerItem>(item)) {
-            items_.push_back(item);
-        }
-    }
-    LOGD("[indexer] items nums : %{public}d", static_cast<int32_t>(items_.size()));
-}
-
-void RenderIndexer::InitFocusedItem()
-{
-    for (auto item : items_) {
-        RefPtr<RenderIndexerItem> indexerItem = AceType::DynamicCast<RenderIndexerItem>(item);
-        if (indexerItem) {
-            indexerItem->SetClicked(false);
-        }
-    }
-
-    if (focusedItem_ >= 0) {
-        auto item = GetSpecificItem(focusedItem_);
-        if (item) {
-            item->SetClicked(true);
-        }
-    }
-}
-
 void RenderIndexer::HandleTouchDown(const TouchEventInfo& info)
 {
     if (touchBubbleDisplay || touchPopupListDisplay) {
-        bubbleController_->Pause();
+        LOGI("touch down bubble or popup list.");
+        if (IsValidBubbleBox()) {
+            bubbleDisplay_->UpdateOpacity(DEFAULT_OPACITY);
+        }
+
+        if (IsValidPopupList()) {
+            popupListDisplay_->UpdateOpacity(DEFAULT_OPACITY);
+        }
+
+        if (bubbleController_) {
+            bubbleController_->Pause();
+        }
         return;
     }
 
@@ -249,6 +228,7 @@ void RenderIndexer::HandleTouchDown(const TouchEventInfo& info)
     }
 
     touchPostion_ = info.GetTouches().front().GetLocalLocation();
+    LOGI("[indexer] item is HandleTouchDown x:%{public}lf, y:%{public}lf", touchPostion_.GetX(), touchPostion_.GetY());
     HandleTouched(touchPostion_);
     clicked_ = true;
 
@@ -257,7 +237,9 @@ void RenderIndexer::HandleTouchDown(const TouchEventInfo& info)
 
 void RenderIndexer::HandleTouchUp(const TouchEventInfo& info)
 {
-    if (touchBubbleDisplay || touchPopupListDisplay) {
+    if ((touchBubbleDisplay || touchPopupListDisplay) && bubbleController_) {
+        LOGI("touch up bubble or popup list.");
+        bubbleController_->UpdatePlayedTime(0);
         bubbleController_->Resume();
         return;
     }
@@ -265,8 +247,9 @@ void RenderIndexer::HandleTouchUp(const TouchEventInfo& info)
     if (info.GetTouches().empty()) {
         return;
     }
+
     touchPostion_ = info.GetTouches().front().GetLocalLocation();
-    LOGD("[indexer] item is HandleTouchUp x:%{public}lf, y:%{public}lf", touchPostion_.GetX(), touchPostion_.GetY());
+    LOGI("[indexer] item is HandleTouchUp x:%{public}lf, y:%{public}lf", touchPostion_.GetX(), touchPostion_.GetY());
     HandleTouched(touchPostion_);
     if (clicked_) {
         clicked_ = false;
@@ -277,26 +260,20 @@ void RenderIndexer::HandleTouchUp(const TouchEventInfo& info)
 void RenderIndexer::HandleTouchMove(const TouchEventInfo& info)
 {
     if (touchBubbleDisplay || touchPopupListDisplay) {
-        LOGD("touch move bubble or popup list.");
         return;
     }
+
+    if (info.GetTouches().empty()) {
+        return;
+    }
+
     touchPostion_ = info.GetTouches().front().GetLocalLocation();
-    LOGD("[indexer] item is HandleTouchMove x:%{public}lf, y:%{public}lf", touchPostion_.GetX(), touchPostion_.GetY());
+    LOGI("[indexer] item is HandleTouchMove x:%{public}lf, y:%{public}lf", touchPostion_.GetX(), touchPostion_.GetY());
     HandleTouched(touchPostion_);
     if (clicked_) {
         clicked_ = true;
         MarkNeedLayout();
     }
-}
-
-void RenderIndexer::HandleDragStart()
-{
-    LOGD("[indexer] HandleDragstart");
-}
-
-void RenderIndexer::HandleDragEnd()
-{
-    LOGD("[indexer] HandleDragEnd");
 }
 
 bool RenderIndexer::TouchTest(const Point& globalPoint, const Point& parentLocalPoint,
@@ -309,6 +286,7 @@ bool RenderIndexer::TouchTest(const Point& globalPoint, const Point& parentLocal
     if (focusedNode) {
         focusedNode->SetFocused(false);
     }
+
     // reset touch flag
     touchBubbleDisplay = false;
     touchPopupListDisplay = false;
@@ -324,9 +302,10 @@ bool RenderIndexer::TouchTest(const Point& globalPoint, const Point& parentLocal
     if (!isPopupListRect) {
         LOGW("popup list rect wrong.");
     }
+
     // Since the paintRect is relative to parent, use parent local point to perform touch test.
     if (GetPaintRect().IsInRegion(parentLocalPoint)) {
-        LOGD("touch in indexer");
+        LOGI("touch in indexer");
 
         // Calculates the local point location and coordinate offset in this node.
         const auto localPoint = parentLocalPoint - GetPaintRect().GetOffset();
@@ -335,7 +314,7 @@ bool RenderIndexer::TouchTest(const Point& globalPoint, const Point& parentLocal
         OnTouchTestHit(coordinateOffset, touchRestrict, result);
         return true;
     } else if (isBubbleRect && bubbleRect.IsInRegion(globalPoint)) {
-        LOGD("touch in bubble display");
+        LOGI("touch in bubble display");
         touchBubbleDisplay = true;
 
         // Calculates the local point location and coordinate offset in bubble.
@@ -345,7 +324,7 @@ bool RenderIndexer::TouchTest(const Point& globalPoint, const Point& parentLocal
         OnTouchTestHit(coordinateOffset, touchRestrict, result);
         return RenderNode::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
     } else if (isPopupListRect && popupListRect.IsInRegion(globalPoint)) {
-        LOGD("touch in popupList display");
+        LOGI("touch in popupList display");
         touchPopupListDisplay = true;
 
         // Calculates the local point location and coordinate offset in bubble.
@@ -355,6 +334,7 @@ bool RenderIndexer::TouchTest(const Point& globalPoint, const Point& parentLocal
         OnTouchTestHit(coordinateOffset, touchRestrict, result);
         return RenderNode::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
     } else {
+        LOGI("touch in other display");
         if (IsValidBubbleBox() && bubbleController_ && bubbleController_->IsRunning()) {
             bubbleController_->Finish();
         }
@@ -365,11 +345,6 @@ bool RenderIndexer::TouchTest(const Point& globalPoint, const Point& parentLocal
 void RenderIndexer::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    if (dragRecognizer_) {
-        dragRecognizer_->SetCoordinateOffset(coordinateOffset);
-        result.emplace_back(dragRecognizer_);
-    }
-
     if (touchRecognizer_) {
         touchRecognizer_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(touchRecognizer_);
@@ -397,13 +372,26 @@ int32_t RenderIndexer::GetTouchedItemIndex(const Offset& touchPosition)
     }
 
     int32_t index = static_cast<int32_t>((position - paddingY_) / itemSizeRender_);
-    LOGD("[indexer] HandleTouched section index:%{public}d", index);
+    LOGI("[indexer] GetTouchedItemIndex section index:%{public}d", index);
     return GetItemIndex(index);
 }
 
 void RenderIndexer::UpdateBubbleText()
 {
     if (IsValidBubbleBox() && !bubbleBox_->GetChildren().empty()) {
+        // update bubble border
+        RefPtr<Decoration> decoration = bubbleBox_->GetBackDecoration();
+        Border border = decoration->GetBorder();
+        Radius radius;
+        if (popupListEnabled_) {
+            radius = Radius(Dimension(ZERO_RADIUS, DimensionUnit::VP));
+        } else {
+            radius = Radius(Dimension(BUBBLE_BOX_RADIUS, DimensionUnit::VP));
+        }
+        border.SetBottomLeftRadius(radius);
+        border.SetBottomRightRadius(radius);
+        decoration->SetBorder(border);
+
         auto text = AceType::DynamicCast<RenderText>(bubbleBox_->GetChildren().front());
         auto item = GetSpecificItem(focusedItem_);
         if (bubbleText_ && text && item) {
@@ -418,7 +406,7 @@ void RenderIndexer::UpdateBubbleText()
 void RenderIndexer::BuildBubbleAnimation()
 {
     if (!IsValidBubbleBox()) {
-        LOGD("bubble box is invalid");
+        LOGI("bubble box is invalid");
         return;
     }
     if (!bubbleController_) {
@@ -432,10 +420,11 @@ void RenderIndexer::BuildBubbleAnimation()
         if (!indexer) {
             return;
         }
+
         if (indexer->IsValidBubbleBox()) {
             indexer->bubbleDisplay_->UpdateOpacity(ZERO_OPACITY);
         }
-        // add popup list animation
+
         if (indexer->IsValidPopupList()) {
             indexer->popupListDisplay_->UpdateOpacity(ZERO_OPACITY);
         }
@@ -443,7 +432,7 @@ void RenderIndexer::BuildBubbleAnimation()
 
     // build and start animation
     auto animation = AceType::MakeRefPtr<KeyframeAnimation<uint8_t>>();
-    auto startFrame = AceType::MakeRefPtr<Keyframe<uint8_t>>(KEYFRAME_BEGIN, ZERO_OPACITY);
+    auto startFrame = AceType::MakeRefPtr<Keyframe<uint8_t>>(KEYFRAME_BEGIN, DEFAULT_OPACITY);
     auto midFrame = AceType::MakeRefPtr<Keyframe<uint8_t>>(KEYFRAME_HALF, DEFAULT_OPACITY);
     auto endFrame = AceType::MakeRefPtr<Keyframe<uint8_t>>(KEYFRAME_END, ZERO_OPACITY);
     midFrame->SetCurve(Curves::DECELE);
@@ -454,7 +443,7 @@ void RenderIndexer::BuildBubbleAnimation()
     animation->AddListener([weak](uint8_t value) {
         auto indexer = weak.Upgrade();
         if (!indexer) {
-            LOGW("indexer error %{public}s", AceType::TypeName(indexer));
+            LOGW("indexer error %s", AceType::TypeName(indexer));
             return;
         }
 
@@ -475,7 +464,7 @@ void RenderIndexer::BuildBubbleAnimation()
 void RenderIndexer::BeginBubbleAnimation()
 {
     if (!IsValidBubbleBox()) {
-        LOGD("bubble box is invalid");
+        LOGI("bubble box is invalid");
         return;
     }
     if (!bubbleController_) {
@@ -505,6 +494,24 @@ bool RenderIndexer::IsValidBubbleBox()
     return true;
 }
 
+bool RenderIndexer::IsValidPopupList()
+{
+    if (!bubbleEnabled_ || !popupListEnabled_ || GetChildren().empty()) {
+        return false;
+    }
+    if (!popupListDisplay_) {
+        popupListDisplay_ = AceType::DynamicCast<RenderDisplay>(GetChildren().back());
+        if (!popupListDisplay_ || popupListDisplay_->GetChildren().empty()) {
+            return false;
+        }
+        popupList_ = AceType::DynamicCast<RenderPopupList>(popupListDisplay_->GetChildren().front());
+        if (!popupList_) {
+            return false;
+        }
+    }
+    return true;
+}
+
 int32_t RenderIndexer::GetItemIndex(int32_t index)
 {
     if (items_.empty()) {
@@ -523,7 +530,7 @@ int32_t RenderIndexer::GetItemIndex(int32_t index)
     if (indexerItem) {
         itemIndexInList = indexerItem->GetSectionIndex();
     }
-    LOGD("[indexer] GetItemIndex index:%{public}d indexInList:%{public}d", index, itemIndexInList);
+    LOGI("[indexer] GetItemIndex index:%{public}d indexInList:%{public}d", index, itemIndexInList);
     return itemIndexInList;
 }
 
@@ -540,15 +547,20 @@ void RenderIndexer::HandleFocusAnimation(const Size& size, const Offset& offset)
     }
 
     double focusPadding = NormalizeToPx(FOCUS_PADDING);
-    context->ShowFocusAnimation(
-        RRect::MakeRRect(Rect(Offset(), size - Size(focusPadding, focusPadding) * 2), focusPadding, focusPadding),
+    context->ShowFocusAnimation(RRect::MakeRRect(Rect(Offset(),
+        size - Size(focusPadding, focusPadding) * PADDIN_SIZE), focusPadding, focusPadding),
         Color::BLUE, offset + Offset(focusPadding, focusPadding));
 }
 
 void RenderIndexer::MoveSectionWithIndexer(int32_t curSection)
 {
     if (focusedItem_ == curSection) {
-        LOGD("Current focused item already is:%{public}d", curSection);
+        LOGI("Current focused item already is:%{public}d", curSection);
+
+        // click the same letter multiple times.
+        if (!bubbleController_->IsRunning()) {
+            bubbleController_->Play();
+        }
         return;
     }
 
@@ -579,6 +591,7 @@ void RenderIndexer::MoveList(int32_t index)
         LOGE("[indexer] invalid item indexer");
         return;
     }
+
     // trigger onSelected Method
     OnSelected(index);
 
@@ -612,8 +625,15 @@ void RenderIndexer::OnRequestPopupData(int32_t selected)
         auto event = std::make_shared<IndexerEventInfo>(selected);
         if (event) {
             auto popupData = requestPopupDataEventFun_(event);
-            if (IsValidPopupList()) {
+            if (popupList_) {
                 popupList_->OnRequestPopupDataSelected(popupData);
+            }
+
+            // switch bubble style
+            if (popupData.size() == 0) {
+                popupListEnabled_ = false;
+            } else {
+                popupListEnabled_ = true;
             }
         }
     }
@@ -626,7 +646,7 @@ bool RenderIndexer::GetBubbleRect(Rect& rect)
     }
 
     Offset bubbleOffset = bubbleDisplay_->GetGlobalOffset();
-    Size bubbleSize = bubbleDisplay_->GetPaintRect().GetSize();
+    Size bubbleSize = bubbleDisplay_->GetLayoutSize();
 
     rect.SetOffset(bubbleOffset);
     rect.SetSize(bubbleSize);
@@ -639,7 +659,7 @@ bool RenderIndexer::GetPopupListRect(Rect& rect)
         return false;
     }
     Offset popupListOffset = popupListDisplay_->GetGlobalOffset();
-    Size popupListSize = popupListDisplay_->GetPaintRect().GetSize();
+    Size popupListSize = popupListDisplay_->GetLayoutSize();
 
     rect.SetOffset(popupListOffset);
     rect.SetSize(popupListSize);

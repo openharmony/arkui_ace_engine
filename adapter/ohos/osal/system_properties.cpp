@@ -73,6 +73,11 @@ void SystemProperties::InitDeviceType(DeviceType)
     // Do nothing, no need to store type here, use system property at 'GetDeviceType' instead.
 }
 
+int SystemProperties::GetArkProperties()
+{
+    return system::GetIntParameter<int>("persist.ark.properties", -1);
+}
+
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
@@ -94,7 +99,6 @@ ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
-bool SystemProperties::isDeclarativeFrontend_ = false;
 
 DeviceType SystemProperties::GetDeviceType()
 {

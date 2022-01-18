@@ -110,6 +110,14 @@ public:
         return resolution_;
     }
 
+    /*
+     * Set resolution of device.
+     */
+    static void SetResolution(double resolution)
+    {
+        resolution_ = resolution;
+    }
+
     static bool GetIsScreenRound()
     {
         return isRound_;
@@ -150,14 +158,9 @@ public:
         return paramDeviceType_;
     }
 
-    static void SetDeclarativeFrontend(bool value)
-    {
-        isDeclarativeFrontend_ = value;
-    }
-
     static bool GetRosenBackendEnabled()
     {
-        return rosenBackendEnabled_ && isDeclarativeFrontend_;
+        return rosenBackendEnabled_;
     }
 
     static bool GetTraceEnabled()
@@ -219,6 +222,8 @@ public:
         return pxNum * resolution_;
     }
 
+    static int GetArkProperties();
+
 private:
     static bool traceEnabled_;
     static bool accessibilityEnabled_;
@@ -241,7 +246,6 @@ private:
     static ScreenShape screenShape_;
     static LongScreenType LongScreen_;
     static bool rosenBackendEnabled_;
-    static bool isDeclarativeFrontend_;
 };
 
 } // namespace OHOS::Ace

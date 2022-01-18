@@ -1415,7 +1415,8 @@ void FlutterRenderCustomPaint::WebGLInit(CanvasRenderContextBase* context)
             webglBitmap_.eraseColor(SK_ColorTRANSPARENT);
 #endif
         }
-        webGLContext_->SetBitMapPtr(reinterpret_cast<char*>(webglBitmap_.getPixels()));
+        webGLContext_->SetBitMapPtr(reinterpret_cast<char*>(webglBitmap_.getPixels()),
+            webglBitmap_.width(), webglBitmap_.height());
     }
 }
 

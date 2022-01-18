@@ -427,7 +427,7 @@ private:
     TextStyle textStyle_;
     TextStyle selectedTextStyle_;
     Color backgroundColor_ = Color::TRANSPARENT;
-    Color selectedBackgroundColor_ = Color::GRAY;
+    Color selectedBackgroundColor_;
 
     RefPtr<AccessibilityNode> node_;
     int32_t parentId_ = -1;

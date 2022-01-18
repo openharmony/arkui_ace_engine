@@ -49,6 +49,7 @@ void SwiperDeclaration::InitSpecialized()
     AddSpecializedStyle(DeclarationConstants::DEFAULT_SWIPER_STYLE);
     AddSpecializedEvent(DeclarationConstants::DEFAULT_SWIPER_EVENT);
     AddSpecializedMethod(DeclarationConstants::DEFAULT_SWIPER_METHOD);
+    AddSpecializedRemoteMessageEvent(DeclarationConstants::DEFAULT_SWIPER_EVENT);
 }
 
 bool SwiperDeclaration::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)

@@ -18,7 +18,9 @@
 
 #include <mutex>
 
+#include "ability_info.h"
 #include "iremote_object.h"
+#include "dialog_callback_interface.h"
 #include "ui_service_interface.h"
 #include "ui_service_mgr_errors.h"
 #include "ui_service_mgr_interface.h"
@@ -47,6 +49,20 @@ public:
 
     ErrCode ReturnRequest(
         const AAFwk::Want& want, const std::string& source,  const std::string& data,  const std::string& extraData);
+
+    ErrCode ShowDialog(const std::string& name,
+                       const std::string& params,
+                       OHOS::Rosen::WindowType windowType,
+                       int x,
+                       int y,
+                       int width,
+                       int height,
+                       DialogCallback callback);
+
+    ErrCode CancelDialog(int32_t id);
+
+    ErrCode ShowAppPickerDialog(const AAFwk::Want& want, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos);
+
 private:
     /**
      * Connect UIService manager service.
@@ -54,6 +70,9 @@ private:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode Connect();
+
+    const std::string GetPickerDialogParam(
+        const AAFwk::Want& want, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos) const;
 
     static std::mutex mutex_;
     static std::shared_ptr<UIServiceMgrClient> instance_;

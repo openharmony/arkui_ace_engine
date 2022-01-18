@@ -32,10 +32,11 @@ void GridLayoutTestUtils::PrintNodeInfo(const RefPtr<RenderNode>& node)
 
 RefPtr<Component> GridLayoutTestUtils::CreateComponent(FlexDirection direction, std::string rows, std::string cols)
 {
+    constexpr double DIM_SIZE_VALUE_TEST = 1080.0;
     std::list<RefPtr<Component>> children;
     RefPtr<GridLayoutComponent> component = AceType::MakeRefPtr<GridLayoutComponent>(children);
-    component->SetWidth(1080.0);
-    component->SetHeight(1080.0);
+    component->SetWidth(DIM_SIZE_VALUE_TEST);
+    component->SetHeight(DIM_SIZE_VALUE_TEST);
     component->SetDirection(direction);
     component->SetRowsArgs(rows);
     component->SetColumnsArgs(cols);
@@ -44,10 +45,11 @@ RefPtr<Component> GridLayoutTestUtils::CreateComponent(FlexDirection direction, 
 
 RefPtr<RenderNode> GridLayoutTestUtils::CreateRenderItem(int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan)
 {
+    constexpr double DIM_SIZE_VALUE_TEST = 540.0;
     RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<BoxComponent>();
     RefPtr<RenderBox> renderBox = AceType::MakeRefPtr<MockRenderBox>();
-    boxComponent->SetWidth(540.0);
-    boxComponent->SetHeight(540.0);
+    boxComponent->SetWidth(DIM_SIZE_VALUE_TEST);
+    boxComponent->SetHeight(DIM_SIZE_VALUE_TEST);
     renderBox->Update(boxComponent);
     RefPtr<RenderGridLayoutItem> item = AceType::MakeRefPtr<MockRenderGridLayoutItem>();
     item->SetRowIndex(row);
@@ -58,4 +60,41 @@ RefPtr<RenderNode> GridLayoutTestUtils::CreateRenderItem(int32_t row, int32_t co
     return item;
 }
 
+RefPtr<RenderNode> GridLayoutTestUtils::CreateDragRenderItem()
+{
+    constexpr double DIM_SIZE_VALUE_TEST = 50.0;
+    RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<BoxComponent>();
+    RefPtr<RenderBox> renderBox = AceType::MakeRefPtr<MockRenderBox>();
+    boxComponent->SetWidth(DIM_SIZE_VALUE_TEST);
+    boxComponent->SetHeight(DIM_SIZE_VALUE_TEST);
+    renderBox->Update(boxComponent);
+    RefPtr<RenderGridLayoutItem> item = AceType::MakeRefPtr<MockRenderGridLayoutItem>();
+    item->AddChild(renderBox);
+    return item;
+}
+
+RefPtr<Component> GridLayoutTestUtils::CreateDragComponent(std::string rows, std::string cols)
+{
+    constexpr double DIM_SIZE_VALUE_TEST = 150.0;
+    constexpr int32_t MAX_COUNT_VALUE_TEST = 5;
+    constexpr int32_t MIN_COUNT_VALUE_TEST = 1;
+    constexpr int32_t CELL_LENGTH_VALUE_TEST = 50;
+
+    std::list<RefPtr<Component>> children;
+    RefPtr<GridLayoutComponent> component = AceType::MakeRefPtr<GridLayoutComponent>(children);
+    component->SetSupportAnimation(false);
+    component->SetEditMode(true);
+    if (!rows.empty()) {
+        component->SetHeight(DIM_SIZE_VALUE_TEST);
+    }
+    if (!cols.empty()) {
+        component->SetWidth(DIM_SIZE_VALUE_TEST);
+    }
+    component->SetRowsArgs(rows);
+    component->SetColumnsArgs(cols);
+    component->SetMaxCount(MAX_COUNT_VALUE_TEST);
+    component->SetMinCount(MIN_COUNT_VALUE_TEST);
+    component->SetCellLength(CELL_LENGTH_VALUE_TEST);
+    return component;
+}
 } // namespace OHOS::Ace

@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
+#include "core/components/box/box_component_helper.h"
 #include "core/components/button/button_component.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/padding/padding_component.h"
@@ -150,6 +151,17 @@ void JSButton::SetStateEffect(bool stateEffect)
     }
 }
 
+void JSButton::JsRemoteMessage(const JSCallbackInfo& info)
+{
+    EventMarker remoteMessageEventId;
+    JSInteractableView::JsRemoteMessage(info, remoteMessageEventId);
+    auto stack = ViewStackProcessor::GetInstance();
+    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    if (buttonComponent) {
+        buttonComponent->SetRemoteMessageEventId(remoteMessageEventId);
+    }
+}
+
 void JSButton::JSBind(BindingTarget globalObj)
 {
     JSClass<JSButton>::Declare("Button");
@@ -161,6 +173,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("type", &JSButton::SetType, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("stateEffect", &JSButton::SetStateEffect, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("onClick", &JSButton::JsOnClick);
+    JSClass<JSButton>::StaticMethod("remoteMessage", &JSButton::JsRemoteMessage);
     JSClass<JSButton>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSButton>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSButton>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -294,6 +307,7 @@ void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
     }
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     if (buttonComponent == nullptr) {
         LOGE("Button component create failed");
         return;
@@ -306,7 +320,13 @@ void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
             buttonComponent->SetClickedColor(buttonComponent->GetBackgroundColor().BlendColor(blendColor));
         }
     } else {
-        buttonComponent->SetColorForState(backgroundColor, stack->GetVisualState());
+        buttonComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(ButtonStateAttribute::COLOR,
+            AnimatableColor(backgroundColor, option), stack->GetVisualState());
+        if (!buttonComponent->GetStateAttributes()->
+            HasAttribute(ButtonStateAttribute::COLOR, VisualState::NORMAL)) {
+            buttonComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(ButtonStateAttribute::COLOR,
+                AnimatableColor(buttonComponent->GetBackgroundColor(), option), VisualState::NORMAL);
+        }
     }
     info.ReturnSelf();
 }
@@ -320,13 +340,21 @@ void JSButton::JsWidth(const JSCallbackInfo& info)
     }
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    AnimationOption option = stack->GetImplicitAnimationOption();
     if (!buttonComponent) {
         return;
     }
     if (!stack->IsVisualStateSet()) {
         buttonComponent->SetWidth(value, stack->GetImplicitAnimationOption());
     } else {
-        buttonComponent->SetWidthForState(value, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+        buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+            ButtonStateAttribute::WIDTH, AnimatableDimension(value, option),
+            stack->GetVisualState());
+        if (!buttonComponent->GetStateAttributes()->
+            HasAttribute(ButtonStateAttribute::WIDTH, VisualState::NORMAL)) {
+            buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(ButtonStateAttribute::WIDTH,
+                AnimatableDimension(buttonComponent->GetWidth(), option), VisualState::NORMAL);
+        }
     }
 }
 
@@ -339,13 +367,20 @@ void JSButton::JsHeight(const JSCallbackInfo& info)
     }
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    auto option = stack->GetImplicitAnimationOption();
     if (!buttonComponent) {
         return;
     }
     if (!stack->IsVisualStateSet()) {
-        buttonComponent->SetHeight(value, stack->GetImplicitAnimationOption());
+        buttonComponent->SetHeight(value, option);
     } else {
-        buttonComponent->SetHeightForState(value, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+        buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(ButtonStateAttribute::HEIGHT,
+                AnimatableDimension(value, option), stack->GetVisualState());
+        if (!buttonComponent->GetStateAttributes()->
+            HasAttribute(ButtonStateAttribute::HEIGHT, VisualState::NORMAL)) {
+            buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(ButtonStateAttribute::HEIGHT,
+                AnimatableDimension(buttonComponent->GetHeight(), option), VisualState::NORMAL);
+        }
     }
 }
 
@@ -363,6 +398,7 @@ void JSButton::JsSize(const JSCallbackInfo& info)
 
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    auto option = stack->GetImplicitAnimationOption();
     if (buttonComponent == nullptr) {
         LOGE("Button component create failed");
         return;
@@ -371,12 +407,33 @@ void JSButton::JsSize(const JSCallbackInfo& info)
     JSRef<JSVal> widthValue = sizeObj->GetProperty("width");
     Dimension width;
     if (ParseJsDimensionVp(widthValue, width)) {
-        buttonComponent->SetWidth(width);
+        if (!stack->IsVisualStateSet()) {
+            buttonComponent->SetWidth(width, stack->GetImplicitAnimationOption());
+        } else {
+            buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+                ButtonStateAttribute::WIDTH, AnimatableDimension(width, option),
+                stack->GetVisualState());
+            if (!buttonComponent->GetStateAttributes()->
+                HasAttribute(ButtonStateAttribute::WIDTH, VisualState::NORMAL)) {
+                buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(ButtonStateAttribute::WIDTH,
+                    AnimatableDimension(buttonComponent->GetWidth(), option), VisualState::NORMAL);
+            }
+        }
     }
     JSRef<JSVal> heightValue = sizeObj->GetProperty("height");
     Dimension height;
     if (ParseJsDimensionVp(heightValue, height)) {
-        buttonComponent->SetHeight(height);
+        if (!stack->IsVisualStateSet()) {
+            buttonComponent->SetHeight(height, stack->GetImplicitAnimationOption());
+        } else {
+            buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(ButtonStateAttribute::HEIGHT,
+                    AnimatableDimension(height, option), stack->GetVisualState());
+            if (!buttonComponent->GetStateAttributes()->
+                HasAttribute(ButtonStateAttribute::HEIGHT, VisualState::NORMAL)) {
+                buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(ButtonStateAttribute::HEIGHT,
+                    AnimatableDimension(buttonComponent->GetHeight(), option), VisualState::NORMAL);
+            }
+        }
     }
 }
 
@@ -392,6 +449,7 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
     }
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    auto option = stack->GetImplicitAnimationOption();
     if (buttonComponent == nullptr) {
         LOGE("Button component create failed");
         return;
@@ -399,11 +457,22 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
     buttonComponent->SetRadiusState(true);
     if (!stack->IsVisualStateSet()) {
         buttonComponent->SetRectRadius(radius);
-        JSViewAbstract::SetBorderRadius(radius, stack->GetImplicitAnimationOption());
+        JSViewAbstract::SetBorderRadius(radius, option);
     } else {
-        buttonComponent->SetRectRadiusForState(radius, stack->GetVisualState());
-        auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
-        boxComponent->SetBorderRadiusForState(radius, stack->GetImplicitAnimationOption(), stack->GetVisualState());
+        buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(ButtonStateAttribute::RADIUS,
+            AnimatableDimension(radius, option), stack->GetVisualState());
+        auto boxComponent = stack->GetBoxComponent();
+        boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_RADIUS,
+            AnimatableDimension(radius, option), stack->GetVisualState());
+
+        if (!buttonComponent->GetStateAttributes()->
+            HasAttribute(ButtonStateAttribute::RADIUS, VisualState::NORMAL)) {
+            buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(ButtonStateAttribute::RADIUS,
+                AnimatableDimension(buttonComponent->GetRectRadius(), option), VisualState::NORMAL);
+            auto defaultRadius = BoxComponentHelper::GetBorderRadius(boxComponent->GetBackDecoration());
+            boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_RADIUS,
+                AnimatableDimension(defaultRadius.GetX(), option), VisualState::NORMAL);
+        }
     }
 }
 

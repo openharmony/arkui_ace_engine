@@ -84,7 +84,7 @@ public:
 private:
     void StartRecording();
     void SetOffSet(
-        const RefPtr<RenderNode>& child, Flutter::OffsetLayer* layer, const Offset& pos, const std::string name);
+        const RefPtr<RenderNode>& child, Flutter::OffsetLayer* layer, const Offset& pos, const std::string& name);
 
     fml::RefPtr<flutter::PictureRecorder> recorder_;
     fml::RefPtr<flutter::Canvas> canvas_;

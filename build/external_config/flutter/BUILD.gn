@@ -418,7 +418,10 @@ template("flutter_engine_shell") {
     ]
 
     if (is_standard_system && platform == "ohos") {
-      include_dirs = [ "//utils/native/base/include" ]
+      include_dirs = [
+        "//foundation/windowmanager/interfaces/innerkits",
+        "//utils/native/base/include",
+      ]
       sources += [
         "$flutter_root/engine/flutter/shell/platform/ohos/ace_vsync_waiter_embedder.cc",
         "$flutter_root/engine/flutter/shell/platform/ohos/ohos_shell_holder.cc",

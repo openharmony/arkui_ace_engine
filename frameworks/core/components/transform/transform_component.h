@@ -167,15 +167,15 @@ public:
     void SetTranslateTransition(TransitionType type, const Dimension& x, const Dimension& y, const Dimension& z);
     void SetRotateTransition(TransitionType type, double x, double y, double z, double angle);
 
-    RefPtr<StateAttributeList<TransformStateAttribute>> GetStateAttributeList()
+    RefPtr<StateAttributes<TransformStateAttribute>> GetStateAttributes()
     {
         if (stateAttributeList_ == nullptr) {
-            stateAttributeList_ = MakeRefPtr<StateAttributeList<TransformStateAttribute>>();
+            stateAttributeList_ = MakeRefPtr<StateAttributes<TransformStateAttribute>>();
         }
         return stateAttributeList_;
     }
 
-    bool HasStateAttributeList()
+    bool HasStateAttributes()
     {
         return stateAttributeList_ != nullptr;
     }
@@ -192,7 +192,7 @@ private:
     ClickSpringEffectType clickSpringEffectType_ = ClickSpringEffectType::NONE;
     TransitionEffect transitionEffect_ = TransitionEffect::NONE;
     Shadow shadow_;
-    RefPtr<StateAttributeList<TransformStateAttribute>> stateAttributeList_ = nullptr;
+    RefPtr<StateAttributes<TransformStateAttribute>> stateAttributeList_ = nullptr;
 };
 
 } // namespace OHOS::Ace

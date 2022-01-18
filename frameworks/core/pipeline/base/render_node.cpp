@@ -21,7 +21,7 @@
 #include <unistd.h>
 
 #ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_canvas_node.h"
 
 #include "core/animation/native_curve_helper.h"
 #endif
@@ -40,6 +40,7 @@
 #include "core/components/transform/render_transform.h"
 #include "core/components_v2/list/render_list.h"
 #include "core/event/ace_event_helper.h"
+#include "core/event/axis_event.h"
 #include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace {
@@ -86,7 +87,7 @@ void RenderNode::MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole, 
     }
     LOGI("Hole: MarkTreeRender %{public}s", AceType::TypeName(Referenced::RawPtr(root)));
     bool subMeetHole = meetHole;
-    for (auto child: root->GetChildren()) {
+    for (auto child : root->GetChildren()) {
         MarkTreeRender(child, subMeetHole, needFlush);
     }
     meetHole = subMeetHole;
@@ -368,7 +369,7 @@ void RenderNode::RenderWithContext(RenderContext& context, const Offset& offset)
     }
     pendingDispatchLayoutReady_ = false;
     if (GetHasSubWindow() || !GetNeedClip()) {
-        LOGI("Hole: meet subwindow node or no need clip");
+        LOGD("Hole: meet subwindow node or no need clip");
         if (context.GetNeedRestoreHole()) {
             context.Restore();
             context.SetNeedRestoreHole(false);
@@ -717,6 +718,43 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     return dispatchSuccess || beforeSize != endSize;
 }
 
+RefPtr<RenderNode> RenderNode::FindDropChild(const Point& globalPoint, const Point& parentLocalPoint)
+{
+    Point transformPoint = GetTransformPoint(parentLocalPoint);
+    if (!InTouchRectList(transformPoint, GetTouchRectList())) {
+        return nullptr;
+    }
+
+    const auto localPoint = transformPoint - GetPaintRect().GetOffset();
+    const auto& children = GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        if (!child->GetVisible()) {
+            continue;
+        }
+        if (child->InterceptTouchEvent()) {
+            continue;
+        }
+
+        auto target = child->FindDropChild(globalPoint, localPoint);
+        if (target) {
+            return target;
+        }
+    }
+
+    for (auto& rect : GetTouchRectList()) {
+        if (touchable_ && rect.IsInRegion(transformPoint)) {
+            RefPtr<RenderNode> renderNode = AceType::Claim<RenderNode>(this);
+            auto renderBox = AceType::DynamicCast<RenderBox>(renderNode);
+            if (renderBox && renderBox->GetOnDrop()) {
+                return renderNode;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 void RenderNode::MouseTest(const Point& globalPoint, const Point& parentLocalPoint, MouseTestResult& result)
 {
     LOGD("MouseTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
@@ -782,6 +820,48 @@ bool RenderNode::MouseDetect(const Point& globalPoint, const Point& parentLocalP
     }
     auto endSize = hoverList.size();
     return beforeSize != endSize;
+}
+
+bool RenderNode::AxisDetect(const Point& globalPoint, const Point& parentLocalPoint, WeakPtr<RenderNode>& axisNode,
+    const AxisDirection direction)
+{
+    LOGD("AxisDetect: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
+        GetTypeName(), GetTouchRect().Left(), GetTouchRect().Top(), GetTouchRect().Width(), GetTouchRect().Height());
+    if (disabled_) {
+        return false;
+    }
+
+    Point transformPoint = GetTransformPoint(parentLocalPoint);
+    if (!InTouchRectList(transformPoint, GetTouchRectList())) {
+        return false;
+    }
+
+    const auto localPoint = transformPoint - GetPaintRect().GetOffset();
+    const auto& sortedChildren = SortChildrenByZIndex(GetChildren());
+    for (auto iter = sortedChildren.rbegin(); iter != sortedChildren.rend(); ++iter) {
+        auto& child = *iter;
+        if (!child->GetVisible() || child->disabled_) {
+            continue;
+        }
+        child->AxisDetect(globalPoint, localPoint, axisNode, direction);
+    }
+
+    for (auto& rect : GetTouchRectList()) {
+        if (touchable_ && rect.IsInRegion(transformPoint)) {
+            if (!axisNode.Upgrade()) {
+                axisNode = CheckAxisNode();
+                if (axisNode.Upgrade() && !(axisNode.Upgrade()->isScrollable(direction))) {
+                    axisNode = nullptr;
+                }
+            }
+            // Calculates the coordinate offset in this node.
+            globalPoint_ = globalPoint;
+            auto offset = globalPoint - localPoint;
+            coordinatePoint_ = Point(offset.GetX(), offset.GetY());
+            break;
+        }
+    }
+    return true;
 }
 
 bool RenderNode::MouseHoverTest(const Point& parentLocalPoint)
@@ -1096,7 +1176,8 @@ Offset RenderNode::GetGlobalOffset() const
 Offset RenderNode::GetPaintOffset() const
 {
     auto renderNode = parent_.Upgrade();
-    return (renderNode && !IsHeadRenderNode()) ? GetPosition() + renderNode->GetPaintOffset() : GetPosition();
+    bool isNotHead = !IsHeadRenderNode() || (renderNode ? (renderNode->rsNode_ == rsNode_) : false);
+    return (renderNode && isNotHead) ? GetPosition() + renderNode->GetPaintOffset() : GetPosition();
 }
 
 Offset RenderNode::GetGlobalOffsetExternal() const
@@ -1858,9 +1939,19 @@ void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail)
     if (isHead && !rsNode_) {
         // create RSNode in first node of JSview
         rsNode_ = CreateRSNode();
-    } else if (!isHead && rsNode_) {
-        // destroy unneeded RSNode
-        rsNode_ = nullptr;
+    }
+#endif
+}
+
+void RenderNode::SyncRSNode(std::shared_ptr<RSNode> rsNode)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    rsNode_ = rsNode;
+    if (!isTailRenderNode_) {
+        const auto& children = GetChildren();
+        for (const auto& item : children) {
+            item->SyncRSNode(rsNode);
+        }
     }
 #endif
 }
@@ -1939,13 +2030,13 @@ void RenderNode::MarkParentNeedRender() const
 std::shared_ptr<RSNode> RenderNode::CreateRSNode() const
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    return Rosen::RSNode::Create();
+    return Rosen::RSCanvasNode::Create();
 #else
     return nullptr;
 #endif
 }
 
-void RenderNode::OnStatusStyleChanged(StyleState state)
+void RenderNode::OnStatusStyleChanged(VisualState state)
 {
     LOGD("start %{public}s", AceType::TypeName(this));
     if (isHeadRenderNode_) {

@@ -35,7 +35,7 @@
 #include "core/pipeline/base/rosen_render_context.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
-//#include "core/components/text_field/on_text_changed_listener_impl.h"
+#include "core/components/text_field/on_text_changed_listener_impl.h"
 #endif
 
 namespace OHOS::Ace {
@@ -248,7 +248,8 @@ void RosenRenderTextField::PaintIcon(const Offset& offset, RenderContext& contex
 
 void RosenRenderTextField::PaintSelection(SkCanvas* canvas) const
 {
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE) {
+    if (SystemProperties::GetDeviceType() != DeviceType::PHONE &&
+        SystemProperties::GetDeviceType() != DeviceType::CAR) {
         return;
     }
     using namespace Constants;
@@ -613,14 +614,17 @@ void RosenRenderTextField::ComputeOffsetAfterLayout()
     }
 
 #if defined(ENABLE_STANDARD_INPUT)
-//    auto globalOffset = GetGlobalOffset();
-//    MiscServices::CursorInfo cursorInfo {
-//        .left = caretRect_.Left() + globalOffset.GetX(),
-//        .top = caretRect_.Top() + globalOffset.GetY(),
-//        .width = caretRect_.Width(),
-//        .height = caretRect_.Height()
-//    };
-//    MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
+    auto globalOffset = GetGlobalOffset();
+    MiscServices::CursorInfo cursorInfo {
+        .left = caretRect_.Left() + globalOffset.GetX(),
+        .top = caretRect_.Top() + globalOffset.GetY(),
+        .width = caretRect_.Width(),
+        .height = caretRect_.Height()
+    };
+    MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
+    auto value = GetEditingValue();
+    MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
+        StringUtils::Str8ToStr16(value.text), value.selection.GetStart(), value.selection.GetEnd());
 #endif
 }
 
@@ -1039,9 +1043,8 @@ int32_t RosenRenderTextField::GetCursorPositionForMoveUp()
         return 0;
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() - PreferredLineHeight();
-    return static_cast<int32_t>(
-        paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.Left(), caretRect_.Top() + verticalOffset)
-            .position - 1);
+    return static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(
+        caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset).position);
 }
 
 int32_t RosenRenderTextField::GetCursorPositionForMoveDown()
@@ -1050,9 +1053,8 @@ int32_t RosenRenderTextField::GetCursorPositionForMoveDown()
         return 0;
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() + PreferredLineHeight();
-    return static_cast<int32_t>(
-        paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.Left(), caretRect_.Top() + verticalOffset)
-            .position - 1);
+    return static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(
+        caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset).position);
 }
 
 int32_t RosenRenderTextField::GetCursorPositionForClick(const Offset& offset)

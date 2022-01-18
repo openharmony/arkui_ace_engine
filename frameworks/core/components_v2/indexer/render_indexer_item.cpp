@@ -32,7 +32,6 @@ RefPtr<RenderNode> RenderIndexerItem::Create()
 
 void RenderIndexerItem::Update(const RefPtr<Component>& component)
 {
-    LOGD("[indexer] Update RenderIndexerItem");
     RefPtr<IndexerItemComponent> itemComponent = AceType::DynamicCast<IndexerItemComponent>(component);
     if (itemComponent) {
         sectionIndex_ = itemComponent->GetSectionIndex();

@@ -109,8 +109,6 @@ public:
     std::unique_ptr<JsonValue> GetOffset() const override;
     std::string GetRect() const override;
     Rect GetParentRect() const override;
-    Rect GetParentRect(IdType TypeId) const;
-    bool IsHaveElement(IdType TypeId) const;
 
     // layout constraint
     double GetAspectRatio() const override;

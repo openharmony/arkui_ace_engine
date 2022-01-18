@@ -52,6 +52,11 @@ enum class ResourceType : uint32_t {
     RAWFILE = 30000
 };
 
+enum class ResponseType : int32_t {
+    RIGHT_CLICK = 0,
+    LONGPRESS,
+};
+
 class JSViewAbstract {
 public:
     static void SetPadding(const Dimension& value);
@@ -84,6 +89,7 @@ public:
     static void JsBackgroundImageSize(const JSCallbackInfo& info);
     static void JsBackgroundImagePosition(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
+    static void JsBindContextMenu(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
     static void JsMargin(const JSCallbackInfo& info);
@@ -106,7 +112,6 @@ public:
     static void JsGridOffset(const JSCallbackInfo& info);
     static void JsUseSizeType(const JSCallbackInfo& Info);
     static void JsHoverEffect(const JSCallbackInfo& info);
-    static void JsOnDoubleClick(const JSCallbackInfo& info);
     static void JsOnMouse(const JSCallbackInfo& info);
 
     // response region
@@ -158,7 +163,7 @@ public:
     static void SetVisibility(int value);
     static void Pop();
 
-    static void JsOnDrag(const JSCallbackInfo& info);
+    static void JsOnDragStart(const JSCallbackInfo& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);

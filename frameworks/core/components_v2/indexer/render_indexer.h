@@ -30,14 +30,14 @@
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace::V2 {
-constexpr int32_t TABLE_ANGLE = 0;
-constexpr int32_t TABLE_POSITION_X = 1;
-constexpr int32_t TABLE_POSITION_Y = 2;
-constexpr int32_t TABLE_INDEX_COUNT = 3;
-constexpr int32_t INDEXER_BUBBLE_ANIMATION_DURATION = 3000;
-constexpr double ROTATION_THRESHOLD = 90.0;
-constexpr double HALF = 0.5;
-constexpr double DOUBLE = 2.0;
+inline constexpr int32_t TABLE_ANGLE = 0;
+inline constexpr int32_t TABLE_POSITION_X = 1;
+inline constexpr int32_t TABLE_POSITION_Y = 2;
+inline constexpr int32_t TABLE_INDEX_COUNT = 3;
+inline constexpr int32_t INDEXER_BUBBLE_ANIMATION_DURATION = 3000;
+inline constexpr double ROTATION_THRESHOLD = 90.0;
+inline constexpr double HALF = 0.5;
+inline constexpr double DOUBLE = 2.0;
 
 class RenderIndexer : public RenderNode, public RotationNode {
     DECLARE_ACE_TYPE(RenderIndexer, RenderNode);
@@ -135,8 +135,6 @@ public:
     void MoveSectionWithIndexer(int32_t curSection);
 
 protected:
-    void HandleDragStart();
-    void HandleDragEnd();
     void HandleTouched(const Offset& touchPosition);
     void MoveList(int32_t index);
 
@@ -150,6 +148,7 @@ protected:
 
     void OnSelected(int32_t selected) const;
     void OnRequestPopupData(int32_t selected);
+
     bool GetBubbleRect(Rect& rect);
     bool GetPopupListRect(Rect& rect);
 
@@ -171,7 +170,6 @@ protected:
     Color color_;
 
     RefPtr<RawRecognizer> touchRecognizer_;
-    RefPtr<DragRecognizer> dragRecognizer_;
     RefPtr<TextComponent> bubbleText_;
     RefPtr<RenderBox> bubbleBox_;                   // reference of the bubble box render node
     RefPtr<RenderDisplay> bubbleDisplay_;           // reference of the bubble box render node
