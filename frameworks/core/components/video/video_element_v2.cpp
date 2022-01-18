@@ -165,6 +165,7 @@ void VideoElementV2::UpdatVideoComponent(const RefPtr<VideoComponentV2>& videoCo
         videoComponent_->SetSrc(videoComponent->GetSrc());
         videoComponent_->SetAutoPlay(videoComponent->IsAutoPlay());
         videoComponent_->SetPoster(videoComponent->GetPoster());
+        videoComponent_->SetPosterImage(videoComponent->GetPosterImage());
         videoComponent_->SetNeedControls(videoComponent->NeedControls());
         videoComponent_->SetLoop(videoComponent->IsLoop());
         videoComponent_->SetStartTime(videoComponent->GetStartTime());
