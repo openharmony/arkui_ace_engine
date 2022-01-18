@@ -467,4 +467,56 @@ void BackendDelegateImpl::OnCommand(const OHOS::AAFwk::Want &want, int startId)
         TaskExecutor::TaskType::JS);
 }
 
+bool BackendDelegateImpl::ParseFileUri(
+    const RefPtr<AssetManager>& assetManager, const std::string& fileUri, std::string& assetsFilePath)
+{
+    if (!assetManager || fileUri.empty() || (fileUri.length() > PATH_MAX)) {
+        return false;
+    }
+
+    std::string fileName;
+    std::string filePath;
+    size_t slashPos = fileUri.find_last_of("/");
+    if (slashPos == std::string::npos) {
+        fileName = fileUri;
+    } else {
+        fileName = fileUri.substr(slashPos + 1);
+        filePath = fileUri.substr(0, slashPos);
+    }
+
+    if (Framework::StartWith(filePath, "/")) {
+        filePath = filePath.substr(1);
+    }
+
+    std::vector<std::string> files;
+    assetManager->GetAssetList(filePath, files);
+
+    bool fileExist = false;
+    for (const auto& file : files) {
+        bool startWithSlash = Framework::StartWith(file, "/");
+        if ((startWithSlash && (file.substr(1) == fileName)) || (!startWithSlash && (file == fileName))) {
+            assetsFilePath = filePath + file;
+            fileExist = true;
+            break;
+        }
+    }
+
+    return fileExist;
+}
+
+bool BackendDelegateImpl::GetResourceData(const std::string& fileUri, std::vector<uint8_t>& content)
+{
+    std::string targetFilePath;
+    if (!ParseFileUri(assetManager_, fileUri, targetFilePath)) {
+        LOGE("GetResourceData parse file uri failed.");
+        return false;
+    }
+    if (!Framework::GetAssetContentAllowEmpty(assetManager_, targetFilePath, content)) {
+        LOGE("GetResourceData GetAssetContent failed.");
+        return false;
+    }
+
+    return true;
+}
+
 } // namespace OHOS::Ace::Framework

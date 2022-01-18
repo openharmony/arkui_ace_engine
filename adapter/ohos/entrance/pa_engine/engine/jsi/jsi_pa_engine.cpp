@@ -331,6 +331,93 @@ void JsiPaEngineInstance::RegisterConsoleModule()
     global->SetProperty(runtime_, "console", consoleObj);
 }
 
+std::string GetLogContent(NativeEngine* nativeEngine, NativeCallbackInfo* info)
+{
+    std::string content;
+    for (size_t i = 0; i < info->argc; ++i) {
+        if (info->argv[i]->TypeOf() != NATIVE_STRING) {
+            LOGE("argv is not NativeString");
+            continue;
+        }
+        auto nativeString = reinterpret_cast<NativeString*>(info->argv[i]->GetInterface(NativeString::INTERFACE_ID));
+        size_t bufferSize = nativeString->GetLength();
+        size_t strLength = 0;
+        char* buffer = new char[bufferSize + 1] { 0 };
+        nativeString->GetCString(buffer, bufferSize + 1, &strLength);
+        content.append(buffer);
+        delete[] buffer;
+    }
+    return content;
+}
+
+NativeValue* AppLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info, JsLogLevel level)
+{
+    // Should have at least 1 parameters.
+    if (info->argc == 0) {
+        LOGE("the arg is error");
+        return nativeEngine->CreateUndefined();
+    }
+    std::string content = GetLogContent(nativeEngine, info);
+    switch (level) {
+        case JsLogLevel::DEBUG:
+            APP_LOGD("app Log: %{public}s", content.c_str());
+            break;
+        case JsLogLevel::INFO:
+            APP_LOGI("app Log: %{public}s", content.c_str());
+            break;
+        case JsLogLevel::WARNING:
+            APP_LOGW("app Log: %{public}s", content.c_str());
+            break;
+        case JsLogLevel::ERROR:
+            APP_LOGE("app Log: %{public}s", content.c_str());
+            break;
+    }
+
+    return nativeEngine->CreateUndefined();
+}
+
+NativeValue* AppDebugLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
+{
+    return AppLogPrint(nativeEngine, info, JsLogLevel::DEBUG);
+}
+
+NativeValue* AppInfoLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
+{
+    return AppLogPrint(nativeEngine, info, JsLogLevel::INFO);
+}
+
+NativeValue* AppWarnLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
+{
+    return AppLogPrint(nativeEngine, info, JsLogLevel::WARNING);
+}
+
+NativeValue* AppErrorLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
+{
+    return AppLogPrint(nativeEngine, info, JsLogLevel::ERROR);
+}
+
+void JsiPaEngineInstance::RegisterConsoleModule(ArkNativeEngine* engine)
+{
+    ACE_SCOPED_TRACE("JsiEngineInstance::RegisterConsoleModule");
+    LOGD("JsiEngineInstance RegisterConsoleModule to nativeEngine");
+    NativeValue* global = engine->GetGlobal();
+    if (global->TypeOf() != NATIVE_OBJECT) {
+        LOGE("global is not NativeObject");
+        return;
+    }
+    auto nativeGlobal = reinterpret_cast<NativeObject*>(global->GetInterface(NativeObject::INTERFACE_ID));
+
+    // app log method
+    NativeValue* console = engine->CreateObject();
+    auto consoleObj = reinterpret_cast<NativeObject*>(console->GetInterface(NativeObject::INTERFACE_ID));
+    consoleObj->SetProperty("log", engine->CreateFunction("log", strlen("log"), AppDebugLogPrint, nullptr));
+    consoleObj->SetProperty("debug", engine->CreateFunction("debug", strlen("debug"), AppDebugLogPrint, nullptr));
+    consoleObj->SetProperty("info", engine->CreateFunction("info", strlen("info"), AppInfoLogPrint, nullptr));
+    consoleObj->SetProperty("warn", engine->CreateFunction("warn", strlen("warn"), AppWarnLogPrint, nullptr));
+    consoleObj->SetProperty("error", engine->CreateFunction("error", strlen("error"), AppErrorLogPrint, nullptr));
+    nativeGlobal->SetProperty("console", console);
+}
+
 void JsiPaEngineInstance::RegisterPaModule()
 {
     ACE_SCOPED_TRACE("JsiPaEngineInstance::RegisterAceModule");
@@ -526,6 +613,71 @@ JsiPaEngine::~JsiPaEngine()
     }
 }
 
+void JsiPaEngine::RegisterWorker()
+{
+    RegisterInitWorkerFunc();
+    RegisterAssetFunc();
+}
+
+void JsiPaEngine::RegisterInitWorkerFunc()
+{
+    auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
+    auto&& initWorkerFunc = [weak = AceType::WeakClaim(this), weakInstance](NativeEngine* nativeEngine) {
+        LOGI("WorkerCore RegisterInitWorkerFunc called");
+        auto paEngine = weak.Upgrade();
+        if (nativeEngine == nullptr) {
+            LOGE("nativeEngine is nullptr");
+            return;
+        }
+        auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
+        if (arkNativeEngine == nullptr) {
+            LOGE("arkNativeEngine is nullptr");
+            return;
+        }
+        auto instance = weakInstance.Upgrade();
+        if (instance == nullptr) {
+            LOGE("instance is nullptr");
+            return;
+        }
+
+        auto runtime = instance->GetJsRuntime();
+
+        instance->RegisterConsoleModule(arkNativeEngine);
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+        for (const auto& [key, value] : paEngine->GetExtraNativeObject()) {
+            shared_ptr<JsValue> nativeValue = runtime->NewNativePointer(value);
+            runtime->GetGlobal()->SetProperty(runtime, key, nativeValue);
+        }
+#endif
+        // load jsfwk
+        if (!arkNativeEngine->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
+            LOGE("Failed to load js framework!");
+        }
+    };
+    nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
+}
+
+void JsiPaEngine::RegisterAssetFunc()
+{
+    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
+    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content) {
+        LOGI("WorkerCore RegisterAssetFunc called");
+        auto delegate = weakDelegate.Upgrade();
+        if (delegate == nullptr) {
+            LOGE("delegate is nullptr");
+            return;
+        }
+        size_t index = uri.find_last_of(".");
+        if (index == std::string::npos) {
+            LOGE("invalid uri");
+        } else {
+            delegate->GetResourceData(uri.substr(0, index) + ".abc", content);
+        }
+    };
+    nativeEngine_->SetGetAssetFunc(assetFunc);
+}
+
 bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
 {
     ACE_SCOPED_TRACE("JsiPaEngine::Initialize");
@@ -555,6 +707,7 @@ bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     });
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
+    RegisterWorker();
     return true;
 }
 
