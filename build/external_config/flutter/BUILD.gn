@@ -435,11 +435,7 @@ template("flutter_engine_shell") {
           "$flutter_root/engine/flutter/shell/platform/ohos/ohos_surface_gl.cc",
         ]
 
-        deps +=
-            [ "//foundation/graphic/standard/prebuilts/librarys/gpu:gpu_libs" ]
-
-        include_dirs +=
-            [ "//foundation/graphic/standard/prebuilts/librarys/gpu/include" ]
+        public_deps = [ "//foundation/graphic/standard:libgl" ]
       }
       deps += [
         "//foundation/graphic/standard:libvsync_client",
