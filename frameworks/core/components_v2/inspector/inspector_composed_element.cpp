@@ -26,11 +26,14 @@
 #include "core/components/display/render_display.h"
 #include "core/components/flex/flex_item_element.h"
 #include "core/components/flex/render_flex_item.h"
+#include "core/components/popup/popup_element_v2.h"
+#include "core/components/tab_bar/tabs_element.h"
 #include "core/components/text/render_text.h"
 #include "core/components/text/text_element.h"
 #include "core/components/transform/transform_element.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_v2/inspector/tab_content_composed_element.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/composed_component.h"
@@ -608,7 +611,13 @@ std::string InspectorComposedElement::GetRect() const
 {
     std::string strRec;
     Rect rect = GetRenderRect();
-    Rect parentRect = GetParentRect();
+    Rect parentRect;
+    if (IsHaveElement(TabContentItemElement::TypeId())) {
+        parentRect = GetParentRect(TabsElement::TypeId());
+    }
+    else {
+        parentRect = GetParentRect();
+    }
     rect = rect.Constrain(parentRect);
     strRec = std::to_string(rect.Left())
                  .append(",")
@@ -628,6 +637,33 @@ Rect InspectorComposedElement::GetParentRect() const
     }
     Rect parentRect = parent->GetRenderRect();
     return parentRect;
+}
+
+Rect InspectorComposedElement::GetParentRect(IdType TypeId) const
+{
+    auto parent = GetElementParent().Upgrade();
+    while (parent) {
+        if (AceType::TypeId(parent) == TypeId) {
+            return parent->GetRenderRect();
+        }
+        parent = parent->GetElementParent().Upgrade();
+    }
+    return Rect();
+}
+
+bool InspectorComposedElement::IsHaveElement(IdType TypeId) const
+{
+    if (GetTargetTypeId() == TypeId) {
+        return true;
+    }
+    auto parent = GetElementParent().Upgrade();
+    while (parent) {
+        if (AceType::TypeId(parent) == TypeId) {
+            return true;
+        }
+        parent = parent->GetElementParent().Upgrade();
+    }
+    return false;
 }
 
 double InspectorComposedElement::GetAspectRatio() const
