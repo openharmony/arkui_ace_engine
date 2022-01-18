@@ -114,7 +114,7 @@ protected:
     int64_t textureId_ = INVALID_TEXTURE;
     Size drawSize_;   // size of draw area
     Size sourceSize_; // size of source
-#ifdef OHOS_STANDARD_SYSTEM
+#if (defined OHOS_STANDARD_SYSTEM) && (!defined ENABLE_ROSEN_BACKEND)
     ImageFit imageFit_ = ImageFit::FILL;
 #else
     ImageFit imageFit_ = ImageFit::CONTAIN;

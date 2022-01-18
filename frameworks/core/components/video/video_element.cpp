@@ -339,11 +339,12 @@ void VideoElement::PreparePlayer()
     }
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     auto videoElement = WeakClaim(this);
-    uiTaskExecutor.PostSyncTask([&videoElement] {
+    Size videoSize = Size(mediaPlayer_->GetVideoWidth(), mediaPlayer_->GetVideoHeight());
+    uiTaskExecutor.PostSyncTask([&videoElement, videoSize] {
         auto video = videoElement.Upgrade();
         if (video) {
-            video->OnPrepared(0.0, 0.0, false, 0, 0, true);
-            LOGI("Video OnPrepared");
+            LOGI("Video OnPrepared video size: %{public}s", videoSize.ToString().c_str());
+            video->OnPrepared(videoSize.Width(), videoSize.Height(), false, 0, 0, true);
         }
     });
 }
