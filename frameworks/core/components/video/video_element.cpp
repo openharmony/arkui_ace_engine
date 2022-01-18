@@ -1314,7 +1314,7 @@ const RefPtr<Component> VideoElement::CreateControl()
 const RefPtr<Component> VideoElement::CreatePoster()
 {
     RefPtr<ImageComponent> image;
-    if (IsDeclarativePara()) {
+    if (posterImage_) {
         image = posterImage_;
     } else {
         image = AceType::MakeRefPtr<ImageComponent>(poster_);
@@ -1338,7 +1338,7 @@ const RefPtr<Component> VideoElement::CreatePoster()
 const RefPtr<Component> VideoElement::CreateChild()
 {
     RefPtr<Component> child;
-    if (isInitialState_ && !poster_.empty()) {
+    if (isInitialState_ && (!poster_.empty() || posterImage_)) {
         std::list<RefPtr<Component>> columnChildren;
 #ifndef OHOS_STANDARD_SYSTEM
         columnChildren.emplace_back(AceType::MakeRefPtr<FlexItemComponent>(VIDEO_CHILD_COMMON_FLEX_GROW,
