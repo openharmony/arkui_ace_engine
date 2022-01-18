@@ -137,6 +137,8 @@ public:
 
     void PopToPage(int32_t pageId);
 
+    void RestorePopPage(const RefPtr<PageComponent>& pageComponent);
+
     bool CanPopPage();
 
     void ReplacePage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage);

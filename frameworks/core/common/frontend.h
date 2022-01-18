@@ -180,6 +180,16 @@ public:
     // navigator component call router
     virtual void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) {};
 
+    // distribute
+    virtual const std::string& RestoreRouterStack(const std::string& contentInfo)
+    {
+        return "";
+    }
+    virtual const std::string& GetContentInfo() const
+    {
+        return "";
+    }
+
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {};
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     virtual void RunNativeEngineLoop() {};

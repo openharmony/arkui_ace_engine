@@ -77,8 +77,37 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
 
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
 {
+    CommonInitialize(window, url, storage);
+    LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
+    // run page.
+    Platform::AceContainer::RunPage(
+        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
+    LOGI("Initialize UIContentImpl done.");
+}
+
+void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
+{
+    CommonInitialize(window, contentInfo, storage);
+    startUrl_ = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo);
+    if (startUrl_.empty()) {
+        LOGW("UIContent Restore start url is empty");
+    }
+    LOGI("Restore startUrl = %{public}s", startUrl_.c_str());
+    Platform::AceContainer::RunPage(
+        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
+    LOGI("Restore UIContentImpl done.");
+}
+
+const std::string& UIContentImpl::GetContentInfo() const
+{
+    LOGI("UIContent GetContentInfo");
+    return Platform::AceContainer::GetContentInfo(instanceId_);
+}
+
+void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
+{
     window_ = window;
-    startUrl_ = url;
+    startUrl_ = contentInfo;
     if (!window_) {
         LOGE("Null window, can't initialize UI content");
         return;
@@ -207,11 +236,6 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
         }
     }
 #endif
-
-    // run page.
-    Platform::AceContainer::RunPage(
-        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
-    LOGI("Initialize UIContentImpl done.");
 }
 
 void UIContentImpl::Foreground()
@@ -242,17 +266,6 @@ void UIContentImpl::Destroy()
 {
     LOGI("Destroy UIContent");
     Platform::AceContainer::DestroyContainer(instanceId_);
-}
-
-void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
-{
-    LOGI("UIContent Restore: mock %{public}s", contentInfo.c_str());
-}
-
-const std::string& UIContentImpl::GetContentInfo() const
-{
-    LOGI("UIContent GetContentInfo: mock");
-    return "contentInfo";
 }
 
 bool UIContentImpl::ProcessBackPressed()
