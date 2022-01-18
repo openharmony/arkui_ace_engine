@@ -103,6 +103,9 @@ public:
     void NotifyAppStorage(const WeakPtr<Framework::JsEngine>& jsEngineWeak,
         const std::string& key, const std::string& value);
 
+    // distribute
+    const std::string& RestoreRouterStack(const std::string& contentInfo) override;
+    const std::string& GetContentInfo() const override;
 
     // Accessibility delegate functions.
     RefPtr<Framework::AccessibilityNodeManager> GetJSAccessibilityManager() const
@@ -236,11 +239,12 @@ private:
     int32_t GenerateNextPageId();
     void RecyclePageId(int32_t pageId);
 
-    void LoadPage(int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params);
+    void LoadPage(int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params,
+        bool isRestore = false);
     void OnPageReady(
-        const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage);
+        const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage, bool isRestore);
     void FlushPageCommand(
-        const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage);
+        const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage, bool isRestore);
     void AddPageLocked(const RefPtr<JsAcePage>& page);
     void OnPrePageChange(const RefPtr<JsAcePage>& page);
     void SetCurrentPage(int32_t pageId);
@@ -250,11 +254,15 @@ private:
     void PopToPage(const std::string& url);
     int32_t OnPopPageSuccess();
     void PopPage();
+    void RestorePopPage(const RefPtr<JsAcePage>& page, const std::string& url);
 
     void PopPageTransitionListener(const TransitionEvent& event, int32_t destroyPageId);
 
     void PopToPageTransitionListener(
         const TransitionEvent& event, const std::string& url, int32_t pageId);
+
+    void RestorePageTransitionListener(
+        const TransitionEvent& event, const std::string& url, const RefPtr<JsAcePage>& page);
 
     int32_t OnClearInvisiblePagesSuccess();
     void ClearInvisiblePages();
@@ -272,7 +280,7 @@ private:
 
     int32_t GetRunningPageId() const;
     std::string GetRunningPageUrl() const;
-    int32_t GetPageIdByUrl(const std::string& url);
+    int32_t GetPageIdByUrl(const std::string& url, bool isRestore = false);
 
     void ResetStagingPage();
     void FlushAnimationTasks();

@@ -146,6 +146,10 @@ public:
     // navigator component call router
     void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) override;
 
+    // distribute
+    const std::string& RestoreRouterStack(const std::string& contentInfo) override;
+    const std::string& GetContentInfo() const override;
+
     void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data);
 
     void SetJsEngine(const RefPtr<Framework::JsEngine>& jsEngine)
