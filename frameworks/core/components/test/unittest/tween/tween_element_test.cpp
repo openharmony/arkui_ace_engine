@@ -152,7 +152,7 @@ public:
             tweenComponent_->UpdateAnimationName("test");
             g_configTweenComponent(tweenComponent_);
         }
-        auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, tweenComponent_);
+        auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, "", tweenComponent_);
 
         context_->SetupRootElement();
         context_->PushPage(pageComponent);

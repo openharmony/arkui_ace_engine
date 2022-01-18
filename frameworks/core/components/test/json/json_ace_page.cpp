@@ -32,7 +32,7 @@ RefPtr<PageComponent> JsonAcePage::BuildPage(const std::string& content)
     RefPtr<PageTransitionComponent> transitionStack = AceType::MakeRefPtr<PageTransitionComponent>();
     transitionStack->SetContent(pageContent);
 
-    RefPtr<PageComponent> page = AceType::MakeRefPtr<PageComponent>(GetPageId(), transitionStack);
+    RefPtr<PageComponent> page = AceType::MakeRefPtr<PageComponent>(GetPageId(), "JsonPage", transitionStack);
     return page;
 }
 

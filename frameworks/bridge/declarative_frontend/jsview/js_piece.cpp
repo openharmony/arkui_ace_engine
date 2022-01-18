@@ -128,6 +128,7 @@ void JSPiece::JsOnClose(const JSCallbackInfo& info)
         EventMarker clickEventId(
             [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc)](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("Piece.onClose");
                 func->Execute();
             });
         auto pieceComponent =

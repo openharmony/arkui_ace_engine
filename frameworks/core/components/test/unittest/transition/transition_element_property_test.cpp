@@ -157,7 +157,7 @@ public:
         if (g_configTransitionComponent) {
             g_configTransitionComponent(transitionComponent_);
         }
-        auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, pageComponent_);
+        auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, "", pageComponent_);
 
         context_->SetupRootElement();
         context_->PushPage(pageComponent);

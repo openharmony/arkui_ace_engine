@@ -109,6 +109,7 @@ void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
             EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE(execCtx);
                 LOGD("onComplete send");
+                ACE_SCORING_EVENT("Plugin.onComplete");
                 func->Execute();
             });
         plugin->SetOnCompleteEventId(onCompleteId);
@@ -128,6 +129,7 @@ void JSPlugin::JsOnError(const JSCallbackInfo& info)
                 JAVASCRIPT_EXECUTION_SCOPE(execCtx);
                 std::vector<std::string> keys = { "errcode", "msg" };
                 LOGD("onError send");
+                ACE_SCORING_EVENT("Plugin.onError");
                 func->Execute(keys, param);
             });
 

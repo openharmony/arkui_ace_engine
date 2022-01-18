@@ -14,6 +14,7 @@
  */
 
 #include "core/components/page/page_element.h"
+
 #include "base/log/dump_log.h"
 #include "core/common/frontend.h"
 #include "core/common/text_field_manager.h"
@@ -21,10 +22,14 @@
 
 namespace OHOS::Ace {
 
-PageElement::PageElement(int32_t pageId, const ComposeId& id) : ComposedElement(id), pageId_(pageId) {}
+PageElement::PageElement(int32_t pageId, const std::string& pageUrl, const ComposeId& id)
+    : ComposedElement(id), pageId_(pageId), pageUrl_(pageUrl)
+{}
 
-PageElement::PageElement(int32_t pageId, const ComposeId& cardComposeId, const ComposeId& id)
-    : ComposedElement(id), pageId_(pageId), cardComposeId_(cardComposeId) {}
+PageElement::PageElement(
+    int32_t pageId, const std::string& pageUrl, const ComposeId& cardComposeId, const ComposeId& id)
+    : ComposedElement(id), pageId_(pageId), pageUrl_(pageUrl), cardComposeId_(cardComposeId)
+{}
 
 PageElement::~PageElement()
 {
@@ -100,8 +105,7 @@ const PageElement::CardTransitionMap& PageElement::GetCardTransitionMap() const
     return cardTransitionMap_;
 }
 
-void PageElement::AddGeometryTransition(const std::string& id, WeakPtr<BoxElement>& boxElement,
-    AnimationOption& option)
+void PageElement::AddGeometryTransition(const std::string& id, WeakPtr<BoxElement>& boxElement, AnimationOption& option)
 {
     if (geometryTransitionMap_.find(id) == geometryTransitionMap_.end()) {
         GeometryTransitionInfo sharedInfo;
@@ -110,8 +114,7 @@ void PageElement::AddGeometryTransition(const std::string& id, WeakPtr<BoxElemen
         sharedInfo.isNeedCreate = false;
         geometryTransitionMap_.emplace(id, sharedInfo);
     } else {
-        if (geometryTransitionMap_[id].appearElement != boxElement &&
-            !geometryTransitionMap_[id].isNeedCreate) {
+        if (geometryTransitionMap_[id].appearElement != boxElement && !geometryTransitionMap_[id].isNeedCreate) {
             geometryTransitionMap_[id].disappearElement = geometryTransitionMap_[id].appearElement;
             geometryTransitionMap_[id].appearElement = boxElement;
             geometryTransitionMap_[id].sharedAnimationOption = option;
