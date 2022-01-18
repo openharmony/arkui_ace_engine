@@ -34,6 +34,7 @@ RefPtr<OHOS::Ace::SingleChild> JSPanHandler::CreateComponent(const JSCallbackInf
                     LOGE("Error processing event. Not an instance of DragStartInfo");
                     return;
                 }
+                ACE_SCORING_EVENT("PanHandler.onDragStart");
                 func->Execute(*dragStartInfo);
             },
             "dragStart", 0);
@@ -50,6 +51,7 @@ RefPtr<OHOS::Ace::SingleChild> JSPanHandler::CreateComponent(const JSCallbackInf
                     LOGE("Error processing event. Not an instance of DragUpdateInfo");
                     return;
                 }
+                ACE_SCORING_EVENT("PanHandler.onDragUpdate");
                 func->Execute(*dragUpdateInfo);
             },
             "dragUpdate", 0);
@@ -66,6 +68,7 @@ RefPtr<OHOS::Ace::SingleChild> JSPanHandler::CreateComponent(const JSCallbackInf
                     LOGE("Error processing event. Not an instance of DragEndInfo");
                     return;
                 }
+                ACE_SCORING_EVENT("PanHandler.onDragEnd");
                 func->Execute(*dragEndInfo);
             },
             "dragEnd", 0);
@@ -76,6 +79,7 @@ RefPtr<OHOS::Ace::SingleChild> JSPanHandler::CreateComponent(const JSCallbackInf
         auto dragCancelId = EventMarker(
             [execCtx = args.GetExecutionContext(), func = std::move(jsOnCancelFunc_)](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("PanHandler.onDragCancel");
                 func->Execute();
             }, "dragCancel", 0);
         gestureComponent->SetOnVerticalDragCancelId(dragCancelId);

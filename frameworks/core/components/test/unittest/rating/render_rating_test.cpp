@@ -141,7 +141,7 @@ void RatingComponentTest::CreateAndRenderRating(UpdateRatingCallback updateRatin
         updateRating(rating);
     }
 
-    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, rating);
+    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, "", rating);
 
     context_->SetupRootElement();
     context_->PushPage(pageComponent);

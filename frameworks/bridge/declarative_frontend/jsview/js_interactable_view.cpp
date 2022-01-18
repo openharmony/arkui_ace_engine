@@ -48,6 +48,7 @@ void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
                     impl->UpdateEventInfo(*info);
                 }
                 auto touchInfo = TypeInfoHelper::DynamicCast<TouchEventInfo>(info);
+                ACE_SCORING_EVENT("onTouch");
                 func->Execute(*touchInfo);
             },
             "onTouch");
@@ -64,6 +65,7 @@ void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
             [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyFunc)](BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 auto keyInfo = TypeInfoHelper::DynamicCast<KeyEventInfo>(info);
+                ACE_SCORING_EVENT("onKey");
                 func->Execute(*keyInfo);
             },
             "onKey", 0);
@@ -79,6 +81,7 @@ void JSInteractableView::JsOnHover(const JSCallbackInfo& args)
         RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(args[0]));
         auto onHoverId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onHover");
             func->Execute(info);
         };
         auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -107,6 +110,7 @@ void JSInteractableView::JsOnDelete(const JSCallbackInfo& info)
         auto onDeleteId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsOnDeleteFunc)]() {
             LOGD("onDelete callback");
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onDelete");
             func->Execute();
         });
         auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
@@ -153,6 +157,7 @@ EventMarker JSInteractableView::GetClickEventMarker(const JSCallbackInfo& info)
             if (impl) {
                 impl->UpdateEventInfo(newInfo);
             }
+            ACE_SCORING_EVENT("onClick");
             func->Execute(newInfo);
         });
     return onClickId;
@@ -175,6 +180,7 @@ RefPtr<Gesture> JSInteractableView::GetTapGesture(
             if (impl) {
                 impl->UpdateEventInfo(info);
             }
+            ACE_SCORING_EVENT("onClick");
             func->Execute(info);
         });
     return tapGesture;
@@ -204,6 +210,7 @@ void JSInteractableView::JsOnAppear(const JSCallbackInfo& info)
         auto onAppearId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             LOGI("About to call JsOnAppear method on js");
+            ACE_SCORING_EVENT("onAppear");
             func->Execute();
         });
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
@@ -219,6 +226,7 @@ void JSInteractableView::JsOnDisAppear(const JSCallbackInfo& info)
         auto onDisAppearId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             LOGD("Start to call JsOnDisAppear method on js");
+            ACE_SCORING_EVENT("onDisAppear");
             func->Execute();
         });
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
@@ -267,6 +275,7 @@ EventMarker JSInteractableView::GetEventMarker(const JSCallbackInfo& info, const
     auto eventMarker =
         EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onClick");
             func->Execute(keys, param);
         });
     return eventMarker;

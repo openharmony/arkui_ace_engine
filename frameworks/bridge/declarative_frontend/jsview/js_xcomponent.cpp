@@ -116,8 +116,10 @@ EventMarker JSXComponent::GetEventMarker(const JSCallbackInfo& info, const std::
             std::string::size_type posLoad = param.find("load");
             // load callback method, need to return a napi instance
             if (posLoad != std::string::npos) {
+                ACE_SCORING_EVENT("XComponent.onLoad");
                 func->ExecuteNew(keys, param);
             } else {
+                ACE_SCORING_EVENT("XComponent.onLoad");
                 func->Execute(keys, param);
             }
         });

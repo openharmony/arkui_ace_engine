@@ -92,7 +92,7 @@ void TestTouchEventConvert(const RefPtr<PipelineContext>& context, double expect
     };
     BackEndEventManager<void(const TouchEventInfo&)>::GetInstance().BindBackendEvent(marker, callback);
     touchListener->SetOnTouchDownId(marker);
-    auto page = AceType::MakeRefPtr<PageComponent>(0, touchListener);
+    auto page = AceType::MakeRefPtr<PageComponent>(0, "", touchListener);
     context->PushPage(page);
     context->OnVsyncEvent(0, 0);
     context->OnSurfaceDensityChanged(TEST_DENSITY);

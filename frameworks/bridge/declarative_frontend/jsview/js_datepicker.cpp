@@ -105,6 +105,7 @@ void JSDatePicker::OnChange(const JSCallbackInfo& info)
         EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
+            ACE_SCORING_EVENT("datePicker.onChange");
             func->Execute(keys, info);
         });
     if (datePicker) {
@@ -254,6 +255,7 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
             EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second", "status"};
+                ACE_SCORING_EVENT("DatePicker.show");
                 func->Execute(keys, info);
             });
         datePicker->SetDialogResult(resultId);

@@ -139,4 +139,9 @@ void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
     mnc_ = mnc;
 }
 
+bool SystemProperties::IsScoringEnabled(const std::string& name)
+{
+    return false;
+}
+
 } // namespace OHOS::Ace

@@ -78,6 +78,19 @@ int SystemProperties::GetArkProperties()
     return system::GetIntParameter<int>("persist.ark.properties", -1);
 }
 
+bool SystemProperties::IsScoringEnabled(const std::string& name)
+{
+    if (name.empty()) {
+        return false;
+    }
+    std::string filePath = "/etc/" + name;
+    if (access(filePath.c_str(), F_OK) == 0) {
+        return true;
+    }
+    std::string prop = system::GetParameter("persist.ace.trace.scoringtool", "");
+    return prop == name;
+}
+
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;

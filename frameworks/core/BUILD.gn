@@ -271,6 +271,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/qrcode:ace_core_components_qrcode_$platform",
       "$ace_root/frameworks/core/components/refresh:ace_core_components_refresh_$platform",
       "$ace_root/frameworks/core/components/root:ace_core_components_root_$platform",
+      "$ace_root/frameworks/core/components/scoring:ace_core_components_scoring_$platform",
       "$ace_root/frameworks/core/components/scroll:ace_core_components_scroll_$platform",
       "$ace_root/frameworks/core/components/scroll_bar:ace_core_components_scroll_bar_$platform",
       "$ace_root/frameworks/core/components/search:ace_core_components_search_$platform",

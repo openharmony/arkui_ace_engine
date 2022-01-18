@@ -266,6 +266,7 @@ void JSCalendar::JsOnSelectedChange(const JSCallbackInfo& info)
             [execCtx = info.GetExecutionContext(), func = std::move(selectedChangeFuc)](const std::string& info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 std::vector<std::string> keys = { "year", "month", "day" };
+                ACE_SCORING_EVENT("Calendar.onSelectedChange");
                 func->Execute(keys, info);
             });
         component->SetSelectedChangeEvent(onSelectedChangeId);
@@ -281,6 +282,7 @@ void JSCalendar::JsOnRequestData(const JSCallbackInfo& info)
             [execCtx = info.GetExecutionContext(), func = std::move(requestDataFuc)](const std::string& info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 std::vector<std::string> keys = { "year", "month", "currentMonth", "currentYear", "monthState" };
+                ACE_SCORING_EVENT("Calendar.onRequestData");
                 func->Execute(keys, info);
             });
         component->SetRequestDataEvent(onRequestDataId);

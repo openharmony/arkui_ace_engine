@@ -305,13 +305,18 @@ RefPtr<AccessibilityNode> InspectorComposedComponent::CreateAccessibilityNode(
         return nullptr;
     }
 
+    auto node = accessibilityManager->CreateAccessibilityNode(
+        InspectorComposedComponent::GetEtsTag(tag), nodeId, parentNodeId, itemIndex);
+    return node;
+}
+
+std::string InspectorComposedComponent::GetEtsTag(const std::string& tag)
+{
     auto iter = COMPONENT_TAG_TO_ETS_TAG_MAP.find(tag);
     if (iter == COMPONENT_TAG_TO_ETS_TAG_MAP.end()) {
-        auto node = accessibilityManager->CreateAccessibilityNode(tag, nodeId, parentNodeId, itemIndex);
-        return node;
+        return tag;
     }
-    auto node = accessibilityManager->CreateAccessibilityNode(iter->second, nodeId, parentNodeId, itemIndex);
-    return node;
+    return iter->second;
 }
 
 } // namespace OHOS::Ace::V2

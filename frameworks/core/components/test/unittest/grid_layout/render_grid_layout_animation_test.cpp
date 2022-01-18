@@ -175,7 +175,7 @@ bool RenderGridLayoutAnimationTest::CreateGrid(bool isVertical, bool isSpringRec
         renderNode_->AddChild(item);
     }
 
-    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, gridComponent);
+    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, "", gridComponent);
 
     mockContext_->SetupRootElement();
     mockContext_->PushPage(pageComponent);

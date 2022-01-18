@@ -48,6 +48,7 @@ void JSTabs::SetOnChange(const JSCallbackInfo& args)
                 LOGE("HandleChangeEvent TabsInfo == nullptr");
                 return;
             }
+            ACE_SCORING_EVENT("Tabs.onChange");
             func->Execute(*TabsInfo);
         });
         auto component = AceType::DynamicCast<TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
