@@ -846,9 +846,7 @@ template("ace_skia_core") {
         ]
       } else {
         if (is_standard_system) {
-          deps = [
-            "//foundation/graphic/standard/prebuilts/librarys/gpu:gpu_libs",
-          ]
+          public_deps = [ "//foundation/graphic/standard:libgl" ]
         } else {
           aosp_deps = [
             "shared_library:libEGL",
@@ -1132,10 +1130,6 @@ foreach(item, ace_platforms) {
 config("ace_gpu_config") {
   visibility = [ ":*" ]
   include_dirs = [ "$flutter_root/skia" ]
-  if (is_standard_system) {
-    include_dirs +=
-        [ "//foundation/graphic/standard/prebuilts/librarys/gpu/include" ]
-  }
   cflags_cc = ace_skia_common_ccflags
   cflags_cc += [ "-Wno-extra-semi" ]
   cflags = ace_skia_common_cflags
@@ -1455,9 +1449,7 @@ template("ace_gpu") {
       if (!defined(config.disable_gpu) || !config.disable_gpu) {
         # Ohos or Android platform
         if (is_standard_system) {
-          deps = [
-            "//foundation/graphic/standard/prebuilts/librarys/gpu:gpu_libs",
-          ]
+          public_deps = [ "//foundation/graphic/standard:libgl" ]
         } else {
           aosp_deps = [
             "shared_library:libEGL",
