@@ -153,9 +153,6 @@ public:
     static panda::Local<panda::FunctionRef> New(JsiFunctionCallback func);
 
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiFunction)
-
-private:
-    const panda::ecmascript::EcmaVM* vm_;
 };
 
 class JsiObjTemplate : public JsiObject {

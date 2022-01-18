@@ -221,22 +221,22 @@ void JsiObject::SetPropertyObject(const char* prop, JsiRef<JsiValue> value) cons
 JsiFunction::JsiFunction() {}
 JsiFunction::JsiFunction(panda::Local<panda::FunctionRef> val) : JsiType(val)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
-    vm_ = runtime->GetEcmaVm();
 }
 
 JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<JsiValue> argv[]) const
 {
-    LocalScope scope(vm_);
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto vm = runtime->GetEcmaVm();
+    LocalScope scope(vm);
     std::vector<panda::Local<panda::JSValueRef>> arguments;
     for (int i = 0; i < argc; ++i) {
         arguments.emplace_back(argv[i].Get().GetHandle());
     }
     auto thisObj = thisVal.Get().GetHandle();
-    auto result = GetHandle()->Call(vm_, thisObj, arguments.data(), argc);
-    Local<ObjectRef> exception = JSNApi::GetUncaughtException(vm_);
+    auto result = GetHandle()->Call(vm, thisObj, arguments.data(), argc);
+    Local<ObjectRef> exception = JSNApi::GetUncaughtException(vm);
     if (!exception.IsEmpty() && !exception->IsHole()) {
-        result = JSValueRef::Undefined(vm_);
+        result = JSValueRef::Undefined(vm);
     }
     return JsiRef<JsiValue>::Make(result);
 }
