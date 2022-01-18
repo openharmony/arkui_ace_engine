@@ -161,7 +161,7 @@ public:
         auto transitionComponent = AceType::MakeRefPtr<PageTransitionComponent>();
         transitionComponent->SetSeparation(true);
         transitionComponent->SetContent(collaboration);
-        return AceType::MakeRefPtr<PageComponent>(g_pageId, transitionComponent);
+        return AceType::MakeRefPtr<PageComponent>(g_pageId, "", transitionComponent);
     }
 
 protected:

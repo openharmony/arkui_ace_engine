@@ -235,6 +235,7 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
             [execCtx = args.GetExecutionContext(), func = std::move(jsLoadSuccFunc)](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageSuccessEvent>(info);
+                ACE_SCORING_EVENT("Image.onComplete");
                 func->Execute(*eventInfo);
             }));
     } else {
@@ -253,6 +254,7 @@ void JSImage::OnError(const JSCallbackInfo& args)
             [execCtx = args.GetExecutionContext(), func = std::move(jsLoadFailFunc)](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageFailEvent>(info);
+                ACE_SCORING_EVENT("Image.onError");
                 func->Execute(*eventInfo);
             }));
     } else {
@@ -270,6 +272,7 @@ void JSImage::OnFinish(const JSCallbackInfo& info)
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto eventMarker = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Image.onFinish");
         func->Execute();
     });
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

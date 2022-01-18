@@ -89,10 +89,11 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     }
     LOGI("Initialize UIContentImpl start.");
     static std::once_flag onceFlag;
-    std::call_once(onceFlag, []() {
+    std::call_once(onceFlag, [context = context_]() {
         LOGI("Initialize for current process.");
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+        AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
     });
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());

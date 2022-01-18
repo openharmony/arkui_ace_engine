@@ -163,6 +163,7 @@ void JSPageTransition::JsHandlerOnEnter(const JSCallbackInfo& info)
     auto onEnterHandler = [execCtx = info.GetExecutionContext(), func = std::move(function)](
                               RouteType type, const float& progress) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("PageTransition.onEnter");
         func->Execute(type, progress);
     };
 
@@ -186,6 +187,7 @@ void JSPageTransition::JsHandlerOnExit(const JSCallbackInfo& info)
     auto onExitHandler = [execCtx = info.GetExecutionContext(), func = std::move(function)](
                              RouteType type, const float& progress) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("PageTransition.onExit");
         func->Execute(type, progress);
     };
 

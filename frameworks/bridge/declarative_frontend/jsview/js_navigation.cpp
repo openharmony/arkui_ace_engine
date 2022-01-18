@@ -55,8 +55,12 @@ void ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<ToolBarIt
         if (itemActionValue->IsFunction()) {
             auto menuItemActionFunc =
                 AceType::MakeRefPtr<JsEventFunction<BaseEventInfo, 0>>(JSRef<JSFunc>::Cast(itemActionValue), nullptr);
-            toolBarItem->action =
-                EventMarker([func = std::move(menuItemActionFunc)]() { func->Execute(); }, "toolBarItemClick", 0);
+            toolBarItem->action = EventMarker(
+                [func = std::move(menuItemActionFunc)]() {
+                    ACE_SCORING_EVENT("Navigation.toolBarItemClick");
+                    func->Execute();
+                },
+                "toolBarItemClick", 0);
         }
         items.push_back(toolBarItem);
     }
@@ -110,6 +114,7 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         if (builderObject->IsFunction()) {
             ScopedViewStackProcessor builderViewStackProcessor;
             JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+            ACE_SCORING_EVENT("Navigation.title.builder");
             jsBuilderFunc.Execute();
             navigationContainer->GetDeclaration()->customTitle = ViewStackProcessor::GetInstance()->Finish();
         }
@@ -228,7 +233,10 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
         if (builderObject->IsFunction()) {
             ScopedViewStackProcessor builderViewStackProcessor;
             JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
-            jsBuilderFunc.Execute();
+            {
+                ACE_SCORING_EVENT("Navigation.menu.builder");
+                jsBuilderFunc.Execute();
+            }
             navigationContainer->GetDeclaration()->customMenus = ViewStackProcessor::GetInstance()->Finish();
         }
     } else {
@@ -262,6 +270,7 @@ void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
                 LOGE("HandleChangeEvent eventInfo == nullptr");
                 return;
             }
+            ACE_SCORING_EVENT("Navigation.onTitleModeChanged");
             func->Execute(*eventInfo);
         });
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();

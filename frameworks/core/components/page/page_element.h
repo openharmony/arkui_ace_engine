@@ -43,13 +43,18 @@ public:
         bool isNeedCreate;
     };
     using GeometryTransitionMap = std::unordered_map<std::string, GeometryTransitionInfo>;
-    PageElement(int32_t pageId, const ComposeId& id);
-    PageElement(int32_t pageId, const ComposeId& cardComposeId, const ComposeId& id);
+    PageElement(int32_t pageId, const std::string& pageUrl, const ComposeId& id);
+    PageElement(int32_t pageId, const std::string& pageUrl, const ComposeId& cardComposeId, const ComposeId& id);
     ~PageElement();
 
     int32_t GetPageId()
     {
         return pageId_;
+    }
+
+    std::string GetPageUrl() const
+    {
+        return pageUrl_;
     }
 
     void RemoveSharedTransition(const ShareId& shareId);
@@ -92,6 +97,7 @@ protected:
 private:
     int32_t callbackId_ = 0;
     int32_t pageId_ = -1;
+    std::string pageUrl_;
     ComposeId cardComposeId_;
     SharedTransitionMap sharedTransitionElementMap_;
     HiddenCallbackMap hiddenCallbackMap_;

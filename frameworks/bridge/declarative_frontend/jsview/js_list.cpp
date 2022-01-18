@@ -264,7 +264,10 @@ void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
         }
         // use another VSP instance while executing the builder function
         ScopedViewStackProcessor builderViewStackProcessor;
-        builderFunc->Execute();
+        {
+            ACE_SCORING_EVENT("List.onItemDragStart.builder");
+            builderFunc->Execute();
+        }
         RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
         if (!customComponent) {
             LOGE("Custom component is null.");
@@ -291,6 +294,7 @@ void JSList::ItemDragEnterCallback(const JSCallbackInfo& info)
     auto onItemDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
                                 const ItemDragInfo& dragInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("List.onItemDragEnter");
         func->ItemDragEnterExecute(dragInfo);
     };
     auto component = AceType::DynamicCast<V2::ListComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -312,6 +316,7 @@ void JSList::ItemDragMoveCallback(const JSCallbackInfo& info)
     auto onItemDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
                             const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("List.onItemDragMove");
         func->ItemDragMoveExecute(dragInfo, itemIndex, insertIndex);
     };
     auto component = AceType::DynamicCast<V2::ListComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -333,6 +338,7 @@ void JSList::ItemDragLeaveCallback(const JSCallbackInfo& info)
     auto onItemDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
                                 const ItemDragInfo& dragInfo, int32_t itemIndex) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("List.onItemDragLeave");
         func->ItemDragLeaveExecute(dragInfo, itemIndex);
     };
     auto component = AceType::DynamicCast<V2::ListComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -354,6 +360,7 @@ void JSList::ItemDropCallback(const JSCallbackInfo& info)
     auto onItemDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
                         const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("List.onItemDrop");
         func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
     };
     auto component = AceType::DynamicCast<V2::ListComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

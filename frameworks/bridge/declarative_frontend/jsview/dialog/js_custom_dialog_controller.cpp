@@ -130,6 +130,7 @@ void JSCustomDialogController::ShowDialog(const JSCallbackInfo& info)
     dialogProperties_.customComponent = customDialog_;
     EventMarker cancelMarker([cancelCallback = jsCancelFunction_]() {
         if (cancelCallback) {
+            ACE_SCORING_EVENT("CustomDialog.cancel");
             cancelCallback->Execute();
         }
     });
@@ -210,7 +211,10 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         LOGE("Builder of CustomDialog is null.");
         return;
     }
-    jsBuilderFunction_->Execute();
+    {
+        ACE_SCORING_EVENT("CustomDialog.builder");
+        jsBuilderFunction_->Execute();
+    }
     customDialog_ = ViewStackProcessor::GetInstance()->Finish();
 
     if (!customDialog_) {

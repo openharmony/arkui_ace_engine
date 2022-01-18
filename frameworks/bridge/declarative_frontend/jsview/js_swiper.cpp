@@ -367,6 +367,7 @@ void JSSwiper::SetOnChange(const JSCallbackInfo& args)
                 LOGE("HandleChangeEvent swiperInfo == nullptr");
                 return;
             }
+            ACE_SCORING_EVENT("Swiper.OnChange");
             func->Execute(*swiperInfo);
         });
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
@@ -496,6 +497,7 @@ void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
         auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Swiper.finishAnimation");
             func->Execute();
         });
         if (controller_) {

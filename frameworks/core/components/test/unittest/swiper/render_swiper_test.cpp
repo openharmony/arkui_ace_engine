@@ -274,7 +274,7 @@ void SwiperComponentTest::CreateAndRenderSwiper(uint32_t childCount, UpdateSwipe
         updateSwiper(swiperComponent);
     }
 
-    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, swiperComponent);
+    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, "", swiperComponent);
 
     context_->SetupRootElement();
     context_->PushPage(pageComponent);

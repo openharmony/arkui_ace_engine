@@ -284,6 +284,7 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
                 if (impl) {
                     impl->UpdateEventInfo(newInfo);
                 }
+                ACE_SCORING_EVENT("Button.onClick");
                 func->Execute(newInfo);
             });
 

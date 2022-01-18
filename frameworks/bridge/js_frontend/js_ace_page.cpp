@@ -77,9 +77,9 @@ RefPtr<PageComponent> JsAcePage::BuildPage(const std::string& url)
 
     if (container_.Upgrade()) {
         if (component_) {
-            return AceType::MakeRefPtr<PageComponent>(pageId, component_);
+            return AceType::MakeRefPtr<PageComponent>(pageId, url, component_);
         } else if (rootComposedStack) {
-            return AceType::MakeRefPtr<PageComponent>(pageId, rootComposedStack);
+            return AceType::MakeRefPtr<PageComponent>(pageId, url, rootComposedStack);
         }
     }
     if (!pageTransition_) {
@@ -108,9 +108,10 @@ RefPtr<PageComponent> JsAcePage::BuildPage(const std::string& url)
     const std::string& cardComposeId = GetCardId();
     if (!cardComposeId.empty()) {
         return AceType::MakeRefPtr<PageComponent>(
-            pageId, cardComposeId, isDeclarative ? std::move(pageTransition_) : pageTransition_);
+            pageId, url, cardComposeId, isDeclarative ? std::move(pageTransition_) : pageTransition_);
     }
-    return AceType::MakeRefPtr<PageComponent>(pageId, isDeclarative ? std::move(pageTransition_) : pageTransition_);
+    return AceType::MakeRefPtr<PageComponent>(
+        pageId, url, isDeclarative ? std::move(pageTransition_) : pageTransition_);
 }
 
 std::string JsAcePage::GetCardId() const

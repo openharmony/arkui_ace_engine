@@ -347,6 +347,7 @@ void JSGesture::JsHandlerOnGestureEvent(JSGestureEvent action, const JSCallbackI
             if (impl) {
                 impl->UpdateEventInfo(info);
             }
+            ACE_SCORING_EVENT("Gesture.onCancel");
             func->Execute(info);
         };
         gesture->SetOnActionCancelId(onActionCancelFunc);
@@ -359,6 +360,7 @@ void JSGesture::JsHandlerOnGestureEvent(JSGestureEvent action, const JSCallbackI
         if (impl) {
             impl->UpdateEventInfo(info);
         }
+        ACE_SCORING_EVENT("Gesture.onActionCancel");
         func->Execute(info);
     };
 

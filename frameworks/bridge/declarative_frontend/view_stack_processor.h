@@ -162,6 +162,8 @@ private:
     void UpdateTopComponentProps(const RefPtr<Component>& component);
 
     void CreateInspectorComposedComponent(const std::string& inspectorTag);
+    void CreateScoringComponent(const std::string& tag);
+    RefPtr<Component> GetScoringComponent() const;
 
     // Singleton instance
     static thread_local std::unique_ptr<ViewStackProcessor> instance;
@@ -182,6 +184,8 @@ private:
     VisualState visualState_ = VisualState::NOTSET;
 
     static thread_local int32_t composedElementId_;
+
+    bool isScoringEnable_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ViewStackProcessor);
 };

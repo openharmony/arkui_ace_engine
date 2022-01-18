@@ -26,6 +26,7 @@
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/image/image_component.h"
 #include "core/components/menu/menu_component.h"
+#include "core/components/scoring/scoring_component.h"
 #include "core/components/stepper/stepper_item_component_v2.h"
 #include "core/components/text/text_component.h"
 #include "core/components/text_field/text_field_component.h"
@@ -364,7 +365,9 @@ void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomV
         name = composedComponent->GetName();
     }
     auto tag = component->GetInspectorTag();
-    CreateInspectorComposedComponent(tag.empty() ? (name.empty() ? AceType::TypeName(component) : name) : tag);
+    tag = tag.empty() ? (name.empty() ? AceType::TypeName(component) : name) : tag;
+    CreateInspectorComposedComponent(tag);
+    CreateScoringComponent(tag);
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component) &&
@@ -523,6 +526,11 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
         components.emplace_back(composedComponent);
     }
 
+    auto scoringComponent = GetScoringComponent();
+    if (scoringComponent) {
+        components.emplace_back(scoringComponent);
+    }
+
     std::string componentNames[] = { "flexItem", "display", "transform", "touch", "pan_guesture", "click_guesture",
         "focusable", "coverage", "box", "shared_transition", "mouse" };
     for (auto& name : componentNames) {
@@ -563,8 +571,9 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
             Component::MergeRSNode(components);
         }
     } else if (!components.empty() && (AceType::InstanceOf<TextureComponent>(mainComponent) ||
-        AceType::InstanceOf<BoxComponent>(mainComponent) || AceType::InstanceOf<TextFieldComponent>(mainComponent) ||
-        AceType::InstanceOf<FormComponent>(mainComponent))) {
+                                          AceType::InstanceOf<BoxComponent>(mainComponent) ||
+                                          AceType::InstanceOf<TextFieldComponent>(mainComponent) ||
+                                          AceType::InstanceOf<FormComponent>(mainComponent))) {
         Component::MergeRSNode(components);
         Component::MergeRSNode(mainComponent);
         components.emplace_back(mainComponent);
@@ -738,6 +747,19 @@ RefPtr<V2::InspectorComposedComponent> ViewStackProcessor::GetInspectorComposedC
     return nullptr;
 }
 
+RefPtr<Component> ViewStackProcessor::GetScoringComponent() const
+{
+    if (componentsStack_.empty()) {
+        return nullptr;
+    }
+    auto& wrappingComponentsMap = componentsStack_.top();
+    auto iter = wrappingComponentsMap.find("scoring");
+    if (iter != wrappingComponentsMap.end()) {
+        return iter->second;
+    }
+    return nullptr;
+}
+
 void ViewStackProcessor::CreateInspectorComposedComponent(const std::string& inspectorTag)
 {
     if (V2::InspectorComposedComponent::HasInspectorFinished(inspectorTag)) {
@@ -745,6 +767,24 @@ void ViewStackProcessor::CreateInspectorComposedComponent(const std::string& ins
             AceType::MakeRefPtr<V2::InspectorComposedComponent>(GenerateId() + inspectorTag, inspectorTag);
         auto& wrappingComponentsMap = componentsStack_.top();
         wrappingComponentsMap.emplace("inspector", composedComponent);
+    }
+}
+
+void ViewStackProcessor::CreateScoringComponent(const std::string& tag)
+{
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, [this]() {
+        auto name = AceApplicationInfo::GetInstance().GetProcessName().empty()
+                        ? AceApplicationInfo::GetInstance().GetPackageName()
+                        : AceApplicationInfo::GetInstance().GetProcessName();
+        isScoringEnable_ = SystemProperties::IsScoringEnabled(name);
+    });
+
+    if (isScoringEnable_) {
+        auto component =
+            AceType::MakeRefPtr<ScoringComponent>(V2::InspectorComposedComponent::GetEtsTag(tag), viewKey_);
+        auto& wrappingComponentsMap = componentsStack_.top();
+        wrappingComponentsMap.emplace("scoring", component);
     }
 }
 

@@ -24,8 +24,9 @@ class PageComponent : public ComposedComponent {
     DECLARE_ACE_TYPE(PageComponent, ComposedComponent);
 
 public:
-    PageComponent(int32_t pageId, const RefPtr<Component>& child);
-    PageComponent(int32_t pageId, const ComposeId& cardComposeId, const RefPtr<Component>& child);
+    PageComponent(int32_t pageId, const std::string& pageUrl, const RefPtr<Component>& child);
+    PageComponent(
+        int32_t pageId, const std::string& pageUrl, const ComposeId& cardComposeId, const RefPtr<Component>& child);
     ~PageComponent() override = default;
 
     RefPtr<Element> CreateElement() override;
@@ -37,6 +38,7 @@ public:
 
 private:
     int32_t pageId_ = -1;
+    std::string pageUrl_;
     ComposeId cardComposeId_;
 };
 

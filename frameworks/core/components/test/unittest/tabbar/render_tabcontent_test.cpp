@@ -230,7 +230,7 @@ void RenderTabContentTest::CreateAndRenderBarAndContent(UpdateTabBarCallback upd
 
     RefPtr<ColumnComponent> column =
         AceType::MakeRefPtr<ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::FLEX_START, children);
-    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, column);
+    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, "", column);
 
     context_->SetupRootElement();
     context_->PushPage(pageComponent);
@@ -254,7 +254,7 @@ void RenderTabContentTest::CreateAndRenderContent(UpdateTabContentCallback callb
         callback(tabContentComponent);
     }
 
-    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, tabContentComponent);
+    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, "", tabContentComponent);
 
     context_->SetupRootElement();
     context_->PushPage(pageComponent);
@@ -291,7 +291,7 @@ void RenderTabContentTest::CreateBarAndContent(
 
     RefPtr<ColumnComponent> column =
         AceType::MakeRefPtr<ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::FLEX_START, children);
-    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, column);
+    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, "", column);
 
     context_->SetupRootElement();
     context_->PushPage(pageComponent);
