@@ -33,6 +33,9 @@ public:
     static void Destructor(JSWebController* webController);
 
     void Reload() const;
+    void LoadUrl(const JSCallbackInfo& args);
+    void ExecuteTypeScript(const JSCallbackInfo& args);
+    void LoadDataWithBaseUrl(const JSCallbackInfo& args);
 
     const RefPtr<WebController>& GetController() const
     {

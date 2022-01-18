@@ -34,12 +34,56 @@ class WebController : public virtual AceType {
     DECLARE_ACE_TYPE(WebController, AceType);
 
 public:
+    using LoadUrlImpl = std::function<void(std::string)>;
+    void LoadUrl(std::string url) const
+    {
+        if (loadUrlImpl_) {
+            loadUrlImpl_(url);
+        }
+    }
+
+    void SetLoadUrltImpl(LoadUrlImpl && loadUrlImpl)
+    {
+        loadUrlImpl_ = std::move(loadUrlImpl);
+    }
+
+    using ExecuteTypeScriptImpl = std::function<void(std::string)>;
+    void ExecuteTypeScript(std::string jscode) const
+    {
+        if (executeTypeScriptImpl_) {
+            executeTypeScriptImpl_(jscode);
+        }
+    }
+
+    void SetExecuteTypeScriptImpl(ExecuteTypeScriptImpl && executeTypeScriptImpl)
+    {
+        executeTypeScriptImpl_ = std::move(executeTypeScriptImpl);
+    }
+
+    using LoadDataWithBaseUrlImpl = std::function<void(
+        std::string, std::string, std::string, std::string, std::string)>;
+    void LoadDataWithBaseUrl(std::string baseUrl, std::string data, std::string mimeType, std::string encoding,
+        std::string historyUrl) const
+    {
+        if (loadDataWithBaseUrlImpl_) {
+            loadDataWithBaseUrlImpl_(baseUrl, data, mimeType, encoding, historyUrl);
+        }
+    }
+
+    void SetLoadDataWithBaseUrlImpl(LoadDataWithBaseUrlImpl && loadDataWithBaseUrlImpl)
+    {
+        loadDataWithBaseUrlImpl_ = std::move(loadDataWithBaseUrlImpl);
+    }
+
     void Reload() const
     {
         declaration_->webMethod.Reload();
     }
 private:
     RefPtr<WebDeclaration> declaration_;
+    LoadUrlImpl loadUrlImpl_;
+    ExecuteTypeScriptImpl executeTypeScriptImpl_;
+    LoadDataWithBaseUrlImpl loadDataWithBaseUrlImpl_;
 };
 
 // A component can show HTML5 webpages.
@@ -104,6 +148,16 @@ public:
         return declaration_->GetPageFinishedEventId();
     }
 
+    void SetRequestFocusEventId(const EventMarker& requestFocusEventId)
+    {
+        declaration_->SetRequestFocusEventId(requestFocusEventId);
+    }
+
+    const EventMarker& GetRequestFocusEventId() const
+    {
+        return declaration_->GetRequestFocusEventId();
+    }
+
     void SetPageErrorEventId(const EventMarker& pageErrorEventId)
     {
         declaration_->SetPageErrorEventId(pageErrorEventId);
@@ -141,6 +195,36 @@ public:
         webController_ = webController;
     }
 
+    bool GetJsEnabled() const
+    {
+        return isJsEnabled_;
+    }
+
+    void SetJsEnabled(bool isEnabled)
+    {
+        isJsEnabled_ = isEnabled;
+    }
+
+    bool GetContentAccessEnabled() const
+    {
+        return isContentAccessEnabled_;
+    }
+
+    void SetContentAccessEnabled(bool isEnabled)
+    {
+        isContentAccessEnabled_ = isEnabled;
+    }
+
+    bool GetFileAccessEnabled() const
+    {
+        return isFileAccessEnabled_;
+    }
+
+    void SetFileAccessEnabled(bool isEnabled)
+    {
+        isFileAccessEnabled_ = isEnabled;
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -149,6 +233,9 @@ private:
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebController> webController_;
     std::string type_;
+    bool isJsEnabled_ = true;
+    bool isContentAccessEnabled_ = true;
+    bool isFileAccessEnabled_ = true;
 };
 
 } // namespace OHOS::Ace

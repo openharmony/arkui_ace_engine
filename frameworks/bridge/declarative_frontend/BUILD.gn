@@ -230,19 +230,19 @@ template("declarative_js_engine") {
       ]
     }
 
-    if (defined(config.advance_components_support) &&
-        config.advance_components_support) {
-      sources += [
-        "jsview/js_web.cpp",
-        "jsview/js_web_controller.cpp",
-      ]
-    }
-
     if (defined(config.xcomponent_components_support) &&
         config.xcomponent_components_support) {
       sources += [
         "jsview/js_xcomponent.cpp",
         "jsview/js_xcomponent_controller.cpp",
+      ]
+    }
+
+    if (defined(config.web_components_support) &&
+        config.web_components_support) {
+      sources += [
+        "jsview/js_web.cpp",
+        "jsview/js_web_controller.cpp",
       ]
     }
 

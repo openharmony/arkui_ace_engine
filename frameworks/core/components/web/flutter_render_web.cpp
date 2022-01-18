@@ -14,10 +14,6 @@
  */
 
 #include "core/components/web/flutter_render_web.h"
-
-#include "base/log/ace_trace.h"
-#include "base/log/dump_log.h"
-
 namespace OHOS::Ace {
 
 using namespace Flutter;
@@ -27,21 +23,19 @@ void FlutterRenderWeb::PerformLayout()
     RenderWeb::PerformLayout();
 }
 
-void FlutterRenderWeb::DumpTree(int32_t depth)
+void FlutterRenderWeb::DumpTree(int32_t depth) {}
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+void FlutterRenderWeb::OnPaintFinish()
 {
-    auto children = GetChildren();
-
-    if (DumpLog::GetInstance().GetDumpFile() > 0) {
-        DumpLog::GetInstance().AddDesc("sourceSize:", " width = ", GetLayoutSize().Width(),
-            " height = ", GetLayoutSize().Height());
-        DumpLog::GetInstance().AddDesc("globalPosition:", "x = ", GetGlobalOffset().GetX(),
-            " y = ", GetGlobalOffset().GetY());
-        DumpLog::GetInstance().Print(depth, AceType::TypeName(this), children.size());
+    if (!delegate_) {
+        return;
     }
-
-    for (const auto& item : children) {
-        item->DumpTree(depth + 1);
+    if (!isCreateWebView_) {
+        isCreateWebView_ = true;
+        delegate_->InitWebViewWithWindow();
     }
 }
+#endif
 
 } // namespace OHOS::Ace
