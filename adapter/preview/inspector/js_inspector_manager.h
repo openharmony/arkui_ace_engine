@@ -41,6 +41,7 @@ private:
     void OperateComponent(const std::string& attrsJson);
     RefPtr<Component> GetNewComponentWithJsCode(const std::unique_ptr<JsonValue>& root);
     RefPtr<V2::InspectorComposedElement> GetInspectorElementById(NodeId nodeId);
+    const WeakPtr<Element>& GetRootElement();
     void GetNodeJSONStrMap();
     void GetAttrsAndStyles(std::unique_ptr<JsonValue>& jsonNode, const RefPtr<AccessibilityNode>& node);
     void GetAttrsAndStylesV2(std::unique_ptr<JsonValue>& jsonNode, const RefPtr<AccessibilityNode>& node);
