@@ -127,7 +127,7 @@ public:
         if (g_configImageAnimator) {
             g_configImageAnimator(imageAnimatorComponent_);
         }
-        auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, imageAnimatorComponent_);
+        auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, "", imageAnimatorComponent_);
         context_->SetupRootElement();
         context_->PushPage(pageComponent);
 

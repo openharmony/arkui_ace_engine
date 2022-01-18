@@ -58,6 +58,7 @@ RefPtr<OHOS::Ace::Component> JSView::CreateComponent()
             return;
         }
         if (jsView->element_.Invalid()) {
+            ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
             jsView->jsViewFunction_->ExecuteAppear();
         }
         jsView->element_ = element;
@@ -71,7 +72,10 @@ RefPtr<OHOS::Ace::Component> JSView::CreateComponent()
                     if (!jsView || !jsView->jsViewFunction_) {
                         return nullptr;
                     }
-                    jsView->jsViewFunction_->ExecuteTransition();
+                    {
+                        ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Transition");
+                        jsView->jsViewFunction_->ExecuteTransition();
+                    }
                     return jsView->BuildPageTransitionComponent();
                 };
                 element->SetPageTransitionFunction(std::move(pageTransitionFunction));
@@ -103,9 +107,18 @@ RefPtr<OHOS::Ace::Component> JSView::InternalRender(const RefPtr<Component>& par
         LOGE("JSView: InternalRender jsViewFunction_ error");
         return nullptr;
     }
-    jsViewFunction_->ExecuteAboutToRender();
-    jsViewFunction_->ExecuteRender();
-    jsViewFunction_->ExecuteOnRenderDone();
+    {
+        ACE_SCORING_EVENT("Component[" + viewId_ + "].AboutToRender");
+        jsViewFunction_->ExecuteAboutToRender();
+        }
+    {
+        ACE_SCORING_EVENT("Component[" + viewId_ + "].Build");
+        jsViewFunction_->ExecuteRender();
+        }
+    {
+        ACE_SCORING_EVENT("Component[" + viewId_ + "].OnRenderDone");
+        jsViewFunction_->ExecuteOnRenderDone();
+        }
     CleanUpAbandonedChild();
     jsViewFunction_->Destroy(this);
     auto buildComponent = ViewStackProcessor::GetInstance()->Finish();
@@ -131,8 +144,14 @@ void JSView::Destroy(JSView* parentCustomView)
 {
     LOGD("JSView::Destroy start");
     DestroyChild(parentCustomView);
-    jsViewFunction_->ExecuteDisappear();
-    jsViewFunction_->ExecuteAboutToBeDeleted();
+    {
+        ACE_SCORING_EVENT("Component[" + viewId_ + "].Disappear");
+        jsViewFunction_->ExecuteDisappear();
+    }
+    {
+        ACE_SCORING_EVENT("Component[" + viewId_ + "].AboutToBeDeleted");
+        jsViewFunction_->ExecuteAboutToBeDeleted();
+    }
     LOGD("JSView::Destroy end");
 }
 

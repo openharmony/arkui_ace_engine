@@ -284,6 +284,7 @@ void JSSlidingPanel::SetOnSizeChange(const JSCallbackInfo& args)
                     LOGE("HandleSizeChangeEvent, sizeChange == nullptr");
                     return;
                 }
+                ACE_SCORING_EVENT("SlidingPanel.OnSizeChange");
                 func->Execute(*sizeChange);
             });
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();

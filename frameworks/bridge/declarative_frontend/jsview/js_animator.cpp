@@ -459,6 +459,7 @@ void JSAnimator::OnFrame(const JSCallbackInfo& info)
     auto OnFrameEvent = [execCtx = info.GetExecutionContext(), func = std::move(function)](
         const float& progress) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Animator.onFrame");
         func->Execute(progress);
     };
     auto page = GetCurrentPage();
@@ -479,6 +480,7 @@ EventMarker JSAnimator::GetEventMarker(const JSCallbackInfo& info)
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto eventMarker = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Animator.onClick");
         func->Execute();
     });
     return eventMarker;

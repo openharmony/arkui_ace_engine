@@ -58,6 +58,7 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto readyEvent_ = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Canvas.onReady");
         func->Execute();
     });
     auto container = Container::Current();

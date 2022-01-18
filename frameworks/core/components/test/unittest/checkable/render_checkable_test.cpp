@@ -232,7 +232,7 @@ void CheckableComponentTest::CreateCheckboxAndRender(UpdateCheckboxCallback upda
         updateCheckable(checkboxComponent);
     }
 
-    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, checkboxComponent);
+    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, "", checkboxComponent);
 
     context_->SetupRootElement();
     context_->PushPage(pageComponent);
@@ -250,7 +250,7 @@ void CheckableComponentTest::CreateSwitchAndRender(UpdateSwitchCallback updateCh
         updateCheckable(switchComponent);
     }
 
-    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, switchComponent);
+    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, "", switchComponent);
 
     context_->SetupRootElement();
     context_->PushPage(pageComponent);
@@ -462,7 +462,7 @@ void CheckableComponentTest::TestRadioChangedEvent(bool clickStatusOn)
 
     RefPtr<RowComponent> row =
         AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::FLEX_START, children);
-    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, row);
+    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, "", row);
     context_->SetTimeProvider([] { return g_timeStamp + 10 * MICROSEC_TO_NANOSEC; });
     context_->SetupRootElement();
     context_->PushPage(pageComponent);

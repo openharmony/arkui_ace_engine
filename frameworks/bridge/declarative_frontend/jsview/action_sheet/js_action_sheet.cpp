@@ -61,6 +61,7 @@ ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
         tapGesture->SetOnActionId(
             [execCtx = args.GetExecutionContext(), func = std::move(actionFunc)](const GestureEvent& info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("SheetInfo.action");
                 func->Execute();
                 // Close dialog when click sheet.
                 auto container = Container::Current();
@@ -120,6 +121,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         auto cancelFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(cancelValue));
         EventMarker cancelId([execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("ActionSheet.cancel");
             func->Execute();
         });
         properties.callbacks.try_emplace("cancel", cancelId);
@@ -142,6 +144,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
                 auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
                 EventMarker actionId([execCtx = args.GetExecutionContext(), func = std::move(actionFunc)]() {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    ACE_SCORING_EVENT("ActionSheet.confirm.action");
                     func->Execute();
                 });
                 properties.primaryId = actionId;

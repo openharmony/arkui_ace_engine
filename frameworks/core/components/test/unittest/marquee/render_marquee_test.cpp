@@ -82,7 +82,7 @@ protected:
 void PrepareRender(const RefPtr<PipelineContext>& context, const RefPtr<MarqueeComponent>& component)
 {
     g_runningNano = 0;
-    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, component);
+    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, "", component);
     context->SetTimeProvider([] { return g_runningNano; });
     context->SetupRootElement();
     context->PushPage(pageComponent);

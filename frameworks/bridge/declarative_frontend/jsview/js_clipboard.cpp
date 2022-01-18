@@ -47,6 +47,7 @@ void JSClipboard::Get(const JSCallbackInfo& info)
         auto function = [execCtx = info.GetExecutionContext(), callback](const std::string& str) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto func = std::move(callback);
+            ACE_SCORING_EVENT("clipboard.get");
             func->Execute(str);
         };
         clipboard->GetData(function);

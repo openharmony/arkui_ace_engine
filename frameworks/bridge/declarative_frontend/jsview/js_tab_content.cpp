@@ -102,6 +102,7 @@ RefPtr<Component> JSTabContent::ProcessTabBarBuilderFunction(
 {
     ScopedViewStackProcessor builderViewStackProcessor;
     JsFunction jsBuilderFunc(builderFunc);
+    ACE_SCORING_EVENT("TabContent.tabBarBuilder");
     jsBuilderFunc.Execute();
     RefPtr<Component> builderGeneratedRootComponent = ViewStackProcessor::GetInstance()->Finish();
     return builderGeneratedRootComponent;

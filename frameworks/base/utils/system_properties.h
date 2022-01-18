@@ -224,6 +224,8 @@ public:
 
     static int GetArkProperties();
 
+    static bool IsScoringEnabled(const std::string& name);
+
 private:
     static bool traceEnabled_;
     static bool accessibilityEnabled_;

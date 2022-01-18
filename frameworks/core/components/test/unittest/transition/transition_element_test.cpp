@@ -740,7 +740,7 @@ public:
         if (g_configPushTransition) {
             g_configPushTransition(transitionComponent);
         }
-        auto pageComponent = AceType::MakeRefPtr<PageComponent>(++g_pageId, transitionComponent);
+        auto pageComponent = AceType::MakeRefPtr<PageComponent>(++g_pageId, "", transitionComponent);
         LOGD("end create push page.");
         return AceType::DynamicCast<Component>(pageComponent);
     }
@@ -765,7 +765,7 @@ public:
         if (g_configPushTransition) {
             g_configPushTransition(transitionComponent);
         }
-        auto pageComponent = AceType::MakeRefPtr<PageComponent>(g_pageId, transitionComponent);
+        auto pageComponent = AceType::MakeRefPtr<PageComponent>(g_pageId, "", transitionComponent);
         return AceType::DynamicCast<Component>(pageComponent);
     }
 
