@@ -30,8 +30,7 @@ std::unique_ptr<AceEngine> g_aceEngine;
 
 AceEngine::AceEngine()
 {
-    // Watch dog thread(anr) can not exit when app stop.
-    // watchDog_ = AceType::MakeRefPtr<WatchDog>();
+    watchDog_ = AceType::MakeRefPtr<WatchDog>();
 }
 
 AceEngine& AceEngine::Get()
