@@ -25,6 +25,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/image/render_image.h"
+#include "core/gestures/click_recognizer.h"
 #include "core/event/axis_event.h"
 #include "core/gestures/raw_recognizer.h"
 
@@ -270,7 +271,7 @@ protected:
 private:
     void UpdateBackDecoration(const RefPtr<Decoration>& newDecoration);
     void UpdateFrontDecoration(const RefPtr<Decoration>& newDecoration);
-
+    void HandleRemoteMessage(const ClickInfo& clickInfo);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     void CalculateScale(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size);
     void CalculateRotate(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size);
@@ -309,8 +310,8 @@ private:
     Size selectedItemSize_;
     size_t selectedIndex_ = DEFAULT_INDEX;
     size_t insertIndex_ = DEFAULT_INDEX;
+    std::function<void(const std::shared_ptr<ClickInfo>&)> remoteMessageEvent_;
 }; // class RenderBox
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_RENDER_BOX_H

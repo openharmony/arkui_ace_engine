@@ -25,6 +25,7 @@ struct RequestPluginInfo {
     std::string bundleName;
     std::string abilityName;
     std::string moduleName;
+    std::string source;
     int32_t dimension = -1;
     bool allowUpate = true;
     Dimension width;
@@ -34,7 +35,7 @@ struct RequestPluginInfo {
     std::string ToString() const
     {
         std::stringstream paramStream;
-        paramStream << bundleName << abilityName << moduleName << pluginName << dimension << index;
+        paramStream << bundleName << abilityName << moduleName << pluginName << source << dimension << index;
         return paramStream.str();
     }
 };

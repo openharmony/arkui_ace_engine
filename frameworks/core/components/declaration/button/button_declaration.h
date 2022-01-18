@@ -299,6 +299,12 @@ public:
         return event.clickEventId;
     }
 
+    const EventMarker& GetRemoteMessageEventId() const
+    {
+        auto& event = static_cast<ButtonEvent&>(GetEvent(EventTag::SPECIALIZED_REMOTE_MESSAGE_EVENT));
+        return event.clickEventId;
+    }
+
     const RefPtr<ButtonProgressController> GetButtonController() const
     {
         return buttonController_;
@@ -517,6 +523,12 @@ public:
     void SetClickedEventId(const EventMarker& eventId)
     {
         auto& event = MaybeResetEvent<ButtonEvent>(EventTag::SPECIALIZED_EVENT);
+        event.clickEventId = eventId;
+    }
+
+    void SetRemoteMessageEventId(const EventMarker& eventId)
+    {
+        auto& event = MaybeResetEvent<ButtonEvent>(EventTag::SPECIALIZED_REMOTE_MESSAGE_EVENT);
         event.clickEventId = eventId;
     }
 

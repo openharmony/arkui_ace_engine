@@ -168,6 +168,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("onItemDragLeave", &JSGrid::JsOnGridDragLeave);
     JSClass<JSGrid>::StaticMethod("onItemDragStart", &JSGrid::JsOnGridDragStart);
     JSClass<JSGrid>::StaticMethod("onItemDrop", &JSGrid::JsOnGridDrop);
+    JSClass<JSGrid>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSGrid>::Inherit<JSContainerBase>();
     JSClass<JSGrid>::Inherit<JSViewAbstract>();
     JSClass<JSGrid>::Bind<>(globalObj);

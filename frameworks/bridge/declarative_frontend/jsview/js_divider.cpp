@@ -110,6 +110,7 @@ void JSDivider::JSBind(BindingTarget globalObj)
     JSClass<JSDivider>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSDivider>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSDivider>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSDivider>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
     JSClass<JSDivider>::Inherit<JSViewAbstract>();
     JSClass<JSDivider>::Bind<>(globalObj);

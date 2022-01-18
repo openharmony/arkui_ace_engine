@@ -63,6 +63,8 @@ public:
     const RefPtr<TextDeclaration>& GetDeclaration() const;
     void SetDeclaration(const RefPtr<TextDeclaration>& declaration);
     Dimension GetDeclarationHeight() const;
+
+    void SetRemoteMessageEvent(const EventMarker& eventId);
 private:
     RefPtr<TextDeclaration> declaration_;
 };

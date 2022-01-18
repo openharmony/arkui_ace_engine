@@ -14,7 +14,7 @@
  */
 
 #include "gtest/gtest.h"
-
+#include "base/i18n/localization.h"
 #include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/frontend.h"
 #define private public
@@ -31,7 +31,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-const std::string PATH = "/data/accounts/account_0/applications/com.example.plugin/com.example.plugin/";
+const std::string PATH = "/data/accounts/account_0/applications/com.example.provide01/com.example.provide01/";
 } // namespace
 class PluginSubContainerTest : public testing::Test {
 public:
@@ -289,5 +289,114 @@ HWTEST_F(PluginSubContainerTest, PluginSubContainerSetAssetManager001, TestSize.
     pluginSubContainer->frontend_ = AceType::MakeRefPtr<PluginFrontend>();
     RefPtr<FlutterAssetManager> flutterAssetManager = pluginSubContainer->SetAssetManager(PATH, "plugincomponent1");
     EXPECT_TRUE(flutterAssetManager != nullptr);
+}
+
+/**
+ * @tc.name: PluginSubContaineRunPlugin001
+ * @tc.desc: Verify the RunPlugin Interface of PluginSubContainer work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PluginSubContainerTest, PluginSubContaineRunPlugin001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. SetLocale.
+    */
+    Localization::GetInstance()->SetLocale("en", "US", "", "", "en-US");
+
+    /**
+     * @tc.steps: step2. Build a PluginSubContainer.
+     */
+    RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
+    auto pipelineContext = PluginSubContainerTest::GetPipelineContext(pluginFrontend);
+    RefPtr <PluginSubContainer> pluginSubContainer = Referenced::MakeRefPtr<PluginSubContainer>(pipelineContext);
+    RefPtr<PluginElement> pluginElement = AceType::MakeRefPtr<PluginElement>();
+    pluginElement->SetRenderNode(pluginElement->CreateRenderNode());
+    pluginElement->pluginSubContainer_ = pluginSubContainer;
+    pluginSubContainer->SetPluginElement(pluginElement);
+    RefPtr<PluginComponent> mountPoint = AceType::MakeRefPtr<PluginComponent>();
+    pluginSubContainer->SetPluginComponet(mountPoint);
+
+    /**
+     * @tc.steps: step3. Initialize.
+     * @tc.expected: step3. Initialize success.
+     */
+    pluginSubContainer->Initialize();
+    EXPECT_TRUE(pluginSubContainer->frontend_ != nullptr);
+    /**
+     * @tc.steps: step4. RunPlugin.
+     * @tc.expected: step4. RunPlugin success.
+     */
+    pluginSubContainer->RunPlugin(PATH, "newui", "", "data");
+}
+
+/**
+ * @tc.name: PluginSubContaineRunPlugin002
+ * @tc.desc: Verify the RunPlugin Interface of PluginSubContainer work fail because could not get plugin element.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PluginSubContainerTest, PluginSubContaineRunPlugin002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. SetLocale.
+    */
+    Localization::GetInstance()->SetLocale("en", "US", "", "", "en-US");
+
+    /**
+     * @tc.steps: step2. Build a PluginSubContainer.
+     */
+    RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
+    auto pipelineContext = PluginSubContainerTest::GetPipelineContext(pluginFrontend);
+    RefPtr <PluginSubContainer> pluginSubContainer = Referenced::MakeRefPtr<PluginSubContainer>(pipelineContext);
+
+    /**
+     * @tc.steps: step3. Initialize.
+     * @tc.expected: step3. Initialize success.
+     */
+    pluginSubContainer->Initialize();
+    EXPECT_TRUE(pluginSubContainer->frontend_ != nullptr);
+
+    /**
+     * @tc.steps: step4. RunPlugin.
+     * @tc.expected: step4. RunPlugin fail.
+     */
+    pluginSubContainer->RunPlugin(PATH, "newui", "", "data");
+}
+
+/**
+ * @tc.name: PluginSubContaineRunPlugin003
+ * @tc.desc: Verify the RunPlugin Interface of PluginSubContainer work fail because could not get render node
+ * @tc.type: FUNC
+ */
+HWTEST_F(PluginSubContainerTest, PluginSubContaineRunPlugin003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. SetLocale.
+    */
+    Localization::GetInstance()->SetLocale("en", "US", "", "", "en-US");
+
+    /**
+     * @tc.steps: step2. Build a PluginSubContainer.
+     */
+    RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
+    auto pipelineContext = PluginSubContainerTest::GetPipelineContext(pluginFrontend);
+    RefPtr <PluginSubContainer> pluginSubContainer = Referenced::MakeRefPtr<PluginSubContainer>(pipelineContext);
+    RefPtr<PluginElement> pluginElement = AceType::MakeRefPtr<PluginElement>();
+    pluginElement->pluginSubContainer_ = pluginSubContainer;
+    pluginSubContainer->SetPluginElement(pluginElement);
+    RefPtr<PluginComponent> mountPoint = AceType::MakeRefPtr<PluginComponent>();
+    pluginSubContainer->SetPluginComponet(mountPoint);
+
+    /**
+     * @tc.steps: step3. Initialize.
+     * @tc.expected: step3. Initialize success.
+     */
+    pluginSubContainer->Initialize();
+    EXPECT_TRUE(pluginSubContainer->frontend_ != nullptr);
+
+    /**
+     * @tc.steps: step4. RunPlugin.
+     * @tc.expected: step4. RunPlugin fail.
+     */
+    pluginSubContainer->RunPlugin(PATH, "newui", "", "data");
 }
 } // namespace OHOS::Ace

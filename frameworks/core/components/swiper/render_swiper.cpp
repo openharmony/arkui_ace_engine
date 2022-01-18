@@ -164,6 +164,8 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
         catchMode_ = clickId.GetCatchMode();
     }
     clickEvent_ = AceAsyncEvent<void(const std::shared_ptr<ClickInfo>&)>::Create(clickId, context_);
+    remoteMessageEvent_ = AceAsyncEvent<void(const std::shared_ptr<ClickInfo>&)>::Create(
+        swiper->GetRemoteMessageEventId(), context_);
     RegisterChangeEndListener(COMPONENT_CHANGE_END_LISTENER_KEY, swiper->GetChangeEndListener());
     show_ = swiper->IsShow();
     axis_ = swiper->GetAxis();
@@ -415,6 +417,12 @@ void RenderSwiper::InitRecognizer(bool catchMode)
             auto client = weak.Upgrade();
             if (client) {
                 client->HandleClick(info);
+            }
+        });
+        clickRecognizer_->SetRemoteMessage([weak](const ClickInfo& info) {
+            auto client = weak.Upgrade();
+            if (client) {
+                client->HandleRemoteMessage(info);
             }
         });
         static const int32_t bubbleModeVersion = 6;
@@ -755,6 +763,13 @@ void RenderSwiper::HandleClick(const ClickInfo& clickInfo)
         } else if (clickPoint.GetY() > itemRect.Bottom()) {
             IndicatorSwipeNext();
         }
+    }
+}
+
+void RenderSwiper::HandleRemoteMessage(const ClickInfo& clickInfo)
+{
+    if (remoteMessageEvent_) {
+        remoteMessageEvent_(std::make_shared<ClickInfo>(clickInfo));
     }
 }
 

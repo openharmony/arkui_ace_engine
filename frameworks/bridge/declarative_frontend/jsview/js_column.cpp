@@ -118,6 +118,7 @@ void JSColumn::JSBind(BindingTarget globalObj)
     JSClass<JSColumn>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSColumn>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSColumn>::StaticMethod("onPan", &JSInteractableView::JsOnPan);
+    JSClass<JSColumn>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSColumn>::Inherit<JSContainerBase>();
     JSClass<JSColumn>::Inherit<JSViewAbstract>();
     JSClass<JSColumn>::Bind<>(globalObj);

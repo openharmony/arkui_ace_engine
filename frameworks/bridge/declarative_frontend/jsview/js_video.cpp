@@ -292,6 +292,7 @@ void JSVideo::JSBind(BindingTarget globalObj)
     JSClass<JSVideo>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSVideo>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSVideo>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSVideo>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
     JSClass<JSVideo>::Inherit<JSViewAbstract>();
     // override method

@@ -80,6 +80,17 @@ void ClickRecognizer::OnAccepted()
         onClick_(info);
     }
 
+    if (remoteMessage_) {
+        TouchPoint touchPoint = {};
+        if (!touchPoints_.empty()) {
+            touchPoint = touchPoints_.begin()->second;
+        }
+
+        ClickInfo info(touchPoint.id);
+        info.SetTimeStamp(touchPoint.time);
+        info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(touchPoint.GetOffset() - coordinateOffset_);
+        remoteMessage_(info);
+    }
     SetFingerList(touchPoints_, coordinateOffset_, fingerList_);
     SendCallbackMsg(onAction_);
     Reset();

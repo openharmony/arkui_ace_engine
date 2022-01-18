@@ -77,8 +77,8 @@ public:
             const std::string& data, const std::string& extraData) override;
         void OnRequestCallBack(const AAFwk::Want& want, const std::string& name,  const std::string& data) override;
         void OnReturnRequest(const AAFwk::Want& want, const std::string& source,  const std::string& data,
-             const std::string& extraData) override;
-
+            const std::string& extraData) override;
+    
     private:
         std::mutex mutex_;
         std::map<std::shared_ptr<PluginComponentCallBack>, CallBackType> callbackVec_;

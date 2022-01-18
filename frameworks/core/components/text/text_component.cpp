@@ -146,6 +146,11 @@ void TextComponent::SetOnClick(const EventMarker& onClick)
     declaration_->SetClickEvent(onClick);
 }
 
+void TextComponent::SetRemoteMessageEvent(const EventMarker& eventId)
+{
+    declaration_->SetRemoteMessageEvent(eventId);
+}
+
 void TextComponent::SetDeclaration(const RefPtr<TextDeclaration>& declaration)
 {
     if (declaration) {

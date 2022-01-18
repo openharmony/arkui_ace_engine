@@ -43,6 +43,7 @@ public:
     void SetIsShow(bool isShow);
 
     void SetOnClick(const EventMarker& onClick);
+    void SetRemoteMessageEventId(const EventMarker& eventId);
 
     bool HasNewStyle() const
     {

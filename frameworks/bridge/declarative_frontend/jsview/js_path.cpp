@@ -93,6 +93,7 @@ void JSPath::JSBind(BindingTarget globalObj)
     JSClass<JSPath>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSPath>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSPath>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSPath>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
     JSClass<JSPath>::Inherit<JSShapeAbstract>();
     JSClass<JSPath>::Bind(globalObj, JSPath::ConstructorCallback, JSPath::DestructorCallback);

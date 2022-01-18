@@ -405,6 +405,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("onError", &JSImage::OnError);
     JSClass<JSImage>::StaticMethod("onFinish", &JSImage::OnFinish);
     JSClass<JSImage>::StaticMethod("syncLoad", &JSImage::SetSyncLoad);
+    JSClass<JSImage>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSImage>::Inherit<JSViewAbstract>();
     // override method
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);

@@ -133,6 +133,7 @@ protected:
 private:
     void HandleTouchEvent(GestureType type, const Offset& touchPosition);
     void HandleClick(const ClickInfo& info);
+    void HandleRemoteMessage(const ClickInfo& info);
     void HandleLongPress(const Offset& longPressPosition);
     EventMarker GetEventMarker(int32_t position, GestureType type);
     void FireEvent(const EventMarker& marker);

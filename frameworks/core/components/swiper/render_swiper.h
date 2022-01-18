@@ -358,6 +358,7 @@ private:
     void HandleTouchUp(const TouchEventInfo& info);
     void HandleTouchMove(const TouchEventInfo& info);
     void HandleClick(const ClickInfo& clickInfo);
+    void HandleRemoteMessage(const ClickInfo& clickInfo);
     void HandleDragStart(const DragStartInfo& info);
     void HandleDragUpdate(const DragUpdateInfo& info);
     void HandleDragEnd(const DragEndInfo& info);
@@ -480,6 +481,7 @@ private:
     std::function<void()> animationFinishEvent_;
     std::function<void(const std::string&)> rotationEvent_;
     std::function<void(const std::shared_ptr<ClickInfo>&)> clickEvent_;
+    std::function<void(const std::shared_ptr<ClickInfo>&)> remoteMessageEvent_;
 
     double duration_ = 0.0;
     double prevItemOffset_ = 0.0;

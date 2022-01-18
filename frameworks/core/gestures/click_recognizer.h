@@ -54,6 +54,11 @@ public:
         onClick_ = onClick;
     }
 
+    void SetRemoteMessage(const ClickCallback& remoteMessage)
+    {
+        remoteMessage_ = remoteMessage;
+    }
+
     void SetUseCatchMode(bool useCatchMode)
     {
         useCatchMode_ = useCatchMode;
@@ -83,6 +88,7 @@ private:
     TimeStamp time_;
     Offset focusPoint_;
     ClickCallback onClick_;
+    ClickCallback remoteMessage_;
     bool useCatchMode_ = true;
     WeakPtr<PipelineContext> context_;
     CancelableCallback<void()> fingerDeadlineTimer_;

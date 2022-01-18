@@ -75,6 +75,7 @@ void PluginSubContainer::Initialize()
     auto jsEngine = loader->CreateJsEngine(instanceId_);
     if (!jsEngine) {
         LOGE("PluginSubContainer::Initialize:jsEngine is nullptr");
+        return;
     }
     jsEngine->AddExtraNativeObject("ability", PluginManager::GetInstance().GetAceAbility());
 
@@ -150,13 +151,14 @@ void PluginSubContainer::UpdateSurfaceSize()
 }
 
 void PluginSubContainer::RunPlugin(
-    const int64_t id, const std::string& path, const std::string& module, const std::string& data)
+    const std::string& path, const std::string& module, const std::string& source, const std::string& data)
 {
     frontend_->ResetPageLoadState();
     auto flutterAssetManager = SetAssetManager(path, module);
 
     auto&& window = std::make_unique<PluginWindow>(outSidePipelineContext_);
-    pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(std::move(window), taskExecutor_, assetManager_, frontend_);
+    pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
+        std::move(window), taskExecutor_, assetManager_, frontend_);
 
     density_ = outSidePipelineContext_.Upgrade()->GetDensity();
     UpdateRootElmentSize();
@@ -200,7 +202,7 @@ void PluginSubContainer::RunPlugin(
     }
     pipelineContext_->SetDrawDelegate(pluginRender->GetDrawDelegate());
 
-    frontend_->RunPage(0, "", data);
+    frontend_->RunPage(0, source, data);
 }
 
 void PluginSubContainer::SetPluginComponentTheme(
@@ -267,6 +269,7 @@ RefPtr<FlutterAssetManager> PluginSubContainer::SetAssetManager(const std::strin
         std::vector<std::string> basePaths;
         basePaths.push_back(temp1);
         basePaths.push_back(temp2);
+        basePaths.push_back("");
 
         if (assetProvider->Initialize(path, basePaths)) {
             LOGD("push plugin asset provider to queue.");

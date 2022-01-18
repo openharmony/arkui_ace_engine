@@ -171,6 +171,11 @@ const EventMarker& ButtonComponent::GetClickedEventId() const
     return declaration_->GetClickedEventId();
 }
 
+const EventMarker& ButtonComponent::GetRemoteMessageEventId() const
+{
+    return declaration_->GetRemoteMessageEventId();
+}
+
 RefPtr<ButtonProgressController> ButtonComponent::GetButtonController() const
 {
     return declaration_->GetButtonController();
@@ -260,6 +265,11 @@ void ButtonComponent::SetBorderEdge(const BorderEdge& borderEdge)
 void ButtonComponent::SetClickedEventId(const EventMarker& eventId)
 {
     declaration_->SetClickedEventId(eventId);
+}
+
+void ButtonComponent::SetRemoteMessageEventId(const EventMarker& eventId)
+{
+    declaration_->SetRemoteMessageEventId(eventId);
 }
 
 void ButtonComponent::SetClickFunction(std::function<void()>&& clickCallback)

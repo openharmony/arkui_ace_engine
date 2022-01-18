@@ -962,6 +962,16 @@ public:
         return pluginOffset_;
     }
 
+    void SetPluginEventOffset(const Offset& offset)
+    {
+        pluginEventOffset_ = offset;
+    }
+
+    Offset GetPluginEventOffset() const
+    {
+        return pluginEventOffset_;
+    }
+
     void SetTouchPipeline(WeakPtr<PipelineContext> context);
     void RemoveTouchPipeline(WeakPtr<PipelineContext> context);
 
@@ -1189,6 +1199,7 @@ private:
 
     std::vector<WeakPtr<PipelineContext>> touchPluginPipelineContext_;
     Offset pluginOffset_ { 0, 0 };
+    Offset pluginEventOffset_ { 0, 0 };
 
     bool isRebuildFinished_ = false;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;

@@ -32,6 +32,7 @@ const std::vector<StyleTag> DeclarationConstants::DEFAULT_STYLES { StyleTag::COM
     StyleTag::COMMON_IMAGE_STYLE };
 const std::vector<EventTag> DeclarationConstants::DEFAULT_EVENTS { EventTag::COMMON_RAW_EVENT,
     EventTag::COMMON_GESTURE_EVENT, EventTag::COMMON_FOCUS_EVENT, EventTag::COMMON_KEY_EVENT,
+    EventTag::COMMON_REMOTE_MESSAGE_GRESURE_EVENT,
     EventTag::COMMON_MOUSE_EVENT, EventTag::COMMON_SWIPE_EVENT, EventTag::COMMON_ATTACH_EVENT,
     EventTag::COMMON_CROWN_EVENT };
 const std::vector<MethodTag> DeclarationConstants::DEFAULT_METHODS { MethodTag::COMMON_METHOD };

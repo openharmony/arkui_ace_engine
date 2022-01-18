@@ -73,6 +73,7 @@ public:
     const Color& GetFocusAnimationColor() const;
     const BorderEdge& GetBorderEdge() const;
     const EventMarker& GetClickedEventId() const;
+    const EventMarker& GetRemoteMessageEventId() const;
     RefPtr<ButtonProgressController> GetButtonController() const;
 
     void SetDisabledState(bool state);
@@ -92,6 +93,7 @@ public:
     void SetFocusAnimationColor(const Color& color);
     void SetBorderEdge(const BorderEdge& borderEdge);
     void SetClickedEventId(const EventMarker& eventId);
+    void SetRemoteMessageEventId(const EventMarker& eventId);
     void SetClickFunction(std::function<void()>&& clickCallback);
     void SetDeclaration(const RefPtr<ButtonDeclaration>& declaration);
 

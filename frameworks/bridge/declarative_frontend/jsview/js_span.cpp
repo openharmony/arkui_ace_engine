@@ -259,6 +259,15 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
     }
 }
 
+void JSSpan::JsRemoteMessage(const JSCallbackInfo& info)
+{
+    EventMarker remoteMessageEventId;
+    JSInteractableView::JsRemoteMessage(info, remoteMessageEventId);
+    auto stack = ViewStackProcessor::GetInstance();
+    auto textSpanComponent = AceType::DynamicCast<TextSpanComponent>(stack->GetMainComponent());
+    textSpanComponent->SetRemoteMessageEventId(remoteMessageEventId);
+}
+
 void JSSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSpan>::Declare("Span");
@@ -276,6 +285,7 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSSpan>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSpan>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSSpan>::StaticMethod("remoteMessage", &JSSpan::JsRemoteMessage);
     JSClass<JSSpan>::StaticMethod("onClick", &JSSpan::JsOnClick);
     JSClass<JSSpan>::Inherit<JSContainerBase>();
     JSClass<JSSpan>::Inherit<JSViewAbstract>();

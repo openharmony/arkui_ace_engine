@@ -91,6 +91,7 @@ void JSGridItem::JSBind(BindingTarget globalObj)
     JSClass<JSGridItem>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSGridItem>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSGridItem>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSGridItem>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
     JSClass<JSGridItem>::Inherit<JSContainerBase>();
     JSClass<JSGridItem>::Inherit<JSViewAbstract>();

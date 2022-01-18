@@ -353,22 +353,22 @@ template("ace_core_source_set") {
     if (defined(config.plugin_components_support) &&
         config.plugin_components_support) {
       if (!use_mingw_win && !use_mac) {
-        deps += [ "$ace_root/frameworks/core/components/plugin:ace_core_components_plugin_$platform" ]
-        deps += [ "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native" ]
-
+        deps += [
+          "$ace_root/frameworks/core/components/plugin:ace_core_components_plugin_$platform",
+          "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
+          "//foundation/appexecfwk/standard/common:libappexecfwk_common",
+        ]
         external_deps = [
+          "aafwk_standard:ability_manager",
           "aafwk_standard:base",
           "aafwk_standard:want",
           "appexecfwk_standard:appexecfwk_base",
           "appexecfwk_standard:appexecfwk_core",
           "appexecfwk_standard:libeventhandler",
         ]
+        sources += [ "common/plugin_manager.cpp" ]
       }
     }
-    if (!use_mingw_win && !use_mac) {
-      sources += [ "common/plugin_manager.cpp" ]
-    }
-
     include_dirs = [ "//foundation/windowmanager/interfaces/innerkits" ]
 
     if (!is_wearable_product) {
