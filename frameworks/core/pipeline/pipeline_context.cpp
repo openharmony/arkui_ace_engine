@@ -994,6 +994,15 @@ void PipelineContext::PopToPage(int32_t pageId)
     }
 }
 
+void PipelineContext::RestorePopPage(const RefPtr<PageComponent>& pageComponent)
+{
+    CHECK_RUN_ON(UI);
+    auto stageElement = GetStageElement();
+    if (stageElement) {
+        stageElement->RestorePopPage(pageComponent);
+    }
+}
+
 bool PipelineContext::CanReplacePage()
 {
     auto stageElement = GetStageElement();

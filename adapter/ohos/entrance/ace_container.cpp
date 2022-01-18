@@ -878,4 +878,32 @@ void AceContainer::SetDialogCallback(int32_t instanceId, FrontendDialogCallback 
     }
 }
 
+const std::string& AceContainer::RestoreRouterStack(int32_t instanceId, const std::string& contentInfo)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        return "";
+    }
+    auto front = container->GetFrontend();
+    if (front) {
+        return front->RestoreRouterStack(contentInfo);
+    } else {
+        return "";
+    }
+}
+
+const std::string& AceContainer::GetContentInfo(int32_t instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        return "";
+    }
+    auto front = container->GetFrontend();
+    if (front) {
+        return front->GetContentInfo();
+    } else {
+        return "";
+    }
+}
+
 } // namespace OHOS::Ace::Platform

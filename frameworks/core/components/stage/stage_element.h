@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 
-enum class StackOperation { NONE, PUSH_PAGE, POP, POP_TO_PAGE, REPLACE, CLEAR };
+enum class StackOperation { NONE, PUSH_PAGE, POP, POP_TO_PAGE, REPLACE, CLEAR, RESTORE };
 
 class StageElement : public StackElement, public PageTransitionListenable, public FlushEvent {
     DECLARE_ACE_TYPE(StageElement, StackElement, FlushEvent);
@@ -35,6 +35,7 @@ public:
     virtual void PushPage(const RefPtr<Component>& newComponent);
     void Pop();
     void PopToPage(int32_t pageId);
+    void RestorePopPage(const RefPtr<Component>& newComponent);
     virtual void Replace(const RefPtr<Component>& newComponent);
     bool ClearOffStage();
     bool CanPopPage();
@@ -85,6 +86,7 @@ private:
     // Only after PerformBuild can we determine if there is a shared element transition.
     void OnPostFlush() override;
     void MakeTopPageTouchable();
+    void RestorePop();
 
     StackOperation operation_ { StackOperation::NONE };
     StackOperation pendingOperation_ { StackOperation::NONE };

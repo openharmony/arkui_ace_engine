@@ -59,6 +59,8 @@ public:
     void UpdateViewportConfig(const ViewportConfig& config) override;
 
 private:
+    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
+
     OHOS::AbilityRuntime::Context* context_ = nullptr;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
