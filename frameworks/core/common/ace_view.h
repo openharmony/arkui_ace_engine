@@ -85,7 +85,7 @@ public:
         return false;
     }
     // Use to receive event from pc previewer
-    virtual bool HandleTouchEvent(const TouchPoint& touchEvent)
+    virtual bool HandleTouchEvent(const TouchEvent& touchEvent)
     {
         return false;
     }

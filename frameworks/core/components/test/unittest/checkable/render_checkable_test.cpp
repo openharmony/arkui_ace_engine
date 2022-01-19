@@ -70,11 +70,11 @@ constexpr double TEST_TEXT_SIZE = 200.0;
 constexpr bool SHOW_TEXT = true;
 const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManager>();
 
-const TouchPoint MOCK_DOWN_TOUCH_EVENT { 10, 10, 10, TouchType::DOWN };
-const TouchPoint MOCK_MOVE_TOUCH_EVENT { 10, 10, 10, TouchType::MOVE };
-const TouchPoint MOCK_UP_TOUCH_EVENT { 10, 10, 10, TouchType::UP };
-const TouchPoint MOCK_DOWN_TOUCH_EVENT_AT_END { 10, 1000, 10, TouchType::DOWN };
-const TouchPoint MOCK_MOVE_TOUCH_EVENT_AT_END { 10, 1000, 10, TouchType::MOVE };
+const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 10, 10, TouchType::DOWN };
+const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 10, 10, TouchType::MOVE };
+const TouchEvent MOCK_UP_TOUCH_EVENT { 10, 10, 10, TouchType::UP };
+const TouchEvent MOCK_DOWN_TOUCH_EVENT_AT_END { 10, 1000, 10, TouchType::DOWN };
+const TouchEvent MOCK_MOVE_TOUCH_EVENT_AT_END { 10, 1000, 10, TouchType::MOVE };
 enum class TestGestureType {
     CLICK = 0,
     DRAG_LESS_THAN_HALF,
@@ -169,7 +169,7 @@ protected:
     void CreateCheckboxAndRender(UpdateCheckboxCallback updateCheckable);
     void CreateSwitchAndRender(UpdateSwitchCallback updateCheckable);
     void ClickCheckable();
-    void MoveTouchPoint(TouchPoint& touchPoint, bool dragLessHalf, bool backward);
+    void MoveTouchPoint(TouchEvent& touchPoint, bool dragLessHalf, bool backward);
     void DragSwitch(const TestGestureType gestureType);
     void ApplyAction(const TestGestureType gestureType, const bool& testSuccess);
     void WaitAndMockVsync(int64_t waitFor);
@@ -276,7 +276,7 @@ void CheckableComponentTest::ClickCheckable()
     context_->OnVsyncEvent(GetTickCount(), 0);
 }
 
-void CheckableComponentTest::MoveTouchPoint(TouchPoint& touchPoint, bool dragLessHalf, bool backward)
+void CheckableComponentTest::MoveTouchPoint(TouchEvent& touchPoint, bool dragLessHalf, bool backward)
 {
     double moveLength = dragLessHalf ? DRAG_DELTA_SMALL : DRAG_DELTA_LARGE;
     if (backward) {
@@ -291,7 +291,7 @@ void CheckableComponentTest::MoveTouchPoint(TouchPoint& touchPoint, bool dragLes
 void CheckableComponentTest::DragSwitch(const TestGestureType gestureType)
 {
     context_->OnTouchEvent(MOCK_DOWN_TOUCH_EVENT);
-    TouchPoint touchPoint = MOCK_MOVE_TOUCH_EVENT;
+    TouchEvent touchPoint = MOCK_MOVE_TOUCH_EVENT;
     switch (gestureType) {
         case TestGestureType::DRAG_LESS_THAN_HALF:
             MoveTouchPoint(touchPoint, DRAG_LESS_THAN_HALF, DRAG_FORWARD);
@@ -324,7 +324,7 @@ void CheckableComponentTest::DragSwitch(const TestGestureType gestureType)
         default:
             break;
     }
-    TouchPoint touchEndPoint = MOCK_UP_TOUCH_EVENT;
+    TouchEvent touchEndPoint = MOCK_UP_TOUCH_EVENT;
     touchEndPoint.x = touchPoint.x;
     context_->OnTouchEvent(touchEndPoint);
 }

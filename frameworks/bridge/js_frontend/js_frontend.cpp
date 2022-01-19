@@ -24,11 +24,12 @@ namespace {
 
 void TouchInfoToString(const BaseEventInfo& info, std::string& eventParam)
 {
-    eventParam.append("{\"touches\":[{");
+    eventParam.append("{\"touches\":[");
     const auto touchInfo = TypeInfoHelper::DynamicCast<TouchEventInfo>(&info);
     if (touchInfo) {
         auto touchList = touchInfo->GetTouches();
         for (const auto& location : touchList) {
+            eventParam.append("{");
             auto globalLocation = location.GetGlobalLocation();
             eventParam.append("\"globalX\":")
                 .append(std::to_string(globalLocation.GetX()))
@@ -42,16 +43,18 @@ void TouchInfoToString(const BaseEventInfo& info, std::string& eventParam)
                 .append(std::to_string(localLocation.GetY()))
                 .append(",");
             eventParam.append("\"size\":").append(std::to_string(location.GetSize())).append(",");
-            eventParam.append("\"force\":").append(std::to_string(location.GetForce())).append(",");
+            eventParam.append("\"identifier\":").append(std::to_string(location.GetFingerId())).append(",");
+            eventParam.append("\"force\":").append(std::to_string(location.GetForce())).append("},");
         }
         if (eventParam.back() == ',') {
             eventParam.pop_back();
         }
-        eventParam.append("}],");
+        eventParam.append("],");
         eventParam.append("\"deviceId\":").append(std::to_string(touchInfo->GetDeviceId())).append(",");
-        eventParam.append("\"changedTouches\":[{");
+        eventParam.append("\"changedTouches\":[");
         auto changeTouch = touchInfo->GetChangedTouches();
         for (const auto& change : changeTouch) {
+            eventParam.append("{");
             auto globalLocation = change.GetGlobalLocation();
             eventParam.append("\"globalX\":")
                 .append(std::to_string(globalLocation.GetX()))
@@ -65,13 +68,15 @@ void TouchInfoToString(const BaseEventInfo& info, std::string& eventParam)
                 .append(std::to_string(localLocation.GetY()))
                 .append(",");
             eventParam.append("\"size\":").append(std::to_string(change.GetSize())).append(",");
-            eventParam.append("\"force\":").append(std::to_string(change.GetForce())).append(",");
+            eventParam.append("\"identifier\":").append(std::to_string(change.GetFingerId())).append(",");
+            eventParam.append("\"force\":").append(std::to_string(change.GetForce())).append("},");
         }
         if (eventParam.back() == ',') {
             eventParam.pop_back();
         }
+        eventParam.append("]");
     }
-    eventParam.append("}]}");
+    eventParam.append("}");
 }
 
 void DragStartInfoToString(const BaseEventInfo& info, std::string& eventParam)
@@ -797,8 +802,9 @@ void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const Base
         DragDropInfoToString(info, eventParam);
     }
 
-    LOGD("HandleAsyncEvent pageId: %{public}d, eventId: %{public}s, eventType: %{public}s",
-         eventMarker.GetData().pageId, eventMarker.GetData().eventId.c_str(), eventMarker.GetData().eventType.c_str());
+    LOGD("HandleAsyncEvent pageId: %{public}d, eventId: %{public}s, eventType: %{public}s, eventParam: %{public}s",
+        eventMarker.GetData().pageId, eventMarker.GetData().eventId.c_str(), eventMarker.GetData().eventType.c_str(),
+        eventParam.c_str());
     std::string param;
     auto adapter = TypeInfoHelper::DynamicCast<EventToJSONStringAdapter>(&info);
     if (adapter) {

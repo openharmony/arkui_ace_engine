@@ -101,7 +101,7 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
     return aceAbility;
 }
 
-bool AceAbility::DispatchTouchEvent(const TouchPoint& event)
+bool AceAbility::DispatchTouchEvent(const TouchEvent& event)
 {
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     if (!container) {

@@ -52,9 +52,9 @@ class SwipeRecognizer : public TouchEventTarget {
     DECLARE_ACE_TYPE(SwipeRecognizer, TouchEventTarget)
 
 public:
-    bool HandleEvent(const TouchPoint& point) override;
+    bool HandleEvent(const TouchEvent& point) override;
 
-    bool DispatchEvent(const TouchPoint& point) override;
+    bool DispatchEvent(const TouchEvent& point) override;
 
     void AddSwipeCallback(const SwipeCallback& swipeCallback)
     {
@@ -62,7 +62,7 @@ public:
     }
 
 private:
-    std::unordered_map<int32_t, std::pair<TouchPoint, bool>> statusMap_;
+    std::unordered_map<int32_t, std::pair<TouchEvent, bool>> statusMap_;
     SwipeCallback swipeCallback_;
 };
 

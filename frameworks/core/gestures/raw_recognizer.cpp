@@ -27,7 +27,7 @@ const char ON_TOUCH_CANCEL_EVENT[] = "onTouchCancel";
 
 } // namespace
 
-void RawRecognizer::HandleEvent(const TouchPoint& point, uint32_t stage)
+void RawRecognizer::HandleEvent(const TouchEvent& point, uint32_t stage)
 {
     LOGD("raw recognizer handle event, event type is %{public}zu stage=%u", point.type, stage);
     switch (point.type) {
@@ -69,7 +69,7 @@ void RawRecognizer::HandleEvent(const TouchPoint& point, uint32_t stage)
     lastPoint_ = point;
 }
 
-bool RawRecognizer::DispatchEvent(const TouchPoint& point)
+bool RawRecognizer::DispatchEvent(const TouchEvent& point)
 {
     HandleEvent(point, EventStage::CAPTURE);
     CatchTouchEventCallback catchCallback;
@@ -90,7 +90,7 @@ bool RawRecognizer::DispatchEvent(const TouchPoint& point)
     return true;
 }
 
-bool RawRecognizer::HandleEvent(const TouchPoint& point)
+bool RawRecognizer::HandleEvent(const TouchEvent& point)
 {
     HandleEvent(point, EventStage::BUBBLE);
     CatchTouchEventCallback catchCallback;
@@ -112,9 +112,29 @@ bool RawRecognizer::HandleEvent(const TouchPoint& point)
 };
 
 TouchEventInfo RawRecognizer::CreateTouchEventInfo(
-    const std::string& type, const TouchPoint& point, bool ignoreCurrent) const
+    const std::string& type, const TouchEvent& point, bool ignoreCurrent) const
 {
+    // TODO: add mini version judge.
+    auto useNewVersion = true;
     TouchEventInfo info(type);
+    if (useNewVersion) {
+        TouchLocationInfo changedTouchLocationInfo(point.id);
+        changedTouchLocationInfo.SetGlobalLocation(point.GetOffset())
+            .SetLocalLocation(point.GetOffset() - coordinateOffset_)
+            .SetSize(point.size);
+        changedTouchLocationInfo.SetForce(point.force);
+        info.AddChangedTouchLocationInfo(std::move(changedTouchLocationInfo));
+        for (auto&& touchPoint : point.pointers_) {
+            TouchLocationInfo touchLocationInfo(touchPoint.id);
+            auto offset = Offset(touchPoint.x, touchPoint.y);
+            touchLocationInfo.SetGlobalLocation(offset)
+                .SetLocalLocation(offset - coordinateOffset_)
+                .SetSize(touchPoint.size);
+            touchLocationInfo.SetForce(touchPoint.force);
+            info.AddTouchLocationInfo(std::move(touchLocationInfo));
+        }
+        return info;
+    }
     if (!isFirstTrack_) {
         TouchLocationInfo lastTouchLocationInfo(lastPoint_.id);
         lastTouchLocationInfo.SetGlobalLocation(lastPoint_.GetOffset())

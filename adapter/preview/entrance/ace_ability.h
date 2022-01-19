@@ -47,7 +47,7 @@ public:
 
     // Be called in Previewer frontend thread, which is not ACE platform thread.
     static void Stop();
-    static bool DispatchTouchEvent(const TouchPoint& event);
+    static bool DispatchTouchEvent(const TouchEvent& event);
     static bool DispatchBackPressedEvent();
     void OnConfigurationChanged(const DeviceConfig& newConfig);
 

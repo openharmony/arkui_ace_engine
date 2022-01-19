@@ -65,10 +65,10 @@ public:
     }
 
 private:
-    void HandleTouchDownEvent(const TouchPoint& event) override;
-    void HandleTouchUpEvent(const TouchPoint& event) override;
-    void HandleTouchMoveEvent(const TouchPoint& event) override;
-    void HandleTouchCancelEvent(const TouchPoint& event) override;
+    void HandleTouchDownEvent(const TouchEvent& event) override;
+    void HandleTouchUpEvent(const TouchEvent& event) override;
+    void HandleTouchMoveEvent(const TouchEvent& event) override;
+    void HandleTouchCancelEvent(const TouchEvent& event) override;
     bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
     void HandleOverdueDeadline();
     void DeadlineTimer(CancelableCallback<void()>& deadlineTimer, int32_t time);
@@ -93,7 +93,7 @@ private:
     WeakPtr<PipelineContext> context_;
     CancelableCallback<void()> fingerDeadlineTimer_;
     CancelableCallback<void()> tapDeadlineTimer_;
-    std::map<int32_t, TouchPoint> touchPoints_;
+    std::map<int32_t, TouchEvent> touchPoints_;
 };
 
 } // namespace OHOS::Ace

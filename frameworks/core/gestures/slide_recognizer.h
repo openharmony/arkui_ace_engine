@@ -52,10 +52,10 @@ private:
         REJECT,
         DETECTING,
     };
-    void HandleTouchDownEvent(const TouchPoint& event) override;
-    void HandleTouchUpEvent(const TouchPoint& event) override;
-    void HandleTouchMoveEvent(const TouchPoint& event) override;
-    void HandleTouchCancelEvent(const TouchPoint& event) override;
+    void HandleTouchDownEvent(const TouchEvent& event) override;
+    void HandleTouchUpEvent(const TouchEvent& event) override;
+    void HandleTouchMoveEvent(const TouchEvent& event) override;
+    void HandleTouchCancelEvent(const TouchEvent& event) override;
     bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
     GestureAcceptResult ParseFingersOffset() const;
     void Reset();
@@ -73,7 +73,7 @@ private:
     SwipeDirection direction_;
     double speed_ = 0.0;
     WeakPtr<PipelineContext> context_;
-    std::map<int32_t, TouchPoint> touchPoints_;
+    std::map<int32_t, TouchEvent> touchPoints_;
     std::map<int32_t, Offset> fingersDistance_;
     TimeStamp time_;
     TimeStamp touchDownTime_;

@@ -25,7 +25,7 @@
 namespace OHOS::Ace {
 
 void EventManager::TouchTest(
-    const TouchPoint& touchPoint, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict)
+    const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict)
 {
     ACE_FUNCTION_TRACE();
     if (!renderNode) {
@@ -42,7 +42,7 @@ void EventManager::TouchTest(
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
 }
 
-bool EventManager::DispatchTouchEvent(const TouchPoint& point)
+bool EventManager::DispatchTouchEvent(const TouchEvent& point)
 {
     ACE_FUNCTION_TRACE();
     const auto iter = touchTestResults_.find(point.id);

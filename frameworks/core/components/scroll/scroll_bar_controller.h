@@ -50,11 +50,11 @@ public:
     virtual void MarkScrollRender();
     void Reset();
 
-    bool DispatchEvent(const TouchPoint& point) override
+    bool DispatchEvent(const TouchEvent& point) override
     {
         return true;
     }
-    bool HandleEvent(const TouchPoint& event) override
+    bool HandleEvent(const TouchEvent& event) override
     {
         if (dragRecognizer_) {
             dragRecognizer_->HandleEvent(event);

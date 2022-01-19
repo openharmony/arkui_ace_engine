@@ -29,7 +29,7 @@ void LongPressRecognizer::OnAccepted()
     LOGI("long press gesture has been accepted!");
 
     if (onLongPress_ && !touchMap_.empty()) {
-        TouchPoint trackPoint = touchMap_.begin()->second;
+        TouchEvent trackPoint = touchMap_.begin()->second;
         LongPressInfo info(trackPoint.id);
         info.SetTimeStamp(time_);
         info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(trackPoint.GetOffset() - coordinateOffset_);
@@ -57,7 +57,7 @@ void LongPressRecognizer::OnRejected()
     Reset();
 }
 
-void LongPressRecognizer::HandleTouchDownEvent(const TouchPoint& event)
+void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     if (fingers_ > MAX_FINGERS) {
         return;
@@ -81,7 +81,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchPoint& event)
     }
 }
 
-void LongPressRecognizer::HandleTouchUpEvent(const TouchPoint& event)
+void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("long press recognizer receives touch up event");
     auto it = touchMap_.find(event.id);
@@ -102,7 +102,7 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchPoint& event)
     }
 }
 
-void LongPressRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
+void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("long press recognizer receives touch move event");
     auto it = touchMap_.find(event.id);
@@ -126,7 +126,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
     time_ = event.time;
 }
 
-void LongPressRecognizer::HandleTouchCancelEvent(const TouchPoint& event)
+void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     LOGD("long press recognizer receives touch cancel event");
     if (state_ == DetectState::READY || state_ == DetectState::DETECTING) {
@@ -219,7 +219,7 @@ void LongPressRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc
         info.SetTimeStamp(time_);
         info.SetRepeat(isRepeat);
         info.SetFingerList(fingerList_);
-        TouchPoint trackPoint = {};
+        TouchEvent trackPoint = {};
         if (!touchMap_.empty()) {
             trackPoint = touchMap_.begin()->second;
         }

@@ -178,7 +178,7 @@ void XComponentElement::RegisterDispatchTouchEventCallback()
         LOGE("RegisterDispatchTouchEventCallback pipelineContext is null");
         return;
     }
-    pipelineContext->SetDispatchTouchEventHandler([weak = WeakClaim(this)](const TouchPoint& event) {
+    pipelineContext->SetDispatchTouchEventHandler([weak = WeakClaim(this)](const TouchEvent& event) {
         auto element = weak.Upgrade();
         if (element) {
             element->DispatchTouchEvent(event);
@@ -186,7 +186,7 @@ void XComponentElement::RegisterDispatchTouchEventCallback()
     });
 }
 
-void XComponentElement::DispatchTouchEvent(const TouchPoint& event)
+void XComponentElement::DispatchTouchEvent(const TouchEvent& event)
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
@@ -207,7 +207,7 @@ void XComponentElement::DispatchTouchEvent(const TouchPoint& event)
     }
 }
 
-void XComponentElement::SetTouchEventType(const TouchPoint& event)
+void XComponentElement::SetTouchEventType(const TouchEvent& event)
 {
     switch (event.type) {
         case TouchType::DOWN:

@@ -21,7 +21,7 @@
 namespace OHOS::Ace {
 namespace {
 
-SwipeEventInfo::SwipeDirection GetSwipeDirection(const TouchPoint& firstPoint, const TouchPoint& lastPoint)
+SwipeEventInfo::SwipeDirection GetSwipeDirection(const TouchEvent& firstPoint, const TouchEvent& lastPoint)
 {
     static const double duration = 15.0;
     auto xOffset = lastPoint.x - firstPoint.x;
@@ -40,7 +40,7 @@ SwipeEventInfo::SwipeDirection GetSwipeDirection(const TouchPoint& firstPoint, c
 }
 
 float GetSwipeDistance(
-    SwipeEventInfo::SwipeDirection direction, const TouchPoint& firstPoint, const TouchPoint& lastPoint)
+    SwipeEventInfo::SwipeDirection direction, const TouchEvent& firstPoint, const TouchEvent& lastPoint)
 {
     if (direction == SwipeEventInfo::SwipeDirection::RIGHT) {
         return (lastPoint.x - firstPoint.x);
@@ -73,7 +73,7 @@ std::string SwipeEventInfo::ToJsonParamInfo() const
     return jsonValue->ToString();
 }
 
-bool SwipeRecognizer::HandleEvent(const TouchPoint& point)
+bool SwipeRecognizer::HandleEvent(const TouchEvent& point)
 {
     switch (point.type) {
         case TouchType::DOWN: {
@@ -110,7 +110,7 @@ bool SwipeRecognizer::HandleEvent(const TouchPoint& point)
     return true;
 }
 
-bool SwipeRecognizer::DispatchEvent(const TouchPoint& point)
+bool SwipeRecognizer::DispatchEvent(const TouchEvent& point)
 {
     return true;
 }

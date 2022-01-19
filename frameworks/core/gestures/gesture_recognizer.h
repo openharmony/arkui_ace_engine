@@ -53,11 +53,11 @@ public:
         return true;
     }
 
-    bool DispatchEvent(const TouchPoint& point) override
+    bool DispatchEvent(const TouchEvent& point) override
     {
         return true;
     }
-    bool HandleEvent(const TouchPoint& point) override;
+    bool HandleEvent(const TouchEvent& point) override;
 
     // Coordinate offset is used to calculate the local location of the touch point in the render node.
     void SetCoordinateOffset(const Offset& coordinateOffset)
@@ -154,10 +154,10 @@ public:
     }
 
 protected:
-    virtual void HandleTouchDownEvent(const TouchPoint& event) = 0;
-    virtual void HandleTouchUpEvent(const TouchPoint& event) = 0;
-    virtual void HandleTouchMoveEvent(const TouchPoint& event) = 0;
-    virtual void HandleTouchCancelEvent(const TouchPoint& event) = 0;
+    virtual void HandleTouchDownEvent(const TouchEvent& event) = 0;
+    virtual void HandleTouchUpEvent(const TouchEvent& event) = 0;
+    virtual void HandleTouchMoveEvent(const TouchEvent& event) = 0;
+    virtual void HandleTouchCancelEvent(const TouchEvent& event) = 0;
 
     virtual void AddToReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer);
     virtual void DelFromReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer);
