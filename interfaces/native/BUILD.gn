@@ -54,7 +54,7 @@ ohos_shared_library("ace_ndk") {
   version_script = get_label_info(":libace_ndk", "target_gen_dir") + "/" +
                    get_label_info(":libace_ndk", "name") + version_script_suffix
   subsystem_name = "ace"
-  part_name = "ace_engine_full"
+  part_name = ace_engine_part
 }
 
 group("ace_packages_ndk") {
