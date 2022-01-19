@@ -105,7 +105,7 @@ public:
 
     // distribute
     const std::string& RestoreRouterStack(const std::string& contentInfo) override;
-    const std::string& GetContentInfo() const override;
+    const std::string& GetContentInfo() override;
 
     // Accessibility delegate functions.
     RefPtr<Framework::AccessibilityNodeManager> GetJSAccessibilityManager() const
@@ -291,6 +291,7 @@ private:
     bool isRouteStackFull_ = false;
     bool isStagingPageExist_ = false;
     std::string mainPagePath_;
+    std::string pageStack_;
     std::string backUri_;
     std::string backParam_;
     std::vector<PageInfo> pageRouteStack_;

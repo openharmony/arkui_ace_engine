@@ -78,7 +78,7 @@ public:
     {
         return "";
     }
-    virtual const std::string& GetContentInfo() const
+    virtual const std::string& GetContentInfo()
     {
         return "";
     }
