@@ -39,8 +39,9 @@ ohos_unittest("PluginManagerTest") {
   ]
 
   external_deps = [
-    "aafwk_standard:base",
-    "aafwk_standard:want",
+    "ability_runtime:app_manager",
+    "ability_runtime:base",
+    "ability_runtime:want",
     "appexecfwk_standard:appexecfwk_base",
     "appexecfwk_standard:appexecfwk_core",
     "appexecfwk_standard:libeventhandler",

@@ -260,8 +260,8 @@ template("declarative_js_engine") {
         ]
 
         external_deps = [
-          "aafwk_standard:ability_manager",
-          "aafwk_standard:want",
+          "ability_runtime:ability_manager",
+          "ability_runtime:want",
         ]
         sources += [ "jsview/js_plugin.cpp" ]
       }
