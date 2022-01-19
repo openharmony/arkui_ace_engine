@@ -23,6 +23,7 @@
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "display_type.h"
+#include "foundation/graphic/standard/interfaces/innerkits/surface/window.h"
 #include "foundation/windowmanager/interfaces/innerkits/wm/window.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
@@ -78,6 +79,7 @@ private:
     sptr<Rosen::Window> previewWindow_;
     static std::unordered_map<std::string, uint64_t> surfaceIdMap_;
     RefPtr<XComponentController> xcomponentController_;
+    sptr<OHOS::Surface> producerSurface_ = nullptr;
 #endif
 };
 } // namespace OHOS::Ace

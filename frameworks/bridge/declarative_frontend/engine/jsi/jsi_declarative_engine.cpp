@@ -1055,7 +1055,6 @@ void JsiDeclarativeEngine::FireExternalEvent(const std::string& componentId, con
         LOGE("FireExternalEvent xcomponent is null.");
         return;
     }
-    auto textureId = static_cast<int64_t>(xcomponent->GetTextureId());
 
     auto container = Container::Current();
     if (!container) {
@@ -1067,7 +1066,15 @@ void JsiDeclarativeEngine::FireExternalEvent(const std::string& componentId, con
         LOGE("FireExternalEvent nativeView null");
         return;
     }
-    auto nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+
+    void* nativeWindow = nullptr;
+#ifdef OHOS_STANDARD_SYSTEM
+    nativeWindow = const_cast<void*>(xcomponent->GetNativeWindow());
+#else
+    auto textureId = static_cast<int64_t>(xcomponent->GetTextureId());
+    nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+#endif
+
     if (!nativeWindow) {
         LOGE("FireExternalEvent nativeWindow invalid");
         return;

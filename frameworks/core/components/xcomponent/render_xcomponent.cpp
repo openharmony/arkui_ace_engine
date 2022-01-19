@@ -40,9 +40,6 @@ void RenderXComponent::PushTask(const TaskFunction& func)
 
 void RenderXComponent::Update(const RefPtr<Component>& component)
 {
-    if (!component) {
-        return;
-    }
     const RefPtr<XComponentComponent> xcomponent = AceType::DynamicCast<XComponentComponent>(component);
     if (!xcomponent) {
         return;
@@ -79,13 +76,6 @@ void RenderXComponent::PerformLayout()
                      Size::INFINITE_SIZE :
                      (GetLayoutParam().GetMaxSize().Height()));
     SetLayoutSize(drawSize_);
-
-#ifdef OHOS_STANDARD_SYSTEM
-    if (xcomponentSizeChangeEvent_ && (!drawSize_.IsHeightInfinite())) {
-        xcomponentSizeChangeEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
-    }
-#endif
-
     SetNeedLayout(false);
     MarkNeedRender();
 }
@@ -94,12 +84,6 @@ void RenderXComponent::OnPaintFinish()
 {
     position_ = GetGlobalOffset();
     NativeXComponentOffset(position_.GetX(), position_.GetY());
-
-#ifdef OHOS_STANDARD_SYSTEM
-    if (xcomponentSizeChangeEvent_ && (!drawSize_.IsHeightInfinite())) {
-        xcomponentSizeChangeEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
-    }
-#endif
 
     auto xcomponent = delegate_->GetXComponent().Upgrade();
     if (std::strcmp(xcomponent->GetXComponentType().c_str(), "texture") == 0) {
