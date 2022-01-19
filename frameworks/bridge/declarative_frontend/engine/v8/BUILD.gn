@@ -39,7 +39,9 @@ template("declarative_js_engine_v8") {
     ]
 
     sources = [
+      "content_storage_set.cpp",
       "functions/v8_function.cpp",
+      "js_converter.cpp",
       "v8_declarative_engine.cpp",
       "v8_declarative_group_js_bridge.cpp",
       "v8_function_destroy_helper.cpp",

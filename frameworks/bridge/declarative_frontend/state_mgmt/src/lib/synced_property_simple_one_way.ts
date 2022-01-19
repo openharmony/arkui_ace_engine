@@ -77,11 +77,17 @@ class SynchedPropertySimpleOneWaySubscribing<T> extends SynchedPropertySimpleOne
   implements ISinglePropertyChangeSubscriber<T> {
 
   private linkedParentProperty_: ObservedPropertySimpleAbstract<T>;
+  private contentStorageLinkedParentProperty_: ObservedPropertySimpleAbstract<T>;
 
-  constructor(linkedProperty: ObservedPropertySimpleAbstract<T>, subscribeMe?: IPropertySubscriber, info?: PropertyInfo) {
+  constructor(linkedProperty: ObservedPropertySimpleAbstract<T>, subscribeMe?: IPropertySubscriber, info?: PropertyInfo,
+    contentObserver?: ObservedPropertySimpleAbstract<T>) {
     super(linkedProperty.get(), subscribeMe, info);
     this.linkedParentProperty_ = linkedProperty;
     this.linkedParentProperty_.subscribeMe(this);
+    if (contentObserver) {
+      this.contentStorageLinkedParentProperty_ = contentObserver;
+      this.contentStorageLinkedParentProperty_.subscribeMe(this);
+    }
   }
 
 
@@ -108,7 +114,7 @@ class SynchedPropertySimpleOneWaySubscribing<T> extends SynchedPropertySimpleOne
     throw new Error("Can not create a 'Link' from a 'Prop' property. ");
   }
   public createProp(subscribeOwner?: IPropertySubscriber,
-    propPropName?: PropertyInfo): ObservedPropertyAbstract<T> {
-    return new SynchedPropertySimpleOneWaySubscribing<T>(this, subscribeOwner, propPropName);
+    propPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T> {
+    return new SynchedPropertySimpleOneWaySubscribing<T>(this, subscribeOwner, propPropName, contentObserver);
   }
 }
