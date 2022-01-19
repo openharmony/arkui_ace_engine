@@ -137,6 +137,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #endif
+#include "frameworks/bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 
@@ -621,6 +622,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"Radio", JSRadio::JSBind},
     {"ActionSheet", JSActionSheet::JSBind},
     {"AlertDialog", JSAlertDialog::JSBind},
+    {"ContextMenu", JSContextMenu::JSBind },
     {"AbilityComponent", JSAbilityComponent::JSBind},
     {"TextArea", JSTextArea::JSBind},
     {"TextInput", JSTextInput::JSBind},
