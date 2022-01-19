@@ -42,8 +42,8 @@ build_component("web") {
     deps = [
       "//foundation/appexecfwk/standard/kits:appkit_native",
       "//foundation/web/webview/ohos_webview:libwebview",
+      "//foundation/windowmanager/utils:libwmutil",
       "//foundation/windowmanager/wm:libwm",
-      "//foundation/windowmanager/wm:libwmutil",
     ]
   }
 }
