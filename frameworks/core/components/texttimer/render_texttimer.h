@@ -38,6 +38,25 @@ public:
     void UpdateRenders();
     void Tick(uint64_t duration);
     void UpdateValue(uint32_t elapsedTime);
+    bool GetIsCountDown() const
+    {
+        return isCountDown_;
+    }
+    double GetCount() const
+    {
+        return inputCount_;
+    }
+    std::string GetFormat() const
+    {
+        return format_;
+    }
+    TextStyle GetTextStyle() const
+    {
+        if (textComponent_) {
+            return textComponent_->GetTextStyle();
+        }
+        return TextStyle();
+    }
 
 protected:
     double LayoutBox();
