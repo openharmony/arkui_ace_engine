@@ -14,6 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_checkboxgroup.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -21,6 +22,20 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 namespace OHOS::Ace::Framework {
+
+JSRef<JSVal> CheckboxGroupResultEventToJSValue(const CheckboxGroupResult& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSArray> nameArr = JSRef<JSArray>::New();
+    std::vector<std::string> nameList = eventInfo.GetNameList();
+    for (int idx = 0; idx < (int)nameList.size(); ++idx) {
+        JSRef<JSVal> name = JSRef<JSVal>::Make(ToJSValue(nameList[idx]));
+        nameArr->SetValueAt(idx, name);
+    }
+    obj->SetPropertyObject("name", nameArr);
+    obj->SetProperty("status", eventInfo.GetStatus());
+    return JSRef<JSVal>::Cast(obj);
+}
 
 void JSCheckboxGroup::JSBind(BindingTarget globalObj)
 {
@@ -34,13 +49,19 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
     JSClass<JSCheckboxGroup>::StaticMethod("height", &JSCheckboxGroup::JsHeight);
     JSClass<JSCheckboxGroup>::StaticMethod("size", &JSCheckboxGroup::JsSize);
     JSClass<JSCheckboxGroup>::StaticMethod("padding", &JSCheckboxGroup::JsPadding);
+    JSClass<JSCheckboxGroup>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSCheckboxGroup>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSCheckboxGroup>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSCheckboxGroup>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSCheckboxGroup>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSCheckboxGroup>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSCheckboxGroup>::Inherit<JSViewAbstract>();
     JSClass<JSCheckboxGroup>::Bind<>(globalObj);
 }
 
 void JSCheckboxGroup::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("checkboxgroup create error, info is not-valid");
         return;
     }
@@ -58,7 +79,7 @@ void JSCheckboxGroup::Create(const JSCallbackInfo& info)
 void JSCheckboxGroup::SetSelecteAll(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsBoolean()) {
-        LOGI();
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments, arg is not a bool");
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();
@@ -68,10 +89,20 @@ void JSCheckboxGroup::SetSelecteAll(const JSCallbackInfo& info)
 
 void JSCheckboxGroup::SetOnChange(const JSCallbackInfo& args)
 {
-    if (!JSViewBindEvent(&CheckableComponent::SetOnChange, args)) {
-        LOGW("Failed to bind event");
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGI("args not function");
+        return;
     }
-    args.ReturnSelf();
+
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<CheckboxGroupResult, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), CheckboxGroupResultEventToJSValue);
+    auto checkbox = AceType::DynamicCast<CheckboxComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    checkbox->SetOnGroupChange(EventMarker(
+        [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
+            func->Execute(*eventInfo);
+        }));
 }
 
 void JSCheckboxGroup::JsWidth(const JSCallbackInfo& info)

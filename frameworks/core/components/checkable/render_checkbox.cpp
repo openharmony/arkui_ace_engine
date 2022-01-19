@@ -22,8 +22,15 @@ namespace {
 
 constexpr int32_t DEFUALT_CHECKBOX_ANIMATION_DURATION = 150;
 constexpr double DEFAULT_MAX_CHECKBOX_SHAPE_SCALE = 1.0;
+constexpr double DEFAULT_MID_CHECKBOX_SHAPE_SCALE = 0.5;
 constexpr double DEFAULT_MIN_CHECKBOX_SHAPE_SCALE = 0.0;
 
+const std::vector<double> CHECKBOX_SCALE = {
+    DEFAULT_MAX_CHECKBOX_SHAPE_SCALE, DEFAULT_MID_CHECKBOX_SHAPE_SCALE, DEFAULT_MIN_CHECKBOX_SHAPE_SCALE
+};
+const std::vector<CheckableStatus> CHECKABLE_STATUS = {
+    CheckableStatus::ALL, CheckableStatus::PART, CheckableStatus::NONE
+};
 } // namespace
 
 void RenderCheckbox::Update(const RefPtr<Component>& component)
@@ -40,29 +47,24 @@ void RenderCheckbox::Update(const RefPtr<Component>& component)
     auto context = context_.Upgrade();
     if (context->GetIsDeclarative()) {
         component_ = checkbox;
-        auto checkboxList = checkbox->GetCheckboxList();
-        size_t count = 0;
-        isGroup_ = !checkboxList.empty();
-        if (isGroup_) {
-            for(auto& item : checkboxList) {
-                if (item->GetValue()) {
-                    count++;
-                }
-            }
-            if (count == checkboxList.size()) {
-                checkbox->SetValue(true);
-            } else {
-                checkbox->SetValue(false);
-            }
-        }
+        UpdateGroupStatus();
+        component_->SetGroupValue(CHECKABLE_STATUS[status_]);
 
-        checkbox->SetGroupValueUpdateHandler([weak = AceType::WeakClaim(this)](bool checked) {
-            LOGI("group value changed checked  ==== %{public}d", checked);
+        checkbox->SetGroupValueUpdateHandler([weak = AceType::WeakClaim(this)](CheckableStatus checked) {
             auto renderCheckbox = weak.Upgrade();
             if (renderCheckbox && renderCheckbox->UpdateGroupValue(checked)) {
                 renderCheckbox->MarkNeedRender();
             }
         });
+        checkbox->SetItemValueUpdateHandler([weak = AceType::WeakClaim(this)](bool checked) {
+            auto renderCheckbox = weak.Upgrade();
+            if (renderCheckbox && renderCheckbox->UpdateItemValue(checked)) {
+                renderCheckbox->MarkNeedRender();
+            }
+        });
+
+        onGroupChange_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            checkbox->GetOnGroupChange(), context_);
     }
 
     if (!controller_) {
@@ -89,26 +91,44 @@ void RenderCheckbox::Update(const RefPtr<Component>& component)
     UpdateAccessibilityAttr();
 }
 
-bool RenderCheckbox::UpdateGroupValue(const bool groupValue)
-{
-    bool needRender = false;
 
-    if (!groupValue) {
-        checked_ = false;
-        needRender = true;
+bool RenderCheckbox::UpdateItemValue(const bool itemValue)
+{
+
+    if (!(component_->GetCheckboxName().empty())) {
         UpdateUIStatus();
         UpdateAnimation();
         controller_->Play();
-    } else if (groupValue) {
-        checked_ = true;
-        needRender = true;
-        UpdateAnimation();
-        controller_->Play();
+    } else {
+        return false;
     }
-    if (onChange_) {
-        onChange_(checked_);
+
+    return true;
+}
+
+bool RenderCheckbox::UpdateGroupValue(const CheckableStatus groupValue)
+{
+    if (!(component_->GetGroupName().empty())) {
+        UpdateGroupStatus();
+        if (onGroupChange_) {
+            std::vector<std::string> result;
+            component_->GetSelectedCheckBoxName(result);
+            onGroupChange_(std::make_shared<CheckboxGroupResult>(result, status_));
+        }
+        if (component_->GetGroupValue() != groupValue) {
+            component_->SetGroupValue(groupValue);
+            lastStatus_ = status_;
+            UpdateUIStatus();
+            UpdateAnimation();
+            controller_->Play();
+        } else {
+            return false;
+        }
+    } else {
+        return false;
     }
-    return needRender;
+
+    return true;
 }
 
 void RenderCheckbox::UpdateAccessibilityAttr()
@@ -134,14 +154,27 @@ void RenderCheckbox::HandleClick()
 {
     auto context = context_.Upgrade();
     if (context->GetIsDeclarative()) {
-        if (component_ && isGroup_) {
-            component_->SetMember(checked_);
-        } else if (component_->GetGroup()) {
-            component_->SetValue(checked_);
+        if (!(component_->GetGroupName().empty())) {
+            lastStatus_ = status_;
+            auto value = (component_->GetGroupValue() ==
+                CheckableStatus::ALL) ? CheckableStatus::NONE : CheckableStatus::ALL;
+            component_->SetGroupValue(value);
+            component_->SetMember(value == CheckableStatus::ALL);
+            UpdateGroupStatus();
+
+            if (onGroupChange_) {
+                std::vector<std::string> result;
+                component_->GetSelectedCheckBoxName(result);
+                onGroupChange_(std::make_shared<CheckboxGroupResult>(result, status_));
+            }
+        } else if (!(component_->GetCheckboxName().empty())) {
+            component_->SetValue(!component_->GetValue());
             component_->GetGroup()->SetGroupStatus();
         }
-        }
+    }
+    UpdateUIStatus();
     UpdateAnimation();
+    MarkNeedRender();
     if (controller_) {
         controller_->Play();
     }
@@ -155,12 +188,17 @@ void RenderCheckbox::UpdateAnimation()
     }
     double from = 0.0;
     double to = 0.0;
-    if (checked_) {
-        from = DEFAULT_MAX_CHECKBOX_SHAPE_SCALE;
-        to = DEFAULT_MIN_CHECKBOX_SHAPE_SCALE;
-    } else {
-        from = DEFAULT_MIN_CHECKBOX_SHAPE_SCALE;
-        to = DEFAULT_MAX_CHECKBOX_SHAPE_SCALE;
+    if (!(component_->GetGroupName().empty())) {
+        from = CHECKBOX_SCALE[lastStatus_];
+        to = CHECKBOX_SCALE[status_];
+    } else if (!(component_->GetCheckboxName().empty())) {
+        if (component_->GetValue()) {
+            from = DEFAULT_MIN_CHECKBOX_SHAPE_SCALE;
+            to = DEFAULT_MAX_CHECKBOX_SHAPE_SCALE;
+        } else {
+            from = DEFAULT_MAX_CHECKBOX_SHAPE_SCALE;
+            to = DEFAULT_MIN_CHECKBOX_SHAPE_SCALE;
+        }
     }
 
     if (translate_) {
@@ -184,12 +222,50 @@ void RenderCheckbox::UpdateCheckBoxShape(const double value)
         return;
     }
     shapeScale_ = value;
-    if (!checked_) {
-        uiStatus_ = UIStatus::OFF_TO_ON;
-    } else {
-        uiStatus_ = UIStatus::ON_TO_OFF;
+    if (!(component_->GetGroupName().empty())) {
+        if (lastStatus_ == SelectStatus::ALL && status_ == SelectStatus::PART) {
+            uiStatus_ = UIStatus::ON_TO_PART;
+        } else if (lastStatus_ == SelectStatus::ALL && status_ == SelectStatus::NONE) {
+            uiStatus_ = UIStatus::ON_TO_OFF;
+        } else if (lastStatus_ == SelectStatus::PART && status_ == SelectStatus::ALL) {
+            uiStatus_ = UIStatus::PART_TO_ON;
+        } else if (lastStatus_ == SelectStatus::PART && status_ == SelectStatus::NONE) {
+            uiStatus_ = UIStatus::PART_TO_OFF;
+        } else if (lastStatus_ == SelectStatus::NONE && status_ == SelectStatus::ALL) {
+            uiStatus_ = UIStatus::OFF_TO_ON;
+        } else if (lastStatus_ == SelectStatus::NONE && status_ == SelectStatus::PART) {
+            uiStatus_ = UIStatus::OFF_TO_PART;
+        }
+    } else if (!(component_->GetCheckboxName().empty())) {
+        uiStatus_ = (component_->GetValue()) ? UIStatus::OFF_TO_ON : UIStatus::ON_TO_OFF;
     }
+
     MarkNeedRender();
+}
+
+void RenderCheckbox::UpdateGroupStatus()
+{
+    if (!component_) {
+        return;
+    }
+
+    auto checkboxList = component_->GetCheckboxList();
+    int count = 0;
+    isGroup_ = !checkboxList.empty();
+    if (isGroup_) {
+        for(auto& item : checkboxList) {
+            if (item->GetValue()) {
+                count++;
+            }
+        }
+        if (count == (int)checkboxList.size()) {
+            status_ = SelectStatus::ALL;
+        } else if (count > 0 && (int)checkboxList.size() > count) {
+            status_ = SelectStatus::PART;
+        } else {
+            status_ = SelectStatus::NONE;
+        }
+    }
 }
 
 void RenderCheckbox::OnAnimationStop()

@@ -32,6 +32,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_checkbox.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
@@ -861,7 +863,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextTimer", JSTextTimer::JSBind },
     { "TextAreaController", JSTextAreaController::JSBind },
     { "TextInputController", JSTextInputController::JSBind },
-    { "TextTimerController", JSTextTimerController::JSBind }
+    { "TextTimerController", JSTextTimerController::JSBind },
+    { "Checkbox", JSCheckbox::JSBind},
+    { "CheckboxGroup", JSCheckboxGroup::JSBind}
 };
 
 void RegisterAllModule(BindingTarget globalObj)

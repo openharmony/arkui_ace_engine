@@ -33,10 +33,14 @@ public:
 private:
     void DrawCheck(SkCanvas* canvas, const Offset& origin, const SkPaint& paint, const SkPaint& shadowPaint) const;
     void DrawActiveBorder(SkCanvas* canvas, const Offset& paintOffset, SkPaint& strokePaint) const;
+    void DrawActiveSquare(SkCanvas* canvas, const Offset& paintOffset, SkPaint& strokePaint) const;
     void DrawUnselected(SkCanvas* canvas, const Offset& origin, uint32_t paintColor, SkPaint& paint) const;
+    void SetUIStatus(SkCanvas* canvas, const Offset& paintOffset, SkPaint& strokePaint, SkPaint& shadowPaint);
     void DrawBorder(SkCanvas* canvas, const Offset& origin, const SkPaint& paint, const Size& paintSize) const;
     void DrawAnimationOffToOn(
         SkCanvas* canvas, const Offset& origin, const SkPaint& paint, const SkPaint& shadowPaint) const;
+    void DrawSquare(
+        SkCanvas* canvas, const Offset& origin, const SkPaint& paint, const Size& paintSize) const;
     void DrawAnimationOnToOff(
         SkCanvas* canvas, const Offset& origin, const SkPaint& paint, const SkPaint& shadowPaint) const;
 };

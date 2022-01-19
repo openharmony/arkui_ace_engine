@@ -129,6 +129,8 @@ template("declarative_js_engine") {
       "jsview/js_canvas_image_data.cpp",
       "jsview/js_canvas_path.cpp",
       "jsview/js_canvas_renderer.cpp",
+      "jsview/js_checkbox.cpp",
+      "jsview/js_checkboxgroup.cpp",
       "jsview/js_circle.cpp",
       "jsview/js_clipboard.cpp",
       "jsview/js_column.cpp",

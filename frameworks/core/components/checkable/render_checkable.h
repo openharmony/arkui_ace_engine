@@ -33,6 +33,11 @@ enum class UIStatus {
     FOCUS,
     ON_TO_OFF,
     OFF_TO_ON,
+    PART,
+    PART_TO_OFF,
+    OFF_TO_PART,
+    PART_TO_ON,
+    ON_TO_PART,
 };
 
 class RenderCheckable : public RenderNode {
@@ -91,7 +96,7 @@ protected:
     void OnStatusChanged(RenderStatus renderStatus) override;
     void InitSize();
     void CalculateSize();
-    void UpdateUIStatus()
+    virtual void UpdateUIStatus()
     {
         uiStatus_ = checked_ ? UIStatus::SELECTED : ((onFocus_ && needFocus_) ? UIStatus::FOCUS : UIStatus::UNSELECTED);
     }
