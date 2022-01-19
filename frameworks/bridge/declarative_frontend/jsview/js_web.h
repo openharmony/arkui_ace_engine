@@ -19,14 +19,18 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
-class ACE_EXPORT JSWeb : public JSContainerBase {
+class JSWeb : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
     static void OnPageStart(const JSCallbackInfo& args);
     static void OnPageFinish(const JSCallbackInfo& args);
+    static void OnRequestFocus(const JSCallbackInfo& args);
     static void OnError(const JSCallbackInfo& args);
     static void OnMessage(const JSCallbackInfo& args);
+    static void JsEnabled(bool isJsEnabled);
+    static void ContentAccessEnabled(bool isContentAccessEnabled);
+    static void FileAccessEnabled(bool isFileAccessEnabled);
 };
 }
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_H

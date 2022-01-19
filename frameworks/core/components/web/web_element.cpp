@@ -31,6 +31,9 @@ void WebElement::SetNewComponent(const RefPtr<Component>& newComponent)
             WebClient::GetInstance().UpdateWebviewUrl(webComponent->GetSrc());
         }
         webSrc_ = webComponent->GetSrc();
+        webComponent->SetJsEnabled(webComponent->GetJsEnabled());
+        webComponent->SetContentAccessEnabled(webComponent->GetContentAccessEnabled());
+        webComponent->SetFileAccessEnabled(webComponent->GetFileAccessEnabled());
         Element::SetNewComponent(webComponent);
     }
 }

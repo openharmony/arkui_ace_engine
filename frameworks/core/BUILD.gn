@@ -333,6 +333,11 @@ template("ace_core_source_set") {
         "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform",
       ]
     }
+
+    if (defined(config.web_components_support) &&
+        config.web_components_support) {
+      deps += [ "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform" ]
+    }
     sources += [ "common/form_manager.cpp" ]
 
     # xcomponent components supports phone, TV and wearable except PC Preview

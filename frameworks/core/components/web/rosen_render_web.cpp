@@ -15,9 +15,6 @@
 
 #include "core/components/web/rosen_render_web.h"
 
-#include "base/log/ace_trace.h"
-#include "base/log/dump_log.h"
-
 namespace OHOS::Ace {
 
 void RosenRenderWeb::PerformLayout()
@@ -25,21 +22,6 @@ void RosenRenderWeb::PerformLayout()
     RenderWeb::PerformLayout();
 }
 
-void RosenRenderWeb::DumpTree(int32_t depth)
-{
-    auto children = GetChildren();
-
-    if (DumpLog::GetInstance().GetDumpFile() > 0) {
-        DumpLog::GetInstance().AddDesc("sourceSize:", " width = ", GetLayoutSize().Width(),
-            " height = ", GetLayoutSize().Height());
-        DumpLog::GetInstance().AddDesc("globalPosition:", "x = ", GetGlobalOffset().GetX(),
-            " y = ", GetGlobalOffset().GetY());
-        DumpLog::GetInstance().Print(depth, AceType::TypeName(this), children.size());
-    }
-
-    for (const auto& item : children) {
-        item->DumpTree(depth + 1);
-    }
-}
+void RosenRenderWeb::DumpTree(int32_t depth) {}
 
 } // namespace OHOS::Ace

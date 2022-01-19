@@ -105,7 +105,9 @@
 #include "frameworks/bridge/common/dom/dom_tool_bar_item.h"
 #include "frameworks/bridge/common/dom/dom_video.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef WEB_SUPPORTED
 #include "frameworks/bridge/common/dom/dom_web.h"
+#endif
 #endif
 #endif
 
@@ -245,8 +247,10 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_USE, &DOMNodeCreator<DOMSvgUse> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_VIDEO, &DOMNodeCreator<DOMVideo> },
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(OHOS_STANDARD_SYSTEM)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef WEB_SUPPORTED
         { DOM_NODE_TAG_WEB, &DOMNodeCreator<DOMWeb> },
+#endif
 #endif
 #endif
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)

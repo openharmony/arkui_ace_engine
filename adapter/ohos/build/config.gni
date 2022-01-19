@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/ohos/ace/ace_args.gni")
+
 defines = [
   "OHOS_PLATFORM",
   "OHOS_STANDARD_SYSTEM",
@@ -49,6 +51,14 @@ hdc_register_support = true
 pa_engine_path = "adapter/ohos/entrance/pa_engine"
 enable_rosen_backend = true
 enable_standard_input = true
+
+if (defined(is_experiment_build) && is_experiment_build) {
+  web_components_support = true
+}
+
+if (defined(web_components_support) && web_components_support) {
+  defines += [ "WEB_SUPPORTED" ]
+}
 
 if (disable_gpu || enable_rosen_backend) {
   defines += [ "GPU_DISABLED" ]

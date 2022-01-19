@@ -54,6 +54,12 @@
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
 #endif
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef WEB_SUPPORTED
+#include "frameworks/bridge/declarative_frontend/jsview/js_web.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
+#endif
+#endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_gesture.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
@@ -811,6 +817,12 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "FormComponent", JSForm::JSBind },
 #endif
 #endif
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef WEB_SUPPORTED
+    { "Web", JSWeb::JSBind },
+    { "WebController", JSWebController::JSBind },
+#endif
+#endif
 #ifndef WEARABLE_PRODUCT
     { "Camera", JSCamera::JSBind },
     { "Piece", JSPiece::JSBind },
@@ -881,6 +893,11 @@ void RegisterAllModule(BindingTarget globalObj)
     JSTextAreaController::JSBind(globalObj);
     JSSearchController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef WEB_SUPPORTED
+    JSWebController::JSBind(globalObj);
+#endif
+#endif
     for (auto& iter : bindFuncs) {
         iter.second(globalObj);
     }
@@ -913,6 +930,12 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
         JSTextAreaController::JSBind(globalObj);
     } else if ((*func).first == "Search") {
         JSSearchController::JSBind(globalObj);
+    } else if ((*func).first == "Web") {
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef WEB_SUPPORTED
+        JSWebController::JSBind(globalObj);
+#endif
+#endif
     }
 
     (*func).second(globalObj);

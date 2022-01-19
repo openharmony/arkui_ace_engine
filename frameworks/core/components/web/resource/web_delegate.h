@@ -19,8 +19,13 @@
 #include <list>
 
 #include "core/components/common/layout/constants.h"
+#include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
 #include "core/components/web/web_component.h"
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+#include "webview_helper.h"
+#include "window.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -31,6 +36,7 @@ public:
     using CreatedCallback = std::function<void()>;
     using ReleasedCallback = std::function<void(bool)>;
     using EventCallback = std::function<void(const std::string&)>;
+    using EventCallbackV2 = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     enum class State: char {
         WAITINGFORSIZE,
         CREATING,
@@ -58,18 +64,35 @@ public:
     void RemoveReleasedCallback();
     void Reload();
     void UpdateUrl(const std::string& url);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+    void InitOHOSWeb(const WeakPtr<PipelineContext>& context);
+    void InitWebViewWithWindow();
+    void ShowWebView()
+    {
+        if (window_) {
+            window_->Show();
+        }
+    }
 
+    void HideWebView()
+    {
+        if (window_) {
+            window_->Hide();
+        }
+    }
+#endif
+    void OnPageStarted(const std::string& param);
+    void OnPageFinished(const std::string& param);
+    void OnRequestFocus();
+    void OnPageError(const std::string& param);
+    void OnMessage(const std::string& param);
+    void OnRouterPush(const std::string& param);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
     void ReleasePlatformResource();
     void Stop();
     void UnregisterEvent();
-    void OnPageStarted(const std::string& param);
-    void OnPageFinished(const std::string& param);
-    void OnPageError(const std::string& param);
-    void OnMessage(const std::string& param);
-    void OnRouterPush(const std::string& param);
     std::string GetUrlStringParam(const std::string& param, const std::string& name) const;
     void CallWebRouterBack();
     void CallPopPageSuccessPageUrl(const std::string& url);
@@ -78,6 +101,14 @@ private:
     void BindRouterBackMethod();
     void BindPopPageSuccessMethod();
     void BindIsPagePathInvalidMethod();
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+    sptr<Rosen::Window> CreateWindow();
+    void LoadUrl(std::string url);
+    void ExecuteTypeScript(std::string jscode);
+    void LoadDataWithBaseUrl(
+        std::string baseUrl, std::string data, std::string mimeType, std::string encoding, std::string historyUrl);
+    void SetWebCallBack();
+#endif
 
     RefPtr<WebComponent> webComponent_;
     std::list<CreatedCallback> createdCallbacks_;
@@ -92,6 +123,15 @@ private:
     Method changePageUrlMethod_;
     Method isPagePathInvalidMethod_;
     State state_ {State::WAITINGFORSIZE};
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+    std::shared_ptr<WebView> webview_;
+    sptr<Rosen::Window> window_;
+    bool isCreateWebView_ = false;
+
+    EventCallbackV2 onPageFinishedV2_;
+    EventCallbackV2 onRequestFocusV2_;
+
+#endif
 };
 
 } // namespace OHOS::Ace
