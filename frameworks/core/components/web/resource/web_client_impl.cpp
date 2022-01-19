@@ -14,6 +14,7 @@
  */
 
 #include "core/components/web/resource/web_client_impl.h"
+#include "core/components/web/resource/web_delegate.h"
 
 namespace OHOS::Ace {
 void WebClientImpl::OnPageFinished(int httpStatusCode, const std::string& url)
