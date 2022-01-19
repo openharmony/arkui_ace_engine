@@ -204,9 +204,9 @@ class AppStorage {
     return this.storage_.size;
   }
 
-  public link<T>(propName: string, linkUser?: IPropertySubscriber, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T> | undefined {
+  public link<T>(propName: string, linkUser?: IPropertySubscriber): ObservedPropertyAbstract<T> | undefined {
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
-    return (p) ? p.createLink(linkUser, propName, contentObserver) : undefined
+    return (p) ? p.createLink(linkUser, propName) : undefined
   }
 
   public setAndLink<T>(propName: string, defaultValue: T, linkUser?: IPropertySubscriber): ObservedPropertyAbstract<T> {
@@ -214,16 +214,12 @@ class AppStorage {
     if (!p) {
       this.setOrCreate(propName, defaultValue);
     }
-    if (linkUser && (linkUser as View).getContentStorage()) {
-      var contentObserver = (linkUser as View).getContentStorage().setAndLink(propName, defaultValue, linkUser);
-      return this.link(propName, linkUser, contentObserver)
-    }
     return this.link(propName, linkUser);
   }
 
-  public prop<S>(propName: string, propUser?: IPropertySubscriber, contentObserver?: ObservedPropertyAbstract<S>): ObservedPropertyAbstract<S> | undefined {
+  public prop<S>(propName: string, propUser?: IPropertySubscriber): ObservedPropertyAbstract<S> | undefined {
     var p: ObservedPropertyAbstract<S> | undefined = this.storage_.get(propName);
-    return (p) ? p.createProp(propUser, propName, contentObserver) : undefined
+    return (p) ? p.createProp(propUser, propName) : undefined
   }
 
   public setAndProp<S>(propName: string, defaultValue: S, propUser?: IPropertySubscriber): ObservedPropertyAbstract<S> {
@@ -237,12 +233,6 @@ class AppStorage {
         return undefined;
       }
     }
-
-    if (propUser && (propUser as View).getContentStorage()) {
-      var contentObserver = (propUser as View).getContentStorage().setAndProp(propName, defaultValue, propUser);
-      return this.prop(propName, propUser, contentObserver)
-    }
-
     return this.prop(propName, propUser);
   }
 

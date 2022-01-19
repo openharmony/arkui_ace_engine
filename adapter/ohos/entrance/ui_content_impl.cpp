@@ -215,8 +215,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     // set view
     Platform::AceContainer::SetView(flutterAceView, config_.Density(), width, height);
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, config_.Orientation());
-    auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
-    container->SetContentStorage(nativeEngine->CreateReference(storage, 1));
 
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {

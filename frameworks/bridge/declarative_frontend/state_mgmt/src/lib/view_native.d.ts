@@ -16,9 +16,6 @@
 declare class NativeView {
   constructor(compilerAssignedUniqueChildId: string, parent: View);
   markNeedUpdate(): void;
-  getContentStorage() : ContentStorage;
-  getContext() : Context;
-
   findChildById(compilerAssignedUniqueChildId: string): View;
 
   static create(newView: View): void;

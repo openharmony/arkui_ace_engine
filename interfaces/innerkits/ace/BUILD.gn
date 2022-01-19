@@ -24,10 +24,7 @@ ohos_shared_library("ace_uicontent") {
 
   configs = [ "$ace_root:ace_config" ]
 
-  sources = [
-    "${ace_root}/interfaces/innerkits/ace/declarative_module_preloader.cpp",
-    "${ace_root}/interfaces/innerkits/ace/ui_content.cpp",
-  ]
+  sources = [ "${ace_root}/interfaces/innerkits/ace/ui_content.cpp" ]
 
   subsystem_name = "ace"
   part_name = ace_engine_part

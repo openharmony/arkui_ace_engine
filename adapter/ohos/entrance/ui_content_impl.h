@@ -20,7 +20,6 @@
 #include "interfaces/innerkits/ace/viewport_config.h"
 #include "key_event.h"
 #include "native_engine/native_value.h"
-#include "native_engine/native_engine.h"
 #include "touch_event.h"
 
 #include "base/utils/macros.h"
