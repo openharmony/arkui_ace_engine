@@ -50,7 +50,7 @@ public:
     static RefPtr<CanvasPath2D> JsMakePath2D(const JSCallbackInfo& info);
     void SetAntiAlias();
 
-    static void ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint32_t>& array);
+    void ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint32_t>& array);
 
     void JsFillRect(const JSCallbackInfo& info);
     void JsStrokeRect(const JSCallbackInfo& info);
