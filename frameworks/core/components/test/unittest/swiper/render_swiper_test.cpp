@@ -56,9 +56,9 @@ constexpr double DRAG_OFFSET_MAX = 1.0;
 constexpr double DRAG_OFFSET_MAX_NEGATIVE = -1.0;
 constexpr double DRAG_OFFSET_SWITCH_DP = 14.0;
 
-const TouchPoint MOCK_DOWN_TOUCH_EVENT { 10, 540, 200, TouchType::DOWN };
-const TouchPoint MOCK_MOVE_TOUCH_EVENT { 10, 540, 200, TouchType::MOVE };
-const TouchPoint MOCK_UP_TOUCH_EVENT { 10, 540, 200, TouchType::UP };
+const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 540, 200, TouchType::DOWN };
+const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 540, 200, TouchType::MOVE };
+const TouchEvent MOCK_UP_TOUCH_EVENT { 10, 540, 200, TouchType::UP };
 enum class DragDirection {
     LEFT,
     RIGHT,
@@ -301,7 +301,7 @@ void SwiperComponentTest::WaitAndMockVsync(int64_t waitFor)
 void SwiperComponentTest::DragSwiper(const DragDirection& dragDirection)
 {
     context_->OnTouchEvent(MOCK_DOWN_TOUCH_EVENT);
-    TouchPoint touchPoint = MOCK_MOVE_TOUCH_EVENT;
+    TouchEvent touchPoint = MOCK_MOVE_TOUCH_EVENT;
     double dragOffset = SWIPER_WIDTH * 0.3; // 0.3 mean darg 30% of the swiper width
     for (int i = 0; i < 3; i++) {
         context_->OnTouchEvent(touchPoint);
@@ -311,7 +311,7 @@ void SwiperComponentTest::DragSwiper(const DragDirection& dragDirection)
             touchPoint.x += dragOffset;
         }
     }
-    TouchPoint touchEndPoint = MOCK_UP_TOUCH_EVENT;
+    TouchEvent touchEndPoint = MOCK_UP_TOUCH_EVENT;
     touchEndPoint.x = touchPoint.x;
     context_->OnTouchEvent(touchEndPoint);
 }

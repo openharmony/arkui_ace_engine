@@ -70,7 +70,7 @@ void ParallelRecognizer::OnPending(size_t touchId)
     }
 }
 
-bool ParallelRecognizer::HandleEvent(const TouchPoint& point)
+bool ParallelRecognizer::HandleEvent(const TouchEvent& point)
 {
     if (point.type == TouchType::UNKNOWN) {
         LOGW("unknown touch type");

@@ -46,7 +46,7 @@ void PinchRecognizer::OnRejected()
     Reset();
 }
 
-void PinchRecognizer::HandleTouchDownEvent(const TouchPoint& event)
+void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch down event, begin to detect pinch event");
     if (fingers_ > MAX_PINCH_FINGERS) {
@@ -64,7 +64,7 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchPoint& event)
     }
 }
 
-void PinchRecognizer::HandleTouchUpEvent(const TouchPoint& event)
+void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch up event");
     auto itr = touchPoints_.find(event.id);
@@ -87,7 +87,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchPoint& event)
     }
 }
 
-void PinchRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
+void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch move event");
     auto itr = touchPoints_.find(event.id);
@@ -116,7 +116,7 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
     }
 }
 
-void PinchRecognizer::HandleTouchCancelEvent(const TouchPoint& event)
+void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch cancel event");
     if (state_ == DetectState::READY || state_ == DetectState::DETECTING) {

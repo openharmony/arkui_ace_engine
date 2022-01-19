@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace {
 
-void VelocityTracker::UpdateTouchPoint(const TouchPoint& event)
+void VelocityTracker::UpdateTouchPoint(const TouchEvent& event)
 {
     currentTrackPoint_ = event;
     if (isFirstPoint_) {

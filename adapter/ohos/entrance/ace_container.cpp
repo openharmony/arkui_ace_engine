@@ -427,7 +427,7 @@ void AceContainer::InitializeCallback()
     ACE_FUNCTION_TRACE();
 
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
-    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchPoint& event) {
+    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchEvent& event) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, event]() { context->OnTouchEvent(event); }, TaskExecutor::TaskType::UI);

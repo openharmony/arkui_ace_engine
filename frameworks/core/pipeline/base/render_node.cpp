@@ -1590,7 +1590,7 @@ Rect RenderNode::GetDirtyRect() const
     return dirty;
 }
 
-bool RenderNode::IsPointInBox(const TouchPoint& point)
+bool RenderNode::IsPointInBox(const TouchEvent& point)
 {
     double offsetX = GetGlobalOffset().GetX();
     double offsetY = GetGlobalOffset().GetY();

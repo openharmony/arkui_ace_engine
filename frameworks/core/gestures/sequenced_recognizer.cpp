@@ -73,7 +73,7 @@ void SequencedRecognizer::OnPending(size_t touchId)
     }
 }
 
-bool SequencedRecognizer::HandleEvent(const TouchPoint& point)
+bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
 {
     RefPtr<GestureRecognizer> curRecognizer = recognizers_[activeIndex];
     LOGD("dispatch to the %{public}zu gesture recognizer, event type is %{public}zu", activeIndex, point.type);

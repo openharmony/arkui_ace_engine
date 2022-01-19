@@ -138,7 +138,7 @@ public:
     bool HandleTouchEvent(const std::vector<uint8_t>& data) override;
 
     // Use to receive event from pc previewer
-    bool HandleTouchEvent(const TouchPoint& touchEvent) override;
+    bool HandleTouchEvent(const TouchEvent& touchEvent) override;
 
     ViewType GetViewType() const override
     {

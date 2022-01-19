@@ -203,7 +203,7 @@ public:
     void RemoveScheduleTask(uint32_t id);
 
     // Called by view when touch event received.
-    void OnTouchEvent(const TouchPoint& point);
+    void OnTouchEvent(const TouchEvent& point);
 
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
@@ -360,12 +360,12 @@ public:
     }
     void NotifyDestroyEventDismiss() const;
 
-    using DispatchTouchEventHandler = std::function<void(const TouchPoint& event)>;
+    using DispatchTouchEventHandler = std::function<void(const TouchEvent& event)>;
     void SetDispatchTouchEventHandler(DispatchTouchEventHandler&& listener)
     {
         dispatchTouchEventHandler_.push_back(std::move(listener));
     }
-    void NotifyDispatchTouchEventDismiss(const TouchPoint& event) const;
+    void NotifyDispatchTouchEventDismiss(const TouchEvent& event) const;
 
     float GetViewScale() const
     {
@@ -382,8 +382,8 @@ public:
     {
         return rootHeight_;
     }
-    RefPtr<RenderNode> DragTestAll(const TouchPoint& point);
-    RefPtr<RenderNode> DragTest(const TouchPoint& point, const RefPtr<RenderNode>& renderNode, int32_t deep);
+    RefPtr<RenderNode> DragTestAll(const TouchEvent& point);
+    RefPtr<RenderNode> DragTest(const TouchEvent& point, const RefPtr<RenderNode>& renderNode, int32_t deep);
 
     double GetRootWidth() const
     {

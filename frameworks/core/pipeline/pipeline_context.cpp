@@ -1310,13 +1310,13 @@ void PipelineContext::RemoveScheduleTask(uint32_t id)
     scheduleTasks_.erase(id);
 }
 
-RefPtr<RenderNode> PipelineContext::DragTestAll(const TouchPoint& point)
+RefPtr<RenderNode> PipelineContext::DragTestAll(const TouchEvent& point)
 {
     return DragTest(point, rootElement_->GetRenderNode(), 0);
 }
 
 RefPtr<RenderNode> PipelineContext::DragTest(
-    const TouchPoint& point, const RefPtr<RenderNode>& renderNode, int32_t deep)
+    const TouchEvent& point, const RefPtr<RenderNode>& renderNode, int32_t deep)
 {
     if (AceType::InstanceOf<RenderBox>(renderNode) && renderNode->onDomDragEnter_ && renderNode->IsPointInBox(point)) {
         return renderNode;
@@ -1332,7 +1332,7 @@ RefPtr<RenderNode> PipelineContext::DragTest(
     return nullptr;
 }
 
-void PipelineContext::OnTouchEvent(const TouchPoint& point)
+void PipelineContext::OnTouchEvent(const TouchEvent& point)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
@@ -1931,7 +1931,7 @@ void PipelineContext::NotifyDestroyEventDismiss() const
     }
 }
 
-void PipelineContext::NotifyDispatchTouchEventDismiss(const TouchPoint& event) const
+void PipelineContext::NotifyDispatchTouchEventDismiss(const TouchEvent& event) const
 {
     CHECK_RUN_ON(UI);
     for (auto& iterDispatchTouchEventHander : dispatchTouchEventHandler_) {

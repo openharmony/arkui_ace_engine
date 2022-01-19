@@ -375,7 +375,7 @@ HWTEST_F(GesturesTest, RawRecognizer001, TestSize.Level1)
      * @tc.steps: step2. send touch down event.
      * @tc.expected: step2. receive touch down callback and touch point result is right.
      */
-    TouchPoint point {
+    TouchEvent point {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::DOWN, .time = std::chrono::high_resolution_clock::now()
     };
     rawRecognizer->HandleEvent(point);
@@ -411,7 +411,7 @@ HWTEST_F(GesturesTest, RawRecognizer002, TestSize.Level1)
      * @tc.steps: step2. send touch up event.
      * @tc.expected: step2. receive touch up callback and touch point result is right.
      */
-    TouchPoint point {
+    TouchEvent point {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::UP, .time = std::chrono::high_resolution_clock::now()
     };
     rawRecognizer->HandleEvent(point);
@@ -448,7 +448,7 @@ HWTEST_F(GesturesTest, RawRecognizer003, TestSize.Level1)
      * @tc.steps: step2. send touch cancel event.
      * @tc.expected: step2. receive touch cancel callback and touch point result is right.
      */
-    TouchPoint point {
+    TouchEvent point {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::CANCEL, .time = std::chrono::high_resolution_clock::now()
     };
     rawRecognizer->HandleEvent(point);
@@ -484,7 +484,7 @@ HWTEST_F(GesturesTest, RawRecognizer004, TestSize.Level1)
      * @tc.steps: step2. send touch move event.
      * @tc.expected: step2. receive touch move callback and touch point result is right.
      */
-    TouchPoint point {
+    TouchEvent point {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::MOVE, .time = std::chrono::high_resolution_clock::now()
     };
     rawRecognizer->HandleEvent(point);
@@ -518,7 +518,7 @@ HWTEST_F(GesturesTest, VelocityTracker001, TestSize.Level1)
      * @tc.steps: step2. send start point.
      * @tc.expected: step2. receive first point to calculate the velocity.
      */
-    TouchPoint pointFirst {
+    TouchEvent pointFirst {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::MOVE, .time = std::chrono::high_resolution_clock::now()
     };
     onVelocityTracker.UpdateTouchPoint(pointFirst);
@@ -530,7 +530,7 @@ HWTEST_F(GesturesTest, VelocityTracker001, TestSize.Level1)
      * @tc.expected: step3. receive first point to calculate the velocity.
      */
     usleep(TIME_MILLISECOND);
-    TouchPoint pointSecond {
+    TouchEvent pointSecond {
         .x = LOCATION_X, .y = 2 * LOCATION_Y, .type = TouchType::MOVE, .time = std::chrono::high_resolution_clock::now()
     };
 
@@ -564,7 +564,7 @@ HWTEST_F(GesturesTest, VelocityTracker002, TestSize.Level1)
      * @tc.steps: step2. send start point.
      * @tc.expected: step2. receive first point to calculate the velocity.
      */
-    TouchPoint pointFirst {
+    TouchEvent pointFirst {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::MOVE, .time = std::chrono::high_resolution_clock::now()
     };
     onVelocityTracker.UpdateTouchPoint(pointFirst);
@@ -576,7 +576,7 @@ HWTEST_F(GesturesTest, VelocityTracker002, TestSize.Level1)
      * @tc.expected: step3. receive first point to calculate the velocity.
      */
     usleep(TIME_MILLISECOND);
-    TouchPoint pointSecond {
+    TouchEvent pointSecond {
         .x = 2 * LOCATION_X, .y = LOCATION_Y, .type = TouchType::MOVE, .time = std::chrono::high_resolution_clock::now()
     };
 
@@ -610,7 +610,7 @@ HWTEST_F(GesturesTest, VelocityTracker003, TestSize.Level1)
      * @tc.steps: step2. send start point.
      * @tc.expected: step2. receive first point to calculate the velocity.
      */
-    TouchPoint pointFirst {
+    TouchEvent pointFirst {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::MOVE, .time = std::chrono::high_resolution_clock::now()
     };
     velTracker.UpdateTouchPoint(pointFirst);
@@ -622,7 +622,7 @@ HWTEST_F(GesturesTest, VelocityTracker003, TestSize.Level1)
      * @tc.expected: step3. receive first point to calculate the velocity.
      */
     usleep(TIME_MILLISECOND);
-    TouchPoint pointSecond { .x = 2 * LOCATION_X,
+    TouchEvent pointSecond { .x = 2 * LOCATION_X,
         .y = 2 * LOCATION_Y,
         .type = TouchType::MOVE,
         .time = std::chrono::high_resolution_clock::now() };
@@ -663,7 +663,7 @@ HWTEST_F(GesturesTest, LongPressRecognizer001, TestSize.Level1)
      * @tc.steps: step2. send touch down event.
      * @tc.expected: step2. touch point result is right.
      */
-    TouchPoint point {
+    TouchEvent point {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::DOWN, .time = std::chrono::high_resolution_clock::now()
     };
     longPressRecognizer->HandleEvent(point);
@@ -702,7 +702,7 @@ HWTEST_F(GesturesTest, LongPressRecognizer002, TestSize.Level1)
      * @tc.steps: step2. send touch down event.
      * @tc.expected: step2. touch point result is right.
      */
-    TouchPoint point {
+    TouchEvent point {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::DOWN, .time = std::chrono::high_resolution_clock::now()
     };
     longPressRecognizer->HandleEvent(point);
@@ -752,7 +752,7 @@ HWTEST_F(GesturesTest, LongPressRecognizer003, TestSize.Level1)
      * @tc.steps: step2. send touch down event.
      * @tc.expected: step2. touch point result is right.
      */
-    TouchPoint point {
+    TouchEvent point {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::DOWN, .time = std::chrono::high_resolution_clock::now()
     };
     longPressRecognizer->HandleEvent(point);
@@ -803,7 +803,7 @@ HWTEST_F(GesturesTest, LongPressRecognizer004, TestSize.Level1)
      * @tc.steps: step2. send touch down event.
      * @tc.expected: step2. touch point result is right.
      */
-    TouchPoint point {
+    TouchEvent point {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::DOWN, .time = std::chrono::high_resolution_clock::now()
     };
     longPressRecognizer->HandleEvent(point);
@@ -844,7 +844,7 @@ HWTEST_F(GesturesTest, ClickRecognizer001, TestSize.Level1)
      * @tc.steps: step2. send touch down event.
      * @tc.expected: step2. receive touch down callback and touch point result is right.
      */
-    TouchPoint point { .id = 2,
+    TouchEvent point { .id = 2,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
@@ -885,7 +885,7 @@ HWTEST_F(GesturesTest, ClickRecognizer002, TestSize.Level1)
      * @tc.expected: step2. receive touch down callback and touch point result is
      * right.
      */
-    TouchPoint pointStart {
+    TouchEvent pointStart {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::DOWN, .time = std::chrono::high_resolution_clock::now()
     };
     clickRecognizer->HandleEvent(pointStart);
@@ -895,7 +895,7 @@ HWTEST_F(GesturesTest, ClickRecognizer002, TestSize.Level1)
      * @tc.steps: step3. send the touch move event. move not far than max threshold
      * @tc.expected: step3. the touch location info is right.
      */
-    TouchPoint pointEnd { .x = LOCATION_X + MAX_THRESHOLD,
+    TouchEvent pointEnd { .x = LOCATION_X + MAX_THRESHOLD,
         .y = LOCATION_Y,
         .type = TouchType::MOVE,
         .time = std::chrono::high_resolution_clock::now() };
@@ -933,7 +933,7 @@ HWTEST_F(GesturesTest, ClickRecognizer003, TestSize.Level1)
      * @tc.steps: step2. send touch down event.
      * @tc.expected: step2. receive touch down callback and touch point result is right.
      */
-    TouchPoint pointStart {
+    TouchEvent pointStart {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::DOWN, .time = std::chrono::high_resolution_clock::now()
     };
     clickRecognizer->HandleEvent(pointStart);
@@ -943,7 +943,7 @@ HWTEST_F(GesturesTest, ClickRecognizer003, TestSize.Level1)
      * @tc.steps: step3. send the touch move event. move far than max threshold
      * @tc.expected: step3. the touch location info is right.
      */
-    TouchPoint pointEnd { .x = LOCATION_X + MAX_THRESHOLD + 0.1f,
+    TouchEvent pointEnd { .x = LOCATION_X + MAX_THRESHOLD + 0.1f,
         .y = LOCATION_Y,
         .type = TouchType::MOVE,
         .time = std::chrono::high_resolution_clock::now() };
@@ -1052,14 +1052,14 @@ HWTEST_F(GesturesTest, DragRecognizer001, TestSize.Level1)
      * @tc.steps: step2. send down event and vertical move event.
      * @tc.expected: step2. receive event callback and result is right.
      */
-    TouchPoint pointStart { .id = 2,
+    TouchEvent pointStart { .id = 2,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
         .time = std::chrono::high_resolution_clock::now() };
     dragRecognizer->HandleEvent(pointStart);
 
-    TouchPoint pointEnd { .id = 2,
+    TouchEvent pointEnd { .id = 2,
         .x = LOCATION_X,
         .y = 2 * LOCATION_Y,
         .type = TouchType::MOVE,
@@ -1105,14 +1105,14 @@ HWTEST_F(GesturesTest, DragRecognizer002, TestSize.Level1)
      * @tc.steps: step2. send down event and horizontal move event.
      * @tc.expected: step2. receive event callback and result is right.
      */
-    TouchPoint pointStart { .id = 2,
+    TouchEvent pointStart { .id = 2,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
         .time = std::chrono::high_resolution_clock::now() };
     dragRecognizer->HandleEvent(pointStart);
 
-    TouchPoint pointEnd { .id = 2,
+    TouchEvent pointEnd { .id = 2,
         .x = 2 * LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::MOVE,
@@ -1158,14 +1158,14 @@ HWTEST_F(GesturesTest, DragRecognizer003, TestSize.Level1)
      * @tc.steps: step2. send down event and free move event.
      * @tc.expected: step2. receive event callback and result is right.
      */
-    TouchPoint pointStart { .id = 2,
+    TouchEvent pointStart { .id = 2,
         .x = 2 * LOCATION_X,
         .y = 2 * LOCATION_Y,
         .type = TouchType::DOWN,
         .time = std::chrono::high_resolution_clock::now() };
     dragRecognizer->HandleEvent(pointStart);
 
-    TouchPoint pointEnd { .id = 2,
+    TouchEvent pointEnd { .id = 2,
         .x = 2 * LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::MOVE,
@@ -1212,7 +1212,7 @@ HWTEST_F(GesturesTest, DragRecognizer004, TestSize.Level1)
      * @tc.steps: step2. send down event and move event.
      * @tc.expected: step2. receive event callback and check result is right.
      */
-    TouchPoint pointStart { .id = 2,
+    TouchEvent pointStart { .id = 2,
         .x = 2 * LOCATION_X,
         .y = 2 * LOCATION_Y,
         .type = TouchType::DOWN,
@@ -1252,14 +1252,14 @@ HWTEST_F(GesturesTest, DragRecognizer005, TestSize.Level1)
      * @tc.steps: step2. send down event and cancel event.
      * @tc.expected: step2. receive event callback and check result is right.
      */
-    TouchPoint pointStart { .id = 2,
+    TouchEvent pointStart { .id = 2,
         .x = 2 * LOCATION_X,
         .y = 2 * LOCATION_Y,
         .type = TouchType::DOWN,
         .time = std::chrono::high_resolution_clock::now() };
     dragRecognizer->HandleEvent(pointStart);
 
-    TouchPoint pointEnd { .id = 2,
+    TouchEvent pointEnd { .id = 2,
         .x = 2 * LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::MOVE,
@@ -1305,7 +1305,7 @@ HWTEST_F(GesturesTest, TapRecognizer001, TestSize.Level1)
      * @tc.steps: step2. send touch down event.
      * @tc.expected: step2. receive touch down callback and touch point result is right.
      */
-    TouchPoint point { .id = 0,
+    TouchEvent point { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
@@ -1347,7 +1347,7 @@ HWTEST_F(GesturesTest, TapRecognizer002, TestSize.Level1)
      * @tc.steps: step2. send touch down event.
      * @tc.expected: step2. receive touch down callback and touch point result is right.
      */
-    TouchPoint point { .id = 0,
+    TouchEvent point { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
@@ -1368,7 +1368,7 @@ HWTEST_F(GesturesTest, TapRecognizer002, TestSize.Level1)
      * @tc.steps: step4. send touch down event.
      * @tc.expected: step4. receive touch down callback and touch point result is right.
      */
-    TouchPoint point1 { .id = 0,
+    TouchEvent point1 { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
@@ -1412,7 +1412,7 @@ HWTEST_F(GesturesTest, TapRecognizer003, TestSize.Level1)
      * @tc.steps: step2. send touch down event.
      * @tc.expected: step2. receive touch down callback and touch point result is right.
      */
-    TouchPoint point { .id = 0,
+    TouchEvent point { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
@@ -1421,7 +1421,7 @@ HWTEST_F(GesturesTest, TapRecognizer003, TestSize.Level1)
     tapRecognizer->HandleEvent(point);
     ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point.time);
 
-    TouchPoint point1 { .id = 1,
+    TouchEvent point1 { .id = 1,
         .x = LOCATION_X1,
         .y = LOCATION_Y1,
         .type = TouchType::DOWN,
@@ -1466,7 +1466,7 @@ HWTEST_F(GesturesTest, TapRecognizer004, TestSize.Level1)
      * @tc.steps: step2. send touch down event.
      * @tc.expected: step2. receive touch down callback and touch point result is right.
      */
-    TouchPoint point { .id = 0,
+    TouchEvent point { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
@@ -1475,7 +1475,7 @@ HWTEST_F(GesturesTest, TapRecognizer004, TestSize.Level1)
     tapRecognizer->HandleEvent(point);
     ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point.time);
 
-    TouchPoint point1 { .id = 1,
+    TouchEvent point1 { .id = 1,
         .x = LOCATION_X1,
         .y = LOCATION_Y1,
         .type = TouchType::DOWN,
@@ -1499,7 +1499,7 @@ HWTEST_F(GesturesTest, TapRecognizer004, TestSize.Level1)
      * @tc.steps: step4. send touch down event.
      * @tc.expected: step4. receive touch down callback and touch point result is right.
      */
-    TouchPoint point2 { .id = 1,
+    TouchEvent point2 { .id = 1,
         .x = LOCATION_X1,
         .y = LOCATION_Y1,
         .type = TouchType::DOWN,
@@ -1508,7 +1508,7 @@ HWTEST_F(GesturesTest, TapRecognizer004, TestSize.Level1)
     tapRecognizer->HandleEvent(point2);
     ASSERT_NE(onTap.GetTapInfo().GetTimeStamp(), point2.time);
 
-    TouchPoint point3 { .id = 0,
+    TouchEvent point3 { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
@@ -1566,7 +1566,7 @@ HWTEST_F(GesturesTest, PanRecognizer001, TestSize.Level1)
      * @tc.steps: step2. send down event and all move event.
      * @tc.expected: step2. receive event callback and result is right.
      */
-    TouchPoint point { .id = 0,
+    TouchEvent point { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
@@ -1649,7 +1649,7 @@ HWTEST_F(GesturesTest, PanRecognizer002, TestSize.Level1)
      * @tc.steps: step2. send down event and all move event.
      * @tc.expected: step2. receive event callback and result is right.
      */
-    TouchPoint point { .id = 0,
+    TouchEvent point { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
@@ -1732,7 +1732,7 @@ HWTEST_F(GesturesTest, PanRecognizer003, TestSize.Level1)
      * @tc.steps: step2. send down event and all move event.
      * @tc.expected: step2. receive event callback and result is right.
      */
-    TouchPoint point { .id = 0,
+    TouchEvent point { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
@@ -1814,7 +1814,7 @@ HWTEST_F(GesturesTest, PanRecognizer004, TestSize.Level1)
      * @tc.steps: step2. send down event and all move event.
      * @tc.expected: step2. receive event callback and result is right.
      */
-    TouchPoint point { .id = 0,
+    TouchEvent point { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
@@ -1829,7 +1829,7 @@ HWTEST_F(GesturesTest, PanRecognizer004, TestSize.Level1)
     ASSERT_NE(onPan.GetPanInfo().GetOffsetX(), MIN_PAN_DISTANCE * 4);
     ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
 
-    TouchPoint point1 { .id = 1,
+    TouchEvent point1 { .id = 1,
         .x = LOCATION_X1,
         .y = LOCATION_Y1,
         .type = TouchType::DOWN,
@@ -1916,7 +1916,7 @@ HWTEST_F(GesturesTest, PanRecognizer005, TestSize.Level1)
      * @tc.steps: step2. send down event and all move event.
      * @tc.expected: step2. receive event callback and result is right.
      */
-    TouchPoint point { .id = 0,
+    TouchEvent point { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
@@ -1931,7 +1931,7 @@ HWTEST_F(GesturesTest, PanRecognizer005, TestSize.Level1)
     ASSERT_EQ(onPan.GetPanInfo().GetOffsetX(), MIN_PAN_DISTANCE * 4);
     ASSERT_EQ(onPan.GetPanInfo().GetOffsetY(), 0);
 
-    TouchPoint point1 { .id = 1,
+    TouchEvent point1 { .id = 1,
         .x = LOCATION_X1,
         .y = LOCATION_Y1,
         .type = TouchType::DOWN,
@@ -2022,14 +2022,14 @@ HWTEST_F(GesturesTest, PinchRecognizer001, TestSize.Level1)
      * @tc.steps: step2. send down event and all move event.
      * @tc.expected: step2. receive event callback and result is right.
      */
-    TouchPoint point { .id = 0,
+    TouchEvent point { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
         .time = std::chrono::high_resolution_clock::now() };
     pinchRecognizer->HandleEvent(point);
 
-    TouchPoint point1 { .id = 1,
+    TouchEvent point1 { .id = 1,
         .x = LOCATION_X1,
         .y = LOCATION_Y1,
         .type = TouchType::DOWN,
@@ -2121,14 +2121,14 @@ HWTEST_F(GesturesTest, PinchRecognizer002, TestSize.Level1)
      * @tc.steps: step2. send down event and all move event.
      * @tc.expected: step2. receive event callback and result is right.
      */
-    TouchPoint point { .id = 0,
+    TouchEvent point { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
         .time = std::chrono::high_resolution_clock::now() };
     pinchRecognizer->HandleEvent(point);
 
-    TouchPoint point1 { .id = 1,
+    TouchEvent point1 { .id = 1,
         .x = LOCATION_X1,
         .y = LOCATION_Y1,
         .type = TouchType::DOWN,
@@ -2149,14 +2149,14 @@ HWTEST_F(GesturesTest, PinchRecognizer002, TestSize.Level1)
     pinchRecognizer->HandleEvent(point1);
     ASSERT_NE(onPinch.GetPinchInfo().GetScale(), 3.0);
 
-    TouchPoint point2 { .id = 2,
+    TouchEvent point2 { .id = 2,
         .x = LOCATION_X2,
         .y = LOCATION_Y2,
         .type = TouchType::DOWN,
         .time = std::chrono::high_resolution_clock::now() };
     pinchRecognizer->HandleEvent(point2);
 
-    TouchPoint point3 {
+    TouchEvent point3 {
         .id = 3, .x = 0, .y = 0, .type = TouchType::DOWN, .time = std::chrono::high_resolution_clock::now()
     };
     pinchRecognizer->HandleEvent(point3);
@@ -2246,14 +2246,14 @@ HWTEST_F(GesturesTest, RotationRecognizer001, TestSize.Level1)
      * @tc.steps: step2. send down event and all move event.
      * @tc.expected: step2. receive event callback and result is right.
      */
-    TouchPoint point { .id = 0,
+    TouchEvent point { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
         .time = std::chrono::high_resolution_clock::now() };
     rotationRecognizer->HandleEvent(point);
 
-    TouchPoint point1 { .id = 1,
+    TouchEvent point1 { .id = 1,
         .x = LOCATION_X1,
         .y = LOCATION_Y1,
         .type = TouchType::DOWN,
@@ -2335,14 +2335,14 @@ HWTEST_F(GesturesTest, RotationRecognizer002, TestSize.Level1)
      * @tc.steps: step2. send down event and all move event.
      * @tc.expected: step2. receive event callback and result is right.
      */
-    TouchPoint point { .id = 0,
+    TouchEvent point { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
         .time = std::chrono::high_resolution_clock::now() };
     rotationRecognizer->HandleEvent(point);
 
-    TouchPoint point1 { .id = 1,
+    TouchEvent point1 { .id = 1,
         .x = LOCATION_X1,
         .y = LOCATION_Y1,
         .type = TouchType::DOWN,
@@ -2360,7 +2360,7 @@ HWTEST_F(GesturesTest, RotationRecognizer002, TestSize.Level1)
     rotationRecognizer->HandleEvent(point1);
     ASSERT_NE(onRotation.GetRotationInfo().GetAngle(), 90.0);
 
-    TouchPoint point2 { .id = 2,
+    TouchEvent point2 { .id = 2,
         .x = LOCATION_X2,
         .y = LOCATION_Y2,
         .type = TouchType::DOWN,
@@ -2446,7 +2446,7 @@ HWTEST_F(GesturesTest, MultiLongPressRecognizer001, TestSize.Level1)
      * @tc.steps: step2. send down event and all move event.
      * @tc.expected: step2. receive event callback and result is right.
      */
-    TouchPoint point { .id = 0,
+    TouchEvent point { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
@@ -2512,7 +2512,7 @@ HWTEST_F(GesturesTest, MultiLongPressRecognizer002, TestSize.Level1)
      * @tc.steps: step2. send down event and all move event.
      * @tc.expected: step2. receive event callback and result is right.
      */
-    TouchPoint point { .id = 0,
+    TouchEvent point { .id = 0,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
@@ -2520,7 +2520,7 @@ HWTEST_F(GesturesTest, MultiLongPressRecognizer002, TestSize.Level1)
     longPressRecognizer->HandleEvent(point);
     ASSERT_FALSE(onLongPress.GetMultiLongPressInfo().GetRepeat());
 
-    TouchPoint point1 { .id = 1,
+    TouchEvent point1 { .id = 1,
         .x = LOCATION_X1,
         .y = LOCATION_Y1,
         .type = TouchType::DOWN,

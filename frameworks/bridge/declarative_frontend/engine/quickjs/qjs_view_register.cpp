@@ -274,9 +274,9 @@ static JSValue JsSendEventByKey(JSContext* ctx, JSValueConst new_target, int arg
     return JS_NewBool(ctx, result);
 }
 
-static TouchPoint GetTouchPointFromJS(JSContext* ctx, JSValue value)
+static TouchEvent GetTouchPointFromJS(JSContext* ctx, JSValue value)
 {
-    TouchPoint touchPoint;
+    TouchEvent touchPoint;
 
     auto type = JS_GetPropertyStr(ctx, value, "type");
     auto iType = static_cast<int32_t>(TouchType::UNKNOWN);
@@ -320,7 +320,7 @@ static JSValue JsSendTouchEvent(JSContext* ctx, JSValueConst new_target, int arg
     if (!pipelineContext) {
         return JS_ThrowSyntaxError(ctx, "pipeline is null");
     }
-    TouchPoint touchPoint = GetTouchPointFromJS(ctx, argv[0]);
+    TouchEvent touchPoint = GetTouchPointFromJS(ctx, argv[0]);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); }, TaskExecutor::TaskType::UI);
 

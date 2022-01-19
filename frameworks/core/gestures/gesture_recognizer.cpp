@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 
-bool GestureRecognizer::HandleEvent(const TouchPoint& point)
+bool GestureRecognizer::HandleEvent(const TouchEvent& point)
 {
     switch (point.type) {
         case TouchType::MOVE:

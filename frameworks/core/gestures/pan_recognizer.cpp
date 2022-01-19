@@ -47,7 +47,7 @@ void PanRecognizer::OnRejected()
     Reset();
 }
 
-void PanRecognizer::HandleTouchDownEvent(const TouchPoint& event)
+void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     LOGD("pan recognizer receives touch down event, begin to detect pan event");
     fingers_ = newFingers_;
@@ -74,7 +74,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchPoint& event)
     }
 }
 
-void PanRecognizer::HandleTouchUpEvent(const TouchPoint& event)
+void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("pan recognizer receives touch up event");
     auto itr = touchPoints_.find(event.id);
@@ -119,7 +119,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchPoint& event)
     }
 }
 
-void PanRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
+void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pan recognizer receives touch move event");
     auto itr = touchPoints_.find(event.id);
@@ -157,7 +157,7 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
     }
 }
 
-void PanRecognizer::HandleTouchCancelEvent(const TouchPoint& event)
+void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     LOGD("pan recognizer receives touch cancel event");
     if (state_ == DetectState::READY || state_ == DetectState::DETECTING) {

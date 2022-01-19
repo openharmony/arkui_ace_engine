@@ -72,7 +72,7 @@ bool MultiFingersRecognizer::IsInReferee(size_t touchId)
     return refereePointers_.find(touchId) != refereePointers_.end();
 }
 
-void MultiFingersRecognizer::SetFingerList(const std::map<int32_t, TouchPoint> touchPoints,
+void MultiFingersRecognizer::SetFingerList(const std::map<int32_t, TouchEvent> touchPoints,
     const Offset& coordinateOffset, std::list<FingerInfo>& fingerList)
 {
     for (auto& point : touchPoints) {

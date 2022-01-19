@@ -90,12 +90,12 @@ bool RenderTouchListener::GetVisible() const
     return RenderNode::GetVisible() && isVisible_;
 }
 
-bool RenderTouchListener::DispatchEvent(const TouchPoint& point)
+bool RenderTouchListener::DispatchEvent(const TouchEvent& point)
 {
     return true;
 }
 
-bool RenderTouchListener::HandleEvent(const TouchPoint& point)
+bool RenderTouchListener::HandleEvent(const TouchEvent& point)
 {
     bool isPropagation = true;
     auto context = context_.Upgrade();
@@ -119,7 +119,7 @@ bool RenderTouchListener::HandleEvent(const TouchPoint& point)
     return isPropagation;
 }
 
-bool RenderTouchListener::TriggerTouchCallBack(const TouchPoint& changedPoint)
+bool RenderTouchListener::TriggerTouchCallBack(const TouchEvent& changedPoint)
 {
     if (!onTouchEventCallback_) {
         return true;

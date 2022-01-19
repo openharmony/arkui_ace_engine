@@ -165,7 +165,7 @@ private:
     }
 
     bool IsLastPage() const;
-    bool IsNeedForbidToPlatform(TouchPoint point);
+    bool IsNeedForbidToPlatform(TouchEvent point);
 
     std::unique_ptr<flutter::OhosShellHolder> shell_holder_;
     TouchEventCallback touchEventCallback_;

@@ -115,7 +115,7 @@ struct MouseEvent final {
             .sourceType = sourceType };
     }
 
-    TouchPoint CreateTouchPoint() const
+    TouchEvent CreateTouchPoint() const
     {
         TouchType type = TouchType::UNKNOWN;
         if (action == MouseAction::PRESS) {

@@ -64,12 +64,12 @@ public:
     bool GetSpringRecognizer();
     bool GetDragDropRecognizer();
     void SetDragDropEvent(const RefPtr<GridLayoutComponent>& component);
-    void MockTouchEventDown(TouchPoint& info);
-    void MockTouchEventMove(TouchPoint& info);
-    void MockTouchEventUp(TouchPoint& info);
-    void MockDragTouchEventDown(TouchPoint& info);
-    void MockDragTouchEventMove(TouchPoint& info);
-    void MockDragTouchEventUp(TouchPoint& info);
+    void MockTouchEventDown(TouchEvent& info);
+    void MockTouchEventMove(TouchEvent& info);
+    void MockTouchEventUp(TouchEvent& info);
+    void MockDragTouchEventDown(TouchEvent& info);
+    void MockDragTouchEventMove(TouchEvent& info);
+    void MockDragTouchEventUp(TouchEvent& info);
     void WaitAndMockVsync(int64_t waitFor);
     void InitImageAnimatorComponent();
 };
@@ -198,7 +198,7 @@ void RenderGridLayoutAnimationTest::BackItemsData(std::vector<Offset>& data)
     }
 }
 
-void RenderGridLayoutAnimationTest::MockTouchEventDown(TouchPoint& info)
+void RenderGridLayoutAnimationTest::MockTouchEventDown(TouchEvent& info)
 {
     if (slideRecognizer_) {
         info.x = renderNode_->GetGlobalOffset().GetX() + GRID_OFFSET_TEST - coordinateOffset_.GetX();
@@ -209,7 +209,7 @@ void RenderGridLayoutAnimationTest::MockTouchEventDown(TouchPoint& info)
     }
 }
 
-void RenderGridLayoutAnimationTest::MockTouchEventMove(TouchPoint& info)
+void RenderGridLayoutAnimationTest::MockTouchEventMove(TouchEvent& info)
 {
     if (slideRecognizer_) {
         for (int32_t i = 0; i <= MOVE_COUNT_TEST; i++) {
@@ -223,7 +223,7 @@ void RenderGridLayoutAnimationTest::MockTouchEventMove(TouchPoint& info)
     }
 }
 
-void RenderGridLayoutAnimationTest::MockTouchEventUp(TouchPoint& info)
+void RenderGridLayoutAnimationTest::MockTouchEventUp(TouchEvent& info)
 {
     if (slideRecognizer_) {
         info.type = TouchType::UP;
@@ -232,7 +232,7 @@ void RenderGridLayoutAnimationTest::MockTouchEventUp(TouchPoint& info)
     }
 }
 
-void RenderGridLayoutAnimationTest::MockDragTouchEventDown(TouchPoint& info)
+void RenderGridLayoutAnimationTest::MockDragTouchEventDown(TouchEvent& info)
 {
     if (dragDropGesture_) {
         info.x = renderNode_->GetGlobalOffset().GetX() + GRID_OFFSET_TEST - coordinateOffset_.GetX();
@@ -243,7 +243,7 @@ void RenderGridLayoutAnimationTest::MockDragTouchEventDown(TouchPoint& info)
     }
 }
 
-void RenderGridLayoutAnimationTest::MockDragTouchEventMove(TouchPoint& info)
+void RenderGridLayoutAnimationTest::MockDragTouchEventMove(TouchEvent& info)
 {
     if (dragDropGesture_) {
         for (int32_t i = 0; i < MOVE_COUNT_TEST; i++) {
@@ -256,7 +256,7 @@ void RenderGridLayoutAnimationTest::MockDragTouchEventMove(TouchPoint& info)
     }
 }
 
-void RenderGridLayoutAnimationTest::MockDragTouchEventUp(TouchPoint& info)
+void RenderGridLayoutAnimationTest::MockDragTouchEventUp(TouchEvent& info)
 {
     if (dragDropGesture_) {
         info.type = TouchType::UP;
@@ -287,7 +287,7 @@ void RenderGridLayoutAnimationTest::WaitAndMockVsync(int64_t waitFor)
  */
 HWTEST_F(RenderGridLayoutAnimationTest, RenderGridLayoutSpringTest001, TestSize.Level1)
 {
-    TouchPoint touchPoint;
+    TouchEvent touchPoint;
     std::vector<Offset> data;
     bool result = CreateGrid(true, true);
     ASSERT_TRUE(result);
@@ -321,7 +321,7 @@ HWTEST_F(RenderGridLayoutAnimationTest, RenderGridLayoutSpringTest001, TestSize.
  */
 HWTEST_F(RenderGridLayoutAnimationTest, RenderGridLayoutSpringTest002, TestSize.Level1)
 {
-    TouchPoint touchPoint;
+    TouchEvent touchPoint;
     std::vector<Offset> data;
     bool result = CreateGrid(false, true);
     ASSERT_TRUE(result);
@@ -355,7 +355,7 @@ HWTEST_F(RenderGridLayoutAnimationTest, RenderGridLayoutSpringTest002, TestSize.
  */
 HWTEST_F(RenderGridLayoutAnimationTest, RenderGridLayoutDragDropTest001, TestSize.Level1)
 {
-    TouchPoint touchPoint;
+    TouchEvent touchPoint;
     std::vector<Offset> data;
     bool result = CreateGrid(true, false);
     ASSERT_TRUE(result);
