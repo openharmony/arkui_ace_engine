@@ -16,7 +16,6 @@
     "src/lib/synced_property_simple_two_way.ts",
     "src/lib/i_storage.ts",
     "src/lib/app_storage.ts",
-    "src/lib/content_storage.ts",
     "src/lib/view_native.d.ts",
     "src/lib/view.ts",
     "src/lib/persistent_storage.ts",

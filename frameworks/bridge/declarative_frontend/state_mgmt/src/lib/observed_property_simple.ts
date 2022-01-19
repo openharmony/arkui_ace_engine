@@ -77,11 +77,11 @@ class ObservedPropertySimple<T> extends ObservedPropertySimpleAbstract<T>
  * changes.
  */
   public createLink(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T> {
-    return new SynchedPropertySimpleTwoWay(this, subscribeOwner, linkPropName, contentObserver);
+    linkPropName?: PropertyInfo): ObservedPropertyAbstract<T> {
+    return new SynchedPropertySimpleTwoWay(this, subscribeOwner, linkPropName);
   }
   public createProp(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T> {
-    return new SynchedPropertySimpleOneWaySubscribing(this, subscribeOwner, linkPropName, contentObserver);
+    linkPropName?: PropertyInfo): ObservedPropertyAbstract<T> {
+    return new SynchedPropertySimpleOneWaySubscribing(this, subscribeOwner, linkPropName);
   }
 }

@@ -19,8 +19,6 @@
 #include <memory>
 
 #include "ability_context.h"
-#include "native_engine/native_value.h"
-#include "native_engine/native_reference.h"
 
 #include "adapter/ohos/entrance/ace_ability.h"
 #include "adapter/ohos/entrance/platform_event_callback.h"
@@ -153,8 +151,6 @@ public:
     bool Dump(const std::vector<std::string>& params) override;
 
     void TriggerGarbageCollection() override;
-
-    void SetContentStorage(NativeReference* storage);
 
     void OnFinish()
     {

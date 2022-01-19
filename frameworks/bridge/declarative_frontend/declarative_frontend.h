@@ -182,12 +182,6 @@ public:
     {
         isSubWindow_ = isSubWindow;
     }
-
-    RefPtr<Framework::JsEngine> GetJsEngine()
-    {
-        return jsEngine_;
-    }
-
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 
