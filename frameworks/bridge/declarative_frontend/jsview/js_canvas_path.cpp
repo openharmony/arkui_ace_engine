@@ -214,8 +214,8 @@ void JSCanvasPath::JsPath2DRect(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], y);
         JSViewAbstract::ParseJsDouble(info[2], width);
         JSViewAbstract::ParseJsDouble(info[3], height);
-        X = SystemProperties::Vp2Px(X);
-        Y = SystemProperties::Vp2Px(Y);
+        x = SystemProperties::Vp2Px(x);
+        y = SystemProperties::Vp2Px(y);
         width = SystemProperties::Vp2Px(width);
         height = SystemProperties::Vp2Px(height);
 
