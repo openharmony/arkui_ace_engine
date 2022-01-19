@@ -1967,20 +1967,20 @@ const std::string& FrontendDelegateDeclarative::RestoreRouterStack(const std::st
         pageRouteStack_.emplace_back(
             PageInfo { GenerateNextPageId(), url.substr(1, url.size() - 2), true });
     }
-    std::string startUrl = routerStack->GetArrayItem(stackSize - 1)->ToString();
+    mainPagePath_ = routerStack->GetArrayItem(stackSize - 1)->ToString();
     // remove 5 useless character, as "XXX.js" to XXX
-    startUrl = startUrl.substr(1, startUrl.size() - 5);
-    return startUrl;
+    mainPagePath_ = mainPagePath_.substr(1, mainPagePath_.size() - 5);
+    return mainPagePath_;
 }
 
-const std::string& FrontendDelegateDeclarative::GetContentInfo() const
+const std::string& FrontendDelegateDeclarative::GetContentInfo()
 {
     auto jsonRouterStack = JsonUtil::CreateArray(true);
     for (size_t index = 0; index < pageRouteStack_.size(); ++index) {
         jsonRouterStack->Put("", pageRouteStack_[index].url.c_str());
     }
-    std::string routerStack = jsonRouterStack->ToString();
-    return routerStack;
+    pageStack_ = jsonRouterStack->ToString();
+    return pageStack_;
 }
 
 } // namespace OHOS::Ace::Framework
