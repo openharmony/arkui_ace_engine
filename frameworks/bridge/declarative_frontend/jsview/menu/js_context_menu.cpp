@@ -25,7 +25,7 @@ void JSContextMenu::Close(const JSCallbackInfo& args)
     auto container = Container::Current();
     if (container) {
         auto context = container->GetPipelineContext();
-        auto executor = container->GetTaskExecutor();
+        auto executor = Container::CurrentTaskExecutor();
         if (executor) {
             executor->PostTask(
                 [context]() {
