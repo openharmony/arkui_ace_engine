@@ -14,6 +14,7 @@
  */
 
 type ProvidedVarsMap = Map<string, ObservedPropertyAbstract<any>>;
+type Context = any;
 
 // Nativeview
 // implemented in C++  for release
@@ -148,4 +149,12 @@ abstract class View extends NativeView implements
 
     return providedVarStore.createLink(this, consumeVarName);
   }
+}
+
+function getContentStorage(view: View) : ContentStorage {
+  return view.getContentStorage();
+}
+
+function getContext(view: View) : Context {
+  return view.getContext();
 }

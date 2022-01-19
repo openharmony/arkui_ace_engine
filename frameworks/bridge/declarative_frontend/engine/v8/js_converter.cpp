@@ -12,14 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 
-declare class NativeView {
-  constructor(compilerAssignedUniqueChildId: string, parent: View);
-  markNeedUpdate(): void;
-  getContentStorage() : ContentStorage;
-  getContext() : Context;
+#include "base/log/log.h"
+#include "native_engine/native_value.h"
 
-  findChildById(compilerAssignedUniqueChildId: string): View;
+namespace OHOS::Ace::Framework {
 
-  static create(newView: View): void;
+V8Ref<V8Value> JsConverter::ConvertNativeValueToJsVal(NativeValue* nativeValue)
+{
+    return V8Ref<V8Value>::Make();
 }
+
+} // namespace OHOS::Ace::Framework

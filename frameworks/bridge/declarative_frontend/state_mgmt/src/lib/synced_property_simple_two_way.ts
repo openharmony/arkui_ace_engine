@@ -17,11 +17,15 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   implements ISinglePropertyChangeSubscriber<T> {
 
   private source_: ObservedPropertyAbstract<T>;
+  private contentObserver_?: ObservedPropertyAbstract<T>;
 
-  constructor(source: ObservedPropertyAbstract<T>, owningView: IPropertySubscriber, owningViewPropNme: PropertyInfo) {
+  constructor(source: ObservedPropertyAbstract<T>, owningView: IPropertySubscriber, owningViewPropNme: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>) {
     super(owningView, owningViewPropNme);
     this.source_ = source;
     this.source_.subscribeMe(this);
+    if (contentObserver) {
+      this.contentObserver_ = contentObserver;
+    }
   }
 
   /*
@@ -46,11 +50,24 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   public get(): T {
     console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: get`)
     this.notifyPropertyRead();
+    if (this.contentObserver_) {
+      return this.contentObserver_.get();
+    }
     return this.source_.get();
   }
 
   // set 'writes through` to the ObservedProperty
   public set(newValue: T): void {
+    if (this.contentObserver_) {
+      if (this.contentObserver_.get() == newValue) {
+        console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+        return;
+      }
+
+      this.contentObserver_.set(newValue);
+      return;
+    }
+
     if (this.source_.get() == newValue) {
       console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
       return;

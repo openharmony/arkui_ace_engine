@@ -18,15 +18,20 @@ class SynchedPropertyObjectTwoWay<C extends Object>
   implements ISinglePropertyChangeSubscriber<C> {
 
   private linkedParentProperty_: ObservedPropertyObjectAbstract<C>;
+  private contentStoragelinkedParentProperty_: ObservedPropertyObjectAbstract<C>;
 
   constructor(linkSouce: ObservedPropertyObjectAbstract<C>,
     owningChildView: IPropertySubscriber,
-    thisPropertyName: PropertyInfo) {
+    thisPropertyName: PropertyInfo,
+    contentStoragelinkedParentProperty?: ObservedPropertyObjectAbstract<C>) {
     super(owningChildView, thisPropertyName);
     this.linkedParentProperty_ = linkSouce;
     // register to the parent property
     this.linkedParentProperty_.subscribeMe(this);
-
+    if (contentStoragelinkedParentProperty) {
+      this.contentStoragelinkedParentProperty_ = contentStoragelinkedParentProperty;
+      this.contentStoragelinkedParentProperty_.subscribeMe(this);
+    }
     // register to the ObservedObject
     ObservedObject.addOwningProperty(this.getObject(), this);
   }
@@ -38,6 +43,9 @@ class SynchedPropertyObjectTwoWay<C extends Object>
   aboutToBeDeleted() {
     // unregister from parent of this link
     this.linkedParentProperty_.unlinkSuscriber(this.id__());
+    if (this.contentStoragelinkedParentProperty_) {
+      this.contentStoragelinkedParentProperty_.unlinkSuscriber(this.id__());
+    }
 
     // unregister from the ObservedObject
     ObservedObject.removeOwningProperty(this.getObject(), this);
@@ -46,10 +54,17 @@ class SynchedPropertyObjectTwoWay<C extends Object>
 
   private getObject(): C {
     this.notifyPropertyRead();
+    if (this.contentStoragelinkedParentProperty_) {
+      return this.contentStoragelinkedParentProperty_.get();
+    }
     return this.linkedParentProperty_.get();
   }
 
   private setObject(newValue: C): void {
+    if (this.contentStoragelinkedParentProperty_) {
+      this.contentStoragelinkedParentProperty_.set(newValue);
+      return;
+    }
     this.linkedParentProperty_.set(newValue)
   }
 
@@ -91,11 +106,11 @@ class SynchedPropertyObjectTwoWay<C extends Object>
  * changes.
  */
   public createLink(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo): ObservedPropertyAbstract<C> {
-    return new SynchedPropertyObjectTwoWay(this, subscribeOwner, linkPropName);
+    linkPropName?: PropertyInfo, contentStoragelinkedParentProperty?: ObservedPropertyObjectAbstract<C>): ObservedPropertyAbstract<C> {
+    return new SynchedPropertyObjectTwoWay(this, subscribeOwner, linkPropName, contentStoragelinkedParentProperty);
   }
   public createProp(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo): ObservedPropertyAbstract<C> {
+    linkPropName?: PropertyInfo, contentStoragelinkedParentProperty?: ObservedPropertyObjectAbstract<C>): ObservedPropertyAbstract<C> {
     throw new Error("Creating a 'Prop' proerty is unsuppoeted for Object type prperty value.");
   }
 

@@ -13,13 +13,23 @@
  * limitations under the License.
  */
 
-declare class NativeView {
-  constructor(compilerAssignedUniqueChildId: string, parent: View);
-  markNeedUpdate(): void;
-  getContentStorage() : ContentStorage;
-  getContext() : Context;
+#ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_DECLARATIVE_MODULE_PRELOADER_H
+#define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_DECLARATIVE_MODULE_PRELOADER_H
 
-  findChildById(compilerAssignedUniqueChildId: string): View;
+#include <memory>
+#include <string>
 
-  static create(newView: View): void;
-}
+class NativeEngine;
+
+namespace OHOS::Ace {
+
+#define ACE_EXPORT __attribute__((visibility("default")))
+
+class ACE_EXPORT DeclarativeModulePreloader {
+public:
+    static void Preload(NativeEngine& runtime);
+};
+
+} // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_DECLARATIVE_MODULE_PRELOADER_H

@@ -130,9 +130,9 @@ abstract class ObservedPropertyAbstract<T>  {
    * changes.
    */
   public abstract createLink(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo): ObservedPropertyAbstract<T>;
+    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T>;
   public abstract createProp(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo): ObservedPropertyAbstract<T>;
+    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T>;
 
   /**
    * factory function for concrete 'object' or 'simple' ObservedProperty object
