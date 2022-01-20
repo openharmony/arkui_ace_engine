@@ -160,7 +160,6 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                 uiTaskExecutor.PostTask([id, path, module, data, weak] {
                     auto form = weak.Upgrade();
                     if (form) {
-                        form->HandleOnAcquireEvent(id);
                         auto container = form->GetSubContainer();
                         if (container) {
                             container->RunCard(id, path, module, data);

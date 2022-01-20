@@ -107,7 +107,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineContext>& context, const
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, info.id);
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_MODULE_NAME_KEY, info.moduleName);
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_NAME_KEY, info.cardName);
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TEMPORARY_KEY, false);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TEMPORARY_KEY, info.temporary);
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::ACQUIRE_TYPE,
         OHOS::AppExecFwk::Constants::ACQUIRE_TYPE_CREATE_FORM);
     if (info.dimension != -1) {
@@ -149,6 +149,7 @@ std::string FormManagerDelegate::ConvertRequestInfo(const RequestFormInfo& info)
                 << "name" << FORM_MANAGER_PARAM_EQUALS << info.cardName << FORM_MANAGER_PARAM_AND
                 << "dimension" << FORM_MANAGER_PARAM_EQUALS << info.dimension << FORM_MANAGER_PARAM_AND
                 << "id" << FORM_MANAGER_PARAM_EQUALS << info.id << FORM_MANAGER_PARAM_AND
+                << "temporary" << FORM_MANAGER_PARAM_EQUALS << info.temporary << FORM_MANAGER_PARAM_AND
                 << "cardkey" << FORM_MANAGER_PARAM_EQUALS << info.ToString();
     return paramStream.str();
 }
@@ -192,6 +193,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineContext>&
                     << "name" << FORM_MANAGER_PARAM_EQUALS << info.cardName << FORM_MANAGER_PARAM_AND
                     << "dimension" << FORM_MANAGER_PARAM_EQUALS << info.dimension << FORM_MANAGER_PARAM_AND
                     << "id" << FORM_MANAGER_PARAM_EQUALS << info.id << FORM_MANAGER_PARAM_AND
+                    << "temporary" << FORM_MANAGER_PARAM_EQUALS << info.temporary << FORM_MANAGER_PARAM_AND
                     << "cardkey" << FORM_MANAGER_PARAM_EQUALS << info.ToString();
 
         std::string param = paramStream.str();

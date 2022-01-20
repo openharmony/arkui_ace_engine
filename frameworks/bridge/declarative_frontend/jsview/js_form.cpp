@@ -43,10 +43,12 @@ void JSForm::Create(const JSCallbackInfo& info)
     JSRef<JSVal> ability = obj->GetProperty("ability");
     JSRef<JSVal> module = obj->GetProperty("module");
     JSRef<JSVal> dimension = obj->GetProperty("dimension");
+    JSRef<JSVal> temporary = obj->GetProperty("temporary");
 
-    LOGD("js form create id:%{public}d, name:%{public}s, bundle:%{public}s, ability:%{public}s, module:%{public}s",
+    LOGD("js form create id:%{public}d, name:%{public}s, bundle:%{public}s, ability:%{public}s, module:%{public}s, "
+         "temporary:%{public}s",
         id->ToNumber<int32_t>(), name->ToString().c_str(), bundle->ToString().c_str(), ability->ToString().c_str(),
-        module->ToString().c_str());
+        module->ToString().c_str(), temporary->ToString().c_str());
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     RequestFormInfo fomInfo;
@@ -56,6 +58,7 @@ void JSForm::Create(const JSCallbackInfo& info)
     fomInfo.abilityName = ability->ToString();
     fomInfo.moduleName = module->ToString();
     fomInfo.dimension = dimension->ToNumber<int32_t>();
+    fomInfo.temporary = temporary->ToBoolean();
 
     RefPtr<FormComponent> form = AceType::MakeRefPtr<OHOS::Ace::FormComponent>();
     form->SetFormRequestionInfo(fomInfo);
