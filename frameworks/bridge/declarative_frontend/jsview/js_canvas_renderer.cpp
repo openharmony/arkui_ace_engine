@@ -1116,8 +1116,8 @@ void JSCanvasRenderer::JsBezierCurveTo(const JSCallbackInfo& info)
         param.cp1y = SystemProperties::Vp2Px(param.cp1y);
         param.cp2x = SystemProperties::Vp2Px(param.cp2x);
         param.cp2y = SystemProperties::Vp2Px(param.cp2y);
-        x = SystemProperties::Vp2Px(x);
-        y = SystemProperties::Vp2Px(y);
+        param.x = SystemProperties::Vp2Px(param.x);
+        param.y = SystemProperties::Vp2Px(param.y);
 
         if (isOffscreen_) {
             offscreenCanvas_->BezierCurveTo(param);
