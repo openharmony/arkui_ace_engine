@@ -72,7 +72,7 @@ void RenderTexture::InitControlsHeight(const RefPtr<Component>& component)
     }
 
     if (videoComponent->NeedControls()) {
-        controlsHeight_ += videoTheme->GetBtnSize().Height();
+        controlsHeight_ += NormalizeToPx(Dimension(videoTheme->GetBtnSize().Height(), DimensionUnit::VP));
         controlsHeight_ += NormalizeToPx(videoTheme->GetBtnEdge().Top());
         controlsHeight_ += NormalizeToPx(videoTheme->GetBtnEdge().Bottom());
     }
