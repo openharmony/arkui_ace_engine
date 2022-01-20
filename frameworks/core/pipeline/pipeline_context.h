@@ -83,6 +83,7 @@ class AccessibilityManager;
 class RenderContext;
 struct PageTarget;
 class DialogComponent;
+class SelectPopupComponent;
 
 struct WindowBlurInfo {
     float progress_;
@@ -116,6 +117,7 @@ public:
     RefPtr<Element> SetupRootElement();
 
     RefPtr<DialogComponent> ShowDialog(const DialogProperties& dialogProperties, bool isRightToLeft);
+    void CloseContextMenu();
 
     void GetBoundingRectData(int32_t nodeId, Rect& rect);
 
@@ -915,6 +917,11 @@ public:
     void SetPreTargetRenderNode(const RefPtr<RenderNode>& preTargetRenderNode);
     const RefPtr<RenderNode> GetPreTargetRenderNode() const;
 
+    void SetContextMenu(const RefPtr<Component>& contextMenu)
+    {
+        contextMenu_ = contextMenu;
+    }
+
     double GetDensity() const
     {
         return density_;
@@ -1123,6 +1130,7 @@ private:
     // strong deactivate element and it's id.
     std::map<int32_t, RefPtr<Element>> deactivateElements_;
 
+    RefPtr<Component> contextMenu_;
     // animation frame callback
     AnimationCallback animationCallback_;
 

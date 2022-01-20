@@ -61,6 +61,7 @@
 #include "core/components/root/root_component.h"
 #include "core/components/root/root_element.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/components/select_popup/select_popup_component.h"
 #include "core/components/semi_modal/semi_modal_component.h"
 #include "core/components/semi_modal/semi_modal_element.h"
 #include "core/components/semi_modal/semi_modal_theme.h"
@@ -965,6 +966,14 @@ RefPtr<DialogComponent> PipelineContext::ShowDialog(const DialogProperties& dial
     }
     lastStack->PushDialog(dialog);
     return dialog;
+}
+
+void PipelineContext::CloseContextMenu()
+{
+    auto menu = AceType::DynamicCast<SelectPopupComponent>(contextMenu_);
+    if (menu) {
+        menu->HideDialog(SELECT_INVALID_INDEX);
+    }
 }
 
 bool PipelineContext::CanPopPage()

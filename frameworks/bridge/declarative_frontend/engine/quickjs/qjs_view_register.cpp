@@ -136,6 +136,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #endif
+#include "frameworks/bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
@@ -944,7 +945,7 @@ void JsRegisterViews(BindingTarget globalObj)
 
     JSActionSheet::JSBind(globalObj);
     JSAlertDialog::JSBind(globalObj);
-
+    JSContextMenu::JSBind(globalObj);
     JSAbilityComponent::JSBind(globalObj);
     JSAbilityComponentController::JSBind(globalObj);
 
