@@ -309,7 +309,7 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context)
 {
     state_ = State::CREATING;
     // load webview so
-    if (!WebViewHelper::Instance().Init()) {
+    if (!OHOS::WebView::WebViewHelper::Instance().Init()) {
         LOGE("Fail to init WebViewHelper");
         return;
     }
@@ -392,10 +392,10 @@ void WebDelegate::InitWebViewWithWindow()
             if (!delegate) {
                 return;
             }
-            WebViewInitArgs initArgs;
+            OHOS::WebView::WebViewInitArgs initArgs;
             std::string app_path = GetDataPath();
             if (!app_path.empty()) {
-                initArgs.webcore_args_to_add.push_back(std::string("--user-data-dir=").append(app_path));
+                initArgs.web_engine_args_to_add.push_back(std::string("--user-data-dir=").append(app_path));
             }
 
             delegate->window_ = delegate->CreateWindow();
@@ -403,7 +403,7 @@ void WebDelegate::InitWebViewWithWindow()
                 return;
             }
             delegate->webview_ =
-                WebViewAdapterHelper::Instance().CreateWebView(delegate->window_.GetRefPtr(), initArgs);
+                OHOS::WebView::WebViewAdapterHelper::Instance().CreateWebView(delegate->window_.GetRefPtr(), initArgs);
             if (delegate->webview_ == nullptr) {
                 delegate->window_ = nullptr;
                 LOGE("fail to get webview instance");
@@ -420,7 +420,7 @@ void WebDelegate::InitWebViewWithWindow()
             auto webviewClient = std::make_shared<WebClientImpl>();
             webviewClient->SetWebDelegate(weak);
             delegate->webview_->SetWebViewClient(webviewClient);
-            std::shared_ptr<WebSettings> setting = delegate->webview_->GetSettings();
+            std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
             setting->SetDomStorageEnabled(true);
             setting->SetJavaScriptCanOpenWindowsAutomatically(true);
             setting->SetJavaScriptEnabled(isJsEnabled);

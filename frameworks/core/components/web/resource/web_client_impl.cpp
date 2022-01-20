@@ -44,7 +44,7 @@ void WebClientImpl::OnPageStarted(const std::string& url)
     delegate->OnPageStarted(url);
 }
 
-void WebClientImpl::SetWebView(std::shared_ptr<WebView> webview)
+void WebClientImpl::SetWebView(std::shared_ptr<OHOS::WebView::WebView> webview)
 {
     webviewWeak_ = webview;
 }
