@@ -139,7 +139,7 @@ public:
     {
         auto renderNode = GetRenderNode();
         if (renderNode) {
-            return renderNode->GetRectBasedWindowTopLeft();
+            return renderNode->GetHidden() ? Rect() : renderNode->GetRectBasedWindowTopLeft();
         }
         return Rect();
     }
