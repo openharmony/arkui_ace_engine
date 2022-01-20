@@ -124,7 +124,7 @@ TouchEventInfo RawRecognizer::CreateTouchEventInfo(
             .SetSize(point.size);
         changedTouchLocationInfo.SetForce(point.force);
         info.AddChangedTouchLocationInfo(std::move(changedTouchLocationInfo));
-        for (auto&& touchPoint : point.pointers_) {
+        for (auto&& touchPoint : point.pointers) {
             TouchLocationInfo touchLocationInfo(touchPoint.id);
             auto offset = Offset(touchPoint.x, touchPoint.y);
             touchLocationInfo.SetGlobalLocation(offset)

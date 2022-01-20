@@ -81,7 +81,7 @@ struct TouchEvent final {
     SourceType sourceType = SourceType::NONE;
 
     // all points on the touch screen.
-    std::vector<TouchPoint> pointers_;
+    std::vector<TouchPoint> pointers;
 
     Offset GetOffset() const
     {
@@ -91,33 +91,33 @@ struct TouchEvent final {
     TouchEvent CreateScalePoint(float scale) const
     {
         if (NearZero(scale)) {
-            return { id, x, y, type, time, size, force, deviceId, sourceType, pointers_ };
+            return { id, x, y, type, time, size, force, deviceId, sourceType, pointers };
         }
-        auto points = pointers_;
-        std::for_each(points.begin(), points.end(), [scale](auto&& point) {
+        auto temp = pointers;
+        std::for_each(temp.begin(), temp.end(), [scale](auto&& point) {
             point.x = point.x / scale;
             point.y = point.y / scale;
         });
-        return { id, x / scale, y / scale, type, time, size, force, deviceId, sourceType, points };
+        return { id, x / scale, y / scale, type, time, size, force, deviceId, sourceType, temp };
     }
 
     TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const
     {
-        auto points = pointers_;
+        auto temp = pointers;
         if (NearZero(scale)) {
-            std::for_each(points.begin(), points.end(), [offsetX, offsetY](auto&& point) {
+            std::for_each(temp.begin(), temp.end(), [offsetX, offsetY](auto&& point) {
                 point.x = point.x - offsetX;
                 point.y = point.y - offsetY;
             });
-            return { pointId, x - offsetX, y - offsetY, type, time, size, force, deviceId, sourceType, points };
+            return { pointId, x - offsetX, y - offsetY, type, time, size, force, deviceId, sourceType, temp };
         }
 
-        std::for_each(points.begin(), points.end(), [scale, offsetX, offsetY](auto&& point) {
+        std::for_each(temp.begin(), temp.end(), [scale, offsetX, offsetY](auto&& point) {
             point.x = (point.x - offsetX) / scale;
             point.y = (point.y - offsetY) / scale;
         });
         return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, type, time, size, force, deviceId, sourceType,
-            points };
+            temp };
     }
 };
 
