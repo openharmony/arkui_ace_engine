@@ -129,6 +129,11 @@ public:
         return frameEvent_;
     }
 
+    void OnJsEngineDestroy()
+    {
+        frameEvent_ = nullptr;
+    }
+
 private:
     RefPtr<Animator> animator_;
     RefPtr<Curve> curve_;

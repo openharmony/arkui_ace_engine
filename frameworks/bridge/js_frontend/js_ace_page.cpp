@@ -415,6 +415,11 @@ void JsAcePage::OnJsEngineDestroy()
             bridge->OnJsEngineDestroy();
         }
     }
+    for (auto&& [id, info] : animatorInfos_) {
+        if (info) {
+            info->OnJsEngineDestroy();
+        }
+    }
 }
 
 } // namespace OHOS::Ace::Framework
