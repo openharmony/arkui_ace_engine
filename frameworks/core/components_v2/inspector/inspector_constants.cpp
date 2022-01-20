@@ -264,6 +264,10 @@ ACE_EXPORT extern const char TEXTAREA_ETS_TAG[] = "TextArea";
 ACE_EXPORT extern const char TEXTINPUT_COMPONENT_TAG[] = "TextInput";
 ACE_EXPORT extern const char TEXTINPUT_ETS_TAG[] = "TextInput";
 
+// texttimer
+ACE_EXPORT extern const char TEXTTIMER_COMPONENT_TAG[] = "TextTimerComponent";
+ACE_EXPORT extern const char TEXTTIMER_ETS_TAG[] = "TextTimer";
+
 // select
 ACE_EXPORT extern const char SELECT_COMPONENT_TAG[] = "SelectComponent";
 ACE_EXPORT extern const char SELECT_ETS_TAG[] = "Select";
