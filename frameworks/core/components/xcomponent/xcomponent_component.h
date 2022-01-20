@@ -252,6 +252,18 @@ public:
         xcomponentController_ = xcomponentController;
     }
 
+#ifdef OHOS_STANDARD_SYSTEM
+    void SetNativeWindow(void* nativeWindow)
+    {
+        nativeWindow_ = nativeWindow;
+    }
+
+    void* GetNativeWindow()
+    {
+        return nativeWindow_;
+    }
+#endif
+
 private:
     RefPtr<XComponentDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -264,6 +276,9 @@ private:
     int64_t textureId_ = -1;
     int32_t nodeId_ = -1;
     RefPtr<NativeTexture> texture_;
+#ifdef OHOS_STANDARD_SYSTEM
+    void* nativeWindow_ = nullptr;
+#endif
 };
 } // namespace OHOS::Ace
 

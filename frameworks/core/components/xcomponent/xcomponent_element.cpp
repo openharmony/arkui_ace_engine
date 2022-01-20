@@ -24,6 +24,7 @@ namespace OHOS::Ace {
 namespace {
 const char* SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
+constexpr int32_t STATUS_BAR_HEIGHT = 100;
 } // namespace
 
 bool g_onload = false;
@@ -284,14 +285,14 @@ void XComponentElement::CreateSurface()
         return;
     }
 
-    auto producerSurface = previewWindow_->GetSurfaceNode()->GetSurface();
-    if (producerSurface == nullptr) {
+    producerSurface_ = previewWindow_->GetSurfaceNode()->GetSurface();
+    if (producerSurface_ == nullptr) {
         LOGE("producerSurface is nullptr");
         return;
     }
 
     auto surfaceUtils = SurfaceUtils::GetInstance();
-    auto ret = surfaceUtils->Add(producerSurface->GetUniqueId(), producerSurface);
+    auto ret = surfaceUtils->Add(producerSurface_->GetUniqueId(), producerSurface_);
     if (ret != SurfaceError::SURFACE_ERROR_OK) {
         LOGE("xcomponent add surface error: %{public}d", ret);
     }
@@ -302,14 +303,14 @@ void XComponentElement::CreateSurface()
             return;
         }
         xcomponentController_ = controller;
-        xcomponentController_->surfaceId_ = producerSurface->GetUniqueId();
+        xcomponentController_->surfaceId_ = producerSurface_->GetUniqueId();
     }
 
-    producerSurface->SetQueueSize(SURFACE_QUEUE_SIZE);
-    producerSurface->SetUserData("SURFACE_STRIDE_ALIGNMENT", SURFACE_STRIDE_ALIGNMENT);
-    producerSurface->SetUserData("SURFACE_FORMAT", std::to_string(PIXEL_FMT_RGBA_8888));
+    producerSurface_->SetQueueSize(SURFACE_QUEUE_SIZE);
+    producerSurface_->SetUserData("SURFACE_STRIDE_ALIGNMENT", SURFACE_STRIDE_ALIGNMENT);
+    producerSurface_->SetUserData("SURFACE_FORMAT", std::to_string(PIXEL_FMT_RGBA_8888));
 
-    XComponentElement::surfaceIdMap_.emplace(xcomponent_->GetId(), producerSurface->GetUniqueId());
+    XComponentElement::surfaceIdMap_.emplace(xcomponent_->GetId(), producerSurface_->GetUniqueId());
 
     previewWindow_->Show();
 }
@@ -377,8 +378,18 @@ void XComponentElement::OnXComponentSize(int64_t textureId, int32_t textureWidth
             }
 
             float viewScale = context->GetViewScale();
-            previewWindow_->MoveTo((int32_t)(offset.GetX() * viewScale), (int32_t)(offset.GetY() * viewScale));
+            previewWindow_->MoveTo((int32_t)(offset.GetX() * viewScale),
+                                   (int32_t)((offset.GetY() + STATUS_BAR_HEIGHT) * viewScale));
             previewWindow_->Resize(textureWidth * viewScale, textureHeight * viewScale);
+            auto nativeWindow = CreateNativeWindowFromSurface(&producerSurface_);
+            if (nativeWindow) {
+                NativeWindowHandleOpt(nativeWindow, SET_BUFFER_GEOMETRY,
+                                      (int)(textureWidth * viewScale), (int)(textureHeight * viewScale));
+                xcomponent_->SetNativeWindow(nativeWindow);
+            } else {
+                LOGE("can not create NativeWindow frome surface");
+            }
+
             if (!hidden_) {
                 previewWindow_->Show();
             }
@@ -387,7 +398,7 @@ void XComponentElement::OnXComponentSize(int64_t textureId, int32_t textureWidth
     std::string str = "";
     if (!g_onload) {
         g_onload = true;
-        this->OnTextureSize(0, str);
+        this->OnTextureSize(X_INVALID_ID, str);
     }
 #endif
 
