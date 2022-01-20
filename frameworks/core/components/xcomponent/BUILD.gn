@@ -37,6 +37,7 @@ build_component("xcomponent") {
     deps = [
       "//foundation/graphic/standard:libsurface",
       "//foundation/graphic/standard:libwmclient",
+      "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
       "//foundation/windowmanager/utils:libwmutil",
       "//foundation/windowmanager/wm:libwm",
     ]

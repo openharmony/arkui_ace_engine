@@ -15,6 +15,7 @@
 
 #include "adapter/ohos/entrance/ace_ability.h"
 
+#include <ui/rs_surface_node.h>
 #include "ability_process.h"
 #include "dm/display_manager.h"
 #include "display_type.h"

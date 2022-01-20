@@ -16,6 +16,8 @@
 #include "ui_mgr_service.h"
 
 #include <atomic>
+#include <i_input_event_consumer.h>
+#include <key_event.h>
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
