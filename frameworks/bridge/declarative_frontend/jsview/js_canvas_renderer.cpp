@@ -15,7 +15,11 @@
 
 #include "bridge/declarative_frontend/jsview/js_canvas_renderer.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
-
+#include "bridge/declarative_frontend/engine/js_converter.h"
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#include "pixel_map.h"
+#include "pixel_map_napi.h"
+#endif
 namespace OHOS::Ace::Framework {
 std::unordered_map<int32_t, Pattern> JSCanvasRenderer::pattern_;
 int32_t JSCanvasRenderer::patternCount_ = 0;
@@ -29,6 +33,10 @@ const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
 const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
 const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Defaulte value is low.
 constexpr double DEFAULT_QUALITY = 0.92;
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+const uint32_t BIT8 = 8;
+const uint32_t BIT24 = 24;
+#endif
 template<typename T>
 inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t length, T defaultValue)
 {
@@ -751,6 +759,79 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
     retObj->SetProperty("height", final_height);
     retObj->SetPropertyObject("data", colorArray);
     info.SetReturnValue(retObj);
+}
+
+void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
+{
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+    // 0 Get input param
+    double left = 0.0;
+    double top = 0.0;
+    double width = 0.0;
+    double height = 0.0;
+    uint32_t final_width = 0.0;
+    uint32_t final_height = 0.0;
+    JSViewAbstract::ParseJsDouble(info[0], left);
+    JSViewAbstract::ParseJsDouble(info[1], top);
+    JSViewAbstract::ParseJsDouble(info[2], width);
+    JSViewAbstract::ParseJsDouble(info[3], height);
+
+    // 1 Get data from canvas
+    std::unique_ptr<ImageData> canvasData;
+    if (isOffscreen_) {
+        canvasData = offscreenCanvas_->GetImageData(left, top, width, height);
+    } else {
+        canvasData = pool_->GetImageData(left, top, width, height);
+    }
+    final_height = canvasData->dirtyHeight;
+    final_width = canvasData->dirtyWidth;
+    uint32_t length = final_height * final_width;
+    uint32_t* data = new uint32_t[length];
+    uint32_t tmp;
+    for (uint32_t i = 0; i < final_height; i++) {
+        for (uint32_t j = 0; j < final_width; j++) {
+            uint32_t idx = i * final_width + j;
+            Color pixel = canvasData->data[idx];
+            tmp = pixel.GetValue();
+            data[idx] = (tmp << BIT8) | (tmp >> BIT24);
+        }
+    }
+
+    // 2 Create piexclmap
+    OHOS::Media::InitializationOptions options;
+    options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
+    options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
+    options.size.width = final_width;
+    options.size.height = final_height;
+    options.editable = true;
+    std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(data, length, options);
+
+    // 3 piexclmap to NapiValue
+    NativeEngine* nativeEngine = nullptr;
+#ifdef USE_V8_ENGINE
+    nativeEngine = V8DeclarativeEngineInstance::GetNativeEngine();
+#elif USE_QUICKJS_ENGINE
+    nativeEngine = QJSDeclarativeEngineInstance::GetNativeEngine();
+#elif USE_ARK_ENGINE
+    nativeEngine = JsiDeclarativeEngineInstance::GetNativeEngine();
+#endif
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    std::shared_ptr<OHOS::Media::PixelMap> sharedPixelmap(pixelmap.release());
+    napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, sharedPixelmap);
+
+    // 4 NapiValue to JsValue
+#ifdef USE_ARK_ENGINE
+    NativeValue* nativeValue = reinterpret_cast<NativeValue*>(napiValue);
+    auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
+    info.SetReturnValue(jsValue);
+#else
+    napi_value temp = nullptr;
+    napi_create_int32(env, 0, &temp);
+    napi_set_named_property(env, napiValue, "index", temp);
+#endif
+
+#endif
 }
 
 void JSCanvasRenderer::JsGetJsonData(const JSCallbackInfo& info)

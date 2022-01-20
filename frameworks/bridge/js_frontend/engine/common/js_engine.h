@@ -42,6 +42,16 @@ public:
     virtual ~JsEngineInstance() = default;
 
     virtual void FlushCommandBuffer(void* context, const std::string& command);
+    static NativeEngine* GetNativeEngine()
+    {
+        return nativeEngine_;
+    }
+    static void SetNativeEngine(NativeEngine* nativeEngine)
+    {
+        nativeEngine_ = nativeEngine;
+    }
+protected:
+    static thread_local NativeEngine* nativeEngine_;
 };
 
 class JsEngine : public AceType {

@@ -28,14 +28,14 @@
 
 namespace OHOS::Ace::Framework {
 
-class QJSDeclarativeEngineInstance final : public AceType {
+class QJSDeclarativeEngineInstance final : public AceType, public JsEngineInstance {
 public:
     explicit QJSDeclarativeEngineInstance(const RefPtr<FrontendDelegate>& delegate)
         : context_(nullptr), frontendDelegate_(delegate), dispatcher_(nullptr)
     {}
 
     ~QJSDeclarativeEngineInstance() override;
-
+    void FlushCommandBuffer(void* context, const std::string& command) override;
     bool InitJSEnv(JSRuntime* runtime, JSContext* context,
         const std::unordered_map<std::string, void*>& extraNativeObject);
 

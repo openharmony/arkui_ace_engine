@@ -12,22 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JS_CONVERTER_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JS_CONVERTER_H
 
-#include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 
-#include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
-#include "native_engine/native_engine.h"
+class NativeValue;
 
 namespace OHOS::Ace::Framework {
-
-thread_local NativeEngine* JsEngine::nativeEngine_ = nullptr;
-thread_local NativeEngine* JsEngineInstance::nativeEngine_ = nullptr;
-
-void JsEngine::RunNativeEngineLoop()
-{
-    if (nativeEngine_ != nullptr) {
-        nativeEngine_->Loop(LOOP_NOWAIT, false);
-    }
-}
-
+class JsConverter {
+public:
+    static JSRef<JSVal> ConvertNativeValueToJsVal(NativeValue* nativeValue);
+};
 } // namespace OHOS::Ace::Framework
+
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JS_CONVERTER_H

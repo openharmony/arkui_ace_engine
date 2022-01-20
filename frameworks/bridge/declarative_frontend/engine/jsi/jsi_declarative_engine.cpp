@@ -807,6 +807,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
 
     nativeEngine_ = new ArkNativeEngine(vm, static_cast<void*>(this));
+    engineInstance_->SetNativeEngine(nativeEngine_);
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
     if (delegate && delegate->GetAssetManager()) {

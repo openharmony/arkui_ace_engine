@@ -69,6 +69,7 @@ bool QJSDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 
     engineInstance_ = AceType::MakeRefPtr<QJSDeclarativeEngineInstance>(delegate);
     nativeEngine_ = new QuickJSNativeEngine(runtime, context, static_cast<void*>(this));
+    engineInstance_->SetNativeEngine(nativeEngine_);
     bool res = engineInstance_->InitJSEnv(runtime, context, GetExtraNativeObject());
     if (!res) {
         LOGE("QJSDeclarativeEngine initialize failed: %{public}d", instanceId_);
