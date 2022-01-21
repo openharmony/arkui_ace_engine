@@ -363,8 +363,8 @@ template("ace_core_source_set") {
           "ability_runtime:app_manager",
           "ability_runtime:base",
           "ability_runtime:want",
-          "appexecfwk_standard:appexecfwk_base",
-          "appexecfwk_standard:appexecfwk_core",
+          "bundle_framework:appexecfwk_base",
+          "bundle_framework:appexecfwk_core",
           "appexecfwk_standard:libeventhandler",
         ]
         sources += [ "common/plugin_manager.cpp" ]

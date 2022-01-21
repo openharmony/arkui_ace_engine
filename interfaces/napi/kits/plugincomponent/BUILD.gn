@@ -48,8 +48,8 @@ ohos_shared_library("plugincomponent") {
     "ability_runtime:app_manager",
     "ability_runtime:base",
     "ability_runtime:want",
-    "appexecfwk_standard:appexecfwk_base",
-    "appexecfwk_standard:appexecfwk_core",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]
