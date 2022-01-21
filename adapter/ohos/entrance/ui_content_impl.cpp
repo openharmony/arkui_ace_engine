@@ -21,6 +21,7 @@
 #include "ability_info.h"
 #include "configuration.h"
 #include "init_data.h"
+#include "service_extension_context.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -145,8 +146,23 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     if (moduleInfo != nullptr) {
         packagePathStr += "/" + moduleInfo->name + "/";
     }
-    auto abilityContext = static_cast<OHOS::AbilityRuntime::AbilityContext*>(context_);
-    auto info = abilityContext->GetAbilityInfo();
+
+    const std::shared_ptr<OHOS::AbilityRuntime::Context> context(context_);
+    auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
+    std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> info;
+
+    if (abilityContext) {
+        info = abilityContext->GetAbilityInfo();
+    } else {
+        auto serviceContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::ServiceExtensionContext>(context);
+        if (!serviceContext) {
+            LOGE("context is not AbilityContext or ServiceExtensionContext.");
+            return;
+        }
+        info = serviceContext->GetAbilityInfo();
+    }
+    
     std::string srcPath = "";
     if (info != nullptr && !info->srcPath.empty()) {
         srcPath = info->srcPath;
@@ -180,9 +196,13 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
     auto container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
         context_, std::make_unique<ContentEventCallback>([context = context_] {
-            if (context) {
-                auto abilityContext = static_cast<OHOS::AbilityRuntime::AbilityContext*>(context);
-                abilityContext->TerminateSelf();
+            if (context != nullptr) {
+                const std::shared_ptr<OHOS::AbilityRuntime::Context> sharedContext(context);
+                auto abilityContext =
+                    OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+                if (abilityContext) {
+                    abilityContext->TerminateSelf();
+                }
             }
         }));
     AceEngine::Get().AddContainer(instanceId_, container);
