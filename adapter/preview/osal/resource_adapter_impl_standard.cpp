@@ -15,6 +15,7 @@
 
 #include "adapter/ohos/osal/resource_adapter_impl.h"
 #include "adapter/ohos/osal/resource_convertor.h"
+#include "adapter/preview/entrance/ace_application_info.h"
 
 namespace OHOS::Ace {
 
@@ -48,6 +49,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
          "ori=%{public}d, dpi=%{public}d, device=%{public}d",
         appResRet, sysResRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(),
         resConfig->GetDeviceType());
+    Platform::AceApplicationInfoImpl::GetInstance().SetResourceManager(newResMgr);
     resourceManager_ = newResMgr;
     packagePathStr_ = appResPath;
 }

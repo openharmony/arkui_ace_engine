@@ -22,14 +22,6 @@ template("preview_entrance_source") {
     cflags_cc += invoker.cflags_cc
     configs = [ "$ace_root:ace_config" ]
 
-    if (platform == "windows") {
-      defines -= [ "UNICODE" ]
-    }
-
-    if (platform == "mac") {
-      include_dirs = [ "//utils/native/base/include" ]
-    }
-
     sources = [
       "ace_ability.cpp",
       "ace_application_info.cpp",
@@ -44,6 +36,18 @@ template("preview_entrance_source") {
       "$ace_napi:ace_napi",
       "$ace_root/frameworks/core/components/theme:build_theme_code",
     ]
+
+    if (platform == "windows") {
+      defines -= [ "UNICODE" ]
+      include_dirs = [ "//utils/native/base/include" ]
+      deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
+      cflags_cc += [ "-DNONLS" ]
+    }
+
+    if (platform == "mac") {
+      include_dirs = [ "//utils/native/base/include" ]
+      deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
+    }
   }
 }
 
