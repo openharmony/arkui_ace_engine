@@ -1,17 +1,19 @@
 <div class="container">
-<!--    <panel id="simplepanel" class="sharePannel" dragbar="true" type="foldable" mode="full" fullheight="256vp" halfheight="256vp" onsizechange="changeSize">-->
     <div class="share">
+        <div class="shareBack">
+            <image class="backImage" onclick="onBack" src="common/handle_down.svg"></image>
+        </div>
         <div class="shareCard">
             <div class="shareInfo">
-                <image class="shareIcon" src="{{previewCard.icon}}"></image>
+                <image class="shareIcon" style="border: {{viewStyle.iconBoard}};" src="{{viewStyle.icon}}"></image>
                 <div class="shareText">
-                    <text class="mainText">{{previewCard.mainText}}</text>
-                    <text class="subText">{{previewCard.subText}}</text>
+                    <text class="mainText" style="height: {{viewStyle.textMainHeight}};">{{previewCard.mainText}}</text>
+                    <text class="subText" style="visibility: {{viewStyle.textVisible}};">{{previewCard.subText}}</text>
                 </div>
             </div>
             <div class="shareButton">
-                <text class="button1" >{{previewCard.button1}}</text>
-                <text class="button2" >{{previewCard.button2}}</text>
+                <text class="button1" style="visibility: {{viewStyle.copyVisible}};">{{viewStyle.button1}}</text>
+                <text class="button2" style="visibility: {{viewStyle.printVisible}};">{{viewStyle.button2}}</text>
             </div>
         </div>
         <swiper class="swiper">
@@ -23,5 +25,4 @@
             </div>
         </swiper>
     </div>
-<!--    </panel>-->
 </div>
