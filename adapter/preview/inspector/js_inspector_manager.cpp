@@ -280,20 +280,26 @@ void JsInspectorManager::OperateComponent(const std::string& jsCode)
     auto root = JsonUtil::ParseJsonString(jsCode);
     auto operateType = root->GetString("type", "");
     auto parentID = root->GetInt("parentID", -1);
+    auto slot = root->GetInt("slot", -1);
+    auto newComponent = GetNewComponentWithJsCode(root);
     if (parentID <= 0) {
+        auto rootElement = GetRootElement().Upgrade();
+        auto child = rootElement->GetChildBySlot(-1); // rootElement only has one child,and use the default slot -1
+        if (!newComponent) {
+            LOGE("operateType:UpdateComponent, newComponent should not be nullptr");
+            return;
+        }
+        rootElement->UpdateChildWithSlot(child, newComponent, -1, -1);
         return;
     }
-    auto slot = root->GetInt("slot", -1);
     auto parentElement = GetInspectorElementById(parentID);
     if (operateType == "AddComponent") {
-        auto newComponent = GetNewComponentWithJsCode(root);
         if (!newComponent) {
             LOGE("operateType:AddComponent, newComponent should not be nullptr");
             return;
         }
         parentElement->AddChildWithSlot(slot, newComponent);
     } else if (operateType == "UpdateComponent") {
-        auto newComponent = GetNewComponentWithJsCode(root);
         if (!newComponent) {
             LOGE("operateType:UpdateComponent, newComponent should not be nullptr");
             return;
@@ -345,6 +351,22 @@ RefPtr<V2::InspectorComposedElement> JsInspectorManager::GetInspectorElementById
         return nullptr;
     }
     return inspectorElement;
+}
+
+const WeakPtr<Element>& JsInspectorManager::GetRootElement()
+{
+    auto node = GetAccessibilityNodeFromPage(0);
+    if (!node) {
+        LOGE("get AccessibilityNode failed");
+        return nullptr;
+    }
+    auto child = node->GetChildList();
+    if (child.empty()) {
+        LOGE("child is null");
+        return nullptr;
+    }
+    auto InspectorComponentElement = GetInspectorElementById(child.front()->GetNodeId());
+    return InspectorComponentElement->GetElementParent();
 }
 
 void JsInspectorManager::GetNodeJSONStrMap()
