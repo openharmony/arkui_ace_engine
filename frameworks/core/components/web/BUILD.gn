@@ -19,7 +19,7 @@ if (is_standard_system && !use_mingw_win && !use_mac) {
       "//utils/native/base/include",
       "//foundation/windowmanager/interfaces/innerkits/wm",
       "//foundation/web/webview/interfaces/innerkits/ohos_webview",
-      "//foundation/appexecfwk/standard/kits/appkit/native/app/include",
+      "//foundation/aafwk/standard/frameworks/kits/appkit/native/app/include",
     ]
   }
 }
@@ -40,7 +40,7 @@ build_component("web") {
   if (is_standard_system && !use_mingw_win && !use_mac) {
     configs = [ ":ohos_web_config" ]
     deps = [
-      "//foundation/appexecfwk/standard/kits:appkit_native",
+      "//foundation/aafwk/standard/frameworks/kits/appkit:appkit_native",
       "//foundation/web/webview/ohos_webview:libwebview",
       "//foundation/windowmanager/utils:libwmutil",
       "//foundation/windowmanager/wm:libwm",
