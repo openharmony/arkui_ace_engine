@@ -320,9 +320,9 @@ class ACE_EXPORT CheckboxGroupResult : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(CheckboxGroupResult, BaseEventInfo);
 
 public:
-    CheckboxGroupResult(std::vector<std::string> vec, int32_t status) :
+    CheckboxGroupResult(const std::vector<std::string> vec, int32_t status) :
         BaseEventInfo("CheckboxGroupResult"),  status_(status) {
-        for (int i = 0; i < (int)vec.size(); ++i) {
+        for (int i = 0; i < static_cast<int32_t>(vec.size()); ++i) {
             nameVector_.push_back(vec[i]);
         }
     }
@@ -341,7 +341,7 @@ public:
 
 private:
     std::vector<std::string> nameVector_;
-    int32_t status_;
+    int32_t status_ = 0;
 };
 
 class ACE_EXPORT CheckboxComponent : public CheckableComponent, public CheckableValue<bool>, public LabelTarget {

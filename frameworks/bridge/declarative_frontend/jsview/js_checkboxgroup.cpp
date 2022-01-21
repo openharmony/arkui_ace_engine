@@ -28,7 +28,7 @@ JSRef<JSVal> CheckboxGroupResultEventToJSValue(const CheckboxGroupResult& eventI
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     JSRef<JSArray> nameArr = JSRef<JSArray>::New();
     std::vector<std::string> nameList = eventInfo.GetNameList();
-    for (int idx = 0; idx < (int)nameList.size(); ++idx) {
+    for (int idx = 0; idx < static_cast<int32_t>(nameList.size()); ++idx) {
         JSRef<JSVal> name = JSRef<JSVal>::Make(ToJSValue(nameList[idx]));
         nameArr->SetValueAt(idx, name);
     }

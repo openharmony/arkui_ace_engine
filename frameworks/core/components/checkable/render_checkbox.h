@@ -65,7 +65,7 @@ protected:
     void UpdateAccessibilityAttr();
     void UpdateGroupStatus();
 
-    enum SelectStatus {
+    enum class SelectStatus {
         ALL = 0,
         PART,
         NONE,
@@ -75,8 +75,8 @@ protected:
     RefPtr<Animator> controller_;
     RefPtr<CurveAnimation<double>> translate_;
 
-    SelectStatus status_;
-    SelectStatus lastStatus_;
+    SelectStatus status_ = SelectStatus::ALL;
+    SelectStatus lastStatus_ = SelectStatus::ALL;
     double shapeScale_ = 1.0;
     std::string checkboxGroupName_ = "";
     RefPtr<CheckboxComponent> component_;

@@ -48,7 +48,7 @@ void RenderCheckbox::Update(const RefPtr<Component>& component)
     if (context->GetIsDeclarative()) {
         component_ = checkbox;
         UpdateGroupStatus();
-        component_->SetGroupValue(CHECKABLE_STATUS[status_]);
+        component_->SetGroupValue(CHECKABLE_STATUS[static_cast<int32_t>(status_)]);
 
         checkbox->SetGroupValueUpdateHandler([weak = AceType::WeakClaim(this)](CheckableStatus checked) {
             auto renderCheckbox = weak.Upgrade();
@@ -113,7 +113,7 @@ bool RenderCheckbox::UpdateGroupValue(const CheckableStatus groupValue)
         if (onGroupChange_) {
             std::vector<std::string> result;
             component_->GetSelectedCheckBoxName(result);
-            onGroupChange_(std::make_shared<CheckboxGroupResult>(result, status_));
+            onGroupChange_(std::make_shared<CheckboxGroupResult>(result, static_cast<int32_t>(status_)));
         }
         if (component_->GetGroupValue() != groupValue) {
             component_->SetGroupValue(groupValue);
@@ -165,7 +165,7 @@ void RenderCheckbox::HandleClick()
             if (onGroupChange_) {
                 std::vector<std::string> result;
                 component_->GetSelectedCheckBoxName(result);
-                onGroupChange_(std::make_shared<CheckboxGroupResult>(result, status_));
+                onGroupChange_(std::make_shared<CheckboxGroupResult>(result, static_cast<int32_t>(status_)));
             }
         } else if (!(component_->GetCheckboxName().empty())) {
             component_->SetValue(!component_->GetValue());
@@ -189,8 +189,8 @@ void RenderCheckbox::UpdateAnimation()
     double from = 0.0;
     double to = 0.0;
     if (!(component_->GetGroupName().empty())) {
-        from = CHECKBOX_SCALE[lastStatus_];
-        to = CHECKBOX_SCALE[status_];
+        from = CHECKBOX_SCALE[static_cast<int32_t>(lastStatus_)];
+        to = CHECKBOX_SCALE[static_cast<int32_t>(status_)];
     } else if (!(component_->GetCheckboxName().empty())) {
         if (component_->GetValue()) {
             from = DEFAULT_MIN_CHECKBOX_SHAPE_SCALE;
