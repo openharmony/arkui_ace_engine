@@ -76,7 +76,7 @@ enum class LogLevel : uint32_t {
     FATAL,
 };
 
-class ACE_FORCE_EXPORT LogWrapper final {
+class ACE_FORCE_EXPORT_WITH_PREVIEW LogWrapper final {
 public:
     static bool JudgeLevel(LogLevel level)
     {
