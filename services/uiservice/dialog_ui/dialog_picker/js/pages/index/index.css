@@ -16,14 +16,11 @@
 
 .share {
     border-radius: 0vp 0vp 24vp 24vp;
-    width: 519vp;
-    height: 256vp;
     background-color: #FAFAFA;
     flex-direction: column;
 }
 
 .shareBack {
-    margin-top: 6vp;
     justify-content: center;
     flex-shrink: 0;
 }
@@ -35,16 +32,12 @@
 
 .shareCard {
     margin: 8vp 12vp 8vp 12vp; /* 上 右 下 左*/
-    width: 495vp;
-    height: 87vp;
-    border-radius: 24vp;
     background-color: #FFFFFF;
     flex-direction: column;
     flex-shrink: 0;
 }
 
 .shareInfo {
-    margin: 16vp 43.5vp 6vp 16vp;
     flex-direction: row;
 }
 
@@ -52,21 +45,13 @@
     width: 42vp;
     height: 48vp;
     background-color: #FFFFFFFF;
-/*    circle icon*/
-/*    width: 48vp;*/
-/*    height: 48vp;*/
-/*    border-radius: 80vp;*/
-/*    border: 0.25vp solid #000000;*/
 }
 
 .shareText {
-    left: 16vp;
-    top: 3vp;
     flex-direction: column;
 }
 
 .mainText {
-    width: 380vp;
     font-family: sans-serif;
     font-size: 14vp;
     max-lines: 2;
@@ -75,8 +60,6 @@
 }
 
 .subText {
-    top: 2vp;
-    width: 380vp;
     height: 14vp;
     font-family: sans-serif;
     font-size: 10vp;
@@ -85,16 +68,12 @@
     text-overflow: ellipsis;
 }
 
-.shareButton {
-    left: 405vp;
-    color: rgba(0, 125, 255, 1);
-}
-
 .button1 {
     width: 25vp;
     height: 16vp;
     font-size: 12vp;
     font-family: sans-serif;
+    color: rgba(0, 125, 255, 1);
 }
 
 .button2 {
@@ -103,18 +82,17 @@
     height: 16vp;
     font-size: 12vp;
     font-family: sans-serif;
+    color: rgba(0, 125, 255, 1);
 }
 
 .swiper {
     indicator-size: 4vp;
     indicator-top: 90%;
-    height: 115vp;
 }
 
 .shareAppSelect {
     margin-left: 15vp;
     margin-right: 15vp;
-    margin-top: 16vp;
     flex-direction: row;
     flex-wrap: wrap;
 }

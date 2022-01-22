@@ -32,9 +32,13 @@ namespace Ace {
 constexpr int UI_MGR_SERVICE_SA_ID = 7001;
 constexpr int UI_DIALOG_PICKER_WIDTH = 519 * 2; // 519 vp
 constexpr int UI_DIALOG_PICKER_HEIGHT = 256 * 2; // 256 vp
+constexpr int UI_DIALOG_PICKER_WIDTH_NARROW = 360 * 2; // 360 vp
+constexpr int UI_DIALOG_PICKER_HEIGHT_NARROW = 347 * 2; // 347 vp
 constexpr int UI_DEFAULT_WIDTH = 2560;
 constexpr int UI_DEFAULT_HEIGHT = 1600;
 constexpr int UI_DEFAULT_BUTTOM_CLIP = 50 * 2; // 48vp
+constexpr int UI_WIDTH_780DP = 780 * 2; // 780vp
+constexpr int UI_HALF = 2;
 std::shared_ptr<UIServiceMgrClient> UIServiceMgrClient::instance_ = nullptr;
 std::mutex UIServiceMgrClient::mutex_;
 
@@ -175,30 +179,32 @@ ErrCode UIServiceMgrClient::ShowAppPickerDialog(const AAFwk::Want& want,
                                                 const std::vector<AppExecFwk::AbilityInfo>& abilityInfos)
 {
     if (abilityInfos.size() == 0) {
-        HILOG_INFO("abilityInfos size is zero");
+        HILOG_WARN("abilityInfos size is zero");
         return UI_SERVICE_INVALID_PARAMETER;
     }
-
-    // get windows size
-    const int32_t half = 2;
     int32_t offsetX = 0;
     int32_t offsetY = 0;
     int32_t width = UI_DIALOG_PICKER_WIDTH;
     int32_t height = UI_DIALOG_PICKER_HEIGHT;
+    bool wideScreen = true;
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (display != nullptr) {
-        offsetX = (display->GetWidth() - width) / half;
+        if (display->GetWidth() < UI_WIDTH_780DP) {
+            HILOG_INFO("share dialog narrow.");
+            wideScreen = false;
+            width = UI_DIALOG_PICKER_WIDTH_NARROW;
+            height = UI_DIALOG_PICKER_HEIGHT_NARROW;
+        }
+        offsetX = (display->GetWidth() - width) / UI_HALF;
         offsetY = display->GetHeight() - height - UI_DEFAULT_BUTTOM_CLIP;
     } else {
-        offsetX = (UI_DEFAULT_WIDTH - width) / half;
+        HILOG_WARN("share dialog get display fail, use default wide.");
+        offsetX = (UI_DEFAULT_WIDTH - width) / UI_HALF;
         offsetY = UI_DEFAULT_HEIGHT - height - UI_DEFAULT_BUTTOM_CLIP;
     }
-    HILOG_DEBUG("share dialog position: width:%{public}d, height:%{public}d, offsetX:%{public}d, offsetY:%{public}d",
-        width, height, offsetX, offsetY);
-
-    const std::string param = GetPickerDialogParam(want, abilityInfos);
-    HILOG_DEBUG("share dialog js param: %{public}s", param.c_str());
-
+    const std::string param = GetPickerDialogParam(want, abilityInfos, wideScreen);
+    HILOG_DEBUG("share dialog position:[%{public}d,%{public}d,%{public}d,%{public}d],str: %{public}s",
+        offsetX, offsetY, width, height, param.c_str());
     const std::string jsBundleName = "dialog_picker_service";
     return ShowDialog(jsBundleName, param, OHOS::Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW, offsetX, offsetY,
         width, height, [want](int32_t id, const std::string& event, const std::string& params) mutable {
@@ -216,8 +222,7 @@ ErrCode UIServiceMgrClient::ShowAppPickerDialog(const AAFwk::Want& want,
                 shareWant.SetElementName(bundleName, abilityName);
                 auto abilityClient = AAFwk::AbilityManagerClient::GetInstance();
                 if (abilityClient != nullptr) {
-                    HILOG_INFO("dialog callback: start ability elementName: %{public}s-%{public}s",
-                        bundleName.c_str(), abilityName.c_str());
+                    HILOG_INFO("dialog callback: %{public}s-%{public}s", bundleName.c_str(), abilityName.c_str());
                     abilityClient->StartAbility(shareWant);
                 }
             }
@@ -251,7 +256,7 @@ ErrCode UIServiceMgrClient::Connect()
 }
 
 const std::string UIServiceMgrClient::GetPickerDialogParam(
-    const AAFwk::Want& want, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos) const
+    const AAFwk::Want& want, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos, bool wideScreen) const
 {
     auto type = want.GetStringParam("ability.picker.type");
     auto text = want.GetStringParam("ability.picker.text");
@@ -260,6 +265,9 @@ const std::string UIServiceMgrClient::GetPickerDialogParam(
     auto fileSizes = want.GetIntArrayParam("ability.picker.fileSizes");
 
     std::string param = "{"; // json head
+    if (!wideScreen) {
+        param += "\"deviceType\": \"phone\",";
+    }
     param += "\"previewCard\": { \"type\": \"";
     param += type;
     param += "\", \"icon\": \"";
@@ -269,7 +277,7 @@ const std::string UIServiceMgrClient::GetPickerDialogParam(
     param += "\", \"subText\": \"";
     param += uri;
     param += "\", \"fileList\": [";
-    for (int i = 0; i < fileNames.size() && i < fileSizes.size(); i++) {
+    for (int i = 0; i < (int)fileNames.size() && i < (int)fileSizes.size(); i++) {
         param += "{";
         param += "\"name\": \"";
         param += fileNames[i];
