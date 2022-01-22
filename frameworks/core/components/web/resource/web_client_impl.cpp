@@ -14,6 +14,7 @@
  */
 
 #include "core/components/web/resource/web_client_impl.h"
+#include "core/components/web/resource/web_delegate.h"
 
 namespace OHOS::Ace {
 void WebClientImpl::OnPageFinished(int httpStatusCode, const std::string& url)
@@ -43,7 +44,7 @@ void WebClientImpl::OnPageStarted(const std::string& url)
     delegate->OnPageStarted(url);
 }
 
-void WebClientImpl::SetWebView(std::shared_ptr<WebView> webview)
+void WebClientImpl::SetWebView(std::shared_ptr<OHOS::WebView::WebView> webview)
 {
     webviewWeak_ = webview;
 }

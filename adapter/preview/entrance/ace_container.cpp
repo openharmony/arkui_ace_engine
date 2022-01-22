@@ -175,7 +175,7 @@ void AceContainer::InitializeCallback()
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
 
     auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
-    auto&& touchEventCallback = [weak, id = instanceId_](const TouchPoint& event) {
+    auto&& touchEventCallback = [weak, id = instanceId_](const TouchEvent& event) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
@@ -775,9 +775,11 @@ void AceContainer::InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs)
         return;
     }
     auto config = container->GetResourceConfiguration();
+    config.SetDeviceType(SystemProperties::GetDeviceType());
     config.SetOrientation(SystemProperties::GetDevcieOrientation());
     config.SetDensity(runArgs.deviceConfig.density);
-    config.SetDeviceType(SystemProperties::GetDeviceType());
+    config.SetColorMode(runArgs.deviceConfig.colorMode);
+    config.SetFontRatio(runArgs.deviceConfig.fontRatio);
     container->SetResourceConfiguration(config);
 }
 

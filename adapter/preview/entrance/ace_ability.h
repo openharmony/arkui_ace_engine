@@ -41,27 +41,41 @@ struct ConfigChanges {
     bool watchDensity = false;
 };
 
+struct SystemParams {
+    int32_t deviceWidth { 0 };
+    int32_t deviceHeight { 0 };
+    bool isRound = false;
+    double density { 1.0 };
+    std::string language = "zh";
+    std::string region = "CN";
+    std::string script = "";
+    OHOS::Ace::DeviceType deviceType { DeviceType::PHONE };
+    OHOS::Ace::ColorMode colorMode { ColorMode::LIGHT };
+    OHOS::Ace::DeviceOrientation orientation { DeviceOrientation::PORTRAIT };
+};
+
 class ACE_PREVIEW_EXPORT AceAbility {
 public:
-    static std::unique_ptr<AceAbility> CreateInstance(AceRunArgs& runArgs);
-
-    // Be called in Previewer frontend thread, which is not ACE platform thread.
-    static void Stop();
-    static bool DispatchTouchEvent(const TouchPoint& event);
-    static bool DispatchBackPressedEvent();
-    void OnConfigurationChanged(const DeviceConfig& newConfig);
-
     explicit AceAbility(const AceRunArgs& runArgs);
     ~AceAbility();
 
-    void InitEnv();
+    // Be called in Previewer frontend thread, which is not ACE platform thread.    
+    static std::unique_ptr<AceAbility> CreateInstance(AceRunArgs& runArgs);    
+    void InitEnv();    
     void Start();
+    static void Stop();
+
+    static bool DispatchTouchEvent(const TouchEvent& event);
+    static bool DispatchBackPressedEvent();
+
+    void OnConfigurationChanged(const DeviceConfig& newConfig);
     void SurfaceChanged(
         const DeviceOrientation& orientation, const double& resolution, int32_t& width, int32_t& height);
     void ReplacePage(const std::string& url, const std::string& params);
+    void LoadDocument(const std::string& url, const std::string& componentName, SystemParams& systemParams);
+
     std::string GetJSONTree();
     std::string GetDefaultJSONTree();
-    void LoadDocument(const std::string& url, const std::string& componentName);
     bool OperateComponent(const std::string& attrsJson);
 
 private:

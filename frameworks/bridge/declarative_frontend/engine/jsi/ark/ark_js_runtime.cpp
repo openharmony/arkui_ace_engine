@@ -87,8 +87,7 @@ bool ArkJSRuntime::EvaluateJsCode(const uint8_t *buffer, int32_t size)
 {
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
-    Local<StringRef> entryPoint = StringRef::NewFromUtf8(vm_, PANDA_MAIN_FUNCTION);
-    bool ret = JSNApi::Execute(vm_, buffer, size, entryPoint);
+    bool ret = JSNApi::Execute(vm_, buffer, size, PANDA_MAIN_FUNCTION);
     HandleUncaughtException();
     return ret;
 }
@@ -102,9 +101,7 @@ bool ArkJSRuntime::ExecuteJsBin(const std::string &fileName)
         debugFlag = false;
     }
     LocalScope scope(vm_);
-    Local<StringRef> file = StringRef::NewFromUtf8(vm_, fileName.c_str());
-    Local<StringRef> entryPoint = StringRef::NewFromUtf8(vm_, PANDA_MAIN_FUNCTION);
-    bool ret = JSNApi::Execute(vm_, file, entryPoint);
+    bool ret = JSNApi::Execute(vm_, fileName, PANDA_MAIN_FUNCTION);
     HandleUncaughtException();
     return ret;
 }

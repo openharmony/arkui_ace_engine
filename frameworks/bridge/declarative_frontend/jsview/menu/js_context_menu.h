@@ -13,21 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MARQUEE_MARQUEE_ELEMENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MARQUEE_MARQUEE_ELEMENT_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MENU_CONTEXTMENU_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MENU_CONTEXTMENU_H
 
-#include "core/components/marquee/render_marquee.h"
-#include "core/pipeline/base/render_element.h"
-#include "core/pipeline/base/sole_child_element.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
-namespace OHOS::Ace {
-class MarqueeElement : public SoleChildElement {
-    DECLARE_ACE_TYPE(MarqueeElement, SoleChildElement);
+namespace OHOS::Ace::Framework {
 
+class JSContextMenu : public JSViewAbstract, public JSInteractableView {
 public:
-    MarqueeElement() = default;
-    ~MarqueeElement() override = default;
+    static void JSBind(BindingTarget globalObj);
+    static void Close(const JSCallbackInfo& args);
 };
-} // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MARQUEE_MARQUEE_ELEMENT_H
+} // namespace OHOS::Ace::Framework
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MENU_CONTEXTMENU_H

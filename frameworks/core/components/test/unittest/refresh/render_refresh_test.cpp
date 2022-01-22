@@ -45,9 +45,9 @@ static int64_t GetTickCount()
     return (ts.tv_sec * SEC_TO_NANOSEC + ts.tv_nsec);
 }
 
-const TouchPoint MOCK_DOWN_TOUCH_EVENT { 10, 540.0f, 500.0f, TouchType::DOWN };
-const TouchPoint MOCK_MOVE_TOUCH_EVENT { 10, 540.0f, 500.0f, TouchType::MOVE };
-const TouchPoint MOCK_UP_TOUCH_EVENT { 10, 540.0f, 500.0f, TouchType::UP };
+const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 540.0f, 500.0f, TouchType::DOWN };
+const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 540.0f, 500.0f, TouchType::MOVE };
+const TouchEvent MOCK_UP_TOUCH_EVENT { 10, 540.0f, 500.0f, TouchType::UP };
 
 enum class DragDirection {
     UP,
@@ -146,7 +146,7 @@ void RenderRefreshTest::WaitAndMockVsync(int64_t waitFor)
 void RenderRefreshTest::DragRefresh(const DragDirection& dragDirection)
 {
     context_->OnTouchEvent(MOCK_DOWN_TOUCH_EVENT);
-    TouchPoint touchPoint = MOCK_MOVE_TOUCH_EVENT;
+    TouchEvent touchPoint = MOCK_MOVE_TOUCH_EVENT;
     for (int32_t i = 0; i < 3; i++) {
         context_->OnTouchEvent(touchPoint);
         context_->OnVsyncEvent(GetTickCount(), 0);
@@ -156,7 +156,7 @@ void RenderRefreshTest::DragRefresh(const DragDirection& dragDirection)
             touchPoint.y -= 20.0f;
         }
     }
-    TouchPoint touchEndPoint = MOCK_UP_TOUCH_EVENT;
+    TouchEvent touchEndPoint = MOCK_UP_TOUCH_EVENT;
     touchEndPoint.x = touchPoint.x;
     touchEndPoint.y = touchPoint.y;
     context_->OnTouchEvent(touchEndPoint);

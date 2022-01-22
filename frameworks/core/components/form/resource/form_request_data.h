@@ -26,6 +26,7 @@ struct RequestFormInfo {
     std::string bundleName;
     std::string abilityName;
     std::string moduleName;
+    bool temporary = false;
     int32_t dimension = -1;
     bool allowUpate = true;
     Dimension width;
@@ -35,7 +36,7 @@ struct RequestFormInfo {
     std::string ToString() const
     {
         std::stringstream paramStream;
-        paramStream << bundleName << abilityName << moduleName << cardName << dimension << index;
+        paramStream << bundleName << abilityName << moduleName << cardName << dimension << index << temporary;
         return paramStream.str();
     }
 };

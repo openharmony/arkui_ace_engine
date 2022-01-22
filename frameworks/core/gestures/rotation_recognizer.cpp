@@ -46,7 +46,7 @@ void RotationRecognizer::OnRejected()
     Reset();
 }
 
-void RotationRecognizer::HandleTouchDownEvent(const TouchPoint& event)
+void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     LOGD("rotation recognizer receives touch down event, begin to detect rotation event");
     if (fingers_ > MAX_ROTATION_FINGERS) {
@@ -63,7 +63,7 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchPoint& event)
     }
 }
 
-void RotationRecognizer::HandleTouchUpEvent(const TouchPoint& event)
+void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("rotation recognizer receives touch up event");
     auto itr = touchPoints_.find(event.id);
@@ -89,7 +89,7 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchPoint& event)
     }
 }
 
-void RotationRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
+void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("rotation recognizer receives touch move event");
     auto itr = touchPoints_.find(event.id);
@@ -119,7 +119,7 @@ void RotationRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
     }
 }
 
-void RotationRecognizer::HandleTouchCancelEvent(const TouchPoint& event)
+void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     LOGD("rotation recognizer receives touch cancel event");
     if (state_ == DetectState::READY || state_ == DetectState::DETECTING) {

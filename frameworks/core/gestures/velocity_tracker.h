@@ -37,14 +37,14 @@ public:
         isFirstPoint_ = true;
     }
 
-    void UpdateTouchPoint(const TouchPoint& event);
+    void UpdateTouchPoint(const TouchEvent& event);
 
-    const TouchPoint& GetFirstTrackPoint() const
+    const TouchEvent& GetFirstTrackPoint() const
     {
         return firstTrackPoint_;
     }
 
-    const TouchPoint& GetCurrentTrackPoint() const
+    const TouchEvent& GetCurrentTrackPoint() const
     {
         return currentTrackPoint_;
     }
@@ -108,8 +108,8 @@ public:
 
 private:
     Axis mainAxis_ { Axis::FREE };
-    TouchPoint firstTrackPoint_;
-    TouchPoint currentTrackPoint_;
+    TouchEvent firstTrackPoint_;
+    TouchEvent currentTrackPoint_;
     Offset lastPosition_;
     Velocity velocity_;
     Offset delta_;

@@ -275,11 +275,15 @@ ACE_EXPORT extern const char TEXTAREA_ETS_TAG[];
 ACE_EXPORT extern const char TEXTINPUT_COMPONENT_TAG[];
 ACE_EXPORT extern const char TEXTINPUT_ETS_TAG[];
 
+// texttimer
+ACE_EXPORT extern const char TEXTTIMER_COMPONENT_TAG[];
+ACE_EXPORT extern const char TEXTTIMER_ETS_TAG[];
+
 // select
 ACE_EXPORT extern const char SELECT_COMPONENT_TAG[];
 ACE_EXPORT extern const char SELECT_ETS_TAG[];
 
-//marquee
+// marquee
 ACE_EXPORT extern const char MARQUEE_COMPONENT_TAG[];
 ACE_EXPORT extern const char MARQUEE_ETS_TAG[];
 

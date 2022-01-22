@@ -99,7 +99,7 @@ void TestTouchEventConvert(const RefPtr<PipelineContext>& context, double expect
     context->OnSurfaceChanged(TEST_SURFACE_WIDTH, TEST_SURFACE_HEIGHT);
 
     // Mock touch down event
-    TouchPoint point {
+    TouchEvent point {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::DOWN, .time = std::chrono::high_resolution_clock::now()
     };
     context->OnTouchEvent(point);

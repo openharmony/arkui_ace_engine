@@ -440,6 +440,7 @@ template("flutter_engine_shell") {
       }
       deps += [
         "//foundation/graphic/standard:libvsync_client",
+        "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
         "//foundation/windowmanager/wm:libwm",
       ]
       external_deps = [

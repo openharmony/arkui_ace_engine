@@ -38,10 +38,10 @@ public:
     void OnRejected() override;
 
 private:
-    void HandleTouchDownEvent(const TouchPoint& event) override;
-    void HandleTouchUpEvent(const TouchPoint& event) override;
-    void HandleTouchMoveEvent(const TouchPoint& event) override;
-    void HandleTouchCancelEvent(const TouchPoint& event) override;
+    void HandleTouchDownEvent(const TouchEvent& event) override;
+    void HandleTouchUpEvent(const TouchEvent& event) override;
+    void HandleTouchMoveEvent(const TouchEvent& event) override;
+    void HandleTouchCancelEvent(const TouchEvent& event) override;
     bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
     double ComputeAverageDeviation();
     void Reset();
@@ -54,7 +54,7 @@ private:
     double scale_ = 1.0;
     Offset pinchCenter_;
     TimeStamp time_;
-    std::map<int32_t, TouchPoint> touchPoints_;
+    std::map<int32_t, TouchEvent> touchPoints_;
     bool pendingEnd_ = false;
     bool pendingCancel_ = false;
 };

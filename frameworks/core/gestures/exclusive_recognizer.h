@@ -40,13 +40,13 @@ public:
     void OnAccepted(size_t touchId) override;
     void OnRejected(size_t touchId) override;
     void OnPending(size_t touchId) override;
-    bool HandleEvent(const TouchPoint& point) override;
+    bool HandleEvent(const TouchEvent& point) override;
 
 private:
-    void HandleTouchDownEvent(const TouchPoint& event) override {};
-    void HandleTouchUpEvent(const TouchPoint& event) override {};
-    void HandleTouchMoveEvent(const TouchPoint& event) override {};
-    void HandleTouchCancelEvent(const TouchPoint& event) override {};
+    void HandleTouchDownEvent(const TouchEvent& event) override {};
+    void HandleTouchUpEvent(const TouchEvent& event) override {};
+    void HandleTouchMoveEvent(const TouchEvent& event) override {};
+    void HandleTouchCancelEvent(const TouchEvent& event) override {};
     void BatchAdjudicate(const std::set<size_t>& touchIds, const RefPtr<GestureRecognizer>& recognizer,
         GestureDisposal disposal) override;
     void AddToReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer) override;

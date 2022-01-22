@@ -34,12 +34,16 @@ template("gen_sa_dialog_js") {
       target_out_dir + "/default/manifest.json",
     ]
 
-    foreach(i18n_file, i18n_files) {
-      outputs += [ target_out_dir + "/default/" + i18n_file ]
+    if (defined(i18n_files)) {
+      foreach(i18n_file, i18n_files) {
+        outputs += [ target_out_dir + "/default/" + i18n_file ]
+      }
     }
 
-    foreach(common_file, common_files) {
-      outputs += [ target_out_dir + "/default/" + common_file ]
+    if (defined(common_files)) {
+      foreach(common_file, common_files) {
+        outputs += [ target_out_dir + "/default/" + common_file ]
+      }
     }
 
     args = [
@@ -65,21 +69,25 @@ template("gen_sa_dialog_js") {
     source = target_out_dir + "/default/pages/index/index.js"
   }
 
-  foreach(i18n_file, i18n_files) {
-    name = string_replace(i18n_file, "/", "_")
-    ohos_prebuilt_etc("dialog_js_files_$name") {
-      deps = [ ":build_dialog_js" ]
-      relative_install_dir = "$install_path/$dialog_name/i18n"
-      source = target_out_dir + "/default/$i18n_file"
+  if (defined(i18n_files)) {
+    foreach(i18n_file, i18n_files) {
+      name = string_replace(i18n_file, "/", "_")
+      ohos_prebuilt_etc("dialog_js_files_$name") {
+        deps = [ ":build_dialog_js" ]
+        relative_install_dir = "$install_path/$dialog_name/i18n"
+        source = target_out_dir + "/default/$i18n_file"
+      }
     }
   }
 
-  foreach(common_file, common_files) {
-    name = string_replace(common_file, "/", "_")
-    ohos_prebuilt_etc("dialog_js_files_$name") {
-      deps = [ ":build_dialog_js" ]
-      relative_install_dir = "$install_path/$dialog_name/common"
-      source = target_out_dir + "/default/$common_file"
+  if (defined(common_files)) {
+    foreach(common_file, common_files) {
+      name = string_replace(common_file, "/", "_")
+      ohos_prebuilt_etc("dialog_js_files_$name") {
+        deps = [ ":build_dialog_js" ]
+        relative_install_dir = "$install_path/$dialog_name/common"
+        source = target_out_dir + "/default/$common_file"
+      }
     }
   }
 
@@ -95,13 +103,17 @@ template("gen_sa_dialog_js") {
       ":dialog_js_files_index",
       ":dialog_js_files_manifest",
     ]
-    foreach(i18n_file, i18n_files) {
-      name = string_replace(i18n_file, "/", "_")
-      deps += [ ":dialog_js_files_$name" ]
+    if (defined(i18n_files)) {
+      foreach(i18n_file, i18n_files) {
+        name = string_replace(i18n_file, "/", "_")
+        deps += [ ":dialog_js_files_$name" ]
+      }
     }
-    foreach(common_file, common_files) {
-      name = string_replace(common_file, "/", "_")
-      deps += [ ":dialog_js_files_$name" ]
+    if (defined(common_files)) {
+      foreach(common_file, common_files) {
+        name = string_replace(common_file, "/", "_")
+        deps += [ ":dialog_js_files_$name" ]
+      }
     }
   }
 }

@@ -67,7 +67,7 @@ void ClickRecognizer::OnAccepted()
 {
     LOGI("Click gesture has been accepted!");
     if (onClick_) {
-        TouchPoint touchPoint = {};
+        TouchEvent touchPoint = {};
         if (!touchPoints_.empty()) {
             touchPoint = touchPoints_.begin()->second;
         }
@@ -81,7 +81,7 @@ void ClickRecognizer::OnAccepted()
     }
 
     if (remoteMessage_) {
-        TouchPoint touchPoint = {};
+        TouchEvent touchPoint = {};
         if (!touchPoints_.empty()) {
             touchPoint = touchPoints_.begin()->second;
         }
@@ -102,7 +102,7 @@ void ClickRecognizer::OnRejected()
     Reset();
 }
 
-void ClickRecognizer::HandleTouchDownEvent(const TouchPoint& event)
+void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     InitGlobalValue(event.sourceType);
     LOGD("click recognizer receives touch down event, begin to detect click event");
@@ -147,7 +147,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchPoint& event)
     }
 }
 
-void ClickRecognizer::HandleTouchUpEvent(const TouchPoint& event)
+void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     InitGlobalValue(event.sourceType);
     LOGD("click recognizer receives touch up event");
@@ -203,7 +203,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchPoint& event)
     }
 }
 
-void ClickRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
+void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     InitGlobalValue(event.sourceType);
     LOGD("click recognizer receives touch move event");
@@ -219,7 +219,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
     }
 }
 
-void ClickRecognizer::HandleTouchCancelEvent(const TouchPoint& event)
+void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     InitGlobalValue(event.sourceType);
     LOGD("click recognizer receives touch cancel event");
@@ -293,7 +293,7 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         GestureEvent info;
         info.SetTimeStamp(time_);
         info.SetFingerList(fingerList_);
-        TouchPoint touchPoint = {};
+        TouchEvent touchPoint = {};
         if (!touchPoints_.empty()) {
             touchPoint = touchPoints_.begin()->second;
         }

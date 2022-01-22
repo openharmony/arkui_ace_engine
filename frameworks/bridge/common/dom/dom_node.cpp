@@ -1254,7 +1254,8 @@ void DOMNode::CompositeComponents()
 
     auto mainComponent = GetSpecializedComponent();
     if (!components.empty() &&
-        (AceType::InstanceOf<TextureComponent>(mainComponent) || AceType::InstanceOf<ListComponent>(mainComponent))) {
+        (AceType::InstanceOf<TextureComponent>(mainComponent) || AceType::InstanceOf<ListComponent>(mainComponent) ||
+        AceType::InstanceOf<ListItemComponent>(mainComponent))) {
         Component::MergeRSNode(components);
         Component::MergeRSNode(mainComponent);
     } else {

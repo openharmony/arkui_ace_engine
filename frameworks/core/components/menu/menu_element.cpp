@@ -85,6 +85,7 @@ void MenuElement::OnTargetCallback(const ComposeId& id, const Offset& point)
     auto popup = data_->GetPopup();
     if (id.empty()) {
         popup->ShowDialog(stack, point, point, true);
+        context->SetContextMenu(popup);
         return;
     }
 

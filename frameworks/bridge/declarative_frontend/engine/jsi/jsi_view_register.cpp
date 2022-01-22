@@ -137,6 +137,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #endif
+#include "frameworks/bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "frameworks/core/common/container.h"
@@ -405,9 +406,9 @@ panda::Local<panda::JSValueRef> JsSendEventByKey(panda::EcmaVM* vm, panda::Local
     return panda::BooleanRef::New(vm, result);
 }
 
-static TouchPoint GetTouchPointFromJS(const JsiObject& value)
+static TouchEvent GetTouchPointFromJS(const JsiObject& value)
 {
-    TouchPoint touchPoint;
+    TouchEvent touchPoint;
 
     auto type = value->GetProperty("type");
     touchPoint.type = static_cast<TouchType>(type->ToNumber<int32_t>());
@@ -449,7 +450,7 @@ panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::EcmaVM* vm, panda::Local
         return panda::JSValueRef::Undefined(vm);
     }
     JsiObject obj(args[0]);
-    TouchPoint touchPoint = GetTouchPointFromJS(obj);
+    TouchEvent touchPoint = GetTouchPointFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); }, TaskExecutor::TaskType::UI);
     return panda::BooleanRef::New(vm, result);
@@ -806,6 +807,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Radio", JSRadio::JSBind },
     { "ActionSheet", JSActionSheet::JSBind },
     { "AlertDialog", JSAlertDialog::JSBind },
+    { "ContextMenu", JSContextMenu::JSBind },
     { "AbilityComponent", JSAbilityComponent::JSBind },
     { "TextArea", JSTextArea::JSBind },
     { "TextInput", JSTextInput::JSBind },

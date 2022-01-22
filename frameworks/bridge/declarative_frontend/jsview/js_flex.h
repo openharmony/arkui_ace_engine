@@ -39,7 +39,7 @@ public:
      * spacebetween: The project is located in a container with a blank space between lines.
      * spacearound: The item is located in a container with blank space before, between, and after each line.
      */
-    static void SetJustifyContent(int value);
+    static void SetJustifyContent(int32_t value);
 
     /**
      * JS AlignItems function definition:
@@ -50,9 +50,9 @@ public:
      * flexend: The element is aligned to the end of the cross axis.
      * center: The element is centered on the cross axis.
      */
-    static void SetAlignItems(int value);
+    static void SetAlignItems(int32_t value);
 
-    static void SetAlignContent(int value);
+    static void SetAlignContent(int32_t value);
 
     static void SetWrap(bool value);
 

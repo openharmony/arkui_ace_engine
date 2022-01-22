@@ -31,7 +31,7 @@
 namespace OHOS::Ace {
 
 using PageTask = std::function<void()>;
-using TouchEventCallback = std::function<void(const TouchPoint&)>;
+using TouchEventCallback = std::function<void(const TouchEvent&)>;
 using KeyEventCallback = std::function<bool(const KeyEvent&)>;
 using MouseEventCallback = std::function<void(const MouseEvent&)>;
 using AxisEventCallback = std::function<void(const AxisEvent&)>;

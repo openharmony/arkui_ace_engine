@@ -213,6 +213,7 @@ template("declarative_js_engine") {
       "jsview/js_view_context.cpp",
       "jsview/js_view_functions.cpp",
       "jsview/js_view_stack_processor.cpp",
+      "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
       "sharedata/js_share_data.cpp",
       "view_stack_processor.cpp",
@@ -260,8 +261,8 @@ template("declarative_js_engine") {
         ]
 
         external_deps = [
-          "aafwk_standard:ability_manager",
-          "aafwk_standard:want",
+          "ability_runtime:ability_manager",
+          "ability_runtime:want",
         ]
         sources += [ "jsview/js_plugin.cpp" ]
       }

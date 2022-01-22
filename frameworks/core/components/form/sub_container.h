@@ -28,6 +28,9 @@ public:
     using OnFormAcquiredCallback = std::function<void(const size_t)>;
 
     SubContainer(const WeakPtr<PipelineContext>& context) : outSidePipelineContext_(context) {}
+    SubContainer(const WeakPtr<PipelineContext>& context, int32_t instanceId)
+        : outSidePipelineContext_(context), instanceId_(instanceId)
+    {}
     ~SubContainer() = default;
 
     void Initialize();
@@ -87,6 +90,7 @@ private:
     RefPtr<PipelineContext> pipelineContext_;
     WeakPtr<PipelineContext> outSidePipelineContext_;
     RefPtr<AssetManager> assetManager_;
+    int32_t instanceId_;
 
     int64_t runningCardId_ = 0;
     bool allowUpdate_ = true;

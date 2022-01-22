@@ -100,7 +100,7 @@ public:
 
     virtual void MoveWhenOutOfViewPort(bool hasEffect);
 
-    bool IsPointInBox(const TouchPoint& point);
+    bool IsPointInBox(const TouchEvent& point);
     void Attach(const WeakPtr<PipelineContext>& context);
 
     // unmount from render tree

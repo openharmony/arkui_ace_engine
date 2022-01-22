@@ -23,6 +23,7 @@
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "display_type.h"
+#include "foundation/graphic/standard/interfaces/innerkits/surface/window.h"
 #include "foundation/windowmanager/interfaces/innerkits/wm/window.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
@@ -48,11 +49,11 @@ private:
     void InitEvent();
     void RegisterSurfaceDestroyEvent();
     void OnSurfaceDestroyEvent();
-    void SetTouchEventType(const TouchPoint& event);
+    void SetTouchEventType(const TouchEvent& event);
     void OnXComponentInit(const std::string& param);
     void OnSurfaceInit(const std::string& componentId, const uint32_t nodeId);
     void RegisterDispatchTouchEventCallback();
-    void DispatchTouchEvent(const TouchPoint& event);
+    void DispatchTouchEvent(const TouchEvent& event);
     void OnXComponentSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
     void OnTextureSize(int64_t textureId, std::string& result);
 
@@ -74,10 +75,12 @@ private:
     void CreateSurface();
     void OnXComponentHiddenChange(bool hidden);
 
+    bool onLoadDone_ = false;
     bool hidden_ = false;
     sptr<Rosen::Window> previewWindow_;
     static std::unordered_map<std::string, uint64_t> surfaceIdMap_;
     RefPtr<XComponentController> xcomponentController_;
+    sptr<OHOS::Surface> producerSurface_ = nullptr;
 #endif
 };
 } // namespace OHOS::Ace

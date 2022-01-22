@@ -160,7 +160,6 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                 uiTaskExecutor.PostTask([id, path, module, data, weak] {
                     auto form = weak.Upgrade();
                     if (form) {
-                        form->HandleOnAcquireEvent(id);
                         auto container = form->GetSubContainer();
                         if (container) {
                             container->RunCard(id, path, module, data);
@@ -252,7 +251,12 @@ void FormElement::CreateCardContainer()
         subContainer_.Reset();
     }
 
-    subContainer_ = AceType::MakeRefPtr<SubContainer>(GetContext().Upgrade());
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        LOGE("get context fail.");
+        return;
+    }
+    subContainer_ = AceType::MakeRefPtr<SubContainer>(context, context->GetInstanceId());
     if (!subContainer_) {
         LOGE("create card container fail.");
         return;

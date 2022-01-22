@@ -83,9 +83,9 @@ class RawRecognizer : public TouchEventTarget {
     DECLARE_ACE_TYPE(RawRecognizer, TouchEventTarget);
 
 public:
-    void HandleEvent(const TouchPoint& point, uint32_t stage);
-    bool DispatchEvent(const TouchPoint& point) override;
-    bool HandleEvent(const TouchPoint& point) override;
+    void HandleEvent(const TouchEvent& point, uint32_t stage);
+    bool DispatchEvent(const TouchEvent& point) override;
+    bool HandleEvent(const TouchEvent& point) override;
 
     void SetOnEventCallback(
         const OnTouchEventCallback& eventCallback, uint32_t stage, uint32_t eventType)
@@ -127,11 +127,11 @@ public:
 
 private:
     TouchEventInfo CreateTouchEventInfo(
-        const std::string& type, const TouchPoint& point, bool ignoreCurrent = false) const;
+        const std::string& type, const TouchEvent& point, bool ignoreCurrent = false) const;
 
     OnTouchEventCallback onEventCallbacks_[EventStage::SIZE][EventType::SIZE];
     CatchTouchEventCallback catcheventCallbacks_[EventStage::SIZE][EventType::SIZE];
-    TouchPoint lastPoint_;
+    TouchEvent lastPoint_;
     Offset coordinateOffset_;
     bool isFirstTrack_ = true;
 };

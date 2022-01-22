@@ -66,7 +66,7 @@ private:
     RefPtr<VerticalDragRecognizer> verticalDragRecognizer_;
     RefPtr<HorizontalDragRecognizer> horizontalDragRecognizer_;
     bool isVisible_ = true;
-    TouchPoint touchpoint_;
+    TouchEvent touchpoint_;
     RefPtr<RenderNode> dragTarget_ = nullptr;
 };
 

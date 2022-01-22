@@ -69,6 +69,7 @@ build_component("inspector_v2") {
     "text_composed_element.cpp",
     "textarea_composed_element.cpp",
     "textinput_composed_element.cpp",
+    "texttimer_composed_element.cpp",
     "time_picker_composed_element.cpp",
     "toggle_composed_element.cpp",
     "wrap_composed_element.cpp",

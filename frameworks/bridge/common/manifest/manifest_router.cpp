@@ -46,6 +46,10 @@ std::string ManifestRouter::GetPagePath(const std::string& uri, const std::strin
             return uri + suffix;
         }
     }
+    if (uri.rfind(suffix) != std::string::npos) {
+        return uri;
+    }
+
     LOGE("can't find this page %{private}s path", uri.c_str());
     return "";
 }

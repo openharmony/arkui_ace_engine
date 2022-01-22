@@ -93,6 +93,14 @@ void FlutterRenderXComponent::Paint(RenderContext& context, const Offset& offset
         }
         AddTextureLayer();
     }
+#ifdef OHOS_STANDARD_SYSTEM
+    if (!hasSetDefaultSize_) {
+        if (xcomponentSizeChangeEvent_ && (!drawSize_.IsHeightInfinite())) {
+            xcomponentSizeChangeEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
+        }
+        hasSetDefaultSize_ = true;
+    }
+#endif
     RenderNode::Paint(context, offset);
 }
 

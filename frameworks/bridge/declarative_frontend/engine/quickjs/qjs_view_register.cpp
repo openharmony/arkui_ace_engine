@@ -136,6 +136,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #endif
+#include "frameworks/bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
@@ -274,9 +275,9 @@ static JSValue JsSendEventByKey(JSContext* ctx, JSValueConst new_target, int arg
     return JS_NewBool(ctx, result);
 }
 
-static TouchPoint GetTouchPointFromJS(JSContext* ctx, JSValue value)
+static TouchEvent GetTouchPointFromJS(JSContext* ctx, JSValue value)
 {
-    TouchPoint touchPoint;
+    TouchEvent touchPoint;
 
     auto type = JS_GetPropertyStr(ctx, value, "type");
     auto iType = static_cast<int32_t>(TouchType::UNKNOWN);
@@ -320,7 +321,7 @@ static JSValue JsSendTouchEvent(JSContext* ctx, JSValueConst new_target, int arg
     if (!pipelineContext) {
         return JS_ThrowSyntaxError(ctx, "pipeline is null");
     }
-    TouchPoint touchPoint = GetTouchPointFromJS(ctx, argv[0]);
+    TouchEvent touchPoint = GetTouchPointFromJS(ctx, argv[0]);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); }, TaskExecutor::TaskType::UI);
 
@@ -944,7 +945,7 @@ void JsRegisterViews(BindingTarget globalObj)
 
     JSActionSheet::JSBind(globalObj);
     JSAlertDialog::JSBind(globalObj);
-
+    JSContextMenu::JSBind(globalObj);
     JSAbilityComponent::JSBind(globalObj);
     JSAbilityComponentController::JSBind(globalObj);
 
