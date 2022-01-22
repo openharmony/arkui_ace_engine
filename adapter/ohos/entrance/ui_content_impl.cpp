@@ -192,20 +192,21 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 
     std::string moduleName = info->moduleName;
     std::shared_ptr<OHOS::AppExecFwk::ApplicationInfo> appInfo = context->GetApplicationInfo();
-    std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
 
     std::string resPath;
-    for (const auto& module : moduleList) {
-        if (module.moduleName == moduleName) {
-            resPath = module.moduleSourceDir + "/assets/" + module.moduleName + "/";
-            break;
+    if (appInfo) {
+        std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
+        for (const auto& module : moduleList) {
+            if (module.moduleName == moduleName) {
+                resPath = module.moduleSourceDir + "/assets/" + module.moduleName + "/";
+                break;
+            }
         }
     }
-
     // create container
     instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
     auto container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
-        context.get(), std::make_unique<ContentEventCallback>([context = context_] {
+        info, std::make_unique<ContentEventCallback>([context = context_] {
             auto sharedContext = context.lock();
             if (!sharedContext) {
                 return;

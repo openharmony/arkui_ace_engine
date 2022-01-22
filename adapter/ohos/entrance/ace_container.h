@@ -36,8 +36,9 @@ class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatch
 public:
     AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AppExecFwk::Ability* aceAbility,
         std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner = false);
-    AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AbilityRuntime::Context* context,
-                 std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner = false);
+    AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+        std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
+        bool useCurrentEventRunner = false);
     ~AceContainer() override = default;
 
     void Initialize() override;
@@ -229,7 +230,7 @@ private:
     ColorScheme colorScheme_ { ColorScheme::FIRST_VALUE };
     ResourceInfo resourceInfo_;
     OHOS::AppExecFwk::Ability* aceAbility_ = nullptr;
-    OHOS::AbilityRuntime::Context* context_ = nullptr;
+    std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo_;
     void* sharedRuntime_ = nullptr;
     int32_t pageId_ = 0;
     bool useCurrentEventRunner_ = false;

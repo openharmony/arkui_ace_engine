@@ -88,9 +88,10 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
     platformEventCallback_ = std::move(callback);
 }
 
-AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AbilityRuntime::Context* context,
-    std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner)
-    : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), context_(context),
+AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+    std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
+    bool useCurrentEventRunner)
+    : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), abilityInfo_(abilityInfo),
       useCurrentEventRunner_(useCurrentEventRunner)
 {
     ACE_DCHECK(callback);
@@ -189,10 +190,8 @@ void AceContainer::InitializeFrontend()
         return;
     }
     ACE_DCHECK(frontend_);
-    std::shared_ptr<AppExecFwk::AbilityInfo> info =
-        aceAbility_
-            ? aceAbility_->GetAbilityInfo()
-            : (context_ ? static_cast<OHOS::AbilityRuntime::AbilityContext*>(context_)->GetAbilityInfo() : nullptr);
+    auto abilityInfo = abilityInfo_.lock();
+    std::shared_ptr<AppExecFwk::AbilityInfo> info = aceAbility_ ? aceAbility_->GetAbilityInfo() : abilityInfo;
     if (info && info->isLauncherAbility) {
         frontend_->DisallowPopLastPage();
     }
@@ -449,7 +448,7 @@ void AceContainer::InitializeCallback()
             [context, event]() { context->OnMouseEvent(event); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
- 
+
     auto&& axisEventCallback = [context = pipelineContext_, id = instanceId_](const AxisEvent& event) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
@@ -482,7 +481,8 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterDensityChangeCallback(densityChangeCallback);
 
-    auto&& systemBarHeightChangeCallback = [context = pipelineContext_, id = instanceId_](double statusBar, double navigationBar) {
+    auto&& systemBarHeightChangeCallback = [context = pipelineContext_, id = instanceId_](
+                                               double statusBar, double navigationBar) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("SystemBarHeightChangeCallback(%lf, %lf)", statusBar, navigationBar);
         context->GetTaskExecutor()->PostTask(
