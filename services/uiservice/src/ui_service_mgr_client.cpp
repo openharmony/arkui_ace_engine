@@ -34,6 +34,7 @@ constexpr int UI_DIALOG_PICKER_WIDTH = 519 * 2; // 519 vp
 constexpr int UI_DIALOG_PICKER_HEIGHT = 256 * 2; // 256 vp
 constexpr int UI_DEFAULT_WIDTH = 2560;
 constexpr int UI_DEFAULT_HEIGHT = 1600;
+constexpr int UI_DEFAULT_BUTTOM_CLIP = 50 * 2; // 48vp
 std::shared_ptr<UIServiceMgrClient> UIServiceMgrClient::instance_ = nullptr;
 std::mutex UIServiceMgrClient::mutex_;
 
@@ -187,10 +188,10 @@ ErrCode UIServiceMgrClient::ShowAppPickerDialog(const AAFwk::Want& want,
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (display != nullptr) {
         offsetX = (display->GetWidth() - width) / half;
-        offsetY = display->GetHeight() - height;
+        offsetY = display->GetHeight() - height - UI_DEFAULT_BUTTOM_CLIP;
     } else {
         offsetX = (UI_DEFAULT_WIDTH - width) / half;
-        offsetY = UI_DEFAULT_HEIGHT - height;
+        offsetY = UI_DEFAULT_HEIGHT - height - UI_DEFAULT_BUTTOM_CLIP;
     }
     HILOG_DEBUG("share dialog position: width:%{public}d, height:%{public}d, offsetX:%{public}d, offsetY:%{public}d",
         width, height, offsetX, offsetY);
@@ -252,16 +253,34 @@ ErrCode UIServiceMgrClient::Connect()
 const std::string UIServiceMgrClient::GetPickerDialogParam(
     const AAFwk::Want& want, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos) const
 {
+    auto type = want.GetStringParam("ability.picker.type");
+    auto text = want.GetStringParam("ability.picker.text");
+    auto uri = want.GetStringParam("ability.picker.uri");
+    auto fileNames = want.GetStringArrayParam("ability.picker.fileNames");
+    auto fileSizes = want.GetIntArrayParam("ability.picker.fileSizes");
+
     std::string param = "{"; // json head
     param += "\"previewCard\": { \"type\": \"";
-    param += want.GetType();
+    param += type;
     param += "\", \"icon\": \"";
     param += "";
     param += "\", \"mainText\": \"";
-    param += "";
+    param += text;
     param += "\", \"subText\": \"";
-    param += "";
-    param += "\"},";
+    param += uri;
+    param += "\", \"fileList\": [";
+    for (int i = 0; i < fileNames.size() && i < fileSizes.size(); i++) {
+        param += "{";
+        param += "\"name\": \"";
+        param += fileNames[i];
+        param += "\", \"size\": ";
+        param += std::to_string(fileSizes[i]);
+        param += "}";
+        if (i != (int)fileNames.size() -1 && i != (int)fileSizes.size() -1) {
+            param+=",";
+        }
+    }
+    param += "]},";
     param += "\"hapList\": [";
     for (int i = 0; i < (int)abilityInfos.size(); i++) {
         const auto& abilityInfo = abilityInfos[i];
