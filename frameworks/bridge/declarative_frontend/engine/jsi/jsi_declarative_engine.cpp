@@ -326,6 +326,14 @@ JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 
     DestroyAllRootViewHandle();
 
+    if (runningPage_) {
+        runningPage_->OnJsEngineDestroy();
+    }
+
+    if (stagingPage_) {
+        stagingPage_->OnJsEngineDestroy();
+    }
+
     if (runtime_) {
         runtime_->RegisterUncaughtExceptionHandler(nullptr);
         // reset runtime in utils
