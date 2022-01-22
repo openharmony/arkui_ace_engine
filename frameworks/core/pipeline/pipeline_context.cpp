@@ -2239,6 +2239,11 @@ void PipelineContext::OnShow()
             if (!context) {
                 return;
             }
+#ifdef ENABLE_ROSEN_BACKEND
+            if (context->rsUIDirector_) {
+                context->rsUIDirector_->GoForeground();
+            }
+#endif
             const auto& rootElement = context->rootElement_;
             if (!rootElement) {
                 LOGE("render element is null!");
@@ -2272,6 +2277,11 @@ void PipelineContext::OnHide()
             if (!context) {
                 return;
             }
+#ifdef ENABLE_ROSEN_BACKEND
+            if (context->rsUIDirector_) {
+                context->rsUIDirector_->GoBackground();
+            }
+#endif
             context->NotifyPopupDismiss();
             const auto& rootElement = context->rootElement_;
             if (!rootElement) {
