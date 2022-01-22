@@ -320,6 +320,11 @@ void V8Class<C>::InternalMemberFunctionCallback(const v8::FunctionCallbackInfo<v
     T* instance = static_cast<T*>(ptr);
     int index = V8ValueConvertor::fromV8Value<int>(info.Data());
     auto binding = ThisJSClass::GetFunctionBinding(index);
+    if (binding == nullptr) {
+        LOGW("Can't find function in function map, index: %{public}d, JSClass: %{public}s",
+            index, ThisJSClass::JSName());
+        return;
+    }
     LOGD("InternalMemberFunctionCallback: Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
     auto fnPtr = static_cast<FunctionBinding<T, void, Args...>*>(binding)->Get();
     (instance->*fnPtr)(info);
@@ -339,6 +344,11 @@ void V8Class<C>::MethodCallback(const v8::FunctionCallbackInfo<v8::Value>& info)
     Class* instance = static_cast<Class*>(ptr);
     int index = V8ValueConvertor::fromV8Value<int>(info.Data());
     auto binding = ThisJSClass::GetFunctionBinding(index);
+    if (binding == nullptr) {
+        LOGW("Can't find function in function map, index: %{public}d, JSClass: %{public}s",
+            index, ThisJSClass::JSName());
+        return;
+    }
     LOGD("Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
     bool strictTypeCheck = binding->Options() & MethodOptions::STRICT_TYPE_CHECK;
 
@@ -397,6 +407,11 @@ void V8Class<C>::JSMethodCallback(const v8::FunctionCallbackInfo<v8::Value>& inf
     Class* instance = static_cast<Class*>(ptr);
     int index = V8ValueConvertor::fromV8Value<int>(info.Data());
     auto binding = ThisJSClass::GetFunctionBinding(index);
+    if (binding == nullptr) {
+        LOGW("Can't find function in function map, index: %{public}d, JSClass: %{public}s",
+            index, ThisJSClass::JSName());
+        return;
+    }
     LOGD("Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
     bool strictTypeCheck = binding->Options() & MethodOptions::STRICT_TYPE_CHECK;
 
@@ -421,6 +436,11 @@ void V8Class<C>::StaticMethodCallback(const v8::FunctionCallbackInfo<v8::Value>&
 
     int index = V8ValueConvertor::fromV8Value<int>(info.Data());
     auto binding = ThisJSClass::GetFunctionBinding(index);
+    if (binding == nullptr) {
+        LOGW("Can't find function in function map, index: %{public}d, JSClass: %{public}s",
+            index, ThisJSClass::JSName());
+        return;
+    }
     LOGD("Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
     bool strictTypeCheck = binding->Options() & MethodOptions::STRICT_TYPE_CHECK;
 
@@ -464,6 +484,11 @@ void V8Class<C>::JSStaticMethodCallback(const v8::FunctionCallbackInfo<v8::Value
     v8::Context::Scope contextScope(isolate->GetCurrentContext());
     int index = V8ValueConvertor::fromV8Value<int>(info.Data());
     auto binding = ThisJSClass::GetFunctionBinding(index);
+    if (binding == nullptr) {
+        LOGW("Can't find function in function map, index: %{public}d, JSClass: %{public}s",
+            index, ThisJSClass::JSName());
+        return;
+    }
     LOGD("Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
 
     auto fnPtr = static_cast<StaticFunctionBinding<void, const JSCallbackInfo&>*>(binding)->Get();
