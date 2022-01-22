@@ -33,10 +33,6 @@ const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
 const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
 const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Defaulte value is low.
 constexpr double DEFAULT_QUALITY = 0.92;
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
-const uint32_t BIT8 = 8;
-const uint32_t BIT24 = 24;
-#endif
 template<typename T>
 inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t length, T defaultValue)
 {
@@ -787,13 +783,11 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     final_width = canvasData->dirtyWidth;
     uint32_t length = final_height * final_width;
     uint32_t* data = new uint32_t[length];
-    uint32_t tmp;
     for (uint32_t i = 0; i < final_height; i++) {
         for (uint32_t j = 0; j < final_width; j++) {
             uint32_t idx = i * final_width + j;
             Color pixel = canvasData->data[idx];
-            tmp = pixel.GetValue();
-            data[idx] = (tmp << BIT8) | (tmp >> BIT24);
+            data[idx] = pixel.GetValue();
         }
     }
 
