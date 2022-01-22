@@ -895,6 +895,7 @@ bool V8DeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
     nativeEngine_ =
         new V8NativeEngine(GetPlatform().get(), isolate, engineInstance_->GetContext(), static_cast<void*>(this));
+    engineInstance_->SetNativeEngine(nativeEngine_);
     SetPostTask(nativeEngine_);
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();

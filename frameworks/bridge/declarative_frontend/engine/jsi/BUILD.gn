@@ -76,6 +76,7 @@ template("declarative_js_engine_ark") {
     sources = [
       "ark/ark_js_runtime.cpp",
       "ark/ark_js_value.cpp",
+      "js_converter.cpp",
       "jsi_declarative_engine.cpp",
       "jsi_declarative_group_js_bridge.cpp",
       "jsi_declarative_utils.cpp",
