@@ -27,7 +27,6 @@ constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 constexpr int32_t STATUS_BAR_HEIGHT = 100;
 } // namespace
 
-bool g_onload = false;
 std::unordered_map<std::string, uint64_t> XComponentElement::surfaceIdMap_;
 #endif
 
@@ -396,8 +395,8 @@ void XComponentElement::OnXComponentSize(int64_t textureId, int32_t textureWidth
         }
     }
     std::string str = "";
-    if (!g_onload) {
-        g_onload = true;
+    if (!onLoadDone_) {
+        onLoadDone_ = true;
         this->OnTextureSize(X_INVALID_ID, str);
     }
 #endif
