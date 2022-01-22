@@ -61,7 +61,7 @@ public:
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
 
-    OHOS::AbilityRuntime::Context* context_ = nullptr;
+    std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
     ViewportConfig config_;
