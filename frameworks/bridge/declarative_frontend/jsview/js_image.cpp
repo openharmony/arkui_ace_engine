@@ -301,6 +301,18 @@ void JSImage::Create(const JSCallbackInfo& info)
 #endif
 }
 
+void JSImage::JsBorder(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBorder(info);
+    SetBorder(GetBackDecoration()->GetBorder());
+}
+
+void JSImage::JsBorderRadius(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBorderRadius(info);
+    SetBorder(GetBackDecoration()->GetBorder());
+}
+
 void JSImage::SetSourceSize(const JSCallbackInfo& info)
 {
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -392,9 +404,9 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("interpolation", &JSImage::SetImageInterpolation, opt);
     JSClass<JSImage>::StaticMethod("borderStyle", &JSViewAbstract::SetBorderStyle, opt);
     JSClass<JSImage>::StaticMethod("borderColor", &JSViewAbstract::JsBorderColor);
-    JSClass<JSImage>::StaticMethod("border", &JSViewAbstract::JsBorder);
+    JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderWidth", &JSViewAbstract::JsBorderWidth);
-    JSClass<JSImage>::StaticMethod("borderRadius", &JSViewAbstract::JsBorderRadius);
+    JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
     JSClass<JSImage>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSImage>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSImage>::StaticMethod("autoResize", &JSImage::SetAutoResize);
