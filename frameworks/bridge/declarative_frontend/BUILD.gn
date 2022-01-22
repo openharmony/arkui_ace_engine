@@ -278,17 +278,17 @@ template("declarative_js_engine") {
       deps += [ ":gen_obj_src_js_mock_system_plugin" ]
     } else {
       if (defined(config.plugin_components_support) &&
-        config.plugin_components_support) {
+          config.plugin_components_support) {
         if (!use_mingw_win && !use_mac) {
           external_deps += [
             "multimedia_image_standard:image",
-            "multimedia_image_standard:image_native"
+            "multimedia_image_standard:image_native",
           ]
         }
       } else {
         external_deps = [
           "multimedia_image_standard:image",
-          "multimedia_image_standard:image_native"
+          "multimedia_image_standard:image_native",
         ]
       }
     }
