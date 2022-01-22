@@ -23,6 +23,7 @@
 }
 
 .shareBack {
+    margin-top: 6vp;
     justify-content: center;
     flex-shrink: 0;
 }
@@ -48,11 +49,14 @@
 }
 
 .shareIcon {
-    width: 48vp;
+    width: 42vp;
     height: 48vp;
     background-color: #FFFFFFFF;
-    border-radius: 80vp;
-    border: 0.25vp solid #000000;
+/*    circle icon*/
+/*    width: 48vp;*/
+/*    height: 48vp;*/
+/*    border-radius: 80vp;*/
+/*    border: 0.25vp solid #000000;*/
 }
 
 .shareText {
@@ -63,9 +67,10 @@
 
 .mainText {
     width: 380vp;
-    height: 19vp;
     font-family: sans-serif;
     font-size: 14vp;
+    max-lines: 2;
+    text-overflow: ellipsis;
     color: rgba(0, 0, 0, 1);
 }
 
@@ -76,24 +81,28 @@
     font-family: sans-serif;
     font-size: 10vp;
     color: rgba(0, 0, 0, 1);
+    max-lines: 1;
+    text-overflow: ellipsis;
 }
 
 .shareButton {
     left: 405vp;
-    font-size: 12vp;
-    font-family: sans-serif;
     color: rgba(0, 125, 255, 1);
 }
 
 .button1 {
     width: 25vp;
     height: 16vp;
+    font-size: 12vp;
+    font-family: sans-serif;
 }
 
 .button2 {
     left: 24vp;
     width: 25vp;
     height: 16vp;
+    font-size: 12vp;
+    font-family: sans-serif;
 }
 
 .swiper {
