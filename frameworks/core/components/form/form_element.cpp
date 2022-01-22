@@ -251,7 +251,12 @@ void FormElement::CreateCardContainer()
         subContainer_.Reset();
     }
 
-    subContainer_ = AceType::MakeRefPtr<SubContainer>(GetContext().Upgrade());
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        LOGE("get context fail.");
+        return;
+    }
+    subContainer_ = AceType::MakeRefPtr<SubContainer>(context, context->GetInstanceId());
     if (!subContainer_) {
         LOGE("create card container fail.");
         return;

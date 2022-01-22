@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container_scope.h"
 #include "core/components/form/sub_container.h"
 
 #include "adapter/ohos/entrance/file_asset_provider.h"
@@ -155,8 +156,10 @@ void SubContainer::RunCard(const int64_t id, const std::string path, const std::
     }
 
     auto&& window = std::make_unique<FormWindow>(outSidePipelineContext_);
-    pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(std::move(window), taskExecutor_, assetManager_, frontend_);
 
+    pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
+        std::move(window), taskExecutor_, assetManager_, nullptr, frontend_, instanceId_);
+    ContainerScope scope(instanceId_);
     density_ = outSidePipelineContext_.Upgrade()->GetDensity();
     UpdateRootElmentSize();
     pipelineContext_->SetIsJsCard(true);
