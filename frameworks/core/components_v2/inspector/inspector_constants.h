@@ -279,6 +279,10 @@ ACE_EXPORT extern const char TEXTINPUT_ETS_TAG[];
 ACE_EXPORT extern const char SELECT_COMPONENT_TAG[];
 ACE_EXPORT extern const char SELECT_ETS_TAG[];
 
+//marquee
+ACE_EXPORT extern const char MARQUEE_COMPONENT_TAG[];
+ACE_EXPORT extern const char MARQUEE_ETS_TAG[];
+
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

@@ -268,4 +268,8 @@ ACE_EXPORT extern const char TEXTINPUT_ETS_TAG[] = "TextInput";
 ACE_EXPORT extern const char SELECT_COMPONENT_TAG[] = "SelectComponent";
 ACE_EXPORT extern const char SELECT_ETS_TAG[] = "Select";
 
+//marquee
+ACE_EXPORT extern const char MARQUEE_COMPONENT_TAG[] = "MarqueeComponent";
+ACE_EXPORT extern const char MARQUEE_ETS_TAG[] = "Marquee";
+
 } // namespace OHOS::Ace::V2

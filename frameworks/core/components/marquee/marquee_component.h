@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MARQUEE_MARQUEE_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MARQUEE_MARQUEE_COMPONENT_H
 
+#include "core/components/marquee/marquee_element.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/components/marquee/render_marquee.h"
 #include "core/components/text/text_component.h"
@@ -70,6 +71,10 @@ public:
     }
 
     ~MarqueeComponent() override = default;
+    RefPtr<Element> CreateElement() override
+    {
+        return AceType::MakeRefPtr<MarqueeElement>();
+    }
 
     RefPtr<RenderNode> CreateRenderNode() override
     {
