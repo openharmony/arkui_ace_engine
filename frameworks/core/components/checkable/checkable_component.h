@@ -320,7 +320,7 @@ class ACE_EXPORT CheckboxGroupResult : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(CheckboxGroupResult, BaseEventInfo);
 
 public:
-    CheckboxGroupResult(const std::vector<std::string> vec, int32_t status) :
+    CheckboxGroupResult(const std::vector<std::string>& vec, int32_t status) :
         BaseEventInfo("CheckboxGroupResult"),  status_(status) {
         for (int i = 0; i < static_cast<int32_t>(vec.size()); ++i) {
             nameVector_.push_back(vec[i]);
