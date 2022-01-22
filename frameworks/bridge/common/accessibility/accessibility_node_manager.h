@@ -99,6 +99,7 @@ public:
     RefPtr<AccessibilityNode> CreateAccessibilityNode(
         const std::string& tag, int32_t nodeId, int32_t parentNodeId, int32_t itemIndex) override;
     RefPtr<AccessibilityNode> GetAccessibilityNodeById(NodeId nodeId) const override;
+    std::string GetInspectorNodeById(NodeId nodeId) const override;
     void RemoveAccessibilityNodes(RefPtr<AccessibilityNode>& node) override;
     void RemoveAccessibilityNodeById(NodeId nodeId) override;
     void ClearPageAccessibilityNodes(int32_t pageId) override;
@@ -126,6 +127,7 @@ public:
     bool IsDeclarative();
 
 protected:
+    static bool GetDefaultAttrsByType(const std::string& type, std::unique_ptr<JsonValue>& jsonDefaultAttrs);
     mutable std::mutex mutex_;
     std::unordered_map<NodeId, RefPtr<AccessibilityNode>> accessibilityNodes_;
     std::unordered_map<std::string, WeakPtr<AccessibilityNode>> nodeWithIdMap_;

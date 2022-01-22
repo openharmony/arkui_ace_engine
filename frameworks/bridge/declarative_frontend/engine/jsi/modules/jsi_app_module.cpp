@@ -60,7 +60,7 @@ shared_ptr<JsValue> AppTerminate(const shared_ptr<JsRuntime>& runtime, const sha
         LOGE("get frontend delegate failed");
         return runtime->NewNull();
     }
-    auto pipelineContext = instance->GetPipelineContext(runtime);
+    auto pipelineContext = delegate->GetPipelineContext();
     if (!pipelineContext) {
         LOGE("get frontend pipelineContext failed");
         return runtime->NewNull();

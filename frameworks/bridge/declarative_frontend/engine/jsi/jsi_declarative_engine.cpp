@@ -657,16 +657,6 @@ std::string JsiDeclarativeEngineInstance::GetMediaResource(const std::string& ta
     return std::string();
 }
 
-RefPtr<FrontendDelegate> GetFrontendDelegate(const shared_ptr<JsRuntime>& runtime)
-{
-    if (!runtime) {
-        LOGE("JsRuntime is null, cannot get frontend delegate!");
-        return nullptr;
-    }
-    auto engineInstance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
-    return engineInstance->GetFrontendDelegate();
-}
-
 RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetRunningPage(int32_t instanceId)
 {
     auto engineInstance = JsiDeclarativeEngineInstance::GetEngineInstance(instanceId);

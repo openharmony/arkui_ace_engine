@@ -850,6 +850,19 @@ Rect FrontendDelegateImpl::GetBoundingRectData(NodeId nodeId)
     return rect;
 }
 
+std::string FrontendDelegateImpl::GetInspector(NodeId nodeId)
+{
+    std::string attrs;
+    auto task = [weak = WeakClaim(AceType::RawPtr(jsAccessibilityManager_)), nodeId, &attrs]() {
+        auto accessibilityNodeManager = weak.Upgrade();
+        if (accessibilityNodeManager) {
+            attrs = accessibilityNodeManager->GetInspectorNodeById(nodeId);
+        }
+    };
+    PostSyncTaskToPage(task);
+    return attrs;
+}
+
 void FrontendDelegateImpl::ShowDialog(const std::string& title, const std::string& message,
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)

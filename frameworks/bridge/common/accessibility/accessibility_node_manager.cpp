@@ -18,6 +18,56 @@
 #include "base/geometry/dimension_offset.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "core/accessibility/js_inspector/inspect_badge.h"
+#include "core/accessibility/js_inspector/inspect_button.h"
+#include "core/accessibility/js_inspector/inspect_camera.h"
+#include "core/accessibility/js_inspector/inspect_canvas.h"
+#include "core/accessibility/js_inspector/inspect_chart.h"
+#include "core/accessibility/js_inspector/inspect_dialog.h"
+#include "core/accessibility/js_inspector/inspect_div.h"
+#include "core/accessibility/js_inspector/inspect_divider.h"
+#include "core/accessibility/js_inspector/inspect_form.h"
+#include "core/accessibility/js_inspector/inspect_grid_column.h"
+#include "core/accessibility/js_inspector/inspect_grid_container.h"
+#include "core/accessibility/js_inspector/inspect_grid_row.h"
+#include "core/accessibility/js_inspector/inspect_image.h"
+#include "core/accessibility/js_inspector/inspect_image_animator.h"
+#include "core/accessibility/js_inspector/inspect_input.h"
+#include "core/accessibility/js_inspector/inspect_label.h"
+#include "core/accessibility/js_inspector/inspect_list.h"
+#include "core/accessibility/js_inspector/inspect_list_item.h"
+#include "core/accessibility/js_inspector/inspect_list_item_group.h"
+#include "core/accessibility/js_inspector/inspect_marquee.h"
+#include "core/accessibility/js_inspector/inspect_menu.h"
+#include "core/accessibility/js_inspector/inspect_navigation_bar.h"
+#include "core/accessibility/js_inspector/inspect_option.h"
+#include "core/accessibility/js_inspector/inspect_panel.h"
+#include "core/accessibility/js_inspector/inspect_picker.h"
+#include "core/accessibility/js_inspector/inspect_picker_view.h"
+#include "core/accessibility/js_inspector/inspect_piece.h"
+#include "core/accessibility/js_inspector/inspect_popup.h"
+#include "core/accessibility/js_inspector/inspect_progress.h"
+#include "core/accessibility/js_inspector/inspect_qrcode.h"
+#include "core/accessibility/js_inspector/inspect_rating.h"
+#include "core/accessibility/js_inspector/inspect_refresh.h"
+#include "core/accessibility/js_inspector/inspect_search.h"
+#include "core/accessibility/js_inspector/inspect_select.h"
+#include "core/accessibility/js_inspector/inspect_slider.h"
+#include "core/accessibility/js_inspector/inspect_span.h"
+#include "core/accessibility/js_inspector/inspect_stack.h"
+#include "core/accessibility/js_inspector/inspect_stepper.h"
+#include "core/accessibility/js_inspector/inspect_stepper_item.h"
+#include "core/accessibility/js_inspector/inspect_swiper.h"
+#include "core/accessibility/js_inspector/inspect_switch.h"
+#include "core/accessibility/js_inspector/inspect_tab_bar.h"
+#include "core/accessibility/js_inspector/inspect_tab_content.h"
+#include "core/accessibility/js_inspector/inspect_tabs.h"
+#include "core/accessibility/js_inspector/inspect_text.h"
+#include "core/accessibility/js_inspector/inspect_textarea.h"
+#include "core/accessibility/js_inspector/inspect_toggle.h"
+#include "core/accessibility/js_inspector/inspect_toolbar.h"
+#include "core/accessibility/js_inspector/inspect_toolbar_item.h"
+#include "core/accessibility/js_inspector/inspect_video.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 
 namespace OHOS::Ace::Framework {
@@ -32,6 +82,80 @@ constexpr int32_t CARD_BASE = 100000;
 constexpr int32_t CARD_MAX_AGP_ID = 20000;
 
 std::atomic<int32_t> g_accessibilityId(ROOT_STACK_BASE);
+
+const char INSPECTOR_TYPE[] = "$type";
+const char INSPECTOR_ID[] = "$ID";
+const char INSPECTOR_RECT[] = "$rect";
+const char INSPECTOR_ATTRS[] = "$attrs";
+const char INSPECTOR_STYLES[] = "$styles";
+
+template<class T>
+RefPtr<InspectNode> InspectNodeCreator(NodeId nodeId, const std::string& tag)
+{
+    return AceType::MakeRefPtr<T>(nodeId, tag);
+}
+
+const LinearMapNode<RefPtr<InspectNode> (*)(NodeId, const std::string&)> inspectNodeCreators[] = {
+    { DOM_NODE_TAG_BADGE, &InspectNodeCreator<InspectBadge> },
+    { DOM_NODE_TAG_BUTTON, &InspectNodeCreator<InspectButton> },
+    { DOM_NODE_TAG_CAMERA, &InspectNodeCreator<InspectCamera> },
+    { DOM_NODE_TAG_CANVAS, &InspectNodeCreator<InspectCanvas> },
+    { DOM_NODE_TAG_CHART, &InspectNodeCreator<InspectChart> },
+    { DOM_NODE_TAG_DIALOG, &InspectNodeCreator<InspectDialog> },
+    { DOM_NODE_TAG_DIV, &InspectNodeCreator<InspectDiv> },
+    { DOM_NODE_TAG_DIVIDER, &InspectNodeCreator<InspectDivider> },
+    { DOM_NODE_TAG_FORM, &InspectNodeCreator<InspectForm> },
+    { DOM_NODE_TAG_GRID_COLUMN, &InspectNodeCreator<InspectGridColumn> },
+    { DOM_NODE_TAG_GRID_CONTAINER, &InspectNodeCreator<InspectGridContainer> },
+    { DOM_NODE_TAG_GRID_ROW, &InspectNodeCreator<InspectGridRow> },
+    { DOM_NODE_TAG_IMAGE, &InspectNodeCreator<InspectImage> },
+    { DOM_NODE_TAG_IMAGE_ANIMATOR, &InspectNodeCreator<InspectImageAnimator> },
+    { DOM_NODE_TAG_INPUT, &InspectNodeCreator<InspectInput> },
+    { DOM_NODE_TAG_LABEL, &InspectNodeCreator<InspectLabel> },
+    { DOM_NODE_TAG_LIST, &InspectNodeCreator<InspectList> },
+    { DOM_NODE_TAG_LIST_ITEM, &InspectNodeCreator<InspectListItem> },
+    { DOM_NODE_TAG_LIST_ITEM_GROUP, &InspectNodeCreator<InspectListItemGroup> },
+    { DOM_NODE_TAG_MARQUEE, &InspectNodeCreator<InspectMarquee> },
+    { DOM_NODE_TAG_MENU, &InspectNodeCreator<InspectMenu> },
+    { DOM_NODE_TAG_NAVIGATION_BAR, &InspectNodeCreator<InspectNavigationBar> },
+    { DOM_NODE_TAG_OPTION, &InspectNodeCreator<InspectOption> },
+    { DOM_NODE_TAG_PANEL, &InspectNodeCreator<InspectPanel> },
+    { DOM_NODE_TAG_PICKER_DIALOG, &InspectNodeCreator<InspectPicker> },
+    { DOM_NODE_TAG_PICKER_VIEW, &InspectNodeCreator<InspectPickerView> },
+    { DOM_NODE_TAG_PIECE, &InspectNodeCreator<InspectPiece> },
+    { DOM_NODE_TAG_POPUP, &InspectNodeCreator<InspectPopup> },
+    { DOM_NODE_TAG_PROGRESS, &InspectNodeCreator<InspectProgress> },
+    { DOM_NODE_TAG_QRCODE, &InspectNodeCreator<InspectQRcode> },
+    { DOM_NODE_TAG_RATING, &InspectNodeCreator<InspectRating> },
+    { DOM_NODE_TAG_REFRESH, &InspectNodeCreator<InspectRefresh> },
+    { DOM_NODE_TAG_SEARCH, &InspectNodeCreator<InspectSearch> },
+    { DOM_NODE_TAG_SELECT, &InspectNodeCreator<InspectSelect> },
+    { DOM_NODE_TAG_SLIDER, &InspectNodeCreator<InspectSlider> },
+    { DOM_NODE_TAG_SPAN, &InspectNodeCreator<InspectSpan> },
+    { DOM_NODE_TAG_STACK, &InspectNodeCreator<InspectStack> },
+    { DOM_NODE_TAG_STEPPER, &InspectNodeCreator<InspectStepper> },
+    { DOM_NODE_TAG_STEPPER_ITEM, &InspectNodeCreator<InspectStepperItem> },
+    { DOM_NODE_TAG_SWIPER, &InspectNodeCreator<InspectSwiper> },
+    { DOM_NODE_TAG_SWITCH, &InspectNodeCreator<InspectSwitch> },
+    { DOM_NODE_TAG_TAB_BAR, &InspectNodeCreator<InspectTabBar> },
+    { DOM_NODE_TAG_TAB_CONTENT, &InspectNodeCreator<InspectTabContent> },
+    { DOM_NODE_TAG_TABS, &InspectNodeCreator<InspectTabs> },
+    { DOM_NODE_TAG_TEXT, &InspectNodeCreator<InspectText> },
+    { DOM_NODE_TAG_TEXTAREA, &InspectNodeCreator<InspectTextArea> },
+    { DOM_NODE_TAG_TOGGLE, &InspectNodeCreator<InspectToggle> },
+    { DOM_NODE_TAG_TOOL_BAR, &InspectNodeCreator<InspectToolbar> },
+    { DOM_NODE_TAG_TOOL_BAR_ITEM, &InspectNodeCreator<InspectToolbarItem> },
+    { DOM_NODE_TAG_VIDEO, &InspectNodeCreator<InspectVideo> },
+};
+
+std::string ConvertStrToPropertyType(const std::string& typeValue)
+{
+    std::string dstStr;
+    std::regex regex("([A-Z])");
+    dstStr = regex_replace(typeValue, regex, "-$1");
+    std::transform(dstStr.begin(), dstStr.end(), dstStr.begin(), ::tolower);
+    return dstStr;
+}
 
 inline int32_t GetRootNodeIdFromPage(const RefPtr<JsAcePage>& page)
 {
@@ -185,6 +309,41 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::GetAccessibilityNodeFromPage
     }
 
     return GetAccessibilityNodeById(nodeId);
+}
+
+std::string AccessibilityNodeManager::GetInspectorNodeById(NodeId nodeId) const
+{
+    auto node = GetAccessibilityNodeFromPage(nodeId);
+    if (!node) {
+        LOGE("AccessibilityNodeManager::GetInspectorNodeById, no node with id:%{public}d", nodeId);
+        return "";
+    }
+    auto jsonNode = JsonUtil::Create(true);
+    jsonNode->Put(INSPECTOR_TYPE, node->GetTag().c_str());
+    jsonNode->Put(INSPECTOR_ID, node->GetNodeId());
+    jsonNode->Put(INSPECTOR_RECT, node->GetRect().ToBounds().c_str());
+    auto result = GetDefaultAttrsByType(node->GetTag(), jsonNode);
+    if (!result) {
+        return jsonNode->ToString();
+    }
+    auto attrJsonNode = jsonNode->GetObject(INSPECTOR_ATTRS);
+    for (const auto& attr : node->GetAttrs()) {
+        if (attrJsonNode->Contains(attr.first)) {
+            attrJsonNode->Replace(attr.first.c_str(), attr.second.c_str());
+        } else {
+            attrJsonNode->Put(attr.first.c_str(), attr.second.c_str());
+        }
+    }
+    auto styleJsonNode = jsonNode->GetObject(INSPECTOR_STYLES);
+    for (const auto& style : node->GetStyles()) {
+        auto styleType = ConvertStrToPropertyType(style.first);
+        if (styleJsonNode->Contains(styleType)) {
+            styleJsonNode->Replace(styleType.c_str(), style.second.c_str());
+        } else {
+            styleJsonNode->Put(styleType.c_str(), style.second.c_str());
+        }
+    }
+    return jsonNode->ToString();
 }
 
 void AccessibilityNodeManager::ClearNodeRectInfo(RefPtr<AccessibilityNode>& node, bool isPopDialog)
@@ -532,8 +691,7 @@ void AccessibilityNodeManager::UpdateEventTarget(NodeId id, BaseEventInfo& info)
     auto marginBottom = inspector->GetMargin(AnimatableType::PROPERTY_MARGIN_BOTTOM).ConvertToPx();
     auto& target = info.GetTargetWichModify();
     auto Localoffset = rectInLocal.GetOffset();
-    target.area.SetOffset(DimensionOffset(
-        Offset(Localoffset.GetX() + marginLeft, Localoffset.GetY() + marginTop)));
+    target.area.SetOffset(DimensionOffset(Offset(Localoffset.GetX() + marginLeft, Localoffset.GetY() + marginTop)));
     auto globalOffset = rectInGlobal.GetOffset();
     target.origin =
         DimensionOffset(Offset(globalOffset.GetX() - Localoffset.GetX(), globalOffset.GetY() - Localoffset.GetY()));
@@ -549,6 +707,25 @@ bool AccessibilityNodeManager::IsDeclarative()
     }
 
     return context->GetIsDeclarative();
+}
+
+bool AccessibilityNodeManager::GetDefaultAttrsByType(
+    const std::string& type, std::unique_ptr<JsonValue>& jsonDefaultAttrs)
+{
+    NodeId nodeId = -1;
+    RefPtr<InspectNode> inspectNode;
+    int64_t creatorIndex = BinarySearchFindIndex(inspectNodeCreators, ArraySize(inspectNodeCreators), type.c_str());
+    if (creatorIndex >= 0) {
+        inspectNode = inspectNodeCreators[creatorIndex].value(nodeId, type);
+    } else {
+        LOGW("node type %{public}s is invalid", type.c_str());
+        return false;
+    }
+    inspectNode->InitCommonStyles();
+    inspectNode->PackAttrAndStyle();
+    inspectNode->SetAllAttr(jsonDefaultAttrs, INSPECTOR_ATTRS);
+    inspectNode->SetAllStyle(jsonDefaultAttrs, INSPECTOR_STYLES);
+    return true;
 }
 
 } // namespace OHOS::Ace::Framework

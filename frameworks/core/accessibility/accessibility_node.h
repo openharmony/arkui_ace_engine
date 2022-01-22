@@ -605,19 +605,17 @@ public:
         return marginSize_;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    // used for inspector node in PC preview
-    std::vector<std::pair<std::string, std::string>> GetAttrs() const
+    const std::vector<std::pair<std::string, std::string>>& GetAttrs() const
     {
         return attrs_;
     }
 
-    // used for inspector node in PC preview
-    std::vector<std::pair<std::string, std::string>> GetStyles() const
+    const std::vector<std::pair<std::string, std::string>>& GetStyles() const
     {
         return styles_;
     }
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     // used for inspector node in PC preview
     bool GetClearRectInfoFlag() const
     {
@@ -830,10 +828,10 @@ private:
     AceCollectionInfo collectionInfo_;
     AceCollectionItemInfo collectionItemInfo_;
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    // used for inspector node in PC preview
     std::vector<std::pair<std::string, std::string>> attrs_;
     std::vector<std::pair<std::string, std::string>> styles_;
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     // used for inspector node in PC preview
     bool isClearRectInfo_ = false;
     // focus scale or translateScale for inspector node in PC preview
@@ -844,7 +842,6 @@ private:
     RotateAxis rotateAxis_ = RotateAxis::AXIS_Z;
     bool isAnimationNode_ = false;
     int32_t zIndex_ = 0;
-    std::string debugLine_;
 #endif
 };
 
