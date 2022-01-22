@@ -44,6 +44,7 @@ public:
     CopyablePersistent<v8::Function> GetCallbackFunc(uint32_t callbackId, bool isInterval);
     std::vector<CopyablePersistent<v8::Value>> GetCallbackArray(uint32_t callbackId, bool isInterval);
     v8::Isolate* GetCallbackIsolate(uint32_t callbackId, bool isInterval);
+    void ClearTimerIsolate(v8::Isolate* isolate);
 
 private:
     uint32_t AddCallback(std::unordered_map<uint32_t, CopyablePersistent<v8::Function>>& callbackFuncMap,

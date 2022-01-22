@@ -24,6 +24,7 @@
 #include "frameworks/bridge/codec/function_call.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
+#include "frameworks/bridge/declarative_frontend/engine/v8/v8_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_utils.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
@@ -880,6 +881,7 @@ void V8DeclarativeGroupJsBridge::Destroy(v8::Isolate* isolate, bool isWorker)
         context_.Reset();
     }
 
+    ModuleManager::GetInstance()->ClearTimerIsolate(isolate);
     DestroyModuleCallbackMap(isolate);
     DestroyCallbackIdIsolateMap(isolate);
     DestroyIsolateNativeEngineMap(isolate);
