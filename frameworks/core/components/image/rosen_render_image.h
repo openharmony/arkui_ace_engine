@@ -96,7 +96,9 @@ private:
     void UpdateRenderAltImage(const RefPtr<Component>& component);
     void SetSkRadii(const Radius& radius, SkVector& radii);
     void SetClipRadius();
-    void CanvasDrawImageRect(SkPaint& paint, const Offset& offset, SkCanvas* canvas);
+    void CanvasDrawImageRect(SkPaint& paint, const Offset& offset, SkCanvas* canvas, const Rect& paintRect);
+    void DrawImageOnCanvas(const Rect& srcRect, const Rect& dstRect, const SkPaint& paint,
+        SkCanvas* canvas) const;
     void PaintSVGImage(const sk_sp<SkData>& skData, bool onlyLayoutSelf = false);
     void DrawSVGImage(const Offset& offset, SkCanvas* canvas);
     void DrawSVGImageCustom(RenderContext& context, const Offset& offset);
@@ -104,6 +106,7 @@ private:
     Rect RecalculateSrcRect(const Size& realImageSize);
     void ApplyColorFilter(SkPaint& paint);
     void ApplyInterpolation(SkPaint& paint);
+    void ApplyBorderRadius(const Offset& offset, const Rect& paintRect, SkCanvas* canvas);
     void AddSvgChild();
     void CreateAnimatedPlayer(const RefPtr<ImageProvider>& provider, SkCodec* codecPtr, bool forceResize);
     bool VerifySkImageDataFromPixmap(const RefPtr<PixelMap>& pixmap) const;

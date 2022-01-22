@@ -60,6 +60,8 @@ public:
     static void JsPadding(const JSCallbackInfo& info);
     static void JsMargin(const JSCallbackInfo& info);
     static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
+    static void JsBorder(const JSCallbackInfo& info);
+    static void JsBorderRadius(const JSCallbackInfo& info);
     static void SetLeftBorderWidth(const Dimension& value);
     static void SetTopBorderWidth(const Dimension& value);
     static void SetRightBorderWidth(const Dimension& value);
