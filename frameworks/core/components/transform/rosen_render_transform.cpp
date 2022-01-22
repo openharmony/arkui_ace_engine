@@ -114,6 +114,7 @@ void RosenRenderTransform::SyncGeometryProperties()
 void RosenRenderTransform::Update(const RefPtr<Component>& component)
 {
     RenderTransform::Update(component);
+    MarkNeedSyncGeometryProperties();
 }
 
 Point RosenRenderTransform::GetTransformPoint(const Point& point)
