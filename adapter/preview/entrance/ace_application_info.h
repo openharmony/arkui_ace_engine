@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_ADAPTER_PREVIEW_ACE_APPLICATION_INFO_H
 #define FOUNDATION_ACE_ADAPTER_PREVIEW_ACE_APPLICATION_INFO_H
 
+#include "resource_manager.h"
+
 #include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace::Platform {
@@ -30,9 +32,18 @@ public:
 
     bool GetBundleInfo(const std::string& packageName, AceBundleInfo& bundleInfo) override;
     double GetLifeTime() const override;
+    
+    void SetResourceManager(std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
+    {
+        resourceManager_ = resourceManager;
+    }
+
     void SetDebug(bool isDebugVersion, bool needDebugBreakpoint) override;
 
     std::string GetJsEngineParam(const std::string& key) const override;
+
+private: 
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager_;
 };
 
 } // namespace OHOS::Ace::Platform

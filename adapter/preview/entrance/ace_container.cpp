@@ -775,9 +775,11 @@ void AceContainer::InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs)
         return;
     }
     auto config = container->GetResourceConfiguration();
+    config.SetDeviceType(SystemProperties::GetDeviceType());
     config.SetOrientation(SystemProperties::GetDevcieOrientation());
     config.SetDensity(runArgs.deviceConfig.density);
-    config.SetDeviceType(SystemProperties::GetDeviceType());
+    config.SetColorMode(runArgs.deviceConfig.colorMode);
+    config.SetFontRatio(runArgs.deviceConfig.fontRatio);
     container->SetResourceConfiguration(config);
 }
 

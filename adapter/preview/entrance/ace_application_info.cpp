@@ -33,7 +33,29 @@
 
 namespace OHOS::Ace::Platform {
 
-void AceApplicationInfoImpl::ChangeLocale(const std::string& language, const std::string& countryOrRegion) {}
+void AceApplicationInfoImpl::ChangeLocale(const std::string& language, const std::string& countryOrRegion) 
+{
+    std::string languageLower;
+    std::transform(language.begin(), language.end(), languageLower.begin(), ::tolower);
+
+    std::string countryOrRegionUpper;
+    std::transform(countryOrRegion.begin(), countryOrRegion.end(), countryOrRegionUpper.begin(), ::tolower);
+
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    resourceManager_->GetResConfig(*resConfig);
+
+    auto localeInfo = resConfig->GetLocaleInfo();
+    if (localeInfo == nullptr) {
+        LOGE("get local info failed");
+        return;
+    }
+
+    auto script = localeInfo->getScript();
+    resConfig->SetLocaleInfo(languageLower.c_str(), script, countryOrRegionUpper.c_str());
+    resourceManager_->UpdateResConfig(*resConfig);
+
+    SetLocale(languageLower, countryOrRegionUpper, (script == nullptr) ? "" : script, "");
+}
 
 void AceApplicationInfoImpl::SetLocale(const std::string& language, const std::string& countryOrRegion,
     const std::string& script, const std::string& keywordsAndValues)
