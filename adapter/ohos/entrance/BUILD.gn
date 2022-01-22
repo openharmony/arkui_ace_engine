@@ -49,7 +49,9 @@ template("ace_ohos_standard_source_set") {
 
     include_dirs = [
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/featureAbility",
+      "//foundation/aafwk/standard/interfaces/innerkits/runtime/include/",
       "//foundation/ace/napi/interfaces/kits",
+      "//foundation/ace/napi/native_engine",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_dataability/include",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb/include",
       "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
