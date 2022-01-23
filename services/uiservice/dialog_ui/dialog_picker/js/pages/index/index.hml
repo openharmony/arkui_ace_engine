@@ -1,23 +1,23 @@
 <div class="container">
-    <div class="share">
-        <div class="shareBack">
+    <div class="share" style="width: {{share.width}}; height: {{share.height}};">
+        <div class="shareBack" style="margin-top: {{share.backTop}};">
             <image class="backImage" onclick="onBack" src="common/handle_down.svg"></image>
         </div>
-        <div class="shareCard">
-            <div class="shareInfo">
+        <div class="shareCard" style="width: {{share.card.width}}; height: {{share.card.height}}; border-radius: {{share.card.radius}};">
+            <div class="shareInfo" style="margin: {{share.card.contentMargin}}">
                 <image class="shareIcon" style="border: {{viewStyle.iconBoard}};" src="{{viewStyle.icon}}"></image>
-                <div class="shareText">
-                    <text class="mainText" style="height: {{viewStyle.textMainHeight}};">{{previewCard.mainText}}</text>
-                    <text class="subText" style="visibility: {{viewStyle.textVisible}};">{{previewCard.subText}}</text>
+                <div class="shareText" style="left: {{share.card.text.left}}; top: {{share.card.text.top}};">
+                    <text class="mainText" style="height: {{viewStyle.textMainHeight}}; width: {{share.card.text.main.width}};">{{previewCard.mainText}}</text>
+                    <text class="subText" style="visibility: {{viewStyle.textVisible}}; top: {{share.card.text.sub.top}}; width: {{share.card.text.sub.width}};">{{previewCard.subText}}</text>
                 </div>
             </div>
-            <div class="shareButton">
+            <div style="left: {{share.card.btn.left}};">
                 <text class="button1" style="visibility: {{viewStyle.copyVisible}};">{{viewStyle.button1}}</text>
                 <text class="button2" style="visibility: {{viewStyle.printVisible}};">{{viewStyle.button2}}</text>
             </div>
         </div>
-        <swiper class="swiper">
-            <div class="shareAppSelect" for="shareHapList">
+        <swiper class="swiper" style="height: {{share.swiper.height}};">
+            <div class="shareAppSelect" style="margin-top: {{share.swiper.select.marginTop}};" for="shareHapList">
                 <div class="shareApp" for="{{$item}}" onClick="onShare({{$item}})">
                     <image class="AppIcon" src="{{$item.icon}}"></image>
                     <text class="AppName">{{$item.name}}</text>

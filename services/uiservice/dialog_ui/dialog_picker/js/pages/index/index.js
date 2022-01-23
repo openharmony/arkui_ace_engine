@@ -16,9 +16,45 @@ export default {
             format: "png",
             button1: "",
             button2: "",
-        }
+        },
+        share: {
+            width: "519vp",
+            height: "256vp",
+            backTop: "6vp",
+            card: {
+                width: "495vp",
+                height: "87vp",
+                radius: "24vp",
+                contentMargin: "16vp 43.5vp 6vp 16vp",
+                text: {
+                    top: "3vp",
+                    left: "16vp",
+                    main:{
+                        width: "380vp",
+                    },
+                    sub: {
+                        top: "2vp",
+                        width: "380vp",
+                    },
+                },
+                btn:{
+                    left: "405vp",
+                }
+            },
+            swiper: {
+                height: "115vp",
+                select: {
+                    marginTop: "16vp",
+                }
+            }
+        },
     },
     onInit() {
+        if (this.deviceType == "phone") {
+            console.log("this is phone devices");
+            this.getHapListStyle();
+        }
+
         this.getViewStyle();
         let shareHap = [];
         for (let i = 0; i < this.hapList.length; i++) {
@@ -64,7 +100,7 @@ export default {
                 }
             }
             if (defaultIcon == "ic_unknown") {
-                this.previewCard.mainText = this.$t('strings.unknown');
+                this.previewCard.mainText = this.$t('strings.unknownName');
                 this.previewCard.subText = this.$t('strings.fileSize') + " KB";
             }
         } else if (fileNums == 1) {
@@ -94,7 +130,7 @@ export default {
                 defaultIcon = "ic_unknown";
             }
             if (this.previewCard.mainText == "") {
-                this.previewCard.mainText = this.$t('strings.unknown');;
+                this.previewCard.mainText = this.$t('strings.unknownName');;
             }
         } else {
             defaultIcon = "ic_file_multiple";
@@ -112,5 +148,25 @@ export default {
             this.previewCard.subText = this.$t('strings.totalSize') + Math.round(totalSize / 1024) + "KB";
         }
         this.viewStyle.icon = "common/" + defaultIcon + "." + this.viewStyle.format;
+    },
+    getHapListStyle() {
+        if (this.deviceType == "phone") {
+            this.lineNums = 8;
+        }
+        this.share.width = "360vp";
+        this.share.height = "347vp";
+        this.share.backTop = "0vp";
+        this.share.card.width = "336vp";
+        this.share.card.height = "96vp";
+        this.share.card.radius = "16vp";
+        this.share.card.contentMargin = "16vp 24vp 8vp 16vp";
+        this.share.card.text.top = "6vp";
+        this.share.card.text.left = "12vp";
+        this.share.card.text.main.width = "236vp";
+        this.share.card.text.sub.top = "4vp";
+        this.share.card.text.sub.width = "236vp";
+        this.share.card.btn.left = "254vp";
+        this.share.swiper.height = "200vp";
+        this.share.swiper.select.marginTop = "8vp";
     }
 }
