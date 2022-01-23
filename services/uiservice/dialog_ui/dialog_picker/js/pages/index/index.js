@@ -64,6 +64,7 @@ export default {
                 shareHap = [];
             }
         }
+        this.getHapResource();
     },
     onShare: function (item) {
         let param = item.bundle + ";" + item.ability;
@@ -100,7 +101,7 @@ export default {
                 }
             }
             if (defaultIcon == "ic_unknown") {
-                this.previewCard.mainText = this.$t('strings.unknownName');
+                this.previewCard.mainText = this.$t('strings.defaultName');
                 this.previewCard.subText = this.$t('strings.fileSize') + " KB";
             }
         } else if (fileNums == 1) {
@@ -130,7 +131,7 @@ export default {
                 defaultIcon = "ic_unknown";
             }
             if (this.previewCard.mainText == "") {
-                this.previewCard.mainText = this.$t('strings.unknownName');;
+                this.previewCard.mainText = this.$t('strings.defaultName');;
             }
         } else {
             defaultIcon = "ic_file_multiple";
@@ -168,5 +169,59 @@ export default {
         this.share.card.btn.left = "254vp";
         this.share.swiper.height = "200vp";
         this.share.swiper.select.marginTop = "8vp";
+    },
+    getHapResource() {
+        this.labelMap = new Map()
+        for (let i = 0; i < this.hapList.length; i++) {
+            let lableId = Number(this.hapList[i].name);
+            resourceManager.getResourceManager(this.hapList[i].bundle).then(mgr =>{
+                console.log("dialog service bundle:" + this.hapList[i].bundle + "---lableId:" + lableId);
+                mgr.getString(lableId).then(value => {
+                    console.log("dialog service get label(" + lableId + ") value:" + value);
+                    this.updateHapName(this.hapList[i].bundle, value);
+                }).catch(error => {
+                    console.log("dialog service resource getString error:" + error);
+                })
+            }).catch(error => {
+                console.log("dialog service getResourceManager error:" + error);
+            });
+
+            let iconId = Number(this.hapList[i].icon);
+            resourceManager.getResourceManager(this.hapList[i].bundle).then(mgr =>{
+                console.log("dialog service bundle:" + this.hapList[i].bundle + "---iconId:" + iconId);
+                mgr.getMediaBase64(iconId).then(value => {
+                    console.log("dialog service get icon(" + iconId + ") value:" + value);
+                    this.updateHapIcon(this.hapList[i].bundle, value);
+                }).catch(error => {
+                    console.log("dialog service resource getString error:" + error);
+                })
+            }).catch(error => {
+                console.log("dialog service getResourceManager error:" + error);
+            });
+        }
+    },
+    updateHapName(bundle, hapLabel) {
+        for (let i = 0; i < this.shareHapList.length; i++) {
+            if (this.shareHapList[i] != null) {
+                for (let j = 0; j < this.shareHapList[i].length; j++) {
+                    if (this.shareHapList[i][j].bundle == bundle) {
+                        this.shareHapList[i][j].name = hapLabel;
+                        console.log("update bundle:" + bundle + " to lable:" + hapLabel);
+                    }
+                }
+            }
+        }
+    },
+    updateHapIcon(bundle, hapIcon) {
+        for (let i = 0; i < this.shareHapList.length; i++) {
+            if (this.shareHapList[i] != null) {
+                for (let j = 0; j < this.shareHapList[i].length; j++) {
+                    if (this.shareHapList[i][j].bundle == bundle) {
+                        this.shareHapList[i][j].icon = hapIcon;
+                        console.log("update bundle:" + bundle + " to icon:" + hapIcon);
+                    }
+                }
+            }
+        }
     }
 }
