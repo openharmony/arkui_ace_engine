@@ -293,9 +293,9 @@ const std::string UIServiceMgrClient::GetPickerDialogParam(
     for (int i = 0; i < (int)abilityInfos.size(); i++) {
         const auto& abilityInfo = abilityInfos[i];
         param += "{ \"name\": \"";
-        param += abilityInfo.label; // or int32_t abilityInfo.labelId
+        param += std::to_string(abilityInfo.labelId); // or string abilityInfo.label
         param += "\", \"icon\": \"";
-        param += abilityInfo.iconPath; // or int32_t abilityInfo.iconId
+        param += std::to_string(abilityInfo.iconId); // or string abilityInfo.icon
         param += "\", \"bundle\": \"";
         param += abilityInfo.bundleName;
         param += "\", \"ability\": \"";
