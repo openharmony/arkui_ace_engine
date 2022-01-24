@@ -169,7 +169,7 @@ private:
     friend class QJSUtils;
     friend class QJSValue;
 #if defined(USE_CLANG_COVERAGE) || defined(CLANG_COVERAGE)
-    static std::stack<JSContext*> qjsHandleScopeStack_;
+    static std::stack<QJSHandleScope*> qjsHandleScopeStack_;
 #else
     static thread_local std::stack<QJSHandleScope*> qjsHandleScopeStack_;
 #endif
