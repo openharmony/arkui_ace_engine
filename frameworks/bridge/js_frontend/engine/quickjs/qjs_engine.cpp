@@ -567,7 +567,7 @@ JSValue JsUpdateElementStyles(JSContext* ctx, JSValueConst value, int32_t argc, 
         return JS_EXCEPTION;
     }
 
-    auto page = GetRunningPage(ctx);
+    auto page = GetStagingPage(ctx);
     if (page == nullptr) {
         return JS_EXCEPTION;
     }
