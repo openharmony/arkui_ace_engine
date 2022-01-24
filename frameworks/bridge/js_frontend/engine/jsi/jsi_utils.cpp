@@ -116,35 +116,44 @@ void JsiUtils::JsiDumpSourceFile(std::string& stackStr)
         const std::string closeBrace = ")";
         const std::string openBrace = "(";
         const std::string appFile = "app_.js";
-        int32_t offSet = 13;
+        int32_t offSet = 14;
         std::string sourceInfo;
         std::string line = "";
+        std::string column = "";
         MappingInfo mapInfo;
 
         int32_t closeBracePos = stackStr.find(closeBrace);
         int32_t openBracePos = stackStr.find(openBrace);
         int32_t appFlag = stackStr.find(appFile);
 
+        int32_t flag = 0;
         for (int32_t i = closeBracePos - 1; i > 0; i--) {
-            if (stackStr[i] >= '0' && stackStr[i] <= '9') {
+            if (stackStr[i] == ':') {
+                flag += 1;
+                continue;
+            }
+            if (flag == 0) {
+                column = stackStr[i] + column;
+            } else if (flag == 1) {
                 line = stackStr[i] + line;
             } else {
                 break;
             }
         }
 
-        if (line == "") {
-            LOGI("the stack without line info");
+        if (line == "" || column == "") {
+            LOGI("the stack without line or column info");
             return;
         }
 
         if (appFlag > 0 && appMap) {
-            mapInfo = appMap->Find(std::stoi(line) - offSet, 1);
+            mapInfo = appMap->Find(StringUtils::StringToInt(line) - offSet, StringUtils::StringToInt(column));
         } else {
-            mapInfo = pageMap->Find(std::stoi(line) - offSet, 1);
+            mapInfo = pageMap->Find(StringUtils::StringToInt(line) - offSet, StringUtils::StringToInt(column));
         }
 
-        sourceInfo = "(" + mapInfo.sources + ":" + std::to_string(mapInfo.row) + ")";
+        sourceInfo = "(" + mapInfo.sources + ":" + std::to_string(mapInfo.row) + ":" +
+                     std::to_string(mapInfo.col) + ")";
         stackStr.replace(openBracePos, closeBracePos - openBracePos + 1, sourceInfo);
     }
 }
