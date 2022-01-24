@@ -148,6 +148,42 @@ RefPtr<FlexItemComponent> ViewStackProcessor::GetFlexItemComponent()
     return flexItem;
 }
 
+RefPtr<StepperItemComponent> ViewStackProcessor::GetStepperItemComponent()
+{
+    auto& wrappingComponentsMap = componentsStack_.top();
+    if (wrappingComponentsMap.find("stepperItem") != wrappingComponentsMap.end()) {
+        return AceType::DynamicCast<StepperItemComponent>(wrappingComponentsMap["stepperItem"]);
+    }
+
+    RefPtr<StepperItemComponent> stepperItem = AceType::MakeRefPtr<StepperItemComponent>(RefPtr<Component>());
+    wrappingComponentsMap.emplace("stepperItem", stepperItem);
+    return stepperItem;
+}
+
+RefPtr<DisplayComponent> ViewStackProcessor::GetStepperDisplayComponent()
+{
+    auto& wrappingComponentsMap = componentsStack_.top();
+    if (wrappingComponentsMap.find("stepperDisplay") != wrappingComponentsMap.end()) {
+        return AceType::DynamicCast<DisplayComponent>(wrappingComponentsMap["stepperDisplay"]);
+    }
+
+    RefPtr<DisplayComponent> stepperDisplay = AceType::MakeRefPtr<DisplayComponent>();
+    wrappingComponentsMap.emplace("stepperDisplay", stepperDisplay);
+    return stepperDisplay;
+}
+
+RefPtr<ScrollComponent> ViewStackProcessor::GetStepperScrollComponent()
+{
+    auto& wrappingComponentsMap = componentsStack_.top();
+    if (wrappingComponentsMap.find("stepperScroll") != wrappingComponentsMap.end()) {
+        return AceType::DynamicCast<ScrollComponent>(wrappingComponentsMap["stepperScroll"]);
+    }
+
+    RefPtr<ScrollComponent> stepperScroll = AceType::MakeRefPtr<ScrollComponent>(RefPtr<Component>());
+    wrappingComponentsMap.emplace("stepperScroll", stepperScroll);
+    return stepperScroll;
+}
+
 RefPtr<BoxComponent> ViewStackProcessor::GetBoxComponent()
 {
     auto& wrappingComponentsMap = componentsStack_.top();
@@ -516,8 +552,6 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
 
     bool isItemComponent = AceType::InstanceOf<V2::ListItemComponent>(mainComponent) ||
                            AceType::InstanceOf<GridLayoutItemComponent>(mainComponent);
-    auto stepperItemComponentV2 = AceType::DynamicCast<StepperItemComponentV2>(mainComponent);
-    bool isStepperItemComponent = AceType::InstanceOf<StepperItemComponentV2>(mainComponent);
 
     RefPtr<Component> itemChildComponent;
 
@@ -537,8 +571,9 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
         components.emplace_back(scoringComponent);
     }
 
-    std::string componentNames[] = { "flexItem", "display", "transform", "touch", "pan_guesture", "click_guesture",
-        "focusable", "coverage", "box", "shared_transition", "mouse" };
+    std::string componentNames[] = { "stepperItem", "stepperDisplay", "flexItem", "display", "transform", "touch",
+        "pan_guesture", "click_guesture", "focusable", "coverage", "box", "shared_transition", "mouse",
+        "stepperScroll" };
     for (auto& name : componentNames) {
         auto iter = wrappingComponentsMap.find(name);
         if (iter != wrappingComponentsMap.end()) {
@@ -569,12 +604,6 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
         if (itemChildComponent) {
             Component::MergeRSNode(components, 1);
             components.emplace_back(itemChildComponent);
-        }
-    } else if (isStepperItemComponent) {
-        if (stepperItemComponentV2) {
-            auto scorll = stepperItemComponentV2->AdjustComponentScroll(mainComponent);
-            components.emplace_back(scorll);
-            Component::MergeRSNode(components);
         }
     } else if (!components.empty() && (AceType::InstanceOf<TextureComponent>(mainComponent) ||
                                           AceType::InstanceOf<BoxComponent>(mainComponent) ||
@@ -616,17 +645,13 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     }
 
     auto component = components.front();
-    if (isStepperItemComponent) {
-        if (stepperItemComponentV2) {
-            component = stepperItemComponentV2->AdjustComponentDisplay(component);
-        }
-    }
     auto iter = wrappingComponentsMap.find("box");
     if (iter != wrappingComponentsMap.end() && (iter->second->GetTextDirection() != component->GetTextDirection())) {
         component->SetTextDirection(iter->second->GetTextDirection());
     }
 
     for (auto&& component : components) {
+        LOGE("componentName:%{public}s", AceType::TypeName(component));
         component->SetTouchable(mainComponent->IsTouchable());
     }
 

@@ -63,6 +63,7 @@
 #include "core/components_v2/inspector/span_composed_element.h"
 #include "core/components_v2/inspector/stack_composed_element.h"
 #include "core/components_v2/inspector/stepper_composed_element.h"
+#include "core/components_v2/inspector/stepper_item_composed_element.h"
 #include "core/components_v2/inspector/swiper_composed_element.h"
 #include "core/components_v2/inspector/switch_composed_element.h"
 #include "core/components_v2/inspector/tab_content_composed_element.h"
@@ -174,6 +175,8 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) {return AceType::MakeRefPtr<V2::HyperlinkComposedElement>(id); } },
     { STEPPER_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::StepperComposedElement>(id); } },
+    { STEPPER_ITEM_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::StepperItemComposedElement>(id); } },
     { SCROLL_BAR_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::ScrollBarComposedElement>(id); } },
     { REFRESH_COMPONENT_TAG,
@@ -250,6 +253,7 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { SHEET_COMPONENT_TAG, SHEET_ETS_TAG },
     { HYPERLINK_COMPONENT_TAG, HYPERLINK_ETS_TAG },
     { STEPPER_COMPONENT_TAG, STEPPER_ETS_TAG },
+    { STEPPER_ITEM_COMPONENT_TAG, STEPPER_ITEM_ETS_TAG },
     { SCROLL_BAR_COMPONENT_TAG, SCROLL_BAR_ETS_TAG },
     { REFRESH_COMPONENT_TAG, REFRESH_ETS_TAG },
     { DATE_PICKER_COMPONENT_TAG, DATE_PICKER_ETS_TAG },

@@ -229,6 +229,10 @@ ACE_EXPORT extern const char HYPERLINK_ETS_TAG[] = "Hyperlink";
 ACE_EXPORT extern const char STEPPER_COMPONENT_TAG[] = "StepperComponent";
 ACE_EXPORT extern const char STEPPER_ETS_TAG[] = "Stepper";
 
+// stepperItem
+ACE_EXPORT extern const char STEPPER_ITEM_COMPONENT_TAG[] = "StepperItemComponentV2";
+ACE_EXPORT extern const char STEPPER_ITEM_ETS_TAG[] = "StepperItem";
+
 // scrollbar
 ACE_EXPORT extern const char SCROLL_BAR_COMPONENT_TAG[] = "ScrollBarComponent";
 ACE_EXPORT extern const char SCROLL_BAR_ETS_TAG[] = "ScrollBar";

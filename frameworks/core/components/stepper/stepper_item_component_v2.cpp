@@ -13,42 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/components/scroll/scroll_component.h"
 #include "core/components/stepper/stepper_item_component_v2.h"
+#include "core/components/scroll/scroll_component.h"
 
 namespace OHOS::Ace {
-
 StepperItemComponentV2::StepperItemComponentV2(FlexDirection direction, FlexAlign mainAxisAlign,
     FlexAlign crossAxisAlign, const std::list<RefPtr<Component>>& children)
     : FlexComponent(direction, mainAxisAlign, crossAxisAlign, children)
-{
-    displayComponent_ = AceType::MakeRefPtr<DisplayComponent>();
-    stepperItemComponent_ = AceType::MakeRefPtr<StepperItemComponent>(RefPtr<Component>());
-}
-
-RefPtr<StepperItemComponent> StepperItemComponentV2::GetStepperItemComponent() const
-{
-    return stepperItemComponent_;
-}
-
-RefPtr<Component> StepperItemComponentV2::AdjustComponentScroll(const RefPtr<Component>& component)
-{
-    if (component) {
-        auto scroll = AceType::MakeRefPtr<ScrollComponent>(component);
-        scroll->SetTakeBoundary(false);
-        return scroll;
-    }
-    return nullptr;
-}
-
-RefPtr<Component> StepperItemComponentV2::AdjustComponentDisplay(const RefPtr<Component>& component)
-{
-    if (component) {
-        displayComponent_->SetChild(component);
-        stepperItemComponent_->SetChild(displayComponent_);
-        return stepperItemComponent_;
-    }
-    return nullptr;
-}
-
+{}
 } // namespace OHOS::Ace

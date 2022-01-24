@@ -36,6 +36,8 @@
 #include "frameworks/core/components/mouse_listener/mouse_listener_component.h"
 #include "frameworks/core/components/navigation_bar/navigation_container_component.h"
 #include "frameworks/core/components/page_transition/page_transition_component.h"
+#include "frameworks/core/components/scroll/scroll_component.h"
+#include "frameworks/core/components/stepper/stepper_item_component.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/core/components/popup/popup_component_v2.h"
 #endif
@@ -59,6 +61,9 @@ public:
     // possible wrapping components
     static std::string GenerateId();
     RefPtr<FlexItemComponent> GetFlexItemComponent();
+    RefPtr<StepperItemComponent> GetStepperItemComponent();
+    RefPtr<DisplayComponent> GetStepperDisplayComponent();
+    RefPtr<ScrollComponent> GetStepperScrollComponent();
     RefPtr<BoxComponent> GetBoxComponent();
     RefPtr<Component> GetMainComponent() const;
     RefPtr<DisplayComponent> GetDisplayComponent();
