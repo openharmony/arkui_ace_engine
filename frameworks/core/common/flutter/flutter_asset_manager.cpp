@@ -32,7 +32,7 @@ RefPtr<Asset> FlutterAssetManager::GetAsset(const std::string& assetName)
             }
         }
     }
-    LOGE("find asset failed, assetName = %{private}s", assetName.c_str());
+    LOGW("find asset failed, assetName = %{public}s", assetName.c_str());
     return nullptr;
 }
 

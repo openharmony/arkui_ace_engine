@@ -72,7 +72,7 @@ void ManifestRouter::RouterParse(const std::unique_ptr<JsonValue>& root)
         return;
     }
 
-    auto pagesArray = root->GetValue("pages");
+    auto pagesArray = root->Contains("pages") ? root->GetValue("pages") : root->GetValue("src");
     if (pagesArray && pagesArray->IsArray()) {
         for (int32_t index = 0; index < pagesArray->GetArraySize(); index++) {
             auto page = pagesArray->GetArrayItem(index);
