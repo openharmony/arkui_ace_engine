@@ -34,10 +34,13 @@ constexpr float CHECK_MARK_MIDDLE_X_POSITION = 0.44f;
 constexpr float CHECK_MARK_MIDDLE_Y_POSITION = 0.68f;
 constexpr float CHECK_MARK_END_X_POSITION = 0.76f;
 constexpr float CHECK_MARK_END_Y_POSITION = 0.33f;
+constexpr float CHECK_MARK_PART_X_POSITION = 0.25f;
+constexpr float CHECK_MARK_PART_Y_POSITION = 0.25f;
 constexpr double CHECK_MARK_LEFT_ANIMATION_PERCENT = 0.45;
 constexpr double CHECK_MARK_RIGHT_ANIMATION_PERCENT = 0.55;
 constexpr double DEFAULT_MAX_CHECKBOX_SHAPE_SCALE = 1.0;
 constexpr double DEFAULT_MIN_CHECKBOX_SHAPE_SCALE = 0.0;
+constexpr double HALF_THE_WIDTH = 0.5;
 
 } // namespace
 
@@ -63,6 +66,12 @@ void RosenRenderCheckbox::Paint(RenderContext& context, const Offset& offset)
     shadowPaint.setColor(shadowColor_);
     shadowPaint.setStrokeCap(SkPaint::kRound_Cap);
     SetStrokeWidth(NormalizeToPx(checkStroke_ + shadowWidth_ * 2), shadowPaint);
+    SetUIStatus(canvas, paintOffset, strokePaint, shadowPaint);
+}
+
+void RosenRenderCheckbox::SetUIStatus(SkCanvas* canvas,
+    const Offset& paintOffset, SkPaint& strokePaint, SkPaint& shadowPaint)
+{
     switch (uiStatus_) {
         case UIStatus::SELECTED: {
             DrawActiveBorder(canvas, paintOffset, strokePaint);
@@ -87,6 +96,27 @@ void RosenRenderCheckbox::Paint(RenderContext& context, const Offset& offset)
             DrawAnimationOnToOff(canvas, paintOffset, strokePaint, shadowPaint);
             break;
         }
+        case UIStatus::PART: {
+            DrawUnselected(canvas, paintOffset, inactiveColor_, strokePaint);
+            DrawActiveSquare(canvas, paintOffset, strokePaint);
+            break;
+        }
+        case UIStatus::PART_TO_OFF: {
+            DrawUnselected(canvas, paintOffset, inactiveColor_, strokePaint);
+            break;
+        }
+        case UIStatus::OFF_TO_PART: {
+            DrawUnselected(canvas, paintOffset, inactiveColor_, strokePaint);
+            break;
+        }
+        case UIStatus::PART_TO_ON: {
+            DrawUnselected(canvas, paintOffset, inactiveColor_, strokePaint);
+            break;
+        }
+        case UIStatus::ON_TO_PART: {
+            DrawUnselected(canvas, paintOffset, inactiveColor_, strokePaint);
+            break;
+        }
         default:
             LOGE("unknown ui status");
             break;
@@ -103,6 +133,35 @@ void RosenRenderCheckbox::DrawActiveBorder(SkCanvas* canvas, const Offset& paint
     SetStrokeWidth(NormalizeToPx(checkStroke_), strokePaint);
     strokePaint.setColor(pointColor_);
     strokePaint.setStrokeCap(SkPaint::kRound_Cap);
+}
+
+void RosenRenderCheckbox::DrawActiveSquare(
+    SkCanvas* canvas, const Offset& paintOffset, SkPaint& strokePaint) const
+{
+    SkPaint skPaint;
+    skPaint.setAntiAlias(true);
+    skPaint.setColor(activeColor_);
+    DrawSquare(canvas, paintOffset, skPaint, drawSize_ * HALF_THE_WIDTH);
+
+    SetStrokeWidth(NormalizeToPx(checkStroke_), strokePaint);
+    strokePaint.setColor(pointColor_);
+    strokePaint.setStrokeCap(SkPaint::kRound_Cap);
+}
+ 
+void RosenRenderCheckbox::DrawSquare(
+    SkCanvas* canvas, const Offset& origin, const SkPaint& paint, const Size& paintSize) const
+{
+    SkRRect rrect;
+    double originX = origin.GetX();
+    double originY = origin.GetY();
+
+    const Offset start =
+        Offset(drawSize_.Width() * CHECK_MARK_PART_X_POSITION, drawSize_.Width() * CHECK_MARK_PART_Y_POSITION);
+    double borderRadius = 0;
+    rrect = SkRRect::MakeRectXY(
+        { originX + start.GetX(), originY + start.GetY(), paintSize.Width() + originX + start.GetX(),
+            paintSize.Height() + originY + start.GetY() }, borderRadius, borderRadius);
+    canvas->drawRRect(rrect, paint);
 }
 
 void RosenRenderCheckbox::DrawUnselected(

@@ -37,6 +37,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_checkbox.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
@@ -930,6 +932,8 @@ void JsRegisterViews(BindingTarget globalObj)
     JSPatternLock::JSBind(globalObj);
     JSPatternLockController::JSBind(globalObj);
     JSTextPickerDialog::JSBind(globalObj);
+    JSCheckbox::JSBind(globalObj);
+    JSCheckboxGroup::JSBind(globalObj);
 
     JSObjectTemplate toggleType;
     toggleType.Constant("Checkbox", 0);

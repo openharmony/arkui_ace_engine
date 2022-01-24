@@ -24,7 +24,7 @@ namespace OHOS::Ace::Framework {
 
 void JSCheckbox::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("checkboxgroup create error, info is not-valid");
         return;
     }
@@ -66,6 +66,12 @@ void JSCheckbox::JSBind(BindingTarget globalObj)
     JSClass<JSCheckbox>::StaticMethod("height", &JSCheckbox::JsHeight);
     JSClass<JSCheckbox>::StaticMethod("size", &JSCheckbox::JsSize);
     JSClass<JSCheckbox>::StaticMethod("padding", &JSCheckbox::JsPadding);
+    JSClass<JSCheckbox>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSCheckbox>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSCheckbox>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSCheckbox>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSCheckbox>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSCheckbox>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSCheckbox>::Inherit<JSViewAbstract>();
     JSClass<JSCheckbox>::Bind<>(globalObj);
 }
@@ -73,6 +79,7 @@ void JSCheckbox::JSBind(BindingTarget globalObj)
 void JSCheckbox::SetSelect(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsBoolean()) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments, arg is not a bool");
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();

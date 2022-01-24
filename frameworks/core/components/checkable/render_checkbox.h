@@ -33,10 +33,29 @@ public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void HandleClick() override;
-    bool UpdateGroupValue(const bool groupValue);
+    bool UpdateItemValue(const bool itemValue);
+    bool UpdateGroupValue(const CheckableStatus groupValue);
     void SetChecked(bool checked)
     {
         checked_ = checked;
+    }
+
+    void UpdateUIStatus() override
+    {
+        if (!(component_->GetGroupName().empty())) {
+            auto value = component_->GetGroupValue();
+            if (value == CheckableStatus::ALL) {
+                uiStatus_ = UIStatus::SELECTED;
+            } else if (value == CheckableStatus::PART) {
+                uiStatus_ = UIStatus::PART;
+            } else if (value == CheckableStatus::NONE) {
+                uiStatus_ = UIStatus::UNSELECTED;
+            }
+        } else if (!(component_->GetCheckboxName().empty())) {
+            bool isCheck = component_->GetValue();
+            uiStatus_ = isCheck ? UIStatus::SELECTED :
+                ((onFocus_ && needFocus_) ? UIStatus::FOCUS : UIStatus::UNSELECTED);
+        }
     }
 
 protected:
@@ -44,17 +63,27 @@ protected:
     void OnAnimationStop();
     void UpdateCheckBoxShape(double value);
     void UpdateAccessibilityAttr();
+    void UpdateGroupStatus();
+
+    enum class SelectStatus {
+        ALL = 0,
+        PART,
+        NONE,
+    };
 
     // animation control
     RefPtr<Animator> controller_;
     RefPtr<CurveAnimation<double>> translate_;
 
+    SelectStatus status_ = SelectStatus::ALL;
+    SelectStatus lastStatus_ = SelectStatus::ALL;
     double shapeScale_ = 1.0;
     std::string checkboxGroupName_ = "";
     RefPtr<CheckboxComponent> component_;
     bool isGroup_ = false;
     bool selectAll_ = false;
     std::function<void(bool)> groupValueChangedListener_;
+    std::function<void(const std::shared_ptr<BaseEventInfo>&)> onGroupChange_;
 };
 
 } // namespace OHOS::Ace
