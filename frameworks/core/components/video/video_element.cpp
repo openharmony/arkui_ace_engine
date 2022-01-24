@@ -1038,7 +1038,7 @@ void VideoElement::OnPrepared(
         std::string param;
         if (IsDeclarativePara()) {
             auto json = JsonUtil::Create(true);
-            json->Put("duration", std::to_string(duration_).c_str());
+            json->Put("duration", static_cast<double>(duration_));
             param = json->ToString();
         } else {
             param = std::string("\"prepared\",{\"duration\":")
@@ -1131,7 +1131,7 @@ void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
         std::string param;
         if (IsDeclarativePara()) {
             auto json = JsonUtil::Create(true);
-            json->Put("time", std::to_string(currentPos).c_str());
+            json->Put("time", static_cast<double>(currentPos));
             param = json->ToString();
         } else {
             param = std::string("\"timeupdate\",{\"currenttime\":")
@@ -1437,7 +1437,7 @@ void VideoElement::OnSliderChange(const std::string& param)
             std::string param;
             if (IsDeclarativePara()) {
                 auto json = JsonUtil::Create(true);
-                json->Put("time", std::to_string(value).c_str());
+                json->Put("time", static_cast<double>(value));
                 param = json->ToString();
             } else {
                 param = std::string("\"seeked\",{\"currenttime\":")
@@ -1470,7 +1470,7 @@ void VideoElement::OnSliderMoving(const std::string& param)
             std::string param;
             if (IsDeclarativePara()) {
                 auto json = JsonUtil::Create(true);
-                json->Put("time", std::to_string(value).c_str());
+                json->Put("time", static_cast<double>(value));
                 param = json->ToString();
             } else {
                 param = std::string("\"seeking\",{\"currenttime\":")
