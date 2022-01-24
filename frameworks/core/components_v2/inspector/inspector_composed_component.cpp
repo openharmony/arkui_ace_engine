@@ -66,6 +66,7 @@
 #include "core/components_v2/inspector/switch_composed_element.h"
 #include "core/components_v2/inspector/tab_content_composed_element.h"
 #include "core/components_v2/inspector/tabs_composed_element.h"
+#include "core/components_v2/inspector/text_clock_composed_element.h"
 #include "core/components_v2/inspector/text_composed_element.h"
 #include "core/components_v2/inspector/textarea_composed_element.h"
 #include "core/components_v2/inspector/textinput_composed_element.h"
@@ -193,7 +194,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { TEXTTIMER_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::TextTimerComposedElement>(id); } },
     { SELECT_COMPONENT_TAG,
-        [](const std::string& id) {return AceType::MakeRefPtr<V2::SelectComposedElement>(id); } }
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::SelectComposedElement>(id); } },
+    { TEXTCLOCK_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::TextClockComposedElement>(id); } }
 };
 
 } // namespace
@@ -255,8 +258,9 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { MENU_TAG, MENU_ETS_TAG },
     { TEXTAREA_COMPONENT_TAG, TEXTAREA_ETS_TAG },
     { TEXTINPUT_COMPONENT_TAG, TEXTINPUT_ETS_TAG },
-    { TEXTTIMER_COMPONENT_TAG, TEXTTIMER_ETS_TAG },
-    { SELECT_COMPONENT_TAG, SELECT_ETS_TAG }
+    { SELECT_COMPONENT_TAG, SELECT_ETS_TAG },
+    { TEXTCLOCK_COMPONENT_TAG, TEXTCLOCK_ETS_TAG },
+    { TEXTTIMER_COMPONENT_TAG, TEXTTIMER_ETS_TAG }
 };
 
 RefPtr<Element> InspectorComposedComponent::CreateElement()
