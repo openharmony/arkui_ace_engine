@@ -272,4 +272,7 @@ ACE_EXPORT extern const char TEXTTIMER_ETS_TAG[] = "TextTimer";
 ACE_EXPORT extern const char SELECT_COMPONENT_TAG[] = "SelectComponent";
 ACE_EXPORT extern const char SELECT_ETS_TAG[] = "Select";
 
+// textclock
+ACE_EXPORT extern const char TEXTCLOCK_COMPONENT_TAG[] = "TextClockComponent";
+ACE_EXPORT extern const char TEXTCLOCK_ETS_TAG[] = "TextClock";
 } // namespace OHOS::Ace::V2
