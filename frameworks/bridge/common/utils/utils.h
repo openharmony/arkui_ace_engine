@@ -84,7 +84,7 @@ bool GetAssetContentImpl(const RefPtr<AssetManager>& assetManager, const std::st
     }
     auto jsAsset = assetManager->GetAsset(url);
     if (jsAsset == nullptr) {
-        LOGE("uri:%{private}s Asset is null", url.c_str());
+        LOGW("uri:%{public}s Asset is null", url.c_str());
         return false;
     }
     auto bufLen = jsAsset->GetSize();
@@ -106,7 +106,7 @@ bool GetAssetContentAllowEmpty(const RefPtr<AssetManager>& assetManager, const s
     }
     auto jsAsset = assetManager->GetAsset(url);
     if (jsAsset == nullptr) {
-        LOGE("uri:%{private}s Asset is null", url.c_str());
+        LOGW("uri:%{public}s Asset is null", url.c_str());
         return false;
     }
     auto bufLen = jsAsset->GetSize();

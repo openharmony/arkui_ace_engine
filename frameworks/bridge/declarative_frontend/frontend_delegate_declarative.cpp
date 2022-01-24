@@ -51,6 +51,7 @@ constexpr int32_t CALLBACK_ERRORCODE_COMPLETE = 2;
 constexpr int32_t CALLBACK_DATACODE_ZERO = 0;
 
 const char MANIFEST_JSON[] = "manifest.json";
+const char PAGES_JSON[] = "main_pages.json";
 const char FILE_TYPE_JSON[] = ".json";
 const char I18N_FOLDER[] = "i18n/";
 const char RESOURCES_FOLDER[] = "resources/";
@@ -143,6 +144,9 @@ void FrontendDelegateDeclarative::RunPage(const std::string& url, const std::str
     if (GetAssetContent(MANIFEST_JSON, jsonContent)) {
         manifestParser_->Parse(jsonContent);
         manifestParser_->Printer();
+    } else if (GetAssetContent(PAGES_JSON, jsonContent)) {
+        LOGI("Parse main_pages.json");
+        manifestParser_->Parse(jsonContent);
     } else {
         LOGE("RunPage parse manifest.json failed");
         EventReport::SendPageRouterException(PageRouterExcepType::RUN_PAGE_ERR, url);

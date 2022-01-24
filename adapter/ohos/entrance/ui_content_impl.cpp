@@ -153,12 +153,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
     }
 
-    auto packagePathStr = context->GetBundleCodePath();
-    auto moduleInfo = context->GetHapModuleInfo();
-    if (moduleInfo != nullptr) {
-        packagePathStr += "/" + moduleInfo->name + "/";
-    }
-
     auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
     std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> info;
 
@@ -173,33 +167,61 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
         info = serviceContext->GetAbilityInfo();
     }
-    std::string srcPath = "";
-    if (info != nullptr && !info->srcPath.empty()) {
-        srcPath = info->srcPath;
-    }
 
     RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-    auto assetBasePathStr = { "assets/js/" + (srcPath.empty() ? "default" : srcPath) + "/",
-        std::string("assets/js/share/") };
-
-    if (flutterAssetManager && !packagePathStr.empty()) {
-        auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-        if (assetProvider->Initialize(packagePathStr, assetBasePathStr)) {
-            LOGI("Push AssetProvider to queue.");
-            flutterAssetManager->PushBack(std::move(assetProvider));
-        }
-    }
-
-    std::string moduleName = info->moduleName;
-    std::shared_ptr<OHOS::AppExecFwk::ApplicationInfo> appInfo = context->GetApplicationInfo();
-
+    bool isStageMode = info != nullptr ? info->isStageBasedModel : false;
+    std::string moduleName = info != nullptr ? info->moduleName : "";
+    auto appInfo = context->GetApplicationInfo();
     std::string resPath;
-    if (appInfo) {
-        std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
-        for (const auto& module : moduleList) {
-            if (module.moduleName == moduleName) {
-                resPath = module.moduleSourceDir + "/assets/" + module.moduleName + "/";
-                break;
+    LOGI("Initialize UIContent isStageMode:%{public}s", isStageMode ? "true" : "false");
+    if (isStageMode) {
+        if (appInfo) {
+            std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
+            for (const auto& module : moduleList) {
+                if (module.moduleName == moduleName) {
+                    resPath = module.moduleSourceDir + "/";
+                    break;
+                }
+            }
+        }
+        LOGI("In stage mode, resPath:%{private}s", resPath.c_str());
+        auto assetBasePathStr = { std::string("ets/"), std::string("resources/base/profile/") };
+        if (flutterAssetManager && !resPath.empty()) {
+            auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
+            if (assetProvider->Initialize(resPath, assetBasePathStr)) {
+                LOGI("Push AssetProvider to queue.");
+                flutterAssetManager->PushBack(std::move(assetProvider));
+            }
+        }
+    } else {
+        auto packagePathStr = context->GetBundleCodePath();
+        auto moduleInfo = context->GetHapModuleInfo();
+        if (moduleInfo != nullptr) {
+            packagePathStr += "/" + moduleInfo->name + "/";
+        }
+        std::string srcPath = "";
+        if (info != nullptr && !info->srcPath.empty()) {
+            srcPath = info->srcPath;
+        }
+
+        auto assetBasePathStr = { "assets/js/" + (srcPath.empty() ? "default" : srcPath) + "/",
+            std::string("assets/js/share/") };
+
+        if (flutterAssetManager && !packagePathStr.empty()) {
+            auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
+            if (assetProvider->Initialize(packagePathStr, assetBasePathStr)) {
+                LOGI("Push AssetProvider to queue.");
+                flutterAssetManager->PushBack(std::move(assetProvider));
+            }
+        }
+
+        if (appInfo) {
+            std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
+            for (const auto& module : moduleList) {
+                if (module.moduleName == moduleName) {
+                    resPath = module.moduleSourceDir + "/assets/" + module.moduleName + "/";
+                    break;
+                }
             }
         }
     }
