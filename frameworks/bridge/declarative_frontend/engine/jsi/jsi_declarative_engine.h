@@ -61,8 +61,6 @@ public:
         const std::string& targetStringKey, const std::string& targetStringValue);
     static std::string GetMediaResource(const std::string& targetFileName);
 
-    RefPtr<FrontendDelegate> GetFrontendDelegate() const;
-
     static RefPtr<JsAcePage> GetRunningPage(int32_t instanceId);
     static RefPtr<JsAcePage> GetStagingPage(int32_t instanceId);
     static void PostJsTask(const shared_ptr<JsRuntime>&, std::function<void()>&& task);

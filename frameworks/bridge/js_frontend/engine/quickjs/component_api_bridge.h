@@ -28,6 +28,7 @@ class ComponentApiBridge : virtual public AceType {
 public:
     static JSValue JsGetScrollOffset(JSContext* ctx, NodeId nodeId);
     static JSValue JsGetBoundingRect(JSContext* ctx, NodeId nodeId);
+    static JSValue JsGetInspector(JSContext* ctx, NodeId nodeId);
     static void JsScrollTo(JSContext* ctx, const std::string& args, NodeId nodeId);
     static JSValue JsCreateObserver(JSContext* ctx, const std::string& args, NodeId nodeId);
 

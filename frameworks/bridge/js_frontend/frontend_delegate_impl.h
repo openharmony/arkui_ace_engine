@@ -295,6 +295,8 @@ public:
 
     Rect GetBoundingRectData(NodeId nodeId) override;
 
+    std::string GetInspector(NodeId nodeId) override;
+
     void PushJsCallbackToRenderNode(NodeId id, double ratio, std::function<void(bool, double)>&& callback) override;
     void RemoveVisibleChangeNode(NodeId id) override;
 

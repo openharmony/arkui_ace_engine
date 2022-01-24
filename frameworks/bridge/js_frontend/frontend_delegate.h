@@ -114,6 +114,8 @@ public:
 
     virtual Rect GetBoundingRectData(NodeId nodeId) = 0;
 
+    virtual std::string GetInspector(NodeId nodeId) = 0;
+
     virtual void PushJsCallbackToRenderNode(NodeId id, double ratio, std::function<void(bool, double)>&& callback) = 0;
 
     // ----------------

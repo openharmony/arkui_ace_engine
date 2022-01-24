@@ -1171,6 +1171,19 @@ Rect FrontendDelegateDeclarative::GetBoundingRectData(NodeId nodeId)
     return rect;
 }
 
+std::string FrontendDelegateDeclarative::GetInspector(NodeId nodeId)
+{
+    std::string attrs;
+    auto task = [weak = WeakClaim(AceType::RawPtr(jsAccessibilityManager_)), nodeId, &attrs]() {
+        auto accessibilityNodeManager = weak.Upgrade();
+        if (accessibilityNodeManager) {
+            attrs = accessibilityNodeManager->GetInspectorNodeById(nodeId);
+        }
+    };
+    PostSyncTaskToPage(task);
+    return attrs;
+}
+
 void FrontendDelegateDeclarative::SetCallBackResult(const std::string& callBackId, const std::string& result)
 {
     jsCallBackResult_.try_emplace(StringToInt(callBackId), result);
