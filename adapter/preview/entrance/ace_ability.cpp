@@ -349,19 +349,12 @@ void AceAbility::OnConfigurationChanged(const DeviceConfig& newConfig)
         return;
     }
     if (newConfig.colorMode != runArgs_.deviceConfig.colorMode) {
-        container->UpdateColorMode(newConfig.colorMode);
+        container->UpdateDeviceConfig(newConfig);
         runArgs_.deviceConfig.colorMode = newConfig.colorMode;
 
         auto type = container->GetType();
         if (type == FrontendType::DECLARATIVE_JS) {
-            SystemProperties::SetColorMode(runArgs_.deviceConfig.colorMode);
             container->NativeOnConfigurationUpdated(ACE_INSTANCE_ID);
-            return;
-        }
-
-        auto context = container->GetPipelineContext();
-        if (context == nullptr) {
-            LOGE("context is null, OnConfigurationChanged failed.");
             return;
         }
     }
@@ -424,15 +417,16 @@ void AceAbility::ReplacePage(const std::string& url, const std::string& params)
 
 void AceAbility::LoadDocument(const std::string& url, const std::string& componentName, SystemParams& systemParams)
 {
+    AceApplicationInfo::GetInstance().ChangeLocale(systemParams.language, systemParams.region);
+    runArgs_.isRound = systemParams.isRound;
+    SurfaceChanged(systemParams.orientation, systemParams.density, systemParams.deviceWidth, systemParams.deviceHeight);
     DeviceConfig deviceConfig = {
         .orientation = systemParams.orientation,
         .density = systemParams.density,
         .deviceType = systemParams.deviceType,
         .colorMode = systemParams.colorMode,
     };
-    OnConfigurationChanged(deviceConfig);
-    AceApplicationInfo::GetInstance().ChangeLocale(systemParams.language, systemParams.region);
-    SurfaceChanged(systemParams.orientation, systemParams.density, systemParams.deviceWidth, systemParams.deviceHeight);
+    OnConfigurationChanged(  deviceConfig);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     if (!container) {
         LOGE("container is null");
