@@ -806,6 +806,7 @@ V8DeclarativeEngineInstance::~V8DeclarativeEngineInstance()
     // delete function template
     V8FunctionDestroyCallbackHelper::DeleteFunctionTemplate(isolate_.Get());
     // Just invalidate it, isolate_ will dispose when js-thread finished.
+    ModuleManager::GetInstance()->ClearTimerIsolate(isolate_.Get());
     isolate_.Invalidate();
 }
 
@@ -1689,6 +1690,10 @@ void V8DeclarativeEngine::TimerCallJs(const std::string& callbackId, bool isInte
     ACE_DCHECK(engineInstance_);
     v8::Isolate* isolate = ModuleManager::GetInstance()->GetCallbackIsolate(std::stoi(callbackId), isInterval);
     ACE_DCHECK(isolate);
+    if (isolate == nullptr) {
+        LOGW("CallbackIsolate is null when TimerCallJs is called.");
+        return;
+    }
     v8::Isolate::Scope isolateScope(isolate);
     v8::HandleScope handleScope(isolate);
     auto context = isolate->GetCurrentContext();
