@@ -86,7 +86,7 @@ void UpdateTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, To
             continue;
         }
         auto touchPoint = ConvertTouchPoint(item);
-        touchEvent.pointers_.emplace_back(std::move(touchPoint));
+        touchEvent.pointers.emplace_back(std::move(touchPoint));
     }
 }
 
