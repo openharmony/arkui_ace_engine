@@ -184,6 +184,8 @@ void GetLocalJsonObject(InternalResource::ResourceId id, std::string language, s
 static std::unique_ptr<JsonValue> g_indexJsonEntry = nullptr;
 static std::unique_ptr<JsonValue> g_indexJsonError = nullptr;
 
+Localization::~Localization() = default;
+
 void Localization::SetLocaleImpl(const std::string& language, const std::string& countryOrRegion,
     const std::string& script, const std::string& selectLanguage, const std::string& keywordsAndValues)
 {
