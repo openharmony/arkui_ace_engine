@@ -187,6 +187,7 @@ void JsiDeclarativeUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error)
     std::string summaryBody = GenerateSummaryBody(error, instanceId_, pageUrl_);
     LOGE("reasonStr: %{public}s", reasonStr.c_str());
     LOGE("summaryBody: \n%{public}s", summaryBody.c_str());
+    EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), reasonStr, summaryBody);
 }
 
 } // namespace OHOS::Ace::Framework
