@@ -94,7 +94,7 @@ struct TouchEvent final {
             return { id, x, y, type, time, size, force, deviceId, sourceType, pointers_ };
         }
         auto points = pointers_;
-        std::for_each(points.begin(), points.end(), [scale](auto point) {
+        std::for_each(points.begin(), points.end(), [scale](auto&& point) {
             point.x = point.x / scale;
             point.y = point.y / scale;
         });
