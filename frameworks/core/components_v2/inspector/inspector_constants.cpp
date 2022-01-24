@@ -247,6 +247,10 @@ ACE_EXPORT extern const char TIME_PICKER_ETS_TAG[] = "DatePicker";
 ACE_EXPORT extern const char RADIO_COMPONENT_TAG[] = "RadioComponent<VALUE_TYPE>";
 ACE_EXPORT extern const char RADIO_ETS_TAG[] = "Radio";
 
+// gauge
+ACE_EXPORT extern const char GAUGE_COMPONENT_TAG[] = "Gauge";
+ACE_EXPORT extern const char GAUGE_ETS_TAG[] = "Gauge";
+
 // gridContainer
 ACE_EXPORT extern const char GRIDCONTAINER_COMPONENT_TAG[] = "GridContainer";
 ACE_EXPORT extern const char GRIDCONTAINER_ETS_TAG[] = "GridContainer";

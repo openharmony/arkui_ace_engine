@@ -30,6 +30,7 @@
 #include "core/components_v2/inspector/date_picker_composed_element.h"
 #include "core/components_v2/inspector/divider_composed_element.h"
 #include "core/components_v2/inspector/flex_composed_element.h"
+#include "core/components_v2/inspector/gauge_composed_element.h"
 #include "core/components_v2/inspector/grid_composed_element.h"
 #include "core/components_v2/inspector/grid_container_composed_element.h"
 #include "core/components_v2/inspector/grid_item_composed_element.h"
@@ -181,6 +182,8 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) {return AceType::MakeRefPtr<V2::TimePickerComposedElement>(id); } },
     { RADIO_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::RadioComposedElement>(id); } },
+    { GAUGE_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::GaugeComposedElement>(id); } },
     { GRIDCONTAINER_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::GridContainerComposedElement>(id); } },
     { MENU_TAG,
