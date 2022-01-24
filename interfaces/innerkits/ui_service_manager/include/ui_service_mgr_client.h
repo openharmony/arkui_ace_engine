@@ -73,6 +73,8 @@ private:
 
     const std::string GetPickerDialogParam(const AAFwk::Want& want,
         const std::vector<AppExecFwk::AbilityInfo>& abilityInfos, bool wideScreen = true) const;
+    void GetDisplayPosition(
+        int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height, bool& wideScreen);
 
     static std::mutex mutex_;
     static std::shared_ptr<UIServiceMgrClient> instance_;

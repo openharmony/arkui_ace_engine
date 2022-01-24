@@ -20,7 +20,9 @@ gen_sa_dialog_js("dialog_picker_js_files_etc") {
     "i18n/zh-CN.json",
   ]
   common_files = [
+    "common/handle_down.png",
     "common/handle_down.svg",
+    "common/handle_up.png",
     "common/handle_up.svg",
     "common/ic_apk.png",
     "common/ic_calendar.png",

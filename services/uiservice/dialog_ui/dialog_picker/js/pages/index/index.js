@@ -21,6 +21,7 @@ export default {
             width: "519vp",
             height: "256vp",
             backTop: "6vp",
+            backIcon: "common/handle_down.png",
             card: {
                 width: "495vp",
                 height: "87vp",
@@ -68,12 +69,14 @@ export default {
     },
     onShare: function (item) {
         let param = item.bundle + ";" + item.ability;
+        console.log("dialog service share to :" + item.ability);
         callNativeHandler('SHARE_EVENT', param);
     },
     changeSize: function (param) {
         callNativeHandler('CLOSE_EVENT', "");
     },
     onBack: function () {
+        console.log("dialog service close");
         callNativeHandler('CLOSE_EVENT', "");
     },
     getViewStyle() {
@@ -131,7 +134,7 @@ export default {
                 defaultIcon = "ic_unknown";
             }
             if (this.previewCard.mainText == "") {
-                this.previewCard.mainText = this.$t('strings.defaultName');;
+                this.previewCard.mainText = this.$t('strings.defaultName');
             }
         } else {
             defaultIcon = "ic_file_multiple";
@@ -206,7 +209,7 @@ export default {
                 for (let j = 0; j < this.shareHapList[i].length; j++) {
                     if (this.shareHapList[i][j].bundle == bundle) {
                         this.shareHapList[i][j].name = hapLabel;
-                        console.log("update bundle:" + bundle + " to lable:" + hapLabel);
+                        console.log("dialog service update bundle:" + bundle + " to lable:" + hapLabel);
                     }
                 }
             }
@@ -218,7 +221,7 @@ export default {
                 for (let j = 0; j < this.shareHapList[i].length; j++) {
                     if (this.shareHapList[i][j].bundle == bundle) {
                         this.shareHapList[i][j].icon = hapIcon;
-                        console.log("update bundle:" + bundle + " to icon:" + hapIcon);
+                        console.log("dialog service update bundle:" + bundle + " to icon:" + hapIcon);
                     }
                 }
             }
