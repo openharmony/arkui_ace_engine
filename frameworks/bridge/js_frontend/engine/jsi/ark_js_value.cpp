@@ -139,6 +139,7 @@ shared_ptr<JsValue> ArkJSValue::Call(shared_ptr<JsRuntime> runtime, shared_ptr<J
     Local<FunctionRef> function(GetValue(pandaRuntime));
     Local<JSValueRef> result = function->Call(pandaRuntime->GetEcmaVm(), thisValue, arguments.data(), argc);
     Local<ObjectRef> exception = JSNApi::GetUncaughtException(pandaRuntime->GetEcmaVm());
+    pandaRuntime->HandleUncaughtException();
     if (!exception.IsEmpty() && !exception->IsHole()) {
         result = JSValueRef::Undefined(pandaRuntime->GetEcmaVm());
     }

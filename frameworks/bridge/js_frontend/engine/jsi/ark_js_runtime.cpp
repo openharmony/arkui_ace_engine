@@ -189,7 +189,7 @@ void ArkJSRuntime::RegisterUncaughtExceptionHandler(UncaughtExceptionCallback ca
 
 void ArkJSRuntime::HandleUncaughtException()
 {
-    Local<ObjectRef> exception = JSNApi::GetUncaughtException(vm_);
+    Local<ObjectRef> exception = JSNApi::GetAndClearUncaughtException(vm_);
     if (!exception.IsEmpty() && !exception->IsHole() && uncaughtErrorHandler_ != nullptr) {
         shared_ptr<JsValue> errorPtr =
             std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(shared_from_this(), exception));
