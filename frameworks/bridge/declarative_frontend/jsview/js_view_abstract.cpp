@@ -3583,6 +3583,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         auto optionTheme = GetTheme<SelectTheme>();
         auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
         optionComponent->SetCustomComponent(customComponent);
+        menuComponent->ClearOptions();
         menuComponent->AppendOption(optionComponent);
     } else {
         LOGE("Param is invalid");
