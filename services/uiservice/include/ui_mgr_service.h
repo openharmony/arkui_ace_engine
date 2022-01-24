@@ -21,12 +21,14 @@
 #include <thread_ex.h>
 #include <unordered_map>
 
+#include "ability.h"
 #include "element_name.h"
 #include "event_handler.h"
 #include "event_runner.h"
 #include "hilog_wrapper.h"
 #include "iremote_object.h"
 #include "resource_manager.h"
+#include "runtime.h"
 #include "system_ability.h"
 #include "ui_service_mgr_stub.h"
 #include "uri.h"
@@ -80,6 +82,7 @@ private:
     int HandleRegister(const AAFwk::Want& want,  const sptr<IUIService>& uiService);
     int HandleUnregister(const AAFwk::Want& want);
     void InitResourceManager();
+    OHOS::AppExecFwk::Ability* CreateAbility();
     std::string GetCallBackKeyStr(const AAFwk::Want& want);
     std::shared_ptr<EventRunner> eventLoop_;
     std::shared_ptr<EventHandler> handler_;

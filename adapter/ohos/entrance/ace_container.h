@@ -197,6 +197,7 @@ public:
     static void SetView(AceView* view, double density, int32_t width, int32_t height);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
+    static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
     static void SetFontScale(int32_t instanceId, float fontScale);
     static void SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme);
     static const std::string& RestoreRouterStack(int32_t instanceId, const std::string& contentInfo);
@@ -215,6 +216,7 @@ private:
     void AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
+    OHOS::AppExecFwk::Ability* GetAbilityInner() const;
     int32_t instanceId_ = 0;
     AceView* aceView_ = nullptr;
     RefPtr<TaskExecutor> taskExecutor_;
