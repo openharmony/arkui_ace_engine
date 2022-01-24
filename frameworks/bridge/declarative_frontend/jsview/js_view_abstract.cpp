@@ -335,6 +335,31 @@ bool ParseLocationProps(const JSCallbackInfo& info, AnimatableDimension& x, Anim
 const std::vector<Placement> PLACEMENT = { Placement::LEFT, Placement::RIGHT, Placement::TOP, Placement::BOTTOM,
     Placement::TOP_LEFT, Placement::TOP_RIGHT, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT };
 
+void ParseShowObject(
+    const JSCallbackInfo& info, const JSRef<JSObject>& showObj, const RefPtr<PopupComponentV2>& popupComponent)
+{
+    JSRef<JSVal> changeEventVal = showObj->GetProperty("changeEvent");
+        if (changeEventVal->IsFunction()) {
+            RefPtr<JsFunction> jsFunc =
+                AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+            auto eventMarker = EventMarker(
+                [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    ACE_SCORING_EVENT("Popup.onStateChange");
+
+                    if (param != "true" && param != "false") {
+                        LOGE("param is not equal true or fasle, invaild.");
+                        return;
+                    }
+
+                    bool newValue = StringToBool(param);
+                    JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
+                    func->ExecuteJS(1, &newJSVal);
+                });
+            popupComponent->SetChangeEvent(eventMarker);
+        }
+}
+
 void ParsePopupParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupComponentV2>& popupComponent)
 {
@@ -2801,8 +2826,13 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
         return;
     }
 
-    if (!info[0]->IsBoolean() && !info[1]->IsBoolean()) {
-        LOGE("No overLayer text.");
+    if (!info[0]->IsBoolean() && !info[0]->IsObject()) {
+        LOGE("The first param type is not bool or object, invaild.");
+        return;
+    }
+
+    if (!info[1]->IsObject()) {
+        LOGE("The second param type is not object, invaild.");
         return;
     }
 
@@ -2825,19 +2855,12 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
     if (info[0]->IsBoolean()) {
         popupParam->SetIsShow(info[0]->ToBoolean());
     } else {
-        popupParam->SetIsShow(info[1]->ToBoolean());
+        JSRef<JSObject> showObj = JSRef<JSObject>::Cast(info[0]);
+        ParseShowObject(info, showObj, popupComponent);
+        popupParam->SetIsShow(showObj->GetProperty("value")->ToBoolean());
     }
 
-    JSRef<JSObject> popupObj;
-    if (info[0]->IsObject()) {
-        popupObj = JSRef<JSObject>::Cast(info[0]);
-    } else if (info[1]->IsObject()) {
-        popupObj = JSRef<JSObject>::Cast(info[1]);
-    } else {
-        LOGE("No param object.");
-        return;
-    }
-
+    JSRef<JSObject> popupObj = JSRef<JSObject>::Cast(info[1]);
     if (popupObj->GetProperty("message")->IsString()) {
         ParsePopupParam(info, popupObj, popupComponent);
     } else {

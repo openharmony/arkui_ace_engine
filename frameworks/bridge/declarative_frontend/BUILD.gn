@@ -129,6 +129,8 @@ template("declarative_js_engine") {
       "jsview/js_canvas_image_data.cpp",
       "jsview/js_canvas_path.cpp",
       "jsview/js_canvas_renderer.cpp",
+      "jsview/js_checkbox.cpp",
+      "jsview/js_checkboxgroup.cpp",
       "jsview/js_circle.cpp",
       "jsview/js_clipboard.cpp",
       "jsview/js_column.cpp",
@@ -290,6 +292,21 @@ template("declarative_js_engine") {
 
     if (platform == "windows" || platform == "mac") {
       deps += [ ":gen_obj_src_js_mock_system_plugin" ]
+    } else {
+      if (defined(config.plugin_components_support) &&
+          config.plugin_components_support) {
+        if (!use_mingw_win && !use_mac) {
+          external_deps += [
+            "multimedia_image_standard:image",
+            "multimedia_image_standard:image_native",
+          ]
+        }
+      } else {
+        external_deps = [
+          "multimedia_image_standard:image",
+          "multimedia_image_standard:image_native",
+        ]
+      }
     }
   }
 }

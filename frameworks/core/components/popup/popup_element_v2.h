@@ -78,6 +78,7 @@ private:
     bool hasShown_ = false;
     ComposeId showId_;
     std::function<void(const std::string&)> onStateChange_;
+    std::function<void(const std::string&)> changeEvent_;
 };
 
 } // namespace OHOS::Ace

@@ -276,4 +276,7 @@ ACE_EXPORT extern const char SELECT_ETS_TAG[] = "Select";
 ACE_EXPORT extern const char MARQUEE_COMPONENT_TAG[] = "MarqueeComponent";
 ACE_EXPORT extern const char MARQUEE_ETS_TAG[] = "Marquee";
 
+// textclock
+ACE_EXPORT extern const char TEXTCLOCK_COMPONENT_TAG[] = "TextClockComponent";
+ACE_EXPORT extern const char TEXTCLOCK_ETS_TAG[] = "TextClock";
 } // namespace OHOS::Ace::V2

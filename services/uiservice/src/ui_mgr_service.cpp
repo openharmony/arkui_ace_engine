@@ -136,6 +136,26 @@ void UIMgrService::InitResourceManager()
     resourceManager_ = resourceManager;
 }
 
+OHOS::AppExecFwk::Ability* UIMgrService::CreateAbility()
+{
+    auto ability = OHOS::AppExecFwk::Ability::Create(nullptr);
+    if (ability == nullptr) {
+        HILOG_ERROR("create ability failed");
+        return nullptr;
+    }
+
+    auto deal = std::make_shared<OHOS::AppExecFwk::ContextDeal>();
+    if (deal == nullptr) {
+        HILOG_ERROR("create deal failed");
+        delete ability;
+        return nullptr;
+    }
+
+    deal->initResourceManager(resourceManager_);
+    ability->AttachBaseContext(deal);
+    return ability;
+}
+
 int UIMgrService::ShowDialog(const std::string& name,
                              const std::string& params,
                              OHOS::Rosen::WindowType windowType,
@@ -173,7 +193,7 @@ int UIMgrService::ShowDialog(const std::string& name,
 
         std::string resPath;
         // create container
-        Ace::Platform::AceContainer::CreateContainer(dialogId, Ace::FrontendType::JS, false, "", nullptr,
+        Ace::Platform::AceContainer::CreateContainer(dialogId, Ace::FrontendType::JS, false, "", CreateAbility(),
             std::make_unique<AcePlatformEventCallback>([]() {}), true);
         auto container = Ace::Platform::AceContainer::GetContainer(dialogId);
         if (!container) {
@@ -293,6 +313,10 @@ int UIMgrService::CancelDialog(int id)
             context->SetRSUIDirector(nullptr);
         }
 #endif
+        auto ability = Platform::AceContainer::GetAbility(id);
+        if (ability != nullptr) {
+            delete ability;
+        }
         Platform::AceContainer::DestroyContainer(id);
     };
 

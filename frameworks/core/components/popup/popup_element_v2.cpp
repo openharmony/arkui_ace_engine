@@ -39,6 +39,11 @@ void PopupElementV2::PerformBuild()
             AceAsyncEvent<void(const std::string&)>::Create(popupComponentV2->GetOnStateChange(), context_);
     }
 
+    if (!popupComponentV2->GetChangeEvent().IsEmpty()) {
+        changeEvent_ =
+            AceAsyncEvent<void(const std::string&)>::Create(popupComponentV2->GetChangeEvent(), context_);
+    }
+
     if (IsDeclarative()) {
         HandleDeclarativePerformBuild();
     }
@@ -80,6 +85,12 @@ void PopupElementV2::OnStateChange(bool isVisible)
         return;
     }
     hasShown_ = isVisible;
+
+    if (changeEvent_ && !isVisible) {
+        changeEvent_("false");
+        return;
+    }
+
     if (!onStateChange_) {
         return;
     }

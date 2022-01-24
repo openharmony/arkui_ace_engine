@@ -50,6 +50,26 @@ public:
     }
     void UpdateTimeTextCallBack();
 
+    double GetHoursWest() const
+    {
+        return hoursWest_;
+    }
+
+    const std::string& GeFormat() const
+    {
+        return format_;
+    }
+
+    bool GetStatus() const
+    {
+        return isStart_;
+    }
+
+    const RefPtr<RenderText>& GetRenderText() const
+    {
+        return renderTimeText_;
+    }
+
 protected:
     RenderTextClock();
 

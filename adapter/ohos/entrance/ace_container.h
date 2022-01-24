@@ -36,8 +36,9 @@ class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatch
 public:
     AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AppExecFwk::Ability* aceAbility,
         std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner = false);
-    AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AbilityRuntime::Context* context,
-                 std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner = false);
+    AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+        std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
+        bool useCurrentEventRunner = false);
     ~AceContainer() override = default;
 
     void Initialize() override;
@@ -197,6 +198,7 @@ public:
     static void SetView(AceView* view, double density, int32_t width, int32_t height);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
+    static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
     static void SetFontScale(int32_t instanceId, float fontScale);
     static void SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme);
     static const std::string& RestoreRouterStack(int32_t instanceId, const std::string& contentInfo);
@@ -215,6 +217,7 @@ private:
     void AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
+    OHOS::AppExecFwk::Ability* GetAbilityInner() const;
     int32_t instanceId_ = 0;
     AceView* aceView_ = nullptr;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -229,7 +232,7 @@ private:
     ColorScheme colorScheme_ { ColorScheme::FIRST_VALUE };
     ResourceInfo resourceInfo_;
     OHOS::AppExecFwk::Ability* aceAbility_ = nullptr;
-    OHOS::AbilityRuntime::Context* context_ = nullptr;
+    std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo_;
     void* sharedRuntime_ = nullptr;
     int32_t pageId_ = 0;
     bool useCurrentEventRunner_ = false;

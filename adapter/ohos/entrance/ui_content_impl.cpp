@@ -21,6 +21,8 @@
 #include "ability_info.h"
 #include "configuration.h"
 #include "init_data.h"
+#include "js_runtime_utils.h"
+#include "native_reference.h"
 #include "service_extension_context.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -70,9 +72,18 @@ extern "C" ACE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtim
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime);
 }
 
-UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime)
-    : context_(context), runtime_(runtime)
+UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime) : runtime_(runtime)
 {
+    if (context == nullptr) {
+        LOGE("context is nullptr");
+        return;
+    }
+    const auto& obj = context->GetBindingObject();
+    auto ref = obj->Get<NativeReference>();
+    auto object = AbilityRuntime::ConvertNativeValueTo<NativeObject>(ref->Get());
+    auto weak = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(object->GetNativePointer());
+    context_ = *weak;
+
     LOGI("Create UIContentImpl.");
 }
 
@@ -113,13 +124,14 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         LOGE("Null window, can't initialize UI content");
         return;
     }
-    if (!context_) {
-        LOGE("Null ability, can't initialize UI content");
+    auto context = context_.lock();
+    if (!context) {
+        LOGE("context is null");
         return;
     }
     LOGI("Initialize UIContentImpl start.");
     static std::once_flag onceFlag;
-    std::call_once(onceFlag, [context = context_]() {
+    std::call_once(onceFlag, [&context]() {
         LOGI("Initialize for current process.");
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
@@ -127,7 +139,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     });
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
-    auto resourceManager = context_->GetResourceManager();
+    auto resourceManager = context->GetResourceManager();
     if (resourceManager != nullptr) {
         resourceManager->GetResConfig(*resConfig);
         auto localeInfo = resConfig->GetLocaleInfo();
@@ -141,13 +153,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
     }
 
-    auto packagePathStr = context_->GetBundleCodePath();
-    auto moduleInfo = context_->GetHapModuleInfo();
-    if (moduleInfo != nullptr) {
-        packagePathStr += "/" + moduleInfo->name + "/";
-    }
-
-    const std::shared_ptr<OHOS::AbilityRuntime::Context> context(context_);
     auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
     std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> info;
 
@@ -162,47 +167,76 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
         info = serviceContext->GetAbilityInfo();
     }
-    
-    std::string srcPath = "";
-    if (info != nullptr && !info->srcPath.empty()) {
-        srcPath = info->srcPath;
-    }
 
     RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-    auto assetBasePathStr = { "assets/js/" + (srcPath.empty() ? "default" : srcPath) + "/",
-        std::string("assets/js/share/") };
-
-    if (flutterAssetManager && !packagePathStr.empty()) {
-        auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-        if (assetProvider->Initialize(packagePathStr, assetBasePathStr)) {
-            LOGI("Push AssetProvider to queue.");
-            flutterAssetManager->PushBack(std::move(assetProvider));
-        }
-    }
-
-    std::string moduleName = info->moduleName;
-    std::shared_ptr<OHOS::AppExecFwk::ApplicationInfo> appInfo = context_->GetApplicationInfo();
-    std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
-
+    bool isStageMode = info != nullptr ? info->isStageBasedModel : false;
+    std::string moduleName = info != nullptr ? info->moduleName : "";
+    auto appInfo = context->GetApplicationInfo();
     std::string resPath;
-    for (const auto& module : moduleList) {
-        if (module.moduleName == moduleName) {
-            resPath = module.moduleSourceDir + "/assets/" + module.moduleName + "/";
-            break;
+    LOGI("Initialize UIContent isStageMode:%{public}s", isStageMode ? "true" : "false");
+    if (isStageMode) {
+        if (appInfo) {
+            std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
+            for (const auto& module : moduleList) {
+                if (module.moduleName == moduleName) {
+                    resPath = module.moduleSourceDir + "/";
+                    break;
+                }
+            }
+        }
+        LOGI("In stage mode, resPath:%{private}s", resPath.c_str());
+        auto assetBasePathStr = { std::string("ets/"), std::string("resources/base/profile/") };
+        if (flutterAssetManager && !resPath.empty()) {
+            auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
+            if (assetProvider->Initialize(resPath, assetBasePathStr)) {
+                LOGI("Push AssetProvider to queue.");
+                flutterAssetManager->PushBack(std::move(assetProvider));
+            }
+        }
+    } else {
+        auto packagePathStr = context->GetBundleCodePath();
+        auto moduleInfo = context->GetHapModuleInfo();
+        if (moduleInfo != nullptr) {
+            packagePathStr += "/" + moduleInfo->name + "/";
+        }
+        std::string srcPath = "";
+        if (info != nullptr && !info->srcPath.empty()) {
+            srcPath = info->srcPath;
+        }
+
+        auto assetBasePathStr = { "assets/js/" + (srcPath.empty() ? "default" : srcPath) + "/",
+            std::string("assets/js/share/") };
+
+        if (flutterAssetManager && !packagePathStr.empty()) {
+            auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
+            if (assetProvider->Initialize(packagePathStr, assetBasePathStr)) {
+                LOGI("Push AssetProvider to queue.");
+                flutterAssetManager->PushBack(std::move(assetProvider));
+            }
+        }
+
+        if (appInfo) {
+            std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
+            for (const auto& module : moduleList) {
+                if (module.moduleName == moduleName) {
+                    resPath = module.moduleSourceDir + "/assets/" + module.moduleName + "/";
+                    break;
+                }
+            }
         }
     }
-
     // create container
     instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
     auto container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
-        context_, std::make_unique<ContentEventCallback>([context = context_] {
-            if (context != nullptr) {
-                const std::shared_ptr<OHOS::AbilityRuntime::Context> sharedContext(context);
-                auto abilityContext =
-                    OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-                if (abilityContext) {
-                    abilityContext->TerminateSelf();
-                }
+        info, std::make_unique<ContentEventCallback>([context = context_] {
+            auto sharedContext = context.lock();
+            if (!sharedContext) {
+                return;
+            }
+            auto abilityContext =
+                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+            if (abilityContext) {
+                abilityContext->TerminateSelf();
             }
         }));
     AceEngine::Get().AddContainer(instanceId_, container);

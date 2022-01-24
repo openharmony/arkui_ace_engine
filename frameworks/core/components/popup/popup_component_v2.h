@@ -58,6 +58,16 @@ public:
         onStateChange_ = onStateChange;
     }
 
+    const EventMarker& GetChangeEvent() const
+    {
+        return changeEvent_;
+    }
+
+    void SetChangeEvent(const EventMarker& changeEvent)
+    {
+        changeEvent_ = changeEvent;
+    }
+
     void Initialization(
         const RefPtr<ThemeManager>& themeManager, const WeakPtr<PipelineContext>& context);
 
@@ -112,6 +122,7 @@ private:
     bool hasInitialization_ = false;
     bool placementOnTop_ = false;
     EventMarker onStateChange_;
+    EventMarker changeEvent_;
     RefPtr<PopupParam> popupParam_;
     RefPtr<PopupController> popupController_;
     RefPtr<ThemeManager> themeManager_;

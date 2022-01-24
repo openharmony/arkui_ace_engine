@@ -66,6 +66,11 @@ QJSDeclarativeEngineInstance* QJSDeclarativeEngineInstance::UnWrapEngineInstance
     return instance;
 }
 
+void QJSDeclarativeEngineInstance::FlushCommandBuffer(void* context, const std::string& command)
+{
+    return;
+}
+
 void QJSDeclarativeEngineInstance::SetRunningPage(const RefPtr<JsAcePage>& page)
 {
     std::lock_guard<std::mutex> lock(mutex_);

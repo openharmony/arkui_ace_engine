@@ -71,8 +71,8 @@ private:
      */
     ErrCode Connect();
 
-    const std::string GetPickerDialogParam(
-        const AAFwk::Want& want, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos) const;
+    const std::string GetPickerDialogParam(const AAFwk::Want& want,
+        const std::vector<AppExecFwk::AbilityInfo>& abilityInfos, bool wideScreen = true) const;
 
     static std::mutex mutex_;
     static std::shared_ptr<UIServiceMgrClient> instance_;

@@ -52,11 +52,17 @@ ViewStackProcessor* ViewStackProcessor::GetInstance()
 ViewStackProcessor::ViewStackProcessor()
 {
     radioGroups_ = std::make_shared<JsPageRadioGroups>();
+    checkboxGroups_ = std::make_shared<JsPageCheckboxGroups>();
 }
 
 std::shared_ptr<JsPageRadioGroups> ViewStackProcessor::GetRadioGroupCompnent()
 {
     return radioGroups_;
+}
+
+std::shared_ptr<JsPageCheckboxGroups> ViewStackProcessor::GetCheckboxGroupCompnent()
+{
+    return checkboxGroups_;
 }
 
 RefPtr<ComposedComponent> ViewStackProcessor::GetRootComponent(const std::string& id, const std::string& name)

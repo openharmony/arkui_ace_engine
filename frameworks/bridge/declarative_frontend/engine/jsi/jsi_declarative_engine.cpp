@@ -326,6 +326,14 @@ JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 
     DestroyAllRootViewHandle();
 
+    if (runningPage_) {
+        runningPage_->OnJsEngineDestroy();
+    }
+
+    if (stagingPage_) {
+        stagingPage_->OnJsEngineDestroy();
+    }
+
     if (runtime_) {
         runtime_->RegisterUncaughtExceptionHandler(nullptr);
         // reset runtime in utils
@@ -807,6 +815,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
 
     nativeEngine_ = new ArkNativeEngine(vm, static_cast<void*>(this));
+    engineInstance_->SetNativeEngine(nativeEngine_);
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
     if (delegate && delegate->GetAssetManager()) {
@@ -956,14 +965,14 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
             std::string appBasePath = delegate->GetAssetPath("app.abc");
             std::string appPath = appBasePath.append("app.abc");
             LOGI("appPath is: %{private}s", appPath.c_str());
-            if (!runtime->ExecuteJsBin(appPath)) {
-                LOGE("ExecuteJsBin \"app.js\" failed.");
-                return;
+            if (runtime->ExecuteJsBin(appPath)) {
+                CallAppFunc("onCreate");
+            } else {
+                LOGW("ExecuteJsBin \"app.js\" failed.");
             }
-            CallAppFunc("onCreate");
         }
         if (!runtime->ExecuteJsBin(assetPath)) {
-            LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
+            LOGE("ExecuteJsBin %{public}s failed.", urlName.c_str());
             return;
         }
     }

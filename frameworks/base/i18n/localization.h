@@ -44,12 +44,13 @@ enum MeasureFormatStyle { WIDTH_WIDE, WIDTH_SHORT, WIDTH_NARROW, WIDTH_NUMERIC, 
 
 enum TimeUnitStyle { YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, MILLISECOND };
 
-class ACE_FORCE_EXPORT Localization : public NonCopyable {
+class ACE_FORCE_EXPORT_WITH_PREVIEW Localization : public NonCopyable {
 public:
     /**
      * Get language list to select the best language.
      * @return language list which is supported
      */
+    virtual ~Localization();
     static const std::vector<std::string>& GetLanguageList(const std::string& language);
 
     static std::shared_ptr<Localization> GetInstance();

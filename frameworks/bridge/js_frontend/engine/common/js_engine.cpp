@@ -21,6 +21,7 @@
 namespace OHOS::Ace::Framework {
 
 thread_local NativeEngine* JsEngine::nativeEngine_ = nullptr;
+thread_local NativeEngine* JsEngineInstance::nativeEngine_ = nullptr;
 
 void JsEngine::RunNativeEngineLoop()
 {

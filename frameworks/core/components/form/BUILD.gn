@@ -30,8 +30,8 @@ build_component("form") {
     external_deps = [
       "ability_runtime:app_manager",
       "ability_runtime:want",
-      "appexecfwk_standard:appexecfwk_base",
-      "appexecfwk_standard:appexecfwk_core",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
       "form_runtime:fmskit_native",
       "form_runtime:form_manager",
       "ipc:ipc_core",

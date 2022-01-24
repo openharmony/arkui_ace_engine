@@ -49,7 +49,9 @@ template("ace_ohos_standard_source_set") {
 
     include_dirs = [
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/featureAbility",
+      "//foundation/aafwk/standard/interfaces/innerkits/runtime/include/",
       "//foundation/ace/napi/interfaces/kits",
+      "//foundation/ace/napi/native_engine",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_dataability/include",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb/include",
       "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
@@ -80,9 +82,9 @@ template("ace_ohos_standard_source_set") {
       "ability_runtime:app_manager",
       "ability_runtime:base",
       "ability_runtime:want",
-      "appexecfwk_standard:appexecfwk_base",
-      "appexecfwk_standard:appexecfwk_core",
       "appexecfwk_standard:libeventhandler",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
       "form_runtime:fmskit_native",
       "form_runtime:form_manager",
       "ipc:ipc_core",

@@ -47,6 +47,7 @@
 
 namespace OHOS::Ace::Framework {
     using JsPageRadioGroups = std::unordered_map<std::string, RadioGroupComponent<std::string>>;
+    using JsPageCheckboxGroups = std::unordered_map<std::string, RefPtr<CheckboxComponent>>;
 
 class ViewStackProcessor final {
 public:
@@ -119,6 +120,7 @@ public:
 
     void SetIsPercentSize(RefPtr<Component>& component);
     std::shared_ptr<JsPageRadioGroups> GetRadioGroupCompnent();
+    std::shared_ptr<JsPageCheckboxGroups> GetCheckboxGroupCompnent();
 
     RefPtr<Component> GetNewComponent();
     RefPtr<V2::InspectorComposedComponent> GetInspectorComposedComponent() const;
@@ -171,6 +173,7 @@ private:
     // stack
     std::stack<std::unordered_map<std::string, RefPtr<Component>>> componentsStack_;
     std::shared_ptr<JsPageRadioGroups> radioGroups_;
+    std::shared_ptr<JsPageCheckboxGroups> checkboxGroups_;
 
     RefPtr<PageTransitionComponent> pageTransitionComponent_;
 
