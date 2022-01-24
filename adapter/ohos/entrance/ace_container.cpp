@@ -587,6 +587,15 @@ sptr<OHOS::Rosen::Window> AceContainer::GetUIWindow(int32_t instanceId)
     return container->GetUIWindowInner();
 }
 
+OHOS::AppExecFwk::Ability* AceContainer::GetAbility(int32_t instanceId)
+{
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    if (!container) {
+        return nullptr;
+    }
+    return container->GetAbilityInner();
+}
+
 bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string& content, const std::string& params)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -838,6 +847,11 @@ void AceContainer::SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow)
 sptr<OHOS::Rosen::Window> AceContainer::GetUIWindowInner() const
 {
     return uiWindow_;
+}
+
+OHOS::AppExecFwk::Ability* AceContainer::GetAbilityInner() const
+{
+    return aceAbility_;
 }
 
 void AceContainer::SetFontScale(int32_t instanceId, float fontScale)
