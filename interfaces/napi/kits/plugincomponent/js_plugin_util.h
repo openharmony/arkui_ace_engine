@@ -16,6 +16,7 @@
 #ifndef OHOS_NAPI_ACE_PLUGIN_UTIL_H
 #define OHOS_NAPI_ACE_PLUGIN_UTIL_H
 
+#include "napi/native_api.h"
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
 #include "js_plugin_data.h"
