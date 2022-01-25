@@ -17,6 +17,7 @@
 
 #include "base/log/ace_trace.h"
 #include "core/pipeline/base/composed_element.h"
+#include "frameworks/bridge/declarative_frontend/engine/content_storage_set.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -172,9 +173,21 @@ void JSView::JSBind(BindingTarget object)
     JSClass<JSView>::Method("markNeedUpdate", &JSView::MarkNeedUpdate);
     JSClass<JSView>::Method("needsUpdate", &JSView::NeedsUpdate);
     JSClass<JSView>::Method("markStatic", &JSView::MarkStatic);
+    JSClass<JSView>::CustomMethod("getContext", &JSView::GetContext);
+    JSClass<JSView>::CustomMethod("getContentStorage", &JSView::GetContentStorage);
     JSClass<JSView>::CustomMethod("findChildById", &JSView::FindChildById);
     JSClass<JSView>::Inherit<JSViewAbstract>();
     JSClass<JSView>::Bind(object, ConstructorCallback, DestructorCallback);
+}
+
+void JSView::GetContext(const JSCallbackInfo& info)
+{
+    info.SetReturnValue(ContentStorageSet::GetCurrentContext());
+}
+
+void JSView::GetContentStorage(const JSCallbackInfo& info)
+{
+    info.SetReturnValue(ContentStorageSet::GetCurrentStorage());
 }
 
 void JSView::FindChildById(const JSCallbackInfo& info)
