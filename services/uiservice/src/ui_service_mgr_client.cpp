@@ -142,7 +142,6 @@ ErrCode UIServiceMgrClient::ShowDialog(const std::string& name,
             return UI_SERVICE_NOT_CONNECTED;
         }
     }
-
     const sptr<DialogCallbackStub> dialogCallbackStub(new (std::nothrow)DialogCallbackStub(callback));
     sptr<IUIServiceMgr> doms = iface_cast<IUIServiceMgr>(remoteObject_);
     if (doms == nullptr) {
@@ -187,21 +186,7 @@ ErrCode UIServiceMgrClient::ShowAppPickerDialog(const AAFwk::Want& want,
     int32_t width = UI_DIALOG_PICKER_WIDTH;
     int32_t height = UI_DIALOG_PICKER_HEIGHT;
     bool wideScreen = true;
-    auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    if (display != nullptr) {
-        if (display->GetWidth() < UI_WIDTH_780DP) {
-            HILOG_INFO("share dialog narrow.");
-            wideScreen = false;
-            width = UI_DIALOG_PICKER_WIDTH_NARROW;
-            height = UI_DIALOG_PICKER_HEIGHT_NARROW;
-        }
-        offsetX = (display->GetWidth() - width) / UI_HALF;
-        offsetY = display->GetHeight() - height - UI_DEFAULT_BUTTOM_CLIP;
-    } else {
-        HILOG_WARN("share dialog get display fail, use default wide.");
-        offsetX = (UI_DEFAULT_WIDTH - width) / UI_HALF;
-        offsetY = UI_DEFAULT_HEIGHT - height - UI_DEFAULT_BUTTOM_CLIP;
-    }
+    GetDisplayPosition(offsetX, offsetY, width, height, wideScreen);
     const std::string param = GetPickerDialogParam(want, abilityInfos, wideScreen);
     HILOG_DEBUG("share dialog position:[%{public}d,%{public}d,%{public}d,%{public}d],str: %{public}s",
         offsetX, offsetY, width, height, param.c_str());
@@ -308,6 +293,32 @@ const std::string UIServiceMgrClient::GetPickerDialogParam(
     param += "]";
     param += "}"; // json tail
     return param;
+}
+
+void UIServiceMgrClient::GetDisplayPosition(
+    int32_t& offsetX, int32_t& offsetY, int32_t& width, int32_t& height, bool& wideScreen)
+{
+    wideScreen = true;
+    auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (display == nullptr) {
+        HILOG_WARN("share dialog GetDefaultDisplay fail, try again.");
+        display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    }
+
+    if (display != nullptr) {
+        if (display->GetWidth() < UI_WIDTH_780DP) {
+            HILOG_INFO("share dialog narrow.");
+            wideScreen = false;
+            width = UI_DIALOG_PICKER_WIDTH_NARROW;
+            height = UI_DIALOG_PICKER_HEIGHT_NARROW;
+        }
+        offsetX = (display->GetWidth() - width) / UI_HALF;
+        offsetY = display->GetHeight() - height - UI_DEFAULT_BUTTOM_CLIP;
+    } else {
+        HILOG_WARN("share dialog get display fail, use default wide.");
+        offsetX = (UI_DEFAULT_WIDTH - width) / UI_HALF;
+        offsetY = UI_DEFAULT_HEIGHT - height - UI_DEFAULT_BUTTOM_CLIP;
+    }
 }
 }  // namespace Ace
 }  // namespace OHOS

@@ -66,6 +66,7 @@
     color: rgba(0, 0, 0, 1);
     max-lines: 1;
     text-overflow: ellipsis;
+    word-break: break-all;
 }
 
 .button1 {

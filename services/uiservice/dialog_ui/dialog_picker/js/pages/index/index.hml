@@ -1,7 +1,7 @@
 <div class="container">
     <div class="share" style="width: {{share.width}}; height: {{share.height}};">
         <div class="shareBack" style="margin-top: {{share.backTop}};">
-            <image class="backImage" onclick="onBack" src="common/handle_down.svg"></image>
+            <image class="backImage" onclick="onBack" src="{{share.backIcon}}"></image>
         </div>
         <div class="shareCard" style="width: {{share.card.width}}; height: {{share.card.height}}; border-radius: {{share.card.radius}};">
             <div class="shareInfo" style="margin: {{share.card.contentMargin}}">
