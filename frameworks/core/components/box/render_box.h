@@ -237,6 +237,16 @@ public:
         return preTargetRenderBox_;
     }
 
+    const OnMouseCallback GetOnMouseId() const
+    {
+        return onMouse_;
+    }
+
+    RefPtr<Gesture> GetOnLongPress() const
+    {
+        return onLongPressId_;
+    }
+
     RefPtr<RenderBox> FindTargetRenderBox(const RefPtr<PipelineContext> context, const GestureEvent& info);
 
     void ResetController(RefPtr<Animator>& controller);
@@ -288,6 +298,7 @@ private:
     RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_;
     OnHoverCallback onHover_;
     OnMouseCallback onMouse_;
+    RefPtr<Gesture> onLongPressId_;
     TextDirection inspectorDirection_ { TextDirection::LTR };
 
     // Drag event

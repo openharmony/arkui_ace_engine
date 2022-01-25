@@ -109,7 +109,8 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
     { "height", [](const InspectorNode& inspector) { return inspector.GetHeight(); } },
     { "align", [](const InspectorNode& inspector) { return inspector.GetAlign(); } },
     { "direction", [](const InspectorNode& inspector) { return inspector.GetDirectionStr(); } },
-    { "bindPopup", [](const InspectorNode& inspector) { return inspector.GetBindPopup(); } }
+    { "bindPopup", [](const InspectorNode& inspector) { return inspector.GetBindPopup(); } },
+    { "bindContextMenu", [](const InspectorNode& inspector) { return inspector.GetBindContextMenu(); } }
 };
 
 const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP {
@@ -1303,6 +1304,25 @@ std::string InspectorComposedElement::GetBindPopup() const
     popupJson->Put("primaryButton", primaryButtonJson);
     popupJson->Put("secondaryButton", secondaryButtonJson);
     return show + ", " + popupJson->ToString();
+}
+
+std::string InspectorComposedElement::GetBindContextMenu() const
+{
+    auto node = GetInspectorNode(BoxElement::TypeId());
+    if (!node) {
+        return "-";
+    }
+    auto responseType = AceType::DynamicCast<RenderBox>(node);
+    if (responseType) {
+        if (responseType->GetOnMouseId()) {
+            return "ResponseType.RightClick";
+        } else if (responseType->GetOnLongPress()){
+            return "ResponseType.Longpress";
+        } else{
+            return "-";
+        }
+    }
+    return "-";
 }
 
 void InspectorComposedElement::UpdateEventTarget(BaseEventInfo& info) const

@@ -189,6 +189,10 @@ public:
 
     // bindpopup
     virtual std::string GetBindPopup() const = 0;
+
+    //bindcontextmenu
+    virtual std::string GetBindContextMenu() const = 0;
+
     // auto test
     virtual bool GetClickable() const = 0;
     virtual bool GetCheckable() const = 0;
