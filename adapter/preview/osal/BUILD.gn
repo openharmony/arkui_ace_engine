@@ -88,6 +88,8 @@ template("ace_osal_preview_source_set") {
       "$ace_root:ace_config",
       "//third_party/curl:curl_config",
     ]
+
+    sources += [ "clipboard_impl.cpp" ]
   }
 }
 

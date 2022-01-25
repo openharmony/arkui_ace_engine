@@ -24,6 +24,7 @@
 #include "base/geometry/size.h"
 #include "base/utils/system_properties.h"
 #include "core/common/clipboard/clipboard.h"
+#include "core/common/clipboard/clipboard_impl.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_client.h"
 #include "core/common/ime/text_input_connection.h"
@@ -590,6 +591,7 @@ private:
     RefPtr<TextEditController> controller_;
     RefPtr<TextInputConnection> connection_;
     RefPtr<Clipboard> clipboard_;
+    std::shared_ptr<ClipboardProxyImpl> clipboardProxyImpl_;
     RefPtr<TextOverlayComponent> textOverlay_;
     WeakPtr<StackElement> stackElement_;
     RefPtr<ClickRecognizer> clickRecognizer_;

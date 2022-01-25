@@ -16,11 +16,8 @@
 #include "core/common/clipboard/clipboard_proxy.h"
 
 namespace OHOS::Ace {
-
 ClipboardProxy* ClipboardProxy::inst_ = nullptr;
-
 std::mutex ClipboardProxy::mutex_;
-
 ClipboardProxy* ClipboardProxy::GetInstance()
 {
     if (inst_ == nullptr) {
@@ -32,7 +29,7 @@ ClipboardProxy* ClipboardProxy::GetInstance()
     return inst_;
 }
 
-void ClipboardProxy::SetDelegate(std::unique_ptr<ClipboardInterface>&& delegate)
+void ClipboardProxy::SetDelegate(std::shared_ptr<ClipboardInterface>&& delegate)
 {
     delegate_ = std::move(delegate);
 }
@@ -44,5 +41,4 @@ RefPtr<Clipboard> ClipboardProxy::GetClipboard(const RefPtr<TaskExecutor>& taskE
     }
     return delegate_->GetClipboard(taskExecutor);
 }
-
 } // namespace OHOS::Ace
