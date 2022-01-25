@@ -48,6 +48,9 @@ void RenderListItem::Update(const RefPtr<Component>& component)
         button_.Reset();
     }
 
+    onSelectId_ = item->GetOnSelectId();
+    selectable_ = item->GetSelectable();
+
     MarkNeedLayout();
 }
 

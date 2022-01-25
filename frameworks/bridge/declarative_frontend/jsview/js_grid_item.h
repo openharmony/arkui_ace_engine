@@ -36,6 +36,8 @@ protected:
     static void SetRowStart(int32_t rowStart);
     static void SetRowEnd(int32_t rowEnd);
     static void ForceRebuild(bool forceRebuild);
+    static void SetSelectable(bool selectable);
+    static void SelectCallback(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework

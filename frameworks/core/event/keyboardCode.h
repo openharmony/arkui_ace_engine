@@ -22,6 +22,8 @@ enum class keyboardCode : int32_t {
     LETTER_CODE_END = 2042,
     LEFT_CTRL_CODE = 2072,
     RIGHT_CTRL_CODE = 2073,
+    LEFT_SHIFT_CODE = 2047,
+    RIGHT_SHIFT_CODE = 2048,
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_BOARDCODE_H

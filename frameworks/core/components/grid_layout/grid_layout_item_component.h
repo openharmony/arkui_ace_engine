@@ -21,6 +21,8 @@
 
 namespace OHOS::Ace {
 
+using OnSelectFunc = std::function<void(bool)>;
+
 class ACE_EXPORT GridLayoutItemComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(GridLayoutItemComponent, SoleChildComponent);
 
@@ -78,6 +80,26 @@ public:
         return forceRebuild_;
     }
 
+    bool GetSelectable() const
+    {
+        return selectable_;
+    }
+
+    void SetSelectable(bool selectable)
+    {
+        selectable_ = selectable;
+    }
+
+    OnSelectFunc GetOnSelectId() const
+    {
+        return onSelectId_;
+    }
+
+    void SetOnSelectId(const OnSelectFunc& onSelectId)
+    {
+        onSelectId_ = onSelectId;
+    }
+
 private:
     EventMarker clickEventId_;
     int32_t columnIndex_ = -1;
@@ -85,6 +107,8 @@ private:
     int32_t columnSpan_ = 1;
     int32_t rowSpan_ = 1;
     bool forceRebuild_ = false;
+    OnSelectFunc onSelectId_;
+    bool selectable_ = false;
 };
 
 } // namespace OHOS::Ace

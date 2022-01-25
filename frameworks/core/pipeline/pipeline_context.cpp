@@ -1414,7 +1414,38 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     }
     rootElement_->HandleSpecifiedKey(event);
     NotifyDestroyEventDismiss();
+    SetShortcutKey(event);
     return eventManager_.DispatchKeyEvent(event, rootElement_);
+}
+
+void PipelineContext::SetShortcutKey(const KeyEvent& event)
+{
+    if (event.action == KeyAction::DOWN) {
+        auto codeValue = static_cast<int32_t>(event.code);
+        if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_LEFT) ||
+            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_RIGHT)) {
+            MarkIsShiftDown(true);
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_LEFT) ||
+            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_RIGHT)) {
+            MarkIsCtrlDown(true);
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_A)) {
+            MarkIsKeyboardA(true);
+            if (subscribeCtrlA_) {
+                subscribeCtrlA_();
+            }
+        }
+    } else if (event.action == KeyAction::UP) {
+        auto codeValue = static_cast<int32_t>(event.code);
+        if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_LEFT) ||
+            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_RIGHT)) {
+            MarkIsShiftDown(false);
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_LEFT) ||
+            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_RIGHT)) {
+            MarkIsCtrlDown(false);
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_A)) {
+            MarkIsKeyboardA(false);
+        }
+    }
 }
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event)

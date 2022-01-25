@@ -116,6 +116,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("editMode", &JSList::SetEditMode);
     JSClass<JSList>::StaticMethod("cachedCount", &JSList::SetCachedCount);
     JSClass<JSList>::StaticMethod("chainAnimation", &JSList::SetChainAnimation);
+    JSClass<JSList>::StaticMethod("multiSelectable", &JSList::SetMultiSelectable);
 
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);
@@ -369,6 +370,11 @@ void JSList::ItemDropCallback(const JSCallbackInfo& info)
         return;
     }
     component->SetOnItemDropId(onItemDropId);
+}
+
+void JSList::SetMultiSelectable(bool multiSelectable)
+{
+    JSViewSetProperty(&V2::ListComponent::SetMultiSelectable, multiSelectable);
 }
 
 } // namespace OHOS::Ace::Framework

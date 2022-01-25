@@ -69,6 +69,26 @@ public:
         return component_->GetEditMode();
     }
 
+    bool GetSelectable() const
+    {
+        return selectable_;
+    }
+
+    OnSelectFunc GetOnSelectId() const
+    {
+        return onSelectId_;
+    }
+
+    void MarkIsSelected(bool isSelected)
+    {
+        isSelected_ = isSelected;
+    }
+
+    bool IsSelected() const
+    {
+        return isSelected_;
+    }
+
 private:
     void CreateDeleteButton();
 
@@ -79,6 +99,9 @@ private:
     bool editMode_ = false;
 
     RefPtr<LongPressRecognizer> longPressRecognizer_;
+    OnSelectFunc onSelectId_;
+    bool selectable_ = false;
+    bool isSelected_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderListItem);
 };
