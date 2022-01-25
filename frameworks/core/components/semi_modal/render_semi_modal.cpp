@@ -33,7 +33,6 @@ namespace {
 constexpr int32_t ANIMATION_BASE_DURATION = 256;
 constexpr double CONTENT_DEFAULT_RATIO = 0.67;
 constexpr double KEYBOARD_HEIGHT_RATIO = 0.18;
-constexpr uint32_t FIND_MAX_COUNT = 64;
 constexpr Dimension BLANK_MIN_HEIGHT = 8.0_vp;
 constexpr Dimension DRAG_UP_THRESHOLD = 48.0_vp;
 constexpr Dimension DRAG_BAR_ARROW_BIAS = 1.0_vp;
@@ -45,26 +44,6 @@ int32_t GetAnimationDuration(double delta, double dragRange)
         return 0;
     }
     return static_cast<int32_t>(((std::abs(delta) / dragRange) + 1.0) * ANIMATION_BASE_DURATION);
-}
-
-template<class T>
-RefPtr<T> FindChildOfClass(const RefPtr<RenderNode>& parent)
-{
-    // BFS to find child in tree.
-    uint32_t findCount = 0;
-    auto searchQueue = parent->GetChildren(); // copy children to a queue
-    while (++findCount <= FIND_MAX_COUNT && !searchQueue.empty()) {
-        const auto child = searchQueue.front();
-        searchQueue.pop_front();
-        if (!child) {
-            continue;
-        }
-        if (AceType::InstanceOf<T>(child)) {
-            return AceType::DynamicCast<T>(child);
-        }
-        searchQueue.insert(searchQueue.end(), child->GetChildren().begin(), child->GetChildren().end());
-    }
-    return RefPtr<T>();
 }
 
 } // namespace

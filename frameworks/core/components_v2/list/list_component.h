@@ -78,6 +78,7 @@ public:
     ACE_DEFINE_COMPONENT_PROP(ScrollController, RefPtr<ListPositionController>);
     ACE_DEFINE_COMPONENT_PROP(ScrollBarProxy, RefPtr<ScrollBarProxy>);
     ACE_DEFINE_COMPONENT_PROP(ChainAnimation, bool, false);
+    ACE_DEFINE_COMPONENT_PROP(MultiSelectable, bool, false);
 
     ACE_DEFINE_COMPONENT_EVENT(OnScroll, void(Dimension, ScrollState));
     ACE_DEFINE_COMPONENT_EVENT(OnScrollIndex, void(int32_t, int32_t));

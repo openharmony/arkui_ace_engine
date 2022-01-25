@@ -34,6 +34,8 @@ enum class KeyCode : int32_t {
     KEYBOARD_A = 29,
     HANDLE_A = 96,
     HANDLE_SELECT = 109,
+    KEYBOARD_SHIFT_LEFT = 59,
+    KEYBOARD_SHIFT_RIGHT = 60,
     KEYBOARD_TAB = 61,
     KEYBOARD_SPACE = 62,
     KEYBOARD_ENTER = 66,

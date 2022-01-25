@@ -41,6 +41,7 @@ public:
     static void SetEditMode(bool editMode);
     static void SetCachedCount(int32_t cachedCount);
     static void SetChainAnimation(bool enableChainAnimation);
+    static void SetMultiSelectable(bool multiSelectable);
 
     static void ItemDragStartCallback(const JSCallbackInfo& info);
     static void ItemDragEnterCallback(const JSCallbackInfo& info);
