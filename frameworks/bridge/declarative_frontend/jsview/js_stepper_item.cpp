@@ -32,7 +32,8 @@ void JSStepperItem::Create(const JSCallbackInfo& info)
     auto stepperItemComponentV2 = AceType::MakeRefPtr<StepperItemComponentV2>(
             FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::FLEX_START, componentChildren);
     ViewStackProcessor::GetInstance()->Push(stepperItemComponentV2);
-    RefPtr<StepperItemComponent> stepperItemComponent = stepperItemComponentV2->GetStepperItemComponent();
+
+    RefPtr<StepperItemComponent> stepperItemComponent = ViewStackProcessor::GetInstance()->GetStepperItemComponent();
     RefPtr<StepperTheme> stepperTheme = GetTheme<StepperTheme>();
     if (stepperTheme) {
         TextStyle textStyle_ = stepperTheme->GetTextStyle();
@@ -45,6 +46,8 @@ void JSStepperItem::Create(const JSCallbackInfo& info)
     if (focusAnimationTheme) {
         stepperItemComponent->SetFocusAnimationColor(focusAnimationTheme->GetColor());
     }
+    ViewStackProcessor::GetInstance()->GetStepperDisplayComponent();
+    ViewStackProcessor::GetInstance()->GetStepperScrollComponent();
 }
 
 void JSStepperItem::JSBind(BindingTarget globalObj)
@@ -75,7 +78,7 @@ void JSStepperItem::SetPrevLabel(const JSCallbackInfo& info)
     }
     auto stepperItemComponentV2 = AceType::DynamicCast<StepperItemComponentV2>(
         ViewStackProcessor::GetInstance()->GetMainComponent());
-    RefPtr<StepperItemComponent> stepperItem = stepperItemComponentV2->GetStepperItemComponent();
+    RefPtr<StepperItemComponent> stepperItem = ViewStackProcessor::GetInstance()->GetStepperItemComponent();
     if (!stepperItem) {
         LOGE("StepperItemComponent.");
         return;
@@ -97,7 +100,7 @@ void JSStepperItem::SetNextLabel(const JSCallbackInfo& info)
     }
     auto stepperItemComponentV2 = AceType::DynamicCast<StepperItemComponentV2>(
         ViewStackProcessor::GetInstance()->GetMainComponent());
-    RefPtr<StepperItemComponent> stepperItem = stepperItemComponentV2->GetStepperItemComponent();
+    RefPtr<StepperItemComponent> stepperItem = ViewStackProcessor::GetInstance()->GetStepperItemComponent();
     if (!stepperItem) {
         LOGE("StepperItemComponent.");
         return;
@@ -117,7 +120,7 @@ void JSStepperItem::SetStatus(const JSCallbackInfo& info)
     std::string status = statusArray[0];
     auto stepperItemComponentV2 = AceType::DynamicCast<StepperItemComponentV2>(
         ViewStackProcessor::GetInstance()->GetMainComponent());
-    RefPtr<StepperItemComponent> stepperItem = stepperItemComponentV2->GetStepperItemComponent();
+    RefPtr<StepperItemComponent> stepperItem = ViewStackProcessor::GetInstance()->GetStepperItemComponent();
     StepperLabels label = stepperItem->GetLabel();
     if (info.Length() < 1) {
         label.initialStatus = status;

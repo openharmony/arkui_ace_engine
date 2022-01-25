@@ -13,12 +13,21 @@
  * limitations under the License.
  */
 
-#include "core/components/stepper/stepper_item_component_v2.h"
-#include "core/components/scroll/scroll_component.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MARQUEE_MARQUEE_ELEMENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MARQUEE_MARQUEE_ELEMENT_H
+
+#include "core/components/marquee/render_marquee.h"
+#include "core/pipeline/base/render_element.h"
+#include "core/pipeline/base/sole_child_element.h"
 
 namespace OHOS::Ace {
-StepperItemComponentV2::StepperItemComponentV2(FlexDirection direction, FlexAlign mainAxisAlign,
-    FlexAlign crossAxisAlign, const std::list<RefPtr<Component>>& children)
-    : FlexComponent(direction, mainAxisAlign, crossAxisAlign, children)
-{}
+class MarqueeElement : public SoleChildElement {
+    DECLARE_ACE_TYPE(MarqueeElement, SoleChildElement);
+
+public:
+    MarqueeElement() = default;
+    ~MarqueeElement() override = default;
+};
 } // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_MARQUEE_MARQUEE_ELEMENT_H

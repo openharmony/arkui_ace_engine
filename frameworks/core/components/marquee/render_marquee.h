@@ -36,6 +36,30 @@ public:
     void OnHiddenChanged(bool hidden) override;
     void Start();
     void Stop();
+    std::string GetValue() const
+    {
+        return value_;
+    }
+    double GetStep() const
+    {
+        return scrollAmount_;
+    }
+    int32_t GetLoop() const
+    {
+        return loop_;
+    }
+    bool GetStart() const
+    {
+        return start_;
+    }
+    bool GetFromStart() const
+    {
+        if (direction_ == MarqueeDirection::LEFT) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 protected:
     virtual TextDirection GetTextDirection(const std::string& text) const = 0;
@@ -70,9 +94,11 @@ private:
     bool startAfterShowed_ = false;
     bool playerFinishControl_ = false;
     bool isHidden_ = false;
+    bool start_ = true;
     double scrollAmount_ = 0.0;
     int32_t loop_ = ANIMATION_REPEAT_INFINITE;
     int32_t currentLoop_ = 0;
+    std::string value_;
     MarqueeDirection direction_ = MarqueeDirection::LEFT;
     std::function<void()> bounceEvent_;
     std::function<void()> finishEvent_;

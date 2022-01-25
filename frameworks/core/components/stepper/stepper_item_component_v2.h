@@ -20,7 +20,6 @@
 #include "frameworks/bridge/common/dom/dom_node.h"
 
 namespace OHOS::Ace {
-
 class ACE_EXPORT StepperItemComponentV2 : public FlexComponent {
     DECLARE_ACE_TYPE(StepperItemComponentV2, FlexComponent);
 
@@ -28,16 +27,7 @@ public:
     StepperItemComponentV2(FlexDirection direction, FlexAlign mainAxisAlign, FlexAlign crossAxisAlign,
         const std::list<RefPtr<Component>>& children);
     ~StepperItemComponentV2() override = default;
-
-    RefPtr<Component> AdjustComponentScroll(const RefPtr<Component>& component);
-    RefPtr<Component> AdjustComponentDisplay(const RefPtr<Component>& component);
-    RefPtr<StepperItemComponent> GetStepperItemComponent() const;
-
-private:
-    RefPtr<DisplayComponent> displayComponent_;
-    RefPtr<StepperItemComponent> stepperItemComponent_;
 };
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_STEPPER_STEPPER_ITEM_COMPONENT_V2_H

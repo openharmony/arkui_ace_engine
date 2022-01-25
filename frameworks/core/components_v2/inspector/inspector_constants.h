@@ -239,6 +239,10 @@ ACE_EXPORT extern const char HYPERLINK_ETS_TAG[];
 ACE_EXPORT extern const char STEPPER_COMPONENT_TAG[];
 ACE_EXPORT extern const char STEPPER_ETS_TAG[];
 
+// stepperItem
+ACE_EXPORT extern const char STEPPER_ITEM_COMPONENT_TAG[];
+ACE_EXPORT extern const char STEPPER_ITEM_ETS_TAG[];
+
 // scrollBar
 ACE_EXPORT extern const char SCROLL_BAR_COMPONENT_TAG[];
 ACE_EXPORT extern const char SCROLL_BAR_ETS_TAG[];
@@ -286,6 +290,10 @@ ACE_EXPORT extern const char TEXTTIMER_ETS_TAG[];
 // select
 ACE_EXPORT extern const char SELECT_COMPONENT_TAG[];
 ACE_EXPORT extern const char SELECT_ETS_TAG[];
+
+// marquee
+ACE_EXPORT extern const char MARQUEE_COMPONENT_TAG[];
+ACE_EXPORT extern const char MARQUEE_ETS_TAG[];
 
 // textclock
 ACE_EXPORT extern const char TEXTCLOCK_COMPONENT_TAG[];

@@ -34,10 +34,15 @@ public:
     void PerformLayout() override;
     void FireAppearEvent() const;
     void FireDisappearEvent() const;
+    int32_t GetIndex() const
+    {
+        return index_;
+    }
 
 private:
     OnEventFunc appearEvent_;
     OnEventFunc disappearEvent_;
+    int32_t index_;
 };
 
 } // namespace OHOS::Ace

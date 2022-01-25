@@ -119,6 +119,11 @@ public:
         return stepperComponent_;
     }
 
+    std::vector<StepperLabels> GetStepperLabels() const
+    {
+        return stepperLabels_;
+    }
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
