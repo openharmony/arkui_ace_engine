@@ -126,7 +126,8 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
 {
     frontendType_ = frontend->GetType();
     RegisterEventHandler(frontend->GetEventHandler());
-    auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](const uint64_t nanoTimestamp, const uint32_t frameCount) {
+    auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](
+                               const uint64_t nanoTimestamp, const uint32_t frameCount) {
         ContainerScope scope(instanceId);
         auto context = weak.Upgrade();
         if (context) {
@@ -272,6 +273,9 @@ void PipelineContext::FlushFocus()
         rootElement_->RequestFocusImmediately();
     }
 
+    if (GetIsDeclarative()) {
+        return;
+    }
     decltype(needRebuildFocusElement_) rebuildElements(std::move(needRebuildFocusElement_));
     for (const auto& elementWeak : rebuildElements) {
         auto element = elementWeak.Upgrade();
