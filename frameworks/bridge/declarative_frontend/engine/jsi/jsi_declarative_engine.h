@@ -66,6 +66,7 @@ public:
     static void PostJsTask(const shared_ptr<JsRuntime>&, std::function<void()>&& task);
     static void TriggerPageUpdate(const shared_ptr<JsRuntime>&);
     static RefPtr<PipelineContext> GetPipelineContext(const shared_ptr<JsRuntime>& runtime);
+    static void PreInitAceModule(void* runtime);
     WeakPtr<JsMessageDispatcher> GetJsMessageDispatcher() const
     {
         return dispatcher_;
@@ -172,6 +173,7 @@ private:
     mutable std::mutex mutex_;
     bool isDebugMode_ = true;
     bool usingSharedRuntime_ = false;
+    static bool aceModuleInited_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngineInstance);
 };
@@ -237,6 +239,10 @@ public:
     void JsCallback(const std::string& callbackId, const std::string& args) override;
 
     void RunGarbageCollection() override;
+
+    void SetContentStorage(int32_t instanceId, NativeReference* storage) override;
+
+    void SetContext(int32_t instanceId, NativeReference* context) override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 

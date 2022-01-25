@@ -19,6 +19,7 @@ import("//foundation/ace/ace_engine/build/ace_gen_obj.gni")
 base_output_path = get_label_info(":gen_abc_proxyclass", "target_out_dir")
 abcproxyclass_obj_path = base_output_path + "/abc_proxy_class.o"
 abcenumstyle_obj_path = base_output_path + "/abc_enum_style.o"
+abccontentstorage_obj_path = base_output_path + "/abc_content_storage.o"
 
 ts2abc_gen_abc("gen_stateMgmt_abc") {
   extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
@@ -40,6 +41,16 @@ ts2abc_gen_abc("gen_jsEnumStyle_abc") {
   out_puts = [ base_output_path + "/jsEnumStyle.abc" ]
 }
 
+ts2abc_gen_abc("gen_contentStorage_abc") {
+  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  src_js = rebase_path(
+          "//foundation/ace/ace_engine/frameworks/bridge/declarative_frontend/engine/contentStorage.js")
+  dst_file = rebase_path(base_output_path + "/contentStorage.abc")
+
+  in_puts = [ "//foundation/ace/ace_engine/frameworks/bridge/declarative_frontend/engine/contentStorage.js" ]
+  out_puts = [ base_output_path + "/contentStorage.abc" ]
+}
+
 gen_obj("abc_proxyclass") {
   input = base_output_path + "/stateMgmt.abc"
   if (use_mac) {
@@ -53,6 +64,12 @@ gen_obj("abc_enum_style") {
   input = base_output_path + "/jsEnumStyle.abc"
   output = abcenumstyle_obj_path
   snapshot_dep = [ ":gen_jsEnumStyle_abc" ]
+}
+
+gen_obj("abc_contentStorage") {
+  input = base_output_path + "/contentStorage.abc"
+  output = abccontentstorage_obj_path
+  snapshot_dep = [ ":gen_contentStorage_abc" ]
 }
 
 template("declarative_js_engine_ark") {
@@ -76,6 +93,7 @@ template("declarative_js_engine_ark") {
     sources = [
       "ark/ark_js_runtime.cpp",
       "ark/ark_js_value.cpp",
+      "content_storage_set.cpp",
       "js_converter.cpp",
       "jsi_declarative_engine.cpp",
       "jsi_declarative_group_js_bridge.cpp",
@@ -98,9 +116,14 @@ template("declarative_js_engine_ark") {
     public_deps = [ "//foundation/ace/napi:ace_napi" ]
 
     deps += [
+      ":gen_obj_src_abc_contentStorage",
       ":gen_obj_src_abc_enum_style",
       ":gen_obj_src_abc_proxyclass",
     ]
+
+    deps += [ "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native" ]
+
+    external_deps = [ "ability_runtime:ability_context_native" ]
   }
 }
 

@@ -78,6 +78,8 @@ public:
     JSRefPtr<JSView> GetChildById(const std::string& viewId);
 
     void FindChildById(const JSCallbackInfo& info);
+    void GetContext(const JSCallbackInfo& info);
+    void GetContentStorage(const JSCallbackInfo& info);
 
     void FireOnShow()
     {

@@ -697,6 +697,18 @@ void AceContainer::TriggerGarbageCollection()
         TaskExecutor::TaskType::JS);
 }
 
+void AceContainer::SetContentStorage(NativeReference* storage, NativeReference* context)
+{
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+    auto jsEngine = declarativeFrontend->GetJsEngine();
+    if (context) {
+        jsEngine->SetContext(instanceId_, context);
+    }
+    if (storage) {
+        jsEngine->SetContentStorage(instanceId_, storage);
+    }
+}
+
 void AceContainer::AddAssetPath(
     int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths)
 {

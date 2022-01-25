@@ -52,6 +52,7 @@ foreach(item, ace_platforms) {
 base_output_path = get_label_info(":gen_js_proxyclass", "target_out_dir")
 jsproxyclass_obj_path = base_output_path + "/js_proxy_class.o"
 jsenumstyle_obj_path = base_output_path + "/js_enum_style.o"
+jscontentstorage_obj_path = base_output_path + "/js_content_storage.o"
 jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
 
 gen_obj("js_proxyclass") {
@@ -60,6 +61,15 @@ gen_obj("js_proxyclass") {
     jsproxyclass_obj_path = base_output_path + "/js_proxy_class.c"
   }
   output = jsproxyclass_obj_path
+  snapshot_dep = []
+}
+
+gen_obj("js_content_storage") {
+  input = "engine/contentStorage.js"
+  if (use_mac || use_mingw_win) {
+    jscontentstorage_obj_path = base_output_path + "/js_content_storage.c"
+  }
+  output = jscontentstorage_obj_path
   snapshot_dep = []
 }
 
@@ -284,6 +294,7 @@ template("declarative_js_engine") {
     deps += [ "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform" ]
 
     deps += [
+      ":gen_obj_src_js_content_storage",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
     ]
