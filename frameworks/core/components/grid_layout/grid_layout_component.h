@@ -245,6 +245,16 @@ public:
     const OnGridDragStartFunc& GetOnGridDragStartId() const;
     const OnGridDropFunc& GetOnGridDropId() const;
 
+    void SetMultiSelectable(bool multiSelectable)
+    {
+        multiSelectable_ = multiSelectable;
+    }
+
+    bool GetMultiSelectable() const
+    {
+        return multiSelectable_;
+    }
+
 private:
     FlexDirection direction_ = FlexDirection::COLUMN;
     FlexAlign flexAlign_ = FlexAlign::CENTER;
@@ -273,6 +283,7 @@ private:
 
     // drag in grid attribute
     bool editMode_ = false;
+    bool multiSelectable_ = false;
     int32_t maxCount_ = 1;
     int32_t minCount_ = 1;
     int32_t cellLength_ = 0;

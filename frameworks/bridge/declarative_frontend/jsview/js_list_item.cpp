@@ -69,6 +69,36 @@ void JSListItem::SetEditable(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
+void JSListItem::SetSelectable(bool selectable)
+{
+    auto listItem =
+        AceType::DynamicCast<V2::ListItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (listItem) {
+        listItem->SetSelectable(selectable);
+    }
+}
+
+void JSListItem::SelectCallback(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        LOGE("fail to bind onSelect event due to info is not function");
+        return;
+    }
+
+    RefPtr<JsMouseFunction> jsOnSelectFunc = AceType::MakeRefPtr<JsMouseFunction>(JSRef<JSFunc>::Cast(args[0]));
+    auto onSelectId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnSelectFunc)](bool isSelected) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->SelectExecute(isSelected);
+    };
+    auto listItem =
+        AceType::DynamicCast<V2::ListItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!listItem) {
+        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<V2::ListItemComponent>());
+        return;
+    }
+    listItem->SetOnSelectId(onSelectId);
+}
+
 void JSListItem::JSBind(BindingTarget globalObj)
 {
     JSClass<JSListItem>::Declare("ListItem");
@@ -76,6 +106,8 @@ void JSListItem::JSBind(BindingTarget globalObj)
 
     JSClass<JSListItem>::StaticMethod("sticky", &JSListItem::SetSticky);
     JSClass<JSListItem>::StaticMethod("editable", &JSListItem::SetEditable);
+    JSClass<JSListItem>::StaticMethod("selectable", &JSListItem::SetSelectable);
+    JSClass<JSListItem>::StaticMethod("onSelect", &JSListItem::SelectCallback);
 
     JSClass<JSListItem>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSListItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);

@@ -183,6 +183,9 @@ void RenderList::Update(const RefPtr<Component>& component)
         CreateDragDropRecognizer();
     }
 
+    
+    isMultiSelectable_  = component_->GetMultiSelectable();
+
     MarkNeedLayout();
 }
 
@@ -1555,6 +1558,334 @@ void RenderList::HandleAxisEvent(const AxisEvent& event)
 WeakPtr<RenderNode> RenderList::CheckAxisNode()
 {
     return AceType::WeakClaim<RenderNode>(this);
+}
+
+bool RenderList::HandleMouseEvent(const MouseEvent& event)
+{
+    if (!isMultiSelectable_) {
+        return false;
+    }
+
+    if (event.action == MouseAction::HOVER_EXIT) {
+        mouseIsHover_ = false;
+    } else {
+        mouseIsHover_ = true;
+    }
+
+    auto context = context_.Upgrade();
+    if (context) {
+        context->SubscribeCtrlA([wp = AceType::WeakClaim(this)]() {
+            auto sp = wp.Upgrade();
+            if (sp) {
+                if (sp->mouseIsHover_ == true) {
+                    sp->MultiSelectAllWhenCtrlA();
+                } else {
+                    sp->ClearMultiSelect();
+                    sp->MarkNeedRender();
+                }
+            }
+        });
+    }
+
+    if (context->IsCtrlDown()) {
+        if (context->IsKeyboardA()) {
+            MultiSelectAllWhenCtrlA();
+            return true;
+        }
+        HandleMouseEventWhenCtrlDown(event);
+        return true;
+    }
+    selectedItemsWithCtrl_.clear();
+
+    if (context->IsShiftDown()) {
+        HandleMouseEventWhenShiftDown(event);
+        return true;
+    }
+    firstItemWithShift_ = nullptr;
+
+    HandleMouseEventWithoutKeyboard(event);
+    return true;
+}
+
+void RenderList::ClearMultiSelect()
+{
+    for (const auto& listItem : items_) {
+        if (!listItem) {
+            continue;
+        }
+        listItem->MarkIsSelected(false);
+    }
+}
+
+void RenderList::MultiSelectWithoutKeyboard(const Rect& selectedZone)
+{
+    if (!selectedZone.IsValid()) {
+        Point mousePoint(selectedZone.GetOffset().GetX(), selectedZone.GetOffset().GetY());
+        auto listItem = FindChildNodeOfClass<RenderListItem>(mousePoint, mousePoint);
+        if (!listItem) {
+            return;
+        }
+        if (!listItem->GetSelectable()) {
+            return;
+        }
+        listItem->MarkIsSelected(true);
+        if (listItem->GetOnSelectId()) {
+            (listItem->GetOnSelectId())(listItem->IsSelected());
+        }
+        return;
+    }
+
+    for (const auto& listItem : items_) {
+        if (!listItem) {
+            continue;
+        }
+        if (!listItem->GetSelectable()) {
+            continue;
+        }
+        if (!selectedZone.IsIntersectWith(listItem->GetPaintRect())) {
+            listItem->MarkIsSelected(false);
+            if (listItem->GetOnSelectId()) {
+                (listItem->GetOnSelectId())(listItem->IsSelected());
+            }
+            continue;
+        }
+        listItem->MarkIsSelected(true);
+        if (listItem->GetOnSelectId()) {
+            (listItem->GetOnSelectId())(listItem->IsSelected());
+        }
+    }
+}
+
+void RenderList::HandleMouseEventWithoutKeyboard(const MouseEvent& event)
+{
+    if (event.button == MouseButton::LEFT_BUTTON) {
+        if (event.action == MouseAction::PRESS) {
+            ClearMultiSelect();
+            mouseStartOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            mouseEndOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWithoutKeyboard(selectedZone);
+            MarkNeedRender();
+        } else if (event.action == MouseAction::MOVE) {
+            mouseEndOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWithoutKeyboard(selectedZone);
+            MarkNeedRender();
+        } else if (event.action == MouseAction::RELEASE) {
+            mouseStartOffset_ = Offset(0.0, 0.0);
+            mouseEndOffset_ = Offset(0.0, 0.0);
+            MarkNeedRender();
+        }
+    }
+}
+
+RefPtr<RenderListItem> RenderList::GetPressItemWhenShiftDown(const Rect& selectedZone)
+{
+    if (!selectedZone.IsValid()) {
+        Point mousePoint(selectedZone.GetOffset().GetX(), selectedZone.GetOffset().GetY());
+        auto listItem = FindChildNodeOfClass<RenderListItem>(mousePoint, mousePoint);
+        if (!listItem) {
+            return nullptr;
+        }
+        if (!listItem->GetSelectable()) {
+            return nullptr;
+        }
+        return listItem;
+    }
+    return nullptr;
+}
+
+void RenderList::MultiSelectWhenShiftDown(const Rect& selectedZone)
+{
+    for (const auto& listItem : items_) {
+        if (!listItem) {
+            continue;
+        }
+        if (!listItem->GetSelectable()) {
+            continue;
+        }
+        if (!selectedZone.IsIntersectWith(listItem->GetPaintRect())) {
+            continue;
+        }
+        listItem->MarkIsSelected(true);
+        if (listItem->GetOnSelectId()) {
+            (listItem->GetOnSelectId())(listItem->IsSelected());
+        }
+    }
+}
+
+void RenderList::HandleMouseEventWhenShiftDown(const MouseEvent& event)
+{
+    if (event.button == MouseButton::LEFT_BUTTON) {
+        if (event.action == MouseAction::PRESS) {
+            mouseStartOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            mouseEndOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            if (firstItemWithShift_ == nullptr) {
+                firstItemWithShift_ = GetPressItemWhenShiftDown(selectedZone);
+            }
+            secondItemWithShift_ = GetPressItemWhenShiftDown(selectedZone);
+            MultiSelectAllInRange(firstItemWithShift_, secondItemWithShift_);
+            MarkNeedRender();
+        } else if (event.action == MouseAction::MOVE) {
+            mouseEndOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWhenShiftDown(selectedZone);
+            MarkNeedRender();
+        } else if (event.action == MouseAction::RELEASE) {
+            mouseStartOffset_ = Offset(0.0, 0.0);
+            mouseEndOffset_ = Offset(0.0, 0.0);
+            MarkNeedRender();
+        }
+    }
+}
+
+void RenderList::MultiSelectAllInRange(const RefPtr<RenderListItem>& firstItem,
+    const RefPtr<RenderListItem>& secondItem)
+{
+    ClearMultiSelect();
+    if (!firstItem) {
+        return;
+    }
+
+    if (!secondItem) {
+        firstItem->MarkIsSelected(true);
+        if (firstItem->GetOnSelectId()) {
+            (firstItem->GetOnSelectId())(firstItem->IsSelected());
+        }
+        return;
+    }
+
+    auto fromItemIndex = std::min(GetIndexByListItem(firstItem), GetIndexByListItem(secondItem));
+    auto toItemIndex = std::max(GetIndexByListItem(firstItem), GetIndexByListItem(secondItem));
+    
+    for (const auto& listItem : items_) {
+        if (!listItem) {
+            continue;
+        }
+        if (!listItem->GetSelectable()) {
+            continue;
+        }
+
+        auto nowIndex = GetIndexByListItem(listItem);
+        if (nowIndex <= toItemIndex && nowIndex >= fromItemIndex) {
+            listItem->MarkIsSelected(true);
+            if (listItem->GetOnSelectId()) {
+                (listItem->GetOnSelectId())(listItem->IsSelected());
+            }
+        }
+    }
+}
+
+void RenderList::MultiSelectWhenCtrlDown(const Rect& selectedZone)
+{
+    if (!selectedZone.IsValid()) {
+        Point mousePoint(selectedZone.GetOffset().GetX(), selectedZone.GetOffset().GetY());
+        auto listItem = FindChildNodeOfClass<RenderListItem>(mousePoint, mousePoint);
+        if (!listItem) {
+            return;
+        }
+        if (!listItem->GetSelectable()) {
+            return;
+        }
+
+        if (selectedItemsWithCtrl_.find(listItem) != selectedItemsWithCtrl_.end()) {
+            listItem->MarkIsSelected(false);
+        } else {
+            listItem->MarkIsSelected(true);
+        }
+
+        if (listItem->GetOnSelectId()) {
+            (listItem->GetOnSelectId())(listItem->IsSelected());
+        }
+        return;
+    }
+
+    for (const auto& listItem : items_) {
+        if (!listItem) {
+            continue;
+        }
+        if (!listItem->GetSelectable()) {
+            continue;
+        }
+        if (!selectedZone.IsIntersectWith(listItem->GetPaintRect())) {
+            if (selectedItemsWithCtrl_.find(listItem) != selectedItemsWithCtrl_.end()) {
+                listItem->MarkIsSelected(true);
+            } else {
+                listItem->MarkIsSelected(false);
+            }
+            if (listItem->GetOnSelectId()) {
+                (listItem->GetOnSelectId())(listItem->IsSelected());
+            }
+            continue;
+        }
+
+        if (selectedItemsWithCtrl_.find(listItem) != selectedItemsWithCtrl_.end()) {
+            listItem->MarkIsSelected(false);
+        } else {
+            listItem->MarkIsSelected(true);
+        }
+
+        if (listItem->GetOnSelectId()) {
+            (listItem->GetOnSelectId())(listItem->IsSelected());
+        }
+    }
+}
+
+void RenderList::HandleMouseEventWhenCtrlDown(const MouseEvent& event)
+{
+    if (event.button == MouseButton::LEFT_BUTTON) {
+        if (event.action == MouseAction::PRESS) {
+            mouseStartOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            mouseEndOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWhenCtrlDown(selectedZone);
+            MarkNeedRender();
+        } else if (event.action == MouseAction::MOVE) {
+            mouseEndOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWhenCtrlDown(selectedZone);
+            MarkNeedRender();
+        } else if (event.action == MouseAction::RELEASE) {
+            mouseStartOffset_ = Offset(0.0, 0.0);
+            mouseEndOffset_ = Offset(0.0, 0.0);
+            MarkNeedRender();
+            CollectSelectedItems();
+        }
+    }
+}
+
+void RenderList::CollectSelectedItems()
+{
+    selectedItemsWithCtrl_.clear();
+    for (const auto& listItem : items_) {
+        if (!listItem) {
+            continue;
+        }
+        if (!listItem->GetSelectable()) {
+            continue;
+        }
+        if (listItem->IsSelected()) {
+            selectedItemsWithCtrl_.insert(listItem);
+        }
+    }
+}
+
+void RenderList::MultiSelectAllWhenCtrlA()
+{
+    for (const auto& listItem : items_) {
+        if (!listItem) {
+            continue;
+        }
+        if (!listItem->GetSelectable()) {
+            continue;
+        }
+        listItem->MarkIsSelected(true);
+        if (listItem->GetOnSelectId()) {
+            (listItem->GetOnSelectId())(listItem->IsSelected());
+        }
+    }
+    MarkNeedRender();
 }
 
 } // namespace OHOS::Ace::V2

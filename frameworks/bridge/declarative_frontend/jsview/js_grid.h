@@ -36,6 +36,7 @@ public:
     static void JsOnScrollIndex(const JSCallbackInfo& info);
     static void SetCachedCount(int32_t cachedCount);
     static void SetEditMode(bool editMode);
+    static void SetMultiSelectable(bool multiSelectable);
     static void SetMaxCount(int32_t maxCount);
     static void SetMinCount(int32_t minCount);
     static void CellLength(int32_t cellLength);
