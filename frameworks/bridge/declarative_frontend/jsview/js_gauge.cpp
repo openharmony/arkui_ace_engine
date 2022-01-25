@@ -62,6 +62,7 @@ void JSGauge::Create(const JSCallbackInfo& info)
     auto progressChild =
         AceType::MakeRefPtr<ProgressComponent>(gaugeMin, gaugeValue, gaugeMin, gaugeMax, ProgressType::GAUGE);
     progressChild->SetIndicatorFlag(true);
+    progressChild->SetInspectorTag("Gauge");
     ViewStackProcessor::GetInstance()->Push(progressChild);
     RefPtr<ProgressTheme> progressTheme = GetTheme<ProgressTheme>();
     progressChild->InitStyle(progressTheme);

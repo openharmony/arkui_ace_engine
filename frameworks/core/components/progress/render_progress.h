@@ -44,6 +44,10 @@ public:
     {
         return max_;
     }
+    double GetMinValue() const
+    {
+        return min_;
+    }
     double GetValue() const
     {
         return value_;
