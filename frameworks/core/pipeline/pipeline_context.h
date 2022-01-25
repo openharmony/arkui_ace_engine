@@ -1046,6 +1046,84 @@ public:
         subscribeCtrlA_ = callback;
     }
 
+    void SetWindowMinimizeCallBack(std::function<bool(void)>&& callback)
+    {
+        windowMinimizeCallback_ = std::move(callback);
+    }
+
+    void SetWindowMaximizeCallBack(std::function<bool(void)>&& callback)
+    {
+        windowMaximizeCallback_ = std::move(callback);
+    }
+
+    void SetWindowRecoverCallBack(std::function<bool(void)>&& callback)
+    {
+        windowRecoverCallback_ = std::move(callback);
+    }
+
+    void SetWindowCloseCallBack(std::function<bool(void)>&& callback)
+    {
+        windowCloseCallback_ = std::move(callback);
+    }
+
+    void SetWindowSplitCallBack(std::function<bool(void)>&& callback)
+    {
+        windowSplitCallback_ = std::move(callback);
+    }
+
+    void SetWindowGetModeCallBack(std::function<WindowMode(void)>&& callback)
+    {
+        windowGetModeCallback_ = std::move(callback);
+    }
+
+    bool FireWindowMinimizeCallBack() const
+    {
+        if (windowMinimizeCallback_) {
+            return windowMinimizeCallback_();
+        }
+        return false;
+    }
+
+    bool FireWindowMaximizeCallBack() const
+    {
+        if (windowMaximizeCallback_) {
+            return windowMaximizeCallback_();
+        }
+        return false;
+    }
+
+    bool FireWindowRecoverCallBack() const
+    {
+        if (windowRecoverCallback_) {
+            return windowRecoverCallback_();
+        }
+        return false;
+    }
+
+    bool FireWindowSplitCallBack() const
+    {
+        if (windowSplitCallback_) {
+            return windowSplitCallback_();
+        }
+        return false;
+    }
+
+    bool FireWindowCloseCallBack() const
+    {
+        if (windowCloseCallback_) {
+            return windowCloseCallback_();
+        }
+        return false;
+    }
+
+    WindowMode FireWindowGetModeCallBack() const
+    {
+        if (windowGetModeCallback_) {
+            return windowGetModeCallback_();
+        }
+        return WindowMode::WINDOW_MODE_UNDEFINED;
+    }
+
 private:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     void FlushPipelineWithoutAnimation();
@@ -1263,6 +1341,13 @@ private:
     bool isCtrlDown_ = false;
     bool isKeyboardA_ = false;
     SubscribeCtrlACallback subscribeCtrlA_;
+
+    std::function<bool(void)> windowMinimizeCallback_ = nullptr;
+    std::function<bool(void)> windowMaximizeCallback_ = nullptr;
+    std::function<bool(void)> windowRecoverCallback_ = nullptr;
+    std::function<bool(void)> windowCloseCallback_ = nullptr;
+    std::function<bool(void)> windowSplitCallback_ = nullptr;
+    std::function<WindowMode(void)> windowGetModeCallback_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

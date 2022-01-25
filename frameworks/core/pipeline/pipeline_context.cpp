@@ -45,6 +45,8 @@
 #include "core/common/thread_checker.h"
 #include "core/components/checkable/render_checkable.h"
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/container_modal/container_modal_component.h"
+#include "core/components/container_modal/container_modal_element.h"
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/custom_paint/render_custom_paint.h"
 #include "core/components/dialog/dialog_component.h"
@@ -325,6 +327,11 @@ RefPtr<StageElement> PipelineContext::GetStageElement() const
         auto dialogElement = AceType::DynamicCast<DialogModalElement>(rootElement_->GetFirstChild());
         if (dialogElement) {
             return dialogElement->GetStageElement();
+        }
+    } else if (windowModal_ == WindowModal::CONTAINER_MODAL) {
+        auto containerElement = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
+        if (containerElement) {
+            return containerElement->GetStageElement();
         }
     } else {
         auto stack = rootElement_->GetFirstChild();
@@ -706,6 +713,9 @@ RefPtr<Element> PipelineContext::SetupRootElement()
         rootStage->SetAlignment(Alignment::BOTTOM_LEFT);
         auto dialogModal = DialogModalComponent::Create(stack);
         rootComponent = RootComponent::Create(dialogModal);
+    } else if (windowModal_ == WindowModal::CONTAINER_MODAL) {
+        auto containerModal = ContainerModalComponent::Create(AceType::WeakClaim(this), stack);
+        rootComponent = RootComponent::Create(containerModal);
     } else {
         rootComponent = RootComponent::Create(stack);
     }
