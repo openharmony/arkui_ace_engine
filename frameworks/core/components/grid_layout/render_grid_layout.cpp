@@ -173,8 +173,8 @@ int32_t RenderGridLayout::RequestNextFocus(bool vertical, bool reverse)
 // Handle direction key move
 int32_t RenderGridLayout::focusMove(KeyDirection direction)
 {
-    int32_t nextRow = focusRow_;
-    int32_t nextCol = focusCol_;
+    int32_t nextRow = focusRow_ < 0 ? 0 : focusRow_;
+    int32_t nextCol = focusCol_ < 0 ? 0 : focusCol_;
     int32_t next = focusIndex_;
     while (focusIndex_ == next || next < 0) {
         switch (direction) {

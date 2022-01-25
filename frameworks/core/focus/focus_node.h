@@ -177,8 +177,8 @@ protected:
     virtual void OnFocusMove(KeyCode keyCode)
     {
         bool flag = keyCode == KeyCode::TV_CONTROL_UP || keyCode == KeyCode::TV_CONTROL_DOWN ||
-            keyCode == KeyCode::TV_CONTROL_LEFT || keyCode == KeyCode::TV_CONTROL_RIGHT ||
-                keyCode == KeyCode::KEYBOARD_TAB;
+                    keyCode == KeyCode::TV_CONTROL_LEFT || keyCode == KeyCode::TV_CONTROL_RIGHT ||
+                    keyCode == KeyCode::KEYBOARD_TAB;
         if (onFocusMove_ && flag) {
             onFocusMove_((int)keyCode);
         }
