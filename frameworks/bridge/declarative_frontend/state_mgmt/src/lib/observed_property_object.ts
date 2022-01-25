@@ -108,12 +108,12 @@ class ObservedPropertyObject<T extends Object> extends ObservedPropertyObjectAbs
  * changes.
  */
   public createLink(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo): ObservedPropertyAbstract<T> {
-    return new SynchedPropertyObjectTwoWay(this, subscribeOwner, linkPropName);
+    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T> {
+    return new SynchedPropertyObjectTwoWay(this, subscribeOwner, linkPropName, contentObserver);
   }
 
   public createProp(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo): ObservedPropertyAbstract<T> {
+    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T> {
     throw new Error("Creating a 'Prop' proerty is unsuppoeted for Object type prperty value.");
   }
 }

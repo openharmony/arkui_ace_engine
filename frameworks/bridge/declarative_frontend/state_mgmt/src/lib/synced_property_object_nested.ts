@@ -92,11 +92,11 @@ class SynchedPropertyNesedObject<C extends Object>
  * changes.
  */
   public createLink(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo): ObservedPropertyAbstract<C> {
+    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<C>): ObservedPropertyAbstract<C> {
     throw new Error("Method not supported for property linking to a nested objects.");
   }
   public createProp(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo): ObservedPropertyAbstract<C> {
+    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<C>): ObservedPropertyAbstract<C> {
     throw new Error("Creating a 'Prop' proerty is unsuppoeted for Object type prperty value.");
   }
 }
