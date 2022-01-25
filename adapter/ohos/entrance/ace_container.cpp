@@ -898,6 +898,7 @@ std::string AceContainer::RestoreRouterStack(int32_t instanceId, const std::stri
     if (!container) {
         return "";
     }
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (front) {
         return front->RestoreRouterStack(contentInfo);
@@ -912,6 +913,7 @@ std::string AceContainer::GetContentInfo(int32_t instanceId)
     if (!container) {
         return "";
     }
+    ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (front) {
         return front->GetContentInfo();

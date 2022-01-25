@@ -136,11 +136,13 @@ public:
     const void* GetNativeWindowById(uint64_t textureId) override;
 
 private:
-    void NotifySurfaceChanged(int width, int height) const
+    void NotifySurfaceChanged(int width, int height)
     {
         if (viewChangeCallback_) {
             viewChangeCallback_(width, height);
         }
+        width_ = width;
+        height_ =height;
     }
 
     void NotifyDensityChanged(double density) const
