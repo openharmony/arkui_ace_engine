@@ -444,7 +444,7 @@ template("flutter_engine_shell") {
         "//foundation/windowmanager/wm:libwm",
       ]
       external_deps = [
-        "appexecfwk_standard:libeventhandler",
+        "eventhandler:libeventhandler",
         "ipc:ipc_core",
       ]
     } else if (platform == "ohos" || platform == "android") {

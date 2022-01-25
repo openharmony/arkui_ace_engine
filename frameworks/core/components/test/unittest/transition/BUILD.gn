@@ -236,8 +236,8 @@ ohos_unittest("TransitionElementTest") {
 
   if (is_standard_system) {
     external_deps = [
-      "appexecfwk_standard:libeventhandler",
       "bytrace_standard:bytrace_core",
+      "eventhandler:libeventhandler",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
       "startup_l2:syspara",
@@ -301,8 +301,8 @@ ohos_unittest("SharedTransitionElementTest") {
 
   if (is_standard_system) {
     external_deps = [
-      "appexecfwk_standard:libeventhandler",
       "bytrace_standard:bytrace_core",
+      "eventhandler:libeventhandler",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
       "startup_l2:syspara",
@@ -361,8 +361,8 @@ ohos_unittest("TransitionPropertyElementTest") {
 
   if (is_standard_system) {
     external_deps = [
-      "appexecfwk_standard:libeventhandler",
       "bytrace_standard:bytrace_core",
+      "eventhandler:libeventhandler",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
       "startup_l2:syspara",
