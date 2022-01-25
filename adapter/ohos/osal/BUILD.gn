@@ -61,6 +61,15 @@ template("ace_osal_ohos_source_set") {
     }
     sources += [ "pixel_map_ohos.cpp" ]
     external_deps += [ "hisysevent_native:libhisysevent" ]
+    sources += [ "clipboard_impl.cpp" ]
+    if (defined(config.enable_system_clipboard) &&
+        config.enable_system_clipboard) {
+      deps += [
+        "//base/miscservices/pasteboard/framework/innerkits:pasteboard_client",
+      ]
+      external_deps += [ "ipc:ipc_core" ]
+      defines += [ "SYSTEM_CLIPBOARD_SUPPORTED" ]
+    }
   }
 }
 

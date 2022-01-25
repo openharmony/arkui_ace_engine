@@ -59,6 +59,7 @@ enable_standard_input = true
 
 if (defined(is_experiment_build) && is_experiment_build) {
   web_components_support = true
+  enable_system_clipboard = true
 }
 
 if (defined(web_components_support) && web_components_support) {

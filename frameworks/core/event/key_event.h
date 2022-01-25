@@ -19,9 +19,7 @@
 #include <cstdint>
 
 #include "core/event/ace_events.h"
-
 namespace OHOS::Ace {
-
 enum class KeyCode : int32_t {
     UNKNOWN = -1,
     KEYBOARD_HOME = 3,
@@ -32,6 +30,9 @@ enum class KeyCode : int32_t {
     KEYBOARD_RIGHT = 22,
     KEYBOARD_CENTER = 23,
     KEYBOARD_A = 29,
+    KEYBOARD_C = 31,
+    KEYBOARD_V = 50,
+    KEYBOARD_X = 52,
     HANDLE_A = 96,
     HANDLE_SELECT = 109,
     KEYBOARD_TAB = 61,
@@ -132,7 +133,5 @@ private:
     int32_t keySource_ = 0;
     int32_t metakey_ = 0;
 };
-
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H

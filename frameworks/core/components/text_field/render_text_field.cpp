@@ -242,7 +242,9 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     text_ = textField->GetValue();
     showEllipsis_ = textField->ShowEllipsis();
     auto context = context_.Upgrade();
+    clipboardProxyImpl_ = std::make_shared<ClipboardProxyImpl>();
     if (!clipboard_ && context) {
+        ClipboardProxy::GetInstance()->SetDelegate(clipboardProxyImpl_);
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
     }
 
@@ -1741,8 +1743,17 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
             } else {
                 if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_A)) {
                     HandleOnCopyAll(nullptr);
-                    isCtrlDown_ = false;
+                } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_C)) {
+                    HandleOnCopy();
+                } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_V)) {
+                    HandleOnPaste();
+                } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_X)) {
+                    HandleOnCut();
+                    MarkNeedLayout();
+                } else {
+                    LOGE("Unknow Event");
                 }
+                isCtrlDown_ = false;
             }
         } else if (codeValue == LEFT_SHIFT_CODE || codeValue == RIGHT_SHIFT_CODE) {
             isShiftDown_ = true;
@@ -1759,6 +1770,7 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
     value.UpdateSelection(
         std::max(GetEditingValue().selection.GetEnd(), 0) + StringUtils::Str8ToStr16(appendElement).length());
     SetEditingValue(std::move(value));
+    MarkNeedLayout();
     return true;
 }
 
