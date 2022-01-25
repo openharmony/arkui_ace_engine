@@ -361,6 +361,8 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("alignStyle", &JSIndexer::SetAlignStyle, opt);
     JSClass<JSIndexer>::StaticMethod("onRequestPopupData", &JSIndexer::JsOnRequestPopupData, opt);
     JSClass<JSIndexer>::StaticMethod("onPopupSelected", &JSIndexer::JsOnPopupSelected, opt);
+    JSClass<JSIndexer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSIndexer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSIndexer>::Inherit<JSContainerBase>();
     JSClass<JSIndexer>::Inherit<JSViewAbstract>();
     JSClass<JSIndexer>::Bind(globalObj);
