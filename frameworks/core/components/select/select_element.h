@@ -57,7 +57,7 @@ private:
     Dimension normalPadding_;
     Color eventEffectColor_ = Color::TRANSPARENT;
     RefPtr<Animator> eventEffectController_;
-    std::function<void(std::size_t)> onSelected_;
+    std::function<void(std::size_t, std::string)> onSelected_;
 };
 
 } // namespace OHOS::Ace
