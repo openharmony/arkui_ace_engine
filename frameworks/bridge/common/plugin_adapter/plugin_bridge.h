@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class ACE_FORCE_EXPORT PluginBridge {
+class ACE_FORCE_EXPORT_WITH_PREVIEW PluginBridge {
 public:
     static std::pair<std::string, bool> GetDeviceInfo();
 
