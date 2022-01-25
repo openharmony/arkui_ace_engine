@@ -39,6 +39,8 @@ struct EditMode {
     };
 };
 
+using OnSelectFunc = std::function<void(bool)>;
+
 class ACE_EXPORT ListItemComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(V2::ListItemComponent, SoleChildComponent);
 
@@ -57,7 +59,29 @@ public:
 
     uint32_t Compare(const RefPtr<Component>& component) const override;
 
+    bool GetSelectable() const
+    {
+        return selectable_;
+    }
+
+    void SetSelectable(bool selectable)
+    {
+        selectable_ = selectable;
+    }
+
+    OnSelectFunc GetOnSelectId() const
+    {
+        return onSelectId_;
+    }
+
+    void SetOnSelectId(const OnSelectFunc& onSelectId)
+    {
+        onSelectId_ = onSelectId;
+    }
+
 private:
+    OnSelectFunc onSelectId_;
+    bool selectable_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemComponent);
 };
 

@@ -20,8 +20,10 @@
 #include <numeric>
 #include <regex>
 
+#include "base/geometry/offset.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
+#include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve_animation.h"
@@ -132,6 +134,9 @@ void RenderGridLayout::Update(const RefPtr<Component>& component)
         }
         InitAnimationController(GetContext());
     }
+
+    isMultiSelectable_ = grid->GetMultiSelectable();
+
     MarkNeedLayout();
 }
 
@@ -2878,6 +2883,330 @@ void RenderGridLayout::CalcSpringGravitationDirect()
     } else {
         gravitationDirect_ = GridSpringGravitationDirect::SPRING_TO_UP;
     }
+}
+
+bool RenderGridLayout::HandleMouseEvent(const MouseEvent& event)
+{
+    if (!isMultiSelectable_) {
+        return false;
+    }
+
+    auto context = context_.Upgrade();
+    if (context) {
+        context->SubscribeCtrlA([wp = AceType::WeakClaim(this)]() {
+            auto sp = wp.Upgrade();
+            if (sp) {
+                sp->MultiSelectAllWhenCtrlA();
+            }
+        });
+    }
+
+    if (context->IsCtrlDown()) {
+        if (context->IsKeyboardA()) {
+            MultiSelectAllWhenCtrlA();
+            return true;
+        }
+        HandleMouseEventWhenCtrlDown(event);
+        return true;
+    }
+    selectedItemsWithCtrl_.clear();
+
+    if (context->IsShiftDown()) {
+        HandleMouseEventWhenShiftDown(event);
+        return true;
+    }
+    firstItemWithShift_ = nullptr;
+
+    HandleMouseEventWithoutKeyboard(event);
+    return true;
+}
+
+void RenderGridLayout::ClearMultiSelect()
+{
+    for (const auto& item : GetChildren()) {
+        auto gridLayoutItem = FindChildOfClass<RenderGridLayoutItem>(item);
+        if (!gridLayoutItem) {
+            continue;
+        }
+        gridLayoutItem->MarkIsSelected(false);
+    }
+}
+
+void RenderGridLayout::MultiSelectWithoutKeyboard(const Rect& selectedZone)
+{
+    if (!selectedZone.IsValid()) {
+        Point mousePoint(selectedZone.GetOffset().GetX(), selectedZone.GetOffset().GetY());
+        auto gridLayoutItem = FindChildNodeOfClass<RenderGridLayoutItem>(mousePoint, mousePoint);
+        if (!gridLayoutItem) {
+            return;
+        }
+        if (!gridLayoutItem->GetSelectable()) {
+            return;
+        }
+        gridLayoutItem->MarkIsSelected(true);
+        if (gridLayoutItem->GetOnSelectId()) {
+            (gridLayoutItem->GetOnSelectId())(gridLayoutItem->IsSelected());
+        }
+        return;
+    }
+
+    for (const auto& item : GetChildren()) {
+        auto gridLayoutItem = FindChildOfClass<RenderGridLayoutItem>(item);
+        if (!gridLayoutItem) {
+            continue;
+        }
+        if (!gridLayoutItem->GetSelectable()) {
+            continue;
+        }
+        if (!selectedZone.IsIntersectWith(item->GetPaintRect())) {
+            gridLayoutItem->MarkIsSelected(false);
+            if (gridLayoutItem->GetOnSelectId()) {
+                (gridLayoutItem->GetOnSelectId())(gridLayoutItem->IsSelected());
+            }
+            continue;
+        }
+        gridLayoutItem->MarkIsSelected(true);
+        if (gridLayoutItem->GetOnSelectId()) {
+            (gridLayoutItem->GetOnSelectId())(gridLayoutItem->IsSelected());
+        }
+    }
+}
+
+void RenderGridLayout::HandleMouseEventWithoutKeyboard(const MouseEvent& event)
+{
+    if (event.button == MouseButton::LEFT_BUTTON) {
+        if (event.action == MouseAction::PRESS) {
+            ClearMultiSelect();
+            mouseStartOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            mouseEndOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWithoutKeyboard(selectedZone);
+            MarkNeedRender();
+        } else if (event.action == MouseAction::MOVE) {
+            mouseEndOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWithoutKeyboard(selectedZone);
+            MarkNeedRender();
+        } else if (event.action == MouseAction::RELEASE) {
+            mouseStartOffset_ = Offset(0.0, 0.0);
+            mouseEndOffset_ = Offset(0.0, 0.0);
+            MarkNeedRender();
+        }
+    }
+}
+
+RefPtr<RenderGridLayoutItem> RenderGridLayout::GetPressItemWhenShiftDown(const Rect& selectedZone)
+{
+    if (!selectedZone.IsValid()) {
+        Point mousePoint(selectedZone.GetOffset().GetX(), selectedZone.GetOffset().GetY());
+        auto gridLayoutItem = FindChildNodeOfClass<RenderGridLayoutItem>(mousePoint, mousePoint);
+        if (!gridLayoutItem) {
+            return nullptr;
+        }
+        if (!gridLayoutItem->GetSelectable()) {
+            return nullptr;
+        }
+        return gridLayoutItem;
+    }
+    return nullptr;
+}
+
+void RenderGridLayout::MultiSelectWhenShiftDown(const Rect& selectedZone)
+{
+    for (const auto& item : GetChildren()) {
+        auto gridLayoutItem = FindChildOfClass<RenderGridLayoutItem>(item);
+        if (!gridLayoutItem) {
+            continue;
+        }
+        if (!gridLayoutItem->GetSelectable()) {
+            continue;
+        }
+        if (!selectedZone.IsIntersectWith(item->GetPaintRect())) {
+            continue;
+        }
+        gridLayoutItem->MarkIsSelected(true);
+        if (gridLayoutItem->GetOnSelectId()) {
+            (gridLayoutItem->GetOnSelectId())(gridLayoutItem->IsSelected());
+        }
+    }
+}
+
+void RenderGridLayout::HandleMouseEventWhenShiftDown(const MouseEvent& event)
+{
+    if (event.button == MouseButton::LEFT_BUTTON) {
+        if (event.action == MouseAction::PRESS) {
+            mouseStartOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            mouseEndOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            if (firstItemWithShift_ == nullptr) {
+                firstItemWithShift_ = GetPressItemWhenShiftDown(selectedZone);
+            }
+            secondItemWithShift_ = GetPressItemWhenShiftDown(selectedZone);
+            MultiSelectAllInRange(firstItemWithShift_, secondItemWithShift_);
+            MarkNeedRender();
+        } else if (event.action == MouseAction::MOVE) {
+            mouseEndOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWhenShiftDown(selectedZone);
+            MarkNeedRender();
+        } else if (event.action == MouseAction::RELEASE) {
+            mouseStartOffset_ = Offset(0.0, 0.0);
+            mouseEndOffset_ = Offset(0.0, 0.0);
+            MarkNeedRender();
+        }
+    }
+}
+
+void RenderGridLayout::MultiSelectAllInRange(const RefPtr<RenderGridLayoutItem>& firstItem,
+    const RefPtr<RenderGridLayoutItem>& secondItem)
+{
+    ClearMultiSelect();
+    if (!firstItem) {
+        return;
+    }
+
+    if (!secondItem) {
+        firstItem->MarkIsSelected(true);
+        if (firstItem->GetOnSelectId()) {
+            (firstItem->GetOnSelectId())(firstItem->IsSelected());
+        }
+        return;
+    }
+
+    auto fromItemIndex = std::min(firstItem->GetIndex(), secondItem->GetIndex());
+    auto toItemIndex = std::max(firstItem->GetIndex(), secondItem->GetIndex());
+    
+    for (const auto& item : GetChildren()) {
+        auto gridLayoutItem = FindChildOfClass<RenderGridLayoutItem>(item);
+        if (!gridLayoutItem) {
+            continue;
+        }
+        if (!gridLayoutItem->GetSelectable()) {
+            continue;
+        }
+
+        auto nowIndex = gridLayoutItem->GetIndex();
+        if (nowIndex <= toItemIndex && nowIndex >= fromItemIndex) {
+            gridLayoutItem->MarkIsSelected(true);
+            if (gridLayoutItem->GetOnSelectId()) {
+                (gridLayoutItem->GetOnSelectId())(gridLayoutItem->IsSelected());
+            }
+        }
+    }
+}
+
+void RenderGridLayout::MultiSelectWhenCtrlDown(const Rect& selectedZone)
+{
+    if (!selectedZone.IsValid()) {
+        Point mousePoint(selectedZone.GetOffset().GetX(), selectedZone.GetOffset().GetY());
+        auto gridLayoutItem = FindChildNodeOfClass<RenderGridLayoutItem>(mousePoint, mousePoint);
+        if (!gridLayoutItem) {
+            return;
+        }
+        if (!gridLayoutItem->GetSelectable()) {
+            return;
+        }
+
+        if (selectedItemsWithCtrl_.find(gridLayoutItem) != selectedItemsWithCtrl_.end()) {
+            gridLayoutItem->MarkIsSelected(false);
+        } else {
+            gridLayoutItem->MarkIsSelected(true);
+        }
+
+        if (gridLayoutItem->GetOnSelectId()) {
+            (gridLayoutItem->GetOnSelectId())(gridLayoutItem->IsSelected());
+        }
+        return;
+    }
+
+    for (const auto& item : GetChildren()) {
+        auto gridLayoutItem = FindChildOfClass<RenderGridLayoutItem>(item);
+        if (!gridLayoutItem) {
+            continue;
+        }
+        if (!gridLayoutItem->GetSelectable()) {
+            continue;
+        }
+        if (!selectedZone.IsIntersectWith(item->GetPaintRect())) {
+            if (selectedItemsWithCtrl_.find(gridLayoutItem) != selectedItemsWithCtrl_.end()) {
+                gridLayoutItem->MarkIsSelected(true);
+            }  else {
+                gridLayoutItem->MarkIsSelected(false);
+            }
+            if (gridLayoutItem->GetOnSelectId()) {
+                (gridLayoutItem->GetOnSelectId())(gridLayoutItem->IsSelected());
+            }
+            continue;
+        }
+
+        if (selectedItemsWithCtrl_.find(gridLayoutItem) != selectedItemsWithCtrl_.end()) {
+            gridLayoutItem->MarkIsSelected(false);
+        } else {
+            gridLayoutItem->MarkIsSelected(true);
+        }
+
+        if (gridLayoutItem->GetOnSelectId()) {
+            (gridLayoutItem->GetOnSelectId())(gridLayoutItem->IsSelected());
+        }
+    }
+}
+
+void RenderGridLayout::HandleMouseEventWhenCtrlDown(const MouseEvent& event)
+{
+    if (event.button == MouseButton::LEFT_BUTTON) {
+        if (event.action == MouseAction::PRESS) {
+            mouseStartOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            mouseEndOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWhenCtrlDown(selectedZone);
+            MarkNeedRender();
+        } else if (event.action == MouseAction::MOVE) {
+            mouseEndOffset_ = event.GetOffset() - GetPaintRect().GetOffset();
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWhenCtrlDown(selectedZone);
+            MarkNeedRender();
+        } else if (event.action == MouseAction::RELEASE) {
+            mouseStartOffset_ = Offset(0.0, 0.0);
+            mouseEndOffset_ = Offset(0.0, 0.0);
+            MarkNeedRender();
+            CollectSelectedItems();
+        }
+    }
+}
+
+void RenderGridLayout::CollectSelectedItems()
+{
+    selectedItemsWithCtrl_.clear();
+    for (const auto& item : GetChildren()) {
+        auto gridLayoutItem = FindChildOfClass<RenderGridLayoutItem>(item);
+        if (!gridLayoutItem) {
+            continue;
+        }
+        if (!gridLayoutItem->GetSelectable()) {
+            continue;
+        }
+        if (gridLayoutItem->IsSelected()) {
+            selectedItemsWithCtrl_.insert(gridLayoutItem);
+        }
+    }
+}
+
+void RenderGridLayout::MultiSelectAllWhenCtrlA()
+{
+    for (const auto& item : GetChildren()) {
+        auto gridLayoutItem = FindChildOfClass<RenderGridLayoutItem>(item);
+        if (!gridLayoutItem) {
+            continue;
+        }
+        if (!gridLayoutItem->GetSelectable()) {
+            continue;
+        }
+        gridLayoutItem->MarkIsSelected(true);
+        if (gridLayoutItem->GetOnSelectId()) {
+            (gridLayoutItem->GetOnSelectId())(gridLayoutItem->IsSelected());
+        }
+    }
+    MarkNeedRender();
 }
 
 } // namespace OHOS::Ace

@@ -93,6 +93,7 @@ struct WindowBlurInfo {
 };
 
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
+using SubscribeCtrlACallback = std::function<void()>;
 
 class ACE_EXPORT PipelineContext final : public AceType {
     DECLARE_ACE_TYPE(PipelineContext, AceType);
@@ -1003,6 +1004,48 @@ public:
         onVsyncProfiler_ = nullptr;
     }
 
+    bool IsShiftDown() const
+    {
+        return isShiftDown_;
+    }
+
+    void MarkIsShiftDown(bool isShiftDown) 
+    {
+        isShiftDown_ = isShiftDown;
+    }
+
+    bool IsCtrlDown() const
+    {
+        return isCtrlDown_;
+    }
+
+    void MarkIsCtrlDown(bool isCtrlDown) 
+    {
+        isCtrlDown_ = isCtrlDown;
+    }
+
+    bool IsKeyboardA() const
+    {
+        return isKeyboardA_;
+    }
+
+    void MarkIsKeyboardA(bool isKeyboardA) 
+    {
+        isKeyboardA_ = isKeyboardA;
+    }
+
+    void SetShortcutKey(const KeyEvent& event);
+
+    EventManager GetEventManager() const
+    {
+        return eventManager_;
+    }
+
+    void SubscribeCtrlA(SubscribeCtrlACallback callback)
+    {
+        subscribeCtrlA_ = callback;
+    }
+
 private:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     void FlushPipelineWithoutAnimation();
@@ -1215,6 +1258,11 @@ private:
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
 
     std::function<void(const std::string&)> onVsyncProfiler_;
+
+    bool isShiftDown_ = false;
+    bool isCtrlDown_ = false;
+    bool isKeyboardA_ = false;
+    SubscribeCtrlACallback subscribeCtrlA_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

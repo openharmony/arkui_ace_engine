@@ -51,6 +51,9 @@ KeyEvent KeyEventTransfer::GetKeyEvent(
     } else if ((keyCode == static_cast<int32_t>(keyboardCode::LEFT_CTRL_CODE)) ||
         (keyCode == static_cast<int32_t>(keyboardCode::RIGHT_CTRL_CODE))) {
         keyCode_ = static_cast<KeyCode>(keyCode - CTRL_CODE_DIFF);
+    } else if ((keyCode == static_cast<int32_t>(keyboardCode::LEFT_SHIFT_CODE)) ||
+        (keyCode == static_cast<int32_t>(keyboardCode::RIGHT_SHIFT_CODE))) {
+        keyCode_ = static_cast<KeyCode>(keyCode - LETTER_CODE_DIFF);
     } else {
         keyCode_ = KeyCode::UNKNOWN;
     }

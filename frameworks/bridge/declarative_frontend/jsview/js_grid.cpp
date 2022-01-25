@@ -157,6 +157,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("onScrollIndex", &JSGrid::JsOnScrollIndex);
     JSClass<JSGrid>::StaticMethod("cachedCount", &JSGrid::SetCachedCount);
     JSClass<JSGrid>::StaticMethod("editMode", &JSGrid::SetEditMode, opt);
+    JSClass<JSGrid>::StaticMethod("multiSelectable", &JSGrid::SetMultiSelectable, opt);
     JSClass<JSGrid>::StaticMethod("maxCount", &JSGrid::SetMaxCount, opt);
     JSClass<JSGrid>::StaticMethod("minCount", &JSGrid::SetMinCount, opt);
     JSClass<JSGrid>::StaticMethod("cellLength", &JSGrid::CellLength, opt);
@@ -423,6 +424,15 @@ void JSGrid::JsOnGridDrop(const JSCallbackInfo& info)
         return;
     }
     component->SetOnGridDropId(onItemDropId);
+}
+
+void JSGrid::SetMultiSelectable(bool multiSelectable)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (grid) {
+        grid->SetMultiSelectable(multiSelectable);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

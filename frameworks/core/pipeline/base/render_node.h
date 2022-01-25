@@ -53,6 +53,7 @@ class Component;
 constexpr int32_t DEFAULT_RENDER_NODE_SLOT = -1;
 constexpr int32_t PRESS_DURATION = 100;
 constexpr int32_t HOVER_DURATION = 250;
+constexpr uint32_t FIND_MAX_COUNT = 64;
 
 using HoverAndPressCallback = std::function<void(const Color&)>;
 using Rosen::RSNode;
@@ -987,6 +988,26 @@ public:
         return pageRenderNode->FindChildNodeOfClass<T>(info.GetGlobalPoint(), info.GetGlobalPoint());
     }
 
+    template<class T>
+    RefPtr<T> FindChildOfClass(const RefPtr<RenderNode>& parent)
+    {
+        // BFS to find child in tree.
+        uint32_t findCount = 0;
+        auto searchQueue = parent->GetChildren(); // copy children to a queue
+        while (++findCount <= FIND_MAX_COUNT && !searchQueue.empty()) {
+            const auto child = searchQueue.front();
+            searchQueue.pop_front();
+            if (!child) {
+                continue;
+            }
+            if (AceType::InstanceOf<T>(child)) {
+                return AceType::DynamicCast<T>(child);
+            }
+            searchQueue.insert(searchQueue.end(), child->GetChildren().begin(), child->GetChildren().end());
+        }
+        return RefPtr<T>();
+    }
+
     void SaveExplicitAnimationOption(const AnimationOption& option);
 
     const AnimationOption& GetExplicitAnimationOption() const;
@@ -1206,6 +1227,9 @@ protected:
     AnimationOption nonStrictOption_; // clear after transition done
     MotionPathOption motionPathOption_;
     RefPtr<V2::EventExtensions> eventExtensions_;
+
+    // Compute multiSelect zone
+    Rect ComputeSelectedZone(const Offset& startOffset, const Offset& endOffset);
 
 private:
     void AddDirtyRenderBoundaryNode()

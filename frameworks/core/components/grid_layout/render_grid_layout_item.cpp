@@ -38,6 +38,8 @@ void RenderGridLayoutItem::Update(const RefPtr<Component>& component)
     SetRowSpan(gridItem->GetRowSpan());
     SetForceRebuild(gridItem->ForceRebuild());
     InitAnimationController(GetContext());
+    onSelectId_ = gridItem->GetOnSelectId();
+    selectable_ = gridItem->GetSelectable();
     MarkNeedLayout();
 }
 

@@ -32,6 +32,8 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
 
 private:
+    void PaintSelectedZone(RenderContext& context);
+    void PaintItemZone(RenderContext& context, const RefPtr<RenderListItem>& item);
     RefPtr<RenderListItem> prevStickyItem_;
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderList);
 };
