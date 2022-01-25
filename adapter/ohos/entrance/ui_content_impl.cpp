@@ -169,12 +169,12 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
 
     RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-    bool isStageMode = info != nullptr ? info->isStageBasedModel : false;
+    bool isModelJson = info != nullptr ? info->isModuleJson : false;
     std::string moduleName = info != nullptr ? info->moduleName : "";
     auto appInfo = context->GetApplicationInfo();
     std::string resPath;
-    LOGI("Initialize UIContent isStageMode:%{public}s", isStageMode ? "true" : "false");
-    if (isStageMode) {
+    LOGI("Initialize UIContent isModelJson:%{public}s", isModelJson ? "true" : "false");
+    if (isModelJson) {
         if (appInfo) {
             std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
             for (const auto& module : moduleList) {
