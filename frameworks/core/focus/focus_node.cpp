@@ -15,12 +15,14 @@
 
 #include "core/focus/focus_node.h"
 
+#include <algorithm>
 #include <atomic>
 
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/flex/flex_element.h"
+#include "core/event/ace_event_handler.h"
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/render_element.h"
 
@@ -56,10 +58,6 @@ bool FocusNode::HandleKeyEvent(const KeyEvent& keyEvent)
     }
     if (OnKeyEvent(keyEvent)) {
         return true;
-    }
-
-    if (keyEvent.action != KeyAction::CLICK) {
-        return false;
     }
 
     switch (keyEvent.code) {
@@ -352,8 +350,12 @@ bool FocusGroup::IsFocusable() const
     if (!FocusNode::IsFocusable()) {
         return false;
     }
-    return std::any_of(focusNodes_.begin(), focusNodes_.end(),
-        [](const RefPtr<FocusNode>& focusNode) { return focusNode->IsFocusable(); });
+    if (focusNodes_.size() > 0) {
+        return std::any_of(focusNodes_.begin(), focusNodes_.end(),
+            [](const RefPtr<FocusNode>& focusNode) { return focusNode->IsFocusable(); });
+    } else {
+        return true;
+    }
 }
 
 bool FocusGroup::GoToNextFocus(bool reverse, const Rect& rect)
@@ -362,21 +364,31 @@ bool FocusGroup::GoToNextFocus(bool reverse, const Rect& rect)
         return false;
     }
     auto itNewFocusNode = itLastFocusNode_;
-
+    if (itNewFocusNode == focusNodes_.end()) {
+        itNewFocusNode = focusNodes_.begin();
+    }
     if (reverse) {
-        while (itNewFocusNode != focusNodes_.begin()) {
+        if (itNewFocusNode == focusNodes_.begin()) {
+            itNewFocusNode = focusNodes_.end();
+            return false;
+        } else {
             --itNewFocusNode;
+        }
+        while (itNewFocusNode != focusNodes_.begin()) {
+            if (TryRequestFocus(*itNewFocusNode, rect)) {
+                return true;
+            }
+            --itNewFocusNode;
+        }
+        if (itNewFocusNode == focusNodes_.begin()) {
             if (TryRequestFocus(*itNewFocusNode, rect)) {
                 return true;
             }
         }
     } else {
-        if (itNewFocusNode == focusNodes_.end()) {
-            itNewFocusNode = focusNodes_.begin();
-        } else {
+        if (itNewFocusNode != focusNodes_.end()) {
             ++itNewFocusNode;
         }
-
         while (itNewFocusNode != focusNodes_.end()) {
             if (TryRequestFocus(*itNewFocusNode, rect)) {
                 return true;
@@ -399,7 +411,7 @@ bool FocusGroup::OnKeyEvent(const KeyEvent& keyEvent)
         return true;
     }
 
-    if (keyEvent.action != KeyAction::UP) {
+    if (keyEvent.action != KeyAction::DOWN) {
         return false;
     }
 
@@ -407,8 +419,8 @@ bool FocusGroup::OnKeyEvent(const KeyEvent& keyEvent)
         return false;
     }
 
-    LOGD("Position information: X: %{public}lf Y: %{public}lf W: %{public}lf H: %{public}lf", GetRect().Left(),
-        GetRect().Top(), GetRect().Width(), GetRect().Height());
+    LOGD("Position information: Node is %{public}s, X: %{public}lf Y: %{public}lf W: %{public}lf H: %{public}lf",
+        AceType::TypeName(this), GetRect().Left(), GetRect().Top(), GetRect().Width(), GetRect().Height());
 
     OnFocusMove(keyEvent.code);
     switch (keyEvent.code) {
@@ -561,7 +573,7 @@ void FocusGroup::RefreshParentFocusable(bool focusable)
 
 void FocusGroup::RebuildChild(std::list<RefPtr<FocusNode>>&& rebuildFocusNodes)
 {
-    if (rebuildFocusNodes.empty() || rebuildFocusNodes.size() > focusNodes_.size()) {
+    if (rebuildFocusNodes.empty()) {
         return;
     }
 

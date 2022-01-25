@@ -495,6 +495,7 @@ var FocusDirection;
   FocusDirection[FocusDirection["Left"] = 21] = "Left";
   FocusDirection[FocusDirection["Right"] = 22] = "Right";
   FocusDirection[FocusDirection["Tab"] = 61] = "Tab";
+  FocusDirection[FocusDirection["ShiftTab"] = 200] = "ShiftTab";
 })(FocusDirection || (FocusDirection = {}));
 
 var SlideEffect;
