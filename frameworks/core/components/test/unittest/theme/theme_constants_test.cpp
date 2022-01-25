@@ -46,7 +46,6 @@ using namespace testing::ext;
 namespace OHOS::Ace {
 namespace {
 
-DeviceType g_mockDeviceType = DeviceType::PHONE;
 RefPtr<ThemeConstants> g_themeConstants = nullptr;
 // Same with value defined at ThemeConstants
 const Color COLOR_CONTROL_ACTIVATED_PHONE = Color(0xff0a59f7);
@@ -104,13 +103,6 @@ void ThemeConstantsTest::TearDownTestCase() {}
 void ThemeConstantsTest::SetUp() {}
 void ThemeConstantsTest::TearDown() {}
 
-bool SystemProperties::rosenBackendEnabled_ = true;
-// Mock get device type.
-DeviceType SystemProperties::GetDeviceType()
-{
-    return g_mockDeviceType;
-}
-
 /**
  * @tc.name: PlatformConstants001
  * @tc.desc: Test get default theme at phone.
@@ -123,7 +115,7 @@ HWTEST_F(ThemeConstantsTest, PlatformConstants001, TestSize.Level1)
     /**
      * @tc.steps: step1. Mock device type is phone.
      */
-    g_mockDeviceType = DeviceType::PHONE;
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
     ThemeConstants::InitDeviceType();
 
     /**
@@ -147,7 +139,7 @@ HWTEST_F(ThemeConstantsTest, PlatformConstants002, TestSize.Level1)
     /**
      * @tc.steps: step1. Mock device type is tv.
      */
-    g_mockDeviceType = DeviceType::TV;
+    SystemProperties::SetDeviceType(DeviceType::TV);
     ThemeConstants::InitDeviceType();
 
     /**
@@ -171,7 +163,7 @@ HWTEST_F(ThemeConstantsTest, PlatformConstants003, TestSize.Level1)
     /**
      * @tc.steps: step1. Mock device type is unknown.
      */
-    g_mockDeviceType = DeviceType::UNKNOWN;
+    SystemProperties::SetDeviceType(DeviceType::UNKNOWN);
     ThemeConstants::InitDeviceType();
 
     /**
@@ -194,7 +186,7 @@ HWTEST_F(ThemeConstantsTest, ConstantsDefine001, TestSize.Level1)
     /**
      * @tc.steps: step1. Mock device type is phone.
      */
-    g_mockDeviceType = DeviceType::PHONE;
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
     ThemeConstants::InitDeviceType();
 
     /**

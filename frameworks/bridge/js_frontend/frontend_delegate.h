@@ -74,11 +74,11 @@ public:
     }
 
     // distribute
-    virtual const std::string& RestoreRouterStack(const std::string& contentInfo)
+    virtual std::string RestoreRouterStack(const std::string& contentInfo)
     {
         return "";
     }
-    virtual const std::string& GetContentInfo()
+    virtual std::string GetContentInfo()
     {
         return "";
     }

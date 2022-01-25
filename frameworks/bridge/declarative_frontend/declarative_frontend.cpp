@@ -512,7 +512,7 @@ void DeclarativeFrontend::NavigatePage(uint8_t type, const PageTarget& target, c
     }
 }
 
-const std::string& DeclarativeFrontend::RestoreRouterStack(const std::string& contentInfo)
+std::string DeclarativeFrontend::RestoreRouterStack(const std::string& contentInfo)
 {
     if (delegate_) {
         return delegate_->RestoreRouterStack(contentInfo);
@@ -521,7 +521,7 @@ const std::string& DeclarativeFrontend::RestoreRouterStack(const std::string& co
     }
 }
 
-const std::string& DeclarativeFrontend::GetContentInfo() const
+std::string DeclarativeFrontend::GetContentInfo() const
 {
     if (delegate_) {
         return delegate_->GetContentInfo();

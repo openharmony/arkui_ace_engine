@@ -16,7 +16,10 @@
 #include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
-bool SystemProperties::rosenBackendEnabled_ = false;
+
+DeviceType SystemProperties::deviceType_ = DeviceType::UNKNOWN;
+
+bool SystemProperties::rosenBackendEnabled_ = true;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -27,6 +30,11 @@ float SystemProperties::GetFontWeightScale()
 DeviceType SystemProperties::GetDeviceType()
 {
     return DeviceType::PHONE;
+}
+
+bool SystemProperties::GetDebugEnabled()
+{
+    return false;
 }
 
 }

@@ -110,7 +110,7 @@ void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& cont
     LOGI("Restore UIContentImpl done.");
 }
 
-const std::string& UIContentImpl::GetContentInfo() const
+std::string UIContentImpl::GetContentInfo() const
 {
     LOGI("UIContent GetContentInfo");
     return Platform::AceContainer::GetContentInfo(instanceId_);

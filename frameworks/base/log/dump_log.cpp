@@ -24,6 +24,9 @@ DumpLog::~DumpLog() = default;
 
 void DumpLog::Print(int32_t depth, const std::string& className, int32_t childSize)
 {
+    if (ferror(dumpFile_.get())) {
+        return;
+    }
     std::string space = "  ";
     for (int32_t i = 0; i < depth; ++i) {
         fwrite(space.c_str(), 1, space.length(), dumpFile_.get());

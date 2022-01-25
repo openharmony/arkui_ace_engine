@@ -47,7 +47,7 @@ public:
 
     // distribute
     void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) override;
-    const std::string& GetContentInfo() const override;
+    std::string GetContentInfo() const override;
 
     // UI content event process
     bool ProcessBackPressed() override;

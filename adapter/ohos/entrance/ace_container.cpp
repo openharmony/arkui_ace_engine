@@ -892,7 +892,7 @@ void AceContainer::SetDialogCallback(int32_t instanceId, FrontendDialogCallback 
     }
 }
 
-const std::string& AceContainer::RestoreRouterStack(int32_t instanceId, const std::string& contentInfo)
+std::string AceContainer::RestoreRouterStack(int32_t instanceId, const std::string& contentInfo)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
@@ -906,7 +906,7 @@ const std::string& AceContainer::RestoreRouterStack(int32_t instanceId, const st
     }
 }
 
-const std::string& AceContainer::GetContentInfo(int32_t instanceId)
+std::string AceContainer::GetContentInfo(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {

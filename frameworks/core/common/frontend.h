@@ -181,11 +181,11 @@ public:
     virtual void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) {};
 
     // distribute
-    virtual const std::string& RestoreRouterStack(const std::string& contentInfo)
+    virtual std::string RestoreRouterStack(const std::string& contentInfo)
     {
         return "";
     }
-    virtual const std::string& GetContentInfo() const
+    virtual std::string GetContentInfo() const
     {
         return "";
     }

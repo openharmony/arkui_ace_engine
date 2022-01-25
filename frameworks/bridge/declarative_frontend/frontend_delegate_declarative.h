@@ -104,8 +104,8 @@ public:
         const std::string& key, const std::string& value);
 
     // distribute
-    const std::string& RestoreRouterStack(const std::string& contentInfo) override;
-    const std::string& GetContentInfo() override;
+    std::string RestoreRouterStack(const std::string& contentInfo) override;
+    std::string GetContentInfo() override;
 
     // Accessibility delegate functions.
     RefPtr<Framework::AccessibilityNodeManager> GetJSAccessibilityManager() const

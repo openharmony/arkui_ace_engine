@@ -144,4 +144,9 @@ bool SystemProperties::IsScoringEnabled(const std::string& name)
     return false;
 }
 
+bool SystemProperties::GetDebugEnabled()
+{
+    return false;
+}
+
 } // namespace OHOS::Ace
