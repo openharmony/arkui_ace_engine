@@ -191,6 +191,16 @@ public:
         return lazyForEachComponent_.Upgrade();
     }
 
+    void SetCurve(const RefPtr<Curve>& curve)
+    {
+        curve_ = curve;
+    }
+
+    const RefPtr<Curve>& GetCurve() const
+    {
+        return curve_;
+    }
+
 private:
     RefPtr<SwiperDeclaration> declaration_;
     bool show_ { true };
@@ -201,6 +211,7 @@ private:
     MoveCallback moveCallback_;
     MainSwiperSize mainSwiperSize_ = MainSwiperSize::AUTO;
     WeakPtr<V2::LazyForEachComponent> lazyForEachComponent_;
+    RefPtr<Curve> curve_;
 };
 
 } // namespace OHOS::Ace
