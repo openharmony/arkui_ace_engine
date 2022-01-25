@@ -216,7 +216,7 @@ public:
 
     void RebuildFocusTree();
 
-    RefPtr<FocusNode> RebuildFocusChild();
+    std::list<RefPtr<FocusNode>> RebuildFocusChild();
 
     void SetParent(const WeakPtr<Element>& parent)
     {

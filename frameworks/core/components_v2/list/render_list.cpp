@@ -43,6 +43,49 @@ constexpr int32_t DEFAULT_FINGERS = 1;
 constexpr int32_t DEFAULT_DURATION = 200;
 constexpr int32_t DEFAULT_DISTANCE = 0;
 
+constexpr bool DIR_HORIZONTAL = false;
+constexpr bool DIR_VERTICAL = true;
+constexpr bool DIR_FORWARD = false;
+constexpr bool DIR_REVERSE = true;
+constexpr int32_t STEP_FORWARD = 1;
+constexpr int32_t STEP_BACK = -1;
+constexpr int32_t STEP_INVALID = 10;
+
+//IsRightToLeft | IsListVertical | IsDirectionVertical | IsDirectionReverse
+const std::map<bool, std::map<bool, std::map<bool, std::map<bool, int32_t>>>> DIRECTION_MAP = {
+    { false, // RTL is false
+        {
+            { false,
+                {
+                    { DIR_HORIZONTAL, { { DIR_FORWARD, STEP_FORWARD }, { DIR_REVERSE, STEP_BACK } } },
+                    { DIR_VERTICAL, { { DIR_FORWARD, STEP_INVALID }, { DIR_REVERSE, STEP_INVALID } } }
+                }
+            },
+            { true,
+                {
+                    { DIR_HORIZONTAL, { { DIR_FORWARD, STEP_INVALID }, { DIR_REVERSE, STEP_INVALID } } },
+                    { DIR_VERTICAL, { { DIR_FORWARD, STEP_FORWARD }, { DIR_REVERSE, STEP_BACK } } }
+                }
+            }
+        }
+    },
+    { true, // RTL is true
+        {
+            { false,
+                {
+                    { DIR_HORIZONTAL, { { DIR_FORWARD, STEP_BACK }, { DIR_REVERSE, STEP_FORWARD } } },
+                    { DIR_VERTICAL, { { DIR_FORWARD, STEP_INVALID }, { DIR_REVERSE, STEP_INVALID } } }
+                }
+            },
+            { true,
+                {
+                    { DIR_HORIZONTAL, { { DIR_FORWARD, STEP_INVALID }, { DIR_REVERSE, STEP_INVALID } } },
+                    { DIR_VERTICAL, { { DIR_FORWARD, STEP_BACK }, { DIR_REVERSE, STEP_FORWARD } } }
+                }
+            }
+        }
+    }
+};
 } // namespace
 
 RenderList::~RenderList()
@@ -1886,6 +1929,18 @@ void RenderList::MultiSelectAllWhenCtrlA()
         }
     }
     MarkNeedRender();
+}
+
+int32_t RenderList::RequestNextFocus(bool vertical, bool reverse)
+{
+    // TODO rigthToLeft_ need initial
+    bool rightToLeft_ = false;
+    int32_t moveStep = DIRECTION_MAP.at(rightToLeft_).at(vertical_).at(vertical).at(reverse);
+    if (moveStep == STEP_INVALID) {
+        return -1;
+    }
+    focusIndex_ += moveStep;
+    return focusIndex_;
 }
 
 } // namespace OHOS::Ace::V2

@@ -219,6 +219,8 @@ public:
 
     WeakPtr<RenderNode> CheckAxisNode() override;
 
+    int32_t RequestNextFocus(bool vertical, bool reverse);
+
 protected:
     void UpdateAccessibilityAttr();
     bool HandleActionScroll(bool forward);
@@ -343,6 +345,7 @@ protected:
 
     Offset mouseStartOffset_;
     Offset mouseEndOffset_;
+    int32_t focusIndex_ = 0;
 
 private:
     bool ActionByScroll(bool forward, ScrollEventBack scrollEventBack);

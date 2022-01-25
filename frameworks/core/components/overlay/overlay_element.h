@@ -24,6 +24,10 @@ class OverlayElement : public StackElement {
     DECLARE_ACE_TYPE(OverlayElement, StackElement);
 
 public:
+    OverlayElement()
+    {
+        SetFocusable(false);
+    }
     void Clear();
 };
 

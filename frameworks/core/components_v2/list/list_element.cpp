@@ -18,6 +18,7 @@
 #include "base/log/log.h"
 #include "base/utils/macros.h"
 #include "core/components_v2/list/list_component.h"
+#include "core/components_v2/list/render_list.h"
 #include "core/pipeline/base/composed_component.h"
 
 namespace OHOS::Ace::V2 {
@@ -83,7 +84,30 @@ size_t ListElement::FindPreviousStickyListItem(size_t index)
 
 bool ListElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect)
 {
-    return false;
+    RefPtr<RenderList> list = AceType::DynamicCast<RenderList>(renderNode_);
+    if (!list) {
+        LOGE("Render grid is null.");
+        return false;
+    }
+    LOGI("RequestNextFocus vertical:%{public}d reverse:%{public}d.", vertical, reverse);
+    bool ret = false;
+    while (!ret) {
+        int32_t focusIndex = list->RequestNextFocus(vertical, reverse);
+        int32_t size = GetChildrenList().size();
+        if (focusIndex < 0 || focusIndex >= size) {
+            return false;
+        }
+        auto iter = GetChildrenList().begin();
+        std::advance(iter, focusIndex);
+        auto focusNode = *iter;
+        if (!focusNode) {
+            LOGE("Target focus node is null.");
+            return false;
+        }
+        // If current Node can not obtain focus, move to next.
+        ret = focusNode->RequestFocusImmediately();
+    }
+    return ret;
 }
 
 RefPtr<Element> ListElement::OnUpdateElement(const RefPtr<Element>& element, const RefPtr<Component>& component)
