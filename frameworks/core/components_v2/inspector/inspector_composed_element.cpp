@@ -1316,9 +1316,9 @@ std::string InspectorComposedElement::GetBindContextMenu() const
     if (responseType) {
         if (responseType->GetOnMouseId()) {
             return "ResponseType.RightClick";
-        } else if (responseType->GetOnLongPress()){
+        } else if (responseType->GetOnLongPress()) {
             return "ResponseType.Longpress";
-        } else{
+        } else {
             return "-";
         }
     }

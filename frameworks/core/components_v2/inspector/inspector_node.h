@@ -190,7 +190,7 @@ public:
     // bindpopup
     virtual std::string GetBindPopup() const = 0;
 
-    //bindcontextmenu
+    // bindcontextmenu
     virtual std::string GetBindContextMenu() const = 0;
 
     // auto test

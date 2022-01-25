@@ -199,7 +199,7 @@ public:
         return AceType::TypeId(this);
     }
 
-    //bindcontextmenu
+    // bindcontextmenu
     std::string GetBindContextMenu() const override;
 
     virtual void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
