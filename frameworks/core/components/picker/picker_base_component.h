@@ -188,6 +188,16 @@ public:
 
     void Initialize(const RefPtr<AccessibilityManager>& accessibilityManager, const RefPtr<ThemeManager>& themeManager);
 
+    void SetDialogName(const std::string& dialogName)
+    {
+        dialogInsprctorTag_ = dialogName;
+    }
+
+    const std::string& GetDialogName()
+    {
+        return dialogInsprctorTag_;
+    }
+
     bool GetHasTitle() const
     {
         return hasTitle_;
@@ -555,6 +565,7 @@ private:
 
     RefPtr<PickerAnimationController> animationController_;
     RefPtr<DialogComponent> dialogComponent_;
+    std::string dialogInsprctorTag_;
 };
 
 } // namespace OHOS::Ace

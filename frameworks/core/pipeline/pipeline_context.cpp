@@ -952,13 +952,15 @@ void PipelineContext::GetBoundingRectData(int32_t nodeId, Rect& rect)
     }
 }
 
-RefPtr<DialogComponent> PipelineContext::ShowDialog(const DialogProperties& dialogProperties, bool isRightToLeft)
+RefPtr<DialogComponent> PipelineContext::ShowDialog(const DialogProperties& dialogProperties,
+    bool isRightToLeft, const std::string& inspectorTag)
 {
     CHECK_RUN_ON(UI);
     const auto& dialog = DialogBuilder::Build(dialogProperties, AceType::WeakClaim(this));
     if (!dialog) {
         return nullptr;
     }
+    dialog->SetInspectorTag(inspectorTag);
     auto customComponent = dialogProperties.customComponent;
     if (customComponent) {
         dialog->SetCustomChild(customComponent);

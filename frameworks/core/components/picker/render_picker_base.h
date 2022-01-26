@@ -24,6 +24,7 @@
 #include "core/components/checkable/render_checkbox.h"
 #include "core/components/gesture_listener/render_gesture_listener.h"
 #include "core/components/picker/picker_base_component.h"
+#include "core/components/picker/picker_text_component.h"
 #include "core/components/picker/render_picker_column.h"
 #include "core/components/stack/render_stack.h"
 #include "core/components/triangle/render_triangle.h"
@@ -81,6 +82,21 @@ public:
     const std::vector<RefPtr<RenderPickerColumn>>& GetRenderPickerColumn() const
     {
         return columns_;
+    }
+
+    const Dimension& GetColumnHeight() const
+    {
+        return columnHeight_;
+    }
+
+    const std::vector<std::string>& GetRange() const
+    {
+        return range_;
+    }
+
+    uint32_t GetSelected() const
+    {
+        return selectedIndex_;
     }
 
 protected:
@@ -152,6 +168,9 @@ private:
 
     bool switchHandlerSetted_ = false;
     bool hasLayout_ = false;
+    Dimension columnHeight_;
+    uint32_t selectedIndex_ = 0;
+    std::vector<std::string> range_ {""};
 
     std::function<void()> onCancelCallback_;
     std::function<void(const std::string&)> onChangeCallback_;

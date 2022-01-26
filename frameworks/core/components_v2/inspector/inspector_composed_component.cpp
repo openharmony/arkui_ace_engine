@@ -46,6 +46,7 @@
 #include "core/components_v2/inspector/navigation_composed_element.h"
 #include "core/components_v2/inspector/navigator_composed_element.h"
 #include "core/components_v2/inspector/panel_composed_element.h"
+#include "core/components_v2/inspector/picker_text_dialog_composed_element.h"
 #include "core/components_v2/inspector/progress_composed_element.h"
 #include "core/components_v2/inspector/qrcode_composed_element.h"
 #include "core/components_v2/inspector/radio_composed_element.h"
@@ -71,6 +72,7 @@
 #include "core/components_v2/inspector/tabs_composed_element.h"
 #include "core/components_v2/inspector/text_clock_composed_element.h"
 #include "core/components_v2/inspector/text_composed_element.h"
+#include "core/components_v2/inspector/text_picker_composed_element.h"
 #include "core/components_v2/inspector/textarea_composed_element.h"
 #include "core/components_v2/inspector/textinput_composed_element.h"
 #include "core/components_v2/inspector/texttimer_composed_element.h"
@@ -205,7 +207,11 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { MARQUEE_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::MarqueeComposedElement>(id); } },
     { TEXTCLOCK_COMPONENT_TAG,
-        [](const std::string& id) {return AceType::MakeRefPtr<V2::TextClockComposedElement>(id); } }
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::TextClockComposedElement>(id); } },
+    { TEXT_PICKER_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::TextPickerComposedElement>(id); } },
+    { PICKER_TEXT_DIALOG_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::PickerTextDialogComposedElement>(id); } }
 };
 
 } // namespace
@@ -271,7 +277,9 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { MARQUEE_COMPONENT_TAG, MARQUEE_ETS_TAG },
     { SELECT_COMPONENT_TAG, SELECT_ETS_TAG },
     { TEXTCLOCK_COMPONENT_TAG, TEXTCLOCK_ETS_TAG },
-    { TEXTTIMER_COMPONENT_TAG, TEXTTIMER_ETS_TAG }
+    { TEXTTIMER_COMPONENT_TAG, TEXTTIMER_ETS_TAG },
+    { TEXT_PICKER_COMPONENT_TAG, TEXT_PICKER_ETS_TAG },
+    { PICKER_TEXT_DIALOG_COMPONENT_TAG, PICKER_TEXT_DIALOG_ETS_TAG }
 };
 
 RefPtr<Element> InspectorComposedComponent::CreateElement()

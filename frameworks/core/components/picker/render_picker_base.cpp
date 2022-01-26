@@ -52,12 +52,15 @@ bool RenderPickerBase::TouchTest(const Point& globalPoint, const Point& parentLo
 void RenderPickerBase::Update(const RefPtr<Component>& component)
 {
     auto picker = AceType::DynamicCast<PickerBaseComponent>(component);
+    auto textPicker = AceType::DynamicCast<PickerTextComponent>(component);
     if (!picker) {
         LOGE("input component is incorrect type or null.");
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
-
+    selectedIndex_ = textPicker->GetSelected();
+    range_ = textPicker->GetRange();
+    columnHeight_ = picker->GetColumnHeight();
     data_ = picker;
     SetInterceptTouchEvent(!data_->GetSubsidiary());
     data_->OnColumnsCreating();
