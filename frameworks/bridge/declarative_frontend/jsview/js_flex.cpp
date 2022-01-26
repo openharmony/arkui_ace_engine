@@ -45,7 +45,8 @@ void JSFlex::SetJustifyContent(int32_t value)
     if ((value == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
         (value == static_cast<int32_t>(FlexAlign::FLEX_END)) || (value == static_cast<int32_t>(FlexAlign::CENTER)) ||
         (value == static_cast<int32_t>(FlexAlign::SPACE_AROUND)) ||
-        (value == static_cast<int32_t>(FlexAlign::SPACE_BETWEEN))) {
+        (value == static_cast<int32_t>(FlexAlign::SPACE_BETWEEN)) ||
+        (value == static_cast<int32_t>(FlexAlign::SPACE_EVENLY))) {
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
         auto flex = AceType::DynamicCast<FlexComponent>(component);
         if (flex) {
