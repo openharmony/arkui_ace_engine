@@ -40,6 +40,31 @@
 #include "core/common/flutter/flutter_asset_manager.h"
 
 namespace OHOS::Ace {
+namespace {
+
+WindowMode GetWindowMode(OHOS::Rosen::Window* window)
+{
+    if (!window) {
+        LOGE("Get window mode failed, window is null!");
+        return WindowMode::WINDOW_MODE_UNDEFINED;
+    }
+    switch (window->GetMode()) {
+        case OHOS::Rosen::WindowMode::WINDOW_MODE_FULLSCREEN:
+            return WindowMode::WINDOW_MODE_FULLSCREEN;
+        case OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY:
+            return WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+        case OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY:
+            return WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+        case OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING:
+            return WindowMode::WINDOW_MODE_FLOATING;
+        case OHOS::Rosen::WindowMode::WINDOW_MODE_PIP:
+            return WindowMode::WINDOW_MODE_PIP;
+        default:
+            return WindowMode::WINDOW_MODE_UNDEFINED;
+    }
+}
+
+}
 
 static std::atomic<int32_t> gInstanceId = 0;
 
@@ -257,6 +282,11 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetPackagePathStr(resPath);
     container->SetAssetManager(flutterAssetManager);
 
+    if (window_ && window_->IsDecorEnable()) {
+        LOGI("Container modal is enabled.");
+        container->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    }
+
     // create ace_view
     auto flutterAceView =
         Platform::FlutterAceView::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
@@ -276,6 +306,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         container->SetContentStorage(nativeEngine->CreateReference(storage, 1),
             context->GetBindingObject()->Get<NativeReference>());
     }
+
+    InitWindowCallback();
 
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
@@ -413,6 +445,62 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config)
         Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation());
     }
     config_ = config;
+}
+
+void UIContentImpl::InitWindowCallback()
+{
+    LOGE("UIContent InitWindowCallback");
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("get container(id=%{public}d) failed", instanceId_);
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGE("get pipeline context failed");
+        return;
+    }
+
+    auto& window = window_;
+    pipelineContext->SetWindowMinimizeCallBack([&window]() -> bool {
+        if (!window) {
+            return false;
+        }
+        return (OHOS::Rosen::WMError::WM_OK == window->Minimize());
+    });
+
+    pipelineContext->SetWindowMaximizeCallBack([&window]() -> bool {
+        if (!window) {
+            return false;
+        }
+        return (OHOS::Rosen::WMError::WM_OK == window->Maximize());
+    });
+
+    pipelineContext->SetWindowRecoverCallBack([&window]() -> bool {
+        if (!window) {
+            return false;
+        }
+        return (OHOS::Rosen::WMError::WM_OK == window->Recover());
+    });
+
+    pipelineContext->SetWindowCloseCallBack([&window]() -> bool {
+        if (!window) {
+            return false;
+        }
+        return (OHOS::Rosen::WMError::WM_OK == window->Close());
+    });
+
+    pipelineContext->SetWindowSplitCallBack([&window]() -> bool {
+        if (!window) {
+            return false;
+        }
+        return (OHOS::Rosen::WMError::WM_OK ==
+            window->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
+    });
+
+    pipelineContext->SetWindowGetModeCallBack([&window]() -> WindowMode {
+        return GetWindowMode(window);
+    });
 }
 
 } // namespace OHOS::Ace

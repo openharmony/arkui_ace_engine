@@ -227,6 +227,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/clip:ace_core_components_clip_$platform",
       "$ace_root/frameworks/core/components/clock:ace_core_components_clock_$platform",
       "$ace_root/frameworks/core/components/common:ace_core_components_common_$platform",
+      "$ace_root/frameworks/core/components/container_modal:ace_core_components_container_modal_$platform",
       "$ace_root/frameworks/core/components/counter:ace_core_components_counter_$platform",
       "$ace_root/frameworks/core/components/coverage:ace_core_components_coverage_$platform",
       "$ace_root/frameworks/core/components/custom_dialog:ace_core_components_custom_dialog_$platform",
