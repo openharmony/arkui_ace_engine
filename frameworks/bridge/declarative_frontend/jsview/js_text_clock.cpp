@@ -32,6 +32,7 @@ constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
 constexpr int32_t HOURS_WEST_UPPER_LIMIT = 12;
 constexpr int32_t HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT = -12;
 constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
+constexpr char DEFAULT_FORMAT[] = "hhmmss";
 
 bool IsHoursWestValid(double& hoursWest)
 {
@@ -76,6 +77,8 @@ void JSTextClock::Create(const JSCallbackInfo& info)
     }
     RefPtr<TextClockComponent> textClockComponent = AceType::MakeRefPtr<TextClockComponent>(std::string(""));
     textClockComponent->SetHoursWest(hourWest);
+    std::string defaultFormat = DEFAULT_FORMAT;
+    textClockComponent->SetFormat(defaultFormat);
     ViewStackProcessor::GetInstance()->Push(textClockComponent);
 }
 
@@ -134,7 +137,8 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
     if (info[0]->IsString()) {
         textClockComponent->SetFormat(info[0]->ToString());
     } else {
-        LOGW("arg is not string");
+        LOGE("arg is not string");
+        return;
     }
 }
 
