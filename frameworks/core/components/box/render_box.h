@@ -237,7 +237,7 @@ public:
         return preTargetRenderBox_;
     }
 
-    const OnMouseCallback GetOnMouseId() const
+    const OnMouseCallback& GetOnMouseId() const
     {
         return onMouse_;
     }
