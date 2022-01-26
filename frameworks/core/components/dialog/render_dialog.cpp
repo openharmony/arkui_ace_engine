@@ -19,6 +19,8 @@ namespace OHOS::Ace {
 
 void RenderDialog::Update(const RefPtr<Component>& component)
 {
+    auto dialog = AceType::DynamicCast<DialogComponent>(component);
+    properties_ = dialog->GetDialogProperties();
     MarkNeedLayout();
 }
 

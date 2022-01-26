@@ -197,7 +197,7 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
             });
         PickerText->SetDialogResult(resultId);
     }
-
+    PickerText->SetDialogName("pickerTextDialog");
     PickerText->OpenDialog(properties);
 }
 } // namespace OHOS::Ace::Framework

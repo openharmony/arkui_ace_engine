@@ -116,9 +116,9 @@ public:
 
     RefPtr<Element> SetupRootElement();
 
-    RefPtr<DialogComponent> ShowDialog(const DialogProperties& dialogProperties, bool isRightToLeft);
+    RefPtr<DialogComponent> ShowDialog(const DialogProperties& dialogProperties, bool isRightToLeft,
+        const std::string& inspectorTag = "");
     void CloseContextMenu();
-
     void GetBoundingRectData(int32_t nodeId, Rect& rect);
 
     RefPtr<OffscreenCanvas> CreateOffscreenCanvas(int32_t width, int32_t height);

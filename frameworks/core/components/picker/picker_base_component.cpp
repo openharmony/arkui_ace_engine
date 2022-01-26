@@ -361,7 +361,7 @@ void PickerBaseComponent::OpenDialog(DialogProperties& properties)
         [context, dialogProperties = properties, weak = WeakClaim(this)]() mutable {
             const auto& picker = weak.Upgrade();
             if (context && picker) {
-                picker->dialogComponent_ = context->ShowDialog(dialogProperties, false);
+                picker->dialogComponent_ = context->ShowDialog(dialogProperties, false, picker->GetDialogName());
             }
         },
         TaskExecutor::TaskType::UI);
