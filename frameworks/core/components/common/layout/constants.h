@@ -476,6 +476,11 @@ enum class CalendarType {
     SIMPLE,
 };
 
+enum class SideBarContainerStyle {
+    EMBED,
+    OVERLAY
+};
+
 inline constexpr uint32_t STATE_NORMAL = 0;
 inline constexpr uint32_t STATE_PRESSED = 1;
 inline constexpr uint32_t STATE_FOCUS = 1 << 1;
