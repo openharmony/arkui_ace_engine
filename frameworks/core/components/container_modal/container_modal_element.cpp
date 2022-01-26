@@ -16,9 +16,9 @@
 #include "core/components/container_modal/container_modal_element.h"
 
 #include "core/components/box/box_element.h"
+#include "core/components/container_modal/render_container_modal.h"
 #include "core/components/flex/flex_element.h"
 #include "core/components/flex/flex_item_element.h"
-#include "core/components/container_modal/render_container_modal.h"
 
 namespace OHOS::Ace {
 namespace {

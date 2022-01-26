@@ -48,7 +48,7 @@ WindowMode GetWindowMode(OHOS::Rosen::Window* window)
         LOGE("Get window mode failed, window is null!");
         return WindowMode::WINDOW_MODE_UNDEFINED;
     }
-    switch(window->GetMode()) {
+    switch (window->GetMode()) {
         case OHOS::Rosen::WindowMode::WINDOW_MODE_FULLSCREEN:
             return WindowMode::WINDOW_MODE_FULLSCREEN;
         case OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY:
@@ -65,7 +65,6 @@ WindowMode GetWindowMode(OHOS::Rosen::Window* window)
 }
 
 }
-
 
 static std::atomic<int32_t> gInstanceId = 0;
 
