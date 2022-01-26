@@ -65,13 +65,19 @@ inline TextSelection GetRangeOfSameType(const std::string& str, int32_t position
             selection.baseOffset = i + 1;
             break;
         }
+        if (i == 0) {
+            selection.baseOffset = 0;
+        }
     }
 
     // find end position.
-    for (int32_t i = position + 1; i < length; ++i) {
+    for (int32_t i = position; i < length; ++i) {
         if (GetCharType(wstring, i) != type) {
             selection.extentOffset = i;
             break;
+        }
+        if (i == (length - 1)) {
+            selection.extentOffset = length;
         }
     }
     return selection;
