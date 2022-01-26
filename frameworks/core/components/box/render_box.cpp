@@ -136,6 +136,7 @@ void RenderBox::Update(const RefPtr<Component>& component)
 
         onHover_ = box->GetOnHoverId();
         onMouse_ = box->GetOnMouseId();
+        onLongPressId_ = box->GetOnLongPress();
 
         auto gestures = box->GetGestures();
         UpdateGestureRecognizer(gestures);
