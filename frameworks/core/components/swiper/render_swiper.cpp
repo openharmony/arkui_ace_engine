@@ -140,6 +140,8 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     fadeColor_ = swiper->GetFadeColor();
     scale_ = context->GetDipScale();
 
+    curve_ = swiper->GetCurve();
+
     // Get item count of swiper
     const auto& children = swiper->GetChildren();
     itemCount_ = children.size();
@@ -1027,7 +1029,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
         needRestore = true;
     }
     LOGD("translate animation, start=%{public}f, end=%{public}f", start, end);
-    translate_ = AceType::MakeRefPtr<CurveAnimation<double>>(start, end, Curves::LINEAR);
+    translate_ = AceType::MakeRefPtr<CurveAnimation<double>>(start, end, curve_);
     auto weak = AceType::WeakClaim(this);
     translate_->AddListener(Animation<double>::ValueCallback([weak, fromIndex, toIndex, start, end](double value) {
         auto swiper = weak.Upgrade();
@@ -1191,7 +1193,7 @@ void RenderSwiper::AddSwipeToOpacityListener(int32_t fromIndex, int32_t toIndex)
 void RenderSwiper::AddSwipeToIndicatorListener(int32_t fromIndex, int32_t toIndex)
 {
     indicatorAnimation_ = AceType::MakeRefPtr<CurveAnimation<double>>(
-        CUR_START_TRANSLATE_TIME, CUR_END_TRANSLATE_TIME, Curves::LINEAR);
+        CUR_START_TRANSLATE_TIME, CUR_END_TRANSLATE_TIME, curve_);
     indicatorAnimation_->AddListener(
         [weak = AceType::WeakClaim(this), fromIndex, toIndex](const double value) {
         auto swiper = weak.Upgrade();
@@ -2761,7 +2763,7 @@ void RenderSwiper::StartIndicatorAnimation(int32_t fromIndex, int32_t toIndex, b
         animationDirect_ *= INDICATOR_DIRECT_BACKWARD;
     }
     indicatorAnimation_ = AceType::MakeRefPtr<CurveAnimation<double>>(
-        CUR_START_TRANSLATE_TIME, CUR_END_TRANSLATE_TIME, Curves::LINEAR);
+        CUR_START_TRANSLATE_TIME, CUR_END_TRANSLATE_TIME, curve_);
     indicatorAnimation_->AddListener(
         [weak = AceType::WeakClaim(this), fromIndex, toIndex, contentOffset](const double value) {
         auto swiper = weak.Upgrade();
