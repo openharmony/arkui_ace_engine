@@ -74,6 +74,7 @@ struct TouchEvent final {
     float x = 0.0f;
     float y = 0.0f;
     TouchType type = TouchType::UNKNOWN;
+    // nanosecond time stamp.
     TimeStamp time;
     double size = 0.0;
     float force = 0.0f;

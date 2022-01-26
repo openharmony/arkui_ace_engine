@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace {
 
+// nano seconds.
 using TimeStamp = std::chrono::high_resolution_clock::time_point;
 
 } // namespace OHOS::Ace

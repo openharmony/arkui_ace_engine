@@ -163,6 +163,7 @@ void DragRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     auto& dragInfo = iter->second;
+    dragInfo.velocityTracker_.UpdateTouchPoint(event, true);
     if (dragInfo.states_ == DetectState::DETECTED) {
         bool upSuccess = true;
         for (auto entry = dragFingers_.begin(); entry != dragFingers_.end(); ++entry) {

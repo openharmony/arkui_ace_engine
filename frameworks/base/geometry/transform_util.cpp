@@ -499,7 +499,7 @@ bool TransformUtil::DecomposeTransform(DecomposedTransform& out, const Matrix4& 
     }
 
     if (!NearZero(matrix.Get(3, 0)) || !NearZero(matrix.Get(3, 1)) || !NearZero(matrix.Get(3, 2))) {
-        float rhs[4] = { matrix.Get(3, 0), matrix.Get(3, 1), matrix.Get(3, 2), matrix.Get(3, 3) };
+        double rhs[4] = { matrix.Get(3, 0), matrix.Get(3, 1), matrix.Get(3, 2), matrix.Get(3, 3) };
 
         Matrix4 inversePerspectiveMatrix = Matrix4::Invert(perspectiveMatrix);
         Matrix4 transposedInversePerspectiveMatrix = inversePerspectiveMatrix;
