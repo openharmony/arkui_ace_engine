@@ -51,7 +51,6 @@ std::string StepperItemComposedElement::GetPrevLabel() const
 {
     auto node = GetInspectorNode(StepperItemElement::TypeId());
     if (!node) {
-        LOGE("zzjnode");
         return "";
     }
     auto stepperItemRender = AceType::DynamicCast<RenderStepperItem>(node);

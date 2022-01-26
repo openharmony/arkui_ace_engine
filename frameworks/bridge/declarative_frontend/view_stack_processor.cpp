@@ -651,7 +651,6 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     }
 
     for (auto&& component : components) {
-        LOGE("componentName:%{public}s", AceType::TypeName(component));
         component->SetTouchable(mainComponent->IsTouchable());
     }
 
