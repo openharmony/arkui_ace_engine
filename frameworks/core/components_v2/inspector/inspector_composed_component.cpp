@@ -211,7 +211,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { TEXT_PICKER_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::TextPickerComposedElement>(id); } },
     { PICKER_TEXT_DIALOG_COMPONENT_TAG,
-        [](const std::string& id) {return AceType::MakeRefPtr<V2::PickerTextDialogComposedElement>(id); } }
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::PickerTextDialogComposedElement>(id); } },
+    { CANVAS_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } }
 };
 
 } // namespace
@@ -279,7 +281,8 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { TEXTCLOCK_COMPONENT_TAG, TEXTCLOCK_ETS_TAG },
     { TEXTTIMER_COMPONENT_TAG, TEXTTIMER_ETS_TAG },
     { TEXT_PICKER_COMPONENT_TAG, TEXT_PICKER_ETS_TAG },
-    { PICKER_TEXT_DIALOG_COMPONENT_TAG, PICKER_TEXT_DIALOG_ETS_TAG }
+    { PICKER_TEXT_DIALOG_COMPONENT_TAG, PICKER_TEXT_DIALOG_ETS_TAG },
+    { CANVAS_COMPONENT_TAG, CANVAS_ETS_TAG }
 };
 
 RefPtr<Element> InspectorComposedComponent::CreateElement()
