@@ -164,16 +164,16 @@ private:
     static void Finalizer(JSRuntime* rt, JSValue val);
     static void GcMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* markFunc);
 
-    static JSValue proto_;
-    static std::unordered_map<std::string, JSCFunctionListEntry*> functions_;
-    static std::unordered_map<std::string, JSCFunctionListEntry*> staticFunctions_;
-    static JSClassID classId_;
-    static JSClassExoticMethods exoticMethods_;
-    static JSClassDef classDefinitions_;
-    static FunctionCallback constructor_; // TODO(cvetan) remove
-    static JSFunctionCallback jsConstructor_;
-    static JSDestructorCallback<C> jsDestructor_;
-    static JSGCMarkCallback<C> gcMark_;
+    static thread_local JSValue proto_;
+    static thread_local std::unordered_map<std::string, JSCFunctionListEntry*> functions_;
+    static thread_local std::unordered_map<std::string, JSCFunctionListEntry*> staticFunctions_;
+    static thread_local JSClassID classId_;
+    static thread_local JSClassExoticMethods exoticMethods_;
+    static thread_local JSClassDef classDefinitions_;
+    static thread_local FunctionCallback constructor_; // TODO(cvetan) remove
+    static thread_local JSFunctionCallback jsConstructor_;
+    static thread_local JSDestructorCallback<C> jsDestructor_;
+    static thread_local JSGCMarkCallback<C> gcMark_;
 
     template<typename U>
     friend class QJSKlass;

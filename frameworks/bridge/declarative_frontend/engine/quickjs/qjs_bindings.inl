@@ -22,26 +22,26 @@
 namespace OHOS::Ace::Framework {
 
 template<typename T>
-JSValue QJSKlass<T>::proto_ = JS_UNDEFINED;
+thread_local JSValue QJSKlass<T>::proto_ = JS_UNDEFINED;
 template<typename T>
-std::unordered_map<std::string, JSCFunctionListEntry*> QJSKlass<T>::functions_;
+thread_local std::unordered_map<std::string, JSCFunctionListEntry*> QJSKlass<T>::functions_;
 template<typename T>
-std::unordered_map<std::string, JSCFunctionListEntry*> QJSKlass<T>::staticFunctions_;
+thread_local std::unordered_map<std::string, JSCFunctionListEntry*> QJSKlass<T>::staticFunctions_;
 template<typename T>
-JSClassDef QJSKlass<T>::classDefinitions_ = { .class_name = nullptr, .finalizer = QJSKlass<T>::Finalizer,
+thread_local JSClassDef QJSKlass<T>::classDefinitions_ = { .class_name = nullptr, .finalizer = QJSKlass<T>::Finalizer,
     .gc_mark = QJSKlass<T>::GcMark, .call = nullptr, .exotic = nullptr };
 template<typename T>
-JSClassExoticMethods QJSKlass<T>::exoticMethods_;
+thread_local JSClassExoticMethods QJSKlass<T>::exoticMethods_;
 template<typename T>
-JSClassID QJSKlass<T>::classId_;
+thread_local JSClassID QJSKlass<T>::classId_;
 template<typename T>
-FunctionCallback QJSKlass<T>::constructor_ = nullptr;
+thread_local FunctionCallback QJSKlass<T>::constructor_ = nullptr;
 template<typename T>
-JSFunctionCallback QJSKlass<T>::jsConstructor_ = nullptr;
+thread_local JSFunctionCallback QJSKlass<T>::jsConstructor_ = nullptr;
 template<typename T>
-JSDestructorCallback<T> QJSKlass<T>::jsDestructor_ = nullptr;
+thread_local JSDestructorCallback<T> QJSKlass<T>::jsDestructor_ = nullptr;
 template<typename T>
-JSGCMarkCallback<T> QJSKlass<T>::gcMark_ = nullptr;
+thread_local JSGCMarkCallback<T> QJSKlass<T>::gcMark_ = nullptr;
 
 template<typename T>
 JSValue Wrap(JSValueConst newTarget, T* thisPtr)
