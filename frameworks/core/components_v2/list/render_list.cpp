@@ -317,7 +317,11 @@ void RenderList::PerformLayout()
     auto layoutSize = SetItemsPosition(mainSize, innerLayout);
 
     // Set layout size of list component itself
-    SetLayoutSize(GetLayoutParam().Constrain(layoutSize));
+    if (fixedMainSize_ || fixedCrossSize_) {
+        SetLayoutSize(GetLayoutParam().GetMaxSize());
+    } else {
+        SetLayoutSize(GetLayoutParam().Constrain(layoutSize));
+    }
 
     // Clear auto scrolling flags
     autoScrollingForItemMove_ = false;
