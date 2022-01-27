@@ -173,6 +173,9 @@ void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)
     }
 #ifdef ENABLE_ROSEN_BACKEND
     if (auto rsNode = child->rsNode_) {
+        if (rsNode_ == rsNode) {
+            child->OnRemove();
+        }
         child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId(), rsNode->GetId());
     }
 #endif

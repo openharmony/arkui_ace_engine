@@ -323,6 +323,8 @@ public:
 
     virtual void OnChildRemoved(const RefPtr<RenderNode>& child) {}
 
+    virtual void OnRemove() {}
+
     const std::string& GetAccessibilityText() const
     {
         return accessibilityText_;
