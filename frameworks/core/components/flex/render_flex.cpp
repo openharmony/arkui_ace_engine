@@ -794,7 +794,7 @@ void RenderFlex::RelayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, double
     }
     allocatedSize_ -= GetMainSize(flexItem);
     auto innerLayout = MakeConstrainedLayoutParam(mainFlexExtent, flexItem->GetNormalizedConstraints(), canItemStretch,
-        flexItem->MustStretch());
+        flexItem->MustStretch() || !useOldLayoutVersion_);
     if (flexItem->MustStretch()) {
         auto crossStretch = crossAxisSize_ == CrossAxisSize::MAX
                                 ? GetMainAxisValue(GetLayoutParam().GetMaxSize(), FlipAxis(direction_))

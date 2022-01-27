@@ -1655,6 +1655,10 @@ bool RenderSwiper::OnRotation(const RotationEvent& event)
     if (disableRotation_) {
         return false;
     }
+    if (itemCount_ < LEAST_SLIDE_ITEM_COUNT) {
+        LOGI("Rotation is not enabled when count is 1");
+        return false;
+    }
     // Clockwise rotation switches to the next one, counterclockwise rotation switches to the previous one.
     auto context = GetContext().Upgrade();
     if (!context) {
