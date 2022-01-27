@@ -137,9 +137,12 @@ void RenderNode::AddChild(const RefPtr<RenderNode>& child, int32_t slot)
     child->SetDepth(GetDepth() + 1);
     OnChildAdded(child);
     disappearingNodes_.remove(child);
-    child->NotifyTransition(TransitionType::APPEARING, child->GetNodeId());
     if (SystemProperties::GetRosenBackendEnabled()) {
         RSNodeAddChild(child);
+        // we don't know transition parameters until Update() is called, so we set pending flag here
+        child->SetPendingAppearingTransition();
+    } else {
+        child->NotifyTransition(TransitionType::APPEARING, child->GetNodeId());
     }
 }
 
@@ -172,11 +175,12 @@ void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)
         child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId());
     }
 #ifdef ENABLE_ROSEN_BACKEND
-    if (auto rsNode = child->rsNode_) {
-        if (rsNode_ == rsNode) {
-            child->OnRemove();
-        }
-        child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId(), rsNode->GetId());
+    else if (SystemProperties::GetRosenBackendEnabled() && child->HasDisappearingTransition(child->GetNodeId())) {
+        // if rosen backend is enabled, kick off a disappearing transition
+        child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId());
+    }
+    if (rsNode_ && rsNode_ == child->rsNode_) {
+        child->OnRemove();
     }
 #endif
     LOGD("RenderNode RemoveChild %{public}zu", children_.size());
@@ -1531,6 +1535,19 @@ bool RenderNode::IsDisappearing()
 }
 bool RenderNode::HasDisappearingTransition(int32_t nodeId)
 {
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        if (isTailRenderNode_) {
+            return false;
+        }
+        for (auto& child : children_) {
+            if (child->HasDisappearingTransition(nodeId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+#endif
     for (auto& child : children_) {
         if (child->GetNodeId() == nodeId) {
             if (child->HasDisappearingTransition(nodeId)) {
@@ -1541,16 +1558,27 @@ bool RenderNode::HasDisappearingTransition(int32_t nodeId)
     return false;
 }
 
-void RenderNode::NotifyTransition(TransitionType type, int32_t nodeId, unsigned long long rsNodeId)
+void RenderNode::NotifyTransition(TransitionType type, int32_t nodeId)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    OnRSTransition(type, rsNodeId);
-#else
-    OnTransition(type, nodeId);
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        if (GetRSNode() == nullptr) {
+            return;
+        }
+        OnRSTransition(type);
+        if (!isTailRenderNode_) {
+            return;
+        }
+        for (auto& child : children_) {
+            child->NotifyTransition(type, nodeId);
+        }
+        return;
+    }
 #endif
+    OnTransition(type, nodeId);
     for (auto& child : children_) {
         if (child->GetNodeId() == nodeId) {
-            child->NotifyTransition(type, nodeId, rsNodeId);
+            child->NotifyTransition(type, nodeId);
         }
     }
 }
@@ -2009,10 +2037,10 @@ void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
             child->SyncRSNodeBoundary(true, true);
         }
     } else {
+        if (child->rsNode_) {
+            LOGE("Overwriting existing RSNode in child, this SHOULD NOT HAPPEN.");
+        }
         child->rsNode_ = rsNode_;
-    }
-    if (auto rsNode = child->rsNode_) {
-        child->NotifyTransition(TransitionType::APPEARING, child->GetNodeId(), rsNode->GetId());
     }
 #endif
 }

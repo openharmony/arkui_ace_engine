@@ -50,9 +50,12 @@ public:
 
     void PerformLayout() override;
 
+    void SetPendingAppearingTransition() override
+    {
+        pendingAppearingTransition_ = true;
+    }
 protected:
-    virtual void ClearRenderObject() override;
-    void OnRSTransition(TransitionType type, unsigned long long rsNodeId) override;
+    void OnRSTransition(TransitionType type) override;
 
 private:
     Matrix4 GetEffectiveTransform(const Offset& offset);
@@ -60,7 +63,8 @@ private:
     double ConvertDimensionToScaleBySize(const Dimension& dimension, double size);
 
     Matrix4 previousTransformMatrix_;
-    bool pendingTransitionAppearing_ = false;
+
+    bool pendingAppearingTransition_ = false;
 };
 
 } // namespace OHOS::Ace

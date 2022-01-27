@@ -47,14 +47,18 @@ public:
     }
     void OnRemove() override;
 
+    void SetPendingAppearingTransition() override
+    {
+        pendingAppearingTransition_ = true;
+    }
 protected:
     void OnOpacityAnimationCallback();
     void OnVisibleChanged() override;
     virtual void ClearRenderObject() override;
-    void OnRSTransition(TransitionType type, unsigned long long rsNodeId) override;
+    void OnRSTransition(TransitionType type) override;
 
 private:
-    bool pendingTransitionAppearing_ = false;
+    bool pendingAppearingTransition_ = false;
 };
 
 } // namespace OHOS::Ace
