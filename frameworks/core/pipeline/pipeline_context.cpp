@@ -3153,7 +3153,7 @@ void PipelineContext::SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector>
 #endif
 }
 
-const std::shared_ptr<OHOS::Rosen::RSUIDirector>& PipelineContext::GetRSUIDirector()
+std::shared_ptr<OHOS::Rosen::RSUIDirector> PipelineContext::GetRSUIDirector()
 {
 #ifdef ENABLE_ROSEN_BACKEND
     return rsUIDirector_;

@@ -31,6 +31,7 @@
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "base/log/log.h"
@@ -161,6 +162,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
         AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
+        CapabilityRegistry::Register();
     });
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());

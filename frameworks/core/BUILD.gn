@@ -331,17 +331,13 @@ template("ace_core_source_set") {
 
     if (!use_mingw_win && !use_mac && !is_wearable_product &&
         !is_standard_system) {
-      deps += [
-        "$ace_root/frameworks/core/components/rich_text:ace_core_components_rich_text_$platform",
-        "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform",
-      ]
+      deps += [ "$ace_root/frameworks/core/components/rich_text:ace_core_components_rich_text_$platform" ]
     }
 
     if (defined(config.web_components_support) &&
         config.web_components_support) {
       deps += [ "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform" ]
     }
-    sources += [ "common/form_manager.cpp" ]
 
     # xcomponent components supports phone, TV and wearable except PC Preview
     if (defined(config.xcomponent_components_support) &&
@@ -351,6 +347,7 @@ template("ace_core_source_set") {
 
     if (defined(config.form_components_support) &&
         config.form_components_support) {
+      sources += [ "common/form_manager.cpp" ]
       deps += [ "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform" ]
     }
 

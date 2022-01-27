@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_IMPL_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_IMPL_H
+#ifndef FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_CLIPBOARD_CLIPBOARD_IMPL_H
+#define FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_CLIPBOARD_CLIPBOARD_IMPL_H
 
 #include "core/common/clipboard/clipboard_interface.h"
+
 namespace OHOS::Ace {
+
 class ClipboardImpl : public Clipboard {
 public:
     explicit ClipboardImpl(const RefPtr<TaskExecutor>& taskExecutor) : Clipboard(taskExecutor) {};
@@ -40,5 +42,7 @@ public:
         return AceType::MakeRefPtr<ClipboardImpl>(taskExecutor);
     }
 };
+
 } // namespace OHOS::Ace::Platform
-#endif
+
+#endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_CLIPBOARD_CLIPBOARD_IMPL_H

@@ -85,7 +85,7 @@ void QjsXComponentBridge::HandleContext(JSContext* ctx, NodeId id, const std::st
     nativeXComponentImpl_->SetSurface(nativeWindow);
     nativeXComponentImpl_->SetXComponentId(xcomponent->GetId());
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef XCOMPONENT_SUPPORTED
     auto nativeEngine = static_cast<QuickJSNativeEngine*>(engine->GetQuickJSNativeEngine());
     if (nativeEngine == nullptr) {
         LOGE("nativeEngine is null");

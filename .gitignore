@@ -3,12 +3,9 @@
 *.iml
 .idea/
 CMakeLists.txt
-cmake-build-debug/
-.vs/
-.vscode/
-*.iml
-.idea/
-CMakeLists.txt
+adapter/*
+!adapter/ohos/
+!adapter/preview/
 cmake-build-debug/
 lite/appfwk/
 lite/base/

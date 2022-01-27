@@ -13,20 +13,23 @@
  * limitations under the License.
  */
 
-#include "core/common/clipboard/clipboard_impl.h"
+#ifndef FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_CAPABILITY_REIGSTRY_H
+#define FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_CAPABILITY_REIGSTRY_H
+
+#include <string>
+
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
 
-void ClipboardImpl::SetData(const std::string& data)
-{
-    LOGI("Preview doesn't support system clipboard");
-}
+class CapabilityRegistry {
+public:
+    CapabilityRegistry() = delete;
+    ~CapabilityRegistry() = delete;
 
-void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callback)
-{
-    LOGI("Preview doesn't support system clipboard");
-}
+    static void Register();
+};
 
-void ClipboardImpl::Clear() {}
+} // namespace OHOS::Ace
 
-} // namespace OHOS::Ace::Platform
+#endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_CAPABILITY_REIGSTRY_H

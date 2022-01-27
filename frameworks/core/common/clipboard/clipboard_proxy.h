@@ -18,22 +18,25 @@
 
 #include "base/utils/singleton.h"
 #include "core/common/clipboard/clipboard_interface.h"
-namespace OHOS::Ace {
-class ACE_EXPORT ClipboardProxy : public ClipboardInterface {
 
+namespace OHOS::Ace {
+
+class ACE_EXPORT ClipboardProxy : public ClipboardInterface {
 public:
     static ClipboardProxy* GetInstance();
     ClipboardProxy() = default;
     ~ClipboardProxy() = default;
-    void SetDelegate(std::shared_ptr<ClipboardInterface>&& delegate);
+    void SetDelegate(std::unique_ptr<ClipboardInterface>&& delegate);
     RefPtr<Clipboard> GetClipboard(const RefPtr<TaskExecutor>& taskExecutor) const override;
 
 private:
     static ClipboardProxy* inst_;
     static std::mutex mutex_;
-    std::shared_ptr<ClipboardInterface> delegate_;
+    std::unique_ptr<ClipboardInterface> delegate_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ClipboardProxy);
 };
+
 } // namespace OHOS::Ace
+
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_PROXY_H

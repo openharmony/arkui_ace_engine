@@ -16,7 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_canvas_renderer.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
 #endif
@@ -759,7 +759,7 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
 {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#ifdef PIXEL_MAP_SUPPORTED
     // 0 Get input param
     double left = 0.0;
     double top = 0.0;

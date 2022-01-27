@@ -25,11 +25,6 @@ template("libace_static") {
       "$ace_root/frameworks/core:ace_core_$platform",
     ]
 
-    if (defined(config.use_static_libcxx) && config.use_static_libcxx) {
-      deps += [ "${aosp_libs_dir}/ndk/libcxx:libc++_static" ]
-      libs = [ "${aosp_libs_dir}/ndk/libcxx/${target_os}_${target_cpu}/libc++_static.a" ]
-    }
-
     if (defined(config.platform_deps)) {
       deps += config.platform_deps
     }
