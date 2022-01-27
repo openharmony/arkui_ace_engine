@@ -425,7 +425,7 @@ const uint8_t* InternalResource::GetResource(const ResourceId id, size_t& size) 
                 static_cast<size_t>(_binary_piece_delete_svg_end - _binary_piece_delete_svg_start)) },
         { InternalResource::ResourceId::IC_BACK,
             ResourceData(_binary_ic_back_svg_start,
-                         static_cast<size_t>(_binary_ic_back_svg_end - _binary_ic_back_svg_start)) },
+                static_cast<size_t>(_binary_ic_back_svg_end - _binary_ic_back_svg_start)) },
         { InternalResource::ResourceId::IC_MORE,
             ResourceData(_binary_ic_more_svg_start,
                 static_cast<size_t>(_binary_ic_more_svg_end - _binary_ic_more_svg_start)) },

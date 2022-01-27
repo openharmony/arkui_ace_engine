@@ -712,3 +712,9 @@ var SeekMode;
   SeekMode[SeekMode["ClosestSync"] = 2] = "ClosestSync";
   SeekMode[SeekMode["Closest"] = 3] = "Closest";
 })(SeekMode || (SeekMode = {}));
+
+var SideBarContainerStyle;
+(function (SideBarContainerStyle) {
+  SideBarContainerStyle[SideBarContainerStyle["Overlay"] = 1] = "Overlay";
+  SideBarContainerStyle[SideBarContainerStyle["Embed"] = 0] = "Embed";
+})(SideBarContainerStyle || (SideBarContainerStyle = {}));
