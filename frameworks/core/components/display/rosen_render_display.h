@@ -45,6 +45,7 @@ public:
     {
         return true;
     }
+    void OnRemove() override;
 
 protected:
     void OnOpacityAnimationCallback();
