@@ -19,6 +19,9 @@
         ],
         "rom": "25600KB",
         "ram": "102400KB",
+        "hisysevent_config":[
+            "//foundation/ace/ace_engine/adapter/ohos/build/hisysevent.yaml"
+        ],
         "deps": {
             "components": [
                 "hiviewdfx_hilog_native",
