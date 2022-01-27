@@ -44,12 +44,13 @@ void JSTextTimer::Create(const JSCallbackInfo& info)
     bool isCountDown = tempIsCountDown->ToBoolean();
     timerComponent->SetIsCountDown(isCountDown);
 
-    double inputCount = 0;
-    auto count = paramObject->GetProperty("count");
-    if (count->IsNumber()) {
-        if (!isCountDown || (isCountDown && count->IsNumber() > 0)) {
-            inputCount = count->ToNumber<double>();
-            timerComponent->SetInputCount(inputCount);
+    if (isCountDown) {
+        auto count = paramObject->GetProperty("count");
+        if (count->IsNumber()) {
+            double inputCount = count->ToNumber<double>();
+            if (inputCount > 0) {
+                timerComponent->SetInputCount(inputCount);
+            }
         }
     }
 
@@ -76,6 +77,8 @@ void JSTextTimer::JSBind(BindingTarget globalObj)
     JSClass<JSTextTimer>::StaticMethod("fontStyle", &JSTextTimer::SetFontStyle, opt);
     JSClass<JSTextTimer>::StaticMethod("fontFamily", &JSTextTimer::SetFontFamily, opt);
     JSClass<JSTextTimer>::StaticMethod("onTimer", &JSTextTimer::OnTimer);
+    JSClass<JSTextTimer>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSTextTimer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextTimer>::Inherit<JSViewAbstract>();
     JSClass<JSTextTimer>::Bind<>(globalObj);
 }

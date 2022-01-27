@@ -70,6 +70,9 @@ void RenderPickerOption::Update(const RefPtr<Component>& component)
         hoverDecoration_->SetBackgroundColor(theme->GetHoverColor());
     }
     optionSize_ = theme->GetOptionSize(option->GetSelected());
+    if (!NearZero(NormalizeToPx(option->GetFixHeight()))) {
+        optionSize_.SetHeight(NormalizeToPx(option->GetFixHeight()));
+    }
     optionSizeUnit_ = theme->GetOptionSizeUnit();
     optionPadding_ = theme->GetOptionPadding();
     textComponent_ = option->GetTextComponent();

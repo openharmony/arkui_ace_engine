@@ -389,6 +389,16 @@ Offset RenderDialogTween::ComputeChildPosition(const Size& childSize) const
 
     Offset dialogOffset =
         Offset(NormalizePercentToPx(offset_.GetX(), false, true), NormalizePercentToPx(offset_.GetY(), true, true));
+    if (offset_.GetX().Unit() == DimensionUnit::PERCENT) {
+        dialogOffset.SetX(offset_.GetX().Value() * childSize.Width());
+    } else {
+        dialogOffset.SetX(NormalizeToPx(offset_.GetX()));
+    }
+    if (offset_.GetY().Unit() == DimensionUnit::PERCENT) {
+        dialogOffset.SetY(offset_.GetY().Value() * childSize.Height());
+    } else {
+        dialogOffset.SetY(NormalizeToPx(offset_.GetY()));
+    }
     if (init_) {
         if (SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
             return topLeftPoint + dialogOffset;

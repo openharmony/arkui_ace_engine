@@ -21,7 +21,6 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/picker/picker_base_component.h"
-#include "core/components/picker/picker_text_component.h"
 #include "core/components/picker/picker_theme.h"
 
 namespace OHOS::Ace::Framework {
@@ -56,7 +55,6 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
     }
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto getValue = paramObject->GetProperty("value");
     auto getSelected = paramObject->GetProperty("selected");
     JSRef<JSArray> getRange = paramObject->GetProperty("range");
     std::vector<std::string> getRangeVector;
@@ -67,6 +65,10 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
 
     if (!ParseJsInteger(getSelected, selected)) {
         LOGE("parse selected value failed");
+    }
+
+    if (selected < 0 || selected >= (int)getRangeVector.size()) {
+        LOGE("selected is out of range");
     }
 
     RefPtr<Component> pickerTextComponent = AceType::MakeRefPtr<OHOS::Ace::PickerTextComponent>();
@@ -150,38 +152,13 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
         return;
     }
 
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto getValue = paramObject->GetProperty("value");
-    auto getSelected = paramObject->GetProperty("selected");
-    auto defaultHeight = paramObject->GetProperty("defaultPickerItemHeight");
-    JSRef<JSArray> getRange = paramObject->GetProperty("range");
-    std::vector<std::string> getRangeVector;
-    if (!JSViewAbstract::ParseJsStrArray(getRange, getRangeVector)) {
-        LOGE("parse range failed");
-        return;
-    }
-
-    uint32_t selected = 0;
-    if (!JSViewAbstract::ParseJsInteger(getSelected, selected)) {
-        LOGE("parse selected value failed");
-    }
-
     auto PickerText = AceType::MakeRefPtr<PickerTextComponent>();
     if (!PickerText) {
         LOGE("PickerText Component is null");
         return;
     }
-
-    Dimension height;
-    if (defaultHeight->IsNumber() && !JSViewAbstract::ParseJsDimensionFp(defaultHeight, height)) {
-        return;
-    }
-
-    PickerText->SetIsDialog(false);
-    PickerText->SetIsCreateDialogComponent(true);
-    PickerText->SetColumnHeight(height);
-    PickerText->SetSelected(selected);
-    PickerText->SetRange(getRangeVector);
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    ParseText(PickerText, paramObject);
     DialogProperties properties {};
     properties.alignment = DialogAlignment::CENTER;
     properties.customComponent = PickerText;
@@ -199,5 +176,37 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     }
     PickerText->SetDialogName("pickerTextDialog");
     PickerText->OpenDialog(properties);
+}
+
+void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const JSRef<JSObject>& paramObj)
+{
+    auto getSelected = paramObj->GetProperty("selected");
+    auto defaultHeight = paramObj->GetProperty("defaultPickerItemHeight");
+    JSRef<JSArray> getRange = paramObj->GetProperty("range");
+    std::vector<std::string> getRangeVector;
+    if (!JSViewAbstract::ParseJsStrArray(getRange, getRangeVector)) {
+        LOGE("parse range failed");
+        return;
+    }
+
+    uint32_t selected = 0;
+    if (!JSViewAbstract::ParseJsInteger(getSelected, selected)) {
+        LOGE("parse selected value failed");
+    }
+
+    if (selected < 0 || selected >= (int)getRangeVector.size()) {
+        LOGE("selected is out of range");
+    }
+
+    Dimension height;
+    if (defaultHeight->IsNumber() && !JSViewAbstract::ParseJsDimensionFp(defaultHeight, height)) {
+        return;
+    }
+
+    component->SetIsDialog(false);
+    component->SetIsCreateDialogComponent(true);
+    component->SetColumnHeight(height);
+    component->SetSelected(selected);
+    component->SetRange(getRangeVector);
 }
 } // namespace OHOS::Ace::Framework
