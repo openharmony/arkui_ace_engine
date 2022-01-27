@@ -101,6 +101,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sheet.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_side_bar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_slider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
@@ -857,6 +858,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSScroller::JSBind(globalObj);
     JSScrollBar::JSBind(globalObj),
     JSToggle::JSBind(globalObj);
+    JSSideBar::JSBind(globalObj);
     JSSlider::JSBind(globalObj);
     JSTextPicker::JSBind(globalObj);
     JSBlank::JSBind(globalObj);

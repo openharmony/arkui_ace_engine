@@ -96,6 +96,12 @@ public:
         return *this;
     }
 
+    Size& MinusWidth(double width)
+    {
+        width_ -= width;
+        return *this;
+    }
+
     bool IsValid() const
     {
         return width_ > 0.0 && height_ > 0.0;
