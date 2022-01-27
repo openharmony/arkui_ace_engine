@@ -27,7 +27,7 @@ template("ace_capability_ohos_source_set") {
 
     if (defined(config.enable_system_clipboard) &&
         config.enable_system_clipboard) {
-      external_deps += [
+      external_deps = [
         "ability_runtime:want",
         "ipc:ipc_core",
         "pasteboard_native:pasteboard_client",
