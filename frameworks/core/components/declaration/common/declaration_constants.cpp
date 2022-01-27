@@ -147,6 +147,11 @@ const std::shared_ptr<SearchStyle> DeclarationConstants::DEFAULT_SEARCH_STYLE = 
 const std::shared_ptr<SearchEvent> DeclarationConstants::DEFAULT_SEARCH_EVENT = std::make_shared<SearchEvent>();
 const std::shared_ptr<SearchMethod> DeclarationConstants::DEFAULT_SEARCH_METHOD = std::make_shared<SearchMethod>();
 
+// default value of side bar
+const std::shared_ptr<SideBarContainerAttribute> DeclarationConstants::DEFAULT_SIDE_BAR_ATTR =
+    std::make_shared<SideBarContainerAttribute>();
+const std::shared_ptr<RegionEvent> DeclarationConstants::DEFAULT_REGION_EVENT = std::make_shared<RegionEvent>();
+
 // default value of span
 const std::shared_ptr<SpanAttribute> DeclarationConstants::DEFAULT_SPAN_ATTR = std::make_shared<SpanAttribute>();
 const std::shared_ptr<SpanStyle> DeclarationConstants::DEFAULT_SPAN_STYLE = std::make_shared<SpanStyle>();

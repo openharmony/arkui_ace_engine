@@ -42,7 +42,7 @@ public:
 
     const std::string& GetRequestFocus() const
     {
-        return "";
+        return focusUrl_;
     }
 private:
     std::string focusUrl_;

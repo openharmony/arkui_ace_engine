@@ -111,6 +111,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sheet.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_side_bar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
@@ -814,6 +815,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextArea", JSTextArea::JSBind },
     { "TextInput", JSTextInput::JSBind },
     { "TextClock", JSTextClock::JSBind },
+    { "SideBarContainer", JSSideBar::JSBind },
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     { "QRCode", JSQRCode::JSBind },
     { "PluginComponent", JSPlugin::JSBind },

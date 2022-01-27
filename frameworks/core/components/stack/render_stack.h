@@ -79,6 +79,7 @@ protected:
     Offset GetPositionedChildOffset(const RefPtr<RenderPositioned>& item);
 
     virtual void DetermineStackSize(bool hasNonPositioned);
+    virtual void SetChildrenStatus() {}
 
 private:
     Alignment align_;

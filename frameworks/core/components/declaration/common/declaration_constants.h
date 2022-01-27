@@ -31,6 +31,7 @@
 #include "core/components/declaration/richtext/rich_text_declaration.h"
 #include "core/components/declaration/search/search_declaration.h"
 #include "core/components/declaration/span/span_declaration.h"
+#include "core/components/declaration/side_bar/side_bar_declaration.h"
 #include "core/components/declaration/svg/svg_animate_declaration.h"
 #include "core/components/declaration/svg/svg_base_declaration.h"
 #include "core/components/declaration/svg/svg_circle_declaration.h"
@@ -150,6 +151,10 @@ public:
     static const std::shared_ptr<SearchStyle> DEFAULT_SEARCH_STYLE;
     static const std::shared_ptr<SearchEvent> DEFAULT_SEARCH_EVENT;
     static const std::shared_ptr<SearchMethod> DEFAULT_SEARCH_METHOD;
+
+    // default value of side bar
+    static const std::shared_ptr<SideBarContainerAttribute> DEFAULT_SIDE_BAR_ATTR;
+    static const std::shared_ptr<RegionEvent> DEFAULT_REGION_EVENT;
 
     // default value of span
     static const std::shared_ptr<SpanAttribute> DEFAULT_SPAN_ATTR;
