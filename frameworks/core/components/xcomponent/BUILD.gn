@@ -18,12 +18,15 @@ build_component("xcomponent") {
     "flutter_render_xcomponent.cpp",
     "native_interface_xcomponent_impl.cpp",
     "render_xcomponent.cpp",
+    "render_xcomponent_creator.cpp",
     "resource/native_texture.cpp",
     "resource/xcomponent_delegate.cpp",
     "resource/xcomponent_resource.cpp",
     "xcomponent_component.cpp",
     "xcomponent_element.cpp",
   ]
+
+  rosen_sources = [ "rosen_render_xcomponent.cpp" ]
 
   if (is_standard_system && !use_mingw_win && !use_mac) {
     include_dirs = [

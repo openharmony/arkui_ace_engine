@@ -76,8 +76,6 @@ private:
     void OnXComponentHiddenChange(bool hidden);
 
     bool onLoadDone_ = false;
-    bool hidden_ = false;
-    sptr<Rosen::Window> previewWindow_;
     static std::unordered_map<std::string, uint64_t> surfaceIdMap_;
     RefPtr<XComponentController> xcomponentController_;
     sptr<OHOS::Surface> producerSurface_ = nullptr;

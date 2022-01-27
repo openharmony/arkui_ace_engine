@@ -94,16 +94,6 @@ void RenderXComponent::OnPaintFinish()
     UpdateXComponentLayout();
 }
 
-#ifdef OHOS_STANDARD_SYSTEM
-void RenderXComponent::SetHidden(bool hidden, bool inRecursion)
-{
-    RenderNode::SetHidden(hidden, inRecursion);
-    if (xcomponentHiddenChangeEvent_) {
-        xcomponentHiddenChangeEvent_(hidden);
-    }
-}
-#endif
-
 void RenderXComponent::CreateXComponentPlatformResource()
 {
     if ((delegate_) && (!isCreatePlatformResourceSuccess_) && (!drawSize_.IsHeightInfinite())) {
