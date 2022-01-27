@@ -880,11 +880,11 @@ void JsRegisterViews(BindingTarget globalObj)
     JSTextInputController::JSBind(globalObj);
     JSTextClock::JSBind(globalObj);
     JSMarquee::JSBind(globalObj);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef PLUGIN_COMPONENT_SUPPORTED
     JSPlugin::JSBind(globalObj);
 #endif
     JSSheet::JSBind(globalObj);
-#if defined(FORM_SUPPORTED)
+#ifdef FORM_SUPPORTED
     JSForm::JSBind(globalObj);
 #endif
     JSRect::JSBind(globalObj);
@@ -905,12 +905,12 @@ void JsRegisterViews(BindingTarget globalObj)
     JSCamera::JSBind(globalObj);
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(OHOS_STANDARD_SYSTEM)
+#ifdef WEB_SUPPORTED
     JSWeb::JSBind(globalObj);
     JSWebController::JSBind(globalObj);
 #endif
 #endif
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef XCOMPONENT_SUPPORTED
     JSXComponent::JSBind(globalObj);
     JSXComponentController::JSBind(globalObj);
 #endif

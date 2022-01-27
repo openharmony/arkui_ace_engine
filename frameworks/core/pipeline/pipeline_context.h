@@ -992,7 +992,7 @@ public:
 
     void SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector);
 
-    const std::shared_ptr<OHOS::Rosen::RSUIDirector>& GetRSUIDirector();
+    std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRSUIDirector();
 
     void SetOnVsyncProfiler(const std::function<void(const std::string&)> callback)
     {

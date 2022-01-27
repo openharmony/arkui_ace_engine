@@ -27,7 +27,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
 
@@ -347,7 +347,7 @@ std::function<void()> JSInteractableView::GetRemoteMessageEventCallback(const JS
             // onCall
         } else if (action.compare("route") == 0) {
             // startAbility
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef PLUGIN_COMPONENT_SUPPORTED
             std::vector<std::string> strList;
             SplitString(ability, '/', strList);
             if (strList.size() <= 1) {

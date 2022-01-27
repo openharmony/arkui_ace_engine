@@ -245,9 +245,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     text_ = textField->GetValue();
     showEllipsis_ = textField->ShowEllipsis();
     auto context = context_.Upgrade();
-    clipboardProxyImpl_ = std::make_shared<ClipboardProxyImpl>();
     if (!clipboard_ && context) {
-        ClipboardProxy::GetInstance()->SetDelegate(clipboardProxyImpl_);
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
     }
 

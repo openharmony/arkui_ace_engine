@@ -13,35 +13,16 @@
  * limitations under the License.
  */
 
+#include "adapter/ohos/entrance/capability_registry.h"
+
+#include "adapter/ohos/capability/clipboard/clipboard_impl.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 
 namespace OHOS::Ace {
 
-ClipboardProxy* ClipboardProxy::inst_ = nullptr;
-std::mutex ClipboardProxy::mutex_;
-
-ClipboardProxy* ClipboardProxy::GetInstance()
+void CapabilityRegistry::Register()
 {
-    if (inst_ == nullptr) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (inst_ == nullptr) {
-            inst_ = new ClipboardProxy();
-        }
-    }
-    return inst_;
-}
-
-void ClipboardProxy::SetDelegate(std::unique_ptr<ClipboardInterface>&& delegate)
-{
-    delegate_ = std::move(delegate);
-}
-
-RefPtr<Clipboard> ClipboardProxy::GetClipboard(const RefPtr<TaskExecutor>& taskExecutor) const
-{
-    if (!delegate_) {
-        return nullptr;
-    }
-    return delegate_->GetClipboard(taskExecutor);
+    ClipboardProxy::GetInstance()->SetDelegate(std::make_unique<ClipboardProxyImpl>());
 }
 
 } // namespace OHOS::Ace

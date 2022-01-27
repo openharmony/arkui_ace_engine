@@ -928,7 +928,7 @@ template("ace_skia_ext") {
 
     deps = [
       ":ace_skia_opts_$platform",
-      ":ace_svg_model_ohos",
+      ":ace_svg_model_$platform",
       ":ace_xml",
     ]
 

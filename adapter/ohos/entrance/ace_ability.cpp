@@ -30,6 +30,7 @@
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/log/log.h"
@@ -154,6 +155,7 @@ void AceAbility::OnStart(const Want& want)
         LOGI("Initialize for current process.");
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+        CapabilityRegistry::Register();
     });
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
