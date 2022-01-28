@@ -60,24 +60,24 @@ struct MaybeReferenced<C, true>
 };
 
 template<typename C>
-std::unordered_map<v8::Isolate*, v8::Persistent<v8::FunctionTemplate>> V8Class<C>::functionTemplates_;
+thread_local std::unordered_map<v8::Isolate*, v8::Persistent<v8::FunctionTemplate>> V8Class<C>::functionTemplates_;
 
 template<typename C>
-std::mutex V8Class<C>::mutex_;
+thread_local std::mutex V8Class<C>::mutex_;
 
 template<typename C>
-FunctionCallback V8Class<C>::constructor_ = nullptr;
+thread_local FunctionCallback V8Class<C>::constructor_ = nullptr;
 template<typename C>
-std::unordered_map<std::string, v8::Local<v8::FunctionTemplate>> V8Class<C>::staticPropertyNames_;
+thread_local std::unordered_map<std::string, v8::Local<v8::FunctionTemplate>> V8Class<C>::staticPropertyNames_;
 
 template<typename C>
-JSFunctionCallback V8Class<C>::jsConstructor_ = nullptr;
+thread_local JSFunctionCallback V8Class<C>::jsConstructor_ = nullptr;
 
 template<typename C>
-JSDestructorCallback<C> V8Class<C>::jsDestructor_ = nullptr;
+thread_local JSDestructorCallback<C> V8Class<C>::jsDestructor_ = nullptr;
 
 template<typename C>
-JSGCMarkCallback<C> V8Class<C>::gcMark_ = nullptr;
+thread_local JSGCMarkCallback<C> V8Class<C>::gcMark_ = nullptr;
 
 template<typename C>
 void V8Class<C>::Declare(const char* name)

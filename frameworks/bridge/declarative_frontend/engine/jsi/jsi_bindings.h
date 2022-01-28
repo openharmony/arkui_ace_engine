@@ -136,17 +136,17 @@ private:
         panda::Local<panda::JSValueRef> newTarget, const panda::Local<panda::JSValueRef> argv[], int32_t argc,
         void* data);
 
-    static std::unordered_map<std::string, panda::Global<panda::FunctionRef>> staticFunctions_;
-    static std::unordered_map<std::string, panda::Global<panda::FunctionRef>> customFunctions_;
-    static std::unordered_map<std::string, panda::Global<panda::FunctionRef>> customGetFunctions_;
-    static std::unordered_map<std::string, panda::Global<panda::FunctionRef>> customSetFunctions_;
-    static FunctionCallback constructor_;
-    static JSFunctionCallback jsConstructor_;
-    static JSDestructorCallback<C> jsDestructor_;
-    static JSGCMarkCallback<C> jsGcMark_;
-    static std::string className_;
-    static panda::Global<panda::FunctionRef> classFunction_;
-    static std::vector<shared_ptr<int32_t>> functionIds_;
+    static thread_local std::unordered_map<std::string, panda::Global<panda::FunctionRef>> staticFunctions_;
+    static thread_local std::unordered_map<std::string, panda::Global<panda::FunctionRef>> customFunctions_;
+    static thread_local std::unordered_map<std::string, panda::Global<panda::FunctionRef>> customGetFunctions_;
+    static thread_local std::unordered_map<std::string, panda::Global<panda::FunctionRef>> customSetFunctions_;
+    static thread_local FunctionCallback constructor_;
+    static thread_local JSFunctionCallback jsConstructor_;
+    static thread_local JSDestructorCallback<C> jsDestructor_;
+    static thread_local JSGCMarkCallback<C> jsGcMark_;
+    static thread_local std::string className_;
+    static thread_local panda::Global<panda::FunctionRef> classFunction_;
+    static thread_local std::vector<shared_ptr<int32_t>> functionIds_;
 };
 
 template<typename T>
