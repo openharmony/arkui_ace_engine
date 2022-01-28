@@ -207,6 +207,7 @@ bool RenderPatternLock::AddChoosePoint(Offset offset, int16_t x, int16_t y)
     double distance = (offset - centerOffset).GetDistance();
     if (distance <= (NormalizeToPx(circleRadius_) * SCALE_SELECTED_CIRCLE_RADIUS)) {
         if (!CheckChoosePoint(x, y)) {
+            AddPassPoint(offset, x, y);
             animator_->SetDuration(DOWN_DURATION);
             animator_->Forward();
             choosePoint_.push_back(PatternLockCell(x, y));
@@ -255,5 +256,50 @@ bool RenderPatternLock::CheckAutoReset() const
         return false;
     }
     return true;
+}
+void RenderPatternLock::AddPassPoint(Offset offset, int16_t x, int16_t y)
+{
+    if (choosePoint_.empty()) {
+        return;
+    }
+    passPointCount_ = 0;
+    PatternLockCell lastCell = choosePoint_.back();
+    int16_t lastX = lastCell.GetColumn();
+    int16_t lastY = lastCell.GetRow();
+    int16_t lastCode = lastCell.GetCode();
+    int16_t nowCode = COL_COUNT * (y - 1) + (x - 1);
+    std::vector<PatternLockCell> passPointVec;
+    for (int16_t i = 1; i <= COL_COUNT; i++) {
+        for (int16_t j = 1; j <= COL_COUNT; j++) {
+            PatternLockCell passPoint = PatternLockCell(i, j);
+            if ((passPoint.GetCode() >= nowCode && passPoint.GetCode() >= lastCode) ||
+                (passPoint.GetCode() <= nowCode && passPoint.GetCode() <= lastCode)) {
+                break;
+            }
+            if ((j != y) && (j != lastY) &&
+                ((double(lastX - i) / (lastY - j) == double(i - x) / (j - y)) && !CheckChoosePoint(i, j))) {
+                passPointVec.push_back(passPoint);
+            }
+            if ((j == lastY) && (j == y) && !CheckChoosePoint(i, j)) {
+                passPointVec.push_back(passPoint);
+            }
+        }
+    }
+    size_t passPointLength = passPointVec.size();
+    if (passPointLength == 0) {
+        return;
+    }
+    passPointCount_ = passPointLength;
+    if (nowCode > lastCode) {
+        choosePoint_.push_back(passPointVec.front());
+        if (passPointLength > 1) {
+            choosePoint_.push_back(passPointVec.back());
+        }
+    } else {
+        choosePoint_.push_back(passPointVec.back());
+        if (passPointLength > 1) {
+            choosePoint_.push_back(passPointVec.front());
+        }
+    }
 }
 } // namespace OHOS::Ace::V2

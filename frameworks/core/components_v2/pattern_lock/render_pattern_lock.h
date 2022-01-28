@@ -42,6 +42,7 @@ public:
 
 protected:
     bool AddChoosePoint(Offset offset, int16_t x, int16_t y);
+    void AddPassPoint(Offset offset, int16_t x, int16_t y);
     bool CheckChoosePoint(int16_t x, int16_t y) const;
     bool CheckChoosePointIsLastIndex(int16_t x, int16_t y, int16_t index) const;
     Offset GetCircleCenterByXY(const Offset& offset, int16_t x, int16_t y);
@@ -100,6 +101,7 @@ protected:
     std::vector<PatternLockCell> choosePoint_;
     RefPtr<Animator> animator_;
     bool autoReset_ = true;
+    int16_t passPointCount_ = 0;
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_PATTERN_LOCK_RENDER_PATTERN_LOCK_H

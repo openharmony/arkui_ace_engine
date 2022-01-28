@@ -21,12 +21,14 @@
 #include "core/components_v2/pattern_lock/render_pattern_lock.h"
 #include "core/pipeline/base/render_node.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/test/unittest/mock/mock_render_common.h"
 #define private public
 #define protect public
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace {
 namespace {
+using PatternLockEventCallback = std::function<void(const std::string&,  const BaseEventInfo& info)>;
 constexpr int16_t UT_COL_COUNT = 3;
 constexpr Dimension UT_SIDE_LENGTH = 600.0_vp;
 const double UT_DISTENCE_STEP = UT_SIDE_LENGTH.Value() / 6;
@@ -55,7 +57,30 @@ Offset GetPointOutOfActiveAreaBoundary(const Offset& cellCenter)
 {
     return Offset(cellCenter.GetX() + UT_CIRCLE_ACTIVE_RADIUS.Value() + 1, cellCenter.GetY());
 }
+class TestPatternLockEventHander : public AceEventHandler {
+public:
+    explicit TestPatternLockEventHander(PatternLockEventCallback eventCallback) : eventCallback_(eventCallback) {};
+    ~TestPatternLockEventHander() = default;
 
+    void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param) override {};
+    void HandleAsyncEvent(const EventMarker& eventMarker) override {};
+    void HandleAsyncEvent(const EventMarker& eventMarker, int32_t param) override {};
+    void HandleAsyncEvent(const EventMarker& eventMarker, const BaseEventInfo& info) override
+    {
+        if (eventCallback_) {
+            eventCallback_(eventMarker.GetData().eventId, info);
+        }
+    };
+    void HandleAsyncEvent(const EventMarker& eventMarker, const KeyEvent& keyEvent) override {};
+    void HandleSyncEvent(const EventMarker& eventMarker, bool& result) override {};
+    void HandleSyncEvent(const EventMarker& eventMarker, const BaseEventInfo& info, bool& result) override {};
+    void HandleSyncEvent(const EventMarker& eventMarker, const std::string& param, std::string& result) override {};
+    void HandleSyncEvent(const EventMarker& eventMarker, const KeyEvent& keyEvent, bool& result) override {};
+    void HandleSyncEvent(
+        const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId) override {};
+private:
+    PatternLockEventCallback eventCallback_;
+};
 } // namespace
 class MockRenderPatternLock final : public V2::RenderPatternLock {
     DECLARE_ACE_TYPE(MockRenderPatternLock, RenderPatternLock);
@@ -146,12 +171,22 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+protected:
+    RefPtr<PipelineContext> context_;
+    RefPtr<MockRenderPatternLock> renderPatternLock_;
 };
 void RenderPatternLockTest::SetUpTestCase() {}
 void RenderPatternLockTest::TearDownTestCase() {}
-void RenderPatternLockTest::SetUp() {}
-void RenderPatternLockTest::TearDown() {}
-
+void RenderPatternLockTest::SetUp()
+{
+    context_= MockRenderCommon::GetMockContext();
+    renderPatternLock_ = AceType::MakeRefPtr<MockRenderPatternLock>();
+    renderPatternLock_->Attach(context_);
+}
+void RenderPatternLockTest::TearDown()
+{
+    context_ = nullptr;
+}
 /**
  * @tc.name: RenderPatternLockUpdate001
  * @tc.desc:RenderPatternLock  Update from Component params
@@ -297,7 +332,7 @@ HWTEST_F(RenderPatternLockTest, RenderPatternLockTouchDown001_InActiveArea, Test
 
     // Touch all cell to test if the cell can been selected.
     for (int j = 0; j < testCount; j++) {
-        for (int i = 0; i < std::size(UT_CELLS_CENTER_POINT); i++) {
+        for (size_t i = 0; i < std::size(UT_CELLS_CENTER_POINT); i++) {
             offset = GetRandomPointInActiveArea(UT_CELLS_CENTER_POINT[i]);
             renderPatternLock->MockHandleCellTouchDown(offset);
             EXPECT_TRUE(renderPatternLock->GetCellCenter() == offset);
@@ -322,7 +357,7 @@ HWTEST_F(RenderPatternLockTest, RenderPatternLockTouchDown002_InActiveAreaBounda
     renderPatternLock->Update(patternLock);
 
     // Touch all cell to test if the cell can been selected.
-    for (int i = 0; i < std::size(UT_CELLS_CENTER_POINT); i++) {
+    for (size_t i = 0; i < std::size(UT_CELLS_CENTER_POINT); i++) {
         renderPatternLock->MockHandleCellTouchDown(GetPointInActiveAreaBoundary(UT_CELLS_CENTER_POINT[i]));
         EXPECT_TRUE(renderPatternLock->GetIsMoveEventValid());
         EXPECT_EQ(renderPatternLock->GetChoosePoint().size(), 1);
@@ -343,7 +378,7 @@ HWTEST_F(RenderPatternLockTest, RenderPatternLockTouchDown003_OutOfActiveAreaBou
     renderPatternLock->Update(patternLock);
 
     // Touch all cell to test if the cell can been selected.
-    for (int i = 0; i < std::size(UT_CELLS_CENTER_POINT); i++) {
+    for (size_t i = 0; i < std::size(UT_CELLS_CENTER_POINT); i++) {
         renderPatternLock->MockHandleCellTouchDown(GetPointOutOfActiveAreaBoundary(UT_CELLS_CENTER_POINT[i]));
         EXPECT_TRUE(renderPatternLock->GetIsMoveEventValid());
         EXPECT_EQ(renderPatternLock->GetChoosePoint().size(), 0);
@@ -396,7 +431,7 @@ HWTEST_F(RenderPatternLockTest, RenderPatternLockTouchMove002_IntoActiveArea, Te
     Offset offset;
 
     // Touch all cell to test if the cell can been selected.
-    for (int i = 0; i < std::size(UT_CELLS_CENTER_POINT); i++) {
+    for (size_t i = 0; i < std::size(UT_CELLS_CENTER_POINT); i++) {
         offset = GetRandomPointInActiveArea(UT_CELLS_CENTER_POINT[i]);
         renderPatternLock->MockHandleCellTouchMove(offset);
         EXPECT_TRUE(renderPatternLock->GetCellCenter() == offset);
@@ -422,7 +457,7 @@ HWTEST_F(RenderPatternLockTest, RenderPatternLockTouchMove003_ToActiveAreaBounda
     EXPECT_EQ(renderPatternLock->GetChoosePoint().size(), 0);
 
     // Touch all cell to test if the cell can been selected.
-    for (int i = 0; i < std::size(UT_CELLS_CENTER_POINT); i++) {
+    for (size_t i = 0; i < std::size(UT_CELLS_CENTER_POINT); i++) {
         renderPatternLock->MockHandleCellTouchMove(GetPointInActiveAreaBoundary(UT_CELLS_CENTER_POINT[i]));
         EXPECT_EQ(renderPatternLock->GetChoosePoint().size(), i + 1);
         EXPECT_EQ(renderPatternLock->GetChoosePoint()[i].GetCode(), UT_CELLS_CODE[i]);
@@ -446,7 +481,7 @@ HWTEST_F(RenderPatternLockTest, RenderPatternLockTouchMove004_ToOutOfActiveAreaB
     EXPECT_EQ(renderPatternLock->GetChoosePoint().size(), 0);
 
     // Touch all cell to test if the cell can been selected.
-    for (int i = 0; i < std::size(UT_CELLS_CENTER_POINT); i++) {
+    for (size_t i = 0; i < std::size(UT_CELLS_CENTER_POINT); i++) {
         renderPatternLock->MockHandleCellTouchMove(GetPointOutOfActiveAreaBoundary(UT_CELLS_CENTER_POINT[i]));
         EXPECT_EQ(renderPatternLock->GetChoosePoint().size(), 0);
     }
@@ -466,7 +501,7 @@ HWTEST_F(RenderPatternLockTest, RenderPatternLockTouchMove005_TouchSameCell, Tes
 
     renderPatternLock->MockHandleCellTouchDown(Offset::Zero());
 
-    for (int i = 0; i < std::size(UT_CELLS_CENTER_POINT); i++) {
+    for (size_t i = 0; i < std::size(UT_CELLS_CENTER_POINT); i++) {
         for (int j = 0; j < NUM_INT_TWO; j++) {
             renderPatternLock->MockHandleCellTouchMove(GetRandomPointInActiveArea(UT_CELLS_CENTER_POINT[i]));
             EXPECT_EQ(renderPatternLock->GetChoosePoint().size(), i + 1);
@@ -524,5 +559,30 @@ HWTEST_F(RenderPatternLockTest, RenderPatternLockHandleReset002_ByController, Te
 
     controller->Reset();
     EXPECT_EQ(renderPatternLock->GetChoosePoint().size(), 0);
+}
+/**
+ * @tc.name: RenderPatternLockEvent001
+ * @tc.desc: event  return choose point
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPatternLockTest, RenderPatternLockEvent001, TestSize.Level1)
+{
+    std::string lockEventId = "patternCompleteEvent";
+    RefPtr<TestPatternLockEventHander> eventHandler = AceType::MakeRefPtr<TestPatternLockEventHander>(
+        [this, lockEventId](const std::string& eventId, const BaseEventInfo& info) {
+            GTEST_LOG_(INFO) << "RenderPatternLockEvent001 handler run";
+            auto lockEvent = TypeInfoHelper::DynamicCast<V2::PatternCompleteEvent>(&info);
+            EXPECT_EQ(eventId, lockEventId);
+            EXPECT_TRUE(lockEvent->GetInput()[0] == NUM_INT_THREE);
+        });
+
+    context_->RegisterEventHandler(eventHandler);
+    RefPtr<V2::PatternLockComponent> patternLock = AceType::MakeRefPtr<V2::PatternLockComponent>();
+    patternLock->SetPatternCompleteEvent(EventMarker(lockEventId));
+    patternLock->SetSideLength(UT_SIDE_LENGTH);
+    renderPatternLock_->Update(patternLock);
+    renderPatternLock_->PerformLayout();
+    renderPatternLock_->MockHandleCellTouchDown(UT_CELLS_CENTER_POINT[NUM_INT_THREE]);
+    renderPatternLock_->MockHandleCellTouchUp();
 }
 } // namespace OHOS::Ace
