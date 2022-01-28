@@ -34,6 +34,7 @@ TabsComponent::TabsComponent(
     } else {
         controller_ = controller;
     }
+    controller_->SetPageReady(true);
     tabBarIndicator_ = AceType::MakeRefPtr<TabBarIndicatorComponent>();
     tabBar_ = AceType::MakeRefPtr<TabBarComponent>(tabBarChildren_, controller_, tabBarIndicator_);
     tabBar_->SetBarPosition(barPosition);

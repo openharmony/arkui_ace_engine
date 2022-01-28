@@ -23,7 +23,6 @@
 #include "core/pipeline/base/element.h"
 
 namespace OHOS::Ace {
-
 using TabBarChangeListener = std::function<void(int32_t)>;
 
 class ACE_EXPORT TabController : public AceType {
@@ -35,18 +34,18 @@ public:
 
     static RefPtr<TabController> GetController(int32_t id);
 
+    int32_t GetId() const;
+    int32_t GetIndex() const;
+
     void ValidateIndex(int32_t maxIndex);
     void SetPageReady(bool ready);
     void SetIndex(int32_t index);
     void SetIndexByController(int32_t index, bool blockEvent = true);
     void SetIndexByScrollContent(int32_t index);
-    int32_t GetIndex() const;
     void SetContentElement(const RefPtr<Element>& contentElement);
     void SetBarElement(const RefPtr<Element>& barElement);
-    int32_t GetId() const;
     void ChangeDispatch(int32_t index);
-    int32_t GetInitialIndex() const;
-    void SetInitialIndex(int32_t initIndex);
+    bool IsIndexDefined() const;
 
     void OnTabBarChanged(int32_t index)
     {
@@ -62,13 +61,12 @@ public:
 private:
     int32_t id_ = -1;
     int32_t index_ = 0;
-    int32_t initialIndex_ = 0;
     bool pageReady_ = false;
+    bool indexDefined_ = false;
     WeakPtr<Element> contentElement_;
     WeakPtr<Element> barElement_;
     TabBarChangeListener tabBarChangeListener_;
 };
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TAB_BAR_TAB_CONTROLLER_H

@@ -65,7 +65,6 @@ void JSTabs::SetOnChange(const JSCallbackInfo& args)
 void JSTabs::Create(const JSCallbackInfo& info)
 {
     BarPosition barVal = BarPosition::START;
-    int32_t initialIndex = 0;
     RefPtr<TabController> tabController;
     if (info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -88,8 +87,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
             if (!tabController) {
                 tabController = JSTabsController::CreateController();
             }
-            initialIndex = index->ToNumber<int32_t>();
-            tabController->SetInitialIndex(initialIndex);
+            tabController->SetIndex(index->ToNumber<int32_t>());
         }
     }
     std::list<RefPtr<Component>> children;
