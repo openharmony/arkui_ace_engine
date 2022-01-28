@@ -23,17 +23,11 @@
 #include "core/components/video/resource/player.h"
 #include "core/components/video/resource/texture.h"
 #include "core/components/video/texture_component.h"
+#include "core/components/video/video_utils.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/base/element.h"
 
 namespace OHOS::Ace {
-
-enum class SeekMode {
-    SEEK_PREVIOUS_SYNC = 0, // sync to keyframes before the time point.
-    SEEK_NEXT_SYNC, // sync to keyframes after the time point.
-    SEEK_CLOSEST_SYNC, // sync to closest keyframes.
-    SEEK_CLOSEST, // seek to frames closest the time point.
-};
 
 class VideoController : public virtual AceType {
     DECLARE_ACE_TYPE(VideoController, AceType);

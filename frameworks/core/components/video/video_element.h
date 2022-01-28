@@ -83,7 +83,7 @@ private:
     void OnError(const std::string& errorId, const std::string& param);
     void OnPrepared(
         uint32_t width, uint32_t height, bool isPlaying, uint32_t duration, uint32_t currentPos, bool needFireEvent);
-    void OnPlayerStatus(bool isPlaying);
+    void OnPlayerStatus(PlaybackStatus status);
     void OnCurrentTimeChange(uint32_t currentPos);
     void OnCompletion();
     void OnStartBtnClick();

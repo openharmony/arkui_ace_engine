@@ -18,12 +18,45 @@
 
 #include "base/log/log.h"
 
+#include "core/components/video/video_utils.h"
 #include "foundation/multimedia/media_standard/interfaces/innerkits/native/media/include/player.h"
 
 namespace OHOS::Ace {
 namespace {
 
 constexpr int32_t MILLISECONDS_TO_SECONDS = 1000;
+
+PlaybackStatus ConvertToPlaybackStatus(int32_t status)
+{
+    PlaybackStatus result = PlaybackStatus::NONE;
+    switch (status) {
+        case OHOS::Media::PLAYER_STATE_ERROR:
+            result = PlaybackStatus::ERROR;
+            break;
+        case OHOS::Media::PLAYER_IDLE:
+            result = PlaybackStatus::IDLE;
+            break;
+        case OHOS::Media::PLAYER_PREPARED:
+            result = PlaybackStatus::PREPARED;
+            break;
+        case OHOS::Media::PLAYER_STARTED:
+            result = PlaybackStatus::STARTED;
+            break;
+        case OHOS::Media::PLAYER_PAUSED:
+            result = PlaybackStatus::PAUSED;
+            break;
+        case OHOS::Media::PLAYER_STOPPED:
+            result = PlaybackStatus::STOPPED;
+            break;
+        case OHOS::Media::PLAYER_PLAYBACK_COMPLETE:
+            result = PlaybackStatus::PLAYBACK_COMPLETE;
+            break;
+        default:
+            LOGE("status is not supported");
+            break;
+    }
+    return result;
+}
 
 } // namespace
 
@@ -32,7 +65,7 @@ struct MediaPlayerCallback : public Media::PlayerCallback {
 public:
     using PositionUpdatedEvent = std::function<void(uint32_t)>;
     using EndOfStreamEvent = std::function<void()>;
-    using StateChangedEvent = std::function<void(bool)>;
+    using StateChangedEvent = std::function<void(PlaybackStatus)>;
 
     MediaPlayerCallback() = default;
     ~MediaPlayerCallback() = default;
@@ -61,7 +94,7 @@ public:
                 LOGI("OnStateChanged callback");
                 PrintState(static_cast<OHOS::Media::PlayerStates>(extra));
                 if (stateChangedEvent_ != nullptr) {
-                    stateChangedEvent_(extra == OHOS::Media::PLAYER_STARTED);
+                    stateChangedEvent_(ConvertToPlaybackStatus(extra));
                 }
                 break;
             case OHOS::Media::INFO_TYPE_POSITION_UPDATE:
