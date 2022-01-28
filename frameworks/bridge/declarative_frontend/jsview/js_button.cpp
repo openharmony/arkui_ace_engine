@@ -172,7 +172,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("fontFamily", &JSButton::SetFontFamily, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("type", &JSButton::SetType, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("stateEffect", &JSButton::SetStateEffect, MethodOptions::NONE);
-    JSClass<JSButton>::StaticMethod("onClick", &JSButton::JsOnClick);
+    JSClass<JSButton>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSButton>::StaticMethod("remoteMessage", &JSButton::JsRemoteMessage);
     JSClass<JSButton>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSButton>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
