@@ -174,8 +174,8 @@ ErrCode UIServiceMgrClient::CancelDialog(int32_t id)
     return doms->CancelDialog(id);
 }
 
-ErrCode UIServiceMgrClient::ShowAppPickerDialog(const AAFwk::Want& want,
-                                                const std::vector<AppExecFwk::AbilityInfo>& abilityInfos)
+ErrCode UIServiceMgrClient::ShowAppPickerDialog(
+    const AAFwk::Want& want, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos, int32_t userId)
 {
     if (abilityInfos.size() == 0) {
         HILOG_WARN("abilityInfos size is zero");
@@ -192,7 +192,7 @@ ErrCode UIServiceMgrClient::ShowAppPickerDialog(const AAFwk::Want& want,
         offsetX, offsetY, width, height, param.c_str());
     const std::string jsBundleName = "dialog_picker_service";
     return ShowDialog(jsBundleName, param, OHOS::Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW, offsetX, offsetY,
-        width, height, [want](int32_t id, const std::string& event, const std::string& params) mutable {
+        width, height, [want, userId](int32_t id, const std::string& event, const std::string& params) mutable {
             HILOG_DEBUG("dialog callback: event: %{public}s, params: %{public}s", event.c_str(), params.c_str());
             if (event == "SHARE_EVENT") {
                 std::string bundleName;
@@ -208,7 +208,7 @@ ErrCode UIServiceMgrClient::ShowAppPickerDialog(const AAFwk::Want& want,
                 auto abilityClient = AAFwk::AbilityManagerClient::GetInstance();
                 if (abilityClient != nullptr) {
                     HILOG_INFO("dialog callback: %{public}s-%{public}s", bundleName.c_str(), abilityName.c_str());
-                    abilityClient->StartAbility(shareWant);
+                    abilityClient->StartAbility(shareWant, AAFwk::DEFAULT_INVAL_VALUE, userId);
                 }
             }
             Ace::UIServiceMgrClient::GetInstance()->CancelDialog(id);

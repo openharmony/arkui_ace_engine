@@ -61,7 +61,8 @@ public:
 
     ErrCode CancelDialog(int32_t id);
 
-    ErrCode ShowAppPickerDialog(const AAFwk::Want& want, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos);
+    ErrCode ShowAppPickerDialog(
+        const AAFwk::Want& want, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos, int32_t userId);
 
 private:
     /**
