@@ -30,8 +30,19 @@
 
 namespace OHOS::Ace::Platform {
 namespace {
-
 constexpr int32_t DEFAULT_ACTION_ID = 0;
+
+TouchPoint ConvertTouchPoint(flutter::PointerData* pointerItem)
+{
+    TouchPoint touchPoint;
+    // just get the max of width and height
+    touchPoint.size = pointerItem->size; 
+    touchPoint.id = pointerItem->device;
+    touchPoint.force = pointerItem->pressure;
+    touchPoint.x = pointerItem->physical_x;
+    touchPoint.y = pointerItem->physical_y;
+    return touchPoint;
+}
 
 void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>& events)
 {
@@ -48,6 +59,7 @@ void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>
             static_cast<float>(current->physical_y), TouchType::UNKNOWN, time, current->size,
             static_cast<float>(current->pressure), static_cast<int64_t>(current->device)
         };
+        point.pointers.emplace_back(ConvertTouchPoint(current));
         switch (current->change) {
             case flutter::PointerData::Change::kCancel:
                 point.type = TouchType::CANCEL;
