@@ -24,8 +24,8 @@ void JSWebController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWebController>::Declare("WebController");
     JSClass<JSWebController>::CustomMethod("loadUrl", &JSWebController::LoadUrl);
-    JSClass<JSWebController>::CustomMethod("evaluateJavaScript", &JSWebController::ExecuteTypeScript);
-    JSClass<JSWebController>::CustomMethod("loadDataWithBaseURL", &JSWebController::LoadDataWithBaseUrl);
+    JSClass<JSWebController>::CustomMethod("runJavaScript", &JSWebController::ExecuteTypeScript);
+    JSClass<JSWebController>::CustomMethod("loadData", &JSWebController::LoadDataWithBaseUrl);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
 }
 

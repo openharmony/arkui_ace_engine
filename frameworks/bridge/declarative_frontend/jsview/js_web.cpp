@@ -29,14 +29,14 @@ void JSWeb::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWeb>::Declare("Web");
     JSClass<JSWeb>::StaticMethod("create", &JSWeb::Create);
-    JSClass<JSWeb>::StaticMethod("onPageStart", &JSWeb::OnPageStart);
-    JSClass<JSWeb>::StaticMethod("onPageFinish", &JSWeb::OnPageFinish);
-    JSClass<JSWeb>::StaticMethod("onRequestFocus", &JSWeb::OnRequestFocus);
-    JSClass<JSWeb>::StaticMethod("onError", &JSWeb::OnError);
+    JSClass<JSWeb>::StaticMethod("onPageBegin", &JSWeb::OnPageStart);
+    JSClass<JSWeb>::StaticMethod("onPageEnd", &JSWeb::OnPageFinish);
+    JSClass<JSWeb>::StaticMethod("onRequestSelected", &JSWeb::OnRequestFocus);
+    JSClass<JSWeb>::StaticMethod("onErrorReceive", &JSWeb::OnError);
     JSClass<JSWeb>::StaticMethod("onMessage", &JSWeb::OnMessage);
-    JSClass<JSWeb>::StaticMethod("javaScriptEnabled", &JSWeb::JsEnabled);
-    JSClass<JSWeb>::StaticMethod("contentAccessEnabled", &JSWeb::ContentAccessEnabled);
-    JSClass<JSWeb>::StaticMethod("fileAccessEnabled", &JSWeb::FileAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("javaScriptAccess", &JSWeb::JsEnabled);
+    JSClass<JSWeb>::StaticMethod("fileExtendAccess", &JSWeb::ContentAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("fileAccess", &JSWeb::FileAccessEnabled);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
 }
