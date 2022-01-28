@@ -124,6 +124,10 @@ void JsInspectorManager::AssembleJSONTree(std::string& jsonStr)
 std::unique_ptr<JsonValue> JsInspectorManager::GetChildrenJson(RefPtr<AccessibilityNode> node)
 {
     auto jsonNodeArray = JsonUtil::CreateArray(false);
+    if (!node) {
+        LOGW("GetChildrenJson, AccessibilityNode is nullptr");
+        return jsonNodeArray;
+    }
     auto child = node->GetChildList();
     for (auto item = child.begin(); item != child.end(); item++) {
         jsonNodeArray->Put(GetChildJson(*item));
@@ -134,7 +138,7 @@ std::unique_ptr<JsonValue> JsInspectorManager::GetChildrenJson(RefPtr<Accessibil
 std::unique_ptr<JsonValue> JsInspectorManager::GetChildJson(RefPtr<AccessibilityNode> node)
 {
     auto jsonNode = JsonUtil::Create(false);
-    if (node == nullptr) {
+    if (!node) {
         LOGW("GetChildJson, AccessibilityNode is nullptr");
         return jsonNode;
     }
