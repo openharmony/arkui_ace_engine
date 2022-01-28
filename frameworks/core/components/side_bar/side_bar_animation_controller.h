@@ -28,7 +28,7 @@ using AnimationCallback = std::function<void(double)>;
 using StopAnimationCallback = std::function<void()>;
 
 class SideBarAnimation : public AceType {
-    DECLARE_ACE_TYPE(StepperAnimation, AceType);
+    DECLARE_ACE_TYPE(SideBarAnimation, AceType);
 
 public:
     SideBarAnimation(const WeakPtr<PipelineContext>& context, double start, double end, int delay,
