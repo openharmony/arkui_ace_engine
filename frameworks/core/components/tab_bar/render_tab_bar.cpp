@@ -41,9 +41,12 @@ void RenderTabBar::Update(const RefPtr<Component>& component)
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
-    int32_t index = tabBar->GetIndex();
     tabsSize_ = tabBar->GetChildren().size();
-    index_ = (index >= 0 && index < tabsSize_) ? index : 0;
+    auto tabController = tabBar->GetController();
+    if (tabController) {
+        auto index = tabController->GetIndex();
+        index_ = (index >= 0 && index < tabsSize_) ? index : 0;
+    }
     if (initialUpdate_) {
         auto barIndicator = tabBar->GetIndicator();
         if (barIndicator) {
@@ -54,14 +57,6 @@ void RenderTabBar::Update(const RefPtr<Component>& component)
                 indicator_->Update(barIndicator);
                 indicatorPadding_ = barIndicator->GetPadding();
                 indicatorStyle_ = GetIndicatorStyle(barIndicator);
-            }
-        }
-        auto context = context_.Upgrade();
-        if (context && context->GetIsDeclarative()) {
-            auto tabController = tabBar->GetController();
-            if (tabController) {
-                index_ = tabController->GetInitialIndex();
-                tabController->SetIndexByController(tabController->GetInitialIndex());
             }
         }
         initialUpdate_ = false;
@@ -285,26 +280,30 @@ void RenderTabBar::SetIndex(int32_t index, bool force)
 
 void RenderTabBar::Initialize()
 {
-    clickRecognizer_ = AceType::MakeRefPtr<ClickRecognizer>();
-    clickRecognizer_->SetOnClick([weakBar = AceType::WeakClaim(this)](const ClickInfo& info) {
-        auto tabBar = weakBar.Upgrade();
-        if (tabBar) {
-            tabBar->HandleClickedEvent(info);
-        }
-    });
-    scrollable_ = AceType::MakeRefPtr<Scrollable>(
-        [weak = AceType::WeakClaim(this)](double offset, int32_t source) {
-            auto tabBar = weak.Upgrade();
-            if (tabBar && (source != SCROLL_FROM_START)) {
-                return tabBar->HandleScrollablePosition(offset);
-            } else {
-                return false;
+    if (!clickRecognizer_) {
+        clickRecognizer_ = AceType::MakeRefPtr<ClickRecognizer>();
+        clickRecognizer_->SetOnClick([weakBar = AceType::WeakClaim(this)](const ClickInfo& info) {
+            auto tabBar = weakBar.Upgrade();
+            if (tabBar) {
+                tabBar->HandleClickedEvent(info);
             }
-        },
-        isVertical_ ? Axis::VERTICAL : Axis::HORIZONTAL);
-    scrollable_->Initialize(GetContext());
-    scrollable_->SetNodeId(GetAccessibilityNodeId());
-    scrollable_->SetScrollableNode(AceType::WeakClaim(this));
+        });
+    }
+    if (!scrollable_) {
+        scrollable_ = AceType::MakeRefPtr<Scrollable>(
+            [weak = AceType::WeakClaim(this)](double offset, int32_t source) {
+                auto tabBar = weak.Upgrade();
+                if (tabBar && (source != SCROLL_FROM_START)) {
+                    return tabBar->HandleScrollablePosition(offset);
+                } else {
+                    return false;
+                }
+            },
+            isVertical_ ? Axis::VERTICAL : Axis::HORIZONTAL);
+        scrollable_->Initialize(GetContext());
+        scrollable_->SetNodeId(GetAccessibilityNodeId());
+        scrollable_->SetScrollableNode(AceType::WeakClaim(this));
+    }
 
     if (!tabBarSizeAnimation_ && !indicator_) {
         tabBarSizeAnimation_ = AceType::MakeRefPtr<TabBarSizeAnimation>();

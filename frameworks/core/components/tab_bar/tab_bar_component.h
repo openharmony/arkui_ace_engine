@@ -70,14 +70,6 @@ public:
         }
     }
 
-    int32_t GetIndex() const
-    {
-        if (controller_) {
-            return controller_->GetIndex();
-        }
-        return 0;
-    }
-
     void SetController(const RefPtr<TabController>& controller)
     {
         controller_ = controller;
@@ -179,6 +171,7 @@ public:
 
     void InitNavigationBarStyle();
     void InitBottomTabStyle(const RefPtr<TabTheme>& theme);
+    // Called by element on perform build process.
     void BuildItems(std::list<RefPtr<TabBarItemComponent>>& items);
 
 private:

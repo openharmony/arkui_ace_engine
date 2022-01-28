@@ -54,31 +54,36 @@ void TabBarElement::UpdateElement(int32_t index)
 
 void TabBarElement::Update()
 {
-    ComponentGroupElement::Update();
-
     if (component_) {
         RefPtr<TabBarComponent> tabBar = AceType::DynamicCast<TabBarComponent>(component_);
         if (!tabBar) {
             LOGE("TabBarElement::Update: get TabBarComponent failed!");
             return;
         }
-        controller_ = tabBar->GetController();
-        if (controller_) {
-            controller_->SetBarElement(AceType::Claim(this));
-        }
-
         indicatorStyle_ = tabBar->GetIndicator();
         focusIndicatorStyle_ = tabBar->GetFocusIndicator();
-
         tabs_.clear();
         tabBar->BuildItems(tabs_);
+        vertical_ = tabBar->IsVertical();
+        auto controller = tabBar->GetController();
+        if (controller && (controller_ != controller)) {
+            // Get index from old controller before replace.
+            if (!controller->IsIndexDefined() && controller_) {
+                controller->SetIndex(controller_->GetIndex());
+            }
+            controller_ = controller;
+        }
+        if (!controller_) {
+            LOGE("fail to get controller");
+            return;
+        }
+        controller_->SetBarElement(AceType::Claim(this));
         auto domChangeEvent = AceAsyncEvent<void(uint32_t)>::Create(tabBar->GetDomChangeEventId(), GetContext());
         if (domChangeEvent) {
-            int32_t index = controller_ ? controller_->GetIndex() : 0;
-            domChangeEvent(index);
+            domChangeEvent(controller_->GetIndex());
         }
-        vertical_ = tabBar->IsVertical();
     }
+    ComponentGroupElement::Update();
 }
 
 bool TabBarElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect)

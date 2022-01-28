@@ -97,8 +97,6 @@ void TabContentElement::PrepareContent(int32_t index)
 
 void TabContentElement::Update()
 {
-    ComponentGroupElement::Update();
-
     if (NeedUpdate()) {
         RefPtr<TabContentComponent> tabContent = AceType::DynamicCast<TabContentComponent>(component_);
         if (!tabContent) {
@@ -106,13 +104,21 @@ void TabContentElement::Update()
             return;
         }
         contents_ = tabContent->GetChildren();
-        controller_ = tabContent->GetController();
+        auto controller = tabContent->GetController();
+        if (controller && (controller_ != controller)) {
+            // Get index from old controller before replace.
+            if (!controller->IsIndexDefined() && controller_) {
+                controller->SetIndex(controller_->GetIndex());
+            }
+            controller_ = controller;
+        }
         if (!controller_) {
             LOGE("Get controller failed");
             return;
         }
         controller_->SetContentElement(AceType::Claim(this));
     }
+    ComponentGroupElement::Update();
 }
 
 void TabContentElement::PerformBuild()

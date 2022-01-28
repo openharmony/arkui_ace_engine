@@ -37,12 +37,12 @@ void RenderTabContent::Update(const RefPtr<Component>& component)
     }
     auto tabController = tabContent->GetController();
     int32_t count = tabContent->GetChildren().size();
-    int32_t tabIndex = tabController->GetIndex();
-    if (count != contentCount_ && tabIndex >= count) {
+    int32_t tabIndex = tabController ? tabController->GetIndex() : 0;
+    if (count != contentCount_ && tabIndex >= count && tabController) {
         tabController->ValidateIndex(count - 1);
         tabIndex = tabController->GetIndex();
-        currentIndex_ = tabIndex;
     }
+    currentIndex_ = tabIndex;
     contentCount_ = count;
     if (scrollable_ != tabContent->IsScrollable()) {
         if (animator_ && animator_->IsRunning()) {
@@ -53,10 +53,6 @@ void RenderTabContent::Update(const RefPtr<Component>& component)
     scrollDuration_ = tabContent->GetScrollDuration();
     isVertical_ = tabContent->IsVertical();
     SetTextDirection(tabContent->GetTextDirection());
-    if (!isInitialized_) {
-        currentIndex_ = tabIndex;
-        isInitialized_ = true;
-    }
     auto context = context_.Upgrade();
     if (context && context->GetIsDeclarative()) {
         onChangeEvent_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(

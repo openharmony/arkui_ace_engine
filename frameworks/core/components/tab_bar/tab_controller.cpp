@@ -51,9 +51,11 @@ void TabController::SetPageReady(bool ready)
 
 void TabController::SetIndex(int32_t index)
 {
-    if (index_ == index) {
+    if (index_ == index || index < 0) {
+        LOGW("Input index is not valid.");
         return;
     }
+    indexDefined_ = true;
 
     index_ = index;
     if (contentElement_.Upgrade()) {
@@ -70,6 +72,7 @@ void TabController::SetIndexByController(int32_t index, bool blockEvent)
         LOGW("Input index is not valid.");
         return;
     }
+    indexDefined_ = true;
     if (barElement_.Upgrade()) {
         auto tabBar = AceType::DynamicCast<TabBarElement>(barElement_.Upgrade());
         if (tabBar) {
@@ -104,9 +107,11 @@ void TabController::ChangeDispatch(int32_t index)
 
 void TabController::SetIndexByScrollContent(int32_t index)
 {
-    if (index_ == index) {
+    if (index_ == index || index < 0) {
+        LOGW("Input index is not valid.");
         return;
     }
+    indexDefined_ = true;
     index_ = index;
     if (barElement_.Upgrade()) {
         auto tabBar = AceType::DynamicCast<TabBarElement>(barElement_.Upgrade());
@@ -136,14 +141,9 @@ int32_t TabController::GetIndex() const
     return index_;
 }
 
-int32_t TabController::GetInitialIndex() const
+bool TabController::IsIndexDefined() const
 {
-    return initialIndex_;
-}
-
-void TabController::SetInitialIndex(int32_t initIndex)
-{
-    initialIndex_ = initIndex;
+    return indexDefined_;
 }
 
 } // namespace OHOS::Ace
