@@ -268,18 +268,9 @@ template("declarative_js_engine") {
 
     if (defined(config.plugin_components_support) &&
         config.plugin_components_support) {
-      if (!use_mingw_win && !use_mac) {
-        deps = [
-          "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
-          "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-        ]
-
-        external_deps = [
-          "ability_runtime:ability_manager",
-          "ability_runtime:want",
-        ]
-        sources += [ "jsview/js_plugin.cpp" ]
-      }
+      deps +=
+          [ "$ace_flutter_engine_root:third_party_flutter_engine_$platform" ]
+      sources += [ "jsview/js_plugin.cpp" ]
     }
 
     if (defined(config.use_build_in_js_engine) &&
@@ -309,7 +300,7 @@ template("declarative_js_engine") {
       if (defined(config.plugin_components_support) &&
           config.plugin_components_support) {
         if (!use_mingw_win && !use_mac) {
-          external_deps += [
+          external_deps = [
             "multimedia_image_standard:image",
             "multimedia_image_standard:image_native",
           ]

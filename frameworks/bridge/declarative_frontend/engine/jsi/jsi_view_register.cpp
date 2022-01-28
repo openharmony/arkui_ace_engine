@@ -92,6 +92,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
+#endif
+#ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
@@ -186,6 +188,12 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::EcmaVM* vm, panda::Local<p
     page->SetDeclarativeOnPageDisAppearCallback([view]() { view->FireOnHide(); });
     page->SetDeclarativeOnBackPressCallback([view]() { return view->FireOnBackPress(); });
     page->SetDeclarativeOnPageRefreshCallback([view]() { view->MarkNeedUpdate(); });
+
+    if (page->IsUsePluginComponent()) {
+        if (!page->GetPluginComponentJsonData().empty()) {
+            view->ExecuteUpdateWithValueParams(page->GetPluginComponentJsonData());
+        }
+    }
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -818,10 +826,12 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "SideBarContainer", JSSideBar::JSBind },
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     { "QRCode", JSQRCode::JSBind },
-    { "PluginComponent", JSPlugin::JSBind },
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
 #endif
+#endif
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+    { "PluginComponent", JSPlugin::JSBind },
 #endif
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #ifdef WEB_SUPPORTED

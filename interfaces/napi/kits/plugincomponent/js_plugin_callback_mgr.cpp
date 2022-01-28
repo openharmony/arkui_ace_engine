@@ -38,7 +38,7 @@ JSPluginCallbackMgr& JSPluginCallbackMgr::Instance(void)
     return gJSPluginCallbackMgr;
 }
 
-bool JSPluginCallbackMgr::RegisterOnEvent(CallBackType eventType, const AAFwk::Want& want,
+bool JSPluginCallbackMgr::RegisterOnEvent(napi_env env, CallBackType eventType, const AAFwk::Want& want,
     ACECallbackInfo& cbInfo)
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -60,7 +60,7 @@ bool JSPluginCallbackMgr::RegisterOnEvent(CallBackType eventType, const AAFwk::W
     }
 }
 
-bool JSPluginCallbackMgr::RegisterRequestEvent(const AAFwk::Want& want, ACECallbackInfo& cbInfo,
+bool JSPluginCallbackMgr::RegisterRequestEvent(napi_env env, const AAFwk::Want& want, ACECallbackInfo& cbInfo,
     const std::shared_ptr<AceJSPluginRequestParam>& param)
 {
     HILOG_INFO("%{public}s called.", __func__);
@@ -95,5 +95,10 @@ void JSPluginCallbackMgr::UnRegisterEvent(size_t key)
     if (iter != eventList_.end()) {
         eventList_.erase(iter);
     }
+}
+
+void JSPluginCallbackMgr::UnregisterCallBack(napi_env env, const AAFwk::Want& want)
+{
+    PluginComponentManager::GetInstance()->UnregisterCallBack(want);
 }
 }  // namespace OHOS::Ace::Napi

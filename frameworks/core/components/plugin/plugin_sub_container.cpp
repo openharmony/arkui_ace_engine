@@ -77,7 +77,9 @@ void PluginSubContainer::Initialize()
         LOGE("PluginSubContainer::Initialize:jsEngine is nullptr");
         return;
     }
-    jsEngine->AddExtraNativeObject("ability", PluginManager::GetInstance().GetAceAbility());
+    if (!PluginManager::GetInstance().GetAceAbility()) {
+        jsEngine->AddExtraNativeObject("ability", PluginManager::GetInstance().GetAceAbility());
+    }
 
     frontend_->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
     frontend_->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());

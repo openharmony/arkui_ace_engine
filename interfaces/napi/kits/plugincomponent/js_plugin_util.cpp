@@ -903,9 +903,10 @@ ACEAsyncJSCallbackInfo* AceCreateAsyncJSCallbackInfo(napi_env env)
 
     napi_value abilityObj = 0;
     NAPI_CALL(env, napi_get_named_property(env, global, "ability", &abilityObj));
-
     Ability *ability = nullptr;
-    NAPI_CALL(env, napi_get_value_external(env, abilityObj, (void **)&ability));
+    if (abilityObj) {
+        NAPI_CALL(env, napi_get_value_external(env, abilityObj, (void **)&ability));
+    }
 
     ACEAsyncJSCallbackInfo* asyncCallbackInfo = new (std::nothrow) ACEAsyncJSCallbackInfo {
         .cbInfo = {
@@ -920,7 +921,6 @@ ACEAsyncJSCallbackInfo* AceCreateAsyncJSCallbackInfo(napi_env env)
     if (asyncCallbackInfo != nullptr) {
         AceClearThreadReturnData(&asyncCallbackInfo->native_data);
     }
-
     return asyncCallbackInfo;
 }
 
