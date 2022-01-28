@@ -46,13 +46,28 @@ const char INSPECTOR_STYLES[] = "$styles";
 const char INSPECTOR_INNER_DEBUGLINE[] = "debugLine";
 const char INSPECTOR_DEBUGLINE[] = "$debugLine";
 
-std::list<std::string> specialComponentNameV1 = {"dialog", "panel"};
+std::list<std::string> specialComponentNameV1 = { "dialog", "panel" };
 
 } // namespace
 
+std::string GetDeviceTypeStr(const DeviceType& deviceType)
+{
+    std::string deviceName = "";
+    if (deviceType == DeviceType::TV) {
+        deviceName = "TV";
+    } else if (deviceType == DeviceType::WATCH) {
+        deviceName = "Watch";
+    } else if (deviceType == DeviceType::CAR) {
+        deviceName = "Car";
+    } else {
+        deviceName = "Phone";
+    }
+    return deviceName;
+}
+
 void JsInspectorManager::InitializeCallback()
 {
-    auto assembleJSONTreeCallback = [weak = WeakClaim(this)](std::string &jsonTreeStr) {
+    auto assembleJSONTreeCallback = [weak = WeakClaim(this)](std::string& jsonTreeStr) {
         auto jsInspectorManager = weak.Upgrade();
         if (!jsInspectorManager) {
             return false;
@@ -61,7 +76,7 @@ void JsInspectorManager::InitializeCallback()
         return true;
     };
     InspectorClient::GetInstance().RegisterJSONTreeCallback(assembleJSONTreeCallback);
-    auto assembleDefaultJSONTreeCallback = [weak = WeakClaim(this)](std::string &jsonTreeStr) {
+    auto assembleDefaultJSONTreeCallback = [weak = WeakClaim(this)](std::string& jsonTreeStr) {
         auto jsInspectorManager = weak.Upgrade();
         if (!jsInspectorManager) {
             return false;
@@ -81,14 +96,12 @@ void JsInspectorManager::InitializeCallback()
     InspectorClient::GetInstance().RegisterOperateComponentCallback(operateComponentCallback);
 }
 
-// assemble the JSON tree using all depth -1 nodes and root nodes.
+// resurse the child from root node to assemble the JSON tree
 void JsInspectorManager::AssembleJSONTree(std::string& jsonStr)
 {
     auto jsonNode = JsonUtil::Create(true);
-    auto jsonNodeArray = JsonUtil::CreateArray(true);
-    GetNodeJSONStrMap();
-
     jsonNode->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
+
     auto context = GetPipelineContext().Upgrade();
     if (context) {
         float scale = context->GetViewScale();
@@ -98,28 +111,50 @@ void JsInspectorManager::AssembleJSONTree(std::string& jsonStr)
         jsonNode->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
     }
     jsonNode->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
-    auto firstDepthNodeVec = nodeJSONInfoMap_[1];
-    for (auto nodeJSONInfo : firstDepthNodeVec) {
-        auto nodeJSONValue = JsonUtil::ParseJsonString(nodeJSONInfo.second.c_str());
-        jsonNodeArray->Put(nodeJSONValue);
+    auto node = GetAccessibilityNodeFromPage(0);
+    if (!node) {
+        LOGE("get root accessibilityNode failed");
+        return;
     }
-    jsonNode->Put(INSPECTOR_CHILDREN, jsonNodeArray);
+    jsonNode->Put(INSPECTOR_CHILDREN, GetChildrenJson(node));
     jsonStr = jsonNode->ToString();
 }
 
-std::string GetDeviceTypeStr(const DeviceType &deviceType)
+// find children of the current node and combine them with this node to form a JSON array object.
+std::unique_ptr<JsonValue> JsInspectorManager::GetChildrenJson(RefPtr<AccessibilityNode> node)
 {
-    std::string deviceName = "";
-    if (deviceType == DeviceType::TV) {
-        deviceName = "TV";
-    } else if (deviceType == DeviceType::WATCH) {
-        deviceName = "Watch";
-    } else if (deviceType == DeviceType::CAR) {
-        deviceName = "Car";
-    } else {
-        deviceName = "Phone";
+    auto jsonNodeArray = JsonUtil::CreateArray(false);
+    auto child = node->GetChildList();
+    for (auto item = child.begin(); item != child.end(); item++) {
+        jsonNodeArray->Put(GetChildJson(*item));
     }
-    return deviceName;
+    return jsonNodeArray;
+}
+
+std::unique_ptr<JsonValue> JsInspectorManager::GetChildJson(RefPtr<AccessibilityNode> node)
+{
+    auto jsonNode = JsonUtil::Create(false);
+    if (node == nullptr) {
+        LOGW("GetChildJson, AccessibilityNode is nullptr");
+        return jsonNode;
+    }
+    if (node->GetTag() == "inspectDialog") {
+        RemoveAccessibilityNodes(node);
+        return jsonNode;
+    }
+
+    jsonNode->Put(INSPECTOR_TYPE, node->GetTag().c_str());
+    jsonNode->Put(INSPECTOR_ID, node->GetNodeId());
+    jsonNode->Put(INSPECTOR_Z_INDEX, node->GetZIndex());
+    if (GetVersion() == AccessibilityVersion::JS_VERSION) {
+        jsonNode->Put(INSPECTOR_RECT, UpdateNodeRectStrInfo(node).c_str());
+        GetAttrsAndStyles(jsonNode, node);
+    } else {
+        jsonNode->Put(INSPECTOR_RECT, UpdateNodeRectStrInfoV2(node).c_str());
+        GetAttrsAndStylesV2(jsonNode, node);
+    }
+    jsonNode->Put(INSPECTOR_CHILDREN, GetChildrenJson(node));
+    return jsonNode;
 }
 
 // assemble the default attrs and styles for all components
@@ -142,7 +177,7 @@ void JsInspectorManager::AssembleDefaultJSONTree(std::string& jsonStr)
         DOM_NODE_TAG_SWITCH, DOM_NODE_TAG_TAB_BAR, DOM_NODE_TAG_TAB_CONTENT, DOM_NODE_TAG_TABS, DOM_NODE_TAG_TEXT,
         DOM_NODE_TAG_TEXTAREA, DOM_NODE_TAG_TOGGLE, DOM_NODE_TAG_TOOL_BAR, DOM_NODE_TAG_TOOL_BAR_ITEM,
         DOM_NODE_TAG_VIDEO };
-    
+
     auto jsonDefaultValue = JsonUtil::Create(true);
     for (const auto& tag : tagNames) {
         auto jsonDefaultAttrs = JsonUtil::Create(true);
@@ -250,54 +285,6 @@ const WeakPtr<Element>& JsInspectorManager::GetRootElement()
     return InspectorComponentElement->GetElementParent();
 }
 
-void JsInspectorManager::GetNodeJSONStrMap()
-{
-    ClearContainer();
-    DumpNodeTreeInfo(0, 0);
-
-    if (depthNodeIdVec_.empty()) {
-        LOGE("page is empty");
-        return;
-    }
-
-    for (auto depthNodeId : depthNodeIdVec_) {
-        depthNodeIdMap_[depthNodeId.first].push_back(depthNodeId.second);
-    }
-
-    auto maxItem =  std::max_element(depthNodeIdVec_.begin(), depthNodeIdVec_.end());
-    for (int depth = maxItem->first; depth > 0; depth--) {
-        auto depthNodeId = depthNodeIdMap_[depth];
-        for (auto nodeId : depthNodeId) {
-            auto node = GetAccessibilityNodeFromPage(nodeId);
-            if (node == nullptr) {
-                LOGE("GetAccessibilityNodeFromPage is null, nodeId: %{public}d", nodeId);
-                continue;
-            }
-            if (node->GetTag() == "inspectDialog") {
-                RemoveAccessibilityNodes(node);
-                continue;
-            }
-            auto jsonNode = JsonUtil::Create(true);
-            auto jsonNodeArray = JsonUtil::CreateArray(true);
-            jsonNode->Put(INSPECTOR_TYPE, node->GetTag().c_str());
-            jsonNode->Put(INSPECTOR_ID, node->GetNodeId());
-            jsonNode->Put(INSPECTOR_Z_INDEX, node->GetZIndex());
-            if (GetVersion() == AccessibilityVersion::JS_VERSION) {
-                jsonNode->Put(INSPECTOR_RECT, UpdateNodeRectStrInfo(node).c_str());
-                GetAttrsAndStyles(jsonNode, node);
-            } else {
-                jsonNode->Put(INSPECTOR_RECT, UpdateNodeRectStrInfoV2(node).c_str());
-                GetAttrsAndStylesV2(jsonNode, node);
-            }
-            if (node->GetChildList().size() > 0) {
-                GetChildrenJSONArray(depth, node, jsonNodeArray);
-                jsonNode->Put(INSPECTOR_CHILDREN, jsonNodeArray);
-            }
-            nodeJSONInfoMap_[depth].emplace_back(nodeId, jsonNode->ToString());
-        }
-    }
-}
-
 // get attrs and styles from AccessibilityNode to JsonValue
 void JsInspectorManager::GetAttrsAndStyles(std::unique_ptr<JsonValue>& jsonNode, const RefPtr<AccessibilityNode>& node)
 {
@@ -322,8 +309,8 @@ void JsInspectorManager::GetAttrsAndStyles(std::unique_ptr<JsonValue>& jsonNode,
     jsonNode->Put(INSPECTOR_STYLES, styleJsonNode);
 }
 
-void JsInspectorManager::GetAttrsAndStylesV2(std::unique_ptr<JsonValue>& jsonNode,
-                                             const RefPtr<AccessibilityNode>& node)
+void JsInspectorManager::GetAttrsAndStylesV2(
+    std::unique_ptr<JsonValue>& jsonNode, const RefPtr<AccessibilityNode>& node)
 {
     auto weakComposedElement = GetComposedElementFromPage(node->GetNodeId());
     auto composedElement = DynamicCast<V2::InspectorComposedElement>(weakComposedElement.Upgrade());
@@ -344,16 +331,6 @@ void JsInspectorManager::GetAttrsAndStylesV2(std::unique_ptr<JsonValue>& jsonNod
     }
 }
 
-// clear the memory occupied by each item in map and vector.
-void JsInspectorManager::ClearContainer()
-{
-    std::vector<std::pair<int32_t, int32_t>>().swap(depthNodeIdVec_);
-    std::unordered_map<int32_t, std::vector<std::pair<int32_t, std::string>>>().swap(nodeJSONInfoMap_);
-    nodeJSONInfoMap_.clear();
-    std::unordered_map<int32_t, std::vector<int32_t>>().swap(depthNodeIdMap_);
-    depthNodeIdMap_.clear();
-}
-
 std::string JsInspectorManager::UpdateNodeRectStrInfo(const RefPtr<AccessibilityNode> node)
 {
     auto it = std::find(specialComponentNameV1.begin(), specialComponentNameV1.end(), node->GetTag());
@@ -361,26 +338,27 @@ std::string JsInspectorManager::UpdateNodeRectStrInfo(const RefPtr<Accessibility
         node->UpdateRectWithChildRect();
     }
 
-    PositionInfo positionInfo = {0, 0, 0, 0};
+    PositionInfo positionInfo = { 0, 0, 0, 0 };
     if (node->GetTag() == DOM_NODE_TAG_SPAN) {
-        positionInfo = {
-                node->GetParentNode()->GetWidth(), node->GetParentNode()->GetHeight(),
-                node->GetParentNode()->GetLeft(), node->GetParentNode()->GetTop()
-        };
+        positionInfo = { node->GetParentNode()->GetWidth(), node->GetParentNode()->GetHeight(),
+            node->GetParentNode()->GetLeft(), node->GetParentNode()->GetTop() };
     } else {
-        positionInfo = {node->GetWidth(), node->GetHeight(), node->GetLeft(), node->GetTop()};
+        positionInfo = { node->GetWidth(), node->GetHeight(), node->GetLeft(), node->GetTop() };
     }
     if (!node->GetVisible()) {
-        positionInfo = {0, 0, 0, 0};
+        positionInfo = { 0, 0, 0, 0 };
     }
     // the dialog node is hidden, while the position and size of the node are not cleared.
     if (node->GetClearRectInfoFlag() == true) {
-        positionInfo = {0, 0, 0, 0};
+        positionInfo = { 0, 0, 0, 0 };
     }
-    std::string strRec = std::to_string(positionInfo.left).append(",").
-            append(std::to_string(positionInfo.top)).
-            append(",").append(std::to_string(positionInfo.width)).
-            append(",").append(std::to_string(positionInfo.height));
+    std::string strRec = std::to_string(positionInfo.left)
+                             .append(",")
+                             .append(std::to_string(positionInfo.top))
+                             .append(",")
+                             .append(std::to_string(positionInfo.width))
+                             .append(",")
+                             .append(std::to_string(positionInfo.height));
     return strRec;
 }
 
@@ -398,39 +376,6 @@ std::string JsInspectorManager::UpdateNodeRectStrInfoV2(const RefPtr<Accessibili
         return strRec;
     }
     return strRec;
-}
-
-void JsInspectorManager::DumpNodeTreeInfo(int32_t depth, NodeId nodeID)
-{
-    auto node = GetAccessibilityNodeFromPage(nodeID);
-    if (!node) {
-        LOGE("JsInspectorManager::DumpNodeTreeInfo return");
-        return;
-    }
-
-    // get the vector of nodeID per depth
-    depthNodeIdVec_.emplace_back(depth, nodeID);
-    for (const auto& item : node->GetChildList()) {
-        DumpNodeTreeInfo(depth + 1, item->GetNodeId());
-    }
-}
-
-// find children of the current node and combine them with this node to form a JSON array object.
-void JsInspectorManager::GetChildrenJSONArray(
-    int32_t depth, RefPtr<AccessibilityNode> node, std::unique_ptr<JsonValue>& childJSONArray)
-{
-    auto childNodeJSONVec = nodeJSONInfoMap_[depth + 1];
-    auto child = node->GetChildList();
-    for (auto item = child.begin(); item != child.end(); item++) {
-        for (auto iter = childNodeJSONVec.begin(); iter != childNodeJSONVec.end(); iter++) {
-            auto id = (*item)->GetNodeId();
-            if (id == iter->first) {
-                auto childJSONValue = JsonUtil::ParseJsonString(iter->second.c_str());
-                childJSONArray->Put(childJSONValue);
-                break;
-            }
-        }
-    }
 }
 
 std::string JsInspectorManager::ConvertStrToPropertyType(const std::string& typeValue)

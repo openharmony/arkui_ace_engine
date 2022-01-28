@@ -37,26 +37,20 @@ public:
 
 private:
     void AssembleJSONTree(std::string& jsonStr);
+    std::unique_ptr<JsonValue> GetChildrenJson(RefPtr<AccessibilityNode> node);
+    std::unique_ptr<JsonValue> GetChildJson(RefPtr<AccessibilityNode> node);
     void AssembleDefaultJSONTree(std::string& jsonStr);
+
     void OperateComponent(const std::string& attrsJson);
     RefPtr<Component> GetNewComponentWithJsCode(const std::unique_ptr<JsonValue>& root);
     RefPtr<V2::InspectorComposedElement> GetInspectorElementById(NodeId nodeId);
     const WeakPtr<Element>& GetRootElement();
-    void GetNodeJSONStrMap();
     void GetAttrsAndStyles(std::unique_ptr<JsonValue>& jsonNode, const RefPtr<AccessibilityNode>& node);
     void GetAttrsAndStylesV2(std::unique_ptr<JsonValue>& jsonNode, const RefPtr<AccessibilityNode>& node);
-    void ClearContainer();
     std::string UpdateNodeRectStrInfo(const RefPtr<AccessibilityNode> node);
     std::string UpdateNodeRectStrInfoV2(const RefPtr<AccessibilityNode> node);
-    void DumpNodeTreeInfo(int32_t depth, NodeId nodeID);
-    void GetChildrenJSONArray(
-            int32_t depth, RefPtr<AccessibilityNode> node, std::unique_ptr<JsonValue>& childJSONArray);
     std::string ConvertStrToPropertyType(const std::string& typeValue);
     std::string ConvertPseudoClassStyle(const std::string pseudoClassValue);
-
-    std::vector<std::pair<int32_t, int32_t>> depthNodeIdVec_;
-    std::unordered_map<int32_t, std::vector<int32_t>> depthNodeIdMap_;
-    std::unordered_map<int32_t, std::vector<std::pair<int32_t, std::string>>> nodeJSONInfoMap_;
 };
 
 } // namespace OHOS::Ace::Framework
