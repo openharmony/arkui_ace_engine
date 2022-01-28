@@ -42,7 +42,7 @@ void PressRecognizer::OnRejected(size_t touchId)
     state_ = DetectState::READY;
 }
 
-void PressRecognizer::HandleTouchDownEvent(const TouchPoint& event)
+void PressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     LOGD("press recognizer receives touch down event, begin to detect press event");
     if (state_ == DetectState::READY) {
@@ -68,7 +68,7 @@ void PressRecognizer::HandleTouchDownEvent(const TouchPoint& event)
     }
 }
 
-void PressRecognizer::HandleTouchUpEvent(const TouchPoint& event)
+void PressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("press recognizer receives touch up event");
     if (state_ == DetectState::DETECTING) {
@@ -82,7 +82,7 @@ void PressRecognizer::HandleTouchUpEvent(const TouchPoint& event)
     state_ = DetectState::READY;
 }
 
-void PressRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
+void PressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("press recognizer receives touch move event");
     if (state_ == DetectState::DETECTING) {
@@ -99,7 +99,7 @@ void PressRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
     }
 }
 
-void PressRecognizer::HandleTouchCancelEvent(const TouchPoint& event)
+void PressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     LOGD("press recognizer receives touch cancel event");
     if (state_ == DetectState::DETECTING) {

@@ -160,6 +160,9 @@ ohos_unittest("ThemeConstantsTest") {
     "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
     "theme_constants_test.cpp",
     "theme_mock.cpp",
+
+    # mock
+    "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
   ]
 
   # add sources only needed by wearable like watch.

@@ -54,14 +54,14 @@ public:
     }
 
 private:
-    void HandleTouchDownEvent(const TouchPoint& event) override;
-    void HandleTouchUpEvent(const TouchPoint& event) override;
-    void HandleTouchMoveEvent(const TouchPoint& event) override;
-    void HandleTouchCancelEvent(const TouchPoint& event) override;
+    void HandleTouchDownEvent(const TouchEvent& event) override;
+    void HandleTouchUpEvent(const TouchEvent& event) override;
+    void HandleTouchMoveEvent(const TouchEvent& event) override;
+    void HandleTouchCancelEvent(const TouchEvent& event) override;
     void HandleOverdueDeadline();
 
     WeakPtr<PipelineContext> context_;
-    TouchPoint trackPoint_;
+    TouchEvent trackPoint_;
     OnPress onPress_;
     CancelableCallback<void()> deadlineTimer_;
     OnPressCancel onPressCancel_;

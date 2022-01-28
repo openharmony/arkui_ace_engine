@@ -197,7 +197,7 @@ bool Inspector::SendEventByKey(
                 return;
             }
 
-            TouchPoint point {
+            TouchEvent point {
                 .x = static_cast<float>(rect.Left() + rect.Width() / 2),
                 .y = static_cast<float>(rect.Top() + rect.Height() / 2),
                 .type = TouchType::DOWN,
@@ -207,7 +207,7 @@ bool Inspector::SendEventByKey(
 
             switch (action) {
                 case static_cast<int>(AceAction::ACTION_CLICK): {
-                    TouchPoint upPoint {
+                    TouchEvent upPoint {
                         .x = point.x,
                         .y = point.y,
                         .type = TouchType::UP,
@@ -221,7 +221,7 @@ bool Inspector::SendEventByKey(
                     auto&& callback = [weak, point]() {
                         auto refPtr = weak.Upgrade();
                         if (refPtr) {
-                            TouchPoint upPoint {
+                            TouchEvent upPoint {
                                 .x = point.x,
                                 .y = point.y,
                                 .type = TouchType::UP,

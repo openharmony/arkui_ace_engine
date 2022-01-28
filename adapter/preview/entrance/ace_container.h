@@ -172,9 +172,9 @@ public:
 
     bool Dump(const std::vector<std::string>& params) override;
 
-    void UpdateColorMode(ColorMode newColorMode);
+    void UpdateDeviceConfig(const DeviceConfig& deviceConfig);
 
-    void LoadDocument(const std::string& url,  const std::string& componentName);
+    void LoadDocument(const std::string& url, const std::string& componentName);
 
     void RunNativeEngineLoop();
 

@@ -17,6 +17,7 @@
 
 #include "base/log/log.h"
 #include "base/utils/utils.h"
+#include "core/components/container_modal/container_modal_element.h"
 #include "core/components/dialog_modal/dialog_modal_element.h"
 #include "core/components/root/render_root.h"
 #include "core/components/root/root_component.h"
@@ -52,6 +53,13 @@ RefPtr<Element> RootElement::GetOverlayElement(WindowModal windowModal) const
             return RefPtr<OverlayElement>();
         }
         return dialogModal->GetOverlayElement();
+    } else if (windowModal == WindowModal::CONTAINER_MODAL) {
+        auto containerModal = AceType::DynamicCast<ContainerModalElement>(GetFirstChild());
+        if (!containerModal) {
+            LOGE("Get overlay element failed. containerModal element is null!");
+            return RefPtr<OverlayElement>();
+        }
+        return containerModal->GetOverlayElement();
     } else {
         auto stack = GetFirstChild();
         if (!stack) {

@@ -35,10 +35,10 @@ ark_engine = {
 js_engines += [ ark_engine ]
 
 if ("${product_name}" == "rk3566" || "${product_name}" == "rk3568" ||
-    "${product_name}" == "Hi3516DV300") {
+    "${product_name}" == "Hi3516DV300" || "${product_name}" == "ohos-arm64") {
   disable_gpu = true
 } else {
-  disable_gpu = true
+  disable_gpu = false
 }
 use_external_icu = "shared"
 use_curl_download = true
@@ -50,6 +50,7 @@ advance_components_support = false
 form_components_support = true
 plugin_components_support = true
 xcomponent_components_support = true
+pixel_map_support = true
 js_pa_support = true
 connect_server_support = false
 hdc_register_support = true
@@ -59,6 +60,7 @@ enable_standard_input = true
 
 if (defined(is_experiment_build) && is_experiment_build) {
   web_components_support = true
+  enable_system_clipboard = true
 }
 
 if (defined(web_components_support) && web_components_support) {
@@ -71,6 +73,18 @@ if (disable_gpu || enable_rosen_backend) {
 
 if (form_components_support) {
   defines += [ "FORM_SUPPORTED" ]
+}
+
+if (xcomponent_components_support) {
+  defines += [ "XCOMPONENT_SUPPORTED" ]
+}
+
+if (plugin_components_support) {
+  defines += [ "PLUGIN_COMPONENT_SUPPORTED" ]
+}
+
+if (pixel_map_support) {
+  defines += [ "PIXEL_MAP_SUPPORTED" ]
 }
 
 if (enable_rosen_backend) {

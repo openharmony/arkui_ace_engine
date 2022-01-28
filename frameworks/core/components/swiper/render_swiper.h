@@ -551,6 +551,8 @@ private:
     int32_t nextIndex_ = 0;
 
     int32_t showingCount_ = 0;
+
+    RefPtr<Curve> curve_;
 };
 
 } // namespace OHOS::Ace

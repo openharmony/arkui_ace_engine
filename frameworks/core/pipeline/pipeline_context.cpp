@@ -45,6 +45,8 @@
 #include "core/common/thread_checker.h"
 #include "core/components/checkable/render_checkable.h"
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/container_modal/container_modal_component.h"
+#include "core/components/container_modal/container_modal_element.h"
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/custom_paint/render_custom_paint.h"
 #include "core/components/dialog/dialog_component.h"
@@ -61,6 +63,7 @@
 #include "core/components/root/root_component.h"
 #include "core/components/root/root_element.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/components/select_popup/select_popup_component.h"
 #include "core/components/semi_modal/semi_modal_component.h"
 #include "core/components/semi_modal/semi_modal_element.h"
 #include "core/components/semi_modal/semi_modal_theme.h"
@@ -125,7 +128,8 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
 {
     frontendType_ = frontend->GetType();
     RegisterEventHandler(frontend->GetEventHandler());
-    auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](const uint64_t nanoTimestamp, const uint32_t frameCount) {
+    auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](
+                               const uint64_t nanoTimestamp, const uint32_t frameCount) {
         ContainerScope scope(instanceId);
         auto context = weak.Upgrade();
         if (context) {
@@ -271,6 +275,9 @@ void PipelineContext::FlushFocus()
         rootElement_->RequestFocusImmediately();
     }
 
+    if (GetIsDeclarative()) {
+        return;
+    }
     decltype(needRebuildFocusElement_) rebuildElements(std::move(needRebuildFocusElement_));
     for (const auto& elementWeak : rebuildElements) {
         auto element = elementWeak.Upgrade();
@@ -324,6 +331,11 @@ RefPtr<StageElement> PipelineContext::GetStageElement() const
         auto dialogElement = AceType::DynamicCast<DialogModalElement>(rootElement_->GetFirstChild());
         if (dialogElement) {
             return dialogElement->GetStageElement();
+        }
+    } else if (windowModal_ == WindowModal::CONTAINER_MODAL) {
+        auto containerElement = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
+        if (containerElement) {
+            return containerElement->GetStageElement();
         }
     } else {
         auto stack = rootElement_->GetFirstChild();
@@ -705,6 +717,9 @@ RefPtr<Element> PipelineContext::SetupRootElement()
         rootStage->SetAlignment(Alignment::BOTTOM_LEFT);
         auto dialogModal = DialogModalComponent::Create(stack);
         rootComponent = RootComponent::Create(dialogModal);
+    } else if (windowModal_ == WindowModal::CONTAINER_MODAL) {
+        auto containerModal = ContainerModalComponent::Create(AceType::WeakClaim(this), stack);
+        rootComponent = RootComponent::Create(containerModal);
     } else {
         rootComponent = RootComponent::Create(stack);
     }
@@ -947,13 +962,15 @@ void PipelineContext::GetBoundingRectData(int32_t nodeId, Rect& rect)
     }
 }
 
-RefPtr<DialogComponent> PipelineContext::ShowDialog(const DialogProperties& dialogProperties, bool isRightToLeft)
+RefPtr<DialogComponent> PipelineContext::ShowDialog(const DialogProperties& dialogProperties,
+    bool isRightToLeft, const std::string& inspectorTag)
 {
     CHECK_RUN_ON(UI);
     const auto& dialog = DialogBuilder::Build(dialogProperties, AceType::WeakClaim(this));
     if (!dialog) {
         return nullptr;
     }
+    dialog->SetInspectorTag(inspectorTag);
     auto customComponent = dialogProperties.customComponent;
     if (customComponent) {
         dialog->SetCustomChild(customComponent);
@@ -965,6 +982,14 @@ RefPtr<DialogComponent> PipelineContext::ShowDialog(const DialogProperties& dial
     }
     lastStack->PushDialog(dialog);
     return dialog;
+}
+
+void PipelineContext::CloseContextMenu()
+{
+    auto menu = AceType::DynamicCast<SelectPopupComponent>(contextMenu_);
+    if (menu) {
+        menu->HideDialog(SELECT_INVALID_INDEX);
+    }
 }
 
 bool PipelineContext::CanPopPage()
@@ -991,6 +1016,15 @@ void PipelineContext::PopToPage(int32_t pageId)
     auto stageElement = GetStageElement();
     if (stageElement) {
         stageElement->PopToPage(pageId);
+    }
+}
+
+void PipelineContext::RestorePopPage(const RefPtr<PageComponent>& pageComponent)
+{
+    CHECK_RUN_ON(UI);
+    auto stageElement = GetStageElement();
+    if (stageElement) {
+        stageElement->RestorePopPage(pageComponent);
     }
 }
 
@@ -1301,13 +1335,13 @@ void PipelineContext::RemoveScheduleTask(uint32_t id)
     scheduleTasks_.erase(id);
 }
 
-RefPtr<RenderNode> PipelineContext::DragTestAll(const TouchPoint& point)
+RefPtr<RenderNode> PipelineContext::DragTestAll(const TouchEvent& point)
 {
     return DragTest(point, rootElement_->GetRenderNode(), 0);
 }
 
 RefPtr<RenderNode> PipelineContext::DragTest(
-    const TouchPoint& point, const RefPtr<RenderNode>& renderNode, int32_t deep)
+    const TouchEvent& point, const RefPtr<RenderNode>& renderNode, int32_t deep)
 {
     if (AceType::InstanceOf<RenderBox>(renderNode) && renderNode->onDomDragEnter_ && renderNode->IsPointInBox(point)) {
         return renderNode;
@@ -1323,7 +1357,7 @@ RefPtr<RenderNode> PipelineContext::DragTest(
     return nullptr;
 }
 
-void PipelineContext::OnTouchEvent(const TouchPoint& point)
+void PipelineContext::OnTouchEvent(const TouchEvent& point)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
@@ -1396,7 +1430,38 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     }
     rootElement_->HandleSpecifiedKey(event);
     NotifyDestroyEventDismiss();
+    SetShortcutKey(event);
     return eventManager_.DispatchKeyEvent(event, rootElement_);
+}
+
+void PipelineContext::SetShortcutKey(const KeyEvent& event)
+{
+    if (event.action == KeyAction::DOWN) {
+        auto codeValue = static_cast<int32_t>(event.code);
+        if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_LEFT) ||
+            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_RIGHT)) {
+            MarkIsShiftDown(true);
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_LEFT) ||
+            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_RIGHT)) {
+            MarkIsCtrlDown(true);
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_A)) {
+            MarkIsKeyboardA(true);
+            if (subscribeCtrlA_) {
+                subscribeCtrlA_();
+            }
+        }
+    } else if (event.action == KeyAction::UP) {
+        auto codeValue = static_cast<int32_t>(event.code);
+        if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_LEFT) ||
+            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_RIGHT)) {
+            MarkIsShiftDown(false);
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_LEFT) ||
+            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_RIGHT)) {
+            MarkIsCtrlDown(false);
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_A)) {
+            MarkIsKeyboardA(false);
+        }
+    }
 }
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event)
@@ -1922,7 +1987,7 @@ void PipelineContext::NotifyDestroyEventDismiss() const
     }
 }
 
-void PipelineContext::NotifyDispatchTouchEventDismiss(const TouchPoint& event) const
+void PipelineContext::NotifyDispatchTouchEventDismiss(const TouchEvent& event) const
 {
     CHECK_RUN_ON(UI);
     for (auto& iterDispatchTouchEventHander : dispatchTouchEventHandler_) {
@@ -2221,6 +2286,11 @@ void PipelineContext::OnShow()
             if (!context) {
                 return;
             }
+#ifdef ENABLE_ROSEN_BACKEND
+            if (context->rsUIDirector_) {
+                context->rsUIDirector_->GoForeground();
+            }
+#endif
             const auto& rootElement = context->rootElement_;
             if (!rootElement) {
                 LOGE("render element is null!");
@@ -2254,6 +2324,11 @@ void PipelineContext::OnHide()
             if (!context) {
                 return;
             }
+#ifdef ENABLE_ROSEN_BACKEND
+            if (context->rsUIDirector_) {
+                context->rsUIDirector_->GoBackground();
+            }
+#endif
             context->NotifyPopupDismiss();
             const auto& rootElement = context->rootElement_;
             if (!rootElement) {
@@ -3088,7 +3163,7 @@ void PipelineContext::SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector>
 #endif
 }
 
-const std::shared_ptr<OHOS::Rosen::RSUIDirector>& PipelineContext::GetRSUIDirector()
+std::shared_ptr<OHOS::Rosen::RSUIDirector> PipelineContext::GetRSUIDirector()
 {
 #ifdef ENABLE_ROSEN_BACKEND
     return rsUIDirector_;

@@ -38,21 +38,23 @@ template("pa_backend") {
     ]
     deps = [
       "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
+      "//foundation/aafwk/standard/frameworks/kits/appkit:appkit_native",
       "//foundation/aafwk/standard/interfaces/innerkits/base:base",
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common:napi_common",
       "//foundation/ace/napi:ace_napi",
       "//foundation/ace/napi:ace_napi_quickjs",
-      "//foundation/appexecfwk/standard/kits:appkit_native",
       "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
       "//utils/native/base:utils",
     ]
     external_deps = [
-      "aafwk_standard:want",
-      "appexecfwk_standard:appexecfwk_base",
-      "appexecfwk_standard:appexecfwk_core",
-      "appexecfwk_standard:libeventhandler",
+      "ability_runtime:app_manager",
+      "ability_runtime:want",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "eventhandler:libeventhandler",
+      "form_runtime:form_manager",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
       "ipc_js:rpc",

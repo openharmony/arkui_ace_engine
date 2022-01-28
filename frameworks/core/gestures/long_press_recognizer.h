@@ -55,10 +55,10 @@ public:
     }
 
 private:
-    void HandleTouchDownEvent(const TouchPoint& event) override;
-    void HandleTouchUpEvent(const TouchPoint& event) override;
-    void HandleTouchMoveEvent(const TouchPoint& event) override;
-    void HandleTouchCancelEvent(const TouchPoint& event) override;
+    void HandleTouchDownEvent(const TouchEvent& event) override;
+    void HandleTouchUpEvent(const TouchEvent& event) override;
+    void HandleTouchMoveEvent(const TouchEvent& event) override;
+    void HandleTouchCancelEvent(const TouchEvent& event) override;
     bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
     void HandleOverdueDeadline();
     void DeadlineTimer(int32_t time);
@@ -75,7 +75,7 @@ private:
     int32_t duration_ = 500;
     int32_t fingers_ = 1;
     bool repeat_ = false;
-    std::map<int32_t, TouchPoint> touchMap_;
+    std::map<int32_t, TouchEvent> touchMap_;
     int32_t pointsCount_ = 0;
     TimeStamp time_;
     bool pendingEnd_ = false;

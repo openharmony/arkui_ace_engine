@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DIALOG_RENDER_DIALOG_H
 
 #include "core/pipeline/base/render_node.h"
+#include "core/components/dialog/dialog_component.h"
 
 namespace OHOS::Ace {
 
@@ -27,6 +28,8 @@ public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
+private:
+    DialogProperties properties_;
 };
 
 } // namespace OHOS::Ace

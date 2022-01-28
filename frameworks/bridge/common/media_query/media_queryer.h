@@ -26,11 +26,7 @@ namespace OHOS::Ace::Framework {
 
 using MediaFeature = std::unique_ptr<JsonValue>;
 
-#ifndef WINDOWS_PLATFORM
-class ACE_FORCE_EXPORT MediaQueryer {
-#else
-class ACE_PREVIEW_EXPORT MediaQueryer {
-#endif
+class ACE_FORCE_EXPORT_WITH_PREVIEW MediaQueryer {
 public:
     bool MatchCondition(const std::string& condition, const MediaFeature& mediaFeature);
     std::unique_ptr<JsonValue> GetMediaFeature() const;

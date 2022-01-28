@@ -52,6 +52,7 @@ foreach(item, ace_platforms) {
 base_output_path = get_label_info(":gen_js_proxyclass", "target_out_dir")
 jsproxyclass_obj_path = base_output_path + "/js_proxy_class.o"
 jsenumstyle_obj_path = base_output_path + "/js_enum_style.o"
+jscontentstorage_obj_path = base_output_path + "/js_content_storage.o"
 jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
 
 gen_obj("js_proxyclass") {
@@ -60,6 +61,15 @@ gen_obj("js_proxyclass") {
     jsproxyclass_obj_path = base_output_path + "/js_proxy_class.c"
   }
   output = jsproxyclass_obj_path
+  snapshot_dep = []
+}
+
+gen_obj("js_content_storage") {
+  input = "engine/contentStorage.js"
+  if (use_mac || use_mingw_win) {
+    jscontentstorage_obj_path = base_output_path + "/js_content_storage.c"
+  }
+  output = jscontentstorage_obj_path
   snapshot_dep = []
 }
 
@@ -107,6 +117,7 @@ template("declarative_js_engine") {
       "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_hover_function.cpp",
       "engine/functions/js_key_function.cpp",
+      "engine/functions/js_mouse_function.cpp",
       "engine/functions/js_on_area_change_function.cpp",
       "engine/functions/js_page_transition_function.cpp",
       "engine/functions/js_pan_function.cpp",
@@ -129,6 +140,8 @@ template("declarative_js_engine") {
       "jsview/js_canvas_image_data.cpp",
       "jsview/js_canvas_path.cpp",
       "jsview/js_canvas_renderer.cpp",
+      "jsview/js_checkbox.cpp",
+      "jsview/js_checkboxgroup.cpp",
       "jsview/js_circle.cpp",
       "jsview/js_clipboard.cpp",
       "jsview/js_column.cpp",
@@ -189,6 +202,7 @@ template("declarative_js_engine") {
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
       "jsview/js_sheet.cpp",
+      "jsview/js_side_bar.cpp",
       "jsview/js_slider.cpp",
       "jsview/js_sliding_panel.cpp",
       "jsview/js_span.cpp",
@@ -213,6 +227,7 @@ template("declarative_js_engine") {
       "jsview/js_view_context.cpp",
       "jsview/js_view_functions.cpp",
       "jsview/js_view_stack_processor.cpp",
+      "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
       "sharedata/js_share_data.cpp",
       "view_stack_processor.cpp",
@@ -260,8 +275,8 @@ template("declarative_js_engine") {
         ]
 
         external_deps = [
-          "aafwk_standard:ability_manager",
-          "aafwk_standard:want",
+          "ability_runtime:ability_manager",
+          "ability_runtime:want",
         ]
         sources += [ "jsview/js_plugin.cpp" ]
       }
@@ -281,6 +296,7 @@ template("declarative_js_engine") {
     deps += [ "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform" ]
 
     deps += [
+      ":gen_obj_src_js_content_storage",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
     ]
@@ -289,6 +305,21 @@ template("declarative_js_engine") {
 
     if (platform == "windows" || platform == "mac") {
       deps += [ ":gen_obj_src_js_mock_system_plugin" ]
+    } else {
+      if (defined(config.plugin_components_support) &&
+          config.plugin_components_support) {
+        if (!use_mingw_win && !use_mac) {
+          external_deps += [
+            "multimedia_image_standard:image",
+            "multimedia_image_standard:image_native",
+          ]
+        }
+      } else {
+        external_deps = [
+          "multimedia_image_standard:image",
+          "multimedia_image_standard:image_native",
+        ]
+      }
     }
   }
 }

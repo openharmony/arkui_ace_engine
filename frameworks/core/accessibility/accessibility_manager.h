@@ -50,6 +50,7 @@ public:
     virtual RefPtr<AccessibilityNode> CreateAccessibilityNode(
         const std::string& tag, int32_t nodeId, int32_t parentNodeId, int32_t itemIndex) = 0;
     virtual RefPtr<AccessibilityNode> GetAccessibilityNodeById(NodeId nodeId) const = 0;
+    virtual std::string GetInspectorNodeById(NodeId nodeId) const = 0;
     virtual void RemoveAccessibilityNodes(RefPtr<AccessibilityNode>& node) = 0;
     virtual void RemoveAccessibilityNodeById(NodeId nodeId) = 0;
     virtual void ClearPageAccessibilityNodes(int32_t pageId) = 0;

@@ -72,7 +72,7 @@ std::string SystemProperties::brand_ = UNDEFINED_PARAM;
 std::string SystemProperties::manufacturer_ = UNDEFINED_PARAM;
 std::string SystemProperties::model_ = UNDEFINED_PARAM;
 std::string SystemProperties::product_ = UNDEFINED_PARAM;
-std::string SystemProperties::apiVersion_ = "7";
+std::string SystemProperties::apiVersion_ = "8";
 std::string SystemProperties::releaseType_ = UNDEFINED_PARAM;
 std::string SystemProperties::paramDeviceType_ = UNDEFINED_PARAM;
 int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
@@ -137,6 +137,16 @@ void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
 {
     mcc_ = mcc;
     mnc_ = mnc;
+}
+
+bool SystemProperties::IsScoringEnabled(const std::string& name)
+{
+    return false;
+}
+
+bool SystemProperties::GetDebugEnabled()
+{
+    return false;
 }
 
 } // namespace OHOS::Ace

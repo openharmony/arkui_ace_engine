@@ -28,6 +28,8 @@ public:
 
     static shared_ptr<JsValue> JsGetBoundingRect(const shared_ptr<JsRuntime>& runtime, NodeId nodeId);
 
+    static shared_ptr<JsValue> JsGetInspector(const shared_ptr<JsRuntime>& runtime, NodeId nodeId);
+
     static void JsScrollTo(const shared_ptr<JsRuntime>& runtime, const std::string& arguments, NodeId nodeId);
 };
 

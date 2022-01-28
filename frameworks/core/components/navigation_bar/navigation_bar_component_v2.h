@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NAVIGATION_BAR_NAVIGATION_BAR_COMPONENT_V2_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NAVIGATION_BAR_NAVIGATION_BAR_COMPONENT_V2_H
 
+#include "core/components/menu/menu_component.h"
 #include "core/components/navigation_bar/navigation_bar_component_base.h"
 #include "core/components/navigation_bar/navigation_container_component.h"
 #include "core/pipeline/base/composed_component.h"
@@ -56,6 +57,8 @@ private:
     bool AddMenu(const RefPtr<ComponentGroup>& container);
     RefPtr<Component> BuildAnimationContainer(
         const RefPtr<Component>& content, const Dimension& height, const Edge& edge);
+    void BindMoreButtonClickEvent();
+    void AddOption(const RefPtr<ToolBarItem>& menuItem);
 
     RefPtr<NavigationDeclaration> declaration_;
     RefPtr<NavigationBarTheme> theme_;
@@ -66,6 +69,8 @@ private:
 
     RefPtr<ComposedComponent> titleComposed_;
     RefPtr<ComposedComponent> subTitleComposed_;
+    RefPtr<ButtonComponent> moreButton_;
+    RefPtr<MenuComponent> menu_;
     EventMarker backClickMarker_;
     int32_t menuCount_ = 0;
 };

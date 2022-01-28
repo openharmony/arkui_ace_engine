@@ -15,7 +15,9 @@
 
 #include "core/components/stack/stack_element.h"
 
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/bubble/bubble_element.h"
+#include "core/components/dialog/dialog_component.h"
 #include "core/components/dialog/dialog_element.h"
 #include "core/components/drop_filter/drop_filter_element.h"
 #include "core/components/page/page_element.h"
@@ -23,6 +25,9 @@
 #include "core/components/popup/popup_component.h"
 #include "core/components/select_popup/select_popup_element.h"
 #include "core/components/text_overlay/text_overlay_element.h"
+#include "core/components_v2/inspector/inspector_composed_element.h"
+#include "core/components_v2/inspector/inspector_composed_component.h"
+
 namespace OHOS::Ace {
 
 void StackElement::PushInstant(const RefPtr<Component>& newComponent, bool disableTouchEvent)
@@ -84,6 +89,8 @@ bool StackElement::PushDialog(const RefPtr<Component>& newComponent, bool disabl
         context->SendEventToAccessibility(stackEvent);
     }
     PopupComponentInfo pushComponentInfo = { -1, "-1", Operation::DIALOG_PUSH, newComponent };
+    CreateInspectorComponent(pushComponentInfo);
+
     popupComponentInfos_.emplace_back(pushComponentInfo);
     disableTouchEvent_ = disableTouchEvent;
     MarkDirty();
@@ -273,7 +280,10 @@ void StackElement::PerformPopDialog(int32_t id)
 void StackElement::PerformPopDialogById(int32_t id)
 {
     bool hasDialog = std::any_of(children_.begin(), children_.end(),
-        [](const RefPtr<Element>& child) { return AceType::InstanceOf<DialogElement>(child); });
+        [](const RefPtr<Element>& child) {
+            return AceType::InstanceOf<V2::InspectorComposedElement>(child) ||
+            AceType::InstanceOf<DialogElement>(child);
+        });
     if (!hasDialog) {
         EnableTouchEventAndRequestFocus();
         return;
@@ -283,6 +293,14 @@ void StackElement::PerformPopDialogById(int32_t id)
         if (dialogElement && dialogElement->GetDialogId() == id) {
             UpdateChild(*iter, nullptr);
             break;
+        }
+        auto inspectorComposedElement = AceType::DynamicCast<V2::InspectorComposedElement>(*iter);
+        if (inspectorComposedElement) {
+            dialogElement = inspectorComposedElement->GetContentElement<DialogElement>(DialogElement::TypeId());
+            if (dialogElement && dialogElement->GetDialogId() == id) {
+                UpdateChild(inspectorComposedElement, nullptr);
+                break;
+            }
         }
     }
     EnableTouchEventAndRequestFocus();
@@ -403,6 +421,22 @@ void StackElement::EnableTouchEventAndRequestFocus()
     }
     if (IsFocusable()) {
         RequestFocus();
+    }
+}
+
+void StackElement::CreateInspectorComponent(PopupComponentInfo& componentInfo) const
+{
+    auto dialog = AceType::DynamicCast<DialogComponent>(componentInfo.component);
+    if (!dialog) {
+        return;
+    }
+    auto inspectorTag = dialog->GetInspectorTag();
+    if (V2::InspectorComposedComponent::HasInspectorFinished(inspectorTag)) {
+        auto composedComponent =
+            AceType::MakeRefPtr<V2::InspectorComposedComponent>(std::to_string(dialog->GetDialogId()) +
+            inspectorTag, inspectorTag);
+        composedComponent->SetChild(componentInfo.component);
+        componentInfo.component = composedComponent;
     }
 }
 

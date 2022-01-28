@@ -124,7 +124,7 @@ private:
     Method isPagePathInvalidMethod_;
     State state_ {State::WAITINGFORSIZE};
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
-    std::shared_ptr<WebView> webview_;
+    std::shared_ptr<OHOS::WebView::WebView> webview_;
     sptr<Rosen::Window> window_;
     bool isCreateWebView_ = false;
 

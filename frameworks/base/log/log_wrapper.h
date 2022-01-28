@@ -21,6 +21,7 @@
 #include <string>
 
 #include "base/utils/macros.h"
+#include "base/utils/system_properties.h"
 
 #ifdef ACE_INSTANCE_LOG
 #define ACE_FMT_PREFIX "[%{private}s(%{private}s)-(%{public}d)] "
@@ -39,18 +40,14 @@
         }                                                                                                       \
     } while (0)
 
-#ifdef ACE_DEBUG_LOG
 #define LOGD(fmt, ...) PRINT_LOG(DEBUG, fmt, ##__VA_ARGS__)
-#else
-#define LOGD(fmt, ...)
-#endif
-
 #define LOGI(fmt, ...) PRINT_LOG(INFO, fmt, ##__VA_ARGS__)
 #define LOGW(fmt, ...) PRINT_LOG(WARN, fmt, ##__VA_ARGS__)
 #define LOGE(fmt, ...) PRINT_LOG(ERROR, fmt, ##__VA_ARGS__)
 #define LOGF(fmt, ...) PRINT_LOG(FATAL, fmt, ##__VA_ARGS__)
 
 #define LOG_DESTROY() LOGI("destroyed")
+#define LOG_FUNCTION() LOGD("function track: %{public}s", __FUNCTION__)
 
 #define PRINT_APP_LOG(level, fmt, ...) \
     OHOS::Ace::LogWrapper::PrintLog(OHOS::Ace::LogDomain::JS_APP, OHOS::Ace::LogLevel::level, fmt, ##__VA_ARGS__)
@@ -76,10 +73,13 @@ enum class LogLevel : uint32_t {
     FATAL,
 };
 
-class ACE_FORCE_EXPORT LogWrapper final {
+class ACE_FORCE_EXPORT_WITH_PREVIEW LogWrapper final {
 public:
     static bool JudgeLevel(LogLevel level)
     {
+        if (level == LogLevel::DEBUG) {
+            return SystemProperties::GetDebugEnabled();
+        }
         return level_ <= level;
     }
 

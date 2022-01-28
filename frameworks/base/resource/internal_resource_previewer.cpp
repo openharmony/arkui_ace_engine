@@ -295,6 +295,31 @@ extern uint8_t* _binary_fa_black_clock_widget_minute_png_end;
 extern uint8_t _binary_fa_black_clock_widget_second_png_start[];
 extern uint8_t* _binary_fa_black_clock_widget_second_png_end;
 
+// binary/ic_public_drawer.svg
+// Use objcopy transform to compiled object file.
+// The following parameters represent the beginning and end of the file.
+extern uint8_t _binary_ic_public_drawer_svg_start[];
+extern uint8_t _binary_ic_public_drawer_svg_end[];
+// binary/container_modal_window_close.svg
+extern uint8_t _binary_container_modal_window_close_svg_start[];
+extern uint8_t _binary_container_modal_window_close_svg_end[];
+
+// binary/container_modal_window_maximize.svg
+extern uint8_t _binary_container_modal_window_maximize_svg_start[];
+extern uint8_t _binary_container_modal_window_maximize_svg_end[];
+
+// binary/container_modal_window_minimize.svg
+extern uint8_t _binary_container_modal_window_minimize_svg_start[];
+extern uint8_t _binary_container_modal_window_minimize_svg_end[];
+
+// binary/container_modal_window_recover.svg
+extern uint8_t _binary_container_modal_window_recover_svg_start[];
+extern uint8_t _binary_container_modal_window_recover_svg_end[];
+
+// binary/container_modal_window_split_left.svg
+extern uint8_t _binary_container_modal_window_split_left_svg_start[];
+extern uint8_t _binary_container_modal_window_split_left_svg_end[];
+
 namespace OHOS::Ace {
 namespace {
 
@@ -425,7 +450,7 @@ const uint8_t* InternalResource::GetResource(const ResourceId id, size_t& size) 
                 static_cast<size_t>(_binary_piece_delete_svg_end - _binary_piece_delete_svg_start)) },
         { InternalResource::ResourceId::IC_BACK,
             ResourceData(_binary_ic_back_svg_start,
-                         static_cast<size_t>(_binary_ic_back_svg_end - _binary_ic_back_svg_start)) },
+                static_cast<size_t>(_binary_ic_back_svg_end - _binary_ic_back_svg_start)) },
         { InternalResource::ResourceId::IC_MORE,
             ResourceData(_binary_ic_more_svg_start,
                 static_cast<size_t>(_binary_ic_more_svg_end - _binary_ic_more_svg_start)) },
@@ -464,6 +489,29 @@ const uint8_t* InternalResource::GetResource(const ResourceId id, size_t& size) 
             ResourceData(_binary_fa_black_clock_widget_second_png_start,
                 static_cast<size_t>(
                     _binary_fa_black_clock_widget_second_png_end - _binary_fa_black_clock_widget_second_png_start)) },
+        { InternalResource::ResourceId::SIDE_BAR,
+            ResourceData(_binary_ic_public_drawer_svg_start,
+                static_cast<size_t>(_binary_ic_public_drawer_svg_end - _binary_ic_public_drawer_svg_start)) },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE,
+            ResourceData(_binary_container_modal_window_close_svg_start,
+                static_cast<size_t>(_binary_container_modal_window_close_svg_end -
+                _binary_container_modal_window_close_svg_start)) },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
+            ResourceData(_binary_container_modal_window_maximize_svg_start,
+                static_cast<size_t>(_binary_container_modal_window_maximize_svg_end -
+                _binary_container_modal_window_maximize_svg_start)) },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE,
+            ResourceData(_binary_container_modal_window_minimize_svg_start,
+                static_cast<size_t>(_binary_container_modal_window_minimize_svg_end -
+                _binary_container_modal_window_minimize_svg_start)) },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER,
+            ResourceData(_binary_container_modal_window_recover_svg_start,
+                static_cast<size_t>(_binary_container_modal_window_recover_svg_end -
+                _binary_container_modal_window_recover_svg_start)) },
+        { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT,
+            ResourceData(_binary_container_modal_window_split_left_svg_start,
+                static_cast<size_t>(_binary_container_modal_window_split_left_svg_end -
+                _binary_container_modal_window_split_left_svg_start)) },
     };
     auto iter = RESOURCE_MAP.find(id);
     if (iter != RESOURCE_MAP.end()) {

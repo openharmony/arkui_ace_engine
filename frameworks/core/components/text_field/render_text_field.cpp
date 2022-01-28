@@ -22,6 +22,7 @@
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/font_manager.h"
 #include "core/components/stack/stack_element.h"
+#include "core/components/text/text_utils.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components/text_overlay/text_overlay_element.h"
 #include "core/event/ace_event_helper.h"
@@ -52,6 +53,8 @@ constexpr int32_t LEFT_SHIFT_CODE = 59;
 constexpr int32_t RIGHT_SHIFT_CODE = 60;
 constexpr int32_t NUMBER_CODE_DIFF = 7;
 constexpr int32_t SHOW_HANDLE_DURATION = 250;
+constexpr int32_t DOUBLE_CLICK_FINGERS = 1;
+constexpr int32_t DOUBLE_CLICK_COUNTS = 2;
 constexpr double FIFTY_PERCENT = 0.5;
 
 constexpr Dimension OFFSET_FOCUS = 4.0_vp;
@@ -408,8 +411,24 @@ void RenderTextField::OnTouchTestHit(
                 client->OnClick(info);
             }
         });
+        clickRecognizer_->SetPriority(GesturePriority::Low);
     }
     result.emplace_back(clickRecognizer_);
+
+    if (!doubleClickRecognizer_) {
+        doubleClickRecognizer_ =
+            AceType::MakeRefPtr<ClickRecognizer>(context_, DOUBLE_CLICK_FINGERS, DOUBLE_CLICK_COUNTS);
+        doubleClickRecognizer_->SetUseCatchMode(catchMode_);
+        auto weak = WeakClaim(this);
+        doubleClickRecognizer_->SetOnClick([weak](const ClickInfo& info) {
+            auto client = weak.Upgrade();
+            if (client) {
+                client->OnDoubleClick(info);
+            }
+        });
+        doubleClickRecognizer_->SetPriority(GesturePriority::High);
+    }
+    result.emplace_back(doubleClickRecognizer_);
 
     if (!longPressRecognizer_) {
         longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(context_);
@@ -420,6 +439,7 @@ void RenderTextField::OnTouchTestHit(
                 client->OnLongPress(info);
             }
         });
+        longPressRecognizer_->SetPriority(GesturePriority::High);
     }
     longPressRecognizer_->SetTouchRestrict(touchRestrict);
     result.emplace_back(longPressRecognizer_);
@@ -548,6 +568,16 @@ bool RenderTextField::SearchAction(const Offset& globalPosition, const Offset& g
         }
     }
     return false;
+}
+
+void RenderTextField::OnDoubleClick(const ClickInfo& clickInfo)
+{
+    auto clickPosition = GetCursorPositionForClick(clickInfo.GetGlobalLocation());
+    auto selection = TextUtils::GetRangeOfSameType(GetEditingValue().text, clickPosition - 1);
+    UpdateSelection(selection.GetStart(), selection.GetEnd());
+    LOGI("text field accept double click, position: %{public}d, selection: %{public}s",
+        clickPosition, selection.ToString().c_str());
+    MarkNeedRender();
 }
 
 void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
@@ -1741,8 +1771,17 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
             } else {
                 if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_A)) {
                     HandleOnCopyAll(nullptr);
-                    isCtrlDown_ = false;
+                } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_C)) {
+                    HandleOnCopy();
+                } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_V)) {
+                    HandleOnPaste();
+                } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_X)) {
+                    HandleOnCut();
+                    MarkNeedLayout();
+                } else {
+                    LOGE("Unknow Event");
                 }
+                isCtrlDown_ = false;
             }
         } else if (codeValue == LEFT_SHIFT_CODE || codeValue == RIGHT_SHIFT_CODE) {
             isShiftDown_ = true;
@@ -1759,6 +1798,7 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
     value.UpdateSelection(
         std::max(GetEditingValue().selection.GetEnd(), 0) + StringUtils::Str8ToStr16(appendElement).length());
     SetEditingValue(std::move(value));
+    MarkNeedLayout();
     return true;
 }
 

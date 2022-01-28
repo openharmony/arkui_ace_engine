@@ -219,6 +219,8 @@ public:
 
     WeakPtr<RenderNode> CheckAxisNode() override;
 
+    int32_t RequestNextFocus(bool vertical, bool reverse);
+
 protected:
     void UpdateAccessibilityAttr();
     bool HandleActionScroll(bool forward);
@@ -341,6 +343,10 @@ protected:
     Offset betweenItemAndBuilder_;
     RefPtr<RenderListItem> selectedDragItem_;
 
+    Offset mouseStartOffset_;
+    Offset mouseEndOffset_;
+    int32_t focusIndex_ = 0;
+
 private:
     bool ActionByScroll(bool forward, ScrollEventBack scrollEventBack);
     void ModifyActionScroll();
@@ -360,6 +366,29 @@ private:
     OnItemDropFunc onItemDrop_;
 
     UpdateBuilderFunc updateBuilder_;
+
+    bool HandleMouseEvent(const MouseEvent& event) override;
+    bool isMultiSelectable_ = false;
+    void ClearMultiSelect();
+    bool mouseIsHover_ = false;
+
+    void MultiSelectWithoutKeyboard(const Rect& selectedZone);
+    void HandleMouseEventWithoutKeyboard(const MouseEvent& event);
+
+    void MultiSelectWhenCtrlDown(const Rect& selectedZone);
+    void HandleMouseEventWhenCtrlDown(const MouseEvent& event);
+    void CollectSelectedItems();
+    std::set<RefPtr<RenderListItem>> selectedItemsWithCtrl_;
+
+    void MultiSelectWhenShiftDown(const Rect& selectedZone);
+    RefPtr<RenderListItem> GetPressItemWhenShiftDown(const Rect& selectedZone);
+    void HandleMouseEventWhenShiftDown(const MouseEvent& event);
+    void MultiSelectAllInRange(const RefPtr<RenderListItem>& firstItem,
+        const RefPtr<RenderListItem>& secondItem);
+    RefPtr<RenderListItem> firstItemWithShift_;
+    RefPtr<RenderListItem> secondItemWithShift_;
+
+    void MultiSelectAllWhenCtrlA();
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderList);
 };

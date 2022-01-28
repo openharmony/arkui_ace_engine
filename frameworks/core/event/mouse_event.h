@@ -115,7 +115,7 @@ struct MouseEvent final {
             .sourceType = sourceType };
     }
 
-    TouchPoint CreateTouchPoint() const
+    TouchEvent CreateTouchPoint() const
     {
         TouchType type = TouchType::UNKNOWN;
         if (action == MouseAction::PRESS) {
@@ -127,10 +127,11 @@ struct MouseEvent final {
         } else {
             type = TouchType::UNKNOWN;
         }
-
         int32_t id = GetId();
-
-        return { .id = id,
+        TouchPoint point {
+            .id = id, .x = x, .y = y, .downTime = time, .size = 0.0, .isPressed = (type == TouchType::DOWN)
+        };
+        TouchEvent event { .id = id,
             .x = x,
             .y = y,
             .type = type,
@@ -138,6 +139,8 @@ struct MouseEvent final {
             .size = 0.0,
             .deviceId = deviceId,
             .sourceType = sourceType };
+        event.pointers.emplace_back(std::move(point));
+        return event;
     }
 
     MouseEvent operator-(const Offset& offset) const

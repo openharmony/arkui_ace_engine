@@ -192,11 +192,12 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
             EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 std::vector<std::string> keys = { "value", "index", "status"};
+                ACE_SCORING_EVENT("TextPicker.show");
                 func->Execute(keys, info);
             });
         PickerText->SetDialogResult(resultId);
     }
-
+    PickerText->SetDialogName("pickerTextDialog");
     PickerText->OpenDialog(properties);
 }
 } // namespace OHOS::Ace::Framework

@@ -76,8 +76,21 @@ void RosenRenderDisplay::OnRSTransition(TransitionType type, unsigned long long 
     }
 }
 
+void RosenRenderDisplay::OnRemove()
+{
+    if (auto rsNodePtr = GetRSNode()) {
+        rsNodePtr->SetAlpha(1);
+        rsNodePtr->SetVisible(true);
+    }
+    RenderDisplay::OnRemove();
+}
+
 void RosenRenderDisplay::ClearRenderObject()
 {
+    if (auto rsNode = GetRSNode()) {
+        rsNode->SetAlpha(1);
+        rsNode->SetVisible(true);
+    }
     RenderDisplay::ClearRenderObject();
     pendingTransitionAppearing_ = false;
 }

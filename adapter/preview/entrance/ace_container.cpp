@@ -175,7 +175,7 @@ void AceContainer::InitializeCallback()
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
 
     auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
-    auto&& touchEventCallback = [weak, id = instanceId_](const TouchPoint& event) {
+    auto&& touchEventCallback = [weak, id = instanceId_](const TouchEvent& event) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
@@ -614,19 +614,26 @@ void AceContainer::SetResourcesPathAndThemeStyle(int32_t instanceId, const std::
     container->resourceInfo_.SetThemeId(themeId);
 }
 
-void AceContainer::UpdateColorMode(ColorMode newColorMode)
+void AceContainer::UpdateDeviceConfig(const DeviceConfig& deviceConfig)
 {
     ContainerScope scope(instanceId_);
+    SystemProperties::InitDeviceType(deviceConfig.deviceType);
+    SystemProperties::SetDeviceOrientation(deviceConfig.orientation == DeviceOrientation::PORTRAIT ? 0 : 1);
+    SystemProperties::SetResolution(deviceConfig.density);
+    SystemProperties::SetColorMode(deviceConfig.colorMode);
     auto resConfig = resourceInfo_.GetResourceConfiguration();
-
-    OHOS::Ace::ColorMode colorMode = static_cast<OHOS::Ace::ColorMode>(newColorMode);
-    SystemProperties::SetColorMode(colorMode);
-    if (resConfig.GetColorMode() == colorMode) {
+    if (resConfig.GetDeviceType() == deviceConfig.deviceType &&
+        resConfig.GetOrientation() == deviceConfig.orientation && resConfig.GetDensity() == deviceConfig.density &&
+        resConfig.GetColorMode() == deviceConfig.colorMode && resConfig.GetFontRatio() == deviceConfig.fontRatio) {
         return;
     } else {
-        resConfig.SetColorMode(colorMode);
+        resConfig.SetDeviceType(deviceConfig.deviceType);
+        resConfig.SetOrientation(deviceConfig.orientation);
+        resConfig.SetDensity(deviceConfig.density);
+        resConfig.SetColorMode(deviceConfig.colorMode);
+        resConfig.SetFontRatio(deviceConfig.fontRatio);
         if (frontend_) {
-            frontend_->SetColorMode(colorMode);
+            frontend_->SetColorMode(deviceConfig.colorMode);
         }
     }
     resourceInfo_.SetResourceConfiguration(resConfig);
@@ -775,9 +782,11 @@ void AceContainer::InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs)
         return;
     }
     auto config = container->GetResourceConfiguration();
+    config.SetDeviceType(SystemProperties::GetDeviceType());
     config.SetOrientation(SystemProperties::GetDevcieOrientation());
     config.SetDensity(runArgs.deviceConfig.density);
-    config.SetDeviceType(SystemProperties::GetDeviceType());
+    config.SetColorMode(runArgs.deviceConfig.colorMode);
+    config.SetFontRatio(runArgs.deviceConfig.fontRatio);
     container->SetResourceConfiguration(config);
 }
 

@@ -247,13 +247,11 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_USE, &DOMNodeCreator<DOMSvgUse> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_VIDEO, &DOMNodeCreator<DOMVideo> },
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #ifdef WEB_SUPPORTED
         { DOM_NODE_TAG_WEB, &DOMNodeCreator<DOMWeb> },
 #endif
 #endif
-#endif
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef XCOMPONENT_SUPPORTED
         { DOM_NODE_TAG_XCOMPONENT, &DOMNodeCreator<DOMXComponent> },
 #endif
     };

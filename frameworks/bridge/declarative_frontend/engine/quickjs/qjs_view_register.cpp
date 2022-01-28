@@ -37,6 +37,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_checkbox.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
@@ -99,6 +101,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sheet.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_side_bar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_slider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
@@ -136,6 +139,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #endif
+#include "frameworks/bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
@@ -274,9 +278,9 @@ static JSValue JsSendEventByKey(JSContext* ctx, JSValueConst new_target, int arg
     return JS_NewBool(ctx, result);
 }
 
-static TouchPoint GetTouchPointFromJS(JSContext* ctx, JSValue value)
+static TouchEvent GetTouchPointFromJS(JSContext* ctx, JSValue value)
 {
-    TouchPoint touchPoint;
+    TouchEvent touchPoint;
 
     auto type = JS_GetPropertyStr(ctx, value, "type");
     auto iType = static_cast<int32_t>(TouchType::UNKNOWN);
@@ -320,7 +324,7 @@ static JSValue JsSendTouchEvent(JSContext* ctx, JSValueConst new_target, int arg
     if (!pipelineContext) {
         return JS_ThrowSyntaxError(ctx, "pipeline is null");
     }
-    TouchPoint touchPoint = GetTouchPointFromJS(ctx, argv[0]);
+    TouchEvent touchPoint = GetTouchPointFromJS(ctx, argv[0]);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); }, TaskExecutor::TaskType::UI);
 
@@ -854,6 +858,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSScroller::JSBind(globalObj);
     JSScrollBar::JSBind(globalObj),
     JSToggle::JSBind(globalObj);
+    JSSideBar::JSBind(globalObj);
     JSSlider::JSBind(globalObj);
     JSTextPicker::JSBind(globalObj);
     JSBlank::JSBind(globalObj);
@@ -877,11 +882,11 @@ void JsRegisterViews(BindingTarget globalObj)
     JSTextInputController::JSBind(globalObj);
     JSTextClock::JSBind(globalObj);
     JSMarquee::JSBind(globalObj);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef PLUGIN_COMPONENT_SUPPORTED
     JSPlugin::JSBind(globalObj);
 #endif
     JSSheet::JSBind(globalObj);
-#if defined(FORM_SUPPORTED)
+#ifdef FORM_SUPPORTED
     JSForm::JSBind(globalObj);
 #endif
     JSRect::JSBind(globalObj);
@@ -902,12 +907,12 @@ void JsRegisterViews(BindingTarget globalObj)
     JSCamera::JSBind(globalObj);
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(OHOS_STANDARD_SYSTEM)
+#ifdef WEB_SUPPORTED
     JSWeb::JSBind(globalObj);
     JSWebController::JSBind(globalObj);
 #endif
 #endif
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef XCOMPONENT_SUPPORTED
     JSXComponent::JSBind(globalObj);
     JSXComponentController::JSBind(globalObj);
 #endif
@@ -929,6 +934,8 @@ void JsRegisterViews(BindingTarget globalObj)
     JSPatternLock::JSBind(globalObj);
     JSPatternLockController::JSBind(globalObj);
     JSTextPickerDialog::JSBind(globalObj);
+    JSCheckbox::JSBind(globalObj);
+    JSCheckboxGroup::JSBind(globalObj);
 
     JSObjectTemplate toggleType;
     toggleType.Constant("Checkbox", 0);
@@ -944,7 +951,7 @@ void JsRegisterViews(BindingTarget globalObj)
 
     JSActionSheet::JSBind(globalObj);
     JSAlertDialog::JSBind(globalObj);
-
+    JSContextMenu::JSBind(globalObj);
     JSAbilityComponent::JSBind(globalObj);
     JSAbilityComponentController::JSBind(globalObj);
 

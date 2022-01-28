@@ -1934,6 +1934,8 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
         return ComponentApiBridge::JsGetScrollOffset(ctx, nodeId);
     } else if (std::strcmp(methodName.get(), "getBoundingClientRect") == 0) {
         return ComponentApiBridge::JsGetBoundingRect(ctx, nodeId);
+    } else if (std::strcmp(methodName.get(), "getInspector") == 0) {
+        return ComponentApiBridge::JsGetInspector(ctx, nodeId);
     } else if (std::strcmp(methodName.get(), "scrollTo") == 0) {
         ComponentApiBridge::JsScrollTo(ctx, args.get(), nodeId);
     } else if (std::strcmp(methodName.get(), "getXComponentContext") == 0) {
@@ -2390,6 +2392,18 @@ JSValue JsGetBoundingClientRect(JSContext* ctx, JSValueConst value, int32_t argc
     return JS_NULL;
 }
 
+JSValue JsGetInspector(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto page = GetStagingPage(ctx);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return JS_NULL;
+    }
+    int32_t nodeId = GetNodeId(ctx, value);
+    ComponentApiBridge::JsGetInspector(ctx, nodeId);
+    return JS_NULL;
+}
+
 JSValue JsCreateElement(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
     int32_t newNodeId = CreateDomElement(ctx, value, argc, argv);
@@ -2402,6 +2416,7 @@ JSValue JsCreateElement(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
     JS_SetPropertyStr(ctx, node, "animate", JS_NewCFunction(ctx, JsAnimate, "animate", 1));
     JS_SetPropertyStr(ctx, node, "getBoundingClientRect",
         JS_NewCFunction(ctx, JsGetBoundingClientRect, "getBoundingClientRect", 1));
+    JS_SetPropertyStr(ctx, node, "getInspector", JS_NewCFunction(ctx, JsGetInspector, "getInspector", 1));
     return node;
 }
 

@@ -255,8 +255,9 @@ void SelectElement::HandleOptionClickedEvent(std::size_t index)
         onChangeCallback_(param);
     }
 
+    std::string value = option->GetValue();
     if (onSelected_) {
-        onSelected_(index);
+        onSelected_(index, value);
     }
 }
 

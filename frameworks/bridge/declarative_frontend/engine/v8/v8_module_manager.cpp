@@ -746,6 +746,30 @@ v8::Isolate* ModuleManager::GetCallbackIsolate(uint32_t callbackId, bool isInter
     }
 }
 
+void ModuleManager::ClearTimerIsolate(v8::Isolate* isolate)
+{
+    for (auto it = callbackIsolateMap_.begin(); it != callbackIsolateMap_.end();) {
+        if (it->second == isolate) {
+            uint32_t index = it->first;
+            callbackFuncMap_.erase(index);
+            callbackArrayMap_.erase(index);
+            callbackIsolateMap_.erase(it++);
+        } else {
+            it++;
+        }
+    }
+    for (auto it = intervalCallbackIsolateMap_.begin(); it != intervalCallbackIsolateMap_.end();) {
+        if (it->second == isolate) {
+            uint32_t index = it->first;
+            intervalCallbackFuncMap_.erase(index);
+            intervalCallbackArrayMap_.erase(index);
+            intervalCallbackIsolateMap_.erase(it++);
+        } else {
+            it++;
+        }
+    }
+}
+
 void ModuleManager::InitTimerModule(v8::Local<v8::Context>& localContext)
 {
     v8::Isolate* isolate = localContext->GetIsolate();

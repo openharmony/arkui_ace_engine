@@ -18,7 +18,6 @@
 namespace OHOS::Ace {
 
 ClipboardProxy* ClipboardProxy::inst_ = nullptr;
-
 std::mutex ClipboardProxy::mutex_;
 
 ClipboardProxy* ClipboardProxy::GetInstance()

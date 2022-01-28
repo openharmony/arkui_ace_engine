@@ -17,6 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_IME_TEXT_SELECTION_H
 
 #include <cstdint>
+#include <iomanip>
+#include <limits>
+#include <sstream>
+#include <string>
 
 #include "core/common/ime/constant.h"
 
@@ -75,6 +79,14 @@ struct TextSelection {
     inline bool IsValid() const
     {
         return baseOffset > -1 && extentOffset > -1;
+    }
+
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << "Selection (" << baseOffset << ", " << extentOffset << ")";
+        std::string output = ss.str();
+        return output;
     }
 
     // May larger than, smaller than or equal to extentOffset.

@@ -17,6 +17,7 @@
 
 #include "base/json/json_util.h"
 #include "core/components/xcomponent/render_xcomponent.h"
+#include "core/components/xcomponent/rosen_render_xcomponent.h"
 #include "core/components/xcomponent/xcomponent_component.h"
 
 namespace OHOS::Ace {
@@ -26,7 +27,6 @@ const char* SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 } // namespace
 
-bool g_onload = false;
 std::unordered_map<std::string, uint64_t> XComponentElement::surfaceIdMap_;
 #endif
 
@@ -77,35 +77,10 @@ void XComponentElement::Prepare(const WeakPtr<Element>& parent)
                     }
             });
 #ifdef OHOS_STANDARD_SYSTEM
-            renderXComponent->SetXComponentHiddenChange([weak = WeakClaim(this)](bool hidden) {
-                    auto xcomponentElement = weak.Upgrade();
-                    if (xcomponentElement) {
-                        xcomponentElement->OnXComponentHiddenChange(hidden);
-                    }
-            });
+            CreateSurface();
 #endif
         }
     }
-
-#ifdef OHOS_STANDARD_SYSTEM
-    auto context = context_.Upgrade();
-    if (!context) {
-        return;
-    }
-    context->AddPageTransitionListener([weak = AceType::WeakClaim(this)](const TransitionEvent& event,
-                                           const WeakPtr<PageElement>& in, const WeakPtr<PageElement>& out) {
-        auto xcomponent = weak.Upgrade();
-        if (!xcomponent) {
-            return;
-        }
-        if (event == TransitionEvent::POP_START) {
-            if (xcomponent->previewWindow_) {
-                xcomponent->previewWindow_->Hide();
-                xcomponent->previewWindow_->Destroy();
-            }
-        }
-    });
-#endif
 }
 
 void XComponentElement::InitEvent()
@@ -178,7 +153,7 @@ void XComponentElement::RegisterDispatchTouchEventCallback()
         LOGE("RegisterDispatchTouchEventCallback pipelineContext is null");
         return;
     }
-    pipelineContext->SetDispatchTouchEventHandler([weak = WeakClaim(this)](const TouchPoint& event) {
+    pipelineContext->SetDispatchTouchEventHandler([weak = WeakClaim(this)](const TouchEvent& event) {
         auto element = weak.Upgrade();
         if (element) {
             element->DispatchTouchEvent(event);
@@ -186,7 +161,7 @@ void XComponentElement::RegisterDispatchTouchEventCallback()
     });
 }
 
-void XComponentElement::DispatchTouchEvent(const TouchPoint& event)
+void XComponentElement::DispatchTouchEvent(const TouchEvent& event)
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
@@ -207,7 +182,7 @@ void XComponentElement::DispatchTouchEvent(const TouchPoint& event)
     }
 }
 
-void XComponentElement::SetTouchEventType(const TouchPoint& event)
+void XComponentElement::SetTouchEventType(const TouchEvent& event)
 {
     switch (event.type) {
         case TouchType::DOWN:
@@ -264,34 +239,25 @@ void XComponentElement::CreatePlatformResource()
             }
         },
         idStr_);
-#ifdef OHOS_STANDARD_SYSTEM
-    CreateSurface();
-#endif
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
 void XComponentElement::CreateSurface()
 {
-    if (previewWindow_ == nullptr) {
-        sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
-        option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_LAUNCHING);
-        option->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-        previewWindow_ = Rosen::Window::Create("xcomponent_window", option);
+    if (renderNode_) {
+        auto rosenTexture = AceType::DynamicCast<RosenRenderXComponent>(renderNode_);
+        if (rosenTexture) {
+            producerSurface_ = rosenTexture->GetSurface();
+        }
     }
 
-    if (previewWindow_ == nullptr || previewWindow_->GetSurfaceNode() == nullptr) {
-        LOGE("Create xcomponent previewWindow failed");
-        return;
-    }
-
-    auto producerSurface = previewWindow_->GetSurfaceNode()->GetSurface();
-    if (producerSurface == nullptr) {
+    if (producerSurface_ == nullptr) {
         LOGE("producerSurface is nullptr");
         return;
     }
 
     auto surfaceUtils = SurfaceUtils::GetInstance();
-    auto ret = surfaceUtils->Add(producerSurface->GetUniqueId(), producerSurface);
+    auto ret = surfaceUtils->Add(producerSurface_->GetUniqueId(), producerSurface_);
     if (ret != SurfaceError::SURFACE_ERROR_OK) {
         LOGE("xcomponent add surface error: %{public}d", ret);
     }
@@ -302,29 +268,14 @@ void XComponentElement::CreateSurface()
             return;
         }
         xcomponentController_ = controller;
-        xcomponentController_->surfaceId_ = producerSurface->GetUniqueId();
+        xcomponentController_->surfaceId_ = producerSurface_->GetUniqueId();
     }
 
-    producerSurface->SetQueueSize(SURFACE_QUEUE_SIZE);
-    producerSurface->SetUserData("SURFACE_STRIDE_ALIGNMENT", SURFACE_STRIDE_ALIGNMENT);
-    producerSurface->SetUserData("SURFACE_FORMAT", std::to_string(PIXEL_FMT_RGBA_8888));
+    producerSurface_->SetQueueSize(SURFACE_QUEUE_SIZE);
+    producerSurface_->SetUserData("SURFACE_STRIDE_ALIGNMENT", SURFACE_STRIDE_ALIGNMENT);
+    producerSurface_->SetUserData("SURFACE_FORMAT", std::to_string(PIXEL_FMT_RGBA_8888));
 
-    XComponentElement::surfaceIdMap_.emplace(xcomponent_->GetId(), producerSurface->GetUniqueId());
-
-    previewWindow_->Show();
-}
-
-void XComponentElement::OnXComponentHiddenChange(bool hidden)
-{
-    if (!previewWindow_) {
-        return;
-    }
-    hidden_ = hidden;
-    if (hidden) {
-        previewWindow_->Hide();
-    } else {
-        previewWindow_->Show();
-    }
+    XComponentElement::surfaceIdMap_.emplace(xcomponent_->GetId(), producerSurface_->GetUniqueId());
 }
 #endif
 
@@ -349,11 +300,6 @@ void XComponentElement::ReleasePlatformResource()
     }
 
 #ifdef OHOS_STANDARD_SYSTEM
-    if (previewWindow_) {
-        previewWindow_->Hide();
-        previewWindow_->Destroy();
-    }
-
     if (!surfaceIdMap_.empty()) {
         auto surfaceUtils = SurfaceUtils::GetInstance();
         auto ret = surfaceUtils->Remove(XComponentElement::surfaceIdMap_[xcomponent_->GetId()]);
@@ -367,9 +313,8 @@ void XComponentElement::ReleasePlatformResource()
 void XComponentElement::OnXComponentSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    if (previewWindow_ != nullptr) {
+    if (producerSurface_ != nullptr) {
         if (renderNode_ != nullptr) {
-            Offset offset = renderNode_->GetGlobalOffset();
             auto context = context_.Upgrade();
             if (context == nullptr) {
                 LOGE("context is nullptr");
@@ -377,17 +322,20 @@ void XComponentElement::OnXComponentSize(int64_t textureId, int32_t textureWidth
             }
 
             float viewScale = context->GetViewScale();
-            previewWindow_->MoveTo((int32_t)(offset.GetX() * viewScale), (int32_t)(offset.GetY() * viewScale));
-            previewWindow_->Resize(textureWidth * viewScale, textureHeight * viewScale);
-            if (!hidden_) {
-                previewWindow_->Show();
+            auto nativeWindow = CreateNativeWindowFromSurface(&producerSurface_);
+            if (nativeWindow) {
+                NativeWindowHandleOpt(nativeWindow, SET_BUFFER_GEOMETRY,
+                                      (int)(textureWidth * viewScale), (int)(textureHeight * viewScale));
+                xcomponent_->SetNativeWindow(nativeWindow);
+            } else {
+                LOGE("can not create NativeWindow frome surface");
             }
         }
     }
     std::string str = "";
-    if (!g_onload) {
-        g_onload = true;
-        this->OnTextureSize(0, str);
+    if (!onLoadDone_) {
+        onLoadDone_ = true;
+        this->OnTextureSize(X_INVALID_ID, str);
     }
 #endif
 

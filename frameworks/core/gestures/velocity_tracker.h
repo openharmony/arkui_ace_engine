@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_VELOCITY_TRACKER_H
 
 #include "base/geometry/axis.h"
+#include "base/geometry/least_square_impl.h"
 #include "base/geometry/offset.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/velocity.h"
@@ -35,16 +36,18 @@ public:
         velocity_.Reset();
         delta_.Reset();
         isFirstPoint_ = true;
+        xAxis_.Reset();
+        yAxis_.Reset();
     }
 
-    void UpdateTouchPoint(const TouchPoint& event);
+    void UpdateTouchPoint(const TouchEvent& event, bool end = false);
 
-    const TouchPoint& GetFirstTrackPoint() const
+    const TouchEvent& GetFirstTrackPoint() const
     {
         return firstTrackPoint_;
     }
 
-    const TouchPoint& GetCurrentTrackPoint() const
+    const TouchEvent& GetCurrentTrackPoint() const
     {
         return currentTrackPoint_;
     }
@@ -59,8 +62,9 @@ public:
         return delta_;
     }
 
-    const Velocity& GetVelocity() const
+    const Velocity& GetVelocity()
     {
+        UpdateVelocity();
         return velocity_;
     }
 
@@ -74,7 +78,7 @@ public:
             case Axis::VERTICAL:
                 return lastPosition_.GetY();
             default:
-              return 0.0;
+                return 0.0;
         }
     }
 
@@ -88,12 +92,13 @@ public:
             case Axis::VERTICAL:
                 return delta_.GetY();
             default:
-              return 0.0;
+                return 0.0;
         }
     }
 
-    double GetMainAxisVelocity() const
+    double GetMainAxisVelocity()
     {
+        UpdateVelocity();
         switch (mainAxis_) {
             case Axis::FREE:
                 return velocity_.GetVelocityValue();
@@ -102,19 +107,24 @@ public:
             case Axis::VERTICAL:
                 return velocity_.GetVelocityY();
             default:
-              return 0.0;
+                return 0.0;
         }
     }
 
 private:
+    void UpdateVelocity();
+
     Axis mainAxis_ { Axis::FREE };
-    TouchPoint firstTrackPoint_;
-    TouchPoint currentTrackPoint_;
+    TouchEvent firstTrackPoint_;
+    TouchEvent currentTrackPoint_;
     Offset lastPosition_;
     Velocity velocity_;
     Offset delta_;
     bool isFirstPoint_ = true;
     TimeStamp lastTimePoint_;
+    LeastSquareImpl xAxis_ { 3, 5 };
+    LeastSquareImpl yAxis_ { 3, 5 };
+    bool isVelocityDone_ = false;
 };
 
 } // namespace OHOS::Ace

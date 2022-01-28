@@ -29,6 +29,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/ace_data_ability.cpp",
       "$ace_root/adapter/ohos/entrance/ace_form_ability.cpp",
       "$ace_root/adapter/ohos/entrance/ace_service_ability.cpp",
+      "$ace_root/adapter/ohos/entrance/capability_registry.cpp",
       "$ace_root/adapter/ohos/entrance/file_asset_provider.cpp",
       "$ace_root/adapter/ohos/entrance/flutter_ace_view.cpp",
       "$ace_root/adapter/ohos/entrance/pa_container.cpp",
@@ -49,7 +50,9 @@ template("ace_ohos_standard_source_set") {
 
     include_dirs = [
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/featureAbility",
+      "//foundation/aafwk/standard/interfaces/innerkits/runtime/include/",
       "//foundation/ace/napi/interfaces/kits",
+      "//foundation/ace/napi/native_engine",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_dataability/include",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb/include",
       "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
@@ -61,8 +64,10 @@ template("ace_ohos_standard_source_set") {
     deps = [
       "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
       "$ace_flutter_engine_root/skia:ace_skia_$platform",
+      "$ace_root/adapter/ohos/capability:ace_capability_ohos",
       "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
       "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
+      "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
       "//foundation/windowmanager/dm:libdm",
@@ -74,14 +79,16 @@ template("ace_ohos_standard_source_set") {
         [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]
 
     external_deps = [
-      "aafwk_standard:ability_context_native",
-      "aafwk_standard:ability_manager",
-      "aafwk_standard:base",
-      "aafwk_standard:want",
-      "appexecfwk_standard:appexecfwk_base",
-      "appexecfwk_standard:appexecfwk_core",
-      "appexecfwk_standard:fmskit_native",
-      "appexecfwk_standard:libeventhandler",
+      "ability_runtime:ability_context_native",
+      "ability_runtime:ability_manager",
+      "ability_runtime:app_manager",
+      "ability_runtime:base",
+      "ability_runtime:want",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "eventhandler:libeventhandler",
+      "form_runtime:fmskit_native",
+      "form_runtime:form_manager",
       "ipc:ipc_core",
       "napi:ace_napi",
       "native_appdatamgr:native_dataability",

@@ -229,6 +229,10 @@ ACE_EXPORT extern const char HYPERLINK_ETS_TAG[] = "Hyperlink";
 ACE_EXPORT extern const char STEPPER_COMPONENT_TAG[] = "StepperComponent";
 ACE_EXPORT extern const char STEPPER_ETS_TAG[] = "Stepper";
 
+// stepperItem
+ACE_EXPORT extern const char STEPPER_ITEM_COMPONENT_TAG[] = "StepperItemComponentV2";
+ACE_EXPORT extern const char STEPPER_ITEM_ETS_TAG[] = "StepperItem";
+
 // scrollbar
 ACE_EXPORT extern const char SCROLL_BAR_COMPONENT_TAG[] = "ScrollBarComponent";
 ACE_EXPORT extern const char SCROLL_BAR_ETS_TAG[] = "ScrollBar";
@@ -268,8 +272,32 @@ ACE_EXPORT extern const char TEXTAREA_ETS_TAG[] = "TextArea";
 ACE_EXPORT extern const char TEXTINPUT_COMPONENT_TAG[] = "TextInput";
 ACE_EXPORT extern const char TEXTINPUT_ETS_TAG[] = "TextInput";
 
+// texttimer
+ACE_EXPORT extern const char TEXTTIMER_COMPONENT_TAG[] = "TextTimerComponent";
+ACE_EXPORT extern const char TEXTTIMER_ETS_TAG[] = "TextTimer";
+
 // select
 ACE_EXPORT extern const char SELECT_COMPONENT_TAG[] = "SelectComponent";
 ACE_EXPORT extern const char SELECT_ETS_TAG[] = "Select";
+
+// marquee
+ACE_EXPORT extern const char MARQUEE_COMPONENT_TAG[] = "MarqueeComponent";
+ACE_EXPORT extern const char MARQUEE_ETS_TAG[] = "Marquee";
+
+// textclock
+ACE_EXPORT extern const char TEXTCLOCK_COMPONENT_TAG[] = "TextClockComponent";
+ACE_EXPORT extern const char TEXTCLOCK_ETS_TAG[] = "TextClock";
+
+// textpicker
+ACE_EXPORT extern const char TEXT_PICKER_COMPONENT_TAG[] = "PickerTextComponent";
+ACE_EXPORT extern const char TEXT_PICKER_ETS_TAG[] = "TextPicker";
+
+// pickertextdialog
+ACE_EXPORT extern const char PICKER_TEXT_DIALOG_COMPONENT_TAG[] = "pickerTextDialog";
+ACE_EXPORT extern const char PICKER_TEXT_DIALOG_ETS_TAG[] = "pickerTextDialog";
+
+// canvas
+ACE_EXPORT extern const char CANVAS_COMPONENT_TAG[] = "CustomPaintComponent";
+ACE_EXPORT extern const char CANVAS_ETS_TAG[] = "Canvas";
 
 } // namespace OHOS::Ace::V2

@@ -82,6 +82,7 @@ void RenderStack::PerformLayout()
         item->Layout(innerLayout);
     }
 
+    SetChildrenStatus();
     // place children
     for (const auto& item : GetChildren()) {
         auto positionedItem = AceType::DynamicCast<RenderPositioned>(item);

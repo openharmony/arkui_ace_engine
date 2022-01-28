@@ -24,12 +24,12 @@
 namespace OHOS::Ace {
 class WebDelegate;
 
-class WebClientImpl : public WebViewClient {
+class WebClientImpl : public OHOS::WebView::WebViewClient {
 public:
     WebClientImpl() = default;
     ~WebClientImpl() = default;
 
-    void SetWebView(std::shared_ptr<WebView> webview) override;
+    void SetWebView(std::shared_ptr<OHOS::WebView::WebView> webview) override;
     void OnProxyDied() override;
     void OnRouterPush(const std::string& param) override;
     void OnMessage(const std::string& param) override;
@@ -47,7 +47,7 @@ public:
     }
 
 private:
-    std::weak_ptr<WebView> webviewWeak_;
+    std::weak_ptr<OHOS::WebView::WebView> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;
 };
 } // namespace OHOS::Ace

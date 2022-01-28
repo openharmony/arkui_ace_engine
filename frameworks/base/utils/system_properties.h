@@ -73,6 +73,15 @@ public:
      */
     static DeviceType GetDeviceType();
 
+    /**
+     * Set type of current device.
+     * @param deviceType
+     */
+    static void SetDeviceType(DeviceType deviceType)
+    {
+        deviceType_ = deviceType;
+    }
+
     /*
      * Get current orientation of device.
      */
@@ -173,6 +182,8 @@ public:
         return accessibilityEnabled_;
     }
 
+    static bool GetDebugEnabled();
+
     /*
      * Set device orientation.
      */
@@ -223,6 +234,8 @@ public:
     }
 
     static int GetArkProperties();
+
+    static bool IsScoringEnabled(const std::string& name);
 
 private:
     static bool traceEnabled_;

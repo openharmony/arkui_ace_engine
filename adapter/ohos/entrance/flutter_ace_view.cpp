@@ -61,43 +61,71 @@ void GetEventDevice(int32_t sourceType, E& event)
     }
 }
 
-TouchPoint ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
+{
+    TouchPoint touchPoint;
+    // just get the max of width and height
+    touchPoint.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / 2.0; 
+    touchPoint.id = pointerItem.GetPointerId();
+    touchPoint.force = pointerItem.GetPressure();
+    touchPoint.downTime = TimeStamp(std::chrono::milliseconds(pointerItem.GetDownTime()));
+    touchPoint.x = pointerItem.GetLocalX();
+    touchPoint.y = pointerItem.GetLocalY();
+    touchPoint.isPressed = pointerItem.IsPressed();
+    return touchPoint;
+}
+
+void UpdateTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, TouchEvent& touchEvent)
+{
+    auto ids = pointerEvent->GetPointersIdList();
+    for (auto&& id : ids) {
+        MMI::PointerEvent::PointerItem item;
+        bool ret = pointerEvent->GetPointerItem(id, item);
+        if (!ret) {
+            LOGE("get pointer item failed.");
+            continue;
+        }
+        auto touchPoint = ConvertTouchPoint(item);
+        touchEvent.pointers.emplace_back(std::move(touchPoint));
+    }
+}
+
+TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t pointerID = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem item;
     bool ret = pointerEvent->GetPointerItem(pointerID, item);
     if (!ret) {
         LOGE("get pointer item failed.");
-        return TouchPoint();
+        return TouchEvent();
     }
-    std::chrono::microseconds micros(pointerEvent->GetActionTime());
-    TimeStamp time(micros);
-
-    int32_t pressWidth = item.GetWidth();
-    int32_t pressHeight = item.GetHeight();
-    double size = std::max(pressWidth, pressHeight) / 2.0; // just get the max of width and height
-    TouchPoint point { pointerID, item.GetLocalX(), item.GetLocalY(), TouchType::UNKNOWN, time, size };
+    auto touchPoint = ConvertTouchPoint(item);
+    std::chrono::milliseconds milliseconds(pointerEvent->GetActionTime());
+    TimeStamp time(milliseconds);
+    TouchEvent event { touchPoint.id, touchPoint.x, touchPoint.y, TouchType::UNKNOWN, time, touchPoint.size,
+        touchPoint.force, pointerEvent->GetDeviceId() };
     int32_t orgDevice = pointerEvent->GetSourceType();
-    GetEventDevice(orgDevice, point);
+    GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();
     switch (orgAction) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
-            point.type = TouchType::CANCEL;
+            event.type = TouchType::CANCEL;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN:
-            point.type = TouchType::DOWN;
+            event.type = TouchType::DOWN;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
-            point.type = TouchType::MOVE;
+            event.type = TouchType::MOVE;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_UP:
-            point.type = TouchType::UP;
+            event.type = TouchType::UP;
             break;
         default:
             LOGW("unknown type");
             break;
     }
-    return point;
+    UpdateTouchEvent(pointerEvent, event);
+    return event;
 }
 
 void GetMouseEventAction(int32_t action, MouseEvent& events)
@@ -360,7 +388,7 @@ void FlutterAceView::SetShellHolder(std::unique_ptr<flutter::OhosShellHolder> ho
 
 void FlutterAceView::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    TouchPoint touchPoint = ConvertTouchEvent(pointerEvent);
+    TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
     if (touchPoint.type != TouchType::UNKNOWN) {
         if (touchEventCallback_) {
             touchEventCallback_(touchPoint);
@@ -502,7 +530,7 @@ uint32_t FlutterAceView::GetBackgroundColor()
 
 // On watch device, it's probable to quit the application unexpectedly when we slide our finger diagonally upward on the
 // screen, so we do restrictions here.
-bool FlutterAceView::IsNeedForbidToPlatform(TouchPoint point)
+bool FlutterAceView::IsNeedForbidToPlatform(TouchEvent point)
 {
     if (point.type == TouchType::DOWN) {
         auto result = touchPointInfoMap_.try_emplace(point.id, TouchPointInfo(point.GetOffset()));

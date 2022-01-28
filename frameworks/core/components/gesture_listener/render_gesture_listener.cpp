@@ -83,7 +83,7 @@ void RenderGestureListener::Update(const RefPtr<Component>& component)
         if (!context) {
             return;
         }
-        TouchPoint point;
+        TouchEvent point;
         point.x = x;
         point.y = y;
         if (dragTarget_ == nullptr) {

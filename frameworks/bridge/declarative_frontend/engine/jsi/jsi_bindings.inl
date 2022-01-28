@@ -21,37 +21,37 @@
 namespace OHOS::Ace::Framework {
 
 template<typename C>
-std::unordered_map<std::string, panda::Global<panda::FunctionRef>> JsiClass<C>::staticFunctions_;
+thread_local std::unordered_map<std::string, panda::Global<panda::FunctionRef>> JsiClass<C>::staticFunctions_;
 
 template<typename C>
-std::unordered_map<std::string, panda::Global<panda::FunctionRef>> JsiClass<C>::customFunctions_;
+thread_local std::unordered_map<std::string, panda::Global<panda::FunctionRef>> JsiClass<C>::customFunctions_;
 
 template<typename C>
-std::unordered_map<std::string, panda::Global<panda::FunctionRef>> JsiClass<C>::customGetFunctions_;
+thread_local std::unordered_map<std::string, panda::Global<panda::FunctionRef>> JsiClass<C>::customGetFunctions_;
 
 template<typename C>
-std::unordered_map<std::string, panda::Global<panda::FunctionRef>> JsiClass<C>::customSetFunctions_;
+thread_local std::unordered_map<std::string, panda::Global<panda::FunctionRef>> JsiClass<C>::customSetFunctions_;
 
 template<typename C>
-FunctionCallback JsiClass<C>::constructor_ = nullptr;
+thread_local FunctionCallback JsiClass<C>::constructor_ = nullptr;
 
 template<typename C>
-JSFunctionCallback JsiClass<C>::jsConstructor_ = nullptr;
+thread_local JSFunctionCallback JsiClass<C>::jsConstructor_ = nullptr;
 
 template<typename C>
-JSDestructorCallback<C> JsiClass<C>::jsDestructor_ = nullptr;
+thread_local JSDestructorCallback<C> JsiClass<C>::jsDestructor_ = nullptr;
 
 template<typename C>
-JSGCMarkCallback<C> JsiClass<C>::jsGcMark_ = nullptr;
+thread_local JSGCMarkCallback<C> JsiClass<C>::jsGcMark_ = nullptr;
 
 template<typename C>
-std::string JsiClass<C>::className_;
+thread_local std::string JsiClass<C>::className_;
 
 template<typename C>
-panda::Global<panda::FunctionRef> JsiClass<C>::classFunction_;
+thread_local panda::Global<panda::FunctionRef> JsiClass<C>::classFunction_;
 
 template<typename C>
-std::vector<shared_ptr<int32_t>> JsiClass<C>::functionIds_;
+thread_local std::vector<shared_ptr<int32_t>> JsiClass<C>::functionIds_;
 
 template<typename C>
 void JsiClass<C>::Declare(const char* name)

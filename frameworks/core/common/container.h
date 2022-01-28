@@ -31,7 +31,7 @@
 namespace OHOS::Ace {
 
 using PageTask = std::function<void()>;
-using TouchEventCallback = std::function<void(const TouchPoint&)>;
+using TouchEventCallback = std::function<void(const TouchEvent&)>;
 using KeyEventCallback = std::function<bool(const KeyEvent&)>;
 using MouseEventCallback = std::function<void(const MouseEvent&)>;
 using AxisEventCallback = std::function<void(const AxisEvent&)>;
@@ -41,7 +41,7 @@ using CardViewPositionCallBack = std::function<void(int id, float offsetX, float
 constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
 constexpr int32_t INSTANCE_ID_PLATFORM = -2;
 
-class ACE_FORCE_EXPORT Container : public virtual AceType {
+class ACE_FORCE_EXPORT_WITH_PREVIEW Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
 
 public:
@@ -156,7 +156,11 @@ protected:
     std::string cardHapPath_;
 
 private:
+#ifndef WINDOWS_PLATFORM
     static thread_local int32_t currentId_;
+#else
+    static int32_t currentId_;
+#endif
     static std::function<void(int32_t)> updateScopeNotify_;
     std::string moduleName_;
     Settings settings_;

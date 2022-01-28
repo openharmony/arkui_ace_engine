@@ -160,14 +160,14 @@ private:
     static bool CheckIfConstructCall(const v8::FunctionCallbackInfo<v8::Value>& info);
 
     // functionTemplate corresponding to isolate
-    static std::unordered_map<v8::Isolate*, v8::Persistent<v8::FunctionTemplate>> functionTemplates_;
-    static std::unordered_map<std::string, v8::Local<v8::FunctionTemplate>> staticPropertyNames_;
-    static std::mutex mutex_;
+    static thread_local std::unordered_map<v8::Isolate*, v8::Persistent<v8::FunctionTemplate>> functionTemplates_;
+    static thread_local std::unordered_map<std::string, v8::Local<v8::FunctionTemplate>> staticPropertyNames_;
+    static thread_local std::mutex mutex_;
     // TODO(cvetan): Remove
-    static FunctionCallback constructor_;
-    static JSFunctionCallback jsConstructor_;
-    static JSDestructorCallback<C> jsDestructor_;
-    static JSGCMarkCallback<C> gcMark_;
+    static thread_local FunctionCallback constructor_;
+    static thread_local JSFunctionCallback jsConstructor_;
+    static thread_local JSDestructorCallback<C> jsDestructor_;
+    static thread_local JSGCMarkCallback<C> gcMark_;
 
     friend class V8Wrapper;
 };

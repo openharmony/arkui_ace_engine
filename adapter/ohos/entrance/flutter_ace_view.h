@@ -136,11 +136,13 @@ public:
     const void* GetNativeWindowById(uint64_t textureId) override;
 
 private:
-    void NotifySurfaceChanged(int width, int height) const
+    void NotifySurfaceChanged(int width, int height)
     {
         if (viewChangeCallback_) {
             viewChangeCallback_(width, height);
         }
+        width_ = width;
+        height_ =height;
     }
 
     void NotifyDensityChanged(double density) const
@@ -165,7 +167,7 @@ private:
     }
 
     bool IsLastPage() const;
-    bool IsNeedForbidToPlatform(TouchPoint point);
+    bool IsNeedForbidToPlatform(TouchEvent point);
 
     std::unique_ptr<flutter::OhosShellHolder> shell_holder_;
     TouchEventCallback touchEventCallback_;

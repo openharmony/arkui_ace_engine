@@ -29,6 +29,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/grid_layout/grid_layout_component.h"
+#include "core/components/grid_layout/render_grid_layout_item.h"
 #include "core/components/positioned/positioned_component.h"
 #include "core/components/stack/stack_element.h"
 #include "core/gestures/drag_recognizer.h"
@@ -546,6 +547,30 @@ protected:
     RefPtr<Animator> springController_;
     RefPtr<SpringMotion> springMotion_;
     std::vector<Offset> springStartPosition_;
+
+    Offset mouseStartOffset_;
+    Offset mouseEndOffset_;
+    bool HandleMouseEvent(const MouseEvent& event) override;
+    bool isMultiSelectable_ = false;
+    void ClearMultiSelect();
+
+    void MultiSelectWithoutKeyboard(const Rect& selectedZone);
+    void HandleMouseEventWithoutKeyboard(const MouseEvent& event);
+
+    void MultiSelectWhenCtrlDown(const Rect& selectedZone);
+    void HandleMouseEventWhenCtrlDown(const MouseEvent& event);
+    void CollectSelectedItems();
+    std::set<RefPtr<RenderGridLayoutItem>> selectedItemsWithCtrl_;
+
+    void MultiSelectWhenShiftDown(const Rect& selectedZone);
+    RefPtr<RenderGridLayoutItem> GetPressItemWhenShiftDown(const Rect& selectedZone);
+    void HandleMouseEventWhenShiftDown(const MouseEvent& event);
+    void MultiSelectAllInRange(const RefPtr<RenderGridLayoutItem>& firstItem,
+        const RefPtr<RenderGridLayoutItem>& secondItem);
+    RefPtr<RenderGridLayoutItem> firstItemWithShift_;
+    RefPtr<RenderGridLayoutItem> secondItemWithShift_;
+
+    void MultiSelectAllWhenCtrlA();
 };
 
 } // namespace OHOS::Ace

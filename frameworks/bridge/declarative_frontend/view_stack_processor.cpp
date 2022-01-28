@@ -26,11 +26,13 @@
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/image/image_component.h"
 #include "core/components/menu/menu_component.h"
+#include "core/components/scoring/scoring_component.h"
 #include "core/components/stepper/stepper_item_component_v2.h"
 #include "core/components/text/text_component.h"
 #include "core/components/text_field/text_field_component.h"
 #include "core/components/text_span/text_span_component.h"
 #include "core/components/video/video_component_v2.h"
+#include "core/components/xcomponent/xcomponent_component.h"
 #include "core/components_v2/list/list_item_component.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/multi_composed_component.h"
@@ -51,11 +53,17 @@ ViewStackProcessor* ViewStackProcessor::GetInstance()
 ViewStackProcessor::ViewStackProcessor()
 {
     radioGroups_ = std::make_shared<JsPageRadioGroups>();
+    checkboxGroups_ = std::make_shared<JsPageCheckboxGroups>();
 }
 
 std::shared_ptr<JsPageRadioGroups> ViewStackProcessor::GetRadioGroupCompnent()
 {
     return radioGroups_;
+}
+
+std::shared_ptr<JsPageCheckboxGroups> ViewStackProcessor::GetCheckboxGroupCompnent()
+{
+    return checkboxGroups_;
 }
 
 RefPtr<ComposedComponent> ViewStackProcessor::GetRootComponent(const std::string& id, const std::string& name)
@@ -139,6 +147,42 @@ RefPtr<FlexItemComponent> ViewStackProcessor::GetFlexItemComponent()
     RefPtr<FlexItemComponent> flexItem = AceType::MakeRefPtr<OHOS::Ace::FlexItemComponent>(0.0, 1.0, 0.0);
     wrappingComponentsMap.emplace("flexItem", flexItem);
     return flexItem;
+}
+
+RefPtr<StepperItemComponent> ViewStackProcessor::GetStepperItemComponent()
+{
+    auto& wrappingComponentsMap = componentsStack_.top();
+    if (wrappingComponentsMap.find("stepperItem") != wrappingComponentsMap.end()) {
+        return AceType::DynamicCast<StepperItemComponent>(wrappingComponentsMap["stepperItem"]);
+    }
+
+    RefPtr<StepperItemComponent> stepperItem = AceType::MakeRefPtr<StepperItemComponent>(RefPtr<Component>());
+    wrappingComponentsMap.emplace("stepperItem", stepperItem);
+    return stepperItem;
+}
+
+RefPtr<DisplayComponent> ViewStackProcessor::GetStepperDisplayComponent()
+{
+    auto& wrappingComponentsMap = componentsStack_.top();
+    if (wrappingComponentsMap.find("stepperDisplay") != wrappingComponentsMap.end()) {
+        return AceType::DynamicCast<DisplayComponent>(wrappingComponentsMap["stepperDisplay"]);
+    }
+
+    RefPtr<DisplayComponent> stepperDisplay = AceType::MakeRefPtr<DisplayComponent>();
+    wrappingComponentsMap.emplace("stepperDisplay", stepperDisplay);
+    return stepperDisplay;
+}
+
+RefPtr<ScrollComponent> ViewStackProcessor::GetStepperScrollComponent()
+{
+    auto& wrappingComponentsMap = componentsStack_.top();
+    if (wrappingComponentsMap.find("stepperScroll") != wrappingComponentsMap.end()) {
+        return AceType::DynamicCast<ScrollComponent>(wrappingComponentsMap["stepperScroll"]);
+    }
+
+    RefPtr<ScrollComponent> stepperScroll = AceType::MakeRefPtr<ScrollComponent>(RefPtr<Component>());
+    wrappingComponentsMap.emplace("stepperScroll", stepperScroll);
+    return stepperScroll;
 }
 
 RefPtr<BoxComponent> ViewStackProcessor::GetBoxComponent()
@@ -364,7 +408,9 @@ void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomV
         name = composedComponent->GetName();
     }
     auto tag = component->GetInspectorTag();
-    CreateInspectorComposedComponent(tag.empty() ? (name.empty() ? AceType::TypeName(component) : name) : tag);
+    tag = tag.empty() ? (name.empty() ? AceType::TypeName(component) : name) : tag;
+    CreateInspectorComposedComponent(tag);
+    CreateScoringComponent(tag);
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component) &&
@@ -507,8 +553,6 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
 
     bool isItemComponent = AceType::InstanceOf<V2::ListItemComponent>(mainComponent) ||
                            AceType::InstanceOf<GridLayoutItemComponent>(mainComponent);
-    auto stepperItemComponentV2 = AceType::DynamicCast<StepperItemComponentV2>(mainComponent);
-    bool isStepperItemComponent = AceType::InstanceOf<StepperItemComponentV2>(mainComponent);
 
     RefPtr<Component> itemChildComponent;
 
@@ -523,8 +567,14 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
         components.emplace_back(composedComponent);
     }
 
-    std::string componentNames[] = { "flexItem", "display", "transform", "touch", "pan_guesture", "click_guesture",
-        "focusable", "coverage", "box", "shared_transition", "mouse" };
+    auto scoringComponent = GetScoringComponent();
+    if (scoringComponent) {
+        components.emplace_back(scoringComponent);
+    }
+
+    std::string componentNames[] = { "stepperItem", "stepperDisplay", "flexItem", "display", "transform", "touch",
+        "pan_guesture", "click_guesture", "focusable", "coverage", "box", "shared_transition", "mouse",
+        "stepperScroll" };
     for (auto& name : componentNames) {
         auto iter = wrappingComponentsMap.find(name);
         if (iter != wrappingComponentsMap.end()) {
@@ -556,15 +606,11 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
             Component::MergeRSNode(components, 1);
             components.emplace_back(itemChildComponent);
         }
-    } else if (isStepperItemComponent) {
-        if (stepperItemComponentV2) {
-            auto scorll = stepperItemComponentV2->AdjustComponentScroll(mainComponent);
-            components.emplace_back(scorll);
-            Component::MergeRSNode(components);
-        }
     } else if (!components.empty() && (AceType::InstanceOf<TextureComponent>(mainComponent) ||
-        AceType::InstanceOf<BoxComponent>(mainComponent) || AceType::InstanceOf<TextFieldComponent>(mainComponent) ||
-        AceType::InstanceOf<FormComponent>(mainComponent))) {
+                                          AceType::InstanceOf<BoxComponent>(mainComponent) ||
+                                          AceType::InstanceOf<TextFieldComponent>(mainComponent) ||
+                                          AceType::InstanceOf<FormComponent>(mainComponent) ||
+                                          AceType::InstanceOf<XComponentComponent>(mainComponent))) {
         Component::MergeRSNode(components);
         Component::MergeRSNode(mainComponent);
         components.emplace_back(mainComponent);
@@ -601,11 +647,6 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     }
 
     auto component = components.front();
-    if (isStepperItemComponent) {
-        if (stepperItemComponentV2) {
-            component = stepperItemComponentV2->AdjustComponentDisplay(component);
-        }
-    }
     auto iter = wrappingComponentsMap.find("box");
     if (iter != wrappingComponentsMap.end() && (iter->second->GetTextDirection() != component->GetTextDirection())) {
         component->SetTextDirection(iter->second->GetTextDirection());
@@ -738,6 +779,19 @@ RefPtr<V2::InspectorComposedComponent> ViewStackProcessor::GetInspectorComposedC
     return nullptr;
 }
 
+RefPtr<Component> ViewStackProcessor::GetScoringComponent() const
+{
+    if (componentsStack_.empty()) {
+        return nullptr;
+    }
+    auto& wrappingComponentsMap = componentsStack_.top();
+    auto iter = wrappingComponentsMap.find("scoring");
+    if (iter != wrappingComponentsMap.end()) {
+        return iter->second;
+    }
+    return nullptr;
+}
+
 void ViewStackProcessor::CreateInspectorComposedComponent(const std::string& inspectorTag)
 {
     if (V2::InspectorComposedComponent::HasInspectorFinished(inspectorTag)) {
@@ -745,6 +799,24 @@ void ViewStackProcessor::CreateInspectorComposedComponent(const std::string& ins
             AceType::MakeRefPtr<V2::InspectorComposedComponent>(GenerateId() + inspectorTag, inspectorTag);
         auto& wrappingComponentsMap = componentsStack_.top();
         wrappingComponentsMap.emplace("inspector", composedComponent);
+    }
+}
+
+void ViewStackProcessor::CreateScoringComponent(const std::string& tag)
+{
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, [this]() {
+        auto name = AceApplicationInfo::GetInstance().GetProcessName().empty()
+                        ? AceApplicationInfo::GetInstance().GetPackageName()
+                        : AceApplicationInfo::GetInstance().GetProcessName();
+        isScoringEnable_ = SystemProperties::IsScoringEnabled(name);
+    });
+
+    if (isScoringEnable_) {
+        auto component =
+            AceType::MakeRefPtr<ScoringComponent>(V2::InspectorComposedComponent::GetEtsTag(tag), viewKey_);
+        auto& wrappingComponentsMap = componentsStack_.top();
+        wrappingComponentsMap.emplace("scoring", component);
     }
 }
 

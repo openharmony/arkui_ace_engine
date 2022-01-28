@@ -118,8 +118,9 @@ void JSSelect::Selected(int value)
         return;
     }
     auto option = popup->GetSelectOptions();
-    if (value < 0 || value > static_cast<int32_t>(option.size())) {
-        return;
+    if (value < 0 || value >= static_cast<int32_t>(option.size())) {
+        LOGE("Input selected index error, use the defalut value");
+        value = 0;
     }
 
     auto tipText = selectComponent->GetTipText();
@@ -167,10 +168,15 @@ void JSSelect::Font(const JSCallbackInfo& info)
         }
     }
 
-    auto weight = param->GetProperty("weight");
-    if (!weight->IsNull() && weight->IsNumber()) {
-        FontWeight weightVal = static_cast<FontWeight>(weight->ToNumber<int32_t>());
-        textStyle.SetFontWeight(weightVal);
+    std::string weight;
+    auto fontWeight = param->GetProperty("weight");
+    if (!fontWeight->IsNull()) {
+        if (fontWeight->IsNumber()) {
+            weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        } else {
+            ParseJsString(fontWeight, weight);
+        }
+        textStyle.SetFontWeight(ConvertStrToFontWeight(weight));
     }
 
     auto family = param->GetProperty("family");
@@ -272,10 +278,15 @@ void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
             }
         }
 
-        auto weight = param->GetProperty("weight");
-        if (!weight->IsNull() && weight->IsNumber()) {
-            FontWeight weightVal = static_cast<FontWeight>(weight->ToNumber<int32_t>());
-            textStyle.SetFontWeight(weightVal);
+        std::string weight;
+        auto fontWeight = param->GetProperty("weight");
+        if (!fontWeight->IsNull()) {
+            if (fontWeight->IsNumber()) {
+                weight = std::to_string(fontWeight->ToNumber<int32_t>());
+            } else {
+                ParseJsString(fontWeight, weight);
+            }
+            textStyle.SetFontWeight(ConvertStrToFontWeight(weight));
         }
 
         auto family = param->GetProperty("family");
@@ -386,10 +397,15 @@ void JSSelect::OptionFont(const JSCallbackInfo& info)
             }
         }
 
-        auto weight = param->GetProperty("weight");
-        if (!weight->IsNull() && weight->IsNumber()) {
-            FontWeight weightVal = static_cast<FontWeight>(weight->ToNumber<int32_t>());
-            textStyle.SetFontWeight(weightVal);
+        std::string weight;
+        auto fontWeight = param->GetProperty("weight");
+        if (!fontWeight->IsNull()) {
+            if (fontWeight->IsNumber()) {
+                weight = std::to_string(fontWeight->ToNumber<int32_t>());
+            } else {
+                ParseJsString(fontWeight, weight);
+            }
+            textStyle.SetFontWeight(ConvertStrToFontWeight(weight));
         }
 
         auto family = param->GetProperty("family");

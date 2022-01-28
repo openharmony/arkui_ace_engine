@@ -349,7 +349,7 @@ public:
         }
         theme_ = theme;
     }
-    ACE_DEFINE_COMPONENT_EVENT(OnSelected, void(int32_t));
+    ACE_DEFINE_COMPONENT_EVENT(OnSelected, void(int32_t, std::string));
 
     RefPtr<SelectPopupComponent> GetSelectPopupComponent() const
     {

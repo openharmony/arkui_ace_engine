@@ -31,6 +31,9 @@ declare_args() {
 
   # Disable glfw window to build for PC preview scenario.
   enable_glfw_window = false
+
+  # Enable when build for cross platform
+  is_cross_platform_build = false
 }
 
 use_external_v8_snapshot = false
@@ -69,6 +72,8 @@ if (is_standard_system) {
   objcopy_default = "//prebuilts/clang/ohos/linux-x86_64/llvm/bin/llvm-objcopy"
   node_js_path =
       "//prebuilts/build-tools/common/nodejs/node-v12.18.4-linux-x64/bin/"
+} else if (is_cross_platform_build && defined(aosp_objcopy)) {
+  objcopy_default = aosp_objcopy
 }
 
 # Config part name

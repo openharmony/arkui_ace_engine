@@ -53,7 +53,6 @@ inline bool StringToBool(const std::string& value)
     return value == "true";
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 void MergeItems(const std::vector<std::pair<std::string, std::string>>& newItems,
     std::vector<std::pair<std::string, std::string>>& items)
 {
@@ -96,7 +95,6 @@ void MergeItems(const std::vector<std::pair<std::string, std::string>>& newItems
         items = sameVec;
     }
 }
-#endif
 
 } // namespace
 
@@ -200,9 +198,8 @@ void AccessibilityNode::SetPositionInfo(const PositionInfo& positionInfo)
 
 void AccessibilityNode::SetAttr(const std::vector<std::pair<std::string, std::string>>& attrs)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     MergeItems(attrs, attrs_);
-#endif
+
     for (const auto& attr : attrs) {
         if (attr.first == ACCESSIBILITY_VALUE) {
             text_ = attr.second;
@@ -233,12 +230,10 @@ void AccessibilityNode::SetAttr(const std::vector<std::pair<std::string, std::st
     SetOperableInfo();
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 void AccessibilityNode::SetStyle(const std::vector<std::pair<std::string, std::string>>& styles)
 {
     MergeItems(styles, styles_);
 }
-#endif
 
 void AccessibilityNode::AddEvent(int32_t pageId, const std::vector<std::string>& events)
 {

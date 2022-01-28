@@ -73,6 +73,16 @@ public:
         return "";
     }
 
+    // distribute
+    virtual std::string RestoreRouterStack(const std::string& contentInfo)
+    {
+        return "";
+    }
+    virtual std::string GetContentInfo()
+    {
+        return "";
+    }
+
     virtual void TriggerPageUpdate(int32_t pageId, bool directExecute = false) = 0;
 
     // posting js task from jsengine
@@ -103,6 +113,8 @@ public:
         std::function<void(int32_t, int32_t)>&& callback) = 0;
 
     virtual Rect GetBoundingRectData(NodeId nodeId) = 0;
+
+    virtual std::string GetInspector(NodeId nodeId) = 0;
 
     virtual void PushJsCallbackToRenderNode(NodeId id, double ratio, std::function<void(bool, double)>&& callback) = 0;
 

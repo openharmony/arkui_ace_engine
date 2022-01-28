@@ -86,7 +86,7 @@ struct alignas(8) AceMouseData {
     int64_t deviceId;
 };
 
-void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchPoint>& events);
+void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>& events);
 
 void ConvertMouseEvent(const std::vector<uint8_t>& data, MouseEvent& events);
 

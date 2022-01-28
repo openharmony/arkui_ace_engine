@@ -16,6 +16,8 @@
 #include "ui_mgr_service.h"
 
 #include <atomic>
+#include <i_input_event_consumer.h>
+#include <key_event.h>
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
@@ -27,6 +29,9 @@
 #include "init_data.h"
 #include "ipc_skeleton.h"
 #include "locale_config.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_ui_director.h"
+#endif
 #include "res_config.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
@@ -131,6 +136,26 @@ void UIMgrService::InitResourceManager()
     resourceManager_ = resourceManager;
 }
 
+OHOS::AppExecFwk::Ability* UIMgrService::CreateAbility()
+{
+    auto ability = OHOS::AppExecFwk::Ability::Create(nullptr);
+    if (ability == nullptr) {
+        HILOG_ERROR("create ability failed");
+        return nullptr;
+    }
+
+    auto deal = std::make_shared<OHOS::AppExecFwk::ContextDeal>();
+    if (deal == nullptr) {
+        HILOG_ERROR("create deal failed");
+        delete ability;
+        return nullptr;
+    }
+
+    deal->initResourceManager(resourceManager_);
+    ability->AttachBaseContext(deal);
+    return ability;
+}
+
 int UIMgrService::ShowDialog(const std::string& name,
                              const std::string& params,
                              OHOS::Rosen::WindowType windowType,
@@ -168,7 +193,7 @@ int UIMgrService::ShowDialog(const std::string& name,
 
         std::string resPath;
         // create container
-        Ace::Platform::AceContainer::CreateContainer(dialogId, Ace::FrontendType::JS, false, "", nullptr,
+        Ace::Platform::AceContainer::CreateContainer(dialogId, Ace::FrontendType::JS, false, "", CreateAbility(),
             std::make_unique<AcePlatformEventCallback>([]() {}), true);
         auto container = Ace::Platform::AceContainer::GetContainer(dialogId);
         if (!container) {
@@ -228,6 +253,32 @@ int UIMgrService::ShowDialog(const std::string& name,
         Ace::Platform::AceContainer::SetUIWindow(dialogId, dialogWindow);
         Ace::Platform::FlutterAceView::SurfaceChanged(flutterAceView, windowWidth, windowHeight, 0);
 
+        auto context = Ace::Platform::AceContainer::GetContainer(dialogId)->GetPipelineContext();
+#ifdef ENABLE_ROSEN_BACKEND
+        if (SystemProperties::GetRosenBackendEnabled()) {
+            auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+            if (rsUiDirector != nullptr) {
+                rsUiDirector->SetRSSurfaceNode(dialogWindow->GetSurfaceNode());
+
+                dialogWindow->RegisterWindowChangeListener(listener);
+
+                rsUiDirector->SetSurfaceNodeSize(windowWidth, windowHeight);
+                rsUiDirector->SetUITaskRunner(
+                    [taskExecutor = Ace::Platform::AceContainer::GetContainer(dialogId)->GetTaskExecutor()]
+                        (const std::function<void()>& task) {
+                            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                        });
+                if (context != nullptr) {
+                    context->SetRSUIDirector(rsUiDirector);
+                }
+                rsUiDirector->Init();
+                HILOG_INFO("Init Rosen Backend");
+            }
+        } else {
+            HILOG_INFO("not Init Rosen Backend");
+        }
+#endif
+
         // run page.
         Ace::Platform::AceContainer::RunPage(
             dialogId, Ace::Platform::AceContainer::GetContainer(dialogId)->GeneratePageId(), "", params);
@@ -257,6 +308,15 @@ int UIMgrService::CancelDialog(int id)
     auto cancelDialogCallback = [id]() {
         auto dialogWindow = Platform::AceContainer::GetUIWindow(id);
         dialogWindow->Destroy();
+#ifdef ENABLE_ROSEN_BACKEND
+        if (auto context = Ace::Platform::AceContainer::GetContainer(id)->GetPipelineContext()) {
+            context->SetRSUIDirector(nullptr);
+        }
+#endif
+        auto ability = Platform::AceContainer::GetAbility(id);
+        if (ability != nullptr) {
+            delete ability;
+        }
         Platform::AceContainer::DestroyContainer(id);
     };
 

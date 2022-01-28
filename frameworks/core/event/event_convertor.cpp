@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchPoint>& events)
+void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>& events)
 {
     const auto* origin = reinterpret_cast<const AceActionData*>(data.data());
     size_t size = data.size() / sizeof(AceActionData);
@@ -32,7 +32,7 @@ void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchPoint>
     while (current < end) {
         std::chrono::microseconds micros(current->timeStamp);
         TimeStamp time(micros);
-        TouchPoint point { static_cast<int32_t>(current->actionId), static_cast<float>(current->physicalX),
+        TouchEvent point { static_cast<int32_t>(current->actionId), static_cast<float>(current->physicalX),
             static_cast<float>(current->physicalY), TouchType::UNKNOWN, time, current->size,
             static_cast<float>(current->pressure), static_cast<int64_t>(current->sourceDeviceId) };
         switch (current->actionType) {

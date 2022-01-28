@@ -219,7 +219,7 @@ shared_ptr<JsValue> JsHandleCallback(const shared_ptr<JsRuntime>& runtime, const
 shared_ptr<JsValue> JsRunLoopOnce(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGI("JsRunLoopOnce");
+    LOGD("JsRunLoopOnce");
     auto engineInstance = static_cast<JsiPaEngineInstance*>(runtime->GetEmbedderData());
     if (engineInstance == nullptr) {
         LOGE("engineInstance is nullptr");
@@ -240,7 +240,7 @@ shared_ptr<JsValue> JsRunLoopOnce(const shared_ptr<JsRuntime>& runtime, const sh
 shared_ptr<JsValue> JsRunMicrotasks(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGI("JsRunMicrotasks");
+    LOGD("JsRunMicrotasks");
     runtime->ExecutePendingJob();
     return runtime->NewUndefined();
 }
@@ -510,7 +510,7 @@ bool JsiPaEngineInstance::InitJsEnv(bool debuggerMode, const std::unordered_map<
 
 bool JsiPaEngineInstance::FireJsEvent(const std::string& eventStr)
 {
-    LOGI("JsiPaEngineInstance FireJsEvent");
+    LOGD("JsiPaEngineInstance FireJsEvent");
 
     shared_ptr<JsValue> global = runtime_->GetGlobal();
     shared_ptr<JsValue> func = global->GetProperty(runtime_, "callJS");
@@ -713,7 +713,7 @@ bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
 
 void JsiPaEngine::SetPostTask(NativeEngine* nativeEngine)
 {
-    LOGI("SetPostTask");
+    LOGD("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
     auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
@@ -749,7 +749,7 @@ void JsiPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
         std::string urlName = url.substr(0, pos) + bin_ext;
         std::string assetBasePath = delegate->GetAssetPath(urlName);
         std::string assetPath = assetBasePath.append(urlName);
-        LOGI("assetPath is: %{private}s", assetPath.c_str());
+        LOGD("assetPath is: %{private}s", assetPath.c_str());
         if (!runtime->ExecuteJsBin(assetPath)) {
             LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
             return;
@@ -911,7 +911,7 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func,
 shared_ptr<JsValue> JsiPaEngine::CallAsyncFunc(const shared_ptr<JsValue>& func,
     std::vector<shared_ptr<JsValue>>& argv)
 {
-    LOGI("JsiPaEngine CallAsyncFunc");
+    LOGD("JsiPaEngine CallAsyncFunc");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     ACE_DCHECK(runtime);
@@ -934,7 +934,7 @@ shared_ptr<JsValue> JsiPaEngine::CallAsyncFunc(const shared_ptr<JsValue>& func,
         nativeEngine_->Loop(LOOP_ONCE);
         runtime->ExecutePendingJob();
     }
-    LOGI("JsiPaEngine CallAsyncFunc end");
+    LOGD("JsiPaEngine CallAsyncFunc end");
     return engineInstance_->GetAsyncResult();
 }
 
@@ -1011,7 +1011,7 @@ void JsiPaEngine::StartForm(const OHOS::AAFwk::Want& want)
         LOGE("JsiPaEngine StartForm GetPropertyNames error");
         return;
     }
-    LOGI("JsiPaEngine onCreate return property num %{public}d", len);
+    LOGD("JsiPaEngine onCreate return property num %{public}d", len);
 
     std::string jsonStr = "{";
     std::string valueStr = "";
@@ -1306,7 +1306,7 @@ int32_t JsiPaEngine::Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPr
 
 std::string JsiPaEngine::GetType(const Uri& uri)
 {
-    LOGI("JsiPaEngine GetType");
+    LOGD("JsiPaEngine GetType");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     std::vector<shared_ptr<JsValue>> argv;
@@ -1324,7 +1324,7 @@ std::string JsiPaEngine::GetType(const Uri& uri)
 
 std::vector<std::string> JsiPaEngine::GetFileTypes(const Uri& uri, const std::string& mimeTypeFilter)
 {
-    LOGI("JsiPaEngine GetFileTypes");
+    LOGD("JsiPaEngine GetFileTypes");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     std::vector<shared_ptr<JsValue>> argv;
@@ -1508,7 +1508,7 @@ void JsiPaEngine::OnUpdate(const int64_t formId)
 
 void JsiPaEngine::OnCastTemptoNormal(const int64_t formId)
 {
-    LOGI("JsiPaEngine OnCastTemptoNormal");
+    LOGD("JsiPaEngine OnCastTemptoNormal");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewInt32(formId) };

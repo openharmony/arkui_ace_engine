@@ -41,6 +41,11 @@ void RosenRenderList::Paint(RenderContext& context, const Offset& offset)
         if (child == currentStickyItem_ || child == selectedItem_) {
             continue;
         }
+
+        if (child->IsSelected()) {
+            PaintItemZone(context, child);
+        }
+
         PaintChild(child, context, offset);
     }
 
@@ -104,6 +109,53 @@ void RosenRenderList::Paint(RenderContext& context, const Offset& offset)
         selectedItem_->SetPosition(MakeValue<Offset>(selectedItemMainAxis_, 0.0));
         PaintChild(selectedItem_, context, offset);
     }
+
+    PaintSelectedZone(context);
+}
+
+void RosenRenderList::PaintSelectedZone(RenderContext& context)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (canvas == nullptr) {
+        LOGE("skia canvas is null");
+        return;
+    }
+
+    SkRect skRect = SkRect::MakeXYWH(mouseStartOffset_.GetX(), mouseStartOffset_.GetY(),
+        mouseEndOffset_.GetX()-mouseStartOffset_.GetX(), mouseEndOffset_.GetY()-mouseStartOffset_.GetY());
+
+    SkPaint fillGeometry;
+    fillGeometry.setAntiAlias(true);
+    fillGeometry.setStyle(SkPaint::Style::kFill_Style);
+    fillGeometry.setColor(0x1A000000);
+
+    SkPaint strokeGeometry;
+    strokeGeometry.setAntiAlias(true);
+    strokeGeometry.setStyle(SkPaint::Style::kStroke_Style);
+    strokeGeometry.setColor(0x33FFFFFF);
+    strokeGeometry.setStrokeWidth(NormalizeToPx(1.0_vp));
+
+    canvas->drawRect(skRect, fillGeometry);
+    canvas->drawRect(skRect, strokeGeometry);
+}
+
+void RosenRenderList::PaintItemZone(RenderContext& context, const RefPtr<RenderListItem>& item)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (canvas == nullptr) {
+        LOGE("skia canvas is null");
+        return;
+    }
+
+    SkRect skRect = SkRect::MakeXYWH(item->GetPaintRect().GetOffset().GetX(), item->GetPaintRect().GetOffset().GetY(),
+        item->GetPaintRect().Width(), item->GetPaintRect().Height());
+
+    SkPaint fillGeometry;
+    fillGeometry.setAntiAlias(true);
+    fillGeometry.setStyle(SkPaint::Style::kFill_Style);
+    fillGeometry.setColor(0x1A0A59f7);
+
+    canvas->drawRect(skRect, fillGeometry);
 }
 
 } // namespace OHOS::Ace::V2

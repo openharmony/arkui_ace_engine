@@ -32,6 +32,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_checkbox.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
@@ -109,6 +111,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sheet.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_side_bar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
@@ -137,6 +140,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #endif
+#include "frameworks/bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "frameworks/core/common/container.h"
@@ -405,9 +409,9 @@ panda::Local<panda::JSValueRef> JsSendEventByKey(panda::EcmaVM* vm, panda::Local
     return panda::BooleanRef::New(vm, result);
 }
 
-static TouchPoint GetTouchPointFromJS(const JsiObject& value)
+static TouchEvent GetTouchPointFromJS(const JsiObject& value)
 {
-    TouchPoint touchPoint;
+    TouchEvent touchPoint;
 
     auto type = value->GetProperty("type");
     touchPoint.type = static_cast<TouchType>(type->ToNumber<int32_t>());
@@ -449,7 +453,7 @@ panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::EcmaVM* vm, panda::Local
         return panda::JSValueRef::Undefined(vm);
     }
     JsiObject obj(args[0]);
-    TouchPoint touchPoint = GetTouchPointFromJS(obj);
+    TouchEvent touchPoint = GetTouchPointFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); }, TaskExecutor::TaskType::UI);
     return panda::BooleanRef::New(vm, result);
@@ -806,10 +810,12 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Radio", JSRadio::JSBind },
     { "ActionSheet", JSActionSheet::JSBind },
     { "AlertDialog", JSAlertDialog::JSBind },
+    { "ContextMenu", JSContextMenu::JSBind },
     { "AbilityComponent", JSAbilityComponent::JSBind },
     { "TextArea", JSTextArea::JSBind },
     { "TextInput", JSTextInput::JSBind },
     { "TextClock", JSTextClock::JSBind },
+    { "SideBarContainer", JSSideBar::JSBind },
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     { "QRCode", JSQRCode::JSBind },
     { "PluginComponent", JSPlugin::JSBind },
@@ -870,7 +876,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextTimer", JSTextTimer::JSBind },
     { "TextAreaController", JSTextAreaController::JSBind },
     { "TextInputController", JSTextInputController::JSBind },
-    { "TextTimerController", JSTextTimerController::JSBind }
+    { "TextTimerController", JSTextTimerController::JSBind },
+    { "Checkbox", JSCheckbox::JSBind },
+    { "CheckboxGroup", JSCheckboxGroup::JSBind }
 };
 
 void RegisterAllModule(BindingTarget globalObj)

@@ -31,6 +31,7 @@ const char PROPERTY_DEVICE_TYPE_TV[] = "tv";
 const char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 const char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 const char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
+const char ENABLE_DEBUG_FILE_PATH[] = "/etc/enabledebug";
 
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
@@ -66,6 +67,13 @@ bool IsAccessibilityEnabled()
             system::GetParameter("debug.ace.testmode.enabled", "0") == "1");
 }
 
+bool IsDebugEnabled()
+{
+    if (access(ENABLE_DEBUG_FILE_PATH, F_OK) == 0) {
+        return true;
+    }
+    return false;
+}
 } // namespace
 
 void SystemProperties::InitDeviceType(DeviceType)
@@ -76,6 +84,19 @@ void SystemProperties::InitDeviceType(DeviceType)
 int SystemProperties::GetArkProperties()
 {
     return system::GetIntParameter<int>("persist.ark.properties", -1);
+}
+
+bool SystemProperties::IsScoringEnabled(const std::string& name)
+{
+    if (name.empty()) {
+        return false;
+    }
+    std::string filePath = "/etc/" + name;
+    if (access(filePath.c_str(), F_OK) == 0) {
+        return true;
+    }
+    std::string prop = system::GetParameter("persist.ace.trace.scoringtool", "");
+    return prop == name;
 }
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
@@ -180,4 +201,8 @@ void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
     mnc_ = mnc;
 }
 
+bool SystemProperties::GetDebugEnabled()
+{
+    return IsDebugEnabled();
+}
 } // namespace OHOS::Ace

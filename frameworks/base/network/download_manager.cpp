@@ -61,15 +61,6 @@ public:
         // Some servers don't like requests that are made without a user-agent field, so we provide one
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_USERAGENT, "libcurl-agent/1.0");
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_URL, url.c_str());
-#ifdef WINDOWS_PLATFORM
-        const char* fileName = "../../resources/cacert.pem";
-        std::unique_ptr<FILE, decltype(&fclose)> file(fopen(fileName, "rb"), fclose);
-        if (file) {
-            ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_CAINFO, fileName);
-        } else {
-            LOGE("There is no CA certificate file for previewer to download https resource.");
-        }
-#endif
 
         CURLcode result = curl_easy_perform(handle.get());
         if (result != CURLE_OK) {

@@ -43,6 +43,8 @@ ohos_unittest("PipelineContextTest") {
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
     "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
+    "$ace_root/frameworks/base/geometry/least_square_impl.cpp",
+    "$ace_root/frameworks/base/geometry/matrix3.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
     "$ace_root/frameworks/base/geometry/quaternion.cpp",
     "$ace_root/frameworks/base/geometry/transform_util.cpp",
@@ -173,6 +175,7 @@ ohos_unittest("PipelineContextTest") {
 
     #mock
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/container_modal_mock.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
     "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/mock/mock_image_loader.cpp",
@@ -216,7 +219,7 @@ ohos_unittest("PipelineContextTest") {
     configs += [ "//third_party/curl:curl_config" ]
     deps += [ "//third_party/curl:curl" ]
     external_deps = [
-      "appexecfwk_standard:libeventhandler",
+      "eventhandler:libeventhandler",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
     ]

@@ -21,6 +21,7 @@
 
 #include "base/geometry/dimension_rect.h"
 #include "base/json/json_util.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"

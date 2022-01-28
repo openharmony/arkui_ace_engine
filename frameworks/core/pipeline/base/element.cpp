@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
+#include "base/memory/ace_type.h"
 #include "core/common/frontend.h"
 #include "core/components/focus_animation/focus_animation_element.h"
 #include "core/components/page/page_element.h"
@@ -441,24 +442,29 @@ void Element::RebuildFocusTree()
     std::list<RefPtr<FocusNode>> rebuildFocusNodes;
     for (auto& item : children_) {
         auto tmp = item->RebuildFocusChild();
-        if (tmp != nullptr) {
-            rebuildFocusNodes.emplace_back(tmp);
+        if (!tmp.empty()) {
+            rebuildFocusNodes.merge(std::move(tmp));
         }
     }
     focusScope->RebuildChild(std::move(rebuildFocusNodes));
 }
 
-RefPtr<FocusNode> Element::RebuildFocusChild()
+std::list<RefPtr<FocusNode>> Element::RebuildFocusChild()
 {
+    std::list<RefPtr<FocusNode>> list;
     auto focusNode = AceType::DynamicCast<FocusNode>(this);
     if (focusNode) {
-        return AceType::Claim(focusNode);
+        RebuildFocusTree();
+        list.emplace_back(AceType::Claim(focusNode));
+        return list;
     }
-
     for (auto& item : children_) {
-        return item->RebuildFocusChild();
+        auto focusTmp = item->RebuildFocusChild();
+        if (!focusTmp.empty()) {
+            list.merge(std::move(focusTmp));
+        }
     }
-    return nullptr;
+    return list;
 }
 
 void Element::MarkActive(bool active)

@@ -49,6 +49,21 @@ constexpr double SCREEN_DENSITY_COEFFICIENT_PHONE = 1080.0 * 160.0 / 480.0;
 constexpr double SCREEN_DENSITY_COEFFICIENT_WATCH = 466.0 * 160 / 320.0;
 constexpr double SCREEN_DENSITY_COEFFICIENT_TABLE = 2560.0 * 160.0 / 280.0;
 constexpr double SCREEN_DENSITY_COEFFICIENT_TV = 3840.0 * 160.0 / 640.0;
+
+void AdaptDeviceType(AceRunArgs& runArgs)
+{
+    if (runArgs.deviceConfig.deviceType == DeviceType::PHONE) {
+        runArgs.deviceConfig.density = runArgs.deviceWidth / SCREEN_DENSITY_COEFFICIENT_PHONE;
+    } else if (runArgs.deviceConfig.deviceType == DeviceType::WATCH) {
+        runArgs.deviceConfig.density = runArgs.deviceWidth / SCREEN_DENSITY_COEFFICIENT_WATCH;
+    } else if (runArgs.deviceConfig.deviceType == DeviceType::TABLET) {
+        runArgs.deviceConfig.density = runArgs.deviceWidth / SCREEN_DENSITY_COEFFICIENT_TABLE;
+    } else if (runArgs.deviceConfig.deviceType == DeviceType::TV) {
+        runArgs.deviceConfig.density = runArgs.deviceWidth / SCREEN_DENSITY_COEFFICIENT_TV;
+    } else {
+        LOGE("DeviceType not supported");
+    }
+}
 #endif
 
 void SetPhysicalDeviceFonts(bool& physicalDeviceFontsEnabled)
@@ -68,7 +83,62 @@ void SetFontBasePath(std::string& basePath)
     SkFontMgr_Config_Parser::setFontBasePathCallback(basePath);
 }
 
+std::string GetCustomAssetPath(std::string assetPath)
+{
+    if (assetPath.empty()) {
+        LOGE("AssetPath is null.");
+        return std::string();
+    }
+    std::string customAssetPath;
+    if (OHOS::Ace::Framework::EndWith(assetPath, DELIMITER)) {
+        assetPath = assetPath.substr(0, assetPath.size() - 1);
+    }
+    customAssetPath = assetPath.substr(0, assetPath.find_last_of(DELIMITER) + 1);
+    return customAssetPath;
+}
+
 } // namespace
+
+AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
+{
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        LOGI("Initialize for current process.");
+        Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+    });
+    if (runArgs_.formsEnabled) {
+        LOGI("CreateContainer with JS_CARD frontend");
+        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS_CARD);
+    } else if (runArgs_.aceVersion == AceVersion::ACE_1_0) {
+        LOGI("CreateContainer with JS frontend");
+        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS);
+    } else if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
+        LOGI("CreateContainer with JSDECLARATIVE frontend");
+        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::DECLARATIVE_JS);
+    } else {
+        LOGE("UnKnown frontend type");
+    }
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGE("container is null, set configuration failed.");
+        return;
+    }
+    container->InitDeviceInfo(ACE_INSTANCE_ID, runArgs);
+    SetConfigChanges(runArgs.configChanges);
+    auto resConfig = container->GetResourceConfiguration();
+    resConfig.SetOrientation(SystemProperties::GetDevcieOrientation());
+    resConfig.SetDensity(SystemProperties::GetResolution());
+    resConfig.SetDeviceType(SystemProperties::GetDeviceType());
+    container->SetResourceConfiguration(resConfig);
+}
+
+AceAbility::~AceAbility()
+{
+    if (controller_) {
+        FlutterDesktopDestroyWindow(controller_);
+    }
+    FlutterDesktopTerminate();
+}
 
 std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
 {
@@ -101,7 +171,92 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
     return aceAbility;
 }
 
-bool AceAbility::DispatchTouchEvent(const TouchPoint& event)
+void AceAbility::InitEnv()
+{
+    AceContainer::AddAssetPath(
+        ACE_INSTANCE_ID, "", { runArgs_.assetPath, GetCustomAssetPath(runArgs_.assetPath).append(ASSET_PATH_SHARE) });
+
+    AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.systemResourcesPath,
+        runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
+
+    auto view = new FlutterAceView(ACE_INSTANCE_ID);
+    if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
+        AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);
+        AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
+    } else {
+        AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
+        AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);
+    }
+
+    AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
+    IdleCallback idleNoticeCallback = [view](int64_t deadline) { view->ProcessIdleEvent(deadline); };
+    FlutterDesktopSetIdleCallback(controller_, idleNoticeCallback);
+
+    // Should make it possible to update surface changes by using viewWidth and viewHeight.
+    view->NotifySurfaceChanged(runArgs_.deviceWidth, runArgs_.deviceHeight);
+    view->NotifyDensityChanged(runArgs_.deviceConfig.density);
+}
+
+void AceAbility::Start()
+{
+    RunEventLoop();
+}
+
+void AceAbility::Stop()
+{
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        return;
+    }
+
+    container->GetTaskExecutor()->PostTask([]() { loopRunning_ = false; }, TaskExecutor::TaskType::PLATFORM);
+}
+
+void AceAbility::RunEventLoop()
+{
+    while (!FlutterDesktopWindowShouldClose(controller_) && loopRunning_) {
+        FlutterDesktopWaitForEvents(controller_);
+#ifdef USE_GLFW_WINDOW
+        auto window = FlutterDesktopGetWindow(controller_);
+        int width;
+        int height;
+        FlutterDesktopGetWindowSize(window, &width, &height);
+        if (width != runArgs_.deviceWidth || height != runArgs_.deviceHeight) {
+            AdaptDeviceType(runArgs_);
+            SurfaceChanged(runArgs_.deviceConfig.orientation, runArgs_.deviceConfig.density, width, height);
+        }
+#endif
+        auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+        if (container) {
+            container->RunNativeEngineLoop();
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    loopRunning_ = true;
+
+    // Currently exit loop is only to restart the AceContainer for real-time preivew case.
+    // Previewer background thread will release the AceAbility instance and create new one,
+    // then call the InitEnv() and Start() again.
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGE("container is null");
+        FlutterDesktopDestroyWindow(controller_);
+        controller_ = nullptr;
+        return;
+    }
+    auto viewPtr = container->GetAceView();
+    AceContainer::DestroyContainer(ACE_INSTANCE_ID);
+
+    FlutterDesktopDestroyWindow(controller_);
+    if (viewPtr != nullptr) {
+        delete viewPtr;
+        viewPtr = nullptr;
+    }
+    controller_ = nullptr;
+}
+
+bool AceAbility::DispatchTouchEvent(const TouchEvent& event)
 {
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     if (!container) {
@@ -157,39 +312,6 @@ bool AceAbility::DispatchBackPressedEvent()
     return backFuture.get();
 }
 
-AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
-{
-    static std::once_flag onceFlag;
-    std::call_once(onceFlag, []() {
-        LOGI("Initialize for current process.");
-        Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
-    });
-    if (runArgs_.formsEnabled) {
-        LOGI("CreateContainer with JS_CARD frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS_CARD);
-    } else if (runArgs_.aceVersion == AceVersion::ACE_1_0) {
-        LOGI("CreateContainer with JS frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS);
-    } else if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
-        LOGI("CreateContainer with JSDECLARATIVE frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::DECLARATIVE_JS);
-    } else {
-        LOGE("UnKnown frontend type");
-    }
-    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    if (!container) {
-        LOGE("container is null, set configuration failed.");
-        return;
-    }
-    container->InitDeviceInfo(ACE_INSTANCE_ID, runArgs);
-    SetConfigChanges(runArgs.configChanges);
-    auto resConfig = container->GetResourceConfiguration();
-    resConfig.SetOrientation(SystemProperties::GetDevcieOrientation());
-    resConfig.SetDensity(SystemProperties::GetResolution());
-    resConfig.SetDeviceType(SystemProperties::GetDeviceType());
-    container->SetResourceConfiguration(resConfig);
-}
-
 void AceAbility::SetConfigChanges(const std::string& configChanges)
 {
     if (configChanges == "") {
@@ -219,54 +341,6 @@ void AceAbility::SetConfigChanges(const std::string& configChanges)
     }
 }
 
-AceAbility::~AceAbility()
-{
-    if (controller_) {
-        FlutterDesktopDestroyWindow(controller_);
-    }
-    FlutterDesktopTerminate();
-}
-
-std::string GetCustomAssetPath(std::string assetPath)
-{
-    if (assetPath.empty()) {
-        LOGE("AssetPath is null.");
-        return std::string();
-    }
-    std::string customAssetPath;
-    if (OHOS::Ace::Framework::EndWith(assetPath, DELIMITER)) {
-        assetPath = assetPath.substr(0, assetPath.size() - 1);
-    }
-    customAssetPath = assetPath.substr(0, assetPath.find_last_of(DELIMITER) + 1);
-    return customAssetPath;
-}
-
-void AceAbility::InitEnv()
-{
-    AceContainer::AddAssetPath(
-        ACE_INSTANCE_ID, "", { runArgs_.assetPath, GetCustomAssetPath(runArgs_.assetPath).append(ASSET_PATH_SHARE) });
-
-    AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.systemResourcesPath,
-        runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
-
-    auto view = new FlutterAceView(ACE_INSTANCE_ID);
-    if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
-        AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);
-        AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
-    } else {
-        AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
-        AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);
-    }
-
-    AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
-    IdleCallback idleNoticeCallback = [view](int64_t deadline) { view->ProcessIdleEvent(deadline); };
-    FlutterDesktopSetIdleCallback(controller_, idleNoticeCallback);
-
-    // Should make it possible to update surface changes by using viewWidth and viewHeight.
-    view->NotifySurfaceChanged(runArgs_.deviceWidth, runArgs_.deviceHeight);
-    view->NotifyDensityChanged(runArgs_.deviceConfig.density);
-}
-
 void AceAbility::OnConfigurationChanged(const DeviceConfig& newConfig)
 {
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
@@ -275,98 +349,15 @@ void AceAbility::OnConfigurationChanged(const DeviceConfig& newConfig)
         return;
     }
     if (newConfig.colorMode != runArgs_.deviceConfig.colorMode) {
-        container->UpdateColorMode(newConfig.colorMode);
+        container->UpdateDeviceConfig(newConfig);
         runArgs_.deviceConfig.colorMode = newConfig.colorMode;
 
         auto type = container->GetType();
         if (type == FrontendType::DECLARATIVE_JS) {
-            SystemProperties::SetColorMode(runArgs_.deviceConfig.colorMode);
             container->NativeOnConfigurationUpdated(ACE_INSTANCE_ID);
             return;
         }
-
-        auto context = container->GetPipelineContext();
-        if (context == nullptr) {
-            LOGE("context is null, OnConfigurationChanged failed.");
-            return;
-        }
     }
-}
-
-void AceAbility::Start()
-{
-    RunEventLoop();
-}
-
-void AceAbility::Stop()
-{
-    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    if (!container) {
-        return;
-    }
-
-    container->GetTaskExecutor()->PostTask([]() { loopRunning_ = false; }, TaskExecutor::TaskType::PLATFORM);
-}
-
-#ifdef USE_GLFW_WINDOW
-void AdaptDeviceType(AceRunArgs& runArgs)
-{
-    if (runArgs.deviceConfig.deviceType == DeviceType::PHONE) {
-        runArgs.deviceConfig.density = runArgs.deviceWidth / SCREEN_DENSITY_COEFFICIENT_PHONE;
-    } else if (runArgs.deviceConfig.deviceType == DeviceType::WATCH) {
-        runArgs.deviceConfig.density = runArgs.deviceWidth / SCREEN_DENSITY_COEFFICIENT_WATCH;
-    } else if (runArgs.deviceConfig.deviceType == DeviceType::TABLET) {
-        runArgs.deviceConfig.density = runArgs.deviceWidth / SCREEN_DENSITY_COEFFICIENT_TABLE;
-    } else if (runArgs.deviceConfig.deviceType == DeviceType::TV) {
-        runArgs.deviceConfig.density = runArgs.deviceWidth / SCREEN_DENSITY_COEFFICIENT_TV;
-    } else {
-        LOGE("DeviceType not supported");
-    }
-}
-#endif
-
-void AceAbility::RunEventLoop()
-{
-    while (!FlutterDesktopWindowShouldClose(controller_) && loopRunning_) {
-        FlutterDesktopWaitForEvents(controller_);
-#ifdef USE_GLFW_WINDOW
-        auto window = FlutterDesktopGetWindow(controller_);
-        int width;
-        int height;
-        FlutterDesktopGetWindowSize(window, &width, &height);
-        if (width != runArgs_.deviceWidth || height != runArgs_.deviceHeight) {
-            AdaptDeviceType(runArgs_);
-            SurfaceChanged(runArgs_.deviceConfig.orientation, runArgs_.deviceConfig.density, width, height);
-        }
-#endif
-        auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-        if (container) {
-            container->RunNativeEngineLoop();
-        }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    }
-    loopRunning_ = true;
-
-    // Currently exit loop is only to restart the AceContainer for real-time preivew case.
-    // Previewer background thread will release the AceAbility instance and create new one,
-    // then call the InitEnv() and Start() again.
-    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    if (!container) {
-        LOGE("container is null");
-        FlutterDesktopDestroyWindow(controller_);
-        controller_ = nullptr;
-        return;
-    }
-    auto viewPtr = container->GetAceView();
-    AceContainer::DestroyContainer(ACE_INSTANCE_ID);
-
-    FlutterDesktopDestroyWindow(controller_);
-    if (viewPtr != nullptr) {
-        delete viewPtr;
-        viewPtr = nullptr;
-    }
-    controller_ = nullptr;
 }
 
 void AceAbility::SurfaceChanged(
@@ -414,6 +405,36 @@ void AceAbility::SurfaceChanged(
     runArgs_.deviceHeight = height;
 }
 
+void AceAbility::ReplacePage(const std::string& url, const std::string& params)
+{
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGE("container is null");
+        return;
+    }
+    container->GetFrontend()->ReplacePage(url, params);
+}
+
+void AceAbility::LoadDocument(const std::string& url, const std::string& componentName, SystemParams& systemParams)
+{
+    AceApplicationInfo::GetInstance().ChangeLocale(systemParams.language, systemParams.region);
+    runArgs_.isRound = systemParams.isRound;
+    SurfaceChanged(systemParams.orientation, systemParams.density, systemParams.deviceWidth, systemParams.deviceHeight);
+    DeviceConfig deviceConfig = {
+        .orientation = systemParams.orientation,
+        .density = systemParams.density,
+        .deviceType = systemParams.deviceType,
+        .colorMode = systemParams.colorMode,
+    };
+    OnConfigurationChanged(  deviceConfig);
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGE("container is null");
+        return;
+    }
+    container->LoadDocument(url, componentName);
+}
+
 std::string AceAbility::GetJSONTree()
 {
     std::string jsonTreeStr;
@@ -426,26 +447,6 @@ std::string AceAbility::GetDefaultJSONTree()
     std::string defaultJsonTreeStr;
     OHOS::Ace::Framework::InspectorClient::GetInstance().AssembleDefaultJSONTreeStr(defaultJsonTreeStr);
     return defaultJsonTreeStr;
-}
-
-void AceAbility::LoadDocument(const std::string& url, const std::string& componentName)
-{
-    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    if (!container) {
-        LOGE("container is null");
-        return;
-    }
-    container->LoadDocument(url, componentName);
-}
-
-void AceAbility::ReplacePage(const std::string& url, const std::string& params)
-{
-    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    if (!container) {
-        LOGE("container is null");
-        return;
-    }
-    container->GetFrontend()->ReplacePage(url, params);
 }
 
 bool AceAbility::OperateComponent(const std::string& attrsJson)

@@ -32,10 +32,11 @@ constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
 constexpr int32_t HOURS_WEST_UPPER_LIMIT = 12;
 constexpr int32_t HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT = -12;
 constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
+constexpr char DEFAULT_FORMAT[] = "hhmmss";
 
 bool IsHoursWestValid(double& hoursWest)
 {
-    if (hoursWest <= HOURS_WEST_LOWER_LIMIT || hoursWest >= HOURS_WEST_UPPER_LIMIT) {
+    if (hoursWest < HOURS_WEST_LOWER_LIMIT || hoursWest > HOURS_WEST_UPPER_LIMIT) {
         return false;
     }
     if (hoursWest < HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT) {
@@ -68,14 +69,16 @@ void JSTextClock::Create(const JSCallbackInfo& info)
             if (IsHoursWestValid(hourWest_)) {
                 hourWest = hourWest_;
             } else {
-                LOGI("hourWest args is invalid");
+                LOGE("hourWest args is invalid");
             }
         } else {
-            LOGI("hourWest args is not number");
+            LOGE("hourWest args is not number,args is invalid");
         }
     }
     RefPtr<TextClockComponent> textClockComponent = AceType::MakeRefPtr<TextClockComponent>(std::string(""));
     textClockComponent->SetHoursWest(hourWest);
+    std::string defaultFormat = DEFAULT_FORMAT;
+    textClockComponent->SetFormat(defaultFormat);
     ViewStackProcessor::GetInstance()->Push(textClockComponent);
 }
 
@@ -134,7 +137,8 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
     if (info[0]->IsString()) {
         textClockComponent->SetFormat(info[0]->ToString());
     } else {
-        LOGW("arg is not string");
+        LOGE("arg is not string");
+        return;
     }
 }
 

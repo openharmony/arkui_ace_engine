@@ -59,17 +59,22 @@ void JSVideo::Create(const JSCallbackInfo& info)
     }
 
     JSRef<JSVal> previewUriValue = videoObj->GetProperty("previewUri");
-    std::string previewUri;
-    auto noPixMap = ParseJsMedia(previewUriValue, previewUri);
-    RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(previewUri);
-    imageComponent->SetUseSkiaSvg(false);
-    videoComponent->SetPoster(previewUri);
-    if (!noPixMap) {
+    if (!previewUriValue->IsUndefined() && !previewUriValue->IsNull()) {
+        std::string previewUri;
+        auto noPixMap = ParseJsMedia(previewUriValue, previewUri);
+        videoComponent->SetPoster(previewUri);
+        if (!noPixMap) {
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-        imageComponent->SetPixmap(CreatePixelMapFromNapiValue(previewUriValue));
+            auto pixelMap = CreatePixelMapFromNapiValue(previewUriValue);
+            if (pixelMap) {
+                RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(previewUri);
+                imageComponent->SetUseSkiaSvg(false);
+                imageComponent->SetPixmap(pixelMap);
+                videoComponent->SetPosterImage(imageComponent);
+            }
 #endif
+        }
     }
-    videoComponent->SetPosterImage(imageComponent);
 
     auto controllerObj = videoObj->GetProperty("controller");
     if (controllerObj->IsObject()) {

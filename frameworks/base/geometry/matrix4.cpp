@@ -22,11 +22,10 @@
 
 namespace OHOS::Ace {
 namespace {
-
 constexpr int32_t MATRIX_LENGTH = Matrix4::DIMENSION * Matrix4::DIMENSION;
-constexpr float ANGLE_UNIT = 0.017453f;    // PI / 180
+constexpr double ANGLE_UNIT = 0.017453f; // PI / 180
 
-inline bool IsEqual(const float& left, const float& right)
+inline bool IsEqual(const double& left, const double& right)
 {
     return NearEqual(left, right);
 }
@@ -35,45 +34,33 @@ inline bool IsEqual(const float& left, const float& right)
 
 Matrix4 Matrix4::CreateIdentity()
 {
-    return Matrix4(
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f);
+    return Matrix4(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-Matrix4 Matrix4::CreateTranslate(float x, float y, float z)
+Matrix4 Matrix4::CreateTranslate(double x, double y, double z)
 {
-    return Matrix4(
-        1.0f, 0.0f, 0.0f, x,
-        0.0f, 1.0f, 0.0f, y,
-        0.0f, 0.0f, 1.0f, z,
-        0.0f, 0.0f, 0.0f, 1.0f);
+    return Matrix4(1.0f, 0.0f, 0.0f, x, 0.0f, 1.0f, 0.0f, y, 0.0f, 0.0f, 1.0f, z, 0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-Matrix4 Matrix4::CreateScale(float x, float y, float z)
+Matrix4 Matrix4::CreateScale(double x, double y, double z)
 {
-    return Matrix4(
-        x, 0.0f, 0.0f, 0.0f,
-        0.0f, y, 0.0f, 0.0f,
-        0.0f, 0.0f, z, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f);
+    return Matrix4(x, 0.0f, 0.0f, 0.0f, 0.0f, y, 0.0f, 0.0f, 0.0f, 0.0f, z, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-Matrix4 Matrix4::CreateRotate(float angle, float dx, float dy, float dz)
+Matrix4 Matrix4::CreateRotate(double angle, double dx, double dy, double dz)
 {
     // (x,y,z) need normalize
-    float sum = dx * dx + dy * dy + dz * dz;
+    double sum = dx * dx + dy * dy + dz * dz;
     if (NearZero(sum)) {
         return Matrix4::CreateIdentity();
     }
 
-    float x = dx / sqrt(sum);
-    float y = dy / sqrt(sum);
-    float z = dz / sqrt(sum);
-    float redian = static_cast<float>(angle * (M_PI / 180.0f));
-    float cosValue = cosf(redian);
-    float sinValue = sinf(redian);
+    double x = dx / sqrt(sum);
+    double y = dy / sqrt(sum);
+    double z = dz / sqrt(sum);
+    double redian = static_cast<double>(angle * (M_PI / 180.0f));
+    double cosValue = cosf(redian);
+    double sinValue = sinf(redian);
 
     return Matrix4(cosValue + (x * x * (1.0f - cosValue)), (x * y * (1.0f - cosValue)) - (z * sinValue),
         (x * z * (1.0f - cosValue)) + (y * sinValue), 0.0f, (y * x * (1.0f - cosValue)) + (z * sinValue),
@@ -82,25 +69,18 @@ Matrix4 Matrix4::CreateRotate(float angle, float dx, float dy, float dz)
         cosValue + (z * z * (1.0f - cosValue)), 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-Matrix4 Matrix4::CreateMatrix2D(float m00, float m10, float m01, float m11, float m03, float m13)
+Matrix4 Matrix4::CreateMatrix2D(double m00, double m10, double m01, double m11, double m03, double m13)
 {
-    return Matrix4(
-        m00, m01, 0.0f, m03,
-        m10, m11, 0.0f, m13,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f);
+    return Matrix4(m00, m01, 0.0f, m03, m10, m11, 0.0f, m13, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-Matrix4 Matrix4::CreateSkew(float x, float y)
+Matrix4 Matrix4::CreateSkew(double x, double y)
 {
-    return Matrix4(
-        1.0f, std::tan(x * ANGLE_UNIT), 0.0f, 0.0f,
-        std::tan(y * ANGLE_UNIT), 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f);
+    return Matrix4(1.0f, std::tan(x * ANGLE_UNIT), 0.0f, 0.0f, std::tan(y * ANGLE_UNIT), 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-Matrix4 Matrix4::CreatePerspective(float distance)
+Matrix4 Matrix4::CreatePerspective(double distance)
 {
     auto result = CreateIdentity();
     if (GreatNotEqual(distance, 0.0f)) {
@@ -112,10 +92,8 @@ Matrix4 Matrix4::CreatePerspective(float distance)
 Matrix4 Matrix4::Invert(const Matrix4& matrix)
 {
     Matrix4 inverted = CreateInvert(matrix);
-    float determinant = matrix(0, 0) * inverted(0, 0) +
-                        matrix(0, 1) * inverted(1, 0) +
-                        matrix(0, 2) * inverted(2, 0) +
-                        matrix(0, 3) * inverted(3, 0);
+    double determinant = matrix(0, 0) * inverted(0, 0) + matrix(0, 1) * inverted(1, 0) + matrix(0, 2) * inverted(2, 0) +
+                         matrix(0, 3) * inverted(3, 0);
 
     if (!NearZero(determinant)) {
         inverted = inverted * (1.0f / determinant);
@@ -135,8 +113,8 @@ Matrix4::Matrix4(const Matrix4& matrix)
     std::copy_n(&matrix.matrix4x4_[0][0], MATRIX_LENGTH, &matrix4x4_[0][0]);
 }
 
-Matrix4::Matrix4(float m00, float m01, float m02, float m03, float m10, float m11, float m12, float m13, float m20,
-    float m21, float m22, float m23, float m30, float m31, float m32, float m33)
+Matrix4::Matrix4(double m00, double m01, double m02, double m03, double m10, double m11, double m12, double m13,
+    double m20, double m21, double m22, double m23, double m30, double m31, double m32, double m33)
 {
     matrix4x4_[0][0] = m00;
     matrix4x4_[1][0] = m01;
@@ -156,7 +134,7 @@ Matrix4::Matrix4(float m00, float m01, float m02, float m03, float m10, float m1
     matrix4x4_[3][3] = m33;
 }
 
-void Matrix4::SetScale(float x, float y, float z)
+void Matrix4::SetScale(double x, double y, double z)
 {
     // The 4X4 matrix scale index is [0][0], [1][1], [2][2], [3][3].
     matrix4x4_[0][0] = x;
@@ -165,17 +143,17 @@ void Matrix4::SetScale(float x, float y, float z)
     matrix4x4_[3][3] = 1.0f;
 }
 
-float Matrix4::GetScaleX() const
+double Matrix4::GetScaleX() const
 {
     return matrix4x4_[0][0];
 }
 
-float Matrix4::GetScaleY() const
+double Matrix4::GetScaleY() const
 {
     return matrix4x4_[1][1];
 }
 
-void Matrix4::SetEntry(int32_t row, int32_t col, float value)
+void Matrix4::SetEntry(int32_t row, int32_t col, double value)
 {
     if ((row < 0 || row >= DIMENSION) || (col < 0 || col >= DIMENSION)) {
         return;
@@ -188,7 +166,7 @@ bool Matrix4::IsIdentityMatrix() const
     return *this == CreateIdentity();
 }
 
-void Matrix4::Rotate(float angle, float dx, float dy, float dz)
+void Matrix4::Rotate(double angle, double dx, double dy, double dz)
 {
     Matrix4 transform = *this;
     *this = transform * CreateRotate(angle, dx, dy, dz);
@@ -257,10 +235,10 @@ bool Matrix4::operator==(const Matrix4& matrix) const
     return std::equal(&matrix4x4_[0][0], &matrix4x4_[0][0] + MATRIX_LENGTH, &matrix.matrix4x4_[0][0], IsEqual);
 }
 
-Matrix4 Matrix4::operator*(float num)
+Matrix4 Matrix4::operator*(double num)
 {
     Matrix4 ret(*this);
-    std::for_each_n(&ret.matrix4x4_[0][0], MATRIX_LENGTH, [num](float& v) { v *= num; });
+    std::for_each_n(&ret.matrix4x4_[0][0], MATRIX_LENGTH, [num](double& v) { v *= num; });
     return ret;
 }
 
@@ -301,12 +279,28 @@ Matrix4 Matrix4::operator*(const Matrix4& matrix)
             matrix4x4_[3][3] * matrix(3, 3));
 }
 
+Matrix4N Matrix4::operator*(const Matrix4N& matrix) const
+{
+    int32_t columns = matrix.GetColNum();
+    Matrix4N matrix4n { columns };
+    for (auto i = 0; i < DIMENSION; i++) {
+        for (auto j = 0; j < columns; j++) {
+            double value = 0.0;
+            for (auto k = 0; k < DIMENSION; k++) {
+                value += matrix4x4_[i][k] * matrix[k][j];
+            }
+            matrix4n[i][j] = value;
+        }
+    }
+    return matrix4n;
+}
+
 Point Matrix4::operator*(const Point& point)
 {
     double x = point.GetX();
     double y = point.GetY();
     return Point(matrix4x4_[0][0] * x + matrix4x4_[1][0] * y + matrix4x4_[3][0],
-                 matrix4x4_[0][1] * x + matrix4x4_[1][1] * y + matrix4x4_[3][1]);
+        matrix4x4_[0][1] * x + matrix4x4_[1][1] * y + matrix4x4_[3][1]);
 }
 
 Matrix4& Matrix4::operator=(const Matrix4& matrix)
@@ -318,7 +312,7 @@ Matrix4& Matrix4::operator=(const Matrix4& matrix)
     return *this;
 }
 
-float Matrix4::operator[](int32_t index) const
+double Matrix4::operator[](int32_t index) const
 {
     if (index < 0 || index >= MATRIX_LENGTH) {
         return 0.0f;
@@ -328,7 +322,7 @@ float Matrix4::operator[](int32_t index) const
     return matrix4x4_[row][col];
 }
 
-float Matrix4::operator()(int32_t row, int32_t col) const
+double Matrix4::operator()(int32_t row, int32_t col) const
 {
     // Caller guarantee row and col in range of [0, 3].
     return matrix4x4_[row][col];
@@ -383,14 +377,14 @@ void Matrix4::Transpose()
     std::swap(matrix4x4_[2][3], matrix4x4_[3][2]);
 }
 
-void Matrix4::MapScalars(const float src[DIMENSION], float dst[DIMENSION]) const
+void Matrix4::MapScalars(const double src[DIMENSION], double dst[DIMENSION]) const
 {
-    float storage[DIMENSION];
+    double storage[DIMENSION];
 
-    float* result = (src == dst) ? storage : dst;
+    double* result = (src == dst) ? storage : dst;
 
     for (int i = 0; i < DIMENSION; i++) {
-        float value = 0;
+        double value = 0;
         for (int j = 0; j < DIMENSION; j++) {
             value += matrix4x4_[j][i] * src[j];
         }
@@ -406,7 +400,7 @@ std::string Matrix4::ToString() const
 {
     std::string out;
     for (auto& i : matrix4x4_) {
-        for (float j : i) {
+        for (double j : i) {
             out += std::to_string(j);
             out += ",";
         }
@@ -415,4 +409,119 @@ std::string Matrix4::ToString() const
     return out;
 }
 
+Matrix4N::Matrix4N(int32_t columns) : columns_(columns)
+{
+    matrix4n_.resize(DIMENSION, std::vector<double>(columns_, 0));
+}
+
+bool Matrix4N::SetEntry(int32_t row, int32_t col, double value)
+{
+    if (row >= DIMENSION || col >= columns_) {
+        return false;
+    }
+    matrix4n_[row][col] = value;
+    return true;
+}
+
+Matrix4 Matrix4N::operator*(const MatrixN4& matrix) const
+{
+    auto matrix4 = Matrix4::CreateIdentity();
+    if (columns_ != matrix.GetRowNum()) {
+        return matrix4;
+    }
+    for (auto i = 0; i < DIMENSION; i++) {
+        for (auto j = 0; j < DIMENSION; j++) {
+            double value = 0.0;
+            for (auto k = 0; k < columns_; k++) {
+                value += matrix4n_[i][k] * matrix[k][j];
+            }
+            matrix4.SetEntry(i, j, value);
+        }
+    }
+    return matrix4;
+}
+
+MatrixN4 Matrix4N::Transpose() const
+{
+    MatrixN4 matrix { columns_ };
+    for (auto i = 0; i < DIMENSION; i++) {
+        for (auto j = 0; j < columns_; j++) {
+            matrix[j][i] = matrix4n_[i][j];
+        }
+    }
+    return matrix;
+}
+
+std::vector<double> Matrix4N::MapScalars(const std::vector<double>& src) const
+{
+    std::vector<double> value { DIMENSION, 0 };
+    if (static_cast<int32_t>(src.size()) != columns_) {
+        return value;
+    }
+    for (int32_t i = 0; i < DIMENSION; i++) {
+        double item = 0.0;
+        for (int32_t j = 0; j < columns_; j++) {
+            item = item + matrix4n_[i][j] * src[j];
+        }
+        value[i] = item;
+    }
+    return value;
+}
+
+bool Matrix4N::MapScalars(const std::vector<double>& src, std::vector<double>& result) const
+{
+    if (static_cast<int32_t>(src.size()) != columns_) {
+        return false;
+    }
+    result.resize(DIMENSION, 0);
+    for (int32_t i = 0; i < DIMENSION; i++) {
+        double item = 0.0;
+        for (int32_t j = 0; j < columns_; j++) {
+            item = item + matrix4n_[i][j] * src[j];
+        }
+        result[i] = item;
+    }
+    return true;
+}
+
+MatrixN4::MatrixN4(int32_t rows) : rows_(rows)
+{
+    matrixn4_.resize(rows, std::vector<double>(DIMENSION, 0));
+}
+
+bool MatrixN4::SetEntry(int32_t row, int32_t col, double value)
+{
+    if (row >= rows_ || col >= DIMENSION) {
+        return false;
+    }
+    matrixn4_[row][col] = value;
+    return true;
+}
+
+Matrix4N MatrixN4::Transpose() const
+{
+    Matrix4N matrix { rows_ };
+    for (auto i = 0; i < DIMENSION; i++) {
+        for (auto j = 0; j < rows_; j++) {
+            matrix[i][j] = matrixn4_[j][i];
+        }
+    }
+    return matrix;
+}
+
+std::vector<double> MatrixN4::MapScalars(const std::vector<double>& src) const
+{
+    std::vector<double> value { rows_, 0 };
+    if (static_cast<int32_t>(src.size()) != DIMENSION) {
+        return value;
+    }
+    for (int32_t i = 0; i < rows_; i++) {
+        double item = 0.0;
+        for (int32_t j = 0; j < DIMENSION; j++) {
+            item = item + matrixn4_[i][j] * src[j];
+        }
+        value[i] = item;
+    }
+    return value;
+}
 } // namespace OHOS::Ace

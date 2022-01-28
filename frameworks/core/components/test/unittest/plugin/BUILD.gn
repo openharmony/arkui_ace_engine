@@ -64,9 +64,10 @@ ohos_unittest("PluginCallBackClientTest") {
   ]
 
   external_deps = [
-    "aafwk_standard:want",
-    "appexecfwk_standard:appexecfwk_base",
-    "appexecfwk_standard:appexecfwk_core",
+    "ability_runtime:app_manager",
+    "ability_runtime:want",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "ipc:ipc_core",
   ]
 
@@ -97,9 +98,10 @@ ohos_unittest("PluginComponentTest") {
   ]
 
   external_deps = [
-    "aafwk_standard:want",
-    "appexecfwk_standard:appexecfwk_base",
-    "appexecfwk_standard:appexecfwk_core",
+    "ability_runtime:app_manager",
+    "ability_runtime:want",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "ipc:ipc_core",
   ]
 
@@ -130,9 +132,10 @@ ohos_unittest("PluginElementTest") {
   ]
 
   external_deps = [
-    "aafwk_standard:want",
-    "appexecfwk_standard:appexecfwk_base",
-    "appexecfwk_standard:appexecfwk_core",
+    "ability_runtime:app_manager",
+    "ability_runtime:want",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "ipc:ipc_core",
   ]
 
@@ -165,9 +168,10 @@ ohos_unittest("PluginManagerDelegateTest") {
   ]
 
   external_deps = [
-    "aafwk_standard:want",
-    "appexecfwk_standard:appexecfwk_base",
-    "appexecfwk_standard:appexecfwk_core",
+    "ability_runtime:app_manager",
+    "ability_runtime:want",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "ipc:ipc_core",
   ]
 
@@ -218,7 +222,7 @@ ohos_unittest("PluginSubContainerTest") {
     "$ace_root/build:ace_ohos_unittest_base",
   ]
 
-  external_deps = [ "aafwk_standard:want" ]
+  external_deps = [ "ability_runtime:want" ]
 
   if (!is_standard_system) {
     subsystem_name = "ace"

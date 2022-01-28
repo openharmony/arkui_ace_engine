@@ -91,6 +91,7 @@ void JSMatrix2d::JsSetTranslateX(const JSCallbackInfo& info)
     double translateX;
     if (info[0]->IsNumber()) {
         JSViewAbstract::ParseJsDouble(info[0], translateX);
+        translateX = SystemProperties::Vp2Px(translateX);
         translateX_ = translateX;
     }
 }
@@ -100,6 +101,7 @@ void JSMatrix2d::JsSetTranslateY(const JSCallbackInfo& info)
     double translateY;
     if (info[0]->IsNumber()) {
         JSViewAbstract::ParseJsDouble(info[0], translateY);
+        translateY = SystemProperties::Vp2Px(translateY);
         translateY_ = translateY;
     }
 }

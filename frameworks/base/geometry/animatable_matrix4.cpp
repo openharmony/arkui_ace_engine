@@ -32,7 +32,6 @@ AnimatableMatrix4& AnimatableMatrix4::operator=(const AnimatableMatrix4& newMatr
     SetAnimationOption(newMatrix4.GetAnimationOption());
     auto pipelineContext = context_.Upgrade();
     if (!animationCallback_ || !pipelineContext) {
-        LOGD("Animatable assign without animation due to null callback or context");
         Matrix4& matrix4 = *this;
         matrix4 = newMatrix4;
         return *this;

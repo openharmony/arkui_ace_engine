@@ -25,6 +25,7 @@
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
 class NativeEngine;
+class NativeReference;
 namespace OHOS::Ace::Framework {
 struct JsModule {
     const std::string moduleName;
@@ -42,6 +43,16 @@ public:
     virtual ~JsEngineInstance() = default;
 
     virtual void FlushCommandBuffer(void* context, const std::string& command);
+    static NativeEngine* GetNativeEngine()
+    {
+        return nativeEngine_;
+    }
+    static void SetNativeEngine(NativeEngine* nativeEngine)
+    {
+        nativeEngine_ = nativeEngine;
+    }
+protected:
+    static thread_local NativeEngine* nativeEngine_;
 };
 
 class JsEngine : public AceType {
@@ -143,6 +154,10 @@ public:
     virtual ACE_EXPORT FrontendDelegate* GetFrontend() {
         return nullptr;
     }
+
+    virtual void SetContentStorage(int32_t instanceId, NativeReference* storage) {}
+
+    virtual void SetContext(int32_t instanceId, NativeReference* context) {}
 
     bool IsDebugVersion() const
     {

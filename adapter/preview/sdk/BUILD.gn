@@ -104,17 +104,47 @@ if (is_standard_system) {
     module_install_name = ""
   }
 
-  ohos_copy("copy_media_query_shared_library") {
-    shared_library_path =
+  ohos_copy("copy_napi_modules_shared_library") {
+    mediaquery_path =
         get_label_info("$ace_root/interfaces/napi/kits/media_query:mediaquery",
                        "root_out_dir")
-    deps = [ "$ace_root/interfaces/napi/kits/media_query:mediaquery" ]
+    prompt_path = get_label_info("$ace_root/interfaces/napi/kits/prompt:prompt",
+                                 "root_out_dir")
+    router_path = get_label_info("$ace_root/interfaces/napi/kits/router:router",
+                                 "root_out_dir")
+    configuration_path = get_label_info(
+            "$ace_root/interfaces/napi/kits/configuration:configuration",
+            "root_out_dir")
+    device_path = get_label_info("$ace_root/interfaces/napi/kits/device:device",
+                                 "root_out_dir")
+    grid_path = get_label_info("$ace_root/interfaces/napi/kits/grid:grid",
+                               "root_out_dir")
+    deps = [
+      "$ace_root/interfaces/napi/kits/configuration:configuration",
+      "$ace_root/interfaces/napi/kits/device:device",
+      "$ace_root/interfaces/napi/kits/grid:grid",
+      "$ace_root/interfaces/napi/kits/media_query:mediaquery",
+      "$ace_root/interfaces/napi/kits/prompt:prompt",
+      "$ace_root/interfaces/napi/kits/router:router",
+    ]
     if (use_mac) {
-      sources =
-          [ "$shared_library_path/ace/ace_engine_standard/libmediaquery.dylib" ]
+      sources = [
+        "$configuration_path/ace/ace_engine_standard/libconfiguration.dylib",
+        "$device_path/ace/ace_engine_standard/libdevice.dylib",
+        "$grid_path/ace/ace_engine_standard/libgrid.dylib",
+        "$mediaquery_path/ace/ace_engine_standard/libmediaquery.dylib",
+        "$prompt_path/ace/ace_engine_standard/libprompt.dylib",
+        "$router_path/ace/ace_engine_standard/librouter.dylib",
+      ]
     } else {
-      sources =
-          [ "$shared_library_path/ace/ace_engine_standard/libmediaquery.dll" ]
+      sources = [
+        "$configuration_path/ace/ace_engine_standard/libconfiguration.dll",
+        "$device_path/ace/ace_engine_standard/libdevice.dll",
+        "$grid_path/ace/ace_engine_standard/libgrid.dll",
+        "$mediaquery_path/ace/ace_engine_standard/libmediaquery.dll",
+        "$prompt_path/ace/ace_engine_standard/libprompt.dll",
+        "$router_path/ace/ace_engine_standard/librouter.dll",
+      ]
     }
     outputs =
         [ target_out_dir + "/previewer/common/bin/module/{{source_file_part}}" ]
@@ -144,6 +174,15 @@ if (is_standard_system) {
     outputs = [ target_out_dir + "/previewer/common/{{source_file_part}}" ]
     module_source_dir = target_out_dir + "/previewer/common"
     module_install_name = ""
+  }
+
+  ohos_copy("copy_preview_curl_cacert") {
+    if (use_mingw_win) {
+      sources = [ "./cacert.pem" ]
+      outputs = [ target_out_dir + "/previewer/resources/cacert.pem" ]
+      module_source_dir = target_out_dir + "/previewer/resources"
+      module_install_name = ""
+    }
   }
 } else {
   ohos_copy("copy_system_resource") {

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_GRID_LAYOUT_ROSEN_RENDER_GRID_LAYOUT_H
 
 #include "core/components/grid_layout/render_grid_layout.h"
+#include "core/components/grid_layout/render_grid_layout_item.h"
 
 namespace OHOS::Ace {
 
@@ -28,8 +29,11 @@ public:
     ~RosenRenderGridLayout() override = default;
 
     void Update(const RefPtr<Component>& component) override;
+    void Paint(RenderContext& context, const Offset& offset) override;
 
 private:
+    void PaintSelectedZone(RenderContext& context);
+    void PaintItemZone(RenderContext& context, const Rect& paintRect);
 };
 
 } // namespace OHOS::Ace

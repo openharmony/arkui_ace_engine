@@ -54,37 +54,71 @@ struct TouchRestrict final {
 };
 
 struct TouchPoint final {
+    int32_t id = 0;
+    float x = 0.0f;
+    float y = 0.0f;
+    TimeStamp downTime;
+    double size = 0.0;
+    float force = 0.0f;
+    bool isPressed = false;
+};
+
+/**
+ * @brief TouchEvent contains the active change point and a list of all touch points.
+ */
+struct TouchEvent final {
+    // the active changed point info
     // The ID is used to identify the point of contact between the finger and the screen. Different fingers have
     // different ids.
     int32_t id = 0;
     float x = 0.0f;
     float y = 0.0f;
     TouchType type = TouchType::UNKNOWN;
+    // nanosecond time stamp.
     TimeStamp time;
     double size = 0.0;
     float force = 0.0f;
     int64_t deviceId = 0;
     SourceType sourceType = SourceType::NONE;
 
+    // all points on the touch screen.
+    std::vector<TouchPoint> pointers;
+
     Offset GetOffset() const
     {
         return Offset(x, y);
     }
 
-    TouchPoint CreateScalePoint(float scale) const
+    TouchEvent CreateScalePoint(float scale) const
     {
         if (NearZero(scale)) {
-            return { id, x, y, type, time, size, force, deviceId, sourceType };
+            return { id, x, y, type, time, size, force, deviceId, sourceType, pointers };
         }
-        return { id, x / scale, y / scale, type, time, size, force, deviceId, sourceType };
+        auto temp = pointers;
+        std::for_each(temp.begin(), temp.end(), [scale](auto&& point) {
+            point.x = point.x / scale;
+            point.y = point.y / scale;
+        });
+        return { id, x / scale, y / scale, type, time, size, force, deviceId, sourceType, temp };
     }
 
-    TouchPoint UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const
+    TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const
     {
+        auto temp = pointers;
         if (NearZero(scale)) {
-            return { pointId, x - offsetX, y - offsetY, type, time, size, force, deviceId };
+            std::for_each(temp.begin(), temp.end(), [offsetX, offsetY](auto&& point) {
+                point.x = point.x - offsetX;
+                point.y = point.y - offsetY;
+            });
+            return { pointId, x - offsetX, y - offsetY, type, time, size, force, deviceId, sourceType, temp };
         }
-        return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, type, time, size, force, deviceId };
+
+        std::for_each(temp.begin(), temp.end(), [scale, offsetX, offsetY](auto&& point) {
+            point.x = (point.x - offsetX) / scale;
+            point.y = (point.y - offsetY) / scale;
+        });
+        return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, type, time, size, force, deviceId, sourceType,
+            temp };
     }
 };
 
@@ -258,8 +292,8 @@ class TouchEventTarget : public virtual AceType {
     DECLARE_ACE_TYPE(TouchEventTarget, AceType);
 
 public:
-    virtual bool DispatchEvent(const TouchPoint& point) = 0;
-    virtual bool HandleEvent(const TouchPoint& point) = 0;
+    virtual bool DispatchEvent(const TouchEvent& point) = 0;
+    virtual bool HandleEvent(const TouchEvent& point) = 0;
 
     void SetTouchRestrict(const TouchRestrict& touchRestrict)
     {

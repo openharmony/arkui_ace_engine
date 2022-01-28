@@ -21,56 +21,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "adapter/preview/inspector/inspect_badge.h"
-#include "adapter/preview/inspector/inspect_button.h"
-#include "adapter/preview/inspector/inspect_camera.h"
-#include "adapter/preview/inspector/inspect_canvas.h"
-#include "adapter/preview/inspector/inspect_chart.h"
-#include "adapter/preview/inspector/inspect_dialog.h"
-#include "adapter/preview/inspector/inspect_div.h"
-#include "adapter/preview/inspector/inspect_divider.h"
-#include "adapter/preview/inspector/inspect_form.h"
-#include "adapter/preview/inspector/inspect_grid_column.h"
-#include "adapter/preview/inspector/inspect_grid_container.h"
-#include "adapter/preview/inspector/inspect_grid_row.h"
-#include "adapter/preview/inspector/inspect_image.h"
-#include "adapter/preview/inspector/inspect_image_animator.h"
-#include "adapter/preview/inspector/inspect_input.h"
-#include "adapter/preview/inspector/inspect_label.h"
-#include "adapter/preview/inspector/inspect_list.h"
-#include "adapter/preview/inspector/inspect_list_item.h"
-#include "adapter/preview/inspector/inspect_list_item_group.h"
-#include "adapter/preview/inspector/inspect_marquee.h"
-#include "adapter/preview/inspector/inspect_menu.h"
-#include "adapter/preview/inspector/inspect_navigation_bar.h"
-#include "adapter/preview/inspector/inspect_option.h"
-#include "adapter/preview/inspector/inspect_panel.h"
-#include "adapter/preview/inspector/inspect_picker.h"
-#include "adapter/preview/inspector/inspect_picker_view.h"
-#include "adapter/preview/inspector/inspect_piece.h"
-#include "adapter/preview/inspector/inspect_popup.h"
-#include "adapter/preview/inspector/inspect_progress.h"
-#include "adapter/preview/inspector/inspect_qrcode.h"
-#include "adapter/preview/inspector/inspect_rating.h"
-#include "adapter/preview/inspector/inspect_refresh.h"
-#include "adapter/preview/inspector/inspect_search.h"
-#include "adapter/preview/inspector/inspect_select.h"
-#include "adapter/preview/inspector/inspect_slider.h"
-#include "adapter/preview/inspector/inspect_span.h"
-#include "adapter/preview/inspector/inspect_stack.h"
-#include "adapter/preview/inspector/inspect_stepper.h"
-#include "adapter/preview/inspector/inspect_stepper_item.h"
-#include "adapter/preview/inspector/inspect_swiper.h"
-#include "adapter/preview/inspector/inspect_switch.h"
-#include "adapter/preview/inspector/inspect_tab_bar.h"
-#include "adapter/preview/inspector/inspect_tab_content.h"
-#include "adapter/preview/inspector/inspect_tabs.h"
-#include "adapter/preview/inspector/inspect_text.h"
-#include "adapter/preview/inspector/inspect_textarea.h"
-#include "adapter/preview/inspector/inspect_toggle.h"
-#include "adapter/preview/inspector/inspect_toolbar.h"
-#include "adapter/preview/inspector/inspect_toolbar_item.h"
-#include "adapter/preview/inspector/inspect_video.h"
 #include "adapter/preview/inspector/inspector_client.h"
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
@@ -99,13 +49,6 @@ const char INSPECTOR_DEBUGLINE[] = "$debugLine";
 std::list<std::string> specialComponentNameV1 = {"dialog", "panel"};
 
 } // namespace
-
-
-template<class T>
-RefPtr<InspectNode> InspectNodeCreator(NodeId nodeId, const std::string& tag)
-{
-    return AceType::MakeRefPtr<T>(nodeId, tag);
-}
 
 void JsInspectorManager::InitializeCallback()
 {
@@ -199,76 +142,14 @@ void JsInspectorManager::AssembleDefaultJSONTree(std::string& jsonStr)
         DOM_NODE_TAG_SWITCH, DOM_NODE_TAG_TAB_BAR, DOM_NODE_TAG_TAB_CONTENT, DOM_NODE_TAG_TABS, DOM_NODE_TAG_TEXT,
         DOM_NODE_TAG_TEXTAREA, DOM_NODE_TAG_TOGGLE, DOM_NODE_TAG_TOOL_BAR, DOM_NODE_TAG_TOOL_BAR_ITEM,
         DOM_NODE_TAG_VIDEO };
-
-    static const LinearMapNode<RefPtr<InspectNode>(*)(NodeId, const std::string&)> inspectNodeCreators[] = {
-        { DOM_NODE_TAG_BADGE, &InspectNodeCreator<InspectBadge> },
-        { DOM_NODE_TAG_BUTTON, &InspectNodeCreator<InspectButton> },
-        { DOM_NODE_TAG_CAMERA, &InspectNodeCreator<InspectCamera> },
-        { DOM_NODE_TAG_CANVAS, &InspectNodeCreator<InspectCanvas> },
-        { DOM_NODE_TAG_CHART, &InspectNodeCreator<InspectChart> },
-        { DOM_NODE_TAG_DIALOG, &InspectNodeCreator<InspectDialog> },
-        { DOM_NODE_TAG_DIV, &InspectNodeCreator<InspectDiv> },
-        { DOM_NODE_TAG_DIVIDER, &InspectNodeCreator<InspectDivider> },
-        { DOM_NODE_TAG_FORM, &InspectNodeCreator<InspectForm> },
-        { DOM_NODE_TAG_GRID_COLUMN, &InspectNodeCreator<InspectGridColumn> },
-        { DOM_NODE_TAG_GRID_CONTAINER, &InspectNodeCreator<InspectGridContainer> },
-        { DOM_NODE_TAG_GRID_ROW, &InspectNodeCreator<InspectGridRow> },
-        { DOM_NODE_TAG_IMAGE, &InspectNodeCreator<InspectImage> },
-        { DOM_NODE_TAG_IMAGE_ANIMATOR, &InspectNodeCreator<InspectImageAnimator> },
-        { DOM_NODE_TAG_INPUT, &InspectNodeCreator<InspectInput> },
-        { DOM_NODE_TAG_LABEL, &InspectNodeCreator<InspectLabel> },
-        { DOM_NODE_TAG_LIST, &InspectNodeCreator<InspectList> },
-        { DOM_NODE_TAG_LIST_ITEM, &InspectNodeCreator<InspectListItem> },
-        { DOM_NODE_TAG_LIST_ITEM_GROUP, &InspectNodeCreator<InspectListItemGroup> },
-        { DOM_NODE_TAG_MARQUEE, &InspectNodeCreator<InspectMarquee> },
-        { DOM_NODE_TAG_MENU, &InspectNodeCreator<InspectMenu> },
-        { DOM_NODE_TAG_NAVIGATION_BAR, &InspectNodeCreator<InspectNavigationBar> },
-        { DOM_NODE_TAG_OPTION, &InspectNodeCreator<InspectOption> },
-        { DOM_NODE_TAG_PANEL, &InspectNodeCreator<InspectPanel> },
-        { DOM_NODE_TAG_PICKER_DIALOG, &InspectNodeCreator<InspectPickerDialog> },
-        { DOM_NODE_TAG_PICKER_VIEW, &InspectNodeCreator<InspectPickerView> },
-        { DOM_NODE_TAG_PIECE, &InspectNodeCreator<InspectPiece> },
-        { DOM_NODE_TAG_POPUP, &InspectNodeCreator<InspectPopup> },
-        { DOM_NODE_TAG_PROGRESS, &InspectNodeCreator<InspectProgress> },
-        { DOM_NODE_TAG_QRCODE, &InspectNodeCreator<InspectQRcode> },
-        { DOM_NODE_TAG_RATING, &InspectNodeCreator<InspectRating> },
-        { DOM_NODE_TAG_REFRESH, &InspectNodeCreator<InspectRefresh> },
-        { DOM_NODE_TAG_SEARCH, &InspectNodeCreator<InspectSearch> },
-        { DOM_NODE_TAG_SELECT, &InspectNodeCreator<InspectSelect> },
-        { DOM_NODE_TAG_SLIDER, &InspectNodeCreator<InspectSlider> },
-        { DOM_NODE_TAG_SPAN, &InspectNodeCreator<InspectSpan> },
-        { DOM_NODE_TAG_STACK, &InspectNodeCreator<InspectStack> },
-        { DOM_NODE_TAG_STEPPER, &InspectNodeCreator<InspectStepper> },
-        { DOM_NODE_TAG_STEPPER_ITEM, &InspectNodeCreator<InspectStepperItem> },
-        { DOM_NODE_TAG_SWIPER, &InspectNodeCreator<InspectSwiper> },
-        { DOM_NODE_TAG_SWITCH, &InspectNodeCreator<InspectSwitch> },
-        { DOM_NODE_TAG_TAB_BAR, &InspectNodeCreator<InspectTabBar> },
-        { DOM_NODE_TAG_TAB_CONTENT, &InspectNodeCreator<InspectTabContent> },
-        { DOM_NODE_TAG_TABS, &InspectNodeCreator<InspectTabs> },
-        { DOM_NODE_TAG_TEXT, &InspectNodeCreator<InspectText> },
-        { DOM_NODE_TAG_TEXTAREA, &InspectNodeCreator<InspectTextArea> },
-        { DOM_NODE_TAG_TOGGLE, &InspectNodeCreator<InspectToggle> },
-        { DOM_NODE_TAG_TOOL_BAR, &InspectNodeCreator<InspectToolbar> },
-        { DOM_NODE_TAG_TOOL_BAR_ITEM, &InspectNodeCreator<InspectToolbarItem> },
-        { DOM_NODE_TAG_VIDEO, &InspectNodeCreator<InspectVideo> },
-    };
+    
     auto jsonDefaultValue = JsonUtil::Create(true);
-    for (std::size_t i = 0; i < tagNames.size(); i++) {
+    for (const auto& tag : tagNames) {
         auto jsonDefaultAttrs = JsonUtil::Create(true);
-        NodeId nodeId = -1;
-        auto tag = tagNames[i];
-        RefPtr<InspectNode> inspectNode;
-        int64_t creatorIndex = BinarySearchFindIndex(inspectNodeCreators, ArraySize(inspectNodeCreators), tag.c_str());
-        if (creatorIndex >= 0) {
-            inspectNode = inspectNodeCreators[creatorIndex].value(nodeId, tag);
-        } else {
+        if (!GetDefaultAttrsByType(tag, jsonDefaultAttrs)) {
             LOGW("node type %{public}s is invalid", tag.c_str());
             return;
         }
-        inspectNode->InitCommonStyles();
-        inspectNode->PackAttrAndStyle();
-        inspectNode->SetAllAttr(jsonDefaultAttrs, INSPECTOR_ATTRS);
-        inspectNode->SetAllStyle(jsonDefaultAttrs, INSPECTOR_STYLES);
         jsonDefaultValue->Put(tag.c_str(), jsonDefaultAttrs);
     }
     jsonNode->Put(INSPECTOR_DEFAULT_VALUE, jsonDefaultValue);
@@ -280,20 +161,26 @@ void JsInspectorManager::OperateComponent(const std::string& jsCode)
     auto root = JsonUtil::ParseJsonString(jsCode);
     auto operateType = root->GetString("type", "");
     auto parentID = root->GetInt("parentID", -1);
+    auto slot = root->GetInt("slot", -1);
+    auto newComponent = GetNewComponentWithJsCode(root);
     if (parentID <= 0) {
+        auto rootElement = GetRootElement().Upgrade();
+        auto child = rootElement->GetChildBySlot(-1); // rootElement only has one child,and use the default slot -1
+        if (!newComponent) {
+            LOGE("operateType:UpdateComponent, newComponent should not be nullptr");
+            return;
+        }
+        rootElement->UpdateChildWithSlot(child, newComponent, -1, -1);
         return;
     }
-    auto slot = root->GetInt("slot", -1);
     auto parentElement = GetInspectorElementById(parentID);
     if (operateType == "AddComponent") {
-        auto newComponent = GetNewComponentWithJsCode(root);
         if (!newComponent) {
             LOGE("operateType:AddComponent, newComponent should not be nullptr");
             return;
         }
         parentElement->AddChildWithSlot(slot, newComponent);
     } else if (operateType == "UpdateComponent") {
-        auto newComponent = GetNewComponentWithJsCode(root);
         if (!newComponent) {
             LOGE("operateType:UpdateComponent, newComponent should not be nullptr");
             return;
@@ -345,6 +232,22 @@ RefPtr<V2::InspectorComposedElement> JsInspectorManager::GetInspectorElementById
         return nullptr;
     }
     return inspectorElement;
+}
+
+const WeakPtr<Element>& JsInspectorManager::GetRootElement()
+{
+    auto node = GetAccessibilityNodeFromPage(0);
+    if (!node) {
+        LOGE("get AccessibilityNode failed");
+        return nullptr;
+    }
+    auto child = node->GetChildList();
+    if (child.empty()) {
+        LOGE("child is null");
+        return nullptr;
+    }
+    auto InspectorComponentElement = GetInspectorElementById(child.front()->GetNodeId());
+    return InspectorComponentElement->GetElementParent();
 }
 
 void JsInspectorManager::GetNodeJSONStrMap()

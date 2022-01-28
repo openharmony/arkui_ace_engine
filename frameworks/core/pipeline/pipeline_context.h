@@ -83,6 +83,7 @@ class AccessibilityManager;
 class RenderContext;
 struct PageTarget;
 class DialogComponent;
+class SelectPopupComponent;
 
 struct WindowBlurInfo {
     float progress_;
@@ -92,6 +93,7 @@ struct WindowBlurInfo {
 };
 
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
+using SubscribeCtrlACallback = std::function<void()>;
 
 class ACE_EXPORT PipelineContext final : public AceType {
     DECLARE_ACE_TYPE(PipelineContext, AceType);
@@ -115,8 +117,9 @@ public:
 
     RefPtr<Element> SetupRootElement();
 
-    RefPtr<DialogComponent> ShowDialog(const DialogProperties& dialogProperties, bool isRightToLeft);
-
+    RefPtr<DialogComponent> ShowDialog(const DialogProperties& dialogProperties, bool isRightToLeft,
+        const std::string& inspectorTag = "");
+    void CloseContextMenu();
     void GetBoundingRectData(int32_t nodeId, Rect& rect);
 
     RefPtr<OffscreenCanvas> CreateOffscreenCanvas(int32_t width, int32_t height);
@@ -136,6 +139,8 @@ public:
     void PopPage();
 
     void PopToPage(int32_t pageId);
+
+    void RestorePopPage(const RefPtr<PageComponent>& pageComponent);
 
     bool CanPopPage();
 
@@ -201,7 +206,7 @@ public:
     void RemoveScheduleTask(uint32_t id);
 
     // Called by view when touch event received.
-    void OnTouchEvent(const TouchPoint& point);
+    void OnTouchEvent(const TouchEvent& point);
 
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
@@ -358,12 +363,12 @@ public:
     }
     void NotifyDestroyEventDismiss() const;
 
-    using DispatchTouchEventHandler = std::function<void(const TouchPoint& event)>;
+    using DispatchTouchEventHandler = std::function<void(const TouchEvent& event)>;
     void SetDispatchTouchEventHandler(DispatchTouchEventHandler&& listener)
     {
         dispatchTouchEventHandler_.push_back(std::move(listener));
     }
-    void NotifyDispatchTouchEventDismiss(const TouchPoint& event) const;
+    void NotifyDispatchTouchEventDismiss(const TouchEvent& event) const;
 
     float GetViewScale() const
     {
@@ -380,8 +385,8 @@ public:
     {
         return rootHeight_;
     }
-    RefPtr<RenderNode> DragTestAll(const TouchPoint& point);
-    RefPtr<RenderNode> DragTest(const TouchPoint& point, const RefPtr<RenderNode>& renderNode, int32_t deep);
+    RefPtr<RenderNode> DragTestAll(const TouchEvent& point);
+    RefPtr<RenderNode> DragTest(const TouchEvent& point, const RefPtr<RenderNode>& renderNode, int32_t deep);
 
     double GetRootWidth() const
     {
@@ -913,6 +918,11 @@ public:
     void SetPreTargetRenderNode(const RefPtr<RenderNode>& preTargetRenderNode);
     const RefPtr<RenderNode> GetPreTargetRenderNode() const;
 
+    void SetContextMenu(const RefPtr<Component>& contextMenu)
+    {
+        contextMenu_ = contextMenu;
+    }
+
     double GetDensity() const
     {
         return density_;
@@ -982,7 +992,7 @@ public:
 
     void SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector);
 
-    const std::shared_ptr<OHOS::Rosen::RSUIDirector>& GetRSUIDirector();
+    std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRSUIDirector();
 
     void SetOnVsyncProfiler(const std::function<void(const std::string&)> callback)
     {
@@ -992,6 +1002,126 @@ public:
     void ResetOnVsyncProfiler()
     {
         onVsyncProfiler_ = nullptr;
+    }
+
+    bool IsShiftDown() const
+    {
+        return isShiftDown_;
+    }
+
+    void MarkIsShiftDown(bool isShiftDown) 
+    {
+        isShiftDown_ = isShiftDown;
+    }
+
+    bool IsCtrlDown() const
+    {
+        return isCtrlDown_;
+    }
+
+    void MarkIsCtrlDown(bool isCtrlDown) 
+    {
+        isCtrlDown_ = isCtrlDown;
+    }
+
+    bool IsKeyboardA() const
+    {
+        return isKeyboardA_;
+    }
+
+    void MarkIsKeyboardA(bool isKeyboardA) 
+    {
+        isKeyboardA_ = isKeyboardA;
+    }
+
+    void SetShortcutKey(const KeyEvent& event);
+
+    EventManager GetEventManager() const
+    {
+        return eventManager_;
+    }
+
+    void SubscribeCtrlA(SubscribeCtrlACallback callback)
+    {
+        subscribeCtrlA_ = callback;
+    }
+
+    void SetWindowMinimizeCallBack(std::function<bool(void)>&& callback)
+    {
+        windowMinimizeCallback_ = std::move(callback);
+    }
+
+    void SetWindowMaximizeCallBack(std::function<bool(void)>&& callback)
+    {
+        windowMaximizeCallback_ = std::move(callback);
+    }
+
+    void SetWindowRecoverCallBack(std::function<bool(void)>&& callback)
+    {
+        windowRecoverCallback_ = std::move(callback);
+    }
+
+    void SetWindowCloseCallBack(std::function<bool(void)>&& callback)
+    {
+        windowCloseCallback_ = std::move(callback);
+    }
+
+    void SetWindowSplitCallBack(std::function<bool(void)>&& callback)
+    {
+        windowSplitCallback_ = std::move(callback);
+    }
+
+    void SetWindowGetModeCallBack(std::function<WindowMode(void)>&& callback)
+    {
+        windowGetModeCallback_ = std::move(callback);
+    }
+
+    bool FireWindowMinimizeCallBack() const
+    {
+        if (windowMinimizeCallback_) {
+            return windowMinimizeCallback_();
+        }
+        return false;
+    }
+
+    bool FireWindowMaximizeCallBack() const
+    {
+        if (windowMaximizeCallback_) {
+            return windowMaximizeCallback_();
+        }
+        return false;
+    }
+
+    bool FireWindowRecoverCallBack() const
+    {
+        if (windowRecoverCallback_) {
+            return windowRecoverCallback_();
+        }
+        return false;
+    }
+
+    bool FireWindowSplitCallBack() const
+    {
+        if (windowSplitCallback_) {
+            return windowSplitCallback_();
+        }
+        return false;
+    }
+
+    bool FireWindowCloseCallBack() const
+    {
+        if (windowCloseCallback_) {
+            return windowCloseCallback_();
+        }
+        return false;
+    }
+
+    WindowMode FireWindowGetModeCallBack() const
+    {
+        if (windowGetModeCallback_) {
+            return windowGetModeCallback_();
+        }
+        return WindowMode::WINDOW_MODE_UNDEFINED;
     }
 
 private:
@@ -1121,6 +1251,7 @@ private:
     // strong deactivate element and it's id.
     std::map<int32_t, RefPtr<Element>> deactivateElements_;
 
+    RefPtr<Component> contextMenu_;
     // animation frame callback
     AnimationCallback animationCallback_;
 
@@ -1205,6 +1336,18 @@ private:
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
 
     std::function<void(const std::string&)> onVsyncProfiler_;
+
+    bool isShiftDown_ = false;
+    bool isCtrlDown_ = false;
+    bool isKeyboardA_ = false;
+    SubscribeCtrlACallback subscribeCtrlA_;
+
+    std::function<bool(void)> windowMinimizeCallback_ = nullptr;
+    std::function<bool(void)> windowMaximizeCallback_ = nullptr;
+    std::function<bool(void)> windowRecoverCallback_ = nullptr;
+    std::function<bool(void)> windowCloseCallback_ = nullptr;
+    std::function<bool(void)> windowSplitCallback_ = nullptr;
+    std::function<WindowMode(void)> windowGetModeCallback_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

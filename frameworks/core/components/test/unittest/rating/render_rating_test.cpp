@@ -58,9 +58,9 @@ const KeyEvent KEY_EVENT_RIGHT(KeyCode::KEYBOARD_RIGHT, KeyAction::CLICK, 0, 0, 
 const KeyEvent KEY_EVENT_LEFT(KeyCode::KEYBOARD_LEFT, KeyAction::CLICK, 0, 0, 0, 0, 0, 0);
 const KeyEvent KEY_EVENT_ENTER(KeyCode::KEYBOARD_ENTER, KeyAction::CLICK, 0, 0, 0, 0, 0, 0);
 
-const TouchPoint MOCK_DOWN_TOUCH_EVENT { 10, 648, 20, TouchType::DOWN };
-const TouchPoint MOCK_MOVE_TOUCH_EVENT { 10, 648, 20, TouchType::MOVE };
-const TouchPoint MOCK_UP_TOUCH_EVENT { 10, 648, 20, TouchType::UP };
+const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 648, 20, TouchType::DOWN };
+const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 648, 20, TouchType::MOVE };
+const TouchEvent MOCK_UP_TOUCH_EVENT { 10, 648, 20, TouchType::UP };
 enum class DragDirection {
     LEFT,
     RIGHT,
@@ -141,7 +141,7 @@ void RatingComponentTest::CreateAndRenderRating(UpdateRatingCallback updateRatin
         updateRating(rating);
     }
 
-    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, rating);
+    auto pageComponent = AceType::MakeRefPtr<PageComponent>(0, "", rating);
 
     context_->SetupRootElement();
     context_->PushPage(pageComponent);
@@ -152,14 +152,14 @@ void RatingComponentTest::CreateAndRenderRating(UpdateRatingCallback updateRatin
 void RatingComponentTest::DragRating(const DragDirection& dragDirection, double dragOffset) const
 {
     context_->OnTouchEvent(MOCK_DOWN_TOUCH_EVENT);
-    TouchPoint touchPoint = MOCK_MOVE_TOUCH_EVENT;
+    TouchEvent touchPoint = MOCK_MOVE_TOUCH_EVENT;
     if (dragDirection == DragDirection::LEFT) {
         touchPoint.x -= dragOffset;
     } else if (dragDirection == DragDirection::RIGHT) {
         touchPoint.x += dragOffset;
     }
     context_->OnTouchEvent(touchPoint);
-    TouchPoint touchEndPoint = MOCK_UP_TOUCH_EVENT;
+    TouchEvent touchEndPoint = MOCK_UP_TOUCH_EVENT;
     touchEndPoint.x = touchPoint.x;
     context_->OnTouchEvent(touchEndPoint);
     context_->OnVsyncEvent(GetTickCount(), 0);
@@ -330,7 +330,7 @@ HWTEST_F(RatingComponentTest, RatingOperation004, TestSize.Level1)
      * @tc.expected: step3. Event of change of score still triggers.
      */
     double scoreDelta = 2.0;
-    TouchPoint touchPoint = MOCK_DOWN_TOUCH_EVENT;
+    TouchEvent touchPoint = MOCK_DOWN_TOUCH_EVENT;
     touchPoint.x -= TEST_SINGLE_STAR_WIDTH * scoreDelta;
     context_->OnTouchEvent(touchPoint);
     touchPoint = MOCK_UP_TOUCH_EVENT;

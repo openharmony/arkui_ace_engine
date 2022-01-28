@@ -92,14 +92,14 @@ void TestTouchEventConvert(const RefPtr<PipelineContext>& context, double expect
     };
     BackEndEventManager<void(const TouchEventInfo&)>::GetInstance().BindBackendEvent(marker, callback);
     touchListener->SetOnTouchDownId(marker);
-    auto page = AceType::MakeRefPtr<PageComponent>(0, touchListener);
+    auto page = AceType::MakeRefPtr<PageComponent>(0, "", touchListener);
     context->PushPage(page);
     context->OnVsyncEvent(0, 0);
     context->OnSurfaceDensityChanged(TEST_DENSITY);
     context->OnSurfaceChanged(TEST_SURFACE_WIDTH, TEST_SURFACE_HEIGHT);
 
     // Mock touch down event
-    TouchPoint point {
+    TouchEvent point {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::DOWN, .time = std::chrono::high_resolution_clock::now()
     };
     context->OnTouchEvent(point);

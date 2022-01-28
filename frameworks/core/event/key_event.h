@@ -16,12 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H
 
+#include <list>
 #include <cstdint>
 
 #include "core/event/ace_events.h"
-
 namespace OHOS::Ace {
-
 enum class KeyCode : int32_t {
     UNKNOWN = -1,
     KEYBOARD_HOME = 3,
@@ -32,8 +31,13 @@ enum class KeyCode : int32_t {
     KEYBOARD_RIGHT = 22,
     KEYBOARD_CENTER = 23,
     KEYBOARD_A = 29,
+    KEYBOARD_C = 31,
+    KEYBOARD_V = 50,
+    KEYBOARD_X = 52,
     HANDLE_A = 96,
     HANDLE_SELECT = 109,
+    KEYBOARD_SHIFT_LEFT = 59,
+    KEYBOARD_SHIFT_RIGHT = 60,
     KEYBOARD_TAB = 61,
     KEYBOARD_SPACE = 62,
     KEYBOARD_ENTER = 66,
@@ -41,7 +45,9 @@ enum class KeyCode : int32_t {
     KEYBOARD_ESCAPE = 111,
     KEYBOARD_CONTROL_LEFT = 113,
     KEYBOARD_CONTROL_RIGHT = 114,
-    KEYBOARD_NUMBER_ENTER = 160,
+    KEYBOARD_NUMBER_ENTER = 131,
+
+    COMBINE_KEY_SHIFT_TAB = 200,
 
     TV_CONTROL_BACK = KEYBOARD_BACK,
     TV_CONTROL_UP = KEYBOARD_UP,
@@ -132,7 +138,5 @@ private:
     int32_t keySource_ = 0;
     int32_t metakey_ = 0;
 };
-
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H

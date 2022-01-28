@@ -51,6 +51,8 @@
 
 extern const char _binary_stateMgmt_js_start[];
 extern const char _binary_stateMgmt_js_end[];
+extern const char _binary_contentStorage_js_start[];
+extern const char _binary_contentStorage_js_end[];
 extern const char _binary_jsEnumStyle_js_start[];
 extern const char _binary_jsEnumStyle_js_end[];
 
@@ -506,6 +508,7 @@ void V8DeclarativeEngineInstance::InitJSContext()
     InitJsNativeModuleObject(localContext);
     InitJsExportsUtilObject(localContext);
     InitAceModules(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end, isolate_.Get());
+    InitAceModules(_binary_contentStorage_js_start, _binary_contentStorage_js_end, isolate_.Get());
     InitAceModules(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end, isolate_.Get());
 
     auto groupJsBridge = DynamicCast<V8DeclarativeGroupJsBridge>(frontendDelegate_->GetGroupJsBridge());
@@ -806,6 +809,7 @@ V8DeclarativeEngineInstance::~V8DeclarativeEngineInstance()
     // delete function template
     V8FunctionDestroyCallbackHelper::DeleteFunctionTemplate(isolate_.Get());
     // Just invalidate it, isolate_ will dispose when js-thread finished.
+    ModuleManager::GetInstance()->ClearTimerIsolate(isolate_.Get());
     isolate_.Invalidate();
 }
 
@@ -895,6 +899,7 @@ bool V8DeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
     nativeEngine_ =
         new V8NativeEngine(GetPlatform().get(), isolate, engineInstance_->GetContext(), static_cast<void*>(this));
+    engineInstance_->SetNativeEngine(nativeEngine_);
     SetPostTask(nativeEngine_);
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
@@ -1688,6 +1693,10 @@ void V8DeclarativeEngine::TimerCallJs(const std::string& callbackId, bool isInte
     ACE_DCHECK(engineInstance_);
     v8::Isolate* isolate = ModuleManager::GetInstance()->GetCallbackIsolate(std::stoi(callbackId), isInterval);
     ACE_DCHECK(isolate);
+    if (isolate == nullptr) {
+        LOGW("CallbackIsolate is null when TimerCallJs is called.");
+        return;
+    }
     v8::Isolate::Scope isolateScope(isolate);
     v8::HandleScope handleScope(isolate);
     auto context = isolate->GetCurrentContext();

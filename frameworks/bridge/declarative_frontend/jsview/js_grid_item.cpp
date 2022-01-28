@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_mouse_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_item.h"
 
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -84,6 +85,8 @@ void JSGridItem::JSBind(BindingTarget globalObj)
     JSClass<JSGridItem>::StaticMethod("rowStart", &JSGridItem::SetRowStart, opt);
     JSClass<JSGridItem>::StaticMethod("rowEnd", &JSGridItem::SetRowEnd, opt);
     JSClass<JSGridItem>::StaticMethod("forceRebuild", &JSGridItem::ForceRebuild, opt);
+    JSClass<JSGridItem>::StaticMethod("selectable", &JSGridItem::SetSelectable, opt);
+    JSClass<JSGridItem>::StaticMethod("onSelect", &JSGridItem::SelectCallback);
     JSClass<JSGridItem>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSGridItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSGridItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
@@ -96,6 +99,36 @@ void JSGridItem::JSBind(BindingTarget globalObj)
     JSClass<JSGridItem>::Inherit<JSContainerBase>();
     JSClass<JSGridItem>::Inherit<JSViewAbstract>();
     JSClass<JSGridItem>::Bind<>(globalObj);
+}
+
+void JSGridItem::SetSelectable(bool selectable)
+{
+    auto gridItem =
+        AceType::DynamicCast<GridLayoutItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (gridItem) {
+        gridItem->SetSelectable(selectable);
+    }
+}
+
+void JSGridItem::SelectCallback(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        LOGE("fail to bind onSelect event due to info is not function");
+        return;
+    }
+
+    RefPtr<JsMouseFunction> jsOnSelectFunc = AceType::MakeRefPtr<JsMouseFunction>(JSRef<JSFunc>::Cast(args[0]));
+    auto onSelectId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnSelectFunc)](bool isSelected) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->SelectExecute(isSelected);
+    };
+    auto gridItem =
+        AceType::DynamicCast<GridLayoutItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!gridItem) {
+        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<GridLayoutItemComponent>());
+        return;
+    }
+    gridItem->SetOnSelectId(onSelectId);
 }
 
 } // namespace OHOS::Ace::Framework

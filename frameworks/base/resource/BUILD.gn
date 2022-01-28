@@ -43,6 +43,11 @@ source_set("binary_resource") {
       get_label_info(":binary_resource($current_toolchain)", "target_out_dir")
   sources = [
     "$ace_resource_dir/close.o",
+    "$ace_resource_dir/container_modal_window_close.o",
+    "$ace_resource_dir/container_modal_window_maximize.o",
+    "$ace_resource_dir/container_modal_window_minimize.o",
+    "$ace_resource_dir/container_modal_window_recover.o",
+    "$ace_resource_dir/container_modal_window_split_left.o",
     "$ace_resource_dir/correct.o",
     "$ace_resource_dir/down_arrow.o",
     "$ace_resource_dir/entry.o",
@@ -60,6 +65,7 @@ source_set("binary_resource") {
     "$ace_resource_dir/ic_more.o",
     "$ace_resource_dir/ic_more_dark.o",
     "$ace_resource_dir/ic_more_transparent.o",
+    "$ace_resource_dir/ic_public_drawer.o",
     "$ace_resource_dir/indexer_arrow.o",
     "$ace_resource_dir/indexletter_bar.o",
     "$ace_resource_dir/left_arrow.o",
@@ -98,6 +104,11 @@ source_set("binary_resource_mac_and_windows") {
       get_label_info(":binary_resource($current_toolchain)", "target_out_dir")
   sources = [
     "$ace_resource_dir/close.c",
+    "$ace_resource_dir/container_modal_window_close.c",
+    "$ace_resource_dir/container_modal_window_maximize.c",
+    "$ace_resource_dir/container_modal_window_minimize.c",
+    "$ace_resource_dir/container_modal_window_recover.c",
+    "$ace_resource_dir/container_modal_window_split_left.c",
     "$ace_resource_dir/correct.c",
     "$ace_resource_dir/down_arrow.c",
     "$ace_resource_dir/entry.c",
@@ -115,6 +126,7 @@ source_set("binary_resource_mac_and_windows") {
     "$ace_resource_dir/ic_more.c",
     "$ace_resource_dir/ic_more_dark.c",
     "$ace_resource_dir/ic_more_transparent.c",
+    "$ace_resource_dir/ic_public_drawer.c",
     "$ace_resource_dir/indexer_arrow.c",
     "$ace_resource_dir/indexletter_bar.c",
     "$ace_resource_dir/left_arrow.c",
@@ -151,6 +163,11 @@ action_foreach("objcopy_resource") {
   # add resource file here
   sources = [
     "binary/close.svg",
+    "binary/container_modal_window_close.svg",
+    "binary/container_modal_window_maximize.svg",
+    "binary/container_modal_window_minimize.svg",
+    "binary/container_modal_window_recover.svg",
+    "binary/container_modal_window_split_left.svg",
     "binary/correct.svg",
     "binary/down_arrow.svg",
     "binary/exit_full_screen.svg",
@@ -168,6 +185,7 @@ action_foreach("objcopy_resource") {
     "binary/ic_more.svg",
     "binary/ic_more_dark.svg",
     "binary/ic_more_transparent.svg",
+    "binary/ic_public_drawer.svg",
     "binary/indexer_arrow.png",
     "binary/indexletter_bar.json",
     "binary/left_arrow.svg",
@@ -226,6 +244,11 @@ action_foreach("objcopy_resource_mac_and_windows") {
   # add resource file here
   sources = [
     "binary/close.svg",
+    "binary/container_modal_window_close.svg",
+    "binary/container_modal_window_maximize.svg",
+    "binary/container_modal_window_minimize.svg",
+    "binary/container_modal_window_recover.svg",
+    "binary/container_modal_window_split_left.svg",
     "binary/correct.svg",
     "binary/down_arrow.svg",
     "binary/exit_full_screen.svg",
@@ -243,6 +266,7 @@ action_foreach("objcopy_resource_mac_and_windows") {
     "binary/ic_more.svg",
     "binary/ic_more_dark.svg",
     "binary/ic_more_transparent.svg",
+    "binary/ic_public_drawer.svg",
     "binary/indexer_arrow.png",
     "binary/indexletter_bar.json",
     "binary/left_arrow.svg",

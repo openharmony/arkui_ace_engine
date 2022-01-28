@@ -167,9 +167,9 @@ void DeclarativeFrontend::Destroy()
     CHECK_RUN_ON(JS);
     LOGI("DeclarativeFrontend Destroy begin.");
     // To guarantee the jsEngine_ and delegate_ released in js thread
-    jsEngine_.Reset();
     delegate_.Reset();
     handler_.Reset();
+    jsEngine_.Reset();
     LOGI("DeclarativeFrontend Destroy end.");
 }
 
@@ -509,6 +509,24 @@ void DeclarativeFrontend::NavigatePage(uint8_t type, const PageTarget& target, c
         default:
             LOGE("Navigator type is invalid!");
             delegate_->BackWithTarget(target, params);
+    }
+}
+
+std::string DeclarativeFrontend::RestoreRouterStack(const std::string& contentInfo)
+{
+    if (delegate_) {
+        return delegate_->RestoreRouterStack(contentInfo);
+    } else {
+        return "";
+    }
+}
+
+std::string DeclarativeFrontend::GetContentInfo() const
+{
+    if (delegate_) {
+        return delegate_->GetContentInfo();
+    } else {
+        return "";
     }
 }
 

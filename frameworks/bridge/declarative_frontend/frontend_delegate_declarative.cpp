@@ -51,6 +51,7 @@ constexpr int32_t CALLBACK_ERRORCODE_COMPLETE = 2;
 constexpr int32_t CALLBACK_DATACODE_ZERO = 0;
 
 const char MANIFEST_JSON[] = "manifest.json";
+const char PAGES_JSON[] = "main_pages.json";
 const char FILE_TYPE_JSON[] = ".json";
 const char I18N_FOLDER[] = "i18n/";
 const char RESOURCES_FOLDER[] = "resources/";
@@ -138,11 +139,14 @@ void FrontendDelegateDeclarative::RunPage(const std::string& url, const std::str
 {
     ACE_SCOPED_TRACE("FrontendDelegateDeclarative::RunPage");
 
-    LOGI("FrontendDelegateDeclarative RunPage url=%{private}s", url.c_str());
+    LOGI("FrontendDelegateDeclarative RunPage url=%{public}s", url.c_str());
     std::string jsonContent;
     if (GetAssetContent(MANIFEST_JSON, jsonContent)) {
         manifestParser_->Parse(jsonContent);
         manifestParser_->Printer();
+    } else if (GetAssetContent(PAGES_JSON, jsonContent)) {
+        LOGI("Parse main_pages.json");
+        manifestParser_->Parse(jsonContent);
     } else {
         LOGE("RunPage parse manifest.json failed");
         EventReport::SendPageRouterException(PageRouterExcepType::RUN_PAGE_ERR, url);
@@ -594,21 +598,8 @@ void FrontendDelegateDeclarative::OnNewRequest(const std::string& data)
 
 void FrontendDelegateDeclarative::CallPopPage()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    auto& currentPage = pageRouteStack_.back();
-    if (!pageRouteStack_.empty() && currentPage.isAlertBeforeBackPage) {
-        backUri_ = "";
-        taskExecutor_->PostTask(
-            [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
-                isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
-                    if (context) {
-                        context->ShowDialog(dialogProperties, isRightToLeft);
-                    }
-                },
-            TaskExecutor::TaskType::UI);
-    } else {
-        PopPage();
-    }
+    LOGI("CallPopPage begin");
+    Back("", "");
 }
 
 void FrontendDelegateDeclarative::ResetStagingPage()
@@ -841,21 +832,37 @@ void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const
 {
     LOGD("router.Back path = %{private}s", target.url.c_str());
     if (target.url.empty()) {
+        std::string pagePath;
         {
             std::lock_guard<std::mutex> lock(mutex_);
             if (pageRouteStack_.size() > 1) {
                 pageId_ = pageRouteStack_[pageRouteStack_.size() - 2].pageId;
+                if (!params.empty()) {
+                    pageParamMap_[pageId_] = params;
+                }
+                // determine whether the previous page needs to be loaded
+                if (pageRouteStack_[pageRouteStack_.size() - 2].isRestore) {
+                    pagePath =
+                        manifestParser_->GetRouter()->GetPagePath(pageRouteStack_[pageRouteStack_.size() - 2].url);
+                }
             }
-            if (!params.empty()) {
-                pageParamMap_[pageId_] = params;
-            }
+        }
+        if (!pagePath.empty()) {
+            LoadPage(pageId_, PageTarget(pagePath), false, params, true);
+            return;
+        } else {
+            LOGW("back to invalid restore page");
         }
         PopPage();
     } else {
         std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url);
         LOGD("router.Back pagePath = %{private}s", pagePath.c_str());
         if (!pagePath.empty()) {
-            pageId_ = GetPageIdByUrl(target.url);
+            bool isRestore = false;
+            pageId_ = GetPageIdByUrl(target.url, isRestore);
+            if (isRestore) {
+                LoadPage(pageId_, PageTarget(pagePath), false, params, true);
+            }
             if (!params.empty()) {
                 std::lock_guard<std::mutex> lock(mutex_);
                 pageParamMap_[pageId_] = params;
@@ -1164,6 +1171,19 @@ Rect FrontendDelegateDeclarative::GetBoundingRectData(NodeId nodeId)
     return rect;
 }
 
+std::string FrontendDelegateDeclarative::GetInspector(NodeId nodeId)
+{
+    std::string attrs;
+    auto task = [weak = WeakClaim(AceType::RawPtr(jsAccessibilityManager_)), nodeId, &attrs]() {
+        auto accessibilityNodeManager = weak.Upgrade();
+        if (accessibilityNodeManager) {
+            attrs = accessibilityNodeManager->GetInspectorNodeById(nodeId);
+        }
+    };
+    PostSyncTaskToPage(task);
+    return attrs;
+}
+
 void FrontendDelegateDeclarative::SetCallBackResult(const std::string& callBackId, const std::string& result)
 {
     jsCallBackResult_.try_emplace(StringToInt(callBackId), result);
@@ -1235,7 +1255,7 @@ std::string FrontendDelegateDeclarative::GetAssetPath(const std::string& url)
 }
 
 void FrontendDelegateDeclarative::LoadPage(
-    int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params)
+    int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params, bool isRestore)
 {
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -1258,10 +1278,10 @@ void FrontendDelegateDeclarative::LoadPage(
     auto document = AceType::MakeRefPtr<DOMDocument>(pageId);
     auto page = AceType::MakeRefPtr<JsAcePage>(pageId, document, target.url, target.container);
     page->SetPageParams(params);
-    page->SetFlushCallback([weak = AceType::WeakClaim(this), isMainPage](const RefPtr<JsAcePage>& acePage) {
+    page->SetFlushCallback([weak = AceType::WeakClaim(this), isMainPage, isRestore](const RefPtr<JsAcePage>& acePage) {
         auto delegate = weak.Upgrade();
         if (delegate && acePage) {
-            delegate->FlushPageCommand(acePage, acePage->GetUrl(), isMainPage);
+            delegate->FlushPageCommand(acePage, acePage->GetUrl(), isMainPage, isRestore);
         }
     });
     taskExecutor_->PostTask(
@@ -1326,7 +1346,7 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate()
 }
 
 void FrontendDelegateDeclarative::OnPageReady(
-    const RefPtr<JsAcePage>& page, const std::string& url, bool isMainPage)
+    const RefPtr<JsAcePage>& page, const std::string& url, bool isMainPage, bool isRestore)
 {
     LOGI("OnPageReady url = %{private}s", url.c_str());
     // Pop all JS command and execute them in UI thread.
@@ -1336,7 +1356,7 @@ void FrontendDelegateDeclarative::OnPageReady(
     auto pipelineContext = pipelineContextHolder_.Get();
     page->SetPipelineContext(pipelineContext);
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), page, url, jsCommands, isMainPage] {
+        [weak = AceType::WeakClaim(this), page, url, jsCommands, isMainPage, isRestore] {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
@@ -1353,6 +1373,10 @@ void FrontendDelegateDeclarative::OnPageReady(
             }
             if (pipelineContext->GetAccessibilityManager()) {
                 pipelineContext->GetAccessibilityManager()->HandleComponentPostBinding();
+            }
+            if (isRestore) {
+                delegate->RestorePopPage(page, url);
+                return;
             }
             if (pipelineContext->CanPushPage()) {
                 if (!isMainPage) {
@@ -1386,14 +1410,14 @@ void FrontendDelegateDeclarative::OnPrePageChange(const RefPtr<JsAcePage>& page)
 }
 
 void FrontendDelegateDeclarative::FlushPageCommand(
-    const RefPtr<JsAcePage>& page, const std::string& url, bool isMainPage)
+    const RefPtr<JsAcePage>& page, const std::string& url, bool isMainPage, bool isRestore)
 {
     if (!page) {
         return;
     }
     LOGI("FlushPageCommand FragmentCount(%{public}d)", page->FragmentCount());
     if (page->FragmentCount() == 1) {
-        OnPageReady(page, url, isMainPage);
+        OnPageReady(page, url, isMainPage, isRestore);
     } else {
         TriggerPageUpdate(page->GetPageId());
     }
@@ -1425,7 +1449,7 @@ void FrontendDelegateDeclarative::OnPushPageSuccess(
 {
     std::lock_guard<std::mutex> lock(mutex_);
     AddPageLocked(page);
-    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url});
+    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url });
     if (pageRouteStack_.size() >= MAX_ROUTER_STACK) {
         isRouteStackFull_ = true;
         EventReport::SendPageRouterException(PageRouterExcepType::PAGE_STACK_OVERFLOW_ERR, page->GetUrl());
@@ -1562,6 +1586,63 @@ void FrontendDelegateDeclarative::PopPageTransitionListener(
     }
 }
 
+void FrontendDelegateDeclarative::RestorePopPage(const RefPtr<JsAcePage>& page, const std::string& url)
+{
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), page, url] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            LOGI("RestorePopPage begin");
+            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            bool isLastPage = false;
+            if (delegate->pageRouteStack_.size() == 1) {
+                if (delegate->disallowPopLastPage_) {
+                    LOGW("Not allow back because this is the last page!");
+                    return;
+                }
+
+                isLastPage = true;
+                delegate->OnPageHide();
+                delegate->OnPageDestroy(delegate->GetRunningPageId());
+                delegate->OnPopPageSuccess();
+                pipelineContext->Finish();
+                return;
+            }
+            delegate->OnPageHide();
+            pipelineContext->RemovePageTransitionListener(delegate->pageTransitionListenerId_);
+            delegate->pageTransitionListenerId_ = pipelineContext->AddPageTransitionListener(
+                [weak, url, page](
+                    const TransitionEvent& event, const WeakPtr<PageElement>& in, const WeakPtr<PageElement>& out) {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->RestorePageTransitionListener(event, url, page);
+                    }
+                });
+            pipelineContext->RestorePopPage(page->BuildPage(url));
+            delegate->isStagingPageExist_ = false;
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void FrontendDelegateDeclarative::RestorePageTransitionListener(
+    const TransitionEvent& event, const std::string& url, const RefPtr<JsAcePage>& page)
+{
+    if (event == TransitionEvent::POP_END) {
+        LOGI("RestorePageTransitionListener %{public}s", url.c_str());
+        OnPopToPageSuccess(url);
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            AddPageLocked(page);
+            pageRouteStack_.back().isRestore = false;
+        }
+        SetCurrentPage(GetPageIdByUrl(url));
+        OnPageShow();
+        OnMediaQueryUpdate();
+    }
+}
+
 int32_t FrontendDelegateDeclarative::OnClearInvisiblePagesSuccess()
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -1668,12 +1749,12 @@ void FrontendDelegateDeclarative::LoadReplacePage(int32_t pageId, const PageTarg
     auto url = target.url;
     LOGD("FrontendDelegateDeclarative LoadReplacePage[%{private}d]: %{private}s.", pageId, url.c_str());
     if (pageId == INVALID_PAGE_ID) {
-        LOGE("FrontendDelegateDeclarative, invalid page id");
+        LOGW("FrontendDelegateDeclarative, invalid page id");
         EventReport::SendPageRouterException(PageRouterExcepType::REPLACE_PAGE_ERR, url);
         return;
     }
     if (isStagingPageExist_) {
-        LOGE("FrontendDelegateDeclarative, replace page failed, waiting for current page loading finish.");
+        LOGW("FrontendDelegateDeclarative, replace page failed, waiting for current page loading finish.");
         EventReport::SendPageRouterException(PageRouterExcepType::REPLACE_PAGE_ERR, url);
         return;
     }
@@ -1766,13 +1847,14 @@ std::string FrontendDelegateDeclarative::GetRunningPageUrl() const
     return pageUrl;
 }
 
-int32_t FrontendDelegateDeclarative::GetPageIdByUrl(const std::string& url)
+int32_t FrontendDelegateDeclarative::GetPageIdByUrl(const std::string& url, bool isRestore)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     auto pageIter = std::find_if(std::rbegin(pageRouteStack_), std::rend(pageRouteStack_),
         [&url](const PageInfo& pageRoute) { return url == pageRoute.url; });
     if (pageIter != std::rend(pageRouteStack_)) {
         LOGD("GetPageIdByUrl pageId=%{private}d url=%{private}s", pageIter->pageId, url.c_str());
+        isRestore = pageIter->isRestore;
         return pageIter->pageId;
     }
     return INVALID_PAGE_ID;
@@ -1883,6 +1965,39 @@ void FrontendDelegateDeclarative::AttachPipelineContext(const RefPtr<PipelineCon
 RefPtr<PipelineContext> FrontendDelegateDeclarative::GetPipelineContext()
 {
     return pipelineContextHolder_.Get();
+}
+
+std::string FrontendDelegateDeclarative::RestoreRouterStack(const std::string& contentInfo)
+{
+    auto routerStack = JsonUtil::ParseJsonString(contentInfo);
+    if (!routerStack->IsValid() || !routerStack->IsArray()) {
+        LOGW("restore router stack is invalid");
+        return "";
+    }
+    int32_t stackSize = routerStack->GetArraySize();
+    if (stackSize < 1) {
+        LOGW("restore stack size is invalid");
+    }
+    for (int32_t index = 0; index < stackSize - 1; ++index) {
+        std::string url = routerStack->GetArrayItem(index)->ToString();
+        // remove 2 useless character, as "XXX" to XXX
+        pageRouteStack_.emplace_back(
+            PageInfo { GenerateNextPageId(), url.substr(1, url.size() - 2), true });
+    }
+    mainPagePath_ = routerStack->GetArrayItem(stackSize - 1)->ToString();
+    // remove 5 useless character, as "XXX.js" to XXX
+    mainPagePath_ = mainPagePath_.substr(1, mainPagePath_.size() - 5);
+    return mainPagePath_;
+}
+
+std::string FrontendDelegateDeclarative::GetContentInfo()
+{
+    auto jsonRouterStack = JsonUtil::CreateArray(true);
+    for (size_t index = 0; index < pageRouteStack_.size(); ++index) {
+        jsonRouterStack->Put("", pageRouteStack_[index].url.c_str());
+    }
+    pageStack_ = jsonRouterStack->ToString();
+    return pageStack_;
 }
 
 } // namespace OHOS::Ace::Framework

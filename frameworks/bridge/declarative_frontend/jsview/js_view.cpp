@@ -17,6 +17,7 @@
 
 #include "base/log/ace_trace.h"
 #include "core/pipeline/base/composed_element.h"
+#include "frameworks/bridge/declarative_frontend/engine/content_storage_set.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -58,6 +59,7 @@ RefPtr<OHOS::Ace::Component> JSView::CreateComponent()
             return;
         }
         if (jsView->element_.Invalid()) {
+            ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
             jsView->jsViewFunction_->ExecuteAppear();
         }
         jsView->element_ = element;
@@ -71,7 +73,10 @@ RefPtr<OHOS::Ace::Component> JSView::CreateComponent()
                     if (!jsView || !jsView->jsViewFunction_) {
                         return nullptr;
                     }
-                    jsView->jsViewFunction_->ExecuteTransition();
+                    {
+                        ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Transition");
+                        jsView->jsViewFunction_->ExecuteTransition();
+                    }
                     return jsView->BuildPageTransitionComponent();
                 };
                 element->SetPageTransitionFunction(std::move(pageTransitionFunction));
@@ -103,9 +108,18 @@ RefPtr<OHOS::Ace::Component> JSView::InternalRender(const RefPtr<Component>& par
         LOGE("JSView: InternalRender jsViewFunction_ error");
         return nullptr;
     }
-    jsViewFunction_->ExecuteAboutToRender();
-    jsViewFunction_->ExecuteRender();
-    jsViewFunction_->ExecuteOnRenderDone();
+    {
+        ACE_SCORING_EVENT("Component[" + viewId_ + "].AboutToRender");
+        jsViewFunction_->ExecuteAboutToRender();
+        }
+    {
+        ACE_SCORING_EVENT("Component[" + viewId_ + "].Build");
+        jsViewFunction_->ExecuteRender();
+        }
+    {
+        ACE_SCORING_EVENT("Component[" + viewId_ + "].OnRenderDone");
+        jsViewFunction_->ExecuteOnRenderDone();
+        }
     CleanUpAbandonedChild();
     jsViewFunction_->Destroy(this);
     auto buildComponent = ViewStackProcessor::GetInstance()->Finish();
@@ -131,8 +145,14 @@ void JSView::Destroy(JSView* parentCustomView)
 {
     LOGD("JSView::Destroy start");
     DestroyChild(parentCustomView);
-    jsViewFunction_->ExecuteDisappear();
-    jsViewFunction_->ExecuteAboutToBeDeleted();
+    {
+        ACE_SCORING_EVENT("Component[" + viewId_ + "].Disappear");
+        jsViewFunction_->ExecuteDisappear();
+    }
+    {
+        ACE_SCORING_EVENT("Component[" + viewId_ + "].AboutToBeDeleted");
+        jsViewFunction_->ExecuteAboutToBeDeleted();
+    }
     LOGD("JSView::Destroy end");
 }
 
@@ -153,9 +173,21 @@ void JSView::JSBind(BindingTarget object)
     JSClass<JSView>::Method("markNeedUpdate", &JSView::MarkNeedUpdate);
     JSClass<JSView>::Method("needsUpdate", &JSView::NeedsUpdate);
     JSClass<JSView>::Method("markStatic", &JSView::MarkStatic);
+    JSClass<JSView>::CustomMethod("getContext", &JSView::GetContext);
+    JSClass<JSView>::CustomMethod("getContentStorage", &JSView::GetContentStorage);
     JSClass<JSView>::CustomMethod("findChildById", &JSView::FindChildById);
     JSClass<JSView>::Inherit<JSViewAbstract>();
     JSClass<JSView>::Bind(object, ConstructorCallback, DestructorCallback);
+}
+
+void JSView::GetContext(const JSCallbackInfo& info)
+{
+    info.SetReturnValue(ContentStorageSet::GetCurrentContext());
+}
+
+void JSView::GetContentStorage(const JSCallbackInfo& info)
+{
+    info.SetReturnValue(ContentStorageSet::GetCurrentStorage());
 }
 
 void JSView::FindChildById(const JSCallbackInfo& info)

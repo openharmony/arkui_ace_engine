@@ -2083,6 +2083,8 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
         }
     } else if (std::strcmp(methodName.c_str(), "getBoundingClientRect") == 0) {
         return JsiComponentApiBridge::JsGetBoundingRect(runtime, nodeId);
+    } else if (std::strcmp(methodName.c_str(), "getInspector") == 0) {
+        return JsiComponentApiBridge::JsGetInspector(runtime, nodeId);
     } else if (std::strcmp(methodName.c_str(), "getScrollOffset") == 0) {
         return JsiComponentApiBridge::JsGetScrollOffset(runtime, nodeId);
     } else if (std::strcmp(methodName.c_str(), "scrollTo") == 0) {
@@ -2498,6 +2500,13 @@ shared_ptr<JsValue> JsGetBoundingClientRect(const shared_ptr<JsRuntime>& runtime
     return JsiComponentApiBridge::JsGetBoundingRect(runtime, nodeId);
 }
 
+shared_ptr<JsValue> JsGetInspector(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    int32_t nodeId = GetNodeId(runtime, thisObj);
+    return JsiComponentApiBridge::JsGetInspector(runtime, nodeId);
+}
+
 shared_ptr<JsValue> JsCreateElement(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
@@ -2510,6 +2519,7 @@ shared_ptr<JsValue> JsCreateElement(const shared_ptr<JsRuntime>& runtime, const 
     node->SetProperty(runtime, "focus", runtime->NewFunction(JsFocus));
     node->SetProperty(runtime, "animate", runtime->NewFunction(JsAnimate));
     node->SetProperty(runtime, "getBoundingClientRect", runtime->NewFunction(JsGetBoundingClientRect));
+    node->SetProperty(runtime, "getInspector", runtime->NewFunction(JsGetInspector));
     return node;
 }
 

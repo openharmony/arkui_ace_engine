@@ -146,6 +146,10 @@ public:
     // navigator component call router
     void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) override;
 
+    // distribute
+    std::string RestoreRouterStack(const std::string& contentInfo) override;
+    std::string GetContentInfo() const override;
+
     void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data);
 
     void SetJsEngine(const RefPtr<Framework::JsEngine>& jsEngine)
@@ -178,6 +182,12 @@ public:
     {
         isSubWindow_ = isSubWindow;
     }
+
+    RefPtr<Framework::JsEngine> GetJsEngine()
+    {
+        return jsEngine_;
+    }
+
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 

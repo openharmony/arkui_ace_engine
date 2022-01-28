@@ -48,9 +48,10 @@ build_component("plugin") {
     ]
 
     external_deps = [
-      "aafwk_standard:want",
-      "appexecfwk_standard:appexecfwk_base",
-      "appexecfwk_standard:appexecfwk_core",
+      "ability_runtime:app_manager",
+      "ability_runtime:want",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
       "ipc:ipc_core",
     ]
   }

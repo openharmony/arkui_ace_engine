@@ -88,9 +88,10 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
     platformEventCallback_ = std::move(callback);
 }
 
-AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AbilityRuntime::Context* context,
-    std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner)
-    : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), context_(context),
+AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+    std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
+    bool useCurrentEventRunner)
+    : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), abilityInfo_(abilityInfo),
       useCurrentEventRunner_(useCurrentEventRunner)
 {
     ACE_DCHECK(callback);
@@ -189,10 +190,8 @@ void AceContainer::InitializeFrontend()
         return;
     }
     ACE_DCHECK(frontend_);
-    std::shared_ptr<AppExecFwk::AbilityInfo> info =
-        aceAbility_
-            ? aceAbility_->GetAbilityInfo()
-            : (context_ ? static_cast<OHOS::AbilityRuntime::AbilityContext*>(context_)->GetAbilityInfo() : nullptr);
+    auto abilityInfo = abilityInfo_.lock();
+    std::shared_ptr<AppExecFwk::AbilityInfo> info = aceAbility_ ? aceAbility_->GetAbilityInfo() : abilityInfo;
     if (info && info->isLauncherAbility) {
         frontend_->DisallowPopLastPage();
     }
@@ -427,7 +426,7 @@ void AceContainer::InitializeCallback()
     ACE_FUNCTION_TRACE();
 
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
-    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchPoint& event) {
+    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchEvent& event) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, event]() { context->OnTouchEvent(event); }, TaskExecutor::TaskType::UI);
@@ -449,7 +448,7 @@ void AceContainer::InitializeCallback()
             [context, event]() { context->OnMouseEvent(event); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
- 
+
     auto&& axisEventCallback = [context = pipelineContext_, id = instanceId_](const AxisEvent& event) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
@@ -482,7 +481,8 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterDensityChangeCallback(densityChangeCallback);
 
-    auto&& systemBarHeightChangeCallback = [context = pipelineContext_, id = instanceId_](double statusBar, double navigationBar) {
+    auto&& systemBarHeightChangeCallback = [context = pipelineContext_, id = instanceId_](
+                                               double statusBar, double navigationBar) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("SystemBarHeightChangeCallback(%lf, %lf)", statusBar, navigationBar);
         context->GetTaskExecutor()->PostTask(
@@ -587,6 +587,15 @@ sptr<OHOS::Rosen::Window> AceContainer::GetUIWindow(int32_t instanceId)
     return container->GetUIWindowInner();
 }
 
+OHOS::AppExecFwk::Ability* AceContainer::GetAbility(int32_t instanceId)
+{
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    if (!container) {
+        return nullptr;
+    }
+    return container->GetAbilityInner();
+}
+
 bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string& content, const std::string& params)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -686,6 +695,18 @@ void AceContainer::TriggerGarbageCollection()
             PurgeMallocCache();
         },
         TaskExecutor::TaskType::JS);
+}
+
+void AceContainer::SetContentStorage(NativeReference* storage, NativeReference* context)
+{
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+    auto jsEngine = declarativeFrontend->GetJsEngine();
+    if (context) {
+        jsEngine->SetContext(instanceId_, context);
+    }
+    if (storage) {
+        jsEngine->SetContentStorage(instanceId_, storage);
+    }
 }
 
 void AceContainer::AddAssetPath(
@@ -840,6 +861,11 @@ sptr<OHOS::Rosen::Window> AceContainer::GetUIWindowInner() const
     return uiWindow_;
 }
 
+OHOS::AppExecFwk::Ability* AceContainer::GetAbilityInner() const
+{
+    return aceAbility_;
+}
+
 void AceContainer::SetFontScale(int32_t instanceId, float fontScale)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -875,6 +901,36 @@ void AceContainer::SetDialogCallback(int32_t instanceId, FrontendDialogCallback 
     auto front = container->GetFrontend();
     if (front && front->GetType() == FrontendType::JS) {
         front->SetDialogCallback(callback);
+    }
+}
+
+std::string AceContainer::RestoreRouterStack(int32_t instanceId, const std::string& contentInfo)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        return "";
+    }
+    ContainerScope scope(instanceId);
+    auto front = container->GetFrontend();
+    if (front) {
+        return front->RestoreRouterStack(contentInfo);
+    } else {
+        return "";
+    }
+}
+
+std::string AceContainer::GetContentInfo(int32_t instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        return "";
+    }
+    ContainerScope scope(instanceId);
+    auto front = container->GetFrontend();
+    if (front) {
+        return front->GetContentInfo();
+    } else {
+        return "";
     }
 }
 

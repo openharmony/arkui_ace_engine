@@ -351,8 +351,18 @@ enum class WindowModal : int32_t {
     SEMI_MODAL = 1,
     SEMI_MODAL_FULL_SCREEN = 2,
     DIALOG_MODAL = 3,
+    CONTAINER_MODAL = 4,
     FIRST_VALUE = NORMAL,
-    LAST_VALUE = DIALOG_MODAL,
+    LAST_VALUE = CONTAINER_MODAL,
+};
+
+enum class WindowMode : uint32_t {
+    WINDOW_MODE_UNDEFINED = 0,
+    WINDOW_MODE_FULLSCREEN = 1,
+    WINDOW_MODE_SPLIT_PRIMARY = 100,
+    WINDOW_MODE_SPLIT_SECONDARY,
+    WINDOW_MODE_FLOATING,
+    WINDOW_MODE_PIP
 };
 
 enum class PanelType {
@@ -464,6 +474,11 @@ enum class BarPosition {
 enum class CalendarType {
     NORMAL = 0,
     SIMPLE,
+};
+
+enum class SideBarContainerStyle {
+    EMBED,
+    OVERLAY
 };
 
 inline constexpr uint32_t STATE_NORMAL = 0;

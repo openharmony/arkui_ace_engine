@@ -19,7 +19,11 @@
 
 namespace OHOS::Ace {
 
+#ifndef WINDOWS_PLATFORM
 thread_local int32_t Container::currentId_ = INSTANCE_ID_UNDEFINED;
+#else
+int32_t Container::currentId_ = INSTANCE_ID_UNDEFINED;
+#endif
 std::function<void(int32_t)> Container::updateScopeNotify_;
 
 int32_t Container::CurrentId()

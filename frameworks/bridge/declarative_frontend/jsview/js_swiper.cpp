@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <iterator>
 
+#include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_component.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -47,6 +48,7 @@ void JSSwiper::Create(const JSCallbackInfo& info)
     component->SetIndicator(InitIndicatorStyle());
     component->SetMainSwiperSize(MainSwiperSize::MIN);
     component->SetCachedSize(DEFAULT_SWIPER_CACHED_COUNT);
+    component->SetCurve(Curves::LINEAR);
     ViewStackProcessor::GetInstance()->Push(component);
     JSInteractableView::SetFocusNode(true);
 }
@@ -79,6 +81,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("displayCount", &JSSwiper::SetDisplayCount);
     JSClass<JSSwiper>::StaticMethod("itemSpace", &JSSwiper::SetItemSpace);
     JSClass<JSSwiper>::StaticMethod("cachedCount", &JSSwiper::SetCachedCount);
+    JSClass<JSSwiper>::StaticMethod("curve", &JSSwiper::SetCurve);
     JSClass<JSSwiper>::StaticMethod("onChange", &JSSwiper::SetOnChange);
     JSClass<JSSwiper>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSwiper>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -354,6 +357,15 @@ void JSSwiper::SetCachedCount(int32_t cachedCount)
     }
 }
 
+void JSSwiper::SetCurve(const std::string& curveStr)
+{
+    RefPtr<Curve> curve = CreateCurve(curveStr);
+
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    swiper->SetCurve(curve);
+}
+
 void JSSwiper::SetOnChange(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -367,6 +379,7 @@ void JSSwiper::SetOnChange(const JSCallbackInfo& args)
                 LOGE("HandleChangeEvent swiperInfo == nullptr");
                 return;
             }
+            ACE_SCORING_EVENT("Swiper.OnChange");
             func->Execute(*swiperInfo);
         });
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
@@ -496,6 +509,7 @@ void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
         auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Swiper.finishAnimation");
             func->Execute();
         });
         if (controller_) {

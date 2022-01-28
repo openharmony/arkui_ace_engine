@@ -47,9 +47,12 @@ void JSClipboard::Get(const JSCallbackInfo& info)
         auto function = [execCtx = info.GetExecutionContext(), callback](const std::string& str) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto func = std::move(callback);
+            ACE_SCORING_EVENT("clipboard.get");
             func->Execute(str);
         };
-        clipboard->GetData(function);
+        if (clipboard) {
+            clipboard->GetData(function);
+        }
     }
 }
 
@@ -62,7 +65,9 @@ void JSClipboard::Set(const std::string& data)
     }
     auto executor = container->GetTaskExecutor();
     auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(executor);
-    clipboard->SetData(data);
+    if (clipboard) {
+        clipboard->SetData(data);
+    }
 }
 
 void JSClipboard::Clear()
@@ -74,7 +79,9 @@ void JSClipboard::Clear()
     }
     auto executor = container->GetTaskExecutor();
     auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(executor);
-    clipboard->Clear();
+    if (clipboard) {
+        clipboard->Clear();
+    }
 }
 
 } // namespace OHOS::Ace::Framework

@@ -335,6 +335,31 @@ bool ParseLocationProps(const JSCallbackInfo& info, AnimatableDimension& x, Anim
 const std::vector<Placement> PLACEMENT = { Placement::LEFT, Placement::RIGHT, Placement::TOP, Placement::BOTTOM,
     Placement::TOP_LEFT, Placement::TOP_RIGHT, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT };
 
+void ParseShowObject(
+    const JSCallbackInfo& info, const JSRef<JSObject>& showObj, const RefPtr<PopupComponentV2>& popupComponent)
+{
+    JSRef<JSVal> changeEventVal = showObj->GetProperty("changeEvent");
+        if (changeEventVal->IsFunction()) {
+            RefPtr<JsFunction> jsFunc =
+                AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+            auto eventMarker = EventMarker(
+                [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    ACE_SCORING_EVENT("Popup.onStateChange");
+
+                    if (param != "true" && param != "false") {
+                        LOGE("param is not equal true or fasle, invaild.");
+                        return;
+                    }
+
+                    bool newValue = StringToBool(param);
+                    JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
+                    func->ExecuteJS(1, &newJSVal);
+                });
+            popupComponent->SetChangeEvent(eventMarker);
+        }
+}
+
 void ParsePopupParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupComponentV2>& popupComponent)
 {
@@ -354,6 +379,7 @@ void ParsePopupParam(
         auto eventMarker = EventMarker(
             [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("Popup.onStateChange");
                 func->Execute(keys, param);
             });
         popupComponent->SetOnStateChange(eventMarker);
@@ -373,6 +399,7 @@ void ParsePopupParam(
             auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
             EventMarker actionId([execCtx = info.GetExecutionContext(), func = std::move(actionFunc)]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("primaryButton.action");
                 func->Execute();
             });
             properties.actionId = actionId;
@@ -395,6 +422,7 @@ void ParsePopupParam(
             auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
             EventMarker actionId([execCtx = info.GetExecutionContext(), func = std::move(actionFunc)]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("secondaryButton.action");
                 func->Execute();
             });
             properties.actionId = actionId;
@@ -428,7 +456,10 @@ void ParseCustomPopupParam(
     }
     // use another VSP instance while executing the builder function
     ScopedViewStackProcessor builderViewStackProcessor;
-    builderFunc->Execute();
+    {
+        ACE_SCORING_EVENT("popup.builder");
+        builderFunc->Execute();
+    }
     customComponent = ViewStackProcessor::GetInstance()->Finish();
     popupComponent->SetCustomComponent(customComponent);
 
@@ -471,6 +502,7 @@ void ParseCustomPopupParam(
         auto eventMarker = EventMarker(
             [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("popup.onStateChange");
                 func->Execute(keys, param);
             });
         popupComponent->SetOnStateChange(eventMarker);
@@ -1718,6 +1750,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             optionComponent->SetValue(value);
             optionComponent->SetCustomizedCallback([action, context] {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
+                ACE_SCORING_EVENT("menu.action");
                 action->Execute();
             });
             menuComponent->AppendOption(optionComponent);
@@ -1743,7 +1776,10 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
         }
         // use another VSP instance while executing the builder function
         ScopedViewStackProcessor builderViewStackProcessor;
-        builderFunc->Execute();
+        {
+            ACE_SCORING_EVENT("menu.builder");
+            builderFunc->Execute();
+        }
         auto customComponent = ViewStackProcessor::GetInstance()->Finish();
         if (!customComponent) {
             LOGE("Custom component is null.");
@@ -2660,6 +2696,7 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
     auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
                         const RefPtr<DragEvent>& info, const std::string &extraParams) -> RefPtr<Component> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
+        
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
             LOGE("builder param is not an object.");
@@ -2679,7 +2716,10 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
         }
         // use another VSP instance while executing the builder function
         ScopedViewStackProcessor builderViewStackProcessor;
-        builderFunc->Execute();
+        {
+            ACE_SCORING_EVENT("onDragStart.builder");
+            builderFunc->Execute();
+        }
         RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
         if (!customComponent) {
             LOGE("Custom component is null.");
@@ -2701,6 +2741,7 @@ void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
     auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
                             const RefPtr<DragEvent>& info, const std::string &extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragEnter");
         func->Execute(info, extraParams);
     };
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -2717,6 +2758,7 @@ void JSViewAbstract::JsOnDragMove(const JSCallbackInfo& info)
     auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
                             const RefPtr<DragEvent>& info, const std::string &extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragMove");
         func->Execute(info, extraParams);
     };
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -2733,6 +2775,7 @@ void JSViewAbstract::JsOnDragLeave(const JSCallbackInfo& info)
     auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
                             const RefPtr<DragEvent>& info, const std::string &extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragLeave");
         func->Execute(info, extraParams);
     };
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -2749,6 +2792,7 @@ void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
     auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
                         const RefPtr<DragEvent>& info, const std::string &extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDrop");
         func->Execute(info, extraParams);
     };
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -2766,6 +2810,7 @@ void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
                                     const Rect& oldRect, const Offset& oldOrigin, const Rect& rect,
                                     const Offset& origin) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onAreaChange");
         func->Execute(oldRect, oldOrigin, rect, origin);
     };
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -2781,8 +2826,13 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
         return;
     }
 
-    if (!info[0]->IsBoolean() && !info[1]->IsBoolean()) {
-        LOGE("No overLayer text.");
+    if (!info[0]->IsBoolean() && !info[0]->IsObject()) {
+        LOGE("The first param type is not bool or object, invaild.");
+        return;
+    }
+
+    if (!info[1]->IsObject()) {
+        LOGE("The second param type is not object, invaild.");
         return;
     }
 
@@ -2805,19 +2855,12 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
     if (info[0]->IsBoolean()) {
         popupParam->SetIsShow(info[0]->ToBoolean());
     } else {
-        popupParam->SetIsShow(info[1]->ToBoolean());
+        JSRef<JSObject> showObj = JSRef<JSObject>::Cast(info[0]);
+        ParseShowObject(info, showObj, popupComponent);
+        popupParam->SetIsShow(showObj->GetProperty("value")->ToBoolean());
     }
 
-    JSRef<JSObject> popupObj;
-    if (info[0]->IsObject()) {
-        popupObj = JSRef<JSObject>::Cast(info[0]);
-    } else if (info[1]->IsObject()) {
-        popupObj = JSRef<JSObject>::Cast(info[1]);
-    } else {
-        LOGE("No param object.");
-        return;
-    }
-
+    JSRef<JSObject> popupObj = JSRef<JSObject>::Cast(info[1]);
     if (popupObj->GetProperty("message")->IsString()) {
         ParsePopupParam(info, popupObj, popupComponent);
     } else {
@@ -3339,6 +3382,7 @@ void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
         RefPtr<JsFocusFunction> jsOnFocusMove = AceType::MakeRefPtr<JsFocusFunction>(JSRef<JSFunc>::Cast(args[0]));
         auto onFocusMove = [execCtx = args.GetExecutionContext(), func = std::move(jsOnFocusMove)](int info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onFocusMove");
             func->Execute(info);
         };
         auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
@@ -3352,6 +3396,7 @@ void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
         RefPtr<JsFocusFunction> jsOnFocus = AceType::MakeRefPtr<JsFocusFunction>(JSRef<JSFunc>::Cast(args[0]));
         auto onFocus = [execCtx = args.GetExecutionContext(), func = std::move(jsOnFocus)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onFocus");
             func->Execute();
         };
         auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
@@ -3365,6 +3410,7 @@ void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)
         RefPtr<JsFocusFunction> jsOnBlur = AceType::MakeRefPtr<JsFocusFunction>(JSRef<JSFunc>::Cast(args[0]));
         auto onBlur_ = [execCtx = args.GetExecutionContext(), func = std::move(jsOnBlur)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onBlur");
             func->Execute();
         };
         auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
@@ -3524,7 +3570,10 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         }
         // use another VSP instance while executing the builder function
         ScopedViewStackProcessor builderViewStackProcessor;
-        builderFunc->Execute();
+        {
+            ACE_SCORING_EVENT("contextMenu.builder");
+            builderFunc->Execute();
+        }
         auto customComponent = ViewStackProcessor::GetInstance()->Finish();
         if (!customComponent) {
             LOGE("Custom component is null.");
@@ -3534,6 +3583,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         auto optionTheme = GetTheme<SelectTheme>();
         auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
         optionComponent->SetCustomComponent(customComponent);
+        menuComponent->ClearOptions();
         menuComponent->AppendOption(optionComponent);
     } else {
         LOGE("Param is invalid");
@@ -4136,6 +4186,7 @@ RefPtr<Gesture> JSViewAbstract::GetTapGesture(const JSCallbackInfo& info, int32_
             if (impl) {
                 impl->UpdateEventInfo(info);
             }
+            ACE_SCORING_EVENT("onClick");
             func->Execute(info);
         });
     return tapGesture;
@@ -4157,6 +4208,7 @@ void JSViewAbstract::JsOnMouse(const JSCallbackInfo& args)
             if (impl) {
                 impl->UpdateEventInfo(info);
             }
+            ACE_SCORING_EVENT("onMouse");
             func->Execute(info);
         };
         auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();

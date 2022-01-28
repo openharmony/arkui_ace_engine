@@ -114,10 +114,6 @@ template("ace_libicu") {
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
 
-    if (platform == "windows" || platform == "mac") {
-      configs += [ "//build/config/compiler:rtti" ]
-    }
-
     if (defined(config.use_external_icu)) {
       if (config.use_external_icu == "static") {
         deps = [
@@ -131,6 +127,7 @@ template("ace_libicu") {
         ]
       }
     } else {
+      configs += [ "//build/config/compiler:rtti" ]
       configs += [ "$ace_root/build:reduce_eh_frame_config" ]
       defines += [
         "U_COMMON_IMPLEMENTATION",

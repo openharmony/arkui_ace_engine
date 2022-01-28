@@ -23,7 +23,7 @@ namespace OHOS::Ace::Framework {
 JSRef<JSArray> JSPatternLock::ChoosePointToJSValue(std::vector<int> input)
 {
     JSRef<JSArray> arr = JSRef<JSArray>::New();
-    for (int i = 0; i < input.size(); i++) {
+    for (size_t i = 0; i < input.size(); i++) {
         arr->SetValueAt(i, ConvertToJSValue(input[i]));
     }
     return arr;

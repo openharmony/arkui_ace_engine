@@ -24,6 +24,7 @@
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "frameworks/bridge/declarative_frontend/engine/content_storage_set.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_runtime.h"
@@ -42,6 +43,8 @@ extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_start[];
 extern const char _binary_jsEnumStyle_abc_end[];
+extern const char _binary_contentStorage_abc_start[];
+extern const char _binary_contentStorage_abc_end[];
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -319,12 +322,22 @@ std::unordered_map<int32_t, WeakPtr<JsiDeclarativeEngineInstance>> JsiDeclarativ
 
 thread_local shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::runtime_;
 
+bool JsiDeclarativeEngineInstance::aceModuleInited_ = false;
+
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
     CHECK_RUN_ON(JS);
     LOG_DESTROY();
 
     DestroyAllRootViewHandle();
+
+    if (runningPage_) {
+        runningPage_->OnJsEngineDestroy();
+    }
+
+    if (stagingPage_) {
+        stagingPage_->OnJsEngineDestroy();
+    }
 
     if (runtime_) {
         runtime_->RegisterUncaughtExceptionHandler(nullptr);
@@ -404,6 +417,15 @@ bool JsiDeclarativeEngineInstance::FireJsEvent(const std::string& eventStr)
 
 void JsiDeclarativeEngineInstance::InitAceModule()
 {
+    if (!aceModuleInited_) {
+        bool contentStorageResult = runtime_->EvaluateJsCode((uint8_t*)_binary_contentStorage_abc_start,
+            _binary_contentStorage_abc_end - _binary_contentStorage_abc_start);
+        if (!contentStorageResult) {
+            JsiDeclarativeUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_);
+            LOGE("EvaluateJsCode stateMgmt failed");
+        }
+    }
+
     bool stateMgmtResult = runtime_->EvaluateJsCode(
         (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
     if (!stateMgmtResult) {
@@ -416,6 +438,51 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         JsiDeclarativeUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_);
         LOGE("EvaluateJsCode jsEnumStyle failed");
     }
+}
+
+extern "C" ACE_EXPORT void OHOS_ACE_PreInitAceModule(void* runtime)
+{
+    LOGI("Ace ark lib loaded, PreInitAceModule.");
+    JsiDeclarativeEngineInstance::PreInitAceModule(runtime);
+}
+
+void JsiDeclarativeEngineInstance::PreInitAceModule(void* runtime)
+{
+    auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime);
+    std::shared_ptr<ArkJSRuntime> arkRuntime;
+    EcmaVM* vm = nullptr;
+    if (!sharedRuntime) {
+        LOGI("PreInitAceModule will not use sharedRuntime");
+    } else {
+        arkRuntime = std::make_shared<ArkJSRuntime>();
+        auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
+        vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
+        if (vm == nullptr) {
+            LOGE("PreInitAceModule NativeDeclarativeEngine Initialize, vm is null");
+            return;
+        }
+        if (!arkRuntime->InitializeFromExistVM(vm)) {
+            LOGE("PreInitAceModule Ark Engine initialize runtime failed");
+            return;
+        }
+    }
+
+    shared_ptr<JsValue> global = arkRuntime->GetGlobal();
+    shared_ptr<JsValue> aceConsoleObj = arkRuntime->NewObject();
+    aceConsoleObj->SetProperty(arkRuntime, "log", arkRuntime->NewFunction(JsDebugLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "debug", arkRuntime->NewFunction(JsDebugLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "info", arkRuntime->NewFunction(JsInfoLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "warn", arkRuntime->NewFunction(JsWarnLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsErrorLogPrint));
+    global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
+
+    bool contentStorageResult = arkRuntime->EvaluateJsCode(
+        (uint8_t*)_binary_contentStorage_abc_start, _binary_contentStorage_abc_end - _binary_contentStorage_abc_start);
+    if (!contentStorageResult) {
+        JsiDeclarativeUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, 0);
+        LOGE("PreInitAceModule EvaluateJsCode stateMgmt failed");
+    }
+    aceModuleInited_ = contentStorageResult;
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule()
@@ -435,6 +502,10 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
         global->SetProperty(runtime_, "console", consoleObj);
     }
 
+    if (aceModuleInited_) {
+        LOGD("console module has already inited");
+        return;
+    }
     // js framework log method
     shared_ptr<JsValue> aceConsoleObj = runtime_->NewObject();
     aceConsoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(JsDebugLogPrint));
@@ -657,16 +728,6 @@ std::string JsiDeclarativeEngineInstance::GetMediaResource(const std::string& ta
     return std::string();
 }
 
-RefPtr<FrontendDelegate> GetFrontendDelegate(const shared_ptr<JsRuntime>& runtime)
-{
-    if (!runtime) {
-        LOGE("JsRuntime is null, cannot get frontend delegate!");
-        return nullptr;
-    }
-    auto engineInstance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
-    return engineInstance->GetFrontendDelegate();
-}
-
 RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetRunningPage(int32_t instanceId)
 {
     auto engineInstance = JsiDeclarativeEngineInstance::GetEngineInstance(instanceId);
@@ -807,6 +868,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
 
     nativeEngine_ = new ArkNativeEngine(vm, static_cast<void*>(this));
+    engineInstance_->SetNativeEngine(nativeEngine_);
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
     if (delegate && delegate->GetAssetManager()) {
@@ -956,14 +1018,14 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
             std::string appBasePath = delegate->GetAssetPath("app.abc");
             std::string appPath = appBasePath.append("app.abc");
             LOGI("appPath is: %{private}s", appPath.c_str());
-            if (!runtime->ExecuteJsBin(appPath)) {
-                LOGE("ExecuteJsBin \"app.js\" failed.");
-                return;
+            if (runtime->ExecuteJsBin(appPath)) {
+                CallAppFunc("onCreate");
+            } else {
+                LOGW("ExecuteJsBin \"app.js\" failed.");
             }
-            CallAppFunc("onCreate");
         }
         if (!runtime->ExecuteJsBin(assetPath)) {
-            LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
+            LOGE("ExecuteJsBin %{public}s failed.", urlName.c_str());
             return;
         }
     }
@@ -1048,7 +1110,6 @@ void JsiDeclarativeEngine::FireExternalEvent(const std::string& componentId, con
         LOGE("FireExternalEvent xcomponent is null.");
         return;
     }
-    auto textureId = static_cast<int64_t>(xcomponent->GetTextureId());
 
     auto container = Container::Current();
     if (!container) {
@@ -1060,7 +1121,15 @@ void JsiDeclarativeEngine::FireExternalEvent(const std::string& componentId, con
         LOGE("FireExternalEvent nativeView null");
         return;
     }
-    auto nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+
+    void* nativeWindow = nullptr;
+#ifdef OHOS_STANDARD_SYSTEM
+    nativeWindow = const_cast<void*>(xcomponent->GetNativeWindow());
+#else
+    auto textureId = static_cast<int64_t>(xcomponent->GetTextureId());
+    nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+#endif
+
     if (!nativeWindow) {
         LOGE("FireExternalEvent nativeWindow invalid");
         return;
@@ -1243,6 +1312,16 @@ void JsiDeclarativeEngine::RunGarbageCollection()
     if (engineInstance_ && engineInstance_->GetJsRuntime()) {
         engineInstance_->GetJsRuntime()->RunGC();
     }
+}
+
+void JsiDeclarativeEngine::SetContentStorage(int32_t instanceId, NativeReference* nativeValue)
+{
+    ContentStorageSet::SetCurrentStorage(instanceId, nativeValue);
+}
+
+void JsiDeclarativeEngine::SetContext(int32_t instanceId, NativeReference* context)
+{
+    ContentStorageSet::SetCurrentContext(instanceId, context);
 }
 
 RefPtr<GroupJsBridge> JsiDeclarativeEngine::GetGroupJsBridge()

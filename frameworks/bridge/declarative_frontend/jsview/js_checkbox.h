@@ -16,8 +16,6 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CHECKBOX_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CHECKBOX_H
 
-#include <variant>
-
 #include "core/components/checkable/checkable_component.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 

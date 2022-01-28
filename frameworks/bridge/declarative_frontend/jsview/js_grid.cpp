@@ -157,6 +157,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("onScrollIndex", &JSGrid::JsOnScrollIndex);
     JSClass<JSGrid>::StaticMethod("cachedCount", &JSGrid::SetCachedCount);
     JSClass<JSGrid>::StaticMethod("editMode", &JSGrid::SetEditMode, opt);
+    JSClass<JSGrid>::StaticMethod("multiSelectable", &JSGrid::SetMultiSelectable, opt);
     JSClass<JSGrid>::StaticMethod("maxCount", &JSGrid::SetMaxCount, opt);
     JSClass<JSGrid>::StaticMethod("minCount", &JSGrid::SetMinCount, opt);
     JSClass<JSGrid>::StaticMethod("cellLength", &JSGrid::CellLength, opt);
@@ -299,6 +300,7 @@ void JSGrid::JsOnGridDragEnter(const JSCallbackInfo& info)
     auto onItemDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
                                 const ItemDragInfo& dragInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Grid.onItemDragEnter");
         func->ItemDragEnterExecute(dragInfo);
     };
     auto component = AceType::DynamicCast<GridLayoutComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -320,6 +322,7 @@ void JSGrid::JsOnGridDragMove(const JSCallbackInfo& info)
     auto onItemDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
                             const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Grid.onItemDragMove");
         func->ItemDragMoveExecute(dragInfo, itemIndex, insertIndex);
     };
     auto component = AceType::DynamicCast<GridLayoutComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -341,6 +344,7 @@ void JSGrid::JsOnGridDragLeave(const JSCallbackInfo& info)
     auto onItemDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
                                 const ItemDragInfo& dragInfo, int32_t itemIndex) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Grid.onItemDragLeave");
         func->ItemDragLeaveExecute(dragInfo, itemIndex);
     };
     auto component = AceType::DynamicCast<GridLayoutComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -381,7 +385,10 @@ void JSGrid::JsOnGridDragStart(const JSCallbackInfo& info)
         }
         // use another VSP instance while executing the builder function
         ScopedViewStackProcessor builderViewStackProcessor;
-        builderFunc->Execute();
+        {
+            ACE_SCORING_EVENT("Grid.onItemDragStart.builder");
+            builderFunc->Execute();
+        }
         RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
         if (!customComponent) {
             LOGE("Custom component is null.");
@@ -408,6 +415,7 @@ void JSGrid::JsOnGridDrop(const JSCallbackInfo& info)
     auto onItemDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
                         const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Grid.onItemDrop");
         func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
     };
     auto component = AceType::DynamicCast<GridLayoutComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -416,6 +424,15 @@ void JSGrid::JsOnGridDrop(const JSCallbackInfo& info)
         return;
     }
     component->SetOnGridDropId(onItemDropId);
+}
+
+void JSGrid::SetMultiSelectable(bool multiSelectable)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (grid) {
+        grid->SetMultiSelectable(multiSelectable);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

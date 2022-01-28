@@ -84,7 +84,7 @@ void ExclusiveRecognizer::OnPending(size_t touchId)
     }
 }
 
-bool ExclusiveRecognizer::HandleEvent(const TouchPoint& point)
+bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
 {
     switch (point.type) {
         case TouchType::MOVE:

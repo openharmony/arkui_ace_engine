@@ -235,6 +235,7 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
             [execCtx = args.GetExecutionContext(), func = std::move(jsLoadSuccFunc)](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageSuccessEvent>(info);
+                ACE_SCORING_EVENT("Image.onComplete");
                 func->Execute(*eventInfo);
             }));
     } else {
@@ -253,6 +254,7 @@ void JSImage::OnError(const JSCallbackInfo& args)
             [execCtx = args.GetExecutionContext(), func = std::move(jsLoadFailFunc)](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageFailEvent>(info);
+                ACE_SCORING_EVENT("Image.onError");
                 func->Execute(*eventInfo);
             }));
     } else {
@@ -270,6 +272,7 @@ void JSImage::OnFinish(const JSCallbackInfo& info)
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto eventMarker = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Image.onFinish");
         func->Execute();
     });
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -296,6 +299,18 @@ void JSImage::Create(const JSCallbackInfo& info)
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     imageComponent->SetPixmap(CreatePixelMapFromNapiValue(info[0]));
 #endif
+}
+
+void JSImage::JsBorder(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBorder(info);
+    SetBorder(GetBackDecoration()->GetBorder());
+}
+
+void JSImage::JsBorderRadius(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBorderRadius(info);
+    SetBorder(GetBackDecoration()->GetBorder());
 }
 
 void JSImage::SetSourceSize(const JSCallbackInfo& info)
@@ -389,9 +404,9 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("interpolation", &JSImage::SetImageInterpolation, opt);
     JSClass<JSImage>::StaticMethod("borderStyle", &JSViewAbstract::SetBorderStyle, opt);
     JSClass<JSImage>::StaticMethod("borderColor", &JSViewAbstract::JsBorderColor);
-    JSClass<JSImage>::StaticMethod("border", &JSViewAbstract::JsBorder);
+    JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderWidth", &JSViewAbstract::JsBorderWidth);
-    JSClass<JSImage>::StaticMethod("borderRadius", &JSViewAbstract::JsBorderRadius);
+    JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
     JSClass<JSImage>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSImage>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSImage>::StaticMethod("autoResize", &JSImage::SetAutoResize);

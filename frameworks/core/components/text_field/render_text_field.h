@@ -337,6 +337,7 @@ protected:
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     void OnHiddenChanged(bool hidden) override;
     void OnClick(const ClickInfo& clickInfo);
+    void OnDoubleClick(const ClickInfo& clickInfo);
     void OnLongPress(const LongPressInfo& longPressInfo);
     bool HandleMouseEvent(const MouseEvent& event) override;
 
@@ -592,6 +593,7 @@ private:
     RefPtr<TextOverlayComponent> textOverlay_;
     WeakPtr<StackElement> stackElement_;
     RefPtr<ClickRecognizer> clickRecognizer_;
+    RefPtr<ClickRecognizer> doubleClickRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<Animator> pressController_;

@@ -21,6 +21,9 @@
 #include "ability_info.h"
 #include "configuration.h"
 #include "init_data.h"
+#include "js_runtime_utils.h"
+#include "native_reference.h"
+#include "service_extension_context.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -28,6 +31,7 @@
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "base/log/log.h"
@@ -37,6 +41,31 @@
 #include "core/common/flutter/flutter_asset_manager.h"
 
 namespace OHOS::Ace {
+namespace {
+
+WindowMode GetWindowMode(OHOS::Rosen::Window* window)
+{
+    if (!window) {
+        LOGE("Get window mode failed, window is null!");
+        return WindowMode::WINDOW_MODE_UNDEFINED;
+    }
+    switch (window->GetMode()) {
+        case OHOS::Rosen::WindowMode::WINDOW_MODE_FULLSCREEN:
+            return WindowMode::WINDOW_MODE_FULLSCREEN;
+        case OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY:
+            return WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+        case OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY:
+            return WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+        case OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING:
+            return WindowMode::WINDOW_MODE_FLOATING;
+        case OHOS::Rosen::WindowMode::WINDOW_MODE_PIP:
+            return WindowMode::WINDOW_MODE_PIP;
+        default:
+            return WindowMode::WINDOW_MODE_UNDEFINED;
+    }
+}
+
+}
 
 static std::atomic<int32_t> gInstanceId = 0;
 
@@ -69,34 +98,75 @@ extern "C" ACE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtim
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime);
 }
 
-UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime)
-    : context_(context), runtime_(runtime)
+UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime) : runtime_(runtime)
 {
+    if (context == nullptr) {
+        LOGE("context is nullptr");
+        return;
+    }
+    const auto& obj = context->GetBindingObject();
+    auto ref = obj->Get<NativeReference>();
+    auto object = AbilityRuntime::ConvertNativeValueTo<NativeObject>(ref->Get());
+    auto weak = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(object->GetNativePointer());
+    context_ = *weak;
+
     LOGI("Create UIContentImpl.");
 }
 
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
 {
+    CommonInitialize(window, url, storage);
+    LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
+    // run page.
+    Platform::AceContainer::RunPage(
+        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
+    LOGI("Initialize UIContentImpl done.");
+}
+
+void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
+{
+    CommonInitialize(window, contentInfo, storage);
+    startUrl_ = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo);
+    if (startUrl_.empty()) {
+        LOGW("UIContent Restore start url is empty");
+    }
+    LOGI("Restore startUrl = %{public}s", startUrl_.c_str());
+    Platform::AceContainer::RunPage(
+        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
+    LOGI("Restore UIContentImpl done.");
+}
+
+std::string UIContentImpl::GetContentInfo() const
+{
+    LOGI("UIContent GetContentInfo");
+    return Platform::AceContainer::GetContentInfo(instanceId_);
+}
+
+void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
+{
     window_ = window;
-    startUrl_ = url;
+    startUrl_ = contentInfo;
     if (!window_) {
         LOGE("Null window, can't initialize UI content");
         return;
     }
-    if (!context_) {
-        LOGE("Null ability, can't initialize UI content");
+    auto context = context_.lock();
+    if (!context) {
+        LOGE("context is null");
         return;
     }
     LOGI("Initialize UIContentImpl start.");
     static std::once_flag onceFlag;
-    std::call_once(onceFlag, []() {
+    std::call_once(onceFlag, [&context]() {
         LOGI("Initialize for current process.");
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+        AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
+        CapabilityRegistry::Register();
     });
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
-    auto resourceManager = context_->GetResourceManager();
+    auto resourceManager = context->GetResourceManager();
     if (resourceManager != nullptr) {
         resourceManager->GetResConfig(*resConfig);
         auto localeInfo = resConfig->GetLocaleInfo();
@@ -110,48 +180,89 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
         }
     }
 
-    auto packagePathStr = context_->GetBundleCodePath();
-    auto moduleInfo = context_->GetHapModuleInfo();
-    if (moduleInfo != nullptr) {
-        packagePathStr += "/" + moduleInfo->name + "/";
-    }
-    auto abilityContext = static_cast<OHOS::AbilityRuntime::AbilityContext*>(context_);
-    auto info = abilityContext->GetAbilityInfo();
-    std::string srcPath = "";
-    if (info != nullptr && !info->srcPath.empty()) {
-        srcPath = info->srcPath;
+    auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
+    std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> info;
+
+    if (abilityContext) {
+        info = abilityContext->GetAbilityInfo();
+    } else {
+        auto serviceContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::ServiceExtensionContext>(context);
+        if (!serviceContext) {
+            LOGE("context is not AbilityContext or ServiceExtensionContext.");
+            return;
+        }
+        info = serviceContext->GetAbilityInfo();
     }
 
     RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-    auto assetBasePathStr = { "assets/js/" + (srcPath.empty() ? "default" : srcPath) + "/",
-        std::string("assets/js/share/") };
-
-    if (flutterAssetManager && !packagePathStr.empty()) {
-        auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-        if (assetProvider->Initialize(packagePathStr, assetBasePathStr)) {
-            LOGI("Push AssetProvider to queue.");
-            flutterAssetManager->PushBack(std::move(assetProvider));
-        }
-    }
-
-    std::string moduleName = info->moduleName;
-    std::shared_ptr<OHOS::AppExecFwk::ApplicationInfo> appInfo = context_->GetApplicationInfo();
-    std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
-
+    bool isModelJson = info != nullptr ? info->isModuleJson : false;
+    std::string moduleName = info != nullptr ? info->moduleName : "";
+    auto appInfo = context->GetApplicationInfo();
     std::string resPath;
-    for (const auto& module : moduleList) {
-        if (module.moduleName == moduleName) {
-            resPath = module.moduleSourceDir + "/assets/" + module.moduleName + "/";
-            break;
+    LOGI("Initialize UIContent isModelJson:%{public}s", isModelJson ? "true" : "false");
+    if (isModelJson) {
+        if (appInfo) {
+            std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
+            for (const auto& module : moduleList) {
+                if (module.moduleName == moduleName) {
+                    resPath = module.moduleSourceDir + "/";
+                    break;
+                }
+            }
+        }
+        LOGI("In stage mode, resPath:%{private}s", resPath.c_str());
+        auto assetBasePathStr = { std::string("ets/"), std::string("resources/base/profile/") };
+        if (flutterAssetManager && !resPath.empty()) {
+            auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
+            if (assetProvider->Initialize(resPath, assetBasePathStr)) {
+                LOGI("Push AssetProvider to queue.");
+                flutterAssetManager->PushBack(std::move(assetProvider));
+            }
+        }
+    } else {
+        auto packagePathStr = context->GetBundleCodePath();
+        auto moduleInfo = context->GetHapModuleInfo();
+        if (moduleInfo != nullptr) {
+            packagePathStr += "/" + moduleInfo->name + "/";
+        }
+        std::string srcPath = "";
+        if (info != nullptr && !info->srcPath.empty()) {
+            srcPath = info->srcPath;
+        }
+
+        auto assetBasePathStr = { "assets/js/" + (srcPath.empty() ? "default" : srcPath) + "/",
+            std::string("assets/js/share/") };
+
+        if (flutterAssetManager && !packagePathStr.empty()) {
+            auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
+            if (assetProvider->Initialize(packagePathStr, assetBasePathStr)) {
+                LOGI("Push AssetProvider to queue.");
+                flutterAssetManager->PushBack(std::move(assetProvider));
+            }
+        }
+
+        if (appInfo) {
+            std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
+            for (const auto& module : moduleList) {
+                if (module.moduleName == moduleName) {
+                    resPath = module.moduleSourceDir + "/assets/" + module.moduleName + "/";
+                    break;
+                }
+            }
         }
     }
-
     // create container
     instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
     auto container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
-        context_, std::make_unique<ContentEventCallback>([context = context_] {
-            if (context) {
-                auto abilityContext = static_cast<OHOS::AbilityRuntime::AbilityContext*>(context);
+        info, std::make_unique<ContentEventCallback>([context = context_] {
+            auto sharedContext = context.lock();
+            if (!sharedContext) {
+                return;
+            }
+            auto abilityContext =
+                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+            if (abilityContext) {
                 abilityContext->TerminateSelf();
             }
         }));
@@ -173,6 +284,11 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     container->SetPackagePathStr(resPath);
     container->SetAssetManager(flutterAssetManager);
 
+    if (window_ && window_->IsDecorEnable()) {
+        LOGI("Container modal is enabled.");
+        container->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    }
+
     // create ace_view
     auto flutterAceView =
         Platform::FlutterAceView::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
@@ -185,6 +301,15 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     // set view
     Platform::AceContainer::SetView(flutterAceView, config_.Density(), width, height);
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, config_.Orientation());
+    auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
+    if (!storage) {
+        container->SetContentStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
+    } else {
+        container->SetContentStorage(nativeEngine->CreateReference(storage, 1),
+            context->GetBindingObject()->Get<NativeReference>());
+    }
+
+    InitWindowCallback();
 
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
@@ -207,11 +332,6 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
         }
     }
 #endif
-
-    // run page.
-    Platform::AceContainer::RunPage(
-        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
-    LOGI("Initialize UIContentImpl done.");
 }
 
 void UIContentImpl::Foreground()
@@ -242,17 +362,6 @@ void UIContentImpl::Destroy()
 {
     LOGI("Destroy UIContent");
     Platform::AceContainer::DestroyContainer(instanceId_);
-}
-
-void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
-{
-    LOGI("UIContent Restore: mock %{public}s", contentInfo.c_str());
-}
-
-const std::string& UIContentImpl::GetContentInfo() const
-{
-    LOGI("UIContent GetContentInfo: mock");
-    return "contentInfo";
 }
 
 bool UIContentImpl::ProcessBackPressed()
@@ -338,6 +447,62 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config)
         Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation());
     }
     config_ = config;
+}
+
+void UIContentImpl::InitWindowCallback()
+{
+    LOGE("UIContent InitWindowCallback");
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("get container(id=%{public}d) failed", instanceId_);
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGE("get pipeline context failed");
+        return;
+    }
+
+    auto& window = window_;
+    pipelineContext->SetWindowMinimizeCallBack([&window]() -> bool {
+        if (!window) {
+            return false;
+        }
+        return (OHOS::Rosen::WMError::WM_OK == window->Minimize());
+    });
+
+    pipelineContext->SetWindowMaximizeCallBack([&window]() -> bool {
+        if (!window) {
+            return false;
+        }
+        return (OHOS::Rosen::WMError::WM_OK == window->Maximize());
+    });
+
+    pipelineContext->SetWindowRecoverCallBack([&window]() -> bool {
+        if (!window) {
+            return false;
+        }
+        return (OHOS::Rosen::WMError::WM_OK == window->Recover());
+    });
+
+    pipelineContext->SetWindowCloseCallBack([&window]() -> bool {
+        if (!window) {
+            return false;
+        }
+        return (OHOS::Rosen::WMError::WM_OK == window->Close());
+    });
+
+    pipelineContext->SetWindowSplitCallBack([&window]() -> bool {
+        if (!window) {
+            return false;
+        }
+        return (OHOS::Rosen::WMError::WM_OK ==
+            window->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
+    });
+
+    pipelineContext->SetWindowGetModeCallBack([&window]() -> WindowMode {
+        return GetWindowMode(window);
+    });
 }
 
 } // namespace OHOS::Ace

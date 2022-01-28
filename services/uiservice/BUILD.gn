@@ -85,6 +85,7 @@ template("uiservice_static") {
       "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+      "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
       "//foundation/windowmanager/wm:libwm",
@@ -98,6 +99,9 @@ template("uiservice_static") {
     deps += [ "$ace_root/build:libace" ]
 
     external_deps = [
+      "ability_runtime:ability_manager",
+      "ability_runtime:app_manager",
+      "ability_runtime:runtime",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
     ]

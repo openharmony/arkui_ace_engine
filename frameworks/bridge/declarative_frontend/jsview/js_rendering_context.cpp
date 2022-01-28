@@ -67,6 +67,7 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("putImageData", &JSCanvasRenderer::JsPutImageData);
     JSClass<JSRenderingContext>::CustomMethod("getImageData", &JSCanvasRenderer::JsGetImageData);
     JSClass<JSRenderingContext>::CustomMethod("getJsonData", &JSCanvasRenderer::JsGetJsonData);
+    JSClass<JSRenderingContext>::CustomMethod("getPixelMap", &JSCanvasRenderer::JsGetPixelMap);
 
     JSClass<JSRenderingContext>::CustomProperty("fillStyle", &JSCanvasRenderer::JsGetFillStyle,
                                                 &JSCanvasRenderer::JsSetFillStyle);

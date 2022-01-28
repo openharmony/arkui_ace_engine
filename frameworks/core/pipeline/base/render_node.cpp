@@ -173,6 +173,9 @@ void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)
     }
 #ifdef ENABLE_ROSEN_BACKEND
     if (auto rsNode = child->rsNode_) {
+        if (rsNode_ == rsNode) {
+            child->OnRemove();
+        }
         child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId(), rsNode->GetId());
     }
 #endif
@@ -1590,7 +1593,7 @@ Rect RenderNode::GetDirtyRect() const
     return dirty;
 }
 
-bool RenderNode::IsPointInBox(const TouchPoint& point)
+bool RenderNode::IsPointInBox(const TouchEvent& point)
 {
     double offsetX = GetGlobalOffset().GetX();
     double offsetY = GetGlobalOffset().GetY();
@@ -2045,6 +2048,36 @@ void RenderNode::OnStatusStyleChanged(VisualState state)
     RefPtr<RenderNode> parent = parent_.Upgrade();
     if (parent) {
         parent->OnStatusStyleChanged(state);
+    }
+}
+
+Rect RenderNode::ComputeSelectedZone(const Offset& startOffset, const Offset& endOffset)
+{
+    Rect selectedZone;
+    if (startOffset.GetX() <= endOffset.GetX()) {
+        if (startOffset.GetY() <= endOffset.GetY()) {
+            // bottom right
+            selectedZone = Rect(startOffset.GetX(), startOffset.GetY(),
+                endOffset.GetX() - startOffset.GetX(), endOffset.GetY() - startOffset.GetY());
+            return selectedZone;
+        } else {
+            // top right
+            selectedZone = Rect(startOffset.GetX(), endOffset.GetY(),
+                endOffset.GetX() - startOffset.GetX(), startOffset.GetY() - endOffset.GetY());
+            return selectedZone;
+        }
+    } else {
+        if (startOffset.GetY() <= endOffset.GetY()) {
+            // bottom left
+            selectedZone = Rect(endOffset.GetX(), startOffset.GetY(),
+                startOffset.GetX() - endOffset.GetX(), endOffset.GetY() - startOffset.GetY());
+            return selectedZone;
+        } else {
+            // top left
+            selectedZone = Rect(endOffset.GetX(), endOffset.GetY(),
+                startOffset.GetX() - endOffset.GetX(), startOffset.GetY() - endOffset.GetY());
+            return selectedZone;
+        }
     }
 }
 

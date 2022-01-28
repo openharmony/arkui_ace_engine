@@ -66,8 +66,9 @@ void ParseButtonObj(
         auto actionValue = objInner->GetProperty("action");
         if (actionValue->IsFunction()) {
             auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-            EventMarker actionId([execCtx = args.GetExecutionContext(), func = std::move(actionFunc)]() {
+            EventMarker actionId([execCtx = args.GetExecutionContext(), func = std::move(actionFunc), property]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("AlertDialog.]" + property + "].onSction");
                 func->Execute();
             });
 
@@ -118,6 +119,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
             auto cancelFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(cancelValue));
             EventMarker cancelId([execCtx = args.GetExecutionContext(), func = std::move(cancelFunc)]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("AlertDialog.property.cancel");
                 func->Execute();
             });
             properties.callbacks.try_emplace("cancel", cancelId);

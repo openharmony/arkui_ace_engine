@@ -17,6 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_LIST_ITEM_H
 
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_mouse_function.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
@@ -27,6 +28,8 @@ public:
     static void Create(const JSCallbackInfo& args);
     static void SetSticky(int32_t sticky);
     static void SetEditable(const JSCallbackInfo& args);
+    static void SetSelectable(bool selectable);
+    static void SelectCallback(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework

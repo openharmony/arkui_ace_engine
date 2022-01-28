@@ -20,6 +20,7 @@
 #include "interfaces/innerkits/ace/viewport_config.h"
 #include "key_event.h"
 #include "native_engine/native_value.h"
+#include "native_engine/native_engine.h"
 #include "touch_event.h"
 
 #include "base/utils/macros.h"
@@ -47,7 +48,7 @@ public:
 
     // distribute
     void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) override;
-    const std::string& GetContentInfo() const override;
+    std::string GetContentInfo() const override;
 
     // UI content event process
     bool ProcessBackPressed() override;
@@ -59,7 +60,10 @@ public:
     void UpdateViewportConfig(const ViewportConfig& config) override;
 
 private:
-    OHOS::AbilityRuntime::Context* context_ = nullptr;
+    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
+    void InitWindowCallback();
+
+    std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
     ViewportConfig config_;

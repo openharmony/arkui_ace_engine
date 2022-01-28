@@ -33,7 +33,7 @@ def main(argv):
     interface_target_path = os.path.join(target_out_path, "interface")
     if os.path.exists(interface_target_path):
         shutil.rmtree(interface_target_path)
-    shutil.copytree(interface_path, interface_target_path)
+    shutil.copytree(interface_path, interface_target_path, ignore=shutil.ignore_patterns('.git'))
 
     third_party_target_path = os.path.join(target_out_path, "third_party")
     if os.path.exists(third_party_target_path):
@@ -41,17 +41,17 @@ def main(argv):
     os.makedirs(third_party_target_path);
 
     parse5_target_path = os.path.join(third_party_target_path, "parse5")
-    shutil.copytree(parse5_path, parse5_target_path)
+    shutil.copytree(parse5_path, parse5_target_path, ignore=shutil.ignore_patterns('.git'))
 
     weex_loader_target_path = os.path.join(third_party_target_path, "weex-loader")
-    shutil.copytree(weex_loader_path, weex_loader_target_path)
+    shutil.copytree(weex_loader_path, weex_loader_target_path, ignore=shutil.ignore_patterns('.git'))
 
     js2bundle_target_path = os.path.join(target_out_path, "developtools")
     if os.path.exists(js2bundle_target_path):
         shutil.rmtree(js2bundle_target_path)
     os.makedirs(js2bundle_target_path);
     js2bundle_target_path = os.path.join(js2bundle_target_path, "ace-js2bundle")
-    shutil.copytree(js2bundle_path, js2bundle_target_path, True)
+    shutil.copytree(js2bundle_path, js2bundle_target_path, True, ignore=shutil.ignore_patterns('.git'))
     js2bundle_target_path = os.path.join(js2bundle_target_path, "ace-loader")
     os.chdir(js2bundle_target_path)
 
@@ -63,13 +63,13 @@ def main(argv):
     if os.path.exists(target_i18n_path):
         shutil.rmtree(target_i18n_path)
     source_i18n_path = os.path.join(project_path, "i18n")
-    shutil.copytree(source_i18n_path, target_i18n_path)
+    shutil.copytree(source_i18n_path, target_i18n_path, ignore=shutil.ignore_patterns('.git'))
 
     target_common_path = os.path.join(js2bundle_target_path, "sample", "rich", "common")
     if os.path.exists(target_common_path):
         shutil.rmtree(target_common_path)
     source_common_path = os.path.join(project_path, "common")
-    shutil.copytree(source_common_path, target_common_path)
+    shutil.copytree(source_common_path, target_common_path, ignore=shutil.ignore_patterns('.git'))
 
     target_index_path = os.path.join(js2bundle_target_path, "sample", "rich", "pages", "index")
     shutil.copyfile(

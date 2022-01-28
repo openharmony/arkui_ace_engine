@@ -377,6 +377,7 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
                 if (impl) {
                     impl->UpdateEventInfo(newInfo);
                 }
+                ACE_SCORING_EVENT("Text.onClick");
                 func->Execute(newInfo);
             });
         auto click = ViewStackProcessor::GetInstance()->GetClickGestureListenerComponent();
@@ -448,6 +449,8 @@ void JSText::Create(const JSCallbackInfo& info)
 
     auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponentV2>(data);
     ViewStackProcessor::GetInstance()->Push(textComponent);
+    JSInteractableView::SetFocusable(true);
+    JSInteractableView::SetFocusNode(false);
 
     // Init text style, allowScale is not supported in declarative.
     auto textStyle = textComponent->GetTextStyle();

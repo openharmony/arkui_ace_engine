@@ -88,6 +88,21 @@ JSValue ComponentApiBridge::JsGetBoundingRect(JSContext* ctx, NodeId nodeId)
     return rectContext;
 }
 
+JSValue ComponentApiBridge::JsGetInspector(JSContext* ctx, NodeId nodeId)
+{
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (instance == nullptr) {
+        return JS_NULL;
+    }
+    auto delegate = instance->GetDelegate();
+    if (!delegate) {
+        return JS_NULL;
+    }
+    auto attributes = delegate->GetInspector(nodeId);
+    JSValue result = JS_NewString(ctx, attributes.c_str());
+    return result;
+}
+
 void ComponentApiBridge::JsScrollTo(JSContext* ctx, const std::string& args, NodeId nodeId)
 {
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));

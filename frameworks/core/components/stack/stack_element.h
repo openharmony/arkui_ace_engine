@@ -90,6 +90,8 @@ private:
     void PerformPopupChild();
     void EnableTouchEventAndRequestFocus();
 
+    void CreateInspectorComponent(PopupComponentInfo& componentInfo) const;
+
     std::list<PopupComponentInfo> popupComponentInfos_;
     std::vector<ToastInfo> toastStack_;
     bool disableTouchEvent_ = true;

@@ -495,6 +495,7 @@ var FocusDirection;
   FocusDirection[FocusDirection["Left"] = 21] = "Left";
   FocusDirection[FocusDirection["Right"] = 22] = "Right";
   FocusDirection[FocusDirection["Tab"] = 61] = "Tab";
+  FocusDirection[FocusDirection["ShiftTab"] = 200] = "ShiftTab";
 })(FocusDirection || (FocusDirection = {}));
 
 var SlideEffect;
@@ -711,3 +712,9 @@ var SeekMode;
   SeekMode[SeekMode["ClosestSync"] = 2] = "ClosestSync";
   SeekMode[SeekMode["Closest"] = 3] = "Closest";
 })(SeekMode || (SeekMode = {}));
+
+var SideBarContainerStyle;
+(function (SideBarContainerStyle) {
+  SideBarContainerStyle[SideBarContainerStyle["Overlay"] = 1] = "Overlay";
+  SideBarContainerStyle[SideBarContainerStyle["Embed"] = 0] = "Embed";
+})(SideBarContainerStyle || (SideBarContainerStyle = {}));

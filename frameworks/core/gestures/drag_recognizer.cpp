@@ -76,7 +76,7 @@ void DragRecognizer::OnRejected(size_t touchId)
     iter->second.states_ = DetectState::READY;
 }
 
-void DragRecognizer::HandleTouchDownEvent(const TouchPoint& event)
+void DragRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     LOGD("drag recognizer receives touch down event, detecting drag event");
     if ((touchRestrict_.forbiddenType & TouchRestrict::SWIPE) == TouchRestrict::SWIPE) {
@@ -109,7 +109,7 @@ void DragRecognizer::HandleTouchDownEvent(const TouchPoint& event)
     }
 }
 
-void DragRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
+void DragRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("drag recognizer receives touch move event");
     auto iter = dragFingers_.find(event.id);
@@ -153,7 +153,7 @@ void DragRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
     }
 }
 
-void DragRecognizer::HandleTouchUpEvent(const TouchPoint& event)
+void DragRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("drag recognizer receives touch up event");
     auto iter = dragFingers_.find(event.id);
@@ -163,6 +163,7 @@ void DragRecognizer::HandleTouchUpEvent(const TouchPoint& event)
     }
 
     auto& dragInfo = iter->second;
+    dragInfo.velocityTracker_.UpdateTouchPoint(event, true);
     if (dragInfo.states_ == DetectState::DETECTED) {
         bool upSuccess = true;
         for (auto entry = dragFingers_.begin(); entry != dragFingers_.end(); ++entry) {
@@ -202,7 +203,7 @@ void DragRecognizer::HandleTouchUpEvent(const TouchPoint& event)
     dragInfo.states_ = DetectState::READY;
 }
 
-void DragRecognizer::HandleTouchCancelEvent(const TouchPoint& event)
+void DragRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     LOGD("drag recognizer receives touch cancel event");
     auto iter = dragFingers_.find(event.id);

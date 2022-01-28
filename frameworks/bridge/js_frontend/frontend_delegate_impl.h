@@ -65,6 +65,7 @@ using CallNativeHandlerCallback = std::function<void(const std::string& event, c
 struct PageInfo {
     int32_t pageId = -1;
     std::string url;
+    bool isRestore = false;
     bool isAlertBeforeBackPage = false;
     DialogProperties dialogProperties;
 };
@@ -293,6 +294,8 @@ public:
         std::function<void(int32_t, int32_t)>&& callback) override;
 
     Rect GetBoundingRectData(NodeId nodeId) override;
+
+    std::string GetInspector(NodeId nodeId) override;
 
     void PushJsCallbackToRenderNode(NodeId id, double ratio, std::function<void(bool, double)>&& callback) override;
     void RemoveVisibleChangeNode(NodeId id) override;

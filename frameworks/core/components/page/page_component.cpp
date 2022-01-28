@@ -24,24 +24,25 @@ const ComposeId PAGE_COMPOSE_ID_PREFIX = "Page-";
 
 }
 
-PageComponent::PageComponent(int32_t pageId, const RefPtr<Component>& child)
+PageComponent::PageComponent(int32_t pageId, const std::string& pageUrl, const RefPtr<Component>& child)
     : ComposedComponent(
           PAGE_COMPOSE_ID_PREFIX + std::to_string(pageId), PAGE_COMPOSE_ID_PREFIX + std::to_string(pageId), child),
-      pageId_(pageId)
+      pageId_(pageId), pageUrl_(pageUrl)
 {}
 
-PageComponent::PageComponent(int32_t pageId, const ComposeId& cardComposeId, const RefPtr<Component>& child)
+PageComponent::PageComponent(
+    int32_t pageId, const std::string& pageUrl, const ComposeId& cardComposeId, const RefPtr<Component>& child)
     : ComposedComponent(
           PAGE_COMPOSE_ID_PREFIX + std::to_string(pageId), PAGE_COMPOSE_ID_PREFIX + std::to_string(pageId), child),
-      pageId_(pageId), cardComposeId_(cardComposeId)
+      pageId_(pageId), pageUrl_(pageUrl), cardComposeId_(cardComposeId)
 {}
 
 RefPtr<Element> PageComponent::CreateElement()
 {
     if (!cardComposeId_.empty()) {
-        return AceType::MakeRefPtr<PageElement>(pageId_, cardComposeId_, GetId());
+        return AceType::MakeRefPtr<PageElement>(pageId_, pageUrl_, cardComposeId_, GetId());
     }
-    return AceType::MakeRefPtr<PageElement>(pageId_, GetId());
+    return AceType::MakeRefPtr<PageElement>(pageId_, pageUrl_, GetId());
 }
 
 } // namespace OHOS::Ace

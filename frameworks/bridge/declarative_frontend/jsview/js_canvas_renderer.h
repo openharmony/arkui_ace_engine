@@ -50,7 +50,7 @@ public:
     static RefPtr<CanvasPath2D> JsMakePath2D(const JSCallbackInfo& info);
     void SetAntiAlias();
 
-    static void ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint32_t>& array);
+    void ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint32_t>& array);
 
     void JsFillRect(const JSCallbackInfo& info);
     void JsStrokeRect(const JSCallbackInfo& info);
@@ -125,6 +125,7 @@ public:
     void JsSetTextAlign(const JSCallbackInfo& info);
     void JsSetTextBaseline(const JSCallbackInfo& info);
     void JsSetImageSmoothingQuality(const JSCallbackInfo& info);
+    void JsGetPixelMap(const JSCallbackInfo& info);
 
     void SetComponent(const RefPtr<CanvasTaskPool>& controller)
     {

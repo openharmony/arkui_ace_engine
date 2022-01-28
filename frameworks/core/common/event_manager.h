@@ -38,13 +38,13 @@ public:
     // After the touch down event is triggered, the touch test is performed to collect the corresponding
     // touch event target list.
     void TouchTest(
-        const TouchPoint& touchPoint, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict);
+        const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict);
 
-    bool DispatchTouchEvent(const TouchPoint& point);
+    bool DispatchTouchEvent(const TouchEvent& point);
 
     // Distribute the key event to the corresponding root node. If the root node is not processed, return false and the
     // platform will handle it.
-    static bool DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNode>& focusNode);
+    bool DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNode>& focusNode);
 
     // Distribute the rotation event to the corresponding render tree or requested render node. If the render is not
     // processed, return false and the platform will handle it.

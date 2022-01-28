@@ -130,6 +130,7 @@ public:
 #endif
 
     static bool HasInspectorFinished(std::string tag);
+    static std::string GetEtsTag(const std::string& tag);
     static RefPtr<AccessibilityManager> GetAccessibilityManager();
     static RefPtr<AccessibilityNode> CreateAccessibilityNode(
         const std::string& tag, int32_t nodeId, int32_t parentNodeId, int32_t itemIndex);

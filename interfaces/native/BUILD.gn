@@ -14,15 +14,17 @@
 import("//build/ohos.gni")
 import("//foundation/ace/ace_engine/ace_config.gni")
 
-ohos_ndk_headers("ace_header") {
-  dest_dir = "$ndk_headers_out_dir/ace/xcomponent/"
-  sources = [ "native_interface_xcomponent.h" ]
-}
+if (!is_cross_platform_build) {
+  ohos_ndk_headers("ace_header") {
+    dest_dir = "$ndk_headers_out_dir/ace/xcomponent/"
+    sources = [ "native_interface_xcomponent.h" ]
+  }
 
-ohos_ndk_library("libace_ndk") {
-  ndk_description_file = "./libace.ndk.json"
-  min_compact_version = "7"
-  output_name = "ace_ndk"
+  ohos_ndk_library("libace_ndk") {
+    ndk_description_file = "./libace.ndk.json"
+    min_compact_version = "7"
+    output_name = "ace_ndk"
+  }
 }
 
 ohos_shared_library("ace_ndk") {
@@ -54,7 +56,7 @@ ohos_shared_library("ace_ndk") {
   version_script = get_label_info(":libace_ndk", "target_gen_dir") + "/" +
                    get_label_info(":libace_ndk", "name") + version_script_suffix
   subsystem_name = "ace"
-  part_name = "ace_engine_full"
+  part_name = ace_engine_part
 }
 
 group("ace_packages_ndk") {

@@ -19,7 +19,26 @@ gen_sa_dialog_js("dialog_picker_js_files_etc") {
     "i18n/en-US.json",
     "i18n/zh-CN.json",
   ]
-  common_files = []
+  common_files = [
+    "common/handle_down.png",
+    "common/handle_down.svg",
+    "common/handle_up.png",
+    "common/handle_up.svg",
+    "common/ic_apk.png",
+    "common/ic_calendar.png",
+    "common/ic_contacts.png",
+    "common/ic_doc.png",
+    "common/ic_documents.png",
+    "common/ic_file_multiple.png",
+    "common/ic_html.png",
+    "common/ic_image.png",
+    "common/ic_mp3.png",
+    "common/ic_pdf.png",
+    "common/ic_pptx.png",
+    "common/ic_unknown.png",
+    "common/ic_video.png",
+    "common/ic_xls.png",
+  ]
   dialog_name = "dialog_picker_service"
   part_name = "ace_engine_standard"
   subsystem_name = "ace"

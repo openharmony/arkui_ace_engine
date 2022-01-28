@@ -19,9 +19,9 @@
 #include <list>
 
 #include "core/pipeline/base/composed_component.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
 
 namespace OHOS::Ace {
 
@@ -78,10 +78,13 @@ public:
     JSRefPtr<JSView> GetChildById(const std::string& viewId);
 
     void FindChildById(const JSCallbackInfo& info);
+    void GetContext(const JSCallbackInfo& info);
+    void GetContentStorage(const JSCallbackInfo& info);
 
     void FireOnShow()
     {
         if (jsViewFunction_) {
+            ACE_SCORING_EVENT("Component[" + viewId_ + "].OnShow");
             jsViewFunction_->ExecuteShow();
         }
     }
@@ -89,6 +92,7 @@ public:
     void FireOnHide()
     {
         if (jsViewFunction_) {
+            ACE_SCORING_EVENT("Component[" + viewId_ + "].OnHide");
             jsViewFunction_->ExecuteHide();
         }
     }
@@ -96,6 +100,7 @@ public:
     bool FireOnBackPress()
     {
         if (jsViewFunction_) {
+            ACE_SCORING_EVENT("Component[" + viewId_ + "].OnBackPress");
             return jsViewFunction_->ExecuteOnBackPress();
         }
         return false;

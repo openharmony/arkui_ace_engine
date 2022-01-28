@@ -340,11 +340,13 @@ void VideoElement::PreparePlayer()
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     auto videoElement = WeakClaim(this);
     Size videoSize = Size(mediaPlayer_->GetVideoWidth(), mediaPlayer_->GetVideoHeight());
-    uiTaskExecutor.PostSyncTask([&videoElement, videoSize] {
+    int32_t milliSecondDuration = 0;
+    mediaPlayer_->GetDuration(milliSecondDuration);
+    uiTaskExecutor.PostSyncTask([&videoElement, videoSize, duration = milliSecondDuration / MILLISECONDS_TO_SECONDS] {
         auto video = videoElement.Upgrade();
         if (video) {
             LOGI("Video OnPrepared video size: %{public}s", videoSize.ToString().c_str());
-            video->OnPrepared(videoSize.Width(), videoSize.Height(), false, 0, 0, true);
+            video->OnPrepared(videoSize.Width(), videoSize.Height(), false, duration, 0, true);
         }
     });
 }
@@ -1036,7 +1038,7 @@ void VideoElement::OnPrepared(
         std::string param;
         if (IsDeclarativePara()) {
             auto json = JsonUtil::Create(true);
-            json->Put("duration", std::to_string(duration_).c_str());
+            json->Put("duration", static_cast<double>(duration_));
             param = json->ToString();
         } else {
             param = std::string("\"prepared\",{\"duration\":")
@@ -1129,7 +1131,7 @@ void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
         std::string param;
         if (IsDeclarativePara()) {
             auto json = JsonUtil::Create(true);
-            json->Put("time", std::to_string(currentPos).c_str());
+            json->Put("time", static_cast<double>(currentPos));
             param = json->ToString();
         } else {
             param = std::string("\"timeupdate\",{\"currenttime\":")
@@ -1314,7 +1316,7 @@ const RefPtr<Component> VideoElement::CreateControl()
 const RefPtr<Component> VideoElement::CreatePoster()
 {
     RefPtr<ImageComponent> image;
-    if (IsDeclarativePara()) {
+    if (posterImage_) {
         image = posterImage_;
     } else {
         image = AceType::MakeRefPtr<ImageComponent>(poster_);
@@ -1338,7 +1340,7 @@ const RefPtr<Component> VideoElement::CreatePoster()
 const RefPtr<Component> VideoElement::CreateChild()
 {
     RefPtr<Component> child;
-    if (isInitialState_ && !poster_.empty()) {
+    if (isInitialState_ && (!poster_.empty() || posterImage_)) {
         std::list<RefPtr<Component>> columnChildren;
 #ifndef OHOS_STANDARD_SYSTEM
         columnChildren.emplace_back(AceType::MakeRefPtr<FlexItemComponent>(VIDEO_CHILD_COMMON_FLEX_GROW,
@@ -1435,7 +1437,7 @@ void VideoElement::OnSliderChange(const std::string& param)
             std::string param;
             if (IsDeclarativePara()) {
                 auto json = JsonUtil::Create(true);
-                json->Put("time", std::to_string(value).c_str());
+                json->Put("time", static_cast<double>(value));
                 param = json->ToString();
             } else {
                 param = std::string("\"seeked\",{\"currenttime\":")
@@ -1468,7 +1470,7 @@ void VideoElement::OnSliderMoving(const std::string& param)
             std::string param;
             if (IsDeclarativePara()) {
                 auto json = JsonUtil::Create(true);
-                json->Put("time", std::to_string(value).c_str());
+                json->Put("time", static_cast<double>(value));
                 param = json->ToString();
             } else {
                 param = std::string("\"seeking\",{\"currenttime\":")

@@ -79,7 +79,6 @@ public:
         SetAnimationOption(newValue.GetAnimationOption());
         auto context = context_.Upgrade();
         if (!context || !animationCallback_) {
-            LOGD("Animatable assign without animation due to null callback or context");
             SetValue(newValue.GetValue());
             return *this;
         }

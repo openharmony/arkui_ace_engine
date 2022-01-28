@@ -100,6 +100,27 @@ shared_ptr<JsValue> JsiComponentApiBridge::JsGetBoundingRect(const shared_ptr<Js
     return rectContext;
 }
 
+shared_ptr<JsValue> JsiComponentApiBridge::JsGetInspector(const shared_ptr<JsRuntime>& runtime, NodeId nodeId)
+{
+    if (!runtime) {
+        LOGE("JsGetInspector failed. runtime is null.");
+        return nullptr;
+    }
+    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (!engine) {
+        LOGE("JsGetInspector failed. engine is null.");
+        return runtime->NewUndefined();
+    }
+    auto delegate = engine->GetFrontendDelegate();
+    if (!delegate) {
+        LOGE("JsGetInspector failed. delegate is null.");
+        return runtime->NewUndefined();
+    }
+    auto attributes = delegate->GetInspector(nodeId);
+    shared_ptr<JsValue> result = runtime->NewString(attributes);
+    return result;
+}
+
 void JsiComponentApiBridge::JsScrollTo(
     const shared_ptr<JsRuntime>& runtime, const std::string& arguments, NodeId nodeId)
 {

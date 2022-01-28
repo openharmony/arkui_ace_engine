@@ -58,7 +58,7 @@ void SlideRecognizer::OnRejected()
     Reset();
 }
 
-void SlideRecognizer::HandleTouchDownEvent(const TouchPoint& event)
+void SlideRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     LOGD("slide recognizer receives touch down event, begin to detect slide event");
     fingers_ = newFingers_;
@@ -86,7 +86,7 @@ void SlideRecognizer::HandleTouchDownEvent(const TouchPoint& event)
     }
 }
 
-void SlideRecognizer::HandleTouchUpEvent(const TouchPoint& event)
+void SlideRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     auto itr = touchPoints_.find(event.id);
     if (itr == touchPoints_.end()) {
@@ -162,7 +162,7 @@ void SlideRecognizer::HandleTouchUpEvent(const TouchPoint& event)
     }
 }
 
-void SlideRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
+void SlideRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("slide recognizer receives touch move event");
     auto itr = touchPoints_.find(event.id);
@@ -202,7 +202,7 @@ void SlideRecognizer::HandleTouchMoveEvent(const TouchPoint& event)
     }
 }
 
-void SlideRecognizer::HandleTouchCancelEvent(const TouchPoint& event)
+void SlideRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     LOGD("slide recognizer receives touch cancel event");
     if (state_ == DetectState::READY || state_ == DetectState::DETECTING) {

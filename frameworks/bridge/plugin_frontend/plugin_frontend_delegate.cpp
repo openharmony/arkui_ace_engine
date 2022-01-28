@@ -982,6 +982,19 @@ Rect PluginFrontendDelegate::GetBoundingRectData(NodeId nodeId)
     return rect;
 }
 
+std::string PluginFrontendDelegate::GetInspector(NodeId nodeId)
+{
+    std::string attrs;
+    auto task = [weak = WeakClaim(AceType::RawPtr(jsAccessibilityManager_)), nodeId, &attrs]() {
+        auto accessibilityNodeManager = weak.Upgrade();
+        if (accessibilityNodeManager) {
+            attrs = accessibilityNodeManager->GetInspectorNodeById(nodeId);
+        }
+    };
+    PostSyncTaskToPage(task);
+    return attrs;
+}
+
 void PluginFrontendDelegate::SetCallBackResult(const std::string& callBackId, const std::string& result)
 {
     jsCallBackResult_.try_emplace(StringToInt(callBackId), result);

@@ -25,6 +25,7 @@ class RenderGridLayoutItem : public RenderNode {
 
 public:
     using OnItemLongPressed = std::function<bool(int32_t, const WeakPtr<RenderNode>&)>;
+    using OnSelectFunc = std::function<void(bool)>;
 
     static RefPtr<RenderNode> Create();
 
@@ -112,6 +113,26 @@ public:
     bool AnimationAddInterpolator(const RefPtr<Animation<Point>>& animation);
     void AnimationPlay();
 
+    bool GetSelectable() const
+    {
+        return selectable_;
+    }
+
+    OnSelectFunc GetOnSelectId() const
+    {
+        return onSelectId_;
+    }
+
+    void MarkIsSelected(bool isSelected)
+    {
+        isSelected_ = isSelected;
+    }
+
+    bool IsSelected() const
+    {
+        return isSelected_;
+    }
+
 private:
     int32_t index_ = -1;
     int32_t columnIndex_ = -1;
@@ -122,6 +143,9 @@ private:
     OnItemLongPressed OnItemLongPressed_;
     RefPtr<Animator> animationController_;
     void InitAnimationController(const WeakPtr<PipelineContext>& context);
+    OnSelectFunc onSelectId_;
+    bool selectable_ = false;
+    bool isSelected_ = false;
 };
 
 } // namespace OHOS::Ace

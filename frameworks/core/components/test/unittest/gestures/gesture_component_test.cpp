@@ -155,7 +155,7 @@ HWTEST_F(GestureComponentTest, TouchListener001, TestSize.Level1)
      * @tc.steps: step4. send touch down event.
      * @tc.expected: step4. receive touch down callback and touch point result is right.
      */
-    TouchPoint touchDown {
+    TouchEvent touchDown {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::DOWN, .time = std::chrono::high_resolution_clock::now()
     };
     result.front()->HandleEvent(touchDown);
@@ -206,7 +206,7 @@ HWTEST_F(GestureComponentTest, TouchListener002, TestSize.Level1)
      * @tc.steps: step4. send touch move event.
      * @tc.expected: step4. receive touch move callback and touch point result is right.
      */
-    TouchPoint touchMove {
+    TouchEvent touchMove {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::MOVE, .time = std::chrono::high_resolution_clock::now()
     };
     result.front()->HandleEvent(touchMove);
@@ -257,7 +257,7 @@ HWTEST_F(GestureComponentTest, TouchListener003, TestSize.Level1)
      * @tc.steps: step4. send touch up event.
      * @tc.expected: step4. receive touch move callback and touch point result is right.
      */
-    TouchPoint touchMove {
+    TouchEvent touchMove {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::UP, .time = std::chrono::high_resolution_clock::now()
     };
     result.front()->HandleEvent(touchMove);
@@ -309,7 +309,7 @@ HWTEST_F(GestureComponentTest, TouchListener004, TestSize.Level1)
      * @tc.steps: step4. send touch up event.
      * @tc.expected: step4. receive touch move callback and touch point result is right.
      */
-    TouchPoint touchMove {
+    TouchEvent touchMove {
         .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::CANCEL, .time = std::chrono::high_resolution_clock::now()
     };
     result.front()->HandleEvent(touchMove);
@@ -360,7 +360,7 @@ HWTEST_F(GestureComponentTest, GuestureListener001, TestSize.Level1)
      * @tc.steps: step4. send touch down and up event.
      * @tc.expected: step4. receive click callback and touch point result is right.
      */
-    TouchPoint touchClick { .id = 2,
+    TouchEvent touchClick { .id = 2,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
@@ -418,7 +418,7 @@ HWTEST_F(GestureComponentTest, GuestureListener002, TestSize.Level1)
      * @tc.steps: step4. send touch down and up event.
      * @tc.expected: step4. would not receive long press callback except click callback .
      */
-    TouchPoint touchClick { .id = 2,
+    TouchEvent touchClick { .id = 2,
         .x = LOCATION_X,
         .y = LOCATION_Y,
         .type = TouchType::DOWN,
