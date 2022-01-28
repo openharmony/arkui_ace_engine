@@ -69,12 +69,17 @@ const char* SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 constexpr int32_t WINDOW_HEIGHT_DEFAULT = 1;
 constexpr int32_t WINDOW_WIDTH_DEFAULT = 1;
-#else
-constexpr float ILLEGAL_SPEED = 0.0f;
 #endif
+constexpr float ILLEGAL_SPEED = 0.0f;
 constexpr int32_t COMPATIBLE_VERSION = 5;
 
 #ifdef OHOS_STANDARD_SYSTEM
+constexpr float SPEED_0_75_X = 0.75;
+constexpr float SPEED_1_00_X = 1.00;
+constexpr float SPEED_1_25_X = 1.25;
+constexpr float SPEED_1_75_X = 1.75;
+constexpr float SPEED_2_00_X = 2.00;
+
 OHOS::Media::PlayerSeekMode ConvertToMediaSeekMode(SeekMode seekMode)
 {
     OHOS::Media::PlayerSeekMode mode = OHOS::Media::SEEK_PREVIOUS_SYNC;
@@ -84,6 +89,25 @@ OHOS::Media::PlayerSeekMode ConvertToMediaSeekMode(SeekMode seekMode)
         mode = OHOS::Media::SEEK_CLOSEST_SYNC;
     } else if (seekMode == SeekMode::SEEK_CLOSEST) {
         mode = OHOS::Media::SEEK_CLOSEST;
+    }
+    return mode;
+}
+
+OHOS::Media::PlaybackRateMode ConvertToMediaPlaybackSpeed(float speed)
+{
+    OHOS::Media::PlaybackRateMode mode = OHOS::Media::SPEED_FORWARD_1_00_X;
+    if (NearEqual(speed, SPEED_0_75_X)) {
+        mode = OHOS::Media::PlaybackRateMode::SPEED_FORWARD_0_75_X;
+    } else if (NearEqual(speed, SPEED_1_00_X)) {
+        mode = OHOS::Media::PlaybackRateMode::SPEED_FORWARD_1_00_X;
+    } else if (NearEqual(speed, SPEED_1_25_X)) {
+        mode = OHOS::Media::PlaybackRateMode::SPEED_FORWARD_1_25_X;
+    } else if (NearEqual(speed, SPEED_1_75_X)) {
+        mode = OHOS::Media::PlaybackRateMode::SPEED_FORWARD_1_75_X;
+    } else if (NearEqual(speed, SPEED_2_00_X)) {
+        mode = OHOS::Media::PlaybackRateMode::SPEED_FORWARD_2_00_X;
+    } else {
+        LOGW("speed is not supported yet.");
     }
     return mode;
 }
@@ -233,12 +257,12 @@ void VideoElement::RegistMediaPlayerEvent()
         });
     };
 
-    auto&& stateChangedEvent = [videoElement, uiTaskExecutor](bool isPlaying) {
-        uiTaskExecutor.PostSyncTask([&videoElement, isPlaying] {
+    auto&& stateChangedEvent = [videoElement, uiTaskExecutor](PlaybackStatus status) {
+        uiTaskExecutor.PostSyncTask([&videoElement, status] {
             auto video = videoElement.Upgrade();
             if (video) {
                 LOGD("OnPlayerStatus");
-                video->OnPlayerStatus(isPlaying);
+                video->OnPlayerStatus(status);
             }
         });
     };
@@ -294,7 +318,7 @@ void VideoElement::PreparePlayer()
         return;
     }
     std::string filePath = src_;
-    if (!StringUtils::StartWith(filePath, "file://")) {
+    if (!StringUtils::StartWith(filePath, "file://") && !StringUtils::StartWith(filePath, "http")) {
         filePath = GetAssetAbsolutePath(src_);
     }
     LOGI("filePath : %{private}s", filePath.c_str());
@@ -331,24 +355,6 @@ void VideoElement::PreparePlayer()
         LOGE("Player prepare failed");
         return;
     }
-
-    auto context = context_.Upgrade();
-    if (context == nullptr) {
-        LOGE("context is nullptr");
-        return;
-    }
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    auto videoElement = WeakClaim(this);
-    Size videoSize = Size(mediaPlayer_->GetVideoWidth(), mediaPlayer_->GetVideoHeight());
-    int32_t milliSecondDuration = 0;
-    mediaPlayer_->GetDuration(milliSecondDuration);
-    uiTaskExecutor.PostSyncTask([&videoElement, videoSize, duration = milliSecondDuration / MILLISECONDS_TO_SECONDS] {
-        auto video = videoElement.Upgrade();
-        if (video) {
-            LOGI("Video OnPrepared video size: %{public}s", videoSize.ToString().c_str());
-            video->OnPrepared(videoSize.Width(), videoSize.Height(), false, duration, 0, true);
-        }
-    });
 }
 
 std::string VideoElement::GetAssetAbsolutePath(const std::string& fileName)
@@ -869,7 +875,7 @@ void VideoElement::InitListener()
         uiTaskExecutor.PostSyncTask([&videoElement, isPlaying] {
             auto video = videoElement.Upgrade();
             if (video) {
-                video->OnPlayerStatus(isPlaying);
+                video->OnPlayerStatus(isPlaying ? PlaybackStatus::STARTED : PlaybackStatus::NONE);
             }
         });
     };
@@ -1066,8 +1072,9 @@ void VideoElement::OnPrepared(
 #endif
 }
 
-void VideoElement::OnPlayerStatus(bool isPlaying)
+void VideoElement::OnPlayerStatus(PlaybackStatus status)
 {
+    bool isPlaying = (status == PlaybackStatus::STARTED);
     if (isInitialState_) {
         isInitialState_ = !isPlaying;
     }
@@ -1104,6 +1111,29 @@ void VideoElement::OnPlayerStatus(bool isPlaying)
             onPause_(param);
         }
     }
+
+#ifdef OHOS_STANDARD_SYSTEM
+    if (status == PlaybackStatus::PREPARED) {
+        auto context = context_.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return;
+        }
+        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        auto videoElement = WeakClaim(this);
+        Size videoSize = Size(mediaPlayer_->GetVideoWidth(), mediaPlayer_->GetVideoHeight());
+        int32_t milliSecondDuration = 0;
+        mediaPlayer_->GetDuration(milliSecondDuration);
+        uiTaskExecutor.PostSyncTask(
+            [&videoElement, videoSize, duration = milliSecondDuration / MILLISECONDS_TO_SECONDS] {
+                auto video = videoElement.Upgrade();
+                if (video) {
+                    LOGI("Video OnPrepared video size: %{public}s", videoSize.ToString().c_str());
+                    video->OnPrepared(videoSize.Width(), videoSize.Height(), false, duration, 0, true);
+                }
+            });
+    }
+#endif
 }
 
 void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
@@ -1490,13 +1520,18 @@ void VideoElement::IntTimeToText(uint32_t time, std::string& timeText)
 
 void VideoElement::Start()
 {
-    if (isStop_) {
-        CreatePlatformResource();
+#ifdef OHOS_STANDARD_SYSTEM
+    if (mediaPlayer_ == nullptr) {
+        LOGE("player is null");
         return;
     }
-
-#ifdef OHOS_STANDARD_SYSTEM
-    if (mediaPlayer_ != nullptr && !mediaPlayer_->IsPlaying()) {
+    if (isStop_) {
+        if (mediaPlayer_->Prepare() != 0) {
+            LOGE("Player prepare failed");
+            return;
+        }
+    }
+    if (!mediaPlayer_->IsPlaying()) {
         LOGI("Video Start");
         auto context = context_.Upgrade();
         if (context == nullptr) {
@@ -1509,6 +1544,10 @@ void VideoElement::Start()
         });
     }
 #else
+    if (isStop_) {
+        CreatePlatformResource();
+        return;
+    }
     if (!isPlaying_ && player_) {
         player_->Start();
     }
@@ -1532,8 +1571,14 @@ void VideoElement::Pause()
 void VideoElement::Stop()
 {
     OnCurrentTimeChange(0);
-    OnPlayerStatus(false);
+    OnPlayerStatus(PlaybackStatus::STOPPED);
+#ifndef OHOS_STANDARD_SYSTEM
     ReleasePlatformResource();
+#else
+    if (mediaPlayer_ != nullptr) {
+        mediaPlayer_->Stop();
+    }
+#endif
     isStop_ = true;
 }
 
@@ -1677,8 +1722,16 @@ void VideoElement::EnableLooping(bool loop)
 
 void VideoElement::SetSpeed(float speed)
 {
-#ifndef OHOS_STANDARD_SYSTEM
-    if (player_ && speed >= ILLEGAL_SPEED) {
+    if (speed <= ILLEGAL_SPEED) {
+        LOGE("speed is not valid: %{public}lf", speed);
+        return;
+    }
+#ifdef OHOS_STANDARD_SYSTEM
+    if (mediaPlayer_ != nullptr) {
+        mediaPlayer_->SetPlaybackSpeed(ConvertToMediaPlaybackSpeed(speed));
+    }
+#else
+    if (player_) {
         player_->SetSpeed(speed);
     }
 #endif

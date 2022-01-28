@@ -718,3 +718,12 @@ var SideBarContainerStyle;
   SideBarContainerStyle[SideBarContainerStyle["Overlay"] = 1] = "Overlay";
   SideBarContainerStyle[SideBarContainerStyle["Embed"] = 0] = "Embed";
 })(SideBarContainerStyle || (SideBarContainerStyle = {}));
+
+var PlaybackSpeed;
+(function (PlaybackSpeed) {
+  PlaybackSpeed["Speed_Forward_0_75_X"] = "0.75";
+  PlaybackSpeed["Speed_Forward_1_00_X"] = "1.00";
+  PlaybackSpeed["Speed_Forward_1_25_X"] = "1.25";
+  PlaybackSpeed["Speed_Forward_1_75_X"] = "1.75";
+  PlaybackSpeed["Speed_Forward_2_00_X"] = "2.00";
+})(PlaybackSpeed || (PlaybackSpeed = {}));
