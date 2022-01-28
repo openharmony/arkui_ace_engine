@@ -46,8 +46,8 @@ void RosenRenderPatternLock::PaintLockCircle(SkCanvas* canvas, const Offset& off
     double offsetX = cellcenter.GetX();
     double offsetY = cellcenter.GetY();
     if (CheckChoosePoint(x, y)) {
-        int16_t lastIndexFir = 1;
-        int16_t lastIndexSec = 2;
+        const int16_t lastIndexFir = 1;
+        int16_t lastIndexDecrease = 2 + passPointCount_;
         if (CheckChoosePointIsLastIndex(x, y, lastIndexFir)) {
             if (isMoveEventValid_) {
                 skPaintFill.setColor(activeColor_.GetValue());
@@ -56,7 +56,7 @@ void RosenRenderPatternLock::PaintLockCircle(SkCanvas* canvas, const Offset& off
                 skPaintFill.setColor(selectedColor_.GetValue());
                 canvas->drawCircle(offsetX, offsetY, NormalizeToPx(circleRadiusAnimatorToDecrease_), skPaintFill);
             }
-        } else if (CheckChoosePointIsLastIndex(x, y, lastIndexSec)) {
+        } else if (CheckChoosePointIsLastIndex(x, y, lastIndexDecrease)) {
             if (isMoveEventValid_) {
                 skPaintFill.setColor(selectedColor_.GetValue());
                 canvas->drawCircle(offsetX, offsetY, NormalizeToPx(circleRadiusAnimatorToDecrease_), skPaintFill);
@@ -77,6 +77,10 @@ void RosenRenderPatternLock::PaintLockCircle(SkCanvas* canvas, const Offset& off
 
 void RosenRenderPatternLock::PaintLockLine(SkCanvas* canvas, const Offset& offset)
 {
+    size_t count = choosePoint_.size();
+    if (count == 0) {
+        return;
+    }
     double half = 0.5;
     int realSizeInt = static_cast<int>(NormalizeToPx(sideLength_) + half);
     int offsetIntX = static_cast<int>(offset.GetX() - half);
@@ -95,15 +99,10 @@ void RosenRenderPatternLock::PaintLockLine(SkCanvas* canvas, const Offset& offse
     } else {
         skPaintStroke.setStrokeWidth(NormalizeToPx(strokeWidth_));
     }
-    int16_t count = choosePoint_.size();
-    for (int16_t i = 0; i < count - 1; i++) {
+    for (size_t i = 0; i < count - 1; i++) {
         Offset pointBegin = GetCircleCenterByXY(offset, choosePoint_[i].GetColumn(), choosePoint_[i].GetRow());
-        double x1 = pointBegin.GetX();
-        double y1 = pointBegin.GetY();
         Offset pointEnd = GetCircleCenterByXY(offset, choosePoint_[i + 1].GetColumn(), choosePoint_[i + 1].GetRow());
-        double x2 = pointEnd.GetX();
-        double y2 = pointEnd.GetY();
-        canvas->drawLine(x1, y1, x2, y2, skPaintStroke);
+        canvas->drawLine(pointBegin.GetX(), pointBegin.GetY(), pointEnd.GetX(), pointEnd.GetY(), skPaintStroke);
     }
     if (count > 0 && isMoveEventValid_) {
         Offset pointBegin =
@@ -126,5 +125,4 @@ void RosenRenderPatternLock::PaintLockLine(SkCanvas* canvas, const Offset& offse
     }
     canvas->restore();
 }
-
 } // namespace OHOS::Ace::V2

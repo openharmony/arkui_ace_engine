@@ -47,7 +47,7 @@ void FlutterRenderPatternLock::PaintLockCircle(ScopedCanvas& canvas, const Offse
     double offsetY = cellcenter.GetY();
     if (CheckChoosePoint(x, y)) {
         const int16_t lastIndexFir = 1;
-        const int16_t lastIndexSec = 2;
+        int16_t lastIndexDecrease = 2 + passPointCount_;
         if (CheckChoosePointIsLastIndex(x, y, lastIndexFir)) {
             if (isMoveEventValid_) {
                 skPaintFill.setColor(activeColor_.GetValue());
@@ -58,7 +58,7 @@ void FlutterRenderPatternLock::PaintLockCircle(ScopedCanvas& canvas, const Offse
                 canvas->canvas()->drawCircle(
                     offsetX, offsetY, NormalizeToPx(circleRadiusAnimatorToDecrease_), skPaintFill);
             }
-        } else if (CheckChoosePointIsLastIndex(x, y, lastIndexSec)) {
+        } else if (CheckChoosePointIsLastIndex(x, y, lastIndexDecrease)) {
             if (isMoveEventValid_) {
                 skPaintFill.setColor(selectedColor_.GetValue());
                 canvas->canvas()->drawCircle(
@@ -79,6 +79,10 @@ void FlutterRenderPatternLock::PaintLockCircle(ScopedCanvas& canvas, const Offse
 }
 void FlutterRenderPatternLock::PaintLockLine(ScopedCanvas& canvas, const Offset& offset)
 {
+    size_t count = choosePoint_.size();
+    if (count == 0) {
+        return;
+    }
     double half = 0.5;
     int realSizeInt = static_cast<int>(NormalizeToPx(sideLength_) + half);
     int offsetIntX = static_cast<int>(offset.GetX() - half);
@@ -97,8 +101,7 @@ void FlutterRenderPatternLock::PaintLockLine(ScopedCanvas& canvas, const Offset&
     } else {
         skPaintStroke.setStrokeWidth(NormalizeToPx(strokeWidth_));
     }
-    int16_t count = choosePoint_.size();
-    for (int16_t i = 0; i < count - 1; i++) {
+    for (size_t i = 0; i < count - 1; i++) {
         Offset pointBegin = GetCircleCenterByXY(offset, choosePoint_[i].GetColumn(), choosePoint_[i].GetRow());
         Offset pointEnd = GetCircleCenterByXY(offset, choosePoint_[i + 1].GetColumn(), choosePoint_[i + 1].GetRow());
         canvas->canvas()->drawLine(
