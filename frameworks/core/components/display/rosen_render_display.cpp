@@ -68,9 +68,9 @@ void RosenRenderDisplay::OnRSTransition(TransitionType type)
         return;
     }
     if (type == TransitionType::APPEARING && hasAppearTransition_) {
-        GetRSNode()->NotifyTransition(Rosen::RSTransitionEffect::OPACITY, Rosen::RSTransitionType::APPEARING);
+        GetRSNode()->NotifyTransition(Rosen::RSTransitionEffect::OPACITY, true);
     } else if (type == TransitionType::DISAPPEARING && hasDisappearTransition_) {
-        GetRSNode()->NotifyTransition(Rosen::RSTransitionEffect::OPACITY, Rosen::RSTransitionType::DISAPPEARING);
+        GetRSNode()->NotifyTransition(Rosen::RSTransitionEffect::OPACITY, false);
     }
 }
 
@@ -90,6 +90,6 @@ void RosenRenderDisplay::ClearRenderObject()
         rsNode->SetVisible(true);
     }
     RenderDisplay::ClearRenderObject();
-    pendingTransitionAppearing_ = false;
+    pendingAppearingTransition_ = false;
 }
 } // namespace OHOS::Ace
