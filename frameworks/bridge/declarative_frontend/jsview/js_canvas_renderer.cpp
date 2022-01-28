@@ -55,6 +55,10 @@ inline Rect GetJsRectParam(const JSCallbackInfo& info)
     JSViewAbstract::ParseJsDouble(info[1], y);
     JSViewAbstract::ParseJsDouble(info[2], width);
     JSViewAbstract::ParseJsDouble(info[3], height);
+    x = SystemProperties::Vp2Px(x);
+    y = SystemProperties::Vp2Px(y);
+    width = SystemProperties::Vp2Px(width);
+    height = SystemProperties::Vp2Px(height);
 
     Rect rect = Rect(x, y, width, height);
     return rect;
@@ -147,6 +151,10 @@ void JSCanvasRenderer::JsCreateLinearGradient(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], y0);
         JSViewAbstract::ParseJsDouble(info[2], x1);
         JSViewAbstract::ParseJsDouble(info[3], y1);
+        x0 = SystemProperties::Vp2Px(x0);
+        y0 = SystemProperties::Vp2Px(y0);
+        x1 = SystemProperties::Vp2Px(x1);
+        y1 = SystemProperties::Vp2Px(y1);
         Offset beginOffset = Offset(x0, y0);
         Offset endOffset = Offset(x1, y1);
 
@@ -180,6 +188,12 @@ void JSCanvasRenderer::JsCreateRadialGradient(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[3], endX);
         JSViewAbstract::ParseJsDouble(info[4], endY);
         JSViewAbstract::ParseJsDouble(info[5], endRadial);
+        startX = SystemProperties::Vp2Px(startX);
+        startY = SystemProperties::Vp2Px(startY);
+        startRadial = SystemProperties::Vp2Px(startRadial);
+        endX = SystemProperties::Vp2Px(endX);
+        endY = SystemProperties::Vp2Px(endY);
+        endRadial = SystemProperties::Vp2Px(endRadial);
         Offset innerCenter = Offset(startX, startY);
         Offset outerCenter = Offset(endX, endY);
 
@@ -210,6 +224,8 @@ void JSCanvasRenderer::JsFillText(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsString(info[0], text);
         JSViewAbstract::ParseJsDouble(info[1], x);
         JSViewAbstract::ParseJsDouble(info[2], y);
+        x = SystemProperties::Vp2Px(x);
+        y = SystemProperties::Vp2Px(y);
 
         if (isOffscreen_) {
             offscreenCanvas_->FillText(text, x, y, paintState_);
@@ -233,6 +249,8 @@ void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsString(info[0], text);
         JSViewAbstract::ParseJsDouble(info[1], x);
         JSViewAbstract::ParseJsDouble(info[2], y);
+        x = SystemProperties::Vp2Px(x);
+        y = SystemProperties::Vp2Px(y);
 
         if (isOffscreen_) {
             offscreenCanvas_->StrokeText(text, x, y, paintState_);
@@ -534,6 +552,8 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
                 image.flag = 0;
                 JSViewAbstract::ParseJsDouble(info[1], image.dx);
                 JSViewAbstract::ParseJsDouble(info[2], image.dy);
+                image.dx = SystemProperties::Vp2Px(image.dx);
+                image.dy = SystemProperties::Vp2Px(image.dy);
                 break;
         // 5 parameters: drawImage(image, dx, dy, dWidth, dHeight)
             case 5:
@@ -542,6 +562,10 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
                 JSViewAbstract::ParseJsDouble(info[2], image.dy);
                 JSViewAbstract::ParseJsDouble(info[3], image.dWidth);
                 JSViewAbstract::ParseJsDouble(info[4], image.dHeight);
+                image.dx = SystemProperties::Vp2Px(image.dx);
+                image.dy = SystemProperties::Vp2Px(image.dy);
+                image.dWidth = SystemProperties::Vp2Px(image.dWidth);
+                image.dHeight = SystemProperties::Vp2Px(image.dHeight);
             break;
         // 9 parameters: drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
             case 9:
@@ -554,6 +578,14 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
                 JSViewAbstract::ParseJsDouble(info[6], image.dy);
                 JSViewAbstract::ParseJsDouble(info[7], image.dWidth);
                 JSViewAbstract::ParseJsDouble(info[8], image.dHeight);
+                image.sx = SystemProperties::Vp2Px(image.sx);
+                image.sy = SystemProperties::Vp2Px(image.sy);
+                image.sWidth = SystemProperties::Vp2Px(image.sWidth);
+                image.sHeight = SystemProperties::Vp2Px(image.sHeight);
+                image.dx = SystemProperties::Vp2Px(image.dx);
+                image.dy = SystemProperties::Vp2Px(image.dy);
+                image.dWidth = SystemProperties::Vp2Px(image.dWidth);
+                image.dHeight = SystemProperties::Vp2Px(image.dHeight);
                 break;
             default:
                 break;
@@ -598,6 +630,9 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
     if (info.Length() == 2) {
         JSViewAbstract::ParseJsDouble(info[0], width);
         JSViewAbstract::ParseJsDouble(info[1], height);
+        width = SystemProperties::Vp2Px(width);
+        height = SystemProperties::Vp2Px(height);
+
     }
     if (info.Length() == 1 && info[0]->IsObject()) {
         width = imageData_.dirtyWidth;
@@ -694,6 +729,8 @@ void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& ima
 
     ParseJsInt(info[1], imageData.x);
     ParseJsInt(info[2], imageData.y);
+    imageData.x = SystemProperties::Vp2Px(imageData.x);
+    imageData.y = SystemProperties::Vp2Px(imageData.y);
 
     imageData.dirtyWidth = width;
     imageData.dirtyHeight = height;
@@ -703,6 +740,10 @@ void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& ima
         ParseJsInt(info[4], imageData.dirtyY);
         ParseJsInt(info[5], imageData.dirtyWidth);
         ParseJsInt(info[6], imageData.dirtyHeight);
+        imageData.dirtyX = SystemProperties::Vp2Px(imageData.dirtyX);
+        imageData.dirtyY = SystemProperties::Vp2Px(imageData.dirtyY);
+        imageData.dirtyWidth = SystemProperties::Vp2Px(imageData.dirtyWidth);
+        imageData.dirtyHeight = SystemProperties::Vp2Px(imageData.dirtyHeight);
     }
 
     imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, width)
@@ -724,6 +765,10 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
     JSViewAbstract::ParseJsDouble(info[1], top);
     JSViewAbstract::ParseJsDouble(info[2], width);
     JSViewAbstract::ParseJsDouble(info[3], height);
+    left = SystemProperties::Vp2Px(left);
+    top = SystemProperties::Vp2Px(top);
+    width = SystemProperties::Vp2Px(width);
+    height = SystemProperties::Vp2Px(height);
 
     std::unique_ptr<ImageData> data;
     if (isOffscreen_) {
@@ -909,6 +954,7 @@ void JSCanvasRenderer::JsSetMiterLimit(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double limit = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], limit);
+        limit = SystemProperties::Vp2Px(limit);
         if (isOffscreen_) {
             offscreenCanvas_->SetMiterLimit(limit);
         } else {
@@ -922,6 +968,7 @@ void JSCanvasRenderer::JsSetLineWidth(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double lineWidth = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], lineWidth);
+        lineWidth = SystemProperties::Vp2Px(lineWidth);
         if (isOffscreen_) {
             offscreenCanvas_->SetLineWidth(lineWidth);
         } else {
@@ -979,6 +1026,7 @@ void JSCanvasRenderer::JsSetLineDashOffset(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double lineDashOffset = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], lineDashOffset);
+        lineDashOffset = SystemProperties::Vp2Px(lineDashOffset);
         if (isOffscreen_) {
             offscreenCanvas_->SetLineDashOffset(lineDashOffset);
         } else {
@@ -1019,6 +1067,7 @@ void JSCanvasRenderer::JsSetShadowOffsetX(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double offsetX = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], offsetX);
+        offsetX = SystemProperties::Vp2Px(offsetX);
         if (isOffscreen_) {
             offscreenCanvas_->SetShadowOffsetX(offsetX);
         } else {
@@ -1032,6 +1081,7 @@ void JSCanvasRenderer::JsSetShadowOffsetY(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double offsetY = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], offsetY);
+        offsetY = SystemProperties::Vp2Px(offsetY);
         if (isOffscreen_) {
             offscreenCanvas_->SetShadowOffsetY(offsetY);
         } else {
@@ -1089,6 +1139,8 @@ void JSCanvasRenderer::JsMoveTo(const JSCallbackInfo& info)
         double y = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], x);
         JSViewAbstract::ParseJsDouble(info[1], y);
+        x = SystemProperties::Vp2Px(x);
+        y = SystemProperties::Vp2Px(y);
         if (isOffscreen_) {
             offscreenCanvas_->MoveTo(x, y);
         } else {
@@ -1109,6 +1161,8 @@ void JSCanvasRenderer::JsLineTo(const JSCallbackInfo& info)
         double y = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], x);
         JSViewAbstract::ParseJsDouble(info[1], y);
+        x = SystemProperties::Vp2Px(x);
+        y = SystemProperties::Vp2Px(y);
         if (isOffscreen_) {
             offscreenCanvas_->LineTo(x, y);
         } else {
@@ -1133,6 +1187,12 @@ void JSCanvasRenderer::JsBezierCurveTo(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[3], param.cp2y);
         JSViewAbstract::ParseJsDouble(info[4], param.x);
         JSViewAbstract::ParseJsDouble(info[5], param.y);
+        param.cp1x = SystemProperties::Vp2Px(param.cp1x);
+        param.cp1y = SystemProperties::Vp2Px(param.cp1y);
+        param.cp2x = SystemProperties::Vp2Px(param.cp2x);
+        param.cp2y = SystemProperties::Vp2Px(param.cp2y);
+        param.x = SystemProperties::Vp2Px(param.x);
+        param.y = SystemProperties::Vp2Px(param.y);
 
         if (isOffscreen_) {
             offscreenCanvas_->BezierCurveTo(param);
@@ -1155,6 +1215,10 @@ void JSCanvasRenderer::JsQuadraticCurveTo(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], param.cpy);
         JSViewAbstract::ParseJsDouble(info[2], param.x);
         JSViewAbstract::ParseJsDouble(info[3], param.y);
+        param.cpx = SystemProperties::Vp2Px(param.cpx);
+        param.cpy = SystemProperties::Vp2Px(param.cpy);
+        param.x = SystemProperties::Vp2Px(param.x);
+        param.y = SystemProperties::Vp2Px(param.y);
 
         if (isOffscreen_) {
             offscreenCanvas_->QuadraticCurveTo(param);
@@ -1179,6 +1243,11 @@ void JSCanvasRenderer::JsArcTo(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[2], param.x2);
         JSViewAbstract::ParseJsDouble(info[3], param.y2);
         JSViewAbstract::ParseJsDouble(info[4], param.radius);
+        param.x1 = SystemProperties::Vp2Px(param.x1);
+        param.y1 = SystemProperties::Vp2Px(param.y1);
+        param.x2 = SystemProperties::Vp2Px(param.x2);
+        param.y2 = SystemProperties::Vp2Px(param.y2);
+        param.radius = SystemProperties::Vp2Px(param.radius);
 
         if (isOffscreen_) {
             offscreenCanvas_->ArcTo(param);
@@ -1203,8 +1272,11 @@ void JSCanvasRenderer::JsArc(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[2], param.radius);
         JSViewAbstract::ParseJsDouble(info[3], param.startAngle);
         JSViewAbstract::ParseJsDouble(info[4], param.endAngle);
+        param.x = SystemProperties::Vp2Px(param.x);
+        param.y = SystemProperties::Vp2Px(param.y);
+        param.radius = SystemProperties::Vp2Px(param.radius);
 
-        if (!info[5]->IsNull()) {
+        if (info.Length() == 6) {
             JSViewAbstract::ParseJsBool(info[5], param.anticlockwise);
         }
         if (isOffscreen_) {
@@ -1232,11 +1304,13 @@ void JSCanvasRenderer::JsEllipse(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[4], param.rotation);
         JSViewAbstract::ParseJsDouble(info[5], param.startAngle);
         JSViewAbstract::ParseJsDouble(info[6], param.endAngle);
+        param.x = SystemProperties::Vp2Px(param.x);
+        param.y = SystemProperties::Vp2Px(param.y);
+        param.radiusX = SystemProperties::Vp2Px(param.radiusX);
+        param.radiusY = SystemProperties::Vp2Px(param.radiusY);
 
         if (info.Length() == 8) {
-            uint32_t anti;
-            JSViewAbstract::ParseJsInteger(info[7], anti);
-            param.anticlockwise = (anti == 1);
+            JSViewAbstract::ParseJsBool(info[7], param.anticlockwise);
         }
         if (isOffscreen_) {
             offscreenCanvas_->Ellipse(param);
@@ -1392,6 +1466,8 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
             JSViewAbstract::ParseJsDouble(info[3], param.scaleY);
             JSViewAbstract::ParseJsDouble(info[4], param.translateX);
             JSViewAbstract::ParseJsDouble(info[5], param.translateY);
+            param.translateX = SystemProperties::Vp2Px(param.translateX);
+            param.translateY = SystemProperties::Vp2Px(param.translateY);
 
             if (isOffscreen_) {
                 offscreenCanvas_->SetTransform(param);
@@ -1439,6 +1515,8 @@ void JSCanvasRenderer::JsTransform(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[3], param.scaleY);
         JSViewAbstract::ParseJsDouble(info[4], param.translateX);
         JSViewAbstract::ParseJsDouble(info[5], param.translateY);
+        param.translateX = SystemProperties::Vp2Px(param.translateX);
+        param.translateY = SystemProperties::Vp2Px(param.translateY);
 
         if (isOffscreen_) {
             offscreenCanvas_->Transform(param);
@@ -1460,6 +1538,8 @@ void JSCanvasRenderer::JsTranslate(const JSCallbackInfo& info)
         double y = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], x);
         JSViewAbstract::ParseJsDouble(info[1], y);
+        x = SystemProperties::Vp2Px(x);
+        y = SystemProperties::Vp2Px(y);
         if (isOffscreen_) {
             offscreenCanvas_->Translate(x, y);
         } else {
@@ -1569,6 +1649,10 @@ void JSCanvasRenderer::JsFillRect(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], y);
         JSViewAbstract::ParseJsDouble(info[2], width);
         JSViewAbstract::ParseJsDouble(info[3], height);
+        x = SystemProperties::Vp2Px(x);
+        y = SystemProperties::Vp2Px(y);
+        width = SystemProperties::Vp2Px(width);
+        height = SystemProperties::Vp2Px(height);
 
         Rect rect = Rect(x, y, width, height);
         if (isOffscreen_) {
@@ -1595,6 +1679,10 @@ void JSCanvasRenderer::JsStrokeRect(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], y);
         JSViewAbstract::ParseJsDouble(info[2], width);
         JSViewAbstract::ParseJsDouble(info[3], height);
+        x = SystemProperties::Vp2Px(x);
+        y = SystemProperties::Vp2Px(y);
+        width = SystemProperties::Vp2Px(width);
+        height = SystemProperties::Vp2Px(height);
 
         Rect rect = Rect(x, y, width, height);
         if (isOffscreen_) {
@@ -1621,6 +1709,10 @@ void JSCanvasRenderer::JsClearRect(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], y);
         JSViewAbstract::ParseJsDouble(info[2], width);
         JSViewAbstract::ParseJsDouble(info[3], height);
+        x = SystemProperties::Vp2Px(x);
+        y = SystemProperties::Vp2Px(y);
+        width = SystemProperties::Vp2Px(width);
+        height = SystemProperties::Vp2Px(height);
 
         Rect rect = Rect(x, y, width, height);
         if (isOffscreen_) {

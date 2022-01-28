@@ -39,6 +39,8 @@ void JSCanvasPath::JsPath2DSetTransform(const JSCallbackInfo& info)
             JSViewAbstract::ParseJsDouble(info[3], scaleY);
             JSViewAbstract::ParseJsDouble(info[4], translateX);
             JSViewAbstract::ParseJsDouble(info[5], translateY);
+            translateX = SystemProperties::Vp2Px(translateX);
+            translateY = SystemProperties::Vp2Px(translateY);
             path2d_->SetTransform(scaleX, skewX, skewY, scaleY, translateX, translateY);
         }
     }
@@ -52,6 +54,8 @@ void JSCanvasPath::JsPath2DMoveTo(const JSCallbackInfo& info)
             double Y = 0.0;
             JSViewAbstract::ParseJsDouble(info[0], X);
             JSViewAbstract::ParseJsDouble(info[1], Y);
+            X = SystemProperties::Vp2Px(X);
+            Y = SystemProperties::Vp2Px(Y);
             path2d_->MoveTo(X, Y);
         }
     }
@@ -65,6 +69,8 @@ void JSCanvasPath::JsPath2DLineTo(const JSCallbackInfo& info)
             double Y = 0.0;
             JSViewAbstract::ParseJsDouble(info[0], X);
             JSViewAbstract::ParseJsDouble(info[1], Y);
+            X = SystemProperties::Vp2Px(X);
+            Y = SystemProperties::Vp2Px(Y);
             path2d_->LineTo(X, Y);
         }
     }
@@ -85,10 +91,11 @@ void JSCanvasPath::JsPath2DArc(const JSCallbackInfo& info)
             JSViewAbstract::ParseJsDouble(info[2], radius);
             JSViewAbstract::ParseJsDouble(info[3], startAngle);
             JSViewAbstract::ParseJsDouble(info[4], endAngle);
+            X = SystemProperties::Vp2Px(X);
+            Y = SystemProperties::Vp2Px(Y);
+            radius = SystemProperties::Vp2Px(radius);
             if (info.Length() == 6) {
-                uint32_t anti;
-                JSViewAbstract::ParseJsInteger(info[5], anti);
-                anticlockwise = (anti == 1);
+                JSViewAbstract::ParseJsBool(info[5], anticlockwise);
             }
             path2d_->Arc(X, Y, radius, startAngle, endAngle, anticlockwise);
         }
@@ -109,6 +116,11 @@ void JSCanvasPath::JsPath2DArcTo(const JSCallbackInfo& info)
             JSViewAbstract::ParseJsDouble(info[2], x2);
             JSViewAbstract::ParseJsDouble(info[3], y2);
             JSViewAbstract::ParseJsDouble(info[4], radius);
+            x1 = SystemProperties::Vp2Px(x1);
+            y1 = SystemProperties::Vp2Px(y1);
+            x2 = SystemProperties::Vp2Px(x2);
+            y2 = SystemProperties::Vp2Px(y2);
+            radius = SystemProperties::Vp2Px(radius);
             path2d_->ArcTo(x1, y1, x2, y2, radius);
         }
     }
@@ -125,6 +137,10 @@ void JSCanvasPath::JsPath2DQuadraticCurveTo(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], cpy);
         JSViewAbstract::ParseJsDouble(info[2], x);
         JSViewAbstract::ParseJsDouble(info[3], y);
+        cpx = SystemProperties::Vp2Px(cpx);
+        cpy = SystemProperties::Vp2Px(cpy);
+        x = SystemProperties::Vp2Px(x);
+        y = SystemProperties::Vp2Px(y);
         path2d_->QuadraticCurveTo(cpx, cpy, x, y);
     }
 }
@@ -144,6 +160,12 @@ void JSCanvasPath::JsPath2DBezierCurveTo(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[3], cp2y);
         JSViewAbstract::ParseJsDouble(info[4], x);
         JSViewAbstract::ParseJsDouble(info[5], y);
+        cp1x = SystemProperties::Vp2Px(cp1x);
+        cp1y = SystemProperties::Vp2Px(cp1y);
+        cp2x = SystemProperties::Vp2Px(cp2x);
+        cp2y = SystemProperties::Vp2Px(cp2y);
+        x = SystemProperties::Vp2Px(x);
+        y = SystemProperties::Vp2Px(y);
         path2d_->BezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
     }
 }
@@ -166,13 +188,15 @@ void JSCanvasPath::JsPath2DEllipse(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[4], rotation);
         JSViewAbstract::ParseJsDouble(info[5], startAngle);
         JSViewAbstract::ParseJsDouble(info[6], endAngle);
+        X = SystemProperties::Vp2Px(X);
+        Y = SystemProperties::Vp2Px(Y);
+        radiusX = SystemProperties::Vp2Px(radiusX);
+        radiusY = SystemProperties::Vp2Px(radiusY);
 
         bool anticlockwise = false;
 
         if (info.Length() == 8) {
-            uint32_t anti;
-            JSViewAbstract::ParseJsInteger(info[7], anti);
-            anticlockwise = (anti == 1);
+            JSViewAbstract::ParseJsBool(info[7], anticlockwise);
         }
 
         path2d_->Ellipse(X, Y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise);
@@ -190,6 +214,10 @@ void JSCanvasPath::JsPath2DRect(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(info[1], y);
         JSViewAbstract::ParseJsDouble(info[2], width);
         JSViewAbstract::ParseJsDouble(info[3], height);
+        x = SystemProperties::Vp2Px(x);
+        y = SystemProperties::Vp2Px(y);
+        width = SystemProperties::Vp2Px(width);
+        height = SystemProperties::Vp2Px(height);
 
         path2d_->Rect(x, y, width, height);
     }
