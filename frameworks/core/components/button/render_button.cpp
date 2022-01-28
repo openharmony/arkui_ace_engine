@@ -269,7 +269,10 @@ void RenderButton::OnTouchTestHit(
     }
     touchRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(touchRecognizer_);
-    result.emplace_back(clickRecognizer_);
+    auto context = context_.Upgrade();
+    if (context && !context->GetIsDeclarative()) {
+        result.emplace_back(clickRecognizer_);
+    }
 }
 
 void RenderButton::HandleFocusEvent(bool isFocus)
