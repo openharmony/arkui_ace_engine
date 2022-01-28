@@ -212,14 +212,7 @@ public:
         return (value_ < dimension.value_);
     }
 
-    std::string ToString() const
-    {
-        static std::string units[6] = {"px", "vp", "fp", "%", "lpx", "auto"};
-        if (units[static_cast<int>(unit_)] == units[3]) {
-            return std::to_string(value_ * 100).append(units[static_cast<int>(unit_)]);
-        }
-        return std::to_string(value_).append(units[static_cast<int>(unit_)]);
-    }
+    std::string ToString() const;
 
 private:
     double value_ = 0.0;
