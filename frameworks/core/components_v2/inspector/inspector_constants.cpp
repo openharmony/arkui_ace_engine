@@ -296,4 +296,8 @@ ACE_EXPORT extern const char TEXT_PICKER_ETS_TAG[] = "TextPicker";
 ACE_EXPORT extern const char PICKER_TEXT_DIALOG_COMPONENT_TAG[] = "pickerTextDialog";
 ACE_EXPORT extern const char PICKER_TEXT_DIALOG_ETS_TAG[] = "pickerTextDialog";
 
+// canvas
+ACE_EXPORT extern const char CANVAS_COMPONENT_TAG[] = "CustomPaintComponent";
+ACE_EXPORT extern const char CANVAS_ETS_TAG[] = "Canvas";
+
 } // namespace OHOS::Ace::V2
