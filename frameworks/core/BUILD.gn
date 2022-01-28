@@ -353,22 +353,8 @@ template("ace_core_source_set") {
 
     if (defined(config.plugin_components_support) &&
         config.plugin_components_support) {
-      if (!use_mingw_win && !use_mac) {
-        deps += [
-          "$ace_root/frameworks/core/components/plugin:ace_core_components_plugin_$platform",
-          "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-          "//foundation/appexecfwk/standard/common:libappexecfwk_common",
-        ]
-        external_deps = [
-          "ability_runtime:app_manager",
-          "ability_runtime:base",
-          "ability_runtime:want",
-          "bundle_framework:appexecfwk_base",
-          "bundle_framework:appexecfwk_core",
-          "eventhandler:libeventhandler",
-        ]
-        sources += [ "common/plugin_manager.cpp" ]
-      }
+      deps += [ "$ace_root/frameworks/core/components/plugin:ace_core_components_plugin_$platform" ]
+      sources += [ "common/plugin_manager.cpp" ]
     }
     include_dirs = [ "//foundation/windowmanager/interfaces/innerkits" ]
 

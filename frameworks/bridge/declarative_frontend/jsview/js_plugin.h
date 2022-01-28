@@ -30,4 +30,4 @@ public:
     static void JsOnError(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_FORM_COMPONENT_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_PLUGIN_COMPONENT_H

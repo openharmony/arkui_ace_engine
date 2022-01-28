@@ -17,6 +17,9 @@
 
 #include "base/log/log_wrapper.h"
 #include "core/common/container.h"
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+#include "core/common/plugin_manager.h"
+#endif
 #include "core/components/gesture_listener/gesture_listener_component.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/pipeline/base/single_child.h"
@@ -27,9 +30,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#ifdef PLUGIN_COMPONENT_SUPPORTED
-#include "core/common/plugin_manager.h"
-#endif
 
 namespace OHOS::Ace::Framework {
 

@@ -1626,7 +1626,7 @@ void PluginFrontendDelegate::RegisterFont(const std::string& familyName, const s
 }
 
 void PluginFrontendDelegate::HandleImage(
-    const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) 
+    const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback)
 {
     if (src.empty() || !callback) {
         return;
@@ -1638,7 +1638,6 @@ void PluginFrontendDelegate::HandleImage(
             TaskExecutor::TaskType::JS);
     };
     pipelineContextHolder_.Get()->TryLoadImageInfo(src, std::move(loadCallback));
-
 }
 
 void PluginFrontendDelegate::PushJsCallbackToRenderNode(NodeId id, double ratio,

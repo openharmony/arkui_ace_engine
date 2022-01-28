@@ -32,12 +32,14 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
+#include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/container_scope.h"
 #include "core/common/frontend.h"
 #include "core/common/plugin_manager.h"
+#include "core/common/plugin_utils.h"
 
 namespace OHOS {
 namespace Ace {
@@ -210,6 +212,9 @@ void AceAbility::OnStart(const Want& want)
 
     AceApplicationInfo::GetInstance().SetDebug(appInfo->debug, want.GetBoolParam("debugApp", false));
 
+    auto pluginUtils = std::make_shared<PluginUtilsImpl>();
+    PluginManager::GetInstance().SetAceAbility(this, pluginUtils);
+
     // create container
     Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, srcPath, this,
         std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); }));
@@ -224,7 +229,6 @@ void AceAbility::OnStart(const Want& want)
         container->SetResourceConfiguration(aceResCfg);
         container->SetPackagePathStr(resPath);
     }
-    PluginManager::GetInstance().SetAceAbility(this);
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(abilityId_);
     OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();

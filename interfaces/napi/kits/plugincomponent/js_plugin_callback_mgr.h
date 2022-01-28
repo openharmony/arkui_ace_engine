@@ -31,10 +31,11 @@ public:
     ~JSPluginCallbackMgr();
 
     static JSPluginCallbackMgr& Instance(void);
-    bool RegisterOnEvent(CallBackType eventType, const AAFwk::Want& want, ACECallbackInfo& cbInfo);
-    bool RegisterRequestEvent(const AAFwk::Want& want, ACECallbackInfo& cbInfo,
+    bool RegisterOnEvent(napi_env env, CallBackType eventType, const AAFwk::Want& want, ACECallbackInfo& cbInfo);
+    bool RegisterRequestEvent(napi_env env, const AAFwk::Want& want, ACECallbackInfo& cbInfo,
         const std::shared_ptr<AceJSPluginRequestParam>& param);
     void UnRegisterEvent(size_t key);
+    void UnregisterCallBack(napi_env env, const AAFwk::Want& want);
 private:
     std::mutex mutex_;
     std::map<size_t, std::shared_ptr<JSPluginCallback>> eventList_;

@@ -19,9 +19,9 @@
 #include <mutex>
 #include <unordered_map>
 
-#include "adapter/ohos/entrance/ace_ability.h"
 #include "base/utils/macros.h"
 #include "base/utils/singleton.h"
+#include "core/common/plugin_utils.h"
 #include "core/components/plugin/plugin_sub_container.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
 
@@ -45,17 +45,18 @@ public:
         return jsEngineLoader_;
     }
 
-    void SetAceAbility(AceAbility* aceAbility)
+    void SetAceAbility(void* aceAbility, const std::shared_ptr<PluginUtils>& pluginUtils)
     {
         aceAbility_ = aceAbility;
+        pluginUtils_ = pluginUtils;
     };
 
-    AceAbility* GetAceAbility() const
+    void* GetAceAbility() const
     {
         return aceAbility_;
     };
 
-    ErrCode StartAbility(const std::string& bundleName, const std::string& abilityName, const std::string& params);
+    int32_t StartAbility(const std::string& bundleName, const std::string& abilityName, const std::string& params);
 
 private:
     std::mutex mutex_;
@@ -63,7 +64,8 @@ private:
     std::mutex nonmatchedContainerMutex_;
     std::unordered_map<std::string, RefPtr<PluginSubContainer>> nonmatchedContainerMap_;
     Framework::JsEngineLoader* jsEngineLoader_ = nullptr;
-    AceAbility* aceAbility_ = nullptr;
+    void* aceAbility_ = nullptr;
+    static std::shared_ptr<PluginUtils> pluginUtils_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PLUGIN_MANAGER_H

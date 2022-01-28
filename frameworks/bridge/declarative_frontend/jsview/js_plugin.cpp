@@ -17,19 +17,10 @@
 
 #include "base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#if !(defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM))
 #include "frameworks/core/components/plugin/plugin_component.h"
-#else
 #include "frameworks/core/components/box/box_component.h"
-#endif
 
 namespace OHOS::Ace::Framework {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-namespace {
-constexpr Dimension DEFAULT_FONT_SIZE = 30.0_px;
-}
-#endif
-
 void JSPlugin::Create(const JSCallbackInfo& info)
 {
     if (info.Length() == 0 || !info[0]->IsObject()) {

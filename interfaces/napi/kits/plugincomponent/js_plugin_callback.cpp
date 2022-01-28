@@ -161,6 +161,48 @@ napi_value JSPluginCallback::MakePluginTemplateObject(const PluginComponentTempl
     return jsPluginTemplate;
 }
 
+void JSPluginCallback::OnPushEventInner(const OnPluginUvWorkData* workData)
+{
+    napi_value jsCallback = nullptr;
+    napi_value undefined = nullptr;
+    napi_value jsResult = nullptr;
+    napi_value callbackParam[ACE_ARGS_FOUR] = {nullptr};
+    napi_handle_scope scope = nullptr;
+    std::string dataTmp("{}");
+    std::string extraDataTmp("{}");
+    if (!workData->data.empty()) {
+        dataTmp = workData->data;
+    }
+    if (!workData->extraData.empty()) {
+        extraDataTmp = workData->extraData;
+    }
+    
+    napi_open_handle_scope(cbInfo_.env, &scope);
+    if (scope == nullptr) {
+        napi_close_handle_scope(cbInfo_.env, scope);
+        return;
+    }
+    
+    PluginComponentTemplate componentTemplate;
+    componentTemplate.SetSource(workData->sourceName);
+    componentTemplate.SetAbility(workData->abilityName);
+
+    napi_open_handle_scope(cbInfo_.env, &scope);
+    if (scope == nullptr) {
+        napi_close_handle_scope(cbInfo_.env, scope);
+        return;
+    }
+    callbackParam[ACE_PARAM0] = AceWrapWant(cbInfo_.env, workData->want);
+    callbackParam[ACE_PARAM1] = MakePluginTemplateObject(componentTemplate);
+    callbackParam[ACE_PARAM2] = AceStringToKVObject(cbInfo_.env, dataTmp);
+    callbackParam[ACE_PARAM3] = AceStringToKVObject(cbInfo_.env, extraDataTmp);
+
+    napi_get_undefined(cbInfo_.env, &undefined);
+    napi_get_reference_value(cbInfo_.env, cbInfo_.callback, &jsCallback);
+    napi_call_function(cbInfo_.env, undefined, jsCallback, ACE_ARGS_FOUR, callbackParam, &jsResult);
+    napi_close_handle_scope(cbInfo_.env, scope);
+}
+
 void JSPluginCallback::OnPushEvent(const AAFwk::Want& want,
     const PluginComponentTemplate& pluginTemplate, const std::string& data, const std::string& extraData)
 {
@@ -170,26 +212,44 @@ void JSPluginCallback::OnPushEvent(const AAFwk::Want& want,
         return;
     }
 
+    uvWorkData_.that = (void *)this;
+    uvWorkData_.want = want;
+    uvWorkData_.sourceName = pluginTemplate.GetSource();
+    uvWorkData_.abilityName = pluginTemplate.GetAbility();
+    uvWorkData_.data = data;
+    uvWorkData_.extraData = extraData;
+    OnPushEventInner(&uvWorkData_);
+}
+
+void JSPluginCallback::OnRequestEventInner(const OnPluginUvWorkData* workData)
+{
     napi_value jsCallback = nullptr;
     napi_value undefined = nullptr;
     napi_value jsResult = nullptr;
-    napi_value callbackParam[ACE_ARGS_FOUR] = {nullptr};
+    napi_handle_scope scope = nullptr;
     std::string dataTmp("{}");
-    std::string extraDataTmp("{}");
-    if (!data.empty()) {
-        dataTmp = data;
+    if (!workData->data.empty()) {
+        dataTmp = workData->data;
     }
-    if (!extraData.empty()) {
-        extraDataTmp = extraData;
+
+    napi_open_handle_scope(cbInfo_.env, &scope);
+    if (scope == nullptr) {
+        napi_close_handle_scope(cbInfo_.env, scope);
+        return;
     }
-    callbackParam[ACE_PARAM0] = AceWrapWant(cbInfo_.env, want);
-    callbackParam[ACE_PARAM1] = MakePluginTemplateObject(pluginTemplate);
+    napi_value callbackParam[ACE_ARGS_THREE] = {nullptr};
+    callbackParam[ACE_PARAM0] = AceWrapWant(cbInfo_.env, workData->want);
+    callbackParam[ACE_PARAM1] = AceWrapStringToJS(cbInfo_.env, workData->name);
     callbackParam[ACE_PARAM2] = AceStringToKVObject(cbInfo_.env, dataTmp);
-    callbackParam[ACE_PARAM3] = AceStringToKVObject(cbInfo_.env, extraDataTmp);
 
     napi_get_undefined(cbInfo_.env, &undefined);
     napi_get_reference_value(cbInfo_.env, cbInfo_.callback, &jsCallback);
-    napi_call_function(cbInfo_.env, undefined, jsCallback, ACE_ARGS_FOUR, callbackParam, &jsResult);
+    napi_call_function(cbInfo_.env, undefined, jsCallback, ACE_ARGS_THREE, callbackParam, &jsResult);
+
+    if (AceIsTypeForNapiValue(cbInfo_.env, jsResult, napi_object)) {
+        SendRequestEventResult(jsResult);
+    }
+    napi_close_handle_scope(cbInfo_.env, scope);
 }
 
 void JSPluginCallback::OnRequestEvent(const AAFwk::Want& want, const std::string& name,
@@ -200,26 +260,37 @@ void JSPluginCallback::OnRequestEvent(const AAFwk::Want& want, const std::string
         return;
     }
 
+    uvWorkData_.that = (void *)this;
+    uvWorkData_.want = want;
+    uvWorkData_.data = data;
+    uvWorkData_.name = name;
+    OnRequestEventInner(&uvWorkData_);
+}
+
+void JSPluginCallback::OnRequestCallBackInner(const OnPluginUvWorkData* workData)
+{
     napi_value jsCallback = nullptr;
     napi_value undefined = nullptr;
     napi_value jsResult = nullptr;
-    std::string dataTmp("{}");
-    if (!data.empty()) {
-        dataTmp = data;
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(cbInfo_.env, &scope);
+    if (scope == nullptr) {
+        napi_close_handle_scope(cbInfo_.env, scope);
+        return;
     }
+    PluginComponentTemplate componentTemplate;
+    componentTemplate.SetSource(workData->sourceName);
+    componentTemplate.SetAbility(workData->abilityName);
+    napi_value callbackParam[ACE_ARGS_TWO] = {nullptr};
 
-    napi_value callbackParam[ACE_ARGS_THREE] = {nullptr};
-    callbackParam[ACE_PARAM0] = AceWrapWant(cbInfo_.env, want);
-    callbackParam[ACE_PARAM1] = AceWrapStringToJS(cbInfo_.env, name);
-    callbackParam[ACE_PARAM2] = AceStringToKVObject(cbInfo_.env, dataTmp);
+    callbackParam[ACE_PARAM0] = AceGetCallbackErrorValue(cbInfo_.env, 0);
+    callbackParam[ACE_PARAM1] = MakeCallbackParamForRequest(componentTemplate, workData->data,
+        workData->extraData);
 
     napi_get_undefined(cbInfo_.env, &undefined);
     napi_get_reference_value(cbInfo_.env, cbInfo_.callback, &jsCallback);
-    napi_call_function(cbInfo_.env, undefined, jsCallback, ACE_ARGS_THREE, callbackParam, &jsResult);
-
-    if (AceIsTypeForNapiValue(cbInfo_.env, jsResult, napi_object)) {
-        SendRequestEventResult(jsResult);
-    }
+    napi_call_function(cbInfo_.env, undefined, jsCallback, ACE_ARGS_TWO, callbackParam, &jsResult);
+    napi_close_handle_scope(cbInfo_.env, scope);
 }
 
 void JSPluginCallback::OnRequestCallBack(const PluginComponentTemplate& pluginTemplate,
@@ -232,18 +303,12 @@ void JSPluginCallback::OnRequestCallBack(const PluginComponentTemplate& pluginTe
         return;
     }
 
-    napi_value jsCallback = nullptr;
-    napi_value undefined = nullptr;
-    napi_value jsResult = nullptr;
-
-    napi_value callbackParam[ACE_ARGS_TWO] = {nullptr};
-
-    callbackParam[ACE_PARAM0] = AceGetCallbackErrorValue(cbInfo_.env, 0);
-    callbackParam[ACE_PARAM1] = MakeCallbackParamForRequest(pluginTemplate, data, extraData);
-
-    napi_get_undefined(cbInfo_.env, &undefined);
-    napi_get_reference_value(cbInfo_.env, cbInfo_.callback, &jsCallback);
-    napi_call_function(cbInfo_.env, undefined, jsCallback, ACE_ARGS_TWO, callbackParam, &jsResult);
+    uvWorkData_.that = (void *)this;
+    uvWorkData_.sourceName = pluginTemplate.GetSource();
+    uvWorkData_.abilityName = pluginTemplate.GetAbility();
+    uvWorkData_.data = data;
+    uvWorkData_.extraData = extraData;
+    OnRequestCallBackInner(&uvWorkData_);
 }
 
 bool JSPluginCallback::OnEventStrictEquals(CallBackType eventType, const AAFwk::Want& want,

@@ -106,7 +106,7 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
             }
             auto density = pipelineContext->GetDensity();
             Offset pluginOffset = {pos.GetX() / density, pos.GetY() / density};
-            pluginContext->SetPluginOffset(child->GetGlobalOffset());
+            pluginContext->SetPluginEventOffset(child->GetGlobalOffset());
         }
     } else {
         child->RenderWithContext(*this, rect.GetOffset());

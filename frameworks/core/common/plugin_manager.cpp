@@ -15,10 +15,11 @@
 
 #include "core/common/plugin_manager.h"
 
-#include "ability_manager_client.h"
 #include "base/log/log.h"
+#include "core/common/plugin_utils.h"
 
 namespace OHOS::Ace {
+std::shared_ptr<PluginUtils> PluginManager::pluginUtils_ = nullptr;
 PluginManager::PluginManager() {}
 
 PluginManager::~PluginManager()
@@ -87,14 +88,13 @@ int64_t PluginManager::GetPluginSubContainerId()
     return pluginSubContainerMap_.rbegin()->first + 1;
 }
 
-ErrCode PluginManager::StartAbility(
+int32_t PluginManager::StartAbility(
     const std::string& bundleName, const std::string& abilityName, const std::string& params)
 {
-    AAFwk::Want want;
-    AppExecFwk::ElementName element("", bundleName, abilityName);
-    want.SetElement(element);
-    want.SetParam("params", params);
-    ErrCode error = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want);
-    return error;
+    if (!pluginUtils_) {
+        LOGE("PluginUtils is nullptr.");
+        return -1;
+    }
+    return pluginUtils_->StartAbility(bundleName, abilityName, params);
 }
 } // namespace OHOS::Ace

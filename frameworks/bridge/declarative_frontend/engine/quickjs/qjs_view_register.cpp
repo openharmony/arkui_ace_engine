@@ -128,8 +128,10 @@
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/declarative_frontend/jsview/js_web.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 #endif
+#endif
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+#include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"

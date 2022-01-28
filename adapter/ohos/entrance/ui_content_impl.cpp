@@ -34,11 +34,13 @@
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
+#include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "core/common/plugin_manager.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -252,6 +254,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             }
         }
     }
+    auto pluginUtils = std::make_shared<PluginUtilsImpl>();
+    PluginManager::GetInstance().SetAceAbility(nullptr, pluginUtils);
     // create container
     instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
     auto container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,

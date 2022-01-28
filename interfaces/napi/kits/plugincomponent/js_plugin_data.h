@@ -64,6 +64,7 @@ struct ACEAsyncJSCallbackInfo {
     AceFromJSParam jsParamList = {};
     napi_value result = nullptr;
     int error_code = 0;
+    AAFwk::Want wantStage = {};
 };
 
 struct ACEAsyncParamEx {
