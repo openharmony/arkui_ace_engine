@@ -43,6 +43,8 @@ ohos_unittest("PipelineContextTest") {
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
     "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
+    "$ace_root/frameworks/base/geometry/least_square_impl.cpp",
+    "$ace_root/frameworks/base/geometry/matrix3.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
     "$ace_root/frameworks/base/geometry/quaternion.cpp",
     "$ace_root/frameworks/base/geometry/transform_util.cpp",
