@@ -421,7 +421,7 @@ void AceAbility::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent
 
 void AceAbility::OnKeyUp(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    LOGI("AceAbility::OnKeyUp called,keyEvent info: keyCode is %{private}d,\
+    LOGI("AceAbility::OnKeyUp called,keyEvent info: keyCode is %{public}d,\
         keyAction is %{public}d, keyActionTime is %{public}d",
         keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
     auto flutterAceView = static_cast<Platform::FlutterAceView*>(

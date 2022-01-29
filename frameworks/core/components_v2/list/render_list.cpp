@@ -51,7 +51,7 @@ constexpr int32_t STEP_FORWARD = 1;
 constexpr int32_t STEP_BACK = -1;
 constexpr int32_t STEP_INVALID = 10;
 
-//IsRightToLeft | IsListVertical | IsDirectionVertical | IsDirectionReverse
+// IsRightToLeft | IsListVertical | IsDirectionVertical | IsDirectionReverse
 const std::map<bool, std::map<bool, std::map<bool, std::map<bool, int32_t>>>> DIRECTION_MAP = {
     { false, // RTL is false
         {

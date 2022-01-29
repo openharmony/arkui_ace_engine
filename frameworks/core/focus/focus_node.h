@@ -28,6 +28,7 @@
 namespace OHOS::Ace {
 
 class FocusGroup;
+class ClickInfo;
 
 class ACE_EXPORT FocusNode : public virtual AceType {
     DECLARE_ACE_TYPE(FocusNode, AceType);
@@ -83,6 +84,10 @@ public:
     void SetOnClickCallback(std::function<void()>&& onClickCallback)
     {
         onClickCallback_ = std::move(onClickCallback);
+    }
+    void SetOnClickCallback(std::function<void(const std::shared_ptr<ClickInfo>&)>&& onClickCallback)
+    {
+        onClickEventCallback_ = std::move(onClickCallback);
     }
     void SetOnFocusCallback(std::function<void()>&& onFocusCallback)
     {
@@ -153,6 +158,8 @@ public:
         }
     }
 
+    virtual void OnClick(const KeyEvent& event);
+
 protected:
     virtual bool OnKeyEvent(const KeyEvent& keyEvent);
 
@@ -213,6 +220,7 @@ private:
 
     WeakPtr<FocusGroup> parent_;
 
+    std::function<void(std::shared_ptr<ClickInfo>&)> onClickEventCallback_;
     std::function<bool(const KeyEvent&)> onKeyCallback_;
     std::function<void(const std::shared_ptr<KeyEventInfo>&)> onKeyEventCallback_;
     std::function<void()> onClickCallback_;

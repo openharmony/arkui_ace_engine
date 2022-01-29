@@ -25,6 +25,7 @@
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/render_element.h"
+#include "core/gestures/click_recognizer.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -60,11 +61,27 @@ bool FocusNode::HandleKeyEvent(const KeyEvent& keyEvent)
         return true;
     }
 
+    auto element = AceType::DynamicCast<Element>(this);
+    if (!element) {
+        return false;
+    }
+    auto context = element->GetContext().Upgrade();
+    if (!context) {
+        return false;
+    }
+
     switch (keyEvent.code) {
         case KeyCode::KEYBOARD_ENTER:
         case KeyCode::KEYBOARD_NUMBER_ENTER:
         case KeyCode::KEYBOARD_CENTER:
-            OnClick();
+            if (keyEvent.action != KeyAction::DOWN) {
+                return false;
+            }
+            if (context->GetIsDeclarative()) {
+                OnClick(keyEvent);
+            } else {
+                OnClick();
+            }
             return true;
 
         default:
@@ -247,6 +264,21 @@ void FocusNode::RequestFocus()
         context->AddDirtyFocus(AceType::Claim(this));
     } else {
         LOGE("fail to add dirty focus due to context is null");
+    }
+}
+
+void FocusNode::OnClick(const KeyEvent& event)
+{
+    if (onClickEventCallback_) {
+        auto info = std::make_shared<ClickInfo>(-1);
+        info->SetTimeStamp(TimeStamp(std::chrono::milliseconds(event.timeStamp)));
+        info->SetGlobalLocation(
+            Offset((GetRect().Left() + GetRect().Right()) / 2, (GetRect().Top() + GetRect().Bottom()) / 2));
+        info->SetLocalLocation(
+            Offset((GetRect().Right() - GetRect().Left()) / 2, (GetRect().Bottom() - GetRect().Top()) / 2));
+        info->SetSourceDevice(static_cast<SourceType>(event.sourceDevice));
+        info->SetDeviceId(event.deviceId);
+        onClickEventCallback_(info);
     }
 }
 

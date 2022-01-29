@@ -172,7 +172,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("fontFamily", &JSButton::SetFontFamily, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("type", &JSButton::SetType, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("stateEffect", &JSButton::SetStateEffect, MethodOptions::NONE);
-    JSClass<JSButton>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSButton>::StaticMethod("onClick", &JSButton::JsOnClick);
     JSClass<JSButton>::StaticMethod("remoteMessage", &JSButton::JsRemoteMessage);
     JSClass<JSButton>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSButton>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -274,10 +274,26 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
             return;
         }
         auto impl = inspector->GetInspectorFunctionImpl();
-        JSRef<JSFunc> clickFunction = JSRef<JSFunc>::Cast(info[0]);
-        auto onClickFunc = AceType::MakeRefPtr<JsClickFunction>(clickFunction);
+
+        RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto clickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](GestureEvent& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            if (impl) {
+                impl->UpdateEventInfo(info);
+            }
+            ACE_SCORING_EVENT("onClick");
+            func->Execute(info);
+        };
+        RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(DEFAULT_TAP_COUNTS, DEFAULT_TAP_FINGERS);
+        tapGesture->SetOnActionId(clickId);
+        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        if (tapGesture) {
+            box->SetOnClick(tapGesture);
+        }
+
+        RefPtr<JsClickFunction> jsClickEventFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
         EventMarker clickEventId(
-            [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc), impl](const BaseEventInfo* info) {
+            [execCtx = info.GetExecutionContext(), func = std::move(jsClickEventFunc), impl](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
                 auto newInfo = *clickInfo;
@@ -287,12 +303,13 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
                 ACE_SCORING_EVENT("Button.onClick");
                 func->Execute(newInfo);
             });
-
         auto buttonComponent =
             AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         if (buttonComponent) {
             buttonComponent->SetClickedEventId(clickEventId);
         }
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+        focusableComponent->SetOnClickId(clickEventId);
     }
 }
 

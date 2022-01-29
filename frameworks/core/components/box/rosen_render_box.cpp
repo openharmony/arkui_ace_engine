@@ -1091,7 +1091,7 @@ void RosenRenderBox::AnimateMouseHoverExit()
 {
     LOGI("RosenRenderBox::AnimateMouseHoverExit in. animationType_ = %{public}d", animationType_);
     if (animationType_ == HoverAnimationType::SCALE) {
-        isHoveredBoard = true;
+        isHoveredScale = true;
         auto rsNode = GetRSNode();
         rsNode->SetScale(SCALE_CHANGED);
 

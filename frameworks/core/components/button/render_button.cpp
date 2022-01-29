@@ -97,11 +97,7 @@ void RenderButton::Initialize()
         auto button = wp.Upgrade();
         if (button) {
             const auto context = button->GetContext().Upgrade();
-            if (context && context->GetIsDeclarative()) {
-                button->HandleClickEvent(info);
-            } else {
-                button->HandleClickEvent();
-            }
+            button->PlayClickAnimation();
         }
     });
     clickRecognizer_->SetRemoteMessage([wp](const ClickInfo& info) {
@@ -270,9 +266,10 @@ void RenderButton::OnTouchTestHit(
     touchRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(touchRecognizer_);
     auto context = context_.Upgrade();
-    if (context && !context->GetIsDeclarative()) {
-        result.emplace_back(clickRecognizer_);
+    if (context && context->GetIsDeclarative()) {
+        clickRecognizer_->SetUseCatchMode(false);
     }
+    result.emplace_back(clickRecognizer_);
 }
 
 void RenderButton::HandleFocusEvent(bool isFocus)
@@ -819,7 +816,7 @@ void RenderButton::OnStatusStyleChanged(const VisualState state)
                     LOGD("background color start %{public}x  end %{public}x", clickedColor_.GetValue(),
                         colorState->value_.GetValue());
                     backgroundColor_.SetValue(clickedColor_.GetValue()); // Start value
-                    backgroundColor_ = colorState->value_; // End value and animate
+                    backgroundColor_ = colorState->value_;               // End value and animate
                 }
             } break;
 

@@ -431,11 +431,7 @@ void RenderBox::UpdateBackDecoration(const RefPtr<Decoration>& newDecoration)
     backDecoration_->SetInvert(newDecoration->GetInvert());
     backDecoration_->SetColorBlend(newDecoration->GetColorBlend());
     backDecoration_->SetSepia(newDecoration->GetSepia());
-    if (isHoveredBoard) {
-        backDecoration_->SetBackgroundColor(hoverColor_);
-    } else {
-        backDecoration_->SetBackgroundColor(newDecoration->GetBackgroundColor());
-    }
+    backDecoration_->SetBackgroundColor(newDecoration->GetBackgroundColor());
 }
 
 void RenderBox::UpdateFrontDecoration(const RefPtr<Decoration>& newDecoration)
