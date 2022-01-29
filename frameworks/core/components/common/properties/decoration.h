@@ -646,6 +646,12 @@ public:
         src_ = ThemeUtils::ProcessImageSource(imgSrc, themeConstants);
     }
 
+    void SetParsedSrc(const std::string& src)
+    {
+        // src is processed by ParseJsMedia function
+        src_ = src;
+    }
+
     bool operator==(const BackgroundImage& image) const
     {
         bool fileName = src_ == image.GetSrc();
