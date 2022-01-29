@@ -632,6 +632,7 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
             coverageComponent->InsertChild(0, components[idx]);
             if (coverageComponent->IsOverLay()) {
                 coverageComponent->Initialization();
+                Component::MergeRSNode(components[idx], coverageComponent);
             }
 #ifndef WEARABLE_PRODUCT
             auto popupComponent = GetPopupComponent(false);

@@ -45,6 +45,7 @@ void CoverageComponent::Initialization()
     textBoxComponent_->SetChild(textComponent_);
     alignComponent_->AppendChild(textBoxComponent_);
     InsertChild(1, alignComponent_);
+    Component::MergeRSNode(alignComponent_, textComponent_);
 }
 
 } // namespace OHOS::Ace
