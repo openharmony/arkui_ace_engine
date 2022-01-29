@@ -82,21 +82,27 @@ if (is_standard_system) {
   }
 
   ohos_copy("copy_napi_shared_library") {
-    shared_library_path =
+    shared_library_path_napi =
         get_label_info("//foundation/ace/napi:ace_napi", "root_out_dir")
+    shared_library_path_uv =
+        get_label_info("//third_party/libuv:uv", "root_out_dir")
+
     deps = [
       "//foundation/ace/napi:ace_napi",
       "//foundation/ace/napi:ace_napi_quickjs",
+      "//third_party/libuv:uv",
     ]
     if (use_mac) {
       sources = [
-        "$shared_library_path/ace/napi/libace_napi.dylib",
-        "$shared_library_path/ace/napi/libace_napi_quickjs.dylib",
+        "$shared_library_path_napi/ace/napi/libace_napi.dylib",
+        "$shared_library_path_napi/ace/napi/libace_napi_quickjs.dylib",
+        "$shared_library_path_uv/ace/napi/libuv.dylib",
       ]
     } else {
       sources = [
-        "$shared_library_path/ace/napi/libace_napi.dll",
-        "$shared_library_path/ace/napi/libace_napi_quickjs.dll",
+        "$shared_library_path_napi/ace/napi/libace_napi.dll",
+        "$shared_library_path_napi/ace/napi/libace_napi_quickjs.dll",
+        "$shared_library_path_uv/ace/napi/libuv.dll",
       ]
     }
     outputs = [ target_out_dir + "/previewer/common/bin/{{source_file_part}}" ]
