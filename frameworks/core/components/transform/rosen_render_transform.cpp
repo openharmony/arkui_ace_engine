@@ -20,15 +20,22 @@
 
 namespace OHOS::Ace {
 
+void RosenRenderTransform::Update(const RefPtr<Component>& component)
+{
+    RenderTransform::Update(component);
+    MarkNeedSyncGeometryProperties();
+    if (pendingAppearingTransition_ && hasAppearTransition_) {
+        // we have a pending appearing transition
+        OnRSTransition(TransitionType::APPEARING);
+        pendingAppearingTransition_ = false;
+    }
+}
+
 void RosenRenderTransform::UpdateTransformLayer()
 {
     auto rsNode = GetRSNode();
     if (!rsNode) {
         return;
-    }
-
-    if (pendingTransitionAppearing_ && hasAppearTransition_) {
-        OnRSTransition(TransitionType::APPEARING, rsNode->GetId());
     }
 
     if (needUpdateTransform_) {
@@ -109,12 +116,6 @@ void RosenRenderTransform::SyncGeometryProperties()
 {
     RenderNode::SyncGeometryProperties();
     UpdateTransformLayer();
-}
-
-void RosenRenderTransform::Update(const RefPtr<Component>& component)
-{
-    RenderTransform::Update(component);
-    MarkNeedSyncGeometryProperties();
 }
 
 Point RosenRenderTransform::GetTransformPoint(const Point& point)
@@ -209,46 +210,41 @@ void RosenRenderTransform::PerformLayout()
     }
 }
 
-void RosenRenderTransform::OnRSTransition(TransitionType type, unsigned long long rsNodeId)
+void RosenRenderTransform::OnRSTransition(TransitionType type)
 {
-    std::vector<TransformOperation> transforms;
-    if (type == TransitionType::APPEARING) {
-        if (pendingTransitionAppearing_ && hasAppearTransition_) {
-            pendingTransitionAppearing_ = false;
-            transforms = transformEffectsAppearing_;
-        } else {
-            pendingTransitionAppearing_ = true;
-            return;
-        }
-    } else if (type == TransitionType::DISAPPEARING && hasDisappearTransition_) {
-        transforms = transformEffectsDisappearing_;
+    if (GetRSNode() == nullptr) {
+        return;
     }
-    std::vector<Rosen::RSTransitionEffect> effects;
-    for (auto transform : transforms) {
+    std::vector<TransformOperation>* transforms;
+    bool appearing;
+    if (type == TransitionType::APPEARING && hasAppearTransition_) {
+        transforms = &transformEffectsAppearing_;
+        appearing = true;
+    } else if (type == TransitionType::DISAPPEARING && hasDisappearTransition_) {
+        transforms = &transformEffectsDisappearing_;
+        appearing = false;
+    } else {
+        return;
+    }
+
+    Rosen::Vector2f pivot(ConvertDimensionToScaleBySize(originX_, GetLayoutSize().Width()),
+        ConvertDimensionToScaleBySize(originY_, GetLayoutSize().Height()));
+    auto effect = Rosen::RSTransitionEffect::Create();
+    for (auto& transform : *transforms) {
         switch (transform.type_) {
             case TransformOperationType::SCALE: {
                 auto& scale = transform.scaleOperation_;
-                effects.push_back(Rosen::RSTransitionEffect(
-                    (type == TransitionType::DISAPPEARING) ?
-                        Rosen::RSTransitionEffectType::SCALE_OUT : Rosen::RSTransitionEffectType::SCALE_IN,
-                    Rosen::ScaleParams(scale.scaleX, scale.scaleY, scale.scaleZ, originX_.Value(), originY_.Value())));
+                effect->Scale({ scale.scaleX, scale.scaleY, scale.scaleZ }, pivot);
                 break;
             }
             case TransformOperationType::TRANSLATE: {
                 auto& translate = transform.translateOperation_;
-                effects.push_back(Rosen::RSTransitionEffect(
-                    (type == TransitionType::DISAPPEARING) ?
-                        Rosen::RSTransitionEffectType::TRANSLATE_OUT : Rosen::RSTransitionEffectType::TRANSLATE_IN,
-                    Rosen::TranslateParams(translate.dx.Value(), translate.dy.Value(), translate.dz.Value())));
+                effect->Translate({ translate.dx.Value(), translate.dy.Value(), translate.dz.Value() });
                 break;
             }
             case TransformOperationType::ROTATE: {
                 auto& rotate = transform.rotateOperation_;
-                effects.push_back(Rosen::RSTransitionEffect((type == TransitionType::DISAPPEARING)
-                                                                ? Rosen::RSTransitionEffectType::ROTATE_OUT
-                                                                : Rosen::RSTransitionEffectType::ROTATE_IN,
-                    Rosen::RotateParams(
-                        rotate.dx, rotate.dy, rotate.dz, rotate.angle, originX_.Value(), originY_.Value())));
+                effect->Rotate({ rotate.dx, rotate.dy, rotate.dz, rotate.angle }, pivot);
                 break;
             }
             default: {
@@ -256,12 +252,7 @@ void RosenRenderTransform::OnRSTransition(TransitionType type, unsigned long lon
             }
         }
     }
-    Rosen::RSNode::NotifyTransition(effects, rsNodeId);
+    GetRSNode()->NotifyTransition(effect, appearing);
 }
 
-void RosenRenderTransform::ClearRenderObject()
-{
-    RenderTransform::ClearRenderObject();
-    pendingTransitionAppearing_ = false;
-}
 } // namespace OHOS::Ace

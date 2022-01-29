@@ -918,7 +918,8 @@ public:
 
     bool IsDisappearing();
     virtual bool HasDisappearingTransition(int32_t nodeId);
-    void NotifyTransition(TransitionType type, int32_t nodeId, unsigned long long rsNodeId = 0);
+    void NotifyTransition(TransitionType type, int32_t nodeId);
+    virtual void SetPendingAppearingTransition() {}
 
     Rect GetDirtyRect() const;
     std::function<void(const DragUpdateInfo&)> onDomDragEnter_ = nullptr;
@@ -1167,7 +1168,7 @@ protected:
     }
 
     virtual std::shared_ptr<RSNode> CreateRSNode() const;
-    virtual void OnRSTransition(TransitionType type, unsigned long long rsNodeId) {};
+    virtual void OnRSTransition(TransitionType type) {};
     // JSview boundary, all nodes in [head, tail] share the same RSNode
     bool IsHeadRenderNode() const
     {
