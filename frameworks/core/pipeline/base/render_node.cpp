@@ -251,24 +251,24 @@ void RenderNode::UpdateTouchRect()
 
 void RenderNode::SetTouchRectList(std::vector<Rect>& touchRectList)
 {
+    std::vector<Rect> parentTouchRectList = touchRectList;
     const auto& children = GetChildren();
     if (!children.empty()) {
         for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
             auto& child = *iter;
             auto childTouchRectList = child->GetTouchRectList();
-            CompareTouchRectList(touchRectList, childTouchRectList);
+            CompareTouchRectList(touchRectList, childTouchRectList, parentTouchRectList);
         }
     }
 }
 
-void RenderNode::CompareTouchRectList(
-    std::vector<Rect>& parentTouchRectList, const std::vector<Rect>& childTouchRectList)
+void RenderNode::CompareTouchRectList(std::vector<Rect>& touchRectList,
+    const std::vector<Rect>& childTouchRectList, const std::vector<Rect>& parentTouchRectList)
 {
-    std::vector<Rect> parentRectList = parentTouchRectList;
     for (auto& childRect : childTouchRectList) {
         bool isInRegion = false;
         auto rect = childRect;
-        for (auto& parentRect : parentRectList) {
+        for (auto& parentRect : parentTouchRectList) {
             // unified coordinate system
             rect.SetOffset(childRect.GetOffset() + parentRect.GetOffset());
             if (CompareTouchRect(parentRect, rect)) {
@@ -277,7 +277,7 @@ void RenderNode::CompareTouchRectList(
             }
         }
         if (!isInRegion && !IsResponseRegion()) {
-            parentTouchRectList.emplace_back(rect);
+            touchRectList.emplace_back(rect);
         }
     }
 }
