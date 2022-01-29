@@ -226,7 +226,7 @@ void RenderPickerColumn::PerformLayout()
         layout.SetFixedSize(size);
         clip_->Layout(layout);
     } else {
-        double fixHeight = (data_ ? NormalizeToPx(data_->GetFixHeight()) : 0.0);
+        double fixHeight = 0.0;
         clip_->SetPosition(Offset(x, y));
         if (!NearZero(fixHeight)) {
             auto layout = GetLayoutParam();

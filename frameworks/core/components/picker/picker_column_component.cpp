@@ -70,6 +70,7 @@ void PickerColumnComponent::Initialize()
         option->SetAlignTop(false);
         option->SetAlignBottom(false);
         option->SetTheme(theme_->clone());
+        option->SetFixHeight(fixHeight_);
         showOptions.emplace_back(option);
     }
 

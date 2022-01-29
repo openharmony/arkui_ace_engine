@@ -176,18 +176,19 @@ void RenderTextTimer::Tick(uint64_t duration)
 {
     elapsedTime_ += duration;
 
+    if (onTimer_) {
+        onTimer_(GetMilliseconds(), elapsedTime_);
+    }
+
     double tmp_value = static_cast<double>(elapsedTime_);
     if (isCountDown_) {
         tmp_value = (inputCount_ >= elapsedTime_) ? (inputCount_ - elapsedTime_) : 0;
     }
 
     if (isCountDown_ && tmp_value <= 0) {
+        UpdateValue(0);
         HandlePause();
         return;
-    }
-
-    if (onTimer_) {
-        onTimer_(GetMilliseconds(), elapsedTime_);
     }
 
     UpdateValue(static_cast<uint32_t>(tmp_value));

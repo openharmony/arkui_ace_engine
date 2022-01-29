@@ -117,6 +117,15 @@ public:
         disappear_ = value;
     }
 
+    const Dimension& GetFixHeight() const
+    {
+        return fixHeight_;
+    }
+    void SetFixHeight(const Dimension& value)
+    {
+        fixHeight_ = value;
+    }
+
 private:
     bool selected_ = false;
     bool autoLayout_ = false;
@@ -126,6 +135,7 @@ private:
     std::string text_;
     uint32_t index_ = 0;
     RefPtr<PickerTheme> theme_;
+    Dimension fixHeight_;
 
     RefPtr<BoxComponent> boxComponent_;
     RefPtr<TextComponent> textComponent_;

@@ -163,14 +163,23 @@ void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
     auto startDate = paramObj->GetProperty("start");
     auto endDate = paramObj->GetProperty("end");
     auto selectedDate = paramObj->GetProperty("selected");
+    auto parseStartDate = ParseDate(startDate);
+    auto parseEndDate = ParseDate(endDate);
+    auto parseSelectedDate = ParseDate(selectedDate);
+    auto startDays = parseStartDate.ToDays();
+    auto endDays = parseEndDate.ToDays();
+    auto selectedDays = parseSelectedDate.ToDays();
+    if (startDays > endDays || selectedDays < startDays || selectedDays > endDays) {
+        LOGE("date error");
+    }
     if (startDate->IsObject()) {
-        datePicker->SetStartDate(ParseDate(startDate));
+        datePicker->SetStartDate(parseStartDate);
     }
     if (endDate->IsObject()) {
-        datePicker->SetEndDate(ParseDate(endDate));
+        datePicker->SetEndDate(parseEndDate);
     }
     if (selectedDate->IsObject()) {
-        datePicker->SetSelectedDate(ParseDate(selectedDate));
+        datePicker->SetSelectedDate(parseSelectedDate);
     }
 
     datePicker->SetIsDialog(false);

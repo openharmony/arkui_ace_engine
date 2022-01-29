@@ -18,6 +18,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/components/picker/picker_text_component.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -43,6 +44,8 @@ class JSTextPickerDialog {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Show(const JSCallbackInfo& info);
+private:
+    static void ParseText(RefPtr<PickerTextComponent>& component, const JSRef<JSObject>& paramObj);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTPICKER_H
