@@ -472,7 +472,7 @@ void DeclarativeFrontend::RunPage(int32_t pageId, const std::string& url, const 
 {
     // Not use this pageId from backend, manage it in FrontendDelegateDeclarative.
     if (delegate_) {
-        delegate_->RunPage(url, params);
+        delegate_->RunPage(url, params, pageProfile_);
     }
 }
 

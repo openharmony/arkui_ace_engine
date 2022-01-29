@@ -179,6 +179,11 @@ public:
         sharedRuntime_ = runtime;
     }
 
+    void SetPageProfile(const std::string& pageProfile)
+    {
+        pageProfile_ = pageProfile;
+    }
+
     static void CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName,
         OHOS::AppExecFwk::Ability* aceAbility, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false);
@@ -238,6 +243,7 @@ private:
     OHOS::AppExecFwk::Ability* aceAbility_ = nullptr;
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo_;
     void* sharedRuntime_ = nullptr;
+    std::string pageProfile_;
     int32_t pageId_ = 0;
     bool useCurrentEventRunner_ = false;
     sptr<OHOS::Rosen::Window> uiWindow_ = nullptr;
