@@ -539,6 +539,7 @@ void RenderList::OnTouchTestHit(
     }
 
     if (component_->GetEditMode() && dragDropGesture_) {
+        dragDropGesture_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(dragDropGesture_);
     }
 

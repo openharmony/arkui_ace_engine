@@ -931,9 +931,11 @@ void RenderGridLayout::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
     if (dragDropGesture_) {
+        dragDropGesture_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(dragDropGesture_);
     }
     if (slideRecognizer_) {
+        slideRecognizer_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(slideRecognizer_);
     }
 }

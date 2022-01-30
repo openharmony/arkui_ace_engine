@@ -451,6 +451,7 @@ void RenderSearch::OnTouchTestHit(
         });
     }
     rawRecognizer_->SetTouchRestrict(touchRestrict);
+    rawRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(rawRecognizer_);
 
     if (!clickRecognizer_) {
@@ -463,6 +464,7 @@ void RenderSearch::OnTouchTestHit(
         });
     }
     clickRecognizer_->SetTouchRestrict(touchRestrict);
+    clickRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(clickRecognizer_);
 }
 

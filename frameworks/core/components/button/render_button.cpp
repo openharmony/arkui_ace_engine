@@ -271,6 +271,7 @@ void RenderButton::OnTouchTestHit(
     result.emplace_back(touchRecognizer_);
     auto context = context_.Upgrade();
     if (context && !context->GetIsDeclarative()) {
+        clickRecognizer_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(clickRecognizer_);
     }
 }

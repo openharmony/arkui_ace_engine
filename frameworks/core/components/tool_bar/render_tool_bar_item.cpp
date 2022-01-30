@@ -162,6 +162,7 @@ void RenderToolBarItem::OnTouchTestHit(
         return;
     }
     touchRecognizer_->SetCoordinateOffset(coordinateOffset);
+    clickRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(touchRecognizer_);
     result.emplace_back(clickRecognizer_);
 }
