@@ -19,12 +19,60 @@
 #include "base/log/event_report.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/container_modal/container_modal_component.h"
+#include "core/components/image/image_component.h"
+#include "core/components/text/text_component.h"
+#include "core/components/theme/theme_manager.h"
 
 namespace OHOS::Ace {
 
 RefPtr<RenderNode> RenderContainerModal::Create()
 {
     return AceType::MakeRefPtr<RenderContainerModal>();
+}
+
+void RenderContainerModal::UpdateStyle(const RefPtr<Component>& component) const
+{
+    auto containerModal = AceType::DynamicCast<ContainerModalComponent>(component);
+    if (!containerModal) {
+        return;
+    }
+    auto themeManager = GetThemeManager();
+    if (!themeManager) {
+        LOGE("get theme manager failed");
+        return;
+    }
+    auto themeConstants = themeManager->GetThemeConstants();
+    if (!themeConstants) {
+        LOGE("get theme constants failed");
+        return;
+    }
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        LOGE("get pipeline context failed");
+        return;
+    }
+    auto labelId = context->GetAppLabelId();
+    auto appLabelComponent = AceType::DynamicCast<TextComponent>(containerModal->GetTitleLabel());
+    if (appLabelComponent && labelId != 0) {
+        auto appLabel = themeConstants->GetString(labelId);
+        appLabelComponent->SetData(appLabel);
+    }
+
+    auto iconId = context->GetAppIconId();
+    auto appIconComponent = AceType::DynamicCast<ImageComponent>(containerModal->GetTitleIcon());
+    if (appIconComponent && iconId != 0) {
+        auto appIconSrc = themeConstants->GetMediaPath(iconId);
+        appIconComponent->SetSrc(appIconSrc);
+    }
+
+    auto buttonIconComponent = AceType::DynamicCast<ImageComponent>(containerModal->GetMaximizeRecoverButtonIcon());
+    if (buttonIconComponent) {
+        if (context->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            buttonIconComponent->SetResourceId(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER);
+        } else {
+            buttonIconComponent->SetResourceId(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE);
+        }
+    }
 }
 
 void RenderContainerModal::Update(const RefPtr<Component>& component)
@@ -35,6 +83,7 @@ void RenderContainerModal::Update(const RefPtr<Component>& component)
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
+    UpdateStyle(component);
     MarkNeedLayout();
 }
 

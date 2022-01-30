@@ -70,24 +70,35 @@ RefPtr<RenderNode> ContainerModalComponent::CreateRenderNode()
     return RenderContainerModal::Create();
 }
 
+RefPtr<Component> ContainerModalComponent::GetMaximizeRecoverButtonIcon()
+{
+    auto button = AceType::DynamicCast<ButtonComponent>(titleMaximizeRecoverButton_);
+    if (!button || button->GetChildren().empty()) {
+        LOGE("tile maximize recover button is null");
+        return nullptr;
+    }
+    return button->GetChildren().front();
+}
+
 RefPtr<Component> ContainerModalComponent::BuildTitle()
 {
     std::list<RefPtr<Component>> titleChildren;
     // title icon
-    auto imageIcon = InternalResource::ResourceId::RATE_STAR_BIG_ON_SVG;
-    auto image = AceType::MakeRefPtr<ImageComponent>(imageIcon);
+    auto image = AceType::MakeRefPtr<ImageComponent>();
     image->SetWidth(TITLE_ICON_SIZE);
     image->SetHeight(TITLE_ICON_SIZE);
     titleChildren.emplace_back(SetPadding(image, TITLE_PADDING_START, TITLE_ELEMENT_MARGIN_HORIZONTAL));
+    titleIcon_ = image;
 
     // title text
-    auto text = AceType::MakeRefPtr<TextComponent>("AppName");
+    auto text = AceType::MakeRefPtr<TextComponent>("");
     TextStyle style;
     style.SetFontSize(TITLE_TEXT_FONT_SIZE);
     style.SetTextColor(TITLE_TEXT_COLOR);
     style.SetFontWeight(FontWeight::W500);
     style.SetAllowScale(false);
     text->SetTextStyle(style);
+    titleLabel_ = text;
     auto flexItem = AceType::MakeRefPtr<FlexItemComponent>(1.0, 1.0, 0.0, text);
     titleChildren.emplace_back(flexItem);
 
@@ -101,7 +112,7 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
             context->FireWindowSplitCallBack();
         }
     });
-    auto maximizeBtn = BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
+    auto maximizeRecoverBtn = BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
         [contextWptr]() {
         auto context = contextWptr.Upgrade();
         if (context) {
@@ -115,6 +126,7 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
             }
         }
     });
+    titleMaximizeRecoverButton_ = maximizeRecoverBtn;
     auto minimizeBtn = BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE,
         [contextWptr]() {
         LOGI("minimize button clicked");
@@ -133,7 +145,7 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
     });
 
     titleChildren.emplace_back(SetPadding(leftSplitBtn, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
-    titleChildren.emplace_back(SetPadding(maximizeBtn, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
+    titleChildren.emplace_back(SetPadding(maximizeRecoverBtn, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     titleChildren.emplace_back(SetPadding(minimizeBtn, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     titleChildren.emplace_back(SetPadding(closeBtn, ZERO_PADDING, TITLE_PADDING_END));
 
