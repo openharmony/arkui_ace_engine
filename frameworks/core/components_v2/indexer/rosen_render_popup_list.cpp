@@ -13,31 +13,18 @@
  * limitations under the License.
  */
 
-#include "core/components_v2/indexer/flutter_render_popup_list.h"
+#include "core/components_v2/indexer/rosen_render_popup_list.h"
 
-#include "base/utils/utils.h"
-#include "core/pipeline/base/scoped_canvas_state.h"
+#include "render_service_client/core/ui/rs_node.h"
+
+#include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace::V2 {
-RenderLayer FlutterRenderPopupList::GetRenderLayer()
-{
-    if (!layer_) {
-        layer_ = AceType::MakeRefPtr<Flutter::ClipLayer>(
-            0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Flutter::Clip::HARD_EDGE);
-    }
-    return AceType::RawPtr(layer_);
-}
 
-bool FlutterRenderPopupList::IsRepaintBoundary() const
+void RosenRenderPopupList::Paint(RenderContext& context, const Offset& offset)
 {
-    return true;
-}
-
-void FlutterRenderPopupList::Paint(RenderContext& context, const Offset& offset)
-{
-    const auto& layoutSize = GetLayoutSize();
-    if (layer_) {
-        layer_->SetClip(0, layoutSize.Width(), 0, layoutSize.Height(), Flutter::Clip::HARD_EDGE);
+    if (auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode()) {
+        rsNode->SetClipToFrame(true);
     }
 
     if (renderBox_) {
@@ -48,4 +35,5 @@ void FlutterRenderPopupList::Paint(RenderContext& context, const Offset& offset)
         PaintChild(child, context, offset);
     }
 }
+
 } // namespace OHOS::Ace::V2
