@@ -34,14 +34,14 @@ public:
     RefPtr<Element> CreateElement() override;
     RefPtr<RenderNode> CreateRenderNode() override;
     void BuildInnerChild();
-    RefPtr<Component> GetMaximizeRecoverButtonIcon();
+    RefPtr<Component> GetMaximizeRecoverButtonIcon() const;
 
-    RefPtr<Component> GetTitleIcon()
+    RefPtr<Component> GetTitleIcon() const
     {
         return titleIcon_;
     }
 
-    RefPtr<Component> GetTitleLabel()
+    RefPtr<Component> GetTitleLabel() const
     {
         return titleLabel_;
     }

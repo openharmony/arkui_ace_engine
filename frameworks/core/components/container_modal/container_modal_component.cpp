@@ -70,7 +70,7 @@ RefPtr<RenderNode> ContainerModalComponent::CreateRenderNode()
     return RenderContainerModal::Create();
 }
 
-RefPtr<Component> ContainerModalComponent::GetMaximizeRecoverButtonIcon()
+RefPtr<Component> ContainerModalComponent::GetMaximizeRecoverButtonIcon() const
 {
     auto button = AceType::DynamicCast<ButtonComponent>(titleMaximizeRecoverButton_);
     if (!button || button->GetChildren().empty()) {
