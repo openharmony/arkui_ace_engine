@@ -135,7 +135,7 @@ int32_t FrontendDelegateDeclarative::GetMinPlatformVersion()
     return manifestParser_->GetMinPlatformVersion();
 }
 
-void FrontendDelegateDeclarative::RunPage(const std::string& url, const std::string& params)
+void FrontendDelegateDeclarative::RunPage(const std::string& url, const std::string& params, const std::string& profile)
 {
     ACE_SCOPED_TRACE("FrontendDelegateDeclarative::RunPage");
 
@@ -144,6 +144,9 @@ void FrontendDelegateDeclarative::RunPage(const std::string& url, const std::str
     if (GetAssetContent(MANIFEST_JSON, jsonContent)) {
         manifestParser_->Parse(jsonContent);
         manifestParser_->Printer();
+    } else if (!profile.empty() && GetAssetContent(profile, jsonContent)) {
+        LOGI("Parse profile %{public}s", profile.c_str());
+        manifestParser_->Parse(jsonContent);
     } else if (GetAssetContent(PAGES_JSON, jsonContent)) {
         LOGI("Parse main_pages.json");
         manifestParser_->Parse(jsonContent);

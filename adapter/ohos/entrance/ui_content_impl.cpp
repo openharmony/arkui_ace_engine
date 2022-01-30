@@ -202,6 +202,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     std::string moduleName = info != nullptr ? info->moduleName : "";
     auto appInfo = context->GetApplicationInfo();
     std::string resPath;
+    std::string pageProfile;
     LOGI("Initialize UIContent isModelJson:%{public}s", isModelJson ? "true" : "false");
     if (isModelJson) {
         if (appInfo) {
@@ -221,6 +222,17 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 LOGI("Push AssetProvider to queue.");
                 flutterAssetManager->PushBack(std::move(assetProvider));
             }
+        }
+        auto hapInfo = context->GetHapModuleInfo();
+        if (hapInfo) {
+            pageProfile = hapInfo->pages;
+            const std::string profilePrefix = "@profile:";
+            if (pageProfile.find(profilePrefix) == 0) {
+                pageProfile = pageProfile.substr(profilePrefix.length()).append(".json");
+            }
+            LOGI("In stage mode, pageProfile:%{public}s", pageProfile.c_str());
+        } else {
+            LOGE("In stage mode, can't get hap info.");
         }
     } else {
         auto packagePathStr = context->GetBundleCodePath();
@@ -273,6 +285,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     AceEngine::Get().AddContainer(instanceId_, container);
     container->GetSettings().SetUsingSharedRuntime(true);
     container->SetSharedRuntime(runtime_);
+    container->SetPageProfile(pageProfile);
     container->Initialize();
     ContainerScope scope(instanceId_);
     auto front = container->GetFrontend();

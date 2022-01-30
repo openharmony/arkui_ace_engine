@@ -182,6 +182,7 @@ void AceContainer::InitializeFrontend()
         }
         jsEngine->AddExtraNativeObject("ability", aceAbility_);
         declarativeFrontend->SetJsEngine(jsEngine);
+        declarativeFrontend->SetPageProfile(pageProfile_);
         declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
         declarativeFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
     } else {
