@@ -146,6 +146,8 @@ void RenderPickerColumn::OnTouchTestHit(
         dragRecognizer_ = AceType::MakeRefPtr<VerticalDragRecognizer>();
     }
 
+    rawRecognizer_->SetCoordinateOffset(coordinateOffset);
+    dragRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(rawRecognizer_);
     result.emplace_back(dragRecognizer_);
 }

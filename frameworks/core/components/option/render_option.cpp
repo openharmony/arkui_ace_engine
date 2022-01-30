@@ -544,6 +544,8 @@ void RenderOption::OnTouchTestHit(
     LOGD("RenderOption::OnTouchTestHit(%{public}lf, %{public}lf).", coordinateOffset.GetX(), coordinateOffset.GetY());
     InitClickEvent();
     InitTouchEvent();
+    click_->SetCoordinateOffset(coordinateOffset);
+    touch_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(click_);
     result.emplace_back(touch_);
 }

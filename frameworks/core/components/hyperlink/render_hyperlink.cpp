@@ -84,6 +84,7 @@ void RenderHyperlink::OnTouchTestHit(
     if (!clickRecognizer_) {
         return;
     }
+    clickRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(clickRecognizer_);
 }
 

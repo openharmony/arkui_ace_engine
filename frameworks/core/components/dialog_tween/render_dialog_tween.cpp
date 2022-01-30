@@ -512,6 +512,7 @@ void RenderDialogTween::OnTouchTestHit(
     clickDetector_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(clickDetector_);
     if (isDragable_) {
+        dragDetector_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(dragDetector_);
     }
 }
