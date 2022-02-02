@@ -101,7 +101,14 @@ void JSTabs::Create(const JSCallbackInfo& info)
             box->SetHeight(DEFAULT_TAB_BAR_HEIGHT, DimensionUnit::VP);
         }
     }
+    ViewStackProcessor::GetInstance()->PushTabs(tabsComponent);
     ViewStackProcessor::GetInstance()->Push(tabsComponent);
+}
+
+void JSTabs::Pop()
+{
+    ViewStackProcessor::GetInstance()->PopTabs();
+    JSContainerBase::Pop();
 }
 
 void JSTabs::SetVertical(const std::string& value)
@@ -198,6 +205,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::Declare("Tabs");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSTabs>::StaticMethod("create", &JSTabs::Create, opt);
+    JSClass<JSTabs>::StaticMethod("pop", &JSTabs::Pop, opt);
     JSClass<JSTabs>::StaticMethod("vertical", &JSTabs::SetVertical, opt);
     JSClass<JSTabs>::StaticMethod("scrollable", &JSTabs::SetScrollable, opt);
     JSClass<JSTabs>::StaticMethod("barMode", &JSTabs::SetBarMode, opt);

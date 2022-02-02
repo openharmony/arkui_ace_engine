@@ -93,6 +93,25 @@ public:
     // use flag: isCustomView to avoid creating redundant Components.
     void Push(const RefPtr<Component>& component, bool isCustomView = false);
 
+    // Push special tabs component for tabs, tabContent.
+    void PushTabs(const RefPtr<Component>& component)
+    {
+        tabsStack_.push(component);
+    }
+
+    void PopTabs()
+    {
+        tabsStack_.pop();
+    }
+
+    RefPtr<Component> GetTopTabs() const
+    {
+        if (tabsStack_.empty()) {
+            return nullptr;
+        }
+        return tabsStack_.top();
+    }
+
     // Wrap the components map for the stack top and then pop the stack.
     // Add the wrappedcomponent has child of the new stack top's main component.
     void Pop();
@@ -179,6 +198,8 @@ private:
     std::stack<std::unordered_map<std::string, RefPtr<Component>>> componentsStack_;
     std::shared_ptr<JsPageRadioGroups> radioGroups_;
     std::shared_ptr<JsPageCheckboxGroups> checkboxGroups_;
+    // stack for tabs component.
+    std::stack<RefPtr<Component>> tabsStack_;
 
     RefPtr<PageTransitionComponent> pageTransitionComponent_;
 

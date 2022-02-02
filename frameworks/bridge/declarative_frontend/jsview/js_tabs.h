@@ -24,6 +24,7 @@ class JSTabs : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
+    static void Pop();
 
 protected:
     static void SetVertical(const std::string& value);

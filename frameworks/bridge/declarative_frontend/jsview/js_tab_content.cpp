@@ -32,7 +32,7 @@ constexpr char DEFAULT_TAB_BAR_NAME[] = "TabBar";
 
 void JSTabContent::Create()
 {
-    auto tabsComponent = AceType::DynamicCast<TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    auto tabsComponent = AceType::DynamicCast<TabsComponent>(ViewStackProcessor::GetInstance()->GetTopTabs());
     if (tabsComponent) {
         auto tabBar = tabsComponent->GetTabBarChild();
         std::list<RefPtr<Component>> components;
@@ -41,6 +41,8 @@ void JSTabContent::Create()
         tabContentItemComponent->SetTabsComponent(AceType::WeakClaim(AceType::RawPtr(tabsComponent)));
         tabBar->AppendChild(CreateTabBarLabelComponent(tabBar, std::string(DEFAULT_TAB_BAR_NAME)));
         ViewStackProcessor::GetInstance()->Push(tabContentItemComponent);
+    } else {
+        LOGE("fail to create tab content due to tabs missing");
     }
 }
 

@@ -812,7 +812,7 @@ void ViewStackProcessor::CreateScoringComponent(const std::string& tag)
         isScoringEnable_ = SystemProperties::IsScoringEnabled(name);
     });
 
-    if (isScoringEnable_) {
+    if (isScoringEnable_ && V2::InspectorComposedComponent::HasInspectorFinished(tag)) {
         auto component =
             AceType::MakeRefPtr<ScoringComponent>(V2::InspectorComposedComponent::GetEtsTag(tag), viewKey_);
         auto& wrappingComponentsMap = componentsStack_.top();
