@@ -39,7 +39,7 @@ void JSTabContent::Create()
         auto tabContentItemComponent = AceType::MakeRefPtr<TabContentItemComponent>(components);
         tabContentItemComponent->SetCrossAxisSize(CrossAxisSize::MAX);
         tabContentItemComponent->SetTabsComponent(AceType::WeakClaim(AceType::RawPtr(tabsComponent)));
-        tabBar->AppendChild(CreateTabBarLabelComponent(tabBar, std::string(DEFAULT_TAB_BAR_NAME)));
+        tabBar->AppendChild(CreateTabBarLabelComponent(tabContentItemComponent, std::string(DEFAULT_TAB_BAR_NAME)));
         ViewStackProcessor::GetInstance()->Push(tabContentItemComponent);
     } else {
         LOGE("fail to create tab content due to tabs missing");
@@ -49,7 +49,7 @@ void JSTabContent::Create()
 void JSTabContent::SetTabBar(const JSCallbackInfo& info)
 {
     auto tabContentItemComponent =
-        AceType::DynamicCast<OHOS::Ace::TabContentItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+        AceType::DynamicCast<TabContentItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!tabContentItemComponent) {
         return;
     }
@@ -67,12 +67,8 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     RefPtr<Component> tabBarChild = nullptr;
     std::string infoStr;
     if (ParseJsString(info[0], infoStr)) {
-        std::string textVal = infoStr.empty() ? DEFAULT_TAB_BAR_NAME : infoStr;
-        auto text = AceType::MakeRefPtr<TextComponent>(textVal);
-        auto textStyle = text->GetTextStyle();
-        textStyle.SetFontSize(DEFAULT_SINGLE_TEXT_FONT_SIZE);
-        text->SetTextStyle(textStyle);
-        tabContentItemComponent->SetBarText(textVal);
+        auto textVal = infoStr.empty() ? DEFAULT_TAB_BAR_NAME : infoStr;
+        auto text = CreateTabBarLabelComponent(tabContentItemComponent, textVal);
         auto defaultTabChild = tabBar->GetChildren().back();
         tabBar->RemoveChildDirectly(defaultTabChild);
         tabBar->AppendChild(text);
@@ -83,25 +79,27 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     JSRef<JSVal> textParam = paramObject->GetProperty("text");
     JSRef<JSVal> iconParam = paramObject->GetProperty("icon");
     if (builderFuncParam->IsFunction()) {
-        tabBarChild = ProcessTabBarBuilderFunction(tabBar, builderFuncParam);
-    } else if ((!textParam->IsEmpty()) && (!iconParam->IsEmpty())) {
-        tabBarChild = ProcessTabBarTextIconPair(tabBar, textParam, iconParam);
-    } else if (textParam->IsEmpty() && (!iconParam->IsEmpty())) {
-        tabBarChild = ProcessTabBarLabel(tabBar, textParam);
+        tabBarChild = ProcessTabBarBuilderFunction(tabContentItemComponent, builderFuncParam);
+        // for custom build, no need for indicator.
+        tabBar->ResetIndicator();
+        tabBar->SetAlignment(Alignment::TOP_LEFT);
+    } else if (!textParam->IsEmpty() && !iconParam->IsEmpty()) {
+        tabBarChild = ProcessTabBarTextIconPair(tabContentItemComponent, textParam, iconParam);
+    } else if (!textParam->IsEmpty() && iconParam->IsEmpty()) {
+        tabBarChild = ProcessTabBarLabel(tabContentItemComponent, textParam);
     } else {
         LOGE("invalid parameters: expecting either builder func, text & icon pair, or label");
         return;
     }
     auto defaultTabChild = tabBar->GetChildren().back();
-    ACE_DCHECK(tabBarChild != nullptr);
-    ACE_DCHECK(defaultTabChild != nullptr);
     tabBar->RemoveChildDirectly(defaultTabChild);
     tabBar->AppendChild(tabBarChild);
 }
 
 RefPtr<Component> JSTabContent::ProcessTabBarBuilderFunction(
-    RefPtr<TabBarComponent>& tabBar, const JSRef<JSObject> builderFunc)
+    RefPtr<TabContentItemComponent>& tabContent, const JSRef<JSObject> builderFunc)
 {
+    tabContent->SetBarText("custom");
     ScopedViewStackProcessor builderViewStackProcessor;
     JsFunction jsBuilderFunc(builderFunc);
     ACE_SCORING_EVENT("TabContent.tabBarBuilder");
@@ -111,36 +109,41 @@ RefPtr<Component> JSTabContent::ProcessTabBarBuilderFunction(
 }
 
 RefPtr<TextComponent> JSTabContent::CreateTabBarLabelComponent(
-    RefPtr<TabBarComponent>& tabBar, const std::string& labelStr)
+    RefPtr<TabContentItemComponent>& tabContent, const std::string& labelStr)
 {
+    tabContent->SetBarText(labelStr);
     auto text = AceType::MakeRefPtr<TextComponent>(labelStr);
     auto textStyle = text->GetTextStyle();
     textStyle.SetFontSize(DEFAULT_SINGLE_TEXT_FONT_SIZE);
+    textStyle.SetMaxLines(1);
+    textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
     text->SetTextStyle(textStyle);
+    text->SetAutoMaxLines(false);
     return text;
 }
 
-RefPtr<TextComponent> JSTabContent::ProcessTabBarLabel(RefPtr<TabBarComponent>& tabBar, JSRef<JSVal> labelVal)
+RefPtr<TextComponent> JSTabContent::ProcessTabBarLabel(
+    RefPtr<TabContentItemComponent>& tabContent, JSRef<JSVal> labelVal)
 {
     std::string textStr;
     if (!ParseJsString(labelVal, textStr)) {
         textStr = DEFAULT_TAB_BAR_NAME;
     }
-    LOGD("text: %s", textStr.c_str());
-    return CreateTabBarLabelComponent(tabBar, textStr);
+    return CreateTabBarLabelComponent(tabContent, textStr);
 }
 
 RefPtr<Component> JSTabContent::ProcessTabBarTextIconPair(
-    RefPtr<TabBarComponent>& tabBar, JSRef<JSVal> textVal, JSRef<JSVal> iconVal)
+    RefPtr<TabContentItemComponent>& tabContent, JSRef<JSVal> textVal, JSRef<JSVal> iconVal)
 {
     std::string iconUri;
     if (!ParseJsMedia(iconVal, iconUri)) {
-        return ProcessTabBarLabel(tabBar, textVal);
+        return ProcessTabBarLabel(tabContent, textVal);
     }
     std::string textStr;
     if (!ParseJsString(textVal, textStr)) {
         textStr = DEFAULT_TAB_BAR_NAME;
     }
+    tabContent->SetBarText(textStr);
     auto imageComponent = AceType::MakeRefPtr<ImageComponent>(iconUri);
     auto box = AceType::MakeRefPtr<BoxComponent>();
     auto padding = AceType::MakeRefPtr<PaddingComponent>();
@@ -152,6 +155,8 @@ RefPtr<Component> JSTabContent::ProcessTabBarTextIconPair(
     auto textComponent = AceType::MakeRefPtr<TextComponent>(textStr);
     auto textStyle = textComponent->GetTextStyle();
     textStyle.SetFontSize(DEFAULT_SMALL_TEXT_FONT_SIZE);
+    textStyle.SetMaxLines(1);
+    textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
     textComponent->SetTextStyle(textStyle);
     std::list<RefPtr<Component>> children;
     children.emplace_back(box);
@@ -164,9 +169,8 @@ RefPtr<Component> JSTabContent::ProcessTabBarTextIconPair(
 void JSTabContent::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTabContent>::Declare("TabContent");
-    MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSTabContent>::StaticMethod("create", &JSTabContent::Create, opt);
-    JSClass<JSTabContent>::StaticMethod("tabBar", &JSTabContent::SetTabBar, opt);
+    JSClass<JSTabContent>::StaticMethod("create", &JSTabContent::Create);
+    JSClass<JSTabContent>::StaticMethod("tabBar", &JSTabContent::SetTabBar);
     JSClass<JSTabContent>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTabContent>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTabContent>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -174,9 +178,9 @@ void JSTabContent::JSBind(BindingTarget globalObj)
     JSClass<JSTabContent>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSTabContent>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSTabContent>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSTabContent>::StaticMethod("width", &JSTabContent::SetTabContentWidth, opt);
-    JSClass<JSTabContent>::StaticMethod("height", &JSTabContent::SetTabContentHeight, opt);
-    JSClass<JSTabContent>::StaticMethod("size", &JSTabContent::SetTabContentSize, opt);
+    JSClass<JSTabContent>::StaticMethod("width", &JSTabContent::SetTabContentWidth);
+    JSClass<JSTabContent>::StaticMethod("height", &JSTabContent::SetTabContentHeight);
+    JSClass<JSTabContent>::StaticMethod("size", &JSTabContent::SetTabContentSize);
     JSClass<JSTabContent>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSTabContent>::Inherit<JSContainerBase>();
     JSClass<JSTabContent>::Bind<>(globalObj);

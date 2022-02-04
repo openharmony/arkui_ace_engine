@@ -174,6 +174,17 @@ public:
     // Called by element on perform build process.
     void BuildItems(std::list<RefPtr<TabBarItemComponent>>& items);
 
+    void ResetIndicator()
+    {
+        indicator_.Reset();
+        focusIndicator_.Reset();
+    }
+
+    void SetAlignment(Alignment alignment)
+    {
+        itemAlignment_ = alignment;
+    }
+
 private:
     bool vertical_ { false }; // the tab is vertical or not, default value is false
 
