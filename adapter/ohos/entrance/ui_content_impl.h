@@ -69,6 +69,7 @@ private:
     ViewportConfig config_;
     std::string startUrl_;
     int32_t instanceId_ = -1;
+    bool updateConfig_ = false;
 };
 
 } // namespace OHOS::Ace
