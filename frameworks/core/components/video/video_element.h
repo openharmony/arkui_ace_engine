@@ -132,6 +132,7 @@ private:
     ImageFit imageFit_ { ImageFit::CONTAIN };
     ImageObjectPosition imagePosition_;
 
+    bool hasSrcChanged_ = true;
     bool needControls_ = true;
     bool isAutoPlay_ = false;
     bool isMute_ = false;
