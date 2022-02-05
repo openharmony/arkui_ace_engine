@@ -1661,7 +1661,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height)
     height_ = height;
 
     ACE_SCOPED_TRACE("OnSurfaceChanged(%d, %d)", width, height);
-    LOGI("Surface size changed, [%{private}d * %{private}d]", width, height);
+    LOGI("Surface size changed, [%{public}d * %{public}d]", width, height);
     if (!NearZero(rootHeight_)) {
         double newRootHeight = height / viewScale_;
         double newRootWidth = width / viewScale_;

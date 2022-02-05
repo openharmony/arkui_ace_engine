@@ -183,7 +183,7 @@ void SystemProperties::SetDeviceOrientation(int32_t orientation)
         Swap(deviceWidth_, deviceHeight_);
         orientation_ = DeviceOrientation::LANDSCAPE;
     } else {
-        LOGW("SetDeviceOrientation, undefined orientation");
+        LOGI("SetDeviceOrientation, no change info: %{public}d", orientation);
     }
 }
 
