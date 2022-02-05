@@ -24,8 +24,8 @@
 namespace OHOS::Ace::Framework {
 namespace {
 
-constexpr double DEFAULT_TAB_BAR_WIDTH = 200;
-constexpr double DEFAULT_TAB_BAR_HEIGHT = 56;
+constexpr Dimension DEFAULT_TAB_BAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAULT_TAB_BAR_HEIGHT = 56.0_vp;
 const std::vector<BarPosition> BAR_POSITIONS = { BarPosition::START, BarPosition::END };
 
 JSRef<JSVal> TabContentChangeEventToJSValue(const TabContentChangeEvent& eventInfo)
@@ -95,13 +95,22 @@ void JSTabs::Create(const JSCallbackInfo& info)
         AceType::MakeRefPtr<OHOS::Ace::TabsComponent>(children, barVal, tabController);
     auto tabBar = tabsComponent->GetTabBarChild();
     if (tabBar) {
+        auto theme = GetTheme<TabTheme>();
+        tabBar->InitStyle(theme);
         auto box = AceType::DynamicCast<BoxComponent>(tabBar->GetParent().Upgrade());
         if (box) {
-            box->SetWidth(DEFAULT_TAB_BAR_WIDTH, DimensionUnit::VP);
-            box->SetHeight(DEFAULT_TAB_BAR_HEIGHT, DimensionUnit::VP);
+            box->SetWidth(theme ? theme->GetDefaultWidth() : DEFAULT_TAB_BAR_WIDTH);
+            box->SetHeight(theme ? theme->GetDefaultHeight() : DEFAULT_TAB_BAR_HEIGHT);
         }
     }
+    ViewStackProcessor::GetInstance()->PushTabs(tabsComponent);
     ViewStackProcessor::GetInstance()->Push(tabsComponent);
+}
+
+void JSTabs::Pop()
+{
+    ViewStackProcessor::GetInstance()->PopTabs();
+    JSContainerBase::Pop();
 }
 
 void JSTabs::SetVertical(const std::string& value)
@@ -150,33 +159,59 @@ void JSTabs::SetBarMode(const std::string& value)
     }
 }
 
-void JSTabs::SetBarWidth(double width)
+void JSTabs::SetBarWidth(const JSCallbackInfo& info)
 {
     auto component = AceType::DynamicCast<TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!component) {
         return;
     }
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    Dimension width;
+    if (!ParseJsDimensionVp(info[0], width)) {
+        LOGE("The arg is wrong, fail to parse dimension");
+        return;
+    }
     auto tabBar = component->GetTabBarChild();
-    if (tabBar) {
-        auto box = AceType::DynamicCast<BoxComponent>(tabBar->GetParent().Upgrade());
-        if (box) {
-            box->SetWidth(width, DimensionUnit::VP);
-        }
+    if (!tabBar) {
+        LOGE("can not find tab bar component");
+        return;
+    }
+    auto box = AceType::DynamicCast<BoxComponent>(tabBar->GetParent().Upgrade());
+    if (box) {
+        box->SetWidth(width);
+    } else {
+        LOGE("can not find box component");
     }
 }
 
-void JSTabs::SetBarHeight(double height)
+void JSTabs::SetBarHeight(const JSCallbackInfo& info)
 {
     auto component = AceType::DynamicCast<TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!component) {
         return;
     }
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    Dimension height;
+    if (!ParseJsDimensionVp(info[0], height)) {
+        LOGE("The arg is wrong, fail to parse dimension");
+        return;
+    }
     auto tabBar = component->GetTabBarChild();
-    if (tabBar) {
-        auto box = AceType::DynamicCast<BoxComponent>(tabBar->GetParent().Upgrade());
-        if (box) {
-            box->SetHeight(height, DimensionUnit::VP);
-        }
+    if (!tabBar) {
+        LOGE("can not find tab bar component");
+        return;
+    }
+    auto box = AceType::DynamicCast<BoxComponent>(tabBar->GetParent().Upgrade());
+    if (box) {
+        box->SetHeight(height);
+    } else {
+        LOGE("can not find box component");
     }
 }
 
@@ -196,14 +231,14 @@ void JSTabs::SetAnimationDuration(float value)
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTabs>::Declare("Tabs");
-    MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSTabs>::StaticMethod("create", &JSTabs::Create, opt);
-    JSClass<JSTabs>::StaticMethod("vertical", &JSTabs::SetVertical, opt);
-    JSClass<JSTabs>::StaticMethod("scrollable", &JSTabs::SetScrollable, opt);
-    JSClass<JSTabs>::StaticMethod("barMode", &JSTabs::SetBarMode, opt);
-    JSClass<JSTabs>::StaticMethod("barWidth", &JSTabs::SetBarWidth, opt);
-    JSClass<JSTabs>::StaticMethod("barHeight", &JSTabs::SetBarHeight, opt);
-    JSClass<JSTabs>::StaticMethod("animationDuration", &JSTabs::SetAnimationDuration, opt);
+    JSClass<JSTabs>::StaticMethod("create", &JSTabs::Create);
+    JSClass<JSTabs>::StaticMethod("pop", &JSTabs::Pop);
+    JSClass<JSTabs>::StaticMethod("vertical", &JSTabs::SetVertical);
+    JSClass<JSTabs>::StaticMethod("scrollable", &JSTabs::SetScrollable);
+    JSClass<JSTabs>::StaticMethod("barMode", &JSTabs::SetBarMode);
+    JSClass<JSTabs>::StaticMethod("barWidth", &JSTabs::SetBarWidth);
+    JSClass<JSTabs>::StaticMethod("barHeight", &JSTabs::SetBarHeight);
+    JSClass<JSTabs>::StaticMethod("animationDuration", &JSTabs::SetAnimationDuration);
     JSClass<JSTabs>::StaticMethod("onChange", &JSTabs::SetOnChange);
     JSClass<JSTabs>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTabs>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);

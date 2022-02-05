@@ -16,6 +16,7 @@
 #include "core/components/tab_bar/tabs_component.h"
 
 #include "core/components/clip/clip_component.h"
+#include "core/components/foreach/for_each_component.h"
 #include "core/components/tab_bar/tabs_element.h"
 
 namespace OHOS::Ace {
@@ -44,6 +45,7 @@ TabsComponent::TabsComponent(
     auto box = AceType::MakeRefPtr<BoxComponent>();
     box->SetChild(tabBar_);
     box->SetIgnoreInspector(true);
+    box->SetFlex(BoxFlex::FLEX_XY);
     if (barPosition == BarPosition::END) {
         AppendChildDirectly(flexItem_);
         AppendChildDirectly(box);
@@ -60,6 +62,15 @@ RefPtr<Element> TabsComponent::CreateElement()
 
 void TabsComponent::AppendChild(const RefPtr<Component>& child)
 {
+    if (AceType::InstanceOf<ForEachComponent>(child)) {
+        auto children = DynamicCast<ForEachComponent>(child)->GetChildren();
+        for (auto&& item : children) {
+            auto clip = AceType::MakeRefPtr<ClipComponent>(item);
+            clip->SetFollowChild(false);
+            tabContent_->AppendChildDirectly(clip);
+        }
+        return;
+    }
     auto clip = AceType::MakeRefPtr<ClipComponent>(child);
     clip->SetFollowChild(false);
     tabContent_->AppendChildDirectly(clip);
