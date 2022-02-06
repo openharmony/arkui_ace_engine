@@ -773,8 +773,8 @@ class SynchedPropertySimpleOneWay extends ObservedPropertySimpleAbstract {
             return;
         }
         aceConsole.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
-        this.notifyHasChanged(newValue, isCrossWindow);
         this.wrappedValue_ = newValue;
+        this.notifyHasChanged(newValue, isCrossWindow);
     }
     /**
      * These functions are meant for use in connection with the App Stoage and
