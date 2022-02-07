@@ -749,21 +749,24 @@ void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::str
 
 void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string& params)
 {
-    auto& currentPage = pageRouteStack_.back();
-    if (currentPage.isAlertBeforeBackPage) {
-        backUri_ = uri;
-        backParam_ = params;
-        taskExecutor_->PostTask(
-            [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
-                isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
-                    if (context) {
-                        context->ShowDialog(dialogProperties, isRightToLeft);
-                    }
-                },
-            TaskExecutor::TaskType::UI);
-    } else {
-        BackWithTarget(PageTarget(uri), params);
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        auto& currentPage = pageRouteStack_.back();
+        if (currentPage.isAlertBeforeBackPage) {
+            backUri_ = uri;
+            backParam_ = params;
+            taskExecutor_->PostTask(
+                [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
+                    isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
+                        if (context) {
+                            context->ShowDialog(dialogProperties, isRightToLeft);
+                        }
+                    },
+                TaskExecutor::TaskType::UI);
+            return;
+        }
     }
+    BackWithTarget(PageTarget(uri), params);
 }
 
 void FrontendDelegateDeclarative::Push(const PageTarget& target, const std::string& params)
@@ -838,15 +841,16 @@ void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const
         std::string pagePath;
         {
             std::lock_guard<std::mutex> lock(mutex_);
-            if (pageRouteStack_.size() > 1) {
-                pageId_ = pageRouteStack_[pageRouteStack_.size() - 2].pageId;
+            size_t pageRouteSize = pageRouteStack_.size();
+            if (pageRouteSize > 1) {
+                pageId_ = pageRouteStack_[pageRouteSize - 2].pageId;
                 if (!params.empty()) {
                     pageParamMap_[pageId_] = params;
                 }
                 // determine whether the previous page needs to be loaded
-                if (pageRouteStack_[pageRouteStack_.size() - 2].isRestore) {
+                if (pageRouteStack_[pageRouteSize - 2].isRestore) {
                     pagePath =
-                        manifestParser_->GetRouter()->GetPagePath(pageRouteStack_[pageRouteStack_.size() - 2].url);
+                        manifestParser_->GetRouter()->GetPagePath(pageRouteStack_[pageRouteSize - 2].url);
                 }
             }
         }
@@ -1600,7 +1604,7 @@ void FrontendDelegateDeclarative::RestorePopPage(const RefPtr<JsAcePage>& page, 
             LOGI("RestorePopPage begin");
             auto pipelineContext = delegate->pipelineContextHolder_.Get();
             bool isLastPage = false;
-            if (delegate->pageRouteStack_.size() == 1) {
+            if (delegate->GetStackSize() == 1) {
                 if (delegate->disallowPopLastPage_) {
                     LOGW("Not allow back because this is the last page!");
                     return;
@@ -1972,6 +1976,7 @@ RefPtr<PipelineContext> FrontendDelegateDeclarative::GetPipelineContext()
 
 std::string FrontendDelegateDeclarative::RestoreRouterStack(const std::string& contentInfo)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     auto routerStack = JsonUtil::ParseJsonString(contentInfo);
     if (!routerStack->IsValid() || !routerStack->IsArray()) {
         LOGW("restore router stack is invalid");
@@ -1987,20 +1992,19 @@ std::string FrontendDelegateDeclarative::RestoreRouterStack(const std::string& c
         pageRouteStack_.emplace_back(
             PageInfo { GenerateNextPageId(), url.substr(1, url.size() - 2), true });
     }
-    mainPagePath_ = routerStack->GetArrayItem(stackSize - 1)->ToString();
+    std::string startUrl = routerStack->GetArrayItem(stackSize - 1)->ToString();
     // remove 5 useless character, as "XXX.js" to XXX
-    mainPagePath_ = mainPagePath_.substr(1, mainPagePath_.size() - 5);
-    return mainPagePath_;
+    return startUrl.substr(1, startUrl.size() - 5);
 }
 
 std::string FrontendDelegateDeclarative::GetContentInfo()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     auto jsonRouterStack = JsonUtil::CreateArray(true);
     for (size_t index = 0; index < pageRouteStack_.size(); ++index) {
         jsonRouterStack->Put("", pageRouteStack_[index].url.c_str());
     }
-    pageStack_ = jsonRouterStack->ToString();
-    return pageStack_;
+    return jsonRouterStack->ToString();
 }
 
 } // namespace OHOS::Ace::Framework

@@ -293,7 +293,6 @@ private:
     bool isRouteStackFull_ = false;
     bool isStagingPageExist_ = false;
     std::string mainPagePath_;
-    std::string pageStack_;
     std::string backUri_;
     std::string backParam_;
     std::vector<PageInfo> pageRouteStack_;
