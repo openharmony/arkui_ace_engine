@@ -765,7 +765,7 @@ void AceContainer::AttachView(
             TaskExecutor::TaskType::UI);
     }
 
-    AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_);
+    AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
 }
 
 void AceContainer::InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs)
