@@ -129,6 +129,7 @@ ohos_copy("copy_napi_shared_library_for_test") {
     sources = [
       "$shared_library_path/ace/napi/libace_napi.dylib",
       "$shared_library_path/ace/napi/libace_napi_quickjs.dylib",
+      "$shared_library_path/ace/napi/libuv.dylib",
     ]
     outputs =
         [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
@@ -136,6 +137,7 @@ ohos_copy("copy_napi_shared_library_for_test") {
     sources = [
       "$shared_library_path/ace/napi/libace_napi.dll",
       "$shared_library_path/ace/napi/libace_napi_quickjs.dll",
+      "$shared_library_path/ace/napi/libuv.dll",
     ]
     outputs =
         [ root_build_dir + "/mingw_x86_64/common/common/{{source_file_part}}" ]
