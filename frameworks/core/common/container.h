@@ -107,12 +107,12 @@ public:
 
     bool IsFirstUpdate()
     {
-        return firstUpateData_;
+        return firstUpdateData_;
     }
 
     void AlreadyFirstUpdate()
     {
-        firstUpateData_ = false;
+        firstUpdateData_ = false;
     }
 
     void SetModuleName(const std::string& moduleName)
@@ -152,7 +152,7 @@ public:
 
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
-    bool firstUpateData_ = true;
+    bool firstUpdateData_ = true;
     std::string cardHapPath_;
 
 private:

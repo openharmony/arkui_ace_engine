@@ -23,7 +23,7 @@ WatchDog::WatchDog() {}
 
 WatchDog::~WatchDog() {}
 
-void WatchDog::Register(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor) {}
+void WatchDog::Register(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor, bool useUIAsJSThread) {}
 
 void WatchDog::Unregister(int32_t instanceId) {}
 

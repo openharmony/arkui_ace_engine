@@ -849,7 +849,7 @@ void AceContainer::AttachView(
     aceView_->Launch();
     frontend_->AttachPipelineContext(pipelineContext_);
 
-    AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_);
+    AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
 }
 
 void AceContainer::SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow)
