@@ -2601,10 +2601,13 @@ void RenderSwiper::FinishAllSwipeAnimation(bool useFinish)
     } else {
         StopSwipeAnimation();
     }
+
     StopSwipeToAnimation();
     StopIndicatorAnimation();
     StopIndicatorSpringAnimation();
     ResetIndicatorPosition();
+
+    LoadLazyItems((currentIndex_ + 1) % itemCount_ == targetIndex_);
     UpdateOneItemOpacity(MAX_OPACITY, currentIndex_);
     UpdateOneItemOpacity(MAX_OPACITY, targetIndex_);
     currentIndex_ = targetIndex_;
@@ -2911,17 +2914,17 @@ void RenderSwiper::BuildLazyItems()
         } else {
             if (currentIndex_ <= halfLazy) {
                 cacheStart_ = 0;
-                cacheEnd_ = lazyLoadCacheSize_ - 1;
+                cacheEnd_ = swiper_->GetCachedSize() + swiper_->GetDisplayCount() - 1;
             } else if (currentIndex_ >= itemCount_ - halfLazy - 1) {
                 cacheEnd_ = itemCount_ - 1;
-                cacheStart_ = cacheEnd_ - lazyLoadCacheSize_ + 1;
+                cacheStart_ = cacheEnd_ - swiper_->GetCachedSize() - swiper_->GetDisplayCount();
             } else {
                 cacheStart_ = currentIndex_ - halfLazy;
                 cacheEnd_ = cacheStart_ + lazyLoadCacheSize_ - 1;
             }
         }
     }
-    LOGI("currentIndex_ = %d, init cached: %{public}d - %{public}d", currentIndex_, cacheStart_, cacheEnd_);
+    LOGI("currentIndex_ = %{public}d, init cached: %{public}d - %{public}d", currentIndex_, cacheStart_, cacheEnd_);
     int32_t index = cacheStart_;
     while ((index >= cacheStart_ && cacheStart_ > cacheEnd_) || index <= cacheEnd_) {
         buildChildByIndex_(index++);
@@ -2953,11 +2956,10 @@ void RenderSwiper::LoadLazyItems(bool swipeToNext)
         // all item in caches
         return;
     }
-    int32_t halfLazy = lazyLoadCacheSize_ / 2;
     if (swipeToNext) {
         if (!loop_) {
-            if (currentIndex_ >= halfLazy && currentIndex_ < itemCount_ - halfLazy - 1) {
-                buildChildByIndex_(++cacheEnd_);
+            buildChildByIndex_(++cacheEnd_);
+            if (cacheStart_ + cacheEnd_ >= lazyLoadCacheSize_) {
                 deleteChildByIndex_(cacheStart_++);
             }
         } else {
@@ -2972,10 +2974,10 @@ void RenderSwiper::LoadLazyItems(bool swipeToNext)
         }
     } else {
         if (!loop_) {
-            if (currentIndex_ > halfLazy && currentIndex_ < itemCount_ - halfLazy) {
+            if (cacheStart_ + cacheEnd_ >= lazyLoadCacheSize_) {
                 buildChildByIndex_(--cacheStart_);
-                deleteChildByIndex_(cacheEnd_--);
             }
+            deleteChildByIndex_(cacheEnd_--);
         } else {
             if (--cacheStart_ < 0) {
                 cacheStart_ = itemCount_ - 1;
@@ -2987,6 +2989,7 @@ void RenderSwiper::LoadLazyItems(bool swipeToNext)
             }
         }
     }
+    LOGI("load lazy cached: %{public}d - %{public}d, current = %{public}d", cacheStart_, cacheEnd_, currentIndex_);
 }
 
 void RenderSwiper::AddChildByIndex(int32_t index, const RefPtr<RenderNode>& renderNode)
