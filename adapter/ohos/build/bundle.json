@@ -57,7 +57,6 @@
         "build": {
             "sub_component": [
                 "//foundation/ace/ace_engine/adapter/ohos/build:ace_packages",
-                "//foundation/ace/ace_engine/adapter/preview/build:ace_for_windows",
                 "//foundation/ace/ace_engine/sa_profile:ace_sa_profile",
                 "//foundation/ace/ace_engine/services/uiservice:ui_service.cfg"
             ],
