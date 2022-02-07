@@ -221,6 +221,9 @@ void FlutterTaskExecutor::AddTaskObserver(Task&& callback)
 
 void FlutterTaskExecutor::RemoveTaskObserver()
 {
+    if (!fml::MessageLoop::IsInitializedForCurrentThread()) {
+        return;
+    }
     fml::MessageLoop::GetCurrent().RemoveTaskObserver(reinterpret_cast<intptr_t>(this));
 }
 
