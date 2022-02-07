@@ -34,6 +34,17 @@ public:
     RefPtr<Element> CreateElement() override;
     RefPtr<RenderNode> CreateRenderNode() override;
     void BuildInnerChild();
+    RefPtr<Component> GetMaximizeRecoverButtonIcon() const;
+
+    RefPtr<Component> GetTitleIcon() const
+    {
+        return titleIcon_;
+    }
+
+    RefPtr<Component> GetTitleLabel() const
+    {
+        return titleLabel_;
+    }
 
 private:
     RefPtr<Component> BuildTitle();
@@ -43,6 +54,9 @@ private:
         const Dimension& rightPadding);
 
     WeakPtr<PipelineContext> context_;
+    RefPtr<Component> titleIcon_;
+    RefPtr<Component> titleLabel_;
+    RefPtr<Component> titleMaximizeRecoverButton_;
 };
 
 } // namespace OHOS::Ace

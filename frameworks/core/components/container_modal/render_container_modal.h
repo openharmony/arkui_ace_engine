@@ -35,6 +35,7 @@ public:
 private:
     void ContainerBoxLayout();
     bool ParseRequiredRenderNodes();
+    void UpdateStyle(const RefPtr<Component>& component) const;
 
     WeakPtr<RenderBox> containerBox_;
 };

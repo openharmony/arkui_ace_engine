@@ -1124,6 +1124,26 @@ public:
         return WindowMode::WINDOW_MODE_UNDEFINED;
     }
 
+    void SetAppIconId(int32_t id)
+    {
+        appIconId_ = id;
+    }
+
+    int32_t GetAppIconId() const
+    {
+        return appIconId_;
+    }
+
+    void SetAppLabelId(int32_t id)
+    {
+        appLabelId_ = id;
+    }
+
+    int32_t GetAppLabelId() const
+    {
+        return appLabelId_;
+    }
+
 private:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     void FlushPipelineWithoutAnimation();
@@ -1342,6 +1362,8 @@ private:
     bool isKeyboardA_ = false;
     SubscribeCtrlACallback subscribeCtrlA_;
 
+    int32_t appLabelId_ = 0;
+    int32_t appIconId_ = 0;
     std::function<bool(void)> windowMinimizeCallback_ = nullptr;
     std::function<bool(void)> windowMaximizeCallback_ = nullptr;
     std::function<bool(void)> windowRecoverCallback_ = nullptr;

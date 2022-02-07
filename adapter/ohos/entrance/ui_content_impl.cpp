@@ -345,7 +345,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             context->GetBindingObject()->Get<NativeReference>());
     }
 
-    InitWindowCallback();
+    InitWindowCallback(info);
 
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
@@ -490,7 +490,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config)
     updateConfig_ = true;
 }
 
-void UIContentImpl::InitWindowCallback()
+void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info)
 {
     LOGE("UIContent InitWindowCallback");
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -502,6 +502,10 @@ void UIContentImpl::InitWindowCallback()
     if (!pipelineContext) {
         LOGE("get pipeline context failed");
         return;
+    }
+    if (info != nullptr) {
+        pipelineContext->SetAppLabelId(info->labelId);
+        pipelineContext->SetAppIconId(info->iconId);
     }
 
     auto& window = window_;
