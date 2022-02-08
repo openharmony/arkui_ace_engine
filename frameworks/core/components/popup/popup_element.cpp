@@ -80,6 +80,17 @@ bool PopupElement::ShowPopup()
     weakStack_ = WeakClaim(RawPtr(stackElement));
     bubble->SetWeakStack(weakStack_);
     stackElement->PushComponent(bubble, false);
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    auto manager = context->GetAccessibilityManager();
+    if (manager) {
+        auto node = manager->GetAccessibilityNodeById(StringUtils::StringToInt(popup_->GetId()));
+        if (!node) {
+            return true;
+        }
+        node->SetZIndexToChild(stackElement->GetChildrenSize());
+        manager->ClearNodeRectInfo(node, false);
+    }
+#endif
     return true;
 }
 
