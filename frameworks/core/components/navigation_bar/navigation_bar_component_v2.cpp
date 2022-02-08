@@ -47,12 +47,24 @@ RefPtr<Component> NavigationBarBuilder::BuildMiniLayer()
         backIcon.image->SetMatchTextDirection(true);
         backIcon.image->SetColor(theme_->GetMenuIconColor());
         auto backButton = BuildIconButton(theme_, menuZoneSize_, menuZoneSize_, backIcon, backClickMarker_);
+        EventMarker clickEventId([weakContext = context_](const BaseEventInfo* info) {
+            auto context = weakContext.Upgrade();
+            if (!context) {
+                LOGW("context is empty");
+                return;
+            }
+            context->CallRouterBackToPopPage();
+        });
+        backButton->SetClickedEventId(clickEventId);
         container->AppendChild(GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "backButton", backButton));
         container->AppendChild(BuildPadding(theme_->GetTitleMinPadding().Value()));
         padding.SetLeft(theme_->GetDefaultPaddingStart());
+    } else {
+        container->AppendChild(BuildPadding(theme_->GetMaxPaddingStart().Value()));
     }
 
     container->AppendChild(BuildTitle());
+    container->SetUpdateType(UpdateType::REBUILD);
 
     if (AddMenu(container)) {
         padding.SetRight(theme_->GetDefaultPaddingEnd());
@@ -140,7 +152,7 @@ RefPtr<Component> NavigationBarBuilder::BuildAnimationContainer(
         boxContainer->SetHeight(height, declaration_->animationOption);
         display->SetOpacity(1.0, declaration_->animationOption);
     } else {
-        boxContainer->SetHeight(Dimension(), declaration_->animationOption);
+        boxContainer->SetHeight(Dimension(0.0, height.Unit()), declaration_->animationOption);
         display->SetOpacity(0.0, declaration_->animationOption);
     }
     return display;
@@ -210,6 +222,7 @@ bool NavigationBarBuilder::AddMenu(const RefPtr<ComponentGroup>& container)
             if (theme_->GetMenuItemPadding().Value() > 0.0 && needAddPadding) {
                 container->AppendChild(BuildPadding(theme_->GetMenuItemPadding().Value()));
             }
+            optionButton->SetClickedEventId(menuItem->actionWithParam);
             container->AppendChild(
                 GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "optionButton", optionButton));
             needAddPadding = true;
