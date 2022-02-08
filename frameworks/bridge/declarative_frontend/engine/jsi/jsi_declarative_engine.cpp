@@ -329,8 +329,6 @@ JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
     CHECK_RUN_ON(JS);
     LOG_DESTROY();
 
-    DestroyAllRootViewHandle();
-
     if (runningPage_) {
         runningPage_->OnJsEngineDestroy();
     }
@@ -816,7 +814,9 @@ JsiDeclarativeEngine::~JsiDeclarativeEngine()
 
     if (!runtime_ && nativeEngine_ != nullptr) {
         nativeEngine_->CancelCheckUVLoop();
+        engineInstance_->DestroyAllRootViewHandle();
         delete nativeEngine_;
+        nativeEngine_ = nullptr;
     }
 
     if (nativeXComponent_) {
