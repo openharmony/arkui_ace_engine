@@ -1044,7 +1044,7 @@ void JsiPaEngine::StartForm(const OHOS::AAFwk::Want& want)
     char* image = (char*)malloc((len + 1) * sizeof(char));
     if (image) {
         valueStr.copy(image, len, 0);
-        formData.AddImageData("image1", image);
+        formData.AddImageData("image1", image, (len + 1) * sizeof(char));
         LOGI("JsiPaEngine image.size:%{public}d", len);
     }
     // free(pImage); // image need be freed by FormProviderData;
