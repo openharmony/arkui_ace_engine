@@ -1335,6 +1335,30 @@ RefPtr<GroupJsBridge> JsiDeclarativeEngine::GetGroupJsBridge()
     return AceType::MakeRefPtr<JsiDeclarativeGroupJsBridge>();
 }
 
+void JsiDeclarativeEngine::OnActive()
+{
+    LOGI("JsiDeclarativeEngine onActive called.");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("onActive failed, runtime is null.");
+        return;
+    }
+
+    CallAppFunc("onActive");
+}
+
+void JsiDeclarativeEngine::OnInactive()
+{
+    LOGI("JsiDeclarativeEngine OnInactive called.");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnInactive failed, runtime is null.");
+        return;
+    }
+
+    CallAppFunc("onInactive");
+}
+
 bool JsiDeclarativeEngine::OnStartContinuation()
 {
     LOGI("JsiDeclarativeEngine OnStartContinuation");

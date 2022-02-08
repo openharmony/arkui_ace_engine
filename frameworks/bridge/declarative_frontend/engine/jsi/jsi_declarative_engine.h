@@ -215,6 +215,10 @@ public:
     // Destroy page instance
     void DestroyPageInstance(int32_t pageId) override;
 
+    void OnActive() override;
+
+    void OnInactive() override;
+
     bool OnStartContinuation() override;
 
     void OnCompleteContinuation(int32_t code) override;
