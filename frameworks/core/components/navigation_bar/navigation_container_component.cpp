@@ -101,7 +101,7 @@ RefPtr<ComposedComponent> NavigationContainerComponent::BuildToolBar(
 
     if (!declaration->HasToolBar()) {
         display->SetOpacity(0.0, declaration->animationOption);
-        tabBarBox->SetHeight(Dimension(), declaration->animationOption);
+        tabBarBox->SetHeight(Dimension(0.0, DimensionUnit::VP), declaration->animationOption);
     } else {
         display->SetOpacity(1.0, declaration->animationOption);
         tabBarBox->SetHeight(theme->GetDefaultHeight(), declaration->animationOption);
