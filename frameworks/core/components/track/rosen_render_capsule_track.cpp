@@ -31,11 +31,10 @@ void RosenRenderCapsuleTrack::DrawShape(RenderContext& context, const Offset& of
     }
 
     Size canvasSize = GetLayoutSize();
-    double progressHeight = canvasSize.Height() / 2.0;
+    double progressHeight = canvasSize.Height();
     double progressWidth = canvasSize.Width();
     Size progressSize = Size(progressWidth, progressHeight);
     double rrectRadius = progressSize.Height() / 2.0;
-    double trackHeight = canvasSize.Height() / 2.0 - rrectRadius;
 
     SkPaint paint;
     paint.setColor(GetBackgroundColor().GetValue());
@@ -48,7 +47,7 @@ void RosenRenderCapsuleTrack::DrawShape(RenderContext& context, const Offset& of
                     rrectRadius,
                     rrectRadius);
 
-    rRect.offset(offset.GetX(), offset.GetY() + trackHeight);
+    rRect.offset(offset.GetX(), offset.GetY());
     canvas->drawRRect(rRect, paint);
 }
 
@@ -65,49 +64,111 @@ void RosenRenderCapsuleTrack::DrawCapsuleProgressAnimation(RenderContext& contex
     double offsetY = offset.GetY();
 
     Size canvasSize = GetLayoutSize();
-    double capsuleHeight = canvasSize.Height() / 2.0;
+    double capsuleHeight = canvasSize.Height();
     double capsuleWidth  = canvasSize.Width();
     Size progressSize = Size(capsuleWidth, capsuleHeight);
 
     double radius = progressSize.Height() / 2.0;
-    double trackHeight = canvasSize.Height() / 2.0 - radius;
+    
     double progressWidth = progressSize.Width()*GetTotalRatio();
 
     SkPath path;
     path.addArc({
-        offsetX, offsetY + trackHeight, progressSize.Height() + offsetX,
-        progressSize.Height() + offsetY + trackHeight
+        offsetX, offsetY, progressSize.Height() + offsetX,
+        progressSize.Height() + offsetY
     },
         90,
         180);
     if (LessNotEqual(progressWidth, radius)) {
         path.addArc({
-            progressWidth + offsetX, offsetY + trackHeight,
+            progressWidth + offsetX, offsetY,
             progressSize.Height() - progressWidth + offsetX,
-            progressSize.Height() + offsetY + trackHeight
+            progressSize.Height() + offsetY
     },
             270,
             -180);
     } else if (GreatNotEqual(progressWidth, progressSize.Width() - radius)) {
         path.addRect({
-            radius + offsetX, offsetY + trackHeight,
+            radius + offsetX, offsetY,
             progressSize.Width() - radius + offsetX,
-            progressSize.Height() + offsetY + trackHeight
+            progressSize.Height() + offsetY
     });
         path.addArc({
             (progressSize.Width() - radius) * 2.0 - progressWidth + offsetX,
-            offsetY + trackHeight,
-            progressWidth + offsetX, progressSize.Height() + offsetY + trackHeight
+            offsetY,
+            progressWidth + offsetX, progressSize.Height() + offsetY
     },
             270,
             180);
     } else {
         path.addRect({
             radius + offsetX,
-            offsetY + trackHeight,
+            offsetY,
             progressWidth + offsetX,
-            progressSize.Height() + offsetY + trackHeight
+            progressSize.Height() + offsetY
     });
+    }
+
+    SkPaint paint;
+    paint.setColor(GetSelectColor().GetValue());
+    paint.setStyle(SkPaint::Style::kFill_Style);
+    paint.setAntiAlias(true);
+    canvas->drawPath(path, paint);
+}
+
+void RosenRenderCapsuleTrack::DrawCapsuleProgressVerticalAnimation(RenderContext& context, const Offset& offset)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+
+    double offsetX = offset.GetX();
+    double offsetY = offset.GetY();
+
+    Size canvasSize = GetLayoutSize();
+    double capsuleHeight = canvasSize.Height();
+    double capsuleWidth = canvasSize.Width();
+    Size progressSize = Size(capsuleWidth, capsuleHeight);
+
+    double radius = progressSize.Width() / 2.0;
+    double progressWidth = progressSize.Height()*GetTotalRatio();
+
+    SkPath path;
+    path.addArc({
+        offsetX, offsetY, progressSize.Width() + offsetX,
+        progressSize.Width() + offsetY
+    },
+        0,
+        -180);
+    if (LessNotEqual(progressWidth, radius)) {
+        path.addArc({
+            offsetX, offsetY + progressWidth,
+            progressSize.Width() + offsetX,
+            progressSize.Width() - progressWidth + offsetY
+        },
+            180,
+            180);
+    } else if (GreatNotEqual(progressWidth, progressSize.Height() - radius)) {
+        path.addRect({
+            offsetX, offsetY + radius,
+            progressSize.Width() + offsetX,
+            progressSize.Height() - radius + offsetY
+        });
+        path.addArc({
+            offsetX, offsetY + (progressSize.Height() - radius) * 2.0 - progressWidth,
+            progressSize.Width() + offsetX,
+            progressWidth + offsetY
+        },
+            180,
+            -180);
+    } else {
+        path.addRect({
+            offsetX, radius + offsetY,
+            offsetX + progressSize.Width(),
+            progressWidth + offsetY
+        });
     }
 
     SkPaint paint;
@@ -120,6 +181,13 @@ void RosenRenderCapsuleTrack::DrawCapsuleProgressAnimation(RenderContext& contex
 void RosenRenderCapsuleTrack::Paint(RenderContext& context, const Offset& offset)
 {
     DrawShape(context, offset);
-    DrawCapsuleProgressAnimation(context, offset);
+    Size canvasSize = GetLayoutSize();
+    double height = canvasSize.Height();
+    double width = canvasSize.Width();
+    if (width >= height) {
+        DrawCapsuleProgressAnimation(context, offset);
+    } else {
+        DrawCapsuleProgressVerticalAnimation(context, offset);
+    }
 }
 } // namespace OHOS::Ace
