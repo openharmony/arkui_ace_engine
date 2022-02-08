@@ -252,8 +252,12 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
     previewSurface_->SetUserData(SURFACE_STRIDE_ALIGNMENT, std::to_string(SURFACE_STRIDE_ALIGNMENT_VAL));
 #ifdef PRODUCT_RK
     previewSurface_->SetUserData(SURFACE_FORMAT, std::to_string(PIXEL_FMT_RGBA_8888));
+    previewSurface_->SetUserData(CameraStandard::CameraManager::surfaceFormat,
+                                 std::to_string(OHOS_CAMERA_FORMAT_RGBA_8888));
 #else
     previewSurface_->SetUserData(SURFACE_FORMAT, std::to_string(PIXEL_FMT_YCRCB_420_SP));
+    previewSurface_->SetUserData(CameraStandard::CameraManager::surfaceFormat,
+                                 std::to_string(OHOS_CAMERA_FORMAT_YCRCB_420_SP));
 #endif
     previewSurface_->SetUserData(SURFACE_WIDTH, std::to_string(PREVIEW_SURFACE_WIDTH));
     previewSurface_->SetUserData(SURFACE_HEIGHT, std::to_string(PREVIEW_SURFACE_HEIGHT));
@@ -310,6 +314,8 @@ int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> c
         return -1;
     }
     captureConsumerSurface_->SetDefaultWidthAndHeight(PHOTO_SURFACE_WIDTH, PHOTO_SURFACE_HEIGHT);
+    captureConsumerSurface_->SetUserData(CameraStandard::CameraManager::surfaceFormat,
+                                         std::to_string(OHOS_CAMERA_FORMAT_JPEG));
     if (photoListener_ == nullptr) {
         photoListener_ = new CaptureListener(this);
     }
@@ -372,6 +378,13 @@ int32_t CameraCallback::PrepareVideo(sptr<OHOS::CameraStandard::CameraManager> c
         return -1;
     }
     sptr<Surface> recorderSurface = (recorder_->GetSurface(videoSourceId_));
+#ifdef PRODUCT_RK
+    recorderSurface->SetUserData(CameraStandard::CameraManager::surfaceFormat,
+                                 std::to_string(OHOS_CAMERA_FORMAT_RGBA_8888));
+#else
+    recorderSurface->SetUserData(CameraStandard::CameraManager::surfaceFormat,
+                                 std::to_string(OHOS_CAMERA_FORMAT_YCRCB_420_SP));
+#endif
     videoOutput_ = camManagerObj->CreateVideoOutput(recorderSurface);
     if (videoOutput_ == nullptr) {
         LOGE("Create Video Output Failed");

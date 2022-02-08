@@ -34,6 +34,7 @@ public:
     std::string value;
     std::string icon;
     EventMarker action;
+    EventMarker actionWithParam;
 };
 
 enum class NavigationTitleMode {

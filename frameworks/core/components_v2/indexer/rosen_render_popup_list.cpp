@@ -13,18 +13,27 @@
  * limitations under the License.
  */
 
-#include "core/common/watch_dog.h"
+#include "core/components_v2/indexer/rosen_render_popup_list.h"
 
-namespace OHOS::Ace {
+#include "render_service_client/core/ui/rs_node.h"
 
-class ThreadWatcher : public Referenced {};
+#include "core/pipeline/base/rosen_render_context.h"
 
-WatchDog::WatchDog() {}
+namespace OHOS::Ace::V2 {
 
-WatchDog::~WatchDog() {}
+void RosenRenderPopupList::Paint(RenderContext& context, const Offset& offset)
+{
+    if (auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode()) {
+        rsNode->SetClipToFrame(true);
+    }
 
-void WatchDog::Register(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor, bool useUIAsJSThread) {}
+    if (renderBox_) {
+        PaintChild(renderBox_, context, offset);
+    }
 
-void WatchDog::Unregister(int32_t instanceId) {}
+    for (const auto& child : items_) {
+        PaintChild(child, context, offset);
+    }
+}
 
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::V2

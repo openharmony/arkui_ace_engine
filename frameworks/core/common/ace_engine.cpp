@@ -141,10 +141,10 @@ RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
     }
 }
 
-void AceEngine::RegisterToWatchDog(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor)
+void AceEngine::RegisterToWatchDog(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor, bool useUIAsJSThread)
 {
     if (watchDog_) {
-        watchDog_->Register(instanceId, taskExecutor);
+        watchDog_->Register(instanceId, taskExecutor, useUIAsJSThread);
     }
 }
 

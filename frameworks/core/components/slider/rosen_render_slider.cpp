@@ -87,13 +87,22 @@ void RosenRenderSlider::AddTipChild()
     if (!showTips_) {
         return;
     }
-
-    if (tip_) {
-        return;
-    }
-
     RefPtr<SliderTheme> theme = GetTheme<SliderTheme>();
     if (!theme) {
+        return;
+    }
+    auto tipComponent = AceType::MakeRefPtr<TipComponent>(tipText_);
+    tipComponent->SetBgColor(theme->GetTipColor());
+    tipComponent->SetDirection(direction_);
+    auto padding = NormalizeToPx(theme->GetTipTextPadding());
+    auto edge = direction_ == Axis::VERTICAL ? Edge(0.0, padding, 0.0, padding, DimensionUnit::PX)
+                                             : Edge(padding, 0.0, padding, 0.0, DimensionUnit::PX);
+    if (tip_) {
+        auto renderTip = AceType::DynamicCast<RenderTip>(tip_);
+        if (renderTip) {
+            renderTip->SetPadding(edge);
+        }
+        tip_->Update(tipComponent);
         return;
     }
 
@@ -106,10 +115,6 @@ void RosenRenderSlider::AddTipChild()
     tipText_->SetFocusColor(theme->GetTipTextColor());
     tipText_->SetTextStyle(textStyle);
 
-    auto tipComponent = AceType::MakeRefPtr<TipComponent>(tipText_);
-    tipComponent->SetBgColor(theme->GetTipColor());
-    tipComponent->SetDirection(direction_);
-
     renderText_ = RenderText::Create();
     renderText_->Attach(GetContext());
 
@@ -117,11 +122,9 @@ void RosenRenderSlider::AddTipChild()
     tip_->AddChild(renderText_);
     tip_->Attach(GetContext());
     tip_->SetVisible(false);
-    auto padding = NormalizeToPx(theme->GetTipTextPadding());
     auto renderTip = AceType::DynamicCast<RenderTip>(tip_);
     if (renderTip) {
-        renderTip->SetPadding(direction_ == Axis::VERTICAL ?
-            Edge(0.0, padding, 0.0, padding, DimensionUnit::PX) : Edge(padding, 0.0, padding, 0.0, DimensionUnit::PX));
+        renderTip->SetPadding(edge);
     }
 
     AddChild(tip_);

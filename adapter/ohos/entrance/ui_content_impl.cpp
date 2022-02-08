@@ -20,6 +20,7 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "configuration.h"
+#include "dm/display_manager.h"
 #include "init_data.h"
 #include "js_runtime_utils.h"
 #include "native_reference.h"
@@ -167,6 +168,28 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         CapabilityRegistry::Register();
     });
 
+    int32_t width = window_->GetRect().width_;
+    int32_t height = window_->GetRect().height_;
+    LOGI("UIContent Initialize: width: %{public}d, height: %{public}d", width, height);
+
+    // get density
+    auto density = 1.0f;
+    if (updateConfig_) {
+        density = config_.Density();
+    } else {
+        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+        if (defaultDisplay) {
+            density = defaultDisplay->GetVirtualPixelRatio();
+            LOGI("AceAbility: Default display density set: %{public}f", density);
+        } else {
+            LOGI("AceAbility: Default display is null, set density failed. Use default density: %{public}f", density);
+        }
+    }
+    SystemProperties::SetResolution(density);
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetColorMode(ColorMode::LIGHT);
+    SystemProperties::SetDeviceOrientation(height >= width ? 0 : 1);
+
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     auto resourceManager = context->GetResourceManager();
     if (resourceManager != nullptr) {
@@ -202,6 +225,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     std::string moduleName = info != nullptr ? info->moduleName : "";
     auto appInfo = context->GetApplicationInfo();
     std::string resPath;
+    std::string pageProfile;
     LOGI("Initialize UIContent isModelJson:%{public}s", isModelJson ? "true" : "false");
     if (isModelJson) {
         if (appInfo) {
@@ -221,6 +245,17 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 LOGI("Push AssetProvider to queue.");
                 flutterAssetManager->PushBack(std::move(assetProvider));
             }
+        }
+        auto hapInfo = context->GetHapModuleInfo();
+        if (hapInfo) {
+            pageProfile = hapInfo->pages;
+            const std::string profilePrefix = "@profile:";
+            if (pageProfile.find(profilePrefix) == 0) {
+                pageProfile = pageProfile.substr(profilePrefix.length()).append(".json");
+            }
+            LOGI("In stage mode, pageProfile:%{public}s", pageProfile.c_str());
+        } else {
+            LOGE("In stage mode, can't get hap info.");
         }
     } else {
         auto packagePathStr = context->GetBundleCodePath();
@@ -273,6 +308,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     AceEngine::Get().AddContainer(instanceId_, container);
     container->GetSettings().SetUsingSharedRuntime(true);
     container->SetSharedRuntime(runtime_);
+    container->SetPageProfile(pageProfile);
     container->Initialize();
     ContainerScope scope(instanceId_);
     auto front = container->GetFrontend();
@@ -288,7 +324,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetPackagePathStr(resPath);
     container->SetAssetManager(flutterAssetManager);
 
-    if (window_ && window_->IsDecorEnable()) {
+    if (window_->IsDecorEnable()) {
         LOGI("Container modal is enabled.");
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
@@ -298,12 +334,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         Platform::FlutterAceView::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window_);
 
-    int32_t width = window_->GetRect().width_;
-    int32_t height = window_->GetRect().height_;
-    LOGI("UIContent Initialize: width: %{public}d, height: %{public}d", width, height);
-
     // set view
-    Platform::AceContainer::SetView(flutterAceView, config_.Density(), width, height);
+    Platform::AceContainer::SetView(flutterAceView, density, width, height);
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, config_.Orientation());
     auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
     if (!storage) {
@@ -313,7 +345,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             context->GetBindingObject()->Get<NativeReference>());
     }
 
-    InitWindowCallback();
+    InitWindowCallback(info);
 
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
@@ -426,6 +458,10 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config)
 {
     LOGI("UIContent UpdateViewportConfig %{public}s", config.ToString().c_str());
+    SystemProperties::SetResolution(config.Density());
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetColorMode(ColorMode::LIGHT);
+    SystemProperties::SetDeviceOrientation(config.Height() >= config.Width() ? 0 : 1);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (container) {
 #ifdef ENABLE_ROSEN_BACKEND
@@ -451,9 +487,10 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config)
         Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation());
     }
     config_ = config;
+    updateConfig_ = true;
 }
 
-void UIContentImpl::InitWindowCallback()
+void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info)
 {
     LOGE("UIContent InitWindowCallback");
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -465,6 +502,10 @@ void UIContentImpl::InitWindowCallback()
     if (!pipelineContext) {
         LOGE("get pipeline context failed");
         return;
+    }
+    if (info != nullptr) {
+        pipelineContext->SetAppLabelId(info->labelId);
+        pipelineContext->SetAppIconId(info->iconId);
     }
 
     auto& window = window_;

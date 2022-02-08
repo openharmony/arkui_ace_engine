@@ -632,6 +632,7 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
             coverageComponent->InsertChild(0, components[idx]);
             if (coverageComponent->IsOverLay()) {
                 coverageComponent->Initialization();
+                Component::MergeRSNode(components[idx], coverageComponent);
             }
 #ifndef WEARABLE_PRODUCT
             auto popupComponent = GetPopupComponent(false);
@@ -812,7 +813,7 @@ void ViewStackProcessor::CreateScoringComponent(const std::string& tag)
         isScoringEnable_ = SystemProperties::IsScoringEnabled(name);
     });
 
-    if (isScoringEnable_) {
+    if (isScoringEnable_ && V2::InspectorComposedComponent::HasInspectorFinished(tag)) {
         auto component =
             AceType::MakeRefPtr<ScoringComponent>(V2::InspectorComposedComponent::GetEtsTag(tag), viewKey_);
         auto& wrappingComponentsMap = componentsStack_.top();

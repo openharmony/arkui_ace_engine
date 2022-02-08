@@ -708,10 +708,10 @@ var SourceType;
 
 var SeekMode;
 (function (SeekMode) {
-  SeekMode[SeekMode["PreviousSync"] = 0] = "PreviousSync";
-  SeekMode[SeekMode["NextSync"] = 1] = "NextSync";
-  SeekMode[SeekMode["ClosestSync"] = 2] = "ClosestSync";
-  SeekMode[SeekMode["Closest"] = 3] = "Closest";
+  SeekMode[SeekMode["PreviousKeyframe"] = 0] = "PreviousKeyframe";
+  SeekMode[SeekMode["NextKeyframe"] = 1] = "NextKeyframe";
+  SeekMode[SeekMode["ClosestKeyframe"] = 2] = "ClosestKeyframe";
+  SeekMode[SeekMode["Accurate"] = 3] = "Accurate";
 })(SeekMode || (SeekMode = {}));
 
 var SideBarContainerStyle;

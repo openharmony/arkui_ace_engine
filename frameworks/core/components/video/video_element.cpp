@@ -148,6 +148,11 @@ VideoElement::~VideoElement()
         }
     }
     ReleasePlatformResource();
+#ifdef OHOS_STANDARD_SYSTEM
+    if (mediaPlayer_ != nullptr) {
+        mediaPlayer_->Release();
+    }
+#endif
 }
 
 void VideoElement::PerformBuild()
@@ -308,6 +313,9 @@ void VideoElement::CreateMediaPlayer()
 
 void VideoElement::PreparePlayer()
 {
+    if (!hasSrcChanged_) {
+        return;
+    }
     if (mediaPlayer_ == nullptr) {
         LOGE("mediaPlayer_ is nullptr");
         return;
@@ -351,10 +359,11 @@ void VideoElement::PreparePlayer()
         LOGE("Player SetVideoSurface failed");
         return;
     }
-    if (mediaPlayer_->Prepare() != 0) {
+    if (mediaPlayer_->PrepareAsync() != 0) {
         LOGE("Player prepare failed");
         return;
     }
+    hasSrcChanged_ = false;
 }
 
 std::string VideoElement::GetAssetAbsolutePath(const std::string& fileName)
@@ -623,6 +632,7 @@ void VideoElement::SetNewComponent(const RefPtr<Component>& newComponent)
             if (isError_) {
                 return;
             }
+            hasSrcChanged_ = false;
             InitStatus(videoComponent);
 
             // When the video is in the initial state and the attribute is auto play, start playing.
@@ -635,6 +645,7 @@ void VideoElement::SetNewComponent(const RefPtr<Component>& newComponent)
                 SetVolume(1.0f);
             }
         } else {
+            hasSrcChanged_ = true;
             ResetStatus();
             InitStatus(videoComponent);
             CreatePlatformResource();
@@ -913,11 +924,7 @@ void VideoElement::InitListener()
 
 void VideoElement::ReleasePlatformResource()
 {
-#ifdef OHOS_STANDARD_SYSTEM
-    if (mediaPlayer_ != nullptr) {
-        mediaPlayer_->Release();
-    }
-#else
+#ifndef OHOS_STANDARD_SYSTEM
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -1117,6 +1124,9 @@ void VideoElement::OnPlayerStatus(PlaybackStatus status)
         auto context = context_.Upgrade();
         if (context == nullptr) {
             LOGE("context is nullptr");
+            return;
+        }
+        if (!mediaPlayer_) {
             return;
         }
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);

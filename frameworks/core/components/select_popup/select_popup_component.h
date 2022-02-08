@@ -256,6 +256,11 @@ public:
         return node_;
     }
 
+    RefPtr<StackElement> GetStackElement() const
+    {
+        return stackElement_;
+    }
+
     void SetNode(const RefPtr<AccessibilityNode>& value)
     {
         node_ = value;

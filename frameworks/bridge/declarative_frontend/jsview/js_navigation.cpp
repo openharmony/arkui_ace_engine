@@ -18,6 +18,7 @@
 #include "core/components/navigation_bar/navigation_bar_component_v2.h"
 #include "core/components/navigation_bar/navigation_container_component.h"
 #include "core/components/option/option_component.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -53,14 +54,18 @@ void ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<ToolBarIt
 
         auto itemActionValue = itemObject->GetProperty("action");
         if (itemActionValue->IsFunction()) {
-            auto menuItemActionFunc =
-                AceType::MakeRefPtr<JsEventFunction<BaseEventInfo, 0>>(JSRef<JSFunc>::Cast(itemActionValue), nullptr);
+            auto onClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(itemActionValue));
             toolBarItem->action = EventMarker(
-                [func = std::move(menuItemActionFunc)]() {
+                [func = std::move(onClickFunc)]() {
                     ACE_SCORING_EVENT("Navigation.toolBarItemClick");
                     func->Execute();
-                },
-                "toolBarItemClick", 0);
+                });
+            auto onClickWithParamFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(itemActionValue));
+            toolBarItem->actionWithParam = EventMarker(
+                [func = std::move(onClickWithParamFunc)](const BaseEventInfo* info) {
+                    ACE_SCORING_EVENT("Navigation.menuItemButtonClick");
+                    func->Execute();
+                });
         }
         items.push_back(toolBarItem);
     }

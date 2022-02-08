@@ -89,6 +89,7 @@ void CustomDialogElement::ShowDialog()
     auto mananger = context->GetAccessibilityManager();
     if (mananger) {
         auto node = mananger->GetAccessibilityNodeById(StringUtils::StringToInt(GetId()));
+        node->SetZIndexToChild(stackElement->GetChildrenSize());
         mananger->ClearNodeRectInfo(node, isPopDialog_);
     }
 #endif

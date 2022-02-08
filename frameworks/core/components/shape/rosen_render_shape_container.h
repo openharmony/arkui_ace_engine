@@ -31,7 +31,7 @@ class RosenRenderShapeContainer : public RenderShapeContainer {
 public:
     void PerformLayout() override;
     void Paint(RenderContext& context, const Offset& offset) override;
-    RefPtr<RosenRenderShape> GetShapeChild(const RefPtr<RenderNode>& node);
+    RefPtr<RosenRenderShape> GetShapeChild(const RefPtr<RenderNode>& node, Offset& offset);
 
 private:
     void BitmapMesh(RenderContext& context, const Offset& offset);

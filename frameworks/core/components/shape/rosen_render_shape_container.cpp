@@ -78,25 +78,24 @@ void RosenRenderShapeContainer::Paint(RenderContext& context, const Offset& offs
     BitmapMesh(context, offset);
 }
 
-RefPtr<RosenRenderShape> RosenRenderShapeContainer::GetShapeChild(const RefPtr<RenderNode>& node)
+RefPtr<RosenRenderShape> RosenRenderShapeContainer::GetShapeChild(const RefPtr<RenderNode>& node, Offset& offset)
 {
+    offset += node->GetPosition();
+    if (auto renderShape = AceType::DynamicCast<RosenRenderShape>(node)) {
+        return renderShape;
+    }
     const auto& children = node->GetChildren();
     for (const auto& item : SortChildrenByZIndex(children)) {
-        RefPtr<RosenRenderShape> renderShape = AceType::DynamicCast<RosenRenderShape>(item);
-        if (renderShape) {
-            return renderShape;
-        } else {
-            RefPtr<RosenRenderShape> temp = GetShapeChild(item);
-            if (temp) {
-                return temp;
-            }
+        if (RefPtr<RosenRenderShape> temp = GetShapeChild(item, offset)) {
+            return temp;
         }
     }
+    offset = offset - node->GetPosition();
     return nullptr;
 }
 
 void RosenRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset& offset)
-{ // new no-gpu cancas;
+{
     auto pipelineContext = GetContext().Upgrade();
 
     auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width(), GetLayoutSize().Height(),
@@ -114,13 +113,11 @@ void RosenRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset&
     // for the child
     const auto& children = GetChildren();
     for (const auto& item : SortChildrenByZIndex(children)) {
-        RefPtr<RosenRenderShape> renderShape = GetShapeChild(item);
+        Offset childOffset = offset;
+        RefPtr<RosenRenderShape> renderShape = GetShapeChild(item, childOffset);
         if (renderShape) {
-        } else {
-            continue;
+            renderShape->PaintOnCanvas(skOffCanvas_.get(), childOffset);
         }
-        renderShape->PaintOnCanvas(skOffCanvas_.get(), Offset(renderShape->GetPosition().GetX() + offset.GetX(),
-            renderShape->GetPosition().GetY() + offset.GetY()));
     }
     if (column_ == 0 && row_ == 0) {
         skCanvas_->drawBitmap(skOffBitmap_, 0, 0);

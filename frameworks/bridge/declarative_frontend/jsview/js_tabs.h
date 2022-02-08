@@ -24,13 +24,14 @@ class JSTabs : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
+    static void Pop();
 
 protected:
     static void SetVertical(const std::string& value);
     static void SetScrollable(const std::string& value);
     static void SetBarMode(const std::string& value);
-    static void SetBarWidth(double width);
-    static void SetBarHeight(double height);
+    static void SetBarWidth(const JSCallbackInfo& info);
+    static void SetBarHeight(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetAnimationDuration(float value);
 };

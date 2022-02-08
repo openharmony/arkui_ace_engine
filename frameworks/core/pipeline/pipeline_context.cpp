@@ -1645,7 +1645,8 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height)
     CHECK_RUN_ON(UI);
     // Refresh the screen when developers customize the resolution and screen density on the PC preview.
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-    if (width_ == width && height_ == height) {
+    if (width_ == width && height_ == height && isSurfaceReady_) {
+        LOGI("Surface size is same, no need update");
         return;
     }
 #endif
@@ -1660,7 +1661,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height)
     height_ = height;
 
     ACE_SCOPED_TRACE("OnSurfaceChanged(%d, %d)", width, height);
-    LOGI("Surface size changed, [%{private}d * %{private}d]", width, height);
+    LOGI("Surface size changed, [%{public}d * %{public}d]", width, height);
     if (!NearZero(rootHeight_)) {
         double newRootHeight = height / viewScale_;
         double newRootWidth = width / viewScale_;

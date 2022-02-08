@@ -81,6 +81,9 @@ void RosenRenderPatternLock::PaintLockLine(SkCanvas* canvas, const Offset& offse
     if (count == 0) {
         return;
     }
+    if (LessOrEqual(strokeWidth_.Value(), 0.0)) {
+        return;
+    }
     double half = 0.5;
     int realSizeInt = static_cast<int>(NormalizeToPx(sideLength_) + half);
     int offsetIntX = static_cast<int>(offset.GetX() - half);
@@ -92,13 +95,9 @@ void RosenRenderPatternLock::PaintLockLine(SkCanvas* canvas, const Offset& offse
     skPaintStroke.setAntiAlias(true);
     skPaintStroke.setStyle(SkPaint::Style::kStroke_Style);
     skPaintStroke.setStrokeCap(SkPaint::kRound_Cap);
+    skPaintStroke.setStrokeWidth(NormalizeToPx(strokeWidth_));
     Color pathColorAlpha255 = pathColor_.ChangeAlpha(MAX_ALPHA);
     skPaintStroke.setColor(pathColorAlpha255.GetValue());
-    if (LessOrEqual(strokeWidth_.Value(), 0.0)) {
-        return;
-    } else {
-        skPaintStroke.setStrokeWidth(NormalizeToPx(strokeWidth_));
-    }
     for (size_t i = 0; i < count - 1; i++) {
         Offset pointBegin = GetCircleCenterByXY(offset, choosePoint_[i].GetColumn(), choosePoint_[i].GetRow());
         Offset pointEnd = GetCircleCenterByXY(offset, choosePoint_[i + 1].GetColumn(), choosePoint_[i + 1].GetRow());

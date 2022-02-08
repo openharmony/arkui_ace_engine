@@ -1572,8 +1572,11 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
         return;
     }
 
-    if (!info[0]->IsString()) {
-        LOGE("info[0] is not a string.");
+    std::string src;
+    if (info[0]->IsString()) {
+        src = info[0]->ToString();
+    } else if (!ParseJsMedia(info[0], src)) {
+        LOGE("can not parse image src.");
         return;
     }
 
@@ -1586,7 +1589,13 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
     if (!image) {
         image = AceType::MakeRefPtr<BackgroundImage>();
     }
-    image->SetSrc(info[0]->ToString(), GetThemeConstants());
+
+    if (info[0]->IsString()) {
+        image->SetSrc(src, GetThemeConstants());
+    } else {
+        image->SetParsedSrc(src);
+    }
+
     int32_t repeatIndex = 0;
     if (info.Length() == 2 && info[1]->IsNumber()) {
         repeatIndex = info[1]->ToNumber<int32_t>();

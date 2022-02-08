@@ -144,7 +144,8 @@ public:
 
     void SetTouchRectList(std::vector<Rect>& touchRectList);
     bool CompareTouchRect(const Rect& parentTouchRect, const Rect& childTouchRect);
-    void CompareTouchRectList(std::vector<Rect>& parentTouchRectList, const std::vector<Rect>& childTouchRectList);
+    void CompareTouchRectList(std::vector<Rect>& touchRectList,
+        const std::vector<Rect>& childTouchRectList, const std::vector<Rect>& parentTouchRectList);
 
     bool NeedLayout() const
     {

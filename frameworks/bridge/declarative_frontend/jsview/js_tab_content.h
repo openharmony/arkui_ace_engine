@@ -49,12 +49,13 @@ protected:
     }
 
 private:
-    static RefPtr<Component> ProcessTabBarBuilderFunction(RefPtr<TabBarComponent>& tabBar, JSRef<JSObject> builderFunc);
-    static RefPtr<Component> ProcessTabBarTextIconPair(RefPtr<TabBarComponent>& tabBar, JSRef<JSVal> text,
-        JSRef<JSVal> icon);
-    static RefPtr<TextComponent> CreateTabBarLabelComponent(RefPtr<TabBarComponent>& tabBar,
-        const std::string& labelStr);
-    static RefPtr<TextComponent> ProcessTabBarLabel(RefPtr<TabBarComponent>& tabBar, JSRef<JSVal> labelVal);
+    static RefPtr<Component> ProcessTabBarBuilderFunction(
+        RefPtr<TabContentItemComponent>& tabContent, JSRef<JSObject> builderFunc);
+    static RefPtr<Component> ProcessTabBarTextIconPair(
+        RefPtr<TabContentItemComponent>& tabContent, JSRef<JSVal> text, JSRef<JSVal> icon);
+    static RefPtr<TextComponent> CreateTabBarLabelComponent(
+        RefPtr<TabContentItemComponent>& tabContent, const std::string& labelStr);
+    static RefPtr<TextComponent> ProcessTabBarLabel(RefPtr<TabContentItemComponent>& tabContent, JSRef<JSVal> labelVal);
 };
 
 } // namespace OHOS::Ace::Framework

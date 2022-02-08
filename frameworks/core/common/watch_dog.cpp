@@ -408,14 +408,16 @@ WatchDog::~WatchDog()
     g_anrThread.reset();
 }
 
-void WatchDog::Register(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor)
+void WatchDog::Register(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor, bool useUIAsJSThread)
 {
     Watchers watchers = {
         .jsWatcher = AceType::MakeRefPtr<ThreadWatcher>(instanceId, TaskExecutor::TaskType::JS),
         .uiWatcher = AceType::MakeRefPtr<ThreadWatcher>(instanceId, TaskExecutor::TaskType::UI),
     };
-    watchers.jsWatcher->SetTaskExecutor(taskExecutor);
     watchers.uiWatcher->SetTaskExecutor(taskExecutor);
+    if (!useUIAsJSThread) {
+        watchers.jsWatcher->SetTaskExecutor(taskExecutor);
+    }
     const auto resExecutor = watchMap_.try_emplace(instanceId, watchers);
     if (!resExecutor.second) {
         LOGW("Duplicate instance id: %{public}d when register to watch dog", instanceId);

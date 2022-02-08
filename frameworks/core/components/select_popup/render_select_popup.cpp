@@ -398,6 +398,9 @@ void RenderSelectPopup::OnTouchTestHit(
         clickDetector_ = AceType::MakeRefPtr<ClickRecognizer>();
     }
     rawDetector_->SetCoordinateOffset(coordinateOffset);
+    dragDetector_->SetCoordinateOffset(coordinateOffset);
+    longPressDetector_->SetCoordinateOffset(coordinateOffset);
+    clickDetector_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(rawDetector_);
     result.emplace_back(dragDetector_);
     result.emplace_back(longPressDetector_);

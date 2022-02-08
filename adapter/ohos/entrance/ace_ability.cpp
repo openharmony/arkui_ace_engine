@@ -215,6 +215,29 @@ void AceAbility::OnStart(const Want& want)
     auto pluginUtils = std::make_shared<PluginUtilsImpl>();
     PluginManager::GetInstance().SetAceAbility(this, pluginUtils);
 
+    OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
+
+    // register surface change callback
+    OHOS::sptr<OHOS::Rosen::IWindowChangeListener> thisAbility(this);
+    window->RegisterWindowChangeListener(thisAbility);
+
+    int32_t width = window->GetRect().width_;
+    int32_t height = window->GetRect().height_;
+    LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", width, height);
+
+    // get density
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (defaultDisplay) {
+        density_ = defaultDisplay->GetVirtualPixelRatio();
+        LOGI("AceAbility: Default display density set: %{public}f", density_);
+    } else {
+        LOGI("AceAbility: Default display is null, set density failed. Use default density: %{public}f", density_);
+    }
+    SystemProperties::SetResolution(density_);
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetColorMode(ColorMode::LIGHT);
+    SystemProperties::SetDeviceOrientation(height >= width ? 0 : 1);
+
     // create container
     Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, srcPath, this,
         std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); }));
@@ -229,31 +252,10 @@ void AceAbility::OnStart(const Want& want)
         container->SetResourceConfiguration(aceResCfg);
         container->SetPackagePathStr(resPath);
     }
+
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(abilityId_);
-    OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
-
-    // register surface change callback
-    OHOS::sptr<OHOS::Rosen::IWindowChangeListener> thisAbility(this);
-    window->RegisterWindowChangeListener(thisAbility);
-
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window);
-
-    // set metrics
-    int32_t width = window->GetRect().width_;
-    int32_t height = window->GetRect().height_;
-    LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", width, height);
-
-    // get density
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    if (defaultDisplay) {
-        density_ = defaultDisplay->GetVirtualPixelRatio();
-        LOGI("AceAbility: Default display density set: %{public}f", density_);
-    } else {
-        LOGI("AceAbility: Default display is null, set density failed. Use default density: %{public}f", density_);
-    }
-    SystemProperties::SetResolution(density_);
-
     flutter::ViewportMetrics metrics;
     metrics.physical_width = width;
     metrics.physical_height = height;
@@ -590,6 +592,8 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect)
     }
 
 #endif
+    SystemProperties::SetDeviceOrientation(height >= width ? 0 : 1);
+
     auto flutterAceView = static_cast<Platform::FlutterAceView*>(
         Platform::AceContainer::GetContainer(abilityId_)->GetView());
 

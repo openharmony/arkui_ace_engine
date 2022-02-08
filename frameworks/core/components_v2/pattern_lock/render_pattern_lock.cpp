@@ -274,7 +274,7 @@ void RenderPatternLock::AddPassPoint(Offset offset, int16_t x, int16_t y)
             PatternLockCell passPoint = PatternLockCell(i, j);
             if ((passPoint.GetCode() >= nowCode && passPoint.GetCode() >= lastCode) ||
                 (passPoint.GetCode() <= nowCode && passPoint.GetCode() <= lastCode)) {
-                break;
+                continue;
             }
             if ((j != y) && (j != lastY) &&
                 ((double(lastX - i) / (lastY - j) == double(i - x) / (j - y)) && !CheckChoosePoint(i, j))) {

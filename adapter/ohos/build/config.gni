@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos/ace/ace_args.gni")
+import("product_config.gni")
 
 defines = [
   "OHOS_PLATFORM",
@@ -34,13 +35,13 @@ ark_engine = {
 }
 js_engines += [ ark_engine ]
 
-if ("${product_name}" == "rk3566" || "${product_name}" == "rk3568" ||
-    "${product_name}" == "Hi3516DV300" || "${product_name}" == "ohos-arm64" ||
-    "${product_name}" == "watchos") {
-  disable_gpu = true
-} else {
-  disable_gpu = false
+disable_gpu = false
+foreach(product, gpu_block_product_list) {
+  if ("${product_name}" == product) {
+    disable_gpu = true
+  }
 }
+
 use_external_icu = "shared"
 use_curl_download = true
 ohos_standard_fontmgr = true

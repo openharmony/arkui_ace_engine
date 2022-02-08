@@ -413,6 +413,7 @@ void RenderTextField::OnTouchTestHit(
         });
         clickRecognizer_->SetPriority(GesturePriority::Low);
     }
+    clickRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(clickRecognizer_);
 
     if (!doubleClickRecognizer_) {
@@ -428,6 +429,7 @@ void RenderTextField::OnTouchTestHit(
         });
         doubleClickRecognizer_->SetPriority(GesturePriority::High);
     }
+    doubleClickRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(doubleClickRecognizer_);
 
     if (!longPressRecognizer_) {
@@ -441,6 +443,7 @@ void RenderTextField::OnTouchTestHit(
         });
         longPressRecognizer_->SetPriority(GesturePriority::High);
     }
+    longPressRecognizer_->SetCoordinateOffset(coordinateOffset);
     longPressRecognizer_->SetTouchRestrict(touchRestrict);
     result.emplace_back(longPressRecognizer_);
 
@@ -469,6 +472,7 @@ void RenderTextField::OnTouchTestHit(
         });
     }
     rawRecognizer_->SetTouchRestrict(touchRestrict);
+    rawRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(rawRecognizer_);
 }
 

@@ -13,18 +13,20 @@
  * limitations under the License.
  */
 
-#include "core/common/watch_dog.h"
+#include "core/components_v2/indexer/flutter_render_popup_list.h"
+#include "core/components_v2/indexer/rosen_render_popup_list.h"
 
-namespace OHOS::Ace {
-
-class ThreadWatcher : public Referenced {};
-
-WatchDog::WatchDog() {}
-
-WatchDog::~WatchDog() {}
-
-void WatchDog::Register(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor, bool useUIAsJSThread) {}
-
-void WatchDog::Unregister(int32_t instanceId) {}
-
+namespace OHOS::Ace::V2 {
+RefPtr<RenderNode> RenderPopupList::Create()
+{
+    if (SystemProperties::GetRosenBackendEnabled()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        return AceType::MakeRefPtr<RosenRenderPopupList>();
+#else
+        return nullptr;
+#endif
+    } else {
+        return AceType::MakeRefPtr<FlutterRenderPopupList>();
+    }
+}
 } // namespace OHOS::Ace

@@ -28,6 +28,7 @@ public:
 
     void DrawShape(RenderContext& context, const Offset& offset);
     void DrawCapsuleProgressAnimation(RenderContext& context, const Offset& offset);
+    void DrawCapsuleProgressVerticalAnimation(RenderContext& context, const Offset& offset);
     void Paint(RenderContext& context, const Offset& offset) override;
 };
 } // namespace OHOS::Ace

@@ -1416,18 +1416,19 @@ void RenderBox::OnTouchTestHit(
     AddRecognizerToResult(coordinateOffset, touchRestrict, result);
 
     if (onClick_) {
+        onClick_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(onClick_);
     }
     if (onLongPress_) {
-        result.emplace_back(onLongPress_);
-    }
-    if (onLongPress_) {
+        onLongPress_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(onLongPress_);
     }
     if (dragDropGesture_) {
+        dragDropGesture_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(dragDropGesture_);
     }
     if (touchRecognizer_) {
+        touchRecognizer_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(touchRecognizer_);
     }
 }

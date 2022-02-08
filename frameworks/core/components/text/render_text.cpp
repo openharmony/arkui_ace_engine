@@ -241,6 +241,7 @@ void RenderText::OnTouchTestHit(
             });
         }
         rawRecognizer_->SetTouchRestrict(touchRestrict);
+        rawRecognizer_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(rawRecognizer_);
         needTouchDetector_ = false;
     }

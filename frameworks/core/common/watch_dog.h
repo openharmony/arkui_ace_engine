@@ -34,7 +34,7 @@ public:
     WatchDog();
     ~WatchDog() override;
 
-    void Register(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor);
+    void Register(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor, bool useUIAsJSThread);
     void Unregister(int32_t instanceId);
     void BuriedBomb(int32_t instanceId, uint64_t bombId);
     void DefusingBomb(int32_t instanceId);

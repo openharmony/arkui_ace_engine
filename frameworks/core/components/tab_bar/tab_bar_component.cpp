@@ -61,7 +61,7 @@ void TabBarComponent::InitStyle(const RefPtr<TabTheme>& theme)
     focusRadiusDimension_ = theme->GetFocusIndicatorRadius();
     focusAnimationColor_ = theme->GetFocusIndicatorColor();
     gradientWidth_ = theme->GetGradientWidth();
-    activeIndicatorMinWidth_ = theme->GetActiveIndicatorMinWidth_();
+    activeIndicatorMinWidth_ = theme->GetActiveIndicatorMinWidth();
 
     Dimension labelPaddingDimension = theme->GetLabelPadding();
     SetLabelPadding(

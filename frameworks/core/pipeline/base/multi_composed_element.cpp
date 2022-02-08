@@ -53,7 +53,7 @@ void MultiComposedElement::UpdateChildren(const std::list<RefPtr<Component>>& ne
 
     // For declarative frontend, the component tree is very stable,
     // so size of children MUST be matched between elements and components
-    if (children_.size() != newComponents.size()) {
+    if (children_.size() != newComponents.size() && component_->GetUpdateType() != UpdateType::REBUILD) {
         LOGW("Size of old children and new components are mismatched");
         return;
     }

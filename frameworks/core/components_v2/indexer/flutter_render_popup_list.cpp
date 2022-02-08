@@ -19,11 +19,6 @@
 #include "core/pipeline/base/scoped_canvas_state.h"
 
 namespace OHOS::Ace::V2 {
-RefPtr<RenderNode> RenderPopupList::Create()
-{
-    return AceType::MakeRefPtr<FlutterRenderPopupList>();
-}
-
 RenderLayer FlutterRenderPopupList::GetRenderLayer()
 {
     if (!layer_) {

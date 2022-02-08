@@ -178,6 +178,11 @@ public:
         }
     }
 
+    void SetPageProfile(const std::string& pageProfile)
+    {
+        pageProfile_ = pageProfile;
+    }
+
     void MarkIsSubWindow(bool isSubWindow)
     {
         isSubWindow_ = isSubWindow;
@@ -196,6 +201,7 @@ private:
     RefPtr<AceEventHandler> handler_;
     RefPtr<Framework::JsEngine> jsEngine_;
     RefPtr<AccessibilityManager> accessibilityManager_;
+    std::string pageProfile_;
     bool foregroundFrontend_ = false;
     bool isSubWindow_ = false;
 };

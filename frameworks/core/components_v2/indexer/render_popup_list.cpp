@@ -201,6 +201,7 @@ void RenderPopupList::OnRequestPopupDataSelected(std::vector<std::string>& data)
     renderBox_->Attach(GetContext());
     renderBox_->Update(boxComponent_);
     renderBox_->PerformLayout();
+    renderBox_->MarkNeedRender();
     MarkNeedLayout();
 }
 

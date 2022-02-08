@@ -118,7 +118,7 @@ public:
         return activeIndicatorWidth_;
     }
 
-    const Dimension& GetActiveIndicatorMinWidth_() const
+    const Dimension& GetActiveIndicatorMinWidth() const
     {
         return activeIndicatorMinWidth_;
     }

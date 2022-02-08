@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 
+#include "ability_info.h"
 #include "interfaces/innerkits/ace/ui_content.h"
 #include "interfaces/innerkits/ace/viewport_config.h"
 #include "key_event.h"
@@ -61,7 +62,7 @@ public:
 
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
-    void InitWindowCallback();
+    void InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info);
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
@@ -69,6 +70,7 @@ private:
     ViewportConfig config_;
     std::string startUrl_;
     int32_t instanceId_ = -1;
+    bool updateConfig_ = false;
 };
 
 } // namespace OHOS::Ace

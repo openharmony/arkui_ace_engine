@@ -384,6 +384,10 @@ sk_sp<SkImage> ImageProvider::GetSkImage(
 {
     ImageSourceInfo info(src);
     auto imageLoader = ImageLoader::CreateImageLoader(info);
+    if (!imageLoader) {
+        LOGE("Invalid src, src is %{public}s", src.c_str());
+        return nullptr;
+    }
     auto imageSkData = imageLoader->LoadImageData(info, context);
     if (!imageSkData) {
         LOGE("fetch data failed. src: %{private}s", src.c_str());
