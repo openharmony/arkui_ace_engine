@@ -162,6 +162,8 @@ Size RenderTrack::Measure()
 {
     if (GetLayoutParam().GetMaxSize().IsInfinite()) {
         auto defaultWidth = theme_ != nullptr ? NormalizeToPx(theme_->GetTrackWidth()) : 0.0;
+        defaultWidth =
+            std::min(defaultWidth, std::min(GetLayoutParam().GetMaxSize().Width(), defaultWidth));
         return direction_ == Axis::HORIZONTAL ?
             Size(defaultWidth, paintData_.thickness) : Size(paintData_.thickness, defaultWidth);
     }
@@ -251,14 +253,15 @@ void RenderMoonTrack::Dump()
 
 Size RenderCapsuleTrack::Measure()
 {
+    double width = GetLayoutParam().GetMaxSize().Width();
+    double height = GetLayoutParam().GetMaxSize().Height();
     if (GetLayoutParam().GetMaxSize().IsInfinite()) {
-        double diameter = theme_ != nullptr ? NormalizeToPx(theme_->GetRingDiameter()) : 0.0;
-        diameter =
-            std::min(diameter, std::min(GetLayoutParam().GetMaxSize().Width(), GetLayoutParam().GetMaxSize().Height()));
-        return Size(diameter, diameter);
+        width = theme_ != nullptr ? NormalizeToPx(theme_->GetTrackWidth()) : 0.0;
+        width =
+            std::min(width, std::min(GetLayoutParam().GetMaxSize().Width(), width));
+        height = width / 2.0;
     }
-    double diameter = std::min(GetLayoutParam().GetMaxSize().Height(), GetLayoutParam().GetMaxSize().Width());
-    return Size(diameter, diameter);
+    return Size(width, height);
 }
 
 void RenderCapsuleTrack::Dump()
