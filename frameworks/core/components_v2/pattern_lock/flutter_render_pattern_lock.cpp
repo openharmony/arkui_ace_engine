@@ -83,6 +83,9 @@ void FlutterRenderPatternLock::PaintLockLine(ScopedCanvas& canvas, const Offset&
     if (count == 0) {
         return;
     }
+    if (LessOrEqual(strokeWidth_.Value(), 0.0)) {
+        return;
+    }
     double half = 0.5;
     int realSizeInt = static_cast<int>(NormalizeToPx(sideLength_) + half);
     int offsetIntX = static_cast<int>(offset.GetX() - half);
@@ -96,11 +99,7 @@ void FlutterRenderPatternLock::PaintLockLine(ScopedCanvas& canvas, const Offset&
     skPaintStroke.setStrokeCap(SkPaint::kRound_Cap);
     Color pathColorAlpha255 = pathColor_.ChangeAlpha(MAX_ALPHA);
     skPaintStroke.setColor(pathColorAlpha255.GetValue());
-    if (LessOrEqual(strokeWidth_.Value(), 0.0)) {
-        return;
-    } else {
-        skPaintStroke.setStrokeWidth(NormalizeToPx(strokeWidth_));
-    }
+    skPaintStroke.setStrokeWidth(NormalizeToPx(strokeWidth_));
     for (size_t i = 0; i < count - 1; i++) {
         Offset pointBegin = GetCircleCenterByXY(offset, choosePoint_[i].GetColumn(), choosePoint_[i].GetRow());
         Offset pointEnd = GetCircleCenterByXY(offset, choosePoint_[i + 1].GetColumn(), choosePoint_[i + 1].GetRow());
