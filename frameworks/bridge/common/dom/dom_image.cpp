@@ -70,6 +70,10 @@ bool DOMImage::SetSpecializedAttr(const std::pair<std::string, std::string>& att
         imageChild_->SetSrc(ParseImageSrc(attr.second));
         return true;
     }
+    if (attr.first == DOM_IMAGE_SYNC_MODE) {
+        imageChild_->SetSyncMode(StringToBool(attr.second));
+        return true;
+    }
     if (attr.first == DOM_IMAGE_ALT) {
         imageChild_->SetAlt(ParseImageSrc(attr.second));
         return true;
