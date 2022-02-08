@@ -170,16 +170,17 @@ void JSSideBar::SetButtonAttribute(const JSRef<JSVal>& btnAtt,
             JSRef<JSVal> showIcon = iconsVal->GetProperty("shown");
             JSRef<JSVal> switchingIcon = iconsVal->GetProperty("switching");
             JSRef<JSVal> hiddenIcon = iconsVal->GetProperty("hidden");
-            if (!showIcon->IsNull() && showIcon->IsString()) {
-                sidebar->SetShowIcon(showIcon->ToString());
+            std::string showIconStr;
+            if (!showIcon->IsNull() && ParseJsMedia(showIcon, showIconStr)) {
+                sidebar->SetShowIcon(showIconStr);
             }
-
-            if (!hiddenIcon->IsNull() && hiddenIcon->IsString()) {
-                sidebar->SetHiddenIcon(hiddenIcon->ToString());
+            std::string hiddenIconStr;
+            if (!hiddenIcon->IsNull() && ParseJsMedia(hiddenIcon, hiddenIconStr)) {
+                sidebar->SetHiddenIcon(hiddenIconStr);
             }
-
-            if (!switchingIcon->IsNull() && switchingIcon->IsString()) {
-                sidebar->SetSwitchIcon(switchingIcon->ToString());
+            std::string switchingIconStr;
+            if (!switchingIcon->IsNull() && ParseJsMedia(switchingIcon, switchingIconStr)) {
+                sidebar->SetSwitchIcon(switchingIconStr);
             }
         }
     }

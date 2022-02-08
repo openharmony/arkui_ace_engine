@@ -59,8 +59,6 @@ private:
     bool isAnimation_ = false;
     bool isInitialized_ = false;
 
-    Rect exceptRegion_;
-
     Dimension sidebarWidth_ = 200.0_vp;
     Dimension minSidebarWidth_ = 200.0_vp;
     Dimension maxSidebarWidth_ = 280.0_vp;
