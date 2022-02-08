@@ -52,8 +52,6 @@ constexpr float LEFT_START = 135.0f;
 constexpr float LEFT_END = 180.0f;
 constexpr float SWEEP_ANGLE = 45.0f;
 constexpr float EXTEND = 1024.0f;
-constexpr float BRIGHT_DARK = 230.0f;
-constexpr float BRIGHT_LIGHT = 45.0f;
 
 class GradientShader {
 public:
@@ -1293,17 +1291,16 @@ void RosenDecorationPainter::PaintGrayScale(
             canvas->clipRRect(outerRRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-#ifdef USE_SYSTEM_SKIA
             float matrix[20] = { 0 };
             matrix[0] = matrix[5] = matrix[10] = 0.2126f * scale;
             matrix[1] = matrix[6] = matrix[11] = 0.7152f * scale;
             matrix[2] = matrix[7] = matrix[12] = 0.0722f * scale;
             matrix[18] = 1.0f * scale;
-
+#ifdef USE_SYSTEM_SKIA
             auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
             paint.setColorFilter(filter);
 #else
-            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
@@ -1322,24 +1319,14 @@ void RosenDecorationPainter::PaintBrightness(
             SkPaint paint;
             paint.setAntiAlias(true);
             float matrix[20] = { 0 };
-
-            if (bright < 0.0) {
-                return;
-            } else if (bright > 20.0) {
-                bright = 20.0;
-            }
-            if (bright <= 1.0) {
-                bright = BRIGHT_DARK * (bright - 1);
-            } else {
-                bright = BRIGHT_LIGHT * bright;
-            }
+            bright = bright - 1;
             matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
             matrix[4] = matrix[9] = matrix[14] = bright;
 #ifdef USE_SYSTEM_SKIA
             auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
             paint.setColorFilter(filter);
 #else
-            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
@@ -1357,15 +1344,15 @@ void RosenDecorationPainter::PaintContrast(
             canvas->clipRRect(outerRRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-#ifdef USE_SYSTEM_SKIA
             float matrix[20] = { 0 };
             matrix[0] = matrix[6] = matrix[12] = contrasts;
-            matrix[4] = matrix[9] = matrix[14] = 128 * (1 - contrasts);
+            matrix[4] = matrix[9] = matrix[14] = 128 * (1 - contrasts) / 255;
             matrix[18] = 1.0f;
+#ifdef USE_SYSTEM_SKIA
             auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
             paint.setColorFilter(filter);
 #else
-            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
@@ -1386,7 +1373,9 @@ void RosenDecorationPainter::PaintColorBlend(
             SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
             SkBlendMode::kPlus));
 #else
-        paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+        paint.setColorFilter(SkColorFilters::Blend(
+            SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
+            SkBlendMode::kPlus));
 #endif
         SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
         canvas->saveLayer(slr);
@@ -1403,7 +1392,6 @@ void RosenDecorationPainter::PaintSaturate(
             canvas->clipRRect(outerRRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-#ifdef USE_SYSTEM_SKIA
             float matrix[20] = { 0 };
             matrix[0] = 0.3086f * (1 - saturates) + saturates;
             matrix[1] = matrix[11] = 0.6094f * (1 - saturates);
@@ -1412,10 +1400,11 @@ void RosenDecorationPainter::PaintSaturate(
             matrix[6] = 0.6094f * (1 - saturates) + saturates;
             matrix[12] = 0.0820f * (1 - saturates) + saturates;
             matrix[18] = 1.0f;
+#ifdef USE_SYSTEM_SKIA
             auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
             paint.setColorFilter(filter);
 #else
-            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
@@ -1436,7 +1425,6 @@ void RosenDecorationPainter::PaintSepia(
             canvas->clipRRect(outerRRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-#ifdef USE_SYSTEM_SKIA
             float matrix[20] = { 0 };
             matrix[0] = 0.393f * sepias;
             matrix[1] = 0.769f * sepias;
@@ -1450,10 +1438,11 @@ void RosenDecorationPainter::PaintSepia(
             matrix[11] = 0.534f * sepias;
             matrix[12] = 0.131f * sepias;
             matrix[18] = 1.0f * sepias;
+#ifdef USE_SYSTEM_SKIA
             auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
             paint.setColorFilter(filter);
 #else
-            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
@@ -1471,20 +1460,19 @@ void RosenDecorationPainter::PaintInvert(
             canvas->clipRRect(outerRRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-#ifdef USE_SYSTEM_SKIA
             float matrix[20] = { 0 };
             if (inverts > 1.0) {
                 inverts = 1.0;
             }
-            matrix[0] = matrix[6] = matrix[12] = -1.2f * inverts;
-            matrix[3] = matrix[8] = matrix[13] = 1.2f * inverts;
-            matrix[4] = matrix[9] = matrix[14] = 1.2f * inverts;
-            matrix[18] = 1.2f * inverts;
+            matrix[0] = matrix[6] = matrix[12] = -1.0f * inverts;
+            matrix[18] = 1.0f;
+            matrix[4] = matrix[9] = matrix[14] = 1.0f;
+#ifdef USE_SYSTEM_SKIA
             LOGD("start set invert: %f", inverts);
             auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
             paint.setColorFilter(filter);
 #else
-            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
@@ -1529,7 +1517,7 @@ void RosenDecorationPainter::PaintHueRotate(
             auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
             paint.setColorFilter(filter);
 #else
-            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
