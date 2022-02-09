@@ -15,6 +15,8 @@
 
 #include "core/components/button/button_element.h"
 
+#include "core/event/key_event.h"
+
 namespace OHOS::Ace {
 
 RefPtr<RenderNode> ButtonElement::CreateRenderNode()
@@ -98,6 +100,22 @@ void ButtonElement::OnClick()
         return;
     }
     button_->HandleClickEvent();
+}
+
+void ButtonElement::OnClick(const KeyEvent& event)
+{
+    if (!button_) {
+        return;
+    }
+    ClickInfo info(-1);
+    info.SetTimeStamp(TimeStamp(std::chrono::milliseconds(event.timeStamp)));
+    info.SetGlobalLocation(
+        Offset((GetRect().Left() + GetRect().Right()) / 2, (GetRect().Top() + GetRect().Bottom()) / 2));
+    info.SetLocalLocation(
+        Offset((GetRect().Right() - GetRect().Left()) / 2, (GetRect().Bottom() - GetRect().Top()) / 2));
+    info.SetSourceDevice(static_cast<SourceType>(event.sourceDevice));
+    info.SetDeviceId(event.deviceId);
+    button_->HandleClickEvent(info);
 }
 
 void ButtonElement::OnBlur()

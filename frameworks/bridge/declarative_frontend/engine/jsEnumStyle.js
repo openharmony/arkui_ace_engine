@@ -703,6 +703,7 @@ var SourceType;
   SourceType[SourceType["Unknown"] = 0] = "Unknown";
   SourceType[SourceType["Mouse"] = 1] = "Mouse";
   SourceType[SourceType["TouchScreen"] = 2] = "TouchScreen";
+  SourceType[SourceType["Keyboard"] = 4] = "Keyboard";
 })(SourceType || (SourceType = {}));
 
 var SeekMode;

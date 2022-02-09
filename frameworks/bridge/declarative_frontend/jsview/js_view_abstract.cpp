@@ -339,25 +339,25 @@ void ParseShowObject(
     const JSCallbackInfo& info, const JSRef<JSObject>& showObj, const RefPtr<PopupComponentV2>& popupComponent)
 {
     JSRef<JSVal> changeEventVal = showObj->GetProperty("changeEvent");
-        if (changeEventVal->IsFunction()) {
-            RefPtr<JsFunction> jsFunc =
-                AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-            auto eventMarker = EventMarker(
-                [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
-                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("Popup.onStateChange");
+    if (changeEventVal->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+        auto eventMarker = EventMarker(
+            [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("Popup.onStateChange");
 
-                    if (param != "true" && param != "false") {
-                        LOGE("param is not equal true or fasle, invaild.");
-                        return;
-                    }
+                if (param != "true" && param != "false") {
+                    LOGE("param is not equal true or fasle, invaild.");
+                    return;
+                }
 
-                    bool newValue = StringToBool(param);
-                    JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
-                    func->ExecuteJS(1, &newJSVal);
-                });
-            popupComponent->SetChangeEvent(eventMarker);
-        }
+                bool newValue = StringToBool(param);
+                JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
+                func->ExecuteJS(1, &newJSVal);
+            });
+        popupComponent->SetChangeEvent(eventMarker);
+    }
 }
 
 void ParsePopupParam(
@@ -2705,7 +2705,7 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
     auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
                         const RefPtr<DragEvent>& info, const std::string &extraParams) -> RefPtr<Component> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
-        
+
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
             LOGE("builder param is not an object.");

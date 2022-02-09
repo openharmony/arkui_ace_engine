@@ -56,7 +56,14 @@ void FocusableElement::Update()
     onBlur_ = focusableComponent->GetOnBlur();
 
     if (!onClickId.IsEmpty()) {
-        SetOnClickCallback(AceAsyncEvent<void()>::Create(onClickId, context_));
+        auto context = context_.Upgrade();
+        if (context) {
+            if (context->GetIsDeclarative()) {
+                SetOnClickCallback(AceAsyncEvent<void(const std::shared_ptr<ClickInfo>&)>::Create(onClickId, context_));
+            } else {
+                SetOnClickCallback(AceAsyncEvent<void()>::Create(onClickId, context_));
+            }
+        }
     }
     if (!onFocusId.IsEmpty()) {
         SetOnFocusCallback(AceAsyncEvent<void()>::Create(onFocusId, context_));

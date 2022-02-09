@@ -140,6 +140,10 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
         if (tapGesture) {
             click->SetOnClick(tapGesture);
         }
+
+        auto onClickId = GetClickEventMarker(info);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+        focusableComponent->SetOnClickId(onClickId);
     }
 }
 
