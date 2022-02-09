@@ -153,16 +153,17 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
     if (!formManagerBridge_) {
         formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(GetContext());
         formManagerBridge_->AddFormAcquireCallback(
-            [weak = WeakClaim(this)](int64_t id, std::string path, std::string module, std::string data) {
+            [weak = WeakClaim(this)](int64_t id, std::string path, std::string module, std::string data,
+                std::map<std::string, std::pair<int, int32_t>> imageDataMap) {
                 auto element = weak.Upgrade();
                 auto uiTaskExecutor = SingleTaskExecutor::Make(
                     element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-                uiTaskExecutor.PostTask([id, path, module, data, weak] {
+                uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, weak] {
                     auto form = weak.Upgrade();
                     if (form) {
                         auto container = form->GetSubContainer();
                         if (container) {
-                            container->RunCard(id, path, module, data);
+                            container->RunCard(id, path, module, data, imageDataMap);
                         }
                     }
                 });

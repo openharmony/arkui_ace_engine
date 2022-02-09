@@ -33,8 +33,11 @@ class FormManagerDelegate : public FormManagerResource {
     DECLARE_ACE_TYPE(FormManagerDelegate, FormManagerResource);
 
 public:
-    using OnFormAcquiredCallback
+    using onFormAcquiredCallbackForJava
         = std::function<void(int64_t, const std::string&, const std::string&, const std::string&)>;
+    using OnFormAcquiredCallback
+        = std::function<void(int64_t, const std::string&, const std::string&,
+         const std::string&, const std::map<std::string, std::pair<int, int32_t>>&)>;
     using OnFormUpdateCallback = std::function<void(int64_t, const std::string&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
 
@@ -78,6 +81,7 @@ private:
     void OnFormUpdate(const std::string& param);
     void OnFormError(const std::string& param);
 
+    onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
     OnFormAcquiredCallback onFormAcquiredCallback_;
     OnFormUpdateCallback onFormUpdateCallback_;
     OnFormErrorCallback onFormErrorCallback_;
