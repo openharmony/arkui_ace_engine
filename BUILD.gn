@@ -29,7 +29,7 @@ config("ace_config") {
     include_dirs += [
       "//base/global/resmgr_standard/frameworks/resmgr/include",
       "//base/global/resmgr_standard/interfaces/innerkits/include",
-      "$ace_root/services/uiservice/include",
+      "$ace_root/adapter/ohos/services/uiservice/include",
     ]
   }
   defines = ace_common_defines

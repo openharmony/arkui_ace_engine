@@ -9,8 +9,8 @@
       ],
       "module_list": [
         "//foundation/ace/ace_engine/adapter/ohos/build:ace_packages",
-        "//foundation/ace/ace_engine/sa_profile:ace_sa_profile",
-        "//foundation/ace/ace_engine/services/uiservice:ui_service.cfg"
+        "//foundation/ace/ace_engine/adapter/ohos/sa_profile:ace_sa_profile",
+        "//foundation/ace/ace_engine/adapter/ohos/services/uiservice:ui_service.cfg"
       ],
       "inner_kits": [
         {

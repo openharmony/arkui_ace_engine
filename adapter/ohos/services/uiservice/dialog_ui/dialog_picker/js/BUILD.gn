@@ -14,7 +14,7 @@
 import("//foundation/ace/ace_engine/build/ace_gen_sa_dialog_js.gni")
 
 gen_sa_dialog_js("dialog_picker_js_files_etc") {
-  project_path = "//foundation/ace/ace_engine/services/uiservice/dialog_ui/dialog_picker/js"
+  project_path = "//foundation/ace/ace_engine/adapter/ohos/services/uiservice/dialog_ui/dialog_picker/js"
   i18n_files = [
     "i18n/en-US.json",
     "i18n/zh-CN.json",
