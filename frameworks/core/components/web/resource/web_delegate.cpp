@@ -452,6 +452,8 @@ sptr<Rosen::Window> WebDelegate::CreateWindow()
     int DEFAULT_WIDTH = (int)(scale * context->GetRootWidth());
     sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
     option->SetWindowRect({ DEFAULT_LEFT, DEFAULT_TOP, DEFAULT_WIDTH, DEFAULT_HEIGHT_WITHOUT_SYSTEM_BAR });
+    option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_LAUNCHING);
+    option->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
     auto window = Rosen::Window::Create("ohos_web_window", option);
     return window;
 }
