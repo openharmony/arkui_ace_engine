@@ -227,14 +227,12 @@ void RosenRenderTransform::OnRSTransition(TransitionType type)
         return;
     }
 
-    Rosen::Vector2f pivot(ConvertDimensionToScaleBySize(originX_, GetLayoutSize().Width()),
-        ConvertDimensionToScaleBySize(originY_, GetLayoutSize().Height()));
     auto effect = Rosen::RSTransitionEffect::Create();
     for (auto& transform : *transforms) {
         switch (transform.type_) {
             case TransformOperationType::SCALE: {
                 auto& scale = transform.scaleOperation_;
-                effect->Scale({ scale.scaleX, scale.scaleY, scale.scaleZ }, pivot);
+                effect->Scale({ scale.scaleX, scale.scaleY, scale.scaleZ });
                 break;
             }
             case TransformOperationType::TRANSLATE: {
@@ -244,7 +242,7 @@ void RosenRenderTransform::OnRSTransition(TransitionType type)
             }
             case TransformOperationType::ROTATE: {
                 auto& rotate = transform.rotateOperation_;
-                effect->Rotate({ rotate.dx, rotate.dy, rotate.dz, rotate.angle }, pivot);
+                effect->Rotate({ rotate.dx, rotate.dy, rotate.dz, rotate.angle });
                 break;
             }
             default: {
