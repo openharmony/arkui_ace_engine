@@ -85,7 +85,6 @@ void StackComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component
     }
     stackElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
     stackElement->MarkDirty();
-    LOGD("stack AddChildWithSlot");
 }
 
 void StackComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
@@ -98,7 +97,6 @@ void StackComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Compon
     auto child = stackElement->GetChildBySlot(slot);
     stackElement->UpdateChildWithSlot(child, newComponent, slot, slot);
     stackElement->MarkDirty();
-    LOGD("stack UpdateChildWithSlot");
 }
 
 void StackComposedElement::DeleteChildWithSlot(int32_t slot)
@@ -110,7 +108,5 @@ void StackComposedElement::DeleteChildWithSlot(int32_t slot)
     }
     stackElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
     stackElement->MarkDirty();
-    LOGD("stack DeleteChildWithSlot");
 }
-
 } // namespace OHOS::Ace::V2

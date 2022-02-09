@@ -19,7 +19,6 @@ namespace OHOS::Ace {
 
 void RenderBlock::Update(const RefPtr<Component>& component)
 {
-    LOGD("Slider::RenderBlock Update");
     const RefPtr<BlockComponent> block = AceType::DynamicCast<BlockComponent>(component);
     if (block == nullptr) {
         LOGE("Slider::RenderBlock update with nullptr");
@@ -34,7 +33,6 @@ void RenderBlock::Update(const RefPtr<Component>& component)
 
 void RenderBlock::PerformLayout()
 {
-    LOGD("Slider::RenderBlock PerformLayout");
     SetLayoutSize(Measure());
 }
 

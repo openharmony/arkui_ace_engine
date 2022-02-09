@@ -231,7 +231,6 @@ void TextComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>
     }
     textElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
     textElement->MarkDirty();
-    LOGD("text AddChildWithSlot");
 }
 
 void TextComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
@@ -244,7 +243,6 @@ void TextComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Compone
     auto child = textElement->GetChildBySlot(slot);
     textElement->UpdateChildWithSlot(child, newComponent, slot, slot);
     textElement->MarkDirty();
-    LOGD("text UpdateChildWithSlot");
 }
 
 void TextComposedElement::DeleteChildWithSlot(int32_t slot)
@@ -256,7 +254,6 @@ void TextComposedElement::DeleteChildWithSlot(int32_t slot)
     }
     textElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
     textElement->MarkDirty();
-    LOGD("text DeleteChildWithSlot");
 }
 
 } // namespace OHOS::Ace::V2

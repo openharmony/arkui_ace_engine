@@ -27,7 +27,6 @@ using namespace Flutter;
 
 void FlutterRenderRoot::Paint(RenderContext& context, const Offset& offset)
 {
-    LOGD("RootNode Paint");
     auto canvas = static_cast<FlutterRenderContext&>(context).GetCanvas();
     if (!canvas || !canvas->canvas()) {
         LOGE("Paint canvas is null");

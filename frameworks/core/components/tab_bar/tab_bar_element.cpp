@@ -114,7 +114,6 @@ void TabBarElement::PerformBuild()
         return;
     }
 
-    LOGD("TabBarElement::PerformBuild");
     int32_t index = 0;
     for (auto& box : tabs_) {
         UpdateChild(GetChild(index), box);

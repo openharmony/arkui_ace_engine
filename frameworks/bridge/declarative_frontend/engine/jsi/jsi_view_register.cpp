@@ -573,7 +573,6 @@ panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::EcmaVM* vm, panda::Local
 panda::Local<panda::JSValueRef> Vp2Px(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
     const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
 {
-    LOGD("Vp2Px");
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
@@ -594,7 +593,6 @@ panda::Local<panda::JSValueRef> Vp2Px(panda::EcmaVM* vm, panda::Local<panda::JSV
 panda::Local<panda::JSValueRef> Px2Vp(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
     const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
 {
-    LOGD("Px2Vp");
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
@@ -618,7 +616,6 @@ panda::Local<panda::JSValueRef> Px2Vp(panda::EcmaVM* vm, panda::Local<panda::JSV
 panda::Local<panda::JSValueRef> Fp2Px(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
     const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
 {
-    LOGD("Fp2Px");
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
@@ -647,7 +644,6 @@ panda::Local<panda::JSValueRef> Fp2Px(panda::EcmaVM* vm, panda::Local<panda::JSV
 panda::Local<panda::JSValueRef> Px2Fp(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
     const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
 {
-    LOGD("Px2Fp");
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
@@ -678,7 +674,6 @@ panda::Local<panda::JSValueRef> Px2Fp(panda::EcmaVM* vm, panda::Local<panda::JSV
 panda::Local<panda::JSValueRef> Lpx2Px(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
     const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
 {
-    LOGD("Lpx2Px");
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
@@ -706,7 +701,6 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::EcmaVM* vm, panda::Local<panda::JS
 panda::Local<panda::JSValueRef> Px2Lpx(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
     const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
 {
-    LOGD("Px2Lpx");
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);

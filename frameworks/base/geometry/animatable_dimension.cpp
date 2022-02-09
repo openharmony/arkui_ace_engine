@@ -58,7 +58,6 @@ void AnimatableDimension::AnimateTo(double endValue)
         return;
     }
     if (NearEqual(Value(), endValue) && !evaluator_) {
-        LOGD("AnimateTo with same value. endValue: %{public}.2f", endValue);
         return;
     }
     ResetController();

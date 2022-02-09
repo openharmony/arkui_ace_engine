@@ -35,7 +35,6 @@ const std::vector<CheckableStatus> CHECKABLE_STATUS = {
 
 void RenderCheckbox::Update(const RefPtr<Component>& component)
 {
-    LOGD("update");
     RenderCheckable::Update(component);
     const auto& checkbox = AceType::DynamicCast<CheckboxComponent>(component);
     if (!checkbox) {

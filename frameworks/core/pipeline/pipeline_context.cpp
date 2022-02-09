@@ -511,7 +511,6 @@ void PipelineContext::FlushRender()
 
     auto context = RenderContext::Create();
     if (transparentHole_.IsValid()) {
-        LOGD("Hole: set transparentHole_ in FlushRender");
         context->SetClipHole(transparentHole_);
     }
     if (!dirtyRenderNodes_.empty()) {
@@ -1156,11 +1155,8 @@ void PipelineContext::ScheduleUpdate(const RefPtr<ComposedComponent>& compose)
 {
     CHECK_RUN_ON(UI);
     ComposeId id = compose->GetId();
-    LOGD("update compose for id:%{public}s", id.c_str());
     const auto& it = composedElementMap_.find(id);
-    if (it == composedElementMap_.end()) {
-        LOGD("can't update composed for id:%{public}s, name:%{public}s", id.c_str(), compose->GetName().c_str());
-    } else {
+    if (it != composedElementMap_.end()) {
         for (const auto& composedElement : it->second) {
             composedElement->SetUpdateComponent(compose);
         }
@@ -1171,7 +1167,6 @@ void PipelineContext::ScheduleUpdate(const RefPtr<ComposedComponent>& compose)
 void PipelineContext::AddComposedElement(const ComposeId& id, const RefPtr<ComposedElement>& element)
 {
     CHECK_RUN_ON(UI);
-    LOGD("add new composed element id:%{public}s", id.c_str());
     auto it = composedElementMap_.find(id);
     if (it != composedElementMap_.end()) {
         it->second.emplace_back(element);
@@ -1185,7 +1180,6 @@ void PipelineContext::AddComposedElement(const ComposeId& id, const RefPtr<Compo
 void PipelineContext::RemoveComposedElement(const ComposeId& id, const RefPtr<ComposedElement>& element)
 {
     CHECK_RUN_ON(UI);
-    LOGD("remove composed element id:%{public}s", id.c_str());
     auto it = composedElementMap_.find(id);
     if (it != composedElementMap_.end()) {
         it->second.remove(element);
@@ -1202,7 +1196,6 @@ void PipelineContext::AddDirtyElement(const RefPtr<Element>& dirtyElement)
         LOGW("dirtyElement is null");
         return;
     }
-    LOGD("schedule rebuild for %{public}s", AceType::TypeName(dirtyElement));
     dirtyElements_.emplace(dirtyElement);
     hasIdleTasks_ = true;
     window_->RequestFrame();
@@ -1230,7 +1223,6 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<RenderNode>& renderNode, b
         LOGW("renderNode is null");
         return;
     }
-    LOGD("schedule render for %{public}s", AceType::TypeName(renderNode));
     if (!overlay) {
         dirtyRenderNodes_.emplace(renderNode);
     } else {
@@ -1257,7 +1249,6 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<RenderNode>& renderNode)
         LOGW("renderNode is null");
         return;
     }
-    LOGD("schedule layout for %{public}s", AceType::TypeName(AceType::RawPtr(renderNode)));
     renderNode->SaveExplicitAnimationOption(explicitAnimationOption_);
     dirtyLayoutNodes_.emplace(renderNode);
     ForceLayoutForImplicitAnimation();
@@ -1272,7 +1263,6 @@ void PipelineContext::AddPredictLayoutNode(const RefPtr<RenderNode>& renderNode)
         LOGW("renderNode is null");
         return;
     }
-    LOGD("schedule predict layout for %{public}s", AceType::TypeName(renderNode));
     predictLayoutNodes_.emplace(renderNode);
     ForceLayoutForImplicitAnimation();
     hasIdleTasks_ = true;

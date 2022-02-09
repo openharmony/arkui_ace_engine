@@ -25,7 +25,6 @@ namespace OHOS::Ace {
 
 void RosenRenderRoot::Paint(RenderContext& context, const Offset& offset)
 {
-    LOGD("RootNode Paint");
     auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
     if (!rsNode) {
         LOGE("Paint canvas is null");

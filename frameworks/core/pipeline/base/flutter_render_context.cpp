@@ -39,7 +39,6 @@ FlutterRenderContext::~FlutterRenderContext()
 void FlutterRenderContext::Repaint(const RefPtr<RenderNode>& node)
 {
     if (!ShouldPaint(node) || !node->NeedRender() || !node->GetRenderLayer()) {
-        LOGD("Node is not need to paint");
         return;
     }
     InitContext(node->GetRenderLayer(), node->GetRectWithShadow());
@@ -50,7 +49,6 @@ void FlutterRenderContext::Repaint(const RefPtr<RenderNode>& node)
 void FlutterRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offset& offset)
 {
     if (!ShouldPaint(child)) {
-        LOGD("Node is not need to paint");
         return;
     }
 
@@ -174,7 +172,6 @@ void FlutterRenderContext::StopRecordingIfNeeded()
 bool FlutterRenderContext::IsIntersectWith(const RefPtr<RenderNode>& child, Offset& offset)
 {
     if (!ShouldPaint(child)) {
-        LOGD("Node is not need to paint");
         return false;
     }
 
@@ -192,7 +189,6 @@ bool FlutterRenderContext::IsIntersectWith(const RefPtr<RenderNode>& child, Offs
 
 void FlutterRenderContext::InitContext(RenderLayer layer, const Rect& rect)
 {
-    LOGD("InitContext with width %{public}lf height %{public}lf", rect.Width(), rect.Height());
     estimatedRect_ = rect;
     containerLayer_ = CastLayerAs<ContainerLayer>(layer);
     containerLayer_->RemoveChildren();

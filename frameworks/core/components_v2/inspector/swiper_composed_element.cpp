@@ -145,7 +145,6 @@ void SwiperComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Componen
     }
     swiperElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
     swiperElement->MarkDirty();
-    LOGD("swiper AddChildWithSlot");
 }
 
 void SwiperComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
@@ -158,7 +157,6 @@ void SwiperComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Compo
     auto child = swiperElement->GetChildBySlot(slot);
     swiperElement->UpdateChildWithSlot(child, newComponent, slot, slot);
     swiperElement->MarkDirty();
-    LOGD("swiper UpdateChildWithSlot");
 }
 
 void SwiperComposedElement::DeleteChildWithSlot(int32_t slot)
@@ -170,7 +168,6 @@ void SwiperComposedElement::DeleteChildWithSlot(int32_t slot)
     }
     swiperElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
     swiperElement->MarkDirty();
-    LOGD("swiper DeleteChildWithSlot");
 }
 
 } // namespace OHOS::Ace::V2

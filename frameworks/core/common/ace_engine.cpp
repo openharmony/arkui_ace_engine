@@ -22,6 +22,7 @@
 #include "base/log/log.h"
 #include "base/memory/memory_monitor.h"
 #include "base/thread/background_task_executor.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ace_page.h"
 #include "core/image/image_cache.h"
 
@@ -54,9 +55,10 @@ void HandleSignal(int signo)
         default:
             return;
     }
-    auto fd = fopen("/data/arkui_dump.log", "w");
+    auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
+    auto fd = fopen(dumpFilePath.c_str(), "w");
     if (fd == nullptr) {
-        LOGE("HandleSignal signal failed due to fd is null");
+        LOGE("HandleSignal signal failed due to fd is null, path is %{private}s", dumpFilePath.c_str());
         return;
     }
 

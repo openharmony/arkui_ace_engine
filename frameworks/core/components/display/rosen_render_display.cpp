@@ -53,7 +53,6 @@ void RosenRenderDisplay::OnOpacityAnimationCallback()
 
 void RosenRenderDisplay::Paint(RenderContext& context, const Offset& offset)
 {
-    LOGD("Paint");
     if (visible_ == VisibleType::VISIBLE) {
         RenderNode::Paint(context, offset);
     }

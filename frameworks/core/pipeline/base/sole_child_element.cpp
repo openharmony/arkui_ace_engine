@@ -23,13 +23,11 @@ namespace OHOS::Ace {
 
 RefPtr<Element> SoleChildElement::Create()
 {
-    LOGD("SoleChildElement::Create");
     return AceType::MakeRefPtr<SoleChildElement>();
 }
 
 void SoleChildElement::PerformBuild()
 {
-    LOGD("SoleChildElement::PerformBuild");
     RefPtr<SoleChildComponent> component = AceType::DynamicCast<SoleChildComponent>(component_);
     const auto& child = children_.empty() ? nullptr : children_.front();
     UpdateChild(child, component->GetChild());

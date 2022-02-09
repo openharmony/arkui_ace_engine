@@ -27,7 +27,6 @@ namespace OHOS::Ace {
 
 RefPtr<Element> ComponentGroupElement::Create()
 {
-    LOGD("ComponentGroupElement::Create");
     return AceType::MakeRefPtr<ComponentGroupElement>();
 }
 
@@ -47,10 +46,8 @@ void ComponentGroupElement::PerformBuild()
 
     const auto& newComponents = componentGroup->GetChildren();
     if (context->GetIsDeclarative() && componentGroup->GetUpdateType() != UpdateType::REBUILD) {
-        LOGD("Reconciliation via declarative path %{public}s", AceType::TypeName(this));
         UpdateChildrenForDeclarative(newComponents);
     } else {
-        LOGD("Reconciliation via common path %{public}s", AceType::TypeName(this));
         UpdateChildren(newComponents);
     }
 }

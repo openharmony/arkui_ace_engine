@@ -49,7 +49,6 @@ void RenderRoot::Update(const RefPtr<Component>&)
 
 void RenderRoot::PerformLayout()
 {
-    LOGD("RenderRoot::PerformLayout");
     auto appTheme = GetTheme<AppTheme>();
     // Use theme background color to clear canvas.
     if (appTheme && !isBgColorInit_) {

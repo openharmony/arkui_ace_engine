@@ -235,7 +235,6 @@ void GridComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>
     }
     gridLayoutElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
     gridLayoutElement->MarkDirty();
-    LOGD("grid AddChildWithSlot");
 }
 
 void GridComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
@@ -248,7 +247,6 @@ void GridComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Compone
     auto child = gridLayoutElement->GetChildBySlot(slot);
     gridLayoutElement->UpdateChildWithSlot(child, newComponent, slot, slot);
     gridLayoutElement->MarkDirty();
-    LOGD("grid UpdateChildWithSlot");
 }
 
 void GridComposedElement::DeleteChildWithSlot(int32_t slot)
@@ -260,7 +258,6 @@ void GridComposedElement::DeleteChildWithSlot(int32_t slot)
     }
     gridLayoutElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
     gridLayoutElement->MarkDirty();
-    LOGD("grid DeleteChildWithSlot");
 }
 
 } // namespace OHOS::Ace::V2

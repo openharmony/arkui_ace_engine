@@ -142,7 +142,6 @@ void ButtonComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Componen
     }
     buttonElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
     buttonElement->MarkDirty();
-    LOGD("button AddChildWithSlot");
 }
 
 void ButtonComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
@@ -155,7 +154,6 @@ void ButtonComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Compo
     auto child = buttonElement->GetChildBySlot(slot);
     buttonElement->UpdateChildWithSlot(child, newComponent, slot, slot);
     buttonElement->MarkDirty();
-    LOGD("button UpdateChildWithSlot");
 }
 
 void ButtonComposedElement::DeleteChildWithSlot(int32_t slot)
@@ -167,7 +165,6 @@ void ButtonComposedElement::DeleteChildWithSlot(int32_t slot)
     }
     buttonElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
     buttonElement->MarkDirty();
-    LOGD("button DeleteChildWithSlot");
 }
 
 } // namespace OHOS::Ace::V2

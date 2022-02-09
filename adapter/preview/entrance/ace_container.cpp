@@ -589,7 +589,7 @@ void AceContainer::AddAssetPath(
         }
 
         if (flutterAssetManager) {
-            LOGD("Current path is: %s", path.c_str());
+            LOGD("Current path is: %{private}s", path.c_str());
             auto dirAssetProvider = AceType::MakeRefPtr<DirAssetProvider>(
                 path, std::make_unique<flutter::DirectoryAssetBundle>(
                           fml::OpenDirectory(path.c_str(), false, fml::FilePermission::kRead)));

@@ -151,14 +151,34 @@ void AceAbility::OnStart(const Want& want)
 {
     Ability::OnStart(want);
     LOGI("AceAbility::OnStart called");
-
     static std::once_flag onceFlag;
-    std::call_once(onceFlag, []() {
+    auto abilityContext = GetAbilityContext();
+    std::call_once(onceFlag, [abilityContext]() {
         LOGI("Initialize for current process.");
+        SystemProperties::SetDeviceType(DeviceType::PHONE);
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
         CapabilityRegistry::Register();
+        AceApplicationInfo::GetInstance().SetPackageName(abilityContext->GetBundleName());
+        AceApplicationInfo::GetInstance().SetDataFileDirPath(abilityContext->GetFilesDir());
     });
+    OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
+    // register surface change callback
+    OHOS::sptr<OHOS::Rosen::IWindowChangeListener> thisAbility(this);
+    window->RegisterWindowChangeListener(thisAbility);
+    int32_t width = window->GetRect().width_;
+    int32_t height = window->GetRect().height_;
+    LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", width, height);
+    // get density
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (defaultDisplay) {
+        density_ = defaultDisplay->GetVirtualPixelRatio();
+        LOGI("AceAbility: Default display density set: %{public}f", density_);
+    } else {
+        LOGI("AceAbility: Default display is null, set density failed. Use default density: %{public}f", density_);
+    }
+    SystemProperties::InitDeviceInfo(width, height, height >= width ? 0 : 1, density_, false);
+    SystemProperties::SetColorMode(ColorMode::LIGHT);
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     auto resourceManager = GetResourceManager();
@@ -214,29 +234,6 @@ void AceAbility::OnStart(const Want& want)
 
     auto pluginUtils = std::make_shared<PluginUtilsImpl>();
     PluginManager::GetInstance().SetAceAbility(this, pluginUtils);
-
-    OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
-
-    // register surface change callback
-    OHOS::sptr<OHOS::Rosen::IWindowChangeListener> thisAbility(this);
-    window->RegisterWindowChangeListener(thisAbility);
-
-    int32_t width = window->GetRect().width_;
-    int32_t height = window->GetRect().height_;
-    LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", width, height);
-
-    // get density
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    if (defaultDisplay) {
-        density_ = defaultDisplay->GetVirtualPixelRatio();
-        LOGI("AceAbility: Default display density set: %{public}f", density_);
-    } else {
-        LOGI("AceAbility: Default display is null, set density failed. Use default density: %{public}f", density_);
-    }
-    SystemProperties::SetResolution(density_);
-    SystemProperties::SetDeviceType(DeviceType::PHONE);
-    SystemProperties::SetColorMode(ColorMode::LIGHT);
-    SystemProperties::SetDeviceOrientation(height >= width ? 0 : 1);
 
     // create container
     Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, srcPath, this,
@@ -411,7 +408,6 @@ void AceAbility::OnBackPressed()
 
 void AceAbility::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    LOGI("AceAbility::OnPointerEvent called ");
     auto flutterAceView = static_cast<Platform::FlutterAceView*>(
         Platform::AceContainer::GetContainer(abilityId_)->GetView());
     if (!flutterAceView) {
@@ -423,9 +419,6 @@ void AceAbility::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent
 
 void AceAbility::OnKeyUp(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    LOGI("AceAbility::OnKeyUp called,keyEvent info: keyCode is %{public}d,\
-        keyAction is %{public}d, keyActionTime is %{public}d",
-        keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
     auto flutterAceView = static_cast<Platform::FlutterAceView*>(
         Platform::AceContainer::GetContainer(abilityId_)->GetView());
     if (!flutterAceView) {
@@ -443,9 +436,6 @@ void AceAbility::OnKeyUp(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 
 void AceAbility::OnKeyDown(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    LOGI("AceAbility::OnKeyDown called,keyEvent info: keyCode is %{private}d,\
-        keyAction is %{public}d, keyActionTime is %{public}d",
-        keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
     auto flutterAceView = static_cast<Platform::FlutterAceView*>(
         Platform::AceContainer::GetContainer(abilityId_)->GetView());
     if (!flutterAceView) {

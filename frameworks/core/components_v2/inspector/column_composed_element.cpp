@@ -125,7 +125,6 @@ void ColumnComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Componen
     }
     flexElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
     flexElement->MarkDirty();
-    LOGD("column AddChildWithSlot");
 }
 
 void ColumnComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
@@ -138,7 +137,6 @@ void ColumnComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Compo
     auto child = flexElement->GetChildBySlot(slot);
     flexElement->UpdateChildWithSlot(child, newComponent, slot, slot);
     flexElement->MarkDirty();
-    LOGD("column UpdateChildWithSlot");
 }
 
 void ColumnComposedElement::DeleteChildWithSlot(int32_t slot)
@@ -150,7 +148,6 @@ void ColumnComposedElement::DeleteChildWithSlot(int32_t slot)
     }
     flexElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
     flexElement->MarkDirty();
-    LOGD("column DeleteChildWithSlot");
 }
 
 } // namespace OHOS::Ace::V2

@@ -39,7 +39,6 @@ RosenRenderContext::~RosenRenderContext()
 void RosenRenderContext::Repaint(const RefPtr<RenderNode>& node)
 {
     if (!ShouldPaint(node) || !node->NeedRender() || node->GetRSNode() == nullptr) {
-        LOGD("Node is not need to paint");
         return;
     }
 
@@ -59,7 +58,6 @@ void RosenRenderContext::Repaint(const RefPtr<RenderNode>& node)
 void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offset& offset)
 {
     if (!ShouldPaint(child)) {
-        LOGD("Node is not need to paint");
         return;
     }
     auto pipelineContext = child->GetContext().Upgrade();
@@ -149,7 +147,6 @@ void RosenRenderContext::StopRecordingIfNeeded()
 bool RosenRenderContext::IsIntersectWith(const RefPtr<RenderNode>& child, Offset& offset)
 {
     if (!ShouldPaint(child)) {
-        LOGD("Node is not need to paint");
         return false;
     }
 
@@ -168,7 +165,6 @@ bool RosenRenderContext::IsIntersectWith(const RefPtr<RenderNode>& child, Offset
 void RosenRenderContext::InitContext(
     const std::shared_ptr<RSNode>& rsNode, const Rect& rect, const Offset& initialOffset)
 {
-    LOGD("InitContext with width %{public}lf height %{public}lf", rect.Width(), rect.Height());
     rsNode_ = rsNode;
     estimatedRect_ = rect + initialOffset;
     if (rsNode_ == nullptr) {

@@ -23,8 +23,6 @@ using namespace Flutter;
 
 void FlutterRenderClip::Paint(RenderContext& context, const Offset& offset)
 {
-    LOGD("Paint");
-
     RRect rrect;
     Corner corner = {
         Radius(NormalizeToPx(topLeftRadius_.GetX()), NormalizeToPx(topLeftRadius_.GetY())),

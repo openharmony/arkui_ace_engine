@@ -38,7 +38,6 @@ constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 
 void FlutterRenderSlider::Update(const RefPtr<Component>& component)
 {
-    LOGD("Slider::Update");
     RenderSlider::Update(component);
     if (initialUpdate_) {
         track_ = RenderTrack::Create();
@@ -59,7 +58,6 @@ void FlutterRenderSlider::Update(const RefPtr<Component>& component)
     blockHotHeight_ = slider->GetBlock()->GetHotRegionHeight();
     track_->Update(slider->GetTrack());
 
-    LOGD("Slider::Update end");
     MarkNeedLayout();
 }
 

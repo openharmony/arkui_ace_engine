@@ -31,7 +31,6 @@ RenderLayer FlutterRenderTabContent::GetRenderLayer()
 }
 void FlutterRenderTabContent::Paint(RenderContext& context, const Offset& offset)
 {
-    LOGD("TabContent Paint");
     layer_->SetClip(0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Clip::HARD_EDGE);
     RenderNode::Paint(context, offset);
 }

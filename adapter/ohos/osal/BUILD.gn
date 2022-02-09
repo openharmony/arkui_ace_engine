@@ -26,11 +26,7 @@ template("ace_osal_ohos_source_set") {
         "hiviewdfx_hilog_native:libhilog",
         "startup_l2:syspara",
       ]
-      configs = [
-        # need check this
-        "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config",
-        "$ace_root:ace_config",
-      ]
+      configs = [ "$ace_root:ace_config" ]
     } else {
       external_deps = [
         "bytrace:bytrace_core",

@@ -96,7 +96,6 @@ void HyperlinkComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Compo
     }
     hyperlinkElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
     hyperlinkElement->MarkDirty();
-    LOGD("hyperlink AddChildWithSlot");
 }
 
 void HyperlinkComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
@@ -113,7 +112,6 @@ void HyperlinkComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Co
     }
     hyperlinkElement->UpdateChildWithSlot(child, newComponent, slot, slot);
     hyperlinkElement->MarkDirty();
-    LOGD("hyperlink UpdateChildWithSlot");
 }
 
 void HyperlinkComposedElement::DeleteChildWithSlot(int32_t slot)
@@ -125,7 +123,6 @@ void HyperlinkComposedElement::DeleteChildWithSlot(int32_t slot)
     }
     hyperlinkElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
     hyperlinkElement->MarkDirty();
-    LOGD("hyperlink DeleteChildWithSlot");
 }
 
 } // namespace OHOS::Ace::V2

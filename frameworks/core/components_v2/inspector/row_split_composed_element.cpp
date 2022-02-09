@@ -70,7 +70,6 @@ void RowSplitComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Compon
     }
     rowSplitElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
     rowSplitElement->MarkDirty();
-    LOGD("rowSplit AddChildWithSlot");
 }
 
 void RowSplitComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
@@ -83,7 +82,6 @@ void RowSplitComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Com
     auto child = rowSplitElement->GetChildBySlot(slot);
     rowSplitElement->UpdateChildWithSlot(child, newComponent, slot, slot);
     rowSplitElement->MarkDirty();
-    LOGD("rowSplit UpdateChildWithSlot");
 }
 
 void RowSplitComposedElement::DeleteChildWithSlot(int32_t slot)
@@ -95,7 +93,6 @@ void RowSplitComposedElement::DeleteChildWithSlot(int32_t slot)
     }
     rowSplitElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
     rowSplitElement->MarkDirty();
-    LOGD("rowSplit DeleteChildWithSlot");
 }
 
 } // namespace OHOS::Ace::V2

@@ -32,7 +32,6 @@ constexpr Dimension HOVER_RADIUS = 16.0_vp;
 
 void FlutterRenderCircleBlock::Update(const RefPtr<Component>& component)
 {
-    LOGD("Slider::Update");
     RenderBlock::Update(component);
 }
 

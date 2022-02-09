@@ -27,8 +27,6 @@ void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>
     size_t size = data.size() / sizeof(AceActionData);
     auto current = const_cast<AceActionData*>(origin);
     auto end = current + size;
-
-    LOGD("ConvertTouchEvent size:%zu", size);
     while (current < end) {
         std::chrono::microseconds micros(current->timeStamp);
         TimeStamp time(micros);
@@ -43,7 +41,6 @@ void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>
             case AceActionData::ActionType::ADD:
             case AceActionData::ActionType::REMOVE:
             case AceActionData::ActionType::HOVER:
-                LOGD("ConvertTouchEvent not implement!");
                 break;
             case AceActionData::ActionType::DOWN:
                 point.type = TouchType::DOWN;

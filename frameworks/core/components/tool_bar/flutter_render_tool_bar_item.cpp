@@ -39,7 +39,6 @@ RenderLayer FlutterRenderToolBarItem::GetRenderLayer()
 
 void FlutterRenderToolBarItem::Paint(RenderContext& context, const Offset& offset)
 {
-    LOGD("ToolBarItem Paint");
     clipLayer_->SetClip(0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Clip::HARD_EDGE);
     auto renderContext = AceType::DynamicCast<FlutterRenderContext>(&context);
     if (!renderContext) {
