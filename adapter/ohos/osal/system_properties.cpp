@@ -31,7 +31,6 @@ const char PROPERTY_DEVICE_TYPE_TV[] = "tv";
 const char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 const char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 const char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
-const char ENABLE_DEBUG_FILE_PATH[] = "/etc/enabledebug";
 
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
@@ -51,7 +50,13 @@ bool IsTraceEnabled()
 
 bool IsRosenBackendEnabled()
 {
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    return false;
+#endif
 #ifdef ENABLE_ROSEN_BACKEND
+    if (system::GetParameter("persist.ace.rosen.backend.enabled", "0") == "1") {
+        return true;
+    }
     if (access(DISABLE_ROSEN_FILE_PATH, F_OK) == 0) {
         return false;
     }
@@ -69,10 +74,7 @@ bool IsAccessibilityEnabled()
 
 bool IsDebugEnabled()
 {
-    if (access(ENABLE_DEBUG_FILE_PATH, F_OK) == 0) {
-        return true;
-    }
-    return false;
+    return (system::GetParameter("persist.ace.debug.enabled", "0") == "1");
 }
 } // namespace
 
@@ -120,6 +122,7 @@ ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
+bool SystemProperties::debugEnabled_ = IsDebugEnabled();
 
 DeviceType SystemProperties::GetDeviceType()
 {
@@ -164,6 +167,10 @@ void SystemProperties::InitDeviceInfo(
     apiVersion_ = system::GetParameter("hw_sc.build.os.apiversion", INVALID_PARAM);
     releaseType_ = system::GetParameter("hw_sc.build.os.releasetype", INVALID_PARAM);
     paramDeviceType_ = system::GetParameter("hw_sc.build.os.devicetype", INVALID_PARAM);
+    debugEnabled_ = IsDebugEnabled();
+    traceEnabled_ = IsTraceEnabled();
+    accessibilityEnabled_ = IsAccessibilityEnabled();
+    rosenBackendEnabled_ = IsRosenBackendEnabled();
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
@@ -203,6 +210,6 @@ void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
 
 bool SystemProperties::GetDebugEnabled()
 {
-    return IsDebugEnabled();
+    return debugEnabled_;
 }
 } // namespace OHOS::Ace

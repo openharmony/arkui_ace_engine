@@ -222,6 +222,26 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     TimeStamp time(micros);
     event.time = time;
 }
+
+void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    LOGI("point source: %{public}d", pointerEvent->GetSourceType());
+    auto actionId = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    if (pointerEvent->GetPointerItem(actionId, item)) {
+        LOGI("action point info: id: %{public}d, x: %{public}d, y: %{public}d, action: %{public}d", actionId,
+            item.GetLocalX(), item.GetLocalY(), pointerEvent->GetPointerAction());
+    }
+    auto ids = pointerEvent->GetPointersIdList();
+    for (auto&& id : ids) {
+        MMI::PointerEvent::PointerItem item;
+        if (pointerEvent->GetPointerItem(id, item)) {
+            LOGI("all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d", actionId,
+                item.GetLocalX(), item.GetLocalY(), item.IsPressed());
+        }
+    }
+}
+
 } // namespace
 
 FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatfromThread)
@@ -304,7 +324,7 @@ void FlutterAceView::SetViewportMetrics(FlutterAceView* view, const flutter::Vie
 
 void FlutterAceView::DispatchTouchEvent(FlutterAceView* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    LOGD("FlutterAceView::DispatchTouchEvent SourceType = %{public}d", pointerEvent->GetSourceType());
+    LogPointInfo(pointerEvent);
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         // mouse event
         if (pointerEvent->GetPointerAction() >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
@@ -325,6 +345,8 @@ void FlutterAceView::DispatchTouchEvent(FlutterAceView* view, const std::shared_
 bool FlutterAceView::DispatchKeyEvent(FlutterAceView* view, int32_t keyCode, int32_t action, int32_t repeatTime,
     int64_t timeStamp, int64_t timeStampStart)
 {
+    LOGI("key info: keyCode: %{public}d, action: %{public}d, timeStamp: %{public}d", keyCode, action,
+        static_cast<int32_t>(timeStamp));
     if (view != nullptr) {
         return view->ProcessKeyEvent(keyCode, action, repeatTime, timeStamp, timeStampStart);
     }
@@ -402,7 +424,6 @@ void FlutterAceView::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>&
 {
     MouseEvent event;
     ConvertMouseEvent(pointerEvent, event);
-    LOGD("ProcessMouseEvent");
 
     if (mouseEventCallback_) {
         mouseEventCallback_(event);
@@ -413,7 +434,6 @@ void FlutterAceView::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& 
 {
     AxisEvent event;
     ConvertAxisEvent(pointerEvent, event);
-    LOGD("ProcessAxisEvent");
 
     if (axisEventCallback_) {
         axisEventCallback_(event);
@@ -578,6 +598,7 @@ std::unique_ptr<DrawDelegate> FlutterAceView::GetDrawDelegate()
 
     darwDelegate->SetDrawFrameCallback([this](RefPtr<Flutter::Layer>& layer, const Rect& dirty) {
         if (!layer) {
+            LOGE("layer is nullptr");
             return;
         }
         RefPtr<Flutter::FlutterSceneBuilder> flutterSceneBuilder = AceType::MakeRefPtr<Flutter::FlutterSceneBuilder>();
@@ -590,6 +611,8 @@ std::unique_ptr<DrawDelegate> FlutterAceView::GetDrawDelegate()
         auto window = flutter::UIDartState::Current()->window();
         if (window != nullptr && window->client() != nullptr) {
             window->client()->Render(scene.get());
+        } else {
+            LOGE("window is nullptr");
         }
     });
 

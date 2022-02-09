@@ -32,7 +32,6 @@ RenderLayer FlutterRenderRefresh::GetRenderLayer()
 
 void FlutterRenderRefresh::Paint(RenderContext& context, const Offset& offset)
 {
-    LOGD("Refresh Paint");
     layer_->SetClip(0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Clip::HARD_EDGE);
 
     auto children = GetChildren();

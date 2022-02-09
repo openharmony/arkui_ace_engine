@@ -102,7 +102,6 @@ void ScrollBarComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Compo
     }
     scrollBarElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
     scrollBarElement->MarkDirty();
-    LOGD("scrollBar AddChildWithSlot");
 }
 
 void ScrollBarComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
@@ -115,7 +114,6 @@ void ScrollBarComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Co
     auto child = scrollBarElement->GetChildBySlot(slot);
     scrollBarElement->UpdateChildWithSlot(child, newComponent, slot, slot);
     scrollBarElement->MarkDirty();
-    LOGD("scrollBar UpdateChildWithSlot");
 }
 
 void ScrollBarComposedElement::DeleteChildWithSlot(int32_t slot)
@@ -127,6 +125,5 @@ void ScrollBarComposedElement::DeleteChildWithSlot(int32_t slot)
     }
     scrollBarElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
     scrollBarElement->MarkDirty();
-    LOGD("scrollBar DeleteChildWithSlot");
 }
 } // namespace OHOS::Ace::V2

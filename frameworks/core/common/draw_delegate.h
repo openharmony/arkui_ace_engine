@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DRAW_DELEGATE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DRAW_DELEGATE_H
 
+#include "base/geometry/rect.h"
 #include "core/pipeline/layers/layer.h"
 
 namespace OHOS::Rosen {

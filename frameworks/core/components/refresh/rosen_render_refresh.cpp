@@ -28,7 +28,6 @@ void RosenRenderRefresh::Paint(RenderContext& context, const Offset& offset)
     if (rsNode == nullptr) {
         return;
     }
-    LOGD("Refresh Paint");
     rsNode->SetClipToFrame(true);
 
     auto children = GetChildren();

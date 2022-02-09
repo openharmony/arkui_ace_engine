@@ -76,10 +76,8 @@ void RenderNode::MarkTreeRender(const RefPtr<RenderNode>& root, bool& meetHole, 
 
     if (meetHole) {
         root->SetNeedClip(false);
-        LOGD("Hole: has meet hole, no need clip");
     } else {
         root->SetNeedClip(true);
-        LOGD("Hole: has not meet hole, need clip");
     }
 
     if (needFlush) {
@@ -376,7 +374,6 @@ void RenderNode::RenderWithContext(RenderContext& context, const Offset& offset)
     }
     pendingDispatchLayoutReady_ = false;
     if (GetHasSubWindow() || !GetNeedClip()) {
-        LOGD("Hole: meet subwindow node or no need clip");
         if (context.GetNeedRestoreHole()) {
             context.Restore();
             context.SetNeedRestoreHole(false);

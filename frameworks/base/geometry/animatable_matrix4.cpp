@@ -69,7 +69,6 @@ void AnimatableMatrix4::AnimateTo(const Matrix4& endValue)
     }
 
     if (*this == endValue && !evaluator_) {
-        LOGD("AnimateTo with same value. endValue: %{public}s", endValue.ToString().c_str());
         return;
     }
     ResetController();

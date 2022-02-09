@@ -27,7 +27,6 @@ namespace OHOS::Ace {
 
 void RootElement::PerformBuild()
 {
-    LOGD("RootElement::PerformBuild");
     const RefPtr<RootComponent> root = AceType::DynamicCast<RootComponent>(component_);
     if (root) {
         active_ = true;

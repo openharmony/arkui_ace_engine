@@ -162,9 +162,11 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     static std::once_flag onceFlag;
     std::call_once(onceFlag, [&context]() {
         LOGI("Initialize for current process.");
+        SystemProperties::SetDeviceType(DeviceType::PHONE);
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
         AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
+        AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
         CapabilityRegistry::Register();
     });
 
@@ -185,10 +187,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             LOGI("AceAbility: Default display is null, set density failed. Use default density: %{public}f", density);
         }
     }
-    SystemProperties::SetResolution(density);
-    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::InitDeviceInfo(width, height, height >= width ? 0 : 1, density, false);
     SystemProperties::SetColorMode(ColorMode::LIGHT);
-    SystemProperties::SetDeviceOrientation(height >= width ? 0 : 1);
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     auto resourceManager = context->GetResourceManager();

@@ -80,7 +80,6 @@ void BackendDelegateImpl::RunPa(const std::string& url, const OHOS::AAFwk::Want&
 
 void BackendDelegateImpl::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const
 {
-    LOGD("BackendDelegateImpl SetJsMessageDispatcher");
     taskExecutor_->PostTask([dispatcherCallback = dispatcherCallback_, dispatcher] { dispatcherCallback(dispatcher); },
         TaskExecutor::TaskType::JS);
 }

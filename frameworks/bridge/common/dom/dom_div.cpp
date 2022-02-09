@@ -39,13 +39,11 @@ DOMDiv::DOMDiv(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nod
 void DOMDiv::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 {
     ACE_DCHECK(child);
-    LOGD("DOMDiv appendChild %{public}s", child->GetTag().c_str());
     if (GetDisplay() == DisplayType::GRID) {
         if (!grid_) {
             LOGE("DOMDiv GridLayout is null");
             return;
         }
-        LOGD("Current is grid, add child to grid.");
         grid_->InsertChild(slot, child->GetRootComponent());
     } else {
         if (isFlexWrap_) {
@@ -53,14 +51,12 @@ void DOMDiv::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
                 LOGE("DOMDiv wrapChild is null");
                 return;
             }
-            LOGD("Current is wrap, add child to wrap.");
             wrapChild_->InsertChild(slot, child->GetRootComponent());
         } else {
             if (!flexChild_) {
                 LOGE("DOMDiv FlexChild is null");
                 return;
             }
-            LOGD("Current is flex, add child to flex.");
             flexChild_->InsertChild(slot, child->GetRootComponent());
         }
     }
@@ -68,13 +64,11 @@ void DOMDiv::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 
 void DOMDiv::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 {
-    LOGD("DOMDiv remove child %{public}s", child->GetTag().c_str());
     if (GetDisplay() == DisplayType::GRID) {
         if (!grid_) {
             LOGE("DOMDiv GridLayout is null");
             return;
         }
-        LOGD("Current is grid, remove child from grid.");
         grid_->RemoveChild(child->GetRootComponent());
     } else {
         if (isFlexWrap_) {
@@ -82,14 +76,12 @@ void DOMDiv::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
                 LOGE("DOMDiv wrapChild is null");
                 return;
             }
-            LOGD("Current is wrap, remove child from wrap.");
             wrapChild_->RemoveChild(child->GetRootComponent());
         } else {
             if (!flexChild_) {
                 LOGE("DOMDiv FlexChild is null");
                 return;
             }
-            LOGD("Current is flex, remove child from flex.");
             flexChild_->RemoveChild(child->GetRootComponent());
         }
     }
@@ -121,7 +113,6 @@ Alignment DOMDiv::ComputeFlexAlign(FlexAlign flexMainAlign, FlexAlign flexCrossA
 
 void DOMDiv::CreateOrUpdateGrid()
 {
-    LOGD("Create DOMGrid");
     if (!grid_) {
         grid_ = AceType::MakeRefPtr<GridLayoutComponent>(std::list<RefPtr<Component>>());
     }
@@ -140,7 +131,6 @@ void DOMDiv::CreateOrUpdateGrid()
 
 void DOMDiv::CreateOrUpdateGridItem()
 {
-    LOGD("Create DOMGrid item");
     if (!gridItem_) {
         gridItem_ = AceType::MakeRefPtr<GridLayoutItemComponent>(RefPtr<Component>());
     }

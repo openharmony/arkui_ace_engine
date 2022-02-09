@@ -21,7 +21,6 @@ using namespace Flutter;
 
 RenderLayer FlutterRenderDisplay::GetRenderLayer()
 {
-    LOGD("GetRenderLayer");
     if (disableLayer_) {
         return nullptr;
     }
@@ -38,7 +37,6 @@ RenderLayer FlutterRenderDisplay::GetRenderLayer()
 
 void FlutterRenderDisplay::Paint(RenderContext& context, const Offset& offset)
 {
-    LOGD("Paint");
     if (visible_ == VisibleType::VISIBLE) {
         if (!disableLayer_ && layer_) {
             layer_->SetOpacity(opacity_, 0.0, 0.0);

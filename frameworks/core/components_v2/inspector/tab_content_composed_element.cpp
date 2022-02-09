@@ -96,7 +96,6 @@ void TabContentComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Comp
     }
     tabContentElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
     tabContentElement->MarkDirty();
-    LOGD("tabContent AddChildWithSlot");
 }
 
 void TabContentComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
@@ -109,7 +108,6 @@ void TabContentComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<C
     auto child = tabContentElement->GetChildBySlot(slot);
     tabContentElement->UpdateChildWithSlot(child, newComponent, slot, slot);
     tabContentElement->MarkDirty();
-    LOGD("tabContent UpdateChildWithSlot");
 }
 
 void TabContentComposedElement::DeleteChildWithSlot(int32_t slot)
@@ -121,7 +119,6 @@ void TabContentComposedElement::DeleteChildWithSlot(int32_t slot)
     }
     tabContentElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
     tabContentElement->MarkDirty();
-    LOGD("tabContent DeleteChildWithSlot");
 }
 
 } // namespace OHOS::Ace::V2

@@ -37,7 +37,6 @@ void RosenRenderToolBarItem::Update(const RefPtr<Component>& component)
 
 void RosenRenderToolBarItem::Paint(RenderContext& context, const Offset& offset)
 {
-    LOGD("ToolBarItem Paint");
     auto renderContext = AceType::DynamicCast<RosenRenderContext>(&context);
     if (!renderContext) {
         LOGE("Render context is null");

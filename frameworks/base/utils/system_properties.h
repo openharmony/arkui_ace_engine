@@ -259,6 +259,7 @@ private:
     static ScreenShape screenShape_;
     static LongScreenType LongScreen_;
     static bool rosenBackendEnabled_;
+    static bool debugEnabled_;
 };
 
 } // namespace OHOS::Ace

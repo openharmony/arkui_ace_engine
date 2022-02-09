@@ -61,6 +61,16 @@ public:
     void SetProcessName(const std::string& processName);
     const std::string& GetProcessName() const;
 
+
+    void SetDataFileDirPath(const std::string& dataDirFilePath)
+    {
+        dataDirFilePath_ = dataDirFilePath;
+    }
+    const std::string& GetDataFileDirPath() const
+    {
+        return dataDirFilePath_;
+    }
+
     virtual bool GetBundleInfo(const std::string& packageName, AceBundleInfo& bundleInfo) = 0;
     virtual double GetLifeTime() const = 0;
 
@@ -137,6 +147,7 @@ protected:
 
     std::string packageName_;
     std::string processName_;
+    std::string dataDirFilePath_;
     int32_t uid_;
 
     bool isRightToLeft_ = false;

@@ -33,7 +33,6 @@ constexpr double DEFAULT_SHRINK_TIME_SLOT = 0.9;
 
 void RenderRadio::Update(const RefPtr<Component>& component)
 {
-    LOGD("update");
     RenderCheckable::Update(component);
     const auto& radio = AceType::DynamicCast<RadioComponent<std::string>>(component);
     component_ = radio;

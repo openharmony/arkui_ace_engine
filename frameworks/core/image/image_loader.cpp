@@ -146,7 +146,6 @@ sk_sp<SkData> ImageLoader::LoadDataFromCachedFile(const std::string& uri)
 sk_sp<SkData> FileImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
 {
-    LOGD("File Image!");
     auto src = imageSourceInfo.GetSrc();
     std::string filePath = RemovePathHead(src);
     if (imageSourceInfo.GetSrcType() == SrcType::INTERNAL) {
@@ -283,7 +282,6 @@ sk_sp<SkData> NetworkImageLoader::LoadImageData(
 {
     auto uri = imageSourceInfo.GetSrc();
     // 1. find in cache file path.
-    LOGD("Network Image!");
     auto skData = ImageLoader::LoadDataFromCachedFile(uri);
     if (skData) {
         return skData;
