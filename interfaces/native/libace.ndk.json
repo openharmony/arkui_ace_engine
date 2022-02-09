@@ -1,26 +1,26 @@
 [
     {
         "first_introduced": "7",
-        "name": "NativeXComponent_GetXComponentId"
+        "name": "OH_NativeXComponent_GetXComponentId"
     },
     {
         "first_introduced": "7",
-        "name": "NativeXComponent_GetNativeWindow"
+        "name": "OH_NativeXComponent_GetNativeWindow"
     },
     {
         "first_introduced": "7",
-        "name": "NativeXComponent_GetXComponentSize"
+        "name": "OH_NativeXComponent_GetXComponentSize"
     },
     {
         "first_introduced": "7",
-        "name": "NativeXComponent_RegisterCallback"
+        "name": "OH_NativeXComponent_RegisterCallback"
     },
     {
         "first_introduced": "7",
-        "name": "NativeXComponent_GetTouchInfo"
+        "name": "OH_NativeXComponent_GetTouchInfo"
     },
     {
         "first_introduced": "7",
-        "name": "NativeXComponent_GetXComponentOffset"
+        "name": "OH_NativeXComponent_GetXComponentOffset"
     }
 ]
