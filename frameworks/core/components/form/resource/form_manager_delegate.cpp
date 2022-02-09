@@ -315,8 +315,8 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
 void FormManagerDelegate::OnFormAcquired(const std::string& param)
 {
     auto result = ParseMapFromString(param);
-    if (onFormAcquiredCallback_) {
-        onFormAcquiredCallback_(StringUtils::StringToLongInt(result["formId"]), result["codePath"],
+    if (onFormAcquiredCallbackForJava_) {
+        onFormAcquiredCallbackForJava_(StringUtils::StringToLongInt(result["formId"]), result["codePath"],
             result["moduleName"], result["data"]);
     }
 }
@@ -355,7 +355,7 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJs
         }
         hasCreated_ = true;
         onFormAcquiredCallback_(runningCardId_, formJsInfo.jsFormCodePath + "/", formJsInfo.formName,
-            formJsInfo.formData);
+            formJsInfo.formData, formJsInfo.imageDataMap);
     } else {
         if (formJsInfo.formData.empty()) {
             LOGE("update form data success, but data is empty!!!");
