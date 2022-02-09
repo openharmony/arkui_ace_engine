@@ -39,8 +39,7 @@ void RosenRenderBadge::Paint(RenderContext& context, const Offset& offset)
     context.PaintChild(badgeChild, offset + badgeChildInitialOffset_);
     if (showMessage_) {
         DrawBadge(context, offset);
-        if ((!textData_.empty() || badge_->GetMessageCount() > 0) && showMessage_ &&
-            (LessOrEqual(textSize_.Height(), badgeHeight_))) {
+        if (LessOrEqual(textSize_.Height(), badgeHeight_)) {
             PaintText(offset + textInitialOffset_, context);
         }
     }
