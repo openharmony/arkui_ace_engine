@@ -25,7 +25,6 @@ class JSBadge : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
-    static void SetVisible(bool isVisible);
 
 private:
     static void SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badge);
