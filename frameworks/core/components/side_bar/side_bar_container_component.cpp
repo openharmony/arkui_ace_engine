@@ -34,8 +34,6 @@ SideBarContainerComponent::SideBarContainerComponent(const std::list<RefPtr<Comp
 {
     declaration_ = AceType::MakeRefPtr<SideBarDeclaration>();
     declaration_->Init();
-
-    BuildButton();
 }
 
 RefPtr<RenderNode> SideBarContainerComponent::CreateRenderNode()
@@ -48,25 +46,25 @@ RefPtr<Element> SideBarContainerComponent::CreateElement()
     return AceType::MakeRefPtr<SideBarContainerElement>();
 }
 
-void SideBarContainerComponent::BuildButton()
+RefPtr<Component> SideBarContainerComponent::BuildButton()
 {
     RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>();
     if (sideStatus_ == SideStatus::SHOW) {
         if (GetShowIcon().empty()) {
-            imageComponent->SetSrc(GetShowIcon());
-        } else {
             imageComponent->SetResourceId(InternalResource::ResourceId::SIDE_BAR);
+        } else {
+            imageComponent->SetSrc(GetShowIcon());
         }
     } else {
-        if (!GetHiddenIcon().empty()) {
-            imageComponent->SetSrc(GetHiddenIcon());
-        } else {
+        if (GetHiddenIcon().empty()) {
             imageComponent->SetResourceId(InternalResource::ResourceId::SIDE_BAR);
+        } else {
+            imageComponent->SetSrc(GetHiddenIcon());
         }
     }
     imageComponent->SetUseSkiaSvg(false);
     imageComponent->SetImageFit(ImageFit::FILL);
-    exRegionComponent_ = imageComponent;
+    return imageComponent;
 }
 
 void SideBarContainerComponent::Build()
@@ -95,25 +93,25 @@ void SideBarContainerComponent::Build()
 
     RefPtr<BoxComponent> btnbox = AceType::MakeRefPtr<BoxComponent>();
     btnbox->SetOnClick(tapGesture);
-    btnbox->SetChild(exRegionComponent_);
+    btnbox->SetChild(BuildButton());
     btnbox->SetWidth(Dimension(declaration_->GetImageWidth(), DimensionUnit::VP));
     btnbox->SetHeight(Dimension(declaration_->GetImageHeight(), DimensionUnit::VP));
-    btnbox->SetLeft(Dimension(declaration_->GetLeft(), DimensionUnit::VP));
-    btnbox->SetTop(Dimension(declaration_->GetTop(), DimensionUnit::VP));
-    btnbox->SetPositionType(PositionType::ABSOLUTE);
     btnbox->SetFlex(BoxFlex::FLEX_XY);
-    RefPtr<DisplayComponent> display = AceType::MakeRefPtr<DisplayComponent>(btnbox);
+    RefPtr<DisplayComponent> displayBtn = AceType::MakeRefPtr<DisplayComponent>(btnbox);
+    displayBtn->SetLeft(Dimension(declaration_->GetLeft(), DimensionUnit::VP));
+    displayBtn->SetTop(Dimension(declaration_->GetTop(), DimensionUnit::VP));
+    displayBtn->SetPositionType(PositionType::ABSOLUTE);
     if (!GetShowControlButton()) {
-        display->SetVisible(VisibleType::GONE);
+        displayBtn->SetVisible(VisibleType::GONE);
     } else {
-        display->SetVisible(VisibleType::VISIBLE);
+        displayBtn->SetVisible(VisibleType::VISIBLE);
     }
 
     ClearChildren();
 
     AppendChild(contentbox);
     AppendChild(barbox);
-    AppendChild(btnbox);
+    AppendChild(displayBtn);
 }
 
 void SideBarContainerComponent::SetButtonWidth(double width)

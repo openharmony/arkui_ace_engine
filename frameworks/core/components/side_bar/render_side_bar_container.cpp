@@ -56,9 +56,6 @@ void RenderSideBarContainer::Update(const RefPtr<Component>& component)
         return;
     }
 
-    exceptRegion_.SetRect(
-        sideBar_->GetButtonTop(), sideBar_->GetButtonLeft(), sideBar_->GetButtonWidth(), sideBar_->GetButtonHeight());
-
     auto width = sidebarWidth_;
     auto minWidth = sideBar_->GetSideBarMinWidth();
     auto maxWidth = sideBar_->GetSideBarMaxWidth();
@@ -88,6 +85,7 @@ void RenderSideBarContainer::Update(const RefPtr<Component>& component)
             container->DoSideBarAnimation();
         }
     });
+
     RenderStack::Update(component);
 }
 
@@ -228,6 +226,7 @@ void RenderSideBarContainer::SetChildrenStatus()
     RefPtr<RenderNode>& imageBox = *(++begin);
     auto box = imageBox->GetFirstChild();
     renderImage_ = box ? box->GetFirstChild() : nullptr;
+
     static Dimension miniWidthToHide = 520.0_vp;
     auto layoutSize = GetLayoutSize();
     if (status_ == SideStatus::SHOW) {
@@ -264,28 +263,29 @@ void RenderSideBarContainer::UpdateRenderImage()
 {
     auto renderImage = DynamicCast<RenderImage>(renderImage_.Upgrade());
     if (!renderImage) {
+        LOGE("sidebar control button image error");
         return;
     }
     auto imageComponent = AceType::MakeRefPtr<ImageComponent>();
     if (status_ == SideStatus::SHOW) {
         if (sideBar_->GetShowIcon().empty()) {
-            imageComponent->SetSrc(sideBar_->GetShowIcon());
-        } else {
             imageComponent->SetResourceId(InternalResource::ResourceId::SIDE_BAR);
+        } else {
+            imageComponent->SetSrc(sideBar_->GetShowIcon());
         }
     }
     if (status_ == SideStatus::HIDDEN) {
         if (sideBar_->GetHiddenIcon().empty()) {
-            imageComponent->SetSrc(sideBar_->GetHiddenIcon());
-        } else {
             imageComponent->SetResourceId(InternalResource::ResourceId::SIDE_BAR);
+        } else {
+            imageComponent->SetSrc(sideBar_->GetHiddenIcon());
         }
     }
     if (status_ == SideStatus::CHANGING) {
         if (sideBar_->GetSwitchIcon().empty()) {
-            imageComponent->SetSrc(sideBar_->GetSwitchIcon());
-        } else {
             imageComponent->SetResourceId(InternalResource::ResourceId::SIDE_BAR);
+        } else {
+            imageComponent->SetSrc(sideBar_->GetSwitchIcon());
         }
     }
     imageComponent->SetUseSkiaSvg(false);

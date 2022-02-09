@@ -105,11 +105,6 @@ public:
 
     void SetClickedFunction(std::function<void()>&& clickCallback);
 
-    std::function<void(SideStatus)> GetStatusFunction()
-    {
-        return updateImage_;
-    }
-
     void SetSideBarMaxWidth(const Dimension& max)
     {
         sidebarMaxWidth_ = max;
@@ -147,12 +142,10 @@ public:
     }
 
 private:
-    void BuildButton();
+    RefPtr<Component> BuildButton();
 
     std::function<void()> buttonClick_;
-    RefPtr<Component> exRegionComponent_;
     RefPtr<SideBarDeclaration> declaration_;
-    std::function<RefPtr<Component>(SideStatus)> updateImage_;
     Dimension sidebarWidth_ = 200.0_vp;
     Dimension sidebarMinWidth_ = 200.0_vp;
     Dimension sidebarMaxWidth_ = 280.0_vp;
