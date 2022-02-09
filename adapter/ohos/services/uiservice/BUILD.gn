@@ -14,7 +14,8 @@
 import("//build/ohos.gni")
 import("//foundation/aafwk/standard/aafwk.gni")
 import("//foundation/ace/ace_engine/ace_config.gni")
-import("//foundation/ace/ace_engine/services/uiservice/uiservicems.gni")
+import(
+    "//foundation/ace/ace_engine/adapter/ohos/services/uiservice/uiservicems.gni")
 
 ohos_prebuilt_etc("ui_service.cfg") {
   relative_install_dir = "init"
@@ -94,7 +95,7 @@ template("uiservice_static") {
       "//utils/native/base:utils",
     ]
 
-    deps += [ "//foundation/ace/ace_engine/services/uiservice/dialog_ui/dialog_picker/js:dialog_picker_js_files_etc" ]
+    deps += [ "//foundation/ace/ace_engine/adapter/ohos/services/uiservice/dialog_ui/dialog_picker/js:dialog_picker_js_files_etc" ]
 
     deps += [ "$ace_root/build:libace" ]
 
