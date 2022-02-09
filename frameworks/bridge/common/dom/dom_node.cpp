@@ -107,6 +107,15 @@ DOMNode::~DOMNode()
                 BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(focusEvent.blur.eventMarker);
             }
         }
+        auto& mouseEvent = static_cast<CommonMouseEvent&>(declaration_->GetEvent(EventTag::COMMON_MOUSE_EVENT));
+        if (mouseEvent.IsValid()) {
+            if (!mouseEvent.mouseHover.eventMarker.IsEmpty()) {
+                BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(mouseEvent.mouseHover.eventMarker);
+            }
+            if (!mouseEvent.mouseHoverExit.eventMarker.IsEmpty()) {
+                BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(mouseEvent.mouseHoverExit.eventMarker);
+            }
+        }
 
         for (uint32_t eventAction = 0; eventAction < EventAction::SIZE; eventAction++) {
             for (uint32_t eventStage = 0; eventStage < EventStage::SIZE; eventStage++) {
