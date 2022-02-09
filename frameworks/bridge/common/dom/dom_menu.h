@@ -27,7 +27,7 @@ class DOMMenu final : public DOMNode {
 
 public:
     DOMMenu(NodeId nodeId, const std::string& nodeName);
-    ~DOMMenu() override = default;
+    ~DOMMenu() override;
 
     void BindIdNode(const RefPtr<DOMNode>& idNode);
 
@@ -51,6 +51,9 @@ private:
 
     RefPtr<MenuComponent> menuChild_;
     TextStyle titleStyle_;
+    EventMarker clickMarkerId_;
+    EventMarker focusMarkerId_;
+    EventMarker longPressMarkerId_;
     bool isClickType_ = true;
 };
 
