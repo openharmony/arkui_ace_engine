@@ -48,9 +48,22 @@ void JSBadge::JSBind(BindingTarget globalObj)
 
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSBadge>::StaticMethod("create", &JSBadge::Create, opt);
+    JSClass<JSBadge>::StaticMethod("visible", &JSBadge::SetVisible);
 
     JSClass<JSBadge>::Inherit<JSViewAbstract>();
     JSClass<JSBadge>::Bind(globalObj);
+}
+
+void JSBadge::SetVisible(bool isVisible)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto badgeComponent = AceType::DynamicCast<BadgeComponent>(component);
+    if (!badgeComponent) {
+        LOGE("component error");
+        return;
+    }
+
+    badgeComponent->SetShowMessage(isVisible);
 }
 
 void JSBadge::SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badge)
