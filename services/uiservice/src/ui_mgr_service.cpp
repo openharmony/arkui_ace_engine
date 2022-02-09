@@ -61,7 +61,7 @@ static std::atomic<int32_t> gDialogId = 0;
 
 class UIMgrServiceWindowChangeListener : public Rosen::IWindowChangeListener {
 public:
-    void OnSizeChange(OHOS::Rosen::Rect rect) override
+    void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override
     {
         HILOG_INFO("UIMgrServiceWindowChangeListener size change");
     }

@@ -61,7 +61,7 @@ public:
     void OnRemoteTerminated() override;
 
     // override Rosen::IWindowChangeListener virtual callback function
-    void OnSizeChange(OHOS::Rosen::Rect rect) override;
+    void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override;
 
 private:
     static int32_t instanceId_;
