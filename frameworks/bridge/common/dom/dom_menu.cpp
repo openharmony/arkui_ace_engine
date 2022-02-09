@@ -34,6 +34,19 @@ DOMMenu::DOMMenu(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, n
     menuChild_ = AceType::MakeRefPtr<MenuComponent>(std::to_string(nodeId), nodeName);
 }
 
+DOMMenu::~DOMMenu()
+{
+    if (!clickMarkerId_.IsEmpty()) {
+        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(clickMarkerId_);
+    }
+    if (!focusMarkerId_.IsEmpty()) {
+        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(focusMarkerId_);
+    }
+    if (!longPressMarkerId_.IsEmpty()) {
+        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(longPressMarkerId_);
+    }
+}
+
 void DOMMenu::InitializeStyle()
 {
     ResetInitializedStyle();
@@ -130,9 +143,9 @@ RefPtr<Component> DOMMenu::GetSpecializedComponent()
 void DOMMenu::BindIdNode(const RefPtr<DOMNode>& idNode)
 {
     if (SystemProperties::GetDeviceType() == DeviceType::TV) {
-        EventMarker clickMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
+        focusMarkerId_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
-            clickMarker, [weak = WeakClaim(this), idNode]() {
+            focusMarkerId_, [weak = WeakClaim(this), idNode]() {
                 if (!idNode || idNode->IsNodeDisabled()) {
                     return;
                 }
@@ -146,12 +159,12 @@ void DOMMenu::BindIdNode(const RefPtr<DOMNode>& idNode)
                     targetCallback(targetId, Offset(0, 0));
                 }
             });
-        idNode->SetOnFocusClick(clickMarker);
+        idNode->SetOnFocusClick(focusMarkerId_);
     }
     if (isClickType_) {
-        EventMarker clickMarker = BackEndEventManager<void(const ClickInfo&)>::GetInstance().GetAvailableMarker();
+        clickMarkerId_ = BackEndEventManager<void(const ClickInfo&)>::GetInstance().GetAvailableMarker();
         BackEndEventManager<void(const ClickInfo&)>::GetInstance().BindBackendEvent(
-            clickMarker, [weak = WeakClaim(this), idNode](const ClickInfo& clickInfo) {
+            clickMarkerId_, [weak = WeakClaim(this), idNode](const ClickInfo& clickInfo) {
                 auto domMenu = weak.Upgrade();
                 if (!domMenu || !idNode) {
                     return;
@@ -162,12 +175,12 @@ void DOMMenu::BindIdNode(const RefPtr<DOMNode>& idNode)
                     targetCallback(targetId, clickInfo.GetGlobalLocation());
                 }
             });
-        idNode->SetOnClick(clickMarker);
+        idNode->SetOnClick(clickMarkerId_);
     } else {
-        EventMarker longPressMarker =
+        longPressMarkerId_ =
             BackEndEventManager<void(const LongPressInfo&)>::GetInstance().GetAvailableMarker();
         BackEndEventManager<void(const LongPressInfo&)>::GetInstance().BindBackendEvent(
-            longPressMarker, [weak = WeakClaim(this), idNode](const LongPressInfo& longPressInfo) {
+            longPressMarkerId_, [weak = WeakClaim(this), idNode](const LongPressInfo& longPressInfo) {
                 auto domMenu = weak.Upgrade();
                 if (!domMenu || !idNode) {
                     return;
@@ -178,7 +191,7 @@ void DOMMenu::BindIdNode(const RefPtr<DOMNode>& idNode)
                     targetCallback(targetId, longPressInfo.GetGlobalLocation());
                 }
             });
-        idNode->SetOnLongPress(longPressMarker);
+        idNode->SetOnLongPress(longPressMarkerId_);
     }
 }
 
