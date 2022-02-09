@@ -2973,7 +2973,10 @@ void JsiEngineInstance::InitGroupJsBridge()
 bool JsiEngineInstance::FireJsEvent(const std::string& eventStr)
 {
     LOGI("JsiEngineInstance FireJsEvent");
-
+    if (!runningPage_) {
+        LOGW("js engine instance running page is not valid.");
+        return false;
+    }
     std::vector<shared_ptr<JsValue>> argv;
     argv.push_back(runtime_->NewString(std::to_string(runningPage_->GetPageId())));
     shared_ptr<JsValue> var1 = runtime_->ParseJson(eventStr);
