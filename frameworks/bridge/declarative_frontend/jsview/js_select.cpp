@@ -93,6 +93,14 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("optionFont", &JSSelect::OptionFont, opt);
     JSClass<JSSelect>::StaticMethod("optionFontColor", &JSSelect::OptionFontColor, opt);
     JSClass<JSSelect>::StaticMethod("onSelected", &JSSelect::OnSelected, opt);
+    JSClass<JSSelect>::StaticMethod("width", &JSSelect::JsWidth);
+    JSClass<JSSelect>::StaticMethod("height", &JSSelect::JsHeight);
+    JSClass<JSSelect>::StaticMethod("size", &JSSelect::JsSize);
+    JSClass<JSSelect>::StaticMethod("padding", &JSSelect::JsPadding);
+    JSClass<JSSelect>::StaticMethod("paddingTop", &JSSelect::SetPaddingTop, opt);
+    JSClass<JSSelect>::StaticMethod("paddingBottom", &JSSelect::SetPaddingBottom, opt);
+    JSClass<JSSelect>::StaticMethod("paddingLeft", &JSSelect::SetPaddingLeft, opt);
+    JSClass<JSSelect>::StaticMethod("paddingRight", &JSSelect::SetPaddingRight, opt);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -461,5 +469,197 @@ void JSSelect::OnSelected(const JSCallbackInfo& info)
         LOGE("Failed to bind event");
     }
     info.ReturnSelf();
+}
+
+void JSSelect::JsWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    Width(info[0]);
+}
+
+void JSSelect::Width(const JSRef<JSVal>& jsValue)
+{
+    Dimension value;
+    if (!ParseJsDimensionVp(jsValue, value)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto box = stack->GetBoxComponent();
+    auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
+    if (selectComponent) {
+        selectComponent->SetWidth(value);
+        box->SetWidth(value);
+    }
+}
+
+void JSSelect::JsHeight(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    Height(info[0]);
+}
+
+void JSSelect::Height(const JSRef<JSVal>& jsValue)
+{
+    Dimension value;
+    if (!ParseJsDimensionVp(jsValue, value)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto box = stack->GetBoxComponent();
+    auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
+    if (selectComponent) {
+        selectComponent->SetHeight(value);
+        box->SetHeight(value);
+    }
+}
+
+void JSSelect::JsSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        LOGE("arg is not Object or String.");
+        return;
+    }
+
+    JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+    Width(sizeObj->GetProperty("width"));
+    Height(sizeObj->GetProperty("height"));
+}
+
+void JSSelect::JsPadding(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
+        LOGE("arg is not a string, number or object.");
+        return;
+    }
+
+    if (info[0]->IsObject()) {
+        auto stack = ViewStackProcessor::GetInstance();
+        auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
+        if (!selectComponent) {
+            LOGE("search component error");
+            return;
+        }
+        auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+        if (!argsPtrItem || argsPtrItem->IsNull()) {
+            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+            return;
+        }
+        if (argsPtrItem->Contains("top")) {
+            Dimension topDimen = Dimension(0.0, DimensionUnit::VP);
+            if (ParseJsonDimensionVp(argsPtrItem->GetValue("top"), topDimen)) {
+                selectComponent->SetTopPadding(topDimen);
+            }  
+        }
+        if (argsPtrItem->Contains("left")) {
+            Dimension leftDimen = Dimension(0.0, DimensionUnit::VP);
+            if (ParseJsonDimensionVp(argsPtrItem->GetValue("left"), leftDimen)) {
+                selectComponent->SetLeftPadding(leftDimen);
+            }  
+        }
+        if (argsPtrItem->Contains("right")) {
+            Dimension rightDimen = Dimension(0.0, DimensionUnit::VP);
+            if (ParseJsonDimensionVp(argsPtrItem->GetValue("right"), rightDimen)) {
+                selectComponent->SetRightPadding(rightDimen);
+            }  
+        }
+        if (argsPtrItem->Contains("bottom")) {
+            Dimension bottomDimen = Dimension(0.0, DimensionUnit::VP);
+            if (ParseJsonDimensionVp(argsPtrItem->GetValue("bottom"), bottomDimen)) {
+                selectComponent->SetBottomPadding(bottomDimen);
+            }  
+        }
+    }
+    Dimension length;
+    if (ParseJsDimensionVp(info[0], length)) {
+        auto stack = ViewStackProcessor::GetInstance();
+        auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
+        if (selectComponent) {
+            selectComponent->SetLeftPadding(length);
+            selectComponent->SetTopPadding(length);
+            selectComponent->SetRightPadding(length);
+            selectComponent->SetBottomPadding(length);
+        }
+    }
+}
+
+void JSSelect::SetPaddingLeft(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
+    if (selectComponent) {
+        selectComponent->SetLeftPadding(value);
+    }
+}
+
+void JSSelect::SetPaddingTop(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
+    if (selectComponent) {
+        selectComponent->SetTopPadding(value);
+    }
+}
+
+void JSSelect::SetPaddingRight(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
+    if (selectComponent) {
+        selectComponent->SetRightPadding(value);
+    }
+}
+
+void JSSelect::SetPaddingBottom(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
+    if (selectComponent) {
+        selectComponent->SetBottomPadding(value);
+    }
 }
 } // namespace OHOS::Ace::Framework

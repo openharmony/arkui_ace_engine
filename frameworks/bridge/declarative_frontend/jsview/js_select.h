@@ -35,6 +35,16 @@ public:
     static void OptionFont(const JSCallbackInfo& info);
     static void OptionFontColor(const JSCallbackInfo& info);
     static void OnSelected(const JSCallbackInfo& info);
+    static void JsWidth(const JSCallbackInfo& info);
+    static void JsHeight(const JSCallbackInfo& info);
+    static void Width(const JSRef<JSVal>& jsValue);
+    static void Height(const JSRef<JSVal>& jsValue);
+    static void JsSize(const JSCallbackInfo& info);
+    static void JsPadding(const JSCallbackInfo& info);
+    static void SetPaddingTop(const JSCallbackInfo& info);
+    static void SetPaddingBottom(const JSCallbackInfo& info);
+    static void SetPaddingLeft(const JSCallbackInfo& info);
+    static void SetPaddingRight(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif
