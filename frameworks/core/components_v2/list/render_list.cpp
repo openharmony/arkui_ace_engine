@@ -317,7 +317,7 @@ void RenderList::PerformLayout()
     auto layoutSize = SetItemsPosition(mainSize, innerLayout);
 
     // Set layout size of list component itself
-    if (fixedMainSize_ || fixedCrossSize_) {
+    if (fixedMainSize_) {
         SetLayoutSize(GetLayoutParam().GetMaxSize());
     } else {
         SetLayoutSize(GetLayoutParam().Constrain(layoutSize));
