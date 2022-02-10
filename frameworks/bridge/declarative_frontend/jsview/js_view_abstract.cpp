@@ -3539,7 +3539,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
             if (!refPtr) {
                 return;
             }
-            if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
+            if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
                 auto showMenu = refPtr->GetTargetCallback();
                 showMenu("", info.GetGlobalLocation());
             }
