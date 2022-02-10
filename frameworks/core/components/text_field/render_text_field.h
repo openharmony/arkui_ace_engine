@@ -534,7 +534,7 @@ private:
     void OnOverlayFocusChange(bool isFocus, bool needCloseKeyboard);
     void FireSelectChangeIfNeeded(const TextEditingValue& newValue, bool needFireSelectChangeEvent) const;
     int32_t GetInstanceId() const;
-    void PopTextOverlay() const;
+    void PopTextOverlay();
 
     /**
      * @brief Update remote editing value only if text or selection is changed.

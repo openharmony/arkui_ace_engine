@@ -523,6 +523,10 @@ bool RenderTextOverlay::TouchTest(const Point& globalPoint, const Point& parentL
         OnTouchTestHit(coordinateOffset, touchRestrict, result);
         return true;
     }
+    if (globalPoint.GetSourceType() == SourceType::MOUSE) {
+        PopOverlay();
+        return true;
+    }
     return false;
 }
 
@@ -535,6 +539,15 @@ void RenderTextOverlay::OnTouchTestHit(
     result.emplace_back(dragDetector_);
     touchDetector_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(touchDetector_);
+}
+
+bool RenderTextOverlay::HandleMouseEvent(const MouseEvent& event)
+{
+    if (event.button != MouseButton::LEFT_BUTTON && event.action == MouseAction::PRESS) {
+        PopOverlay();
+        return true;
+    }
+    return false;
 }
 
 void RenderTextOverlay::HandleClick(const Offset& clickOffset)

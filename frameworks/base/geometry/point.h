@@ -19,6 +19,7 @@
 #include "base/geometry/offset.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+#include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
 
@@ -27,6 +28,7 @@ public:
     Point() = default;
     ~Point() = default;
     Point(double x, double y) : x_(x), y_(y) {}
+    Point(double x, double y, SourceType sourceType) : x_(x), y_(y), sourceType_(sourceType) {}
 
     double GetX() const
     {
@@ -46,6 +48,16 @@ public:
     void SetY(double y)
     {
         y_ = y;
+    }
+
+    void SetSourceType(SourceType sourceType)
+    {
+        sourceType_ = sourceType;
+    }
+
+    SourceType GetSourceType() const
+    {
+        return sourceType_;
     }
 
     void Rotate(const Point& center, double angle)
@@ -84,6 +96,7 @@ public:
 private:
     double x_ = 0.0;
     double y_ = 0.0;
+    SourceType sourceType_ = SourceType::NONE;
 };
 
 } // namespace OHOS::Ace

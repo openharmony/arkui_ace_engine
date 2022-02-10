@@ -36,7 +36,7 @@ void EventManager::TouchTest(
     GestureReferee::GetInstance().CleanGestureScope(touchPoint.id);
     // collect
     TouchTestResult hitTestResult;
-    const Point point { touchPoint.x, touchPoint.y };
+    const Point point { touchPoint.x, touchPoint.y, touchPoint.sourceType };
     // For root node, the parent local point is the same as global point.
     renderNode->TouchTest(point, point, touchRestrict, hitTestResult);
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
