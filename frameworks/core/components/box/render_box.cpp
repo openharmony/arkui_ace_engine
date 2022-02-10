@@ -341,6 +341,8 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
         SetInsertIndex(targetRenderBox, info);
         if (insertIndex_ == DEFAULT_INDEX) {
             (targetRenderBox->GetOnDrop())(event, extraParams->ToString());
+            SetPreTargetRenderBox(nullptr);
+            return;
         }
         if (targetRenderBox != initialRenderBox_) {
             extraParams->Put("selectedIndex", -1);
