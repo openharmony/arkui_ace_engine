@@ -224,6 +224,7 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     if (itemCount_ < LEAST_SLIDE_ITEM_COUNT) {
         LOGD("swiper item is less than least slide count");
         swiper_ = swiper;
+        index_ = 0;
         return;
     }
     UpdateIndex(swiper->GetIndex());
@@ -1001,6 +1002,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
                 fromIndex = GetNextIndex();
                 start += nextItemOffset_;
                 toIndex = currentIndex_;
+                end += nextItemOffset_;
             }
         } else {
             toIndex = GetNextIndex();
@@ -1009,6 +1011,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
                 fromIndex = GetPrevIndex();
                 start += prevItemOffset_;
                 toIndex = currentIndex_;
+                end += prevItemOffset_;
             }
         }
         targetIndex_ = toIndex;
