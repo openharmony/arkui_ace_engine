@@ -79,8 +79,10 @@ public:
 
     void HandleFocusEvent(bool isFocus);
     void HandleClickEvent(const ClickInfo& info);
-    void HandleRemoteMessageEvent(const ClickInfo& info);
     void HandleClickEvent();
+    void HandleKeyEnterEvent(const ClickInfo& info);
+    void HandleKeyEnterEvent();
+    void HandleRemoteMessageEvent(const ClickInfo& info);
     void HandleRemoteMessageEvent();
     void DisplayFocusAnimation();
     void PlayFocusAnimation(bool isFocus);

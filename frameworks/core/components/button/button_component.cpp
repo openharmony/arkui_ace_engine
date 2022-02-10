@@ -106,6 +106,11 @@ bool ButtonComponent::GetRadiusState() const
     return declaration_->GetRadiusState();
 }
 
+bool ButtonComponent::GetCatchMode() const
+{
+    return isCatchMode_;
+}
+
 const Dimension& ButtonComponent::GetMinWidth() const
 {
     return declaration_->GetMinWidth();
@@ -171,6 +176,11 @@ const EventMarker& ButtonComponent::GetClickedEventId() const
     return declaration_->GetClickedEventId();
 }
 
+const EventMarker& ButtonComponent::GetKeyEnterEventId() const
+{
+    return keyEnterId_;
+}
+
 const EventMarker& ButtonComponent::GetRemoteMessageEventId() const
 {
     return declaration_->GetRemoteMessageEventId();
@@ -199,6 +209,11 @@ void ButtonComponent::SetAutoFocusState(bool state)
 void ButtonComponent::SetRadiusState(bool state)
 {
     declaration_->SetRadiusState(state);
+}
+
+void ButtonComponent::SetCatchMode(bool catchMode)
+{
+    isCatchMode_ = catchMode;
 }
 
 void ButtonComponent::SetMinWidth(const Dimension& width)
@@ -265,6 +280,11 @@ void ButtonComponent::SetBorderEdge(const BorderEdge& borderEdge)
 void ButtonComponent::SetClickedEventId(const EventMarker& eventId)
 {
     declaration_->SetClickedEventId(eventId);
+}
+
+void ButtonComponent::SetKeyEnterEventId(const EventMarker& eventId)
+{
+    keyEnterId_ = eventId;
 }
 
 void ButtonComponent::SetRemoteMessageEventId(const EventMarker& eventId)

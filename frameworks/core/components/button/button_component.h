@@ -60,6 +60,7 @@ public:
     bool GetWaitingState() const;
     bool GetAutoFocusState() const;
     bool GetRadiusState() const;
+    bool GetCatchMode() const;
     const Dimension& GetMinWidth() const;
     const Dimension& GetRectRadius() const;
     const Dimension& GetProgressDiameter() const;
@@ -73,6 +74,7 @@ public:
     const Color& GetFocusAnimationColor() const;
     const BorderEdge& GetBorderEdge() const;
     const EventMarker& GetClickedEventId() const;
+    const EventMarker& GetKeyEnterEventId() const;
     const EventMarker& GetRemoteMessageEventId() const;
     RefPtr<ButtonProgressController> GetButtonController() const;
 
@@ -82,6 +84,7 @@ public:
     void SetRadiusState(bool state);
     void SetMinWidth(const Dimension& width);
     void SetRectRadius(const Dimension& radius);
+    void SetCatchMode(bool catchMode);
     void SetProgressDiameter(const Dimension& diameter);
     void SetBackgroundColor(const Color& color);
     void SetClickedColor(const Color& color);
@@ -93,6 +96,7 @@ public:
     void SetFocusAnimationColor(const Color& color);
     void SetBorderEdge(const BorderEdge& borderEdge);
     void SetClickedEventId(const EventMarker& eventId);
+    void SetKeyEnterEventId(const EventMarker& eventId);
     void SetRemoteMessageEventId(const EventMarker& eventId);
     void SetClickFunction(std::function<void()>&& clickCallback);
     void SetDeclaration(const RefPtr<ButtonDeclaration>& declaration);
@@ -190,10 +194,12 @@ private:
     bool stateEffect_ = true;
     bool isDeclarative_ = false;
     bool isInputButton_ = false;
+    bool isCatchMode_ = true;
     uint32_t layoutFlag_ = 0;
     // for custom button type
     std::array<Radius, 4> radii_ = { Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp) };
     RefPtr<StateAttributes<ButtonStateAttribute>> stateAttributeList_;
+    EventMarker keyEnterId_;
 };
 
 class ButtonBuilder {
