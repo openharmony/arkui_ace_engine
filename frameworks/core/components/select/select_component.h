@@ -356,6 +356,56 @@ public:
         return popup_;
     }
 
+    void SetWidth(const Dimension& width)
+    {
+        width_ = width;
+    }
+
+    void SetHeight(const Dimension& height)
+    {
+        height_ = height;
+    }
+
+    void SetLeftPadding(const Dimension& padding)
+    {
+        innerPadding_.SetLeft(padding);;
+    }
+
+    void SetRightPadding(const Dimension& padding)
+    {
+        innerPadding_.SetRight(padding);
+    }
+
+    const Dimension& GetLeftPadding() const
+    {
+        return innerPadding_.Left();
+    }
+
+    const Dimension& GetRightPadding() const
+    {
+        return innerPadding_.Right();
+    }
+
+    void SetTopPadding(const Dimension& padding)
+    {
+        innerPadding_.SetTop(padding);
+    }
+
+    void SetBottomPadding(const Dimension& padding)
+    {
+        innerPadding_.SetBottom(padding);
+    }
+
+    const Dimension& GetTopPadding() const
+    {
+        return innerPadding_.Top();
+    }
+
+    const Dimension& GetBottomPadding() const
+    {
+        return innerPadding_.Bottom();
+    }
+
 private:
     bool disabled_ { false };
     bool clicked_ { false };
@@ -372,7 +422,7 @@ private:
 
     // used in navigation
     bool isSelectFontSize_ = false;
-    Edge innerPadding_;
+    Edge innerPadding_ = Edge(8.0, 9.25, 8.0, 9.25, DimensionUnit::VP);
 
     Dimension width_ = -1.0_px;
     Dimension height_ = -1.0_px;
