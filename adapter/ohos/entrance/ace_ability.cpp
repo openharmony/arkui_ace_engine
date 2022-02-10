@@ -563,7 +563,7 @@ void AceAbility::OnRemoteTerminated()
     LOGI("AceAbility::OnRemoteTerminated finish.");
 }
 
-void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect)
+void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason)
 {
     uint32_t width = rect.width_;
     uint32_t height = rect.height_;
