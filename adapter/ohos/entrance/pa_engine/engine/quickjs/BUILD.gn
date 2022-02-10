@@ -50,8 +50,7 @@ template("js_pa_engine_qjs") {
       "//utils/native/base:utils",
     ]
     external_deps = [
-      "ability_runtime:app_manager",
-      "ability_runtime:want",
+      "ability_base:want",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "eventhandler:libeventhandler",
