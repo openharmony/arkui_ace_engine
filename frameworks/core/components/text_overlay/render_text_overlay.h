@@ -64,6 +64,7 @@ public:
     bool IsAnimationStarted() const;
     void SetIsAnimationStopped(bool isAnimationStopped);
     double GetHorizonOffsetForAnimation() const;
+    bool HandleMouseEvent(const MouseEvent& event) override;
 
 protected:
     void OnPaintFinish() override;

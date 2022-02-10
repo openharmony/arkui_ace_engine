@@ -372,27 +372,27 @@ void RenderTextField::PerformLayout()
 
 bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
 {
-    if (MouseButton::LEFT_BUTTON == event.button && MouseAction::PRESS == event.action) {
-        UpdateStartSelection(DEFAULT_SELECT_INDEX, event.GetOffset(), true, false);
-    }
-
-    if (MouseButton::LEFT_BUTTON == event.button && MouseAction::MOVE == event.action) {
-        int32_t start = GetEditingValue().selection.baseOffset;
-        int32_t end = GetCursorPositionForClick(event.GetOffset());
-        UpdateSelection(start, end);
-        if (showCursor_) {
-            showCursor_ = false;
+    if (event.button == MouseButton::LEFT_BUTTON) {
+        if (event.action == MouseAction::PRESS) {
+            UpdateStartSelection(DEFAULT_SELECT_INDEX, event.GetOffset(), true, false);
+        } else if (event.action == MouseAction::MOVE) {
+            int32_t start = GetEditingValue().selection.baseOffset;
+            int32_t end = GetCursorPositionForClick(event.GetOffset());
+            UpdateSelection(start, end);
+            StopTwinkling();
+            MarkNeedRender();
+        } else {
+            LOGD("on left button release");
         }
-        MarkNeedRender();
     }
 
-    if (MouseButton::RIGHT_BUTTON == event.button) {
+    if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         Offset rightClickOffset = event.GetOffset();
         bool singleHandle = (GetEditingValue().selection.GetStart() == GetEditingValue().selection.GetEnd());
         ShowTextOverlay(rightClickOffset, singleHandle);
     }
-    
-    return false;
+
+    return true;
 }
 
 void RenderTextField::OnTouchTestHit(
@@ -524,26 +524,17 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     if (onTapEvent_) {
         onTapEvent_();
     }
-
     CursorMoveOnClick(globalPosition);
-
     ShowError("", false);
-
     UpdateStartSelection(DEFAULT_SELECT_INDEX, globalPosition, true, false);
-
+    if (clickInfo.GetSourceDevice() == SourceType::MOUSE) {
+        StartTwinkling();
+    } else {
+        ShowTextOverlay(globalPosition, true);
+    }
     auto context = GetContext().Upgrade();
     if (context) {
         context->SetClickPosition(GetGlobalOffset() + Size(0, GetLayoutSize().Height()));
-    }
-
-    auto lastStack = GetLastStack();
-    if (lastStack) {
-        lastStack->PopTextOverlay();
-    }
-
-    StartTwinkling();
-    if (!showCursor_) {
-        showCursor_ = true;
     }
 }
 
@@ -579,8 +570,8 @@ void RenderTextField::OnDoubleClick(const ClickInfo& clickInfo)
     auto clickPosition = GetCursorPositionForClick(clickInfo.GetGlobalLocation());
     auto selection = TextUtils::GetRangeOfSameType(GetEditingValue().text, clickPosition - 1);
     UpdateSelection(selection.GetStart(), selection.GetEnd());
-    LOGI("text field accept double click, position: %{public}d, selection: %{public}s",
-        clickPosition, selection.ToString().c_str());
+    LOGI("text field accept double click, position: %{public}d, selection: %{public}s", clickPosition,
+        selection.ToString().c_str());
     MarkNeedRender();
 }
 
@@ -597,8 +588,12 @@ void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
     }
 
     ShowError("", false);
-    Offset longPressPosition = longPressInfo.GetGlobalLocation();
 
+    if (longPressInfo.GetSourceDevice() == SourceType::MOUSE) {
+        return;
+    }
+
+    Offset longPressPosition = longPressInfo.GetGlobalLocation();
     bool isTextEnd =
         (static_cast<size_t>(GetCursorPositionForClick(longPressPosition)) == GetEditingValue().GetWideText().length());
     bool singleHandle = isTextEnd || GetEditingValue().text.empty();
@@ -655,10 +650,7 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
     }
 
     // Pop text overlay before push.
-    auto lastStack = GetLastStack();
-    if (lastStack) {
-        lastStack->PopTextOverlay();
-    }
+    PopTextOverlay();
 
     // If there is no text, don't show overlay.
     if (isSingleHandle && GetEditingValue().text.empty()) {
@@ -1769,7 +1761,7 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
         } else if (codeValue >= LETTER_CODE_START && codeValue <= LETTER_CODE_END) {
             if (!isCtrlDown_) {
                 int32_t letterCode =
-                isShiftDown_ ? (codeValue + UPPER_CASE_LETTER_DIFF) : (codeValue + LOWER_CASE_LETTER_DIFF);
+                    isShiftDown_ ? (codeValue + UPPER_CASE_LETTER_DIFF) : (codeValue + LOWER_CASE_LETTER_DIFF);
                 appendElement = static_cast<char>(letterCode);
                 isShiftDown_ = false;
             } else {
@@ -1790,7 +1782,7 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
         } else if (codeValue == LEFT_SHIFT_CODE || codeValue == RIGHT_SHIFT_CODE) {
             isShiftDown_ = true;
         } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_LEFT) ||
-            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_RIGHT)) {
+                   codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_RIGHT)) {
             isCtrlDown_ = true;
         }
     }
@@ -1973,12 +1965,10 @@ void RenderTextField::HandleDeviceOrientationChange()
 {
     if (deviceOrientation_ != SystemProperties::GetDevcieOrientation()) {
         deviceOrientation_ = SystemProperties::GetDevcieOrientation();
-        const auto& stackElement = stackElement_.Upgrade();
-        if (stackElement && isOverlayShowed_) {
+        if (isOverlayShowed_) {
             onKeyboardClose_ = nullptr;
-            stackElement->PopTextOverlay();
+            PopTextOverlay();
             StartTwinkling();
-            isOverlayShowed_ = false;
         }
     }
 }
@@ -1987,11 +1977,7 @@ void RenderTextField::OnHiddenChanged(bool hidden)
 {
     if (hidden) {
         CloseKeyboard();
-        const auto& stackElement = stackElement_.Upgrade();
-        if (stackElement) {
-            stackElement->PopTextOverlay();
-            isOverlayShowed_ = false;
-        }
+        PopTextOverlay();
     }
 }
 
@@ -2022,12 +2008,13 @@ void RenderTextField::Delete(int32_t start, int32_t end)
     }
 }
 
-void RenderTextField::PopTextOverlay() const
+void RenderTextField::PopTextOverlay()
 {
     const auto& stackElement = stackElement_.Upgrade();
     if (stackElement) {
         stackElement->PopTextOverlay();
     }
+    isOverlayShowed_ = false;
 }
 
 } // namespace OHOS::Ace
