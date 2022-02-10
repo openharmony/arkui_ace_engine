@@ -158,6 +158,7 @@ void RenderBox::Update(const RefPtr<Component>& component)
                 box->HandleTouchEvent(false);
             }
         });
+        touchRecognizer_->SetOnTouchMove(box->GetOnTouchMoveId());
     }
     // In each update, the extensions will be updated with new one.
     if (eventExtensions_ && eventExtensions_->HasOnAreaChangeExtension()) {

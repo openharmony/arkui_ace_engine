@@ -30,7 +30,7 @@ public:
     }
 
     ~ContainerModalComponent() override = default;
-    static RefPtr<Component> Create(const WeakPtr<PipelineContext>& context, RefPtr<Component> child);
+    static RefPtr<Component> Create(const WeakPtr<PipelineContext>& context, const RefPtr<Component>& child);
     RefPtr<Element> CreateElement() override;
     RefPtr<RenderNode> CreateRenderNode() override;
     void BuildInnerChild();

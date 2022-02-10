@@ -1009,7 +1009,7 @@ public:
         return isShiftDown_;
     }
 
-    void MarkIsShiftDown(bool isShiftDown) 
+    void MarkIsShiftDown(bool isShiftDown)
     {
         isShiftDown_ = isShiftDown;
     }
@@ -1019,7 +1019,7 @@ public:
         return isCtrlDown_;
     }
 
-    void MarkIsCtrlDown(bool isCtrlDown) 
+    void MarkIsCtrlDown(bool isCtrlDown)
     {
         isCtrlDown_ = isCtrlDown;
     }
@@ -1029,7 +1029,7 @@ public:
         return isKeyboardA_;
     }
 
-    void MarkIsKeyboardA(bool isKeyboardA) 
+    void MarkIsKeyboardA(bool isKeyboardA)
     {
         isKeyboardA_ = isKeyboardA;
     }
@@ -1076,6 +1076,11 @@ public:
         windowGetModeCallback_ = std::move(callback);
     }
 
+    void SetWindowStartMoveCallBack(std::function<void(void)>&& callback)
+    {
+        windowStartMoveCallback_ = std::move(callback);
+    }
+
     bool FireWindowMinimizeCallBack() const
     {
         if (windowMinimizeCallback_) {
@@ -1114,6 +1119,13 @@ public:
             return windowCloseCallback_();
         }
         return false;
+    }
+
+    void FireWindowStartMoveCallBack() const
+    {
+        if (windowStartMoveCallback_) {
+            windowStartMoveCallback_();
+        }
     }
 
     WindowMode FireWindowGetModeCallBack() const
@@ -1369,6 +1381,7 @@ private:
     std::function<bool(void)> windowRecoverCallback_ = nullptr;
     std::function<bool(void)> windowCloseCallback_ = nullptr;
     std::function<bool(void)> windowSplitCallback_ = nullptr;
+    std::function<void(void)> windowStartMoveCallback_ = nullptr;
     std::function<WindowMode(void)> windowGetModeCallback_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
