@@ -18,7 +18,8 @@
 
 namespace OHOS::Ace {
 
-RefPtr<Component> ContainerModalComponent::Create(const WeakPtr<PipelineContext>& context, RefPtr<Component> child)
+RefPtr<Component> ContainerModalComponent::Create(const WeakPtr<PipelineContext>& context,
+    const RefPtr<Component>& child)
 {
     return nullptr;
 }

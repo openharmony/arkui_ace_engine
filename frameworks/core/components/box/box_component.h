@@ -21,6 +21,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/gestures/gesture_info.h"
+#include "core/gestures/raw_recognizer.h"
 
 namespace OHOS::Ace {
 
@@ -144,6 +145,16 @@ public:
     OnMouseCallback GetOnMouseId() const
     {
         return onMouseId_;
+    }
+
+    void SetOnTouchMoveId(const OnTouchEventCallback& onTouchMoveId)
+    {
+        onTouchMoveId_ = onTouchMoveId;
+    }
+
+    const OnTouchEventCallback& GetOnTouchMoveId() const
+    {
+        return onTouchMoveId_;
     }
 
     RefPtr<Gesture> GetOnClick() const
@@ -311,6 +322,7 @@ private:
     OnDropFunc onDropId_;
     OnHoverCallback onHoverId_;
     OnMouseCallback onMouseId_;
+    OnTouchEventCallback onTouchMoveId_;
     RefPtr<Gesture> onClickId_;
     RefPtr<Gesture> onLongPressId_;
     std::array<RefPtr<Gesture>, 3> gestures_;

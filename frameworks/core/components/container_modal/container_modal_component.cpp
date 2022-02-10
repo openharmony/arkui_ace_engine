@@ -52,7 +52,7 @@ const Color TITLE_BUTTON_CLICKED_COLOR = Color(0x33000000);
 } // namespace
 
 RefPtr<Component> ContainerModalComponent::Create(const WeakPtr<PipelineContext>& context,
-    RefPtr<Component> child)
+    const RefPtr<Component>& child)
 {
     auto component = AceType::MakeRefPtr<ContainerModalComponent>(context);
     component->SetChild(child);
@@ -160,8 +160,23 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
     titleBox->SetHeight(CONTAINER_TITLE_HEIGHT);
     titleBox->SetBackDecoration(titleDecoration);
     auto row = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, titleChildren);
-    titleBox->SetChild(row);
 
+    // handle mouse move
+    titleBox->SetOnMouseId([contextWptr](MouseInfo& info) {
+        auto context = contextWptr.Upgrade();
+        if (context && info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::MOVE) {
+            context->FireWindowStartMoveCallBack();
+        }
+    });
+
+    // handle touch move
+    titleBox->SetOnTouchMoveId([contextWptr](const TouchEventInfo&) {
+        auto context = contextWptr.Upgrade();
+        if (context) {
+            context->FireWindowStartMoveCallBack();
+        }
+    });
+    titleBox->SetChild(row);
     return titleBox;
 }
 

@@ -537,6 +537,13 @@ void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::A
         return (OHOS::Rosen::WMError::WM_OK == window->Close());
     });
 
+    pipelineContext->SetWindowStartMoveCallBack([&window]() {
+        if (!window) {
+            return;
+        }
+        window->StartMove();
+    });
+
     pipelineContext->SetWindowSplitCallBack([&window]() -> bool {
         if (!window) {
             return false;
