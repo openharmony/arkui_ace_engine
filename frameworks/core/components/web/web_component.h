@@ -35,6 +35,9 @@ class WebController : public virtual AceType {
 
 public:
     using LoadUrlImpl = std::function<void(std::string)>;
+    using AccessBackwardImpl = std::function<bool()>;
+    using AccessForwardImpl = std::function<bool()>;
+    using AccessStepImpl = std::function<bool(int32_t)>;
     void LoadUrl(std::string url) const
     {
         if (loadUrlImpl_) {
@@ -42,9 +45,48 @@ public:
         }
     }
 
+    bool AccessStep(int32_t step)
+    {
+        if (accessStepImpl_) {
+            return accessStepImpl_(step);
+        }
+        return false;
+    }
+
+    bool AccessBackward()
+    {
+        if (accessBackwardImpl_) {
+            return accessBackwardImpl_();
+        }
+        return false;
+    }
+
+    bool AccessForward()
+    {
+        if (accessForwardImpl_) {
+            return accessForwardImpl_();
+        }
+        return false;
+    }
+
     void SetLoadUrltImpl(LoadUrlImpl && loadUrlImpl)
     {
         loadUrlImpl_ = std::move(loadUrlImpl);
+    }
+
+    void SetAccessBackwardImpl(AccessBackwardImpl && accessBackwardImpl)
+    {
+        accessBackwardImpl_ = std::move(accessBackwardImpl);
+    }
+
+    void SetAccessForwardImpl(AccessForwardImpl && accessForwardImpl)
+    {
+        accessForwardImpl_ = std::move(accessForwardImpl);
+    }
+
+    void SetAccessStepImpl(AccessStepImpl && accessStepImpl)
+    {
+        accessStepImpl_ = std::move(accessStepImpl);
     }
 
     using ExecuteTypeScriptImpl = std::function<void(std::string)>;
@@ -82,6 +124,9 @@ public:
 private:
     RefPtr<WebDeclaration> declaration_;
     LoadUrlImpl loadUrlImpl_;
+    AccessBackwardImpl accessBackwardImpl_;
+    AccessForwardImpl accessForwardImpl_;
+    AccessStepImpl accessStepImpl_;
     ExecuteTypeScriptImpl executeTypeScriptImpl_;
     LoadDataWithBaseUrlImpl loadDataWithBaseUrlImpl_;
 };
