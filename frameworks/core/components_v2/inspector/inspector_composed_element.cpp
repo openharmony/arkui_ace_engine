@@ -142,8 +142,7 @@ const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_
     { "padding", [](const InspectorNode& inspector) { return inspector.GetPadding(); } },
     { "margin", [](const InspectorNode& inspector) { return inspector.GetAllMargin(); } },
     { "size", [](const InspectorNode& inspector) { return inspector.GetSize(); } },
-    { "backgroundImageSize",
-        [](const InspectorNode& inspector) { return inspector.GetBackgroundImageSize(); } },
+    { "backgroundImageSize", [](const InspectorNode& inspector) { return inspector.GetBackgroundImageSize(); } },
     { "backgroundImagePosition",
         [](const InspectorNode& inspector) { return inspector.GetBackgroundImagePosition(); } },
     { "useSizeType", [](const InspectorNode& inspector) { return inspector.GetUseSizeType(); } },
@@ -611,8 +610,17 @@ std::string InspectorComposedElement::GetRect() const
 {
     std::string strRec;
     Rect rect = GetRenderRect();
-    Rect parentRect = GetParentRect();
-    rect = rect.Constrain(parentRect);
+
+    if (accessibilityNode_ && accessibilityNode_->GetParentNode()) {
+        auto parent = accessibilityNode_->GetParentNode();
+        if (parent->GetClipFlag()) {
+            rect = rect.Constrain(parent->GetRect());
+        }
+    }
+    if (GetClipFlag()) {
+        accessibilityNode_->SetClipFlagToChild(true);
+    }
+
     strRec = std::to_string(rect.Left())
                  .append(",")
                  .append(std::to_string(rect.Top()))
@@ -921,6 +929,16 @@ std::string InspectorComposedElement::GetClip() const
         }
     }
     return jsonValue->ToString();
+}
+
+bool InspectorComposedElement::GetClipFlag() const
+{
+    auto render = GetRenderBox();
+    if (!render) {
+        return false;
+    }
+
+    return render->GetBoxClipFlag();
 }
 
 bool InspectorComposedElement::GetEnabled() const

@@ -368,8 +368,7 @@ public:
         isPassword_ = isPassword;
     }
 
-    std::unordered_set<AceAction> GetSupportAction(
-        uint64_t enableActions = DEFAULT_ACTIONS) const;
+    std::unordered_set<AceAction> GetSupportAction(uint64_t enableActions = DEFAULT_ACTIONS) const;
 
     void AddSupportAction(AceAction action)
     {
@@ -381,7 +380,6 @@ public:
         isEnable ? supportActions_ |= (1UL << static_cast<uint32_t>(action))
                  : supportActions_ &= (~(0UL)) ^ (1UL << static_cast<uint32_t>(action));
     }
-
 
     const std::string& GetAccessibilityLabel() const
     {
@@ -615,6 +613,19 @@ public:
         return styles_;
     }
 
+    void SetClipFlagToChild(bool clipFlag)
+    {
+        for (auto& child : children_) {
+            child->SetClipFlagToChild(clipFlag);
+        }
+        clipFlag_ = clipFlag;
+    }
+
+    bool GetClipFlag()
+    {
+        return clipFlag_;
+    }
+
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     // used for inspector node in PC preview
     bool GetClearRectInfoFlag() const
@@ -732,11 +743,13 @@ public:
         isAnimationNode_ = IsAnimationNode;
     }
 
-    int32_t GetZIndex() {
+    int32_t GetZIndex()
+    {
         return zIndex_;
     }
 
-    void SetZIndex(int32_t index) {
+    void SetZIndex(int32_t index)
+    {
         zIndex_ = index;
     }
 
@@ -830,7 +843,7 @@ private:
 
     std::vector<std::pair<std::string, std::string>> attrs_;
     std::vector<std::pair<std::string, std::string>> styles_;
-
+    bool clipFlag_ = false;
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     // used for inspector node in PC preview
     bool isClearRectInfo_ = false;

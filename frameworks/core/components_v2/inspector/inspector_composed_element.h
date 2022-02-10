@@ -172,6 +172,7 @@ public:
 
     // shape clip
     std::string GetClip() const override;
+    bool GetClipFlag() const;
     std::unique_ptr<JsonValue> GetMask() const override;
 
     // grid setting
