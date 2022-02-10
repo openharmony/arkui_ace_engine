@@ -161,6 +161,8 @@ void AceAbility::OnStart(const Want& want)
         CapabilityRegistry::Register();
         AceApplicationInfo::GetInstance().SetPackageName(abilityContext->GetBundleName());
         AceApplicationInfo::GetInstance().SetDataFileDirPath(abilityContext->GetFilesDir());
+        ImageCache::SetImageCacheFilePath(abilityContext->GetCacheDir());
+        ImageCache::SetCacheFileInfo();
     });
     OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
     // register surface change callback

@@ -204,6 +204,10 @@ void ImageCache::WriteCacheFile(const std::string& url, const void * const data,
 #else
     std::ofstream outFile(cacheNetworkFilePath, std::fstream::out);
 #endif
+    if (!outFile.is_open()) {
+        LOGW("open cache file failed, cannot write.");
+        return;
+    }
     outFile.write(reinterpret_cast<const char*>(data), size);
 
     cacheFileSize_ += size;
