@@ -100,6 +100,7 @@ void ButtonElement::OnClick()
         return;
     }
     button_->HandleClickEvent();
+    button_->HandleKeyEnterEvent();
 }
 
 void ButtonElement::OnClick(const KeyEvent& event)
@@ -116,6 +117,7 @@ void ButtonElement::OnClick(const KeyEvent& event)
     info.SetSourceDevice(static_cast<SourceType>(event.sourceDevice));
     info.SetDeviceId(event.deviceId);
     button_->HandleClickEvent(info);
+    button_->HandleKeyEnterEvent(info);
 }
 
 void ButtonElement::OnBlur()

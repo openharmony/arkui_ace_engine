@@ -211,6 +211,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
         buttonChildren.emplace_back(padding);
     }
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
+    buttonComponent->SetCatchMode(false);
     SetDefaultAttributes(buttonComponent);
     if (!labelSet && info[0]->IsObject()) {
         SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[0]), buttonComponent);
@@ -229,6 +230,7 @@ void JSButton::CreateWithChild(const JSCallbackInfo& info)
 {
     std::list<RefPtr<Component>> buttonChildren;
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
+    buttonComponent->SetCatchMode(false);
     SetDefaultAttributes(buttonComponent);
     if (info[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[0]);
@@ -307,7 +309,7 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
         auto buttonComponent =
             AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         if (buttonComponent) {
-            buttonComponent->SetClickedEventId(clickEventId);
+            buttonComponent->SetKeyEnterEventId(clickEventId);
         }
         auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
         focusableComponent->SetOnClickId(clickEventId);

@@ -97,7 +97,11 @@ void RenderButton::Initialize()
         auto button = wp.Upgrade();
         if (button) {
             const auto context = button->GetContext().Upgrade();
-            button->PlayClickAnimation();
+            if (context && context->GetIsDeclarative()) {
+                button->HandleClickEvent(info);
+            } else {
+                button->HandleClickEvent();
+            }
         }
     });
     clickRecognizer_->SetRemoteMessage([wp](const ClickInfo& info) {
@@ -220,6 +224,41 @@ void RenderButton::HandleClickEvent(const ClickInfo& info)
     PlayClickAnimation();
 }
 
+void RenderButton::HandleClickEvent()
+{
+    if (!buttonComponent_) {
+        return;
+    }
+    auto onClick = AceAsyncEvent<void()>::Create(buttonComponent_->GetClickedEventId(), context_);
+    if (onClick) {
+        onClick();
+    }
+    PlayClickAnimation();
+}
+
+void RenderButton::HandleKeyEnterEvent(const ClickInfo& info)
+{
+    if (!buttonComponent_) {
+        return;
+    }
+    auto onEnterWithInfo =
+        AceAsyncEvent<void(const ClickInfo&)>::Create(buttonComponent_->GetKeyEnterEventId(), context_);
+    if (onEnterWithInfo) {
+        onEnterWithInfo(info);
+    }
+}
+
+void RenderButton::HandleKeyEnterEvent()
+{
+    if (!buttonComponent_) {
+        return;
+    }
+    auto onEnter = AceAsyncEvent<void()>::Create(buttonComponent_->GetKeyEnterEventId(), context_);
+    if (onEnter) {
+        onEnter();
+    }
+}
+
 void RenderButton::HandleRemoteMessageEvent(const ClickInfo& info)
 {
     if (!buttonComponent_) {
@@ -229,18 +268,6 @@ void RenderButton::HandleRemoteMessageEvent(const ClickInfo& info)
         AceAsyncEvent<void(const ClickInfo&)>::Create(buttonComponent_->GetRemoteMessageEventId(), context_);
     if (onRemoteMessagekWithInfo) {
         onRemoteMessagekWithInfo(info);
-    }
-    PlayClickAnimation();
-}
-
-void RenderButton::HandleClickEvent()
-{
-    if (!buttonComponent_) {
-        return;
-    }
-    auto onClick = AceAsyncEvent<void()>::Create(buttonComponent_->GetClickedEventId(), context_);
-    if (onClick) {
-        onClick();
     }
     PlayClickAnimation();
 }
@@ -265,10 +292,6 @@ void RenderButton::OnTouchTestHit(
     }
     touchRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(touchRecognizer_);
-    auto context = context_.Upgrade();
-    if (context && context->GetIsDeclarative()) {
-        clickRecognizer_->SetUseCatchMode(false);
-    }
     result.emplace_back(clickRecognizer_);
 }
 
@@ -444,7 +467,8 @@ void RenderButton::Update(const RefPtr<Component>& component)
             catchMode = true;
         }
     }
-    clickRecognizer_->SetUseCatchMode(catchMode);
+    auto catchModeButton = buttonComponent_->GetCatchMode();
+    clickRecognizer_->SetUseCatchMode(catchMode && catchModeButton);
     SetAccessibilityText(button->GetAccessibilityText());
     UpdateDownloadStyles(button);
 
