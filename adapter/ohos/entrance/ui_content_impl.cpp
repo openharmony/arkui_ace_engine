@@ -168,6 +168,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
         AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
         CapabilityRegistry::Register();
+        ImageCache::SetImageCacheFilePath(context->GetCacheDir());
+        ImageCache::SetCacheFileInfo();
     });
 
     int32_t width = window_->GetRect().width_;
