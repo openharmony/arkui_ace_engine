@@ -95,6 +95,8 @@ void RenderBadge::Update(const RefPtr<Component>& component)
             } else {
                 textData_ = std::to_string(messageCount);
             }
+        } else {
+            showMessage_ = false;
         }
     } else {
         textData_ = badgeLabel;
