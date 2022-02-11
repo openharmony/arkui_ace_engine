@@ -162,7 +162,7 @@ void RosenRenderTexture::DumpTree(int32_t depth)
 
 std::shared_ptr<RSNode> RosenRenderTexture::CreateRSNode() const
 {
-    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig;
+    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = "RosenRenderTexture"};
     return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
 }
 

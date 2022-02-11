@@ -279,6 +279,11 @@ RefPtr<Component> DOMVideo::GetEventComponents(const RefPtr<Component>& videoChi
     }
 
     auto box = AceType::MakeRefPtr<BoxComponent>();
+    Component::MergeRSNode(box);
+    RefPtr<BoxComponent> oldBox = GetBoxComponent();
+    if (oldBox) {
+        box->SetOnClick(oldBox->GetOnClick());
+    }
     box->SetChild(videoChild);
 
     if (!components.empty()) {
