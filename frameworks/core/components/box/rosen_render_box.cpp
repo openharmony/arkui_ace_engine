@@ -43,7 +43,10 @@ constexpr float SCALE_CHANGED = 1.05;
 const Color BOARD_CHANGED = Color::FromRGBO(0, 0, 0, 0.05);
 const Rosen::RSAnimationTimingCurve SCALE_ANIMATION_TIMING_CURVE =
     Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f);
-
+constexpr uint32_t ACCESSIBILITY_FOCUS_COLOR = 0xbf39b500;
+constexpr double ACCESSIBILITY_FOCUS_WIDTH = 4.0;
+constexpr double ACCESSIBILITY_FOCUS_RADIUS_X = 2.0;
+constexpr double ACCESSIBILITY_FOCUS_RADIUS_Y = 2.0;
 } // namespace
 
 RosenRenderBox::RosenRenderBox()
@@ -277,6 +280,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
     }
     SkRRect outerRRect =
         SkRRect::MakeRect(SkRect::MakeLTRB(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom()));
+        SkRect focusRect = SkRect::MakeLTRB(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom());
     Color bgColor = pipeline->GetRootBgColor();
     if (backDecoration_) {
         auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
@@ -313,6 +317,11 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
             RosenDecorationPainter::PaintHueRotate(outerRRect, canvas, frontDecoration_->GetHueRotate(), bgColor);
         }
     }
+
+    if (isAccessibilityFocus_) {
+        PaintAccessibilityFocus(focusRect, context);
+    }
+
     if ((!backDecoration_) || backDecoration_->GetImage() ||
         (backDecoration_->GetBackgroundColor() != Color::TRANSPARENT) || !(backDecoration_->GetGradient().IsValid())) {
         // no need to paint gradient
@@ -335,6 +344,25 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
 SkColorType ConvertToSkColorType(PixelFormat pixelFormat);
 
 SkAlphaType ConvertToSkAlphaType(AlphaType alphaType);
+
+void RosenRenderBox::PaintAccessibilityFocus(const SkRect& focusRect, RenderContext& context)
+{
+    auto canvas = static_cast<RosenRenderContext&>(context).GetCanvas();
+    if (canvas == nullptr) {
+        LOGE("Canvas is null, save failed.");
+        return;
+    }
+    canvas->save();
+
+    SkPaint paint;
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setColor(ACCESSIBILITY_FOCUS_COLOR);
+    paint.setStrokeWidth(ACCESSIBILITY_FOCUS_WIDTH);
+
+    SkRRect rRect = SkRRect::MakeRectXY(focusRect, ACCESSIBILITY_FOCUS_RADIUS_X, ACCESSIBILITY_FOCUS_RADIUS_Y);
+    canvas->drawRRect(rRect, paint);
+    canvas->restore();
+}
 
 void RosenRenderBox::DrawOnPixelMap()
 {

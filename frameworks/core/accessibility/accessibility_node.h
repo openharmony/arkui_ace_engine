@@ -46,6 +46,7 @@ using ActionScrollBackwardImpl = std::function<bool()>;
 using ActionFocusImpl = std::function<void()>;
 using ActionUpdateIdsImpl = std::function<void()>;
 using FocusChangeCallback = std::function<void(const std::string&)>;
+using ActionAccessibilityFocusImpl = std::function<void(bool)>;
 
 using NodeId = int32_t;
 // If no insertion location is specified, new child will be added to the end of children list by default.
@@ -74,6 +75,8 @@ public:
     bool ActionFocus();
     void SetActionUpdateIdsImpl(const ActionUpdateIdsImpl& actionUpdateIdsImpl);
     void ActionUpdateIds();
+    void SetActionAccessibilityFocusImpl(const ActionAccessibilityFocusImpl& actionAccessibilityFocusImpl);
+    bool ActionAccessibilityFocus(bool isFocus);
 
     // node base
     void SetAttr(const std::vector<std::pair<std::string, std::string>>& attrs);
@@ -785,6 +788,7 @@ protected:
     ActionScrollBackwardImpl actionScrollBackwardImpl_;
     ActionFocusImpl actionFocusImpl_;
     ActionUpdateIdsImpl actionUpdateIdsImpl_;
+    ActionAccessibilityFocusImpl actionAccessibilityFocusIdsImpl_;
     EventMarker onAccessibilityEventId_;
     EventMarker onClickId_;
     EventMarker onLongPressId_;

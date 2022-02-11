@@ -23,7 +23,7 @@
 #include "core/common/frontend.h"
 #include "frameworks/bridge/card_frontend/card_frontend_delegate.h"
 #include "frameworks/bridge/card_frontend/js_card_parser.h"
-#include "frameworks/bridge/common/accessibility/js_accessibility_manager.h"
+#include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
 #include "frameworks/bridge/common/utils/page_id_pool.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"

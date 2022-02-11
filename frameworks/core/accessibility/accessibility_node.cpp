@@ -160,6 +160,21 @@ bool AccessibilityNode::ActionScrollBackward()
     return false;
 }
 
+void AccessibilityNode::SetActionAccessibilityFocusImpl(
+    const ActionAccessibilityFocusImpl& actionAccessibilityFocusImpl)
+{
+    actionAccessibilityFocusIdsImpl_ = actionAccessibilityFocusImpl;
+}
+
+bool AccessibilityNode::ActionAccessibilityFocus(bool isFocus)
+{
+    if (actionAccessibilityFocusIdsImpl_) {
+        actionAccessibilityFocusIdsImpl_(isFocus);
+        return true;
+    }
+    return false;
+}
+
 void AccessibilityNode::SetActionFocusImpl(const ActionFocusImpl& actionFocusImpl)
 {
     actionFocusImpl_ = actionFocusImpl;

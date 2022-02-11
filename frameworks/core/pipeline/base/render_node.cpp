@@ -355,12 +355,59 @@ void RenderNode::DumpTree(int32_t depth)
         DumpLog::GetInstance().AddDesc(std::string("LayoutParam: ").append(layoutParam_.ToString()));
         DumpLog::GetInstance().AddDesc(
             std::string("MouseState: ").append(mouseState_ == MouseState::HOVER ? "HOVER" : "NONE"));
+#ifdef ENABLE_ROSEN_BACKEND
+        if (rsNode_) {
+            DumpLog::GetInstance().AddDesc(rsNode_->DumpNode(depth));
+        }
+#endif
         Dump();
         DumpLog::GetInstance().Print(depth, AceType::TypeName(this), children.size());
     }
 
     for (const auto& item : children) {
         item->DumpTree(depth + 1);
+    }
+}
+
+void RenderNode::DumpTree(int32_t depth, std::vector<std::string>& info)
+{
+    auto accessibilityNode = GetAccessibilityNode().Upgrade();
+    int32_t nodeId = 0;
+    if (accessibilityNode) {
+        nodeId = accessibilityNode->GetNodeId();
+    }
+    const auto& children = GetChildren();
+    {
+        auto dirtyRect = context_.Upgrade()->GetDirtyRect();
+        std::string touchRectList = "[";
+        for (auto& rect : touchRectList_) {
+            touchRectList.append("{").append(rect.ToString()).append("}");
+        }
+        touchRectList.append("]");
+
+        DumpLog::GetInstance().AddDesc(std::string("AccessibilityNodeID: ").append(std::to_string(nodeId)));
+        DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(depth)));
+        DumpLog::GetInstance().AddDesc(
+            std::string("DisappearingNodes: ").append(std::to_string(disappearingNodes_.size())));
+        DumpLog::GetInstance().AddDesc(std::string("GlobalOffset: ").append(GetGlobalOffset().ToString()));
+        DumpLog::GetInstance().AddDesc(std::string("PaintRect: ").append(paintRect_.ToString()));
+        DumpLog::GetInstance().AddDesc(std::string("TouchRect: ").append(touchRect_.ToString()));
+        DumpLog::GetInstance().AddDesc(std::string("TouchRectList: ").append(touchRectList));
+        DumpLog::GetInstance().AddDesc(std::string("DirtyRect: ").append(dirtyRect.ToString()));
+        DumpLog::GetInstance().AddDesc(std::string("LayoutParam: ").append(layoutParam_.ToString()));
+        DumpLog::GetInstance().AddDesc(
+            std::string("MouseState: ").append(mouseState_ == MouseState::HOVER ? "HOVER" : "NONE"));
+#ifdef ENABLE_ROSEN_BACKEND
+        if (rsNode_) {
+            DumpLog::GetInstance().AddDesc(rsNode_->DumpNode(depth));
+        }
+#endif
+        Dump();
+        DumpLog::GetInstance().PrintToString(depth, AceType::TypeName(this), children.size(), info);
+    }
+
+    for (const auto& item : children) {
+        item->DumpTree(depth + 1, info);
     }
 }
 

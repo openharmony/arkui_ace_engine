@@ -812,6 +812,45 @@ void PipelineContext::Dump(const std::vector<std::string>& params) const
     }
 }
 
+void PipelineContext::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    if (params.empty()) {
+        LOGW("params is empty now, it's illegal!");
+        return;
+    }
+
+    // GetLastPage must run on UI
+    taskExecutor_->PostSyncTask(
+        [&params, &info, weak = AceType::WeakClaim(this)]() {
+            auto context = weak.Upgrade();
+            if (!context) {
+                return;
+            }
+            if (params[0] == "-element") {
+                if (params.size() > 1 && params[1] == "-lastpage") {
+                    context->GetLastPage()->DumpTree(0, info);
+                } else {
+                    context->GetRootElement()->DumpTree(0, info);
+                }
+            } else if (params[0] == "-render") {
+                if (params.size() > 1 && params[1] == "-lastpage") {
+                    context->GetLastPage()->GetRenderNode()->DumpTree(0, info);
+                } else {
+                    context->GetRootElement()->GetRenderNode()->DumpTree(0, info);
+                }
+            } else if (params[0] == "-inspector") {
+                auto accessibilityManager = context->GetAccessibilityManager();
+                if (!accessibilityManager) {
+                    return;
+                }
+                accessibilityManager->DumpTree(0, 0, info);
+            } else {
+                DumpLog::GetInstance().Print("Error: Unsupported dump params!");
+            }
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 RefPtr<StackElement> PipelineContext::GetLastStack() const
 {
     const auto& pageElement = GetLastPage();

@@ -149,6 +149,8 @@ private:
     void ImageObjReady(const RefPtr<ImageObject>& imageObj);
     void ImageObjFailed();
 
+    void PaintAccessibilityFocus(const SkRect& focusRect, RenderContext& context);
+
     RefPtr<Flutter::ClipLayer> GetClipLayer();
 
     RefPtr<Flutter::ClipLayer> clipLayer_;

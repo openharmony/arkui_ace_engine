@@ -29,6 +29,7 @@
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/components_v2/list/render_list.h"
 #include "core/event/axis_event.h"
+#include "core/event/mouse_event.h"
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/pan_recognizer.h"
 #include "core/gestures/sequenced_recognizer.h"
@@ -42,6 +43,20 @@ constexpr int32_t DEFAULT_DURATION = 150;
 constexpr int32_t DEFAULT_DISTANCE = 0;
 
 }; // namespace
+
+void RenderBox::HandleAccessibilityFocusEvent(bool isAccessibilityFocus)
+{
+    LOGD("ACE: RenderAccessibilityFocus::HandleAccessibilityFocusEvent, isFocus:%{public}d", isAccessibilityFocus);
+    isAccessibilityFocus_ = isAccessibilityFocus;
+    std::string accessibilityEventType;
+    if (isAccessibilityFocus) {
+        accessibilityEventType = "accessibilityfocus";
+    } else {
+        accessibilityEventType = "accessibilityclearfocus";
+    }
+    SendAccessibilityEvent(accessibilityEventType);
+    MarkNeedRender();
+}
 
 Size RenderBox::GetBorderSize() const
 {
@@ -59,6 +74,14 @@ Offset RenderBox::GetBorderOffset() const
         return backDecoration_->GetBorder().GetOffset(context->GetDipScale());
     }
     return Offset(0.0, 0.0);
+}
+
+Radius RenderBox::GetBorderRadius() const
+{
+    if (backDecoration_) {
+        return backDecoration_->GetBorder().TopLeftRadius();
+    }
+    return Radius();
 }
 
 void RenderBox::Update(const RefPtr<Component>& component)
@@ -140,6 +163,17 @@ void RenderBox::Update(const RefPtr<Component>& component)
 
         auto gestures = box->GetGestures();
         UpdateGestureRecognizer(gestures);
+        auto refNode = accessibilityNode_.Upgrade();
+        if (!refNode) {
+            return;
+        }
+        auto weakPtr = AceType::WeakClaim(this);
+        refNode->SetActionAccessibilityFocusImpl([weakPtr](bool isFocus) {
+            auto accessibilityFocus = weakPtr.Upgrade();
+            if (accessibilityFocus) {
+                accessibilityFocus->HandleAccessibilityFocusEvent(isFocus);
+            }
+        });
         if (box->HasStateAttributes()) {
             stateAttributeList_ = box->GetStateAttributes();
         }
@@ -176,6 +210,21 @@ void RenderBox::HandleTouchEvent(bool isTouchDown)
         OnStatusStyleChanged(VisualState::PRESSED);
     } else {
         OnStatusStyleChanged(VisualState::NORMAL);
+    }
+}
+
+void RenderBox::SendAccessibilityEvent(const std::string& eventType)
+{
+    auto accessibilityNode = GetAccessibilityNode().Upgrade();
+    if (!accessibilityNode) {
+        return;
+    }
+    auto context = context_.Upgrade();
+    if (context) {
+        AccessibilityEvent event;
+        event.nodeId = accessibilityNode->GetNodeId();
+        event.eventType = eventType;
+        context->SendEventToAccessibility(event);
     }
 }
 
@@ -935,6 +984,14 @@ void RenderBox::MouseHoverExitTest()
 
 void RenderBox::HandleMouseHoverEvent(MouseState mouseState)
 {
+    std::string accessibilityEventType;
+    if (mouseState == MouseState::HOVER) {
+        accessibilityEventType = "mousehoverenter";
+    } else {
+        accessibilityEventType = "mousehoverexit";
+    }
+    SendAccessibilityEvent(accessibilityEventType);
+
     if (onHover_) {
         onHover_(mouseState == MouseState::HOVER);
     }

@@ -125,6 +125,8 @@ public:
         return buttonComponent_->GetBackgroundColor();
     }
 
+    void SendAccessibilityEvent();
+
 protected:
     RenderButton();
     virtual Size Measure() = 0;

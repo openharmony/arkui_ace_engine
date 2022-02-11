@@ -107,13 +107,11 @@ void RenderDisplay::GetOpacityCallbacks()
 
 void RenderDisplay::Dump()
 {
-    if (DumpLog::GetInstance().GetDumpFile()) {
-        DumpLog::GetInstance().AddDesc(
-            std::string("Display: ")
-                .append(visible_ == VisibleType::VISIBLE ? "visible"
-                                                         : visible_ == VisibleType::INVISIBLE ? "invisible" : "gone"));
-        DumpLog::GetInstance().AddDesc(std::string("Opacity: ").append(std::to_string(animatableOpacity_.GetValue())));
-    }
+    DumpLog::GetInstance().AddDesc(
+        std::string("Display: ")
+            .append(visible_ == VisibleType::VISIBLE ? "visible"
+                                                        : visible_ == VisibleType::INVISIBLE ? "invisible" : "gone"));
+    DumpLog::GetInstance().AddDesc(std::string("Opacity: ").append(std::to_string(animatableOpacity_.GetValue())));
 }
 
 bool RenderDisplay::GetVisible() const

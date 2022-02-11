@@ -159,6 +159,8 @@ public:
 
     void Dump(const std::vector<std::string>& params) const;
 
+    void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
+
     RefPtr<StackElement> GetLastStack() const;
 
     RefPtr<PageElement> GetLastPage() const;

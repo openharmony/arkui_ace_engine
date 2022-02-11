@@ -16,8 +16,10 @@
 #include "core/components/text/render_text.h"
 
 #include "base/geometry/size.h"
+#include "base/log/dump_log.h"
 #include "core/common/font_manager.h"
 #include "core/components/text/text_component.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
@@ -504,6 +506,22 @@ Size RenderText::GetContentSize()
 RefPtr<Component> RenderText::GetComponent()
 {
     return text_;
+}
+
+void RenderText::Dump()
+{
+    DumpLog::GetInstance().AddDesc(std::string("FontColor: ").append(textStyle_.GetTextColor().ColorToString()));
+    DumpLog::GetInstance().AddDesc(std::string("FontSize: ").append(textStyle_.GetFontSize().ToString()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("FontStyle: ").append(V2::ConvertWrapFontStyleToStirng(textStyle_.GetFontStyle())));
+    DumpLog::GetInstance().AddDesc(
+        std::string("FontWeight: ").append(V2::ConvertWrapFontWeightToStirng(textStyle_.GetFontWeight())));
+    std::string fontFamilies;
+    for (const auto& family : textStyle_.GetFontFamilies()) {
+        fontFamilies += family;
+        fontFamilies += ",";
+    }
+    DumpLog::GetInstance().AddDesc(std::string("FontFamily: ").append(fontFamilies));
 }
 
 } // namespace OHOS::Ace

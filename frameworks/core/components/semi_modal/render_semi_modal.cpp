@@ -735,14 +735,12 @@ void RenderSemiModal::ShowUpAnimation()
 
 void RenderSemiModal::Dump()
 {
-    if (DumpLog::GetInstance().GetDumpFile()) {
-        DumpLog::GetInstance().AddDesc(std::string("navigationHeight: ").append(std::to_string(navigationHeight_)));
-        DumpLog::GetInstance().AddDesc(std::string("statusBarHeight: ").append(std::to_string(statusBarHeight_)));
-        DumpLog::GetInstance().AddDesc(std::string("blankHeight: ").append(std::to_string(blankHeight_)));
-        DumpLog::GetInstance().AddDesc(std::string("defaultBlankHeight: ").append(std::to_string(defaultBlankHeight_)));
-        DumpLog::GetInstance().AddDesc(std::string("minBlankHeight: ").append(std::to_string(minBlankHeight_)));
-        DumpLog::GetInstance().AddDesc(std::string("normalBlankHeight: ").append(std::to_string(normalBlankHeight_)));
-    }
+    DumpLog::GetInstance().AddDesc(std::string("navigationHeight: ").append(std::to_string(navigationHeight_)));
+    DumpLog::GetInstance().AddDesc(std::string("statusBarHeight: ").append(std::to_string(statusBarHeight_)));
+    DumpLog::GetInstance().AddDesc(std::string("blankHeight: ").append(std::to_string(blankHeight_)));
+    DumpLog::GetInstance().AddDesc(std::string("defaultBlankHeight: ").append(std::to_string(defaultBlankHeight_)));
+    DumpLog::GetInstance().AddDesc(std::string("minBlankHeight: ").append(std::to_string(minBlankHeight_)));
+    DumpLog::GetInstance().AddDesc(std::string("normalBlankHeight: ").append(std::to_string(normalBlankHeight_)));
 }
 
 void RenderSemiModal::MovePage(double delta)

@@ -270,7 +270,7 @@ void AceAbility::OnStart(const Want& want)
     }
 
     // set view
-    Platform::AceContainer::SetView(flutterAceView, density_, width, height);
+    Platform::AceContainer::SetView(flutterAceView, density_, width, height, window->GetWindowId());
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
 
     // get url
@@ -595,6 +595,14 @@ WindowSizeChangeReason AceAbility::Convert2WindowSizeChangeReason(OHOS::Rosen::W
         return WindowSizeChangeReason::UNDEFINED;
     }
     return static_cast<WindowSizeChangeReason>(reasonValue);
+}
+
+void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
+    if (context != nullptr) {
+        context->DumpInfo(params, info);
+    }
 }
 
 } // namespace Ace

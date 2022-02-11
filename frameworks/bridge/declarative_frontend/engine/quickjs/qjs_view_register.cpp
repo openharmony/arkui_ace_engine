@@ -17,7 +17,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
-#include "bridge/common/accessibility/js_accessibility_manager.h"
+#include "bridge/common/accessibility/accessibility_node_manager.h"
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "core/components/common/layout/constants.h"
@@ -753,7 +753,7 @@ JSValue JsGetInspectorNodes(JSContext* ctx, JSValueConst new_target, int argc, J
     if (!front) {
         return JS_ThrowSyntaxError(ctx, "front is null");
     }
-    auto accessibilityManager = AceType::DynamicCast<JsAccessibilityManager>(front->GetAccessibilityManager());
+    auto accessibilityManager = AceType::DynamicCast<AccessibilityNodeManager>(front->GetAccessibilityManager());
     if (!accessibilityManager) {
         return JS_ThrowSyntaxError(ctx, "AccessibilityManager is null");
     }
@@ -779,7 +779,7 @@ JSValue JsGetInspectorNodeById(JSContext* ctx, JSValueConst new_target, int argc
     if (!front) {
         return JS_ThrowSyntaxError(ctx, "front is null");
     }
-    auto accessibilityManager = AceType::DynamicCast<JsAccessibilityManager>(front->GetAccessibilityManager());
+    auto accessibilityManager = AceType::DynamicCast<AccessibilityNodeManager>(front->GetAccessibilityManager());
     if (!accessibilityManager) {
         return JS_ThrowSyntaxError(ctx, "AccessibilityManager is null");
     }

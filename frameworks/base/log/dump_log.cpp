@@ -71,6 +71,55 @@ void DumpLog::Print(int32_t depth, const std::string& content)
     fwrite(data.c_str(), 1, data.length(), dumpFile_.get());
 }
 
+void DumpLog::PrintToString(
+    int32_t depth, const std::string& className, int32_t childSize, std::vector<std::string>& info)
+{
+    std::string data;
+    std::string space = "  ";
+    for (int32_t i = 0; i < depth; ++i) {
+        data.append(space);
+    }
+    data.append(space);
+
+    data.append("|-> ");
+    data.append(className);
+    data.append(" childSize:" + std::to_string(childSize));
+    data.append("\n");
+
+    for (auto& desc : description_) {
+        for (int32_t i = 0; i < depth; ++i) {
+            data.append(space);
+        }
+
+        if (childSize == 0) {
+            data.append("      ");
+        } else {
+            data.append("    | ");
+        }
+        data.append(desc);
+    }
+    info.emplace_back(data);
+    description_.clear();
+    description_.shrink_to_fit();
+}
+
+void DumpLog::PrintToString(const std::string& content, std::vector<std::string>& info)
+{
+    PrintToString(0, content, info);
+}
+
+void DumpLog::PrintToString(int32_t depth, const std::string& content, std::vector<std::string>& info)
+{
+    std::string space = " ";
+    std::string data;
+    for (int32_t i = 0; i < depth; ++i) {
+        data.append(space);
+    }
+
+    data.append(content);
+    info.emplace_back(std::move(data));
+}
+
 void DumpLog::Reset()
 {
     dumpFile_.reset();
