@@ -1383,17 +1383,17 @@ void RosenRenderCustomPaint::Mesh(SkBitmap& bitmap, int column, int row,
         y += dy;
     }
 
-    uint16_t* dex = indices;
+    uint16_t* dexs = indices;
     int index = 0;
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < column; j++) {
-            *dex++ = index;
-            *dex++ = index + column + 1;
-            *dex++ = index + column + 2;
+            *dexs++ = index;
+            *dexs++ = index + column + 1;
+            *dexs++ = index + column + 2;
 
-            *dex++ = index;
-            *dex++ = index + column + 2;
-            *dex++ = index + 1;
+            *dexs++ = index;
+            *dexs++ = index + column + 2;
+            *dexs++ = index + 1;
 
             index += 1;
         }
@@ -1407,11 +1407,11 @@ void RosenRenderCustomPaint::Mesh(SkBitmap& bitmap, int column, int row,
     sk_sp<SkColorFilter> colorFter;
     sk_sp<SkShader> shader;
     sk_sp<SkImage> image = SkImage::MakeFromBitmap(bitmap);
-    #ifdef USE_SYSTEM_SKIA
-        shader = image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode);
-    #else
-        shader = image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp);
-    #endif
+#ifdef USE_SYSTEM_SKIA
+    shader = image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode);
+#else
+    shader = image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp);
+#endif
     if (colorFter) {
         shader = shader->makeWithColorFilter(colorFter);
     }
