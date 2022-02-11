@@ -62,7 +62,9 @@ void RenderSideBarContainer::Update(const RefPtr<Component>& component)
     if (sideBar_->IsSideBarwidthDefined()) {
         width = sideBar_->GetSideBarWidth();
     }
-
+    exceptRegion_.SetRect(SystemProperties::Vp2Px(sideBar_->GetButtonLeft()),
+        SystemProperties::Vp2Px(sideBar_->GetButtonTop()), SystemProperties::Vp2Px(sideBar_->GetButtonWidth()),
+        SystemProperties::Vp2Px(sideBar_->GetButtonHeight()));
     if (width < minWidth || width > maxWidth || minWidth > maxWidth) {
         LOGE("the minSideBarWidth or maxSideBarWidth is illegal, use default value");
     } else {
@@ -162,11 +164,12 @@ bool RenderSideBarContainer::TouchTest(const Point& globalPoint, const Point& pa
     }
 
     auto paintRect = GetPaintRect();
+    auto exceptRegion = Rect(paintRect.GetOffset() + exceptRegion_.GetOffset(), exceptRegion_.GetSize());
     auto dragRect = Rect(paintRect.GetOffset() + Offset((sidebarWidth_ - DEFAULT_DRAG_REGION).ConvertToPx(), 0),
         Size(2 * DEFAULT_DRAG_REGION.ConvertToPx(), paintRect.Height()));
     auto touchRect = GetTransformRect(dragRect);
     auto point = GetTransformPoint(parentLocalPoint);
-    if (touchRect.IsInRegion(point)) {
+    if (touchRect.IsInRegion(point) && !GetTransformRect(exceptRegion).IsInRegion(point)) {
         const auto localPoint = point - GetPaintRect().GetOffset();
         const auto coordinateOffset = globalPoint - localPoint;
         dragRecognizer_->SetCoordinateOffset(coordinateOffset);

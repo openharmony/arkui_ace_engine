@@ -64,6 +64,7 @@ private:
     Dimension maxSidebarWidth_ = 280.0_vp;
     Dimension curPosition_ = -sidebarWidth_;
     Dimension preSidebarWidth_;
+    Rect exceptRegion_;
 };
 
 }
