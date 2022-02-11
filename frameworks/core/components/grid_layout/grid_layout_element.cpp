@@ -83,6 +83,7 @@ void GridLayoutElement::ApplyRenderChild(const RefPtr<RenderElement>& renderChil
 void GridLayoutElement::PerformBuild()
 {
     children_.clear();
+    renderNode_->ClearChildren();
     ComponentGroupElement::PerformBuild();
 }
 
