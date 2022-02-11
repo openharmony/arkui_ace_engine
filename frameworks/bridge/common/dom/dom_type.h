@@ -909,6 +909,7 @@ ACE_EXPORT extern const char DOM_INPUT_SELECTED_END[];
 ACE_EXPORT extern const char DOM_INPUT_SOFT_KEYBOARD_ENABLED[];
 ACE_EXPORT extern const char DOM_INPUT_METHOD_SHOW_ERROR[];
 ACE_EXPORT extern const char DOM_INPUT_METHOD_DELETE[];
+ACE_EXPORT extern const char DOM_INPUT_METHOD_INSERT[];
 
 // input event extern constants
 ACE_EXPORT extern const char DOM_INPUT_EVENT_NAME[];

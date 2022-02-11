@@ -2012,6 +2012,25 @@ int32_t RenderTextField::GetInstanceId() const
     return 0;
 }
 
+void RenderTextField::Insert(const std::string& text)
+{
+    auto context = context_.Upgrade();
+    if (context) {
+        context->GetTaskExecutor()->PostTask(
+            [weakPtr = WeakClaim(this), text] {
+                const auto& textField = weakPtr.Upgrade();
+                    auto value = textField->GetEditingValue();
+                    auto textEditingValue = std::make_shared<TextEditingValue>();
+                    textEditingValue->text =
+                        value.GetBeforeSelection() + text + value.GetAfterSelection();
+                    textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + text.length());
+                    textField->UpdateEditingValue(textEditingValue, true);
+            },
+            TaskExecutor::TaskType::UI);
+    }
+}
+
+
 void RenderTextField::Delete(int32_t start, int32_t end)
 {
     auto value = GetEditingValue();

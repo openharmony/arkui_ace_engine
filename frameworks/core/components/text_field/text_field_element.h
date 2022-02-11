@@ -40,6 +40,7 @@ public:
     void CloseKeyboard(bool forceClose = false);
     void ShowError(const std::string& errorText);
     void Delete();
+	void Insert(const std::string& args);
 
 private:
     void OnSurfaceChanged(int32_t width, int32_t height, int32_t oldWidth, int32_t oldHeight);

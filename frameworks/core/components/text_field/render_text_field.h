@@ -118,6 +118,7 @@ public:
     void CursorMoveRight(CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
     void CursorMoveUp();
     void CursorMoveDown();
+	void Insert(const std::string& text);
 
     void SetInputFilter(const std::string& inputFilter)
     {
