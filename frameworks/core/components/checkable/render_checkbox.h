@@ -55,6 +55,8 @@ public:
             bool isCheck = component_->GetValue();
             uiStatus_ = isCheck ? UIStatus::SELECTED :
                 ((onFocus_ && needFocus_) ? UIStatus::FOCUS : UIStatus::UNSELECTED);
+        } else {
+            uiStatus_ = checked_? UIStatus::SELECTED : UIStatus::UNSELECTED;
         }
     }
 
