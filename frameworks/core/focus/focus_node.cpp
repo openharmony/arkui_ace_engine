@@ -526,7 +526,7 @@ void FocusGroup::OnBlur()
 {
     FocusNode::OnBlur();
 
-    if (itLastFocusNode_ != focusNodes_.end()) {
+    if (itLastFocusNode_ != focusNodes_.end() && *itLastFocusNode_) {
         (*itLastFocusNode_)->LostFocus();
     }
 }
