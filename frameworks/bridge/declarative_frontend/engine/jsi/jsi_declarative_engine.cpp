@@ -851,6 +851,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
             LOGE("Ark Engine initialize runtime failed");
             return false;
         }
+        nativeEngine_ = nativeArkEngine;
     }
     engineInstance_->SetDebugMode(NeedDebugBreakPoint());
     bool result =
@@ -867,7 +868,9 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         return false;
     }
 
-    nativeEngine_ = new ArkNativeEngine(vm, static_cast<void*>(this));
+    if (nativeEngine_ == nullptr) {
+        nativeEngine_ = new ArkNativeEngine(vm, static_cast<void*>(this));
+    }
     engineInstance_->SetNativeEngine(nativeEngine_);
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
