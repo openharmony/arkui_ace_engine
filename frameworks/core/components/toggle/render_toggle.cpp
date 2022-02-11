@@ -219,6 +219,7 @@ void RenderToggle::Update(const RefPtr<Component>& component)
 {
     toggleComponent_ = AceType::DynamicCast<ToggleComponent>(component);
     widthDefined_ = !NearZero(toggleComponent_->GetWidth().Value());
+    heightDefined_ = !NearZero(toggleComponent_->GetHeight().Value());
     onClick_ = AceAsyncEvent<void()>::Create(toggleComponent_->GetClickEvent(), context_);
     auto catchMode = toggleComponent_->GetClickEvent().IsEmpty() || toggleComponent_->GetClickEvent().GetCatchMode();
     static const int32_t bubbleModeVersion = 6;
@@ -253,7 +254,12 @@ void RenderToggle::PerformLayout()
         childrenSize.SetWidth(child->GetLayoutSize().Width());
         childrenSize.SetHeight(child->GetLayoutSize().Height());
     }
-    Size layoutSize = widthDefined_ ? toggleSize_ : Size(childrenSize.Width(), toggleSize_.Height());
+    double width = widthDefined_ ? toggleSize_.Width() : childrenSize.Width();
+    double height = toggleSize_.Height();
+    if (!heightDefined_ && toggleComponent_->GetFontDefinedState()) {
+        height = childrenSize.Height();
+    }
+    Size layoutSize = Size(width, height);
     layoutSize = GetLayoutParam().Constrain(layoutSize);
     SetLayoutSize(layoutSize);
     toggleSize_ = GetLayoutSize();

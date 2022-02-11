@@ -74,6 +74,11 @@ public:
         return changeEvent_;
     }
 
+    bool GetFontDefinedState() const
+    {
+        return fontSizeDefined_;
+    }
+
     void SetCheckedState(bool state)
     {
         isChecked_ = state;
@@ -114,8 +119,14 @@ public:
         changeEvent_ = event;
     }
 
+    void SetFontDefinedState(bool state)
+    {
+        fontSizeDefined_ = state;
+    }
+
 private:
-    bool isChecked_ { false };
+    bool isChecked_ = false;
+    bool fontSizeDefined_ = false;
     Color backgroundColor_;
     Color checkedColor_;
     Color pressedBlendColor_;

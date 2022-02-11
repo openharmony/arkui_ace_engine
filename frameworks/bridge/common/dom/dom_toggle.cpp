@@ -93,6 +93,7 @@ bool DOMToggle::SetSpecializedStyle(const std::pair<std::string, std::string>& s
         { DOM_TEXT_FONT_SIZE,
             [](DOMToggle& toggle, const std::string& value) {
                 toggle.textStyle_.SetFontSize(toggle.ParseDimension(value));
+                toggle.toggleChild_->SetFontDefinedState(true);
             } },
         { DOM_TEXT_FONT_STYLE,
             [](DOMToggle& toggle, const std::string& value) {
@@ -169,7 +170,9 @@ void DOMToggle::PrepareSpecializedComponent()
     if (!NearZero(toggleChild_->GetHeight().Value())) {
         boxComponent_->SetHeight(toggleChild_->GetHeight().Value(), toggleChild_->GetHeight().Unit());
     } else {
-        boxComponent_->SetHeight(toggleTheme_->GetHeight().Value(), toggleTheme_->GetHeight().Unit());
+        if (!toggleChild_->GetFontDefinedState()) {
+            boxComponent_->SetHeight(toggleTheme_->GetHeight().Value(), toggleTheme_->GetHeight().Unit());
+        }
     }
     auto backDecoration = boxComponent_->GetBackDecoration();
     if (backDecoration) {
