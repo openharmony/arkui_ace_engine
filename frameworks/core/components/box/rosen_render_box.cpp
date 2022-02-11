@@ -1052,15 +1052,17 @@ void RosenRenderBox::AnimateMouseHoverEnter()
     if (animationType_ == HoverAnimationType::SCALE) {
         isHoveredScale = true;
         auto rsNode = GetRSNode();
-        rsNode->SetScale(SCALE_DEFAULT);
+        float scaleBegin = SCALE_DEFAULT;
+        float scaleEnd = SCALE_CHANGED;
 
+        rsNode->SetScale(scaleBegin);
         Rosen::RSAnimationTimingProtocol protocol;
         protocol.SetDuration(HOVER_ANIMATION_DURATION);
         RSNode::Animate(
             protocol, SCALE_ANIMATION_TIMING_CURVE,
-            [rsNode]() {
+            [rsNode, scaleEnd]() {
                 if (rsNode) {
-                    rsNode->SetScale(SCALE_CHANGED);
+                    rsNode->SetScale(scaleEnd);
                 }
             },
             []() {});
@@ -1093,15 +1095,17 @@ void RosenRenderBox::AnimateMouseHoverExit()
     if (animationType_ == HoverAnimationType::SCALE) {
         isHoveredScale = true;
         auto rsNode = GetRSNode();
-        rsNode->SetScale(SCALE_CHANGED);
+        float scaleBegin = SCALE_CHANGED;
+        float scaleEnd = SCALE_DEFAULT;
 
+        rsNode->SetScale(scaleBegin);
         Rosen::RSAnimationTimingProtocol protocol;
         protocol.SetDuration(HOVER_ANIMATION_DURATION);
         RSNode::Animate(
             protocol, SCALE_ANIMATION_TIMING_CURVE,
-            [rsNode]() {
+            [rsNode, scaleEnd]() {
                 if (rsNode) {
-                    rsNode->SetScale(SCALE_DEFAULT);
+                    rsNode->SetScale(scaleEnd);
                 }
             },
             []() {});

@@ -144,7 +144,7 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
             hoverNodeCur->OnMouseClickUpAnimation();
         }
     } else {
-        if (hoverNodeCur != hoverNodePre) {
+        if (event.button == MouseButton::NONE_BUTTON && hoverNodeCur != hoverNodePre) {
             if (hoverNodeCur) {
                 hoverNodeCur->AnimateMouseHoverEnter();
             }
