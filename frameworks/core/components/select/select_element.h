@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SELECT_SELECT_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SELECT_SELECT_ELEMENT_H
 
+#include "core/common/container.h"
 #include "core/components/text/text_component.h"
 #include "core/pipeline/base/sole_child_element.h"
 
@@ -29,7 +30,13 @@ public:
 
     bool CanUpdate(const RefPtr<Component>& newComponent) override
     {
-        return false;
+        auto context = context_.Upgrade();
+
+        if (context && context->GetIsDeclarative()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     void FlushRefresh();
