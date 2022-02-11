@@ -39,9 +39,8 @@ ohos_unittest("PluginManagerTest") {
   ]
 
   external_deps = [
-    "ability_runtime:app_manager",
-    "ability_runtime:base",
-    "ability_runtime:want",
+    "ability_base:base",
+    "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "eventhandler:libeventhandler",
