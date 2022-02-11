@@ -251,6 +251,8 @@ protected:
     double max_ = DEFAULT_MAX;
     double min_ = DEFAULT_MIN;
 
+    double scaleValue_ = 1.0;
+
     bool showSteps_ = false;
     bool showTips_ = false;
     bool isDraging_ = false;
@@ -258,6 +260,7 @@ protected:
     SliderMode mode_ = SliderMode::OUTSET;
     Dimension blockHotWidth_;
     Dimension blockHotHeight_;
+    Dimension hotWidth_;
     Axis direction_ = Axis::HORIZONTAL;
 
     RefPtr<RenderNode> tip_;

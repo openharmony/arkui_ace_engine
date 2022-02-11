@@ -206,6 +206,16 @@ public:
         track_->SetReverse(isReverse_);
     }
 
+    const Dimension& GetThickness() const
+    {
+        return thickness_;
+    }
+
+    void SetThickness(const Dimension& thickness)
+    {
+        thickness_ = thickness;
+    }
+
     ACE_DEFINE_COMPONENT_EVENT(OnChange, void(double,int));
 
 private:
@@ -221,6 +231,7 @@ private:
     SliderMode mode_ = SliderMode::OUTSET;
     RefPtr<RotationController> rotationController_;
     Axis axis_ = Axis::HORIZONTAL;
+    Dimension thickness_;
 };
 
 } // namespace OHOS::Ace

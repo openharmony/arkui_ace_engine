@@ -39,6 +39,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void SetBlockColor(const JSCallbackInfo& info);
     static void SetTrackColor(const JSCallbackInfo& info);
+    static void SetThickness(const JSCallbackInfo& info);
     static void SetSelectedColor(const JSCallbackInfo& info);
     static void SetMinLabel(const JSCallbackInfo& info);
     static void SetMaxLabel(const JSCallbackInfo& info);

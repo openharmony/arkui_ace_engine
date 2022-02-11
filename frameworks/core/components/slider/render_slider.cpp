@@ -29,6 +29,8 @@ constexpr double DOUBLE_TO_PERCENT = 100.0;
 constexpr double CHANGE_RATIO = 0.2;
 constexpr double DEFAULT_NORMAL_RADIUS_SCALE = 1.0;
 constexpr double DEFAULT_LARGE_RADIUS_SCALE = 1.1;
+constexpr double DEFAULT_OUTSET_TRACK_THICKNESS = 4.0;
+constexpr double DEFAULT_INSET_TRACK_THICKNESS = 20.0;
 constexpr int32_t DEFAULT_SLIDER_ANIMATION_DURATION = 150;
 constexpr int32_t SLIDER_MOVE_DURATION = 100;
 constexpr Dimension DEFAULT_SLIDER_WIDTH_DP = 260.0_vp;
@@ -68,6 +70,8 @@ void RenderSlider::Update(const RefPtr<Component>& component)
         isReverse_ = slider->IsReverse();
         isError_ = false;
         isValueError_ = false;
+        scaleValue_ = mode_ == SliderMode::INSET ? slider->GetThickness().Value() / DEFAULT_INSET_TRACK_THICKNESS :
+            slider->GetThickness().Value() / DEFAULT_OUTSET_TRACK_THICKNESS;
         SyncValueToComponent(std::clamp(slider->GetValue(), min_, max_));
         if (min_ >= max_ || step_ > (max_ - min_) || step_ <= 0.0) {
             isValueError_ = true;
