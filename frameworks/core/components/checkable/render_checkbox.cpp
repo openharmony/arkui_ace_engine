@@ -42,10 +42,10 @@ void RenderCheckbox::Update(const RefPtr<Component>& component)
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
+    component_ = checkbox;
 
     auto context = context_.Upgrade();
     if (context->GetIsDeclarative()) {
-        component_ = checkbox;
         UpdateGroupStatus();
         component_->SetGroupValue(CHECKABLE_STATUS[static_cast<int32_t>(status_)]);
 
