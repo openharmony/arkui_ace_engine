@@ -563,6 +563,7 @@ private:
     std::function<void(const double&)> updateHandleDiameterInner_;
     std::function<void(const std::string&)> onTextChangeEvent_;
     std::function<void(std::string)> onChange_;
+    std::function<void(const ClickInfo& clickInfo)> onClick_;
     std::function<void(const std::string&)> onError_;
     std::function<void(bool)> onEditChanged_;
     std::function<void(int32_t)> onSubmit_;
