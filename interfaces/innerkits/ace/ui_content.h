@@ -33,6 +33,7 @@ class Configuration;
 
 namespace Rosen {
 class Window;
+enum class WindowSizeChangeReason : uint32_t;
 }
 
 namespace MMI {
@@ -75,7 +76,7 @@ public:
     virtual bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) = 0;
     virtual bool ProcessVsyncEvent(uint64_t timeStampNanos) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
-    virtual void UpdateViewportConfig(const ViewportConfig& config) = 0;
+    virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) = 0;
 };
 
 } // namespace OHOS::Ace

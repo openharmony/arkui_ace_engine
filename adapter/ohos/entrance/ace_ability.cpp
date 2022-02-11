@@ -323,7 +323,6 @@ void AceAbility::OnStart(const Want& want)
             // todo regist on size change()
             window->RegisterWindowChangeListener(thisAbility);
 
-            rsUiDirector->SetSurfaceNodeSize(width, height);
             rsUiDirector->SetUITaskRunner(
                 [taskExecutor = Platform::AceContainer::GetContainer(abilityId_)->GetTaskExecutor(), id = abilityId_]
                     (const std::function<void()>& task) {
@@ -570,22 +569,7 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeCha
     uint32_t width = rect.width_;
     uint32_t height = rect.height_;
     LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u", width, height);
-#ifdef ENABLE_ROSEN_BACKEND
-    auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
-    if (context) {
-        auto rsUIDirector = context->GetRSUIDirector();
-        if (rsUIDirector) {
-            rsUIDirector->SetSurfaceNodeSize(width, height);
-        } else {
-            LOGE("ceAbility::OnSizeChange rsUIDirector is null.");
-        }
-    } else {
-        LOGE("ceAbility::OnSizeChange pipline context is null.");
-    }
-
-#endif
     SystemProperties::SetDeviceOrientation(height >= width ? 0 : 1);
-
     auto flutterAceView = static_cast<Platform::FlutterAceView*>(
         Platform::AceContainer::GetContainer(abilityId_)->GetView());
 
@@ -599,7 +583,18 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeCha
     metrics.physical_height = height;
     metrics.device_pixel_ratio = density_;
     Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
+    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0, Convert2WindowSizeChangeReason(reason));
+}
+
+WindowSizeChangeReason AceAbility::Convert2WindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason reason)
+{
+    auto reasonValue = static_cast<uint32_t>(reason);
+    constexpr uint32_t MAX_REASON_VALUE = 5;
+    if (reasonValue > MAX_REASON_VALUE) {
+        LOGE("AceAbility: unsupported WindowSizeChangeReason");
+        return WindowSizeChangeReason::UNDEFINED;
+    }
+    return static_cast<WindowSizeChangeReason>(reasonValue);
 }
 
 } // namespace Ace

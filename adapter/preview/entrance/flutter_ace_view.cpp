@@ -86,7 +86,7 @@ void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>
     }
 }
 
-}
+} // namespace
 
 void FlutterAceView::RegisterTouchEventCallback(TouchEventCallback&& callback)
 {

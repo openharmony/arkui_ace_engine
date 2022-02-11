@@ -1630,7 +1630,41 @@ RefPtr<Frontend> PipelineContext::GetFrontend() const
     return weakFrontend_.Upgrade();
 }
 
-void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height)
+void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    if (!rootElement_ || !rootElement_->GetRenderNode()) {
+        LOGE("RootNodeAnimation: no rootelement found, no animation configured");
+        SetRootSizeWithWidthHeight(width, height);
+        return;
+    }
+    auto rootNode = AceType::DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
+    switch (type) {
+        case WindowSizeChangeReason::RECOVER:
+        case WindowSizeChangeReason::MAXIMIZE: {
+            LOGD("PipelineContext::Rootnodeanimation, width = %{private}d, height = %{private}d", width, height);
+            AnimationOption option;
+            constexpr int32_t duration = 400;
+            option.SetDuration(duration);
+            auto curve = MakeRefPtr<DecelerationCurve>();
+            option.SetCurve(curve);
+            Animate(option, curve, [width, height, this]() {
+                SetRootSizeWithWidthHeight(width, height);
+                FlushLayout();
+            });
+            break;
+        }
+        case WindowSizeChangeReason::ROTATION:
+        case WindowSizeChangeReason::RESIZE:
+        case WindowSizeChangeReason::DRAG:
+        case WindowSizeChangeReason::UNDEFINED:
+        default: {
+            LOGD("PipelineContext::RootNodeAnimation : unsupported type, no animation added");
+            SetRootSizeWithWidthHeight(width, height);
+        }
+    }
+}
+
+void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     CHECK_RUN_ON(UI);
     // Refresh the screen when developers customize the resolution and screen density on the PC preview.
@@ -1661,7 +1695,6 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height)
         }
     }
     GridSystemManager::GetInstance().OnSurfaceChanged(width);
-
     auto frontend = weakFrontend_.Upgrade();
     if (frontend) {
         frontend->OnSurfaceChanged(width, height);
@@ -1675,7 +1708,11 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height)
             transitionElement->InitTransitionClip();
         }
     }
+#ifdef ENABLE_ROSEN_BACKEND
+    WindowSizeChangeAnimate(width, height, type);
+#else
     SetRootSizeWithWidthHeight(width, height);
+#endif
     if (isSurfaceReady_) {
         return;
     }
@@ -2797,20 +2834,20 @@ void PipelineContext::ForceLayoutForImplicitAnimation()
 }
 
 bool PipelineContext::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
-    const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack)
+    const std::function<void()>& propertyCallback, const std::function<void()>& finishCallback)
 {
     if (!propertyCallback) {
         LOGE("failed to create animation, property callback is null!");
         return false;
     }
 
-    OpenImplicitAnimation(option, curve, finishCallBack);
+    OpenImplicitAnimation(option, curve, finishCallback);
     propertyCallback();
     return CloseImplicitAnimation();
 }
 
 void PipelineContext::OpenImplicitAnimation(
-    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!SystemProperties::GetRosenBackendEnabled()) {
@@ -2831,7 +2868,7 @@ void PipelineContext::OpenImplicitAnimation(
                                 option.GetAnimationDirection() == AnimationDirection::ALTERNATE);
     timingProtocol.SetAutoReverse(option.GetAnimationDirection() == AnimationDirection::ALTERNATE ||
                                   option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
-    RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), finishCallBack);
+    RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), finishCallback);
 #endif
 }
 

@@ -29,11 +29,6 @@
 #include "core/event/key_event_recognizer.h"
 #include "core/event/key_event_transfer.h"
 
-#include "mouse_event.h"
-#include "touch_event.h"
-#include "window.h"
-#include "window_manager.h"
-
 namespace OHOS::Ace::Platform {
 
 using ReleaseCallback = std::function<void()>;
@@ -46,7 +41,8 @@ public:
     static FlutterAceView* CreateView(
         int32_t instanceId, bool useCurrentEventRunner = false, bool usePlatfromThread = false);
     static void SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen::Window> window);
-    static void SurfaceChanged(FlutterAceView* view, int32_t width, int32_t height, int32_t orientation);
+    static void SurfaceChanged(FlutterAceView* view, int32_t width, int32_t height, int32_t orientation,
+        WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED);
     static void SetViewportMetrics(FlutterAceView* view, const flutter::ViewportMetrics& metrics);
 
     static void DispatchTouchEvent(FlutterAceView* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -136,13 +132,13 @@ public:
     const void* GetNativeWindowById(uint64_t textureId) override;
 
 private:
-    void NotifySurfaceChanged(int width, int height)
+    void NotifySurfaceChanged(int width, int height, WindowSizeChangeReason type)
     {
         if (viewChangeCallback_) {
-            viewChangeCallback_(width, height);
+            viewChangeCallback_(width, height, type);
         }
         width_ = width;
-        height_ =height;
+        height_ = height;
     }
 
     void NotifyDensityChanged(double density) const

@@ -265,7 +265,7 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterCardViewAccessibilityParamsCallback(cardViewParamsCallback);
 
-    auto&& viewChangeCallback = [weak, id = instanceId_](int32_t width, int32_t height) {
+    auto&& viewChangeCallback = [weak, id = instanceId_](int32_t width, int32_t height, WindowSizeChangeReason type) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
@@ -274,7 +274,8 @@ void AceContainer::InitializeCallback()
         }
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(
-            [context, width, height]() { context->OnSurfaceChanged(width, height); }, TaskExecutor::TaskType::UI);
+            [context, width, height, type]() { context->OnSurfaceChanged(width, height, type); },
+            TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
 

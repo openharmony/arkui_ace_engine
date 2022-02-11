@@ -43,6 +43,7 @@
 #include "core/common/focus_animation_manager.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_res_register.h"
+#include "core/common/window_animation_config.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/page/page_component.h"
@@ -91,6 +92,7 @@ struct WindowBlurInfo {
     RRect innerRect_;
     std::vector<RRect> coords_;
 };
+
 
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 using SubscribeCtrlACallback = std::function<void()>;
@@ -258,7 +260,10 @@ public:
 
     void PostAsyncEvent(const TaskExecutor::Task& task);
 
-    void OnSurfaceChanged(int32_t width, int32_t height);
+    void OnSurfaceChanged(
+        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED);
+
+    void WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
 
     void OnSurfaceDensityChanged(double density);
 
