@@ -198,6 +198,14 @@ void RenderCheckbox::UpdateAnimation()
             from = DEFAULT_MAX_CHECKBOX_SHAPE_SCALE;
             to = DEFAULT_MIN_CHECKBOX_SHAPE_SCALE;
         }
+    } else {
+        if (checked_) {
+            from = DEFAULT_MAX_CHECKBOX_SHAPE_SCALE;
+            to = DEFAULT_MIN_CHECKBOX_SHAPE_SCALE;
+        } else {
+            from = DEFAULT_MAX_CHECKBOX_SHAPE_SCALE;
+            to = DEFAULT_MIN_CHECKBOX_SHAPE_SCALE;
+        }
     }
 
     if (translate_) {
@@ -237,6 +245,8 @@ void RenderCheckbox::UpdateCheckBoxShape(const double value)
         }
     } else if (!(component_->GetCheckboxName().empty())) {
         uiStatus_ = (component_->GetValue()) ? UIStatus::OFF_TO_ON : UIStatus::ON_TO_OFF;
+    } else {
+        uiStatus_ = checked_ ? UIStatus::ON_TO_OFF : UIStatus::OFF_TO_ON;
     }
 
     MarkNeedRender();
