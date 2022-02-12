@@ -58,12 +58,30 @@ public:
         return hideNavigationBar_;
     }
 
+    bool GetHideNavigationToolBar() const
+    {
+        return hideNavigationToolBar_;
+    }
+
+    NavigationTitleMode GetTitleMode() const
+    {
+        return titleMode_;
+    }
+
+    const std::list<RefPtr<ToolBarItem>>& GetToolBarItems()
+    {
+        return toolBarItems_;
+    }
+
 private:
     RefPtr<RenderCollapsingNavigationBar> collapsingNavigationBar_;
     std::string title_;
     std::string subTitle_;
     bool hideBackButton_ = false;
     bool hideNavigationBar_ = false;
+    bool hideNavigationToolBar_ = false;
+    NavigationTitleMode titleMode_ = NavigationTitleMode::MINI;
+    std::list<RefPtr<ToolBarItem>> toolBarItems_;
 };
 
 } // namespace OHOS::Ace
