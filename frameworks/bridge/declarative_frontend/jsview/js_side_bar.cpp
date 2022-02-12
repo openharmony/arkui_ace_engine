@@ -34,6 +34,7 @@ void JSSideBar::Create(const JSCallbackInfo& info)
 
     std::list<RefPtr<Component>> children;
     auto sideBarContainer = AceType::MakeRefPtr<OHOS::Ace::SideBarContainerComponent>(children);
+    sideBarContainer->SetMainStackSize(MainStackSize::MAX);
 
     if (info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
