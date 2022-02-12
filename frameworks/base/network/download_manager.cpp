@@ -54,6 +54,8 @@ public:
         }
 
         dataOut.clear();
+        errorStr_.clear();
+        errorStr_.reserve(CURL_ERROR_SIZE);
 
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_URL, url.c_str());
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_WRITEFUNCTION, OnWritingMemory);
@@ -62,10 +64,17 @@ public:
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_USERAGENT, "libcurl-agent/1.0");
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_URL, url.c_str());
 
+        ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_VERBOSE, 1L);
+        ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_ERRORBUFFER, errorStr_.data());
+
         CURLcode result = curl_easy_perform(handle.get());
         if (result != CURLE_OK) {
             LOGE("Failed to download, url: %{private}s, %{public}s", url.c_str(), curl_easy_strerror(result));
+            if (!errorStr_.empty()) {
+                LOGE("Failed to download reason: %{public}s", errorStr_.c_str());
+            }
             dataOut.clear();
+            errorStr_.shrink_to_fit();
             return false;
         }
         dataOut.shrink_to_fit();
@@ -73,6 +82,8 @@ public:
     }
 
 private:
+    std::string errorStr_;
+
     static size_t OnWritingMemory(void* data, size_t size, size_t memBytes, void* userData)
     {
         // size is always 1, for more details see https://curl.haxx.se/libcurl/c/CURLOPT_WRITEFUNCTION.html
