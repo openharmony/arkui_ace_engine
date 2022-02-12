@@ -2133,7 +2133,8 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
             if(node == nullptr) {
                 LOGE("node is nullptr");
             }
-            auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node ? node->GetTag() : "", childNodeId, nodeId);
+            auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node ? node->GetTag() : "", childNodeId,
+			    nodeId);
             sPage->PushCommand(command);
             if (!sPage->CheckPageCreated() && sPage->GetCommandSize() > FRAGMENT_SIZE) {
                 sPage->FlushCommands();

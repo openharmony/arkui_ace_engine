@@ -1980,7 +1980,8 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
             if (node == nullptr) {
                 LOGE("node is nullptr");
             }
-            auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node ? node->GetTag() : "", childNodeId, nodeId);
+            auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node ? node->GetTag() : "", childNodeId,
+			    nodeId);
             sPage->PushCommand(command);
             if (!sPage->CheckPageCreated() && sPage->GetCommandSize() > FRAGMENT_SIZE) {
                 sPage->FlushCommands();
