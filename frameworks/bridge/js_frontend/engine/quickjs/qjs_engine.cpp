@@ -1980,7 +1980,7 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
             if (node == nullptr) {
                 LOGE("node is nullptr");
             }
-            auto command = Referenced::MakeRefPtr<JsCommandAppendElement>("", childNodeId, nodeId);
+            auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node ? node->GetTag() : "", childNodeId, nodeId);
             sPage->PushCommand(command);
             if (!sPage->CheckPageCreated() && sPage->GetCommandSize() > FRAGMENT_SIZE) {
                 sPage->FlushCommands();
@@ -2340,13 +2340,13 @@ JSValue JsAppendChild(JSContext* ctx, JSValueConst value, int32_t argc, JSValueC
             }
         }
         RefPtr<DOMNode> parentNode = domDocument->GetDOMNodeById(parentNodeId);
-        if (node == nullptr) {
+        if (parentNode == nullptr) {
             LOGE("node is nullptr");
         }
         if (node != nullptr && parentNode != nullptr) {
             parentNode->RemoveNode(node);
         }
-        auto command = Referenced::MakeRefPtr<JsCommandAppendElement>("", id, parentNodeId);
+        auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node ? node->GetTag() : "", id, parentNodeId);
         page->PushCommand(command);
         if (!page->CheckPageCreated() && page->GetCommandSize() > FRAGMENT_SIZE) {
             page->FlushCommands();
