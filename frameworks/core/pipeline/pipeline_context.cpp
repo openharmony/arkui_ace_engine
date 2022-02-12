@@ -1471,6 +1471,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     eventManager_.MouseTest(scaleEvent, rootElement_->GetRenderNode());
     eventManager_.DispatchMouseEvent(scaleEvent);
     eventManager_.DispatchMouseHoverEvent(scaleEvent);
+    FlushMessages();
 }
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event)
