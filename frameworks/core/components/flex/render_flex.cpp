@@ -43,7 +43,7 @@ double GetMainAxisValue(const Size& size, FlexDirection direction)
 
 inline bool IsNonRelativePosition(PositionType pos)
 {
-    return ((pos != PositionType::RELATIVE) && (pos != PositionType::SEMI_RELATIVE));
+    return ((pos != PositionType::RELATIVE) && (pos != PositionType::SEMI_RELATIVE) && (pos != PositionType::OFFSET));
 }
 
 } // namespace
