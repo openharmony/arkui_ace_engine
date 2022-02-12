@@ -293,14 +293,15 @@ void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen
     LOGI("<<< FlutterAceView::SurfaceCreated, end");
 }
 
-void FlutterAceView::SurfaceChanged(FlutterAceView* view, int32_t width, int32_t height, int32_t orientation)
+void FlutterAceView::SurfaceChanged(
+    FlutterAceView* view, int32_t width, int32_t height, int32_t orientation, WindowSizeChangeReason type)
 {
     if (view == nullptr) {
         LOGE("FlutterAceView::SurfaceChanged, view is nullptr");
         return;
     }
 
-    view->NotifySurfaceChanged(width, height);
+    view->NotifySurfaceChanged(width, height, type);
     auto platformView = view->GetShellHolder()->GetPlatformView();
     LOGI("FlutterAceView::SurfaceChanged, GetPlatformView");
     if (platformView) {

@@ -21,6 +21,7 @@
 
 #include "ability.h"
 #include "ability_loader.h"
+#include "core/common/window_animation_config.h"
 #include "core/event/touch_event.h"
 #include "want.h"
 #include "wm/window.h"
@@ -62,6 +63,7 @@ public:
 
     // override Rosen::IWindowChangeListener virtual callback function
     void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override;
+    static WindowSizeChangeReason Convert2WindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason reason);
 
 private:
     static int32_t instanceId_;

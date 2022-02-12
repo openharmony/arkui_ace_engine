@@ -77,7 +77,7 @@ public:
     void RegisterSystemBarHeightChangeCallback(SystemBarHeightChangeCallbak&& callback) override
     {
         if (callback) {
-            systemBarHeightChangeCallbak_ = std::move(callback);
+            systemBarHeightChangeCallback_ = std::move(callback);
         }
     }
 
@@ -104,12 +104,13 @@ public:
 
     void ProcessIdleEvent(int64_t deadline);
 
-    void NotifySurfaceChanged(int32_t width, int32_t height)
+    void NotifySurfaceChanged(
+        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED)
     {
         width_ = width;
         height_ = height;
         if (viewChangeCallback_) {
-            viewChangeCallback_(width, height);
+            viewChangeCallback_(width, height, type);
         }
     }
 
@@ -122,8 +123,8 @@ public:
 
     void NotifySystemBarHeightChanged(double statusBar, double navigationBar) const
     {
-        if (systemBarHeightChangeCallbak_) {
-            systemBarHeightChangeCallbak_(statusBar, navigationBar);
+        if (systemBarHeightChangeCallback_) {
+            systemBarHeightChangeCallback_(statusBar, navigationBar);
         }
     }
 
@@ -161,7 +162,7 @@ private:
     CardViewAccessibilityParamsCallback cardViewAccessibilityParamsCallback_;
     ViewChangeCallback viewChangeCallback_;
     DensityChangeCallback densityChangeCallback_;
-    SystemBarHeightChangeCallbak systemBarHeightChangeCallbak_;
+    SystemBarHeightChangeCallbak systemBarHeightChangeCallback_;
     SurfaceDestroyCallback surfaceDestroyCallback_;
     IdleCallback idleCallback_;
     KeyEventCallback keyEventCallback_;

@@ -466,11 +466,13 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterRotationEventCallback(rotationEventCallback);
 
-    auto&& viewChangeCallback = [context = pipelineContext_, id = instanceId_](int32_t width, int32_t height) {
+    auto&& viewChangeCallback = [context = pipelineContext_, id = instanceId_](int32_t width, int32_t height,
+                                    WindowSizeChangeReason type) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(
-            [context, width, height]() { context->OnSurfaceChanged(width, height); }, TaskExecutor::TaskType::UI);
+            [context, width, height, type]() { context->OnSurfaceChanged(width, height, type); },
+            TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
 

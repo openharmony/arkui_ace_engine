@@ -56,7 +56,7 @@ public:
     using CardViewAccessibilityParamsCallback = std::function<void(const std::string& key, bool focus)>;
     virtual void RegisterCardViewAccessibilityParamsCallback(CardViewAccessibilityParamsCallback&& callback) = 0;
 
-    using ViewChangeCallback = std::function<void(int32_t width, int32_t height)>;
+    using ViewChangeCallback = std::function<void(int32_t width, int32_t height, WindowSizeChangeReason type)>;
     virtual void RegisterViewChangeCallback(ViewChangeCallback&& callback) = 0;
 
     using DensityChangeCallback = std::function<void(double density)>;

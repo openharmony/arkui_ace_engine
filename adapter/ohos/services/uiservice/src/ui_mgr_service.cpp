@@ -261,8 +261,6 @@ int UIMgrService::ShowDialog(const std::string& name,
                 rsUiDirector->SetRSSurfaceNode(dialogWindow->GetSurfaceNode());
 
                 dialogWindow->RegisterWindowChangeListener(listener);
-
-                rsUiDirector->SetSurfaceNodeSize(windowWidth, windowHeight);
                 rsUiDirector->SetUITaskRunner(
                     [taskExecutor = Ace::Platform::AceContainer::GetContainer(dialogId)->GetTaskExecutor()]
                         (const std::function<void()>& task) {

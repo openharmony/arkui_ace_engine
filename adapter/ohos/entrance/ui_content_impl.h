@@ -58,7 +58,7 @@ public:
     bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) override;
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
-    void UpdateViewportConfig(const ViewportConfig& config) override;
+    void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) override;
 
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
