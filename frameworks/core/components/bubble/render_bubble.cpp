@@ -410,4 +410,18 @@ void RenderBubble::FirePopEvent()
     }
 }
 
+WeakPtr<RenderNode> RenderBubble::CheckHoverNode()
+{
+    return AceType::WeakClaim<RenderNode>(this);
+}
+
+bool RenderBubble::HandleMouseEvent(const MouseEvent& event)
+{
+    if (event.button != MouseButton::NONE_BUTTON && event.button != MouseButton::LEFT_BUTTON &&
+        event.action == MouseAction::PRESS) {
+        HandleTouch();
+    }
+    return false;
+}
+
 } // namespace OHOS::Ace

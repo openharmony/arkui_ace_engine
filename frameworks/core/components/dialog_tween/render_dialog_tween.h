@@ -40,6 +40,8 @@ public:
     void OnPaintFinish() override;
     bool PopDialog();
     void SetAnimator(const RefPtr<Animator>& animator_);
+    bool HandleMouseEvent(const MouseEvent& event) override;
+    WeakPtr<RenderNode> CheckHoverNode() override;
 
 protected:
     void OnTouchTestHit(
