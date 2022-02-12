@@ -35,6 +35,9 @@ public:
     std::unique_ptr<JsonValue> ToJsonObject() const override;
     std::string GetNavigationTitle() const;
     std::string GetNavigationSubTitle() const;
+    std::string GetNavigationSubTitleMode() const;
+    std::string GetNavigationToolBar() const;
+    bool GetNavigationHideToolBar() const;
     bool GetHideNavigationBackButton() const;
     bool GetHideNavigationBar() const;
 

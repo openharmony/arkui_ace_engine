@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/components/navigation_bar/navigation_container_component.h"
 
 namespace OHOS::Ace::V2 {
 
@@ -28,7 +29,11 @@ const std::unordered_map<std::string, std::function<std::string(const Navigation
         { "title",
             [](const NavigationComposedElement& inspector) { return inspector.GetNavigationTitle(); } },
         { "subtitle",
-            [](const NavigationComposedElement& inspector) { return inspector.GetNavigationSubTitle(); } }
+            [](const NavigationComposedElement& inspector) { return inspector.GetNavigationSubTitle(); } },
+        { "titleMode",
+            [](const NavigationComposedElement& inspector) { return inspector.GetNavigationSubTitleMode(); } },
+        { "toolBar",
+            [](const NavigationComposedElement& inspector) { return inspector.GetNavigationToolBar(); } },
     };
 
 const std::unordered_map<std::string, std::function<bool(const NavigationComposedElement&)>>
@@ -36,7 +41,9 @@ const std::unordered_map<std::string, std::function<bool(const NavigationCompose
         { "hideBackButton",
             [](const NavigationComposedElement& inspector) { return inspector.GetHideNavigationBackButton(); } },
         { "hideTitleBar",
-            [](const NavigationComposedElement& inspector) { return inspector.GetHideNavigationBar(); } }
+            [](const NavigationComposedElement& inspector) { return inspector.GetHideNavigationBar(); } },
+        { "hideToolBar",
+            [](const NavigationComposedElement& inspector) { return inspector.GetNavigationHideToolBar(); } }
     };
 
 }
@@ -49,9 +56,15 @@ void NavigationComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(
         std::string("navigationSubTitle: ").append(GetNavigationSubTitle()));
     DumpLog::GetInstance().AddDesc(
+        std::string("navigationSubTitleMode: ").append(GetNavigationSubTitleMode()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("navigationToolBar: ").append(GetNavigationToolBar()));
+    DumpLog::GetInstance().AddDesc(
         std::string("hideNavigationBackButton: ").append(GetHideNavigationBackButton() ? "true" : "false"));
     DumpLog::GetInstance().AddDesc(
         std::string("hideNavigationBar: ").append(GetHideNavigationBar() ? "true" : "false"));
+    DumpLog::GetInstance().AddDesc(
+        std::string("hideNavigationToolBar: ").append(GetNavigationHideToolBar() ? "true" : "false"));
 }
 
 std::unique_ptr<JsonValue> NavigationComposedElement::ToJsonObject() const
@@ -85,6 +98,51 @@ std::string NavigationComposedElement::GetNavigationSubTitle() const
     return render->GetSubTitle();
 }
 
+std::string NavigationComposedElement::GetNavigationToolBar() const
+{
+    auto render = GetRenderNavigation();
+    auto jsonValue = JsonUtil::Create(true);
+    if (!render) {
+        return "";
+    }
+    auto toolBarItem = render->GetToolBarItems();
+    if (!toolBarItem.empty()) {
+        auto jsonOptions = JsonUtil::CreateArray(false);
+        std::list<RefPtr<ToolBarItem>>::iterator iter;
+        int32_t i = 0;
+        for (iter = toolBarItem.begin(); iter != toolBarItem.end(); ++iter, i++) {
+            auto jsonToolBarItem = JsonUtil::CreateArray(false);
+            auto toolBarItem_ = *iter;
+            jsonToolBarItem->Put("value", toolBarItem_->value.c_str());
+            jsonToolBarItem->Put("icon", toolBarItem_->icon.c_str());
+            auto index_ = std::to_string(i);
+            jsonOptions->Put(index_.c_str(), jsonToolBarItem);
+        }
+        jsonValue->Put("items", jsonOptions);
+        return jsonValue->ToString();
+    }
+    return "";
+}
+
+std::string NavigationComposedElement::GetNavigationSubTitleMode() const
+{
+    auto node = GetInspectorNode(NavigationComposedElement::TypeId());
+    if (!node) {
+        return "NavigationTitleMode.Free";
+    }
+    auto renderNavigation = AceType::DynamicCast<RenderNavigationContainer>(node);
+    if (renderNavigation) {
+        if (renderNavigation->GetTitleMode() == NavigationTitleMode::MINI) {
+            return "NavigationTitleMode.Mini";
+        } else if (renderNavigation->GetTitleMode() == NavigationTitleMode::FREE) {
+            return "NavigationTitleMode.Free";
+        } else {
+            return "NavigationTitleMode.Full";
+        }
+    }
+    return "NavigationTitleMode.Free";
+}
+
 bool NavigationComposedElement::GetHideNavigationBackButton() const
 {
     auto render = GetRenderNavigation();
@@ -101,6 +159,15 @@ bool NavigationComposedElement::GetHideNavigationBar() const
         return false;
     }
     return render->GetHideNavigationBar();
+}
+
+bool NavigationComposedElement::GetNavigationHideToolBar() const
+{
+    auto render = GetRenderNavigation();
+    if (!render) {
+        return false;
+    }
+    return render->GetHideNavigationToolBar();
 }
 
 RefPtr<RenderNavigationContainer> NavigationComposedElement::GetRenderNavigation() const
