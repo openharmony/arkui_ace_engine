@@ -158,6 +158,9 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     if (textField->GetOnSubmit()) {
         onSubmit_ = *textField->GetOnSubmit();
     }
+    if (textField->GetOnClick()) {
+        onClick_ = *textField->GetOnClick();
+    }
     onSelectChangeEvent_ = AceAsyncEvent<void(const std::string&)>::Create(textField->GetOnSelectChange(), context_);
     onFinishInputEvent_ = AceAsyncEvent<void(const std::string&)>::Create(textField->GetOnFinishInput(), context_);
     onTapEvent_ = AceAsyncEvent<void()>::Create(textField->GetOnTap(), context_);
@@ -523,6 +526,9 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     }
     if (onTapEvent_) {
         onTapEvent_();
+    }
+    if (onClick_) {
+        onClick_(clickInfo);
     }
     CursorMoveOnClick(globalPosition);
     ShowError("", false);

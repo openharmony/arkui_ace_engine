@@ -282,6 +282,8 @@ public:
 
     ACE_DEFINE_COMPONENT_EVENT(OnPaste, void(std::string));
 
+    ACE_DEFINE_COMPONENT_EVENT(OnClick, void(const ClickInfo& clickInfo));
+
 private:
     RefPtr<TextFieldDeclaration> declaration_;
     std::function<void(const std::string&)> OnError_;

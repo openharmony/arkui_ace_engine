@@ -127,7 +127,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSTextInput>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSTextInput>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
-    JSClass<JSTextInput>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSTextInput>::StaticMethod("onClick", &JSTextInput::SetOnClick);
     JSClass<JSTextInput>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTextInput>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextInput>::StaticMethod("onCopy", &JSTextInput::SetOnCopy);
@@ -554,6 +554,14 @@ void JSTextInput::SetOnCut(const JSCallbackInfo& info)
 void JSTextInput::SetOnPaste(const JSCallbackInfo& info)
 {
     if (!JSViewBindEvent(&TextFieldComponent::SetOnPaste, info)) {
+        LOGW("Failed(OnPaste) to bind event");
+    }
+    info.ReturnSelf();
+}
+
+void JSTextInput::SetOnClick(const JSCallbackInfo& info)
+{
+    if (!JSViewBindEvent(&TextFieldComponent::SetOnClick, info)) {
         LOGW("Failed(OnPaste) to bind event");
     }
     info.ReturnSelf();
