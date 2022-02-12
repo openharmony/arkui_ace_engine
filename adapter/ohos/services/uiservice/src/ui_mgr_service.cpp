@@ -136,7 +136,7 @@ void UIMgrService::InitResourceManager()
     resourceManager_ = resourceManager;
 }
 
-OHOS::AppExecFwk::Ability* UIMgrService::CreateAbility()
+std::shared_ptr<OHOS::AppExecFwk::Ability> UIMgrService::CreateAbility()
 {
     auto ability = OHOS::AppExecFwk::Ability::Create(nullptr);
     if (ability == nullptr) {
@@ -153,7 +153,8 @@ OHOS::AppExecFwk::Ability* UIMgrService::CreateAbility()
 
     deal->initResourceManager(resourceManager_);
     ability->AttachBaseContext(deal);
-    return ability;
+    std::shared_ptr<OHOS::AppExecFwk::Ability> sharedAbility(ability);
+    return sharedAbility;
 }
 
 int UIMgrService::ShowDialog(const std::string& name,
@@ -311,10 +312,6 @@ int UIMgrService::CancelDialog(int id)
             context->SetRSUIDirector(nullptr);
         }
 #endif
-        auto ability = Platform::AceContainer::GetAbility(id);
-        if (ability != nullptr) {
-            delete ability;
-        }
         Platform::AceContainer::DestroyContainer(id);
     };
 

@@ -862,11 +862,11 @@ public:
         return rootElement_;
     }
 
-    const RefPtr<DataProviderManager>& GetDataProviderManager() const
+    const RefPtr<DataProviderManagerInterface>& GetDataProviderManager() const
     {
         return dataProviderManager_;
     }
-    void SetDataProviderManager(const RefPtr<DataProviderManager>& dataProviderManager)
+    void SetDataProviderManager(const RefPtr<DataProviderManagerInterface>& dataProviderManager)
     {
         dataProviderManager_ = dataProviderManager;
     }
@@ -1236,7 +1236,7 @@ private:
     RefPtr<FocusAnimationManager> focusAnimationManager_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
-    RefPtr<DataProviderManager> dataProviderManager_;
+    RefPtr<DataProviderManagerInterface> dataProviderManager_;
     RefPtr<PlatformResRegister> platformResRegister_;
     RefPtr<RootElement> rootElement_;
     RefPtr<FocusNode> dirtyFocusNode_;

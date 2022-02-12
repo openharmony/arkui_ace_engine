@@ -36,9 +36,11 @@ class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatch
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
 public:
-    AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AppExecFwk::Ability* aceAbility,
+    AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+        std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
         std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner = false);
     AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+        std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false);
     ~AceContainer() override = default;
@@ -185,7 +187,7 @@ public:
     }
 
     static void CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName,
-        OHOS::AppExecFwk::Ability* aceAbility, std::unique_ptr<PlatformEventCallback> callback,
+        std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false);
 
     static void DestroyContainer(int32_t instanceId);
@@ -226,7 +228,7 @@ private:
     void AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
-    OHOS::AppExecFwk::Ability* GetAbilityInner() const;
+    std::weak_ptr<OHOS::AppExecFwk::Ability> GetAbilityInner() const;
     int32_t instanceId_ = 0;
     AceView* aceView_ = nullptr;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -240,13 +242,15 @@ private:
     WindowModal windowModal_ { WindowModal::NORMAL };
     ColorScheme colorScheme_ { ColorScheme::FIRST_VALUE };
     ResourceInfo resourceInfo_;
-    OHOS::AppExecFwk::Ability* aceAbility_ = nullptr;
+    std::weak_ptr<OHOS::AppExecFwk::Ability> aceAbility_;
+    std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext_;
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo_;
     void* sharedRuntime_ = nullptr;
     std::string pageProfile_;
     int32_t pageId_ = 0;
     bool useCurrentEventRunner_ = false;
     sptr<OHOS::Rosen::Window> uiWindow_ = nullptr;
+    bool useStageModel_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };

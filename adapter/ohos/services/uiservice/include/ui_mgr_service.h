@@ -82,7 +82,7 @@ private:
     int HandleRegister(const AAFwk::Want& want,  const sptr<IUIService>& uiService);
     int HandleUnregister(const AAFwk::Want& want);
     void InitResourceManager();
-    OHOS::AppExecFwk::Ability* CreateAbility();
+    std::shared_ptr<OHOS::AppExecFwk::Ability> CreateAbility();
     std::string GetCallBackKeyStr(const AAFwk::Want& want);
     std::shared_ptr<EventRunner> eventLoop_;
     std::shared_ptr<EventHandler> handler_;
