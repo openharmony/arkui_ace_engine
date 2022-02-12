@@ -300,4 +300,16 @@ ACE_EXPORT extern const char PICKER_TEXT_DIALOG_ETS_TAG[] = "pickerTextDialog";
 ACE_EXPORT extern const char CANVAS_COMPONENT_TAG[] = "CustomPaintComponent";
 ACE_EXPORT extern const char CANVAS_ETS_TAG[] = "Canvas";
 
+// ActionSheet
+ACE_EXPORT extern const char ACTIONSHEETDIALOG_COMPONENT_TAG[] = "ActionSheet";
+ACE_EXPORT extern const char ACTIONSHEETDIALOG_ETS_TAG[] = "ActionSheet";
+
+// AlertDialog
+ACE_EXPORT extern const char ALERTDIALOG_COMPONENT_TAG[] = "AlertDialog";
+ACE_EXPORT extern const char ALERTDIALOG_ETS_TAG[] = "AlertDialog";
+
+// customdialog
+ACE_EXPORT extern const char CUSTOMDIALOG_COMPONENT_TAG[] = "CustomDialog";
+ACE_EXPORT extern const char CUSTOMDIALOG_ETS_TAG[] = "CustomDialog";
+
 } // namespace OHOS::Ace::V2

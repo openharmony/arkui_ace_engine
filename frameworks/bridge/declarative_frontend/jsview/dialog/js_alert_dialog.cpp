@@ -165,7 +165,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
                 executor->PostTask(
                     [context, properties]() {
                         if (context) {
-                            context->ShowDialog(properties, false);
+                            context->ShowDialog(properties, false, "AlertDialog");
                         }
                     },
                     TaskExecutor::TaskType::UI);

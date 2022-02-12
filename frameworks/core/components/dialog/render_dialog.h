@@ -28,6 +28,10 @@ public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
+    const DialogProperties& GetDialogProperties()
+    {
+        return properties_;
+    }
 private:
     DialogProperties properties_;
 };

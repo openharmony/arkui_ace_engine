@@ -200,7 +200,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
             executor->PostTask(
                 [context, properties]() {
                     if (context) {
-                        context->ShowDialog(properties, false);
+                        context->ShowDialog(properties, false, "ActionSheet");
                     }
                 },
                 TaskExecutor::TaskType::UI);
