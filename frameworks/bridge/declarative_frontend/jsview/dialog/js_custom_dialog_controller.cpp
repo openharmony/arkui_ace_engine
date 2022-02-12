@@ -145,7 +145,7 @@ void JSCustomDialogController::ShowDialog(const JSCallbackInfo& info)
     executor->PostTask(
         [context, dialogProperties = dialogProperties_, this]() mutable {
             if (context) {
-                this->dialogComponent_ = context->ShowDialog(dialogProperties, false);
+                this->dialogComponent_ = context->ShowDialog(dialogProperties, false, "CustomDialog");
             }
         },
         TaskExecutor::TaskType::UI);
