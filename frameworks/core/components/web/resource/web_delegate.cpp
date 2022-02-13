@@ -25,7 +25,7 @@
 #include "core/event/ace_event_helper.h"
 #include "core/event/back_end_event_manager.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+#ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
 #include "webview_adapter_helper.h"
 #endif
@@ -144,7 +144,7 @@ void WebDelegate::CreatePlatformResource(
     InitWebEvent();
 }
 
-void WebDelegate::LoadUrl(std::string url)
+void WebDelegate::LoadUrl(const std::string& url)
 {
     auto context = context_.Upgrade();
     if (!context) {
@@ -163,7 +163,7 @@ void WebDelegate::LoadUrl(std::string url)
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void WebDelegate::ExecuteTypeScript(std::string jscode)
+void WebDelegate::ExecuteTypeScript(const std::string& jscode)
 {
     auto context = context_.Upgrade();
     if (!context) {
@@ -182,8 +182,8 @@ void WebDelegate::ExecuteTypeScript(std::string jscode)
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void WebDelegate::LoadDataWithBaseUrl(
-    std::string baseUrl, std::string data, std::string mimeType, std::string encoding, std::string historyUrl)
+void WebDelegate::LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
+    const std::string& encoding, const std::string& historyUrl)
 {
     auto context = context_.Upgrade();
     if (!context) {
@@ -304,8 +304,8 @@ void WebDelegate::InitWebEvent()
     }
 }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
-void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context)
+#ifdef OHOS_STANDARD_SYSTEM
+void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surface> surface)
 {
     state_ = State::CREATING;
     // load webview so
@@ -331,7 +331,11 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context)
 
     if (!isCreateWebView_) {
         isCreateWebView_ = true;
-        InitWebViewWithWindow();
+        if (surface != nullptr) {
+            InitWebViewWithSurface(surface);
+        } else {
+            InitWebViewWithWindow();
+        }
     }
 
     SetWebCallBack();
@@ -424,11 +428,8 @@ void WebDelegate::InitWebViewWithWindow()
             setting->SetDomStorageEnabled(true);
             setting->SetJavaScriptCanOpenWindowsAutomatically(true);
             setting->SetJavaScriptEnabled(isJsEnabled);
-            setting->SetAllowFileAccessFromFileURLs(true);
             setting->SetAllowFileAccess(isFileAccessEnabled);
             setting->SetAllowContentAccess(isContentAccessEnabled);
-            setting->SetBlockNetworkImage(false);
-            setting->SetLoadsImagesAutomatically(true);
 
             delegate->webview_->LoadURL(component->GetSrc());
             delegate->window_->Show();
@@ -436,7 +437,89 @@ void WebDelegate::InitWebViewWithWindow()
         TaskExecutor::TaskType::PLATFORM);
 }
 
-sptr<Rosen::Window> WebDelegate::CreateWindow()
+#if defined(ENABLE_ROSEN_BACKEND)
+void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
+{
+    LOGI("Create webview with surface");
+    auto context = context_.Upgrade();
+    if (!context || !surface) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), surface]() {
+            wptr<Surface> surfaceWeak(surface);
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            OHOS::WebView::WebViewInitArgs initArgs;
+            const std::string& app_path = GetDataPath();
+            if (!app_path.empty()) {
+                initArgs.web_engine_args_to_add.push_back(std::string("--user-data-dir=").append(app_path));
+            }
+
+            sptr<Surface> surface = surfaceWeak.promote();
+            if (surface == nullptr) {
+                LOGE("surface is nullptr or has expired");
+                return;
+            }
+            delegate->webview_ =
+                OHOS::WebView::WebViewAdapterHelper::Instance().CreateWebView(surface, initArgs);
+            if (delegate->webview_ == nullptr) {
+                LOGE("fail to get webview instance");
+                return;
+            }
+            auto component = delegate->webComponent_;
+            if (component == nullptr) {
+                return;
+            }
+            auto webviewClient = std::make_shared<WebClientImpl>();
+            webviewClient->SetWebDelegate(weak);
+            delegate->webview_->SetWebViewClient(webviewClient);
+            std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+            setting->SetDomStorageEnabled(true);
+            setting->SetJavaScriptCanOpenWindowsAutomatically(true);
+            setting->SetJavaScriptEnabled(component->GetJsEnabled());
+            setting->SetAllowFileAccess(component->GetFileAccessEnabled());
+            setting->SetAllowContentAccess(component->GetContentAccessEnabled());
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+#endif
+
+void WebDelegate::Resize(const double& width, const double& height)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), width, height] () {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_ && !delegate->window_) {
+                delegate->webview_->Resize(width, height);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::LoadUrl()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)] () {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                delegate->webview_->LoadURL(delegate->webComponent_->GetSrc());
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+sptr<OHOS::Rosen::Window> WebDelegate::CreateWindow()
 {
     auto context = context_.Upgrade();
     if (!context) {
@@ -645,6 +728,32 @@ void WebDelegate::OnRouterPush(const std::string& param)
 {
     OHOS::Ace::Framework::DelegateClient::GetInstance().RouterPush(param);
 }
+
+#ifdef OHOS_STANDARD_SYSTEM
+void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const double& y)
+{
+    ACE_DCHECK(webview_ != nullptr);
+    webview_->OnTouchPress(id, x, y);
+}
+
+void WebDelegate::HandleTouchUp(const int32_t& id, const double& x, const double& y)
+{
+    ACE_DCHECK(webview_ != nullptr);
+    webview_->OnTouchRelease(id, x, y);
+}
+
+void WebDelegate::HandleTouchMove(const int32_t& id, const double& x, const double& y)
+{
+    ACE_DCHECK(webview_ != nullptr);
+    webview_->OnTouchMove(id, x, y);
+}
+
+void WebDelegate::HandleTouchCancel()
+{
+    ACE_DCHECK(webview_ != nullptr);
+    webview_->OnTouchCancel();
+}
+#endif
 
 std::string WebDelegate::GetUrlStringParam(const std::string& param, const std::string& name) const
 {

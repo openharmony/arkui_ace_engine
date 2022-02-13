@@ -17,12 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_RESOURCE_WEB_DELEGATE_H
 
 #include <list>
-
+#ifdef OHOS_STANDARD_SYSTEM
+#include <ui/rs_surface_node.h>
+#endif
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
 #include "core/components/web/web_component.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+#ifdef OHOS_STANDARD_SYSTEM
 #include "webview_helper.h"
 #include "window.h"
 #endif
@@ -64,8 +66,8 @@ public:
     void RemoveReleasedCallback();
     void Reload();
     void UpdateUrl(const std::string& url);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
-    void InitOHOSWeb(const WeakPtr<PipelineContext>& context);
+#ifdef OHOS_STANDARD_SYSTEM
+    void InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surface> surface = nullptr);
     void InitWebViewWithWindow();
     void ShowWebView()
     {
@@ -80,6 +82,12 @@ public:
             window_->Hide();
         }
     }
+    void Resize(const double& width, const double& height);
+    void LoadUrl();
+    void HandleTouchDown(const int32_t& id, const double& x, const double& y);
+    void HandleTouchUp(const int32_t& id, const double& x, const double& y);
+    void HandleTouchMove(const int32_t& id, const double& x, const double& y);
+    void HandleTouchCancel();
 #endif
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
@@ -101,13 +109,16 @@ private:
     void BindRouterBackMethod();
     void BindPopPageSuccessMethod();
     void BindIsPagePathInvalidMethod();
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
-    sptr<Rosen::Window> CreateWindow();
-    void LoadUrl(std::string url);
-    void ExecuteTypeScript(std::string jscode);
-    void LoadDataWithBaseUrl(
-        std::string baseUrl, std::string data, std::string mimeType, std::string encoding, std::string historyUrl);
+#ifdef OHOS_STANDARD_SYSTEM
+    sptr<OHOS::Rosen::Window> CreateWindow();
+    void LoadUrl(const std::string& url);
+    void ExecuteTypeScript(const std::string& jscode);
+    void LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
+        const std::string& encoding, const std::string& historyUrl);
     void SetWebCallBack();
+#if defined(ENABLE_ROSEN_BACKEND)
+    void InitWebViewWithSurface(sptr<Surface> surface);
+#endif
 #endif
 
     RefPtr<WebComponent> webComponent_;
@@ -123,7 +134,7 @@ private:
     Method changePageUrlMethod_;
     Method isPagePathInvalidMethod_;
     State state_ {State::WAITINGFORSIZE};
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+#ifdef OHOS_STANDARD_SYSTEM
     std::shared_ptr<OHOS::WebView::WebView> webview_;
     sptr<Rosen::Window> window_;
     bool isCreateWebView_ = false;

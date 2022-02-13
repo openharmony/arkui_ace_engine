@@ -26,8 +26,18 @@ class RosenRenderWeb final : public RenderWeb {
 public:
     void DumpTree(int32_t depth) override;
 
+#ifdef OHOS_STANDARD_SYSTEM
+    void OnAttachContext() override;
+    void Paint(RenderContext& context, const Offset& offset) override;
+    void SyncGeometryProperties() override;
+    std::shared_ptr<RSNode> CreateRSNode() const override;
+#endif
+
 private:
     void PerformLayout() override;
+#ifdef OHOS_STANDARD_SYSTEM
+    OHOS::sptr<OHOS::Surface> GetSurface();
+#endif
 };
 
 } // namespace OHOS::Ace

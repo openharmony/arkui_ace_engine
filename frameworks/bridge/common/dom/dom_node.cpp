@@ -27,6 +27,7 @@
 #include "core/components/scroll/scroll_fade_effect.h"
 #include "core/components/scroll/scroll_spring_effect.h"
 #include "core/components/video/texture_component.h"
+#include "core/components/web/web_component.h"
 #include "core/components/xcomponent/xcomponent_component.h"
 #include "frameworks/bridge/common/dom/dom_div.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -1267,6 +1268,7 @@ void DOMNode::CompositeComponents()
         (AceType::InstanceOf<TextureComponent>(mainComponent) ||
         AceType::InstanceOf<ListComponent>(mainComponent) ||
         AceType::InstanceOf<ListItemComponent>(mainComponent) ||
+        AceType::InstanceOf<WebComponent>(mainComponent) ||
         AceType::InstanceOf<XComponentComponent>(mainComponent))) {
         Component::MergeRSNode(components);
         Component::MergeRSNode(mainComponent);
