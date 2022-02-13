@@ -32,6 +32,7 @@
 #include "core/components/text_field/text_field_component.h"
 #include "core/components/text_span/text_span_component.h"
 #include "core/components/video/video_component_v2.h"
+#include "core/components/web/web_component.h"
 #include "core/components/xcomponent/xcomponent_component.h"
 #include "core/components_v2/list/list_item_component.h"
 #include "core/pipeline/base/component.h"
@@ -607,10 +608,11 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
             components.emplace_back(itemChildComponent);
         }
     } else if (!components.empty() && (AceType::InstanceOf<TextureComponent>(mainComponent) ||
-                                          AceType::InstanceOf<BoxComponent>(mainComponent) ||
-                                          AceType::InstanceOf<TextFieldComponent>(mainComponent) ||
-                                          AceType::InstanceOf<FormComponent>(mainComponent) ||
-                                          AceType::InstanceOf<XComponentComponent>(mainComponent))) {
+        AceType::InstanceOf<BoxComponent>(mainComponent) ||
+        AceType::InstanceOf<TextFieldComponent>(mainComponent) ||
+        AceType::InstanceOf<FormComponent>(mainComponent) ||
+        AceType::InstanceOf<WebComponent>(mainComponent) ||
+        AceType::InstanceOf<XComponentComponent>(mainComponent))) {
         Component::MergeRSNode(components);
         Component::MergeRSNode(mainComponent);
         components.emplace_back(mainComponent);

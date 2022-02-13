@@ -19,9 +19,20 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_component.h"
+#include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
+
+namespace {
+#ifdef OHOS_STANDARD_SYSTEM
+struct TouchInfo {
+    double x = -1;
+    double y = -1;
+    int32_t id = -1;
+};
+#endif
+}
 
 class RenderWeb : public RenderNode {
     DECLARE_ACE_TYPE(RenderWeb, RenderNode);
@@ -29,14 +40,15 @@ class RenderWeb : public RenderNode {
 public:
     static RefPtr<RenderNode> Create();
 
-    RenderWeb() : RenderNode(true) {}
+    RenderWeb();
     ~RenderWeb() override = default;
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     void OnAttachContext() override;
+    void OnSizeChanged() override;
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+#ifdef OHOS_STANDARD_SYSTEM
     void OnAppShow() override
     {
         RenderNode::OnAppShow();
@@ -86,14 +98,25 @@ public:
 
 protected:
     RefPtr<WebDelegate> delegate_;
+    Size drawSize_;
 
 private:
+#ifdef OHOS_STANDARD_SYSTEM
+    void Initialize();
+    void HandleTouch(const bool& isPress, const TouchEventInfo& info);
+    void HandleTouchMove(const TouchEventInfo& info);
+    void HandleTouchCancel(const TouchEventInfo& info);
+    bool ParseTouchInfo(const TouchEventInfo& info, TouchInfo& touchInfo);
+    void OnTouchTestHit(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
+        TouchTestResult& result) override;
+    RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
+    bool isUrlLoaded_ = false;
+#endif
+
     int32_t GetIntParam(const std::string& param, const std::string& name) const;
     std::string GetStringParam(const std::string& param, const std::string& name) const;
     std::string GetUrlStringParam(const std::string& param, const std::string& name) const;
-
     Offset position_;
-    Size drawSize_;
     std::function<void(std::string)> onPageStartedV2_;
     std::function<void(std::string)> onPageFinishedV2_;
     std::function<void(std::string)> onPageErrorV2_;

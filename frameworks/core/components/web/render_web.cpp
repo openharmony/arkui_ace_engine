@@ -25,12 +25,22 @@
 namespace OHOS::Ace {
 
 namespace {
-
+#ifdef OHOS_STANDARD_SYSTEM
+#define ALLOC_EVEN_ALIGN(value, base) ((value % base == 0) ? value : ((value / base + 1) * base));
+constexpr size_t ALIGN_BYTES = 16;
+#endif
 constexpr char NTC_PARAM_ERROR_CODE[] = "errorCode";
 constexpr char NTC_PARAM_URL[] = "url";
 constexpr char NTC_PARAM_DESCRIPTION[] = "description";
-
 }
+
+RenderWeb::RenderWeb() : RenderNode(true)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    Initialize();
+#endif
+}
+
 void RenderWeb::OnAttachContext()
 {
     auto pipelineContext = context_.Upgrade();
@@ -42,7 +52,7 @@ void RenderWeb::OnAttachContext()
         // web component is displayed in full screen by default.
         drawSize_ = Size(pipelineContext->GetRootWidth(), pipelineContext->GetRootHeight());
         position_ = Offset(0, 0);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+#ifdef OHOS_STANDARD_SYSTEM
         delegate_->InitOHOSWeb(context_);
 #else
         delegate_->CreatePlatformResource(drawSize_, position_, context_);
@@ -84,13 +94,35 @@ void RenderWeb::PerformLayout()
     }
 
     // render web do not support child.
-    drawSize_ = Size(GetLayoutParam().GetMaxSize().Width(),
+    auto size = Size(GetLayoutParam().GetMaxSize().Width(),
                      (GetLayoutParam().GetMaxSize().Height() == Size::INFINITE_SIZE) ?
                      Size::INFINITE_SIZE :
                      (GetLayoutParam().GetMaxSize().Height()));
+#ifdef OHOS_STANDARD_SYSTEM
+    uint32_t width = static_cast<uint32_t>(size.Width());
+    uint32_t height = static_cast<uint32_t>(size.Height());
+    uint32_t alignWidth = ALLOC_EVEN_ALIGN(width, ALIGN_BYTES);
+    uint32_t alignHeight = ALLOC_EVEN_ALIGN(height, ALIGN_BYTES);
+    drawSize_ = Size(alignWidth, alignHeight);
+#else
+    drawSize_ = size;
+#endif
     SetLayoutSize(drawSize_);
     SetNeedLayout(false);
     MarkNeedRender();
+}
+
+void RenderWeb::OnSizeChanged()
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    if (delegate_) {
+        delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+        if (!isUrlLoaded_) {
+            delegate_->LoadUrl();
+            isUrlLoaded_ = true;
+        }
+    }
+#endif
 }
 
 void RenderWeb::OnPageStartedV2(const std::string& param)
@@ -205,4 +237,120 @@ std::string RenderWeb::GetStringParam(const std::string& param, const std::strin
     }
     return result;
 }
+
+#ifdef OHOS_STANDARD_SYSTEM
+void RenderWeb::Initialize()
+{
+    touchRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
+    touchRecognizer_->SetOnTouchDown([weakItem = AceType::WeakClaim(this)](const TouchEventInfo& info) {
+        auto item = weakItem.Upgrade();
+        if (item) {
+            item->HandleTouch(true, info);
+        }
+    });
+    touchRecognizer_->SetOnTouchUp([weakItem = AceType::WeakClaim(this)](const TouchEventInfo& info) {
+        auto item = weakItem.Upgrade();
+        if (item) {
+            item->HandleTouch(false, info);
+        }
+    });
+    touchRecognizer_->SetOnTouchMove([weakItem = AceType::WeakClaim(this)](const TouchEventInfo& info) {
+        auto item = weakItem.Upgrade();
+        if (item) {
+            item->HandleTouchMove(info);
+        }
+    });
+    touchRecognizer_->SetOnTouchCancel([weakItem = AceType::WeakClaim(this)](const TouchEventInfo& info) {
+        auto item = weakItem.Upgrade();
+        if (item) {
+            item->HandleTouchCancel(info);
+        }
+    });
+}
+
+void RenderWeb::HandleTouch(const bool& isPress, const TouchEventInfo& info)
+{
+    if (!delegate_) {
+        LOGE("Touch delegate_ is nullprt");
+        return;
+    }
+    TouchInfo touchInfo;
+    if (!ParseTouchInfo(info, touchInfo)) {
+        LOGE("Touch error");
+        return;
+    }
+    if (isPress) {
+        delegate_->HandleTouchDown(touchInfo.id, touchInfo.x, touchInfo.y);
+    } else {
+        delegate_->HandleTouchUp(touchInfo.id, touchInfo.x, touchInfo.y);
+    }
+}
+
+void RenderWeb::HandleTouchMove(const TouchEventInfo& info)
+{
+    if (info.GetTouches().empty()) {
+        LOGE("Touch move getTouches is empty");
+        return;
+    }
+    if (!delegate_) {
+        LOGE("Touch move delegate_ is nullprt");
+        return;
+    }
+    TouchInfo touchInfo;
+    if (!ParseTouchInfo(info, touchInfo)) {
+        LOGE("Touch move error");
+        return;
+    }
+    delegate_->HandleTouchMove(touchInfo.id, touchInfo.x, touchInfo.y);
+}
+
+void RenderWeb::HandleTouchCancel(const TouchEventInfo& info)
+{
+    if (info.GetTouches().empty()) {
+        LOGE("Touch cancel getTouches is empty");
+        return;
+    }
+    if (!delegate_) {
+        LOGE("Touch cancel delegate_ is nullprt");
+        return;
+    }
+    delegate_->HandleTouchCancel();
+}
+
+bool RenderWeb::ParseTouchInfo(const TouchEventInfo& touchEventInfo, TouchInfo& touchInfo)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return false;
+    }
+
+    constexpr int invalidFingerID = -1;
+    TouchLocationInfo info{invalidFingerID};
+    if (!touchEventInfo.GetTouches().empty()) {
+        info = touchEventInfo.GetTouches().front();
+    } else if (!touchEventInfo.GetChangedTouches().empty()) {
+        info = touchEventInfo.GetChangedTouches().front();
+    } else {
+        return false;
+    }
+    auto viewScale = context->GetViewScale();
+    touchInfo.id = info.GetFingerId();
+    Offset location = info.GetLocalLocation();
+    touchInfo.x = location.GetX() * viewScale;
+    touchInfo.y = location.GetY() * viewScale;
+    LOGD("touch id:%{private}d, x:%{private}lf, y:%{private}lf", touchInfo.id, touchInfo.x, touchInfo.y);
+    return true;
+}
+
+void RenderWeb::OnTouchTestHit(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
+    TouchTestResult& result)
+{
+    if (!touchRecognizer_) {
+        LOGE("TouchTestHit touchRecognizer_ is nullprt");
+        return;
+    }
+    touchRecognizer_->SetCoordinateOffset(coordinateOffset);
+    result.emplace_back(touchRecognizer_);
+}
+#endif
 } // namespace OHOS::Ace
