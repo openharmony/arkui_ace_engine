@@ -139,7 +139,8 @@ void RowComposedElement::DeleteChildWithSlot(int32_t slot)
         LOGE("get GetRowElement failed");
         return;
     }
-    rowElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    auto child = rowElement->GetChildBySlot(slot);
+    rowElement->UpdateChildWithSlot(child, nullptr, slot, slot);
     rowElement->MarkDirty();
 }
 

@@ -166,7 +166,8 @@ void SwiperComposedElement::DeleteChildWithSlot(int32_t slot)
         LOGE("get GetSwiperElement failed");
         return;
     }
-    swiperElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    auto child = swiperElement->GetChildBySlot(slot);
+    swiperElement->UpdateChildWithSlot(child, nullptr, slot, slot);
     swiperElement->MarkDirty();
 }
 

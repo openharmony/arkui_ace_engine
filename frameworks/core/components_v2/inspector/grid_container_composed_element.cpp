@@ -145,7 +145,8 @@ void GridContainerComposedElement::DeleteChildWithSlot(int32_t slot)
         LOGE("get GetBoxElement failed");
         return;
     }
-    boxElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    auto child = boxElement->GetChildBySlot(slot);
+    boxElement->UpdateChildWithSlot(child, nullptr, slot, slot);
     boxElement->MarkDirty();
 }
 

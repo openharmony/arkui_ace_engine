@@ -121,7 +121,8 @@ void HyperlinkComposedElement::DeleteChildWithSlot(int32_t slot)
         LOGE("get HyperlinkElement failed");
         return;
     }
-    hyperlinkElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    auto child = hyperlinkElement->GetChildBySlot(slot);
+    hyperlinkElement->UpdateChildWithSlot(child, nullptr, slot, slot);
     hyperlinkElement->MarkDirty();
 }
 

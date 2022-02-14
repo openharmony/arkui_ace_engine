@@ -92,7 +92,8 @@ void ColumnSplitComposedElement::DeleteChildWithSlot(int32_t slot)
         LOGE("get GetColumnSplitElement failed");
         return;
     }
-    columnSplitElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    auto child = columnSplitElement->GetChildBySlot(slot);
+    columnSplitElement->UpdateChildWithSlot(child, nullptr, slot, slot);
     columnSplitElement->MarkDirty();
 }
 
