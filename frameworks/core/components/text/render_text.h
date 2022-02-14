@@ -75,6 +75,8 @@ public:
 
     RefPtr<Component> GetComponent() override;
 
+    void Dump() override;
+
     void SetParagraphWidth(double paragraphWidth)
     {
         paragraphWidth_ = paragraphWidth;

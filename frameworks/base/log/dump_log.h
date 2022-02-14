@@ -44,6 +44,11 @@ public:
     void Print(int32_t depth, const std::string& className, int32_t childSize);
     void Print(const std::string& content);
     void Print(int32_t depth, const std::string& content);
+
+    void PrintToString(int32_t depth, const std::string& className, int32_t childSize, std::vector<std::string>& info);
+    void PrintToString(const std::string& content, std::vector<std::string>& info);
+    void PrintToString(int32_t depth, const std::string& content, std::vector<std::string>& info);
+
     void Reset();
 
     template<typename T>

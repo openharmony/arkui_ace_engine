@@ -182,6 +182,18 @@ void Element::DumpTree(int32_t depth)
     }
 }
 
+void Element::DumpTree(int32_t depth, std::vector<std::string>& info)
+{
+    Dump();
+    DumpLog::GetInstance().AddDesc(std::string("retakeID: ").append(std::to_string(GetRetakeId())));
+    DumpLog::GetInstance().AddDesc(std::string("Active: ").append(IsActive() ? "Y" : "N"));
+    DumpLog::GetInstance().PrintToString(depth, AceType::TypeName(this), children_.size(), info);
+
+    for (const auto& item : children_) {
+        item->DumpTree(depth + 1, info);
+    }
+}
+
 void Element::Dump() {}
 
 bool Element::CanUpdate(const RefPtr<Component>& newComponent)

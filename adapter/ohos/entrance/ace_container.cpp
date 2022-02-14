@@ -556,7 +556,7 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     AceEngine::Get().RemoveContainer(instanceId);
 }
 
-void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t height)
+void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t height, int32_t windowId)
 {
     if (view == nullptr) {
         return;
@@ -572,7 +572,7 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
         return;
     }
     std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
-    container->AttachView(std::move(window), view, density, width, height);
+    container->AttachView(std::move(window), view, density, width, height, windowId);
 }
 
 void AceContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow)
@@ -750,7 +750,7 @@ void AceContainer::AddAssetPath(
 }
 
 void AceContainer::AttachView(
-    std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height)
+    std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height, int32_t windowId)
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
@@ -785,6 +785,7 @@ void AceContainer::AttachView(
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
     pipelineContext_->SetWindowModal(windowModal_);
     pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
+    pipelineContext_->SetWindowId(windowId);
     InitializeCallback();
 
     auto&& finishEventHandler = [weak = WeakClaim(this), instanceId] {

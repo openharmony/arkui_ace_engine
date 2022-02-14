@@ -65,6 +65,8 @@ public:
     void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override;
     static WindowSizeChangeReason Convert2WindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason reason);
 
+    void Dump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+
 private:
     static int32_t instanceId_;
     static const std::string START_PARAMS_KEY;

@@ -21,6 +21,7 @@
 #include "base/log/dump_log.h"
 #include "core/animation/property_animatable_helper.h"
 #include "core/components/box/box_base_component.h"
+#include "core/components/common/properties/radius.h"
 #include "core/components/flex/render_flex.h"
 #include "core/components/text_field/render_text_field.h"
 
@@ -42,6 +43,11 @@ Size RenderBoxBase::GetBorderSize() const
 Offset RenderBoxBase::GetBorderOffset() const
 {
     return Offset(0.0, 0.0);
+}
+
+Radius RenderBoxBase::GetBorderRadius() const
+{
+    return Radius();
 }
 
 bool RenderBoxBase::IsSizeValid(const Dimension& value, double maxLimit)
@@ -736,6 +742,7 @@ void RenderBoxBase::Dump()
         dipScale = context->GetDipScale();
     }
     Size borderSize = GetBorderSize();
+    Radius radius = GetBorderRadius();
     DumpLog::GetInstance().AddDesc("BoxFlex: " + std::to_string(static_cast<int32_t>(flex_)) +
                                    ", BGcolor: " + std::to_string(GetColor().GetValue()) + ", BoxSizing: " +
                                    std::to_string(static_cast<int32_t>(boxSizing_)) + ", Align: " + align_.ToString());
@@ -746,7 +753,9 @@ void RenderBoxBase::Dump()
                                        .append(", Padding: ")
                                        .append(padding_.GetLayoutSizeInPx(dipScale).ToString())
                                        .append(", Border: ")
-                                       .append(borderSize.ToString()));
+                                       .append(borderSize.ToString())
+                                       .append(", Radius: ")
+                                       .append(radius.GetX().ToString()));
     DumpLog::GetInstance().AddDesc(std::string("Constraints: ")
                                        .append(constraints_.ToString())
                                        .append(", ChildLayout: ")

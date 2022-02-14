@@ -867,4 +867,21 @@ void RenderButton::OnStatusStyleChanged(const VisualState state)
     }
     MarkNeedLayout();
 }
+
+void RenderButton::SendAccessibilityEvent()
+{
+    auto accessibilityNode = GetAccessibilityNode().Upgrade();
+    if (!accessibilityNode) {
+        return;
+    }
+
+    auto context = context_.Upgrade();
+    if (context) {
+        AccessibilityEvent radioEvent;
+        radioEvent.nodeId = accessibilityNode->GetNodeId();
+        radioEvent.eventType = "click";
+        context->SendEventToAccessibility(radioEvent);
+    }
+}
+
 } // namespace OHOS::Ace

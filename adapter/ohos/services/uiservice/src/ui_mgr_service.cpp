@@ -250,7 +250,8 @@ int UIMgrService::ShowDialog(const std::string& name,
         Ace::Platform::AceContainer::AddAssetPath(dialogId, packagePathStr, assetBasePathStr);
 
         // set view
-        Ace::Platform::AceContainer::SetView(flutterAceView, density_, windowWidth, windowHeight);
+        Ace::Platform::AceContainer::SetView(
+            flutterAceView, density_, windowWidth, windowHeight, dialogWindow->GetWindowId());
         Ace::Platform::AceContainer::SetUIWindow(dialogId, dialogWindow);
         Ace::Platform::FlutterAceView::SurfaceChanged(flutterAceView, windowWidth, windowHeight, 0);
 

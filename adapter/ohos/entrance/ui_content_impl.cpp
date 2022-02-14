@@ -337,7 +337,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window_);
 
     // set view
-    Platform::AceContainer::SetView(flutterAceView, density, width, height);
+    Platform::AceContainer::SetView(flutterAceView, density, width, height, window_->GetWindowId());
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, config_.Orientation());
     auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
     if (!storage) {
@@ -475,6 +475,21 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     }
     config_ = config;
     updateConfig_ = true;
+}
+
+void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("get container(id=%{public}d) failed", instanceId_);
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGE("get pipeline context failed");
+        return;
+    }
+    pipelineContext->DumpInfo(params, info);
 }
 
 void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info)

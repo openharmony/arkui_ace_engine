@@ -553,10 +553,8 @@ void RenderSlidingPanel::AnimateTo(double blankHeight, PanelMode mode)
 
 void RenderSlidingPanel::Dump()
 {
-    if (DumpLog::GetInstance().GetDumpFile()) {
-        DumpLog::GetInstance().AddDesc(std::string("PanelMode:").append(std::to_string(static_cast<int32_t>(mode_))));
-        DumpLog::GetInstance().AddDesc(std::string("blankHeight: ").append(std::to_string(blankHeight_)));
-    }
+    DumpLog::GetInstance().AddDesc(std::string("PanelMode:").append(std::to_string(static_cast<int32_t>(mode_))));
+    DumpLog::GetInstance().AddDesc(std::string("blankHeight: ").append(std::to_string(blankHeight_)));
 }
 
 } // namespace OHOS::Ace

@@ -77,6 +77,8 @@ public:
     virtual bool ProcessVsyncEvent(uint64_t timeStampNanos) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) = 0;
+
+    virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
 };
 
 } // namespace OHOS::Ace

@@ -142,16 +142,14 @@ void PageElement::FinishCreateGeometryTransition(const std::string& id)
 
 void PageElement::Dump()
 {
-    if (DumpLog::GetInstance().GetDumpFile()) {
-        for (const auto& item : geometryTransitionMap_) {
-            DumpLog::GetInstance().AddDesc(std::string("geometryTransitionID: ").append(item.first));
-            auto element = item.second.appearElement.Upgrade();
-            if (!element) {
-                continue;
-            }
-            std::string retakeId = std::to_string(element->GetRetakeId());
-            DumpLog::GetInstance().AddDesc(std::string("RetakeId: ").append(retakeId));
+    for (const auto& item : geometryTransitionMap_) {
+        DumpLog::GetInstance().AddDesc(std::string("geometryTransitionID: ").append(item.first));
+        auto element = item.second.appearElement.Upgrade();
+        if (!element) {
+            continue;
         }
+        std::string retakeId = std::to_string(element->GetRetakeId());
+        DumpLog::GetInstance().AddDesc(std::string("RetakeId: ").append(retakeId));
     }
 }
 

@@ -42,6 +42,8 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void OnPaintFinish() override;
 
+    void HandleAccessibilityFocusEvent(bool isAccessibilityFocus);
+
     void OnAttachContext() override
     {
         RenderBoxBase::OnAttachContext();
@@ -257,6 +259,8 @@ protected:
     void ClearRenderObject() override;
 
     Offset GetBorderOffset() const override;
+    Radius GetBorderRadius() const override;
+    
     void UpdateGestureRecognizer(const std::array<RefPtr<Gesture>, MAX_GESTURE_SIZE>& gestures);
     bool ExistGestureRecognizer();
 
@@ -277,6 +281,7 @@ protected:
     bool isZoom = false;
     bool isHoveredBoard = false;
     bool isHoveredScale = false;
+    bool isAccessibilityFocus_ = false;
 
 private:
     void UpdateBackDecoration(const RefPtr<Decoration>& newDecoration);
@@ -288,6 +293,8 @@ private:
     void CalculateTranslate(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size);
 #endif
     void HandleTouchEvent(bool isTouchDown);
+
+    void SendAccessibilityEvent(const std::string& eventType);
 
     // 0 - low priority gesture, 1 - high priority gesture, 2 - parallel priority gesture
     std::array<RefPtr<GestureRecognizer>, MAX_GESTURE_SIZE> recognizers_;
