@@ -1300,9 +1300,8 @@ void RosenRenderCustomPaint::DrawBitmapMesh(const RefPtr<OffscreenCanvas>& offsc
     const std::vector<double>& mesh, int32_t column, int32_t row)
 {
     std::unique_ptr<ImageData> imageData = offscreenCanvas->GetImageData(0, 0,
-    offscreenCanvas->GetWidth(), offscreenCanvas->GetHeight());
-        if (imageData != nullptr) {
-
+        offscreenCanvas->GetWidth(), offscreenCanvas->GetHeight());
+    if (imageData != nullptr) {
         if (imageData->data.empty()) {
             LOGE("PutImageData failed, image data is empty.");
             return;
