@@ -583,15 +583,15 @@ void RosenRenderImage::ApplyBorderRadius(
 
 void RosenRenderImage::ApplyColorFilter(SkPaint& paint)
 {
-    if (!color_.has_value()) {
-        return;
-    }
-    Color color = color_.value();
 #ifdef USE_SYSTEM_SKIA
     if (imageRenderMode_ == ImageRenderMode::TEMPLATE) {
         paint.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(GRAY_COLOR_MATRIX));
         return;
     }
+    if (!color_.has_value()) {
+        return;
+    }
+    Color color = color_.value();
     paint.setColorFilter(SkColorFilter::MakeModeFilter(
         SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()), SkBlendMode::kPlus));
 #else
@@ -599,6 +599,10 @@ void RosenRenderImage::ApplyColorFilter(SkPaint& paint)
         paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
         return;
     }
+    if (!color_.has_value()) {
+        return;
+    }
+    Color color = color_.value();
     paint.setColorFilter(SkColorFilters::Blend(
         SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()), SkBlendMode::kPlus));
 #endif
