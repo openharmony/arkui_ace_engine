@@ -251,7 +251,7 @@ RefPtr<Component> RenderBox::GenCustomComponent(const RefPtr<PipelineContext>& c
     auto extraParams = JsonUtil::Create(true);
     SetSelectedIndex(info);
     if (selectedIndex_  != DEFAULT_INDEX) {
-        extraParams->Put("selectedIndex", selectedIndex_ );
+        extraParams->Put("selectedIndex", selectedIndex_);
     }
 
     auto customComponent = onDragStart_(event, extraParams->ToString());

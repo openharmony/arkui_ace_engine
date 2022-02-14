@@ -59,8 +59,8 @@ template("ace_osal_ohos_source_set") {
       external_deps += [ "multimedia_image:image" ]
     }
     sources += [
+      "drag_window_ohos.cpp",
       "pixel_map_ohos.cpp",
-      "drag_window_ohos.cpp"
     ]
     external_deps += [ "hisysevent_native:libhisysevent" ]
   }
