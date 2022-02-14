@@ -174,6 +174,8 @@ private:
     void ImageObjReady(const RefPtr<ImageObject>& imageObj);
     void ImageObjFailed();
 
+    void PaintAccessibilityFocus(const SkRect& focusRect, RenderContext& context);
+
     RRect windowBlurRRect_;
     void FetchImageData();
     std::string borderSrc_;

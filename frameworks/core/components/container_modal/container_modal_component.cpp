@@ -43,7 +43,6 @@ const Dimension TITLE_TEXT_FONT_SIZE = 16.0_fp;
 const Dimension CONTENT_MARGIN = 4.0_vp;
 const Color CONTAINER_BACKGROUND_COLOR = Color(0xd6e4e5ed);
 const Color CONTAINER_BORDER_COLOR = Color(0x33000000);
-const Color TITLE_BACKGROUND_COLOR = Color::TRANSPARENT;
 const Color TITLE_TEXT_COLOR = Color(0xe5000000);
 const Color CONTENT_BACKGROUND_COLOR = Color(0xffffffff);
 const Color TITLE_BUTTON_BACKGROUND_COLOR = Color(0x33000000);
@@ -150,15 +149,9 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
     titleChildren.emplace_back(SetPadding(closeBtn, ZERO_PADDING, TITLE_PADDING_END));
 
     // build title box
-    Border titleBorder;
-    titleBorder.SetTopLeftRadius(Radius(CONTAINER_OUTER_RADIUS - CONTAINER_BORDER_WIDTH));
-    titleBorder.SetTopRightRadius(Radius(CONTAINER_OUTER_RADIUS - CONTAINER_BORDER_WIDTH));
     auto titleDecoration = AceType::MakeRefPtr<Decoration>();
-    titleDecoration->SetBackgroundColor(TITLE_BACKGROUND_COLOR);
-    titleDecoration->SetBorder(titleBorder);
     auto titleBox = AceType::MakeRefPtr<BoxComponent>();
     titleBox->SetHeight(CONTAINER_TITLE_HEIGHT);
-    titleBox->SetBackDecoration(titleDecoration);
     auto row = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, titleChildren);
 
     // handle mouse move
@@ -183,9 +176,7 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
 RefPtr<Component> ContainerModalComponent::BuildContent()
 {
     auto contentBox = AceType::MakeRefPtr<BoxComponent>();
-    auto clip = AceType::MakeRefPtr<ClipComponent>(GetChild());
-    contentBox->SetChild(clip);
-
+    contentBox->SetChild(GetChild());
     Border contentBorder;
     contentBorder.SetBorderRadius(Radius(CONTAINER_INNER_RADIUS));
     auto contentDecoration = AceType::MakeRefPtr<Decoration>();
@@ -196,12 +187,11 @@ RefPtr<Component> ContainerModalComponent::BuildContent()
     Edge margin;
     margin.SetLeft(CONTENT_MARGIN);
     margin.SetRight(CONTENT_MARGIN);
-    margin.SetBottom(CONTENT_MARGIN);
     contentBox->SetMargin(margin);
 
-    auto flexItem = AceType::MakeRefPtr<FlexItemComponent>(1, 1, 0);
-    flexItem->SetChild(contentBox);
-    return flexItem;
+    // adaptive height
+    contentBox->SetFlexWeight(1.0);
+    return contentBox;
 }
 
 RefPtr<Component> ContainerModalComponent::BuildControlButton(InternalResource::ResourceId icon,
@@ -257,6 +247,11 @@ void ContainerModalComponent::BuildInnerChild()
     containerBox->SetBackDecoration(containerDecoration);
     containerBox->SetFlex(BoxFlex::FLEX_X);
     containerBox->SetAlignment(Alignment::CENTER);
+
+    // Use the bottom padding of the containerBox to replace the bottom margin of the contentBox.
+    Edge padding;
+    padding.SetBottom(CONTENT_MARGIN);
+    containerBox->SetPadding(padding);
     containerBox->SetChild(column);
     SetChild(containerBox);
 }

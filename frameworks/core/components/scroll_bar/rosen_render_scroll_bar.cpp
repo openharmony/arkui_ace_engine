@@ -26,6 +26,9 @@ void RosenRenderScrollBar::Paint(RenderContext& context, const Offset& offset)
         LOGD("DisplayMode is off, or opacity is zero, needn't paint.");
         return;
     }
+    for (auto& child : GetChildren()) {
+        child->MarkNeedRender();
+    }
     RenderNode::Paint(context, offset);
 }
 

@@ -28,7 +28,7 @@ const std::unordered_map<std::string, std::function<std::string(const Navigation
     CREATE_JSON_STRING_MAP {
         { "title",
             [](const NavigationComposedElement& inspector) { return inspector.GetNavigationTitle(); } },
-        { "subtitle",
+        { "subTitle",
             [](const NavigationComposedElement& inspector) { return inspector.GetNavigationSubTitle(); } },
         { "titleMode",
             [](const NavigationComposedElement& inspector) { return inspector.GetNavigationSubTitleMode(); } },

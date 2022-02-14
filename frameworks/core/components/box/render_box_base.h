@@ -284,6 +284,7 @@ public:
 protected:
     virtual void ClearRenderObject() override;
     virtual Offset GetBorderOffset() const;
+    virtual Radius GetBorderRadius() const;
 
     EdgePx ConvertEdgeToPx(const Edge& edge, bool additional);
     double ConvertMarginToPx(Dimension dimension, bool vertical, bool additional) const;

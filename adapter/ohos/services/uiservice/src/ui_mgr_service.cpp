@@ -136,7 +136,7 @@ void UIMgrService::InitResourceManager()
     resourceManager_ = resourceManager;
 }
 
-OHOS::AppExecFwk::Ability* UIMgrService::CreateAbility()
+std::shared_ptr<OHOS::AppExecFwk::Ability> UIMgrService::CreateAbility()
 {
     auto ability = OHOS::AppExecFwk::Ability::Create(nullptr);
     if (ability == nullptr) {
@@ -153,7 +153,8 @@ OHOS::AppExecFwk::Ability* UIMgrService::CreateAbility()
 
     deal->initResourceManager(resourceManager_);
     ability->AttachBaseContext(deal);
-    return ability;
+    std::shared_ptr<OHOS::AppExecFwk::Ability> sharedAbility(ability);
+    return sharedAbility;
 }
 
 int UIMgrService::ShowDialog(const std::string& name,
@@ -249,7 +250,8 @@ int UIMgrService::ShowDialog(const std::string& name,
         Ace::Platform::AceContainer::AddAssetPath(dialogId, packagePathStr, assetBasePathStr);
 
         // set view
-        Ace::Platform::AceContainer::SetView(flutterAceView, density_, windowWidth, windowHeight);
+        Ace::Platform::AceContainer::SetView(
+            flutterAceView, density_, windowWidth, windowHeight, dialogWindow->GetWindowId());
         Ace::Platform::AceContainer::SetUIWindow(dialogId, dialogWindow);
         Ace::Platform::FlutterAceView::SurfaceChanged(flutterAceView, windowWidth, windowHeight, 0);
 
@@ -311,10 +313,6 @@ int UIMgrService::CancelDialog(int id)
             context->SetRSUIDirector(nullptr);
         }
 #endif
-        auto ability = Platform::AceContainer::GetAbility(id);
-        if (ability != nullptr) {
-            delete ability;
-        }
         Platform::AceContainer::DestroyContainer(id);
     };
 

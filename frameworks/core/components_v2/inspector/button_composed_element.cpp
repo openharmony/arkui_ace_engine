@@ -29,6 +29,8 @@ const std::unordered_map<std::string, std::function<std::string(const ButtonComp
     { "stateEffect", [](const ButtonComposedElement& inspector) { return inspector.GetStateEffect(); } },
     { "label", [](const ButtonComposedElement& inspector) { return inspector.GetLabel(); } },
     { "fontSize", [](const ButtonComposedElement& inspector) { return inspector.GetFontSize(); } },
+    { "fontWeight", [](const ButtonComposedElement& inspector) { return inspector.GetFontWeight(); } },
+    { "fontColor", [](const ButtonComposedElement& inspector) { return inspector.GetFontColor(); } },
 };
 
 void ButtonComposedElement::Dump()
@@ -91,6 +93,34 @@ std::string ButtonComposedElement::GetFontSize() const
     }
     auto fontSize = render ? render->GetTextStyle().GetFontSize() : Dimension();
     return std::to_string(static_cast<int32_t>(fontSize.ConvertToVp()));
+}
+
+std::string ButtonComposedElement::GetFontWeight() const
+{
+    auto node = GetInspectorNode(TextElement::TypeId());
+    if (!node) {
+        return "";
+    }
+    auto render = AceType::DynamicCast<RenderText>(node);
+    if (!render) {
+        return "";
+    }
+    auto fontWeight = render ? render->GetTextStyle().GetFontWeight() : FontWeight::NORMAL;
+    return ConvertWrapFontWeightToStirng(fontWeight);
+}
+
+std::string ButtonComposedElement::GetFontColor() const
+{
+    auto node = GetInspectorNode(TextElement::TypeId());
+    if (!node) {
+        return "";
+    }
+    auto render = AceType::DynamicCast<RenderText>(node);
+    if (!render) {
+        return "";
+    }
+    auto fontColor = render ? render->GetTextStyle().GetTextColor() : Color::BLACK;
+    return fontColor.ColorToString();
 }
 
 std::string ButtonComposedElement::GetBackgroundColor() const

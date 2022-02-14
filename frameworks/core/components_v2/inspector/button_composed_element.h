@@ -36,6 +36,8 @@ public:
     std::string GetStateEffect() const;
     std::string GetLabel() const;
     std::string GetFontSize() const;
+    std::string GetFontWeight() const;
+    std::string GetFontColor() const;
     std::string GetBackgroundColor() const override;
     std::string ConvertButtonTypeToString(ButtonType buttonType) const;
 

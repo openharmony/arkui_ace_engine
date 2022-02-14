@@ -140,15 +140,15 @@ void RenderDialogTween::Update(const RefPtr<Component>& component)
             if (context && context->GetIsDeclarative()) {
                 BackEndEventManager<void(const ClickInfo&)>::GetInstance().BindBackendEvent(
                     menuSuccessId[index], [weak = WeakClaim(this), index](const ClickInfo& info) {
-                    auto dialog = weak.Upgrade();
-                    dialog->CallOnSuccess(index);
-                });
+                        auto dialog = weak.Upgrade();
+                        dialog->CallOnSuccess(index);
+                    });
             } else {
                 BackEndEventManager<void()>::GetInstance().BindBackendEvent(
                     menuSuccessId[index], [weak = WeakClaim(this), index]() {
-                    auto dialog = weak.Upgrade();
-                    dialog->CallOnSuccess(index);
-                });
+                        auto dialog = weak.Upgrade();
+                        dialog->CallOnSuccess(index);
+                    });
             }
         }
     }
@@ -431,8 +431,7 @@ bool RenderDialogTween::SetAlignmentSwitch(const Size& maxSize, const Size& chil
                 topLeftPoint = Offset((maxSize.Width() - childSize.Width()) / 2.0, 0.0);
                 break;
             case DialogAlignment::CENTER:
-                topLeftPoint =
-                    Offset(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
+                topLeftPoint = Offset(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
                 break;
             case DialogAlignment::BOTTOM:
                 topLeftPoint =
@@ -455,12 +454,10 @@ bool RenderDialogTween::SetAlignmentSwitch(const Size& maxSize, const Size& chil
                 topLeftPoint = Offset(0.0, maxSize.Height() - childSize.Height());
                 break;
             case DialogAlignment::BOTTOM_END:
-                topLeftPoint =
-                    Offset(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height());
+                topLeftPoint = Offset(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height());
                 break;
             default:
-                topLeftPoint =
-                    Offset(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
+                topLeftPoint = Offset(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
                 break;
         }
         return true;
@@ -609,6 +606,20 @@ void RenderDialogTween::RemoveBackendEvent(const RefPtr<DialogTweenComponent>& c
     BackEndEventManager<void(int32_t)>::GetInstance().RemoveBackEndEvent(component->GetOnSuccessId());
     BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(component->GetOnCancelId());
     BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(component->GetOnCompleteId());
+}
+
+WeakPtr<RenderNode> RenderDialogTween::CheckHoverNode()
+{
+    return AceType::WeakClaim<RenderNode>(this);
+}
+
+bool RenderDialogTween::HandleMouseEvent(const MouseEvent& event)
+{
+    if (event.button != MouseButton::NONE_BUTTON && event.button != MouseButton::LEFT_BUTTON &&
+        event.action == MouseAction::PRESS) {
+        HandleClick({ event.x, event.y });
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace

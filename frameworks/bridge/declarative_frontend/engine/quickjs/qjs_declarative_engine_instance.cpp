@@ -509,17 +509,17 @@ JSValue RequireNativeModule(JSContext* ctx, JSValueConst new_target, int argc, J
     JSValue globalObj = JS_GetGlobalObject(ctx);
     JSValue moduleObject = JS_GetPropertyStr(ctx, globalObj, moduleName.get());
     if (JS_IsObject(moduleObject)) {
-        LOGE("has already init moduleObject %s", moduleName.get());
-        return moduleObject;
+        LOGD("has already init moduleObject %s", moduleName.get());
+        JS_FreeValue(ctx, globalObj);
+        return JS_DupValue(ctx, moduleObject);
     }
-    JS_FreeValue(ctx, moduleObject);
 
     // init module object first time
     JSValue jsModuleObject = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, globalObj, moduleName.get(), jsModuleObject);
     JS_FreeValue(ctx, globalObj);
     if (ModuleManager::GetInstance()->InitModule(ctx, moduleName, jsModuleObject)) {
-        return jsModuleObject;
+        return JS_DupValue(ctx, jsModuleObject);
     } else {
         LOGE("init moduleObject %s failed", moduleName.get());
         return JS_NULL;

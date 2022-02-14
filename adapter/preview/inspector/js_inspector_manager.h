@@ -22,7 +22,7 @@
 
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/pipeline_context.h"
-#include "frameworks/bridge/common/accessibility/js_accessibility_manager.h"
+#include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 
 namespace OHOS::Ace::Framework {
 

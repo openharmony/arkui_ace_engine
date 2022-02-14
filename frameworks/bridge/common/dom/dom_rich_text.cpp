@@ -23,16 +23,30 @@ namespace OHOS::Ace::Framework {
 
 DOMRichText::DOMRichText(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
-    childComponent_ = AceType::MakeRefPtr<RichTextComponent>(nodeName);
+    childComponent_ = AceType::MakeRefPtr<V2::RichTextComponent>();
 }
 
-void DOMRichText::PrepareSpecializedComponent()
+bool DOMRichText::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
 {
-    auto richTextDeclaration = AceType::DynamicCast<RichTextDeclaration>(declaration_);
-    if (!richTextDeclaration) {
-        return;
+    if (attr.first == DOM_RICH_TEXT_DATA) {
+        childComponent_->SetData(attr.second);
+        return true;
     }
-    childComponent_->SetDeclaration(richTextDeclaration);
+    return false;
+}
+
+bool DOMRichText::AddSpecializedEvent(int32_t pageId, const std::string& event)
+{
+    if (event == DOM_LOAD_START) {
+        auto eventMarker = EventMarker(GetNodeIdForEvent(), event, pageId);
+        childComponent_->SetPageStartedEventId(eventMarker);
+    } else if (event == DOM_LOAD_COMPLETE) {
+        auto eventMarker = EventMarker(GetNodeIdForEvent(), event, pageId);
+        childComponent_->SetPageFinishedEventId(eventMarker);
+    } else {
+        return false;
+    }
+    return true;
 }
 
 } // namespace OHOS::Ace::Framework

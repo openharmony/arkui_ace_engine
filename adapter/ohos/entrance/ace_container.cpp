@@ -19,6 +19,7 @@
 #include "flutter/lib/ui/ui_dart_state.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
+#include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -78,7 +79,8 @@ const char* GetDeclarativeSharedLibrary(bool isArkApp)
 
 } // namespace
 
-AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp, OHOS::AppExecFwk::Ability* aceAbility,
+AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+    std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
     std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner)
     : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), aceAbility_(aceAbility),
       useCurrentEventRunner_(useCurrentEventRunner)
@@ -86,17 +88,20 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
     ACE_DCHECK(callback);
     InitializeTask();
     platformEventCallback_ = std::move(callback);
+    useStageModel_ = false;
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+    std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
     bool useCurrentEventRunner)
-    : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), abilityInfo_(abilityInfo),
-      useCurrentEventRunner_(useCurrentEventRunner)
+    : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), runtimeContext_(runtimeContext),
+      abilityInfo_(abilityInfo), useCurrentEventRunner_(useCurrentEventRunner)
 {
     ACE_DCHECK(callback);
     InitializeTask();
     platformEventCallback_ = std::move(callback);
+    useStageModel_ = true;
 }
 
 void AceContainer::InitializeTask()
@@ -157,12 +162,13 @@ void AceContainer::DestroyView()
 
 void AceContainer::InitializeFrontend()
 {
+    auto aceAbility = aceAbility_.lock();
     if (type_ == FrontendType::JS) {
         frontend_ = Frontend::Create();
         auto jsFrontend = AceType::DynamicCast<JsFrontend>(frontend_);
         auto& loader = Framework::JsEngineLoader::Get(GetEngineSharedLibrary(isArkApp_));
         auto jsEngine = loader.CreateJsEngine(instanceId_);
-        jsEngine->AddExtraNativeObject("ability", aceAbility_);
+        jsEngine->AddExtraNativeObject("ability", aceAbility.get());
         jsFrontend->SetJsEngine(jsEngine);
         jsFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
         jsFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
@@ -180,7 +186,7 @@ void AceContainer::InitializeFrontend()
         } else {
             jsEngine = loader.CreateJsEngine(instanceId_);
         }
-        jsEngine->AddExtraNativeObject("ability", aceAbility_);
+        jsEngine->AddExtraNativeObject("ability", aceAbility.get());
         declarativeFrontend->SetJsEngine(jsEngine);
         declarativeFrontend->SetPageProfile(pageProfile_);
         declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
@@ -192,7 +198,7 @@ void AceContainer::InitializeFrontend()
     }
     ACE_DCHECK(frontend_);
     auto abilityInfo = abilityInfo_.lock();
-    std::shared_ptr<AppExecFwk::AbilityInfo> info = aceAbility_ ? aceAbility_->GetAbilityInfo() : abilityInfo;
+    std::shared_ptr<AppExecFwk::AbilityInfo> info = aceAbility ? aceAbility->GetAbilityInfo() : abilityInfo;
     if (info && info->isLauncherAbility) {
         frontend_->DisallowPopLastPage();
     }
@@ -518,7 +524,8 @@ void AceContainer::InitializeCallback()
 }
 
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName,
-    OHOS::AppExecFwk::Ability* aceAbility, std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner)
+    std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
+    bool useCurrentEventRunner)
 {
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(
         instanceId, type, isArkApp, aceAbility, std::move(callback), useCurrentEventRunner);
@@ -557,7 +564,7 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     AceEngine::Get().RemoveContainer(instanceId);
 }
 
-void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t height)
+void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t height, int32_t windowId)
 {
     if (view == nullptr) {
         return;
@@ -573,7 +580,7 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
         return;
     }
     std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
-    container->AttachView(std::move(window), view, density, width, height);
+    container->AttachView(std::move(window), view, density, width, height, windowId);
 }
 
 void AceContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow)
@@ -604,7 +611,7 @@ OHOS::AppExecFwk::Ability* AceContainer::GetAbility(int32_t instanceId)
     if (!container) {
         return nullptr;
     }
-    return container->GetAbilityInner();
+    return container->GetAbilityInner().lock().get();
 }
 
 bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string& content, const std::string& params)
@@ -751,7 +758,7 @@ void AceContainer::AddAssetPath(
 }
 
 void AceContainer::AttachView(
-    std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height)
+    std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height, int32_t windowId)
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
@@ -786,6 +793,7 @@ void AceContainer::AttachView(
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
     pipelineContext_->SetWindowModal(windowModal_);
     pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
+    pipelineContext_->SetWindowId(windowId);
     InitializeCallback();
 
     auto&& finishEventHandler = [weak = WeakClaim(this), instanceId] {
@@ -860,6 +868,13 @@ void AceContainer::AttachView(
     frontend_->AttachPipelineContext(pipelineContext_);
 
     AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
+
+    auto dataAbilityHelperImpl = [ability = GetAbilityInner(), runtimeContext = runtimeContext_,
+        useStageModel = useStageModel_] () {
+        return AceType::MakeRefPtr<DataAbilityHelperStandard>(ability.lock(), runtimeContext.lock(), useStageModel);
+    };
+    auto dataProviderManager = MakeRefPtr<DataProviderManagerStandard>(dataAbilityHelperImpl);
+    pipelineContext_->SetDataProviderManager(dataProviderManager);
 }
 
 void AceContainer::SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow)
@@ -872,7 +887,7 @@ sptr<OHOS::Rosen::Window> AceContainer::GetUIWindowInner() const
     return uiWindow_;
 }
 
-OHOS::AppExecFwk::Ability* AceContainer::GetAbilityInner() const
+std::weak_ptr<OHOS::AppExecFwk::Ability> AceContainer::GetAbilityInner() const
 {
     return aceAbility_;
 }

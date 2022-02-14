@@ -45,6 +45,10 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr int32_t DOUBLE_WIDTH = 2;
+constexpr uint32_t ACCESSIBILITY_FOCUS_COLOR = 0xbf39b500;
+constexpr double ACCESSIBILITY_FOCUS_WIDTH = 4.0;
+constexpr double ACCESSIBILITY_FOCUS_RADIUS_X = 2.0;
+constexpr double ACCESSIBILITY_FOCUS_RADIUS_Y = 2.0;
 
 } // namespace
 
@@ -276,6 +280,7 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
     flutter::RRect outerRRect;
     outerRRect.sk_rrect =
         SkRRect::MakeRect(SkRect::MakeLTRB(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom()));
+    SkRect focusRect = SkRect::MakeLTRB(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom());
     UpdateBlurRRect(outerRRect, offset);
 
     RefPtr<FlutterDecorationPainter> decorationPainter;
@@ -351,6 +356,28 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
                 outerRRect, canvas->canvas(), frontDecoration_->GetColorBlend(), bgColor);
         }
     }
+    if (isAccessibilityFocus_) {
+        PaintAccessibilityFocus(focusRect, context);
+    }
+}
+
+void FlutterRenderBox::PaintAccessibilityFocus(const SkRect& focusRect, RenderContext& context)
+{
+    flutter::Canvas* canvas = static_cast<FlutterRenderContext&>(context).GetCanvas();
+    if (canvas == nullptr) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+
+    flutter::Paint paint;
+    flutter::RRect rRect;
+    rRect.sk_rrect.setRectXY(focusRect, ACCESSIBILITY_FOCUS_RADIUS_X, ACCESSIBILITY_FOCUS_RADIUS_Y);
+    paint.paint()->setStyle(SkPaint::Style::kStroke_Style);
+    paint.paint()->setColor(ACCESSIBILITY_FOCUS_COLOR);
+    paint.paint()->setStrokeWidth(ACCESSIBILITY_FOCUS_WIDTH);
+    flutter::PaintData paintData;
+
+    canvas->drawRRect(rRect, paint, paintData);
 }
 
 SkColorType ConvertToSkColorType(PixelFormat pixelFormat)

@@ -313,9 +313,10 @@ void RenderSelectPopup::PerformLayout()
     }
     for (const auto& option : renderOptions_) {
         if (selectLeftTop_ != selectRightBottom_ && selectPopup_ && !selectPopup_->IsMenu()) {
-            option->SetMaxWidth((selectPopup_->GetTextDirection() == TextDirection::RTL ?
-                selectRightBottom_.GetX() - normalPadding_ - 2.0 * outPadding :
-                globalRightBottom_.GetX() - selectLeftTop_.GetX() - normalPadding_ - 2.0 * outPadding));
+            option->SetMaxWidth(
+                (selectPopup_->GetTextDirection() == TextDirection::RTL
+                        ? selectRightBottom_.GetX() - normalPadding_ - 2.0 * outPadding
+                        : globalRightBottom_.GetX() - selectLeftTop_.GetX() - normalPadding_ - 2.0 * outPadding));
         } else if (selectLeftTop_ == selectRightBottom_ && selectPopup_ && selectPopup_->IsMenu()) {
             auto leftSpace = selectLeftTop_.GetX();
             auto rightSpace = globalRightBottom_.GetX() - leftSpace;
@@ -350,8 +351,8 @@ void RenderSelectPopup::PerformLayout()
         }
     }
     LayoutParam scrollLayout;
-    scrollLayout.SetFixedSize(Size(totalSize.Width() - 2.0 * outPadding,
-        totalSize.Height() - fixHeight - 2.0 * outPadding));
+    scrollLayout.SetFixedSize(
+        Size(totalSize.Width() - 2.0 * outPadding, totalSize.Height() - fixHeight - 2.0 * outPadding));
     renderScroll_->Layout(scrollLayout);
     if (renderTitleBox_) {
         LayoutParam layout;
@@ -478,6 +479,20 @@ bool RenderSelectPopup::ScreenDirectionSwitched()
         selectPopup_->HideDialog(SELECT_INVALID_INDEX);
     }
     return switched;
+}
+
+WeakPtr<RenderNode> RenderSelectPopup::CheckHoverNode()
+{
+    return AceType::WeakClaim<RenderNode>(this);
+}
+
+bool RenderSelectPopup::HandleMouseEvent(const MouseEvent& event)
+{
+    if (event.button != MouseButton::NONE_BUTTON && event.button != MouseButton::LEFT_BUTTON &&
+        event.action == MouseAction::PRESS) {
+        HandleRawEvent({ event.x, event.y });
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace

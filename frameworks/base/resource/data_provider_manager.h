@@ -21,11 +21,13 @@
 #include <vector>
 
 #include "base/memory/ace_type.h"
+#include "base/resource/data_ability_helper.h"
 
 namespace OHOS::Ace {
 
 class DataProviderRes {
 public:
+    explicit DataProviderRes(std::vector<uint8_t>&& data) : data_(std::move(data)) {}
     DataProviderRes(uint8_t* dataRes, int64_t size) : data_(dataRes, dataRes + size) {}
     ~DataProviderRes() = default;
 
@@ -38,24 +40,43 @@ private:
     std::vector<uint8_t> data_;
 };
 
-using DataProviderImpl = std::function<std::unique_ptr<DataProviderRes>(const std::string& uriStr)>;
-
-class DataProviderManager : public AceType {
+class DataProviderManagerInterface : public AceType {
     DECLARE_ACE_TYPE(DataProviderManager, AceType)
+
+public:
+    DataProviderManagerInterface() = default;
+    ~DataProviderManagerInterface() override = default;
+
+    virtual std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) = 0;
+};
+
+using DataProviderImpl = std::function<std::unique_ptr<DataProviderRes>(const std::string& uriStr)>;
+class DataProviderManager : public DataProviderManagerInterface {
+    DECLARE_ACE_TYPE(DataProviderManager, DataProviderManagerInterface)
 public:
     explicit DataProviderManager(const DataProviderImpl& dataProvider) : platformImpl_(dataProvider) {}
-    ~DataProviderManager() = default;
+    ~DataProviderManager() override = default;
 
-    std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr)
-    {
-        if (platformImpl_) {
-            return platformImpl_(uriStr);
-        }
-        return nullptr;
-    }
+    std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) override;
 
 private:
     DataProviderImpl platformImpl_;
+};
+
+using DataAbilityHelperImpl = std::function<RefPtr<DataAbilityHelper>()>;
+class DataProviderManagerStandard : public DataProviderManagerInterface {
+    DECLARE_ACE_TYPE(DataProviderManagerStandard, DataProviderManagerInterface)
+
+public:
+    explicit DataProviderManagerStandard(const DataAbilityHelperImpl& dataAbilityHelperImpl) :
+        dataAbilityHelperImpl_(dataAbilityHelperImpl) {}
+    ~DataProviderManagerStandard() override = default;
+
+    std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) override;
+
+private:
+    DataAbilityHelperImpl dataAbilityHelperImpl_;
+    RefPtr<DataAbilityHelper> helper_;
 };
 
 } // namespace OHOS::Ace

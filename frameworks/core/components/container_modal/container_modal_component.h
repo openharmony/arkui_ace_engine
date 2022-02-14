@@ -50,7 +50,7 @@ private:
     RefPtr<Component> BuildTitle();
     RefPtr<Component> BuildContent();
     RefPtr<Component> BuildControlButton(InternalResource::ResourceId icon, std::function<void()>&& clickCallback);
-    RefPtr<Component> SetPadding(const RefPtr<Component>& component, const Dimension& leftPadding,
+    static RefPtr<Component> SetPadding(const RefPtr<Component>& component, const Dimension& leftPadding,
         const Dimension& rightPadding);
 
     WeakPtr<PipelineContext> context_;

@@ -55,6 +55,17 @@ template("ace_osal_ohos_source_set") {
       public_deps =
           [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]
       external_deps += [ "multimedia_image_standard:image" ]
+      if (defined(config.accessibility_support) &&
+          config.accessibility_support) {
+        sources += [ "js_accessibility_manager.cpp" ]
+        external_deps += [
+          "ability_runtime:ability_manager",
+          "ability_runtime:want",
+          "accessibility:accessibilityclient",
+        ]
+      } else {
+        sources += [ "fake_accessibility_manager.cpp" ]
+      }
     } else {
       external_deps += [ "multimedia_image:image" ]
     }

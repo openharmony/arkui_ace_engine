@@ -61,6 +61,7 @@ public:
     virtual void DumpHandleEvent(const std::vector<std::string>& params) = 0;
     virtual void DumpProperty(const std::vector<std::string>& params) = 0;
     virtual void DumpTree(int32_t depth, NodeId nodeID) = 0;
+    virtual void DumpTree(int32_t depth, NodeId nodeID, std::vector<std::string>& infos) = 0;
     virtual void SetCardViewPosition(int id, float offsetX, float offsetY) = 0;
     virtual void SetCardViewParams(const std::string& key, bool focus) = 0;
     virtual void SetSupportAction(uint32_t action, bool isEnable) = 0;

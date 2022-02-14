@@ -39,6 +39,8 @@ public:
     void TransferFromImageBitmap(const RefPtr<OffscreenCanvas>& offscreenCanvas) override;
     void DrawBitmapMesh(const RefPtr<OffscreenCanvas>& offscreenCanvas,
         const std::vector<double>& mesh, int32_t column, int32_t row) override;
+    void Mesh(SkBitmap& bitmap, int column, int row,
+        const float* vertices, const int* colors, const SkPaint* paint);
     std::string ToDataURL(const std::string& args) override;
     void SetAntiAlias(bool isEnabled) override;
     void FillRect(const Offset& offset, const Rect& rect) override;

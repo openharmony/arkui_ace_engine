@@ -46,7 +46,6 @@ use_external_icu = "shared"
 use_curl_download = true
 ohos_standard_fontmgr = true
 sk_use_hilog = true
-accessibility_support = false
 rich_components_support = true
 advance_components_support = false
 form_components_support = true
@@ -63,6 +62,7 @@ enable_standard_input = true
 if (defined(is_experiment_build) && is_experiment_build) {
   web_components_support = true
   enable_system_clipboard = true
+  accessibility_support = true
 }
 
 if (defined(web_components_support) && web_components_support) {

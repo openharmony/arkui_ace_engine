@@ -243,7 +243,7 @@ void AceAbility::OnStart(const Want& want)
     PluginManager::GetInstance().SetAceAbility(this, pluginUtils);
 
     // create container
-    Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, srcPath, this,
+    Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, srcPath, shared_from_this(),
         std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); }));
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
@@ -275,7 +275,7 @@ void AceAbility::OnStart(const Want& want)
     }
 
     // set view
-    Platform::AceContainer::SetView(flutterAceView, density_, width, height);
+    Platform::AceContainer::SetView(flutterAceView, density_, width, height, window->GetWindowId());
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
 
     // get url
@@ -602,6 +602,14 @@ WindowSizeChangeReason AceAbility::Convert2WindowSizeChangeReason(OHOS::Rosen::W
     return static_cast<WindowSizeChangeReason>(reasonValue);
 }
 
+void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
+    if (context != nullptr) {
+        context->DumpInfo(params, info);
+    }
+}
+
 void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
 {
     LOGI("AceAbility::OnDrag called ");
@@ -627,6 +635,5 @@ void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
 
     flutterAceView->ProcessDragEvent(x, y, action);
 }
-
 } // namespace Ace
 } // namespace OHOS

@@ -26,21 +26,7 @@ template("bridge_accessibility") {
 
     sources = [ "accessibility_node_manager.cpp" ]
 
-    deps = []
-    if (defined(config.accessibility_support) && config.accessibility_support) {
-      if (platform == "ohos") {
-        sources += [ "js_accessibility_manager.cpp" ]
-        deps += [ "//utils/jni:utils_jnikit" ]
-        external_deps = [
-          "barrierfree:barrierfree_interface_native",
-          "barrierfree:barrierfree_native_ace",
-        ]
-      }
-    } else {
-      sources += [ "fake_accessibility_manager.cpp" ]
-    }
-
-    deps += [
+    deps = [
       "$ace_root/frameworks/core/accessibility/js_inspector:js_inspector_$platform",
       "$ace_root/frameworks/core/components/theme:build_theme_code",
     ]

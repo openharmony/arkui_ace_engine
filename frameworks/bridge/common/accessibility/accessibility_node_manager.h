@@ -115,6 +115,7 @@ public:
     void DumpHandleEvent(const std::vector<std::string>& params) override;
     void DumpProperty(const std::vector<std::string>& params) override;
     void DumpTree(int32_t depth, NodeId nodeID) override;
+    void DumpTree(int32_t depth, NodeId nodeID, std::vector<std::string>& infos) override;
     std::unique_ptr<JsonValue> DumpComposedElementsToJson() const;
     std::unique_ptr<JsonValue> DumpComposedElementToJson(NodeId nodeId);
     void SetCardViewParams(const std::string& key, bool focus) override;
