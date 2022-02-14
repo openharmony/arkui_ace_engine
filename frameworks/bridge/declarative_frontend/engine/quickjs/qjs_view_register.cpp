@@ -126,6 +126,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include "frameworks/bridge/declarative_frontend/jsview/js_richtext.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
 #endif
@@ -910,6 +911,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
 #ifdef WEB_SUPPORTED
+    JSRichText::JSBind(globalObj);
     JSWeb::JSBind(globalObj);
     JSWebController::JSBind(globalObj);
 #endif
