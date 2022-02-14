@@ -26,6 +26,10 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("loadUrl", &JSWebController::LoadUrl);
     JSClass<JSWebController>::CustomMethod("runJavaScript", &JSWebController::ExecuteTypeScript);
     JSClass<JSWebController>::CustomMethod("loadData", &JSWebController::LoadDataWithBaseUrl);
+    JSClass<JSWebController>::CustomMethod("backward", &JSWebController::Backward);
+    JSClass<JSWebController>::CustomMethod("forward", &JSWebController::Forward);
+    JSClass<JSWebController>::CustomMethod("accessForward", &JSWebController::AccessForward);
+    JSClass<JSWebController>::CustomMethod("accessBackward", &JSWebController::AccessBackward);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
 }
 
@@ -108,4 +112,43 @@ void JSWebController::LoadDataWithBaseUrl(const JSCallbackInfo& args)
         }
     }
 }
+
+void JSWebController::Backward(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController Start backward.");
+    if (webController_) {
+        webController_->Backward();
+    }
+}
+
+void JSWebController::Forward(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController Start forward.");
+    if (webController_) {
+        webController_->Forward();
+    }
+}
+
+void JSWebController::AccessBackward(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController start accessBackward.");
+    if (webController_) {
+        auto canAccess = webController_->AccessBackward();
+        auto jsVal = JSVal(ToJSValue(canAccess));
+        auto returnValue = JSRef<JSVal>::Make(jsVal);
+        args.SetReturnValue(returnValue);
+    }
+}
+
+void JSWebController::AccessForward(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController start accessForward.");
+    if (webController_) {
+        auto canAccess = webController_->AccessForward();
+        auto jsVal = JSVal(ToJSValue(canAccess));
+        auto returnValue = JSRef<JSVal>::Make(jsVal);
+        args.SetReturnValue(returnValue);
+    }
+}
+
 } // namespace OHOS::Ace::Framework
