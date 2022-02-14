@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@ constexpr int32_t GET_INSPECTOR_TREE_TIMES = 12;
 constexpr int32_t GET_INSPECTOR_TREE_INTERVAL = 5000;
 constexpr char FILE_NAME[] = "InspectorTree.txt";
 constexpr char ACE_VERSION_2[] = "2.0";
+constexpr char MODEL_STAGE[] = "stage";
 constexpr char MAX_ARGS_COUNT = 2;
 
 auto&& renderCallback = [](const void*, const size_t bufferSize, const int32_t width, const int32_t height) -> bool {
@@ -38,20 +39,24 @@ auto&& renderCallback = [](const void*, const size_t bufferSize, const int32_t w
 int main(int argc, const char* argv[])
 {
 #ifdef MAC_PLATFORM
-    std::string assetPath = "/Volumes/SSD2T/daily-test/preview/js/default";
-    std::string assetPath2 = "/Volumes/SSD2T/daily-test/preview/js/default_2.0";
+    std::string assetPathJs = "/Volumes/SSD2T/daily-test/preview/js/default";
+    std::string assetPathEts = "/Volumes/SSD2T/daily-test/preview/js/default_2.0";
+    std::string assetPathEtsStage = "/Volumes/SSD2T/daily-test/preview/js/ets";
     std::string appResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/AppResources";
+    std::string appResourcesPathStage = "/Volumes/SSD2T/daily-test/preview/js";
     std::string systemResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/SystemResources";
     std::string fontBasePath = "/Volumes/SSD2T/daily-test/preview/js/fonts";
 #else
-    std::string assetPath = "D:\\Workspace\\preview\\js\\default";
-    std::string assetPath2 = "D:\\Workspace\\preview\\js\\default_2.0";
+    std::string assetPathJs = "D:\\Workspace\\preview\\js\\default";
+    std::string assetPathEts = "D:\\Workspace\\preview\\js\\default_2.0";
+    std::string assetPathEtsStage = "D:\\Workspace\\preview\\js\\ets";
     std::string appResourcesPath = "D:\\Workspace\\preview\\js\\AppResources\\assets\\entry";
+    std::string appResourcesPathStage = "D:\\Workspace\\preview\\js";
     std::string systemResourcesPath = "D:\\Workspace\\preview\\js\\SystemResources\\assets\\entry";
     std::string fontBasePath = "D:\\Workspace\\preview\\js\\fonts";
 #endif
     OHOS::Ace::Platform::AceRunArgs args = {
-        .assetPath = assetPath,
+        .assetPath = assetPathJs,
         .systemResourcesPath = systemResourcesPath,
         .appResourcesPath = appResourcesPath,
         .fontBasePath = fontBasePath,
@@ -64,9 +69,16 @@ int main(int argc, const char* argv[])
         .onRender = std::move(renderCallback),
     };
 
-    if (argc == MAX_ARGS_COUNT && !std::strcmp(argv[1], ACE_VERSION_2)) {
-        args.assetPath = assetPath2;
-        args.aceVersion = OHOS::Ace::Platform::AceVersion::ACE_2_0;
+    if (argc == MAX_ARGS_COUNT) {
+        if (!std::strcmp(argv[1], ACE_VERSION_2)) {
+            args.assetPath = assetPathEts;
+            args.aceVersion = OHOS::Ace::Platform::AceVersion::ACE_2_0;
+        } else if (!std::strcmp(argv[1], MODEL_STAGE)) {
+            args.assetPath = assetPathEtsStage;
+            args.aceVersion = OHOS::Ace::Platform::AceVersion::ACE_2_0;
+            args.appResourcesPath = appResourcesPathStage;
+            args.projectModel = OHOS::Ace::Platform::ProjectModel::STAGE;
+        }
     }
 
     auto ability = OHOS::Ace::Platform::AceAbility::CreateInstance(args);

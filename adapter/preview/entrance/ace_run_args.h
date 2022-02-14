@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,14 @@ enum class AceVersion {
     ACE_2_0,
 };
 
+enum class ProjectModel {
+    FA,
+    STAGE,
+};
+
 struct ACE_PREVIEW_EXPORT AceRunArgs {
+    // the adopted project model
+    ProjectModel projectModel = ProjectModel::FA;
     // The absolute path end of "default".
     std::string assetPath;
     // The absolute path of system resources.
