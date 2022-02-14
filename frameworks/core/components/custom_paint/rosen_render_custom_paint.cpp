@@ -39,13 +39,13 @@
 #include "base/utils/linear_map.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "utils/native/base/include/securec.h"
 #include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/rosen_render_context.h"
-#include "utils/native/base/include/securec.h"
 
 namespace OHOS::Ace {
 namespace {
