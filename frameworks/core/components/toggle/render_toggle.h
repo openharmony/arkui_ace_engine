@@ -74,11 +74,12 @@ protected:
     RefPtr<KeyframeAnimation<float>> scaleAnimationUp_;
     RefPtr<KeyframeAnimation<float>> scaleAnimationDown_;
 
-    bool widthDefined_ { false };
-    bool isPressed_ { false };
-    bool isMoveEventValid_ { false };
-    bool isFocus_ { false };
-    float scale_ { 1.0f };
+    bool widthDefined_ = false;
+    bool heightDefined_ = false;
+    bool isPressed_ = false;
+    bool isMoveEventValid_ = false;
+    bool isFocus_ = false;
+    float scale_ = 1.0f;
 
     Size toggleSize_;
     std::function<void()> onClick_;
