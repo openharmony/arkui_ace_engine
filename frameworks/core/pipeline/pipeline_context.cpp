@@ -1878,11 +1878,14 @@ void PipelineContext::SetRootBgColor(const Color& color)
         LOGE("GetTheme failed!");
         return;
     }
-    appTheme->SetBackgroundColor(color);
+    if (windowModal_ == WindowModal::CONTAINER_MODAL) {
+        rootBgColor_ = Color::TRANSPARENT;
+    }
+    appTheme->SetBackgroundColor(rootBgColor_);
     if (rootElement_) {
         auto renderRoot = DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
         if (renderRoot) {
-            renderRoot->SetBgColor(color);
+            renderRoot->SetBgColor(rootBgColor_);
         }
     }
 }

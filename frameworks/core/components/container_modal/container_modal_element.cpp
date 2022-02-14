@@ -23,49 +23,38 @@
 namespace OHOS::Ace {
 namespace {
 
-constexpr uint32_t COLUMN_CHILD_MIN = 2;
+constexpr uint32_t COLUMN_CHILD_NUM = 2;
 
 } // namespace
 
 RefPtr<StackElement> ContainerModalElement::GetStackElement() const
 {
-    auto containerbox = AceType::DynamicCast<BoxElement>(GetFirstChild());
-    if (!containerbox) {
+    auto containerBox = AceType::DynamicCast<BoxElement>(GetFirstChild());
+    if (!containerBox) {
         LOGE("Get stack element failed. Container box element is null!");
-        return RefPtr<StackElement>();
+        return {};
     }
 
-    auto column = AceType::DynamicCast<ColumnElement>(containerbox->GetFirstChild());
-    if (!column || column->GetChildren().size() < COLUMN_CHILD_MIN) {
-        // column should has more than 2 child
+    auto column = AceType::DynamicCast<ColumnElement>(containerBox->GetFirstChild());
+    if (!column || column->GetChildren().size() != COLUMN_CHILD_NUM) {
+        // column should have 2 children, title and content.
         LOGE("Get stack element failed. Column is null or child size error!");
-        return RefPtr<StackElement>();
+        return {};
     }
 
     // Get second child
     auto secondItr = std::next(column->GetChildren().begin());
-    auto contentFlexItem = AceType::DynamicCast<FlexItemElement>(*secondItr);
-    if (!contentFlexItem) {
-        LOGE("Get stack element failed. content flex item element is null!");
-        return RefPtr<StackElement>();
-    }
+    auto contentBox = AceType::DynamicCast<BoxElement>(*secondItr);
 
-    auto contentBox = AceType::DynamicCast<BoxElement>(contentFlexItem->GetFirstChild());
     if (!contentBox) {
         LOGE("Get stack element failed. content box element is null!");
-        return RefPtr<StackElement>();
+        return {};
     }
 
-    auto clip = contentBox->GetFirstChild();
-    if (!clip) {
-        LOGE("Get stack element failed. clip is null!");
-        return RefPtr<StackElement>();
-    }
-
-    auto stack = clip->GetFirstChild();
+    auto stack = contentBox->GetFirstChild();
     if (!stack || !AceType::InstanceOf<StackElement>(stack)) {
         LOGE("Get stack element failed. stack is null or type error!");
-        return RefPtr<StackElement>();
+        return {};
     }
 
     return AceType::DynamicCast<StackElement>(stack);
@@ -76,16 +65,16 @@ RefPtr<OverlayElement> ContainerModalElement::GetOverlayElement() const
     auto stack = GetStackElement();
     if (!stack) {
         LOGE("Get overlay element failed, stack element is null");
-        return RefPtr<OverlayElement>();
+        return {};
     }
 
-    for (auto child : stack->GetChildren()) {
+    for (const auto& child : stack->GetChildren()) {
         if (child && AceType::InstanceOf<OverlayElement>(child)) {
             return AceType::DynamicCast<OverlayElement>(child);
         }
     }
     LOGE("Get overlay element failed, all children of stack element do not meet the requirements");
-    return RefPtr<OverlayElement>();
+    return {};
 }
 
 RefPtr<StageElement> ContainerModalElement::GetStageElement() const
@@ -93,15 +82,15 @@ RefPtr<StageElement> ContainerModalElement::GetStageElement() const
     auto stack = GetStackElement();
     if (!stack) {
         LOGE("Get stage element failed, stack element is null");
-        return RefPtr<StageElement>();
+        return {};
     }
-    for (auto child : stack->GetChildren()) {
+    for (const auto& child : stack->GetChildren()) {
         if (child && AceType::InstanceOf<StageElement>(child)) {
             return AceType::DynamicCast<StageElement>(child);
         }
     }
     LOGE("Get stage element failed, all children of stack element do not meet the requirements");
-    return RefPtr<StageElement>();
+    return {};
 }
 
 } // namespace OHOS::Ace
