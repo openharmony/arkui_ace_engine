@@ -20,6 +20,7 @@ source_set("ace_resource") {
   sources = [
     "ace_res_config.cpp",
     "ace_res_key_parser.cpp",
+    "data_provider_manager.cpp",
     "internal_resource.cpp",
     "shared_image_manager.cpp",
   ]

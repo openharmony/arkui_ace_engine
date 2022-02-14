@@ -295,8 +295,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     PluginManager::GetInstance().SetAceAbility(nullptr, pluginUtils);
     // create container
     instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
-    auto container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true, info,
-        std::make_unique<ContentEventCallback>([context = context_] {
+    auto container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
+        context_, info, std::make_unique<ContentEventCallback>([context = context_] {
             auto sharedContext = context.lock();
             if (!sharedContext) {
                 return;

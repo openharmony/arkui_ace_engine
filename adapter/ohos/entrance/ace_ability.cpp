@@ -238,7 +238,7 @@ void AceAbility::OnStart(const Want& want)
     PluginManager::GetInstance().SetAceAbility(this, pluginUtils);
 
     // create container
-    Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, srcPath, this,
+    Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, srcPath, shared_from_this(),
         std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); }));
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
