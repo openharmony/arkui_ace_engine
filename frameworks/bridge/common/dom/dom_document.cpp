@@ -92,9 +92,6 @@
 #include "frameworks/bridge/common/dom/dom_piece.h"
 #include "frameworks/bridge/common/dom/dom_popup.h"
 #include "frameworks/bridge/common/dom/dom_rating.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-#include "frameworks/bridge/common/dom/dom_rich_text.h"
-#endif
 #include "frameworks/bridge/common/dom/dom_select.h"
 #include "frameworks/bridge/common/dom/dom_stepper.h"
 #include "frameworks/bridge/common/dom/dom_stepper_item.h"
@@ -106,6 +103,7 @@
 #include "frameworks/bridge/common/dom/dom_video.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #ifdef WEB_SUPPORTED
+#include "frameworks/bridge/common/dom/dom_rich_text.h"
 #include "frameworks/bridge/common/dom/dom_web.h"
 #endif
 #endif
@@ -210,11 +208,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
 #endif
         { DOM_NODE_TAG_RECT, &DOMNodeCreator<DOMSvgRect> },
         { DOM_NODE_TAG_REFRESH, &DOMNodeCreator<DOMRefresh> },
-#ifndef WEARABLE_PRODUCT
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(OHOS_STANDARD_SYSTEM)
-        { DOM_NODE_TAG_RICH_TEXT, &DOMNodeCreator<DOMRichText> },
-#endif
-#endif
         { DOM_NODE_TAG_SEARCH, &DOMNodeCreator<DOMSearch> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_SELECT, &DOMNodeCreator<DOMSelect> },
@@ -248,6 +241,7 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_VIDEO, &DOMNodeCreator<DOMVideo> },
 #ifdef WEB_SUPPORTED
+        { DOM_NODE_TAG_RICH_TEXT, &DOMNodeCreator<DOMRichText> },
         { DOM_NODE_TAG_WEB, &DOMNodeCreator<DOMWeb> },
 #endif
 #endif

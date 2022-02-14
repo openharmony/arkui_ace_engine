@@ -256,6 +256,7 @@ template("declarative_js_engine") {
     if (defined(config.web_components_support) &&
         config.web_components_support) {
       sources += [
+        "jsview/js_richtext.cpp",
         "jsview/js_web.cpp",
         "jsview/js_web_controller.cpp",
       ]

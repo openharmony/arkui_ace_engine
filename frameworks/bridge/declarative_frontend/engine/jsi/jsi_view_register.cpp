@@ -58,6 +58,7 @@
 #endif
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #ifdef WEB_SUPPORTED
+#include "frameworks/bridge/declarative_frontend/jsview/js_richtext.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
 #endif
@@ -829,6 +830,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #ifdef WEB_SUPPORTED
+    { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
 #endif

@@ -62,6 +62,7 @@
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_richtext.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
 #endif
@@ -636,6 +637,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #endif
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(OHOS_STANDARD_SYSTEM)
+    {"RichText", JSRichText::JSBind},
     {"Web", JSWeb::JSBind},
     {"WebController", JSWebController::JSBind},
 #endif
