@@ -24,8 +24,9 @@
         ],
         "deps": {
             "components": [
+                "ability_base",
                 "hiviewdfx_hilog_native",
-                "aafwk_standard",
+                "ability_runtime",
                 "appexecfwk_standard",
                 "ipc",
                 "ipc_js",
