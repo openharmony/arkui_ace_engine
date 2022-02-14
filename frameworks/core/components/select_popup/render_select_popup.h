@@ -63,6 +63,9 @@ public:
         isWattingForAnimationStart_ = isWattingForAnimationStart;
     }
 
+    bool HandleMouseEvent(const MouseEvent& event) override;
+    WeakPtr<RenderNode> CheckHoverNode() override;
+
 protected:
     bool isFullScreen_ = true;
     bool isWattingForAnimationStart_ = false;
