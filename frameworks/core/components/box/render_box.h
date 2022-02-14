@@ -28,6 +28,7 @@
 #include "core/gestures/click_recognizer.h"
 #include "core/event/axis_event.h"
 #include "core/gestures/raw_recognizer.h"
+#include "base/window/drag_window.h"
 
 namespace OHOS::Ace {
 
@@ -247,6 +248,8 @@ public:
         return onLongPressId_;
     }
 
+    RefPtr<Component> GenCustomComponent(const RefPtr<PipelineContext>& context, const GestureEvent& info);
+    void AddDataToClipboard(const RefPtr<PipelineContext>& context);
     RefPtr<RenderBox> FindTargetRenderBox(const RefPtr<PipelineContext> context, const GestureEvent& info);
 
     void ResetController(RefPtr<Animator>& controller);
@@ -322,6 +325,10 @@ private:
     size_t selectedIndex_ = DEFAULT_INDEX;
     size_t insertIndex_ = DEFAULT_INDEX;
     std::function<void(const std::shared_ptr<ClickInfo>&)> remoteMessageEvent_;
+
+    RefPtr<DragWindow> dragWindow_;
+    bool isDragRenderBox_ = false;
+    std::string customDragInfo_;
 }; // class RenderBox
 } // namespace OHOS::Ace
 

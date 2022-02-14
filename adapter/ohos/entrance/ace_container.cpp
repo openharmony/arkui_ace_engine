@@ -507,6 +507,14 @@ void AceContainer::InitializeCallback()
             [context, deadline]() { context->OnIdle(deadline); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterIdleCallback(idleCallback);
+
+    auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
+                                   int32_t x, int32_t y, const DragEventAction& action) {
+        ContainerScope scope(id);
+        context->GetTaskExecutor()->PostTask(
+            [context, x, y, action]() { context->OnDragEvent(x, y, action); }, TaskExecutor::TaskType::UI);
+    };
+    aceView_->RegisterDragEventCallback(dragEventCallback);
 }
 
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName,

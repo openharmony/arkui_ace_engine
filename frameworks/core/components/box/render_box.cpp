@@ -32,6 +32,7 @@
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/pan_recognizer.h"
 #include "core/gestures/sequenced_recognizer.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -103,6 +104,7 @@ void RenderBox::Update(const RefPtr<Component>& component)
             onLongPress_->SetIsExternalGesture(true);
         }
 
+        customDragInfo_ = box->GetCustomDragInfo();
         onDragStart_ = box->GetOnDragStartId();
         onDragEnter_ = box->GetOnDragEnterId();
         onDragMove_ = box->GetOnDragMoveId();
@@ -206,14 +208,59 @@ void RenderBox::CreateDragDropRecognizer()
             LOGE("RenderBox is null.");
             return;
         }
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+        if (renderBox->isDragRenderBox_) {
+            renderBox->isDragRenderBox_ = false;
+        }
+
+        if (renderBox->dragWindow_) {
+            renderBox->dragWindow_->Destory();
+            renderBox->dragWindow_ = nullptr;
+        }
+#else
         auto stackElement = pipelineContext->GetLastStack();
         stackElement->PopComponent();
         renderBox->SetPreTargetRenderBox(nullptr);
+#endif
     });
 
     std::vector<RefPtr<GestureRecognizer>> recognizers { longPressRecognizer, panRecognizer };
     dragDropGesture_ = AceType::MakeRefPtr<OHOS::Ace::SequencedRecognizer>(GetContext(), recognizers);
     dragDropGesture_->SetIsExternalGesture(true);
+}
+
+void RenderBox::AddDataToClipboard(const RefPtr<PipelineContext>& context)
+{
+    auto seleItemSizeStr = JsonUtil::Create(true);
+    seleItemSizeStr->Put("width", selectedItemSize_.Width());
+    seleItemSizeStr->Put("height", selectedItemSize_.Height());
+    seleItemSizeStr->Put("selectedIndex", selectedIndex_);
+    seleItemSizeStr->Put("customDragInfo", customDragInfo_.c_str());
+
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
+    clipboard->SetData(seleItemSizeStr->ToString());
+}
+
+RefPtr<Component> RenderBox::GenCustomComponent(const RefPtr<PipelineContext>& context, const GestureEvent& info)
+{
+    RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+    event->SetX(context->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+    event->SetY(context->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+    selectedItemSize_ = GetLayoutSize();
+    auto extraParams = JsonUtil::Create(true);
+    SetSelectedIndex(info);
+    if (selectedIndex_  != DEFAULT_INDEX) {
+        extraParams->Put("selectedIndex", selectedIndex_ );
+    }
+
+    auto customComponent = onDragStart_(event, extraParams->ToString());
+    if (!customComponent) {
+        LOGE("Custom component is null.");
+        return nullptr;
+    }
+
+    return customComponent;
 }
 
 void RenderBox::PanOnActionStart(const GestureEvent& info)
@@ -225,24 +272,27 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
             return;
         }
 
-        RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
-        RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
-        event->SetPasteData(pasteData);
-        event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
-        event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
-
-        selectedItemSize_ = GetLayoutSize();
-        auto extraParams = JsonUtil::Create(true);
-        SetSelectedIndex(info);
-        if (selectedIndex_ != DEFAULT_INDEX) {
-            extraParams->Put("selectedIndex", selectedIndex_);
-        }
-
-        auto customComponent = onDragStart_(event, extraParams->ToString());
-        if (!customComponent) {
-            LOGE("Custom component is null.");
+        auto customComponent = GenCustomComponent(pipelineContext, info);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+        auto wp = AceType::WeakClaim(this);
+        auto initRenderNode = wp.Upgrade();
+        if (!initRenderNode) {
+            LOGE("initRenderNode is null.");
             return;
         }
+
+        isDragRenderBox_ = true;
+        pipelineContext->SetInitRenderNode(initRenderNode);
+
+        AddDataToClipboard(pipelineContext);
+        auto positionedComponent = AceType::MakeRefPtr<PositionedComponent>(customComponent);
+        if (!dragWindow_) {
+            dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
+                static_cast<int32_t>(GetGlobalOffset().GetX()), static_cast<int32_t>(GetGlobalOffset().GetY()),
+                static_cast<uint32_t>(positionedComponent->GetWidth()),
+                static_cast<uint32_t>(positionedComponent->GetHeight()));
+        }
+#else
         auto stackElement = pipelineContext->GetLastStack();
         auto positionedComponent = AceType::MakeRefPtr<PositionedComponent>(customComponent);
         positionedComponent->SetTop(Dimension(GetGlobalOffset().GetY()));
@@ -259,11 +309,22 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
 
         positionedComponent->SetUpdatePositionFuncId(updatePosition);
         stackElement->PushComponent(positionedComponent);
+#endif
     }
 }
 
 void RenderBox::PanOnActionUpdate(const GestureEvent& info)
 {
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+        if (isDragRenderBox_) {
+            int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
+            int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
+
+            if (dragWindow_) {
+                dragWindow_->MoveTo(x, y);
+            }
+        }
+#else
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         LOGE("Context is null.");
@@ -271,8 +332,6 @@ void RenderBox::PanOnActionUpdate(const GestureEvent& info)
     }
 
     RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
-    RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
-    event->SetPasteData(pasteData);
     event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
     event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
 
@@ -308,10 +367,21 @@ void RenderBox::PanOnActionUpdate(const GestureEvent& info)
         (targetRenderBox->GetOnDragEnter())(event, extraParams->ToString());
     }
     SetPreTargetRenderBox(targetRenderBox);
+#endif
 }
 
 void RenderBox::PanOnActionEnd(const GestureEvent& info)
 {
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+        if (isDragRenderBox_) {
+            isDragRenderBox_ = false;
+        }
+
+        if (dragWindow_) {
+            dragWindow_->Destory();
+            dragWindow_ = nullptr;
+        }
+#else
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         LOGE("Context is null.");
@@ -353,6 +423,7 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
         (targetRenderBox->GetOnDrop())(event, extraParams->ToString());
     }
     SetPreTargetRenderBox(nullptr);
+#endif
 }
 
 void RenderBox::SetSelectedIndex(const GestureEvent& info)

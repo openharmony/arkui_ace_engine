@@ -168,6 +168,11 @@ void AceAbility::OnStart(const Want& want)
     // register surface change callback
     OHOS::sptr<OHOS::Rosen::IWindowChangeListener> thisAbility(this);
     window->RegisterWindowChangeListener(thisAbility);
+
+    // register drag event callback
+    OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener(this);
+    window->RegisterDragListener(dragWindowListener);
+
     int32_t width = window->GetRect().width_;
     int32_t height = window->GetRect().height_;
     LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", width, height);
@@ -595,6 +600,32 @@ WindowSizeChangeReason AceAbility::Convert2WindowSizeChangeReason(OHOS::Rosen::W
         return WindowSizeChangeReason::UNDEFINED;
     }
     return static_cast<WindowSizeChangeReason>(reasonValue);
+}
+
+void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
+{
+    LOGI("AceAbility::OnDrag called ");
+    auto flutterAceView = static_cast<Platform::FlutterAceView*>(
+        Platform::AceContainer::GetContainer(abilityId_)->GetView());
+    if (!flutterAceView) {
+        LOGE("AceAbility::OnDrag flutterAceView is null");
+        return;
+    }
+
+    DragEventAction action;
+    switch (event) {
+        case OHOS::Rosen::DragEvent::DRAG_EVENT_END:
+            action = DragEventAction::DRAG_EVENT_END;
+            break;
+        case OHOS::Rosen::DragEvent::DRAG_EVENT_IN:
+        case OHOS::Rosen::DragEvent::DRAG_EVENT_OUT:
+        case OHOS::Rosen::DragEvent::DRAG_EVENT_MOVE:
+        default:
+            action = DragEventAction::DRAG_EVENT_START;
+            break;
+    }
+
+    flutterAceView->ProcessDragEvent(x, y, action);
 }
 
 } // namespace Ace
