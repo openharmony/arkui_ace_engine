@@ -65,6 +65,10 @@ public:
     {
         HILOG_INFO("UIMgrServiceWindowChangeListener size change");
     }
+    void OnModeChange(OHOS::Rosen::WindowMode mode) override
+    {
+        HILOG_INFO("UIMgrServiceWindowChangeListener mode change");
+    }
 };
 
 class UIMgrServiceInputEventConsumer : public MMI::IInputEventConsumer {
