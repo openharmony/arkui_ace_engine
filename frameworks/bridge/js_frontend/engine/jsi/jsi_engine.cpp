@@ -2119,7 +2119,6 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
         if (sPage == nullptr) {
             return runtime->NewUndefined();
         }
-
         int32_t childNodeId = 0;
         std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(arguments);
         if (argsValue && argsValue->IsArray()) {
@@ -2133,9 +2132,9 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
             RefPtr<DOMNode> node = domDocument->GetDOMNodeById(childNodeId);
             if(node == nullptr) {
                 LOGE("node is nullptr");
-                return runtime->NewUndefined();
             }
-            auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node->GetTag(), childNodeId, nodeId);
+            auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node ? node->GetTag() : "", childNodeId,
+			    nodeId);
             sPage->PushCommand(command);
             if (!sPage->CheckPageCreated() && sPage->GetCommandSize() > FRAGMENT_SIZE) {
                 sPage->FlushCommands();
@@ -2427,10 +2426,16 @@ shared_ptr<JsValue> JsAppendChild(const shared_ptr<JsRuntime>& runtime, const sh
         RefPtr<DOMNode> node = domDocument->GetDOMNodeById(id);
         if (node == nullptr) {
             LOGE("node is nullptr");
-            return runtime->NewUndefined();
         }
         int32_t parentNodeId = GetNodeId(runtime, thisObj);
-        auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node->GetTag(), node->GetNodeId(), parentNodeId);
+        RefPtr<DOMNode> parentNode = domDocument->GetDOMNodeById(parentNodeId);
+        if (parentNode == nullptr) {
+            LOGE("parentNodeId is nullptr");
+        }
+        if (parentNode != nullptr && node != nullptr) {
+            parentNode->RemoveNode(node);
+        }
+        auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node ? node->GetTag() : "", id, parentNodeId);
         page->PushCommand(command);
         if (!page->CheckPageCreated() && page->GetCommandSize() > FRAGMENT_SIZE) {
             page->FlushCommands();

@@ -1979,9 +1979,9 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
             RefPtr<DOMNode> node = domDocument->GetDOMNodeById(childNodeId);
             if (node == nullptr) {
                 LOGE("node is nullptr");
-                return JS_NULL;
             }
-            auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node->GetTag(), node->GetNodeId(), nodeId);
+            auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node ? node->GetTag() : "", childNodeId,
+			    nodeId);
             sPage->PushCommand(command);
             if (!sPage->CheckPageCreated() && sPage->GetCommandSize() > FRAGMENT_SIZE) {
                 sPage->FlushCommands();
@@ -2332,14 +2332,22 @@ JSValue JsAppendChild(JSContext* ctx, JSValueConst value, int32_t argc, JSValueC
         RefPtr<DOMNode> node = domDocument->GetDOMNodeById(id);
         if (node == nullptr) {
             LOGE("node is nullptr");
-            return JS_NULL;
         }
-        int32_t parentNodeId;
+        int32_t parentNodeId = 0;
         JSValue bridgeId = JS_GetPropertyStr(ctx, value, "__nodeId");
-        if (JS_IsInteger(bridgeId) && (JS_ToInt32(ctx, &parentNodeId, bridgeId)) < 0) {
-            parentNodeId = 0;
+        if (JS_IsInteger(bridgeId)) {
+            if ((JS_ToInt32(ctx, &parentNodeId, bridgeId)) < 0) {
+                parentNodeId = 0;
+            }
         }
-        auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node->GetTag(), node->GetNodeId(), parentNodeId);
+        RefPtr<DOMNode> parentNode = domDocument->GetDOMNodeById(parentNodeId);
+        if (parentNode == nullptr) {
+            LOGE("node is nullptr");
+        }
+        if (node != nullptr && parentNode != nullptr) {
+            parentNode->RemoveNode(node);
+        }
+        auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node ? node->GetTag() : "", id, parentNodeId);
         page->PushCommand(command);
         if (!page->CheckPageCreated() && page->GetCommandSize() > FRAGMENT_SIZE) {
             page->FlushCommands();
