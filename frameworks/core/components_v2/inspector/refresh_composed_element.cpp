@@ -88,4 +88,50 @@ std::string RefreshComposedElement::GetFriction() const
     }
     return "-";
 }
+
+void RefreshComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto refreshElement = GetContentElement<RefreshElement>(RefreshElement::TypeId());
+    if (!refreshElement) {
+        LOGE("get GetRefreshElement failed");
+        return;
+    }
+    refreshElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    refreshElement->MarkDirty();
+    LOGD("refresh AddChildWithSlot");
+}
+
+void RefreshComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto refreshElement = GetContentElement<RefreshElement>(RefreshElement::TypeId());
+    if (!refreshElement) {
+        LOGE("get GetRefreshElement failed");
+        return;
+    }
+    auto child = GetElementChildBySlot(slot, refreshElement);
+    if (!child) {
+        LOGE("refreshElement get GetChildBySlot failed");
+        return;
+    }
+    refreshElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    refreshElement->MarkDirty();
+    LOGD("refresh UpdateChildWithSlot");
+}
+
+void RefreshComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto refreshElement = GetContentElement<RefreshElement>(RefreshElement::TypeId());
+    if (!refreshElement) {
+        LOGE("get GetRefreshElement failed");
+        return;
+    }
+    auto child = GetElementChildBySlot(slot, refreshElement);
+    if (!child) {
+        LOGE("refreshElement get GetChildBySlot failed");
+        return;
+    }
+    refreshElement->UpdateChildWithSlot(child, nullptr, slot, slot);
+    refreshElement->MarkDirty();
+    LOGD("refresh DeleteChildWithSlot");
+}
 } // namespace OHOS::Ace::V2
