@@ -76,6 +76,7 @@
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/factories/flutter_render_factory.h"
 #include "core/pipeline/base/render_context.h"
+#include "core/components_v2/list/render_list.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -2704,57 +2705,145 @@ const RefPtr<RenderNode> PipelineContext::GetPreTargetRenderNode() const
     return preTargetRenderNode_;
 }
 
-bool PipelineContext::ProcessDragEvent(int action, double windowX, double windowY, const std::string& data)
+void PipelineContext::SetInitRenderNode(const RefPtr<RenderNode>& initRenderNode)
 {
-    RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
-    RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
-    event->SetPasteData(pasteData);
-    event->SetX(ConvertPxToVp(Dimension(windowX, DimensionUnit::PX)));
-    event->SetY(ConvertPxToVp(Dimension(windowY, DimensionUnit::PX)));
-    auto json = JsonUtil::ParseJsonString(data);
-    event->SetDescription(json->GetValue("description")->GetString());
-    event->GetPasteData()->SetPlainText(json->GetValue("plainText")->GetString());
+    initRenderNode_ = initRenderNode;
+}
+
+const RefPtr<RenderNode> PipelineContext::GetInitRenderNode() const
+{
+    return initRenderNode_;
+}
+
+void PipelineContext::ProcessDragEventStart(
+    const RefPtr<RenderNode>& renderNode, const RefPtr<DragEvent>& event, const Point& globalPoint)
+{
+    auto targetRenderBox = AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, globalPoint));
+    auto initRenderBox = AceType::DynamicCast<RenderBox>(GetInitRenderNode());
+    auto extraParams = JsonUtil::Create(true);
+    extraParams->Put("customDragInfo", customDragInfo_.c_str());
+    auto info = GestureEvent();
+    info.SetGlobalPoint(globalPoint);
+    auto preTargetRenderBox = AceType::DynamicCast<RenderBox>(GetPreTargetRenderNode());
+
+    if (targetRenderBox == preTargetRenderBox) {
+        if (targetRenderBox && targetRenderBox->GetOnDragMove()) {
+            auto renderList = renderNode->FindChildNodeOfClass<V2::RenderList>(globalPoint, globalPoint);
+            if (renderList) {
+                insertIndex_ = renderList->CalculateInsertIndex(renderList, info, selectedItemSize_);
+            }
+
+            if (insertIndex_ == RenderNode::DEFAULT_INDEX) {
+                (targetRenderBox->GetOnDragMove())(event, extraParams->ToString());
+                return;
+            }
+
+            if (targetRenderBox != initRenderBox) {
+                extraParams->Put("selectedIndex", -1);
+            } else {
+                extraParams->Put("selectedIndex", selectedIndex_);
+            }
+
+            extraParams->Put("insertIndex", insertIndex_);
+            (targetRenderBox->GetOnDragMove())(event, extraParams->ToString());
+        }
+    } else {
+        if (preTargetRenderBox && preTargetRenderBox->GetOnDragLeave()) {
+            (preTargetRenderBox->GetOnDragLeave())(event, extraParams->ToString());
+        }
+
+        if (targetRenderBox && targetRenderBox->GetOnDragEnter()) {
+            (targetRenderBox->GetOnDragEnter())(event, extraParams->ToString());
+        }
+
+        SetPreTargetRenderNode(targetRenderBox);
+    }
+}
+
+void PipelineContext::ProcessDragEventEnd(
+    const RefPtr<RenderNode>& renderNode, const RefPtr<DragEvent>& event, const Point& globalPoint)
+{
+    auto targetRenderBox = AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, globalPoint));
+    auto initRenderBox = AceType::DynamicCast<RenderBox>(GetInitRenderNode());
+    auto extraParams = JsonUtil::Create(true);
+    extraParams->Put("customDragInfo", customDragInfo_.c_str());
+    auto info = GestureEvent();
+    info.SetGlobalPoint(globalPoint);
+    auto preTargetRenderBox = AceType::DynamicCast<RenderBox>(GetPreTargetRenderNode());
+
+    if (targetRenderBox && targetRenderBox->GetOnDrop()) {
+        auto renderList = renderNode->FindChildNodeOfClass<V2::RenderList>(globalPoint, globalPoint);
+        if (renderList) {
+            insertIndex_ = renderList->CalculateInsertIndex(renderList, info, selectedItemSize_);
+        }
+
+        if (insertIndex_ == RenderNode::DEFAULT_INDEX) {
+            (targetRenderBox->GetOnDrop())(event, extraParams->ToString());
+            return;
+        }
+
+        if (targetRenderBox != initRenderBox) {
+            extraParams->Put("selectedIndex", -1);
+        } else {
+            extraParams->Put("selectedIndex", selectedIndex_);
+        }
+
+        extraParams->Put("insertIndex", insertIndex_);
+        (targetRenderBox->GetOnDrop())(event, extraParams->ToString());
+    }
+
+    if (initRenderBox && initRenderBox->GetOnDrop()) {
+        (initRenderBox->GetOnDrop())(event, extraParams->ToString());
+    }
+
+    SetPreTargetRenderNode(nullptr);
+    SetInitRenderNode(nullptr);
+}
+
+void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
+{
+    if (!clipboard_) {
+        clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(GetTaskExecutor());
+    }
+
+    if (!clipboardCallback_) {
+        auto callback = [weakPipelineContext = WeakClaim(this)](const std::string& data) {
+            auto pipelineContext = weakPipelineContext.Upgrade();
+            if (pipelineContext) {
+                auto json = JsonUtil::ParseJsonString(data);
+                pipelineContext->selectedItemSize_.SetWidth(json->GetDouble("width"));
+                pipelineContext->selectedItemSize_.SetHeight(json->GetDouble("height"));
+                pipelineContext->selectedIndex_ = json->GetInt("selectedIndex");
+                pipelineContext->customDragInfo_ = json->GetString("customDragInfo");
+            }
+        };
+
+        clipboardCallback_ = callback;
+    }
+
+    if (clipboardCallback_) {
+        clipboard_->GetData(clipboardCallback_);
+    }
 
     auto renderNode = GetLastPageRender();
     if (!renderNode) {
-        return false;
+        LOGE("PipelineContext::OnDragEvent renderNode is null.");
+        return;
     }
 
-    Point globalPoint(windowX, windowY);
-    Point localPoint(windowX, windowY);
+    RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+    event->SetX(ConvertPxToVp(Dimension(x, DimensionUnit::PX)));
+    event->SetY(ConvertPxToVp(Dimension(y, DimensionUnit::PX)));
 
-    if (action == DragEventAction::ACTION_DRAG_LOCATION) {
-        auto targetRenderBox =
-            AceType::DynamicCast<RenderBox>(renderNode->FindChildNodeOfClass<RenderBox>(globalPoint, localPoint));
-        auto preTargetRenderBox = AceType::DynamicCast<RenderBox>(GetPreTargetRenderNode());
+    Point globalPoint(x, y);
 
-        if (targetRenderBox == preTargetRenderBox) {
-            if (targetRenderBox && targetRenderBox->GetOnDragMove()) {
-                (targetRenderBox->GetOnDragMove())(event, json->ToString());
-            }
-        } else {
-            if (preTargetRenderBox && preTargetRenderBox->GetOnDragLeave()) {
-                (preTargetRenderBox->GetOnDragLeave())(event, json->ToString());
-            }
-            if (targetRenderBox && targetRenderBox->GetOnDragEnter()) {
-                (targetRenderBox->GetOnDragEnter())(event, json->ToString());
-            }
-            SetPreTargetRenderNode(targetRenderBox);
-        }
-
-        return targetRenderBox ? true : false;
-    } else if (action == DragEventAction::ACTION_DROP) {
-        auto targetRenderBox =
-            AceType::DynamicCast<RenderBox>(renderNode->FindChildNodeOfClass<RenderBox>(globalPoint, localPoint));
-
-        if (targetRenderBox && targetRenderBox->GetOnDrop()) {
-            (targetRenderBox->GetOnDrop())(event, json->ToString());
-        }
-        SetPreTargetRenderNode(nullptr);
-        return targetRenderBox ? true : false;
+    if (action == DragEventAction::DRAG_EVENT_START) {
+        ProcessDragEventStart(renderNode, event, globalPoint);
     }
 
-    return true;
+    if (action == DragEventAction::DRAG_EVENT_END) {
+        ProcessDragEventEnd(renderNode, event, globalPoint);
+    }
 }
 
 void PipelineContext::FlushWindowBlur()

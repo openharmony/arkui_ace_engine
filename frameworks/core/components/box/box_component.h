@@ -309,6 +309,16 @@ public:
     {
         onLongPressId_ = onLongPressId;
     }
+
+    void SetCustomDragInfo(const std::string& customDragInfo)
+    {
+        customDragInfo_ = customDragInfo;
+    }
+
+    std::string GetCustomDragInfo() const
+    {
+        return customDragInfo_;
+    }
     
 private:
     RefPtr<Decoration> backDecoration_;
@@ -334,6 +344,8 @@ private:
     TextDirection inspectorDirection_ { TextDirection::LTR };
     RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_ = nullptr;
     EventMarker remoteMessageId_;
+
+    std::string customDragInfo_;
 };
 
 } // namespace OHOS::Ace

@@ -38,6 +38,7 @@ public:
     void RegisterMouseEventCallback(MouseEventCallback&& callback) override;
     void RegisterAxisEventCallback(AxisEventCallback&& callback) override;
     void RegisterRotationEventCallback(RotationEventCallBack&& callback) override;
+    void RegisterDragEventCallback(DragEventCallBack&& callback) override {}
 
     void Launch() override;
 

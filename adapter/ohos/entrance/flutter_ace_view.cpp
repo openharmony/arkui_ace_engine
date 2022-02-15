@@ -370,6 +370,12 @@ void FlutterAceView::RegisterTouchEventCallback(TouchEventCallback&& callback)
     touchEventCallback_ = std::move(callback);
 }
 
+void FlutterAceView::RegisterDragEventCallback(DragEventCallBack&& callback)
+{
+    ACE_DCHECK(callback);
+    dragEventCallback_ = std::move(callback);
+}
+
 void FlutterAceView::RegisterKeyEventCallback(KeyEventCallback&& callback)
 {
     ACE_DCHECK(callback);
@@ -418,6 +424,15 @@ void FlutterAceView::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>&
         }
     } else {
         LOGW("Unknown event.");
+    }
+}
+
+void FlutterAceView::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action)
+{
+    LOGD("ProcessDragEvent");
+
+    if (dragEventCallback_) {
+        dragEventCallback_(x, y, action);
     }
 }
 
