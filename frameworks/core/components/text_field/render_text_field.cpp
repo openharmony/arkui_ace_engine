@@ -1987,6 +1987,12 @@ void RenderTextField::OnHiddenChanged(bool hidden)
     }
 }
 
+void RenderTextField::OnAppHide()
+{
+    RenderNode::OnAppHide();
+    OnHiddenChanged(true);
+}
+
 void RenderTextField::OnOverlayFocusChange(bool isFocus, bool needCloseKeyboard)
 {
     isOverlayFocus_ = isFocus;
