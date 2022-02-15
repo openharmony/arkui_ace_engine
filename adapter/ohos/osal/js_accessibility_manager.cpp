@@ -650,7 +650,7 @@ RefPtr<AccessibilityNodeManager> AccessibilityNodeManager::Create()
 }
 
 void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessibilityId(
-    const long elementId, const int requestId, AccessibilityInteractionOperationCallback& callback, const int mode)
+    const long elementId, const int requestId, AccessibilityElementOperatorCallback& callback, const int mode)
 {
     auto jsAccessibilityManager = GetHandler().Upgrade();
     if (!jsAccessibilityManager) {
@@ -675,7 +675,7 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessib
 }
 
 void JsAccessibilityManager::SearchElementInfoByAccessibilityId(
-    const long elementId, const int requestId, AccessibilityInteractionOperationCallback& callback, const int mode)
+    const long elementId, const int requestId, AccessibilityElementOperatorCallback& callback, const int mode)
 {
     auto weak = WeakClaim(this);
     auto jsAccessibilityManager = weak.Upgrade();
@@ -733,7 +733,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(
 }
 
 void JsAccessibilityManager::JsInteractionOperation::SearchElementInfosByText(const long elementId,
-    const std::string& text, const int requestId, AccessibilityInteractionOperationCallback& callback)
+    const std::string& text, const int requestId, AccessibilityElementOperatorCallback& callback)
 {
     if (text.empty()) {
         LOGW("Text is null");
@@ -764,7 +764,7 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfosByText(co
 }
 
 void JsAccessibilityManager::SearchElementInfosByText(const long elementId, const std::string& text,
-    const int requestId, AccessibilityInteractionOperationCallback& callback)
+    const int requestId, AccessibilityElementOperatorCallback& callback)
 {
     if (text.empty()) {
         LOGW("Text is null");
@@ -811,7 +811,7 @@ void JsAccessibilityManager::SearchElementInfosByText(const long elementId, cons
 }
 
 void JsAccessibilityManager::JsInteractionOperation::FindFocusedElementInfo(
-    const long elementId, const int focusType, const int requestId, AccessibilityInteractionOperationCallback& callback)
+    const long elementId, const int focusType, const int requestId, AccessibilityElementOperatorCallback& callback)
 {
     auto jsAccessibilityManager = GetHandler().Upgrade();
     if (!jsAccessibilityManager) {
@@ -835,7 +835,7 @@ void JsAccessibilityManager::JsInteractionOperation::FindFocusedElementInfo(
 }
 
 void JsAccessibilityManager::FindFocusedElementInfo(
-    const long elementId, const int focusType, const int requestId, AccessibilityInteractionOperationCallback& callback)
+    const long elementId, const int focusType, const int requestId, AccessibilityElementOperatorCallback& callback)
 {
     auto weak = WeakClaim(this);
     auto jsAccessibilityManager = weak.Upgrade();
@@ -866,11 +866,11 @@ void JsAccessibilityManager::FindFocusedElementInfo(
     callback.SetFindFocusedElementInfoResult(nodeInfo, requestId);
 }
 
-void JsAccessibilityManager::JsInteractionOperation::PerformAction(const long elementId, const int action,
+void JsAccessibilityManager::JsInteractionOperation::ExecuteAction(const long elementId, const int action,
     const std::map<std::string, std::string> actionArguments, const int requestId,
-    AccessibilityInteractionOperationCallback& callback)
+    AccessibilityElementOperatorCallback& callback)
 {
-    LOGI("PerformAction, id:%{public}ld, action:%{public}d, request:%{public}d.", elementId, action, requestId);
+    LOGI("ExecuteAction, id:%{public}ld, action:%{public}d, request:%{public}d.", elementId, action, requestId);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     if (!jsAccessibilityManager) {
         return;
@@ -887,7 +887,7 @@ void JsAccessibilityManager::JsInteractionOperation::PerformAction(const long el
             if (!jsAccessibilityManager) {
                 return;
             }
-            jsAccessibilityManager->PerformAction(elementId, actionInfo, actionArguments, requestId, callback);
+            jsAccessibilityManager->ExecuteAction(elementId, actionInfo, actionArguments, requestId, callback);
         },
         TaskExecutor::TaskType::UI);
 }
@@ -941,9 +941,9 @@ bool JsAccessibilityManager::AccessibilityActionEvent(const ActionType& action,
     }
 }
 
-void JsAccessibilityManager::PerformAction(const long elementId, const ActionType& action,
+void JsAccessibilityManager::ExecuteAction(const long elementId, const ActionType& action,
     const std::map<std::string, std::string> actionArguments, const int requestId,
-    AccessibilityInteractionOperationCallback& callback)
+    AccessibilityElementOperatorCallback& callback)
 {
     auto weak = WeakClaim(this);
     auto jsAccessibilityManager = weak.Upgrade();
@@ -951,19 +951,19 @@ void JsAccessibilityManager::PerformAction(const long elementId, const ActionTyp
     auto node = jsAccessibilityManager->GetAccessibilityNodeFromPage((NodeId)elementId);
     if (!node) {
         LOGW("AccessibilityNodeInfo can't attach component by Id = %{public}d", (NodeId)elementId);
-        callback.SetPerformActionResult(false, requestId);
+        callback.SetExecuteActionResult(false, requestId);
         return;
     }
 
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
     if (!context) {
-        callback.SetPerformActionResult(false, requestId);
+        callback.SetExecuteActionResult(false, requestId);
         return;
     }
 
     bool actionResult = AccessibilityActionEvent(action, actionArguments, node, context);
 
-    callback.SetPerformActionResult(actionResult, requestId);
+    callback.SetExecuteActionResult(actionResult, requestId);
 }
 
 void JsAccessibilityManager::JsInteractionOperation::ClearFocus()
@@ -1015,7 +1015,7 @@ int JsAccessibilityManager::RegisterInteractionOperation(const int windowId)
     interactionOperation_ = std::make_shared<JsInteractionOperation>();
     interactionOperation_->SetHandler(WeakClaim(this));
     int32_t userId = AceApplicationInfo::GetInstance().GetUserId();
-    int retReg = instance->RegisterInteractionOperation(windowId, interactionOperation_, userId);
+    int retReg = instance->RegisterElementOperator(windowId, interactionOperation_, userId);
     LOGI("register accessibility interaction operation:%{public}d,%{public}d", windowId, retReg);
     Register(!retReg);
 
@@ -1035,7 +1035,7 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     }
     Register(false);
     currentFocusNodeId_ = -1;
-    return instance->DeregisterInteractionOperation(windowId);
+    return instance->DeregisterElementOperator(windowId);
 }
 
 void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(
@@ -1061,7 +1061,7 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(
 }
 
 void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearch(
-    const long elementId, const int direction, const int requestId, AccessibilityInteractionOperationCallback& callback)
+    const long elementId, const int direction, const int requestId, AccessibilityElementOperatorCallback& callback)
 {
     auto jsAccessibilityManager = GetHandler().Upgrade();
     if (!jsAccessibilityManager) {
@@ -1084,7 +1084,7 @@ void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearch(
 }
 
 void JsAccessibilityManager::FocusMoveSearch(const long elementId, const int direction, const int requestId,
-    Accessibility::AccessibilityInteractionOperationCallback& callback)
+    Accessibility::AccessibilityElementOperatorCallback& callback)
 {
     auto weak = WeakClaim(this);
     auto jsAccessibilityManager = weak.Upgrade();

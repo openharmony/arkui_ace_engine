@@ -41,7 +41,7 @@ private:
 };
 
 class DataProviderManagerInterface : public AceType {
-    DECLARE_ACE_TYPE(DataProviderManager, AceType)
+    DECLARE_ACE_TYPE(DataProviderManagerInterface, AceType)
 
 public:
     DataProviderManagerInterface() = default;
