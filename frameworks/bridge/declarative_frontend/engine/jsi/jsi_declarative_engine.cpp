@@ -626,7 +626,10 @@ void JsiDeclarativeEngineInstance::InitJsNativeModuleObject()
 {
     shared_ptr<JsValue> global = runtime_->GetGlobal();
     global->SetProperty(runtime_, "requireNativeModule", runtime_->NewFunction(RequireNativeModule));
-    JsiTimerModule::GetInstance()->InitTimerModule(runtime_, global);
+
+    if (!usingSharedRuntime_) {
+        JsiTimerModule::GetInstance()->InitTimerModule(runtime_, global);
+    }
 }
 
 void JsiDeclarativeEngineInstance::InitGlobalObjectTemplate()
