@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_richtext.h"
 
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_v2/richtext/rich_text_component.h"
 
@@ -30,7 +31,7 @@ void JSRichText::Create(const JSCallbackInfo& info)
 
     std::string data;
     ParseJsString(info[0], data);
-    Component->SetData(data);
+    component->SetData(data);
 }
 
 void JSRichText::JSBind(BindingTarget globalObj)
