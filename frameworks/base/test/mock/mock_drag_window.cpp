@@ -25,5 +25,4 @@ RefPtr<DragWindow> DragWindow::CreateDragWindow(const std::string& windowName, i
 void DragWindow::MoveTo(int32_t x, int32_t y) const {}
 
 void DragWindow::Destory() const {}
-
 } // namespace OHOS::Ace
