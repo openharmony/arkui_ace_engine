@@ -91,7 +91,8 @@ void RowSplitComposedElement::DeleteChildWithSlot(int32_t slot)
         LOGE("get GetRowSplitElement failed");
         return;
     }
-    rowSplitElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    auto child = rowSplitElement->GetChildBySlot(slot);
+    rowSplitElement->UpdateChildWithSlot(child, nullptr, slot, slot);
     rowSplitElement->MarkDirty();
 }
 

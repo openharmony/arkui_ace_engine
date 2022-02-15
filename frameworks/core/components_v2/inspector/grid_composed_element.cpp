@@ -256,7 +256,8 @@ void GridComposedElement::DeleteChildWithSlot(int32_t slot)
         LOGE("get GridLayoutElement failed");
         return;
     }
-    gridLayoutElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    auto child = gridLayoutElement->GetChildBySlot(slot);
+    gridLayoutElement->UpdateChildWithSlot(child, nullptr, slot, slot);
     gridLayoutElement->MarkDirty();
 }
 

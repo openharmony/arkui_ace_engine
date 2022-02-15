@@ -106,7 +106,8 @@ void StackComposedElement::DeleteChildWithSlot(int32_t slot)
         LOGE("get GetStackElement failed");
         return;
     }
-    stackElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    auto child = stackElement->GetChildBySlot(slot);
+    stackElement->UpdateChildWithSlot(child, nullptr, slot, slot);
     stackElement->MarkDirty();
 }
 } // namespace OHOS::Ace::V2

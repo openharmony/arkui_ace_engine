@@ -193,7 +193,8 @@ void ButtonComposedElement::DeleteChildWithSlot(int32_t slot)
         LOGE("get GetButtonElement failed");
         return;
     }
-    buttonElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    auto child = buttonElement->GetChildBySlot(slot);
+    buttonElement->UpdateChildWithSlot(child, nullptr, slot, slot);
     buttonElement->MarkDirty();
 }
 

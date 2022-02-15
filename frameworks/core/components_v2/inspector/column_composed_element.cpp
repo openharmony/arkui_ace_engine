@@ -146,7 +146,8 @@ void ColumnComposedElement::DeleteChildWithSlot(int32_t slot)
         LOGE("get GetFlexElement failed");
         return;
     }
-    flexElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    auto child = flexElement->GetChildBySlot(slot);
+    flexElement->UpdateChildWithSlot(child, nullptr, slot, slot);
     flexElement->MarkDirty();
 }
 

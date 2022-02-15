@@ -117,7 +117,8 @@ void TabContentComposedElement::DeleteChildWithSlot(int32_t slot)
         LOGE("get GetTabContentElement failed");
         return;
     }
-    tabContentElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    auto child = tabContentElement->GetChildBySlot(slot);
+    tabContentElement->UpdateChildWithSlot(child, nullptr, slot, slot);
     tabContentElement->MarkDirty();
 }
 
