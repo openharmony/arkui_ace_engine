@@ -49,8 +49,6 @@ constexpr int32_t LETTER_CODE_START = 29;
 constexpr int32_t LETTER_CODE_END = 54;
 constexpr int32_t LOWER_CASE_LETTER_DIFF = 68;
 constexpr int32_t UPPER_CASE_LETTER_DIFF = 36;
-constexpr int32_t LEFT_SHIFT_CODE = 59;
-constexpr int32_t RIGHT_SHIFT_CODE = 60;
 constexpr int32_t NUMBER_CODE_DIFF = 7;
 constexpr int32_t SHOW_HANDLE_DURATION = 250;
 constexpr int32_t DOUBLE_CLICK_FINGERS = 1;
@@ -1217,6 +1215,11 @@ bool RenderTextField::OnKeyEvent(const KeyEvent& event)
             return false;
         }
     }
+    if (event.action == KeyAction::UP &&
+        ((event.code == KeyCode::KEYBOARD_SHIFT_LEFT || event.code == KeyCode::KEYBOARD_SHIFT_RIGHT) ||
+        (event.code == KeyCode::KEYBOARD_CONTROL_LEFT || event.code == KeyCode::KEYBOARD_CONTROL_RIGHT))) {
+        return HandleKeyEvent(event);
+    }
 
     if (event.action == KeyAction::DOWN) {
         cursorPositionType_ = CursorPositionType::NONE;
@@ -1762,8 +1765,8 @@ RefPtr<StackElement> RenderTextField::GetLastStack() const
 bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
 {
     std::string appendElement;
+    auto codeValue = static_cast<int32_t>(event.code);
     if (event.action == KeyAction::DOWN) {
-        auto codeValue = static_cast<int32_t>(event.code);
         if (codeValue >= NUMBER_CODE_START && codeValue <= NUMBER_CODE_END) {
             appendElement = std::to_string(codeValue - NUMBER_CODE_DIFF);
         } else if (codeValue >= LETTER_CODE_START && codeValue <= LETTER_CODE_END) {
@@ -1771,8 +1774,7 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
                 int32_t letterCode =
                 isShiftDown_ ? (codeValue + UPPER_CASE_LETTER_DIFF) : (codeValue + LOWER_CASE_LETTER_DIFF);
                 appendElement = static_cast<char>(letterCode);
-                isShiftDown_ = false;
-            } else {
+            } else if (isCtrlDown_) {
                 if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_A)) {
                     HandleOnCopyAll(nullptr);
                 } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_C)) {
@@ -1781,18 +1783,26 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
                     HandleOnPaste();
                 } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_X)) {
                     HandleOnCut();
-                    MarkNeedLayout();
                 } else {
                     LOGE("Unknow Event");
                 }
-                isCtrlDown_ = false;
+                MarkNeedLayout();
             }
-        } else if (codeValue == LEFT_SHIFT_CODE || codeValue == RIGHT_SHIFT_CODE) {
-            isShiftDown_ = true;
         } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_LEFT) ||
             codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_RIGHT)) {
             isCtrlDown_ = true;
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_LEFT) ||
+            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_RIGHT)) {
+            isShiftDown_ = true;
         }
+    }
+    if (event.action == KeyAction::UP && (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_LEFT) ||
+        codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_RIGHT))) {
+        isShiftDown_ = false;
+    }
+    if (event.action == KeyAction::UP && (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_LEFT) ||
+        codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_RIGHT))) {
+        isCtrlDown_ = false;
     }
     if (appendElement.empty()) {
         return false;
