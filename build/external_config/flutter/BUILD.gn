@@ -46,6 +46,7 @@ template("flutter_engine") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    license_file = "$flutter_root/engine/flutter/LICENSE"
     deps = [
       ":flutter_engine_asset_manager",
       ":flutter_engine_common_$platform",

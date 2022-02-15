@@ -109,6 +109,7 @@ template("ace_libicu") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    license_file = "$flutter_root/skia/third_party/externals/icu/LICENSE"
     public_configs = [ ":icu_config_$platform" ]
     configs = [ ":icu_compile_flags" ]
     defines += invoker.defines

@@ -45,6 +45,7 @@ template("ace_libharfbuzz") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    license_file = "$flutter_root/skia/third_party/externals/harfbuzz/COPYING"
     defines += invoker.defines
     defines += [
       "HAVE_ICU",

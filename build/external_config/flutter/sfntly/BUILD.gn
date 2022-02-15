@@ -44,6 +44,8 @@ template("ace_libsfntly") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    license_file =
+        "$flutter_root/skia/third_party/externals/sfntly/cpp/COPYING.txt"
     defines += invoker.defines
     defines += [
       "SFNTLY_NO_EXCEPTION",
