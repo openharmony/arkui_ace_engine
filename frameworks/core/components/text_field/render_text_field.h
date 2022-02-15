@@ -336,6 +336,7 @@ protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     void OnHiddenChanged(bool hidden) override;
+    void OnAppHide() override;
     void OnClick(const ClickInfo& clickInfo);
     void OnDoubleClick(const ClickInfo& clickInfo);
     void OnLongPress(const LongPressInfo& longPressInfo);
