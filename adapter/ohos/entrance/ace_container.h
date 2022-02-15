@@ -32,6 +32,7 @@
 #include "core/common/js_message_dispatcher.h"
 
 namespace OHOS::Ace::Platform {
+using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
 class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
@@ -206,7 +207,8 @@ public:
     static void OnConfigurationUpdated(int32_t instanceId, const std::string& configuration);
     static void OnNewRequest(int32_t instanceId, const std::string& data);
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
-    static void SetView(AceView* view, double density, int32_t width, int32_t height, int32_t windowId);
+    static void SetView(AceView* view, double density, int32_t width, int32_t height, int32_t windowId,
+                        UIEnvCallback callback = nullptr);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
@@ -225,8 +227,8 @@ private:
     void InitializeCallback();
     void InitializeTask();
 
-    void AttachView(
-        std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height, int32_t windowId);
+    void AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
+                    int32_t windowId, UIEnvCallback callback = nullptr);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
     std::weak_ptr<OHOS::AppExecFwk::Ability> GetAbilityInner() const;

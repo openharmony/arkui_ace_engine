@@ -564,7 +564,8 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     AceEngine::Get().RemoveContainer(instanceId);
 }
 
-void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t height, int32_t windowId)
+void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t height, int32_t windowId,
+                           UIEnvCallback callback)
 {
     if (view == nullptr) {
         return;
@@ -580,7 +581,7 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
         return;
     }
     std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
-    container->AttachView(std::move(window), view, density, width, height, windowId);
+    container->AttachView(std::move(window), view, density, width, height, windowId, callback);
 }
 
 void AceContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow)
@@ -758,7 +759,8 @@ void AceContainer::AddAssetPath(
 }
 
 void AceContainer::AttachView(
-    std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height, int32_t windowId)
+    std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height, int32_t windowId,
+    UIEnvCallback callback)
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
@@ -863,7 +865,12 @@ void AceContainer::AttachView(
             TaskExecutor::TaskType::UI);
     }
     taskExecutor_->PostTask(
-        [context = pipelineContext_]() { context->SetupRootElement(); }, TaskExecutor::TaskType::UI);
+        [context = pipelineContext_, callback]() {
+            if (callback != nullptr) {
+                callback(context);
+            }
+            context->SetupRootElement();
+        }, TaskExecutor::TaskType::UI);
     aceView_->Launch();
     frontend_->AttachPipelineContext(pipelineContext_);
 
