@@ -32,7 +32,8 @@ group("unittest") {
     #"divider:unittest",
     "drag_bar:unittest",
     "flex:unittest",
-    "gestures:unittest",
+
+    #"gestures:unittest",
     "grid:unittest",
     "grid_layout:unittest",
     "image:unittest",
@@ -42,9 +43,11 @@ group("unittest") {
     "padding:unittest",
     "pattern_lock:unittest",
     "progress:unittest",
-    "refresh:unittest",
+
+    #"refresh:unittest",
     "rotation:unittest",
-    "scroll:unittest",
+
+    #"scroll:unittest",
     "semimodal:unittest",
 
     #"shadow:unittest",
@@ -59,7 +62,8 @@ group("unittest") {
     "transform:unittest",
     "transition:unittest",
     "tween:unittest",
-    "view_update:unittest",
+
+    #"view_update:unittest",
     "wrap:unittest",
   ]
   if (!is_wearable_product) {
@@ -69,7 +73,8 @@ group("unittest") {
       "camera:unittest",
       "marquee:unittest",
       "menu:unittest",
-      "picker:unittest",
+
+      #"picker:unittest",
       "piece:unittest",
       "rating:unittest",
 

@@ -228,7 +228,7 @@ config("config_theme_manager_test") {
 group("unittest") {
   testonly = true
   deps = [
-    ":ThemeConstantsTest",
+    #":ThemeConstantsTest",
     ":ThemeManagerTest",
   ]
 }

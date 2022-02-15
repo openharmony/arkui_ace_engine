@@ -286,7 +286,8 @@ group("unittest") {
     ":FlutterRenderPluginTest",
     ":PluginCallBackClientTest",
     ":PluginComponentTest",
-    ":PluginElementTest",
+
+    #":PluginElementTest",
     ":PluginManagerDelegateTest",
     ":PluginManagerResourceTest",
     ":PluginSubContainerTest",

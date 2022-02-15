@@ -42,5 +42,5 @@ group("unittest") {
   testonly = true
   deps = []
 
-  deps += [ ":GesturesTest" ]
+  #deps += [ ":GesturesTest" ]
 }
