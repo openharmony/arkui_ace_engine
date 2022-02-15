@@ -69,6 +69,7 @@ ohos_unittest("PipelineContextTest") {
     "//foundation/ace/ace_engine/frameworks/core/common/vibrator/vibrator_proxy.cpp",
     "//foundation/ace/ace_engine/frameworks/core/common/window.cpp",
     "//foundation/ace/ace_engine/frameworks/core/pipeline/pipeline_context.cpp",
+    "//foundation/ace/ace_engine/frameworks/core/common/clipboard/clipboard_proxy.cpp",
 
     # components
     "//foundation/ace/ace_engine/frameworks/core/components/box/box_component.cpp",
@@ -183,6 +184,7 @@ ohos_unittest("PipelineContextTest") {
     "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
     "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
   ]
 
   # add sources only needed by wearable like watch.
