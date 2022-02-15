@@ -25,7 +25,7 @@
 namespace OHOS::Ace {
 namespace {
 
-const char PROPERTY_DEVICE_TYPE[] = "ro.build.characteristics";
+const char PROPERTY_DEVICE_TYPE[] = "const.build.characteristics";
 const char PROPERTY_DEVICE_TYPE_DEFAULT[] = "default";
 const char PROPERTY_DEVICE_TYPE_TV[] = "tv";
 const char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
