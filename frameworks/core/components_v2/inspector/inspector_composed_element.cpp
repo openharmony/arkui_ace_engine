@@ -1449,8 +1449,8 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetSweepGradient() const
         if (GradientType::SWEEP != sweepGradient.GetType()) {
             return resultJson;
         }
-        auto radialCenterX = sweepGradient.GetRadialGradient().radialCenterX;
-        auto radialCenterY = sweepGradient.GetRadialGradient().radialCenterY;
+        auto radialCenterX = sweepGradient.GetSweepGradient().centerX;
+        auto radialCenterY = sweepGradient.GetSweepGradient().centerY;
         if (radialCenterX && radialCenterY) {
             auto jsPoint = JsonUtil::CreateArray(false);
             jsPoint->Put("0", radialCenterX->ToString().c_str());
@@ -1464,7 +1464,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetSweepGradient() const
             resultJson->Put("start", startAngle->ToString().c_str());
         }
         if (endAngle) {
-            resultJson->Put("angle", endAngle->ToString().c_str());
+            resultJson->Put("end", endAngle->ToString().c_str());
         }
 
         GetColorsAndRepeating(resultJson, sweepGradient);

@@ -33,6 +33,7 @@ public:
     std::unique_ptr<JsonValue> ToJsonObject() const override;
     std::string GetSticky() const;
     std::string GetEditable() const;
+    int32_t GetZIndex() const override;
 
     AceType::IdType GetTargetTypeId() const override
     {

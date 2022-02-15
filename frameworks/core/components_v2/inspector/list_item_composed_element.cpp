@@ -28,7 +28,6 @@ const std::unordered_map<std::string, std::function<std::string(const ListItemCo
     { "sticky", [](const ListItemComposedElement& inspector) { return inspector.GetSticky(); } },
     { "editable", [](const ListItemComposedElement& inspector) { return inspector.GetEditable(); } }
 };
-
 }
 
 void ListItemComposedElement::Dump()
@@ -87,6 +86,19 @@ std::string ListItemComposedElement::GetEditable() const
         }
     }
     return "false";
+}
+
+int32_t ListItemComposedElement::GetZIndex() const 
+{
+    auto node = GetInspectorNode(ListItemElement::TypeId(), true);
+    if (!node) {
+        return 0;
+    }
+    auto renderListItem = AceType::DynamicCast<RenderListItem>(node);
+    if (!renderListItem) {
+        return 0;
+    }
+    return renderListItem->GetZIndex();
 }
 
 } // namespace OHOS::Ace::V2
