@@ -313,6 +313,19 @@ void PipelineContext::RefreshStageFocus()
     stageElement->RefreshFocus();
 }
 
+
+void PipelineContext::ShowContainerTitle(bool isShow)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        LOGW("Window modal is not container.");
+        return;
+    }
+    auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
+    if (containerModal) {
+        containerModal->ShowTitle(isShow);
+    }
+}
+
 RefPtr<StageElement> PipelineContext::GetStageElement() const
 {
     CHECK_RUN_ON(UI);

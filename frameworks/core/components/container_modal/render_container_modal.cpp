@@ -52,14 +52,14 @@ void RenderContainerModal::UpdateStyle(const RefPtr<Component>& component) const
         return;
     }
     auto labelId = context->GetAppLabelId();
-    auto appLabelComponent = AceType::DynamicCast<TextComponent>(containerModal->GetTitleLabel());
+    auto appLabelComponent = containerModal->GetTitleLabel();
     if (appLabelComponent && labelId != 0) {
         auto appLabel = themeConstants->GetString(labelId);
         appLabelComponent->SetData(appLabel);
     }
 
     auto iconId = context->GetAppIconId();
-    auto appIconComponent = AceType::DynamicCast<ImageComponent>(containerModal->GetTitleIcon());
+    auto appIconComponent = containerModal->GetTitleIcon();
     if (appIconComponent && iconId != 0) {
         auto appIconSrc = themeConstants->GetMediaPath(iconId);
         appIconComponent->SetSrc(appIconSrc);
@@ -115,7 +115,6 @@ void RenderContainerModal::PerformLayout()
 
     ContainerBoxLayout();
 }
-
 
 void RenderContainerModal::ContainerBoxLayout()
 {
