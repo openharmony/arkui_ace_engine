@@ -28,9 +28,14 @@ class ContainerModalElement : public SoleChildElement {
 public:
     RefPtr<OverlayElement> GetOverlayElement() const;
     RefPtr<StageElement> GetStageElement() const;
+    void ShowTitle(bool isShow);
+    void Update() override;
+    void PerformBuild() override;
 
 private:
     RefPtr<StackElement> GetStackElement() const;
+    RefPtr<Animator> controller_;
+    RefPtr<RenderDisplay> renderDisplay_;
 };
 
 } // namespace OHOS::Ace

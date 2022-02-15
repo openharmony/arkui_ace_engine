@@ -455,6 +455,8 @@ public:
 
     void RefreshStageFocus();
 
+    void ShowContainerTitle(bool isShow);
+
     RefPtr<StageElement> GetStageElement() const;
 
     RefPtr<ComposedElement> GetComposedElementById(const ComposeId& id);

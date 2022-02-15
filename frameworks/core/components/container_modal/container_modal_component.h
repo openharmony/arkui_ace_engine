@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CONTAINER_MODAL_CONTAINER_MODAL_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CONTAINER_MODAL_CONTAINER_MODAL_COMPONENT_H
 
+#include "core/components/button/button_component.h"
+#include "core/components/image/image_component.h"
+#include "core/components/text/text_component.h"
 #include "core/pipeline/base/sole_child_component.h"
 
 namespace OHOS::Ace {
@@ -36,27 +39,31 @@ public:
     void BuildInnerChild();
     RefPtr<Component> GetMaximizeRecoverButtonIcon() const;
 
-    RefPtr<Component> GetTitleIcon() const
+    RefPtr<ImageComponent> GetTitleIcon() const
     {
         return titleIcon_;
     }
 
-    RefPtr<Component> GetTitleLabel() const
+    RefPtr<TextComponent> GetTitleLabel() const
     {
         return titleLabel_;
     }
 
 private:
     RefPtr<Component> BuildTitle();
+    RefPtr<Component> BuildFloatingTitle();
     RefPtr<Component> BuildContent();
-    RefPtr<Component> BuildControlButton(InternalResource::ResourceId icon, std::function<void()>&& clickCallback);
-    static RefPtr<Component> SetPadding(const RefPtr<Component>& component, const Dimension& leftPadding,
-        const Dimension& rightPadding);
+    RefPtr<ButtonComponent> BuildControlButton(
+        InternalResource::ResourceId icon, std::function<void()>&& clickCallback);
+    std::list<RefPtr<Component>> BuildTitleChildren();
+    static RefPtr<Component> SetPadding(
+        const RefPtr<Component>& component, const Dimension& leftPadding, const Dimension& rightPadding);
 
     WeakPtr<PipelineContext> context_;
-    RefPtr<Component> titleIcon_;
-    RefPtr<Component> titleLabel_;
-    RefPtr<Component> titleMaximizeRecoverButton_;
+    RefPtr<ImageComponent> titleIcon_;
+    RefPtr<TextComponent> titleLabel_;
+    RefPtr<ButtonComponent> titleMaximizeRecoverButton_;
+    std::list<RefPtr<Component>> titleChildren_;
 };
 
 } // namespace OHOS::Ace
