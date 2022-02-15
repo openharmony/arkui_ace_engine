@@ -54,6 +54,11 @@ public:
         return component_ ? component_->GetSticky() : StickyMode::NONE;
     }
 
+    int32_t GetZIndex() const
+    {
+        return component_ ? component_->GetZIndex() : 0;
+    }
+
     void SetEditMode(bool editMode);
 
     ACE_DEFINE_COMPONENT_EVENT(OnDeleteClick, void(RefPtr<RenderListItem>));
