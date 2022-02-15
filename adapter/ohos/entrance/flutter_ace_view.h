@@ -54,6 +54,7 @@ public:
     static uint32_t GetBackgroundColor();
 
     void RegisterTouchEventCallback(TouchEventCallback&& callback) override;
+    void RegisterDragEventCallback(DragEventCallBack&& callback) override;
     void RegisterKeyEventCallback(KeyEventCallback&& callback) override;
     void RegisterMouseEventCallback(MouseEventCallback&& callback) override;
     void RegisterAxisEventCallback(AxisEventCallback&& callback) override;
@@ -126,6 +127,7 @@ public:
         return AceView::ViewType::SURFACE_VIEW;
     }
 
+    void ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action);
     std::unique_ptr<DrawDelegate> GetDrawDelegate() override;
     std::unique_ptr<PlatformWindow> GetPlatformWindow() override;
     bool Dump(const std::vector<std::string>& params) override;
@@ -175,6 +177,7 @@ private:
     SystemBarHeightChangeCallbak systemBarHeightChangeCallback_;
     SurfaceDestroyCallback surfaceDestroyCallback_;
     IdleCallback idleCallback_;
+    DragEventCallBack dragEventCallback_;
     int32_t instanceId_ = 0;
     bool viewLaunched_ = false;
     RefPtr<PlatformResRegister> resRegister_;
@@ -196,7 +199,6 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(FlutterAceView);
 };
-
 } // namespace OHOS::Ace::Platform
 
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_CPP_FLUTTER_ACE_VIEW_H

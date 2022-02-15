@@ -36,7 +36,10 @@ template("ace_osal_ohos_source_set") {
 
       configs = [ "$ace_root:ace_config" ]
     }
-    include_dirs = [ "//utils/native/base/include" ]
+    include_dirs = [
+      "//utils/native/base/include",
+      "//foundation/windowmanager/interfaces/innerkits",
+    ]
 
     sources = [
       "ace_trace.cpp",
@@ -66,7 +69,10 @@ template("ace_osal_ohos_source_set") {
     } else {
       external_deps += [ "multimedia_image:image" ]
     }
-    sources += [ "pixel_map_ohos.cpp" ]
+    sources += [
+      "drag_window_ohos.cpp",
+      "pixel_map_ohos.cpp",
+    ]
     external_deps += [ "hisysevent_native:libhisysevent" ]
   }
 }

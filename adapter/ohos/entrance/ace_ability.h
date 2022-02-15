@@ -28,7 +28,9 @@
 
 namespace OHOS::Ace {
 
-class AceAbility final : public OHOS::AppExecFwk::Ability, public OHOS::Rosen::IWindowChangeListener {
+class AceAbility final : public OHOS::AppExecFwk::Ability,
+                         public OHOS::Rosen::IWindowChangeListener,
+                         public OHOS::Rosen::IWindowDragListener {
 public:
     AceAbility()
     {
@@ -61,6 +63,8 @@ public:
     void OnCompleteContinuation(int result) override;
     void OnRemoteTerminated() override;
 
+    // override Rosen::IWindowDragListener virtual callback function
+    void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event) override;
     // override Rosen::IWindowChangeListener virtual callback function
     void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override;
     void OnModeChange(OHOS::Rosen::WindowMode mode) override;

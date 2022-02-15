@@ -57,6 +57,7 @@
 #include "core/event/multimodal/multimodal_manager.h"
 #include "core/event/multimodal/multimodal_subscriber.h"
 #endif
+#include "core/common/clipboard/clipboard_proxy.h"
 
 namespace OHOS::Rosen {
 class RSUIDirector;
@@ -921,9 +922,11 @@ public:
     }
     void StartSystemDrag(const std::string& str, const RefPtr<PixelMap>& pixmap);
     void InitDragListener();
-    bool ProcessDragEvent(int action, double windowX, double windowY, const std::string& data);
+    void OnDragEvent(int32_t x, int32_t y, DragEventAction action);
     void SetPreTargetRenderNode(const RefPtr<RenderNode>& preTargetRenderNode);
     const RefPtr<RenderNode> GetPreTargetRenderNode() const;
+    void SetInitRenderNode(const RefPtr<RenderNode>& initRenderNode);
+    const RefPtr<RenderNode> GetInitRenderNode() const;
 
     void SetContextMenu(const RefPtr<Component>& contextMenu)
     {
@@ -1163,6 +1166,16 @@ public:
         return appLabelId_;
     }
 
+    void SetClipboardCallback(const std::function<void(const std::string&)> callback)
+    {
+        clipboardCallback_ = callback;
+    }
+
+    void ProcessDragEventStart(
+        const RefPtr<RenderNode>& renderNode, const RefPtr<DragEvent>& event, const Point& globalPoint);
+    void ProcessDragEventEnd(
+        const RefPtr<RenderNode>& renderNode, const RefPtr<DragEvent>& event, const Point& globalPoint);
+
 private:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     void FlushPipelineWithoutAnimation();
@@ -1390,6 +1403,14 @@ private:
     std::function<bool(void)> windowSplitCallback_ = nullptr;
     std::function<void(void)> windowStartMoveCallback_ = nullptr;
     std::function<WindowMode(void)> windowGetModeCallback_ = nullptr;
+
+    std::function<void(const std::string&)> clipboardCallback_ = nullptr;
+    Size selectedItemSize_ { 0.0, 0.0 };
+    size_t selectedIndex_ = -1;
+    size_t insertIndex_ = -1;
+    RefPtr<Clipboard> clipboard_;
+    RefPtr<RenderNode> initRenderNode_;
+    std::string customDragInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

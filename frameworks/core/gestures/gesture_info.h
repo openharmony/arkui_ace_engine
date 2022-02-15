@@ -75,11 +75,9 @@ enum class Direction {
     END,
 };
 
-enum DragEventAction {
-    ACTION_DRAG_STARTED = 0,
-    ACTION_DRAG_LOCATION,
-    ACTION_DROP,
-    ACTION_DRAG_ENDED
+enum class DragEventAction {
+    DRAG_EVENT_START = 0,
+    DRAG_EVENT_END,
 };
 
 struct PanDirection final {
