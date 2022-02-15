@@ -28,6 +28,7 @@ namespace {
 const char PROPERTY_DEVICE_TYPE[] = "ro.build.characteristics";
 const char PROPERTY_DEVICE_TYPE_DEFAULT[] = "default";
 const char PROPERTY_DEVICE_TYPE_TV[] = "tv";
+const char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
 const char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 const char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 const char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
@@ -145,6 +146,8 @@ void SystemProperties::InitDeviceTypeBySystemProperty()
         deviceType_ = DeviceType::CAR;
     } else if (deviceProp == PROPERTY_DEVICE_TYPE_WATCH) {
         deviceType_ = DeviceType::WATCH;
+    }  else if (deviceProp == PROPERTY_DEVICE_TYPE_TABLET) {
+        deviceType_ = DeviceType::TABLET;
     } else {
         deviceType_ = DeviceType::PHONE;
     }
