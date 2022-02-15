@@ -32,6 +32,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("create", &JSSlider::Create, opt);
     JSClass<JSSlider>::StaticMethod("blockColor", &JSSlider::SetBlockColor);
     JSClass<JSSlider>::StaticMethod("trackColor", &JSSlider::SetTrackColor);
+    JSClass<JSSlider>::StaticMethod("trackThickness", &JSSlider::SetThickness);
     JSClass<JSSlider>::StaticMethod("selectedColor", &JSSlider::SetSelectedColor);
     JSClass<JSSlider>::StaticMethod("minLabel", &JSSlider::SetMinLabel);
     JSClass<JSSlider>::StaticMethod("maxLabel", &JSSlider::SetMaxLabel);
@@ -175,6 +176,28 @@ void JSSlider::Create(const JSCallbackInfo& info)
     ViewStackProcessor::GetInstance()->Push(sliderComponent);
 }
 
+void JSSlider::SetThickness(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto slider = AceType::DynamicCast<SliderComponent>(component);
+    if (!slider) {
+        LOGE("Slider Component is null");
+        return;
+    }
+    slider->SetThickness(value);
+}
+
 void JSSlider::SetBlockColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -195,7 +218,7 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
     }
 
     Color colorVal;
-    if (ParseJsColor(info[0], colorVal))  {
+    if (ParseJsColor(info[0], colorVal)) {
         block->SetBlockColor(colorVal);
     }
 }

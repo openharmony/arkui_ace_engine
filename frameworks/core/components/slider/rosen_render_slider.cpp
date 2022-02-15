@@ -51,10 +51,20 @@ void RosenRenderSlider::Update(const RefPtr<Component>& component)
 
     AddTipChild();
     const RefPtr<SliderComponent> slider = AceType::DynamicCast<SliderComponent>(component);
+    auto block = slider->GetBlock();
+    auto blockSize = block->GetBlockSize();
+    double temp = GreatNotEqual(scaleValue_, 0) ? scaleValue_ : 1;
+    block->SetBlockSize(blockSize * temp);
     block_->Update(slider->GetBlock());
-    blockHotWidth_ = slider->GetBlock()->GetHotRegionWidth();
-    blockHotHeight_ = slider->GetBlock()->GetHotRegionHeight();
-    track_->Update(slider->GetTrack());
+    hotWidth_ = slider->GetBlock()->GetHotRegionWidth();
+    blockHotWidth_ = GreatNotEqual(scaleValue_, 0) ? slider->GetBlock()->GetHotRegionWidth() * scaleValue_ :
+        slider->GetBlock()->GetHotRegionWidth();
+    blockHotHeight_ = GreatNotEqual(scaleValue_, 0) ? slider->GetBlock()->GetHotRegionHeight() * scaleValue_ :
+        slider->GetBlock()->GetHotRegionHeight();
+    auto track = slider->GetTrack();
+    auto thickness = track->GetTrackThickness();
+    track->SetTrackThickness(thickness * scaleValue_);
+    track_->Update(track);
 
     LOGD("Slider::Update end");
     MarkNeedLayout();
@@ -197,11 +207,13 @@ void RosenRenderSlider::SetTipPosition(double blockOffset)
         if (direction_ == Axis::VERTICAL) {
             double tipLayoutWidth = renderTip->GetLayoutSize().Width();
             double childHalfHeight = renderTip->GetChildSize().Height() * HALF;
-            renderTip->SetPosition(Offset(-tipLayoutWidth, blockOffset - childHalfHeight));
+            renderTip->SetPosition(Offset(-tipLayoutWidth - HALF * (NormalizeToPx(blockHotWidth_) -
+                NormalizeToPx(hotWidth_)), blockOffset - childHalfHeight));
         } else {
             double childHalfWidth = renderTip->GetChildSize().Width() * HALF;
             double tipLayoutHeight = renderTip->GetLayoutSize().Height();
-            renderTip->SetPosition(Offset(blockOffset - childHalfWidth, -tipLayoutHeight));
+            renderTip->SetPosition(Offset(blockOffset - childHalfWidth, -tipLayoutHeight - HALF *
+                (NormalizeToPx(blockHotWidth_) - NormalizeToPx(hotWidth_))));
         }
     }
 }
