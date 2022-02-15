@@ -38,6 +38,8 @@ public:
     using AccessBackwardImpl = std::function<bool()>;
     using AccessForwardImpl = std::function<bool()>;
     using AccessStepImpl = std::function<bool(int32_t)>;
+    using BackwardImpl = std::function<void()>;
+    using ForwardImpl = std::function<void()>;
     void LoadUrl(std::string url) const
     {
         if (loadUrlImpl_) {
@@ -69,6 +71,22 @@ public:
         return false;
     }
 
+    void Backward()
+    {
+        LOGI("Start backward.");
+        if (backwardImpl_) {
+            backwardImpl_();
+        }
+    }
+
+    void Forward()
+    {
+        LOGI("Start forward.");
+        if (forwardimpl_) {
+            forwardimpl_();
+        }
+    }
+
     void SetLoadUrltImpl(LoadUrlImpl && loadUrlImpl)
     {
         loadUrlImpl_ = std::move(loadUrlImpl);
@@ -87,6 +105,16 @@ public:
     void SetAccessStepImpl(AccessStepImpl && accessStepImpl)
     {
         accessStepImpl_ = std::move(accessStepImpl);
+    }
+
+    void SetBackwardImpl(BackwardImpl && backwardImpl)
+    {
+        backwardImpl_ = std::move(backwardImpl);
+    }
+
+    void SetForwardImpl(ForwardImpl && forwardImpl)
+    {
+        forwardimpl_ = std::move(forwardImpl);
     }
 
     using ExecuteTypeScriptImpl = std::function<void(std::string)>;
@@ -124,9 +152,14 @@ public:
 private:
     RefPtr<WebDeclaration> declaration_;
     LoadUrlImpl loadUrlImpl_;
+    
+    // Forward and Backward
     AccessBackwardImpl accessBackwardImpl_;
     AccessForwardImpl accessForwardImpl_;
     AccessStepImpl accessStepImpl_;
+    BackwardImpl backwardImpl_;
+    ForwardImpl forwardimpl_;
+
     ExecuteTypeScriptImpl executeTypeScriptImpl_;
     LoadDataWithBaseUrlImpl loadDataWithBaseUrlImpl_;
 };

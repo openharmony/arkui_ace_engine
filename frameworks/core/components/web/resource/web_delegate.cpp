@@ -163,6 +163,76 @@ void WebDelegate::LoadUrl(const std::string& url)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+#ifdef OHOS_STANDARD_SYSTEM
+void WebDelegate::Backward()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("Get context failed, it is null.");
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                LOGE("Get delegate failed, it is null.");
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->GoBack();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::Forward()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("Get context failed, it is null.");
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                LOGE("Get delegate failed, it is null.");
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->GoForward();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+bool WebDelegate::AccessBackward()
+{
+    auto delegate = WeakClaim(this).Upgrade();
+    if (!delegate) {
+        LOGE("Get delegate failed, it is null.");
+        return false;
+    }
+    if (delegate->webview_) {
+        return delegate->webview_->CanGoBack();
+    }
+    return false;
+}
+
+bool WebDelegate::AccessForward()
+{
+    auto delegate = WeakClaim(this).Upgrade();
+    if (!delegate) {
+        LOGE("Get delegate failed, it is null.");
+        return false;
+    }
+    if (delegate->webview_) {
+        return delegate->webview_->CanGoForward();
+    }
+    return false;
+}
+
+#endif
 void WebDelegate::ExecuteTypeScript(const std::string& jscode)
 {
     auto context = context_.Upgrade();
@@ -361,6 +431,36 @@ void WebDelegate::SetWebCallBack()
                     delegate->LoadUrl(url);
                 }
             });
+        });
+        webController->SetBackwardImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostTask([weak]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->Backward();
+                }
+            });
+        });
+        webController->SetForwardImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostTask([weak]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->Forward();
+                }
+            });
+        });
+        webController->SetAccessBackwardImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->AccessBackward();
+            }
+            return false;
+        });
+        webController->SetAccessForwardImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->AccessForward();
+            }
+            return false;
         });
         webController->SetExecuteTypeScriptImpl([weak = WeakClaim(this), uiTaskExecutor](std::string jscode) {
             uiTaskExecutor.PostTask([weak, jscode]() {

@@ -116,6 +116,12 @@ private:
     void LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
         const std::string& encoding, const std::string& historyUrl);
     void SetWebCallBack();
+
+    // Backward and forward
+    void Backward();
+    void Forward();
+    bool AccessBackward();
+    bool AccessForward();
 #if defined(ENABLE_ROSEN_BACKEND)
     void InitWebViewWithSurface(sptr<Surface> surface);
 #endif

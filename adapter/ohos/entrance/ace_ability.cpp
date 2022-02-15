@@ -591,6 +591,11 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeCha
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0, Convert2WindowSizeChangeReason(reason));
 }
 
+void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)
+{
+    LOGI("AceAbility::OnModeChange");
+}
+
 WindowSizeChangeReason AceAbility::Convert2WindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason reason)
 {
     auto reasonValue = static_cast<uint32_t>(reason);
