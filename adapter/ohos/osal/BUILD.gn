@@ -56,8 +56,8 @@ template("ace_osal_ohos_source_set") {
           config.accessibility_support) {
         sources += [ "js_accessibility_manager.cpp" ]
         external_deps += [
+          "ability_base:want",
           "ability_runtime:ability_manager",
-          "ability_runtime:want",
           "accessibility:accessibilityclient",
         ]
       } else {

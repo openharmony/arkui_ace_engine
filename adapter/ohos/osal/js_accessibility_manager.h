@@ -23,7 +23,7 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
-#include "accessibility_interaction_operation.h"
+#include "accessibility_element_operator.h"
 #include "accessibility_state_event.h"
 
 namespace OHOS::Ace::Framework {
@@ -74,36 +74,36 @@ public:
     virtual bool SendAccessibilitySyncEvent(const AccessibilityEvent& accessibilityEvent);
 
     void SearchElementInfoByAccessibilityId(const long elementId, const int requestId,
-        Accessibility::AccessibilityInteractionOperationCallback& callback, const int mode);
+        Accessibility::AccessibilityElementOperatorCallback& callback, const int mode);
     void SearchElementInfosByText(const long elementId, const std::string& text, const int requestId,
-        Accessibility::AccessibilityInteractionOperationCallback& callback);
+        Accessibility::AccessibilityElementOperatorCallback& callback);
     void FindFocusedElementInfo(const long elementId, const int focusType, const int requestId,
-        Accessibility::AccessibilityInteractionOperationCallback& callback);
+        Accessibility::AccessibilityElementOperatorCallback& callback);
     void FocusMoveSearch(const long elementId, const int direction, const int requestId,
-        Accessibility::AccessibilityInteractionOperationCallback& callback);
-    void PerformAction(const long accessibilityId, const Accessibility::ActionType& action,
+        Accessibility::AccessibilityElementOperatorCallback& callback);
+    void ExecuteAction(const long accessibilityId, const Accessibility::ActionType& action,
         const std::map<std::string, std::string> actionArguments, const int requestId,
-        Accessibility::AccessibilityInteractionOperationCallback& callback);
+        Accessibility::AccessibilityElementOperatorCallback& callback);
     bool ClearCurrentFocus();
 
 private:
     void UpdateNodeChildIds(const RefPtr<AccessibilityNode>& node);
 
-    class JsInteractionOperation : public Accessibility::AccessibilityInteractionOperation {
+    class JsInteractionOperation : public Accessibility::AccessibilityElementOperator {
     public:
         virtual ~JsInteractionOperation() = default;
         // Accessibility overide.
         void SearchElementInfoByAccessibilityId(const long elementId, const int requestId,
-            Accessibility::AccessibilityInteractionOperationCallback& callback, const int mode) override;
+            Accessibility::AccessibilityElementOperatorCallback& callback, const int mode) override;
         void SearchElementInfosByText(const long elementId, const std::string& text, const int requestId,
-            Accessibility::AccessibilityInteractionOperationCallback& callback) override;
+            Accessibility::AccessibilityElementOperatorCallback& callback) override;
         void FindFocusedElementInfo(const long elementId, const int focusType, const int requestId,
-            Accessibility::AccessibilityInteractionOperationCallback& callback) override;
+            Accessibility::AccessibilityElementOperatorCallback& callback) override;
         void FocusMoveSearch(const long elementId, const int direction, const int requestId,
-            Accessibility::AccessibilityInteractionOperationCallback& callback) override;
-        void PerformAction(const long elementId, const int action,
+            Accessibility::AccessibilityElementOperatorCallback& callback) override;
+        void ExecuteAction(const long elementId, const int action,
             const std::map<std::string, std::string> actionArguments, const int requestId,
-            Accessibility::AccessibilityInteractionOperationCallback& callback) override;
+            Accessibility::AccessibilityElementOperatorCallback& callback) override;
         void ClearFocus() override;
         void OutsideTouch() override;
 
