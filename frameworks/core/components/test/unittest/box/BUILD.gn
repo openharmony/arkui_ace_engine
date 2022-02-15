@@ -151,11 +151,12 @@ ohos_unittest("MouseHoverAnimationTest") {
 group("unittest") {
   testonly = true
   deps = [
-    ":RenderBoxPercentTest",
+    #":RenderBoxPercentTest",
     ":RenderBoxTest",
   ]
   deps += [ ":MouseHoverTest" ]
-  deps += [ ":MouseHoverAnimationTest" ]
+
+  #deps += [ ":MouseHoverAnimationTest" ]
 
   #deps += [ ":BoxCreatorTest" ]
 }

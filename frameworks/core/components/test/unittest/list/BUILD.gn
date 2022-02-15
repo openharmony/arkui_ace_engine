@@ -113,7 +113,7 @@ group("unittest") {
   testonly = true
   deps = [
     #":ListCreatorTest",
-    ":ListElementTest",
+    #":ListElementTest",
     ":RenderListTest",
   ]
 }

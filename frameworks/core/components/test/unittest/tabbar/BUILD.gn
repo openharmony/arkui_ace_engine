@@ -386,7 +386,7 @@ group("unittest") {
     #":RenderTabContentTest",
 
     #":TabBarCreatorTest",
-    ":TabBarElementTest",
+    #":TabBarElementTest",
 
     #":TabContentCreatorTest",
   ]
