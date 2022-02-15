@@ -17,6 +17,5 @@ build_component("richtext_v2") {
   sources = [
     "render_rich_text.cpp",
     "rich_text_component.cpp",
-    "rich_text_element.cpp",
   ]
 }

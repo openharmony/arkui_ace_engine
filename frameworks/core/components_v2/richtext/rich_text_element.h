@@ -21,9 +21,6 @@
 namespace OHOS::Ace::V2 {
 class RichTextElement : public SoleChildElement {
     DECLARE_ACE_TYPE(V2::RichTextElement, SoleChildElement);
-
-public:
-    void PerformBuild() override;
 };
 } // namespace OHOS::Ace::V2
 
