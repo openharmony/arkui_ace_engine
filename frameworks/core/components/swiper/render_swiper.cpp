@@ -141,6 +141,33 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     scale_ = context->GetDipScale();
 
     curve_ = swiper->GetCurve();
+    if (curve_) {
+        if (curve_ == Curves::EASE) {
+            curveRender_ = "Curves.EASE";
+        } else if (curve_ == Curves::EASE_IN) {
+            curveRender_ = "Curves.EASE_IN";
+        } else if (curve_ == Curves::EASE_OUT) {
+            curveRender_ = "Curves.EASE_OUT";
+        } else if (curve_ == Curves::EASE_IN_OUT) {
+            curveRender_ = "Curves.EASE_IN_OUT";
+        } else if (curve_ == Curves::FAST_OUT_SLOW_IN) {
+            curveRender_ = "Curves.FAST_OUT_SLOW_IN";
+        } else if (curve_ == Curves::LINEAR_OUT_SLOW_IN) {
+            curveRender_ = "Curves.LINEAR_OUT_SLOW_IN";
+        } else if (curve_ == Curves::FAST_OUT_LINEAR_IN) {
+            curveRender_ = "Curves.FAST_OUT_LINEAR_IN";
+        } else if (curve_ == Curves::FRICTION) {
+            curveRender_ = "Curves.FRICTION";
+        } else if (curve_ == Curves::EXTREME_DECELERATION) {
+            curveRender_ = "Curves.EXTREME_DECELERATION";
+        } else if (curve_ == Curves::SHARP) {
+            curveRender_ = "Curves.SHARP";
+        } else if (curve_ == Curves::SMOOTH) {
+            curveRender_ = "Curves.SMOOTH";
+        } else if (curve_ == Curves::LINEAR) {
+            curveRender_ = "Curves.LINEAR";
+        }
+    }
 
     // Get item count of swiper
     const auto& children = swiper->GetChildren();
