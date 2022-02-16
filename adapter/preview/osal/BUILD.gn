@@ -46,6 +46,7 @@ template("ace_osal_preview_source_set") {
       "fetch_manager.cpp",
       "log_wrapper.cpp",
       "response_data.cpp",
+      "ressched_report.cpp",
       "system_properties.cpp",
     ]
 
