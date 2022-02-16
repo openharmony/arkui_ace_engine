@@ -160,6 +160,11 @@ public:
         return axis_ == Axis::HORIZONTAL ? size.Width() : size.Height();
     }
 
+    std::string GetCurveRender() const
+    {
+        return curveRender_;
+    }
+
     void ShowPrevious();
     void ShowNext();
 
@@ -553,6 +558,7 @@ private:
     int32_t showingCount_ = 0;
 
     RefPtr<Curve> curve_;
+    std::string curveRender_;
 };
 
 } // namespace OHOS::Ace

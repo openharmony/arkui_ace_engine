@@ -127,6 +127,16 @@ std::string SwiperComposedElement::GetItemSpace() const
     return "0";
 }
 
+std::string SwiperComposedElement::GetCurve() const
+{
+    auto renderSwiper = GetRenderSwiper();
+    if (renderSwiper) {
+        auto curve = renderSwiper->GetCurveRender();
+        return curve;
+    }
+    return "";
+}
+
 RefPtr<RenderSwiper> SwiperComposedElement::GetRenderSwiper() const
 {
     auto node = GetInspectorNode(SwiperElement::TypeId());
