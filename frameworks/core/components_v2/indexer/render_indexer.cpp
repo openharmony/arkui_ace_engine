@@ -558,7 +558,7 @@ void RenderIndexer::MoveSectionWithIndexer(int32_t curSection)
         LOGI("Current focused item already is:%{public}d", curSection);
 
         // click the same letter multiple times.
-        if (!bubbleController_->IsRunning()) {
+        if (bubbleController_ && !bubbleController_->IsRunning()) {
             bubbleController_->Play();
         }
         return;
