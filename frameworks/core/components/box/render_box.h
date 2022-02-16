@@ -297,6 +297,7 @@ private:
 #endif
     void HandleTouchEvent(bool isTouchDown);
 
+    void SetAccessibilityFocusImpl();
     void SendAccessibilityEvent(const std::string& eventType);
 
     // 0 - low priority gesture, 1 - high priority gesture, 2 - parallel priority gesture
