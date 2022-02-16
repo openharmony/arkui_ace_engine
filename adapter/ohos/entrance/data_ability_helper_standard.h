@@ -27,6 +27,10 @@ namespace OHOS::AbilityRuntime {
     class Context;
 }
 
+namespace OHOS {
+    class Uri;
+}
+
 namespace OHOS::Ace {
 
 class DataAbilityHelperStandard : public DataAbilityHelper {
@@ -40,7 +44,10 @@ public:
     int32_t OpenFile(const std::string& uriStr, const std::string& mode) override;
 
 private:
+    bool useStageModel_ = false;
     std::shared_ptr<AppExecFwk::DataAbilityHelper> dataAbilityHelper_;
+    std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext_;
+    std::shared_ptr<OHOS::Uri> uri_;
 };
 
 } // namespace OHOS::Ace
