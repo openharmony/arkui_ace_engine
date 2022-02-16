@@ -34,6 +34,7 @@ public:
 
     void ShowError(const std::string& errorText);
     void Delete();
+    void Insert(const std::string& args);
 
     void CaretPosition(int32_t caretPosition);
 

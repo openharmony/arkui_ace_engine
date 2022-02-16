@@ -872,6 +872,7 @@ const char DOM_TEXTAREA_SHOW_COUNTER[] = "showcounter";
 const char DOM_INPUT_SHOW_COUNTER[] = "showcounter";
 const char DOM_INPUT_METHOD_SHOW_ERROR[] = "showError";
 const char DOM_INPUT_METHOD_DELETE[] = "delete";
+const char DOM_INPUT_METHOD_INSERT[] = "insert";
 
 // input attribute and style constants
 const char DOM_INPUT_TYPE[] = "type";

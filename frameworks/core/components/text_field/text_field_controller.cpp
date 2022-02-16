@@ -63,4 +63,14 @@ void TextFieldController::CaretPosition(int32_t caretPosition)
     }
 }
 
+void TextFieldController::Insert(const std::string& args)
+{
+    auto textField = AceType::DynamicCast<TextFieldElement>(element_.Upgrade());
+    if (!textField) {
+        return;
+    }
+    textField->Insert(args);
+}
+
+
 }  // namespace OHOS::Ace

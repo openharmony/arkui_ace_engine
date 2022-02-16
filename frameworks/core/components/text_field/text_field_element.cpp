@@ -262,4 +262,14 @@ void TextFieldElement::Delete()
     RequestKeyboard(true);
 }
 
+void TextFieldElement::Insert(const std::string& args)
+{
+    auto textField = DynamicCast<RenderTextField>(renderNode_);
+    if (!textField) {
+        return;
+    }
+    textField->Insert(args);
+}
+
+
 } // namespace OHOS::Ace

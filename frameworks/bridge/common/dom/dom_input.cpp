@@ -161,6 +161,16 @@ void DOMInput::CallSpecializedMethod(const std::string& method, const std::strin
         controller->ShowError(errorText);
     } else if (method == DOM_INPUT_METHOD_DELETE) {
         controller->Delete();
+    } else if (method == DOM_INPUT_METHOD_INSERT) {
+        std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
+        std::unique_ptr<JsonValue> text = argsValue->GetArrayItem(0);
+        std::string inputText = text->GetString();
+        if (text->IsString()) {
+            inputText = text->GetString();
+        } else if (text->IsNumber()) {
+            inputText = std::to_string(text->GetInt());
+        }
+        controller->Insert(inputText);
     }
 }
 
