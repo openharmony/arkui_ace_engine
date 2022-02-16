@@ -163,17 +163,7 @@ void RenderBox::Update(const RefPtr<Component>& component)
 
         auto gestures = box->GetGestures();
         UpdateGestureRecognizer(gestures);
-        auto refNode = accessibilityNode_.Upgrade();
-        if (!refNode) {
-            return;
-        }
-        auto weakPtr = AceType::WeakClaim(this);
-        refNode->SetActionAccessibilityFocusImpl([weakPtr](bool isFocus) {
-            auto accessibilityFocus = weakPtr.Upgrade();
-            if (accessibilityFocus) {
-                accessibilityFocus->HandleAccessibilityFocusEvent(isFocus);
-            }
-        });
+        SetAccessibilityFocusImpl();
         if (box->HasStateAttributes()) {
             stateAttributeList_ = box->GetStateAttributes();
         }
@@ -211,6 +201,21 @@ void RenderBox::HandleTouchEvent(bool isTouchDown)
     } else {
         OnStatusStyleChanged(VisualState::NORMAL);
     }
+}
+
+void RenderBox::SetAccessibilityFocusImpl()
+{
+    auto refNode = accessibilityNode_.Upgrade();
+    if (!refNode) {
+        return;
+    }
+    auto weakPtr = AceType::WeakClaim(this);
+    refNode->SetActionAccessibilityFocusImpl([weakPtr](bool isFocus) {
+        auto accessibilityFocus = weakPtr.Upgrade();
+        if (accessibilityFocus) {
+            accessibilityFocus->HandleAccessibilityFocusEvent(isFocus);
+        }
+    });
 }
 
 void RenderBox::SendAccessibilityEvent(const std::string& eventType)
