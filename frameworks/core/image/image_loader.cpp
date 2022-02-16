@@ -293,9 +293,20 @@ sk_sp<SkData> NetworkImageLoader::LoadImageData(
         LOGE("Download image %{private}s failed!", uri.c_str());
         return nullptr;
     }
+    sk_sp<SkData> data = SkData::MakeWithCopy(imageData.data(), imageData.size());
     // 3. write it into file cache.
-    ImageCache::WriteCacheFile(uri, imageData.data(), imageData.size());
-    return SkData::MakeWithCopy(imageData.data(), imageData.size());
+    auto pipelineContext = context.Upgrade();
+    if (!pipelineContext) {
+        LOGE("invalid pipeline context");
+        return nullptr;
+    }
+    pipelineContext->GetTaskExecutor()->PostTask(
+        [ uri, imgData = std::move(imageData) ] () {
+            ImageCache::WriteCacheFile(uri, imgData.data(), imgData.size());
+        },
+        TaskExecutor::TaskType::IO);
+
+    return data;
 }
 
 sk_sp<SkData> InternalImageLoader::LoadImageData(
