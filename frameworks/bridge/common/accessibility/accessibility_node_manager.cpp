@@ -765,14 +765,8 @@ void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID, std::vecto
         return;
     }
 
-    std::string info = "ID:";
-    info.append(std::to_string(node->GetNodeId()));
-    if (!node->GetText().empty()) {
-        info.append(" ");
-        info.append("text:");
-        info.append(node->GetText());
-    }
-    DumpLog::GetInstance().AddDesc(info);
+    DumpLog::GetInstance().AddDesc("ID: " + std::to_string(node->GetNodeId()));
+    DumpLog::GetInstance().AddDesc("text: " + node->GetText());
     DumpLog::GetInstance().AddDesc("width: " + std::to_string(node->GetWidth()));
     DumpLog::GetInstance().AddDesc("height: " + std::to_string(node->GetHeight()));
     DumpLog::GetInstance().AddDesc("visible: " + std::to_string(node->GetShown() && node->GetVisible()));
