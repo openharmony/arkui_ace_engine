@@ -488,11 +488,9 @@ void JSSelect::Width(const JSRef<JSVal>& jsValue)
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();
-    auto box = stack->GetBoxComponent();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
     if (selectComponent) {
         selectComponent->SetWidth(value);
-        box->SetWidth(value);
     }
 }
 
@@ -513,11 +511,9 @@ void JSSelect::Height(const JSRef<JSVal>& jsValue)
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();
-    auto box = stack->GetBoxComponent();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
     if (selectComponent) {
         selectComponent->SetHeight(value);
-        box->SetHeight(value);
     }
 }
 

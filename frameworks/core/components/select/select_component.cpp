@@ -141,7 +141,7 @@ bool SelectComponent::Initialize()
     box->SetBackDecoration(backDecoration);
     box->SetPadding(innerPadding_);
     box->SetWidth(width_.Value(), width_.Unit());
-    box->SetHeight(height_.Value(), width_.Unit());
+    box->SetHeight(height_.Value(), height_.Unit());
     box->SetChild(AceType::MakeRefPtr<ClipComponent>(row));
     boxComponent_ = box;
     boxComponent_->SetMouseAnimationType(HoverAnimationType::OPACITY);
