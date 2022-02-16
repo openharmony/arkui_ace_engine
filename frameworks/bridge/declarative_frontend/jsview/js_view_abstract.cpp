@@ -55,6 +55,58 @@ constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
 constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
 constexpr double EPSILON = 0.000002f;
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
+constexpr double FULL_DIMENSION = 100.0;
+constexpr double HALF_DIMENSION = 50.0;
+
+bool CheckJSCallbackInfo(const std::string& callerName, const JSCallbackInfo& info,
+    std::vector<JSCallbackInfoType>& infoTypes)
+{
+    if (info.Length() < 1) {
+        LOGE("%{public}s: The arg is supposed to have at least one argument", callerName.c_str());
+        return false;
+    }
+    bool typeVerified = false;
+    std::string unrecognizedType;
+    for (const auto& infoType : infoTypes) {
+        switch (infoType) {
+            case JSCallbackInfoType::STRING:
+                if (info[0]->IsString()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "string|";
+                }
+                break;
+            case JSCallbackInfoType::NUMBER:
+                if (info[0]->IsNumber()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "number|";
+                }
+                break;
+            case JSCallbackInfoType::OBJECT:
+                if (info[0]->IsObject()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "object|";
+                }
+                break;
+            case JSCallbackInfoType::FUNCTION:
+                if (info[0]->IsFunction()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "Function|";
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    if (!typeVerified) {
+        LOGE("%{public}s: info[0] is not a [%{public}s]",
+            callerName.c_str(), unrecognizedType.substr(0, unrecognizedType.size()-1).c_str());
+    }
+    return typeVerified || infoTypes.size() == 0;
+}
 
 void ParseJsScale(std::unique_ptr<JsonValue>& argsPtrItem, float& scaleX, float& scaleY, float& scaleZ,
     Dimension& centerX, Dimension& centerY)
@@ -244,17 +296,12 @@ bool ParseMotionPath(const std::unique_ptr<JsonValue>& argsPtrItem, MotionPathOp
     return false;
 }
 
-void SetBgImgPosition(const BackgroundImagePositionType type, const double valueX, const double valueY,
-    BackgroundImagePosition& bgImgPosition)
+void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY,
+    const double valueX, const double valueY, BackgroundImagePosition& bgImgPosition)
 {
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    if (type == BackgroundImagePositionType::PERCENT) {
-        bgImgPosition.SetSizeX(AnimatableDimension(valueX, DimensionUnit::PERCENT, option));
-        bgImgPosition.SetSizeY(AnimatableDimension(valueY, DimensionUnit::PERCENT, option));
-    } else {
-        bgImgPosition.SetSizeX(AnimatableDimension(valueX, DimensionUnit::PX, option));
-        bgImgPosition.SetSizeY(AnimatableDimension(valueY, DimensionUnit::PX, option));
-    }
+    bgImgPosition.SetSizeX(AnimatableDimension(valueX, typeX, option));
+    bgImgPosition.SetSizeY(AnimatableDimension(valueY, typeY, option));
 }
 
 std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray> params, int32_t containCount)
@@ -317,8 +364,8 @@ void ReplaceHolder(std::string& originStr, JSRef<JSArray> params, int32_t contai
 
 bool ParseLocationProps(const JSCallbackInfo& info, AnimatableDimension& x, AnimatableDimension& y)
 {
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("ParseLocationProps", info, checkList)) {
         return false;
     }
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
@@ -524,13 +571,8 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 void JSViewAbstract::JsScale(const JSCallbackInfo& info)
 {
     LOGD("JsScale");
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least one argument");
-        return;
-    }
-
-    if (!info[0]->IsNumber() && !info[0]->IsObject()) {
-        LOGE("arg is not Number or Object.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("JsScale", info, checkList)) {
         return;
     }
 
@@ -630,13 +672,9 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
 void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
 {
     LOGD("JsTranslate");
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least one argument");
-        return;
-    }
-
-    if (!info[0]->IsNumber() && !info[0]->IsString() && !info[0]->IsObject()) {
-        LOGE("arg is not [Number|String|Object].");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
+        JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("JsTranslate", info, checkList)) {
         return;
     }
 
@@ -700,13 +738,8 @@ void JSViewAbstract::JsTranslateY(const JSCallbackInfo& info)
 void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
 {
     LOGD("JsRotate");
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-
-    if (!info[0]->IsNumber() && !info[0]->IsObject()) {
-        LOGE("arg is not Number or Object.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("JsRotate", info, checkList)) {
         return;
     }
 
@@ -782,13 +815,8 @@ void JSViewAbstract::JsRotateY(const JSCallbackInfo& info)
 void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
 {
     LOGD("JsTransform");
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least one argument");
-        return;
-    }
-
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not object");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("JsTransform", info, checkList)) {
         return;
     }
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -818,7 +846,7 @@ void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
 {
     LOGD("JsTransition");
     if (info.Length() > 1) {
-        LOGE("The arg is wrong, it is supposed to have at least one argument");
+        LOGE("Too many arguments");
         return;
     }
     if (info.Length() == 0) {
@@ -1058,13 +1086,8 @@ bool JSViewAbstract::ParseJsResponseRegionArray(const JSRef<JSVal>& jsValue, std
 
 void JSViewAbstract::JsSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("JsSize", info, checkList)) {
         return;
     }
 
@@ -1075,13 +1098,8 @@ void JSViewAbstract::JsSize(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("JsConstraintSize", info, checkList)) {
         return;
     }
 
@@ -1120,13 +1138,8 @@ void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsLayoutPriority(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
-    if (!info[0]->IsNumber() && !info[0]->IsString()) {
-        LOGE("arg is not Number or String.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER};
+    if (!CheckJSCallbackInfo("JsLayoutPriority", info, checkList)) {
         return;
     }
 
@@ -1143,13 +1156,8 @@ void JSViewAbstract::JsLayoutPriority(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
-    if (!info[0]->IsNumber() && !info[0]->IsString()) {
-        LOGE("arg is not Number or String.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER};
+    if (!CheckJSCallbackInfo("JsLayoutWeight", info, checkList)) {
         return;
     }
 
@@ -1166,12 +1174,8 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("JsAlign: The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-    if (!info[0]->IsNumber()) {
-        LOGE("JsAlign: arg is not Number or String.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::NUMBER};
+    if (!CheckJSCallbackInfo("JsAlign", info, checkList)) {
         return;
     }
     auto value = info[0]->ToNumber<int32_t>();
@@ -1249,13 +1253,8 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
-    if (!info[0]->IsString()) {
-        LOGE("No overLayer text.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::STRING};
+    if (!CheckJSCallbackInfo("JsOverlay", info, checkList)) {
         return;
     }
 
@@ -1389,12 +1388,8 @@ void JSViewAbstract::JsDisplayPriority(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("JsSharedTransition: The arg is wrong, it is supposed to have at least one argument");
-        return;
-    }
-    if (!info[0]->IsString()) {
-        LOGE("JsSharedTransition: arg[0] is not String.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::STRING};
+    if (!CheckJSCallbackInfo("JsSharedTransition", info, checkList)) {
         return;
     }
     // id
@@ -1473,12 +1468,8 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("JsGeometryTransition: The arg is wrong, it is supposed to have at least one argument");
-        return;
-    }
-    if (!info[0]->IsString()) {
-        LOGE("JsGeometryTransition: arg[0] is not String.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::STRING};
+    if (!CheckJSCallbackInfo("JsGeometryTransition", info, checkList)) {
         return;
     }
     // id
@@ -1493,12 +1484,8 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("JsAlignSelf: The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-    if (!info[0]->IsNumber()) {
-        LOGE("JsAlignSelf: arg is not Number or String.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::NUMBER};
+    if (!CheckJSCallbackInfo("JsAlignSelf", info, checkList)) {
         return;
     }
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
@@ -1607,12 +1594,8 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have 1 object argument.");
-        return;
-    }
-    if (!info[0]->IsObject() && !info[0]->IsNumber()) {
-        LOGE("JsBackgroundImageSize: info[0] is not object or number");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("JsBackgroungImageSize", info, checkList)) {
         return;
     }
     auto decoration = GetBackDecoration();
@@ -1635,14 +1618,26 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
             LOGE("Js Parse failed. imageArgs is null.");
             return;
         }
-        double width = 0.0;
-        double height = 0.0;
-        ParseJsonDouble(imageArgs->GetValue("width"), width);
-        ParseJsonDouble(imageArgs->GetValue("height"), height);
-        bgImgSize.SetSizeTypeX(BackgroundImageSizeType::LENGTH);
-        bgImgSize.SetSizeValueX(width);
-        bgImgSize.SetSizeTypeY(BackgroundImageSizeType::LENGTH);
-        bgImgSize.SetSizeValueY(height);
+        Dimension width;
+        Dimension height;
+        ParseJsonDimensionVp(imageArgs->GetValue("width"), width);
+        ParseJsonDimensionVp(imageArgs->GetValue("height"), height);
+        double valueWidth = width.Value();
+        double valueHeight = height.Value();
+        BackgroundImageSizeType typeWidth = BackgroundImageSizeType::LENGTH;
+        BackgroundImageSizeType typeHeight = BackgroundImageSizeType::LENGTH;
+        if (width.Unit() == DimensionUnit::PERCENT) {
+            typeWidth = BackgroundImageSizeType::PERCENT;
+            valueWidth = width.Value() * FULL_DIMENSION;
+        }
+        if (height.Unit() == DimensionUnit::PERCENT) {
+            typeHeight = BackgroundImageSizeType::PERCENT;
+            valueHeight = height.Value() * FULL_DIMENSION;
+        }
+        bgImgSize.SetSizeTypeX(typeWidth);
+        bgImgSize.SetSizeValueX(valueWidth);
+        bgImgSize.SetSizeTypeY(typeHeight);
+        bgImgSize.SetSizeValueY(valueHeight);
     }
     image->SetImageSize(bgImgSize);
     decoration->SetImage(image);
@@ -1650,12 +1645,8 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have 1 object argument.");
-        return;
-    }
-    if (!info[0]->IsObject() && !info[0]->IsNumber()) {
-        LOGE("JsBackgroundImageSize: info[0] is not object or number");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("JsBackgroundImagePosition", info, checkList)) {
         return;
     }
     auto decoration = GetBackDecoration();
@@ -1672,31 +1663,40 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         int32_t align = info[0]->ToNumber<int32_t>();
         switch (align) {
             case 0:
-                SetBgImgPosition(BackgroundImagePositionType::PERCENT, 0, 0, bgImgPosition);
+                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
+                    0.0, 0.0, bgImgPosition);
                 break;
             case 1:
-                SetBgImgPosition(BackgroundImagePositionType::PERCENT, 50, 0, bgImgPosition);
+                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
+                    HALF_DIMENSION, 0.0, bgImgPosition);
                 break;
             case 2:
-                SetBgImgPosition(BackgroundImagePositionType::PERCENT, 100, 0, bgImgPosition);
+                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
+                    FULL_DIMENSION, 0.0, bgImgPosition);
                 break;
             case 3:
-                SetBgImgPosition(BackgroundImagePositionType::PERCENT, 0, 50, bgImgPosition);
+                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
+                    0.0, HALF_DIMENSION, bgImgPosition);
                 break;
             case 4:
-                SetBgImgPosition(BackgroundImagePositionType::PERCENT, 50, 50, bgImgPosition);
+                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
+                    HALF_DIMENSION, HALF_DIMENSION, bgImgPosition);
                 break;
             case 5:
-                SetBgImgPosition(BackgroundImagePositionType::PERCENT, 100, 50, bgImgPosition);
+                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
+                    FULL_DIMENSION, HALF_DIMENSION, bgImgPosition);
                 break;
             case 6:
-                SetBgImgPosition(BackgroundImagePositionType::PERCENT, 0, 100, bgImgPosition);
+                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
+                    0.0, FULL_DIMENSION, bgImgPosition);
                 break;
             case 7:
-                SetBgImgPosition(BackgroundImagePositionType::PERCENT, 50, 100, bgImgPosition);
+                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
+                    HALF_DIMENSION, FULL_DIMENSION, bgImgPosition);
                 break;
             case 8:
-                SetBgImgPosition(BackgroundImagePositionType::PERCENT, 100, 100, bgImgPosition);
+                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
+                    FULL_DIMENSION, FULL_DIMENSION, bgImgPosition);
                 break;
             default:
                 break;
@@ -1707,11 +1707,23 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
             LOGE("Js Parse failed. imageArgs is null.");
             return;
         }
-        double x = 0.0;
-        double y = 0.0;
-        ParseJsonDouble(imageArgs->GetValue("x"), x);
-        ParseJsonDouble(imageArgs->GetValue("y"), y);
-        SetBgImgPosition(BackgroundImagePositionType::PX, x, y, bgImgPosition);
+        Dimension x;
+        Dimension y;
+        ParseJsonDimensionVp(imageArgs->GetValue("x"), x);
+        ParseJsonDimensionVp(imageArgs->GetValue("y"), y);
+        double valueX = x.Value();
+        double valueY = y.Value();
+        DimensionUnit typeX = DimensionUnit::PX;
+        DimensionUnit typeY = DimensionUnit::PX;
+        if (x.Unit() == DimensionUnit::PERCENT) {
+            valueX = x.Value() * FULL_DIMENSION;
+            typeX = DimensionUnit::PERCENT;
+        }
+        if (y.Unit() == DimensionUnit::PERCENT) {
+            valueY = y.Value() * FULL_DIMENSION;
+            typeY = DimensionUnit::PERCENT;
+        }
+        SetBgImgPosition(typeX, typeY, valueX, valueY, bgImgPosition);
     }
     image->SetImagePosition(bgImgPosition);
     decoration->SetImage(image);
@@ -1815,12 +1827,9 @@ void JSViewAbstract::JsMargin(const JSCallbackInfo& info)
 
 void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-    if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
-        LOGE("arg is not a string, number or object.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
+        JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("ParseMarginOrPadding", info, checkList)) {
         return;
     }
 
@@ -1861,12 +1870,8 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
 
 void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not a object.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("JsBorder", info, checkList)) {
         return;
     }
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -2033,13 +2038,8 @@ void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not object");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("JsWindowBlur", info, checkList)) {
         return;
     }
 
@@ -2502,15 +2502,10 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
 
 std::pair<Dimension, Dimension> JSViewAbstract::ParseSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("ParseSize", info, checkList)) {
         return std::pair<Dimension, Dimension>();
     }
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not a object.");
-        return std::pair<Dimension, Dimension>();
-    }
-
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
     if (!argsPtrItem || argsPtrItem->IsNull()) {
         LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
@@ -2582,13 +2577,8 @@ void JSViewAbstract::JsUseAlign(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsGridSpan(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-
-    if (!info[0]->IsNumber()) {
-        LOGE("arg is not Number");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::NUMBER};
+    if (!CheckJSCallbackInfo("JsGridSpan", info, checkList)) {
         return;
     }
     auto gridContainerInfo = JSGridContainer::GetContainer();
@@ -2638,13 +2628,8 @@ static bool ParseSpanAndOffset(const JSRef<JSVal>& val, uint32_t& span, int32_t&
 
 void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The argument is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-
-    if (!info[0]->IsObject()) {
-        LOGE("The argument is not object or string.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("JsUseSizeType", info, checkList)) {
         return;
     }
     auto gridContainerInfo = JSGridContainer::GetContainer();
@@ -2697,8 +2682,8 @@ void JSViewAbstract::Pop()
 
 void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject()) {
-        LOGE("fail to bind onDrag event due to info is not object.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("JsOnDragStart", info, checkList)) {
         return;
     }
 
@@ -2755,8 +2740,8 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsFunction()) {
-        LOGE("fail to bind onDragEnter event due to info is not function");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::FUNCTION};
+    if (!CheckJSCallbackInfo("JsOnDragEnter", info, checkList)) {
         return;
     }
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
@@ -2772,8 +2757,8 @@ void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnDragMove(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsFunction()) {
-        LOGE("fail to bind onDragMove event due to info is not function");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::FUNCTION};
+    if (!CheckJSCallbackInfo("JsOnDragMove", info, checkList)) {
         return;
     }
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
@@ -2789,8 +2774,8 @@ void JSViewAbstract::JsOnDragMove(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnDragLeave(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsFunction()) {
-        LOGE("fail to bind onDragLeave event due to info is not function");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::FUNCTION};
+    if (!CheckJSCallbackInfo("JsOnDragLeave", info, checkList)) {
         return;
     }
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
@@ -2806,8 +2791,8 @@ void JSViewAbstract::JsOnDragLeave(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsFunction()) {
-        LOGE("fail to bind onDrop event due to info is not function");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::FUNCTION};
+    if (!CheckJSCallbackInfo("JsOnDrop", info, checkList)) {
         return;
     }
     RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
@@ -2823,8 +2808,8 @@ void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsFunction()) {
-        LOGE("fail to bind on area change event due to info is not function");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::FUNCTION};
+    if (!CheckJSCallbackInfo("JsOnAreaChange", info, checkList)) {
         return;
     }
     auto jsOnAreaChangeFunction = AceType::MakeRefPtr<JsOnAreaChangeFunction>(JSRef<JSFunc>::Cast(info[0]));
@@ -2982,12 +2967,8 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not a object.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("JsRadialGradient", info, checkList)) {
         return;
     }
 
@@ -3054,12 +3035,8 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not a object.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("JsSweepGradient", info, checkList)) {
         return;
     }
 
@@ -3139,12 +3116,8 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not a object.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("JsMotionPath", info, checkList)) {
         return;
     }
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -3162,12 +3135,8 @@ void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not a object.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    if (!CheckJSCallbackInfo("JsShadow", info, checkList)) {
         return;
     }
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -3456,13 +3425,8 @@ void JSViewAbstract::JsId(const std::string& id)
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
-    if (!info[0]->IsString()) {
-        LOGE("info[0] is not a string.");
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::STRING};
+    if (!CheckJSCallbackInfo("JsDebugLine", info, checkList)) {
         return;
     }
 

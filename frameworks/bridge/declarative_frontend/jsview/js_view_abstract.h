@@ -58,6 +58,14 @@ enum class ResponseType : int32_t {
     LONGPRESS,
 };
 
+enum class JSCallbackInfoType {
+    STRING,
+    NUMBER,
+    OBJECT,
+    BOOLEAN,
+    FUNCTION
+};
+
 class JSViewAbstract {
 public:
     static void SetPadding(const Dimension& value);
