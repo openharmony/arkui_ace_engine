@@ -431,7 +431,7 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
     LOGI("AceAbility::OnKeyUp called,touchEvent info: keyCode is %{private}d,\
-        keyAction is %{public}d, keyActionTime is %{public}" PRId64 "",
+         keyAction is %{public}d, keyActionTime is %{public}" PRId64,
         touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (container) {
