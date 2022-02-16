@@ -17,6 +17,7 @@
 
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
+#include "base/ressched/ressched_report.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -94,6 +95,7 @@ void ClickRecognizer::OnAccepted()
     SetFingerList(touchPoints_, coordinateOffset_, fingerList_);
     SendCallbackMsg(onAction_);
     Reset();
+    ResSchedReport::GetInstance().ResSchedDataReport("click");
 }
 
 void ClickRecognizer::OnRejected()
