@@ -99,6 +99,26 @@ public:
         return selectedIndex_;
     }
 
+    const PickerDate& GetStartDate() const
+    {
+        return startDateSolar_;
+    }
+
+    const PickerDate& GetEndDate() const
+    {
+        return endDateSolar_;
+    }
+    
+    const PickerDate& GetSelectedDate() const
+    {
+        return selectedDate_;
+    }
+
+    const std::string GetType() const
+    {
+        return type_;
+    }
+
 protected:
     void OnTouchTestHit(const Offset&, const TouchRestrict&, TouchTestResult& result) override
     {
@@ -171,6 +191,10 @@ private:
     Dimension columnHeight_;
     uint32_t selectedIndex_ = 0;
     std::vector<std::string> range_ {""};
+    std::string type_ = "DatePickerType.Date";
+    PickerDate startDateSolar_ = PickerDate(1970, 1, 1);
+    PickerDate endDateSolar_ = PickerDate(2100, 12, 31);
+    PickerDate selectedDate_ = PickerDate::Current();
 
     std::function<void()> onCancelCallback_;
     std::function<void(const std::string&)> onChangeCallback_;

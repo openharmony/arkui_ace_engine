@@ -18,6 +18,7 @@
 #include <numeric>
 
 #include "base/log/event_report.h"
+#include "core/components/picker/picker_time_component.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
@@ -62,6 +63,13 @@ void RenderPickerBase::Update(const RefPtr<Component>& component)
     if (textPicker) {
         selectedIndex_ = textPicker->GetSelected();
         range_ = textPicker->GetRange();
+    }
+
+    auto time = AceType::DynamicCast<PickerTimeComponent>(component);
+    if (time) {
+        type_ = "DatePickerType.Time";
+    } else {
+        type_ = "DatePickerType.Date";
     }
 
     columnHeight_ = picker->GetColumnHeight();

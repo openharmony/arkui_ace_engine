@@ -269,7 +269,7 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
             });
         datePicker->SetDialogResult(resultId);
     }
-
+    datePicker->SetDialogName("DatePickerDialog");
     datePicker->OpenDialog(properties);
 }
 

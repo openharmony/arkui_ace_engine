@@ -50,7 +50,7 @@ std::string PickerTextDialogComposedElement::GetShow() const
     jsonValue->Put("selected", GetSelected().c_str());
     jsonValue->Put("defaultPickerItemHeight", GetDefaultPickerItemHeight().c_str());
     jsonShow->Put("show", jsonValue);
-    return jsonValue->ToString();
+    return jsonShow->ToString();
 }
 
 std::string PickerTextDialogComposedElement::GetDefaultPickerItemHeight() const
