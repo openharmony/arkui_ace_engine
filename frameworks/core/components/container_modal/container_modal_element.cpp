@@ -194,27 +194,48 @@ void ContainerModalElement::Update()
         LOGE("ContainerModalElement update failed, container box component is null.");
         return;
     }
-    containerBox->SetOnTouchMoveId([week = WeakClaim(this), weakContext = context_](const TouchEventInfo& info) {
+
+    // touch top to pop-up title bar.
+    containerBox->SetOnTouchMoveId([week = WeakClaim(this)](const TouchEventInfo& info) {
         auto containerElement = week.Upgrade();
-        auto context = weakContext.Upgrade();
-        if (!containerElement || !context) {
+        if (!containerElement || !containerElement->CanShowFloatingTitle()) {
             return;
         }
-        if (context->FireWindowGetModeCallBack() != WindowMode::WINDOW_MODE_FULLSCREEN) {
-            LOGI("Window is not full screen, can not show floating title.");
-            return;
-        }
-        if (containerElement->renderDisplay_ &&
-            containerElement->renderDisplay_->GetVisibleType() == VisibleType::VISIBLE) {
-            LOGI("Floating tittle is visible now, no need to show again.");
-            return;
-        }
-        // touch top to pop-up title bar.
         if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <= TITLE_POPUP_DISTANCE) {
             containerElement->renderDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
             containerElement->controller_->Forward();
         }
     });
+
+    // mouse move top to pop-up title bar.
+    containerBox->SetOnMouseId([week = WeakClaim(this)](MouseInfo& info) {
+        auto containerElement = week.Upgrade();
+        if (!containerElement || !containerElement->CanShowFloatingTitle()) {
+            return;
+        }
+        if (info.GetAction() == MouseAction::MOVE && info.GetLocalLocation().GetY() <= TITLE_POPUP_DISTANCE) {
+            containerElement->renderDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
+            containerElement->controller_->Forward();
+        }
+    });
+}
+
+bool ContainerModalElement::CanShowFloatingTitle()
+{
+    auto context = context_.Upgrade();
+    if (!context || !renderDisplay_ || !controller_) {
+        LOGI("Show floating title failed, context, renderDisplay_ or controller is null.");
+        return false;
+    }
+    if (context->FireWindowGetModeCallBack() != WindowMode::WINDOW_MODE_FULLSCREEN) {
+        LOGI("Window is not full screen, can not show floating title.");
+        return false;
+    }
+    if (renderDisplay_->GetVisibleType() == VisibleType::VISIBLE) {
+        LOGI("Floating tittle is visible now, no need to show again.");
+        return false;
+    }
+    return true;
 }
 
 } // namespace OHOS::Ace
