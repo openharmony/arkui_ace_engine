@@ -24,6 +24,8 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr uint32_t COLUMN_CHILD_NUM = 2;
+constexpr uint32_t TITLE_POPUP_TIME = 500;     // 500ms
+constexpr double TITLE_POPUP_DISTANCE = 100.0; // 100px
 
 } // namespace
 
@@ -31,29 +33,34 @@ RefPtr<StackElement> ContainerModalElement::GetStackElement() const
 {
     auto containerBox = AceType::DynamicCast<BoxElement>(GetFirstChild());
     if (!containerBox) {
-        LOGE("Get stack element failed. Container box element is null!");
+        LOGE("Get stack element failed, container box element is null!");
         return {};
     }
 
-    auto column = AceType::DynamicCast<ColumnElement>(containerBox->GetFirstChild());
+    // The first stack is not what we need.
+    auto stackElement = AceType::DynamicCast<StackElement>(containerBox->GetFirstChild());
+    if (!stackElement) {
+        LOGE("Get stack element failed, stack element is null!");
+        return {};
+    }
+
+    auto column = AceType::DynamicCast<ColumnElement>(stackElement->GetFirstChild());
     if (!column || column->GetChildren().size() != COLUMN_CHILD_NUM) {
         // column should have 2 children, title and content.
-        LOGE("Get stack element failed. Column is null or child size error!");
+        LOGE("Get stack element failed, column is null or child size error!");
         return {};
     }
 
-    // Get second child
-    auto secondItr = std::next(column->GetChildren().begin());
-    auto contentBox = AceType::DynamicCast<BoxElement>(*secondItr);
-
+    // Get second child : content
+    auto contentBox = AceType::DynamicCast<BoxElement>(column->GetLastChild());
     if (!contentBox) {
-        LOGE("Get stack element failed. content box element is null!");
+        LOGE("Get stack element failed, content box element is null!");
         return {};
     }
 
     auto stack = contentBox->GetFirstChild();
     if (!stack || !AceType::InstanceOf<StackElement>(stack)) {
-        LOGE("Get stack element failed. stack is null or type error!");
+        LOGE("Get stack element failed, stack is null or type error!");
         return {};
     }
 
@@ -91,6 +98,123 @@ RefPtr<StageElement> ContainerModalElement::GetStageElement() const
     }
     LOGE("Get stage element failed, all children of stack element do not meet the requirements");
     return {};
+}
+
+void ContainerModalElement::ShowTitle(bool isShow)
+{
+    auto containerBox = AceType::DynamicCast<BoxElement>(GetFirstChild());
+    if (!containerBox) {
+        LOGE("ContainerModalElement showTitle failed, container box element is null!");
+        return;
+    }
+
+    auto stackElement = AceType::DynamicCast<StackElement>(containerBox->GetFirstChild());
+    if (!stackElement) {
+        LOGE("ContainerModalElement showTitle failed, stack element is null!");
+        return;
+    }
+
+    auto column = AceType::DynamicCast<ColumnElement>(stackElement->GetFirstChild());
+    if (!column || column->GetChildren().size() != COLUMN_CHILD_NUM) {
+        // column should have 2 children, title and content.
+        LOGE("ContainerModalElement showTitle failed, column  element is null or children size error!");
+        return;
+    }
+
+    // Get first child : title
+    auto display = AceType::DynamicCast<DisplayElement>(column->GetFirstChild());
+    if (!display) {
+        LOGE("ContainerModalElement showTitle failed,, display element is null.");
+        return;
+    }
+    auto renderDisplay = AceType::DynamicCast<RenderDisplay>(display->GetRenderNode());
+    if (renderDisplay) {
+        renderDisplay->UpdateVisibleType(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
+    }
+
+    // hide floating title anyway.
+    if (renderDisplay_) {
+        renderDisplay_->UpdateVisibleType(VisibleType::GONE);
+    }
+}
+
+void ContainerModalElement::PerformBuild()
+{
+    SoleChildElement::PerformBuild();
+    if (!controller_) {
+        controller_ = AceType::MakeRefPtr<Animator>(context_);
+        controller_->SetDuration(TITLE_POPUP_TIME);
+        controller_->SetFillMode(FillMode::FORWARDS);
+        auto translateY = AceType::MakeRefPtr<CurveAnimation<DimensionOffset>>(
+            DimensionOffset(Dimension(), Dimension(-TITLE_POPUP_DISTANCE)), DimensionOffset(Dimension(), Dimension()),
+            Curves::FRICTION);
+        TweenOption option;
+        option.SetTranslateAnimations(AnimationType::TRANSLATE_Y, translateY);
+        auto containerBox = AceType::DynamicCast<BoxElement>(GetFirstChild());
+        if (!containerBox) {
+            LOGE("ContainerModalElement PerformBuild failed, container box element is null!");
+            return;
+        }
+
+        auto stackElement = AceType::DynamicCast<StackElement>(containerBox->GetFirstChild());
+        if (!stackElement) {
+            LOGE("ContainerModalElement PerformBuild failed, stack element is null!");
+            return;
+        }
+
+        auto tween = AceType::DynamicCast<TweenElement>(stackElement->GetLastChild());
+        if (!tween) {
+            LOGE("ContainerModalElement PerformBuild failed, tween element is null.");
+            return;
+        }
+        auto display = AceType::DynamicCast<DisplayElement>(tween->GetFirstChild());
+        if (display && !renderDisplay_) {
+            renderDisplay_ = AceType::DynamicCast<RenderDisplay>(display->GetRenderNode());
+            if (renderDisplay_) {
+                renderDisplay_->UpdateVisibleType(VisibleType::GONE);
+            }
+        }
+        tween->SetController(controller_);
+        tween->SetOption(option);
+        tween->ApplyKeyframes();
+    }
+}
+
+void ContainerModalElement::Update()
+{
+    RenderElement::Update();
+
+    const auto container = AceType::DynamicCast<ContainerModalComponent>(component_);
+    if (!container) {
+        LOGE("ContainerModalElement update failed, container modal component is null.");
+        return;
+    }
+    auto containerBox = AceType::DynamicCast<BoxComponent>(container->GetChild());
+    if (!containerBox) {
+        LOGE("ContainerModalElement update failed, container box component is null.");
+        return;
+    }
+    containerBox->SetOnTouchMoveId([week = WeakClaim(this), weakContext = context_](const TouchEventInfo& info) {
+        auto containerElement = week.Upgrade();
+        auto context = weakContext.Upgrade();
+        if (!containerElement || !context) {
+            return;
+        }
+        if (context->FireWindowGetModeCallBack() != WindowMode::WINDOW_MODE_FULLSCREEN) {
+            LOGI("Window is not full screen, can not show floating title.");
+            return;
+        }
+        if (containerElement->renderDisplay_ &&
+            containerElement->renderDisplay_->GetVisibleType() == VisibleType::VISIBLE) {
+            LOGI("Floating tittle is visible now, no need to show again.");
+            return;
+        }
+        // touch top to pop-up title bar.
+        if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <= TITLE_POPUP_DISTANCE) {
+            containerElement->renderDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
+            containerElement->controller_->Forward();
+        }
+    });
 }
 
 } // namespace OHOS::Ace
