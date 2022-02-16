@@ -43,6 +43,7 @@ template("ace_base_source_set") {
       "log/ace_tracker.cpp",
       "log/dump_log.cpp",
       "memory/memory_monitor.cpp",
+      "ressched/ressched_report.cpp",
       "thread/background_task_executor.cpp",
       "utils/base_id.cpp",
       "utils/date_util.cpp",
