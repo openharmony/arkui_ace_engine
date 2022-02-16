@@ -155,7 +155,6 @@ void AceAbility::OnStart(const Want& want)
     auto abilityContext = GetAbilityContext();
     std::call_once(onceFlag, [abilityContext]() {
         LOGI("Initialize for current process.");
-        SystemProperties::SetDeviceType(DeviceType::PHONE);
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
         CapabilityRegistry::Register();
