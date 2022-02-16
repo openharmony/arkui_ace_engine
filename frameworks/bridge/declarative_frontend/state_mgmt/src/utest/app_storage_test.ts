@@ -16,14 +16,12 @@
 const testAppStorage = tsuite("AppStorage", () => {
 
   tcase("size", () => {
-    AppStorage.SetOrCreate<string>("say", "Hello");
-    AppStorage.SetOrCreate<string>("name", "Gudio");
-
+    AppStorage.CreateSingleton({say: "Hello", name: "Gudio"});
     test("AppStrorage has initial two ObservedProperties", AppStorage.Size() == 2);
   });
 
   tcase("AppStorage has self set value", () => {
-    test("added 'say' missing from AppStrorage", AppStorage.Has("say"));
+    test("added 'say' is in AppStrorage", AppStorage.Has("say"));
   });
 
   tcase("AppStorage remembers self set value", () => {

@@ -11,11 +11,20 @@ TS sources are built into a single JS file using `tsc`.
 Before first build:
 `npm install`
 
-For every build
+For every debug build
 `npm run build`
 
 The output is one JS file:
 `./dist/stateMgmt.js`
+
+For every release build
+`npm run build_release`
+
+The output is one JS file:
+`./distRelease/stateMgmt.js`
+
+The difference between debug build and release buold is the removal 
+of all console.log/.debug/.info statements from the generated JS code.
 
 ## Unit tests for state mgmt using node.js / npm
 

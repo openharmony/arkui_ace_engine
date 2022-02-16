@@ -108,7 +108,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
       return false;
     }
 
-    let link = AppStorage.GetOrCreate().link(propName, this);
+    let link = AppStorage.Link(propName, this);
     if (link) {
       console.debug(`PersistentStorage: persistProp ${propName} in AppStorage, using that`);
       this.links_.set(propName, link);
@@ -124,7 +124,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
       } catch (error) {
         console.error(`PersistentStorage: convert for ${propName} has error: ` + error.toString());
       }
-      link = AppStorage.GetOrCreate().setAndLink(propName, returnValue, this);
+      link = AppStorage.SetAndLink(propName, returnValue, this);
       this.links_.set(propName, link);
       console.debug(`PersistentStorage: created new persistent prop for ${propName}`);
     }

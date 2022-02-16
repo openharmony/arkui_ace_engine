@@ -31,12 +31,62 @@ abstract class View extends NativeView implements
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: ProvidedVarsMap;
 
+  // my LocalStorge instance, shared with ancestor Views.
+  // create a default instance on demand if none is initialized
+  protected localStoragebackStore_: LocalStorage = undefined;
+  protected get localStorage_() {
+    if (!this.localStoragebackStore_) {
+      console.warn(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
+      this.localStoragebackStore_ = new LocalStorage({ /* emty */ });
+    }
+    return this.localStoragebackStore_;
+  }
+  protected set localStorage_(instance: LocalStorage) {
+    if (!instance) { 
+      // setting to undefined not allowed
+      return;
+    }
+    if (this.localStoragebackStore_) {
+      console.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+    }
+    this.localStoragebackStore_ = instance;
+  }
 
-  constructor(compilerAssignedUniqueChildId: string, parent: View) {
+  /**
+   * Create a View
+   * 
+   * 1. option: top level View, specify
+   *    - compilerAssignedUniqueChildId must specify
+   *    - parent=undefined
+   *    - localStorage  must provide if @LocalSTorageLink/Prop variables are used
+   *      in this View or descendant Views.
+   * 
+   * 2. option: not a top level View
+   *    - compilerAssignedUniqueChildId must specify
+   *    - parent must specify
+   *    - localStorage do not specify, will inherit from parent View.
+   * 
+   * @param compilerAssignedUniqueChildId Tw
+   * @param parent 
+   * @param localStorage 
+   */
+
+  constructor(compilerAssignedUniqueChildId: string, parent: View, localStorage?: LocalStorage) {
     super(compilerAssignedUniqueChildId, parent);
     this.id_ = SubscriberManager.Get().MakeId();
     this.providedVars_ = parent ? new Map(parent.providedVars_)
       : new Map<string, ObservedPropertyAbstract<any>>();
+
+    this.localStoragebackStore_ = undefined;
+    if (parent) {
+      // this View is not a top-level View
+      console.log(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
+      this.localStorage_ = parent.localStorage_;
+    } else if (localStorage) {
+      this.localStorage_ = localStorage;
+      console.log(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
+    }
+
     SubscriberManager.Get().add(this);
     console.debug(`${this.constructor.name}: constructor done`);
   }

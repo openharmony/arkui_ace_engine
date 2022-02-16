@@ -15,8 +15,8 @@
 
 const testEnvironment = tsuite("Environment", () => {
   var mockEnv = new MockEnvironmentBackend();
-  var envProps = [
-    { key: "accessibilityEnabled", defaultValue: mockEnv.getAccessibilityEnabled() === "true" }, // backend returns string, spec has boolean for frontend
+  var envProps : { key: string, defaultValue: boolean | number | string  }[] = [
+    { key: "accessibilityEnabled", defaultValue: (mockEnv.getAccessibilityEnabled() == "true") }, // backend returns string, spec has boolean for frontend
     { key: "colorMode", defaultValue: mockEnv.getColorMode() },
     { key: "fontScale", defaultValue: mockEnv.getFontScale() },
     { key: "fontWeightScale", defaultValue: mockEnv.getFontWeightScale() },
@@ -37,14 +37,14 @@ const testEnvironment = tsuite("Environment", () => {
     const keys = Environment.Keys();
     console.debug("Environment variables:");
     for (let i in keys) {
-      console.debug(`${keys[i]}`);
+      console.debug(`${keys[i]} - strigified value: ${JSON.stringify(AppStorage.Get(keys[i]))}`);
     }
 
     test("Environment number of keys returned corresponds with number of values registered", keys.length == envProps.length);
   });
 
   tcase("Value retrieval", () => {
-    test("Environment value 'accessibilityEnabled' correct", AppStorage.Get<boolean>("accessibilityEnabled") === false);
+    test("Environment value 'accessibilityEnabled' correct", AppStorage.Get<boolean>("accessibilityEnabled") == false);
     test("Environment value 'languageCode' correct", AppStorage.Get<string>("languageCode") == "cn");
 
   });

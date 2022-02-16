@@ -53,7 +53,8 @@ const testViewState = tsuite("View State", () => {
         forLink_?: boolean,
         forProp_?: string,
         forReg_?: string;
-      }) {
+      },
+      uri : string) {
       super(compilerAssignedUniqueChildId, parent);
       // tsc will add initialization of forLink_ and forProp_ with defauilt values here
       this.updateWithValueParams(params);
@@ -65,7 +66,7 @@ const testViewState = tsuite("View State", () => {
       forProp_?: string,
       forReg_?: string
     }): void {
-      console.debug(`${this.id()}:${this.constructor.name}: updateWithValueParams ...`);
+      console.debug(`${this.id__()}:${this.constructor.name}: updateWithValueParams ...`);
       if (params.forLink_) {
         this.forLink_ = params.forLink_;
       }
@@ -75,27 +76,27 @@ const testViewState = tsuite("View State", () => {
       if (params.forReg_) {
         this.forReg_ = params.forReg_;
       }
-      console.debug(`${this.id()}:${this.constructor.name}: updateWithValueParams done`);
+      console.debug(`${this.id__()}:${this.constructor.name}: updateWithValueParams done`);
     }
 
     // generated based on state definitions
     public aboutToBeDeleted() {
-      console.debug(`${this.id()}:${this.constructor.name}: abouttoBeDeleted`);
+      console.debug(`${this.id__()}:${this.constructor.name}: abouttoBeDeleted`);
       // tell the ObservedProperty this View is to be deleted
       this.__forLink_.aboutToBeDeleted(this);
       this.__forProp_.aboutToBeDeleted(this);
-      SubscriberManager.Get().delete(this.id());
+      SubscriberManager.Get().delete(this.id__());
     }
 
     // added just to make things work, not in production when this func is implemented in C++
     findChildById(compilerAssignedUniqueChildId: string): View {
-      console.log(`${this.id()}:${this.constructor.name}: findChildById ${compilerAssignedUniqueChildId}. Will not work!`);
+      console.log(`${this.id__()}:${this.constructor.name}: findChildById ${compilerAssignedUniqueChildId}. Will not work!`);
       return childView;
     }
 
     public render() {
       // dump state
-      console.debug(`${this.id()}:${this.constructor.name}: render: state is: forLink_: ${this.forLink_}, forProp_: ${this.forProp_}`);
+      console.debug(`${this.id__()}:${this.constructor.name}: render: state is: forLink_: ${this.forLink_}, forProp_: ${this.forProp_}`);
 
       const compilerAssignedChildId = "1";
             /* global var */ childView = this.findChildById(compilerAssignedChildId) as Child;
@@ -165,7 +166,7 @@ const testViewState = tsuite("View State", () => {
 
     // generated
     public updateWithValueParams(params: { num_?: number, reg_?: string }): void {
-      console.debug(`${this.id()}:${this.constructor.name}: updateWithValueParams start`);
+      console.debug(`${this.id__()}:${this.constructor.name}: updateWithValueParams start`);
       if (params.num_) {
         this.num_ = params.num_;
       }
@@ -178,7 +179,7 @@ const testViewState = tsuite("View State", () => {
     // generated based on state definitions
     // notify all SubscribedAbstractProperty objects they will be deleted soon
     public aboutToBeDeleted() {
-      console.debug(`${this.id()}:${this.constructor.name}: aboutToBeDeleted`);
+      console.debug(`${this.id__()}:${this.constructor.name}: aboutToBeDeleted`);
       // notify @State
       // this View unsubscribes
       this.__num_.aboutToBeDeleted(this);
@@ -189,21 +190,26 @@ const testViewState = tsuite("View State", () => {
       this.__link_.aboutToBeDeleted();
       this.__prop_.aboutToBeDeleted();
 
-      SubscriberManager.Get().delete(this.id());
+      SubscriberManager.Get().delete(this.id__());
     }
 
 
     // transpiled from build()
     public render() {
       // dump state
-      console.debug(`${this.id()}:${this.constructor.name}: render: state is: num_: ${this.num_}, link_: ${this.link_}, prop_: ${this.prop_}, reg_=${this.reg_}`);
+      console.debug(`${this.id__()}:${this.constructor.name}: render: state is: num_: ${this.num_}, link_: ${this.link_}, prop_: ${this.prop_}, reg_=${this.reg_}`);
     }
   }
 
 
   // simulate the process
+
+  console.debug("create LocalStorage ...")
+  const uri = "stateMgmt/src/utest/view_test.ts";
+  LocalStorageLookup.GetOrCreate(uri, {});
+
   console.debug("create Parent ...")
-  let parentView: Parent = new Parent("0", undefined, {})
+  let parentView: Parent = new Parent("0", undefined, {}, uri);
 
 
   tcase("Parent.render #1 ...", () => {
