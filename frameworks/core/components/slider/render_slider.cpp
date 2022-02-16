@@ -300,14 +300,11 @@ void RenderSlider::FireMoveEndEvent()
                                 .append("}");
         onMoveEnd_(param);
     }
-    if (onChange_) {
-        onChange_(value_, static_cast<int>(SliderEvent::MOVE_END));
-    }
 }
 
 void RenderSlider::FireMovingEvent(SliderEvent mode)
 {
-    if (onMoving_) {
+    if (onMoving_ || onChange_) {
         auto jsonResult = JsonUtil::Create(true);
         jsonResult->Put("progress", std::to_string(value_).c_str());
         switch (mode) {
@@ -355,11 +352,9 @@ void RenderSlider::FireMovingEvent(SliderEvent mode)
                 break;
         }
         jsonResult->Put("value", value_);
-        onMoving_(std::string(R"("change",)").append(jsonResult->ToString()));
-    }
-
-    if (onChange_) {
-        onChange_(value_, static_cast<int>(SliderEvent::MOVE_MOVING));
+        if (onMoving_) {
+            onMoving_(std::string(R"("change",)").append(jsonResult->ToString()));
+        }
     }
 }
 
@@ -374,6 +369,7 @@ void RenderSlider::HandleClick(const Offset& clickPosition)
         UpdateBlockPosition(clickPosition, true);
         insideBlockRegion_ = false;
         FireMovingEvent(SliderEvent::CLICK);
+        FireMoveEndEvent();
         return;
     }
     RenderBlockPosition(clickPosition);
