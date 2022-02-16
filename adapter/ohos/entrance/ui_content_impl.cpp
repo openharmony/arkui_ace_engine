@@ -16,6 +16,7 @@
 #include "adapter/ohos/entrance/ui_content_impl.h"
 
 #include <atomic>
+#include <regex>
 
 #include "ability_context.h"
 #include "ability_info.h"
@@ -45,6 +46,10 @@
 
 namespace OHOS::Ace {
 namespace {
+
+const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
+const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
+const std::string FILE_SEPARATOR = "/";
 
 WindowMode GetWindowMode(OHOS::Rosen::Window* window)
 {
@@ -224,6 +229,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     bool isModelJson = info != nullptr ? info->isModuleJson : false;
     std::string moduleName = info != nullptr ? info->moduleName : "";
     auto appInfo = context->GetApplicationInfo();
+    auto bundleName = info != nullptr ? info->bundleName : "";
     std::string resPath;
     std::string pageProfile;
     LOGI("Initialize UIContent isModelJson:%{public}s", isModelJson ? "true" : "false");
@@ -232,7 +238,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
             for (const auto& module : moduleList) {
                 if (module.moduleName == moduleName) {
-                    resPath = module.moduleSourceDir + "/";
+                    std::regex pattern(ABS_BUNDLE_CODE_PATH + bundleName + FILE_SEPARATOR);
+                    auto moduleSourceDir = std::regex_replace(module.moduleSourceDir, pattern, LOCAL_BUNDLE_CODE_PATH);
+                    resPath = moduleSourceDir + "/";
                     break;
                 }
             }
@@ -258,7 +266,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             LOGE("In stage mode, can't get hap info.");
         }
     } else {
-        auto packagePathStr = context->GetBundleCodePath();
+        auto packagePathStr = context->GetBundleCodeDir();
         auto moduleInfo = context->GetHapModuleInfo();
         if (moduleInfo != nullptr) {
             packagePathStr += "/" + moduleInfo->name + "/";
@@ -283,7 +291,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
             for (const auto& module : moduleList) {
                 if (module.moduleName == moduleName) {
-                    resPath = module.moduleSourceDir + "/assets/" + module.moduleName + "/";
+                    std::regex pattern(ABS_BUNDLE_CODE_PATH + bundleName + FILE_SEPARATOR);
+                    auto moduleSourceDir = std::regex_replace(module.moduleSourceDir, pattern, LOCAL_BUNDLE_CODE_PATH);
+                    resPath = moduleSourceDir + "/assets/" + module.moduleName + "/";
                     break;
                 }
             }

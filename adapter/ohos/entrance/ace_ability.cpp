@@ -15,6 +15,8 @@
 
 #include "adapter/ohos/entrance/ace_ability.h"
 
+#include <regex>
+
 #include <ui/rs_surface_node.h>
 #include "ability_process.h"
 #include "dm/display_manager.h"
@@ -44,6 +46,10 @@
 namespace OHOS {
 namespace Ace {
 namespace {
+
+const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
+const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
+const std::string FILE_SEPARATOR = "/";
 
 FrontendType GetFrontendType(const std::string& frontendType)
 {
@@ -205,7 +211,9 @@ void AceAbility::OnStart(const Want& want)
     std::string resPath;
     for (auto module : moduleList) {
         if (module.moduleName == moduleName) {
-            resPath = module.moduleSourceDir + "/assets/" + module.moduleName + "/";
+            std::regex pattern(ABS_BUNDLE_CODE_PATH + info->bundleName + FILE_SEPARATOR);
+            auto moduleSourceDir = std::regex_replace(module.moduleSourceDir, pattern, LOCAL_BUNDLE_CODE_PATH);
+            resPath = moduleSourceDir + "/assets/" + module.moduleName + FILE_SEPARATOR;
             break;
         }
     }
