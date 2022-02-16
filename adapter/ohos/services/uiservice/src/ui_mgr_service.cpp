@@ -177,6 +177,7 @@ int UIMgrService::ShowDialog(const std::string& name,
     }
 
     int32_t dialogId = gDialogId.fetch_add(1, std::memory_order_relaxed);
+    HILOG_INFO("Show dialog id: %{public}d", dialogId);
     sptr<OHOS::Rosen::Window> dialogWindow = nullptr;
     auto showDialogCallback = [&]() {
         SetHwIcuDirectory();
@@ -253,35 +254,38 @@ int UIMgrService::ShowDialog(const std::string& name,
         std::vector<std::string> assetBasePathStr = { name + "/" };
         Ace::Platform::AceContainer::AddAssetPath(dialogId, packagePathStr, assetBasePathStr);
 
+        Ace::Platform::UIEnvCallback callback = nullptr;
+#ifdef ENABLE_ROSEN_BACKEND
+        callback = [dialogWindow, listener, dialogId] (
+            const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
+            if (SystemProperties::GetRosenBackendEnabled()) {
+                auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+                if (rsUiDirector != nullptr) {
+                    rsUiDirector->SetRSSurfaceNode(dialogWindow->GetSurfaceNode());
+                    dialogWindow->RegisterWindowChangeListener(listener);
+
+                    rsUiDirector->SetUITaskRunner(
+                        [taskExecutor = Ace::Platform::AceContainer::GetContainer(dialogId)->GetTaskExecutor()]
+                            (const std::function<void()>& task) {
+                                taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                            });
+                    if (context != nullptr) {
+                        context->SetRSUIDirector(rsUiDirector);
+                    }
+                    rsUiDirector->Init();
+                    HILOG_INFO("Init Rosen Backend");
+                }
+            } else {
+                HILOG_INFO("not Init Rosen Backend");
+            }
+        };
+#endif
+
         // set view
         Ace::Platform::AceContainer::SetView(
-            flutterAceView, density_, windowWidth, windowHeight, dialogWindow->GetWindowId());
+            flutterAceView, density_, windowWidth, windowHeight, dialogWindow->GetWindowId(), callback);
         Ace::Platform::AceContainer::SetUIWindow(dialogId, dialogWindow);
         Ace::Platform::FlutterAceView::SurfaceChanged(flutterAceView, windowWidth, windowHeight, 0);
-
-        auto context = Ace::Platform::AceContainer::GetContainer(dialogId)->GetPipelineContext();
-#ifdef ENABLE_ROSEN_BACKEND
-        if (SystemProperties::GetRosenBackendEnabled()) {
-            auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-            if (rsUiDirector != nullptr) {
-                rsUiDirector->SetRSSurfaceNode(dialogWindow->GetSurfaceNode());
-
-                dialogWindow->RegisterWindowChangeListener(listener);
-                rsUiDirector->SetUITaskRunner(
-                    [taskExecutor = Ace::Platform::AceContainer::GetContainer(dialogId)->GetTaskExecutor()]
-                        (const std::function<void()>& task) {
-                            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-                        });
-                if (context != nullptr) {
-                    context->SetRSUIDirector(rsUiDirector);
-                }
-                rsUiDirector->Init();
-                HILOG_INFO("Init Rosen Backend");
-            }
-        } else {
-            HILOG_INFO("not Init Rosen Backend");
-        }
-#endif
 
         // run page.
         Ace::Platform::AceContainer::RunPage(
@@ -310,12 +314,18 @@ int UIMgrService::ShowDialog(const std::string& name,
 int UIMgrService::CancelDialog(int id)
 {
     auto cancelDialogCallback = [id]() {
+        HILOG_INFO("Cancel dialog id: %{public}d", id);
         auto dialogWindow = Platform::AceContainer::GetUIWindow(id);
-        dialogWindow->Destroy();
-#ifdef ENABLE_ROSEN_BACKEND
-        if (auto context = Ace::Platform::AceContainer::GetContainer(id)->GetPipelineContext()) {
-            context->SetRSUIDirector(nullptr);
+        if (dialogWindow) {
+            dialogWindow->Destroy();
         }
+#ifdef ENABLE_ROSEN_BACKEND
+        auto taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor();
+        taskExecutor->PostTask([id]() {
+            if (auto context = Ace::Platform::AceContainer::GetContainer(id)->GetPipelineContext()) {
+                context->SetRSUIDirector(nullptr);
+            }
+        }, TaskExecutor::TaskType::UI);
 #endif
         Platform::AceContainer::DestroyContainer(id);
     };
