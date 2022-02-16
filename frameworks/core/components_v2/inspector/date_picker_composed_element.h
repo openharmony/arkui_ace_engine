@@ -33,6 +33,10 @@ public:
 
     std::string GetLunar() const;
     std::string GetUseMilitaryTime() const;
+    std::string GetStart() const;
+    std::string GetEnd() const;
+    std::string GetSelected() const;
+    std::string GetDatePickerType() const;
 
 private:
     RefPtr<RenderPickerBase> GetRenderPickerBase() const;

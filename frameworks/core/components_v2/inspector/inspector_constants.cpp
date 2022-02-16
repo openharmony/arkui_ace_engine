@@ -312,4 +312,8 @@ ACE_EXPORT extern const char ALERTDIALOG_ETS_TAG[] = "AlertDialog";
 ACE_EXPORT extern const char CUSTOMDIALOG_COMPONENT_TAG[] = "CustomDialog";
 ACE_EXPORT extern const char CUSTOMDIALOG_ETS_TAG[] = "CustomDialog";
 
+// datePickerdialog
+ACE_EXPORT extern const char DATE_PICKER_DIALOG_COMPONENT_TAG[] = "DatePickerDialog";
+ACE_EXPORT extern const char DATE_PICKER_DIALOG_ETS_TAG[] = "DatePickerDialog";
+
 } // namespace OHOS::Ace::V2

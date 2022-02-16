@@ -31,6 +31,7 @@
 #include "core/components_v2/inspector/customdialog_composed_element.h"
 #include "core/components_v2/inspector/data_panel_composed_element.h"
 #include "core/components_v2/inspector/date_picker_composed_element.h"
+#include "core/components_v2/inspector/date_picker_dialog_composed_element.h"
 #include "core/components_v2/inspector/divider_composed_element.h"
 #include "core/components_v2/inspector/flex_composed_element.h"
 #include "core/components_v2/inspector/gauge_composed_element.h"
@@ -222,7 +223,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { ALERTDIALOG_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::AlertDialogComposedElement>(id); } },
     { CUSTOMDIALOG_COMPONENT_TAG,
-        [](const std::string& id) {return AceType::MakeRefPtr<V2::CustomDialogComposedElement>(id); } }
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::CustomDialogComposedElement>(id); } },
+    { DATE_PICKER_DIALOG_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::DatePickerDialogComposedElement>(id); } }
 };
 
 } // namespace
@@ -294,7 +297,8 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { CANVAS_COMPONENT_TAG, CANVAS_ETS_TAG },
     { ACTIONSHEETDIALOG_COMPONENT_TAG, ACTIONSHEETDIALOG_ETS_TAG },
     { ALERTDIALOG_COMPONENT_TAG, ALERTDIALOG_ETS_TAG },
-    { CUSTOMDIALOG_COMPONENT_TAG, CUSTOMDIALOG_ETS_TAG }
+    { CUSTOMDIALOG_COMPONENT_TAG, CUSTOMDIALOG_ETS_TAG },
+    { DATE_PICKER_DIALOG_COMPONENT_TAG, DATE_PICKER_DIALOG_ETS_TAG }
 };
 
 RefPtr<Element> InspectorComposedComponent::CreateElement()

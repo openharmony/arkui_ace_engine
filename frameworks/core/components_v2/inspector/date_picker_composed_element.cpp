@@ -19,13 +19,20 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/picker/picker_base_element.h"
+#include "core/components/picker/picker_date_component.h"
+#include "core/components/picker/picker_time_component.h"
+#include "core/components/picker/render_picker_base.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
 namespace {
 const std::unordered_map<std::string, std::function<std::string(const DatePickerComposedElement&)>> CREATE_JSON_MAP {
     { "lunar", [](const DatePickerComposedElement& inspector) { return inspector.GetLunar(); } },
-    { "useMilitaryTime", [](const DatePickerComposedElement& inspector) { return inspector.GetUseMilitaryTime(); } }
+    { "useMilitaryTime", [](const DatePickerComposedElement& inspector) { return inspector.GetUseMilitaryTime(); } },
+    { "start", [](const DatePickerComposedElement& inspector) { return inspector.GetStart(); } },
+    { "end", [](const DatePickerComposedElement& inspector) { return inspector.GetEnd(); } },
+    { "selected", [](const DatePickerComposedElement& inspector) { return inspector.GetSelected(); } },
+    { "type", [](const DatePickerComposedElement& inspector) { return inspector.GetDatePickerType(); } }
 };
 }
 
@@ -34,6 +41,10 @@ void DatePickerComposedElement::Dump()
     InspectorComposedElement::Dump();
     DumpLog::GetInstance().AddDesc(std::string("lunar: ").append(GetLunar()));
     DumpLog::GetInstance().AddDesc(std::string("useMilitaryTime: ").append(GetUseMilitaryTime()));
+    DumpLog::GetInstance().AddDesc(std::string("start: ").append(GetStart()));
+    DumpLog::GetInstance().AddDesc(std::string("end: ").append(GetEnd()));
+    DumpLog::GetInstance().AddDesc(std::string("selected: ").append(GetSelected()));
+    DumpLog::GetInstance().AddDesc(std::string("type: ").append(GetDatePickerType()));
 }
 
 std::unique_ptr<JsonValue> DatePickerComposedElement::ToJsonObject() const
@@ -69,6 +80,63 @@ std::string DatePickerComposedElement::GetUseMilitaryTime() const
         }
     }
     return ConvertBoolToString(useMilitaryTime);
+}
+
+std::string DatePickerComposedElement::GetStart() const
+{
+    auto render = GetRenderPickerBase();
+    if (render) {
+        auto start = render->GetStartDate();
+        std::string startDate;
+        startDate += std::to_string(start.GetYear());
+        startDate += "-";
+        startDate += std::to_string(start.GetMonth());
+        startDate += "-";
+        startDate += std::to_string(start.GetDay());
+        return startDate;
+    }
+    return "1970-1-1";
+}
+
+std::string DatePickerComposedElement::GetEnd() const
+{
+    auto render = GetRenderPickerBase();
+    if (render) {
+        auto start = render->GetEndDate();
+        std::string endDate;
+        endDate += std::to_string(start.GetYear());
+        endDate += "-";
+        endDate += std::to_string(start.GetMonth());
+        endDate += "-";
+        endDate += std::to_string(start.GetDay());
+        return endDate;
+    }
+    return "2100-12-31";
+}
+
+std::string DatePickerComposedElement::GetSelected() const
+{
+    auto render = GetRenderPickerBase();
+    if (render) {
+        auto start = render->GetSelectedDate();
+        std::string selectedDate;
+        selectedDate += std::to_string(start.GetYear());
+        selectedDate += "-";
+        selectedDate += std::to_string(start.GetMonth());
+        selectedDate += "-";
+        selectedDate += std::to_string(start.GetDay());
+        return selectedDate;
+    }
+    return "";
+}
+
+std::string DatePickerComposedElement::GetDatePickerType() const
+{
+    auto render = GetRenderPickerBase();
+    if (render) {
+        return render->GetType();
+    }
+    return "DatePickerType.Time";
 }
 
 RefPtr<RenderPickerBase> DatePickerComposedElement::GetRenderPickerBase() const
