@@ -162,7 +162,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     static std::once_flag onceFlag;
     std::call_once(onceFlag, [&context]() {
         LOGI("Initialize for current process.");
-        SystemProperties::SetDeviceType(DeviceType::PHONE);
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
         AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
@@ -459,7 +458,6 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
 {
     LOGI("UIContent UpdateViewportConfig %{public}s", config.ToString().c_str());
     SystemProperties::SetResolution(config.Density());
-    SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetColorMode(ColorMode::LIGHT);
     SystemProperties::SetDeviceOrientation(config.Height() >= config.Width() ? 0 : 1);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
