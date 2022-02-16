@@ -36,6 +36,7 @@ private:
     RefPtr<StackElement> GetStackElement() const;
     RefPtr<Animator> controller_;
     RefPtr<RenderDisplay> renderDisplay_;
+    bool CanShowFloatingTitle();
 };
 
 } // namespace OHOS::Ace
