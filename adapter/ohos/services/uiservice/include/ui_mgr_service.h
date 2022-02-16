@@ -89,6 +89,7 @@ private:
     UIServiceRunningState state_;
     std::map<std::string, sptr<IUIService>> callbackMap_;
     std::mutex uiMutex_;
+    std::unordered_map<int32_t, std::shared_ptr<OHOS::AppExecFwk::Ability>> abilityMaps_;
 
     const std::string PUSH_STRING = "PUSH";
     const std::string REQUEST_STRING = "REQUEST";

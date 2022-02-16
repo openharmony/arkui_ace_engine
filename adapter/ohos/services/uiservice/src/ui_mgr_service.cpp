@@ -199,8 +199,10 @@ int UIMgrService::ShowDialog(const std::string& name,
 
         std::string resPath;
         // create container
-        Ace::Platform::AceContainer::CreateContainer(dialogId, Ace::FrontendType::JS, false, "", CreateAbility(),
+        auto ability = CreateAbility();
+        Ace::Platform::AceContainer::CreateContainer(dialogId, Ace::FrontendType::JS, false, "", ability,
             std::make_unique<AcePlatformEventCallback>([]() {}), true);
+        abilityMaps_[dialogId] = ability;
         auto container = Ace::Platform::AceContainer::GetContainer(dialogId);
         if (!container) {
             HILOG_ERROR("container is null, set configuration failed.");
@@ -313,7 +315,7 @@ int UIMgrService::ShowDialog(const std::string& name,
 
 int UIMgrService::CancelDialog(int id)
 {
-    auto cancelDialogCallback = [id]() {
+    auto cancelDialogCallback = [id, this]() {
         HILOG_INFO("Cancel dialog id: %{public}d", id);
         auto dialogWindow = Platform::AceContainer::GetUIWindow(id);
         if (dialogWindow) {
@@ -327,6 +329,7 @@ int UIMgrService::CancelDialog(int id)
             }
         }, TaskExecutor::TaskType::UI);
 #endif
+        abilityMaps_.erase(id);
         Platform::AceContainer::DestroyContainer(id);
     };
 
