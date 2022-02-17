@@ -70,7 +70,7 @@ bool DOMImage::SetSpecializedAttr(const std::pair<std::string, std::string>& att
         imageChild_->SetSrc(ParseImageSrc(attr.second));
         return true;
     }
-    if (attr.first == DOM_IMAGE_SYNC_MODE) {
+    if (attr.first == DOM_IMAGE_SYNC_LOAD) {
         imageChild_->SetSyncMode(StringToBool(attr.second));
         return true;
     }

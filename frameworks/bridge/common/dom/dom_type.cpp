@@ -414,7 +414,7 @@ const char DOM_IMAGE_ALT[] = "alt";
 const char DOM_IMAGE_MATCH_TEXT_DIRECTION[] = "matchTextDirection";
 const char DOM_IMAGE_FIT_ORIGINAL_SIZE[] = "fitOriginalSize";
 const char DOM_IMAGE_FILL_COLOR[] = "fill";
-const char DOM_IMAGE_SYNC_MODE[] = "syncmode";
+const char DOM_IMAGE_SYNC_LOAD[] = "syncload";
 // objectPosition
 const char DOM_IMAGE_POSITION[] = "objectPosition";
 const char DOM_IMAGE_POSITION_LEFT[] = "left";
