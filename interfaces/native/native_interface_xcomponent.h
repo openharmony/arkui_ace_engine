@@ -120,14 +120,14 @@ typedef struct NativeXComponentCallback {
  *        char buffer should be at least as large as the size of the real id length plus 1.
  *        The size of the char buffer is recommend to be [XCOMPONENT_ID_LEN_MAX + 1]
  * @param size is an in-out param.
- *        [in] Indicates the length of the id char buffer (including null-terminator)
+ *        [in] Indicates the length of the id char buffer (including null-terminator).
  *             The referenced value of 'size' should be in the range (0, XCOMPONENT_ID_LEN_MAX + 1]
- *        [out] Receives the length of the id (not include null-terminator)
+ *        [out] Receives the length of the id (not include null-terminator).
  * @return Returns the execution result.
  * @since 7
  * @version 1.0
  */
-int32_t NativeXComponent_GetXComponentId(NativeXComponent* component, char* id, uint64_t* size);
+int32_t OH_NativeXComponent_GetXComponentId(NativeXComponent* component, char* id, uint64_t* size);
 
 /**
  * @brief Obtains the native window handler.
@@ -138,7 +138,7 @@ int32_t NativeXComponent_GetXComponentId(NativeXComponent* component, char* id, 
  * @since 7
  * @version 1.0
  */
-int32_t NativeXComponent_GetNativeWindow(NativeXComponent* component, void** window);
+int32_t OH_NativeXComponent_GetNativeWindow(NativeXComponent* component, void** window);
 
 /**
  * @brief Obtains the size of the xcomponent.
@@ -151,8 +151,8 @@ int32_t NativeXComponent_GetNativeWindow(NativeXComponent* component, void** win
  * @since 7
  * @version 1.0
  */
-int32_t NativeXComponent_GetXComponentSize(NativeXComponent* component, const void* window,
-                                           uint64_t* width, uint64_t* height);
+int32_t OH_NativeXComponent_GetXComponentSize(NativeXComponent* component, const void* window,
+                                              uint64_t* width, uint64_t* height);
 
 /**
  * @brief Obtains the offset of the xcomponent.
@@ -165,7 +165,7 @@ int32_t NativeXComponent_GetXComponentSize(NativeXComponent* component, const vo
  * @since 7
  * @version 1.0
  */
-int32_t NativeXComponent_GetXComponentOffset(NativeXComponent* component, const void* window, double* x, double* y);
+int32_t OH_NativeXComponent_GetXComponentOffset(NativeXComponent* component, const void* window, double* x, double* y);
 
 /**
  * @brief Obtains the information of touch event.
@@ -177,7 +177,7 @@ int32_t NativeXComponent_GetXComponentOffset(NativeXComponent* component, const 
  * @since 7
  * @version 1.0
  */
-int32_t NativeXComponent_GetTouchInfo(NativeXComponent* component, const void* window, TouchInfo* touchInfo);
+int32_t OH_NativeXComponent_GetTouchInfo(NativeXComponent* component, const void* window, TouchInfo* touchInfo);
 
 /**
  * @brief Set the callback to the xcomponent.
@@ -188,7 +188,7 @@ int32_t NativeXComponent_GetTouchInfo(NativeXComponent* component, const void* w
  * @since 7
  * @version 1.0
  */
-int32_t NativeXComponent_RegisterCallback(NativeXComponent* component, NativeXComponentCallback* callback);
+int32_t OH_NativeXComponent_RegisterCallback(NativeXComponent* component, NativeXComponentCallback* callback);
 
 #ifdef __cplusplus
 };

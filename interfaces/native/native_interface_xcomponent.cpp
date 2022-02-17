@@ -33,6 +33,9 @@ int32_t NativeXComponent_GetXComponentId(NativeXComponent* component, char* id, 
     return component->GetXComponentId(id, size);
 }
 
+int32_t OH_NativeXComponent_GetXComponentId(NativeXComponent* component, char* id, uint64_t* size)
+    __attribute__((weak, alias("NativeXComponent_GetXComponentId")));
+
 int32_t NativeXComponent_GetNativeWindow(NativeXComponent* component, void** window)
 {
     if ((component == nullptr) || (window == nullptr)) {
@@ -40,6 +43,9 @@ int32_t NativeXComponent_GetNativeWindow(NativeXComponent* component, void** win
     }
     return component->GetNativeWindow(window);
 }
+
+int32_t OH_NativeXComponent_GetNativeWindow(NativeXComponent* component, void** window)
+    __attribute__((weak, alias("NativeXComponent_GetNativeWindow")));
 
 int32_t NativeXComponent_GetXComponentSize(
     NativeXComponent* component, const void* window, uint64_t* width, uint64_t* height)
@@ -50,6 +56,10 @@ int32_t NativeXComponent_GetXComponentSize(
     return component->GetXComponentSize(window, width, height);
 }
 
+int32_t OH_NativeXComponent_GetXComponentSize(
+    NativeXComponent* component, const void* window, uint64_t* width, uint64_t* height)
+    __attribute__((weak, alias("NativeXComponent_GetXComponentSize")));
+
 int32_t NativeXComponent_GetXComponentOffset(NativeXComponent* component, const void* window, double* x, double* y)
 {
     if ((component == nullptr) || (window == nullptr) || (x == nullptr) || (y == nullptr)) {
@@ -57,6 +67,9 @@ int32_t NativeXComponent_GetXComponentOffset(NativeXComponent* component, const 
     }
     return component->GetXComponentOffset(window, x, y);
 }
+
+int32_t OH_NativeXComponent_GetXComponentOffset(NativeXComponent* component, const void* window, double* x, double* y)
+    __attribute__((weak, alias("NativeXComponent_GetXComponentOffset")));
 
 int32_t NativeXComponent_GetTouchInfo(NativeXComponent* component, const void* window, TouchInfo* touchInfo)
 {
@@ -66,6 +79,9 @@ int32_t NativeXComponent_GetTouchInfo(NativeXComponent* component, const void* w
     return component->GetTouchInfo(window, touchInfo);
 }
 
+int32_t OH_NativeXComponent_GetTouchInfo(NativeXComponent* component, const void* window, TouchInfo* touchInfo)
+    __attribute__((weak, alias("NativeXComponent_GetTouchInfo")));
+
 int32_t NativeXComponent_RegisterCallback(NativeXComponent* component, NativeXComponentCallback* callback)
 {
     if ((component == nullptr) || (callback == nullptr)) {
@@ -73,6 +89,9 @@ int32_t NativeXComponent_RegisterCallback(NativeXComponent* component, NativeXCo
     }
     return component->RegisterCallback(callback);
 }
+
+int32_t OH_NativeXComponent_RegisterCallback(NativeXComponent* component, NativeXComponentCallback* callback)
+    __attribute__((weak, alias("NativeXComponent_RegisterCallback")));
 
 #ifdef __cplusplus
 };
