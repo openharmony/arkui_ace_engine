@@ -76,6 +76,7 @@ template("make_skia_deps") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set("ace_skia_$platform") {
+    license_file = "$flutter_root/skia/LICENSE"
     if (platform == "ohos" && defined(config.enable_native_view) &&
         config.enable_native_view) {
       public_configs = [
