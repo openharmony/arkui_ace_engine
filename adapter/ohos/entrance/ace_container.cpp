@@ -241,6 +241,7 @@ void AceContainer::OnShow(int32_t instanceId)
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (front) {
+        front->UpdateState(Frontend::State::ON_SHOW);
         front->OnShow();
     }
     auto context = container->GetPipelineContext();
@@ -259,6 +260,7 @@ void AceContainer::OnHide(int32_t instanceId)
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (front) {
+        front->UpdateState(Frontend::State::ON_HIDE);
         front->OnHide();
         auto taskExecutor = container->GetTaskExecutor();
         if (taskExecutor) {
@@ -276,6 +278,7 @@ void AceContainer::OnActive(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
+        LOGE("container is null, OnActive failed.");
         return;
     }
 

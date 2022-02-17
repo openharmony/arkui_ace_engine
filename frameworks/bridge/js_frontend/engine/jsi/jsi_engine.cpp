@@ -3532,7 +3532,7 @@ bool JsiEngine::OnRestoreData(const std::string& data)
     shared_ptr<JsValue> result;
     shared_ptr<JsValue> jsonObj = runtime->ParseJson(data);
     if (jsonObj->IsUndefined(runtime) || jsonObj->IsException(runtime)) {
-        LOGE("JsiDeclarativeEngine: Parse json for restore data failed.");
+        LOGE("JsiEngine: Parse json for restore data failed.");
         return false;
     }
     std::vector<shared_ptr<JsValue>> argv = { jsonObj };
