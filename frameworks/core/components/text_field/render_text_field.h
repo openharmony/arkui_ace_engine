@@ -591,6 +591,7 @@ private:
     std::vector<InputOption> inputOptions_;
     std::list<std::unique_ptr<TextInputFormatter>> textInputFormatters_;
     RefPtr<TextEditController> controller_;
+    RefPtr<TextFieldController> textFieldController_;
     RefPtr<TextInputConnection> connection_;
     RefPtr<Clipboard> clipboard_;
     RefPtr<TextOverlayComponent> textOverlay_;

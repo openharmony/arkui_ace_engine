@@ -216,10 +216,10 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         cursorColor_ = textField->GetCursorColor();
     }
     cursorRadius_ = textField->GetCursorRadius();
-    const auto& textFieldController = textField->GetTextFieldController();
-    if (textFieldController) {
+    textFieldController_ = textField->GetTextFieldController();
+    if (textFieldController_) {
         auto weak = AceType::WeakClaim(this);
-        textFieldController->SetCaretPosition([weak](int32_t caretPosition) {
+        textFieldController_->SetCaretPosition([weak](int32_t caretPosition) {
             auto textField = weak.Upgrade();
             if (textField) {
                 textField->UpdateSelection(caretPosition);
@@ -867,7 +867,9 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
 bool RenderTextField::CloseKeyboard(bool forceClose)
 {
     if (!isOverlayShowed_ || !isOverlayFocus_ || forceClose) {
-        StopTwinkling();
+        if (!textFieldController_) {
+            StopTwinkling();
+        }
         if (HasConnection()) {
 #if defined(ENABLE_STANDARD_INPUT)
             MiscServices::InputMethodController::GetInstance()->HideTextInput();
