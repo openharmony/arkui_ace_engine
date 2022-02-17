@@ -317,6 +317,16 @@ int UIMgrService::CancelDialog(int id)
 {
     auto cancelDialogCallback = [id, this]() {
         HILOG_INFO("Cancel dialog id: %{public}d", id);
+        int ret = abilityMaps_.erase(id);
+        if (ret == 0) {
+            HILOG_ERROR("Cancel dialog failed: no such dialog(%{public}d)", id);
+            return;
+        }
+        auto container = Platform::AceContainer::GetContainer(id);
+        if (!container) {
+            HILOG_INFO("Container(%{public}d) not found.", id);
+            return;
+        }
         auto dialogWindow = Platform::AceContainer::GetUIWindow(id);
         if (dialogWindow) {
             dialogWindow->Destroy();
@@ -329,7 +339,6 @@ int UIMgrService::CancelDialog(int id)
             }
         }, TaskExecutor::TaskType::UI);
 #endif
-        abilityMaps_.erase(id);
         Platform::AceContainer::DestroyContainer(id);
     };
 
