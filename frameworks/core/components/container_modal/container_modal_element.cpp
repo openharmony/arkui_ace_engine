@@ -227,8 +227,9 @@ bool ContainerModalElement::CanShowFloatingTitle()
         LOGI("Show floating title failed, context, renderDisplay_ or controller is null.");
         return false;
     }
-    if (context->FireWindowGetModeCallBack() != WindowMode::WINDOW_MODE_FULLSCREEN) {
-        LOGI("Window is not full screen, can not show floating title.");
+    auto mode = context->FireWindowGetModeCallBack();
+    if (mode != WindowMode::WINDOW_MODE_FULLSCREEN && mode != WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+        LOGI("Window is not full screen or split primary, can not show floating title.");
         return false;
     }
     if (renderDisplay_->GetVisibleType() == VisibleType::VISIBLE) {

@@ -231,6 +231,7 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren()
             auto context = contextWptr.Upgrade();
             if (context) {
                 context->FireWindowSplitCallBack();
+                context->ShowContainerTitle(false);
             }
         });
     titleMaximizeRecoverButton_ =
