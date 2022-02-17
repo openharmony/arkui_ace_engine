@@ -1976,8 +1976,19 @@ RefPtr<PipelineContext> FrontendDelegateDeclarative::GetPipelineContext()
 
 std::string FrontendDelegateDeclarative::RestoreRouterStack(const std::string& contentInfo)
 {
+    LOGI("FrontendDelegateDeclarative::RestoreRouterStack: contentInfo = %{public}s", contentInfo.c_str());
+    auto jsonContentInfo = JsonUtil::ParseJsonString(contentInfo);
+    if (!jsonContentInfo->IsValid() || !jsonContentInfo->IsObject()) {
+        LOGW("restore contentInfo is invalid");
+        return "";
+    }
+    // restore node info
+    auto jsonNodeInfo = jsonContentInfo->GetValue("nodeInfo");
+    auto pipelineContext = pipelineContextHolder_.Get();
+    pipelineContext->RestoreNodeInfo(std::move(jsonNodeInfo));
+    // restore stack info
     std::lock_guard<std::mutex> lock(mutex_);
-    auto routerStack = JsonUtil::ParseJsonString(contentInfo);
+    auto routerStack = jsonContentInfo->GetValue("stackInfo");
     if (!routerStack->IsValid() || !routerStack->IsArray()) {
         LOGW("restore router stack is invalid");
         return "";
@@ -1999,12 +2010,21 @@ std::string FrontendDelegateDeclarative::RestoreRouterStack(const std::string& c
 
 std::string FrontendDelegateDeclarative::GetContentInfo()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    auto jsonRouterStack = JsonUtil::CreateArray(true);
-    for (size_t index = 0; index < pageRouteStack_.size(); ++index) {
-        jsonRouterStack->Put("", pageRouteStack_[index].url.c_str());
+    auto jsonContentInfo = JsonUtil::Create(true);
+
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        auto jsonRouterStack = JsonUtil::CreateArray(false);
+        for (size_t index = 0; index < pageRouteStack_.size(); ++index) {
+            jsonRouterStack->Put("", pageRouteStack_[index].url.c_str());
+        }
+        jsonContentInfo->Put("stackInfo", jsonRouterStack);
     }
-    return jsonRouterStack->ToString();
+
+    auto pipelineContext = pipelineContextHolder_.Get();
+    jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
+
+    return jsonContentInfo->ToString();
 }
 
 } // namespace OHOS::Ace::Framework

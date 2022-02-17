@@ -3345,4 +3345,55 @@ std::shared_ptr<OHOS::Rosen::RSUIDirector> PipelineContext::GetRSUIDirector()
 #endif
 }
 
+void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<RenderElement>& node)
+{
+    auto ret = storeNode_.try_emplace(restoreId, node);
+    if (!ret.second) {
+        LOGW("store restore ndoe fail, id = %{public}d", restoreId);
+        storeNode_[restoreId] = node;
+    }
+}
+
+std::unique_ptr<JsonValue> PipelineContext::GetStoredNodeInfo()
+{
+    auto jsonNodeInfo = JsonUtil::Create(false);
+    auto iter = storeNode_.begin();
+    while (iter != storeNode_.end()) {
+        auto RenderElement = (iter->second).Upgrade();
+        if (RenderElement) {
+            std::string info = RenderElement->ProvideRestoreInfo();
+            if (!info.empty()) {
+                jsonNodeInfo->Put(std::to_string(iter->first).c_str(), info.c_str());
+            }
+        }
+        ++iter;
+    }
+    return jsonNodeInfo;
+}
+
+void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
+{
+    if (!nodeInfo->IsValid() || !nodeInfo->IsObject()) {
+        LOGW("restore nodeInfo is invalid");
+    }
+    auto child = nodeInfo->GetChild();
+    while (child->IsValid()) {
+        auto key = child->GetKey();
+        auto value = child->GetString();
+        restoreNodeInfo_.try_emplace(std::stoi(key), value);
+        child = child->GetNext();
+    }
+}
+
+std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
+{
+    auto iter = restoreNodeInfo_.find(restoreId);
+    if (iter != restoreNodeInfo_.end()) {
+        LOGE("PipelineContext::GetRestoreInfo, id = %{public}d, info = %{public}s", restoreId, iter->second.c_str());
+        return iter->second;
+    }
+    LOGE("PipelineContext::GetRestoreInfo not find, id = %{public}d", restoreId);
+    return "";
+}
+
 } // namespace OHOS::Ace

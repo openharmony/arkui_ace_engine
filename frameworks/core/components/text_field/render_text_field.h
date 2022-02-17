@@ -308,6 +308,12 @@ public:
 
     void UpdateConfiguration();
 #endif
+    std::string ProvideRestoreInfo() override;
+
+    void SetOnIsCurrentFocus(const std::function<bool()>& onIsCurrentFocus)
+    {
+        onIsCurrentFocus_ = onIsCurrentFocus;
+    }
 
 protected:
     // Describe where caret is and how tall visually.
@@ -545,6 +551,8 @@ private:
 
     void AttachIme();
 
+    void ApplyRestoreInfo();
+
     int32_t initIndex_ = 0;
     bool isOverlayFocus_ = false;
     bool isShiftDown_ = false;
@@ -577,6 +585,7 @@ private:
     std::function<void()> onLongPressEvent_;
     std::function<void()> moveNextFocusEvent_;
     std::function<void(bool)> onOverlayFocusChange_;
+    std::function<bool()> onIsCurrentFocus_;
     std::function<void(std::string)> onCopy_;
     std::function<void(std::string)> onCut_;
     std::function<void(std::string)> onPaste_;

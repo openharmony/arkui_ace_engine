@@ -3422,6 +3422,14 @@ void JSViewAbstract::JsId(const std::string& id)
     JsKey(id);
 }
 
+void JSViewAbstract::JsRestoreId(int32_t restoreId)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    if (component) {
+        component->SetRestoreId(restoreId);
+    }
+}
+
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 {
@@ -3685,6 +3693,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("mask", &JSViewAbstract::JsMask);
     JSClass<JSViewAbstract>::StaticMethod("key", &JSViewAbstract::JsKey);
     JSClass<JSViewAbstract>::StaticMethod("id", &JSViewAbstract::JsId);
+    JSClass<JSViewAbstract>::StaticMethod("restoreId", &JSViewAbstract::JsRestoreId);
     JSClass<JSViewAbstract>::StaticMethod("hoverEffect", &JSViewAbstract::JsHoverEffect);
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)

@@ -230,6 +230,17 @@ public:
     {
         inspectorKey_ = inspectorKey;
     }
+
+    int32_t GetRestoreId() const
+    {
+        return restoreId_;
+    }
+
+    void SetRestoreId(int32_t restoreId)
+    {
+        restoreId_ = restoreId;
+    }
+
 protected:
     TextDirection direction_ = TextDirection::LTR;
 
@@ -252,6 +263,7 @@ private:
     bool isHeadComponent_ = false;
     bool isTailComponent_ = false;
     std::string inspectorTag_;
+    int32_t restoreId_ = -1;
 };
 
 } // namespace OHOS::Ace

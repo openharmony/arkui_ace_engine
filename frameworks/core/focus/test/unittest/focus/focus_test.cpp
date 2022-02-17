@@ -119,6 +119,12 @@ void PipelineContext::RemoveScheduleTask(uint32_t id) {}
 void PipelineContext::AddDeactivateElement(int, RefPtr<Element> const&) {}
 void PipelineContext::AddNeedRebuildFocusElement(RefPtr<Element> const&) {}
 void PipelineContext::AddNeedRenderFinishNode(RefPtr<RenderNode> const& renderNode) {}
+void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<RenderElement>& node) {}
+
+std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
+{
+    return "";
+}
 
 bool PipelineContext::IsVisibleChangeNodeExists(NodeId index) const
 {

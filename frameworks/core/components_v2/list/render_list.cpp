@@ -16,6 +16,7 @@
 #include "core/components_v2/list/render_list.h"
 
 #include "base/log/log.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/animation/bilateral_spring_node.h"
 #include "core/components/scroll/render_scroll.h"
@@ -110,6 +111,7 @@ void RenderList::Update(const RefPtr<Component>& component)
         initialIndex_ = component_->GetInitialIndex();
         startIndex_ = initialIndex_ > 0 ? initialIndex_ : 0;
     }
+    ApplyRestoreInfo();
 
     const auto& divider = component_->GetItemDivider();
     listSpace_ = component_->GetSpace();
@@ -1946,6 +1948,20 @@ int32_t RenderList::RequestNextFocus(bool vertical, bool reverse)
     }
     focusIndex_ += moveStep;
     return focusIndex_;
+}
+
+std::string RenderList::ProvideRestoreInfo()
+{
+    return std::to_string(firstDisplayIndex_);
+}
+
+void RenderList::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    JumpToIndex(StringUtils::StringToInt(GetRestoreInfo()), DEFAULT_SOURCE);
+    SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace::V2
