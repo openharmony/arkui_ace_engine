@@ -170,7 +170,8 @@ private:
     Dimension itemExtent_;
     std::pair<bool, Dimension> scrollbarWidth_;
     std::pair<bool, Color> scrollbarColor_;
-    std::pair<bool, Dimension> scrollbarPosition_;
+    std::pair<bool, Dimension> scrollbarPositionX_;
+    std::pair<bool, Dimension> scrollbarPositionY_;
 
     EventMarker onRequestItem_;
 
