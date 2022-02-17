@@ -51,7 +51,6 @@ void RenderStack::PerformLayout()
     for (const auto& item : GetChildren()) {
         if (item->GetIsPercentSize()) {
             percentChild.emplace_back(item);
-            continue;
         }
         auto positionedItem = AceType::DynamicCast<RenderPositioned>(item);
         if (!positionedItem) {
@@ -139,6 +138,22 @@ void RenderStack::DetermineStackSize(bool hasNonPositioned)
         lastChildHeight = constrainedHeight;
         maxX = std::max(maxX, item->GetLayoutSize().Width() + NormalizePercentToPx(item->GetLeft(), false));
         maxY = std::max(maxY, item->GetLayoutSize().Height() + NormalizePercentToPx(item->GetTop(), true));
+    }
+    for (const auto& item : GetChildren()) {
+        if (item->GetIsPercentSize()) {
+            if (maxX == 0 || maxY == 0) {
+                double constrainedWidth = std::clamp(item->GetLayoutSize().Width(), GetLayoutParam().GetMinSize().Width(),
+                    GetLayoutParam().GetMaxSize().Width());
+                double constrainedHeight = std::clamp(item->GetLayoutSize().Height(), GetLayoutParam().GetMinSize().Height(),
+                    GetLayoutParam().GetMaxSize().Height());
+                width = std::max(width, constrainedWidth);
+                height = std::max(height, constrainedHeight);
+                lastChildWidth = constrainedWidth;
+                lastChildHeight = constrainedHeight;
+                maxX = std::max(maxX, item->GetLayoutSize().Width() + NormalizePercentToPx(item->GetLeft(), false));
+                maxY = std::max(maxY, item->GetLayoutSize().Height() + NormalizePercentToPx(item->GetTop(), true));
+            }
+        }
     }
     if (mainStackSize_ == MainStackSize::NORMAL && !hasNonPositioned && !maxSize.IsInfinite()) {
         SetLayoutSize(maxSize);
