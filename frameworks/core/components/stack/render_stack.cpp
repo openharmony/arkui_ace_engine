@@ -142,10 +142,10 @@ void RenderStack::DetermineStackSize(bool hasNonPositioned)
     for (const auto& item : GetChildren()) {
         if (item->GetIsPercentSize()) {
             if (maxX == 0 || maxY == 0) {
-                double constrainedWidth = std::clamp(item->GetLayoutSize().Width(), GetLayoutParam().GetMinSize().Width(),
-                    GetLayoutParam().GetMaxSize().Width());
-                double constrainedHeight = std::clamp(item->GetLayoutSize().Height(), GetLayoutParam().GetMinSize().Height(),
-                    GetLayoutParam().GetMaxSize().Height());
+                double constrainedWidth = std::clamp(item->GetLayoutSize().Width(),
+                    GetLayoutParam().GetMinSize().Width(), GetLayoutParam().GetMaxSize().Width());
+                double constrainedHeight = std::clamp(item->GetLayoutSize().Height(),
+                    GetLayoutParam().GetMinSize().Height(), GetLayoutParam().GetMaxSize().Height());
                 width = std::max(width, constrainedWidth);
                 height = std::max(height, constrainedHeight);
                 lastChildWidth = constrainedWidth;
