@@ -22,8 +22,9 @@ namespace OHOS::Ace {
 DataAbilityHelperStandard::DataAbilityHelperStandard(const std::shared_ptr<OHOS::AppExecFwk::Context>& context,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& runtimeContext, bool useStageModel)
 {
+    useStageModel_ = useStageModel;
     if (useStageModel) {
-        dataAbilityHelper_ = AppExecFwk::DataAbilityHelper::Creator(runtimeContext, nullptr, false);
+        runtimeContext_ = runtimeContext;
     } else {
         dataAbilityHelper_ = AppExecFwk::DataAbilityHelper::Creator(context);
     }
@@ -32,12 +33,17 @@ DataAbilityHelperStandard::DataAbilityHelperStandard(const std::shared_ptr<OHOS:
 int32_t DataAbilityHelperStandard::OpenFile(const std::string& uriStr, const std::string& mode)
 {
     LOGD("DataAbilityHelperStandard::OpenFile start uri: %{private}s, mode: %{private}s", uriStr.c_str(), mode.c_str());
+    Uri uri = Uri(uriStr);
+    if (useStageModel_ && !dataAbilityHelper_) {
+        uri_ = std::make_shared<Uri>(uriStr);
+        dataAbilityHelper_ = AppExecFwk::DataAbilityHelper::Creator(runtimeContext_.lock(), uri_, false);
+    }
+
     if (dataAbilityHelper_) {
-        Uri uri = Uri(uriStr);
         return dataAbilityHelper_->OpenFile(uri, mode);
     }
     LOGE("DataAbilityHelperStandard::OpenFile fail, data ability helper is not exist.");
-    return 0;
+    return -1;
 }
 
 } // namespace OHOS::Ace
