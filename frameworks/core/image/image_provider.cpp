@@ -450,4 +450,57 @@ bool ImageProvider::IsWideGamut(const sk_sp<SkColorSpace>& colorSpace)
     return GreatNotEqual(areaOfPoint, SRGB_GAMUT_AREA);
 }
 
+SkImageInfo ImageProvider::MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap)
+{
+    SkColorType ct = PixelFormatToSkColorType(pixmap);
+    SkAlphaType at = AlphaTypeToSkAlphaType(pixmap);
+    sk_sp<SkColorSpace> cs = ColorSpaceToSkColorSpace(pixmap);
+    return SkImageInfo::Make(pixmap->GetWidth(), pixmap->GetHeight(), ct, at, cs);
+}
+
+sk_sp<SkColorSpace> ImageProvider::ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap)
+{
+    return SkColorSpace::MakeSRGB(); // Media::PixelMap has not support wide gamut yet.
+}
+
+SkAlphaType ImageProvider::AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pixmap)
+{
+    switch (pixmap->GetAlphaType()) {
+        case AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN:
+            return SkAlphaType::kUnknown_SkAlphaType;
+        case AlphaType::IMAGE_ALPHA_TYPE_OPAQUE:
+            return SkAlphaType::kOpaque_SkAlphaType;
+        case AlphaType::IMAGE_ALPHA_TYPE_PREMUL:
+            return SkAlphaType::kPremul_SkAlphaType;
+        case AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL:
+            return SkAlphaType::kUnpremul_SkAlphaType;
+        default:
+            return SkAlphaType::kUnknown_SkAlphaType;
+    }
+}
+
+SkColorType ImageProvider::PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap)
+{
+    switch (pixmap->GetPixelFormat()) {
+        case PixelFormat::RGB_565:
+            return SkColorType::kRGB_565_SkColorType;
+        case PixelFormat::RGBA_8888:
+            return SkColorType::kRGBA_8888_SkColorType;
+        case PixelFormat::BGRA_8888:
+            return SkColorType::kBGRA_8888_SkColorType;
+        case PixelFormat::ALPHA_8:
+            return SkColorType::kAlpha_8_SkColorType;
+        case PixelFormat::RGBA_F16:
+            return SkColorType::kRGBA_F16_SkColorType;
+        case PixelFormat::UNKNOWN:
+        case PixelFormat::ARGB_8888:
+        case PixelFormat::RGB_888:
+        case PixelFormat::NV21:
+        case PixelFormat::NV12:
+        case PixelFormat::CMYK:
+        default:
+            return SkColorType::kUnknown_SkColorType;
+    }
+}
+
 } // namespace OHOS::Ace

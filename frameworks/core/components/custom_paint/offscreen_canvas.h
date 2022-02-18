@@ -231,6 +231,7 @@ public:
     virtual void Clip() = 0;
     virtual void PutImageData(const ImageData& imageData) = 0;
     virtual void DrawImage(const CanvasImage& image, double width, double height) = 0;
+    virtual void DrawPixelMap(RefPtr<PixelMap> pixelMap, const CanvasImage& image) = 0;
     virtual void LineTo(double x, double y) = 0;
     virtual void BezierCurveTo(const BezierCurveParam& param) = 0;
     virtual void QuadraticCurveTo(const QuadraticCurveParam& param) = 0;

@@ -23,6 +23,7 @@
 
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/custom_paint/render_custom_paint.h"
+#include "core/image/image_provider.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 #include "core/pipeline/layers/clip_layer.h"
 
@@ -32,7 +33,7 @@ class FlutterRenderCustomPaint : public RenderCustomPaint {
     DECLARE_ACE_TYPE(FlutterRenderCustomPaint, RenderCustomPaint);
 
 public:
-    FlutterRenderCustomPaint() = default;
+    FlutterRenderCustomPaint();
     ~FlutterRenderCustomPaint() override = default;
 
     void Paint(RenderContext& context, const Offset& offset) override;
@@ -72,6 +73,7 @@ public:
     void Transform(const TransformParam& param) override;
     void Translate(double x, double y) override;
     void DrawImage(const Offset& offset, const CanvasImage& canvasImage, double width, double height) override;
+    void DrawPixelMap(RefPtr<PixelMap> pixelMap, const CanvasImage& canvasImage) override;
     void PutImageData(const Offset& offset, const ImageData& imageData) override;
     std::unique_ptr<ImageData> GetImageData(double left, double top, double width, double height) override;
     std::string GetJsonData(const std::string& path) override;
@@ -119,6 +121,7 @@ private:
     SkBitmap webglBitmap_;
     std::unique_ptr<SkCanvas> skCanvas_;
     std::unique_ptr<SkCanvas> cacheCanvas_;
+    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
 };
 
 } // namespace OHOS::Ace
