@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/components/text/text_component_v2.h"
+#include "core/components/text_clock/text_clock_controller.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/element.h"
 
@@ -41,15 +42,15 @@ public:
     void SetFormat(const std::string& format);
     std::string GetFormat() const;
 
-    void SetStatus(bool status);
-    bool GetStatus() const;
+    void SetTextClockController(RefPtr<TextClockController> textClockController);
 
+    RefPtr<TextClockController> GetTextClockController() const;
     ACE_DEFINE_COMPONENT_EVENT(OnDateChange, void(uint64_t));
 
 private:
     std::string format_;
     double hoursWest_ = DBL_MAX;
-    bool isStart_ = true;
+    RefPtr<TextClockController> textClockController_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_CLOCK_TEXT_CLOCK_COMPONENT_H
