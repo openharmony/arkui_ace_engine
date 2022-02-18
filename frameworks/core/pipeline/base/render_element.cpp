@@ -57,6 +57,17 @@ void RenderElement::Prepare(const WeakPtr<Element>& parent)
         });
     }
     nodeMounted_ = true;
+
+    int32_t restoreId = component_->GetRestoreId();
+    if (restoreId >= 0) {
+        auto context = context_.Upgrade();
+        if (context) {
+            // store distribute node
+            context->StoreNode(restoreId, AceType::WeakClaim(this));
+            // restore distribute node info
+            renderNode_->SetRestoreInfo(context->GetRestoreInfo(restoreId));
+        }
+    }
 }
 
 void RenderElement::SetAccessibilityNode(const WeakPtr<Element>& parent)

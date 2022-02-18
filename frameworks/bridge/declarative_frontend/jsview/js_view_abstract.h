@@ -122,6 +122,7 @@ public:
     static void JsUseSizeType(const JSCallbackInfo& Info);
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void JsOnMouse(const JSCallbackInfo& info);
+    static void JsRestoreId(int32_t restoreId);
 
     // response region
     static void JsResponseRegion(const JSCallbackInfo& info);

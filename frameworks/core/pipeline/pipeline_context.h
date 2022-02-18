@@ -86,6 +86,7 @@ class RenderContext;
 struct PageTarget;
 class DialogComponent;
 class SelectPopupComponent;
+class RenderElement;
 
 struct WindowBlurInfo {
     float progress_;
@@ -1178,6 +1179,14 @@ public:
     void ProcessDragEventEnd(
         const RefPtr<RenderNode>& renderNode, const RefPtr<DragEvent>& event, const Point& globalPoint);
 
+    void StoreNode(int32_t restoreId, const WeakPtr<RenderElement>& node);
+
+    std::unique_ptr<JsonValue> GetStoredNodeInfo();
+
+    void RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo);
+
+    std::string GetRestoreInfo(int32_t restoreId);
+
 private:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     void FlushPipelineWithoutAnimation();
@@ -1413,6 +1422,9 @@ private:
     RefPtr<Clipboard> clipboard_;
     RefPtr<RenderNode> initRenderNode_;
     std::string customDragInfo_;
+
+    std::unordered_map<int32_t, WeakPtr<RenderElement>> storeNode_;
+    std::unordered_map<int32_t, std::string> restoreNodeInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

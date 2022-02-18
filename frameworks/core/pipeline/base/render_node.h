@@ -1105,6 +1105,21 @@ public:
     RefPtr<RenderNode> FindDropChild(const Point& globalPoint, const Point& parentLocalPoint);
     static constexpr size_t DEFAULT_INDEX = -1;
 
+    virtual std::string ProvideRestoreInfo()
+    {
+        return "";
+    }
+
+    void SetRestoreInfo(const std::string& restoreInfo)
+    {
+        restoreInfo_ = restoreInfo;
+    }
+
+    const std::string& GetRestoreInfo() const
+    {
+        return restoreInfo_;
+    }
+
 protected:
     explicit RenderNode(bool takeBoundary = false);
     virtual void ClearRenderObject();
@@ -1305,6 +1320,8 @@ private:
 
     bool isPaintGeometryTransition_ = false;
     bool isPaintOutOfParent_ = false;
+
+    std::string restoreInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderNode);
 };

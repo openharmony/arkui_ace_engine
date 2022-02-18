@@ -48,6 +48,11 @@ public:
         }
     }
 
+    std::string ProvideRestoreInfo()
+    {
+        return renderNode_->ProvideRestoreInfo();
+    }
+
 protected:
     void UpdateAccessibilityNode();
     virtual RefPtr<RenderNode> CreateRenderNode();

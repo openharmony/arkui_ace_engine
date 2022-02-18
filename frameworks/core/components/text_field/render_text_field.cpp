@@ -241,6 +241,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
             controller_->SetText(textField->GetValue(), false);
         }
     }
+    ApplyRestoreInfo();
     extend_ = textField->IsExtend();
     softKeyboardEnabled_ = textField->IsSoftKeyboardEnabled();
     text_ = textField->GetValue();
@@ -2058,6 +2059,35 @@ void RenderTextField::PopTextOverlay()
         stackElement->PopTextOverlay();
     }
     isOverlayShowed_ = false;
+}
+
+std::string RenderTextField::ProvideRestoreInfo()
+{
+    if (!onIsCurrentFocus_ || !onIsCurrentFocus_()) {
+        return "";
+    }
+    auto value = GetEditingValue();
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("start", value.selection.GetStart());
+    jsonObj->Put("end", value.selection.GetEnd());
+    return jsonObj->ToString();
+}
+
+void RenderTextField::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    auto info = JsonUtil::ParseJsonString(GetRestoreInfo());
+    if (!info->IsValid() || !info->IsObject()) {
+        LOGW("RenderTextField:: restore info is invalid");
+        return;
+    }
+    auto jsonStart = info->GetValue("start");
+    auto jsonEnd = info->GetValue("end");
+    UpdateSelection(jsonStart->GetInt(), jsonEnd->GetInt());
+    StartTwinkling();
+    SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace

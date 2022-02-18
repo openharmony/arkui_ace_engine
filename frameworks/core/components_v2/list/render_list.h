@@ -221,6 +221,8 @@ public:
 
     int32_t RequestNextFocus(bool vertical, bool reverse);
 
+    std::string ProvideRestoreInfo() override;
+
 protected:
     void UpdateAccessibilityAttr();
     bool HandleActionScroll(bool forward);
@@ -389,6 +391,8 @@ private:
     RefPtr<RenderListItem> secondItemWithShift_;
 
     void MultiSelectAllWhenCtrlA();
+
+    void ApplyRestoreInfo();
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderList);
 };
