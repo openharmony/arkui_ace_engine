@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,7 +135,7 @@ void BadgeComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Compon
         LOGE("get GetBadgeElement failed");
         return;
     }
-    auto child = GetElementChildBySlot(slot, badgeElement);
+    auto child = GetElementChildBySlot(badgeElement, slot);
     if (!child) {
         LOGE("badgeElement get GetChildBySlot failed");
         return;
@@ -152,7 +152,7 @@ void BadgeComposedElement::DeleteChildWithSlot(int32_t slot)
         LOGE("get GetBadgeElement failed");
         return;
     }
-    auto child = GetElementChildBySlot(slot, badgeElement);
+    auto child = GetElementChildBySlot(badgeElement, slot);
     if (!child) {
         LOGE("badgeElement get GetChildBySlot failed");
         return;

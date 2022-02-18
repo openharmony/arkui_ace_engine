@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,7 +111,11 @@ void ScrollBarComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Co
         LOGE("get GetScrollBarElement failed");
         return;
     }
-    auto child = scrollBarElement->GetChildBySlot(slot);
+    auto child = GetElementChildBySlot(scrollBarElement, slot);
+    if (!child) {
+        LOGE("scrollBarElement get GetChildBySlot failed");
+        return;
+    }
     scrollBarElement->UpdateChildWithSlot(child, newComponent, slot, slot);
     scrollBarElement->MarkDirty();
 }
@@ -123,7 +127,12 @@ void ScrollBarComposedElement::DeleteChildWithSlot(int32_t slot)
         LOGE("get GetScrollBarElement failed");
         return;
     }
-    scrollBarElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
+    auto child = GetElementChildBySlot(scrollBarElement, slot);
+    if (!child) {
+        LOGE("scrollBarElement get GetChildBySlot failed");
+        return;
+    }
+    scrollBarElement->UpdateChildWithSlot(child, nullptr, slot, slot);
     scrollBarElement->MarkDirty();
 }
 } // namespace OHOS::Ace::V2

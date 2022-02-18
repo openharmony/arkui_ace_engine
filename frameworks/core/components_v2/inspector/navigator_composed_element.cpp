@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,7 +131,7 @@ void NavigatorComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Co
         LOGE("get GetNavigatorElement failed");
         return;
     }
-    auto child = GetElementChildBySlot(slot, navigatorElement);
+    auto child = GetElementChildBySlot(navigatorElement, slot);
     if (!child) {
         LOGE("navigatorElement get GetChildBySlot failed");
         return;
@@ -148,7 +148,7 @@ void NavigatorComposedElement::DeleteChildWithSlot(int32_t slot)
         LOGE("get GetNavigatorElement failed");
         return;
     }
-    auto child = GetElementChildBySlot(slot, navigatorElement);
+    auto child = GetElementChildBySlot(navigatorElement, slot);
     if (!child) {
         LOGE("navigatorElement get GetChildBySlot failed");
         return;

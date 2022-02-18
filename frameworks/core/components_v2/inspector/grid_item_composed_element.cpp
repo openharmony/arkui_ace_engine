@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -155,7 +155,7 @@ void GridItemComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Com
         LOGE("get GetGridLayoutItemElement failed");
         return;
     }
-    auto child = GetElementChildBySlot(slot, gridLayoutItemElement);
+    auto child = GetElementChildBySlot(gridLayoutItemElement, slot);
     if (!child) {
         LOGE("gridLayoutItemElement get GetChildBySlot failed");
         return;
@@ -172,7 +172,7 @@ void GridItemComposedElement::DeleteChildWithSlot(int32_t slot)
         LOGE("get GetGridLayoutItemElement failed");
         return;
     }
-    auto child = GetElementChildBySlot(slot, gridLayoutItemElement);
+    auto child = GetElementChildBySlot(gridLayoutItemElement, slot);
     if (!child) {
         LOGE("gridLayoutItemElement get GetChildBySlot failed");
         return;

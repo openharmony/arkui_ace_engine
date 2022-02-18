@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,7 @@ public:
     {
         auto child = children_.empty() ? nullptr : children_.front();
         while (child) {
-            LOGW("GetContentElement: child = %{public}s", AceType::TypeName(child));
+            LOGD("GetContentElement: child = %{public}s", AceType::TypeName(child));
             auto inspectorComposedElement = AceType::DynamicCast<InspectorComposedElement>(child);
             if (inspectorComposedElement && !isFindAll) {
                 return nullptr;
@@ -90,7 +90,7 @@ public:
         return nullptr;
     }
 
-    RefPtr<Element> GetElementChildBySlot(int32_t& slot, const RefPtr<Element>& element) const;
+    RefPtr<Element> GetElementChildBySlot(const RefPtr<Element>& element, int32_t& slot) const;
 
     // dimension settings
     std::string GetWidth() const override;
