@@ -273,6 +273,14 @@ void CanvasTaskPool::DrawImage(const CanvasImage& image, double width, double he
     PushTask(task);
 }
 
+void CanvasTaskPool::DrawPixelMap(RefPtr<PixelMap> pixelMap, const CanvasImage& image)
+{
+    auto task = [pixelMap, image](RenderCustomPaint& interface, const Offset& offset) {
+        interface.DrawPixelMap(pixelMap, image);
+    };
+    PushTask(task);
+}
+
 void CanvasTaskPool::PutImageData(const ImageData& imageData)
 {
     auto task = [imageData](

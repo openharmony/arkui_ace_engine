@@ -124,6 +124,19 @@ constexpr size_t BLEND_MODE_SIZE = ArraySize(SK_BLEND_MODE_TABLE);
 
 } // namespace
 
+RosenRenderCustomPaint::RosenRenderCustomPaint()
+{
+    auto currentDartState = flutter::UIDartState::Current();
+    if (!currentDartState) {
+        return;
+    }
+
+    renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(
+        currentDartState->GetSkiaUnrefQueue(),
+        currentDartState->GetIOManager(),
+        currentDartState->GetTaskRunners().GetIOTaskRunner());
+}
+
 void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
 {
     auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
@@ -1121,6 +1134,68 @@ void RosenRenderCustomPaint::DrawImage(
         case 2: {
             SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
             SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+            skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
+            break;
+        }
+        default:
+            break;
+    }
+    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
+        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+        cacheBitmap_.eraseColor(0);
+    }
+}
+
+void RosenRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const CanvasImage& canvasImage)
+{
+    if (!flutter::UIDartState::Current()) {
+        return;
+    }
+
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        return;
+    }
+
+    // get skImage form pixelMap
+    auto imageInfo = ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
+    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
+
+    // Step2: Create SkImage and draw it, using gpu or cpu
+    sk_sp<SkImage> image;
+    if (!renderTaskHolder_->ioManager) {
+        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+    } else {
+#ifndef GPU_DISABLED
+        image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
+            imagePixmap, true, imagePixmap.colorSpace(), true);
+#else
+        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+#endif
+    }
+    if (!image) {
+        LOGE("image is null");
+        return;
+    }
+
+    InitCachePaint();
+    const auto skCanvas =
+        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+    InitImagePaint();
+    switch (canvasImage.flag) {
+        case 0:
+            skCanvas->drawImage(image, canvasImage.dx, canvasImage.dy);
+            break;
+        case 1: {
+            SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            skCanvas->drawImageRect(image, rect, &imagePaint_);
+            break;
+        }
+        case 2: {
+            SkRect dstRect =
+                SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            SkRect srcRect =
+                SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
             skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
             break;
         }

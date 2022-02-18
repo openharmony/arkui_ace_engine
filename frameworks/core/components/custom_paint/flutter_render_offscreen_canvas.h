@@ -24,6 +24,7 @@
 #include "frameworks/bridge/js_frontend/engine/quickjs/offscreen_canvas_bridge.h"
 #include "core/components/custom_paint/render_custom_paint.h"
 #include "core/components/custom_paint/offscreen_canvas.h"
+#include "core/image/image_provider.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 #include "core/pipeline/layers/clip_layer.h"
 
@@ -58,6 +59,7 @@ public:
     void Clip() override;
     void PutImageData(const ImageData& imageData) override;
     void DrawImage(const CanvasImage& canvasImage, double width, double height) override;
+    void DrawPixelMap(RefPtr<PixelMap> pixelMap, const CanvasImage& image) override;
     void LineTo(double x, double y) override;
     void BezierCurveTo(const BezierCurveParam& param) override;
     void QuadraticCurveTo(const QuadraticCurveParam& param) override;
@@ -87,6 +89,7 @@ private:
     std::unique_ptr<SkCanvas> cacheCanvas_;
     std::unique_ptr<SkCanvas> skCanvas_;
     std::map<std::string, setColorFunc> filterFunc_;
+    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
     void UpdatePaintShader(SkPaint& paint, const Gradient& gradient);
     void UpdatePaintShader(const Pattern& pattern, SkPaint& paint);
     void PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow = false);

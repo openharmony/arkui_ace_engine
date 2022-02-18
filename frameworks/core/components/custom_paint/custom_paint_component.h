@@ -97,6 +97,7 @@ public:
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
     void DrawImage(const CanvasImage& image, double width, double height);
+    void DrawPixelMap(RefPtr<PixelMap> pixelMap, const CanvasImage& image);
     void PutImageData(const ImageData& imageData);
     std::unique_ptr<ImageData> GetImageData(double left, double top, double width, double height);
     std::string GetJsonData(const std::string& path);

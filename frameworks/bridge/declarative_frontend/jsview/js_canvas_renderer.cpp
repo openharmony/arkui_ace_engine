@@ -14,8 +14,11 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_canvas_renderer.h"
+
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
+
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
@@ -539,13 +542,27 @@ RefPtr<CanvasPath2D> JSCanvasRenderer::JsMakePath2D(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
 {
     CanvasImage image;
-
+    double imgWidth;
+    double imgHeight;
+    RefPtr<PixelMap> pixelMap = nullptr;
+    bool isImage = false;
     if (info[0]->IsObject()) {
         JSRenderImage* jsImage = JSRef<JSObject>::Cast(info[0])->Unwrap<JSRenderImage>();
-        std::string imageValue = jsImage->GetSrc();
-        image.src = imageValue;
-        double imgWidth = jsImage->GetWidth();
-        double imgHeight = jsImage->GetHeight();
+        if (jsImage) {
+            isImage = true;
+            std::string imageValue = jsImage->GetSrc();
+            image.src = imageValue;
+            imgWidth = jsImage->GetWidth();
+            imgHeight = jsImage->GetHeight();
+        } else {
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+            pixelMap = CreatePixelMapFromNapiValue(info[0]);
+#endif
+            if (!pixelMap) {
+                LOGE("pixelMap is null");
+                return;
+            }
+        }
 
         switch (info.Length()) {
             case 3:
@@ -555,7 +572,7 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
                 image.dx = SystemProperties::Vp2Px(image.dx);
                 image.dy = SystemProperties::Vp2Px(image.dy);
                 break;
-        // 5 parameters: drawImage(image, dx, dy, dWidth, dHeight)
+            // 5 parameters: drawImage(image, dx, dy, dWidth, dHeight)
             case 5:
                 image.flag = 1;
                 JSViewAbstract::ParseJsDouble(info[1], image.dx);
@@ -566,8 +583,8 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
                 image.dy = SystemProperties::Vp2Px(image.dy);
                 image.dWidth = SystemProperties::Vp2Px(image.dWidth);
                 image.dHeight = SystemProperties::Vp2Px(image.dHeight);
-            break;
-        // 9 parameters: drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+                break;
+            // 9 parameters: drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
             case 9:
                 image.flag = 2;
                 JSViewAbstract::ParseJsDouble(info[1], image.sx);
@@ -578,10 +595,12 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
                 JSViewAbstract::ParseJsDouble(info[6], image.dy);
                 JSViewAbstract::ParseJsDouble(info[7], image.dWidth);
                 JSViewAbstract::ParseJsDouble(info[8], image.dHeight);
-                image.sx = SystemProperties::Vp2Px(image.sx);
-                image.sy = SystemProperties::Vp2Px(image.sy);
-                image.sWidth = SystemProperties::Vp2Px(image.sWidth);
-                image.sHeight = SystemProperties::Vp2Px(image.sHeight);
+                if (isImage) {
+                    image.sx = SystemProperties::Vp2Px(image.sx);
+                    image.sy = SystemProperties::Vp2Px(image.sy);
+                    image.sWidth = SystemProperties::Vp2Px(image.sWidth);
+                    image.sHeight = SystemProperties::Vp2Px(image.sHeight);
+                }
                 image.dx = SystemProperties::Vp2Px(image.dx);
                 image.dy = SystemProperties::Vp2Px(image.dy);
                 image.dWidth = SystemProperties::Vp2Px(image.dWidth);
@@ -592,9 +611,17 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
         }
 
         if (isOffscreen_) {
-            offscreenCanvas_->DrawImage(image, imgWidth, imgHeight);
+            if (isImage) {
+                offscreenCanvas_->DrawImage(image, imgWidth, imgHeight);
+            } else {
+                offscreenCanvas_->DrawPixelMap(pixelMap, image);
+            }
         } else {
-            pool_->DrawImage(image, imgWidth, imgHeight);
+            if (isImage) {
+                pool_->DrawImage(image, imgWidth, imgHeight);
+            } else {
+                pool_->DrawPixelMap(pixelMap, image);
+            }
         }
     }
 }

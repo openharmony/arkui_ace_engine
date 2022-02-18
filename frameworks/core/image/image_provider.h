@@ -134,6 +134,10 @@ public:
 
     static RefPtr<ImageObject> QueryImageObjectFromCache(
         const ImageSourceInfo& imageInfo, const RefPtr<PipelineContext>& pipelineContext);
+    static SkColorType PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap);
+    static SkAlphaType AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pixmap);
+    static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
+    static sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap);
 };
 
 } // namespace OHOS::Ace
