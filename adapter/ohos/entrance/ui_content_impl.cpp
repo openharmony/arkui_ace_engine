@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -346,8 +346,31 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         Platform::FlutterAceView::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window_);
 
+    Ace::Platform::UIEnvCallback callback = nullptr;
+#ifdef ENABLE_ROSEN_BACKEND
+    callback = [ window, id = instanceId_, container] (
+        const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) {
+        if (SystemProperties::GetRosenBackendEnabled()) {
+            auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+            if (rsUiDirector != nullptr) {
+                rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
+                rsUiDirector->SetUITaskRunner(
+                    [ taskExecutor = container->GetTaskExecutor(), id ](const std::function<void()>& task) {
+                        ContainerScope scope(id);
+                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                    });
+                auto context = container->GetPipelineContext();
+                if (context != nullptr) {
+                    context->SetRSUIDirector(rsUiDirector);
+                }
+                rsUiDirector->Init();
+                LOGI("UIContent Init Rosen Backend");
+            }
+        }
+    };
+#endif
     // set view
-    Platform::AceContainer::SetView(flutterAceView, density, width, height, window_->GetWindowId());
+    Platform::AceContainer::SetView(flutterAceView, density, width, height, window_->GetWindowId(), callback);
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, config_.Orientation());
     auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
     if (!storage) {
@@ -358,26 +381,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
 
     InitWindowCallback(info);
-
-#ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled()) {
-        auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        if (rsUiDirector != nullptr) {
-            rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
-            rsUiDirector->SetUITaskRunner(
-                [taskExecutor = container->GetTaskExecutor(), id = instanceId_](const std::function<void()>& task) {
-                    ContainerScope scope(id);
-                    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-                });
-            auto context = container->GetPipelineContext();
-            if (context != nullptr) {
-                context->SetRSUIDirector(rsUiDirector);
-            }
-            rsUiDirector->Init();
-            LOGI("UIContent Init Rosen Backend");
-        }
-    }
-#endif
 }
 
 void UIContentImpl::Foreground()

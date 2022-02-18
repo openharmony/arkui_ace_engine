@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -281,21 +281,38 @@ void AceAbility::OnStart(const Want& want)
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
     }
 
-    // set view
-    Platform::AceContainer::SetView(flutterAceView, density_, width, height, window->GetWindowId());
-    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
+    Ace::Platform::UIEnvCallback callback = nullptr;
+#ifdef ENABLE_ROSEN_BACKEND
+    callback = [ window, thisAbility, id = abilityId_ ] (
+        const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
+        if (SystemProperties::GetRosenBackendEnabled()) {
+            auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+            if (rsUiDirector != nullptr) {
+                rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
 
-    // get url
-    std::string parsedPageUrl;
-    if (!remotePageUrl_.empty()) {
-        parsedPageUrl = remotePageUrl_;
-    } else if (!pageUrl_.empty()) {
-        parsedPageUrl = pageUrl_;
-    } else if (want.HasParameter(PAGE_URI)) {
-        parsedPageUrl = want.GetStringParam(PAGE_URI);
-    } else {
-        parsedPageUrl = "";
-    }
+                // todo regist on size change()
+                window->RegisterWindowChangeListener(thisAbility);
+
+                rsUiDirector->SetUITaskRunner(
+                    [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id ]
+                        (const std::function<void()>& task) {
+                            ContainerScope scope(id);
+                            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                        });
+                if (context != nullptr) {
+                    context->SetRSUIDirector(rsUiDirector);
+                }
+                rsUiDirector->Init();
+                LOGI("Init Rosen Backend");
+            }
+        } else {
+            LOGI("not Init Rosen Backend");
+        }
+    };
+#endif
+    // set view
+    Platform::AceContainer::SetView(flutterAceView, density_, width, height, window->GetWindowId(), callback);
+    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
 
     // action event hadnler
     auto&& actionEventHandler = [this](const std::string& action) {
@@ -326,33 +343,17 @@ void AceAbility::OnStart(const Want& want)
         context->SetActionEventHandler(actionEventHandler);
     }
 
-#ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled()) {
-        auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        if (rsUiDirector != nullptr) {
-            rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
-
-            // todo regist on size change()
-            window->RegisterWindowChangeListener(thisAbility);
-
-            rsUiDirector->SetUITaskRunner(
-                [taskExecutor = Platform::AceContainer::GetContainer(abilityId_)->GetTaskExecutor(), id = abilityId_]
-                    (const std::function<void()>& task) {
-                        ContainerScope scope(id);
-                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-                    });
-            if (context != nullptr) {
-                context->SetRSUIDirector(rsUiDirector);
-            }
-            rsUiDirector->Init();
-            LOGI("Init Rosen Backend");
-        }
+    // get url
+    std::string parsedPageUrl;
+    if (!remotePageUrl_.empty()) {
+        parsedPageUrl = remotePageUrl_;
+    } else if (!pageUrl_.empty()) {
+        parsedPageUrl = pageUrl_;
+    } else if (want.HasParameter(PAGE_URI)) {
+        parsedPageUrl = want.GetStringParam(PAGE_URI);
     } else {
-        LOGI("not Init Rosen Backend");
+        parsedPageUrl = "";
     }
-#else
-    LOGI("no macro Init Rosen Backend");
-#endif
 
     // run page.
     Platform::AceContainer::RunPage(abilityId_, Platform::AceContainer::GetContainer(abilityId_)->GeneratePageId(),
