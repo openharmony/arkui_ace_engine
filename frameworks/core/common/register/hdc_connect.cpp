@@ -121,7 +121,9 @@ void Stop(int signo)
 
 void StopConnect()
 {
-    g_connectManagement->terminateFlag_ = true;
+#ifdef JS_JDWP_CONNECT
+    FreeInstance();
+#endif // JS_JDWP_CONNECT
 }
 
 void* HdcConnectRun(void* pkgContent)
@@ -139,13 +141,6 @@ void* HdcConnectRun(void* pkgContent)
         return nullptr;
     }
     uv_run(&loopMain, UV_RUN_DEFAULT);
-    static constexpr int WAIT_SLEEP_TIME = 1000;
-    while (!g_connectManagement->terminateFlag_) {
-        usleep(WAIT_SLEEP_TIME);
-    }
-#ifdef JS_JDWP_CONNECT
-    FreeInstance();
-#endif // JS_JDWP_CONNECT
     return nullptr;
 }
 

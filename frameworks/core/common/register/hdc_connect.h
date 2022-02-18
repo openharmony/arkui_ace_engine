@@ -39,7 +39,6 @@ public:
     ~ConnectManagement() {};
     void SetPkgName(const std::string& pkgName);
     std::string GetPkgName();
-    bool terminateFlag_ = false;
 
 private:
     std::string pkgName_;
