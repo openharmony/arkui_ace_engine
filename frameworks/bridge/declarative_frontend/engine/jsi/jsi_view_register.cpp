@@ -17,6 +17,7 @@
 #include "base/log/log.h"
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
@@ -290,7 +291,13 @@ panda::Local<panda::JSValueRef> JsGetMediaResource(panda::EcmaVM* vm, panda::Loc
 
 RefPtr<FrontendDelegate> JsGetFrontendDelegate()
 {
-    auto engineInstance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
+    auto engine = EngineHelper::GetEngine(Container::CurrentId());
+    auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
+    if (!jsiEngine) {
+        LOGE("jsiEngine is null");
+        return nullptr;
+    }
+    auto engineInstance = jsiEngine->GetEngineInstance();
     if (engineInstance == nullptr) {
         LOGE("engineInstance is null!");
         return nullptr;

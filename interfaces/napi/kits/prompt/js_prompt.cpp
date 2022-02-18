@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,10 @@
 #include "napi/native_engine/native_value.h"
 #include "napi/native_node_api.h"
 
-#include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "interfaces/napi/kits/napi_utils.h"
+
+#include "bridge/common/utils/engine_helper.h"
+#include "bridge/js_frontend/engine/common/js_engine.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -127,9 +129,12 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         }
     }
 
-    OHOS::Ace::Framework::JsEngine* jsEngine = nullptr;
-    napi_get_jsEngine(env, (void**)&jsEngine);
-    jsEngine->GetFrontend()->ShowToast(messageString, duration, bottomString);
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (!delegate) {
+        LOGE("can not get delegate.");
+        return nullptr;
+    }
+    delegate->ShowToast(messageString, duration, bottomString);
     return nullptr;
 }
 
@@ -240,10 +245,7 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                         napi_get_value_string_utf8(env, colorNApi, color.get(), colorLen, &ret);
                         colorString = color.get();
                     }
-                    ButtonInfo buttonInfo = {
-                        .text = textString,
-                        .textColor = colorString
-                    };
+                    ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
                     asyncContext->buttons.emplace_back(buttonInfo);
                 }
             }
@@ -271,8 +273,6 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         env, nullptr, resource, [](napi_env env, void* data) {},
         [](napi_env env, napi_status status, void* data) {
             PromptAsyncContext* asyncContext = (PromptAsyncContext*)data;
-            OHOS::Ace::Framework::JsEngine* jsEngine = nullptr;
-            napi_get_jsEngine(env, (void**)&jsEngine);
             auto callBack = [env, asyncContext](int32_t callbackType, int32_t successType) {
                 napi_value ret;
                 napi_value successIndex = nullptr;
@@ -286,8 +286,8 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 bool dialogResult = true;
                 switch (callbackType) {
                     case 0:
-                         napi_get_undefined(env, &result[0]);
-                         dialogResult = true;
+                        napi_get_undefined(env, &result[0]);
+                        dialogResult = true;
                         break;
                     case 1:
                         napi_value message = nullptr;
@@ -311,8 +311,13 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 napi_delete_async_work(env, asyncContext->work);
                 delete asyncContext;
             };
-            jsEngine->GetFrontend()->ShowDialog(asyncContext->titleString, asyncContext->messageString,
-                asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
+            auto delegate = EngineHelper::GetCurrentDelegate();
+            if (delegate) {
+                delegate->ShowDialog(asyncContext->titleString, asyncContext->messageString,
+                    asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
+            } else {
+                LOGE("delegate is null");
+            }
         },
         (void*)asyncContext, &asyncContext->work);
     napi_queue_async_work(env, asyncContext->work);
@@ -418,10 +423,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                             ParseString(id, type, params, colorString);
                         }
                     }
-                    ButtonInfo buttonInfo = {
-                        .text = textString,
-                        .textColor = colorString
-                    };
+                    ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
                     asyncContext->buttons.emplace_back(buttonInfo);
                 }
             }
@@ -443,8 +445,6 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         env, nullptr, resource, [](napi_env env, void* data) {},
         [](napi_env env, napi_status status, void* data) {
             ShowActionMenuAsyncContext* asyncContext = (ShowActionMenuAsyncContext*)data;
-            OHOS::Ace::Framework::JsEngine* jsEngine = nullptr;
-            napi_get_jsEngine(env, (void**)&jsEngine);
             auto callBack = [env, asyncContext](int32_t callbackType, int32_t successType) {
                 napi_value ret;
                 napi_value successIndex = nullptr;
@@ -483,8 +483,12 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 napi_delete_async_work(env, asyncContext->work);
                 delete asyncContext;
             };
-            jsEngine->GetFrontend()->ShowActionMenu(
-                asyncContext->titleString, asyncContext->buttons, std::move(callBack));
+            auto delegate = EngineHelper::GetCurrentDelegate();
+            if (delegate) {
+                delegate->ShowActionMenu(asyncContext->titleString, asyncContext->buttons, std::move(callBack));
+            } else {
+                LOGE("delegate is null");
+            }
         },
         (void*)asyncContext, &asyncContext->work);
     napi_queue_async_work(env, asyncContext->work);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "base/json/json_util.h"
 #include "base/log/log.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/core/common/container.h"
@@ -64,13 +65,13 @@ shared_ptr<JsValue> PagePush(const shared_ptr<JsRuntime>& runtime, const shared_
 
     std::string uri = ParseRouteUrl(runtime, argv[0], ROUTE_KEY_URI);
     std::string params = ParseRouteParams(runtime, argv[0], ROUTE_KEY_PARAMS);
-    auto instance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
-    if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (delegate == nullptr) {
+        LOGE("get jsi delegate failed");
         return runtime->NewNull();
     }
 
-    instance->GetDelegate()->Push(uri, params);
+    delegate->Push(uri, params);
     return runtime->NewNull();
 }
 
@@ -85,13 +86,13 @@ shared_ptr<JsValue> PageReplace(const shared_ptr<JsRuntime>& runtime, const shar
 
     std::string uri = ParseRouteUrl(runtime, argv[0], ROUTE_KEY_URI);
     std::string params = ParseRouteParams(runtime, argv[0], ROUTE_KEY_PARAMS);
-    auto instance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
-    if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (delegate == nullptr) {
+        LOGE("get jsi delegate failed");
         return runtime->NewNull();
     }
 
-    instance->GetDelegate()->Replace(uri, params);
+    delegate->Replace(uri, params);
     return runtime->NewNull();
 }
 
@@ -110,13 +111,13 @@ shared_ptr<JsValue> PageBack(const shared_ptr<JsRuntime>& runtime, const shared_
         uri = ParseRouteUrl(runtime, argv[0], ROUTE_KEY_URI);
         params = ParseRouteParams(runtime, argv[0], ROUTE_KEY_PARAMS);
     }
-    auto instance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
-    if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (delegate == nullptr) {
+        LOGE("get jsi delegate failed");
         return runtime->NewNull();
     }
 
-    instance->GetDelegate()->Back(uri, params);
+    delegate->Back(uri, params);
     return runtime->NewNull();
 }
 
@@ -124,13 +125,13 @@ shared_ptr<JsValue> PageClear(const shared_ptr<JsRuntime>& runtime, const shared
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     LOGI("PageClear Start");
-    auto instance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
-    if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (delegate == nullptr) {
+        LOGE("get jsi delegate failed");
         return runtime->NewNull();
     }
 
-    instance->GetDelegate()->Clear();
+    delegate->Clear();
     return runtime->NewNull();
 }
 
@@ -138,13 +139,13 @@ shared_ptr<JsValue> PageGetLength(const shared_ptr<JsRuntime>& runtime, const sh
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     LOGI("PageGetLength Start");
-    auto instance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
-    if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (delegate == nullptr) {
+        LOGE("get jsi delegate failed");
         return runtime->NewNull();
     }
 
-    int32_t routeLength = instance->GetDelegate()->GetStackSize();
+    int32_t routeLength = delegate->GetStackSize();
     return runtime->NewString(std::to_string(routeLength));
 }
 
@@ -152,16 +153,16 @@ shared_ptr<JsValue> PageGetState(const shared_ptr<JsRuntime>& runtime, const sha
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     LOGI("PageGetState Start");
-    auto instance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
-    if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (delegate == nullptr) {
+        LOGE("get jsi delegate failed");
         return runtime->NewNull();
     }
 
     int32_t routeIndex = 0;
     std::string routeName;
     std::string routePath;
-    instance->GetDelegate()->GetState(routeIndex, routeName, routePath);
+    delegate->GetState(routeIndex, routeName, routePath);
     shared_ptr<JsValue> jsState = runtime->NewObject();
     jsState->SetProperty(runtime, "index", runtime->NewNumber(routeIndex));
     jsState->SetProperty(runtime, "name", runtime->NewString(routeName));
@@ -173,13 +174,13 @@ shared_ptr<JsValue> PageGetParams(const shared_ptr<JsRuntime>& runtime, const sh
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     LOGI("PageGetParams Start");
-    auto instance = JsiDeclarativeEngineInstance::GetEngineInstance(Container::CurrentId());
-    if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (delegate == nullptr) {
+        LOGE("get jsi delegate failed");
         return runtime->NewNull();
     }
 
-    std::string paramsStr = instance->GetDelegate()->GetParams();
+    std::string paramsStr = delegate->GetParams();
     if (paramsStr.empty()) {
         LOGI("PageGetParams params is null");
         return runtime->NewNull();

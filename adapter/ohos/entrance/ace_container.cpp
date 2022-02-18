@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,7 @@
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/card_frontend/card_frontend.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
@@ -169,6 +170,7 @@ void AceContainer::InitializeFrontend()
         auto& loader = Framework::JsEngineLoader::Get(GetEngineSharedLibrary(isArkApp_));
         auto jsEngine = loader.CreateJsEngine(instanceId_);
         jsEngine->AddExtraNativeObject("ability", aceAbility.get());
+        EngineHelper::AddEngine(instanceId_, jsEngine);
         jsFrontend->SetJsEngine(jsEngine);
         jsFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
         jsFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
@@ -187,6 +189,7 @@ void AceContainer::InitializeFrontend()
             jsEngine = loader.CreateJsEngine(instanceId_);
         }
         jsEngine->AddExtraNativeObject("ability", aceAbility.get());
+        EngineHelper::AddEngine(instanceId_, jsEngine);
         declarativeFrontend->SetJsEngine(jsEngine);
         declarativeFrontend->SetPageProfile(pageProfile_);
         declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
@@ -564,6 +567,7 @@ void AceContainer::DestroyContainer(int32_t instanceId)
         taskExecutor->PostSyncTask([] { LOGI("Wait JS thread..."); }, TaskExecutor::TaskType::JS);
     }
     container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
+    EngineHelper::RemoveEngine(instanceId);
     AceEngine::Get().RemoveContainer(instanceId);
 }
 

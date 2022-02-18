@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/content_storage_set.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
@@ -731,7 +732,13 @@ std::string JsiDeclarativeEngineInstance::GetMediaResource(const std::string& ta
 
 RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetRunningPage(int32_t instanceId)
 {
-    auto engineInstance = JsiDeclarativeEngineInstance::GetEngineInstance(instanceId);
+    auto engine = EngineHelper::GetEngine(instanceId);
+    auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
+    if (!jsiEngine) {
+        LOGE("jsiEngine is null");
+        return nullptr;
+    }
+    auto engineInstance = jsiEngine->GetEngineInstance();
     LOGD("GetRunningPage id:%{public}d instance:%{public}p", instanceId, RawPtr(engineInstance));
     if (engineInstance == nullptr) {
         LOGE("engineInstance is nullptr");
@@ -742,7 +749,13 @@ RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetRunningPage(int32_t instanceI
 
 RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetStagingPage(int32_t instanceId)
 {
-    auto engineInstance = JsiDeclarativeEngineInstance::GetEngineInstance(instanceId);
+    auto engine = EngineHelper::GetEngine(instanceId);
+    auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
+    if (!jsiEngine) {
+        LOGE("jsiEngine is null");
+        return nullptr;
+    }
+    auto engineInstance = jsiEngine->GetEngineInstance();
     LOGD("GetStagingPage id:%{public}d instance:%{public}p", instanceId, RawPtr(engineInstance));
     if (engineInstance == nullptr) {
         LOGE("engineInstance is nullptr");
@@ -813,7 +826,6 @@ JsiDeclarativeEngine::~JsiDeclarativeEngine()
     XComponentClient::GetInstance().SetJSValCallToNull();
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
-    JsiDeclarativeEngineInstance::RemoveEngineInstance(instanceId_);
 
     if (!runtime_ && nativeEngine_ != nullptr) {
         nativeEngine_->CancelCheckUVLoop();
@@ -835,7 +847,6 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     LOGI("JsiDeclarativeEngine Initialize");
     ACE_DCHECK(delegate);
     engineInstance_ = AceType::MakeRefPtr<JsiDeclarativeEngineInstance>(delegate, instanceId_);
-    JsiDeclarativeEngineInstance::AddEngineInstance(instanceId_, engineInstance_);
     auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime_);
     std::shared_ptr<ArkJSRuntime> arkRuntime;
     EcmaVM* vm = nullptr;

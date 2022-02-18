@@ -112,6 +112,7 @@ template("bridge_common") {
       "plugin_adapter/plugin_bridge.cpp",
 
       # utils
+      "utils/engine_helper.cpp",
       "utils/source_map.cpp",
       "utils/transform_convertor.cpp",
       "utils/utils.cpp",
