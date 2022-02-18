@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -178,6 +178,11 @@ public:
 
     void RunNativeEngineLoop();
 
+    void SetPageProfile(const std::string& pageProfile)
+    {
+        pageProfile_ = pageProfile;
+    }
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
@@ -197,6 +202,7 @@ private:
     ColorScheme colorScheme_ { ColorScheme::SCHEME_LIGHT };
     ResourceInfo resourceInfo_;
     static std::once_flag onceFlag_;
+    std::string pageProfile_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };

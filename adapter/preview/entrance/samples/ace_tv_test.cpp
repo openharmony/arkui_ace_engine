@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,16 +38,16 @@ auto&& renderCallback = [](const void*, const size_t bufferSize, const int32_t w
 int main(int argc, const char* argv[])
 {
 #ifdef MAC_PLATFORM
-    std::string assetPath = "/Volumes/SSD2T/daily-test/preview/js/default";
-    std::string assetPath2 = "/Volumes/SSD2T/daily-test/preview/js/default_2.0";
+    std::string assetPathJs = "/Volumes/SSD2T/daily-test/preview/js/default";
+    std::string assetPathEts = "/Volumes/SSD2T/daily-test/preview/js/default_2.0";
     std::string fontBasePath = "/Volumes/SSD2T/daily-test/preview/js/fonts";
 #else
-    std::string assetPath = "D:\\Workspace\\preview\\js\\default";
-    std::string assetPath2 = "D:\\Workspace\\preview\\js\\default_2.0";
+    std::string assetPathJs = "D:\\Workspace\\preview\\js\\default";
+    std::string assetPathEts = "D:\\Workspace\\preview\\js\\default_2.0";
     std::string fontBasePath = "D:\\Workspace\\preview\\js\\fonts";
 #endif
     OHOS::Ace::Platform::AceRunArgs args = {
-        .assetPath = assetPath,
+        .assetPath = assetPathJs,
         .fontBasePath = fontBasePath,
         .deviceConfig.orientation = OHOS::Ace::DeviceOrientation::LANDSCAPE,
         .deviceConfig.density = 1,
@@ -59,7 +59,7 @@ int main(int argc, const char* argv[])
     };
 
     if (argc == MAX_ARGS_COUNT && !std::strcmp(argv[1], ACE_VERSION_2)) {
-        args.assetPath = assetPath2;
+        args.assetPath = assetPathEts;
         args.aceVersion = OHOS::Ace::Platform::AceVersion::ACE_2_0;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,10 +37,13 @@ namespace {
 constexpr int32_t UNUSED_PAGE_ID = 1;
 
 constexpr char ASSET_PATH_SHARE[] = "share";
+constexpr char PAGE_PROFILE[] = "main_pages.json";
 #ifdef WINDOWS_PLATFORM
 constexpr char DELIMITER[] = "\\";
+constexpr char ASSET_PATH_SHARE_STAGE[] = "resources\\base\\profile";
 #else
 constexpr char DELIMITER[] = "/";
+constexpr char ASSET_PATH_SHARE_STAGE[] = "resources/base/profile";
 #endif
 
 #ifdef USE_GLFW_WINDOW
@@ -130,6 +133,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     resConfig.SetDensity(SystemProperties::GetResolution());
     resConfig.SetDeviceType(SystemProperties::GetDeviceType());
     container->SetResourceConfiguration(resConfig);
+    container->SetPageProfile(PAGE_PROFILE);
 }
 
 AceAbility::~AceAbility()
@@ -173,8 +177,17 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
 
 void AceAbility::InitEnv()
 {
-    AceContainer::AddAssetPath(
-        ACE_INSTANCE_ID, "", { runArgs_.assetPath, GetCustomAssetPath(runArgs_.assetPath).append(ASSET_PATH_SHARE) });
+    if (runArgs_.projectModel == ProjectModel::STAGE) {
+        std::string appResourcesPath(runArgs_.appResourcesPath);
+        if (!OHOS::Ace::Framework::EndWith(appResourcesPath, DELIMITER)) {
+            appResourcesPath.append(DELIMITER);
+        }
+        AceContainer::AddAssetPath(ACE_INSTANCE_ID,
+            "", { runArgs_.assetPath, appResourcesPath.append(ASSET_PATH_SHARE_STAGE) });
+    } else {
+        AceContainer::AddAssetPath(ACE_INSTANCE_ID,
+            "", { runArgs_.assetPath, GetCustomAssetPath(runArgs_.assetPath).append(ASSET_PATH_SHARE) });
+    }
 
     AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.systemResourcesPath,
         runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);

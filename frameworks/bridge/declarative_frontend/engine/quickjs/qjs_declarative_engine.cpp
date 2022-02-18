@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -188,7 +188,6 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         std::string appjsContent;
         if (!engineInstance_->GetDelegate()->GetAssetContent("app.js", appjsContent)) {
             LOGE("js file load failed!");
-            return;
         }
         std::string appMap;
         if (engineInstance_->GetDelegate()->GetAssetContent("app.js.map", appMap)) {
@@ -200,9 +199,9 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
             ctx, appjsContent.c_str(), appjsContent.length(), "app.js", JS_EVAL_TYPE_GLOBAL);
         if (result == -1) {
             LOGE("failed to execute Loadjs script");
-            return;
+        } else {
+            CallAppFunc("onCreate", 0, nullptr);
         }
-        CallAppFunc("onCreate", 0, nullptr);
     }
     std::string jsContent;
 
