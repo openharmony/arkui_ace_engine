@@ -25,10 +25,6 @@
 namespace OHOS::Ace {
 
 namespace {
-#ifdef OHOS_STANDARD_SYSTEM
-#define ALLOC_EVEN_ALIGN(value, base) ((value % base == 0) ? value : ((value / base + 1) * base));
-constexpr size_t ALIGN_BYTES = 16;
-#endif
 constexpr char NTC_PARAM_ERROR_CODE[] = "errorCode";
 constexpr char NTC_PARAM_URL[] = "url";
 constexpr char NTC_PARAM_DESCRIPTION[] = "description";
@@ -94,19 +90,10 @@ void RenderWeb::PerformLayout()
     }
 
     // render web do not support child.
-    auto size = Size(GetLayoutParam().GetMaxSize().Width(),
+    drawSize_ = Size(GetLayoutParam().GetMaxSize().Width(),
                      (GetLayoutParam().GetMaxSize().Height() == Size::INFINITE_SIZE) ?
                      Size::INFINITE_SIZE :
                      (GetLayoutParam().GetMaxSize().Height()));
-#ifdef OHOS_STANDARD_SYSTEM
-    uint32_t width = static_cast<uint32_t>(size.Width());
-    uint32_t height = static_cast<uint32_t>(size.Height());
-    uint32_t alignWidth = ALLOC_EVEN_ALIGN(width, ALIGN_BYTES);
-    uint32_t alignHeight = ALLOC_EVEN_ALIGN(height, ALIGN_BYTES);
-    drawSize_ = Size(alignWidth, alignHeight);
-#else
-    drawSize_ = size;
-#endif
     SetLayoutSize(drawSize_);
     SetNeedLayout(false);
     MarkNeedRender();
