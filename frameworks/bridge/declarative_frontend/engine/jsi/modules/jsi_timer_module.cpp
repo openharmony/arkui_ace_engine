@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,6 +113,24 @@ shared_ptr<JsValue> ClearInterval(const shared_ptr<JsRuntime>& runtime, const sh
     return runtime->NewNull();
 }
 
+shared_ptr<JsValue> CanIUse(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (argc != 1) {
+        LOGE("agrc should be 1");
+        return runtime->NewNull();
+    }
+    if (!argv[0]->IsString(runtime)) {
+        LOGW("argv[0] is not IsString");
+        return runtime->NewNull();
+    }
+
+    std::string syscapString = argv[0]->ToString(runtime);
+
+    bool ret = Ace::SystemProperties::IsSyscapExist(syscapString.c_str());
+    return runtime->NewBoolean(ret);
+}
+
 JsiTimerModule* JsiTimerModule::GetInstance()
 {
     static JsiTimerModule instance;
@@ -161,6 +179,7 @@ void JsiTimerModule::InitTimerModule(const shared_ptr<JsRuntime>& runtime, share
     moduleObj->SetProperty(runtime, SET_INTERVAL, runtime->NewFunction(SetInterval));
     moduleObj->SetProperty(runtime, CLEAR_TIMEOUT, runtime->NewFunction(ClearTimeout));
     moduleObj->SetProperty(runtime, CLEAR_INTERVAL, runtime->NewFunction(ClearInterval));
+    moduleObj->SetProperty(runtime, CAN_IUSE, runtime->NewFunction(CanIUse));
 }
 
 } // namespace OHOS::Ace::Framework

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,10 +21,12 @@
 
 #include "base/log/log.h"
 #include "core/common/ace_application_info.h"
+#ifdef OHOS_STANDARD_SYSTEM
+#include "systemcapability.h"
+#endif
 
 namespace OHOS::Ace {
 namespace {
-
 const char PROPERTY_DEVICE_TYPE[] = "ro.build.characteristics";
 const char PROPERTY_DEVICE_TYPE_DEFAULT[] = "default";
 const char PROPERTY_DEVICE_TYPE_TV[] = "tv";
@@ -77,6 +79,15 @@ bool IsDebugEnabled()
     return (system::GetParameter("persist.ace.debug.enabled", "0") == "1");
 }
 } // namespace
+
+bool SystemProperties::IsSyscapExist(const char *cap)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    return HasSystemCapability(cap);
+#else
+    return false;
+#endif
+}
 
 void SystemProperties::InitDeviceType(DeviceType)
 {
