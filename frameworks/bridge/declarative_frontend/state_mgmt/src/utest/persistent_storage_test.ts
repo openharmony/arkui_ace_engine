@@ -55,9 +55,8 @@ const testPersistentStorage = tsuite("PersistentStorage", () => {
     test("PersistentStorage 'writeToDb' value retrieved from AppStorage correct", AppStorage.Get<string>("writeToDb") == "test");
     test("PersistentStorage 'numberToDb' value retrieved from AppStorage correct", AppStorage.Get<number>("numberToDb") == 42);
 
-    // issue link https://gitee.com/openharmony/ace_ace_engine/issues/I4TCI5
-    // FIXME issue:  test("PersistentStorage 'writeToDb' value retrieved from MockStorage correct", ms.get("writeToDb") == "test");
-    // FIXME issue: test("PersistentStorage 'numberToDb' value retrieved from MockStorage correct", ms.get("numberToDb") == 42);
+    test("PersistentStorage 'writeToDb' value retrieved from MockStorage correct", ms.get<string>("writeToDb") == "test");
+    test("PersistentStorage 'numberToDb' value retrieved from MockStorage correct", ms.get("numberToDb") == 42);
   });
 
   tcase("deleting values from IStorage via PersistentStorage", () => {
@@ -72,9 +71,8 @@ const testPersistentStorage = tsuite("PersistentStorage", () => {
   tcase("Persisting new property that does not exist in db", () => {
     PersistentStorage.PersistProp("newProp", "new property value");
 
-    // issue link https://gitee.com/openharmony/ace_ace_engine/issues/I4TCI5
-   //FIXME issue:   test("PersistentStorage 'newProp' value retrieved from AppStorage correct", AppStorage.Get<string>("newProp") == "new property value");
-   // FIXME issue:  test("MockStorage 'newProp' value retrieved from MockStorage correct", ms.get("newProp") == "new property value");
+   test("PersistentStorage 'newProp' value retrieved from AppStorage correct", AppStorage.Get<string>("newProp") == "new property value");
+   test("MockStorage 'newProp' value retrieved from MockStorage correct", ms.get("newProp") == "new property value");
   });
 
   tcase("keys retrieval", () => {
