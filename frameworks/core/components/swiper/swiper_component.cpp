@@ -22,6 +22,8 @@
 #include "core/components_v2/swiper/swiper_element.h"
 
 namespace OHOS::Ace {
+constexpr double MAX_OPACITY = 255.0;
+const std::string DISPLAY_COMPOSED_NAME = "SwiperDisplayChild";
 
 SwiperComponent::SwiperComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children)
 {
@@ -43,7 +45,16 @@ void SwiperComponent::AppendChild(const RefPtr<Component>& child)
         auto lazyForEach = AceType::DynamicCast<V2::LazyForEachComponent>(child);
         lazyForEachComponent_ = lazyForEach;
     }
-    ComponentGroup::AppendChild(child);
+
+    if (AceType::InstanceOf<ComposedComponent>(child)) {
+        auto composed = AceType::DynamicCast<ComposedComponent>(child);
+        auto display = AceType::MakeRefPtr<DisplayComponent>(child);
+        display->SetOpacity(MAX_OPACITY);
+        ComponentGroup::AppendChild(AceType::MakeRefPtr<ComposedComponent>("display" + composed->GetName(),
+            DISPLAY_COMPOSED_NAME, display));
+    } else {
+        ComponentGroup::AppendChild(child);
+    }
 }
 
 RefPtr<RenderNode> SwiperComponent::CreateRenderNode()
