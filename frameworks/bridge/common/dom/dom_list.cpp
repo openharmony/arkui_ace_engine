@@ -307,7 +307,11 @@ void DOMList::ResetInitializedStyle()
         scrollBar_->SetActiveWidth(scrollBarTheme->GetActiveWidth());
         scrollBar_->SetMinHeight(scrollBarTheme->GetMinHeight());
         scrollBar_->SetMinDynamicHeight(scrollBarTheme->GetMinDynamicHeight());
-        scrollBar_->SetReservedHeight(scrollBarTheme->GetReservedHeight());
+        if (scrollbarPositionY_.first == false) {
+            scrollBar_->SetReservedHeight(scrollBarTheme->GetReservedHeight());
+        } else {
+            scrollBar_->SetReservedHeight(scrollbarPositionY_.second);
+        }
         scrollBar_->SetTouchWidth(scrollBarTheme->GetTouchWidth());
         scrollBar_->SetBackgroundColor(scrollBarTheme->GetBackgroundColor());
         scrollBar_->SetForegroundColor(scrollBarTheme->GetForegroundColor());
@@ -449,8 +453,8 @@ void DOMList::InitScrollBarWithSpecializedStyle()
         scrollBar_->SetActiveWidth(scrollbarWidth_.second);
         scrollBar_->SetTouchWidth(scrollbarWidth_.second);
     }
-    if (scrollbarPosition_.first) {
-        scrollBar_->SetPosition(scrollbarPosition_.second);
+    if (scrollbarPositionX_.first) {
+        scrollBar_->SetPosition(scrollbarPositionX_.second);
     }
 }
 
@@ -552,9 +556,16 @@ bool DOMList::SetSpecializedStyle(const std::pair<std::string, std::string>& sty
             } },
         { DOM_SCROLL_SCROLLBAR_OFFSET,
             [](const std::string& val, DOMList& list) {
-                list.scrollbarPosition_.first = true;
-                auto position = list.ParseDimension(val);
-                list.scrollbarPosition_.second = position.IsValid() ? position : Dimension();
+                std::vector<std::string> offset;
+                OHOS::Ace::StringUtils::StringSpliter(val, ',', offset);
+                list.scrollbarPositionX_.first = true;
+                auto position = list.ParseDimension(offset[0]);
+                list.scrollbarPositionX_.second = position.IsValid() ? position : Dimension();
+                if (offset.size() > 1) {
+                    list.scrollbarPositionY_.first = true;
+                    auto positionY = list.ParseDimension(offset[1]);
+                    list.scrollbarPositionY_.second = positionY.IsValid() ? positionY : Dimension();
+                }
                 return true;
             } },
         { DOM_SCROLL_SCROLLBAR_WIDTH,
@@ -566,9 +577,9 @@ bool DOMList::SetSpecializedStyle(const std::pair<std::string, std::string>& sty
             } },
         { DOM_SCROLL_SCROLLBAR_POSITION,
             [](const std::string& val, DOMList& list) {
-                list.scrollbarPosition_.first = true;
+                list.scrollbarPositionX_.first = true;
                 auto position = list.ParseDimension(val);
-                list.scrollbarPosition_.second = position.IsValid() ? position : Dimension();
+                list.scrollbarPositionX_.second = position.IsValid() ? position : Dimension();
                 return true;
             } },
     };
