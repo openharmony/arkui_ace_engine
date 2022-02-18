@@ -116,4 +116,50 @@ OHOS::Ace::RefPtr<OHOS::Ace::RenderBadge> BadgeComposedElement::GetRenderBadge()
     return nullptr;
 }
 
+void BadgeComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto badgeElement = GetContentElement<BadgeElement>(BadgeElement::TypeId());
+    if (!badgeElement) {
+        LOGE("get GetBadgeElement failed");
+        return;
+    }
+    badgeElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    badgeElement->MarkDirty();
+    LOGD("badge AddChildWithSlot");
+}
+
+void BadgeComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto badgeElement = GetContentElement<BadgeElement>(BadgeElement::TypeId());
+    if (!badgeElement) {
+        LOGE("get GetBadgeElement failed");
+        return;
+    }
+    auto child = GetElementChildBySlot(slot, badgeElement);
+    if (!child) {
+        LOGE("badgeElement get GetChildBySlot failed");
+        return;
+    }
+    badgeElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    badgeElement->MarkDirty();
+    LOGD("badge UpdateChildWithSlot");
+}
+
+void BadgeComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto badgeElement = GetContentElement<BadgeElement>(BadgeElement::TypeId());
+    if (!badgeElement) {
+        LOGE("get GetBadgeElement failed");
+        return;
+    }
+    auto child = GetElementChildBySlot(slot, badgeElement);
+    if (!child) {
+        LOGE("badgeElement get GetChildBySlot failed");
+        return;
+    }
+    badgeElement->UpdateChildWithSlot(child, nullptr, slot, slot);
+    badgeElement->MarkDirty();
+    LOGD("badge DeleteChildWithSlot");
+}
+
 }

@@ -37,6 +37,9 @@ public:
     std::string GetBadgePosition(void) const;
     std::string GetLabel(void) const;
     std::string GetStyle() const;
+    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
+    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
+    void DeleteChildWithSlot(int32_t slot) override;
 
 private:
     OHOS::Ace::RefPtr<OHOS::Ace::RenderBadge> GetRenderBadge() const;

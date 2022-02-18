@@ -185,6 +185,19 @@ void InspectorComposedElement::OnActive()
     inspectorId_ = GetCurrentInspectorId();
 }
 
+RefPtr<Element> InspectorComposedElement::GetElementChildBySlot(int32_t& slot, const RefPtr<Element>& element) const
+{
+    if (!element) {
+        return nullptr;
+    }
+    auto child = element->GetChildBySlot(slot);
+    if (!child) {
+        slot = DEFAULT_ELEMENT_SLOT;
+        child = element->GetChildBySlot(slot);
+    }
+    return child;
+}
+
 std::unique_ptr<JsonValue> InspectorComposedElement::ToJsonObject() const
 {
     auto resultJson = JsonUtil::Create(true);

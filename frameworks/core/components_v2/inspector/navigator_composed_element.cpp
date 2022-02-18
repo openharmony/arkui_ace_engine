@@ -112,4 +112,50 @@ std::string NavigatorComposedElement::GetParams() const
     return "{}";
 }
 
+void NavigatorComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto navigatorElement = GetContentElement<NavigatorElement>(NavigatorElement::TypeId());
+    if (!navigatorElement) {
+        LOGE("get GetNavigatorElement failed");
+        return;
+    }
+    navigatorElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    navigatorElement->MarkDirty();
+    LOGD("navigator AddChildWithSlot");
+}
+
+void NavigatorComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto navigatorElement = GetContentElement<NavigatorElement>(NavigatorElement::TypeId());
+    if (!navigatorElement) {
+        LOGE("get GetNavigatorElement failed");
+        return;
+    }
+    auto child = GetElementChildBySlot(slot, navigatorElement);
+    if (!child) {
+        LOGE("navigatorElement get GetChildBySlot failed");
+        return;
+    }
+    navigatorElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    navigatorElement->MarkDirty();
+    LOGD("navigator UpdateChildWithSlot");
+}
+
+void NavigatorComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto navigatorElement = GetContentElement<NavigatorElement>(NavigatorElement::TypeId());
+    if (!navigatorElement) {
+        LOGE("get GetNavigatorElement failed");
+        return;
+    }
+    auto child = GetElementChildBySlot(slot, navigatorElement);
+    if (!child) {
+        LOGE("navigatorElement get GetChildBySlot failed");
+        return;
+    }
+    navigatorElement->UpdateChildWithSlot(child, nullptr, slot, slot);
+    navigatorElement->MarkDirty();
+    LOGD("navigator DeleteChildWithSlot");
+}
+
 } // namespace OHOS::Ace::V2

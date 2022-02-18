@@ -29,6 +29,10 @@ RefPtr<Element> SoleChildElement::Create()
 void SoleChildElement::PerformBuild()
 {
     RefPtr<SoleChildComponent> component = AceType::DynamicCast<SoleChildComponent>(component_);
+    if (!component) {
+        LOGW("Should be sole child component, but %s", AceType::TypeName(component_));
+        return;
+    }
     const auto& child = children_.empty() ? nullptr : children_.front();
     UpdateChild(child, component->GetChild());
 }

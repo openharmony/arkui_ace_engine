@@ -64,6 +64,7 @@ public:
     {
         auto child = children_.empty() ? nullptr : children_.front();
         while (child) {
+            LOGW("GetContentElement: child = %{public}s", AceType::TypeName(child));
             auto inspectorComposedElement = AceType::DynamicCast<InspectorComposedElement>(child);
             if (inspectorComposedElement && !isFindAll) {
                 return nullptr;
@@ -88,6 +89,8 @@ public:
         }
         return nullptr;
     }
+
+    RefPtr<Element> GetElementChildBySlot(int32_t& slot, const RefPtr<Element>& element) const;
 
     // dimension settings
     std::string GetWidth() const override;
