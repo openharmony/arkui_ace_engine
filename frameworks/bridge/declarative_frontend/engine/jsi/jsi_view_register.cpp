@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -875,6 +875,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Search", JSSearch::JSBind },
     { "Select", JSSelect::JSBind },
     { "SearchController", JSSearchController::JSBind },
+    { "TextClockController", JSTextClockController::JSBind },
     { "Sheet", JSSheet::JSBind },
     { "JSClipboard", JSClipboard::JSBind },
     { "PatternLock", JSPatternLock::JSBind },
@@ -906,6 +907,7 @@ void RegisterAllModule(BindingTarget globalObj)
     JSTextInputController::JSBind(globalObj);
     JSTextAreaController::JSBind(globalObj);
     JSSearchController::JSBind(globalObj);
+    JSTextClockController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #ifdef WEB_SUPPORTED
@@ -940,6 +942,8 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
         JSTextTimerController::JSBind(globalObj);
     } else if ((*func).first == "TextInput") {
         JSTextInputController::JSBind(globalObj);
+    } else if ((*func).first == "TextClock") {
+        JSTextClockController::JSBind(globalObj);
     } else if ((*func).first == "TextArea") {
         JSTextAreaController::JSBind(globalObj);
     } else if ((*func).first == "Search") {

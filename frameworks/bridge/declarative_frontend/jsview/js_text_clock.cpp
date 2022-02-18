@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,11 +59,12 @@ double GetSystemTimeZone()
 void JSTextClock::Create(const JSCallbackInfo& info)
 {
     double hourWest = GetSystemTimeZone();
+    RefPtr<TextClockComponent> textClockComponent = AceType::MakeRefPtr<TextClockComponent>(std::string(""));
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGD("TextClock Info is non-valid");
     } else {
         JSRef<JSObject> optionsObject = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> hourWestVal = optionsObject->GetProperty("hourswest");
+        JSRef<JSVal> hourWestVal = optionsObject->GetProperty("timeZoneOffset");
         if (hourWestVal->IsNumber()) {
             double hourWest_ = hourWestVal->ToNumber<double>();
             if (IsHoursWestValid(hourWest_)) {
@@ -74,8 +75,22 @@ void JSTextClock::Create(const JSCallbackInfo& info)
         } else {
             LOGE("hourWest args is not number,args is invalid");
         }
+        auto controllerObj = optionsObject->GetProperty("controller");
+        if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+            textClockComponent->SetTextClockController(AceType::MakeRefPtr<TextClockController>());
+            JSTextClockController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextClockController>();
+            if (jsController != nullptr) {
+                auto controller = textClockComponent->GetTextClockController();
+                if (controller) {
+                    jsController->SetController(controller);
+                } else {
+                    LOGD("TextClockController is nullptr");
+                }
+            }
+        } else {
+            LOGI("controllerObj is nullptr or undefined");
+        }
     }
-    RefPtr<TextClockComponent> textClockComponent = AceType::MakeRefPtr<TextClockComponent>(std::string(""));
     textClockComponent->SetHoursWest(hourWest);
     std::string defaultFormat = DEFAULT_FORMAT;
     textClockComponent->SetFormat(defaultFormat);
@@ -88,7 +103,6 @@ void JSTextClock::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSTextClock>::StaticMethod("create", &JSTextClock::Create, opt);
     JSClass<JSTextClock>::StaticMethod("format", &JSTextClock::SetFormat, opt);
-    JSClass<JSTextClock>::StaticMethod("status", &JSTextClock::SetStatus, opt);
     JSClass<JSTextClock>::StaticMethod("onDateChange", &JSTextClock::JsOnDateChange, opt);
     JSClass<JSTextClock>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTextClock>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -103,23 +117,6 @@ void JSTextClock::JSBind(BindingTarget globalObj)
     JSClass<JSTextClock>::StaticMethod("fontFamily", &JSText::SetFontFamily, opt);
     JSClass<JSTextClock>::Inherit<JSViewAbstract>();
     JSClass<JSTextClock>::Bind<>(globalObj);
-}
-
-void JSTextClock::SetStatus(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
-        return;
-    }
-    auto textClockComponent = AceType::DynamicCast<TextClockComponent>
-                              (ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!textClockComponent) {
-        LOGE("textClockComponent is null.");
-        return;
-    }
-    if (info[0]->IsBoolean()) {
-        textClockComponent->SetStatus(info[0]->ToBoolean());
-    }
 }
 
 void JSTextClock::SetFormat(const JSCallbackInfo& info)
@@ -148,5 +145,42 @@ void JSTextClock::JsOnDateChange(const JSCallbackInfo& info)
         LOGW("failed to bind event");
     }
     info.ReturnSelf();
+}
+
+void JSTextClockController::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSTextClockController>::Declare("TextClockController");
+    JSClass<JSTextClockController>::Method("start", &JSTextClockController::Start);
+    JSClass<JSTextClockController>::Method("stop", &JSTextClockController::Stop);
+    JSClass<JSTextClockController>::Bind(globalObj, JSTextClockController::Constructor,
+                                         JSTextClockController::Destructor);
+}
+
+void JSTextClockController::Constructor(const JSCallbackInfo& args)
+{
+    auto scroller = Referenced::MakeRefPtr<JSTextClockController>();
+    scroller->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(scroller));
+}
+
+void JSTextClockController::Destructor(JSTextClockController* scroller)
+{
+    if (scroller != nullptr) {
+        scroller->DecRefCount();
+    }
+}
+
+void JSTextClockController::Start()
+{
+    if (controller_) {
+        controller_->Start();
+    }
+}
+
+void JSTextClockController::Stop()
+{
+    if (controller_) {
+        controller_->Stop();
+    }
 }
 } // namespace OHOS::Ace::Framework

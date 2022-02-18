@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "core/components/text_clock/render_text_clock.h"
+#include "core/components/text_clock/text_clock_controller.h"
 
 #include <chrono>
 #include <sys/time.h>
@@ -44,12 +45,27 @@ void RenderTextClock::Update(const RefPtr<Component>& component)
     format_ = textClockComponent_->GetFormat();
     textStyle_ = textClockComponent_->GetTextStyle();
     hoursWest_ = textClockComponent_->GetHoursWest();
-    isStart_ = textClockComponent_->GetStatus();
     if (textClockComponent_->GetOnDateChange()) {
         onDateChange = *textClockComponent_->GetOnDateChange();
     }
     UpdateTimeText();
-
+    auto textClockController = textClockComponent_->GetTextClockController();
+    if (textClockController) {
+        textClockController->OnStart([wp = WeakClaim(this)]() {
+            auto textClock = wp.Upgrade();
+            if (textClock) {
+                textClock->isStart_ = true;
+                textClock->MarkNeedLayout();
+            }
+        });
+        textClockController->OnStop([wp = WeakClaim(this)]() {
+            auto textClock = wp.Upgrade();
+            if (textClock) {
+                textClock->isStart_ = false;
+                textClock->MarkNeedLayout();
+            }
+        });
+    }
     timeCallback_ = ([wp = WeakClaim(this)]() {
         auto renderTextClock = wp.Upgrade();
         if (renderTextClock) {
