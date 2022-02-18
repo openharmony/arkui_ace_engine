@@ -583,8 +583,12 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeCha
     uint32_t height = rect.height_;
     LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u", width, height);
     SystemProperties::SetDeviceOrientation(height >= width ? 0 : 1);
-    auto flutterAceView = static_cast<Platform::FlutterAceView*>(
-        Platform::AceContainer::GetContainer(abilityId_)->GetView());
+    auto container = Platform::AceContainer::GetContainer(abilityId_);
+    if (!container) {
+        LOGE("container may be destroyed.");
+        return;
+    }
+    auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
 
     if (!flutterAceView) {
         LOGE("flutterAceView is null");
