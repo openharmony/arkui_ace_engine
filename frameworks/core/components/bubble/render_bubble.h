@@ -80,7 +80,7 @@ protected:
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;
-    Placement arrowPlacement_;
+    Placement arrowPlacement_ = Placement::TOP;
     ComposeId targetId_;
     std::function<void(const std::string&)> onVisibilityChange_;
     RefPtr<RawRecognizer> rawDetector_;

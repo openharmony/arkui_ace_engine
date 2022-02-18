@@ -483,7 +483,7 @@ public:
     }
 
 private:
-    CheckableStatus groupValue_;
+    CheckableStatus groupValue_ = CheckableStatus::NONE;
     std::list<RefPtr<CheckboxComponent>> checkboxList_;
     RefPtr<CheckboxComponent> group_;
     std::string groupName_ = "";

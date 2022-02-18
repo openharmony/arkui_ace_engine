@@ -1985,6 +1985,7 @@ std::string FrontendDelegateDeclarative::RestoreRouterStack(const std::string& c
     int32_t stackSize = routerStack->GetArraySize();
     if (stackSize < 1) {
         LOGW("restore stack size is invalid");
+        return "";
     }
     for (int32_t index = 0; index < stackSize - 1; ++index) {
         std::string url = routerStack->GetArrayItem(index)->ToString();

@@ -136,7 +136,7 @@ protected:
                 inUnspecifiedRun = true;
             } else if (colorStops_[i].hasValue && inUnspecifiedRun) {
                 auto noValueEndIndex = static_cast<int32_t>(i);
-                if (noValueStartIndex < noValueEndIndex) {
+                if (noValueStartIndex > 0 && noValueStartIndex < noValueEndIndex) {
                     auto beginValue = colorStops_[noValueStartIndex - 1].offset;
                     auto endValue = colorStops_[noValueEndIndex].offset;
                     auto delta = (endValue - beginValue) / static_cast<float>(noValueEndIndex - noValueStartIndex + 1);
