@@ -751,6 +751,10 @@ void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string
 {
     {
         std::lock_guard<std::mutex> lock(mutex_);
+        if (pageRouteStack_.empty()) {
+            LOGI("page route stack is empty");
+            return;
+        }
         auto& currentPage = pageRouteStack_.back();
         if (currentPage.isAlertBeforeBackPage) {
             backUri_ = uri;
