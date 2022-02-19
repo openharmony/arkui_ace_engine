@@ -27,6 +27,7 @@ public:
     static RefPtr<RenderNode> Create();
 
     void MoveChildToViewPort(const Size& size, const Offset& childOffset, const Offset& effectOffset);
+    bool IsUseOnly() override;
 
 protected:
     void PerformLayout() override;

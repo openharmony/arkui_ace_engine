@@ -1217,6 +1217,11 @@ void RenderList::OnPaintFinish()
     context->SendEventToAccessibility(scrollEvent);
 }
 
+bool RenderList::IsUseOnly()
+{
+    return true;
+}
+
 bool RenderList::PrepareRawRecognizer()
 {
     if (rawRecognizer_) {

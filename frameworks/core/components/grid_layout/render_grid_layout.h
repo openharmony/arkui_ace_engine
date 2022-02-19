@@ -131,6 +131,7 @@ public:
     void Update(const RefPtr<Component>& component) override;
 
     void PerformLayout() override;
+    bool IsUseOnly() override;
 
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;

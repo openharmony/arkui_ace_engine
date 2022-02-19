@@ -60,6 +60,8 @@ public:
 
     void OnPaintFinish() override;
 
+    bool IsUseOnly() override;
+
     template<class T>
     T MakeValue(double mainValue, double crossValue) const
     {

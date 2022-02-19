@@ -249,6 +249,9 @@ void RenderNode::UpdateTouchRect()
 
 void RenderNode::SetTouchRectList(std::vector<Rect>& touchRectList)
 {
+    if (IsUseOnly()) {
+        return;
+    }
     std::vector<Rect> parentTouchRectList = touchRectList;
     const auto& children = GetChildren();
     if (!children.empty()) {
