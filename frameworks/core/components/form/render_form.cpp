@@ -59,13 +59,15 @@ void RenderForm::PerformLayout()
 bool RenderForm::TouchTest(const Point& globalPoint,
     const Point& parentLocalPoint, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
+    LOGI("formcomponent begin touch event");
     auto context = GetContext().Upgrade();
     if (context) {
         auto pluginContext = GetSubPipelineContext();
         if (pluginContext) {
-            double x = globalPoint.GetX() - pluginContext->GetPluginOffset().GetX();
-            double y = globalPoint.GetY() - pluginContext->GetPluginOffset().GetY();
+            double x = globalPoint.GetX() - pluginContext->GetPluginEventOffset().GetX();
+            double y = globalPoint.GetY() - pluginContext->GetPluginEventOffset().GetY();
             if (x <= rootWidht_.Value() && y <= rootHeight_.Value()) {
+                LOGI("formcomponent set touch pipeline");
                 context->SetTouchPipeline(WeakPtr<PipelineContext>(pluginContext));
             }
         }

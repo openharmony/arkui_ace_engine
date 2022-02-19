@@ -207,6 +207,7 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
 
 void FormElement::OnActionEvent(const std::string& action) const
 {
+    LOGI("begin action event");
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
         LOGE("get event action failed");
@@ -238,6 +239,7 @@ void FormElement::OnActionEvent(const std::string& action) const
     }
 
     if (formManagerBridge_) {
+        LOGI("send action event to ability.");
         formManagerBridge_->OnActionEvent(action);
     }
 }
