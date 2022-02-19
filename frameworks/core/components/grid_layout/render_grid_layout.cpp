@@ -863,6 +863,11 @@ void RenderGridLayout::PerformLayout()
     SetLayoutSize(GetLayoutParam().Constrain(Size(colSize_, rowSize_)));
 }
 
+bool RenderGridLayout::IsUseOnly()
+{
+    return true;
+}
+
 bool RenderGridLayout::CouldBeInserted()
 {
     int32_t itemCount = CountItemInGrid();

@@ -91,6 +91,11 @@ LayoutParam RenderSingleChildScroll::MakeInnerLayoutParam() const
     return layout;
 }
 
+bool RenderSingleChildScroll::IsUseOnly()
+{
+    return true;
+}
+
 bool RenderSingleChildScroll::CalculateMainScrollExtent(const Size& itemSize)
 {
     bool isScrollable = false;

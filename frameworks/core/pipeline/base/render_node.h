@@ -286,6 +286,11 @@ public:
         return false;
     }
 
+    virtual bool IsUseOnly()
+    {
+        return false;
+    }
+
     virtual Point GetTransformPoint(const Point& point)
     {
         return point;
