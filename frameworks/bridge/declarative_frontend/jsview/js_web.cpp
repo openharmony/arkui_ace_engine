@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,21 +62,22 @@ void JSWeb::Create(const JSCallbackInfo& info)
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
 
     JSRef<JSVal> srcValue = paramObject->GetProperty("src");
-    std::string webSrc;
+    std::string webSrc = "";
+    std::string dstSrc = "";
     RefPtr<WebComponent> webComponent;
     if (ParseJsMedia(srcValue, webSrc)) {
         int np = webSrc.find_first_of("/");
-        std::string tempSrc = webSrc.erase(np, 1);
-        webComponent = AceType::MakeRefPtr<OHOS::Ace::WebComponent>(tempSrc);
-        webComponent->SetSrc(tempSrc);
-    } else {
-        auto src = paramObject->GetProperty("src");
-        if (!src->IsString()) {
-            LOGI("web create error, src is non-vaild");
-            return;
+        if (np < 0) {
+            dstSrc = webSrc;
+        } else {
+            dstSrc = webSrc.erase(np, 1);
         }
-        webComponent = AceType::MakeRefPtr<OHOS::Ace::WebComponent>(src->ToString());
-        webComponent->SetSrc(src->ToString());
+        LOGI("JSWeb::Create src:%{public}s", dstSrc.c_str());
+        webComponent = AceType::MakeRefPtr<OHOS::Ace::WebComponent>(dstSrc);
+        webComponent->SetSrc(dstSrc);
+    } else {
+        LOGE("Web component failed to parse src");
+        return;
     }
 
     auto controllerObj = paramObject->GetProperty("controller");
