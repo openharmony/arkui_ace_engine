@@ -36,7 +36,8 @@ public:
     void OnPageStarted(const std::string& url) override;
     void OnPageFinished(int httpStatusCode, const std::string& url) override;
     void OnRequestFocus() override;
-    void OnPageLoadError(int errorCode, const std::string& description, const std::string& failingUrl) override;
+    void onReceivedError(std::shared_ptr<WebView::WebResourceRequest> request,
+        std::shared_ptr<WebView::WebResourceError> error) override;
     bool ShouldOverrideUrlLoading(const std::string& url) override
     {
         return false;
