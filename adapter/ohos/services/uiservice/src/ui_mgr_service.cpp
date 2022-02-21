@@ -333,11 +333,13 @@ int UIMgrService::CancelDialog(int id)
         }
 #ifdef ENABLE_ROSEN_BACKEND
         auto taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor();
-        taskExecutor->PostTask([id]() {
-            if (auto context = Ace::Platform::AceContainer::GetContainer(id)->GetPipelineContext()) {
-                context->SetRSUIDirector(nullptr);
-            }
-        }, TaskExecutor::TaskType::UI);
+        taskExecutor->PostTask(
+            [id]() {
+                if (auto context = Ace::Platform::AceContainer::GetContainer(id)->GetPipelineContext()) {
+                    context->SetRSUIDirector(nullptr);
+                }
+            },
+            TaskExecutor::TaskType::UI);
 #endif
         Platform::AceContainer::DestroyContainer(id);
     };
@@ -413,8 +415,7 @@ int UIMgrService::RegisterCallBack(const AAFwk::Want& want, const sptr<IUIServic
         HILOG_ERROR("UIMgrService::RegisterCallBack failed!. handler is nullptr");
         return UI_SERVICE_HANDLER_IS_NULL;
     }
-    std::function <void()> registerFunc =
-        std::bind(&UIMgrService::HandleRegister, shared_from_this(), want, uiService);
+    std::function<void()> registerFunc = std::bind(&UIMgrService::HandleRegister, shared_from_this(), want, uiService);
     bool ret = handler_->PostTask(registerFunc);
     if (!ret) {
         HILOG_ERROR("DataObsMgrService::RegisterCallBack PostTask error");
@@ -431,8 +432,7 @@ int UIMgrService::UnregisterCallBack(const AAFwk::Want& want)
         HILOG_ERROR("UIMgrService::UnregisterCallBack failed!. handler is nullptr");
         return UI_SERVICE_HANDLER_IS_NULL;
     }
-    std::function <void()> unregisterFunc =
-        std::bind(&UIMgrService::HandleUnregister, shared_from_this(), want);
+    std::function<void()> unregisterFunc = std::bind(&UIMgrService::HandleUnregister, shared_from_this(), want);
     bool ret = handler_->PostTask(unregisterFunc);
     if (!ret) {
         HILOG_ERROR("DataObsMgrService::UnregisterCallBack PostTask error");

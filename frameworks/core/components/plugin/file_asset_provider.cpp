@@ -21,7 +21,7 @@
 #include "base/log/log.h"
 
 namespace OHOS::Ace::Plugin {
-constexpr long FOO_MAX_LEN = 20*1024*1024;
+constexpr long FOO_MAX_LEN = 20 * 1024 * 1024;
 bool FileAssetProvider::Initialize(const std::string& packagePath, const std::vector<std::string>& assetBasePaths)
 {
     ACE_SCOPED_TRACE("Initialize");

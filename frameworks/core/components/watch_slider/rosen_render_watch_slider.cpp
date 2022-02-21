@@ -47,26 +47,30 @@ void RosenRenderWatchSlider::Paint(RenderContext& context, const Offset& offset)
     canvas->clipRRect(bottomClipLayer, SkClipOp::kIntersect, true);
     SkPaint paint;
     paint.setColor(backgroundColor_.GetValue());
-    canvas->drawRect({topX, topY, topX + NormalizeToPx(THICKNESS),
-        topY + GetLayoutSize().Height() - 2.0 * NormalizeToPx(DEFAULT_PADDING)},paint);
+    canvas->drawRect({ topX, topY, topX + NormalizeToPx(THICKNESS),
+                         topY + GetLayoutSize().Height() - 2.0 * NormalizeToPx(DEFAULT_PADDING) },
+        paint);
     paint.setColor(selectColor_.GetValue());
     double maxRegion = 0.0;
     if (!NearEqual(max_, min_)) {
         maxRegion =
             (GetLayoutSize().Height() - 2.0 * NormalizeToPx(DEFAULT_PADDING)) * ((max_ - value_) / (max_ - min_));
     }
-    canvas->drawRect({topX, topY + maxRegion, topX + NormalizeToPx(THICKNESS),
-        topY + GetLayoutSize().Height() - 2.0 * NormalizeToPx(DEFAULT_PADDING)}, paint);
+    canvas->drawRect({ topX, topY + maxRegion, topX + NormalizeToPx(THICKNESS),
+                         topY + GetLayoutSize().Height() - 2.0 * NormalizeToPx(DEFAULT_PADDING) },
+        paint);
     double trackLength = GetLayoutSize().Height() - 2.0 * NormalizeToPx(DEFAULT_PADDING);
     if (!isContinuous_) {
         paint.setColor(Color::BLACK.GetValue());
         // equally divided track into three pieces. each block takes 1/4
-        canvas->drawRect({topX, topY + trackLength * 0.25, topX + NormalizeToPx(THICKNESS),
-            topY + trackLength * 0.25 + 2.0}, paint);
-        canvas->drawRect({topX, topY + trackLength * 0.5, topX + NormalizeToPx(THICKNESS),
-            topY + trackLength * 0.5 + 2.0}, paint);
-        canvas->drawRect({topX, topY + trackLength * 0.75, topX + NormalizeToPx(THICKNESS),
-            topY + trackLength * 0.75 + 2.0}, paint);
+        canvas->drawRect(
+            { topX, topY + trackLength * 0.25, topX + NormalizeToPx(THICKNESS), topY + trackLength * 0.25 + 2.0 },
+            paint);
+        canvas->drawRect(
+            { topX, topY + trackLength * 0.5, topX + NormalizeToPx(THICKNESS), topY + trackLength * 0.5 + 2.0 }, paint);
+        canvas->drawRect(
+            { topX, topY + trackLength * 0.75, topX + NormalizeToPx(THICKNESS), topY + trackLength * 0.75 + 2.0 },
+            paint);
     }
     bottomIcon_->RenderWithContext(context, bottomIconPosition_);
     topIcon_->RenderWithContext(context, topIconPosition_);

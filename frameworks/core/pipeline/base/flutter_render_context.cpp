@@ -110,16 +110,16 @@ void FlutterRenderContext::SetOffSet(
     if (context) {
         auto density = context->GetDensity();
         auto parent = child->GetParent();
-        Offset pluginOffset = {0, 0};
+        Offset pluginOffset = { 0, 0 };
         if (!NearZero(density)) {
             if (parent.Upgrade() && parent.Upgrade()->GetRenderLayer()) {
-                layer->SetOffset(renderPost.GetX() / density - renderPost.GetX(),
-                    renderPost.GetY() / density - renderPost.GetY());
-                pluginOffset = {renderPost.GetX() / density - renderPost.GetX(),
-                    renderPost.GetY() / density - renderPost.GetY()};
+                layer->SetOffset(
+                    renderPost.GetX() / density - renderPost.GetX(), renderPost.GetY() / density - renderPost.GetY());
+                pluginOffset = { renderPost.GetX() / density - renderPost.GetX(),
+                    renderPost.GetY() / density - renderPost.GetY() };
             } else {
                 layer->SetOffset(pos.GetX() / density, pos.GetY() / density);
-                pluginOffset = {pos.GetX() / density, pos.GetY() / density};
+                pluginOffset = { pos.GetX() / density, pos.GetY() / density };
             }
         }
         // plugin offset
@@ -147,8 +147,8 @@ void FlutterRenderContext::StartRecording()
     if (clipHole_.IsValid()) {
         canvas_->save();
         needRestoreHole_ = true;
-        canvas_->clipRect(clipHole_.Left(), clipHole_.Top(),
-            clipHole_.Right(), clipHole_.Bottom(), SkClipOp::kDifference);
+        canvas_->clipRect(
+            clipHole_.Left(), clipHole_.Top(), clipHole_.Right(), clipHole_.Bottom(), SkClipOp::kDifference);
     }
     containerLayer_->AddChildren(currentLayer_);
 }

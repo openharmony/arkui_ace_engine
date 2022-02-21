@@ -25,7 +25,7 @@
 
 #ifdef ACE_INSTANCE_LOG
 #define ACE_FMT_PREFIX "[%{private}s(%{private}s)-(%{public}d)] "
-#define ACE_LOG_ID ,OHOS::Ace::LogWrapper::GetId()
+#define ACE_LOG_ID , OHOS::Ace::LogWrapper::GetId()
 #else
 #define ACE_FMT_PREFIX "[%{private}s(%{private}s)] "
 #define ACE_LOG_ID

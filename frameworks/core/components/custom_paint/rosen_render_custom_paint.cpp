@@ -1392,7 +1392,7 @@ void RosenRenderCustomPaint::DrawBitmapMesh(const RefPtr<OffscreenCanvas>& offsc
         }
         SkBitmap skBitmap;
         auto imageInfo = SkImageInfo::Make(imageData->dirtyWidth, imageData->dirtyHeight,
-        SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+            SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
         skBitmap.allocPixels(imageInfo);
         skBitmap.setPixels(data);
         int32_t size = mesh.size();
@@ -1429,11 +1429,11 @@ void RosenRenderCustomPaint::Mesh(SkBitmap& bitmap, int column, int row,
     uint16_t* indices = builder.indices();
     const SkScalar height = SkIntToScalar(bitmap.height());
     const SkScalar width = SkIntToScalar(bitmap.width());
-    if (row==0) {
+    if (row == 0) {
         LOGE("row is zero");
         return;
     }
-    if (column==0) {
+    if (column == 0) {
         LOGE("column is zero");
         return;
     }

@@ -269,8 +269,8 @@ const std::string UIServiceMgrClient::GetPickerDialogParam(
         param += "\", \"size\": ";
         param += std::to_string(fileSizes[i]);
         param += "}";
-        if (i != (int)fileNames.size() -1 && i != (int)fileSizes.size() -1) {
-            param+=",";
+        if (i != (int)fileNames.size() - 1 && i != (int)fileSizes.size() - 1) {
+            param += ",";
         }
     }
     param += "]},";

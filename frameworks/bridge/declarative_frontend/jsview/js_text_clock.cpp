@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::Framework {
 
-namespace{
+namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const int32_t TWENTY_FOUR_HOUR_BASE = 24;
 constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
@@ -54,7 +54,7 @@ double GetSystemTimeZone()
     double hoursWest = minutesWest / TOTAL_MINUTE_OF_HOUR;
     return hoursWest;
 }
-}
+} // namespace
 
 void JSTextClock::Create(const JSCallbackInfo& info)
 {

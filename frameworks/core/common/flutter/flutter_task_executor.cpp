@@ -167,7 +167,8 @@ void FlutterTaskExecutor::InitOtherThreads(const flutter::TaskRunners& taskRunne
 bool FlutterTaskExecutor::OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const
 {
     int32_t currentId = Container::CurrentId();
-    TaskExecutor::Task wrappedTask = currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId) : std::move(task);
+    TaskExecutor::Task wrappedTask =
+        currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId) : std::move(task);
 
     switch (type) {
         case TaskType::PLATFORM:

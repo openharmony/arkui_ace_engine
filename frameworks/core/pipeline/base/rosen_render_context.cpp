@@ -119,8 +119,9 @@ void RosenRenderContext::StartRecording()
     if (clipHole_.IsValid()) {
         recordingCanvas_->save();
         needRestoreHole_ = true;
-        recordingCanvas_->clipRect(SkRect::MakeXYWH(clipHole_.Left(), clipHole_.Top(),
-            clipHole_.Right(), clipHole_.Bottom()), SkClipOp::kDifference, true);
+        recordingCanvas_->clipRect(
+            SkRect::MakeXYWH(clipHole_.Left(), clipHole_.Top(), clipHole_.Right(), clipHole_.Bottom()),
+            SkClipOp::kDifference, true);
     }
 }
 

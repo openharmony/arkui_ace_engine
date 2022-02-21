@@ -2130,7 +2130,7 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
         auto domDocument = sPage->GetDomDocument();
         if (domDocument) {
             RefPtr<DOMNode> node = domDocument->GetDOMNodeById(childNodeId);
-            if(node == nullptr) {
+            if (node == nullptr) {
                 LOGE("node is nullptr");
             }
             auto command = Referenced::MakeRefPtr<JsCommandAppendElement>(node ? node->GetTag() : "", childNodeId,
@@ -2874,7 +2874,7 @@ void JsiEngineInstance::RegisterDocumentModule()
     LOGD("JsiEngineInstance RegisterDocumentModule");
     shared_ptr<JsValue> global = runtime_->GetGlobal();
     shared_ptr<JsValue> domObj = runtime_->NewObject();
-    domObj->SetProperty(runtime_, "createElement",runtime_->NewFunction(JsCreateElement));
+    domObj->SetProperty(runtime_, "createElement", runtime_->NewFunction(JsCreateElement));
     global->SetProperty(runtime_, "dom", domObj);
 }
 

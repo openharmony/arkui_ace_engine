@@ -144,21 +144,20 @@ void DOMMenu::BindIdNode(const RefPtr<DOMNode>& idNode)
 {
     if (SystemProperties::GetDeviceType() == DeviceType::TV) {
         focusMarkerId_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
-        BackEndEventManager<void()>::GetInstance().BindBackendEvent(
-            focusMarkerId_, [weak = WeakClaim(this), idNode]() {
-                if (!idNode || idNode->IsNodeDisabled()) {
-                    return;
-                }
-                auto domMenu = weak.Upgrade();
-                if (!domMenu) {
-                    return;
-                }
-                const auto& targetCallback = domMenu->menuChild_->GetTargetCallback();
-                const auto& targetId = idNode->GetRootComponent()->GetId();
-                if (targetCallback) {
-                    targetCallback(targetId, Offset(0, 0));
-                }
-            });
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(focusMarkerId_, [weak = WeakClaim(this), idNode]() {
+            if (!idNode || idNode->IsNodeDisabled()) {
+                return;
+            }
+            auto domMenu = weak.Upgrade();
+            if (!domMenu) {
+                return;
+            }
+            const auto& targetCallback = domMenu->menuChild_->GetTargetCallback();
+            const auto& targetId = idNode->GetRootComponent()->GetId();
+            if (targetCallback) {
+                targetCallback(targetId, Offset(0, 0));
+            }
+        });
         idNode->SetOnFocusClick(focusMarkerId_);
     }
     if (isClickType_) {

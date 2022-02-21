@@ -165,7 +165,7 @@ bool RenderText::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     const auto localPoint = parentLocalPoint - GetPaintRect().GetOffset();
     Offset localOffset = Offset(localPoint.GetX(), localPoint.GetY());
     // If span of touch position has click event, need add click detector.
-    if (!GetEventMarker(GetTouchPosition(localOffset), GestureType::CLICK).IsEmpty()||
+    if (!GetEventMarker(GetTouchPosition(localOffset), GestureType::CLICK).IsEmpty() ||
         !GetEventMarker(GetTouchPosition(localOffset), GestureType::REMOTE_MESSAGE).IsEmpty()) {
         needClickDetector_ = true;
     }

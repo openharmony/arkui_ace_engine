@@ -78,7 +78,7 @@ std::string SelectComposedElement::GetOptions() const
     if (popup) {
         auto vectorValue = popup->GetSelectOptions();
         auto jsonOptions = JsonUtil::CreateArray(false);
-        for (size_t i = 0 ; i < vectorValue.size() ; i++) {
+        for (size_t i = 0; i < vectorValue.size(); i++) {
             if (vectorValue[i] && vectorValue[i]->GetIcon()) {
                 auto temp = JsonUtil::Create(false);
                 temp->Put("value", vectorValue[i]->GetValue().c_str());

@@ -41,7 +41,7 @@ std::shared_ptr<UIServiceMgrClient> MockUIServiceMgrClient::GetInstance()
 {
     if (instance_ == nullptr) {
         if (instance_ == nullptr) {
-            std::shared_ptr<UIServiceMgrClient> client =std::make_shared<MockUIServiceMgrClient>();
+            std::shared_ptr<UIServiceMgrClient> client = std::make_shared<MockUIServiceMgrClient>();
             if (client != nullptr) {
                 ((MockUIServiceMgrClient *)client.get())->Connect();
             }
@@ -54,7 +54,7 @@ std::shared_ptr<UIServiceMgrClient> MockUIServiceMgrClient::GetInstance()
 ErrCode MockUIServiceMgrClient::Connect()
 {
     if (remoteObject_ == nullptr) {
-        sptr<IRemoteObject> mockUIServiceManager =(new (std::nothrow) MockUIMgrService());
+        sptr<IRemoteObject> mockUIServiceManager = (new (std::nothrow) MockUIMgrService());
         if (mockUIServiceManager != nullptr) {
             ((MockUIMgrService *)mockUIServiceManager.GetRefPtr())->OnStart();
         }

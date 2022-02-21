@@ -24,10 +24,10 @@
 #include "flutter/common/task_runners.h"
 
 namespace OHOS::Ace {
-namespace{
+namespace {
 constexpr int32_t INTERVAL_OF_USECOND = 1000000;
 constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
-}
+} // namespace
 
 void FlutterRenderTextClock::Paint(RenderContext& context, const Offset& offset)
 {

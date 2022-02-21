@@ -314,11 +314,11 @@ void FlutterRenderCustomPaint::Mesh(SkBitmap& bitmap, int column, int row,
     const SkScalar height = SkIntToScalar(bitmap.height());
     const SkScalar width = SkIntToScalar(bitmap.width());
 
-    if (row==0) {
+    if (row == 0) {
         LOGE("row is zero");
         return;
     }
-    if (column==0) {
+    if (column == 0) {
         LOGE("column is zero");
         return;
     }
