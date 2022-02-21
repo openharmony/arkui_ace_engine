@@ -163,19 +163,53 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     properties.alignment = DialogAlignment::CENTER;
     properties.customComponent = PickerText;
 
-    if (info[1]->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
-        auto resultId =
-            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                std::vector<std::string> keys = { "value", "index", "status"};
-                ACE_SCORING_EVENT("TextPicker.show");
-                func->Execute(keys, info);
-            });
-        PickerText->SetDialogResult(resultId);
-    }
+    AddEvent(PickerText, info);
     PickerText->SetDialogName("pickerTextDialog");
     PickerText->OpenDialog(properties);
+}
+
+void JSTextPickerDialog::AddEvent(RefPtr<PickerTextComponent>& picker, const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("TextPicker AddEvent error, info is non-valid");
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto onAccept = paramObject->GetProperty("onAccept");
+    if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
+        auto acceptId =
+            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                std::vector<std::string> keys = { "value", "index"};
+                ACE_SCORING_EVENT("TextPickerDialog.onAccept");
+                func->Execute(keys, info);
+            });
+        picker->SetDialogAcceptEvent(acceptId);
+    }
+    auto onCancel = paramObject->GetProperty("onCancel");
+    if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
+        auto cancelId =
+            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("TextPickerDialog.onCancel");
+                func->Execute();
+            });
+        picker->SetDialogCancelEvent(cancelId);
+    }
+    auto onChange = paramObject->GetProperty("onChange");
+    if (!onChange->IsUndefined() && onChange->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
+        auto changeId =
+            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                std::vector<std::string> keys = { "value", "index"};
+                ACE_SCORING_EVENT("TextPickerDialog.onChange");
+                func->Execute(keys, info);
+            });
+        picker->SetDialogChangeEvent(changeId);
+    }
 }
 
 void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const JSRef<JSObject>& paramObj)
