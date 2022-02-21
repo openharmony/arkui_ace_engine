@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,12 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_RESOURCE_WEB_DELEGATE_H
 
 #include <list>
+#include <map>
+
 #ifdef OHOS_STANDARD_SYSTEM
 #include <ui/rs_surface_node.h>
 #endif
+
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
@@ -109,12 +112,19 @@ private:
     void BindRouterBackMethod();
     void BindPopPageSuccessMethod();
     void BindIsPagePathInvalidMethod();
+
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();
-    void LoadUrl(const std::string& url);
-    void ExecuteTypeScript(const std::string& jscode);
+    void LoadUrl(const std::string& url, const std::map<std::string, std::string>& httpHeaders);
+    void ExecuteTypeScript(const std::string& jscode, const std::function<void(std::string)>&& callback);
     void LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
         const std::string& encoding, const std::string& historyUrl);
+    void Refresh();
+    void StopLoading();
+    void AddJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
+    void RemoveJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
+    void RequestFocus();
+    int GetHitTestResult();
     void SetWebCallBack();
 
     // Backward and forward

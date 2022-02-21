@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
 #include "webview_adapter_helper.h"
+#include "web_javascript_execute_callback.h"
 #endif
 
 namespace OHOS::Ace {
@@ -144,20 +145,21 @@ void WebDelegate::CreatePlatformResource(
     InitWebEvent();
 }
 
-void WebDelegate::LoadUrl(const std::string& url)
+void WebDelegate::LoadUrl(const std::string& url, const std::map<std::string, std::string>& httpHeaders)
 {
     auto context = context_.Upgrade();
     if (!context) {
         return;
     }
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), url]() {
+        [weak = WeakClaim(this), url, httpHeaders]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
             }
             if (delegate->webview_) {
-                delegate->webview_->LoadURL(url);
+                delegate->webview_->LoadUrl(
+                    const_cast<std::string&>(url), const_cast<std::map<std::string, std::string>&>(httpHeaders));
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -233,23 +235,37 @@ bool WebDelegate::AccessForward()
 }
 
 #endif
-void WebDelegate::ExecuteTypeScript(const std::string& jscode)
+
+void WebDelegate::ExecuteTypeScript(const std::string& jscode, const std::function<void(const std::string)>&& callback)
 {
     auto context = context_.Upgrade();
     if (!context) {
         return;
     }
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), jscode]() {
+    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), jscode, callback]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
             }
             if (delegate->webview_) {
-                delegate->webview_->ExecuteJavaScript(jscode);
+                auto callbackImpl = std::make_shared<WebJavaScriptExecuteCallBack>();
+                if (callbackImpl && callback) {
+                    callbackImpl->SetCallBack([weak, func = std::move(callback)](std::string result) {
+                        auto delegate = weak.Upgrade();
+                        if (!delegate) {
+                            return;
+                        }
+                        auto context = delegate->context_.Upgrade();
+                        if (context) {
+                            context->GetTaskExecutor()->PostTask([callback = std::move(func), result]() {
+                                callback(result);
+                                }, TaskExecutor::TaskType::JS);
+                        }
+                    });
+                }
+                delegate->webview_->ExecuteJavaScript(jscode, callbackImpl);
             }
-        },
-        TaskExecutor::TaskType::PLATFORM);
+        }, TaskExecutor::TaskType::PLATFORM);
 }
 
 void WebDelegate::LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
@@ -266,10 +282,114 @@ void WebDelegate::LoadDataWithBaseUrl(const std::string& baseUrl, const std::str
                 return;
             }
             if (delegate->webview_) {
-                delegate->webview_->LoadDataWithBaseURL(baseUrl, data, mimeType, encoding, historyUrl);
+                if (baseUrl.empty() && historyUrl.empty()) {
+                    delegate->webview_->LoadData(data, mimeType, encoding);
+                } else {
+                    delegate->webview_->LoadDataWithBaseURL(baseUrl, data, mimeType, encoding, historyUrl);
+                }
             }
         },
         TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::Refresh()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->Reload();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::StopLoading()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->StopLoading();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::AddJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), objectName, methodList]() {
+        auto delegate = weak.Upgrade();
+        if (!delegate) {
+            return;
+        }
+        if (delegate->webview_) {
+            delegate->webview_->AddJavascriptInterface(objectName, methodList);
+        }
+        }, TaskExecutor::TaskType::PLATFORM);
+}
+void WebDelegate::RemoveJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), objectName, methodList]() {
+        auto delegate = weak.Upgrade();
+        if (!delegate) {
+            return;
+        }
+        if (delegate->webview_) {
+            delegate->webview_->RemoveJavascriptInterface(objectName, methodList);
+        }
+        }, TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::RequestFocus()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webComponent_) {
+                delegate->webComponent_->RequestFocus();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+int WebDelegate::GetHitTestResult()
+{
+    if (webview_) {
+        return webview_->GetHitTestResult().GetType();
+    }
+    return 0;
 }
 
 void WebDelegate::CreatePluginResource(
@@ -424,11 +544,12 @@ void WebDelegate::SetWebCallBack()
             return;
         }
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        webController->SetLoadUrltImpl([weak = WeakClaim(this), uiTaskExecutor](std::string url) {
-            uiTaskExecutor.PostTask([weak, url]() {
+        webController->SetLoadUrlImpl([weak = WeakClaim(this), uiTaskExecutor](
+            std::string url, const std::map<std::string, std::string>& httpHeaders) {
+            uiTaskExecutor.PostTask([weak, url, httpHeaders]() {
                 auto delegate = weak.Upgrade();
                 if (delegate) {
-                    delegate->LoadUrl(url);
+                    delegate->LoadUrl(url, httpHeaders);
                 }
             });
         });
@@ -462,11 +583,12 @@ void WebDelegate::SetWebCallBack()
             }
             return false;
         });
-        webController->SetExecuteTypeScriptImpl([weak = WeakClaim(this), uiTaskExecutor](std::string jscode) {
-            uiTaskExecutor.PostTask([weak, jscode]() {
+        webController->SetExecuteTypeScriptImpl([weak = WeakClaim(this), uiTaskExecutor](
+            std::string jscode, std::function<void(const std::string)>&& callback) {
+            uiTaskExecutor.PostTask([weak, jscode, callback]() {
                 auto delegate = weak.Upgrade();
                 if (delegate) {
-                    delegate->ExecuteTypeScript(jscode);
+                    delegate->ExecuteTypeScript(jscode, std::move(callback));
                 }
             });
         });
@@ -477,6 +599,59 @@ void WebDelegate::SetWebCallBack()
                     auto delegate = weak.Upgrade();
                     if (delegate) {
                         delegate->LoadDataWithBaseUrl(baseUrl, data, mimeType, encoding, historyUrl);
+                    }
+                });
+            });
+        webController->SetRefreshImpl(
+            [weak = WeakClaim(this), uiTaskExecutor]() {
+                uiTaskExecutor.PostTask([weak]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->Refresh();
+                    }
+                });
+            });
+        webController->SetStopLoadingImpl(
+            [weak = WeakClaim(this), uiTaskExecutor]() {
+                uiTaskExecutor.PostTask([weak]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->StopLoading();
+                    }
+                });
+            });
+        webController->SetGetHitTestResultImpl(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    return delegate->GetHitTestResult();
+                }
+                return 0;
+            });
+        webController->SetAddJavascriptInterfaceImpl([weak = WeakClaim(this), uiTaskExecutor](
+            std::string objectName, const std::vector<std::string>& methodList) {
+                uiTaskExecutor.PostTask([weak, objectName, methodList]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->AddJavascriptInterface(objectName, methodList);
+                    }
+                });
+            });
+        webController->SetRemoveJavascriptInterfaceImpl([weak = WeakClaim(this), uiTaskExecutor](
+            std::string objectName, const std::vector<std::string>& methodList) {
+                uiTaskExecutor.PostTask([weak, objectName, methodList]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->RemoveJavascriptInterface(objectName, methodList);
+                    }
+                });
+            });
+        webController->SetRequestFocusImpl(
+            [weak = WeakClaim(this), uiTaskExecutor]() {
+                uiTaskExecutor.PostTask([weak]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->RequestFocus();
                     }
                 });
             });
