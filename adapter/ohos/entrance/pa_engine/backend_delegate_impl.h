@@ -135,7 +135,7 @@ public:
 
     bool GetAssetContent(const std::string& url, std::string& content) override;
     bool GetAssetContent(const std::string& url, std::vector<uint8_t>& content) override;
-    bool GetResourceData(const std::string& fileUri, std::vector<uint8_t>& content) override;
+    bool GetResourceData(const std::string& fileUri, std::vector<uint8_t>& content, std::string& ami) override;
     std::string GetAssetPath(const std::string& url) override;
 
     // JsEventHandler delegate functions.
