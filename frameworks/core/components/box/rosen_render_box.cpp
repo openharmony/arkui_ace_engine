@@ -297,6 +297,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
             RosenDecorationPainter::PaintInvert(outerRRect, canvas, backDecoration_->GetInvert(), bgColor);
             RosenDecorationPainter::PaintSepia(outerRRect, canvas, backDecoration_->GetSepia(), bgColor);
             RosenDecorationPainter::PaintHueRotate(outerRRect, canvas, backDecoration_->GetHueRotate(), bgColor);
+            RosenDecorationPainter::PaintColorBlend(outerRRect, canvas, backDecoration_->GetColorBlend(), bgColor);
         }
     }
     RenderNode::Paint(context, offset);
@@ -315,6 +316,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
             RosenDecorationPainter::PaintInvert(outerRRect, canvas, frontDecoration_->GetInvert(), bgColor);
             RosenDecorationPainter::PaintSepia(outerRRect, canvas, frontDecoration_->GetSepia(), bgColor);
             RosenDecorationPainter::PaintHueRotate(outerRRect, canvas, frontDecoration_->GetHueRotate(), bgColor);
+            RosenDecorationPainter::PaintColorBlend(outerRRect, canvas, frontDecoration_->GetColorBlend(), bgColor);
         }
     }
 

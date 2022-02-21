@@ -79,7 +79,8 @@ public:
 
     void PaintBlur(RenderContext& context, const Dimension& blurRadius);
 
-    void PaintColorBlend(const SkRRect& outerRRect, SkCanvas* canvas, const Color& colorBlend, const Color& color);
+    static void PaintColorBlend(const SkRRect& outerRRect, SkCanvas* canvas, const Color& colorBlend,
+        const Color& color);
 
     void PaintGradient(RenderContext& context);
 
