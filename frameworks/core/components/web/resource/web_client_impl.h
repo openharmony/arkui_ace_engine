@@ -24,7 +24,7 @@
 namespace OHOS::Ace {
 class WebDelegate;
 
-class WebClientImpl : public OHOS::WebView::WebViewClient {
+class WebClientImpl : public OHOS::WebView::WebViewClient, public OHOS::WebView::DownloadListener {
 public:
     WebClientImpl() = default;
     ~WebClientImpl() = default;
@@ -35,6 +35,9 @@ public:
     void OnMessage(const std::string& param) override;
     void OnPageStarted(const std::string& url) override;
     void OnPageFinished(int httpStatusCode, const std::string& url) override;
+    void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
+        const std::string& mimetype, long contentLength) override;
+
     void OnRequestFocus() override;
     void OnPageLoadError(int errorCode, const std::string& description, const std::string& failingUrl) override;
     bool ShouldOverrideUrlLoading(const std::string& url) override

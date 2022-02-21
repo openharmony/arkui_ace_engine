@@ -27,12 +27,27 @@
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
 #include "core/components/web/web_component.h"
+#include "core/components/web/web_event.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "webview_helper.h"
 #include "window.h"
 #endif
 
 namespace OHOS::Ace {
+
+class ResultOhos : public Result {
+    DECLARE_ACE_TYPE(ResultOhos, Result)
+
+public:
+    ResultOhos(std::shared_ptr<OHOS::WebView::JSDialogResult> result) : result_(result) {}
+
+    void Confirm() override;
+    void Confirm(const std::string &message) override;
+    void Cancel() override;
+
+private:
+    std::shared_ptr<OHOS::WebView::JSDialogResult> result_;
+};
 
 class WebDelegate : public WebResource {
     DECLARE_ACE_TYPE(WebDelegate, WebResource);
@@ -95,6 +110,8 @@ public:
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
     void OnRequestFocus();
+    void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
+        const std::string& mimetype, long contentLength);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
     void OnRouterPush(const std::string& param);
@@ -158,6 +175,7 @@ private:
 
     EventCallbackV2 onPageFinishedV2_;
     EventCallbackV2 onRequestFocusV2_;
+    EventCallbackV2 onDownloadStartV2_;
 
 #endif
 };

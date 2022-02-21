@@ -318,6 +318,16 @@ public:
         return declaration_->GetRequestFocusEventId();
     }
 
+    void SetDownloadStartEventId(const EventMarker& downloadStartEventId)
+    {
+        declaration_->SetDownloadStartEventId(downloadStartEventId);
+    }
+
+    const EventMarker& GetDownloadStartEventId() const
+    {
+        return declaration_->GetDownloadStartEventId();
+    }
+
     void SetPageErrorEventId(const EventMarker& pageErrorEventId)
     {
         declaration_->SetPageErrorEventId(pageErrorEventId);

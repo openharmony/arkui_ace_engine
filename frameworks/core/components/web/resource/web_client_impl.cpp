@@ -44,6 +44,17 @@ void WebClientImpl::OnPageStarted(const std::string& url)
     delegate->OnPageStarted(url);
 }
 
+void WebClientImpl::OnDownloadStart(const std::string& url, const std::string& userAgent,
+    const std::string& contentDisposition, const std::string& mimetype, long contentLength)
+{
+    LOGI("OnDownloadStart.");
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnDownloadStart(url, userAgent, contentDisposition, mimetype, contentLength);
+}
+
 void WebClientImpl::SetWebView(std::shared_ptr<OHOS::WebView::WebView> webview)
 {
     webviewWeak_ = webview;

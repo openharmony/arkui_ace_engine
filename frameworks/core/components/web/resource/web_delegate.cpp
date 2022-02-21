@@ -64,6 +64,27 @@ constexpr char WEB_ERROR_MSG_CREATEFAIL[] = "create web_delegate failed.";
 
 } // namespace
 
+void ResultOhos::Confirm()
+{
+    if (result_) {
+        result_->Confirm();
+    }
+}
+
+void ResultOhos::Confirm(const std::string &message)
+{
+    if (result_) {
+        result_->Confirm(message);
+    }
+}
+
+void ResultOhos::Cancel()
+{
+    if (result_) {
+        result_->Cancel();
+    }
+}
+
 WebDelegate::~WebDelegate()
 {
     ReleasePlatformResource();
@@ -546,6 +567,8 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
         webComponent_->GetPageFinishedEventId(), pipelineContext);
     onRequestFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
         webComponent_->GetRequestFocusEventId(), pipelineContext);
+    onDownloadStartV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetDownloadStartEventId(), pipelineContext);
 }
 
 void WebDelegate::SetWebCallBack()
@@ -970,6 +993,15 @@ void WebDelegate::OnPageFinished(const std::string& param)
     // ace 2.0
     if (onPageFinishedV2_) {
         onPageFinishedV2_(std::make_shared<LoadWebPageFinishEvent>(param));
+    }
+}
+
+void WebDelegate::OnDownloadStart(const std::string& url, const std::string& userAgent,
+    const std::string& contentDisposition, const std::string& mimetype, long contentLength)
+{
+    if (onDownloadStartV2_) {
+        onDownloadStartV2_(std::make_shared<DownloadStartEvent>(url, userAgent, contentDisposition,
+            mimetype, contentLength));
     }
 }
 
