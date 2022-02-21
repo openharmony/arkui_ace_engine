@@ -41,6 +41,7 @@ public:
     void FillText(const std::string& text, double x, double y, const PaintState& state) override;
     void StrokeText(const std::string& text, double x, double y, const PaintState& state) override;
     double MeasureText(const std::string& text, const PaintState& state) override;
+    double MeasureTextHeight(const std::string& text, const PaintState& state) override;
     std::string ToDataURL(const std::string& type, const double quality) override;
     std::unique_ptr<ImageData> GetImageData(double left, double top, double width, double height) override;
     void BeginPath() override;

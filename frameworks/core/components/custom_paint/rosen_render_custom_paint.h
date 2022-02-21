@@ -49,6 +49,7 @@ public:
     void FillText(const Offset& offset, const std::string& text, double x, double y) override;
     void StrokeText(const Offset& offset, const std::string& text, double x, double y) override;
     double MeasureText(const std::string& text, const PaintState& state) override;
+    double MeasureTextHeight(const std::string& text, const PaintState& state) override;
     void MoveTo(const Offset& offset, double x, double y) override;
     void LineTo(const Offset& offset, double x, double y) override;
     void BezierCurveTo(const Offset& offset, const BezierCurveParam& param) override;
