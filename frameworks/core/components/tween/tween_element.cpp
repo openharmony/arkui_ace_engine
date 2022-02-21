@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -965,14 +965,17 @@ void TweenElement::AddPrepareListener(
     controller->RemovePrepareListener(prepareId);
     prepareId =
         controller->AddPrepareListener([weakTransform, weakContext = context_,
-                                           weakTween = AceType::WeakClaim(this)]() {
+                                           weakTween = AceType::WeakClaim(this),
+                                           needForceResetTransform =
+                                              controller->GetAllowRunningAsynchronously()]() {
             // reset transform matrix at the start of every frame.
             auto context = weakContext.Upgrade();
             auto tween = weakTween.Upgrade();
             auto transform = weakTransform.Upgrade();
             if (context && tween && transform) {
                 auto currentTimestamp = context->GetTimeFromExternalTimer();
-                if (tween->currentTimestamp_ != currentTimestamp || tween->currentTimestamp_ == 0) {
+                if (tween->currentTimestamp_ != currentTimestamp || tween->currentTimestamp_ == 0 ||
+                        needForceResetTransform) {
                     transform->ResetTransform();
                     tween->currentTimestamp_ = currentTimestamp;
                 }

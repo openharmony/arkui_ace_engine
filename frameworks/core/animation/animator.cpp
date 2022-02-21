@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -266,6 +266,11 @@ void Animator::SetAllowRunningAsynchronously(bool runAsync)
 {
     allowRunningAsynchronously_ = runAsync;
     LOGD("Set allow running asynchronously. id: %{public}d, allow: %{public}d", controllerId_, runAsync);
+}
+
+bool Animator::GetAllowRunningAsynchronously()
+{
+    return allowRunningAsynchronously_;
 }
 
 // return true, the animation is played backward
