@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,8 +94,11 @@ public:
     // Whether the animation should be played in reverse in turn.
     void SetAnimationDirection(AnimationDirection direction);
 
-    // Whether or not the animator is allowed to run asynchronously off of the UI thread.
+    // Set Whether or not the animator is allowed to run asynchronously off of the UI thread.
     void SetAllowRunningAsynchronously(bool runAsync);
+
+    // Get whether or not the animator is allowed to run asynchronously off of the UI thread.
+    bool GetAllowRunningAsynchronously();
 
     // Update the played time, will not trigger OnFrame callback.
     void UpdatePlayedTime(int32_t playedTime, bool checkReverse = false);
