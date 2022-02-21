@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -121,25 +121,6 @@ public:
         isDebugMode_ = isDebugMode;
     }
 
-    static void AddEngineInstance(int32_t id, WeakPtr<JsiDeclarativeEngineInstance> instance)
-    {
-        engineInstaneMap_.emplace(id, instance);
-    }
-
-    static RefPtr<JsiDeclarativeEngineInstance> GetEngineInstance(int32_t id)
-    {
-        auto iter = engineInstaneMap_.find(id);
-        if (iter != engineInstaneMap_.end()) {
-            return iter->second.Upgrade();
-        }
-        return nullptr;
-    }
-
-    static void RemoveEngineInstance(int32_t id)
-    {
-        engineInstaneMap_.erase(id);
-    }
-
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global
@@ -253,6 +234,11 @@ public:
     virtual FrontendDelegate* GetFrontend() override
     {
         return AceType::RawPtr(engineInstance_->GetDelegate());
+    }
+
+    RefPtr<JsiDeclarativeEngineInstance> GetEngineInstance()
+    {
+        return engineInstance_;
     }
 
     void RunNativeEngineLoop() override

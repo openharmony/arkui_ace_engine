@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "napi/native_node_api.h"
 
 #include "frameworks/base/log/log.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
 namespace OHOS::Ace::Napi {
@@ -63,6 +64,7 @@ static void ParseParams(napi_env env, napi_value params, std::string& paramsStri
 
 static napi_value JSRouterPush(napi_env env, napi_callback_info info)
 {
+    LOGI("NAPI router push called");
     size_t requireArgc = 1;
     size_t argc = 1;
     napi_value argv = nullptr;
@@ -95,9 +97,12 @@ static napi_value JSRouterPush(napi_env env, napi_callback_info info)
     } else {
         LOGE("The parameter type is incorrect.");
     }
-    OHOS::Ace::Framework::JsEngine* jsEngine = nullptr;
-    napi_get_jsEngine(env, (void**)&jsEngine);
-    jsEngine->GetFrontend()->Push(uriString, paramsString);
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (!delegate) {
+        LOGE("can not get delegate.");
+        return nullptr;
+    }
+    delegate->Push(uriString, paramsString);
     return nullptr;
 }
 
@@ -136,9 +141,12 @@ static napi_value JSRouterReplace(napi_env env, napi_callback_info info)
         LOGE("The parameter type is incorrect.");
     }
 
-    OHOS::Ace::Framework::JsEngine* jsEngine = nullptr;
-    napi_get_jsEngine(env, (void**)&jsEngine);
-    jsEngine->GetFrontend()->Replace(uriString, paramsString);
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (!delegate) {
+        LOGE("can not get delegate.");
+        return nullptr;
+    }
+    delegate->Replace(uriString, paramsString);
     return nullptr;
 }
 
@@ -150,8 +158,11 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
 
-    OHOS::Ace::Framework::JsEngine* jsEngine = nullptr;
-    napi_get_jsEngine(env, (void**)&jsEngine);
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (!delegate) {
+        LOGE("can not get delegate.");
+        return nullptr;
+    }
     std::string uriString;
     std::string paramsString;
     napi_value uriNApi = nullptr;
@@ -174,23 +185,29 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
     } else {
         LOGE("The parameter type is incorrect.");
     }
-    jsEngine->GetFrontend()->Back(uriString, paramsString);
+    delegate->Back(uriString, paramsString);
     return nullptr;
 }
 
 static napi_value JSRouterClear(napi_env env, napi_callback_info info)
 {
-    OHOS::Ace::Framework::JsEngine* jsEngine = nullptr;
-    napi_get_jsEngine(env, (void**)&jsEngine);
-    jsEngine->GetFrontend()->Clear();
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (!delegate) {
+        LOGE("can not get delegate.");
+        return nullptr;
+    }
+    delegate->Clear();
     return nullptr;
 }
 
 static napi_value JSRouterGetLength(napi_env env, napi_callback_info info)
 {
-    OHOS::Ace::Framework::JsEngine* jsEngine = nullptr;
-    napi_get_jsEngine(env, (void**)&jsEngine);
-    int32_t routeNumber = jsEngine->GetFrontend()->GetStackSize();
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (!delegate) {
+        LOGE("can not get delegate.");
+        return nullptr;
+    }
+    int32_t routeNumber = delegate->GetStackSize();
     napi_value routeNApiNum = nullptr;
     napi_create_int32(env, routeNumber, &routeNApiNum);
     napi_value result = nullptr;
@@ -203,9 +220,12 @@ static napi_value JSRouterGetState(napi_env env, napi_callback_info info)
     int32_t routeIndex = 0;
     std::string routeName;
     std::string routePath;
-    OHOS::Ace::Framework::JsEngine* jsEngine = nullptr;
-    napi_get_jsEngine(env, (void**)&jsEngine);
-    jsEngine->GetFrontend()->GetState(routeIndex, routeName, routePath);
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (!delegate) {
+        LOGE("can not get delegate.");
+        return nullptr;
+    }
+    delegate->GetState(routeIndex, routeName, routePath);
     size_t routeNameLen = routeName.length();
     size_t routePathLen = routePath.length();
 
@@ -298,8 +318,6 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
         env, nullptr, resource, [](napi_env env, void* data) {},
         [](napi_env env, napi_status status, void* data) {
             RouterAsyncContext* asyncContext = (RouterAsyncContext*)data;
-            OHOS::Ace::Framework::JsEngine* jsEngine = nullptr;
-            napi_get_jsEngine(env, (void**)&jsEngine);
             napi_value ret;
             napi_value callback = nullptr;
             if (!asyncContext->fail.empty()) {
@@ -363,7 +381,12 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
                     napi_delete_async_work(env, asyncContext->work);
                     delete asyncContext;
                 };
-                jsEngine->GetFrontend()->EnableAlertBeforeBackPage(asyncContext->messageString, std::move(callBack));
+                auto delegate = EngineHelper::GetCurrentDelegate();
+                if (delegate) {
+                    delegate->EnableAlertBeforeBackPage(asyncContext->messageString, std::move(callBack));
+                } else {
+                    LOGE("can not get delegate.");
+                }
             }
         },
         (void*)routerAsyncContext, &routerAsyncContext->work);
@@ -419,9 +442,12 @@ static napi_value JSRouterDisableAlertBeforeBackPage(napi_env env, napi_callback
         env, nullptr, resource, [](napi_env env, void* data) {},
         [](napi_env env, napi_status status, void* data) {
             DisableRouterAsyncContext* asyncContext = (DisableRouterAsyncContext*)data;
-            OHOS::Ace::Framework::JsEngine* jsEngine = nullptr;
-            napi_get_jsEngine(env, (void**)&jsEngine);
-            jsEngine->GetFrontend()->DisableAlertBeforeBackPage();
+            auto delegate = EngineHelper::GetCurrentDelegate();
+            if (delegate) {
+                delegate->DisableAlertBeforeBackPage();
+            } else {
+                LOGE("can not get delegate.");
+            }
             napi_value ret;
             napi_value callback = nullptr;
             asyncContext->success = "disableAlertBeforeBackPage:ok";
@@ -454,9 +480,12 @@ static napi_value JSRouterDisableAlertBeforeBackPage(napi_env env, napi_callback
 
 static napi_value JSRouterGetParams(napi_env env, napi_callback_info info)
 {
-    OHOS::Ace::Framework::JsEngine* jsEngine = nullptr;
-    napi_get_jsEngine(env, (void**)&jsEngine);
-    std::string paramsStr = jsEngine->GetFrontend()->GetParams();
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (!delegate) {
+        LOGE("can not get delegate.");
+        return nullptr;
+    }
+    std::string paramsStr = delegate->GetParams();
     if (paramsStr.empty()) {
         LOGI("PageGetParams params is null");
         return nullptr;

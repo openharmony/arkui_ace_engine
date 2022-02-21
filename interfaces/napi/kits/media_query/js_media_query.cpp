@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 
 #include "base/log/log.h"
 #include "bridge/common/media_query/media_queryer.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/js_frontend/engine/common/js_engine.h"
 
 namespace OHOS::Ace::Napi {
@@ -98,6 +99,7 @@ public:
                 listener->MediaQueryResult::NapiSerilizer(listener->env_, resultArg);
 
                 napi_value result = nullptr;
+                LOGI("NAPI MeidaQueryCallback call js");
                 napi_call_function(listener->env_, thisVal, cb, 1, &resultArg, &result);
             }
         }
@@ -105,8 +107,12 @@ public:
 
     static napi_value On(napi_env env, napi_callback_info info)
     {
-        JsEngine* jsEngine = nullptr;
-        napi_get_jsEngine(env, (void**)&jsEngine);
+        LOGI("NAPI MeidaQuery On called");
+        auto jsEngine = EngineHelper::GetCurrentEngine();
+        if (!jsEngine) {
+            LOGE("get jsEngine failed");
+            return nullptr;
+        }
         jsEngine->RegistMediaUpdateCallback(NapiCallback);
 
         napi_value thisVar = nullptr;
@@ -124,7 +130,7 @@ public:
         listener->cbList_.emplace_back(ref);
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-        NapiCallback(jsEngine);
+        NapiCallback(AceType::RawPtr(jsEngine));
 #endif
 
         return nullptr;
@@ -149,12 +155,15 @@ public:
                 listener->cbList_.erase(iter);
             }
         }
-        JsEngine* jsEngine = nullptr;
-        napi_get_jsEngine(env, (void**)&jsEngine);
+        auto jsEngine = EngineHelper::GetCurrentEngine();
+        if (!jsEngine) {
+            LOGE("get jsEngine failed");
+            return nullptr;
+        }
         const std::lock_guard<std::mutex> lock(mutex_);
-        if (listenerSets_[jsEngine].empty()) {
+        if (listenerSets_[AceType::RawPtr(jsEngine)].empty()) {
             jsEngine->UnregistMediaUpdateCallback();
-            listenerSets_.erase(jsEngine);
+            listenerSets_.erase(AceType::RawPtr(jsEngine));
         }
         return nullptr;
     }
@@ -204,10 +213,13 @@ private:
         if (thisVarRef_ == nullptr) {
             napi_create_reference(env, thisVar, 1, &thisVarRef_);
         }
-        JsEngine* jsEngine = nullptr;
-        napi_get_jsEngine(env, (void**)&jsEngine);
+        auto jsEngine = EngineHelper::GetCurrentEngine();
+        if (!jsEngine) {
+            LOGE("get jsEngine failed");
+            return;
+        }
         const std::lock_guard<std::mutex> lock(mutex_);
-        listenerSets_[jsEngine].emplace(this);
+        listenerSets_[AceType::RawPtr(jsEngine)].emplace(this);
     }
 
     static MediaQueryListener* GetListener(napi_env env, napi_value thisVar)
