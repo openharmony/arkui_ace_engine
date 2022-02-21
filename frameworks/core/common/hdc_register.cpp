@@ -43,9 +43,6 @@ HdcRegister::HdcRegister(): registerHandler_(nullptr)
 
 HdcRegister::~HdcRegister()
 {
-    if (!isDebugVersion_) {
-        return;
-    }
     StopHdcRegister();
 }
 
@@ -81,6 +78,9 @@ void HdcRegister::StartHdcRegister()
 
 void HdcRegister::StopHdcRegister()
 {
+    if (!isDebugVersion_) {
+        return;
+    }
     LOGI("Stop Hdc Register");
     if (registerHandler_ == nullptr) {
         LOGE("registerHandler_ is null");
@@ -91,6 +91,7 @@ void HdcRegister::StopHdcRegister()
         LOGE("stopRegister = NULL, dlerror = %s", dlerror());
         return;
     }
+    stopRegister();
     dlclose(registerHandler_);
     registerHandler_ = nullptr;
 }
