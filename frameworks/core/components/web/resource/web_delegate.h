@@ -91,6 +91,7 @@ public:
     void HandleTouchUp(const int32_t& id, const double& x, const double& y);
     void HandleTouchMove(const int32_t& id, const double& x, const double& y);
     void HandleTouchCancel();
+    void OnPageErrorOHOS(const int& errorCode, const std::string& description, const std::string& url);
 #endif
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
@@ -128,6 +129,7 @@ private:
     void OnInactive();
     void OnActive();
     int GetHitTestResult();
+    void RegisterOHOSWebEventAndMethord();
     void SetWebCallBack();
 
     // Backward and forward
