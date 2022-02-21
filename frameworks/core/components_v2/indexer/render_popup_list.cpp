@@ -281,11 +281,10 @@ RefPtr<RenderPopupListItem> RenderPopupList::RequestAndLayoutNewItem(size_t inde
     RefPtr<PopupListItemComponent> itemComponent = AceType::MakeRefPtr<PopupListItemComponent>(datas_[index]);
     RefPtr<RenderPopupListItem> renderItem = AceType::DynamicCast<RenderPopupListItem>(RenderPopupListItem::Create());
     AddChild(renderItem);
-    renderItem->Attach(GetContext());
-    renderItem->Update(itemComponent);
-    renderItem->Layout(layoutParam);
-
     if (renderItem) {
+        renderItem->Attach(GetContext());
+        renderItem->Update(itemComponent);
+        renderItem->Layout(layoutParam);
         if (index < startIndex_) {
             items_.emplace_front(renderItem);
         } else {

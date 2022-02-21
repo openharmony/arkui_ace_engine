@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::Framework {
 
-std::string MediaQueryInfo::GetDeviceType() const
+std::string MediaQueryInfo::GetDeviceType()
 {
     if (SystemProperties::GetParamDeviceType() == "tablet") {
         return "tablet";
@@ -38,7 +38,7 @@ std::string MediaQueryInfo::GetDeviceType() const
     }
 }
 
-std::string MediaQueryInfo::GetOrientation() const
+std::string MediaQueryInfo::GetOrientation()
 {
     switch (SystemProperties::GetDevcieOrientation()) {
         case DeviceOrientation::PORTRAIT:
@@ -60,7 +60,7 @@ std::string MediaQueryInfo::GetMediaQueryInfo() const
 }
 
 /* 2.0 info */
-std::unique_ptr<JsonValue> MediaQueryInfo::GetMediaQueryJsonInfo() const
+std::unique_ptr<JsonValue> MediaQueryInfo::GetMediaQueryJsonInfo()
 {
     CHECK_RUN_ON(JS);
     auto json = JsonUtil::Create(true);

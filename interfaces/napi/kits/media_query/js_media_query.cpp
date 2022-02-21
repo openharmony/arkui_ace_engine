@@ -83,10 +83,9 @@ public:
     static void NapiCallback(JsEngine* jsEngine)
     {
         const std::lock_guard<std::mutex> lock(mutex_);
-        MediaQueryInfo mediaInfo;
         MediaQueryer queryer;
         for (auto listener : listenerSets_[jsEngine]) {
-            auto json = mediaInfo.GetMediaQueryJsonInfo();
+            auto json = MediaQueryInfo::GetMediaQueryJsonInfo();
             listener->matches_ = queryer.MatchCondition(listener->media_, json);
             for (auto& cbRef : listener->cbList_) {
                 napi_value thisVal = nullptr;
@@ -277,8 +276,7 @@ static napi_value JSMatchMediaSync(napi_env env, napi_callback_info info)
 
     /* construct object for query */
     std::string conditionStr(condition, len);
-    MediaQueryInfo mediaInfo;
-    auto mediaFeature = mediaInfo.GetMediaQueryJsonInfo();
+    auto mediaFeature = MediaQueryInfo::GetMediaQueryJsonInfo();
     MediaQueryer queryer;
     bool matchResult = queryer.MatchCondition(conditionStr, mediaFeature);
     MediaQueryListener* listener = new MediaQueryListener(matchResult, conditionStr);

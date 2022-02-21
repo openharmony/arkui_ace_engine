@@ -3151,8 +3151,12 @@ void JsiEngine::GetLoadOptions(std::string& optionStr, bool isMainPage, bool has
     LOGD("JsiEngine GetLoadOptions");
     ACE_DCHECK(engineInstance_);
     auto delegate = engineInstance_->GetFrontendDelegate();
+    if (!delegate) {
+        LOGW("GetLoadOptions error: delegate is null");
+        return;
+    }
     auto mediaQuery = delegate->GetMediaQueryInfoInstance();
-    auto renderOption = mediaQuery->GetMediaQueryJsonInfo();
+    auto renderOption = MediaQueryInfo::GetMediaQueryJsonInfo();
     if (mediaQuery) {
         renderOption->Put("isInit", mediaQuery->GetIsInit());
     }

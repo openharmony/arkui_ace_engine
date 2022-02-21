@@ -3230,7 +3230,7 @@ QjsEngine::~QjsEngine()
 void QjsEngine::GetLoadOptions(std::string& optionStr, bool isMainPage, const RefPtr<JsAcePage>& page)
 {
     auto mediaQuery = engineInstance_->GetDelegate()->GetMediaQueryInfoInstance();
-    auto renderOption = mediaQuery->GetMediaQueryJsonInfo();
+    auto renderOption = MediaQueryInfo::GetMediaQueryJsonInfo();
     if (mediaQuery) {
         renderOption->Put("isInit", mediaQuery->GetIsInit());
         renderOption->Put("bundleUrl", page->GetUrl().c_str());

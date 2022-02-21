@@ -422,8 +422,12 @@ void AceAbility::OnBackPressed()
 
 void AceAbility::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    auto flutterAceView = static_cast<Platform::FlutterAceView*>(
-        Platform::AceContainer::GetContainer(abilityId_)->GetView());
+    auto container = Platform::AceContainer::GetContainer(abilityId_);
+    if (!container) {
+        LOGE("container may be destroyed.");
+        return;
+    }
+    auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
     if (!flutterAceView) {
         LOGE("flutterAceView is null");
         return;
@@ -433,8 +437,12 @@ void AceAbility::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent
 
 void AceAbility::OnKeyUp(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    auto flutterAceView = static_cast<Platform::FlutterAceView*>(
-        Platform::AceContainer::GetContainer(abilityId_)->GetView());
+    auto container = Platform::AceContainer::GetContainer(abilityId_);
+    if (!container) {
+        LOGE("container may be destroyed.");
+        return;
+    }
+    auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
     if (!flutterAceView) {
         LOGI("flutterAceView is null, keyboard event does not take effect");
         return;
@@ -450,8 +458,12 @@ void AceAbility::OnKeyUp(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 
 void AceAbility::OnKeyDown(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    auto flutterAceView = static_cast<Platform::FlutterAceView*>(
-        Platform::AceContainer::GetContainer(abilityId_)->GetView());
+    auto container = Platform::AceContainer::GetContainer(abilityId_);
+    if (!container) {
+        LOGE("container may be destroyed.");
+        return;
+    }
+    auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
     if (!flutterAceView) {
         LOGI("flutterAceView is null, keyboard event does not take effect");
         return;
@@ -621,7 +633,12 @@ WindowSizeChangeReason AceAbility::Convert2WindowSizeChangeReason(OHOS::Rosen::W
 
 void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
-    auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
+    auto container = Platform::AceContainer::GetContainer(abilityId_);
+    if (!container) {
+        LOGE("container may be destroyed.");
+        return;
+    }
+    auto context = container->GetPipelineContext();
     if (context != nullptr) {
         context->DumpInfo(params, info);
     }
@@ -630,8 +647,12 @@ void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::s
 void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
 {
     LOGI("AceAbility::OnDrag called ");
-    auto flutterAceView = static_cast<Platform::FlutterAceView*>(
-        Platform::AceContainer::GetContainer(abilityId_)->GetView());
+    auto container = Platform::AceContainer::GetContainer(abilityId_);
+    if (!container) {
+        LOGE("container may be destroyed.");
+        return;
+    }
+    auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
     if (!flutterAceView) {
         LOGE("AceAbility::OnDrag flutterAceView is null");
         return;

@@ -3788,7 +3788,7 @@ void V8Engine::GetLoadOptions(std::string& optionStr, bool isMainPage, const Ref
     auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
 
     auto mediaQuery = engineInstance_->GetDelegate()->GetMediaQueryInfoInstance();
-    auto renderOption = mediaQuery->GetMediaQueryJsonInfo();
+    auto renderOption = MediaQueryInfo::GetMediaQueryJsonInfo();
     if (mediaQuery) {
         renderOption->Put("isInit", mediaQuery->GetIsInit());
         renderOption->Put("bundleUrl", page->GetUrl().c_str());

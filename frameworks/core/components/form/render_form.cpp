@@ -22,7 +22,6 @@ namespace OHOS::Ace {
 void RenderForm::Update(const RefPtr<Component>& component)
 {
     auto form = AceType::DynamicCast<FormComponent>(component);
-    LOGE("Update size:[%s,%s]", form->GetWidth().ToString().c_str(), form->GetHeight().ToString().c_str());
 
     Dimension rootWidht = 0.0_vp;
     Dimension rootHeight = 0.0_vp;

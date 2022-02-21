@@ -33,12 +33,12 @@ public:
     MediaQueryInfo() = default;
     ~MediaQueryInfo() override = default;
 
-    std::unique_ptr<JsonValue> GetMediaQueryJsonInfo() const;
+    static std::unique_ptr<JsonValue> GetMediaQueryJsonInfo();
     std::string GetMediaQueryInfo() const;
 
-    std::string GetDeviceType() const;
+    static std::string GetDeviceType();
 
-    std::string GetOrientation() const;
+    static std::string GetOrientation();
 
     bool GetIsInit() const
     {
