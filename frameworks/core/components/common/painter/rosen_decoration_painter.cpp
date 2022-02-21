@@ -52,6 +52,7 @@ constexpr float LEFT_START = 135.0f;
 constexpr float LEFT_END = 180.0f;
 constexpr float SWEEP_ANGLE = 45.0f;
 constexpr float EXTEND = 1024.0f;
+constexpr uint32_t COLOR_MASK = 0xff000000;
 
 class GradientShader {
 public:
@@ -1363,22 +1364,24 @@ void RosenDecorationPainter::PaintContrast(
 void RosenDecorationPainter::PaintColorBlend(
     const SkRRect& outerRRect, SkCanvas* canvas, const Color& colorBlend, const Color& color)
 {
-    if (canvas) {
-        SkAutoCanvasRestore acr(canvas, true);
-        canvas->clipRRect(outerRRect, true);
-        SkPaint paint;
-        paint.setAntiAlias(true);
+    if (colorBlend.GetValue() != COLOR_MASK) {
+        if (canvas) {
+            SkAutoCanvasRestore acr(canvas, true);
+            canvas->clipRRect(outerRRect, true);
+            SkPaint paint;
+            paint.setAntiAlias(true);
 #ifdef USE_SYSTEM_SKIA
-        paint.setColorFilter(SkColorFilter::MakeModeFilter(
-            SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
-            SkBlendMode::kPlus));
+            paint.setColorFilter(SkColorFilter::MakeModeFilter(
+                SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
+                SkBlendMode::kPlus));
 #else
-        paint.setColorFilter(SkColorFilters::Blend(
-            SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
-            SkBlendMode::kPlus));
+            paint.setColorFilter(SkColorFilters::Blend(
+                SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
+                SkBlendMode::kPlus));
 #endif
-        SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
-        canvas->saveLayer(slr);
+            SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+            canvas->saveLayer(slr);
+        }
     }
 }
 
