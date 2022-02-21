@@ -202,11 +202,7 @@ void RenderOption::OnSelect(uint32_t selectIndex)
 
 void RenderOption::OnTouch(bool down)
 {
-    if (data_->GetCustomComponent()) {
-        return;
-    }
-
-    if (!data_ || data_->GetDisabled()) {
+    if (!data_ || data_->GetDisabled() || data_->GetCustomComponent()) {
         return;
     }
 

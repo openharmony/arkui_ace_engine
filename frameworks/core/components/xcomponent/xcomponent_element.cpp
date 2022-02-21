@@ -42,8 +42,8 @@ void XComponentElement::SetNewComponent(const RefPtr<Component>& newComponent)
         return;
     }
     auto xcomponent = AceType::DynamicCast<XComponentComponent>(newComponent);
-    idStr_ = xcomponent->GetId();
     if (xcomponent) {
+        idStr_ = xcomponent->GetId();
         if (texture_) {
             xcomponent->SetTextureId(texture_->GetId());
             xcomponent->SetTexture(texture_);

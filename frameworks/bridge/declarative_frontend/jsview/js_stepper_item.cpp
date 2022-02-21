@@ -76,8 +76,6 @@ void JSStepperItem::SetPrevLabel(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-    auto stepperItemComponentV2 = AceType::DynamicCast<StepperItemComponentV2>(
-        ViewStackProcessor::GetInstance()->GetMainComponent());
     RefPtr<StepperItemComponent> stepperItem = ViewStackProcessor::GetInstance()->GetStepperItemComponent();
     if (!stepperItem) {
         LOGE("StepperItemComponent.");
@@ -98,8 +96,6 @@ void JSStepperItem::SetNextLabel(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-    auto stepperItemComponentV2 = AceType::DynamicCast<StepperItemComponentV2>(
-        ViewStackProcessor::GetInstance()->GetMainComponent());
     RefPtr<StepperItemComponent> stepperItem = ViewStackProcessor::GetInstance()->GetStepperItemComponent();
     if (!stepperItem) {
         LOGE("StepperItemComponent.");
@@ -118,17 +114,16 @@ void JSStepperItem::SetStatus(const JSCallbackInfo& info)
 {
     const std::string statusArray[] = {"normal", "disabled", "waiting", "skip"};
     std::string status = statusArray[0];
-    auto stepperItemComponentV2 = AceType::DynamicCast<StepperItemComponentV2>(
-        ViewStackProcessor::GetInstance()->GetMainComponent());
     RefPtr<StepperItemComponent> stepperItem = ViewStackProcessor::GetInstance()->GetStepperItemComponent();
-    StepperLabels label = stepperItem->GetLabel();
-    if (info.Length() < 1) {
-        label.initialStatus = status;
-    }
     if (!stepperItem) {
         LOGE("StepperItemComponent is NULL");
         return;
     }
+    StepperLabels label = stepperItem->GetLabel();
+    if (info.Length() < 1) {
+        label.initialStatus = status;
+    }
+
     if (info[0]->IsNumber()) {
         auto index = info[0]->ToNumber<uint32_t>();
         if (index >= 0 && index < sizeof(statusArray) / sizeof(statusArray[0])) {

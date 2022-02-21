@@ -351,8 +351,7 @@ bool MediaQueryer::MatchCondition(const std::string& condition, const MediaFeatu
 /* card info */
 std::unique_ptr<JsonValue> MediaQueryer::GetMediaFeature() const
 {
-    MediaQueryInfo mediaQueryInfo;
-    auto json = mediaQueryInfo.GetMediaQueryJsonInfo();
+    auto json = MediaQueryInfo::GetMediaQueryJsonInfo();
 
     /* cover the following aspects with card specified values */
     double aspectRatio = (height_ != 0) ? (static_cast<double>(width_) / height_) : 1.0;

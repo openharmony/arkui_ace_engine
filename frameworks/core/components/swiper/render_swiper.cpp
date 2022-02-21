@@ -3059,6 +3059,10 @@ void RenderSwiper::ClearItems(const RefPtr<Component>& lazyForEachComponent, int
 void RenderSwiper::ResetCachedChildren()
 {
     auto context = context_.Upgrade();
+    if (!context) {
+        LOGW("ResetCachedChildren fail, context is null");
+        return;
+    }
     if (context->GetIsDeclarative()) {
         return;
     }

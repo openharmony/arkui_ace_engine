@@ -316,12 +316,12 @@ void DOMTextarea::OnRequestFocus(bool shouldFocus)
 
 void DOMTextarea::PrepareSpecializedComponent()
 {
-    textAreaChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
     RefPtr<BoxComponent> boxComponent = GetBoxComponent();
     if (!boxComponent || !textAreaChild_) {
         return;
     }
     boxComponent_->SetMouseAnimationType(HoverAnimationType::OPACITY);
+    textAreaChild_->SetTextDirection(IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
     textAreaChild_->SetTextStyle(textStyle_);
     textAreaChild_->SetInputOptions(inputOptions_);
     textAreaChild_->SetImageFill(GetImageFill());

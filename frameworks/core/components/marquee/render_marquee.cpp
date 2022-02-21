@@ -285,8 +285,8 @@ void RenderMarquee::PerformLayout()
         childText_->GetLayoutSize().ToString().c_str());
     const static int32_t PLATFORM_VERSION_SIX = 6;
     auto context = GetContext().Upgrade();
-    if (!context->GetIsDeclarative()) {
-        if (context && context->GetMinPlatformVersion() >= PLATFORM_VERSION_SIX) {
+    if (context && !context->GetIsDeclarative()) {
+        if (context->GetMinPlatformVersion() >= PLATFORM_VERSION_SIX) {
             if (childText_->GetLayoutSize().Width() <= layoutSize.Width()) {
                 childText_->SetPosition(Offset(0.0, 0.0));
                 return;
