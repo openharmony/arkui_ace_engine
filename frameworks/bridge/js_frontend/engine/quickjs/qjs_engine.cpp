@@ -3196,14 +3196,14 @@ void QjsEngine::RegisterInitWorkerFunc()
 void QjsEngine::RegisterAssetFunc()
 {
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content) {
+    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content, std::string& ami) {
         LOGI("WorkerCore RegisterAssetFunc called");
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->GetResourceData(uri, content);
+        delegate->GetResourceData(uri, content, ami);
     };
     nativeEngine_->SetGetAssetFunc(assetFunc);
 }
