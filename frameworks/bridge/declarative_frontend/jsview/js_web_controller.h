@@ -40,6 +40,7 @@ public:
     // Backward and Forward for web page
     void Backward(const JSCallbackInfo& args);
     void Forward(const JSCallbackInfo& args);
+    void AccessStep(const JSCallbackInfo& args);
     void AccessBackward(const JSCallbackInfo& args);
     void AccessForward(const JSCallbackInfo& args);
 

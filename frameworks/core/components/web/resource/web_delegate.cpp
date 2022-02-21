@@ -206,6 +206,19 @@ void WebDelegate::Forward()
         TaskExecutor::TaskType::PLATFORM);
 }
 
+bool WebDelegate::AccessStep(int32_t step)
+{
+    auto delegate = WeakClaim(this).Upgrade();
+    if (!delegate) {
+        LOGE("Get delegate failed, it is null.");
+        return false;
+    }
+    if (delegate->webview_) {
+        return delegate->webview_->CanGoBackOrForward(step);
+    }
+    return false;
+}
+
 bool WebDelegate::AccessBackward()
 {
     auto delegate = WeakClaim(this).Upgrade();
@@ -447,6 +460,13 @@ void WebDelegate::SetWebCallBack()
                     delegate->Forward();
                 }
             });
+        });
+        webController->SetAccessStepImpl([weak = WeakClaim(this)](int32_t step) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->AccessStep(step);
+            }
+            return false;
         });
         webController->SetAccessBackwardImpl([weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();

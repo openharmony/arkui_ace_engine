@@ -120,6 +120,7 @@ private:
     // Backward and forward
     void Backward();
     void Forward();
+    bool AccessStep(int32_t step);
     bool AccessBackward();
     bool AccessForward();
 #if defined(ENABLE_ROSEN_BACKEND)

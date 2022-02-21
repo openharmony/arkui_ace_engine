@@ -28,6 +28,7 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("loadData", &JSWebController::LoadDataWithBaseUrl);
     JSClass<JSWebController>::CustomMethod("backward", &JSWebController::Backward);
     JSClass<JSWebController>::CustomMethod("forward", &JSWebController::Forward);
+    JSClass<JSWebController>::CustomMethod("accessStep", &JSWebController::AccessStep);
     JSClass<JSWebController>::CustomMethod("accessForward", &JSWebController::AccessForward);
     JSClass<JSWebController>::CustomMethod("accessBackward", &JSWebController::AccessBackward);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
@@ -126,6 +127,22 @@ void JSWebController::Forward(const JSCallbackInfo& args)
     LOGI("JSWebController Start forward.");
     if (webController_) {
         webController_->Forward();
+    }
+}
+
+void JSWebController::AccessStep(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController start accessStep.");
+    int32_t step = 0;
+    if (args.Length() < 1 || !ConvertFromJSValue(args[0], step)) {
+        LOGE("AccessStep parameter is invalid.");
+        return;
+    }
+    if (webController_) {
+        auto canAccess = webController_->AccessStep(step);
+        auto jsVal = JSVal(ToJSValue(canAccess));
+        auto returnValue = JSRef<JSVal>::Make(jsVal);
+        args.SetReturnValue(returnValue);
     }
 }
 
