@@ -58,6 +58,11 @@ template("js_engine_ark") {
       "//ark/js_runtime:libark_jsruntime",
       "//foundation/ace/napi:ace_napi_ark",
     ]
+    external_deps = [
+      "napi:ace_napi",
+      "multimedia_image_standard:image",
+      "multimedia_image_standard:image_native",
+    ]
   }
 }
 
