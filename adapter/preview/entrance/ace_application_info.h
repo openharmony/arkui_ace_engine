@@ -27,12 +27,12 @@ public:
     static AceApplicationInfoImpl& GetInstance();
 
     void SetLocale(const std::string& language, const std::string& countryOrRegion, const std::string& script,
-                   const std::string& keywordsAndValues) override;
+        const std::string& keywordsAndValues) override;
     void ChangeLocale(const std::string& language, const std::string& countryOrRegion) override;
 
     bool GetBundleInfo(const std::string& packageName, AceBundleInfo& bundleInfo) override;
     double GetLifeTime() const override;
-    
+
     void SetResourceManager(std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
     {
         resourceManager_ = resourceManager;
@@ -42,7 +42,7 @@ public:
 
     std::string GetJsEngineParam(const std::string& key) const override;
 
-private: 
+private:
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager_;
 };
 

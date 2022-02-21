@@ -40,10 +40,7 @@ void FlutterRenderCapsuleTrack::DrawShape(RenderContext& context, const Offset& 
     flutter::RRect rRect;
     flutter::PaintData paintData;
 
-    rRect.sk_rrect.setRectXY(SkRect::MakeIWH(progressSize.Width(),
-                             progressSize.Height()),
-                             rrectRadius,
-                             rrectRadius);
+    rRect.sk_rrect.setRectXY(SkRect::MakeIWH(progressSize.Width(), progressSize.Height()), rrectRadius, rrectRadius);
 
     rRect.sk_rrect.offset(offset.GetX(), offset.GetY());
     canvas->drawRRect(rRect, paint, paintData);

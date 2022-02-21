@@ -24,7 +24,7 @@
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
-namespace{
+namespace {
 constexpr int32_t BASE_YEAR = 1900;
 }
 

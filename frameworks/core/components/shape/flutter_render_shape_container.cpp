@@ -154,11 +154,11 @@ void FlutterRenderShapeContainer::DrawBitmapMesh(SkBitmap& bitmap, int column, i
     const SkScalar height = SkIntToScalar(bitmap.height());
     const SkScalar width = SkIntToScalar(bitmap.width());
 
-    if (row==0) {
+    if (row == 0) {
         LOGE("row is zero");
         return;
     }
-    if (column==0) {
+    if (column == 0) {
         LOGE("column is zero");
         return;
     }

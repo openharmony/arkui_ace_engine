@@ -45,7 +45,7 @@ constexpr int32_t MAX_TAP_FINGERS = 10;
 
 void ClickRecognizer::InitGlobalValue(SourceType sourceType)
 {
-    switch(sourceType) {
+    switch (sourceType) {
         case SourceType::TOUCH:
             MULTI_FINGER_TIMEOUT = MULTI_FINGER_TIMEOUT_TOUCH;
             MULTI_TAP_TIMEOUT = MULTI_TAP_TIMEOUT_TOUCH;

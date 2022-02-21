@@ -2277,7 +2277,7 @@ void RenderGridLayout::AddNodeAnimationToControllerForDrop(
     item->SetNeedRender(true);
     item->MarkNeedPredictLayout();
 
-    if (curInsertRowIndex_ >= 0 && curInsertColumnIndex_ >=0) {
+    if (curInsertRowIndex_ >= 0 && curInsertColumnIndex_ >= 0) {
         item->Layout(MakeInnerLayoutParam(curInsertRowIndex_, curInsertColumnIndex_, 1, 1));
     }
     auto animationRef = AceType::MakeRefPtr<CurveAnimation<Point>>(startPoint, endPoint, Curves::FRICTION);

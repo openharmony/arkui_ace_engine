@@ -77,7 +77,7 @@ std::unique_ptr<JsonValue> PickerTextDialogComposedElement::GetRange() const
     auto jsonRange = JsonUtil::CreateArray(false);
     if (render) {
         auto range = render->GetRange();
-        for (size_t i = 0 ; i < range.size() ; i++) {
+        for (size_t i = 0; i < range.size(); i++) {
             auto index = std::to_string(i);
             jsonRange->Put(index.c_str(), range[i].c_str());
         }

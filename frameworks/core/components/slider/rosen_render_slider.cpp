@@ -207,8 +207,9 @@ void RosenRenderSlider::SetTipPosition(double blockOffset)
         if (direction_ == Axis::VERTICAL) {
             double tipLayoutWidth = renderTip->GetLayoutSize().Width();
             double childHalfHeight = renderTip->GetChildSize().Height() * HALF;
-            renderTip->SetPosition(Offset(-tipLayoutWidth - HALF * (NormalizeToPx(blockHotWidth_) -
-                NormalizeToPx(hotWidth_)), blockOffset - childHalfHeight));
+            renderTip->SetPosition(
+                Offset(-tipLayoutWidth - HALF * (NormalizeToPx(blockHotWidth_) - NormalizeToPx(hotWidth_)),
+                    blockOffset - childHalfHeight));
         } else {
             double childHalfWidth = renderTip->GetChildSize().Width() * HALF;
             double tipLayoutHeight = renderTip->GetLayoutSize().Height();

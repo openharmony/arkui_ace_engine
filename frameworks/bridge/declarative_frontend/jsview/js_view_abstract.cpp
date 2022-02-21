@@ -672,8 +672,8 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
 void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
 {
     LOGD("JsTranslate");
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
-        JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
+        JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsTranslate", info, checkList)) {
         return;
     }
@@ -1827,8 +1827,8 @@ void JSViewAbstract::JsMargin(const JSCallbackInfo& info)
 
 void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
-        JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
+        JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("ParseMarginOrPadding", info, checkList)) {
         return;
     }

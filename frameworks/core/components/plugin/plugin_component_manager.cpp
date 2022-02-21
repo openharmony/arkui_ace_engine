@@ -25,7 +25,7 @@
 #include "system_ability_definition.h"
 
 namespace OHOS::Ace {
-constexpr long FOO_MAX_LEN = 20*1024*1024;
+constexpr long FOO_MAX_LEN = 20 * 1024 * 1024;
 std::shared_ptr<PluginComponentManager> PluginComponentManager::instance_ = nullptr;
 std::mutex PluginComponentManager::mutex_;
 
@@ -63,7 +63,7 @@ int PluginComponentManager::Request(
         pluginTemplate.SetAbility(want.GetElement().GetBundleName() + "/" + want.GetElement().GetAbilityName());
 
         for (auto iter = listener_->GetPluginComponentCallBack().begin();
-            iter != listener_->GetPluginComponentCallBack().end();) {
+             iter != listener_->GetPluginComponentCallBack().end();) {
             if (iter->second == CallBackType::RequestCallBack && iter->first != nullptr) {
                 iter->first->OnRequestCallBack(pluginTemplate, data, "");
                 listener_->GetPluginComponentCallBack().erase(iter++);

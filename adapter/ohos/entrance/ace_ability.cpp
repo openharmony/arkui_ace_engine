@@ -439,9 +439,9 @@ void AceAbility::OnKeyUp(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
         LOGI("flutterAceView is null, keyboard event does not take effect");
         return;
     }
-    int32_t repeatTime = 0;  // TODO:repeatTime need to be rebuild
+    int32_t repeatTime = 0; // TODO:repeatTime need to be rebuild
     auto result = flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent->GetKeyCode(), keyEvent->GetKeyAction(),
-                                    repeatTime, keyEvent->GetActionTime(), keyEvent->GetActionStartTime());
+        repeatTime, keyEvent->GetActionTime(), keyEvent->GetActionStartTime());
     if (!result) {
         LOGI("AceAbility::OnKeyUp: passed to Ability to process");
         Ability::OnKeyUp(keyEvent);
@@ -456,9 +456,9 @@ void AceAbility::OnKeyDown(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
         LOGI("flutterAceView is null, keyboard event does not take effect");
         return;
     }
-    int32_t repeatTime = 0;  // TODO:repeatTime need to be rebuild
+    int32_t repeatTime = 0; // TODO:repeatTime need to be rebuild
     auto result = flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent->GetKeyCode(), keyEvent->GetKeyAction(),
-                                    repeatTime, keyEvent->GetActionTime(), keyEvent->GetActionStartTime());
+        repeatTime, keyEvent->GetActionTime(), keyEvent->GetActionStartTime());
     if (!result) {
         LOGI("AceAbility::OnKeyDown: passed to Ability to process");
         Ability::OnKeyDown(keyEvent);

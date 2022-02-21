@@ -160,7 +160,8 @@ void RosenRenderCheckbox::DrawSquare(
     double borderRadius = 0;
     rrect = SkRRect::MakeRectXY(
         { originX + start.GetX(), originY + start.GetY(), paintSize.Width() + originX + start.GetX(),
-            paintSize.Height() + originY + start.GetY() }, borderRadius, borderRadius);
+            paintSize.Height() + originY + start.GetY() },
+        borderRadius, borderRadius);
     canvas->drawRRect(rrect, paint);
 }
 

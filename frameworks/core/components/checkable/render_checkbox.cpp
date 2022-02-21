@@ -262,7 +262,7 @@ void RenderCheckbox::UpdateGroupStatus()
     int count = 0;
     isGroup_ = !checkboxList.empty();
     if (isGroup_) {
-        for(auto& item : checkboxList) {
+        for (auto& item : checkboxList) {
             if (item->GetValue()) {
                 count++;
             }

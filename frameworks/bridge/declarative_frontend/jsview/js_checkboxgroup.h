@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSCheckboxGroup : public JSViewAbstract{
+class JSCheckboxGroup : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);

@@ -431,7 +431,7 @@ public:
 
     void SetMember(bool isAllSelect)
     {
-        for(auto& item : checkboxList_) {
+        for (auto& item : checkboxList_) {
             if (item->GetValue() == isAllSelect) {
                 continue;
             }
@@ -443,7 +443,7 @@ public:
     void SetGroupStatus()
     {
         size_t count = 0;
-        for(auto& item : checkboxList_) {
+        for (auto& item : checkboxList_) {
             if (item->GetValue()) {
                 ++count;
             }
@@ -475,7 +475,7 @@ public:
 
     void GetSelectedCheckBoxName(std::vector<std::string>& result)
     {
-        for(auto& item : checkboxList_) {
+        for (auto& item : checkboxList_) {
             if (item->GetValue()) {
                 result.push_back(item->GetCheckboxName());
             }

@@ -296,7 +296,8 @@ std::string PluginElement::GetPackagePathByAbsolutePath(
         packagePathStr = info.pluginName.substr(0, posAssets);
         size_t posModule = info.pluginName.find("/", posAssets + assets.size());
         if (posModule != std::string::npos) {
-            info.moduleName = info.pluginName.substr(posAssets + assets.size(), posModule-(posAssets + assets.size()));
+            info.moduleName =
+                info.pluginName.substr(posAssets + assets.size(), posModule - (posAssets + assets.size()));
             info.source = info.pluginName.substr(posModule);
         } else {
             info.moduleName = "/";
@@ -304,8 +305,8 @@ std::string PluginElement::GetPackagePathByAbsolutePath(
         }
     } else {
         size_t pos = info.pluginName.rfind("/");
-        packagePathStr = info.pluginName.substr(0, pos+1);
-        info.source = info.pluginName.substr(pos+1);
+        packagePathStr = info.pluginName.substr(0, pos + 1);
+        info.source = info.pluginName.substr(pos + 1);
         info.moduleName = "/";
     }
     return packagePathStr;

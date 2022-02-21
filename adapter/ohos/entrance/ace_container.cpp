@@ -873,7 +873,8 @@ void AceContainer::AttachView(
                 callback(context);
             }
             context->SetupRootElement();
-        }, TaskExecutor::TaskType::UI);
+        },
+        TaskExecutor::TaskType::UI);
     aceView_->Launch();
     frontend_->AttachPipelineContext(pipelineContext_);
 

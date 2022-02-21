@@ -42,10 +42,7 @@ void RosenRenderCapsuleTrack::DrawShape(RenderContext& context, const Offset& of
     paint.setAntiAlias(true);
     SkRRect rRect;
 
-    rRect.setRectXY(SkRect::MakeIWH(progressSize.Width(),
-         progressSize.Height()),
-                    rrectRadius,
-                    rrectRadius);
+    rRect.setRectXY(SkRect::MakeIWH(progressSize.Width(), progressSize.Height()), rrectRadius, rrectRadius);
 
     rRect.offset(offset.GetX(), offset.GetY());
     canvas->drawRRect(rRect, paint);
@@ -73,40 +70,19 @@ void RosenRenderCapsuleTrack::DrawCapsuleProgressAnimation(RenderContext& contex
     double progressWidth = progressSize.Width()*GetTotalRatio();
 
     SkPath path;
-    path.addArc({
-        offsetX, offsetY, progressSize.Height() + offsetX,
-        progressSize.Height() + offsetY
-    },
-        90,
-        180);
+    path.addArc({ offsetX, offsetY, progressSize.Height() + offsetX, progressSize.Height() + offsetY }, 90, 180);
     if (LessNotEqual(progressWidth, radius)) {
-        path.addArc({
-            progressWidth + offsetX, offsetY,
-            progressSize.Height() - progressWidth + offsetX,
-            progressSize.Height() + offsetY
-    },
-            270,
-            -180);
+        path.addArc({ progressWidth + offsetX, offsetY, progressSize.Height() - progressWidth + offsetX,
+                        progressSize.Height() + offsetY },
+            270, -180);
     } else if (GreatNotEqual(progressWidth, progressSize.Width() - radius)) {
-        path.addRect({
-            radius + offsetX, offsetY,
-            progressSize.Width() - radius + offsetX,
-            progressSize.Height() + offsetY
-    });
-        path.addArc({
-            (progressSize.Width() - radius) * 2.0 - progressWidth + offsetX,
-            offsetY,
-            progressWidth + offsetX, progressSize.Height() + offsetY
-    },
-            270,
-            180);
+        path.addRect(
+            { radius + offsetX, offsetY, progressSize.Width() - radius + offsetX, progressSize.Height() + offsetY });
+        path.addArc({ (progressSize.Width() - radius) * 2.0 - progressWidth + offsetX, offsetY, progressWidth + offsetX,
+                        progressSize.Height() + offsetY },
+            270, 180);
     } else {
-        path.addRect({
-            radius + offsetX,
-            offsetY,
-            progressWidth + offsetX,
-            progressSize.Height() + offsetY
-    });
+        path.addRect({ radius + offsetX, offsetY, progressWidth + offsetX, progressSize.Height() + offsetY });
     }
 
     SkPaint paint;
@@ -136,39 +112,19 @@ void RosenRenderCapsuleTrack::DrawCapsuleProgressVerticalAnimation(RenderContext
     double progressWidth = progressSize.Height()*GetTotalRatio();
 
     SkPath path;
-    path.addArc({
-        offsetX, offsetY, progressSize.Width() + offsetX,
-        progressSize.Width() + offsetY
-    },
-        0,
-        -180);
+    path.addArc({ offsetX, offsetY, progressSize.Width() + offsetX, progressSize.Width() + offsetY }, 0, -180);
     if (LessNotEqual(progressWidth, radius)) {
-        path.addArc({
-            offsetX, offsetY + progressWidth,
-            progressSize.Width() + offsetX,
-            progressSize.Width() - progressWidth + offsetY
-        },
-            180,
-            180);
+        path.addArc({ offsetX, offsetY + progressWidth, progressSize.Width() + offsetX,
+                        progressSize.Width() - progressWidth + offsetY },
+            180, 180);
     } else if (GreatNotEqual(progressWidth, progressSize.Height() - radius)) {
-        path.addRect({
-            offsetX, offsetY + radius,
-            progressSize.Width() + offsetX,
-            progressSize.Height() - radius + offsetY
-        });
-        path.addArc({
-            offsetX, offsetY + (progressSize.Height() - radius) * 2.0 - progressWidth,
-            progressSize.Width() + offsetX,
-            progressWidth + offsetY
-        },
-            180,
-            -180);
+        path.addRect(
+            { offsetX, offsetY + radius, progressSize.Width() + offsetX, progressSize.Height() - radius + offsetY });
+        path.addArc({ offsetX, offsetY + (progressSize.Height() - radius) * 2.0 - progressWidth,
+                        progressSize.Width() + offsetX, progressWidth + offsetY },
+            180, -180);
     } else {
-        path.addRect({
-            offsetX, radius + offsetY,
-            offsetX + progressSize.Width(),
-            progressWidth + offsetY
-        });
+        path.addRect({ offsetX, radius + offsetY, offsetX + progressSize.Width(), progressWidth + offsetY });
     }
 
     SkPaint paint;
