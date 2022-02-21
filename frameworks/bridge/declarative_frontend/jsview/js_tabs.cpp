@@ -24,7 +24,6 @@
 namespace OHOS::Ace::Framework {
 namespace {
 
-constexpr Dimension DEFAULT_TAB_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_TAB_BAR_HEIGHT = 56.0_vp;
 const std::vector<BarPosition> BAR_POSITIONS = { BarPosition::START, BarPosition::END };
 
@@ -99,8 +98,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
         tabBar->InitStyle(theme);
         auto box = AceType::DynamicCast<BoxComponent>(tabBar->GetParent().Upgrade());
         if (box) {
-            box->SetWidth(theme ? theme->GetDefaultWidth() : DEFAULT_TAB_BAR_WIDTH);
-            box->SetHeight(theme ? theme->GetDefaultHeight() : DEFAULT_TAB_BAR_HEIGHT);
+            box->SetHeight(DEFAULT_TAB_BAR_HEIGHT);
         }
     }
     ViewStackProcessor::GetInstance()->PushTabs(tabsComponent);
