@@ -122,6 +122,7 @@ template("declarative_js_engine") {
       "engine/functions/js_page_transition_function.cpp",
       "engine/functions/js_pan_function.cpp",
       "engine/functions/js_touch_function.cpp",
+      "engine/functions/js_webview_function.cpp",
       "engine/js_types.cpp",
       "interfaces/profiler/js_profiler.cpp",
       "jsview/action_sheet/js_action_sheet.cpp",

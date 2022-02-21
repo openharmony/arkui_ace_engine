@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,14 +17,17 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_ELEMENT_H
 
 #include "core/pipeline/base/render_element.h"
+#include "core/focus/focus_node.h"
 
 namespace OHOS::Ace {
 
-class WebElement : public RenderElement {
+class WebElement : public RenderElement, public FocusNode {
     DECLARE_ACE_TYPE(WebElement, RenderElement);
 
 public:
     void SetNewComponent(const RefPtr<Component>& newComponent) override;
+
+    void OnFocus() override;
 
 private:
     std::string webSrc_;

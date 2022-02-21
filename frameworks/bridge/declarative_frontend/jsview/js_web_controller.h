@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,12 @@ public:
     void LoadUrl(const JSCallbackInfo& args);
     void ExecuteTypeScript(const JSCallbackInfo& args);
     void LoadDataWithBaseUrl(const JSCallbackInfo& args);
+    void Refresh(const JSCallbackInfo& args);
+    void StopLoading(const JSCallbackInfo& args);
+    void GetHitTestResult(const JSCallbackInfo& args);
+    void AddJavascriptInterface(const JSCallbackInfo& args);
+    void RemoveJavascriptInterface(const JSCallbackInfo& args);
+    void RequestFocus(const JSCallbackInfo& args);
 
     // Backward and Forward for web page
     void Backward(const JSCallbackInfo& args);
