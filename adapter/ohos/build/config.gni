@@ -42,6 +42,12 @@ foreach(product, gpu_block_product_list) {
   }
 }
 
+foreach(product, enable_accessibility_product_list) {
+  if ("${product_name}" == product) {
+    accessibility_support = true
+  }
+}
+
 use_external_icu = "shared"
 use_curl_download = true
 ohos_standard_fontmgr = true
