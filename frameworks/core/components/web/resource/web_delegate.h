@@ -164,6 +164,7 @@ private:
     void StopLoading();
     void AddJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
     void RemoveJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
+    void SetWebViewJavaScriptResultCallBack(const WebController::JavaScriptCallBackImpl&& javaScriptCallBackImpl);
     void RequestFocus();
     void OnFocus();
     void OnInactive();
