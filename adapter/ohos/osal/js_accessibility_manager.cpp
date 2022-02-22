@@ -311,6 +311,24 @@ RefPtr<AccessibilityNode> FindFocus(const RefPtr<AccessibilityNode>& node, bool&
 
     return node;
 }
+
+RefPtr<AccessibilityNode> FindText(const RefPtr<AccessibilityNode>& node, const std::string& text, bool& status)
+{
+    if ((node->GetText().find(text) != std::string::npos) && node->GetChildList().empty()) {
+        status = true;
+        return node;
+    }
+    if (!node->GetChildList().empty()) {
+        for (const auto& item : node->GetChildList()) {
+            FindText(item, text, status);
+            if (status) {
+                return item;
+            }
+        }
+    }
+
+    return node;
+}
 } // namespace
 
 JsAccessibilityManager::~JsAccessibilityManager()
@@ -787,23 +805,12 @@ void JsAccessibilityManager::SearchElementInfosByText(const long elementId, cons
     }
 
     std::list<AccessibilityElementInfo> infos;
-
-    std::string source = node->GetText();
-    if (source.find(text) != std::string::npos) {
-        UpdateAccessibilityNodeInfo(node, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
+    bool status = false;
+    auto nodeResult = FindText(node, text, status);
+    if (status) {
+        UpdateAccessibilityNodeInfo(nodeResult, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
             jsAccessibilityManager->GetRootNodeId());
         infos.push_back(nodeInfo);
-    }
-
-    // childs.
-    auto childs = node->GetChildList();
-    for (const auto& item : node->GetChildList()) {
-        std::string source = item->GetText();
-        if (source.find(text) != std::string::npos) {
-            UpdateAccessibilityNodeInfo(item, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
-                jsAccessibilityManager->GetRootNodeId());
-            infos.push_back(nodeInfo);
-        }
     }
 
     callback.SetSearchElementInfoByTextResult(infos, requestId);
