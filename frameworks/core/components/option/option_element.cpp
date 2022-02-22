@@ -53,7 +53,7 @@ void OptionElement::PerformBuild()
 
 bool OptionElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
-    if (!((keyEvent.code == KeyCode::KEYBOARD_BACK || keyEvent.code == KeyCode::KEYBOARD_ESCAPE) &&
+    if (!((keyEvent.code == KeyCode::KEY_BACK || keyEvent.code == KeyCode::KEY_ESCAPE) &&
         keyEvent.action == KeyAction::UP)) {
         return false;
     }

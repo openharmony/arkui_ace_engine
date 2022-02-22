@@ -37,7 +37,8 @@ void DragBarElement::OnBlur()
 
 bool DragBarElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
-    if (keyEvent.code == KeyCode::KEYBOARD_ENTER || keyEvent.code == KeyCode::KEYBOARD_SPACE) {
+    if (keyEvent.code == KeyCode::KEY_ENTER || keyEvent.code == KeyCode::KEY_NUMPAD_ENTER ||
+        keyEvent.code == KeyCode::KEY_SPACE) {
         auto dragBar = AceType::DynamicCast<RenderDragBar>(renderNode_);
         if (dragBar) {
             dragBar->HandleClick(Offset());

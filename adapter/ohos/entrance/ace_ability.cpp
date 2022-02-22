@@ -16,11 +16,11 @@
 #include "adapter/ohos/entrance/ace_ability.h"
 
 #include <regex>
-
 #include <ui/rs_surface_node.h>
+
 #include "ability_process.h"
-#include "dm/display_manager.h"
 #include "display_type.h"
+#include "dm/display_manager.h"
 #include "init_data.h"
 #include "res_config.h"
 #include "resource_manager.h"
@@ -205,12 +205,12 @@ void AceAbility::OnStart(const Want& want)
             AceApplicationInfo::GetInstance().SetLocale((language == nullptr) ? "" : language,
                 (region == nullptr) ? "" : region, (script == nullptr) ? "" : script, "");
         } else {
-           LOGW("localeInfo is null.");
-           AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
+            LOGW("localeInfo is null.");
+            AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
         }
     } else {
-       LOGW("resourceManager is null.");
-       AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
+        LOGW("resourceManager is null.");
+        AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
     }
 
     auto packagePathStr = GetBundleCodePath();
@@ -283,8 +283,8 @@ void AceAbility::OnStart(const Want& want)
 
     Ace::Platform::UIEnvCallback callback = nullptr;
 #ifdef ENABLE_ROSEN_BACKEND
-    callback = [ window, thisAbility, id = abilityId_ ] (
-        const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
+    callback = [window, thisAbility, id = abilityId_](
+                   const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
         if (SystemProperties::GetRosenBackendEnabled()) {
             auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
             if (rsUiDirector != nullptr) {
@@ -294,11 +294,11 @@ void AceAbility::OnStart(const Want& want)
                 window->RegisterWindowChangeListener(thisAbility);
 
                 rsUiDirector->SetUITaskRunner(
-                    [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id ]
-                        (const std::function<void()>& task) {
-                            ContainerScope scope(id);
-                            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-                        });
+                    [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id](
+                        const std::function<void()>& task) {
+                        ContainerScope scope(id);
+                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                    });
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);
                 }
@@ -447,9 +447,7 @@ void AceAbility::OnKeyUp(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
         LOGI("flutterAceView is null, keyboard event does not take effect");
         return;
     }
-    int32_t repeatTime = 0; // TODO:repeatTime need to be rebuild
-    auto result = flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent->GetKeyCode(), keyEvent->GetKeyAction(),
-        repeatTime, keyEvent->GetActionTime(), keyEvent->GetActionStartTime());
+    auto result = flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent);
     if (!result) {
         LOGI("AceAbility::OnKeyUp: passed to Ability to process");
         Ability::OnKeyUp(keyEvent);
@@ -468,9 +466,7 @@ void AceAbility::OnKeyDown(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
         LOGI("flutterAceView is null, keyboard event does not take effect");
         return;
     }
-    int32_t repeatTime = 0; // TODO:repeatTime need to be rebuild
-    auto result = flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent->GetKeyCode(), keyEvent->GetKeyAction(),
-        repeatTime, keyEvent->GetActionTime(), keyEvent->GetActionStartTime());
+    auto result = flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent);
     if (!result) {
         LOGI("AceAbility::OnKeyDown: passed to Ability to process");
         Ability::OnKeyDown(keyEvent);
