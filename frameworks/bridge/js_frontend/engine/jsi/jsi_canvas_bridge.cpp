@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "base/utils/string_utils.h"
 
 #include "core/components/custom_paint/offscreen_canvas.h"
+#include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_offscreen_canvas_bridge.h"
 
@@ -29,10 +30,7 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
-
-using PixelMapNapiEntry = void* (*)(napi_env, napi_value);
-PixelMapNapiEntry pixelMapNapiEntry_ = nullptr;
-
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue> jsValue)
 {
     auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
@@ -40,7 +38,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtim
         LOGE(" engine is null.");
         return nullptr;
     }
-    
+
     auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetArkNativeEngine());
     if (!nativeEngine) {
         LOGE("NativeEngine is null");
@@ -57,35 +55,15 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtim
         LOGE("arkRuntime is null");
         return nullptr;
     }
-    
+
     JSValueWrapper valueWrapper = arkJsValue->GetValue(arkRuntime);
     NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
 
-    if (!pixelMapNapiEntry_) {
-#ifdef _ARM64_
-        std::string prefix = "/system/lib64/module/";
-#else
-        std::string prefix = "/system/lib/module/";
-#endif
-#ifdef OHOS_STANDARD_SYSTEM
-        std::string napiPluginName = "multimedia/libimage.z.so";
-#else
-        std::string napiPluginName = "multimedia/libimage_napi.z.so";
-#endif
-        auto napiPluginPath = prefix.append(napiPluginName);
-        void* handle = dlopen(napiPluginPath.c_str(), RTLD_LAZY);
-        if (handle == nullptr) {
-            LOGE("Failed to open shared library %{public}s, reason: %{public}s", napiPluginPath.c_str(), dlerror());
-            return nullptr;
-        }
-        pixelMapNapiEntry_ = reinterpret_cast<PixelMapNapiEntry>(dlsym(handle, "OHOS_MEDIA_GetPixelMap"));
-        if (pixelMapNapiEntry_ == nullptr) {
-            dlclose(handle);
-            LOGE("Failed to get symbol OHOS_MEDIA_GetPixelMap in %{public}s", napiPluginPath.c_str());
-            return nullptr;
-        }
+    PixelMapNapiEntry pixelMapNapiEntry = JsEngine::GetPixelMapNapiEntry();
+    if (!pixelMapNapiEntry) {
+        LOGE("pixelMapNapiEntry is null");
     }
-    void* pixmapPtrAddr = pixelMapNapiEntry_(
+    void* pixmapPtrAddr = pixelMapNapiEntry(
         reinterpret_cast<napi_env>(nativeEngine), reinterpret_cast<napi_value>(nativeValue));
     if (pixmapPtrAddr == nullptr) {
         LOGE(" Failed to get pixmap pointer");
@@ -93,7 +71,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtim
     }
     return PixelMap::CreatePixelMap(pixmapPtrAddr);
 }
-
+#endif
 
 template<typename T>
 inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t length, T defaultValue)
@@ -1015,12 +993,16 @@ shared_ptr<JsValue> JsiCanvasBridge::JsDrawImage(const shared_ptr<JsRuntime>& ru
     double width = 0.0;
     double height = 0.0;
     auto src = argv[0]->GetProperty(runtime, DOM_SRC);
-    if (src->IsUndefined(runtime)) {        
+    if (src->IsUndefined(runtime)) {
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
         pixelMap = CreatePixelMapFromNapiValue(runtime, argv[0]);
         if (!pixelMap) {
             LOGE("pixelMap is null");
         }
         isPixelMap = true;
+#else
+        return runtime->NewUndefined();
+#endif
     } else if (!src->IsString(runtime)) {
         ParseDomImage(runtime, argv[0], width, height, image.src);
     } else {
@@ -1706,7 +1688,7 @@ shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>&
         }
     }
 
-    // 2 Create piexclmap
+    // 2 Create pixelmap
     OHOS::Media::InitializationOptions options;
     options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
@@ -1720,7 +1702,7 @@ shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>&
         return runtime->NewUndefined();
     }
 
-    // 3 piexclmap to NapiValue
+    // 3 pixelmap to NapiValue
     auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetArkNativeEngine());
     if (!nativeEngine) {
         LOGE("NativeEngine is null");
