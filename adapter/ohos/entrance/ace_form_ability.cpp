@@ -68,7 +68,7 @@ OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::W
     if (want.HasParameter(URI)) {
         parsedUrl = want.GetStringParam(URI);
     } else {
-        parsedUrl = "app.js";
+        parsedUrl = "form.js";
     }
 
     std::string wantIdStr = want.GetStringParam(AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY);
