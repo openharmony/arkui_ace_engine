@@ -361,6 +361,16 @@ public:
         return declaration_->GetRequestFocusEventId();
     }
 
+    void SetDownloadStartEventId(const EventMarker& downloadStartEventId)
+    {
+        declaration_->SetDownloadStartEventId(downloadStartEventId);
+    }
+
+    const EventMarker& GetDownloadStartEventId() const
+    {
+        return declaration_->GetDownloadStartEventId();
+    }
+    
     void SetOnFocusEventId(const EventMarker& onFocusEventId)
     {
         declaration_->SetOnFocusEventId(onFocusEventId);

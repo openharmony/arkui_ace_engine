@@ -50,6 +50,17 @@ JSRef<JSVal> LoadWebPageFinishEventToJSValue(const LoadWebPageFinishEvent& event
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> DownloadStartEventToJSValue(const DownloadStartEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("url", eventInfo.GetUrl());
+    obj->SetProperty("userAgent", eventInfo.GetUserAgent());
+    obj->SetProperty("contentDisposition", eventInfo.GetContentDisposition());
+    obj->SetProperty("mimetype", eventInfo.GetMimetype());
+    obj->SetProperty("contentLength", eventInfo.GetContentLength());
+    return JSRef<JSVal>::Cast(obj);
+}
+
 JSRef<JSVal> LoadWebRequestFocusEventToJSValue(const LoadWebRequestFocusEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetRequestFocus()));
@@ -141,6 +152,24 @@ void JSWeb::OnRequestFocus(const JSCallbackInfo& args)
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetRequestFocusEventId(eventMarker);
+}
+
+void JSWeb::OnDownloadStart(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is invalid");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DownloadStartEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), DownloadStartEventToJSValue);
+    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<DownloadStartEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetDownloadStartEventId(eventMarker);
 }
 
 void JSWeb::OnFocus(const JSCallbackInfo& args)

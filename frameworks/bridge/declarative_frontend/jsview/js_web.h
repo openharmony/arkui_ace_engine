@@ -28,6 +28,7 @@ public:
     static void OnRequestFocus(const JSCallbackInfo& args);
     static void OnError(const JSCallbackInfo& args);
     static void OnMessage(const JSCallbackInfo& args);
+    static void OnDownloadStart(const JSCallbackInfo& args);
     static void JsEnabled(bool isJsEnabled);
     static void ContentAccessEnabled(bool isContentAccessEnabled);
     static void FileAccessEnabled(bool isFileAccessEnabled);

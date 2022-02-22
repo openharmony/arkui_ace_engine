@@ -33,6 +33,7 @@ struct WebEvent : Event {
     EventMarker onFocusEventId;
     EventMarker pageErrorEventId;
     EventMarker messageEventId;
+    EventMarker downloadStartEventId;
 };
 
 struct WebMethod : Method {
@@ -84,6 +85,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.pageFinishEventId;
+    }
+
+    void SetDownloadStartEventId(const EventMarker& downloadStartEventId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.downloadStartEventId = downloadStartEventId;
+    }
+
+    const EventMarker& GetDownloadStartEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.downloadStartEventId;
     }
 
     void SetRequestFocusEventId(const EventMarker& requestFocusEventId)
