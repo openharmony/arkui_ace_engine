@@ -114,6 +114,12 @@ public:
         }
     }
 
+    void SetPadding(const Edge& padding)
+    {
+        paddingOrigin_ = padding;
+        MarkNeedLayout();
+    }
+
     double GetWidth() const // add for animation
     {
         return width_.Value();
