@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "third_party/skia/include/utils/SkParsePath.h"
 
 #include "core/common/frontend.h"
+#include "core/components/box/rosen_mask_painter.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/border_edge.h"
@@ -324,15 +325,30 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         PaintAccessibilityFocus(focusRect, context);
     }
 
-    if ((!backDecoration_) || backDecoration_->GetImage() ||
-        (backDecoration_->GetBackgroundColor() != Color::TRANSPARENT) || !(backDecoration_->GetGradient().IsValid())) {
-        // no need to paint gradient
-        return;
-    }
-
     const auto renderContext = static_cast<RosenRenderContext*>(&context);
     auto rsNode = renderContext->GetRSNode();
     if (rsNode == nullptr) {
+        return;
+    }
+
+#ifdef OHOS_PLATFORM
+    RefPtr<RosenMaskPainter> mask = AceType::DynamicCast<RosenMaskPainter>(mask_);
+    if (mask && mask->HasReady()) {
+        SkPath skPath;
+        if (mask_->IsPath()) {
+            if (!CreateSkPath(mask_->GetMaskPath()->GetBasicShape(),
+                mask_->GetMaskPath()->GetGeometryBoxType(), &skPath)) {
+                LOGE("CreateSkPath is failed.");
+                return;
+            }
+        }
+        rsNode->SetMask(mask->GetRSMask(GetPaintRect(), skPath));
+    }
+#endif
+
+    if ((!backDecoration_) || backDecoration_->GetImage() ||
+        (backDecoration_->GetBackgroundColor() != Color::TRANSPARENT) || !(backDecoration_->GetGradient().IsValid())) {
+        // no need to paint gradient
         return;
     }
 
