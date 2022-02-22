@@ -240,12 +240,10 @@ void PickerDateComponent::OnSelectedSaving()
 std::string PickerDateComponent::GetSelectedObject(bool isColumnChange,
     const std::string& changeColumnTag, int status) const
 {
-    if (isColumnChange) {
-        LOGW("not need support.");
-        return "";
-    }
-
     auto date = selectedDate_;
+    if (isColumnChange) {
+        date = GetCurrentDate();
+    }
     // W3C's month is between 0 to 11, need to reduce one.
     date.SetMonth(date.GetMonth() - 1);
     return date.ToString(true, status);

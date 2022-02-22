@@ -49,9 +49,14 @@ void PickerTextComponent::OnColumnsBuilding()
 std::string PickerTextComponent::GetSelectedObject(bool isColumnChange,
     const std::string& changeColumnTag, int32_t status) const
 {
+    auto value = selectedValue_;
+    auto index = selectedIndex_;
     if (isColumnChange) {
-        LOGW("text picker has no column change event.");
-        return "";
+        auto column = GetColumn(PICKER_TEXT_COLUMN);
+        if (column) {
+            value = column->GetCurrentText();
+            index = column->GetCurrentIndex();
+        }
     }
     auto container = Container::Current();
     if (!container) {
@@ -62,12 +67,12 @@ std::string PickerTextComponent::GetSelectedObject(bool isColumnChange,
         return "";
     }
     if (context->GetIsDeclarative()) {
-        return std::string("{\"value\":") + "\"" + selectedValue_ + "\"" +
-            ",\"index\":" + std::to_string(selectedIndex_) +
+        return std::string("{\"value\":") + "\"" + value + "\"" +
+            ",\"index\":" + std::to_string(index) +
             ",\"status\":" + std::to_string(status) + "}";
     } else {
-        return std::string("{\"newValue\":") + "\"" + selectedValue_ + "\"" +
-            ",\"newSelected\":" + std::to_string(selectedIndex_) +
+        return std::string("{\"newValue\":") + "\"" + value + "\"" +
+            ",\"newSelected\":" + std::to_string(index) +
             ",\"status\":" + std::to_string(status) + "}";
     }
 }

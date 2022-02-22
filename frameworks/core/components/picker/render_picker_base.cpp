@@ -79,7 +79,9 @@ void RenderPickerBase::Update(const RefPtr<Component>& component)
     onCancelCallback_ = AceAsyncEvent<void()>::Create(data_->GetOnCancel(), context_);
     onChangeCallback_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetOnChange(), context_);
     onColumnChangeCallback_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetOnColumnChange(), context_);
-    onDialogResult_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetDialogResult(), context_);
+    onDialogAccept_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetDialogAcceptEvent(), context_);
+    onDialogCancel_ = AceAsyncEvent<void()>::Create(data_->GetDialogCancelEvent(), context_);
+    onDialogChange_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetDialogChangeEvent(), context_);
 
     const auto context = context_.Upgrade();
     if (context && context->GetIsDeclarative()) {
@@ -527,7 +529,13 @@ void RenderPickerBase::HandleFinish(bool success)
         onTextCancel_();
     }
 
-    OnDialogStatusChange(success ? DialogStatus::ACCEPT : DialogStatus::CANCEL);
+    if (data_->GetIsCreateDialogComponent()) {
+        if (success && onDialogAccept_) {
+            onDialogAccept_(std::string("\"change\",") + data_->GetSelectedObject(false, "") + ",null");
+        } else if (!success && onDialogCancel_) {
+            onDialogCancel_();
+        }
+    }
     data_->HideDialog();
 }
 
@@ -587,7 +595,9 @@ void RenderPickerBase::HandleColumnChange(const std::string& tag, bool isAdd, ui
         return;
     }
 
-    OnDialogStatusChange(DialogStatus::UPDATE);
+    if (data_->GetIsCreateDialogComponent() && onDialogChange_) {
+        onDialogChange_(std::string("\"columnchange\",") + data_->GetSelectedObject(true, "") + ",null");
+    }
 
     data_->OnTitleBuilding();
     auto titleComponent = data_->GetTitle();
@@ -597,16 +607,6 @@ void RenderPickerBase::HandleColumnChange(const std::string& tag, bool isAdd, ui
         } else {
             LOGE("render title or title component is null.");
         }
-    }
-}
-
-void RenderPickerBase::OnDialogStatusChange(int32_t status)
-{
-    if (!data_->GetIsCreateDialogComponent()) {
-        return;
-    }
-    if (onDialogResult_) {
-        onDialogResult_(std::string("\"change\",") + data_->GetSelectedObject(false, "", status) + ",null");
     }
 }
 

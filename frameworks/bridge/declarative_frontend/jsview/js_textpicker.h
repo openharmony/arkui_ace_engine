@@ -46,6 +46,7 @@ public:
     static void Show(const JSCallbackInfo& info);
 private:
     static void ParseText(RefPtr<PickerTextComponent>& component, const JSRef<JSObject>& paramObj);
+    static void AddEvent(RefPtr<PickerTextComponent>& picker, const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTPICKER_H
