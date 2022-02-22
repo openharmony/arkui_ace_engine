@@ -49,6 +49,17 @@ private:
     std::shared_ptr<OHOS::WebView::JSDialogResult> result_;
 };
 
+class WebGeolocationOhos : public WebGeolocation {
+    DECLARE_ACE_TYPE(WebGeolocationOhos, WebGeolocation)
+
+public:
+    WebGeolocationOhos(OHOS::WebView::GeolocationCallback* callback) : geolocationCallback_(callback) {}
+    
+    void Invoke(const std::string& origin, const bool& allow, const bool& retain) override;
+private:
+    OHOS::WebView::GeolocationCallback* geolocationCallback_;
+};
+
 class WebDelegate : public WebResource {
     DECLARE_ACE_TYPE(WebDelegate, WebResource);
 
@@ -110,6 +121,10 @@ public:
 #endif
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
+    void OnProgressChanged(int param);
+    void OnReceivedTitle(const std::string& param);
+    void OnGeolocationPermissionsHidePrompt();
+    void OnGeolocationPermissionsShowPrompt(const std::string& origin, OHOS::WebView::GeolocationCallback* callback);
     void OnRequestFocus();
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
@@ -179,6 +194,11 @@ private:
     bool isCreateWebView_ = false;
 
     EventCallbackV2 onPageFinishedV2_;
+    EventCallbackV2 onPageStartedV2_;
+    EventCallbackV2 onProgressChangeV2_;
+    EventCallbackV2 onTitleReceiveV2_;
+    EventCallbackV2 onGeolocationHideV2_;
+    EventCallbackV2 onGeolocationShowV2_;
     EventCallbackV2 onRequestFocusV2_;
     EventCallbackV2 onDownloadStartV2_;
     EventCallbackV2 onFocusV2_;

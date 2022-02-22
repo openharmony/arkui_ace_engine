@@ -346,6 +346,46 @@ public:
         return declaration_->GetPageFinishedEventId();
     }
 
+    void SetProgressChangeEventId(const EventMarker& progressChangeEventId)
+    {
+        declaration_->SetProgressChangeEventId(progressChangeEventId);
+    }
+
+    const EventMarker& GetProgressChangeEventId() const
+    {
+        return declaration_->GetProgressChangeEventId();
+    }
+
+    void SetTitleReceiveEventId(const EventMarker& titleReceiveEventId)
+    {
+        declaration_->SetTitleReceiveEventId(titleReceiveEventId);
+    }
+
+    const EventMarker& GetTitleReceiveEventId() const
+    {
+        return declaration_->GetTitleReceiveEventId();
+    }
+
+    void SetGeolocationHideEventId(const EventMarker& geolocationHideEventId)
+    {
+        declaration_->SetGeolocationHideEventId(geolocationHideEventId);
+    }
+
+    const EventMarker& GetGeolocationHideEventId() const
+    {
+        return declaration_->GetGeolocationHideEventId();
+    }
+
+    void SetGeolocationShowEventId(const EventMarker& geolocationShowEventId)
+    {
+        declaration_->SetGeolocationShowEventId(geolocationShowEventId);
+    }
+
+    const EventMarker& GetGeolocationShowEventId() const
+    {
+        return declaration_->GetGeolocationShowEventId();
+    }
+
     void SetRequestFocusEventId(const EventMarker& requestFocusEventId)
     {
         declaration_->SetRequestFocusEventId(requestFocusEventId);
