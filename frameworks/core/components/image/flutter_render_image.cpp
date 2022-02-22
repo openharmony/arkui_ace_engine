@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -293,7 +293,7 @@ void FlutterRenderImage::Update(const RefPtr<Component>& component)
     // curImageSrc represents the picture currently shown and imageSrc represents next picture to be shown
     imageLoadingStatus_ = (sourceInfo_ != curSourceInfo_) ? ImageLoadingStatus::UPDATING : imageLoadingStatus_;
     UpdateRenderAltImage(component);
-    if (proceedPreviousLoading_ && !sourceInfo_.IsSvg()) {
+    if (proceedPreviousLoading_ && !sourceInfo_.IsSvg() && sourceInfo_.GetSrcType() != SrcType::MEMORY) {
         LOGI("Proceed previous loading, imageSrc is %{private}s, image loading status: %{public}d",
             sourceInfo_.ToString().c_str(), imageLoadingStatus_);
         return;

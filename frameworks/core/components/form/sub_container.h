@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@ public:
     void Initialize();
     void RunCard(const int64_t id, const std::string path, const std::string module, const std::string data,
         std::map<std::string, std::pair<int, int32_t>> imageDataMap);
-    void UpdateCard(const std::string content);
+    void UpdateCard(const std::string content, std::map<std::string, std::pair<int, int32_t>> imageDataMap);
     void Destroy();
     void GetNamesOfSharedImage(std::vector<std::string>& picNameArray);
     void UpdateSharedImage(std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray,
