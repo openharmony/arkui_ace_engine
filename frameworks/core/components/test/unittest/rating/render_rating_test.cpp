@@ -54,9 +54,9 @@ constexpr uint32_t TEST_DEFAULT_RATING_STAR_NUM = 5;
 constexpr double TEST_DEFAULT_RATING_SCORE = 0.0;
 constexpr double TEST_DEFAULT_RATING_STEP_SIZE = 0.5;
 
-const KeyEvent KEY_EVENT_RIGHT(KeyCode::KEYBOARD_RIGHT, KeyAction::CLICK, 0, 0, 0, 0, 0, 0);
-const KeyEvent KEY_EVENT_LEFT(KeyCode::KEYBOARD_LEFT, KeyAction::CLICK, 0, 0, 0, 0, 0, 0);
-const KeyEvent KEY_EVENT_ENTER(KeyCode::KEYBOARD_ENTER, KeyAction::CLICK, 0, 0, 0, 0, 0, 0);
+const KeyEvent KEY_EVENT_RIGHT(KeyCode::KEY_DPAD_RIGHT, KeyAction::CLICK);
+const KeyEvent KEY_EVENT_LEFT(KeyCode::KEY_DPAD_LEFT, KeyAction::CLICK);
+const KeyEvent KEY_EVENT_ENTER(KeyCode::KEY_ENTER, KeyAction::CLICK);
 
 const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 648, 20, TouchType::DOWN };
 const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 648, 20, TouchType::MOVE };

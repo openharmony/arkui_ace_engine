@@ -158,7 +158,6 @@ template("ace_core_source_set") {
       "event/event_convertor.cpp",
       "event/key_event.cpp",
       "event/key_event_recognizer.cpp",
-      "event/key_event_transfer.cpp",
       "event/mouse_raw_recognizer.cpp",
 
       # focus

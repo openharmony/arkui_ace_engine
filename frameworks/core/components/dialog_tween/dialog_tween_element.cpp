@@ -45,8 +45,8 @@ void DialogTweenElement::PerformBuild()
         }
     });
     animator->AddStopListener([weakDialog = AceType::WeakClaim(AceType::RawPtr(renderDialogTween)),
-                                              weakTransition = AceType::WeakClaim(AceType::RawPtr(transitionElement)),
-                                              weakController = WeakClaim(RawPtr(animator))] {
+                                  weakTransition = AceType::WeakClaim(AceType::RawPtr(transitionElement)),
+                                  weakController = WeakClaim(RawPtr(animator))] {
         auto renderDialogTween = weakDialog.Upgrade();
         if (renderDialogTween) {
             renderDialogTween->SetDisableTouchEvent(false);
@@ -67,7 +67,7 @@ void DialogTweenElement::PerformBuild()
 
 bool DialogTweenElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
-    if (keyEvent.code == KeyCode::KEYBOARD_BACK && keyEvent.action == KeyAction::UP) {
+    if (keyEvent.code == KeyCode::KEY_BACK && keyEvent.action == KeyAction::UP) {
         const auto& dialog = AceType::DynamicCast<RenderDialogTween>(renderNode_);
         if (dialog) {
             return dialog->PopDialog();

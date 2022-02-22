@@ -439,9 +439,7 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (container) {
         auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
-        int32_t repeatTime = 0;
-        Platform::FlutterAceView::DispatchKeyEvent(aceView, touchEvent->GetKeyCode(), touchEvent->GetKeyAction(),
-            repeatTime, touchEvent->GetActionTime(), touchEvent->GetActionStartTime());
+        Platform::FlutterAceView::DispatchKeyEvent(aceView, touchEvent);
         return true;
     }
     return false;

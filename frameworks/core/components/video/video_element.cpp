@@ -209,7 +209,7 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
 #ifdef OHOS_STANDARD_SYSTEM
 ::OHOS::sptr<::OHOS::Subwindow> VideoElement::CreateSubwindow()
 {
-    const auto &wmi = ::OHOS::WindowManager::GetInstance();
+    const auto& wmi = ::OHOS::WindowManager::GetInstance();
     if (wmi == nullptr) {
         LOGE("Window manager get instance failed");
         return nullptr;
@@ -1054,8 +1054,7 @@ void VideoElement::OnPrepared(
             json->Put("duration", static_cast<double>(duration_));
             param = json->ToString();
         } else {
-            param = std::string("\"prepared\",{\"duration\":")
-                                    .append(std::to_string(duration_)).append("}");
+            param = std::string("\"prepared\",{\"duration\":").append(std::to_string(duration_)).append("}");
         }
         LOGE("video onPrepared event: %s ", param.c_str());
         onPrepared_(param);
@@ -1174,8 +1173,7 @@ void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
             json->Put("time", static_cast<double>(currentPos));
             param = json->ToString();
         } else {
-            param = std::string("\"timeupdate\",{\"currenttime\":")
-                        .append(std::to_string(currentPos)).append("}");
+            param = std::string("\"timeupdate\",{\"currenttime\":").append(std::to_string(currentPos)).append("}");
         }
         LOGE("video onTimeUpdate event: %s ", param.c_str());
         onTimeUpdate_(param);
@@ -1480,8 +1478,7 @@ void VideoElement::OnSliderChange(const std::string& param)
                 json->Put("time", static_cast<double>(value));
                 param = json->ToString();
             } else {
-                param = std::string("\"seeked\",{\"currenttime\":")
-                                        .append(std::to_string(value)).append("}");
+                param = std::string("\"seeked\",{\"currenttime\":").append(std::to_string(value)).append("}");
             }
             onSeeked_(param);
         }
@@ -1513,8 +1510,7 @@ void VideoElement::OnSliderMoving(const std::string& param)
                 json->Put("time", static_cast<double>(value));
                 param = json->ToString();
             } else {
-                param = std::string("\"seeking\",{\"currenttime\":")
-                                        .append(std::to_string(value)).append("}");
+                param = std::string("\"seeking\",{\"currenttime\":").append(std::to_string(value)).append("}");
             }
             onSeeking_(param);
         }
@@ -1549,9 +1545,7 @@ void VideoElement::Start()
             return;
         }
         auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        platformTask.PostTask([mediaPlayer = mediaPlayer_] {
-            mediaPlayer->Play();
-        });
+        platformTask.PostTask([mediaPlayer = mediaPlayer_] { mediaPlayer->Play(); });
     }
 #else
     if (isStop_) {
@@ -1624,8 +1618,7 @@ void VideoElement::FullScreen()
 
                 // add fullscreen component cover componen
                 if (IsDeclarativePara()) {
-                    stackElement->PushComponent(
-                        AceType::MakeRefPtr<ComposedComponent>("0", "fullscreen", component));
+                    stackElement->PushComponent(AceType::MakeRefPtr<ComposedComponent>("0", "fullscreen", component));
                 } else {
                     auto composedComponent = AceType::DynamicCast<ComposedComponent>(component);
                     if (!composedComponent) {
@@ -1636,8 +1629,7 @@ void VideoElement::FullScreen()
                         LOGE("VideoElement::FullScreen: is InspectorComposedComponent");
                         return;
                     }
-                    stackElement->PushComponent(
-                        AceType::MakeRefPtr<ComposedComponent>(composedComponent->GetId(),
+                    stackElement->PushComponent(AceType::MakeRefPtr<ComposedComponent>(composedComponent->GetId(),
                         composedComponent->GetName() + "fullscreen", composedComponent->GetChild()));
                 }
                 isFullScreen_ = true;
@@ -1655,8 +1647,8 @@ void VideoElement::FullScreen()
                         param = json->ToString();
                     } else {
                         param = std::string("\"fullscreenchange\",{\"fullscreen\":")
-                                            .append(std::to_string(isFullScreen_))
-                                            .append("}");
+                                    .append(std::to_string(isFullScreen_))
+                                    .append("}");
                     }
                     onFullScreenChange_(param);
                 }
@@ -1697,8 +1689,8 @@ void VideoElement::ExitFullScreen()
                 param = json->ToString();
             } else {
                 param = std::string("\"fullscreenchange\",{\"fullscreen\":")
-                                        .append(std::to_string(isFullScreen_))
-                                        .append("}");
+                            .append(std::to_string(isFullScreen_))
+                            .append("}");
             }
             onFullScreenChange_(param);
         }
@@ -1773,15 +1765,15 @@ bool VideoElement::OnKeyEvent(const KeyEvent& keyEvent)
         return false;
     }
     switch (keyEvent.code) {
-        case KeyCode::KEYBOARD_BACK:
-        case KeyCode::KEYBOARD_ESCAPE: {
+        case KeyCode::KEY_BACK:
+        case KeyCode::KEY_ESCAPE: {
             if (isFullScreen_) {
                 ExitFullScreen();
                 return true;
             }
             break;
         }
-        case KeyCode::KEYBOARD_ENTER: {
+        case KeyCode::KEY_ENTER: {
             if (!isFullScreen_) {
                 FullScreen();
             } else {

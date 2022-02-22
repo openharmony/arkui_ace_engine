@@ -74,7 +74,7 @@ void TextFieldElement::Update()
                 if (textField) {
                     textField->OnSurfaceChanged(width, height, oldWidth, oldHeight);
                 }
-        });
+            });
     }
 }
 
@@ -101,12 +101,12 @@ RefPtr<RenderNode> TextFieldElement::CreateRenderNode()
                 }
                 sp->isNextAction_ = true;
 
-                KeyEvent keyEvent(KeyCode::KEYBOARD_DOWN, KeyAction::UP, 0, 0, 0, 0, 0, 0);
+                KeyEvent keyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::UP);
                 if (!pipeline->OnKeyEvent(keyEvent)) {
                     sp->CloseKeyboard();
                 } else {
                     // below textfield will auto open keyboard
-                    KeyEvent keyEventEnter(KeyCode::KEYBOARD_ENTER, KeyAction::UP, 0, 0, 0, 0, 0, 0);
+                    KeyEvent keyEventEnter(KeyCode::KEY_ENTER, KeyAction::UP);
                     pipeline->OnKeyEvent(keyEventEnter);
                 }
             }
@@ -154,22 +154,22 @@ bool TextFieldElement::OnKeyEvent(const KeyEvent& keyEvent)
     }
 
     switch (keyEvent.code) {
-        case KeyCode::KEYBOARD_BACK:
-        case KeyCode::KEYBOARD_ESCAPE: {
+        case KeyCode::KEY_BACK:
+        case KeyCode::KEY_ESCAPE: {
             bool editingMode = editingMode_;
             CloseKeyboard();
             // If not editingMode, mark the keyevent unhandled to let navigator pop page..
             return editingMode;
         }
-        case KeyCode::KEYBOARD_ENTER:
-        case KeyCode::KEYBOARD_NUMBER_ENTER:
-        case KeyCode::KEYBOARD_CENTER:
+        case KeyCode::KEY_ENTER:
+        case KeyCode::KEY_NUMPAD_ENTER:
+        case KeyCode::KEY_DPAD_CENTER:
             RequestKeyboard(true);
             return true;
-        case KeyCode::KEYBOARD_LEFT:
-        case KeyCode::KEYBOARD_RIGHT:
-        case KeyCode::KEYBOARD_UP:
-        case KeyCode::KEYBOARD_DOWN: {
+        case KeyCode::KEY_DPAD_LEFT:
+        case KeyCode::KEY_DPAD_RIGHT:
+        case KeyCode::KEY_DPAD_UP:
+        case KeyCode::KEY_DPAD_DOWN: {
             bool result = editingMode_ && !isNextAction_;
             isNextAction_ = false;
             return result;
@@ -278,6 +278,5 @@ void TextFieldElement::Insert(const std::string& args)
     }
     textField->Insert(args);
 }
-
 
 } // namespace OHOS::Ace

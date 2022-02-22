@@ -89,17 +89,17 @@ bool PickerColumnElement::OnKeyEvent(const KeyEvent& keyEvent)
     }
 
     if (keyEvent.action == KeyAction::CLICK) {
-        if (keyEvent.code == KeyCode::KEYBOARD_UP || keyEvent.code == KeyCode::TV_CONTROL_UP) {
+        if (keyEvent.code == KeyCode::KEY_DPAD_UP || keyEvent.code == KeyCode::TV_CONTROL_UP) {
             return render->HandleScroll(false);
         }
-        if (keyEvent.code == KeyCode::KEYBOARD_DOWN || keyEvent.code == KeyCode::TV_CONTROL_DOWN) {
+        if (keyEvent.code == KeyCode::KEY_DPAD_DOWN || keyEvent.code == KeyCode::TV_CONTROL_DOWN) {
             return render->HandleScroll(true);
         }
     }
 
     if (keyEvent.action == KeyAction::UP) {
-        if (keyEvent.code == KeyCode::KEYBOARD_ESCAPE ||
-            keyEvent.code == KeyCode::KEYBOARD_BACK || keyEvent.code == KeyCode::TV_CONTROL_BACK) {
+        if (keyEvent.code == KeyCode::KEY_ESCAPE || keyEvent.code == KeyCode::KEY_BACK ||
+            keyEvent.code == KeyCode::TV_CONTROL_BACK) {
             return render->HandleFinished(false);
         }
     }

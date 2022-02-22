@@ -21,16 +21,22 @@
 #include "base/geometry/size.h"
 #include "base/utils/utils.h"
 #include "core/components/declaration/common/declaration.h"
-#include "core/components_v2/common/common_def.h"
 #include "core/components/declaration/web/web_client.h"
 #include "core/components/declaration/web/web_declaration.h"
 #include "core/components/web/resource/web_javascript_value.h"
+#include "core/components_v2/common/common_def.h"
 #include "core/focus/focus_node.h"
 #include "core/pipeline/base/element.h"
 
 namespace OHOS::Ace {
 
 class WebDelegate;
+
+enum MixedModeContent {
+    MIXED_CONTENT_ALWAYS_ALLOW = 0,
+    MIXED_CONTENT_NEVER_ALLOW = 1,
+    MIXED_CONTENT_COMPATIBILITY_MODE = 2
+};
 
 class WebController : public virtual AceType {
     DECLARE_ACE_TYPE(WebController, AceType);
@@ -368,6 +374,46 @@ public:
         return declaration_->GetPageFinishedEventId();
     }
 
+    void SetProgressChangeEventId(const EventMarker& progressChangeEventId)
+    {
+        declaration_->SetProgressChangeEventId(progressChangeEventId);
+    }
+
+    const EventMarker& GetProgressChangeEventId() const
+    {
+        return declaration_->GetProgressChangeEventId();
+    }
+
+    void SetTitleReceiveEventId(const EventMarker& titleReceiveEventId)
+    {
+        declaration_->SetTitleReceiveEventId(titleReceiveEventId);
+    }
+
+    const EventMarker& GetTitleReceiveEventId() const
+    {
+        return declaration_->GetTitleReceiveEventId();
+    }
+
+    void SetGeolocationHideEventId(const EventMarker& geolocationHideEventId)
+    {
+        declaration_->SetGeolocationHideEventId(geolocationHideEventId);
+    }
+
+    const EventMarker& GetGeolocationHideEventId() const
+    {
+        return declaration_->GetGeolocationHideEventId();
+    }
+
+    void SetGeolocationShowEventId(const EventMarker& geolocationShowEventId)
+    {
+        declaration_->SetGeolocationShowEventId(geolocationShowEventId);
+    }
+
+    const EventMarker& GetGeolocationShowEventId() const
+    {
+        return declaration_->GetGeolocationShowEventId();
+    }
+
     void SetRequestFocusEventId(const EventMarker& requestFocusEventId)
     {
         declaration_->SetRequestFocusEventId(requestFocusEventId);
@@ -464,6 +510,65 @@ public:
     {
         isFileAccessEnabled_ = isEnabled;
     }
+    bool GetOnLineImageAccessEnabled() const
+    {
+        return isOnLineImageAccessEnabled_;
+    }
+
+    void SetOnLineImageAccessEnabled(bool isEnabled)
+    {
+        isOnLineImageAccessEnabled_ = isEnabled;
+    }
+
+    bool GetDomStorageAccessEnabled() const
+    {
+        return isDomStorageAccessEnabled_;
+    }
+
+    void SetDomStorageAccessEnabled(bool isEnabled)
+    {
+        isDomStorageAccessEnabled_ = isEnabled;
+    }
+
+    bool GetImageAccessEnabled() const
+    {
+        return isImageAccessEnabled_;
+    }
+
+    void SetImageAccessEnabled(bool isEnabled)
+    {
+        isImageAccessEnabled_ = isEnabled;
+    }
+
+    MixedModeContent GetMixedMode() const
+    {
+        return mixedContentMode_;
+    }
+
+    void SetMixedMode(MixedModeContent mixedModeNum)
+    {
+        mixedContentMode_ = mixedModeNum;
+    }
+
+    bool GetZoomAccessEnabled() const
+    {
+        return isZoomAccessEnabled_;
+    }
+
+    void SetZoomAccessEnabled(bool isEnabled)
+    {
+        isZoomAccessEnabled_ = isEnabled;
+    }
+
+    bool GetGeolocationAccessEnabled() const
+    {
+        return isGeolocationAccessEnabled_;
+    }
+
+    void SetGeolocationAccessEnabled(bool isEnabled)
+    {
+        isGeolocationAccessEnabled_ = isEnabled;
+    }
 
     void RequestFocus();
 
@@ -479,6 +584,13 @@ private:
     bool isContentAccessEnabled_ = true;
     bool isFileAccessEnabled_ = true;
     WeakPtr<FocusNode> focusElement_;
+    bool isOnLineImageAccessEnabled_ = false;
+    bool isDomStorageAccessEnabled_ = false;
+    bool isImageAccessEnabled_ = true;
+    MixedModeContent mixedContentMode_ = MixedModeContent::MIXED_CONTENT_NEVER_ALLOW;
+    bool isZoomAccessEnabled_ = true;
+    bool isGeolocationAccessEnabled_ = true;
+
 };
 
 } // namespace OHOS::Ace

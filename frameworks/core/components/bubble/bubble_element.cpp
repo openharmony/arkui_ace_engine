@@ -33,7 +33,7 @@ void BubbleElement::PerformBuild()
 
 bool BubbleElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
-    if (keyEvent.code == KeyCode::KEYBOARD_BACK && keyEvent.action == KeyAction::UP) {
+    if (keyEvent.code == KeyCode::KEY_BACK && keyEvent.action == KeyAction::UP) {
         const auto& bubble = AceType::DynamicCast<RenderBubble>(renderNode_);
         if (bubble) {
             return bubble->PopBubble();

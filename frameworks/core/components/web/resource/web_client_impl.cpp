@@ -44,6 +44,43 @@ void WebClientImpl::OnPageStarted(const std::string& url)
     delegate->OnPageStarted(url);
 }
 
+void WebClientImpl::OnProgressChanged(int newProgress)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnProgressChanged(newProgress);
+}
+
+void WebClientImpl::OnReceivedTitle(const std::string &title)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnReceivedTitle(title);
+}
+
+void WebClientImpl::OnGeolocationPermissionsHidePrompt()
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnGeolocationPermissionsHidePrompt();
+}
+
+void WebClientImpl::OnGeolocationPermissionsShowPrompt(const std::string& origin,
+    OHOS::WebView::GeolocationCallback* callback)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnGeolocationPermissionsShowPrompt(origin, callback);
+}
+
 void WebClientImpl::OnDownloadStart(const std::string& url, const std::string& userAgent,
     const std::string& contentDisposition, const std::string& mimetype, long contentLength)
 {

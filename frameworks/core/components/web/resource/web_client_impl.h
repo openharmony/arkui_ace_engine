@@ -35,6 +35,11 @@ public:
     void OnMessage(const std::string& param) override;
     void OnPageStarted(const std::string& url) override;
     void OnPageFinished(int httpStatusCode, const std::string& url) override;
+    void OnProgressChanged(int newProgress) override;
+    void OnReceivedTitle(const std::string &title) override;
+    void OnGeolocationPermissionsHidePrompt() override;
+    void OnGeolocationPermissionsShowPrompt(const std::string& origin,
+        OHOS::WebView::GeolocationCallback* callback) override;
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength) override;
 

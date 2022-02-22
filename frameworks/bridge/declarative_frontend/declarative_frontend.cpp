@@ -303,8 +303,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         jsEngine->OnWindowDisplayModeChanged(isShownInMultiWindow, data);
     };
 
-    const auto& onSaveAbilityStateCallBack  = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                                    std::string& data) {
+    const auto& onSaveAbilityStateCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](std::string& data) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             LOGE("the js engine is nullptr");
@@ -312,7 +311,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         }
         jsEngine->OnSaveAbilityState(data);
     };
-    const auto& onRestoreAbilityStateCallBack  = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+    const auto& onRestoreAbilityStateCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                                     const std::string& data) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
@@ -322,8 +321,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         jsEngine->OnRestoreAbilityState(data);
     };
 
-    const auto& onNewWantCallBack  = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                                    const std::string& data) {
+    const auto& onNewWantCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& data) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             LOGE("the js engine is nullptr");
@@ -392,8 +390,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         jsEngine->JsCallback(callbackId, args);
     };
 
-    const auto& onMemoryLevelCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                                     const int32_t level) {
+    const auto& onMemoryLevelCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const int32_t level) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -408,8 +405,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         }
         return jsEngine->OnStartContinuation();
     };
-    const auto& onCompleteContinuationCallBack =
-        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](int32_t code) {
+    const auto& onCompleteContinuationCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](int32_t code) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -423,16 +419,15 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         }
         jsEngine->OnRemoteTerminated();
     };
-    const auto& onSaveDataCallBack =
-        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](std::string& savedData) {
+    const auto& onSaveDataCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](std::string& savedData) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
         }
         jsEngine->OnSaveData(savedData);
     };
-    const auto& onRestoreDataCallBack =
-        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& data) -> bool {
+    const auto& onRestoreDataCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                            const std::string& data) -> bool {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return false;
@@ -441,7 +436,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     };
 
     const auto& externalEventCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                    const std::string& componentId, const uint32_t nodeId) {
+                                            const std::string& componentId, const uint32_t nodeId) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -453,10 +448,10 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
         resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
         timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback, onWindowDisplayModeChangedCallBack,
-        onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack,
-        onNewWantCallBack, onActiveCallBack, onInactiveCallBack, onMemoryLevelCallBack, onStartContinuationCallBack,
-        onCompleteContinuationCallBack, onRemoteTerminatedCallBack, onSaveDataCallBack,
-        onRestoreDataCallBack, externalEventCallback);
+        onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack, onNewWantCallBack,
+        onActiveCallBack, onInactiveCallBack, onMemoryLevelCallBack, onStartContinuationCallBack,
+        onCompleteContinuationCallBack, onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack,
+        externalEventCallback);
     if (disallowPopLastPage_) {
         delegate_->DisallowPopLastPage();
     }
@@ -926,9 +921,7 @@ void DeclarativeEventHandler::HandleSyncEvent(const EventMarker& eventMarker, co
                             .append(",\"repeatCount\":")
                             .append(std::to_string(static_cast<int32_t>(info.repeatTime)))
                             .append(",\"timestamp\":")
-                            .append(std::to_string(static_cast<int32_t>(info.timeStamp)))
-                            .append(",\"timestampStart\":")
-                            .append(std::to_string(static_cast<int32_t>(info.timeStampStart)))
+                            .append(std::to_string(info.timeStamp.time_since_epoch().count()))
                             .append(",\"key\":\"")
                             .append(info.key)
                             .append("\"},");

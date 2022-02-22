@@ -22,12 +22,12 @@
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/compositing/scene_builder.h"
 #include "flutter/shell/platform/ohos/ohos_shell_holder.h"
+#include "key_event.h"
 
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_view.h"
 #include "core/common/platform_res_register.h"
 #include "core/event/key_event_recognizer.h"
-#include "core/event/key_event_transfer.h"
 
 namespace OHOS::Ace::Platform {
 
@@ -46,10 +46,9 @@ public:
     static void SetViewportMetrics(FlutterAceView* view, const flutter::ViewportMetrics& metrics);
 
     static void DispatchTouchEvent(FlutterAceView* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-
-    static bool DispatchKeyEvent(FlutterAceView* view, int32_t keyCode, int32_t action, int32_t repeatTime,
-        int64_t timeStamp, int64_t timeStampStart);
+    static bool DispatchKeyEvent(FlutterAceView* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     static bool DispatchRotationEvent(FlutterAceView* view, float rotationValue);
+
     static void InitCacheFilePath(const std::string& path);
     static uint32_t GetBackgroundColor();
 
@@ -75,8 +74,7 @@ public:
 
     void ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
-    bool ProcessKeyEvent(
-        int32_t keyCode, int32_t keyAction, int32_t repeatTime, int64_t timeStamp = 0, int64_t timeStampStart = 0);
+    bool ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
     void ProcessIdleEvent(int64_t deadline);
 
@@ -183,7 +181,6 @@ private:
     RefPtr<PlatformResRegister> resRegister_;
     KeyEventCallback keyEventCallback_;
     KeyEventRecognizer keyEventRecognizer_;
-    KeyEventTransfer keyEventTransfer_;
     // mark the touch event's state, HORIZONTAL_STATE: the event should send to platform, VERTICAL_STATE: should not
     enum class EventState { INITIAL_STATE, HORIZONTAL_STATE, VERTICAL_STATE };
 

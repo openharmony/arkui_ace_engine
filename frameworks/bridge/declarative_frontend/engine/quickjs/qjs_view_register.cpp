@@ -142,11 +142,11 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #endif
+#include "core/components_v2/inspector/inspector.h"
 #include "frameworks/bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
-#include "core/components_v2/inspector/inspector.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -343,7 +343,7 @@ static V2::JsKeyEvent GetKeyEventFromJS(JSContext* ctx, JSValue value)
     event.action = static_cast<KeyAction>(type);
 
     auto jsKeyCode = JS_GetPropertyStr(ctx, value, "keyCode");
-    auto code = static_cast<int32_t>(KeyCode::UNKNOWN);
+    auto code = static_cast<int32_t>(KeyCode::KEY_UNKNOWN);
     JS_ToInt32(ctx, &code, jsKeyCode);
     event.code = static_cast<KeyCode>(code);
 
