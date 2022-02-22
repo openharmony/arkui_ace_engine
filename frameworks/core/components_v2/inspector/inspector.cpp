@@ -14,9 +14,10 @@
  */
 
 #include "inspector.h"
-#include "inspector_composed_element.h"
 
+#include "inspector_composed_element.h"
 #include "shape_composed_element.h"
+
 #include "core/components/root/root_element.h"
 
 namespace OHOS::Ace::V2 {
@@ -118,7 +119,7 @@ std::string Inspector::GetInspectorTree(const RefPtr<PipelineContext>& context)
     std::unordered_map<int32_t, std::vector<std::pair<RefPtr<Element>, std::string>>> elementJSONInfoMap;
     for (int depth = depthElementMap.size(); depth > 0; depth--) {
         const auto& depthElements = depthElementMap[depth];
-        for (const auto& element: depthElements) {
+        for (const auto& element : depthElements) {
             auto inspectorElement = AceType::DynamicCast<V2::InspectorComposedElement>(element);
             if (inspectorElement == nullptr) {
                 continue;
@@ -171,7 +172,7 @@ std::string Inspector::GetInspectorTree(const RefPtr<PipelineContext>& context)
 
     auto jsonNodeArray = JsonUtil::CreateArray(true);
     auto firstDepthNodeVec = elementJSONInfoMap[elementJSONInfoMap.size() - 1];
-    for (const auto& nodeJSONInfo: firstDepthNodeVec) {
+    for (const auto& nodeJSONInfo : firstDepthNodeVec) {
         auto nodeJSONValue = JsonUtil::ParseJsonString(nodeJSONInfo.second);
         jsonNodeArray->Put(nodeJSONValue);
     }
@@ -197,22 +198,18 @@ bool Inspector::SendEventByKey(
                 return;
             }
 
-            TouchEvent point {
-                .x = static_cast<float>(rect.Left() + rect.Width() / 2),
+            TouchEvent point { .x = static_cast<float>(rect.Left() + rect.Width() / 2),
                 .y = static_cast<float>(rect.Top() + rect.Height() / 2),
                 .type = TouchType::DOWN,
-                .time = std::chrono::high_resolution_clock::now()
-            };
+                .time = std::chrono::high_resolution_clock::now() };
             context->OnTouchEvent(point);
 
             switch (action) {
                 case static_cast<int>(AceAction::ACTION_CLICK): {
-                    TouchEvent upPoint {
-                        .x = point.x,
+                    TouchEvent upPoint { .x = point.x,
                         .y = point.y,
                         .type = TouchType::UP,
-                        .time = std::chrono::high_resolution_clock::now()
-                    };
+                        .time = std::chrono::high_resolution_clock::now() };
                     context->OnTouchEvent(upPoint);
                     break;
                 }
@@ -221,12 +218,10 @@ bool Inspector::SendEventByKey(
                     auto&& callback = [weak, point]() {
                         auto refPtr = weak.Upgrade();
                         if (refPtr) {
-                            TouchEvent upPoint {
-                                .x = point.x,
+                            TouchEvent upPoint { .x = point.x,
                                 .y = point.y,
                                 .type = TouchType::UP,
-                                .time = std::chrono::high_resolution_clock::now()
-                            };
+                                .time = std::chrono::high_resolution_clock::now() };
                             refPtr->OnTouchEvent(upPoint);
                         }
                     };
@@ -247,9 +242,13 @@ bool Inspector::SendEventByKey(
 
 bool Inspector::SendKeyEvent(const RefPtr<PipelineContext>& context, const JsKeyEvent& event)
 {
-    KeyEvent keyEvent(event.code, event.action, 1, event.timeStamp, event.timeStamp, event.metaKey, event.sourceDevice,
-                      event.deviceId);
-    return context->GetTaskExecutor()->PostTask([context, keyEvent]() { context->OnKeyEvent(keyEvent); },
-                                                TaskExecutor::TaskType::UI);
+    KeyEvent keyEvent(event.code, event.action);
+    keyEvent.metaKey = event.metaKey;
+    keyEvent.deviceId = event.deviceId;
+    keyEvent.repeatTime = 0;
+    keyEvent.SetTimeStamp(event.timeStamp);
+    keyEvent.sourceType = static_cast<SourceType>(event.sourceDevice);
+    return context->GetTaskExecutor()->PostTask(
+        [context, keyEvent]() { context->OnKeyEvent(keyEvent); }, TaskExecutor::TaskType::UI);
 }
 } // namespace OHOS::Ace::V2

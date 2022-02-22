@@ -25,7 +25,7 @@ constexpr int32_t ELEMENT_CHANGE_END_LISTENER_KEY = 1002;
 constexpr int32_t RIGHT_BUTTON_INDEX = 1;
 constexpr int32_t DEFAULT_BUTTON_NUM = 2;
 
-}
+} // namespace
 
 void StepperElement::PerformBuild()
 {
@@ -242,7 +242,7 @@ bool StepperElement::OnKeyEvent(const KeyEvent& keyEvent)
             return RequestNextFocus(false, true, GetRect());
         case KeyCode::TV_CONTROL_RIGHT:
             return RequestNextFocus(false, false, GetRect());
-        case KeyCode::KEYBOARD_TAB:
+        case KeyCode::KEY_TAB:
             return RequestNextFocus(false, false, GetRect()) || RequestNextFocus(true, false, GetRect());
         default:
             return false;

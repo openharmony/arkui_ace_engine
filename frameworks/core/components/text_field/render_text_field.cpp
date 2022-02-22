@@ -1209,16 +1209,15 @@ bool RenderTextField::OnKeyEvent(const KeyEvent& event)
     }
 
     // If back or escape is clicked and overlay is showing, pop overlay firstly.
-    if (event.action == KeyAction::UP &&
-        (event.code == KeyCode::KEYBOARD_BACK || event.code == KeyCode::KEYBOARD_ESCAPE)) {
+    if (event.action == KeyAction::UP && (event.code == KeyCode::KEY_BACK || event.code == KeyCode::KEY_ESCAPE)) {
         if (isOverlayShowed_) {
             PopTextOverlay();
             return false;
         }
     }
     if (event.action == KeyAction::UP &&
-        ((event.code == KeyCode::KEYBOARD_SHIFT_LEFT || event.code == KeyCode::KEYBOARD_SHIFT_RIGHT) ||
-        (event.code == KeyCode::KEYBOARD_CONTROL_LEFT || event.code == KeyCode::KEYBOARD_CONTROL_RIGHT))) {
+        ((event.code == KeyCode::KEY_SHIFT_LEFT || event.code == KeyCode::KEY_SHIFT_RIGHT) ||
+            (event.code == KeyCode::KEY_CTRL_LEFT || event.code == KeyCode::KEY_CTRL_RIGHT))) {
         return HandleKeyEvent(event);
     }
 
@@ -1776,33 +1775,33 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
                     isShiftDown_ ? (codeValue + UPPER_CASE_LETTER_DIFF) : (codeValue + LOWER_CASE_LETTER_DIFF);
                 appendElement = static_cast<char>(letterCode);
             } else if (isCtrlDown_) {
-                if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_A)) {
+                if (codeValue == static_cast<int32_t>(KeyCode::KEY_A)) {
                     HandleOnCopyAll(nullptr);
-                } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_C)) {
+                } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_C)) {
                     HandleOnCopy();
-                } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_V)) {
+                } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_V)) {
                     HandleOnPaste();
-                } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_X)) {
+                } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_X)) {
                     HandleOnCut();
                 } else {
                     LOGE("Unknow Event");
                 }
                 MarkNeedLayout();
             }
-        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_LEFT) ||
-                   codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_RIGHT)) {
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_CTRL_LEFT) ||
+                   codeValue == static_cast<int32_t>(KeyCode::KEY_CTRL_RIGHT)) {
             isCtrlDown_ = true;
-        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_LEFT) ||
-            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_RIGHT)) {
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_LEFT) ||
+                   codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_RIGHT)) {
             isShiftDown_ = true;
         }
     }
-    if (event.action == KeyAction::UP && (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_LEFT) ||
-        codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_RIGHT))) {
+    if (event.action == KeyAction::UP && (codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_LEFT) ||
+                                             codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_RIGHT))) {
         isShiftDown_ = false;
     }
-    if (event.action == KeyAction::UP && (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_LEFT) ||
-        codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_RIGHT))) {
+    if (event.action == KeyAction::UP && (codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_LEFT) ||
+                                             codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_RIGHT))) {
         isCtrlDown_ = false;
     }
     if (appendElement.empty()) {
@@ -2030,17 +2029,15 @@ void RenderTextField::Insert(const std::string& text)
         context->GetTaskExecutor()->PostTask(
             [weakPtr = WeakClaim(this), text] {
                 const auto& textField = weakPtr.Upgrade();
-                    auto value = textField->GetEditingValue();
-                    auto textEditingValue = std::make_shared<TextEditingValue>();
-                    textEditingValue->text =
-                        value.GetBeforeSelection() + text + value.GetAfterSelection();
-                    textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + text.length());
-                    textField->UpdateEditingValue(textEditingValue, true);
+                auto value = textField->GetEditingValue();
+                auto textEditingValue = std::make_shared<TextEditingValue>();
+                textEditingValue->text = value.GetBeforeSelection() + text + value.GetAfterSelection();
+                textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + text.length());
+                textField->UpdateEditingValue(textEditingValue, true);
             },
             TaskExecutor::TaskType::UI);
     }
 }
-
 
 void RenderTextField::Delete(int32_t start, int32_t end)
 {

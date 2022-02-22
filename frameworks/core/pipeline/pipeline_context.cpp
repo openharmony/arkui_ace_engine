@@ -72,11 +72,11 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
+#include "core/components_v2/list/render_list.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/factories/flutter_render_factory.h"
 #include "core/pipeline/base/render_context.h"
-#include "core/components_v2/list/render_list.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -313,7 +313,6 @@ void PipelineContext::RefreshStageFocus()
 
     stageElement->RefreshFocus();
 }
-
 
 void PipelineContext::ShowContainerTitle(bool isShow)
 {
@@ -1015,8 +1014,8 @@ void PipelineContext::GetBoundingRectData(int32_t nodeId, Rect& rect)
     }
 }
 
-RefPtr<DialogComponent> PipelineContext::ShowDialog(const DialogProperties& dialogProperties,
-    bool isRightToLeft, const std::string& inspectorTag)
+RefPtr<DialogComponent> PipelineContext::ShowDialog(
+    const DialogProperties& dialogProperties, bool isRightToLeft, const std::string& inspectorTag)
 {
     CHECK_RUN_ON(UI);
     const auto& dialog = DialogBuilder::Build(dialogProperties, AceType::WeakClaim(this));
@@ -1461,12 +1460,12 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         return false;
     }
     if (!isKeyEvent_ && SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-        if (KeyCode::KEYBOARD_UP <= event.code && event.code <= KeyCode::KEYBOARD_RIGHT) {
+        if (KeyCode::KEY_DPAD_UP <= event.code && event.code <= KeyCode::KEY_DPAD_RIGHT) {
             if (event.action == KeyAction::UP) {
                 SetIsKeyEvent(true);
             }
             return true;
-        } else if (event.code == KeyCode::KEYBOARD_ENTER) {
+        } else if (event.code == KeyCode::KEY_ENTER) {
             if (event.action == KeyAction::CLICK) {
                 SetIsKeyEvent(true);
             }
@@ -1482,13 +1481,13 @@ void PipelineContext::SetShortcutKey(const KeyEvent& event)
 {
     if (event.action == KeyAction::DOWN) {
         auto codeValue = static_cast<int32_t>(event.code);
-        if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_LEFT) ||
-            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_RIGHT)) {
+        if (codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_LEFT) ||
+            codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_RIGHT)) {
             MarkIsShiftDown(true);
-        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_LEFT) ||
-            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_RIGHT)) {
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_CTRL_LEFT) ||
+                   codeValue == static_cast<int32_t>(KeyCode::KEY_CTRL_RIGHT)) {
             MarkIsCtrlDown(true);
-        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_A)) {
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_A)) {
             MarkIsKeyboardA(true);
             if (subscribeCtrlA_) {
                 subscribeCtrlA_();
@@ -1496,13 +1495,13 @@ void PipelineContext::SetShortcutKey(const KeyEvent& event)
         }
     } else if (event.action == KeyAction::UP) {
         auto codeValue = static_cast<int32_t>(event.code);
-        if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_LEFT) ||
-            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_RIGHT)) {
+        if (codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_LEFT) ||
+            codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_RIGHT)) {
             MarkIsShiftDown(false);
-        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_LEFT) ||
-            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_RIGHT)) {
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_CTRL_LEFT) ||
+                   codeValue == static_cast<int32_t>(KeyCode::KEY_CTRL_RIGHT)) {
             MarkIsCtrlDown(false);
-        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_A)) {
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_A)) {
             MarkIsKeyboardA(false);
         }
     }

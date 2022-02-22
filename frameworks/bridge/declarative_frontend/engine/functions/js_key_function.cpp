@@ -24,15 +24,14 @@ JSRef<JSObject> JsKeyFunction::createKeyEvent(KeyEventInfo& event)
     JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
     objectTemplate->SetInternalFieldCount(1);
     JSRef<JSObject> keyEventObj = objectTemplate->NewInstance();
-    keyEventObj->SetProperty<int32_t>("type", event.GetKeyType());
+    keyEventObj->SetProperty<int32_t>("type", static_cast<int32_t>(event.GetKeyType()));
     keyEventObj->SetProperty<int32_t>("keyCode", static_cast<int32_t>(event.GetKeyCode()));
     keyEventObj->SetProperty<const char*>("keyText", event.GetKeyText());
-    keyEventObj->SetProperty<int32_t>("keySource", event.GetKeySource());
+    keyEventObj->SetProperty<int32_t>("keySource", static_cast<int32_t>(event.GetKeySource()));
     keyEventObj->SetProperty<int64_t>("deviceId", event.GetDeviceId());
     keyEventObj->SetProperty<int32_t>("metaKey", event.GetMetaKey());
     keyEventObj->SetProperty<float>("timestamp", event.GetTimeStamp().time_since_epoch().count());
-    keyEventObj->SetPropertyObject(
-        "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
+    keyEventObj->SetPropertyObject("stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
     keyEventObj->Wrap<KeyEventInfo>(&event);
     return keyEventObj;
 }

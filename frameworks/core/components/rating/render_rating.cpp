@@ -286,7 +286,7 @@ bool RenderRating::HandleFocusEvent(const KeyEvent& keyEvent)
             return StarMovingForward();
         case KeyCode::TV_CONTROL_ENTER:
         case KeyCode::TV_CONTROL_CENTER:
-        case KeyCode::KEYBOARD_NUMBER_ENTER:
+        case KeyCode::KEY_NUMPAD_ENTER:
             // fire current score via change event when ENTER key is clicked, whether the score changes or not
             FireChangeEvent();
             return true;

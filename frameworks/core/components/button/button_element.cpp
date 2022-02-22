@@ -109,12 +109,12 @@ void ButtonElement::OnClick(const KeyEvent& event)
         return;
     }
     ClickInfo info(-1);
-    info.SetTimeStamp(TimeStamp(std::chrono::milliseconds(event.timeStamp)));
+    info.SetTimeStamp(event.timeStamp);
     info.SetGlobalLocation(
         Offset((GetRect().Left() + GetRect().Right()) / 2, (GetRect().Top() + GetRect().Bottom()) / 2));
     info.SetLocalLocation(
         Offset((GetRect().Right() - GetRect().Left()) / 2, (GetRect().Bottom() - GetRect().Top()) / 2));
-    info.SetSourceDevice(static_cast<SourceType>(event.sourceDevice));
+    info.SetSourceDevice(event.sourceType);
     info.SetDeviceId(event.deviceId);
     button_->HandleClickEvent(info);
     button_->HandleKeyEnterEvent(info);

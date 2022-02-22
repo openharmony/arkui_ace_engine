@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <fstream>
 
+#include "key_event.h"
 #include "pointer_event.h"
 
 #include "base/log/dump_log.h"
@@ -31,6 +32,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/event/axis_event.h"
+#include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/image/image_cache.h"
@@ -65,7 +67,7 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
 {
     TouchPoint touchPoint;
     // just get the max of width and height
-    touchPoint.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / 2.0; 
+    touchPoint.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / 2.0;
     touchPoint.id = pointerItem.GetPointerId();
     touchPoint.force = pointerItem.GetPressure();
     touchPoint.downTime = TimeStamp(std::chrono::milliseconds(pointerItem.GetDownTime()));
@@ -196,8 +198,8 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
     }
     events.pressedButtons = static_cast<int32_t>(pressedButtons);
 
-    std::chrono::microseconds micros(item.GetDownTime());
-    TimeStamp time(micros);
+    std::chrono::milliseconds milliseconds(pointerEvent->GetActionTime());
+    TimeStamp time(milliseconds);
     events.time = time;
 }
 
@@ -218,9 +220,35 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
 
-    std::chrono::microseconds micros(item.GetDownTime());
-    TimeStamp time(micros);
+    std::chrono::milliseconds milliseconds(pointerEvent->GetActionTime());
+    TimeStamp time(milliseconds);
     event.time = time;
+}
+
+void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
+{
+    event.code = static_cast<KeyCode>(keyEvent->GetKeyCode());
+    if (keyEvent->GetKeyAction() == OHOS::MMI::KeyEvent::KEY_ACTION_UP) {
+        event.action = KeyAction::UP;
+    } else if (keyEvent->GetKeyAction() == OHOS::MMI::KeyEvent::KEY_ACTION_DOWN) {
+        event.action = KeyAction::DOWN;
+    } else {
+        event.action = KeyAction::UNKNOWN;
+    }
+    std::chrono::milliseconds milliseconds(keyEvent->GetActionTime());
+    TimeStamp time(milliseconds);
+    event.timeStamp = time;
+    event.key = KeyToString(static_cast<int32_t>(event.code));
+    event.deviceId = keyEvent->GetDeviceId();
+    event.sourceType = SourceType::KEYBOARD;
+    std::string pressedKeyStr = "Pressed Keys: ";
+    for (const auto& curCode : keyEvent->GetPressedKeys()) {
+
+        pressedKeyStr += (std::to_string(curCode) + " ");
+        event.pressedCodes.emplace_back(static_cast<KeyCode>(curCode));
+    }
+    LOGI("ConvertKeyEvent: keyCode: %{public}d keyAction: %{public}d pressedCodes: %{public}s time: %{public}lld",
+        event.code, event.action, pressedKeyStr.c_str(), (long long)(keyEvent->GetActionTime()));
 }
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -343,13 +371,10 @@ void FlutterAceView::DispatchTouchEvent(FlutterAceView* view, const std::shared_
     }
 }
 
-bool FlutterAceView::DispatchKeyEvent(FlutterAceView* view, int32_t keyCode, int32_t action, int32_t repeatTime,
-    int64_t timeStamp, int64_t timeStampStart)
+bool FlutterAceView::DispatchKeyEvent(FlutterAceView* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    LOGI("key info: keyCode: %{public}d, action: %{public}d, timeStamp: %{public}d", keyCode, action,
-        static_cast<int32_t>(timeStamp));
     if (view != nullptr) {
-        return view->ProcessKeyEvent(keyCode, action, repeatTime, timeStamp, timeStampStart);
+        return view->ProcessKeyEvent(keyEvent);
     }
     LOGE("view is null, return false!");
     return false;
@@ -456,15 +481,14 @@ void FlutterAceView::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
 }
 
-bool FlutterAceView::ProcessKeyEvent(
-    int32_t keyCode, int32_t keyAction, int32_t repeatTime, int64_t timeStamp, int64_t timeStampStart)
+bool FlutterAceView::ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (!keyEventCallback_) {
         return false;
     }
-
-    KeyEvent keyEvent = keyEventTransfer_.GetKeyEvent(keyCode, keyAction, repeatTime, timeStamp, timeStampStart);
-    return keyEventCallback_(keyEvent);
+    KeyEvent event;
+    ConvertKeyEvent(keyEvent, event);
+    return keyEventCallback_(event);
 }
 
 void FlutterAceView::ProcessIdleEvent(int64_t deadline)

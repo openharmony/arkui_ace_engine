@@ -23,9 +23,9 @@
 #include "core/common/ace_application_info.h"
 #include "core/components/flex/flex_element.h"
 #include "core/event/ace_event_handler.h"
+#include "core/gestures/click_recognizer.h"
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/render_element.h"
-#include "core/gestures/click_recognizer.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -71,9 +71,9 @@ bool FocusNode::HandleKeyEvent(const KeyEvent& keyEvent)
     }
 
     switch (keyEvent.code) {
-        case KeyCode::KEYBOARD_ENTER:
-        case KeyCode::KEYBOARD_NUMBER_ENTER:
-        case KeyCode::KEYBOARD_CENTER:
+        case KeyCode::KEY_ENTER:
+        case KeyCode::KEY_NUMPAD_ENTER:
+        case KeyCode::KEY_DPAD_CENTER:
             if (keyEvent.action != KeyAction::DOWN) {
                 return false;
             }
@@ -271,12 +271,12 @@ void FocusNode::OnClick(const KeyEvent& event)
 {
     if (onClickEventCallback_) {
         auto info = std::make_shared<ClickInfo>(-1);
-        info->SetTimeStamp(TimeStamp(std::chrono::milliseconds(event.timeStamp)));
+        info->SetTimeStamp(event.timeStamp);
         info->SetGlobalLocation(
             Offset((GetRect().Left() + GetRect().Right()) / 2, (GetRect().Top() + GetRect().Bottom()) / 2));
         info->SetLocalLocation(
             Offset((GetRect().Right() - GetRect().Left()) / 2, (GetRect().Bottom() - GetRect().Top()) / 2));
-        info->SetSourceDevice(static_cast<SourceType>(event.sourceDevice));
+        info->SetSourceDevice(static_cast<SourceType>(event.sourceType));
         info->SetDeviceId(event.deviceId);
         onClickEventCallback_(info);
     }
@@ -464,8 +464,15 @@ bool FocusGroup::OnKeyEvent(const KeyEvent& keyEvent)
             return RequestNextFocus(false, !AceApplicationInfo::GetInstance().IsRightToLeft(), GetRect());
         case KeyCode::TV_CONTROL_RIGHT:
             return RequestNextFocus(false, AceApplicationInfo::GetInstance().IsRightToLeft(), GetRect());
-        case KeyCode::KEYBOARD_TAB:
-            return RequestNextFocus(false, false, GetRect()) || RequestNextFocus(true, false, GetRect());
+        case KeyCode::KEY_TAB:
+            if (keyEvent.pressedCodes.size() == 1) {
+                return RequestNextFocus(false, false, GetRect()) || RequestNextFocus(true, false, GetRect());
+            } else {
+                if (keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB }) ||
+                    keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_TAB })) {
+                    return RequestNextFocus(false, true, GetRect()) || RequestNextFocus(true, true, GetRect());
+                }
+            }
         default:
             return false;
     }

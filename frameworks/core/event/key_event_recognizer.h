@@ -27,9 +27,8 @@ class KeyEventRecognizer {
 public:
     // This method recognizes events by recording raw key events. If the raw event can be identified as a special
     // event, it returns the raw event and the identified special event, otherwise it returns only the raw event.
-    std::vector<KeyEvent> GetKeyEvents(
-        int32_t keyCode, int32_t keyAction, int32_t repeatTime, int64_t timeStamp = 0, int64_t timeStampStart = 0,
-        int32_t metaKey = 0, int32_t keySource = 0, int32_t deviceId = 0);
+    std::vector<KeyEvent> GetKeyEvents(int32_t keyCode, int32_t keyAction, int32_t repeatTime, int64_t timeStamp = 0,
+        int64_t timeStampStart = 0, int32_t metaKey = 0, int32_t keySource = 0, int64_t deviceId = 0);
 private:
     std::unordered_map<int32_t, bool> keyMap_;
 };

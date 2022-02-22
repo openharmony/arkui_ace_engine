@@ -26,18 +26,16 @@ constexpr int32_t LONG_PRESS_DURATION = 1;
 
 }
 
-std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(
-    int32_t keyCode, int32_t keyAction, int32_t repeatTime, int64_t timeStamp, int64_t timeStampStart, int32_t metaKey,
-    int32_t keySource, int32_t deviceId)
+std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(int32_t keyCode, int32_t keyAction, int32_t repeatTime,
+    int64_t timeStamp, int64_t timeStampStart, int32_t metaKey, int32_t keySource, int64_t deviceId)
 {
     if (timeStamp == 0) {
         timeStamp = clock();
         timeStampStart = timeStamp;
     }
     std::vector<KeyEvent> keyEvents;
-    keyEvents.emplace_back(
-        static_cast<KeyCode>(keyCode), static_cast<KeyAction>(keyAction), repeatTime, timeStamp, timeStampStart,
-        metaKey, keySource, deviceId);
+    keyEvents.emplace_back(KeyEvent(static_cast<KeyCode>(keyCode), static_cast<KeyAction>(keyAction), repeatTime,
+        timeStamp, deviceId, static_cast<SourceType>(keySource)));
     auto result = keyMap_.try_emplace(keyCode, false);
     auto iter = result.first;
 
@@ -46,9 +44,8 @@ std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(
         (!iter->second)) {
         LOGD("this event is long press, key code is %{public}d", keyCode);
         iter->second = true;
-        keyEvents.emplace_back(
-            static_cast<KeyCode>(keyCode), KeyAction::LONG_PRESS, repeatTime, timeStamp, timeStampStart, metaKey,
-            keySource, deviceId);
+        keyEvents.emplace_back(KeyEvent(static_cast<KeyCode>(keyCode), KeyAction::LONG_PRESS, repeatTime, timeStamp,
+            deviceId, static_cast<SourceType>(keySource)));
     }
     // Recognize click event.
     if (keyAction == static_cast<int32_t>(KeyAction::UP)) {
@@ -56,9 +53,8 @@ std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(
             iter->second = false;
         } else {
             LOGD("this event is click, key code is %{public}d", keyCode);
-            keyEvents.emplace_back(
-                static_cast<KeyCode>(keyCode), KeyAction::CLICK, repeatTime, timeStamp, timeStampStart, metaKey,
-                keySource, deviceId);
+            keyEvents.emplace_back(KeyEvent(static_cast<KeyCode>(keyCode), KeyAction::CLICK, repeatTime, timeStamp,
+                deviceId, static_cast<SourceType>(keySource)));
         }
     }
     return keyEvents;
