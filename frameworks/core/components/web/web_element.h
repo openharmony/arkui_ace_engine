@@ -29,21 +29,9 @@ public:
 
     void OnFocus() override;
 
-    void SetComponent(const RefPtr<Component>& component)
-    {
-        if (component) {
-            component_ = std::move(component);
-        }
-    }
-
-    RefPtr<Component> GetComponent() const
-    {
-        return component_;
-    }
-
 private:
     std::string webSrc_;
-    RefPtr<Component> component_;
+    WeakPtr<Component> component_;
 };
 
 } // namespace OHOS::Ace
