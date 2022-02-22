@@ -882,7 +882,7 @@ void RenderGridScroll::DealCache(int32_t start, int32_t end)
             break;
         }
 
-        if (start - i >= 0 && inCache_.count(start - i) == 0) {
+        if (start >= i && inCache_.count(start - i) == 0) {
             loadingIndex_ = start - i;
             break;
         }

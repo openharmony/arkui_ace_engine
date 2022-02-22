@@ -20,6 +20,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/utils.h"
 #include "core/animation/curve_animation.h"
 #include "core/event/ace_event_helper.h"
 
@@ -430,7 +431,11 @@ RefreshStatus RenderRefresh::GetNextStatus()
 
 double RenderRefresh::GetFriction(double percentage) const
 {
-    return frictionRatio_ * std::pow(1.0 - percentage, SQUARE);
+    if (NearEqual(percentage, 1.0)) {
+        return 0.0;
+    } else {
+        return frictionRatio_ * std::pow(1.0 - percentage, SQUARE);
+    }
 }
 
 double RenderRefresh::GetOffset(double delta) const

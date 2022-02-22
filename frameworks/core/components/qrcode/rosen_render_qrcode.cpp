@@ -50,14 +50,14 @@ void RosenRenderQrcode::DrawQRCode(
     }
     if (qrcode_->GetType() == QrcodeType::CIRCLE) {
         SkRect clipRect = { topLeft.GetX(), topLeft.GetY(), topLeft.GetX() + size, topLeft.GetY() + size };
-        auto clipLayer = SkRRect::MakeRectXY(clipRect, size / 2, size / 2);
+        auto clipLayer = SkRRect::MakeRectXY(clipRect, size / 2.0, size / 2.0);
         canvas->clipRRect(clipLayer, SkClipOp::kIntersect, true);
     }
     canvas->drawBitmap(ProcessQrcodeData(size, qrCode), topLeft.GetX(), topLeft.GetY());
     if (qrcode_->GetType() == QrcodeType::CIRCLE) {
         int32_t smallSquareWidth = size / sqrt(2);
-        canvas->drawBitmap(ProcessQrcodeData(smallSquareWidth, qrCode), topLeft.GetX() + (size - smallSquareWidth) / 2,
-            topLeft.GetY() + (size - smallSquareWidth) / 2);
+        canvas->drawBitmap(ProcessQrcodeData(smallSquareWidth, qrCode),
+            topLeft.GetX() + (size - smallSquareWidth) / 2.0, topLeft.GetY() + (size - smallSquareWidth) / 2.0);
     }
 }
 

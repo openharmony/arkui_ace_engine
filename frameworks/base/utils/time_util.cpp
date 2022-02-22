@@ -70,7 +70,7 @@ TimeOfNow GetTimeOfNow(double hoursWest)
         if (!NearEqual(timeOfNow.hoursWest_, DBL_MAX)) { // default value of hoursWest_ is DBL_MAX
             LOGW("hoursWest [%{public}lf] is invalid, use current time zone.", timeOfNow.hoursWest_);
         }
-        timeOfNow.hoursWest_ = timeZone.tz_minuteswest / TOTAL_MINUTE_OF_HOUR;
+        timeOfNow.hoursWest_ = static_cast<double>(timeZone.tz_minuteswest) / static_cast<double>(TOTAL_MINUTE_OF_HOUR);
     }
     int secondsOfToday = currentTime.tv_sec % TOTAL_SECONDS_OF_DAY - minutesWest * TOTAL_SECONDS_OF_MINUTE;
     if (secondsOfToday < 0) {

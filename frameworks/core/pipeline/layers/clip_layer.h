@@ -41,6 +41,7 @@ public:
     {
         rrect_.sk_rrect = SkRRect::MakeRect(SkRect::MakeLTRB(static_cast<SkScalar>(left), static_cast<SkScalar>(top),
             static_cast<SkScalar>(right), static_cast<SkScalar>(bottom)));
+        rrect_.is_null = false;
     }
     ~ClipLayer() override = default;
 
