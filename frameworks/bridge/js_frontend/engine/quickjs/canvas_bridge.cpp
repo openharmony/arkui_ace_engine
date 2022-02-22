@@ -632,7 +632,7 @@ JSValue CanvasBridge::JsMeasureText(JSContext* ctx, JSValueConst value, int32_t 
             return;
         }
         width = canvasTask->MeasureText(text, textState);
-	height = canvasTask->MeasureTextHeight(text, textState);
+        height = canvasTask->MeasureTextHeight(text, textState);
     };
     instance->GetDelegate()->PostSyncTaskToPage(task);
     JSValue textMetrics = JS_NewObject(ctx);

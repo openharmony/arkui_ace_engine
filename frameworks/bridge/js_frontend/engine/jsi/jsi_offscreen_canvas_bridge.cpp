@@ -511,7 +511,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsMeasureText(const shared_ptr<JsR
     auto offscreenCanvas = GlobalGetOffscreenCanvas(runtime, value);
     if (offscreenCanvas) {
         width = offscreenCanvas->MeasureText(text, textState);
-	height = offscreenCanvas->MeasureTextHeight(text, textState);
+        height = offscreenCanvas->MeasureTextHeight(text, textState);
     }
     auto textMetrics = runtime->NewObject();
     textMetrics->SetProperty(runtime, "width", runtime->NewNumber(width));

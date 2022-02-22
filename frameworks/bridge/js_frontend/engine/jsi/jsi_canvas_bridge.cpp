@@ -541,7 +541,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsMeasureText(const shared_ptr<JsRuntime>& 
             return;
         }
         width = canvasTask->MeasureText(text, textState);
-	height = canvasTask->MeasureTextHeight(text, textState);
+        height = canvasTask->MeasureTextHeight(text, textState);
     };
     auto delegate = engine->GetFrontendDelegate();
     if (!delegate) {

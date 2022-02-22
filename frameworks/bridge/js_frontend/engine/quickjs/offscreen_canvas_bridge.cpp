@@ -2105,7 +2105,7 @@ JSValue OffscreenCanvasBridge::JsMeasureText(
     auto bridge = GetOffscreenCanvasBridge(ctx, value);
     if (bridge) {
         width = bridge->offscreenCanvas_->MeasureText(text, textState);
-	height = bridge->offscreenCanvas_->MeasureTextHeight(text, textState);
+        height = bridge->offscreenCanvas_->MeasureTextHeight(text, textState);
     }
 
     JSValue textMetrics = JS_NewObject(ctx);

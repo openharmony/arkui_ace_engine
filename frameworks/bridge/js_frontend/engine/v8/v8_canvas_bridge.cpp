@@ -627,7 +627,7 @@ void V8CanvasBridge::MeasureText(const v8::FunctionCallbackInfo<v8::Value>& args
             return;
         }
         width = canvasTask->MeasureText(text, textState);
-	height = canvasTask->MeasureTextHeight(text, textState);
+        height = canvasTask->MeasureTextHeight(text, textState);
     };
     auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
     (*delegate)->PostSyncTaskToPage(task);

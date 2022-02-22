@@ -543,7 +543,7 @@ void V8OffscreenCanvasBridge::MeasureText(const v8::FunctionCallbackInfo<v8::Val
     auto offscreenCanvas = GlobalGetOffscreenCanvas(args);
     if (offscreenCanvas) {
         width = offscreenCanvas->MeasureText(text, textState);
-	height = offscreenCanvas->MeasureTextHeight(text, textState);
+        height = offscreenCanvas->MeasureTextHeight(text, textState);
     }
     v8::Local<v8::Object> textMetrics = v8::Object::New(isolate);
     textMetrics
