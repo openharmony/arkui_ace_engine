@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -49,11 +49,14 @@ template("ace_osal_ohos_source_set") {
       "system_properties.cpp",
     ]
 
+    public_deps =
+        [ "//base/startup/init_lite/interfaces/innerkits:libbegetutil" ]
+
     if (is_standard_system) {
       sources += [ "resource_adapter_impl.cpp" ]
       sources += [ "resource_convertor.cpp" ]
       deps = [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
-      public_deps =
+      public_deps +=
           [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]
       external_deps += [ "multimedia_image_standard:image" ]
       if (defined(config.accessibility_support) &&

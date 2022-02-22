@@ -531,6 +531,7 @@ void QJSDeclarativeEngineInstance::InitJsNativeModuleObject(JSContext* ctx)
 {
     QJSUtils::DefineGlobalFunction(ctx, RequireNativeModule, "requireNativeModule", 1);
     ModuleManager::GetInstance()->InitTimerModule(ctx);
+    ModuleManager::GetInstance()->InitSyscapModule(ctx);
 }
 
 void QJSDeclarativeEngineInstance::InitJsExportsUtilObject(JSContext* ctx)

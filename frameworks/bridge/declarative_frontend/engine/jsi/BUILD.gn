@@ -106,6 +106,7 @@ template("declarative_js_engine_ark") {
       "modules/jsi_matrix4_module.cpp",
       "modules/jsi_module_manager.cpp",
       "modules/jsi_router_module.cpp",
+      "modules/jsi_syscap_module.cpp",
       "modules/jsi_timer_module.cpp",
     ]
 

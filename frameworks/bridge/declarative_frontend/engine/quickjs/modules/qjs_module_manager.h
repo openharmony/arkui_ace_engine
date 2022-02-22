@@ -32,6 +32,7 @@ public:
     static ModuleManager* GetInstance();
     bool InitModule(JSContext* ctx, const std::string& moduleName, JSValue& jsObject);
     void InitTimerModule(JSContext* ctx);
+    void InitSyscapModule(JSContext* ctx);
 
     JSValue SetWaitTimer(JSContext* ctx, int32_t argc, JSValueConst* argv, bool isInterval);
     JSValue ClearWaitTimer(JSContext* ctx, int32_t argc, JSValueConst* argv, bool isInterval);
