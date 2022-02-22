@@ -529,7 +529,8 @@ shared_ptr<JsValue> JsiCanvasBridge::JsMeasureText(const shared_ptr<JsRuntime>& 
         return runtime->NewUndefined();
     }
     double width = 0.0;
-    auto task = [&text, &textState, id, page, &width]() {
+    double height = 0.0;
+    auto task = [&text, &textState, id, page, &width, &height]() {
         auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
         if (!canvas) {
             return;
@@ -540,6 +541,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsMeasureText(const shared_ptr<JsRuntime>& 
             return;
         }
         width = canvasTask->MeasureText(text, textState);
+	height = canvasTask->MeasureTextHeight(text, textState);
     };
     auto delegate = engine->GetFrontendDelegate();
     if (!delegate) {
@@ -549,6 +551,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsMeasureText(const shared_ptr<JsRuntime>& 
     delegate->PostSyncTaskToPage(task);
     auto textMetrics = runtime->NewObject();
     textMetrics->SetProperty(runtime, "width", runtime->NewNumber(width));
+    textMetrics->SetProperty(runtime, "height", runtime->NewNumber(height));
     return textMetrics;
 }
 

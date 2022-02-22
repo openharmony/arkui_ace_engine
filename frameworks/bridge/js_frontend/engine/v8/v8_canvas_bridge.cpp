@@ -615,7 +615,8 @@ void V8CanvasBridge::MeasureText(const v8::FunctionCallbackInfo<v8::Value>& args
         return;
     }
     double width = 0.0;
-    auto task = [&text, &textState, id, page, &width]() {
+    double height = 0.0;
+    auto task = [&text, &textState, id, page, &width, &height]() {
         auto canvas = AceType::DynamicCast<DOMCanvas>((*page)->GetDomDocument()->GetDOMNodeById(id));
         if (!canvas) {
             return;
@@ -626,12 +627,16 @@ void V8CanvasBridge::MeasureText(const v8::FunctionCallbackInfo<v8::Value>& args
             return;
         }
         width = canvasTask->MeasureText(text, textState);
+	height = canvasTask->MeasureTextHeight(text, textState);
     };
     auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
     (*delegate)->PostSyncTaskToPage(task);
     v8::Local<v8::Object> textMetrics = v8::Object::New(isolate);
     textMetrics
         ->Set(context, v8::String::NewFromUtf8(isolate, "width").ToLocalChecked(), v8::Number::New(isolate, width))
+        .ToChecked();
+    textMetrics
+        ->Set(context, v8::String::NewFromUtf8(isolate, "height").ToLocalChecked(), v8::Number::New(isolate, height))
         .ToChecked();
     args.GetReturnValue().Set(textMetrics);
 }

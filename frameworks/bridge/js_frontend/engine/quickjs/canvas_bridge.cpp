@@ -620,7 +620,8 @@ JSValue CanvasBridge::JsMeasureText(JSContext* ctx, JSValueConst value, int32_t 
         return JS_NULL;
     }
     double width = 0.0;
-    auto task = [&text, &textState, id, page, &width]() {
+    double height = 0.0;
+    auto task = [&text, &textState, id, page, &width, &height]() {
         auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
         if (!canvas) {
             return;
@@ -631,10 +632,12 @@ JSValue CanvasBridge::JsMeasureText(JSContext* ctx, JSValueConst value, int32_t 
             return;
         }
         width = canvasTask->MeasureText(text, textState);
+	height = canvasTask->MeasureTextHeight(text, textState);
     };
     instance->GetDelegate()->PostSyncTaskToPage(task);
     JSValue textMetrics = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, textMetrics, "width", JS_NewFloat64(ctx, width));
+    JS_SetPropertyStr(ctx, textMetrics, "height", JS_NewFloat64(ctx, height));
     return textMetrics;
 }
 

@@ -539,13 +539,18 @@ void V8OffscreenCanvasBridge::MeasureText(const v8::FunctionCallbackInfo<v8::Val
     std::string text = *arg;
     auto textState = ParseTextState(context, args.Holder());
     double width = 0.0;
+    double height = 0.0;
     auto offscreenCanvas = GlobalGetOffscreenCanvas(args);
     if (offscreenCanvas) {
         width = offscreenCanvas->MeasureText(text, textState);
+	height = offscreenCanvas->MeasureTextHeight(text, textState);
     }
     v8::Local<v8::Object> textMetrics = v8::Object::New(isolate);
     textMetrics
         ->Set(context, v8::String::NewFromUtf8(isolate, "width").ToLocalChecked(), v8::Number::New(isolate, width))
+        .ToChecked();
+    textMetrics
+        ->Set(context, v8::String::NewFromUtf8(isolate, "height").ToLocalChecked(), v8::Number::New(isolate, height))
         .ToChecked();
     args.GetReturnValue().Set(textMetrics);
 }
