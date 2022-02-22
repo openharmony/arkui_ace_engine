@@ -179,7 +179,7 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     } else {
         LOGI("ACE::ParentID is %{public}d.", node->GetParentId());
     }
-    if (node->GetNodeId() == rootId) {
+    if (node->GetNodeId() == 0) {
         nodeInfo.SetParent(-1);
     }
     nodeInfo.SetWindowId(windowId);
@@ -364,10 +364,8 @@ void JsAccessibilityManager::InitializeCallback()
     if (!pipelineContext) {
         return;
     }
-    int32_t windowId = pipelineContext->GetWindowId();
-    if (AccessibilitySystemAbilityClient::GetInstance()->IsEnabled()) {
-        RegisterInteractionOperation(windowId);
-    }
+
+    RegisterInteractionOperation(pipelineContext->GetWindowId());
 }
 
 bool JsAccessibilityManager::SendAccessibilitySyncEvent(const AccessibilityEvent& accessibilityEvent)
@@ -684,8 +682,9 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(
     }
 
     NodeId nodeId = static_cast<NodeId>(elementId);
+    // get root node
     if (elementId == -1) {
-        nodeId = jsAccessibilityManager->GetRootNodeId();
+        nodeId = 0;
     }
     auto node = jsAccessibilityManager->GetAccessibilityNodeFromPage(nodeId);
     if (!node) {
@@ -846,7 +845,7 @@ void JsAccessibilityManager::FindFocusedElementInfo(
     AccessibilityElementInfo nodeInfo;
     NodeId nodeId = static_cast<NodeId>(elementId);
     if (elementId == -1) {
-        nodeId = jsAccessibilityManager->GetRootNodeId();
+        nodeId = 0;
     }
 
     auto node = jsAccessibilityManager->GetAccessibilityNodeFromPage(nodeId);

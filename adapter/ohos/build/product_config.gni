@@ -18,3 +18,5 @@ gpu_block_product_list = [
   "rk3568",
   "watchos",
 ]
+
+enable_accessibility_product_list = [ "rk3568" ]
