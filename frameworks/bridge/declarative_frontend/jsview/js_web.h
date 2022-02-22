@@ -25,6 +25,10 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void OnPageStart(const JSCallbackInfo& args);
     static void OnPageFinish(const JSCallbackInfo& args);
+    static void OnProgressChange(const JSCallbackInfo& args);
+    static void OnTitleReceive(const JSCallbackInfo& args);
+    static void OnGeolocationHide(const JSCallbackInfo& args);
+    static void OnGeolocationShow(const JSCallbackInfo& args);
     static void OnRequestFocus(const JSCallbackInfo& args);
     static void OnError(const JSCallbackInfo& args);
     static void OnMessage(const JSCallbackInfo& args);

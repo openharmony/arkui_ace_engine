@@ -25,12 +25,66 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
 
 namespace OHOS::Ace::Framework {
+
+class JSWebGeolocation : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebGeolocation>::Declare("WebGeolocation");
+        JSClass<JSWebGeolocation>::CustomMethod("invoke", &JSWebGeolocation::Invoke);
+        JSClass<JSWebGeolocation>::Bind(globalObj, &JSWebGeolocation::Constructor, &JSWebGeolocation::Destructor);
+    }
+
+    void SetEvent(const LoadWebGeolocationShowEvent& eventInfo)
+    {
+        webGeolocation_ = eventInfo.GetWebGeolocation();
+    }
+
+    void Invoke(const JSCallbackInfo& args)
+    {
+        std::string origin;
+        bool allow = false;
+        bool retain = false;
+        if (args[0]->IsString()) {
+            origin = args[0]->ToString();
+        }
+        if (args[1]->IsBoolean()) {
+            allow = args[1]->ToBoolean();
+        }
+        if (args[2]->IsBoolean()) {
+            retain = args[2]->ToBoolean();
+        }
+        webGeolocation_->Invoke(origin, allow, retain);
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebGeolocation = Referenced::MakeRefPtr<JSWebGeolocation>();
+        jsWebGeolocation->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebGeolocation));
+    }
+
+    static void Destructor(JSWebGeolocation* jsWebGeolocation)
+    {
+        if (jsWebGeolocation != nullptr) {
+            jsWebGeolocation->DecRefCount();
+        }
+    }
+
+    RefPtr<WebGeolocation> webGeolocation_;
+};
+    
 void JSWeb::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWeb>::Declare("Web");
     JSClass<JSWeb>::StaticMethod("create", &JSWeb::Create);
     JSClass<JSWeb>::StaticMethod("onPageBegin", &JSWeb::OnPageStart);
     JSClass<JSWeb>::StaticMethod("onPageEnd", &JSWeb::OnPageFinish);
+    JSClass<JSWeb>::StaticMethod("onProgressChange", &JSWeb::OnProgressChange);
+    JSClass<JSWeb>::StaticMethod("onTitleReceive", &JSWeb::OnTitleReceive);
+    JSClass<JSWeb>::StaticMethod("onGeolocationHide", &JSWeb::OnGeolocationHide);
+    JSClass<JSWeb>::StaticMethod("onGeolocationShow", &JSWeb::OnGeolocationShow);
     JSClass<JSWeb>::StaticMethod("onRequestSelected", &JSWeb::OnRequestFocus);
     JSClass<JSWeb>::StaticMethod("onErrorReceive", &JSWeb::OnError);
     JSClass<JSWeb>::StaticMethod("onMessage", &JSWeb::OnMessage);
@@ -41,12 +95,50 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onFocus", &JSWeb::OnFocus);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
+    JSWebGeolocation::JSBind(globalObj);
 }
 
 JSRef<JSVal> LoadWebPageFinishEventToJSValue(const LoadWebPageFinishEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("url", eventInfo.GetLoadedUrl());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> LoadWebPageStartEventToJSValue(const LoadWebPageStartEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("url", eventInfo.GetLoadedUrl());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> LoadWebProgressChangeEventToJSValue(const LoadWebProgressChangeEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("newProgress", eventInfo.GetNewProgress());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> LoadWebTitleReceiveEventToJSValue(const LoadWebTitleReceiveEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("title", eventInfo.GetTitle());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> LoadWebGeolocationHideEventToJSValue(const LoadWebGeolocationHideEvent& eventInfo)
+{
+    return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetOrigin()));
+}
+
+JSRef<JSVal> LoadWebGeolocationShowEventToJSValue(const LoadWebGeolocationShowEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("origin", eventInfo.GetOrigin());
+    JSRef<JSObject> geolocationObj = JSClass<JSWebGeolocation>::NewInstance();
+    auto geolocationEvent = Referenced::Claim(geolocationObj->Unwrap<JSWebGeolocation>());
+    geolocationEvent->SetEvent(eventInfo);
+    obj->SetPropertyObject("geolocation", geolocationObj);
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -113,11 +205,19 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
 void JSWeb::OnPageStart(const JSCallbackInfo& args)
 {
-    if (!JSViewBindEvent(&WebComponent::SetOnPageStart, args)) {
-        LOGW("Failed to bind start event");
+    if (!args[0]->IsFunction()) {
+        return;
     }
-
-    args.ReturnSelf();
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebPageStartEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadWebPageStartEventToJSValue);
+    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebPageStartEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetPageStartedEventId(eventMarker);
 }
 
 void JSWeb::OnPageFinish(const JSCallbackInfo& args)
@@ -135,6 +235,74 @@ void JSWeb::OnPageFinish(const JSCallbackInfo& args)
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetPageFinishedEventId(eventMarker);
+}
+
+void JSWeb::OnProgressChange(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebProgressChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadWebProgressChangeEventToJSValue);
+    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebProgressChangeEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetProgressChangeEventId(eventMarker);
+}
+
+void JSWeb::OnTitleReceive(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebTitleReceiveEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadWebTitleReceiveEventToJSValue);
+    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebTitleReceiveEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetTitleReceiveEventId(eventMarker);
+}
+
+void JSWeb::OnGeolocationHide(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebGeolocationHideEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadWebGeolocationHideEventToJSValue);
+    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebGeolocationHideEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetGeolocationHideEventId(eventMarker);
+}
+
+void JSWeb::OnGeolocationShow(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebGeolocationShowEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadWebGeolocationShowEventToJSValue);
+    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebGeolocationShowEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetGeolocationShowEventId(eventMarker);
 }
 
 void JSWeb::OnRequestFocus(const JSCallbackInfo& args)

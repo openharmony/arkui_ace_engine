@@ -59,6 +59,32 @@ private:
     RefPtr<Result> result_;
 };
 
+class ACE_EXPORT WebGeolocation : public AceType {
+    DECLARE_ACE_TYPE(WebGeolocation, AceType)
+
+public:
+    WebGeolocation() = default;
+    ~WebGeolocation() = default;
+
+    virtual void Invoke(const std::string& origin, const bool& allow, const bool& retain) = 0;
+};
+
+class ACE_EXPORT LoadWebPageStartEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageStartEvent, BaseEventInfo);
+
+public:
+    LoadWebPageStartEvent(const std::string& url) : BaseEventInfo("LoadWebPageStartEvent"), loadedUrl_(url) {}
+    ~LoadWebPageStartEvent() = default;
+
+    const std::string& GetLoadedUrl() const
+    {
+        return loadedUrl_;
+    }
+
+private:
+    std::string loadedUrl_;
+};
+
 class ACE_EXPORT LoadWebPageFinishEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageFinishEvent, BaseEventInfo);
 
@@ -75,6 +101,78 @@ private:
     std::string loadedUrl_;
 };
 
+class ACE_EXPORT LoadWebProgressChangeEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebProgressChangeEvent, BaseEventInfo);
+
+public:
+    LoadWebProgressChangeEvent(const int& newProgress)
+        : BaseEventInfo("LoadWebProgressChangeEvent"), newProgress_(newProgress) {}
+    ~LoadWebProgressChangeEvent() = default;
+
+    const int& GetNewProgress() const
+    {
+        return newProgress_;
+    }
+
+private:
+    int newProgress_;
+};
+
+class ACE_EXPORT LoadWebTitleReceiveEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebTitleReceiveEvent, BaseEventInfo);
+
+public:
+    LoadWebTitleReceiveEvent(const std::string& title) : BaseEventInfo("LoadWebTitleReceiveEvent"), title_(title) {}
+    ~LoadWebTitleReceiveEvent() = default;
+
+    const std::string& GetTitle() const
+    {
+        return title_;
+    }
+
+private:
+    std::string title_;
+};
+
+class ACE_EXPORT LoadWebGeolocationHideEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebGeolocationHideEvent, BaseEventInfo);
+
+public:
+    LoadWebGeolocationHideEvent(const std::string& origin)
+        : BaseEventInfo("LoadWebGeolocationHideEvent"), origin_(origin) {}
+    ~LoadWebGeolocationHideEvent() = default;
+
+    const std::string& GetOrigin() const
+    {
+        return origin_;
+    }
+
+private:
+    std::string origin_;
+};
+
+class ACE_EXPORT LoadWebGeolocationShowEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebGeolocationShowEvent, BaseEventInfo);
+
+public:
+    LoadWebGeolocationShowEvent(const std::string& origin, const RefPtr<WebGeolocation>& webGeolocation)
+        : BaseEventInfo("LoadWebGeolocationShowEvent"), origin_(origin), webGeolocation_(webGeolocation) {}
+    ~LoadWebGeolocationShowEvent() = default;
+
+    const std::string& GetOrigin() const
+    {
+        return origin_;
+    }
+
+    const RefPtr<WebGeolocation>& GetWebGeolocation() const
+    {
+        return webGeolocation_;
+    }
+
+private:
+    std::string origin_;
+    RefPtr<WebGeolocation> webGeolocation_;
+};
 
 class ACE_EXPORT DownloadStartEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(DownloadStartEvent, BaseEventInfo);

@@ -99,6 +99,13 @@ void WebDelegate::ReleasePlatformResource()
     }
 }
 
+void WebGeolocationOhos::Invoke(const std::string &origin, const bool& allow, const bool& retain)
+{
+    if (geolocationCallback_) {
+        geolocationCallback_->Invoke(origin, allow, retain);
+    }
+}
+
 void WebDelegate::Stop()
 {
     auto context = context_.Upgrade();
@@ -565,6 +572,16 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
     SetWebCallBack();
     onPageFinishedV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
         webComponent_->GetPageFinishedEventId(), pipelineContext);
+    onPageStartedV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetPageStartedEventId(), pipelineContext);
+    onProgressChangeV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetProgressChangeEventId(), pipelineContext);
+    onTitleReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetTitleReceiveEventId(), pipelineContext);
+    onGeolocationHideV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetGeolocationHideEventId(), pipelineContext);
+    onGeolocationShowV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetGeolocationShowEventId(), pipelineContext);
     onFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
         webComponent_->GetOnFocusEventId(), pipelineContext);
     onRequestFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
@@ -1055,6 +1072,11 @@ void WebDelegate::OnPageStarted(const std::string& param)
         std::string urlParam = std::string(R"("pagestart",{"url":)").append(paramStart.append("},null"));
         onPageStarted_(urlParam);
     }
+
+    // ace 2.0
+    if (onPageStartedV2_) {
+        onPageStartedV2_(std::make_shared<LoadWebPageStartEvent>(param));
+    }
 }
 
 void WebDelegate::OnPageFinished(const std::string& param)
@@ -1067,6 +1089,40 @@ void WebDelegate::OnPageFinished(const std::string& param)
     // ace 2.0
     if (onPageFinishedV2_) {
         onPageFinishedV2_(std::make_shared<LoadWebPageFinishEvent>(param));
+    }
+}
+
+void WebDelegate::OnProgressChanged(int param)
+{
+    // ace 2.0
+    if (onProgressChangeV2_) {
+        onProgressChangeV2_(std::make_shared<LoadWebProgressChangeEvent>(param));
+    }
+}
+
+void WebDelegate::OnReceivedTitle(const std::string& param)
+{
+    // ace 2.0
+    if (onTitleReceiveV2_) {
+        onTitleReceiveV2_(std::make_shared<LoadWebTitleReceiveEvent>(param));
+    }
+}
+
+void WebDelegate::OnGeolocationPermissionsHidePrompt()
+{
+    // ace 2.0
+    if (onGeolocationHideV2_) {
+        onGeolocationHideV2_(std::make_shared<LoadWebGeolocationHideEvent>(""));
+    }
+}
+
+void WebDelegate::OnGeolocationPermissionsShowPrompt(const std::string& origin,
+    OHOS::WebView::GeolocationCallback* callback)
+{
+    // ace 2.0
+    if (onGeolocationShowV2_) {
+        auto geolocation = AceType::MakeRefPtr<WebGeolocationOhos>(callback);
+        onGeolocationShowV2_(std::make_shared<LoadWebGeolocationShowEvent>(origin, geolocation));
     }
 }
 
