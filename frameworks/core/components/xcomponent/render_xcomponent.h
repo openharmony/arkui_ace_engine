@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,7 @@ public:
     };
 
     void NativeXComponentInit(
-        NativeXComponent* nativeXComponent,
+        OH_NativeXComponent* nativeXComponent,
         WeakPtr<NativeXComponentImpl> nativeXComponentImpl);
 
     void NativeXComponentDestroy();
@@ -60,13 +60,13 @@ public:
         xcomponentSizeChangeEvent_ = std::move(xcomponentSizeChangeEvent);
     }
 
-    void NativeXComponentDispatchTouchEvent(const TouchInfo& touchInfo);
+    void NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent);
 
 protected:
     RefPtr<XComponentDelegate> delegate_;
     RefPtr<XComponentTaskPool> pool_;
     std::list<TaskFunction> tasks_;
-    NativeXComponent* nativeXComponent_ = nullptr;
+    OH_NativeXComponent* nativeXComponent_ = nullptr;
     WeakPtr<NativeXComponentImpl> nativeXComponentImpl_;
     XComponentSizeChangeEvent xcomponentSizeChangeEvent_;
 

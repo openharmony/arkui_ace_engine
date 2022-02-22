@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ namespace OHOS::Ace::Framework {
 V8XComponentBridge::V8XComponentBridge()
 {
     nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
-    nativeXComponent_ = new NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
+    nativeXComponent_ = new OH_NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
 }
 
 V8XComponentBridge::~V8XComponentBridge()
@@ -96,7 +96,7 @@ void V8XComponentBridge::HandleContext(const v8::Local<v8::Context>& ctx, NodeId
     }
 
     auto renderContext = nativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true,
-                                                        args, NATIVE_XCOMPONENT_OBJ,
+                                                        args, OH_NATIVE_XCOMPONENT_OBJ,
                                                         reinterpret_cast<void*>(nativeXComponent_));
     renderContext_.Reset(isolate_, renderContext);
     auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate_->GetData(V8EngineInstance::FRONTEND_DELEGATE));
