@@ -79,6 +79,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWeb>::Declare("Web");
     JSClass<JSWeb>::StaticMethod("create", &JSWeb::Create);
+    JSClass<JSWeb>::StaticMethod("onPageBegin", &JSWeb::OnPageStart);
     JSClass<JSWeb>::StaticMethod("onPageEnd", &JSWeb::OnPageFinish);
     JSClass<JSWeb>::StaticMethod("onProgressChange", &JSWeb::OnProgressChange);
     JSClass<JSWeb>::StaticMethod("onTitleReceive", &JSWeb::OnTitleReceive);
