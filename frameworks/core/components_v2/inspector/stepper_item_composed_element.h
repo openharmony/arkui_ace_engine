@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_STEPPER_ITEM_COMPOSED_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_STEPPER_ITEM_COMPOSED_ELEMENT_H
 
+#include "core/components/flex/flex_element.h"
 #include "core/components/stepper/stepper_element.h"
 #include "core/components/stepper/stepper_item_element.h"
 #include "core/components/stepper/render_stepper.h"
@@ -35,6 +36,9 @@ public:
     std::string GetPrevLabel() const;
     std::string GetNextLabel() const;
     std::string GetStatus() const;
+    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
+    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
+    void DeleteChildWithSlot(int32_t slot) override;
 };
 } // namespace OHOS::Ace
 

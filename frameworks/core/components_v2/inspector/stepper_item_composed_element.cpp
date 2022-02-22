@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,4 +97,40 @@ std::string StepperItemComposedElement::GetStatus() const
     auto label = render->GetStepperLabels();
     return label[index].initialStatus;
 }
+
+void StepperItemComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto stepperItemV2 = GetContentElement<FlexElement>(FlexElement::TypeId());
+    if (!stepperItemV2) {
+        LOGE("get GetStepperItemV2 failed");
+        return;
+    }
+    stepperItemV2->UpdateChildWithSlot(nullptr, newComponent, -1, -1);
+    stepperItemV2->MarkDirty();
+}
+
+void StepperItemComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto stepperItemV2 = GetContentElement<FlexElement>(FlexElement::TypeId());
+    if (!stepperItemV2) {
+        LOGE("get GetStepperItemV2 failed");
+        return;
+    }
+    auto child = stepperItemV2->GetFirstChild();
+    stepperItemV2->UpdateChildWithSlot(child, newComponent, -1, -1);
+    stepperItemV2->MarkDirty();
+}
+
+void StepperItemComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto stepperItemV2 = GetContentElement<FlexElement>(FlexElement::TypeId());
+    if (!stepperItemV2) {
+        LOGE("get GetStepperItemV2 failed");
+        return;
+    }
+    auto child = stepperItemV2->GetFirstChild();
+    stepperItemV2->UpdateChildWithSlot(child, nullptr, -1, -1);
+    stepperItemV2->MarkDirty();
+}
+
 } // namespace OHOS::Ace::V2
