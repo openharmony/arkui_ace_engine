@@ -31,25 +31,21 @@ void WebElement::SetNewComponent(const RefPtr<Component>& newComponent)
         if (!webSrc_.empty() && webSrc_ != webComponent->GetSrc()) {
             WebClient::GetInstance().UpdateWebviewUrl(webComponent->GetSrc());
         }
-        webSrc_ = webComponent->GetSrc();
-        webComponent->SetJsEnabled(webComponent->GetJsEnabled());
-        webComponent->SetContentAccessEnabled(webComponent->GetContentAccessEnabled());
-        webComponent->SetFileAccessEnabled(webComponent->GetFileAccessEnabled());
         Element::SetNewComponent(webComponent);
     }
-    SetComponent(newComponent);
+    component_ = AceType::WeakClaim(AceType::RawPtr(newComponent));
 }
 
 void WebElement::OnFocus()
 {
     FocusNode::OnFocus();
     LOGI("web element onfocus");
-    auto component = GetComponent();
+    auto component = component_.Upgrade();
     auto webComponent = AceType::DynamicCast<WebComponent>(component);
     if (webComponent) {
-        RefPtr<WebController> controller = webComponent->GetController();
+        auto controller = webComponent->GetController();
         if (controller) {
-            controller->WebController::OnFocus();
+            controller->OnFocus();
         }
     }
 }

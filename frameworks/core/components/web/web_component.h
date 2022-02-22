@@ -298,11 +298,6 @@ public:
     using ErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using MethodCall = std::function<void(const std::string&)>;
     using Method = std::string;
-    ACE_DEFINE_COMPONENT_EVENT(OnPageStart, void(std::string));
-    ACE_DEFINE_COMPONENT_EVENT(OnPageFinish, void(std::string));
-    ACE_DEFINE_COMPONENT_EVENT(OnFocus, void(std::string));
-    ACE_DEFINE_COMPONENT_EVENT(OnError, void(std::string));
-    ACE_DEFINE_COMPONENT_EVENT(OnMessage, void(std::string));
 
     WebComponent() = default;
     explicit WebComponent(const std::string& type);

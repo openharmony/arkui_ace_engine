@@ -79,15 +79,12 @@ void JSWeb::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWeb>::Declare("Web");
     JSClass<JSWeb>::StaticMethod("create", &JSWeb::Create);
-    JSClass<JSWeb>::StaticMethod("onPageBegin", &JSWeb::OnPageStart);
     JSClass<JSWeb>::StaticMethod("onPageEnd", &JSWeb::OnPageFinish);
     JSClass<JSWeb>::StaticMethod("onProgressChange", &JSWeb::OnProgressChange);
     JSClass<JSWeb>::StaticMethod("onTitleReceive", &JSWeb::OnTitleReceive);
     JSClass<JSWeb>::StaticMethod("onGeolocationHide", &JSWeb::OnGeolocationHide);
     JSClass<JSWeb>::StaticMethod("onGeolocationShow", &JSWeb::OnGeolocationShow);
     JSClass<JSWeb>::StaticMethod("onRequestSelected", &JSWeb::OnRequestFocus);
-    JSClass<JSWeb>::StaticMethod("onErrorReceive", &JSWeb::OnError);
-    JSClass<JSWeb>::StaticMethod("onMessage", &JSWeb::OnMessage);
     JSClass<JSWeb>::StaticMethod("javaScriptAccess", &JSWeb::JsEnabled);
     JSClass<JSWeb>::StaticMethod("fileExtendAccess", &JSWeb::ContentAccessEnabled);
     JSClass<JSWeb>::StaticMethod("fileAccess", &JSWeb::FileAccessEnabled);
@@ -355,24 +352,6 @@ void JSWeb::OnFocus(const JSCallbackInfo& args)
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetOnFocusEventId(eventMarker);
-}
-
-void JSWeb::OnError(const JSCallbackInfo& args)
-{
-    if (!JSViewBindEvent(&WebComponent::SetOnError, args)) {
-        LOGW("Failed to bind error event");
-    }
-
-    args.ReturnSelf();
-}
-
-void JSWeb::OnMessage(const JSCallbackInfo& args)
-{
-    if (!JSViewBindEvent(&WebComponent::SetOnMessage, args)) {
-        LOGW("Failed to bind message event");
-    }
-
-    args.ReturnSelf();
 }
 
 void JSWeb::JsEnabled(bool isJsEnabled)
