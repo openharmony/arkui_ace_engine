@@ -24,6 +24,7 @@
 #include "core/components_v2/common/common_def.h"
 #include "core/components/declaration/web/web_client.h"
 #include "core/components/declaration/web/web_declaration.h"
+#include "core/components/web/resource/web_javascript_value.h"
 #include "core/focus/focus_node.h"
 #include "core/pipeline/base/element.h"
 
@@ -222,9 +223,12 @@ public:
         getHitTestResultImpl_ = std::move(getHitTestResultImpl);
     }
 
-    using AddJavascriptInterfaceImpl =
-        std::function<void(const std::string&, const std::vector<std::string>&)>;
-    void AddJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList)
+    using AddJavascriptInterfaceImpl = std::function<void(
+        const std::string&,
+        const std::vector<std::string>&)>;
+    void AddJavascriptInterface(
+        const std::string& objectName,
+        const std::vector<std::string>& methodList)
     {
         if (addJavascriptInterfaceImpl_) {
             addJavascriptInterfaceImpl_(objectName, methodList);
@@ -245,6 +249,23 @@ public:
     void SetRemoveJavascriptInterfaceImpl(RemoveJavascriptInterfaceImpl && removeJavascriptInterfaceImpl)
     {
         removeJavascriptInterfaceImpl_ = std::move(removeJavascriptInterfaceImpl);
+    }
+
+    using JavaScriptCallBackImpl = std::function<std::shared_ptr<WebJSValue>(
+        const std::string& objectName,
+        const std::string& objectMethod,
+        const std::vector<std::shared_ptr<WebJSValue>>& args)>;
+    using WebViewJavaScriptResultCallBackImpl = std::function<void(JavaScriptCallBackImpl&& javaScriptCallBackImpl)>;
+    void SetWebViewJavaScriptResultCallBackImpl(
+        WebViewJavaScriptResultCallBackImpl && webViewJavaScriptResultCallBackImpl)
+    {
+        webViewJavaScriptResultCallBackImpl_ = webViewJavaScriptResultCallBackImpl;
+    }
+    void SetJavaScriptCallBackImpl(JavaScriptCallBackImpl&& javaScriptCallBackImpl)
+    {
+        if (webViewJavaScriptResultCallBackImpl_) {
+            webViewJavaScriptResultCallBackImpl_(std::move(javaScriptCallBackImpl));
+        }
     }
 
     using RequestFocusImpl = std::function<void()>;
@@ -285,6 +306,7 @@ private:
     GetHitTestResultImpl getHitTestResultImpl_;
     AddJavascriptInterfaceImpl addJavascriptInterfaceImpl_;
     RemoveJavascriptInterfaceImpl removeJavascriptInterfaceImpl_;
+    WebViewJavaScriptResultCallBackImpl webViewJavaScriptResultCallBackImpl_;
     RequestFocusImpl requestFocusImpl_;
 };
 
