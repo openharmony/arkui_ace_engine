@@ -453,7 +453,7 @@ void FlutterRenderCalendar::DrawTouchedArea(RenderContext& context, Offset offse
     double dayNumberStartY = topPadding_ + weekHeight_ + weekAndDayRowSpace_ + NormalizeToPx(dateOffset);
     double x = textDirection_ == TextDirection::LTR ? column * (dayWidth_ + colSpace_)
                                                                : (totalWeek - column - 1) * (dayWidth_ + colSpace_);
-    double y = (touchIndex_ / 7) * (dayHeight_ + dailyRowSpace) + dayNumberStartY;
+    double y = (touchIndex_ / 7.0) * (dayHeight_ + dailyRowSpace) + dayNumberStartY;
     Offset circleCenter = Offset(x - (focusedAreaRadius_ * 2 - dayWidth_) / 2 + focusedAreaRadius_,
         y - NormalizeToPx(1.0_vp) + focusedAreaRadius_);
     Offset bgCircleStart = offset + circleCenter;

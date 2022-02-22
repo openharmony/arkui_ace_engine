@@ -15,6 +15,7 @@
 
 #include "core/components/common/properties/motion_path_evaluator.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/core/components/common/painter/flutter_svg_painter.h"
 
 namespace OHOS::Ace {
@@ -58,6 +59,9 @@ MotionPathEvaluator::MotionPathEvaluator(
 
 MotionPathPosition MotionPathEvaluator::Evaluate(float fraction)
 {
+    if (NearEqual(fraction, 1.0f)) {
+        fraction = 1.0f;
+    }
     if (!motionPathOption_.IsValid()) {
         return MotionPathPosition { .offset = startPoint_ * (1.0f - fraction) + endPoint_ * fraction, .rotate = 0.0f };
     }

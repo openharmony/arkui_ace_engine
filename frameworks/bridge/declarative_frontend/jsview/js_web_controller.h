@@ -41,6 +41,8 @@ public:
     void GetHitTestResult(const JSCallbackInfo& args);
     void AddJavascriptInterface(const JSCallbackInfo& args);
     void RemoveJavascriptInterface(const JSCallbackInfo& args);
+    void OnInactive(const JSCallbackInfo& args);
+    void OnActive(const JSCallbackInfo& args);
     void RequestFocus(const JSCallbackInfo& args);
 
     // Backward and Forward for web page

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
 #include "core/components/clip/clip_component.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/container_modal/container_modal_element.h"
 #include "core/components/container_modal/render_container_modal.h"
 #include "core/components/flex/flex_component.h"
@@ -28,27 +29,6 @@
 #include "core/components/tween/tween_component.h"
 
 namespace OHOS::Ace {
-namespace {
-
-const Dimension CONTAINER_INNER_RADIUS = 14.0_vp;
-const Dimension CONTAINER_OUTER_RADIUS = 16.0_vp;
-const Dimension CONTAINER_BORDER_WIDTH = 1.0_vp;
-const Dimension CONTAINER_TITLE_HEIGHT = 48.0_vp;
-const Dimension TITLE_PADDING_START = 24.0_vp;
-const Dimension TITLE_PADDING_END = 24.0_vp;
-const Dimension ZERO_PADDING = 0.0_vp;
-const Dimension TITLE_ELEMENT_MARGIN_HORIZONTAL = 16.0_vp;
-const Dimension TITLE_ICON_SIZE = 20.0_vp;
-const Dimension TITLE_BUTTON_SIZE = 24.0_vp;
-const Dimension TITLE_TEXT_FONT_SIZE = 16.0_fp;
-const Dimension CONTENT_MARGIN = 4.0_vp;
-const Color CONTAINER_BACKGROUND_COLOR = Color(0xd6e4e5ed);
-const Color CONTAINER_BORDER_COLOR = Color(0x33000000);
-const Color TITLE_TEXT_COLOR = Color(0xe5000000);
-const Color CONTENT_BACKGROUND_COLOR = Color(0xffffffff);
-const Color TITLE_BUTTON_BACKGROUND_COLOR = Color(0x33000000);
-
-} // namespace
 
 RefPtr<Component> ContainerModalComponent::Create(
     const WeakPtr<PipelineContext>& context, const RefPtr<Component>& child)
@@ -133,11 +113,6 @@ RefPtr<Component> ContainerModalComponent::BuildContent()
     contentDecoration->SetBorder(contentBorder);
     contentBox->SetBackDecoration(contentDecoration);
 
-    Edge margin;
-    margin.SetLeft(CONTENT_MARGIN);
-    margin.SetRight(CONTENT_MARGIN);
-    contentBox->SetMargin(margin);
-
     // adaptive height
     contentBox->SetFlexWeight(1.0);
     return contentBox;
@@ -199,9 +174,7 @@ void ContainerModalComponent::BuildInnerChild()
     containerBox->SetFlex(BoxFlex::FLEX_X);
     containerBox->SetAlignment(Alignment::CENTER);
 
-    // Use the bottom padding of the containerBox to replace the bottom margin of the contentBox.
-    Edge padding;
-    padding.SetBottom(CONTENT_MARGIN);
+    Edge padding = Edge(CONTENT_PADDING, Dimension(0.0), CONTENT_PADDING, CONTENT_PADDING);
     containerBox->SetPadding(padding);
     containerBox->SetChild(stackComponent);
     SetChild(containerBox);

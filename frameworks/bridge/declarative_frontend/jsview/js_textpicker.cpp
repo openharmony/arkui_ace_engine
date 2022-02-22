@@ -67,7 +67,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
         LOGE("parse selected value failed");
     }
 
-    if (selected < 0 || selected >= (int)getRangeVector.size()) {
+    if (selected < 0 || selected >= getRangeVector.size()) {
         LOGE("selected is out of range");
     }
 
@@ -194,7 +194,7 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
         LOGE("parse selected value failed");
     }
 
-    if (selected < 0 || selected >= (int)getRangeVector.size()) {
+    if (selected < 0 || selected >= getRangeVector.size()) {
         LOGE("selected is out of range");
     }
 

@@ -174,7 +174,7 @@ private:
     Pattern GetPattern(int32_t id);
     std::vector<uint32_t> lineDash_;
     ImageData imageData_;
-    bool isOffscreen_;
+    bool isOffscreen_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

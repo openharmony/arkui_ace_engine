@@ -22,7 +22,7 @@ HdcJdwpSimulator::HdcJdwpSimulator(uv_loop_t *loopIn, const std::string pkgName)
     loop_ = loopIn;
     exit_ = false;
     pkgName_ = pkgName;
-    connect_ = new uv_connect_t();
+    connect_ = new (std::nothrow) uv_connect_t();
     ctxPoint_ = (HCtxJdwpSimulator)MallocContext();
 }
 
@@ -58,7 +58,7 @@ RetErrCode HdcJdwpSimulator::SendToStream(uv_stream_t *handleStream, const uint8
         LOGE("HdcJdwpSimulator::SendToStream wrong bufLen.");
         return RetErrCode::ERR_GENERIC;
     }
-    uint8_t *pDynBuf = new uint8_t[bufLen];
+    uint8_t *pDynBuf = new (std::nothrow) uint8_t[bufLen];
     if (pDynBuf == nullptr) {
         LOGE("HdcJdwpSimulator::SendToStream new pDynBuf fail.");
         return RetErrCode::ERR_GENERIC;
@@ -105,7 +105,7 @@ void HdcJdwpSimulator::ConnectJdwp(uv_connect_t *connection, int status)
 #ifdef JS_JDWP_CONNECT
     string pkgName = thisClass->pkgName_;
     uint32_t pkgSize = pkgName.size() + sizeof(JsMsgHeader);
-    uint8_t* info = new uint8_t[pkgSize]();
+    uint8_t* info = new (std::nothrow) uint8_t[pkgSize]();
     if (!info) {
         LOGE("ConnectJdwp new info fail.");
         return;
@@ -139,7 +139,7 @@ void HdcJdwpSimulator::ConnectJdwp(uv_connect_t *connection, int status)
 void *HdcJdwpSimulator::MallocContext()
 {
     HCtxJdwpSimulator ctx = nullptr;
-    if ((ctx = new ContextJdwpSimulator()) == nullptr) {
+    if ((ctx = new (std::nothrow) ContextJdwpSimulator()) == nullptr) {
         return nullptr;
     }
     ctx->thisClass = this;

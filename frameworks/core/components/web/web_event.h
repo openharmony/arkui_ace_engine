@@ -133,6 +133,21 @@ public:
 private:
     std::string focusUrl_;
 };
+
+class ACE_EXPORT LoadWebOnFocusEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebOnFocusEvent, BaseEventInfo);
+
+public:
+    LoadWebOnFocusEvent(const std::string& url) : BaseEventInfo("LoadWebOnFocusEvent"), focusUrl_(url) {}
+    ~LoadWebOnFocusEvent() = default;
+
+    const std::string& GetOnFocus() const
+    {
+        return focusUrl_;
+    }
+private:
+    std::string focusUrl_;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H

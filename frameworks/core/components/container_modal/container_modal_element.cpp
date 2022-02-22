@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "core/components/container_modal/container_modal_element.h"
 
 #include "core/components/box/box_element.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/container_modal/render_container_modal.h"
 #include "core/components/flex/flex_element.h"
 #include "core/components/flex/flex_item_element.h"
@@ -107,6 +108,22 @@ void ContainerModalElement::ShowTitle(bool isShow)
         LOGE("ContainerModalElement showTitle failed, container box element is null!");
         return;
     }
+    auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
+    if (containerRenderBox) {
+        auto containerDecoration = AceType::MakeRefPtr<Decoration>();
+        Edge padding = Edge();
+        if (isShow) {
+            Border outerBorder;
+            outerBorder.SetBorderRadius(Radius(CONTAINER_OUTER_RADIUS));
+            outerBorder.SetColor(CONTAINER_BORDER_COLOR);
+            outerBorder.SetWidth(CONTAINER_BORDER_WIDTH);
+            containerDecoration->SetBackgroundColor(CONTAINER_BACKGROUND_COLOR);
+            containerDecoration->SetBorder(outerBorder);
+            padding = Edge(CONTENT_PADDING, Dimension(0.0), CONTENT_PADDING, CONTENT_PADDING);
+        }
+        containerRenderBox->SetBackDecoration(containerDecoration);
+        containerRenderBox->SetPadding(padding);
+    }
 
     auto stackElement = AceType::DynamicCast<StackElement>(containerBox->GetFirstChild());
     if (!stackElement) {
@@ -119,6 +136,18 @@ void ContainerModalElement::ShowTitle(bool isShow)
         // column should have 2 children, title and content.
         LOGE("ContainerModalElement showTitle failed, column  element is null or children size error!");
         return;
+    }
+
+    auto contentRenderBox = AceType::DynamicCast<RenderBox>(column->GetLastChild()->GetRenderNode());
+    if (contentRenderBox) {
+        auto contentDecoration = AceType::MakeRefPtr<Decoration>();
+        contentDecoration->SetBackgroundColor(CONTENT_BACKGROUND_COLOR);
+        if (isShow) {
+            Border contentBorder;
+            contentBorder.SetBorderRadius(Radius(CONTAINER_INNER_RADIUS));
+            contentDecoration->SetBorder(contentBorder);
+        }
+        contentRenderBox->SetBackDecoration(contentDecoration);
     }
 
     // Get first child : title

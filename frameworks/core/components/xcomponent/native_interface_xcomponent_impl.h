@@ -27,7 +27,7 @@ class NativeXComponentImpl : public virtual AceType {
     DECLARE_ACE_TYPE(NativeXComponentImpl, AceType);
 
 public:
-    NativeXComponentImpl() : window_(nullptr), width_(0), height_(0), x_(0.0), y_(0.0), callback_(nullptr) {}
+    NativeXComponentImpl() {}
 
     ~NativeXComponentImpl() {}
 
@@ -113,13 +113,13 @@ public:
 
 private:
     std::string xcomponetId_;
-    void* window_;
-    int width_;
-    int height_;
-    double x_;
-    double y_;
+    void* window_ = nullptr;
+    int width_ = 0;
+    int height_ = 0;
+    double x_ = 0.0;
+    double y_ = 0.0;
     TouchInfo touchInfo_;
-    NativeXComponentCallback* callback_;
+    NativeXComponentCallback* callback_ = nullptr;
 };
 }
 

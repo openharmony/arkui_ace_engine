@@ -141,6 +141,9 @@ private:
     void AddJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
     void RemoveJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
     void RequestFocus();
+    void OnFocus();
+    void OnInactive();
+    void OnActive();
     int GetHitTestResult();
     void SetWebCallBack();
 
@@ -176,6 +179,7 @@ private:
     EventCallbackV2 onPageFinishedV2_;
     EventCallbackV2 onRequestFocusV2_;
     EventCallbackV2 onDownloadStartV2_;
+    EventCallbackV2 onFocusV2_;
 
 #endif
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@ struct WebEvent : Event {
     EventMarker pageStartEventId;
     EventMarker pageFinishEventId;
     EventMarker requestFocusEventId;
+    EventMarker onFocusEventId;
     EventMarker pageErrorEventId;
     EventMarker messageEventId;
     EventMarker downloadStartEventId;
@@ -108,6 +109,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.requestFocusEventId;
+    }
+
+    void SetOnFocusEventId(const EventMarker& onFocusEventId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.onFocusEventId = onFocusEventId;
+    }
+
+    const EventMarker& GetOnFocusEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.onFocusEventId;
     }
 
     void SetPageErrorEventId(const EventMarker& pageErrorEventId)

@@ -36,6 +36,8 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("getHitTest", &JSWebController::GetHitTestResult);
     JSClass<JSWebController>::CustomMethod("registerJavaScriptProxy", &JSWebController::AddJavascriptInterface);
     JSClass<JSWebController>::CustomMethod("deleteJavaScriptRegister", &JSWebController::RemoveJavascriptInterface);
+    JSClass<JSWebController>::CustomMethod("onInactive", &JSWebController::OnInactive);
+    JSClass<JSWebController>::CustomMethod("onActive", &JSWebController::OnActive);
     JSClass<JSWebController>::CustomMethod("requestFocus", &JSWebController::RequestFocus);
     JSClass<JSWebController>::CustomMethod("loadData", &JSWebController::LoadDataWithBaseUrl);
     JSClass<JSWebController>::CustomMethod("backward", &JSWebController::Backward);
@@ -301,6 +303,20 @@ void JSWebController::RemoveJavascriptInterface(const JSCallbackInfo& args)
 
     if (webController_) {
         webController_->RemoveJavascriptInterface(objName, methods);
+    }
+}
+
+void JSWebController::OnInactive(const JSCallbackInfo& args)
+{
+    if (webController_) {
+        webController_->OnInactive();
+    }
+}
+
+void JSWebController::OnActive(const JSCallbackInfo& args)
+{
+    if (webController_) {
+        webController_->OnActive();
     }
 }
 

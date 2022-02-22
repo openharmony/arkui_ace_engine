@@ -565,6 +565,8 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
     SetWebCallBack();
     onPageFinishedV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
         webComponent_->GetPageFinishedEventId(), pipelineContext);
+    onFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetOnFocusEventId(), pipelineContext);
     onRequestFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
         webComponent_->GetRequestFocusEventId(), pipelineContext);
     onDownloadStartV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
@@ -686,6 +688,33 @@ void WebDelegate::SetWebCallBack()
                     auto delegate = weak.Upgrade();
                     if (delegate) {
                         delegate->RemoveJavascriptInterface(objectName, methodList);
+                    }
+                });
+            });
+        webController->SetOnInactiveImpl(
+            [weak = WeakClaim(this), uiTaskExecutor]() {
+                uiTaskExecutor.PostTask([weak]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->OnInactive();
+                    }
+                });
+            });
+        webController->SetOnActiveImpl(
+            [weak = WeakClaim(this), uiTaskExecutor]() {
+                uiTaskExecutor.PostTask([weak]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->OnActive();
+                    }
+                });
+            });
+        webController->SetOnFocusImpl(
+            [weak = WeakClaim(this), uiTaskExecutor]() {
+                uiTaskExecutor.PostTask([weak]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->OnFocus();
                     }
                 });
             });
@@ -835,6 +864,51 @@ void WebDelegate::LoadUrl()
             }
         },
         TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::OnInactive()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->OnPause();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::OnActive()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->OnResume();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::OnFocus()
+{
+    if (onFocusV2_) {
+        onFocusV2_(std::make_shared<LoadWebRequestFocusEvent>(""));
+    }
 }
 
 sptr<OHOS::Rosen::Window> WebDelegate::CreateWindow()
