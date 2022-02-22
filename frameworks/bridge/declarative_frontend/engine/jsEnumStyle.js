@@ -728,3 +728,10 @@ var PlaybackSpeed;
   PlaybackSpeed["Speed_Forward_1_75_X"] = "1.75";
   PlaybackSpeed["Speed_Forward_2_00_X"] = "2.00";
 })(PlaybackSpeed || (PlaybackSpeed = {}));
+
+var MixedModeContent;
+(function (MixedModeContent) {
+  MixedModeContent[MixedModeContent["MIXED_CONTENT_ALWAYS_ALLOW"] = 0] = "MIXED_CONTENT_ALWAYS_ALLOW";
+  MixedModeContent[MixedModeContent["MIXED_CONTENT_NEVER_ALLOW"] = 1] = "MIXED_CONTENT_NEVER_ALLOW";
+  MixedModeContent[MixedModeContent["MIXED_CONTENT_COMPATIBILITY_MODE"] = 2] = "MIXED_CONTENT_COMPATIBILITY_MODE";
+})(MixedModeContent || (MixedModeContent = {}));

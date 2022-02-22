@@ -101,6 +101,14 @@ public:
         }
     }
     void Resize(const double& width, const double& height);
+    void UpdateJavaScriptEnabled(const bool& isJsEnabled);
+    void UpdateAllowFileAccess(const bool& isFileAccessEnabled);
+    void UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled);
+    void UpdateLoadsImagesAutomatically(const bool& isImageAccessEnabled);
+    void UpdateMixedContentMode(const MixedModeContent& mixedMode);
+    void UpdateSupportZoom(const bool& isZoomAccessEnabled);
+    void UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled);
+    void UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled);
     void LoadUrl();
     void HandleTouchDown(const int32_t& id, const double& x, const double& y);
     void HandleTouchUp(const int32_t& id, const double& x, const double& y);

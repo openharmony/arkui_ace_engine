@@ -57,6 +57,16 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         LOGE("WebComponent is null");
         return;
     }
+    if (delegate_) {
+        delegate_->UpdateJavaScriptEnabled(web->GetJsEnabled());
+        delegate_->UpdateBlockNetworkImage(web->GetOnLineImageAccessEnabled());
+        delegate_->UpdateAllowFileAccess(web->GetFileAccessEnabled());
+        delegate_->UpdateLoadsImagesAutomatically(web->GetImageAccessEnabled());
+        delegate_->UpdateMixedContentMode(web->GetMixedMode());
+        delegate_->UpdateSupportZoom(web->GetZoomAccessEnabled());
+        delegate_->UpdateDomStorageEnabled(web->GetDomStorageAccessEnabled());
+        delegate_->UpdateGeolocationEnabled(web->GetGeolocationAccessEnabled());
+    }
 
     if (!component) {
         return;

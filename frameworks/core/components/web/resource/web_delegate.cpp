@@ -27,8 +27,8 @@
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
-#include "webview_adapter_helper.h"
 #include "web_javascript_execute_callback.h"
+#include "webview_adapter_helper.h"
 #endif
 
 namespace OHOS::Ace {
@@ -824,11 +824,17 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             webviewClient->SetWebDelegate(weak);
             delegate->webview_->SetWebViewClient(webviewClient);
             std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
-            setting->SetDomStorageEnabled(true);
+            setting->SetDomStorageEnabled(component->GetDomStorageAccessEnabled());
             setting->SetJavaScriptCanOpenWindowsAutomatically(true);
             setting->SetJavaScriptEnabled(component->GetJsEnabled());
             setting->SetAllowFileAccess(component->GetFileAccessEnabled());
             setting->SetAllowContentAccess(component->GetContentAccessEnabled());
+            setting->SetBlockNetworkImage(component->GetOnLineImageAccessEnabled());
+            setting->SetLoadsImagesAutomatically(component->GetImageAccessEnabled());
+            setting->SetMixedContentMode(
+                static_cast<OHOS::WebView::WebSettings::MixedContentMode>(component->GetMixedMode()));
+            setting->SetSupportZoom(component->GetZoomAccessEnabled());
+            setting->SetGeolocationEnabled(component->GetGeolocationAccessEnabled());
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -845,6 +851,140 @@ void WebDelegate::Resize(const double& width, const double& height)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->webview_ && !delegate->window_) {
                 delegate->webview_->Resize(width, height);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateJavaScriptEnabled(const bool& isJsEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isJsEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                setting->SetJavaScriptEnabled(isJsEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateAllowFileAccess(const bool& isFileAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isFileAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                setting->SetAllowFileAccess(isFileAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), onLineImageAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                setting->SetBlockNetworkImage(onLineImageAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateLoadsImagesAutomatically(const bool& isImageAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isImageAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                setting->SetLoadsImagesAutomatically(isImageAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateMixedContentMode(const MixedModeContent& mixedMode)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), mixedMode]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                setting->SetMixedContentMode(static_cast<OHOS::WebView::WebSettings::MixedContentMode>(mixedMode));
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateSupportZoom(const bool& isZoomAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isZoomAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                setting->SetSupportZoom(isZoomAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+void WebDelegate::UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isDomStorageAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                setting->SetDomStorageEnabled(isDomStorageAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+void WebDelegate::UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isGeolocationAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                setting->SetGeolocationEnabled(isGeolocationAccessEnabled);
             }
         },
         TaskExecutor::TaskType::PLATFORM);

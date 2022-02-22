@@ -33,6 +33,13 @@ public:
     static void ContentAccessEnabled(bool isContentAccessEnabled);
     static void FileAccessEnabled(bool isFileAccessEnabled);
     static void OnFocus(const JSCallbackInfo& args);
+    static void OnLineImageAccessEnabled(bool isOnLineImageAccessEnabled);
+    static void DomStorageAccessEnabled(bool isDomStorageAccessEnabled);
+    static void ImageAccessEnabled(bool isImageAccessEnabled);
+    static void MixedMode(int32_t MixedModeNum);
+    static void ZoomAccessEnabled(bool isZoomAccessEnabled);
+    static void GeolocationAccessEnabled(bool isGeolocationAccessEnabled);
+
 };
 }
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_H
