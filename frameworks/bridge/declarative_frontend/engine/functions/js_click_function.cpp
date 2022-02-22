@@ -31,7 +31,7 @@ void JsClickFunction::Execute()
 #elif USE_QUICKJS_ENGINE
     QJSDeclarativeEngineInstance::TriggerPageUpdate(QJSContext::Current());
 #elif USE_ARK_ENGINE
-    JsiDeclarativeEngineInstance::TriggerPageUpdate(JsiDeclarativeEngineInstance::GetJsRuntime());
+    JsiDeclarativeEngineInstance::TriggerPageUpdate(JsiDeclarativeEngineInstance::GetCurrentRuntime());
 #endif
 }
 

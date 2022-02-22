@@ -158,7 +158,7 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
 #elif USE_QUICKJS_ENGINE
     auto pipelineContext = QJSDeclarativeEngineInstance::GetPipelineContext(info[1]->GetJsContext());
 #elif USE_ARK_ENGINE
-    auto runtime = JsiDeclarativeEngineInstance::GetJsRuntime();
+    auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
     auto pipelineContext = JsiDeclarativeEngineInstance::GetPipelineContext(runtime);
 #endif
     if (!pipelineContext) {

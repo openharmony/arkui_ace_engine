@@ -23,7 +23,6 @@ std::map<int32_t, V8Ref<V8Value>> ContentStorageSet::contentStorageSet_;
 std::map<int32_t, V8Ref<V8Value>> ContentStorageSet::contextSet_;
 std::map<int32_t, NativeReference*> ContentStorageSet::lazyContentStorageSet_;
 std::map<int32_t, NativeReference*> ContentStorageSet::lazyContextSet_;
-bool ContentStorageSet::runtimeInited_ = false;
 
 V8Ref<V8Value> ContentStorageSet::GetCurrentStorage()
 {

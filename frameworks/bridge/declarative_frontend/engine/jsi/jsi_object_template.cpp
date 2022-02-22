@@ -19,7 +19,7 @@ namespace OHOS::Ace::Framework {
 
 JsiObjectTemplate::JsiObjectTemplate()
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = runtime->GetEcmaVm();
     proto_.FreeGlobalHandleAddr();
     proto_ = panda::Global<panda::ObjectRef>(runtime->GetEcmaVm(), panda::ObjectRef::New(vm));
@@ -32,13 +32,13 @@ JsiObjectTemplate::~JsiObjectTemplate()
 
 panda::Local<panda::ObjectRef> JsiObjectTemplate::operator*() const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     return proto_.ToLocal(runtime->GetEcmaVm());
 }
 
 panda::Local<panda::ObjectRef> JsiObjectTemplate::NewInstance() const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     return panda::ObjectRef::New(runtime->GetEcmaVm());
 }
 

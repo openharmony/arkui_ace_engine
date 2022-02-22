@@ -226,9 +226,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
         if (defaultDisplay) {
             density = defaultDisplay->GetVirtualPixelRatio();
-            LOGI("AceAbility: Default display density set: %{public}f", density);
+            LOGI("UIContent: Default display density set: %{public}f", density);
         } else {
-            LOGI("AceAbility: Default display is null, set density failed. Use default density: %{public}f", density);
+            LOGI("UIContent: Default display is null, set density failed. Use default density: %{public}f", density);
         }
     }
     SystemProperties::InitDeviceInfo(width, height, height >= width ? 0 : 1, density, false);
