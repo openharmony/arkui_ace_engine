@@ -35,7 +35,6 @@ namespace OHOS::Ace {
 
 namespace {
 
-constexpr char WEB_METHOD_RELOAD[] = "reload";
 constexpr char WEB_METHOD_ROUTER_BACK[] = "routerBack";
 constexpr char WEB_METHOD_UPDATEURL[] = "updateUrl";
 constexpr char WEB_METHOD_CHANGE_PAGE_URL[] = "changePageUrl";
@@ -529,6 +528,28 @@ void WebDelegate::InitWebEvent()
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
+void WebDelegate::OnPageErrorOHOS(const int& errorCode, const std::string& description, const std::string& url)
+{
+    if (onPageError_) {
+        std::string paramUrl = std::string(R"(")").append(url).append(std::string(R"(")")).append(",");
+        std::string paramErrorCode = std::string(R"(")")
+                                         .append(NTC_PARAM_ERROR_CODE)
+                                         .append(std::string(R"(")"))
+                                         .append(":")
+                                         .append(std::to_string(errorCode))
+                                         .append(",");
+
+        std::string paramDesc = std::string(R"(")")
+                                    .append(NTC_PARAM_DESCRIPTION)
+                                    .append(std::string(R"(")"))
+                                    .append(":")
+                                    .append(std::string(R"(")").append(description).append(std::string(R"(")")));
+        std::string errorParam =
+            std::string(R"("error",{"url":)").append((paramUrl + paramErrorCode + paramDesc).append("},null"));
+        onPageError_(errorParam);
+    }
+}
+
 void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surface> surface)
 {
     state_ = State::CREATING;
@@ -563,6 +584,10 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
     }
 
     SetWebCallBack();
+    if (!pipelineContext->GetIsDeclarative()) {
+        RegisterOHOSWebEventAndMethord();
+    }
+    
     onPageFinishedV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
         webComponent_->GetPageFinishedEventId(), pipelineContext);
     onFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
@@ -571,6 +596,30 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
         webComponent_->GetRequestFocusEventId(), pipelineContext);
     onDownloadStartV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
         webComponent_->GetDownloadStartEventId(), pipelineContext);
+}
+
+void WebDelegate::RegisterOHOSWebEventAndMethord()
+{
+    auto reloadCallback = [weak = WeakClaim(this)]() {
+    auto delegate = weak.Upgrade();
+        if (!delegate) {
+            return false;
+        }
+        delegate->Reload();
+        return true;
+    };
+    WebClient::GetInstance().RegisterReloadCallback(reloadCallback);
+
+    auto webCom = webComponent_;
+    if (!webCom->GetPageStartedEventId().IsEmpty()) {
+        onPageStarted_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetPageStartedEventId(), context_);
+    }
+    if (!webCom->GetPageFinishedEventId().IsEmpty()) {
+        onPageFinished_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetPageFinishedEventId(), context_);
+    }
+    if (!webCom->GetPageErrorEventId().IsEmpty()) {
+        onPageError_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetPageErrorEventId(), context_);
+    }
 }
 
 void WebDelegate::SetWebCallBack()
@@ -1006,9 +1055,27 @@ void WebDelegate::RemoveReleasedCallback()
 
 void WebDelegate::Reload()
 {
+#ifdef OHOS_STANDARD_SYSTEM
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->Reload();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+#else
     hash_ = MakeResourceHash();
-    reloadMethod_ = MakeMethodHash(WEB_METHOD_RELOAD);
+    reloadMethod_ = MakeMethodHash("reload");
     CallResRegisterMethod(reloadMethod_, WEB_PARAM_NONE, nullptr);
+#endif
 }
 
 void WebDelegate::UpdateUrl(const std::string& url)

@@ -68,12 +68,14 @@ void WebClientImpl::OnProxyDied()
     }
 }
 
-void WebClientImpl::OnPageLoadError(int errorCode, const std::string& description, const std::string& failingUrl)
+void WebClientImpl::onReceivedError(std::shared_ptr<WebView::WebResourceRequest> request,
+    std::shared_ptr<WebView::WebResourceError> error)
 {
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
     }
+    delegate->OnPageErrorOHOS(error->GetErrorCode(), error->GetDescription(), request->GetUrl());
 }
 
 void WebClientImpl::OnMessage(const std::string& param)
