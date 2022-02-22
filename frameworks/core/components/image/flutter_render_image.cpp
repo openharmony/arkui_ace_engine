@@ -587,26 +587,28 @@ void FlutterRenderImage::ApplyBorderRadius(
 
 void FlutterRenderImage::ApplyColorFilter(flutter::Paint& paint)
 {
-    if (!color_.has_value()) {
-        return;
-    }
-    Color color = color_.value();
 #ifdef USE_SYSTEM_SKIA
     if (imageRenderMode_ == ImageRenderMode::TEMPLATE) {
         paint.paint()->setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(GRAY_COLOR_MATRIX));
         return;
     }
+    if (!color_.has_value()) {
+        return;
+    }
+    Color color = color_.value();
     paint.paint()->setColorFilter(SkColorFilter::MakeModeFilter(
-        SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()),
-        SkBlendMode::kPlus));
+        SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()), SkBlendMode::kPlus));
 #else
     if (imageRenderMode_ == ImageRenderMode::TEMPLATE) {
         paint.paint()->setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
         return;
     }
+    if (!color_.has_value()) {
+        return;
+    }
+    Color color = color_.value();
     paint.paint()->setColorFilter(SkColorFilters::Blend(
-        SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()),
-        SkBlendMode::kPlus));
+        SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()), SkBlendMode::kPlus));
 #endif
 }
 
