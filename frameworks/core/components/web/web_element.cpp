@@ -37,12 +37,21 @@ void WebElement::SetNewComponent(const RefPtr<Component>& newComponent)
         webComponent->SetFileAccessEnabled(webComponent->GetFileAccessEnabled());
         Element::SetNewComponent(webComponent);
     }
+    SetComponent(newComponent);
 }
 
 void WebElement::OnFocus()
 {
     FocusNode::OnFocus();
     LOGI("web element onfocus");
+    auto component = GetComponent();
+    auto webComponent = AceType::DynamicCast<WebComponent>(component);
+    if (webComponent) {
+        RefPtr<WebController> controller = webComponent->GetController();
+        if (controller) {
+            controller->WebController::OnFocus();
+        }
+    }
 }
 
 } // namespace OHOS::Ace

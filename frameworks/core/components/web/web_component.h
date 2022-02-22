@@ -145,6 +145,45 @@ public:
         loadDataWithBaseUrlImpl_ = std::move(loadDataWithBaseUrlImpl);
     }
 
+    using OnInactiveImpl = std::function<void()>;
+    void OnInactive() const
+    {
+        if (onInactiveImpl_) {
+            onInactiveImpl_();
+        }
+    }
+
+    void SetOnInactiveImpl(OnInactiveImpl && onInactiveImpl)
+    {
+        onInactiveImpl_ = std::move(onInactiveImpl);
+    }
+
+    using OnActiveImpl = std::function<void()>;
+    void OnActive() const
+    {
+        if (onActiveImpl_) {
+            onActiveImpl_();
+        }
+    }
+
+    void SetOnActiveImpl(OnActiveImpl && onActiveImpl)
+    {
+        onActiveImpl_ = std::move(onActiveImpl);
+    }
+
+    using OnFocusImpl = std::function<void()>;
+    void OnFocus() const
+    {
+        if (onFocusImpl_) {
+            onFocusImpl_();
+        }
+    }
+
+    void SetOnFocusImpl(OnFocusImpl && onFocusImpl)
+    {
+        onFocusImpl_ = std::move(onFocusImpl);
+    }
+
     using RefreshImpl = std::function<void()>;
     void Refresh() const
     {
@@ -237,6 +276,9 @@ private:
     ForwardImpl forwardimpl_;
 
     ExecuteTypeScriptImpl executeTypeScriptImpl_;
+    OnInactiveImpl onInactiveImpl_;
+    OnActiveImpl onActiveImpl_;
+    OnFocusImpl onFocusImpl_;
     LoadDataWithBaseUrlImpl loadDataWithBaseUrlImpl_;
     RefreshImpl refreshImpl_;
     StopLoadingImpl stopLoadingImpl_;
@@ -258,6 +300,7 @@ public:
     using Method = std::string;
     ACE_DEFINE_COMPONENT_EVENT(OnPageStart, void(std::string));
     ACE_DEFINE_COMPONENT_EVENT(OnPageFinish, void(std::string));
+    ACE_DEFINE_COMPONENT_EVENT(OnFocus, void(std::string));
     ACE_DEFINE_COMPONENT_EVENT(OnError, void(std::string));
     ACE_DEFINE_COMPONENT_EVENT(OnMessage, void(std::string));
 
@@ -316,6 +359,16 @@ public:
     const EventMarker& GetRequestFocusEventId() const
     {
         return declaration_->GetRequestFocusEventId();
+    }
+
+    void SetOnFocusEventId(const EventMarker& onFocusEventId)
+    {
+        declaration_->SetOnFocusEventId(onFocusEventId);
+    }
+
+    const EventMarker& GetOnFocusEventId() const
+    {
+        return declaration_->GetOnFocusEventId();
     }
 
     void SetPageErrorEventId(const EventMarker& pageErrorEventId)

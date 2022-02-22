@@ -37,6 +37,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("javaScriptAccess", &JSWeb::JsEnabled);
     JSClass<JSWeb>::StaticMethod("fileExtendAccess", &JSWeb::ContentAccessEnabled);
     JSClass<JSWeb>::StaticMethod("fileAccess", &JSWeb::FileAccessEnabled);
+
+    JSClass<JSWeb>::StaticMethod("onFocus", &JSWeb::OnFocus);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
 }
@@ -51,6 +53,11 @@ JSRef<JSVal> LoadWebPageFinishEventToJSValue(const LoadWebPageFinishEvent& event
 JSRef<JSVal> LoadWebRequestFocusEventToJSValue(const LoadWebRequestFocusEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetRequestFocus()));
+}
+
+JSRef<JSVal> LoadWebOnFocusEventToJSValue(const LoadWebOnFocusEvent& eventInfo)
+{
+    return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetOnFocus()));
 }
 
 void JSWeb::Create(const JSCallbackInfo& info)
@@ -90,6 +97,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         webComponent->SetWebController(controller->GetController());
     }
     ViewStackProcessor::GetInstance()->Push(webComponent);
+    JSInteractableView::SetFocusNode(true);
 }
 
 void JSWeb::OnPageStart(const JSCallbackInfo& args)
@@ -133,6 +141,23 @@ void JSWeb::OnRequestFocus(const JSCallbackInfo& args)
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetRequestFocusEventId(eventMarker);
+}
+
+void JSWeb::OnFocus(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebOnFocusEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadWebOnFocusEventToJSValue);
+    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebOnFocusEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnFocusEventId(eventMarker);
 }
 
 void JSWeb::OnError(const JSCallbackInfo& args)
