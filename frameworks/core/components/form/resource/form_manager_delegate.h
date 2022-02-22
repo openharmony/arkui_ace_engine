@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,10 +35,12 @@ class FormManagerDelegate : public FormManagerResource {
 public:
     using onFormAcquiredCallbackForJava
         = std::function<void(int64_t, const std::string&, const std::string&, const std::string&)>;
+    using OnFormUpdateCallbackForJava = std::function<void(int64_t, const std::string&)>;
     using OnFormAcquiredCallback
         = std::function<void(int64_t, const std::string&, const std::string&,
          const std::string&, const std::map<std::string, std::pair<int, int32_t>>&)>;
-    using OnFormUpdateCallback = std::function<void(int64_t, const std::string&)>;
+    using OnFormUpdateCallback = std::function<void(int64_t, const std::string&,
+        const std::map<std::string, std::pair<int, int32_t>>&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
 
     enum class State: char {
@@ -82,6 +84,7 @@ private:
     void OnFormError(const std::string& param);
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
+    OnFormUpdateCallbackForJava onFormUpdateCallbackForJava_;
     OnFormAcquiredCallback onFormAcquiredCallback_;
     OnFormUpdateCallback onFormUpdateCallback_;
     OnFormErrorCallback onFormErrorCallback_;
