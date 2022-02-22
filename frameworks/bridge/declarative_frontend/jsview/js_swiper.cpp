@@ -270,7 +270,7 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         }
 
         if (info[0]->IsObject()) {
-            JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
             JSRef<JSVal> leftValue = obj->GetProperty("left");
             JSRef<JSVal> topValue = obj->GetProperty("top");
             JSRef<JSVal> rightValue = obj->GetProperty("right");
