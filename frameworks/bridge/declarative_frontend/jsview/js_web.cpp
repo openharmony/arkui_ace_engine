@@ -91,6 +91,12 @@ void JSWeb::JSBind(BindingTarget globalObj)
 
     JSClass<JSWeb>::StaticMethod("onFocus", &JSWeb::OnFocus);
     JSClass<JSWeb>::StaticMethod("onDownloadStart", &JSWeb::OnDownloadStart);
+    JSClass<JSWeb>::StaticMethod("onlineImageAccess", &JSWeb::OnLineImageAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("domStorageAccess", &JSWeb::DomStorageAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("imageAccess", &JSWeb::ImageAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("mixedMode", &JSWeb::MixedMode);
+    JSClass<JSWeb>::StaticMethod("zoomAccess", &JSWeb::ZoomAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -387,4 +393,83 @@ void JSWeb::FileAccessEnabled(bool isFileAccessEnabled)
     }
     webComponent->SetFileAccessEnabled(isFileAccessEnabled);
 }
+
+void JSWeb::OnLineImageAccessEnabled(bool isOnLineImageAccessEnabled)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetOnLineImageAccessEnabled(!isOnLineImageAccessEnabled);
+}
+
+void JSWeb::DomStorageAccessEnabled(bool isDomStorageAccessEnabled)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetDomStorageAccessEnabled(isDomStorageAccessEnabled);
+}
+
+void JSWeb::ImageAccessEnabled(bool isImageAccessEnabled)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetImageAccessEnabled(isImageAccessEnabled);
+}
+
+void JSWeb::MixedMode(int32_t mixedMode)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    auto mixedContentMode = MixedModeContent::MIXED_CONTENT_NEVER_ALLOW;
+    switch (mixedMode) {
+        case 0:
+            mixedContentMode = MixedModeContent::MIXED_CONTENT_ALWAYS_ALLOW;
+            break;
+        case 2:
+            mixedContentMode = MixedModeContent::MIXED_CONTENT_COMPATIBILITY_MODE;
+            break;
+        default:
+            mixedContentMode = MixedModeContent::MIXED_CONTENT_NEVER_ALLOW;
+            break;
+    }
+    webComponent->SetMixedMode(mixedContentMode);
+}
+
+void JSWeb::ZoomAccessEnabled(bool isZoomAccessEnabled)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetZoomAccessEnabled(isZoomAccessEnabled);
+}
+
+void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetGeolocationAccessEnabled(isGeolocationAccessEnabled);
+}
+
 } // namespace OHOS::Ace::Framework
