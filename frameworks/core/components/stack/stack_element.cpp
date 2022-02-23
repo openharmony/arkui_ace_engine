@@ -222,8 +222,10 @@ void StackElement::PerformPushChild(PopupComponentInfo& popupComponentInfo)
         return;
     }
     renderNode->MarkNeedLayout();
-    if (!focusNodes_.empty() && focusNodes_.back()->IsFocusable()) {
-        focusNodes_.back()->RequestFocus();
+    if (isPageElement()) {
+        if (!focusNodes_.empty() && focusNodes_.back()->IsFocusable()) {
+                focusNodes_.back()->RequestFocus();
+        }
     }
     popupComponentInfo.component = nullptr;
 }
@@ -367,7 +369,9 @@ void StackElement::PerformDirectPop()
 
 bool StackElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect)
 {
-    // Only consider the top node.
+    if (!isPageElement()) {
+        return GoToNextFocus(reverse, rect);
+    }
     return false;
 }
 
