@@ -73,7 +73,8 @@ class ACE_EXPORT LoadWebPageStartEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageStartEvent, BaseEventInfo);
 
 public:
-    LoadWebPageStartEvent(const std::string& url) : BaseEventInfo("LoadWebPageStartEvent"), loadedUrl_(url) {}
+    explicit LoadWebPageStartEvent(const std::string& url) : BaseEventInfo
+        ("LoadWebPageStartEvent"), loadedUrl_(url) {}
     ~LoadWebPageStartEvent() = default;
 
     const std::string& GetLoadedUrl() const
@@ -89,7 +90,8 @@ class ACE_EXPORT LoadWebPageFinishEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageFinishEvent, BaseEventInfo);
 
 public:
-    LoadWebPageFinishEvent(const std::string& url) : BaseEventInfo("LoadWebPageFinishEvent"), loadedUrl_(url) {}
+    explicit LoadWebPageFinishEvent(const std::string& url) : BaseEventInfo
+        ("LoadWebPageFinishEvent"), loadedUrl_(url) {}
     ~LoadWebPageFinishEvent() = default;
 
     const std::string& GetLoadedUrl() const
@@ -105,7 +107,7 @@ class ACE_EXPORT LoadWebProgressChangeEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebProgressChangeEvent, BaseEventInfo);
 
 public:
-    LoadWebProgressChangeEvent(const int& newProgress)
+    explicit LoadWebProgressChangeEvent(const int& newProgress)
         : BaseEventInfo("LoadWebProgressChangeEvent"), newProgress_(newProgress) {}
     ~LoadWebProgressChangeEvent() = default;
 
@@ -122,7 +124,8 @@ class ACE_EXPORT LoadWebTitleReceiveEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebTitleReceiveEvent, BaseEventInfo);
 
 public:
-    LoadWebTitleReceiveEvent(const std::string& title) : BaseEventInfo("LoadWebTitleReceiveEvent"), title_(title) {}
+    explicit LoadWebTitleReceiveEvent(const std::string& title) : BaseEventInfo
+        ("LoadWebTitleReceiveEvent"), title_(title) {}
     ~LoadWebTitleReceiveEvent() = default;
 
     const std::string& GetTitle() const
@@ -138,7 +141,7 @@ class ACE_EXPORT LoadWebGeolocationHideEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebGeolocationHideEvent, BaseEventInfo);
 
 public:
-    LoadWebGeolocationHideEvent(const std::string& origin)
+    explicit LoadWebGeolocationHideEvent(const std::string& origin)
         : BaseEventInfo("LoadWebGeolocationHideEvent"), origin_(origin) {}
     ~LoadWebGeolocationHideEvent() = default;
 
@@ -221,7 +224,8 @@ class ACE_EXPORT LoadWebRequestFocusEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebRequestFocusEvent, BaseEventInfo);
 
 public:
-    LoadWebRequestFocusEvent(const std::string& url) : BaseEventInfo("LoadWebRequestFocusEvent"), focusUrl_(url) {}
+    explicit LoadWebRequestFocusEvent(const std::string& url) : BaseEventInfo
+        ("LoadWebRequestFocusEvent"), focusUrl_(url) {}
     ~LoadWebRequestFocusEvent() = default;
 
     const std::string& GetRequestFocus() const
@@ -236,7 +240,8 @@ class ACE_EXPORT LoadWebOnFocusEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebOnFocusEvent, BaseEventInfo);
 
 public:
-    LoadWebOnFocusEvent(const std::string& url) : BaseEventInfo("LoadWebOnFocusEvent"), focusUrl_(url) {}
+    explicit LoadWebOnFocusEvent(const std::string& url) : BaseEventInfo
+        ("LoadWebOnFocusEvent"), focusUrl_(url) {}
     ~LoadWebOnFocusEvent() = default;
 
     const std::string& GetOnFocus() const
