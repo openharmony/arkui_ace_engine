@@ -17,11 +17,9 @@
 
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
-#include "core/components/clip/clip_component.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/container_modal/container_modal_element.h"
 #include "core/components/container_modal/render_container_modal.h"
-#include "core/components/flex/flex_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/image/image_component.h"
 #include "core/components/padding/padding_component.h"
@@ -49,22 +47,12 @@ RefPtr<RenderNode> ContainerModalComponent::CreateRenderNode()
     return RenderContainerModal::Create();
 }
 
-RefPtr<Component> ContainerModalComponent::GetMaximizeRecoverButtonIcon() const
-{
-    if (!titleMaximizeRecoverButton_ || titleMaximizeRecoverButton_->GetChildren().empty()) {
-        LOGE("tile maximize recover button is null");
-        return nullptr;
-    }
-    return titleMaximizeRecoverButton_->GetChildren().front();
-}
-
 RefPtr<Component> ContainerModalComponent::BuildTitle()
 {
     // build title box
-    titleChildren_ = BuildTitleChildren();
     auto titleBox = AceType::MakeRefPtr<BoxComponent>();
     titleBox->SetHeight(CONTAINER_TITLE_HEIGHT);
-    auto row = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, titleChildren_);
+    titleChildrenRow_ = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, BuildTitleChildren(false));
 
     // handle mouse move
     titleBox->SetOnMouseId([contextWptr = context_](MouseInfo& info) {
@@ -81,7 +69,7 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
             context->FireWindowStartMoveCallBack();
         }
     });
-    titleBox->SetChild(row);
+    titleBox->SetChild(titleChildrenRow_);
     auto display = AceType::MakeRefPtr<DisplayComponent>(titleBox);
     return display;
 }
@@ -96,8 +84,8 @@ RefPtr<Component> ContainerModalComponent::BuildFloatingTitle()
     titleBox->SetHeight(CONTAINER_TITLE_HEIGHT);
     titleBox->SetBackDecoration(titleDecoration);
 
-    auto row = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, titleChildren_);
-    titleBox->SetChild(row);
+    floatingTitleChildrenRow_ = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, BuildTitleChildren(true));
+    titleBox->SetChild(floatingTitleChildrenRow_);
     auto tween = AceType::MakeRefPtr<TweenComponent>("ContainerModal", titleBox);
     return tween;
 }
@@ -180,23 +168,27 @@ void ContainerModalComponent::BuildInnerChild()
     SetChild(containerBox);
 }
 
-std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren()
+std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool isFloating)
 {
     // title icon
-    titleIcon_ = AceType::MakeRefPtr<ImageComponent>();
-    titleIcon_->SetWidth(TITLE_ICON_SIZE);
-    titleIcon_->SetHeight(TITLE_ICON_SIZE);
+    if (!titleIcon_) {
+        titleIcon_ = AceType::MakeRefPtr<ImageComponent>();
+        titleIcon_->SetWidth(TITLE_ICON_SIZE);
+        titleIcon_->SetHeight(TITLE_ICON_SIZE);
+    }
 
     // title text
-    titleLabel_ = AceType::MakeRefPtr<TextComponent>("");
-    TextStyle style;
-    style.SetFontSize(TITLE_TEXT_FONT_SIZE);
-    style.SetTextColor(TITLE_TEXT_COLOR);
-    style.SetFontWeight(FontWeight::W500);
-    style.SetAllowScale(false);
-    titleLabel_->SetTextStyle(style);
+    if (!titleLabel_) {
+        titleLabel_ = AceType::MakeRefPtr<TextComponent>("");
+        TextStyle style;
+        style.SetFontSize(TITLE_TEXT_FONT_SIZE);
+        style.SetTextColor(TITLE_TEXT_COLOR);
+        style.SetFontWeight(FontWeight::W500);
+        style.SetAllowScale(false);
+        titleLabel_->SetTextStyle(style);
+    }
 
-    // title button
+    // title control button
     auto contextWptr = context_;
     auto titleLeftSplitButton =
         BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT, [contextWptr]() {
@@ -207,8 +199,9 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren()
                 context->ShowContainerTitle(false);
             }
         });
-    titleMaximizeRecoverButton_ =
-        BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE, [contextWptr]() {
+    auto buttonResourceId = isFloating ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
+                                       : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
+    auto titleMaximizeRecoverButton = BuildControlButton(buttonResourceId, [contextWptr]() {
             auto context = contextWptr.Upgrade();
             if (context) {
                 auto mode = context->FireWindowGetModeCallBack();
@@ -243,7 +236,7 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren()
     titleChildren.emplace_back(SetPadding(titleIcon_, TITLE_PADDING_START, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     titleChildren.emplace_back(AceType::MakeRefPtr<FlexItemComponent>(1.0, 1.0, 0.0, titleLabel_));
     titleChildren.emplace_back(SetPadding(titleLeftSplitButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
-    titleChildren.emplace_back(SetPadding(titleMaximizeRecoverButton_, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
+    titleChildren.emplace_back(SetPadding(titleMaximizeRecoverButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     titleChildren.emplace_back(SetPadding(titleMinimizeButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     titleChildren.emplace_back(SetPadding(titleCloseButton, ZERO_PADDING, TITLE_PADDING_END));
     return titleChildren;
