@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,8 +26,6 @@ TextTimerComponent::TextTimerComponent()
         declaration_ = AceType::MakeRefPtr<TextTimerDeclaration>();
         declaration_->Init();
     }
-
-    textComponent_ = AceType::MakeRefPtr<TextComponent>("");
 }
 
 RefPtr<RenderNode> TextTimerComponent::CreateRenderNode()
@@ -83,17 +81,5 @@ void TextTimerComponent::SetTextStyle(const TextStyle& style)
 RefPtr<TextTimerController> TextTimerComponent::GetTextTimerController() const
 {
     return declaration_->GetTextTimerController();
-}
-
-void TextTimerComponent::Initialize()
-{
-    auto value = 0;
-    if (GetIsCountDown()) {
-        value = GetInputCount();
-    }
-    std::string timerText = Localization::GetInstance()->FormatDuration(value, GetFormat());
-    textComponent_->SetData(timerText);
-    textComponent_->SetTextStyle(GetTextStyle());
-    SetChild(textComponent_);
 }
 } // namespace OHOS::Ace

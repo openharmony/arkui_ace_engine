@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,7 @@
 #include <functional>
 
 #include "base/utils/system_properties.h"
-#include "core/components/box/render_box.h"
 #include "core/components/text/render_text.h"
-#include "core/components/texttimer/texttimer_component.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -35,7 +33,6 @@ public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
-    void UpdateRenders();
     void Tick(uint64_t duration);
     void UpdateValue(uint32_t elapsedTime);
     bool GetIsCountDown() const
@@ -59,17 +56,11 @@ public:
     }
 
 protected:
-    double LayoutBox();
-    void GetRenders(const RefPtr<RenderNode>& render);
-    void GetRenders();
-    void ClearRenders();
-
     uint64_t elapsedTime_ = 0; // millisecond.
     double inputCount_;
     bool isCountDown_;
     std::string format_;
     std::function<void(uint64_t, uint64_t)> onTimer_;
-    WeakPtr<TextTimerComponent> textTimerComponent_;
 
 private:
     void HandleStart();

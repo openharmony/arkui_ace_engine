@@ -315,14 +315,23 @@ void JSDatePickerDialog::CreateDatePicker(RefPtr<Component> &component, const JS
     auto selectedDate = paramObj->GetProperty("selected");
     auto lunar = paramObj->GetProperty("lunar");
     bool isLunar = lunar->ToBoolean();
+    auto parseStartDate = ParseDate(startDate);
+    auto parseEndDate = ParseDate(endDate);
+    auto parseSelectedDate = ParseDate(selectedDate);
+    auto startDays = parseStartDate.ToDays();
+    auto endDays = parseEndDate.ToDays();
+    auto selectedDays = parseSelectedDate.ToDays();
+    if (startDays > endDays || selectedDays < startDays || selectedDays > endDays) {
+        LOGE("date error");
+    }
     if (startDate->IsObject()) {
-        datePicker->SetStartDate(ParseDate(startDate));
+        datePicker->SetStartDate(parseStartDate);
     }
     if (endDate->IsObject()) {
-        datePicker->SetEndDate(ParseDate(endDate));
+        datePicker->SetEndDate(parseEndDate);
     }
     if (selectedDate->IsObject()) {
-        datePicker->SetSelectedDate(ParseDate(selectedDate));
+        datePicker->SetSelectedDate(parseSelectedDate);
     }
     datePicker->SetIsDialog(false);
     datePicker->SetIsCreateDialogComponent(true);
