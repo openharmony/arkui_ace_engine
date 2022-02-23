@@ -125,6 +125,8 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
             double height = 0.0;
             JSViewAbstract::ParseJsDouble(args[0], width);
             JSViewAbstract::ParseJsDouble(args[1], height);
+            width = SystemProperties::Vp2Px(width);
+            height = SystemProperties::Vp2Px(height);
             auto container = Container::Current();
             if (container) {
                 auto context = container->GetPipelineContext();
