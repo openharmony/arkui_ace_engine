@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -70,10 +70,7 @@ template("ace_osal_ohos_source_set") {
     } else {
       external_deps += [ "multimedia_image:image" ]
     }
-    sources += [
-      "drag_window_ohos.cpp",
-      "pixel_map_ohos.cpp",
-    ]
+    sources += [ "pixel_map_ohos.cpp" ]
     external_deps += [ "hisysevent_native:libhisysevent" ]
   }
 }

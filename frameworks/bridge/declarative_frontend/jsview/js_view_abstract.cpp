@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_focus_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_v2/extensions/events/on_area_change_extension.h"
 #ifdef USE_V8_ENGINE
 #include "bridge/declarative_frontend/engine/v8/functions/v8_function.h"
@@ -2682,60 +2683,73 @@ void JSViewAbstract::Pop()
 
 void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::FUNCTION};
     if (!CheckJSCallbackInfo("JsOnDragStart", info, checkList)) {
         return;
     }
 
-    std::string customDragInfo;
-    JSRef<JSObject> dragObj = JSRef<JSObject>::Cast(info[0]);
-    auto infoStr = dragObj->GetProperty("info");
-    ParseJsString(infoStr, customDragInfo);
-
-    auto eventFuc = dragObj->GetProperty("event");
-    if (!eventFuc->IsFunction()) {
-        LOGE("fail to bind onDrag event due to event is not function.");
-        return;
-    }
-
-    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(eventFuc));
+    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
-                        const RefPtr<DragEvent>& info, const std::string &extraParams) -> RefPtr<Component> {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
+                        const RefPtr<DragEvent>& info, const std::string &extraParams) -> DragItemInfo {
+        DragItemInfo itemInfo;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
 
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
             LOGE("builder param is not an object.");
-            return nullptr;
+            return itemInfo;
+        }
+        auto componnet = ParseDragItemComponent(ret);
+        if (componnet) {
+            LOGI("use custom builder param.");
+            itemInfo.customComponent = componnet;
+            return itemInfo;
         }
 
         auto builderObj = JSRef<JSObject>::Cast(ret);
-        auto builder = builderObj->GetProperty("builder");
-        if (!builder->IsFunction()) {
-            LOGE("builder param is not a function.");
-            return nullptr;
-        }
-        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-        if (!builderFunc) {
-            LOGE("builder function is null.");
-            return nullptr;
-        }
-        // use another VSP instance while executing the builder function
-        ScopedViewStackProcessor builderViewStackProcessor;
-        {
-            ACE_SCORING_EVENT("onDragStart.builder");
-            builderFunc->Execute();
-        }
-        RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
-        if (!customComponent) {
-            LOGE("Custom component is null.");
-            return nullptr;
-        }
-        return customComponent;
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+        auto pixmap = builderObj->GetProperty("pixelMap");
+        itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
+#endif
+        auto extarInfo = builderObj->GetProperty("extraInfo");
+        ParseJsString(extarInfo, itemInfo.extraInfo);
+        auto component = ParseDragItemComponent(builderObj->GetProperty("builder"));
+        itemInfo.customComponent = component;
+        return itemInfo;
     };
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetOnDragStartId(onDragStartId);
-    box->SetCustomDragInfo(customDragInfo);
+}
+
+RefPtr<Component> JSViewAbstract::ParseDragItemComponent(const JSRef<JSVal>& info)
+{
+    JSRef<JSVal> builder;
+    if (info->IsObject()) {
+        auto builderObj = JSRef<JSObject>::Cast(info);
+        builder = builderObj->GetProperty("builder");
+    } else if (info->IsFunction()) {
+        builder = info;
+    } else {
+        return nullptr;
+    }
+    if (!builder->IsFunction()) {
+        return nullptr;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    if (!builderFunc) {
+        return nullptr;
+    }
+    // use another VSP instance while executing the builder function
+    ScopedViewStackProcessor builderViewStackProcessor;
+    {
+        ACE_SCORING_EVENT("onDragStart.builder");
+        builderFunc->Execute();
+    }
+    auto component = ViewStackProcessor::GetInstance()->Finish();
+    if (!component) {
+        LOGE("Custom component is null.");
+    }
+    return component;
 }
 
 void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)

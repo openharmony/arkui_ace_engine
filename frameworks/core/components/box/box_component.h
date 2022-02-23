@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,8 +24,16 @@
 #include "core/gestures/raw_recognizer.h"
 
 namespace OHOS::Ace {
+/**
+ * @brief Used for drag event info.
+ */
+struct DragItemInfo {
+    RefPtr<Component> customComponent;
+    RefPtr<PixelMap> pixelMap;
+    std::string extraInfo;
+};
 
-using OnDragFunc = std::function<RefPtr<Component>(const RefPtr<DragEvent>&, const std::string&)>;
+using OnDragFunc = std::function<DragItemInfo(const RefPtr<DragEvent>&, const std::string&)>;
 using OnDropFunc = std::function<void(const RefPtr<DragEvent>&, const std::string&)>;
 using OnHoverCallback = std::function<void(bool)>;
 using OnMouseCallback = std::function<void(MouseInfo& info)>;
@@ -310,16 +318,6 @@ public:
         onLongPressId_ = onLongPressId;
     }
 
-    void SetCustomDragInfo(const std::string& customDragInfo)
-    {
-        customDragInfo_ = customDragInfo;
-    }
-
-    std::string GetCustomDragInfo() const
-    {
-        return customDragInfo_;
-    }
-    
 private:
     RefPtr<Decoration> backDecoration_;
     RefPtr<Decoration> frontDecoration_;
@@ -344,8 +342,6 @@ private:
     TextDirection inspectorDirection_ { TextDirection::LTR };
     RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_ = nullptr;
     EventMarker remoteMessageId_;
-
-    std::string customDragInfo_;
 };
 
 } // namespace OHOS::Ace

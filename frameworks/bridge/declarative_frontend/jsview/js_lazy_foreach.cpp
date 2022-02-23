@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,63 +30,9 @@
 #include "core/pipeline/base/multi_composed_component.h"
 
 namespace OHOS::Ace::Framework {
-namespace {
 
-enum {
-    PARAM_VIEW_ID = 0,
-    PARAM_PARENT_VIEW,
-    PARAM_DATA_SOURCE,
-    PARAM_ITEM_GENERATOR,
-    PARAM_KEY_GENERATOR,
-
-    MIN_PARAM_SIZE = PARAM_KEY_GENERATOR,
-    MAX_PARAM_SIZE,
-};
-
-bool ParseAndVerifyParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[MAX_PARAM_SIZE])
-{
-    if (info.Length() < MIN_PARAM_SIZE) {
-        return false;
-    }
-
-    if (!info[PARAM_VIEW_ID]->IsNumber() && !info[PARAM_VIEW_ID]->IsString()) {
-        return false;
-    }
-    if (!info[PARAM_PARENT_VIEW]->IsObject()) {
-        return false;
-    }
-    if (!info[PARAM_DATA_SOURCE]->IsObject()) {
-        return false;
-    }
-    if (!info[PARAM_ITEM_GENERATOR]->IsFunction()) {
-        return false;
-    }
-    if (info.Length() > MIN_PARAM_SIZE && !info[PARAM_KEY_GENERATOR]->IsFunction()) {
-        return false;
-    }
-
-    for (int32_t idx = PARAM_VIEW_ID; idx < std::min(info.Length(), static_cast<int32_t>(MAX_PARAM_SIZE)); ++idx) {
-        params[idx] = info[idx];
-    }
-    return true;
-}
-
-inline JSRef<JSFunc> GetFunctionFromObject(const JSRef<JSObject>& obj, const char* funcName)
-{
-    JSRef<JSVal> jsVal = obj->GetProperty(funcName);
-    if (jsVal->IsFunction()) {
-        return JSRef<JSFunc>::Cast(jsVal);
-    }
-    return JSRef<JSFunc>();
-}
-
-template<class... T>
-JSRef<JSVal> CallJSFunction(const JSRef<JSFunc>& func, const JSRef<JSObject>& obj, T&&... args)
-{
-    JSRef<JSVal> params[] = { ConvertToJSValue(std::forward<T>(args))... };
-    return func->Call(obj, ArraySize(params), params);
-}
-
+// Avoid the problem that clang expands template static variable assignment with
+// thread_local keyword in anonymous namespace and does not take effect
 class JSDataChangeListener : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -183,6 +129,62 @@ private:
     std::set<WeakPtr<V2::DataChangeListener>> listeners_;
 };
 
+namespace {
+
+enum {
+    PARAM_VIEW_ID = 0,
+    PARAM_PARENT_VIEW,
+    PARAM_DATA_SOURCE,
+    PARAM_ITEM_GENERATOR,
+    PARAM_KEY_GENERATOR,
+
+    MIN_PARAM_SIZE = PARAM_KEY_GENERATOR,
+    MAX_PARAM_SIZE,
+};
+
+bool ParseAndVerifyParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[MAX_PARAM_SIZE])
+{
+    if (info.Length() < MIN_PARAM_SIZE) {
+        return false;
+    }
+
+    if (!info[PARAM_VIEW_ID]->IsNumber() && !info[PARAM_VIEW_ID]->IsString()) {
+        return false;
+    }
+    if (!info[PARAM_PARENT_VIEW]->IsObject()) {
+        return false;
+    }
+    if (!info[PARAM_DATA_SOURCE]->IsObject()) {
+        return false;
+    }
+    if (!info[PARAM_ITEM_GENERATOR]->IsFunction()) {
+        return false;
+    }
+    if (info.Length() > MIN_PARAM_SIZE && !info[PARAM_KEY_GENERATOR]->IsFunction()) {
+        return false;
+    }
+
+    for (int32_t idx = PARAM_VIEW_ID; idx < std::min(info.Length(), static_cast<int32_t>(MAX_PARAM_SIZE)); ++idx) {
+        params[idx] = info[idx];
+    }
+    return true;
+}
+
+inline JSRef<JSFunc> GetFunctionFromObject(const JSRef<JSObject>& obj, const char* funcName)
+{
+    JSRef<JSVal> jsVal = obj->GetProperty(funcName);
+    if (jsVal->IsFunction()) {
+        return JSRef<JSFunc>::Cast(jsVal);
+    }
+    return JSRef<JSFunc>();
+}
+
+template<class... T>
+JSRef<JSVal> CallJSFunction(const JSRef<JSFunc>& func, const JSRef<JSObject>& obj, T&&... args)
+{
+    JSRef<JSVal> params[] = { ConvertToJSValue(std::forward<T>(args))... };
+    return func->Call(obj, ArraySize(params), params);
+}
 class DefaultDataChangeListener : public V2::DataChangeListener {
 public:
     explicit DefaultDataChangeListener(JSView* parentView) : parentView_(parentView) {}

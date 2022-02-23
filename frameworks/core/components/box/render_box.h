@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -250,8 +250,8 @@ public:
         return onLongPressId_;
     }
 
-    RefPtr<Component> GenCustomComponent(const RefPtr<PipelineContext>& context, const GestureEvent& info);
-    void AddDataToClipboard(const RefPtr<PipelineContext>& context);
+    DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info);
+    void AddDataToClipboard(const RefPtr<PipelineContext>& context, const std::string& extraInfo);
     RefPtr<RenderBox> FindTargetRenderBox(const RefPtr<PipelineContext> context, const GestureEvent& info);
 
     void ResetController(RefPtr<Animator>& controller);
@@ -336,7 +336,7 @@ private:
 
     RefPtr<DragWindow> dragWindow_;
     bool isDragRenderBox_ = false;
-    std::string customDragInfo_;
+    bool hasDragItem_ = false;
 }; // class RenderBox
 } // namespace OHOS::Ace
 

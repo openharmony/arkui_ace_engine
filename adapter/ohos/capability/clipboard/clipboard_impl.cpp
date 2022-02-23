@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,22 +20,29 @@
 #endif
 
 namespace OHOS::Ace {
-
+#ifndef SYSTEM_CLIPBOARD_SUPPORTED
+namespace {
+std::string g_clipboard;
+}
+#endif
 void ClipboardImpl::SetData(const std::string& data)
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
     if (taskExecutor_) {
-        auto pasteData = OHOS::MiscServices::PasteboardClient::GetInstance()->CreatePlainTextData(data);
-        if (!pasteData) {
-            LOGE("cteate SystemKeyboardData fail from MiscServices");
-            return;
-        }
         taskExecutor_->PostTask(
-            [pasteData]() { OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData); },
-            TaskExecutor::TaskType::IO);
+            [data]() {
+                auto pasteData = OHOS::MiscServices::PasteboardClient::GetInstance()->CreatePlainTextData(data);
+                if (!pasteData) {
+                    LOGE("cteate SystemKeyboardData fail from MiscServices");
+                    return;
+                }
+                OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
+            },
+            TaskExecutor::TaskType::PLATFORM);
     }
 #else
     LOGI("Current device doesn't support system clipboard");
+    taskExecutor_->PostTask([data]() { g_clipboard = data; }, TaskExecutor::TaskType::UI);
 #endif
 }
 
@@ -43,28 +50,36 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
     if (taskExecutor_) {
-        auto has = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
-        if (!has) {
-            LOGE("SystemKeyboardData is not exist from MiscServices");
-            return;
-        }
-        OHOS::MiscServices::PasteData pasteData;
-        auto ok = OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData);
-        if (!ok) {
-            LOGE("Get SystemKeyboardData fail from MiscServices");
-            return;
-        }
-        auto textData = pasteData.GetPrimaryText();
-        if (!textData) {
-            LOGE("Get SystemKeyboardTextData fail from MiscServices");
-            return;
-        }
-        taskExecutor_->PostTask(
-            [callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_)), textData]() { callback(*textData); },
-            TaskExecutor::TaskType::IO);
+        std::string result;
+        taskExecutor_->PostSyncTask(
+            [&result]() {
+                auto has = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
+                if (!has) {
+                    LOGE("SystemKeyboardData is not exist from MiscServices");
+                    return;
+                }
+                OHOS::MiscServices::PasteData pasteData;
+                auto ok = OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData);
+                if (!ok) {
+                    LOGE("Get SystemKeyboardData fail from MiscServices");
+                    return;
+                }
+                auto textData = pasteData.GetPrimaryText();
+                if (!textData) {
+                    LOGE("Get SystemKeyboardTextData fail from MiscServices");
+                    return;
+                }
+                result = *textData;
+            },
+            TaskExecutor::TaskType::PLATFORM);
+
+        taskExecutor_->PostTask([callback, result]() { callback(result); }, TaskExecutor::TaskType::UI);
     }
 #else
     LOGI("Current device doesn't support system clipboard");
+    taskExecutor_->PostTask(
+        [callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_)), textData = g_clipboard]() { callback(textData); },
+        TaskExecutor::TaskType::UI);
 #endif
 }
 

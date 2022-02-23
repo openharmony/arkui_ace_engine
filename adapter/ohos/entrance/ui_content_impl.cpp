@@ -38,6 +38,7 @@
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
+#include "base/geometry/rect.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
@@ -106,6 +107,42 @@ extern "C" ACE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtim
     LOGI("Ace lib loaded, CreateUIContent.");
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime);
 }
+
+class DragWindowListener : public OHOS::Rosen::IWindowDragListener {
+public:
+    explicit DragWindowListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~DragWindowListener() = default;
+    void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
+    {
+        LOGI("DragWindowListener::OnDrag called.");
+        auto flutterAceView =
+            static_cast<Platform::FlutterAceView*>(Platform::AceContainer::GetContainer(instanceId_)->GetView());
+        if (!flutterAceView) {
+            LOGE("DragWindowListener::OnDrag flutterAceView is null");
+            return;
+        }
+
+        DragEventAction action;
+        switch (event) {
+            case OHOS::Rosen::DragEvent::DRAG_EVENT_END:
+                action = DragEventAction::DRAG_EVENT_END;
+                break;
+            case OHOS::Rosen::DragEvent::DRAG_EVENT_MOVE:
+            case OHOS::Rosen::DragEvent::DRAG_EVENT_OUT:
+                action = DragEventAction::DRAG_EVENT_MOVE;
+                break;
+            case OHOS::Rosen::DragEvent::DRAG_EVENT_IN:
+            default:
+                action = DragEventAction::DRAG_EVENT_START;
+                break;
+        }
+
+        flutterAceView->ProcessDragEvent(x, y, action);
+    }
+
+private:
+    int32_t instanceId_ = -1;
+};
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime) : runtime_(runtime)
 {
@@ -565,6 +602,19 @@ void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::A
     });
 
     pipelineContext->SetWindowGetModeCallBack([&window]() -> WindowMode { return GetWindowMode(window); });
+
+    pipelineContext->SetGetWindowRectImpl([&window]() -> Rect {
+        Rect rect;
+        if (!window) {
+            return rect;
+        }
+        auto windowRect = window->GetRect();
+        rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+        return rect;
+    });
+
+    dragWindowListener_ = new DragWindowListener(instanceId_);
+    window->RegisterDragListener(dragWindowListener_);
 }
 
 } // namespace OHOS::Ace
