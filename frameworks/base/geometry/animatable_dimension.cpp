@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,13 +26,25 @@ AnimatableDimension& AnimatableDimension::operator=(const Dimension& newDimensio
     return *this;
 }
 
+AnimatableDimension& AnimatableDimension::operator=(const CalcDimension& newDimension)
+{
+    ResetAnimatableDimension();
+    CalcDimension& dimension = *this;
+    dimension = newDimension;
+    return *this;
+}
+
 AnimatableDimension& AnimatableDimension::operator=(const AnimatableDimension& newDimension)
 {
     SetUnit(newDimension.Unit());
     SetAnimationOption(newDimension.GetAnimationOption());
     auto pipelineContext = context_.Upgrade();
     if (!animationCallback_ || !pipelineContext) {
-        SetValue(newDimension.Value());
+        if (newDimension.Unit() == DimensionUnit::CALC) {
+            SetCalcValue(newDimension.CalcValue());
+        } else {
+            SetValue(newDimension.Value());
+        }
         return *this;
     }
     AnimationOption explicitAnim = pipelineContext->GetExplicitAnimationOption();
@@ -43,7 +55,11 @@ AnimatableDimension& AnimatableDimension::operator=(const AnimatableDimension& n
         AnimateTo(newDimension.Value());
     } else {
         ResetController();
-        SetValue(newDimension.Value());
+        if (newDimension.Unit() == DimensionUnit::CALC) {
+            SetCalcValue(newDimension.CalcValue());
+        } else {
+            SetValue(newDimension.Value());
+        }
     }
     isFirstAssign_ = false;
     return *this;

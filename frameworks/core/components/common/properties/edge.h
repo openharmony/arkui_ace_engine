@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_EDGE_H
 
 #include "base/geometry/animatable_dimension.h"
+#include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/size.h"
@@ -32,15 +33,25 @@ public:
     Edge() = default;
     explicit Edge(double value) : Edge(value, value, value, value) {};
     explicit Edge(const Dimension& value) : Edge(value, value, value, value) {};
+    explicit Edge(const std::string& value) : Edge(value, value, value, value) {};
+    explicit Edge(const CalcDimension& value) : Edge(value, value, value, value) {};
     Edge(double left, double top, double right, double bottom, DimensionUnit unit = DimensionUnit::PX)
         : left_(Dimension(left, unit)), top_(Dimension(top, unit)), right_(Dimension(right, unit)),
           bottom_(Dimension(bottom, unit)) {};
-    Edge(const Dimension& left, const Dimension& top, const Dimension& right, const Dimension& bottom)
+    Edge(const std::string& left, const std::string& top, const std::string& right, const std::string& bottom,
+        DimensionUnit unit = DimensionUnit::CALC) : left_(CalcDimension(left, unit)), top_(CalcDimension(top, unit)),
+        right_(CalcDimension(right, unit)), bottom_(CalcDimension(bottom, unit)) {};
+    Edge(const CalcDimension& left, const CalcDimension& top, const CalcDimension& right, const CalcDimension& bottom)
         : left_(left), top_(top), right_(right), bottom_(bottom) {};
     Edge(const Dimension& left, const Dimension& top, const Dimension& right, const Dimension& bottom,
          const AnimationOption& option)
         : left_(AnimatableDimension(left, option)), top_(AnimatableDimension(top, option)),
           right_(AnimatableDimension(right, option)), bottom_(AnimatableDimension(bottom, option)) {};
+    Edge(const CalcDimension& left, const CalcDimension& top, const CalcDimension& right, const CalcDimension& bottom,
+         const AnimationOption& option)
+        : left_(AnimatableDimension(left, option)), top_(AnimatableDimension(top, option)),
+          right_(AnimatableDimension(right, option)), bottom_(AnimatableDimension(bottom, option)) {};
+
     virtual ~Edge() = default;
 
     static const Edge NONE;
@@ -69,6 +80,12 @@ public:
         left_ = left;
     }
 
+    virtual void SetLeft(const CalcDimension& left)
+    {
+        left_ = AnimatableDimension(left);
+    }
+
+
     virtual void SetLeft(const Dimension& left)
     {
         left_ = AnimatableDimension(left);
@@ -83,6 +100,12 @@ public:
     {
         top_ = top;
     }
+
+    virtual void SetTop(const CalcDimension& top)
+    {
+        top_ = AnimatableDimension(top);
+    }
+
 
     virtual void SetTop(const Dimension& top)
     {
@@ -99,6 +122,11 @@ public:
         right_ = right;
     }
 
+    virtual void SetRight(const CalcDimension& right)
+    {
+        right_ = AnimatableDimension(right);
+    }
+
     virtual void SetRight(const Dimension& right)
     {
         right_ = AnimatableDimension(right);
@@ -112,6 +140,11 @@ public:
     virtual void SetBottom(const AnimatableDimension& bottom)
     {
         bottom_ = bottom;
+    }
+
+    virtual void SetBottom(const CalcDimension& bottom)
+    {
+        bottom_ = AnimatableDimension(bottom);
     }
 
     virtual void SetBottom(const Dimension& bottom)
@@ -166,7 +199,10 @@ class EdgePx : public Edge {
 public:
     EdgePx() = default;
     explicit EdgePx(double value) : EdgePx(value, value, value, value) {};
+    explicit EdgePx(const std::string& value) : EdgePx(value, value, value, value) {};
     EdgePx(double left, double top, double right, double bottom) : Edge(left, top, right, bottom) {};
+    EdgePx(const std::string& left, const std::string& top, const std::string& right, const std::string& bottom)
+        : Edge(left, top, right, bottom) {};
     ~EdgePx() override = default;
 
     double LeftPx() const
@@ -191,7 +227,7 @@ public:
 
     void SetLeft(const AnimatableDimension& left) override
     {
-        if (left.Unit() != DimensionUnit::PX) {
+        if (left.Unit() != DimensionUnit::PX && left.Unit() != DimensionUnit::CALC) {
             return;
         }
         left_ = left;
@@ -205,9 +241,17 @@ public:
         left_ = AnimatableDimension(left);
     }
 
+    void SetLeft(const CalcDimension& left) override
+    {
+        if (left.Unit() != DimensionUnit::CALC) {
+            return;
+        }
+        left_ = AnimatableDimension(left);
+    }
+
     void SetTop(const AnimatableDimension& top) override
     {
-        if (top.Unit() != DimensionUnit::PX) {
+        if (top.Unit() != DimensionUnit::PX && top.Unit() != DimensionUnit::CALC) {
             return;
         }
         top_ = top;
@@ -221,9 +265,17 @@ public:
         top_ = AnimatableDimension(top);
     }
 
+    void SetTop(const CalcDimension& top) override
+    {
+        if (top.Unit() != DimensionUnit::CALC) {
+            return;
+        }
+        top_ = AnimatableDimension(top);
+    }
+
     void SetRight(const AnimatableDimension& right) override
     {
-        if (right.Unit() != DimensionUnit::PX) {
+        if (right.Unit() != DimensionUnit::PX && right.Unit() != DimensionUnit::CALC) {
             return;
         }
         right_ = right;
@@ -237,9 +289,17 @@ public:
         right_ = AnimatableDimension(right);
     }
 
+    void SetRight(const CalcDimension& right) override
+    {
+        if (right.Unit() != DimensionUnit::CALC) {
+            return;
+        }
+        right_ = AnimatableDimension(right);
+    }
+
     void SetBottom(const AnimatableDimension& bottom) override
     {
-        if (bottom.Unit() != DimensionUnit::PX) {
+        if (bottom.Unit() != DimensionUnit::PX && bottom.Unit() != DimensionUnit::CALC) {
             return;
         }
         bottom_ = bottom;
@@ -252,6 +312,15 @@ public:
         }
         bottom_ = AnimatableDimension(bottom);
     }
+
+    void SetBottom(const CalcDimension& bottom) override
+    {
+        if (bottom.Unit() != DimensionUnit::CALC) {
+            return;
+        }
+        bottom_ = AnimatableDimension(bottom);
+    }
+
 
     Size GetLayoutSize() const
     {

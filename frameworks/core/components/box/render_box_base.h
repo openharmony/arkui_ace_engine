@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -287,10 +287,10 @@ protected:
     virtual Radius GetBorderRadius() const;
 
     EdgePx ConvertEdgeToPx(const Edge& edge, bool additional);
-    double ConvertMarginToPx(Dimension dimension, bool vertical, bool additional) const;
-    double ConvertDimensionToPx(Dimension dimension, bool vertical, bool defaultZero = false) const;
-    double ConvertHorizontalDimensionToPx(Dimension dimension, bool defaultZero = false) const;
-    double ConvertVerticalDimensionToPx(Dimension dimension, bool defaultZero = false) const;
+    double ConvertMarginToPx(CalcDimension dimension, bool vertical, bool additional) const;
+    double ConvertDimensionToPx(CalcDimension dimension, bool vertical, bool defaultZero = false) const;
+    double ConvertHorizontalDimensionToPx(CalcDimension dimension, bool defaultZero = false) const;
+    double ConvertVerticalDimensionToPx(CalcDimension dimension, bool defaultZero = false) const;
     void CalculateWidth();
     void CalculateHeight();
     void CalculateAutoMargin();
@@ -352,10 +352,10 @@ private:
     double selfMinWidth_ = 0.0;                  // exclude margin
     double selfMaxHeight_ = Size::INFINITE_SIZE; // exclude margin
     double selfMinHeight_ = 0.0;                 // exclude margin
-    Dimension minWidth_ = Dimension();
-    Dimension minHeight_ = Dimension();
-    Dimension maxWidth_ = Dimension();
-    Dimension maxHeight_ = Dimension();
+    CalcDimension minWidth_ = Dimension();
+    CalcDimension minHeight_ = Dimension();
+    CalcDimension maxWidth_ = Dimension();
+    CalcDimension maxHeight_ = Dimension();
 
     // result for layout
     LayoutParam selfLayoutParam_; // include margin

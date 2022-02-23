@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "core/components/declaration/common/declaration.h"
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/calc_dimension.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/string_utils.h"
 #include "core/common/ace_application_info.h"
@@ -1154,7 +1155,7 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
             [](const std::string& value, Declaration& declaration) {
                 auto& sizeStyle = declaration.MaybeResetStyle<CommonSizeStyle>(StyleTag::COMMON_SIZE_STYLE);
                 if (sizeStyle.IsValid()) {
-                    sizeStyle.height = declaration.ParseDimension(value);
+                    sizeStyle.height = declaration.ParseCalcDimension(value);
                     declaration.hasBoxStyle_ = true;
                 }
             } },
@@ -1187,7 +1188,7 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
             [](const std::string& value, Declaration& declaration) {
                 auto& marginStyle = declaration.MaybeResetStyle<CommonMarginStyle>(StyleTag::COMMON_MARGIN_STYLE);
                 if (marginStyle.IsValid()) {
-                    marginStyle.margin.SetBottom(declaration.ParseDimension(value));
+                    marginStyle.margin.SetBottom(declaration.ParseCalcDimension(value));
                     declaration.hasBoxStyle_ = true;
                 }
             } },
@@ -1196,9 +1197,9 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
                 auto& marginStyle = declaration.MaybeResetStyle<CommonMarginStyle>(StyleTag::COMMON_MARGIN_STYLE);
                 if (marginStyle.IsValid()) {
                     if (declaration.IsRightToLeft()) {
-                        marginStyle.margin.SetLeft(declaration.ParseDimension(value));
+                        marginStyle.margin.SetLeft(declaration.ParseCalcDimension(value));
                     } else {
-                        marginStyle.margin.SetRight(declaration.ParseDimension(value));
+                        marginStyle.margin.SetRight(declaration.ParseCalcDimension(value));
                     }
                     declaration.hasBoxStyle_ = true;
                 }
@@ -1207,7 +1208,7 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
             [](const std::string& value, Declaration& declaration) {
                 auto& marginStyle = declaration.MaybeResetStyle<CommonMarginStyle>(StyleTag::COMMON_MARGIN_STYLE);
                 if (marginStyle.IsValid()) {
-                    marginStyle.margin.SetLeft(declaration.ParseDimension(value));
+                    marginStyle.margin.SetLeft(declaration.ParseCalcDimension(value));
                     declaration.hasBoxStyle_ = true;
                 }
             } },
@@ -1215,7 +1216,7 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
             [](const std::string& value, Declaration& declaration) {
                 auto& marginStyle = declaration.MaybeResetStyle<CommonMarginStyle>(StyleTag::COMMON_MARGIN_STYLE);
                 if (marginStyle.IsValid()) {
-                    marginStyle.margin.SetRight(declaration.ParseDimension(value));
+                    marginStyle.margin.SetRight(declaration.ParseCalcDimension(value));
                     declaration.hasBoxStyle_ = true;
                 }
             } },
@@ -1224,9 +1225,9 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
                 auto& marginStyle = declaration.MaybeResetStyle<CommonMarginStyle>(StyleTag::COMMON_MARGIN_STYLE);
                 if (marginStyle.IsValid()) {
                     if (declaration.IsRightToLeft()) {
-                        marginStyle.margin.SetRight(declaration.ParseDimension(value));
+                        marginStyle.margin.SetRight(declaration.ParseCalcDimension(value));
                     } else {
-                        marginStyle.margin.SetLeft(declaration.ParseDimension(value));
+                        marginStyle.margin.SetLeft(declaration.ParseCalcDimension(value));
                     }
                     declaration.hasBoxStyle_ = true;
                 }
@@ -1235,7 +1236,7 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
             [](const std::string& value, Declaration& declaration) {
                 auto& marginStyle = declaration.MaybeResetStyle<CommonMarginStyle>(StyleTag::COMMON_MARGIN_STYLE);
                 if (marginStyle.IsValid()) {
-                    marginStyle.margin.SetTop(declaration.ParseDimension(value));
+                    marginStyle.margin.SetTop(declaration.ParseCalcDimension(value));
                     declaration.hasBoxStyle_ = true;
                 }
             } },
@@ -1264,28 +1265,28 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
             [](const std::string& value, Declaration& declaration) {
                 auto& sizeStyle = declaration.MaybeResetStyle<CommonSizeStyle>(StyleTag::COMMON_SIZE_STYLE);
                 if (sizeStyle.IsValid()) {
-                    sizeStyle.maxHeight = declaration.ParseDimension(value);
+                    sizeStyle.maxHeight = declaration.ParseCalcDimension(value);
                 }
             } },
         { DOM_MAX_WIDTH,
             [](const std::string& value, Declaration& declaration) {
                 auto& sizeStyle = declaration.MaybeResetStyle<CommonSizeStyle>(StyleTag::COMMON_SIZE_STYLE);
                 if (sizeStyle.IsValid()) {
-                    sizeStyle.maxWidth = declaration.ParseDimension(value);
+                    sizeStyle.maxWidth = declaration.ParseCalcDimension(value);
                 }
             } },
         { DOM_MIN_HEIGHT,
             [](const std::string& value, Declaration& declaration) {
                 auto& sizeStyle = declaration.MaybeResetStyle<CommonSizeStyle>(StyleTag::COMMON_SIZE_STYLE);
                 if (sizeStyle.IsValid()) {
-                    sizeStyle.minHeight = declaration.ParseDimension(value);
+                    sizeStyle.minHeight = declaration.ParseCalcDimension(value);
                 }
             } },
         { DOM_MIN_WIDTH,
             [](const std::string& value, Declaration& declaration) {
                 auto& sizeStyle = declaration.MaybeResetStyle<CommonSizeStyle>(StyleTag::COMMON_SIZE_STYLE);
                 if (sizeStyle.IsValid()) {
-                    sizeStyle.minWidth = declaration.ParseDimension(value);
+                    sizeStyle.minWidth = declaration.ParseCalcDimension(value);
                 }
             } },
         { DOM_OPACITY,
@@ -1323,7 +1324,7 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
             [](const std::string& value, Declaration& declaration) {
                 auto& paddingStyle = declaration.MaybeResetStyle<CommonPaddingStyle>(StyleTag::COMMON_PADDING_STYLE);
                 if (paddingStyle.IsValid()) {
-                    paddingStyle.padding.SetBottom(declaration.ParseDimension(value));
+                    paddingStyle.padding.SetBottom(declaration.ParseCalcDimension(value));
                     declaration.hasBoxStyle_ = true;
                 }
             } },
@@ -1332,9 +1333,9 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
                 auto& paddingStyle = declaration.MaybeResetStyle<CommonPaddingStyle>(StyleTag::COMMON_PADDING_STYLE);
                 if (paddingStyle.IsValid()) {
                     if (declaration.IsRightToLeft()) {
-                        paddingStyle.padding.SetLeft(declaration.ParseDimension(value));
+                        paddingStyle.padding.SetLeft(declaration.ParseCalcDimension(value));
                     } else {
-                        paddingStyle.padding.SetRight(declaration.ParseDimension(value));
+                        paddingStyle.padding.SetRight(declaration.ParseCalcDimension(value));
                     }
                     declaration.hasBoxStyle_ = true;
                 }
@@ -1343,7 +1344,7 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
             [](const std::string& value, Declaration& declaration) {
                 auto& paddingStyle = declaration.MaybeResetStyle<CommonPaddingStyle>(StyleTag::COMMON_PADDING_STYLE);
                 if (paddingStyle.IsValid()) {
-                    paddingStyle.padding.SetLeft(declaration.ParseDimension(value));
+                    paddingStyle.padding.SetLeft(declaration.ParseCalcDimension(value));
                     declaration.hasBoxStyle_ = true;
                 }
             } },
@@ -1351,7 +1352,7 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
             [](const std::string& value, Declaration& declaration) {
                 auto& paddingStyle = declaration.MaybeResetStyle<CommonPaddingStyle>(StyleTag::COMMON_PADDING_STYLE);
                 if (paddingStyle.IsValid()) {
-                    paddingStyle.padding.SetRight(declaration.ParseDimension(value));
+                    paddingStyle.padding.SetRight(declaration.ParseCalcDimension(value));
                     declaration.hasBoxStyle_ = true;
                 }
             } },
@@ -1360,9 +1361,9 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
                 auto& paddingStyle = declaration.MaybeResetStyle<CommonPaddingStyle>(StyleTag::COMMON_PADDING_STYLE);
                 if (paddingStyle.IsValid()) {
                     if (declaration.IsRightToLeft()) {
-                        paddingStyle.padding.SetRight(declaration.ParseDimension(value));
+                        paddingStyle.padding.SetRight(declaration.ParseCalcDimension(value));
                     } else {
-                        paddingStyle.padding.SetLeft(declaration.ParseDimension(value));
+                        paddingStyle.padding.SetLeft(declaration.ParseCalcDimension(value));
                     }
                     declaration.hasBoxStyle_ = true;
                 }
@@ -1371,7 +1372,7 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
             [](const std::string& value, Declaration& declaration) {
                 auto& paddingStyle = declaration.MaybeResetStyle<CommonPaddingStyle>(StyleTag::COMMON_PADDING_STYLE);
                 if (paddingStyle.IsValid()) {
-                    paddingStyle.padding.SetTop(declaration.ParseDimension(value));
+                    paddingStyle.padding.SetTop(declaration.ParseCalcDimension(value));
                     declaration.hasBoxStyle_ = true;
                 }
             } },
@@ -1562,7 +1563,7 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
             [](const std::string& value, Declaration& declaration) {
                 auto& sizeStyle = declaration.MaybeResetStyle<CommonSizeStyle>(StyleTag::COMMON_SIZE_STYLE);
                 if (sizeStyle.IsValid()) {
-                    sizeStyle.width = declaration.ParseDimension(value);
+                    sizeStyle.width = declaration.ParseCalcDimension(value);
                     declaration.hasBoxStyle_ = true;
                 }
             } },
@@ -2048,7 +2049,7 @@ void Declaration::SetMarginOverall(const std::string& value, Declaration& declar
             marginStyle.margin.SetBottom(declaration.ParseDimension(offsets[0]));
             break;
         case 2:
-            marginStyle.margin.SetLeft(declaration.ParseDimension(offsets[0]));
+            marginStyle.margin.SetLeft(declaration.ParseDimension(offsets[1]));
             marginStyle.margin.SetRight(declaration.ParseDimension(offsets[1]));
             marginStyle.margin.SetTop(declaration.ParseDimension(offsets[0]));
             marginStyle.margin.SetBottom(declaration.ParseDimension(offsets[0]));
@@ -3204,6 +3205,15 @@ Dimension Declaration::ParseDimension(const std::string& value, bool useVp) cons
     auto&& noRefFunc = [&value, useVp]() { return StringUtils::StringToDimension(value, useVp); };
     auto&& idRefFunc = [constants = themeConstants](uint32_t refId) { return constants->GetDimension(refId); };
     return ParseThemeReference<Dimension>(value, noRefFunc, idRefFunc, Dimension());
+}
+
+CalcDimension Declaration::ParseCalcDimension(const std::string& value, bool useVp) const
+{
+    if (value.find("calc") != std::string::npos) {
+        return StringUtils::StringToCalcDimension(value, useVp);
+    } else {
+        return ParseDimension(value, useVp);
+    }
 }
 
 Dimension Declaration::ParseLineHeight(const std::string& value) const
