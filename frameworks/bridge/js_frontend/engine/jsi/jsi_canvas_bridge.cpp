@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,59 @@
 #include "base/utils/string_utils.h"
 
 #include "core/components/custom_paint/offscreen_canvas.h"
+#include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_offscreen_canvas_bridge.h"
+
+#ifdef PIXEL_MAP_SUPPORTED
+#include "pixel_map.h"
+#include "pixel_map_napi.h"
+#endif
 
 namespace OHOS::Ace::Framework {
 namespace {
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue> jsValue)
+{
+    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (!engine) {
+        LOGE(" engine is null.");
+        return nullptr;
+    }
+
+    auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetArkNativeEngine());
+    if (!nativeEngine) {
+        LOGE("NativeEngine is null");
+        return nullptr;
+    }
+
+    shared_ptr<ArkJSValue> arkJsValue = std::static_pointer_cast<ArkJSValue>(jsValue);
+    if (!arkJsValue) {
+        LOGE("arkJsValue is null.");
+        return nullptr;
+    }
+    shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (!arkRuntime) {
+        LOGE("arkRuntime is null");
+        return nullptr;
+    }
+
+    JSValueWrapper valueWrapper = arkJsValue->GetValue(arkRuntime);
+    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+
+    PixelMapNapiEntry pixelMapNapiEntry = JsEngine::GetPixelMapNapiEntry();
+    if (!pixelMapNapiEntry) {
+        LOGE("pixelMapNapiEntry is null");
+    }
+    void* pixmapPtrAddr = pixelMapNapiEntry(
+        reinterpret_cast<napi_env>(nativeEngine), reinterpret_cast<napi_value>(nativeValue));
+    if (pixmapPtrAddr == nullptr) {
+        LOGE(" Failed to get pixmap pointer");
+        return nullptr;
+    }
+    return PixelMap::CreatePixelMap(pixmapPtrAddr);
+}
+#endif
 
 template<typename T>
 inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t length, T defaultValue)
@@ -231,6 +280,7 @@ void JsiCanvasBridge::HandleJsContext(const shared_ptr<JsRuntime>& runtime, Node
         { "createImageData", JsCreateImageData },
         { "putImageData", JsPutImageData },
         { "getImageData", JsGetImageData },
+        { "getPixelMap", JsGetPixelMap },
         { "getJsonData", JsGetJsonData },
         { "transferFromImageBitmap", JsTransferFromImageBitmap },
         { "drawBitmapMesh", JsDrawBitmapMesh },
@@ -939,11 +989,24 @@ shared_ptr<JsValue> JsiCanvasBridge::JsDrawImage(const shared_ptr<JsRuntime>& ru
         return runtime->NewUndefined();
     }
 
+    RefPtr<PixelMap> pixelMap = nullptr;
+    bool isPixelMap = false;
+
     CanvasImage image;
     double width = 0.0;
     double height = 0.0;
     auto src = argv[0]->GetProperty(runtime, DOM_SRC);
-    if (!src->IsString(runtime)) {
+    if (src->IsUndefined(runtime)) {
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+        pixelMap = CreatePixelMapFromNapiValue(runtime, argv[0]);
+        if (!pixelMap) {
+            LOGE("pixelMap is null");
+        }
+        isPixelMap = true;
+#else
+        return runtime->NewUndefined();
+#endif
+    } else if (!src->IsString(runtime)) {
         ParseDomImage(runtime, argv[0], width, height, image.src);
     } else {
         auto imgSrc = src->ToString(runtime);
@@ -980,7 +1043,13 @@ shared_ptr<JsValue> JsiCanvasBridge::JsDrawImage(const shared_ptr<JsRuntime>& ru
         default:
             break;
     }
-    auto task = [image, width, height](const RefPtr<CanvasTaskPool>& pool) { pool->DrawImage(image, width, height); };
+    auto task = [image, width, height, isPixelMap, pixelMap](const RefPtr<CanvasTaskPool>& pool) {
+        if (isPixelMap) {
+            pool->DrawPixelMap(pixelMap, image);
+        } else {
+            pool->DrawImage(image, width, height);
+        }
+    };
     PushTaskToPage(runtime, value, task);
     return runtime->NewUndefined();
 }
@@ -1567,6 +1636,111 @@ shared_ptr<JsValue> JsiCanvasBridge::JsGetImageData(const shared_ptr<JsRuntime>&
     }
     imageData->SetProperty(runtime, "data", colorArray);
     return imageData;
+}
+
+shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+#ifdef PIXEL_MAP_SUPPORTED
+    // 0 Get input param
+    if (argc != 4) {
+        return runtime->NewUndefined();
+    }
+    Rect rect = GetJsRectParam(runtime, argc, std::move(argv));
+    NodeId id = GetCurrentNodeId(runtime, value);
+    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (!engine) {
+        LOGE("JsGetImageData failed. engine is null.");
+        return runtime->NewUndefined();
+    }
+    auto page = engine->GetRunningPage();
+    if (!page) {
+        LOGE("JsGetImageData failed. page is null.");
+        return runtime->NewUndefined();
+    }
+    std::unique_ptr<ImageData> imageData;
+    auto task = [id, page, &rect, &imageData]() {
+        auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
+        if (!canvas) {
+            return;
+        }
+        auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
+        auto canvasTask = paintChild->GetTaskPool();
+        if (!canvasTask) {
+            return;
+        }
+        imageData = canvasTask->GetImageData(rect.Left(), rect.Top(), rect.Width(), rect.Height());
+    };
+    auto delegate = engine->GetFrontendDelegate();
+    if (!delegate) {
+        LOGE("JsGetImageData failed. delegate is null.");
+        return runtime->NewUndefined();
+    }
+    delegate->PostSyncTaskToPage(task);
+
+    // 1 Get data from canvas
+    uint32_t final_height = imageData->dirtyHeight;
+    uint32_t final_width = imageData->dirtyWidth;
+    uint32_t length = final_height * final_width;
+    uint32_t* data = new uint32_t[length];
+    for (uint32_t i = 0; i < final_height; i++) {
+        for (uint32_t j = 0; j < final_width; j++) {
+            uint32_t idx = i * final_width + j;
+            Color pixel = imageData->data[idx];
+            data[idx] = pixel.GetValue();
+        }
+    }
+
+    // 2 Create pixelmap
+    OHOS::Media::InitializationOptions options;
+    options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
+    options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
+    options.size.width = final_width;
+    options.size.height = final_height;
+    options.editable = true;
+    std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(data, length, options);
+    if (pixelmap == nullptr) {
+        LOGE(" pixelmap is null.");
+        return runtime->NewUndefined();
+    }
+
+    // 3 pixelmap to NapiValue
+    auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetArkNativeEngine());
+    if (!nativeEngine) {
+        LOGE("NativeEngine is null");
+        return runtime->NewUndefined();
+    }
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    std::shared_ptr<OHOS::Media::PixelMap> sharedPixelmap(pixelmap.release());
+    napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, sharedPixelmap);
+
+    if (!napiValue) {
+        LOGE("napiValue is null");
+        return runtime->NewUndefined();
+    }
+
+    // 4 NapiValue to JsValue
+    NativeValue* nativeValue = reinterpret_cast<NativeValue*>(napiValue);
+    if (!nativeValue) {
+        LOGE("nativeValue is null");
+        return runtime->NewUndefined();
+    }
+
+    Global<JSValueRef> globalRef = *nativeValue;
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (!arkRuntime) {
+        LOGE("arkRuntime is null");
+        return runtime->NewUndefined();
+    }
+    auto jsValue = std::make_shared<ArkJSValue>(arkRuntime, globalRef.ToLocal(arkRuntime->GetEcmaVm()));
+    if (!jsValue) {
+        LOGE("jsValue is null");
+        return runtime->NewUndefined();
+    }
+
+    return jsValue;
+#endif
 }
 
 shared_ptr<JsValue> JsiCanvasBridge::JsGetJsonData(const shared_ptr<JsRuntime>& runtime,

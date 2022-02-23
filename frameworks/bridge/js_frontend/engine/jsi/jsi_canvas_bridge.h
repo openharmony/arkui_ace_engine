@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,6 +129,8 @@ public:
     static shared_ptr<JsValue> JsPutImageData(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
         const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
     static shared_ptr<JsValue> JsGetImageData(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
+        const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
+    static shared_ptr<JsValue> JsGetPixelMap(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
         const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
     static shared_ptr<JsValue> JsTransferFromImageBitmap(const shared_ptr<JsRuntime>& runtime,
         const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
