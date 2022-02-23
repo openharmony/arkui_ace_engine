@@ -1080,7 +1080,7 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
  * UI state of app-wide access and same life cycle as the app.
  *
  */
-class LocalStorage {
+class LocalStorage extends NativeLocalStorage {
     /**
      * Construct new instance
      * initialzie with all properties and their values that Object.keys(params) returns
@@ -1088,6 +1088,7 @@ class LocalStorage {
      * @param initializingProperties
      */
     constructor(initializingProperties = {}) {
+        super();
         console.log(`${this.constructor.name} constructor: initializing with Object: ${JSON.stringify(initializingProperties)} .`);
         this.storage_ = new Map();
         Object.keys(initializingProperties).filter((propName) => initializingProperties[propName] != undefined).forEach((propName) => this.addNewPropertyInternal(propName, initializingProperties[propName]));
@@ -1924,7 +1925,7 @@ class PersistentStorage {
         if (this.persistProp1(propName, defaultValue)) {
             // persist new prop
             console.debug(`PersistentStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
-            PersistentStorage.Storage_.set(propName, JSON.stringify(this.links_.get(propName).get()));
+            PersistentStorage.Storage_.set(propName, this.links_.get(propName).get());
         }
     }
     // helper function to persist a property
@@ -1946,15 +1947,12 @@ class PersistentStorage {
         else {
             let newValue = PersistentStorage.Storage_.get(propName);
             let returnValue;
-            if (!newValue || newValue == "") {
+            if (!newValue) {
                 console.debug(`PersistentStorage: no entry for ${propName}, will initialize with default value`);
                 returnValue = defaultValue;
             }
-            try {
-                returnValue = JSON.parse(newValue);
-            }
-            catch (error) {
-                console.error(`PersistentStorage: convert for ${propName} has error: ` + error.toString());
+            else {
+                returnValue = newValue;
             }
             link = AppStorage.SetAndLink(propName, returnValue, this);
             this.links_.set(propName, link);
@@ -1981,7 +1979,7 @@ class PersistentStorage {
     write() {
         this.links_.forEach((link, propName, map) => {
             console.debug(`PersistentStorage: writing ${propName} to storage`);
-            PersistentStorage.Storage_.set(propName, JSON.stringify(link.get()));
+            PersistentStorage.Storage_.set(propName, link.get());
         });
     }
     propertyHasChanged(info) {
@@ -2013,7 +2011,7 @@ class PersistentStorage {
     static NotifyHasChanged(propName) {
         console.debug(`PersistentStorage: force writing '${propName}'-
         '${PersistentStorage.GetOrCreate().links_.get(propName)}' to storage`);
-        PersistentStorage.Storage_.set(propName, JSON.stringify(PersistentStorage.GetOrCreate().links_.get(propName).get()));
+        PersistentStorage.Storage_.set(propName, PersistentStorage.GetOrCreate().links_.get(propName).get());
     }
 }
 PersistentStorage.Instance_ = undefined;
