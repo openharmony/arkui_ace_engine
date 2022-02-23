@@ -52,7 +52,8 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
     // build title box
     auto titleBox = AceType::MakeRefPtr<BoxComponent>();
     titleBox->SetHeight(CONTAINER_TITLE_HEIGHT);
-    titleChildrenRow_ = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, BuildTitleChildren(false));
+    titleChildrenRow_ =
+        AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, BuildTitleChildren(false));
 
     // handle mouse move
     titleBox->SetOnMouseId([contextWptr = context_](MouseInfo& info) {
@@ -84,7 +85,8 @@ RefPtr<Component> ContainerModalComponent::BuildFloatingTitle()
     titleBox->SetHeight(CONTAINER_TITLE_HEIGHT);
     titleBox->SetBackDecoration(titleDecoration);
 
-    floatingTitleChildrenRow_ = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, BuildTitleChildren(true));
+    floatingTitleChildrenRow_ =
+        AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, BuildTitleChildren(true));
     titleBox->SetChild(floatingTitleChildrenRow_);
     auto tween = AceType::MakeRefPtr<TweenComponent>("ContainerModal", titleBox);
     return tween;
