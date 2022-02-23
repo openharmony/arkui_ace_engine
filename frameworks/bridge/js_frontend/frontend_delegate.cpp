@@ -81,6 +81,23 @@ bool FrontendDelegate::GetResourceData(const std::string& fileUri, T& content)
 }
 
 template<typename T>
+bool FrontendDelegate::GetResourceData(const std::string& fileUri, T& content, std::string& ami)
+{
+    std::string targetFilePath;
+    if (!ParseFileUri(assetManager_, fileUri, targetFilePath)) {
+        LOGE("GetResourceData parse file uri failed.");
+        return false;
+    }
+    ami = assetManager_->GetAssetPath(targetFilePath) + targetFilePath;
+    if (!GetAssetContentAllowEmpty(assetManager_, targetFilePath, content)) {
+        LOGE("GetResourceData GetAssetContent failed.");
+        return false;
+    }
+
+    return true;
+}
+
+template<typename T>
 bool FrontendDelegate::GetResourceData(const std::string& fileUri, const RefPtr<AssetManager>& assetManager,
     T& content)
 {
@@ -99,6 +116,8 @@ bool FrontendDelegate::GetResourceData(const std::string& fileUri, const RefPtr<
 
 template bool FrontendDelegate::GetResourceData(const std::string& fileUri, std::string& content);
 template bool FrontendDelegate::GetResourceData(const std::string& fileUri, std::vector<uint8_t>& content);
+template bool FrontendDelegate::GetResourceData(const std::string& fileUri, std::vector<uint8_t>& content,
+                                                std::string& ami);
 template bool FrontendDelegate::GetResourceData(const std::string& fileUri, const RefPtr<AssetManager>& assetManager,
     std::vector<uint8_t>& content);
 
