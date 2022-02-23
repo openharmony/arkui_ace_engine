@@ -89,7 +89,7 @@ void RenderIndexer::Update(const RefPtr<Component>& component)
         }
     }
     MarkNeedLayout();
-    selectedEventFun_ = AceAsyncEvent<void(const std::shared_ptr<IndexerEventInfo>&)>::
+    selectedEventFun_ = AceSyncEvent<void(const std::shared_ptr<IndexerEventInfo>&)>::
         Create(indexerComponent->GetSelectedEvent(), context_);
     requestPopupDataEventFun_ = indexerComponent->GetRequestPopupDataFunc();
 }
