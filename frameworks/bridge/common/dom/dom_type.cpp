@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -414,7 +414,7 @@ const char DOM_IMAGE_ALT[] = "alt";
 const char DOM_IMAGE_MATCH_TEXT_DIRECTION[] = "matchTextDirection";
 const char DOM_IMAGE_FIT_ORIGINAL_SIZE[] = "fitOriginalSize";
 const char DOM_IMAGE_FILL_COLOR[] = "fill";
-const char DOM_IMAGE_SYNC_MODE[] = "syncmode";
+const char DOM_IMAGE_SYNC_LOAD[] = "syncload";
 // objectPosition
 const char DOM_IMAGE_POSITION[] = "objectPosition";
 const char DOM_IMAGE_POSITION_LEFT[] = "left";
