@@ -28,11 +28,7 @@ namespace OHOS::Ace {
 
 class AceFormAbility final : public OHOS::AppExecFwk::Ability {
 public:
-    AceFormAbility()
-    {
-        abilityId_ = instanceId_;
-        instanceId_++;
-    }
+    AceFormAbility();
     virtual ~AceFormAbility() = default;
     void OnStart(const OHOS::AAFwk::Want& want) override;
     void OnStop() override;
@@ -101,12 +97,10 @@ public:
      */
     virtual void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap) override;
 
-    // Wait for AAfwk support this callback.
-    virtual void OnAcquireState(const OHOS::AAFwk::Want& want);
-
 private:
     int64_t abilityId_ = 0;
-    static int64_t instanceId_;
+    std::map<int64_t, int32_t> formMap_;
+    static int32_t instanceId_;
     static const std::string START_PARAMS_KEY;
     static const std::string URI;
 };
