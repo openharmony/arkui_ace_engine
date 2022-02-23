@@ -48,8 +48,7 @@ void RosenRenderRoot::SyncGeometryProperties()
     }
     Offset paintOffset = GetPaintOffset();
     Size paintSize = GetLayoutSize();
-    rsNode->SetBounds(paintOffset.GetX() * scale_, paintOffset.GetY() * scale_, paintSize.Width() * scale_,
-        paintSize.Height() * scale_);
+    rsNode->SetBounds(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
     rsNode->SetFrame(paintOffset.GetX() * scale_, paintOffset.GetY() * scale_, paintSize.Width() * scale_,
         paintSize.Height() * scale_);
 }
