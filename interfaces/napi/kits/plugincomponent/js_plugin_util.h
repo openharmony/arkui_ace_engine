@@ -16,10 +16,10 @@
 #ifndef OHOS_NAPI_ACE_PLUGIN_UTIL_H
 #define OHOS_NAPI_ACE_PLUGIN_UTIL_H
 
+#include "js_plugin_data.h"
 #include "napi/native_api.h"
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
-#include "js_plugin_data.h"
 
 namespace OHOS::Ace::Napi {
 bool AceIsTypeForNapiValue(napi_env env, napi_value param, napi_valuetype expectType);

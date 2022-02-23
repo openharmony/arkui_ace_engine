@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_ROSEN_RENDER_TOOL_BAR_ITEM_H
 
 #include "include/core/SkCanvas.h"
+
 #include "core/components/tool_bar/render_tool_bar_item.h"
 
 namespace OHOS::Ace {

@@ -17,8 +17,8 @@
 
 #include "base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "frameworks/core/components/plugin/plugin_component.h"
 #include "frameworks/core/components/box/box_component.h"
+#include "frameworks/core/components/plugin/plugin_component.h"
 
 namespace OHOS::Ace::Framework {
 void JSPlugin::Create(const JSCallbackInfo& info)

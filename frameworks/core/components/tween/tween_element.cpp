@@ -975,7 +975,7 @@ void TweenElement::AddPrepareListener(
             if (context && tween && transform) {
                 auto currentTimestamp = context->GetTimeFromExternalTimer();
                 if (tween->currentTimestamp_ != currentTimestamp || tween->currentTimestamp_ == 0 ||
-                        needForceResetTransform) {
+                    needForceResetTransform) {
                     transform->ResetTransform();
                     tween->currentTimestamp_ = currentTimestamp;
                 }

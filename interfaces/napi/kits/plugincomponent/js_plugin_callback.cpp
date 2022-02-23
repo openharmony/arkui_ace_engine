@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components/plugin/plugin_component_manager.h"
+#include "js_plugin_callback.h"
+
 #include "hilog_wrapper.h"
+#include "js_plugin_callback_mgr.h"
 #include "js_plugin_util.h"
 #include "js_plugin_want.h"
-#include "js_plugin_callback_mgr.h"
-#include "js_plugin_callback.h"
+
+#include "core/components/plugin/plugin_component_manager.h"
 
 namespace OHOS::Ace::Napi {
 std::atomic_size_t JSPluginCallback::uuid_ = 0;

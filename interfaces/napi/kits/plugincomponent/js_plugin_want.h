@@ -16,9 +16,10 @@
 #ifndef OHOS_NAPI_ACE_PLUGIN_WANT_H
 #define OHOS_NAPI_ACE_PLUGIN_WANT_H
 
-#include <vector>
 #include <map>
 #include <string>
+#include <vector>
+
 #include "js_plugin_data.h"
 #include "ohos/aafwk/content/want_params.h"
 

@@ -20,11 +20,12 @@
 #include <unordered_set>
 #include <vector>
 
+#include "accessibility_element_operator.h"
+#include "accessibility_state_event.h"
+
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
-#include "accessibility_element_operator.h"
-#include "accessibility_state_event.h"
 
 namespace OHOS::Ace::Framework {
 
