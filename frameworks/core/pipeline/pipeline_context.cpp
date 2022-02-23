@@ -2723,15 +2723,16 @@ void PipelineContext::SetInitRenderNode(const RefPtr<RenderNode>& initRenderNode
     initRenderNode_ = initRenderNode;
 }
 
-const RefPtr<RenderNode> PipelineContext::GetInitRenderNode() const
+const RefPtr<RenderNode>& PipelineContext::GetInitRenderNode() const
 {
     return initRenderNode_;
 }
 
-void PipelineContext::ProcessDragEventStart(
+void PipelineContext::ProcessDragEvent(
     const RefPtr<RenderNode>& renderNode, const RefPtr<DragEvent>& event, const Point& globalPoint)
 {
-    auto targetRenderBox = AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, globalPoint));
+    auto targetRenderBox =
+        AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, globalPoint - pageOffset_));
     auto initRenderBox = AceType::DynamicCast<RenderBox>(GetInitRenderNode());
     auto extraParams = JsonUtil::Create(true);
     extraParams->Put("customDragInfo", customDragInfo_.c_str());
@@ -2776,7 +2777,8 @@ void PipelineContext::ProcessDragEventStart(
 void PipelineContext::ProcessDragEventEnd(
     const RefPtr<RenderNode>& renderNode, const RefPtr<DragEvent>& event, const Point& globalPoint)
 {
-    auto targetRenderBox = AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, globalPoint));
+    auto targetRenderBox =
+        AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, globalPoint - pageOffset_));
     auto initRenderBox = AceType::DynamicCast<RenderBox>(GetInitRenderNode());
     auto extraParams = JsonUtil::Create(true);
     extraParams->Put("customDragInfo", customDragInfo_.c_str());
@@ -2851,10 +2853,12 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     Point globalPoint(x, y);
 
     if (action == DragEventAction::DRAG_EVENT_START) {
-        ProcessDragEventStart(renderNode, event, globalPoint);
+        pageOffset_ = GetPageRect().GetOffset();
     }
 
-    if (action == DragEventAction::DRAG_EVENT_END) {
+    if (action != DragEventAction::DRAG_EVENT_END) {
+        ProcessDragEvent(renderNode, event, globalPoint);
+    } else {
         ProcessDragEventEnd(renderNode, event, globalPoint);
     }
 }
