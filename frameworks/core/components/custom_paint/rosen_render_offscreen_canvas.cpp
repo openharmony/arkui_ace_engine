@@ -1008,6 +1008,28 @@ double RosenRenderOffscreenCanvas::MeasureText(const std::string& text, const Pa
     return paragraph->GetMaxIntrinsicWidth();
 }
 
+double RosenRenderOffscreenCanvas::MeasureTextHeight(const std::string& text, const PaintState& state)
+{
+    using namespace Constants;
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
+    style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
+    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    if (!fontCollection) {
+        LOGW("MeasureText: fontCollection is null");
+        return 0.0;
+    }
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
+    ConvertTxtStyle(state.GetTextStyle(), pipelineContext_, txtStyle);
+    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
+    builder->PushStyle(txtStyle);
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
+    paragraph->Layout(Size::INFINITE_SIZE);
+    return paragraph->GetHeight();
+}
+
 void RosenRenderOffscreenCanvas::PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow)
 {
     paragraph_->Layout(width_);

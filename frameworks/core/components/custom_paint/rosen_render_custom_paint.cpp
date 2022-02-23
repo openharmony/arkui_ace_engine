@@ -398,6 +398,27 @@ double RosenRenderCustomPaint::MeasureText(const std::string& text, const PaintS
     return paragraph->GetMaxIntrinsicWidth();
 }
 
+double RosenRenderCustomPaint::MeasureTextHeight(const std::string& text, const PaintState& state)
+{
+    using namespace Constants;
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+    if (!fontCollection) {
+        LOGW("MeasureText: fontCollection is null");
+        return 0.0;
+    }
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
+    ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
+    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
+    builder->PushStyle(txtStyle);
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
+    paragraph->Layout(Size::INFINITE_SIZE);
+    return paragraph->GetHeight();
+}
+
 void RosenRenderCustomPaint::PaintText(const Offset& offset, double x, double y, bool isStroke, bool hasShadow)
 {
     paragraph_->Layout(GetLayoutSize().Width());
