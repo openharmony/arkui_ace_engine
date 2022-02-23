@@ -867,6 +867,12 @@ void WebDelegate::InitWebViewWithWindow()
             auto webviewClient = std::make_shared<WebClientImpl>();
             webviewClient->SetWebDelegate(weak);
             delegate->webview_->SetWebViewClient(webviewClient);
+
+            // Set downloadListenerImpl
+            auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>();
+            downloadListenerImpl->SetWebDelegate(weak);
+            delegate->webview_->SetDownloadListener(downloadListenerImpl);
+
             std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
             setting->SetDomStorageEnabled(true);
             setting->SetJavaScriptCanOpenWindowsAutomatically(true);
@@ -900,7 +906,6 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             if (!app_path.empty()) {
                 initArgs.web_engine_args_to_add.push_back(std::string("--user-data-dir=").append(app_path));
             }
-
             sptr<Surface> surface = surfaceWeak.promote();
             if (surface == nullptr) {
                 LOGE("surface is nullptr or has expired");
@@ -918,7 +923,11 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             }
             auto webviewClient = std::make_shared<WebClientImpl>();
             webviewClient->SetWebDelegate(weak);
+            auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>();
+            downloadListenerImpl->SetWebDelegate(weak);
             delegate->webview_->SetWebViewClient(webviewClient);
+            delegate->webview_->SetDownloadListener(downloadListenerImpl);
+
             std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
             setting->SetDomStorageEnabled(component->GetDomStorageAccessEnabled());
             setting->SetJavaScriptCanOpenWindowsAutomatically(true);

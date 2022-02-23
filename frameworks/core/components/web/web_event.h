@@ -18,6 +18,78 @@
 
 namespace OHOS::Ace {
 
+class ACE_EXPORT WebError : public AceType {
+    DECLARE_ACE_TYPE(WebError, AceType)
+
+public:
+    WebError(const std::string& info, int32_t code) : info_(info), code_(code) {}
+    ~WebError() = default;
+
+    const std::string& GetInfo() const
+    {
+        return info_;
+    }
+
+    int32_t GetCode() const
+    {
+        return code_;
+    }
+
+private:
+    std::string info_;
+    int32_t code_;
+};
+
+class ACE_EXPORT WebRequest : public AceType {
+    DECLARE_ACE_TYPE(WebRequest, AceType)
+
+public:
+    WebRequest(const std::map<std::string, std::string>& headers, const std::string& method, const std::string& url,
+        bool hasGesture, bool isMainFrame, bool isRedirect)
+        : headers_(headers), method_(method), url_(url), hasGesture_(hasGesture), isMainFrame_(isMainFrame),
+          isRedirect_(isRedirect)
+    {}
+    ~WebRequest() = default;
+
+    const std::map<std::string, std::string>& GetHeaders() const
+    {
+        return headers_;
+    }
+
+    const std::string& GetMethod() const
+    {
+        return method_;
+    }
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+    bool HasGesture() const
+    {
+        return hasGesture_;
+    }
+
+    bool IsMainFrame() const
+    {
+        return isMainFrame_;
+    }
+
+    bool IsRedirect() const
+    {
+        return isRedirect_;
+    }
+
+private:
+    std::map<std::string, std::string> headers_;
+    std::string method_;
+    std::string url_;
+    bool hasGesture_;
+    bool isMainFrame_;
+    bool isRedirect_;
+};
+
 class ACE_EXPORT Result : public AceType {
     DECLARE_ACE_TYPE(Result, AceType)
 
@@ -26,7 +98,7 @@ public:
     ~Result() = default;
 
     virtual void Confirm() = 0;
-    virtual void Confirm(const std::string &message) = 0;
+    virtual void Confirm(const std::string& message) = 0;
     virtual void Cancel() = 0;
 };
 

@@ -17,6 +17,18 @@
 #include "core/components/web/resource/web_delegate.h"
 
 namespace OHOS::Ace {
+
+void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::string& userAgent,
+    const std::string& contentDisposition, const std::string& mimetype, long contentLength)
+{
+    LOGI("OnDownloadStart.");
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnDownloadStart(url, userAgent, contentDisposition, mimetype, contentLength);
+}
+
 void WebClientImpl::OnPageFinished(int httpStatusCode, const std::string& url)
 {
     auto delegate = webDelegate_.Upgrade();
@@ -79,17 +91,6 @@ void WebClientImpl::OnGeolocationPermissionsShowPrompt(const std::string& origin
         return;
     }
     delegate->OnGeolocationPermissionsShowPrompt(origin, callback);
-}
-
-void WebClientImpl::OnDownloadStart(const std::string& url, const std::string& userAgent,
-    const std::string& contentDisposition, const std::string& mimetype, long contentLength)
-{
-    LOGI("OnDownloadStart.");
-    auto delegate = webDelegate_.Upgrade();
-    if (!delegate) {
-        return;
-    }
-    delegate->OnDownloadStart(url, userAgent, contentDisposition, mimetype, contentLength);
 }
 
 void WebClientImpl::SetWebView(std::shared_ptr<OHOS::WebView::WebView> webview)
