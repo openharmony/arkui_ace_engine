@@ -18,9 +18,9 @@
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/third_party/txt/src/txt/paragraph_txt.h"
 #include "third_party/skia/include/core/SkColor.h"
+#include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/effects/Sk1DPathEffect.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
-#include "third_party/skia/include/core/SkPaint.h"
 
 #include "base/utils/string_utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"

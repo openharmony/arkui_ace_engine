@@ -15,8 +15,8 @@
 
 #include "core/components/watch_slider/rosen_render_watch_slider.h"
 
-#include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkPaint.h"
+#include "third_party/skia/include/core/SkRRect.h"
 
 #include "base/geometry/dimension.h"
 #include "core/pipeline/base/rosen_render_context.h"

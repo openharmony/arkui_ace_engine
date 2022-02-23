@@ -283,7 +283,8 @@ void WebDelegate::ExecuteTypeScript(const std::string& jscode, const std::functi
     if (!context) {
         return;
     }
-    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), jscode, callback]() {
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), jscode, callback]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
@@ -298,15 +299,16 @@ void WebDelegate::ExecuteTypeScript(const std::string& jscode, const std::functi
                         }
                         auto context = delegate->context_.Upgrade();
                         if (context) {
-                            context->GetTaskExecutor()->PostTask([callback = std::move(func), result]() {
-                                callback(result);
-                                }, TaskExecutor::TaskType::JS);
+                            context->GetTaskExecutor()->PostTask(
+                                [callback = std::move(func), result]() { callback(result); },
+                                TaskExecutor::TaskType::JS);
                         }
                     });
                 }
                 delegate->webview_->ExecuteJavaScript(jscode, callbackImpl);
             }
-        }, TaskExecutor::TaskType::PLATFORM);
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 
 void WebDelegate::LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
@@ -377,15 +379,17 @@ void WebDelegate::AddJavascriptInterface(const std::string& objectName, const st
     if (!context) {
         return;
     }
-    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), objectName, methodList]() {
-        auto delegate = weak.Upgrade();
-        if (!delegate) {
-            return;
-        }
-        if (delegate->webview_) {
-            delegate->webview_->AddJavascriptInterface(objectName, methodList);
-        }
-        }, TaskExecutor::TaskType::PLATFORM);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), objectName, methodList]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->AddJavascriptInterface(objectName, methodList);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 void WebDelegate::RemoveJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList)
 {
@@ -393,15 +397,17 @@ void WebDelegate::RemoveJavascriptInterface(const std::string& objectName, const
     if (!context) {
         return;
     }
-    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), objectName, methodList]() {
-        auto delegate = weak.Upgrade();
-        if (!delegate) {
-            return;
-        }
-        if (delegate->webview_) {
-            delegate->webview_->RemoveJavascriptInterface(objectName, methodList);
-        }
-        }, TaskExecutor::TaskType::PLATFORM);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), objectName, methodList]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->RemoveJavascriptInterface(objectName, methodList);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 
 void WebDelegate::SetWebViewJavaScriptResultCallBack(
@@ -412,18 +418,20 @@ void WebDelegate::SetWebViewJavaScriptResultCallBack(
         return;
     }
 
-    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), javaScriptCallBackImpl]() {
-        auto delegate = weak.Upgrade();
-        if (delegate == nullptr || delegate->webview_ == nullptr) {
-            return;
-        }
-        auto webJSResultCallBack = std::make_shared<WebJavaScriptResultCallBack>(delegate->context_);
-        if (webJSResultCallBack) {
-            LOGI("WebDelegate SetWebViewJavaScriptResultCallBack");
-            webJSResultCallBack->SetJavaScriptCallBack(std::move(javaScriptCallBackImpl));
-            delegate->webview_->SetWebViewJavaScriptResultCallBack(webJSResultCallBack);
-        }
-        }, TaskExecutor::TaskType::PLATFORM);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), javaScriptCallBackImpl]() {
+            auto delegate = weak.Upgrade();
+            if (delegate == nullptr || delegate->webview_ == nullptr) {
+                return;
+            }
+            auto webJSResultCallBack = std::make_shared<WebJavaScriptResultCallBack>(delegate->context_);
+            if (webJSResultCallBack) {
+                LOGI("WebDelegate SetWebViewJavaScriptResultCallBack");
+                webJSResultCallBack->SetJavaScriptCallBack(std::move(javaScriptCallBackImpl));
+                delegate->webview_->SetWebViewJavaScriptResultCallBack(webJSResultCallBack);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 
 void WebDelegate::RequestFocus()

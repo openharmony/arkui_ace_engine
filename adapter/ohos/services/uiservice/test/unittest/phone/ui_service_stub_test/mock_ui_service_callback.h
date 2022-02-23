@@ -19,8 +19,9 @@
 
 #include <gmock/gmock.h>
 #include <map>
-#include "ui_service_stub.h"
+
 #include "semaphore_ex.h"
+#include "ui_service_stub.h"
 
 namespace OHOS {
 namespace Ace {

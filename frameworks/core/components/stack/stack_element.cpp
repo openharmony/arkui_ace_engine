@@ -25,8 +25,8 @@
 #include "core/components/popup/popup_component.h"
 #include "core/components/select_popup/select_popup_element.h"
 #include "core/components/text_overlay/text_overlay_element.h"
-#include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
+#include "core/components_v2/inspector/inspector_composed_element.h"
 
 namespace OHOS::Ace {
 

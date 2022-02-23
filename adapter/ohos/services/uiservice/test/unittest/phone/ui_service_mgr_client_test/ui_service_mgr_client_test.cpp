@@ -14,13 +14,14 @@
  */
 #include <gtest/gtest.h>
 #include <memory>
+
 #include "mock_ui_service_mgr_client.h"
 #include "ui_service_mgr_proxy.h"
 #define private public
 #include "mock_ui_mgr_service.h"
+#include "mock_ui_service_callback.h"
 #include "ui_service_proxy.h"
 #include "ui_service_stub.h"
-#include "mock_ui_service_callback.h"
 
 using namespace testing::ext;
 using namespace testing;

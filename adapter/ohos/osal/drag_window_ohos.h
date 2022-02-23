@@ -16,10 +16,11 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_DRAG_WINDOW_OHOS_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_DRAG_WINDOW_OHOS_H
 
-#include "base/window/drag_window.h"
 #include "wm/window.h"
-#include "wm/wm_common.h"
 #include "wm/window_option.h"
+#include "wm/wm_common.h"
+
+#include "base/window/drag_window.h"
 
 namespace OHOS::Ace {
 class DragWindowOhos : public DragWindow {

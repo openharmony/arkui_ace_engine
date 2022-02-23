@@ -12,14 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components/plugin/plugin_component_manager.h"
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
 #include "hilog_wrapper.h"
-#include "js_plugin_util.h"
-#include "js_plugin_want.h"
 #include "js_plugin_callback.h"
 #include "js_plugin_callback_mgr.h"
+#include "js_plugin_util.h"
+#include "js_plugin_want.h"
+#include "napi/native_api.h"
+#include "napi/native_node_api.h"
+
+#include "core/components/plugin/plugin_component_manager.h"
 
 namespace OHOS::Ace::Napi {
 constexpr int ACE_ARGS_MAX_COUNT = 10;

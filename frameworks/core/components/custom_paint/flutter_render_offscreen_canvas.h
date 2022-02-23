@@ -21,12 +21,13 @@
 #include "flutter/third_party/txt/src/txt/paragraph.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPath.h"
-#include "frameworks/bridge/js_frontend/engine/quickjs/offscreen_canvas_bridge.h"
-#include "core/components/custom_paint/render_custom_paint.h"
+
 #include "core/components/custom_paint/offscreen_canvas.h"
+#include "core/components/custom_paint/render_custom_paint.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 #include "core/pipeline/layers/clip_layer.h"
+#include "frameworks/bridge/js_frontend/engine/quickjs/offscreen_canvas_bridge.h"
 
 namespace OHOS::Ace {
 using setColorFunc = std::function<void (const std::string&)>;

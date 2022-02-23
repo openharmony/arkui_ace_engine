@@ -16,12 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SHAPE_ROSEN_RENDER_SHAPE_CONTAINER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SHAPE_ROSEN_RENDER_SHAPE_CONTAINER_H
 
-#include "frameworks/core/components/shape/render_shape_container.h"
-#include "include/core/SkCanvas.h"
 #include "include/core/SkBitmap.h"
+#include "include/core/SkCanvas.h"
 #include "include/core/SkPath.h"
+
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/shape/rosen_render_shape.h"
+#include "frameworks/core/components/shape/render_shape_container.h"
 
 namespace OHOS::Ace {
 

@@ -17,10 +17,9 @@
 
 #include "errors.h"
 #include "string_ex.h"
-
+#include "ui_service_mgr_errors.h"
 #include "ui_service_proxy.h"
 #include "ui_service_stub.h"
-#include "ui_service_mgr_errors.h"
 
 namespace OHOS {
 namespace Ace {

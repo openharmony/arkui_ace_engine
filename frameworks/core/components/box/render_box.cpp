@@ -22,6 +22,7 @@
 #include "base/log/event_report.h"
 #include "base/utils/utils.h"
 #include "core/animation/property_animatable_helper.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/components/box/box_component.h"
 #include "core/components/box/box_component_helper.h"
 #include "core/components/root/root_element.h"
@@ -33,7 +34,6 @@
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/pan_recognizer.h"
 #include "core/gestures/sequenced_recognizer.h"
-#include "core/common/clipboard/clipboard_proxy.h"
 
 namespace OHOS::Ace {
 namespace {

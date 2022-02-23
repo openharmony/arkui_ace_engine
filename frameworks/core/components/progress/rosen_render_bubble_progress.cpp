@@ -16,6 +16,7 @@
 #include "core/components/progress/rosen_render_bubble_progress.h"
 
 #include "third_party/skia/include/core/SkPaint.h"
+
 #include "base/geometry/offset.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
