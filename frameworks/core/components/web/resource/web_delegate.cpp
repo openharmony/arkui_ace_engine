@@ -27,6 +27,7 @@
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
+#include "web_hit_testresult.h"
 #include "web_javascript_execute_callback.h"
 #include "web_javascript_result_callback.h"
 #include "webview_adapter_helper.h"
@@ -455,10 +456,46 @@ void WebDelegate::RequestFocus()
 
 int WebDelegate::GetHitTestResult()
 {
+    WebHitTestType webHitType = WebHitTestType::UNKNOWN;
     if (webview_) {
-        return webview_->GetHitTestResult().GetType();
+        int hitType = webview_->GetHitTestResult().GetType();
+        switch (hitType) {
+            case OHOS::WebView::HitTestResult::UNKNOWN_TYPE:
+                webHitType = WebHitTestType::UNKNOWN;
+                break;
+            case OHOS::WebView::HitTestResult::ANCHOR_TYPE:
+                webHitType = WebHitTestType::HTTP;
+                break;
+            case OHOS::WebView::HitTestResult::PHONE_TYPE:
+                webHitType = WebHitTestType::PHONE;
+                break;
+            case OHOS::WebView::HitTestResult::GEO_TYPE:
+                webHitType = WebHitTestType::MAP;
+                break;
+            case OHOS::WebView::HitTestResult::EMAIL_TYPE:
+                webHitType = WebHitTestType::EMAIL;
+                break;
+            case OHOS::WebView::HitTestResult::IMAGE_TYPE:
+                webHitType = WebHitTestType::IMG;
+                break;
+            case OHOS::WebView::HitTestResult::IMAGE_ANCHOR_TYPE:
+                webHitType = WebHitTestType::HTTP_IMG;
+                break;
+            case OHOS::WebView::HitTestResult::SRC_ANCHOR_TYPE:
+                webHitType = WebHitTestType::HTTP;
+                break;
+            case OHOS::WebView::HitTestResult::SRC_IMAGE_ANCHOR_TYPE:
+                webHitType = WebHitTestType::HTTP_IMG;
+                break;
+            case OHOS::WebView::HitTestResult::EDIT_TEXT_TYPE:
+                webHitType = WebHitTestType::EDIT;
+                break;
+            default:
+                LOGW("unkonw hit test type:%{public}d", static_cast<int>(hitType));
+                break;
+        }
     }
-    return 0;
+    return static_cast<int>(webHitType);
 }
 
 void WebDelegate::CreatePluginResource(
