@@ -41,7 +41,9 @@ void ListElement::PerformBuild()
 {
     auto listComponent = AceType::DynamicCast<ListComponent>(component_);
     ACE_DCHECK(listComponent); // MUST be ListComponent
-
+    if (!listComponent) {
+        return;
+    }
     UpdateChildren(listComponent->GetChildren());
 }
 
@@ -54,6 +56,12 @@ RefPtr<RenderListItem> ListElement::RequestListItem(size_t index)
 {
     auto element = GetElementByIndex(index);
     return element ? AceType::DynamicCast<RenderListItem>(element->GetRenderNode()) : nullptr;
+}
+
+RefPtr<Element> ListElement::GetListItemBySlot(size_t index)
+{
+    auto listItemElement = GetElementByIndex(index);
+    return listItemElement ? listItemElement : nullptr;
 }
 
 void ListElement::RecycleListItem(size_t index)
