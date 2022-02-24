@@ -67,7 +67,6 @@ void ClickRecognizer::InitGlobalValue(SourceType sourceType)
 void ClickRecognizer::OnAccepted()
 {
     LOGI("Click gesture has been accepted!");
-    ResSchedReport::GetInstance().ResSchedDataReport("click");
     if (onClick_) {
         TouchEvent touchPoint = {};
         if (!touchPoints_.empty()) {
@@ -96,6 +95,7 @@ void ClickRecognizer::OnAccepted()
     SetFingerList(touchPoints_, coordinateOffset_, fingerList_);
     SendCallbackMsg(onAction_);
     Reset();
+    ResSchedReport::GetInstance().ResSchedDataReport("click");
 }
 
 void ClickRecognizer::OnRejected()
