@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CONTAINER_MODAL_CONTAINER_MODAL_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CONTAINER_MODAL_CONTAINER_MODAL_ELEMENT_H
 
+#include "core/components/flex/flex_component.h"
 #include "core/components/overlay/overlay_element.h"
 #include "core/components/stage/stage_element.h"
 #include "core/pipeline/base/sole_child_element.h"
@@ -34,9 +35,14 @@ public:
 
 private:
     RefPtr<StackElement> GetStackElement() const;
-    RefPtr<Animator> controller_;
-    RefPtr<RenderDisplay> renderDisplay_;
     bool CanShowFloatingTitle();
+    void ChangeFloatingTitleIcon();
+    RefPtr<Animator> controller_;
+    RefPtr<RenderDisplay> floatingTitleDisplay_;
+    RefPtr<BoxElement> floatingTitleBox_;
+    RefPtr<RowComponent> titleChildrenRow_;
+    RefPtr<RowComponent> floatingTitleChildrenRow_;
+    bool isFirstShowTitle_ = true;
 };
 
 } // namespace OHOS::Ace

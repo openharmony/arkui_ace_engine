@@ -64,15 +64,6 @@ void RenderContainerModal::UpdateStyle(const RefPtr<Component>& component) const
         auto appIconSrc = themeConstants->GetMediaPath(iconId);
         appIconComponent->SetSrc(appIconSrc);
     }
-
-    auto buttonIconComponent = AceType::DynamicCast<ImageComponent>(containerModal->GetMaximizeRecoverButtonIcon());
-    if (buttonIconComponent) {
-        if (context->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-            buttonIconComponent->SetResourceId(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER);
-        } else {
-            buttonIconComponent->SetResourceId(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE);
-        }
-    }
 }
 
 void RenderContainerModal::Update(const RefPtr<Component>& component)
