@@ -17,6 +17,17 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_RESOURCE_WEB_JAVASCRIPT_VALUE_H
 
 namespace OHOS::Ace {
+enum class WebHitTestType : int {
+    EDIT = 0,
+    EMAIL,
+    HTTP,
+    HTTP_IMG,
+    IMG,
+    MAP,
+    PHONE,
+    UNKNOWN
+};
+
 enum class WebJavaScriptBridgeError : int {
     NO_ERROR = 0,
     UNKNOWN_OBJECT_ID,
