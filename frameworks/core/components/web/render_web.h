@@ -71,31 +71,6 @@ public:
         delegate_ = delegate;
     }
 
-    void OnPageStartedV2(const std::string& param);
-    void OnPageFinishedV2(const std::string& param);
-    void OnPageErrorV2(const std::string& param);
-    void OnMessageV2(const std::string& param);
-
-    void SetOnPageStart(const std::function<void(std::string)>& param)
-    {
-        onPageStartedV2_ = param;
-    }
-
-    void SetOnPageFinish(const std::function<void(std::string)>& param)
-    {
-        onPageStartedV2_ = param;
-    }
-
-    void SetOnError(const std::function<void(std::string)>& param)
-    {
-        onPageStartedV2_ = param;
-    }
-
-    void SetOnMessage(const std::function<void(std::string)>& param)
-    {
-        onPageMessageV2_ = param;
-    }
-
 protected:
     RefPtr<WebDelegate> delegate_;
     Size drawSize_;
@@ -113,14 +88,7 @@ private:
     bool isUrlLoaded_ = false;
 #endif
 
-    int32_t GetIntParam(const std::string& param, const std::string& name) const;
-    std::string GetStringParam(const std::string& param, const std::string& name) const;
-    std::string GetUrlStringParam(const std::string& param, const std::string& name) const;
     Offset position_;
-    std::function<void(std::string)> onPageStartedV2_;
-    std::function<void(std::string)> onPageFinishedV2_;
-    std::function<void(std::string)> onPageErrorV2_;
-    std::function<void(std::string)> onPageMessageV2_;
 };
 
 } // namespace OHOS::Ace

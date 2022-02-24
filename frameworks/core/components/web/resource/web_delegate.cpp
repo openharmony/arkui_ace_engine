@@ -1151,7 +1151,7 @@ void WebDelegate::OnActive()
 void WebDelegate::OnFocus()
 {
     if (onFocusV2_) {
-        onFocusV2_(std::make_shared<LoadWebRequestFocusEvent>(""));
+        onFocusV2_(std::make_shared<LoadWebOnFocusEvent>(""));
     }
 }
 
