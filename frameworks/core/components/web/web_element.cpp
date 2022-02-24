@@ -32,18 +32,16 @@ void WebElement::SetNewComponent(const RefPtr<Component>& newComponent)
             WebClient::GetInstance().UpdateWebviewUrl(webComponent->GetSrc());
         }
         Element::SetNewComponent(webComponent);
+        webComp_ = std::move(webComponent);
     }
-    component_ = AceType::WeakClaim(AceType::RawPtr(newComponent));
 }
 
 void WebElement::OnFocus()
 {
     FocusNode::OnFocus();
     LOGI("web element onfocus");
-    auto component = component_.Upgrade();
-    auto webComponent = AceType::DynamicCast<WebComponent>(component);
-    if (webComponent) {
-        auto controller = webComponent->GetController();
+    if (webComp_) {
+        auto controller = webComp_->GetController();
         if (controller) {
             controller->OnFocus();
         }
