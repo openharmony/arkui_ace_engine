@@ -393,6 +393,11 @@ void RenderSwiper::PerformLayout()
     }
 }
 
+bool RenderSwiper::IsUseOnly()
+{
+    return true;
+}
+
 void RenderSwiper::Initialize(const WeakPtr<PipelineContext>& context, bool catchMode)
 {
     if (!disableSwipe_) {
