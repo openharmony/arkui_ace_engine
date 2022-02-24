@@ -180,7 +180,8 @@ void AceAbility::OnStart(const Want& want)
 
     int32_t width = window->GetRect().width_;
     int32_t height = window->GetRect().height_;
-    LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", width, height);
+    LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d, left: %{public}d, top: %{public}d", width,
+        height, window->GetRect().posX_, window->GetRect().posY_);
     // get density
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplay) {
@@ -191,6 +192,7 @@ void AceAbility::OnStart(const Want& want)
     }
     SystemProperties::InitDeviceInfo(width, height, height >= width ? 0 : 1, density_, false);
     SystemProperties::SetColorMode(ColorMode::LIGHT);
+    SystemProperties::SetWindowPos(window->GetRect().posX_, window->GetRect().posY_);
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     auto resourceManager = GetResourceManager();
@@ -589,8 +591,10 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeCha
 {
     uint32_t width = rect.width_;
     uint32_t height = rect.height_;
-    LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u", width, height);
+    LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d", width,
+        height, rect.posX_, rect.posY_);
     SystemProperties::SetDeviceOrientation(height >= width ? 0 : 1);
+    SystemProperties::SetWindowPos(rect.posX_, rect.posY_);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
         LOGE("container may be destroyed.");
