@@ -78,9 +78,23 @@ class XComponentController : public virtual AceType {
     DECLARE_ACE_TYPE(XComponentController, AceType);
 
 public:
+    using ConfigSurfaceImpl = std::function<void(uint32_t, uint32_t)>;
+
     uint64_t GetSurfaceId()
     {
         return surfaceId_;
+    }
+
+    void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
+    {
+        if (ConfigSurfaceImpl_) {
+            ConfigSurfaceImpl_(surfaceWidth, surfaceHeight);
+        }
+    }
+
+    void SetConfigSurfaceImpl(ConfigSurfaceImpl&& ConfigSurfaceImpl)
+    {
+        ConfigSurfaceImpl_ = std::move(ConfigSurfaceImpl);
     }
 
 public:
@@ -110,6 +124,7 @@ public:
 
 private:
     std::list<RefPtr<XComponentController>> controllers_;
+    ConfigSurfaceImpl ConfigSurfaceImpl_;
 };
 
 // A component can show different native view.
