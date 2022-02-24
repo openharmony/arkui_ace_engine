@@ -37,7 +37,6 @@ namespace {
 constexpr int32_t UNUSED_PAGE_ID = 1;
 
 constexpr char ASSET_PATH_SHARE[] = "share";
-constexpr char PAGE_PROFILE[] = "main_pages.json";
 #ifdef WINDOWS_PLATFORM
 constexpr char DELIMITER[] = "\\";
 constexpr char ASSET_PATH_SHARE_STAGE[] = "resources\\base\\profile";
@@ -133,7 +132,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     resConfig.SetDensity(SystemProperties::GetResolution());
     resConfig.SetDeviceType(SystemProperties::GetDeviceType());
     container->SetResourceConfiguration(resConfig);
-    container->SetPageProfile(PAGE_PROFILE);
+    container->SetPageProfile((runArgs_.projectModel == ProjectModel::STAGE) ? runArgs_.pageProfile+".json" : "");
 }
 
 AceAbility::~AceAbility()
