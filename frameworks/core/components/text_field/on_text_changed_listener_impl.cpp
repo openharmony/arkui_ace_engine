@@ -86,9 +86,7 @@ void OnTextChangedListenerImpl::DeleteForward(int32_t length)
         auto textEditingValue = std::make_shared<TextEditingValue>();
         textEditingValue->text = value.text;
         textEditingValue->UpdateSelection(start, end);
-        if (start > 0 && end > 0) {
-            textEditingValue->Delete(start == end ? start - length : start, end);
-        }
+        textEditingValue->Delete(start == end ? start - length : start, end);
         client->UpdateEditingValue(textEditingValue, true);
     };
     PostTaskToUI(task);
