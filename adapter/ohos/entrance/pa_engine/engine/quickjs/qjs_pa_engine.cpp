@@ -1379,7 +1379,7 @@ void QjsPaEngine::OnCastTemptoNormal(const int64_t formId)
     ACE_DCHECK(ctx);
 
     Framework::QJSHandleScope handleScope(ctx);
-    JSValue paFunc = GetPaFunc("onCastTemp");
+    JSValue paFunc = GetPaFunc("onCastToNormal");
 
     JSValue argFormIdJSValue = JS_NewInt32(ctx, formId);
 
