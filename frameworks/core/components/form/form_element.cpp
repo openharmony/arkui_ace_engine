@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "core/common/container_scope.h"
 #include "core/common/form_manager.h"
 #include "frameworks/base/utils/string_utils.h"
 #include "frameworks/core/components/form/form_component.h"
@@ -105,7 +106,7 @@ void FormElement::InitEvent(const RefPtr<FormComponent>& component)
     }
 }
 
-void FormElement::HandleOnAcquireEvent(int64_t id) const
+void FormElement::HandleOnAcquireEvent(int64_t id)
 {
     LOGD("HandleOnAcquireEvent acquire event id:%{public}d", static_cast<int32_t>(id));
 
@@ -113,37 +114,77 @@ void FormElement::HandleOnAcquireEvent(int64_t id) const
         LOGE("could not find available event handle");
         return;
     }
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("fail to get context, onAcquire failed.");
+        return;
+    }
 
     auto json = JsonUtil::Create(true);
     json->Put("id", std::to_string(id).c_str());
-    onAcquireEvent_(json->ToString());
+
+    LOGI("HandleOnAcquireEvent msg:%{public}s", json->ToString().c_str());
+    int32_t instance = context->GetInstanceId();
+    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), info = json->ToString(), instance] {
+        auto element = weak.Upgrade();
+        if (element != nullptr && element->onAcquireEvent_ != nullptr) {
+            ContainerScope scope(instance);
+            element->onAcquireEvent_(info);
+        }
+    }, TaskExecutor::TaskType::JS);
 }
 
-void FormElement::HandleOnRouterEvent(const std::unique_ptr<JsonValue>& action) const
+void FormElement::HandleOnRouterEvent(const std::unique_ptr<JsonValue>& action)
 {
     if (!onRouterEvent_) {
         LOGE("action could not find available event handle");
         return;
     }
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("fail to get context, onRouter failed.");
+        return;
+    }
 
     auto json = JsonUtil::Create(true);
     json->Put("action", action);
-    onRouterEvent_(json->ToString());
+
+    LOGI("HandleOnRouterEvent msg:%{public}s", json->ToString().c_str());
+    int32_t instance = context->GetInstanceId();
+    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), info = json->ToString(), instance] {
+        auto element = weak.Upgrade();
+        if (element != nullptr && element->onRouterEvent_ != nullptr) {
+            ContainerScope scope(instance);
+            element->onRouterEvent_(info);
+        }
+    }, TaskExecutor::TaskType::JS);
 }
 
-void FormElement::HandleOnErrorEvent(const std::string code, const std::string msg) const
+void FormElement::HandleOnErrorEvent(const std::string code, const std::string msg)
 {
-    LOGD("HandleOnErrorEvent msg:%{public}s", msg.c_str());
-
     if (!onErrorEvent_) {
         LOGE("could not find available event handle");
+        return;
+    }
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("fail to get context, onError failed.");
         return;
     }
 
     auto json = JsonUtil::Create(true);
     json->Put("errcode", code.c_str());
     json->Put("msg", msg.c_str());
-    onErrorEvent_(json->ToString());
+
+    LOGI("HandleOnErrorEvent msg:%{public}s", msg.c_str());
+    int32_t instance = context->GetInstanceId();
+    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), info = json->ToString(), instance] {
+        auto element = weak.Upgrade();
+        if (element != nullptr && element->onErrorEvent_ != nullptr) {
+            ContainerScope scope(instance);
+            element->onErrorEvent_(info);
+        }
+    }, TaskExecutor::TaskType::JS);
 }
 
 void FormElement::Prepare(const WeakPtr<Element>& parent)
