@@ -319,11 +319,8 @@ std::map<std::string, std::string> JsiDeclarativeEngineInstance::mediaResourceFi
 
 std::unique_ptr<JsonValue> JsiDeclarativeEngineInstance::currentConfigResourceData_;
 
-std::unordered_map<int32_t, WeakPtr<JsiDeclarativeEngineInstance>> JsiDeclarativeEngineInstance::engineInstaneMap_;
-
-thread_local shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::runtime_;
-
-bool JsiDeclarativeEngineInstance::aceModuleInited_ = false;
+bool JsiDeclarativeEngineInstance::isModulePreloaded_ = false;
+bool JsiDeclarativeEngineInstance::isModuleInitialized_ = false;
 
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
@@ -395,12 +392,22 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 
     LocalScope socpe(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
     InitGlobalObjectTemplate();
-    InitConsoleModule();
-    InitAceModule();
-    InitPerfUtilModule();
-    InitJsExportsUtilObject();
-    InitJsNativeModuleObject();
-    InitGroupJsBridge();
+
+    // no need to initialize functions on global when use shared runtime
+    if (usingSharedRuntime_ && isModuleInitialized_) {
+        LOGI("InitJsEnv SharedRuntime has initialized, skip...");
+    } else {
+        InitConsoleModule();
+        InitAceModule();
+        InitPerfUtilModule();
+        InitJsExportsUtilObject();
+        InitJsNativeModuleObject();
+        InitGroupJsBridge();
+    }
+
+    if (usingSharedRuntime_) {
+        isModuleInitialized_ = true;
+    }
 
     // load resourceConfig
     currentConfigResourceData_ = JsonUtil::CreateArray(true);
@@ -416,7 +423,7 @@ bool JsiDeclarativeEngineInstance::FireJsEvent(const std::string& eventStr)
 
 void JsiDeclarativeEngineInstance::InitAceModule()
 {
-    if (!aceModuleInited_) {
+    if (!isModulePreloaded_) {
         bool contentStorageResult = runtime_->EvaluateJsCode((uint8_t*)_binary_contentStorage_abc_start,
             _binary_contentStorage_abc_end - _binary_contentStorage_abc_start);
         if (!contentStorageResult) {
@@ -475,13 +482,13 @@ void JsiDeclarativeEngineInstance::PreInitAceModule(void* runtime)
     aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsErrorLogPrint));
     global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
 
-    bool contentStorageResult = arkRuntime->EvaluateJsCode(
+    bool evalResult = arkRuntime->EvaluateJsCode(
         (uint8_t*)_binary_contentStorage_abc_start, _binary_contentStorage_abc_end - _binary_contentStorage_abc_start);
-    if (!contentStorageResult) {
+    if (!evalResult) {
         JsiDeclarativeUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, 0);
         LOGE("PreInitAceModule EvaluateJsCode stateMgmt failed");
     }
-    aceModuleInited_ = contentStorageResult;
+    isModulePreloaded_ = evalResult;
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule()
@@ -501,7 +508,7 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
         global->SetProperty(runtime_, "console", consoleObj);
     }
 
-    if (aceModuleInited_) {
+    if (isModulePreloaded_) {
         LOGD("console module has already inited");
         return;
     }
@@ -655,7 +662,7 @@ void JsiDeclarativeEngineInstance::RootViewHandle(panda::Local<panda::ObjectRef>
     LOGD("RootViewHandle");
     RefPtr<JsAcePage> page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
     if (page != nullptr) {
-        auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+        auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(GetCurrentRuntime());
         if (!arkRuntime) {
             LOGE("ark engine is null");
             return;
@@ -764,6 +771,22 @@ RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetStagingPage(int32_t instanceI
     return engineInstance->GetStagingPage();
 }
 
+shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::GetCurrentRuntime()
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
+    if (!jsiEngine) {
+        LOGE("jsiEngine is null");
+        return nullptr;
+    }
+    auto engineInstance = jsiEngine->GetEngineInstance();
+    if (engineInstance == nullptr) {
+        LOGE("engineInstance is nullptr");
+        return nullptr;
+    }
+    return engineInstance->GetJsRuntime();
+}
+
 void JsiDeclarativeEngineInstance::PostJsTask(const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task)
 {
     LOGD("PostJsTask");
@@ -868,8 +891,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         nativeEngine_ = nativeArkEngine;
     }
     engineInstance_->SetDebugMode(NeedDebugBreakPoint());
-    bool result =
-        engineInstance_->InitJsEnv(IsDebugVersion(), GetExtraNativeObject(), arkRuntime);
+    bool result = engineInstance_->InitJsEnv(IsDebugVersion(), GetExtraNativeObject(), arkRuntime);
     if (!result) {
         LOGE("JsiDeclarativeEngine Initialize, init js env failed");
         return false;
@@ -1161,9 +1183,8 @@ void JsiDeclarativeEngine::FireExternalEvent(const std::string& componentId, con
     }
 
     std::string arguments;
-    auto arkObjectRef = arkNativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true,
-                                                          arguments, NATIVE_XCOMPONENT_OBJ,
-                                                          reinterpret_cast<void*>(nativeXComponent_));
+    auto arkObjectRef = arkNativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true, arguments,
+        NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_));
 
     if (arkObjectRef.CheckException()) {
         LOGE("LoadModuleByName failed.");
@@ -1213,7 +1234,7 @@ void JsiDeclarativeEngine::FireExternalEvent(const std::string& componentId, con
 void JsiDeclarativeEngine::TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval)
 {
     TimerCallJs(callbackId);
-    auto runtime = JsiDeclarativeEngineInstance::GetJsRuntime();
+    auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
     auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
     if (instance == nullptr) {
         LOGE("get jsi engine instance failed");
@@ -1241,7 +1262,7 @@ void JsiDeclarativeEngine::TimerCallJs(const std::string& callbackId) const
         LOGE("get callback failed");
         return;
     }
-    auto runtime = JsiDeclarativeEngineInstance::GetJsRuntime();
+    auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
     func->Call(runtime, runtime->GetGlobal(), params, params.size());
 }
 

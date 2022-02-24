@@ -26,12 +26,11 @@ std::map<int32_t, JsiRef<JsiValue>> ContentStorageSet::contentStorageSet_;
 std::map<int32_t, JsiRef<JsiValue>> ContentStorageSet::contextSet_;
 std::map<int32_t, NativeReference*> ContentStorageSet::lazyContentStorageSet_;
 std::map<int32_t, NativeReference*> ContentStorageSet::lazyContextSet_;
-bool ContentStorageSet::runtimeInited_ = false;
 
 
 JsiRef<JsiValue> ContentStorageSet::GetCurrentStorage()
 {
-    if (!runtimeInited_) {
+    if (lazyContentStorageSet_.size() != 0) {
         ConvertLazyNativeValueSet();
     }
     auto instanceId = Container::CurrentId();
@@ -46,7 +45,7 @@ JsiRef<JsiValue> ContentStorageSet::GetCurrentStorage()
 
 JsiRef<JsiValue> ContentStorageSet::GetCurrentContext()
 {
-    if (!runtimeInited_) {
+    if (lazyContextSet_.size() != 0) {
         ConvertLazyNativeValueSet();
     }
     auto instanceId = Container::CurrentId();
@@ -61,11 +60,11 @@ JsiRef<JsiValue> ContentStorageSet::GetCurrentContext()
 
 void ContentStorageSet::SetCurrentStorage(int32_t instanceId, NativeReference* storage)
 {
-    if (!runtimeInited_) {
+    if (lazyContentStorageSet_.size() != 0) {
         ConvertLazyNativeValueSet();
     }
 
-    if (runtimeInited_) {
+    if (JsiDeclarativeEngineInstance::GetCurrentRuntime()) {
         contentStorageSet_.insert_or_assign(instanceId, JsConverter::ConvertNativeValueToJsVal(*storage));
     } else {
         lazyContentStorageSet_.insert_or_assign(instanceId, storage);
@@ -74,11 +73,11 @@ void ContentStorageSet::SetCurrentStorage(int32_t instanceId, NativeReference* s
 
 void ContentStorageSet::SetCurrentContext(int32_t instanceId, NativeReference* context)
 {
-    if (!runtimeInited_) {
+    if (lazyContextSet_.size() != 0) {
         ConvertLazyNativeValueSet();
     }
 
-    if (runtimeInited_) {
+    if (JsiDeclarativeEngineInstance::GetCurrentRuntime()) {
         contextSet_.insert_or_assign(instanceId, JsConverter::ConvertNativeValueToJsVal(*context));
     } else {
         lazyContextSet_.insert_or_assign(instanceId, context);
@@ -87,8 +86,7 @@ void ContentStorageSet::SetCurrentContext(int32_t instanceId, NativeReference* c
 
 void ContentStorageSet::ConvertLazyNativeValueSet()
 {
-    if (JsiDeclarativeEngineInstance::GetJsRuntime()) {
-        runtimeInited_ = true;
+    if (JsiDeclarativeEngineInstance::GetCurrentRuntime()) {
         if (lazyContentStorageSet_.size() != 0) {
             for (auto storage : lazyContentStorageSet_) {
                 contentStorageSet_.insert_or_assign(storage.first,

@@ -80,7 +80,7 @@ bool JsiValue::IsObject() const
 
 bool JsiValue::IsArray() const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (GetHandle().IsEmpty()) {
         return false;
     } else {
@@ -108,7 +108,7 @@ bool JsiValue::IsNull() const
 
 std::string JsiValue::ToString() const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     panda::LocalScope scope(runtime->GetEcmaVm());
     if (IsObject()) {
         return JSON::Stringify(runtime->GetEcmaVm(), GetHandle())->ToString(runtime->GetEcmaVm())->ToString();
@@ -118,7 +118,7 @@ std::string JsiValue::ToString() const
 
 bool JsiValue::ToBoolean() const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     return GetHandle()->BooleaValue();
 }
 
@@ -130,25 +130,25 @@ JsiArray::JsiArray(panda::Local<panda::ArrayRef> val) : JsiType(val) {}
 
 JsiRef<JsiValue> JsiArray::GetValueAt(size_t index) const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     return JsiRef<JsiValue>::Make(panda::ArrayRef::GetValueAt(runtime->GetEcmaVm(), GetHandle(), index));
 }
 
 void JsiArray::SetValueAt(size_t index, JsiRef<JsiValue> value) const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     panda::ArrayRef::SetValueAt(runtime->GetEcmaVm(), GetHandle(), index, value.Get().GetHandle());
 }
 
 size_t JsiArray::Length() const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     return GetHandle()->Length(runtime->GetEcmaVm());
 }
 
 bool JsiArray::IsArray() const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (GetHandle().IsEmpty()) {
         return false;
     } else {
@@ -173,13 +173,13 @@ bool JsiObject::IsUndefined() const
 
 JsiRef<JsiArray> JsiObject::GetPropertyNames() const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     return JsiRef<JsiArray>::Make(GetHandle()->GetOwnPropertyNames(runtime->GetEcmaVm()));
 }
 
 JsiRef<JsiValue> JsiObject::GetProperty(const char* prop) const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto stringRef = panda::StringRef::NewFromUtf8(runtime->GetEcmaVm(), prop);
     auto value = GetHandle()->Get(runtime->GetEcmaVm(), stringRef);
     auto func = JsiValue(value);
@@ -189,7 +189,7 @@ JsiRef<JsiValue> JsiObject::GetProperty(const char* prop) const
 
 JsiRef<JsiValue> JsiObject::ToJsonObject(const char* value) const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = runtime->GetEcmaVm();
     auto valueRef = JsiValueConvertor::toJsiValue<std::string>(value);
     auto refValue = JsiRef<JsiValue>::Make(JSON::Parse(vm, valueRef));
@@ -198,7 +198,7 @@ JsiRef<JsiValue> JsiObject::ToJsonObject(const char* value) const
 
 void JsiObject::SetPropertyJsonObject(const char* prop, const char* value) const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = runtime->GetEcmaVm();
     auto stringRef = panda::StringRef::NewFromUtf8(vm, prop);
     auto valueRef = JsiValueConvertor::toJsiValue<std::string>(value);
@@ -209,7 +209,7 @@ void JsiObject::SetPropertyJsonObject(const char* prop, const char* value) const
 
 void JsiObject::SetPropertyObject(const char* prop, JsiRef<JsiValue> value) const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = runtime->GetEcmaVm();
     auto stringRef = panda::StringRef::NewFromUtf8(vm, prop);
     GetHandle()->Set(vm, stringRef, value.Get().GetHandle());
@@ -225,7 +225,7 @@ JsiFunction::JsiFunction(panda::Local<panda::FunctionRef> val) : JsiType(val)
 
 JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<JsiValue> argv[]) const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = runtime->GetEcmaVm();
     LocalScope scope(vm);
     std::vector<panda::Local<panda::JSValueRef>> arguments;
@@ -243,7 +243,7 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
 
 panda::Local<panda::FunctionRef> JsiFunction::New(JsiFunctionCallback func)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     return panda::FunctionRef::New(const_cast<EcmaVM*>(runtime->GetEcmaVm()), func, nullptr);
 }
 
@@ -259,7 +259,7 @@ void JsiObjTemplate::SetInternalFieldCount(int32_t count) const
 
 JsiRef<JsiObject> JsiObjTemplate::NewInstance() const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto instance = panda::ObjectRef::New(runtime->GetEcmaVm());
     instance->SetNativePointerFieldCount(1);
     return JsiRef<JsiObject>::Make(instance);
@@ -267,7 +267,7 @@ JsiRef<JsiObject> JsiObjTemplate::NewInstance() const
 
 panda::Local<panda::JSValueRef> JsiObjTemplate::New()
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     return panda::ObjectRef::New(runtime->GetEcmaVm());
 }
 
@@ -302,7 +302,7 @@ JsiRef<JsiValue> JsiCallbackInfo::operator[](size_t index) const
     if (static_cast<int32_t>(index) < argc_) {
         return JsiRef<JsiValue>::Make(argv_[index].ToLocal(vm_));
     }
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     return JsiRef<JsiValue>::Make(panda::JSValueRef::Undefined(runtime->GetEcmaVm()));
 }
 

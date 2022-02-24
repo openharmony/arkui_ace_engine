@@ -27,7 +27,7 @@ JsiType<T>::JsiType()
 template<typename T>
 JsiType<T>::JsiType(panda::Local<T> val)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     handle_ = Global<T>(runtime->GetEcmaVm(), val);
 }
 
@@ -35,28 +35,28 @@ template<typename T>
 template<typename S>
 JsiType<T>::JsiType(panda::Local<S> val)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     handle_ = Global<T>(runtime->GetEcmaVm(), val);
 }
 
 template<typename T>
 JsiType<T>::JsiType(panda::Global<T> other)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     handle_ = Global<T>(runtime->GetEcmaVm(), other);
 }
 
 template<typename T>
 JsiType<T>::JsiType(const JsiType<T>& rhs)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_);
 }
 
 template<typename T>
 JsiType<T>::JsiType(JsiType<T>&& rhs)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_);
     rhs.handle_.FreeGlobalHandleAddr();
 }
@@ -64,7 +64,7 @@ JsiType<T>::JsiType(JsiType<T>&& rhs)
 template<typename T>
 JsiType<T>& JsiType<T>::operator=(const JsiType<T>& rhs)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_);
     return *this;
 }
@@ -72,7 +72,7 @@ JsiType<T>& JsiType<T>::operator=(const JsiType<T>& rhs)
 template<typename T>
 JsiType<T>& JsiType<T>::operator=(JsiType<T>&& rhs)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_);
     rhs.handle_.FreeGlobalHandleAddr();
     return *this;
@@ -95,7 +95,7 @@ void JsiType<T>::SetWeak()
 template<typename T>
 panda::Local<T> JsiType<T>::GetHandle() const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     return handle_.ToLocal(runtime->GetEcmaVm());
 }
 
@@ -132,7 +132,7 @@ JsiType<T>::operator panda::Local<T>() const
 template<typename T>
 JsiType<T> JsiType<T>::New()
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     return JsiType<T>(T::New(runtime->GetEcmaVm()));
 }
 
@@ -160,7 +160,7 @@ void JsiObject::Wrap(T* data) const
 template<typename T>
 void JsiObject::SetProperty(const char* prop, T value) const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto stringRef = panda::StringRef::NewFromUtf8(runtime->GetEcmaVm(), prop);
     GetHandle()->Set(runtime->GetEcmaVm(), stringRef, JsiValueConvertor::toJsiValue<T>(value));
 }
@@ -181,7 +181,7 @@ template<typename... Args>
 void JsiException::Throw(const char* format, Args... args)
 {
     const std::string str = StringUtils::FormatString(format, args...);
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = runtime->GetEcmaVm();
     panda::JSNApi::ThrowException(vm, panda::Exception::Error(vm, panda::StringRef::NewFromUtf8(vm, str.c_str())));
 }
@@ -190,7 +190,7 @@ template<typename... Args>
 void JsiException::ThrowRangeError(const char* format, Args... args)
 {
     const std::string str = StringUtils::FormatString(format, args...);
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = runtime->GetEcmaVm();
     panda::JSNApi::ThrowException(vm, panda::Exception::RangeError(vm, panda::StringRef::NewFromUtf8(vm, str.c_str())));
 }
@@ -199,7 +199,7 @@ template<typename... Args>
 void JsiException::ThrowReferenceError(const char* format, Args... args)
 {
     const std::string str = StringUtils::FormatString(format, args...);
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = runtime->GetEcmaVm();
     panda::JSNApi::ThrowException(
         vm, panda::Exception::ReferenceError(vm, panda::StringRef::NewFromUtf8(vm, str.c_str())));
@@ -209,7 +209,7 @@ template<typename... Args>
 void JsiException::ThrowSyntaxError(const char* format, Args... args)
 {
     const std::string str = StringUtils::FormatString(format, args...);
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = runtime->GetEcmaVm();
     panda::JSNApi::ThrowException(
         vm, panda::Exception::SyntaxError(vm, panda::StringRef::NewFromUtf8(vm, str.c_str())));
@@ -219,7 +219,7 @@ template<typename... Args>
 void JsiException::ThrowTypeError(const char* format, Args... args)
 {
     const std::string str = StringUtils::FormatString(format, args...);
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = runtime->GetEcmaVm();
     panda::JSNApi::ThrowException(vm, panda::Exception::TypeError(vm, panda::StringRef::NewFromUtf8(vm, str.c_str())));
 }
@@ -228,7 +228,7 @@ template<typename... Args>
 void JsiException::ThrowEvalError(const char* format, Args... args)
 {
     const std::string str = StringUtils::FormatString(format, args...);
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = runtime->GetEcmaVm();
     panda::JSNApi::ThrowException(vm, panda::Exception::EvalError(vm, panda::StringRef::NewFromUtf8(vm, str.c_str())));
 }

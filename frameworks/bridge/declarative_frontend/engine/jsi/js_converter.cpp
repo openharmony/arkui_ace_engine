@@ -24,12 +24,12 @@
 namespace OHOS::Ace::Framework {
 JsiRef<JsiValue> JsConverter::ConvertNativeValueToJsVal(NativeValue* nativeValue)
 {
-    if (!nativeValue || !JsiDeclarativeEngineInstance::GetJsRuntime()) {
+    if (!nativeValue || !JsiDeclarativeEngineInstance::GetCurrentRuntime()) {
         LOGE("ConvertNativeValueToJsVal wrong nativeValue or js runtime not ready");
         return JsiRef<JsiValue>::Make();
     }
     Global<JSValueRef> globalRef = *nativeValue;
-    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto localRef = globalRef.ToLocal(arkRuntime->GetEcmaVm());
     JsiValue jsiValue(localRef);
     return JsiRef<JsiValue>::Make(jsiValue);

@@ -21,7 +21,7 @@ namespace OHOS::Ace::Framework {
 template<typename T>
 void JsiObjectTemplate::Constant(const char* name, T val)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = runtime->GetEcmaVm();
     proto_->Set(vm, panda::StringRef::NewFromUtf8(vm, name), JsiValueConvertor::toJsiValue<T>(val));
 }

@@ -37,7 +37,6 @@ private:
     static std::map<int32_t, JSRef<JSVal>> contextSet_;
     static std::map<int32_t, NativeReference*> lazyContentStorageSet_;
     static std::map<int32_t, NativeReference*> lazyContextSet_;
-    static bool runtimeInited_;
 };
 
 } // namespace OHOS::Ace::Framework

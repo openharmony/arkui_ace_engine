@@ -68,7 +68,7 @@ template<typename C>
 template<typename Base, typename R, typename... Args>
 void JsiClass<C>::Method(const char* name, R (Base::*func)(Args...), int id)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     auto funcId = std::make_shared<int32_t>(id);
     functionIds_.emplace_back(funcId);
@@ -81,7 +81,7 @@ template<typename C>
 template<typename T>
 void JsiClass<C>::CustomMethod(const char* name, MemberFunctionCallback<T> callback, int id)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     auto funcId = std::make_shared<int32_t>(id);
     functionIds_.emplace_back(funcId);
@@ -95,7 +95,7 @@ void JsiClass<C>::CustomMethod(const char* name, MemberFunctionCallback<T> callb
 template<typename C>
 void JsiClass<C>::CustomMethod(const char* name, FunctionCallback callback)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     customFunctions_.emplace(
         name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, callback, nullptr)));
@@ -105,7 +105,7 @@ template<typename C>
 template<typename T>
 void JsiClass<C>::CustomMethod(const char* name, JSMemberFunctionCallback<T> callback, int id)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     auto funcId = std::make_shared<int32_t>(id);
     functionIds_.emplace_back(funcId);
@@ -118,7 +118,7 @@ template<typename C>
 template<typename T>
 void JsiClass<C>::CustomProperty(const char* name, MemberFunctionGetCallback<T> callback, int getterId, int setterId)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     auto funcGetId = std::make_shared<int32_t>(getterId);
     functionIds_.emplace_back(funcGetId);
@@ -141,7 +141,7 @@ void JsiClass<C>::CustomProperty(const char* name, MemberFunctionGetCallback<T> 
 template<typename C>
 void JsiClass<C>::CustomProperty(const char* name, FunctionGetCallback getter, FunctionSetCallback setter)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     customGetFunctions_.emplace(
         name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, getter, nullptr)));
@@ -153,7 +153,7 @@ template<typename C>
 template<typename T>
 void JsiClass<C>::CustomProperty(const char* name, JSMemberFunctionCallback<T> callback, int getterId, int setterId)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     auto funcGetId = std::make_shared<int32_t>(getterId);
     functionIds_.emplace_back(funcGetId);
@@ -171,7 +171,7 @@ template<typename C>
 template<typename R, typename... Args>
 void JsiClass<C>::StaticMethod(const char* name, R (*func)(Args...), int id)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     auto funcId = std::make_shared<int32_t>(id);
     functionIds_.emplace_back(funcId);
@@ -183,7 +183,7 @@ void JsiClass<C>::StaticMethod(const char* name, R (*func)(Args...), int id)
 template<typename C>
 void JsiClass<C>::StaticMethod(const char* name, JSFunctionCallback func, int id)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     auto funcId = std::make_shared<int32_t>(id);
     functionIds_.emplace_back(funcId);
@@ -195,7 +195,7 @@ void JsiClass<C>::StaticMethod(const char* name, JSFunctionCallback func, int id
 template<typename C>
 void JsiClass<C>::CustomStaticMethod(const char* name, FunctionCallback callback)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     staticFunctions_.emplace(
         name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, callback, nullptr)));
@@ -205,7 +205,7 @@ template<typename C>
 template<typename T>
 void JsiClass<C>::StaticConstant(const char* name, T val)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     panda::Local<panda::JSValueRef> key = panda::StringRef::NewFromUtf8(vm, name);
     classFunction_->Set(vm, key, JsiValueConvertor::toJsiValue<std::string>(val));
@@ -215,7 +215,7 @@ template<typename C>
 void JsiClass<C>::Bind(BindingTarget t, FunctionCallback ctor)
 {
     constructor_ = ctor;
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     classFunction_ = panda::Global<panda::FunctionRef>(
         vm, panda::FunctionRef::NewClassFunction(vm, ConstructorInterceptor, nullptr, nullptr));
@@ -249,7 +249,7 @@ void JsiClass<C>::Bind(
     jsConstructor_ = ctor;
     jsDestructor_ = dtor;
     jsGcMark_ = gcMark;
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     classFunction_ = panda::Global<panda::FunctionRef>(
         vm, panda::FunctionRef::NewClassFunction(vm, JSConstructorInterceptor, nullptr, nullptr));
@@ -283,7 +283,7 @@ void JsiClass<C>::Bind(BindingTarget t, JSDestructorCallback<C> dtor, JSGCMarkCa
 {
     jsDestructor_ = dtor;
     jsGcMark_ = gcMark;
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     classFunction_ = panda::Global<panda::FunctionRef>(
         vm, panda::FunctionRef::NewClassFunction(vm, InternalConstructor<Args...>, nullptr, nullptr));
@@ -543,7 +543,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSConstructorInterceptor(panda::Ecm
 template<typename C>
 panda::Local<panda::JSValueRef> JsiClass<C>::NewInstance()
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     return classFunction_->Constructor(vm, nullptr, 0);
 }

@@ -52,10 +52,10 @@
 #define JAVASCRIPT_EXECUTION_SCOPE(exec) \
     panda::LocalScope socpe(exec.vm_);
 #define JAVASCRIPT_EXECUTION_SCOPE_STATIC                                                                \
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime()); \
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime()); \
     panda::LocalScope socpe(runtime->GetEcmaVm());
 #define CHECK_JAVASCRIPT_SCOPE(exec, ...)                                               \
-    if (JsiDeclarativeEngineInstance::GetJsRuntime() == nullptr || exec.vm_ == nullptr) \
+    if (JsiDeclarativeEngineInstance::GetCurrentRuntime() == nullptr || exec.vm_ == nullptr) \
         return __VA_ARGS__;
 #define JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(exec, ...) \
     CHECK_JAVASCRIPT_SCOPE(exec, __VA_ARGS__)            \
