@@ -440,7 +440,7 @@ template("flutter_engine_shell") {
         public_deps = [ "//foundation/graphic/standard:libgl" ]
       }
       deps += [
-        "//foundation/graphic/standard:libvsync_client",
+        "//foundation/graphic/standard/rosen/modules/composer:libcomposer",
         "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
         "//foundation/windowmanager/wm:libwm",
       ]
