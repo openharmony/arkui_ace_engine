@@ -24,7 +24,24 @@
 namespace OHOS::Ace {
 class WebDelegate;
 
-class WebClientImpl : public OHOS::WebView::WebViewClient, public OHOS::WebView::DownloadListener {
+class DownloadListenerImpl : public OHOS::WebView::DownloadListener {
+public:
+    DownloadListenerImpl() = default;
+    ~DownloadListenerImpl() = default;
+
+    void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
+        const std::string& mimetype, long contentLength) override;
+
+    void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
+    {
+        webDelegate_ = delegate;
+    }
+
+private:
+    WeakPtr<WebDelegate> webDelegate_;
+};
+
+class WebClientImpl : public OHOS::WebView::WebViewClient {
 public:
     WebClientImpl() = default;
     ~WebClientImpl() = default;
@@ -40,8 +57,6 @@ public:
     void OnGeolocationPermissionsHidePrompt() override;
     void OnGeolocationPermissionsShowPrompt(const std::string& origin,
         OHOS::WebView::GeolocationCallback* callback) override;
-    void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
-        const std::string& mimetype, long contentLength) override;
 
     void OnRequestFocus() override;
     void onReceivedError(std::shared_ptr<WebView::WebResourceRequest> request,
