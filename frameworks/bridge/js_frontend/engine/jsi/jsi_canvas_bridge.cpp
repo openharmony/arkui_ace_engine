@@ -1740,6 +1740,8 @@ shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>&
     }
 
     return jsValue;
+#else
+    return runtime->NewUndefined();
 #endif
 }
 
