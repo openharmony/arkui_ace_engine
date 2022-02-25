@@ -42,6 +42,7 @@ public:
     using OnFormUpdateCallback = std::function<void(int64_t, const std::string&,
         const std::map<std::string, std::pair<int, int32_t>>&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
+    using OnFormUninstallCallback = std::function<void(int64_t)>;
 
     enum class State: char {
         WAITINGFORSIZE,
@@ -60,9 +61,10 @@ public:
     void AddForm(const WeakPtr<PipelineContext>& context, const RequestFormInfo& info);
     void ReleasePlatformResource();
 
-    void AddFormAcquireCallback(const OnFormAcquiredCallback& layoutChangeCallback);
-    void AddFormUpdateCallback(const OnFormUpdateCallback& layoutChangeCallback);
-    void AddFormErrorCallback(const OnFormErrorCallback& layoutChangeCallback);
+    void AddFormAcquireCallback(const OnFormAcquiredCallback& callback);
+    void AddFormUpdateCallback(const OnFormUpdateCallback& callback);
+    void AddFormErrorCallback(const OnFormErrorCallback& callback);
+    void AddFormUninstallCallback(const OnFormUninstallCallback& callback);
 
     void OnActionEvent(const std::string& action);
 
@@ -88,6 +90,7 @@ private:
     OnFormAcquiredCallback onFormAcquiredCallback_;
     OnFormUpdateCallback onFormUpdateCallback_;
     OnFormErrorCallback onFormErrorCallback_;
+    OnFormUninstallCallback onFormUninstallCallback_;
 
     State state_ { State::WAITINGFORSIZE };
 #ifdef OHOS_STANDARD_SYSTEM

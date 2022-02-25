@@ -101,6 +101,11 @@ void FormElement::InitEvent(const RefPtr<FormComponent>& component)
         onErrorEvent_ = AceAsyncEvent<void(const std::string&)>::Create(component->GetOnErrorEvent(), context_);
     }
 
+    if (!component->GetOnUninstallEvent().IsEmpty()) {
+        onUninstallEvent_ =
+            AceAsyncEvent<void(const std::string&)>::Create(component->GetOnUninstallEvent(), context_);
+    }
+
     if (!component->GetOnRouterEvent().IsEmpty()) {
         onRouterEvent_ = AceAsyncEvent<void(const std::string&)>::Create(component->GetOnRouterEvent(), context_);
     }
@@ -187,6 +192,32 @@ void FormElement::HandleOnErrorEvent(const std::string code, const std::string m
     }, TaskExecutor::TaskType::JS);
 }
 
+void FormElement::HandleOnUninstallEvent(int64_t formId)
+{
+    if (!onUninstallEvent_) {
+        LOGE("could not find available event handle");
+        return;
+    }
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("fail to get context, onUninstall failed.");
+        return;
+    }
+
+    auto json = JsonUtil::Create(true);
+    json->Put("id", std::to_string(formId).c_str());
+
+    LOGI("HandleOnUninstallEvent formId:%{public}s", std::to_string(formId).c_str());
+    int32_t instance = context->GetInstanceId();
+    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), info = json->ToString(), instance] {
+        auto element = weak.Upgrade();
+        if (element != nullptr && element->onUninstallEvent_ != nullptr) {
+            ContainerScope scope(instance);
+            element->onUninstallEvent_(info);
+        }
+    }, TaskExecutor::TaskType::JS);
+}
+
 void FormElement::Prepare(const WeakPtr<Element>& parent)
 {
     RenderElement::Prepare(parent);
@@ -241,6 +272,17 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                 auto renderForm = AceType::DynamicCast<RenderForm>(render);
                 if (renderForm) {
                     renderForm->RemoveChildren();
+                }
+            });
+        });
+        formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this)](int64_t formId) {
+            auto element = weak.Upgrade();
+            auto uiTaskExecutor = SingleTaskExecutor::Make(
+                element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            uiTaskExecutor.PostTask([formId, weak] {
+                auto form = weak.Upgrade();
+                if (form) {
+                    form->HandleOnUninstallEvent(formId);
                 }
             });
         });
