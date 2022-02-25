@@ -69,6 +69,10 @@ public:
     void PopMenu();
     void PopInstant();
     void PushInstant(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
+    virtual bool isPageElement()
+    {
+        return false;
+    }
 
 protected:
     void OnFocus() override;
