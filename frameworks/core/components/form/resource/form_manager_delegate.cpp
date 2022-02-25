@@ -265,6 +265,15 @@ void FormManagerDelegate::AddFormErrorCallback(const OnFormErrorCallback& callba
     onFormErrorCallback_ = callback;
 }
 
+void FormManagerDelegate::AddFormUninstallCallback(const OnFormUninstallCallback& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        LOGE("callback is null or has released");
+        return;
+    }
+    onFormUninstallCallback_ = callback;
+}
+
 void FormManagerDelegate::OnActionEvent(const std::string& action)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
@@ -371,7 +380,10 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJs
 
 void FormManagerDelegate::ProcessFormUninstall(const int64_t formId)
 {
-
+    LOGI("ProcessFormUninstall formId:%{public}s", std::to_string(formId).c_str());
+    if (onFormUninstallCallback_) {
+        onFormUninstallCallback_(formId);
+    }
 }
 
 void FormManagerDelegate::OnDeathReceived()

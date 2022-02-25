@@ -98,6 +98,16 @@ public:
         return onError_;
     }
 
+    void SetOnUninstallEventId(const EventMarker& event)
+    {
+        onUninstall_ = event;
+    }
+
+    const EventMarker& GetOnUninstallEvent() const
+    {
+        return onUninstall_;
+    }
+
     void SetOnRouterEventId(const EventMarker& event)
     {
         onRouter_ = event;
@@ -112,6 +122,7 @@ private:
     RequestFormInfo info_;
     EventMarker onAcquireForm_;
     EventMarker onError_;
+    EventMarker onUninstall_;
     EventMarker onRouter_;
 };
 

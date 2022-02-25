@@ -215,6 +215,27 @@ void JSForm::JsOnError(const JSCallbackInfo& info)
 #endif
 }
 
+void JSForm::JsOnUninstall(const JSCallbackInfo& info)
+{
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (info[0]->IsFunction()) {
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+
+        auto onUninstallId =
+            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                LOGI("onUninstall send:%{public}s", param.c_str());
+                std::vector<std::string> keys = { "id" };
+                ACE_SCORING_EVENT("Form.onUninstall");
+                func->Execute(keys, param);
+            });
+
+        form->SetOnUninstallEventId(onUninstallId);
+    }
+#endif
+}
+
 void JSForm::JsOnRouter(const JSCallbackInfo& info)
 {
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
@@ -249,6 +270,7 @@ void JSForm::JSBind(BindingTarget globalObj)
 
     JSClass<JSForm>::StaticMethod("onAcquired", &JSForm::JsOnAcquired);
     JSClass<JSForm>::StaticMethod("onError", &JSForm::JsOnError);
+    JSClass<JSForm>::StaticMethod("onUninstall", &JSForm::JsOnUninstall);
     JSClass<JSForm>::StaticMethod("onRouter", &JSForm::JsOnRouter);
     JSClass<JSForm>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSForm>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
