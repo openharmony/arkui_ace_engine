@@ -80,9 +80,11 @@ bool QJSDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     nativeEngine_->CheckUVLoop();
 #endif
     if (delegate && delegate->GetAssetManager()) {
-        std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
-        auto qjsNativeEngine = static_cast<QuickJSNativeEngine*>(nativeEngine_);
-        qjsNativeEngine->SetPackagePath(packagePath);
+        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+        if (!packagePath.empty()) {
+            auto qjsNativeEngine = static_cast<QuickJSNativeEngine*>(nativeEngine_);
+            qjsNativeEngine->SetPackagePath(packagePath);
+        }
     }
     RegisterWorker();
 

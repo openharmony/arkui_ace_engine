@@ -217,11 +217,6 @@ void BackendDelegateImpl::LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, st
         TaskExecutor::TaskType::JS);
 }
 
-void BackendDelegateImpl::SetAssetManager(const RefPtr<AssetManager>& assetManager)
-{
-    assetManager_ = assetManager;
-}
-
 SingleTaskExecutor BackendDelegateImpl::GetAnimationJsTask()
 {
     return SingleTaskExecutor::Make(taskExecutor_, TaskExecutor::TaskType::JS);

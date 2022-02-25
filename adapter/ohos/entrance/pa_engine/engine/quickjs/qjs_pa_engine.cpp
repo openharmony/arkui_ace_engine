@@ -449,6 +449,13 @@ bool QjsPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
 #endif
+    if (delegate && delegate->GetAssetManager()) {
+        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+        if (!packagePath.empty()) {
+            auto qjsNativeEngine = static_cast<QuickJSNativeEngine*>(nativeEngine_);
+            qjsNativeEngine->SetPackagePath(packagePath);
+        }
+    }
     RegisterWorker();
     return ret;
 }

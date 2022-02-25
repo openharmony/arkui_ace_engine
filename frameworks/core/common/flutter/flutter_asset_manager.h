@@ -82,12 +82,12 @@ public:
 
     std::string GetAssetPath(const std::string& assetName) override;
 
-    void SetPackagePath(const std::string& packagePath) override
+    void SetLibPath(const std::string& packagePath) override
     {
         packagePath_ = packagePath;
     }
 
-    std::string GetPackagePath() const override
+    std::string GetLibPath() const override
     {
         return packagePath_;
     }

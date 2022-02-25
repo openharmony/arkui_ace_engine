@@ -54,9 +54,9 @@ public:
 
     virtual std::string GetAssetPath(const std::string& assetName) = 0;
 
-    virtual void SetPackagePath(const std::string& packagePath) = 0;
+    virtual void SetLibPath(const std::string& packagePath) = 0;
 
-    virtual std::string GetPackagePath() const = 0;
+    virtual std::string GetLibPath() const = 0;
 
     virtual void GetAssetList(const std::string& path, std::vector<std::string>& assetList) const = 0;
 };

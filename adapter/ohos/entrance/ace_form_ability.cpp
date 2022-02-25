@@ -109,6 +109,23 @@ OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::W
         auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
         Platform::PaContainer::AddAssetPath(formMap_.at(formId), packagePathStr, assetBasePathStr);
     }
+    std::shared_ptr<ApplicationInfo> appInfo = GetApplicationInfo();
+    if (appInfo) {
+        std::string nativeLibraryPath = appInfo->nativeLibraryPath;
+        if (!nativeLibraryPath.empty()) {
+            if (nativeLibraryPath.back() == '/') {
+                nativeLibraryPath.pop_back();
+            }
+            std::string libPath = GetBundleCodePath();
+            if (libPath.back() == '/') {
+                libPath += nativeLibraryPath;
+            } else {
+                libPath += "/" + nativeLibraryPath;
+            }
+            LOGI("napi lib path = %{private}s", libPath.c_str());
+            Platform::PaContainer::AddLibPath(abilityId_, libPath);
+        }
+    }
 
     // run form ability
     Platform::PaContainer::RunPa(formMap_.at(formId), parsedUrl, want);

@@ -96,6 +96,23 @@ void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want)
         auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
         Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
     }
+    std::shared_ptr<ApplicationInfo> appInfo = GetApplicationInfo();
+    if (appInfo) {
+        std::string nativeLibraryPath = appInfo->nativeLibraryPath;
+        if (!nativeLibraryPath.empty()) {
+            if (nativeLibraryPath.back() == '/') {
+                nativeLibraryPath.pop_back();
+            }
+            std::string libPath = GetBundleCodePath();
+            if (libPath.back() == '/') {
+                libPath += nativeLibraryPath;
+            } else {
+                libPath += "/" + nativeLibraryPath;
+            }
+            LOGI("napi lib path = %{private}s", libPath.c_str());
+            Platform::PaContainer::AddLibPath(abilityId_, libPath);
+        }
+    }
 
     // run service
     Platform::PaContainer::RunPa(abilityId_, parsedUrl, want);

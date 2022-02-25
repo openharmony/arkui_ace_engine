@@ -3138,8 +3138,10 @@ bool QjsEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 #endif
     RegisterWorker();
     if (delegate && delegate->GetAssetManager()) {
-        std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
-        nativeEngine_->SetPackagePath(packagePath);
+        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+        if (!packagePath.empty()) {
+            nativeEngine_->SetPackagePath(packagePath);
+        }
     }
 
     return ret;
