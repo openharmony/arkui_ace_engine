@@ -336,7 +336,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         return;
     }
 
-    auto size = SkSize::Make(GetLayoutSize().Width(), GetLayoutSize().Width());
+    auto size = SkSize::Make(GetLayoutSize().Width(), GetLayoutSize().Height());
     auto shader = RosenDecorationPainter::CreateGradientShader(backDecoration_->GetGradient(), size, dipScale_);
 #ifdef OHOS_PLATFORM
     rsNode->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
