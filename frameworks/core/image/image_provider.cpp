@@ -131,7 +131,7 @@ sk_sp<SkData> ImageProvider::LoadImageRawData(
         if (targetSize.IsValid()) {
             LOGD("size valid try load from cache.");
             std::string cacheFilePath =
-                ImageCache::GetImageCacheFilePath(ImageObject::GenerateCacheKey(imageInfo.GetSrc(), targetSize));
+                ImageCache::GetImageCacheFilePath(ImageObject::GenerateCacheKey(imageInfo, targetSize));
             LOGD("cache file path: %{private}s", cacheFilePath.c_str());
             auto data = imageCache->GetDataFromCacheFile(cacheFilePath);
             if (data) {
@@ -332,7 +332,7 @@ sk_sp<SkImage> ImageProvider::ResizeSkImage(
         rawImage,
         dstWidth,
         dstHeight,
-        ImageObject::GenerateCacheKey(src, imageSize));
+        ImageObject::GenerateCacheKey(ImageSourceInfo(src), imageSize));
 }
 
 sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(

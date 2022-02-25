@@ -102,6 +102,7 @@ ImageSourceInfo::ImageSourceInfo(
     if (count > 1) {
         LOGW("multi image source set, only one will be load.");
     }
+    cacheKey_ = std::to_string(std::hash<std::string> {}(src_));
 }
 
 SrcType ImageSourceInfo::ResolveSrcType() const
