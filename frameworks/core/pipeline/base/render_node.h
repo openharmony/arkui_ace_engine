@@ -491,6 +491,11 @@ public:
             if (!inRecursion && SystemProperties::GetRosenBackendEnabled()) {
                 MarkParentNeedRender();
             }
+            if (hidden_) {
+                disableTouchEvent_ = true;
+            } else {
+                disableTouchEvent_ = false;
+            }
         }
         for (auto& child : children_) {
             child->SetHidden(hidden, true);

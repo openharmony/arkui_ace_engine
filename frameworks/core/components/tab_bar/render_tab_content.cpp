@@ -455,4 +455,9 @@ void RenderTabContent::PerformLayout()
     }
 }
 
+bool RenderTabContent::IsUseOnly()
+{
+    return true;
+}
+
 } // namespace OHOS::Ace
