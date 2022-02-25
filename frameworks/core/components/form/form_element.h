@@ -44,9 +44,9 @@ public:
         return subContainer_;
     }
 
-    void HandleOnAcquireEvent(int64_t) const;
-    void HandleOnErrorEvent(const std::string code, const std::string msg) const;
-    void HandleOnRouterEvent(const std::unique_ptr<JsonValue>& action) const;
+    void HandleOnAcquireEvent(int64_t);
+    void HandleOnErrorEvent(const std::string code, const std::string msg);
+    void HandleOnRouterEvent(const std::unique_ptr<JsonValue>& action);
     void OnActionEvent(const std::string& action) const;
 
     bool ISAllowUpdate() const

@@ -184,7 +184,7 @@ void JSForm::JsOnAcquired(const JSCallbackInfo& info)
         auto onAppearId =
             EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-                LOGD("onAcquire send id:%{public}s", param.c_str());
+                LOGI("onAcquire send:%{public}s", param.c_str());
                 std::vector<std::string> keys = { "id" };
                 ACE_SCORING_EVENT("Form.onAcquired");
                 func->Execute(keys, param);
@@ -204,6 +204,7 @@ void JSForm::JsOnError(const JSCallbackInfo& info)
         auto onErrorId =
             EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                LOGI("onError send:%{public}s", param.c_str());
                 std::vector<std::string> keys = { "errcode", "msg" };
                 ACE_SCORING_EVENT("Form.onError");
                 func->Execute(keys, param);
@@ -224,6 +225,7 @@ void JSForm::JsOnRouter(const JSCallbackInfo& info)
         auto onRouterId =
             EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                LOGI("onRouter send:%{public}s", param.c_str());
                 std::vector<std::string> keys = { "action" };
                 ACE_SCORING_EVENT("Form.onRouter");
                 func->Execute(keys, param);
