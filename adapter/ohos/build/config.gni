@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos/ace/ace_args.gni")
+import("//foundation/graphic/standard/graphic_config.gni")
 import("product_config.gni")
 
 defines = [
@@ -35,11 +36,10 @@ ark_engine = {
 }
 js_engines += [ ark_engine ]
 
-disable_gpu = false
-foreach(product, gpu_block_product_list) {
-  if ("${product_name}" == product) {
-    disable_gpu = true
-  }
+if (ace_enable_gpu) {
+  disable_gpu = false
+} else {
+  disable_gpu = true
 }
 
 foreach(product, enable_accessibility_product_list) {
