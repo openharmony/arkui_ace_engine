@@ -198,6 +198,24 @@ RefPtr<Element> InspectorComposedElement::GetElementChildBySlot(const RefPtr<Ele
     return child;
 }
 
+RefPtr<Element> InspectorComposedElement::GetInspectorComposedElementParent(const RefPtr<Element>& element) const
+{
+    if (!element) {
+        return nullptr;
+    }
+    for (const auto& child : element->GetChildren()) {
+        auto inspectorComposedElement = AceType::DynamicCast<InspectorComposedElement>(child);
+        if (inspectorComposedElement) {
+            return element;
+        }
+        auto element_ = GetInspectorComposedElementParent(child);
+        if (element_) {
+            return element_;
+        }
+    }
+    return nullptr;
+}
+
 std::unique_ptr<JsonValue> InspectorComposedElement::ToJsonObject() const
 {
     auto resultJson = JsonUtil::Create(true);

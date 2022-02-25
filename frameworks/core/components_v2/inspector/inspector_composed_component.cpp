@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "core/components_v2/inspector/checkbox_composed_element.h"
 #include "core/components_v2/inspector/column_composed_element.h"
 #include "core/components_v2/inspector/column_split_composed_element.h"
+#include "core/components_v2/inspector/counter_composed_element.h"
 #include "core/components_v2/inspector/customdialog_composed_element.h"
 #include "core/components_v2/inspector/data_panel_composed_element.h"
 #include "core/components_v2/inspector/date_picker_composed_element.h"
@@ -97,7 +98,7 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { COLUMN_SPLIT_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ColumnSplitComposedElement>(id); } },
     { COUNTER_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::CounterComposedElement>(id); } },
     { NAVIGATION_VIEW_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigationComposedElement>(id); } },
     { ROW_SPLIT_COMPONENT_TAG,
