@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,8 @@ void RosenRenderSingleChildScroll::Paint(RenderContext& context, const Offset& o
         return;
     }
     rsNode->SetPaintOrder(true);
-    rsNode->SetClipToFrame(true);
+    // Todo: viewPort_ is not adapt for RS.
+    rsNode->SetClipToBounds(true);
 
     // paint custom effect
     if (scrollEffect_) {
