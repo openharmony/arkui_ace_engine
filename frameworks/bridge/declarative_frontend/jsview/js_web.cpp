@@ -441,7 +441,7 @@ void JSWeb::MixedMode(int32_t mixedMode)
         case 0:
             mixedContentMode = MixedModeContent::MIXED_CONTENT_ALWAYS_ALLOW;
             break;
-        case 2:
+        case 1:
             mixedContentMode = MixedModeContent::MIXED_CONTENT_COMPATIBILITY_MODE;
             break;
         default:
