@@ -70,7 +70,7 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
     touchPoint.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / 2.0;
     touchPoint.id = pointerItem.GetPointerId();
     touchPoint.force = pointerItem.GetPressure();
-    touchPoint.downTime = TimeStamp(std::chrono::milliseconds(pointerItem.GetDownTime()));
+    touchPoint.downTime = TimeStamp(std::chrono::microseconds(pointerItem.GetDownTime()));
     touchPoint.x = pointerItem.GetLocalX();
     touchPoint.y = pointerItem.GetLocalY();
     touchPoint.isPressed = pointerItem.IsPressed();
@@ -102,8 +102,8 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         return TouchEvent();
     }
     auto touchPoint = ConvertTouchPoint(item);
-    std::chrono::milliseconds milliseconds(pointerEvent->GetActionTime());
-    TimeStamp time(milliseconds);
+    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+    TimeStamp time(microseconds);
     TouchEvent event { touchPoint.id, touchPoint.x, touchPoint.y, TouchType::UNKNOWN, time, touchPoint.size,
         touchPoint.force, pointerEvent->GetDeviceId() };
     int32_t orgDevice = pointerEvent->GetSourceType();
