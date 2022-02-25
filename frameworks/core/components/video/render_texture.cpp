@@ -158,10 +158,12 @@ void RenderTexture::ApplyObjectPosition()
 void RenderTexture::CalculateFitContain()
 {
     const Size& layoutSize = GetLayoutSize();
-    double sourceRatio = sourceSize_.Width() / sourceSize_.Height();
-    double layoutRatio = layoutSize.Width() / layoutSize.Height();
+    double layoutRatio = NearZero(layoutSize.Height()) ? 0.0 : layoutSize.Width() / layoutSize.Height();
+    double sourceRatio = NearZero(sourceSize_.Height()) ? layoutRatio : sourceSize_.Width() / sourceSize_.Height();
 
-    if (sourceRatio < layoutRatio) {
+    if (NearZero(layoutRatio) || NearZero(sourceRatio)) {
+        drawSize_ = layoutSize;
+    } else if (sourceRatio < layoutRatio) {
         drawSize_ = Size(sourceRatio * layoutSize.Height(), layoutSize.Height());
     } else {
         drawSize_ = Size(layoutSize.Width(), layoutSize.Width() / sourceRatio);
@@ -170,14 +172,16 @@ void RenderTexture::CalculateFitContain()
 
 void RenderTexture::CalculateFitCover()
 {
-    const Size& LayoutSize = GetLayoutSize();
-    double sourceRatio = sourceSize_.Width() / sourceSize_.Height();
-    double layoutRatio = LayoutSize.Width() / LayoutSize.Height();
+    const Size& layoutSize = GetLayoutSize();
+    double layoutRatio = NearZero(layoutSize.Height()) ? 0.0 : layoutSize.Width() / layoutSize.Height();
+    double sourceRatio = NearZero(sourceSize_.Height()) ? layoutRatio : sourceSize_.Width() / sourceSize_.Height();
 
-    if (sourceRatio < layoutRatio) {
-        drawSize_ = Size(LayoutSize.Width(), LayoutSize.Width() / sourceRatio);
+    if (NearZero(layoutRatio) || NearZero(sourceRatio)) {
+        drawSize_ = layoutSize;
+    } else if (sourceRatio < layoutRatio) {
+        drawSize_ = Size(layoutSize.Width(), layoutSize.Width() / sourceRatio);
     } else {
-        drawSize_ = Size(LayoutSize.Height() * sourceRatio, LayoutSize.Height());
+        drawSize_ = Size(layoutSize.Height() * sourceRatio, layoutSize.Height());
     }
 }
 
