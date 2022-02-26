@@ -91,6 +91,9 @@ void FrameReport::Init()
 
 int FrameReport::GetEnable()
 {
+    if (!frameSchedSoLoaded_) {
+        return 0;
+    }
     frameGetEnableFunc_ = (FrameGetEnableFunc)LoadSymbol("GetSenseSchedEnable");
     if (frameGetEnableFunc_ != nullptr) {
         return frameGetEnableFunc_();
