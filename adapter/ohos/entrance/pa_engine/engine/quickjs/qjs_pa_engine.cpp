@@ -153,6 +153,7 @@ bool UnwrapRawImageDataMap(NativeEngine* engine, NativeValue* argv, std::map<std
     auto param = reinterpret_cast<napi_value>(argv);
 
     if (!AppExecFwk::IsTypeForNapiValue(env, param, napi_object)) {
+        LOGW("%{public}s failed, param is not napi_object.", __func__);
         return false;
     }
 
