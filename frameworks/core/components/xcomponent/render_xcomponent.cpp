@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,7 +114,7 @@ void RenderXComponent::UpdateXComponentLayout()
 }
 
 void RenderXComponent::NativeXComponentInit(
-    NativeXComponent* nativeXComponent,
+    OH_NativeXComponent* nativeXComponent,
     WeakPtr<NativeXComponentImpl> nativeXComponentImpl)
 {
     auto pipelineContext = context_.Upgrade();
@@ -168,7 +168,7 @@ void RenderXComponent::NativeXComponentDestroy()
     TaskExecutor::TaskType::JS);
 }
 
-void RenderXComponent::NativeXComponentDispatchTouchEvent(const TouchInfo& touchInfo)
+void RenderXComponent::NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent)
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
@@ -176,14 +176,14 @@ void RenderXComponent::NativeXComponentDispatchTouchEvent(const TouchInfo& touch
         return;
     }
     float scale = pipelineContext->GetViewScale();
-    float diffX = touchInfo.x - position_.GetX() * scale;
-    float diffY = touchInfo.y - position_.GetY() * scale;
+    float diffX = touchEvent.x - position_.GetX() * scale;
+    float diffY = touchEvent.y - position_.GetY() * scale;
     if ((diffX >= 0) && (diffX <= drawSize_.Width() * scale) && (diffY >= 0) && (diffY <= drawSize_.Height() * scale)) {
         pipelineContext->GetTaskExecutor()->PostTask(
-        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, touchInfo] {
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, touchEvent] {
             auto nXCompImpl = weakNXCompImpl.Upgrade();
             if (nXComp != nullptr && nXCompImpl) {
-                nXCompImpl->SetTouchInfo(touchInfo);
+                nXCompImpl->SetTouchEvent(touchEvent);
                 auto surface = const_cast<void*>(nXCompImpl->GetSurface());
                 auto callback = nXCompImpl->GetCallback();
                 if (callback != nullptr && callback->DispatchTouchEvent != nullptr) {

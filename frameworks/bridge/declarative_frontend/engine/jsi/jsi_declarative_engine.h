@@ -272,7 +272,7 @@ private:
 
     RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
 
-    NativeXComponent *nativeXComponent_ = nullptr;
+    OH_NativeXComponent *nativeXComponent_ = nullptr;
 
     int32_t instanceId_ = 0;
     void* runtime_ = nullptr;
