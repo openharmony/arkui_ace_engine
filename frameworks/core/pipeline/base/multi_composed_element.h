@@ -35,7 +35,8 @@ public:
     bool CanUpdate(const RefPtr<Component>& newComponent) override;
 
 protected:
-    virtual void UpdateChildren(const std::list<RefPtr<Component>>& newComponents);
+    void UpdateChildren(const std::list<RefPtr<Component>>& newComponents);
+    void UpdateChildrenForRebuild(const std::list<RefPtr<Component>>& newComponents);
 };
 
 } // namespace OHOS::Ace
