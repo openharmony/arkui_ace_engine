@@ -23,6 +23,7 @@
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
+#include "base/log/frame_report.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
@@ -856,6 +857,8 @@ void AceContainer::AttachView(
             TaskExecutor::TaskType::PLATFORM);
     };
     pipelineContext_->SetStatusBarEventHandler(setStatusBarEventHandler);
+
+    taskExecutor_->PostTask([] {  FrameReport::GetInstance().Init(); }, TaskExecutor::TaskType::UI);
 
     ThemeConstants::InitDeviceType();
     // Load custom style at UI thread before frontend attach, to make sure style can be loaded before building dom tree.
