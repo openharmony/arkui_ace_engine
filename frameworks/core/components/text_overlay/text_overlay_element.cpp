@@ -52,8 +52,6 @@ void TextOverlayElement::PerformBuild()
         }
     };
     renderTextOverlay->SetStartAnimationCallback(startAnimationCallback);
-
-    RequestFocus();
 }
 
 void TextOverlayElement::OnFocus()
