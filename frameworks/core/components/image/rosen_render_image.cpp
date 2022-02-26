@@ -779,7 +779,8 @@ bool RosenRenderImage::NeedUploadImageObjToGpu()
         resizeCallLoadImage_ =
             !sourceChange && NeedResize() && (imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS);
     }
-    return newSourceCallLoadImage || (resizeCallLoadImage_ && autoResize_);
+    return (newSourceCallLoadImage && (background_ || resizeTarget_.IsValid())) ||
+           (resizeCallLoadImage_ && autoResize_);
 }
 
 void RosenRenderImage::UpLoadImageDataForPaint()
