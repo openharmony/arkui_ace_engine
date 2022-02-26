@@ -23,6 +23,11 @@
 
 namespace OHOS::Ace {
 
+enum class BgTaskPriority {
+    DEFAULT,
+    LOW,
+};
+
 class BackgroundTaskExecutor {
     ACE_DISALLOW_COPY_AND_MOVE(BackgroundTaskExecutor);
 
@@ -31,8 +36,8 @@ public:
 
     static BackgroundTaskExecutor& GetInstance();
 
-    bool PostTask(Task&& task);
-    bool PostTask(const Task& task);
+    bool PostTask(Task&& task, BgTaskPriority priority = BgTaskPriority::DEFAULT);
+    bool PostTask(const Task& task, BgTaskPriority priority = BgTaskPriority::DEFAULT);
 
     void TriggerGarbageCollection();
 
@@ -46,6 +51,7 @@ private:
     std::mutex mutex_;
     std::condition_variable condition_;
     std::list<Task> tasks_;
+    std::list<Task> lowPriorityTasks_;
     std::list<std::thread> threads_;
     size_t currentThreadNum_ { 0 };
     size_t maxThreadNum_ { 0 };
