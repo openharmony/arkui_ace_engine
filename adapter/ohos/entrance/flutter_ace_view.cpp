@@ -369,6 +369,7 @@ void FlutterAceView::DispatchTouchEvent(FlutterAceView* view, const std::shared_
         LOGD("ProcessTouchEvent");
         view->ProcessTouchEvent(pointerEvent);
     }
+    pointerEvent->MarkProcessed();
 }
 
 bool FlutterAceView::DispatchKeyEvent(FlutterAceView* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent)
