@@ -22,9 +22,6 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
-const int32_t WEBVIEW_PARAM_NUMS_EXCUTEJS = 2;
-const int32_t WEBVIEW_PARAM_NUMS_LOADURL = 2;
-
 void ParseWebViewValueToJsValue(
     std::shared_ptr<WebJSValue> value, std::vector<JSRef<JSVal>>& argv)
 {
@@ -149,20 +146,27 @@ void JSWebController::Reload() const
 
 void JSWebController::LoadUrl(const JSCallbackInfo& args)
 {
-    std::string url;
-    if (args.Length() < 1 || !ConvertFromJSValue(args[0], url)) {
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        LOGW("invalid url params");
         return;
     }
 
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    std::string url;
+    if (!ConvertFromJSValue(obj->GetProperty("url"), url)) {
+        LOGW("can't find url.");
+        return;
+    }
+
+    JSRef<JSVal> headers = obj->GetProperty("headers");
     std::map<std::string, std::string> httpHeaders;
-    if (args.Length() >= WEBVIEW_PARAM_NUMS_LOADURL && args[1]->IsArray()) {
-        JSRef<JSArray> array = JSRef<JSArray>::Cast(args[1]);
+    if (headers->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(headers);
         for (size_t i = 0; i < array->Length(); i++) {
             JSRef<JSVal> jsValue = array->GetValueAt(i);
             if (!jsValue->IsObject()) {
                 continue;
             }
-
             JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
             std::string key;
             if (!ConvertFromJSValue(obj->GetProperty("key"), key)) {
@@ -178,7 +182,6 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
         }
         LOGD("httpHeaders size:%{public}d", (int)httpHeaders.size());
     }
-
     if (webController_) {
         webController_->LoadUrl(url, httpHeaders);
     }
@@ -186,15 +189,22 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
 
 void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)
 {
-    std::string jscode;
-    if (args.Length() < 1 || !ConvertFromJSValue(args[0], jscode)) {
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        LOGW("invalid excute params");
         return;
     }
 
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    std::string script;
+    if (!ConvertFromJSValue(obj->GetProperty("script"), script)) {
+        LOGW("can't find script.");
+        return;
+    }
+    JSRef<JSVal> tsCallback = obj->GetProperty("callback");
     std::function<void(std::string)> callback = nullptr;
-    if (args.Length() >= WEBVIEW_PARAM_NUMS_EXCUTEJS && args[1]->IsFunction()) {
+    if (tsCallback->IsFunction()) {
         auto jsCallback =
-            AceType::MakeRefPtr<JsWebViewFunction>(JSRef<JSFunc>::Cast(args[1]));
+            AceType::MakeRefPtr<JsWebViewFunction>(JSRef<JSFunc>::Cast(tsCallback));
         callback = [execCtx = args.GetExecutionContext(), func = std::move(jsCallback)](std::string result) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("ExecuteTypeScript CallBack");
@@ -202,9 +212,8 @@ void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)
             func->Execute(result);
         };
     }
-
     if (webController_) {
-        webController_->ExecuteTypeScript(jscode, std::move(callback));
+        webController_->ExecuteTypeScript(script, std::move(callback));
     }
 }
 
@@ -377,35 +386,15 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
 void JSWebController::RemoveJavascriptInterface(const JSCallbackInfo& args)
 {
     LOGI("JSWebController remove js interface");
-    if (args.Length() < 1 || !args[0]->IsObject()) {
-        return;
-    }
-
-    // options
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    // options.name
     std::string objName;
-    if (!ConvertFromJSValue(obj->GetProperty("name"), objName)) {
+    if (args.Length() < 1 || !ConvertFromJSValue(args[0], objName)) {
         return;
-    }
-    // options.methodList
-    std::vector<std::string> methods;
-    JSRef<JSVal> methodList = obj->GetProperty("methodList");
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(methodList);
-    if (array->IsArray()) {
-        for (size_t i = 0; i < array->Length(); i++) {
-            JSRef<JSVal> method = array->GetValueAt(i);
-            if (method->IsString()) {
-                methods.push_back(method->ToString());
-            }
-        }
     }
     if (objectorMap_.find(objName) != objectorMap_.end()) {
         objectorMap_.erase(objName);
     }
-
     if (webController_) {
-        webController_->RemoveJavascriptInterface(objName, methods);
+        webController_->RemoveJavascriptInterface(objName, {});
     }
 }
 
