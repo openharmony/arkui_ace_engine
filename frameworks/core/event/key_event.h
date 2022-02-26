@@ -458,7 +458,7 @@ struct KeyEvent final {
         std::vector<KeyCode> pCodes;
         std::chrono::milliseconds milliseconds(timeStamp);
         TimeStamp time(milliseconds);
-        KeyEvent(code, action, pCodes, repeatTime, time, 0, deviceId, sourceType);
+        new (this)KeyEvent(code, action, pCodes, repeatTime, time, 0, deviceId, sourceType);
     }
     ~KeyEvent() = default;
 
