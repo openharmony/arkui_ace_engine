@@ -132,7 +132,7 @@ void StackElement::PopMenu()
     MarkDirty();
 }
 
-void StackElement::PopInstant ()
+void StackElement::PopInstant()
 {
     auto child = children_.end();
     if (child != children_.begin()) {
@@ -224,7 +224,7 @@ void StackElement::PerformPushChild(PopupComponentInfo& popupComponentInfo)
     renderNode->MarkNeedLayout();
     if (isPageElement()) {
         if (!focusNodes_.empty() && focusNodes_.back()->IsFocusable()) {
-                focusNodes_.back()->RequestFocus();
+            focusNodes_.back()->RequestFocus();
         }
     }
     popupComponentInfo.component = nullptr;
@@ -281,11 +281,9 @@ void StackElement::PerformPopDialog(int32_t id)
 
 void StackElement::PerformPopDialogById(int32_t id)
 {
-    bool hasDialog = std::any_of(children_.begin(), children_.end(),
-        [](const RefPtr<Element>& child) {
-            return AceType::InstanceOf<V2::InspectorComposedElement>(child) ||
-            AceType::InstanceOf<DialogElement>(child);
-        });
+    bool hasDialog = std::any_of(children_.begin(), children_.end(), [](const RefPtr<Element>& child) {
+        return AceType::InstanceOf<V2::InspectorComposedElement>(child) || AceType::InstanceOf<DialogElement>(child);
+    });
     if (!hasDialog) {
         EnableTouchEventAndRequestFocus();
         return;
@@ -377,6 +375,10 @@ bool StackElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rec
 
 void StackElement::OnFocus()
 {
+    if (!isPageElement()) {
+        FocusGroup::OnFocus();
+        return;
+    }
     if (focusNodes_.empty()) {
         itLastFocusNode_ = focusNodes_.end();
         return;
@@ -407,6 +409,9 @@ void StackElement::OnFocus()
 void StackElement::OnBlur()
 {
     FocusGroup::OnBlur();
+    if (!isPageElement()) {
+        return;
+    }
 
     auto iter = focusNodes_.end();
     while (iter != focusNodes_.begin()) {
@@ -436,9 +441,8 @@ void StackElement::CreateInspectorComponent(PopupComponentInfo& componentInfo) c
     }
     auto inspectorTag = dialog->GetInspectorTag();
     if (V2::InspectorComposedComponent::HasInspectorFinished(inspectorTag)) {
-        auto composedComponent =
-            AceType::MakeRefPtr<V2::InspectorComposedComponent>(std::to_string(dialog->GetDialogId()) +
-            inspectorTag, inspectorTag);
+        auto composedComponent = AceType::MakeRefPtr<V2::InspectorComposedComponent>(
+            std::to_string(dialog->GetDialogId()) + inspectorTag, inspectorTag);
         composedComponent->SetChild(componentInfo.component);
         componentInfo.component = composedComponent;
     }
