@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,7 +81,7 @@ void XComponentTaskPool::SetRenderNode(const WeakPtr<RenderXComponent>& renderNo
 }
 
 void XComponentTaskPool::NativeXComponentInit(
-    NativeXComponent* nativeXComponent,
+    OH_NativeXComponent* nativeXComponent,
     WeakPtr<NativeXComponentImpl> nativeXComponentImpl)
 {
     auto renderNode = renderNode_.Upgrade();

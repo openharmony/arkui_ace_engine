@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1785,7 +1785,7 @@ void V8DeclarativeEngine::InitXComponent()
     }
     ctxXComp_.Reset(isolateXComp_, context);
     nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
-    nativeXComponent_ = new NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
+    nativeXComponent_ = new OH_NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
 }
 
 void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
@@ -1824,7 +1824,7 @@ void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, cons
     }
     std::string arguments;
     v8::Local<v8::Object> renderContext = v8NativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true,
-                                                                           arguments, NATIVE_XCOMPONENT_OBJ,
+                                                                           arguments, OH_NATIVE_XCOMPONENT_OBJ,
                                                                            reinterpret_cast<void*>(nativeXComponent_));
     renderContextXComp_.Reset(isolateXComp_, renderContext);
     auto objContext = V8Object(renderContext);
