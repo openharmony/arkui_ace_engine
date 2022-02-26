@@ -763,9 +763,28 @@ void AceContainer::AddAssetPath(
             LOGI("Push AssetProvider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
         }
-        std::string absPath(packagePath);
-        std::size_t lastSeperatorPos = absPath.rfind("/");
-        flutterAssetManager->SetPackagePath(absPath.substr(0, lastSeperatorPos).append(ASSET_LIBARCH_PATH));
+    }
+}
+
+void AceContainer::AddLibPath(int32_t instanceId, const std::string& libPath)
+{
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    if (!container) {
+        return;
+    }
+
+    RefPtr<FlutterAssetManager> flutterAssetManager;
+    if (container->assetManager_) {
+        flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
+    } else {
+        flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+        container->assetManager_ = flutterAssetManager;
+        if (container->type_ != FrontendType::DECLARATIVE_JS) {
+            container->frontend_->SetAssetManager(flutterAssetManager);
+        }
+    }
+    if (flutterAssetManager) {
+        flutterAssetManager->SetLibPath(libPath);
     }
 }
 

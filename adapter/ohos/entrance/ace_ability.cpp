@@ -282,6 +282,20 @@ void AceAbility::OnStart(const Want& want)
         auto assetBasePathStr = { "assets/js/" + srcPath + "/" };
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
     }
+    std::string nativeLibraryPath = appInfo->nativeLibraryPath;
+    if (!nativeLibraryPath.empty()) {
+        if (nativeLibraryPath.back() == '/') {
+            nativeLibraryPath.pop_back();
+        }
+        std::string libPath = GetBundleCodePath();
+        if (libPath.back() == '/') {
+            libPath += nativeLibraryPath;
+        } else {
+            libPath += "/" + nativeLibraryPath;
+        }
+        LOGI("napi lib path = %{private}s", libPath.c_str());
+        Platform::AceContainer::AddLibPath(abilityId_, libPath);
+    }
 
     Ace::Platform::UIEnvCallback callback = nullptr;
 #ifdef ENABLE_ROSEN_BACKEND

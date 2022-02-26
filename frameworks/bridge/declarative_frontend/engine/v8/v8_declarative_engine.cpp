@@ -905,9 +905,11 @@ bool V8DeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     nativeEngine_->CheckUVLoop();
 #endif
     if (delegate && delegate->GetAssetManager()) {
-        std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
-        auto v8NativeEngine = static_cast<V8NativeEngine*>(nativeEngine_);
-        v8NativeEngine->SetPackagePath(packagePath);
+        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+        if (!packagePath.empty()) {
+            auto v8NativeEngine = static_cast<V8NativeEngine*>(nativeEngine_);
+            v8NativeEngine->SetPackagePath(packagePath);
+        }
     }
     RegisterWorker();
 

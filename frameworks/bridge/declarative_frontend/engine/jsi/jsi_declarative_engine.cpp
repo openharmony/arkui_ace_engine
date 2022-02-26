@@ -911,9 +911,11 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
     if (delegate && delegate->GetAssetManager()) {
-        std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
-        auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
-        arkNativeEngine->SetPackagePath(packagePath);
+        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+        if (!packagePath.empty()) {
+            auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
+            arkNativeEngine->SetPackagePath(packagePath);
+        }
     }
 
     RegisterWorker();
