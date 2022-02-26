@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,7 @@ private:
     void RegisterSurfaceDestroyEvent();
     void OnSurfaceDestroyEvent();
     void SetTouchEventType(const TouchEvent& event);
+    void SetTouchPoint(const TouchEvent& event);
     void OnXComponentInit(const std::string& param);
     void OnSurfaceInit(const std::string& componentId, const uint32_t nodeId);
     void RegisterDispatchTouchEventCallback();
@@ -64,7 +65,7 @@ private:
     std::function<void(const std::string&, const uint32_t)> onSurfaceInit_;
     InitEventCallback onXComponentInit_;
     DestroyEventCallback onXComponentDestroy_;
-    TouchInfo touchEventPoint_;
+    OH_NativeXComponent_TouchEvent touchEventPoint_;
     std::string name_;
     std::string idStr_;
     bool hasSendDestroyEvent_ = false;

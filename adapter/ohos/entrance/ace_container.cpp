@@ -442,7 +442,10 @@ void AceContainer::InitializeCallback()
     auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchEvent& event) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event]() { context->OnTouchEvent(event); }, TaskExecutor::TaskType::UI);
+            [context, event]() {
+                context->OnTouchEvent(event);
+                context->NotifyDispatchTouchEventDismiss(event);
+            }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterTouchEventCallback(touchEventCallback);
 
