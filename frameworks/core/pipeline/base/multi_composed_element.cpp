@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "frameworks/core/pipeline/base/multi_composed_element.h"
 
 #include "core/pipeline/base/multi_composed_component.h"
@@ -41,11 +40,17 @@ void MultiComposedElement::PerformBuild()
 
 void MultiComposedElement::UpdateChildren(const std::list<RefPtr<Component>>& newComponents)
 {
+    if (component_->GetUpdateType() == UpdateType::REBUILD) {
+        UpdateChildrenForRebuild(newComponents);
+        return;
+    }
     int32_t slot = 0;
     countRenderNode_ = 0;
+    bool useSlot = GetRenderSlot() < 0 ? false : true;
     if (children_.empty()) {
         for (const auto& component : newComponents) {
-            auto newChild = UpdateChildWithSlot(nullptr, component, slot++, countRenderNode_ + GetRenderSlot());
+            auto newChild = UpdateChildWithSlot(
+                nullptr, component, slot++, useSlot ? countRenderNode_ + GetRenderSlot() : DEFAULT_RENDER_SLOT);
             countRenderNode_ += newChild->CountRenderNode();
         }
         return;
@@ -53,14 +58,108 @@ void MultiComposedElement::UpdateChildren(const std::list<RefPtr<Component>>& ne
 
     // For declarative frontend, the component tree is very stable,
     // so size of children MUST be matched between elements and components
-    if (children_.size() != newComponents.size() && component_->GetUpdateType() != UpdateType::REBUILD) {
+    if (children_.size() != newComponents.size()) {
         LOGW("Size of old children and new components are mismatched");
         return;
     }
 
     auto itChild = children_.begin();
     for (const auto& component : newComponents) {
-        auto newChild = UpdateChildWithSlot(*(itChild++), component, slot++, countRenderNode_ + GetRenderSlot());
+        auto newChild = UpdateChildWithSlot(
+            *(itChild++), component, slot++, useSlot ? countRenderNode_ + GetRenderSlot() : DEFAULT_RENDER_SLOT);
+        countRenderNode_ += newChild->CountRenderNode();
+    }
+}
+
+void MultiComposedElement::UpdateChildrenForRebuild(const std::list<RefPtr<Component>>& newComponents)
+{
+    auto itChildStart = children_.begin();
+    auto itChildEnd = children_.end();
+    auto itComponentStart = newComponents.begin();
+    auto itComponentEnd = newComponents.end();
+    int32_t slot = 0;
+
+    countRenderNode_ = 0;
+    bool useSlot = GetRenderSlot() < 0 ? false : true;
+
+    // 1. Try to update children at start with new components by order
+    while (itChildStart != itChildEnd && itComponentStart != itComponentEnd) {
+        const auto& child = *itChildStart;
+        const auto& component = *itComponentStart;
+        if (!child->CanUpdate(component)) {
+            break;
+        }
+        auto newChild = UpdateChildWithSlot(
+            child, component, slot++, useSlot ? countRenderNode_ + GetRenderSlot() : DEFAULT_RENDER_SLOT);
+        countRenderNode_ += newChild->CountRenderNode();
+        ++itChildStart;
+        ++itComponentStart;
+    }
+
+    // 2. Try to find children at end with new components by order
+    while (itChildStart != itChildEnd && itComponentStart != itComponentEnd) {
+        const auto& child = *(--itChildEnd);
+        const auto& component = *(--itComponentEnd);
+        if (!child->CanUpdate(component)) {
+            ++itChildEnd;
+            ++itComponentEnd;
+            break;
+        }
+    }
+
+    // 3. Collect children at middle
+    std::unordered_map<ComposeId, RefPtr<Element>> elements;
+    while (itChildStart != itChildEnd) {
+        const auto& child = *(itChildStart++);
+        auto composedElement = AceType::DynamicCast<ComposedElement>(child);
+        if (composedElement) {
+            elements.emplace(composedElement->GetId(), child);
+        } else {
+            UpdateChildWithSlot(child, nullptr, DEFAULT_ELEMENT_SLOT, DEFAULT_RENDER_SLOT);
+        }
+    }
+
+    // 4. Try to update children at middle with new components by order
+    while (itComponentStart != itComponentEnd) {
+        const auto& component = *(itComponentStart++);
+        auto composedComponent = AceType::DynamicCast<BaseComposedComponent>(component);
+        if (!composedComponent) {
+            auto newChild = UpdateChildWithSlot(
+                nullptr, component, slot++, useSlot ? countRenderNode_ + GetRenderSlot() : DEFAULT_RENDER_SLOT);
+            countRenderNode_ += newChild->CountRenderNode();
+            continue;
+        }
+        auto it = elements.find(composedComponent->GetId());
+        if (it == elements.end()) {
+            auto newChild = UpdateChildWithSlot(
+                nullptr, component, slot++, useSlot ? countRenderNode_ + GetRenderSlot() : DEFAULT_RENDER_SLOT);
+            countRenderNode_ += newChild->CountRenderNode();
+            continue;
+        }
+
+        const auto& child = it->second;
+        if (child->CanUpdate(component)) {
+            auto newChild = UpdateChildWithSlot(
+                child, component, slot++, useSlot ? countRenderNode_ + GetRenderSlot() : DEFAULT_RENDER_SLOT);
+            countRenderNode_ += newChild->CountRenderNode();
+        } else {
+            auto newChild = UpdateChildWithSlot(
+                nullptr, component, slot++, useSlot ? countRenderNode_ + GetRenderSlot() : DEFAULT_RENDER_SLOT);
+            countRenderNode_ += newChild->CountRenderNode();
+        }
+
+        elements.erase(it);
+    }
+
+    // 5. Remove these useless children
+    for (const auto& node : elements) {
+        UpdateChildWithSlot(node.second, nullptr, DEFAULT_ELEMENT_SLOT, DEFAULT_RENDER_SLOT);
+    }
+
+    // 6. Try to update children at end with new components by order
+    while (itChildEnd != children_.end() && itComponentEnd != newComponents.end()) {
+        auto newChild = UpdateChildWithSlot(*(itChildEnd++), *(itComponentEnd++), slot++,
+            useSlot ? countRenderNode_ + GetRenderSlot() : DEFAULT_RENDER_SLOT);
         countRenderNode_ += newChild->CountRenderNode();
     }
 }
