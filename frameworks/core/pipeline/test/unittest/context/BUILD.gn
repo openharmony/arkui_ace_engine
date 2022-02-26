@@ -64,6 +64,7 @@ ohos_unittest("PipelineContextTest") {
     "//foundation/ace/ace_engine/frameworks/core/common/ace_engine.cpp",
     "//foundation/ace/ace_engine/frameworks/core/common/clipboard/clipboard_proxy.cpp",
     "//foundation/ace/ace_engine/frameworks/core/common/container.cpp",
+    "//foundation/ace/ace_engine/frameworks/core/common/container_scope.cpp",
     "//foundation/ace/ace_engine/frameworks/core/common/event_manager.cpp",
     "//foundation/ace/ace_engine/frameworks/core/common/flutter/flutter_task_executor.cpp",
     "//foundation/ace/ace_engine/frameworks/core/common/focus_animation_manager.cpp",

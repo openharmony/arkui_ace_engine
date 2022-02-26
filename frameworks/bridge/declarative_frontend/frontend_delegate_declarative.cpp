@@ -60,6 +60,8 @@ const char I18N_FILE_SUFFIX[] = "/properties/string.json";
 
 } // namespace
 
+std::atomic<uint64_t> FrontendDelegateDeclarative::pageIdPool_ = 0;
+
 int32_t FrontendDelegateDeclarative::GenerateNextPageId()
 {
     for (int32_t idx = 0; idx < MAX_PAGE_ID_SIZE; ++idx) {

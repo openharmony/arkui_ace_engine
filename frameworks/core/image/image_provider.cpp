@@ -20,6 +20,7 @@
 #include "third_party/skia/include/core/SkStream.h"
 
 #include "base/thread/background_task_executor.h"
+#include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/image/flutter_render_image.h"
 #include "core/event/ace_event_helper.h"
