@@ -524,6 +524,28 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     updateConfig_ = true;
 }
 
+void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode)
+{
+    LOGI("UpdateWindowMode, window mode is %{public}d", mode);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("UpdateWindowMode failed, get container(id=%{public}d) failed", instanceId_);
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGE("UpdateWindowMode failed, pipeline context is null.");
+        return;
+    }
+    if (mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FULLSCREEN ||
+        mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        pipelineContext->ShowContainerTitle(false);
+    } else {
+        pipelineContext->ShowContainerTitle(true);
+    }
+}
+
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);

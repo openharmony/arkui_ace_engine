@@ -169,7 +169,6 @@ void ContainerModalElement::ShowTitle(bool isShow)
     if (floatingTitleDisplay_) {
         floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
     }
-    isFirstShowTitle_ = false;
 }
 
 void ContainerModalElement::PerformBuild()
@@ -267,7 +266,7 @@ void ContainerModalElement::Update()
 bool ContainerModalElement::CanShowFloatingTitle()
 {
     auto context = context_.Upgrade();
-    if (!context || !floatingTitleDisplay_ || !controller_ || isFirstShowTitle_) {
+    if (!context || !floatingTitleDisplay_ || !controller_) {
         LOGI("Show floating title failed, context, floatingTitleDisplay_ or controller is null.");
         return false;
     }
