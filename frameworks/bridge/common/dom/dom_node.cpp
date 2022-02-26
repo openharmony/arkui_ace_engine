@@ -1502,13 +1502,11 @@ void DOMNode::UpdateDisplayComponent()
         return;
     }
 
-    bool hasCreated = true;
     if (!displayComponent_) {
         displayComponent_ = AceType::MakeRefPtr<DisplayComponent>(rootComponent_->GetChild());
-        hasCreated = false;
     }
     auto& opacityStyle = static_cast<CommonOpacityStyle&>(declaration_->GetStyle(StyleTag::COMMON_OPACITY_STYLE));
-    if (opacityStyle.IsValid() && !hasCreated) {
+    if (opacityStyle.IsValid()) {
         displayComponent_->SetOpacity(opacityStyle.opacity);
         displayComponent_->SetAppearingDuration(opacityStyle.appearingDuration);
     }
