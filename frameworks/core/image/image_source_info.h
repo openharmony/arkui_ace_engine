@@ -160,6 +160,7 @@ public:
         isSvg_ = false;
         fillColor_.reset();
         pixmap_ = nullptr;
+        cacheKey_.clear();
     }
 
     void SetFillColor(const Color& color);
@@ -174,10 +175,16 @@ public:
         return pixmap_;
     }
 
+    const std::string& GetCacheKey() const
+    {
+        return cacheKey_;
+    }
+
 private:
     SrcType ResolveSrcType() const;
 
     std::string src_;
+    std::string cacheKey_;
     Dimension sourceWidth_ = Dimension(-1);
     Dimension sourceHeight_ = Dimension(-1);
     InternalResource::ResourceId resourceId_ = InternalResource::ResourceId::NO_ID;
