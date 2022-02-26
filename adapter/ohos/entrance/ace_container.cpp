@@ -799,7 +799,7 @@ void AceContainer::AttachView(
     auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
     flutterTaskExecutor->InitOtherThreads(state->GetTaskRunners());
     if (GetSettings().usePlatformAsUIThread) {
-        Container::SetScopeNotify([](int32_t id) {
+        ContainerScope::SetScopeNotify([](int32_t id) {
             flutter::UIDartState::Current()->SetCurInstance(id);
         });
     }

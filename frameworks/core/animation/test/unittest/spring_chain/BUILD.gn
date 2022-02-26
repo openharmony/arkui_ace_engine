@@ -50,6 +50,7 @@ ohos_unittest("SpringChainTest") {
     "$ace_root/frameworks/core/common/ace_application_info.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/event_manager.cpp",
     "$ace_root/frameworks/core/common/focus_animation_manager.cpp",
     "$ace_root/frameworks/core/common/font_loader.cpp",

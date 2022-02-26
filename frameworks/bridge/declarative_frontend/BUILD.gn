@@ -284,6 +284,10 @@ template("declarative_js_engine") {
         "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
       ]
       deps += [ "$ace_root/build:libace" ]
+      if (defined(config.build_container_scope_lib) &&
+          config.build_container_scope_lib) {
+        deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
+      }
     }
 
     deps += [ "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform" ]
