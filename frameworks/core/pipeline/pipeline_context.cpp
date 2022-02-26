@@ -857,7 +857,11 @@ void PipelineContext::DumpInfo(const std::vector<std::string>& params, std::vect
                 if (!accessibilityManager) {
                     return;
                 }
-                accessibilityManager->DumpTree(0, 0, info);
+                if (params.size() == 1) {
+                    accessibilityManager->DumpTree(0, 0, info);
+                } else {
+                    accessibilityManager->DumpHandleEvent(params);
+                }
             } else {
                 DumpLog::GetInstance().Print("Error: Unsupported dump params!");
             }

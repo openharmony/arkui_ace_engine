@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -124,6 +124,8 @@ ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
 bool SystemProperties::debugEnabled_ = IsDebugEnabled();
+int32_t SystemProperties::windowPosX_ = 0;
+int32_t SystemProperties::windowPosY_ = 0;
 
 DeviceType SystemProperties::GetDeviceType()
 {
