@@ -90,7 +90,7 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
             }
         }
         Offset pos = rect.GetOffset();
-        if (name == "RosenRenderPlugin" || name == "RosenRenderForm") {
+        if (name == "RosenRenderPlugin") {
             auto renderPlugin = AceType::DynamicCast<RenderSubContainer>(child);
             if (!renderPlugin) {
                 return;
