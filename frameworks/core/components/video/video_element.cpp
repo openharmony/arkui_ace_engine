@@ -71,6 +71,7 @@ const char* SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 constexpr int32_t WINDOW_HEIGHT_DEFAULT = 1;
 constexpr int32_t WINDOW_WIDTH_DEFAULT = 1;
+constexpr int32_t FILE_PREFIX_LENGTH = 7;
 #endif
 constexpr float ILLEGAL_SPEED = 0.0f;
 constexpr int32_t COMPATIBLE_VERSION = 5;
@@ -330,6 +331,11 @@ void VideoElement::PreparePlayer()
     std::string filePath = src_;
     LOGI("filePath : %{private}s", filePath.c_str());
 
+    // Remove file:// prefix for get fd.
+    if (StringUtils::StartWith(filePath, "file://")) {
+        filePath = filePath.substr(FILE_PREFIX_LENGTH);
+    }
+
     int32_t fd = -1;
     // SetSource by fd.
     if (StringUtils::StartWith(filePath, "dataability://")) {
@@ -347,8 +353,8 @@ void VideoElement::PreparePlayer()
         if (dataAilityHelper) {
             fd = dataAilityHelper->OpenFile(filePath, "r");
         }
-    } else if (!StringUtils::StartWith(filePath, "file://") && !StringUtils::StartWith(filePath, "http")) {
-        filePath = GetAssetAbsolutePath(src_);
+    } else if (!StringUtils::StartWith(filePath, "http")) {
+        filePath = GetAssetAbsolutePath(filePath);
         fd = open(filePath.c_str(), O_RDONLY);
     }
 
