@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,6 +75,19 @@ void RosenRenderShapeContainer::Paint(RenderContext& context, const Offset& offs
     if (!skCanvas_) {
         return;
     }
+
+    double viewBoxWidth = NormalizePercentToPx(viewBox_.Width(), false);
+    double viewBoxHeight = NormalizePercentToPx(viewBox_.Height(), true);
+    double viewBoxLeft = NormalizePercentToPx(viewBox_.Left(), false);
+    double viewBoxTop = NormalizePercentToPx(viewBox_.Top(), true);
+    if (!GetLayoutSize().IsInfinite() && GreatNotEqual(viewBoxWidth, 0.0) && GreatNotEqual(viewBoxHeight, 0.0)) {
+        double scale = std::min(GetLayoutSize().Width() / viewBoxWidth, GetLayoutSize().Height() / viewBoxHeight);
+        double tx = GetLayoutSize().Width() * 0.5 - (viewBoxWidth * 0.5 + viewBoxLeft) * scale;
+        double ty = GetLayoutSize().Height() * 0.5 - (viewBoxHeight * 0.5 + viewBoxTop) * scale;
+        
+        skCanvas_->scale(scale, scale);
+        skCanvas_->translate(tx, ty);
+    }
     BitmapMesh(context, offset);
 }
 
@@ -99,9 +112,9 @@ void RosenRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset&
     auto pipelineContext = GetContext().Upgrade();
 
     auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width(), GetLayoutSize().Height(),
-        SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+        SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
     skOffBitmap_.allocPixels(imageInfo);
-    skOffBitmap_.eraseColor(SK_ColorWHITE);
+    skOffBitmap_.eraseColor(SK_ColorTRANSPARENT);
     skOffCanvas_ = std::make_unique<SkCanvas>(skOffBitmap_);
 
     const auto renderContext = static_cast<RosenRenderContext*>(&context);
