@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -157,6 +157,7 @@ bool RenderGridLayoutAnimationTest::CreateGrid(bool isVertical, bool isSpringRec
         return false;
     }
     gridComponent->SetSupportAnimation(true);
+    gridComponent->SetEditMode(true);
     if (isVertical) {
         gridComponent->SetDirection(FlexDirection::COLUMN);
     } else {
@@ -201,10 +202,15 @@ void RenderGridLayoutAnimationTest::BackItemsData(std::vector<Offset>& data)
 void RenderGridLayoutAnimationTest::MockTouchEventDown(TouchEvent& info)
 {
     if (slideRecognizer_) {
+        TouchPoint point;
         info.x = renderNode_->GetGlobalOffset().GetX() + GRID_OFFSET_TEST - coordinateOffset_.GetX();
         info.y = renderNode_->GetGlobalOffset().GetY() + GRID_OFFSET_TEST - coordinateOffset_.GetY();
         info.type = TouchType::DOWN;
         info.time = std::chrono::high_resolution_clock::now();
+        point.x = info.x;
+        point.y = info.y;
+        info.pointers.clear();
+        info.pointers.push_back(point);
         slideRecognizer_->HandleEvent(info);
     }
 }
@@ -212,11 +218,16 @@ void RenderGridLayoutAnimationTest::MockTouchEventDown(TouchEvent& info)
 void RenderGridLayoutAnimationTest::MockTouchEventMove(TouchEvent& info)
 {
     if (slideRecognizer_) {
-        for (int32_t i = 0; i <= MOVE_COUNT_TEST; i++) {
+        for (int32_t i = 0; i < MOVE_COUNT_TEST; i++) {
+            TouchPoint point;
             info.x += MOVE_STEP_SIZE_TEST;
             info.y += MOVE_STEP_SIZE_TEST;
             info.type = TouchType::MOVE;
             info.time = std::chrono::high_resolution_clock::now();
+            point.x = info.x;
+            point.y = info.y;
+            info.pointers.clear();
+            info.pointers.push_back(point);
             slideRecognizer_->HandleEvent(info);
             std::this_thread::sleep_for(std::chrono::milliseconds(EVENT_WAIT_MILLSECOND_TEST));
         }
@@ -226,8 +237,13 @@ void RenderGridLayoutAnimationTest::MockTouchEventMove(TouchEvent& info)
 void RenderGridLayoutAnimationTest::MockTouchEventUp(TouchEvent& info)
 {
     if (slideRecognizer_) {
+        TouchPoint point;
         info.type = TouchType::UP;
         info.time = std::chrono::high_resolution_clock::now();
+        point.x = info.x;
+        point.y = info.y;
+        info.pointers.clear();
+        info.pointers.push_back(point);
         slideRecognizer_->HandleEvent(info);
     }
 }
