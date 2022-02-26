@@ -28,6 +28,7 @@
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "base/log/frame_report.h"
 #include "base/log/log.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
@@ -211,9 +212,16 @@ void PipelineContext::FlushBuild()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushBuild();
+    }
+
     isRebuildFinished_ = false;
     if (dirtyElements_.empty()) {
         isRebuildFinished_ = true;
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().EndFlushBuild();
+        }
         return;
     }
     if (isFirstLoaded_) {
@@ -240,6 +248,10 @@ void PipelineContext::FlushBuild()
         buildAfterCallback_.clear();
     }
     buildingFirstPage_ = false;
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushBuild();
+    }
 }
 
 void PipelineContext::FlushPredictLayout(int64_t targetTimestamp)
@@ -441,8 +453,15 @@ void PipelineContext::FlushLayout()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushLayout();
+    }
+
     if (dirtyLayoutNodes_.empty()) {
         FlushGeometryProperties();
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().EndFlushLayout();
+        }
         return;
     }
     if (isFirstLoaded_) {
@@ -465,6 +484,10 @@ void PipelineContext::FlushLayout()
 
     CreateGeometryTransition();
     FlushGeometryProperties();
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushLayout();
+    }
 }
 
 void PipelineContext::FlushGeometryProperties()
@@ -507,7 +530,14 @@ void PipelineContext::FlushRender()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushRender();
+    }
+
     if (dirtyRenderNodes_.empty() && dirtyRenderNodesInOverlay_.empty() && !needForcedRefresh_) {
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().EndFlushRender();
+        }
         return;
     }
 
@@ -570,6 +600,11 @@ void PipelineContext::FlushRender()
         }
     }
     needForcedRefresh_ = false;
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushRender();
+    }
+
 }
 
 void PipelineContext::FlushRenderFinish()
@@ -578,11 +613,17 @@ void PipelineContext::FlushRenderFinish()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushRenderFinish();
+    }
     if (!needPaintFinishNodes_.empty()) {
         decltype(needPaintFinishNodes_) Nodes(std::move(needPaintFinishNodes_));
         for (const auto& node : Nodes) {
             node->OnPaintFinish();
         }
+    }
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushRenderFinish();
     }
 }
 
@@ -591,12 +632,19 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushAnimation();
+    }
     flushAnimationTimestamp_ = nanoTimestamp;
     isFlushingAnimation_ = true;
 
     ProcessPreFlush();
     if (scheduleTasks_.empty()) {
         isFlushingAnimation_ = false;
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().EndFlushAnimation();
+        }
         return;
     }
     decltype(scheduleTasks_) temp(std::move(scheduleTasks_));
@@ -604,6 +652,10 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
         scheduleTask.second->OnFrame(nanoTimestamp);
     }
     isFlushingAnimation_ = false;
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushAnimation();
+    }
 }
 
 void PipelineContext::FlushPostAnimation()
@@ -672,6 +724,10 @@ void PipelineContext::ProcessPostFlush()
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginProcessPostFlush();
+    }
 
     if (postFlushListeners_.empty()) {
         return;
