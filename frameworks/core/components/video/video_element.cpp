@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
@@ -326,14 +328,53 @@ void VideoElement::PreparePlayer()
         return;
     }
     std::string filePath = src_;
-    if (!StringUtils::StartWith(filePath, "file://") && !StringUtils::StartWith(filePath, "http")) {
-        filePath = GetAssetAbsolutePath(src_);
-    }
     LOGI("filePath : %{private}s", filePath.c_str());
-    if (mediaPlayer_->SetSource(filePath) != 0) {
-        LOGE("Player SetSource failed");
-        return;
+
+    int32_t fd = -1;
+    // SetSource by fd.
+    if (StringUtils::StartWith(filePath, "dataability://")) {
+        auto context = context_.Upgrade();
+        if (!context) {
+            LOGE("get context fail");
+            return;
+        }
+        auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(context->GetDataProviderManager());
+        if (!dataProvider) {
+            LOGE("get data provider fail");
+            return;
+        }
+        auto dataAilityHelper = dataProvider->GetDataAbilityHelper();
+        if (dataAilityHelper) {
+            fd = dataAilityHelper->OpenFile(filePath, "r");
+        }
+    } else if (!StringUtils::StartWith(filePath, "file://") && !StringUtils::StartWith(filePath, "http")) {
+        filePath = GetAssetAbsolutePath(src_);
+        fd = open(filePath.c_str(), O_RDONLY);
     }
+
+    if (fd >= 0) {
+        // get size of file.
+        struct stat statBuf;
+        auto statRes = fstat(fd, &statBuf);
+        if (statRes != 0) {
+            LOGE("get stat fail");
+            close(fd);
+            return;
+        }
+        auto size = statBuf.st_size;
+        if (mediaPlayer_->SetSource(fd, 0, size) != 0) {
+            LOGE("Player SetSource failed");
+            close(fd);
+            return;
+        }
+        close(fd);
+    } else {
+        if (mediaPlayer_->SetSource(filePath) != 0) {
+            LOGE("Player SetSource failed");
+            return;
+        }
+    }
+    
     RegistMediaPlayerEvent();
 
     sptr<Surface> producerSurface;
@@ -379,7 +420,7 @@ std::string VideoElement::GetAssetAbsolutePath(const std::string& fileName)
         return fileName;
     }
     std::string filePath = assetManager->GetAssetPath(fileName);
-    std::string absolutePath = "file://" + filePath + fileName;
+    std::string absolutePath = filePath + fileName;
     return absolutePath;
 }
 #endif
