@@ -36,6 +36,10 @@ template("js_pa_engine") {
       deps += [ "$ace_root/frameworks/bridge:framework_bridge_$platform" ]
     } else {
       deps += [ "$ace_root/build:libace" ]
+      if (defined(config.build_container_scope_lib) &&
+          config.build_container_scope_lib) {
+        deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
+      }
     }
   }
 }

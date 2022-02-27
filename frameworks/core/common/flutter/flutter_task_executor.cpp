@@ -36,6 +36,7 @@
 
 #include "base/log/log.h"
 #include "base/thread/background_task_executor.h"
+#include "core/common/container.h"
 #include "core/common/container_scope.h"
 
 namespace OHOS::Ace {
