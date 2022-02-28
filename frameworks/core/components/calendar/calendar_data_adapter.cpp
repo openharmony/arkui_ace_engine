@@ -180,6 +180,9 @@ void CalendarDataAdapter::RequestData(const CalendarDataRequest& request)
     }
     if (SystemProperties::GetDeviceType() == DeviceType::TV || type_ == CalendarType::NORMAL) {
         GetCacheData(request);
+        if (!context->GetMessageBridge()) {
+            return;
+        }
         context->GetMessageBridge()->SendMessage(dataAdapterAction_.GetAction(request.month.year, request.month.month),
             [weak, request](const std::string& result) {
                 auto dataAdapter = weak.Upgrade();
