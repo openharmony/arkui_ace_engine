@@ -88,19 +88,8 @@ void RenderBadge::Update(const RefPtr<Component>& component)
         }
     }
     clickRecognizer_->SetUseCatchMode(catchMode);
-    if (badgeLabel.empty()) {
-        if (messageCount > 0) {
-            if (messageCount > countLimit) {
-                textData_ = std::to_string(countLimit) + '+';
-            } else {
-                textData_ = std::to_string(messageCount);
-            }
-        } else {
-            showMessage_ = false;
-        }
-    } else {
-        textData_ = badgeLabel;
-    }
+    textData_.clear();
+    showMessage_ = ParseBadgeStatus(badgeLabel, messageCount, countLimit);
     badgeTextComponent_ = AceType::MakeRefPtr<TextComponent>(textData_);
     if (!badgeRenderText_) {
         InitialBadgeText();
@@ -167,6 +156,26 @@ void RenderBadge::InitialBadgeText()
     badgeRenderText_->Attach(GetContext());
     badgeRenderText_->Update(badgeTextComponent_);
     badgeRenderText_->SetLayoutParam(innerLayout);
+}
+
+bool RenderBadge::ParseBadgeStatus(const std::string& label, int64_t messageCount, int64_t countLimit)
+{
+    if (!label.empty()) {
+        textData_ = label;
+        return true;
+    }
+    if (messageCount < 0) {
+        return true;
+    }
+    if (messageCount > 0) {
+        if (messageCount > countLimit) {
+            textData_ = std::to_string(countLimit) + '+';
+        } else {
+            textData_ = std::to_string(messageCount);
+        }
+        return true;
+    }
+    return false;
 }
 
 void RenderBadge::UpdateBadgeText()
