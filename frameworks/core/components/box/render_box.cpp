@@ -1529,8 +1529,8 @@ bool RenderBox::TouchTest(const Point& globalPoint, const Point& parentLocalPoin
     }
 
     TouchTestResult innerResult;
-    bool r = RenderBoxBase::TouchTest(globalPoint, parentLocalPoint, touchRestrict, innerResult);
-    if (!r) {
+    bool parentResult = RenderBoxBase::TouchTest(globalPoint, parentLocalPoint, touchRestrict, innerResult);
+    if (!parentResult) {
         Point transformPoint = GetTransformPoint(parentLocalPoint);
         if (!InTouchRectList(transformPoint, GetTouchRectList())) {
             return false;
@@ -1552,7 +1552,7 @@ bool RenderBox::TouchTest(const Point& globalPoint, const Point& parentLocalPoin
 
     OnTouchTestHierarchy(coordinateOffset, touchRestrict, innerRecognizers, result);
 
-    return r;
+    return parentResult;
 }
 
 void RenderBox::OnTouchTestHierarchy(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,

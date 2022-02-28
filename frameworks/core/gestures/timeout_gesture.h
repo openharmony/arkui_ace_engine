@@ -26,7 +26,7 @@ class ACE_EXPORT TimeoutGesture : public SingleChildGesture {
     DECLARE_ACE_TYPE(TimeoutGesture, SingleChildGesture);
 
 public:
-    TimeoutGesture(const std::chrono::duration<float>& timeout);
+    explicit TimeoutGesture(const std::chrono::duration<float>& timeout);
 
 protected:
     RefPtr<GestureRecognizer> CreateRecognizer(WeakPtr<PipelineContext> context) override;
