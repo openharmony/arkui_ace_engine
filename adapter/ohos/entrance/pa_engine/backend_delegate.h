@@ -53,6 +53,19 @@ public:
 
     virtual const RefPtr<GroupJsBridge>& GetGroupJsBridge() = 0;
 
+    ACE_EXPORT void SetAssetManager(const RefPtr<AssetManager>& assetManager)
+    {
+        assetManager_ = assetManager;
+    }
+
+    ACE_EXPORT RefPtr<AssetManager> GetAssetManager() const
+    {
+        return assetManager_;
+    }
+
+protected:
+    RefPtr<AssetManager> assetManager_;
+
     ACE_DISALLOW_COPY_AND_MOVE(BackendDelegate);
 };
 

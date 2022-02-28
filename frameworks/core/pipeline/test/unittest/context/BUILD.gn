@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -40,6 +40,7 @@ ohos_unittest("PipelineContextTest") {
     "//foundation/ace/ace_engine/frameworks/core/animation/spring_motion.cpp",
 
     #base
+    "$ace_root/adapter/ohos/osal/frame_report.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/adapter/ohos/osal/ressched_report.cpp",
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",

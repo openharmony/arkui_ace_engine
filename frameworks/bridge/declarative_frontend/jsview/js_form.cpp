@@ -184,7 +184,7 @@ void JSForm::JsOnAcquired(const JSCallbackInfo& info)
         auto onAppearId =
             EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-                LOGD("onAcquire send id:%{public}s", param.c_str());
+                LOGI("onAcquire send:%{public}s", param.c_str());
                 std::vector<std::string> keys = { "id" };
                 ACE_SCORING_EVENT("Form.onAcquired");
                 func->Execute(keys, param);
@@ -204,12 +204,34 @@ void JSForm::JsOnError(const JSCallbackInfo& info)
         auto onErrorId =
             EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                LOGI("onError send:%{public}s", param.c_str());
                 std::vector<std::string> keys = { "errcode", "msg" };
                 ACE_SCORING_EVENT("Form.onError");
                 func->Execute(keys, param);
             });
 
         form->SetOnErrorEventId(onErrorId);
+    }
+#endif
+}
+
+void JSForm::JsOnUninstall(const JSCallbackInfo& info)
+{
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (info[0]->IsFunction()) {
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+
+        auto onUninstallId =
+            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                LOGI("onUninstall send:%{public}s", param.c_str());
+                std::vector<std::string> keys = { "id" };
+                ACE_SCORING_EVENT("Form.onUninstall");
+                func->Execute(keys, param);
+            });
+
+        form->SetOnUninstallEventId(onUninstallId);
     }
 #endif
 }
@@ -224,6 +246,7 @@ void JSForm::JsOnRouter(const JSCallbackInfo& info)
         auto onRouterId =
             EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                LOGI("onRouter send:%{public}s", param.c_str());
                 std::vector<std::string> keys = { "action" };
                 ACE_SCORING_EVENT("Form.onRouter");
                 func->Execute(keys, param);
@@ -247,6 +270,7 @@ void JSForm::JSBind(BindingTarget globalObj)
 
     JSClass<JSForm>::StaticMethod("onAcquired", &JSForm::JsOnAcquired);
     JSClass<JSForm>::StaticMethod("onError", &JSForm::JsOnError);
+    JSClass<JSForm>::StaticMethod("onUninstall", &JSForm::JsOnUninstall);
     JSClass<JSForm>::StaticMethod("onRouter", &JSForm::JsOnRouter);
     JSClass<JSForm>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSForm>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);

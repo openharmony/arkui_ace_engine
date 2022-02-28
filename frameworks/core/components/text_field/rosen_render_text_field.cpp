@@ -202,6 +202,8 @@ void RosenRenderTextField::PaintDecoration(
     pipelineContext->AddDirtyLayoutNode(AceType::Claim(this));
 
     Size deflateSize = ComputeDeflateSizeOfErrorAndCountText();
+    decoration_->SetBackgroundColor(inactiveBgColor_);
+    decoration_->SetAnimationColor(inactiveBgColor_);
     RefPtr<RosenDecorationPainter> decorationPainter = AceType::MakeRefPtr<RosenDecorationPainter>(
         decoration_, GetPaintRect() - deflateSize, size - deflateSize, pipelineContext->GetDipScale());
     decorationPainter->PaintDecoration(offset, canvas, context);

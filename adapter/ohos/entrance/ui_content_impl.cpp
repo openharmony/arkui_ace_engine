@@ -255,13 +255,13 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     if (abilityContext) {
         info = abilityContext->GetAbilityInfo();
     } else {
-        auto serviceContext =
-            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::ServiceExtensionContext>(context);
-        if (!serviceContext) {
-            LOGE("context is not AbilityContext or ServiceExtensionContext.");
+        auto extensionContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::ExtensionContext>(context);
+        if (!extensionContext) {
+            LOGE("context is not AbilityContext or ExtensionContext.");
             return;
         }
-        info = serviceContext->GetAbilityInfo();
+        info = extensionContext->GetAbilityInfo();
     }
 
     RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
@@ -336,6 +336,15 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                     break;
                 }
             }
+        }
+    }
+    if (appInfo && flutterAssetManager) {
+        std::string nativeLibraryPath = appInfo->nativeLibraryPath;
+        if (!nativeLibraryPath.empty()) {
+            nativeLibraryPath.pop_back();
+            std::string libPath = context->GetBundleCodeDir() + nativeLibraryPath;
+            LOGI("napi lib path = %{private}s", libPath.c_str());
+            flutterAssetManager->SetLibPath(libPath);
         }
     }
     auto pluginUtils = std::make_shared<PluginUtilsImpl>();
@@ -522,6 +531,28 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     }
     config_ = config;
     updateConfig_ = true;
+}
+
+void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode)
+{
+    LOGI("UpdateWindowMode, window mode is %{public}d", mode);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("UpdateWindowMode failed, get container(id=%{public}d) failed", instanceId_);
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGE("UpdateWindowMode failed, pipeline context is null.");
+        return;
+    }
+    if (mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FULLSCREEN ||
+        mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        pipelineContext->ShowContainerTitle(false);
+    } else {
+        pipelineContext->ShowContainerTitle(true);
+    }
 }
 
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)

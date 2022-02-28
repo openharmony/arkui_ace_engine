@@ -517,11 +517,15 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
         paint.setColor(ALT_COLOR_GREY);
 #ifdef OHOS_PLATFORM
         auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
-        recordingCanvas->DrawAdaptiveRRect(0, paint);
+        if (GetBackgroundImageFlag()) {
+            recordingCanvas->drawRect({ offset.GetX(), offset.GetY(), GetLayoutSize().Width() + offset.GetX(),
+                GetLayoutSize().Height() + offset.GetY() }, paint);
+        } else {
+            recordingCanvas->DrawAdaptiveRRect(0, paint);
+        }
 #else
         canvas->drawRect({ offset.GetX(), offset.GetY(), GetLayoutSize().Width() + offset.GetX(),
-                             GetLayoutSize().Height() + offset.GetY() },
-            paint);
+            GetLayoutSize().Height() + offset.GetY() }, paint);
 #endif
         return;
     }
@@ -783,7 +787,8 @@ bool RosenRenderImage::NeedUploadImageObjToGpu()
         resizeCallLoadImage_ =
             !sourceChange && NeedResize() && (imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS);
     }
-    return newSourceCallLoadImage || (resizeCallLoadImage_ && autoResize_);
+    return (newSourceCallLoadImage && (background_ || resizeTarget_.IsValid())) ||
+           (resizeCallLoadImage_ && autoResize_);
 }
 
 void RosenRenderImage::UpLoadImageDataForPaint()

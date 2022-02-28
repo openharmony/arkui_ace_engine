@@ -22,9 +22,9 @@
 
 namespace OHOS::Ace {
 
-std::string ImageObject::GenerateCacheKey(const std::string& src, Size targetImageSize)
+std::string ImageObject::GenerateCacheKey(const ImageSourceInfo& srcInfo, Size targetImageSize)
 {
-    return std::string(src) + std::to_string(static_cast<int32_t>(targetImageSize.Width())) +
+    return srcInfo.GetCacheKey() + std::to_string(static_cast<int32_t>(targetImageSize.Width())) +
            std::to_string(static_cast<int32_t>(targetImageSize.Height()));
 }
 
@@ -126,7 +126,7 @@ void StaticImageObject::UploadToGpuForRender(
         fml::RefPtr<flutter::CanvasImage> cachedFlutterImage;
         auto imageCache = pipelineContext->GetImageCache();
         if (imageCache) {
-            auto cachedImage = imageCache->GetCacheImage(GenerateCacheKey(imageSource.GetSrc(), imageSize));
+            auto cachedImage = imageCache->GetCacheImage(GenerateCacheKey(imageSource, imageSize));
             LOGD("image cache valid");
             if (cachedImage) {
                 LOGD("cached image found.");
@@ -134,7 +134,7 @@ void StaticImageObject::UploadToGpuForRender(
             }
         }
         if (cachedFlutterImage) {
-            LOGD("get cached image success: %{public}s", GenerateCacheKey(imageSource.GetSrc(), imageSize).c_str());
+            LOGD("get cached image success: %{public}s", GenerateCacheKey(imageSource, imageSize).c_str());
             taskExecutor->PostTask([successCallback, imageSource,
                                        cachedFlutterImage] { successCallback(imageSource, cachedFlutterImage); },
                 TaskExecutor::TaskType::UI);
@@ -164,9 +164,9 @@ void StaticImageObject::UploadToGpuForRender(
                 auto canvasImage = flutter::CanvasImage::Create();
                 canvasImage->set_image(std::move(image));
                 if (imageCache) {
-                    LOGD("cache image key: %{public}s", GenerateCacheKey(imageSource.GetSrc(), imageSize).c_str());
+                    LOGD("cache image key: %{public}s", GenerateCacheKey(imageSource, imageSize).c_str());
                     imageCache->CacheImage(
-                        GenerateCacheKey(imageSource.GetSrc(), imageSize),
+                        GenerateCacheKey(imageSource, imageSize),
                         std::make_shared<CachedImage>(canvasImage));
                 }
                 taskExecutor->PostTask(

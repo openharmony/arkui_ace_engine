@@ -233,8 +233,8 @@ void FlutterRenderImage::ImageDataPaintSuccess(const fml::RefPtr<flutter::Canvas
     int32_t dstHeight = static_cast<int32_t>(previousResizeTarget_.Height() + precision);
     bool isTargetSource = ((dstWidth == image->width()) && (dstHeight == image->height()));
     if (!isTargetSource && (imageObj_->GetFrameCount() <= 1) && !background_) {
-        LOGW("The size of returned image is not as expected, rejecting it. imageSrc: %{private}s,"
-            "expected: [%{private}d x %{private}d], get [%{private}d x %{private}d]",
+        LOGW("The size of returned image is not as expected, rejecting it. imageSrc: %{public}s,"
+            "expected: [%{public}d x %{public}d], get [%{public}d x %{public}d]",
             imageObj_->GetSourceInfo().ToString().c_str(), dstWidth, dstHeight, image->width(), image->height());
         return;
     }
@@ -819,7 +819,8 @@ bool FlutterRenderImage::NeedUploadImageObjToGpu()
         resizeCallLoadImage_ =
             !sourceChange && NeedResize() && (imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS);
     }
-    return newSourceCallLoadImage || (resizeCallLoadImage_ && autoResize_);
+    return (newSourceCallLoadImage && (background_ || resizeTarget_.IsValid())) ||
+           (resizeCallLoadImage_ && autoResize_);
 }
 
 void FlutterRenderImage::UpLoadImageDataForPaint()

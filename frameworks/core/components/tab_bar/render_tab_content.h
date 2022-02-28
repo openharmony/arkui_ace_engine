@@ -39,6 +39,7 @@ public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
+    bool IsUseOnly() override;
 
     using UpdateIndexFunc = std::function<void(int32_t index)>;
     void RegisterCallback(const UpdateIndexFunc& callback)

@@ -48,6 +48,7 @@ bool UnwrapRawImageDataMap(NativeEngine* engine, NativeValue* argv, std::map<std
     auto param = reinterpret_cast<napi_value>(argv);
 
     if (!AppExecFwk::IsTypeForNapiValue(env, param, napi_object)) {
+        LOGW("%{public}s failed, param is not napi_object.", __func__);
         return false;
     }
 
@@ -724,6 +725,13 @@ bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     });
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
+    if (delegate && delegate->GetAssetManager()) {
+        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+        if (!packagePath.empty()) {
+            auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
+            arkNativeEngine->SetPackagePath(packagePath);
+        }
+    }
     RegisterWorker();
     return true;
 }
@@ -1041,8 +1049,8 @@ void JsiPaEngine::StartForm(const OHOS::AAFwk::Want& want)
     if (formImageData != nullptr) {
         std::map<std::string, int> rawImageDataMap;
         auto arkJsRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-        NativeValue* nativeValue = ArkNativeEngine::ArkValueToNativeValue(
-            nativeEngine_, arkJSValue->GetValue(arkJsRuntime));
+        NativeValue* nativeValue = ArkNativeEngine::ArkValueToNativeValue(nativeEngine_,
+            std::static_pointer_cast<ArkJSValue>(formImageData)->GetValue(arkJsRuntime));
         UnwrapRawImageDataMap(nativeEngine_, nativeValue, rawImageDataMap);
         for (const auto& data : rawImageDataMap) {
             formData.AddImageData(data.first, data.second);

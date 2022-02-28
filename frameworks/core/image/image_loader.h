@@ -40,7 +40,6 @@ public:
 
     static std::string RemovePathHead(const std::string& uri);
     static RefPtr<ImageLoader> CreateImageLoader(const ImageSourceInfo& imageSourceInfo);
-    static void CacheResizedImage(const sk_sp<SkImage>& image, const std::string& key);
     static sk_sp<SkData> LoadDataFromCachedFile(const std::string& uri);
 };
 

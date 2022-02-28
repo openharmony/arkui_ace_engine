@@ -38,6 +38,7 @@ public:
     void PerformBuild() override;
 
     RefPtr<RenderListItem> RequestListItem(size_t index) override;
+    RefPtr<Element> GetListItemBySlot(size_t index);
     void RecycleListItem(size_t index) override;
     size_t TotalCount() override;
     size_t FindPreviousStickyListItem(size_t index) override;

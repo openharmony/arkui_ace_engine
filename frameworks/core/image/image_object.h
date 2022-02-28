@@ -45,7 +45,7 @@ public:
     {}
     virtual ~ImageObject() = default;
 
-    static std::string GenerateCacheKey(const std::string& src, Size targetSize);
+    static std::string GenerateCacheKey(const ImageSourceInfo& srcInfo, Size targetSize);
 
     Size GetImageSize()
     {

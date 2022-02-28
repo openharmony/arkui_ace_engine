@@ -42,7 +42,6 @@ private:
     RefPtr<BoxElement> floatingTitleBox_;
     RefPtr<RowComponent> titleChildrenRow_;
     RefPtr<RowComponent> floatingTitleChildrenRow_;
-    bool isFirstShowTitle_ = true;
 };
 
 } // namespace OHOS::Ace

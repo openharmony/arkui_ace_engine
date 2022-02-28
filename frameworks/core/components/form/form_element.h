@@ -44,9 +44,10 @@ public:
         return subContainer_;
     }
 
-    void HandleOnAcquireEvent(int64_t) const;
-    void HandleOnErrorEvent(const std::string code, const std::string msg) const;
-    void HandleOnRouterEvent(const std::unique_ptr<JsonValue>& action) const;
+    void HandleOnAcquireEvent(int64_t);
+    void HandleOnErrorEvent(const std::string code, const std::string msg);
+    void HandleOnRouterEvent(const std::unique_ptr<JsonValue>& action);
+    void HandleOnUninstallEvent(int64_t formId);
     void OnActionEvent(const std::string& action) const;
 
     bool ISAllowUpdate() const
@@ -64,6 +65,7 @@ private:
 
     EventCallback onAcquireEvent_;
     EventCallback onErrorEvent_;
+    EventCallback onUninstallEvent_;
     EventCallback onRouterEvent_;
     RequestFormInfo cardInfo_;
 };

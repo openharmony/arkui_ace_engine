@@ -74,7 +74,15 @@ public:
 
     std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) override;
 
+    const RefPtr<DataAbilityHelper>& GetDataAbilityHelper()
+    {
+        InitHelper();
+        return helper_;
+    }
+
 private:
+    void InitHelper();
+
     DataAbilityHelperImpl dataAbilityHelperImpl_;
     RefPtr<DataAbilityHelper> helper_;
 };

@@ -198,7 +198,6 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
             auto context = contextWptr.Upgrade();
             if (context) {
                 context->FireWindowSplitCallBack();
-                context->ShowContainerTitle(false);
             }
         });
     auto buttonResourceId = isFloating ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
@@ -210,11 +209,9 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
                 if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
                     LOGI("recover button clicked");
                     context->FireWindowRecoverCallBack();
-                    context->ShowContainerTitle(true);
                 } else {
                     LOGI("maximize button clicked");
                     context->FireWindowMaximizeCallBack();
-                    context->ShowContainerTitle(false);
                 }
             }
         });

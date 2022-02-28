@@ -104,8 +104,6 @@ public:
     explicit BackendDelegateImpl(const BackendDelegateImplBuilder& builder);
     ~BackendDelegateImpl() override = default;
 
-    void SetAssetManager(const RefPtr<AssetManager>& assetManager);
-
     // JsBackend delegate functions.
     void RunPa(const std::string& url, const OHOS::AAFwk::Want& want);
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const;
@@ -228,7 +226,6 @@ private:
     BackendType type_ = BackendType::SERVICE;
 
     RefPtr<TaskExecutor> taskExecutor_;
-    RefPtr<AssetManager> assetManager_;
     RefPtr<GroupJsBridge> groupJsBridge_;
     mutable std::mutex mutex_;
     mutable std::once_flag onceFlag_;

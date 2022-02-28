@@ -23,6 +23,7 @@
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
+#include "base/log/frame_report.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
@@ -442,7 +443,10 @@ void AceContainer::InitializeCallback()
     auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchEvent& event) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event]() { context->OnTouchEvent(event); }, TaskExecutor::TaskType::UI);
+            [context, event]() {
+                context->OnTouchEvent(event);
+                context->NotifyDispatchTouchEventDismiss(event);
+            }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterTouchEventCallback(touchEventCallback);
 
@@ -759,9 +763,28 @@ void AceContainer::AddAssetPath(
             LOGI("Push AssetProvider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
         }
-        std::string absPath(packagePath);
-        std::size_t lastSeperatorPos = absPath.rfind("/");
-        flutterAssetManager->SetPackagePath(absPath.substr(0, lastSeperatorPos).append(ASSET_LIBARCH_PATH));
+    }
+}
+
+void AceContainer::AddLibPath(int32_t instanceId, const std::string& libPath)
+{
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    if (!container) {
+        return;
+    }
+
+    RefPtr<FlutterAssetManager> flutterAssetManager;
+    if (container->assetManager_) {
+        flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
+    } else {
+        flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+        container->assetManager_ = flutterAssetManager;
+        if (container->type_ != FrontendType::DECLARATIVE_JS) {
+            container->frontend_->SetAssetManager(flutterAssetManager);
+        }
+    }
+    if (flutterAssetManager) {
+        flutterAssetManager->SetLibPath(libPath);
     }
 }
 
@@ -856,6 +879,8 @@ void AceContainer::AttachView(
             TaskExecutor::TaskType::PLATFORM);
     };
     pipelineContext_->SetStatusBarEventHandler(setStatusBarEventHandler);
+
+    taskExecutor_->PostTask([] {  FrameReport::GetInstance().Init(); }, TaskExecutor::TaskType::UI);
 
     ThemeConstants::InitDeviceType();
     // Load custom style at UI thread before frontend attach, to make sure style can be loaded before building dom tree.

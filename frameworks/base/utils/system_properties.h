@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -237,6 +237,22 @@ public:
 
     static bool IsScoringEnabled(const std::string& name);
 
+    static void SetWindowPos(int32_t x, int32_t y)
+    {
+        windowPosX_ = x;
+        windowPosY_ = y;
+    }
+
+    static int32_t GetWindowPosX()
+    {
+        return windowPosX_;
+    }
+
+    static int32_t GetWindowPosY()
+    {
+        return windowPosY_;
+    }
+
 private:
     static bool traceEnabled_;
     static bool accessibilityEnabled_;
@@ -260,6 +276,8 @@ private:
     static LongScreenType LongScreen_;
     static bool rosenBackendEnabled_;
     static bool debugEnabled_;
+    static int32_t windowPosX_;
+    static int32_t windowPosY_;
 };
 
 } // namespace OHOS::Ace

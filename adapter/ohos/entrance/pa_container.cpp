@@ -311,6 +311,26 @@ void PaContainer::AddAssetPath(
     }
 }
 
+void PaContainer::AddLibPath(int32_t instanceId, const std::string& libPath)
+{
+    auto container = AceType::DynamicCast<PaContainer>(AceEngine::Get().GetContainer(instanceId));
+    if (!container) {
+        return;
+    }
+
+    RefPtr<FlutterAssetManager> flutterAssetManager;
+    if (container->assetManager_) {
+        flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
+    } else {
+        flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+        container->assetManager_ = flutterAssetManager;
+        AceType::DynamicCast<PaBackend>(container->GetBackend())->SetAssetManager(flutterAssetManager);
+    }
+    if (flutterAssetManager) {
+        flutterAssetManager->SetLibPath(libPath);
+    }
+}
+
 int32_t PaContainer::Insert(int32_t instanceId, const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value)
 {
     LOGI("Insert with id %{public}d", instanceId);

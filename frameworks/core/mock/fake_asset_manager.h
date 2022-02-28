@@ -53,9 +53,9 @@ public:
         return "";
     }
 
-    void SetPackagePath(const std::string& packagePath) override {}
+    void SetLibPath(const std::string& packagePath) override {}
 
-    std::string GetPackagePath() const override
+    std::string GetLibPath() const override
     {
         return "";
     }

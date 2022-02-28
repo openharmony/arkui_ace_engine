@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -171,6 +171,8 @@ void XComponentElement::DispatchTouchEvent(const TouchEvent& event)
     auto renderXComponent = AceType::DynamicCast<RenderXComponent>(renderNode_);
     if (renderXComponent) {
         touchEventPoint_.id = event.id;
+        touchEventPoint_.screenX = 0;
+        touchEventPoint_.screenY = 0;
         touchEventPoint_.x = event.x;
         touchEventPoint_.y = event.y;
         touchEventPoint_.size = event.size;
@@ -178,6 +180,7 @@ void XComponentElement::DispatchTouchEvent(const TouchEvent& event)
         touchEventPoint_.deviceId = event.deviceId;
         touchEventPoint_.timeStamp = event.time.time_since_epoch().count();
         SetTouchEventType(event);
+        SetTouchPoint(event);
         renderXComponent->NativeXComponentDispatchTouchEvent(touchEventPoint_);
     }
 }
@@ -186,20 +189,57 @@ void XComponentElement::SetTouchEventType(const TouchEvent& event)
 {
     switch (event.type) {
         case TouchType::DOWN:
-            touchEventPoint_.type = TouchInfoType::DOWN;
+            touchEventPoint_.type = OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_DOWN;
             break;
         case TouchType::UP:
-            touchEventPoint_.type = TouchInfoType::UP;
+            touchEventPoint_.type = OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UP;
             break;
         case TouchType::MOVE:
-            touchEventPoint_.type = TouchInfoType::MOVE;
+            touchEventPoint_.type = OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_MOVE;
             break;
         case TouchType::CANCEL:
-            touchEventPoint_.type = TouchInfoType::CANCEL;
+            touchEventPoint_.type = OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_CANCEL;
             break;
         default:
-            touchEventPoint_.type = TouchInfoType::UNKNOWN;
+            touchEventPoint_.type = OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UNKNOWN;
             break;
+    }
+}
+
+void XComponentElement::SetTouchPoint(const TouchEvent& event)
+{
+    for (uint32_t i = 0; i < OH_MAX_TOUCH_POINTS_NUMBER; ++i) {
+        OH_NativeXComponent_TouchPoint ohTouchPoint;
+        ohTouchPoint.id = 0;
+        ohTouchPoint.screenX = 0;
+        ohTouchPoint.screenY = 0;
+        ohTouchPoint.x = 0;
+        ohTouchPoint.y = 0;
+        ohTouchPoint.type = OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UNKNOWN;
+        ohTouchPoint.size = 0;
+        ohTouchPoint.force = 0;
+        ohTouchPoint.timeStamp = 0;
+        ohTouchPoint.isPressed = false;
+        touchEventPoint_.touchPoints[i] = ohTouchPoint;
+    }
+
+    if (event.pointers.size() > OH_MAX_TOUCH_POINTS_NUMBER) {
+        touchEventPoint_.numPoints = OH_MAX_TOUCH_POINTS_NUMBER;
+    } else {
+        touchEventPoint_.numPoints = event.pointers.size();
+    }
+
+    for (uint32_t i = 0; i < touchEventPoint_.numPoints; ++i) {
+        OH_NativeXComponent_TouchPoint ohTouchPoint;
+        TouchPoint point = event.pointers[i];
+        ohTouchPoint.id = point.id;
+        ohTouchPoint.x = point.x;
+        ohTouchPoint.y = point.y;
+        ohTouchPoint.size = point.size;
+        ohTouchPoint.force = point.force;
+        ohTouchPoint.timeStamp = point.downTime.time_since_epoch().count();
+        ohTouchPoint.isPressed = point.isPressed;
+        touchEventPoint_.touchPoints[i] = ohTouchPoint;
     }
 }
 

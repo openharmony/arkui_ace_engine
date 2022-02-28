@@ -16,6 +16,8 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/core/components/text_field/text_field_controller.h"
+#include "frameworks/core/components/text_field/text_field_component.h"
+#include "frameworks/core/components/text_field/textfield_theme.h"
 
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTAREA_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTAREA_H
@@ -41,6 +43,10 @@ public:
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
+    static void SetBackgroundColor(const JSCallbackInfo& info);
+    static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
+        const RefPtr<TextFieldComponent>& component, const Border& boxBorder,
+        const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
 
 private:
     static void InitDefaultStyle();
