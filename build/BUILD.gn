@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -125,6 +125,7 @@ foreach(item, ace_platforms) {
     ohos_source_set("ace_ohos_unittest_base") {
       testonly = true
       sources = [
+        "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
         "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
         "$ace_root/frameworks/core/mock/mock_download_manager.cpp",
         "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,12 +25,25 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void OnPageStart(const JSCallbackInfo& args);
     static void OnPageFinish(const JSCallbackInfo& args);
+    static void OnProgressChange(const JSCallbackInfo& args);
+    static void OnTitleReceive(const JSCallbackInfo& args);
+    static void OnGeolocationHide(const JSCallbackInfo& args);
+    static void OnGeolocationShow(const JSCallbackInfo& args);
     static void OnRequestFocus(const JSCallbackInfo& args);
     static void OnError(const JSCallbackInfo& args);
     static void OnMessage(const JSCallbackInfo& args);
+    static void OnDownloadStart(const JSCallbackInfo& args);
     static void JsEnabled(bool isJsEnabled);
     static void ContentAccessEnabled(bool isContentAccessEnabled);
     static void FileAccessEnabled(bool isFileAccessEnabled);
+    static void OnFocus(const JSCallbackInfo& args);
+    static void OnLineImageAccessEnabled(bool isOnLineImageAccessEnabled);
+    static void DomStorageAccessEnabled(bool isDomStorageAccessEnabled);
+    static void ImageAccessEnabled(bool isImageAccessEnabled);
+    static void MixedMode(int32_t MixedModeNum);
+    static void ZoomAccessEnabled(bool isZoomAccessEnabled);
+    static void GeolocationAccessEnabled(bool isGeolocationAccessEnabled);
+
 };
 }
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_H

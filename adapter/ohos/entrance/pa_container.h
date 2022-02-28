@@ -128,12 +128,13 @@ public:
     static RefPtr<PaContainer> GetContainer(int32_t instanceId);
     static bool RunPa(int32_t instanceId, const std::string& content, const OHOS::AAFwk::Want& want);
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
-    static bool OnDelete(int32_t formId);
-    static bool OnTriggerEvent(int32_t formId, const std::string& message);
-    static bool OnUpdate(int32_t formId);
-    static bool OnCastTemptoNormal(int32_t formId);
-    static bool OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap);
-    static bool OnAcquireState(const OHOS::AAFwk::Want& want);
+    static void AddLibPath(int32_t instanceId, const std::string& libPath);
+    static bool OnDelete(int32_t instanceId, int64_t formId);
+    static bool OnTriggerEvent(int32_t instanceId, int64_t formId, const std::string& message);
+    static bool OnUpdate(int32_t instanceId, int64_t formId);
+    static bool OnCastTemptoNormal(int32_t instanceId, int64_t formId);
+    static bool OnVisibilityChanged(int32_t instanceId, const std::map<int64_t, int32_t>& formEventsMap);
+    static AppExecFwk::FormProviderData GetFormData(int32_t instanceId);
     static int32_t Insert(int32_t instanceId, const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value);
     static std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> Query(int32_t instanceId, const Uri& uri,
         const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates);
@@ -151,7 +152,6 @@ public:
     static Uri DenormalizeUri(int32_t instanceId, const Uri& uri);
     static sptr<IRemoteObject> OnConnect(int32_t instanceId, const OHOS::AAFwk::Want& want);
     static void OnDisConnect(int32_t instanceId, const OHOS::AAFwk::Want& want);
-    static AppExecFwk::FormProviderData GetFormData(int32_t formId);
     static void OnCommand(const OHOS::AAFwk::Want &want, int startId, int32_t instanceId);
 
 private:

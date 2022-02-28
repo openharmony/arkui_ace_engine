@@ -207,6 +207,7 @@ public:
     static void OnConfigurationUpdated(int32_t instanceId, const std::string& configuration);
     static void OnNewRequest(int32_t instanceId, const std::string& data);
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
+    static void AddLibPath(int32_t instanceId, const std::string& libPath);
     static void SetView(AceView* view, double density, int32_t width, int32_t height, int32_t windowId,
                         UIEnvCallback callback = nullptr);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);

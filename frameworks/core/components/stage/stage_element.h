@@ -56,6 +56,11 @@ public:
 
     bool IsTransitionStop() const;
 
+    bool isPageElement() override
+    {
+        return true;
+    }
+
 protected:
     void MarkDirty() override;
     bool OnKeyEvent(const KeyEvent& keyEvent) override;

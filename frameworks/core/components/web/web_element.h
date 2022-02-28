@@ -16,8 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_ELEMENT_H
 
-#include "core/pipeline/base/render_element.h"
+#include "core/components/web/web_component.h"
 #include "core/focus/focus_node.h"
+#include "core/pipeline/base/render_element.h"
 
 namespace OHOS::Ace {
 
@@ -31,6 +32,7 @@ public:
 
 private:
     std::string webSrc_;
+    RefPtr<WebComponent> webComp_;
 };
 
 } // namespace OHOS::Ace

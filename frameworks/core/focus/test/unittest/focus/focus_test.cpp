@@ -14,6 +14,7 @@
  */
 
 #include <functional>
+
 #include "gtest/gtest.h"
 
 #define protected public
@@ -131,7 +132,10 @@ bool PipelineContext::IsVisibleChangeNodeExists(NodeId index) const
     return false;
 }
 
-RefPtr<Element> PipelineContext::GetDeactivateElement(int) const { return nullptr; }
+RefPtr<Element> PipelineContext::GetDeactivateElement(int) const
+{
+    return nullptr;
+}
 
 const AnimationOption PipelineContext::GetExplicitAnimationOption() const
 {
@@ -174,8 +178,8 @@ bool PipelineContext::Animate(const AnimationOption& option, const RefPtr<Curve>
     return true;
 }
 
-void PipelineContext::OpenImplicitAnimation(const AnimationOption& option,
-    const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
+void PipelineContext::OpenImplicitAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
 {}
 
 bool PipelineContext::CloseImplicitAnimation()
@@ -183,9 +187,7 @@ bool PipelineContext::CloseImplicitAnimation()
     return true;
 }
 
-void PipelineContext::AddGeometryChangedNode(const RefPtr<RenderNode>& renderNode)
-{
-}
+void PipelineContext::AddGeometryChangedNode(const RefPtr<RenderNode>& renderNode) {}
 
 void PipelineContext::ForceLayoutForImplicitAnimation() {}
 
@@ -262,7 +264,7 @@ HWTEST_F(FocusTest, FocusTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. focus moves to the right.
      */
-    KeyEvent keyEvent(KeyCode::TV_CONTROL_RIGHT, KeyAction::UP, 0, 0, 0, 0, 0, 0);
+    KeyEvent keyEvent(KeyCode::TV_CONTROL_RIGHT, KeyAction::UP);
     root_->HandleKeyEvent(keyEvent);
 
     /**
@@ -308,7 +310,7 @@ HWTEST_F(FocusTest, FocusTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. focus moves down.
      */
-    KeyEvent keyEvent(KeyCode::TV_CONTROL_DOWN, KeyAction::UP, 0, 0, 0, 0, 0, 0);
+    KeyEvent keyEvent(KeyCode::TV_CONTROL_DOWN, KeyAction::UP);
     root_->HandleKeyEvent(keyEvent);
 
     /**
@@ -354,7 +356,7 @@ HWTEST_F(FocusTest, FocusTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. set the key callback function.
      */
-    KeyEvent keyEvent(KeyCode::TV_CONTROL_RIGHT, KeyAction::UP, 0, 0, 0, 0, 0, 0);
+    KeyEvent keyEvent(KeyCode::TV_CONTROL_RIGHT, KeyAction::UP);
     std::string keyCallback;
     firstNode_->SetOnKeyCallback([&keyCallback](const KeyEvent& keyEvent) {
         keyCallback = KEY_CALLBACK;
@@ -380,7 +382,7 @@ HWTEST_F(FocusTest, FocusTest004, TestSize.Level1)
     /**
      * @tc.steps: step1. set the click callback function.
      */
-    KeyEvent keyEvent(KeyCode::KEYBOARD_ENTER, KeyAction::CLICK, 0, 0, 0, 0, 0, 0);
+    KeyEvent keyEvent(KeyCode::KEY_ENTER, KeyAction::UP);
     std::string clickCallback;
     firstNode_->SetOnClickCallback([&clickCallback]() { clickCallback = CLICK_CALLBACK; });
 
@@ -556,7 +558,7 @@ HWTEST_F(FocusTest, FocusTest009, TestSize.Level1)
      * @tc.expected: step2. the state of focus is correct.
      */
     secondNode_->RequestFocusImmediately();
-    KeyEvent keyEvent(KeyCode::TV_CONTROL_RIGHT, KeyAction::UP, 0, 0, 0, 0, 0, 0);
+    KeyEvent keyEvent(KeyCode::TV_CONTROL_RIGHT, KeyAction::UP);
     root_->HandleKeyEvent(keyEvent);
     ASSERT_TRUE(fifthNode->IsCurrentFocus());
 

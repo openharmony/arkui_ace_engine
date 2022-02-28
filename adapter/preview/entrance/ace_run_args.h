@@ -51,6 +51,8 @@ enum class ProjectModel {
 struct ACE_PREVIEW_EXPORT AceRunArgs {
     // the adopted project model
     ProjectModel projectModel = ProjectModel::FA;
+    // stores routing information
+    std::string pageProfile = "";
     // The absolute path end of "default".
     std::string assetPath;
     // The absolute path of system resources.

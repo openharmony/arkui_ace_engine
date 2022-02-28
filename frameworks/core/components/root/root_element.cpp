@@ -92,7 +92,7 @@ void RootElement::HandleSpecifiedKey(const KeyEvent& keyEvent)
             }
             isFullWindow = semiModal->IsFullWindow();
         }
-        if (keyEvent.code == KeyCode::KEYBOARD_HOME && keyEvent.action == KeyAction::UP && !isFullWindow) {
+        if (keyEvent.code == KeyCode::KEY_HOME && keyEvent.action == KeyAction::UP && !isFullWindow) {
             const auto& render = AceType::DynamicCast<RenderRoot>(renderNode_);
             if (render) {
                 render->SetBgColor(Color::TRANSPARENT);

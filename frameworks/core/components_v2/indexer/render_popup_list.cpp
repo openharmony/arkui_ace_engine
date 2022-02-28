@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -181,7 +181,7 @@ void RenderPopupList::OnRequestPopupDataSelected(std::vector<std::string>& data)
     datas_.assign(data.begin(), data.end());
 
     // calculate view port size
-    viewPortWidth_ = POPUP_BOX_SIZE;
+    viewPortWidth_ = SystemProperties::Vp2Px(POPUP_BOX_SIZE);
     viewPortHeight_ = ApplyLayoutParam();
 
     LOGI("size of datas %{public}zu view port height %{public}.2f ", datas_.size(), viewPortHeight_);
@@ -238,9 +238,9 @@ double RenderPopupList::ApplyLayoutParam()
 {
     double viewPortSize = 0.0;
     if (datas_.size() > POPUP_ITEM_VIEW_MAX_COUNT) {
-        viewPortSize = POPUP_BOX_SIZE * POPUP_ITEM_VIEW_MAX_COUNT + POPUP_BORDER_RADIUS_SIZE;
+        viewPortSize = SystemProperties::Vp2Px(POPUP_BOX_SIZE) * POPUP_ITEM_VIEW_MAX_COUNT + POPUP_BORDER_RADIUS_SIZE;
     } else {
-        viewPortSize = POPUP_BOX_SIZE * datas_.size() + POPUP_BORDER_RADIUS_SIZE;
+        viewPortSize = SystemProperties::Vp2Px(POPUP_BOX_SIZE) * datas_.size() + POPUP_BORDER_RADIUS_SIZE;
     }
 
     // start position and end position of scrollable

@@ -32,9 +32,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_checkbox.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
@@ -168,7 +168,7 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::EcmaVM* vm, panda::Local<p
     panda::Local<panda::ObjectRef> obj = args[0]->ToObject(vm);
     JSView* view = static_cast<JSView*>(obj->GetNativePointerField(0));
 
-    auto runtime = JsiDeclarativeEngineInstance::GetJsRuntime();
+    auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
     auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
     JsiDeclarativeEngineInstance::RootViewHandle(obj);
 
@@ -984,7 +984,7 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
 
 void JsRegisterViews(BindingTarget globalObj)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetJsRuntime());
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = runtime->GetEcmaVm();
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadDocument"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadDocument, nullptr));

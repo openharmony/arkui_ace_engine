@@ -2101,13 +2101,16 @@ JSValue OffscreenCanvasBridge::JsMeasureText(
     std::string text = arg.get();
     auto textState = JsParseTextState(ctx, value);
     double width = 0.0;
+    double height = 0.0;
     auto bridge = GetOffscreenCanvasBridge(ctx, value);
     if (bridge) {
         width = bridge->offscreenCanvas_->MeasureText(text, textState);
+        height = bridge->offscreenCanvas_->MeasureTextHeight(text, textState);
     }
 
     JSValue textMetrics = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, textMetrics, "width", JS_NewFloat64(ctx, width));
+    JS_SetPropertyStr(ctx, textMetrics, "height", JS_NewFloat64(ctx, height));
     return textMetrics;
 }
 }

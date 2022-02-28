@@ -265,7 +265,7 @@ bool SwiperElement::OnKeyEvent(const KeyEvent& keyEvent)
             return RequestNextFocus(false, true, GetRect());
         case KeyCode::TV_CONTROL_RIGHT:
             return RequestNextFocus(false, false, GetRect());
-        case KeyCode::KEYBOARD_TAB:
+        case KeyCode::KEY_TAB:
             return RequestNextFocus(false, false, GetRect()) || RequestNextFocus(true, false, GetRect());
         default:
             return false;

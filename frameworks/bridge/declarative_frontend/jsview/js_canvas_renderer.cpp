@@ -1646,16 +1646,20 @@ void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
     std::string text = "";
     paintState_.SetTextStyle(style_);
     double width = 0.0;
+    double height = 0.0;
     if (info[0]->IsString()) {
         JSViewAbstract::ParseJsString(info[0], text);
         if (isOffscreen_) {
             width = offscreenCanvas_->MeasureText(text, paintState_);
+            height = offscreenCanvas_->MeasureTextHeight(text, paintState_);
         } else {
             width = pool_->MeasureText(text, paintState_);
+            height = pool_->MeasureTextHeight(text, paintState_);
         }
 
         auto retObj = JSRef<JSObject>::New();
         retObj->SetProperty("width", width);
+        retObj->SetProperty("height", height);
         info.SetReturnValue(retObj);
     }
 }

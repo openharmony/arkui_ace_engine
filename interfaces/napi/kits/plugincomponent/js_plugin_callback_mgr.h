@@ -16,9 +16,10 @@
 #ifndef OHOS_NAPI_ACE_PLUGIN_CALLBACK_MGR_H
 #define OHOS_NAPI_ACE_PLUGIN_CALLBACK_MGR_H
 
-#include <string>
-#include <mutex>
 #include <map>
+#include <mutex>
+#include <string>
+
 #include "js_plugin_callback.h"
 #include "js_plugin_data.h"
 

@@ -18,16 +18,15 @@
 #define MOCK_FOUNDATION_AAFWK_MOCK_DATAOBS_MGR_CLIENT_H
 
 #include <gmock/gmock.h>
-#include <memory>
 #include <map>
+#include <memory>
 #define protected public
 #define private public
+#include "mock_ui_mgr_service.h"
+#include "semaphore_ex.h"
 #include "system_ability.h"
 #include "ui_mgr_service.h"
-#include "semaphore_ex.h"
-#include "mock_ui_mgr_service.h"
 #include "ui_service_mgr_client.h"
-
 
 namespace OHOS {
 namespace Ace {

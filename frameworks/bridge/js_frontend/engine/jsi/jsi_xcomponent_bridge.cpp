@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ namespace OHOS::Ace::Framework {
 JsiXComponentBridge::JsiXComponentBridge()
 {
     nativeXcomponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
-    nativeXComponent_ = new NativeXComponent(AceType::RawPtr(nativeXcomponentImpl_));
+    nativeXComponent_ = new OH_NativeXComponent(AceType::RawPtr(nativeXcomponentImpl_));
 }
 
 JsiXComponentBridge::~JsiXComponentBridge()
@@ -93,7 +93,7 @@ void JsiXComponentBridge::HandleContext(const shared_ptr<JsRuntime>& runtime, No
     }
 
     auto arkObjectRef = nativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true,
-                                                       args, NATIVE_XCOMPONENT_OBJ,
+                                                       args, OH_NATIVE_XCOMPONENT_OBJ,
                                                        reinterpret_cast<void*>(nativeXComponent_));
 
     if (arkObjectRef.CheckException()) {

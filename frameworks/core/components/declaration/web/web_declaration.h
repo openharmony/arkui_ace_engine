@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,9 +29,15 @@ struct WebAttribute : Attribute {
 struct WebEvent : Event {
     EventMarker pageStartEventId;
     EventMarker pageFinishEventId;
+    EventMarker progressChangeEventId;
+    EventMarker titleReceiveEventId;
+    EventMarker geolocationHideEventId;
+    EventMarker geolocationShowEventId;
     EventMarker requestFocusEventId;
+    EventMarker onFocusEventId;
     EventMarker pageErrorEventId;
     EventMarker messageEventId;
+    EventMarker downloadStartEventId;
 };
 
 struct WebMethod : Method {
@@ -85,6 +91,66 @@ public:
         return event.pageFinishEventId;
     }
 
+    void SetProgressChangeEventId(const EventMarker& progressChangeEventId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.progressChangeEventId = progressChangeEventId;
+    }
+
+    const EventMarker& GetProgressChangeEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.progressChangeEventId;
+    }
+
+    void SetTitleReceiveEventId(const EventMarker& titleReceiveEventId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.titleReceiveEventId = titleReceiveEventId;
+    }
+
+    const EventMarker& GetTitleReceiveEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.titleReceiveEventId;
+    }
+
+    void SetGeolocationHideEventId(const EventMarker& geolocationHideEventId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.geolocationHideEventId = geolocationHideEventId;
+    }
+
+    const EventMarker& GetGeolocationHideEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.geolocationHideEventId;
+    }
+
+    void SetGeolocationShowEventId(const EventMarker& geolocationShowEventId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.geolocationShowEventId = geolocationShowEventId;
+    }
+
+    const EventMarker& GetGeolocationShowEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.geolocationShowEventId;
+    }
+
+    void SetDownloadStartEventId(const EventMarker& downloadStartEventId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.downloadStartEventId = downloadStartEventId;
+    }
+
+    const EventMarker& GetDownloadStartEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.downloadStartEventId;
+    }
+
     void SetRequestFocusEventId(const EventMarker& requestFocusEventId)
     {
         auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
@@ -95,6 +161,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.requestFocusEventId;
+    }
+
+    void SetOnFocusEventId(const EventMarker& onFocusEventId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.onFocusEventId = onFocusEventId;
+    }
+
+    const EventMarker& GetOnFocusEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.onFocusEventId;
     }
 
     void SetPageErrorEventId(const EventMarker& pageErrorEventId)

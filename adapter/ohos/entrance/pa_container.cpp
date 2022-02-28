@@ -112,17 +112,17 @@ bool PaContainer::RunPa(int32_t instanceId, const std::string& content, const OH
     LOGI("PA: PaContainer::RunPa start");
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
-        LOGE("PA: container is nuill");
+        LOGE("PA: container is null");
         return false;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     if (!aceContainer) {
-        LOGE("PA: aceContainer is nuill");
+        LOGE("PA: aceContainer is null");
         return false;
     }
     auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (!paBackend) {
-        LOGE("PA: paBackend is nuill");
+        LOGE("PA: paBackend is null");
         return false;
     }
     paBackend->RunPa(content, want);
@@ -130,22 +130,22 @@ bool PaContainer::RunPa(int32_t instanceId, const std::string& content, const OH
     return true;
 }
 
-bool PaContainer::OnDelete(int32_t formId)
+bool PaContainer::OnDelete(int32_t instanceId, int64_t formId)
 {
     LOGI("PA: PaContainer::OnDelete start");
-    auto container = AceEngine::Get().GetContainer(formId);
+    auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
-        LOGE("PA: container is nuill");
+        LOGE("PA: container is nullptr");
         return false;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     if (!aceContainer) {
-        LOGE("PA: aceContainer is nuill");
+        LOGE("PA: aceContainer is nullptr");
         return false;
     }
     auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (!paBackend) {
-        LOGE("PA: paBackend is nuill");
+        LOGE("PA: paBackend is nullptr");
         return false;
     }
     paBackend->OnDelete(formId);
@@ -153,22 +153,22 @@ bool PaContainer::OnDelete(int32_t formId)
     return true;
 }
 
-bool PaContainer::OnTriggerEvent(int32_t formId, const std::string& message)
+bool PaContainer::OnTriggerEvent(int32_t instanceId, int64_t formId, const std::string& message)
 {
     LOGI("PA: PaContainer::OnTriggerEvent start");
-    auto container = AceEngine::Get().GetContainer(formId);
+    auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
-        LOGE("PA: container is nuill");
+        LOGE("PA: container is nullptr");
         return false;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     if (!aceContainer) {
-        LOGE("PA: aceContainer is nuill");
+        LOGE("PA: aceContainer is nullptr");
         return false;
     }
     auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (!paBackend) {
-        LOGE("PA: paBackend is nuill");
+        LOGE("PA: paBackend is nullptr");
         return false;
     }
     paBackend->OnTriggerEvent(formId, message);
@@ -176,22 +176,22 @@ bool PaContainer::OnTriggerEvent(int32_t formId, const std::string& message)
     return true;
 }
 
-bool PaContainer::OnUpdate(int32_t formId)
+bool PaContainer::OnUpdate(int32_t instanceId, int64_t formId)
 {
     LOGI("PA: PaContainer::OnUpdate start");
-    auto container = AceEngine::Get().GetContainer(formId);
+    auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
-        LOGE("PA: container is nuill");
+        LOGE("PA: container is nullptr");
         return false;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     if (!aceContainer) {
-        LOGE("PA: aceContainer is nuill");
+        LOGE("PA: aceContainer is nullptr");
         return false;
     }
     auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (!paBackend) {
-        LOGE("PA: paBackend is nuill");
+        LOGE("PA: paBackend is nullptr");
         return false;
     }
     paBackend->OnUpdate(formId);
@@ -199,22 +199,22 @@ bool PaContainer::OnUpdate(int32_t formId)
     return true;
 }
 
-bool PaContainer::OnCastTemptoNormal(int32_t formId)
+bool PaContainer::OnCastTemptoNormal(int32_t instanceId, int64_t formId)
 {
     LOGI("PA: PaContainer::OnCastTemptoNormal start");
-    auto container = AceEngine::Get().GetContainer(formId);
+    auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
-        LOGE("PA: container is nuill");
+        LOGE("PA: container is nullptr");
         return false;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     if (!aceContainer) {
-        LOGE("PA: aceContainer is nuill");
+        LOGE("PA: aceContainer is nullptr");
         return false;
     }
     auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (!paBackend) {
-        LOGE("PA: paBackend is nuill");
+        LOGE("PA: paBackend is nullptr");
         return false;
     }
     paBackend->OnCastTemptoNormal(formId);
@@ -222,22 +222,22 @@ bool PaContainer::OnCastTemptoNormal(int32_t formId)
     return true;
 }
 
-bool PaContainer::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap)
+bool PaContainer::OnVisibilityChanged(int32_t instanceId, const std::map<int64_t, int32_t>& formEventsMap)
 {
     LOGI("PA: PaContainer::OnVisibilityChanged start");
-    auto container = AceEngine::Get().GetContainer(100000);
+    auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
-        LOGE("PA: container is nuill");
+        LOGE("PA: container is nullptr");
         return false;
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     if (!aceContainer) {
-        LOGE("PA: aceContainer is nuill");
+        LOGE("PA: aceContainer is nullptr");
         return false;
     }
     auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (!paBackend) {
-        LOGE("PA: paBackend is nuill");
+        LOGE("PA: paBackend is nullptr");
         return false;
     }
     paBackend->OnVisibilityChanged(formEventsMap);
@@ -245,45 +245,22 @@ bool PaContainer::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEven
     return true;
 }
 
-bool PaContainer::OnAcquireState(const OHOS::AAFwk::Want& want)
-{
-    LOGI("PA: PaContainer::OnAcquireState start");
-    auto container = AceEngine::Get().GetContainer(100000);
-    if (!container) {
-        LOGE("PA: container is nuill");
-        return false;
-    }
-    auto aceContainer = AceType::DynamicCast<PaContainer>(container);
-    if (!aceContainer) {
-        LOGE("PA: aceContainer is nuill");
-        return false;
-    }
-    auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
-    if (!paBackend) {
-        LOGE("PA: paBackend is nuill");
-        return false;
-    }
-    paBackend->OnAcquireState(want);
-    LOGI("PA: PaContainer::OnAcquireState end");
-    return true;
-}
-
-AppExecFwk::FormProviderData PaContainer::GetFormData(int32_t formId)
+AppExecFwk::FormProviderData PaContainer::GetFormData(int32_t instanceId)
 {
     LOGI("PA: PaContainer::GetFormData start");
-    auto container = AceEngine::Get().GetContainer(formId);
+    auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
-        LOGE("PA: container is nuill");
+        LOGE("PA: container is nullptr");
         return AppExecFwk::FormProviderData();
     }
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     if (!aceContainer) {
-        LOGE("PA: aceContainer is nuill");
+        LOGE("PA: aceContainer is nullptr");
         return AppExecFwk::FormProviderData();
     }
     auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     if (!paBackend) {
-        LOGE("PA: paBackend is nuill");
+        LOGE("PA: paBackend is nullptr");
         return AppExecFwk::FormProviderData();
     }
     return paBackend->GetFormData();
@@ -331,6 +308,26 @@ void PaContainer::AddAssetPath(
             LOGI("Push AssetProvider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
         }
+    }
+}
+
+void PaContainer::AddLibPath(int32_t instanceId, const std::string& libPath)
+{
+    auto container = AceType::DynamicCast<PaContainer>(AceEngine::Get().GetContainer(instanceId));
+    if (!container) {
+        return;
+    }
+
+    RefPtr<FlutterAssetManager> flutterAssetManager;
+    if (container->assetManager_) {
+        flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
+    } else {
+        flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+        container->assetManager_ = flutterAssetManager;
+        AceType::DynamicCast<PaBackend>(container->GetBackend())->SetAssetManager(flutterAssetManager);
+    }
+    if (flutterAssetManager) {
+        flutterAssetManager->SetLibPath(libPath);
     }
 }
 

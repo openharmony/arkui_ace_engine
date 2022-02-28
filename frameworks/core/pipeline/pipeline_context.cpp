@@ -28,6 +28,7 @@
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "base/log/frame_report.h"
 #include "base/log/log.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
@@ -72,11 +73,11 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
+#include "core/components_v2/list/render_list.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/factories/flutter_render_factory.h"
 #include "core/pipeline/base/render_context.h"
-#include "core/components_v2/list/render_list.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -211,9 +212,16 @@ void PipelineContext::FlushBuild()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushBuild();
+    }
+
     isRebuildFinished_ = false;
     if (dirtyElements_.empty()) {
         isRebuildFinished_ = true;
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().EndFlushBuild();
+        }
         return;
     }
     if (isFirstLoaded_) {
@@ -240,6 +248,10 @@ void PipelineContext::FlushBuild()
         buildAfterCallback_.clear();
     }
     buildingFirstPage_ = false;
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushBuild();
+    }
 }
 
 void PipelineContext::FlushPredictLayout(int64_t targetTimestamp)
@@ -313,7 +325,6 @@ void PipelineContext::RefreshStageFocus()
 
     stageElement->RefreshFocus();
 }
-
 
 void PipelineContext::ShowContainerTitle(bool isShow)
 {
@@ -442,8 +453,15 @@ void PipelineContext::FlushLayout()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushLayout();
+    }
+
     if (dirtyLayoutNodes_.empty()) {
         FlushGeometryProperties();
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().EndFlushLayout();
+        }
         return;
     }
     if (isFirstLoaded_) {
@@ -466,6 +484,10 @@ void PipelineContext::FlushLayout()
 
     CreateGeometryTransition();
     FlushGeometryProperties();
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushLayout();
+    }
 }
 
 void PipelineContext::FlushGeometryProperties()
@@ -508,7 +530,14 @@ void PipelineContext::FlushRender()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushRender();
+    }
+
     if (dirtyRenderNodes_.empty() && dirtyRenderNodesInOverlay_.empty() && !needForcedRefresh_) {
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().EndFlushRender();
+        }
         return;
     }
 
@@ -571,6 +600,11 @@ void PipelineContext::FlushRender()
         }
     }
     needForcedRefresh_ = false;
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushRender();
+    }
+
 }
 
 void PipelineContext::FlushRenderFinish()
@@ -579,11 +613,17 @@ void PipelineContext::FlushRenderFinish()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushRenderFinish();
+    }
     if (!needPaintFinishNodes_.empty()) {
         decltype(needPaintFinishNodes_) Nodes(std::move(needPaintFinishNodes_));
         for (const auto& node : Nodes) {
             node->OnPaintFinish();
         }
+    }
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushRenderFinish();
     }
 }
 
@@ -592,12 +632,19 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushAnimation();
+    }
     flushAnimationTimestamp_ = nanoTimestamp;
     isFlushingAnimation_ = true;
 
     ProcessPreFlush();
     if (scheduleTasks_.empty()) {
         isFlushingAnimation_ = false;
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().EndFlushAnimation();
+        }
         return;
     }
     decltype(scheduleTasks_) temp(std::move(scheduleTasks_));
@@ -605,6 +652,10 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
         scheduleTask.second->OnFrame(nanoTimestamp);
     }
     isFlushingAnimation_ = false;
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushAnimation();
+    }
 }
 
 void PipelineContext::FlushPostAnimation()
@@ -673,6 +724,10 @@ void PipelineContext::ProcessPostFlush()
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginProcessPostFlush();
+    }
 
     if (postFlushListeners_.empty()) {
         return;
@@ -858,7 +913,11 @@ void PipelineContext::DumpInfo(const std::vector<std::string>& params, std::vect
                 if (!accessibilityManager) {
                     return;
                 }
-                accessibilityManager->DumpTree(0, 0, info);
+                if (params.size() == 1) {
+                    accessibilityManager->DumpTree(0, 0, info);
+                } else {
+                    accessibilityManager->DumpHandleEvent(params);
+                }
             } else {
                 DumpLog::GetInstance().Print("Error: Unsupported dump params!");
             }
@@ -1015,8 +1074,8 @@ void PipelineContext::GetBoundingRectData(int32_t nodeId, Rect& rect)
     }
 }
 
-RefPtr<DialogComponent> PipelineContext::ShowDialog(const DialogProperties& dialogProperties,
-    bool isRightToLeft, const std::string& inspectorTag)
+RefPtr<DialogComponent> PipelineContext::ShowDialog(
+    const DialogProperties& dialogProperties, bool isRightToLeft, const std::string& inspectorTag)
 {
     CHECK_RUN_ON(UI);
     const auto& dialog = DialogBuilder::Build(dialogProperties, AceType::WeakClaim(this));
@@ -1461,12 +1520,12 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         return false;
     }
     if (!isKeyEvent_ && SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-        if (KeyCode::KEYBOARD_UP <= event.code && event.code <= KeyCode::KEYBOARD_RIGHT) {
+        if (KeyCode::KEY_DPAD_UP <= event.code && event.code <= KeyCode::KEY_DPAD_RIGHT) {
             if (event.action == KeyAction::UP) {
                 SetIsKeyEvent(true);
             }
             return true;
-        } else if (event.code == KeyCode::KEYBOARD_ENTER) {
+        } else if (event.code == KeyCode::KEY_ENTER) {
             if (event.action == KeyAction::CLICK) {
                 SetIsKeyEvent(true);
             }
@@ -1482,13 +1541,13 @@ void PipelineContext::SetShortcutKey(const KeyEvent& event)
 {
     if (event.action == KeyAction::DOWN) {
         auto codeValue = static_cast<int32_t>(event.code);
-        if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_LEFT) ||
-            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_RIGHT)) {
+        if (codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_LEFT) ||
+            codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_RIGHT)) {
             MarkIsShiftDown(true);
-        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_LEFT) ||
-            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_RIGHT)) {
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_CTRL_LEFT) ||
+                   codeValue == static_cast<int32_t>(KeyCode::KEY_CTRL_RIGHT)) {
             MarkIsCtrlDown(true);
-        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_A)) {
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_A)) {
             MarkIsKeyboardA(true);
             if (subscribeCtrlA_) {
                 subscribeCtrlA_();
@@ -1496,13 +1555,13 @@ void PipelineContext::SetShortcutKey(const KeyEvent& event)
         }
     } else if (event.action == KeyAction::UP) {
         auto codeValue = static_cast<int32_t>(event.code);
-        if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_LEFT) ||
-            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_SHIFT_RIGHT)) {
+        if (codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_LEFT) ||
+            codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_RIGHT)) {
             MarkIsShiftDown(false);
-        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_LEFT) ||
-            codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_CONTROL_RIGHT)) {
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_CTRL_LEFT) ||
+                   codeValue == static_cast<int32_t>(KeyCode::KEY_CTRL_RIGHT)) {
             MarkIsCtrlDown(false);
-        } else if (codeValue == static_cast<int32_t>(KeyCode::KEYBOARD_A)) {
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_A)) {
             MarkIsKeyboardA(false);
         }
     }
@@ -2724,15 +2783,16 @@ void PipelineContext::SetInitRenderNode(const RefPtr<RenderNode>& initRenderNode
     initRenderNode_ = initRenderNode;
 }
 
-const RefPtr<RenderNode> PipelineContext::GetInitRenderNode() const
+const RefPtr<RenderNode>& PipelineContext::GetInitRenderNode() const
 {
     return initRenderNode_;
 }
 
-void PipelineContext::ProcessDragEventStart(
+void PipelineContext::ProcessDragEvent(
     const RefPtr<RenderNode>& renderNode, const RefPtr<DragEvent>& event, const Point& globalPoint)
 {
-    auto targetRenderBox = AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, globalPoint));
+    auto targetRenderBox =
+        AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, globalPoint - pageOffset_));
     auto initRenderBox = AceType::DynamicCast<RenderBox>(GetInitRenderNode());
     auto extraParams = JsonUtil::Create(true);
     extraParams->Put("customDragInfo", customDragInfo_.c_str());
@@ -2777,7 +2837,8 @@ void PipelineContext::ProcessDragEventStart(
 void PipelineContext::ProcessDragEventEnd(
     const RefPtr<RenderNode>& renderNode, const RefPtr<DragEvent>& event, const Point& globalPoint)
 {
-    auto targetRenderBox = AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, globalPoint));
+    auto targetRenderBox =
+        AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, globalPoint - pageOffset_));
     auto initRenderBox = AceType::DynamicCast<RenderBox>(GetInitRenderNode());
     auto extraParams = JsonUtil::Create(true);
     extraParams->Put("customDragInfo", customDragInfo_.c_str());
@@ -2852,10 +2913,12 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     Point globalPoint(x, y);
 
     if (action == DragEventAction::DRAG_EVENT_START) {
-        ProcessDragEventStart(renderNode, event, globalPoint);
+        pageOffset_ = GetPageRect().GetOffset();
     }
 
-    if (action == DragEventAction::DRAG_EVENT_END) {
+    if (action != DragEventAction::DRAG_EVENT_END) {
+        ProcessDragEvent(renderNode, event, globalPoint);
+    } else {
         ProcessDragEventEnd(renderNode, event, globalPoint);
     }
 }

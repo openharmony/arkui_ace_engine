@@ -22,8 +22,81 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
-const int32_t WEBVIEW_PARAM_NUMS_EXCUTEJS = 2;
-const int32_t WEBVIEW_PARAM_NUMS_LOADURL = 2;
+void ParseWebViewValueToJsValue(
+    std::shared_ptr<WebJSValue> value, std::vector<JSRef<JSVal>>& argv)
+{
+    auto type = value->GetType();
+    switch (type) {
+        case WebJSValue::Type::INTEGER:
+            argv.push_back(JSRef<JSVal>::Make(ToJSValue(value->GetInt())));
+            break;
+        case WebJSValue::Type::DOUBLE: {
+            argv.push_back(JSRef<JSVal>::Make(ToJSValue(value->GetDouble())));
+            break;
+        }
+        case WebJSValue::Type::BOOLEAN:
+            argv.push_back(JSRef<JSVal>::Make(ToJSValue(value->GetBoolean())));
+            break;
+        case WebJSValue::Type::STRING:
+            argv.push_back(JSRef<JSVal>::Make(ToJSValue(value->GetString())));
+            break;
+        case WebJSValue::Type::NONE:
+            break;
+        default:
+            LOGW("WebJavaScriptResultCallBack: jsvalue type[%{public}d] not support!", (int)type);
+            break;
+    }
+}
+
+std::shared_ptr<WebJSValue> ParseValue(
+    const JSRef<JSVal>& resultValue, std::shared_ptr<WebJSValue> webviewValue)
+{
+    webviewValue->error_ = static_cast<int>(WebJavaScriptBridgeError::NO_ERROR);
+    if (resultValue->IsBoolean()) {
+        webviewValue->SetType(WebJSValue::Type::BOOLEAN);
+        webviewValue->SetBoolean(resultValue->ToBoolean());
+    } else if (resultValue->IsNull()) {
+        webviewValue->SetType(WebJSValue::Type::NONE);
+    } else if (resultValue->IsString()) {
+        webviewValue->SetType(WebJSValue::Type::STRING);
+        webviewValue->SetString(resultValue->ToString());
+    } else if (resultValue->IsNumber()) {
+        webviewValue->SetType(WebJSValue::Type::DOUBLE);
+        webviewValue->SetInt(resultValue->ToNumber<double>());
+    } else if (resultValue->IsArray() || resultValue->IsObject() || resultValue->IsUndefined()) {
+        webviewValue->SetType(WebJSValue::Type::NONE);
+        webviewValue->error_ = static_cast<int>(WebJavaScriptBridgeError::OBJECT_IS_GONE);
+    }
+    return webviewValue;
+}
+}
+
+std::shared_ptr<WebJSValue> JSWebController::GetJavaScriptResult(
+    const std::string& objectName,
+    const std::string& objectMethod,
+    const std::vector<std::shared_ptr<WebJSValue>>& args)
+{
+    std::vector<JSRef<JSVal>> argv = {};
+    std::shared_ptr<WebJSValue> jsResult =
+        std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
+    if (objectorMap_.find(objectName) == objectorMap_.end()) {
+        return jsResult;
+    }
+    auto jsObject = objectorMap_[objectName];
+    if (jsObject->IsEmpty()) {
+        return jsResult;
+    }
+    for (std::shared_ptr<WebJSValue> input: args) {
+        ParseWebViewValueToJsValue(input, argv);
+    }
+    JSRef<JSFunc> func = JSRef<JSFunc>::Cast(jsObject->GetProperty(objectMethod.c_str()));
+    if (func->IsEmpty()) {
+        LOGE("%{public}s not found or is not a function!", objectMethod.c_str());
+        jsResult->error_ = static_cast<int>(WebJavaScriptBridgeError::OBJECT_IS_GONE);
+        return jsResult;
+    }
+    JSRef<JSVal> result = argv.empty() ? func->Call(jsObject, 0, {}) : func->Call(jsObject, argv.size(), &argv[0]);
+    return ParseValue(result, jsResult);
 }
 
 void JSWebController::JSBind(BindingTarget globalObj)
@@ -36,6 +109,8 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("getHitTest", &JSWebController::GetHitTestResult);
     JSClass<JSWebController>::CustomMethod("registerJavaScriptProxy", &JSWebController::AddJavascriptInterface);
     JSClass<JSWebController>::CustomMethod("deleteJavaScriptRegister", &JSWebController::RemoveJavascriptInterface);
+    JSClass<JSWebController>::CustomMethod("onInactive", &JSWebController::OnInactive);
+    JSClass<JSWebController>::CustomMethod("onActive", &JSWebController::OnActive);
     JSClass<JSWebController>::CustomMethod("requestFocus", &JSWebController::RequestFocus);
     JSClass<JSWebController>::CustomMethod("loadData", &JSWebController::LoadDataWithBaseUrl);
     JSClass<JSWebController>::CustomMethod("backward", &JSWebController::Backward);
@@ -71,20 +146,27 @@ void JSWebController::Reload() const
 
 void JSWebController::LoadUrl(const JSCallbackInfo& args)
 {
-    std::string url;
-    if (args.Length() < 1 || !ConvertFromJSValue(args[0], url)) {
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        LOGW("invalid url params");
         return;
     }
 
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    std::string url;
+    if (!ConvertFromJSValue(obj->GetProperty("url"), url)) {
+        LOGW("can't find url.");
+        return;
+    }
+
+    JSRef<JSVal> headers = obj->GetProperty("headers");
     std::map<std::string, std::string> httpHeaders;
-    if (args.Length() >= WEBVIEW_PARAM_NUMS_LOADURL && args[1]->IsArray()) {
-        JSRef<JSArray> array = JSRef<JSArray>::Cast(args[1]);
+    if (headers->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(headers);
         for (size_t i = 0; i < array->Length(); i++) {
             JSRef<JSVal> jsValue = array->GetValueAt(i);
             if (!jsValue->IsObject()) {
                 continue;
             }
-
             JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
             std::string key;
             if (!ConvertFromJSValue(obj->GetProperty("key"), key)) {
@@ -100,7 +182,6 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
         }
         LOGD("httpHeaders size:%{public}d", (int)httpHeaders.size());
     }
-
     if (webController_) {
         webController_->LoadUrl(url, httpHeaders);
     }
@@ -108,15 +189,22 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
 
 void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)
 {
-    std::string jscode;
-    if (args.Length() < 1 || !ConvertFromJSValue(args[0], jscode)) {
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        LOGW("invalid excute params");
         return;
     }
 
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    std::string script;
+    if (!ConvertFromJSValue(obj->GetProperty("script"), script)) {
+        LOGW("can't find script.");
+        return;
+    }
+    JSRef<JSVal> tsCallback = obj->GetProperty("callback");
     std::function<void(std::string)> callback = nullptr;
-    if (args.Length() >= WEBVIEW_PARAM_NUMS_EXCUTEJS && args[1]->IsFunction()) {
+    if (tsCallback->IsFunction()) {
         auto jsCallback =
-            AceType::MakeRefPtr<JsWebViewFunction>(JSRef<JSFunc>::Cast(args[1]));
+            AceType::MakeRefPtr<JsWebViewFunction>(JSRef<JSFunc>::Cast(tsCallback));
         callback = [execCtx = args.GetExecutionContext(), func = std::move(jsCallback)](std::string result) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("ExecuteTypeScript CallBack");
@@ -124,9 +212,8 @@ void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)
             func->Execute(result);
         };
     }
-
     if (webController_) {
-        webController_->ExecuteTypeScript(jscode, std::move(callback));
+        webController_->ExecuteTypeScript(script, std::move(callback));
     }
 }
 
@@ -249,6 +336,21 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
         LOGW("JSWebController not ready");
         return;
     }
+    // Init webview callback
+    if (!jsRegisterCallBackInit_) {
+        LOGI("JSWebController set webview javascript CallBack");
+        jsRegisterCallBackInit_ = true;
+        WebController::JavaScriptCallBackImpl callback = [weak = WeakClaim(this)](
+            const std::string& objectName, const std::string& objectMethod,
+            const std::vector<std::shared_ptr<WebJSValue>>& args) {
+            auto jsWebController = weak.Upgrade();
+            if (jsWebController == nullptr) {
+                return std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
+            }
+            return jsWebController->GetJavaScriptResult(objectName, objectMethod, args);
+        };
+        webController_->SetJavaScriptCallBackImpl(std::move(callback));
+    }
 
     // options
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
@@ -256,6 +358,15 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
     std::string objName;
     if (!ConvertFromJSValue(obj->GetProperty("name"), objName)) {
         return;
+    }
+    // options.obj
+    JSRef<JSVal> jsClassObj = obj->GetProperty("obj");
+    if (!jsClassObj->IsObject()) {
+        LOGW("JSWebController param obj is not object");
+        return;
+    }
+    if (objectorMap_.find(objName) == objectorMap_.end()) {
+        objectorMap_[objName] = JSRef<JSObject>::Cast(jsClassObj);
     }
     // options.methodList
     std::vector<std::string> methods;
@@ -275,32 +386,29 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
 void JSWebController::RemoveJavascriptInterface(const JSCallbackInfo& args)
 {
     LOGI("JSWebController remove js interface");
-    if (args.Length() < 1 || !args[0]->IsObject()) {
-        return;
-    }
-
-    // options
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    // options.name
     std::string objName;
-    if (!ConvertFromJSValue(obj->GetProperty("name"), objName)) {
+    if (args.Length() < 1 || !ConvertFromJSValue(args[0], objName)) {
         return;
     }
-    // options.methodList
-    std::vector<std::string> methods;
-    JSRef<JSVal> methodList = obj->GetProperty("methodList");
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(methodList);
-    if (array->IsArray()) {
-        for (size_t i = 0; i < array->Length(); i++) {
-            JSRef<JSVal> method = array->GetValueAt(i);
-            if (method->IsString()) {
-                methods.push_back(method->ToString());
-            }
-        }
+    if (objectorMap_.find(objName) != objectorMap_.end()) {
+        objectorMap_.erase(objName);
     }
-
     if (webController_) {
-        webController_->RemoveJavascriptInterface(objName, methods);
+        webController_->RemoveJavascriptInterface(objName, {});
+    }
+}
+
+void JSWebController::OnInactive(const JSCallbackInfo& args)
+{
+    if (webController_) {
+        webController_->OnInactive();
+    }
+}
+
+void JSWebController::OnActive(const JSCallbackInfo& args)
+{
+    if (webController_) {
+        webController_->OnActive();
     }
 }
 

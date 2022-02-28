@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,9 @@
 #include "frameworks/bridge/common/dom/dom_proxy.h"
 #include "frameworks/bridge/common/dom/dom_qrcode.h"
 #include "frameworks/bridge/common/dom/dom_refresh.h"
+#ifdef WEB_SUPPORTED
+#include "frameworks/bridge/common/dom/dom_rich_text.h"
+#endif
 #include "frameworks/bridge/common/dom/dom_search.h"
 #include "frameworks/bridge/common/dom/dom_slider.h"
 #include "frameworks/bridge/common/dom/dom_span.h"
@@ -103,7 +106,6 @@
 #include "frameworks/bridge/common/dom/dom_video.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #ifdef WEB_SUPPORTED
-#include "frameworks/bridge/common/dom/dom_rich_text.h"
 #include "frameworks/bridge/common/dom/dom_web.h"
 #endif
 #endif
@@ -208,6 +210,9 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
 #endif
         { DOM_NODE_TAG_RECT, &DOMNodeCreator<DOMSvgRect> },
         { DOM_NODE_TAG_REFRESH, &DOMNodeCreator<DOMRefresh> },
+#ifdef WEB_SUPPORTED
+        { DOM_NODE_TAG_RICH_TEXT, &DOMNodeCreator<DOMRichText> },
+#endif
         { DOM_NODE_TAG_SEARCH, &DOMNodeCreator<DOMSearch> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_SELECT, &DOMNodeCreator<DOMSelect> },
@@ -241,7 +246,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_VIDEO, &DOMNodeCreator<DOMVideo> },
 #ifdef WEB_SUPPORTED
-        { DOM_NODE_TAG_RICH_TEXT, &DOMNodeCreator<DOMRichText> },
         { DOM_NODE_TAG_WEB, &DOMNodeCreator<DOMWeb> },
 #endif
 #endif

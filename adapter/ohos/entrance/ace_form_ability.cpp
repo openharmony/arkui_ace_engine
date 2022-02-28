@@ -26,6 +26,9 @@
 #include "core/common/backend.h"
 
 namespace OHOS::Ace {
+namespace {
+const int INSTANCE_NUM_MAX = 1000;
+} // namespace
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
@@ -53,11 +56,17 @@ private:
     FormPlatformFinish onFinish_;
 };
 
-int64_t AceFormAbility::instanceId_ = 0;
+int32_t AceFormAbility::instanceId_ = 300000;
 const std::string AceFormAbility::START_PARAMS_KEY = "__startParams";
 const std::string AceFormAbility::URI = "url";
 
 REGISTER_AA(AceFormAbility)
+
+AceFormAbility::AceFormAbility()
+{
+    abilityId_ = instanceId_;
+    instanceId_ += INSTANCE_NUM_MAX;
+}
 
 OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::Want& want)
 {
@@ -68,12 +77,13 @@ OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::W
     if (want.HasParameter(URI)) {
         parsedUrl = want.GetStringParam(URI);
     } else {
-        parsedUrl = "app.js";
+        parsedUrl = "form.js";
     }
 
-    std::string wantIdStr = want.GetStringParam(AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY);
-    int32_t wantId = atoi(wantIdStr.c_str());
-    LOGI("AceFormAbility:: wantId = %{public}s, %{public}d", wantIdStr.c_str(), wantId);
+    std::string formIdStr = want.GetStringParam(AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY);
+    LOGI("AceFormAbility::formId = %{public}s.", formIdStr.c_str());
+    int64_t formId = atoll(formIdStr.c_str());
+    formMap_.emplace(formId, abilityId_++);
 
     // get asset
     auto packagePathStr = GetBundleCodePath();
@@ -85,7 +95,7 @@ OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::W
     // init form ability
     BackendType backendType = BackendType::FORM;
     bool isArkApp = GetIsArkFromConfig(packagePathStr);
-    Platform::PaContainer::CreateContainer(wantId, backendType, isArkApp, this,
+    Platform::PaContainer::CreateContainer(formMap_.at(formId), backendType, isArkApp, this,
         std::make_unique<FormPlatformEventCallback>([this]() { TerminateAbility(); }));
 
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
@@ -93,18 +103,34 @@ OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::W
         LOGI("AceFormAbility::OnCreate assetBasePathStr: %{public}s, parsedUrl: %{public}s",
             info->srcPath.c_str(), parsedUrl.c_str());
         auto assetBasePathStr = { "assets/js/" + info->srcPath + "/" };
-        Platform::PaContainer::AddAssetPath(wantId, packagePathStr, assetBasePathStr);
+        Platform::PaContainer::AddAssetPath(formMap_.at(formId), packagePathStr, assetBasePathStr);
     } else {
         LOGI("AceFormAbility::OnCreate parsedUrl: %{public}s", parsedUrl.c_str());
         auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
-        Platform::PaContainer::AddAssetPath(wantId, packagePathStr, assetBasePathStr);
+        Platform::PaContainer::AddAssetPath(formMap_.at(formId), packagePathStr, assetBasePathStr);
+    }
+    std::shared_ptr<ApplicationInfo> appInfo = GetApplicationInfo();
+    if (appInfo) {
+        std::string nativeLibraryPath = appInfo->nativeLibraryPath;
+        if (!nativeLibraryPath.empty()) {
+            if (nativeLibraryPath.back() == '/') {
+                nativeLibraryPath.pop_back();
+            }
+            std::string libPath = GetBundleCodePath();
+            if (libPath.back() == '/') {
+                libPath += nativeLibraryPath;
+            } else {
+                libPath += "/" + nativeLibraryPath;
+            }
+            LOGI("napi lib path = %{private}s", libPath.c_str());
+            Platform::PaContainer::AddLibPath(abilityId_, libPath);
+        }
     }
 
     // run form ability
-    Platform::PaContainer::RunPa(wantId, parsedUrl, want);
-
+    Platform::PaContainer::RunPa(formMap_.at(formId), parsedUrl, want);
     OHOS::AppExecFwk::FormProviderInfo formProviderInfo;
-    formProviderInfo.SetFormData(Platform::PaContainer::GetFormData(wantId));
+    formProviderInfo.SetFormData(Platform::PaContainer::GetFormData(formMap_.at(formId)));
     std::string formData = formProviderInfo.GetFormData().GetDataString();
     LOGI("AceFormAbility::OnCreate return ok, formData: %{public}s", formData.c_str());
     return formProviderInfo;
@@ -112,46 +138,41 @@ OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::W
 
 void AceFormAbility::OnDelete(const int64_t formId)
 {
-    Platform::PaContainer::OnDelete(formId);
+    Platform::PaContainer::OnDelete(formMap_.at(formId), formId);
 }
 
 void AceFormAbility::OnTriggerEvent(const int64_t formId, const std::string& message)
 {
-    Platform::PaContainer::OnTriggerEvent(formId, message);
+    Platform::PaContainer::OnTriggerEvent(formMap_.at(formId), formId, message);
 }
 
 void AceFormAbility::OnUpdate(const int64_t formId)
 {
-    Platform::PaContainer::OnUpdate(formId);
+    Platform::PaContainer::OnUpdate(formMap_.at(formId), formId);
 }
 
 void AceFormAbility::OnCastTemptoNormal(const int64_t formId)
 {
-    Platform::PaContainer::OnCastTemptoNormal(formId);
+    Platform::PaContainer::OnCastTemptoNormal(formMap_.at(formId), formId);
 }
 
 void AceFormAbility::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap)
 {
-    Platform::PaContainer::OnVisibilityChanged(formEventsMap);
-}
-
-void AceFormAbility::OnAcquireState(const OHOS::AAFwk::Want& want)
-{
-    Platform::PaContainer::OnAcquireState(want);
+    for (const auto& form : formMap_) {
+        Platform::PaContainer::OnVisibilityChanged(form.second, formEventsMap);
+    }
 }
 
 void AceFormAbility::OnStart(const OHOS::AAFwk::Want& want)
 {
     LOGI("AceFormAbility::OnStart start");
     Ability::OnStart(want);
-    return;
 }
 
 void AceFormAbility::OnStop()
 {
     LOGI("AceFormAbility::OnStop start ");
     Ability::OnStop();
-    return;
 }
 
 sptr<IRemoteObject> AceFormAbility::OnConnect(const Want& want)
@@ -165,7 +186,6 @@ void AceFormAbility::OnDisconnect(const Want& want)
 {
     LOGI("AceFormAbility::OnDisconnect start");
     Ability::OnDisconnect(want);
-    return;
 }
 
 } // namespace OHOS::Ace

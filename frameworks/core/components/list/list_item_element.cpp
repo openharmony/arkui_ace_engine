@@ -123,7 +123,7 @@ bool ListItemElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
     if (keyEvent.code == KeyCode::TV_CONTROL_UP || keyEvent.code == KeyCode::TV_CONTROL_DOWN ||
         keyEvent.code == KeyCode::TV_CONTROL_LEFT || keyEvent.code == KeyCode::TV_CONTROL_RIGHT ||
-        keyEvent.code == KeyCode::KEYBOARD_TAB) {
+        keyEvent.code == KeyCode::KEY_TAB) {
         RefPtr<FocusGroup> parentElement = FocusGroup::GetParent().Upgrade();
         RefPtr<ListElement> listElement = AceType::DynamicCast<ListElement>(parentElement);
         if (listElement) {
@@ -132,8 +132,8 @@ bool ListItemElement::OnKeyEvent(const KeyEvent& keyEvent)
     }
 
     if (keyEvent.action == KeyAction::CLICK) {
-        if (keyEvent.code == KeyCode::KEYBOARD_ENTER || keyEvent.code == KeyCode::KEYBOARD_NUMBER_ENTER ||
-            keyEvent.code == KeyCode::KEYBOARD_CENTER) {
+        if (keyEvent.code == KeyCode::KEY_ENTER || keyEvent.code == KeyCode::KEY_NUMPAD_ENTER ||
+            keyEvent.code == KeyCode::KEY_DPAD_CENTER) {
             HandleOnClick();
         }
     }

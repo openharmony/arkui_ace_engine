@@ -27,12 +27,38 @@
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
 #include "core/components/web/web_component.h"
+#include "core/components/web/web_event.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "webview_helper.h"
 #include "window.h"
 #endif
 
 namespace OHOS::Ace {
+
+class ResultOhos : public Result {
+    DECLARE_ACE_TYPE(ResultOhos, Result)
+
+public:
+    ResultOhos(std::shared_ptr<OHOS::WebView::JSDialogResult> result) : result_(result) {}
+
+    void Confirm() override;
+    void Confirm(const std::string &message) override;
+    void Cancel() override;
+
+private:
+    std::shared_ptr<OHOS::WebView::JSDialogResult> result_;
+};
+
+class WebGeolocationOhos : public WebGeolocation {
+    DECLARE_ACE_TYPE(WebGeolocationOhos, WebGeolocation)
+
+public:
+    WebGeolocationOhos(OHOS::WebView::GeolocationCallback* callback) : geolocationCallback_(callback) {}
+    
+    void Invoke(const std::string& origin, const bool& allow, const bool& retain) override;
+private:
+    OHOS::WebView::GeolocationCallback* geolocationCallback_;
+};
 
 class WebDelegate : public WebResource {
     DECLARE_ACE_TYPE(WebDelegate, WebResource);
@@ -86,15 +112,30 @@ public:
         }
     }
     void Resize(const double& width, const double& height);
+    void UpdateJavaScriptEnabled(const bool& isJsEnabled);
+    void UpdateAllowFileAccess(const bool& isFileAccessEnabled);
+    void UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled);
+    void UpdateLoadsImagesAutomatically(const bool& isImageAccessEnabled);
+    void UpdateMixedContentMode(const MixedModeContent& mixedMode);
+    void UpdateSupportZoom(const bool& isZoomAccessEnabled);
+    void UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled);
+    void UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled);
     void LoadUrl();
     void HandleTouchDown(const int32_t& id, const double& x, const double& y);
     void HandleTouchUp(const int32_t& id, const double& x, const double& y);
     void HandleTouchMove(const int32_t& id, const double& x, const double& y);
     void HandleTouchCancel();
+    void OnPageErrorOHOS(const int& errorCode, const std::string& description, const std::string& url);
 #endif
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
+    void OnProgressChanged(int param);
+    void OnReceivedTitle(const std::string& param);
+    void OnGeolocationPermissionsHidePrompt();
+    void OnGeolocationPermissionsShowPrompt(const std::string& origin, OHOS::WebView::GeolocationCallback* callback);
     void OnRequestFocus();
+    void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
+        const std::string& mimetype, long contentLength);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
     void OnRouterPush(const std::string& param);
@@ -123,8 +164,13 @@ private:
     void StopLoading();
     void AddJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
     void RemoveJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
+    void SetWebViewJavaScriptResultCallBack(const WebController::JavaScriptCallBackImpl&& javaScriptCallBackImpl);
     void RequestFocus();
+    void OnFocus();
+    void OnInactive();
+    void OnActive();
     int GetHitTestResult();
+    void RegisterOHOSWebEventAndMethord();
     void SetWebCallBack();
 
     // Backward and forward
@@ -157,7 +203,14 @@ private:
     bool isCreateWebView_ = false;
 
     EventCallbackV2 onPageFinishedV2_;
+    EventCallbackV2 onPageStartedV2_;
+    EventCallbackV2 onProgressChangeV2_;
+    EventCallbackV2 onTitleReceiveV2_;
+    EventCallbackV2 onGeolocationHideV2_;
+    EventCallbackV2 onGeolocationShowV2_;
     EventCallbackV2 onRequestFocusV2_;
+    EventCallbackV2 onDownloadStartV2_;
+    EventCallbackV2 onFocusV2_;
 
 #endif
 };

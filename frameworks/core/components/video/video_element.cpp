@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
@@ -69,6 +71,7 @@ const char* SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 constexpr int32_t WINDOW_HEIGHT_DEFAULT = 1;
 constexpr int32_t WINDOW_WIDTH_DEFAULT = 1;
+constexpr int32_t FILE_PREFIX_LENGTH = 7;
 #endif
 constexpr float ILLEGAL_SPEED = 0.0f;
 constexpr int32_t COMPATIBLE_VERSION = 5;
@@ -209,7 +212,7 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
 #ifdef OHOS_STANDARD_SYSTEM
 ::OHOS::sptr<::OHOS::Subwindow> VideoElement::CreateSubwindow()
 {
-    const auto &wmi = ::OHOS::WindowManager::GetInstance();
+    const auto& wmi = ::OHOS::WindowManager::GetInstance();
     if (wmi == nullptr) {
         LOGE("Window manager get instance failed");
         return nullptr;
@@ -326,14 +329,58 @@ void VideoElement::PreparePlayer()
         return;
     }
     std::string filePath = src_;
-    if (!StringUtils::StartWith(filePath, "file://") && !StringUtils::StartWith(filePath, "http")) {
-        filePath = GetAssetAbsolutePath(src_);
-    }
     LOGI("filePath : %{private}s", filePath.c_str());
-    if (mediaPlayer_->SetSource(filePath) != 0) {
-        LOGE("Player SetSource failed");
-        return;
+
+    // Remove file:// prefix for get fd.
+    if (StringUtils::StartWith(filePath, "file://")) {
+        filePath = filePath.substr(FILE_PREFIX_LENGTH);
     }
+
+    int32_t fd = -1;
+    // SetSource by fd.
+    if (StringUtils::StartWith(filePath, "dataability://")) {
+        auto context = context_.Upgrade();
+        if (!context) {
+            LOGE("get context fail");
+            return;
+        }
+        auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(context->GetDataProviderManager());
+        if (!dataProvider) {
+            LOGE("get data provider fail");
+            return;
+        }
+        auto dataAilityHelper = dataProvider->GetDataAbilityHelper();
+        if (dataAilityHelper) {
+            fd = dataAilityHelper->OpenFile(filePath, "r");
+        }
+    } else if (!StringUtils::StartWith(filePath, "http")) {
+        filePath = GetAssetAbsolutePath(filePath);
+        fd = open(filePath.c_str(), O_RDONLY);
+    }
+
+    if (fd >= 0) {
+        // get size of file.
+        struct stat statBuf;
+        auto statRes = fstat(fd, &statBuf);
+        if (statRes != 0) {
+            LOGE("get stat fail");
+            close(fd);
+            return;
+        }
+        auto size = statBuf.st_size;
+        if (mediaPlayer_->SetSource(fd, 0, size) != 0) {
+            LOGE("Player SetSource failed");
+            close(fd);
+            return;
+        }
+        close(fd);
+    } else {
+        if (mediaPlayer_->SetSource(filePath) != 0) {
+            LOGE("Player SetSource failed");
+            return;
+        }
+    }
+    
     RegistMediaPlayerEvent();
 
     sptr<Surface> producerSurface;
@@ -379,7 +426,7 @@ std::string VideoElement::GetAssetAbsolutePath(const std::string& fileName)
         return fileName;
     }
     std::string filePath = assetManager->GetAssetPath(fileName);
-    std::string absolutePath = "file://" + filePath + fileName;
+    std::string absolutePath = filePath + fileName;
     return absolutePath;
 }
 #endif
@@ -1054,8 +1101,7 @@ void VideoElement::OnPrepared(
             json->Put("duration", static_cast<double>(duration_));
             param = json->ToString();
         } else {
-            param = std::string("\"prepared\",{\"duration\":")
-                                    .append(std::to_string(duration_)).append("}");
+            param = std::string("\"prepared\",{\"duration\":").append(std::to_string(duration_)).append("}");
         }
         LOGE("video onPrepared event: %s ", param.c_str());
         onPrepared_(param);
@@ -1174,8 +1220,7 @@ void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
             json->Put("time", static_cast<double>(currentPos));
             param = json->ToString();
         } else {
-            param = std::string("\"timeupdate\",{\"currenttime\":")
-                        .append(std::to_string(currentPos)).append("}");
+            param = std::string("\"timeupdate\",{\"currenttime\":").append(std::to_string(currentPos)).append("}");
         }
         LOGE("video onTimeUpdate event: %s ", param.c_str());
         onTimeUpdate_(param);
@@ -1480,8 +1525,7 @@ void VideoElement::OnSliderChange(const std::string& param)
                 json->Put("time", static_cast<double>(value));
                 param = json->ToString();
             } else {
-                param = std::string("\"seeked\",{\"currenttime\":")
-                                        .append(std::to_string(value)).append("}");
+                param = std::string("\"seeked\",{\"currenttime\":").append(std::to_string(value)).append("}");
             }
             onSeeked_(param);
         }
@@ -1513,8 +1557,7 @@ void VideoElement::OnSliderMoving(const std::string& param)
                 json->Put("time", static_cast<double>(value));
                 param = json->ToString();
             } else {
-                param = std::string("\"seeking\",{\"currenttime\":")
-                                        .append(std::to_string(value)).append("}");
+                param = std::string("\"seeking\",{\"currenttime\":").append(std::to_string(value)).append("}");
             }
             onSeeking_(param);
         }
@@ -1549,9 +1592,7 @@ void VideoElement::Start()
             return;
         }
         auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        platformTask.PostTask([mediaPlayer = mediaPlayer_] {
-            mediaPlayer->Play();
-        });
+        platformTask.PostTask([mediaPlayer = mediaPlayer_] { mediaPlayer->Play(); });
     }
 #else
     if (isStop_) {
@@ -1624,8 +1665,7 @@ void VideoElement::FullScreen()
 
                 // add fullscreen component cover componen
                 if (IsDeclarativePara()) {
-                    stackElement->PushComponent(
-                        AceType::MakeRefPtr<ComposedComponent>("0", "fullscreen", component));
+                    stackElement->PushComponent(AceType::MakeRefPtr<ComposedComponent>("0", "fullscreen", component));
                 } else {
                     auto composedComponent = AceType::DynamicCast<ComposedComponent>(component);
                     if (!composedComponent) {
@@ -1636,8 +1676,7 @@ void VideoElement::FullScreen()
                         LOGE("VideoElement::FullScreen: is InspectorComposedComponent");
                         return;
                     }
-                    stackElement->PushComponent(
-                        AceType::MakeRefPtr<ComposedComponent>(composedComponent->GetId(),
+                    stackElement->PushComponent(AceType::MakeRefPtr<ComposedComponent>(composedComponent->GetId(),
                         composedComponent->GetName() + "fullscreen", composedComponent->GetChild()));
                 }
                 isFullScreen_ = true;
@@ -1655,8 +1694,8 @@ void VideoElement::FullScreen()
                         param = json->ToString();
                     } else {
                         param = std::string("\"fullscreenchange\",{\"fullscreen\":")
-                                            .append(std::to_string(isFullScreen_))
-                                            .append("}");
+                                    .append(std::to_string(isFullScreen_))
+                                    .append("}");
                     }
                     onFullScreenChange_(param);
                 }
@@ -1697,8 +1736,8 @@ void VideoElement::ExitFullScreen()
                 param = json->ToString();
             } else {
                 param = std::string("\"fullscreenchange\",{\"fullscreen\":")
-                                        .append(std::to_string(isFullScreen_))
-                                        .append("}");
+                            .append(std::to_string(isFullScreen_))
+                            .append("}");
             }
             onFullScreenChange_(param);
         }
@@ -1773,15 +1812,15 @@ bool VideoElement::OnKeyEvent(const KeyEvent& keyEvent)
         return false;
     }
     switch (keyEvent.code) {
-        case KeyCode::KEYBOARD_BACK:
-        case KeyCode::KEYBOARD_ESCAPE: {
+        case KeyCode::KEY_BACK:
+        case KeyCode::KEY_ESCAPE: {
             if (isFullScreen_) {
                 ExitFullScreen();
                 return true;
             }
             break;
         }
-        case KeyCode::KEYBOARD_ENTER: {
+        case KeyCode::KEY_ENTER: {
             if (!isFullScreen_) {
                 FullScreen();
             } else {

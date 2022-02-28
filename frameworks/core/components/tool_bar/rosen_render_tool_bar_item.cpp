@@ -14,10 +14,12 @@
  */
 
 #include "core/components/tool_bar/rosen_render_tool_bar_item.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "frameworks/core/components/transform/rosen_render_transform.h"
-#include "core/pipeline/base/rosen_render_context.h"
+
 #include "render_service_client/core/ui/rs_node.h"
+#include "third_party/skia/include/core/SkMaskFilter.h"
+
+#include "core/pipeline/base/rosen_render_context.h"
+#include "frameworks/core/components/transform/rosen_render_transform.h"
 
 namespace OHOS::Ace {
 // for focus

@@ -25,20 +25,82 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
 
 namespace OHOS::Ace::Framework {
+
+class JSWebGeolocation : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebGeolocation>::Declare("WebGeolocation");
+        JSClass<JSWebGeolocation>::CustomMethod("invoke", &JSWebGeolocation::Invoke);
+        JSClass<JSWebGeolocation>::Bind(globalObj, &JSWebGeolocation::Constructor, &JSWebGeolocation::Destructor);
+    }
+
+    void SetEvent(const LoadWebGeolocationShowEvent& eventInfo)
+    {
+        webGeolocation_ = eventInfo.GetWebGeolocation();
+    }
+
+    void Invoke(const JSCallbackInfo& args)
+    {
+        std::string origin;
+        bool allow = false;
+        bool retain = false;
+        if (args[0]->IsString()) {
+            origin = args[0]->ToString();
+        }
+        if (args[1]->IsBoolean()) {
+            allow = args[1]->ToBoolean();
+        }
+        if (args[2]->IsBoolean()) {
+            retain = args[2]->ToBoolean();
+        }
+        webGeolocation_->Invoke(origin, allow, retain);
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebGeolocation = Referenced::MakeRefPtr<JSWebGeolocation>();
+        jsWebGeolocation->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebGeolocation));
+    }
+
+    static void Destructor(JSWebGeolocation* jsWebGeolocation)
+    {
+        if (jsWebGeolocation != nullptr) {
+            jsWebGeolocation->DecRefCount();
+        }
+    }
+
+    RefPtr<WebGeolocation> webGeolocation_;
+};
+    
 void JSWeb::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWeb>::Declare("Web");
     JSClass<JSWeb>::StaticMethod("create", &JSWeb::Create);
     JSClass<JSWeb>::StaticMethod("onPageBegin", &JSWeb::OnPageStart);
     JSClass<JSWeb>::StaticMethod("onPageEnd", &JSWeb::OnPageFinish);
+    JSClass<JSWeb>::StaticMethod("onProgressChange", &JSWeb::OnProgressChange);
+    JSClass<JSWeb>::StaticMethod("onTitleReceive", &JSWeb::OnTitleReceive);
+    JSClass<JSWeb>::StaticMethod("onGeolocationHide", &JSWeb::OnGeolocationHide);
+    JSClass<JSWeb>::StaticMethod("onGeolocationShow", &JSWeb::OnGeolocationShow);
     JSClass<JSWeb>::StaticMethod("onRequestSelected", &JSWeb::OnRequestFocus);
-    JSClass<JSWeb>::StaticMethod("onErrorReceive", &JSWeb::OnError);
-    JSClass<JSWeb>::StaticMethod("onMessage", &JSWeb::OnMessage);
     JSClass<JSWeb>::StaticMethod("javaScriptAccess", &JSWeb::JsEnabled);
     JSClass<JSWeb>::StaticMethod("fileExtendAccess", &JSWeb::ContentAccessEnabled);
     JSClass<JSWeb>::StaticMethod("fileAccess", &JSWeb::FileAccessEnabled);
+
+    JSClass<JSWeb>::StaticMethod("onFocus", &JSWeb::OnFocus);
+    JSClass<JSWeb>::StaticMethod("onDownloadStart", &JSWeb::OnDownloadStart);
+    JSClass<JSWeb>::StaticMethod("onlineImageAccess", &JSWeb::OnLineImageAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("domStorageAccess", &JSWeb::DomStorageAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("imageAccess", &JSWeb::ImageAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("mixedMode", &JSWeb::MixedMode);
+    JSClass<JSWeb>::StaticMethod("zoomAccess", &JSWeb::ZoomAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
+    JSWebGeolocation::JSBind(globalObj);
 }
 
 JSRef<JSVal> LoadWebPageFinishEventToJSValue(const LoadWebPageFinishEvent& eventInfo)
@@ -48,9 +110,62 @@ JSRef<JSVal> LoadWebPageFinishEventToJSValue(const LoadWebPageFinishEvent& event
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> LoadWebPageStartEventToJSValue(const LoadWebPageStartEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("url", eventInfo.GetLoadedUrl());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> LoadWebProgressChangeEventToJSValue(const LoadWebProgressChangeEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("newProgress", eventInfo.GetNewProgress());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> LoadWebTitleReceiveEventToJSValue(const LoadWebTitleReceiveEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("title", eventInfo.GetTitle());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> LoadWebGeolocationHideEventToJSValue(const LoadWebGeolocationHideEvent& eventInfo)
+{
+    return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetOrigin()));
+}
+
+JSRef<JSVal> LoadWebGeolocationShowEventToJSValue(const LoadWebGeolocationShowEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("origin", eventInfo.GetOrigin());
+    JSRef<JSObject> geolocationObj = JSClass<JSWebGeolocation>::NewInstance();
+    auto geolocationEvent = Referenced::Claim(geolocationObj->Unwrap<JSWebGeolocation>());
+    geolocationEvent->SetEvent(eventInfo);
+    obj->SetPropertyObject("geolocation", geolocationObj);
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> DownloadStartEventToJSValue(const DownloadStartEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("url", eventInfo.GetUrl());
+    obj->SetProperty("userAgent", eventInfo.GetUserAgent());
+    obj->SetProperty("contentDisposition", eventInfo.GetContentDisposition());
+    obj->SetProperty("mimetype", eventInfo.GetMimetype());
+    obj->SetProperty("contentLength", eventInfo.GetContentLength());
+    return JSRef<JSVal>::Cast(obj);
+}
+
 JSRef<JSVal> LoadWebRequestFocusEventToJSValue(const LoadWebRequestFocusEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetRequestFocus()));
+}
+
+JSRef<JSVal> LoadWebOnFocusEventToJSValue(const LoadWebOnFocusEvent& eventInfo)
+{
+    return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetOnFocus()));
 }
 
 void JSWeb::Create(const JSCallbackInfo& info)
@@ -90,15 +205,24 @@ void JSWeb::Create(const JSCallbackInfo& info)
         webComponent->SetWebController(controller->GetController());
     }
     ViewStackProcessor::GetInstance()->Push(webComponent);
+    JSInteractableView::SetFocusNode(true);
 }
 
 void JSWeb::OnPageStart(const JSCallbackInfo& args)
 {
-    if (!JSViewBindEvent(&WebComponent::SetOnPageStart, args)) {
-        LOGW("Failed to bind start event");
+    if (!args[0]->IsFunction()) {
+        return;
     }
-
-    args.ReturnSelf();
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebPageStartEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadWebPageStartEventToJSValue);
+    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebPageStartEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetPageStartedEventId(eventMarker);
 }
 
 void JSWeb::OnPageFinish(const JSCallbackInfo& args)
@@ -118,6 +242,74 @@ void JSWeb::OnPageFinish(const JSCallbackInfo& args)
     webComponent->SetPageFinishedEventId(eventMarker);
 }
 
+void JSWeb::OnProgressChange(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebProgressChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadWebProgressChangeEventToJSValue);
+    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebProgressChangeEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetProgressChangeEventId(eventMarker);
+}
+
+void JSWeb::OnTitleReceive(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebTitleReceiveEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadWebTitleReceiveEventToJSValue);
+    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebTitleReceiveEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetTitleReceiveEventId(eventMarker);
+}
+
+void JSWeb::OnGeolocationHide(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebGeolocationHideEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadWebGeolocationHideEventToJSValue);
+    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebGeolocationHideEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetGeolocationHideEventId(eventMarker);
+}
+
+void JSWeb::OnGeolocationShow(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebGeolocationShowEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadWebGeolocationShowEventToJSValue);
+    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebGeolocationShowEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetGeolocationShowEventId(eventMarker);
+}
+
 void JSWeb::OnRequestFocus(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
@@ -135,22 +327,39 @@ void JSWeb::OnRequestFocus(const JSCallbackInfo& args)
     webComponent->SetRequestFocusEventId(eventMarker);
 }
 
-void JSWeb::OnError(const JSCallbackInfo& args)
+void JSWeb::OnDownloadStart(const JSCallbackInfo& args)
 {
-    if (!JSViewBindEvent(&WebComponent::SetOnError, args)) {
-        LOGW("Failed to bind error event");
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is invalid");
+        return;
     }
-
-    args.ReturnSelf();
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DownloadStartEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), DownloadStartEventToJSValue);
+    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<DownloadStartEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetDownloadStartEventId(eventMarker);
 }
 
-void JSWeb::OnMessage(const JSCallbackInfo& args)
+void JSWeb::OnFocus(const JSCallbackInfo& args)
 {
-    if (!JSViewBindEvent(&WebComponent::SetOnMessage, args)) {
-        LOGW("Failed to bind message event");
+    if (!args[0]->IsFunction()) {
+        return;
     }
-
-    args.ReturnSelf();
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebOnFocusEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadWebOnFocusEventToJSValue);
+    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebOnFocusEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnFocusEventId(eventMarker);
 }
 
 void JSWeb::JsEnabled(bool isJsEnabled)
@@ -185,4 +394,83 @@ void JSWeb::FileAccessEnabled(bool isFileAccessEnabled)
     }
     webComponent->SetFileAccessEnabled(isFileAccessEnabled);
 }
+
+void JSWeb::OnLineImageAccessEnabled(bool isOnLineImageAccessEnabled)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetOnLineImageAccessEnabled(!isOnLineImageAccessEnabled);
+}
+
+void JSWeb::DomStorageAccessEnabled(bool isDomStorageAccessEnabled)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetDomStorageAccessEnabled(isDomStorageAccessEnabled);
+}
+
+void JSWeb::ImageAccessEnabled(bool isImageAccessEnabled)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetImageAccessEnabled(isImageAccessEnabled);
+}
+
+void JSWeb::MixedMode(int32_t mixedMode)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    auto mixedContentMode = MixedModeContent::MIXED_CONTENT_NEVER_ALLOW;
+    switch (mixedMode) {
+        case 0:
+            mixedContentMode = MixedModeContent::MIXED_CONTENT_ALWAYS_ALLOW;
+            break;
+        case 1:
+            mixedContentMode = MixedModeContent::MIXED_CONTENT_COMPATIBILITY_MODE;
+            break;
+        default:
+            mixedContentMode = MixedModeContent::MIXED_CONTENT_NEVER_ALLOW;
+            break;
+    }
+    webComponent->SetMixedMode(mixedContentMode);
+}
+
+void JSWeb::ZoomAccessEnabled(bool isZoomAccessEnabled)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetZoomAccessEnabled(isZoomAccessEnabled);
+}
+
+void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetGeolocationAccessEnabled(isGeolocationAccessEnabled);
+}
+
 } // namespace OHOS::Ace::Framework

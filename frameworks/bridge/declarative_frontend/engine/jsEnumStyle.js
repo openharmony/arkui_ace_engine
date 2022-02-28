@@ -728,3 +728,10 @@ var PlaybackSpeed;
   PlaybackSpeed["Speed_Forward_1_75_X"] = "1.75";
   PlaybackSpeed["Speed_Forward_2_00_X"] = "2.00";
 })(PlaybackSpeed || (PlaybackSpeed = {}));
+
+var MixedMode;
+(function (MixedMode) {
+  MixedMode[MixedMode["ALL"] = 0] = "ALL";
+  MixedMode[MixedMode["Compatible"] = 1] = "Compatible";
+  MixedMode[MixedMode["None"] = 2] = "None";
+})(MixedMode || (MixedMode = {}));

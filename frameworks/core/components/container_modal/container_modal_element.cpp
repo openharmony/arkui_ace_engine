@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "core/components/container_modal/container_modal_element.h"
 
 #include "core/components/box/box_element.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/container_modal/render_container_modal.h"
 #include "core/components/flex/flex_element.h"
 #include "core/components/flex/flex_item_element.h"
@@ -108,6 +109,24 @@ void ContainerModalElement::ShowTitle(bool isShow)
         return;
     }
 
+    // full screen need to hide border and padding.
+    auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
+    if (containerRenderBox) {
+        auto containerDecoration = AceType::MakeRefPtr<Decoration>();
+        Edge padding = Edge();
+        if (isShow) {
+            Border outerBorder;
+            outerBorder.SetBorderRadius(Radius(CONTAINER_OUTER_RADIUS));
+            outerBorder.SetColor(CONTAINER_BORDER_COLOR);
+            outerBorder.SetWidth(CONTAINER_BORDER_WIDTH);
+            containerDecoration->SetBackgroundColor(CONTAINER_BACKGROUND_COLOR);
+            containerDecoration->SetBorder(outerBorder);
+            padding = Edge(CONTENT_PADDING, Dimension(0.0), CONTENT_PADDING, CONTENT_PADDING);
+        }
+        containerRenderBox->SetBackDecoration(containerDecoration);
+        containerRenderBox->SetPadding(padding);
+    }
+
     auto stackElement = AceType::DynamicCast<StackElement>(containerBox->GetFirstChild());
     if (!stackElement) {
         LOGE("ContainerModalElement showTitle failed, stack element is null!");
@@ -121,6 +140,19 @@ void ContainerModalElement::ShowTitle(bool isShow)
         return;
     }
 
+    // full screen need to hide border.
+    auto contentRenderBox = AceType::DynamicCast<RenderBox>(column->GetLastChild()->GetRenderNode());
+    if (contentRenderBox) {
+        auto contentDecoration = AceType::MakeRefPtr<Decoration>();
+        contentDecoration->SetBackgroundColor(CONTENT_BACKGROUND_COLOR);
+        if (isShow) {
+            Border contentBorder;
+            contentBorder.SetBorderRadius(Radius(CONTAINER_INNER_RADIUS));
+            contentDecoration->SetBorder(contentBorder);
+        }
+        contentRenderBox->SetBackDecoration(contentDecoration);
+    }
+
     // Get first child : title
     auto display = AceType::DynamicCast<DisplayElement>(column->GetFirstChild());
     if (!display) {
@@ -131,10 +163,11 @@ void ContainerModalElement::ShowTitle(bool isShow)
     if (renderDisplay) {
         renderDisplay->UpdateVisibleType(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
     }
+    ChangeFloatingTitleIcon();
 
     // hide floating title anyway.
-    if (renderDisplay_) {
-        renderDisplay_->UpdateVisibleType(VisibleType::GONE);
+    if (floatingTitleDisplay_) {
+        floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
     }
 }
 
@@ -167,16 +200,24 @@ void ContainerModalElement::PerformBuild()
             LOGE("ContainerModalElement PerformBuild failed, tween element is null.");
             return;
         }
+        floatingTitleBox_ = AceType::DynamicCast<BoxElement>(tween->GetContentElement());
         auto display = AceType::DynamicCast<DisplayElement>(tween->GetFirstChild());
-        if (display && !renderDisplay_) {
-            renderDisplay_ = AceType::DynamicCast<RenderDisplay>(display->GetRenderNode());
-            if (renderDisplay_) {
-                renderDisplay_->UpdateVisibleType(VisibleType::GONE);
+        if (display && !floatingTitleDisplay_) {
+            floatingTitleDisplay_ = AceType::DynamicCast<RenderDisplay>(display->GetRenderNode());
+            if (floatingTitleDisplay_) {
+                floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
             }
         }
         tween->SetController(controller_);
         tween->SetOption(option);
         tween->ApplyKeyframes();
+    }
+
+    // The first time it starts up, it needs to hide title if mode as follows.
+    auto mode = context_.Upgrade()->FireWindowGetModeCallBack();
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        ShowTitle(false);
     }
 }
 
@@ -189,6 +230,8 @@ void ContainerModalElement::Update()
         LOGE("ContainerModalElement update failed, container modal component is null.");
         return;
     }
+    titleChildrenRow_ = container->GetTitleChildrenRow();
+    floatingTitleChildrenRow_ = container->GetFloatingTitleChildrenRow();
     auto containerBox = AceType::DynamicCast<BoxComponent>(container->GetChild());
     if (!containerBox) {
         LOGE("ContainerModalElement update failed, container box component is null.");
@@ -202,7 +245,7 @@ void ContainerModalElement::Update()
             return;
         }
         if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <= TITLE_POPUP_DISTANCE) {
-            containerElement->renderDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
+            containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
             containerElement->controller_->Forward();
         }
     });
@@ -214,7 +257,7 @@ void ContainerModalElement::Update()
             return;
         }
         if (info.GetAction() == MouseAction::MOVE && info.GetLocalLocation().GetY() <= TITLE_POPUP_DISTANCE) {
-            containerElement->renderDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
+            containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
             containerElement->controller_->Forward();
         }
     });
@@ -223,20 +266,45 @@ void ContainerModalElement::Update()
 bool ContainerModalElement::CanShowFloatingTitle()
 {
     auto context = context_.Upgrade();
-    if (!context || !renderDisplay_ || !controller_) {
-        LOGI("Show floating title failed, context, renderDisplay_ or controller is null.");
+    if (!context || !floatingTitleDisplay_ || !controller_) {
+        LOGI("Show floating title failed, context, floatingTitleDisplay_ or controller is null.");
         return false;
     }
     auto mode = context->FireWindowGetModeCallBack();
-    if (mode != WindowMode::WINDOW_MODE_FULLSCREEN && mode != WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
-        LOGI("Window is not full screen or split primary, can not show floating title.");
+    if (mode != WindowMode::WINDOW_MODE_FULLSCREEN && mode != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
+        mode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        LOGI("Window is not full screen or split screen, can not show floating title.");
         return false;
     }
-    if (renderDisplay_->GetVisibleType() == VisibleType::VISIBLE) {
+    if (floatingTitleDisplay_->GetVisibleType() == VisibleType::VISIBLE) {
         LOGI("Floating tittle is visible now, no need to show again.");
         return false;
     }
     return true;
+}
+
+void ContainerModalElement::ChangeFloatingTitleIcon()
+{
+    if (!floatingTitleBox_ || !titleChildrenRow_ || !floatingTitleChildrenRow_) {
+        LOGE("ChangeFloatingTitleIcon failed.");
+        return;
+    }
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("ChangeFloatingTitleIcon failed, context is null.");
+        return;
+    }
+    auto row = AceType::DynamicCast<RowElement>(floatingTitleBox_->GetFirstChild());
+    if (!row) {
+        LOGE("ChangeFloatingTitleIcon failed, row element is null");
+        return;
+    }
+    auto mode = context->FireWindowGetModeCallBack();
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        row->SetUpdateComponent(floatingTitleChildrenRow_);
+    } else {
+        row->SetUpdateComponent(titleChildrenRow_);
+    }
 }
 
 } // namespace OHOS::Ace

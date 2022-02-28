@@ -14,8 +14,9 @@
  */
 #include "js_plugin_util.h"
 
-#include <cstring>
 #include <cinttypes>
+#include <cstring>
+
 #include "hilog_wrapper.h"
 #include "napi/native_engine/native_value.h"
 #include "securec.h"

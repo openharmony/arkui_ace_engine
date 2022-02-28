@@ -72,6 +72,7 @@ public:
     virtual void FillText(const Offset& offset, const std::string& text, double x, double y) = 0;
     virtual void StrokeText(const Offset& offset, const std::string& text, double x, double y) = 0;
     virtual double MeasureText(const std::string& text, const PaintState& state) = 0;
+    virtual double MeasureTextHeight(const std::string& text, const PaintState& state) = 0;
 
     virtual void MoveTo(const Offset& offset, double x, double y) = 0;
     virtual void LineTo(const Offset& offset, double x, double y) = 0;

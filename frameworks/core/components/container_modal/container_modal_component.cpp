@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,9 @@
 
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
-#include "core/components/clip/clip_component.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/container_modal/container_modal_element.h"
 #include "core/components/container_modal/render_container_modal.h"
-#include "core/components/flex/flex_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/image/image_component.h"
 #include "core/components/padding/padding_component.h"
@@ -28,27 +27,6 @@
 #include "core/components/tween/tween_component.h"
 
 namespace OHOS::Ace {
-namespace {
-
-const Dimension CONTAINER_INNER_RADIUS = 14.0_vp;
-const Dimension CONTAINER_OUTER_RADIUS = 16.0_vp;
-const Dimension CONTAINER_BORDER_WIDTH = 1.0_vp;
-const Dimension CONTAINER_TITLE_HEIGHT = 48.0_vp;
-const Dimension TITLE_PADDING_START = 24.0_vp;
-const Dimension TITLE_PADDING_END = 24.0_vp;
-const Dimension ZERO_PADDING = 0.0_vp;
-const Dimension TITLE_ELEMENT_MARGIN_HORIZONTAL = 16.0_vp;
-const Dimension TITLE_ICON_SIZE = 20.0_vp;
-const Dimension TITLE_BUTTON_SIZE = 24.0_vp;
-const Dimension TITLE_TEXT_FONT_SIZE = 16.0_fp;
-const Dimension CONTENT_MARGIN = 4.0_vp;
-const Color CONTAINER_BACKGROUND_COLOR = Color(0xd6e4e5ed);
-const Color CONTAINER_BORDER_COLOR = Color(0x33000000);
-const Color TITLE_TEXT_COLOR = Color(0xe5000000);
-const Color CONTENT_BACKGROUND_COLOR = Color(0xffffffff);
-const Color TITLE_BUTTON_BACKGROUND_COLOR = Color(0x33000000);
-
-} // namespace
 
 RefPtr<Component> ContainerModalComponent::Create(
     const WeakPtr<PipelineContext>& context, const RefPtr<Component>& child)
@@ -69,22 +47,13 @@ RefPtr<RenderNode> ContainerModalComponent::CreateRenderNode()
     return RenderContainerModal::Create();
 }
 
-RefPtr<Component> ContainerModalComponent::GetMaximizeRecoverButtonIcon() const
-{
-    if (!titleMaximizeRecoverButton_ || titleMaximizeRecoverButton_->GetChildren().empty()) {
-        LOGE("tile maximize recover button is null");
-        return nullptr;
-    }
-    return titleMaximizeRecoverButton_->GetChildren().front();
-}
-
 RefPtr<Component> ContainerModalComponent::BuildTitle()
 {
     // build title box
-    titleChildren_ = BuildTitleChildren();
     auto titleBox = AceType::MakeRefPtr<BoxComponent>();
     titleBox->SetHeight(CONTAINER_TITLE_HEIGHT);
-    auto row = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, titleChildren_);
+    titleChildrenRow_ =
+        AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, BuildTitleChildren(false));
 
     // handle mouse move
     titleBox->SetOnMouseId([contextWptr = context_](MouseInfo& info) {
@@ -101,7 +70,7 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
             context->FireWindowStartMoveCallBack();
         }
     });
-    titleBox->SetChild(row);
+    titleBox->SetChild(titleChildrenRow_);
     auto display = AceType::MakeRefPtr<DisplayComponent>(titleBox);
     return display;
 }
@@ -116,8 +85,9 @@ RefPtr<Component> ContainerModalComponent::BuildFloatingTitle()
     titleBox->SetHeight(CONTAINER_TITLE_HEIGHT);
     titleBox->SetBackDecoration(titleDecoration);
 
-    auto row = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, titleChildren_);
-    titleBox->SetChild(row);
+    floatingTitleChildrenRow_ =
+        AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, BuildTitleChildren(true));
+    titleBox->SetChild(floatingTitleChildrenRow_);
     auto tween = AceType::MakeRefPtr<TweenComponent>("ContainerModal", titleBox);
     return tween;
 }
@@ -132,11 +102,6 @@ RefPtr<Component> ContainerModalComponent::BuildContent()
     contentDecoration->SetBackgroundColor(CONTENT_BACKGROUND_COLOR);
     contentDecoration->SetBorder(contentBorder);
     contentBox->SetBackDecoration(contentDecoration);
-
-    Edge margin;
-    margin.SetLeft(CONTENT_MARGIN);
-    margin.SetRight(CONTENT_MARGIN);
-    contentBox->SetMargin(margin);
 
     // adaptive height
     contentBox->SetFlexWeight(1.0);
@@ -199,31 +164,33 @@ void ContainerModalComponent::BuildInnerChild()
     containerBox->SetFlex(BoxFlex::FLEX_X);
     containerBox->SetAlignment(Alignment::CENTER);
 
-    // Use the bottom padding of the containerBox to replace the bottom margin of the contentBox.
-    Edge padding;
-    padding.SetBottom(CONTENT_MARGIN);
+    Edge padding = Edge(CONTENT_PADDING, Dimension(0.0), CONTENT_PADDING, CONTENT_PADDING);
     containerBox->SetPadding(padding);
     containerBox->SetChild(stackComponent);
     SetChild(containerBox);
 }
 
-std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren()
+std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool isFloating)
 {
     // title icon
-    titleIcon_ = AceType::MakeRefPtr<ImageComponent>();
-    titleIcon_->SetWidth(TITLE_ICON_SIZE);
-    titleIcon_->SetHeight(TITLE_ICON_SIZE);
+    if (!titleIcon_) {
+        titleIcon_ = AceType::MakeRefPtr<ImageComponent>();
+        titleIcon_->SetWidth(TITLE_ICON_SIZE);
+        titleIcon_->SetHeight(TITLE_ICON_SIZE);
+    }
 
     // title text
-    titleLabel_ = AceType::MakeRefPtr<TextComponent>("");
-    TextStyle style;
-    style.SetFontSize(TITLE_TEXT_FONT_SIZE);
-    style.SetTextColor(TITLE_TEXT_COLOR);
-    style.SetFontWeight(FontWeight::W500);
-    style.SetAllowScale(false);
-    titleLabel_->SetTextStyle(style);
+    if (!titleLabel_) {
+        titleLabel_ = AceType::MakeRefPtr<TextComponent>("");
+        TextStyle style;
+        style.SetFontSize(TITLE_TEXT_FONT_SIZE);
+        style.SetTextColor(TITLE_TEXT_COLOR);
+        style.SetFontWeight(FontWeight::W500);
+        style.SetAllowScale(false);
+        titleLabel_->SetTextStyle(style);
+    }
 
-    // title button
+    // title control button
     auto contextWptr = context_;
     auto titleLeftSplitButton =
         BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT, [contextWptr]() {
@@ -231,22 +198,20 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren()
             auto context = contextWptr.Upgrade();
             if (context) {
                 context->FireWindowSplitCallBack();
-                context->ShowContainerTitle(false);
             }
         });
-    titleMaximizeRecoverButton_ =
-        BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE, [contextWptr]() {
+    auto buttonResourceId = isFloating ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
+                                       : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
+    auto titleMaximizeRecoverButton = BuildControlButton(buttonResourceId, [contextWptr]() {
             auto context = contextWptr.Upgrade();
             if (context) {
                 auto mode = context->FireWindowGetModeCallBack();
                 if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
                     LOGI("recover button clicked");
                     context->FireWindowRecoverCallBack();
-                    context->ShowContainerTitle(true);
                 } else {
                     LOGI("maximize button clicked");
                     context->FireWindowMaximizeCallBack();
-                    context->ShowContainerTitle(false);
                 }
             }
         });
@@ -270,7 +235,7 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren()
     titleChildren.emplace_back(SetPadding(titleIcon_, TITLE_PADDING_START, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     titleChildren.emplace_back(AceType::MakeRefPtr<FlexItemComponent>(1.0, 1.0, 0.0, titleLabel_));
     titleChildren.emplace_back(SetPadding(titleLeftSplitButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
-    titleChildren.emplace_back(SetPadding(titleMaximizeRecoverButton_, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
+    titleChildren.emplace_back(SetPadding(titleMaximizeRecoverButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     titleChildren.emplace_back(SetPadding(titleMinimizeButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     titleChildren.emplace_back(SetPadding(titleCloseButton, ZERO_PADDING, TITLE_PADDING_END));
     return titleChildren;

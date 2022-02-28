@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include <utility>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
@@ -929,7 +930,7 @@ public:
     void SetPreTargetRenderNode(const RefPtr<RenderNode>& preTargetRenderNode);
     const RefPtr<RenderNode> GetPreTargetRenderNode() const;
     void SetInitRenderNode(const RefPtr<RenderNode>& initRenderNode);
-    const RefPtr<RenderNode> GetInitRenderNode() const;
+    const RefPtr<RenderNode>& GetInitRenderNode() const;
 
     void SetContextMenu(const RefPtr<Component>& contextMenu)
     {
@@ -1094,6 +1095,20 @@ public:
         windowStartMoveCallback_ = std::move(callback);
     }
 
+    void SetGetWindowRectImpl(std::function<Rect()>&& callback)
+    {
+        windowRectImpl_ = std::move(callback);
+    }
+
+    Rect GetCurrentWindowRect() const
+    {
+        Rect rect;
+        if (windowRectImpl_) {
+            rect = windowRectImpl_();
+        }
+        return rect;
+    }
+
     bool FireWindowMinimizeCallBack() const
     {
         if (windowMinimizeCallback_) {
@@ -1169,12 +1184,12 @@ public:
         return appLabelId_;
     }
 
-    void SetClipboardCallback(const std::function<void(const std::string&)> callback)
+    void SetClipboardCallback(const std::function<void(const std::string&)>& callback)
     {
         clipboardCallback_ = callback;
     }
 
-    void ProcessDragEventStart(
+    void ProcessDragEvent(
         const RefPtr<RenderNode>& renderNode, const RefPtr<DragEvent>& event, const Point& globalPoint);
     void ProcessDragEventEnd(
         const RefPtr<RenderNode>& renderNode, const RefPtr<DragEvent>& event, const Point& globalPoint);
@@ -1414,6 +1429,7 @@ private:
     std::function<bool(void)> windowSplitCallback_ = nullptr;
     std::function<void(void)> windowStartMoveCallback_ = nullptr;
     std::function<WindowMode(void)> windowGetModeCallback_ = nullptr;
+    std::function<Rect()> windowRectImpl_ = nullptr;
 
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     Size selectedItemSize_ { 0.0, 0.0 };
@@ -1422,6 +1438,7 @@ private:
     RefPtr<Clipboard> clipboard_;
     RefPtr<RenderNode> initRenderNode_;
     std::string customDragInfo_;
+    Offset pageOffset_;
 
     std::unordered_map<int32_t, WeakPtr<RenderElement>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;

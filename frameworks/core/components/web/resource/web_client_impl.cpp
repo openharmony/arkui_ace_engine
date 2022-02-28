@@ -17,6 +17,18 @@
 #include "core/components/web/resource/web_delegate.h"
 
 namespace OHOS::Ace {
+
+void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::string& userAgent,
+    const std::string& contentDisposition, const std::string& mimetype, long contentLength)
+{
+    LOGI("OnDownloadStart.");
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnDownloadStart(url, userAgent, contentDisposition, mimetype, contentLength);
+}
+
 void WebClientImpl::OnPageFinished(int httpStatusCode, const std::string& url)
 {
     auto delegate = webDelegate_.Upgrade();
@@ -44,6 +56,43 @@ void WebClientImpl::OnPageStarted(const std::string& url)
     delegate->OnPageStarted(url);
 }
 
+void WebClientImpl::OnProgressChanged(int newProgress)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnProgressChanged(newProgress);
+}
+
+void WebClientImpl::OnReceivedTitle(const std::string &title)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnReceivedTitle(title);
+}
+
+void WebClientImpl::OnGeolocationPermissionsHidePrompt()
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnGeolocationPermissionsHidePrompt();
+}
+
+void WebClientImpl::OnGeolocationPermissionsShowPrompt(const std::string& origin,
+    OHOS::WebView::GeolocationCallback* callback)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnGeolocationPermissionsShowPrompt(origin, callback);
+}
+
 void WebClientImpl::SetWebView(std::shared_ptr<OHOS::WebView::WebView> webview)
 {
     webviewWeak_ = webview;
@@ -57,12 +106,14 @@ void WebClientImpl::OnProxyDied()
     }
 }
 
-void WebClientImpl::OnPageLoadError(int errorCode, const std::string& description, const std::string& failingUrl)
+void WebClientImpl::onReceivedError(std::shared_ptr<WebView::WebResourceRequest> request,
+    std::shared_ptr<WebView::WebResourceError> error)
 {
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
     }
+    delegate->OnPageErrorOHOS(error->GetErrorCode(), error->GetDescription(), request->GetUrl());
 }
 
 void WebClientImpl::OnMessage(const std::string& param)

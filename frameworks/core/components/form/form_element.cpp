@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "core/common/container_scope.h"
 #include "core/common/form_manager.h"
 #include "frameworks/base/utils/string_utils.h"
 #include "frameworks/core/components/form/form_component.h"
@@ -100,12 +101,17 @@ void FormElement::InitEvent(const RefPtr<FormComponent>& component)
         onErrorEvent_ = AceAsyncEvent<void(const std::string&)>::Create(component->GetOnErrorEvent(), context_);
     }
 
+    if (!component->GetOnUninstallEvent().IsEmpty()) {
+        onUninstallEvent_ =
+            AceAsyncEvent<void(const std::string&)>::Create(component->GetOnUninstallEvent(), context_);
+    }
+
     if (!component->GetOnRouterEvent().IsEmpty()) {
         onRouterEvent_ = AceAsyncEvent<void(const std::string&)>::Create(component->GetOnRouterEvent(), context_);
     }
 }
 
-void FormElement::HandleOnAcquireEvent(int64_t id) const
+void FormElement::HandleOnAcquireEvent(int64_t id)
 {
     LOGD("HandleOnAcquireEvent acquire event id:%{public}d", static_cast<int32_t>(id));
 
@@ -113,37 +119,103 @@ void FormElement::HandleOnAcquireEvent(int64_t id) const
         LOGE("could not find available event handle");
         return;
     }
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("fail to get context, onAcquire failed.");
+        return;
+    }
 
     auto json = JsonUtil::Create(true);
     json->Put("id", std::to_string(id).c_str());
-    onAcquireEvent_(json->ToString());
+
+    LOGI("HandleOnAcquireEvent msg:%{public}s", json->ToString().c_str());
+    int32_t instance = context->GetInstanceId();
+    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), info = json->ToString(), instance] {
+        auto element = weak.Upgrade();
+        if (element != nullptr && element->onAcquireEvent_ != nullptr) {
+            ContainerScope scope(instance);
+            element->onAcquireEvent_(info);
+        }
+    }, TaskExecutor::TaskType::JS);
 }
 
-void FormElement::HandleOnRouterEvent(const std::unique_ptr<JsonValue>& action) const
+void FormElement::HandleOnRouterEvent(const std::unique_ptr<JsonValue>& action)
 {
     if (!onRouterEvent_) {
         LOGE("action could not find available event handle");
         return;
     }
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("fail to get context, onRouter failed.");
+        return;
+    }
 
     auto json = JsonUtil::Create(true);
     json->Put("action", action);
-    onRouterEvent_(json->ToString());
+
+    LOGI("HandleOnRouterEvent msg:%{public}s", json->ToString().c_str());
+    int32_t instance = context->GetInstanceId();
+    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), info = json->ToString(), instance] {
+        auto element = weak.Upgrade();
+        if (element != nullptr && element->onRouterEvent_ != nullptr) {
+            ContainerScope scope(instance);
+            element->onRouterEvent_(info);
+        }
+    }, TaskExecutor::TaskType::JS);
 }
 
-void FormElement::HandleOnErrorEvent(const std::string code, const std::string msg) const
+void FormElement::HandleOnErrorEvent(const std::string code, const std::string msg)
 {
-    LOGD("HandleOnErrorEvent msg:%{public}s", msg.c_str());
-
     if (!onErrorEvent_) {
         LOGE("could not find available event handle");
+        return;
+    }
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("fail to get context, onError failed.");
         return;
     }
 
     auto json = JsonUtil::Create(true);
     json->Put("errcode", code.c_str());
     json->Put("msg", msg.c_str());
-    onErrorEvent_(json->ToString());
+
+    LOGI("HandleOnErrorEvent msg:%{public}s", msg.c_str());
+    int32_t instance = context->GetInstanceId();
+    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), info = json->ToString(), instance] {
+        auto element = weak.Upgrade();
+        if (element != nullptr && element->onErrorEvent_ != nullptr) {
+            ContainerScope scope(instance);
+            element->onErrorEvent_(info);
+        }
+    }, TaskExecutor::TaskType::JS);
+}
+
+void FormElement::HandleOnUninstallEvent(int64_t formId)
+{
+    if (!onUninstallEvent_) {
+        LOGE("could not find available event handle");
+        return;
+    }
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("fail to get context, onUninstall failed.");
+        return;
+    }
+
+    auto json = JsonUtil::Create(true);
+    json->Put("id", std::to_string(formId).c_str());
+
+    LOGI("HandleOnUninstallEvent formId:%{public}s", std::to_string(formId).c_str());
+    int32_t instance = context->GetInstanceId();
+    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), info = json->ToString(), instance] {
+        auto element = weak.Upgrade();
+        if (element != nullptr && element->onUninstallEvent_ != nullptr) {
+            ContainerScope scope(instance);
+            element->onUninstallEvent_(info);
+        }
+    }, TaskExecutor::TaskType::JS);
 }
 
 void FormElement::Prepare(const WeakPtr<Element>& parent)
@@ -168,15 +240,16 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                     }
                 });
             });
-        formManagerBridge_->AddFormUpdateCallback([weak = WeakClaim(this)](int64_t id, std::string data) {
+        formManagerBridge_->AddFormUpdateCallback([weak = WeakClaim(this)](int64_t id, std::string data,
+            std::map<std::string, std::pair<int, int32_t>> imageDataMap) {
             auto element = weak.Upgrade();
             auto uiTaskExecutor = SingleTaskExecutor::Make(
                 element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([id, data, weak] {
+            uiTaskExecutor.PostTask([id, data, imageDataMap, weak] {
                 auto form = weak.Upgrade();
                 if (form) {
                     if (form->ISAllowUpdate()) {
-                        form->GetSubContainer()->UpdateCard(data);
+                        form->GetSubContainer()->UpdateCard(data, imageDataMap);
                     }
                 }
             });
@@ -199,6 +272,17 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                 auto renderForm = AceType::DynamicCast<RenderForm>(render);
                 if (renderForm) {
                     renderForm->RemoveChildren();
+                }
+            });
+        });
+        formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this)](int64_t formId) {
+            auto element = weak.Upgrade();
+            auto uiTaskExecutor = SingleTaskExecutor::Make(
+                element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            uiTaskExecutor.PostTask([formId, weak] {
+                auto form = weak.Upgrade();
+                if (form) {
+                    form->HandleOnUninstallEvent(formId);
                 }
             });
         });

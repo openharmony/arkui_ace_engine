@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -418,7 +418,7 @@ ACE_EXPORT extern const char DOM_IMAGE_ALT[];
 ACE_EXPORT extern const char DOM_IMAGE_MATCH_TEXT_DIRECTION[];
 ACE_EXPORT extern const char DOM_IMAGE_FIT_ORIGINAL_SIZE[];
 ACE_EXPORT extern const char DOM_IMAGE_FILL_COLOR[];
-ACE_EXPORT extern const char DOM_IMAGE_SYNC_MODE[];
+ACE_EXPORT extern const char DOM_IMAGE_SYNC_LOAD[];
 // objectPosition
 ACE_EXPORT extern const char DOM_IMAGE_POSITION[];
 ACE_EXPORT extern const char DOM_IMAGE_POSITION_LEFT[];

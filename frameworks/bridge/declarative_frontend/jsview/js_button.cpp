@@ -47,6 +47,7 @@ void JSButton::SetFontSize(const JSCallbackInfo& info)
         textStyle.SetAdaptTextSize(fontSize, fontSize);
         textComponent->SetTextStyle(std::move(textStyle));
     }
+    ResetButtonHeight();
 }
 
 void JSButton::SetFontWeight(std::string value)
@@ -185,6 +186,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSButton>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSButton>::StaticMethod("size", &JSButton::JsSize);
+    JSClass<JSButton>::StaticMethod("padding", &JSButton::JsPadding);
 
     JSClass<JSButton>::StaticMethod("createWithLabel", &JSButton::CreateWithLabel, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("createWithChild", &JSButton::CreateWithChild, MethodOptions::NONE);
@@ -264,6 +266,62 @@ void JSButton::SetTypeAndStateEffect(const JSRef<JSObject>& obj, const RefPtr<Bu
     if (stateEffect->IsBoolean()) {
         buttonComponent->SetStateEffect(stateEffect->ToBoolean());
     }
+}
+
+void JSButton::ResetButtonHeight()
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    if (buttonComponent) {
+        if (buttonComponent->GetType() != ButtonType::NORMAL) {
+            return;
+        }
+        const Dimension initialHeight = Dimension(-1.0, DimensionUnit::VP);
+        buttonComponent->SetHeight(initialHeight);
+    }
+}
+
+void JSButton::JsPadding(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
+        LOGE("arg is not a string, number or object.");
+        return;
+    }
+    Edge padding;
+    if (info[0]->IsNumber()) {
+        Dimension edgeValue;
+        if (ParseJsDimensionVp(info[0], edgeValue)) {
+            padding = Edge(edgeValue);
+        }
+    }
+    if (info[0]->IsObject()) {
+        auto object = JsonUtil::ParseJsonString(info[0]->ToString());
+        if (!object) {
+            LOGE("Js Parse object failed. argsPtr is null.");
+            return;
+        }
+        Dimension left = Dimension(0.0, DimensionUnit::VP);
+        Dimension top = Dimension(0.0, DimensionUnit::VP);
+        Dimension right = Dimension(0.0, DimensionUnit::VP);
+        Dimension bottom = Dimension(0.0, DimensionUnit::VP);
+        if (object->Contains("top") || object->Contains("bottom") || object->Contains("left") ||
+            object->Contains("right")) {
+            ParseJsonDimensionVp(object->GetValue("left"), left);
+            ParseJsonDimensionVp(object->GetValue("top"), top);
+            ParseJsonDimensionVp(object->GetValue("right"), right);
+            ParseJsonDimensionVp(object->GetValue("bottom"), bottom);
+        }
+        padding = Edge(left, top, right, bottom);
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    if (component) {
+        auto paddingChild = AceType::DynamicCast<PaddingComponent>(component->GetChildren().front());
+        if (paddingChild) {
+            paddingChild->SetPadding(padding);
+        }
+    }
+    ResetButtonHeight();
 }
 
 void JSButton::JsOnClick(const JSCallbackInfo& info)

@@ -54,8 +54,8 @@ public:
         }
 
         dataOut.clear();
-        errorStr_.clear();
-        errorStr_.reserve(CURL_ERROR_SIZE);
+        std::string errorStr;
+        errorStr.reserve(CURL_ERROR_SIZE);
 
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_URL, url.c_str());
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_WRITEFUNCTION, OnWritingMemory);
@@ -63,18 +63,19 @@ public:
         // Some servers don't like requests that are made without a user-agent field, so we provide one
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_USERAGENT, "libcurl-agent/1.0");
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_URL, url.c_str());
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_CAINFO, "/etc/ssl/certs/cacert.pem");
+#endif
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_VERBOSE, 1L);
-        ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_ERRORBUFFER, errorStr_.data());
+        ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_ERRORBUFFER, errorStr.data());
 
         CURLcode result = curl_easy_perform(handle.get());
         if (result != CURLE_OK) {
             LOGE("Failed to download, url: %{private}s, %{public}s", url.c_str(), curl_easy_strerror(result));
-            if (!errorStr_.empty()) {
-                LOGE("Failed to download reason: %{public}s", errorStr_.c_str());
+            if (!errorStr.empty()) {
+                LOGE("Failed to download reason: %{public}s", errorStr.c_str());
             }
             dataOut.clear();
-            errorStr_.shrink_to_fit();
             return false;
         }
         dataOut.shrink_to_fit();
@@ -82,8 +83,6 @@ public:
     }
 
 private:
-    std::string errorStr_;
-
     static size_t OnWritingMemory(void* data, size_t size, size_t memBytes, void* userData)
     {
         // size is always 1, for more details see https://curl.haxx.se/libcurl/c/CURLOPT_WRITEFUNCTION.html

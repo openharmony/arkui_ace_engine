@@ -146,6 +146,40 @@ namespace {
         }                                                               \
     }
 
+bool UnwrapRawImageDataMap(NativeEngine* engine, NativeValue* argv, std::map<std::string, int>& rawImageDataMap)
+{
+    LOGI("%{public}s called.", __func__);
+    auto env = reinterpret_cast<napi_env>(engine);
+    auto param = reinterpret_cast<napi_value>(argv);
+
+    if (!AppExecFwk::IsTypeForNapiValue(env, param, napi_object)) {
+        LOGW("%{public}s failed, param is not napi_object.", __func__);
+        return false;
+    }
+
+    napi_valuetype jsValueType = napi_undefined;
+    napi_value jsProNameList = nullptr;
+    uint32_t jsProCount = 0;
+
+    NAPI_CALL_BASE(env, napi_get_property_names(env, param, &jsProNameList), false);
+    NAPI_CALL_BASE(env, napi_get_array_length(env, jsProNameList, &jsProCount), false);
+    LOGI("%{public}s called. Property size=%{public}d.", __func__, jsProCount);
+
+    napi_value jsProName = nullptr;
+    napi_value jsProValue = nullptr;
+    for (uint32_t index = 0; index < jsProCount; index++) {
+        NAPI_CALL_BASE(env, napi_get_element(env, jsProNameList, index, &jsProName), false);
+        std::string strProName = AppExecFwk::UnwrapStringFromJS(env, jsProName);
+        LOGI("%{public}s called. Property name=%{public}s.", __func__, strProName.c_str());
+        NAPI_CALL_BASE(env, napi_get_named_property(env, param, strProName.c_str(), &jsProValue), false);
+        NAPI_CALL_BASE(env, napi_typeof(env, jsProValue, &jsValueType), false);
+        int natValue = AppExecFwk::UnwrapInt32FromJS(env, jsProValue);
+        rawImageDataMap.emplace(strProName, natValue);
+        LOGI("%{public}s called. Property value=%{public}d.", __func__, natValue);
+    }
+    return true;
+}
+
 JSValue JsOnCreateFinish(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
     LOGD("JsOnCreateFinish");
@@ -416,6 +450,13 @@ bool QjsPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
 #endif
+    if (delegate && delegate->GetAssetManager()) {
+        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+        if (!packagePath.empty()) {
+            auto qjsNativeEngine = static_cast<QuickJSNativeEngine*>(nativeEngine_);
+            qjsNativeEngine->SetPackagePath(packagePath);
+        }
+    }
     RegisterWorker();
     return ret;
 }
@@ -677,37 +718,24 @@ void QjsPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
     }
 
     if (type == BackendType::FORM) {
-        JSPropertyEnum* pTab = nullptr;
-        uint32_t len = 0;
-        if (!Framework::CheckAndGetJsProperty(ctx, retVal, &pTab, &len)) {
-            LOGE("PA: startRetVal Framework::CheckAndGetJsProperty error");
+        std::string jsonStr;
+        JSValue formJsonData = Framework::QJSUtils::GetPropertyStr(ctx, retVal, "data");
+        if (JS_IsString(formJsonData)) {
+            Framework::ScopedString strValue(ctx, formJsonData);
+            jsonStr = strValue.get();
+            LOGI("Add FormBindingData json:%{public}s", jsonStr.c_str());
         }
-        LOGI("PA: QjsPaEngine onCreate return propey num %{public}u", len);
-        std::string jsonStr = "{";
-        std::string valueStr = "";
-        for (uint32_t i = 0; i < len; i++) {
-            const char* key = JS_AtomToCString(ctx, pTab[i].atom);
-            JSValue value = Framework::QJSUtils::GetPropertyStr(ctx, retVal, key);
-            valueStr = GetJsStringVal(ctx, value);
-            LOGI("PA: QjsPaEngine onCreate return key:%{public}s value:%{public}s", key, valueStr.c_str());
-            jsonStr.append(ToJSONString(key, valueStr));
-            if (i != len - 1) {
-                jsonStr.append(",");
+        AppExecFwk::FormProviderData formData = AppExecFwk::FormProviderData(jsonStr);
+        JSValue formImageData = Framework::QJSUtils::GetPropertyStr(ctx, retVal, "image");
+        if (JS_IsObject(formImageData)) {
+            std::map<std::string, int> rawImageDataMap;
+            NativeValue* nativeValue = reinterpret_cast<NativeValue*>(&formImageData);
+            UnwrapRawImageDataMap(nativeEngine_, nativeValue, rawImageDataMap);
+            for (const auto& data : rawImageDataMap) {
+                formData.AddImageData(data.first, data.second);
             }
         }
-        jsonStr.append("}");
-        LOGI("PA: jsonStr%{public}s ", jsonStr.c_str());
-        AppExecFwk::FormProviderData formData = AppExecFwk::FormProviderData(jsonStr);
         SetFormData(formData);
-
-        len = valueStr.length();
-        char* image = (char*)malloc((len + 1) * sizeof(char));
-        if (image) {
-            valueStr.copy(image, len, 0);
-            formData.AddImageData("image1", image, (len + 1) * sizeof(char));
-            LOGI("PA: QjsPaEngine image.size %{public}d", len);
-        }
-        // free(pImage); // image need be freed by FormProviderData ;
     }
 
     js_std_loop(ctx);
@@ -1379,7 +1407,7 @@ void QjsPaEngine::OnCastTemptoNormal(const int64_t formId)
     ACE_DCHECK(ctx);
 
     Framework::QJSHandleScope handleScope(ctx);
-    JSValue paFunc = GetPaFunc("onCastTemp");
+    JSValue paFunc = GetPaFunc("onCastToNormal");
 
     JSValue argFormIdJSValue = JS_NewInt32(ctx, formId);
 

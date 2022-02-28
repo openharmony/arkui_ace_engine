@@ -21,8 +21,8 @@
 #include "frameworks/core/common/flutter/flutter_asset_manager.h"
 #include "frameworks/core/common/flutter/flutter_task_executor.h"
 #include "frameworks/core/components/plugin/plugin_element.h"
-#include "frameworks/core/components/plugin/render_plugin.h"
 #include "frameworks/core/components/plugin/plugin_window.h"
+#include "frameworks/core/components/plugin/render_plugin.h"
 #include "frameworks/core/components/transform/transform_element.h"
 
 namespace OHOS::Ace {

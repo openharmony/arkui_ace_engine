@@ -41,6 +41,40 @@ const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
 #endif
 
+bool UnwrapRawImageDataMap(NativeEngine* engine, NativeValue* argv, std::map<std::string, int>& rawImageDataMap)
+{
+    LOGI("%{public}s called.", __func__);
+    auto env = reinterpret_cast<napi_env>(engine);
+    auto param = reinterpret_cast<napi_value>(argv);
+
+    if (!AppExecFwk::IsTypeForNapiValue(env, param, napi_object)) {
+        LOGW("%{public}s failed, param is not napi_object.", __func__);
+        return false;
+    }
+
+    napi_valuetype jsValueType = napi_undefined;
+    napi_value jsProNameList = nullptr;
+    uint32_t jsProCount = 0;
+
+    NAPI_CALL_BASE(env, napi_get_property_names(env, param, &jsProNameList), false);
+    NAPI_CALL_BASE(env, napi_get_array_length(env, jsProNameList, &jsProCount), false);
+    LOGI("%{public}s called. Property size=%{public}d.", __func__, jsProCount);
+
+    napi_value jsProName = nullptr;
+    napi_value jsProValue = nullptr;
+    for (uint32_t index = 0; index < jsProCount; index++) {
+        NAPI_CALL_BASE(env, napi_get_element(env, jsProNameList, index, &jsProName), false);
+        std::string strProName = AppExecFwk::UnwrapStringFromJS(env, jsProName);
+        LOGI("%{public}s called. Property name=%{public}s.", __func__, strProName.c_str());
+        NAPI_CALL_BASE(env, napi_get_named_property(env, param, strProName.c_str(), &jsProValue), false);
+        NAPI_CALL_BASE(env, napi_typeof(env, jsProValue, &jsValueType), false);
+        int natValue = AppExecFwk::UnwrapInt32FromJS(env, jsProValue);
+        rawImageDataMap.emplace(strProName, natValue);
+        LOGI("%{public}s called. Property value=%{public}d.", __func__, natValue);
+    }
+    return true;
+}
+
 int PrintLog(int id, int level, const char* tag, const char* fmt, const char* message)
 {
     switch (JsLogLevel(level - 3)) {
@@ -280,22 +314,6 @@ inline std::string ToJSONStringInt(std::string sKey, std::string sValue)
 
     strResult.append(szColon);
     strResult.append(sValue);
-    return strResult;
-}
-
-inline std::string ToJSONString(std::string sKey, std::string sValue)
-{
-    char szDoubleQutoes[] = "\"";
-    char szColon[] = ":";
-    std::string strResult;
-    strResult.append(szDoubleQutoes);
-    strResult.append(sKey);
-    strResult.append(szDoubleQutoes);
-
-    strResult.append(szColon);
-    strResult.append(szDoubleQutoes);
-    strResult.append(sValue);
-    strResult.append(szDoubleQutoes);
     return strResult;
 }
 } // namespace
@@ -707,6 +725,13 @@ bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     });
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
+    if (delegate && delegate->GetAssetManager()) {
+        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+        if (!packagePath.empty()) {
+            auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
+            arkNativeEngine->SetPackagePath(packagePath);
+        }
+    }
     RegisterWorker();
     return true;
 }
@@ -1013,41 +1038,25 @@ void JsiPaEngine::StartForm(const OHOS::AAFwk::Want& want)
     }
     LOGD("JsiPaEngine onCreate return property num %{public}d", len);
 
-    std::string jsonStr = "{";
-    std::string valueStr = "";
-    for (int32_t i = 0; i < len; i++) {
-        shared_ptr<JsValue> key = propertyNames->GetElement(runtime, i);
-        if (key == nullptr) {
-            LOGW("JsiPaEngine key is null. Ignoring!");
-            continue;
-        }
-        std::string keyStr = key->ToString(runtime);
-        shared_ptr<JsValue> value = arkJSValue->GetProperty(runtime, key);
-        if (value == nullptr) {
-            LOGW("JsiPaEngine value is null. Ignoring!");
-            continue;
-        }
-        std::string valStr = value->ToString(runtime);
-        LOGI("JsiPaEngine onCreate return key:%{public}s value:%{public}s", keyStr.c_str(), valueStr.c_str());
-        jsonStr.append(ToJSONString(keyStr, valueStr));
-        if (i != len - 1) {
-            jsonStr.append(",");
-        }
+    std::string jsonStr;
+    shared_ptr<JsValue> formJsonData = arkJSValue->GetProperty(runtime, "data");
+    if (formJsonData != nullptr) {
+        jsonStr = formJsonData->ToString(runtime);
+        LOGI("Add FormBindingData json:%{public}s", jsonStr.c_str());
     }
-    jsonStr.append("}");
-    LOGI("JsiPaEngine jsonStr:%{public}s", jsonStr.c_str());
-
     AppExecFwk::FormProviderData formData = AppExecFwk::FormProviderData(jsonStr);
-    SetFormData(formData);
-
-    len = valueStr.length();
-    char* image = (char*)malloc((len + 1) * sizeof(char));
-    if (image) {
-        valueStr.copy(image, len, 0);
-        formData.AddImageData("image1", image, (len + 1) * sizeof(char));
-        LOGI("JsiPaEngine image.size:%{public}d", len);
+    shared_ptr<JsValue> formImageData = arkJSValue->GetProperty(runtime, "image");
+    if (formImageData != nullptr) {
+        std::map<std::string, int> rawImageDataMap;
+        auto arkJsRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+        NativeValue* nativeValue = ArkNativeEngine::ArkValueToNativeValue(nativeEngine_,
+            std::static_pointer_cast<ArkJSValue>(formImageData)->GetValue(arkJsRuntime));
+        UnwrapRawImageDataMap(nativeEngine_, nativeValue, rawImageDataMap);
+        for (const auto& data : rawImageDataMap) {
+            formData.AddImageData(data.first, data.second);
+        }
     }
-    // free(pImage); // image need be freed by FormProviderData;
+    SetFormData(formData);
 }
 
 RefPtr<GroupJsBridge> JsiPaEngine::GetGroupJsBridge()
@@ -1512,7 +1521,7 @@ void JsiPaEngine::OnCastTemptoNormal(const int64_t formId)
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewInt32(formId) };
-    auto func = GetPaFunc("onCastTemp");
+    auto func = GetPaFunc("onCastToNormal");
     CallFunc(func, argv);
 }
 

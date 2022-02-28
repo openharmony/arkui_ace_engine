@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,11 +20,12 @@
 #include <unordered_set>
 #include <vector>
 
+#include "accessibility_element_operator.h"
+#include "accessibility_state_event.h"
+
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
-#include "accessibility_element_operator.h"
-#include "accessibility_state_event.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -148,13 +149,13 @@ private:
     void AddFocusableNode(std::list<RefPtr<AccessibilityNode>>& nodeList, const RefPtr<AccessibilityNode>& node);
     bool CanAccessibilityFocused(const RefPtr<AccessibilityNode>& node);
     RefPtr<AccessibilityNode> FindNodeInRelativeDirection(
-        std::list<RefPtr<AccessibilityNode>> nodeList, RefPtr<AccessibilityNode>& node, const int direction);
+        const std::list<RefPtr<AccessibilityNode>>& nodeList, RefPtr<AccessibilityNode>& node, const int direction);
     RefPtr<AccessibilityNode> FindNodeInAbsoluteDirection(
-        std::list<RefPtr<AccessibilityNode>> nodeList, RefPtr<AccessibilityNode>& node, const int direction);
+        const std::list<RefPtr<AccessibilityNode>>& nodeList, RefPtr<AccessibilityNode>& node, const int direction);
     RefPtr<AccessibilityNode> GetNextFocusableNode(
-        std::list<RefPtr<AccessibilityNode>> nodeList, RefPtr<AccessibilityNode>& node);
+        const std::list<RefPtr<AccessibilityNode>>& nodeList, RefPtr<AccessibilityNode>& node);
     RefPtr<AccessibilityNode> GetPreviousFocusableNode(
-        std::list<RefPtr<AccessibilityNode>> nodeList, RefPtr<AccessibilityNode>& node);
+        const std::list<RefPtr<AccessibilityNode>>& nodeList, RefPtr<AccessibilityNode>& node);
     bool CheckBetterRect(Rect nodeRect, const int direction, Rect itemRect, Rect tempBest);
     bool IsCandidateRect(Rect nodeRect, Rect itemRect, const int direction);
     bool OutrightBetter(Rect nodeRect, const int direction, Rect Rect1, Rect Rect2);

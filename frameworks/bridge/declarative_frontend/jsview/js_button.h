@@ -43,6 +43,7 @@ public:
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsSize(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
+    static void JsPadding(const JSCallbackInfo& info);
 
 public:
     static void JSBind(BindingTarget globalObj);
@@ -54,6 +55,7 @@ private:
     static void SetTypeAndStateEffect(const JSRef<JSObject>& obj, const RefPtr<ButtonComponent>& buttonComponent);
     static Dimension GetSizeValue(const JSCallbackInfo& info);
     static RefPtr<TextComponent> GetTextComponent();
+    static void ResetButtonHeight();
 };
 
 } // namespace OHOS::Ace::Framework

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ class NativeXComponentImpl : public virtual AceType {
     DECLARE_ACE_TYPE(NativeXComponentImpl, AceType);
 
 public:
-    NativeXComponentImpl() : window_(nullptr), width_(0), height_(0), x_(0.0), y_(0.0), callback_(nullptr) {}
+    NativeXComponentImpl() {}
 
     ~NativeXComponentImpl() {}
 
@@ -91,47 +91,47 @@ public:
         return window_;
     }
 
-    void SetCallback(NativeXComponentCallback* callback)
+    void SetCallback(OH_NativeXComponent_Callback* callback)
     {
         callback_ = callback;
     }
 
-    const NativeXComponentCallback* GetCallback() const
+    const OH_NativeXComponent_Callback* GetCallback() const
     {
         return callback_;
     }
 
-    void SetTouchInfo(const TouchInfo touchInfo)
+    void SetTouchEvent(const OH_NativeXComponent_TouchEvent touchEvent)
     {
-        touchInfo_ = touchInfo;
+        touchEvent_ = touchEvent;
     }
 
-    const TouchInfo GetTouchInfo() const
+    const OH_NativeXComponent_TouchEvent GetTouchEvent() const
     {
-        return touchInfo_;
+        return touchEvent_;
     }
 
 private:
     std::string xcomponetId_;
-    void* window_;
-    int width_;
-    int height_;
-    double x_;
-    double y_;
-    TouchInfo touchInfo_;
-    NativeXComponentCallback* callback_;
+    void* window_ = nullptr;
+    int width_ = 0;
+    int height_ = 0;
+    double x_ = 0.0;
+    double y_ = 0.0;
+    OH_NativeXComponent_TouchEvent touchEvent_;
+    OH_NativeXComponent_Callback* callback_ = nullptr;
 };
 }
 
-struct NativeXComponent {
-    NativeXComponent(OHOS::Ace::NativeXComponentImpl* xComponentImpl) : xcomponentImpl_(xComponentImpl) {}
-    ~NativeXComponent() {}
+struct OH_NativeXComponent {
+    OH_NativeXComponent(OHOS::Ace::NativeXComponentImpl* xComponentImpl) : xcomponentImpl_(xComponentImpl) {}
+    ~OH_NativeXComponent() {}
     int32_t GetXComponentId(char* id, uint64_t* size);
     int32_t GetNativeWindow(void** window);
     int32_t GetXComponentSize(const void* window, uint64_t* width, uint64_t* height);
     int32_t GetXComponentOffset(const void* window, double* x, double* y);
-    int32_t GetTouchInfo(const void* window, TouchInfo* touchInfo);
-    int32_t RegisterCallback(NativeXComponentCallback* callback);
+    int32_t GetTouchEvent(const void* window, OH_NativeXComponent_TouchEvent* touchEvent);
+    int32_t RegisterCallback(OH_NativeXComponent_Callback* callback);
 
 private:
     OHOS::Ace::NativeXComponentImpl* xcomponentImpl_ = nullptr;

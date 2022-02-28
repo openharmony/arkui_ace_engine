@@ -259,13 +259,15 @@ bool JsFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskE
     InitializeFrontendDelegate(taskExecutor);
     auto weakEngine = AceType::WeakClaim(AceType::RawPtr(jsEngine_));
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(delegate_));
-    taskExecutor->PostTask([weakEngine, weakDelegate] {
-        auto jsEngine = weakEngine.Upgrade();
-        if (!jsEngine) {
-            return;
-        }
-        jsEngine->Initialize(weakDelegate.Upgrade());
-    }, TaskExecutor::TaskType::JS);
+    taskExecutor->PostTask(
+        [weakEngine, weakDelegate] {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return;
+            }
+            jsEngine->Initialize(weakDelegate.Upgrade());
+        },
+        TaskExecutor::TaskType::JS);
     LOGI("JsFrontend initialize end.");
     return true;
 }
@@ -290,8 +292,8 @@ void JsFrontend::SetAssetManager(const RefPtr<AssetManager>& assetManager)
 void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor)
 {
     Framework::FrontendDelegateImplBuilder builder;
-    builder.loadCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url,
-                                   const RefPtr<Framework::JsAcePage>& jsPage, bool isMainPage) {
+    builder.loadCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                               const std::string& url, const RefPtr<Framework::JsAcePage>& jsPage, bool isMainPage) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -300,7 +302,7 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
     };
 
     builder.transferCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                                       const RefPtr<JsMessageDispatcher>& dispatcher) {
+                                   const RefPtr<JsMessageDispatcher>& dispatcher) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -309,7 +311,7 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
     };
 
     builder.asyncEventCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                         const std::string& eventId, const std::string& param) {
+                                     const std::string& eventId, const std::string& param) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -318,7 +320,7 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
     };
 
     builder.syncEventCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                        const std::string& eventId, const std::string& param) {
+                                    const std::string& eventId, const std::string& param) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -336,7 +338,7 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
     };
 
     builder.updatePageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                         const RefPtr<Framework::JsAcePage>& jsPage) {
+                                     const RefPtr<Framework::JsAcePage>& jsPage) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -362,7 +364,7 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
     };
 
     builder.destroyApplicationCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                                 const std::string& packageName) {
+                                             const std::string& packageName) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -387,8 +389,7 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
         return jsEngine->OnStartContinuation();
     };
 
-    builder.onCompleteContinuationCallBack =
-        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](int32_t code) {
+    builder.onCompleteContinuationCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](int32_t code) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -404,8 +405,7 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
         jsEngine->OnRemoteTerminated();
     };
 
-    builder.onSaveDataCallBack =
-        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](std::string& savedData) {
+    builder.onSaveDataCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](std::string& savedData) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -413,8 +413,8 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
         jsEngine->OnSaveData(savedData);
     };
 
-    builder.onRestoreDataCallBack =
-        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& data) -> bool {
+    builder.onRestoreDataCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                        const std::string& data) -> bool {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return false;
@@ -423,7 +423,7 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
     };
 
     builder.timerCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                    const std::string& callbackId, const std::string& delay, bool isInterval) {
+                                const std::string& callbackId, const std::string& delay, bool isInterval) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -432,7 +432,7 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
     };
 
     builder.mediaQueryCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                         const std::string& callbackId, const std::string& args) {
+                                     const std::string& callbackId, const std::string& args) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -441,7 +441,7 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
     };
 
     builder.requestAnimationCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                               const std::string& callbackId, uint64_t timeStamp) {
+                                           const std::string& callbackId, uint64_t timeStamp) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -450,7 +450,7 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
     };
 
     builder.jsCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                 const std::string& callbackId, const std::string& args) {
+                             const std::string& callbackId, const std::string& args) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -809,7 +809,7 @@ void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const Base
     auto adapter = TypeInfoHelper::DynamicCast<EventToJSONStringAdapter>(&info);
     if (adapter) {
         LOGD("HandleAsyncEvent pageId: %{public}d, eventId: %{public}s", eventMarker.GetData().pageId,
-             eventMarker.GetData().eventId.c_str());
+            eventMarker.GetData().eventId.c_str());
         param = adapter->ToJSONString();
     } else {
         param = eventMarker.GetData().GetEventParam();
@@ -840,9 +840,7 @@ void JsEventHandler::HandleSyncEvent(const EventMarker& eventMarker, const KeyEv
                             .append(",\"repeatCount\":")
                             .append(std::to_string(static_cast<int32_t>(info.repeatTime)))
                             .append(",\"timestamp\":")
-                            .append(std::to_string(static_cast<int32_t>(info.timeStamp)))
-                            .append(",\"timestampStart\":")
-                            .append(std::to_string(static_cast<int32_t>(info.timeStampStart)))
+                            .append(std::to_string(static_cast<int32_t>(info.timeStamp.time_since_epoch().count())))
                             .append(",\"key\":\"")
                             .append(info.key)
                             .append("\"},");
@@ -862,14 +860,14 @@ void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const Gest
     std::string eventParam = std::string("");
     if (eventMarker.GetData().eventType.find("pinch") != std::string::npos) {
         eventParam.append("\"")
-                .append(eventMarker.GetData().eventType)
-                .append("\",{\"scale\":")
-                .append(std::to_string(info.GetScale()))
-                .append(",\"pinchCenterX\":")
-                .append(std::to_string(info.GetPinchCenter().GetX()))
-                .append(",\"pinchCenterY\":")
-                .append(std::to_string(info.GetPinchCenter().GetY()))
-                .append("}");
+            .append(eventMarker.GetData().eventType)
+            .append("\",{\"scale\":")
+            .append(std::to_string(info.GetScale()))
+            .append(",\"pinchCenterX\":")
+            .append(std::to_string(info.GetPinchCenter().GetX()))
+            .append(",\"pinchCenterY\":")
+            .append(std::to_string(info.GetPinchCenter().GetY()))
+            .append("}");
     }
 
     delegate_->FireAsyncEvent(eventMarker.GetData().eventId, eventParam, "");
@@ -887,10 +885,10 @@ void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const Rota
     std::string eventParam = std::string("");
     if (eventMarker.GetData().eventType == "rotate") {
         eventParam.append("\"")
-                .append(eventMarker.GetData().eventType)
-                .append("\",{\"value\":")
-                .append(std::to_string(info.value))
-                .append("}");
+            .append(eventMarker.GetData().eventType)
+            .append("\",{\"value\":")
+            .append(std::to_string(info.value))
+            .append("}");
     }
 
     delegate_->FireAsyncEvent(eventMarker.GetData().eventId, eventParam, "");

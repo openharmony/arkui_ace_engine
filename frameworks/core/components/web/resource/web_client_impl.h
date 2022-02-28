@@ -24,6 +24,23 @@
 namespace OHOS::Ace {
 class WebDelegate;
 
+class DownloadListenerImpl : public OHOS::WebView::DownloadListener {
+public:
+    DownloadListenerImpl() = default;
+    ~DownloadListenerImpl() = default;
+
+    void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
+        const std::string& mimetype, long contentLength) override;
+
+    void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
+    {
+        webDelegate_ = delegate;
+    }
+
+private:
+    WeakPtr<WebDelegate> webDelegate_;
+};
+
 class WebClientImpl : public OHOS::WebView::WebViewClient {
 public:
     WebClientImpl() = default;
@@ -35,8 +52,15 @@ public:
     void OnMessage(const std::string& param) override;
     void OnPageStarted(const std::string& url) override;
     void OnPageFinished(int httpStatusCode, const std::string& url) override;
+    void OnProgressChanged(int newProgress) override;
+    void OnReceivedTitle(const std::string &title) override;
+    void OnGeolocationPermissionsHidePrompt() override;
+    void OnGeolocationPermissionsShowPrompt(const std::string& origin,
+        OHOS::WebView::GeolocationCallback* callback) override;
+
     void OnRequestFocus() override;
-    void OnPageLoadError(int errorCode, const std::string& description, const std::string& failingUrl) override;
+    void onReceivedError(std::shared_ptr<WebView::WebResourceRequest> request,
+        std::shared_ptr<WebView::WebResourceError> error) override;
     bool ShouldOverrideUrlLoading(const std::string& url) override
     {
         return false;

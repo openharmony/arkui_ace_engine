@@ -16,11 +16,11 @@
 #include "adapter/ohos/entrance/ace_ability.h"
 
 #include <regex>
-
 #include <ui/rs_surface_node.h>
+
 #include "ability_process.h"
-#include "dm/display_manager.h"
 #include "display_type.h"
+#include "dm/display_manager.h"
 #include "init_data.h"
 #include "res_config.h"
 #include "resource_manager.h"
@@ -180,7 +180,8 @@ void AceAbility::OnStart(const Want& want)
 
     int32_t width = window->GetRect().width_;
     int32_t height = window->GetRect().height_;
-    LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d", width, height);
+    LOGI("AceAbility: windowConfig: width: %{public}d, height: %{public}d, left: %{public}d, top: %{public}d", width,
+        height, window->GetRect().posX_, window->GetRect().posY_);
     // get density
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplay) {
@@ -191,6 +192,7 @@ void AceAbility::OnStart(const Want& want)
     }
     SystemProperties::InitDeviceInfo(width, height, height >= width ? 0 : 1, density_, false);
     SystemProperties::SetColorMode(ColorMode::LIGHT);
+    SystemProperties::SetWindowPos(window->GetRect().posX_, window->GetRect().posY_);
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     auto resourceManager = GetResourceManager();
@@ -205,12 +207,12 @@ void AceAbility::OnStart(const Want& want)
             AceApplicationInfo::GetInstance().SetLocale((language == nullptr) ? "" : language,
                 (region == nullptr) ? "" : region, (script == nullptr) ? "" : script, "");
         } else {
-           LOGW("localeInfo is null.");
-           AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
+            LOGW("localeInfo is null.");
+            AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
         }
     } else {
-       LOGW("resourceManager is null.");
-       AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
+        LOGW("resourceManager is null.");
+        AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
     }
 
     auto packagePathStr = GetBundleCodePath();
@@ -280,11 +282,25 @@ void AceAbility::OnStart(const Want& want)
         auto assetBasePathStr = { "assets/js/" + srcPath + "/" };
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
     }
+    std::string nativeLibraryPath = appInfo->nativeLibraryPath;
+    if (!nativeLibraryPath.empty()) {
+        if (nativeLibraryPath.back() == '/') {
+            nativeLibraryPath.pop_back();
+        }
+        std::string libPath = GetBundleCodePath();
+        if (libPath.back() == '/') {
+            libPath += nativeLibraryPath;
+        } else {
+            libPath += "/" + nativeLibraryPath;
+        }
+        LOGI("napi lib path = %{private}s", libPath.c_str());
+        Platform::AceContainer::AddLibPath(abilityId_, libPath);
+    }
 
     Ace::Platform::UIEnvCallback callback = nullptr;
 #ifdef ENABLE_ROSEN_BACKEND
-    callback = [ window, thisAbility, id = abilityId_ ] (
-        const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
+    callback = [window, thisAbility, id = abilityId_](
+                   const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
         if (SystemProperties::GetRosenBackendEnabled()) {
             auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
             if (rsUiDirector != nullptr) {
@@ -294,11 +310,11 @@ void AceAbility::OnStart(const Want& want)
                 window->RegisterWindowChangeListener(thisAbility);
 
                 rsUiDirector->SetUITaskRunner(
-                    [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id ]
-                        (const std::function<void()>& task) {
-                            ContainerScope scope(id);
-                            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-                        });
+                    [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id](
+                        const std::function<void()>& task) {
+                        ContainerScope scope(id);
+                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                    });
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);
                 }
@@ -447,9 +463,7 @@ void AceAbility::OnKeyUp(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
         LOGI("flutterAceView is null, keyboard event does not take effect");
         return;
     }
-    int32_t repeatTime = 0; // TODO:repeatTime need to be rebuild
-    auto result = flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent->GetKeyCode(), keyEvent->GetKeyAction(),
-        repeatTime, keyEvent->GetActionTime(), keyEvent->GetActionStartTime());
+    auto result = flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent);
     if (!result) {
         LOGI("AceAbility::OnKeyUp: passed to Ability to process");
         Ability::OnKeyUp(keyEvent);
@@ -468,9 +482,7 @@ void AceAbility::OnKeyDown(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
         LOGI("flutterAceView is null, keyboard event does not take effect");
         return;
     }
-    int32_t repeatTime = 0; // TODO:repeatTime need to be rebuild
-    auto result = flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent->GetKeyCode(), keyEvent->GetKeyAction(),
-        repeatTime, keyEvent->GetActionTime(), keyEvent->GetActionStartTime());
+    auto result = flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent);
     if (!result) {
         LOGI("AceAbility::OnKeyDown: passed to Ability to process");
         Ability::OnKeyDown(keyEvent);
@@ -593,8 +605,10 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeCha
 {
     uint32_t width = rect.width_;
     uint32_t height = rect.height_;
-    LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u", width, height);
+    LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d", width,
+        height, rect.posX_, rect.posY_);
     SystemProperties::SetDeviceOrientation(height >= width ? 0 : 1);
+    SystemProperties::SetWindowPos(rect.posX_, rect.posY_);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
         LOGE("container may be destroyed.");

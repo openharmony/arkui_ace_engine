@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CONTAINER_MODAL_CONTAINER_MODAL_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CONTAINER_MODAL_CONTAINER_MODAL_ELEMENT_H
 
+#include "core/components/flex/flex_component.h"
 #include "core/components/overlay/overlay_element.h"
 #include "core/components/stage/stage_element.h"
 #include "core/pipeline/base/sole_child_element.h"
@@ -34,9 +35,13 @@ public:
 
 private:
     RefPtr<StackElement> GetStackElement() const;
-    RefPtr<Animator> controller_;
-    RefPtr<RenderDisplay> renderDisplay_;
     bool CanShowFloatingTitle();
+    void ChangeFloatingTitleIcon();
+    RefPtr<Animator> controller_;
+    RefPtr<RenderDisplay> floatingTitleDisplay_;
+    RefPtr<BoxElement> floatingTitleBox_;
+    RefPtr<RowComponent> titleChildrenRow_;
+    RefPtr<RowComponent> floatingTitleChildrenRow_;
 };
 
 } // namespace OHOS::Ace

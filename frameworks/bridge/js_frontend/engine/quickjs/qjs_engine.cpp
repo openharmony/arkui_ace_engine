@@ -1452,7 +1452,13 @@ JSValue JsReadText(JSContext* ctx, JSValueConst argv)
 
         auto substrPos = ParseUtf8TextSubstrStartPos(fileText, position);
         auto substrEndPos = ParseUtf8TextSubstrEndPos(fileText, position + length - 1);
-        fileText = fileText.substr(substrPos - 1, substrEndPos - substrPos + 1);
+        if (substrPos - 1 < 0 || substrEndPos - substrPos < 0) {
+            LOGE("JsReadText: Invalid value of substrPos: %{public}d and substrEndPos: %{public}d", substrPos,
+                substrEndPos);
+            return JS_NULL;
+        }
+        fileText =
+            fileText.substr(static_cast<uint32_t>(substrPos - 1), static_cast<uint32_t>(substrEndPos - substrPos + 1));
         HandleEscapeCharaterInUtf8TextForJson(fileText);
     }
 
@@ -3132,8 +3138,10 @@ bool QjsEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 #endif
     RegisterWorker();
     if (delegate && delegate->GetAssetManager()) {
-        std::string packagePath = delegate->GetAssetManager()->GetPackagePath();
-        nativeEngine_->SetPackagePath(packagePath);
+        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+        if (!packagePath.empty()) {
+            nativeEngine_->SetPackagePath(packagePath);
+        }
     }
 
     return ret;

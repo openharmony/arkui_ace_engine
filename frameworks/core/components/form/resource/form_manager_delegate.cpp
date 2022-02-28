@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -265,6 +265,15 @@ void FormManagerDelegate::AddFormErrorCallback(const OnFormErrorCallback& callba
     onFormErrorCallback_ = callback;
 }
 
+void FormManagerDelegate::AddFormUninstallCallback(const OnFormUninstallCallback& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        LOGE("callback is null or has released");
+        return;
+    }
+    onFormUninstallCallback_ = callback;
+}
+
 void FormManagerDelegate::OnActionEvent(const std::string& action)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
@@ -324,8 +333,8 @@ void FormManagerDelegate::OnFormAcquired(const std::string& param)
 void FormManagerDelegate::OnFormUpdate(const std::string& param)
 {
     auto result = ParseMapFromString(param);
-    if (onFormUpdateCallback_) {
-        onFormUpdateCallback_(StringUtils::StringToLongInt(result["formId"]), result["data"]);
+    if (onFormUpdateCallbackForJava_) {
+        onFormUpdateCallbackForJava_(StringUtils::StringToLongInt(result["formId"]), result["data"]);
     }
 }
 
@@ -365,13 +374,16 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJs
             LOGE("update form data success, but update callback is null!!!");
             return;
         }
-        onFormUpdateCallback_(formJsInfo.formId, formJsInfo.formData);
+        onFormUpdateCallback_(formJsInfo.formId, formJsInfo.formData, formJsInfo.imageDataMap);
     }
 }
 
 void FormManagerDelegate::ProcessFormUninstall(const int64_t formId)
 {
-
+    LOGI("ProcessFormUninstall formId:%{public}s", std::to_string(formId).c_str());
+    if (onFormUninstallCallback_) {
+        onFormUninstallCallback_(formId);
+    }
 }
 
 void FormManagerDelegate::OnDeathReceived()

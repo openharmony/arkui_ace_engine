@@ -38,6 +38,7 @@
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
+#include "base/geometry/rect.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
@@ -106,6 +107,42 @@ extern "C" ACE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtim
     LOGI("Ace lib loaded, CreateUIContent.");
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime);
 }
+
+class DragWindowListener : public OHOS::Rosen::IWindowDragListener {
+public:
+    explicit DragWindowListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~DragWindowListener() = default;
+    void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
+    {
+        LOGI("DragWindowListener::OnDrag called.");
+        auto flutterAceView =
+            static_cast<Platform::FlutterAceView*>(Platform::AceContainer::GetContainer(instanceId_)->GetView());
+        if (!flutterAceView) {
+            LOGE("DragWindowListener::OnDrag flutterAceView is null");
+            return;
+        }
+
+        DragEventAction action;
+        switch (event) {
+            case OHOS::Rosen::DragEvent::DRAG_EVENT_END:
+                action = DragEventAction::DRAG_EVENT_END;
+                break;
+            case OHOS::Rosen::DragEvent::DRAG_EVENT_MOVE:
+            case OHOS::Rosen::DragEvent::DRAG_EVENT_OUT:
+                action = DragEventAction::DRAG_EVENT_MOVE;
+                break;
+            case OHOS::Rosen::DragEvent::DRAG_EVENT_IN:
+            default:
+                action = DragEventAction::DRAG_EVENT_START;
+                break;
+        }
+
+        flutterAceView->ProcessDragEvent(x, y, action);
+    }
+
+private:
+    int32_t instanceId_ = -1;
+};
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime) : runtime_(runtime)
 {
@@ -189,9 +226,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
         if (defaultDisplay) {
             density = defaultDisplay->GetVirtualPixelRatio();
-            LOGI("AceAbility: Default display density set: %{public}f", density);
+            LOGI("UIContent: Default display density set: %{public}f", density);
         } else {
-            LOGI("AceAbility: Default display is null, set density failed. Use default density: %{public}f", density);
+            LOGI("UIContent: Default display is null, set density failed. Use default density: %{public}f", density);
         }
     }
     SystemProperties::InitDeviceInfo(width, height, height >= width ? 0 : 1, density, false);
@@ -299,6 +336,15 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                     break;
                 }
             }
+        }
+    }
+    if (appInfo && flutterAssetManager) {
+        std::string nativeLibraryPath = appInfo->nativeLibraryPath;
+        if (!nativeLibraryPath.empty()) {
+            nativeLibraryPath.pop_back();
+            std::string libPath = context->GetBundleCodeDir() + nativeLibraryPath;
+            LOGI("napi lib path = %{private}s", libPath.c_str());
+            flutterAssetManager->SetLibPath(libPath);
         }
     }
     auto pluginUtils = std::make_shared<PluginUtilsImpl>();
@@ -439,9 +485,7 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (container) {
         auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
-        int32_t repeatTime = 0;
-        Platform::FlutterAceView::DispatchKeyEvent(aceView, touchEvent->GetKeyCode(), touchEvent->GetKeyAction(),
-            repeatTime, touchEvent->GetActionTime(), touchEvent->GetActionStartTime());
+        Platform::FlutterAceView::DispatchKeyEvent(aceView, touchEvent);
         return true;
     }
     return false;
@@ -487,6 +531,28 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     }
     config_ = config;
     updateConfig_ = true;
+}
+
+void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode)
+{
+    LOGI("UpdateWindowMode, window mode is %{public}d", mode);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("UpdateWindowMode failed, get container(id=%{public}d) failed", instanceId_);
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGE("UpdateWindowMode failed, pipeline context is null.");
+        return;
+    }
+    if (mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FULLSCREEN ||
+        mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        pipelineContext->ShowContainerTitle(false);
+    } else {
+        pipelineContext->ShowContainerTitle(true);
+    }
 }
 
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
@@ -567,6 +633,19 @@ void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::A
     });
 
     pipelineContext->SetWindowGetModeCallBack([&window]() -> WindowMode { return GetWindowMode(window); });
+
+    pipelineContext->SetGetWindowRectImpl([&window]() -> Rect {
+        Rect rect;
+        if (!window) {
+            return rect;
+        }
+        auto windowRect = window->GetRect();
+        rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+        return rect;
+    });
+
+    dragWindowListener_ = new DragWindowListener(instanceId_);
+    window->RegisterDragListener(dragWindowListener_);
 }
 
 } // namespace OHOS::Ace

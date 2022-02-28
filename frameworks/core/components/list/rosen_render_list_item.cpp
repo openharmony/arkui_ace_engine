@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include "core/components/list/rosen_render_list_item.h"
+
+#include "render_service_client/core/ui/rs_node.h"
 
 #include "base/utils/device_type.h"
 #include "base/utils/system_properties.h"
@@ -114,6 +116,12 @@ void RosenRenderListItem::PaintUniversalBackground(RenderContext& context, const
         LOGE("Paint canvas is null");
         return;
     }
+    auto rsNode = GetRSNode();
+    if (!rsNode) {
+        LOGE("RsNode is null");
+        return;
+    }
+    rsNode->SetPaintOrder(true);
     auto size = GetPaintSize();
     auto margin = GetMarginInPx();
     auto backgroundOffset = offset + margin.GetOffset();

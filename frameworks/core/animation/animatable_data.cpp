@@ -22,7 +22,10 @@ Dimension AnimatableData<Dimension>::Blend(
     const Dimension& start, const Dimension& end, float process)
 {
     float scaleA = process;
-    float scaleB = 1.0f - process;
+    float scaleB = 0.0f;
+    if (!NearEqual(process, 1.0f)) {
+        scaleB = 1.0f - process;
+    }
     return start * scaleB + end * scaleA;
 }
 

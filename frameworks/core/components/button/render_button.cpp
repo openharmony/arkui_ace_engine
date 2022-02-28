@@ -508,7 +508,13 @@ void RenderButton::SetChildrenLayoutSize()
         maxWidth = isWatchText ? NormalizeToPx(TEXT_BUTTON_MAX_WIDTH) : GetLayoutParam().GetMaxSize().Width();
         maxWidth -= widthDelta_;
     }
-    innerLayoutParam.SetMaxSize(Size(maxWidth, buttonSize_.Height()));
+    double height = buttonSize_.Height();
+    if (buttonComponent_->GetDeclarativeFlag()) {
+        if (!heightDefined_ && type_ == ButtonType::NORMAL) {
+            height = GetLayoutParam().GetMaxSize().Height();
+        }
+    }
+    innerLayoutParam.SetMaxSize(Size(maxWidth, height));
     for (const auto& child : GetChildren()) {
         child->Layout(innerLayoutParam);
         childrenSize_.SetWidth(child->GetLayoutSize().Width());

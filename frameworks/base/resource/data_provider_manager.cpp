@@ -32,9 +32,7 @@ std::unique_ptr<DataProviderRes> DataProviderManager::GetDataProviderResFromUri(
 std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderResFromUri(const std::string& uriStr)
 {
     LOGD("DataProviderManagerStandard::GetDataProviderResFromUri start uri: %{private}s", uriStr.c_str());
-    if (!helper_ && dataAbilityHelperImpl_) {
-        helper_ = dataAbilityHelperImpl_();
-    }
+    InitHelper();
     if (!helper_) {
         LOGE("data ability helper is null");
         return nullptr;
@@ -66,6 +64,13 @@ std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderRes
 
     auto result = std::make_unique<DataProviderRes>(std::move(buffer));
     return result;
+}
+
+void DataProviderManagerStandard::InitHelper()
+{
+    if (!helper_ && dataAbilityHelperImpl_) {
+        helper_ = dataAbilityHelperImpl_();
+    }
 }
 
 } // namespace OHOS::Ace

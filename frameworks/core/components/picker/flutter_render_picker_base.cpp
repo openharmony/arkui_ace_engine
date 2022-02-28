@@ -88,6 +88,9 @@ void FlutterRenderPickerBase::Paint(RenderContext& context, const Offset& offset
     paint.paint()->setColor(theme->GetDividerColor().GetValue());
     auto rect = GetOptionsRect(offset, anchorColumn);
     auto dividerSpacing = NormalizeToPx(theme->GetDividerSpacing());
+    if (!NearZero(NormalizeToPx(data_->GetColumnHeight()))) {
+        dividerSpacing = NormalizeToPx(data_->GetColumnHeight());
+    }
     double upperLine = rect.Top() + rect.Height() / 2.0 - dividerSpacing / 2.0;
     double downLine = rect.Top() + rect.Height() / 2.0 + dividerSpacing / 2.0;
     if (!NearZero(dividerThickness) && !data_->GetSubsidiary()) {

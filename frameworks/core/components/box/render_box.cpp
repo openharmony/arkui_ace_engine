@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "base/log/event_report.h"
 #include "base/utils/utils.h"
 #include "core/animation/property_animatable_helper.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/components/box/box_component.h"
 #include "core/components/box/box_component_helper.h"
 #include "core/components/root/root_element.h"
@@ -33,7 +34,6 @@
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/pan_recognizer.h"
 #include "core/gestures/sequenced_recognizer.h"
-#include "core/common/clipboard/clipboard_proxy.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -127,7 +127,6 @@ void RenderBox::Update(const RefPtr<Component>& component)
             onLongPress_->SetIsExternalGesture(true);
         }
 
-        customDragInfo_ = box->GetCustomDragInfo();
         onDragStart_ = box->GetOnDragStartId();
         onDragEnter_ = box->GetOnDragEnterId();
         onDragMove_ = box->GetOnDragMoveId();
@@ -284,19 +283,19 @@ void RenderBox::CreateDragDropRecognizer()
     dragDropGesture_->SetIsExternalGesture(true);
 }
 
-void RenderBox::AddDataToClipboard(const RefPtr<PipelineContext>& context)
+void RenderBox::AddDataToClipboard(const RefPtr<PipelineContext>& context, const std::string& extraInfo)
 {
     auto seleItemSizeStr = JsonUtil::Create(true);
     seleItemSizeStr->Put("width", selectedItemSize_.Width());
     seleItemSizeStr->Put("height", selectedItemSize_.Height());
     seleItemSizeStr->Put("selectedIndex", selectedIndex_);
-    seleItemSizeStr->Put("customDragInfo", customDragInfo_.c_str());
+    seleItemSizeStr->Put("customDragInfo", extraInfo.c_str());
 
     auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
     clipboard->SetData(seleItemSizeStr->ToString());
 }
 
-RefPtr<Component> RenderBox::GenCustomComponent(const RefPtr<PipelineContext>& context, const GestureEvent& info)
+DragItemInfo RenderBox::GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info)
 {
     RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
     event->SetX(context->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
@@ -308,13 +307,7 @@ RefPtr<Component> RenderBox::GenCustomComponent(const RefPtr<PipelineContext>& c
         extraParams->Put("selectedIndex", selectedIndex_);
     }
 
-    auto customComponent = onDragStart_(event, extraParams->ToString());
-    if (!customComponent) {
-        LOGE("Custom component is null.");
-        return nullptr;
-    }
-
-    return customComponent;
+    return onDragStart_(event, extraParams->ToString());
 }
 
 void RenderBox::PanOnActionStart(const GestureEvent& info)
@@ -326,33 +319,41 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
             return;
         }
 
-        auto customComponent = GenCustomComponent(pipelineContext, info);
+        auto dragItemInfo = GenerateDragItemInfo(pipelineContext, info);
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-        auto wp = AceType::WeakClaim(this);
-        auto initRenderNode = wp.Upgrade();
-        if (!initRenderNode) {
-            LOGE("initRenderNode is null.");
+        if (dragItemInfo.pixelMap) {
+            auto wp = AceType::WeakClaim(this);
+            auto initRenderNode = wp.Upgrade();
+            if (!initRenderNode) {
+                LOGE("initRenderNode is null.");
+                return;
+            }
+
+            isDragRenderBox_ = true;
+            pipelineContext->SetInitRenderNode(initRenderNode);
+
+            AddDataToClipboard(pipelineContext, dragItemInfo.extraInfo);
+            if (!dragWindow_) {
+                auto rect = pipelineContext->GetCurrentWindowRect();
+                dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
+                    static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
+                    static_cast<int32_t>(info.GetGlobalPoint().GetY()) + rect.Top(),
+                    dragItemInfo.pixelMap->GetWidth(), dragItemInfo.pixelMap->GetHeight());
+                dragWindow_->SetOffset(rect.Left(), rect.Top());
+                dragWindow_->DrawPixelMap(dragItemInfo.pixelMap);
+            }
             return;
         }
-
-        isDragRenderBox_ = true;
-        pipelineContext->SetInitRenderNode(initRenderNode);
-
-        AddDataToClipboard(pipelineContext);
-        auto positionedComponent = AceType::MakeRefPtr<PositionedComponent>(customComponent);
-        if (!dragWindow_) {
-            dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
-                static_cast<int32_t>(GetGlobalOffset().GetX()), static_cast<int32_t>(GetGlobalOffset().GetY()),
-                static_cast<uint32_t>(positionedComponent->GetWidth()),
-                static_cast<uint32_t>(positionedComponent->GetHeight()));
+#endif
+        if (!dragItemInfo.customComponent) {
+            LOGW("the drag custom component is null");
+            return;
         }
-#else
-        auto stackElement = pipelineContext->GetLastStack();
-        auto positionedComponent = AceType::MakeRefPtr<PositionedComponent>(customComponent);
+        hasDragItem_ = true;
+        auto positionedComponent = AceType::MakeRefPtr<PositionedComponent>(dragItemInfo.customComponent);
         positionedComponent->SetTop(Dimension(GetGlobalOffset().GetY()));
         positionedComponent->SetLeft(Dimension(GetGlobalOffset().GetX()));
         SetLocalPoint(info.GetGlobalPoint() - GetGlobalOffset());
-
         auto updatePosition = [renderBox = AceType::Claim(this)](
                                   const std::function<void(const Dimension&, const Dimension&)>& func) {
             if (!renderBox) {
@@ -360,25 +361,24 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
             }
             renderBox->SetUpdateBuilderFuncId(func);
         };
-
         positionedComponent->SetUpdatePositionFuncId(updatePosition);
+        auto stackElement = pipelineContext->GetLastStack();
         stackElement->PushComponent(positionedComponent);
-#endif
     }
 }
 
 void RenderBox::PanOnActionUpdate(const GestureEvent& info)
 {
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-        if (isDragRenderBox_) {
+        if (isDragRenderBox_ && dragWindow_) {
             int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
             int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
-
             if (dragWindow_) {
                 dragWindow_->MoveTo(x, y);
             }
+            return;
         }
-#else
+#endif
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         LOGE("Context is null.");
@@ -421,27 +421,40 @@ void RenderBox::PanOnActionUpdate(const GestureEvent& info)
         (targetRenderBox->GetOnDragEnter())(event, extraParams->ToString());
     }
     SetPreTargetRenderBox(targetRenderBox);
-#endif
 }
 
 void RenderBox::PanOnActionEnd(const GestureEvent& info)
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-        if (isDragRenderBox_) {
-            isDragRenderBox_ = false;
-        }
-
-        if (dragWindow_) {
-            dragWindow_->Destory();
-            dragWindow_ = nullptr;
-        }
-#else
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         LOGE("Context is null.");
         return;
     }
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+        if (isDragRenderBox_) {
+            isDragRenderBox_ = false;
 
+            if (GetOnDrop()) {
+                RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+                RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
+                event->SetPasteData(pasteData);
+                event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+                event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+
+                auto extraParams = JsonUtil::Create(true);
+                extraParams->Put("selectedIndex", selectedIndex_);
+                extraParams->Put("insertIndex", insertIndex_);
+                (GetOnDrop())(event, extraParams->ToString());
+                pipelineContext->SetInitRenderNode(nullptr);
+            }
+        }
+
+        if (dragWindow_) {
+            dragWindow_->Destory();
+            dragWindow_ = nullptr;
+            return;
+        }
+#endif
     RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
     RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
     event->SetPasteData(pasteData);
@@ -452,8 +465,11 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
     if (GetUpdateBuilderFuncId()) {
         GetUpdateBuilderFuncId()(Dimension(offset.GetX()), Dimension(offset.GetY()));
     }
-    auto stackElement = pipelineContext->GetLastStack();
-    stackElement->PopComponent();
+    if (hasDragItem_) {
+        auto stackElement = pipelineContext->GetLastStack();
+        stackElement->PopComponent();
+    }
+    hasDragItem_ = false;
 
     ACE_DCHECK(GetPreTargetRenderBox() == FindTargetRenderNode<RenderBox>(pipelineContext, info));
     auto targetRenderBox = GetPreTargetRenderBox();
@@ -477,7 +493,6 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
         (targetRenderBox->GetOnDrop())(event, extraParams->ToString());
     }
     SetPreTargetRenderBox(nullptr);
-#endif
 }
 
 void RenderBox::SetSelectedIndex(const GestureEvent& info)
@@ -507,8 +522,8 @@ RefPtr<RenderBox> RenderBox::FindTargetRenderBox(const RefPtr<PipelineContext> c
     if (!pageRenderNode) {
         return nullptr;
     }
-
-    auto targetRenderNode = pageRenderNode->FindDropChild(info.GetGlobalPoint(), info.GetGlobalPoint());
+    auto offset = context->GetStageRect().GetOffset();
+    auto targetRenderNode = pageRenderNode->FindDropChild(info.GetGlobalPoint(), info.GetGlobalPoint() - offset);
     if (!targetRenderNode) {
         return nullptr;
     }

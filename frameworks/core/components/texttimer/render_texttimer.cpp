@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,12 @@
 #include "core/components/texttimer/texttimer_component.h"
 
 namespace OHOS::Ace {
-RenderTextTimer::RenderTextTimer(){}
+RenderTextTimer::RenderTextTimer()
+{
+    textComponent_ = AceType::MakeRefPtr<TextComponent>(std::string(""));
+    renderText_ = AceType::DynamicCast<RenderText>(RenderText::Create());
+    AddChild(renderText_);
+}
 
 RenderTextTimer::~RenderTextTimer()
 {
@@ -38,7 +43,6 @@ void RenderTextTimer::Update(const RefPtr<Component>& component)
         return;
     }
 
-    textComponent_ = timerComponent->GetTextComponent();
     inputCount_ = timerComponent->GetInputCount();
     isCountDown_ = timerComponent->GetIsCountDown();
     format_ = timerComponent->GetFormat();
@@ -84,71 +88,26 @@ void RenderTextTimer::Update(const RefPtr<Component>& component)
             }
         };
         scheduler_ = SchedulerBuilder::Build(callback, context);
+        textComponent_->SetTextStyle(timerComponent->GetTextStyle());
+        UpdateValue(isCountDown_ ? inputCount_ : 0);
+    } else {
+        HandleReset();
     }
 
-    textTimerComponent_ = timerComponent;
-    MarkNeedLayout();
+    MarkNeedRender();
 }
 
 void RenderTextTimer::PerformLayout()
 {
-    if (!renderText_) {
-        LOGE("render text is null.");
-        return;
+    Size layoutSize;
+    const auto& children = GetChildren();
+    if (!children.empty()) {
+        auto child = children.front();
+        child->Layout(GetLayoutParam());
+        child->SetPosition(Offset::Zero());
+        layoutSize = child->GetLayoutSize();
     }
-
-    renderText_->Layout(GetLayoutParam());
-    Size textSize = renderText_->GetLayoutSize();
-    realSize_ = renderText_->GetLayoutSize();
-    realSize_.SetWidth(textSize.Width());
-    realSize_.SetHeight(textSize.Height());
-    double maxWidth = GetLayoutParam().GetMaxSize().Width();
-    if (realSize_.Width() > maxWidth) {
-        realSize_.SetWidth(maxWidth);
-    }
-
-    LayoutParam textLayout;
-    textLayout.SetFixedSize(textSize);
-    double textX = (realSize_.Width() - textSize.Width()) / 2.0; // place center
-
-    double textY = (realSize_.Height() - textSize.Height()) / 2.0; // place center
-    renderText_->SetPosition(Offset(textX, textY));
-    renderText_->Layout(textLayout);
-
-    SetLayoutSize(realSize_);
-}
-
-void RenderTextTimer::UpdateRenders()
-{
-    ClearRenders();
-    GetRenders();
-}
-
-void RenderTextTimer::GetRenders(const RefPtr<RenderNode>& render)
-{
-    if (!render) {
-        LOGE("render node is null.");
-        return;
-    }
-
-    if (AceType::InstanceOf<RenderText>(render)) {
-        renderText_ = AceType::DynamicCast<RenderText>(render);
-        return;
-    }
-
-    for (const auto& child : render->GetChildren()) {
-        GetRenders(child);
-    }
-}
-
-void RenderTextTimer::GetRenders()
-{
-    GetRenders(AceType::Claim(this));
-}
-
-void RenderTextTimer::ClearRenders()
-{
-    renderText_ = nullptr;
+    SetLayoutSize(layoutSize);
 }
 
 void RenderTextTimer::UpdateValue(uint32_t elapsedTime)
@@ -169,7 +128,9 @@ void RenderTextTimer::UpdateValue(uint32_t elapsedTime)
         LOGE("(RenderTextTimer::UpdateValue)render texttimer is null.");
         return;
     }
+    renderText_->Attach(GetContext());
     renderText_->Update(textComponent_);
+    MarkNeedRender();
 }
 
 void RenderTextTimer::Tick(uint64_t duration)

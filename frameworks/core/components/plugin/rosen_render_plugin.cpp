@@ -19,8 +19,8 @@
 
 #include "core/components/plugin/render_plugin.h"
 #include "core/pipeline/base/render_node.h"
-#include "core/pipeline/layers/layer.h"
 #include "core/pipeline/base/rosen_render_context.h"
+#include "core/pipeline/layers/layer.h"
 
 namespace OHOS::Ace {
 

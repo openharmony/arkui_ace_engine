@@ -297,13 +297,31 @@ public:
         onCancel_ = value;
     }
 
-    const EventMarker& GetDialogResult() const
+    const EventMarker& GetDialogAcceptEvent() const
     {
-        return OnDialogResult_;
+        return OnDialogAccept_;
     }
-    void SetDialogResult(const EventMarker& value)
+    void SetDialogAcceptEvent(const EventMarker& value)
     {
-        OnDialogResult_ = value;
+        OnDialogAccept_ = value;
+    }
+
+    const EventMarker& GetDialogCancelEvent() const
+    {
+        return OnDialogCancel_;
+    }
+    void SetDialogCancelEvent(const EventMarker& value)
+    {
+        OnDialogCancel_ = value;
+    }
+
+    const EventMarker& GetDialogChangeEvent() const
+    {
+        return OnDialogChange_;
+    }
+    void SetDialogChangeEvent(const EventMarker& value)
+    {
+        OnDialogChange_ = value;
     }
 
     void ClearColumns();
@@ -557,7 +575,9 @@ private:
     EventMarker onCancel_;
     EventMarker onOkClickId_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
     EventMarker onCancelClickId_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
-    EventMarker OnDialogResult_;
+    EventMarker OnDialogAccept_;
+    EventMarker OnDialogCancel_;
+    EventMarker OnDialogChange_;
 
     Dimension columnHeight_;
 

@@ -31,11 +31,8 @@ void WebElement::SetNewComponent(const RefPtr<Component>& newComponent)
         if (!webSrc_.empty() && webSrc_ != webComponent->GetSrc()) {
             WebClient::GetInstance().UpdateWebviewUrl(webComponent->GetSrc());
         }
-        webSrc_ = webComponent->GetSrc();
-        webComponent->SetJsEnabled(webComponent->GetJsEnabled());
-        webComponent->SetContentAccessEnabled(webComponent->GetContentAccessEnabled());
-        webComponent->SetFileAccessEnabled(webComponent->GetFileAccessEnabled());
         Element::SetNewComponent(webComponent);
+        webComp_ = std::move(webComponent);
     }
 }
 
@@ -43,6 +40,12 @@ void WebElement::OnFocus()
 {
     FocusNode::OnFocus();
     LOGI("web element onfocus");
+    if (webComp_) {
+        auto controller = webComp_->GetController();
+        if (controller) {
+            controller->OnFocus();
+        }
+    }
 }
 
 } // namespace OHOS::Ace

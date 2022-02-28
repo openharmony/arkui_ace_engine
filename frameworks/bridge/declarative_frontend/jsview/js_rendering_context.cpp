@@ -139,6 +139,7 @@ void JSRenderingContext::JsGetWidth(const JSCallbackInfo& info)
 {
     double width = 0.0;
     width = pool_->GetWidth();
+    width = SystemProperties::Px2Vp(width);
     auto returnValue = JSVal(ToJSValue(width));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
@@ -158,6 +159,7 @@ void JSRenderingContext::JsGetHeight(const JSCallbackInfo& info)
 {
     double height = 0.0;
     height = pool_->GetHeight();
+    height = SystemProperties::Px2Vp(height);
     auto returnValue = JSVal(ToJSValue(height));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);

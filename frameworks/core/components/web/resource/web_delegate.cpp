@@ -27,15 +27,16 @@
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
-#include "webview_adapter_helper.h"
+#include "web_hit_testresult.h"
 #include "web_javascript_execute_callback.h"
+#include "web_javascript_result_callback.h"
+#include "webview_adapter_helper.h"
 #endif
 
 namespace OHOS::Ace {
 
 namespace {
 
-constexpr char WEB_METHOD_RELOAD[] = "reload";
 constexpr char WEB_METHOD_ROUTER_BACK[] = "routerBack";
 constexpr char WEB_METHOD_UPDATEURL[] = "updateUrl";
 constexpr char WEB_METHOD_CHANGE_PAGE_URL[] = "changePageUrl";
@@ -64,6 +65,27 @@ constexpr char WEB_ERROR_MSG_CREATEFAIL[] = "create web_delegate failed.";
 
 } // namespace
 
+void ResultOhos::Confirm()
+{
+    if (result_) {
+        result_->Confirm();
+    }
+}
+
+void ResultOhos::Confirm(const std::string &message)
+{
+    if (result_) {
+        result_->Confirm(message);
+    }
+}
+
+void ResultOhos::Cancel()
+{
+    if (result_) {
+        result_->Cancel();
+    }
+}
+
 WebDelegate::~WebDelegate()
 {
     ReleasePlatformResource();
@@ -75,6 +97,13 @@ void WebDelegate::ReleasePlatformResource()
     if (delegate) {
         delegate->Stop();
         delegate->Release();
+    }
+}
+
+void WebGeolocationOhos::Invoke(const std::string &origin, const bool& allow, const bool& retain)
+{
+    if (geolocationCallback_) {
+        geolocationCallback_->Invoke(origin, allow, retain);
     }
 }
 
@@ -255,7 +284,8 @@ void WebDelegate::ExecuteTypeScript(const std::string& jscode, const std::functi
     if (!context) {
         return;
     }
-    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), jscode, callback]() {
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), jscode, callback]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
@@ -270,15 +300,16 @@ void WebDelegate::ExecuteTypeScript(const std::string& jscode, const std::functi
                         }
                         auto context = delegate->context_.Upgrade();
                         if (context) {
-                            context->GetTaskExecutor()->PostTask([callback = std::move(func), result]() {
-                                callback(result);
-                                }, TaskExecutor::TaskType::JS);
+                            context->GetTaskExecutor()->PostTask(
+                                [callback = std::move(func), result]() { callback(result); },
+                                TaskExecutor::TaskType::JS);
                         }
                     });
                 }
                 delegate->webview_->ExecuteJavaScript(jscode, callbackImpl);
             }
-        }, TaskExecutor::TaskType::PLATFORM);
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 
 void WebDelegate::LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
@@ -349,16 +380,17 @@ void WebDelegate::AddJavascriptInterface(const std::string& objectName, const st
     if (!context) {
         return;
     }
-
-    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), objectName, methodList]() {
-        auto delegate = weak.Upgrade();
-        if (!delegate) {
-            return;
-        }
-        if (delegate->webview_) {
-            delegate->webview_->AddJavascriptInterface(objectName, methodList);
-        }
-        }, TaskExecutor::TaskType::PLATFORM);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), objectName, methodList]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->AddJavascriptInterface(objectName, methodList);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 void WebDelegate::RemoveJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList)
 {
@@ -366,16 +398,41 @@ void WebDelegate::RemoveJavascriptInterface(const std::string& objectName, const
     if (!context) {
         return;
     }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), objectName, methodList]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->RemoveJavascriptInterface(objectName, methodList);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
 
-    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), objectName, methodList]() {
-        auto delegate = weak.Upgrade();
-        if (!delegate) {
-            return;
-        }
-        if (delegate->webview_) {
-            delegate->webview_->RemoveJavascriptInterface(objectName, methodList);
-        }
-        }, TaskExecutor::TaskType::PLATFORM);
+void WebDelegate::SetWebViewJavaScriptResultCallBack(
+    const WebController::JavaScriptCallBackImpl&& javaScriptCallBackImpl)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), javaScriptCallBackImpl]() {
+            auto delegate = weak.Upgrade();
+            if (delegate == nullptr || delegate->webview_ == nullptr) {
+                return;
+            }
+            auto webJSResultCallBack = std::make_shared<WebJavaScriptResultCallBack>(delegate->context_);
+            if (webJSResultCallBack) {
+                LOGI("WebDelegate SetWebViewJavaScriptResultCallBack");
+                webJSResultCallBack->SetJavaScriptCallBack(std::move(javaScriptCallBackImpl));
+                delegate->webview_->SetWebViewJavaScriptResultCallBack(webJSResultCallBack);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 
 void WebDelegate::RequestFocus()
@@ -399,10 +456,46 @@ void WebDelegate::RequestFocus()
 
 int WebDelegate::GetHitTestResult()
 {
+    WebHitTestType webHitType = WebHitTestType::UNKNOWN;
     if (webview_) {
-        return webview_->GetHitTestResult().GetType();
+        int hitType = webview_->GetHitTestResult().GetType();
+        switch (hitType) {
+            case OHOS::WebView::HitTestResult::UNKNOWN_TYPE:
+                webHitType = WebHitTestType::UNKNOWN;
+                break;
+            case OHOS::WebView::HitTestResult::ANCHOR_TYPE:
+                webHitType = WebHitTestType::HTTP;
+                break;
+            case OHOS::WebView::HitTestResult::PHONE_TYPE:
+                webHitType = WebHitTestType::PHONE;
+                break;
+            case OHOS::WebView::HitTestResult::GEO_TYPE:
+                webHitType = WebHitTestType::MAP;
+                break;
+            case OHOS::WebView::HitTestResult::EMAIL_TYPE:
+                webHitType = WebHitTestType::EMAIL;
+                break;
+            case OHOS::WebView::HitTestResult::IMAGE_TYPE:
+                webHitType = WebHitTestType::IMG;
+                break;
+            case OHOS::WebView::HitTestResult::IMAGE_ANCHOR_TYPE:
+                webHitType = WebHitTestType::HTTP_IMG;
+                break;
+            case OHOS::WebView::HitTestResult::SRC_ANCHOR_TYPE:
+                webHitType = WebHitTestType::HTTP;
+                break;
+            case OHOS::WebView::HitTestResult::SRC_IMAGE_ANCHOR_TYPE:
+                webHitType = WebHitTestType::HTTP_IMG;
+                break;
+            case OHOS::WebView::HitTestResult::EDIT_TEXT_TYPE:
+                webHitType = WebHitTestType::EDIT;
+                break;
+            default:
+                LOGW("unkonw hit test type:%{public}d", static_cast<int>(hitType));
+                break;
+        }
     }
-    return 0;
+    return static_cast<int>(webHitType);
 }
 
 void WebDelegate::CreatePluginResource(
@@ -508,6 +601,28 @@ void WebDelegate::InitWebEvent()
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
+void WebDelegate::OnPageErrorOHOS(const int& errorCode, const std::string& description, const std::string& url)
+{
+    if (onPageError_) {
+        std::string paramUrl = std::string(R"(")").append(url).append(std::string(R"(")")).append(",");
+        std::string paramErrorCode = std::string(R"(")")
+                                         .append(NTC_PARAM_ERROR_CODE)
+                                         .append(std::string(R"(")"))
+                                         .append(":")
+                                         .append(std::to_string(errorCode))
+                                         .append(",");
+
+        std::string paramDesc = std::string(R"(")")
+                                    .append(NTC_PARAM_DESCRIPTION)
+                                    .append(std::string(R"(")"))
+                                    .append(":")
+                                    .append(std::string(R"(")").append(description).append(std::string(R"(")")));
+        std::string errorParam =
+            std::string(R"("error",{"url":)").append((paramUrl + paramErrorCode + paramDesc).append("},null"));
+        onPageError_(errorParam);
+    }
+}
+
 void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surface> surface)
 {
     state_ = State::CREATING;
@@ -542,10 +657,52 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
     }
 
     SetWebCallBack();
+    if (!pipelineContext->GetIsDeclarative()) {
+        RegisterOHOSWebEventAndMethord();
+    }
+    
     onPageFinishedV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
         webComponent_->GetPageFinishedEventId(), pipelineContext);
+    onPageStartedV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetPageStartedEventId(), pipelineContext);
+    onProgressChangeV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetProgressChangeEventId(), pipelineContext);
+    onTitleReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetTitleReceiveEventId(), pipelineContext);
+    onGeolocationHideV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetGeolocationHideEventId(), pipelineContext);
+    onGeolocationShowV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetGeolocationShowEventId(), pipelineContext);
+    onFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetOnFocusEventId(), pipelineContext);
     onRequestFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
         webComponent_->GetRequestFocusEventId(), pipelineContext);
+    onDownloadStartV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetDownloadStartEventId(), pipelineContext);
+}
+
+void WebDelegate::RegisterOHOSWebEventAndMethord()
+{
+    auto reloadCallback = [weak = WeakClaim(this)]() {
+    auto delegate = weak.Upgrade();
+        if (!delegate) {
+            return false;
+        }
+        delegate->Reload();
+        return true;
+    };
+    WebClient::GetInstance().RegisterReloadCallback(reloadCallback);
+
+    auto webCom = webComponent_;
+    if (!webCom->GetPageStartedEventId().IsEmpty()) {
+        onPageStarted_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetPageStartedEventId(), context_);
+    }
+    if (!webCom->GetPageFinishedEventId().IsEmpty()) {
+        onPageFinished_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetPageFinishedEventId(), context_);
+    }
+    if (!webCom->GetPageErrorEventId().IsEmpty()) {
+        onPageError_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetPageErrorEventId(), context_);
+    }
 }
 
 void WebDelegate::SetWebCallBack()
@@ -648,6 +805,15 @@ void WebDelegate::SetWebCallBack()
                 }
                 return 0;
             });
+        webController->SetWebViewJavaScriptResultCallBackImpl([weak = WeakClaim(this), uiTaskExecutor](
+            WebController::JavaScriptCallBackImpl&& javaScriptCallBackImpl) {
+                uiTaskExecutor.PostTask([weak, javaScriptCallBackImpl]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->SetWebViewJavaScriptResultCallBack(std::move(javaScriptCallBackImpl));
+                    }
+                });
+            });
         webController->SetAddJavascriptInterfaceImpl([weak = WeakClaim(this), uiTaskExecutor](
             std::string objectName, const std::vector<std::string>& methodList) {
                 uiTaskExecutor.PostTask([weak, objectName, methodList]() {
@@ -663,6 +829,33 @@ void WebDelegate::SetWebCallBack()
                     auto delegate = weak.Upgrade();
                     if (delegate) {
                         delegate->RemoveJavascriptInterface(objectName, methodList);
+                    }
+                });
+            });
+        webController->SetOnInactiveImpl(
+            [weak = WeakClaim(this), uiTaskExecutor]() {
+                uiTaskExecutor.PostTask([weak]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->OnInactive();
+                    }
+                });
+            });
+        webController->SetOnActiveImpl(
+            [weak = WeakClaim(this), uiTaskExecutor]() {
+                uiTaskExecutor.PostTask([weak]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->OnActive();
+                    }
+                });
+            });
+        webController->SetOnFocusImpl(
+            [weak = WeakClaim(this), uiTaskExecutor]() {
+                uiTaskExecutor.PostTask([weak]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->OnFocus();
                     }
                 });
             });
@@ -719,6 +912,12 @@ void WebDelegate::InitWebViewWithWindow()
             auto webviewClient = std::make_shared<WebClientImpl>();
             webviewClient->SetWebDelegate(weak);
             delegate->webview_->SetWebViewClient(webviewClient);
+
+            // Set downloadListenerImpl
+            auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>();
+            downloadListenerImpl->SetWebDelegate(weak);
+            delegate->webview_->SetDownloadListener(downloadListenerImpl);
+
             std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
             setting->SetDomStorageEnabled(true);
             setting->SetJavaScriptCanOpenWindowsAutomatically(true);
@@ -752,7 +951,6 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             if (!app_path.empty()) {
                 initArgs.web_engine_args_to_add.push_back(std::string("--user-data-dir=").append(app_path));
             }
-
             sptr<Surface> surface = surfaceWeak.promote();
             if (surface == nullptr) {
                 LOGE("surface is nullptr or has expired");
@@ -770,13 +968,23 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             }
             auto webviewClient = std::make_shared<WebClientImpl>();
             webviewClient->SetWebDelegate(weak);
+            auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>();
+            downloadListenerImpl->SetWebDelegate(weak);
             delegate->webview_->SetWebViewClient(webviewClient);
+            delegate->webview_->SetDownloadListener(downloadListenerImpl);
+
             std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
-            setting->SetDomStorageEnabled(true);
+            setting->SetDomStorageEnabled(component->GetDomStorageAccessEnabled());
             setting->SetJavaScriptCanOpenWindowsAutomatically(true);
             setting->SetJavaScriptEnabled(component->GetJsEnabled());
             setting->SetAllowFileAccess(component->GetFileAccessEnabled());
             setting->SetAllowContentAccess(component->GetContentAccessEnabled());
+            setting->SetBlockNetworkImage(component->GetOnLineImageAccessEnabled());
+            setting->SetLoadsImagesAutomatically(component->GetImageAccessEnabled());
+            setting->SetMixedContentMode(
+                static_cast<OHOS::WebView::WebSettings::MixedContentMode>(component->GetMixedMode()));
+            setting->SetSupportZoom(component->GetZoomAccessEnabled());
+            setting->SetGeolocationEnabled(component->GetGeolocationAccessEnabled());
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -798,6 +1006,140 @@ void WebDelegate::Resize(const double& width, const double& height)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateJavaScriptEnabled(const bool& isJsEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isJsEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                setting->SetJavaScriptEnabled(isJsEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateAllowFileAccess(const bool& isFileAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isFileAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                setting->SetAllowFileAccess(isFileAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), onLineImageAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                setting->SetBlockNetworkImage(onLineImageAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateLoadsImagesAutomatically(const bool& isImageAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isImageAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                setting->SetLoadsImagesAutomatically(isImageAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateMixedContentMode(const MixedModeContent& mixedMode)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), mixedMode]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                setting->SetMixedContentMode(static_cast<OHOS::WebView::WebSettings::MixedContentMode>(mixedMode));
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateSupportZoom(const bool& isZoomAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isZoomAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                setting->SetSupportZoom(isZoomAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+void WebDelegate::UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isDomStorageAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                setting->SetDomStorageEnabled(isDomStorageAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+void WebDelegate::UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isGeolocationAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                setting->SetGeolocationEnabled(isGeolocationAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::LoadUrl()
 {
     auto context = context_.Upgrade();
@@ -812,6 +1154,51 @@ void WebDelegate::LoadUrl()
             }
         },
         TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::OnInactive()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->OnPause();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::OnActive()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->OnResume();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::OnFocus()
+{
+    if (onFocusV2_) {
+        onFocusV2_(std::make_shared<LoadWebOnFocusEvent>(""));
+    }
 }
 
 sptr<OHOS::Rosen::Window> WebDelegate::CreateWindow()
@@ -909,9 +1296,27 @@ void WebDelegate::RemoveReleasedCallback()
 
 void WebDelegate::Reload()
 {
+#ifdef OHOS_STANDARD_SYSTEM
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->Reload();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+#else
     hash_ = MakeResourceHash();
-    reloadMethod_ = MakeMethodHash(WEB_METHOD_RELOAD);
+    reloadMethod_ = MakeMethodHash("reload");
     CallResRegisterMethod(reloadMethod_, WEB_PARAM_NONE, nullptr);
+#endif
 }
 
 void WebDelegate::UpdateUrl(const std::string& url)
@@ -958,6 +1363,11 @@ void WebDelegate::OnPageStarted(const std::string& param)
         std::string urlParam = std::string(R"("pagestart",{"url":)").append(paramStart.append("},null"));
         onPageStarted_(urlParam);
     }
+
+    // ace 2.0
+    if (onPageStartedV2_) {
+        onPageStartedV2_(std::make_shared<LoadWebPageStartEvent>(param));
+    }
 }
 
 void WebDelegate::OnPageFinished(const std::string& param)
@@ -970,6 +1380,49 @@ void WebDelegate::OnPageFinished(const std::string& param)
     // ace 2.0
     if (onPageFinishedV2_) {
         onPageFinishedV2_(std::make_shared<LoadWebPageFinishEvent>(param));
+    }
+}
+
+void WebDelegate::OnProgressChanged(int param)
+{
+    // ace 2.0
+    if (onProgressChangeV2_) {
+        onProgressChangeV2_(std::make_shared<LoadWebProgressChangeEvent>(param));
+    }
+}
+
+void WebDelegate::OnReceivedTitle(const std::string& param)
+{
+    // ace 2.0
+    if (onTitleReceiveV2_) {
+        onTitleReceiveV2_(std::make_shared<LoadWebTitleReceiveEvent>(param));
+    }
+}
+
+void WebDelegate::OnGeolocationPermissionsHidePrompt()
+{
+    // ace 2.0
+    if (onGeolocationHideV2_) {
+        onGeolocationHideV2_(std::make_shared<LoadWebGeolocationHideEvent>(""));
+    }
+}
+
+void WebDelegate::OnGeolocationPermissionsShowPrompt(const std::string& origin,
+    OHOS::WebView::GeolocationCallback* callback)
+{
+    // ace 2.0
+    if (onGeolocationShowV2_) {
+        auto geolocation = AceType::MakeRefPtr<WebGeolocationOhos>(callback);
+        onGeolocationShowV2_(std::make_shared<LoadWebGeolocationShowEvent>(origin, geolocation));
+    }
+}
+
+void WebDelegate::OnDownloadStart(const std::string& url, const std::string& userAgent,
+    const std::string& contentDisposition, const std::string& mimetype, long contentLength)
+{
+    if (onDownloadStartV2_) {
+        onDownloadStartV2_(std::make_shared<DownloadStartEvent>(url, userAgent, contentDisposition,
+            mimetype, contentLength));
     }
 }
 

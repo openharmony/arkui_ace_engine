@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -124,19 +124,6 @@ public:
 
     // Called when page context attached, subclass can initialize object which needs page context.
     virtual void OnAttachContext() {}
-
-    void Render()
-    {
-        if (!needRender_) {
-            return;
-        }
-        PerformRender();
-        needRender_ = false;
-        OnRenderFinish();
-    }
-
-    // Each subclass should override this function for actual render operation.
-    virtual void PerformRender() {}
 
     virtual void FinishRender(const std::unique_ptr<DrawDelegate>& delegate, const Rect& dirty) {}
 
@@ -503,6 +490,11 @@ public:
             OnHiddenChanged(hidden);
             if (!inRecursion && SystemProperties::GetRosenBackendEnabled()) {
                 MarkParentNeedRender();
+            }
+            if (hidden_) {
+                disableTouchEvent_ = true;
+            } else {
+                disableTouchEvent_ = false;
             }
         }
         for (auto& child : children_) {
@@ -1164,7 +1156,7 @@ protected:
     };
     virtual void OnPositionChanged() {};
     virtual void OnSizeChanged() {};
-    virtual void OnRenderFinish() {};
+    virtual void OnRenderFinish(RenderContext& context) {};
     virtual void OnStatusChanged(RenderStatus renderStatus) {};
     virtual void OnHiddenChanged(bool hidden) {};
     virtual void OnWindowBlurChanged() {};

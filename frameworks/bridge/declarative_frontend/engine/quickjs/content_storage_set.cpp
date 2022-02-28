@@ -23,7 +23,6 @@ std::map<int32_t, QJSRef<QJSValue>> ContentStorageSet::contentStorageSet_;
 std::map<int32_t, QJSRef<QJSValue>> ContentStorageSet::contextSet_;
 std::map<int32_t, NativeReference*> ContentStorageSet::lazyContentStorageSet_;
 std::map<int32_t, NativeReference*> ContentStorageSet::lazyContextSet_;
-bool ContentStorageSet::runtimeInited_ = false;
 
 QJSRef<QJSValue> ContentStorageSet::GetCurrentStorage()
 {

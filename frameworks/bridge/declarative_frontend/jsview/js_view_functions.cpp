@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
 
 #include "base/log/ace_trace.h"
 #include "core/pipeline/base/composed_element.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 

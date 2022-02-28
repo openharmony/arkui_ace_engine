@@ -94,6 +94,7 @@ void JSProgress::JSBind(BindingTarget globalObj)
     JSClass<JSProgress>::StaticMethod("color", &JSProgress::SetColor, opt);
     JSClass<JSProgress>::StaticMethod("circularStyle", &JSProgress::SetCircularStyle, opt);
     JSClass<JSProgress>::StaticMethod("cricularStyle", &JSProgress::SetCircularStyle, opt);
+    JSClass<JSProgress>::StaticMethod("style", &JSProgress::SetCircularStyle, opt);
     JSClass<JSProgress>::StaticMethod("backgroundColor", &JSProgress::JsBackgroundColor, opt);
     JSClass<JSProgress>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSProgress>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -109,6 +110,10 @@ void JSProgress::SetValue(double value)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto progress = AceType::DynamicCast<ProgressComponent>(component);
+    if (!progress) {
+        LOGI("progress component is null.");
+        return;
+    }
     progress->SetValue(value);
 }
 
@@ -116,6 +121,10 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto progress = AceType::DynamicCast<ProgressComponent>(component);
+    if (!progress) {
+        LOGI("progress component is null.");
+        return;
+    }
     RefPtr<TrackComponent> track = progress->GetTrack();
 
     Color colorVal;
@@ -134,6 +143,10 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto progress = AceType::DynamicCast<ProgressComponent>(component);
+    if (!progress) {
+        LOGI("progress component is null.");
+        return;
+    }
     RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
 
     Dimension strokeWidthDimension;

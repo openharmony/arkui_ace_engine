@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -285,7 +285,7 @@ void RosenRenderImage::Update(const RefPtr<Component>& component)
     // curImageSrc represents the picture currently shown and imageSrc represents next picture to be shown
     imageLoadingStatus_ = (sourceInfo_ != curSourceInfo_) ? ImageLoadingStatus::UPDATING : imageLoadingStatus_;
     UpdateRenderAltImage(component);
-    if (proceedPreviousLoading_ && !sourceInfo_.IsSvg()) {
+    if (proceedPreviousLoading_ && !sourceInfo_.IsSvg() && sourceInfo_.GetSrcType() != SrcType::MEMORY) {
         LOGI("Proceed previous loading, imageSrc is %{private}s, image loading status: %{public}d",
             sourceInfo_.ToString().c_str(), imageLoadingStatus_);
         return;
@@ -583,15 +583,15 @@ void RosenRenderImage::ApplyBorderRadius(
 
 void RosenRenderImage::ApplyColorFilter(SkPaint& paint)
 {
-    if (!color_.has_value()) {
-        return;
-    }
-    Color color = color_.value();
 #ifdef USE_SYSTEM_SKIA
     if (imageRenderMode_ == ImageRenderMode::TEMPLATE) {
         paint.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(GRAY_COLOR_MATRIX));
         return;
     }
+    if (!color_.has_value()) {
+        return;
+    }
+    Color color = color_.value();
     paint.setColorFilter(SkColorFilter::MakeModeFilter(
         SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()), SkBlendMode::kPlus));
 #else
@@ -599,6 +599,10 @@ void RosenRenderImage::ApplyColorFilter(SkPaint& paint)
         paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
         return;
     }
+    if (!color_.has_value()) {
+        return;
+    }
+    Color color = color_.value();
     paint.setColorFilter(SkColorFilters::Blend(
         SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()), SkBlendMode::kPlus));
 #endif
@@ -779,7 +783,8 @@ bool RosenRenderImage::NeedUploadImageObjToGpu()
         resizeCallLoadImage_ =
             !sourceChange && NeedResize() && (imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS);
     }
-    return newSourceCallLoadImage || (resizeCallLoadImage_ && autoResize_);
+    return (newSourceCallLoadImage && (background_ || resizeTarget_.IsValid())) ||
+           (resizeCallLoadImage_ && autoResize_);
 }
 
 void RosenRenderImage::UpLoadImageDataForPaint()

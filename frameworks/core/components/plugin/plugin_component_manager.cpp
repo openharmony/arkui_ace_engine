@@ -18,11 +18,12 @@
 #include <map>
 #include <vector>
 
-#include "base/json/json_util.h"
-#include "base/log/log.h"
-#include "ui_service_mgr_client.h"
 #include "sa_mgr_client.h"
 #include "system_ability_definition.h"
+#include "ui_service_mgr_client.h"
+
+#include "base/json/json_util.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
 constexpr long FOO_MAX_LEN = 20 * 1024 * 1024;

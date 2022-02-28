@@ -63,6 +63,7 @@ public:
 
     static RefPtr<JsAcePage> GetRunningPage(int32_t instanceId);
     static RefPtr<JsAcePage> GetStagingPage(int32_t instanceId);
+    static shared_ptr<JsRuntime> GetCurrentRuntime();
     static void PostJsTask(const shared_ptr<JsRuntime>&, std::function<void()>&& task);
     static void TriggerPageUpdate(const shared_ptr<JsRuntime>&);
     static RefPtr<PipelineContext> GetPipelineContext(const shared_ptr<JsRuntime>& runtime);
@@ -111,7 +112,7 @@ public:
         return frontendDelegate_;
     }
 
-    static shared_ptr<JsRuntime> GetJsRuntime()
+    shared_ptr<JsRuntime> GetJsRuntime()
     {
         return runtime_;
     }
@@ -146,15 +147,15 @@ private:
     RefPtr<JsAcePage> runningPage_;
     RefPtr<JsAcePage> stagingPage_;
 
-    static thread_local shared_ptr<JsRuntime> runtime_;
-    static std::unordered_map<int32_t, WeakPtr<JsiDeclarativeEngineInstance>> engineInstaneMap_;
+    shared_ptr<JsRuntime> runtime_;
     RefPtr<FrontendDelegate> frontendDelegate_;
     WeakPtr<JsMessageDispatcher> dispatcher_;
     int32_t instanceId_ = 0;
     mutable std::mutex mutex_;
     bool isDebugMode_ = true;
     bool usingSharedRuntime_ = false;
-    static bool aceModuleInited_;
+    static bool isModulePreloaded_;
+    static bool isModuleInitialized_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngineInstance);
 };
@@ -272,7 +273,7 @@ private:
 
     RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
 
-    NativeXComponent *nativeXComponent_ = nullptr;
+    OH_NativeXComponent *nativeXComponent_ = nullptr;
 
     int32_t instanceId_ = 0;
     void* runtime_ = nullptr;
