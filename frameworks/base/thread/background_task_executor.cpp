@@ -73,7 +73,7 @@ BackgroundTaskExecutor::~BackgroundTaskExecutor()
     }
 }
 
-bool BackgroundTaskExecutor::PostTask(Task&& task)
+bool BackgroundTaskExecutor::PostTask(Task&& task, BgTaskPriority priority)
 {
     if (!task) {
         return false;
@@ -83,12 +83,19 @@ bool BackgroundTaskExecutor::PostTask(Task&& task)
     if (!running_) {
         return false;
     }
-    tasks_.emplace_back(std::move(task));
+    switch (priority) {
+        case BgTaskPriority::LOW:
+            lowPriorityTasks_.emplace_back(std::move(task));
+            break;
+        default:
+            tasks_.emplace_back(std::move(task));
+            break;
+    }
     condition_.notify_one();
     return true;
 }
 
-bool BackgroundTaskExecutor::PostTask(const Task& task)
+bool BackgroundTaskExecutor::PostTask(const Task& task, BgTaskPriority priority)
 {
     if (!task) {
         return false;
@@ -98,7 +105,14 @@ bool BackgroundTaskExecutor::PostTask(const Task& task)
     if (!running_) {
         return false;
     }
-    tasks_.emplace_back(task);
+    switch (priority) {
+        case BgTaskPriority::LOW:
+            lowPriorityTasks_.emplace_back(task);
+            break;
+        default:
+            tasks_.emplace_back(task);
+            break;
+    }
     condition_.notify_one();
     return true;
 }
@@ -150,7 +164,7 @@ void BackgroundTaskExecutor::ThreadLoop(uint32_t threadNo)
     const uint32_t purgeFlag = (1 << (threadNo - 1));
     std::unique_lock<std::mutex> lock(mutex_);
     while (running_) {
-        if (tasks_.empty()) {
+        if (tasks_.empty() && lowPriorityTasks_.empty()) {
             if ((purgeFlags_ & purgeFlag) != purgeFlag) {
                 condition_.wait(lock);
                 continue;
@@ -163,9 +177,14 @@ void BackgroundTaskExecutor::ThreadLoop(uint32_t threadNo)
             purgeFlags_ &= ~purgeFlag;
             continue;
         }
-
-        task = std::move(tasks_.front());
-        tasks_.pop_front();
+        // deal with tasks_ first. do lowPriorityTasks_ only when all tasks_ done.
+        if (!tasks_.empty()) {
+            task = std::move(tasks_.front());
+            tasks_.pop_front();
+        } else {
+            task = std::move(lowPriorityTasks_.front());
+            lowPriorityTasks_.pop_front();
+        }
 
         lock.unlock();
         // Execute the task and clear after execution.

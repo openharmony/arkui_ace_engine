@@ -23,6 +23,7 @@
 #include "base/network/download_manager.h"
 #include "base/resource/ace_res_config.h"
 #include "base/resource/asset_manager.h"
+#include "base/thread/background_task_executor.h"
 #include "base/utils/string_utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
@@ -52,16 +53,6 @@ char* realpath(const char* path, char* resolved_path)
 #endif
 
 } // namespace
-
-void ImageLoader::CacheResizedImage(const sk_sp<SkImage>& image, const std::string& key)
-{
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-    auto data = image->encodeToData(SkEncodedImageFormat::kPNG, 100);
-    if (data) {
-        ImageCache::WriteCacheFile(key, data->data(), data->size());
-    }
-#endif
-}
 
 std::string ImageLoader::RemovePathHead(const std::string& uri)
 {
@@ -164,7 +155,7 @@ sk_sp<SkData> FileImageLoader::LoadImageData(
                        .append(bundleName)
                        .append("/files/")           // infix of absolute path
                        .append(filePath.substr(4)); // 4 is the length of "app/" from "internal://app/"
-    }\
+    }
     if (filePath.length() > PATH_MAX) {
         LOGE("src path is too long");
         return nullptr;
@@ -207,8 +198,12 @@ sk_sp<SkData> DataProviderImageLoader::LoadImageData(
         return nullptr;
     }
     auto imageData = dataRes->GetData();
-    ImageCache::WriteCacheFile(src, imageData.data(), imageData.size());
-    return SkData::MakeWithCopy(imageData.data(), imageData.size());
+    sk_sp<SkData> data = SkData::MakeWithCopy(imageData.data(), imageData.size());
+    BackgroundTaskExecutor::GetInstance().PostTask(
+        [ src, imgData = std::move(imageData) ] () {
+            ImageCache::WriteCacheFile(src, imgData.data(), imgData.size());
+        }, BgTaskPriority::LOW);
+    return data;
 }
 
 sk_sp<SkData> AssetImageLoader::LoadImageData(
@@ -295,17 +290,10 @@ sk_sp<SkData> NetworkImageLoader::LoadImageData(
     }
     sk_sp<SkData> data = SkData::MakeWithCopy(imageData.data(), imageData.size());
     // 3. write it into file cache.
-    auto pipelineContext = context.Upgrade();
-    if (!pipelineContext) {
-        LOGE("invalid pipeline context");
-        return nullptr;
-    }
-    pipelineContext->GetTaskExecutor()->PostTask(
+    BackgroundTaskExecutor::GetInstance().PostTask(
         [ uri, imgData = std::move(imageData) ] () {
             ImageCache::WriteCacheFile(uri, imgData.data(), imgData.size());
-        },
-        TaskExecutor::TaskType::IO);
-
+        }, BgTaskPriority::LOW);
     return data;
 }
 
