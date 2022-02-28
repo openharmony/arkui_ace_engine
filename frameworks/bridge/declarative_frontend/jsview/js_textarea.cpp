@@ -25,8 +25,6 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/text_field/text_field_component.h"
-#include "core/components/text_field/textfield_theme.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -104,6 +102,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("create", &JSTextArea::Create, opt);
     JSClass<JSTextArea>::StaticMethod("placeholderColor", &JSTextArea::SetPlaceholderColor);
     JSClass<JSTextArea>::StaticMethod("placeholderFont", &JSTextArea::SetPlaceholderFont);
+    JSClass<JSTextArea>::StaticMethod("backgroundColor", &JSTextArea::SetBackgroundColor);
     JSClass<JSTextArea>::StaticMethod("textAlign", &JSTextArea::SetTextAlign);
     JSClass<JSTextArea>::StaticMethod("caretColor", &JSTextArea::SetCaretColor);
     JSClass<JSTextArea>::StaticMethod("height", &JSTextArea::JsHeight);
@@ -128,6 +127,39 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::Bind(globalObj);
 }
 
+void JSTextArea::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
+    const RefPtr<TextFieldComponent>& component, const Border& boxBorder,
+    const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme)
+{
+    RefPtr<Decoration> decoration = component->GetDecoration();
+    RefPtr<Decoration> boxDecoration = boxComponent->GetBackDecoration();
+    if (!decoration) {
+        decoration = AceType::MakeRefPtr<Decoration>();
+    }
+    if (boxDecoration) {
+        Border border = decoration->GetBorder();
+        border.SetLeftEdge(boxBorder.Left());
+        border.SetRightEdge(boxBorder.Right());
+        border.SetTopEdge(boxBorder.Top());
+        border.SetBottomEdge(boxBorder.Bottom());
+        border.SetBorderRadius(textFieldTheme->GetBorderRadius());
+        decoration->SetBorder(border);
+        component->SetOriginBorder(decoration->GetBorder());
+
+        if (boxDecoration->GetImage() || boxDecoration->GetGradient().IsValid()) {
+            // clear box properties except background image and radius.
+            boxDecoration->SetBackgroundColor(Color::TRANSPARENT);
+            Border border;
+            border.SetBorderRadius(textFieldTheme->GetBorderRadius());
+            boxDecoration->SetBorder(border);
+        } else {
+            boxDecoration = AceType::MakeRefPtr<Decoration>();
+            boxDecoration->SetBorderRadius(textFieldTheme->GetBorderRadius());
+            boxComponent->SetBackDecoration(boxDecoration);
+        }
+    }
+}
+
 void JSTextArea::Create(const JSCallbackInfo& info)
 {
     RefPtr<TextFieldComponent> textAreaComponent = AceType::MakeRefPtr<TextFieldComponent>();
@@ -137,6 +169,13 @@ void JSTextArea::Create(const JSCallbackInfo& info)
 
     ViewStackProcessor::GetInstance()->Push(textAreaComponent);
     InitDefaultStyle();
+    Border boxBorder;
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto theme = GetTheme<TextFieldTheme>();
+    if (boxComponent->GetBackDecoration()) {
+        boxBorder = boxComponent->GetBackDecoration()->GetBorder();
+    }
+    UpdateDecoration(boxComponent, textAreaComponent, boxBorder, theme);
 
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("textarea create error, info is non-valid");
@@ -160,6 +199,28 @@ void JSTextArea::Create(const JSCallbackInfo& info)
         }
     } else {
         LOGI("controller is nullptr");
+    }
+}
+
+void JSTextArea::SetBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg(SetBackgroundColor) is wrong, it is supposed to have atlease 1 argument");
+        return;
+    }
+
+    Color backgroundColor;
+    if (!ParseJsColor(info[0], backgroundColor)) {
+        LOGE("the info[0] is null");
+        return;
+    }
+
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    if (component) {
+        component->SetBgColor(backgroundColor);
+    } else {
+        LOGE("The component(SetPlaceholderColor) is null");
     }
 }
 

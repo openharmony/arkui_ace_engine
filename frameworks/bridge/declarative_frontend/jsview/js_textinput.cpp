@@ -20,6 +20,7 @@
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/common/ime/text_input_action.h"
@@ -109,6 +110,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("type", &JSTextInput::SetType);
     JSClass<JSTextInput>::StaticMethod("placeholderColor", &JSTextInput::SetPlaceholderColor);
     JSClass<JSTextInput>::StaticMethod("placeholderFont", &JSTextInput::SetPlaceholderFont);
+    JSClass<JSTextInput>::StaticMethod("backgroundColor", &JSTextInput::SetBackgroundColor);
     JSClass<JSTextInput>::StaticMethod("enterKeyType", &JSTextInput::SetEnterKeyType);
     JSClass<JSTextInput>::StaticMethod("caretColor", &JSTextInput::SetCaretColor);
     JSClass<JSTextInput>::StaticMethod("maxLength", &JSTextInput::SetMaxLength);
@@ -147,6 +149,13 @@ void JSTextInput::Create(const JSCallbackInfo& info)
     textInputComponent->SetInspectorTag("TextInput");
     ViewStackProcessor::GetInstance()->Push(textInputComponent);
     InitDefaultStyle();
+    Border boxBorder;
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto theme = GetTheme<TextFieldTheme>();
+    if (boxComponent->GetBackDecoration()) {
+        boxBorder = boxComponent->GetBackDecoration()->GetBorder();
+    }
+    JSTextArea::UpdateDecoration(boxComponent, textInputComponent, boxBorder, theme);
 
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGW("text-input create error, info is non-valid");
@@ -172,6 +181,28 @@ void JSTextInput::Create(const JSCallbackInfo& info)
         }
     } else {
         LOGI("controller is nullptr");
+    }
+}
+
+void JSTextInput::SetBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg(SetBackgroundColor) is wrong, it is supposed to have atlease 1 argument");
+        return;
+    }
+
+    Color backgroundColor;
+    if (!ParseJsColor(info[0], backgroundColor)) {
+        LOGE("the info[0] is null");
+        return;
+    }
+
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    if (component) {
+        component->SetBgColor(backgroundColor);
+    } else {
+        LOGE("The component(SetPlaceholderColor) is null");
     }
 }
 
