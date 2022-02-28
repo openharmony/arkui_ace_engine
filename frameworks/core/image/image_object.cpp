@@ -16,6 +16,7 @@
 #include "core/image/image_object.h"
 
 #include "base/thread/background_task_executor.h"
+#include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/image/render_image.h"
 #include "core/image/flutter_image_cache.h"

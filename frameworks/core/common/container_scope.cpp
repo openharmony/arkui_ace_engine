@@ -13,35 +13,33 @@
  * limitations under the License.
  */
 
-#include "core/common/container.h"
-
-#include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 
 namespace OHOS::Ace {
 
-int32_t Container::CurrentId()
+#ifndef WINDOWS_PLATFORM
+thread_local int32_t ContainerScope::currentId_ = -1;
+#else
+int32_t ContainerScope::currentId_ = -1;
+#endif
+std::function<void(int32_t)> ContainerScope::updateScopeNotify_;
+
+int32_t ContainerScope::CurrentId()
 {
-    return ContainerScope::CurrentId();
+    return currentId_;
 }
 
-RefPtr<Container> Container::Current()
+void ContainerScope::UpdateCurrent(int32_t id)
 {
-    return AceEngine::Get().GetContainer(ContainerScope::CurrentId());
-}
-
-RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
-{
-    auto curContainer = Current();
-    if (curContainer) {
-        return curContainer->GetTaskExecutor();
+    currentId_ = id;
+    if (updateScopeNotify_) {
+        updateScopeNotify_(id);
     }
-    return nullptr;
 }
 
-void Container::UpdateCurrent(int32_t id)
+void ContainerScope::SetScopeNotify(std::function<void(int32_t)>&& notify)
 {
-    ContainerScope::UpdateCurrent(id);
+    updateScopeNotify_ = std::move(notify);
 }
 
 } // namespace OHOS::Ace

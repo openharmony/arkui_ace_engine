@@ -16,26 +16,41 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_SCOPE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_SCOPE_H
 
-#include "core/common/container.h"
+#include <functional>
+#include <stdint.h>
+
+#include "base/utils/macros.h"
+#include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace {
 
 class ACE_EXPORT ContainerScope {
-
 public:
     explicit ContainerScope(int32_t id)
     {
-        restoreId_ = Container::CurrentId();
-        Container::UpdateCurrent(id);
+        restoreId_ = ContainerScope::CurrentId();
+        ContainerScope::UpdateCurrent(id);
     }
 
     ~ContainerScope()
     {
-        Container::UpdateCurrent(restoreId_);
+        ContainerScope::UpdateCurrent(restoreId_);
     }
 
+    static int32_t CurrentId();
+
+    static void UpdateCurrent(int32_t id);
+
+    static void SetScopeNotify(std::function<void(int32_t)>&& notify);
+
 private:
-    int32_t restoreId_ = INSTANCE_ID_UNDEFINED;
+#ifndef WINDOWS_PLATFORM
+    static thread_local int32_t currentId_;
+#else
+    static int32_t currentId_;
+#endif
+    int32_t restoreId_ = -1;
+    static std::function<void(int32_t)> updateScopeNotify_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ContainerScope);
 };

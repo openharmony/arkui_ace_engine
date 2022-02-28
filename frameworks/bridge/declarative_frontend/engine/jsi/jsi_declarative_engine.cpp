@@ -908,8 +908,13 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         nativeEngine_ = new ArkNativeEngine(vm, static_cast<void*>(this));
     }
     engineInstance_->SetNativeEngine(nativeEngine_);
-    SetPostTask(nativeEngine_);
-    nativeEngine_->CheckUVLoop();
+    if (!sharedRuntime) {
+        SetPostTask(nativeEngine_);
+        nativeEngine_->CheckUVLoop();
+    } else {
+        LOGI("Using sharedRuntime, UVLoop handled by AbilityRuntime");
+    }
+
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetLibPath();
         if (!packagePath.empty()) {
@@ -1270,7 +1275,7 @@ void JsiDeclarativeEngine::TimerCallJs(const std::string& callbackId) const
 
 void JsiDeclarativeEngine::DestroyPageInstance(int32_t pageId)
 {
-    LOGI("JsiDeclarativeEngine DestroyPageInstance");
+    LOGI("JsiDeclarativeEngine DestroyPageInstance %{public}d", pageId);
     ACE_DCHECK(engineInstance_);
 
     engineInstance_->DestroyRootViewHandle(pageId);
