@@ -29,9 +29,8 @@ public:
     static void JsSideBarWidth(double length);
     static void JsMaxSideBarWidth(double length);
     static void JsMinSideBarWidth(double length);
-private:
-    static void SetButtonAttribute(const JSRef<JSVal>& btnAtt,
-                                   OHOS::Ace::RefPtr<OHOS::Ace::SideBarContainerComponent>& sidebar);
+    static void JsShowSideBar(bool isShow);
+    static void JsControlButton(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

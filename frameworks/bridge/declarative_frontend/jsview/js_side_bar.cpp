@@ -25,36 +25,28 @@ namespace OHOS::Ace::Framework {
 void JSSideBar::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
     }
 
-    if (!info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to be an object");
+    SideBarContainerType style = SideBarContainerType::EMBED;
+    if (!info[0]->IsNull()) {
+        if (info[0]->IsBoolean()) {
+            style = static_cast<SideBarContainerType>(info[0]->ToBoolean());
+        } else if (info[0]->IsNumber()) {
+            style = static_cast<SideBarContainerType>(info[0]->ToNumber<int>());
+        } else {
+            LOGE("The arg is wrong");
+            return;
+        }
     }
 
     std::list<RefPtr<Component>> children;
     auto sideBarContainer = AceType::MakeRefPtr<OHOS::Ace::SideBarContainerComponent>(children);
     sideBarContainer->SetMainStackSize(MainStackSize::MAX);
+    sideBarContainer->SetSideBarContainerType(style);
 
-    if (info[0]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> showValue = obj->GetProperty("showSideBarContainer");
-        JSRef<JSVal> styleValue = obj->GetProperty("style");
-        JSRef<JSVal> btnAtt = obj->GetProperty("buttonAttr");
-
-        SetButtonAttribute(btnAtt, sideBarContainer);
-
-        if (!styleValue->IsNull() && styleValue->IsNumber()) {
-            SideBarContainerStyle style = static_cast<SideBarContainerStyle>(styleValue->ToNumber<int>());
-            sideBarContainer->SetSideBarContainerStyle(style);
-        }
-
-        if (!showValue->IsNull() && showValue->IsBoolean()) {
-            sideBarContainer->SetShowSideBar(showValue->ToBoolean());
-        }
-    }
     auto stack = ViewStackProcessor::GetInstance();
-
     stack->Push(sideBarContainer);
     JSInteractableView::SetFocusNode(true);
 }
@@ -76,6 +68,8 @@ void JSSideBar::JSBind(BindingTarget globalObj)
     JSClass<JSSideBar>::Declare("SideBarContainer");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSSideBar>::StaticMethod("create", &JSSideBar::Create, opt);
+    JSClass<JSSideBar>::StaticMethod("showSideBar", &JSSideBar::JsShowSideBar);
+    JSClass<JSSideBar>::StaticMethod("controlButton", &JSSideBar::JsControlButton);
     JSClass<JSSideBar>::StaticMethod("showControlButton", &JSSideBar::SetShowControlButton);
     JSClass<JSSideBar>::StaticMethod("onChange", &JSSideBar::OnChange);
     JSClass<JSSideBar>::StaticMethod("sideBarWidth", &JSSideBar::JsSideBarWidth);
@@ -139,11 +133,28 @@ void JSSideBar::JsMinSideBarWidth(double length)
     component->SetSideBarMinWidth(Dimension(length, DimensionUnit::VP));
 }
 
-void JSSideBar::SetButtonAttribute(const JSRef<JSVal>& btnAtt,
-                                   OHOS::Ace::RefPtr<OHOS::Ace::SideBarContainerComponent>& sidebar)
+void JSSideBar::JsShowSideBar(bool isShow)
 {
-    if (!btnAtt->IsNull() && btnAtt->IsObject()) {
-        JSRef<JSObject> value = JSRef<JSObject>::Cast(btnAtt);
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::SideBarContainerComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("side bar is null");
+        return;
+    }
+    component->SetShowSideBar(isShow);
+}
+
+void JSSideBar::JsControlButton(const JSCallbackInfo& info)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::SideBarContainerComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("side bar is null");
+        return;
+    }
+
+    if (!info[0]->IsNull() && info[0]->IsObject()) {
+        JSRef<JSObject> value = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> width = value->GetProperty("width");
         JSRef<JSVal> height = value->GetProperty("height");
         JSRef<JSVal> left = value->GetProperty("left");
@@ -151,19 +162,19 @@ void JSSideBar::SetButtonAttribute(const JSRef<JSVal>& btnAtt,
         JSRef<JSVal> icons = value->GetProperty("icons");
 
         if (!width->IsNull() && width->IsNumber()) {
-            sidebar->SetButtonWidth(width->ToNumber<double>());
+            component->SetButtonWidth(width->ToNumber<double>());
         }
 
         if (!height->IsNull() && height->IsNumber()) {
-            sidebar->SetButtonHeight(height->ToNumber<double>());
+            component->SetButtonHeight(height->ToNumber<double>());
         }
 
         if (!left->IsNull() && left->IsNumber()) {
-            sidebar->SetButtonLeft(left->ToNumber<double>());
+            component->SetButtonLeft(left->ToNumber<double>());
         }
 
         if (!top->IsNull() && top->IsNumber()) {
-            sidebar->SetButtonTop(top->ToNumber<double>());
+            component->SetButtonTop(top->ToNumber<double>());
         }
 
         if (!icons->IsNull() && icons->IsObject()) {
@@ -173,15 +184,15 @@ void JSSideBar::SetButtonAttribute(const JSRef<JSVal>& btnAtt,
             JSRef<JSVal> hiddenIcon = iconsVal->GetProperty("hidden");
             std::string showIconStr;
             if (!showIcon->IsNull() && ParseJsMedia(showIcon, showIconStr)) {
-                sidebar->SetShowIcon(showIconStr);
+                component->SetShowIcon(showIconStr);
             }
             std::string hiddenIconStr;
             if (!hiddenIcon->IsNull() && ParseJsMedia(hiddenIcon, hiddenIconStr)) {
-                sidebar->SetHiddenIcon(hiddenIconStr);
+                component->SetHiddenIcon(hiddenIconStr);
             }
             std::string switchingIconStr;
             if (!switchingIcon->IsNull() && ParseJsMedia(switchingIcon, switchingIconStr)) {
-                sidebar->SetSwitchIcon(switchingIconStr);
+                component->SetSwitchIcon(switchingIconStr);
             }
         }
     }
