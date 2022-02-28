@@ -28,7 +28,8 @@ group("unittest") {
     "unittest/jsfrontend/dominput:unittest",
     "unittest/jsfrontend/domlabel:unittest",
     "unittest/jsfrontend/domlist:unittest",
-    "unittest/jsfrontend/domnode:unittest",
+
+    #"unittest/jsfrontend/domnode:unittest",
     "unittest/jsfrontend/domspan:unittest",
     "unittest/jsfrontend/domsvg:unittest",
     "unittest/jsfrontend/domsvgtext:unittest",
