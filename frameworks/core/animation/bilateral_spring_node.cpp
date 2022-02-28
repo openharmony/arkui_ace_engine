@@ -62,7 +62,7 @@ void BilateralSpringNode::OnAnimation()
         return;
     }
     int64_t delta = context->GetTimeFromExternalTimer() - startTime_;
-    spring_->OnTimestampChanged(delta * 1.0 / NANOS_TO_MILLS, 0.0f, false);
+    spring_->OnTimestampChanged(static_cast<double>(delta * 1.0) / static_cast<double>(NANOS_TO_MILLS), 0.0f, false);
     double simpleValue = spring_->GetCurrentPosition();
     FixValue(simpleValue);
     DoCollision();
