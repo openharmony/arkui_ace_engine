@@ -199,4 +199,45 @@ std::string ListComposedElement::GetChainAnimation() const
     return "false";
 }
 
+void ListComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto listElement = GetContentElement<ListElement>(ListElement::TypeId());
+    if (!listElement) {
+        LOGE("get GetListElement failed");
+        return;
+    }
+    listElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    listElement->MarkDirty();
+}
+
+void ListComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto listElement = GetContentElement<ListElement>(ListElement::TypeId());
+    if (!listElement) {
+        LOGE("get GetListElement failed");
+        return;
+    }
+    auto child = listElement->GetListItemBySlot(slot);
+    if (!child) {
+        return;
+    }
+    listElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    listElement->MarkDirty();
+}
+
+void ListComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto listElement = GetContentElement<ListElement>(ListElement::TypeId());
+    if (!listElement) {
+        LOGE("get GetListElement failed");
+        return;
+    }
+    auto child = listElement->GetListItemBySlot(slot);
+    if (!child) {
+        return;
+    }
+    listElement->UpdateChildWithSlot(child, nullptr, slot, slot);
+    listElement->MarkDirty();
+}
+
 } // namespace OHOS::Ace::V2
