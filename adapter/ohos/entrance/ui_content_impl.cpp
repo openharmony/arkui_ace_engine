@@ -255,13 +255,13 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     if (abilityContext) {
         info = abilityContext->GetAbilityInfo();
     } else {
-        auto serviceContext =
-            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::ServiceExtensionContext>(context);
-        if (!serviceContext) {
-            LOGE("context is not AbilityContext or ServiceExtensionContext.");
+        auto extensionContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::ExtensionContext>(context);
+        if (!extensionContext) {
+            LOGE("context is not AbilityContext or ExtensionContext.");
             return;
         }
-        info = serviceContext->GetAbilityInfo();
+        info = extensionContext->GetAbilityInfo();
     }
 
     RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
