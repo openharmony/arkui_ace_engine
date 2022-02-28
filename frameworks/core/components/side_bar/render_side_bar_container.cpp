@@ -40,7 +40,7 @@ constexpr int32_t DEFAULT_FINGERS = 1;
 constexpr int32_t DEFAULT_DURATION = 50;
 constexpr int32_t DEFAULT_DISTANCE = 0;
 constexpr int32_t DEFAULT_MIX_CHILDREN_SIZE = 3;
-constexpr Dimension DEFAULT_DRAG_REGION = 60.0_vp;
+constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
 
 } // namespace
 
@@ -59,7 +59,7 @@ void RenderSideBarContainer::Update(const RefPtr<Component>& component)
     auto width = sidebarWidth_;
     auto minWidth = sideBar_->GetSideBarMinWidth();
     auto maxWidth = sideBar_->GetSideBarMaxWidth();
-    if (sideBar_->IsSideBarwidthDefined()) {
+    if (!isInitialized_ && sideBar_->IsSideBarwidthDefined()) {
         width = sideBar_->GetSideBarWidth();
     }
     exceptRegion_.SetRect(SystemProperties::Vp2Px(sideBar_->GetButtonLeft()),
