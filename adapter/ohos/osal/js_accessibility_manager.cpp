@@ -217,6 +217,7 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     int column = static_cast<int>(node->GetCollectionItemInfo().column);
     GridItemInfo gridItemInfo(row, row, column, column, false, nodeInfo.IsSelected());
     nodeInfo.SetGridItem(gridItemInfo);
+    nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
     if (node->GetIsPassword()) {
         std::string strStar(node->GetText().size(), '*');
@@ -421,6 +422,10 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(const AccessibilityEvent
 
     auto client = AccessibilitySystemAbilityClient::GetInstance();
     if (!client) {
+        return false;
+    }
+
+    if (!client->IsEnabled()) {
         return false;
     }
 
