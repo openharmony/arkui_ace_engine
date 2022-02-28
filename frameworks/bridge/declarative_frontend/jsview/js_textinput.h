@@ -47,6 +47,7 @@ public:
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
     static void SetOnClick(const JSCallbackInfo& info);
+    static void SetBackgroundColor(const JSCallbackInfo& info);
 
 private:
     static void InitDefaultStyle();
