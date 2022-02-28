@@ -17,12 +17,12 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_RESSCHED_RESSCHED_REPORT_H
 
 #include <string>
-
+#include <unordered_map>
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace {
-using ReportDataFunc = void (*)(uint32_t resType, int64_t value, const std::string& payload);
+using ReportDataFunc = void (*)(uint32_t resType, int64_t value, const std::unordered_map<std::string, std::string>& payload);
 
 ReportDataFunc ACE_EXPORT LoadReportDataFunc();
 

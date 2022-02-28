@@ -28,12 +28,14 @@ ResSchedReport& ResSchedReport::GetInstance()
 
 void ResSchedReport::ResSchedDataReport(const char* name)
 {
+    std::unordered_map<std::string, std::string> payload;
+    payload["name"] = name;
     if (reportDataFunc_ == nullptr) {
         reportDataFunc_ = LoadReportDataFunc();
     }
     if (reportDataFunc_ != nullptr) {
         if (strcmp(name, "click") == 0) {
-            reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, 0, name);
+            reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, 0, payload);
         }
     }
 }
