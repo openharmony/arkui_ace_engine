@@ -55,14 +55,14 @@ public:
         return sideStatus_;
     }
 
-    void SetSideBarContainerStyle(SideBarContainerStyle style)
+    void SetSideBarContainerType(SideBarContainerType style)
     {
-        declaration_->SetSideBarContainerStyle(style);
+        declaration_->SetSideBarContainerType(style);
     }
 
-    SideBarContainerStyle GetSideBarContainerStyle()
+    SideBarContainerType GetSideBarContainerType()
     {
-        return declaration_->GetSideBarContainerStyle();
+        return declaration_->GetSideBarContainerType();
     }
 
     void SetShowControlButton(bool isShow)

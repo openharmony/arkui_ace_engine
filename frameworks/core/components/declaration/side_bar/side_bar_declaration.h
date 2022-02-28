@@ -21,7 +21,7 @@
 namespace OHOS::Ace {
 struct SideBarContainerAttribute : Attribute {
     bool isShow = true;
-    SideBarContainerStyle style = SideBarContainerStyle::EMBED;
+    SideBarContainerType style = SideBarContainerType::EMBED;
     bool isShowButton = true;
     double left = 16.0;
     double top = 48.0;
@@ -56,13 +56,13 @@ public:
         attribute.isShow = isShow;
     }
 
-    SideBarContainerStyle GetSideBarContainerStyle() const
+    SideBarContainerType GetSideBarContainerType() const
     {
         auto& attribute = static_cast<SideBarContainerAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
         return attribute.style;
     }
 
-    void SetSideBarContainerStyle(SideBarContainerStyle style)
+    void SetSideBarContainerType(SideBarContainerType style)
     {
         auto& attribute = MaybeResetAttribute<SideBarContainerAttribute>(AttributeTag::SPECIALIZED_ATTR);
         attribute.style = style;

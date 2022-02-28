@@ -248,7 +248,7 @@ void RenderSideBarContainer::SetChildrenStatus()
             status_ = SideStatus::SHOW;
         }
     }
-    if (sideBar_->GetSideBarContainerStyle() == SideBarContainerStyle::EMBED) {
+    if (sideBar_->GetSideBarContainerType() == SideBarContainerType::EMBED) {
         content->SetLeft(sidebarWidth_ + curPosition_);
         auto fixedSize = layoutSize.MinusWidth((sidebarWidth_ + curPosition_).ConvertToPx());
         content->Layout(LayoutParam(fixedSize, fixedSize));

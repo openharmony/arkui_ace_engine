@@ -714,11 +714,11 @@ var SeekMode;
   SeekMode[SeekMode["Accurate"] = 3] = "Accurate";
 })(SeekMode || (SeekMode = {}));
 
-var SideBarContainerStyle;
-(function (SideBarContainerStyle) {
-  SideBarContainerStyle[SideBarContainerStyle["Overlay"] = 1] = "Overlay";
-  SideBarContainerStyle[SideBarContainerStyle["Embed"] = 0] = "Embed";
-})(SideBarContainerStyle || (SideBarContainerStyle = {}));
+var SideBarContainerType;
+(function (SideBarContainerType) {
+  SideBarContainerType[SideBarContainerType["Overlay"] = 1] = "Overlay";
+  SideBarContainerType[SideBarContainerType["Embed"] = 0] = "Embed";
+})(SideBarContainerType || (SideBarContainerType = {}));
 
 var PlaybackSpeed;
 (function (PlaybackSpeed) {
