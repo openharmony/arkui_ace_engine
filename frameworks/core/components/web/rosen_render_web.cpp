@@ -64,7 +64,7 @@ void RosenRenderWeb::SyncGeometryProperties()
 
 std::shared_ptr<RSNode> RosenRenderWeb::CreateRSNode() const
 {
-    struct OHOS::Rosen::RSSurfaceNodeConfig surfaceNodeConfig;
+    struct OHOS::Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = "RosenRenderWeb"};
     return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
 }
 
