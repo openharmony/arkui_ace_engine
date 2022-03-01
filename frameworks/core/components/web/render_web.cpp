@@ -91,19 +91,6 @@ void RenderWeb::PerformLayout()
     MarkNeedRender();
 }
 
-void RenderWeb::OnSizeChanged()
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    if (delegate_) {
-        delegate_->Resize(drawSize_.Width(), drawSize_.Height());
-        if (!isUrlLoaded_) {
-            delegate_->LoadUrl();
-            isUrlLoaded_ = true;
-        }
-    }
-#endif
-}
-
 #ifdef OHOS_STANDARD_SYSTEM
 void RenderWeb::Initialize()
 {
