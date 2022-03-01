@@ -384,7 +384,7 @@ void ThreadWatcher::PostCheckTask()
     } else {
         LOGW("task executor with instanceId %{public}d invalid when check %{public}s thread whether stuck or not",
             instanceId_, threadName_.c_str());
-    }       
+    }
 }
 
 void ThreadWatcher::TagIncrease()
