@@ -77,10 +77,11 @@ protected:
 private:
 #ifdef OHOS_STANDARD_SYSTEM
     void Initialize();
-    void HandleTouch(const bool& isPress, const TouchEventInfo& info);
+    void HandleTouchDown(const TouchEventInfo& info);
+    void HandleTouchUp(const TouchEventInfo& info);
     void HandleTouchMove(const TouchEventInfo& info);
     void HandleTouchCancel(const TouchEventInfo& info);
-    bool ParseTouchInfo(const TouchEventInfo& info, TouchInfo& touchInfo);
+    bool ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos, const TouchType& touchType);
     void OnTouchTestHit(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& result) override;
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
