@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,12 +28,14 @@ ResSchedReport& ResSchedReport::GetInstance()
 
 void ResSchedReport::ResSchedDataReport(const char* name)
 {
+    std::unordered_map<std::string, std::string> payload;
+    payload["name"] = name;
     if (reportDataFunc_ == nullptr) {
         reportDataFunc_ = LoadReportDataFunc();
     }
     if (reportDataFunc_ != nullptr) {
         if (strcmp(name, "click") == 0) {
-            reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, 0, name);
+            reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, 0, payload);
         }
     }
 }

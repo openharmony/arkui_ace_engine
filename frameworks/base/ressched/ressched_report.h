@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_RESSCHED_RESSCHED_REPORT_H
 
 #include <string>
+#include <unordered_map>
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace {
-using ReportDataFunc = void (*)(uint32_t resType, int64_t value, const std::string& payload);
+using ReportDataFunc = void (*)(uint32_t resType, int64_t value,
+    const std::unordered_map<std::string, std::string>& payload);
 
 ReportDataFunc ACE_EXPORT LoadReportDataFunc();
 
