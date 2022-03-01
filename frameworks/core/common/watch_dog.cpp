@@ -381,6 +381,9 @@ void ThreadWatcher::PostCheckTask()
             type_);
         std::unique_lock<std::shared_mutex> lock(mutex_);
         ++loopTime_;
+    } else {
+        LOGW("task executor with instanceId %{public}d invalid when check %{public}s thread whether stuck or not",
+            instanceId_, threadName_.c_str());
     }
 }
 
@@ -414,6 +417,8 @@ void WatchDog::Register(int32_t instanceId, const RefPtr<TaskExecutor>& taskExec
     watchers.uiWatcher->SetTaskExecutor(taskExecutor);
     if (!useUIAsJSThread) {
         watchers.jsWatcher->SetTaskExecutor(taskExecutor);
+    } else {
+        watchers.jsWatcher = nullptr;
     }
     const auto resExecutor = watchMap_.try_emplace(instanceId, watchers);
     if (!resExecutor.second) {
