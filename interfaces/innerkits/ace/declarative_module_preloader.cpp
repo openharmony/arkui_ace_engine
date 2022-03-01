@@ -38,7 +38,6 @@ void InitAceModule(void* runtime)
     entry(runtime);
 }
 
-
 void DeclarativeModulePreloader::Preload(NativeEngine& runtime)
 {
     InitAceModule(reinterpret_cast<void*>(&runtime));

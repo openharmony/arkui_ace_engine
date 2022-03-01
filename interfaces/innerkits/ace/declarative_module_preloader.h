@@ -19,11 +19,11 @@
 #include <memory>
 #include <string>
 
+#include "base/utils/macros.h"
+
 class NativeEngine;
 
 namespace OHOS::Ace {
-
-#define ACE_EXPORT __attribute__((visibility("default")))
 
 class ACE_EXPORT DeclarativeModulePreloader {
 public:
