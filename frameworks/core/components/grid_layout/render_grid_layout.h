@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -356,6 +356,7 @@ protected:
     bool MayStartToSlide(const TouchEventInfo& info);
     void UpdateSlideStatus(GridSlideStatus status);
     GridSlideStatus GetSlideStatus();
+    GridSlideDirect GetSlideDirect();
     Point GetPointFromTouchInfo(const TouchEventInfo& info);
     void MoveRelativeDistance(double& dx, double& dy);
     void CreateSpringController();
@@ -523,7 +524,9 @@ protected:
     GridLayoutAnimationAct animationAct_ = GridLayoutAnimationAct::ANIMATION_NONE;
     RefPtr<Animator> animationController_;
     RefPtr<Animator> flexController_;
-    bool supportAnimation_ = true;
+    bool supportAnimation_ = false;
+    bool dragAnimation_ = false;
+    EdgeEffect edgeEffect_ = EdgeEffect::SPRING;
     std::atomic<bool> needRunAnimation_;
     std::map<std::string, std::function<void()>> animationFinishedFuncList_;
     std::mutex animationLock_;
