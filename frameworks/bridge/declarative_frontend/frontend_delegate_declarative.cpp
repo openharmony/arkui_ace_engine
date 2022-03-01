@@ -1543,6 +1543,7 @@ int32_t FrontendDelegateDeclarative::OnPopPageSuccess()
         isRouteStackFull_ = false;
     }
     if (!pageRouteStack_.empty()) {
+        LOGI("OnPopPageSuccess: pop to page %{private}s", pageRouteStack_.back().url.c_str());
         return pageRouteStack_.back().pageId;
     }
     return INVALID_PAGE_ID;
