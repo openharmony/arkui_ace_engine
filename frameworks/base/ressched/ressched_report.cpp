@@ -18,6 +18,7 @@
 namespace OHOS::Ace {
 namespace {
     const uint32_t RES_TYPE_CLICK_RECOGNIZE = 9;
+    const uint32_t RES_TYPE_PUSH_PAGE       = 10;
 }
 
 ResSchedReport& ResSchedReport::GetInstance()
@@ -36,6 +37,8 @@ void ResSchedReport::ResSchedDataReport(const char* name)
     if (reportDataFunc_ != nullptr) {
         if (strcmp(name, "click") == 0) {
             reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, 0, payload);
+        } else if (strcmp(name, "pushpage") == 0) {
+            reportDataFunc_(RES_TYPE_PUSH_PAGE, 0, payload);
         }
     }
 }
