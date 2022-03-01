@@ -381,9 +381,6 @@ void ThreadWatcher::PostCheckTask()
             type_);
         std::unique_lock<std::shared_mutex> lock(mutex_);
         ++loopTime_;
-    } else {
-        LOGW("task executor with instanceId %{public}d invalid when check %{public}s thread whether stuck or not",
-            instanceId_, threadName_.c_str());
     }
 }
 
