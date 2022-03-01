@@ -24,6 +24,8 @@ void JSXComponentController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSXComponentController>::Declare("XComponentController");
     JSClass<JSXComponentController>::CustomMethod("getXComponentSurfaceId", &JSXComponentController::GetSurfaceId);
+    JSClass<JSXComponentController>::CustomMethod("getXComponentContext",
+        &JSXComponentController::GetXComponentContext);
     JSClass<JSXComponentController>::Bind(globalObj, JSXComponentController::Constructor,
         JSXComponentController::Destructor);
 }
