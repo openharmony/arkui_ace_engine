@@ -73,6 +73,11 @@ public:
      */
     static DeviceType GetDeviceType();
 
+    /*
+     * check SystemCapability.
+     */
+    static bool IsSyscapExist(const char *cap);
+
     /**
      * Set type of current device.
      * @param deviceType

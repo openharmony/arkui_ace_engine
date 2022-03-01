@@ -23,6 +23,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/include/js_runtime.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/include/js_value.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_timer_module.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_syscap_module.h"
 
 namespace OHOS::Ace::Framework {
 

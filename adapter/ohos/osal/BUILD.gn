@@ -50,11 +50,14 @@ template("ace_osal_ohos_source_set") {
       "system_properties.cpp",
     ]
 
+    public_deps =
+        [ "//base/startup/init_lite/interfaces/innerkits:libbegetutil" ]
+
     if (is_standard_system) {
       sources += [ "resource_adapter_impl.cpp" ]
       sources += [ "resource_convertor.cpp" ]
       deps = [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
-      public_deps =
+      public_deps +=
           [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]
       external_deps += [ "multimedia_image_standard:image" ]
       if (defined(config.accessibility_support) &&

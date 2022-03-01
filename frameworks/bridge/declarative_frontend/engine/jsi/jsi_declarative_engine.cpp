@@ -35,6 +35,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_timer_module.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_syscap_module.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_api_perf.h"
@@ -637,6 +638,7 @@ void JsiDeclarativeEngineInstance::InitJsNativeModuleObject()
 
     if (!usingSharedRuntime_) {
         JsiTimerModule::GetInstance()->InitTimerModule(runtime_, global);
+        JsiSyscapModule::GetInstance()->InitSyscapModule(runtime_, global);
     }
 }
 
