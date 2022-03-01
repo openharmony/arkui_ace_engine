@@ -1165,9 +1165,6 @@ void FrontendDelegateImpl::OnSurfaceChanged()
 {
     if (mediaQueryInfo_->GetIsInit()) {
         mediaQueryInfo_->SetIsInit(false);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-        OnPageShow();
-#endif
     }
     mediaQueryInfo_->EnsureListenerIdValid();
     OnMediaQueryUpdate();
@@ -1247,11 +1244,9 @@ void FrontendDelegateImpl::OnPageReady(const RefPtr<JsAcePage>& page, const std:
                 delegate->ResetStagingPage();
             }
             delegate->isStagingPageExist_ = false;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
             if (isMainPage) {
                 delegate->OnPageShow();
             }
-#endif
         },
         TaskExecutor::TaskType::UI);
 }
