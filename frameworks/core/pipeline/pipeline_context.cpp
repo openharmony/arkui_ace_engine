@@ -30,6 +30,7 @@
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
 #include "base/log/log.h"
+#include "base/ressched/ressched_report.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/string_utils.h"
@@ -1005,6 +1006,7 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
 {
     ACE_FUNCTION_TRACE();
     CHECK_RUN_ON(UI);
+    ResSchedReport::GetInstance().ResSchedDataReport("pushpage");
     auto stageElement = stage;
     if (!stageElement) {
         // if not target stage, use root stage
