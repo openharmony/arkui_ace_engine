@@ -33,7 +33,8 @@ const std::unordered_map<std::string, std::function<std::string(const SwiperComp
     { "duration", [](const SwiperComposedElement& inspector) { return inspector.GetDuration(); } },
     { "vertical", [](const SwiperComposedElement& inspector) { return inspector.GetVertical(); } },
     { "disableSwipe", [](const SwiperComposedElement& inspector) { return inspector.GetDisableSwipe(); } },
-    { "itemSpace", [](const SwiperComposedElement& inspector) { return inspector.GetItemSpace(); } }
+    { "itemSpace", [](const SwiperComposedElement& inspector) { return inspector.GetItemSpace(); } },
+    { "curve", [](const SwiperComposedElement& inspector) { return inspector.GetCurve(); } }
 };
 
 } // namespace
@@ -50,6 +51,7 @@ void SwiperComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(std::string("vertical: ").append(GetVertical()));
     DumpLog::GetInstance().AddDesc(std::string("disableSwipe: ").append(GetDisableSwipe()));
     DumpLog::GetInstance().AddDesc(std::string("itemSpace: ").append(GetItemSpace()));
+    DumpLog::GetInstance().AddDesc(std::string("curve: ").append(GetCurve()));
 }
 
 std::unique_ptr<JsonValue> SwiperComposedElement::ToJsonObject() const
