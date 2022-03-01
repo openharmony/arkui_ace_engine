@@ -15,6 +15,7 @@
     "src/lib/synced_property_simple_one_way.ts",
     "src/lib/synced_property_simple_two_way.ts",
     "src/lib/i_storage.ts",
+    "src/lib/local_storage_native.d.ts",
     "src/lib/local_storage.ts",
     "src/lib/local_storage_lookup",
     "src/lib/app_storage.ts",

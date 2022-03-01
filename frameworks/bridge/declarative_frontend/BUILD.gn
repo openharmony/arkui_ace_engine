@@ -163,6 +163,7 @@ template("declarative_js_engine") {
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_loading_progress.cpp",
+      "jsview/js_local_storage.cpp",
       "jsview/js_marquee.cpp",
       "jsview/js_matrix2d.cpp",
       "jsview/js_navigation.cpp",

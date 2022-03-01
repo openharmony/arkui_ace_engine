@@ -23,7 +23,7 @@
  * UI state of app-wide access and same life cycle as the app.
  * 
  */
-class LocalStorage {
+class LocalStorage extends NativeLocalStorage {
 
   protected storage_: Map<string, ObservedPropertyAbstract<any>>;
 
@@ -34,6 +34,7 @@ class LocalStorage {
    * @param initializingProperties
    */
   constructor(initializingProperties: Object = {}) {
+    super();
     console.log(`${this.constructor.name} constructor: initializing with Object: ${JSON.stringify(initializingProperties)} .`)
     this.storage_ = new Map<string, ObservedPropertyAbstract<any>>();
     Object.keys(initializingProperties).filter((propName) => initializingProperties[propName] != undefined).forEach((propName) =>
