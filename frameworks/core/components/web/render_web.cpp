@@ -111,13 +111,13 @@ void RenderWeb::Initialize()
     touchRecognizer_->SetOnTouchDown([weakItem = AceType::WeakClaim(this)](const TouchEventInfo& info) {
         auto item = weakItem.Upgrade();
         if (item) {
-            item->HandleTouch(true, info);
+            item->HandleTouchDown(info);
         }
     });
     touchRecognizer_->SetOnTouchUp([weakItem = AceType::WeakClaim(this)](const TouchEventInfo& info) {
         auto item = weakItem.Upgrade();
         if (item) {
-            item->HandleTouch(false, info);
+            item->HandleTouchUp(info);
         }
     });
     touchRecognizer_->SetOnTouchMove([weakItem = AceType::WeakClaim(this)](const TouchEventInfo& info) {
@@ -134,77 +134,110 @@ void RenderWeb::Initialize()
     });
 }
 
-void RenderWeb::HandleTouch(const bool& isPress, const TouchEventInfo& info)
+void RenderWeb::HandleTouchDown(const TouchEventInfo& info)
 {
     if (!delegate_) {
-        LOGE("Touch delegate_ is nullprt");
+        LOGE("Touch down delegate_ is nullptr");
         return;
     }
-    TouchInfo touchInfo;
-    if (!ParseTouchInfo(info, touchInfo)) {
-        LOGE("Touch error");
+    std::list<TouchInfo> touchInfos;
+    if (!ParseTouchInfo(info, touchInfos, TouchType::DOWN)) {
+        LOGE("Touch down error");
         return;
     }
-    if (isPress) {
-        delegate_->HandleTouchDown(touchInfo.id, touchInfo.x, touchInfo.y);
-    } else {
-        delegate_->HandleTouchUp(touchInfo.id, touchInfo.x, touchInfo.y);
+    for (auto& touchPoint : touchInfos) {
+        delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y);
+    }
+}
+
+void RenderWeb::HandleTouchUp(const TouchEventInfo& info)
+{
+    if (!delegate_) {
+        LOGE("Touch up delegate_ is nullptr");
+        return;
+    }
+    std::list<TouchInfo> touchInfos;
+    if (!ParseTouchInfo(info, touchInfos, TouchType::UP)) {
+        LOGE("Touch up error");
+        return;
+    }
+    for (auto& touchPoint : touchInfos) {
+        delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y);
     }
 }
 
 void RenderWeb::HandleTouchMove(const TouchEventInfo& info)
 {
-    if (info.GetTouches().empty()) {
-        LOGE("Touch move getTouches is empty");
-        return;
-    }
     if (!delegate_) {
-        LOGE("Touch move delegate_ is nullprt");
+        LOGE("Touch move delegate_ is nullptr");
         return;
     }
-    TouchInfo touchInfo;
-    if (!ParseTouchInfo(info, touchInfo)) {
+    std::list<TouchInfo> touchInfos;
+    if (!ParseTouchInfo(info, touchInfos, TouchType::MOVE)) {
         LOGE("Touch move error");
         return;
     }
-    delegate_->HandleTouchMove(touchInfo.id, touchInfo.x, touchInfo.y);
+    for (auto& touchPoint : touchInfos) {
+        delegate_->HandleTouchMove(touchPoint.id, touchPoint.x, touchPoint.y);
+    }
 }
 
 void RenderWeb::HandleTouchCancel(const TouchEventInfo& info)
 {
-    if (info.GetTouches().empty()) {
-        LOGE("Touch cancel getTouches is empty");
-        return;
-    }
     if (!delegate_) {
-        LOGE("Touch cancel delegate_ is nullprt");
+        LOGE("Touch cancel delegate_ is nullptr");
         return;
     }
     delegate_->HandleTouchCancel();
 }
 
-bool RenderWeb::ParseTouchInfo(const TouchEventInfo& touchEventInfo, TouchInfo& touchInfo)
+bool RenderWeb::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos, const TouchType& touchType)
 {
     auto context = context_.Upgrade();
     if (!context) {
         return false;
     }
-
-    constexpr int invalidFingerID = -1;
-    TouchLocationInfo info{invalidFingerID};
-    if (!touchEventInfo.GetTouches().empty()) {
-        info = touchEventInfo.GetTouches().front();
-    } else if (!touchEventInfo.GetChangedTouches().empty()) {
-        info = touchEventInfo.GetChangedTouches().front();
-    } else {
-        return false;
-    }
     auto viewScale = context->GetViewScale();
-    touchInfo.id = info.GetFingerId();
-    Offset location = info.GetLocalLocation();
-    touchInfo.x = location.GetX() * viewScale;
-    touchInfo.y = location.GetY() * viewScale;
-    LOGD("touch id:%{private}d, x:%{private}lf, y:%{private}lf", touchInfo.id, touchInfo.x, touchInfo.y);
+    if (touchType == TouchType::DOWN) {
+        if (!info.GetTouches().empty()) {
+            for (auto& point : info.GetTouches()) {
+                TouchInfo touchInfo;
+                touchInfo.id = point.GetFingerId();
+                Offset location = point.GetLocalLocation();
+                touchInfo.x = location.GetX() * viewScale;
+                touchInfo.y = location.GetY() * viewScale;
+                touchInfos.emplace_back(touchInfo);
+            }
+        } else {
+            return false;
+        }
+    } else if (touchType == TouchType::MOVE) {
+        if (!info.GetChangedTouches().empty()) {
+            for (auto& point : info.GetChangedTouches()) {
+                TouchInfo touchInfo;
+                touchInfo.id = point.GetFingerId();
+                Offset location = point.GetLocalLocation();
+                touchInfo.x = location.GetX() * viewScale;
+                touchInfo.y = location.GetY() * viewScale;
+                touchInfos.emplace_back(touchInfo);
+            }
+        } else {
+            return false;
+        }
+    } else if (touchType == TouchType::UP) {
+        if (!info.GetChangedTouches().empty()) {
+            for (auto& point : info.GetChangedTouches()) {
+                TouchInfo touchInfo;
+                touchInfo.id = point.GetFingerId();
+                Offset location = point.GetLocalLocation();
+                touchInfo.x = location.GetX() * viewScale;
+                touchInfo.y = location.GetY() * viewScale;
+                touchInfos.emplace_back(touchInfo);
+            }
+        } else {
+            return false;
+        }
+    }
     return true;
 }
 
