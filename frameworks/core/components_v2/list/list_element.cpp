@@ -68,7 +68,9 @@ size_t ListElement::TotalCount()
 
 size_t ListElement::FindPreviousStickyListItem(size_t index)
 {
-    for (size_t idx = std::min(index + 1, TotalCount()); idx > 0; --idx) {
+    size_t begin = std::min(index + 1, TotalCount());
+    size_t end = stickyRange_ > begin ? 0 : begin - stickyRange_;
+    for (size_t idx = begin; idx > end; --idx) {
         auto component = GetComponentByIndex(idx - 1);
         auto listItem = AceType::DynamicCast<ListItemComponent>(component);
         if (!listItem) {

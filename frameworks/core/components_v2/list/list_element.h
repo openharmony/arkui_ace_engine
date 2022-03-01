@@ -54,6 +54,7 @@ private:
     void Apply(const RefPtr<Element>& element) override;
 
     RefPtr<RenderList> renderList_;
+    size_t stickyRange_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListElement);
 };
