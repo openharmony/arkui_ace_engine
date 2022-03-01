@@ -43,6 +43,7 @@ public:
     static void MixedMode(int32_t MixedModeNum);
     static void ZoomAccessEnabled(bool isZoomAccessEnabled);
     static void GeolocationAccessEnabled(bool isGeolocationAccessEnabled);
+    static void JavaScriptProxy(const JSCallbackInfo& args);
 
 };
 }
