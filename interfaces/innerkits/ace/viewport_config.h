@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,12 @@ public:
         height_ = height;
     }
 
+    void SetPosition(int32_t x, int32_t y)
+    {
+        posX_ = x;
+        posY_ = y;
+    }
+
     int32_t Width() const
     {
         return width_;
@@ -42,6 +48,16 @@ public:
     int32_t Height() const
     {
         return height_;
+    }
+
+    int32_t Left() const
+    {
+        return posX_;
+    }
+
+    int32_t Top() const
+    {
+        return posY_;
     }
 
     void SetDensity(float density)
@@ -70,12 +86,15 @@ public:
         config.append(" size:(" + std::to_string(width_) + ", " + std::to_string(height_) + ")");
         config.append(" orintentation:" + std::to_string(orientation_));
         config.append(" density:" + std::to_string(density_));
+        config.append(" position:(" + std::to_string(posX_) + ", " + std::to_string(posY_) + ")");
         return config;
     }
 
 private:
     int32_t width_ = 0;
     int32_t height_ = 0;
+    int32_t posX_ = 0;
+    int32_t posY_ = 0;
     int32_t orientation_ = 0;
     float density_ = 1.0f;
 };
