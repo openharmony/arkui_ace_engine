@@ -17,15 +17,11 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   implements ISinglePropertyChangeSubscriber<T> {
 
   private source_: ObservedPropertyAbstract<T>;
-  private contentObserver_?: ObservedPropertyAbstract<T>;
 
-  constructor(source: ObservedPropertyAbstract<T>, owningView: IPropertySubscriber, owningViewPropNme: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>) {
+  constructor(source: ObservedPropertyAbstract<T>, owningView: IPropertySubscriber, owningViewPropNme: PropertyInfo) {
     super(owningView, owningViewPropNme);
     this.source_ = source;
     this.source_.subscribeMe(this);
-    if (contentObserver) {
-      this.contentObserver_ = contentObserver;
-    }
   }
 
   /*
@@ -50,19 +46,11 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   public get(): T {
     console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: get`)
     this.notifyPropertyRead();
-    if (this.contentObserver_) {
-      return this.contentObserver_.get();
-    }
     return this.source_.get();
   }
 
   // set 'writes through` to the ObservedProperty
   public set(newValue: T): void {
-    if (this.contentObserver_) {
-      this.contentObserver_.set(newValue);
-      return;
-    }
-
     if (this.source_.get() == newValue) {
       console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
       return;
@@ -81,13 +69,13 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
 * changes.
 */
   public createLink(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T> {
-    return new SynchedPropertySimpleTwoWay(this, subscribeOwner, linkPropName, contentObserver);
+    linkPropName?: PropertyInfo): ObservedPropertyAbstract<T> {
+    return new SynchedPropertySimpleTwoWay(this, subscribeOwner, linkPropName);
   }
 
   public createProp(subscribeOwner?: IPropertySubscriber,
-    propPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T> {
-    return new SynchedPropertySimpleOneWaySubscribing(this, subscribeOwner, propPropName, contentObserver);
+    propPropName?: PropertyInfo): ObservedPropertyAbstract<T> {
+    return new SynchedPropertySimpleOneWaySubscribing(this, subscribeOwner, propPropName);
   }
 
 }

@@ -51,8 +51,6 @@
 
 extern const char _binary_stateMgmt_js_start[];
 extern const char _binary_stateMgmt_js_end[];
-extern const char _binary_contentStorage_js_start[];
-extern const char _binary_contentStorage_js_end[];
 extern const char _binary_jsEnumStyle_js_start[];
 extern const char _binary_jsEnumStyle_js_end[];
 
@@ -508,7 +506,6 @@ void V8DeclarativeEngineInstance::InitJSContext()
     InitJsNativeModuleObject(localContext);
     InitJsExportsUtilObject(localContext);
     InitAceModules(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end, isolate_.Get());
-    InitAceModules(_binary_contentStorage_js_start, _binary_contentStorage_js_end, isolate_.Get());
     InitAceModules(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end, isolate_.Get());
 
     auto groupJsBridge = DynamicCast<V8DeclarativeGroupJsBridge>(frontendDelegate_->GetGroupJsBridge());

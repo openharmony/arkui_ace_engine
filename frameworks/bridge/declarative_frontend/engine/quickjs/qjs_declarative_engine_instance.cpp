@@ -40,18 +40,15 @@
 #endif
 
 extern const char _binary_stateMgmt_js_start[];
-extern const char _binary_contentStorage_js_start[];
 extern const char _binary_jsEnumStyle_js_start[];
 extern const char _binary_jsMockSystemPlugin_js_start[];
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 extern const char* _binary_stateMgmt_js_end;
-extern const char* _binary_contentStorage_js_end;
 extern const char* _binary_jsEnumStyle_js_end;
 extern const char* _binary_jsMockSystemPlugin_js_end;
 #else
 extern const char _binary_stateMgmt_js_end[];
-extern const char _binary_contentStorage_js_end[];
 extern const char _binary_jsEnumStyle_js_end[];
 extern const char _binary_jsMockSystemPlugin_js_end[];
 #endif
@@ -436,12 +433,8 @@ bool QJSDeclarativeEngineInstance::InitJSEnv(JSRuntime* runtime, JSContext* cont
     // make jsProxy end of '\0'
     std::string jsProxy(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end - _binary_stateMgmt_js_start);
     std::string jsEnum(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end - _binary_jsEnumStyle_js_start);
-    std::string jsContentStorage(_binary_contentStorage_js_start,
-        _binary_contentStorage_js_end - _binary_contentStorage_js_start);
-    
     if (!InitAceModules(jsProxy.c_str(), jsProxy.length(), "stateMgmt.js")
-        || !InitAceModules(jsEnum.c_str(), jsEnum.length(), "jsEnumStyle.js")
-        || !InitAceModules(jsContentStorage.c_str(), jsContentStorage.length(), "contentStorage.js")) {
+        || !InitAceModules(jsEnum.c_str(), jsEnum.length(), "jsEnumStyle.js")) {
         return false;
     }
 
