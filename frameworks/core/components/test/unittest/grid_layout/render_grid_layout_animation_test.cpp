@@ -157,6 +157,8 @@ bool RenderGridLayoutAnimationTest::CreateGrid(bool isVertical, bool isSpringRec
         return false;
     }
     gridComponent->SetSupportAnimation(true);
+    gridComponent->SetDragAnimation(true);
+    gridComponent->SetEdgeEffection(EdgeEffect::SPRING);
     gridComponent->SetEditMode(true);
     if (isVertical) {
         gridComponent->SetDirection(FlexDirection::COLUMN);
@@ -205,6 +207,8 @@ void RenderGridLayoutAnimationTest::MockTouchEventDown(TouchEvent& info)
         TouchPoint point;
         info.x = renderNode_->GetGlobalOffset().GetX() + GRID_OFFSET_TEST - coordinateOffset_.GetX();
         info.y = renderNode_->GetGlobalOffset().GetY() + GRID_OFFSET_TEST - coordinateOffset_.GetY();
+        point.x = info.x;
+        point.y = info.y;
         info.type = TouchType::DOWN;
         info.time = std::chrono::high_resolution_clock::now();
         point.x = info.x;
@@ -315,7 +319,7 @@ HWTEST_F(RenderGridLayoutAnimationTest, RenderGridLayoutSpringTest001, TestSize.
     for (const auto& item: items) {
         Offset dOffset = item->GetPosition() - data[index];
         index++;
-        ASSERT_TRUE(dOffset.GetY() == SPRING_INIT_DISTANCE);
+        ASSERT_TRUE(NearZero(dOffset.GetY() - SPRING_INIT_DISTANCE));
     }
 
     MockTouchEventUp(touchPoint);
@@ -324,7 +328,7 @@ HWTEST_F(RenderGridLayoutAnimationTest, RenderGridLayoutSpringTest001, TestSize.
     for (const auto& item: items) {
         Offset dOffset = item->GetPosition() - data[index];
         index++;
-        ASSERT_TRUE(dOffset.GetY() == SPRING_INIT_DISTANCE);
+        ASSERT_TRUE(NearZero(dOffset.GetY() - SPRING_INIT_DISTANCE));
     }
 }
 
@@ -349,7 +353,7 @@ HWTEST_F(RenderGridLayoutAnimationTest, RenderGridLayoutSpringTest002, TestSize.
     for (const auto& item: items) {
         Offset dOffset = item->GetPosition() - data[index];
         index++;
-        ASSERT_TRUE(dOffset.GetX() == SPRING_INIT_DISTANCE);
+        ASSERT_TRUE(NearZero(dOffset.GetX() - SPRING_INIT_DISTANCE));
     }
 
     MockTouchEventUp(touchPoint);
@@ -358,7 +362,7 @@ HWTEST_F(RenderGridLayoutAnimationTest, RenderGridLayoutSpringTest002, TestSize.
     for (const auto& item: items) {
         Offset dOffset = item->GetPosition() - data[index];
         index++;
-        ASSERT_TRUE(dOffset.GetX() == SPRING_INIT_DISTANCE);
+        ASSERT_TRUE(NearZero(dOffset.GetX() - SPRING_INIT_DISTANCE));
     }
 }
 
