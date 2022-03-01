@@ -208,6 +208,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
         AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
+        AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
         AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
         CapabilityRegistry::Register();
         ImageCache::SetImageCacheFilePath(context->GetCacheDir());
