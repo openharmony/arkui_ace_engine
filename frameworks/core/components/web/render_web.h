@@ -46,7 +46,6 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     void OnAttachContext() override;
-    void OnSizeChanged() override;
 
 #ifdef OHOS_STANDARD_SYSTEM
     void OnAppShow() override
@@ -85,7 +84,6 @@ private:
     void OnTouchTestHit(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& result) override;
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
-    bool isUrlLoaded_ = false;
 #endif
 
     Offset position_;
