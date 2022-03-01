@@ -19,13 +19,16 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/components/gesture_listener/gesture_component.h"
+#include "frameworks/core/gestures/exclusive_recognizer.h"
 #include "frameworks/core/gestures/gesture_group.h"
 #include "frameworks/core/gestures/long_press_gesture.h"
 #include "frameworks/core/gestures/pan_gesture.h"
+#include "frameworks/core/gestures/parallel_recognizer.h"
 #include "frameworks/core/gestures/pinch_gesture.h"
 #include "frameworks/core/gestures/rotation_gesture.h"
 #include "frameworks/core/gestures/slide_gesture.h"
 #include "frameworks/core/gestures/tap_gesture.h"
+#include "frameworks/core/gestures/timeout_gesture.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -91,7 +94,6 @@ void JSGesture::Finish()
         return;
     }
 
-    gesture->SetPriority(gestureComponent->GetPriority());
     gesture->SetGestureMask(gestureComponent->GetGestureMask());
 
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -499,6 +501,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
     JSClass<JSTapGesture>::StaticMethod("create", &JSTapGesture::Create, opt);
     JSClass<JSTapGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSTapGesture>::StaticMethod("onAction", &JSGesture::JsHandlerOnAction);
+    JSClass<JSTapGesture>::StaticMethod("onActionUpdate", &JSGesture::JsHandlerOnActionUpdate);
     JSClass<JSTapGesture>::Bind<>(globalObj);
 
     JSClass<JSLongPressGesture>::Declare("LongPressGesture");
@@ -507,6 +510,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
     JSClass<JSLongPressGesture>::StaticMethod("onAction", &JSGesture::JsHandlerOnAction);
     JSClass<JSLongPressGesture>::StaticMethod("onActionEnd", &JSGesture::JsHandlerOnActionEnd);
     JSClass<JSLongPressGesture>::StaticMethod("onActionCancel", &JSGesture::JsHandlerOnActionCancel);
+    JSClass<JSLongPressGesture>::StaticMethod("onActionUpdate", &JSGesture::JsHandlerOnActionUpdate);
     JSClass<JSLongPressGesture>::Bind(globalObj);
 
     JSClass<JSPanGesture>::Declare("PanGesture");
@@ -547,6 +551,36 @@ void JSGesture::JSBind(BindingTarget globalObj)
     JSClass<JSGestureGroup>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSGestureGroup>::StaticMethod("onCancel", &JSGesture::JsHandlerOnActionCancel);
     JSClass<JSGestureGroup>::Bind<>(globalObj);
+
+    JSClass<JSTimeoutGesture>::Declare("TimeoutGesture");
+    JSClass<JSTimeoutGesture>::StaticMethod("create", &JSTimeoutGesture::Create, opt);
+    JSClass<JSTimeoutGesture>::StaticMethod("pop", &JSGesture::Pop);
+
+    JSClass<JSTimeoutGesture>::Bind<>(globalObj);
+}
+
+void JSTimeoutGesture::Create(const JSCallbackInfo& args)
+{
+    LOGD("JSTimeoutGesture::Create()");
+    if (!args[0]->IsNumber()) {
+        return;
+    }
+
+    auto gestureComponent = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    auto gesture = AceType::MakeRefPtr<TimeoutGesture>(
+                std::chrono::duration<float>(args[0]->ToNumber<float>()));
+    gestureComponent->PushGesture(gesture);
+}
+
+void JSTimeoutGesture::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSTimeoutGesture>::Declare("TimeoutGesture");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSTimeoutGesture>::StaticMethod("create", &JSTimeoutGesture::Create, opt);
+    JSClass<JSTimeoutGesture>::StaticMethod("pop", &JSGesture::Pop);
+
+    JSClass<JSTimeoutGesture>::Bind<>(globalObj);
 }
 
 }; // namespace OHOS::Ace::Framework
+

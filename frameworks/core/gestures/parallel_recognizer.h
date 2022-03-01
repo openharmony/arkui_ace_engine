@@ -25,7 +25,7 @@ namespace OHOS::Ace {
 
 // ParallelRecognizer identifies events in parallel recognizers.
 // For long press and double click, see: LongPressRecognizer and DoubleClickRecognizer.
-class ParallelRecognizer : public MultiFingersRecognizer {
+class ACE_EXPORT ParallelRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(ParallelRecognizer, MultiFingersRecognizer);
 
 public:
@@ -61,3 +61,4 @@ private:
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_PARALLEL_RECOGNIZER_H
+

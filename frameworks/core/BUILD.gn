@@ -141,8 +141,10 @@ template("ace_core_source_set") {
       "gestures/raw_recognizer.cpp",
       "gestures/rotation_recognizer.cpp",
       "gestures/sequenced_recognizer.cpp",
+      "gestures/single_child_gesture.cpp",
       "gestures/slide_recognizer.cpp",
       "gestures/swipe_recognizer.cpp",
+      "gestures/timeout_recognizer.cpp",
       "gestures/velocity_tracker.cpp",
 
       # declarative
@@ -153,6 +155,7 @@ template("ace_core_source_set") {
       "gestures/rotation_gesture.cpp",
       "gestures/slide_gesture.cpp",
       "gestures/tap_gesture.cpp",
+      "gestures/timeout_gesture.cpp",
 
       # event
       "event/back_end_event_manager.cpp",

@@ -232,6 +232,8 @@ protected:
     Size SetItemsPosition(double mainSize, const LayoutParam& layoutParam);
     bool UpdateScrollPosition(double offset, int32_t source);
 
+    bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
+        TouchTestResult& result) override;
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 

@@ -439,8 +439,19 @@ public:
         return speed_;
     }
 
+    void SetPressed(bool pressed)
+    {
+        pressed_ = pressed;
+    }
+
+    bool GetPressed() const
+    {
+        return pressed_;
+    }
+
 private:
     bool repeat_ = false;
+    bool pressed_ = false;
     double offsetX_ = 0.0;
     double offsetY_ = 0.0;
     double scale_ = 1.0;

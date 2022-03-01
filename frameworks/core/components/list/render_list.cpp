@@ -718,11 +718,19 @@ void RenderList::SetGroupState(int32_t index, bool expand)
 bool RenderList::TouchTest(const Point& globalPoint, const Point& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
+    RefPtr<RenderNode> parent = GetParent().Upgrade();
+    RefPtr<RenderMultiChildScroll> scroll = AceType::DynamicCast<RenderMultiChildScroll>(parent);
+
     if (stickyItem_) {
         const auto localPoint = parentLocalPoint - GetPaintRect().GetOffset();
         stickyItem_->TouchTest(globalPoint, localPoint, touchRestrict, result);
     }
-    return RenderNode::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+
+    if (scroll->IsScrollStop()) {
+        return RenderNode::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+    }
+
+    return true;
 }
 
 // notify start position in global main axis
@@ -782,5 +790,4 @@ void RenderList::SetOnRotateCallback(const RefPtr<ListComponent>& component)
     }
     rotationEvent_ = AceAsyncEvent<void(const RotationEvent&)>::Create(onRotateId, context_);
 }
-
 } // namespace OHOS::Ace

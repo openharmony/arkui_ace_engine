@@ -122,14 +122,17 @@ ohos_unittest("PipelineContextTest") {
     # gestures
     "//foundation/ace/ace_engine/frameworks/core/gestures/click_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/drag_recognizer.cpp",
+    "//foundation/ace/ace_engine/frameworks/core/gestures/exclusive_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/gesture_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/gesture_referee.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/long_press_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/multi_fingers_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/pan_recognizer.cpp",
+    "//foundation/ace/ace_engine/frameworks/core/gestures/parallel_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/raw_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/sequenced_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/swipe_recognizer.cpp",
+    "//foundation/ace/ace_engine/frameworks/core/gestures/timeout_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/velocity_tracker.cpp",
 
     # image
