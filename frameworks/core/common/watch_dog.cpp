@@ -417,6 +417,8 @@ void WatchDog::Register(int32_t instanceId, const RefPtr<TaskExecutor>& taskExec
     watchers.uiWatcher->SetTaskExecutor(taskExecutor);
     if (!useUIAsJSThread) {
         watchers.jsWatcher->SetTaskExecutor(taskExecutor);
+    } else {
+        watchers.jsWatcher = nullptr;
     }
     const auto resExecutor = watchMap_.try_emplace(instanceId, watchers);
     if (!resExecutor.second) {

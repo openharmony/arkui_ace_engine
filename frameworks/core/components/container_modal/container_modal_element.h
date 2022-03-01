@@ -36,6 +36,7 @@ public:
 private:
     RefPtr<StackElement> GetStackElement() const;
     bool CanShowFloatingTitle();
+    bool CanHideFloatingTitle();
     void ChangeFloatingTitleIcon();
     RefPtr<Animator> controller_;
     RefPtr<RenderDisplay> floatingTitleDisplay_;
