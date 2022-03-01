@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_COMMON_STYLE_H
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/calc_dimension.h"
+
 #include "core/animation/animation_pub.h"
 #include "core/animation/shared_transition_effect.h"
 #include "core/components/common/properties/border.h"
@@ -80,12 +82,12 @@ struct CommonStyle : Style {
 };
 
 struct CommonSizeStyle : Style {
-    Dimension width = Dimension(-1.0, DimensionUnit::PX);
-    Dimension height = Dimension(-1.0, DimensionUnit::PX);
-    Dimension minWidth = Dimension(0.0);
-    Dimension minHeight = Dimension(0.0);
-    Dimension maxWidth = Dimension(Size::INFINITE_SIZE);
-    Dimension maxHeight = Dimension(Size::INFINITE_SIZE);
+    CalcDimension width = Dimension(-1.0, DimensionUnit::PX);
+    CalcDimension height = Dimension(-1.0, DimensionUnit::PX);
+    CalcDimension minWidth = Dimension(0.0);
+    CalcDimension minHeight = Dimension(0.0);
+    CalcDimension maxWidth = Dimension(Size::INFINITE_SIZE);
+    CalcDimension maxHeight = Dimension(Size::INFINITE_SIZE);
     double aspectRatio = 0.0;
     BoxSizing boxSizing = BoxSizing::BORDER_BOX;
 };

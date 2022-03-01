@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -418,9 +418,9 @@ public:
 
     /*
      * Parse dimension from string content and reference for id/attr, including format:
-     * 10px, "@id001", "@attr_sys_dimension".
+     * 10px, "@id001", "@attr_sys_dimension, expression".
      */
-    Dimension ParseDimension(const std::string& value) const;
+    CalcDimension ParseDimension(const std::string& value) const;
 
     /*
      * Parse line height from string content and reference for id/attr, including format:
@@ -520,7 +520,7 @@ public:
         return declaration_ ? declaration_->IsRightToLeft() : false;
     }
 
-    void SetHeight(const Dimension& height)
+    void SetHeight(const CalcDimension& height)
     {
         if (declaration_) {
             auto& sizeStyle = declaration_->MaybeResetStyle<CommonSizeStyle>(StyleTag::COMMON_SIZE_STYLE);
@@ -530,7 +530,7 @@ public:
         }
     }
 
-    void SetWidth(const Dimension& width)
+    void SetWidth(const CalcDimension& width)
     {
         if (declaration_) {
             auto& sizeStyle = declaration_->MaybeResetStyle<CommonSizeStyle>(StyleTag::COMMON_SIZE_STYLE);
@@ -552,9 +552,33 @@ public:
         return height;
     }
 
+    virtual CalcDimension GetCalcHeight() const
+    {
+        CalcDimension height = Dimension(-1.0, DimensionUnit::PX);
+        if (declaration_) {
+            auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
+            if (sizeStyle.IsValid()) {
+                height = sizeStyle.height;
+            }
+        }
+        return height;
+    }
+
     virtual Dimension GetWidth() const
     {
         Dimension width = Dimension(-1.0, DimensionUnit::PX);
+        if (declaration_) {
+            auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
+            if (sizeStyle.IsValid()) {
+                width = sizeStyle.width;
+            }
+        }
+        return width;
+    }
+
+    virtual CalcDimension GetCalcWidth() const
+    {
+        CalcDimension width = Dimension(-1.0, DimensionUnit::PX);
         if (declaration_) {
             auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
             if (sizeStyle.IsValid()) {
@@ -767,7 +791,7 @@ protected:
 
     virtual void CompositeComponents();
 
-    virtual void UpdateBoxSize(const Dimension& width, const Dimension& height);
+    virtual void UpdateBoxSize(const CalcDimension& width, const CalcDimension& height);
     virtual void UpdateBoxPadding(const Edge& padding);
     virtual void UpdateBoxBorder(const Border& border);
     virtual void UpdatePropAnimations(const PropAnimationMap& animations);
