@@ -98,6 +98,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("mixedMode", &JSWeb::MixedMode);
     JSClass<JSWeb>::StaticMethod("zoomAccess", &JSWeb::ZoomAccessEnabled);
     JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("javaScriptProxy", &JSWeb::JavaScriptProxy);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -471,6 +472,20 @@ void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)
         return;
     }
     webComponent->SetGeolocationAccessEnabled(isGeolocationAccessEnabled);
+}
+
+void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController add js interface");
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(args[0]);
+    auto controllerObj = paramObject->GetProperty("controller");
+    auto controller = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSWebController>();
+    if (controller) {
+        controller->SetJavascriptInterface(args);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

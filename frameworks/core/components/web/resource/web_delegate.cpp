@@ -823,6 +823,7 @@ void WebDelegate::SetWebCallBack()
                     }
                 });
             });
+        webController->LoadInitJavascriptInterface();
         webController->SetRemoveJavascriptInterfaceImpl([weak = WeakClaim(this), uiTaskExecutor](
             std::string objectName, const std::vector<std::string>& methodList) {
                 uiTaskExecutor.PostTask([weak, objectName, methodList]() {
