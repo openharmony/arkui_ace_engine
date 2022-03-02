@@ -165,6 +165,7 @@ public:
     Uri DenormalizeUri(const Uri& uri) override;
     sptr<IRemoteObject> OnConnectService(const OHOS::AAFwk::Want& want) override;
     void OnDisconnectService(const OHOS::AAFwk::Want& want) override;
+    void OnCreate(const OHOS::AAFwk::Want& want) override;
     void OnDelete(const int64_t formId) override;
     void OnTriggerEvent(const int64_t formId, const std::string& message) override;
     void OnUpdate(const int64_t formId) override;

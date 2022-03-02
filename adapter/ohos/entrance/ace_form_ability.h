@@ -98,8 +98,8 @@ public:
     virtual void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap) override;
 
 private:
-    int64_t abilityId_ = 0;
-    std::map<int64_t, int32_t> formMap_;
+    void LoadFormEnv(const OHOS::AAFwk::Want& want);
+
     static int32_t instanceId_;
     static const std::string START_PARAMS_KEY;
     static const std::string URI;

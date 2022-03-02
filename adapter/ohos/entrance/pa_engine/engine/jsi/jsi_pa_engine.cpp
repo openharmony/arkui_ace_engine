@@ -801,7 +801,7 @@ void JsiPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
     } else if (type == BackendType::DATA) {
         StartData();
     } else if (type == BackendType::FORM) {
-        StartForm(want);
+        LOGI("Form Ability LoadJS finish.");
     } else {
         LOGE("backend type not support");
     }
@@ -1013,50 +1013,6 @@ void JsiPaEngine::StartData()
 
     auto func = GetPaFunc("onInitialized");
     CallFunc(func, argv);
-}
-
-void JsiPaEngine::StartForm(const OHOS::AAFwk::Want& want)
-{
-    LOGI("JsiPaEngine StartForm");
-    ACE_DCHECK(engineInstance_);
-    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-
-    const std::vector<shared_ptr<JsValue>>& argv = { WantToJsValue(want) };
-    auto func = GetPaFunc("onCreate");
-    auto result = CallFunc(func, argv);
-    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(result);
-    if (arkJSValue->IsException(runtime)) {
-        LOGE("JsiPaEngine CallFunc FAILED!");
-        return;
-    }
-
-    shared_ptr<JsValue> propertyNames;
-    int32_t len = 0;
-    if (!arkJSValue->GetPropertyNames(runtime, propertyNames, len)) {
-        LOGE("JsiPaEngine StartForm GetPropertyNames error");
-        return;
-    }
-    LOGD("JsiPaEngine onCreate return property num %{public}d", len);
-
-    std::string jsonStr;
-    shared_ptr<JsValue> formJsonData = arkJSValue->GetProperty(runtime, "data");
-    if (formJsonData != nullptr) {
-        jsonStr = formJsonData->ToString(runtime);
-        LOGI("Add FormBindingData json:%{public}s", jsonStr.c_str());
-    }
-    AppExecFwk::FormProviderData formData = AppExecFwk::FormProviderData(jsonStr);
-    shared_ptr<JsValue> formImageData = arkJSValue->GetProperty(runtime, "image");
-    if (formImageData != nullptr) {
-        std::map<std::string, int> rawImageDataMap;
-        auto arkJsRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-        NativeValue* nativeValue = ArkNativeEngine::ArkValueToNativeValue(nativeEngine_,
-            std::static_pointer_cast<ArkJSValue>(formImageData)->GetValue(arkJsRuntime));
-        UnwrapRawImageDataMap(nativeEngine_, nativeValue, rawImageDataMap);
-        for (const auto& data : rawImageDataMap) {
-            formData.AddImageData(data.first, data.second);
-        }
-    }
-    SetFormData(formData);
 }
 
 RefPtr<GroupJsBridge> JsiPaEngine::GetGroupJsBridge()
@@ -1480,6 +1436,50 @@ void JsiPaEngine::OnCommand(const OHOS::AAFwk::Want &want, int startId)
     };
     auto func = GetPaFunc("onCommand");
     CallFunc(func, argv);
+}
+
+void JsiPaEngine::OnCreate(const OHOS::AAFwk::Want& want)
+{
+    LOGI("JsiPaEngine OnCreate");
+    ACE_DCHECK(engineInstance_);
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+
+    const std::vector<shared_ptr<JsValue>>& argv = { WantToJsValue(want) };
+    auto func = GetPaFunc("onCreate");
+    auto result = CallFunc(func, argv);
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(result);
+    if (arkJSValue->IsException(runtime)) {
+        LOGE("JsiPaEngine CallFunc FAILED!");
+        return;
+    }
+
+    shared_ptr<JsValue> propertyNames;
+    int32_t len = 0;
+    if (!arkJSValue->GetPropertyNames(runtime, propertyNames, len)) {
+        LOGE("JsiPaEngine StartForm GetPropertyNames error");
+        return;
+    }
+    LOGD("JsiPaEngine onCreate return property num %{public}d", len);
+
+    std::string jsonStr;
+    shared_ptr<JsValue> formJsonData = arkJSValue->GetProperty(runtime, "data");
+    if (formJsonData != nullptr) {
+        jsonStr = formJsonData->ToString(runtime);
+        LOGI("Add FormBindingData json:%{public}s", jsonStr.c_str());
+    }
+    AppExecFwk::FormProviderData formData = AppExecFwk::FormProviderData(jsonStr);
+    shared_ptr<JsValue> formImageData = arkJSValue->GetProperty(runtime, "image");
+    if (formImageData != nullptr) {
+        std::map<std::string, int> rawImageDataMap;
+        auto arkJsRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+        NativeValue* nativeValue = ArkNativeEngine::ArkValueToNativeValue(nativeEngine_,
+            std::static_pointer_cast<ArkJSValue>(formImageData)->GetValue(arkJsRuntime));
+        UnwrapRawImageDataMap(nativeEngine_, nativeValue, rawImageDataMap);
+        for (const auto& data : rawImageDataMap) {
+            formData.AddImageData(data.first, data.second);
+        }
+    }
+    SetFormData(formData);
 }
 
 void JsiPaEngine::OnDelete(const int64_t formId)

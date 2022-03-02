@@ -241,6 +241,15 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
         jsBackendEngine->OnCommand(want, startId);
     };
 
+    builder.createFormCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
+                                     const OHOS::AAFwk::Want& want) {
+        auto jsBackendEngine = weakEngine.Upgrade();
+        if (!jsBackendEngine) {
+            return;
+        }
+        jsBackendEngine->OnCreate(want);
+    };
+
     builder.deleteFormCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                      const int64_t formId) {
         auto jsBackendEngine = weakEngine.Upgrade();
@@ -453,6 +462,11 @@ Uri PaBackend::DenormalizeUri(const Uri& uri)
 void PaBackend::RunPa(const std::string& url, const OHOS::AAFwk::Want& want)
 {
     delegate_->RunPa(url, want);
+}
+
+void PaBackend::OnCreate(const OHOS::AAFwk::Want &want)
+{
+    delegate_->OnCreate(want);
 }
 
 void PaBackend::OnDelete(const int64_t formId)

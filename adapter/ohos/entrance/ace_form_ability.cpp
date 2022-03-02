@@ -26,12 +26,8 @@
 #include "core/common/backend.h"
 
 namespace OHOS::Ace {
-namespace {
-const int INSTANCE_NUM_MAX = 1000;
-} // namespace
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
-
 using FormPlatformFinish = std::function<void()>;
 class FormPlatformEventCallback final : public Platform::PlatformEventCallback {
 public:
@@ -64,14 +60,11 @@ REGISTER_AA(AceFormAbility)
 
 AceFormAbility::AceFormAbility()
 {
-    abilityId_ = instanceId_;
-    instanceId_ += INSTANCE_NUM_MAX;
+    instanceId_++;
 }
 
-OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::Want& want)
+void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
 {
-    LOGI("AceFormAbility::OnCreate called");
-
     // get url
     std::string parsedUrl;
     if (want.HasParameter(URI)) {
@@ -79,11 +72,6 @@ OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::W
     } else {
         parsedUrl = "form.js";
     }
-
-    std::string formIdStr = want.GetStringParam(AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY);
-    LOGI("AceFormAbility::formId = %{public}s.", formIdStr.c_str());
-    int64_t formId = atoll(formIdStr.c_str());
-    formMap_.emplace(formId, abilityId_++);
 
     // get asset
     auto packagePathStr = GetBundleCodePath();
@@ -95,19 +83,18 @@ OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::W
     // init form ability
     BackendType backendType = BackendType::FORM;
     bool isArkApp = GetIsArkFromConfig(packagePathStr);
-    Platform::PaContainer::CreateContainer(formMap_.at(formId), backendType, isArkApp, this,
+    Platform::PaContainer::CreateContainer(instanceId_, backendType, isArkApp, this,
         std::make_unique<FormPlatformEventCallback>([this]() { TerminateAbility(); }));
 
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     if (info != nullptr && !info->srcPath.empty()) {
-        LOGI("AceFormAbility::OnCreate assetBasePathStr: %{public}s, parsedUrl: %{public}s",
-            info->srcPath.c_str(), parsedUrl.c_str());
+        LOGI("AceFormAbility srcPath:%{public}s url:%{public}s", info->srcPath.c_str(), parsedUrl.c_str());
         auto assetBasePathStr = { "assets/js/" + info->srcPath + "/" };
-        Platform::PaContainer::AddAssetPath(formMap_.at(formId), packagePathStr, assetBasePathStr);
+        Platform::PaContainer::AddAssetPath(instanceId_, packagePathStr, assetBasePathStr);
     } else {
-        LOGI("AceFormAbility::OnCreate parsedUrl: %{public}s", parsedUrl.c_str());
+        LOGI("AceFormAbility parsedUrl:%{public}s", parsedUrl.c_str());
         auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
-        Platform::PaContainer::AddAssetPath(formMap_.at(formId), packagePathStr, assetBasePathStr);
+        Platform::PaContainer::AddAssetPath(instanceId_, packagePathStr, assetBasePathStr);
     }
     std::shared_ptr<ApplicationInfo> appInfo = GetApplicationInfo();
     if (appInfo) {
@@ -123,14 +110,21 @@ OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::W
                 libPath += "/" + nativeLibraryPath;
             }
             LOGI("napi lib path = %{private}s", libPath.c_str());
-            Platform::PaContainer::AddLibPath(abilityId_, libPath);
+            Platform::PaContainer::AddLibPath(instanceId_, libPath);
         }
     }
 
     // run form ability
-    Platform::PaContainer::RunPa(formMap_.at(formId), parsedUrl, want);
+    Platform::PaContainer::RunPa(instanceId_, parsedUrl, want);
+}
+
+OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::Want& want)
+{
+    std::string formId = want.GetStringParam(AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY);
+    LOGI("AceFormAbility::OnCreate formId = %{public}s.", formId.c_str());
+    Platform::PaContainer::OnCreate(instanceId_, want);
     OHOS::AppExecFwk::FormProviderInfo formProviderInfo;
-    formProviderInfo.SetFormData(Platform::PaContainer::GetFormData(formMap_.at(formId)));
+    formProviderInfo.SetFormData(Platform::PaContainer::GetFormData(instanceId_));
     std::string formData = formProviderInfo.GetFormData().GetDataString();
     LOGI("AceFormAbility::OnCreate return ok, formData: %{public}s", formData.c_str());
     return formProviderInfo;
@@ -138,35 +132,39 @@ OHOS::AppExecFwk::FormProviderInfo AceFormAbility::OnCreate(const OHOS::AAFwk::W
 
 void AceFormAbility::OnDelete(const int64_t formId)
 {
-    Platform::PaContainer::OnDelete(formMap_.at(formId), formId);
+    LOGI("AceFormAbility::OnDelete called: %{public}s", std::to_string(formId).c_str());
+    Platform::PaContainer::OnDelete(instanceId_, formId);
 }
 
 void AceFormAbility::OnTriggerEvent(const int64_t formId, const std::string& message)
 {
-    Platform::PaContainer::OnTriggerEvent(formMap_.at(formId), formId, message);
+    LOGI("AceFormAbility::OnTriggerEvent called: %{public}s", std::to_string(formId).c_str());
+    Platform::PaContainer::OnTriggerEvent(instanceId_, formId, message);
 }
 
 void AceFormAbility::OnUpdate(const int64_t formId)
 {
-    Platform::PaContainer::OnUpdate(formMap_.at(formId), formId);
+    LOGI("AceFormAbility::OnUpdate called: %{public}s", std::to_string(formId).c_str());
+    Platform::PaContainer::OnUpdate(instanceId_, formId);
 }
 
 void AceFormAbility::OnCastTemptoNormal(const int64_t formId)
 {
-    Platform::PaContainer::OnCastTemptoNormal(formMap_.at(formId), formId);
+    LOGI("AceFormAbility::OnCastTemptoNormal called: %{public}s", std::to_string(formId).c_str());
+    Platform::PaContainer::OnCastTemptoNormal(instanceId_, formId);
 }
 
 void AceFormAbility::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap)
 {
-    for (const auto& form : formMap_) {
-        Platform::PaContainer::OnVisibilityChanged(form.second, formEventsMap);
-    }
+    LOGI("AceFormAbility::OnVisibilityChanged called");
+    Platform::PaContainer::OnVisibilityChanged(instanceId_, formEventsMap);
 }
 
 void AceFormAbility::OnStart(const OHOS::AAFwk::Want& want)
 {
     LOGI("AceFormAbility::OnStart start");
     Ability::OnStart(want);
+    LoadFormEnv(want);
 }
 
 void AceFormAbility::OnStop()
