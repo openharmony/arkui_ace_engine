@@ -32,7 +32,7 @@
 namespace OHOS::Ace::V2 {
 namespace {
 
-constexpr double VIEW_PORT_SCALE = 3.0;
+constexpr double VIEW_PORT_SCALE = 1.2;
 constexpr int32_t CHAIN_ANIMATION_NODE_COUNT = 30;
 constexpr int32_t DEFAULT_SOURCE = 3;
 constexpr int32_t SCROLL_STATE_IDLE = 0;
@@ -581,7 +581,7 @@ double RenderList::ApplyLayoutParam()
             endMainPos_ = std::numeric_limits<decltype(endMainPos_)>::max();
             fixedMainSizeByLayoutParam_ = false;
         } else {
-            startMainPos_ = -maxMainSize;
+            startMainPos_ = (1.0 - VIEW_PORT_SCALE) / 2 * maxMainSize;
             endMainPos_ = startMainPos_ + (maxMainSize * VIEW_PORT_SCALE);
             fixedMainSizeByLayoutParam_ = NearEqual(maxMainSize, GetMainSize(GetLayoutParam().GetMinSize()));
         }
