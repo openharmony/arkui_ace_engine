@@ -496,9 +496,6 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
     }
 
     SkPaint paint;
-    if (opacity_ != UINT8_MAX) {
-        paint.setAlpha(opacity_);
-    }
     Rect paintRect = ((imageLoadingStatus_ == ImageLoadingStatus::LOADING) && !resizeCallLoadImage_)
                              ? currentDstRect_
                              : dstRect_;
@@ -569,6 +566,11 @@ void RosenRenderImage::ApplyBorderRadius(
         return;
     }
     SetClipRadius();
+
+#ifdef OHOS_PLATFORM
+    auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
+    recordingCanvas->ClipAdaptiveRRect(radii_[0].x());
+#else
     // There are three situations in which we apply border radius to the whole image component:
     // 1. when the image source is a SVG;
     // 2. when image loads fail;
@@ -583,6 +585,7 @@ void RosenRenderImage::ApplyBorderRadius(
             clipRect.Width(), clipRect.Height()),
         radii_);
     canvas->clipRRect(rrect, true);
+#endif
 }
 
 void RosenRenderImage::ApplyColorFilter(SkPaint& paint)
@@ -645,8 +648,7 @@ void RosenRenderImage::CanvasDrawImageRect(
         return;
     }
 #ifdef OHOS_PLATFORM
-    double dipScale = context_.Upgrade()->GetDipScale();
-    float radius = topLeftRadius_.GetX().ConvertToPx(dipScale);
+    float radius = radii_[0].x();
     int fitNum = static_cast<int>(imageFit_);
     int repeatNum = static_cast<int>(imageRepeat_);
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
