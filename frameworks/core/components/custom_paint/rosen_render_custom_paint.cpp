@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,6 +135,8 @@ RosenRenderCustomPaint::RosenRenderCustomPaint()
         currentDartState->GetSkiaUnrefQueue(),
         currentDartState->GetIOManager(),
         currentDartState->GetTaskRunners().GetIOTaskRunner());
+
+    InitImageCallbacks();
 }
 
 void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
@@ -1120,6 +1122,110 @@ void RosenRenderCustomPaint::UpdateLineDash(SkPaint& paint)
     }
 }
 
+void RosenRenderCustomPaint::InitImageCallbacks()
+{
+    imageObjSuccessCallback_ = [weak = AceType::WeakClaim(this)](
+        ImageSourceInfo info, const RefPtr<ImageObject>& imageObj) {
+        auto render = weak.Upgrade();
+        if (render->loadingSource_ == info) {
+            render->ImageObjReady(imageObj);
+            return;
+        } else {
+            LOGE("image sourceInfo_ check error, : %{public}s vs %{public}s",
+                render->loadingSource_.ToString().c_str(), info.ToString().c_str());
+        }
+    };
+
+    failedCallback_ = [weak = AceType::WeakClaim(this)](ImageSourceInfo info) {
+        auto render = weak.Upgrade();
+        LOGE("tkh failedCallback_");
+        render->ImageObjFailed();
+    };
+
+    uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)](
+        ImageSourceInfo sourceInfo, const fml::RefPtr<flutter::CanvasImage>& image) {};
+
+    onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)](CancelableTask task) {};
+}
+
+void RosenRenderCustomPaint::ImageObjReady(const RefPtr<ImageObject>& imageObj)
+{
+    imageObj_ = imageObj;
+    if (imageObj_->IsSvg()) {
+        skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
+        currentSource_ = loadingSource_;
+        CanvasImage canvasImage = canvasImage_;
+        TaskFunc func = [canvasImage](RenderCustomPaint& interface, const Offset& offset) {
+            interface.DrawImage(offset, canvasImage, 0, 0);
+        };
+        tasks_.emplace_back(func);
+        MarkNeedRender();
+    } else {
+        LOGE("image is not svg");
+    }
+}
+
+void RosenRenderCustomPaint::ImageObjFailed()
+{
+    imageObj_ = nullptr;
+    skiaDom_ = nullptr;
+}
+
+void RosenRenderCustomPaint::DrawSvgImage(const Offset& offset, const CanvasImage& canvasImage)
+{
+    const auto skCanvas =
+        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+
+    // Make the ImageSourceInfo
+    canvasImage_ = canvasImage;
+    loadingSource_ = ImageSourceInfo(canvasImage.src);
+    
+    // get the ImageObject
+    if (currentSource_ != loadingSource_) {
+        ImageProvider::FetchImageObject(loadingSource_, imageObjSuccessCallback_, uploadSuccessCallback_,
+            failedCallback_, GetContext(), true, true, true, renderTaskHolder_, onPostBackgroundTask_);
+    }
+
+    // draw the svg
+    if (skiaDom_) {
+        SkRect srcRect;
+        SkRect dstRect;
+        Offset startPoint;
+        double scaleX = 1.0f;
+        double scaleY = 1.0f;
+        switch (canvasImage.flag) {
+            case 0:
+                srcRect = SkRect::MakeXYWH(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+                dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy,
+                    skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+                break;
+            case 1: {
+                srcRect = SkRect::MakeXYWH(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+                dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+                break;
+            }
+            case 2: {
+                srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+                dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+                break;
+            }
+            default:
+                break;
+        }
+        scaleX = dstRect.width() / srcRect.width();
+        scaleY = dstRect.height() / srcRect.height();
+        startPoint = offset  + Offset(dstRect.left(), dstRect.top())
+	    - Offset(srcRect.left() * scaleX, srcRect.top() * scaleY);
+
+        skCanvas->save();
+        skCanvas->clipRect(dstRect);
+        skCanvas->translate(startPoint.GetX(), startPoint.GetY());
+        skCanvas->scale(scaleX, scaleY);
+        skiaDom_->render(skCanvas);
+        skCanvas->restore();
+    }
+}
+
 void RosenRenderCustomPaint::DrawImage(
     const Offset& offset, const CanvasImage& canvasImage, double width, double height)
 {
@@ -1131,6 +1237,13 @@ void RosenRenderCustomPaint::DrawImage(
     if (!context) {
         return;
     }
+
+    std::string::size_type tmp = canvasImage.src.find(".svg");
+    if (tmp != std::string::npos) {
+        DrawSvgImage(offset, canvasImage);
+        return;
+    }
+
     auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
                      ? ImageProvider::GetSkImage(canvasImage.src, context, Size(width, height))
                      : ImageProvider::GetSkImage(canvasImage.src, context);
