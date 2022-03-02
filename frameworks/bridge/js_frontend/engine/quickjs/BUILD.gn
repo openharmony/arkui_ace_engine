@@ -42,17 +42,22 @@ template("js_engine_qjs") {
     ]
 
     deps = [
-      "$ace_napi:ace_napi_quickjs",
       "$ace_root/frameworks/core/components/theme:build_theme_code",
       "//third_party/jsframework:jsf",
     ]
 
     if (use_js_debug) {
-      deps += [ "//third_party/quickjs:qjs_debugger" ]
+      deps += [
+        "//foundation/ace/napi:ace_napi_quickjs_debug",
+        "//third_party/quickjs:qjs_debugger",
+      ]
       defines += [ "ENABLE_JS_DEBUG" ]
       configs += [ "//third_party/quickjs:qjs_debug_config" ]
     } else {
-      deps += [ "//third_party/quickjs:qjs" ]
+      deps += [
+        "//foundation/ace/napi:ace_napi_quickjs",
+        "//third_party/quickjs:qjs",
+      ]
     }
 
     if (defined(config.use_build_in_js_engine) &&
