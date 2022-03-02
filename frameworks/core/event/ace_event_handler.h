@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/memory/ace_type.h"
+#include "core/common/container_scope.h"
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
 #include "core/event/rotation_event.h"
@@ -34,25 +35,26 @@ public:
     using ArgFunction = std::function<void(BaseEventInfo* info)>;
 
     struct Data final {
-        Data() = default;
+        Data() : instanceId(ContainerScope::CurrentId()) {}
         explicit Data(const Data& other) = default;
         explicit Data(Data&& other) = default;
-        explicit Data(Function&& preFunc) : preFunction(std::move(preFunc)) {}
-        explicit Data(StrFunction&& func) : uiStrFunction(std::move(func)) {}
+        explicit Data(Function&& preFunc) : preFunction(std::move(preFunc)), instanceId(ContainerScope::CurrentId()) {}
+        explicit Data(StrFunction&& func) : uiStrFunction(std::move(func)), instanceId(ContainerScope::CurrentId()) {}
         Data(const std::string& eventId, const std::string& eventType, int32_t pageId, bool isFront)
-            : eventId(eventId), eventType(eventType), pageId(pageId), isFront(isFront)
+            : eventId(eventId), eventType(eventType), pageId(pageId), isFront(isFront),
+              instanceId(ContainerScope::CurrentId())
         {}
         Data(Function&& func, const std::string& eventType, int32_t pageId, bool isFront)
             : uiFunction(std::move(func)), eventId("-1"), eventType(eventType), pageId(pageId), isFront(isFront),
-              isDeclarativeUi(true)
+              isDeclarativeUi(true), instanceId(ContainerScope::CurrentId())
         {}
         Data(ArgFunction&& func, const std::string& eventType, int32_t pageId, bool isFront)
             : uiArgFunction(std::move(func)), eventId("-1"), eventType(eventType), pageId(pageId), isFront(isFront),
-              isDeclarativeUi(true)
+              isDeclarativeUi(true), instanceId(ContainerScope::CurrentId())
         {}
         Data(StrFunction&& func, const std::string& eventType, int32_t pageId, bool isFront)
             : uiStrFunction(std::move(func)), eventId("-1"), eventType(eventType), pageId(pageId), isFront(isFront),
-              isDeclarativeUi(true)
+              isDeclarativeUi(true), instanceId(ContainerScope::CurrentId())
         {}
 
         ~Data() = default;
@@ -72,6 +74,7 @@ public:
         bool isFront = true;
         bool isDeclarativeUi = false;
         bool isCatchMode = true;
+        int32_t instanceId = -1;
     };
 
     EventMarker() = default;
@@ -94,7 +97,14 @@ public:
         StrFunction&& func, const std::string& eventType = std::string(), int32_t pageId = -1, bool isFront = true)
         : data_(std::make_unique<Data>(std::move(func), eventType, pageId, isFront))
     {}
-    EventMarker(const EventMarker& other) : data_(other.data_ ? std::make_unique<Data>(*other.data_) : nullptr) {}
+
+    EventMarker(const EventMarker& other)
+    {
+        if (other.data_) {
+            ContainerScope id(other.data_->instanceId);
+            data_ = std::make_unique<Data>(*other.data_);
+        }
+    }
     ~EventMarker() = default;
 
     EventMarker& operator=(EventMarker&& other) = default;
