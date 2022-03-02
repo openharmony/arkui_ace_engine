@@ -462,7 +462,7 @@ void JSText::Create(const JSCallbackInfo& info)
     textComponent->SetTextStyle(std::move(textStyle));
 
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    boxComponent->SetMouseAnimationType(HoverAnimationType::BOARD);
+    boxComponent->SetMouseAnimationType(HoverAnimationType::NONE);
 }
 
 RefPtr<TextComponentV2> JSText::GetComponent()
