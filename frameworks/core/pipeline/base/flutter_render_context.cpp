@@ -22,6 +22,8 @@
 namespace OHOS::Ace {
 namespace {
 
+constexpr int32_t OVERFLOW_PLATFORM_VERSION = 7;
+
 inline bool ShouldPaint(const RefPtr<RenderNode>& node)
 {
     return node != nullptr && node->GetVisible() && !node->GetHidden();
@@ -52,8 +54,14 @@ void FlutterRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Off
         return;
     }
 
+    bool canChildOverflow = false;
+    auto pipeline = child->GetContext().Upgrade();
+    if (pipeline) {
+        canChildOverflow = pipeline->GetMinPlatformVersion() >= OVERFLOW_PLATFORM_VERSION;
+    }
+
     Rect rect = child->GetTransitionPaintRect() + offset;
-    if (!child->IsPaintOutOfParent() && !estimatedRect_.IsIntersectWith(rect)) {
+    if (!(child->IsPaintOutOfParent() || canChildOverflow) && !estimatedRect_.IsIntersectWith(rect)) {
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
         child->ClearAccessibilityRect();
 #endif

@@ -1098,6 +1098,7 @@ RefPtr<DialogComponent> PipelineContext::ShowDialog(
     if (!lastStack) {
         return nullptr;
     }
+    LOGI("PipelineContext::ShowDialog id is %{public}d", dialog->GetDialogId());
     lastStack->PushDialog(dialog);
     return dialog;
 }
