@@ -295,7 +295,7 @@ RefPtr<MouseListenerComponent> ViewStackProcessor::GetMouseListenerComponent()
 bool ViewStackProcessor::HasClickGestureListenerComponent() const
 {
     auto& wrappingComponentsMap = componentsStack_.top();
-    if (wrappingComponentsMap.find("click_guesture") != wrappingComponentsMap.end()) {
+    if (wrappingComponentsMap.find("click_gesture") != wrappingComponentsMap.end()) {
         return true;
     }
     return false;
@@ -304,18 +304,18 @@ bool ViewStackProcessor::HasClickGestureListenerComponent() const
 RefPtr<GestureListenerComponent> ViewStackProcessor::GetClickGestureListenerComponent()
 {
     auto& wrappingComponentsMap = componentsStack_.top();
-    if (wrappingComponentsMap.find("click_guesture") != wrappingComponentsMap.end()) {
+    if (wrappingComponentsMap.find("click_gesture") != wrappingComponentsMap.end()) {
         auto gestureListenerComponent =
-            AceType::DynamicCast<GestureListenerComponent>(wrappingComponentsMap["click_guesture"]);
+            AceType::DynamicCast<GestureListenerComponent>(wrappingComponentsMap["click_gesture"]);
         if (gestureListenerComponent) {
             return gestureListenerComponent;
         }
     }
 
-    RefPtr<GestureListenerComponent> clickGuestureComponent =
+    RefPtr<GestureListenerComponent> clickGestureComponent =
         AceType::MakeRefPtr<OHOS::Ace::GestureListenerComponent>();
-    wrappingComponentsMap.emplace("click_guesture", clickGuestureComponent);
-    return clickGuestureComponent;
+    wrappingComponentsMap.emplace("click_gesture", clickGestureComponent);
+    return clickGestureComponent;
 }
 
 RefPtr<FocusableComponent> ViewStackProcessor::GetFocusableComponent(bool createIfNotExist)
@@ -336,17 +336,17 @@ RefPtr<FocusableComponent> ViewStackProcessor::GetFocusableComponent(bool create
 RefPtr<GestureListenerComponent> ViewStackProcessor::GetPanGestureListenerComponent()
 {
     auto& wrappingComponentsMap = componentsStack_.top();
-    if (wrappingComponentsMap.find("pan_guesture") != wrappingComponentsMap.end()) {
+    if (wrappingComponentsMap.find("pan_gesture") != wrappingComponentsMap.end()) {
         auto gestureListenerComponent =
-            AceType::DynamicCast<GestureListenerComponent>(wrappingComponentsMap["pan_guesture"]);
+            AceType::DynamicCast<GestureListenerComponent>(wrappingComponentsMap["pan_gesture"]);
         if (gestureListenerComponent) {
             return gestureListenerComponent;
         }
     }
 
-    RefPtr<GestureListenerComponent> panGuestureComponent = AceType::MakeRefPtr<OHOS::Ace::GestureListenerComponent>();
-    wrappingComponentsMap.emplace("pan_guesture", panGuestureComponent);
-    return panGuestureComponent;
+    RefPtr<GestureListenerComponent> panGestureComponent = AceType::MakeRefPtr<OHOS::Ace::GestureListenerComponent>();
+    wrappingComponentsMap.emplace("pan_gesture", panGestureComponent);
+    return panGestureComponent;
 }
 
 RefPtr<SharedTransitionComponent> ViewStackProcessor::GetSharedTransitionComponent()
@@ -575,7 +575,7 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     }
 
     std::string componentNames[] = { "stepperItem", "stepperDisplay", "flexItem", "display", "transform", "touch",
-        "pan_guesture", "click_guesture", "focusable", "coverage", "box", "shared_transition", "mouse",
+        "pan_gesture", "click_gesture", "focusable", "coverage", "box", "shared_transition", "mouse",
         "stepperScroll" };
     for (auto& name : componentNames) {
         auto iter = wrappingComponentsMap.find(name);

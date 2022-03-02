@@ -79,7 +79,7 @@ private:
     // backupListenerId_ is used for backup listenerId_ to handle split screen case.
     // under the circumstances, the viewsizechanged event will be triggered, but the
     // method of addListener will not run, so the listenerId is empty. this backup
-    // can ensure listenerId_ is valid when screen is splited.
+    // can ensure listenerId_ is valid when screen is split.
     std::string backupListenerId_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MediaQueryInfo);

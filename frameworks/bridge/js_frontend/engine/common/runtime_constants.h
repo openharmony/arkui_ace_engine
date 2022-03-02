@@ -84,7 +84,7 @@ constexpr uint32_t COMPONENT_ARGS_IDX = 2;
 
 // JsPerf index
 constexpr uint32_t PERF_ARGS_LEN = 1;
-constexpr uint32_t PERF_ARGS_MRTHOD_IDX = 0;
+constexpr uint32_t PERF_ARGS_METHOD_IDX = 0;
 
 // JsHiViewReport index
 constexpr uint32_t HIVIEW_ARGS_LEN = 2;

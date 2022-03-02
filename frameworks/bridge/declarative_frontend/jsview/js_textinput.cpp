@@ -187,7 +187,7 @@ void JSTextInput::Create(const JSCallbackInfo& info)
 void JSTextInput::SetBackgroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg(SetBackgroundColor) is wrong, it is supposed to have atlease 1 argument");
+        LOGE("The arg(SetBackgroundColor) is wrong, it is supposed to have atleast 1 argument");
         return;
     }
 
@@ -267,7 +267,7 @@ void JSTextInput::JsPadding(const JSCallbackInfo& info)
 void JSTextInput::SetPlaceholderColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg(SetPlaceholderColor) is wrong, it is supposed to have atlease 1 argument");
+        LOGE("The arg(SetPlaceholderColor) is wrong, it is supposed to have atleast 1 argument");
         return;
     }
 
@@ -360,7 +360,7 @@ void JSTextInput::SetEnterKeyType(const JSCallbackInfo& info)
 void JSTextInput::SetCaretColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg(SetCareColor) is wrong, it is supposed to have atlease 1 argument");
+        LOGE("The arg(SetCareColor) is wrong, it is supposed to have atleast 1 argument");
         return;
     }
 
@@ -484,7 +484,7 @@ void JSTextInput::SetFontStyle(int32_t value)
         textStyle.SetFontStyle(FONT_STYLES[value]);
         component->SetEditingStyle(textStyle);
     } else {
-        LOGE("TextInput fontStyle(%d) illega value", value);
+        LOGE("TextInput fontStyle(%d) illegal value", value);
     }
 }
 

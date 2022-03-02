@@ -326,13 +326,13 @@ HWTEST_F(GestureComponentTest, TouchListener004, TestSize.Level1)
 }
 
 /**
- * @tc.name: GuestureListener001
+ * @tc.name: GestureListener001
  * @tc.desc: Verify the gesture listener component can response to touch click event.
  * @tc.type: FUNC
  * @tc.require: AR000DAIGP
  * @tc.author: huye
  */
-HWTEST_F(GestureComponentTest, GuestureListener001, TestSize.Level1)
+HWTEST_F(GestureComponentTest, GestureListener001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create gesture listener component and set click event callback.
@@ -381,13 +381,13 @@ HWTEST_F(GestureComponentTest, GuestureListener001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GuestureListener002
+ * @tc.name: GestureListener002
  * @tc.desc: Verify the gesture listener component can response to touch click event.
  * @tc.type: FUNC
  * @tc.require: AR000DAIGP
  * @tc.author: huye
  */
-HWTEST_F(GestureComponentTest, GuestureListener002, TestSize.Level1)
+HWTEST_F(GestureComponentTest, GestureListener002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create gesture listener component and set click event callback.

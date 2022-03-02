@@ -127,7 +127,7 @@ void JSSelect::Selected(int value)
     }
     auto option = popup->GetSelectOptions();
     if (value < 0 || value >= static_cast<int32_t>(option.size())) {
-        LOGE("Input selected index error, use the defalut value");
+        LOGE("Input selected index error, use the default value");
         value = 0;
     }
 

@@ -24,7 +24,7 @@
 namespace OHOS::Ace::Framework {
 using std::shared_ptr;
 class JsRuntime;
-/* A class that represent all types of js value. Since we don't have seperate class for each type, please check it's
+/* A class that represent all types of js value. Since we don't have separate class for each type, please check it's
  * type before calling a type specific method such as GetProperty.
  */
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)

@@ -125,7 +125,7 @@ public:
     // Stop at the current frame(Continueable stop).
     void Pause();
 
-    // Resume animtion from the pause frame.
+    // Resume animation from the pause frame.
     void Resume();
 
     // Stop at the current frame(Unrecoverable stop).
@@ -144,10 +144,10 @@ private:
     // Screen refresh callback. duration is in millisecond.
     void OnFrame(int64_t duration);
 
-    // Callback the played time to the interpolator animtion.
+    // Callback the played time to the interpolator animation.
     void NotifyInterpolator(int32_t playedTime);
 
-    // Callback the played time to the motion animtion.
+    // Callback the played time to the motion animation.
     void NotifyMotion(int32_t playedTime);
 
     void StartInner(bool alwaysNotify);

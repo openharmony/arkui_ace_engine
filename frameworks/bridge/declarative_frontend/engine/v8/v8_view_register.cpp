@@ -887,7 +887,7 @@ void JsRegisterViews(BindingTarget globalObj)
     globalObj->Set(isolate, "IconPosition", *iconPosition);
     globalObj->Set(isolate, "PickerStyle", *pickerStyle);
     globalObj->Set(isolate, "BadgePosition", *badgePosition);
-    LOGD("View classes and jsCreateDocuemnt, registerObservableObject functions registered.");
+    LOGD("View classes and jsCreateDocument, registerObservableObject functions registered.");
 }
 
 } // namespace OHOS::Ace::Framework

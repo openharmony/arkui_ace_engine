@@ -65,7 +65,7 @@ public:
      *
      * @param params the four values of vector.
      * @return true get the least square result.
-     * @return false falied to get the least square result.
+     * @return false failed to get the least square result.
      */
     bool GetLeastSquareParams(std::vector<double>& params);
 

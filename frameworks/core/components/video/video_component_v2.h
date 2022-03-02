@@ -105,12 +105,12 @@ public:
 
     RefPtr<Element> CreateElement() override;
 
-    std::unordered_map<std::string, RefPtr<Component>>& GetGuestureComponentMap()
+    std::unordered_map<std::string, RefPtr<Component>>& GetGestureComponentMap()
     {
         return map_;
     }
 
-    void SetGuestureComponentMap(std::unordered_map<std::string, RefPtr<Component>> map)
+    void SetGestureComponentMap(std::unordered_map<std::string, RefPtr<Component>> map)
     {
         map_ = map;
     }

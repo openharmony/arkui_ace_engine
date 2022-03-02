@@ -273,9 +273,9 @@ void JSSearch::Create(const JSCallbackInfo& info)
         textFieldComponent->SetValue(key);
     }
 
-    auto placeholde = param->GetProperty("placeholder");
-    if (!placeholde->IsUndefined() && placeholde->IsString()) {
-        auto tip = placeholde->ToString();
+    auto placeholder = param->GetProperty("placeholder");
+    if (!placeholder->IsUndefined() && placeholder->IsString()) {
+        auto tip = placeholder->ToString();
         textFieldComponent->SetPlaceholder(tip);
     }
 

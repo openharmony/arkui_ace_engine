@@ -261,7 +261,7 @@ JSValue QJSDeclarativeEngineInstance::CompileSource(std::string url, const char*
 
         int fho = creat(filename.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
         if (fho != -1) {
-            LOGD("Compiled cache file opend for writing %s", filename.c_str());
+            LOGD("Compiled cache file opened for writing %s", filename.c_str());
             output_object_code(GetQJSContext(), fho, retVal);
             close(fho);
         } else {

@@ -247,18 +247,18 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
 void QJSDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::string componentName)
 {
     // replace the component name in the last loadDocument from current js content.
-    std::string::size_type loadDocomentPos = 0;
-    std::string::size_type  lastLoadDocomentPos = 0;
-    while ((loadDocomentPos = preContent_.find(COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW, loadDocomentPos))
+    std::string::size_type loadDocumentPos = 0;
+    std::string::size_type  lastLoadDocumentPos = 0;
+    while ((loadDocumentPos = preContent_.find(COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW, loadDocumentPos))
            != std::string::npos) {
-        lastLoadDocomentPos = loadDocomentPos;
-        loadDocomentPos++;
+        lastLoadDocumentPos = loadDocumentPos;
+        loadDocumentPos++;
     }
 
-    std::string::size_type position = lastLoadDocomentPos + LOAD_DOCUMENT_STR_LENGTH;
+    std::string::size_type position = lastLoadDocumentPos + LOAD_DOCUMENT_STR_LENGTH;
     std::string::size_type finalPostion = 0;
     while ((position = preContent_.find(LEFT_PARENTTHESIS, position)) != std::string::npos) {
-        if (position > loadDocomentPos + LOAD_DOCUMENT_STR_LENGTH) {
+        if (position > loadDocumentPos + LOAD_DOCUMENT_STR_LENGTH) {
             finalPostion = position;
             break;
         }
@@ -266,7 +266,7 @@ void QJSDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::s
     }
     std::string dstReplaceStr = COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW;
     dstReplaceStr += " " + componentName;
-    preContent_.replace(lastLoadDocomentPos, finalPostion - lastLoadDocomentPos, dstReplaceStr);
+    preContent_.replace(lastLoadDocumentPos, finalPostion - lastLoadDocumentPos, dstReplaceStr);
 
     auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(engineInstance_->GetQJSContext()));
     if (instance == nullptr) {

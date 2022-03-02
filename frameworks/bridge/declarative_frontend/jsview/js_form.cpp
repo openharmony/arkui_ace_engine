@@ -63,7 +63,7 @@ void JSForm::Create(const JSCallbackInfo& info)
     RefPtr<FormComponent> form = AceType::MakeRefPtr<OHOS::Ace::FormComponent>();
     form->SetFormRequestionInfo(fomInfo);
 #else
-    // for PC Preivew
+    // for PC Preview
     RefPtr<ComposedComponent> form = AceType::MakeRefPtr<OHOS::Ace::ComposedComponent>("", "card");
     RefPtr<BoxComponent> mountBox = AceType::MakeRefPtr<OHOS::Ace::BoxComponent>();
     auto textComponent = AceType::MakeRefPtr<TextComponent>("This component is not supported on PC Preview.");

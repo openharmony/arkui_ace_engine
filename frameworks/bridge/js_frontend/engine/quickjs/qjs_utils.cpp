@@ -361,7 +361,7 @@ std::string QJSUtils::JsDumpSourceFile(const char* stack, const RefPtr<RevSource
 
         std::string line = "";
         GetPosInfo(temp, closeBracePos, line);
-        // becasue the function can be called by jsfw or native, but the same
+        // because the function can be called by jsfw or native, but the same
         // is that the line is empty. So, this can be the terminal judgement
         if (line == "") {
             LOGI("the stack without line info");

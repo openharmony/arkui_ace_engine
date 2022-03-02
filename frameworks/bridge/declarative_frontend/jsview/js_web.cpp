@@ -172,7 +172,7 @@ JSRef<JSVal> LoadWebOnFocusEventToJSValue(const LoadWebOnFocusEvent& eventInfo)
 void JSWeb::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("web create error, info is non-vaild");
+        LOGI("web create error, info is non-valid");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -198,7 +198,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
     auto controllerObj = paramObject->GetProperty("controller");
     if (!controllerObj->IsObject()) {
-        LOGI("web create error, controller is non-vaild");
+        LOGI("web create error, controller is non-valid");
         return;
     }
     auto controller = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSWebController>();

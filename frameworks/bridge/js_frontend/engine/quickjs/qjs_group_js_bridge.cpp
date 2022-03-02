@@ -543,19 +543,19 @@ JSValue QuickJsGroupJsBridge::ProcessJsRequest(JSContext* ctx, JSValueConst this
     // In the preview scenario, only the fetch interface is available. If other APIs need to be supported in the future,
     // adaptation is required.
     if (strFunctionName != "fetch") {
-        LOGE("unsupport function %{private}s", strFunctionName.c_str());
+        LOGE("unsupported function %{private}s", strFunctionName.c_str());
         return JS_EXCEPTION;
     }
 
-    OHOS::Ace::RequestData requesetData;
-    ParseJsDataResult parseJsResult = groupJsBridge->ParseRequestData(ctx, argc, argv, requesetData, callbackId);
+    OHOS::Ace::RequestData requestData;
+    ParseJsDataResult parseJsResult = groupJsBridge->ParseRequestData(ctx, argc, argv, requestData, callbackId);
     if (parseJsResult != ParseJsDataResult::PARSE_JS_SUCCESS) {
         ProcessParseJsError(parseJsResult, ctx, callbackId);
         return JS_NULL;
     }
 
-    if ((type == FrontendType::JS && !instance->CallCurlFunction(requesetData, callbackId)) ||
-        (type == FrontendType::DECLARATIVE_JS && !declarativeInstance->CallCurlFunction(requesetData, callbackId))) {
+    if ((type == FrontendType::JS && !instance->CallCurlFunction(requestData, callbackId)) ||
+        (type == FrontendType::DECLARATIVE_JS && !declarativeInstance->CallCurlFunction(requestData, callbackId))) {
         LOGE("CallPlatformFunction fail");
         groupJsBridge->TriggerModulePluginGetErrorCallback(callbackId, PLUGIN_REQUEST_FAIL, "send message failed");
         return JS_NULL;
@@ -727,7 +727,7 @@ void QuickJsGroupJsBridge::ProcessParseJsError(ParseJsDataResult errorType, JSCo
     std::string errMessage;
     switch (errorType) {
         case ParseJsDataResult::PARSE_JS_ERR_UNSUPPORTED_TYPE:
-            errMessage = "unsupporteded js parameter type";
+            errMessage = "unsupported js parameter type";
             instance->PluginErrorCallback(callbackId,
                 static_cast<int32_t>(ParseJsDataResult::PARSE_JS_ERR_UNSUPPORTED_TYPE), std::move(errMessage));
             break;

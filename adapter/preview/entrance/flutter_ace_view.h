@@ -75,7 +75,7 @@ public:
         }
     }
 
-    void RegisterSystemBarHeightChangeCallback(SystemBarHeightChangeCallbak&& callback) override
+    void RegisterSystemBarHeightChangeCallback(SystemBarHeightChangeCallback&& callback) override
     {
         if (callback) {
             systemBarHeightChangeCallback_ = std::move(callback);
@@ -163,7 +163,7 @@ private:
     CardViewAccessibilityParamsCallback cardViewAccessibilityParamsCallback_;
     ViewChangeCallback viewChangeCallback_;
     DensityChangeCallback densityChangeCallback_;
-    SystemBarHeightChangeCallbak systemBarHeightChangeCallback_;
+    SystemBarHeightChangeCallback systemBarHeightChangeCallback_;
     SurfaceDestroyCallback surfaceDestroyCallback_;
     IdleCallback idleCallback_;
     KeyEventCallback keyEventCallback_;

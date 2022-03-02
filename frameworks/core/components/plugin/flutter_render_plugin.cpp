@@ -23,9 +23,9 @@ namespace OHOS::Ace {
 
 std::unique_ptr<DrawDelegate> FlutterRenderPlugin::GetDrawDelegate()
 {
-    auto darwDelegate = std::make_unique<DrawDelegate>();
+    auto drawDelegate = std::make_unique<DrawDelegate>();
 
-    darwDelegate->SetDrawFrameCallback([this](RefPtr<Flutter::Layer>& layer, const Rect& dirty) {
+    drawDelegate->SetDrawFrameCallback([this](RefPtr<Flutter::Layer>& layer, const Rect& dirty) {
         if (!layer_) {
             layer_ = AceType::MakeRefPtr<Flutter::ClipLayer>(
                 0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Flutter::Clip::HARD_EDGE);
@@ -37,7 +37,7 @@ std::unique_ptr<DrawDelegate> FlutterRenderPlugin::GetDrawDelegate()
         MarkNeedRender(true);
     });
 
-    return darwDelegate;
+    return drawDelegate;
 }
 
 void FlutterRenderPlugin::RemoveChildren()

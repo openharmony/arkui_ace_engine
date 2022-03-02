@@ -63,8 +63,8 @@ public:
     using DensityChangeCallback = std::function<void(double density)>;
     virtual void RegisterDensityChangeCallback(DensityChangeCallback&& callback) = 0;
 
-    using SystemBarHeightChangeCallbak = std::function<void(double statusBar, double navigationBar)>;
-    virtual void RegisterSystemBarHeightChangeCallback(SystemBarHeightChangeCallbak&& callback) = 0;
+    using SystemBarHeightChangeCallback = std::function<void(double statusBar, double navigationBar)>;
+    virtual void RegisterSystemBarHeightChangeCallback(SystemBarHeightChangeCallback&& callback) = 0;
 
     using SurfaceDestroyCallback = std::function<void()>;
     virtual void RegisterSurfaceDestroyCallback(SurfaceDestroyCallback&& callback) = 0;

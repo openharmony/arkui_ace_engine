@@ -68,9 +68,9 @@ const Edge& BadgeComponent::GetPadding() const
     return declaration_->GetPadding();
 }
 
-const Dimension& BadgeComponent::GetBadgeCicleSize() const
+const Dimension& BadgeComponent::GetBadgeCircleSize() const
 {
-    return declaration_->GetBadgeCicleSize();
+    return declaration_->GetBadgeCircleSize();
 }
 
 const std::string& BadgeComponent::GetBadgeLabel() const

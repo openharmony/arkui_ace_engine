@@ -27,7 +27,7 @@ namespace OHOS::Ace::Framework {
 void JSProgress::Create(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsObject()) {
-        LOGE("create progress fail beacase the param is invaild");
+        LOGE("create progress fail beacase the param is invalid");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);

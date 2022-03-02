@@ -3420,7 +3420,7 @@ void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<RenderElement>&
 {
     auto ret = storeNode_.try_emplace(restoreId, node);
     if (!ret.second) {
-        LOGW("store restore ndoe fail, id = %{public}d", restoreId);
+        LOGW("store restore node fail, id = %{public}d", restoreId);
         storeNode_[restoreId] = node;
     }
 }

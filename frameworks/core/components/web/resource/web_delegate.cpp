@@ -491,7 +491,7 @@ int WebDelegate::GetHitTestResult()
                 webHitType = WebHitTestType::EDIT;
                 break;
             default:
-                LOGW("unkonw hit test type:%{public}d", static_cast<int>(hitType));
+                LOGW("unknow hit test type:%{public}d", static_cast<int>(hitType));
                 break;
         }
     }
@@ -1319,7 +1319,7 @@ void WebDelegate::RegisterWebEvent()
     });
 }
 
-// upper ui componnet which inherite from WebComponent
+// upper ui component which inherited from WebComponent
 // could implement some curtain createdCallback to customized controller interface
 // eg: web.loadurl.
 void WebDelegate::AddCreatedCallback(const CreatedCallback& createdCallback)

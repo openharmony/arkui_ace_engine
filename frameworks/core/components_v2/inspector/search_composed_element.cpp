@@ -32,7 +32,7 @@ const std::unordered_map<std::string, std::function<std::string(const SearchComp
 void SearchComposedElement::Dump(void)
 {
     InspectorComposedElement::Dump();
-    DumpLog::GetInstance().AddDesc(std::string("searce_composed_element"));
+    DumpLog::GetInstance().AddDesc(std::string("search_composed_element"));
     DumpLog::GetInstance().AddDesc(
         std::string("icon: ").append(GetIcon()));
     DumpLog::GetInstance().AddDesc(

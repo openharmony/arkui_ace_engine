@@ -101,7 +101,7 @@ std::string BadgeComposedElement::GetStyle() const
             jsonValue->Put("color", ConvertColorToString(style->GetBadgeTextColor()).c_str());
             jsonValue->Put("fontSize", style->GetBadgeFontSize().ToString().c_str());
             jsonValue->Put("badgeColor", ConvertColorToString(style->GetBadgeColor()).c_str());
-            jsonValue->Put("badgeSize", style->GetBadgeCicleSize().ToString().c_str());
+            jsonValue->Put("badgeSize", style->GetBadgeCircleSize().ToString().c_str());
         }
     }
     return jsonValue->ToString();

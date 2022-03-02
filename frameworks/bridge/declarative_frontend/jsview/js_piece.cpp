@@ -194,7 +194,7 @@ void JSPiece::SetFontStyle(int32_t value)
         textStyle.SetFontStyle(FONT_STYLES[value]);
         component->SetTextStyle(std::move(textStyle));
     } else {
-        LOGE("Text fontStyle(%d) illega value", value);
+        LOGE("Text fontStyle(%d) illegal value", value);
     }
 }
 

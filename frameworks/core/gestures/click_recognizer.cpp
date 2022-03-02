@@ -133,7 +133,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             DeadlineTimer(fingerDeadlineTimer_, MULTI_FINGER_TIMEOUT);
         }
     } else {
-        LOGE("the state of click recognizer is not ready to recieve touch down event, "
+        LOGE("the state of click recognizer is not ready to receive touch down event, "
              "state is %{public}d, id is %{public}d",
             state_, event.id);
     }

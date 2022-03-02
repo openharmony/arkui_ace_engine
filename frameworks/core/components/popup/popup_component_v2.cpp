@@ -27,7 +27,7 @@
 namespace OHOS::Ace {
 namespace {
 
-constexpr Dimension DEFAULT_FONT_SZIE = 14.0_fp;
+constexpr Dimension DEFAULT_FONT_SIZE = 14.0_fp;
 constexpr Dimension BUTTON_PADDING = 8.0_fp;
 constexpr Dimension BUTTON_ZERO_PADDING = 0.0_fp;
 constexpr Color MASK_COLOR = Color(0x55c0c0c0);
@@ -112,7 +112,7 @@ const RefPtr<Component> PopupComponentV2::CreateMessage()
     auto text = AceType::MakeRefPtr<TextComponentV2>(message_);
     auto textStyle = text->GetTextStyle();
     textStyle.SetAllowScale(false);
-    textStyle.SetFontSize(DEFAULT_FONT_SZIE);
+    textStyle.SetFontSize(DEFAULT_FONT_SIZE);
     textStyle.SetTextColor(Color::WHITE);
     text->SetTextStyle(std::move(textStyle));
     return text;
@@ -154,7 +154,7 @@ const RefPtr<Component> PopupComponentV2::CreateButton(const ButtonProperties& b
 
     auto textStyle = text->GetTextStyle();
     textStyle.SetAllowScale(false);
-    textStyle.SetFontSize(DEFAULT_FONT_SZIE);
+    textStyle.SetFontSize(DEFAULT_FONT_SIZE);
     textStyle.SetTextColor(Color::WHITE);
     text->SetTextStyle(std::move(textStyle));
     std::list<RefPtr<Component>> buttonChildren;

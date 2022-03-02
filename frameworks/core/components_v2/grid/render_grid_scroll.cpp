@@ -108,8 +108,8 @@ bool RenderGridScroll::NeedUpdate(const RefPtr<Component>& component)
 
 void RenderGridScroll::AddChildByIndex(int32_t index, const RefPtr<RenderNode>& renderNode)
 {
-    auto itor = items_.try_emplace(index, renderNode);
-    if (itor.second) {
+    auto iter = items_.try_emplace(index, renderNode);
+    if (iter.second) {
         AddChild(renderNode);
         RefPtr<RenderGridLayoutItem> node = AceType::DynamicCast<RenderGridLayoutItem>(renderNode);
         if (node) {
@@ -392,13 +392,13 @@ void RenderGridScroll::InitialGridProp()
                 break;
             }
             (*mainCount_)++;
-            auto mainItor = gridMatrix_.find(*mainCount_ - 1);
-            if (mainItor == gridMatrix_.end()) {
+            auto mainIter = gridMatrix_.find(*mainCount_ - 1);
+            if (mainIter == gridMatrix_.end()) {
                 break;
             }
             for (int32_t crossIndex = *crossCount_ - 1; crossIndex >= 0; crossIndex--) {
-                auto iter = mainItor->second.find(crossIndex);
-                if (iter != mainItor->second.end()) {
+                auto iter = mainIter->second.find(crossIndex);
+                if (iter != mainIter->second.end()) {
                     endIndex = iter->second;
                     break;
                 }
@@ -570,13 +570,13 @@ void RenderGridScroll::LoadForward()
             break;
         }
         count++;
-        auto mainItor = gridMatrix_.find(count - 1);
-        if (mainItor == gridMatrix_.end()) {
+        auto mainIter = gridMatrix_.find(count - 1);
+        if (mainIter == gridMatrix_.end()) {
             break;
         }
         for (int32_t cross = *crossCount_ - 1; cross >= 0; cross--) {
-            auto iter = mainItor->second.find(cross);
-            if (iter != mainItor->second.end()) {
+            auto iter = mainIter->second.find(cross);
+            if (iter != mainIter->second.end()) {
                 endIndex = iter->second;
                 break;
             }
@@ -602,7 +602,7 @@ void RenderGridScroll::LoadForward()
     startIndex_ += count;
 }
 
-void RenderGridScroll::CaculateViewPort()
+void RenderGridScroll::CalculateViewPort()
 {
     while (!NearZero(currentOffset_) || needCalculateViewPort_) {
         if (currentOffset_ > 0) {
@@ -737,11 +737,11 @@ bool RenderGridScroll::Rank(int32_t mainIndex, int32_t itemIndex)
     }
     ACE_SCOPED_TRACE("Rank [%d]", mainIndex);
     if (itemIndex == -1) {
-        auto mainItor = gridMatrix_.find(mainIndex - 1);
-        if (mainItor != gridMatrix_.end()) {
+        auto mainIter = gridMatrix_.find(mainIndex - 1);
+        if (mainIter != gridMatrix_.end()) {
             for (int32_t cross = *crossCount_ - 1; cross >= 0; cross--) {
-                auto iter = mainItor->second.find(cross);
-                if (iter != mainItor->second.end()) {
+                auto iter = mainIter->second.find(cross);
+                if (iter != mainIter->second.end()) {
                     itemIndex = iter->second + 1;
                     break;
                 }
@@ -804,7 +804,7 @@ void RenderGridScroll::PerformLayout()
     }
     lastOffset_ = startMainPos_ + firstItemOffset_ - currentOffset_;
     InitialGridProp();
-    CaculateViewPort();
+    CalculateViewPort();
     showItem_.clear();
     childrenInRect_.clear();
     double drawLength = 0.0 - firstItemOffset_;

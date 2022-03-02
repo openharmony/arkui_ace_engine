@@ -37,7 +37,7 @@ const char LOAD_JS_BUNDLE_FAILED[] = "JS framework load js bundle failed";
 const char FIRE_EVENT_FAILED[] = "Fire event failed";
 const char ANIMATION_FINISH_FAILED[] = "Animation finish failed";
 const char ANIMATION_CANCEL_FAILED[] = "Animation cancel failed";
-const char STRINGFY_FAILED[] = "Deserialize to string failed";
+const char STRINGIFY_FAILED[] = "Deserialize to string failed";
 const char CALLBACK_PROCESS_FAILED[] = "Callback function process failed";
 
 std::string GetReason(JsErrorType errorType)
@@ -71,8 +71,8 @@ std::string GetReason(JsErrorType errorType)
         case OHOS::Ace::Framework::JsErrorType::ANIMATION_CANCEL_ERROR:
             reasonStr = ANIMATION_CANCEL_FAILED;
             break;
-        case OHOS::Ace::Framework::JsErrorType::STRINGFY_ERROR:
-            reasonStr = STRINGFY_FAILED;
+        case OHOS::Ace::Framework::JsErrorType::STRINGIFY_ERROR:
+            reasonStr = STRINGIFY_FAILED;
             break;
         case OHOS::Ace::Framework::JsErrorType::CALLBACK_PROCESS_ERROR:
             reasonStr = CALLBACK_PROCESS_FAILED;

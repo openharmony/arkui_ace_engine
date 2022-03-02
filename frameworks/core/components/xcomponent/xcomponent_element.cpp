@@ -368,7 +368,7 @@ void XComponentElement::OnXComponentSize(int64_t textureId, int32_t textureWidth
                                       (int)(textureWidth * viewScale), (int)(textureHeight * viewScale));
                 xcomponent_->SetNativeWindow(nativeWindow);
             } else {
-                LOGE("can not create NativeWindow frome surface");
+                LOGE("can not create NativeWindow from surface");
             }
         }
     }

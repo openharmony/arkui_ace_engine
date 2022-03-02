@@ -205,7 +205,7 @@ void JSTextArea::Create(const JSCallbackInfo& info)
 void JSTextArea::SetBackgroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg(SetBackgroundColor) is wrong, it is supposed to have atlease 1 argument");
+        LOGE("The arg(SetBackgroundColor) is wrong, it is supposed to have atleast 1 argument");
         return;
     }
 
@@ -227,7 +227,7 @@ void JSTextArea::SetBackgroundColor(const JSCallbackInfo& info)
 void JSTextArea::SetPlaceholderColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg(SetPlaceholderColor) is wrong, it is supposed to have atlease 1 argument");
+        LOGE("The arg(SetPlaceholderColor) is wrong, it is supposed to have atleast 1 argument");
         return;
     }
 
@@ -316,7 +316,7 @@ void JSTextArea::SetTextAlign(int32_t value)
 void JSTextArea::SetCaretColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg(SetCareColor) is wrong, it is supposed to have atlease 1 argument");
+        LOGE("The arg(SetCareColor) is wrong, it is supposed to have atleast 1 argument");
         return;
     }
 
@@ -429,7 +429,7 @@ void JSTextArea::SetFontStyle(int32_t value)
         textStyle.SetFontStyle(FONT_STYLES[value]);
         component->SetEditingStyle(textStyle);
     } else {
-        LOGE("TextArea fontStyle(%d) illega value", value);
+        LOGE("TextArea fontStyle(%d) illegal value", value);
     }
 }
 

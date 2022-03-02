@@ -62,7 +62,7 @@ const std::set<std::string> FONT_WEIGHTS = {
 };
 const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
 const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
-const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Defaulte value is low.
+const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
 
 inline double GetJsDoubleVal(JSContext* ctx, JSValueConst value)
 {
@@ -577,12 +577,12 @@ JSValue OffscreenCanvasBridge::JsStroke(JSContext* ctx, JSValueConst value, int3
         JSValue typeVal = JS_GetPropertyStr(ctx, argv[0], "__type");
         ScopedString type(ctx, typeVal);
         if (std::strcmp(type.get(), "path2d") != 0) {
-            LOGE("Stroke Path2D fialed, target is not path.");
+            LOGE("Stroke Path2D failed, target is not path.");
             return JS_NULL;
         }
         auto path = GetPath2D(ctx, argv[0]);
         if (path == nullptr) {
-            LOGE("Stroke Path2D fialed, target path is null.");
+            LOGE("Stroke Path2D failed, target path is null.");
             return JS_NULL;
         }
         auto bridge = GetOffscreenCanvasBridge(ctx, value);
@@ -681,29 +681,29 @@ JSValue OffscreenCanvasBridge::JsPath2DAddPath(JSContext* ctx, JSValueConst valu
 {
     // 1 parameter: addPath(path)
     if ((!argv) || (argc != 1)) {
-        LOGE("AddPath to Path2D fialed, invalid args.");
+        LOGE("AddPath to Path2D failed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
     JSValue nodeId = JS_GetPropertyStr(ctx, value, "__id");
     if (JS_IsInteger(nodeId) && JS_ToInt32(ctx, &id, nodeId) < 0) {
-        LOGE("AddPath to Path2D fialed, unknown holder path.");
+        LOGE("AddPath to Path2D failed, unknown holder path.");
         return JS_NULL;
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("AddPath to Path2D fialed, holderPath is null.");
+        LOGE("AddPath to Path2D failed, holderPath is null.");
         return JS_NULL;
     }
     JSValue typeVal = JS_GetPropertyStr(ctx, argv[0], "__type");
     ScopedString type(ctx, typeVal);
     if (std::strcmp(type.get(), "path2d") != 0) {
-        LOGE("AddPath to Path2D fialed, to be added is not path.");
+        LOGE("AddPath to Path2D failed, to be added is not path.");
         return JS_NULL;
     }
     auto toBeAdd = GetPath2D(ctx, argv[0]);
     if (toBeAdd == nullptr) {
-        LOGE("AddPath to Path2D fialed, to be added path is null.");
+        LOGE("AddPath to Path2D failed, to be added path is null.");
         return JS_NULL;
     }
     holderPath->AddPath(toBeAdd);
@@ -715,18 +715,18 @@ JSValue OffscreenCanvasBridge::JsPath2DSetTransform(JSContext* ctx, JSValueConst
 {
     // 6 parameters: setTransform(a, b, c, d, e, f)
     if ((!argv) || (argc != 6)) {
-        LOGE("Call Path2D SetTransform fialed, invalid args.");
+        LOGE("Call Path2D SetTransform failed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
     JSValue nodeId = JS_GetPropertyStr(ctx, value, "__id");
     if (JS_IsInteger(nodeId) && JS_ToInt32(ctx, &id, nodeId) < 0) {
-        LOGE("Call Path2D SetTransform fialed, unknown holder path.");
+        LOGE("Call Path2D SetTransform failed, unknown holder path.");
         return JS_NULL;
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D SetTransform fialed, holderPath is null.");
+        LOGE("Call Path2D SetTransform failed, holderPath is null.");
         return JS_NULL;
     }
     holderPath->SetTransform(GetJsDoubleVal(ctx, argv[0]), GetJsDoubleVal(ctx, argv[1]),
@@ -745,12 +745,12 @@ JSValue OffscreenCanvasBridge::JsPath2DMoveTo(JSContext* ctx, JSValueConst value
     int32_t id = 0;
     JSValue nodeId = JS_GetPropertyStr(ctx, value, "__id");
     if (JS_IsInteger(nodeId) && JS_ToInt32(ctx, &id, nodeId) < 0) {
-        LOGE("Call Path2D MoveTo fialed, unknown holder path.");
+        LOGE("Call Path2D MoveTo failed, unknown holder path.");
         return JS_NULL;
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D MoveTo fialed, holderPath is null.");
+        LOGE("Call Path2D MoveTo failed, holderPath is null.");
         return JS_NULL;
     }
     holderPath->MoveTo(GetJsDoubleVal(ctx, argv[0]), GetJsDoubleVal(ctx, argv[1]));
@@ -761,18 +761,18 @@ JSValue OffscreenCanvasBridge::JsPath2DLineTo(JSContext* ctx, JSValueConst value
 {
     // 2 parameters: lineTo(x, y)
     if ((!argv) || (argc != 2)) {
-        LOGE("Call Path2D LineTo fialed, invalid args.");
+        LOGE("Call Path2D LineTo failed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
     JSValue nodeId = JS_GetPropertyStr(ctx, value, "__id");
     if (JS_IsInteger(nodeId) && JS_ToInt32(ctx, &id, nodeId) < 0) {
-        LOGE("Call Path2D LineTo fialed, unknown holder path.");
+        LOGE("Call Path2D LineTo failed, unknown holder path.");
         return JS_NULL;
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D LineTo fialed, holderPath is null.");
+        LOGE("Call Path2D LineTo failed, holderPath is null.");
         return JS_NULL;
     }
     holderPath->LineTo(GetJsDoubleVal(ctx, argv[0]), GetJsDoubleVal(ctx, argv[1]));
@@ -783,18 +783,18 @@ JSValue OffscreenCanvasBridge::JsPath2DArc(JSContext* ctx, JSValueConst value, i
 {
     // 5 or 6 parameters: arc(x, y, radius, startAngle, endAngle, anticlockwise?)
     if ((!argv) || (argc < 5) || (argc > 6)) {
-        LOGE("Call Path2D Arc fialed, invalid args.");
+        LOGE("Call Path2D Arc failed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
     JSValue nodeId = JS_GetPropertyStr(ctx, value, "__id");
     if (JS_IsInteger(nodeId) && JS_ToInt32(ctx, &id, nodeId) < 0) {
-        LOGE("Call Path2D Arc fialed, unknown holder path.");
+        LOGE("Call Path2D Arc failed, unknown holder path.");
         return JS_NULL;
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D Arc fialed, holderPath is null.");
+        LOGE("Call Path2D Arc failed, holderPath is null.");
         return JS_NULL;
     }
     bool anticlockwise = false;
@@ -812,18 +812,18 @@ JSValue OffscreenCanvasBridge::JsPath2DArcTo(JSContext* ctx, JSValueConst value,
 {
     // 5 parameters: arcTo(x1, y1, x2, y2, radius)
     if ((!argv) || (argc != 5)) {
-        LOGE("Call Path2D ArcTo fialed, invalid args.");
+        LOGE("Call Path2D ArcTo failed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
     JSValue nodeId = JS_GetPropertyStr(ctx, value, "__id");
     if (JS_IsInteger(nodeId) && JS_ToInt32(ctx, &id, nodeId) < 0) {
-        LOGE("Call Path2D ArcTo fialed, unknown holder path.");
+        LOGE("Call Path2D ArcTo failed, unknown holder path.");
         return JS_NULL;
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D ArcTo fialed, holderPath is null.");
+        LOGE("Call Path2D ArcTo failed, holderPath is null.");
         return JS_NULL;
     }
     holderPath->ArcTo(GetJsDoubleVal(ctx, argv[0]), GetJsDoubleVal(ctx, argv[1]), GetJsDoubleVal(ctx, argv[2]),
@@ -836,18 +836,18 @@ JSValue OffscreenCanvasBridge::JsPath2DQuadraticCurveTo(JSContext* ctx, JSValueC
 {
     // 4 parameters: quadraticCurveTo(cpx, cpy, x, y)
     if ((!argv) || (argc != 4)) {
-        LOGE("Call Path2D QuadraticCurveTo fialed, invalid args.");
+        LOGE("Call Path2D QuadraticCurveTo failed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
     JSValue nodeId = JS_GetPropertyStr(ctx, value, "__id");
     if (JS_IsInteger(nodeId) && JS_ToInt32(ctx, &id, nodeId) < 0) {
-        LOGE("Call Path2D QuadraticCurveTo fialed, unknown holder path.");
+        LOGE("Call Path2D QuadraticCurveTo failed, unknown holder path.");
         return JS_NULL;
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D QuadraticCurveTo fialed, holderPath is null.");
+        LOGE("Call Path2D QuadraticCurveTo failed, holderPath is null.");
         return JS_NULL;
     }
     holderPath->QuadraticCurveTo(GetJsDoubleVal(ctx, argv[0]), GetJsDoubleVal(ctx, argv[1]),
@@ -860,18 +860,18 @@ JSValue OffscreenCanvasBridge::JsPath2DBezierCurveTo(JSContext* ctx, JSValueCons
 {
     // 6 parameters: bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
     if ((!argv) || (argc != 6)) {
-        LOGE("Call Path2D BezierCurveTo fialed, invalid args.");
+        LOGE("Call Path2D BezierCurveTo failed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
     JSValue nodeId = JS_GetPropertyStr(ctx, value, "__id");
     if (JS_IsInteger(nodeId) && JS_ToInt32(ctx, &id, nodeId) < 0) {
-        LOGE("Call Path2D BezierCurveTo fialed, unknown holder path.");
+        LOGE("Call Path2D BezierCurveTo failed, unknown holder path.");
         return JS_NULL;
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D BezierCurveTo fialed, holderPath is null.");
+        LOGE("Call Path2D BezierCurveTo failed, holderPath is null.");
         return JS_NULL;
     }
     holderPath->BezierCurveTo(GetJsDoubleVal(ctx, argv[0]), GetJsDoubleVal(ctx, argv[1]),
@@ -884,18 +884,18 @@ JSValue OffscreenCanvasBridge::JsPath2DEllipse(JSContext* ctx, JSValueConst valu
 {
     // 7 or 8 parameters: ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise?)
     if ((!argv) || (argc < 7) || (argc > 8)) {
-        LOGE("Call Path2D Ellipse fialed, invalid args.");
+        LOGE("Call Path2D Ellipse failed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
     JSValue nodeId = JS_GetPropertyStr(ctx, value, "__id");
     if (JS_IsInteger(nodeId) && JS_ToInt32(ctx, &id, nodeId) < 0) {
-        LOGE("Call Path2D Ellipse fialed, unknown holder path.");
+        LOGE("Call Path2D Ellipse failed, unknown holder path.");
         return JS_NULL;
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D Ellipse fialed, holderPath is null.");
+        LOGE("Call Path2D Ellipse failed, holderPath is null.");
         return JS_NULL;
     }
     bool anticlockwise = false;
@@ -914,18 +914,18 @@ JSValue OffscreenCanvasBridge::JsPath2DRect(JSContext* ctx, JSValueConst value, 
 {
     // 4 parameters: rect(x, y, width, height)
     if ((!argv) || (argc != 4)) {
-        LOGE("Call Path2D Rect fialed, invalid args.");
+        LOGE("Call Path2D Rect failed, invalid args.");
         return JS_NULL;
     }
     int32_t id = 0;
     JSValue nodeId = JS_GetPropertyStr(ctx, value, "__id");
     if (JS_IsInteger(nodeId) && JS_ToInt32(ctx, &id, nodeId) < 0) {
-        LOGE("Call Path2D Rect fialed, unknown holder path.");
+        LOGE("Call Path2D Rect failed, unknown holder path.");
         return JS_NULL;
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D Rect fialed, holderPath is null.");
+        LOGE("Call Path2D Rect failed, holderPath is null.");
         return JS_NULL;
     }
     holderPath->Rect(GetJsDoubleVal(ctx, argv[0]), GetJsDoubleVal(ctx, argv[1]),
@@ -938,12 +938,12 @@ JSValue OffscreenCanvasBridge::JsPath2DClosePath(JSContext* ctx, JSValueConst va
     int32_t id = 0;
     JSValue nodeId = JS_GetPropertyStr(ctx, value, "__id");
     if (JS_IsInteger(nodeId) && JS_ToInt32(ctx, &id, nodeId) < 0) {
-        LOGE("Call Path2D ClosePath fialed, unknown holder path.");
+        LOGE("Call Path2D ClosePath failed, unknown holder path.");
         return JS_NULL;
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D ClosePath fialed, holderPath is null.");
+        LOGE("Call Path2D ClosePath failed, holderPath is null.");
         return JS_NULL;
     }
     holderPath->ClosePath();
@@ -1965,12 +1965,12 @@ JSValue OffscreenCanvasBridge::JsIsPointInStroke(JSContext* ctx, JSValueConst va
         JSValue typeVal = JS_GetPropertyStr(ctx, argv[0], "__type");
         ScopedString type(ctx, typeVal);
         if (std::strcmp(type.get(), "path2d") != 0) {
-            LOGE("Stroke Path2D fialed, target is not path.");
+            LOGE("Stroke Path2D failed, target is not path.");
             return JS_NULL;
         }
         auto path = GetPath2D(ctx, argv[0]);
         if (path == nullptr) {
-            LOGE("Stroke Path2D fialed, target path is null.");
+            LOGE("Stroke Path2D failed, target path is null.");
             return JS_NULL;
         }
         auto bridge = GetOffscreenCanvasBridge(ctx, value);
@@ -2004,12 +2004,12 @@ JSValue OffscreenCanvasBridge::JsIsPointInPath(JSContext* ctx, JSValueConst valu
         JSValue typeVal = JS_GetPropertyStr(ctx, argv[0], "__type");
         ScopedString type(ctx, typeVal);
         if (std::strcmp(type.get(), "path2d") != 0) {
-            LOGE("Stroke Path2D fialed, target is not path.");
+            LOGE("Stroke Path2D failed, target is not path.");
             return JS_NULL;
         }
         auto path = GetPath2D(ctx, argv[0]);
         if (path == nullptr) {
-            LOGE("Stroke Path2D fialed, target path is null.");
+            LOGE("Stroke Path2D failed, target path is null.");
             return JS_NULL;
         }
         auto bridge = GetOffscreenCanvasBridge(ctx, value);

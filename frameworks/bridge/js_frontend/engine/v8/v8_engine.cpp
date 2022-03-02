@@ -686,7 +686,7 @@ void RequestFullWindow(const v8::FunctionCallbackInfo<v8::Value>& args, int32_t 
                 v8::Local<v8::Value> valObjKey;
                 bool succ = valObjProperties->Get(context, 0).ToLocal(&valObjKey);
                 v8::String::Utf8Value jsDurationKey(isolate, valObjKey);
-                if (succ && *jsDurationKey && (std::strcmp(*jsDurationKey, APP_REQUEST_FULL_WINDOW_DUATION) == 0)) {
+                if (succ && *jsDurationKey && (std::strcmp(*jsDurationKey, APP_REQUEST_FULL_WINDOW_DURATION) == 0)) {
                     v8::Local<v8::Value> valObjVal = valObj->Get(context, valObjKey).ToLocalChecked();
                     v8::String::Utf8Value jsDurationValue(isolate, valObjVal);
                     if (*jsDurationValue) {
@@ -1979,7 +1979,7 @@ void JsHandleOffscreenCanvas(
         return;
     }
 
-    if (methodName == OFFSCERRN_CANVAS_CREATE) {
+    if (methodName == OFFSCREEN_CANVAS_CREATE) {
         int32_t width = JsParseIntParams(args, "width", index);
         int32_t height = JsParseIntParams(args, "height", index);
 
@@ -2100,7 +2100,7 @@ void JsHandleMediaQuery(const v8::FunctionCallbackInfo<v8::Value>& args, const s
             args.GetReturnValue().Set(res);
         }
     } else {
-        LOGW("system.meidaquery not support method = %{public}s", methodName.c_str());
+        LOGW("system.mediaquery not support method = %{public}s", methodName.c_str());
     }
 }
 
@@ -2822,7 +2822,7 @@ void JsPerfEnd(const v8::FunctionCallbackInfo<v8::Value>& args)
         return;
     }
 
-    v8::String::Utf8Value jsMethodName(isolate, args[PERF_ARGS_MRTHOD_IDX]);
+    v8::String::Utf8Value jsMethodName(isolate, args[PERF_ARGS_METHOD_IDX]);
     if (!(*jsMethodName)) {
         return;
     }
@@ -2850,7 +2850,7 @@ void JsPerfBegin(const v8::FunctionCallbackInfo<v8::Value>& args)
         return;
     }
 
-    v8::String::Utf8Value jsMethodName(isolate, args[PERF_ARGS_MRTHOD_IDX]);
+    v8::String::Utf8Value jsMethodName(isolate, args[PERF_ARGS_METHOD_IDX]);
     if (!(*jsMethodName)) {
         return;
     }

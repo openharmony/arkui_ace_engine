@@ -736,12 +736,12 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsStroke(const shared_ptr<JsRuntim
         auto typeVal = argv[0]->GetProperty(runtime, "__type");
         auto type = typeVal->ToString(runtime);
         if (type != "path2d") {
-            LOGE("Stroke Path2D fialed, target is not path.");
+            LOGE("Stroke Path2D failed, target is not path.");
             return runtime->NewUndefined();
         }
         auto path = GetPath2D(runtime, argv[0]);
         if (path == nullptr) {
-            LOGE("Stroke Path2D fialed, target path is null.");
+            LOGE("Stroke Path2D failed, target path is null.");
             return runtime->NewUndefined();
         }
         auto offscreenCanvas = GlobalGetOffscreenCanvas(runtime, value);
@@ -1022,7 +1022,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DAddPath(const shared_ptr<J
 {
     // 1 parameter: addPath(path)
     if (argc != 1) {
-        LOGE("AddPath to Path2D fialed, invalid args.");
+        LOGE("AddPath to Path2D failed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1035,18 +1035,18 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DAddPath(const shared_ptr<J
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("AddPath to Path2D fialed, holderPath is null.");
+        LOGE("AddPath to Path2D failed, holderPath is null.");
         return runtime->NewUndefined();
     }
     auto typeVal = argv[0]->GetProperty(runtime, "__type");
     auto type = typeVal->ToString(runtime);
     if (type != "path2d") {
-        LOGE("Stroke Path2D fialed, target is not path.");
+        LOGE("Stroke Path2D failed, target is not path.");
         return runtime->NewUndefined();
     }
     auto toBeAdd = GetPath2D(runtime, argv[0]);
     if (toBeAdd == nullptr) {
-        LOGE("AddPath to Path2D fialed, to be added path is null.");
+        LOGE("AddPath to Path2D failed, to be added path is null.");
         return runtime->NewUndefined();
     }
     holderPath->AddPath(toBeAdd);
@@ -1058,7 +1058,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DSetTransform(const shared_
 {
     // 6 parameters: setTransform(a, b, c, d, e, f)
     if (argc != 6) {
-        LOGE("Call Path2D SetTransform fialed, invalid args.");
+        LOGE("Call Path2D SetTransform failed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1071,7 +1071,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DSetTransform(const shared_
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D SetTransform fialed, holderPath is null.");
+        LOGE("Call Path2D SetTransform failed, holderPath is null.");
         return runtime->NewUndefined();
     }
     holderPath->SetTransform(GetJsDoubleVal(runtime, argv[0]), GetJsDoubleVal(runtime, argv[1]),
@@ -1098,7 +1098,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DMoveTo(const shared_ptr<Js
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D MoveTo fialed, holderPath is null.");
+        LOGE("Call Path2D MoveTo failed, holderPath is null.");
         return runtime->NewUndefined();
     }
     holderPath->MoveTo(GetJsDoubleVal(runtime, argv[0]), GetJsDoubleVal(runtime, argv[1]));
@@ -1110,7 +1110,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DLineTo(const shared_ptr<Js
 {
     // 2 parameters: lineTo(x, y)
     if (argc != 2) {
-        LOGE("Call Path2D LineTo fialed, invalid args.");
+        LOGE("Call Path2D LineTo failed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1123,7 +1123,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DLineTo(const shared_ptr<Js
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D LineTo fialed, holderPath is null.");
+        LOGE("Call Path2D LineTo failed, holderPath is null.");
         return runtime->NewUndefined();
     }
     holderPath->LineTo(GetJsDoubleVal(runtime, argv[0]), GetJsDoubleVal(runtime, argv[1]));
@@ -1135,7 +1135,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DArc(const shared_ptr<JsRun
 {
     // 5 or 6 parameters: arc(x, y, radius, startAngle, endAngle, anticlockwise?)
     if (argc < 5 || argc > 6) {
-        LOGE("Call Path2D Arc fialed, invalid args.");
+        LOGE("Call Path2D Arc failed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1148,7 +1148,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DArc(const shared_ptr<JsRun
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D Arc fialed, holderPath is null.");
+        LOGE("Call Path2D Arc failed, holderPath is null.");
         return runtime->NewUndefined();
     }
     bool anticlockwise = false;
@@ -1167,7 +1167,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DArcTo(const shared_ptr<JsR
 {
     // 5 parameters: arcTo(x1, y1, x2, y2, radius)
     if (argc != 5) {
-        LOGE("Call Path2D ArcTo fialed, invalid args.");
+        LOGE("Call Path2D ArcTo failed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1180,7 +1180,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DArcTo(const shared_ptr<JsR
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D ArcTo fialed, holderPath is null.");
+        LOGE("Call Path2D ArcTo failed, holderPath is null.");
         return runtime->NewUndefined();
     }
     holderPath->ArcTo(GetJsDoubleVal(runtime, argv[0]), GetJsDoubleVal(runtime, argv[1]),
@@ -1193,7 +1193,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DQuadraticCurveTo(const sha
 {
     // 4 parameters: quadraticCurveTo(cpx, cpy, x, y)
     if (argc != 4) {
-        LOGE("Call Path2D QuadraticCurveTo fialed, invalid args.");
+        LOGE("Call Path2D QuadraticCurveTo failed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1206,7 +1206,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DQuadraticCurveTo(const sha
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D QuadraticCurveTo fialed, holderPath is null.");
+        LOGE("Call Path2D QuadraticCurveTo failed, holderPath is null.");
         return runtime->NewUndefined();
     }
     holderPath->QuadraticCurveTo(GetJsDoubleVal(runtime, argv[0]), GetJsDoubleVal(runtime, argv[1]),
@@ -1219,7 +1219,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DBezierCurveTo(const shared
 {
     // 6 parameters: bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
     if (argc != 6) {
-        LOGE("Call Path2D BezierCurveTo fialed, invalid args.");
+        LOGE("Call Path2D BezierCurveTo failed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1232,7 +1232,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DBezierCurveTo(const shared
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D BezierCurveTo fialed, holderPath is null.");
+        LOGE("Call Path2D BezierCurveTo failed, holderPath is null.");
         return runtime->NewUndefined();
     }
     holderPath->BezierCurveTo(GetJsDoubleVal(runtime, argv[0]), GetJsDoubleVal(runtime, argv[1]),
@@ -1246,7 +1246,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DEllipse(const shared_ptr<J
 {
     // 7 or 8 parameters: ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise?)
     if (argc < 7 || argc > 8) {
-        LOGE("Call Path2D Ellipse fialed, invalid args.");
+        LOGE("Call Path2D Ellipse failed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1259,7 +1259,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DEllipse(const shared_ptr<J
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D Ellipse fialed, holderPath is null.");
+        LOGE("Call Path2D Ellipse failed, holderPath is null.");
         return runtime->NewUndefined();
     }
     bool anticlockwise = false;
@@ -1279,7 +1279,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DRect(const shared_ptr<JsRu
 {
     // 4 parameters: rect(x, y, width, height)
     if (argc != 4) {
-        LOGE("Call Path2D Rect fialed, invalid args.");
+        LOGE("Call Path2D Rect failed, invalid args.");
         return runtime->NewUndefined();
     }
     int32_t id = -1;
@@ -1292,7 +1292,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DRect(const shared_ptr<JsRu
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D Rect fialed, holderPath is null.");
+        LOGE("Call Path2D Rect failed, holderPath is null.");
         return runtime->NewUndefined();
     }
     holderPath->Rect(GetJsDoubleVal(runtime, argv[0]), GetJsDoubleVal(runtime, argv[1]),
@@ -1313,7 +1313,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPath2DClosePath(const shared_ptr
     }
     auto holderPath = path2Ds_[id];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D ClosePath fialed, holderPath is null.");
+        LOGE("Call Path2D ClosePath failed, holderPath is null.");
         return runtime->NewUndefined();
     }
     holderPath->ClosePath();
@@ -2200,12 +2200,12 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsIsPointInStroke(const shared_ptr
         }
         auto type = typeVal->ToString(runtime);
         if (type != "path2d") {
-            LOGE("Stroke Path2D fialed, target is not path.");
+            LOGE("Stroke Path2D failed, target is not path.");
             return runtime->NewUndefined();
         }
         auto path = GetPath2D(runtime, argv[0]);
         if (path == nullptr) {
-            LOGE("Stroke Path2D fialed, target path is null.");
+            LOGE("Stroke Path2D failed, target path is null.");
             return runtime->NewUndefined();
         }
         auto offscreenCanvas = GlobalGetOffscreenCanvas(runtime, value);
@@ -2243,12 +2243,12 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsIsPointInPath(const shared_ptr<J
         }
         auto type = typeVal->ToString(runtime);
         if (type != "path2d") {
-            LOGE("Stroke Path2D fialed, target is not path.");
+            LOGE("Stroke Path2D failed, target is not path.");
             return runtime->NewUndefined();
         }
         auto path = GetPath2D(runtime, argv[0]);
         if (path == nullptr) {
-            LOGE("Stroke Path2D fialed, target path is null.");
+            LOGE("Stroke Path2D failed, target path is null.");
             return runtime->NewUndefined();
         }
         auto offscreenCanvas = GlobalGetOffscreenCanvas(runtime, value);
