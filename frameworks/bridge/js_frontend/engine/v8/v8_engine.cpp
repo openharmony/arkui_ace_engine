@@ -3734,7 +3734,7 @@ void V8Engine::RegisterInitWorkerFunc()
 void V8Engine::RegisterAssetFunc()
 {
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content) {
+    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content, std::string& ami) {
         LOGI("WorkerCore RegisterAssetFunc called");
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
