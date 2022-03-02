@@ -669,6 +669,7 @@ void QjsPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
         paStartFunc = Framework::QJSUtils::GetPropertyStr(ctx, paObj, "onInitialized");
     } else if (type == BackendType::FORM) {
         LOGI("Form Ability LoadJS finish.");
+        JS_FreeValue(ctx, globalObj);
         return;
     } else {
         LOGE("backend type not support");

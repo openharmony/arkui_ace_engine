@@ -417,7 +417,7 @@ void BackendDelegateImpl::OnDisConnect(const OHOS::AAFwk::Want& want)
 
 void BackendDelegateImpl::OnCreate(const OHOS::AAFwk::Want& want)
 {
-    taskExecutor_->PostTask(
+    taskExecutor_->PostSyncTask(
         [createCallback = createCallback_, want] { createCallback(want); }, TaskExecutor::TaskType::JS);
 }
 
