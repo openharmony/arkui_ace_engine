@@ -18,7 +18,6 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/stepper/render_stepper.h"
 #include "core/components/stepper/render_stepper_item.h"
 #include "core/components_v2/inspector/utils.h"
 namespace OHOS::Ace::V2 {
@@ -49,53 +48,44 @@ std::unique_ptr<JsonValue> StepperItemComposedElement::ToJsonObject() const
 
 std::string StepperItemComposedElement::GetPrevLabel() const
 {
-    auto node = GetInspectorNode(StepperItemElement::TypeId());
-    if (!node) {
+    auto renderStepperItem = GetInspectorElement<RenderStepperItem>(StepperItemElement::TypeId());
+    if (!renderStepperItem) {
         return "";
     }
-    auto stepperItemRender = AceType::DynamicCast<RenderStepperItem>(node);
-    if (!stepperItemRender) {
-        return "";
-    }
-    auto index = stepperItemRender->GetIndex();
-    auto stepperRender = stepperItemRender->GetParent().Upgrade();
-    auto render = AceType::DynamicCast<RenderStepper>(stepperRender);
-    auto label = render->GetStepperLabels();
-    return label[index].leftLabel;
+    auto label = renderStepperItem->GetLabel();
+    return label.leftLabel;
 }
 
 std::string StepperItemComposedElement::GetNextLabel() const
 {
-    auto node = GetInspectorNode(StepperItemElement::TypeId());
-    if (!node) {
+    auto renderStepperItem = GetInspectorElement<RenderStepperItem>(StepperItemElement::TypeId());
+    if (!renderStepperItem) {
         return "";
     }
-    auto stepperItemRender = AceType::DynamicCast<RenderStepperItem>(node);
-    if (!stepperItemRender) {
-        return "";
-    }
-    auto index = stepperItemRender->GetIndex();
-    auto stepperRender = stepperItemRender->GetParent().Upgrade();
-    auto render = AceType::DynamicCast<RenderStepper>(stepperRender);
-    auto label = render->GetStepperLabels();
-    return label[index].rightLabel;
+    auto label = renderStepperItem->GetLabel();
+    return label.rightLabel;
 }
 
 std::string StepperItemComposedElement::GetStatus() const
 {
-    auto node = GetInspectorNode(StepperItemElement::TypeId());
-    if (!node) {
-        return "";
+    auto renderStepperItem = GetInspectorElement<RenderStepperItem>(StepperItemElement::TypeId());
+    if (!renderStepperItem) {
+        return "ItemState.Normal";
     }
-    auto stepperItemRender = AceType::DynamicCast<RenderStepperItem>(node);
-    if (!stepperItemRender) {
-        return "";
+    auto label = renderStepperItem->GetLabel();
+    auto status = label.initialStatus;
+    if (status == "normal") {
+        return "ItemState.Normal";
+    } else if (status == "disabled") {
+        return "ItemState.Disabled";
+    } else if (status == "waiting") {
+        return "ItemState.Waiting";
+    } else if (status == "skip") {
+        return "ItemState.Skip";
+    } else {
+        return "ItemState.Normal";
     }
-    auto index = stepperItemRender->GetIndex();
-    auto stepperRender = stepperItemRender->GetParent().Upgrade();
-    auto render = AceType::DynamicCast<RenderStepper>(stepperRender);
-    auto label = render->GetStepperLabels();
-    return label[index].initialStatus;
+    
 }
 
 void StepperItemComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
