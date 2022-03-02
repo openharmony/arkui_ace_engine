@@ -498,13 +498,14 @@ bool BackendDelegateImpl::ParseFileUri(
     return fileExist;
 }
 
-bool BackendDelegateImpl::GetResourceData(const std::string& fileUri, std::vector<uint8_t>& content)
+bool BackendDelegateImpl::GetResourceData(const std::string& fileUri, std::vector<uint8_t>& content, std::string& ami)
 {
     std::string targetFilePath;
     if (!ParseFileUri(assetManager_, fileUri, targetFilePath)) {
         LOGE("GetResourceData parse file uri failed.");
         return false;
     }
+    ami = assetManager_->GetAssetPath(targetFilePath) + targetFilePath;
     if (!Framework::GetAssetContentAllowEmpty(assetManager_, targetFilePath, content)) {
         LOGE("GetResourceData GetAssetContent failed.");
         return false;

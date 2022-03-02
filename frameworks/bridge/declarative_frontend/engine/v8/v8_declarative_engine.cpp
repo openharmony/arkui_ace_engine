@@ -986,7 +986,7 @@ void V8DeclarativeEngine::RegisterInitWorkerFunc()
 void V8DeclarativeEngine::RegisterAssetFunc()
 {
     auto weakAsset = WeakPtr<AssetManager>(engineInstance_->GetDelegate()->GetAssetManager());
-    auto&& assetFunc = [weakAsset](const std::string& uri, std::vector<uint8_t>& content) {
+    auto&& assetFunc = [weakAsset](const std::string& uri, std::vector<uint8_t>& content, std::string& ami) {
         LOGI("WorkerCore RegisterAssetFunc called");
         auto asset = weakAsset.Upgrade();
         if (!asset) {

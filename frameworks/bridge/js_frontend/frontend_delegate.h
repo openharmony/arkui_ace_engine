@@ -179,6 +179,9 @@ public:
     bool ACE_EXPORT GetResourceData(const std::string& fileUri, T& content);
 
     template<typename T>
+    bool ACE_EXPORT GetResourceData(const std::string& fileUri, T& content, std::string& ami);
+
+    template<typename T>
     ACE_EXPORT static bool GetResourceData(const std::string& fileUri, const RefPtr<AssetManager>& assetManager,
         T& content);
 
