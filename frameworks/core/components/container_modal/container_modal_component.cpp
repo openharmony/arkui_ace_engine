@@ -58,7 +58,7 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
     // handle mouse move
     titleBox->SetOnMouseId([contextWptr = context_](MouseInfo& info) {
         auto context = contextWptr.Upgrade();
-        if (context && info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::MOVE) {
+        if (context && info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
             context->FireWindowStartMoveCallBack();
         }
     });
