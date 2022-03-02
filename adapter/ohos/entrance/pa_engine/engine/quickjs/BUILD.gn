@@ -42,7 +42,6 @@ template("js_pa_engine_qjs") {
       "//foundation/aafwk/standard/interfaces/innerkits/base:base",
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common:napi_common",
       "//foundation/ace/napi:ace_napi",
-      "//foundation/ace/napi:ace_napi_quickjs",
       "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
@@ -101,7 +100,11 @@ template("js_pa_engine_qjs") {
       ]
     }
 
-    deps += [ "//foundation/ace/napi:ace_napi_quickjs" ]
+    if (use_js_debug) {
+      deps += [ "//foundation/ace/napi:ace_napi_quickjs_debug" ]
+    } else {
+      deps += [ "//foundation/ace/napi:ace_napi_quickjs" ]
+    }
   }
 }
 
