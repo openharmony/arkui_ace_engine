@@ -28,7 +28,6 @@ namespace {
 const std::unordered_map<std::string, std::function<std::string(const TextClockComposedElement&)>> CREATE_JSON_MAP {
     { "hourswest", [](const TextClockComposedElement& inspector) { return inspector.GetHoursWest(); } },
     { "format", [](const TextClockComposedElement& inspector) { return inspector.GeFormat(); } },
-    { "status", [](const TextClockComposedElement& inspector) { return inspector.GetStatus(); } },
     { "fontColor", [](const TextClockComposedElement& inspector) { return inspector.GetTextFontColor(); } },
     { "fontSize", [](const TextClockComposedElement& inspector) { return inspector.GetTextFontSize(); } },
     { "fontStyle", [](const TextClockComposedElement& inspector) { return inspector.GetTextFontStyle(); } },
@@ -43,7 +42,6 @@ void TextClockComposedElement::Dump()
     InspectorComposedElement::Dump();
     DumpLog::GetInstance().AddDesc(std::string("hourswest: ").append(GetHoursWest()));
     DumpLog::GetInstance().AddDesc(std::string("format: ").append(GeFormat()));
-    DumpLog::GetInstance().AddDesc(std::string("status: ").append(GetStatus()));
     DumpLog::GetInstance().AddDesc(std::string("fontColor: ").append(GetTextFontColor()));
     DumpLog::GetInstance().AddDesc(std::string("fontSize: ").append(GetTextFontSize()));
     DumpLog::GetInstance().AddDesc(std::string("fontStyle: ").append(GetTextFontStyle()));
@@ -75,16 +73,6 @@ std::string TextClockComposedElement::GeFormat() const
     auto render = GetRenderTextClock();
     if (render) {
         return render->GeFormat();
-    }
-    return "";
-}
-
-std::string TextClockComposedElement::GetStatus() const
-{
-    auto render = GetRenderTextClock();
-    if (render) {
-        bool status = render->GetStatus();
-        return ConvertBoolToString(status);
     }
     return "";
 }
