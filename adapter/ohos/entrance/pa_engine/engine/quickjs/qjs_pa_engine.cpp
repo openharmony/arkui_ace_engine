@@ -622,7 +622,6 @@ inline std::string ToJSONString(std::string sKey, std::string sValue)
 
 void QjsPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
 {
-    LOGI("QjsPaEngine LoadJs");
     LOGI("QjsPaEngine LoadJs: %{private}s", url.c_str());
     ACE_SCOPED_TRACE("QjsPaEngine::LoadJs");
     ACE_DCHECK(engineInstance_);
@@ -669,7 +668,8 @@ void QjsPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
     } else if (type == BackendType::DATA) {
         paStartFunc = Framework::QJSUtils::GetPropertyStr(ctx, paObj, "onInitialized");
     } else if (type == BackendType::FORM) {
-        paStartFunc = Framework::QJSUtils::GetPropertyStr(ctx, paObj, "onCreate");
+        LOGI("Form Ability LoadJS finish.");
+        return;
     } else {
         LOGE("backend type not support");
     }
@@ -701,12 +701,6 @@ void QjsPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
         JSValue abilityInfoJS = (JSValue)*abilityInfoNative;
         JSValueConst argv[] = { abilityInfoJS };
         retVal = Framework::QJSUtils::Call(ctx, paStartFunc, paObj, countof(argv), argv);
-    } else if (type == BackendType::FORM) {
-        napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine_), want);
-        NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
-        JSValue jsWant = (JSValue)*nativeWant;
-        JSValueConst argv[] = { jsWant };
-        retVal = Framework::QJSUtils::Call(ctx, paStartFunc, paObj, countof(argv), argv);
     } else {
         LOGE("PA: QjsPaEngine backend type not support");
     }
@@ -715,27 +709,6 @@ void QjsPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
         LOGE("PA: QjsPaEngine QJSUtils::Call IsException");
     } else {
         LOGI("PA: QjsPaEngine QJSUtils::Call ok");
-    }
-
-    if (type == BackendType::FORM) {
-        std::string jsonStr;
-        JSValue formJsonData = Framework::QJSUtils::GetPropertyStr(ctx, retVal, "data");
-        if (JS_IsString(formJsonData)) {
-            Framework::ScopedString strValue(ctx, formJsonData);
-            jsonStr = strValue.get();
-            LOGI("Add FormBindingData json:%{public}s", jsonStr.c_str());
-        }
-        AppExecFwk::FormProviderData formData = AppExecFwk::FormProviderData(jsonStr);
-        JSValue formImageData = Framework::QJSUtils::GetPropertyStr(ctx, retVal, "image");
-        if (JS_IsObject(formImageData)) {
-            std::map<std::string, int> rawImageDataMap;
-            NativeValue* nativeValue = reinterpret_cast<NativeValue*>(&formImageData);
-            UnwrapRawImageDataMap(nativeEngine_, nativeValue, rawImageDataMap);
-            for (const auto& data : rawImageDataMap) {
-                formData.AddImageData(data.first, data.second);
-            }
-        }
-        SetFormData(formData);
     }
 
     js_std_loop(ctx);
@@ -1337,6 +1310,62 @@ void QjsPaEngine::OnDisconnectService(const OHOS::AAFwk::Want& want)
     }
     JS_FreeValue(ctx, globalObj);
     JS_FreeValue(ctx, retVal);
+}
+
+void QjsPaEngine::OnCreate(const OHOS::AAFwk::Want& want)
+{
+    LOGI("PA: QjsPaEngine OnCreate");
+    // call onCreate
+    JSContext* ctx = engineInstance_->GetQjsContext();
+    ACE_DCHECK(ctx);
+    Framework::QJSHandleScope handleScope(ctx);
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue paObj = Framework::QJSUtils::GetPropertyStr(ctx, globalObj, "pa");
+    if (!JS_IsObject(paObj)) {
+        LOGE("OnCreate failed, get pa object error");
+        return;
+    }
+
+    JSPropertyEnum* pTab = nullptr;
+    uint32_t len = 0;
+    if (!Framework::CheckAndGetJsProperty(ctx, paObj, &pTab, &len)) {
+        LOGE("PA: Framework::CheckAndGetJsProperty error");
+    }
+    LOGI("PA: QjsPaEngine pa propey num %{public}u", len);
+    JSValue paStartFunc = Framework::QJSUtils::GetPropertyStr(ctx, paObj, "onCreate");
+    if (!JS_IsFunction(ctx, paStartFunc)) {
+        LOGE("onCreate func is not found.");
+        JS_FreeValue(ctx, globalObj);
+        return;
+    }
+
+    napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine_), want);
+    NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
+    JSValue jsWant = (JSValue)*nativeWant;
+    JSValueConst argv[] = { jsWant };
+    JSValue retVal = Framework::QJSUtils::Call(ctx, paStartFunc, paObj, countof(argv), argv);
+    if (JS_IsException(retVal)) {
+        LOGE("PA: QjsPaEngine QJSUtils::Call IsException");
+    }
+
+    std::string jsonStr;
+    JSValue formJsonData = Framework::QJSUtils::GetPropertyStr(ctx, retVal, "data");
+    if (JS_IsString(formJsonData)) {
+        Framework::ScopedString strValue(ctx, formJsonData);
+        jsonStr = strValue.get();
+        LOGI("Add FormBindingData json:%{public}s", jsonStr.c_str());
+    }
+    AppExecFwk::FormProviderData formData = AppExecFwk::FormProviderData(jsonStr);
+    JSValue formImageData = Framework::QJSUtils::GetPropertyStr(ctx, retVal, "image");
+    if (JS_IsObject(formImageData)) {
+        std::map<std::string, int> rawImageDataMap;
+        NativeValue* nativeValue = reinterpret_cast<NativeValue*>(&formImageData);
+        UnwrapRawImageDataMap(nativeEngine_, nativeValue, rawImageDataMap);
+        for (const auto& data : rawImageDataMap) {
+            formData.AddImageData(data.first, data.second);
+        }
+    }
+    SetFormData(formData);
 }
 
 void QjsPaEngine::OnDelete(const int64_t formId)
