@@ -42,8 +42,18 @@ public:
         return child_;
     }
 
+    void MarkContextMenu()
+    {
+        isContextMenu_ = true;
+    }
+
+    bool IsContextMenu()
+    {
+        return isContextMenu_;
+    }
 private:
     RefPtr<Component> child_;
+    bool isContextMenu_ = false;
 };
 
 } // namespace OHOS::Ace

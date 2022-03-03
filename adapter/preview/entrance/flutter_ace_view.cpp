@@ -41,6 +41,8 @@ TouchPoint ConvertTouchPoint(flutter::PointerData* pointerItem)
     touchPoint.force = pointerItem->pressure;
     touchPoint.x = pointerItem->physical_x;
     touchPoint.y = pointerItem->physical_y;
+    touchPoint.screenX = pointerItem->physical_x;
+    touchPoint.screenY = pointerItem->physical_y;
     return touchPoint;
 }
 
@@ -56,6 +58,7 @@ void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>
         TimeStamp time(micros);
         TouchEvent point {
             static_cast<int32_t>(DEFAULT_ACTION_ID), static_cast<float>(current->physical_x),
+            static_cast<float>(current->physical_y), static_cast<float>(current->physical_x),
             static_cast<float>(current->physical_y), TouchType::UNKNOWN, time, current->size,
             static_cast<float>(current->pressure), static_cast<int64_t>(current->device)
         };

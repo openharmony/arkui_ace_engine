@@ -57,6 +57,8 @@ struct TouchPoint final {
     int32_t id = 0;
     float x = 0.0f;
     float y = 0.0f;
+    float screenX = 0.0f;
+    float screenY = 0.0f;
     TimeStamp downTime;
     double size = 0.0;
     float force = 0.0f;
@@ -73,6 +75,8 @@ struct TouchEvent final {
     int32_t id = 0;
     float x = 0.0f;
     float y = 0.0f;
+    float screenX = 0.0f;
+    float screenY = 0.0f;
     TouchType type = TouchType::UNKNOWN;
     // nanosecond time stamp.
     TimeStamp time;
@@ -89,17 +93,25 @@ struct TouchEvent final {
         return Offset(x, y);
     }
 
+    Offset GetScreenOffset() const
+    {
+        return Offset(screenX, screenY);
+    }
+
     TouchEvent CreateScalePoint(float scale) const
     {
         if (NearZero(scale)) {
-            return { id, x, y, type, time, size, force, deviceId, sourceType, pointers };
+            return { id, x, y, screenX, screenY, type, time, size, force, deviceId, sourceType, pointers };
         }
         auto temp = pointers;
         std::for_each(temp.begin(), temp.end(), [scale](auto&& point) {
             point.x = point.x / scale;
             point.y = point.y / scale;
+            point.screenX = point.screenX / scale;
+            point.screenY = point.screenY / scale;
         });
-        return { id, x / scale, y / scale, type, time, size, force, deviceId, sourceType, temp };
+        return { id, x / scale, y / scale, screenX / scale, screenY / scale, type, time, size, force, deviceId,
+            sourceType, temp };
     }
 
     TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const
@@ -109,16 +121,21 @@ struct TouchEvent final {
             std::for_each(temp.begin(), temp.end(), [offsetX, offsetY](auto&& point) {
                 point.x = point.x - offsetX;
                 point.y = point.y - offsetY;
+                point.screenX = point.screenX - offsetX;
+                point.screenY = point.screenY - offsetY;
             });
-            return { pointId, x - offsetX, y - offsetY, type, time, size, force, deviceId, sourceType, temp };
+            return { pointId, x - offsetX, y - offsetY, screenX - offsetX, screenY - offsetY, type, time, size, force,
+                deviceId, sourceType, temp };
         }
 
         std::for_each(temp.begin(), temp.end(), [scale, offsetX, offsetY](auto&& point) {
             point.x = (point.x - offsetX) / scale;
             point.y = (point.y - offsetY) / scale;
+            point.screenX = (point.screenX - offsetX) / scale;
+            point.screenY = (point.screenY - offsetY) / scale;
         });
-        return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, type, time, size, force, deviceId, sourceType,
-            temp };
+        return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, (screenX - offsetX) / scale,
+            (screenY - offsetY) / scale, type, time, size, force, deviceId, sourceType, temp };
     }
 };
 
@@ -214,6 +231,17 @@ public:
         return *this;
     }
 
+    TouchLocationInfo& SetScreenLocation(const Offset& screenLocation)
+    {
+        screenLocation_ = screenLocation;
+        return *this;
+    }
+
+    const Offset& GetScreenLocation() const
+    {
+        return screenLocation_;
+    }
+
     const Offset& GetLocalLocation() const
     {
         return localLocation_;
@@ -274,6 +302,8 @@ private:
     // Different from global location, The local location refers to the location of the contact point relative to the
     // current node which has the recognizer.
     Offset localLocation_;
+
+    Offset screenLocation_;
 
     // finger touch size
     double size_ = 0.0;

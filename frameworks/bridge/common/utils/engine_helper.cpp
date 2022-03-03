@@ -15,10 +15,10 @@
 
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace {
-
 std::shared_mutex EngineHelper::mutex_;
 std::unordered_map<int32_t, WeakPtr<Framework::JsEngine>> EngineHelper::engineWeakMap_;
 
@@ -31,6 +31,9 @@ void EngineHelper::AddEngine(int32_t id, WeakPtr<Framework::JsEngine> engine)
 RefPtr<Framework::JsEngine> EngineHelper::GetEngine(int32_t id)
 {
     std::shared_lock<std::shared_mutex> lock(mutex_);
+    if (id >= MIN_SUBCONTAINER_ID) {
+        id = SubwindowManager::GetInstance()->GetParentContainerId(id);
+    }
     auto iter = engineWeakMap_.find(id);
     if (iter != engineWeakMap_.end()) {
         return iter->second.Upgrade();

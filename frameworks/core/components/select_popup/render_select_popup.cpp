@@ -305,7 +305,9 @@ void RenderSelectPopup::PerformLayout()
     normalPadding_ = NormalizeToPx(rrectSize_);
     globalRightBottom_ = Offset() + renderRoot_->GetLayoutSize();
     double outPadding = NormalizeToPx(4.0_vp); // the out padding is 4dp from doc.
-
+    if (isContextMenu_) {
+        outPadding = 0.0;
+    }
     Size totalSize;
     double fixHeight = 0.0;
     if (renderTitleBox_) {
@@ -380,11 +382,18 @@ void RenderSelectPopup::PerformLayout()
 
 void RenderSelectPopup::HandleRawEvent(const Offset& clickPosition)
 {
+    LOGD("Handle Raw Event, Position is %{public}s.", clickPosition.ToString().c_str());
     if (touchRegion_.ContainsInRegion(clickPosition.GetX(), clickPosition.GetY())) {
+        LOGI("Contains the touch region.");
         return;
     }
 
     if (!selectPopup_) {
+        return;
+    }
+    if (isContextMenu_) {
+        LOGI("Hide the contextmenu.");
+        selectPopup_->CloseContextMenu();
         return;
     }
     selectPopup_->HideDialog(SELECT_INVALID_INDEX);
@@ -410,10 +419,14 @@ void RenderSelectPopup::ProcessTouchUp(const TouchEventInfo& info)
     }
 
     auto offset = touches.front().GetGlobalLocation();
-    firstFingerUpOffset_ = offset;
-    if ((offset - firstFingerDownOffset_).GetDistance() <= DEFAULT_DISTANCE) {
-        selectPopup_->HideDialog(SELECT_INVALID_INDEX);
-        firstFingerDownOffset_ = Offset();
+    if (!isContextMenu_) {
+        firstFingerUpOffset_ = offset;
+        if ((offset - firstFingerDownOffset_).GetDistance() <= DEFAULT_DISTANCE) {
+            selectPopup_->HideDialog(SELECT_INVALID_INDEX);
+            firstFingerDownOffset_ = Offset();
+        }
+    } else {
+        HandleRawEvent(offset);
     }
 }
 

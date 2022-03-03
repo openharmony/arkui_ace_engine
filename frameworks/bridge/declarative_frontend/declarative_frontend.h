@@ -193,6 +193,8 @@ public:
         return jsEngine_;
     }
 
+    void AttachSubPipelineContext(const RefPtr<PipelineContext>& context);
+
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 

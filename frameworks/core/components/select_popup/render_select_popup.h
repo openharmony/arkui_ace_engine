@@ -82,6 +82,7 @@ protected:
     Dimension optionInterval_;
     Dimension rrectSize_;
 
+    bool isContextMenu_ = false;
 private:
     void AdjustTvChildVerticalLayout(const Size& size, double& y, double& height);
     void AdjustTvChildHorizontalLayout(const Size& size, double& x, double& width);
@@ -120,7 +121,7 @@ private:
     bool screenHorizontal_ = false;
     bool screenVertical_ = false;
     bool animationCreated_ = false;
-    bool isContextMenu_ = false;
+
     double normalPadding_ = 0.0;
     RefPtr<SelectTheme> theme_;
 

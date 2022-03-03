@@ -57,6 +57,8 @@ struct MouseEvent final {
     float scrollX = 0.0f;
     float scrollY = 0.0f;
     float scrollZ = 0.0f;
+    float screenX = 0.0f;
+    float screenY = 0.0f;
     MouseAction action = MouseAction::NONE;
     MouseButton button = MouseButton::NONE_BUTTON;
     int32_t pressedButtons = 0; // combined by MouseButtons
@@ -67,6 +69,11 @@ struct MouseEvent final {
     Offset GetOffset() const
     {
         return Offset(x, y);
+    }
+
+    Offset GetScreenOffset() const
+    {
+        return Offset(screenX, screenY);
     }
 
     int32_t GetId() const
@@ -90,6 +97,8 @@ struct MouseEvent final {
                 .scrollX = scrollX,
                 .scrollY = scrollY,
                 .scrollZ = scrollZ,
+                .screenX = screenX,
+                .screenY = screenY,
                 .action = action,
                 .button = button,
                 .pressedButtons = pressedButtons,
@@ -107,6 +116,8 @@ struct MouseEvent final {
             .scrollX = scrollX / scale,
             .scrollY = scrollY / scale,
             .scrollZ = scrollZ / scale,
+            .screenX = screenX / scale,
+            .screenY = screenY / scale,
             .action = action,
             .button = button,
             .pressedButtons = pressedButtons,
@@ -128,12 +139,19 @@ struct MouseEvent final {
             type = TouchType::UNKNOWN;
         }
         int32_t id = GetId();
-        TouchPoint point {
-            .id = id, .x = x, .y = y, .downTime = time, .size = 0.0, .isPressed = (type == TouchType::DOWN)
-        };
+        TouchPoint point { .id = id,
+            .x = x,
+            .y = y,
+            .screenX = screenX,
+            .screenY = screenY,
+            .downTime = time,
+            .size = 0.0,
+            .isPressed = (type == TouchType::DOWN) };
         TouchEvent event { .id = id,
             .x = x,
             .y = y,
+            .screenX = screenX,
+            .screenY = screenY,
             .type = type,
             .time = time,
             .size = 0.0,
@@ -154,6 +172,8 @@ struct MouseEvent final {
             .scrollX = scrollX,
             .scrollY = scrollY,
             .scrollZ = scrollZ,
+            .screenX = screenX - offset.GetX(),
+            .screenY = screenY - offset.GetY(),
             .action = action,
             .button = button,
             .pressedButtons = pressedButtons,
@@ -201,6 +221,17 @@ public:
         return *this;
     }
 
+    MouseInfo& SetScreenLocation(const Offset& screenLocation)
+    {
+        screenLocation_ = screenLocation;
+        return *this;
+    }
+
+    const Offset& GetScreenLocation() const
+    {
+        return screenLocation_;
+    }
+
     const Offset& GetLocalLocation() const
     {
         return localLocation_;
@@ -218,6 +249,7 @@ private:
     // Different from global location, The local location refers to the location of the contact point relative to the
     // current node which has the recognizer.
     Offset localLocation_;
+    Offset screenLocation_;
 };
 
 class MouseEventTarget : public virtual AceType {

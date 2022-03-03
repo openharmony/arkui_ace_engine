@@ -131,6 +131,7 @@ bool RenderTouchListener::TriggerTouchCallBack(const TouchEvent& changedPoint)
     float localY = changedPoint.y - coordinateOffset_.GetY();
     changedInfo.SetLocalLocation(Offset(localX, localY));
     changedInfo.SetGlobalLocation(Offset(changedPoint.x, changedPoint.y));
+    changedInfo.SetScreenLocation(Offset(changedPoint.screenX, changedPoint.screenY));
     changedInfo.SetTouchType(changedPoint.type);
     event->AddChangedTouchLocationInfo(std::move(changedInfo));
 
@@ -138,11 +139,14 @@ bool RenderTouchListener::TriggerTouchCallBack(const TouchEvent& changedPoint)
     for (const auto& pointPair : touchPointMap_) {
         float globalX = pointPair.second.x;
         float globalY = pointPair.second.y;
+        float screenX = pointPair.second.screenX;
+        float screenY = pointPair.second.screenY;
         float localX = pointPair.second.x - coordinateOffset_.GetX();
         float localY = pointPair.second.y - coordinateOffset_.GetY();
         TouchLocationInfo info(pointPair.second.id);
         info.SetGlobalLocation(Offset(globalX, globalY));
         info.SetLocalLocation(Offset(localX, localY));
+        info.SetScreenLocation(Offset(screenX, screenY));
         info.SetTouchType(pointPair.second.type);
         event->AddTouchLocationInfo(std::move(info));
     }

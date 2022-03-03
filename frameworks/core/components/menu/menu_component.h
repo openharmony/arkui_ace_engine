@@ -146,7 +146,7 @@ public:
     void SetIsBindTarget(bool isBindTarget) {}
     const RefPtr<SelectPopupComponent>& GetPopup() const;
 
-    void SetContextMenu(bool isContextMenu)
+    void SetIsContextMenu(bool isContextMenu)
     {
         isContextMenu_ = isContextMenu;
         if (popup_) {
