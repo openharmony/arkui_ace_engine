@@ -112,6 +112,7 @@ public:
         }
     }
     void Resize(const double& width, const double& height);
+    void UpdateUserAgent(const std::string& userAgent, const std::string& url);
     void UpdateJavaScriptEnabled(const bool& isJsEnabled);
     void UpdateAllowFileAccess(const bool& isFileAccessEnabled);
     void UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled);
@@ -169,6 +170,7 @@ private:
     void OnFocus();
     void OnInactive();
     void OnActive();
+    void Zoom(float factor);
     int GetHitTestResult();
     void RegisterOHOSWebEventAndMethord();
     void SetWebCallBack();

@@ -44,6 +44,7 @@ public:
     void SetJavascriptInterface(const JSCallbackInfo& args);
     void OnInactive(const JSCallbackInfo& args);
     void OnActive(const JSCallbackInfo& args);
+    void Zoom(const JSCallbackInfo& args);
     void RequestFocus(const JSCallbackInfo& args);
 
     // Backward and Forward for web page
