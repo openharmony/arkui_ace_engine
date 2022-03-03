@@ -38,6 +38,11 @@ void InspectorClient::RegisterOperateComponentCallback(OperateComponentCallback&
     operateComponentCallback_ = callback;
 }
 
+void InspectorClient::RegisterFastPreviewErrorCallback(FastPreviewErrorCallback&& callback)
+{
+    onError_ = callback;
+}
+
 bool InspectorClient::AssembleJSONTreeStr(std::string& jsonTreeStr)
 {
     if (assembleJSONTreeCallback_) {

@@ -31,7 +31,7 @@ public:
 
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
-    std::string GetRect() const override;
+    std::string GetRect() override;
 
     std::string GetSpanData() const;
     std::string GetSpanTextFontSize() const;

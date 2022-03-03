@@ -41,7 +41,8 @@ private:
     std::unique_ptr<JsonValue> GetChildJson(RefPtr<AccessibilityNode> node);
     void AssembleDefaultJSONTree(std::string& jsonStr);
 
-    void OperateComponent(const std::string& attrsJson);
+    bool OperateComponent(const std::string& attrsJson);
+    bool OperateGrneralComponent(int32_t parentID, int32_t slot, std::string& operateType, RefPtr<Component> newComponent);
     RefPtr<Component> GetNewComponentWithJsCode(const std::unique_ptr<JsonValue>& root);
     RefPtr<V2::InspectorComposedElement> GetInspectorElementById(NodeId nodeId);
     const WeakPtr<Element>& GetRootElement();
