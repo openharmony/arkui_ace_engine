@@ -21,6 +21,7 @@
 
 #include "base/json/json_util.h"
 #include "base/log/log.h"
+#include "core/common/container_scope.h"
 #include "core/components/web/web_event.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/back_end_event_manager.h"
@@ -910,12 +911,12 @@ void WebDelegate::InitWebViewWithWindow()
             bool isContentAccessEnabled = component->GetContentAccessEnabled();
             bool isFileAccessEnabled = component->GetFileAccessEnabled();
 
-            auto webviewClient = std::make_shared<WebClientImpl>();
+            auto webviewClient = std::make_shared<WebClientImpl>(Container::CurrentId());
             webviewClient->SetWebDelegate(weak);
             delegate->webview_->SetWebViewClient(webviewClient);
 
             // Set downloadListenerImpl
-            auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>();
+            auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>(Container::CurrentId());
             downloadListenerImpl->SetWebDelegate(weak);
             delegate->webview_->SetDownloadListener(downloadListenerImpl);
 
@@ -967,9 +968,9 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             if (component == nullptr) {
                 return;
             }
-            auto webviewClient = std::make_shared<WebClientImpl>();
+            auto webviewClient = std::make_shared<WebClientImpl>(Container::CurrentId());
             webviewClient->SetWebDelegate(weak);
-            auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>();
+            auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>(Container::CurrentId());
             downloadListenerImpl->SetWebDelegate(weak);
             delegate->webview_->SetWebViewClient(webviewClient);
             delegate->webview_->SetDownloadListener(downloadListenerImpl);

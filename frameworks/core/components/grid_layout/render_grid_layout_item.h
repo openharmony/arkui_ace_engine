@@ -144,7 +144,7 @@ private:
     RefPtr<Animator> animationController_;
     void InitAnimationController(const WeakPtr<PipelineContext>& context);
     OnSelectFunc onSelectId_;
-    bool selectable_ = false;
+    bool selectable_ = true;
     bool isSelected_ = false;
 };
 

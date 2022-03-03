@@ -104,11 +104,25 @@ void JSList::SetChainAnimation(bool enableChainAnimation)
     JSViewSetProperty(&V2::ListComponent::SetChainAnimation, enableChainAnimation);
 }
 
+void JSList::JsWidth(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsWidth(info);
+    JSViewSetProperty(&V2::ListComponent::SetHasWidth, true);
+}
+
+void JSList::JsHeight(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsHeight(info);
+    JSViewSetProperty(&V2::ListComponent::SetHasHeight, true);
+}
+
 void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
     JSClass<JSList>::StaticMethod("create", &JSList::Create);
 
+    JSClass<JSList>::StaticMethod("width", &JSList::JsWidth);
+    JSClass<JSList>::StaticMethod("height", &JSList::JsHeight);
     JSClass<JSList>::StaticMethod("listDirection", &JSList::SetDirection);
     JSClass<JSList>::StaticMethod("scrollBar", &JSList::SetScrollBar);
     JSClass<JSList>::StaticMethod("edgeEffect", &JSList::SetEdgeEffect);

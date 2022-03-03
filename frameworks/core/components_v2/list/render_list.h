@@ -380,6 +380,8 @@ private:
     bool isMultiSelectable_ = false;
     void ClearMultiSelect();
     bool mouseIsHover_ = false;
+    bool hasHeight_ = false;
+    bool hasWidth_ = false;
 
     void MultiSelectWithoutKeyboard(const Rect& selectedZone);
     void HandleMouseEventWithoutKeyboard(const MouseEvent& event);
