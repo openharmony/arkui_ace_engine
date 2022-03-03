@@ -20,12 +20,14 @@
 #include "core/components/container_modal/render_container_modal.h"
 #include "core/components/flex/flex_element.h"
 #include "core/components/flex/flex_item_element.h"
+#include "core/components/padding/render_padding.h"
 #include "core/gestures/tap_gesture.h"
 
 namespace OHOS::Ace {
 namespace {
 
 constexpr uint32_t COLUMN_CHILD_NUM = 2;
+constexpr uint32_t SPLIT_BUTTON_POSITION = 2;
 constexpr uint32_t TITLE_POPUP_TIME = 500;     // 500ms
 constexpr double TITLE_POPUP_DISTANCE = 100.0; // 100px
 
@@ -332,16 +334,27 @@ void ContainerModalElement::ChangeFloatingTitleIcon()
         LOGE("ChangeFloatingTitleIcon failed, context is null.");
         return;
     }
-    auto row = AceType::DynamicCast<RowElement>(floatingTitleBox_->GetFirstChild());
-    if (!row) {
-        LOGE("ChangeFloatingTitleIcon failed, row element is null");
+    auto rowElement = AceType::DynamicCast<RowElement>(floatingTitleBox_->GetFirstChild());
+    if (!rowElement) {
+        LOGE("ChangeFloatingTitleIcon failed, row element is null.");
         return;
     }
+    auto renderRow = AceType::DynamicCast<RenderFlex>(rowElement->GetRenderNode());
+    if (!renderRow) {
+        LOGE("ChangeFloatingTitleIcon failed, renderRow is null.");
+        return;
+    }
+    auto iterator = renderRow->GetChildren().begin();
+    std::advance(iterator, SPLIT_BUTTON_POSITION);
+    auto splitButton = AceType::DynamicCast<RenderPadding>(*iterator);
+
     auto mode = context->FireWindowGetModeCallBack();
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        row->SetUpdateComponent(floatingTitleChildrenRow_);
+        rowElement->SetUpdateComponent(floatingTitleChildrenRow_);
+        splitButton->SetHidden(false);
     } else {
-        row->SetUpdateComponent(titleChildrenRow_);
+        rowElement->SetUpdateComponent(titleChildrenRow_);
+        splitButton->SetHidden(true);
     }
 }
 
