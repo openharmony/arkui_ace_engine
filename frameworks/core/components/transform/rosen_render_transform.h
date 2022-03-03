@@ -54,6 +54,7 @@ public:
     {
         pendingAppearingTransition_ = true;
     }
+
 protected:
     void OnRSTransition(TransitionType type) override;
 
@@ -65,6 +66,7 @@ private:
     Matrix4 previousTransformMatrix_;
 
     bool pendingAppearingTransition_ = false;
+    bool pendingUpdateTransformLayer_ = false;
 };
 
 } // namespace OHOS::Ace
