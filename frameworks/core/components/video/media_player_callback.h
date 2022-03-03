@@ -18,6 +18,7 @@
 
 #include "base/log/log.h"
 
+#include "core/common/container_scope.h"
 #include "core/components/video/video_utils.h"
 #include "foundation/multimedia/media_standard/interfaces/innerkits/native/media/include/player.h"
 
@@ -68,6 +69,11 @@ public:
     using StateChangedEvent = std::function<void(PlaybackStatus)>;
 
     MediaPlayerCallback() = default;
+    explicit MediaPlayerCallback(int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    }
+
     ~MediaPlayerCallback() = default;
 
     void OnError(Media::PlayerErrorType errorType, int32_t errorCode) override
@@ -75,8 +81,9 @@ public:
         LOGE("OnError callback, errorType: %{public}d, errorCode: %{public}d", errorType, errorCode);
     }
 
-    virtual void OnInfo(Media::PlayerOnInfoType type, int32_t extra, const Media::Format &InfoBody = {}) override
+    void OnInfo(Media::PlayerOnInfoType type, int32_t extra, const Media::Format &InfoBody = {}) override
     {
+        ContainerScope scope(instanceId_);
         switch (type) {
             case OHOS::Media::INFO_TYPE_SEEKDONE:
                 LOGI("OnSeekDone callback");
@@ -150,6 +157,7 @@ private:
     PositionUpdatedEvent positionUpdatedEvent_;
     EndOfStreamEvent endOfStreamEvent_;
     StateChangedEvent stateChangedEvent_;
+    int32_t instanceId_ = -1;
 };
 
 } // namespace OHOS::Ace
