@@ -190,10 +190,10 @@ void RosenRenderButton::MeasureCircle()
 {
     if (!buttonComponent_->GetRadiusState()) {
         if (widthDefined_ || heightDefined_) {
-            double minSize =
-                buttonComponent_->GetDeclarativeFlag()
-                    ? std::min(buttonSize_.Width(), buttonSize_.Height())
-                    : std::min(GetLayoutParam().GetMaxSize().Width(), GetLayoutParam().GetMaxSize().Height());
+            double minSize = std::min(GetLayoutParam().GetMaxSize().Width(), GetLayoutParam().GetMaxSize().Height());
+            if (buttonComponent_->GetDeclarativeFlag()) {
+                minSize = widthDefined_ ? std::min(buttonSize_.Width(), buttonSize_.Height()) : buttonSize_.Height();
+            }
             rrectRadius_ = (minSize - widthDelta_) / 2.0;
         }
     } else {
