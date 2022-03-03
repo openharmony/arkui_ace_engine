@@ -75,6 +75,8 @@ private:
 #ifdef OHOS_STANDARD_SYSTEM
     void CreateSurface();
     void OnXComponentHiddenChange(bool hidden);
+    void SetMethodCall();
+    void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
 
     bool onLoadDone_ = false;
     static std::unordered_map<std::string, uint64_t> surfaceIdMap_;

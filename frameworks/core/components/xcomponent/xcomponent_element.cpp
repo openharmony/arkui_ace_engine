@@ -63,6 +63,9 @@ void XComponentElement::Prepare(const WeakPtr<Element>& parent)
     if (xcomponent_) {
         if (!isExternalResource_) {
             CreatePlatformResource();
+#ifdef OHOS_STANDARD_SYSTEM
+            SetMethodCall();
+#endif
         }
     }
     RenderElement::Prepare(parent);
@@ -302,20 +305,46 @@ void XComponentElement::CreateSurface()
         LOGE("xcomponent add surface error: %{public}d", ret);
     }
 
-    if (!xcomponentController_) {
-        const auto& controller = xcomponent_->GetXComponentController();
-        if (!controller) {
-            return;
-        }
-        xcomponentController_ = controller;
-        xcomponentController_->surfaceId_ = producerSurface_->GetUniqueId();
-    }
+    xcomponentController_->surfaceId_ = producerSurface_->GetUniqueId();
 
     producerSurface_->SetQueueSize(SURFACE_QUEUE_SIZE);
     producerSurface_->SetUserData("SURFACE_STRIDE_ALIGNMENT", SURFACE_STRIDE_ALIGNMENT);
     producerSurface_->SetUserData("SURFACE_FORMAT", std::to_string(PIXEL_FMT_RGBA_8888));
 
     XComponentElement::surfaceIdMap_.emplace(xcomponent_->GetId(), producerSurface_->GetUniqueId());
+}
+
+void XComponentElement::SetMethodCall()
+{
+    if (!xcomponentController_) {
+        auto controller = xcomponent_->GetXComponentController();
+        if (!controller) {
+            LOGE("There is no controller in xcomponent.");
+            return;
+        }
+        xcomponentController_ = controller;
+    }
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("There is no context in xcomponent.");
+        return;
+    }
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    xcomponentController_->SetConfigSurfaceImpl([weak = WeakClaim(this), uiTaskExecutor]
+                                                (uint32_t surfaceWidth, uint32_t surfaceHeight) {
+        uiTaskExecutor.PostTask([weak, surfaceWidth, surfaceHeight]() {
+            auto xComponentElement = weak.Upgrade();
+            if (xComponentElement) {
+                xComponentElement->ConfigSurface(surfaceWidth, surfaceHeight);
+            }
+        });
+    });
+}
+
+void XComponentElement::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
+{
+    producerSurface_->SetUserData("SURFACE_WIDTH", std::to_string(surfaceWidth));
+    producerSurface_->SetUserData("SURFACE_HEIGHT", std::to_string(surfaceHeight));
 }
 #endif
 

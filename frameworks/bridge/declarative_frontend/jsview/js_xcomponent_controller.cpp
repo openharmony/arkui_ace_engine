@@ -24,6 +24,8 @@ void JSXComponentController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSXComponentController>::Declare("XComponentController");
     JSClass<JSXComponentController>::CustomMethod("getXComponentSurfaceId", &JSXComponentController::GetSurfaceId);
+    JSClass<JSXComponentController>::CustomMethod("setXComponentSurfaceSize",
+        &JSXComponentController::SetSurfaceConfig);
     JSClass<JSXComponentController>::Bind(globalObj, JSXComponentController::Constructor,
         JSXComponentController::Destructor);
 }
@@ -55,6 +57,27 @@ void JSXComponentController::GetSurfaceId(const JSCallbackInfo& args)
         auto returnValue = JSVal(ToJSValue(std::to_string(surfaceId)));
         auto returnPtr = JSRef<JSVal>::Make(returnValue);
         args.SetReturnValue(returnPtr);
+    }
+}
+
+void JSXComponentController::SetSurfaceConfig(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        LOGW("Invalid params");
+        return;
+    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    int32_t surfaceWidth;
+    int32_t surfaceHeight;
+    if (!ConvertFromJSValue(obj->GetProperty("surfaceWidth"), surfaceWidth) ||
+        !ConvertFromJSValue(obj->GetProperty("surfaceHeight"), surfaceHeight)) {
+        LOGW("Failed to parse param 'surfaceWidth' or 'surfaceHeight'");
+        return;
+    }
+
+    if (xcomponentController_) {
+        xcomponentController_->ConfigSurface(surfaceWidth, surfaceHeight);
     }
 }
 } // namespace OHOS::Ace::Framework
