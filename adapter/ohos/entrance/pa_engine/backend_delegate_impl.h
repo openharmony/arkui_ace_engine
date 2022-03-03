@@ -113,6 +113,8 @@ public:
     // BackendDelegate overrides.
     void PostJsTask(std::function<void()>&& task) override;
 
+    void PostDelayedJsTask(std::function<void()>&& task, uint32_t delayTime) override;
+
     SingleTaskExecutor GetAnimationJsTask() override;
 
     void AddTaskObserver(std::function<void()>&& task) override;

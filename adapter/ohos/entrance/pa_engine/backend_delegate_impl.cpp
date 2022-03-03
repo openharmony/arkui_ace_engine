@@ -93,6 +93,11 @@ void BackendDelegateImpl::PostJsTask(std::function<void()>&& task)
     taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
 }
 
+void BackendDelegateImpl::PostDelayedJsTask(std::function<void()>&& task, uint32_t delayTime)
+{
+    taskExecutor_->PostDelayedTask(task, TaskExecutor::TaskType::JS, delayTime);
+}
+
 bool BackendDelegateImpl::GetAssetContent(const std::string& url, std::string& content)
 {
     return Framework::GetAssetContentImpl(assetManager_, url, content);
