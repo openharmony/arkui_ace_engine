@@ -851,6 +851,15 @@ void WebDelegate::SetWebCallBack()
                     }
                 });
             });
+        webController->SetZoomImpl(
+            [weak = WeakClaim(this), uiTaskExecutor](float factor) {
+                uiTaskExecutor.PostTask([weak, factor]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->Zoom(factor);
+                    }
+                });
+            });
         webController->SetOnFocusImpl(
             [weak = WeakClaim(this), uiTaskExecutor]() {
                 uiTaskExecutor.PostTask([weak]() {
@@ -986,10 +995,32 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
                 static_cast<OHOS::WebView::WebSettings::MixedContentMode>(component->GetMixedMode()));
             setting->SetSupportZoom(component->GetZoomAccessEnabled());
             setting->SetGeolocationEnabled(component->GetGeolocationAccessEnabled());
+            auto userAgent = component->GetUserAgent();
+            if (!userAgent.empty()) {
+                setting->SetUserAgentString(userAgent);
+            }
         },
         TaskExecutor::TaskType::PLATFORM);
 }
 #endif
+
+void WebDelegate::UpdateUserAgent(const std::string& userAgent, const std::string& src)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), userAgent, src]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                    setting->SetUserAgentString(userAgent);
+                    delegate->webview_->LoadURL(src);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
 
 void WebDelegate::Resize(const double& width, const double& height)
 {
@@ -1190,6 +1221,27 @@ void WebDelegate::OnActive()
             }
             if (delegate->webview_) {
                 delegate->webview_->OnResume();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::Zoom(float factor)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), factor]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                LOGE("Get delegate failed, it is null.");
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->ZoomBy(factor);
             }
         },
         TaskExecutor::TaskType::PLATFORM);
