@@ -367,14 +367,15 @@ void RenderSlider::HandleClick(const Offset& clickPosition)
     }
     if (NeedSmoothMoving()) {
         UpdateBlockPosition(clickPosition, true);
-        insideBlockRegion_ = false;
-        FireMovingEvent(SliderEvent::CLICK);
-        FireMoveEndEvent();
+    } else {
+        RenderBlockPosition(clickPosition);
+        UpdateTouchRegion();
+    }
+    insideBlockRegion_ = false;
+    if (onChange_) {
+        FireMovingEvent(SliderEvent::MOVE_END);
         return;
     }
-    RenderBlockPosition(clickPosition);
-    UpdateTouchRegion();
-    insideBlockRegion_ = false;
     FireMovingEvent(SliderEvent::CLICK);
     FireMoveEndEvent();
 }
