@@ -214,7 +214,8 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
     return OperateGrneralComponent(parentID, slot, operateType, newComponent);
 }
 
-bool JsInspectorManager::OperateGrneralComponent(int32_t parentID, int32_t slot, std::string& operateType, RefPtr<Component> newComponent)
+bool JsInspectorManager::OperateGrneralComponent(
+    int32_t parentID, int32_t slot, std::string& operateType, RefPtr<Component> newComponent)
 {
     auto parentElement = GetInspectorElementById(parentID);
     if (!parentElement || !(parentElement->IsRectValid())) {
@@ -227,7 +228,7 @@ bool JsInspectorManager::OperateGrneralComponent(int32_t parentID, int32_t slot,
         return true;
     }
 
-    if(newComponent) {
+    if (newComponent) {
         if (operateType == "AddComponent") {
             parentElement->AddChildWithSlot(slot, newComponent);
         }
