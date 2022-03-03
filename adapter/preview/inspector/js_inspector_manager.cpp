@@ -90,8 +90,7 @@ void JsInspectorManager::InitializeCallback()
         if (!jsInspectorManager) {
             return false;
         }
-        jsInspectorManager->OperateComponent(attrsJson);
-        return true;
+        return jsInspectorManager->OperateComponent(attrsJson);
     };
     InspectorClient::GetInstance().RegisterOperateComponentCallback(operateComponentCallback);
 }
@@ -195,7 +194,7 @@ void JsInspectorManager::AssembleDefaultJSONTree(std::string& jsonStr)
     jsonStr = jsonNode->ToString();
 }
 
-void JsInspectorManager::OperateComponent(const std::string& jsCode)
+bool JsInspectorManager::OperateComponent(const std::string& jsCode)
 {
     auto root = JsonUtil::ParseJsonString(jsCode);
     auto operateType = root->GetString("type", "");
@@ -207,29 +206,38 @@ void JsInspectorManager::OperateComponent(const std::string& jsCode)
         auto child = rootElement->GetChildBySlot(-1); // rootElement only has one child,and use the default slot -1
         if (!newComponent) {
             LOGE("operateType:UpdateComponent, newComponent should not be nullptr");
-            return;
+            return false;
         }
         rootElement->UpdateChildWithSlot(child, newComponent, -1, -1);
-        return;
+        return true;
     }
+    return OperateGrneralComponent(parentID, slot, operateType, newComponent);
+}
+
+bool JsInspectorManager::OperateGrneralComponent(
+    int32_t parentID, int32_t slot, std::string& operateType, RefPtr<Component> newComponent)
+{
     auto parentElement = GetInspectorElementById(parentID);
-    if (operateType == "AddComponent") {
-        if (!newComponent) {
-            LOGE("operateType:AddComponent, newComponent should not be nullptr");
-            return;
-        }
-        parentElement->AddChildWithSlot(slot, newComponent);
-    } else if (operateType == "UpdateComponent") {
-        if (!newComponent) {
-            LOGE("operateType:UpdateComponent, newComponent should not be nullptr");
-            return;
-        }
-        parentElement->UpdateChildWithSlot(slot, newComponent);
-    } else if (operateType == "DeleteComponent") {
-        parentElement->DeleteChildWithSlot(slot);
-    } else {
-        LOGE("operateType:%{publis}s is not support", operateType.c_str());
+    if (!parentElement || !(parentElement->IsRectValid())) {
+        LOGE("parentElement should not be nullptr or display");
+        return false;
     }
+
+    if (operateType == "DeleteComponent") {
+        parentElement->DeleteChildWithSlot(slot);
+        return true;
+    }
+
+    if (newComponent) {
+        if (operateType == "AddComponent") {
+            parentElement->AddChildWithSlot(slot, newComponent);
+        }
+        if (operateType == "UpdateComponent") {
+            parentElement->UpdateChildWithSlot(slot, newComponent);
+        }
+        return true;
+    }
+    return false;
 }
 
 RefPtr<Component> JsInspectorManager::GetNewComponentWithJsCode(const std::unique_ptr<JsonValue>& root)
