@@ -1029,7 +1029,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
         std::abs(scrollOffset_) > NormalizeToPx(MIN_DRAG_DISTANCE)) {
         if (dragVelocity > 0.0) {
             toIndex = GetPrevIndex();
-            end = currentIndex_ == toIndex ? 0.0 : nextItemOffset_;
+            end = currentIndex_ == toIndex ? 0.0 : scrollOffset_ < 0.0 ? 0.0 : nextItemOffset_;
             if (scrollOffset_ < 0.0) {
                 fromIndex = GetNextIndex();
                 start += nextItemOffset_;
@@ -1038,7 +1038,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
             }
         } else {
             toIndex = GetNextIndex();
-            end = currentIndex_ == toIndex ? 0.0 : prevItemOffset_;
+            end = currentIndex_ == toIndex ? 0.0 : scrollOffset_ > 0.0 ? 0.0 : prevItemOffset_;
             if (scrollOffset_ > 0.0) {
                 fromIndex = GetPrevIndex();
                 start += prevItemOffset_;
@@ -1579,8 +1579,17 @@ void RenderSwiper::SetSwiperEffect(double dragOffset)
 
 void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, bool inLayout)
 {
-    scrollOffset_ = offset;
-
+    if (std::abs(currentIndex_ - fromIndex) == 1) {
+        scrollOffset_ = offset + (currentIndex_ - fromIndex) * nextItemOffset_;
+    } else { // for loop reversal
+        if (fromIndex > currentIndex_) {
+            scrollOffset_ = offset + nextItemOffset_;
+        } else if (fromIndex < currentIndex_) {
+            scrollOffset_ = offset - nextItemOffset_;
+        } else {
+            scrollOffset_ = offset;
+        }
+    }
     // move current item
     auto item = items_.find(fromIndex);
     if (item != items_.end()) {
@@ -1592,8 +1601,7 @@ void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, bool in
     if (!loop_) {
         prevItemCount = fromIndex;
     } else {
-        // move additional 1 item to make sure display correctly when scroll left and right quickly
-        prevItemCount = (offset + prevMargin_ + std::fabs(prevItemOffset_) - 1) / std::fabs(prevItemOffset_) + 1;
+        prevItemCount = (offset + prevMargin_ + std::fabs(prevItemOffset_) - 1) / std::fabs(prevItemOffset_);
     }
     if (prevItemCount >= itemCount_ - 1) {
         prevItemCount = itemCount_ - 1;
@@ -1621,8 +1629,7 @@ void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, bool in
     } else {
         double maxLength = (axis_ == Axis::HORIZONTAL ? GetLayoutSize().Width() : GetLayoutSize().Height());
 
-        // move additional 1 item to make sure display correctly when scroll left and right quickly
-        nextItemCount = (maxLength - offset - prevMargin_) / std::fabs(prevItemOffset_) + 1;
+        nextItemCount = (maxLength - offset - prevMargin_ + std::fabs(prevItemOffset_) - 1)/ std::fabs(prevItemOffset_);
         if (nextItemCount > maxNextItemCount) {
             nextItemCount = maxNextItemCount;
         }
