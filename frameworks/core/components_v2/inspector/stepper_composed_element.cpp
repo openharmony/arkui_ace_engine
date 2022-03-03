@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,6 +63,17 @@ RefPtr<StepperComponent> StepperComposedElement::GetStepperComponent() const
         return renderStepper->GetStepperComponent();
     }
     return nullptr;
+}
+
+void StepperComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto stepperComponent = GetStepperComponent();
+    stepperComponent->InsertChild(slot, newComponent);
+    auto renderStepper = GetInspectorElement<RenderStepper>(StepperElement::TypeId());
+    if (!renderStepper) {
+        return;
+    }
+    renderStepper->Update(stepperComponent);
 }
 
 } // namespace OHOS::Ace::V2

@@ -130,6 +130,29 @@ bool PaContainer::RunPa(int32_t instanceId, const std::string& content, const OH
     return true;
 }
 
+bool PaContainer::OnCreate(int32_t instanceId, const OHOS::AAFwk::Want& want)
+{
+    LOGI("PA: PaContainer::OnCreate start");
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        LOGE("PA: container is nullptr");
+        return false;
+    }
+    auto aceContainer = AceType::DynamicCast<PaContainer>(container);
+    if (!aceContainer) {
+        LOGE("PA: aceContainer is nullptr");
+        return false;
+    }
+    auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
+    if (!paBackend) {
+        LOGE("PA: paBackend is nullptr");
+        return false;
+    }
+    paBackend->OnCreate(want);
+    LOGI("PA: PaContainer::OnCreate end");
+    return true;
+}
+
 bool PaContainer::OnDelete(int32_t instanceId, int64_t formId)
 {
     LOGI("PA: PaContainer::OnDelete start");

@@ -31,6 +31,7 @@ void GestureScope::AddMember(const RefPtr<GestureRecognizer>& recognizer)
         return;
     }
 
+
     recognizer->SetRefereeState(RefereeState::DETECTING);
 
     switch (recognizer->GetPriority()) {
@@ -407,6 +408,7 @@ void GestureReferee::Adjudicate(size_t touchId, const RefPtr<GestureRecognizer>&
         LOGE("recognizer is null, Adjudicate failed.");
         return;
     }
+
     const auto iter = gestureScopes_.find(touchId);
     if (iter != gestureScopes_.end()) {
         iter->second.HandleGestureDisposal(recognizer, disposal);

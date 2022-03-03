@@ -31,7 +31,7 @@ enum class DetectState { READY, DETECTING, DETECTED };
 
 enum class RefereeState { DETECTING, PENDING, BLOCKED, SUCCEED, FAIL };
 
-class GestureRecognizer : public TouchEventTarget {
+class ACE_EXPORT GestureRecognizer : public TouchEventTarget {
     DECLARE_ACE_TYPE(GestureRecognizer, TouchEventTarget)
 
 public:

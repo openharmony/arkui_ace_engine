@@ -16,24 +16,18 @@
 #include "core/common/container.h"
 
 #include "core/common/ace_engine.h"
+#include "core/common/container_scope.h"
 
 namespace OHOS::Ace {
 
-#ifndef WINDOWS_PLATFORM
-thread_local int32_t Container::currentId_ = INSTANCE_ID_UNDEFINED;
-#else
-int32_t Container::currentId_ = INSTANCE_ID_UNDEFINED;
-#endif
-std::function<void(int32_t)> Container::updateScopeNotify_;
-
 int32_t Container::CurrentId()
 {
-    return currentId_;
+    return ContainerScope::CurrentId();
 }
 
 RefPtr<Container> Container::Current()
 {
-    return AceEngine::Get().GetContainer(currentId_);
+    return AceEngine::Get().GetContainer(ContainerScope::CurrentId());
 }
 
 RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
@@ -45,17 +39,9 @@ RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
     return nullptr;
 }
 
-void Container::SetScopeNotify(std::function<void(int32_t)>&& notify)
-{
-    updateScopeNotify_ = std::move(notify);
-}
-
 void Container::UpdateCurrent(int32_t id)
 {
-    currentId_ = id;
-    if (updateScopeNotify_) {
-        updateScopeNotify_(id);
-    }
+    ContainerScope::UpdateCurrent(id);
 }
 
 } // namespace OHOS::Ace

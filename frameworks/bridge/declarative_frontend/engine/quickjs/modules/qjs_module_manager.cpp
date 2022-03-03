@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -318,6 +318,29 @@ JSValue ClearInterval(JSContext* ctx, JSValueConst value, int32_t argc, JSValueC
     return ModuleManager::GetInstance()->ClearWaitTimer(ctx, argc, argv, true);
 }
 
+JSValue CanIUse(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    LOGD("CanIUse argc is %d", argc);
+
+    if (argc != 1) {
+        LOGE("CanIUse: invalid value");
+        return JS_NULL;
+    }
+
+    QJSContext::Scope scp(ctx);
+    if (!JS_IsString(argv[0])) {
+        LOGE("CanIUse: invalid input");
+        return JS_NULL;
+    }
+
+    ScopedString targetString(ctx, argv[0]);
+    std::string syscapString = targetString.get();
+
+    bool ret = Ace::SystemProperties::IsSyscapExist(syscapString.c_str());
+
+    return JS_NewBool(ctx, ret);
+}
+
 JSValue ModuleManager::SetWaitTimer(JSContext* ctx, int32_t argc, JSValueConst* argv, bool isInterval)
 {
     LOGD("SetWaitTimer argc is %d", argc);
@@ -458,6 +481,13 @@ void ModuleManager::InitTimerModule(JSContext* ctx)
     JS_SetPropertyStr(ctx, globalObj, SET_INTERVAL, JS_NewCFunction(ctx, SetInterval, SET_INTERVAL, 2));
     JS_SetPropertyStr(ctx, globalObj, CLEAR_TIMEOUT, JS_NewCFunction(ctx, ClearTimeout, CLEAR_TIMEOUT, 1));
     JS_SetPropertyStr(ctx, globalObj, CLEAR_INTERVAL, JS_NewCFunction(ctx, ClearInterval, CLEAR_INTERVAL, 1));
+    JS_FreeValue(ctx, globalObj);
+}
+
+void ModuleManager::InitSyscapModule(JSContext* ctx)
+{
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JS_SetPropertyStr(ctx, globalObj, CAN_IUSE, JS_NewCFunction(ctx, CanIUse, CAN_IUSE, 1));
     JS_FreeValue(ctx, globalObj);
 }
 

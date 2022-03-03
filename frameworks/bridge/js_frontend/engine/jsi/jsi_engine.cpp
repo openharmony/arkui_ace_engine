@@ -2868,6 +2868,32 @@ void JsiEngineInstance::RegisterConsoleModule(ArkNativeEngine* engine)
     nativeGlobal->SetProperty("console", console);
 }
 
+shared_ptr<JsValue> SyscapCanIUse(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (argc != 1) {
+        LOGE("agrc should be 1");
+        return runtime->NewNull();
+    }
+    if (!argv[0]->IsString(runtime)) {
+        LOGW("argv[0] is not IsString");
+        return runtime->NewNull();
+    }
+
+    std::string syscapString = argv[0]->ToString(runtime);
+    bool ret = Ace::SystemProperties::IsSyscapExist(syscapString.c_str());
+    return runtime->NewBoolean(ret);
+}
+
+void JsiEngineInstance::RegisterSyscapModule()
+{
+    ACE_SCOPED_TRACE("JsiEngine::RegisterSyscapModule");
+    LOGD("JsiEngineInstance RegisterSyscapModule");
+    shared_ptr<JsValue> global = runtime_->GetGlobal();
+
+    global->SetProperty(runtime_, CAN_IUSE, runtime_->NewFunction(SyscapCanIUse));
+}
+
 void JsiEngineInstance::RegisterDocumentModule()
 {
     ACE_SCOPED_TRACE("JsiEngine::RegisterDocumentModule");
@@ -2946,6 +2972,7 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
 
     RegisterAceModule();
     RegisterConsoleModule();
+    RegisterSyscapModule();
     RegisterDocumentModule();
     RegisterPerfUtilModule();
     RegisterHiViewModule();
@@ -3117,7 +3144,7 @@ void JsiEngine::RegisterInitWorkerFunc()
 void JsiEngine::RegisterAssetFunc()
 {
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content) {
+    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content, std::string& ami) {
         LOGI("WorkerCore RegisterAssetFunc called");
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
@@ -3128,7 +3155,7 @@ void JsiEngine::RegisterAssetFunc()
         if (index == std::string::npos) {
             LOGE("invalid uri");
         } else {
-            delegate->GetResourceData(uri.substr(0, index) + ".abc", content);
+            delegate->GetResourceData(uri.substr(0, index) + ".abc", content, ami);
         }
     };
     nativeEngine_->SetGetAssetFunc(assetFunc);

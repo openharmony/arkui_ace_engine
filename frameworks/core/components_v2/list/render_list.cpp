@@ -32,7 +32,7 @@
 namespace OHOS::Ace::V2 {
 namespace {
 
-constexpr double VIEW_PORT_SCALE = 3.0;
+constexpr double VIEW_PORT_SCALE = 1.2;
 constexpr int32_t CHAIN_ANIMATION_NODE_COUNT = 30;
 constexpr int32_t DEFAULT_SOURCE = 3;
 constexpr int32_t SCROLL_STATE_IDLE = 0;
@@ -533,6 +533,16 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
     return true;
 }
 
+bool RenderList::TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
+    TouchTestResult& result)
+{
+    if (GetVisible() && fixedMainSize_ && scrollable_ && scrollable_->Available()) {
+        result.emplace_back(scrollable_);
+    }
+
+    return RenderNode::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+}
+
 void RenderList::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
@@ -554,7 +564,6 @@ void RenderList::OnTouchTestHit(
     }
 
     scrollable_->SetCoordinateOffset(coordinateOffset);
-    result.emplace_back(scrollable_);
 }
 
 double RenderList::ApplyLayoutParam()
@@ -581,7 +590,7 @@ double RenderList::ApplyLayoutParam()
             endMainPos_ = std::numeric_limits<decltype(endMainPos_)>::max();
             fixedMainSizeByLayoutParam_ = false;
         } else {
-            startMainPos_ = -maxMainSize;
+            startMainPos_ = (1.0 - VIEW_PORT_SCALE) / 2 * maxMainSize;
             endMainPos_ = startMainPos_ + (maxMainSize * VIEW_PORT_SCALE);
             fixedMainSizeByLayoutParam_ = NearEqual(maxMainSize, GetMainSize(GetLayoutParam().GetMinSize()));
         }

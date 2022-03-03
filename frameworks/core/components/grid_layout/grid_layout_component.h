@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -234,6 +234,30 @@ public:
         return supportAnimation_;
     }
 
+    void SetDragAnimation(bool value)
+    {
+        supportDragAnimation_ = value;
+    }
+
+    bool GetDragAnimation()
+    {
+        return supportDragAnimation_;
+    }
+
+    void SetEdgeEffection(EdgeEffect value)
+    {
+        if (value < EdgeEffect::SPRING || value > EdgeEffect::NONE) {
+            LOGW("Invalid edgeEffect %{public}d", value);
+            return;
+        }
+        edgeEffect_ = value;
+    }
+
+    EdgeEffect GetEdgeEffection()
+    {
+        return edgeEffect_;
+    }
+
     void SetOnGridDragEnterId(const OnGridDragEnterFunc& onGridDragEnterId);
     void SetOnGridDragMoveId(const OnGridDragMoveFunc& onGridDragMoveId);
     void SetOnGridDragLeaveId(const OnGridDragLeaveFunc& onGridDragLeaveId);
@@ -258,6 +282,7 @@ public:
 private:
     FlexDirection direction_ = FlexDirection::COLUMN;
     FlexAlign flexAlign_ = FlexAlign::CENTER;
+    EdgeEffect edgeEffect_ = EdgeEffect::SPRING;
     double width_ = -1.0;
     double height_ = -1.0;
     int32_t columnCount_ = 1;
@@ -265,6 +290,7 @@ private:
     bool isDeclarative_ = false;
     int32_t cacheCount_ = 1;
     bool supportAnimation_ = false;
+    bool supportDragAnimation_ = false;
 
     std::string columnsArgs_;
     std::string rowsArgs_;

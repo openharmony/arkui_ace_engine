@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "base/memory/ace_type.h"
+#include "core/components/stepper/stepper_item_component.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -39,10 +40,16 @@ public:
         return index_;
     }
 
+    const StepperLabels& GetLabel() const
+    {
+        return label_;
+    }
+
 private:
     OnEventFunc appearEvent_;
     OnEventFunc disappearEvent_;
     int32_t index_;
+    StepperLabels label_;
 };
 
 } // namespace OHOS::Ace

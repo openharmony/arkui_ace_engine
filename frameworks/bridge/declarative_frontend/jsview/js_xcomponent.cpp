@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,8 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+RefPtr<JSXComponentController> JSXComponent::jsXComponentController_ = nullptr;
+
 void JSXComponent::JSBind(BindingTarget globalObj)
 {
     JSClass<JSXComponent>::Declare("XComponent");
@@ -56,9 +58,9 @@ void JSXComponent::Create(const JSCallbackInfo& info)
 
     auto controllerObj = paramObject->GetProperty("controller");
     if (controllerObj->IsObject()) {
-        auto controller = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSXComponentController>();
-        if (controller) {
-            xcomponentComponent->SetXComponentController(controller->GetController());
+        jsXComponentController_ = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSXComponentController>();
+        if (jsXComponentController_) {
+            xcomponentComponent->SetXComponentController(jsXComponentController_->GetController());
         }
     }
 
@@ -117,7 +119,7 @@ EventMarker JSXComponent::GetEventMarker(const JSCallbackInfo& info, const std::
             // load callback method, need to return a napi instance
             if (posLoad != std::string::npos) {
                 ACE_SCORING_EVENT("XComponent.onLoad");
-                func->ExecuteNew(keys, param);
+                func->ExecuteNew(keys, param, jsXComponentController_);
             } else {
                 ACE_SCORING_EVENT("XComponent.onLoad");
                 func->Execute(keys, param);

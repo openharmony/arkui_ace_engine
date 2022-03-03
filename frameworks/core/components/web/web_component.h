@@ -152,6 +152,18 @@ public:
         loadDataWithBaseUrlImpl_ = std::move(loadDataWithBaseUrlImpl);
     }
 
+    using InitJavascriptInterface = std::function<void()>;
+    void LoadInitJavascriptInterface() const
+    {
+        if (initJavascriptInterface_) {
+            initJavascriptInterface_();
+        }
+    }
+    void SetInitJavascriptInterface(InitJavascriptInterface&& initJavascriptInterface)
+    {
+        initJavascriptInterface_ = std::move(initJavascriptInterface);
+    }
+
     using OnInactiveImpl = std::function<void()>;
     void OnInactive() const
     {
@@ -307,6 +319,7 @@ private:
     OnActiveImpl onActiveImpl_;
     OnFocusImpl onFocusImpl_;
     LoadDataWithBaseUrlImpl loadDataWithBaseUrlImpl_;
+    InitJavascriptInterface initJavascriptInterface_;
     RefreshImpl refreshImpl_;
     StopLoadingImpl stopLoadingImpl_;
     GetHitTestResultImpl getHitTestResultImpl_;

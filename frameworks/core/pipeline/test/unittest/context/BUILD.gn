@@ -65,6 +65,7 @@ ohos_unittest("PipelineContextTest") {
     "//foundation/ace/ace_engine/frameworks/core/common/ace_engine.cpp",
     "//foundation/ace/ace_engine/frameworks/core/common/clipboard/clipboard_proxy.cpp",
     "//foundation/ace/ace_engine/frameworks/core/common/container.cpp",
+    "//foundation/ace/ace_engine/frameworks/core/common/container_scope.cpp",
     "//foundation/ace/ace_engine/frameworks/core/common/event_manager.cpp",
     "//foundation/ace/ace_engine/frameworks/core/common/flutter/flutter_task_executor.cpp",
     "//foundation/ace/ace_engine/frameworks/core/common/focus_animation_manager.cpp",
@@ -121,14 +122,17 @@ ohos_unittest("PipelineContextTest") {
     # gestures
     "//foundation/ace/ace_engine/frameworks/core/gestures/click_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/drag_recognizer.cpp",
+    "//foundation/ace/ace_engine/frameworks/core/gestures/exclusive_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/gesture_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/gesture_referee.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/long_press_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/multi_fingers_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/pan_recognizer.cpp",
+    "//foundation/ace/ace_engine/frameworks/core/gestures/parallel_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/raw_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/sequenced_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/swipe_recognizer.cpp",
+    "//foundation/ace/ace_engine/frameworks/core/gestures/timeout_recognizer.cpp",
     "//foundation/ace/ace_engine/frameworks/core/gestures/velocity_tracker.cpp",
 
     # image

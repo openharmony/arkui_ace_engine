@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@
 #include "core/components/scroll/scroll_position_controller.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/core/components/transform/click_spring_effect.h"
+#include "base/geometry/calc_dimension.h"
 
 namespace OHOS::Ace {
 
@@ -542,6 +543,12 @@ protected:
      * 10px, "@id001", "@attr_sys_dimension".
      */
     Dimension ParseDimension(const std::string& value, bool useVp = false) const;
+
+    /*
+     * Parse calcdimension from string content and reference for id/attr, including format:
+     * calc(100% - 10px), 10px, "@id001", "@attr_sys_dimension".
+     */
+    CalcDimension ParseCalcDimension(const std::string& value, bool useVp = false) const;
 
     /*
      * Parse line height from string content and reference for id/attr, including format:

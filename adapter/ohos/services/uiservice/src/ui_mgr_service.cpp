@@ -230,6 +230,10 @@ int UIMgrService::ShowDialog(const std::string& name,
         std::string windowName = "system_dialog_window";
         windowName += std::to_string(dialogId);
         dialogWindow = OHOS::Rosen::Window::Create(windowName, option);
+        if (dialogWindow == nullptr) {
+            HILOG_ERROR("Create window failed");
+            return;
+        }
 
         // register surface change callback
         OHOS::sptr<OHOS::Rosen::IWindowChangeListener> listener = new UIMgrServiceWindowChangeListener();

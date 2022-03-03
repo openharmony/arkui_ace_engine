@@ -242,8 +242,7 @@ void RosenRenderTextField::PaintIcon(const Offset& offset, RenderContext& contex
             renderShowIcon_->RenderWithContext(context, passwordIconOffset);
         }
         passwordIconRect_ = Rect(
-            passwordIconOffset - Offset((iconHotZoneSize_ - iconSize_) / 2.0, (iconHotZoneSize_ - iconSize_) / 2.0) +
-                GetGlobalOffset(),
+            passwordIconOffset - Offset((iconHotZoneSize_ - iconSize_) / 2.0, (iconHotZoneSize_ - iconSize_) / 2.0),
             Size(iconHotZoneSize_, iconHotZoneSize_));
     }
 }

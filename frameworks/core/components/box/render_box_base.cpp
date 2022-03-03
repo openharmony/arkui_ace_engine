@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "core/components/common/properties/radius.h"
 #include "core/components/flex/render_flex.h"
 #include "core/components/text_field/render_text_field.h"
+#include "base/utils/string_expression.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -72,9 +73,15 @@ double RenderBoxBase::CalculateHeightPercent(double percent) const
     return ConvertVerticalDimensionToPx(Dimension(percent, DimensionUnit::PERCENT));
 }
 
-double RenderBoxBase::ConvertMarginToPx(Dimension dimension, bool vertical, bool additional) const
+double RenderBoxBase::ConvertMarginToPx(CalcDimension dimension, bool vertical, bool additional) const
 {
-    if (dimension.Unit() == DimensionUnit::PERCENT) {
+    if (dimension.Unit() == DimensionUnit::CALC) {
+        std::string value = dimension.CalcValue();
+        auto node = AceType::Claim(const_cast<RenderBoxBase*>(this));
+        return StringExpression::CalculateExp(value, [vertical, node](const Dimension& dim) -> double {
+                return node->NormalizePercentToPx(dim, vertical, false);
+            });
+    } else if (dimension.Unit() == DimensionUnit::PERCENT) {
         double parentLimit = 0.0;
         if (vertical) {
             parentLimit = GetLayoutParam().GetMaxSize().Height();
@@ -105,9 +112,15 @@ double RenderBoxBase::ConvertMarginToPx(Dimension dimension, bool vertical, bool
     }
 }
 
-double RenderBoxBase::ConvertDimensionToPx(Dimension dimension, bool vertical, bool defaultZero) const
+double RenderBoxBase::ConvertDimensionToPx(CalcDimension dimension, bool vertical, bool defaultZero) const
 {
-    if (dimension.Unit() == DimensionUnit::PERCENT) {
+    if (dimension.Unit() == DimensionUnit::CALC) {
+        std::string value = dimension.CalcValue();
+        auto node = AceType::Claim(const_cast<RenderBoxBase*>(this));
+        return StringExpression::CalculateExp(value, [vertical, node](const Dimension& dim) -> double {
+                return node->NormalizePercentToPx(dim, vertical, false);
+            });
+    } else if (dimension.Unit() == DimensionUnit::PERCENT) {
         double parentLimit = GetLayoutParam().GetMaxSize().Width();
         if (vertical) {
             parentLimit = GetLayoutParam().GetMaxSize().Height();
@@ -131,12 +144,12 @@ double RenderBoxBase::ConvertDimensionToPx(Dimension dimension, bool vertical, b
     }
 }
 
-double RenderBoxBase::ConvertHorizontalDimensionToPx(Dimension dimension, bool defaultZero) const
+double RenderBoxBase::ConvertHorizontalDimensionToPx(CalcDimension dimension, bool defaultZero) const
 {
     return ConvertDimensionToPx(dimension, false, defaultZero);
 }
 
-double RenderBoxBase::ConvertVerticalDimensionToPx(Dimension dimension, bool defaultZero) const
+double RenderBoxBase::ConvertVerticalDimensionToPx(CalcDimension dimension, bool defaultZero) const
 {
     return ConvertDimensionToPx(dimension, true, defaultZero);
 }

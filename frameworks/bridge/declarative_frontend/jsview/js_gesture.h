@@ -140,6 +140,22 @@ public:
 
     static void Create(const JSCallbackInfo& args);
 };
+
+class JSParallelGesture : public JSGesture {
+    DECLARE_ACE_TYPE(JSParallelGesture, JSGesture)
+public:
+    static void Create();
+    static void JSBind(BindingTarget globalObj);
+};
+
+class JSTimeoutGesture : public JSGesture {
+    DECLARE_ACE_TYPE(JSTimeoutGesture, JSGesture)
+public:
+    static void Create(const JSCallbackInfo& args);
+    static void Pop();
+    static void JSBind(BindingTarget globalObj);
+};
 } // namespace OHOS::Ace::Framework
 
 #endif // FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JSVIEW_JS_GESTURE_H
+

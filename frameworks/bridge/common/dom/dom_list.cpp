@@ -197,6 +197,11 @@ void DOMList::ParseIndexer(const std::string& indexerAlphabet)
     indexerAlphabet_.clear();
     indexer_ = false;
 
+    auto context = GetPipelineContext().Upgrade();
+    if (context && context->IsJsCard()) {
+        return;
+    }
+
     if (indexerAlphabet.empty() || indexerAlphabet.find("false") != std::string::npos) {
         return;
     }

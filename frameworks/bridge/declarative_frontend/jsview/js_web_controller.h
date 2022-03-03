@@ -41,6 +41,7 @@ public:
     void GetHitTestResult(const JSCallbackInfo& args);
     void AddJavascriptInterface(const JSCallbackInfo& args);
     void RemoveJavascriptInterface(const JSCallbackInfo& args);
+    void SetJavascriptInterface(const JSCallbackInfo& args);
     void OnInactive(const JSCallbackInfo& args);
     void OnActive(const JSCallbackInfo& args);
     void RequestFocus(const JSCallbackInfo& args);
@@ -63,6 +64,7 @@ public:
     }
 
 protected:
+    void InitJavascriptInterface();
     std::shared_ptr<WebJSValue> GetJavaScriptResult(
         const std::string& objectName,
         const std::string& objectMethod,
@@ -72,6 +74,7 @@ private:
     using ObjectClassMap  = std::map<std::string, JSRef<JSObject>>;
     ObjectClassMap objectorMap_;
     bool jsRegisterCallBackInit_ = false;
+    std::map<std::string, std::vector<std::string>> methods_;
     RefPtr<WebController> webController_;
     ACE_DISALLOW_COPY_AND_MOVE(JSWebController);
 };

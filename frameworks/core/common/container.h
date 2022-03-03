@@ -148,7 +148,6 @@ public:
     static int32_t CurrentId();
     static RefPtr<Container> Current();
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
-    static void SetScopeNotify(std::function<void(int32_t)>&& notify);
     static void UpdateCurrent(int32_t id);
 
 protected:
@@ -157,12 +156,6 @@ protected:
     std::string cardHapPath_;
 
 private:
-#ifndef WINDOWS_PLATFORM
-    static thread_local int32_t currentId_;
-#else
-    static int32_t currentId_;
-#endif
-    static std::function<void(int32_t)> updateScopeNotify_;
     std::string moduleName_;
     Settings settings_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);

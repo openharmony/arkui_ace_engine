@@ -35,6 +35,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_timer_module.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_syscap_module.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_api_perf.h"
@@ -637,6 +638,7 @@ void JsiDeclarativeEngineInstance::InitJsNativeModuleObject()
 
     if (!usingSharedRuntime_) {
         JsiTimerModule::GetInstance()->InitTimerModule(runtime_, global);
+        JsiSyscapModule::GetInstance()->InitSyscapModule(runtime_, global);
     }
 }
 
@@ -908,8 +910,13 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         nativeEngine_ = new ArkNativeEngine(vm, static_cast<void*>(this));
     }
     engineInstance_->SetNativeEngine(nativeEngine_);
-    SetPostTask(nativeEngine_);
-    nativeEngine_->CheckUVLoop();
+    if (!sharedRuntime) {
+        SetPostTask(nativeEngine_);
+        nativeEngine_->CheckUVLoop();
+    } else {
+        LOGI("Using sharedRuntime, UVLoop handled by AbilityRuntime");
+    }
+
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetLibPath();
         if (!packagePath.empty()) {
@@ -976,7 +983,7 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
 void JsiDeclarativeEngine::RegisterAssetFunc()
 {
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content) {
+    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content, std::string &ami) {
         LOGI("WorkerCore RegisterAssetFunc called");
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
@@ -987,7 +994,7 @@ void JsiDeclarativeEngine::RegisterAssetFunc()
         if (index == std::string::npos) {
             LOGE("invalid uri");
         } else {
-            delegate->GetResourceData(uri.substr(0, index) + ".abc", content);
+            delegate->GetResourceData(uri.substr(0, index) + ".abc", content, ami);
         }
     };
     nativeEngine_->SetGetAssetFunc(assetFunc);
@@ -1270,7 +1277,7 @@ void JsiDeclarativeEngine::TimerCallJs(const std::string& callbackId) const
 
 void JsiDeclarativeEngine::DestroyPageInstance(int32_t pageId)
 {
-    LOGI("JsiDeclarativeEngine DestroyPageInstance");
+    LOGI("JsiDeclarativeEngine DestroyPageInstance %{public}d", pageId);
     ACE_DCHECK(engineInstance_);
 
     engineInstance_->DestroyRootViewHandle(pageId);

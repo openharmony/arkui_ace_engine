@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/calc_dimension.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 
@@ -216,6 +217,16 @@ inline Dimension StringToDimensionWithUnit(const std::string& value, DimensionUn
     }
     return Dimension(result, defaultUnit);
 }
+
+inline CalcDimension StringToCalcDimension(const std::string& value, bool useVp = false)
+{
+    if (value.find("calc") != std::string::npos) {
+        return CalcDimension(value, DimensionUnit::CALC);
+    } else {
+        return StringToDimensionWithUnit(value, useVp ? DimensionUnit::VP : DimensionUnit::PX);
+    }
+}
+
 
 inline Dimension StringToDimension(const std::string& value, bool useVp = false)
 {

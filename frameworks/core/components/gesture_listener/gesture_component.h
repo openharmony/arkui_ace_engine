@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_GESTURE_LISTENER_GESTURE_COMPONENT_H
 
 #include "core/gestures/gesture_group.h"
+#include "core/gestures/single_child_gesture.h"
+
 #include "core/pipeline/base/sole_child_component.h"
 
 namespace OHOS::Ace {
@@ -71,6 +73,11 @@ public:
         auto gestureGroup = AceType::DynamicCast<GestureGroup>(gestureStack_.top());
         if (gestureGroup) {
             gestureGroup->AddGesture(gesture);
+        }
+
+        auto container = AceType::DynamicCast<SingleChildGesture>(gestureStack_.top());
+        if (container) {
+            container->SetChild(std::move(gesture));
         }
     }
 

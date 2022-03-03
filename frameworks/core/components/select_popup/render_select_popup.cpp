@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,12 @@
 #include "core/components/select_popup/select_popup_component.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text/render_text.h"
+#include "core/gestures/raw_recognizer.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr int32_t DEFAULT_DISTANCE = 5;
+} // namespace
 
 RenderSelectPopup::RenderSelectPopup()
 {
@@ -386,6 +390,33 @@ void RenderSelectPopup::HandleRawEvent(const Offset& clickPosition)
     selectPopup_->HideDialog(SELECT_INVALID_INDEX);
 }
 
+void RenderSelectPopup::ProcessTouchDown(const TouchEventInfo& info)
+{
+    auto touches = info.GetTouches();
+    if (touches.empty()) {
+        LOGE("touch event info is empty.");
+        return;
+    }
+
+    firstFingerDownOffset_ = touches.front().GetGlobalLocation();
+}
+
+void RenderSelectPopup::ProcessTouchUp(const TouchEventInfo& info)
+{
+    auto touches = info.GetTouches();
+    if (touches.empty()) {
+        LOGE("touch event info is empty.");
+        return;
+    }
+
+    auto offset = touches.front().GetGlobalLocation();
+    firstFingerUpOffset_ = offset;
+    if ((offset - firstFingerDownOffset_).GetDistance() <= DEFAULT_DISTANCE) {
+        selectPopup_->HideDialog(SELECT_INVALID_INDEX);
+        firstFingerDownOffset_ = Offset();
+    }
+}
+
 void RenderSelectPopup::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
@@ -398,6 +429,37 @@ void RenderSelectPopup::OnTouchTestHit(
     if (!clickDetector_) {
         clickDetector_ = AceType::MakeRefPtr<ClickRecognizer>();
     }
+
+    rawDetector_->SetOnTouchDown([weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
+        auto ref = weak.Upgrade();
+        if (!ref) {
+            LOGE("renderSelectPopup upgrade fail.");
+            return;
+        }
+
+        ref->ProcessTouchDown(info);
+    });
+
+    rawDetector_->SetOnTouchUp([weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
+        auto ref = weak.Upgrade();
+        if (!ref) {
+            LOGE("renderSelectPopup upgrade fail.");
+            return;
+        }
+
+        ref->ProcessTouchUp(info);
+    });
+
+    rawDetector_->SetOnTouchCancel([weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
+        auto ref = weak.Upgrade();
+        if (!ref) {
+            LOGE("renderSelectPopup upgrade fail.");
+            return;
+        }
+
+        ref->ProcessTouchUp(info);
+    });
+
     rawDetector_->SetCoordinateOffset(coordinateOffset);
     dragDetector_->SetCoordinateOffset(coordinateOffset);
     longPressDetector_->SetCoordinateOffset(coordinateOffset);

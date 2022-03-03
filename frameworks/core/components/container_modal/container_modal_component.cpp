@@ -58,7 +58,7 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
     // handle mouse move
     titleBox->SetOnMouseId([contextWptr = context_](MouseInfo& info) {
         auto context = contextWptr.Upgrade();
-        if (context && info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::MOVE) {
+        if (context && info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
             context->FireWindowStartMoveCallBack();
         }
     });
@@ -187,7 +187,9 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
         style.SetTextColor(TITLE_TEXT_COLOR);
         style.SetFontWeight(FontWeight::W500);
         style.SetAllowScale(false);
+        style.SetTextOverflow(TextOverflow::ELLIPSIS);
         titleLabel_->SetTextStyle(style);
+        titleLabel_->SetFlexWeight(1.0);
     }
 
     // title control button
@@ -233,7 +235,7 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
         });
     std::list<RefPtr<Component>> titleChildren;
     titleChildren.emplace_back(SetPadding(titleIcon_, TITLE_PADDING_START, TITLE_ELEMENT_MARGIN_HORIZONTAL));
-    titleChildren.emplace_back(AceType::MakeRefPtr<FlexItemComponent>(1.0, 1.0, 0.0, titleLabel_));
+    titleChildren.emplace_back(titleLabel_);
     titleChildren.emplace_back(SetPadding(titleLeftSplitButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     titleChildren.emplace_back(SetPadding(titleMaximizeRecoverButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     titleChildren.emplace_back(SetPadding(titleMinimizeButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));

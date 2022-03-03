@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1331,8 +1331,10 @@ void DOMNode::UpdateFlexItemComponent()
         (parentNode->GetTag() == DOM_NODE_TAG_DIV || parentNode->GetTag() == DOM_NODE_TAG_GRID_COLUMN)) {
         auto parent = AceType::DynamicCast<DOMDiv>(parentNode);
         // Stretch flag means that if the child's main size is determined, it can not be stretched.
-        if (((parent->GetFlexDirection() == FlexDirection::ROW && GreatOrEqual(GetHeight().Value(), 0.0)) ||
-                (parent->GetFlexDirection() == FlexDirection::COLUMN && GreatOrEqual(GetWidth().Value(), 0.0)))) {
+        if ((parent->GetFlexDirection() == FlexDirection::ROW && (GreatOrEqual(GetHeight().Value(), 0.0) ||
+            GetHeight().Unit() == DimensionUnit::CALC)) ||
+            (parent->GetFlexDirection() == FlexDirection::COLUMN && (GreatOrEqual(GetWidth().Value(), 0.0) ||
+            GetWidth().Unit() == DimensionUnit::CALC))) {
             flexItemComponent_->SetStretchFlag(false);
         } else {
             flexItemComponent_->SetStretchFlag(true);
@@ -1361,10 +1363,18 @@ void DOMNode::UpdateUiComponents()
     UpdateTweenComponent();
 }
 
-void DOMNode::UpdateBoxSize(const Dimension& width, const Dimension& height)
+void DOMNode::UpdateBoxSize(const CalcDimension& width, const CalcDimension& height)
 {
-    boxComponent_->SetHeight(height.Value(), height.Unit());
-    boxComponent_->SetWidth(width.Value(), width.Unit());
+    if (height.Unit() == DimensionUnit::CALC) {
+        boxComponent_->SetHeight(height.CalcValue(), height.Unit());
+    } else {
+        boxComponent_->SetHeight(height.Value(), height.Unit());
+    }
+    if (width.Unit() == DimensionUnit::CALC) {
+        boxComponent_->SetWidth(width.CalcValue(), width.Unit());
+    } else {
+        boxComponent_->SetWidth(width.Value(), width.Unit());
+    }
 }
 
 void DOMNode::UpdateBoxPadding(const Edge& padding)
@@ -1386,7 +1396,15 @@ void DOMNode::UpdateBoxComponent()
     }
 
     if (declaration_->HasBoxStyle()) {
-        UpdateBoxSize(GetWidth(), GetHeight());
+        if (GetWidth().Unit() != DimensionUnit::CALC && GetHeight().Unit() != DimensionUnit::CALC) {
+            UpdateBoxSize(GetWidth(), GetHeight());
+        } else if (GetWidth().Unit() == DimensionUnit::CALC && GetHeight().Unit() != DimensionUnit::CALC) {
+            UpdateBoxSize(GetCalcWidth(), GetHeight());
+        } else if (GetWidth().Unit() != DimensionUnit::CALC && GetHeight().Unit() == DimensionUnit::CALC) {
+            UpdateBoxSize(GetWidth(), GetCalcHeight());
+        } else {
+            UpdateBoxSize(GetCalcWidth(), GetCalcHeight());
+        }
         auto& paddingStyle = static_cast<CommonPaddingStyle&>(declaration_->GetStyle(StyleTag::COMMON_PADDING_STYLE));
         if (paddingStyle.IsValid()) {
             UpdateBoxPadding(paddingStyle.padding);
@@ -2111,7 +2129,7 @@ double DOMNode::ParseDouble(const std::string& value) const
     return ParseThemeReference<double>(value, noRefFunc, idRefFunc, 0.0);
 }
 
-Dimension DOMNode::ParseDimension(const std::string& value) const
+CalcDimension DOMNode::ParseDimension(const std::string& value) const
 {
     auto themeConstants = GetThemeConstants();
     if (!themeConstants) {
@@ -2120,7 +2138,11 @@ Dimension DOMNode::ParseDimension(const std::string& value) const
     }
     auto&& noRefFunc = [&value]() { return StringUtils::StringToDimension(value); };
     auto&& idRefFunc = [constants = themeConstants](uint32_t refId) { return constants->GetDimension(refId); };
-    return ParseThemeReference<Dimension>(value, noRefFunc, idRefFunc, Dimension());
+    if (value.find("calc") != std::string::npos) {
+        return CalcDimension(value, DimensionUnit::CALC);
+    } else {
+        return ParseThemeReference<Dimension>(value, noRefFunc, idRefFunc, Dimension());
+    }
 }
 
 Dimension DOMNode::ParseLineHeight(const std::string& value) const

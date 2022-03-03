@@ -169,7 +169,6 @@ public:
         visualState_ = VisualState::NOTSET;
     }
 
-
 private:
     ViewStackProcessor();
 

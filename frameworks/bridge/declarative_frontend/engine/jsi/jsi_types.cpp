@@ -234,8 +234,8 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
     }
     auto thisObj = thisVal.Get().GetHandle();
     auto result = GetHandle()->Call(vm, thisObj, arguments.data(), argc);
-    Local<ObjectRef> exception = JSNApi::GetAndClearUncaughtException(vm);
-    if (!exception.IsEmpty() && !exception->IsHole()) {
+    runtime->HandleUncaughtException();
+    if (result->IsException()) {
         result = JSValueRef::Undefined(vm);
     }
     return JsiRef<JsiValue>::Make(result);

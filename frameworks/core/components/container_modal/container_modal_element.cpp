@@ -20,6 +20,7 @@
 #include "core/components/container_modal/render_container_modal.h"
 #include "core/components/flex/flex_element.h"
 #include "core/components/flex/flex_item_element.h"
+#include "core/gestures/tap_gesture.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -246,28 +247,52 @@ void ContainerModalElement::Update()
         }
         if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <= TITLE_POPUP_DISTANCE) {
             containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
+            containerElement->controller_->ClearStopListeners();
             containerElement->controller_->Forward();
         }
     });
 
-    // mouse move top to pop-up title bar.
-    containerBox->SetOnMouseId([week = WeakClaim(this)](MouseInfo& info) {
-        auto containerElement = week.Upgrade();
-        if (!containerElement || !containerElement->CanShowFloatingTitle()) {
+    // mouse move top to pop up title bar and move other area to hide title bar.
+    containerBox->SetOnMouseId([weak = WeakClaim(this)](MouseInfo& info) {
+        auto containerElement = weak.Upgrade();
+        if (!containerElement || info.GetAction() != MouseAction::MOVE) {
             return;
         }
-        if (info.GetAction() == MouseAction::MOVE && info.GetLocalLocation().GetY() <= TITLE_POPUP_DISTANCE) {
+        if (info.GetLocalLocation().GetY() <= TITLE_POPUP_DISTANCE && containerElement->CanShowFloatingTitle()) {
             containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
+            containerElement->controller_->ClearStopListeners();
             containerElement->controller_->Forward();
         }
+        if (info.GetLocalLocation().GetY() > TITLE_POPUP_DISTANCE && containerElement->CanHideFloatingTitle()) {
+            containerElement->controller_->AddStopListener([weak] {
+                auto container = weak.Upgrade();
+                container->floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
+            });
+            containerElement->controller_->Backward();
+        }
     });
+
+    // touch other area of screen to hide title bar.
+    auto tapGesture = AceType::MakeRefPtr<TapGesture>();
+    tapGesture->SetOnActionId([weak = WeakClaim(this)](GestureEvent& info) {
+        auto containerElement = weak.Upgrade();
+        if (!containerElement || !containerElement->CanHideFloatingTitle()) {
+            return;
+        }
+        containerElement->controller_->AddStopListener([weak] {
+            auto container = weak.Upgrade();
+            container->floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
+        });
+        containerElement->controller_->Backward();
+    });
+    containerBox->SetOnClick(tapGesture);
 }
 
 bool ContainerModalElement::CanShowFloatingTitle()
 {
     auto context = context_.Upgrade();
     if (!context || !floatingTitleDisplay_ || !controller_) {
-        LOGI("Show floating title failed, context, floatingTitleDisplay_ or controller is null.");
+        LOGI("Show floating title failed, context, floatingTitleDisplay or controller is null.");
         return false;
     }
     auto mode = context->FireWindowGetModeCallBack();
@@ -276,8 +301,21 @@ bool ContainerModalElement::CanShowFloatingTitle()
         LOGI("Window is not full screen or split screen, can not show floating title.");
         return false;
     }
-    if (floatingTitleDisplay_->GetVisibleType() == VisibleType::VISIBLE) {
+    if (floatingTitleDisplay_->GetVisible()) {
         LOGI("Floating tittle is visible now, no need to show again.");
+        return false;
+    }
+    return true;
+}
+
+bool ContainerModalElement::CanHideFloatingTitle()
+{
+    if (!floatingTitleDisplay_ || !controller_) {
+        LOGI("Hide floating title failed, floatingTitleDisplay or controller is null.");
+        return false;
+    }
+    if (!floatingTitleDisplay_->GetVisible()) {
+        LOGI("Hide floating title failed, title is not visible.");
         return false;
     }
     return true;

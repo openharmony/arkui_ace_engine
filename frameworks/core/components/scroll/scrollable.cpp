@@ -14,6 +14,7 @@
  */
 
 #include "core/components/scroll/scrollable.h"
+#include <chrono>
 
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
@@ -27,6 +28,7 @@ constexpr double SPRING_SCROLL_DAMPING = 15.55635;
 constexpr double MAX_FRICTION = 0.766;
 const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
     AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
+constexpr std::chrono::milliseconds SCROLL_TIMEOUT = std::chrono::milliseconds(200);
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 1.0;
 constexpr double VELOCITY_SCALE = 1.0;
@@ -81,6 +83,11 @@ void Scrollable::Initialize(const WeakPtr<PipelineContext>& context)
     } else {
         dragRecognizer_ = AceType::MakeRefPtr<HorizontalDragRecognizer>();
     }
+
+    dragRecognizer_->SetContext(context);
+
+    timeoutRecognizer_ = AceType::MakeRefPtr<TimeoutRecognizer>(context, dragRecognizer_, SCROLL_TIMEOUT);
+
     dragRecognizer_->SetOnDragStart([weakScroll = AceType::WeakClaim(this)](const DragStartInfo& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
@@ -125,6 +132,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineContext>& context)
 
     // use RawRecognizer to receive next touch down event to stop animation.
     rawRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
+
     rawRecognizer_->SetOnTouchDown([weakScroll = AceType::WeakClaim(this)](const TouchEventInfo&) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
@@ -474,3 +482,4 @@ const RefPtr<SpringProperty>& Scrollable::GetDefaultOverSpringProperty()
 }
 
 } // namespace OHOS::Ace
+

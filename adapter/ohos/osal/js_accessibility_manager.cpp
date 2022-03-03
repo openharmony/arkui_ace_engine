@@ -217,6 +217,7 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     int column = static_cast<int>(node->GetCollectionItemInfo().column);
     GridItemInfo gridItemInfo(row, row, column, column, false, nodeInfo.IsSelected());
     nodeInfo.SetGridItem(gridItemInfo);
+    nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
     if (node->GetIsPassword()) {
         std::string strStar(node->GetText().size(), '*');
@@ -421,6 +422,10 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(const AccessibilityEvent
 
     auto client = AccessibilitySystemAbilityClient::GetInstance();
     if (!client) {
+        return false;
+    }
+
+    if (!client->IsEnabled()) {
         return false;
     }
 
@@ -1088,10 +1093,9 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     return instance->DeregisterElementOperator(windowId);
 }
 
-void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(
-    const Accessibility::AccessibilityStateEvent& stateEvent)
+void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const bool state)
 {
-    LOGI("JsAccessibilityManager::OnStateChanged changed:%{public}d", stateEvent.GetEventResult());
+    LOGI("JsAccessibilityManager::OnStateChanged changed:%{public}d", state);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     if (!jsAccessibilityManager) {
         return;
@@ -1100,8 +1104,8 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
     if (context) {
         context->GetTaskExecutor()->PostTask(
-            [jsAccessibilityManager, &stateEvent]() {
-                if (stateEvent.GetEventResult()) {
+            [jsAccessibilityManager, state]() {
+                if (state) {
                     jsAccessibilityManager->RegisterInteractionOperation(jsAccessibilityManager->GetWindowId());
                 } else {
                     jsAccessibilityManager->DeregisterInteractionOperation();

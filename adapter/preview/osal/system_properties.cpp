@@ -89,6 +89,11 @@ DeviceType SystemProperties::GetDeviceType()
     return deviceType_;
 }
 
+bool SystemProperties::IsSyscapExist(const char *cap)
+{
+    return false;
+}
+
 void SystemProperties::InitDeviceTypeBySystemProperty()
 {
     deviceType_ = DeviceType::PHONE;
@@ -150,5 +155,4 @@ bool SystemProperties::GetDebugEnabled()
 {
     return false;
 }
-
 } // namespace OHOS::Ace

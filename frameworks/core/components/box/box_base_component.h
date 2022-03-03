@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -171,42 +171,42 @@ public:
         return aspectRatio_;
     }
 
-    void SetMinWidth(const Dimension& minWidth)
+    void SetMinWidth(const CalcDimension& minWidth)
     {
         minWidth_ = minWidth;
     }
 
-    const Dimension& GetMinWidth() const
+    const CalcDimension& GetMinWidth() const
     {
         return minWidth_;
     }
 
-    void SetMinHeight(const Dimension& minHeight)
+    void SetMinHeight(const CalcDimension& minHeight)
     {
         minHeight_ = minHeight;
     }
 
-    const Dimension& GetMinHeight() const
+    const CalcDimension& GetMinHeight() const
     {
         return minHeight_;
     }
 
-    void SetMaxWidth(const Dimension& maxWidth)
+    void SetMaxWidth(const CalcDimension& maxWidth)
     {
         maxWidth_ = maxWidth;
     }
 
-    const Dimension& GetMaxWidth() const
+    const CalcDimension& GetMaxWidth() const
     {
         return maxWidth_;
     }
 
-    void SetMaxHeight(const Dimension& maxHeight)
+    void SetMaxHeight(const CalcDimension& maxHeight)
     {
         maxHeight_ = maxHeight;
     }
 
-    const Dimension& GetMaxHeight() const
+    const CalcDimension& GetMaxHeight() const
     {
         return maxHeight_;
     }
@@ -372,10 +372,10 @@ private:
     uint32_t percentFlag_ = 1;
     bool layoutInBox_ = false;
     AnimatableDimension aspectRatio_ = AnimatableDimension();
-    Dimension minWidth_ = Dimension();
-    Dimension minHeight_ = Dimension();
-    Dimension maxWidth_ = Dimension();
-    Dimension maxHeight_ = Dimension();
+    CalcDimension minWidth_ = Dimension();
+    CalcDimension minHeight_ = Dimension();
+    CalcDimension maxWidth_ = Dimension();
+    CalcDimension maxHeight_ = Dimension();
     RefPtr<GridLayoutInfo> gridLayoutInfo_;
     RefPtr<GridColumnInfo::Builder> gridColumnInfoBuilder_;
     bool useLiteStyle_ = false;

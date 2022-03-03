@@ -45,6 +45,13 @@ void RosenRenderWeb::OnAttachContext()
 
 void RosenRenderWeb::Paint(RenderContext& context, const Offset& offset)
 {
+    if (delegate_) {
+        delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+        if (!isUrlLoaded_) {
+            delegate_->LoadUrl();
+            isUrlLoaded_ = true;
+        }
+    }
     SyncGeometryProperties();
     RenderNode::Paint(context, offset);
 }
@@ -64,7 +71,7 @@ void RosenRenderWeb::SyncGeometryProperties()
 
 std::shared_ptr<RSNode> RosenRenderWeb::CreateRSNode() const
 {
-    struct OHOS::Rosen::RSSurfaceNodeConfig surfaceNodeConfig;
+    struct OHOS::Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = "RosenRenderWeb"};
     return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
 }
 

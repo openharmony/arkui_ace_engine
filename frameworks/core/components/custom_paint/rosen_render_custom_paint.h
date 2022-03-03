@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_CUSTOM_PAINT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_CUSTOM_PAINT_H
 
+#include "experimental/svg/model/SkSVGDOM.h"
 #include "flutter/third_party/txt/src/txt/paragraph.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -24,6 +25,8 @@
 
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/custom_paint/render_custom_paint.h"
+#include "core/image/image_source_info.h"
+#include "core/image/image_object.h"
 #include "core/image/image_provider.h"
 
 namespace OHOS::Ace {
@@ -112,6 +115,10 @@ private:
     void Path2DRect(const Offset& offset, const PathArgs& args);
     void Path2DClosePath(const Offset& offset, const PathArgs& args);
     void Path2DStroke(const Offset& offset);
+    void InitImageCallbacks();
+    void ImageObjReady(const RefPtr<ImageObject>& imageObj);
+    void ImageObjFailed();
+    void DrawSvgImage(const Offset& offset, const CanvasImage& canvasImage);
 
     bool antiAlias_ = false;
     std::unique_ptr<txt::Paragraph> paragraph_;
@@ -124,7 +131,17 @@ private:
     SkBitmap webglBitmap_;
     std::unique_ptr<SkCanvas> skCanvas_;
     std::unique_ptr<SkCanvas> cacheCanvas_;
+
+    ImageSourceInfo loadingSource_;
+    ImageSourceInfo currentSource_;
+    ImageObjSuccessCallback imageObjSuccessCallback_;
+    UploadSuccessCallback uploadSuccessCallback_;
+    FailedCallback failedCallback_;
+    OnPostBackgroundTask onPostBackgroundTask_;
     RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
+    RefPtr<ImageObject> imageObj_ = nullptr;
+    sk_sp<SkSVGDOM> skiaDom_ = nullptr;
+    CanvasImage canvasImage_;
 };
 
 } // namespace OHOS::Ace

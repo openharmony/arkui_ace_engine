@@ -37,6 +37,7 @@ private:
     void PerformLayout() override;
 #ifdef OHOS_STANDARD_SYSTEM
     OHOS::sptr<OHOS::Surface> GetSurface();
+    bool isUrlLoaded_ = false;
 #endif
 };
 

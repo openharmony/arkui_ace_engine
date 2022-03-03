@@ -108,6 +108,8 @@ void RenderGridLayout::Update(const RefPtr<Component>& component)
     editMode_ = grid->GetEditMode();
 
     supportAnimation_ = grid->GetSupportAnimation();
+    dragAnimation_ = grid->GetDragAnimation();
+    edgeEffect_ = grid->GetEdgeEffection();
     onGridDragStartFunc_ = grid->GetOnGridDragStartId();
     OnGridDragEnterFunc_ = grid->GetOnGridDragEnterId();
     onGridDragMoveFunc_ = grid->GetOnGridDragMoveId();
@@ -905,7 +907,7 @@ void RenderGridLayout::BackGridMatrix()
 {
     gridMatrixBack_.clear();
     gridMatrixBack_ = gridMatrix_;
-    if (supportAnimation_) {
+    if (supportAnimation_ || dragAnimation_) {
         gridItemPosition_.clear();
         std::map<int32_t, GridItemIndexPosition> backData;
         ParseRestoreScenePosition(gridMatrixBack_, backData);
@@ -923,7 +925,7 @@ void RenderGridLayout::RestoreScene(const ItemDragInfo& info)
     // Until the moving animation is done, only performlayout needs to be triggered here to retrieve the original data
     // for layout
     needRestoreScene_ = true;
-    if (supportAnimation_) {
+    if (supportAnimation_ || dragAnimation_) {
         CalcRestoreScenePosition(info);
         if (needRunAnimation_.load()) {
             StartAnimationController(GridLayoutAnimationAct::ANIMATION_RESTORE_SCENCE, nullptr);
@@ -975,8 +977,6 @@ void RenderGridLayout::ClearAllDragInfo()
     mainGrid_.Reset();
 }
 
-
-
 void RenderGridLayout::CalIsVertical()
 {
     if (isDynamicGrid_) {
@@ -1025,6 +1025,11 @@ void RenderGridLayout::RegisterLongPressedForItems()
                     auto item = itemRenderNode.Upgrade();
                     if ((index < 0) || (!item)) {
                         LOGE("%{public}s .index invaild or item is null", __PRETTY_FUNCTION__);
+                        return false;
+                    }
+
+                    if (render->GetSlideDirect() != GridSlideDirect::SLIDE_NODE) {
+                        LOGE("%{public}s .the grid is sliding now", __PRETTY_FUNCTION__);
                         return false;
                     }
                     render->dragingItemIndex_ = index;
@@ -1161,7 +1166,7 @@ void RenderGridLayout::PanOnActionUpdate(const GestureEvent& info)
 
 void RenderGridLayout::PanOnActionEnd(const GestureEvent& info)
 {
-    if (!supportAnimation_) {
+    if (!(supportAnimation_ || dragAnimation_)) {
         CloseFlexComponent();
     }
     ItemDragInfo event;
@@ -1314,7 +1319,7 @@ void RenderGridLayout::ImpDragMove(const ItemDragInfo& info)
                 StartAnimationController(GridLayoutAnimationAct::ANIMATION_DRAG_MOVE, nullptr);
             }
         }
-        if (supportAnimation_) {
+        if (supportAnimation_ || dragAnimation_) {
             TriggerMoveEventForJS(info);
         } else {
             isDragChangeLayout_ = true;
@@ -1345,7 +1350,7 @@ void RenderGridLayout::ImpDragLeaveMainGrid(const ItemDragInfo& info)
     }
     FakeRemoveDragItem();
     ClearPartDragInfo();
-    if (supportAnimation_ && needRunAnimation_.load()) {
+    if ((supportAnimation_ || dragAnimation_) && needRunAnimation_.load()) {
         StartAnimationController(GridLayoutAnimationAct::ANIMATION_DRAG_MOVE, [weak = WeakClaim(this)]() {
             auto renderGrid = weak.Upgrade();
             if (renderGrid) {
@@ -1387,7 +1392,7 @@ void RenderGridLayout::ImpDragEnterMainGrid(const ItemDragInfo& info)
     LOGD("%{public}s drag reEnter_ the maingrid.", __PRETTY_FUNCTION__);
     isInMainGrid_ = true;
     reEnter_ = true;
-    if (supportAnimation_ && needRunAnimation_.load()) {
+    if ((supportAnimation_ || dragAnimation_) && needRunAnimation_.load()) {
         StartAnimationController(GridLayoutAnimationAct::ANIMATION_DRAG_MOVE, [weak = WeakClaim(this)]() {
             auto renderGrid = weak.Upgrade();
             if (renderGrid) {
@@ -1447,7 +1452,7 @@ bool RenderGridLayout::OnDrop(const ItemDragInfo& info)
 
     if ((isMainGrid_ && isInMainGrid_ && itemDragStarted_) || (!isMainGrid_ && itemDragEntered_)) {
         bool ret = ImpDropInGrid(info);
-        if (!supportAnimation_) {
+        if (!(supportAnimation_ || dragAnimation_)) {
             ClearAllDragInfo();
         }
         return ret;
@@ -1851,7 +1856,7 @@ void RenderGridLayout::MoveWhenNoInsertCellButWithItemInDragCellAndDragEnter()
     if (CalTheFirstEmptyCell(endRow, endColum, true)) {
         GetPreviousGird(endRow, endColum);
         if (MoveItemsForward(dragPosRowIndex_, dragPosColumnIndex_, endRow, endColum)) {
-            if (supportAnimation_) {
+            if (supportAnimation_ || dragAnimation_) {
                 std::string key(__FUNCTION__);
                 RegisterAnimationFinishedFunc(
                     key, [weak = WeakClaim(this), rowIndex = dragPosRowIndex_, colIndex = dragPosColumnIndex_]() {});
@@ -1890,7 +1895,7 @@ void RenderGridLayout::MoveWhenWithInsertCellAndNoItemInDragCell()
         int32_t startColum = curInsertColumnIndex_;
         GetNextGrid(startRow, startColum);
         if (MoveItemsBackward(startRow, startColum, endRow, endColum)) {
-            if (supportAnimation_) {
+            if (supportAnimation_ || dragAnimation_) {
                 std::string key(__FUNCTION__);
                 RegisterAnimationFinishedFunc(
                     key, [weak = WeakClaim(this), rowIndex = endRow, colIndex = endColum]() {});
@@ -1921,7 +1926,7 @@ void RenderGridLayout::MoveWhenWithInsertCellButWithItemInDragCellDragBeforeInse
     int32_t endColum = curInsertColumnIndex_;
     GetPreviousGird(endRow, endColum);
     if (MoveItemsForward(dragPosRowIndex_, dragPosColumnIndex_, endRow, endColum)) {
-        if (supportAnimation_) {
+        if (supportAnimation_ || dragAnimation_) {
             std::string key(__FUNCTION__);
             RegisterAnimationFinishedFunc(
                 key, [weak = WeakClaim(this), rowIndex = dragPosRowIndex_, colIndex = dragPosColumnIndex_]() {});
@@ -1939,7 +1944,7 @@ void RenderGridLayout::MoveWhenWithInsertCellButWithItemInDragCellDragAfterInser
     int32_t startColum = curInsertColumnIndex_;
     GetNextGrid(startRow, startColum);
     if (MoveItemsBackward(startRow, startColum, dragPosRowIndex_, dragPosColumnIndex_)) {
-        if (supportAnimation_) {
+        if (supportAnimation_ || dragAnimation_) {
             std::string key(__FUNCTION__);
             RegisterAnimationFinishedFunc(
                 key, [weak = WeakClaim(this), rowIndex = dragPosRowIndex_, colIndex = dragPosColumnIndex_]() {});
@@ -1975,7 +1980,7 @@ void RenderGridLayout::FakeRemoveDragItem()
         }
         GetNextGrid(startRow, startColum);
         if (MoveItemsBackward(startRow, startColum, endRow, endColum)) {
-            if (supportAnimation_ && needRunAnimation_.load()) {
+            if ((supportAnimation_ || dragAnimation_) && needRunAnimation_.load()) {
                 std::string key(__FUNCTION__);
                 RegisterAnimationFinishedFunc(key, [weak = WeakClaim(this), rowIndex = endRow, colIndex = endColum]() {
                     auto renderGrid = weak.Upgrade();
@@ -1992,7 +1997,7 @@ void RenderGridLayout::FakeRemoveDragItem()
                 UpdateMatrixByIndexStrong(CELL_EMPTY, endRow, endColum);
             }
         } else {
-            if (supportAnimation_ && needRunAnimation_.load()) {
+            if ((supportAnimation_ || dragAnimation_) && needRunAnimation_.load()) {
                 std::string key(__FUNCTION__);
                 PrepareAnimationController(key);
             }
@@ -2027,7 +2032,7 @@ bool RenderGridLayout::MoveItemsForward(int32_t fromRow, int32_t fromColum, int3
     bool equal = false;
     equal = SortCellIndex(fromRow, fromColum, curRow, curColum, vaild);
 
-    if (supportAnimation_) {
+    if (supportAnimation_ || dragAnimation_) {
         animationItemList_.clear();
     }
 
@@ -2046,7 +2051,7 @@ bool RenderGridLayout::MoveItemsForward(int32_t fromRow, int32_t fromColum, int3
         UpdateMatrixByIndexStrong(CELL_EMPTY, curRow, curColum);
 
         auto item = itemsInGrid_[tmpIndex];
-        if (supportAnimation_) {
+        if (supportAnimation_ || dragAnimation_) {
             AddNodeAnimationToController(tmpIndex, targetRow, targetColum, 1, 1);
         } else {
             item->Layout(MakeInnerLayoutParam(targetRow, targetColum, 1, 1));
@@ -2078,7 +2083,7 @@ bool RenderGridLayout::MoveItemsBackward(int32_t fromRow, int32_t fromColum, int
 
     bool equal = false;
     equal = SortCellIndex(curRow, curColum, toRow, toColum, vaild);
-    if (supportAnimation_) {
+    if (supportAnimation_ || dragAnimation_) {
         animationItemList_.clear();
     }
     while (vaild || equal) {
@@ -2096,7 +2101,7 @@ bool RenderGridLayout::MoveItemsBackward(int32_t fromRow, int32_t fromColum, int
         UpdateMatrixByIndexStrong(CELL_EMPTY, curRow, curColum);
 
         auto item = itemsInGrid_[tmpIndex];
-        if (supportAnimation_) {
+        if (supportAnimation_ || dragAnimation_) {
             AddNodeAnimationToController(tmpIndex, targetRow, targetColum, 1, 1);
         } else {
             item->Layout(MakeInnerLayoutParam(targetRow, targetColum, 1, 1));
@@ -2466,7 +2471,7 @@ void RenderGridLayout::CallDropJSFunc()
 
 bool RenderGridLayout::CheckAnimation()
 {
-    if (!supportAnimation_) {
+    if (!(supportAnimation_ || dragAnimation_ || edgeEffect_ == EdgeEffect::SPRING)) {
         return false;
     }
     if (animationAct_ != GridLayoutAnimationAct::ANIMATION_NONE || runFlexAnimation_.load()) {
@@ -2528,7 +2533,7 @@ void RenderGridLayout::CalcRestoreScenePosition(const ItemDragInfo& info)
 
 void RenderGridLayout::StartFlexController(const Point& endPoint, bool includeSubGrid)
 {
-    if (!supportAnimation_) {
+    if (!(supportAnimation_ || dragAnimation_)) {
         CloseFlexComponent();
         if (includeSubGrid) {
             FinishedFlexControllerForSubGrid();
@@ -2627,7 +2632,7 @@ void RenderGridLayout::ClearSpringSlideData()
 
 void RenderGridLayout::CreateSlideRecognizer()
 {
-    if (!supportAnimation_ || slideRecognizer_) {
+    if (!(supportAnimation_ || edgeEffect_ == EdgeEffect::SPRING) || slideRecognizer_) {
         return;
     }
     slideRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
@@ -2743,6 +2748,11 @@ void RenderGridLayout::UpdateSlideStatus(GridSlideStatus status)
 GridSlideStatus RenderGridLayout::GetSlideStatus()
 {
     return slideStatus_.load();
+}
+
+GridSlideDirect RenderGridLayout::GetSlideDirect()
+{
+    return slideDirect_;
 }
 
 Point RenderGridLayout::GetPointFromTouchInfo(const TouchEventInfo& info)

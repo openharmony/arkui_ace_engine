@@ -44,8 +44,7 @@ BackendDelegateImpl::BackendDelegateImpl(const BackendDelegateImplBuilder& build
       openRawFile_(builder.openRawFileCallback), normalizeUri_(builder.normalizeUriCallback),
       denormalizeUri_(builder.denormalizeUriCallback), destroyApplication_(builder.destroyApplicationCallback),
       commandApplication_(builder.commandApplicationCallback), connectCallback_(builder.connectCallback),
-      disConnectCallback_(builder.disConnectCallback),
-
+      disConnectCallback_(builder.disConnectCallback), createCallback_(builder.createFormCallback),
       deleteCallback_(builder.deleteFormCallback), triggerEventCallback_(builder.triggerEventCallback),
       updateCallback_(builder.updateFormCallback), castTemptoNormalCallback_(builder.castTemptoNormalCallback),
       visibilityChangedCallback_(builder.visibilityChangedCallback),
@@ -416,6 +415,12 @@ void BackendDelegateImpl::OnDisConnect(const OHOS::AAFwk::Want& want)
         [disConnectCallback = disConnectCallback_, want] { disConnectCallback(want); }, TaskExecutor::TaskType::JS);
 }
 
+void BackendDelegateImpl::OnCreate(const OHOS::AAFwk::Want& want)
+{
+    taskExecutor_->PostSyncTask(
+        [createCallback = createCallback_, want] { createCallback(want); }, TaskExecutor::TaskType::JS);
+}
+
 void BackendDelegateImpl::OnDelete(const int64_t formId)
 {
     taskExecutor_->PostTask(
@@ -498,13 +503,14 @@ bool BackendDelegateImpl::ParseFileUri(
     return fileExist;
 }
 
-bool BackendDelegateImpl::GetResourceData(const std::string& fileUri, std::vector<uint8_t>& content)
+bool BackendDelegateImpl::GetResourceData(const std::string& fileUri, std::vector<uint8_t>& content, std::string& ami)
 {
     std::string targetFilePath;
     if (!ParseFileUri(assetManager_, fileUri, targetFilePath)) {
         LOGE("GetResourceData parse file uri failed.");
         return false;
     }
+    ami = assetManager_->GetAssetPath(targetFilePath) + targetFilePath;
     if (!Framework::GetAssetContentAllowEmpty(assetManager_, targetFilePath, content)) {
         LOGE("GetResourceData GetAssetContent failed.");
         return false;

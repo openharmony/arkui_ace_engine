@@ -120,6 +120,7 @@ private:
     Offset lastPosition_;
     Velocity velocity_;
     Offset delta_;
+    Offset offset_;
     bool isFirstPoint_ = true;
     TimeStamp lastTimePoint_;
     LeastSquareImpl xAxis_ { 3, 5 };

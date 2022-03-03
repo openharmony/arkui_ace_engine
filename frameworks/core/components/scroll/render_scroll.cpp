@@ -22,10 +22,15 @@
 #include "core/components/scroll/render_scroll.h"
 
 #include "base/geometry/axis.h"
+
+
 #include "core/animation/curve_animation.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/event/ace_event_helper.h"
+#include "core/gestures/timeout_recognizer.h"
 #include "core/pipeline/base/composed_element.h"
+
+#include <chrono>
 
 namespace OHOS::Ace {
 namespace {

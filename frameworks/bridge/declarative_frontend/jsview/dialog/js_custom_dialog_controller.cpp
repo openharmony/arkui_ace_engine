@@ -117,7 +117,7 @@ void JSCustomDialogController::DestructorCallback(JSCustomDialogController* cont
 
 void JSCustomDialogController::ShowDialog(const JSCallbackInfo& info)
 {
-    LOGD("JSCustomDialogController(ShowDialog)");
+    LOGI("JSCustomDialogController(ShowDialog)");
     auto container = Container::Current();
     if (!container) {
         return;
@@ -153,9 +153,10 @@ void JSCustomDialogController::ShowDialog(const JSCallbackInfo& info)
 
 void JSCustomDialogController::CloseDialog()
 {
-    LOGD("JSCustomDialogController(CloseDialog)");
+    LOGI("JSCustomDialogController(CloseDialog)");
     auto container = Container::Current();
     if (!container) {
+        LOGE("container is null.");
         return;
     }
     auto context = container->GetPipelineContext();

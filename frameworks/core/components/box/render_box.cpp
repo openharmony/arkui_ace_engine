@@ -34,6 +34,9 @@
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/pan_recognizer.h"
 #include "core/gestures/sequenced_recognizer.h"
+#include "core/common/clipboard/clipboard_proxy.h"
+#include "core/gestures/exclusive_recognizer.h"
+#include "core/gestures/parallel_recognizer.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -162,9 +165,9 @@ void RenderBox::Update(const RefPtr<Component>& component)
         onMouse_ = box->GetOnMouseId();
         onLongPressId_ = box->GetOnLongPress();
 
-        auto gestures = box->GetGestures();
-        UpdateGestureRecognizer(gestures);
+        UpdateGestureRecognizerHierarchy(box->GetGestureHierarchy());
         SetAccessibilityFocusImpl();
+
         if (box->HasStateAttributes()) {
             stateAttributeList_ = box->GetStateAttributes();
         }
@@ -1518,54 +1521,97 @@ double RenderBox::GetWindowBlurProgress() const
     return 0.0;
 }
 
-void RenderBox::AddRecognizerToResult(
-    const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
+bool RenderBox::TouchTest(const Point& globalPoint, const Point& parentLocalPoint,
+    const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    if (!ExistGestureRecognizer()) {
-        return;
+    if (recognizerHierarchy_.empty()) {
+        return RenderBoxBase::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
     }
 
-    bool ignoreInternal = false;
-    for (int i = MAX_GESTURE_SIZE - 1; i >= 0; i--) {
-        if (recognizers_[i]) {
-            ignoreInternal = recognizers_[i]->GetPriorityMask() == GestureMask::IgnoreInternal;
-            if (ignoreInternal) {
-                break;
-            }
+    TouchTestResult innerResult;
+    bool parentResult = RenderBoxBase::TouchTest(globalPoint, parentLocalPoint, touchRestrict, innerResult);
+    if (!parentResult) {
+        Point transformPoint = GetTransformPoint(parentLocalPoint);
+        if (!InTouchRectList(transformPoint, GetTouchRectList())) {
+            return false;
         }
     }
 
-    if (ignoreInternal) {
-        auto iter = result.begin();
-        while (iter != result.end()) {
-            auto recognizer = AceType::DynamicCast<GestureRecognizer>(*iter);
-            if (!recognizer) {
-                iter++;
-                continue;
-            }
+    std::vector<RefPtr<GestureRecognizer>> innerRecognizers;
+    const auto coordinateOffset = Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
 
-            if (!recognizer->GetIsExternalGesture()) {
-                iter++;
-                continue;
-            }
-            iter = result.erase(iter);
+    for (auto const& eventTarget : innerResult) {
+        auto recognizer = AceType::DynamicCast<GestureRecognizer>(eventTarget);
+        if (recognizer) {
+            recognizer->SetCoordinateOffset(coordinateOffset);
+            innerRecognizers.push_back(std::move(recognizer));
+        } else {
+            result.push_back(eventTarget);
         }
     }
 
-    for (int i = MAX_GESTURE_SIZE - 1; i >= 0; i--) {
-        if (recognizers_[i]) {
-            LOGD("OnTouchTestHit add recognizer to result %{public}s", AceType::TypeName(recognizers_[i]));
-            recognizers_[i]->SetCoordinateOffset(coordinateOffset);
-            result.emplace_back(recognizers_[i]);
+    OnTouchTestHierarchy(coordinateOffset, touchRestrict, innerRecognizers, result);
+
+    return parentResult;
+}
+
+void RenderBox::OnTouchTestHierarchy(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
+    const std::vector<RefPtr<GestureRecognizer>>& innerRecognizers, TouchTestResult& result)
+{
+    RefPtr<GestureRecognizer> current;
+    if (innerRecognizers.size() == 1) {
+        current = innerRecognizers[0];
+    } else if (innerRecognizers.size() > 1) {
+        current = AceType::MakeRefPtr<ExclusiveRecognizer>(innerRecognizers);
+        current->SetCoordinateOffset(coordinateOffset);
+    }
+
+    for (auto const& level : recognizerHierarchy_) {
+        GesturePriority priority = level.first;
+        auto recognizers = level.second;
+
+        if (recognizers.empty()) {
+            continue;
+        }
+
+        for (auto& recognizer : recognizers) {
+            recognizer->SetCoordinateOffset(coordinateOffset);
+        }
+
+        if (priority == GesturePriority::Parallel) {
+            if (current) {
+                recognizers.push_back(current);
+            }
+
+            if (recognizers.size() > 1) {
+                current = AceType::MakeRefPtr<ParallelRecognizer>(std::move(recognizers));
+                current->SetCoordinateOffset(coordinateOffset);
+            } else if (recognizers.size() == 1) {
+                current = recognizers[0];
+            }
+        } else {
+            if (current) {
+                if (priority == GesturePriority::Low) {
+                    recognizers.insert(recognizers.begin(), current);
+                } else {
+                    recognizers.push_back(current);
+                }
+            }
+
+            if (recognizers.size() > 1) {
+                current = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers));
+                current->SetCoordinateOffset(coordinateOffset);
+            } else if (recognizers.size() == 1) {
+                current = recognizers[0];
+            }
         }
     }
+    result.push_back(std::move(current));
 }
 
 void RenderBox::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    AddRecognizerToResult(coordinateOffset, touchRestrict, result);
-
     if (onClick_) {
         onClick_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(onClick_);
@@ -1584,39 +1630,42 @@ void RenderBox::OnTouchTestHit(
     }
 }
 
-void RenderBox::UpdateGestureRecognizer(const std::array<RefPtr<Gesture>, MAX_GESTURE_SIZE>& gestures)
+void RenderBox::UpdateGestureRecognizerHierarchy(const std::vector<std::pair<GesturePriority,
+        std::vector<RefPtr<Gesture>>>>& hierarchy)
 {
-    // Considering 4 cases:
-    // 1. new gesture == null && old recognizer == null  -->  do nothing
-    // 2. new gesture != null && old recognizer == null  -->  create new recognizer configured with new gesture
-    // 3. new gesture == null && old recognizer != null  -->  remove old recognizer
-    // 4. new gesture != null && old recognizer != null  -->  update old recognizer with new configuration if
-    // possible(determined by[GestureRecognizer::ReconcileFrom]), or remove the old recognizer and create new
-    // one configured with new gesture.
-    for (size_t i = 0; i < gestures.size(); i++) {
-        if (!gestures[i]) {
-            recognizers_[i] = nullptr;
-            continue;
-        }
-        auto recognizer = gestures[i]->CreateRecognizer(context_);
-        if (recognizer) {
-            recognizer->SetIsExternalGesture(true);
-            if (!recognizers_[i] || !recognizers_[i]->ReconcileFrom(recognizer)) {
-                recognizers_[i] = recognizer;
+    bool success = hierarchy.size() == recognizerHierarchy_.size();
+
+    if (success) {
+        for (size_t i = 0; i < hierarchy.size(); ++i) {
+            if (hierarchy[i].first != recognizerHierarchy_[i].first
+                    || hierarchy[i].second.size() != recognizerHierarchy_[i].second.size()) {
+                success = false;
+                break;
+            }
+
+            for (size_t j = 0; j < hierarchy[i].second.size(); ++j) {
+                auto newRecognizer = hierarchy[i].second[j]->CreateRecognizer(context_);
+
+                success = success && recognizerHierarchy_[i].second[j]->ReconcileFrom(newRecognizer);
             }
         }
     }
-}
 
-bool RenderBox::ExistGestureRecognizer()
-{
-    for (size_t i = 0; i < recognizers_.size(); i++) {
-        if (recognizers_[i]) {
-            return true;
+    if (!success) {
+        recognizerHierarchy_.clear();
+        for (auto const& level : hierarchy) {
+            recognizerHierarchy_.emplace_back(
+                level.first,
+                std::vector<RefPtr<GestureRecognizer>>()
+                );
+
+            for (auto const& gesture : level.second) {
+                auto recognizer = gesture->CreateRecognizer(context_);
+                recognizer->SetIsExternalGesture(true);
+                recognizerHierarchy_.back().second.push_back(std::move(recognizer));
+            }
         }
     }
-
-    return false;
 }
 
 void RenderBox::HandleRemoteMessage(const ClickInfo& clickInfo)

@@ -25,6 +25,8 @@
 #include "core/gestures/gesture_recognizer.h"
 #include "core/gestures/velocity.h"
 #include "core/gestures/velocity_tracker.h"
+#include "core/pipeline/pipeline_context.h"
+
 
 namespace OHOS::Ace {
 
@@ -66,6 +68,7 @@ public:
 private:
     // The delta offset between current point and the previous update.
     Offset delta_;
+
     // The delta offset in the main axis between current point and the previous update.
     double mainDelta_ = 0.0;
 };
@@ -86,6 +89,11 @@ public:
         return mainVelocity_;
     }
 
+    const Offset& GetOffset() const
+    {
+        return offset_;
+    }
+
     DragEndInfo& SetVelocity(const Velocity& velocity)
     {
         velocity_ = velocity;
@@ -97,9 +105,19 @@ public:
         return *this;
     }
 
+    DragEndInfo& SetOffset(const Offset& offset)
+    {
+        offset_ = offset;
+        return *this;
+    }
+
 private:
     // The velocity of the moving touch point when it leaves screen.
     Velocity velocity_;
+
+    // The offset from the original touch point
+    Offset offset_;
+
     // The velocity of the moving touch point in main axis when it leaves screen.
     double mainVelocity_ = 0.0;
 };
@@ -156,12 +174,59 @@ public:
         return touchRestrict_;
     }
 
+    bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override
+    {
+        auto drag = AceType::DynamicCast<DragRecognizer>(recognizer);
+
+        if (!drag) {
+            return false;
+        }
+
+        if (axis_ != drag->axis_) {
+            return false;
+        }
+
+        onDragStart_ = drag->onDragStart_;
+        onDragUpdate_ = drag->onDragUpdate_;
+        onDragEnd_ = drag->onDragEnd_;
+        onDragCancel_ = drag->onDragCancel_;
+
+        return true;
+    }
+
+    void SetContext(WeakPtr<PipelineContext> context)
+    {
+        context_ = std::move(context);
+    }
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
     void HandleTouchMoveEvent(const TouchEvent& event) override;
     void HandleTouchCancelEvent(const TouchEvent& event) override;
     bool IsDragGestureAccept(double offset) const;
+
+    void Accept(size_t touchId);
+    void Reject(size_t touchId);
+
+    template <typename TFunc, typename... Ts>
+    void AsyncCallback(TFunc&& func, Ts&&... args)
+    {
+        auto ctx = context_.Upgrade();
+        if (!ctx) {
+            std::forward<TFunc>(func)(std::forward<Ts>(args)...);
+            return;
+        }
+
+        auto marker = EventMarker([this, f = std::forward<TFunc>(func),
+                args = std::make_tuple(std::forward<Ts>(args)...)]() mutable {
+                    std::apply(f, std::move(args));
+                });
+
+        ctx->FireAsyncEvent(std::move(marker));
+    }
+
+    WeakPtr<PipelineContext> context_;
 
     class DragFingersInfo {
     public:

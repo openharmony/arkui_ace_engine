@@ -23,6 +23,8 @@
 
 namespace OHOS::Ace::Framework {
 
+constexpr int32_t PADDING_MULTIPLE = 2;
+
 JSRef<JSVal> CheckboxGroupResultEventToJSValue(const CheckboxGroupResult& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -74,6 +76,12 @@ void JSCheckboxGroup::Create(const JSCallbackInfo& info)
     auto checkboxGroupmap = ViewStackProcessor::GetInstance()->GetCheckboxGroupCompnent();
     checkboxGroupmap->emplace(checkboxGroupName, checkboxComponent);
     ViewStackProcessor::GetInstance()->Push(checkboxComponent);
+    
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto horizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
+    auto verticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
+    box->SetWidth(checkBoxTheme->GetWidth() + horizontalPadding * PADDING_MULTIPLE);
+    box->SetHeight(checkBoxTheme->GetHeight() + verticalPadding * PADDING_MULTIPLE);
 }
 
 void JSCheckboxGroup::SetSelecteAll(const JSCallbackInfo& info)

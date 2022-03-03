@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,17 @@ public:
         width_ = AnimatableDimension(dimension, option);
     }
 
+    virtual void SetWidth(const CalcDimension& dimension, const AnimationOption& option = AnimationOption())
+    {
+        width_ = AnimatableDimension(dimension, option);
+    }
+
     virtual void SetWidth(double width, DimensionUnit unit = DimensionUnit::PX)
+    {
+        width_ = AnimatableDimension(width, unit);
+    }
+
+    virtual void SetWidth(std::string width, DimensionUnit unit = DimensionUnit::CALC)
     {
         width_ = AnimatableDimension(width, unit);
     }
@@ -55,7 +65,17 @@ public:
         height_ = AnimatableDimension(dimension, option);
     }
 
+    virtual void SetHeight(const CalcDimension& dimension, const AnimationOption& option = AnimationOption())
+    {
+        height_ = AnimatableDimension(dimension, option);
+    }
+
     virtual void SetHeight(double height, DimensionUnit unit = DimensionUnit::PX)
+    {
+        height_ = AnimatableDimension(height, unit);
+    }
+
+    virtual void SetHeight(std::string height, DimensionUnit unit = DimensionUnit::CALC)
     {
         height_ = AnimatableDimension(height, unit);
     }

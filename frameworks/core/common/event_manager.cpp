@@ -68,6 +68,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& point)
             GestureReferee::GetInstance().CleanGestureScope(point.id);
             touchTestResults_.erase(point.id);
         }
+
         return true;
     }
     LOGI("the %{public}d touch test result does not exist!", point.id);

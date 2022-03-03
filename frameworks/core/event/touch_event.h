@@ -288,7 +288,7 @@ private:
     TouchType touchType_ = TouchType::UNKNOWN;
 };
 
-class TouchEventTarget : public virtual AceType {
+class ACE_EXPORT TouchEventTarget : public virtual AceType {
     DECLARE_ACE_TYPE(TouchEventTarget, AceType);
 
 public:
