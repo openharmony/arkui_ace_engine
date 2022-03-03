@@ -34,6 +34,7 @@ namespace OHOS::Ace::Platform {
 
 using SendRenderDataCallback = bool (*)(const void*, const size_t, const int32_t, const int32_t);
 using SendCurrentRouterCallback = bool (*)(const std::string currentRouterPath);
+using FastPreviewErrorCallback = void (*)(const std::string& jsonStr);
 
 constexpr uint32_t THEME_ID_LIGHT = 117440515;
 constexpr uint32_t THEME_ID_DARK = 117440516;
@@ -97,6 +98,7 @@ struct ACE_PREVIEW_EXPORT AceRunArgs {
 
     SendRenderDataCallback onRender = nullptr;
     SendCurrentRouterCallback onRouterChange = nullptr;
+    FastPreviewErrorCallback onError = nullptr;
 };
 
 } // namespace OHOS::Ace::Platform

@@ -95,7 +95,7 @@ RefPtr<RenderTextSpan> SpanComposedElement::GetRenderTextSpan() const
 }
 
 // span render with parent(text) together
-std::string SpanComposedElement::GetRect() const
+std::string SpanComposedElement::GetRect()
 {
     std::string strRec;
     Rect rect = GetParentRect();
