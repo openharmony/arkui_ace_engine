@@ -15,8 +15,6 @@
 
 #include "core/components/padding/render_padding.h"
 
-#include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "core/components/padding/padding_component.h"
 
 namespace OHOS::Ace {
