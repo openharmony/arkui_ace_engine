@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -371,8 +371,8 @@ void RenderSwiper::PerformLayout()
                               : -swiperHeight_;
     } else {
         prevItemOffset_ = axis_ == Axis::HORIZONTAL
-                              ? (needReverse_ ? swiperWidth_ - prevMargin_ - nextMargin_ + halfSpace
-                                              : -swiperWidth_ + prevMargin_ + nextMargin_ - halfSpace)
+                              ? (needReverse_ ? swiperWidth_ - prevMargin_ - nextMargin_
+                                              : -swiperWidth_ + prevMargin_ + nextMargin_)
                               : -swiperHeight_ + prevMargin_ + nextMargin_;
     }
     nextItemOffset_ = -prevItemOffset_;
