@@ -36,7 +36,6 @@ public:
 
     std::string GetHoursWest() const;
     std::string GeFormat() const;
-    std::string GetStatus() const;
 
     std::string GetTextFontColor() const;
     std::string GetTextFontStyle() const;
