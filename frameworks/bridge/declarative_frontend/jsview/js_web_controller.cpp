@@ -340,9 +340,11 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
     if (!jsRegisterCallBackInit_) {
         LOGI("JSWebController set webview javascript CallBack");
         jsRegisterCallBackInit_ = true;
-        WebController::JavaScriptCallBackImpl callback = [weak = WeakClaim(this)](
+        WebController::JavaScriptCallBackImpl callback =
+            [execCtx = args.GetExecutionContext(), weak = WeakClaim(this)](
             const std::string& objectName, const std::string& objectMethod,
             const std::vector<std::shared_ptr<WebJSValue>>& args) {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
             auto jsWebController = weak.Upgrade();
             if (jsWebController == nullptr) {
                 return std::make_shared<WebJSValue>(WebJSValue::Type::NONE);

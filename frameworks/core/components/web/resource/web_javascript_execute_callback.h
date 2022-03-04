@@ -19,13 +19,18 @@
 #include <string>
 
 #include "value_callback.h"
+#include "core/common/container_scope.h"
 
 namespace OHOS::Ace {
 using namespace OHOS::WebView;
 class WebJavaScriptExecuteCallBack : public OHOS::WebView::ValueCallback<std::string> {
 public:
+    WebJavaScriptExecuteCallBack() = delete;
+    explicit WebJavaScriptExecuteCallBack(int32_t instanceId) : instanceId_(instanceId) {}
+
     void OnReceiveValue(std::string result) override
     {
+        ContainerScope scope(instanceId_);
         if (callback_) {
             callback_(result);
         }
@@ -35,6 +40,7 @@ public:
         callback_ = callback;
     }
     std::function<void(std::string)> callback_;
+    int32_t instanceId_;
 };
 } // namespace OHOS::Ace
 
