@@ -31,6 +31,7 @@ public:
     static void Destructor(JSXComponentController* xcomponentController);
 
     void GetSurfaceId(const JSCallbackInfo& args);
+    void SetSurfaceConfig(const JSCallbackInfo& args);
 
     void GetXComponentContext(const JSCallbackInfo& args)
     {
