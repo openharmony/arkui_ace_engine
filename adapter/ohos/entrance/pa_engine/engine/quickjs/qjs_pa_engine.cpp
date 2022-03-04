@@ -47,6 +47,7 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
+#include "js_backend_timer_module.h"
 
 #include "napi_common_ability.h"
 
@@ -446,6 +447,7 @@ bool QjsPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
 
     engineInstance_ = AceType::MakeRefPtr<QjsPaEngineInstance>(delegate, instanceId_);
     bool ret = engineInstance_->InitJsEnv(runtime, context, GetExtraNativeObject());
+    JsBackendTimerModule::GetInstance()->InitTimerModule(nativeEngine_, delegate);
     SetPostTask(nativeEngine_);
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
