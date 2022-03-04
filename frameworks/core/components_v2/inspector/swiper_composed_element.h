@@ -43,6 +43,14 @@ public:
     std::string GetDisableSwipe() const;
     std::string GetItemSpace() const;
     std::string GetCurve() const;
+    std::string GetIndicatorStyle() const;
+    std::string GetSelectedColor() const;
+    std::string GetColor() const;
+    std::string GetSwiperLeft() const;
+    std::string GetSwiperTop() const;
+    std::string GetSwiperRight() const;
+    std::string GetSwiperBottom() const;
+    std::string GetSwiperSize() const;
 
     AceType::IdType GetTargetTypeId() const override
     {
