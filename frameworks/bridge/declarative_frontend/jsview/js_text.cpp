@@ -31,7 +31,7 @@
 namespace OHOS::Ace::Framework {
 namespace {
 
-constexpr Dimension DEFAULT_FONT_SZIE = 30.0_px;
+constexpr Dimension DEFAULT_FONT_SIZE = 30.0_px;
 const std::vector<TextCase> TEXT_CASES = { TextCase::NORMAL, TextCase::LOWERCASE, TextCase::UPPERCASE };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::NONE };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
@@ -169,7 +169,7 @@ void JSText::SetFontStyle(int32_t value)
         textStyle.SetFontStyle(FONT_STYLES[value]);
         component->SetTextStyle(std::move(textStyle));
     } else {
-        LOGE("Text fontStyle(%d) illega value", value);
+        LOGE("Text fontStyle(%d) illegal value", value);
     }
 }
 
@@ -309,7 +309,7 @@ void JSText::SetTextCase(int32_t value)
         textStyle.SetTextCase(TEXT_CASES[value]);
         component->SetTextStyle(std::move(textStyle));
     } else {
-        LOGE("Text textCase(%d) illega value", value);
+        LOGE("Text textCase(%d) illegal value", value);
     }
 }
 
@@ -458,11 +458,11 @@ void JSText::Create(const JSCallbackInfo& info)
     // Init text style, allowScale is not supported in declarative.
     auto textStyle = textComponent->GetTextStyle();
     textStyle.SetAllowScale(false);
-    textStyle.SetFontSize(DEFAULT_FONT_SZIE);
+    textStyle.SetFontSize(DEFAULT_FONT_SIZE);
     textComponent->SetTextStyle(std::move(textStyle));
 
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    boxComponent->SetMouseAnimationType(HoverAnimationType::BOARD);
+    boxComponent->SetMouseAnimationType(HoverAnimationType::NONE);
 }
 
 RefPtr<TextComponentV2> JSText::GetComponent()

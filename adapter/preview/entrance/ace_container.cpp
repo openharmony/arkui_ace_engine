@@ -808,14 +808,14 @@ void AceContainer::LoadDocument(const std::string& url, const std::string& compo
         LOGE("component preview not supported");
         return;
     }
-    auto fronended = AceType::DynamicCast<OHOS::Ace::DeclarativeFrontend>(frontend_);
-    if (!fronended) {
-        LOGE("fronended is null, AceContainer::LoadDocument failed");
+    auto frontend = AceType::DynamicCast<OHOS::Ace::DeclarativeFrontend>(frontend_);
+    if (!frontend) {
+        LOGE("frontend is null, AceContainer::LoadDocument failed");
         return;
     }
     std::string dstUrl = url + COMPONENT_PREVIEW + componentName;
     taskExecutor_->PostTask(
-        [front = fronended, componentName, dstUrl]() {
+        [front = frontend, componentName, dstUrl]() {
             front->SetPagePath(dstUrl);
             front->ReplaceJSContent(dstUrl, componentName);
         },

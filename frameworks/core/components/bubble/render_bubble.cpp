@@ -421,7 +421,7 @@ bool RenderBubble::HandleMouseEvent(const MouseEvent& event)
         event.action == MouseAction::PRESS) {
         HandleTouch();
     }
-    return false;
+    return true;
 }
 
 } // namespace OHOS::Ace

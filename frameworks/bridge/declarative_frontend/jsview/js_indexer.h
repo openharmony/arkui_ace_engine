@@ -35,7 +35,7 @@ public:
     static void SetFont(const JSCallbackInfo& args);
     static void SetPopupFont(const JSCallbackInfo& args);
     static void GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle);
-    static void SetIteamSize(const JSCallbackInfo& args);
+    static void SetItemSize(const JSCallbackInfo& args);
     static void SetAlignStyle(int32_t value);
     static void JsOnRequestPopupData(const JSCallbackInfo& args);
     static void JsOnPopupSelected(const JSCallbackInfo& args);

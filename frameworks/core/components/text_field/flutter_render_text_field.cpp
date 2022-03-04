@@ -1324,7 +1324,7 @@ void FlutterRenderTextField::PaintTextField(
     }
 
     canvas->save();
-    // Restric painting rect to text area, excluding the decoration.
+    // Restrict painting rect to text area, excluding the decoration.
     canvas->clipRect(SkRect::MakeLTRB(innerRect_.Left(), innerRect_.Top(), innerRect_.Right(), innerRect_.Bottom()),
         SkClipOp::kIntersect);
     PaintSelection(canvas);

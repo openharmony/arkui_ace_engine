@@ -486,7 +486,7 @@ JSValue JsGetI18nResource(JSContext* ctx, JSValueConst new_target, int argc, JSV
     std::string str = targetString.get();
     StringUtils::SplitStr(str, ".", splitStr);
     if (splitStr.size() != 2) {
-        return JS_ThrowSyntaxError(ctx, "input string res value must can be splited by dot");
+        return JS_ThrowSyntaxError(ctx, "input string res value must can be split by dot");
     }
 
     auto targetStringKey = splitStr[0];
@@ -1064,7 +1064,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JS_SetPropertyStr(ctx, globalObj, "PickerStyle", *pickerStyle);
     JS_SetPropertyStr(ctx, globalObj, "BadgePosition", *badgePosition);
 
-    LOGD("View classes and jsCreateDocuemnt, registerObservableObject functions registered.");
+    LOGD("View classes and jsCreateDocument, registerObservableObject functions registered.");
 }
 
 } // namespace OHOS::Ace::Framework

@@ -396,7 +396,7 @@ void ParseShowObject(
                 ACE_SCORING_EVENT("Popup.onStateChange");
 
                 if (param != "true" && param != "false") {
-                    LOGE("param is not equal true or fasle, invaild.");
+                    LOGE("param is not equal true or false, invalid.");
                     return;
                 }
 
@@ -1320,7 +1320,7 @@ Alignment JSViewAbstract::ParseAlignment(int32_t align)
             alignment = Alignment::BOTTOM_RIGHT;
             break;
         default:
-            LOGE("Invaild value for alignment");
+            LOGE("Invalid value for alignment");
     }
     return alignment;
 }
@@ -1442,7 +1442,7 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
         if (optionsArgs->Contains("motionPath")) {
             MotionPathOption motionPathOption;
             if (ParseMotionPath(optionsArgs->GetValue("motionPath"), motionPathOption)) {
-                tweenOption.SetMotioPathOption(motionPathOption);
+                tweenOption.SetMotionPathOption(motionPathOption);
             }
         }
         // zIndex
@@ -1596,7 +1596,7 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT};
-    if (!CheckJSCallbackInfo("JsBackgroungImageSize", info, checkList)) {
+    if (!CheckJSCallbackInfo("JsBackgroundImageSize", info, checkList)) {
         return;
     }
     auto decoration = GetBackDecoration();
@@ -2094,7 +2094,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
 
 bool JSViewAbstract::ParseJsDimensionVp(const JSRef<JSVal>& jsValue, Dimension& result)
 {
-    // 'vp' -> the value varies with piexl density of device.
+    // 'vp' -> the value varies with pixel density of device.
     return ParseJsDimension(jsValue, result, DimensionUnit::VP);
 }
 
@@ -2110,7 +2110,7 @@ bool JSViewAbstract::ParseJsAnimatableDimensionVp(const JSRef<JSVal>& jsValue, A
 
 bool JSViewAbstract::ParseJsDimensionFp(const JSRef<JSVal>& jsValue, Dimension& result)
 {
-    // the 'fp' unit is used for text secnes.
+    // the 'fp' unit is used for text scenes.
     return ParseJsDimension(jsValue, result, DimensionUnit::FP);
 }
 
@@ -2699,10 +2699,10 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
             LOGE("builder param is not an object.");
             return itemInfo;
         }
-        auto componnet = ParseDragItemComponent(ret);
-        if (componnet) {
+        auto component = ParseDragItemComponent(ret);
+        if (component) {
             LOGI("use custom builder param.");
-            itemInfo.customComponent = componnet;
+            itemInfo.customComponent = component;
             return itemInfo;
         }
 
@@ -2711,9 +2711,9 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
         auto pixmap = builderObj->GetProperty("pixelMap");
         itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
 #endif
-        auto extarInfo = builderObj->GetProperty("extraInfo");
-        ParseJsString(extarInfo, itemInfo.extraInfo);
-        auto component = ParseDragItemComponent(builderObj->GetProperty("builder"));
+        auto extraInfo = builderObj->GetProperty("extraInfo");
+        ParseJsString(extraInfo, itemInfo.extraInfo);
+        component = ParseDragItemComponent(builderObj->GetProperty("builder"));
         itemInfo.customComponent = component;
         return itemInfo;
     };
@@ -2848,12 +2848,12 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsBoolean() && !info[0]->IsObject()) {
-        LOGE("The first param type is not bool or object, invaild.");
+        LOGE("The first param type is not bool or object, invalid.");
         return;
     }
 
     if (!info[1]->IsObject()) {
-        LOGE("The second param type is not object, invaild.");
+        LOGE("The second param type is not object, invalid.");
         return;
     }
 
@@ -2869,7 +2869,7 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
 
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     if (!inspector) {
-        LOGE("this component does not hava inspetor");
+        LOGE("this component does not have inspector");
         return;
     }
     popupParam->SetTargetId(inspector->GetId());
@@ -3481,7 +3481,7 @@ void JSViewAbstract::JsAccessibilityGroup(bool accessible)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     if (!inspector) {
-        LOGE("this component does not hava inspetor");
+        LOGE("this component does not have inspector");
         return;
     }
     inspector->SetAccessibilityGroup(accessible);
@@ -3491,7 +3491,7 @@ void JSViewAbstract::JsAccessibilityText(const std::string& text)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     if (!inspector) {
-        LOGE("this component does not hava inspetor");
+        LOGE("this component does not have inspector");
         return;
     }
     inspector->SetAccessibilitytext(text);
@@ -3501,7 +3501,7 @@ void JSViewAbstract::JsAccessibilityDescription(const std::string& description)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     if (!inspector) {
-        LOGE("this component does not hava inspetor");
+        LOGE("this component does not have inspector");
         return;
     }
     inspector->SetAccessibilityDescription(description);
@@ -3511,7 +3511,7 @@ void JSViewAbstract::JsAccessibilityImportance(const std::string& importance)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     if (!inspector) {
-        LOGE("this component does not hava inspetor");
+        LOGE("this component does not have inspector");
         return;
     }
     inspector->SetAccessibilityImportance(importance);
@@ -3982,7 +3982,7 @@ bool JSViewAbstract::ParseJsonDimension(
         return false;
     }
     if (!jsonValue->IsNumber() && !jsonValue->IsString() && !jsonValue->IsObject()) {
-        LOGE("json value is not numner, string or object");
+        LOGE("json value is not number, string or object");
         return false;
     }
     if (jsonValue->IsNumber()) {
@@ -4020,7 +4020,7 @@ bool JSViewAbstract::ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue
         return false;
     }
     if (!jsonValue->IsNumber() && !jsonValue->IsString() && !jsonValue->IsObject()) {
-        LOGE("json value is not numner, string or object");
+        LOGE("json value is not number, string or object");
         return false;
     }
     if (jsonValue->IsNumber()) {
@@ -4053,7 +4053,7 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
         return false;
     }
     if (!jsonValue->IsNumber() && !jsonValue->IsString() && !jsonValue->IsObject()) {
-        LOGE("json value is not numner, string or object");
+        LOGE("json value is not number, string or object");
         return false;
     }
     if (jsonValue->IsNumber()) {

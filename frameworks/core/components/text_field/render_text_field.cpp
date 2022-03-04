@@ -43,13 +43,6 @@ constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 
 constexpr int32_t DEFAULT_SELECT_INDEX = 0;
-constexpr int32_t NUMBER_CODE_START = 7;
-constexpr int32_t NUMBER_CODE_END = 16;
-constexpr int32_t LETTER_CODE_START = 29;
-constexpr int32_t LETTER_CODE_END = 54;
-constexpr int32_t LOWER_CASE_LETTER_DIFF = 68;
-constexpr int32_t UPPER_CASE_LETTER_DIFF = 36;
-constexpr int32_t NUMBER_CODE_DIFF = 7;
 constexpr int32_t SHOW_HANDLE_DURATION = 250;
 constexpr int32_t DOUBLE_CLICK_FINGERS = 1;
 constexpr int32_t DOUBLE_CLICK_COUNTS = 2;
@@ -834,6 +827,7 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
     }
 
     if (softKeyboardEnabled_) {
+        LOGI("RenderTextField::CloseKeyboard: Request open soft keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
         if (textChangeListener_ == nullptr) {
             textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
@@ -872,6 +866,7 @@ bool RenderTextField::CloseKeyboard(bool forceClose)
             StopTwinkling();
         }
         if (HasConnection()) {
+            LOGI("RenderTextField::CloseKeyboard: Request close soft keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
             MiscServices::InputMethodController::GetInstance()->HideTextInput();
 #else
@@ -1765,44 +1760,27 @@ RefPtr<StackElement> RenderTextField::GetLastStack() const
 bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
 {
     std::string appendElement;
-    auto codeValue = static_cast<int32_t>(event.code);
     if (event.action == KeyAction::DOWN) {
-        if (codeValue >= NUMBER_CODE_START && codeValue <= NUMBER_CODE_END) {
-            appendElement = std::to_string(codeValue - NUMBER_CODE_DIFF);
-        } else if (codeValue >= LETTER_CODE_START && codeValue <= LETTER_CODE_END) {
-            if (!isCtrlDown_) {
-                int32_t letterCode =
-                    isShiftDown_ ? (codeValue + UPPER_CASE_LETTER_DIFF) : (codeValue + LOWER_CASE_LETTER_DIFF);
-                appendElement = static_cast<char>(letterCode);
-            } else if (isCtrlDown_) {
-                if (codeValue == static_cast<int32_t>(KeyCode::KEY_A)) {
-                    HandleOnCopyAll(nullptr);
-                } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_C)) {
-                    HandleOnCopy();
-                } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_V)) {
-                    HandleOnPaste();
-                } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_X)) {
-                    HandleOnCut();
-                } else {
-                    LOGE("Unknow Event");
-                }
-                MarkNeedLayout();
+        if (event.IsNumberKey()) {
+            appendElement = event.ConvertCodeToString();
+        } else if (event.IsLetterKey()) {
+            if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A }) ||
+                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
+                HandleOnCopyAll(nullptr);
+            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
+                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
+                HandleOnCopy();
+            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V }) ||
+                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
+                HandleOnPaste();
+            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_X }) ||
+                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_X })) {
+                HandleOnCut();
+            } else {
+                appendElement = event.ConvertCodeToString();
             }
-        } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_CTRL_LEFT) ||
-                   codeValue == static_cast<int32_t>(KeyCode::KEY_CTRL_RIGHT)) {
-            isCtrlDown_ = true;
-        } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_LEFT) ||
-                   codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_RIGHT)) {
-            isShiftDown_ = true;
         }
-    }
-    if (event.action == KeyAction::UP && (codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_LEFT) ||
-                                             codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_RIGHT))) {
-        isShiftDown_ = false;
-    }
-    if (event.action == KeyAction::UP && (codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_LEFT) ||
-                                             codeValue == static_cast<int32_t>(KeyCode::KEY_SHIFT_RIGHT))) {
-        isCtrlDown_ = false;
+        MarkNeedLayout();
     }
     if (appendElement.empty()) {
         return false;

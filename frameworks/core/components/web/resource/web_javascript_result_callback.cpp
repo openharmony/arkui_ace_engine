@@ -16,6 +16,7 @@
 #include "core/components/web/resource/web_javascript_result_callback.h"
 
 #include "core/components/web/resource/web_javascript_value.h"
+#include "core/common/container_scope.h"
 #include "base/log/log.h"
 
 namespace OHOS::Ace {
@@ -97,6 +98,7 @@ std::shared_ptr<WebViewValue> WebJavaScriptResultCallBack::GetJavaScriptResult(
     std::vector<std::shared_ptr<WebViewValue>> args, const std::string &method, const std::string &object_name)
 {
     LOGI("GetJavaScriptResult");
+    ContainerScope scope(instanceId_);
     std::shared_ptr<WebJSValue> result;
     auto jsArgs = GetWebJSValue(args);
 

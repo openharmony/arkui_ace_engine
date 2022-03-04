@@ -1115,6 +1115,13 @@ bool RenderBox::HandleMouseEvent(const MouseEvent& event)
     info.SetTimeStamp(event.time);
     info.SetDeviceId(event.deviceId);
     info.SetSourceDevice(event.sourceType);
+    LOGI("RenderBox::HandleMouseEvent: Do mouse callback with mouse event{ Global(%{public}f,%{public}f), "
+         "Local(%{public}f,%{public}f)}, Button(%{public}d), Action(%{public}d), Time(%{public}lld), "
+         "DeviceId(%{public}lld, SourceType(%{public}d) }. Return: %{public}d",
+        info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetLocalLocation().GetX(),
+        info.GetLocalLocation().GetY(), info.GetButton(), info.GetAction(),
+        info.GetTimeStamp().time_since_epoch().count(), info.GetDeviceId(), info.GetSourceDevice(),
+        info.IsStopPropagation());
     onMouse_(info);
     return info.IsStopPropagation();
 }

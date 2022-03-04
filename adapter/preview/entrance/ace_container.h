@@ -37,7 +37,7 @@ namespace OHOS::Ace::Platform {
 
 namespace {
 // Different with mobile, we don't support multi-instances in Windows, because we only want
-// preivew UI effect, it doesn't make scense to create multi ability in one process.
+// preview UI effect, it doesn't make sense to create multi ability in one process.
 constexpr int32_t ACE_INSTANCE_ID = 0;
 } // namespace
 

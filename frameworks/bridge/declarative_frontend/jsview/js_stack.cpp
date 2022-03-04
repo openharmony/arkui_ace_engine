@@ -34,7 +34,7 @@ void JSStack::SetStackFit(int value)
             stack->SetStackFit((StackFit)value);
         }
     } else {
-        LOGE("Invaild value for stackfit");
+        LOGE("Invalid value for stackfit");
     }
 }
 
@@ -46,7 +46,7 @@ void JSStack::SetOverflow(int value)
             stack->SetOverflow((Overflow)value);
         }
     } else {
-        LOGE("Invaild value for overflow");
+        LOGE("Invalid value for overflow");
     }
 }
 
@@ -83,7 +83,7 @@ void JSStack::SetAlignment(int value)
             alignment = Alignment::BOTTOM_RIGHT;
             break;
         default:
-            LOGE("Invaild value for alignment");
+            LOGE("Invalid value for alignment");
             return;
     }
 

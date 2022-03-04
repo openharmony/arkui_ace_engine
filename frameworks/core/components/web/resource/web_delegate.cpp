@@ -21,7 +21,7 @@
 
 #include "base/json/json_util.h"
 #include "base/log/log.h"
-#include "core/common/container_scope.h"
+#include "core/common/container.h"
 #include "core/components/web/web_event.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/back_end_event_manager.h"
@@ -292,7 +292,7 @@ void WebDelegate::ExecuteTypeScript(const std::string& jscode, const std::functi
                 return;
             }
             if (delegate->webview_) {
-                auto callbackImpl = std::make_shared<WebJavaScriptExecuteCallBack>();
+                auto callbackImpl = std::make_shared<WebJavaScriptExecuteCallBack>(Container::CurrentId());
                 if (callbackImpl && callback) {
                     callbackImpl->SetCallBack([weak, func = std::move(callback)](std::string result) {
                         auto delegate = weak.Upgrade();
@@ -426,7 +426,8 @@ void WebDelegate::SetWebViewJavaScriptResultCallBack(
             if (delegate == nullptr || delegate->webview_ == nullptr) {
                 return;
             }
-            auto webJSResultCallBack = std::make_shared<WebJavaScriptResultCallBack>(delegate->context_);
+            auto webJSResultCallBack =
+                std::make_shared<WebJavaScriptResultCallBack>(delegate->context_, Container::CurrentId());
             if (webJSResultCallBack) {
                 LOGI("WebDelegate SetWebViewJavaScriptResultCallBack");
                 webJSResultCallBack->SetJavaScriptCallBack(std::move(javaScriptCallBackImpl));
@@ -492,7 +493,7 @@ int WebDelegate::GetHitTestResult()
                 webHitType = WebHitTestType::EDIT;
                 break;
             default:
-                LOGW("unkonw hit test type:%{public}d", static_cast<int>(hitType));
+                LOGW("unknow hit test type:%{public}d", static_cast<int>(hitType));
                 break;
         }
     }
@@ -852,6 +853,15 @@ void WebDelegate::SetWebCallBack()
                     }
                 });
             });
+        webController->SetZoomImpl(
+            [weak = WeakClaim(this), uiTaskExecutor](float factor) {
+                uiTaskExecutor.PostTask([weak, factor]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->Zoom(factor);
+                    }
+                });
+            });
         webController->SetOnFocusImpl(
             [weak = WeakClaim(this), uiTaskExecutor]() {
                 uiTaskExecutor.PostTask([weak]() {
@@ -987,10 +997,32 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
                 static_cast<OHOS::WebView::WebSettings::MixedContentMode>(component->GetMixedMode()));
             setting->SetSupportZoom(component->GetZoomAccessEnabled());
             setting->SetGeolocationEnabled(component->GetGeolocationAccessEnabled());
+            auto userAgent = component->GetUserAgent();
+            if (!userAgent.empty()) {
+                setting->SetUserAgentString(userAgent);
+            }
         },
         TaskExecutor::TaskType::PLATFORM);
 }
 #endif
+
+void WebDelegate::UpdateUserAgent(const std::string& userAgent, const std::string& src)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), userAgent, src]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->webview_) {
+                std::shared_ptr<OHOS::WebView::WebSettings> setting = delegate->webview_->GetSettings();
+                    setting->SetUserAgentString(userAgent);
+                    delegate->webview_->LoadURL(src);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
 
 void WebDelegate::Resize(const double& width, const double& height)
 {
@@ -1196,6 +1228,27 @@ void WebDelegate::OnActive()
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::Zoom(float factor)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), factor]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                LOGE("Get delegate failed, it is null.");
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->ZoomBy(factor);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::OnFocus()
 {
     if (onFocusV2_) {
@@ -1268,7 +1321,7 @@ void WebDelegate::RegisterWebEvent()
     });
 }
 
-// upper ui componnet which inherite from WebComponent
+// upper ui component which inherited from WebComponent
 // could implement some curtain createdCallback to customized controller interface
 // eg: web.loadurl.
 void WebDelegate::AddCreatedCallback(const CreatedCallback& createdCallback)

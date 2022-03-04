@@ -56,10 +56,10 @@ std::string ListItemComposedElement::GetSticky() const
     }
     auto renderListItem = AceType::DynamicCast<RenderListItem>(node);
     if (renderListItem) {
-        auto stikyMode = renderListItem->GetSticky();
-        if (stikyMode == StickyMode::NORMAL) {
+        auto stickyMode = renderListItem->GetSticky();
+        if (stickyMode == StickyMode::NORMAL) {
             return "Sticky.Normal";
-        } else if (stikyMode == StickyMode::OPACITY) {
+        } else if (stickyMode == StickyMode::OPACITY) {
             return "Sticky.Opacity";
         }
     }

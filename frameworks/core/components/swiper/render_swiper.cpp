@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -143,29 +143,29 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     curve_ = swiper->GetCurve();
     if (curve_) {
         if (curve_ == Curves::EASE) {
-            curveRender_ = "Curves.EASE";
+            curveRender_ = "Curves.Ease";
         } else if (curve_ == Curves::EASE_IN) {
-            curveRender_ = "Curves.EASE_IN";
+            curveRender_ = "Curves.EaseIn";
         } else if (curve_ == Curves::EASE_OUT) {
-            curveRender_ = "Curves.EASE_OUT";
+            curveRender_ = "Curves.EaseOut";
         } else if (curve_ == Curves::EASE_IN_OUT) {
-            curveRender_ = "Curves.EASE_IN_OUT";
+            curveRender_ = "Curves.EaseInOut";
         } else if (curve_ == Curves::FAST_OUT_SLOW_IN) {
-            curveRender_ = "Curves.FAST_OUT_SLOW_IN";
+            curveRender_ = "Curves.FastOutSlowIn";
         } else if (curve_ == Curves::LINEAR_OUT_SLOW_IN) {
-            curveRender_ = "Curves.LINEAR_OUT_SLOW_IN";
+            curveRender_ = "Curves.LinearOutSlowIn";
         } else if (curve_ == Curves::FAST_OUT_LINEAR_IN) {
-            curveRender_ = "Curves.FAST_OUT_LINEAR_IN";
+            curveRender_ = "Curves.FastOutLinearIn";
         } else if (curve_ == Curves::FRICTION) {
-            curveRender_ = "Curves.FRICTION";
+            curveRender_ = "Curves.Friction";
         } else if (curve_ == Curves::EXTREME_DECELERATION) {
-            curveRender_ = "Curves.EXTREME_DECELERATION";
+            curveRender_ = "Curves.ExtremeDeceleration";
         } else if (curve_ == Curves::SHARP) {
-            curveRender_ = "Curves.SHARP";
+            curveRender_ = "Curves.Sharp";
         } else if (curve_ == Curves::SMOOTH) {
-            curveRender_ = "Curves.SMOOTH";
+            curveRender_ = "Curves.Smooth";
         } else if (curve_ == Curves::LINEAR) {
-            curveRender_ = "Curves.LINEAR";
+            curveRender_ = "Curves.Linear";
         }
     }
 
@@ -371,8 +371,8 @@ void RenderSwiper::PerformLayout()
                               : -swiperHeight_;
     } else {
         prevItemOffset_ = axis_ == Axis::HORIZONTAL
-                              ? (needReverse_ ? swiperWidth_ - prevMargin_ - nextMargin_ + halfSpace
-                                              : -swiperWidth_ + prevMargin_ + nextMargin_ - halfSpace)
+                              ? (needReverse_ ? swiperWidth_ - prevMargin_ - nextMargin_
+                                              : -swiperWidth_ + prevMargin_ + nextMargin_)
                               : -swiperHeight_ + prevMargin_ + nextMargin_;
     }
     nextItemOffset_ = -prevItemOffset_;
@@ -1923,9 +1923,11 @@ void RenderSwiper::UpdateIndicatorPosition(SwiperIndicatorData& indicatorData)
 
     if (indicator_->GetLeft().Value() != SwiperIndicator::DEFAULT_POSITION) {
         int32_t left = GetValidEdgeLength(swiperWidth_, indicatorWidth, indicator_->GetLeft());
+        swiperLeft_ = indicator_->GetLeft();
         position.SetX(left);
     } else if (indicator_->GetRight().Value() != SwiperIndicator::DEFAULT_POSITION) {
         int32_t right = GetValidEdgeLength(swiperWidth_, indicatorWidth, indicator_->GetRight());
+        swiperRight_ = indicator_->GetRight();
         position.SetX(swiperWidth_ - indicatorWidth - right);
     } else {
         if (axis_ == Axis::HORIZONTAL) {
@@ -1939,9 +1941,11 @@ void RenderSwiper::UpdateIndicatorPosition(SwiperIndicatorData& indicatorData)
 
     if (indicator_->GetTop().Value() != SwiperIndicator::DEFAULT_POSITION) {
         int32_t top = GetValidEdgeLength(swiperHeight_, indicatorHeight, indicator_->GetTop());
+        swiperTop_ = indicator_->GetTop();
         position.SetY(top);
     } else if (indicator_->GetBottom().Value() != SwiperIndicator::DEFAULT_POSITION) {
         int32_t bottom = GetValidEdgeLength(swiperHeight_, indicatorHeight, indicator_->GetBottom());
+        swiperBottom_ = indicator_->GetBottom();
         position.SetY(swiperHeight_ - indicatorHeight - bottom);
     } else {
         if (axis_ == Axis::HORIZONTAL) {
@@ -1985,6 +1989,7 @@ void RenderSwiper::UpdateIndicatorItem(SwiperIndicatorData& indicatorData)
 
     double itemRadius = 0.0;
     for (int32_t i = 0; i < itemCount_; ++i) {
+        swiperSize_ = indicator_->GetSize();
         bool isZoomInBackground = indicatorData.isHovered || indicatorData.isPressed;
         if (isZoomInBackground) {
             // indicator radius and point padding is dynamic changed on zoom and stretch
@@ -2002,9 +2007,11 @@ void RenderSwiper::UpdateIndicatorItem(SwiperIndicatorData& indicatorData)
         if (i == targetIndex) {
             itemStartEndPadding = itemRadius * 2;
             indicatorData.indicatorItemData[i].color = indicator_->GetSelectedColor();
+            selectedColors_ = indicator_->GetSelectedColor();
         } else {
             itemStartEndPadding = itemRadius;
             indicatorData.indicatorItemData[i].color = indicator_->GetColor();
+            colors_ = indicator_->GetColor();
         }
         Offset paddingStartOffset;
         Offset paddingEndOffset;

@@ -205,6 +205,7 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     nodeInfo.SetLabeled(atoi(accessibilityLabel.c_str()));
     nodeInfo.SetError(node->GetErrorText());
     nodeInfo.SetComponentResourceId(node->GetJsComponentId());
+    nodeInfo.SetInspectorKey(node->GetJsComponentId());
     RangeInfo rangeInfo = ConvertAccessibilityValue(node->GetAccessibilityValue());
     nodeInfo.SetRange(rangeInfo);
     nodeInfo.SetInputType(static_cast<int>(node->GetTextInputType()));
@@ -298,7 +299,7 @@ std::string ConvertInputTypeToString(AceTextCategory type)
 bool FindFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityNode>& resultNode)
 {
     LOGI("FindFocus nodeId(%{public}d) focus(%{public}d)", node->GetNodeId(), node->GetFocusedState());
-    if (node->GetFocusedState() && node->GetChildList().empty()) {
+    if (node->GetFocusedState()) {
         resultNode = node;
         LOGI("FindFocus nodeId(%{public}d)", resultNode->GetNodeId());
         return true;
@@ -436,7 +437,8 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(const AccessibilityEvent
     eventInfo.SetComponentType(accessibilityEvent.componentType);
     eventInfo.SetCurrentIndex(static_cast<int>(accessibilityEvent.currentItemIndex));
     eventInfo.SetItemCounts(static_cast<int>(accessibilityEvent.itemCount));
-    LOGI("SendAccessibilitySyncEvent windowId:%{public}d nodeId:%{public}d", windowId, accessibilityEvent.nodeId);
+    LOGI("SendAccessibilitySyncEvent windowId:%{public}d nodeId:%{public}d type:%{public}s", windowId,
+        accessibilityEvent.nodeId, accessibilityEvent.eventType.c_str());
     return client->SendEvent(eventInfo);
 }
 
@@ -975,7 +977,6 @@ bool JsAccessibilityManager::AccessibilityActionEvent(const ActionType& action,
             return node->ActionFocus();
         }
         case ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS: {
-            context->AccessibilityRequestFocus(std::to_string(node->GetNodeId()));
             return RequestAccessibilityFocus(node);
         }
         case ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
@@ -1498,6 +1499,8 @@ bool JsAccessibilityManager::RequestAccessibilityFocus(const RefPtr<Accessibilit
 
     ClearCurrentFocus();
     currentFocusNodeId_ = requestNodeId;
+    node->SetFocusedState(true);
+    LOGI("RequestAccessibilityFocus SetFocusedState true nodeId:%{public}d", node->GetNodeId());
     return node->ActionAccessibilityFocus(true);
 }
 
@@ -1511,6 +1514,7 @@ bool JsAccessibilityManager::ClearAccessibilityFocus(const RefPtr<AccessibilityN
     }
 
     currentFocusNodeId_ = -1;
+    node->SetFocusedState(false);
     return node->ActionAccessibilityFocus(false);
 }
 
@@ -1520,6 +1524,8 @@ bool JsAccessibilityManager::ClearCurrentFocus()
     auto currentFocusNode = GetAccessibilityNodeFromPage(currentFocusNodeId_);
     if (currentFocusNode != nullptr) {
         currentFocusNodeId_ = -1;
+        currentFocusNode->SetFocusedState(false);
+        LOGI("ClearCurrentFocus SetFocusedState false nodeId:%{public}d", currentFocusNode->GetNodeId());
         return currentFocusNode->ActionAccessibilityFocus(false);
     }
     return false;

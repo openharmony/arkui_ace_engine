@@ -165,7 +165,7 @@ protected:
     void RecordLocation();
 
     void InitialGridProp() override;
-    void CaculateViewPort();
+    void CalculateViewPort();
     double BuildLazyGridLayout(int32_t index, double sizeNeed);
     bool GetGridSize();
     void BuildGrid(std::vector<double>& rows, std::vector<double>& cols);

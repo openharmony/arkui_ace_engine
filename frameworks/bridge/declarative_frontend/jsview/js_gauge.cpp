@@ -32,7 +32,7 @@ void JSGauge::JSBind(BindingTarget globalObj)
     JSClass<JSGauge>::StaticMethod("endAngle", &JSGauge::SetEndAngle);
     JSClass<JSGauge>::StaticMethod("colors", &JSGauge::SetColors);
     JSClass<JSGauge>::StaticMethod("strokeWidth", &JSGauge::SetStrokeWidth);
-    JSClass<JSGauge>::StaticMethod("labelConfig", &JSGauge::SetLableConfig);
+    JSClass<JSGauge>::StaticMethod("labelConfig", &JSGauge::SetLabelConfig);
     JSClass<JSGauge>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSGauge>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSGauge>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -155,23 +155,23 @@ void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
     gaugeComponent->SetTrackThickness(strokeWidth);
 }
 
-void JSGauge::SetLableConfig(const JSCallbackInfo& info)
+void JSGauge::SetLabelConfig(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 && !info[0]->IsObject()) {
         LOGE("JSGauge::SetLableTextConfig::The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto lableText = paramObject->GetProperty("text");
-    auto lableColor = paramObject->GetProperty("color");
+    auto labelText = paramObject->GetProperty("text");
+    auto labelColor = paramObject->GetProperty("color");
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
 
-    if (lableText->IsString()) {
-        gaugeComponent->SetLableMarkedText(lableText->ToString());
+    if (labelText->IsString()) {
+        gaugeComponent->SetLableMarkedText(labelText->ToString());
     }
     Color currentColor;
-    if (ParseJsColor(lableColor, currentColor)) {
+    if (ParseJsColor(labelColor, currentColor)) {
         gaugeComponent->SetMarkedTextColor(currentColor);
     }
 }

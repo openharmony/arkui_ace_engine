@@ -128,7 +128,7 @@ void XComponentDelegate::CreatePluginResource(
     });
 }
 
-// upper ui componnet which inherite from XComponentComponent
+// upper ui component which inherited from XComponentComponent
 // could implement some curtain createdCallback to customized controller interface
 void XComponentDelegate::AddCreatedCallback(const CreatedCallback& createdCallback)
 {

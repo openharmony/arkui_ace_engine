@@ -49,7 +49,7 @@ shared_ptr<JsValue> CanIUse(const shared_ptr<JsRuntime>& runtime, const shared_p
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (argc != 1) {
-        LOGE("agrc should be 1");
+        LOGE("argc should be 1");
         return runtime->NewNull();
     }
     if (!argv[0]->IsString(runtime)) {

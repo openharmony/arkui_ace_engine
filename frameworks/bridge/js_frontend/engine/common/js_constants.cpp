@@ -97,7 +97,7 @@ const char APP_PACKAGE_NAME[] = "packageName";
 const char APP_REQUEST_FULL_WINDOW[] = "requestFullWindow";
 const char APP_SCREEN_ON_VISIBLE[] = "screenOnVisible";
 const char APP_SET_SWIPE_TO_DISMISS[] = "setSwipeToDismiss";
-const char APP_REQUEST_FULL_WINDOW_DUATION[] = "duration";
+const char APP_REQUEST_FULL_WINDOW_DURATION[] = "duration";
 const char APP_SCREEN_ON_VISIBLE_FLAG[] = "visible";
 const char APP_SET_IMAGE_CACHE_COUNT[] = "setImageCacheCount";
 const char APP_SET_IMAGE_RAWDATA_CACHE_SIZE[] = "setImageRawDataCacheSize";
@@ -124,7 +124,7 @@ const int32_t PLUGIN_REQUEST_FAIL = 200;
 const int32_t PLUGIN_CALLBACK_DESTROY = 3;
 
 // for offscreenCanvas
-const char OFFSCERRN_CANVAS_CREATE[] = "create";
+const char OFFSCREEN_CANVAS_CREATE[] = "create";
 
 // for readResource
 const char READ_TEXT[] = "readText";

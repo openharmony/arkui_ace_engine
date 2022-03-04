@@ -24,7 +24,7 @@ namespace OHOS::Ace {
 RefPtr<Component> VideoElementV2::GetRootComponent()
 {
     std::string componentNames[] = {
-        "flexItem", "display", "transform", "touch", "pan_guesture", "click_guesture",
+        "flexItem", "display", "transform", "touch", "pan_gesture", "click_gesture",
         "focusable", "box", "shared_transition"
     };
     for (auto& name : componentNames) {
@@ -88,7 +88,7 @@ RefPtr<Component> VideoElementV2::GetEventComponents(const RefPtr<Component>& vi
 {
     std::vector<RefPtr<Component>> components;
     std::string componentNames[] = {
-        "display", "transform", "touch", "pan_guesture", "click_guesture", "focusable"
+        "display", "transform", "touch", "pan_gesture", "click_gesture", "focusable"
     };
     for (auto& name : componentNames) {
         auto iter = map_.find(name);
@@ -147,7 +147,7 @@ void VideoElementV2::SetNewComponent(const RefPtr<Component>& newComponent)
     }
 
     if (videoComponent) {
-        UpdatVideoComponent(videoComponent);
+        UpdateVideoComponent(videoComponent);
         auto singleChild = AceType::DynamicCast<SingleChild>(videoComponent->GetParent().Upgrade());
         if (singleChild) {
             singleChild->SetChild(videoComponent_);
@@ -158,7 +158,7 @@ void VideoElementV2::SetNewComponent(const RefPtr<Component>& newComponent)
     }
 }
 
-void VideoElementV2::UpdatVideoComponent(const RefPtr<VideoComponentV2>& videoComponent)
+void VideoElementV2::UpdateVideoComponent(const RefPtr<VideoComponentV2>& videoComponent)
 {
     if (videoComponent) {
         videoComponent_->SetMute(videoComponent->IsMute());
@@ -172,7 +172,7 @@ void VideoElementV2::UpdatVideoComponent(const RefPtr<VideoComponentV2>& videoCo
         videoComponent_->SetSpeed(videoComponent->GetSpeed());
         videoComponent_->SetDirection(videoComponent->GetDirection());
         videoComponent_->SetFit(videoComponent->GetFit());
-        videoComponent_->SetGuestureComponentMap(videoComponent->GetGuestureComponentMap());
+        videoComponent_->SetGestureComponentMap(videoComponent->GetGestureComponentMap());
 
         videoComponent_->SetPreparedEventId(videoComponent->GetPreparedEventId());
         videoComponent_->SetStartEventId(videoComponent->GetStartEventId());
@@ -194,7 +194,7 @@ void VideoElementV2::InitStatus(const RefPtr<VideoComponent>& videoComponent)
     VideoElement::InitStatus(videoComponent);
     auto videoComponentV2 = AceType::DynamicCast<VideoComponentV2>(videoComponent);
     if (videoComponentV2) {
-        map_ = videoComponentV2->GetGuestureComponentMap();
+        map_ = videoComponentV2->GetGestureComponentMap();
     }
 }
 

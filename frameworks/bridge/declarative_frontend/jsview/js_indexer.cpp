@@ -317,7 +317,7 @@ void JSIndexer::GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle)
     }
 }
 
-void JSIndexer::SetIteamSize(const JSCallbackInfo& args)
+void JSIndexer::SetItemSize(const JSCallbackInfo& args)
 {
     if (args.Length() >= 1) {
         Dimension value;
@@ -357,7 +357,7 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("selectedFont", &JSIndexer::SetSelectedFont);
     JSClass<JSIndexer>::StaticMethod("font", &JSIndexer::SetFont);
     JSClass<JSIndexer>::StaticMethod("popupFont", &JSIndexer::SetPopupFont);
-    JSClass<JSIndexer>::StaticMethod("itemSize", &JSIndexer::SetIteamSize, opt);
+    JSClass<JSIndexer>::StaticMethod("itemSize", &JSIndexer::SetItemSize, opt);
     JSClass<JSIndexer>::StaticMethod("alignStyle", &JSIndexer::SetAlignStyle, opt);
     JSClass<JSIndexer>::StaticMethod("onRequestPopupData", &JSIndexer::JsOnRequestPopupData, opt);
     JSClass<JSIndexer>::StaticMethod("onPopupSelected", &JSIndexer::JsOnPopupSelected, opt);

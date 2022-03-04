@@ -110,7 +110,7 @@ public:
     std::unique_ptr<JsonValue> GetPosition() const override;
     std::unique_ptr<JsonValue> GetMarkAnchor() const override;
     std::unique_ptr<JsonValue> GetOffset() const override;
-    std::string GetRect() const override;
+    std::string GetRect() override;
     Rect GetParentRect() const override;
 
     // layout constraint
@@ -225,6 +225,11 @@ public:
 
     std::pair<Rect, Offset> GetCurrentRectAndOrigin() const override;
 
+    bool IsRectValid() const
+    {
+        return isRectValid_;
+    }
+
     void SetKey(const std::string& key)
     {
         key_ = key;
@@ -254,6 +259,7 @@ protected:
     RefPtr<AccessibilityNode> GetAccessibilityNode() const;
 
 private:
+    bool isRectValid_;
     std::string key_;
 };
 

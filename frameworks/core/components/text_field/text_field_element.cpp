@@ -196,6 +196,10 @@ void TextFieldElement::OnBlur()
     if (renderNode_) {
         renderNode_->ChangeStatus(RenderStatus::BLUR);
     }
+    auto textField = DynamicCast<RenderTextField>(renderNode_);
+    if (textField) {
+        textField->StopTwinkling();
+    }
     CloseKeyboard();
     FocusNode::OnBlur();
 }

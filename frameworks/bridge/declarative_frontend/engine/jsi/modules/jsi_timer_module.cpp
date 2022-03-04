@@ -28,7 +28,7 @@ shared_ptr<JsValue> SetTimeoutOrInterval(const shared_ptr<JsRuntime>& runtime, c
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, bool isInterval)
 {
     if (argc < 2) {
-        LOGE("agrc should be greater than or equal to 2");
+        LOGE("argc should be greater than or equal to 2");
         return runtime->NewNull();
     }
     if (!argv[0]->IsFunction(runtime) || !argv[1]->IsNumber(runtime)) {

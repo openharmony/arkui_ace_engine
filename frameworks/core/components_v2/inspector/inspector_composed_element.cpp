@@ -292,6 +292,7 @@ void InspectorComposedElement::AddComposedComponentId()
     if (accessibilityEnabled_) {
         accessibilityNode_ =
             InspectorComposedComponent::CreateAccessibilityNode(inspectorTag_, inspectorId_, inspectorParentId_, -1);
+        accessibilityNode_->SetJsComponentId(key_);
     }
 }
 
@@ -619,7 +620,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetOffset() const
     return jsonValue;
 }
 
-std::string InspectorComposedElement::GetRect() const
+std::string InspectorComposedElement::GetRect()
 {
     std::string strRec;
     Rect rect = GetRenderRect();
@@ -633,7 +634,7 @@ std::string InspectorComposedElement::GetRect() const
     if (GetClipFlag()) {
         accessibilityNode_->SetClipFlagToChild(true);
     }
-
+    isRectValid_ = rect.IsValid();
     strRec = std::to_string(rect.Left())
                  .append(",")
                  .append(std::to_string(rect.Top()))

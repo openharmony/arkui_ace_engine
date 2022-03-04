@@ -56,7 +56,7 @@ void RosenRenderBadge::DrawCircleBadge(SkCanvas* canvas, const Offset& offset)
     paint.setStyle(SkPaint::Style::kFill_Style);
     paint.setAntiAlias(true);
     SkRRect rRect;
-    auto circleSize = badge_->GetBadgeCicleSize();
+    auto circleSize = badge_->GetBadgeCircleSize();
     auto badgePosition = badge_->GetBadgePosition();
     badgeCircleDiameter_ = badge_->IsBadgeCircleSizeDefined() ? (circleSize.IsValid() ? NormalizeToPx(circleSize) : 0)
                                                               : NormalizeToPx(CIRCLE_BADGE_SIZE);
@@ -85,7 +85,7 @@ void RosenRenderBadge::DrawNumericalBadge(SkCanvas* canvas, const Offset& offset
     paint.setAntiAlias(true);
     SkRRect rRect;
     textSize_ = CalculateTextSize(textData_, textStyle_, badgeRenderText_);
-    auto circleSize = badge_->GetBadgeCicleSize();
+    auto circleSize = badge_->GetBadgeCircleSize();
     badgeCircleDiameter_ = badge_->IsBadgeCircleSizeDefined() ? (circleSize.IsValid() ? NormalizeToPx(circleSize) : 0)
                                                               : NormalizeToPx(NUMERICAL_BADGE_CIRCLE_SIZE);
     badgeHeight_ = badgeCircleDiameter_;

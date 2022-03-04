@@ -105,7 +105,7 @@ public:
         return style.padding;
     }
 
-    const Dimension& GetBadgeCicleSize() const
+    const Dimension& GetBadgeCircleSize() const
     {
         auto& style = static_cast<BadgeStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
         return style.badgeCircleSize;

@@ -31,6 +31,7 @@
 namespace OHOS::Ace {
 
 class WebDelegate;
+class WebElement;
 
 enum MixedModeContent {
     MIXED_CONTENT_ALWAYS_ALLOW = 0,
@@ -190,6 +191,19 @@ public:
         onActiveImpl_ = std::move(onActiveImpl);
     }
 
+    using ZoomImpl = std::function<void(float)>;
+    void Zoom(float factor) const
+    {
+        if (zoomImpl_) {
+            zoomImpl_(factor);
+        }
+    }
+
+    void SetZoomImpl(ZoomImpl && zoomImpl)
+    {
+        zoomImpl_ = std::move(zoomImpl);
+    }
+
     using OnFocusImpl = std::function<void()>;
     void OnFocus() const
     {
@@ -318,6 +332,7 @@ private:
     OnInactiveImpl onInactiveImpl_;
     OnActiveImpl onActiveImpl_;
     OnFocusImpl onFocusImpl_;
+    ZoomImpl zoomImpl_;
     LoadDataWithBaseUrlImpl loadDataWithBaseUrlImpl_;
     InitJavascriptInterface initJavascriptInterface_;
     RefreshImpl refreshImpl_;
@@ -504,6 +519,16 @@ public:
         isJsEnabled_ = isEnabled;
     }
 
+    std::string GetUserAgent() const
+    {
+        return userAgent_;
+    }
+
+    void SetUserAgent(std::string userAgent)
+    {
+        userAgent_ = userAgent;
+    }
+
     bool GetContentAccessEnabled() const
     {
         return isContentAccessEnabled_;
@@ -596,7 +621,9 @@ private:
     bool isJsEnabled_ = true;
     bool isContentAccessEnabled_ = true;
     bool isFileAccessEnabled_ = true;
+    std::string userAgent_;
     WeakPtr<FocusNode> focusElement_;
+    WeakPtr<WebElement> webElement_;
     bool isOnLineImageAccessEnabled_ = false;
     bool isDomStorageAccessEnabled_ = false;
     bool isImageAccessEnabled_ = true;

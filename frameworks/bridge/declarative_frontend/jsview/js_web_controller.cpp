@@ -111,6 +111,7 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("deleteJavaScriptRegister", &JSWebController::RemoveJavascriptInterface);
     JSClass<JSWebController>::CustomMethod("onInactive", &JSWebController::OnInactive);
     JSClass<JSWebController>::CustomMethod("onActive", &JSWebController::OnActive);
+    JSClass<JSWebController>::CustomMethod("zoom", &JSWebController::Zoom);
     JSClass<JSWebController>::CustomMethod("requestFocus", &JSWebController::RequestFocus);
     JSClass<JSWebController>::CustomMethod("loadData", &JSWebController::LoadDataWithBaseUrl);
     JSClass<JSWebController>::CustomMethod("backward", &JSWebController::Backward);
@@ -340,9 +341,11 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
     if (!jsRegisterCallBackInit_) {
         LOGI("JSWebController set webview javascript CallBack");
         jsRegisterCallBackInit_ = true;
-        WebController::JavaScriptCallBackImpl callback = [weak = WeakClaim(this)](
+        WebController::JavaScriptCallBackImpl callback =
+            [execCtx = args.GetExecutionContext(), weak = WeakClaim(this)](
             const std::string& objectName, const std::string& objectMethod,
             const std::vector<std::shared_ptr<WebJSValue>>& args) {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
             auto jsWebController = weak.Upgrade();
             if (jsWebController == nullptr) {
                 return std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
@@ -483,6 +486,18 @@ void JSWebController::OnActive(const JSCallbackInfo& args)
 {
     if (webController_) {
         webController_->OnActive();
+    }
+}
+
+void JSWebController::Zoom(const JSCallbackInfo& args)
+{
+    float factor = 1.0;
+    if (args.Length() < 1 || !ConvertFromJSValue(args[0], factor)) {
+        LOGE("Zoom parameter is invalid.");
+        return;
+    }
+    if (webController_) {
+        webController_->Zoom(factor);
     }
 }
 

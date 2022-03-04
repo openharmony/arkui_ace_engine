@@ -55,7 +55,7 @@ const std::set<std::string> FONT_WEIGHTS = { "normal", "bold", "lighter", "bolde
     "100", "200", "300", "400", "500", "600", "700", "800", "900" };
 const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
 const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
-const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Defaulte value is low.
+const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
 
 inline NodeId GetCurrentNodeId(const v8::Local<v8::Context>& context, v8::Local<v8::Object> value)
 {
@@ -842,12 +842,12 @@ void V8CanvasBridge::Stroke(const v8::FunctionCallbackInfo<v8::Value>& args)
             v8::String::NewFromUtf8(isolate, "__type").ToLocalChecked()).ToLocalChecked();
         v8::String::Utf8Value value(isolate, type->ToString(context).ToLocalChecked());
         if (*value == nullptr || std::strcmp(*value, "path2d") != 0) {
-            LOGE("Stroke Path2D fialed, target is not path.");
+            LOGE("Stroke Path2D failed, target is not path.");
             return;
         }
         auto path = GetPath2D(context, object);
         if (path == nullptr) {
-            LOGE("Stroke Path2D fialed, target path is null.");
+            LOGE("Stroke Path2D failed, target path is null.");
             return;
         }
         auto task = [path](const RefPtr<CanvasTaskPool>& pool) { pool->Stroke(path); };
@@ -1168,7 +1168,7 @@ void V8CanvasBridge::Path2DAddPath(const v8::FunctionCallbackInfo<v8::Value>& ar
 {
     // 1 parameter: addPath(path)
     if (args.Length() != 1) {
-        LOGE("AddPath to Path2D fialed, invalid args.");
+        LOGE("AddPath to Path2D failed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1178,12 +1178,12 @@ void V8CanvasBridge::Path2DAddPath(const v8::FunctionCallbackInfo<v8::Value>& ar
     int32_t holderId = object->Get(context, v8::String::NewFromUtf8(isolate, "__id").ToLocalChecked())
         .ToLocalChecked()->Int32Value(context).ToChecked();
     if (holderId < 0) {
-        LOGE("AddPath to Path2D fialed, unknown holder path.");
+        LOGE("AddPath to Path2D failed, unknown holder path.");
         return;
     }
     auto holderPath = path2Ds_[holderId];
     if (holderPath == nullptr) {
-        LOGE("AddPath to Path2D fialed, holderPath is null.");
+        LOGE("AddPath to Path2D failed, holderPath is null.");
         return;
     }
 
@@ -1192,12 +1192,12 @@ void V8CanvasBridge::Path2DAddPath(const v8::FunctionCallbackInfo<v8::Value>& ar
         v8::String::NewFromUtf8(isolate, "__type").ToLocalChecked()).ToLocalChecked();
     v8::String::Utf8Value value(isolate, type->ToString(context).ToLocalChecked());
     if (*value == nullptr || std::strcmp(*value, "path2d") != 0) {
-        LOGE("AddPath to Path2D fialed, to be added is not path.");
+        LOGE("AddPath to Path2D failed, to be added is not path.");
         return;
     }
     auto toBeAdd = GetPath2D(context, object);
     if (toBeAdd == nullptr) {
-        LOGE("AddPath to Path2D fialed, to be added path is null.");
+        LOGE("AddPath to Path2D failed, to be added path is null.");
         return;
     }
     holderPath->AddPath(toBeAdd);
@@ -1207,7 +1207,7 @@ void V8CanvasBridge::Path2DSetTransform(const v8::FunctionCallbackInfo<v8::Value
 {
     // 6 parameters: setTransform(a, b, c, d, e, f)
     if (args.Length() != 6) {
-        LOGE("Call Path2D SetTransform fialed, invalid args.");
+        LOGE("Call Path2D SetTransform failed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1217,12 +1217,12 @@ void V8CanvasBridge::Path2DSetTransform(const v8::FunctionCallbackInfo<v8::Value
     int32_t holderId = object->Get(context, v8::String::NewFromUtf8(isolate, "__id").ToLocalChecked())
         .ToLocalChecked()->Int32Value(context).ToChecked();
     if (holderId < 0) {
-        LOGE("Call Path2D SetTransform fialed, unknown holder path.");
+        LOGE("Call Path2D SetTransform failed, unknown holder path.");
         return;
     }
     auto holderPath = path2Ds_[holderId];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D SetTransform fialed, holderPath is null.");
+        LOGE("Call Path2D SetTransform failed, holderPath is null.");
         return;
     }
     holderPath->SetTransform(args[0]->NumberValue(context).ToChecked(),
@@ -1247,12 +1247,12 @@ void V8CanvasBridge::Path2DMoveTo(const v8::FunctionCallbackInfo<v8::Value>& arg
     int32_t holderId = object->Get(context, v8::String::NewFromUtf8(isolate, "__id").ToLocalChecked())
         .ToLocalChecked()->Int32Value(context).ToChecked();
     if (holderId < 0) {
-        LOGE("Call Path2D MoveTo fialed, unknown holder path.");
+        LOGE("Call Path2D MoveTo failed, unknown holder path.");
         return;
     }
     auto holderPath = path2Ds_[holderId];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D MoveTo fialed, holderPath is null.");
+        LOGE("Call Path2D MoveTo failed, holderPath is null.");
         return;
     }
     holderPath->MoveTo(args[0]->NumberValue(context).ToChecked(), args[1]->NumberValue(context).ToChecked());
@@ -1262,7 +1262,7 @@ void V8CanvasBridge::Path2DLineTo(const v8::FunctionCallbackInfo<v8::Value>& arg
 {
     // 2 parameters: lineTo(x, y)
     if (args.Length() != 2) {
-        LOGE("Call Path2D LineTo fialed, invalid args.");
+        LOGE("Call Path2D LineTo failed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1272,12 +1272,12 @@ void V8CanvasBridge::Path2DLineTo(const v8::FunctionCallbackInfo<v8::Value>& arg
     int32_t holderId = object->Get(context, v8::String::NewFromUtf8(isolate, "__id").ToLocalChecked())
         .ToLocalChecked()->Int32Value(context).ToChecked();
     if (holderId < 0) {
-        LOGE("Call Path2D LineTo fialed, unknown holder path.");
+        LOGE("Call Path2D LineTo failed, unknown holder path.");
         return;
     }
     auto holderPath = path2Ds_[holderId];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D LineTo fialed, holderPath is null.");
+        LOGE("Call Path2D LineTo failed, holderPath is null.");
         return;
     }
     holderPath->LineTo(args[0]->NumberValue(context).ToChecked(), args[1]->NumberValue(context).ToChecked());
@@ -1287,7 +1287,7 @@ void V8CanvasBridge::Path2DArc(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
     // 5 or 6 parameters: arc(x, y, radius, startAngle, endAngle, anticlockwise?)
     if (args.Length() < 5 || args.Length() > 6) {
-        LOGE("Call Path2D Arc fialed, invalid args.");
+        LOGE("Call Path2D Arc failed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1297,12 +1297,12 @@ void V8CanvasBridge::Path2DArc(const v8::FunctionCallbackInfo<v8::Value>& args)
     int32_t holderId = object->Get(context, v8::String::NewFromUtf8(isolate, "__id").ToLocalChecked())
         .ToLocalChecked()->Int32Value(context).ToChecked();
     if (holderId < 0) {
-        LOGE("Call Path2D Arc fialed, unknown holder path.");
+        LOGE("Call Path2D Arc failed, unknown holder path.");
         return;
     }
     auto holderPath = path2Ds_[holderId];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D Arc fialed, holderPath is null.");
+        LOGE("Call Path2D Arc failed, holderPath is null.");
         return;
     }
     bool anticlockwise = false;
@@ -1318,7 +1318,7 @@ void V8CanvasBridge::Path2DArcTo(const v8::FunctionCallbackInfo<v8::Value>& args
 {
     // 5 parameters: arcTo(x1, y1, x2, y2, radius)
     if (args.Length() != 5) {
-        LOGE("Call Path2D ArcTo fialed, invalid args.");
+        LOGE("Call Path2D ArcTo failed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1328,12 +1328,12 @@ void V8CanvasBridge::Path2DArcTo(const v8::FunctionCallbackInfo<v8::Value>& args
     int32_t holderId = object->Get(context, v8::String::NewFromUtf8(isolate, "__id").ToLocalChecked())
         .ToLocalChecked()->Int32Value(context).ToChecked();
     if (holderId < 0) {
-        LOGE("Call Path2D ArcTo fialed, unknown holder path.");
+        LOGE("Call Path2D ArcTo failed, unknown holder path.");
         return;
     }
     auto holderPath = path2Ds_[holderId];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D ArcTo fialed, holderPath is null.");
+        LOGE("Call Path2D ArcTo failed, holderPath is null.");
         return;
     }
     holderPath->ArcTo(args[0]->NumberValue(context).ToChecked(),
@@ -1347,7 +1347,7 @@ void V8CanvasBridge::Path2DQuadraticCurveTo(const v8::FunctionCallbackInfo<v8::V
 {
     // 4 parameters: quadraticCurveTo(cpx, cpy, x, y)
     if (args.Length() != 4) {
-        LOGE("Call Path2D QuadraticCurveTo fialed, invalid args.");
+        LOGE("Call Path2D QuadraticCurveTo failed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1357,12 +1357,12 @@ void V8CanvasBridge::Path2DQuadraticCurveTo(const v8::FunctionCallbackInfo<v8::V
     int32_t holderId = object->Get(context, v8::String::NewFromUtf8(isolate, "__id").ToLocalChecked())
         .ToLocalChecked()->Int32Value(context).ToChecked();
     if (holderId < 0) {
-        LOGE("Call Path2D QuadraticCurveTo fialed, unknown holder path.");
+        LOGE("Call Path2D QuadraticCurveTo failed, unknown holder path.");
         return;
     }
     auto holderPath = path2Ds_[holderId];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D QuadraticCurveTo fialed, holderPath is null.");
+        LOGE("Call Path2D QuadraticCurveTo failed, holderPath is null.");
         return;
     }
     holderPath->QuadraticCurveTo(args[0]->NumberValue(context).ToChecked(),
@@ -1375,7 +1375,7 @@ void V8CanvasBridge::Path2DBezierCurveTo(const v8::FunctionCallbackInfo<v8::Valu
 {
     // 6 parameters: bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
     if (args.Length() != 6) {
-        LOGE("Call Path2D BezierCurveTo fialed, invalid args.");
+        LOGE("Call Path2D BezierCurveTo failed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1385,12 +1385,12 @@ void V8CanvasBridge::Path2DBezierCurveTo(const v8::FunctionCallbackInfo<v8::Valu
     int32_t holderId = object->Get(context, v8::String::NewFromUtf8(isolate, "__id").ToLocalChecked())
         .ToLocalChecked()->Int32Value(context).ToChecked();
     if (holderId < 0) {
-        LOGE("Call Path2D BezierCurveTo fialed, unknown holder path.");
+        LOGE("Call Path2D BezierCurveTo failed, unknown holder path.");
         return;
     }
     auto holderPath = path2Ds_[holderId];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D BezierCurveTo fialed, holderPath is null.");
+        LOGE("Call Path2D BezierCurveTo failed, holderPath is null.");
         return;
     }
     holderPath->BezierCurveTo(args[0]->NumberValue(context).ToChecked(),
@@ -1405,7 +1405,7 @@ void V8CanvasBridge::Path2DEllipse(const v8::FunctionCallbackInfo<v8::Value>& ar
 {
     // 7 or 8 parameters: ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise?)
     if (args.Length() < 7 || args.Length() > 8) {
-        LOGE("Call Path2D Ellipse fialed, invalid args.");
+        LOGE("Call Path2D Ellipse failed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1415,12 +1415,12 @@ void V8CanvasBridge::Path2DEllipse(const v8::FunctionCallbackInfo<v8::Value>& ar
     int32_t holderId = object->Get(context, v8::String::NewFromUtf8(isolate, "__id").ToLocalChecked())
         .ToLocalChecked()->Int32Value(context).ToChecked();
     if (holderId < 0) {
-        LOGE("Call Path2D Ellipse fialed, unknown holder path.");
+        LOGE("Call Path2D Ellipse failed, unknown holder path.");
         return;
     }
     auto holderPath = path2Ds_[holderId];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D Ellipse fialed, holderPath is null.");
+        LOGE("Call Path2D Ellipse failed, holderPath is null.");
         return;
     }
     bool anticlockwise = false;
@@ -1437,7 +1437,7 @@ void V8CanvasBridge::Path2DRect(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
     // 4 parameters: rect(x, y, width, height)
     if (args.Length() != 4) {
-        LOGE("Call Path2D Rect fialed, invalid args.");
+        LOGE("Call Path2D Rect failed, invalid args.");
         return;
     }
     v8::Isolate* isolate = args.GetIsolate();
@@ -1447,12 +1447,12 @@ void V8CanvasBridge::Path2DRect(const v8::FunctionCallbackInfo<v8::Value>& args)
     int32_t holderId = object->Get(context, v8::String::NewFromUtf8(isolate, "__id").ToLocalChecked())
         .ToLocalChecked()->Int32Value(context).ToChecked();
     if (holderId < 0) {
-        LOGE("Call Path2D Rect fialed, unknown holder path.");
+        LOGE("Call Path2D Rect failed, unknown holder path.");
         return;
     }
     auto holderPath = path2Ds_[holderId];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D Rect fialed, holderPath is null.");
+        LOGE("Call Path2D Rect failed, holderPath is null.");
         return;
     }
     holderPath->Rect(args[0]->NumberValue(context).ToChecked(), args[1]->NumberValue(context).ToChecked(),
@@ -1468,12 +1468,12 @@ void V8CanvasBridge::Path2DClosePath(const v8::FunctionCallbackInfo<v8::Value>& 
     int32_t holderId = object->Get(context, v8::String::NewFromUtf8(isolate, "__id").ToLocalChecked())
         .ToLocalChecked()->Int32Value(context).ToChecked();
     if (holderId < 0) {
-        LOGE("Call Path2D ClosePath fialed, unknown holder path.");
+        LOGE("Call Path2D ClosePath failed, unknown holder path.");
         return;
     }
     auto holderPath = path2Ds_[holderId];
     if (holderPath == nullptr) {
-        LOGE("Call Path2D ClosePath fialed, holderPath is null.");
+        LOGE("Call Path2D ClosePath failed, holderPath is null.");
         return;
     }
     holderPath->ClosePath();
@@ -1828,12 +1828,12 @@ void V8CanvasBridge::TransferFromImageBitmap(const v8::FunctionCallbackInfo<v8::
     if (!page) {
         return;
     }
-    RefPtr<V8OffscreenCanvasBridge> birdge = AceType::DynamicCast<V8OffscreenCanvasBridge>(
+    RefPtr<V8OffscreenCanvasBridge> bridge = AceType::DynamicCast<V8OffscreenCanvasBridge>(
         (*page)->GetOffscreenCanvasBridgeById(bridgeId));
-    if (!birdge) {
+    if (!bridge) {
         return;
     }
-    auto offscreenCanvas = birdge->GetOffscreenCanvas();
+    auto offscreenCanvas = bridge->GetOffscreenCanvas();
     auto task = [offscreenCanvas](const RefPtr<CanvasTaskPool>& pool) {
         pool->TransferFromImageBitmap(offscreenCanvas);
     };
@@ -1860,12 +1860,12 @@ void V8CanvasBridge::DrawBitmapMesh(const v8::FunctionCallbackInfo<v8::Value>& a
     if (!page) {
         return;
     }
-    RefPtr<V8OffscreenCanvasBridge> birdge = AceType::DynamicCast<V8OffscreenCanvasBridge>(
+    RefPtr<V8OffscreenCanvasBridge> bridge = AceType::DynamicCast<V8OffscreenCanvasBridge>(
         (*page)->GetOffscreenCanvasBridgeById(bridgeId));
-    if (!birdge) {
+    if (!bridge) {
         return;
     }
-    auto offscreenCanvas = birdge->GetOffscreenCanvas();
+    auto offscreenCanvas = bridge->GetOffscreenCanvas();
     auto task = [offscreenCanvas, mesh, column, row](const RefPtr<CanvasTaskPool>& pool) {
         pool->DrawBitmapMesh(offscreenCanvas, mesh, (int)column, (int)row);
     };

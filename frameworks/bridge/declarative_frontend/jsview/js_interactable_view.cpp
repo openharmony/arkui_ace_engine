@@ -257,7 +257,7 @@ void JSInteractableView::JsOnAccessibility(const JSCallbackInfo& info)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     if (!inspector) {
-        LOGE("this component does not hava inspetor");
+        LOGE("this component does not have inspector");
         return;
     }
     inspector->SetAccessibilityEvent(GetEventMarker(info, { "eventType" }));
@@ -363,7 +363,7 @@ std::function<void()> JSInteractableView::GetRemoteMessageEventCallback(const JS
                 LOGE("JSInteractableView::JsRemoteMessage: Failed to start the APP %{public}s.", ability.c_str());
             }
 #else
-            LOGE("JSInteractableView::JsRemoteMessage: Unsupport Windows and Mac platforms to start APP.");
+            LOGE("JSInteractableView::JsRemoteMessage: Unsupported Windows and Mac platforms to start APP.");
 #endif
         } else {
             LOGE("action's name is not message or route.");

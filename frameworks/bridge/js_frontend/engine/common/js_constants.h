@@ -97,7 +97,7 @@ ACE_EXPORT extern const char APP_PACKAGE_NAME[];
 ACE_EXPORT extern const char APP_REQUEST_FULL_WINDOW[];
 ACE_EXPORT extern const char APP_SCREEN_ON_VISIBLE[];
 ACE_EXPORT extern const char APP_SET_SWIPE_TO_DISMISS[];
-ACE_EXPORT extern const char APP_REQUEST_FULL_WINDOW_DUATION[];
+ACE_EXPORT extern const char APP_REQUEST_FULL_WINDOW_DURATION[];
 ACE_EXPORT extern const char APP_SCREEN_ON_VISIBLE_FLAG[];
 ACE_EXPORT extern const char APP_SET_IMAGE_CACHE_COUNT[];
 ACE_EXPORT extern const char APP_SET_IMAGE_RAWDATA_CACHE_SIZE[];
@@ -125,7 +125,7 @@ ACE_EXPORT extern const int32_t PLUGIN_REQUEST_FAIL;
 ACE_EXPORT extern const int32_t PLUGIN_CALLBACK_DESTROY;
 
 // for offscreenCanvas
-ACE_EXPORT extern const char OFFSCERRN_CANVAS_CREATE[];
+ACE_EXPORT extern const char OFFSCREEN_CANVAS_CREATE[];
 
 // for readResource
 ACE_EXPORT extern const char READ_TEXT[];

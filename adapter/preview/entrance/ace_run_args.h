@@ -34,6 +34,7 @@ namespace OHOS::Ace::Platform {
 
 using SendRenderDataCallback = bool (*)(const void*, const size_t, const int32_t, const int32_t);
 using SendCurrentRouterCallback = bool (*)(const std::string currentRouterPath);
+using FastPreviewErrorCallback = void (*)(const std::string& jsonStr);
 
 constexpr uint32_t THEME_ID_LIGHT = 117440515;
 constexpr uint32_t THEME_ID_DARK = 117440516;
@@ -62,7 +63,7 @@ struct ACE_PREVIEW_EXPORT AceRunArgs {
     // The absolute base path of system fonts file and fonts config.
     std::string fontBasePath;
 
-    // Indecate light or dark theme.
+    // Indicate light or dark theme.
     uint32_t themeId = THEME_ID_LIGHT;
 
     OHOS::Ace::DeviceConfig deviceConfig = {
@@ -97,6 +98,7 @@ struct ACE_PREVIEW_EXPORT AceRunArgs {
 
     SendRenderDataCallback onRender = nullptr;
     SendCurrentRouterCallback onRouterChange = nullptr;
+    FastPreviewErrorCallback onError = nullptr;
 };
 
 } // namespace OHOS::Ace::Platform

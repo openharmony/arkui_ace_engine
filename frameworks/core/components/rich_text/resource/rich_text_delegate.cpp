@@ -28,9 +28,9 @@ namespace OHOS::Ace {
 
 namespace {
 
-constexpr char RICH_TEXT_METHOD_CHNAGE_VISIBILITY[] = "changeRichTextVisibility";
-constexpr char RICH_TEXT_METHOD_HIDE_RICHTEXT_WHNE_POP[] = "hideRichTextWhenPop";
-constexpr char RICH_TEXT_METHOD_HIDE_RICHTEXT_WHNE_PUSH[] = "hideRichTextWhenPush";
+constexpr char RICH_TEXT_METHOD_CHANGE_VISIBILITY[] = "changeRichTextVisibility";
+constexpr char RICH_TEXT_METHOD_HIDE_RICHTEXT_WHEN_POP[] = "hideRichTextWhenPop";
+constexpr char RICH_TEXT_METHOD_HIDE_RICHTEXT_WHEN_PUSH[] = "hideRichTextWhenPush";
 constexpr char RICH_TEXT_METHOD_SHOW_RICHTEXT[] = "showRichText";
 constexpr char RICH_TEXT_METHOD_UPDATE_CONTENT[] = "updateRichTextContent";
 constexpr char RICH_TEXT_METHOD_UPDATE_TRANSLATE[] = "updateTranslate";
@@ -252,7 +252,7 @@ void RichTextDelegate::RegisterWebEvent()
         });
 }
 
-// upper ui componnet which inherite from WebComponent
+// upper ui component which inherits from WebComponent
 // could implement some curtain createdCallback to customized controller interface
 // eg: web.loadurl.
 void RichTextDelegate::AddCreatedCallback(const CreatedCallback& createdCallback)
@@ -348,7 +348,7 @@ void RichTextDelegate::CallPopPageSuccessPageUrl(const std::string& url, const i
 void RichTextDelegate::CallIsPagePathInvalid(const bool& isPageInvalid)
 {
     hash_ = MakeResourceHash();
-    Method hideRichTextMethod = MakeMethodHash(RICH_TEXT_METHOD_HIDE_RICHTEXT_WHNE_PUSH);
+    Method hideRichTextMethod = MakeMethodHash(RICH_TEXT_METHOD_HIDE_RICHTEXT_WHEN_PUSH);
     std::stringstream paramStream;
     paramStream << RICHTEXT_PARAM_NONE;
     std::string param = paramStream.str();
@@ -363,7 +363,7 @@ void RichTextDelegate::HideRichText()
 
     if (pageUrl != pageUrl_ || pageId != pageId_) {
         hash_ = MakeResourceHash();
-        Method hideRichTextMethod = MakeMethodHash(RICH_TEXT_METHOD_HIDE_RICHTEXT_WHNE_POP);
+        Method hideRichTextMethod = MakeMethodHash(RICH_TEXT_METHOD_HIDE_RICHTEXT_WHEN_POP);
         std::stringstream paramStream;
         paramStream << RICHTEXT_PARAM_NONE;
         std::string param = paramStream.str();
@@ -374,7 +374,7 @@ void RichTextDelegate::HideRichText()
 void RichTextDelegate::ChangeRichTextVisibility(const bool visible)
 {
     hash_ = MakeResourceHash();
-    Method hideRichTextMethod = MakeMethodHash(RICH_TEXT_METHOD_CHNAGE_VISIBILITY);
+    Method hideRichTextMethod = MakeMethodHash(RICH_TEXT_METHOD_CHANGE_VISIBILITY);
     std::string richTextVisible = visible ? "true" : "false";
     std::stringstream paramStream;
     paramStream << NTC_PARAM_RICHTEXT_VISIBILITY << RICHTEXT_PARAM_EQUALS << richTextVisible;

@@ -89,7 +89,6 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("javaScriptAccess", &JSWeb::JsEnabled);
     JSClass<JSWeb>::StaticMethod("fileExtendAccess", &JSWeb::ContentAccessEnabled);
     JSClass<JSWeb>::StaticMethod("fileAccess", &JSWeb::FileAccessEnabled);
-
     JSClass<JSWeb>::StaticMethod("onFocus", &JSWeb::OnFocus);
     JSClass<JSWeb>::StaticMethod("onDownloadStart", &JSWeb::OnDownloadStart);
     JSClass<JSWeb>::StaticMethod("onlineImageAccess", &JSWeb::OnLineImageAccessEnabled);
@@ -99,6 +98,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("zoomAccess", &JSWeb::ZoomAccessEnabled);
     JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
     JSClass<JSWeb>::StaticMethod("javaScriptProxy", &JSWeb::JavaScriptProxy);
+    JSClass<JSWeb>::StaticMethod("userAgent", &JSWeb::UserAgent);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -172,7 +172,7 @@ JSRef<JSVal> LoadWebOnFocusEventToJSValue(const LoadWebOnFocusEvent& eventInfo)
 void JSWeb::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("web create error, info is non-vaild");
+        LOGI("web create error, info is non-valid");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -198,7 +198,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
     auto controllerObj = paramObject->GetProperty("controller");
     if (!controllerObj->IsObject()) {
-        LOGI("web create error, controller is non-vaild");
+        LOGI("web create error, controller is non-valid");
         return;
     }
     auto controller = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSWebController>();
@@ -488,4 +488,14 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     }
 }
 
+void JSWeb::UserAgent(std::string userAgent)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetUserAgent(userAgent);
+}
 } // namespace OHOS::Ace::Framework

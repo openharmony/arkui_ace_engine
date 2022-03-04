@@ -123,7 +123,7 @@ void JSSpan::SetFontStyle(int32_t value)
             declaration->SetHasSetFontStyle(true);
         }
     } else {
-        LOGE("Text fontStyle(%d) illega value", value);
+        LOGE("Text fontStyle(%d) illegal value", value);
     }
 }
 
@@ -198,7 +198,7 @@ void JSSpan::SetTextCase(int32_t value)
             declaration->SetHasSetTextCase(true);
         }
     } else {
-        LOGE("Text textCase(%d) illega value", value);
+        LOGE("Text textCase(%d) illegal value", value);
     }
 }
 

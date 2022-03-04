@@ -23,8 +23,8 @@ namespace OHOS::Ace {
 struct SvgPatternAttribute : SvgBaseAttribute {
     Dimension x; // x-axis default value
     Dimension y; // y-axis default value
-    Dimension width; // pattern area width defalut value
-    Dimension height; // pattern area height defalut value
+    Dimension width; // pattern area width default value
+    Dimension height; // pattern area height default value
     std::string patternUnits = "objectBoundingBox";
     std::string patternContentUnits = "userSpaceOnUse";
     std::string patternTransform;

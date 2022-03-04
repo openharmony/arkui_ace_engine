@@ -175,7 +175,7 @@ public:
         return motionPathOption_;
     }
 
-    void SetMotioPathOption(const MotionPathOption& option)
+    void SetMotionPathOption(const MotionPathOption& option)
     {
         motionPathOption_ = option;
     }

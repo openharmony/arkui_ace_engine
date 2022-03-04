@@ -23,6 +23,7 @@ namespace OHOS::Ace {
 void RosenRenderTransform::Update(const RefPtr<Component>& component)
 {
     RenderTransform::Update(component);
+    pendingUpdateTransformLayer_ = true;
     MarkNeedSyncGeometryProperties();
     if (pendingAppearingTransition_ && hasAppearTransition_) {
         // we have a pending appearing transition
@@ -115,7 +116,10 @@ void RosenRenderTransform::OnAttachContext()
 void RosenRenderTransform::SyncGeometryProperties()
 {
     RenderNode::SyncGeometryProperties();
-    UpdateTransformLayer();
+    if (pendingUpdateTransformLayer_) {
+        UpdateTransformLayer();
+        pendingUpdateTransformLayer_ = false;
+    }
 }
 
 Point RosenRenderTransform::GetTransformPoint(const Point& point)
