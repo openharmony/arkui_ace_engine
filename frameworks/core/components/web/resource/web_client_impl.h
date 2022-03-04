@@ -20,6 +20,7 @@
 #include "webview_client.h"
 
 #include "base/log/log.h"
+#include "core/common/container_scope.h"
 
 namespace OHOS::Ace {
 class WebDelegate;
@@ -27,6 +28,7 @@ class WebDelegate;
 class DownloadListenerImpl : public OHOS::WebView::DownloadListener {
 public:
     DownloadListenerImpl() = default;
+    explicit DownloadListenerImpl(int32_t instanceId) : instanceId_(instanceId) {}
     ~DownloadListenerImpl() = default;
 
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
@@ -39,11 +41,13 @@ public:
 
 private:
     WeakPtr<WebDelegate> webDelegate_;
+    int32_t instanceId_ = -1;
 };
 
 class WebClientImpl : public OHOS::WebView::WebViewClient {
 public:
     WebClientImpl() = default;
+    explicit WebClientImpl(int32_t instanceId) : instanceId_(instanceId) {}
     ~WebClientImpl() = default;
 
     void SetWebView(std::shared_ptr<OHOS::WebView::WebView> webview) override;
@@ -73,6 +77,7 @@ public:
 private:
     std::weak_ptr<OHOS::WebView::WebView> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;
+    int32_t instanceId_ = -1;
 };
 } // namespace OHOS::Ace
 

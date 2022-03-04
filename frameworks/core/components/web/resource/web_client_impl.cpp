@@ -21,6 +21,7 @@ namespace OHOS::Ace {
 void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::string& userAgent,
     const std::string& contentDisposition, const std::string& mimetype, long contentLength)
 {
+    ContainerScope scope(instanceId_);
     LOGI("OnDownloadStart.");
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
@@ -31,6 +32,7 @@ void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::st
 
 void WebClientImpl::OnPageFinished(int httpStatusCode, const std::string& url)
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -40,6 +42,7 @@ void WebClientImpl::OnPageFinished(int httpStatusCode, const std::string& url)
 
 void WebClientImpl::OnRequestFocus()
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -49,6 +52,7 @@ void WebClientImpl::OnRequestFocus()
 
 void WebClientImpl::OnPageStarted(const std::string& url)
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -58,6 +62,7 @@ void WebClientImpl::OnPageStarted(const std::string& url)
 
 void WebClientImpl::OnProgressChanged(int newProgress)
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -67,6 +72,7 @@ void WebClientImpl::OnProgressChanged(int newProgress)
 
 void WebClientImpl::OnReceivedTitle(const std::string &title)
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -76,6 +82,7 @@ void WebClientImpl::OnReceivedTitle(const std::string &title)
 
 void WebClientImpl::OnGeolocationPermissionsHidePrompt()
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -86,6 +93,7 @@ void WebClientImpl::OnGeolocationPermissionsHidePrompt()
 void WebClientImpl::OnGeolocationPermissionsShowPrompt(const std::string& origin,
     OHOS::WebView::GeolocationCallback* callback)
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -109,6 +117,7 @@ void WebClientImpl::OnProxyDied()
 void WebClientImpl::onReceivedError(std::shared_ptr<WebView::WebResourceRequest> request,
     std::shared_ptr<WebView::WebResourceError> error)
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -118,6 +127,7 @@ void WebClientImpl::onReceivedError(std::shared_ptr<WebView::WebResourceRequest>
 
 void WebClientImpl::OnMessage(const std::string& param)
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -127,6 +137,7 @@ void WebClientImpl::OnMessage(const std::string& param)
 
 void WebClientImpl::OnRouterPush(const std::string& param)
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
