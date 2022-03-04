@@ -21,6 +21,7 @@
 
 #include "base/json/json_util.h"
 #include "base/log/log.h"
+#include "core/common/container.h"
 #include "core/components/web/web_event.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/back_end_event_manager.h"
@@ -291,7 +292,7 @@ void WebDelegate::ExecuteTypeScript(const std::string& jscode, const std::functi
                 return;
             }
             if (delegate->webview_) {
-                auto callbackImpl = std::make_shared<WebJavaScriptExecuteCallBack>();
+                auto callbackImpl = std::make_shared<WebJavaScriptExecuteCallBack>(Container::CurrentId());
                 if (callbackImpl && callback) {
                     callbackImpl->SetCallBack([weak, func = std::move(callback)](std::string result) {
                         auto delegate = weak.Upgrade();
@@ -425,7 +426,8 @@ void WebDelegate::SetWebViewJavaScriptResultCallBack(
             if (delegate == nullptr || delegate->webview_ == nullptr) {
                 return;
             }
-            auto webJSResultCallBack = std::make_shared<WebJavaScriptResultCallBack>(delegate->context_);
+            auto webJSResultCallBack =
+                std::make_shared<WebJavaScriptResultCallBack>(delegate->context_, Container::CurrentId());
             if (webJSResultCallBack) {
                 LOGI("WebDelegate SetWebViewJavaScriptResultCallBack");
                 webJSResultCallBack->SetJavaScriptCallBack(std::move(javaScriptCallBackImpl));
