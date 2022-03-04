@@ -198,6 +198,7 @@ void RosenRenderSlider::ProcessTrack(const Offset& currentPosition)
         track->SetTotalRatio(totalRatio_);
         track->SetLayoutSize(Size(trackLength_, hotRegionHeight));
     }
+    track->MarkNeedRender();
 }
 
 void RosenRenderSlider::SetTipPosition(double blockOffset)
