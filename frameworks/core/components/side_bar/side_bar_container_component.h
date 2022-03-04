@@ -48,6 +48,7 @@ public:
         } else {
             sideStatus_ = SideStatus::HIDDEN;
         }
+        isShow_ = isShow;
     }
 
     SideStatus GetSideBarStatus() const
@@ -141,6 +142,11 @@ public:
         return isCustomDefineWidth_;
     }
 
+    bool GetIsShow() const
+    {
+        return isShow_;
+    }
+
 private:
     RefPtr<Component> BuildButton();
 
@@ -150,6 +156,7 @@ private:
     Dimension sidebarMinWidth_ = 200.0_vp;
     Dimension sidebarMaxWidth_ = 280.0_vp;
     bool isCustomDefineWidth_ = false;
+    bool isShow_ = true;
     SideStatus sideStatus_ = SideStatus::AUTO;
 };
 

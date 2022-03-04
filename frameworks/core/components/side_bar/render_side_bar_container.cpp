@@ -57,6 +57,22 @@ void RenderSideBarContainer::Update(const RefPtr<Component>& component)
     }
 
     auto width = sidebarWidth_;
+    showSideBar_ = sideBar_->GetIsShow();
+    if (sideBar_->GetSideBarContainerType() == SideBarContainerType::EMBED) {
+        style_ = "SideBarContainerType.Embed";
+    } else {
+        style_ = "SideBarContainerType.Overlay";
+    }
+    buttonLeft_ = sideBar_->GetButtonLeft();
+    buttonTop_ = sideBar_->GetButtonTop();
+    buttonWidth_ = sideBar_->GetButtonWidth();
+    buttonHeight_ = sideBar_->GetButtonHeight();
+    iconShow_ = sideBar_->GetShowIcon();
+    iconHidden_ = sideBar_->GetHiddenIcon();
+    iconSwitch_ = sideBar_->GetSwitchIcon();
+    showControlButton_ = sideBar_->GetShowControlButton();
+
+
     auto minWidth = sideBar_->GetSideBarMinWidth();
     auto maxWidth = sideBar_->GetSideBarMaxWidth();
     if (!isInitialized_ && sideBar_->IsSideBarwidthDefined()) {
