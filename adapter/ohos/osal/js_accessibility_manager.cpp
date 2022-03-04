@@ -403,11 +403,21 @@ void JsAccessibilityManager::InitializeCallback()
 
 bool JsAccessibilityManager::SendAccessibilitySyncEvent(const AccessibilityEvent& accessibilityEvent)
 {
-    LOGI("JsAccessibilityManager::SendAccessibilitySyncEvent type:%{public}s", accessibilityEvent.eventType.c_str());
-    Accessibility::EventType type = ConvertStrToEventType(accessibilityEvent.eventType);
+    LOGI("JsAccessibilityManager::SendAccessibilitySyncEvent type:%{public}s nodeId:%{public}d",
+        accessibilityEvent.eventType.c_str(), accessibilityEvent.nodeId);
     if (!IsRegister()) {
         return false;
     }
+
+    auto client = AccessibilitySystemAbilityClient::GetInstance();
+    if (!client) {
+        return false;
+    }
+    if (!client->IsEnabled()) {
+        return false;
+    }
+
+    Accessibility::EventType type = ConvertStrToEventType(accessibilityEvent.eventType);
     if (type == Accessibility::EventType::TYPE_VIEW_INVALID) {
         return false;
     }
@@ -421,12 +431,9 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(const AccessibilityEvent
         return false;
     }
 
-    auto client = AccessibilitySystemAbilityClient::GetInstance();
-    if (!client) {
-        return false;
-    }
-
-    if (!client->IsEnabled()) {
+    auto node = GetAccessibilityNodeFromPage(accessibilityEvent.nodeId);
+    if (!node) {
+        LOGW("can't attach component by Id = %{public}d", accessibilityEvent.nodeId);
         return false;
     }
 
@@ -434,11 +441,15 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(const AccessibilityEvent
     eventInfo.SetWindowId(windowId);
     eventInfo.SetSource(accessibilityEvent.nodeId);
     eventInfo.SetEventType(type);
-    eventInfo.SetComponentType(accessibilityEvent.componentType);
+    eventInfo.SetComponentType(node->GetTag());
     eventInfo.SetCurrentIndex(static_cast<int>(accessibilityEvent.currentItemIndex));
     eventInfo.SetItemCounts(static_cast<int>(accessibilityEvent.itemCount));
-    LOGI("SendAccessibilitySyncEvent windowId:%{public}d nodeId:%{public}d type:%{public}s", windowId,
-        accessibilityEvent.nodeId, accessibilityEvent.eventType.c_str());
+    eventInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
+    eventInfo.SetPageId(node->GetPageId());
+    eventInfo.AddContent(node->GetText());
+    eventInfo.SetLatestContent(node->GetText());
+
+    LOGI("SendAccessibilitySyncEvent windowId:%{public}d", windowId);
     return client->SendEvent(eventInfo);
 }
 
