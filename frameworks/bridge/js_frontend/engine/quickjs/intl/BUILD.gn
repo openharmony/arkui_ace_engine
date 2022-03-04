@@ -17,6 +17,8 @@ import("//foundation/ace/ace_engine/ace_config.gni")
 ohos_static_library("intl_qjs_static") {
   include_dirs = [ "$ace_root" ]
   sources = [ "intl_support.cpp" ]
+  part_name = ace_engine_part
+  subsystem_name = "ace"
 }
 
 ohos_shared_library("intl_qjs") {
