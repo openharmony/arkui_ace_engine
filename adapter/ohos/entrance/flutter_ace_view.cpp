@@ -198,9 +198,13 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
     }
     events.pressedButtons = static_cast<int32_t>(pressedButtons);
 
-    std::chrono::milliseconds milliseconds(pointerEvent->GetActionTime());
-    TimeStamp time(milliseconds);
+    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+    TimeStamp time(microseconds);
     events.time = time;
+    LOGI("ConvertMouseEvent: (x,y): (%{public}f,%{public}f). Button: %{public}d. Action: %{public}d. "
+         "DeviceType: %{public}d. PressedButton: %{public}d. Time: %{public}lld",
+        events.x, events.y, events.button, events.action, events.sourceType, events.pressedButtons,
+        pointerEvent->GetActionTime());
 }
 
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event)
@@ -220,9 +224,12 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
 
-    std::chrono::milliseconds milliseconds(pointerEvent->GetActionTime());
-    TimeStamp time(milliseconds);
+    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+    TimeStamp time(microseconds);
     event.time = time;
+    LOGI("ConvertAxisEvent: (x,y): (%{public}f,%{public}f). HorizontalAxis: %{public}f. VerticalAxis: %{public}f. "
+         "DeviceType: %{public}d. Time: %{public}lld",
+        event.x, event.y, event.horizontalAxis, event.verticalAxis, event.sourceType, pointerEvent->GetActionTime());
 }
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
@@ -235,19 +242,18 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     } else {
         event.action = KeyAction::UNKNOWN;
     }
-    std::chrono::milliseconds milliseconds(keyEvent->GetActionTime());
-    TimeStamp time(milliseconds);
+    std::chrono::microseconds microseconds(keyEvent->GetActionTime());
+    TimeStamp time(microseconds);
     event.timeStamp = time;
     event.key = KeyToString(static_cast<int32_t>(event.code));
     event.deviceId = keyEvent->GetDeviceId();
     event.sourceType = SourceType::KEYBOARD;
     std::string pressedKeyStr = "Pressed Keys: ";
     for (const auto& curCode : keyEvent->GetPressedKeys()) {
-
         pressedKeyStr += (std::to_string(curCode) + " ");
         event.pressedCodes.emplace_back(static_cast<KeyCode>(curCode));
     }
-    LOGI("ConvertKeyEvent: keyCode: %{public}d keyAction: %{public}d pressedCodes: %{public}s time: %{public}lld",
+    LOGI("ConvertKeyEvent: KeyCode: %{private}d. KeyAction: %{public}d. PressedCodes: %{private}s. Time: %{public}lld",
         event.code, event.action, pressedKeyStr.c_str(), (long long)(keyEvent->GetActionTime()));
 }
 

@@ -222,9 +222,6 @@ void FocusNode::RefreshFocus()
 
 bool FocusNode::OnKeyEvent(const KeyEvent& keyEvent)
 {
-    if (onKeyCallback_) {
-        return onKeyCallback_(keyEvent);
-    }
     auto element = AceType::DynamicCast<Element>(this);
     if (!element) {
         return false;
@@ -234,12 +231,21 @@ bool FocusNode::OnKeyEvent(const KeyEvent& keyEvent)
         return false;
     }
     if (context->GetIsDeclarative()) {
-        auto event = std::make_shared<KeyEventInfo>(keyEvent);
+        auto info = std::make_shared<KeyEventInfo>(keyEvent);
         if (!onKeyEventCallback_) {
             return false;
         }
-        onKeyEventCallback_(event);
-        return event->IsStopPropagation();
+        LOGI("FocusNode::OnKeyEvent: Do key callback on %{public}s with key event{ Code(%{public}d), "
+             "Action(%{public}d), "
+             "SourceType(%{public}d), DeviceId(%{public}lld), Time(%{public}lld) }. Return: %{public}d",
+            AceType::TypeName(this), info->GetKeyCode(), info->GetKeyType(), info->GetSourceDevice(),
+            info->GetDeviceId(), info->GetTimeStamp().time_since_epoch().count(), info->IsStopPropagation());
+        onKeyEventCallback_(info);
+        return info->IsStopPropagation();
+    } else {
+        if (onKeyCallback_) {
+            return onKeyCallback_(keyEvent);
+        }
     }
     return false;
 }
@@ -278,6 +284,11 @@ void FocusNode::OnClick(const KeyEvent& event)
             Offset((GetRect().Right() - GetRect().Left()) / 2, (GetRect().Bottom() - GetRect().Top()) / 2));
         info->SetSourceDevice(static_cast<SourceType>(event.sourceType));
         info->SetDeviceId(event.deviceId);
+        LOGI("FocusNode::OnClick: Do click callback on %{public}s with key event{ Global(%{public}f,%{public}f), "
+             "Local(%{public}f,%{public}f), SourceType(%{public}d), DeviceId(%{public}lld), Time(%{public}lld) }",
+            AceType::TypeName(this), info->GetGlobalLocation().GetX(), info->GetGlobalLocation().GetY(),
+            info->GetLocalLocation().GetX(), info->GetLocalLocation().GetY(), info->GetSourceDevice(),
+            info->GetDeviceId(), info->GetTimeStamp().time_since_epoch().count());
         onClickEventCallback_(info);
     }
 }
@@ -457,17 +468,23 @@ bool FocusGroup::OnKeyEvent(const KeyEvent& keyEvent)
     OnFocusMove(keyEvent.code);
     switch (keyEvent.code) {
         case KeyCode::TV_CONTROL_UP:
+            LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'UP' by KeyCode(%{public}d)", keyEvent.code);
             return RequestNextFocus(true, true, GetRect());
         case KeyCode::TV_CONTROL_DOWN:
+            LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'DOWN' by KeyCode(%{public}d)", keyEvent.code);
             return RequestNextFocus(true, false, GetRect());
         case KeyCode::TV_CONTROL_LEFT:
+            LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'LEFT' by KeyCode(%{public}d)", keyEvent.code);
             return RequestNextFocus(false, !AceApplicationInfo::GetInstance().IsRightToLeft(), GetRect());
         case KeyCode::TV_CONTROL_RIGHT:
+            LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'RIGHT' by KeyCode(%{public}d)", keyEvent.code);
             return RequestNextFocus(false, AceApplicationInfo::GetInstance().IsRightToLeft(), GetRect());
         case KeyCode::KEY_TAB:
             if (keyEvent.pressedCodes.size() == 1) {
+                LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'TAB' by KeyCode(%{public}d)", keyEvent.code);
                 return RequestNextFocus(false, false, GetRect()) || RequestNextFocus(true, false, GetRect());
             } else {
+                LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'SHIFT-TAB' by KeyCode(%{public}d)", keyEvent.code);
                 if (keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB }) ||
                     keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_TAB })) {
                     return RequestNextFocus(false, true, GetRect()) || RequestNextFocus(true, true, GetRect());

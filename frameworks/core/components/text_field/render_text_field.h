@@ -119,6 +119,8 @@ public:
     void CursorMoveUp();
     void CursorMoveDown();
     void Insert(const std::string& text);
+    void StartTwinkling();
+    void StopTwinkling();
 
     void SetInputFilter(const std::string& inputFilter)
     {
@@ -348,9 +350,6 @@ protected:
     void OnDoubleClick(const ClickInfo& clickInfo);
     void OnLongPress(const LongPressInfo& longPressInfo);
     bool HandleMouseEvent(const MouseEvent& event) override;
-
-    void StartTwinkling();
-    void StopTwinkling();
 
     void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true);
     std::u16string GetTextForDisplay(const std::string& text) const;

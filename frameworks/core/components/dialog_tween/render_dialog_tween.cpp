@@ -619,7 +619,7 @@ bool RenderDialogTween::HandleMouseEvent(const MouseEvent& event)
         event.action == MouseAction::PRESS) {
         HandleClick({ event.x, event.y });
     }
-    return false;
+    return true;
 }
 
 } // namespace OHOS::Ace

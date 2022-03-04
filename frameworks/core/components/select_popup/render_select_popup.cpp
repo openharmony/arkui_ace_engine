@@ -554,7 +554,7 @@ bool RenderSelectPopup::HandleMouseEvent(const MouseEvent& event)
         event.action == MouseAction::PRESS) {
         HandleRawEvent({ event.x, event.y });
     }
-    return false;
+    return true;
 }
 
 } // namespace OHOS::Ace

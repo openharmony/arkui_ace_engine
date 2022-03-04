@@ -77,7 +77,12 @@ void RenderBadge::Update(const RefPtr<Component>& component)
     auto countLimit = badge_->GetMaxCount();
     badgeChildInitialOffset_ = Offset(NormalizeToPx(padding.Left()), NormalizeToPx(padding.Top()));
     onClick_ = AceAsyncEvent<void()>::Create(badge_->GetClickEvent(), context_);
-    auto catchMode = badge_->GetClickEvent().IsEmpty() || badge_->GetClickEvent().GetCatchMode();
+    auto catchMode = true;
+    if (badge_->GetClickEvent().IsEmpty()) {
+        catchMode = false;
+    } else {
+        catchMode = badge_->GetClickEvent().GetCatchMode();
+    }
     static const int32_t bubbleModeVersion = 6;
     auto pipeline = context_.Upgrade();
     if (!catchMode) {
