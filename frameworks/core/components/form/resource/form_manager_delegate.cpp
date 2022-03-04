@@ -118,7 +118,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineContext>& context, const
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
-        auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMsg(ret);
+        auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
         LOGE("Add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
         if (onFormErrorCallback_) {
             onFormErrorCallback_(std::to_string(ret), errorMsg);
