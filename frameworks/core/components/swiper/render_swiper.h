@@ -166,6 +166,41 @@ public:
         return curveRender_;
     }
 
+    const Color& GetColor() const
+    {
+        return colors_;
+    }
+
+    const Color& GetSelectedColor() const
+    {
+        return selectedColors_;
+    }
+
+    const Dimension& GetSwiperTop() const
+    {
+        return swiperTop_;
+    }
+
+    const Dimension& GetSwiperLeft() const
+    {
+        return swiperLeft_;
+    }
+
+    const Dimension& GetSwiperBottom() const
+    {
+        return swiperBottom_;
+    }
+
+    const Dimension& GetSwiperRight() const
+    {
+        return swiperRight_;
+    }
+
+    const Dimension& GetSwiperSize() const
+    {
+        return swiperSize_;
+    }
+
     void ShowPrevious();
     void ShowNext();
 
@@ -560,6 +595,13 @@ private:
 
     RefPtr<Curve> curve_;
     std::string curveRender_;
+    Color colors_;
+    Color selectedColors_;
+    Dimension swiperSize_;
+    Dimension swiperTop_;
+    Dimension swiperLeft_;
+    Dimension swiperBottom_;
+    Dimension swiperRight_;
 };
 
 } // namespace OHOS::Ace
