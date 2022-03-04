@@ -24,15 +24,6 @@
 
 namespace OHOS::Ace::Framework {
 
-double GetJsDoubleVal(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value)
-{
-    auto jsonVal = JsonUtil::ParseJsonData(value->ToString(runtime).c_str());
-    if (jsonVal && jsonVal->IsNumber()) {
-        return jsonVal->GetDouble();
-    }
-    return 0.0;
-}
-
 shared_ptr<JsValue> CurvesInterpolate(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
@@ -41,7 +32,7 @@ shared_ptr<JsValue> CurvesInterpolate(const shared_ptr<JsRuntime>& runtime, cons
     auto jsCurveString = thisObj->GetProperty(runtime, "__curveString");
     auto curveString = jsCurveString->ToString(runtime);
 
-    double time = GetJsDoubleVal(runtime, argv[0]);
+    double time = argv[0]->ToDouble(runtime);
     auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
     if (instance == nullptr) {
         LOGE("get jsi engine instance failed");
@@ -101,26 +92,79 @@ shared_ptr<JsValue> CurvesInit(const shared_ptr<JsRuntime>& runtime, const share
     return curveObj;
 }
 
+bool CreateSpringCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, RefPtr<Curve>& curve)
+{
+    if (argc != 4) {
+        LOGE("Spring curve: the number of parameters is illegal");
+        return false;
+    }
+    double x0 = argv[0]->ToDouble(runtime);
+    double y0 = argv[1]->ToDouble(runtime);
+    double x1 = argv[2]->ToDouble(runtime);
+    double y1 = argv[3]->ToDouble(runtime);
+    
+    curve = AceType::MakeRefPtr<SpringCurve>(x0, y0, x1, y1);
+    return true;
+}
+
+bool CreateCubicCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, RefPtr<Curve>& curve)
+{
+    if (argc != 4) {
+        LOGE("Cubic curve: the number of parameters is illegal");
+        return false;
+    }
+    double x0 = argv[0]->ToDouble(runtime);
+    double y0 = argv[1]->ToDouble(runtime);
+    double x1 = argv[2]->ToDouble(runtime);
+    double y1 = argv[3]->ToDouble(runtime);
+
+    curve = AceType::MakeRefPtr<CubicCurve>(x0, y0, x1, y1);
+    return true;
+}
+
+bool CreateStepsCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, RefPtr<Curve>& curve)
+{
+    if (argc != 1 && argc != 2) {
+        LOGE("Steps curve: the number of parameters is illegal");
+        return false;
+    }
+    int32_t stepSize;
+    if (argc == 2) {
+        stepSize = argv[0]->ToInt32(runtime);
+        bool isEnd = argv[1]->ToBoolean(runtime);
+        if (isEnd) {
+            curve = AceType::MakeRefPtr<StepsCurve>(stepSize, StepsCurvePosition::START);
+        } else {
+            curve = AceType::MakeRefPtr<StepsCurve>(stepSize, StepsCurvePosition::END);
+        }
+    } else {
+        stepSize = argv[0]->ToInt32(runtime);
+        curve = AceType::MakeRefPtr<StepsCurve>(stepSize);
+    }
+    return true;
+}
+
 shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, std::string& curveString)
 {
     auto curveObj = runtime->NewObject();
     curveObj->SetProperty(runtime, CURVE_INTERPOLATE, runtime->NewFunction(CurvesInterpolate));
-    if (argc != 4) {
-        LOGE("CurvesBezier or Spring curve args count is invalid");
-        return runtime->NewNull();
-    }
-    double x0 = GetJsDoubleVal(runtime, argv[0]);
-    double y0 = GetJsDoubleVal(runtime, argv[1]);
-    double x1 = GetJsDoubleVal(runtime, argv[2]);
-    double y1 = GetJsDoubleVal(runtime, argv[3]);
     RefPtr<Curve> curve;
+    bool curveCreated;
     if (curveString == "spring") {
-        curve = AceType::MakeRefPtr<SpringCurve>(x0, y0, x1, y1);
+        curveCreated = CreateSpringCurve(runtime, thisObj, argv, argc, curve);
     } else if (curveString == "cubic-bezier") {
-        curve = AceType::MakeRefPtr<CubicCurve>(x0, y0, x1, y1);
+        curveCreated = CreateCubicCurve(runtime, thisObj, argv, argc, curve);
+    } else if (curveString == "steps") {
+        curveCreated = CreateStepsCurve(runtime, thisObj, argv, argc, curve);
     } else {
         LOGE("curve params: %{public}s is illegal", curveString.c_str());
+        return runtime->NewNull();
+    }
+    if (!curveCreated) {
         return runtime->NewNull();
     }
     auto customCurve = curve->ToString();
@@ -155,11 +199,19 @@ shared_ptr<JsValue> CurvesSpring(const shared_ptr<JsRuntime>& runtime, const sha
     return ParseCurves(runtime, thisObj, argv, argc, curveString);
 }
 
+shared_ptr<JsValue> CurvesSteps(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    std::string curveString("steps");
+    return ParseCurves(runtime, thisObj, argv, argc, curveString);
+}
+
 void InitCurvesModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& moduleObj)
 {
     moduleObj->SetProperty(runtime, CURVES_INIT, runtime->NewFunction(CurvesInit));
     moduleObj->SetProperty(runtime, CURVES_CUBIC_BEZIER, runtime->NewFunction(CurvesBezier));
     moduleObj->SetProperty(runtime, CURVES_SPRING, runtime->NewFunction(CurvesSpring));
+    moduleObj->SetProperty(runtime, CURVES_STEPS, runtime->NewFunction(CurvesSteps));
 }
 
 } // namespace OHOS::Ace::Framework

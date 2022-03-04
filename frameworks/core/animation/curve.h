@@ -166,7 +166,19 @@ public:
         }
         return static_cast<float>(currentStep) / steps_;
     }
-
+    const std::string ToString() override
+    {
+        std::string curveString("steps");
+        std::string comma(",");
+        curveString.append(std::string("(") + std::to_string(steps_) + comma);
+        if (position_ == StepsCurvePosition::START) {
+            curveString.append(std::string("start"));
+        } else {
+            curveString.append(std::string("end"));
+        }
+        curveString.append(std::string(")"));
+        return curveString;
+    }
 private:
     int32_t steps_;
     const StepsCurvePosition position_;
