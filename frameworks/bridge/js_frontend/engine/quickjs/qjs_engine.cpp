@@ -1589,7 +1589,7 @@ JSValue JsHandleMediaQuery(JSContext* ctx, JSValueConst argv, const std::string&
             }
         }
     } else {
-        LOGW("system.meidaquery not support method = %{private}s", methodName.c_str());
+        LOGW("system.mediaquery not support method = %{private}s", methodName.c_str());
     }
     return JS_NULL;
 }
@@ -2024,7 +2024,7 @@ JSValue JsHandleOffscreenCanvas(JSContext* ctx, JSValueConst value, JSValueConst
         return JS_NULL;
     }
 
-    if (methodName == OFFSCERRN_CANVAS_CREATE) {
+    if (methodName == OFFSCREEN_CANVAS_CREATE) {
         int32_t width = JsParseIntParams(ctx, argv, "width");
         int32_t height = JsParseIntParams(ctx, argv, "height");
 

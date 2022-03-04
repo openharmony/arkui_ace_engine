@@ -56,7 +56,7 @@ void FlutterRenderBadge::DrawCircleBadge(flutter::Canvas& canvas, const Offset& 
     paint.paint()->setAntiAlias(true);
     flutter::RRect rRect;
     flutter::PaintData paintData;
-    auto circleSize = badge_->GetBadgeCicleSize();
+    auto circleSize = badge_->GetBadgeCircleSize();
     auto badgePosition = badge_->GetBadgePosition();
     badgeCircleDiameter_ = badge_->IsBadgeCircleSizeDefined() ? (circleSize.IsValid() ? NormalizeToPx(circleSize) : 0)
                                                               : NormalizeToPx(CIRCLE_BADGE_SIZE);
@@ -87,7 +87,7 @@ void FlutterRenderBadge::DrawNumericalBadge(flutter::Canvas& canvas, const Offse
     flutter::RRect rRect;
     flutter::PaintData paintData;
     textSize_ = CalculateTextSize(textData_, textStyle_, badgeRenderText_);
-    auto circleSize = badge_->GetBadgeCicleSize();
+    auto circleSize = badge_->GetBadgeCircleSize();
     badgeCircleDiameter_ = badge_->IsBadgeCircleSizeDefined() ? (circleSize.IsValid() ? NormalizeToPx(circleSize) : 0)
                                                               : NormalizeToPx(NUMERICAL_BADGE_CIRCLE_SIZE);
     badgeHeight_ = badgeCircleDiameter_;

@@ -62,7 +62,7 @@ public:
     void GetRequestData(JSContext* ctx, JSValueConst valObject, OHOS::Ace::RequestData& requestData);
 
     ParseJsDataResult ParseRequestData(
-        JSContext* ctx, int32_t argc, JSValueConst* argv, OHOS::Ace::RequestData& requesetData, int32_t requestId);
+        JSContext* ctx, int32_t argc, JSValueConst* argv, OHOS::Ace::RequestData& requestData, int32_t requestId);
 
     void TriggerModuleJsCallbackPreview(
         int32_t callbackId, int32_t code, OHOS::Ace::ResponseData responseData) override;

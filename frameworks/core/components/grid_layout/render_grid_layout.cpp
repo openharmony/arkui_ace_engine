@@ -335,10 +335,10 @@ Point RenderGridLayout::CalcChildPosition(
 
 Point RenderGridLayout::CalcDragChildStartPosition(const ItemDragInfo& info)
 {
-    double gridPositonX = GetGlobalOffset().GetX();
-    double gridPositonY = GetGlobalOffset().GetY();
-    double dragRelativelyX = info.GetX() - gridPositonX;
-    double dragRelativelyY = info.GetY() - gridPositonY;
+    double gridPositionX = GetGlobalOffset().GetX();
+    double gridPositionY = GetGlobalOffset().GetY();
+    double dragRelativelyX = info.GetX() - gridPositionX;
+    double dragRelativelyY = info.GetY() - gridPositionY;
     return Point(dragRelativelyX, dragRelativelyY);
 }
 
@@ -537,17 +537,17 @@ void RenderGridLayout::UpdateAccessibilityAttr()
 // (3) 30% 20% 50%
 // (4) repeat(2,100px 20%) -- will be prebuild by JS Engine to --- 100px 20% 100px 20%
 // (5) repeat(auto-fill, 100px 300px)  -- will be prebuild by JS Engine to --- auto-fill 100px 300px
-std::vector<double> RenderGridLayout::ParseArgs(const std::string& agrs, double size, double gap)
+std::vector<double> RenderGridLayout::ParseArgs(const std::string& args, double size, double gap)
 {
     std::vector<double> lens;
-    if (agrs.empty()) {
+    if (args.empty()) {
         return lens;
     }
     double pxSum = 0.0; // First priority: such as 50px
     double peSum = 0.0; // Second priority: such as 20%
     double frSum = 0.0; // Third priority: such as 2fr
     std::vector<std::string> strs;
-    std::string handledArg = agrs;
+    std::string handledArg = args;
     ConvertRepeatArgs(handledArg);
     StringUtils::StringSpliter(handledArg, ' ', strs);
     if (!strs.empty() && strs[0] == UNIT_AUTO_FILL) {
@@ -843,7 +843,7 @@ void RenderGridLayout::PerformLayout()
         return;
     }
 
-    // register the item seleceted callback
+    // register the item selected callback
     if (editMode_) {
         RegisterLongPressedForItems();
     }
@@ -928,7 +928,7 @@ void RenderGridLayout::RestoreScene(const ItemDragInfo& info)
     if (supportAnimation_ || dragAnimation_) {
         CalcRestoreScenePosition(info);
         if (needRunAnimation_.load()) {
-            StartAnimationController(GridLayoutAnimationAct::ANIMATION_RESTORE_SCENCE, nullptr);
+            StartAnimationController(GridLayoutAnimationAct::ANIMATION_RESTORE_SCENE, nullptr);
         }
     }
     StartFlexController(startGlobalPoint_);
@@ -1024,7 +1024,7 @@ void RenderGridLayout::RegisterLongPressedForItems()
                     }
                     auto item = itemRenderNode.Upgrade();
                     if ((index < 0) || (!item)) {
-                        LOGE("%{public}s .index invaild or item is null", __PRETTY_FUNCTION__);
+                        LOGE("%{public}s .index invalid or item is null", __PRETTY_FUNCTION__);
                         return false;
                     }
 
@@ -1333,7 +1333,7 @@ void RenderGridLayout::ImpDragMove(const ItemDragInfo& info)
                 -1, dragingItemIndex_);
             component_->GetOnGridDragMoveId()(info, dragingItemIndex_, -1);
         } else {
-            LOGE("%{public}s no onGridGragMove registered.", __PRETTY_FUNCTION__);
+            LOGE("%{public}s no onGridDragMove registered.", __PRETTY_FUNCTION__);
         }
     }
 }
@@ -1346,7 +1346,7 @@ void RenderGridLayout::ImpDragLeaveMainGrid(const ItemDragInfo& info)
         LOGD("%{public}s. from dragstart ItemIndex: %{public}d", __PRETTY_FUNCTION__, dragingItemIndex_);
         component_->GetOnGridDragLeaveId()(info, dragingItemIndex_);
     } else {
-        LOGE("%{public}s no onGridGragLeave registered.", __PRETTY_FUNCTION__);
+        LOGE("%{public}s no onGridDragLeave registered.", __PRETTY_FUNCTION__);
     }
     FakeRemoveDragItem();
     ClearPartDragInfo();
@@ -1372,7 +1372,7 @@ void RenderGridLayout::ImpDragLeaveSubGrid(const ItemDragInfo& info)
         LOGD("%{public}s. from dragenter ItemIndex: %{public}d", __PRETTY_FUNCTION__, -1);
         component_->GetOnGridDragLeaveId()(info, -1);
     } else {
-        LOGE("%{public}s no onGridGragLeave registered.", __PRETTY_FUNCTION__);
+        LOGE("%{public}s no onGridDragLeave registered.", __PRETTY_FUNCTION__);
     }
     if (isDynamicGrid_ && NeedBeSmaller()) {
         // BeSmaller
@@ -1501,7 +1501,7 @@ void RenderGridLayout::ImpDragStart(const ItemDragInfo& info)
             ActionStart(info, customComponent);
         }
     } else {
-        LOGE("%{public}s no onGridGragStart registered.", __PRETTY_FUNCTION__);
+        LOGE("%{public}s no onGridDragStart registered.", __PRETTY_FUNCTION__);
     }
 }
 
@@ -1737,10 +1737,10 @@ void RenderGridLayout::PerformLayoutForStaticGrid()
 
 bool RenderGridLayout::CalDragCell(const ItemDragInfo& info)
 {
-    double gridPositonX = GetGlobalOffset().GetX();
-    double gridPositonY = GetGlobalOffset().GetY();
-    double dragRelativelyX = info.GetX() - gridPositonX;
-    double dragRelativelyY = info.GetY() - gridPositonY;
+    double gridPositionX = GetGlobalOffset().GetX();
+    double gridPositionY = GetGlobalOffset().GetY();
+    double dragRelativelyX = info.GetX() - gridPositionX;
+    double dragRelativelyY = info.GetY() - gridPositionY;
     if (rightToLeft_) {
         dragRelativelyX = colSize_ - dragRelativelyX;
     }
@@ -2018,8 +2018,8 @@ void RenderGridLayout::FakeRemoveDragItemUpdate()
 
 bool RenderGridLayout::MoveItemsForward(int32_t fromRow, int32_t fromColum, int32_t toRow, int32_t toColum)
 {
-    bool vaild = false;
-    if (!SortCellIndex(fromRow, fromColum, toRow, toColum, vaild) && (!vaild)) {
+    bool valid = false;
+    if (!SortCellIndex(fromRow, fromColum, toRow, toColum, valid) && (!valid)) {
         return false;
     }
 
@@ -2030,13 +2030,13 @@ bool RenderGridLayout::MoveItemsForward(int32_t fromRow, int32_t fromColum, int3
     int32_t tmpIndex = -1;
 
     bool equal = false;
-    equal = SortCellIndex(fromRow, fromColum, curRow, curColum, vaild);
+    equal = SortCellIndex(fromRow, fromColum, curRow, curColum, valid);
 
     if (supportAnimation_ || dragAnimation_) {
         animationItemList_.clear();
     }
 
-    while (vaild || equal) {
+    while (valid || equal) {
         // Get target pos
         GetNextGrid(targetRow, targetColum);
 
@@ -2063,15 +2063,15 @@ bool RenderGridLayout::MoveItemsForward(int32_t fromRow, int32_t fromColum, int3
         targetRow = curRow;
         targetColum = curColum;
 
-        equal = SortCellIndex(fromRow, fromColum, curRow, curColum, vaild);
+        equal = SortCellIndex(fromRow, fromColum, curRow, curColum, valid);
     }
     return true;
 }
 
 bool RenderGridLayout::MoveItemsBackward(int32_t fromRow, int32_t fromColum, int32_t toRow, int32_t toColum)
 {
-    bool vaild = false;
-    if (!SortCellIndex(fromRow, fromColum, toRow, toColum, vaild) && (!vaild)) {
+    bool valid = false;
+    if (!SortCellIndex(fromRow, fromColum, toRow, toColum, valid) && (!valid)) {
         return false;
     }
 
@@ -2082,11 +2082,11 @@ bool RenderGridLayout::MoveItemsBackward(int32_t fromRow, int32_t fromColum, int
     int32_t tmpIndex = -1;
 
     bool equal = false;
-    equal = SortCellIndex(curRow, curColum, toRow, toColum, vaild);
+    equal = SortCellIndex(curRow, curColum, toRow, toColum, valid);
     if (supportAnimation_ || dragAnimation_) {
         animationItemList_.clear();
     }
-    while (vaild || equal) {
+    while (valid || equal) {
         // Get target pos
         GetPreviousGird(targetRow, targetColum);
 
@@ -2112,7 +2112,7 @@ bool RenderGridLayout::MoveItemsBackward(int32_t fromRow, int32_t fromColum, int
         targetRow = curRow;
         targetColum = curColum;
 
-        equal = SortCellIndex(curRow, curColum, toRow, toColum, vaild);
+        equal = SortCellIndex(curRow, curColum, toRow, toColum, valid);
     }
 
     return true;
@@ -2348,19 +2348,19 @@ void RenderGridLayout::StartAnimationController(GridLayoutAnimationAct animation
             case GridLayoutAnimationAct::ANIMATION_DRAG_DROP:
                 jsDropFunc_ = func;
                 break;
-            case GridLayoutAnimationAct::ANIMATION_RESTORE_SCENCE:
-                restoreScenceFunc_ = func;
+            case GridLayoutAnimationAct::ANIMATION_RESTORE_SCENE:
+                restoreSceneFunc_ = func;
                 break;
             default:
                 jsMoveFunc_ = nullptr;
                 jsDropFunc_ = nullptr;
-                restoreScenceFunc_ = nullptr;
+                restoreSceneFunc_ = nullptr;
                 break;
         }
         animationController_->Play();
 
-        for (auto itor = animationItemList_.begin(); itor != animationItemList_.end(); ++itor) {
-            AceType::DynamicCast<RenderGridLayoutItem>(*itor)->AnimationPlay();
+        for (auto iter = animationItemList_.begin(); iter != animationItemList_.end(); ++iter) {
+            AceType::DynamicCast<RenderGridLayoutItem>(*iter)->AnimationPlay();
         }
     }
 }
@@ -2396,8 +2396,8 @@ void RenderGridLayout::FinishedAnimationController(const std::string& key)
         case GridLayoutAnimationAct::ANIMATION_DRAG_DROP:
             func = jsDropFunc_;
             break;
-        case GridLayoutAnimationAct::ANIMATION_RESTORE_SCENCE:
-            func = restoreScenceFunc_;
+        case GridLayoutAnimationAct::ANIMATION_RESTORE_SCENE:
+            func = restoreSceneFunc_;
             break;
         default:
             break;
@@ -2425,28 +2425,28 @@ void RenderGridLayout::TriggerMoveEventForJS(const ItemDragInfo& info)
             insertIndex, dragingItemIndex_);
         component_->GetOnGridDragMoveId()(info, dragingItemIndex_, insertIndex);
     } else {
-        LOGE("%{public}s no onGridGragMove registered.", __PRETTY_FUNCTION__);
+        LOGE("%{public}s no onGridDragMove registered.", __PRETTY_FUNCTION__);
     }
 }
 
-void RenderGridLayout::TriggerDropEventForJS(const ItemDragInfo& info, int32_t insertIndex, bool successed)
+void RenderGridLayout::TriggerDropEventForJS(const ItemDragInfo& info, int32_t insertIndex, bool success)
 {
     if (component_->GetOnGridDropId()) {
         LOGD("%{public}s. could be insert. ItemIndex: %{public}d, InsertIndex: %{public}d ", __PRETTY_FUNCTION__,
             dragingItemIndex_, insertIndex);
-        component_->GetOnGridDropId()(info, dragingItemIndex_, insertIndex, successed);
+        component_->GetOnGridDropId()(info, dragingItemIndex_, insertIndex, success);
     } else {
         LOGE("%{public}s no onGridDrop registered.", __PRETTY_FUNCTION__);
     }
 }
 
-void RenderGridLayout::RegisterDropJSEvent(const ItemDragInfo& info, int32_t insertIndex, bool successed)
+void RenderGridLayout::RegisterDropJSEvent(const ItemDragInfo& info, int32_t insertIndex, bool success)
 {
     auto weak = WeakClaim(this);
-    RegisterDropJSFunc([weak, info, insertIndex, successed]() {
+    RegisterDropJSFunc([weak, info, insertIndex, success]() {
         auto renderGrid = weak.Upgrade();
         if (renderGrid) {
-            renderGrid->TriggerDropEventForJS(info, insertIndex, successed);
+            renderGrid->TriggerDropEventForJS(info, insertIndex, success);
         }
     });
     triggerJSDrop_.store(true);
@@ -2549,7 +2549,7 @@ void RenderGridLayout::StartFlexController(const Point& endPoint, bool includeSu
         [weak = WeakClaim(this)](const Point newPoint) {
             auto renderGrid = weak.Upgrade();
             if (renderGrid) {
-                renderGrid->UpdateFlexComponenPosition(newPoint);
+                renderGrid->UpdateFlexComponentPosition(newPoint);
             }
         });
 
@@ -2607,7 +2607,7 @@ void RenderGridLayout::CloseFlexComponent()
     isDragging_.store(false);
 }
 
-void RenderGridLayout::UpdateFlexComponenPosition(const Point& pos)
+void RenderGridLayout::UpdateFlexComponentPosition(const Point& pos)
 {
     if (GetUpdatePositionId() && isExistComponent_) {
         LOGD("RenderGridLayout::PanOnActionUpdate move x=%{public}f, y=%{public}f.", pos.GetX(), pos.GetY());

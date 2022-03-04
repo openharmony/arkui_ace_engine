@@ -253,7 +253,7 @@ void JsPerfEnd(const v8::FunctionCallbackInfo<v8::Value>& args)
         return;
     }
 
-    v8::String::Utf8Value jsMethodName(isolate, args[PERF_ARGS_MRTHOD_IDX]);
+    v8::String::Utf8Value jsMethodName(isolate, args[PERF_ARGS_METHOD_IDX]);
     if (!(*jsMethodName)) {
         return;
     }
@@ -280,7 +280,7 @@ void JsPerfBegin(const v8::FunctionCallbackInfo<v8::Value>& args)
         return;
     }
 
-    v8::String::Utf8Value jsMethodName(isolate, args[PERF_ARGS_MRTHOD_IDX]);
+    v8::String::Utf8Value jsMethodName(isolate, args[PERF_ARGS_METHOD_IDX]);
     if (!(*jsMethodName)) {
         return;
     }

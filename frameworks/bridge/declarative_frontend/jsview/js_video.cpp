@@ -33,7 +33,7 @@ void JSVideo::Create(const JSCallbackInfo& info)
     auto videoComponent = AceType::MakeRefPtr<OHOS::Ace::VideoComponentV2>();
     videoComponent->SetSaveComponentEvent(
         [videoComponent] (std::unordered_map<std::string, RefPtr<Component>> map) {
-            videoComponent->SetGuestureComponentMap(map);
+            videoComponent->SetGestureComponentMap(map);
         });
     if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
         videoComponent->SetTextDirection(TextDirection::RTL);

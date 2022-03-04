@@ -192,9 +192,9 @@ RefPtr<BaseCanvasBridge> JsAcePage::GetBridgeById(NodeId nodeId)
     return iter->second;
 }
 
-RefPtr<BaseCanvasBridge> JsAcePage::GetOffscreenCanvasBridgeById(int32_t birdgeId)
+RefPtr<BaseCanvasBridge> JsAcePage::GetOffscreenCanvasBridgeById(int32_t bridgeId)
 {
-    auto iter = offscreenCanvasBridges_.find(birdgeId);
+    auto iter = offscreenCanvasBridges_.find(bridgeId);
     if (iter == offscreenCanvasBridges_.end()) {
         LOGE("the canvas is not in the map");
         return nullptr;

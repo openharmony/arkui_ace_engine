@@ -576,7 +576,7 @@ void RequestFullWindow(const shared_ptr<JsRuntime>& runtime, const shared_ptr<Js
         if (len == customFullWindowLength) {
             shared_ptr<JsValue> param = arg->GetElement(runtime, 0);
             if (param && param->IsObject(runtime)) {
-                shared_ptr<JsValue> durationValue = param->GetProperty(runtime, APP_REQUEST_FULL_WINDOW_DUATION);
+                shared_ptr<JsValue> durationValue = param->GetProperty(runtime, APP_REQUEST_FULL_WINDOW_DURATION);
                 if (durationValue) {
                     std::string durationStr = durationValue->ToString(runtime);
                     if (!durationStr.empty()) {
@@ -1263,7 +1263,7 @@ shared_ptr<JsValue> JsHandleOffscreenCanvas(
         return runtime->NewUndefined();
     }
 
-    if (methodName == OFFSCERRN_CANVAS_CREATE) {
+    if (methodName == OFFSCREEN_CANVAS_CREATE) {
         int32_t width = ParseIntParams(runtime, arg, "width");
         int32_t height = ParseIntParams(runtime, arg, "height");
 
@@ -1364,7 +1364,7 @@ shared_ptr<JsValue> JsHandleMediaQuery(
             }
         }
     } else {
-        LOGW("system.meidaquery not support method = %{private}s", methodName.c_str());
+        LOGW("system.mediaquery not support method = %{private}s", methodName.c_str());
     }
     return runtime->NewNull();
 }
@@ -2872,7 +2872,7 @@ shared_ptr<JsValue> SyscapCanIUse(const shared_ptr<JsRuntime>& runtime, const sh
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (argc != 1) {
-        LOGE("agrc should be 1");
+        LOGE("argc should be 1");
         return runtime->NewNull();
     }
     if (!argv[0]->IsString(runtime)) {

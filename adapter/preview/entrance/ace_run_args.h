@@ -63,7 +63,7 @@ struct ACE_PREVIEW_EXPORT AceRunArgs {
     // The absolute base path of system fonts file and fonts config.
     std::string fontBasePath;
 
-    // Indecate light or dark theme.
+    // Indicate light or dark theme.
     uint32_t themeId = THEME_ID_LIGHT;
 
     OHOS::Ace::DeviceConfig deviceConfig = {

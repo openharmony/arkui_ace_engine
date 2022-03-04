@@ -57,8 +57,8 @@ protected:
 
     Dimension x_ = Dimension(-0.1, DimensionUnit::PERCENT); // x-axis default value
     Dimension y_ = Dimension(-0.1, DimensionUnit::PERCENT); // y-axis default value
-    Dimension height_ = Dimension(1.2, DimensionUnit::PERCENT); // masking area width defalut value
-    Dimension width_ = Dimension(1.2, DimensionUnit::PERCENT); // masking area height defalut  value
+    Dimension height_ = Dimension(1.2, DimensionUnit::PERCENT); // masking area width default value
+    Dimension width_ = Dimension(1.2, DimensionUnit::PERCENT); // masking area height default  value
     std::string maskUnits_ = "objectBoundingBox";
     std::string maskContentUnits_ = "userSpaceOnUse";
     Rect elementBounds_;

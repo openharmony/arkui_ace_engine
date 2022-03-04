@@ -71,5 +71,5 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(JSTextAreaController);
 };
 
-} // namespace OHOS::Ace::Fremawork
+} // namespace OHOS::Ace::Framework
 #endif  // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTAREA_H

@@ -641,9 +641,9 @@ bool FlutterAceView::IsNeedForbidToPlatform(TouchEvent point)
 
 std::unique_ptr<DrawDelegate> FlutterAceView::GetDrawDelegate()
 {
-    auto darwDelegate = std::make_unique<DrawDelegate>();
+    auto drawDelegate = std::make_unique<DrawDelegate>();
 
-    darwDelegate->SetDrawFrameCallback([this](RefPtr<Flutter::Layer>& layer, const Rect& dirty) {
+    drawDelegate->SetDrawFrameCallback([this](RefPtr<Flutter::Layer>& layer, const Rect& dirty) {
         if (!layer) {
             LOGE("layer is nullptr");
             return;
@@ -663,7 +663,7 @@ std::unique_ptr<DrawDelegate> FlutterAceView::GetDrawDelegate()
         }
     });
 
-    return darwDelegate;
+    return drawDelegate;
 }
 
 std::unique_ptr<PlatformWindow> FlutterAceView::GetPlatformWindow()

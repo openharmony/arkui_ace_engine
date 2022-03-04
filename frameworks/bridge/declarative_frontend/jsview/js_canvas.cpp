@@ -64,10 +64,10 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
     auto container = Container::Current();
     if (container) {
         auto context = container->GetPipelineContext();
-        auto compontent = AceType::DynamicCast<CustomPaintComponent>(
+        auto component = AceType::DynamicCast<CustomPaintComponent>(
             ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (compontent) {
-            compontent->SetOnReadyEvent(readyEvent_, context);
+        if (component) {
+            component->SetOnReadyEvent(readyEvent_, context);
         }
     }
 }

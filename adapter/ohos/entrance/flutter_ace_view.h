@@ -95,7 +95,7 @@ public:
         densityChangeCallback_ = std::move(callback);
     }
 
-    void RegisterSystemBarHeightChangeCallback(SystemBarHeightChangeCallbak&& callback) override
+    void RegisterSystemBarHeightChangeCallback(SystemBarHeightChangeCallback&& callback) override
     {
         systemBarHeightChangeCallback_ = std::move(callback);
     }
@@ -172,7 +172,7 @@ private:
     RotationEventCallBack rotationEventCallBack_;
     ViewChangeCallback viewChangeCallback_;
     DensityChangeCallback densityChangeCallback_;
-    SystemBarHeightChangeCallbak systemBarHeightChangeCallback_;
+    SystemBarHeightChangeCallback systemBarHeightChangeCallback_;
     SurfaceDestroyCallback surfaceDestroyCallback_;
     IdleCallback idleCallback_;
     DragEventCallBack dragEventCallback_;

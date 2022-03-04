@@ -23,9 +23,9 @@ namespace OHOS::Ace {
 
 std::unique_ptr<DrawDelegate> FlutterRenderForm::GetDrawDelegate()
 {
-    auto darwDelegate = std::make_unique<DrawDelegate>();
+    auto drawDelegate = std::make_unique<DrawDelegate>();
 
-    darwDelegate->SetDrawFrameCallback([this](RefPtr<Flutter::Layer>& layer, const Rect& dirty) {
+    drawDelegate->SetDrawFrameCallback([this](RefPtr<Flutter::Layer>& layer, const Rect& dirty) {
         LOGI("form draw delete");
         if (!layer_) {
             layer_ = AceType::MakeRefPtr<Flutter::OffsetLayer>();
@@ -37,7 +37,7 @@ std::unique_ptr<DrawDelegate> FlutterRenderForm::GetDrawDelegate()
         MarkNeedRender(true);
     });
 
-    return darwDelegate;
+    return drawDelegate;
 }
 
 void FlutterRenderForm::RemoveChildren()

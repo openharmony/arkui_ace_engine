@@ -228,7 +228,7 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::EcmaVM* vm, panda::Loca
     std::string str = args[0]->ToString(vm)->ToString();
     StringUtils::SplitStr(str, ".", splitStr);
     if (splitStr.size() != 2) {
-        LOGE("input string res value must can be splited by dot");
+        LOGE("input string res value must can be split by dot");
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -1161,7 +1161,7 @@ void JsRegisterViews(BindingTarget globalObj)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "IconPosition"), *iconPosition);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "PickerStyle"), *pickerStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "BadgePosition"), *badgePosition);
-    LOGD("View classes and jsCreateDocuemnt, registerObservableObject functions registered.");
+    LOGD("View classes and jsCreateDocument, registerObservableObject functions registered.");
 }
 
 } // namespace OHOS::Ace::Framework

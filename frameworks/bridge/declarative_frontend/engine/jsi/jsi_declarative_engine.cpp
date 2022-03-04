@@ -1301,7 +1301,7 @@ void JsiDeclarativeEngine::UpdateApplicationState(const std::string& packageName
     } else if (state == Frontend::State::ON_HIDE) {
         CallAppFunc("onHide");
     } else {
-        LOGW("unsupport state");
+        LOGW("unsupported state");
     }
 }
 

@@ -370,7 +370,7 @@ std::string JsiDeclarativeGroupJsBridge::SerializationObjectToString(
         LOGE("SerializationObjectToString error: JSON has no attribute stringify");
         return "";
     }
-    JsiDeclarativeUtils::SetCurrentState(JsErrorType::STRINGFY_ERROR);
+    JsiDeclarativeUtils::SetCurrentState(JsErrorType::STRINGIFY_ERROR);
     shared_ptr<JsValue> strValue = jsFunc->Call(runtime, runtime->NewUndefined(), { val }, 1);
     if (strValue->IsUndefined(runtime)) {
         LOGE("SerializationObjectToString error: js call error.");
@@ -421,7 +421,7 @@ ParseJsDataResult JsiDeclarativeGroupJsBridge::ParseJsPara(const shared_ptr<JsRu
         } else if (val->IsUndefined(runtime)) {
             LOGD("Process callNative para type:undefined");
         } else {
-            LOGE("Process callNative para type: unsupport type");
+            LOGE("Process callNative para type: unsupported type");
             return ParseJsDataResult::PARSE_JS_ERR_UNSUPPORTED_TYPE;
         }
     }

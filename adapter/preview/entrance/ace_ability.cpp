@@ -249,7 +249,7 @@ void AceAbility::RunEventLoop()
     }
     loopRunning_ = true;
 
-    // Currently exit loop is only to restart the AceContainer for real-time preivew case.
+    // Currently exit loop is only to restart the AceContainer for real-time preview case.
     // Previewer background thread will release the AceAbility instance and create new one,
     // then call the InitEnv() and Start() again.
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
@@ -350,7 +350,7 @@ void AceAbility::SetConfigChanges(const std::string& configChanges)
             configChanges_.watchDensity = true;
             continue;
         } else {
-            LOGW("unsupport config %{public}s", singleConfig.c_str());
+            LOGW("unsupported config %{public}s", singleConfig.c_str());
         }
     }
 }

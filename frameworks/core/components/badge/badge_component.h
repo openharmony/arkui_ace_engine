@@ -39,7 +39,7 @@ public:
     const EventMarker& GetClickEvent() const;
     BadgePosition GetBadgePosition() const;
     const Edge& GetPadding() const;
-    const Dimension& GetBadgeCicleSize() const;
+    const Dimension& GetBadgeCircleSize() const;
     const std::string& GetBadgeLabel() const;
     void SetPadding(const Edge& padding);
     int64_t GetMessageCount() const;

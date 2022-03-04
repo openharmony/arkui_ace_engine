@@ -44,7 +44,7 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
     JSClass<JSCheckboxGroup>::Declare("CheckboxGroup");
 
     JSClass<JSCheckboxGroup>::StaticMethod("create", &JSCheckboxGroup::Create);
-    JSClass<JSCheckboxGroup>::StaticMethod("selectAll", &JSCheckboxGroup::SetSelecteAll);
+    JSClass<JSCheckboxGroup>::StaticMethod("selectAll", &JSCheckboxGroup::SetSelectAll);
     JSClass<JSCheckboxGroup>::StaticMethod("onChange", &JSCheckboxGroup::SetOnChange);
     JSClass<JSCheckboxGroup>::StaticMethod("selectedColor", &JSCheckboxGroup::SelectedColor);
     JSClass<JSCheckboxGroup>::StaticMethod("width", &JSCheckboxGroup::JsWidth);
@@ -84,7 +84,7 @@ void JSCheckboxGroup::Create(const JSCallbackInfo& info)
     box->SetHeight(checkBoxTheme->GetHeight() + verticalPadding * PADDING_MULTIPLE);
 }
 
-void JSCheckboxGroup::SetSelecteAll(const JSCallbackInfo& info)
+void JSCheckboxGroup::SetSelectAll(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsBoolean()) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments, arg is not a bool");

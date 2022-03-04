@@ -404,7 +404,7 @@ void V8DeclarativeGroupJsBridge::ProcessParseJsError(
     std::string errMessage;
     switch (errorType) {
         case ParseJsDataResult::PARSE_JS_ERR_UNSUPPORTED_TYPE:
-            errMessage = "unsupporteded js parameter types";
+            errMessage = "unsupported js parameter types";
             dispatcherUpgrade->DispatchPluginError(callbackId,
                 static_cast<int32_t>(ParseJsDataResult::PARSE_JS_ERR_UNSUPPORTED_TYPE), std::move(errMessage));
             break;

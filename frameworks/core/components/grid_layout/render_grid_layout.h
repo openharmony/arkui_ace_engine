@@ -62,7 +62,7 @@ enum class GridLayoutAnimationAct {
     ANIMATION_NONE = 0,
     ANIMATION_DRAG_MOVE,
     ANIMATION_DRAG_DROP,
-    ANIMATION_RESTORE_SCENCE,
+    ANIMATION_RESTORE_SCENE,
 };
 
 enum class GridSpringGravitationDirect {
@@ -237,7 +237,7 @@ protected:
 
     void UpdateAccessibilityAttr();
 
-    std::vector<double> ParseArgs(const std::string& agrs, double size, double gap);
+    std::vector<double> ParseArgs(const std::string& args, double size, double gap);
 
     std::vector<double> ParseAutoFill(const std::vector<std::string>& strs, double size, double gap);
 
@@ -371,7 +371,7 @@ protected:
     void CalcSpringGravitationDirect();
 
     void TriggerMoveEventForJS(const ItemDragInfo& info);
-    void TriggerDropEventForJS(const ItemDragInfo& info, int32_t insertIndex, bool successed);
+    void TriggerDropEventForJS(const ItemDragInfo& info, int32_t insertIndex, bool success);
     void InitAnimationController(const WeakPtr<PipelineContext>& context);
     bool AddNodeAnimationToController(int32_t itemIndex, int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan);
     void AddNodeAnimationToControllerForDrop(
@@ -400,8 +400,8 @@ protected:
     void FinishedFlexController();
     void FinishedFlexControllerForSubGrid();
     void CloseFlexComponent();
-    void UpdateFlexComponenPosition(const Point& pos);
-    void RegisterDropJSEvent(const ItemDragInfo& info, int32_t insertIndex, bool successed);
+    void UpdateFlexComponentPosition(const Point& pos);
+    void RegisterDropJSEvent(const ItemDragInfo& info, int32_t insertIndex, bool success);
     void RegisterDropJSFunc(const OnCallJSDropFunc& func);
     void CallDropJSFunc();
     bool CheckAnimation();
@@ -532,7 +532,7 @@ protected:
     std::mutex animationLock_;
     OnAnimationCallJSFunc jsMoveFunc_ = nullptr;
     OnAnimationCallJSFunc jsDropFunc_ = nullptr;
-    OnAnimationCallJSFunc restoreScenceFunc_ = nullptr;
+    OnAnimationCallJSFunc restoreSceneFunc_ = nullptr;
     std::map<int32_t, Point> gridItemPosition_;
     std::list<RefPtr<RenderNode>> animationItemList_;
     std::atomic<bool> runFlexAnimation_;

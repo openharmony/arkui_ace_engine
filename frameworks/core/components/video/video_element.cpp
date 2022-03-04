@@ -350,9 +350,9 @@ void VideoElement::PreparePlayer()
             LOGE("get data provider fail");
             return;
         }
-        auto dataAilityHelper = dataProvider->GetDataAbilityHelper();
-        if (dataAilityHelper) {
-            fd = dataAilityHelper->OpenFile(filePath, "r");
+        auto dataAbilityHelper = dataProvider->GetDataAbilityHelper();
+        if (dataAbilityHelper) {
+            fd = dataAbilityHelper->OpenFile(filePath, "r");
         }
     } else if (!StringUtils::StartWith(filePath, "http")) {
         filePath = GetAssetAbsolutePath(filePath);
@@ -1664,7 +1664,7 @@ void VideoElement::FullScreen()
                     return;
                 }
 
-                // add fullscreen component cover componen
+                // add fullscreen component cover component
                 if (IsDeclarativePara()) {
                     stackElement->PushComponent(AceType::MakeRefPtr<ComposedComponent>("0", "fullscreen", component));
                 } else {

@@ -34,7 +34,7 @@ const std::set<std::string> FONT_WEIGHTS = {
 };
 const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
 const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
-const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Defaulte value is low.
+const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
 constexpr double DEFAULT_QUALITY = 0.92;
 template<typename T>
 inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t length, T defaultValue)
@@ -868,7 +868,7 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
         }
     }
 
-    // 2 Create piexclmap
+    // 2 Create pixelmap
     OHOS::Media::InitializationOptions options;
     options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
@@ -878,7 +878,7 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     options.editable = true;
     std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(data, length, options);
 
-    // 3 piexclmap to NapiValue
+    // 3 pixelmap to NapiValue
     NativeEngine* nativeEngine = nullptr;
 #ifdef USE_V8_ENGINE
     nativeEngine = V8DeclarativeEngineInstance::GetNativeEngine();

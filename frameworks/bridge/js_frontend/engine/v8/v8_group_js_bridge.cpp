@@ -358,7 +358,7 @@ void V8GroupJsBridge::ProcessParseJsError(ParseJsDataResult errorType, v8::Isola
     std::string errMessage;
     switch (errorType) {
         case ParseJsDataResult::PARSE_JS_ERR_UNSUPPORTED_TYPE:
-            errMessage = "unsupporteded js parameter types";
+            errMessage = "unsupported js parameter types";
             dispatcherUpgrade->DispatchPluginError(callbackId,
                 static_cast<int32_t>(ParseJsDataResult::PARSE_JS_ERR_UNSUPPORTED_TYPE), std::move(errMessage));
             break;
@@ -432,7 +432,7 @@ std::string V8GroupJsBridge::SerializationObjectToString(v8::Local<v8::Context> 
     v8::Local<v8::Value> argv[] = { val };
     bool succ = function->Call(context, globalObj, 1, argv).ToLocal(&strValue);
     if (!succ) {
-        V8Utils::JsStdDumpErrorAce(isolate, &tryCatch, JsErrorType::STRINGFY_ERROR);
+        V8Utils::JsStdDumpErrorAce(isolate, &tryCatch, JsErrorType::STRINGIFY_ERROR);
         return "";
     }
 

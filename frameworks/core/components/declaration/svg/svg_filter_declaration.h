@@ -23,8 +23,8 @@ namespace OHOS::Ace {
 struct SvgFilterAttribute : SvgBaseAttribute {
     Dimension x = Dimension(-0.1, DimensionUnit::PERCENT); // x-axis default value
     Dimension y = Dimension(-0.1, DimensionUnit::PERCENT); // y-axis default value
-    Dimension width = Dimension(1.2, DimensionUnit::PERCENT); // masking area width defalut value
-    Dimension height = Dimension(1.2, DimensionUnit::PERCENT); // masking area height defalut value
+    Dimension width = Dimension(1.2, DimensionUnit::PERCENT); // masking area width default value
+    Dimension height = Dimension(1.2, DimensionUnit::PERCENT); // masking area height default value
 };
 
 class SvgFilterDeclaration : public SvgBaseDeclaration {

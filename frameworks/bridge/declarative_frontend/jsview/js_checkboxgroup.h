@@ -25,7 +25,7 @@ class JSCheckboxGroup : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
-    static void SetSelecteAll(const JSCallbackInfo& info);
+    static void SetSelectAll(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& args);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
