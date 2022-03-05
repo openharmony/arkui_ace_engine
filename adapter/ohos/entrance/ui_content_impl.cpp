@@ -349,12 +349,16 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     if (appInfo && flutterAssetManager) {
         std::string nativeLibraryPath = appInfo->nativeLibraryPath;
         if (!nativeLibraryPath.empty()) {
-            nativeLibraryPath.pop_back();
-            std::string libPath = context->GetBundleCodeDir() + nativeLibraryPath;
+            if (nativeLibraryPath.back() == '/') {
+                nativeLibraryPath.pop_back();
+            }
+            std::string libPath = context->GetBundleCodeDir();
+            libPath += (libPath.back() == '/') ? nativeLibraryPath : "/" + nativeLibraryPath;
             LOGI("napi lib path = %{private}s", libPath.c_str());
             flutterAssetManager->SetLibPath(libPath);
         }
     }
+
     auto pluginUtils = std::make_shared<PluginUtilsImpl>();
     PluginManager::GetInstance().SetAceAbility(nullptr, pluginUtils);
     // create container
