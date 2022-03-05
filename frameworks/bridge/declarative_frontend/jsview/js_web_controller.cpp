@@ -389,8 +389,7 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
 
 void JSWebController::InitJavascriptInterface()
 {
-    LOGI("JavascriptInterface init js interface");
-    if (webController_ == nullptr) {
+    if (!webController_) {
         LOGW("JSWebController not ready");
         return;
     }
@@ -398,9 +397,10 @@ void JSWebController::InitJavascriptInterface()
     if (!jsRegisterCallBackInit_) {
         LOGI("JSWebController set webview javascript CallBack");
         jsRegisterCallBackInit_ = true;
-        WebController::JavaScriptCallBackImpl callback = [weak = WeakClaim(this)](const std::string& objectName,
-                                                             const std::string& objectMethod,
-                                                             const std::vector<std::shared_ptr<WebJSValue>>& args) {
+        WebController::JavaScriptCallBackImpl callback =
+            [weak = WeakClaim(this)](
+            const std::string& objectName, const std::string& objectMethod,
+            const std::vector<std::shared_ptr<WebJSValue>>& args) {
             auto jsWebController = weak.Upgrade();
             if (jsWebController == nullptr) {
                 return std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
@@ -416,11 +416,10 @@ void JSWebController::InitJavascriptInterface()
 
 void JSWebController::SetJavascriptInterface(const JSCallbackInfo& args)
 {
-    LOGI("SetJavascriptInterface set js interface");
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
     }
-    if (webController_ == nullptr) {
+    if (!webController_) {
         LOGW("JSWebController not ready");
         return;
     }
@@ -446,7 +445,7 @@ void JSWebController::SetJavascriptInterface(const JSCallbackInfo& args)
         for (size_t i = 0; i < array->Length(); i++) {
             JSRef<JSVal> method = array->GetValueAt(i);
             if (method->IsString()) {
-                methods.push_back(method->ToString());
+                methods.emplace_back(method->ToString());
             }
         }
     }

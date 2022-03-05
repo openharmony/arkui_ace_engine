@@ -75,7 +75,7 @@ private:
     using ObjectClassMap  = std::map<std::string, JSRef<JSObject>>;
     ObjectClassMap objectorMap_;
     bool jsRegisterCallBackInit_ = false;
-    std::map<std::string, std::vector<std::string>> methods_;
+    std::unordered_map<std::string, std::vector<std::string>> methods_;
     RefPtr<WebController> webController_;
     ACE_DISALLOW_COPY_AND_MOVE(JSWebController);
 };
