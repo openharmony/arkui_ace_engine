@@ -74,6 +74,69 @@ private:
 };
 
 
+class JSWebConsoleLog : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebConsoleLog>::Declare("ConsoleMessage");
+        JSClass<JSWebConsoleLog>::CustomMethod("getLineNumber", &JSWebConsoleLog::LineNumer);
+        JSClass<JSWebConsoleLog>::CustomMethod("getMessage", &JSWebConsoleLog::Log);
+        JSClass<JSWebConsoleLog>::CustomMethod("getMessageLevel", &JSWebConsoleLog::LogLevel);
+        JSClass<JSWebConsoleLog>::CustomMethod("getSourceId", &JSWebConsoleLog::SourceId);
+        JSClass<JSWebConsoleLog>::Bind(globalObj, &JSWebConsoleLog::Constructor, &JSWebConsoleLog::Destructor);
+    }
+
+    void SetMessage(const RefPtr<WebConsoleLog>& message)
+    {
+        message_ = message;
+    }
+
+    void LineNumer(const JSCallbackInfo& args)
+    {
+        auto code = JSVal(ToJSValue(message_->LineNumer()));
+        auto descriptionRef = JSRef<JSVal>::Make(code);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void Log(const JSCallbackInfo& args)
+    {
+        auto code = JSVal(ToJSValue(message_->Log()));
+        auto descriptionRef = JSRef<JSVal>::Make(code);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void LogLevel(const JSCallbackInfo& args)
+    {
+        auto code = JSVal(ToJSValue(message_->LogLevel()));
+        auto descriptionRef = JSRef<JSVal>::Make(code);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void SourceId(const JSCallbackInfo& args)
+    {
+        auto code = JSVal(ToJSValue(message_->SourceId()));
+        auto descriptionRef = JSRef<JSVal>::Make(code);
+        args.SetReturnValue(descriptionRef);
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebConsoleLog = Referenced::MakeRefPtr<JSWebConsoleLog>();
+        jsWebConsoleLog->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebConsoleLog));
+    }
+
+    static void Destructor(JSWebConsoleLog* jsWebConsoleLog)
+    {
+        if (jsWebConsoleLog != nullptr) {
+            jsWebConsoleLog->DecRefCount();
+        }
+    }
+
+    RefPtr<WebConsoleLog> message_;
+};
+
 class JSWebGeolocation : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -320,6 +383,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onAlert", &JSWeb::OnAlert);
     JSClass<JSWeb>::StaticMethod("onBeforeUnload", &JSWeb::OnBeforeUnload);
     JSClass<JSWeb>::StaticMethod("onConfirm", &JSWeb::OnConfirm);
+    JSClass<JSWeb>::StaticMethod("onConsole", &JSWeb::OnConsoleLog);
     JSClass<JSWeb>::StaticMethod("onPageBegin", &JSWeb::OnPageStart);
     JSClass<JSWeb>::StaticMethod("onPageEnd", &JSWeb::OnPageFinish);
     JSClass<JSWeb>::StaticMethod("onProgressChange", &JSWeb::OnProgressChange);
@@ -349,6 +413,20 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSWebResourceRequest::JSBind(globalObj);
     JSWebResourceError::JSBind(globalObj);
     JSWebResourceResponse::JSBind(globalObj);
+    JSWebConsoleLog::JSBind(globalObj);
+}
+
+JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+
+    JSRef<JSObject> messageObj = JSClass<JSWebConsoleLog>::NewInstance();
+    auto jsWebConsoleLog = Referenced::Claim(messageObj->Unwrap<JSWebConsoleLog>());
+    jsWebConsoleLog->SetMessage(eventInfo.GetMessage());
+
+    obj->SetPropertyObject("message", messageObj);
+
+    return JSRef<JSVal>::Cast(obj);
 }
 
 JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
@@ -511,6 +589,26 @@ void JSWeb::OnCommonDialog(const JSCallbackInfo& args, int dialogEventType)
         };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetOnCommonDialogImpl(std::move(jsCallback), static_cast<DialogEventType>(dialogEventType));
+}
+
+void JSWeb::OnConsoleLog(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebConsoleLogEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadWebConsoleLogEventToJSValue);
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) -> bool {
+            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebConsoleLogEvent>(info);
+            JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
+            if (message->IsBoolean()) {
+                return message->ToBoolean();
+            }
+            return false;
+        };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnConsoleImpl(std::move(jsCallback));
 }
 
 void JSWeb::OnPageStart(const JSCallbackInfo& args)

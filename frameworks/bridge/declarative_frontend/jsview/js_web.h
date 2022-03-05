@@ -28,6 +28,7 @@ public:
     static void OnAlert(const JSCallbackInfo& args);
     static void OnBeforeUnload(const JSCallbackInfo& args);
     static void OnConfirm(const JSCallbackInfo& args);
+    static void OnConsoleLog(const JSCallbackInfo& args);
     static void OnPageStart(const JSCallbackInfo& args);
     static void OnPageFinish(const JSCallbackInfo& args);
     static void OnProgressChange(const JSCallbackInfo& args);

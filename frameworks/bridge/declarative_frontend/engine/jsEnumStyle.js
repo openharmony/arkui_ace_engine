@@ -735,3 +735,12 @@ var MixedMode;
   MixedMode[MixedMode["Compatible"] = 1] = "Compatible";
   MixedMode[MixedMode["None"] = 2] = "None";
 })(MixedMode || (MixedMode = {}));
+
+var MessageLevel
+(function (MessageLevel) {
+  MessageLevel[MessageLevel["Debug"] = 1] = "Debug";
+  MessageLevel[MessageLevel["Info"] = 2] = "Info";
+  MessageLevel[MessageLevel["Warn"] = 3] = "Warn";
+  MessageLevel[MessageLevel["Error"] = 4] = "Error";
+  MessageLevel[MessageLevel["Log"] = 5] = "Log";
+})(MessageLevel || (MessageLevel = {}));

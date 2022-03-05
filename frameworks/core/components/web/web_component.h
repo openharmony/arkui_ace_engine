@@ -660,6 +660,20 @@ public:
 
     void RequestFocus();
 
+    using OnConsoleImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnConsole(const BaseEventInfo* info) const
+    {
+        if (consoleImpl_) {
+            return consoleImpl_(info);
+        }
+        return false;
+    }
+
+    void SetOnConsoleImpl(OnConsoleImpl && consoleImpl)
+    {
+        consoleImpl_ = std::move(consoleImpl);
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -670,6 +684,8 @@ private:
     OnCommonDialogImpl onAlertImpl_;
     OnCommonDialogImpl onConfirmImpl_;
     OnCommonDialogImpl onBeforeUnloadImpl_;
+    OnConsoleImpl consoleImpl_;
+
     std::string type_;
     bool isJsEnabled_ = true;
     bool isContentAccessEnabled_ = true;

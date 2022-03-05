@@ -66,6 +66,38 @@ constexpr char WEB_ERROR_MSG_CREATEFAIL[] = "create web_delegate failed.";
 
 } // namespace
 
+int ConsoleLogOhos::LineNumer()
+{
+    if (message_) {
+        return message_->LineNumer();
+    }
+    return -1;
+}
+
+const std::string& ConsoleLogOhos::Log()
+{
+    if (message_) {
+        return message_->Log();
+    }
+    return "";
+}
+
+int ConsoleLogOhos::LogLevel()
+{
+    if (message_) {
+        return message_->LogLevel();
+    }
+    return -1;
+}
+
+const std::string& ConsoleLogOhos::SourceId()
+{
+    if (message_) {
+        return message_->SourceId();
+    }
+    return "";
+}
+
 void ResultOhos::Confirm()
 {
     if (result_) {
@@ -905,6 +937,7 @@ void WebDelegate::InitWebViewWithWindow()
 
             auto webviewClient = std::make_shared<WebClientImpl>(Container::CurrentId());
             webviewClient->SetWebDelegate(weak);
+            webviewClient->SetPipelineContext(delegate->context_);
             delegate->webview_->SetNWebHandler(webviewClient);
 
             // Set downloadListenerImpl
@@ -962,6 +995,7 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             }
             auto nweb_handler = std::make_shared<WebClientImpl>(Container::CurrentId());
             nweb_handler->SetWebDelegate(weak);
+            nweb_handler->SetPipelineContext(delegate->context_);
             auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>(Container::CurrentId());
             downloadListenerImpl->SetWebDelegate(weak);
             delegate->webview_->SetNWebHandler(nweb_handler);
@@ -1237,6 +1271,12 @@ void WebDelegate::OnFocus()
     if (onFocusV2_) {
         onFocusV2_(std::make_shared<LoadWebOnFocusEvent>(""));
     }
+}
+
+bool WebDelegate::OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message)
+{
+    auto param = std::make_shared<LoadWebConsoleLogEvent>(AceType::MakeRefPtr<ConsoleLogOhos>(message));
+    return webComponent_->OnConsole(param.get());
 }
 
 sptr<OHOS::Rosen::Window> WebDelegate::CreateWindow()
