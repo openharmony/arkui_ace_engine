@@ -1378,9 +1378,9 @@ void QjsPaEngine::OnDelete(const int64_t formId)
     ACE_DCHECK(ctx);
 
     Framework::QJSHandleScope handleScope(ctx);
-    JSValue paFunc = GetPaFunc("onDelete");
+    JSValue paFunc = GetPaFunc("onDestroy");
 
-    JSValue argFormIdJSValue = JS_NewInt32(ctx, formId);
+    JSValue argFormIdJSValue = JS_NewString(ctx, std::to_string(formId).c_str());
 
     JSValueConst argv[] = { argFormIdJSValue };
     JSValue retVal = Framework::QJSUtils::Call(ctx, paFunc, JS_UNDEFINED, countof(argv), argv);
@@ -1398,9 +1398,9 @@ void QjsPaEngine::OnTriggerEvent(const int64_t formId, const std::string& messag
     ACE_DCHECK(ctx);
 
     Framework::QJSHandleScope handleScope(ctx);
-    JSValue paFunc = GetPaFunc("onTriggerEvent");
+    JSValue paFunc = GetPaFunc("onEvent");
 
-    JSValue argFormIdJSValue = JS_NewInt32(ctx, formId);
+    JSValue argFormIdJSValue = JS_NewString(ctx, std::to_string(formId).c_str());
     JSValue argMessageJSValue = JS_NewString(ctx, message.c_str());
 
     JSValueConst argv[] = { argFormIdJSValue, argMessageJSValue };
@@ -1421,7 +1421,7 @@ void QjsPaEngine::OnUpdate(const int64_t formId)
     Framework::QJSHandleScope handleScope(ctx);
     JSValue paFunc = GetPaFunc("onUpdate");
 
-    JSValue argFormIdJSValue = JS_NewInt32(ctx, formId);
+    JSValue argFormIdJSValue = JS_NewString(ctx, std::to_string(formId).c_str());
 
     JSValueConst argv[] = { argFormIdJSValue };
     JSValue retVal = Framework::QJSUtils::Call(ctx, paFunc, JS_UNDEFINED, countof(argv), argv);
@@ -1441,7 +1441,7 @@ void QjsPaEngine::OnCastTemptoNormal(const int64_t formId)
     Framework::QJSHandleScope handleScope(ctx);
     JSValue paFunc = GetPaFunc("onCastToNormal");
 
-    JSValue argFormIdJSValue = JS_NewInt32(ctx, formId);
+    JSValue argFormIdJSValue = JS_NewString(ctx, std::to_string(formId).c_str());
 
     JSValueConst argv[] = { argFormIdJSValue };
     JSValue retVal = Framework::QJSUtils::Call(ctx, paFunc, JS_UNDEFINED, countof(argv), argv);
@@ -1459,7 +1459,7 @@ void QjsPaEngine::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEven
     ACE_DCHECK(ctx);
 
     Framework::QJSHandleScope handleScope(ctx);
-    JSValue paFunc = GetPaFunc("onVisibilityChanged");
+    JSValue paFunc = GetPaFunc("onVisibilityChange");
 
     std::string strJsonResult("{");
     for (auto item = formEventsMap.begin(); item != formEventsMap.end(); item++) {

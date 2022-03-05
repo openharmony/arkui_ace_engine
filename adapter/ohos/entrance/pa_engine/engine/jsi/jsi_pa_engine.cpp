@@ -1489,8 +1489,8 @@ void JsiPaEngine::OnDelete(const int64_t formId)
     LOGI("JsiPaEngine OnDelete");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewInt32(formId) };
-    auto func = GetPaFunc("onDelete");
+    const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewString(std::to_string(formId)) };
+    auto func = GetPaFunc("onDestroy");
     CallFunc(func, argv);
 }
 
@@ -1500,10 +1500,10 @@ void JsiPaEngine::OnTriggerEvent(const int64_t formId, const std::string& messag
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     const std::vector<shared_ptr<JsValue>>& argv = {
-        runtime->NewInt32(formId),
+        runtime->NewString(std::to_string(formId)),
         runtime->NewString(message)
     };
-    auto func = GetPaFunc("onTriggerEvent");
+    auto func = GetPaFunc("onEvent");
     CallFunc(func, argv);
 }
 
@@ -1512,7 +1512,7 @@ void JsiPaEngine::OnUpdate(const int64_t formId)
     LOGI("JsiPaEngine OnUpdate");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewInt32(formId) };
+    const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewString(std::to_string(formId)) };
     auto func = GetPaFunc("onUpdate");
     CallFunc(func, argv);
 }
@@ -1522,7 +1522,7 @@ void JsiPaEngine::OnCastTemptoNormal(const int64_t formId)
     LOGD("JsiPaEngine OnCastTemptoNormal");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewInt32(formId) };
+    const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewString(std::to_string(formId)) };
     auto func = GetPaFunc("onCastToNormal");
     CallFunc(func, argv);
 }
@@ -1543,7 +1543,7 @@ void JsiPaEngine::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEven
 
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     const std::vector<shared_ptr<JsValue>>& argv = { runtime->ParseJson(strJsonResult) };
-    auto func = GetPaFunc("onVisibilityChanged");
+    auto func = GetPaFunc("onVisibilityChange");
     CallFunc(func, argv);
 }
 
