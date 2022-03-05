@@ -164,7 +164,7 @@ public:
         auto descriptionRef = JSRef<JSVal>::Make(reason);
         args.SetReturnValue(descriptionRef);
     }
-    
+
     void GetResponseCode(const JSCallbackInfo& args)
     {
         auto code = JSVal(ToJSValue(response_->GetStatusCode()));
@@ -196,7 +196,6 @@ public:
     {
         JSClass<JSWebResourceRequest>::Declare("WebResourceRequest");
         JSClass<JSWebResourceRequest>::CustomMethod("getRequestUrl", &JSWebResourceRequest::GetUrl);
-        JSClass<JSWebResourceRequest>::CustomMethod("getRequestHeader", &JSWebResourceRequest::GetHeaders);
         JSClass<JSWebResourceRequest>::Bind(
             globalObj, &JSWebResourceRequest::Constructor, &JSWebResourceRequest::Destructor);
     }
