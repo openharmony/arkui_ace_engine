@@ -36,6 +36,7 @@ struct WebEvent : Event {
     EventMarker requestFocusEventId;
     EventMarker onFocusEventId;
     EventMarker pageErrorEventId;
+    EventMarker httpErrorEventId;
     EventMarker messageEventId;
     EventMarker downloadStartEventId;
 };
@@ -185,6 +186,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.pageErrorEventId;
+    }
+
+    void SetHttpErrorEventId(const EventMarker& httpErrorEventId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.httpErrorEventId = httpErrorEventId;
+    }
+
+    const EventMarker& GetHttpErrorEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.httpErrorEventId;
     }
 
     void SetMessageEventId(const EventMarker& messageEventId)

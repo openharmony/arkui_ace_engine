@@ -40,6 +40,56 @@ private:
     int32_t code_;
 };
 
+class ACE_EXPORT WebResponse : public AceType {
+    DECLARE_ACE_TYPE(WebResponse, AceType)
+
+public:
+    WebResponse(const std::map<std::string, std::string>& headers, const std::string& data, const std::string& encoding,
+        const std::string& mimeType, const std::string& reason, int32_t statusCode)
+        : headers_(headers), data_(data), encoding_(encoding), mimeType_(mimeType), reason_(reason),
+          statusCode_(statusCode)
+    {}
+    ~WebResponse() = default;
+
+    const std::map<std::string, std::string>& GetHeaders() const
+    {
+        return headers_;
+    }
+
+    const std::string& GetData() const
+    {
+        return data_;
+    }
+
+    const std::string& GetEncoding() const
+    {
+        return encoding_;
+    }
+
+    const std::string& GetMimeType() const
+    {
+        return mimeType_;
+    }
+
+    const std::string& GetReason() const
+    {
+        return encoding_;
+    }
+
+    int32_t GetStatusCode() const
+    {
+        return statusCode_;
+    }
+
+private:
+    std::map<std::string, std::string> headers_;
+    std::string data_;
+    std::string encoding_;
+    std::string mimeType_;
+    std::string reason_;
+    int32_t statusCode_;
+};
+
 class ACE_EXPORT WebRequest : public AceType {
     DECLARE_ACE_TYPE(WebRequest, AceType)
 
@@ -290,6 +340,58 @@ private:
     std::string contentDisposition_;
     std::string mimetype_;
     long contentLength_;
+};
+
+class ACE_EXPORT ReceivedErrorEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ReceivedErrorEvent, BaseEventInfo);
+
+public:
+    ReceivedErrorEvent(const RefPtr<WebRequest>& request, const RefPtr<WebError>& error)
+        : BaseEventInfo("ReceivedErrorEvent"), request_(request), error_(error)
+    {
+        LOGI("ReceivedErrorEvent constructor");
+    }
+    ~ReceivedErrorEvent() = default;
+
+    const RefPtr<WebRequest>& GetRequest() const
+    {
+        return request_;
+    }
+
+    const RefPtr<WebError>& GetError() const
+    {
+        return error_;
+    }
+
+private:
+    RefPtr<WebRequest> request_;
+    RefPtr<WebError> error_;
+};
+
+class ACE_EXPORT ReceivedHttpErrorEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ReceivedHttpErrorEvent, BaseEventInfo);
+
+public:
+    ReceivedHttpErrorEvent(const RefPtr<WebRequest>& request, const RefPtr<WebResponse>& response)
+        : BaseEventInfo("ReceivedHttpErrorEvent"), request_(request), response_(response)
+    {
+        LOGI("ReceivedHttpErrorEvent constructor");
+    }
+    ~ReceivedHttpErrorEvent() = default;
+
+    const RefPtr<WebRequest>& GetRequest() const
+    {
+        return request_;
+    }
+
+    const RefPtr<WebResponse>& GetResponse() const
+    {
+        return response_;
+    }
+
+private:
+    RefPtr<WebRequest> request_;
+    RefPtr<WebResponse> response_;
 };
 
 class ACE_EXPORT LoadWebRequestFocusEvent : public BaseEventInfo {

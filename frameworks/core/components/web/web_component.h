@@ -482,6 +482,16 @@ public:
         return declaration_->GetPageErrorEventId();
     }
 
+    void SetHttpErrorEventId(const EventMarker& httpErrorEventId)
+    {
+        declaration_->SetHttpErrorEventId(httpErrorEventId);
+    }
+
+    const EventMarker& GetHttpErrorEventId() const
+    {
+        return declaration_->GetHttpErrorEventId();
+    }
+
     void SetMessageEventId(const EventMarker& messageEventId)
     {
         declaration_->SetMessageEventId(messageEventId);

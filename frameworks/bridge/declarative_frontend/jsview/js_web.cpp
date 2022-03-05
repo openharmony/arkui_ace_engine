@@ -74,7 +74,168 @@ private:
 
     RefPtr<WebGeolocation> webGeolocation_;
 };
+
+class JSWebResourceError : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebResourceError>::Declare("WebResourceError");
+        JSClass<JSWebResourceError>::CustomMethod("getErrorCode", &JSWebResourceError::GetErrorCode);
+        JSClass<JSWebResourceError>::CustomMethod("getErrorInfo", &JSWebResourceError::GetErrorInfo);
+        JSClass<JSWebResourceError>::Bind(globalObj, &JSWebResourceError::Constructor, &JSWebResourceError::Destructor);
+    }
+
+    void SetEvent(const ReceivedErrorEvent& eventInfo)
+    {
+        error_ = eventInfo.GetError();
+    }
+
+    void GetErrorCode(const JSCallbackInfo& args)
+    {
+        auto code = JSVal(ToJSValue(error_->GetCode()));
+        auto descriptionRef = JSRef<JSVal>::Make(code);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetErrorInfo(const JSCallbackInfo& args)
+    {
+        auto info = JSVal(ToJSValue(error_->GetInfo()));
+        auto descriptionRef = JSRef<JSVal>::Make(info);
+        args.SetReturnValue(descriptionRef);
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jSWebResourceError = Referenced::MakeRefPtr<JSWebResourceError>();
+        jSWebResourceError->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jSWebResourceError));
+    }
+
+    static void Destructor(JSWebResourceError* jSWebResourceError)
+    {
+        if (jSWebResourceError != nullptr) {
+            jSWebResourceError->DecRefCount();
+        }
+    }
+
+    RefPtr<WebError> error_;
+};
+
+class JSWebResourceResponse : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebResourceResponse>::Declare("WebResourceResponse");
+        JSClass<JSWebResourceResponse>::CustomMethod("getResponseData", &JSWebResourceResponse::GetResponseData);
+        JSClass<JSWebResourceResponse>::Bind(
+            globalObj, &JSWebResourceResponse::Constructor, &JSWebResourceResponse::Destructor);
+    }
+
+    void SetEvent(const ReceivedHttpErrorEvent& eventInfo)
+    {
+        response_ = eventInfo.GetResponse();
+    }
+
+    void GetResponseData(const JSCallbackInfo& args)
+    {
+        auto data = JSVal(ToJSValue(response_->GetData()));
+        auto descriptionRef = JSRef<JSVal>::Make(data);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetResponseEncoding(const JSCallbackInfo& args)
+    {
+        auto encoding = JSVal(ToJSValue(response_->GetEncoding()));
+        auto descriptionRef = JSRef<JSVal>::Make(encoding);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetResponseMimeType(const JSCallbackInfo& args)
+    {
+        auto mimeType = JSVal(ToJSValue(response_->GetMimeType()));
+        auto descriptionRef = JSRef<JSVal>::Make(mimeType);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetReasonMessage(const JSCallbackInfo& args)
+    {
+        auto reason = JSVal(ToJSValue(response_->GetReason()));
+        auto descriptionRef = JSRef<JSVal>::Make(reason);
+        args.SetReturnValue(descriptionRef);
+    }
     
+    void GetResponseCode(const JSCallbackInfo& args)
+    {
+        auto code = JSVal(ToJSValue(response_->GetStatusCode()));
+        auto descriptionRef = JSRef<JSVal>::Make(code);
+        args.SetReturnValue(descriptionRef);
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jSWebResourceResponse = Referenced::MakeRefPtr<JSWebResourceResponse>();
+        jSWebResourceResponse->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jSWebResourceResponse));
+    }
+
+    static void Destructor(JSWebResourceResponse* jSWebResourceResponse)
+    {
+        if (jSWebResourceResponse != nullptr) {
+            jSWebResourceResponse->DecRefCount();
+        }
+    }
+
+    RefPtr<WebResponse> response_;
+};
+
+class JSWebResourceRequest : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebResourceRequest>::Declare("WebResourceRequest");
+        JSClass<JSWebResourceRequest>::CustomMethod("getRequestUrl", &JSWebResourceRequest::GetUrl);
+        JSClass<JSWebResourceRequest>::CustomMethod("getRequestHeader", &JSWebResourceRequest::GetHeaders);
+        JSClass<JSWebResourceRequest>::Bind(
+            globalObj, &JSWebResourceRequest::Constructor, &JSWebResourceRequest::Destructor);
+    }
+
+    void SetErrorEvent(const ReceivedErrorEvent& eventInfo)
+    {
+        request_ = eventInfo.GetRequest();
+    }
+
+    void SetHttpErrorEvent(const ReceivedHttpErrorEvent& eventInfo)
+    {
+        request_ = eventInfo.GetRequest();
+    }
+
+    void GetUrl(const JSCallbackInfo& args)
+    {
+        auto code = JSVal(ToJSValue(request_->GetUrl()));
+        auto descriptionRef = JSRef<JSVal>::Make(code);
+        args.SetReturnValue(descriptionRef);
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jSWebResourceRequest = Referenced::MakeRefPtr<JSWebResourceRequest>();
+        jSWebResourceRequest->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jSWebResourceRequest));
+    }
+
+    static void Destructor(JSWebResourceRequest* jSWebResourceRequest)
+    {
+        if (jSWebResourceRequest != nullptr) {
+            jSWebResourceRequest->DecRefCount();
+        }
+    }
+
+    RefPtr<WebRequest> request_;
+};
+
 void JSWeb::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWeb>::Declare("Web");
@@ -91,6 +252,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("fileAccess", &JSWeb::FileAccessEnabled);
     JSClass<JSWeb>::StaticMethod("onFocus", &JSWeb::OnFocus);
     JSClass<JSWeb>::StaticMethod("onDownloadStart", &JSWeb::OnDownloadStart);
+    JSClass<JSWeb>::StaticMethod("onErrorReceive", &JSWeb::OnErrorReceive);
+    JSClass<JSWeb>::StaticMethod("onHttpErrorReceive", &JSWeb::OnHttpErrorReceive);
     JSClass<JSWeb>::StaticMethod("onlineImageAccess", &JSWeb::OnLineImageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("domStorageAccess", &JSWeb::DomStorageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("imageAccess", &JSWeb::ImageAccessEnabled);
@@ -102,6 +265,9 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
+    JSWebResourceRequest::JSBind(globalObj);
+    JSWebResourceError::JSBind(globalObj);
+    JSWebResourceResponse::JSBind(globalObj);
 }
 
 JSRef<JSVal> LoadWebPageFinishEventToJSValue(const LoadWebPageFinishEvent& eventInfo)
@@ -344,6 +510,80 @@ void JSWeb::OnDownloadStart(const JSCallbackInfo& args)
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetDownloadStartEventId(eventMarker);
+}
+
+JSRef<JSVal> ReceivedErrorEventToJSValue(const ReceivedErrorEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    requestEvent->SetErrorEvent(eventInfo);
+
+    JSRef<JSObject> errorObj = JSClass<JSWebResourceError>::NewInstance();
+    auto errorEvent = Referenced::Claim(errorObj->Unwrap<JSWebResourceError>());
+    errorEvent->SetEvent(eventInfo);
+
+    obj->SetPropertyObject("request", requestObj);
+    obj->SetPropertyObject("error", errorObj);
+
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> ReceivedHttpErrorEventToJSValue(const ReceivedHttpErrorEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    requestEvent->SetHttpErrorEvent(eventInfo);
+
+    JSRef<JSObject> responseObj = JSClass<JSWebResourceResponse>::NewInstance();
+    auto httpErrorEvent = Referenced::Claim(responseObj->Unwrap<JSWebResourceResponse>());
+    httpErrorEvent->SetEvent(eventInfo);
+
+    obj->SetPropertyObject("request", requestObj);
+    obj->SetPropertyObject("response", responseObj);
+
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnErrorReceive(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnErrorReceive");
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ReceivedErrorEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ReceivedErrorEventToJSValue);
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<ReceivedErrorEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetPageErrorEventId(eventMarker);
+}
+
+void JSWeb::OnHttpErrorReceive(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnHttpErrorReceive");
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ReceivedHttpErrorEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ReceivedHttpErrorEventToJSValue);
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<ReceivedHttpErrorEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetHttpErrorEventId(eventMarker);
 }
 
 void JSWeb::OnFocus(const JSCallbackInfo& args)
