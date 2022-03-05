@@ -18,7 +18,7 @@ if (is_standard_system) {
     include_dirs = [
       "//utils/native/base/include",
       "//foundation/windowmanager/interfaces/innerkits/wm",
-      "//foundation/web/webview/interfaces/innerkits/ohos_webview",
+      "//foundation/web/webview/interfaces/innerkits/ohos_nweb",
       "//foundation/aafwk/standard/frameworks/kits/appkit/native/app/include",
     ]
   }
@@ -46,7 +46,7 @@ build_component("web") {
     configs = [ ":ohos_web_config" ]
     deps = [
       "//foundation/aafwk/standard/frameworks/kits/appkit:appkit_native",
-      "//foundation/web/webview/ohos_webview:libwebview",
+      "//foundation/web/webview/ohos_nweb:libnweb",
       "//foundation/windowmanager/utils:libwmutil",
       "//foundation/windowmanager/wm:libwm",
     ]
