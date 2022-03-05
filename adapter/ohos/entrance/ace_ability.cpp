@@ -37,6 +37,7 @@
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/log/log.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "core/common/container_scope.h"
 #include "core/common/frontend.h"
@@ -265,7 +266,8 @@ void AceAbility::OnStart(const Want& want)
         container->SetResourceConfiguration(aceResCfg);
         container->SetPackagePathStr(resPath);
     }
-
+    container->SetWindowName(window->GetWindowName());
+    SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), abilityId_);
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(abilityId_);
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window);

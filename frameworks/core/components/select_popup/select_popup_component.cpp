@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/components/select_popup/select_popup_component.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
 #include "core/components/clip/clip_component.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -164,6 +165,41 @@ void SelectPopupComponent::ShowDialog(
     dialogShowed_ = true;
     stackElement_ = stackElement;
     isMenu_ = isMenu;
+}
+
+void SelectPopupComponent::ShowContextMenu(const Offset& offset)
+{
+    LOGI("Show contextMenu, position is %{public}s", offset.ToString().c_str());
+    RefPtr<PositionedComponent> positioned = AceType::DynamicCast<PositionedComponent>(GetChild());
+    if (positioned) {
+        positioned->SetAutoFocus(true);
+    }
+    selectLeftTop_ = offset;
+    selectRightBottom_ = offset;
+    SubwindowManager::GetInstance()->ShowMenu(AceType::Claim(this));
+}
+
+void SelectPopupComponent::CloseContextMenu()
+{
+    LOGI("Close Contextmenu.");
+    SubwindowManager::GetInstance()->CloseMenu();
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    auto parentNode = node_->GetParentNode();
+    if (parentNode) {
+        parentNode->SetLeft(0);
+        parentNode->SetTop(0);
+        parentNode->SetWidth(0);
+        parentNode->SetHeight(0);
+    }
+#endif
+    auto manager = manager_.Upgrade();
+    if (manager) {
+        for (const auto& option : options_) {
+            option->SetNode(nullptr);
+        }
+        manager->RemoveAccessibilityNodes(node_);
+        SetNode(nullptr);
+    }
 }
 
 RefPtr<BoxComponent> SelectPopupComponent::InitializeInnerBox(const RefPtr<ScrollComponent>& scroll)

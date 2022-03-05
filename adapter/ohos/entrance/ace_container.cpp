@@ -82,8 +82,8 @@ const char* GetDeclarativeSharedLibrary(bool isArkApp)
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
-    std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
-    std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner)
+    std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
+    bool useCurrentEventRunner)
     : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), aceAbility_(aceAbility),
       useCurrentEventRunner_(useCurrentEventRunner)
 {
@@ -96,12 +96,14 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
-    bool useCurrentEventRunner)
+    bool useCurrentEventRunner, bool isSubAceContainer)
     : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), runtimeContext_(runtimeContext),
-      abilityInfo_(abilityInfo), useCurrentEventRunner_(useCurrentEventRunner)
+      abilityInfo_(abilityInfo), useCurrentEventRunner_(useCurrentEventRunner), isSubContainer_(isSubAceContainer)
 {
     ACE_DCHECK(callback);
-    InitializeTask();
+    if (!isSubContainer_) {
+        InitializeTask();
+    }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
 }
@@ -138,6 +140,10 @@ void AceContainer::Destroy()
             context.Swap(pipelineContext_);
             taskExecutor_->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
 
+            if (isSubContainer_) {
+                // SubAcecontainer just return.
+                return;
+            }
             // 2. Destroy Frontend on JS thread.
             RefPtr<Frontend> frontend;
             frontend_.Swap(frontend);
@@ -179,22 +185,27 @@ void AceContainer::InitializeFrontend()
         AceApplicationInfo::GetInstance().SetCardType();
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
     } else if (type_ == FrontendType::DECLARATIVE_JS) {
-        frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
-        auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
-        auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary(isArkApp_));
-        RefPtr<Framework::JsEngine> jsEngine;
-        if (GetSettings().usingSharedRuntime) {
-            jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
-            LOGI("Create engine using runtime, engine %{public}p", RawPtr(jsEngine));
+        if (!isSubContainer_) {
+            frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
+            auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+            auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary(isArkApp_));
+            RefPtr<Framework::JsEngine> jsEngine;
+            if (GetSettings().usingSharedRuntime) {
+                jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
+                LOGI("Create engine using runtime, engine %{public}p", RawPtr(jsEngine));
+            } else {
+                jsEngine = loader.CreateJsEngine(instanceId_);
+            }
+            jsEngine->AddExtraNativeObject("ability", aceAbility.get());
+            EngineHelper::AddEngine(instanceId_, jsEngine);
+            declarativeFrontend->SetJsEngine(jsEngine);
+            declarativeFrontend->SetPageProfile(pageProfile_);
+            declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
+            declarativeFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
         } else {
-            jsEngine = loader.CreateJsEngine(instanceId_);
+            frontend_ = OHOS::Ace::Platform::AceContainer::GetContainer(parentId_)->GetFrontend();
+            return;
         }
-        jsEngine->AddExtraNativeObject("ability", aceAbility.get());
-        EngineHelper::AddEngine(instanceId_, jsEngine);
-        declarativeFrontend->SetJsEngine(jsEngine);
-        declarativeFrontend->SetPageProfile(pageProfile_);
-        declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
-        declarativeFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
     } else {
         LOGE("Frontend type not supported");
         EventReport::SendAppStartException(AppStartExcepType::FRONTEND_TYPE_ERR);
@@ -446,7 +457,8 @@ void AceContainer::InitializeCallback()
             [context, event]() {
                 context->OnTouchEvent(event);
                 context->NotifyDispatchTouchEventDismiss(event);
-            }, TaskExecutor::TaskType::UI);
+            },
+            TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterTouchEventCallback(touchEventCallback);
 
@@ -482,8 +494,8 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterRotationEventCallback(rotationEventCallback);
 
-    auto&& viewChangeCallback = [context = pipelineContext_, id = instanceId_](int32_t width, int32_t height,
-                                    WindowSizeChangeReason type) {
+    auto&& viewChangeCallback = [context = pipelineContext_, id = instanceId_](
+                                    int32_t width, int32_t height, WindowSizeChangeReason type) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(
@@ -575,8 +587,8 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     AceEngine::Get().RemoveContainer(instanceId);
 }
 
-void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t height, int32_t windowId,
-                           UIEnvCallback callback)
+void AceContainer::SetView(
+    AceView* view, double density, int32_t width, int32_t height, int32_t windowId, UIEnvCallback callback)
 {
     if (view == nullptr) {
         return;
@@ -788,20 +800,19 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::string& libPath)
     }
 }
 
-void AceContainer::AttachView(
-    std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height, int32_t windowId,
-    UIEnvCallback callback)
+void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width,
+    int32_t height, int32_t windowId, UIEnvCallback callback)
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
-    auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
-    ACE_DCHECK(state != nullptr);
     auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
-    flutterTaskExecutor->InitOtherThreads(state->GetTaskRunners());
-    if (GetSettings().usePlatformAsUIThread) {
-        ContainerScope::SetScopeNotify([](int32_t id) {
-            flutter::UIDartState::Current()->SetCurInstance(id);
-        });
+    if (!isSubContainer_) {
+        auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
+        ACE_DCHECK(state != nullptr);
+        flutterTaskExecutor->InitOtherThreads(state->GetTaskRunners());
+        if (GetSettings().usePlatformAsUIThread) {
+            ContainerScope::SetScopeNotify([](int32_t id) { flutter::UIDartState::Current()->SetCurInstance(id); });
+        }
     }
     ContainerScope scope(instanceId);
     if (type_ == FrontendType::DECLARATIVE_JS) {
@@ -826,6 +837,9 @@ void AceContainer::AttachView(
     pipelineContext_->SetWindowModal(windowModal_);
     pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
     pipelineContext_->SetWindowId(windowId);
+    if (isSubContainer_) {
+        pipelineContext_->SetIsSubPipeline(true);
+    }
     InitializeCallback();
 
     auto&& finishEventHandler = [weak = WeakClaim(this), instanceId] {
@@ -880,7 +894,7 @@ void AceContainer::AttachView(
     };
     pipelineContext_->SetStatusBarEventHandler(setStatusBarEventHandler);
 
-    taskExecutor_->PostTask([] {  FrameReport::GetInstance().Init(); }, TaskExecutor::TaskType::UI);
+    taskExecutor_->PostTask([] { FrameReport::GetInstance().Init(); }, TaskExecutor::TaskType::UI);
 
     ThemeConstants::InitDeviceType();
     // Load custom style at UI thread before frontend attach, to make sure style can be loaded before building dom tree.
@@ -897,20 +911,29 @@ void AceContainer::AttachView(
             TaskExecutor::TaskType::UI);
     }
     taskExecutor_->PostTask(
-        [context = pipelineContext_, callback]() {
+        [context = pipelineContext_, callback, isSubContainer = isSubContainer_]() {
             if (callback != nullptr) {
                 callback(context);
             }
-            context->SetupRootElement();
+            if (!isSubContainer) {
+                context->SetupRootElement();
+            }
         },
         TaskExecutor::TaskType::UI);
     aceView_->Launch();
-    frontend_->AttachPipelineContext(pipelineContext_);
-
     AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
+    if (!isSubContainer_) {
+        frontend_->AttachPipelineContext(pipelineContext_);
+    } else {
+        auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+        if (declarativeFrontend) {
+            declarativeFrontend->AttachSubPipelineContext(pipelineContext_);
+        }
+        return;
+    }
 
     auto dataAbilityHelperImpl = [ability = GetAbilityInner(), runtimeContext = runtimeContext_,
-        useStageModel = useStageModel_] () {
+                                     useStageModel = useStageModel_]() {
         return AceType::MakeRefPtr<DataAbilityHelperStandard>(ability.lock(), runtimeContext.lock(), useStageModel);
     };
     auto dataProviderManager = MakeRefPtr<DataProviderManagerStandard>(dataAbilityHelperImpl);
@@ -1000,4 +1023,10 @@ std::string AceContainer::GetContentInfo(int32_t instanceId)
     }
 }
 
+void AceContainer::InitializeSubContainer(int32_t parentContainerId)
+{
+    auto taskExec = AceEngine::Get().GetContainer(parentContainerId)->GetTaskExecutor();
+    taskExecutor_ = AceType::DynamicCast<FlutterTaskExecutor>(std::move(taskExec));
+    GetSettings().useUIAsJSThread = true;
+}
 } // namespace OHOS::Ace::Platform

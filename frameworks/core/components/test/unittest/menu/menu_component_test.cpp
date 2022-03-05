@@ -15,6 +15,7 @@
 
 #include "gtest/gtest.h"
 
+#include "base/subwindow/subwindow.h"
 #include "base/utils/utils.h"
 #include "core/components/menu/menu_component.h"
 
@@ -29,6 +30,11 @@ const uint32_t TEST_INVALIDATE_INDEX = 0xffffffff;
 const uint32_t TEST_OPTION_COUNT = 10u;
 
 } // namespace
+
+RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t instanceId)
+{
+    return nullptr;
+}
 
 class MenuComponentTest : public testing::Test {
 public:

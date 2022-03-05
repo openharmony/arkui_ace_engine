@@ -16,11 +16,20 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_TEST_UNITTEST_JSFRONTEND_DOM_MOCK_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_TEST_UNITTEST_JSFRONTEND_DOM_MOCK_H
 
+#include "base/subwindow/subwindow.h"
 #include "core/common/frontend.h"
 #include "core/common/platform_window.h"
 #include "core/common/window.h"
 #include "core/pipeline/pipeline_context.h"
 
+namespace OHOS::Ace {
+
+RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t instanceId)
+{
+    return nullptr;
+}
+
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 
 class MockPlatformWindow : public PlatformWindow {

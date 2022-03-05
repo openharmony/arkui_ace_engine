@@ -824,6 +824,49 @@ RefPtr<Element> PipelineContext::SetupRootElement()
     return rootElement_;
 }
 
+RefPtr<Element> PipelineContext::SetupSubRootElement()
+{
+    LOGI("Set up SubRootElement!");
+
+    RefPtr<StageComponent> rootStage = AceType::MakeRefPtr<StageComponent>(std::list<RefPtr<Component>>());
+    if (isRightToLeft_) {
+        rootStage->SetTextDirection(TextDirection::RTL);
+    }
+    if (GetIsDeclarative()) {
+        rootStage->SetMainStackSize(MainStackSize::MAX);
+    } else {
+        rootStage->SetMainStackSize(MainStackSize::LAST_CHILD_HEIGHT);
+    }
+    auto stack = AceType::MakeRefPtr<StackComponent>(
+        Alignment::TOP_LEFT, StackFit::KEEP, Overflow::OBSERVABLE, std::list<RefPtr<Component>>());
+
+    auto overlay = AceType::MakeRefPtr<OverlayComponent>(std::list<RefPtr<Component>>());
+    overlay->SetTouchable(false);
+    stack->AppendChild(rootStage);
+    stack->AppendChild(overlay);
+    RefPtr<RootComponent> rootComponent;
+    rootComponent = RootComponent::Create(stack);
+    rootComponent->MarkContextMenu();
+    rootElement_ = rootComponent->SetupElementTree(AceType::Claim(this));
+    if (!rootElement_) {
+        LOGE("Set up SubRootElement failed!");
+        EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
+        return RefPtr<Element>();
+    }
+    const auto& rootRenderNode = rootElement_->GetRenderNode();
+    window_->SetRootRenderNode(rootRenderNode);
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+        rsUIDirector_->SetRoot(rootRenderNode->GetRSNode()->GetId());
+    }
+#endif
+    sharedTransitionController_->RegisterTransitionListener();
+    cardTransitionController_->RegisterTransitionListener();
+    requestedRenderNode_.Reset();
+    LOGI("Set up SubRootElement success!");
+    return rootElement_;
+}
+
 void PipelineContext::Dump(const std::vector<std::string>& params) const
 {
     if (params.empty()) {
@@ -932,6 +975,18 @@ void PipelineContext::DumpInfo(const std::vector<std::string>& params, std::vect
 
 RefPtr<StackElement> PipelineContext::GetLastStack() const
 {
+    if (!rootElement_) {
+        LOGE("Rootelement is null");
+        return RefPtr<StackElement>();
+    }
+    if (isSubPipeline_) {
+        const auto& stack = AceType::DynamicCast<StackElement>(rootElement_->GetFirstChild());
+        if (!stack) {
+            LOGE("Get stack failed, it is null");
+            return RefPtr<StackElement>();
+        }
+        return stack;
+    }
     const auto& pageElement = GetLastPage();
     if (!pageElement) {
         return RefPtr<StackElement>();
@@ -2475,6 +2530,9 @@ void PipelineContext::OnHide()
             auto context = weak.Upgrade();
             if (!context) {
                 return;
+            }
+            if (context->IsSubPipeline()) {
+                context->FlushPipelineImmediately();
             }
 #ifdef ENABLE_ROSEN_BACKEND
             if (context->rsUIDirector_) {

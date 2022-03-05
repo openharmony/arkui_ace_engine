@@ -388,6 +388,17 @@ public:
         return globalPoint_;
     }
 
+    GestureEvent& SetScreenLocation(const Offset& screenLocation)
+    {
+        screenLocation_ = screenLocation;
+        return *this;
+    }
+
+    const Offset& GetScreenLocation() const
+    {
+        return screenLocation_;
+    }
+
     GestureEvent& SetGlobalLocation(const Offset& globalLocation)
     {
         globalLocation_ = globalLocation;
@@ -463,6 +474,7 @@ private:
     // Different from global location, The local location refers to the location of the contact point relative to the
     // current node which has the recognizer.
     Offset localLocation_;
+    Offset screenLocation_;
     Offset pinchCenter_;
     std::list<FingerInfo> fingerList_;
 };

@@ -248,6 +248,8 @@ public:
     void HideDialog(uint32_t index);
     void ShowDialog(
         const RefPtr<StackElement>& stackElement, const Offset& leftTop, const Offset& rightBottom, bool isMenu);
+    void ShowContextMenu(const Offset& offset);
+    void CloseContextMenu();
 
     bool Initialize(const RefPtr<AccessibilityManager>& manager);
 
