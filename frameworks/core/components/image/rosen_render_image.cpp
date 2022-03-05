@@ -248,7 +248,7 @@ void RosenRenderImage::ImageDataPaintSuccess(const fml::RefPtr<flutter::CanvasIm
     if (GetHidden() && imageObj_->GetFrameCount() > 1) {
         imageObj_->Pause();
     }
-    if (imageObj_->GetFrameCount() == 1) {
+    if (imageObj_->GetFrameCount() == 1 && imageObj_->GetSourceInfo().GetSrcType() != SrcType::MEMORY) {
         imageObj_->ClearData();
     }
     CacheImageObject();
@@ -779,6 +779,9 @@ void RosenRenderImage::PaintBgImage(const std::shared_ptr<RSNode>& rsNode)
 
 bool RosenRenderImage::NeedUploadImageObjToGpu()
 {
+    if (sourceInfo_.GetSrcType() == SrcType::MEMORY && imageObj_ != nullptr) {
+        return true;
+    }
     bool sourceChange = sourceInfo_ != curSourceInfo_;
     bool newSourceCallLoadImage = (sourceChange && rawImageSize_.IsValid() && srcRect_.IsValid() &&
                                    (rawImageSizeUpdated_ && imageLoadingStatus_ != ImageLoadingStatus::LOADING) &&
@@ -842,6 +845,10 @@ void RosenRenderImage::UpdateData(const std::string& uri, const std::vector<uint
     }
     auto ImageObj =
         ImageObject::BuildImageObject(sourceInfo_, context, skData, useSkiaSvg_);
+    if (!ImageObj) {
+        LOGW("image object is null");
+        return;
+    }
     ImageObjReady(ImageObj);
 }
 
