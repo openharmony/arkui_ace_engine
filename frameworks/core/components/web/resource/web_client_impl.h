@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_RESOURCE_WEBVIEW_CLIENT_IMPL_H
 
 #include "foundation/ace/ace_engine/frameworks/base/memory/referenced.h"
-#include "webview_client.h"
+#include "nweb_handler.h"
 
 #include "base/log/log.h"
 #include "core/common/container_scope.h"
@@ -25,7 +25,7 @@
 namespace OHOS::Ace {
 class WebDelegate;
 
-class DownloadListenerImpl : public OHOS::WebView::DownloadListener {
+class DownloadListenerImpl : public OHOS::NWeb::NWebDownloadCallback {
 public:
     DownloadListenerImpl() = default;
     explicit DownloadListenerImpl(int32_t instanceId) : instanceId_(instanceId) {}
@@ -44,28 +44,28 @@ private:
     int32_t instanceId_ = -1;
 };
 
-class WebClientImpl : public OHOS::WebView::WebViewClient {
+class WebClientImpl : public OHOS::NWeb::NWebHandler {
 public:
     WebClientImpl() = default;
     explicit WebClientImpl(int32_t instanceId) : instanceId_(instanceId) {}
     ~WebClientImpl() = default;
 
-    void SetWebView(std::shared_ptr<OHOS::WebView::WebView> webview) override;
+    void SetNWeb(std::shared_ptr<OHOS::NWeb::NWeb> webview) override;
     void OnProxyDied() override;
     void OnRouterPush(const std::string& param) override;
     void OnMessage(const std::string& param) override;
-    void OnPageStarted(const std::string& url) override;
-    void OnPageFinished(int httpStatusCode, const std::string& url) override;
-    void OnProgressChanged(int newProgress) override;
-    void OnReceivedTitle(const std::string &title) override;
-    void OnGeolocationPermissionsHidePrompt() override;
-    void OnGeolocationPermissionsShowPrompt(const std::string& origin,
-        OHOS::WebView::GeolocationCallback* callback) override;
+    void OnPageLoadBegin(const std::string& url) override;
+    void OnPageLoadEnd(int httpStatusCode, const std::string& url) override;
+    void OnLoadingProgress(int newProgress) override;
+    void OnPageTitle(const std::string &title) override;
+    void OnGeolocationHide() override;
+    void OnGeolocationShow(const std::string& origin,
+        OHOS::NWeb::NWebGeolocationCallbackInterface* callback) override;
 
-    void OnRequestFocus() override;
-    void onReceivedError(std::shared_ptr<WebView::WebResourceRequest> request,
-        std::shared_ptr<WebView::WebResourceError> error) override;
-    bool ShouldOverrideUrlLoading(const std::string& url) override
+    void OnFocus() override;
+    void OnResourceLoadError(std::shared_ptr<NWeb::NWebUrlResourceRequest> request,
+        std::shared_ptr<NWeb::NWebUrlResourceError> error) override;
+    bool OnHandleInterceptUrlLoading(const std::string& url) override
     {
         return false;
     }
@@ -75,7 +75,7 @@ public:
     }
 
 private:
-    std::weak_ptr<OHOS::WebView::WebView> webviewWeak_;
+    std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;
     int32_t instanceId_ = -1;
 };

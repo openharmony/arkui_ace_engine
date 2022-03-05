@@ -29,7 +29,7 @@
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
 #ifdef OHOS_STANDARD_SYSTEM
-#include "webview_helper.h"
+#include "nweb_helper.h"
 #include "window.h"
 #endif
 
@@ -39,25 +39,25 @@ class ResultOhos : public Result {
     DECLARE_ACE_TYPE(ResultOhos, Result)
 
 public:
-    ResultOhos(std::shared_ptr<OHOS::WebView::JSDialogResult> result) : result_(result) {}
+    ResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSDialogResult> result) : result_(result) {}
 
     void Confirm() override;
     void Confirm(const std::string &message) override;
     void Cancel() override;
 
 private:
-    std::shared_ptr<OHOS::WebView::JSDialogResult> result_;
+    std::shared_ptr<OHOS::NWeb::NWebJSDialogResult> result_;
 };
 
 class WebGeolocationOhos : public WebGeolocation {
     DECLARE_ACE_TYPE(WebGeolocationOhos, WebGeolocation)
 
 public:
-    WebGeolocationOhos(OHOS::WebView::GeolocationCallback* callback) : geolocationCallback_(callback) {}
+    WebGeolocationOhos(OHOS::NWeb::NWebGeolocationCallbackInterface* callback) : geolocationCallback_(callback) {}
     
     void Invoke(const std::string& origin, const bool& allow, const bool& retain) override;
 private:
-    OHOS::WebView::GeolocationCallback* geolocationCallback_;
+    OHOS::NWeb::NWebGeolocationCallbackInterface* geolocationCallback_;
 };
 
 class WebDelegate : public WebResource {
@@ -133,7 +133,8 @@ public:
     void OnProgressChanged(int param);
     void OnReceivedTitle(const std::string& param);
     void OnGeolocationPermissionsHidePrompt();
-    void OnGeolocationPermissionsShowPrompt(const std::string& origin, OHOS::WebView::GeolocationCallback* callback);
+    void OnGeolocationPermissionsShowPrompt(const std::string& origin,
+        OHOS::NWeb::NWebGeolocationCallbackInterface* callback);
     void OnRequestFocus();
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
@@ -200,7 +201,7 @@ private:
     Method isPagePathInvalidMethod_;
     State state_ {State::WAITINGFORSIZE};
 #ifdef OHOS_STANDARD_SYSTEM
-    std::shared_ptr<OHOS::WebView::WebView> webview_;
+    std::shared_ptr<OHOS::NWeb::NWeb> webview_;
     sptr<Rosen::Window> window_;
     bool isCreateWebView_ = false;
 

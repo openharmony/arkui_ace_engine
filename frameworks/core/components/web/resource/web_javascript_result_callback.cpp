@@ -21,40 +21,40 @@
 
 namespace OHOS::Ace {
 using namespace OHOS::Ace::Framework;
-using namespace OHOS::WebView;
+using namespace OHOS::NWeb;
 std::condition_variable WebJavaScriptResultCallBack::initCv_;
 
-std::vector<std::shared_ptr<WebJSValue>> GetWebJSValue(const std::vector<std::shared_ptr<WebViewValue>>& args)
+std::vector<std::shared_ptr<WebJSValue>> GetWebJSValue(const std::vector<std::shared_ptr<NWebValue>>& args)
 {
     std::vector<std::shared_ptr<WebJSValue>> webJSValues;
     for (auto value : args) {
         if (value == nullptr) {
             continue;
         }
-        WebViewValue::Type type = value->GetType();
+        NWebValue::Type type = value->GetType();
         auto webJsValue = std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
         switch (type) {
-            case WebViewValue::Type::INTEGER:
+            case NWebValue::Type::INTEGER:
                 webJsValue->SetType(WebJSValue::Type::INTEGER);
                 webJsValue->SetInt(value->GetInt());
                 webJSValues.push_back(webJsValue);
                 break;
-            case WebViewValue::Type::DOUBLE:
+            case NWebValue::Type::DOUBLE:
                 webJsValue->SetType(WebJSValue::Type::DOUBLE);
                 webJsValue->SetDouble(value->GetDouble());
                 webJSValues.push_back(webJsValue);
                 break;
-            case WebViewValue::Type::BOOLEAN:
+            case NWebValue::Type::BOOLEAN:
                 webJsValue->SetType(WebJSValue::Type::BOOLEAN);
                 webJsValue->SetBoolean(value->GetBoolean());
                 webJSValues.push_back(webJsValue);
                 break;
-            case WebViewValue::Type::STRING:
+            case NWebValue::Type::STRING:
                 webJsValue->SetType(WebJSValue::Type::STRING);
                 webJsValue->SetString(value->GetString());
                 webJSValues.push_back(webJsValue);
                 break;
-            case WebViewValue::Type::NONE:
+            case NWebValue::Type::NONE:
                 break;
             default:
                 LOGI("WebJavaScriptResultCallBack: jsvalue type not support!");
@@ -64,25 +64,25 @@ std::vector<std::shared_ptr<WebJSValue>> GetWebJSValue(const std::vector<std::sh
     return webJSValues;
 }
 
-std::shared_ptr<WebViewValue> GetWebViewValue(const std::shared_ptr<WebJSValue>& webJSValue)
+std::shared_ptr<NWebValue> GetWebViewValue(const std::shared_ptr<WebJSValue>& webJSValue)
 {
-    std::shared_ptr<WebViewValue> webViewValue = std::make_shared<WebViewValue>(WebViewValue::Type::NONE);
+    std::shared_ptr<NWebValue> webViewValue = std::make_shared<NWebValue>(NWebValue::Type::NONE);
     WebJSValue::Type type = webJSValue->GetType();
     switch (type) {
         case WebJSValue::Type::INTEGER:
-            webViewValue->SetType(WebViewValue::Type::INTEGER);
+            webViewValue->SetType(NWebValue::Type::INTEGER);
             webViewValue->SetInt(webJSValue->GetInt());
             break;
         case WebJSValue::Type::DOUBLE:
-            webViewValue->SetType(WebViewValue::Type::DOUBLE);
+            webViewValue->SetType(NWebValue::Type::DOUBLE);
             webViewValue->SetDouble(webJSValue->GetDouble());
             break;
         case WebJSValue::Type::BOOLEAN:
-            webViewValue->SetType(WebViewValue::Type::BOOLEAN);
+            webViewValue->SetType(NWebValue::Type::BOOLEAN);
             webViewValue->SetBoolean(webJSValue->GetBoolean());
             break;
         case WebJSValue::Type::STRING:
-            webViewValue->SetType(WebViewValue::Type::STRING);
+            webViewValue->SetType(NWebValue::Type::STRING);
             webViewValue->SetString(webJSValue->GetString());
             break;
         case WebJSValue::Type::NONE:
@@ -94,8 +94,8 @@ std::shared_ptr<WebViewValue> GetWebViewValue(const std::shared_ptr<WebJSValue>&
     return webViewValue;
 }
 
-std::shared_ptr<WebViewValue> WebJavaScriptResultCallBack::GetJavaScriptResult(
-    std::vector<std::shared_ptr<WebViewValue>> args, const std::string &method, const std::string &object_name)
+std::shared_ptr<NWebValue> WebJavaScriptResultCallBack::GetJavaScriptResult(
+    std::vector<std::shared_ptr<NWebValue>> args, const std::string &method, const std::string &object_name)
 {
     LOGI("GetJavaScriptResult");
     ContainerScope scope(instanceId_);
@@ -114,7 +114,7 @@ std::shared_ptr<WebViewValue> WebJavaScriptResultCallBack::GetJavaScriptResult(
     constexpr int duration = 5; // wait 5 seconds
     if (initCv_.wait_for(lock, std::chrono::seconds(duration)) ==
         std::cv_status::timeout) {
-        return std::make_shared<WebViewValue>(WebViewValue::Type::NONE);
+        return std::make_shared<NWebValue>(NWebValue::Type::NONE);
     }
 
     return GetWebViewValue(result);

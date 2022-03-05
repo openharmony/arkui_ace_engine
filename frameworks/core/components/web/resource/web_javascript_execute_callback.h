@@ -18,12 +18,12 @@
 
 #include <string>
 
-#include "value_callback.h"
+#include "nweb_value_callback.h"
 #include "core/common/container_scope.h"
 
 namespace OHOS::Ace {
-using namespace OHOS::WebView;
-class WebJavaScriptExecuteCallBack : public OHOS::WebView::ValueCallback<std::string> {
+using namespace OHOS::NWeb;
+class WebJavaScriptExecuteCallBack : public OHOS::NWeb::NWebValueCallback<std::string> {
 public:
     WebJavaScriptExecuteCallBack() = delete;
     explicit WebJavaScriptExecuteCallBack(int32_t instanceId) : instanceId_(instanceId) {}
