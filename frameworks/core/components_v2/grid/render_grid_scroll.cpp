@@ -33,7 +33,8 @@ namespace {
 
 const char UNIT_PERCENT[] = "%";
 const char UNIT_RATIO[] = "fr";
-constexpr int32_t TIMETHRESHOLD = 2 * 1000000; // microsecond
+constexpr int32_t TIMETHRESHOLD = 3 * 1000000; // 3 millisecond
+constexpr int32_t MICROSEC_TO_NANOSEC = 1000;
 
 } // namespace
 
@@ -832,8 +833,8 @@ void RenderGridScroll::PerformLayout()
                 if (item != items_.end()) {
                     childrenInRect_.push_back(item->second);
                     int32_t itemMainSpan = GetItemSpan(item->second, useScrollable_ != SCROLLABLE::HORIZONTAL);
-                    int32_t itemCrosspan = GetItemSpan(item->second, useScrollable_ == SCROLLABLE::HORIZONTAL);
-                    SetChildPosition(item->second, main, cross, itemMainSpan, itemCrosspan);
+                    int32_t itemCrossSpan = GetItemSpan(item->second, useScrollable_ == SCROLLABLE::HORIZONTAL);
+                    SetChildPosition(item->second, main, cross, itemMainSpan, itemCrossSpan);
                 }
             }
         }
@@ -1016,7 +1017,7 @@ void RenderGridScroll::OnDataSourceUpdated(int32_t index)
     }
     ACE_SCOPED_TRACE("OnDataSourceUpdated %d", index);
     auto items = gridMatrix_.find(startIndex_);
-    if (items != gridMatrix_.end() && items->second.size() > 0) {
+    if (items != gridMatrix_.end() && !items->second.empty()) {
         currentItemIndex_ = items->second.begin()->second;
     }
     startRankItemIndex_ = GetStartingItem(currentItemIndex_);
@@ -1404,8 +1405,9 @@ void RenderGridScroll::OnPaintFinish()
     }
 }
 
-void RenderGridScroll::OnPredictLayout(int64_t targetTimestamp)
+void RenderGridScroll::OnPredictLayout(int64_t deadline)
 {
+    auto startTime = GetSysTimestamp();  // unit: ns
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -1434,7 +1436,8 @@ void RenderGridScroll::OnPredictLayout(int64_t targetTimestamp)
                         break;
                     }
                 }
-                if (GetSysTimestamp() + TIMETHRESHOLD > targetTimestamp) {
+                // Stop predictLayout less than 3 milliseconds before the next vsync arrives.
+                if (GetSysTimestamp() - startTime + TIMETHRESHOLD > deadline * MICROSEC_TO_NANOSEC) {
                     MarkNeedPredictLayout();
                     return;
                 }

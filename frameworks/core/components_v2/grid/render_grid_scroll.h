@@ -67,7 +67,7 @@ public:
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
-    void OnPredictLayout(int64_t targetTimestamp) override;
+    void OnPredictLayout(int64_t deadline) override;
 
     const std::list<RefPtr<RenderNode>>& GetChildren() const override
     {

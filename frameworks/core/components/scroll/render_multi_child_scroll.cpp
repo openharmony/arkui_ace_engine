@@ -343,7 +343,7 @@ bool RenderMultiChildScroll::ReachMaxCount() const
     return reached;
 }
 
-void RenderMultiChildScroll::OnPredictLayout(int64_t targetTimestamp)
+void RenderMultiChildScroll::OnPredictLayout(int64_t deadline)
 {
     int32_t childrenSize = GetChildren().size();
     if (currentIndex_ < 0 || currentIndex_ >= childrenSize || childrenSize == 0) {
