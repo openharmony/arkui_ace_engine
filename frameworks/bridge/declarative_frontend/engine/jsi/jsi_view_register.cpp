@@ -593,9 +593,7 @@ panda::Local<panda::JSValueRef> Vp2Px(panda::EcmaVM* vm, panda::Local<panda::JSV
     double vpValue = args[0]->ToNumber(vm)->Value();
     double density = SystemProperties::GetResolution();
     double pxValue = vpValue * density;
-
-    int32_t result = GreatOrEqual(pxValue, 0) ? (pxValue + 0.5) : (pxValue - 0.5);
-    return panda::NumberRef::New(vm, result);
+    return panda::NumberRef::New(vm, pxValue);
 }
 
 panda::Local<panda::JSValueRef> Px2Vp(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
@@ -644,9 +642,7 @@ panda::Local<panda::JSValueRef> Fp2Px(panda::EcmaVM* vm, panda::Local<panda::JSV
     auto pipelineContext = container->GetPipelineContext();
     double fontScale = pipelineContext->GetFontScale();
     double pxValue = fpValue * density * fontScale;
-
-    int32_t result = GreatOrEqual(pxValue, 0) ? (pxValue + 0.5) : (pxValue - 0.5);
-    return panda::NumberRef::New(vm, result);
+    return panda::NumberRef::New(vm, pxValue);
 }
 
 panda::Local<panda::JSValueRef> Px2Fp(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
@@ -701,9 +697,7 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::EcmaVM* vm, panda::Local<panda::JS
     auto windowConfig = frontend->GetWindowConfig();
     double lpxValue = args[0]->ToNumber(vm)->Value();
     double pxValue = lpxValue * windowConfig.designWidthScale;
-
-    int32_t result = GreatOrEqual(pxValue, 0) ? (pxValue + 0.5) : (pxValue - 0.5);
-    return panda::NumberRef::New(vm, result);
+    return panda::NumberRef::New(vm, pxValue);
 }
 
 panda::Local<panda::JSValueRef> Px2Lpx(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
