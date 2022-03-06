@@ -41,7 +41,6 @@ protected:
 private:
     RefPtr<RenderNode> CreateRenderNode() override;
     void UpdateElement(int32_t index);
-    RefPtr<Element> GetChild(int32_t index);
 
     bool vertical_ { false }; // the tab is vertical or not, default value is false
     std::list<RefPtr<TabBarItemComponent>> tabs_;
