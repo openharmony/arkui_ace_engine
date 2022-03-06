@@ -67,7 +67,7 @@ enable_standard_input = true
 build_container_scope_lib = true
 
 if (defined(is_experiment_build) && is_experiment_build) {
-  web_components_support = false
+  web_components_support = true
   enable_system_clipboard = true
   accessibility_support = true
 }
