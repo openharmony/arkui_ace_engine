@@ -1119,7 +1119,8 @@ void WebDelegate::UpdateMixedContentMode(const MixedModeContent& mixedMode)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->webview_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->webview_->GetPreference();
-                setting->PutImageLoadingAllowed(static_cast<OHOS::NWeb::NWebPreference::AccessMode>(mixedMode));
+                setting->PutAccessModeForSecureOriginLoadFromInsecure(
+                    static_cast<OHOS::NWeb::NWebPreference::AccessMode>(mixedMode));
             }
         },
         TaskExecutor::TaskType::PLATFORM);
