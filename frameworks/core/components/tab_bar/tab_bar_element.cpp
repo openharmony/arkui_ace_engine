@@ -113,24 +113,23 @@ void TabBarElement::PerformBuild()
         ComponentGroupElement::PerformBuild();
         return;
     }
+    auto itChild = children_.begin();
+    auto itChildEnd = children_.end();
+    auto itComponent = tabs_.begin();
+    auto itComponentEnd = tabs_.end();
 
-    int32_t index = 0;
-    for (auto& box : tabs_) {
-        UpdateChild(GetChild(index), box);
-        index++;
+    while (itChild != itChildEnd && itComponent != itComponentEnd) {
+        UpdateChild(*(itChild++), *(itComponent++));
     }
-
+    // delete useless element.
+    while (itChild != itChildEnd) {
+        UpdateChild(*(itChild++), nullptr);
+    }
+    // update component.
+    while (itComponent != itComponentEnd) {
+        UpdateChild(nullptr, *(itComponent++));
+    }
     GetRenderNode()->MarkNeedLayout();
-}
-
-RefPtr<Element> TabBarElement::GetChild(int32_t index)
-{
-    if (index >= 0 && decltype(children_)::size_type(index) < children_.size()) {
-        auto pos = children_.begin();
-        std::advance(pos, index);
-        return (*pos);
-    }
-    return nullptr;
 }
 
 void TabBarElement::OnFocus()
