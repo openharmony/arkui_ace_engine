@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <initializer_list>
 #include <list>
+#include <string>
 #include <vector>
 
 #include "stdarg.h"
@@ -438,6 +439,9 @@ enum class KeyAction : int32_t {
     CLICK = 3,
 };
 
+constexpr int32_t ASCII_START_UPPER_CASE_LETTER = 65;
+constexpr int32_t ASCII_START_LOWER_CASE_LETTER = 97;
+
 const char* KeyToString(int32_t code);
 
 struct KeyEvent final {
@@ -458,7 +462,7 @@ struct KeyEvent final {
         std::vector<KeyCode> pCodes;
         std::chrono::milliseconds milliseconds(timeStamp);
         TimeStamp time(milliseconds);
-        new (this)KeyEvent(code, action, pCodes, repeatTime, time, 0, deviceId, sourceType);
+        new (this) KeyEvent(code, action, pCodes, repeatTime, time, 0, deviceId, sourceType);
     }
     ~KeyEvent() = default;
 
@@ -484,6 +488,32 @@ struct KeyEvent final {
             ++curPressedCode;
         }
         return true;
+    }
+
+    bool IsNumberKey() const
+    {
+        return ((KeyCode::KEY_0 <= code && code <= KeyCode::KEY_9) ||
+                (KeyCode::KEY_NUMPAD_0 <= code && code <= KeyCode::KEY_NUMPAD_9));
+    }
+    bool IsLetterKey() const
+    {
+        return (KeyCode::KEY_A <= code && code <= KeyCode::KEY_Z);
+    }
+    std::string ConvertCodeToString() const
+    {
+        if (KeyCode::KEY_0 <= code && code <= KeyCode::KEY_9) {
+            return std::to_string(static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_0));
+        } else if (KeyCode::KEY_NUMPAD_0 <= code && code <= KeyCode::KEY_NUMPAD_9) {
+            return std::to_string(static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_NUMPAD_0));
+        } else if (IsLetterKey()) {
+            int32_t codeValue = static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_A);
+            if (IsKey({ KeyCode::KEY_SHIFT_LEFT, code }) || IsKey({ KeyCode::KEY_SHIFT_RIGHT, code })) {
+                return std::string(1, static_cast<char>(codeValue + ASCII_START_UPPER_CASE_LETTER));
+            } else {
+                return std::string(1, static_cast<char>(codeValue + ASCII_START_LOWER_CASE_LETTER));
+            }
+        }
+        return "";
     }
 
     KeyCode code { KeyCode::KEY_UNKNOWN };
