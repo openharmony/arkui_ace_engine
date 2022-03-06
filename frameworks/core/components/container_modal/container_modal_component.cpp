@@ -205,18 +205,18 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     auto buttonResourceId = isFloating ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
                                        : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
     auto titleMaximizeRecoverButton = BuildControlButton(buttonResourceId, [contextWptr]() {
-            auto context = contextWptr.Upgrade();
-            if (context) {
-                auto mode = context->FireWindowGetModeCallBack();
-                if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-                    LOGI("recover button clicked");
-                    context->FireWindowRecoverCallBack();
-                } else {
-                    LOGI("maximize button clicked");
-                    context->FireWindowMaximizeCallBack();
-                }
+        auto context = contextWptr.Upgrade();
+        if (context) {
+            auto mode = context->FireWindowGetModeCallBack();
+            if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+                LOGI("recover button clicked");
+                context->FireWindowRecoverCallBack();
+            } else {
+                LOGI("maximize button clicked");
+                context->FireWindowMaximizeCallBack();
             }
-        });
+        }
+    });
     auto titleMinimizeButton =
         BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, [contextWptr]() {
             auto context = contextWptr.Upgrade();
