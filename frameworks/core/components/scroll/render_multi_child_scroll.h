@@ -95,7 +95,7 @@ public:
     }
 
 protected:
-    void OnPredictLayout(int64_t targetTimestamp) override;
+    void OnPredictLayout(int64_t deadline) override;
     void PerformLayout() override;
     void Update(const RefPtr<Component>& component) override;
     bool ReachMaxCount() const override;

@@ -159,7 +159,8 @@ public:
 
     void OnLayout();
 
-    virtual void OnPredictLayout(int64_t targetTimestamp) {}
+    // deadline : The remaining time until the next vsync. (unit: microsecond)
+    virtual void OnPredictLayout(int64_t deadline) {}
 
     virtual Size GetChildViewPort()
     {

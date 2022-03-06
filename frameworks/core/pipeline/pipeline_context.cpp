@@ -254,7 +254,7 @@ void PipelineContext::FlushBuild()
     }
 }
 
-void PipelineContext::FlushPredictLayout(int64_t targetTimestamp)
+void PipelineContext::FlushPredictLayout(int64_t deadline)
 {
     CHECK_RUN_ON(UI);
     if (predictLayoutNodes_.empty()) {
@@ -263,7 +263,7 @@ void PipelineContext::FlushPredictLayout(int64_t targetTimestamp)
     ACE_FUNCTION_TRACE();
     decltype(predictLayoutNodes_) dirtyNodes(std::move(predictLayoutNodes_));
     for (const auto& dirtyNode : dirtyNodes) {
-        dirtyNode->OnPredictLayout(targetTimestamp);
+        dirtyNode->OnPredictLayout(deadline);
     }
 }
 
