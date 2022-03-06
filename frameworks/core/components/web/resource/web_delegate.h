@@ -126,8 +126,11 @@ public:
     void HandleTouchUp(const int32_t& id, const double& x, const double& y);
     void HandleTouchMove(const int32_t& id, const double& x, const double& y);
     void HandleTouchCancel();
-    void OnPageErrorOHOS(const int& errorCode, const std::string& description, const std::string& url);
 #endif
+    void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+        std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
+    void OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+        std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response);
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
     void OnProgressChanged(int param);
@@ -212,6 +215,8 @@ private:
     EventCallbackV2 onGeolocationHideV2_;
     EventCallbackV2 onGeolocationShowV2_;
     EventCallbackV2 onRequestFocusV2_;
+    EventCallbackV2 onErrorReceiveV2_;
+    EventCallbackV2 onHttpErrorReceiveV2_;
     EventCallbackV2 onDownloadStartV2_;
     EventCallbackV2 onFocusV2_;
 

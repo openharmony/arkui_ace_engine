@@ -114,15 +114,26 @@ void WebClientImpl::OnProxyDied()
     }
 }
 
-void WebClientImpl::OnResourceLoadError(std::shared_ptr<NWeb::NWebUrlResourceRequest> request,
-    std::shared_ptr<NWeb::NWebUrlResourceError> error)
+void WebClientImpl::OnResourceLoadError(
+    std::shared_ptr<NWeb::NWebUrlResourceRequest> request, std::shared_ptr<NWeb::NWebUrlResourceError> error)
 {
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
     }
-    delegate->OnPageErrorOHOS(error->ErrorCode(), error->ErrorInfo(), request->Url());
+    delegate->OnErrorReceive(request, error);
+}
+
+void WebClientImpl::OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnHttpErrorReceive(request, response);
 }
 
 void WebClientImpl::OnMessage(const std::string& param)
