@@ -131,6 +131,11 @@ public:
         return false;
     }
 
+    virtual bool IsSubContainer() const
+    {
+        return false;
+    }
+
     const std::string& GetCardHapPath() const
     {
         return cardHapPath_;

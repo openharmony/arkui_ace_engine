@@ -1112,6 +1112,7 @@ bool RenderBox::HandleMouseEvent(const MouseEvent& event)
     info.SetAction(event.action);
     info.SetGlobalLocation(event.GetOffset());
     info.SetLocalLocation(event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY()));
+    info.SetScreenLocation(event.GetScreenOffset());
     info.SetTimeStamp(event.time);
     info.SetDeviceId(event.deviceId);
     info.SetSourceDevice(event.sourceType);

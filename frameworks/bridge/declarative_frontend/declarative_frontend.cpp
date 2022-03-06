@@ -204,6 +204,15 @@ void DeclarativeFrontend::AttachPipelineContext(const RefPtr<PipelineContext>& c
     delegate_->AttachPipelineContext(context);
 }
 
+void DeclarativeFrontend::AttachSubPipelineContext(const RefPtr<PipelineContext>& context)
+{
+    LOGI("DeclarativeFrontend AttachSubPipelineContext.");
+    if (!delegate_) {
+        return;
+    }
+    context->RegisterEventHandler(handler_);
+}
+
 void DeclarativeFrontend::SetAssetManager(const RefPtr<AssetManager>& assetManager)
 {
     LOGI("DeclarativeFrontend SetAssetManager.");

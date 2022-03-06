@@ -99,6 +99,7 @@ bool StackElement::PushDialog(const RefPtr<Component>& newComponent, bool disabl
 
 bool StackElement::PopDialog(int32_t id)
 {
+    LOGI("StackElement::PopDialog id is %{public}d", id);
     auto context = context_.Upgrade();
     if (context) {
         AccessibilityEvent stackEvent;

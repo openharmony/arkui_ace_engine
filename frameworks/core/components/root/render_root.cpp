@@ -15,6 +15,7 @@
 
 #include "core/components/root/render_root.h"
 
+#include "root_component.h"
 #include "base/log/log.h"
 #include "core/animation/curve.h"
 #include "core/animation/curve_animation.h"
@@ -38,11 +39,15 @@ bool IsShadowModal(const WeakPtr<PipelineContext>& contextWeak)
 
 RenderRoot::RenderRoot() : RenderNode(true) {}
 
-void RenderRoot::Update(const RefPtr<Component>&)
+void RenderRoot::Update(const RefPtr<Component>& component)
 {
     if (!controller_ && IsShadowModal(context_)) {
         controller_ = AceType::MakeRefPtr<Animator>(GetContext());
         controller_->SetFillMode(FillMode::FORWARDS);
+    }
+    auto root = AceType::DynamicCast<RootComponent>(component);
+    if (root) {
+        isContextMenu_ = root->IsContextMenu();
     }
     MarkNeedLayout();
 }
@@ -69,6 +74,9 @@ void RenderRoot::PerformLayout()
                 }
             });
             controller_->AddInterpolator(colorAnimation);
+        }
+        if (isContextMenu_) {
+            bgColor_ = Color::TRANSPARENT;
         }
         isBgColorInit_ = true;
     }
@@ -106,14 +114,14 @@ void RenderRoot::SetDefaultBgColor()
     if (!appTheme) {
         return;
     }
-    bgColor_ = appTheme->GetBackgroundColor();
+    bgColor_ = isContextMenu_ ? Color::TRANSPARENT : appTheme->GetBackgroundColor();
     forceColor_ = false;
     MarkNeedRender();
 }
 
 void RenderRoot::SetBgColor(const Color& color)
 {
-    bgColor_ = color;
+    bgColor_ = isContextMenu_ ? Color::TRANSPARENT : color;
     forceColor_ = true;
     MarkNeedRender();
 }

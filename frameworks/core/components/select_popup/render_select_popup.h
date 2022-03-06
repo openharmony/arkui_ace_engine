@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <vector>
 
+#include "base/geometry/offset.h"
 #include "core/components/box/render_box.h"
 #include "core/components/option/render_option.h"
 #include "core/components/positioned/render_positioned.h"
@@ -66,6 +67,9 @@ public:
     bool HandleMouseEvent(const MouseEvent& event) override;
     WeakPtr<RenderNode> CheckHoverNode() override;
 
+    void ProcessTouchDown(const TouchEventInfo& info);
+    void ProcessTouchUp(const TouchEventInfo& info);
+
 protected:
     bool isFullScreen_ = true;
     bool isWattingForAnimationStart_ = false;
@@ -78,6 +82,7 @@ protected:
     Dimension optionInterval_;
     Dimension rrectSize_;
 
+    bool isContextMenu_ = false;
 private:
     void AdjustTvChildVerticalLayout(const Size& size, double& y, double& height);
     void AdjustTvChildHorizontalLayout(const Size& size, double& x, double& width);
@@ -116,13 +121,15 @@ private:
     bool screenHorizontal_ = false;
     bool screenVertical_ = false;
     bool animationCreated_ = false;
-    bool isContextMenu_ = false;
+
     double normalPadding_ = 0.0;
     RefPtr<SelectTheme> theme_;
 
     RefPtr<RenderNode> renderRoot_;
     RefPtr<RenderPositioned> renderPositioned_;
     RefPtr<RenderBox> renderTitleBox_;
+    Offset firstFingerDownOffset_;
+    Offset firstFingerUpOffset_;
 };
 
 } // namespace OHOS::Ace

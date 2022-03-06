@@ -40,6 +40,8 @@
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "base/geometry/rect.h"
 #include "base/log/log.h"
+#include "base/subwindow/subwindow_manager.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
@@ -78,6 +80,8 @@ WindowMode GetWindowMode(OHOS::Rosen::Window* window)
 } // namespace
 
 static std::atomic<int32_t> gInstanceId = 0;
+static std::atomic<int32_t> gSubInstanceId = 1000000;
+const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
 
 using ContentFinishCallback = std::function<void()>;
 class ContentEventCallback final : public Platform::PlatformEventCallback {
@@ -194,6 +198,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     startUrl_ = contentInfo;
     if (!window_) {
         LOGE("Null window, can't initialize UI content");
+        return;
+    }
+    if (StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_PREFIX)) {
+        InitializeSubWindow(window_);
         return;
     }
     auto context = context_.lock();
@@ -363,6 +371,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 abilityContext->TerminateSelf();
             }
         }));
+    container->SetWindowName(window_->GetWindowName());
+
+    // Mark the relationship between windowId and containerId, it is 1:1
+    SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
     container->GetSettings().SetUsingSharedRuntime(true);
     container->SetSharedRuntime(runtime_);
@@ -647,6 +659,30 @@ void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::A
 
     dragWindowListener_ = new DragWindowListener(instanceId_);
     window->RegisterDragListener(dragWindowListener_);
+}
+
+void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window)
+{
+    window_ = window;
+    LOGI("The window name is %{public}s", window->GetWindowName().c_str());
+    if (!window_) {
+        LOGE("Null window, can't initialize UI content");
+        return;
+    }
+
+    RefPtr<Platform::AceContainer> container;
+    instanceId_ = gSubInstanceId.fetch_add(1, std::memory_order_relaxed);
+
+    std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
+    std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext;
+    container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
+        runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+            // Subwindow ,just return.
+            LOGI("Content event callback");
+        }),
+        false, true);
+    SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
+    AceEngine::Get().AddContainer(instanceId_, container);
 }
 
 } // namespace OHOS::Ace

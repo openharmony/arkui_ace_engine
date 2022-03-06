@@ -30,6 +30,10 @@ void RosenRenderRoot::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint canvas is null");
         return;
     }
+    LOGI("color is %{public}s", bgColor_.ColorToString().c_str());
+    if (isContextMenu_) {
+        bgColor_ = Color::TRANSPARENT;
+    }
     rsNode->SetBackgroundColor(bgColor_.GetValue());
     rsNode->SetPivot(0.0f, 0.0f);
     rsNode->SetScale(scale_);

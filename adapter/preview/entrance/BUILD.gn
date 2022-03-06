@@ -28,6 +28,7 @@ template("preview_entrance_source") {
       "ace_container.cpp",
       "ace_resource_register.cpp",
       "flutter_ace_view.cpp",
+      "subwindow_preview.cpp",
     ]
 
     deps = [

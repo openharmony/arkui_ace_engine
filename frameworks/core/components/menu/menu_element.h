@@ -52,6 +52,7 @@ public:
 
 private:
     void OnTargetCallback(const ComposeId& id, const Offset& point);
+    void OnTargetContextCallback(const ComposeId& id, const Offset& point);
     void OnOptionCallback(std::size_t index);
     void OnCanceledCallback();
     RefPtr<RenderBox> GetBoxRenderChild(const RefPtr<Element>& element);

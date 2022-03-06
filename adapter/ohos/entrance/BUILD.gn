@@ -35,6 +35,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/flutter_ace_view.cpp",
       "$ace_root/adapter/ohos/entrance/pa_container.cpp",
       "$ace_root/adapter/ohos/entrance/plugin_utils_impl.cpp",
+      "$ace_root/adapter/ohos/entrance/subwindow/subwindow_ohos.cpp",
 
       # innerkits impl
       "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
