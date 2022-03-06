@@ -221,16 +221,24 @@ void FormElement::HandleOnUninstallEvent(int64_t formId)
 void FormElement::Prepare(const WeakPtr<Element>& parent)
 {
     RenderElement::Prepare(parent);
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("fail to get context, onUninstall failed.");
+        return;
+    }
 
     if (!formManagerBridge_) {
         formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(GetContext());
+        int32_t instanceID = context->GetInstanceId();
         formManagerBridge_->AddFormAcquireCallback(
-            [weak = WeakClaim(this)](int64_t id, std::string path, std::string module, std::string data,
+            [weak = WeakClaim(this), instanceID](int64_t id, std::string path, std::string module, std::string data,
                 std::map<std::string, std::pair<int, int32_t>> imageDataMap) {
+                ContainerScope scope(instanceID);
                 auto element = weak.Upgrade();
                 auto uiTaskExecutor = SingleTaskExecutor::Make(
                     element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-                uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, weak] {
+                uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, weak, instanceID] {
+                    ContainerScope scope(instanceID);
                     auto form = weak.Upgrade();
                     if (form) {
                         auto container = form->GetSubContainer();
@@ -240,12 +248,14 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                     }
                 });
             });
-        formManagerBridge_->AddFormUpdateCallback([weak = WeakClaim(this)](int64_t id, std::string data,
-            std::map<std::string, std::pair<int, int32_t>> imageDataMap) {
+        formManagerBridge_->AddFormUpdateCallback([weak = WeakClaim(this), instanceID](int64_t id, std::string data,
+                                                      std::map<std::string, std::pair<int, int32_t>> imageDataMap) {
+            ContainerScope scope(instanceID);
             auto element = weak.Upgrade();
             auto uiTaskExecutor = SingleTaskExecutor::Make(
                 element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([id, data, imageDataMap, weak] {
+            uiTaskExecutor.PostTask([id, data, imageDataMap, weak, instanceID] {
+                ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();
                 if (form) {
                     if (form->ISAllowUpdate()) {
@@ -254,32 +264,37 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                 }
             });
         });
-        formManagerBridge_->AddFormErrorCallback([weak = WeakClaim(this)](std::string code, std::string msg) {
-            auto element = weak.Upgrade();
-            auto uiTaskExecutor = SingleTaskExecutor::Make(
-                element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([code, msg, weak] {
-                auto form = weak.Upgrade();
-                if (form) {
-                    form->HandleOnErrorEvent(code, msg);
-                }
+        formManagerBridge_->AddFormErrorCallback(
+            [weak = WeakClaim(this), instanceID](std::string code, std::string msg) {
+                ContainerScope scope(instanceID);
+                auto element = weak.Upgrade();
+                auto uiTaskExecutor = SingleTaskExecutor::Make(
+                    element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+                uiTaskExecutor.PostTask([code, msg, weak, instanceID] {
+                    ContainerScope scope(instanceID);
+                    auto form = weak.Upgrade();
+                    if (form) {
+                        form->HandleOnErrorEvent(code, msg);
+                    }
 
-                auto render = form->GetRenderNode();
-                if (!render) {
-                    LOGE("remove card from screen fail, due to could not get card render node");
-                    return;
-                }
-                auto renderForm = AceType::DynamicCast<RenderForm>(render);
-                if (renderForm) {
-                    renderForm->RemoveChildren();
-                }
+                    auto render = form->GetRenderNode();
+                    if (!render) {
+                        LOGE("remove card from screen fail, due to could not get card render node");
+                        return;
+                    }
+                    auto renderForm = AceType::DynamicCast<RenderForm>(render);
+                    if (renderForm) {
+                        renderForm->RemoveChildren();
+                    }
+                });
             });
-        });
-        formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this)](int64_t formId) {
+        formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this), instanceID](int64_t formId) {
+            ContainerScope scope(instanceID);
             auto element = weak.Upgrade();
             auto uiTaskExecutor = SingleTaskExecutor::Make(
                 element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([formId, weak] {
+            uiTaskExecutor.PostTask([formId, weak, instanceID] {
+                ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();
                 if (form) {
                     form->HandleOnUninstallEvent(formId);
