@@ -77,8 +77,17 @@ template("make_skia_deps") {
 
   ohos_source_set("ace_skia_$platform") {
     license_file = "$flutter_root/skia/LICENSE"
-    if (platform == "ohos" && defined(config.enable_native_view) &&
-        config.enable_native_view) {
+    if (platform == "ohos" &&
+        (!defined(config.disable_gpu) || !config.disable_gpu) &&
+        defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
+      public_configs = [
+        ":skia_config",
+        ":harfbuzz_config",
+      ]
+      public_deps =
+          [ "//foundation/graphic/standard/rosen/build/skia:skia_ohos" ]
+    } else if (platform == "ohos" && defined(config.enable_native_view) &&
+               config.enable_native_view) {
       public_configs = [
         ":system_skia_config",
         ":system_harfbuzz_config",
