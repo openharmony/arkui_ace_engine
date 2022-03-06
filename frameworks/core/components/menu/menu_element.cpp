@@ -54,13 +54,20 @@ void MenuElement::PerformBuild()
     if (!data_->GetOnSuccess().IsEmpty()) {
         jsSuccessCallback_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetOnSuccess(), context_);
     }
-    data_->SetTargetCallback([weak = WeakClaim(this)](const ComposeId& id, const Offset& point) {
-        auto refPtr = weak.Upgrade();
-        if (!refPtr) {
-            return;
-        }
-        refPtr->OnTargetCallback(id, point);
-    });
+
+    data_->SetTargetCallback(
+        [weak = WeakClaim(this), isContextMenu = data_->IsContextMenu()](const ComposeId& id, const Offset& point) {
+            auto refPtr = weak.Upgrade();
+            if (!refPtr) {
+                return;
+            }
+            if (isContextMenu) {
+                LOGI("The menu is contextMenu, set the callback.");
+                refPtr->OnTargetContextCallback(id, point);
+            } else {
+                refPtr->OnTargetCallback(id, point);
+            }
+        });
 }
 
 void MenuElement::OnTargetCallback(const ComposeId& id, const Offset& point)
@@ -102,6 +109,28 @@ void MenuElement::OnTargetCallback(const ComposeId& id, const Offset& point)
         targetGlobalOffset.GetY() + targetSize.Height());
 
     popup->ShowDialog(stack, targetGlobalOffset, targetRightBottom, true);
+}
+
+void MenuElement::OnTargetContextCallback(const ComposeId& id, const Offset& point)
+{
+    LOGI("Execute the callback");
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("Get Context failed, context is null.");
+        return;
+    }
+
+    if (!data_ || !data_->GetPopup()) {
+        LOGE("Get component failed, component is null.");
+        return;
+    }
+
+    auto popup = data_->GetPopup();
+    if (popup) {
+        LOGI("Window is ready, prepare to show the menu.");
+        popup->ShowContextMenu(point);
+    }
+
 }
 
 RefPtr<RenderBox> MenuElement::GetBoxRenderChild(const RefPtr<Element>& element)

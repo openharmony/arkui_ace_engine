@@ -19,8 +19,8 @@
 #include <memory>
 
 #include "ability_context.h"
-#include "native_engine/native_value.h"
 #include "native_engine/native_reference.h"
+#include "native_engine/native_value.h"
 
 #include "adapter/ohos/entrance/ace_ability.h"
 #include "adapter/ohos/entrance/platform_event_callback.h"
@@ -38,12 +38,12 @@ class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatch
 
 public:
     AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
-        std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
-        std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner = false);
+        std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
+        bool useCurrentEventRunner = false);
     AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
         std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
-        bool useCurrentEventRunner = false);
+        bool useCurrentEventRunner = false, bool isSubContainer = false);
     ~AceContainer() override = default;
 
     void Initialize() override;
@@ -187,6 +187,26 @@ public:
         pageProfile_ = pageProfile;
     }
 
+    bool IsSubContainer() const override
+    {
+        return isSubContainer_;
+    }
+
+    void* GetSharedRuntime()
+    {
+        return sharedRuntime_;
+    }
+
+    void SetParentId(int32_t parentId)
+    {
+        parentId_ = parentId;
+    }
+
+    int32_t GetParentId()
+    {
+        return parentId_;
+    }
+
     static void CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false);
@@ -209,7 +229,7 @@ public:
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
     static void AddLibPath(int32_t instanceId, const std::string& libPath);
     static void SetView(AceView* view, double density, int32_t width, int32_t height, int32_t windowId,
-                        UIEnvCallback callback = nullptr);
+        UIEnvCallback callback = nullptr);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
@@ -221,6 +241,22 @@ public:
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
 
+    void SetWindowName(const std::string& name)
+    {
+        windowName_ = name;
+    }
+
+    std::string& GetWindowName()
+    {
+        return windowName_;
+    }
+
+    void SetIsSubContainer(bool isSubContainer)
+    {
+        isSubContainer_ = isSubContainer;
+    }
+
+    void InitializeSubContainer(int32_t parentContainerId);
     static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
 
 private:
@@ -229,7 +265,7 @@ private:
     void InitializeTask();
 
     void AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
-                    int32_t windowId, UIEnvCallback callback = nullptr);
+        int32_t windowId, UIEnvCallback callback = nullptr);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
     std::weak_ptr<OHOS::AppExecFwk::Ability> GetAbilityInner() const;
@@ -254,6 +290,10 @@ private:
     int32_t pageId_ = 0;
     bool useCurrentEventRunner_ = false;
     sptr<OHOS::Rosen::Window> uiWindow_ = nullptr;
+    std::string windowName_;
+
+    bool isSubContainer_ = false;
+    int32_t parentId_ = 0;
     bool useStageModel_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);

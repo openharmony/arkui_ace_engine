@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,12 @@
 #include "core/components/select_popup/select_popup_component.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text/render_text.h"
+#include "core/gestures/raw_recognizer.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr int32_t DEFAULT_DISTANCE = 5;
+} // namespace
 
 RenderSelectPopup::RenderSelectPopup()
 {
@@ -301,7 +305,9 @@ void RenderSelectPopup::PerformLayout()
     normalPadding_ = NormalizeToPx(rrectSize_);
     globalRightBottom_ = Offset() + renderRoot_->GetLayoutSize();
     double outPadding = NormalizeToPx(4.0_vp); // the out padding is 4dp from doc.
-
+    if (isContextMenu_) {
+        outPadding = 0.0;
+    }
     Size totalSize;
     double fixHeight = 0.0;
     if (renderTitleBox_) {
@@ -376,14 +382,52 @@ void RenderSelectPopup::PerformLayout()
 
 void RenderSelectPopup::HandleRawEvent(const Offset& clickPosition)
 {
+    LOGD("Handle Raw Event, Position is %{public}s.", clickPosition.ToString().c_str());
     if (touchRegion_.ContainsInRegion(clickPosition.GetX(), clickPosition.GetY())) {
+        LOGI("Contains the touch region.");
         return;
     }
 
     if (!selectPopup_) {
         return;
     }
+    if (isContextMenu_) {
+        LOGI("Hide the contextmenu.");
+        selectPopup_->CloseContextMenu();
+        return;
+    }
     selectPopup_->HideDialog(SELECT_INVALID_INDEX);
+}
+
+void RenderSelectPopup::ProcessTouchDown(const TouchEventInfo& info)
+{
+    auto touches = info.GetTouches();
+    if (touches.empty()) {
+        LOGE("touch event info is empty.");
+        return;
+    }
+
+    firstFingerDownOffset_ = touches.front().GetGlobalLocation();
+}
+
+void RenderSelectPopup::ProcessTouchUp(const TouchEventInfo& info)
+{
+    auto touches = info.GetTouches();
+    if (touches.empty()) {
+        LOGE("touch event info is empty.");
+        return;
+    }
+
+    auto offset = touches.front().GetGlobalLocation();
+    if (!isContextMenu_) {
+        firstFingerUpOffset_ = offset;
+        if ((offset - firstFingerDownOffset_).GetDistance() <= DEFAULT_DISTANCE) {
+            selectPopup_->HideDialog(SELECT_INVALID_INDEX);
+            firstFingerDownOffset_ = Offset();
+        }
+    } else {
+        HandleRawEvent(offset);
+    }
 }
 
 void RenderSelectPopup::OnTouchTestHit(
@@ -398,6 +442,37 @@ void RenderSelectPopup::OnTouchTestHit(
     if (!clickDetector_) {
         clickDetector_ = AceType::MakeRefPtr<ClickRecognizer>();
     }
+
+    rawDetector_->SetOnTouchDown([weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
+        auto ref = weak.Upgrade();
+        if (!ref) {
+            LOGE("renderSelectPopup upgrade fail.");
+            return;
+        }
+
+        ref->ProcessTouchDown(info);
+    });
+
+    rawDetector_->SetOnTouchUp([weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
+        auto ref = weak.Upgrade();
+        if (!ref) {
+            LOGE("renderSelectPopup upgrade fail.");
+            return;
+        }
+
+        ref->ProcessTouchUp(info);
+    });
+
+    rawDetector_->SetOnTouchCancel([weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
+        auto ref = weak.Upgrade();
+        if (!ref) {
+            LOGE("renderSelectPopup upgrade fail.");
+            return;
+        }
+
+        ref->ProcessTouchUp(info);
+    });
+
     rawDetector_->SetCoordinateOffset(coordinateOffset);
     dragDetector_->SetCoordinateOffset(coordinateOffset);
     longPressDetector_->SetCoordinateOffset(coordinateOffset);

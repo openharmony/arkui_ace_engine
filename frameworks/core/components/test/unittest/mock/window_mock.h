@@ -18,6 +18,7 @@
 
 #include <cstdint>
 
+#include "base/subwindow/subwindow.h"
 #include "core/common/platform_window.h"
 #include "core/common/window.h"
 #include "core/components/box/render_box.h"
@@ -113,6 +114,11 @@ public:
 RefPtr<RenderContext> RenderContext::Create()
 {
     return AceType::MakeRefPtr<MockRenderContext>();
+}
+
+RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t instanceId)
+{
+    return nullptr;
 }
 
 class TweenTestUtils {

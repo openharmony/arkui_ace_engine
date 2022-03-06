@@ -122,6 +122,8 @@ public:
 
     RefPtr<Element> SetupRootElement();
 
+    // This is used for subwindow, when the subwindow is created,a new subrootElement will be built
+    RefPtr<Element> SetupSubRootElement();
     RefPtr<DialogComponent> ShowDialog(const DialogProperties& dialogProperties, bool isRightToLeft,
         const std::string& inspectorTag = "");
     void CloseContextMenu();
@@ -1202,6 +1204,15 @@ public:
 
     std::string GetRestoreInfo(int32_t restoreId);
 
+    void SetIsSubPipeline(bool isSubPipeline)
+    {
+        isSubPipeline_ = isSubPipeline;
+    }
+
+    bool IsSubPipeline() const
+    {
+        return isSubPipeline_;
+    }
 private:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     void FlushPipelineWithoutAnimation();
@@ -1443,6 +1454,7 @@ private:
     std::unordered_map<int32_t, WeakPtr<RenderElement>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
 
+    bool isSubPipeline_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
 

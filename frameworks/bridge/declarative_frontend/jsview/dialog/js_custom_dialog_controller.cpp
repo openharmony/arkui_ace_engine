@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,16 +15,17 @@
 
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 
+#include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::vector<DialogAlignment> DIALOG_ALIGNMENT = {
-    DialogAlignment::TOP, DialogAlignment::CENTER, DialogAlignment::BOTTOM, DialogAlignment::DEFAULT,
-    DialogAlignment::TOP_START, DialogAlignment::TOP_END, DialogAlignment::CENTER_START,
-    DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START, DialogAlignment::BOTTOM_END
-};
+const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
+    DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
+    DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
+    DialogAlignment::BOTTOM_END };
 } // namespace
 
 void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
@@ -117,9 +118,21 @@ void JSCustomDialogController::DestructorCallback(JSCustomDialogController* cont
 
 void JSCustomDialogController::ShowDialog(const JSCallbackInfo& info)
 {
-    LOGD("JSCustomDialogController(ShowDialog)");
-    auto container = Container::Current();
+    LOGI("JSCustomDialogController(ShowDialog)");
+    RefPtr<Container> container;
+    auto current = Container::Current();
+    if (!current) {
+        LOGE("Container is null.");
+        return;
+    }
+    if (current->IsSubContainer()) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+        container = AceEngine::Get().GetContainer(parentContainerId);
+    } else {
+        container = std::move(current);
+    }
     if (!container) {
+        LOGE("Container is null.");
         return;
     }
     auto context = container->GetPipelineContext();
@@ -153,9 +166,21 @@ void JSCustomDialogController::ShowDialog(const JSCallbackInfo& info)
 
 void JSCustomDialogController::CloseDialog()
 {
-    LOGD("JSCustomDialogController(CloseDialog)");
-    auto container = Container::Current();
+    LOGI("JSCustomDialogController(CloseDialog)");
+    RefPtr<Container> container;
+    auto current = Container::Current();
+    if (!current) {
+        LOGE("Container is null.");
+        return;
+    }
+    if (current->IsSubContainer()) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+        container = AceEngine::Get().GetContainer(parentContainerId);
+    } else {
+        container = std::move(current);
+    }
     if (!container) {
+        LOGE("Container is null.");
         return;
     }
     auto context = container->GetPipelineContext();

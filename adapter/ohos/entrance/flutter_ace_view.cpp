@@ -73,6 +73,8 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
     touchPoint.downTime = TimeStamp(std::chrono::microseconds(pointerItem.GetDownTime()));
     touchPoint.x = pointerItem.GetLocalX();
     touchPoint.y = pointerItem.GetLocalY();
+    touchPoint.screenX = pointerItem.GetGlobalX();
+    touchPoint.screenY = pointerItem.GetGlobalY();
     touchPoint.isPressed = pointerItem.IsPressed();
     return touchPoint;
 }
@@ -104,8 +106,8 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     auto touchPoint = ConvertTouchPoint(item);
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
-    TouchEvent event { touchPoint.id, touchPoint.x, touchPoint.y, TouchType::UNKNOWN, time, touchPoint.size,
-        touchPoint.force, pointerEvent->GetDeviceId() };
+    TouchEvent event { touchPoint.id, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY,
+        TouchType::UNKNOWN, time, touchPoint.size, touchPoint.force, pointerEvent->GetDeviceId() };
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();
@@ -178,6 +180,8 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
 
     events.x = item.GetLocalX();
     events.y = item.GetLocalY();
+    events.screenX = item.GetGlobalX();
+    events.screenY = item.GetGlobalY();
     int32_t orgAction = pointerEvent->GetPointerAction();
     GetMouseEventAction(orgAction, events);
     int32_t orgButton = pointerEvent->GetButtonId();

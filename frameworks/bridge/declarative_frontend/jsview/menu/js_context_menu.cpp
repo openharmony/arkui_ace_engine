@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,26 +16,14 @@
 #include "frameworks/bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 
 #include "core/common/container.h"
+#include "base/subwindow/subwindow_manager.h"
+#include "base/subwindow/subwindow.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSContextMenu::Close(const JSCallbackInfo& args)
 {
-    // Close context menu.
-    auto container = Container::Current();
-    if (container) {
-        auto context = container->GetPipelineContext();
-        auto executor = Container::CurrentTaskExecutor();
-        if (executor) {
-            executor->PostTask(
-                [context]() {
-                    if (context) {
-                        context->CloseContextMenu();
-                    }
-                },
-                TaskExecutor::TaskType::UI);
-        }
-    }
+    SubwindowManager::GetInstance()->CloseMenu();
     args.SetReturnValue(args.This());
 }
 
