@@ -278,7 +278,7 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 
 } // namespace
 
-FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatfromThread)
+FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatformThread)
 {
     FlutterAceView* aceSurface = new Platform::FlutterAceView(instanceId);
     flutter::Settings settings;
@@ -289,7 +289,7 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
 #else
     settings.enable_software_rendering = true;
 #endif
-    settings.platform_as_ui_thread = usePlatfromThread;
+    settings.platform_as_ui_thread = usePlatformThread;
     settings.use_current_event_runner = useCurrentEventRunner;
     LOGI("software render: %{public}s", settings.enable_software_rendering ? "true" : "false");
     LOGI("use platform as ui thread: %{public}s", settings.platform_as_ui_thread ? "true" : "false");

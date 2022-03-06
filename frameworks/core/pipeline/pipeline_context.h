@@ -1211,7 +1211,7 @@ private:
     void FlushMessages();
     void FlushRenderFinish();
     void FireVisibleChangeEvent();
-    void FlushPredictLayout(int64_t targetTimestamp);
+    void FlushPredictLayout(int64_t deadline);
     void FlushAnimation(uint64_t nanoTimestamp);
     void FlushPostAnimation();
     void FlushPageUpdateTasks();
