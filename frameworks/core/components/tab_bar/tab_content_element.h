@@ -45,13 +45,14 @@ public:
     bool IsFocusable() const override;
 
 private:
+    void PerformBuildForDeclarative();
     RefPtr<RenderNode> CreateRenderNode() override;
     void UpdateLastFocusNode();
     RefPtr<FocusNode> GetCurrentFocusNode() const;
 
     std::list<RefPtr<Component>> contents_;
     std::unordered_map<int32_t, RefPtr<Element>> childMap_;
-    std::unordered_map<int32_t, int32_t> focusIndexMap_;
+    std::unordered_set<int32_t> focusIndexMap_;
     RefPtr<TabController> controller_;
 
     // new content index, requested by tab bar
@@ -60,6 +61,7 @@ private:
     int32_t newIndex_ = -1;
     int32_t lastIndex_ = -1;
     bool fromController_ = false;
+    bool newComponentBuild_ = false;
 };
 
 } // namespace OHOS::Ace

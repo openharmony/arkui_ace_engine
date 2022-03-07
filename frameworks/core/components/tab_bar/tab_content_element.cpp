@@ -103,6 +103,7 @@ void TabContentElement::Update()
             LOGE("Get tabContent failed");
             return;
         }
+        tabContent->SetUpdateType(UpdateType::REBUILD);
         contents_ = tabContent->GetChildren();
         auto controller = tabContent->GetController();
         if (controller && (controller_ != controller)) {
@@ -117,6 +118,10 @@ void TabContentElement::Update()
             return;
         }
         controller_->SetContentElement(AceType::Claim(this));
+        if (controller_->GetIndex() >= static_cast<int32_t>(contents_.size())) {
+            controller_->SetIndex(contents_.size() - 1);
+        }
+        newComponentBuild_ = true;
     }
     ComponentGroupElement::Update();
 }
@@ -126,6 +131,11 @@ void TabContentElement::PerformBuild()
     if (contents_.empty()) {
         LOGD("contents is empty");
         ComponentGroupElement::PerformBuild();
+        return;
+    }
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        PerformBuildForDeclarative();
         return;
     }
     RefPtr<RenderTabContent> tabContent = AceType::DynamicCast<RenderTabContent>(renderNode_);
@@ -146,7 +156,7 @@ void TabContentElement::PerformBuild()
     auto childIter = childMap_.find(target);
     if (childIter == childMap_.end()) {
         auto newChild = UpdateChild(nullptr, *it);
-        focusIndexMap_.emplace(target, childMap_.size());
+        focusIndexMap_.emplace(target);
         childMap_.emplace(target, newChild);
         auto renderChild = newChild->GetRenderNode();
         if (renderChild) {
@@ -157,6 +167,56 @@ void TabContentElement::PerformBuild()
         UpdateChild(childIter->second, *it);
     }
 
+    // process for new content requested by drag
+    if (target == newIndex_) {
+        tabContent->UpdateDragPosition(newIndex_);
+        newIndex_ = -1;
+    }
+    // process for new content requested by tab bar
+    if (target == newBarIndex_) {
+        tabContent->ChangeScroll(newBarIndex_, fromController_);
+        UpdateLastFocusNode();
+        newBarIndex_ = -1;
+    }
+    lastIndex_ = target;
+    fromController_ = false;
+}
+
+void TabContentElement::PerformBuildForDeclarative()
+{
+    RefPtr<RenderTabContent> tabContent = AceType::DynamicCast<RenderTabContent>(renderNode_);
+    if (!tabContent || !controller_ || !renderNode_) {
+        LOGW("tabContent or controller is null.");
+        return;
+    }
+    if (newComponentBuild_) {
+        newComponentBuild_ = false;
+        ComponentGroupElement::PerformBuild();
+        int32_t index = 0;
+        for (const auto& element : children_) {
+            focusIndexMap_.emplace(index);
+            childMap_[index] = element;
+            auto renderChild = element->GetRenderNode();
+            if (renderChild) {
+                tabContent->AddChildContent(index, renderChild);
+            }
+            index++;
+        }
+        if (!childMap_.empty()) {
+            auto maxValue = childMap_.cbegin()->first;
+            for (int32_t remove = index; remove < maxValue; remove++) {
+                focusIndexMap_.erase(remove);
+                childMap_.erase(remove);
+                tabContent->RemoveChildContent(remove);
+            }
+        }
+    }
+    // Do index change.
+    if (newIndex_ >= static_cast<int32_t>(contents_.size())) {
+        newIndex_ = contents_.size() - 1;
+    }
+    int32_t target = newIndex_ >= 0 ? newIndex_ : controller_->GetIndex();
+    LOGD("change to target: %{public}d", target);
     // process for new content requested by drag
     if (target == newIndex_) {
         tabContent->UpdateDragPosition(newIndex_);
@@ -215,12 +275,11 @@ RefPtr<FocusNode> TabContentElement::GetCurrentFocusNode() const
     if (focusIndexIter == focusIndexMap_.end()) {
         return nullptr;
     }
-
-    if (focusNodes_.size() <= size_t(focusIndexIter->second)) {
+    auto pos = focusNodes_.begin();
+    std::advance(pos, *focusIndexIter);
+    if (pos == focusNodes_.end()) {
         return nullptr;
     }
-    auto pos = focusNodes_.begin();
-    std::advance(pos, focusIndexIter->second);
     return AceType::DynamicCast<FocusNode>(*pos);
 }
 

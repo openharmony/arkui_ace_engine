@@ -61,6 +61,9 @@ bool IsRosenBackendEnabled()
     if (system::GetParameter("persist.ace.rosen.backend.enabled", "0") == "1") {
         return true;
     }
+    if (system::GetParameter("persist.ace.rosen.backend.enabled", "0") == "2") {
+        return false;
+    }
     if (access(DISABLE_ROSEN_FILE_PATH, F_OK) == 0) {
         return false;
     }
@@ -82,7 +85,7 @@ bool IsDebugEnabled()
 }
 } // namespace
 
-bool SystemProperties::IsSyscapExist(const char *cap)
+bool SystemProperties::IsSyscapExist(const char* cap)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     return HasSystemCapability(cap);
@@ -160,7 +163,7 @@ void SystemProperties::InitDeviceTypeBySystemProperty()
         deviceType_ = DeviceType::CAR;
     } else if (deviceProp == PROPERTY_DEVICE_TYPE_WATCH) {
         deviceType_ = DeviceType::WATCH;
-    }  else if (deviceProp == PROPERTY_DEVICE_TYPE_TABLET) {
+    } else if (deviceProp == PROPERTY_DEVICE_TYPE_TABLET) {
         deviceType_ = DeviceType::TABLET;
     } else {
         deviceType_ = DeviceType::PHONE;
