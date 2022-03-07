@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_ELEMENT_H
 
+#include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_component.h"
 #include "core/focus/focus_node.h"
 #include "core/pipeline/base/render_element.h"
@@ -30,8 +31,18 @@ public:
 
     void OnFocus() override;
 
+    void SetDelegate(const RefPtr<WebDelegate>& delegate)
+    {
+        delegate_ = delegate;
+    }
+
+protected:
+    RefPtr<WebDelegate> delegate_;
+
 private:
     std::string webSrc_;
+    std::string webUserAgent_;
+
     RefPtr<WebComponent> webComp_;
 };
 

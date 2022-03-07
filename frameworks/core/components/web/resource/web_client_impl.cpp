@@ -21,6 +21,7 @@ namespace OHOS::Ace {
 void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::string& userAgent,
     const std::string& contentDisposition, const std::string& mimetype, long contentLength)
 {
+    ContainerScope scope(instanceId_);
     LOGI("OnDownloadStart.");
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
@@ -29,8 +30,9 @@ void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::st
     delegate->OnDownloadStart(url, userAgent, contentDisposition, mimetype, contentLength);
 }
 
-void WebClientImpl::OnPageFinished(int httpStatusCode, const std::string& url)
+void WebClientImpl::OnPageLoadEnd(int httpStatusCode, const std::string& url)
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -38,8 +40,9 @@ void WebClientImpl::OnPageFinished(int httpStatusCode, const std::string& url)
     delegate->OnPageFinished(url);
 }
 
-void WebClientImpl::OnRequestFocus()
+void WebClientImpl::OnFocus()
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -47,8 +50,9 @@ void WebClientImpl::OnRequestFocus()
     delegate->OnRequestFocus();
 }
 
-void WebClientImpl::OnPageStarted(const std::string& url)
+void WebClientImpl::OnPageLoadBegin(const std::string& url)
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -56,8 +60,9 @@ void WebClientImpl::OnPageStarted(const std::string& url)
     delegate->OnPageStarted(url);
 }
 
-void WebClientImpl::OnProgressChanged(int newProgress)
+void WebClientImpl::OnLoadingProgress(int newProgress)
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -65,8 +70,9 @@ void WebClientImpl::OnProgressChanged(int newProgress)
     delegate->OnProgressChanged(newProgress);
 }
 
-void WebClientImpl::OnReceivedTitle(const std::string &title)
+void WebClientImpl::OnPageTitle(const std::string &title)
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -74,8 +80,9 @@ void WebClientImpl::OnReceivedTitle(const std::string &title)
     delegate->OnReceivedTitle(title);
 }
 
-void WebClientImpl::OnGeolocationPermissionsHidePrompt()
+void WebClientImpl::OnGeolocationHide()
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -83,9 +90,10 @@ void WebClientImpl::OnGeolocationPermissionsHidePrompt()
     delegate->OnGeolocationPermissionsHidePrompt();
 }
 
-void WebClientImpl::OnGeolocationPermissionsShowPrompt(const std::string& origin,
-    OHOS::WebView::GeolocationCallback* callback)
+void WebClientImpl::OnGeolocationShow(const std::string& origin,
+    OHOS::NWeb::NWebGeolocationCallbackInterface* callback)
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -93,7 +101,7 @@ void WebClientImpl::OnGeolocationPermissionsShowPrompt(const std::string& origin
     delegate->OnGeolocationPermissionsShowPrompt(origin, callback);
 }
 
-void WebClientImpl::SetWebView(std::shared_ptr<OHOS::WebView::WebView> webview)
+void WebClientImpl::SetNWeb(std::shared_ptr<OHOS::NWeb::NWeb> webview)
 {
     webviewWeak_ = webview;
 }
@@ -106,18 +114,31 @@ void WebClientImpl::OnProxyDied()
     }
 }
 
-void WebClientImpl::onReceivedError(std::shared_ptr<WebView::WebResourceRequest> request,
-    std::shared_ptr<WebView::WebResourceError> error)
+void WebClientImpl::OnResourceLoadError(
+    std::shared_ptr<NWeb::NWebUrlResourceRequest> request, std::shared_ptr<NWeb::NWebUrlResourceError> error)
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
     }
-    delegate->OnPageErrorOHOS(error->GetErrorCode(), error->GetDescription(), request->GetUrl());
+    delegate->OnErrorReceive(request, error);
+}
+
+void WebClientImpl::OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnHttpErrorReceive(request, response);
 }
 
 void WebClientImpl::OnMessage(const std::string& param)
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
@@ -127,6 +148,7 @@ void WebClientImpl::OnMessage(const std::string& param)
 
 void WebClientImpl::OnRouterPush(const std::string& param)
 {
+    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;

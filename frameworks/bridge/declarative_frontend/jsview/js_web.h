@@ -16,6 +16,8 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_H
 
+#include <string>
+
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
@@ -33,6 +35,8 @@ public:
     static void OnError(const JSCallbackInfo& args);
     static void OnMessage(const JSCallbackInfo& args);
     static void OnDownloadStart(const JSCallbackInfo& args);
+    static void OnErrorReceive(const JSCallbackInfo& args);
+    static void OnHttpErrorReceive(const JSCallbackInfo& args);
     static void JsEnabled(bool isJsEnabled);
     static void ContentAccessEnabled(bool isContentAccessEnabled);
     static void FileAccessEnabled(bool isFileAccessEnabled);
@@ -43,6 +47,8 @@ public:
     static void MixedMode(int32_t MixedModeNum);
     static void ZoomAccessEnabled(bool isZoomAccessEnabled);
     static void GeolocationAccessEnabled(bool isGeolocationAccessEnabled);
+    static void JavaScriptProxy(const JSCallbackInfo& args);
+    static void UserAgent(std::string userAgent);
 
 };
 }

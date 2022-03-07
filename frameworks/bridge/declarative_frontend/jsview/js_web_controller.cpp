@@ -111,6 +111,7 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("deleteJavaScriptRegister", &JSWebController::RemoveJavascriptInterface);
     JSClass<JSWebController>::CustomMethod("onInactive", &JSWebController::OnInactive);
     JSClass<JSWebController>::CustomMethod("onActive", &JSWebController::OnActive);
+    JSClass<JSWebController>::CustomMethod("zoom", &JSWebController::Zoom);
     JSClass<JSWebController>::CustomMethod("requestFocus", &JSWebController::RequestFocus);
     JSClass<JSWebController>::CustomMethod("loadData", &JSWebController::LoadDataWithBaseUrl);
     JSClass<JSWebController>::CustomMethod("backward", &JSWebController::Backward);
@@ -340,9 +341,11 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
     if (!jsRegisterCallBackInit_) {
         LOGI("JSWebController set webview javascript CallBack");
         jsRegisterCallBackInit_ = true;
-        WebController::JavaScriptCallBackImpl callback = [weak = WeakClaim(this)](
+        WebController::JavaScriptCallBackImpl callback =
+            [execCtx = args.GetExecutionContext(), weak = WeakClaim(this)](
             const std::string& objectName, const std::string& objectMethod,
             const std::vector<std::shared_ptr<WebJSValue>>& args) {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
             auto jsWebController = weak.Upgrade();
             if (jsWebController == nullptr) {
                 return std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
@@ -383,6 +386,79 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
 
     webController_->AddJavascriptInterface(objName, methods);
 }
+
+void JSWebController::InitJavascriptInterface()
+{
+    if (!webController_) {
+        LOGW("JSWebController not ready");
+        return;
+    }
+    // Init webview callback
+    if (!jsRegisterCallBackInit_) {
+        LOGI("JSWebController set webview javascript CallBack");
+        jsRegisterCallBackInit_ = true;
+        WebController::JavaScriptCallBackImpl callback =
+            [weak = WeakClaim(this)](
+            const std::string& objectName, const std::string& objectMethod,
+            const std::vector<std::shared_ptr<WebJSValue>>& args) {
+            auto jsWebController = weak.Upgrade();
+            if (jsWebController == nullptr) {
+                return std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
+            }
+            return jsWebController->GetJavaScriptResult(objectName, objectMethod, args);
+        };
+        webController_->SetJavaScriptCallBackImpl(std::move(callback));
+    }
+    for (auto& entry : methods_) {
+        webController_->AddJavascriptInterface(entry.first, entry.second);
+    }
+}
+
+void JSWebController::SetJavascriptInterface(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        return;
+    }
+    if (!webController_) {
+        LOGW("JSWebController not ready");
+        return;
+    }
+    // options
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    // options.name
+    std::string objName;
+    if (!ConvertFromJSValue(obj->GetProperty("name"), objName)) {
+        return;
+    }
+    // options.obj
+    JSRef<JSVal> jsClassObj = obj->GetProperty("obj");
+    if (!jsClassObj->IsObject()) {
+        LOGW("JSWebController param obj is not object");
+        return;
+    }
+    objectorMap_[objName] = JSRef<JSObject>::Cast(jsClassObj);
+    std::vector<std::string> methods;
+    methods_.clear();
+    JSRef<JSVal> methodList = obj->GetProperty("methodList");
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(methodList);
+    if (array->IsArray()) {
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> method = array->GetValueAt(i);
+            if (method->IsString()) {
+                methods.emplace_back(method->ToString());
+            }
+        }
+    }
+    methods_[objName] = methods;
+
+    webController_->SetInitJavascriptInterface([weak = WeakClaim(this)]() {
+        auto jsWebcontroller = weak.Upgrade();
+        if (jsWebcontroller) {
+            jsWebcontroller->InitJavascriptInterface();
+        }
+    });
+}
+
 void JSWebController::RemoveJavascriptInterface(const JSCallbackInfo& args)
 {
     LOGI("JSWebController remove js interface");
@@ -409,6 +485,18 @@ void JSWebController::OnActive(const JSCallbackInfo& args)
 {
     if (webController_) {
         webController_->OnActive();
+    }
+}
+
+void JSWebController::Zoom(const JSCallbackInfo& args)
+{
+    float factor = 1.0;
+    if (args.Length() < 1 || !ConvertFromJSValue(args[0], factor)) {
+        LOGE("Zoom parameter is invalid.");
+        return;
+    }
+    if (webController_) {
+        webController_->Zoom(factor);
     }
 }
 
