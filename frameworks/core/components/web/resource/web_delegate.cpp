@@ -1473,10 +1473,15 @@ void WebDelegate::OnGeolocationPermissionsShowPrompt(const std::string& origin,
     }
 }
 
+bool WebDelegate::OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType)
+{
+    return webComponent_->OnCommonDialog(info, dialogEventType);
+}
+
 void WebDelegate::OnDownloadStart(const std::string& url, const std::string& userAgent,
     const std::string& contentDisposition, const std::string& mimetype, long contentLength)
 {
-    if (onDownloadStartV2_) {
+if (onDownloadStartV2_) {
         onDownloadStartV2_(std::make_shared<DownloadStartEvent>(url, userAgent, contentDisposition,
             mimetype, contentLength));
     }

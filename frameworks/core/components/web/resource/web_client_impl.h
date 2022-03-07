@@ -62,6 +62,16 @@ public:
     void OnGeolocationShow(const std::string& origin,
         OHOS::NWeb::NWebGeolocationCallbackInterface* callback) override;
 
+    bool OnAlertDialogByJS(const std::string &url,
+                           const std::string &message,
+                           std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
+    bool OnBeforeUnloadByJS(const std::string &url,
+                            const std::string &message,
+                            std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
+    bool OnConfirmDialogByJS(const std::string &url,
+                             const std::string &message,
+                             std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
+
     void OnFocus() override;
     void OnResourceLoadError(std::shared_ptr<NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<NWeb::NWebUrlResourceError> error) override;
@@ -72,6 +82,11 @@ public:
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
         webDelegate_ = delegate;
+    }
+
+    const RefPtr<WebDelegate> GetWebDelegate() const
+    {
+        return webDelegate_.Upgrade();
     }
 
 private:

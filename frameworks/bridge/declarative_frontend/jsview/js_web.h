@@ -25,6 +25,9 @@ class JSWeb : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
+    static void OnAlert(const JSCallbackInfo& args);
+    static void OnBeforeUnload(const JSCallbackInfo& args);
+    static void OnConfirm(const JSCallbackInfo& args);
     static void OnPageStart(const JSCallbackInfo& args);
     static void OnPageFinish(const JSCallbackInfo& args);
     static void OnProgressChange(const JSCallbackInfo& args);
@@ -50,6 +53,8 @@ public:
     static void JavaScriptProxy(const JSCallbackInfo& args);
     static void UserAgent(std::string userAgent);
 
+protected:
+    static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
 };
 }
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_H
