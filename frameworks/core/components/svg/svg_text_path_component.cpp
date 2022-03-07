@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include "frameworks/core/components/svg/svg_text_path_component.h"
 
-#include "frameworks/core/components/svg/flutter_render_svg_text_path.h"
+#include "frameworks/core/components/svg/render_svg_text_path.h"
 #include "frameworks/core/components/svg/svg_text_path_element.h"
 
 namespace OHOS::Ace {
@@ -45,7 +45,7 @@ RefPtr<Element> SvgTextPathComponent::CreateElement()
 
 RefPtr<RenderNode> SvgTextPathComponent::CreateRenderNode()
 {
-    return FlutterRenderSvgTextPath::Create();
+    return RenderSvgTextPath::Create();
 }
 
 const std::string& SvgTextPathComponent::GetTextData() const

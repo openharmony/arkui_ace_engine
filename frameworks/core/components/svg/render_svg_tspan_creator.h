@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,19 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components/svg/svg_tspan_component.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_RENDER_SVG_TSPAN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_RENDER_SVG_TSPAN_H
 
-#include "frameworks/core/components/svg/render_svg_tspan_creator.h"
-#include "frameworks/core/components/svg/svg_tspan_element.h"
+#include "base/memory/ace_type.h"
+#include "frameworks/core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 
-RefPtr<Element> SvgTspanComponent::CreateElement()
-{
-    return AceType::MakeRefPtr<SvgTspanElement>();
-}
-
-RefPtr<RenderNode> SvgTspanComponent::CreateRenderNode()
-{
-    return RenderSvgTspanCreator::Create();
-}
+class RenderSvgTspanCreator {
+public:
+    static RefPtr<RenderNode> Create();
+};
 
 } // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_RENDER_SVG_TSPAN_H
