@@ -63,8 +63,10 @@ public:
         OHOS::NWeb::NWebGeolocationCallbackInterface* callback) override;
 
     void OnFocus() override;
-    void OnResourceLoadError(std::shared_ptr<NWeb::NWebUrlResourceRequest> request,
-        std::shared_ptr<NWeb::NWebUrlResourceError> error) override;
+    void OnResourceLoadError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+        std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error) override;
+    void OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+        std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response) override;
     bool OnHandleInterceptUrlLoading(const std::string& url) override
     {
         return false;

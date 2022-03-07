@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_web.h"
 
 #include <string>
+
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -128,6 +129,12 @@ public:
     {
         JSClass<JSWebResourceResponse>::Declare("WebResourceResponse");
         JSClass<JSWebResourceResponse>::CustomMethod("getResponseData", &JSWebResourceResponse::GetResponseData);
+        JSClass<JSWebResourceResponse>::CustomMethod(
+            "getResponseEncoding", &JSWebResourceResponse::GetResponseEncoding);
+        JSClass<JSWebResourceResponse>::CustomMethod(
+            "getResponseMimeType", &JSWebResourceResponse::GetResponseMimeType);
+        JSClass<JSWebResourceResponse>::CustomMethod("getReasonMessage", &JSWebResourceResponse::GetReasonMessage);
+        JSClass<JSWebResourceResponse>::CustomMethod("getResponseCode", &JSWebResourceResponse::GetResponseCode);
         JSClass<JSWebResourceResponse>::Bind(
             globalObj, &JSWebResourceResponse::Constructor, &JSWebResourceResponse::Destructor);
     }
@@ -195,7 +202,10 @@ public:
     static void JSBind(BindingTarget globalObj)
     {
         JSClass<JSWebResourceRequest>::Declare("WebResourceRequest");
-        JSClass<JSWebResourceRequest>::CustomMethod("getRequestUrl", &JSWebResourceRequest::GetUrl);
+        JSClass<JSWebResourceRequest>::CustomMethod("getRequestUrl", &JSWebResourceRequest::GetRequestUrl);
+        JSClass<JSWebResourceRequest>::CustomMethod("isRequestGesture", &JSWebResourceRequest::IsRequestGesture);
+        JSClass<JSWebResourceRequest>::CustomMethod("isMainFrame", &JSWebResourceRequest::IsMainFrame);
+        JSClass<JSWebResourceRequest>::CustomMethod("isRedirect", &JSWebResourceRequest::IsRedirect);
         JSClass<JSWebResourceRequest>::Bind(
             globalObj, &JSWebResourceRequest::Constructor, &JSWebResourceRequest::Destructor);
     }
@@ -210,10 +220,31 @@ public:
         request_ = eventInfo.GetRequest();
     }
 
-    void GetUrl(const JSCallbackInfo& args)
+    void IsRedirect(const JSCallbackInfo& args)
     {
-        auto code = JSVal(ToJSValue(request_->GetUrl()));
-        auto descriptionRef = JSRef<JSVal>::Make(code);
+        auto isRedirect = JSVal(ToJSValue(request_->IsRedirect()));
+        auto descriptionRef = JSRef<JSVal>::Make(isRedirect);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetRequestUrl(const JSCallbackInfo& args)
+    {
+        auto url = JSVal(ToJSValue(request_->GetUrl()));
+        auto descriptionRef = JSRef<JSVal>::Make(url);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void IsRequestGesture(const JSCallbackInfo& args)
+    {
+        auto isRequestGesture = JSVal(ToJSValue(request_->HasGesture()));
+        auto descriptionRef = JSRef<JSVal>::Make(isRequestGesture);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void IsMainFrame(const JSCallbackInfo& args)
+    {
+        auto isMainFrame = JSVal(ToJSValue(request_->IsMainFrame()));
+        auto descriptionRef = JSRef<JSVal>::Make(isMainFrame);
         args.SetReturnValue(descriptionRef);
     }
 
@@ -483,8 +514,8 @@ void JSWeb::OnRequestFocus(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebRequestFocusEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebRequestFocusEventToJSValue);
-    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
-        (const BaseEventInfo* info) {
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebRequestFocusEvent>(info);
             func->Execute(*eventInfo);
@@ -501,8 +532,8 @@ void JSWeb::OnDownloadStart(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DownloadStartEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), DownloadStartEventToJSValue);
-    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
-        (const BaseEventInfo* info) {
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto eventInfo = TypeInfoHelper::DynamicCast<DownloadStartEvent>(info);
             func->Execute(*eventInfo);
@@ -538,8 +569,8 @@ JSRef<JSVal> ReceivedHttpErrorEventToJSValue(const ReceivedHttpErrorEvent& event
     requestEvent->SetHttpErrorEvent(eventInfo);
 
     JSRef<JSObject> responseObj = JSClass<JSWebResourceResponse>::NewInstance();
-    auto httpErrorEvent = Referenced::Claim(responseObj->Unwrap<JSWebResourceResponse>());
-    httpErrorEvent->SetEvent(eventInfo);
+    auto responseEvent = Referenced::Claim(responseObj->Unwrap<JSWebResourceResponse>());
+    responseEvent->SetEvent(eventInfo);
 
     obj->SetPropertyObject("request", requestObj);
     obj->SetPropertyObject("response", responseObj);
@@ -592,8 +623,8 @@ void JSWeb::OnFocus(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebOnFocusEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebOnFocusEventToJSValue);
-    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
-        (const BaseEventInfo* info) {
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebOnFocusEvent>(info);
             func->Execute(*eventInfo);

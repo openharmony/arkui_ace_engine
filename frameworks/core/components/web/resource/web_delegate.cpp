@@ -603,28 +603,6 @@ void WebDelegate::InitWebEvent()
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
-void WebDelegate::OnPageErrorOHOS(const int& errorCode, const std::string& description, const std::string& url)
-{
-    if (onPageError_) {
-        std::string paramUrl = std::string(R"(")").append(url).append(std::string(R"(")")).append(",");
-        std::string paramErrorCode = std::string(R"(")")
-                                         .append(NTC_PARAM_ERROR_CODE)
-                                         .append(std::string(R"(")"))
-                                         .append(":")
-                                         .append(std::to_string(errorCode))
-                                         .append(",");
-
-        std::string paramDesc = std::string(R"(")")
-                                    .append(NTC_PARAM_DESCRIPTION)
-                                    .append(std::string(R"(")"))
-                                    .append(":")
-                                    .append(std::string(R"(")").append(description).append(std::string(R"(")")));
-        std::string errorParam =
-            std::string(R"("error",{"url":)").append((paramUrl + paramErrorCode + paramDesc).append("},null"));
-        onPageError_(errorParam);
-    }
-}
-
 void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surface> surface)
 {
     state_ = State::CREATING;
@@ -679,6 +657,10 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
         webComponent_->GetOnFocusEventId(), pipelineContext);
     onRequestFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
         webComponent_->GetRequestFocusEventId(), pipelineContext);
+    onErrorReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetPageErrorEventId(), pipelineContext);
+    onHttpErrorReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        webComponent_->GetHttpErrorEventId(), pipelineContext);
     onDownloadStartV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
         webComponent_->GetDownloadStartEventId(), pipelineContext);
 }
@@ -1479,6 +1461,52 @@ void WebDelegate::OnDownloadStart(const std::string& url, const std::string& use
     if (onDownloadStartV2_) {
         onDownloadStartV2_(std::make_shared<DownloadStartEvent>(url, userAgent, contentDisposition,
             mimetype, contentLength));
+    }
+}
+
+void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error)
+{
+    if (onPageError_) {
+        std::string url = request->Url();
+        int errorCode = error->ErrorCode();
+        std::string description = error->ErrorInfo();
+        std::string paramUrl = std::string(R"(")").append(url).append(std::string(R"(")")).append(",");
+        std::string paramErrorCode = std::string(R"(")")
+                                         .append(NTC_PARAM_ERROR_CODE)
+                                         .append(std::string(R"(")"))
+                                         .append(":")
+                                         .append(std::to_string(errorCode))
+                                         .append(",");
+
+        std::string paramDesc = std::string(R"(")")
+                                    .append(NTC_PARAM_DESCRIPTION)
+                                    .append(std::string(R"(")"))
+                                    .append(":")
+                                    .append(std::string(R"(")").append(description).append(std::string(R"(")")));
+        std::string errorParam =
+            std::string(R"("error",{"url":)").append((paramUrl + paramErrorCode + paramDesc).append("},null"));
+        onPageError_(errorParam);
+    }
+
+    if (onErrorReceiveV2_) {
+        onErrorReceiveV2_(std::make_shared<ReceivedErrorEvent>(
+            AceType::MakeRefPtr<WebRequest>(request->RequestHeaders(), request->Method(), request->Url(),
+                request->FromGesture(), request->IsAboutMainFrame(), request->IsRequestRedirect()),
+            AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode())));
+    }
+}
+
+void WebDelegate::OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response)
+{
+    if (onHttpErrorReceiveV2_) {
+        onHttpErrorReceiveV2_(std::make_shared<ReceivedHttpErrorEvent>(
+            AceType::MakeRefPtr<WebRequest>(request->RequestHeaders(), request->Method(), request->Url(),
+                request->FromGesture(), request->IsAboutMainFrame(), request->IsRequestRedirect()),
+            AceType::MakeRefPtr<WebResponse>(response->ResponseHeaders(), response->ResponseData(),
+                response->ResponseEncoding(), response->ResponseMimeType(), response->ResponseStatus(),
+                response->ResponseStatusCode())));
     }
 }
 
