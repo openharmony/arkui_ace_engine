@@ -347,7 +347,7 @@ std::string QJSUtils::JsDumpSourceFile(const char* stack, const RefPtr<RevSource
 #endif
     std::string ans = "";
     std::string tempStack = stack;
-    int32_t appFlag = tempStack.find("app.js");
+    std::string::size_type appFlag = tempStack.find("app.js");
     bool isAppPage = appFlag > 0 && appMap;
 
     // find per line of stack
@@ -356,8 +356,8 @@ std::string QJSUtils::JsDumpSourceFile(const char* stack, const RefPtr<RevSource
 
     for (uint32_t i = 0; i < res.size(); i++) {
         std::string temp = res[i];
-        int32_t closeBracePos = temp.find(closeBrace);
-        int32_t openBracePos = temp.find(openBrace);
+        std::string::size_type closeBracePos = temp.find(closeBrace);
+        std::string::size_type openBracePos = temp.find(openBrace);
 
         std::string line = "";
         GetPosInfo(temp, closeBracePos, line);

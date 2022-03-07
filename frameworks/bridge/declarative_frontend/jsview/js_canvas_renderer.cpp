@@ -877,6 +877,7 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     options.size.height = final_height;
     options.editable = true;
     std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(data, length, options);
+    delete[] data;
 
     // 3 pixelmap to NapiValue
     NativeEngine* nativeEngine = nullptr;

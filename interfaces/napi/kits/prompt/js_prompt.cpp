@@ -219,7 +219,7 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 
                 uint32_t index = 0;
                 napi_get_array_length(env, asyncContext->buttonsNApi, &buttonsLen);
-                int buttonsLenInt = buttonsLen;
+                uint32_t buttonsLenInt = buttonsLen;
                 if (buttonsLenInt > SHOW_DIALOG_BUTTON_NUM_MAX) {
                     buttonsLenInt = SHOW_DIALOG_BUTTON_NUM_MAX;
                     LOGE("Supports 1 - 3 buttons");
@@ -383,7 +383,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 napi_value colorNApi = nullptr;
                 uint32_t index = 0;
                 napi_get_array_length(env, asyncContext->buttonsNApi, &buttonsLen);
-                int buttonsLenInt = buttonsLen;
+                uint32_t buttonsLenInt = buttonsLen;
                 if (buttonsLenInt > SHOW_ACTION_MENU_BUTTON_NUM_MAX) {
                     buttonsLenInt = SHOW_ACTION_MENU_BUTTON_NUM_MAX;
                     LOGE("Supports 1 - 6 buttons");
