@@ -1088,10 +1088,9 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     return instance->DeregisterElementOperator(windowId);
 }
 
-void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(
-    const Accessibility::AccessibilityStateEvent& stateEvent)
+void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const bool state)
 {
-    LOGI("JsAccessibilityManager::OnStateChanged changed:%{public}d", stateEvent.GetEventResult());
+    LOGI("JsAccessibilityManager::OnStateChanged changed:%{public}d", state);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     if (!jsAccessibilityManager) {
         return;
@@ -1100,8 +1099,8 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
     if (context) {
         context->GetTaskExecutor()->PostTask(
-            [jsAccessibilityManager, &stateEvent]() {
-                if (stateEvent.GetEventResult()) {
+            [jsAccessibilityManager, state]() {
+                if (state) {
                     jsAccessibilityManager->RegisterInteractionOperation(jsAccessibilityManager->GetWindowId());
                 } else {
                     jsAccessibilityManager->DeregisterInteractionOperation();

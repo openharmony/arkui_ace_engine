@@ -124,7 +124,7 @@ private:
 
     class JsAccessibilityStateObserver : public Accessibility::AccessibilityStateObserver {
     public:
-        void OnStateChanged(const Accessibility::AccessibilityStateEvent& stateEvent) override;
+        void OnStateChanged(const bool state) override;
         void SetHandler(const WeakPtr<JsAccessibilityManager>& js)
         {
             js_ = js;
