@@ -39,7 +39,7 @@ std::vector<std::string> JsForEachFunction::ExecuteIdentityMapper()
     } else {
         jsKeysArr = JSRef<JSArray>::Cast(jsThis_.Lock());
     }
-    int length = jsKeysArr->Length();
+    int length = static_cast<int>(jsKeysArr->Length());
 
     for (int i = 0; i < length; i++) {
         if (!jsKeys.IsEmpty()) {

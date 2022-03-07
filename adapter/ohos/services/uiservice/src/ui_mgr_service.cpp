@@ -303,10 +303,10 @@ int UIMgrService::ShowDialog(const std::string& name,
         return UI_SERVICE_POST_TASK_FAILED;
     }
 
-    int32_t windowWidth = dialogWindow->GetRect().width_;
-    int32_t windowHeight = dialogWindow->GetRect().height_;
-    int32_t windowx = dialogWindow->GetRect().posX_;
-    int32_t windowy = dialogWindow->GetRect().posY_;
+    int32_t windowWidth = static_cast<int32_t>(dialogWindow->GetRect().width_);
+    int32_t windowHeight = static_cast<int32_t>(dialogWindow->GetRect().height_);
+    int32_t windowx = static_cast<int32_t>(dialogWindow->GetRect().posX_);
+    int32_t windowy = static_cast<int32_t>(dialogWindow->GetRect().posY_);
     HILOG_INFO("Show dialog: size: width: %{public}d, height: %{public}d, pos: x: %{public}d, y: %{public}d",
         windowWidth, windowHeight, windowx, windowy);
     dialogWindow->Show();

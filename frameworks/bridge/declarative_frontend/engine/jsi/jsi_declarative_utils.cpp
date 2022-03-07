@@ -123,9 +123,9 @@ void JsiDeclarativeUtils::JsiDumpSourceFile(std::string& stackStr)
         std::string column = "";
         MappingInfo mapInfo;
 
-        int32_t closeBracePos = stackStr.find(closeBrace);
-        int32_t openBracePos = stackStr.find(openBrace);
-        int32_t appFlag = stackStr.find(appFile);
+        int32_t closeBracePos = static_cast<int32_t>(stackStr.find(closeBrace));
+        int32_t openBracePos = static_cast<int32_t>(stackStr.find(openBrace));
+        int32_t appFlag = static_cast<int32_t>(stackStr.find(appFile));
 
         int32_t flag = 0;
         for (int32_t i = closeBracePos - 1; i > 0; i--) {

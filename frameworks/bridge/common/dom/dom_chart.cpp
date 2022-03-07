@@ -508,7 +508,7 @@ void DOMChart::UpdateChartData(int32_t coorY, std::vector<MainChart>& data)
     if (isResetPosition_) {
         position_ = position_ + 1;
     } else {
-        position_ = data[seriesNum_].GetData().size();
+        position_ = static_cast<int32_t>(data[seriesNum_].GetData().size());
     }
     if (position_ > chartOptions_.GetXAxis().max || position_ < chartOptions_.GetXAxis().min) {
         return;

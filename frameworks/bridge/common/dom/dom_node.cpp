@@ -513,7 +513,7 @@ void DOMNode::UpdatePseudoStyleByStatus(int32_t status, bool isBackendChange)
             // status & map key, select the max result one
             for (const auto& pseudoClass : pseudoClassStyleMap_) {
                 uint32_t key = pseudoClass.first;
-                uint32_t andResult = key & status;
+                uint32_t andResult = key & static_cast<uint32_t>(status);
                 if (andResult > maxAndResult) {
                     maxAndResult = andResult;
                     maxValueKey = key;

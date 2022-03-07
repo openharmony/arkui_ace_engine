@@ -582,7 +582,7 @@ JSValue QJSKlass<C>::InternalConstructor(JSContext* ctx, JSValueConst thisObj, i
         return JS_ThrowSyntaxError(ctx, "Constructor of %s called without 'new'!", ThisJSClass::JSName());
     }
 
-    if (argc != sizeof...(Args)) {
+    if (argc != static_cast<int>(sizeof...(Args))) {
         return JS_ThrowSyntaxError(ctx, "Constructing %s requires %zu arguments, %d were provided",
             ThisJSClass::JSName(), sizeof...(Args), argc);
     }

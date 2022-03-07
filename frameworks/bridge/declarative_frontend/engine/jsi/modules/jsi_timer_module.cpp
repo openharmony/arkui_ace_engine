@@ -52,7 +52,7 @@ shared_ptr<JsValue> SetTimeoutOrInterval(const shared_ptr<JsRuntime>& runtime, c
         callBackParams.emplace_back(argv[i]);
     }
     uint32_t callbackId = JsiTimerModule::GetInstance()->AddCallBack(argv[0], callBackParams);
-    uint32_t delay = argv[1]->ToInt32(runtime);
+    uint32_t delay = static_cast<uint32_t>(argv[1]->ToInt32(runtime));
     delegate->WaitTimer(std::to_string(callbackId), std::to_string(delay), isInterval, true);
     return runtime->NewInt32(callbackId);
 }
@@ -80,7 +80,7 @@ void ClearTimeoutOrInterval(const shared_ptr<JsRuntime>& runtime, const shared_p
         return;
     }
 
-    uint32_t callbackId = argv[0]->ToInt32(runtime);
+    uint32_t callbackId = static_cast<uint32_t>(argv[0]->ToInt32(runtime));
     JsiTimerModule::GetInstance()->RemoveCallBack(callbackId);
     delegate->ClearTimer(std::to_string(callbackId));
 }

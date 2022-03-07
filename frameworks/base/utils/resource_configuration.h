@@ -145,7 +145,7 @@ public:
 
     void SetThemeId(uint32_t themeId)
     {
-        themeId_ = themeId;
+        themeId_ = static_cast<int32_t>(themeId);
     }
 
     int32_t GetThemeId() const
