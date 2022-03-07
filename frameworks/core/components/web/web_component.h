@@ -39,6 +39,12 @@ enum MixedModeContent {
     MIXED_CONTENT_COMPATIBILITY_MODE = 2
 };
 
+enum DialogEventType {
+    DIALOG_EVENT_ALERT = 0,
+    DIALOG_EVENT_BEFORE_UNLOAD = 1,
+    DIALOG_EVENT_CONFIRM = 2
+};
+
 class WebController : public virtual AceType {
     DECLARE_ACE_TYPE(WebController, AceType);
 
@@ -618,6 +624,40 @@ public:
         isGeolocationAccessEnabled_ = isEnabled;
     }
 
+    using OnCommonDialogImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType) const
+    {
+        if (dialogEventType == DialogEventType::DIALOG_EVENT_ALERT && onAlertImpl_) {
+            return onAlertImpl_(info);
+        } else if (dialogEventType == DialogEventType::DIALOG_EVENT_CONFIRM && onConfirmImpl_) {
+            return onConfirmImpl_(info);
+        } else if (dialogEventType == DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD && onBeforeUnloadImpl_) {
+            return onBeforeUnloadImpl_(info);
+        } else {
+            return false;
+        }
+    }
+    void SetOnCommonDialogImpl(OnCommonDialogImpl && onCommonDialogImpl, DialogEventType dialogEventType)
+    {
+        if (onCommonDialogImpl == nullptr) {
+            return;
+        }
+
+        switch (dialogEventType) {
+            case DialogEventType::DIALOG_EVENT_ALERT:
+                onAlertImpl_ = std::move(onCommonDialogImpl);
+                break;
+            case DialogEventType::DIALOG_EVENT_CONFIRM:
+                onConfirmImpl_ = std::move(onCommonDialogImpl);
+                break;
+            case DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD:
+                onBeforeUnloadImpl_ = std::move(onCommonDialogImpl);
+                break;
+            default:
+                break;
+        }
+    }
+
     void RequestFocus();
 
 private:
@@ -627,6 +667,9 @@ private:
     ErrorCallback errorCallback_ = nullptr;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebController> webController_;
+    OnCommonDialogImpl onAlertImpl_;
+    OnCommonDialogImpl onConfirmImpl_;
+    OnCommonDialogImpl onBeforeUnloadImpl_;
     std::string type_;
     bool isJsEnabled_ = true;
     bool isContentAccessEnabled_ = true;

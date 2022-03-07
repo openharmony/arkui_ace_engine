@@ -70,6 +70,14 @@ public:
         JsFunction::ExecuteJS(ARGC, &param);
     }
 
+    JSRef<JSVal> ExecuteWithValue(const T& eventInfo)
+    {
+        JSRef<JSVal> param;
+        if (parser_) {
+            param = parser_(eventInfo);
+        }
+        return JsFunction::ExecuteJS(ARGC, &param);
+    }
 private:
     ParseFunc parser_;
 };

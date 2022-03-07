@@ -152,13 +152,13 @@ public:
     virtual void Cancel() = 0;
 };
 
-class ACE_EXPORT AlertEvent : public BaseEventInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(AlertEvent, BaseEventInfo);
+class ACE_EXPORT WebDialogEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebDialogEvent, BaseEventInfo);
 
 public:
-    AlertEvent(const std::string& url, const std::string& message, const RefPtr<Result>& result)
-        : BaseEventInfo("AlertEvent"), url_(url) {}
-    ~AlertEvent() = default;
+    WebDialogEvent(const std::string& url, const std::string& message, const RefPtr<Result>& result)
+        : BaseEventInfo("WebDialogEvent"), url_(url) {}
+    ~WebDialogEvent() = default;
 
     const std::string& GetUrl() const
     {
