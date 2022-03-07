@@ -710,8 +710,35 @@ void PickerDateComponent::SolarColumnsBuilding(const PickerDate& current)
         return;
     }
 
+    auto startYear = startDateSolar_.GetYear();
+    auto endYear = endDateSolar_.GetYear();
+    auto startMonth = startDateSolar_.GetMonth();
+    auto endMonth = endDateSolar_.GetMonth();
+    auto startDay = startDateSolar_.GetDay();
+    auto endDay = endDateSolar_.GetDay();
+    if (startYear > endYear) {
+        return;
+    }
+    if (startYear == endYear && startMonth > endMonth) {
+        return;
+    }
+    if (startYear == endYear && startMonth == endMonth && startDay > endDay) {
+        return;
+    }
+    uint32_t maxDay = PickerDate::GetMaxDay(current.GetYear(), current.GetMonth());
+    if (startYear < endYear) {
+        startMonth = 1;
+        endMonth = 12;
+        startDay = 1;
+        endDay = maxDay;
+    }
+    if (startYear == endYear && startMonth < endMonth) {
+        startDay = 1;
+        endDay = maxDay;
+    }
+
     yearColumn->ClearOption();
-    for (uint32_t year = startDateSolar_.GetYear(); year <= endDateSolar_.GetYear(); ++year) {
+    for (uint32_t year = startYear; year <= endYear; ++year) {
         if (year == current.GetYear()) {
             yearColumn->SetCurrentIndex(yearColumn->GetOptionCount());
         }
@@ -720,7 +747,7 @@ void PickerDateComponent::SolarColumnsBuilding(const PickerDate& current)
 
     monthColumn->ClearOption();
     // solar's month start form 1 to 12
-    for (uint32_t month = 1; month <= 12; month++) {
+    for (uint32_t month = startMonth; month <= endMonth; month++) {
         if (month == current.GetMonth()) {
             monthColumn->SetCurrentIndex(monthColumn->GetOptionCount());
         }
@@ -728,9 +755,9 @@ void PickerDateComponent::SolarColumnsBuilding(const PickerDate& current)
     }
 
     dayColumn->ClearOption();
-    uint32_t maxDay = PickerDate::GetMaxDay(current.GetYear(), current.GetMonth());
+
     // solar's day start from 1
-    for (uint32_t day = 1; day <= maxDay; day++) {
+    for (uint32_t day = startDay; day <= endDay; day++) {
         if (day == current.GetDay()) {
             dayColumn->SetCurrentIndex(dayColumn->GetOptionCount());
         }
