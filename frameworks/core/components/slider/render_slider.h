@@ -252,6 +252,7 @@ protected:
     double min_ = DEFAULT_MIN;
 
     double scaleValue_ = 1.0;
+    double thickness_ = 0.0;
 
     bool showSteps_ = false;
     bool showTips_ = false;
