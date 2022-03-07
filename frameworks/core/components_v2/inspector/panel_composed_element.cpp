@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,6 +164,59 @@ std::string PanelComposedElement::GetShow() const
     } else {
         return "true";
     }
+}
+
+void PanelComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto slidingPanelElement = GetContentElement<SlidingPanelElement>(SlidingPanelElement::TypeId());
+    if (!slidingPanelElement) {
+        LOGE("get GetSlidingPanelElement failed");
+        return;
+    }
+    slidingPanelElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    slidingPanelElement->MarkDirty();
+}
+
+void PanelComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto slidingPanelElement = GetContentElement<SlidingPanelElement>(SlidingPanelElement::TypeId());
+    if (!slidingPanelElement) {
+        LOGE("get GetSlidingPanelElement failed");
+        return;
+    }
+    auto element = GetInspectorComposedElementParent(slidingPanelElement);
+    if (!element) {
+        LOGE("slidingPanelElement get GetInspectorComposedElementParent failed");
+        return;
+    }
+    auto child = GetElementChildBySlot(element, slot);
+    if (!child) {
+        LOGE("get GetElementChildBySlot failed");
+        return;
+    }
+    element->UpdateChildWithSlot(child, newComponent, slot, slot);
+    element->MarkDirty();
+}
+
+void PanelComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto slidingPanelElement = GetContentElement<SlidingPanelElement>(SlidingPanelElement::TypeId());
+    if (!slidingPanelElement) {
+        LOGE("get GetSlidingPanelElement failed");
+        return;
+    }
+    auto element = GetInspectorComposedElementParent(slidingPanelElement);
+    if (!element) {
+        LOGE("slidingPanelElement get GetInspectorComposedElementParent failed");
+        return;
+    }
+    auto child = GetElementChildBySlot(element, slot);
+    if (!child) {
+        LOGE("get GetElementChildBySlot failed");
+        return;
+    }
+    element->UpdateChildWithSlot(child, nullptr, slot, slot);
+    element->MarkDirty();
 }
 
 } // namespace OHOS::Ace::V2

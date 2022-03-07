@@ -91,6 +91,7 @@ public:
     }
 
     RefPtr<Element> GetElementChildBySlot(const RefPtr<Element>& element, int32_t& slot) const;
+    RefPtr<Element> GetInspectorComposedElementParent(const RefPtr<Element>& element) const;
 
     // dimension settings
     std::string GetWidth() const override;
