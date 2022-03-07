@@ -122,11 +122,6 @@ RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(const WeakPtr<PipelineCon
         return;
     }
 
-    renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(
-        currentDartState->GetSkiaUnrefQueue(),
-        currentDartState->GetIOManager(),
-        currentDartState->GetTaskRunners().GetIOTaskRunner());
-
     InitFliterFunc();
 }
 void RosenRenderOffscreenCanvas::AddRect(const Rect& rect)
@@ -334,16 +329,8 @@ void RosenRenderOffscreenCanvas::DrawPixelMap(RefPtr<PixelMap> pixelMap, const C
 
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> image;
-    if (!renderTaskHolder_->ioManager) {
-        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
-    } else {
-#ifndef GPU_DISABLED
-        image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
-            imagePixmap, true, imagePixmap.colorSpace(), true);
-#else
-        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
-#endif
-    }
+
+    image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
     if (!image) {
         LOGE("image is null");
         return;
