@@ -552,7 +552,7 @@ void GetPackageInfo(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsVal
         return;
     }
 
-    uint32_t len = arg->GetArrayLength(runtime);
+    int32_t len = arg->GetArrayLength(runtime);
     if (len < PAG_INFO_ARGS_LEN) {
         LOGE("GetPackageInfo: invalid callback value");
         return;
@@ -1170,8 +1170,8 @@ shared_ptr<JsValue> JsReadText(const shared_ptr<JsRuntime>& runtime, const std::
             return runtime->NewUndefined();
         }
 
-        auto substrPos = ParseUtf8TextSubstrStartPos(fileText, position);
-        auto substrEndPos = ParseUtf8TextSubstrEndPos(fileText, position + length - 1);
+        size_t substrPos = ParseUtf8TextSubstrStartPos(fileText, position);
+        size_t substrEndPos = ParseUtf8TextSubstrEndPos(fileText, position + length - 1);
         fileText = fileText.substr(substrPos - 1, substrEndPos - substrPos + 1);
         HandleEscapeCharaterInUtf8TextForJson(fileText);
     }
@@ -2158,9 +2158,9 @@ std::string ParseLogContent(const std::vector<std::string>& params)
         return ret;
     }
     std::string formatStr = params[0];
-    int32_t size = params.size();
-    int32_t len = formatStr.size();
-    int32_t pos = 0;
+    size_t size = params.size();
+    size_t len = formatStr.size();
+    size_t pos = 0;
     int32_t count = 1;
     for (; pos < len; ++pos) {
         if (count >= size) {

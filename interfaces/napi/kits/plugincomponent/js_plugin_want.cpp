@@ -577,10 +577,10 @@ napi_value AceWrapWantParams(napi_env env, const AAFwk::WantParams& wantParams)
 bool AceInnerSetWantParamsArrayString(
     const std::string& key, const std::vector<std::string>& value, AAFwk::WantParams& wantParams)
 {
-    long size = value.size();
+    size_t size = value.size();
     sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IString);
     if (ao != nullptr) {
-        for (long i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             ao->Set(i, AAFwk::String::Box(value[i]));
         }
         wantParams.SetParam(key, ao);
@@ -593,10 +593,10 @@ bool AceInnerSetWantParamsArrayString(
 bool AceInnerSetWantParamsArrayInt(const std::string& key, const std::vector<int>& value,
     AAFwk::WantParams& wantParams)
 {
-    long size = value.size();
+    size_t size = value.size();
     sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IInteger);
     if (ao != nullptr) {
-        for (long i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             ao->Set(i, AAFwk::Integer::Box(value[i]));
         }
         wantParams.SetParam(key, ao);
@@ -609,10 +609,10 @@ bool AceInnerSetWantParamsArrayInt(const std::string& key, const std::vector<int
 bool AceInnerSetWantParamsArrayLong(const std::string& key, const std::vector<long>& value,
     AAFwk::WantParams& wantParams)
 {
-    long size = value.size();
+    size_t size = value.size();
     sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_ILong);
     if (ao != nullptr) {
-        for (long i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             ao->Set(i, AAFwk::Long::Box(value[i]));
         }
         wantParams.SetParam(key, ao);
@@ -625,10 +625,10 @@ bool AceInnerSetWantParamsArrayLong(const std::string& key, const std::vector<lo
 bool AceInnerSetWantParamsArrayBool(const std::string& key, const std::vector<bool>& value,
     AAFwk::WantParams& wantParams)
 {
-    long size = value.size();
+    size_t size = value.size();
     sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IBoolean);
     if (ao != nullptr) {
-        for (long i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             ao->Set(i, AAFwk::Boolean::Box(value[i]));
         }
         wantParams.SetParam(key, ao);
@@ -641,10 +641,10 @@ bool AceInnerSetWantParamsArrayBool(const std::string& key, const std::vector<bo
 bool AceInnerSetWantParamsArrayDouble(
     const std::string& key, const std::vector<double>& value, AAFwk::WantParams& wantParams)
 {
-    long size = value.size();
+    size_t size = value.size();
     sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IDouble);
     if (ao != nullptr) {
-        for (long i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             ao->Set(i, AAFwk::Double::Box(value[i]));
         }
         wantParams.SetParam(key, ao);

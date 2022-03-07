@@ -27,6 +27,7 @@ QjsXComponentBridge::QjsXComponentBridge()
 {
     nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
     nativeXComponent_ = new OH_NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
+    renderContext_ = JS_NULL;
 }
 
 QjsXComponentBridge::~QjsXComponentBridge()

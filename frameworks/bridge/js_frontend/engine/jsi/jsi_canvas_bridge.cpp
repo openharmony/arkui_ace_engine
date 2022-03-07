@@ -1679,9 +1679,9 @@ shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>&
     delegate->PostSyncTaskToPage(task);
 
     // 1 Get data from canvas
-    uint32_t final_height = imageData->dirtyHeight;
-    uint32_t final_width = imageData->dirtyWidth;
-    uint32_t length = final_height * final_width;
+    int32_t final_height = imageData->dirtyHeight;
+    int32_t final_width = imageData->dirtyWidth;
+    int32_t length = final_height * final_width;
     uint32_t* data = new uint32_t[length];
     for (uint32_t i = 0; i < final_height; i++) {
         for (uint32_t j = 0; j < final_width; j++) {
@@ -1700,6 +1700,7 @@ shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>&
     options.size.height = final_height;
     options.editable = true;
     std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(data, length, options);
+    delete[] data;
     if (pixelmap == nullptr) {
         LOGE(" pixelmap is null.");
         return runtime->NewUndefined();

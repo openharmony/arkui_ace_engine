@@ -122,12 +122,12 @@ void JsiUtils::JsiDumpSourceFile(std::string& stackStr)
         std::string column = "";
         MappingInfo mapInfo;
 
-        int32_t closeBracePos = stackStr.find(closeBrace);
-        int32_t openBracePos = stackStr.find(openBrace);
-        int32_t appFlag = stackStr.find(appFile);
+        std::string::size_type closeBracePos = stackStr.find(closeBrace);
+        std::string::size_type openBracePos = stackStr.find(openBrace);
+        std::string::size_type appFlag = stackStr.find(appFile);
 
         int32_t flag = 0;
-        for (int32_t i = closeBracePos - 1; i > 0; i--) {
+        for (uint32_t i = closeBracePos - 1; i > 0; i--) {
             if (stackStr[i] == ':') {
                 flag += 1;
                 continue;
