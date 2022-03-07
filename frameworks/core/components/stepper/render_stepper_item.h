@@ -35,11 +35,6 @@ public:
     void PerformLayout() override;
     void FireAppearEvent() const;
     void FireDisappearEvent() const;
-    int32_t GetIndex() const
-    {
-        return index_;
-    }
-
     const StepperLabels& GetLabel() const
     {
         return label_;
@@ -48,7 +43,6 @@ public:
 private:
     OnEventFunc appearEvent_;
     OnEventFunc disappearEvent_;
-    int32_t index_;
     StepperLabels label_;
 };
 
