@@ -1762,7 +1762,11 @@ void VideoElement::SetVolume(float volume)
 
 void VideoElement::EnableLooping(bool loop)
 {
-#ifndef OHOS_STANDARD_SYSTEM
+#ifdef OHOS_STANDARD_SYSTEM
+    if (mediaPlayer_) {
+        mediaPlayer_->SetLooping(loop);
+    }
+#else
     if (player_) {
         player_->EnableLooping(loop);
     }
