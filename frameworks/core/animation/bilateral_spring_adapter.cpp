@@ -26,7 +26,7 @@ double BilateralSpringAdapter::ResetControl(int32_t delta)
     double lastValue = controlNode->GetValue();
     LOGD("BeforeReset: %{public}s", DumpNodes().c_str());
     RefPtr<SpringNode> srcNode;
-    int32_t nodeSize = nodes_.size();
+    int32_t nodeSize = static_cast<int32_t>(nodes_.size());
     if (delta < 0) {
         for (int32_t index = nodeSize - 1; index >= 0; index--) {
             if (index + delta < 0) {

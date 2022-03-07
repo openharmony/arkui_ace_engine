@@ -132,7 +132,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     resConfig.SetDensity(SystemProperties::GetResolution());
     resConfig.SetDeviceType(SystemProperties::GetDeviceType());
     container->SetResourceConfiguration(resConfig);
-    container->SetPageProfile((runArgs_.projectModel == ProjectModel::STAGE) ? runArgs_.pageProfile+".json" : "");
+    container->SetPageProfile((runArgs_.projectModel == ProjectModel::STAGE) ? runArgs_.pageProfile + ".json" : "");
 }
 
 AceAbility::~AceAbility()

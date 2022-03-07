@@ -200,9 +200,8 @@ sk_sp<SkData> DataProviderImageLoader::LoadImageData(
     auto imageData = dataRes->GetData();
     sk_sp<SkData> data = SkData::MakeWithCopy(imageData.data(), imageData.size());
     BackgroundTaskExecutor::GetInstance().PostTask(
-        [ src, imgData = std::move(imageData) ] () {
-            ImageCache::WriteCacheFile(src, imgData.data(), imgData.size());
-        }, BgTaskPriority::LOW);
+        [src, imgData = std::move(imageData)]() { ImageCache::WriteCacheFile(src, imgData.data(), imgData.size()); },
+        BgTaskPriority::LOW);
     return data;
 }
 
@@ -291,9 +290,8 @@ sk_sp<SkData> NetworkImageLoader::LoadImageData(
     sk_sp<SkData> data = SkData::MakeWithCopy(imageData.data(), imageData.size());
     // 3. write it into file cache.
     BackgroundTaskExecutor::GetInstance().PostTask(
-        [ uri, imgData = std::move(imageData) ] () {
-            ImageCache::WriteCacheFile(uri, imgData.data(), imgData.size());
-        }, BgTaskPriority::LOW);
+        [uri, imgData = std::move(imageData)]() { ImageCache::WriteCacheFile(uri, imgData.data(), imgData.size()); },
+        BgTaskPriority::LOW);
     return data;
 }
 

@@ -180,20 +180,20 @@ void RenderXComponent::NativeXComponentDispatchTouchEvent(const OH_NativeXCompon
     float diffY = touchEvent.y - position_.GetY() * scale;
     if ((diffX >= 0) && (diffX <= drawSize_.Width() * scale) && (diffY >= 0) && (diffY <= drawSize_.Height() * scale)) {
         pipelineContext->GetTaskExecutor()->PostTask(
-        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, touchEvent] {
-            auto nXCompImpl = weakNXCompImpl.Upgrade();
-            if (nXComp != nullptr && nXCompImpl) {
-                nXCompImpl->SetTouchEvent(touchEvent);
-                auto surface = const_cast<void*>(nXCompImpl->GetSurface());
-                auto callback = nXCompImpl->GetCallback();
-                if (callback != nullptr && callback->DispatchTouchEvent != nullptr) {
-                    callback->DispatchTouchEvent(nXComp, surface);
+            [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, touchEvent] {
+                auto nXCompImpl = weakNXCompImpl.Upgrade();
+                if (nXComp != nullptr && nXCompImpl) {
+                    nXCompImpl->SetTouchEvent(touchEvent);
+                    auto surface = const_cast<void*>(nXCompImpl->GetSurface());
+                    auto callback = nXCompImpl->GetCallback();
+                    if (callback != nullptr && callback->DispatchTouchEvent != nullptr) {
+                        callback->DispatchTouchEvent(nXComp, surface);
+                    }
+                } else {
+                    LOGE("Native XComponent nullptr");
                 }
-            } else {
-                LOGE("Native XComponent nullptr");
-            }
-        },
-        TaskExecutor::TaskType::JS);
+            },
+            TaskExecutor::TaskType::JS);
     }
 }
 

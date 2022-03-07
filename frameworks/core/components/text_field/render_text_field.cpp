@@ -1766,13 +1766,13 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
                 event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
                 HandleOnCopyAll(nullptr);
             } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
+                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
                 HandleOnCopy();
             } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
+                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
                 HandleOnPaste();
             } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_X }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_X })) {
+                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_X })) {
                 HandleOnCut();
             } else {
                 appendElement = event.ConvertCodeToString();

@@ -119,7 +119,7 @@ void TextEditingValue::UpdateSelection(int32_t start, int32_t end)
         start = 0;
     }
     if (static_cast<size_t>(end) > GetWideText().length()) {
-        end = GetWideText().length();
+        end = static_cast<int32_t>(GetWideText().length());
     }
     selection.Update(start, end);
 }
@@ -219,7 +219,7 @@ std::string TextEditingValue::GetSelectedText(const TextSelection& textSelection
         start = 0;
     }
     if (static_cast<size_t>(end) > wideText.length()) {
-        end = wideText.length();
+        end = static_cast<int32_t>(wideText.length());
     }
 
     if (end > 0 && start < end) {

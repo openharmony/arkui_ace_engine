@@ -31,12 +31,11 @@
 #include "core/components_v2/list/render_list.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
+#include "core/gestures/exclusive_recognizer.h"
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/pan_recognizer.h"
-#include "core/gestures/sequenced_recognizer.h"
-#include "core/common/clipboard/clipboard_proxy.h"
-#include "core/gestures/exclusive_recognizer.h"
 #include "core/gestures/parallel_recognizer.h"
+#include "core/gestures/sequenced_recognizer.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -1638,15 +1637,15 @@ void RenderBox::OnTouchTestHit(
     }
 }
 
-void RenderBox::UpdateGestureRecognizerHierarchy(const std::vector<std::pair<GesturePriority,
-        std::vector<RefPtr<Gesture>>>>& hierarchy)
+void RenderBox::UpdateGestureRecognizerHierarchy(
+    const std::vector<std::pair<GesturePriority, std::vector<RefPtr<Gesture>>>>& hierarchy)
 {
     bool success = hierarchy.size() == recognizerHierarchy_.size();
 
     if (success) {
         for (size_t i = 0; i < hierarchy.size(); ++i) {
-            if (hierarchy[i].first != recognizerHierarchy_[i].first
-                    || hierarchy[i].second.size() != recognizerHierarchy_[i].second.size()) {
+            if (hierarchy[i].first != recognizerHierarchy_[i].first ||
+                hierarchy[i].second.size() != recognizerHierarchy_[i].second.size()) {
                 success = false;
                 break;
             }
