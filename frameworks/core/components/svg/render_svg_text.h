@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,10 +25,25 @@
 
 namespace OHOS::Ace {
 
+struct DrawOffset {
+    Offset svg;
+    Offset current;
+    bool isTspan = false;
+};
+
+struct PathOffset {
+    Offset svg;
+    double start = 0.0;
+    double current = 0.0;
+    std::string path;
+};
+
 class RenderSvgText : public RenderSvgBase {
     DECLARE_ACE_TYPE(RenderSvgText, RenderSvgBase)
 
 public:
+    static RefPtr<RenderNode> Create();
+
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     bool PrepareSelfAnimation(const RefPtr<SvgAnimate>& svgAnimate) override;

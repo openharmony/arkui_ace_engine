@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,17 +20,12 @@
 
 namespace OHOS::Ace {
 
-struct DrawOffset {
-    Offset svg;
-    Offset current;
-    bool isTspan = false;
-};
-
 class RosenRenderSvgText : public RenderSvgText {
     DECLARE_ACE_TYPE(RosenRenderSvgText, RenderSvgText);
 
 public:
-    static RefPtr<RenderNode> Create();
+    RosenRenderSvgText();
+    ~RosenRenderSvgText() override = default;
     void Paint(RenderContext& context, const Offset& offset) override;
     void PaintDirectly(RenderContext& context, const Offset& offset) override;
 
