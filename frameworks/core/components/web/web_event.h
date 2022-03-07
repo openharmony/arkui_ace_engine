@@ -18,6 +18,18 @@
 
 namespace OHOS::Ace {
 
+class WebConsoleLog : public AceType {
+    DECLARE_ACE_TYPE(WebConsoleLog, AceType)
+public:
+   WebConsoleLog() = default;
+    ~WebConsoleLog() = default;
+
+    virtual int LineNumer() = 0;
+    virtual const std::string& Log() = 0;
+    virtual int LogLevel() = 0;
+    virtual const std::string& SourceId() = 0;
+};
+
 class ACE_EXPORT WebError : public AceType {
     DECLARE_ACE_TYPE(WebError, AceType)
 
@@ -424,6 +436,23 @@ public:
     }
 private:
     std::string focusUrl_;
+};
+
+class ACE_EXPORT LoadWebConsoleLogEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebConsoleLogEvent, BaseEventInfo);
+
+public:
+    LoadWebConsoleLogEvent(RefPtr<WebConsoleLog> message) : BaseEventInfo("LoadWebConsoleLogEvent"),
+                                                            message_(message) {}
+    ~LoadWebConsoleLogEvent() = default;
+
+    const RefPtr<WebConsoleLog> GetMessage() const
+    {
+        return message_;
+    }
+
+private:
+    RefPtr<WebConsoleLog> message_;
 };
 } // namespace OHOS::Ace
 

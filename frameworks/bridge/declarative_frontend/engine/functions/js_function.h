@@ -78,6 +78,7 @@ public:
         }
         return JsFunction::ExecuteJS(ARGC, &param);
     }
+
 private:
     ParseFunc parser_;
 };
