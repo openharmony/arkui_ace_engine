@@ -337,56 +337,46 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
                 delete asyncContext;
             } else {
                 auto callBack = [env, asyncContext](int32_t callbackType) {
-                    napi_value ret;
-                    napi_value callback = nullptr;
-                    switch (callbackType) {
-                        case 1:
-                            if (asyncContext->callbackSuccess) {
-                                asyncContext->success = "enableAlertBeforeBackPage:ok";
-                                napi_value returnObj = GetReturnObj(env, asyncContext->success);
-                                napi_get_reference_value(env, asyncContext->callbackSuccess, &callback);
-                                napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                                napi_delete_reference(env, asyncContext->callbackSuccess);
-                            }
-
-                            if (asyncContext->callbackComplete) {
-                                asyncContext->complete = "enableAlertBeforeBackPage:ok";
-                                napi_value returnObj = GetReturnObj(env, asyncContext->complete);
-                                napi_get_reference_value(env, asyncContext->callbackComplete, &callback);
-                                napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                                napi_delete_reference(env, asyncContext->callbackComplete);
-                            }
-
-                            break;
-                        case 0:
-                            if (asyncContext->callbackFail) {
-                                asyncContext->fail = "enableAlertBeforeBackPage:fail cancel";
-                                napi_value returnObj = GetReturnObj(env, asyncContext->fail);
-                                napi_get_reference_value(env, asyncContext->callbackFail, &callback);
-                                napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                                napi_delete_reference(env, asyncContext->callbackFail);
-                            }
-                            if (asyncContext->callbackComplete) {
-                                asyncContext->complete = "enableAlertBeforeBackPage:fail cancel";
-                                napi_value returnObj = GetReturnObj(env, asyncContext->complete);
-                                napi_get_reference_value(env, asyncContext->callbackComplete, &callback);
-                                napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                                napi_delete_reference(env, asyncContext->callbackComplete);
-                            }
-                            break;
-                        default:
-                            LOGE("callbackType is invalid");
-                            break;
-                    }
-                    napi_delete_async_work(env, asyncContext->work);
-                    delete asyncContext;
+                    LOGI("callbask after dialog click, callbackType = %{private}d", callbackType);
                 };
                 auto delegate = EngineHelper::GetCurrentDelegate();
+                napi_value ret;
+                napi_value callback = nullptr;
                 if (delegate) {
                     delegate->EnableAlertBeforeBackPage(asyncContext->messageString, std::move(callBack));
+                    if (asyncContext->callbackSuccess) {
+                        asyncContext->success = "enableAlertBeforeBackPage:ok";
+                        napi_value returnObj = GetReturnObj(env, asyncContext->success);
+                        napi_get_reference_value(env, asyncContext->callbackSuccess, &callback);
+                        napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
+                        napi_delete_reference(env, asyncContext->callbackSuccess);
+                    }
+                    if (asyncContext->callbackComplete) {
+                        asyncContext->complete = "enableAlertBeforeBackPage:ok";
+                        napi_value returnObj = GetReturnObj(env, asyncContext->complete);
+                        napi_get_reference_value(env, asyncContext->callbackComplete, &callback);
+                        napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
+                        napi_delete_reference(env, asyncContext->callbackComplete);
+                    }
                 } else {
                     LOGE("can not get delegate.");
+                    if (asyncContext->callbackFail) {
+                        asyncContext->fail = "can not get delegate.";
+                        napi_value returnObj = GetReturnObj(env, asyncContext->fail);
+                        napi_get_reference_value(env, asyncContext->callbackFail, &callback);
+                        napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
+                        napi_delete_reference(env, asyncContext->callbackFail);
+                    }
+                    if (asyncContext->callbackComplete) {
+                        asyncContext->complete = "can not get delegate.";
+                        napi_value returnObj = GetReturnObj(env, asyncContext->complete);
+                        napi_get_reference_value(env, asyncContext->callbackComplete, &callback);
+                        napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
+                        napi_delete_reference(env, asyncContext->callbackComplete);
+                    }
                 }
+                napi_delete_async_work(env, asyncContext->work);
+                delete asyncContext;
             }
         },
         (void*)routerAsyncContext, &routerAsyncContext->work);
