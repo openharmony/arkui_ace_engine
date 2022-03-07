@@ -450,7 +450,7 @@ void RenderButton::Update(const RefPtr<Component>& component)
     height_ = buttonComponent_->GetHeight();
     layoutFlag_ = button->GetLayoutFlag();
     // No animation happens on first setting, will animate from background color on click
-    clickedColor_ = AnimatableColor(button->GetBackgroundColor());
+    clickedColor_ = AnimatableColor(button->GetClickedColor());
     backgroundColor_.SetValue(button->GetBackgroundColor().GetValue());
     stateEffect_ = button->GetStateEffect();
     isWatch_ = (SystemProperties::GetDeviceType() == DeviceType::WATCH);
