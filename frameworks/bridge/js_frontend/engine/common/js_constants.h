@@ -114,6 +114,7 @@ ACE_EXPORT extern const char ANIMATOR_CREATE_ANIMATOR[];
 ACE_EXPORT extern const char CURVES_INIT[];
 ACE_EXPORT extern const char CURVES_CUBIC_BEZIER[];
 ACE_EXPORT extern const char CURVES_SPRING[];
+ACE_EXPORT extern const char CURVES_STEPS[];
 ACE_EXPORT extern const char CURVE_INTERPOLATE[];
 
 // for grid

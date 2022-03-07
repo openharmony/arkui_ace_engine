@@ -572,7 +572,7 @@ public:
 private:
     BackgroundImagePositionType typeX_ { BackgroundImagePositionType::PX };
     BackgroundImagePositionType typeY_ { BackgroundImagePositionType::PX };
-    AnimatableDimension valueX_ = AnimatableDimension(0.0);
+    AnimatableDimension valueX_ = AnimatableDimension(-1.0);
     AnimatableDimension valueY_ = AnimatableDimension(0.0);
 };
 

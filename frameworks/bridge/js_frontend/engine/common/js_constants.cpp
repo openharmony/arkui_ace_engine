@@ -114,6 +114,7 @@ const char ANIMATOR_CREATE_ANIMATOR[] = "createAnimator";
 const char CURVES_INIT[] = "init";
 const char CURVES_CUBIC_BEZIER[] = "cubicBezier";
 const char CURVES_SPRING[] = "spring";
+const char CURVES_STEPS[] = "steps";
 const char CURVE_INTERPOLATE[] = "interpolate";
 
 // for grid
