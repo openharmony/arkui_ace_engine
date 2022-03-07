@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,20 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components/svg/svg_tspan_component.h"
-
-#include "frameworks/core/components/svg/render_svg_tspan_creator.h"
-#include "frameworks/core/components/svg/svg_tspan_element.h"
+#include "flutter_render_svg_text.h"
+#include "rosen_render_svg_text.h"
 
 namespace OHOS::Ace {
-
-RefPtr<Element> SvgTspanComponent::CreateElement()
+RefPtr<RenderNode> RenderSvgText::Create()
 {
-    return AceType::MakeRefPtr<SvgTspanElement>();
+    if (SystemProperties::GetRosenBackendEnabled()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        return AceType::MakeRefPtr<RosenRenderSvgText>();
+#else
+        return nullptr;
+#endif
+    } else {
+        return AceType::MakeRefPtr<FlutterRenderSvgText>();
+    }
 }
-
-RefPtr<RenderNode> SvgTspanComponent::CreateRenderNode()
-{
-    return RenderSvgTspanCreator::Create();
-}
-
 } // namespace OHOS::Ace

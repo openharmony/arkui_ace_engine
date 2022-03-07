@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,13 +18,7 @@
 #include "core/pipeline/base/rosen_render_context.h"
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components/svg/rosen_render_svg_text_path.h"
-
 namespace OHOS::Ace {
-
-RefPtr<RenderNode> RosenRenderSvgTspan::Create()
-{
-    return AceType::MakeRefPtr<RosenRenderSvgTspan>();
-}
 
 void RosenRenderSvgTspan::Paint(RenderContext& context, const Offset& offset)
 {

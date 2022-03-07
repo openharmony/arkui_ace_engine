@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -91,7 +91,10 @@ build_component("svg") {
     "render_svg_rect.cpp",
     "render_svg_rect_creator.cpp",
     "render_svg_text.cpp",
+    "render_svg_text_creator.cpp",
     "render_svg_text_path.cpp",
+    "render_svg_text_path_creator.cpp",
+    "render_svg_tspan_creator.cpp",
     "render_svg_use.cpp",
     "render_svg_use_creator.cpp",
     "svg_circle_component.cpp",
