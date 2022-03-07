@@ -238,7 +238,7 @@ protected:
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
     double ApplyLayoutParam();
-    double LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam);
+    double LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, double mainSize);
     RefPtr<RenderListItem> RequestAndLayoutNewItem(size_t index, const LayoutParam& layoutParam);
 
     RefPtr<RenderListItem> RequestListItem(size_t index);
@@ -359,6 +359,9 @@ private:
     void InitScrollBarProxy();
     Dimension listSpace_;
     double realMainSize_ = 0.0; // Real size of main axis.
+    size_t startCachedCount_ = 0;
+    size_t endCachedCount_ = 0;
+    size_t cachedCount_ = 0;
 
     void CreateDragDropRecognizer();
     RefPtr<RenderListItem> FindCurrentListItem(const Point& point);

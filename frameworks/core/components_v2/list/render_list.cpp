@@ -115,6 +115,9 @@ void RenderList::Update(const RefPtr<Component>& component)
 
     const auto& divider = component_->GetItemDivider();
     listSpace_ = component_->GetSpace();
+    cachedCount_ = component_->GetCachedCount();
+
+    LOGI("cached count: %{public}zu", cachedCount_);
     spaceWidth_ = std::max(NormalizePercentToPx(component_->GetSpace(), vertical_),
         divider ? NormalizePercentToPx(divider->strokeWidth, vertical_) : 0.0);
 
@@ -228,7 +231,7 @@ void RenderList::Update(const RefPtr<Component>& component)
         CreateDragDropRecognizer();
     }
 
-    
+
     isMultiSelectable_  = component_->GetMultiSelectable();
 
     MarkNeedLayout();
@@ -262,14 +265,26 @@ void RenderList::PerformLayout()
     }
 
     const auto innerLayout = MakeInnerLayout();
-    double curMainPos = LayoutOrRecycleCurrentItems(innerLayout);
+    double curMainPos = LayoutOrRecycleCurrentItems(innerLayout, mainSize);
 
     // Try to request new items at end if needed
-    for (size_t newIndex = startIndex_ + items_.size(); curMainPos < endMainPos_; ++newIndex) {
+    for (size_t newIndex = startIndex_ + items_.size();; ++newIndex) {
+        if (cachedCount_ != 0) {
+            if (endCachedCount_ >= cachedCount_) {
+                break;
+            }
+        } else {
+            if (GreatOrEqual(curMainPos, endMainPos_)) {
+                break;
+            }
+        }
         auto child = RequestAndLayoutNewItem(newIndex, innerLayout);
         if (!child) {
             startIndex_ = std::min(startIndex_, TotalCount());
             break;
+        }
+        if (GreatOrEqual(curMainPos, mainSize)) {
+            ++endCachedCount_;
         }
         curMainPos += GetMainSize(child->GetLayoutSize()) + spaceWidth_;
     }
@@ -291,13 +306,25 @@ void RenderList::PerformLayout()
     }
 
     // Try to request new items at start if needed
-    for (; currentOffset_ > startMainPos_ && startIndex_ > 0; --startIndex_) {
+    for (; startIndex_ > 0; --startIndex_) {
+        if (cachedCount_ != 0) {
+            if (startCachedCount_ >= cachedCount_) {
+                break;
+            }
+        } else {
+            if (LessOrEqual(currentOffset_, startMainPos_)) {
+                break;
+            }
+        }
         auto child = RequestAndLayoutNewItem(startIndex_ - 1, innerLayout);
         if (!child) {
             break;
         }
         if (selectedItemIndex_ == startIndex_) {
             continue;
+        }
+        if (LessOrEqual(currentOffset_, 0.0)) {
+            ++startCachedCount_;
         }
         currentOffset_ -= GetMainSize(child->GetLayoutSize()) + spaceWidth_;
     }
@@ -603,7 +630,7 @@ double RenderList::ApplyLayoutParam()
     return maxMainSize;
 }
 
-double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam)
+double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, double mainSize)
 {
     if (currentStickyItem_) {
         currentStickyItem_->Layout(layoutParam);
@@ -611,26 +638,81 @@ double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam)
 
     double curMainPos = currentOffset_;
     size_t curIndex = startIndex_;
-    for (auto it = items_.begin(); it != items_.end(); ++curIndex) {
-        const auto& child = *(it);
-        if (LessOrEqual(curMainPos, endMainPos_)) {
-            child->Layout(layoutParam);
-            double mainSize = GetMainSize(child->GetLayoutSize());
-            curMainPos += mainSize + spaceWidth_;
-            if (GreatOrEqual(curMainPos, startMainPos_)) {
-                ++it;
+    if (cachedCount_ != 0) {
+        startCachedCount_ = 0;
+        endCachedCount_ = 0;
+        bool recycleAll = false;
+        if (GreatOrEqual(curMainPos, mainSize)) {
+            recycleAll = true;
+        }
+        for (auto it = items_.begin(); it != items_.end(); ++curIndex) {
+            const auto& child = *(it);
+            if (recycleAll || endCachedCount_ >= cachedCount_) {
+                if (currentStickyItem_ != child && selectedItem_ != child) {
+                    // Recycle list items out of view port
+                    RecycleListItem(curIndex);
+                }
+                it = items_.erase(it);
                 continue;
             }
-            currentOffset_ = curMainPos;
-            startIndex_ = curIndex + 1;
+
+            if (GreatOrEqual(curMainPos, mainSize)) {
+                ++endCachedCount_;
+            }
+
+            child->Layout(layoutParam);
+            double childMainSize = GetMainSize(child->GetLayoutSize());
+            curMainPos += childMainSize + spaceWidth_;
+
+            if (LessOrEqual(curMainPos, 0.0)) {
+                ++startCachedCount_;
+            }
+            ++it;
         }
 
-        if (currentStickyItem_ != child && selectedItem_ != child) {
-            // Recycle list items out of view port
-            RecycleListItem(curIndex);
+        double curMainPosForRecycle = currentOffset_;
+        curIndex = startIndex_;
+        for (auto it = items_.begin(); it != items_.end(); ++curIndex) {
+            if (startCachedCount_ > cachedCount_) {
+                const auto& child = *(it);
+                double mainSize = GetMainSize(child->GetLayoutSize());
+                curMainPosForRecycle += mainSize + spaceWidth_;
+                currentOffset_ = curMainPosForRecycle;
+                startIndex_ = curIndex + 1;
+
+                if (currentStickyItem_ != child && selectedItem_ != child) {
+                    // Recycle list items out of view port
+                    RecycleListItem(curIndex);
+                }
+                it = items_.erase(it);
+                --startCachedCount_;
+            } else {
+                break;
+            }
         }
-        it = items_.erase(it);
+    } else {
+        for (auto it = items_.begin(); it != items_.end(); ++curIndex) {
+            const auto& child = *(it);
+            if (LessOrEqual(curMainPos, endMainPos_)) {
+                child->Layout(layoutParam);
+                double mainSize = GetMainSize(child->GetLayoutSize());
+                curMainPos += mainSize + spaceWidth_;
+                if (GreatOrEqual(curMainPos, startMainPos_)) {
+                    ++it;
+                    continue;
+                }
+                currentOffset_ = curMainPos;
+                startIndex_ = curIndex + 1;
+            }
+
+            if (currentStickyItem_ != child && selectedItem_ != child) {
+                // Recycle list items out of view port
+                RecycleListItem(curIndex);
+            }
+            it = items_.erase(it);
+        }
     }
+
     return curMainPos;
 }
 
@@ -1822,7 +1904,7 @@ void RenderList::MultiSelectAllInRange(const RefPtr<RenderListItem>& firstItem,
 
     auto fromItemIndex = std::min(GetIndexByListItem(firstItem), GetIndexByListItem(secondItem));
     auto toItemIndex = std::max(GetIndexByListItem(firstItem), GetIndexByListItem(secondItem));
-    
+
     for (const auto& listItem : items_) {
         if (!listItem) {
             continue;
