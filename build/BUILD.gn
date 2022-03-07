@@ -123,6 +123,7 @@ foreach(item, ace_platforms) {
     }
 
     ohos_source_set("ace_ohos_unittest_base") {
+      part_name = ace_engine_part
       testonly = true
       sources = [
         "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
