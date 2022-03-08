@@ -1124,6 +1124,7 @@ protected:
     virtual void OnMouseTestHit(const Offset& coordinateOffset, MouseTestResult& result) {}
     virtual void OnMouseHoverEnterTest() {}
     virtual void OnMouseHoverExitTest() {}
+    void SendAccessibilityEvent(const std::string& eventType);
 
     void PrepareLayout();
 
