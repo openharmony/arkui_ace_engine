@@ -100,6 +100,7 @@ void RenderGridLayout::Update(const RefPtr<Component>& component)
     scrollBarWidth_ = grid->GetScrollBarWidth();
     scrollBarColor_ = grid->GetScrollBarColor();
     displayMode_ = grid->GetScrollBar();
+    isDeclarative_ = grid->IsDeclarative();
 
     // update other new prop
     cellLength_ = grid->GetCellLength();
@@ -285,7 +286,12 @@ void RenderGridLayout::SetChildPosition(
 
     double widthOffset = (colLen - child->GetLayoutSize().Width()) / GAP_DIVIDE_CONSTEXPR;
     double heightOffset = (rowLen - child->GetLayoutSize().Height()) / GAP_DIVIDE_CONSTEXPR;
-    child->SetPosition(Offset(positionX + widthOffset, positionY + heightOffset));
+    if (CheckNeedShrink()) {
+        auto allocatedPositionY = allocatedRowSizes_[row] + (row + rowSpan - 1) * rowGap_;
+        child->SetPosition(Offset(positionX + widthOffset, allocatedPositionY));
+    } else {
+        child->SetPosition(Offset(positionX + widthOffset, positionY + heightOffset));
+    }
 }
 
 Point RenderGridLayout::CalcChildPosition(
@@ -853,6 +859,8 @@ void RenderGridLayout::PerformLayout()
     } else {
         InitialGridProp();
     }
+    allocatedRowSizes_.clear();
+    allocatedRowSizes_.insert(allocatedRowSizes_.begin(), rowCount_ + 1, 0.0);
     if (editMode_) {
         PerformLayoutForEditGrid();
         if (needResetItemPosition_) {
@@ -862,7 +870,12 @@ void RenderGridLayout::PerformLayout()
     } else {
         PerformLayoutForStaticGrid();
     }
-    SetLayoutSize(GetLayoutParam().Constrain(Size(colSize_, rowSize_)));
+    if (CheckNeedShrink()) {
+        SetLayoutSize(GetLayoutParam().Constrain(Size(colSize_,
+            allocatedRowSizes_.back() + (rowCount_ - 1) * rowGap_)));
+    } else {
+        SetLayoutSize(GetLayoutParam().Constrain(Size(colSize_, rowSize_)));
+    }
 }
 
 bool RenderGridLayout::IsUseOnly()
@@ -1693,6 +1706,7 @@ void RenderGridLayout::PerformLayoutForEditGrid()
             item->Layout(MakeInnerLayoutParam(rowIndex, colIndex, itemRowSpan, itemColSpan));
             SetChildPosition(item, rowIndex, colIndex, itemRowSpan, itemColSpan);
             itemsInGrid_.push_back(item);
+            RefreshAllocatedRowSizes(rowIndex, itemRowSpan, item);
             SetItemIndex(item, itemIndex); // Set index for focus adjust.
             ++itemIndex;
             LOGD("%{public}d %{public}d %{public}d %{public}d", rowIndex, colIndex, itemRowSpan, itemColSpan);
@@ -1729,6 +1743,7 @@ void RenderGridLayout::PerformLayoutForStaticGrid()
             item->Layout(MakeInnerLayoutParam(rowIndex, colIndex, itemRowSpan, itemColSpan));
             SetChildPosition(item, rowIndex, colIndex, itemRowSpan, itemColSpan);
         }
+        RefreshAllocatedRowSizes(rowIndex, itemRowSpan, item);
         SetItemIndex(item, itemIndex); // Set index for focus adjust.
         ++itemIndex;
         LOGD("%{public}d %{public}d %{public}d %{public}d", rowIndex, colIndex, itemRowSpan, itemColSpan);
@@ -2494,6 +2509,18 @@ bool RenderGridLayout::CheckAnimation()
         return isDragging_.load();
     }
     return false;
+}
+
+bool RenderGridLayout::CheckNeedShrink() const
+{
+    return isDeclarative_ && needShrink_;
+}
+
+void RenderGridLayout::RefreshAllocatedRowSizes(int32_t rowIndex, int32_t itemRowSpan, const RefPtr<RenderNode>& item)
+{
+    if (CheckNeedShrink()) {
+        allocatedRowSizes_[rowIndex + itemRowSpan] = allocatedRowSizes_[rowIndex] + item->GetLayoutSize().Height();
+    }
 }
 
 void RenderGridLayout::ParseRestoreScenePosition(

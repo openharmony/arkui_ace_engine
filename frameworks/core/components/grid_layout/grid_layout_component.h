@@ -144,6 +144,21 @@ public:
         isDeclarative_ = true;
     }
 
+    bool IsDeclarative()
+    {
+        return isDeclarative_;
+    }
+
+    void SetNeedShrink(bool flag)
+    {
+        needShrink_ = flag;
+    }
+
+    bool NeedShrink()
+    {
+        return needShrink_;
+    }
+
     const RefPtr<V2::GridPositionController>& GetController() const
     {
         return controller_;
@@ -306,6 +321,7 @@ private:
     RefPtr<V2::GridPositionController> controller_;
     EventMarker scrolledEvent_;
     RefPtr<ScrollBarProxy> scrollBarProxy_;
+    bool needShrink_ = false;
 
     // drag in grid attribute
     bool editMode_ = false;

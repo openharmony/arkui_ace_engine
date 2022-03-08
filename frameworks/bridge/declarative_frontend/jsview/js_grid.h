@@ -50,6 +50,7 @@ public:
     static void JsOnGridDragLeave(const JSCallbackInfo& info);
     static void JsOnGridDragStart(const JSCallbackInfo& info);
     static void JsOnGridDrop(const JSCallbackInfo& info);
+    static void JsGridHeight(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
