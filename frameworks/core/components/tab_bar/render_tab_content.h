@@ -58,8 +58,13 @@ public:
 
     void AddChildContent(int32_t index, const RefPtr<RenderNode>& child)
     {
-        contentMap_.emplace(index, child);
+        contentMap_[index] = child;
         requestedIndex_ = index;
+    }
+
+    void RemoveChildContent(int32_t index)
+    {
+        contentMap_.erase(index);
     }
 
     int32_t GetCurrentIndex() const
