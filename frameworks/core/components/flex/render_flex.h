@@ -240,6 +240,7 @@ private:
     double totalFlexWeight_ = 0.0;
     int32_t maxDisplayIndex_ = 0;
     bool useOldLayoutVersion_ = false;
+    bool isDeclarative_ = false;
 
     AlignDeclarationPtr alignPtr_ = nullptr;
 };
