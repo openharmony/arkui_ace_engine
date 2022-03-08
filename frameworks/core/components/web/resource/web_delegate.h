@@ -139,6 +139,7 @@ public:
     void OnGeolocationPermissionsShowPrompt(const std::string& origin,
         OHOS::NWeb::NWebGeolocationCallbackInterface* callback);
     void OnRequestFocus();
+    bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
     void OnPageError(const std::string& param);

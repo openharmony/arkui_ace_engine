@@ -27,6 +27,53 @@
 
 namespace OHOS::Ace::Framework {
 
+class JSWebDialog : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebDialog>::Declare("WebDialog");
+        JSClass<JSWebDialog>::CustomMethod("confirm", &JSWebDialog::Confirm);
+        JSClass<JSWebDialog>::CustomMethod("cancel", &JSWebDialog::Cancel);
+        JSClass<JSWebDialog>::Bind(globalObj, &JSWebDialog::Constructor, &JSWebDialog::Destructor);
+    }
+
+    void SetResult(const RefPtr<Result>& result)
+    {
+        result_ = result;
+    }
+
+    void Confirm(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Confirm();
+        }
+    }
+
+    void Cancel(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Cancel();
+        }
+    }
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebDialog = Referenced::MakeRefPtr<JSWebDialog>();
+        jsWebDialog->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebDialog));
+    }
+
+    static void Destructor(JSWebDialog* jsWebDialog)
+    {
+        if (jsWebDialog != nullptr) {
+            jsWebDialog->DecRefCount();
+        }
+    }
+
+    RefPtr<Result> result_;
+};
+
+
 class JSWebGeolocation : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -270,6 +317,9 @@ void JSWeb::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWeb>::Declare("Web");
     JSClass<JSWeb>::StaticMethod("create", &JSWeb::Create);
+    JSClass<JSWeb>::StaticMethod("onAlert", &JSWeb::OnAlert);
+    JSClass<JSWeb>::StaticMethod("onBeforeUnload", &JSWeb::OnBeforeUnload);
+    JSClass<JSWeb>::StaticMethod("onConfirm", &JSWeb::OnConfirm);
     JSClass<JSWeb>::StaticMethod("onPageBegin", &JSWeb::OnPageStart);
     JSClass<JSWeb>::StaticMethod("onPageEnd", &JSWeb::OnPageFinish);
     JSClass<JSWeb>::StaticMethod("onProgressChange", &JSWeb::OnProgressChange);
@@ -294,10 +344,26 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("userAgent", &JSWeb::UserAgent);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
+    JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
     JSWebResourceRequest::JSBind(globalObj);
     JSWebResourceError::JSBind(globalObj);
     JSWebResourceResponse::JSBind(globalObj);
+}
+
+JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+
+    JSRef<JSObject> resultObj = JSClass<JSWebDialog>::NewInstance();
+    auto jsWebDialog = Referenced::Claim(resultObj->Unwrap<JSWebDialog>());
+    jsWebDialog->SetResult(eventInfo.GetResult());
+
+    obj->SetProperty("url", eventInfo.GetUrl());
+    obj->SetProperty("message", eventInfo.GetMessage());
+    obj->SetPropertyObject("result", resultObj);
+
+    return JSRef<JSVal>::Cast(obj);
 }
 
 JSRef<JSVal> LoadWebPageFinishEventToJSValue(const LoadWebPageFinishEvent& eventInfo)
@@ -403,6 +469,48 @@ void JSWeb::Create(const JSCallbackInfo& info)
     }
     ViewStackProcessor::GetInstance()->Push(webComponent);
     JSInteractableView::SetFocusNode(true);
+}
+
+void JSWeb::OnAlert(const JSCallbackInfo& args)
+{
+    JSWeb::OnCommonDialog(args, DialogEventType::DIALOG_EVENT_ALERT);
+}
+
+void JSWeb::OnBeforeUnload(const JSCallbackInfo& args)
+{
+    JSWeb::OnCommonDialog(args, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
+}
+
+void JSWeb::OnConfirm(const JSCallbackInfo& args)
+{
+    JSWeb::OnCommonDialog(args, DialogEventType::DIALOG_EVENT_CONFIRM);
+}
+
+void JSWeb::OnCommonDialog(const JSCallbackInfo& args, int dialogEventType)
+{
+    LOGI("OnCommonDialog, event type is %{public}d", dialogEventType);
+    if (!args[0]->IsFunction()) {
+        LOGW("param is not funtion.");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebDialogEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), WebDialogEventToJSValue);
+    auto jsCallback = [func = std::move(jsFunc)]
+        (const BaseEventInfo* info) -> bool {
+            ACE_SCORING_EVENT("OnCommonDialog CallBack");
+            if (func == nullptr) {
+                LOGW("function is null");
+                return false;
+            }
+            auto eventInfo = TypeInfoHelper::DynamicCast<WebDialogEvent>(info);
+            JSRef<JSVal> result = func->ExecuteWithValue(*eventInfo);
+            if (result->IsBoolean()) {
+                return result->ToBoolean();
+            }
+            return false;
+        };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnCommonDialogImpl(std::move(jsCallback), static_cast<DialogEventType>(dialogEventType));
 }
 
 void JSWeb::OnPageStart(const JSCallbackInfo& args)
