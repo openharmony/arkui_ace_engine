@@ -31,8 +31,6 @@ namespace OHOS::Ace {
 
 class ListComponent;
 
-constexpr int32_t RECYCLE_NO_LEFT = 0;
-constexpr int32_t RECYCLE_NO_RIGHT = 1;
 constexpr int32_t INVALID_INDEX = -1;
 constexpr int32_t ZERO_INDEX = 0;
 
@@ -544,7 +542,7 @@ private:
     int32_t indexOffset_ = 0;
     int32_t maxCount_ = 0;
     int32_t itemsCount_ = 0;
-    // center list-item index if itemcenter option is enabled.
+    // center list-item index if item center option is enabled.
     int32_t centerIndex_ = INVALID_INDEX;
 
     double listWidth_ = -1.0;

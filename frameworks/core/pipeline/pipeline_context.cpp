@@ -1061,7 +1061,7 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
 {
     ACE_FUNCTION_TRACE();
     CHECK_RUN_ON(UI);
-    ResSchedReport::GetInstance().ResSchedDataReport("pushpage");
+    ResSchedReport::GetInstance().ResSchedDataReport("push_page");
     auto stageElement = stage;
     if (!stageElement) {
         // if not target stage, use root stage

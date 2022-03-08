@@ -255,13 +255,13 @@ void RenderGridScroll::SetChildPosition(
     }
 
     double mainOffset = (mainLen - GetSize(child->GetLayoutSize())) / 2.0;
-    double crosstOffset = (crossLen - GetSize(child->GetLayoutSize(), false)) / 2.0;
+    double crossOffset = (crossLen - GetSize(child->GetLayoutSize(), false)) / 2.0;
 
     Offset offset;
     if (useScrollable_ != SCROLLABLE::HORIZONTAL) {
-        offset = Offset(positionCross + crosstOffset, positionMain + mainOffset - firstItemOffset_);
+        offset = Offset(positionCross + crossOffset, positionMain + mainOffset - firstItemOffset_);
     } else {
-        offset = Offset(positionMain + mainOffset - firstItemOffset_, positionCross + crosstOffset);
+        offset = Offset(positionMain + mainOffset - firstItemOffset_, positionCross + crossOffset);
     }
 
     child->SetPosition(offset);
@@ -388,8 +388,8 @@ void RenderGridScroll::InitialGridProp()
             if (!Rank(*mainCount_, *mainCount_ == 0 ? startRankItemIndex_ : -1)) {
                 // When [firstLineToBottom_] does not equal to [std::nullopt], it indicates that this [InitialGridProp]
                 // is called after [ScrollToIndex].
-                // This this is the case when it scrolls to the last line and the last line is not full.
-                // So we need to add an additional line to [*mainCount_].
+                // This is the case when it scrolls to the last line and the last line is not full.
+                // So we need to add a line to [*mainCount_].
                 (*mainCount_) += firstLineToBottom_ ? 1 : 0;
                 break;
             }
@@ -852,11 +852,11 @@ void RenderGridScroll::PerformLayout()
     CalculateWholeSize(drawLength);
 
     int32_t firstIndex = GetIndexByPosition(0);
-    if (lastFirstIdex_ != firstIndex) {
+    if (lastFirstIndex_ != firstIndex) {
         if (!animatorJumpFlag_) {
             OnScrolled(firstIndex);
         }
-        lastFirstIdex_ = firstIndex;
+        lastFirstIndex_ = firstIndex;
     }
     animatorJumpFlag_ = false;
 }
@@ -924,7 +924,6 @@ void RenderGridScroll::ClearLayout(bool needReservedPlace)
     reachHead_ = false;
     reachTail_ = false;
     startMainPos_ = 0.0;
-    endMainPos_ = 0.0;
     firstItemOffset_ = 0.0;
     startIndex_ = 0;
     endIndex_ = -1;
