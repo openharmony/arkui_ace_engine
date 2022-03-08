@@ -43,7 +43,7 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr int32_t GPU_THREAD_PRIORITY = -10;
-constexpr int32_t UI_THREAD_PRIORITY = -8;
+constexpr int32_t UI_THREAD_PRIORITY = -15;
 
 inline std::string GenJsThreadName()
 {
