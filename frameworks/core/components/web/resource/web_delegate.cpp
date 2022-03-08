@@ -427,7 +427,7 @@ void WebDelegate::SetWebViewJavaScriptResultCallBack(
                 return;
             }
             auto webJSResultCallBack =
-                std::make_shared<WebJavaScriptResultCallBack>(delegate->context_, Container::CurrentId());
+                std::make_shared<WebJavaScriptResultCallBack>(Container::CurrentId());
             if (webJSResultCallBack) {
                 LOGI("WebDelegate SetWebViewJavaScriptResultCallBack");
                 webJSResultCallBack->SetJavaScriptCallBack(std::move(javaScriptCallBackImpl));
