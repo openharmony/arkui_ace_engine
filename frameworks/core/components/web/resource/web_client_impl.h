@@ -16,11 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_RESOURCE_WEBVIEW_CLIENT_IMPL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_RESOURCE_WEBVIEW_CLIENT_IMPL_H
 
+#include <condition_variable>
+
 #include "foundation/ace/ace_engine/frameworks/base/memory/referenced.h"
 #include "nweb_handler.h"
 
 #include "base/log/log.h"
 #include "core/common/container_scope.h"
+#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 class WebDelegate;
@@ -53,6 +56,7 @@ public:
     void SetNWeb(std::shared_ptr<OHOS::NWeb::NWeb> webview) override;
     void OnProxyDied() override;
     void OnRouterPush(const std::string& param) override;
+    bool OnConsoleLog(const OHOS::NWeb::NWebConsoleLog& message) override;
     void OnMessage(const std::string& param) override;
     void OnPageLoadBegin(const std::string& url) override;
     void OnPageLoadEnd(int httpStatusCode, const std::string& url) override;
@@ -85,6 +89,10 @@ public:
     {
         webDelegate_ = delegate;
     }
+    void SetPipelineContext(const WeakPtr<PipelineContext>& context)
+    {
+        context_ = context;
+    }
 
     const RefPtr<WebDelegate> GetWebDelegate() const
     {
@@ -95,6 +103,7 @@ private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;
     int32_t instanceId_ = -1;
+    WeakPtr<PipelineContext> context_;
 };
 } // namespace OHOS::Ace
 

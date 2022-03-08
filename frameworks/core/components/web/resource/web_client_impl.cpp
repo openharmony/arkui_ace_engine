@@ -17,6 +17,7 @@
 
 #include "core/common/container.h"
 #include "core/components/web/resource/web_delegate.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace {
 
@@ -78,6 +79,36 @@ void WebClientImpl::OnFocus()
         return;
     }
     delegate->OnRequestFocus();
+}
+
+bool WebClientImpl::OnConsoleLog(const OHOS::NWeb::NWebConsoleLog& message)
+{
+    ContainerScope scope(instanceId_);
+    static std::condition_variable initCv;
+    bool jsMessage = false;
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        return false;
+    }
+    task->PostTask([webClient = this, &message, &jsMessage] {
+        if (webClient == nullptr) {
+            return;
+        }
+        auto delegate = webClient->webDelegate_.Upgrade();
+        if (delegate) {
+            jsMessage = delegate->OnConsoleLog(std::make_shared<OHOS::NWeb::NWebConsoleLog>(message));
+        }
+        initCv.notify_one();
+    },
+        OHOS::Ace::TaskExecutor::TaskType::JS);
+
+    constexpr int duration = 5;
+    if (initCv.wait_for(lock, std::chrono::seconds(duration)) ==
+        std::cv_status::timeout) {
+            return false;
+    }
+
+    return jsMessage;
 }
 
 void WebClientImpl::OnPageLoadBegin(const std::string& url)
