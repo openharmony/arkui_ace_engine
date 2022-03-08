@@ -72,6 +72,7 @@ public:
     virtual Uri DenormalizeUri(const Uri& uri) = 0;
     virtual sptr<IRemoteObject> OnConnectService(const OHOS::AAFwk::Want& want) = 0;
     virtual void OnDisconnectService(const OHOS::AAFwk::Want& want) = 0;
+    virtual void OnCreate(const OHOS::AAFwk::Want& want) = 0;
     virtual void OnDelete(const int64_t formId) = 0;
     virtual void OnTriggerEvent(const int64_t formId, const std::string& message) = 0;
     virtual void OnUpdate(const int64_t formId) = 0;

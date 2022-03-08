@@ -289,7 +289,7 @@ void SubContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)
         sharedImageManager = pipelineCtx->GetSharedImageManager();
     }
     auto nameSize = picNameArray.size();
-    for (int i = 0; i < nameSize; i++) {
+    for (uint32_t i = 0; i < nameSize; i++) {
         // get name of picture
         auto name = picNameArray[i];
         sharedImageManager->AddPictureNamesToReloadMap(std::move(name));
@@ -320,7 +320,7 @@ void SubContainer::UpdateSharedImage(
     // now it can be assured that all three arrays are of the same size
 
     std::string picNameCopy;
-    for (int i = 0; i < nameArraySize; i++) {
+    for (uint32_t i = 0; i < nameArraySize; i++) {
         // get name of picture
         auto picName = picNameArray[i];
         // save a copy of picName and ReleaseStringUTFChars immediately to avoid memory leak

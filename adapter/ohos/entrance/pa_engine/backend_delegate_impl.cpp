@@ -44,8 +44,7 @@ BackendDelegateImpl::BackendDelegateImpl(const BackendDelegateImplBuilder& build
       openRawFile_(builder.openRawFileCallback), normalizeUri_(builder.normalizeUriCallback),
       denormalizeUri_(builder.denormalizeUriCallback), destroyApplication_(builder.destroyApplicationCallback),
       commandApplication_(builder.commandApplicationCallback), connectCallback_(builder.connectCallback),
-      disConnectCallback_(builder.disConnectCallback),
-
+      disConnectCallback_(builder.disConnectCallback), createCallback_(builder.createFormCallback),
       deleteCallback_(builder.deleteFormCallback), triggerEventCallback_(builder.triggerEventCallback),
       updateCallback_(builder.updateFormCallback), castTemptoNormalCallback_(builder.castTemptoNormalCallback),
       visibilityChangedCallback_(builder.visibilityChangedCallback),
@@ -92,6 +91,11 @@ void BackendDelegateImpl::SetCallBackResult(const std::string& callBackId, const
 void BackendDelegateImpl::PostJsTask(std::function<void()>&& task)
 {
     taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
+}
+
+void BackendDelegateImpl::PostDelayedJsTask(std::function<void()>&& task, uint32_t delayTime)
+{
+    taskExecutor_->PostDelayedTask(task, TaskExecutor::TaskType::JS, delayTime);
 }
 
 bool BackendDelegateImpl::GetAssetContent(const std::string& url, std::string& content)
@@ -414,6 +418,12 @@ void BackendDelegateImpl::OnDisConnect(const OHOS::AAFwk::Want& want)
 {
     taskExecutor_->PostTask(
         [disConnectCallback = disConnectCallback_, want] { disConnectCallback(want); }, TaskExecutor::TaskType::JS);
+}
+
+void BackendDelegateImpl::OnCreate(const OHOS::AAFwk::Want& want)
+{
+    taskExecutor_->PostSyncTask(
+        [createCallback = createCallback_, want] { createCallback(want); }, TaskExecutor::TaskType::JS);
 }
 
 void BackendDelegateImpl::OnDelete(const int64_t formId)

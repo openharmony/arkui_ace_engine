@@ -37,6 +37,9 @@ public:
     // posting js task from jsengine
     virtual void PostJsTask(std::function<void()>&& task) = 0;
 
+    // posting js task from jsengine
+    virtual void PostDelayedJsTask(std::function<void()>&& task, uint32_t delayTime) = 0;
+
     virtual BackendType GetType() const = 0;
 
     virtual SingleTaskExecutor GetAnimationJsTask() = 0;

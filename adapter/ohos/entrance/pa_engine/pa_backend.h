@@ -78,6 +78,7 @@ public:
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
 
     void RunPa(const std::string& url, const OHOS::AAFwk::Want& want);
+    void OnCreate(const OHOS::AAFwk::Want& want);
     void OnDelete(const int64_t formId);
     void OnTriggerEvent(const int64_t formId, const std::string& message);
     void OnUpdate(const int64_t formId);

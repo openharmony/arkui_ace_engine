@@ -24,9 +24,9 @@ namespace OHOS::Ace {
 
 std::unique_ptr<DrawDelegate> RosenRenderForm::GetDrawDelegate()
 {
-    auto darwDelegate = std::make_unique<DrawDelegate>();
+    auto drawDelegate = std::make_unique<DrawDelegate>();
 
-    darwDelegate->SetDrawRSFrameCallback([this](std::shared_ptr<RSNode>& node, const Rect& dirty) {
+    drawDelegate->SetDrawRSFrameCallback([this](std::shared_ptr<RSNode>& node, const Rect& dirty) {
         if (!GetRSNode()) {
             SyncRSNodeBoundary(true, true);
         }
@@ -37,7 +37,7 @@ std::unique_ptr<DrawDelegate> RosenRenderForm::GetDrawDelegate()
         MarkNeedRender(true);
     });
 
-    return darwDelegate;
+    return drawDelegate;
 }
 
 void RosenRenderForm::RemoveChildren()

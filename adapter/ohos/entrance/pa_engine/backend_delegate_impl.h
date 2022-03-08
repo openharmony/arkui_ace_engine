@@ -57,6 +57,7 @@ using NormalizeUriCallback = std::function<Uri(const Uri& uri)>;
 using DenormalizeUriCallback = std::function<Uri(const Uri& uri)>;
 using ConnectCallback = std::function<sptr<IRemoteObject>(const OHOS::AAFwk::Want& want)>;
 using DisConnectCallback = std::function<void(const OHOS::AAFwk::Want& want)>;
+using CreateFormCallback = std::function<void(const OHOS::AAFwk::Want& want)>;
 using DeleteFormCallback = std::function<void(const int64_t formId)>;
 using TriggerEventCallback = std::function<void(const int64_t formId, const std::string& message)>;
 using UpdateFormCallback = std::function<void(const int64_t formId)>;
@@ -86,6 +87,7 @@ struct BackendDelegateImplBuilder {
     DenormalizeUriCallback denormalizeUriCallback;
     ConnectCallback connectCallback;
     DisConnectCallback disConnectCallback;
+    CreateFormCallback createFormCallback;
     DeleteFormCallback deleteFormCallback;
     TriggerEventCallback triggerEventCallback;
     UpdateFormCallback updateFormCallback;
@@ -110,6 +112,8 @@ public:
 
     // BackendDelegate overrides.
     void PostJsTask(std::function<void()>&& task) override;
+
+    void PostDelayedJsTask(std::function<void()>&& task, uint32_t delayTime) override;
 
     SingleTaskExecutor GetAnimationJsTask() override;
 
@@ -174,6 +178,7 @@ public:
     Uri NormalizeUri(const Uri& uri);
     Uri DenormalizeUri(const Uri& uri);
 
+    void OnCreate(const OHOS::AAFwk::Want &want);
     void OnDelete(const int64_t formId);
     void OnTriggerEvent(const int64_t formId, const std::string& message);
     void OnUpdate(const int64_t formId);
@@ -214,6 +219,7 @@ private:
     ConnectCallback connectCallback_;
     DisConnectCallback disConnectCallback_;
 
+    CreateFormCallback createCallback_;
     DeleteFormCallback deleteCallback_;
     TriggerEventCallback triggerEventCallback_;
     UpdateFormCallback updateCallback_;
