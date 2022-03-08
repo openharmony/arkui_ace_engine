@@ -115,7 +115,7 @@ void SubwindowManager::RemoveSubwindow(int32_t instanceId)
 {
     LOGI("Remove subwindow of this instance %{public}d", instanceId);
     std::lock_guard<std::mutex> lock(subwindowMutex_);
-    int res = subwindowMap_.erase(instanceId);
+    int res = static_cast<int>(subwindowMap_.erase(instanceId));
     if (res == 0) {
         LOGW("Remove subwindow of instance %{public}d failed.", instanceId);
     }

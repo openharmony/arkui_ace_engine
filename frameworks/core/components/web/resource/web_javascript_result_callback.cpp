@@ -15,10 +15,10 @@
 
 #include "core/components/web/resource/web_javascript_result_callback.h"
 
-#include "core/components/web/resource/web_javascript_value.h"
+#include "base/log/log.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
-#include "base/log/log.h"
+#include "core/components/web/resource/web_javascript_value.h"
 
 namespace OHOS::Ace {
 using namespace OHOS::Ace::Framework;
@@ -95,7 +95,7 @@ std::shared_ptr<NWebValue> GetWebViewValue(const std::shared_ptr<WebJSValue>& we
 }
 
 std::shared_ptr<NWebValue> WebJavaScriptResultCallBack::GetJavaScriptResult(
-    std::vector<std::shared_ptr<NWebValue>> args, const std::string &method, const std::string &object_name)
+    std::vector<std::shared_ptr<NWebValue>> args, const std::string& method, const std::string& object_name)
 {
     LOGI("GetJavaScriptResult");
     ContainerScope scope(instanceId_);
@@ -108,12 +108,14 @@ std::shared_ptr<NWebValue> WebJavaScriptResultCallBack::GetJavaScriptResult(
         return std::make_shared<NWebValue>(NWebValue::Type::NONE);
     }
 
-    task->PostSyncTask([webJSCallBack = this, object_name, method, jsArgs, &result] {
-        if (webJSCallBack->javaScriptCallBackImpl_) {
-            result = webJSCallBack->javaScriptCallBackImpl_(object_name, method, jsArgs);
-        }
-        }, OHOS::Ace::TaskExecutor::TaskType::JS);
+    task->PostSyncTask(
+        [webJSCallBack = this, object_name, method, jsArgs, &result] {
+            if (webJSCallBack->javaScriptCallBackImpl_) {
+                result = webJSCallBack->javaScriptCallBackImpl_(object_name, method, jsArgs);
+            }
+        },
+        OHOS::Ace::TaskExecutor::TaskType::JS);
 
     return GetWebViewValue(result);
 }
-}
+} // namespace OHOS::Ace

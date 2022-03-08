@@ -92,7 +92,7 @@ private:
         }
         auto data = reinterpret_cast<const typename T::value_type*>(buffer_.data() + readPos_);
         dst.assign(data, data + length);
-        readPos_ += sizeof(typename T::value_type) * length;
+        readPos_ += static_cast<uint32_t>(sizeof(typename T::value_type) * length);
         return true;
     }
 

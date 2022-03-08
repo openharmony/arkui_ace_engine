@@ -51,7 +51,7 @@ public:
 
     bool Remove(const std::string& name)
     {
-        int res = sharedImageMap_.erase(name);
+        int res = static_cast<int>(sharedImageMap_.erase(name));
         return (res != 0);
     }
 

@@ -1376,8 +1376,8 @@ void JsCardParser::ParseMultiVariable(
     value = "";
     // Splicing Between Variables and constants,like variable = "my name is {{name}}, and i am from {{city}}."
     while (variable.find("{{") != std::string::npos && variable.find("}}") != std::string::npos) {
-        int32_t startPos = variable.find("{{");
-        int32_t endPos = variable.find("}}");
+        int32_t startPos = static_cast<int32_t>(variable.find("{{"));
+        int32_t endPos = static_cast<int32_t>(variable.find("}}"));
         if (endPos < startPos) {
             break;
         }

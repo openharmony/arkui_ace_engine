@@ -130,13 +130,15 @@ void FormElement::HandleOnAcquireEvent(int64_t id)
 
     LOGI("HandleOnAcquireEvent msg:%{public}s", json->ToString().c_str());
     int32_t instance = context->GetInstanceId();
-    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), info = json->ToString(), instance] {
-        auto element = weak.Upgrade();
-        if (element != nullptr && element->onAcquireEvent_ != nullptr) {
-            ContainerScope scope(instance);
-            element->onAcquireEvent_(info);
-        }
-    }, TaskExecutor::TaskType::JS);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), info = json->ToString(), instance] {
+            auto element = weak.Upgrade();
+            if (element != nullptr && element->onAcquireEvent_ != nullptr) {
+                ContainerScope scope(instance);
+                element->onAcquireEvent_(info);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void FormElement::HandleOnRouterEvent(const std::unique_ptr<JsonValue>& action)
@@ -156,13 +158,15 @@ void FormElement::HandleOnRouterEvent(const std::unique_ptr<JsonValue>& action)
 
     LOGI("HandleOnRouterEvent msg:%{public}s", json->ToString().c_str());
     int32_t instance = context->GetInstanceId();
-    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), info = json->ToString(), instance] {
-        auto element = weak.Upgrade();
-        if (element != nullptr && element->onRouterEvent_ != nullptr) {
-            ContainerScope scope(instance);
-            element->onRouterEvent_(info);
-        }
-    }, TaskExecutor::TaskType::JS);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), info = json->ToString(), instance] {
+            auto element = weak.Upgrade();
+            if (element != nullptr && element->onRouterEvent_ != nullptr) {
+                ContainerScope scope(instance);
+                element->onRouterEvent_(info);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void FormElement::HandleOnErrorEvent(const std::string code, const std::string msg)
@@ -183,13 +187,15 @@ void FormElement::HandleOnErrorEvent(const std::string code, const std::string m
 
     LOGI("HandleOnErrorEvent msg:%{public}s", msg.c_str());
     int32_t instance = context->GetInstanceId();
-    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), info = json->ToString(), instance] {
-        auto element = weak.Upgrade();
-        if (element != nullptr && element->onErrorEvent_ != nullptr) {
-            ContainerScope scope(instance);
-            element->onErrorEvent_(info);
-        }
-    }, TaskExecutor::TaskType::JS);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), info = json->ToString(), instance] {
+            auto element = weak.Upgrade();
+            if (element != nullptr && element->onErrorEvent_ != nullptr) {
+                ContainerScope scope(instance);
+                element->onErrorEvent_(info);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void FormElement::HandleOnUninstallEvent(int64_t formId)
@@ -209,13 +215,15 @@ void FormElement::HandleOnUninstallEvent(int64_t formId)
 
     LOGI("HandleOnUninstallEvent formId:%{public}s", std::to_string(formId).c_str());
     int32_t instance = context->GetInstanceId();
-    context->GetTaskExecutor()->PostTask([weak = WeakClaim(this), info = json->ToString(), instance] {
-        auto element = weak.Upgrade();
-        if (element != nullptr && element->onUninstallEvent_ != nullptr) {
-            ContainerScope scope(instance);
-            element->onUninstallEvent_(info);
-        }
-    }, TaskExecutor::TaskType::JS);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), info = json->ToString(), instance] {
+            auto element = weak.Upgrade();
+            if (element != nullptr && element->onUninstallEvent_ != nullptr) {
+                ContainerScope scope(instance);
+                element->onUninstallEvent_(info);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void FormElement::Prepare(const WeakPtr<Element>& parent)

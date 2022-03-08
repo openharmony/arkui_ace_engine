@@ -33,7 +33,7 @@ void Scheduler::Start()
     }
     isRunning_ = true;
     startupTimestamp_ = context->GetTimeFromExternalTimer();
-    scheduleId_ = context->AddScheduleTask(AceType::Claim(this));
+    scheduleId_ = static_cast<int32_t>(context->AddScheduleTask(AceType::Claim(this)));
 }
 
 void Scheduler::Stop()
@@ -77,7 +77,7 @@ void Scheduler::OnFrame(uint64_t nanoTimestamp)
         return;
     }
     if (IsActive()) {
-        scheduleId_ = context->AddScheduleTask(AceType::Claim(this));
+        scheduleId_ = static_cast<int32_t>(context->AddScheduleTask(AceType::Claim(this)));
     }
 }
 

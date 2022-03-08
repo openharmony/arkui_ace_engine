@@ -25,9 +25,9 @@
 
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/custom_paint/render_custom_paint.h"
-#include "core/image/image_source_info.h"
 #include "core/image/image_object.h"
 #include "core/image/image_provider.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
 

@@ -428,7 +428,7 @@ void WatchDog::Register(int32_t instanceId, const RefPtr<TaskExecutor>& taskExec
 
 void WatchDog::Unregister(int32_t instanceId)
 {
-    int32_t num = watchMap_.erase(instanceId);
+    int32_t num = static_cast<int32_t>(watchMap_.erase(instanceId));
     if (num == 0) {
         LOGW("Unregister from watch dog failed with instanceID %{public}d", instanceId);
     }

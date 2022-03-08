@@ -240,12 +240,12 @@ bool IsOnBacktrackingPath(const std::string& bestConfigTag, const std::string& c
     for (std::size_t i = 0; i < backtrackPath.size(); i++) {
         for (const auto& bestConfigPath : bestConfigBacktrackPaths) {
             if (bestConfigPath == backtrackPath[i] && bestConfigIndex == -1) {
-                bestConfigIndex = i;
+                bestConfigIndex = static_cast<int32_t>(i);
             }
         }
         for (const auto& candidateConfigPath : candidateConfigBacktrackPaths) {
             if (candidateConfigPath == backtrackPath[i] && candidateConfigIndex == -1) {
-                candidateConfigIndex = i;
+                candidateConfigIndex = static_cast<int32_t>(i);
             }
         }
     }
@@ -307,10 +307,10 @@ bool IsLocaleConfigMoreSpecified(const AceResConfig& bestLocaleConfig, const Ace
     int32_t candidateConfigIndex = -1;
     for (std::size_t i = 0; i < deviceBacktrackPath.size(); i++) {
         if (deviceBacktrackPath[i] == bestConfigTag && bestConfigIndex == -1) {
-            bestConfigIndex = i;
+            bestConfigIndex = static_cast<int32_t>(i);
         }
         if (deviceBacktrackPath[i] == candidateConfigTag && candidateConfigIndex == -1) {
-            candidateConfigIndex = i;
+            candidateConfigIndex = static_cast<int32_t>(i);
         }
     }
     if (bestConfigIndex < candidateConfigIndex) {
@@ -496,7 +496,7 @@ bool IsDialectsOfEnUs(const AceResConfig& config)
         std::vector<std::string> backtrackPath;
         backtrackPath.push_back(configTag);
         FindBacktrackPath(config, backtrackPath, configTag);
-        tracebackPathLength = backtrackPath.size();
+        tracebackPathLength = static_cast<int>(backtrackPath.size());
     }
     // backtracking size 2, means that the locale is an American English dialect.
     return tracebackPathLength == 2;
@@ -793,7 +793,7 @@ void AceResConfig::MatchAndSortI18nConfigs(const std::vector<std::string>& candi
     std::vector<AceResConfig> matchedLocaleConfigs;
     MatchLocaleConfig(candidateLocaleConfigs, deviceLocaleConfig, matchedLocaleConfigs);
     int32_t left = 0;
-    int32_t right = matchedLocaleConfigs.size() - 1;
+    int32_t right = static_cast<int32_t>(matchedLocaleConfigs.size()) - 1;
     SortLocaleConfigs(matchedLocaleConfigs, deviceLocaleConfig, left, right);
     bool existDefault = false;
     for (const auto& matchedLocaleConfig : matchedLocaleConfigs) {
@@ -821,7 +821,7 @@ void AceResConfig::MatchAndSortResConfigs(const std::vector<std::string>& candid
     }
 
     AceResConfig deviceResConfig = ConvertResTagToConfig(deviceResTag, false);
-    int32_t candidateConfigSize = candidateResConfigs.size();
+    int32_t candidateConfigSize = static_cast<int32_t>(candidateResConfigs.size());
     std::vector<AceResConfig> matchedResConfigs;
     for (auto i = 0; i < candidateConfigSize; i++) {
         if (!MatchResConfig(deviceResConfig, candidateResConfigs[i])) {
@@ -831,7 +831,7 @@ void AceResConfig::MatchAndSortResConfigs(const std::vector<std::string>& candid
         }
     }
     int32_t left = 0;
-    int32_t right = matchedResConfigs.size() - 1;
+    int32_t right = static_cast<int32_t>(matchedResConfigs.size()) - 1;
     SortResConfigs(deviceResConfig, matchedResConfigs, left, right);
     for (const auto& matchedConfig : matchedResConfigs) {
         matchedFileList.emplace_back(ConvertResConfigToTag(matchedConfig, styleRes));
@@ -872,7 +872,7 @@ void AceResConfig::MatchAndSortDeclarativeResConfigs(const std::set<std::string>
 
     std::vector<AceResConfig> matchedLocaleConfigs;
     MatchLocaleConfig(candidateResConfigs, deviceResConfig, matchedLocaleConfigs, true);
-    int32_t candidateConfigSize = matchedLocaleConfigs.size();
+    int32_t candidateConfigSize = static_cast<int32_t>(matchedLocaleConfigs.size());
     std::vector<AceResConfig> matchedResConfigs;
     for (auto i = 0; i < candidateConfigSize; i++) {
         if (!DeclaritiveMatchResConfig(deviceResConfig, matchedLocaleConfigs[i])) {

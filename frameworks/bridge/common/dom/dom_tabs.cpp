@@ -94,7 +94,7 @@ bool DOMTabs::SetSpecializedAttr(const std::pair<std::string, std::string>& attr
 bool DOMTabs::AddSpecializedEvent(int32_t pageId, const std::string& event)
 {
     if (event == DOM_CHANGE) {
-        tabPageId_ = pageId;
+        tabPageId_ = static_cast<uint32_t>(pageId);
         tabEventId_ = GetNodeIdForEvent();
         tabEventType_ = event;
         LOGD("DOMTabs AddEvent pageId:%{private}u EventId:%{private}s EventType:%{private}s",

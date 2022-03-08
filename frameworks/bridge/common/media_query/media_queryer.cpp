@@ -298,7 +298,7 @@ bool DoMatchCondition(const std::string& condition, const MediaFeature& mediaFea
     // remove screen and modifier
     std::vector<std::string> conditionArr;
     StringUtils::SplitStr(commaCondition, ",", conditionArr);
-    int32_t len = conditionArr.size();
+    int32_t len = static_cast<int32_t>(conditionArr.size());
     for (int32_t i = 0; i < len; i++) {
         if (CONDITION_WITH_AND.Match(conditionArr[i])) {
             bool result = ParseAndCondition(conditionArr[i], mediaFeature, failReason);

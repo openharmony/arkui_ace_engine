@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-
 #include "base/log/frame_report.h"
-#include "base/log/log_wrapper.h"
 
-#include <dlfcn.h>
 #include <cstdio>
+#include <dlfcn.h>
 #include <unistd.h>
+
+#include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace {
 namespace {

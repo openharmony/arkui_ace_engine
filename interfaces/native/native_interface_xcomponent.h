@@ -173,8 +173,8 @@ int32_t OH_NativeXComponent_GetXComponentId(OH_NativeXComponent* component, char
  * @since 8
  * @version 1.0
  */
-int32_t OH_NativeXComponent_GetXComponentSize(OH_NativeXComponent* component, const void* window,
-                                              uint64_t* width, uint64_t* height);
+int32_t OH_NativeXComponent_GetXComponentSize(
+    OH_NativeXComponent* component, const void* window, uint64_t* width, uint64_t* height);
 
 /**
  * @brief Obtains the offset of the xcomponent.
@@ -187,8 +187,8 @@ int32_t OH_NativeXComponent_GetXComponentSize(OH_NativeXComponent* component, co
  * @since 8
  * @version 1.0
  */
-int32_t OH_NativeXComponent_GetXComponentOffset(OH_NativeXComponent* component, const void* window,
-                                                double* x, double* y);
+int32_t OH_NativeXComponent_GetXComponentOffset(
+    OH_NativeXComponent* component, const void* window, double* x, double* y);
 
 /**
  * @brief Obtains the information of touch event.
@@ -200,8 +200,8 @@ int32_t OH_NativeXComponent_GetXComponentOffset(OH_NativeXComponent* component, 
  * @since 8
  * @version 1.0
  */
-int32_t OH_NativeXComponent_GetTouchEvent(OH_NativeXComponent* component, const void* window,
-                                          OH_NativeXComponent_TouchEvent* touchEvent);
+int32_t OH_NativeXComponent_GetTouchEvent(
+    OH_NativeXComponent* component, const void* window, OH_NativeXComponent_TouchEvent* touchEvent);
 
 /**
  * @brief Set the callback to the xcomponent.

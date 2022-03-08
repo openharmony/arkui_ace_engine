@@ -144,7 +144,7 @@ void AnimatableProperties::UpdatePropAnimation(const PropAnimationMap& propAnima
                         auto animation = weakAnimation.Upgrade();
                         auto animatableProperties = weak.Upgrade();
                         auto padding = AceType::DynamicCast<AnimatableData<Dimension>>(data);
-                        if (animatableProperties & padding) {
+                        if (animatableProperties && padding) {
                             if (animation && animation->GetInit() == nullptr) {
                                 const Dimension& dimension = animatableProperties->GetPadding(setter);
                                 auto init = AceType::MakeRefPtr<AnimatableData<Dimension>>(dimension);
@@ -514,7 +514,7 @@ float AnimatableProperties::GetPropOpacity() const
     if (renderNode == nullptr) {
         return 1.0f;
     }
-    return renderNode->GetOpacity() / UINT8_MAX;
+    return renderNode->GetOpacity() / (UINT8_MAX * 1.0f);
 }
 
 void AnimatableProperties::SetPropShadow(const Shadow& shadow)

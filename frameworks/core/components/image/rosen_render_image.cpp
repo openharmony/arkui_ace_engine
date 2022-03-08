@@ -516,13 +516,15 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
         auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
         if (GetBackgroundImageFlag()) {
             recordingCanvas->drawRect({ offset.GetX(), offset.GetY(), GetLayoutSize().Width() + offset.GetX(),
-                GetLayoutSize().Height() + offset.GetY() }, paint);
+                                          GetLayoutSize().Height() + offset.GetY() },
+                paint);
         } else {
             recordingCanvas->DrawAdaptiveRRect(0, paint);
         }
 #else
         canvas->drawRect({ offset.GetX(), offset.GetY(), GetLayoutSize().Width() + offset.GetX(),
-            GetLayoutSize().Height() + offset.GetY() }, paint);
+                             GetLayoutSize().Height() + offset.GetY() },
+            paint);
 #endif
         return;
     }

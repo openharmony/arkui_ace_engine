@@ -1629,7 +1629,8 @@ void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, bool in
     } else {
         double maxLength = (axis_ == Axis::HORIZONTAL ? GetLayoutSize().Width() : GetLayoutSize().Height());
 
-        nextItemCount = (maxLength - offset - prevMargin_ + std::fabs(prevItemOffset_) - 1)/ std::fabs(prevItemOffset_);
+        nextItemCount =
+            (maxLength - offset - prevMargin_ + std::fabs(prevItemOffset_) - 1) / std::fabs(prevItemOffset_);
         if (nextItemCount > maxNextItemCount) {
             nextItemCount = maxNextItemCount;
         }
