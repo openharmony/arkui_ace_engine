@@ -44,8 +44,8 @@ public:
 
     bool operator==(const ImageSourceInfo& info) const
     {
-        return ((!pixmap_ && !info.pixmap_) ||
-                    (pixmap_ && info.pixmap_ && pixmap_->GetModifyId() == info.pixmap_->GetModifyId())) &&
+        return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmap_ == info.pixmap_)) &&
+                // TODO: Use GetModifyId to distinguish two PixelMap objects after Media provides it
                src_ == info.src_ &&
                resourceId_ == info.resourceId_ &&
                sourceWidth_ == info.sourceWidth_ &&
@@ -57,7 +57,8 @@ public:
     {
         return (!pixmap_ && info.pixmap_) ||
                (pixmap_ && !info.pixmap_) ||
-               (pixmap_ && info.pixmap_ && pixmap_->GetModifyId() != info.pixmap_->GetModifyId()) ||
+               (pixmap_ && info.pixmap_ && pixmap_ != info.pixmap_) ||
+                // TODO: Use GetModifyId to distinguish two PixelMap objects after Media provides it
                src_ != info.src_ ||
                resourceId_ != info.resourceId_ ||
                sourceWidth_ != info.sourceWidth_ ||
