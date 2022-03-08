@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/components/checkable/rosen_render_switch.h"
 
+#include "render_service_client/core/ui/rs_node.h"
 #include "third_party/skia/include/core/SkRRect.h"
 
 #include "core/components/checkable/checkable_component.h"
@@ -54,7 +55,15 @@ void RosenRenderSwitch::Paint(RenderContext& context, const Offset& offset)
 
     // paint track rect
     if (!isSwitchDuringAnimation_) {
+#ifdef OHOS_PLATFORM
+        auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
+        recordingCanvas->SaveAlpha();
+        recordingCanvas->MultiplyAlpha(ConfigureOpacity(disabled_));
         PaintTrack(canvas, trackPaint, originX, originY, trackColor);
+        recordingCanvas->RestoreAlpha();
+#else
+        PaintTrack(canvas, trackPaint, originX, originY, trackColor);
+#endif
     } else {
         // current status is during the switch on/off
         DrawTrackAnimation(paintOffset, canvas, trackPaint);
