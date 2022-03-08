@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "base/log/dump_log.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/pipeline/base/position_layout_utils.h"
@@ -76,6 +77,7 @@ void RenderFlex::Update(const RefPtr<Component>& component)
         space_ = context->NormalizeToPx(flex->GetSpace());
         inspectorSpace_ = flex->GetSpace();
         useOldLayoutVersion_ = context->GetMinPlatformVersion() <= PLATFORM_VERSION_FIVE;
+        isDeclarative_ = context->GetIsDeclarative();
         if (GreatNotEqual(space_, 0.0)) {
             mainAxisAlign_ = FlexAlign::SPACE_CUSOMIZATION;
         }
@@ -400,11 +402,13 @@ void RenderFlex::PerformLayoutInIndexMode()
             auto child = node.node;
             child->Layout(innerLayout);
             allocatedSize_ += GetMainSize(child);
+            allocatedSize_ += space_;
         }
-        if (allocatedSize_ > maxMainSize) {
+        if ((allocatedSize_ - space_) > maxMainSize) {
             for (const auto& node : nodeList) {
                 auto child = node.node;
                 allocatedSize_ -= GetMainSize(child);
+                allocatedSize_ -= space_;
             }
             break;
         }
@@ -431,7 +435,13 @@ void RenderFlex::PerformLayoutInIndexMode()
     }
     LayoutHiddenNodes();
     LayoutAbsoluteChildren();
-    Size layoutSize = GetConstrainedSize(maxMainSize);
+    allocatedSize_ -= space_;
+    Size layoutSize;
+    if (!isDeclarative_ || mainAxisSize_ == MainAxisSize::MAX) {
+        layoutSize = GetConstrainedSize(maxMainSize);
+    } else {
+        layoutSize = GetConstrainedSize(allocatedSize_);
+    }
     SetLayoutSize(layoutSize);
     mainSize_ = GetMainAxisValue(layoutSize, direction_);
     crossSize_ = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? layoutSize.Height()
@@ -551,9 +561,7 @@ void RenderFlex::PerformLayoutInItemMode()
 void RenderFlex::ResizeItems(const FlexItemProperties& flexItemProps, BaselineProperties& baselineProps)
 {
     double availableMainSize = GetAvailableMainSize();
-    auto context = GetContext().Upgrade();
-    bool isDeclarative = context ? context->GetIsDeclarative() : false;
-    if (flexItemProps.totalGrow > 0 && availableMainSize > allocatedSize_ && !isDeclarative) {
+    if (flexItemProps.totalGrow > 0 && availableMainSize > allocatedSize_ && !isDeclarative_) {
         mainAxisSize_ = MainAxisSize::MAX;
     }
     // remainSpace should be (availableMainSize - allocatedSize_), and do not remain space when MainAxisSize::MIN.
@@ -613,6 +621,7 @@ void RenderFlex::DetermineSelfSize(MainAxisSize mainAxisSize, bool useViewPort)
         // If max size of layoutParam is infinity, use children's allocated size as max size.
         maxMainSize = allocatedSize_;
     }
+    allocatedSize_ -= space_;
     // useViewPort means that it is the root flex, should be as large as viewPort.
     Size layoutSize = (mainAxisSize == MainAxisSize::MIN) ? GetConstrainedSize(allocatedSize_)
                       : useViewPort                       ? GetConstrainedSize(mainViewPort)
