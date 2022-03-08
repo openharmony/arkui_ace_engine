@@ -31,7 +31,6 @@
 namespace OHOS::Ace {
 
 class WebDelegate;
-class WebElement;
 
 enum MixedModeContent {
     MIXED_CONTENT_ALWAYS_ALLOW = 0,
@@ -692,7 +691,6 @@ private:
     bool isFileAccessEnabled_ = true;
     std::string userAgent_;
     WeakPtr<FocusNode> focusElement_;
-    WeakPtr<WebElement> webElement_;
     bool isOnLineImageAccessEnabled_ = false;
     bool isDomStorageAccessEnabled_ = false;
     bool isImageAccessEnabled_ = true;

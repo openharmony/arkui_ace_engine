@@ -964,7 +964,7 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     }
 }
 
-void JSWeb::UserAgent(std::string userAgent)
+void JSWeb::UserAgent(const std::string& userAgent)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
