@@ -317,8 +317,9 @@ std::map<std::string, std::string> JsiDeclarativeEngineInstance::mediaResourceFi
 
 std::unique_ptr<JsonValue> JsiDeclarativeEngineInstance::currentConfigResourceData_;
 
+bool JsiDeclarativeEngineInstance::isModulePreloaded_ = false;
 bool JsiDeclarativeEngineInstance::isModuleInitialized_ = false;
-shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::globalRuntime_ = nullptr;
+shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::globalRuntime_;
 
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
@@ -337,9 +338,6 @@ JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
         runtime_->RegisterUncaughtExceptionHandler(nullptr);
         // reset runtime in utils
         JsiDeclarativeUtils::SetRuntime(nullptr, runtime_);
-        if (globalRuntime_ != runtime_) {
-            runtime_->Reset();
-        }
     }
     runtime_.reset();
     runtime_ = nullptr;
@@ -389,22 +387,24 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     }
 #endif
 
-    LocalScope socpe(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
-    InitGlobalObjectTemplate();
+    LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
+    if (!isModulePreloaded_) {
+        InitGlobalObjectTemplate();
+    }
+
 
     // no need to initialize functions on global when use shared runtime
     if (usingSharedRuntime_ && isModuleInitialized_) {
         LOGI("InitJsEnv SharedRuntime has initialized, skip...");
     } else {
-        InitConsoleModule();
-        InitAceModule();
-        InitPerfUtilModule();
-        InitJsExportsUtilObject();
-        InitJsNativeModuleObject();
-        InitGroupJsBridge();
-        if (usingSharedRuntime_) {
-            globalRuntime_ = runtime_;
+        if (!isModulePreloaded_) {
+            InitConsoleModule();
+            InitAceModule();
+            InitJsExportsUtilObject();
+            InitJsNativeModuleObject();
+            InitPerfUtilModule();
         }
+        InitGroupJsBridge();
     }
 
     if (usingSharedRuntime_) {
@@ -439,6 +439,84 @@ void JsiDeclarativeEngineInstance::InitAceModule()
     }
 }
 
+extern "C" ACE_EXPORT void OHOS_ACE_PreloadAceModule(void* runtime)
+{
+    LOGI("Ace ark lib loaded, PreloadAceModule.");
+    JsiDeclarativeEngineInstance::PreloadAceModule(runtime);
+}
+
+void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
+{
+    if (isModulePreloaded_) {
+        LOGE("PreloadAceModule already preloaded");
+        return;
+    }
+    auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime);
+
+    if (!sharedRuntime) {
+        LOGE("PreloadAceModule null runtime");
+        return;
+    }
+    std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
+    auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
+    EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
+    if (vm == nullptr) {
+        LOGE("PreloadAceModule NativeDeclarativeEngine Initialize, vm is null");
+        return;
+    }
+    if (!arkRuntime->InitializeFromExistVM(vm)) {
+        LOGE("PreloadAceModule Ark Engine initialize runtime failed");
+        return;
+    }
+    LocalScope scope(vm);
+    globalRuntime_ = arkRuntime;
+    // preload js views
+    JsRegisterViews(JSNApi::GetGlobalObject(vm));
+
+    // preload aceConsole
+    shared_ptr<JsValue> global = arkRuntime->GetGlobal();
+    shared_ptr<JsValue> aceConsoleObj = arkRuntime->NewObject();
+    aceConsoleObj->SetProperty(arkRuntime, "log", arkRuntime->NewFunction(JsDebugLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "debug", arkRuntime->NewFunction(JsDebugLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "info", arkRuntime->NewFunction(JsInfoLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "warn", arkRuntime->NewFunction(JsWarnLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsErrorLogPrint));
+    global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
+
+    // preload perfutil
+    shared_ptr<JsValue> perfObj = runtime_->NewObject();
+    perfObj->SetProperty(runtime_, "printlog", runtime_->NewFunction(JsPerfPrint));
+    perfObj->SetProperty(runtime_, "sleep", runtime_->NewFunction(JsPerfSleep));
+    perfObj->SetProperty(runtime_, "begin", runtime_->NewFunction(JsPerfBegin));
+    perfObj->SetProperty(runtime_, "end", runtime_->NewFunction(JsPerfEnd));
+    global->SetProperty(runtime_, "perfutil", perfObj);
+
+    // preload exports and requireNative
+    shared_ptr<JsValue> exportsUtilObj = arkRuntime->NewObject();
+    global->SetProperty(arkRuntime, "exports", exportsUtilObj);
+    global->SetProperty(arkRuntime, "requireNativeModule", arkRuntime->NewFunction(RequireNativeModule));
+
+    // preload js enums
+    bool jsEnumStyleResult = arkRuntime->EvaluateJsCode(
+        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
+    if (!jsEnumStyleResult) {
+        LOGE("EvaluateJsCode jsEnumStyle failed");
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    // preload state management
+    bool evalResult = arkRuntime->EvaluateJsCode(
+        (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
+    if (!evalResult) {
+        LOGE("PreloadAceModule EvaluateJsCode stateMgmt failed");
+    }
+
+    isModulePreloaded_ = evalResult;
+    globalRuntime_ = nullptr;
+    LOGI("PreloadAceModule loaded:%{public}d", isModulePreloaded_);
+}
+
 void JsiDeclarativeEngineInstance::InitConsoleModule()
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngineInstance::InitConsoleModule");
@@ -454,6 +532,11 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
         consoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(AppWarnLogPrint));
         consoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(AppErrorLogPrint));
         global->SetProperty(runtime_, "console", consoleObj);
+    }
+
+    if (isModulePreloaded_) {
+        LOGD("console module has already preloaded");
+        return;
     }
 
     // js framework log method
@@ -718,6 +801,9 @@ RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetStagingPage(int32_t instanceI
 
 shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::GetCurrentRuntime()
 {
+    if (globalRuntime_) {
+        return globalRuntime_;
+    }
     auto engine = EngineHelper::GetCurrentEngine();
     auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
     if (!jsiEngine) {

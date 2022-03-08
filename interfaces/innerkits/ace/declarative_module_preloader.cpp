@@ -20,7 +20,7 @@
 namespace OHOS::Ace {
 
 using CreateFunc = void (*)(void*);
-constexpr char PRE_INIT_ACE_MODULE_FUNC[] = "OHOS_ACE_PreInitAceModule";
+constexpr char PRE_INIT_ACE_MODULE_FUNC[] = "OHOS_ACE_PreloadAceModule";
 
 void InitAceModule(void* runtime)
 {

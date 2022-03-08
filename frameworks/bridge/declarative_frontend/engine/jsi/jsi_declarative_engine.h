@@ -68,6 +68,8 @@ public:
     static void PostJsTask(const shared_ptr<JsRuntime>&, std::function<void()>&& task);
     static void TriggerPageUpdate(const shared_ptr<JsRuntime>&);
     static RefPtr<PipelineContext> GetPipelineContext(const shared_ptr<JsRuntime>& runtime);
+    static void PreloadAceModule(void* runtime);
+
     WeakPtr<JsMessageDispatcher> GetJsMessageDispatcher() const
     {
         return dispatcher_;
