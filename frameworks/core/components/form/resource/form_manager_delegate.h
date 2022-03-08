@@ -28,7 +28,7 @@
 #endif
 
 namespace OHOS::Ace {
-
+class FormCallbackClient;
 class FormManagerDelegate : public FormManagerResource {
     DECLARE_ACE_TYPE(FormManagerDelegate, FormManagerResource);
 
@@ -97,6 +97,7 @@ private:
     int64_t runningCardId_ = -1;
     AAFwk::Want wantCache_;
     bool hasCreated_ = false;
+    std::shared_ptr<FormCallbackClient> formCallbackClient_;
 #endif
 };
 

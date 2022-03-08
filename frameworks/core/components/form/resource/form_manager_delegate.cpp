@@ -23,10 +23,10 @@
 #include "frameworks/base/json/json_util.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
+#include "form_callback_client.h"
 #include "form_host_client.h"
 #include "form_js_info.h"
 #include "form_mgr.h"
-#include "frameworks/core/components/form/resource/form_callback_client.h"
 #endif
 
 namespace OHOS::Ace {
@@ -49,10 +49,10 @@ FormManagerDelegate::~FormManagerDelegate()
 void FormManagerDelegate::ReleasePlatformResource()
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    LOGI("FormManagerDelegate destroy.");
     if (runningCardId_ > 0) {
-        OHOS::AppExecFwk::FormMgr::GetInstance().DeleteForm(
-            runningCardId_, OHOS::AppExecFwk::FormHostClient::GetInstance());
-        runningCardId_ = -1;
+        auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
+        clientInstance->RemoveForm(formCallbackClient_, runningCardId_);
     }
 #else
     Stop();
@@ -98,6 +98,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineContext>& context, const
 #ifdef OHOS_STANDARD_SYSTEM
     // dynamic add new form should release the running form first.
     if (runningCardId_ > 0) {
+        LOGI("Add new form, delete old form:%{public}s.", std::to_string(runningCardId_).c_str());
         AppExecFwk::FormMgr::GetInstance().DeleteForm(runningCardId_, AppExecFwk::FormHostClient::GetInstance());
         runningCardId_ = -1;
     }
@@ -116,17 +117,25 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineContext>& context, const
 
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
-    if (ret == 0) {
-        LOGI("add form success");
-        std::shared_ptr<FormCallbackClient> client = std::make_shared<FormCallbackClient>();
-        client->SetFormManagerDelegate(AceType::WeakClaim(this));
-        clientInstance->AddForm(client, formJsInfo.formId);
-
-        runningCardId_ = formJsInfo.formId;
-    } else {
-        // TODO: add error info here
-        LOGE("add form fail");
+    if (ret != 0) {
+        auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
+        LOGE("Add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
+        if (onFormErrorCallback_) {
+            onFormErrorCallback_(std::to_string(ret), errorMsg);
+        }
+        return;
     }
+    LOGI("Add form success formId:%{public}s", std::to_string(formJsInfo.formId).c_str());
+    if (formCallbackClient_ == nullptr) {
+        formCallbackClient_ = std::make_shared<FormCallbackClient>();
+    }
+    formCallbackClient_->SetFormManagerDelegate(AceType::WeakClaim(this));
+    clientInstance->AddForm(formCallbackClient_, formJsInfo.formId);
+    runningCardId_ = formJsInfo.formId;
+    if (info.id == formJsInfo.formId) {
+        LOGI("Added form already exist, trigger FormUpdate immediately.");
+    }
+    ProcessFormUpdate(formJsInfo);
 #else
     if (state_ == State::CREATED) {
         hash_ = MakeResourceHash();
