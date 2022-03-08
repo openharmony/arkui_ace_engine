@@ -99,7 +99,7 @@ public:
     virtual std::unique_ptr<JsonValue> GetPosition() const = 0;
     virtual std::unique_ptr<JsonValue> GetMarkAnchor() const = 0;
     virtual std::unique_ptr<JsonValue> GetOffset() const = 0;
-    virtual std::string GetRect() const = 0;
+    virtual std::string GetRect() = 0;
     virtual Rect GetParentRect() const = 0;
 
     // layout constraint

@@ -203,10 +203,12 @@ void AceAbility::InitEnv()
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     IdleCallback idleNoticeCallback = [view](int64_t deadline) { view->ProcessIdleEvent(deadline); };
     FlutterDesktopSetIdleCallback(controller_, idleNoticeCallback);
+    OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);
 
     // Should make it possible to update surface changes by using viewWidth and viewHeight.
     view->NotifySurfaceChanged(runArgs_.deviceWidth, runArgs_.deviceHeight);
     view->NotifyDensityChanged(runArgs_.deviceConfig.density);
+
 }
 
 void AceAbility::Start()
@@ -479,7 +481,10 @@ bool AceAbility::OperateComponent(const std::string& attrsJson)
     auto taskExecutor = container->GetTaskExecutor();
     taskExecutor->PostTask(
         [attrsJson] {
-          OHOS::Ace::Framework::InspectorClient::GetInstance().OperateComponent(attrsJson);
+          bool result = OHOS::Ace::Framework::InspectorClient::GetInstance().OperateComponent(attrsJson);
+          if (!result) {
+              OHOS::Ace::Framework::InspectorClient::GetInstance().CallFastPreviewErrorCallback(attrsJson);
+          }
         },
         TaskExecutor::TaskType::UI);
     return true;
