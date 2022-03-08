@@ -66,6 +66,10 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         delegate_->UpdateSupportZoom(web->GetZoomAccessEnabled());
         delegate_->UpdateDomStorageEnabled(web->GetDomStorageAccessEnabled());
         delegate_->UpdateGeolocationEnabled(web->GetGeolocationAccessEnabled());
+        auto userAgent = web->GetUserAgent();
+        if (!userAgent.empty()) {
+            delegate_->UpdateuserAgent(userAgent);
+        }
     }
 
     if (!component) {

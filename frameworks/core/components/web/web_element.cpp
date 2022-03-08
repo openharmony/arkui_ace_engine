@@ -32,12 +32,6 @@ void WebElement::SetNewComponent(const RefPtr<Component>& newComponent)
             WebClient::GetInstance().UpdateWebviewUrl(webComponent->GetSrc());
         }
         webSrc_ = webComponent->GetSrc();
-
-        if (delegate_ && !webUserAgent_.empty() && webUserAgent_ != webComponent->GetUserAgent()) {
-            delegate_->UpdateUserAgent(webComponent->GetUserAgent(), webComponent->GetSrc());
-        }
-        webUserAgent_ = webComponent->GetUserAgent();
-
         Element::SetNewComponent(webComponent);
         webComp_ = std::move(webComponent);
     }
