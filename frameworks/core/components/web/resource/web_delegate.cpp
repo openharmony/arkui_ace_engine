@@ -66,6 +66,38 @@ constexpr char WEB_ERROR_MSG_CREATEFAIL[] = "create web_delegate failed.";
 
 } // namespace
 
+int ConsoleLogOhos::LineNumer()
+{
+    if (message_) {
+        return message_->LineNumer();
+    }
+    return -1;
+}
+
+const std::string& ConsoleLogOhos::Log()
+{
+    if (message_) {
+        return message_->Log();
+    }
+    return "";
+}
+
+int ConsoleLogOhos::LogLevel()
+{
+    if (message_) {
+        return message_->LogLevel();
+    }
+    return -1;
+}
+
+const std::string& ConsoleLogOhos::SourceId()
+{
+    if (message_) {
+        return message_->SourceId();
+    }
+    return "";
+}
+
 void ResultOhos::Confirm()
 {
     if (result_) {
@@ -427,7 +459,7 @@ void WebDelegate::SetWebViewJavaScriptResultCallBack(
                 return;
             }
             auto webJSResultCallBack =
-                std::make_shared<WebJavaScriptResultCallBack>(delegate->context_, Container::CurrentId());
+                std::make_shared<WebJavaScriptResultCallBack>(Container::CurrentId());
             if (webJSResultCallBack) {
                 LOGI("WebDelegate SetWebViewJavaScriptResultCallBack");
                 webJSResultCallBack->SetJavaScriptCallBack(std::move(javaScriptCallBackImpl));
@@ -1239,6 +1271,12 @@ void WebDelegate::OnFocus()
     }
 }
 
+bool WebDelegate::OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message)
+{
+    auto param = std::make_shared<LoadWebConsoleLogEvent>(AceType::MakeRefPtr<ConsoleLogOhos>(message));
+    return webComponent_->OnConsole(param.get());
+}
+
 sptr<OHOS::Rosen::Window> WebDelegate::CreateWindow()
 {
     auto context = context_.Upgrade();
@@ -1455,10 +1493,15 @@ void WebDelegate::OnGeolocationPermissionsShowPrompt(const std::string& origin,
     }
 }
 
+bool WebDelegate::OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType)
+{
+    return webComponent_->OnCommonDialog(info, dialogEventType);
+}
+
 void WebDelegate::OnDownloadStart(const std::string& url, const std::string& userAgent,
     const std::string& contentDisposition, const std::string& mimetype, long contentLength)
 {
-    if (onDownloadStartV2_) {
+if (onDownloadStartV2_) {
         onDownloadStartV2_(std::make_shared<DownloadStartEvent>(url, userAgent, contentDisposition,
             mimetype, contentLength));
     }

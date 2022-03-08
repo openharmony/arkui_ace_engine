@@ -53,6 +53,7 @@ public:
     void SetNWeb(std::shared_ptr<OHOS::NWeb::NWeb> webview) override;
     void OnProxyDied() override;
     void OnRouterPush(const std::string& param) override;
+    bool OnConsoleLog(const OHOS::NWeb::NWebConsoleLog& message) override;
     void OnMessage(const std::string& param) override;
     void OnPageLoadBegin(const std::string& url) override;
     void OnPageLoadEnd(int httpStatusCode, const std::string& url) override;
@@ -61,6 +62,16 @@ public:
     void OnGeolocationHide() override;
     void OnGeolocationShow(const std::string& origin,
         OHOS::NWeb::NWebGeolocationCallbackInterface* callback) override;
+
+    bool OnAlertDialogByJS(const std::string &url,
+                           const std::string &message,
+                           std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
+    bool OnBeforeUnloadByJS(const std::string &url,
+                            const std::string &message,
+                            std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
+    bool OnConfirmDialogByJS(const std::string &url,
+                             const std::string &message,
+                             std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
 
     void OnFocus() override;
     void OnResourceLoadError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
@@ -74,6 +85,11 @@ public:
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
         webDelegate_ = delegate;
+    }
+
+    const RefPtr<WebDelegate> GetWebDelegate() const
+    {
+        return webDelegate_.Upgrade();
     }
 
 private:

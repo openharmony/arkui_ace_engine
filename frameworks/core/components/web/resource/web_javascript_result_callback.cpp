@@ -16,13 +16,13 @@
 #include "core/components/web/resource/web_javascript_result_callback.h"
 
 #include "core/components/web/resource/web_javascript_value.h"
+#include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "base/log/log.h"
 
 namespace OHOS::Ace {
 using namespace OHOS::Ace::Framework;
 using namespace OHOS::NWeb;
-std::condition_variable WebJavaScriptResultCallBack::initCv_;
 
 std::vector<std::shared_ptr<WebJSValue>> GetWebJSValue(const std::vector<std::shared_ptr<NWebValue>>& args)
 {
@@ -102,20 +102,17 @@ std::shared_ptr<NWebValue> WebJavaScriptResultCallBack::GetJavaScriptResult(
     std::shared_ptr<WebJSValue> result;
     auto jsArgs = GetWebJSValue(args);
 
-    auto context = context_.Upgrade();
-    context->GetTaskExecutor()->PostTask([webJSCallBack = this, object_name, method, jsArgs, &result] {
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return std::make_shared<NWebValue>(NWebValue::Type::NONE);
+    }
+
+    task->PostSyncTask([webJSCallBack = this, object_name, method, jsArgs, &result] {
         if (webJSCallBack->javaScriptCallBackImpl_) {
             result = webJSCallBack->javaScriptCallBackImpl_(object_name, method, jsArgs);
         }
-        initCv_.notify_one();
         }, OHOS::Ace::TaskExecutor::TaskType::JS);
-
-    std::unique_lock<std::mutex> lock(initMtx_);
-    constexpr int duration = 5; // wait 5 seconds
-    if (initCv_.wait_for(lock, std::chrono::seconds(duration)) ==
-        std::cv_status::timeout) {
-        return std::make_shared<NWebValue>(NWebValue::Type::NONE);
-    }
 
     return GetWebViewValue(result);
 }

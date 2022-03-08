@@ -18,21 +18,16 @@
 
 #include <string>
 #include <vector>
-#include <memory>
-#include <condition_variable>
 
 #include "nweb_javascript_result_callback.h"
 #include "nweb_value.h"
 #include "core/components/web/resource/web_javascript_value.h"
-#include "core/pipeline/pipeline_context.h"
-#include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
 using namespace OHOS::NWeb;
 class WebJavaScriptResultCallBack : public NWebJavaScriptResultCallBack {
 public:
-    WebJavaScriptResultCallBack(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineContext> context, int32_t instanceId)
-        : context_(context), instanceId_(instanceId) {}
+    WebJavaScriptResultCallBack(int32_t instanceId) : instanceId_(instanceId) {}
     ~WebJavaScriptResultCallBack() = default;
 
     std::shared_ptr<NWebValue> GetJavaScriptResult(std::vector<std::shared_ptr<NWebValue>> args,
@@ -52,9 +47,6 @@ protected:
     JavaScriptCallBackImpl javaScriptCallBackImpl_;
 
 private:
-    OHOS::Ace::WeakPtr<OHOS::Ace::PipelineContext> context_;
-    static std::condition_variable initCv_;
-    std::mutex initMtx_;
     int32_t instanceId_ = -1;
 };
 } // namespace OHOS::Ace

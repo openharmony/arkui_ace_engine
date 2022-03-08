@@ -14,9 +14,39 @@
  */
 
 #include "core/components/web/resource/web_client_impl.h"
+
+#include "core/common/container.h"
 #include "core/components/web/resource/web_delegate.h"
 
 namespace OHOS::Ace {
+
+bool OnJsCommonDialog(
+    const std::string &url,
+    const std::string &message,
+    std::shared_ptr<NWeb::NWebJSDialogResult> result,
+    DialogEventType dialogEventType,
+    const WebClientImpl* webClientImpl)
+{
+    bool jsResult = false;
+    auto param = std::make_shared<WebDialogEvent>(url, message, AceType::MakeRefPtr<ResultOhos>(result));
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return false;
+    }
+    task->PostSyncTask([&webClientImpl, dialogEventType, &param, &jsResult] {
+        if (webClientImpl == nullptr) {
+            return;
+        }
+        auto delegate = webClientImpl->GetWebDelegate();
+        if (delegate) {
+            jsResult = delegate->OnCommonDialog(param.get(), dialogEventType);
+        }
+        },
+        OHOS::Ace::TaskExecutor::TaskType::JS);
+    LOGI("OnJsCommonDialog result:%{public}d", jsResult);
+    return jsResult;
+}
 
 void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::string& userAgent,
     const std::string& contentDisposition, const std::string& mimetype, long contentLength)
@@ -48,6 +78,28 @@ void WebClientImpl::OnFocus()
         return;
     }
     delegate->OnRequestFocus();
+}
+
+bool WebClientImpl::OnConsoleLog(const OHOS::NWeb::NWebConsoleLog& message)
+{
+    ContainerScope scope(instanceId_);
+    bool jsMessage = false;
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        return false;
+    }
+    task->PostSyncTask([webClient = this, &message, &jsMessage] {
+        if (webClient == nullptr) {
+            return;
+        }
+        auto delegate = webClient->webDelegate_.Upgrade();
+        if (delegate) {
+            jsMessage = delegate->OnConsoleLog(std::make_shared<OHOS::NWeb::NWebConsoleLog>(message));
+        }
+        },
+        OHOS::Ace::TaskExecutor::TaskType::JS);
+
+    return jsMessage;
 }
 
 void WebClientImpl::OnPageLoadBegin(const std::string& url)
@@ -155,4 +207,29 @@ void WebClientImpl::OnRouterPush(const std::string& param)
     }
     delegate->OnRouterPush(param);
 }
+
+bool WebClientImpl::OnAlertDialogByJS(
+    const std::string &url, const std::string &message, std::shared_ptr<NWeb::NWebJSDialogResult> result)
+{
+    LOGI("OnAlertDialogByJS");
+    ContainerScope scope(instanceId_);
+    return OnJsCommonDialog(url, message, result, DialogEventType::DIALOG_EVENT_ALERT, this);
+}
+
+bool WebClientImpl::OnBeforeUnloadByJS(
+    const std::string &url, const std::string &message, std::shared_ptr<NWeb::NWebJSDialogResult> result)
+{
+    LOGI("OnBeforeUnloadByJS");
+    ContainerScope scope(instanceId_);
+    return OnJsCommonDialog(url, message, result, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD, this);
+}
+
+bool WebClientImpl::OnConfirmDialogByJS(
+    const std::string &url, const std::string &message, std::shared_ptr<NWeb::NWebJSDialogResult> result)
+{
+    LOGI("OnConfirmDialogByJS");
+    ContainerScope scope(instanceId_);
+    return OnJsCommonDialog(url, message, result, DialogEventType::DIALOG_EVENT_CONFIRM, this);
+}
+
 } // namespace OHOS::Ace

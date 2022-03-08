@@ -35,6 +35,24 @@
 
 namespace OHOS::Ace {
 
+class ConsoleLogOhos : public WebConsoleLog {
+    DECLARE_ACE_TYPE(ConsoleLogOhos, WebConsoleLog)
+
+public:
+    ConsoleLogOhos(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message) : message_(message) {}
+
+    int LineNumer() override;
+
+    const std::string& Log() override;
+
+    int LogLevel() override;
+
+    const std::string& SourceId() override;
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message_;
+};
+
 class ResultOhos : public Result {
     DECLARE_ACE_TYPE(ResultOhos, Result)
 
@@ -139,10 +157,12 @@ public:
     void OnGeolocationPermissionsShowPrompt(const std::string& origin,
         OHOS::NWeb::NWebGeolocationCallbackInterface* callback);
     void OnRequestFocus();
+    bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
+    bool OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message);
     void OnRouterPush(const std::string& param);
 private:
     void InitWebEvent();
