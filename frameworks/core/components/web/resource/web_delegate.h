@@ -130,7 +130,7 @@ public:
         }
     }
     void Resize(const double& width, const double& height);
-    void UpdateUserAgent(const std::string& userAgent, const std::string& url);
+    void UpdateUserAgent(const std::string& userAgent);
     void UpdateJavaScriptEnabled(const bool& isJsEnabled);
     void UpdateAllowFileAccess(const bool& isFileAccessEnabled);
     void UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled);
