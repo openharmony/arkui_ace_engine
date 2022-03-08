@@ -115,7 +115,7 @@ void RenderList::Update(const RefPtr<Component>& component)
 
     const auto& divider = component_->GetItemDivider();
     listSpace_ = component_->GetSpace();
-    cachedCount_ = component_->GetCachedCount();
+    cachedCount_ = static_cast<size_t>(component_->GetCachedCount());
 
     LOGI("cached count: %{public}zu", cachedCount_);
     spaceWidth_ = std::max(NormalizePercentToPx(component_->GetSpace(), vertical_),
@@ -865,7 +865,7 @@ void RenderList::ApplyPreviousStickyListItem(size_t index, bool needLayout, cons
 void RenderList::JumpToIndex(int32_t idx, int32_t source)
 {
     RemoveAllItems();
-    startIndex_ = idx;
+    startIndex_ = static_cast<size_t>(idx);
     currentOffset_ = 0.0;
     MarkNeedLayout(true);
 }
@@ -1221,7 +1221,7 @@ void RenderList::UpdateAccessibilityAttr()
         collectionInfo.columns = 1;
     } else {
         collectionInfo.rows = 1;
-        collectionInfo.columns = count;
+        collectionInfo.columns = static_cast<int32_t>(count);
     }
     accessibilityNode->SetCollectionInfo(collectionInfo);
     accessibilityNode->SetScrollableState(true);

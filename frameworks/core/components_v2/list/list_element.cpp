@@ -103,7 +103,7 @@ bool ListElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect
     bool ret = false;
     while (!ret) {
         int32_t focusIndex = list->RequestNextFocus(vertical, reverse);
-        int32_t size = GetChildrenList().size();
+        int32_t size = static_cast<int32_t>(GetChildrenList().size());
         if (focusIndex < 0 || focusIndex >= size) {
             return false;
         }

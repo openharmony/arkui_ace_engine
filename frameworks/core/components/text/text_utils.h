@@ -34,7 +34,7 @@ enum class CharType {
 
 inline CharType GetCharType(const std::wstring& value, int32_t position)
 {
-    if (position < 0 || position >= value.size()) {
+    if (position < 0 || position >= static_cast<int32_t>(value.size())) {
         return CharType::NONE;
     }
 
@@ -52,7 +52,7 @@ inline TextSelection GetRangeOfSameType(const std::string& str, int32_t position
 {
     TextSelection selection = TextSelection(position, position);
     auto wstring = StringUtils::ToWstring(str);
-    int32_t length = wstring.size();
+    int32_t length = static_cast<int32_t>(wstring.size());
     CharType type = GetCharType(wstring, position);
     if (type != CharType::NUMBER && type != CharType::LETTER) {
         selection.extentOffset = position + 1;

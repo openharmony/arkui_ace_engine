@@ -70,23 +70,23 @@ const uint32_t OH_MAX_TOUCH_POINTS_NUMBER = 10;
 
 struct OH_NativeXComponent_TouchPoint {
     // Point ID of contact between the finger and the screen.
-    int32_t id;
+    int32_t id = 0;
     // Horizontal distance of the touch point relative to the upper left corner of screen.
-    float screenX;
+    float screenX = 0.0;
     // Vertical distance of the touch point relative to the upper left corner of screen.
-    float screenY;
+    float screenY = 0.0;
     // Horizontal distance of the touch point relative to the upper left corner of touched element.
-    float x;
+    float x = 0.0;
     // Vertical distance of the touch point relative to the upper left corner of touched element.
-    float y;
+    float y = 0.0;
     // Touch type of the touch event.
-    OH_NativeXComponent_TouchEventType type;
+    OH_NativeXComponent_TouchEventType type = OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UNKNOWN;
     // Contacted surface size of encircling the user and the touch screen.
-    double size;
+    double size = 0.0;
     // Pressure of finger squeezing the touch screen.
-    float force;
+    float force = 0.0;
     // Timestamp of the touch event.
-    long long timeStamp;
+    long long timeStamp = 0;
     // whether the dot is pressed
     bool isPressed = false;
 };
@@ -94,29 +94,29 @@ struct OH_NativeXComponent_TouchPoint {
 // the active changed point info
 struct OH_NativeXComponent_TouchEvent {
     // Point ID of contact between the finger and the screen.
-    int32_t id;
+    int32_t id = 0;
     // Horizontal distance of the touch point relative to the upper left corner of screen.
-    float screenX;
+    float screenX = 0.0;
     // Vertical distance of the touch point relative to the upper left corner of screen.
-    float screenY;
+    float screenY = 0.0;
     // Horizontal distance of the touch point relative to the upper left corner of the element to touch.
-    float x;
+    float x = 0.0;
     // Vertical distance of the touch point relative to the upper left corner of the element to touch.
-    float y;
+    float y = 0.0;
     // Touch type of the touch event.
-    OH_NativeXComponent_TouchEventType type;
+    OH_NativeXComponent_TouchEventType type = OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UNKNOWN;
     // Contacted surface size of encircling the user and the touch screen.
-    double size;
+    double size = 0.0;
     // Pressure of finger squeezing the touch screen.
-    float force;
+    float force = 0.0;
     // Device Id.
-    int64_t deviceId;
+    int64_t deviceId = 0;
     // Timestamp of the touch event.
-    long long timeStamp;
+    long long timeStamp = 0;
     // all points on the touch screen.
     OH_NativeXComponent_TouchPoint touchPoints[OH_MAX_TOUCH_POINTS_NUMBER];
     // number of touchPointers
-    uint32_t numPoints;
+    uint32_t numPoints = 0;
 };
 
 /**

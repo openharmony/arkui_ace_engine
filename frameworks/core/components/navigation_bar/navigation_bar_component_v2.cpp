@@ -200,7 +200,8 @@ bool NavigationBarBuilder::AddMenu(const RefPtr<ComponentGroup>& container)
     }
     uint32_t showInBarSize = 0;
     bool hasRoom = true;
-    uint32_t mostShowInBarSize = menuCount_ > 0 ? menuCount_ : theme_->GetMostMenuItemCountInBar();
+    uint32_t mostShowInBarSize =
+        menuCount_ > 0 ? static_cast<uint32_t>(menuCount_) : theme_->GetMostMenuItemCountInBar();
     bool needAddPadding = false;
     menu_ = AceType::MakeRefPtr<MenuComponent>("", "navigationMenu");
     auto ctx = context_.Upgrade();

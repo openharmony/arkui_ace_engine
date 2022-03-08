@@ -360,8 +360,8 @@ void RenderSvgBase::PrepareTransformFrameAnimation(const RefPtr<SvgAnimate>& svg
 
     // set indices instead of frames
     std::vector<std::string> indices;
-    int32_t size = svgAnimate->GetValues().size();
-    for (int32_t i = 0; i < size; i++) {
+    uint32_t size = svgAnimate->GetValues().size();
+    for (uint32_t i = 0; i < size; i++) {
         indices.emplace_back(std::to_string(i));
     }
     auto instance = AceType::MakeRefPtr<SvgAnimate>();
@@ -531,8 +531,8 @@ void RenderSvgBase::PrepareWeightAnimate(const RefPtr<SvgAnimate>& svgAnimate, s
         valueVector = svgAnimate->GetValues();
         valueVector.insert(valueVector.begin(), originalValue);
         std::vector<std::string> newValues;
-        int32_t size = svgAnimate->GetValues().size();
-        for (int32_t i = 0; i < size; i++) {
+        uint32_t size = svgAnimate->GetValues().size();
+        for (uint32_t i = 0; i < size; i++) {
             newValues.emplace_back(std::to_string(i));
         }
         svgAnimate->SetValues(newValues);

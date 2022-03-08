@@ -145,7 +145,7 @@ void TabBarElement::OnFocus()
     }
     if (controller_) {
         int32_t index = controller_->GetIndex();
-        int32_t size = focusNodes_.size();
+        int32_t size = static_cast<int32_t>(focusNodes_.size());
         if (size > 0) {
             size--;
         }

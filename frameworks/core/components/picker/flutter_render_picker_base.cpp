@@ -44,7 +44,8 @@ Rect FlutterRenderPickerBase::GetOptionsRect(const Offset& offset, const RefPtr<
     // Get pickerColumn's relative position.
     auto parent = pickerColumn->GetParent().Upgrade();
     uint32_t depth = 0;
-    while ((parent) && (AceType::RawPtr(parent) != this) && (++depth < SEARCH_MAX_DEPTH)) {
+    while ((parent) && (AceType::RawPtr(parent) != this) && (depth < SEARCH_MAX_DEPTH)) {
+        depth++;
         top += parent->GetPosition().GetY();
         left += parent->GetPosition().GetX();
         parent = parent->GetParent().Upgrade();

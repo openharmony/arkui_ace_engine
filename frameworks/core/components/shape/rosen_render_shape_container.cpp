@@ -136,9 +136,9 @@ void RosenRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset&
         skCanvas_->drawBitmap(skOffBitmap_, 0, 0);
         return;
     }
-    int32_t size = mesh_.size();
+    uint32_t size = mesh_.size();
     float verts[size];
-    for (int32_t i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         verts[i] = (float)mesh_[i];
     }
     DrawBitmapMesh(skOffBitmap_, column_, row_, verts, 0, nullptr);

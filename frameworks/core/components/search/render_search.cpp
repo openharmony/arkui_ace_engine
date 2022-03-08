@@ -525,8 +525,8 @@ bool RenderSearch::MouseHoverTest(const Point& parentLocalPoint)
     }
 
     bool hoverInSearch = !searchTextRect_.IsInRegion(parentLocalPoint);
-    if (showCloseIcon_) {
-        hoverInSearch &= !closeIconHotZoneRect_.IsInRegion(parentLocalPoint);
+    if (showCloseIcon_ && hoverInSearch) {
+        hoverInSearch = !closeIconHotZoneRect_.IsInRegion(parentLocalPoint);
     }
     if (hoverInSearch) {
         hoverOrPressRender_ = SearchNodeType::NONE;

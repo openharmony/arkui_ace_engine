@@ -139,7 +139,7 @@ bool ListItemGroupElement::RequestNextFocus(bool vertical, bool reverse, const R
             --nextFocusIndex;
         }
     } else {
-        int32_t maxSize = children_.size();
+        int32_t maxSize = static_cast<int32_t>(children_.size());
         while (nextFocusIndex < maxSize) {
             ret = TraverseFocusNode(nextFocusIndex, false);
             if (ret) {
@@ -155,7 +155,7 @@ bool ListItemGroupElement::RequestNextFocus(bool vertical, bool reverse, const R
 int32_t ListItemGroupElement::GetNextFocusIndex(bool vertical, bool reverse)
 {
     int32_t nextFocusIndex = renderItemGroup_->GetNextFocusIndex(GetItemGroupFocusIndex(), vertical, reverse);
-    int32_t childrenSize = children_.size();
+    int32_t childrenSize = static_cast<int32_t>(children_.size());
     if (nextFocusIndex < 0 || nextFocusIndex >= childrenSize) {
         return -1;
     } else {

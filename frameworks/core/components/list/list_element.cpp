@@ -160,7 +160,7 @@ bool ListElement::BuildListDataFromChild(int32_t index)
         return false;
     }
     // now just for prebuild more items.
-    preBuildCount_ = itemComponents_.size();
+    preBuildCount_ = static_cast<int32_t>(itemComponents_.size());
     if (index >= preBuildCount_ - cachedCount_ && requestItemAsync_) {
         RetrieveListData(0, preBuildCount_ + cachedCount_);
     }
@@ -787,7 +787,7 @@ void ListElement::GetRefreshItems(bool& rebuild, int32_t& tailIndex)
     if (isJsCard_) {
         rebuild = true;
     }
-    maxCount_ = itemComponents_.size();
+    maxCount_ = static_cast<int32_t>(itemComponents_.size());
 }
 
 void ListElement::RebuildElements(int32_t tailIndex)

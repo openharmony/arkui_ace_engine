@@ -62,7 +62,7 @@ public:
     void SetIndex(int32_t index)
     {
         if (controller_) {
-            int32_t size = GetChildren().size();
+            int32_t size = static_cast<int32_t>(GetChildren().size());
             if (index < 0 || index >= size) {
                 index = 0;
             }

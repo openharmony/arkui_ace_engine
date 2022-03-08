@@ -53,7 +53,7 @@ public:
             families.emplace_back("sans-serif");
             theme->textStyle_.SetFontFamilies(families);
             theme->minFontSize_ = themeConstants->GetDimension(THEME_STEPPER_TEXT_FONTSIZE_MIN);
-            auto maxlines = themeConstants->GetInt(THEME_STEPPER_TEXT_MAX_LINES);
+            uint32_t maxlines = static_cast<uint32_t>(themeConstants->GetInt(THEME_STEPPER_TEXT_MAX_LINES));
             theme->textMaxLines_ = maxlines < 0 ? theme->textMaxLines_ : maxlines;
             theme->defaultPaddingStart_ = themeConstants->GetDimension(THEME_STEPPER_DEFAULT_PADDING_START);
             theme->defaultPaddingEnd_ = themeConstants->GetDimension(THEME_STEPPER_DEFAULT_PADDING_END);

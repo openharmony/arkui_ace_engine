@@ -126,7 +126,7 @@ void FlutterRenderSvgPath::GetPath(SkPath& out)
         SkPath path;
         SkPath ending;
         int32_t firstPart = (int)weight_;
-        int32_t pathsSize = paths_.size();
+        int32_t pathsSize = static_cast<int32_t>(paths_.size());
         bool ret = false;
         if (firstPart < 0 || firstPart > (pathsSize - 1)) {
             ret = false;

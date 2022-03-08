@@ -23,16 +23,16 @@ namespace OHOS::Ace {
 
 class LunarCalculator {
 public:
-    static int GetLunarLeapMonth(int lunarYear)
+    static uint32_t GetLunarLeapMonth(uint32_t lunarYear)
     {
         if ((lunarYear - YEAR_START) >= LUNAR_INFO_SIZE) {
             return 0;
         }
-        int leapMonth = LUNAR_INFO[lunarYear - YEAR_START] & 0xf; // use 0xf to get leap month info
+        uint32_t leapMonth = LUNAR_INFO[lunarYear - YEAR_START] & 0xf; // use 0xf to get leap month info
         return leapMonth == 0xf ? 0 : leapMonth;
     }
 
-    static int GetLunarLeapDays(int lunarYear)
+    static uint32_t GetLunarLeapDays(uint32_t lunarYear)
     {
         if ((lunarYear - YEAR_START + 1) >= LUNAR_INFO_SIZE) {
             return 0;
@@ -41,12 +41,12 @@ public:
                                                 : 0; // big month 30 days other 29
     }
 
-    static int GetLunarYearDays(int lunarYear)
+    static uint32_t GetLunarYearDays(uint32_t lunarYear)
     {
         if ((lunarYear - YEAR_START) >= LUNAR_INFO_SIZE) {
             return 0;
         }
-        int totalDays = 348;                          // lunar year has (12 * 29 =) 348 days at least
+        uint32_t totalDays = 348;                          // lunar year has (12 * 29 =) 348 days at least
         for (uint32_t i = 0x8000; i > 0x8; i >>= 1) { // get month info from bit of LUNAR_INFO
             totalDays += ((LUNAR_INFO[lunarYear - YEAR_START] & i) != 0) ? 1 : 0;
         }
@@ -54,7 +54,7 @@ public:
         return totalDays + GetLunarLeapDays(lunarYear);
     }
 
-    static int GetLunarMonthDays(int lunarYear, int lunarMonth)
+    static uint32_t GetLunarMonthDays(uint32_t lunarYear, uint32_t lunarMonth)
     {
         if ((lunarYear - YEAR_START) >= LUNAR_INFO_SIZE) {
             return 0;
@@ -65,7 +65,7 @@ public:
     }
 
 private:
-    static constexpr int YEAR_START = 1897; // start year reference with LUNAR_INFO
+    static constexpr uint32_t YEAR_START = 1897; // start year reference with LUNAR_INFO
     static constexpr int32_t LUNAR_INFO_SIZE = 207;
     static const uint16_t LUNAR_INFO[];
 };

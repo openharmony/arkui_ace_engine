@@ -153,7 +153,7 @@ bool RosenRenderSvgPolygon::GetPath(SkPath* out)
         return GetPathWithoutAnimate(out);
     } else {
         int32_t firstPart = (int)weight_;
-        int32_t pathsSize = pointsVector_.size();
+        int32_t pathsSize = static_cast<int32_t>(pointsVector_.size());
         if (firstPart < 0 || firstPart > (pathsSize - 1)) {
             return false;
         }

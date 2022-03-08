@@ -29,7 +29,7 @@ void RenderToolBar::Update(const RefPtr<Component>& component)
         return;
     }
 
-    toolBarsSize_ = toolBar->GetChildren().size();
+    toolBarsSize_ = static_cast<int32_t>(toolBar->GetChildren().size());
 }
 
 void RenderToolBar::PerformLayout()

@@ -272,7 +272,7 @@ public:
 
     void NotifySelectedChanged() const
     {
-        int32_t listenersSize = allListeners_.size();
+        int32_t listenersSize = static_cast<int32_t>(allListeners_.size());
         if (indexOfContainer_ >= 0 && indexOfContainer_ < listenersSize) {
             auto& listener = allListeners_[indexOfContainer_];
             listener->OnSelectedDay(selectedDay_);
