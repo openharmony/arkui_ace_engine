@@ -154,7 +154,7 @@ protected:
     RefPtr<ClickRecognizer> clickRecognizer_;
     RefPtr<Animator> progressController_;
 
-    ButtonType type_;
+    ButtonType type_ = ButtonType::NORMAL;
     Size buttonSize_;
     Offset offsetDelta_;
     double rrectRadius_ = 0.0;

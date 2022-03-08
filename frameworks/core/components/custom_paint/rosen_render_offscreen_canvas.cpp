@@ -67,7 +67,7 @@ std::string GetMimeType(const std::string& args)
 {
     std::string type = args;
     for (size_t i = 0; i < type.size(); ++i) {
-        type[i] = tolower(type[i]);
+        type[i] = static_cast<uint8_t>(tolower(type[i]));
     }
     return type;
 }
@@ -450,10 +450,10 @@ void RosenRenderOffscreenCanvas::UpdatePaintShader(SkPaint& paint, const Gradien
         SkDoubleToScalar(gradient.GetEndOffset().GetY()));
     SkPoint pts[2] = { beginPoint, endPoint };
     auto gradientColors = gradient.GetColors();
-    int32_t colorsSize = gradientColors.size();
+    uint32_t colorsSize = gradientColors.size();
     SkColor colors[gradientColors.size()];
     float pos[gradientColors.size()];
-    for (auto i = 0; i < colorsSize; ++i) {
+    for (uint32_t i = 0; i < colorsSize; ++i) {
         const auto& gradientColor = gradientColors[i];
         colors[i] = gradientColor.GetColor().GetValue();
         pos[i] = gradientColor.GetDimension().Value();
@@ -1445,7 +1445,7 @@ bool RosenRenderOffscreenCanvas::GetFilterType(std::string& filterType, std::str
 bool RosenRenderOffscreenCanvas::IsPercentStr(std::string& percent)
 {
     if (percent.find("%") != std::string::npos) {
-        int index = percent.find("%");
+        size_t index = percent.find("%");
         percent = percent.substr(0, index);
         return true;
     }
@@ -1654,20 +1654,20 @@ void RosenRenderOffscreenCanvas::SetHueRotateFilter(const std::string& filterPar
     std::string percent = filterParam;
     float degree = 0.0f;
     if (percent.find("deg") != std::string::npos) {
-        int index = percent.find("deg");
+        size_t index = percent.find("deg");
         percent = percent.substr(0, index);
         std::istringstream iss(percent);
         iss >> degree;
     }
     if (percent.find("turn") != std::string::npos) {
-        int index = percent.find("turn");
+        size_t index = percent.find("turn");
         percent = percent.substr(0, index);
         std::istringstream iss(percent);
         iss >> degree;
         degree = degree * 360;
     }
     if (percent.find("rad") != std::string::npos) {
-        int index = percent.find("rad");
+        size_t index = percent.find("rad");
         percent = percent.substr(0, index);
         std::istringstream iss(percent);
         iss >> degree;

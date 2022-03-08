@@ -126,7 +126,7 @@ void ListComponent::InsertChild(int32_t position, const RefPtr<Component>& child
         return;
     }
 
-    uint32_t current = 0;
+    int32_t current = 0;
     auto it = children.begin();
     while (it != children.end()) {
         auto listItemComponent = ListItemComponent::GetListItem(*it);
@@ -134,7 +134,7 @@ void ListComponent::InsertChild(int32_t position, const RefPtr<Component>& child
             --current;
         }
 
-        if (current == pos) {
+        if (current == static_cast<int32_t>(pos)) {
             break;
         }
 

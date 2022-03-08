@@ -173,7 +173,7 @@ void RosenRenderArcTrack::Paint(RenderContext& context, const Offset& offset)
             data.color.ChangeAlpha(UNSELECT_ALPHA);
             currentStart += weights_[index];
             if (ShouldHighLight(totalWeight - currentStart, weights_[index], ratio * totalWeight)) {
-                highLightIndex = index;
+                highLightIndex = static_cast<size_t>(index);
                 highLightStart = totalWeight - currentStart;
             }
             data.startDegree = paintData_.startDegree + (1 - currentStart / totalWeight) * paintData_.sweepDegree;

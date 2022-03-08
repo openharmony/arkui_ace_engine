@@ -296,7 +296,7 @@ void RenderSwitch::OnDrag(const Offset& updatePoint)
     bool moveRight = pointPositionDelta_ > 0.0;
     bool needChangeStatus = ((needReverse_ == oldChecked_) && moveRight && effectiveMove) ||
                             ((needReverse_ != oldChecked_) && !moveRight && effectiveMove);
-    checked_ = needChangeStatus ^ oldChecked_;
+    checked_ = needChangeStatus != oldChecked_;     // reverse [checked_] status if [needChangeStatus] is true
 
     // let A = [needReverse_], B = [oldChecked_], C = [moveRight], D = [excessiveMove],
     // and [A'] represents the reverse of [A].

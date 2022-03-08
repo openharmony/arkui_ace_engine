@@ -594,9 +594,9 @@ void FlutterRenderPercentageDataPanel::PaintLinearProgress(RenderContext& contex
     bool isFull = false;
     auto valueSum = 0.0;
     PaintBackground(context, offset, totalWidth, height);
-    for (int i = 0; i < segment.size(); i++) {
+    for (uint32_t i = 0; i < segment.size(); i++) {
         if (i == 0 && segment[0].GetValue() == 0.0) {
-            for (int j = 0; j < segment.size(); j++) {
+            for (uint32_t j = 0; j < segment.size(); j++) {
                 if (segment[j].GetValue() != 0.0 && i == 0) {
                     i = j;
                 }
@@ -665,7 +665,7 @@ void FlutterRenderPercentageDataPanel::Paint(RenderContext& context, const Offse
         PaintRainbowFilterMask(canvas, factor * animationPercent_, segments, arcData);
     }
     totalValue = totalValue * proportions;
-    for (int i = segments.size() - 1; i >= 0; i--) {
+    for (int i = static_cast<int32_t>(segments.size()) - 1; i >= 0; i--) {
         const auto& segment = segments[i];
         arcData.startColor = segment.GetStartColor();
         arcData.endColor = segment.GetEndColor();

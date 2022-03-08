@@ -90,7 +90,7 @@ void Ace::ImageAnimatorElement::Update()
 
 void ImageAnimatorElement::PerformBuild()
 {
-    int32_t size = images_.size();
+    int32_t size = static_cast<int32_t>(images_.size());
     if (size <= 0) {
         LOGE("image size is less than 0.");
         return;
@@ -117,7 +117,7 @@ void ImageAnimatorElement::PerformBuild()
     animator_->ClearInterpolators();
     animator_->AddInterpolator(pictureAnimation_);
     animator_->RemoveRepeatListener(repeatCallbackId_);
-    repeatCallbackId_ = animator_->AddRepeatListener([weak = WeakClaim(this)]() {
+    repeatCallbackId_ = static_cast<int64_t>(animator_->AddRepeatListener([weak = WeakClaim(this)]() {
         auto imageAnimator = weak.Upgrade();
         if (!imageAnimator) {
             return;
@@ -127,7 +127,7 @@ void ImageAnimatorElement::PerformBuild()
         } else {
             imageAnimator->animator_->SetDuration(imageAnimator->duration_);
         }
-    });
+    }));
     animator_->RemoveStopListener(stopCallbackId_);
     stopCallbackId_ = animator_->AddStopListener([weak = WeakClaim(this)]() {
         auto imageAnimator = weak.Upgrade();
@@ -154,9 +154,9 @@ void ImageAnimatorElement::PerformBuild()
 
 RefPtr<Component> ImageAnimatorElement::BuildChild()
 {
-    int32_t size = images_.size();
-    if (size <= 0) {
-        LOGE("image size is less than 0.");
+    uint32_t size = images_.size();
+    if (size == 0) {
+        LOGE("image size is 0.");
         return nullptr;
     }
     auto boxComponent = AceType::MakeRefPtr<BoxComponent>();
@@ -186,7 +186,7 @@ void ImageAnimatorElement::UpdatePreLoadImages(const RefPtr<BoxComponent>& box)
         LOGE("boxComponent is null.");
         return;
     }
-    int32_t size = images_.size();
+    int32_t size = static_cast<int32_t>(images_.size());
     for (int32_t idx = 0; (idx < preDecode_) && (idx < size); idx++) {
         auto imageComponent = DynamicCast<ImageComponent>(box->GetChild());
         if (!imageComponent) {
@@ -210,7 +210,7 @@ void ImageAnimatorElement::CreatePictureAnimation(int32_t size)
     pictureAnimation_->ClearListeners();
     pictureAnimation_->ClearPictures();
     if (durationTotal_ > 0) {
-        int32_t filterImagesSize = filterImages_.size();
+        int32_t filterImagesSize = static_cast<int32_t>(filterImages_.size());
         for (int32_t index = 0; index < filterImagesSize; ++index) {
             int32_t imageDuration = filterImages_[index].duration;
             pictureAnimation_->AddPicture((float)imageDuration / durationTotal_, index);

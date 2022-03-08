@@ -60,6 +60,8 @@ constexpr double SPRING_STIFF = 700.0;
 constexpr double SPRING_DAMP = 22.0;
 constexpr double SPRING_DAMP_INC = 5.0;
 constexpr double DRAG_CALC_STRETCH_STEP = 0.01;
+constexpr int32_t DRAG_CALC_STRETCH_STEP_INT = 1;   // 100*DRAG_CALC_STRETCH_STEP
+constexpr int32_t DRAG_CALC_STRETCH_STEP_MAX = 100; // 100*DRAG_CALC_STRETCH_STEP_INT
 constexpr double DRAG_OFFSET_START_DP = 4.0;
 constexpr double DRAG_OFFSET_SWITCH_DP = 14.0;
 constexpr double DRAG_STRETCH_LONGEST_DP = 80.0;
@@ -171,12 +173,12 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
 
     // Get item count of swiper
     const auto& children = swiper->GetChildren();
-    itemCount_ = children.size();
+    itemCount_ = static_cast<int32_t>(children.size());
     for (const auto& child : children) {
         auto multiChild = AceType::DynamicCast<MultiChild>(child);
         if (multiChild) {
             --itemCount_;
-            itemCount_ += multiChild->Count();
+            itemCount_ += static_cast<int32_t>(multiChild->Count());
         }
     }
 
@@ -2325,12 +2327,13 @@ void RenderSwiper::CalMaxStretch()
     if (focusStretchMaxTime_ == DRAG_OFFSET_MIN) {
         double stretch = DRAG_OFFSET_MIN;
         double maxStretch = DRAG_OFFSET_MIN;
-        const double step = DRAG_CALC_STRETCH_STEP;
-        for (double i = step; i <= 1.0; i += step) {
-            stretch = INDICATOR_FOCUS_HEAD->Move(i) - INDICATOR_FOCUS_TAIL->Move(i);
+        const int32_t step = DRAG_CALC_STRETCH_STEP_INT;
+        for (int32_t i = step; i <= DRAG_CALC_STRETCH_STEP_MAX; i += step) {
+            double actualStep = i * DRAG_CALC_STRETCH_STEP / static_cast<double>(DRAG_CALC_STRETCH_STEP_INT);
+            stretch = INDICATOR_FOCUS_HEAD->Move(actualStep) - INDICATOR_FOCUS_TAIL->Move(actualStep);
             if (stretch > maxStretch) {
                 maxStretch = stretch;
-                focusStretchMaxTime_ = i;
+                focusStretchMaxTime_ = actualStep;
             }
         }
         LOGD("CalMaxStretch(%{public}lf), time(%{public}lf)", maxStretch, focusStretchMaxTime_);

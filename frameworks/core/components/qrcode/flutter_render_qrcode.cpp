@@ -50,7 +50,7 @@ void FlutterRenderQrcode::DrawQRCode(
     }
     if (qrcode_->GetType() == QrcodeType::CIRCLE) {
         SkRect clipRect = { topLeft.GetX(), topLeft.GetY(), topLeft.GetX() + size, topLeft.GetY() + size };
-        auto clipLayer = SkRRect::MakeRectXY(clipRect, size / 2, size / 2);
+        auto clipLayer = SkRRect::MakeRectXY(clipRect, size / 2.0, size / 2.0);
         canvas->canvas()->clipRRect(clipLayer, SkClipOp::kIntersect, true);
     }
     canvas->canvas()->drawBitmap(ProcessQrcodeData(size, qrCode), topLeft.GetX(), topLeft.GetY());
@@ -82,7 +82,7 @@ SkBitmap FlutterRenderQrcode::ProcessQrcodeData(int32_t width, const qrcodegen::
     }
     skBitmap.allocPixels(imageInfo);
     void* rawData = skBitmap.getPixels();
-    int32_t* data = reinterpret_cast<int32_t*>(rawData);
+    uint32_t* data = reinterpret_cast<uint32_t*>(rawData);
     int32_t blockWidth = width / qrCode.getSize();
     for (int32_t i = 0; i < width; i++) {
         for (int32_t j = 0; j < width; j++) {

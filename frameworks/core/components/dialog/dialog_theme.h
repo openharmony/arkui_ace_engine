@@ -149,7 +149,7 @@ public:
             theme->contentAdjustPadding_ = Edge(defaultPadding, 0.0_vp, defaultPadding, 0.0_vp);
             theme->actionsPadding_ = Edge(defaultPadding, actionsTopPadding, defaultPadding, actionsTopPadding);
             theme->buttonHeight_ = dialogPattern->GetAttr<Dimension>(DIALOG_BUTTON_HEIGHT, 0.0_vp);
-            theme->titleMaxLines_ = dialogPattern->GetAttr<int32_t>(DIALOG_TITLE_MAX_LINES, 2);
+            theme->titleMaxLines_ = static_cast<uint32_t>(dialogPattern->GetAttr<int32_t>(DIALOG_TITLE_MAX_LINES, 2));
             theme->titleTextStyle_.SetFontSize(
                 themeStyle->GetAttr<Dimension>(THEME_ATTR_TEXT_SIZE_HEAD_LINE8, 20.0_vp));
             theme->titleMinFontSize_ = themeStyle->GetAttr<Dimension>(THEME_ATTR_TEXT_SIZE_HEAD_LINE8, 20.0_vp);

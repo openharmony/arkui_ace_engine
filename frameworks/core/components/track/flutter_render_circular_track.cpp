@@ -83,7 +83,9 @@ void FlutterRenderCircularTrack::Paint(RenderContext& context, const Offset& off
     }
     canvas->save();
     // change the start point to the top.
-    canvas.GetSkCanvas()->rotate(-90.0, data.center.GetX(), data.center.GetY());
+    if (canvas.GetSkCanvas()) {
+        canvas.GetSkCanvas()->rotate(-90.0, data.center.GetX(), data.center.GetY());
+    }
     // draw background
     data.color = GetBackgroundColor();
     DrawArc(context, data);

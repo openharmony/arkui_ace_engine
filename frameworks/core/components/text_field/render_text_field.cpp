@@ -972,7 +972,7 @@ void RenderTextField::SetEditingValue(TextEditingValue&& newValue, bool needFire
         } else {
             std::regex rw(inputFilter_);
             if (regex_match(newValue.text.c_str(), rw)) {
-                inputCallBackStrSize_ = newValue.text.length();
+                inputCallBackStrSize_ = static_cast<int32_t>(newValue.text.length());
                 controller_->SetValue(newValue, needFireChangeEvent);
             } else {
                 inputCallBackStr_ = newValue.text.substr(inputCallBackStrSize_);
@@ -1894,7 +1894,7 @@ Offset RenderTextField::GetPositionForExtend(int32_t extend, bool isSingleHandle
         extend = 0;
     }
     if (static_cast<size_t>(extend) > GetEditingValue().GetWideText().length()) {
-        extend = GetEditingValue().GetWideText().length();
+        extend = static_cast<int32_t>(GetEditingValue().GetWideText().length());
     }
     return GetHandleOffset(extend);
 }
