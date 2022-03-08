@@ -17,7 +17,6 @@
 
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
-#include "base/ressched/ressched_report.h"
 #include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
