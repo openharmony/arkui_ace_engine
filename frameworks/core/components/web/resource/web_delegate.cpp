@@ -937,7 +937,6 @@ void WebDelegate::InitWebViewWithWindow()
 
             auto webviewClient = std::make_shared<WebClientImpl>(Container::CurrentId());
             webviewClient->SetWebDelegate(weak);
-            webviewClient->SetPipelineContext(delegate->context_);
             delegate->webview_->SetNWebHandler(webviewClient);
 
             // Set downloadListenerImpl
@@ -995,7 +994,6 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             }
             auto nweb_handler = std::make_shared<WebClientImpl>(Container::CurrentId());
             nweb_handler->SetWebDelegate(weak);
-            nweb_handler->SetPipelineContext(delegate->context_);
             auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>(Container::CurrentId());
             downloadListenerImpl->SetWebDelegate(weak);
             delegate->webview_->SetNWebHandler(nweb_handler);
