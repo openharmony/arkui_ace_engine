@@ -68,11 +68,11 @@ void AceApplicationInfoImpl::ChangeLocale(const std::string& language, const std
         return;
     }
 
-    auto script = localeInfo->getScript();
-    resConfig->SetLocaleInfo(languageLower.c_str(), script, countryOrRegionUpper.c_str());
+    auto script = Localization::ComputeScript(language, countryOrRegion);
+    resConfig->SetLocaleInfo(languageLower.c_str(), script.c_str(), countryOrRegionUpper.c_str());
     resourceManager_->UpdateResConfig(*resConfig);
 
-    SetLocale(languageLower, countryOrRegionUpper, (script == nullptr) ? "" : script, "");
+    SetLocale(languageLower, countryOrRegionUpper, (script.empty()) ? "" : script, "");
 }
 
 void AceApplicationInfoImpl::SetLocale(const std::string& language, const std::string& countryOrRegion,
