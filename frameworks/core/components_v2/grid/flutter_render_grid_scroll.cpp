@@ -26,7 +26,6 @@ RenderLayer FlutterRenderGridScroll::GetRenderLayer()
     if (!layer_) {
         layer_ = AceType::MakeRefPtr<ClipLayer>(
             0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Clip::HARD_EDGE);
-        TakeBoundary();
     }
     return AceType::RawPtr(layer_);
 }

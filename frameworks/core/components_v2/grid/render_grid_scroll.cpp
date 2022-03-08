@@ -68,6 +68,7 @@ void RenderGridScroll::Update(const RefPtr<Component>& component)
     startRankItemIndex_ = 0;
     currentItemIndex_ = 0;
     RenderGridLayout::Update(component);
+    TakeBoundary();
     const RefPtr<GridLayoutComponent> grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (!grid) {
         LOGE("RenderGridLayout update failed.");
