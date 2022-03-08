@@ -28,6 +28,8 @@ ohos_unittest("ManifestWindowTest") {
 
   deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
+  external_deps = [ "ability_base:configuration" ]
+
   if (!is_standard_system) {
     subsystem_name = "ace"
     part_name = "ace_engine_full"
