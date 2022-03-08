@@ -368,7 +368,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             auto abilityContext =
                 OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
             if (abilityContext) {
-                abilityContext->TerminateSelf();
+                abilityContext->CloseAbility();
             }
         }));
     container->SetWindowName(window_->GetWindowName());
