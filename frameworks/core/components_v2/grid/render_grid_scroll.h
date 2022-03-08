@@ -224,7 +224,6 @@ protected:
     std::optional<bool> firstLineToBottom_;
     bool needCalculateViewPort_ = false;
     double startMainPos_ = 0.0;
-    double endMainPos_ = 0.0;
     double currentOffset_ = 0.0;
     double animateDelta_ = 0.0;
     double lastOffset_ = 0.0;
@@ -264,7 +263,7 @@ protected:
     GetChildSpanByIndex getChildSpanByIndex_;
     OnScrolledFunc scrolledEventFun_;
 
-    int32_t lastFirstIdex_ = -1;
+    int32_t lastFirstIndex_ = -1;
     int32_t loadingIndex_ = -1;
     int32_t cacheCount_ = 1;
 };

@@ -14,10 +14,12 @@
  */
 
 #include "core/components/scroll/scrollable.h"
+
 #include <chrono>
 
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "base/ressched/ressched_report.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -242,6 +244,10 @@ void Scrollable::HandleDragUpdate(const DragUpdateInfo& info)
     if (RelatedScrollEventPrepare(Offset(0.0, info.GetMainDelta()))) {
         return;
     }
+#ifdef OHOS_PLATFORM
+    // Increase the cpu frequency when sliding.
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
     if (UpdateScrollPosition(info.GetMainDelta(), SCROLL_FROM_UPDATE)) {
         moved_ = true;
     }
@@ -323,7 +329,7 @@ void Scrollable::FixScrollMotion(double position)
     if (motion_ && needCenterFix_ && watchFixCallback_) {
         double finalPoisition = watchFixCallback_(motion_->GetFinalPosition(), position);
         LOGD("final position before fix(%{public}lf), need to fix to position(%{public}lf)",
-             motion_->GetFinalPosition(), finalPoisition);
+            motion_->GetFinalPosition(), finalPoisition);
         if (!NearEqual(finalPoisition, motion_->GetFinalPosition(), DISTANCE_EPSILON)) {
             double velocity = motion_->GetVelocityByFinalPosition(finalPoisition);
             motion_->Reset(sFriction_, position, velocity);
@@ -482,4 +488,3 @@ const RefPtr<SpringProperty>& Scrollable::GetDefaultOverSpringProperty()
 }
 
 } // namespace OHOS::Ace
-
