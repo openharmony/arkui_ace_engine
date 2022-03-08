@@ -27,6 +27,7 @@
 #include "base/log/log.h"
 #include "base/resource/internal_resource.h"
 #include "base/utils/utils.h"
+#include "core/common/container_scope.h"
 #include "core/components/align/align_component.h"
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
@@ -285,7 +286,7 @@ void VideoElement::RegistMediaPlayerEvent()
         });
     };
 
-    mediaPlayerCallback_ = std::make_shared<MediaPlayerCallback>();
+    mediaPlayerCallback_ = std::make_shared<MediaPlayerCallback>(ContainerScope::CurrentId());
     mediaPlayerCallback_->SetPositionUpdatedEvent(positionUpdatedEvent);
     mediaPlayerCallback_->SetStateChangedEvent(stateChangedEvent);
     mediaPlayerCallback_->SetEndOfStreamEvent(endOfStreamEvent);
@@ -1103,7 +1104,7 @@ void VideoElement::OnPrepared(
         } else {
             param = std::string("\"prepared\",{\"duration\":").append(std::to_string(duration_)).append("}");
         }
-        LOGE("video onPrepared event: %s ", param.c_str());
+        LOGI("video onPrepared event: %s ", param.c_str());
         onPrepared_(param);
     }
 
@@ -1222,7 +1223,7 @@ void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
         } else {
             param = std::string("\"timeupdate\",{\"currenttime\":").append(std::to_string(currentPos)).append("}");
         }
-        LOGE("video onTimeUpdate event: %s ", param.c_str());
+        LOGI("video onTimeUpdate event: %s ", param.c_str());
         onTimeUpdate_(param);
     }
 }
