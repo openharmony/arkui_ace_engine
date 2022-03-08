@@ -37,9 +37,11 @@ public:
 private:
     void ShowDialog(const JSCallbackInfo& info);
     void CloseDialog();
+    void NotifyCloseDialog();
 
     JSView* ownerView_ = nullptr;
     bool isShown_ = false;
+    int32_t closeOperationCount_ = 0;
     DialogProperties dialogProperties_;
     RefPtr<JsFunction> jsBuilderFunction_;
     RefPtr<JsFunction> jsCancelFunction_;

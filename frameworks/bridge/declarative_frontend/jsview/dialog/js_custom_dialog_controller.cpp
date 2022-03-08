@@ -116,6 +116,15 @@ void JSCustomDialogController::DestructorCallback(JSCustomDialogController* cont
     }
 }
 
+void JSCustomDialogController::NotifyCloseDialog()
+{
+    LOGD("JSCustomDialogController(NotifyCloseDialog)");
+    if (closeOperationCount_ > 0) {
+        closeOperationCount_--;
+        CloseDialog();
+    }
+}
+
 void JSCustomDialogController::ShowDialog(const JSCallbackInfo& info)
 {
     LOGI("JSCustomDialogController(ShowDialog)");
@@ -155,10 +164,12 @@ void JSCustomDialogController::ShowDialog(const JSCallbackInfo& info)
         LOGE("JSCustomDialogController(JsOpenDialog) No Executor. Cannot post task.");
         return;
     }
+    dialogComponent_ = nullptr;
     executor->PostTask(
         [context, dialogProperties = dialogProperties_, this]() mutable {
             if (context) {
                 this->dialogComponent_ = context->ShowDialog(dialogProperties, false, "CustomDialog");
+                this->NotifyCloseDialog();
             }
         },
         TaskExecutor::TaskType::UI);
@@ -196,6 +207,11 @@ void JSCustomDialogController::CloseDialog()
     auto executor = context->GetTaskExecutor();
     if (!executor) {
         LOGE("JSCustomDialogController(JsOpenDialog) No Executor. Cannot post task.");
+        return;
+    }
+    if (!dialogComponent_) {
+        LOGE("JSCustomDialogController(JsOpenDialog) dialog component is null.");
+        closeOperationCount_++;
         return;
     }
     executor->PostTask(
