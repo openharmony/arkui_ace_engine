@@ -34,7 +34,7 @@ public:
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
 
-    std::string GetHoursWest() const;
+    std::string GetTimeZoneOffset() const;
     std::string GeFormat() const;
 
     std::string GetTextFontColor() const;
