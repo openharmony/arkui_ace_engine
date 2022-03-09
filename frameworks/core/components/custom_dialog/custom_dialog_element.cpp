@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,8 +84,9 @@ void CustomDialogElement::ShowDialog()
     dialogId_ = baseDialog->GetDialogId();
     stackElement->PushDialog(baseDialog);
     isPopDialog_ = false;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    // use accessibility node already created with dom node in JS app
     baseDialog->SetCustomDialogId(StringUtils::StringToInt(GetId()));
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     auto mananger = context->GetAccessibilityManager();
     if (mananger) {
         auto node = mananger->GetAccessibilityNodeById(StringUtils::StringToInt(GetId()));

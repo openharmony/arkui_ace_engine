@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -540,15 +540,16 @@ RefPtr<Component> DialogComponent::GenerateComposed(
     if (pipelineContext) {
         const auto& accessibilityManager = pipelineContext->GetAccessibilityManager();
         if (accessibilityManager) {
-            const auto& composedId = accessibilityManager->GenerateNextAccessibilityId();
+            // use accessibility node already created with dom node in JS app
+            int32_t composedId = customDialogId_;
+            if (composedId == -1) {
+                composedId = accessibilityManager->GenerateNextAccessibilityId();
+            }
             const auto& composed = AceType::MakeRefPtr<ComposedComponent>(std::to_string(composedId), name, child);
             if (isDialogTweenChild) {
                 accessibilityManager->CreateSpecializedNode(name, composedId, dialogTweenComposedId_);
             } else {
                 dialogTweenComposedId_ = composedId;
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
-                accessibilityManager->CreateSpecializedNode(name, composedId, -1);
-#endif
             }
             return composed;
         }
