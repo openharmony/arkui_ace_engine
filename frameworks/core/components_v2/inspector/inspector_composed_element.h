@@ -90,6 +90,19 @@ public:
         return nullptr;
     }
 
+    RefPtr<Element> GetInspectorComposedElement()
+    {
+        auto child = children_.empty() ? nullptr : children_.front();
+        while (child) {
+            auto inspectorComposedElement = AceType::DynamicCast<InspectorComposedElement>(child);
+            if (inspectorComposedElement) {
+                return child;
+            }
+            child = child->GetChildren().empty() ? nullptr : child->GetChildren().front();
+        }
+        return nullptr;
+    }
+
     RefPtr<Element> GetElementChildBySlot(const RefPtr<Element>& element, int32_t& slot) const;
     RefPtr<Element> GetInspectorComposedElementParent(const RefPtr<Element>& element) const;
 

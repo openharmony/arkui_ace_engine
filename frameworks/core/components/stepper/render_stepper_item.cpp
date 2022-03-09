@@ -27,7 +27,6 @@ void RenderStepperItem::Update(const RefPtr<Component>& component)
         LOGW("stepper item component is null");
         return;
     }
-    index_ = stepperItem->GetIndex();
     label_ = stepperItem->GetLabel();
     auto context = context_.Upgrade();
     if (!context) {
