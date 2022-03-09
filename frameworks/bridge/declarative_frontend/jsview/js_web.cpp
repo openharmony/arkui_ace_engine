@@ -245,6 +245,7 @@ public:
             "getResponseMimeType", &JSWebResourceResponse::GetResponseMimeType);
         JSClass<JSWebResourceResponse>::CustomMethod("getReasonMessage", &JSWebResourceResponse::GetReasonMessage);
         JSClass<JSWebResourceResponse>::CustomMethod("getResponseCode", &JSWebResourceResponse::GetResponseCode);
+        JSClass<JSWebResourceResponse>::CustomMethod("getResponseHeader", &JSWebResourceResponse::GetResponseHeader);
         JSClass<JSWebResourceResponse>::Bind(
             globalObj, &JSWebResourceResponse::Constructor, &JSWebResourceResponse::Destructor);
     }
@@ -289,6 +290,21 @@ public:
         args.SetReturnValue(descriptionRef);
     }
 
+    void GetResponseHeader(const JSCallbackInfo& args)
+    {
+        auto map = response_->GetHeaders();
+        std::map<std::string, std::string>::iterator iterator;
+        uint32_t index = 0;
+        JSRef<JSArray> headers = JSRef<JSArray>::New();
+        for (iterator = map.begin(); iterator != map.end(); ++iterator) {
+            JSRef<JSObject> header = JSRef<JSObject>::New();
+            header->SetProperty("headerKey", iterator->first);
+            header->SetProperty("headerValue", iterator->second);
+            headers->SetValueAt(index++, header);
+        }
+        args.SetReturnValue(headers);
+    }
+
 private:
     static void Constructor(const JSCallbackInfo& args)
     {
@@ -313,6 +329,7 @@ public:
     {
         JSClass<JSWebResourceRequest>::Declare("WebResourceRequest");
         JSClass<JSWebResourceRequest>::CustomMethod("getRequestUrl", &JSWebResourceRequest::GetRequestUrl);
+        JSClass<JSWebResourceRequest>::CustomMethod("getRequestHeader", &JSWebResourceRequest::GetRequestHeader);
         JSClass<JSWebResourceRequest>::CustomMethod("isRequestGesture", &JSWebResourceRequest::IsRequestGesture);
         JSClass<JSWebResourceRequest>::CustomMethod("isMainFrame", &JSWebResourceRequest::IsMainFrame);
         JSClass<JSWebResourceRequest>::CustomMethod("isRedirect", &JSWebResourceRequest::IsRedirect);
@@ -356,6 +373,21 @@ public:
         auto isMainFrame = JSVal(ToJSValue(request_->IsMainFrame()));
         auto descriptionRef = JSRef<JSVal>::Make(isMainFrame);
         args.SetReturnValue(descriptionRef);
+    }
+
+    void GetRequestHeader(const JSCallbackInfo& args)
+    {
+        auto map = request_->GetHeaders();
+        std::map<std::string, std::string>::iterator iterator;
+        uint32_t index = 0;
+        JSRef<JSArray> headers = JSRef<JSArray>::New();
+        for (iterator = map.begin(); iterator != map.end(); ++iterator) {
+            JSRef<JSObject> header = JSRef<JSObject>::New();
+            header->SetProperty("headerKey", iterator->first);
+            header->SetProperty("headerValue", iterator->second);
+            headers->SetValueAt(index++, header);
+        }
+        args.SetReturnValue(headers);
     }
 
 private:
