@@ -18,8 +18,8 @@
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"

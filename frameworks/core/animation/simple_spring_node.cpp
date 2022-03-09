@@ -89,7 +89,7 @@ void SimpleSpringNode::EndToValue(double endValue, double velocity)
             return;
         }
         if (controlNode->IsAnimateToEnd()) {
-            startTime_ = context->GetTimeFromExternalTimer() - FRAME_SCHEDULED;
+            startTime_ = context->GetTimeFromExternalTimer() - static_cast<uint64_t>(FRAME_SCHEDULED);
         } else {
             startTime_ = context->GetTimeFromExternalTimer() - (int64_t)(GetFrameDelta() * FRAME_SCHEDULED);
         }
@@ -121,8 +121,8 @@ void SimpleSpringNode::OnAnimation()
         LOGE("Animate failed, spring is null. index: %{public}d", index_);
         return;
     }
-    int64_t delta = context->GetTimeFromExternalTimer() - startTime_;
-    spring_->OnTimestampChanged(delta / NANOS_TO_MILLS, 0.0f, false);
+    int64_t delta = static_cast<int64_t>(context->GetTimeFromExternalTimer()) - static_cast<int64_t>(startTime_);
+    spring_->OnTimestampChanged(static_cast<double>(delta) / static_cast<double>(NANOS_TO_MILLS), 0.0f, false);
     value_ = spring_->GetCurrentPosition();
     velocity_ = spring_->GetCurrentVelocity();
     if (spring_->IsCompleted()) {

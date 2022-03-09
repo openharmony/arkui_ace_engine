@@ -57,8 +57,8 @@ public:
 
 protected:
     uint64_t elapsedTime_ = 0; // millisecond.
-    double inputCount_;
-    bool isCountDown_;
+    double inputCount_ = 0.0;
+    bool isCountDown_ = false;
     std::string format_;
     std::function<void(uint64_t, uint64_t)> onTimer_;
 

@@ -47,7 +47,7 @@ void LengthLimitingFormatter::Format(const TextEditingValue& oldValue, TextEditi
 {
     auto text = newValue.GetWideText();
     if (text.length() > limit_) {
-        int32_t exceedLen = text.length() - limit_;
+        int32_t exceedLen = static_cast<int32_t>(text.length()) - static_cast<int32_t>(limit_);
         int32_t removeBeforeExtent = std::min(exceedLen, newValue.selection.extentOffset);
         int32_t removeAfterExtent = exceedLen - removeBeforeExtent;
         if (removeBeforeExtent > 0) {
@@ -72,7 +72,7 @@ void LengthLimitingFormatter::Format(const TextEditingValue& oldValue, TextEditi
                 StringUtils::NotInBmp(text[preCharIndex])) {
                 --eraseStart;
             }
-            if (eraseStart >= 0 && (text.length() - eraseStart > 0)) {
+            if (eraseStart >= 0 && (static_cast<int32_t>(text.length()) - eraseStart > 0)) {
                 text.erase(eraseStart);
             }
         }

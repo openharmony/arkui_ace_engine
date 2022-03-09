@@ -137,7 +137,7 @@ void RenderFlex::OnPaintFinish()
         return;
     }
     auto collectionInfo = refPtr->GetCollectionInfo();
-    collectionInfo.rows = GetChildren().size();
+    collectionInfo.rows = static_cast<int32_t>(GetChildren().size());
     collectionInfo.columns = 1;
     refPtr->SetCollectionInfo(collectionInfo);
     Rect itemRect;

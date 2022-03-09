@@ -146,7 +146,7 @@ void RenderIndexer::PerformLayout()
 
 void RenderIndexer::UpdateItems()
 {
-    if (nonItemCount_ + items_.size() == GetChildren().size()) {
+    if (nonItemCount_ + static_cast<int32_t>(items_.size()) == static_cast<int32_t>(GetChildren().size())) {
         LOGI("[indexer] no need update Items");
         return;
     }

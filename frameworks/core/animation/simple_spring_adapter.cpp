@@ -47,7 +47,7 @@ RefPtr<SpringNode> SimpleSpringAdapter::GetNode(int32_t index) const
 
 std::string SimpleSpringAdapter::DumpNodes()
 {
-    int32_t nodeSize = nodes_.size();
+    int32_t nodeSize = static_cast<int32_t>(nodes_.size());
     int32_t zeroCount = 0;
     std::string dumpInfo;
     for (int32_t index = 0; index < nodeSize; index++) {

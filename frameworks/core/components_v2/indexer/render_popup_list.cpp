@@ -225,7 +225,7 @@ void RenderPopupList::CalTouchPoint(const Point& globalPoint, int32_t& selected)
         std::unique_ptr<Rect> rect = std::make_unique<Rect>(renderItem->GetGlobalOffset(),
                                         renderItem->GetLayoutSize());
         if (rect->IsInRegion(globalPoint)) {
-            selected = index + startIndex_;
+            selected = index + static_cast<int32_t>(startIndex_);
             renderItem->UpdateBoxSelected();
         } else {
             renderItem->UpdateBoxNormal();

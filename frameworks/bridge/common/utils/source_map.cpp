@@ -41,7 +41,7 @@ MappingInfo RevSourceMap::Find(int32_t row, int32_t col)
     col--;
     // binary search
     int32_t left = 0;
-    int32_t right = afterPos_.size() - 1;
+    int32_t right = static_cast<int32_t>(afterPos_.size()) - 1;
     int32_t res = 0;
     if (row > afterPos_[afterPos_.size() - 1].afterRow) {
         return MappingInfo { row + 1, col + 1, files_[0] };

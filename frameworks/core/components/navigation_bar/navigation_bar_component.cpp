@@ -143,7 +143,7 @@ void TitleBarMenuBuilder::MoveMenuItemsToBar(const RefPtr<ComponentGroup>& conta
 
     bool needAddPadding = false;
     for (const auto& menuItem : allMenuItems_) {
-        hasRoom &= ((showInBarSize < mostShowInBarSize - 1) ||
+        hasRoom = hasRoom && ((showInBarSize < mostShowInBarSize - 1) ||
                     (showInBarSize == mostShowInBarSize - 1 && allMenuItems_.size() == mostShowInBarSize) ||
                     (showInBarSize < mostShowInBarSize && SystemProperties::GetDeviceType() == DeviceType::TV));
         if (menuItem->GetShowInNavigationBar() == ShowInNavigationBar::SHOW && hasRoom) {

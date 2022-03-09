@@ -114,11 +114,11 @@ void RosenRenderFocusAnimation::PaintGlow(SkCanvas* skCanvas, SkPaint& paint, in
     uint8_t blue = pathColor_.GetBlue() & 0xFF;
     uint8_t mAlpha = 0;
     if (progress_ > RIGHT_ANGLE) {
-        mAlpha = static_cast<int32_t>(
+        mAlpha = static_cast<uint8_t>(
             MAX_TRANSPARENCY - (progress_ - RIGHT_ANGLE) * ((MAX_TRANSPARENCY - MIN_TRANSPARENCY) / RIGHT_ANGLE));
     } else {
         mAlpha =
-            static_cast<int32_t>(MIN_TRANSPARENCY + progress_ * ((MAX_TRANSPARENCY - MIN_TRANSPARENCY) / RIGHT_ANGLE));
+            static_cast<uint8_t>(MIN_TRANSPARENCY + progress_ * ((MAX_TRANSPARENCY - MIN_TRANSPARENCY) / RIGHT_ANGLE));
     }
     SkColor boundaryColor = SkColorSetARGB(mAlpha, red, green, blue);
     SkColor glowColor = SkColorSetARGB(MAX_ALPHA, red, green, blue);

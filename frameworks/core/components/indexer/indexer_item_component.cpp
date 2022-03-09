@@ -134,7 +134,7 @@ uint32_t IndexerItemComponent::AddIndexKey(const std::string& indexKey)
     }
 
     keyCount_++;
-    itemIndex += sectionIndex_;
+    itemIndex += static_cast<uint32_t>(sectionIndex_);
     if (circleMode_) {
         itemIndex--;
     }
@@ -178,7 +178,7 @@ uint32_t IndexerItemComponent::AddIndexKeyForSharp(const std::string& indexKey)
     }
 
     keyCount_++;
-    itemIndex += sectionIndex_;
+    itemIndex += static_cast<uint32_t>(sectionIndex_);
     if (circleMode_) {
         itemIndex--;
     }

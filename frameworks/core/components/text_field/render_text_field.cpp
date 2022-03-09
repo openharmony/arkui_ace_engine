@@ -974,7 +974,7 @@ void RenderTextField::SetEditingValue(TextEditingValue&& newValue, bool needFire
         } else {
             std::regex rw(inputFilter_);
             if (regex_match(newValue.text.c_str(), rw)) {
-                inputCallBackStrSize_ = newValue.text.length();
+                inputCallBackStrSize_ = static_cast<int32_t>(newValue.text.length());
                 controller_->SetValue(newValue, needFireChangeEvent);
             } else {
                 inputCallBackStr_ = newValue.text.substr(inputCallBackStrSize_);
@@ -1768,13 +1768,13 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
                 event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
                 HandleOnCopyAll(nullptr);
             } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
+                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
                 HandleOnCopy();
             } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
+                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
                 HandleOnPaste();
             } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_X }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_X })) {
+                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_X })) {
                 HandleOnCut();
             } else {
                 appendElement = event.ConvertCodeToString();
@@ -1896,7 +1896,7 @@ Offset RenderTextField::GetPositionForExtend(int32_t extend, bool isSingleHandle
         extend = 0;
     }
     if (static_cast<size_t>(extend) > GetEditingValue().GetWideText().length()) {
-        extend = GetEditingValue().GetWideText().length();
+        extend = static_cast<int32_t>(GetEditingValue().GetWideText().length());
     }
     return GetHandleOffset(extend);
 }

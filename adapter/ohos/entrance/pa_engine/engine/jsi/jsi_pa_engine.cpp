@@ -104,10 +104,10 @@ std::string ParseLogContent(const std::vector<std::string>& params)
         return ret;
     }
     std::string formatStr = params[0];
-    int32_t size = params.size();
-    int32_t len = formatStr.size();
-    int32_t pos = 0;
-    int32_t count = 1;
+    uint32_t size = params.size();
+    uint32_t len = formatStr.size();
+    uint32_t pos = 0;
+    uint32_t count = 1;
     for (; pos < len; ++pos) {
         if (count >= size) {
             break;

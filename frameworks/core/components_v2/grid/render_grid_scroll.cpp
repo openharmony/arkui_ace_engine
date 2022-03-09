@@ -1043,7 +1043,7 @@ void RenderGridScroll::CalculateWholeSize(double drawLength)
         if (currentItemCount != 0) {
             mainScrollExtent_ = 0.0;
             // calculate the whole size
-            mainScrollExtent_ = totalCount_ / currentItemCount * drawLength;
+            mainScrollExtent_ = static_cast<double>(totalCount_) / static_cast<double>(currentItemCount) * drawLength;
             estimateHeight_ = mainScrollExtent_;
             totalCountFlag_ = false;
         }

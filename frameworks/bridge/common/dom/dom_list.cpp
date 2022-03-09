@@ -212,7 +212,7 @@ void DOMList::ParseIndexer(const std::string& indexerAlphabet)
     }
 
     StringUtils::StringSpliter(indexerAlphabet, INDEXER_ALPHABET_DIV, indexerAlphabet_);
-    int32_t alphabetCount = indexerAlphabet_.size();
+    int32_t alphabetCount = static_cast<int32_t>(indexerAlphabet_.size());
     indexer_ = alphabetCount > 0;
     LOGI("IndexerFlag:%{public}d, AlphabetCount:%{public}d.", indexer_, alphabetCount);
 }

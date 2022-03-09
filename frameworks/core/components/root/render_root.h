@@ -86,7 +86,7 @@ protected:
     bool isBgColorInit_ = false;
     bool isReset_ = false;
     RefPtr<Animator> controller_;
-    bool isContextMenu_;
+    bool isContextMenu_ = false;
 };
 
 } // namespace OHOS::Ace

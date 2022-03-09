@@ -209,7 +209,7 @@ private:
     void Accept(size_t touchId);
     void Reject(size_t touchId);
 
-    template <typename TFunc, typename... Ts>
+    template<typename TFunc, typename... Ts>
     void AsyncCallback(TFunc&& func, Ts&&... args)
     {
         auto ctx = context_.Upgrade();
@@ -218,10 +218,10 @@ private:
             return;
         }
 
-        auto marker = EventMarker([this, f = std::forward<TFunc>(func),
-                args = std::make_tuple(std::forward<Ts>(args)...)]() mutable {
-                    std::apply(f, std::move(args));
-                });
+        auto marker = EventMarker(
+            [this, f = std::forward<TFunc>(func), args = std::make_tuple(std::forward<Ts>(args)...)]() mutable {
+                std::apply(f, std::move(args));
+            });
 
         ctx->FireAsyncEvent(std::move(marker));
     }

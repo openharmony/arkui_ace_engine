@@ -63,9 +63,9 @@ CalendarDataAdapter::CalendarDataAdapter(
     : dataAdapterAction_(dataAdapterAction), pipelineContext_(pipelineContext)
 {
     Date currentDate = Date::Current();
-    today_.day = currentDate.day;
-    today_.month.year = currentDate.year;
-    today_.month.month = currentDate.month - 1;
+    today_.day = static_cast<int32_t>(currentDate.day);
+    today_.month.year = static_cast<int32_t>(currentDate.year);
+    today_.month.month = static_cast<int32_t>(currentDate.month - 1);
 }
 
 bool CalendarDataAdapter::ParseData(int32_t indexOfContainer, const std::string& source, CalendarDaysOfMonth& result)
@@ -533,7 +533,7 @@ void CalendarDataAdapter::ParseCalendarData(std::queue<ObtainedMonth>&& months)
 
 void CalendarDataAdapter::NotifyDataChanged(const CalendarDaysOfMonth& data, int32_t indexOfContainer)
 {
-    int32_t listenersSize = allListeners_.size();
+    int32_t listenersSize = static_cast<int32_t>(allListeners_.size());
     if (indexOfContainer >= 0 && indexOfContainer < listenersSize) {
         auto& listener = allListeners_[indexOfContainer];
         listener->OnDataChanged(data);

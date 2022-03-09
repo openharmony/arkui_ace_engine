@@ -245,7 +245,7 @@ Size RenderWrap::GetLeftSize(double crossLength, double mainLeftLength, double c
 
 void RenderWrap::LayoutWholeWrap()
 {
-    int32_t contentNum = contentList_.size();
+    int32_t contentNum = static_cast<int32_t>(contentList_.size());
     if (contentNum == 0) {
         LOGW("no content in wrap");
         return;
@@ -273,20 +273,21 @@ void RenderWrap::LayoutWholeWrap()
         }
         case WrapAlignment::SPACE_BETWEEN: {
             startPosition = Offset(0.0, 0.0);
-            double crossSpace = contentNum > 1 ? (crossLengthLimit_ - totalCrossLength_) / (contentNum - 1) : 0.0;
+            double crossSpace =
+                contentNum > 1 ? (crossLengthLimit_ - totalCrossLength_) / static_cast<double>(contentNum - 1) : 0.0;
             betweenPosition = isHorizontal ? Offset(0.0, crossSpace) : Offset(crossSpace, 0.0);
             break;
         }
         case WrapAlignment::SPACE_EVENLY: {
             double leftSpace = crossLengthLimit_ - totalCrossLength_;
-            double crossSpace = leftSpace / (contentNum + 1);
+            double crossSpace = leftSpace / static_cast<double>(contentNum + 1);
             startPosition = isHorizontal ? Offset(0.0, crossSpace) : Offset(crossSpace, 0.0);
             betweenPosition = isHorizontal ? Offset(0.0, crossSpace) : Offset(crossSpace, 0.0);
             break;
         }
         case WrapAlignment::SPACE_AROUND: {
             double leftSpace = crossLengthLimit_ - totalCrossLength_;
-            double crossSpace = leftSpace / contentNum;
+            double crossSpace = leftSpace / static_cast<double>(contentNum);
             startPosition = isHorizontal ? Offset(0.0, crossSpace / 2) : Offset(crossSpace / 2, 0.0);
             betweenPosition = isHorizontal ? Offset(0.0, crossSpace) : Offset(crossSpace, 0.0);
             break;
