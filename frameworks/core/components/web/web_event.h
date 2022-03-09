@@ -24,10 +24,10 @@ public:
    WebConsoleLog() = default;
     ~WebConsoleLog() = default;
 
-    virtual int LineNumer() = 0;
-    virtual const std::string& Log() = 0;
-    virtual int LogLevel() = 0;
-    virtual const std::string& SourceId() = 0;
+    virtual int GetLineNumber() = 0;
+    virtual const std::string& GetLog() = 0;
+    virtual int GetLogLevel() = 0;
+    virtual const std::string& GetSourceId() = 0;
 };
 
 class ACE_EXPORT WebError : public AceType {
