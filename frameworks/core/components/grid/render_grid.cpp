@@ -331,7 +331,7 @@ Offset RenderGrid::GetChildOffset(const RefPtr<RenderNode>& child) const
 void RenderGrid::JumpTo(int32_t index)
 {
     LOGD("Jump to index: %{public}d.", index);
-    int32_t size = GetChildren().size();
+    int32_t size = static_cast<int32_t>(GetChildren().size());
     if (index < 0 || index >= size) {
         LOGW("Invalid index: %{public}d.", index);
         return;
@@ -349,7 +349,7 @@ void RenderGrid::JumpTo(int32_t index)
 void RenderGrid::AnimateTo(int32_t index, float duration, const RefPtr<Curve>& curve)
 {
     LOGD("Animate to index: %{public}d.", index);
-    int32_t size = GetChildren().size();
+    int32_t size = static_cast<int32_t>(GetChildren().size());
     if (index < 0 || index >= size) {
         LOGW("Invalid index: %{public}d.", index);
         return;
@@ -497,7 +497,7 @@ void RenderGrid::MoveChildToViewPort(int32_t index)
 
 RefPtr<RenderNode> RenderGrid::GetChildByIndex(int32_t index) const
 {
-    int32_t size = GetChildren().size();
+    int32_t size = static_cast<int32_t>(GetChildren().size());
     if (index < 0 || index >= size) {
         return nullptr;
     }
@@ -646,7 +646,7 @@ void RenderGrid::BuildPositionRelations(int32_t gridPos, int32_t columnSpan, int
     gridPositions_[gridPos] = index;
     indexPositions_[index] = gridPos;
     RelationMap relation;
-    int32_t size = GetChildren().size();
+    int32_t size = static_cast<int32_t>(GetChildren().size());
     relation[KeyDirection::UP] = -1;
     relation[KeyDirection::DOWN] = -1;
     relation[KeyDirection::LEFT] = gridPos % columnCount_ > 0 ? index - 1 : -1;

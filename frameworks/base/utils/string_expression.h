@@ -16,11 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_STRING_EXPRESSION_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_STRING_EXPRESSION_H
 
-#include <string>
-#include <vector>
+#include <functional>
 #include <map>
 #include <regex>
-#include <functional>
+#include <string>
+#include <vector>
 
 namespace OHOS::Ace::StringExpression {
 void InitMapping(std::map<std::string, int> &mapping)
@@ -44,7 +44,7 @@ std::vector<std::string> ConvertDal2Rpn(std::string formula)
     std::string ops = "+-*/()";
     formula = regex_replace(formula, calc, "");
     formula = regex_replace(formula, space, "");
-    for (int i = 0; i < formula.size(); ++ i) {
+    for (std::size_t i = 0; i < formula.size(); ++i) {
         if (ops.find(formula[i]) == ops.npos) {
             curNum += formula[i];
         } else {
@@ -89,13 +89,13 @@ std::vector<std::string> ConvertDal2Rpn(std::string formula)
     return result;
 }
 
-double CalculateExp(std::string expression, const std::function<double (const Dimension&)> calcFunc)
+double CalculateExp(std::string expression, const std::function<double(const Dimension&)> calcFunc)
 {
     std::vector<std::string> rpnexp = ConvertDal2Rpn(expression);
     std::vector<double> result;
     double num = 0.0;
     std::string ops = "+-*/()";
-    for (int i = 0; i < rpnexp.size(); ++ i) {
+    for (std::size_t i = 0; i < rpnexp.size(); ++i) {
         if (ops.find(rpnexp[i]) == ops.npos) {
             std::string value = rpnexp[i];
             Dimension dim = StringUtils::StringToDimensionWithUnit(value);

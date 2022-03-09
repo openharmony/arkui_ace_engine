@@ -105,8 +105,8 @@ void SubwindowOhos::InitContainer()
         Platform::FlutterAceView::CreateView(childContainerId_, true, container->GetSettings().usePlatformAsUIThread);
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window_);
 
-    int32_t width = window_->GetRect().width_;
-    int32_t height = window_->GetRect().height_;
+    int32_t width = static_cast<int32_t>(window_->GetRect().width_);
+    int32_t height = static_cast<int32_t>(window_->GetRect().height_);
     LOGI("UIContent Initialize: width: %{public}d, height: %{public}d", width, height);
 
     Ace::Platform::UIEnvCallback callback = nullptr;

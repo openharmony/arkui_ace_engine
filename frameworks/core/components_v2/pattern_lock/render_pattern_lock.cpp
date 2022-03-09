@@ -242,7 +242,7 @@ bool RenderPatternLock::CheckChoosePoint(int16_t x, int16_t y) const
 }
 bool RenderPatternLock::CheckChoosePointIsLastIndex(int16_t x, int16_t y, int16_t index) const
 {
-    if (!choosePoint_.empty() && choosePoint_.size() >= index) {
+    if (!choosePoint_.empty() && static_cast<int16_t>(choosePoint_.size()) >= index) {
         if (choosePoint_.at(choosePoint_.size() - index).GetColumn() == x &&
             choosePoint_.at(choosePoint_.size() - index).GetRow() == y) {
             return true;
@@ -289,7 +289,7 @@ void RenderPatternLock::AddPassPoint(Offset offset, int16_t x, int16_t y)
     if (passPointLength == 0) {
         return;
     }
-    passPointCount_ = passPointLength;
+    passPointCount_ = static_cast<int16_t>(passPointLength);
     if (nowCode > lastCode) {
         choosePoint_.push_back(passPointVec.front());
         if (passPointLength > 1) {

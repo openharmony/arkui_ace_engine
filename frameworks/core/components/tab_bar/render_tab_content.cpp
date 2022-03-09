@@ -36,7 +36,7 @@ void RenderTabContent::Update(const RefPtr<Component>& component)
         return;
     }
     auto tabController = tabContent->GetController();
-    int32_t count = tabContent->GetChildren().size();
+    int32_t count = static_cast<int32_t>(tabContent->GetChildren().size());
     int32_t tabIndex = tabController ? tabController->GetIndex() : 0;
     if (count != contentCount_ && tabIndex >= count && tabController) {
         tabController->ValidateIndex(count - 1);

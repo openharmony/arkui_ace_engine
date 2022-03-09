@@ -117,7 +117,7 @@ std::string Inspector::GetInspectorTree(const RefPtr<PipelineContext>& context)
 
     size_t height = 0;
     std::unordered_map<int32_t, std::vector<std::pair<RefPtr<Element>, std::string>>> elementJSONInfoMap;
-    for (int depth = depthElementMap.size(); depth > 0; depth--) {
+    for (int depth = static_cast<int32_t>(depthElementMap.size()); depth > 0; depth--) {
         const auto& depthElements = depthElementMap[depth];
         for (const auto& element : depthElements) {
             auto inspectorElement = AceType::DynamicCast<V2::InspectorComposedElement>(element);

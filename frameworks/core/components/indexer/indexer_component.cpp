@@ -232,8 +232,8 @@ void IndexerComponent::BuildCollapseItem()
 
 void IndexerComponent::BuildIndexerItems()
 {
-    int32_t length = labelLocal_.size();
-    if (length <= 0) {
+    uint32_t length = labelLocal_.size();
+    if (length == 0) {
         LOGE("[indexer] invalid section string");
         return;
     }
@@ -256,7 +256,7 @@ void IndexerComponent::BuildIndexerItems()
     }
     // add indexer items except '#'
     isFirstItem_ = true;
-    for (int32_t i = 0; i < length; ++i) {
+    for (uint32_t i = 0; i < length; ++i) {
         std::u16string strItem = labelLocal_[i];
         if (!userDefineList_ && strItem == INDEXER_STR_SHARP) {
             continue;
@@ -267,8 +267,8 @@ void IndexerComponent::BuildIndexerItems()
     if (circleMode_ && multiLanguageEnabled_) {
         isFirstItem_ = true;
         // add default alphabet indexer
-        int32_t count = defaultAlphaLocal_.size();
-        for (int32_t i = 0; i < count; ++i) {
+        uint32_t count = defaultAlphaLocal_.size();
+        for (uint32_t i = 0; i < count; ++i) {
             std::u16string strItem = defaultAlphaLocal_[i];
             BuildTextItem(strItem, strItem, 1);
         }
@@ -335,7 +335,7 @@ int32_t IndexerComponent::AddItemIndexKey(const std::string& indexKey, const std
                 AddSectionHead(item, headStyle);
             }
             // add index key
-            itemIndex = item->AddIndexKey(indexKey);
+            itemIndex = static_cast<int32_t>(item->AddIndexKey(indexKey));
             break;
         }
     }
@@ -372,7 +372,7 @@ int32_t IndexerComponent::AddItemToSharp(const std::string& indexKey, const std:
         AddSectionHead(itemPtr, headStyle);
     }
     // add index key
-    int32_t itemIndex = itemPtr->AddIndexKey(indexKey);
+    int32_t itemIndex = static_cast<int32_t>(itemPtr->AddIndexKey(indexKey));
     // update section head index
     UpdateSectionIndex();
 
@@ -581,7 +581,7 @@ void IndexerComponent::UpdateSectionIndex()
         }
         item->SetSectionIndex(sectionIndex);
         if (item->GetKeyCount() != 0) {
-            sectionIndex = sectionIndex + item->GetKeyCount() + 1;
+            sectionIndex = sectionIndex + static_cast<int32_t>(item->GetKeyCount()) + 1;
             if (GetCircleMode()) {
                 --sectionIndex;
             }

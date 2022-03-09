@@ -210,11 +210,11 @@ std::string IndexerComposedElement::GetArrayValue() const
     auto render = AceType::DynamicCast<RenderIndexer>(node);
     auto jsonValueArray = JsonUtil::CreateArray(true);
     auto value = render->GetArrayValue();
-    int32_t length = value.size();
+    uint32_t length = value.size();
     if (length <= 0) {
         return "";
     }
-    for (int32_t i = 0; i < length; i++) {
+    for (uint32_t i = 0; i < length; i++) {
         auto index = std::to_string(i);
         jsonValueArray->Put(index.c_str(), value[i].c_str());
     }

@@ -344,7 +344,7 @@ void RenderPickerBase::LayoutColumns()
 
     double totalWidth = columnParent_->GetLayoutSize().Width();
     double totalHeight = columnParent_->GetLayoutSize().Height();
-    uint32_t ratioCount = std::accumulate(columns_.begin(), columns_.end(), 0,
+    int32_t ratioCount = std::accumulate(columns_.begin(), columns_.end(), 0,
         [](uint32_t sum, const RefPtr<RenderPickerColumn>& column) { return sum += column->GetWidthRatio(); });
 
     bool divideEvenly = SystemProperties::GetDeviceType() != DeviceType::PHONE || ratioCount == 0;

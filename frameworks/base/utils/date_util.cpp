@@ -28,10 +28,10 @@ Date Date::Current()
     if (local == nullptr) {
         return date;
     }
-    date.year = local->tm_year + 1900; // local date start from 1900
-    date.month = local->tm_mon + 1;    // local month start from 0 to 11, need add one.
-    date.day = local->tm_mday;
-    date.week = local->tm_wday;
+    date.year = static_cast<uint32_t>(local->tm_year) + 1900; // local date start from 1900
+    date.month = static_cast<uint32_t>(local->tm_mon) + 1;    // local month start from 0 to 11, need add one.
+    date.day = static_cast<uint32_t>(local->tm_mday);
+    date.week = static_cast<uint32_t>(local->tm_wday);
     return date;
 }
 

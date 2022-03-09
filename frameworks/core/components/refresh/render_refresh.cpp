@@ -541,11 +541,11 @@ std::string RenderRefresh::GetFormatDateTime()
 
     // This is for i18n date time
     DateTime dateTime;
-    dateTime.year = local->tm_year + BASE_YEAR;
-    dateTime.month = local->tm_mon;
-    dateTime.day = local->tm_mday;
-    dateTime.hour = local->tm_hour;
-    dateTime.minute = local->tm_min;
+    dateTime.year = static_cast<uint32_t>(local->tm_year + BASE_YEAR);
+    dateTime.month = static_cast<uint32_t>(local->tm_mon);
+    dateTime.day = static_cast<uint32_t>(local->tm_mday);
+    dateTime.hour = static_cast<uint32_t>(local->tm_hour);
+    dateTime.minute = static_cast<uint32_t>(local->tm_min);
     std::string time = Localization::GetInstance()->FormatDateTime(dateTime, LAST_UPDATE_FORMAT);
     LOGD("Last update refresh time is %{public}s", time.c_str());
     return time;

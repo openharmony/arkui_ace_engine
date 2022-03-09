@@ -73,7 +73,7 @@ std::string GetMimeType(const std::string& args)
     } else {
         // Convert to lowercase string.
         for (size_t i = 0; i < values[1].size(); ++i) {
-            values[1][i] = tolower(values[1][i]);
+            values[1][i] = static_cast<uint8_t>(tolower(values[1][i]));
         }
         return values[1];
     }
@@ -405,9 +405,9 @@ void FlutterRenderCustomPaint::DrawBitmapMesh(const RefPtr<OffscreenCanvas>& off
         skBitmap.allocPixels(imageInfo);
         skBitmap.setPixels(data);
 
-        int32_t size = mesh.size();
+        uint32_t size = mesh.size();
         float verts[size];
-        for (int32_t i = 0; i < size; i++) {
+        for (uint32_t i = 0; i < size; i++) {
             verts[i] = mesh[i];
         }
 
@@ -1174,10 +1174,10 @@ void FlutterRenderCustomPaint::UpdatePaintShader(const Offset& offset, SkPaint& 
         SkDoubleToScalar(gradient.GetEndOffset().GetY() + offset.GetY()));
     SkPoint pts[2] = { beginPoint, endPoint };
     auto gradientColors = gradient.GetColors();
-    int32_t colorsSize = gradientColors.size();
+    uint32_t colorsSize = gradientColors.size();
     SkColor colors[gradientColors.size()];
     float pos[gradientColors.size()];
-    for (auto i = 0; i < colorsSize; ++i) {
+    for (uint32_t i = 0; i < colorsSize; ++i) {
         const auto& gradientColor = gradientColors[i];
         colors[i] = gradientColor.GetColor().GetValue();
         pos[i] = gradientColor.GetDimension().Value();

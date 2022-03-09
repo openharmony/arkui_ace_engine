@@ -55,7 +55,7 @@ void RenderStepper::Update(const RefPtr<Component>& component)
     }
     childrenArray_.clear();
     needReverse_ = (stepperComponent_->GetTextDirection() == TextDirection::RTL);
-    totalItemCount_ = stepperComponent_->GetChildren().size();
+    totalItemCount_ = static_cast<int32_t>(stepperComponent_->GetChildren().size());
 
     // currentIndex_ should be updated only for the first time
     if (currentIndex_ == -1) {
@@ -452,7 +452,7 @@ void RenderStepper::PerformLayout()
         innerLayout.SetMaxSize(Size(maxSize.Width(), maxSize.Height() - controlPanelHeight_));
         double maxWidth = minSize.Width();
         double maxHeight = minSize.Height();
-        int32_t childrenSize = childrenArray_.size();
+        int32_t childrenSize = static_cast<int32_t>(childrenArray_.size());
         for (int32_t i = 0; i < childrenSize; i++) {
             const auto& childItem = childrenArray_[i];
             childItem->Layout(innerLayout);
@@ -636,7 +636,7 @@ void RenderStepper::FireBackEvent(int32_t currentIndex, int32_t& pendingIndex)
 
 void RenderStepper::FireItemEvent(int32_t index, bool isAppear) const
 {
-    int32_t childrenCount = childrenArray_.size();
+    int32_t childrenCount = static_cast<int32_t>(childrenArray_.size());
     if (index < 0 || index >= childrenCount) {
         LOGW("index is error, index = %{public}d", index);
         return;
@@ -758,7 +758,7 @@ void RenderStepper::InitChildrenArr()
 
 void RenderStepper::UpdateItemPosition(double offset, int32_t index)
 {
-    int32_t childrenCount = childrenArray_.size();
+    int32_t childrenCount = static_cast<int32_t>(childrenArray_.size());
     if (index < 0 || index >= childrenCount) {
         LOGE("index is error, index = %{public}d", index);
         return;

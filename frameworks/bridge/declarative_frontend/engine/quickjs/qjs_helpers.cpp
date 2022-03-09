@@ -34,7 +34,7 @@ std::string ParseLogContent(JSContext* ctx, int32_t argc, JSValueConst* argv)
         return formatStr;
     }
     std::string ret;
-    int32_t len = formatStr.size();
+    int32_t len = static_cast<int32_t>(formatStr.size());
     int32_t pos = 0;
     int32_t count = 1;
     for (; pos < len; ++pos) {

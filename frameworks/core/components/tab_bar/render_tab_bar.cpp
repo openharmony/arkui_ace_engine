@@ -41,7 +41,7 @@ void RenderTabBar::Update(const RefPtr<Component>& component)
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
-    tabsSize_ = tabBar->GetChildren().size();
+    tabsSize_ = static_cast<int32_t>(tabBar->GetChildren().size());
     auto tabController = tabBar->GetController();
     if (tabController) {
         auto index = tabController->GetIndex();
@@ -85,12 +85,12 @@ void RenderTabBar::PerformLayout()
         if (children.size() <= 1) {
             return;
         }
-        tabsSize_ = children.size() - 1;
+        tabsSize_ = static_cast<int32_t>(children.size()) - 1;
     } else {
         if (children.empty()) {
             return;
         }
-        tabsSize_ = children.size();
+        tabsSize_ = static_cast<int32_t>(children.size());
     }
 
     index_ = std::clamp(index_, 0, std::max(0, tabsSize_ - 1));
@@ -707,7 +707,7 @@ void RenderTabBar::InitScrollableOffset(TabBarMode mode)
 
 RefPtr<RenderNode> RenderTabBar::GetChildByIndex(int32_t index) const
 {
-    int32_t size = GetChildren().size();
+    int32_t size = static_cast<int32_t>(GetChildren().size());
     if (index < 0 || index >= size) {
         return nullptr;
     }

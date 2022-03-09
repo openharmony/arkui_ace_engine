@@ -616,8 +616,11 @@ void FlutterRenderCalendar::PaintUnderscore(ScopedCanvas& canvas, const Offset& 
     paint.setColor(color);
     paint.setStyle(SkPaint::Style::kStroke_Style);
     paint.setStrokeWidth(NormalizeToPx(underscoreWidth));
-    skCanvas->drawLine(offset.GetX(), offset.GetY() + NormalizeToPx(underscoreWidth) / 2,
-        offset.GetX() + NormalizeToPx(underscoreLength), offset.GetY() + NormalizeToPx(underscoreWidth) / 2, paint);
+    if (skCanvas) {
+        skCanvas->drawLine(offset.GetX(), offset.GetY() + NormalizeToPx(underscoreWidth) / 2.0,
+            offset.GetX() + NormalizeToPx(underscoreLength), offset.GetY() + NormalizeToPx(underscoreWidth) / 2.0,
+            paint);
+    }
 }
 
 void FlutterRenderCalendar::PaintScheduleMarker(ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day)
@@ -636,7 +639,9 @@ void FlutterRenderCalendar::PaintScheduleMarker(ScopedCanvas& canvas, const Offs
     }
     paint.setAntiAlias(true);
     paint.setColor(color);
-    skCanvas->drawCircle(offset.GetX(), offset.GetY(), NormalizeToPx(scheduleMarkerRadius), paint);
+    if (skCanvas) {
+        skCanvas->drawCircle(offset.GetX(), offset.GetY(), NormalizeToPx(scheduleMarkerRadius), paint);
+    }
 }
 
 void FlutterRenderCalendar::InitWorkStateStyle(

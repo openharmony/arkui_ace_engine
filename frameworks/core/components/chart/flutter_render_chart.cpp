@@ -259,7 +259,7 @@ void FlutterRenderChart::PaintDatas(RenderContext& context, const Rect& paintRec
         paint.paint()->setAntiAlias(true);
         paint.paint()->setStyle(SkPaint::Style::kStrokeAndFill_Style);
 
-        const int32_t barGroupNumber = mainCharts_.size();
+        const int32_t barGroupNumber = static_cast<int32_t>(mainCharts_.size());
         auto barsAreaNumber = horizontal_.tickNumber;
         for (int32_t barGroupIndex = 0; barGroupIndex < barGroupNumber; ++barGroupIndex) {
             auto barGroup = mainCharts_[barGroupIndex];
@@ -273,7 +273,7 @@ void FlutterRenderChart::UpdateLineGradientPoint(
     const std::vector<LineInfo>& pointInfo, const MainChart& line, const Rect& paintRect)
 {
     if (line.GetHeadPointIndex() > 0 && line.GetErasePointNumber() > 0) {
-        startGradientIndex_ = line.GetHeadPointIndex() + line.GetErasePointNumber() - 1;
+        startGradientIndex_ = static_cast<size_t>(line.GetHeadPointIndex() + line.GetErasePointNumber() - 1);
         endGradientIndex_ = startGradientIndex_ + 1;
         if (static_cast<size_t>(startGradientIndex_) >= pointInfo.size()) {
             startGradientIndex_ = pointInfo.size() - 1;
@@ -516,7 +516,7 @@ void FlutterRenderChart::AddCubicPath(fml::RefPtr<flutter::CanvasPath>& path, co
     // and control point B = [(Xi+1 - (Xi+2 - Xi) / 4), (Yi+1 - (Yi+2 - Yi) / 4)]
     if (index > 0 && index < line.size()) {
         Offset prev = ConvertDataToPosition(
-            paintRect, line[(index - 2 < startIndex_ || index < 2) ? startIndex_ : index - 2].GetPointInfo());
+            paintRect, line[(index < 2 || index - 2 < startIndex_) ? startIndex_ : index - 2].GetPointInfo());
         Offset cur = ConvertDataToPosition(paintRect, line[index - 1].GetPointInfo());
         Offset next = ConvertDataToPosition(paintRect, line[index].GetPointInfo());
         Offset nextNext = ConvertDataToPosition(paintRect,
@@ -608,7 +608,7 @@ void FlutterRenderChart::PaintBar(const ScopedCanvas& canvas, flutter::Paint& pa
         LOGE("data paint region width:%{public}lf height:%{public}lf", paintRect.Width(), paintRect.Height());
         return;
     }
-    const int32_t barSize = barGroupData.size();
+    const int32_t barSize = static_cast<int32_t>(barGroupData.size());
     for (int32_t barIndex = 0; barIndex < barSize; ++barIndex) {
         const auto point = barGroupData[barIndex].GetPointInfo();
         // If the actual number of data exceeds Tick, the extra part will not be laid out

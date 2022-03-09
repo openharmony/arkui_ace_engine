@@ -22,8 +22,8 @@
 #include "core/components/box/mask.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/image/image_provider.h"
-#include "core/pipeline/layers/container_layer.h"
 #include "core/pipeline/layers/clip_layer.h"
+#include "core/pipeline/layers/container_layer.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {

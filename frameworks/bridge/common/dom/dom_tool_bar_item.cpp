@@ -194,7 +194,7 @@ void DOMToolBarItem::PrepareSpecializedComponent()
         return;
     }
     auto column = AceType::MakeRefPtr<ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, children);
-    if (icon_.empty() ^ value_.empty()) {
+    if (static_cast<uint32_t>(icon_.empty()) ^ static_cast<uint32_t>(value_.empty())) {
         column->SetMainAxisAlign(FlexAlign::CENTER);
     }
     toolBarItemChild_->SetChild(column);

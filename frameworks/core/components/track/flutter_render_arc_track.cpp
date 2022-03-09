@@ -170,12 +170,12 @@ void FlutterRenderArcTrack::Paint(RenderContext& context, const Offset& offset)
         double highLightStart = 0.0;
         size_t highLightIndex = 0;
         double ratio = leftToRight_ ? GetTotalRatio() : 1 - GetTotalRatio();
-        for (int32_t index = colors_.size() - 1; index >= 0; --index) {
+        for (int32_t index = static_cast<int32_t>(colors_.size()) - 1; index >= 0; --index) {
             data.color = colors_[index];
             data.color.ChangeAlpha(UNSELECT_ALPHA);
             currentStart += weights_[index];
             if (ShouldHighLight(totalWeight - currentStart, weights_[index], ratio * totalWeight)) {
-                highLightIndex = index;
+                highLightIndex = static_cast<size_t>(index);
                 highLightStart = totalWeight - currentStart;
             }
             data.startDegree = paintData_.startDegree + (1 - currentStart / totalWeight) * paintData_.sweepDegree;

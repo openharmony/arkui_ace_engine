@@ -365,7 +365,7 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
             (1.0 * dstWidth * dstHeight) / (rawImage->width() * rawImage->height()) < RESIZE_MAX_PROPORTION;
         if (needCacheResizedImageFile && !srcKey.empty()) {
             BackgroundTaskExecutor::GetInstance().PostTask(
-                [ srcKey, scaledImage ] () {
+                [srcKey, scaledImage]() {
                     LOGI("write png cache file: %{private}s", srcKey.c_str());
                     auto data = scaledImage->encodeToData(SkEncodedImageFormat::kPNG, 100);
                     if (!data) {
@@ -373,7 +373,8 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
                         return;
                     }
                     ImageCache::WriteCacheFile(srcKey, data->data(), data->size());
-                }, BgTaskPriority::LOW);
+                },
+                BgTaskPriority::LOW);
         }
         return scaledImage;
     }

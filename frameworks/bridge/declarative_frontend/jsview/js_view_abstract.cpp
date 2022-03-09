@@ -1148,7 +1148,7 @@ void JSViewAbstract::JsLayoutPriority(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         priority = info[0]->ToNumber<int32_t>();
     } else {
-        priority = StringUtils::StringToUint(info[0]->ToString());
+        priority = static_cast<int32_t>(StringUtils::StringToUint(info[0]->ToString()));
     }
 
     auto flex = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
@@ -1166,7 +1166,7 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         value = info[0]->ToNumber<int32_t>();
     } else {
-        value = StringUtils::StringToUint(info[0]->ToString());
+        value = static_cast<int32_t>(StringUtils::StringToUint(info[0]->ToString()));
     }
 
     auto flex = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
@@ -2245,11 +2245,11 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
     }
 
     JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
-    if (type->ToNumber<uint32_t>() == static_cast<int>(ResourceType::STRING)) {
+    if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
         auto originStr = themeConstants->GetString(resId->ToNumber<uint32_t>());
         ReplaceHolder(originStr, params, 0);
         result = originStr;
-    } else if (type->ToNumber<uint32_t>() == static_cast<int>(ResourceType::PLURAL)) {
+    } else if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::PLURAL)) {
         auto countJsVal = params->GetValueAt(0);
         int count = 0;
         if (!countJsVal->IsNumber()) {
@@ -2345,7 +2345,7 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
         return false;
     }
 
-    if (type->ToNumber<uint32_t>() == static_cast<int>(ResourceType::BOOLEAN)) {
+    if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::BOOLEAN)) {
         result = themeConstants->GetBoolean(resId->ToNumber<uint32_t>());
         return true;
     } else {
@@ -2385,7 +2385,7 @@ bool JSViewAbstract::ParseJsInteger(const JSRef<JSVal>& jsValue, uint32_t& resul
         return false;
     }
 
-    if (type->ToNumber<uint32_t>() == static_cast<int>(ResourceType::INTEGER)) {
+    if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
         result = themeConstants->GetInt(resId->ToNumber<uint32_t>());
         return true;
     } else {
@@ -2439,7 +2439,7 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
         return false;
     }
 
-    if (type->ToNumber<uint32_t>() == static_cast<int>(ResourceType::INTARRAY)) {
+    if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTARRAY)) {
         result = themeConstants->GetIntArray(resId->ToNumber<uint32_t>());
         return true;
     } else {
@@ -2493,7 +2493,7 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
         return false;
     }
 
-    if (type->ToNumber<uint32_t>() == static_cast<int>(ResourceType::STRARRAY)) {
+    if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRARRAY)) {
         result = themeConstants->GetStringArray(resId->ToNumber<uint32_t>());
         return true;
     } else {
@@ -2622,7 +2622,7 @@ static bool ParseSpanAndOffset(const JSRef<JSVal>& val, uint32_t& span, int32_t&
 
     // {lg: {span: 1, offset: 2}}
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(val);
-    span = obj->GetProperty("span")->ToNumber<int32_t>();
+    span = obj->GetProperty("span")->ToNumber<uint32_t>();
     offset = obj->GetProperty("offset")->ToNumber<int32_t>();
     return true;
 }

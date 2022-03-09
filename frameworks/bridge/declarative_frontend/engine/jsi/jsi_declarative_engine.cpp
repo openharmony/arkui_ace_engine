@@ -34,8 +34,8 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_module_manager.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_timer_module.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_syscap_module.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_timer_module.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_api_perf.h"
@@ -64,8 +64,8 @@ std::string ParseLogContent(const std::vector<std::string>& params)
         return ret;
     }
     std::string formatStr = params[0];
-    int32_t size = params.size();
-    int32_t len = formatStr.size();
+    int32_t size = static_cast<int32_t>(params.size());
+    int32_t len = static_cast<int32_t>(formatStr.size());
     int32_t pos = 0;
     int32_t count = 1;
     for (; pos < len; ++pos) {

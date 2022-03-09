@@ -56,7 +56,7 @@ void RenderCalendar::Update(const RefPtr<Component>& component)
     indexOfContainer_ = calendarMonth->GetIndexOfContainer();
     calendarController_ = calendarMonth->GetCalendarController();
     dataAdapter_ = calendarController_->GetDataAdapter();
-    colCount_ = weekNumbers_.size();
+    colCount_ = static_cast<int32_t>(weekNumbers_.size());
     dataAdapter_->RegisterDataListener(AceType::Claim(this));
     type_ = calendarMonth->GetCalendarType();
     if (type_ != CalendarType::SIMPLE) {
@@ -93,9 +93,9 @@ void RenderCalendar::UpdateAccessibility()
     }
     auto today = calendarController_->GetDataAdapter()->GetToday();
     DateTime dateTime;
-    dateTime.year = today.month.year;
-    dateTime.month = today.month.month;
-    dateTime.day = today.day;
+    dateTime.year = static_cast<uint32_t>(today.month.year);
+    dateTime.month = static_cast<uint32_t>(today.month.month);
+    dateTime.day = static_cast<uint32_t>(today.day);
     auto dateText = Localization::GetInstance()->FormatDateTime(dateTime, "yyyyMMdd");
     node->SetText(dateText);
 }
@@ -169,7 +169,7 @@ void RenderCalendar::OnDataChanged(const CalendarDaysOfMonth& daysOfMonth)
         OnStatusChanged(RenderStatus::FOCUS);
     }
     // the number of rows will be 5 or 6, and week number height is half of the date number
-    rowCount_ = colCount_ ? daysOfMonth.days.size() / colCount_ : 0;
+    rowCount_ = colCount_ ? daysOfMonth.days.size() / static_cast<double>(colCount_) : 0;
     calendarController_->JumpMonth();
     hasRequestFocus_ = false;
     cardCalendar_ ? MarkNeedLayout() : MarkNeedRender();
@@ -216,7 +216,7 @@ void RenderCalendar::OnSelectedDay(int32_t selected)
 
 void RenderCalendar::OnStatusChanged(RenderStatus renderStatus)
 {
-    int32_t calendarDaysSize = calendarDays_.size();
+    int32_t calendarDaysSize = static_cast<int32_t>(calendarDays_.size());
     if (renderStatus == RenderStatus::FOCUS) {
         int32_t focusedIndex = selectedDayNumber_ + firstDayIndex_ - 1;
         if (selectedDayNumber_ < 0) {
@@ -269,7 +269,7 @@ void RenderCalendar::OnDateSelected(const CalendarDay& date)
 
 void RenderCalendar::FocusChanged(int32_t oldIndex, int32_t newIndex)
 {
-    int32_t calendarDaysSize = calendarDays_.size();
+    int32_t calendarDaysSize = static_cast<int32_t>(calendarDays_.size());
     if (oldIndex < 0 || oldIndex >= calendarDaysSize) {
         LOGW("lost focus index is out of calendar days array");
         return;

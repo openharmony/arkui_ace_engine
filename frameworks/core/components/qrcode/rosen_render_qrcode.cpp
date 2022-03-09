@@ -82,7 +82,7 @@ SkBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const qrcodegen::Qr
     }
     skBitmap.allocPixels(imageInfo);
     void* rawData = skBitmap.getPixels();
-    int32_t* data = reinterpret_cast<int32_t*>(rawData);
+    uint32_t* data = reinterpret_cast<uint32_t*>(rawData);
     int32_t blockWidth = width / qrCode.getSize();
     for (int32_t i = 0; i < width; i++) {
         for (int32_t j = 0; j < width; j++) {

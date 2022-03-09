@@ -123,13 +123,13 @@ DateTime RenderTextClock::GetDateTime() const
     }
     // This is for i18n date time
     DateTime dateTime;
-    dateTime.year = local->tm_year + BASE_YEAR;
-    dateTime.month = local->tm_mon;
-    dateTime.day = local->tm_mday;
+    dateTime.year = static_cast<uint32_t>(local->tm_year + BASE_YEAR);
+    dateTime.month = static_cast<uint32_t>(local->tm_mon);
+    dateTime.day = static_cast<uint32_t>(local->tm_mday);
     TimeOfNow timeOfNow = GetTimeOfNow(hoursWest_);
     dateTime.hour = timeOfNow.hour24_;
     dateTime.minute = timeOfNow.minute_;
-    dateTime.second = timeOfNow.second_;
+    dateTime.second = static_cast<uint32_t>(timeOfNow.second_);
     return dateTime;
 }
 

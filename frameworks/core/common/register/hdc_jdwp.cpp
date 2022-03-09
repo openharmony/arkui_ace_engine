@@ -70,7 +70,7 @@ RetErrCode HdcJdwpSimulator::SendToStream(uv_stream_t *handleStream, const uint8
         return RetErrCode::ERR_BUF_ALLOC;
     }
 
-    uv_write_t *reqWrite = new uv_write_t();
+    uv_write_t *reqWrite = new (std::nothrow) uv_write_t();
     if (reqWrite == nullptr) {
         LOGE("HdcJdwpSimulator::SendToStream alloc reqWrite fail.");
         delete[] pDynBuf;
