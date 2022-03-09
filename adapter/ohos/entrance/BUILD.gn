@@ -84,6 +84,7 @@ template("ace_ohos_standard_source_set") {
 
     external_deps = [
       "ability_base:base",
+      "ability_base:configuration",
       "ability_base:want",
       "ability_runtime:ability_context_native",
       "ability_runtime:ability_manager",
