@@ -733,6 +733,8 @@ void RenderSwiper::HandleClick(const ClickInfo& clickInfo)
     if (clickEvent_) {
         clickEvent_(std::make_shared<ClickInfo>(clickInfo));
     }
+    std::string accessibilityEventType = "click";
+    SendAccessibilityEvent(accessibilityEventType);
     // for indicator
     if (!indicator_ || swiperIndicatorData_.isDigital) {
         return;

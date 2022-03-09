@@ -2156,4 +2156,19 @@ Rect RenderNode::ComputeSelectedZone(const Offset& startOffset, const Offset& en
     }
 }
 
+void RenderNode::SendAccessibilityEvent(const std::string& eventType)
+{
+    auto accessibilityNode = GetAccessibilityNode().Upgrade();
+    if (!accessibilityNode) {
+        return;
+    }
+    auto context = context_.Upgrade();
+    if (context) {
+        AccessibilityEvent event;
+        event.nodeId = accessibilityNode->GetNodeId();
+        event.eventType = eventType;
+        context->SendEventToAccessibility(event);
+    }
+}
+
 } // namespace OHOS::Ace

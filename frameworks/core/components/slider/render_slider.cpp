@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -371,6 +371,8 @@ void RenderSlider::HandleClick(const Offset& clickPosition)
         totalRatio_ = 0.0;
         return;
     }
+    std::string accessibilityEventType = "click";
+    SendAccessibilityEvent(accessibilityEventType);
     if (NeedSmoothMoving()) {
         UpdateBlockPosition(clickPosition, true);
     } else {
@@ -637,6 +639,8 @@ bool RenderSlider::HandleFocusEvent(const KeyEvent& keyEvent)
     if (updateEvent) {
         FireMoveEndEvent();
         FireMovingEvent(SliderEvent::FOCUS);
+        std::string accessibilityEventType = "focus";
+        SendAccessibilityEvent(accessibilityEventType);
     }
     return updateEvent;
 }

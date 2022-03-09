@@ -221,21 +221,6 @@ void RenderBox::SetAccessibilityFocusImpl()
     });
 }
 
-void RenderBox::SendAccessibilityEvent(const std::string& eventType)
-{
-    auto accessibilityNode = GetAccessibilityNode().Upgrade();
-    if (!accessibilityNode) {
-        return;
-    }
-    auto context = context_.Upgrade();
-    if (context) {
-        AccessibilityEvent event;
-        event.nodeId = accessibilityNode->GetNodeId();
-        event.eventType = eventType;
-        context->SendEventToAccessibility(event);
-    }
-}
-
 void RenderBox::CreateDragDropRecognizer()
 {
     if (dragDropGesture_) {
