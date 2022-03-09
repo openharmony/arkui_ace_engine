@@ -79,10 +79,10 @@ public:
     static void JSBind(BindingTarget globalObj)
     {
         JSClass<JSWebConsoleLog>::Declare("ConsoleMessage");
-        JSClass<JSWebConsoleLog>::CustomMethod("getLineNumber", &JSWebConsoleLog::LineNumer);
-        JSClass<JSWebConsoleLog>::CustomMethod("getMessage", &JSWebConsoleLog::Log);
-        JSClass<JSWebConsoleLog>::CustomMethod("getMessageLevel", &JSWebConsoleLog::LogLevel);
-        JSClass<JSWebConsoleLog>::CustomMethod("getSourceId", &JSWebConsoleLog::SourceId);
+        JSClass<JSWebConsoleLog>::CustomMethod("getLineNumber", &JSWebConsoleLog::GetLineNumber);
+        JSClass<JSWebConsoleLog>::CustomMethod("getMessage", &JSWebConsoleLog::GetLog);
+        JSClass<JSWebConsoleLog>::CustomMethod("getMessageLevel", &JSWebConsoleLog::GetLogLevel);
+        JSClass<JSWebConsoleLog>::CustomMethod("getSourceId", &JSWebConsoleLog::GetSourceId);
         JSClass<JSWebConsoleLog>::Bind(globalObj, &JSWebConsoleLog::Constructor, &JSWebConsoleLog::Destructor);
     }
 
@@ -91,30 +91,30 @@ public:
         message_ = message;
     }
 
-    void LineNumer(const JSCallbackInfo& args)
+    void GetLineNumber(const JSCallbackInfo& args)
     {
-        auto code = JSVal(ToJSValue(message_->LineNumer()));
+        auto code = JSVal(ToJSValue(message_->GetLineNumber()));
         auto descriptionRef = JSRef<JSVal>::Make(code);
         args.SetReturnValue(descriptionRef);
     }
 
-    void Log(const JSCallbackInfo& args)
+    void GetLog(const JSCallbackInfo& args)
     {
-        auto code = JSVal(ToJSValue(message_->Log()));
+        auto code = JSVal(ToJSValue(message_->GetLog()));
         auto descriptionRef = JSRef<JSVal>::Make(code);
         args.SetReturnValue(descriptionRef);
     }
 
-    void LogLevel(const JSCallbackInfo& args)
+    void GetLogLevel(const JSCallbackInfo& args)
     {
-        auto code = JSVal(ToJSValue(message_->LogLevel()));
+        auto code = JSVal(ToJSValue(message_->GetLogLevel()));
         auto descriptionRef = JSRef<JSVal>::Make(code);
         args.SetReturnValue(descriptionRef);
     }
 
-    void SourceId(const JSCallbackInfo& args)
+    void GetSourceId(const JSCallbackInfo& args)
     {
-        auto code = JSVal(ToJSValue(message_->SourceId()));
+        auto code = JSVal(ToJSValue(message_->GetSourceId()));
         auto descriptionRef = JSRef<JSVal>::Make(code);
         args.SetReturnValue(descriptionRef);
     }
