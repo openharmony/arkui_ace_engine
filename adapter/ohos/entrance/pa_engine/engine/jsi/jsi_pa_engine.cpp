@@ -29,6 +29,7 @@
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_utils.h"
+#include "js_backend_timer_module.h"
 
 extern const char _binary_paMgmt_abc_start[];
 extern const char _binary_paMgmt_abc_end[];
@@ -723,6 +724,7 @@ bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     delegate->AddTaskObserver([nativeEngine = nativeEngine_]() {
         nativeEngine->Loop(LOOP_NOWAIT);
     });
+    JsBackendTimerModule::GetInstance()->InitTimerModule(nativeEngine_, delegate);
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
     if (delegate && delegate->GetAssetManager()) {

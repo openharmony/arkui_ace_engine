@@ -35,6 +35,7 @@ template("js_pa_engine_qjs") {
       "//foundation/aafwk/standard/services/abilitymgr/include",
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common",
       "//foundation/aafwk/standard/services/common/include",
+      "//foundation/ace/ace_engine/adapter/ohos/entrance/pa_engine/engine/common",
     ]
     deps = [
       "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
@@ -68,6 +69,7 @@ template("js_pa_engine_qjs") {
         [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]
 
     sources = [
+      "$ace_root/adapter/ohos/entrance/pa_engine/engine/common/js_backend_timer_module.cpp",
       "qjs_pa_engine.cpp",
       "qjs_pa_engine_loader.cpp",
     ]
