@@ -157,6 +157,7 @@ private:
     bool usingSharedRuntime_ = false;
     static bool isModulePreloaded_;
     static bool isModuleInitialized_;
+    static shared_ptr<JsRuntime> globalRuntime_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngineInstance);
 };
