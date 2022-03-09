@@ -116,7 +116,7 @@ void JSCustomDialogController::DestructorCallback(JSCustomDialogController* cont
     }
 }
 
-void JSCustomDialogController::ShowDialog(const JSCallbackInfo& info)
+void JSCustomDialogController::ShowDialog()
 {
     LOGI("JSCustomDialogController(ShowDialog)");
     RefPtr<Container> container;
@@ -148,20 +148,21 @@ void JSCustomDialogController::ShowDialog(const JSCallbackInfo& info)
         }
     });
     dialogProperties_.callbacks.try_emplace("cancel", cancelMarker);
-    dialogProperties_.onStatusChanged = [this](bool isShown) { this->isShown_ = isShown; };
 
     auto executor = context->GetTaskExecutor();
     if (!executor) {
         LOGE("JSCustomDialogController(JsOpenDialog) No Executor. Cannot post task.");
         return;
     }
-    executor->PostTask(
+
+    executor->PostSyncTask(
         [context, dialogProperties = dialogProperties_, this]() mutable {
             if (context) {
                 this->dialogComponent_ = context->ShowDialog(dialogProperties, false, "CustomDialog");
             }
         },
         TaskExecutor::TaskType::UI);
+    isShown_ = true;
 }
 
 void JSCustomDialogController::CloseDialog()
@@ -198,7 +199,8 @@ void JSCustomDialogController::CloseDialog()
         LOGE("JSCustomDialogController(JsOpenDialog) No Executor. Cannot post task.");
         return;
     }
-    executor->PostTask(
+
+    executor->PostSyncTask(
         [lastStack, dialogComponent = dialogComponent_]() {
             if (!lastStack || !dialogComponent) {
                 return;
@@ -217,6 +219,7 @@ void JSCustomDialogController::CloseDialog()
             }
         },
         TaskExecutor::TaskType::UI);
+    isShown_ = false;
 }
 
 void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
@@ -226,7 +229,6 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         LOGD("CustomDialog has already shown.");
         return;
     }
-
     // Cannot reuse component because might depend on state
     if (customDialog_) {
         customDialog_ = nullptr;
@@ -247,7 +249,7 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         return;
     }
 
-    ShowDialog(info);
+    ShowDialog();
 }
 
 void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
