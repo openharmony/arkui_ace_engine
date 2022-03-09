@@ -41,7 +41,7 @@ public:
     static void SetMinCount(int32_t minCount);
     static void CellLength(int32_t cellLength);
     static void SetLayoutDirection(int32_t value);
-    static void SetDirection(int32_t value);
+    static void SetDirection(const std::string& dir);
     static void SetSupportAnimation(bool supportAnimation);
     static void SetDragAnimation(bool value);
     static void SetEdgeEffection(int32_t value);
