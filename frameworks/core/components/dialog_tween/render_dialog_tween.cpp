@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,6 +96,11 @@ RenderDialogTween::~RenderDialogTween()
     auto dialogTweenComponent = weakDialogTweenComponent_.Upgrade();
     if (dialogTweenComponent) {
         RemoveBackendEvent(dialogTweenComponent);
+    }
+
+    auto accessibilityNode = accessibilityNode_.Upgrade();
+    if (accessibilityNode) {
+        accessibilityNode->ClearRect();
     }
 }
 
@@ -240,10 +245,7 @@ void RenderDialogTween::CallOnSuccess(int32_t successType)
             onComplete_();
         }
     }
-    const auto& accessibilityManager = context->GetAccessibilityManager();
-    if (accessibilityManager) {
-        accessibilityManager->RemoveAccessibilityNodeById(composedId_);
-    }
+    RemoveAccessibilityNode();
 }
 
 double RenderDialogTween::GetMaxWidthBasedOnGridType(
@@ -548,14 +550,7 @@ bool RenderDialogTween::PopDialog()
             onComplete_();
         }
     }
-    const auto& accessibilityManager = context->GetAccessibilityManager();
-    if (accessibilityManager) {
-        accessibilityManager->RemoveAccessibilityNodeById(composedId_);
-    }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    auto node = accessibilityManager->GetAccessibilityNodeById(customDialogId_);
-    accessibilityManager->ClearNodeRectInfo(node, true);
-#endif
+    RemoveAccessibilityNode();
     return true;
 }
 
@@ -586,6 +581,33 @@ void RenderDialogTween::InitAccessibilityEventListener()
             dialogTween->PopDialog();
         }
     });
+
+    // RenderDialogTween's size is 0*0, use parent's rect,
+    // or no child on dialog can get focused by click in accessibility mode
+    auto parent = accessibilityNode->GetParentNode();
+    if (parent) {
+        accessibilityNode->SetRect(parent->GetRect());
+    }
+}
+
+void RenderDialogTween::RemoveAccessibilityNode()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    const auto& accessibilityManager = context->GetAccessibilityManager();
+    if (accessibilityManager) {
+        // no new accessibility node is created with DialogTween in JS app
+        if (context->GetIsDeclarative()) {
+            accessibilityManager->RemoveAccessibilityNodeById(composedId_);
+        }
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+        auto node = accessibilityManager->GetAccessibilityNodeById(customDialogId_);
+        accessibilityManager->ClearNodeRectInfo(node, true);
+#endif
+    }
 }
 
 void RenderDialogTween::RemoveBackendEvent(const RefPtr<DialogTweenComponent>& component)
