@@ -322,6 +322,7 @@ std::unique_ptr<JsonValue> JsiDeclarativeEngineInstance::currentConfigResourceDa
 
 bool JsiDeclarativeEngineInstance::isModulePreloaded_ = false;
 bool JsiDeclarativeEngineInstance::isModuleInitialized_ = false;
+shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::globalRuntime_ = nullptr;
 
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
@@ -340,8 +341,9 @@ JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
         runtime_->RegisterUncaughtExceptionHandler(nullptr);
         // reset runtime in utils
         JsiDeclarativeUtils::SetRuntime(nullptr, runtime_);
-
-        runtime_->Reset();
+        if (globalRuntime_ != runtime_) {
+            runtime_->Reset();
+        }
     }
     runtime_.reset();
     runtime_ = nullptr;
@@ -404,6 +406,9 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         InitJsExportsUtilObject();
         InitJsNativeModuleObject();
         InitGroupJsBridge();
+        if (usingSharedRuntime_) {
+            globalRuntime_ = runtime_;
+        }
     }
 
     if (usingSharedRuntime_) {
