@@ -85,11 +85,11 @@ bool WebClientImpl::OnConsoleLog(const OHOS::NWeb::NWebConsoleLog& message)
     ContainerScope scope(instanceId_);
     bool jsMessage = false;
     auto task = Container::CurrentTaskExecutor();
-    if (task == nullptr) {
+    if (!task) {
         return false;
     }
     task->PostSyncTask([webClient = this, &message, &jsMessage] {
-        if (webClient == nullptr) {
+        if (!webClient) {
             return;
         }
         auto delegate = webClient->webDelegate_.Upgrade();
