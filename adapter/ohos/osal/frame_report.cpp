@@ -212,4 +212,24 @@ void FrameReport::BeginProcessPostFlush()
         LOGE("frame-ace:[BeginProcessPostFlush]load BeginProcessPostFlush function failed!");
     }
 }
+
+void FrameReport::BeginListFling()
+{
+    beginListFlingFunc_ = (BeginListFlingFunc)LoadSymbol("BeginListFling");
+    if (beginListFlingFunc_ != nullptr) {
+        beginListFlingFunc_();
+    } else {
+        LOGE("frame-ace:[BeginListFling]load BeginListFling function failed!");
+    }
+}
+
+void FrameReport::EndListFling()
+{
+    endListFlingFunc_ = (EndListFlingFunc)LoadSymbol("EndListFling");
+    if (endListFlingFunc_ != nullptr) {
+        endListFlingFunc_();
+    } else {
+        LOGE("frame-ace:[EndListFling]load EndListFling function failed!");
+    }
+}
 } // namesapce OHOS::Ace
