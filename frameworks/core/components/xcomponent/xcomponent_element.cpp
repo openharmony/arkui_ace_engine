@@ -305,13 +305,21 @@ void XComponentElement::CreateSurface()
         LOGE("xcomponent add surface error: %{public}d", ret);
     }
 
-    xcomponentController_->surfaceId_ = producerSurface_->GetUniqueId();
-
     producerSurface_->SetQueueSize(SURFACE_QUEUE_SIZE);
     producerSurface_->SetUserData("SURFACE_STRIDE_ALIGNMENT", SURFACE_STRIDE_ALIGNMENT);
     producerSurface_->SetUserData("SURFACE_FORMAT", std::to_string(PIXEL_FMT_RGBA_8888));
 
     XComponentElement::surfaceIdMap_.emplace(xcomponent_->GetId(), producerSurface_->GetUniqueId());
+
+    if (!xcomponentController_) {
+        auto controller = xcomponent_->GetXComponentController();
+        if (!controller) {
+            LOGE("There is no controller in xcomponent.");
+            return;
+        }
+        xcomponentController_ = controller;
+    }
+    xcomponentController_->surfaceId_ = producerSurface_->GetUniqueId();
 }
 
 void XComponentElement::SetMethodCall()
@@ -343,8 +351,10 @@ void XComponentElement::SetMethodCall()
 
 void XComponentElement::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
 {
-    producerSurface_->SetUserData("SURFACE_WIDTH", std::to_string(surfaceWidth));
-    producerSurface_->SetUserData("SURFACE_HEIGHT", std::to_string(surfaceHeight));
+    if (producerSurface_) {
+        producerSurface_->SetUserData("SURFACE_WIDTH", std::to_string(surfaceWidth));
+        producerSurface_->SetUserData("SURFACE_HEIGHT", std::to_string(surfaceHeight));
+    }
 }
 #endif
 
@@ -369,9 +379,9 @@ void XComponentElement::ReleasePlatformResource()
     }
 
 #ifdef OHOS_STANDARD_SYSTEM
-    if (!surfaceIdMap_.empty()) {
+    if (producerSurface_) {
         auto surfaceUtils = SurfaceUtils::GetInstance();
-        auto ret = surfaceUtils->Remove(XComponentElement::surfaceIdMap_[xcomponent_->GetId()]);
+        auto ret = surfaceUtils->Remove(producerSurface_->GetUniqueId());
         if (ret != SurfaceError::SURFACE_ERROR_OK) {
             LOGE("xcomponent remove surface error: %{public}d", ret);
         }
