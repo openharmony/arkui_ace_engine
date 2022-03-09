@@ -25,7 +25,6 @@ template("js_pa_engine_qjs") {
     include_dirs = [
       "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_dataability/include",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb/include",
-      "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
       "//foundation/aafwk/standard/services/common/include",
       "//foundation/aafwk/standard/interfaces/innerkits/want/include",
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/context",
@@ -43,7 +42,6 @@ template("js_pa_engine_qjs") {
       "//foundation/aafwk/standard/interfaces/innerkits/base:base",
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common:napi_common",
       "//foundation/ace/napi:ace_napi",
-      "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
       "//foundation/graphic/standard:libwmclient",
@@ -51,6 +49,7 @@ template("js_pa_engine_qjs") {
     ]
     external_deps = [
       "ability_base:want",
+      "ability_base:zuri",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "eventhandler:libeventhandler",

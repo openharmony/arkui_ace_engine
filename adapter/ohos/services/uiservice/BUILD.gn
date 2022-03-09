@@ -83,7 +83,6 @@ template("uiservice_static") {
       "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base:appexecfwk_base",
       "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_core:appexecfwk_core",
       "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler:libeventhandler",
-      "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
       "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
@@ -100,6 +99,7 @@ template("uiservice_static") {
     deps += [ "$ace_root/build:libace" ]
 
     external_deps = [
+      "ability_base:zuri",
       "ability_runtime:ability_manager",
       "ability_runtime:runtime",
       "hiviewdfx_hilog_native:libhilog",
