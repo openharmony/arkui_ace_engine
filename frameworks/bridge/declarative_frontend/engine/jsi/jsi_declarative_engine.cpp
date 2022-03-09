@@ -918,16 +918,16 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     if (!sharedRuntime) {
         SetPostTask(nativeEngine_);
         nativeEngine_->CheckUVLoop();
+
+        if (delegate && delegate->GetAssetManager()) {
+            std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+            if (!packagePath.empty()) {
+                auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
+                arkNativeEngine->SetPackagePath(packagePath);
+            }
+        }
     } else {
         LOGI("Using sharedRuntime, UVLoop handled by AbilityRuntime");
-    }
-
-    if (delegate && delegate->GetAssetManager()) {
-        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
-        if (!packagePath.empty()) {
-            auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
-            arkNativeEngine->SetPackagePath(packagePath);
-        }
     }
 
     RegisterWorker();
