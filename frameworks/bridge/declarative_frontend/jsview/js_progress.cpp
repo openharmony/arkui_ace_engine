@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cmath>
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_progress.h"
 
@@ -114,7 +115,11 @@ void JSProgress::SetValue(double value)
         LOGI("progress component is null.");
         return;
     }
-    progress->SetValue(value);
+    if (std::isnan(value)) {
+        progress->SetValue(0.0);
+    } else {
+        progress->SetValue(value);
+    }
 }
 
 void JSProgress::SetColor(const JSCallbackInfo& info)
