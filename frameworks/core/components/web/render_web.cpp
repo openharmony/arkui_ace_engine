@@ -68,7 +68,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         delegate_->UpdateGeolocationEnabled(web->GetGeolocationAccessEnabled());
         auto userAgent = web->GetUserAgent();
         if (!userAgent.empty()) {
-            delegate_->UpdateuserAgent(userAgent);
+            delegate_->UpdateUserAgent(userAgent);
         }
     }
 
