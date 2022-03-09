@@ -1011,28 +1011,23 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
                  static_cast<OHOS::NWeb::NWebPreference::AccessMode>(component->GetMixedMode()));
             setting->PutZoomingFunctionEnabled(component->GetZoomAccessEnabled());
             setting->PutGeolocationAllowed(component->GetGeolocationAccessEnabled());
-            auto userAgent = component->GetUserAgent();
-            if (!userAgent.empty()) {
-                setting->PutUserAgent(userAgent);
-            }
         },
         TaskExecutor::TaskType::PLATFORM);
 }
 #endif
 
-void WebDelegate::UpdateUserAgent(const std::string& userAgent, const std::string& src)
+void WebDelegate::UpdateUserAgent(const std::string& userAgent)
 {
     auto context = context_.Upgrade();
     if (!context) {
         return;
     }
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), userAgent, src]() {
+        [weak = WeakClaim(this), userAgent]() {
             auto delegate = weak.Upgrade();
             if (delegate && delegate->webview_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->webview_->GetPreference();
-                    setting->PutUserAgent(userAgent);
-                    delegate->webview_->Load(src);
+                setting->PutUserAgent(userAgent);
             }
         },
         TaskExecutor::TaskType::PLATFORM);

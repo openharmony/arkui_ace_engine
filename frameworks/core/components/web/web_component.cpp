@@ -67,10 +67,6 @@ RefPtr<RenderNode> WebComponent::CreateRenderNode()
             }
         });
     });
-    auto webElement = webElement_.Upgrade();
-    if (webElement) {
-        webElement->SetDelegate(delegate_);
-    }
     renderWeb->SetDelegate(delegate_);
     return renderNode;
 }
@@ -79,7 +75,6 @@ RefPtr<Element> WebComponent::CreateElement()
 {
     auto webElement = AceType::MakeRefPtr<WebElement>();
     focusElement_ = webElement;
-    webElement_ = webElement;
     return webElement;
 }
 

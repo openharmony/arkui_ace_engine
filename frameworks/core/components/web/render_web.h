@@ -73,6 +73,7 @@ public:
 protected:
     RefPtr<WebDelegate> delegate_;
     Size drawSize_;
+    bool isUrlLoaded_ = false;
 
 private:
 #ifdef OHOS_STANDARD_SYSTEM

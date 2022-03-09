@@ -52,7 +52,7 @@ public:
     static void ZoomAccessEnabled(bool isZoomAccessEnabled);
     static void GeolocationAccessEnabled(bool isGeolocationAccessEnabled);
     static void JavaScriptProxy(const JSCallbackInfo& args);
-    static void UserAgent(std::string userAgent);
+    static void UserAgent(const std::string& userAgent);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
