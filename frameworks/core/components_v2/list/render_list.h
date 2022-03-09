@@ -403,6 +403,8 @@ private:
 
     void ApplyRestoreInfo();
 
+    bool hasDragItem_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(RenderList);
 };
 

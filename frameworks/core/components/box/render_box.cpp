@@ -258,11 +258,13 @@ void RenderBox::CreateDragDropRecognizer()
             renderBox->dragWindow_->Destory();
             renderBox->dragWindow_ = nullptr;
         }
-#else
-        auto stackElement = pipelineContext->GetLastStack();
-        stackElement->PopComponent();
-        renderBox->SetPreTargetRenderBox(nullptr);
 #endif
+        if (renderBox->hasDragItem_) {
+            auto stackElement = pipelineContext->GetLastStack();
+            stackElement->PopComponent();
+            renderBox->hasDragItem_ = false;
+        }
+        renderBox->SetPreTargetRenderBox(nullptr);
     });
 
     std::vector<RefPtr<GestureRecognizer>> recognizers { longPressRecognizer, panRecognizer };
