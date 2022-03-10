@@ -476,6 +476,11 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSStaticMethodCallback(panda::EcmaV
     auto fnPtr = static_cast<StaticFunctionBinding<void, const JSCallbackInfo&>*>(binding)->Get();
     JsiCallbackInfo info(vm, thisObj, argc, argv);
     fnPtr(info);
+    std::variant<void*, panda::Global<panda::JSValueRef>> retVal = info.GetReturnValue();
+    auto jsVal = std::get_if<panda::Global<panda::JSValueRef>>(&retVal);
+    if (jsVal) {
+        return jsVal->ToLocal(vm);
+    }
     return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
 }
 

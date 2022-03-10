@@ -25,6 +25,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_runtime.h"
@@ -37,6 +38,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_timer_module.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_api_perf.h"
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 
@@ -484,12 +486,12 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
 
     // preload perfutil
-    shared_ptr<JsValue> perfObj = runtime_->NewObject();
-    perfObj->SetProperty(runtime_, "printlog", runtime_->NewFunction(JsPerfPrint));
-    perfObj->SetProperty(runtime_, "sleep", runtime_->NewFunction(JsPerfSleep));
-    perfObj->SetProperty(runtime_, "begin", runtime_->NewFunction(JsPerfBegin));
-    perfObj->SetProperty(runtime_, "end", runtime_->NewFunction(JsPerfEnd));
-    global->SetProperty(runtime_, "perfutil", perfObj);
+    shared_ptr<JsValue> perfObj = arkRuntime->NewObject();
+    perfObj->SetProperty(arkRuntime, "printlog", arkRuntime->NewFunction(JsPerfPrint));
+    perfObj->SetProperty(arkRuntime, "sleep", arkRuntime->NewFunction(JsPerfSleep));
+    perfObj->SetProperty(arkRuntime, "begin", arkRuntime->NewFunction(JsPerfBegin));
+    perfObj->SetProperty(arkRuntime, "end", arkRuntime->NewFunction(JsPerfEnd));
+    global->SetProperty(arkRuntime, "perfutil", perfObj);
 
     // preload exports and requireNative
     shared_ptr<JsValue> exportsUtilObj = arkRuntime->NewObject();
@@ -878,6 +880,10 @@ JsiDeclarativeEngine::~JsiDeclarativeEngine()
 
     XComponentClient::GetInstance().SetRegisterCallbackToNull();
     XComponentClient::GetInstance().SetJSValCallToNull();
+
+#ifdef USE_ARK_ENGINE
+    JSLocalStorage::RemoveStorage(instanceId_);
+#endif
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
 
@@ -1388,6 +1394,20 @@ void JsiDeclarativeEngine::RunGarbageCollection()
     if (engineInstance_ && engineInstance_->GetJsRuntime()) {
         engineInstance_->GetJsRuntime()->RunGC();
     }
+}
+
+void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* nativeValue)
+{
+    LOGI("SetLocalStorage instanceId:%{public}d", instanceId);
+#ifdef USE_ARK_ENGINE
+    auto jsValue = JsConverter::ConvertNativeValueToJsVal(*nativeValue);
+    if (jsValue->IsObject()) {
+        auto storage = JSRef<JSObject>::Cast(jsValue);
+        JSLocalStorage::AddStorage(instanceId, storage);
+    } else {
+        LOGI("SetLocalStorage instanceId:%{public}d invalid storage", instanceId);
+    }
+#endif
 }
 
 RefPtr<GroupJsBridge> JsiDeclarativeEngine::GetGroupJsBridge()

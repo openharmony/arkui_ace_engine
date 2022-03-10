@@ -158,6 +158,8 @@ public:
 
     void TriggerGarbageCollection() override;
 
+    void SetLocalStorage(NativeReference* storage, NativeReference* context);
+
     void OnFinish()
     {
         if (platformEventCallback_) {

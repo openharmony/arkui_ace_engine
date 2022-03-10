@@ -25,6 +25,8 @@
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
 class NativeEngine;
+class NativeReference;
+
 namespace OHOS::Ace::Framework {
 using PixelMapNapiEntry = void* (*)(void*, void*);
 struct JsModule {
@@ -154,6 +156,10 @@ public:
     virtual ACE_EXPORT FrontendDelegate* GetFrontend() {
         return nullptr;
     }
+
+    virtual void SetLocalStorage(int32_t instanceId, NativeReference* storage) {}
+
+    virtual void SetContext(int32_t instanceId, NativeReference* context) {}
 
     bool IsDebugVersion() const
     {

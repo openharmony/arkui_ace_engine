@@ -739,6 +739,26 @@ void AceContainer::TriggerGarbageCollection()
         TaskExecutor::TaskType::JS);
 }
 
+void AceContainer::SetLocalStorage(NativeReference* storage, NativeReference* context)
+{
+    ContainerScope scope(instanceId_);
+    taskExecutor_->PostTask(
+        [frontend = WeakPtr<Frontend>(frontend_), storage, context, id = instanceId_] {
+            auto sp = frontend.Upgrade();
+            if (sp) {
+                auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(sp);
+                auto jsEngine = declarativeFrontend->GetJsEngine();
+                if (context) {
+                    jsEngine->SetContext(id, context);
+                }
+                if (storage) {
+                    jsEngine->SetLocalStorage(id, storage);
+                }
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
 void AceContainer::AddAssetPath(
     int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths)
 {

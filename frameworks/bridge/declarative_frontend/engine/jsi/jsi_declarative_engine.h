@@ -229,6 +229,8 @@ public:
 
     void RunGarbageCollection() override;
 
+    void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
+
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
     virtual FrontendDelegate* GetFrontend() override

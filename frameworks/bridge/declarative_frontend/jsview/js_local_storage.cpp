@@ -17,6 +17,7 @@
 #include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::Framework {
+
 thread_local std::unordered_map<int32_t, JSRef<JSObject>> JSLocalStorage::storages_;
 
 JSLocalStorage::JSLocalStorage()
@@ -46,23 +47,23 @@ void JSLocalStorage::RemoveStorage(int32_t key)
     auto it = storages_.find(key);
     if (it != storages_.end()) {
         storages_.erase(it);
+    } else {
+        LOGW("A local storage with key %{public}d does not exist!", key);
     }
-
-    LOGW("A local storage with key %d does not exist!", key);
 }
 
 void JSLocalStorage::GetShared(const JSCallbackInfo& info)
 {
-    LOGD("JSLocalStorage::GetShared");
     int32_t currentInstance = Container::CurrentId();
-    LOGD("Current ID is %d", currentInstance);
+    LOGD("Current ID is %{public}d", currentInstance);
     auto it = storages_.find(currentInstance);
     if (it == storages_.end()) {
-        LOGD("LocalStorage with ID %d not found!", currentInstance);
+        LOGW("LocalStorage with ID %{public}d not found!", currentInstance);
         JSException::Throw("LocalStorage with ID %d not found!", currentInstance);
         return;
     }
-
+    LOGI("JSLocalStorage::GetShared find ID:%{public}d", currentInstance);
     info.SetReturnValue(it->second);
 }
+
 } // namespace OHOS::Ace::Framework

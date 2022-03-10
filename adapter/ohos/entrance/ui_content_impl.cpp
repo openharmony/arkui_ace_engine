@@ -435,7 +435,14 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     // set view
     Platform::AceContainer::SetView(flutterAceView, density, width, height, window_->GetWindowId(), callback);
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, config_.Orientation());
-
+    auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
+    if (!storage) {
+        container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
+    } else {
+        LOGI("SetLocalStorage %{public}d", storage->TypeOf());
+        container->SetLocalStorage(
+            nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
+    }
     InitWindowCallback(info);
 }
 
