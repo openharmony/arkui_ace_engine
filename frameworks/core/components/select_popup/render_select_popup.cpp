@@ -418,6 +418,15 @@ void RenderSelectPopup::ProcessTouchUp(const TouchEventInfo& info)
         return;
     }
 
+    if (selectPopup_->GetSelectOptions().empty()) {
+        return;
+    }
+
+    auto firstOption = selectPopup_->GetSelectOptions().front();
+    if (!firstOption->GetCustomComponent()) {
+        return;
+    }
+
     auto offset = touches.front().GetGlobalLocation();
     if (!isContextMenu_) {
         firstFingerUpOffset_ = offset;
