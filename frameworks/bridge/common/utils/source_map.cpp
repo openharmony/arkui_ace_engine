@@ -66,7 +66,7 @@ MappingInfo RevSourceMap::Find(int32_t row, int32_t col)
         .col = afterPos_[res].beforeColumn + 1,
         .sources = sources,
     };
-};
+}
 
 void RevSourceMap::ExtractKeyInfo(const std::string& sourceMap, std::vector<std::string>& sourceKeyInfo)
 {

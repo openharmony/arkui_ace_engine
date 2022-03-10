@@ -75,6 +75,7 @@ template("declarative_js_engine_ark") {
     public_configs = [ "//ark/js_runtime:ark_jsruntime_public_config" ]
 
     sources = [
+      "$ace_root/frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.cpp",
       "ark/ark_js_runtime.cpp",
       "ark/ark_js_value.cpp",
       "js_converter.cpp",

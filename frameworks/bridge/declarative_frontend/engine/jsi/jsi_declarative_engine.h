@@ -39,8 +39,7 @@ namespace OHOS::Ace::Framework {
 class JsiDeclarativeEngineInstance final : public AceType, public JsEngineInstance {
     DECLARE_ACE_TYPE(JsiDeclarativeEngineInstance, AceType)
 public:
-    JsiDeclarativeEngineInstance(const RefPtr<FrontendDelegate>& delegate, int32_t instanceId)
-        : frontendDelegate_(delegate), instanceId_(instanceId)
+    JsiDeclarativeEngineInstance(const RefPtr<FrontendDelegate>& delegate) : frontendDelegate_(delegate)
     {}
     ~JsiDeclarativeEngineInstance() override;
 
@@ -152,7 +151,6 @@ private:
     shared_ptr<JsRuntime> runtime_;
     RefPtr<FrontendDelegate> frontendDelegate_;
     WeakPtr<JsMessageDispatcher> dispatcher_;
-    int32_t instanceId_ = 0;
     mutable std::mutex mutex_;
     bool isDebugMode_ = true;
     bool usingSharedRuntime_ = false;
