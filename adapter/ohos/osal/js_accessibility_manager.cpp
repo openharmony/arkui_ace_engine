@@ -485,7 +485,7 @@ void JsAccessibilityManager::UpdateNodeChildIds(const RefPtr<AccessibilityNode>&
     auto rootNodeId = GetRootNodeId();
 
     // get last stack children to barrier free service.
-    if ((node->GetNodeId() == GetRootNodeId() + ROOT_STACK_BASE) && !children.empty()) {
+    if ((node->GetNodeId() == GetRootNodeId() + ROOT_STACK_BASE) && !children.empty() && !IsDeclarative()) {
         auto lastChildNodeId = children.back()->GetNodeId();
         if (isOhosHostCard()) {
             childrenVec.emplace_back(ConvertToCardAccessibilityId(lastChildNodeId, cardId, rootNodeId));
@@ -729,7 +729,7 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessib
 void JsAccessibilityManager::SearchElementInfoByAccessibilityId(
     const long elementId, const int requestId, AccessibilityElementOperatorCallback& callback, const int mode)
 {
-    LOGI("SearchElementInfoByAccessibilityId elementId(%{public}ld)", elementId);
+    LOGI("SearchElementInfoByAccessibilityId elementId(%{public}ld) mode(%{public}d)", elementId, mode);
     auto weak = WeakClaim(this);
     auto jsAccessibilityManager = weak.Upgrade();
     if (!jsAccessibilityManager) {
