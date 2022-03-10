@@ -380,10 +380,6 @@ void RenderSlider::HandleClick(const Offset& clickPosition)
         UpdateTouchRegion();
     }
     insideBlockRegion_ = false;
-    if (onChange_) {
-        FireMovingEvent(SliderEvent::MOVE_END);
-        return;
-    }
     FireMovingEvent(SliderEvent::CLICK);
     FireMoveEndEvent();
 }
