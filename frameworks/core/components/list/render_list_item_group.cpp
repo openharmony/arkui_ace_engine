@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,6 +92,10 @@ LayoutParam RenderListItemGroup::MakeInnerLayoutParam() const
 void RenderListItemGroup::AddArrowImage(double mainSize)
 {
     if (arrowImage_) {
+        if (!GetChildren().empty() && GetChildren().back() != arrowImage_) {
+            RemoveChild(arrowImage_);
+            AddChild(arrowImage_, GetChildren().size());
+        }
         LayoutParam innerLayout;
         double width = NormalizeToPx(imageSize_);
         innerLayout.SetFixedSize(Size(width, width));
@@ -125,10 +129,6 @@ void RenderListItemGroup::AddArrowImage(double mainSize)
         arrowImage_->SetPosition(Offset(offsetX, offsetY));
         double rotateAngle = expand_ ? ROTATE_ANGLE : 0.0;
         arrowImage_->SetRotate(rotateAngle);
-        if (!GetChildren().empty() && GetChildren().back() != arrowImage_) {
-            RemoveChild(arrowImage_);
-            AddChild(arrowImage_, GetChildren().size());
-        }
     }
 }
 
