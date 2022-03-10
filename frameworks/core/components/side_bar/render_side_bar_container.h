@@ -38,6 +38,71 @@ public:
     double GetSlidePosition() const;
     bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result) override;
+    
+    bool GetShowSideBarContainer() const
+    {
+        return showSideBar_;
+    }
+
+    bool GetShowControlButton() const
+    {
+        return showControlButton_;
+    }
+
+    std::string GetStyle() const
+    {
+        return style_;
+    }
+
+    std::string GetShowIcon() const
+    {
+        return iconShow_;
+    }
+
+    std::string GetHiddenIcon() const
+    {
+        return iconHidden_;
+    }
+
+    std::string GetSwitchIcon() const
+    {
+        return iconSwitch_;
+    }
+
+    double GetButtonLeft() const
+    {
+        return buttonLeft_;
+    }
+
+    double GetButtonTop() const
+    {
+        return buttonTop_;
+    }
+
+    double GetButtonWidth() const
+    {
+        return buttonWidth_;
+    }
+
+    double GetButtonHeight() const
+    {
+        return buttonHeight_;
+    }
+
+    const Dimension& GetSideBarWidth() const
+    {
+        return sidebarWidth_;
+    }
+
+    const Dimension& GetSideBarMinWidth() const
+    {
+        return minSidebarWidth_;
+    }
+
+    const Dimension& GetSideBarMaxWidth() const
+    {
+        return maxSidebarWidth_;
+    }
 
 private:
     void DoSideBarAnimation();
@@ -58,6 +123,16 @@ private:
     bool isFocus_ = false;
     bool isAnimation_ = false;
     bool isInitialized_ = false;
+    bool showControlButton_ = true;
+    bool showSideBar_ = true;
+    std::string style_;
+    std::string iconShow_;
+    std::string iconHidden_;
+    std::string iconSwitch_;
+    double buttonLeft_ = 16.0;
+    double buttonTop_ = 48.0;
+    double buttonWidth_ = 32.0;
+    double buttonHeight_ = 32.0;
 
     Dimension sidebarWidth_ = 200.0_vp;
     Dimension minSidebarWidth_ = 200.0_vp;
