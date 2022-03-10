@@ -108,7 +108,7 @@ void RenderList::Update(const RefPtr<Component>& component)
 
     // Start index should be updated only for the first time
     if (startIndex_ == INITIAL_CHILD_INDEX) {
-        initialIndex_ = component_->GetInitialIndex();
+        initialIndex_ = static_cast<size_t>(component_->GetInitialIndex());
         startIndex_ = initialIndex_ > 0 ? initialIndex_ : 0;
     }
     ApplyRestoreInfo();
@@ -1217,7 +1217,7 @@ void RenderList::UpdateAccessibilityAttr()
     auto collectionInfo = accessibilityNode->GetCollectionInfo();
     size_t count = TotalCount() > 0 ? TotalCount() : 1;
     if (vertical_) {
-        collectionInfo.rows = count;
+        collectionInfo.rows = static_cast<int32_t>(count);
         collectionInfo.columns = 1;
     } else {
         collectionInfo.rows = 1;
@@ -1572,7 +1572,7 @@ void RenderList::CreateDragDropRecognizer()
             Point point = info.GetGlobalPoint() - targetRenderlist->GetGlobalOffset();
             auto newListItem = targetRenderlist->FindCurrentListItem(point);
             if (static_cast<int32_t>(targetRenderlist->GetIndexByListItem(newListItem)) > -1) {
-                renderList->insertItemIndex_ = static_cast<int32_t>(targetRenderlist->GetIndexByListItem(newListItem));
+                renderList->insertItemIndex_ = static_cast<size_t>(targetRenderlist->GetIndexByListItem(newListItem));
             }
             if (targetRenderlist == renderList) {
                 (targetRenderlist->GetOnItemDrop())(

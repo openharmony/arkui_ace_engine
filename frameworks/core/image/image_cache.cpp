@@ -215,7 +215,7 @@ void ImageCache::WriteCacheFile(const std::string& url, const void * const data,
     // check if cache files too big.
     if (cacheFileSize_ > static_cast<int32_t>(cacheFileLimit_)) {
         int32_t removeCount = cacheFileInfo_.size() * clearCacheFileRatio_;
-        int32_t removeSize = 0;
+        uint32_t removeSize = 0;
         auto iter = cacheFileInfo_.begin();
         int32_t count = 0;
         while (count < removeCount) {
@@ -225,7 +225,7 @@ void ImageCache::WriteCacheFile(const std::string& url, const void * const data,
             count++;
         }
         cacheFileInfo_.erase(cacheFileInfo_.begin(), iter);
-        cacheFileSize_ -= removeSize;
+        cacheFileSize_ -= static_cast<int32_t>(removeSize);
     }
     // 3. clear files removed from cache list.
     ClearCacheFile(removeVector);

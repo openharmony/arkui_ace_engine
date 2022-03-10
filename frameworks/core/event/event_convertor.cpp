@@ -119,7 +119,7 @@ void ConvertMouseEvent(const std::vector<uint8_t>& data, MouseEvent& events)
             events.button = MouseButton::NONE_BUTTON;
             break;
     }
-    events.pressedButtons = static_cast<size_t>(mouseActionData->pressedButtons);
+    events.pressedButtons = static_cast<int32_t>(mouseActionData->pressedButtons);
     events.time = time;
     events.deviceId = mouseActionData->deviceId;
 }

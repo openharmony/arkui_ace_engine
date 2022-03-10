@@ -570,7 +570,7 @@ void FlutterRenderPercentageDataPanel::PaintLinearProgress(RenderContext& contex
     auto segment = GetSegments();
     auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
     auto segmentWidthSum = 0.0;
-    for (int i = 0; i < segment.size(); i++) {
+    for (uint32_t i = 0; i < segment.size(); i++) {
         segmentWidthSum += segment[i].GetValue();
     }
     auto segmentSize = 0.0;
@@ -579,7 +579,7 @@ void FlutterRenderPercentageDataPanel::PaintLinearProgress(RenderContext& contex
     } else {
         segmentSize = static_cast<double>(segment.size());
     }
-    for (int i = 0; i < segment.size(); i++) {
+    for (uint32_t i = 0; i < segment.size(); i++) {
         if (segment[i].GetValue() == 0.0) {
             segmentSize -= 1;
         }

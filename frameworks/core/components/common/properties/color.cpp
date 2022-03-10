@@ -204,20 +204,17 @@ const Color Color::LineColorTransition(const Color& startColor, const Color& end
     uint8_t blue = 0;
     uint8_t alpha = 0;
 
-    red = (static_cast<int>(endColor.GetRed()) - static_cast<int>(startColor.GetRed())) * percent + startColor.GetRed();
-    green = (static_cast<int>(endColor.GetGreen()) - static_cast<int>(startColor.GetGreen())) * percent +
-            startColor.GetGreen();
-    blue = (static_cast<int>(endColor.GetBlue()) - static_cast<int>(startColor.GetBlue())) * percent +
-           startColor.GetBlue();
-    alpha = (static_cast<int>(endColor.GetAlpha()) - static_cast<int>(startColor.GetAlpha())) * percent +
-            startColor.GetAlpha();
+    red = static_cast<uint8_t>((endColor.GetRed()- startColor.GetRed()) * percent) + startColor.GetRed();
+    green = static_cast<uint8_t>((endColor.GetGreen() - startColor.GetGreen()) * percent) + startColor.GetGreen();
+    blue = static_cast<uint8_t>((endColor.GetBlue() - startColor.GetBlue()) * percent) + startColor.GetBlue();
+    alpha = static_cast<uint8_t>((endColor.GetAlpha() - startColor.GetAlpha()) * percent) + startColor.GetAlpha();
 
     return Color::FromARGB(alpha, red, green, blue);
 }
 
 Color Color::BlendOpacity(double opacityRatio) const
 {
-    int32_t alpha = GetAlpha() * opacityRatio;
+    int32_t alpha = static_cast<int32_t>(GetAlpha() * opacityRatio);
     alpha = std::clamp(alpha, 0, UINT8_MAX);
     return Color::FromARGB(alpha, GetRed(), GetGreen(), GetBlue());
 }
