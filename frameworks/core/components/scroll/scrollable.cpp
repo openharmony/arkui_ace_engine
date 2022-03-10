@@ -223,6 +223,10 @@ void Scrollable::HandleDragStart(const OHOS::Ace::DragStartInfo& info)
         axis_ == Axis::VERTICAL ? info.GetGlobalLocation().GetY() : info.GetGlobalLocation().GetX();
     LOGD("HandleDragStart. LocalLocation: %{public}s, GlobalLocation: %{public}s",
         info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
+#ifdef OHOS_PLATFORM
+    // Increase the cpu frequency when sliding.
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
     UpdateScrollPosition(dragPositionInMainAxis, SCROLL_FROM_START);
     RelatedEventStart();
     auto node = scrollableNode_.Upgrade();
@@ -244,10 +248,6 @@ void Scrollable::HandleDragUpdate(const DragUpdateInfo& info)
     if (RelatedScrollEventPrepare(Offset(0.0, info.GetMainDelta()))) {
         return;
     }
-#ifdef OHOS_PLATFORM
-    // Increase the cpu frequency when sliding.
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-#endif
     if (UpdateScrollPosition(info.GetMainDelta(), SCROLL_FROM_UPDATE)) {
         moved_ = true;
     }
@@ -267,6 +267,9 @@ void Scrollable::HandleDragEnd(const DragEndInfo& info)
         MAX_VELOCITY - slipFactor_);
     correctVelocity = correctVelocity * sVelocityScale_;
     currentVelocity_ = correctVelocity;
+#ifdef OHOS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
     if (dragEndCallback_) {
         dragEndCallback_();
     }
