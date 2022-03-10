@@ -16,22 +16,28 @@
 #include "bridge/declarative_frontend/jsview/js_richtext.h"
 
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components_v2/richtext/rich_text_component.h"
+#include "core/components/web/web_component.h"
 
 namespace OHOS::Ace::Framework {
 void JSRichText::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("richtext create error; info is non-valid");
+        LOGI("richtext create error, info is non-valid");
+        return;
     }
 
-    auto component = AceType::MakeRefPtr<V2::RichTextComponent>();
-    ViewStackProcessor::GetInstance()->Push(component);
-
-    std::string data;
-    ParseJsString(info[0], data);
-    component->SetData(data);
+    std::string data = "";
+    RefPtr<WebComponent> webComponent;
+    if (ParseJsString(info[0], data)) {
+        webComponent = AceType::MakeRefPtr<OHOS::Ace::WebComponent>("");
+        webComponent->SetData(data);
+    } else {
+        LOGE("richtext component failed to parse data");
+        return;
+    }
+    ViewStackProcessor::GetInstance()->Push(webComponent);
 }
 
 void JSRichText::JSBind(BindingTarget globalObj)
@@ -53,11 +59,8 @@ void JSRichText::OnStart(const JSCallbackInfo& info)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Execute();
         });
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto richText = AceType::DynamicCast<V2::RichTextComponent>(component);
-        if (richText) {
-            richText->SetPageStartedEventId(eventMarker);
-        }
+        auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+        webComponent->SetPageStartedEventId(eventMarker);
     }
 }
 
@@ -70,11 +73,8 @@ void JSRichText::OnComplete(const JSCallbackInfo& info)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Execute();
         });
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto richText = AceType::DynamicCast<V2::RichTextComponent>(component);
-        if (richText) {
-            richText->SetPageFinishedEventId(eventMarker);
-        }
+        auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+        webComponent->SetPageFinishedEventId(eventMarker);
     }
 }
 } // namespace OHOS::Ace::Framework
