@@ -26,9 +26,8 @@ namespace OHOS::Ace::V2 {
 namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const TextClockComposedElement&)>> CREATE_JSON_MAP {
-    { "hourswest", [](const TextClockComposedElement& inspector) { return inspector.GetHoursWest(); } },
+    { "timeZoneOffset", [](const TextClockComposedElement& inspector) { return inspector.GetTimeZoneOffset(); } },
     { "format", [](const TextClockComposedElement& inspector) { return inspector.GeFormat(); } },
-    { "status", [](const TextClockComposedElement& inspector) { return inspector.GetStatus(); } },
     { "fontColor", [](const TextClockComposedElement& inspector) { return inspector.GetTextFontColor(); } },
     { "fontSize", [](const TextClockComposedElement& inspector) { return inspector.GetTextFontSize(); } },
     { "fontStyle", [](const TextClockComposedElement& inspector) { return inspector.GetTextFontStyle(); } },
@@ -41,9 +40,8 @@ const std::unordered_map<std::string, std::function<std::string(const TextClockC
 void TextClockComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
-    DumpLog::GetInstance().AddDesc(std::string("hourswest: ").append(GetHoursWest()));
+    DumpLog::GetInstance().AddDesc(std::string("timeZoneOffset: ").append(GetTimeZoneOffset()));
     DumpLog::GetInstance().AddDesc(std::string("format: ").append(GeFormat()));
-    DumpLog::GetInstance().AddDesc(std::string("status: ").append(GetStatus()));
     DumpLog::GetInstance().AddDesc(std::string("fontColor: ").append(GetTextFontColor()));
     DumpLog::GetInstance().AddDesc(std::string("fontSize: ").append(GetTextFontSize()));
     DumpLog::GetInstance().AddDesc(std::string("fontStyle: ").append(GetTextFontStyle()));
@@ -60,12 +58,12 @@ std::unique_ptr<JsonValue> TextClockComposedElement::ToJsonObject() const
     return resultJson;
 }
 
-std::string TextClockComposedElement::GetHoursWest() const
+std::string TextClockComposedElement::GetTimeZoneOffset() const
 {
     auto render = GetRenderTextClock();
     if (render) {
-        double hourswest = render->GetHoursWest();
-        return std::to_string(hourswest);
+        double timeZoneOffset = render->GetHoursWest();
+        return std::to_string(timeZoneOffset);
     }
     return "";
 }
@@ -75,16 +73,6 @@ std::string TextClockComposedElement::GeFormat() const
     auto render = GetRenderTextClock();
     if (render) {
         return render->GeFormat();
-    }
-    return "";
-}
-
-std::string TextClockComposedElement::GetStatus() const
-{
-    auto render = GetRenderTextClock();
-    if (render) {
-        bool status = render->GetStatus();
-        return ConvertBoolToString(status);
     }
     return "";
 }

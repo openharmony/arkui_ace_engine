@@ -60,11 +60,6 @@ public:
         return format_;
     }
 
-    bool GetStatus() const
-    {
-        return isStart_;
-    }
-
     const RefPtr<RenderText>& GetRenderText() const
     {
         return renderTimeText_;
