@@ -45,7 +45,6 @@ void JSXComponent::Create(const JSCallbackInfo& info)
 
     auto type = paramObject->GetProperty("type");
     auto libraryname = paramObject->GetProperty("libraryname");
-    auto source = paramObject->GetProperty("source");
     auto xcomponentComponent = AceType::MakeRefPtr<OHOS::Ace::XComponentComponent>("xcomponent");
 
     if (!id->IsString()) {
