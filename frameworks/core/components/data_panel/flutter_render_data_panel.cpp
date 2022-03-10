@@ -665,7 +665,7 @@ void FlutterRenderPercentageDataPanel::Paint(RenderContext& context, const Offse
         PaintRainbowFilterMask(canvas, factor * animationPercent_, segments, arcData);
     }
     totalValue = totalValue * proportions;
-    for (int i = static_cast<int32_t>(segments.size()) - 1; i >= 0; i--) {
+    for (int32_t i = static_cast<int32_t>(segments.size()) - 1; i >= 0; i--) {
         const auto& segment = segments[i];
         arcData.startColor = segment.GetStartColor();
         arcData.endColor = segment.GetEndColor();
