@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,15 @@ public:
     std::string GetDisableSwipe() const;
     std::string GetItemSpace() const;
     std::string GetCurve() const;
-
+    std::string GetIndicatorStyle() const;
+    std::string GetSelectedColor() const;
+    std::string GetColor() const;
+    std::string GetSwiperLeft() const;
+    std::string GetSwiperTop() const;
+    std::string GetSwiperRight() const;
+    std::string GetSwiperBottom() const;
+    std::string GetSwiperSize() const;
+    
     AceType::IdType GetTargetTypeId() const override
     {
         return SwiperElement::TypeId();

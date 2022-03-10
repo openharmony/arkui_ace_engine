@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,9 @@ const std::unordered_map<std::string, std::function<std::string(const SwiperComp
     { "duration", [](const SwiperComposedElement& inspector) { return inspector.GetDuration(); } },
     { "vertical", [](const SwiperComposedElement& inspector) { return inspector.GetVertical(); } },
     { "disableSwipe", [](const SwiperComposedElement& inspector) { return inspector.GetDisableSwipe(); } },
-    { "itemSpace", [](const SwiperComposedElement& inspector) { return inspector.GetItemSpace(); } }
+    { "itemSpace", [](const SwiperComposedElement& inspector) { return inspector.GetItemSpace(); } },
+    { "curve", [](const SwiperComposedElement& inspector) { return inspector.GetCurve(); } },
+    { "indicatorStyle", [](const SwiperComposedElement& inspector) { return inspector.GetIndicatorStyle(); } }
 };
 
 } // namespace
@@ -50,6 +52,14 @@ void SwiperComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(std::string("vertical: ").append(GetVertical()));
     DumpLog::GetInstance().AddDesc(std::string("disableSwipe: ").append(GetDisableSwipe()));
     DumpLog::GetInstance().AddDesc(std::string("itemSpace: ").append(GetItemSpace()));
+    DumpLog::GetInstance().AddDesc(std::string("curve: ").append(GetCurve()));
+    DumpLog::GetInstance().AddDesc(std::string("selectedColor: ").append(GetSelectedColor()));
+    DumpLog::GetInstance().AddDesc(std::string("color: ").append(GetColor()));
+    DumpLog::GetInstance().AddDesc(std::string("left: ").append(GetSwiperLeft()));
+    DumpLog::GetInstance().AddDesc(std::string("top: ").append(GetSwiperTop()));
+    DumpLog::GetInstance().AddDesc(std::string("right: ").append(GetSwiperRight()));
+    DumpLog::GetInstance().AddDesc(std::string("bottom: ").append(GetSwiperBottom()));
+    DumpLog::GetInstance().AddDesc(std::string("size: ").append(GetSwiperSize()));
 }
 
 std::unique_ptr<JsonValue> SwiperComposedElement::ToJsonObject() const
@@ -59,6 +69,19 @@ std::unique_ptr<JsonValue> SwiperComposedElement::ToJsonObject() const
         resultJson->Put(value.first.c_str(), value.second(*this).c_str());
     }
     return resultJson;
+}
+
+std::string SwiperComposedElement::GetIndicatorStyle() const
+{
+    auto jsonValue = JsonUtil::Create(false);
+    jsonValue->Put("left", GetSwiperLeft().c_str());
+    jsonValue->Put("top", GetSwiperTop().c_str());
+    jsonValue->Put("right", GetSwiperRight().c_str());
+    jsonValue->Put("bottom", GetSwiperBottom().c_str());
+    jsonValue->Put("size", GetSwiperSize().c_str());
+    jsonValue->Put("selectedColor", GetSelectedColor().c_str());
+    jsonValue->Put("color", GetColor().c_str());
+    return jsonValue->ToString();
 }
 
 std::string SwiperComposedElement::GetCurrentIndex() const
@@ -133,6 +156,76 @@ std::string SwiperComposedElement::GetCurve() const
     if (renderSwiper) {
         auto curve = renderSwiper->GetCurveRender();
         return curve;
+    }
+    return "";
+}
+
+std::string SwiperComposedElement::GetSelectedColor() const
+{
+    auto renderSwiper = GetRenderSwiper();
+    if (renderSwiper) {
+        auto selectedColor = renderSwiper->GetSelectedColor();
+        return selectedColor.ColorToString();
+    }
+    return "";
+}
+
+std::string SwiperComposedElement::GetColor() const
+{
+    auto renderSwiper = GetRenderSwiper();
+    if (renderSwiper) {
+        auto Color = renderSwiper->GetColor();
+        return Color.ColorToString();
+    }
+    return "";
+}
+
+std::string SwiperComposedElement::GetSwiperLeft() const
+{
+    auto renderSwiper = GetRenderSwiper();
+    if (renderSwiper) {
+        auto left = renderSwiper->GetSwiperLeft();
+        return left.ToString();
+    }
+    return "";
+}
+
+std::string SwiperComposedElement::GetSwiperTop() const
+{
+    auto renderSwiper = GetRenderSwiper();
+    if (renderSwiper) {
+        auto top = renderSwiper->GetSwiperTop();
+        return top.ToString();
+    }
+    return "";
+}
+
+std::string SwiperComposedElement::GetSwiperRight() const
+{
+    auto renderSwiper = GetRenderSwiper();
+    if (renderSwiper) {
+        auto right = renderSwiper->GetSwiperRight();
+        return right.ToString();
+    }
+    return "";
+}
+
+std::string SwiperComposedElement::GetSwiperBottom() const
+{
+    auto renderSwiper = GetRenderSwiper();
+    if (renderSwiper) {
+        auto bottom = renderSwiper->GetSwiperBottom();
+        return bottom.ToString();
+    }
+    return "";
+}
+
+std::string SwiperComposedElement::GetSwiperSize() const
+{
+    auto renderSwiper = GetRenderSwiper();
+    if (renderSwiper) {
+        auto size = renderSwiper->GetSwiperSize();
+        return size.ToString();
     }
     return "";
 }
