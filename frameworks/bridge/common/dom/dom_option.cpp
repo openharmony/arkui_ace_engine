@@ -44,6 +44,7 @@ void DOMOption::ResetInitializedStyle()
     if (theme_) {
         selectOptionComponent_->SetClickedColor(theme_->GetClickedColor());
         selectOptionComponent_->SetSelectedColor(theme_->GetSelectedColor());
+        selectOptionComponent_->SetSelectedBackgroundColor(theme_->GetSelectedColor());
         selectOptionComponent_->SetFontColor(theme_->GetFontColor());
         selectOptionComponent_->SetFontSize(theme_->GetFontSize());
         selectOptionComponent_->SetFontWeight(theme_->GetFontWeight());
