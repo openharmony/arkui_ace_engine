@@ -64,6 +64,7 @@ build_component("inspector_v2") {
     "shape_composed_element.cpp",
     "shape_container_composed_element.cpp",
     "sheet_composed_element.cpp",
+    "side_bar_composed_element.cpp",
     "slider_composed_element.cpp",
     "span_composed_element.cpp",
     "stack_composed_element.cpp",
