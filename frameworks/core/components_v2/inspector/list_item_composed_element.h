@@ -39,6 +39,7 @@ public:
     {
         return ListItemElement::TypeId();
     }
+    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
 };
 
 } // namespace OHOS::Ace
