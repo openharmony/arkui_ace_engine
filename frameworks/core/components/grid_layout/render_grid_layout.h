@@ -405,9 +405,14 @@ protected:
     void RegisterDropJSFunc(const OnCallJSDropFunc& func);
     void CallDropJSFunc();
     bool CheckAnimation();
+    bool CheckNeedShrink() const;
+    void RefreshAllocatedRowSizes(int32_t rowIndex, int32_t itemRowSpan, const RefPtr<RenderNode>& item);
 
     bool isVertical_ = false;
     bool updateFlag_ = false;
+    bool isDeclarative_ = false;
+    bool needShrink_ = false;
+    std::vector<double> allocatedRowSizes_;
     FlexDirection direction_ = FlexDirection::ROW;
     FlexAlign crossAxisAlign_ = FlexAlign::CENTER;
 

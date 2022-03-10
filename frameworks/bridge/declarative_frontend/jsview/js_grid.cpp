@@ -41,6 +41,7 @@ void JSGrid::Create(const JSCallbackInfo& info)
 
     RefPtr<OHOS::Ace::GridLayoutComponent> gridComponent = AceType::MakeRefPtr<GridLayoutComponent>(componentChildren);
     gridComponent->SetDeclarative();
+    gridComponent->SetNeedShrink(true);
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSScroller* jsScroller = JSRef<JSObject>::Cast(info[0])->Unwrap<JSScroller>();
         if (jsScroller) {
@@ -112,6 +113,25 @@ void JSGrid::SetRowsGap(const JSCallbackInfo& info)
     }
 }
 
+void JSGrid::JsGridHeight(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    JSViewAbstract::JsHeight(info);
+    Dimension height;
+    if (!ParseJsDimensionVp(info[0], height)) {
+        return;
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (grid && height.IsValid()) {
+        grid->SetNeedShrink(false);
+    }
+}
+
+
 void JSGrid::JsOnScrollIndex(const JSCallbackInfo& info)
 {
     if (info[0]->IsFunction()) {
@@ -170,6 +190,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("onItemDragMove", &JSGrid::JsOnGridDragMove);
     JSClass<JSGrid>::StaticMethod("onItemDragLeave", &JSGrid::JsOnGridDragLeave);
     JSClass<JSGrid>::StaticMethod("onItemDragStart", &JSGrid::JsOnGridDragStart);
+    JSClass<JSGrid>::StaticMethod("height", &JSGrid::JsGridHeight);
     JSClass<JSGrid>::StaticMethod("onItemDrop", &JSGrid::JsOnGridDrop);
     JSClass<JSGrid>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSGrid>::Inherit<JSContainerBase>();
