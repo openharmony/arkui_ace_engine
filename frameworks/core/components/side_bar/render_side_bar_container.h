@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,12 +79,10 @@ public:
         return buttonTop_;
     }
 
-
     double GetButtonWidth() const
     {
         return buttonWidth_;
     }
-
 
     double GetButtonHeight() const
     {
@@ -105,7 +103,6 @@ public:
     {
         return maxSidebarWidth_;
     }
-
 
 private:
     void DoSideBarAnimation();
@@ -132,10 +129,10 @@ private:
     std::string iconShow_;
     std::string iconHidden_;
     std::string iconSwitch_;
-    double buttonLeft_;
-    double buttonTop_;
-    double buttonWidth_;
-    double buttonHeight_;
+    double buttonLeft_ = 16.0;
+    double buttonTop_ = 48.0;
+    double buttonWidth_ = 32.0;
+    double buttonHeight_ = 32.0;
 
     Dimension sidebarWidth_ = 200.0_vp;
     Dimension minSidebarWidth_ = 200.0_vp;
