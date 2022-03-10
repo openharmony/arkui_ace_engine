@@ -40,7 +40,7 @@ void GradientLayer::AddToScene(SceneBuilder& builder, double x, double y)
         // Convert color list.
         tonic::Int32List colorList(colors_.size());
         for (size_t i = 0; i < colors_.size(); i++) {
-            colorList[i] = colors_[i].GetValue();
+            colorList[i] = static_cast<int32_t>(colors_[i].GetValue());
         }
 
         // Calculate stop point position(from 0.0 to 1.0).

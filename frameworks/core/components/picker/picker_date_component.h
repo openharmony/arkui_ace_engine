@@ -25,7 +25,7 @@ class LunarCalculator {
 public:
     static uint32_t GetLunarLeapMonth(uint32_t lunarYear)
     {
-        if ((lunarYear - YEAR_START) >= LUNAR_INFO_SIZE) {
+        if (lunarYear >= YEAR_START + LUNAR_INFO_SIZE) {
             return 0;
         }
         uint32_t leapMonth = LUNAR_INFO[lunarYear - YEAR_START] & 0xf; // use 0xf to get leap month info
@@ -34,7 +34,7 @@ public:
 
     static uint32_t GetLunarLeapDays(uint32_t lunarYear)
     {
-        if ((lunarYear - YEAR_START + 1) >= LUNAR_INFO_SIZE) {
+        if (lunarYear >= YEAR_START - 1 + LUNAR_INFO_SIZE) {
             return 0;
         }
         return GetLunarLeapMonth(lunarYear) > 0 ? ((LUNAR_INFO[lunarYear - YEAR_START + 1] & 0xf) == 0xf ? 30 : 29)
@@ -43,7 +43,7 @@ public:
 
     static uint32_t GetLunarYearDays(uint32_t lunarYear)
     {
-        if ((lunarYear - YEAR_START) >= LUNAR_INFO_SIZE) {
+        if (lunarYear >= YEAR_START + LUNAR_INFO_SIZE) {
             return 0;
         }
         uint32_t totalDays = 348;                          // lunar year has (12 * 29 =) 348 days at least
@@ -56,7 +56,7 @@ public:
 
     static uint32_t GetLunarMonthDays(uint32_t lunarYear, uint32_t lunarMonth)
     {
-        if ((lunarYear - YEAR_START) >= LUNAR_INFO_SIZE) {
+        if (lunarYear >= YEAR_START + LUNAR_INFO_SIZE) {
             return 0;
         }
         uint32_t month = static_cast<uint32_t>(lunarMonth);
