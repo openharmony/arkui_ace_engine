@@ -63,13 +63,15 @@ def main(argv):
     if os.path.exists(target_i18n_path):
         shutil.rmtree(target_i18n_path)
     source_i18n_path = os.path.join(project_path, "i18n")
-    shutil.copytree(source_i18n_path, target_i18n_path, ignore=shutil.ignore_patterns('.git'))
+    if os.path.exists(source_i18n_path):
+        shutil.copytree(source_i18n_path, target_i18n_path, ignore=shutil.ignore_patterns('.git'))
 
     target_common_path = os.path.join(js2bundle_target_path, "sample", "rich", "common")
     if os.path.exists(target_common_path):
         shutil.rmtree(target_common_path)
     source_common_path = os.path.join(project_path, "common")
-    shutil.copytree(source_common_path, target_common_path, ignore=shutil.ignore_patterns('.git'))
+    if os.path.exists(source_common_path):
+        shutil.copytree(source_common_path, target_common_path, ignore=shutil.ignore_patterns('.git'))
 
     target_index_path = os.path.join(js2bundle_target_path, "sample", "rich", "pages", "index")
     shutil.copyfile(
