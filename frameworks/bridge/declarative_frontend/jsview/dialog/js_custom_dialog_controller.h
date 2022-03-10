@@ -35,7 +35,7 @@ public:
     void JsCloseDialog(const JSCallbackInfo& info);
 
 private:
-    void ShowDialog();
+    void ShowDialog(const JSCallbackInfo& info);
     void CloseDialog();
 
     JSView* ownerView_ = nullptr;
