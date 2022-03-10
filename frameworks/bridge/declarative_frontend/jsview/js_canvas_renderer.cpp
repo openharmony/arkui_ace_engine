@@ -869,11 +869,6 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     width = SystemProperties::Vp2Px(width);
     height = SystemProperties::Vp2Px(height);
 
-    left = SystemProperties::Vp2Px(left);
-    top = SystemProperties::Vp2Px(top);
-    width = SystemProperties::Vp2Px(width);
-    height = SystemProperties::Vp2Px(height);
-
     // 1 Get data from canvas
     std::unique_ptr<ImageData> canvasData;
     if (isOffscreen_) {
