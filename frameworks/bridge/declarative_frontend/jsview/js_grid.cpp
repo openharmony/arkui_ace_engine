@@ -30,7 +30,6 @@ const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::A
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
 const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDirection::COLUMN,
     FlexDirection::ROW_REVERSE, FlexDirection::COLUMN_REVERSE };
-const std::vector<GridDirection> GRID_DIRECTION = { GridDirection::LTR, GridDirection::RTL, GridDirection::Auto };
 
 } // namespace
 
@@ -313,22 +312,20 @@ void JSGrid::SetLayoutDirection(int32_t value)
     }
 }
 
-void JSGrid::SetDirection(int32_t value)
+void JSGrid::SetDirection(const std::string& dir)
 {
-    if (value >= 0 && value < static_cast<int32_t>(GRID_DIRECTION.size())) {
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
-        if (grid) {
-            bool rightToLeft = false;
-            if (value == (int32_t)GridDirection::LTR) {
-                rightToLeft = false;
-            } else if (value == (int32_t)GridDirection::RTL) {
-                rightToLeft = true;
-            } else {
-                rightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-            }
-            grid->SetRightToLeft(rightToLeft);
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (grid) {
+        bool rightToLeft = false;
+        if (dir == "Ltr") {
+            rightToLeft = false;
+        } else if (dir == "Rtl") {
+            rightToLeft = true;
+        } else {
+            rightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
         }
+        grid->SetRightToLeft(rightToLeft);
     }
 }
 

@@ -48,12 +48,6 @@ enum class GridColumnType {
     CAR_DIALOG,
 };
 
-enum class GridDirection {
-    LTR = 0,
-    RTL,
-    Auto,
-};
-
 class GridLayoutInfo : public virtual AceType {
     DECLARE_ACE_TYPE(GridLayoutInfo, AceType);
 };
