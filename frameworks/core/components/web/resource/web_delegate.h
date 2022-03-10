@@ -41,13 +41,13 @@ class ConsoleLogOhos : public WebConsoleLog {
 public:
     ConsoleLogOhos(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message) : message_(message) {}
 
-    int LineNumer() override;
+    int GetLineNumber() override;
 
-    const std::string& Log() override;
+    const std::string& GetLog() override;
 
-    int LogLevel() override;
+    int GetLogLevel() override;
 
-    const std::string& SourceId() override;
+    const std::string& GetSourceId() override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message_;

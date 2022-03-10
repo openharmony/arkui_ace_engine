@@ -66,7 +66,7 @@ constexpr char WEB_ERROR_MSG_CREATEFAIL[] = "create web_delegate failed.";
 
 } // namespace
 
-int ConsoleLogOhos::LineNumer()
+int ConsoleLogOhos::GetLineNumber()
 {
     if (message_) {
         return message_->LineNumer();
@@ -74,7 +74,7 @@ int ConsoleLogOhos::LineNumer()
     return -1;
 }
 
-const std::string& ConsoleLogOhos::Log()
+const std::string& ConsoleLogOhos::GetLog()
 {
     if (message_) {
         return message_->Log();
@@ -82,7 +82,7 @@ const std::string& ConsoleLogOhos::Log()
     return "";
 }
 
-int ConsoleLogOhos::LogLevel()
+int ConsoleLogOhos::GetLogLevel()
 {
     if (message_) {
         return message_->LogLevel();
@@ -90,7 +90,7 @@ int ConsoleLogOhos::LogLevel()
     return -1;
 }
 
-const std::string& ConsoleLogOhos::SourceId()
+const std::string& ConsoleLogOhos::GetSourceId()
 {
     if (message_) {
         return message_->SourceId();
@@ -1266,12 +1266,6 @@ void WebDelegate::OnFocus()
     }
 }
 
-bool WebDelegate::OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message)
-{
-    auto param = std::make_shared<LoadWebConsoleLogEvent>(AceType::MakeRefPtr<ConsoleLogOhos>(message));
-    return webComponent_->OnConsole(param.get());
-}
-
 sptr<OHOS::Rosen::Window> WebDelegate::CreateWindow()
 {
     auto context = context_.Upgrade();
@@ -1486,6 +1480,12 @@ void WebDelegate::OnGeolocationPermissionsShowPrompt(const std::string& origin,
         auto geolocation = AceType::MakeRefPtr<WebGeolocationOhos>(callback);
         onGeolocationShowV2_(std::make_shared<LoadWebGeolocationShowEvent>(origin, geolocation));
     }
+}
+
+bool WebDelegate::OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message)
+{
+    auto param = std::make_shared<LoadWebConsoleLogEvent>(AceType::MakeRefPtr<ConsoleLogOhos>(message));
+    return webComponent_->OnConsole(param.get());
 }
 
 bool WebDelegate::OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType)
