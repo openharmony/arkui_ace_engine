@@ -148,6 +148,11 @@ void JSCustomDialogController::ShowDialog()
         }
     });
     dialogProperties_.callbacks.try_emplace("cancel", cancelMarker);
+    dialogProperties_.onStatusChanged = [this](bool isShown) {
+        if (!isShown) {
+            this->isShown_ = isShown;
+        }
+    };
 
     auto executor = context->GetTaskExecutor();
     if (!executor) {
