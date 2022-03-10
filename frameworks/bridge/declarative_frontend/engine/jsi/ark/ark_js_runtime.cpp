@@ -200,7 +200,7 @@ void ArkJSRuntime::HandleUncaughtException()
     if (!exception.IsEmpty() && !exception->IsHole() && uncaughtErrorHandler_ != nullptr) {
         shared_ptr<JsValue> errorPtr =
             std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(shared_from_this(), exception));
-        uncaughtErrorHandler_(errorPtr);
+        uncaughtErrorHandler_(errorPtr, shared_from_this());
     }
 }
 

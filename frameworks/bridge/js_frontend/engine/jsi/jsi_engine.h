@@ -24,8 +24,8 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_value.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_group_js_bridge.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_utils.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
