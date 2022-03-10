@@ -77,6 +77,7 @@ RenderTextField::~RenderTextField()
     if (!pipelineContext) {
         return;
     }
+    PopTextOverlay();
     pipelineContext->RemoveFontNode(AceType::WeakClaim(this));
     auto fontManager = pipelineContext->GetFontManager();
     if (fontManager) {
@@ -676,9 +677,6 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
     textOverlay_->SetShareButtonMarker(onShare_);
     textOverlay_->SetSearchButtonMarker(onSearch_);
     textOverlay_->SetContext(context_);
-
-    PushTextOverlayToStack();
-
     // Add the Animation
     InitAnimation();
 
