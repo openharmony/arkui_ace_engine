@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,8 +35,8 @@ public:
     void PerformBuild() override;
     void Update() override;
     void ChangeByContent(int32_t index);
-    void ChangeByBar(int32_t index, bool isFromController = false);
-    void PrepareContent(int32_t index);
+    virtual void ChangeByBar(int32_t index, bool isFromController = false);
+    virtual void PrepareContent(int32_t index);
     void ChangeDispatch(int32_t index);
     RefPtr<Element> GetTabContentChild(int32_t index) const;
 
@@ -44,8 +44,7 @@ public:
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
     bool IsFocusable() const override;
 
-private:
-    void PerformBuildForDeclarative();
+protected:
     RefPtr<RenderNode> CreateRenderNode() override;
     void UpdateLastFocusNode();
     RefPtr<FocusNode> GetCurrentFocusNode() const;

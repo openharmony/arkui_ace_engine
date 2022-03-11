@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "core/components/tab_bar/render_tab_content.h"
 #include "core/components/tab_bar/tab_content_element.h"
+#include "core/components_v2/tabs/tab_content_proxy_element.h"
 
 namespace OHOS::Ace {
 
@@ -29,6 +30,9 @@ TabContentComponent::TabContentComponent(
 
 RefPtr<Element> TabContentComponent::CreateElement()
 {
+    if (useProxy_) {
+        return AceType::MakeRefPtr<V2::TabContentProxyElement>(GetChildren());
+    }
     return AceType::MakeRefPtr<TabContentElement>(GetChildren());
 }
 

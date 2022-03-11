@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,11 +114,17 @@ public:
         return domChangeEventId_;
     }
 
+    void SetUseProxy(bool useProxy)
+    {
+        useProxy_ = useProxy;
+    }
+
 private:
     RefPtr<TabController> controller_;
 
     bool scrollable_ = true; // the default value is true
     bool vertical_ = false;  // the tab is vertical or not, default value is false
+    bool useProxy_ = false;
     float scrollDuration_ = DEFAULT_TABCONTENT_ANIMATION_DURATION;
 
     EventMarker changeEventId_;

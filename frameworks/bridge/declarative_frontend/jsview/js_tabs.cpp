@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 
 #include "core/components/tab_bar/tab_bar_component.h"
 #include "core/components/tab_bar/tab_content_component.h"
-#include "core/components/tab_bar/tabs_component.h"
+#include "core/components_v2/tabs/tabs_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -50,7 +50,7 @@ void JSTabs::SetOnChange(const JSCallbackInfo& args)
             ACE_SCORING_EVENT("Tabs.onChange");
             func->Execute(*TabsInfo);
         });
-        auto component = AceType::DynamicCast<TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+        auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         if (component) {
             auto tabContent = component->GetTabContentChild();
             if (tabContent) {
@@ -86,12 +86,11 @@ void JSTabs::Create(const JSCallbackInfo& info)
             if (!tabController) {
                 tabController = JSTabsController::CreateController();
             }
-            tabController->SetIndex(index->ToNumber<int32_t>());
+            tabController->SetInitialIndex(index->ToNumber<int32_t>());
         }
     }
     std::list<RefPtr<Component>> children;
-    RefPtr<TabsComponent> tabsComponent =
-        AceType::MakeRefPtr<OHOS::Ace::TabsComponent>(children, barVal, tabController);
+    auto tabsComponent = AceType::MakeRefPtr<V2::TabsComponent>(children, barVal, tabController);
     auto tabBar = tabsComponent->GetTabBarChild();
     if (tabBar) {
         auto theme = GetTheme<TabTheme>();
@@ -113,7 +112,7 @@ void JSTabs::Pop()
 
 void JSTabs::SetVertical(const std::string& value)
 {
-    auto tabsComponent = AceType::DynamicCast<TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    auto tabsComponent = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!tabsComponent) {
         return;
     }
@@ -135,7 +134,7 @@ void JSTabs::SetVertical(const std::string& value)
 
 void JSTabs::SetScrollable(const std::string& value)
 {
-    auto component = AceType::DynamicCast<TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!component) {
         return;
     }
@@ -147,7 +146,7 @@ void JSTabs::SetScrollable(const std::string& value)
 
 void JSTabs::SetBarMode(const std::string& value)
 {
-    auto component = AceType::DynamicCast<TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!component) {
         return;
     }
@@ -159,7 +158,7 @@ void JSTabs::SetBarMode(const std::string& value)
 
 void JSTabs::SetBarWidth(const JSCallbackInfo& info)
 {
-    auto component = AceType::DynamicCast<TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!component) {
         return;
     }
@@ -187,7 +186,7 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
 
 void JSTabs::SetBarHeight(const JSCallbackInfo& info)
 {
-    auto component = AceType::DynamicCast<TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!component) {
         return;
     }
@@ -213,9 +212,24 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
     }
 }
 
+void JSTabs::SetIndex(int32_t index)
+{
+    auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!component) {
+        LOGE("can not find tabs component");
+        return;
+    }
+    auto controller = component->GetTabsController();
+    if (controller) {
+        controller->SetPendingIndex(index);
+    } else {
+        LOGE("can not find controller");
+    }
+}
+
 void JSTabs::SetAnimationDuration(float value)
 {
-    auto component = AceType::DynamicCast<TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!component) {
         return;
     }
@@ -236,6 +250,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("barMode", &JSTabs::SetBarMode);
     JSClass<JSTabs>::StaticMethod("barWidth", &JSTabs::SetBarWidth);
     JSClass<JSTabs>::StaticMethod("barHeight", &JSTabs::SetBarHeight);
+    JSClass<JSTabs>::StaticMethod("index", &JSTabs::SetIndex);
     JSClass<JSTabs>::StaticMethod("animationDuration", &JSTabs::SetAnimationDuration);
     JSClass<JSTabs>::StaticMethod("onChange", &JSTabs::SetOnChange);
     JSClass<JSTabs>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);

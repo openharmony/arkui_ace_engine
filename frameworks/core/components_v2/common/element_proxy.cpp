@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -481,7 +481,7 @@ public:
 private:
     class LazyForEachCache final {
     public:
-        explicit LazyForEachCache(const RefPtr<LazyForEachComponent> component)
+        explicit LazyForEachCache(const RefPtr<LazyForEachComponent>& component)
             : lazyForEachComponent_(component), count_(component->TotalCount())
         {}
         ~LazyForEachCache() = default;
@@ -534,7 +534,7 @@ private:
 class LinearElementProxy : public ElementProxy {
 public:
     explicit LinearElementProxy(const WeakPtr<ElementProxyHost>& host) : ElementProxy(host) {}
-    virtual ~LinearElementProxy() override = default;
+    ~LinearElementProxy() override = default;
 
     void UpdateIndex(size_t startIndex) override
     {
@@ -708,7 +708,7 @@ public:
 class MultiComposedElementProxy : public LinearElementProxy {
 public:
     explicit MultiComposedElementProxy(const WeakPtr<ElementProxyHost>& host) : LinearElementProxy(host) {}
-    virtual ~MultiComposedElementProxy() override = default;
+    ~MultiComposedElementProxy() override = default;
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
