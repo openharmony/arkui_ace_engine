@@ -150,6 +150,7 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     fontManager_ = FontManager::Create();
     renderFactory_ = AceType::MakeRefPtr<FlutterRenderFactory>();
     UpdateFontWeightScale();
+    eventManager_.SetInstanceId(instanceId);
 }
 
 PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,

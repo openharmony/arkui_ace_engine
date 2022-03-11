@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,9 @@
 #include "base/thread/background_task_executor.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_page.h"
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+#include "core/common/plugin_manager.h"
+#endif
 #include "core/image/image_cache.h"
 
 namespace OHOS::Ace {
@@ -93,6 +96,11 @@ void AceEngine::Dump(const std::vector<std::string>& params) const
 
 RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
 {
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+    if (instanceId >= MIN_PLUGIN_SUBCONTAINER_ID) {
+        instanceId = PluginManager::GetInstance().GetPluginParentContainerId(instanceId);
+    }
+#endif
     std::lock_guard<std::mutex> lock(mutex_);
     auto container = containerMap_.find(instanceId);
     if (container != containerMap_.end()) {
