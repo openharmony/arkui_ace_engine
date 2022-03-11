@@ -174,8 +174,9 @@ void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)
         child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId());
     }
 #ifdef ENABLE_ROSEN_BACKEND
-    else if (SystemProperties::GetRosenBackendEnabled() && child->HasDisappearingTransition(child->GetNodeId())) {
-        // if rosen backend is enabled, kick off a disappearing transition
+    // To avoid redundant transition animation, only trigger transition when head render node is removed
+    else if (child->IsHeadRenderNode() && child->HasDisappearingTransition(child->GetNodeId())) {
+        // kick off a disappearing transition
         child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId());
     }
     if (rsNode_ && rsNode_ == child->rsNode_) {
@@ -1613,8 +1614,9 @@ void RenderNode::NotifyTransition(TransitionType type, int32_t nodeId)
         if (GetRSNode() == nullptr) {
             return;
         }
+        // call OnRSTransition for all render_nodes sharing this RSNode
         OnRSTransition(type);
-        if (!isTailRenderNode_) {
+        if (isTailRenderNode_) {
             return;
         }
         for (auto& child : children_) {
