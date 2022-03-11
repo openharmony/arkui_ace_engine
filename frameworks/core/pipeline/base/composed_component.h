@@ -79,11 +79,11 @@ public:
         return false;
     }
 
-    bool GetNeedReserveChild(){
+    bool GetNeedReserveChild() {
         return needReserveChild_;
     }
 
-    void SetNeedReserveChild(bool needReserve){
+    void SetNeedReserveChild(bool needReserve) {
         needReserveChild_ = needReserve;
     }
 
