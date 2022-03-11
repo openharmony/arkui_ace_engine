@@ -22,10 +22,13 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
+
+constexpr uint32_t DELAY_TIME_FOR_STACK = 100;
 const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
+
 } // namespace
 
 void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
@@ -116,7 +119,43 @@ void JSCustomDialogController::DestructorCallback(JSCustomDialogController* cont
     }
 }
 
-void JSCustomDialogController::ShowDialog(const JSCallbackInfo& info)
+void JSCustomDialogController::NotifyDialogOperation(DialogOperation operation)
+{
+    LOGD("JSCustomDialogController(NotifyDialogOperation)");
+    if (operation == DialogOperation::DIALOG_OPEN) {
+        isShown_ = true;
+        pending_ = false;
+        for (auto iter = dialogOperation_.begin(); iter != dialogOperation_.end();) {
+            if (*iter == DialogOperation::DIALOG_OPEN) {
+                dialogOperation_.erase(iter++);
+                continue;
+            }
+
+            if (*iter == DialogOperation::DIALOG_CLOSE) {
+                dialogOperation_.erase(iter);
+                CloseDialog();
+                break;
+            }
+        }
+    } else if (operation == DialogOperation::DIALOG_CLOSE) {
+        isShown_ = false;
+        pending_ = false;
+        for (auto iter = dialogOperation_.begin(); iter != dialogOperation_.end();) {
+            if (*iter == DialogOperation::DIALOG_CLOSE) {
+                dialogOperation_.erase(iter++);
+                continue;
+            }
+
+            if (*iter == DialogOperation::DIALOG_OPEN) {
+                dialogOperation_.erase(iter);
+                ShowDialog();
+                break;
+            }
+        }
+    }
+}
+
+void JSCustomDialogController::ShowDialog()
 {
     LOGI("JSCustomDialogController(ShowDialog)");
     RefPtr<Container> container;
@@ -148,20 +187,41 @@ void JSCustomDialogController::ShowDialog(const JSCallbackInfo& info)
         }
     });
     dialogProperties_.callbacks.try_emplace("cancel", cancelMarker);
-    dialogProperties_.onStatusChanged = [this](bool isShown) { this->isShown_ = isShown; };
+    dialogProperties_.onStatusChanged = [this](bool isShown) {
+        if (!isShown) {
+            this->isShown_ = isShown;
+        }
+    };
 
     auto executor = context->GetTaskExecutor();
     if (!executor) {
         LOGE("JSCustomDialogController(JsOpenDialog) No Executor. Cannot post task.");
         return;
     }
-    executor->PostTask(
-        [context, dialogProperties = dialogProperties_, this]() mutable {
-            if (context) {
-                this->dialogComponent_ = context->ShowDialog(dialogProperties, false, "CustomDialog");
-            }
-        },
-        TaskExecutor::TaskType::UI);
+
+    if (pending_) {
+        dialogOperation_.emplace_back(DialogOperation::DIALOG_OPEN);
+        return;
+    }
+
+    if (isShown_) {
+        LOGD("JSCustomDialogController(JsOpenDialog) CustomDialog has already shown.");
+        return;
+    }
+
+    pending_ = true;
+    auto task = [context, dialogProperties = dialogProperties_, this]() mutable {
+        if (context) {
+            this->dialogComponent_ = context->ShowDialog(dialogProperties, false, "CustomDialog");
+        }
+        this->NotifyDialogOperation(DialogOperation::DIALOG_OPEN);
+    };
+    auto stack = context->GetLastStack();
+    if (stack) {
+        executor->PostTask(task, TaskExecutor::TaskType::UI);
+    } else {
+        executor->PostDelayedTask(task, TaskExecutor::TaskType::UI, DELAY_TIME_FOR_STACK);
+    }
 }
 
 void JSCustomDialogController::CloseDialog()
@@ -198,34 +258,37 @@ void JSCustomDialogController::CloseDialog()
         LOGE("JSCustomDialogController(JsOpenDialog) No Executor. Cannot post task.");
         return;
     }
-    executor->PostTask(
-        [lastStack, dialogComponent = dialogComponent_]() {
-            if (!lastStack || !dialogComponent) {
-                return;
-            }
-            auto animator = dialogComponent->GetAnimator();
-            auto dialogId = dialogComponent->GetDialogId();
-            if (animator) {
-                animator->AddStopListener([lastStack, dialogId] {
-                    if (lastStack) {
-                        lastStack->PopDialog(dialogId);
-                    }
-                });
-                animator->Play();
-            } else {
-                lastStack->PopDialog(dialogId);
-            }
-        },
-        TaskExecutor::TaskType::UI);
+
+    if (pending_) {
+        dialogOperation_.emplace_back(DialogOperation::DIALOG_CLOSE);
+        return;
+    }
+
+    pending_ = true;
+    auto task = [lastStack, dialogComponent = dialogComponent_, this]() {
+        if (!lastStack || !dialogComponent) {
+            return;
+        }
+        auto animator = dialogComponent->GetAnimator();
+        auto dialogId = dialogComponent->GetDialogId();
+        if (animator) {
+            animator->AddStopListener([lastStack, dialogId] {
+                if (lastStack) {
+                    lastStack->PopDialog(dialogId);
+                }
+            });
+            animator->Play();
+        } else {
+            lastStack->PopDialog(dialogId);
+        }
+        this->NotifyDialogOperation(DialogOperation::DIALOG_CLOSE);
+    };
+    executor->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
 void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 {
     LOGD("JSCustomDialogController(JsOpenDialog)");
-    if (isShown_) {
-        LOGD("CustomDialog has already shown.");
-        return;
-    }
     // Cannot reuse component because might depend on state
     if (customDialog_) {
         customDialog_ = nullptr;
@@ -246,7 +309,7 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         return;
     }
 
-    ShowDialog(info);
+    ShowDialog();
 }
 
 void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
