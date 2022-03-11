@@ -75,6 +75,9 @@ public:
     // Initialize the JS engine.
     virtual bool Initialize(const RefPtr<FrontendDelegate>& delegate) = 0;
 
+    // Destroy the JS engine resource.
+    virtual void Destroy() {}
+
     // Load script in JS engine, and execute in corresponding context.
     virtual void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) = 0;
 

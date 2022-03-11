@@ -878,6 +878,17 @@ JsiDeclarativeEngine::~JsiDeclarativeEngine()
     CHECK_RUN_ON(JS);
     LOG_DESTROY();
 
+    if (!runtime_ && nativeEngine_ != nullptr) {
+        nativeEngine_->CancelCheckUVLoop();
+        delete nativeEngine_;
+        nativeEngine_ = nullptr;
+    }
+}
+
+void JsiDeclarativeEngine::Destroy()
+{
+    LOGI("JsiDeclarativeEngine Destroy");
+    CHECK_RUN_ON(JS);
     XComponentClient::GetInstance().SetRegisterCallbackToNull();
     XComponentClient::GetInstance().SetJSValCallToNull();
 
@@ -887,11 +898,8 @@ JsiDeclarativeEngine::~JsiDeclarativeEngine()
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
 
-    if (!runtime_ && nativeEngine_ != nullptr) {
-        nativeEngine_->CancelCheckUVLoop();
+    if (nativeEngine_ != nullptr) {
         engineInstance_->DestroyAllRootViewHandle();
-        delete nativeEngine_;
-        nativeEngine_ = nullptr;
     }
 
     if (nativeXComponent_) {
