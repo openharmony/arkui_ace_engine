@@ -1476,6 +1476,7 @@ void RenderList::CreateDragDropRecognizer()
 
             positionedComponent->SetUpdatePositionFuncId(updatePosition);
             stackElement->PushComponent(positionedComponent);
+            renderList->hasDragItem_ = true;
         }
     });
     panRecognizer->SetOnActionUpdate(
@@ -1551,9 +1552,11 @@ void RenderList::CreateDragDropRecognizer()
         ItemDragInfo dragInfo;
         dragInfo.SetX(info.GetGlobalPoint().GetX());
         dragInfo.SetY(info.GetGlobalPoint().GetY());
-
-        auto stackElement = pipelineContext->GetLastStack();
-        stackElement->PopComponent();
+        if (renderList->hasDragItem_) {
+            auto stackElement = pipelineContext->GetLastStack();
+            stackElement->PopComponent();
+            renderList->hasDragItem_ = false;
+        }
 
         ACE_DCHECK(renderList->GetPreTargetRenderList() ==
                    renderList->FindTargetRenderNode<V2::RenderList>(pipelineContext, info));
@@ -1596,8 +1599,11 @@ void RenderList::CreateDragDropRecognizer()
             return;
         }
 
-        auto stackElement = pipelineContext->GetLastStack();
-        stackElement->PopComponent();
+        if (renderList->hasDragItem_) {
+            auto stackElement = pipelineContext->GetLastStack();
+            stackElement->PopComponent();
+            renderList->hasDragItem_ = false;
+        }
 
         renderList->SetPreTargetRenderList(nullptr);
         renderList->selectedDragItem_->SetHidden(false);
