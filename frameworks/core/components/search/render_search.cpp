@@ -291,6 +291,8 @@ void RenderSearch::CreateRenderButton(const RefPtr<SearchComponent>& searchCompo
         renderSearchBox_->Attach(GetContext());
         renderSearchBox_->Update(boxComponent);
         renderSearchBox_->AddChild(renderText);
+        renderSearchBox_->SyncRSNode(nullptr);
+        renderText->SyncRSNode(nullptr);
     }
 }
 
