@@ -299,7 +299,7 @@ std::string ConvertInputTypeToString(AceTextCategory type)
 bool FindFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityNode>& resultNode)
 {
     LOGI("FindFocus nodeId(%{public}d) focus(%{public}d)", node->GetNodeId(), node->GetFocusedState());
-    if (node->GetFocusedState()) {
+    if (node->GetAccessibilityFocusedState()) {
         resultNode = node;
         LOGI("FindFocus nodeId(%{public}d)", resultNode->GetNodeId());
         return true;
@@ -1159,14 +1159,13 @@ void JsAccessibilityManager::FocusMoveSearch(const long elementId, const int dir
     auto weak = WeakClaim(this);
     auto jsAccessibilityManager = weak.Upgrade();
     AccessibilityElementInfo nodeInfo;
-
     auto node = jsAccessibilityManager->GetAccessibilityNodeFromPage((NodeId)elementId);
-    LOGI("FocusMoveSearch nodeId:%{public}d", node->GetNodeId());
     if (!node) {
         LOGW("AccessibilityNodeInfo can't attach component by Id = %{public}d", (NodeId)elementId);
         callback.SetFocusMoveSearchResult(nodeInfo, requestId);
         return;
     }
+    LOGI("FocusMoveSearch nodeId:%{public}d", node->GetNodeId());
 
     auto context = GetPipelineContext().Upgrade();
     if (!context) {
@@ -1205,8 +1204,9 @@ void JsAccessibilityManager::FocusMoveSearch(const long elementId, const int dir
         default:
             break;
     }
-    LOGI("FocusMoveSearch end nodeId:%{public}d", resultNode->GetNodeId());
+
     if (resultNode) {
+        LOGI("FocusMoveSearch end nodeId:%{public}d", resultNode->GetNodeId());
         jsAccessibilityManager->UpdateNodeChildIds(resultNode);
         UpdateAccessibilityNodeInfo(resultNode, nodeInfo, jsAccessibilityManager, windowId_, rootNode->GetNodeId());
     }
@@ -1512,6 +1512,7 @@ bool JsAccessibilityManager::RequestAccessibilityFocus(const RefPtr<Accessibilit
     ClearCurrentFocus();
     currentFocusNodeId_ = requestNodeId;
     node->SetFocusedState(true);
+    node->SetAccessibilityFocusedState(true);
     LOGI("RequestAccessibilityFocus SetFocusedState true nodeId:%{public}d", node->GetNodeId());
     return node->ActionAccessibilityFocus(true);
 }
@@ -1527,6 +1528,7 @@ bool JsAccessibilityManager::ClearAccessibilityFocus(const RefPtr<AccessibilityN
 
     currentFocusNodeId_ = -1;
     node->SetFocusedState(false);
+    node->SetAccessibilityFocusedState(false);
     return node->ActionAccessibilityFocus(false);
 }
 
@@ -1537,6 +1539,7 @@ bool JsAccessibilityManager::ClearCurrentFocus()
     if (currentFocusNode != nullptr) {
         currentFocusNodeId_ = -1;
         currentFocusNode->SetFocusedState(false);
+        currentFocusNode->SetAccessibilityFocusedState(false);
         LOGI("ClearCurrentFocus SetFocusedState false nodeId:%{public}d", currentFocusNode->GetNodeId());
         return currentFocusNode->ActionAccessibilityFocus(false);
     }
