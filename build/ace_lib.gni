@@ -47,6 +47,7 @@ template("libace_static") {
         }
       }
     }
+    part_name = ace_engine_part
   }
 }
 

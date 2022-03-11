@@ -23,6 +23,7 @@ config("flutter_glfw_config") {
 }
 
 ohos_source_set("flutter_platform_common_client_wrapper") {
+  part_name = ace_engine_part
   sources = [
     "$flutter_root/engine/flutter/shell/platform/common/cpp/client_wrapper/engine_method_result.cc",
     "$flutter_root/engine/flutter/shell/platform/common/cpp/client_wrapper/standard_codec.cc",
@@ -48,6 +49,7 @@ ohos_source_set("flutter_platform_common_client_wrapper") {
 template("flutter_embedder_with_symbol_prefix") {
   forward_variables_from(invoker, "*")
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
     defines += [ "FLUTTER_API_SYMBOL_PREFIX=Embedder" ]
     cflags_cc += invoker.cflags_cc
@@ -107,6 +109,7 @@ foreach(item, ace_platforms) {
 template("flutter_platform_glfw") {
   forward_variables_from(invoker, "*")
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
     defines += [ "FLUTTER_DESKTOP_LIBRARY" ]
     cflags_cc += invoker.cflags_cc

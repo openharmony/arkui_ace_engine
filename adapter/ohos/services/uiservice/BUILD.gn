@@ -65,6 +65,7 @@ template("uiservice_static") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
 
