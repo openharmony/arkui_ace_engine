@@ -26,6 +26,7 @@
 
 class NativeEngine;
 class NativeReference;
+
 namespace OHOS::Ace::Framework {
 using PixelMapNapiEntry = void* (*)(void*, void*);
 struct JsModule {
@@ -156,7 +157,7 @@ public:
         return nullptr;
     }
 
-    virtual void SetContentStorage(int32_t instanceId, NativeReference* storage) {}
+    virtual void SetLocalStorage(int32_t instanceId, NativeReference* storage) {}
 
     virtual void SetContext(int32_t instanceId, NativeReference* context) {}
 

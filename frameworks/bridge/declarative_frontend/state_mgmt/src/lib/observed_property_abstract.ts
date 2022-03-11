@@ -65,6 +65,11 @@ abstract class ObservedPropertyAbstract<T>  {
   public info(): PropertyInfo {
     return this.info_;
   }
+  public setInfo(propName: PropertyInfo) {
+    if (propName && propName != "") {
+      this.info_ = propName;
+    }
+  }
 
   public abstract get(): T;
   public abstract set(newValue: T): void;
@@ -130,9 +135,9 @@ abstract class ObservedPropertyAbstract<T>  {
    * changes.
    */
   public abstract createLink(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T>;
+    linkPropName?: PropertyInfo): ObservedPropertyAbstract<T>;
   public abstract createProp(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T>;
+    linkPropName?: PropertyInfo): ObservedPropertyAbstract<T>;
 
   /**
    * factory function for concrete 'object' or 'simple' ObservedProperty object

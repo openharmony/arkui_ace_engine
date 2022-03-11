@@ -78,6 +78,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
@@ -979,6 +980,9 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
 void JsRegisterViews(BindingTarget globalObj)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (!runtime) {
+        LOGE("JsRegisterViews can't find runtime");
+    }
     auto vm = runtime->GetEcmaVm();
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadDocument"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadDocument, nullptr));
@@ -1023,6 +1027,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSContainerBase::JSBind();
     JSShapeAbstract::JSBind();
     JSView::JSBind(globalObj);
+    JSLocalStorage::JSBind(globalObj);
 
     JSEnvironment::JSBind(globalObj);
     JSViewContext::JSBind(globalObj);
@@ -1042,8 +1047,10 @@ void JsRegisterViews(BindingTarget globalObj)
     auto delegate = JsGetFrontendDelegate();
     std::string jsModules;
     if (delegate && delegate->GetAssetContent("component_collection.txt", jsModules)) {
+        LOGI("JsRegisterViews register collection modules");
         JsRegisterModules(globalObj, jsModules);
     } else {
+        LOGI("JsRegisterViews register all modules");
         RegisterAllModule(globalObj);
     }
 

@@ -24,8 +24,6 @@ template("declarative_js_engine_qjs") {
     configs = [ "$ace_root:ace_config" ]
 
     sources = [
-      "content_storage_set.cpp",
-      "js_converter.cpp",
       "modules/qjs_curves_module.cpp",
       "modules/qjs_matrix4_module.cpp",
       "modules/qjs_module_manager.cpp",
