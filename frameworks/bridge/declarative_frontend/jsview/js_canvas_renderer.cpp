@@ -17,6 +17,7 @@
 
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
+#include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 
 #ifdef PIXEL_MAP_SUPPORTED
@@ -924,6 +925,45 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
 #endif
 
 #endif
+}
+
+void JSCanvasRenderer::JsDrawBitmapMesh(const JSCallbackInfo& info)
+{
+    RefPtr<OffscreenCanvas> offscreenCanvas;
+
+    if (info.Length() != 4) {
+        LOGE("info.Length is not right %{public}d", info.Length());
+        return;
+    }
+
+    if (info[0]->IsObject()) {
+        uint32_t id = 0;
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> jsId = obj->GetProperty("__id");
+        JSViewAbstract::ParseJsInteger(jsId, id);
+        offscreenCanvas = JSOffscreenRenderingContext::GetOffscreenCanvas(id);
+    } else {
+        LOGE("info 0 is not object");
+        return;
+    }
+
+    std::vector<double> mesh;
+    double column;
+    double row;
+    if (!ParseJsDoubleArray(info[1], mesh)) {
+        LOGE("info 1 is not double array");
+        return;
+    }
+    if (!JSViewAbstract::ParseJsDouble(info[2], column)) {
+        LOGE("info 2 is not double");
+        return;
+    }
+    if (!JSViewAbstract::ParseJsDouble(info[3], row)) {
+        LOGE("info 3 is not double");
+        return;
+    }
+
+    pool_->DrawBitmapMesh(offscreenCanvas, mesh, column, row);
 }
 
 void JSCanvasRenderer::JsGetJsonData(const JSCallbackInfo& info)
