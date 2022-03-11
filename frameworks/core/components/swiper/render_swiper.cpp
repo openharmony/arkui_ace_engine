@@ -1596,7 +1596,7 @@ void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, bool in
     }
     // move current item
     auto item = items_.find(fromIndex);
-    if (item != items_.end()) {
+    if (item != items_.end() && !(RefuseUpdatePosition(fromIndex) && inLayout)) {
         item->second->SetPosition(GetMainAxisOffset(offset));
     }
 
