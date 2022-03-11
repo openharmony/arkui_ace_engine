@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -133,7 +133,7 @@ void DOMTabBar::OnMounted(const RefPtr<DOMNode>& parentNode)
         lastIndex_ = parentNodeTmp->GetTabIndex();
         controllerId_ = parentNodeTmp->GetTabControllerId();
         const auto& controller = parentNodeTmp->GetTabController();
-        controller->SetIndex(lastIndex_);
+        controller->SetIndexWithoutChangeContent(static_cast<int32_t>(lastIndex_));
         tabBarChild_->SetController(controller);
         PrepareChangeListener();
     }

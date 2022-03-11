@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,14 +58,49 @@ public:
 
     void AddChildContent(int32_t index, const RefPtr<RenderNode>& child)
     {
+        LOGI("AddChildContent: %{public}d", index);
+        auto iter = contentMap_.begin();
+        while (iter != contentMap_.end()) {
+            if (iter->second == child) {
+                if (iter->first != index) {
+                    // index has changed, clear map.
+                    contentMap_.clear();
+                }
+                break;
+            }
+            iter++;
+        }
         contentMap_[index] = child;
         requestedIndex_ = index;
+        forceUpdate_ = true;
     }
 
     void RemoveChildContent(int32_t index)
     {
-        contentMap_.erase(index);
+        LOGI("RemoveChildContent: %{public}d", index);
+        if (contentMap_.find(index) != contentMap_.end()) {
+            contentMap_.clear();
+            forceUpdate_ = true;
+        }
     }
+
+    void RemoveChildContent(const RefPtr<RenderNode>& child)
+    {
+        LOGI("RemoveChildContent by content");
+        auto iter = contentMap_.begin();
+        while (iter != contentMap_.end()) {
+            if (iter->second == child) {
+                iter->second->SetHidden(true);
+                contentMap_.clear();
+                forceUpdate_ = true;
+                break;
+            }
+            iter++;
+        }
+    }
+
+    // Used by declarative element to flush index after performBuild.
+    void FlushIndex();
 
     int32_t GetCurrentIndex() const
     {
@@ -141,6 +176,7 @@ private:
     bool isDragging_ = false;       // whether it is dragging
     bool isInitialized_ = false;
     bool isVertical_ = false; // whether the tab is vertical
+    bool forceUpdate_ = false;
 
     int32_t contentCount_ = 0;    // the count of content
     int32_t currentIndex_ = 0;    // the index of current tab
@@ -156,6 +192,9 @@ private:
     // callbacks when updating the index
     UpdateIndexFunc callback_;
     UpdateIndexFunc requireCallback_;
+
+    RefPtr<TabController> controller_;
+    bool useInitialIndex_ = true;
 };
 
 } // namespace OHOS::Ace

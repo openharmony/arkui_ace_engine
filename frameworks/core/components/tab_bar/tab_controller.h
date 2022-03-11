@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,9 +37,31 @@ public:
     int32_t GetId() const;
     int32_t GetIndex() const;
 
+    void SetTotalCount(int32_t totalCount)
+    {
+        totalCount_ = totalCount;
+    }
+    int32_t GetTotalCount() const
+    {
+        return totalCount_;
+    }
+
+    int32_t GetInitialIndex() const
+    {
+        return initialIndex_;
+    }
+
+    int32_t GetPendingIndex() const
+    {
+        return pendingIndex_;
+    }
+
     void ValidateIndex(int32_t maxIndex);
     void SetPageReady(bool ready);
     void SetIndex(int32_t index);
+    void SetInitialIndex(int32_t index);
+    void SetPendingIndex(int32_t index);
+    void SetIndexWithoutChangeContent(int32_t index);
     void SetIndexByController(int32_t index, bool blockEvent = true);
     void SetIndexByScrollContent(int32_t index);
     void SetContentElement(const RefPtr<Element>& contentElement);
@@ -61,6 +83,9 @@ public:
 private:
     int32_t id_ = -1;
     int32_t index_ = 0;
+    int32_t initialIndex_ = -1;
+    int32_t pendingIndex_ = -1;
+    int32_t totalCount_ = 0;
     bool pageReady_ = false;
     bool indexDefined_ = false;
     WeakPtr<Element> contentElement_;

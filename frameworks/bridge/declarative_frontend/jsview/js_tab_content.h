@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,8 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/core/components/tab_bar/tab_content_component.h"
-#include "frameworks/core/components/tab_bar/tab_content_item_component.h"
-#include "frameworks/core/components/tab_bar/tabs_component.h"
+#include "frameworks/core/components_v2/tabs/tab_content_item_component.h"
+#include "frameworks/core/components_v2/tabs/tabs_component.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -50,12 +50,13 @@ protected:
 
 private:
     static RefPtr<Component> ProcessTabBarBuilderFunction(
-        RefPtr<TabContentItemComponent>& tabContent, JSRef<JSObject> builderFunc);
+        RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSObject> builderFunc);
     static RefPtr<Component> ProcessTabBarTextIconPair(
-        RefPtr<TabContentItemComponent>& tabContent, JSRef<JSVal> text, JSRef<JSVal> icon);
+        RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSVal> text, JSRef<JSVal> icon);
     static RefPtr<TextComponent> CreateTabBarLabelComponent(
-        RefPtr<TabContentItemComponent>& tabContent, const std::string& labelStr);
-    static RefPtr<TextComponent> ProcessTabBarLabel(RefPtr<TabContentItemComponent>& tabContent, JSRef<JSVal> labelVal);
+        RefPtr<V2::TabContentItemComponent>& tabContent, const std::string& labelStr);
+    static RefPtr<TextComponent> ProcessTabBarLabel(
+        RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSVal> labelVal);
 };
 
 } // namespace OHOS::Ace::Framework
