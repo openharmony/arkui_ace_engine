@@ -1603,25 +1603,33 @@ void WebDelegate::OnRouterPush(const std::string& param)
 void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const double& y)
 {
     ACE_DCHECK(webview_ != nullptr);
-    webview_->OnTouchPress(id, x, y);
+    if (webview_) {
+        webview_->OnTouchPress(id, x, y);
+    }
 }
 
 void WebDelegate::HandleTouchUp(const int32_t& id, const double& x, const double& y)
 {
     ACE_DCHECK(webview_ != nullptr);
-    webview_->OnTouchRelease(id, x, y);
+    if (webview_) {
+        webview_->OnTouchRelease(id, x, y);
+    }
 }
 
 void WebDelegate::HandleTouchMove(const int32_t& id, const double& x, const double& y)
 {
     ACE_DCHECK(webview_ != nullptr);
-    webview_->OnTouchMove(id, x, y);
+    if (webview_) {
+        webview_->OnTouchMove(id, x, y);
+    }
 }
 
 void WebDelegate::HandleTouchCancel()
 {
     ACE_DCHECK(webview_ != nullptr);
-    webview_->OnTouchCancel();
+    if (webview_) {
+        webview_->OnTouchCancel();
+    }
 }
 #endif
 
