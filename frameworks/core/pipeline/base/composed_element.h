@@ -65,10 +65,10 @@ public:
         return id_;
     }
 
-    RefPtr<Component> CallRenderFunction(const RefPtr<Component>& componnet)
+    RefPtr<Component> CallRenderFunction(const RefPtr<Component>& component)
     {
         if (renderFunction_) {
-            return renderFunction_(componnet);
+            return renderFunction_(component);
         }
         return nullptr;
     }

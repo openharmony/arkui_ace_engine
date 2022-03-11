@@ -19,6 +19,7 @@
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/common/frontend.h"
+#include "core/components/flex/flex_item_element.h"
 #include "core/components/page/page_element.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/base/composed_component.h"
@@ -68,6 +69,19 @@ void ComposedElement::PerformBuild()
 
     auto component = HasRenderFunction() ? CallRenderFunction(component_) : BuildChild();
     auto child = children_.empty() ? nullptr : children_.front();
+    auto composedComponent = AceType::DynamicCast<ComposedComponent>(component_);
+    if (composedComponent) {
+        auto composedChild = composedComponent->GetChild();
+        if (HasRenderFunction() && composedComponent->GetNeedReserveChild()) {
+            auto flexItem = AceType::DynamicCast<SoleChildComponent>(composedChild);
+            if (flexItem) {
+                flexItem->SetChild(component);
+                UpdateChild(child, flexItem);
+                return;
+            }
+        }
+    }
+
     UpdateChild(child, component);
 }
 

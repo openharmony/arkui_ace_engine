@@ -79,8 +79,18 @@ public:
         return false;
     }
 
+    bool GetNeedReserveChild(){
+        return needReserveChild_;
+    }
+
+    void SetNeedReserveChild(bool needReserve){
+        needReserveChild_ = needReserve;
+    }
+
 private:
     ElementFunction elementFunction_;
+
+    bool needReserveChild_ = false;
 };
 
 } // namespace OHOS::Ace
