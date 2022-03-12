@@ -265,10 +265,6 @@ void RenderTextOverlay::UpdateWeakTextField(const RefPtr<TextOverlayComponent>& 
             option.updateOverlayType == UpdateOverlayType::LONG_PRESS) {
             overlay->childRightBoundary_ = 0.0;
         }
-        if (option.startHandleOffset == overlay->startHandleOffset_ &&
-            option.endHandleOffset == overlay->endHandleOffset_) {
-            return;
-        }
         overlay->SetVisible(true);
         overlay->showOption_ = option;
         overlay->startHandleOffset_ = option.startHandleOffset;
