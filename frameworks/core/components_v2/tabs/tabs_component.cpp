@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/components/tab_bar/tabs_component.h"
+#include "core/components_v2/tabs/tabs_component.h"
 
 #include "core/components/clip/clip_component.h"
 #include "core/components/foreach/for_each_component.h"
-#include "core/components/tab_bar/tabs_element.h"
+#include "core/components_v2/tabs/tabs_element.h"
 
-namespace OHOS::Ace {
+namespace OHOS::Ace::V2 {
 namespace {
 
 int32_t g_tabControllerId = 0;
@@ -40,6 +40,7 @@ TabsComponent::TabsComponent(
     tabBar_ = AceType::MakeRefPtr<TabBarComponent>(tabBarChildren_, controller_, tabBarIndicator_);
     tabBar_->SetBarPosition(barPosition);
     tabContent_ = AceType::MakeRefPtr<TabContentComponent>(tabContentChildren_, controller_);
+    tabContent_->SetUseProxy(true);
     flexItem_ = AceType::MakeRefPtr<FlexItemComponent>(0, 1, 0);
     flexItem_->SetChild(tabContent_);
     auto box = AceType::MakeRefPtr<BoxComponent>();
@@ -62,24 +63,12 @@ RefPtr<Element> TabsComponent::CreateElement()
 
 void TabsComponent::AppendChild(const RefPtr<Component>& child)
 {
-    if (AceType::InstanceOf<ForEachComponent>(child)) {
-        auto children = DynamicCast<ForEachComponent>(child)->GetChildren();
-        for (auto&& item : children) {
-            auto clip = AceType::MakeRefPtr<ClipComponent>(item);
-            clip->SetFollowChild(false);
-            tabContent_->AppendChildDirectly(clip);
-        }
-        return;
-    }
-    auto clip = AceType::MakeRefPtr<ClipComponent>(child);
-    clip->SetFollowChild(false);
-    tabContent_->AppendChildDirectly(clip);
+    tabContent_->AppendChildDirectly(child);
 }
 
 void TabsComponent::RemoveChild(const RefPtr<Component>& child)
 {
-    auto clip = AceType::DynamicCast<ClipComponent>(child);
-    tabContent_->RemoveChildDirectly(clip);
+    tabContent_->RemoveChildDirectly(child);
 }
 
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::V2

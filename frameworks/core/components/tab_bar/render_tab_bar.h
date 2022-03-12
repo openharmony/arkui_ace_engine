@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,6 +131,8 @@ private:
         return TabBarMode::SCROLLABEL == mode_ || TabBarMode::FIXED_START == mode_;
     }
     RefPtr<RenderNode> GetChildByIndex(int32_t index) const;
+
+    void FlushIndex(const RefPtr<TabController>& controller);
 
     RefPtr<ClickRecognizer> clickRecognizer_;
     RefPtr<Scrollable> scrollable_;
