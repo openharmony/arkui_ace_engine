@@ -161,6 +161,7 @@ void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)
             children_.erase(it);
         }
     }
+
     OnChildRemoved(child);
     disappearingNodes_.remove(child);
     // check whether child has config transition or will cause child memory leak.

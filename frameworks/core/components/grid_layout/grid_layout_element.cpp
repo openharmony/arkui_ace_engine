@@ -24,11 +24,6 @@
 
 namespace OHOS::Ace {
 
-RefPtr<RenderNode> GridLayoutElement::CreateRenderNode()
-{
-    return ComponentGroupElement::CreateRenderNode();
-}
-
 void GridLayoutElement::Update()
 {
     ComponentGroupElement::Update();
@@ -45,7 +40,7 @@ bool GridLayoutElement::RequestNextFocus(bool vertical, bool reverse, const Rect
     bool ret = false;
     while (!ret) {
         int32_t focusIndex = grid->RequestNextFocus(vertical, reverse);
-        int32_t size = GetChildrenList().size();
+        auto size = static_cast<int32_t>(GetChildrenList().size());
         if (focusIndex < 0 || focusIndex >= size) {
             return false;
         }
@@ -74,7 +69,17 @@ void GridLayoutElement::ApplyRenderChild(const RefPtr<RenderElement>& renderChil
         return;
     }
 
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        ComponentGroupElement::ApplyRenderChild(renderChild);
+        return;
+    }
+
     auto proxy = RenderItemProxy::Create();
+    if (!proxy) {
+        LOGE("fail to create proxy node");
+        return;
+    }
     proxy->AddChild(renderChild->GetRenderNode());
     proxy->Attach(context_);
     renderNode_->AddChild(proxy);
@@ -82,8 +87,6 @@ void GridLayoutElement::ApplyRenderChild(const RefPtr<RenderElement>& renderChil
 
 void GridLayoutElement::PerformBuild()
 {
-    children_.clear();
-    renderNode_->ClearChildren();
     ComponentGroupElement::PerformBuild();
 }
 
