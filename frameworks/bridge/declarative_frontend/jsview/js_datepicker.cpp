@@ -25,9 +25,7 @@
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace::Framework {
-
 namespace {
-
 void AddEvent(RefPtr<PickerBaseComponent>& picker, const JSCallbackInfo& info, DatePickerType pickerType)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
@@ -77,7 +75,6 @@ void AddEvent(RefPtr<PickerBaseComponent>& picker, const JSCallbackInfo& info, D
         picker->SetDialogChangeEvent(changeId);
     }
 }
-
 }
 
 void JSDatePicker::JSBind(BindingTarget globalObj)
@@ -212,7 +209,6 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
         LOGE("DatePicker Show dialog error, info is non-valid");
         return;
     }
-
 
     RefPtr<Component> component;
     CreateDatePicker(component, JSRef<JSObject>::Cast(info[0]));
