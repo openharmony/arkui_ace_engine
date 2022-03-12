@@ -56,7 +56,7 @@ private:
     void RegisterDispatchTouchEventCallback();
     void DispatchTouchEvent(const TouchEvent& event);
     void OnXComponentSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
-    void OnTextureSize(int64_t textureId, std::string& result);
+    void OnTextureSize(int64_t textureId, const std::string& result);
 
     void CreatePlatformResource();
     void ReleasePlatformResource();
