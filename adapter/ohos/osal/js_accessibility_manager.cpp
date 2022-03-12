@@ -757,7 +757,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(
     // parent and me.
     RefPtr<AccessibilityNode> parentNode;
     uint32_t umode = mode;
-    if (umode & PREFETCH_PREDECESSORS) {
+    if (umode & static_cast<uint32_t>(PREFETCH_PREDECESSORS)) {
         if (node->GetParentId() != -1 && node->GetParentId() != DEFAULT_PARENT_ID) {
             auto parentNode = node->GetParentNode();
             UpdateAccessibilityNodeInfo(parentNode, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
@@ -765,7 +765,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(
             infos.push_back(nodeInfo);
 
             // sister/brothers.
-            if (umode & PREFETCH_SIBLINGS) {
+            if (umode & static_cast<uint32_t>(PREFETCH_SIBLINGS)) {
                 auto childs = parentNode->GetChildList();
                 for (const auto& item : node->GetChildList()) {
                     UpdateAccessibilityNodeInfo(item, nodeInfo, jsAccessibilityManager,

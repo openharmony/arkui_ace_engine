@@ -135,7 +135,7 @@ template<class T>
 void JSRect::SetRadiusWithArrayValue(const RefPtr<T>& component, const JSRef<JSVal>& jsVal)
 {
     JSRef<JSArray> array = JSRef<JSArray>::Cast(jsVal);
-    int32_t length = array->Length();
+    int32_t length = static_cast<int32_t>(array->Length());
     if (length <= 0) {
         LOGE("info is invalid");
         return;
