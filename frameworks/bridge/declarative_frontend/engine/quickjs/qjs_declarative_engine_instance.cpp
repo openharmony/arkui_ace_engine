@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -213,20 +213,20 @@ JSValue QJSDeclarativeEngineInstance::eval_binary_buf(JSContext* ctx, const uint
     return JS_EvalFunction(ctx, obj);
 }
 
-JSValue QJSDeclarativeEngineInstance::CompileSource(std::string url, const char* buf, size_t bufSize)
+JSValue QJSDeclarativeEngineInstance::CompileSource(
+    std::string instanceName, std::string url, const char* buf, size_t bufSize)
 {
     LOGD("Compiling file url %s", url.c_str());
 
     ACE_SCOPED_TRACE("Compile JS");
     JSContext* ctx = GetQJSContext();
 
-    std::size_t h1 = std::hash<std::string> {}(url);
-
     // temporary use image cache path to store the snapshot
     std::string separator = "/";
 #if defined(WINDOWS_PLATFORM)
     separator = "\\";
 #endif
+    std::size_t h1 = std::hash<std::string> {}(instanceName + separator + url);
     std::string filename = ImageCache::GetImageCacheFilePath() + separator;
     filename.append(std::to_string(h1));
 
