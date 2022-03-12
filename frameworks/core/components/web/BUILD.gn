@@ -18,7 +18,7 @@ if (is_standard_system) {
     include_dirs = [
       "//utils/native/base/include",
       "//foundation/windowmanager/interfaces/innerkits/wm",
-      "//foundation/web/webview/interfaces/innerkits/ohos_nweb",
+      "//foundation/web/webview/ohos_nweb/include ",
       "//foundation/aafwk/standard/frameworks/kits/appkit/native/app/include",
     ]
   }
