@@ -992,6 +992,9 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             if (component == nullptr) {
                 return;
             }
+            if (!component->GetData().empty()) {
+                delegate->LoadDataWithBaseUrl("", component->GetData(), "", "", "");
+            }
             auto nweb_handler = std::make_shared<WebClientImpl>(Container::CurrentId());
             nweb_handler->SetWebDelegate(weak);
             auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>(Container::CurrentId());

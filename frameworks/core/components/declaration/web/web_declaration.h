@@ -24,6 +24,7 @@ namespace OHOS::Ace {
 
 struct WebAttribute : Attribute {
     std::string src;
+    std::string data;
 };
 
 struct WebEvent : Event {
@@ -66,6 +67,18 @@ public:
     {
         auto& attribute = static_cast<WebAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
         return attribute.src;
+    }
+	
+    void SetWebData(const std::string& data)
+    {
+        auto& attribute = MaybeResetAttribute<WebAttribute>(AttributeTag::SPECIALIZED_ATTR);
+        attribute.data = data;
+    }
+
+    const std::string& GetWebData() const
+    {
+        auto& attribute = static_cast<WebAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
+        return attribute.data;
     }
 
     void SetPageStartedEventId(const EventMarker& pageStartedEventId)

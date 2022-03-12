@@ -23,7 +23,7 @@ namespace OHOS::Ace::Framework {
 
 DOMRichText::DOMRichText(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
-    childComponent_ = AceType::MakeRefPtr<V2::RichTextComponent>();
+    childComponent_ = AceType::MakeRefPtr<WebComponent>("");
 }
 
 bool DOMRichText::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
