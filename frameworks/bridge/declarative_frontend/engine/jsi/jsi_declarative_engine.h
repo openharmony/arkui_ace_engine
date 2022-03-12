@@ -171,6 +171,8 @@ public:
 
     bool Initialize(const RefPtr<FrontendDelegate>& delegate) override;
 
+    void Destroy() override;
+
     // Load and initialize a JS bundle into the JS Framework
     void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
 

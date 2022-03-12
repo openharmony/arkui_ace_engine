@@ -24,6 +24,7 @@
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/thread_checker.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/content_storage_set.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -851,7 +852,12 @@ JsiDeclarativeEngine::~JsiDeclarativeEngine()
 {
     CHECK_RUN_ON(JS);
     LOG_DESTROY();
+}
 
+void JsiDeclarativeEngine::Destroy()
+{
+    LOGI("JsiDeclarativeEngine::Destroy");
+    CHECK_RUN_ON(JS);
     XComponentClient::GetInstance().SetRegisterCallbackToNull();
     XComponentClient::GetInstance().SetJSValCallToNull();
 

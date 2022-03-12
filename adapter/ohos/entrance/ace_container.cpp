@@ -583,8 +583,13 @@ void AceContainer::DestroyContainer(int32_t instanceId)
         taskExecutor->PostSyncTask([] { LOGI("Wait JS thread..."); }, TaskExecutor::TaskType::JS);
     }
     container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
-    EngineHelper::RemoveEngine(instanceId);
-    AceEngine::Get().RemoveContainer(instanceId);
+    if (taskExecutor) {
+        taskExecutor->PostTask([instanceId] {
+            LOGI("Remove on Platform thread...");
+            EngineHelper::RemoveEngine(instanceId);
+            AceEngine::Get().RemoveContainer(instanceId);
+        }, TaskExecutor::TaskType::PLATFORM);
+    }
 }
 
 void AceContainer::SetView(
