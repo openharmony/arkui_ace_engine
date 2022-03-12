@@ -554,7 +554,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
     std::string dstSrc = "";
     RefPtr<WebComponent> webComponent;
     if (ParseJsMedia(srcValue, webSrc)) {
-        int np = webSrc.find_first_of("/");
+        int np = static_cast<int>(webSrc.find_first_of("/"));
         if (np < 0) {
             dstSrc = webSrc;
         } else {

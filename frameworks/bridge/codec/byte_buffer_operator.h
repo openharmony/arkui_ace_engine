@@ -86,7 +86,8 @@ private:
     bool ReadArray(T& dst) const
     {
         int32_t length = -1;
-        if (!ReadData(length) || length < 0 || readPos_ + sizeof(typename T::value_type) * length > buffer_.size()) {
+        if (!ReadData(length) || length < 0 ||
+            readPos_ + static_cast<uint32_t>(sizeof(typename T::value_type) * length) > buffer_.size()) {
             LOGW("Could not read array length or array length is invalid");
             return false;
         }

@@ -41,7 +41,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
         }
 
         JSRef<JSArray> array = JSRef<JSArray>::Cast(arrayVal);
-        int32_t length = array->Length();
+        int32_t length = static_cast<int32_t>(array->Length());
         if (length <= 0) {
             LOGE("info is invalid");
             return;

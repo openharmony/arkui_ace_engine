@@ -153,7 +153,7 @@ bool AceInnerWrapWantParamsByte(
     auto value = wantParams.GetParam(key);
     AAFwk::IByte *bo = AAFwk::IByte::Query(value);
     if (bo != nullptr) {
-        int intValue = AAFwk::Byte::Unbox(bo);
+        int32_t intValue = static_cast<int32_t>(AAFwk::Byte::Unbox(bo));
         napi_value jsValue = AceWrapInt32ToJS(env, intValue);
         if (jsValue != nullptr) {
             NAPI_CALL_BASE(env, napi_set_named_property(env, jsObject, key.c_str(), jsValue), false);
@@ -384,7 +384,7 @@ bool AceInnerWrapWantParamsArrayByte(napi_env env, napi_value jsObject, const st
         if (ao->Get(i, iface) == ERR_OK) {
             AAFwk::IByte *iValue = AAFwk::IByte::Query(iface);
             if (iValue != nullptr) {
-                int intValue = AAFwk::Byte::Unbox(iValue);
+                int intValue = static_cast<int>(AAFwk::Byte::Unbox(iValue));
                 natArray.push_back(intValue);
             }
         }

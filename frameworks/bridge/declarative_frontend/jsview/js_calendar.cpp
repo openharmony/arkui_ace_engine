@@ -174,7 +174,7 @@ void JSCalendar::SetOffDays(int32_t offDays)
         LOGE("component is not valid");
         return;
     }
-    auto bit = 0b1;
+    uint32_t bit = 0b1;
     std::string result;
     const static int32_t dayOfWeek = 7;
     for (auto i = 0; i < dayOfWeek; ++i) {

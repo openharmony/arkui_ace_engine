@@ -23,6 +23,9 @@ HdcJdwpSimulator::HdcJdwpSimulator(uv_loop_t *loopIn, const std::string pkgName)
     exit_ = false;
     pkgName_ = pkgName;
     connect_ = new (std::nothrow) uv_connect_t();
+    if (connect_ == nullptr) {
+        LOGE("connect_ is null");
+    }
     ctxPoint_ = (HCtxJdwpSimulator)MallocContext();
 }
 
