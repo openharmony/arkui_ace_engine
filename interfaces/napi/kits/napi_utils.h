@@ -68,7 +68,7 @@ void ReplaceHolder(std::string& originStr, std::vector<std::string>& params, int
             firstMatch = false;
             shortHolderType = pos.length() == 0;
         } else {
-            if (shortHolderType ^ (pos.length() == 0)) {
+            if (static_cast<uint32_t>(shortHolderType) ^ ((uint32_t)(pos.length() == 0))) {
                 LOGE("wrong place holder,stop parse string");
                 return;
             }
@@ -76,9 +76,9 @@ void ReplaceHolder(std::string& originStr, std::vector<std::string>& params, int
 
         std::string replaceContentStr;
         if (shortHolderType) {
-            replaceContentStr = params[searchTime + containCount];
+            replaceContentStr = params[static_cast<uint32_t>(searchTime + containCount)];
         } else {
-            replaceContentStr = params[StringUtils::StringToInt(pos) - 1 + containCount];
+            replaceContentStr = params[static_cast<uint32_t>(StringUtils::StringToInt(pos) - 1 + containCount)];
         }
 
         originStr.replace(matchs[0].first - originStr.begin(), matchs[0].length(), replaceContentStr);

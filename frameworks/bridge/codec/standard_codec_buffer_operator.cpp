@@ -66,7 +66,7 @@ bool StandardCodecBufferReader::ReadDataList(std::vector<CodecData>& resultDataL
         return false;
     }
 
-    for (int32_t idx = 0; idx < size; ++idx) {
+    for (uint8_t idx = 0; idx < size; ++idx) {
         CodecData data;
         if (!ReadData(data)) {
             LOGW("Failed to read data");

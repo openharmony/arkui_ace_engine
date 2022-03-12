@@ -902,7 +902,7 @@ void PluginEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const 
             fixParam = fixParam.substr(startPos, endPos - startPos + 1);
         }
         if (delegate_) {
-            delegate_->GetUiTask().PostTask([&eventMarker, fixParam] { eventMarker.CallUiStrFunction(fixParam); });
+            delegate_->GetUiTask().PostTask([eventMarker, fixParam] { eventMarker.CallUiStrFunction(fixParam); });
         }
     } else {
         delegate_->FireAsyncEvent(eventMarker.GetData().eventId, param, "");

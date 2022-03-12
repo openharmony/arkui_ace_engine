@@ -1170,8 +1170,8 @@ shared_ptr<JsValue> JsReadText(const shared_ptr<JsRuntime>& runtime, const std::
             return runtime->NewUndefined();
         }
 
-        auto substrPos = ParseUtf8TextSubstrStartPos(fileText, position);
-        auto substrEndPos = ParseUtf8TextSubstrEndPos(fileText, position + length - 1);
+        size_t substrPos = static_cast<size_t>(ParseUtf8TextSubstrStartPos(fileText, position));
+        size_t substrEndPos = static_cast<size_t>(ParseUtf8TextSubstrEndPos(fileText, position + length - 1));
         fileText = fileText.substr(substrPos - 1, substrEndPos - substrPos + 1);
         HandleEscapeCharaterInUtf8TextForJson(fileText);
     }
@@ -2145,7 +2145,8 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
         page->PushCommand(Referenced::MakeRefPtr<JsCommandCallDomElementMethod>(nodeId, methodName, arguments));
     }
     // focus method should delayed util show attribute update.
-    if (page->CheckPageCreated() && strcmp(DOM_FOCUS, methodName.c_str()) != 0) {
+    if (page->CheckPageCreated() && strlen(DOM_FOCUS) >= strlen(methodName.c_str()) &&
+        strcmp(DOM_FOCUS, methodName.c_str()) != 0) {
         GetFrontendDelegate(runtime)->TriggerPageUpdate(page->GetPageId(), true);
     }
     return resultValue;
@@ -2163,7 +2164,7 @@ std::string ParseLogContent(const std::vector<std::string>& params)
     int32_t pos = 0;
     int32_t count = 1;
     for (; pos < len; ++pos) {
-        if (count >= size) {
+        if (static_cast<uint32_t>(count) >= size) {
             break;
         }
         if (formatStr[pos] == '%') {

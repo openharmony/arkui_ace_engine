@@ -883,7 +883,7 @@ void AceResConfig::MatchAndSortDeclarativeResConfigs(const std::set<std::string>
     }
 
     int32_t left = 0;
-    int32_t right = matchedResConfigs.size() - 1;
+    int32_t right = static_cast<int32_t>(matchedResConfigs.size()) - 1;
     SortDeclarativeResConfigs(deviceResConfig, matchedResConfigs, left, right);
     for (const auto& matchedConfig : matchedResConfigs) {
         matchedFoldersList.emplace_back(ConvertDeclarativeResConfigToTag(matchedConfig));

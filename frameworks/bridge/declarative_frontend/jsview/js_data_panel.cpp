@@ -63,7 +63,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
         LOGE("JSDataPanel::Create values is not array");
         return;
     }
-    size_t length = values->GetArraySize();
+    size_t length = static_cast<uint32_t>(values->GetArraySize());
     double valueSum = 0.0;
     for (size_t i = 0; i < length && i < MAX_COUNT; i++) {
         auto item = values->GetArrayItem(i);
