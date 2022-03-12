@@ -448,6 +448,7 @@ void RenderButton::Update(const RefPtr<Component>& component)
 
     width_ = buttonComponent_->GetWidth();
     height_ = buttonComponent_->GetHeight();
+    buttonComponent_->FitTextHeight(height_);
     layoutFlag_ = button->GetLayoutFlag();
     // No animation happens on first setting, will animate from background color on click
     clickedColor_ = AnimatableColor(button->GetClickedColor());

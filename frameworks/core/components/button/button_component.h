@@ -171,6 +171,18 @@ public:
         return isInputButton_;
     }
 
+    void SetDeclareHeight(bool declareHeight)
+    {
+        isDeclareHeight_ = declareHeight;
+    }
+
+    bool IsDeclareHeight()
+    {
+        return isDeclareHeight_;
+    }
+
+    void FitTextHeight(AnimatableDimension& height);
+
     uint32_t Compare(const RefPtr<Component>& component) const override;
 
     RefPtr<StateAttributes<ButtonStateAttribute>> GetStateAttributes()
@@ -195,6 +207,7 @@ private:
     bool isDeclarative_ = false;
     bool isInputButton_ = false;
     bool isCatchMode_ = true;
+    bool isDeclareHeight_ = false;
     uint32_t layoutFlag_ = 0;
     // for custom button type
     std::array<Radius, 4> radii_ = { Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp) };
