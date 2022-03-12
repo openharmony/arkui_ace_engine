@@ -16,6 +16,7 @@
 #include "core/components/flex/flex_component_v2.h"
 
 #include "core/components/flex/flex_item_component.h"
+#include "core/components/scroll/scroll_component.h"
 #include "core/pipeline/base/composed_component.h"
 #include "frameworks/core/components/foreach/for_each_component.h"
 #include "frameworks/core/components/ifelse/if_else_component.h"
@@ -49,6 +50,7 @@ RefPtr<Component> AddFlexItemComponent(const RefPtr<Component>& component)
         auto newFlexItem = AceType::MakeRefPtr<FlexItemComponent>(0.0, 1.0, 0.0);
         newFlexItem->SetChild(composedChild);
         composedComponent->SetChild(newFlexItem);
+        composedComponent->SetNeedReserveChild(true);
         return component;
     }
 
