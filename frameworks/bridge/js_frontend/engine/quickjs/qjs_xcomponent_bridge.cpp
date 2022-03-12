@@ -65,7 +65,6 @@ void QjsXComponentBridge::HandleContext(JSContext* ctx, NodeId id, const std::st
         LOGE("QjsXComponentBridge xcomponent is null.");
         return;
     }
-    auto textureId = static_cast<int64_t>(xcomponent->GetTextureId());
 
     auto container = Container::Current();
     if (!container) {
@@ -77,7 +76,14 @@ void QjsXComponentBridge::HandleContext(JSContext* ctx, NodeId id, const std::st
         LOGE("QjsXComponentBridge nativeView null");
         return;
     }
-    auto nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+
+    void* nativeWindow = nullptr;
+#ifdef OHOS_STANDARD_SYSTEM
+    nativeWindow = const_cast<void*>(xcomponent->GetNativeWindow());
+#else
+    auto textureId = static_cast<int64_t>(xcomponent->GetTextureId());
+    nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+#endif
     if (!nativeWindow) {
         LOGE("QjsXComponentBridge::HandleJsContext nativeWindow invalid");
         return;
