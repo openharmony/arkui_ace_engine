@@ -27,6 +27,7 @@ public:
     void DumpTree(int32_t depth) override;
 
 #ifdef OHOS_STANDARD_SYSTEM
+    void Update(const RefPtr<Component>& component) override;
     void OnAttachContext() override;
     void Paint(RenderContext& context, const Offset& offset) override;
     void SyncGeometryProperties() override;
