@@ -93,7 +93,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("toolBar", &JSNavigation::SetToolBar);
     JSClass<JSNavigation>::StaticMethod("menus", &JSNavigation::SetMenus);
     JSClass<JSNavigation>::StaticMethod("menuCount", &JSNavigation::SetMenuCount);
-    JSClass<JSNavigation>::StaticMethod("onTitleModeChanged", &JSNavigation::SetOnTitleModeChanged);
+    JSClass<JSNavigation>::StaticMethod("onTitleModeChange", &JSNavigation::SetOnTitleModeChanged);
     JSClass<JSNavigation>::Inherit<JSContainerBase>();
     JSClass<JSNavigation>::Inherit<JSViewAbstract>();
     JSClass<JSNavigation>::Bind(globalObj);

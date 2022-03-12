@@ -38,11 +38,21 @@ public:
     static void JSBind(BindingTarget globalObj)
     {
         JSClass<JSDataChangeListener>::Declare("__ohos_ace_inner_JSDataChangeListener__");
+        // API7 onEditChanged deprecated
         JSClass<JSDataChangeListener>::CustomMethod("onDataReloaded", &JSDataChangeListener::OnDataReloaded);
+        JSClass<JSDataChangeListener>::CustomMethod("onDataReload", &JSDataChangeListener::OnDataReloaded);
+        // API7 onDataAdded deprecated
         JSClass<JSDataChangeListener>::CustomMethod("onDataAdded", &JSDataChangeListener::OnDataAdded);
+        JSClass<JSDataChangeListener>::CustomMethod("onDataAdd", &JSDataChangeListener::OnDataAdded);
+        // API7 onDataDeleted deprecated
         JSClass<JSDataChangeListener>::CustomMethod("onDataDeleted", &JSDataChangeListener::OnDataDeleted);
+        JSClass<JSDataChangeListener>::CustomMethod("onDataDelete", &JSDataChangeListener::OnDataDeleted);
+        // API7 onDataChanged deprecated
         JSClass<JSDataChangeListener>::CustomMethod("onDataChanged", &JSDataChangeListener::OnDataChanged);
+        JSClass<JSDataChangeListener>::CustomMethod("onDataChange", &JSDataChangeListener::OnDataChanged);
+        // API7 onDataMoved deprecated
         JSClass<JSDataChangeListener>::CustomMethod("onDataMoved", &JSDataChangeListener::OnDataMoved);
+        JSClass<JSDataChangeListener>::CustomMethod("onDataMove", &JSDataChangeListener::OnDataMoved);
         JSClass<JSDataChangeListener>::Bind(
             globalObj, &JSDataChangeListener::Constructor, &JSDataChangeListener::Destructor);
     }

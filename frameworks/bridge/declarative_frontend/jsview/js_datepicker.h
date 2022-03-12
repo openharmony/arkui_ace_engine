@@ -21,6 +21,7 @@
 #include "core/components/picker/picker_base_component.h"
 
 namespace OHOS::Ace::Framework {
+
 class JSDatePicker : public JSViewAbstract {
 public:
     static void Create(const JSCallbackInfo& info);
@@ -28,13 +29,10 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void SetLunar(bool isLunar);
     static void OnChange(const JSCallbackInfo& info);
-    static void UseMilitaryTime(bool isUseMilitaryTime);
 
 private:
     static void CreateDatePicker(const JSRef<JSObject>& paramObj);
-    static void CreateTimePicker(const JSRef<JSObject>& paramObj);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
-    static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
 };
 
 class JSDatePickerDialog {
@@ -44,10 +42,32 @@ public:
 
 private:
     static void CreateDatePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
-    static void CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
+    //static void AddEvent(RefPtr<PickerBaseComponent>& picker, const JSCallbackInfo& info);
+};
+
+class JSTimePicker : public JSViewAbstract {
+public:
+    static void Create(const JSCallbackInfo& info);
+
+    static void JSBind(BindingTarget globalObj);
+    static void OnChange(const JSCallbackInfo& info);
+    static void UseMilitaryTime(bool isUseMilitaryTime);
+
+private:
+    static void CreateTimePicker(const JSRef<JSObject>& paramObj);
     static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
-    static void AddEvent(RefPtr<PickerBaseComponent>& picker, const JSCallbackInfo& info);
+};
+
+class JSTimePickerDialog {
+public:
+    static void JSBind(BindingTarget globalObj);
+    static void Show(const JSCallbackInfo& info);
+
+private:
+    static void CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
+    static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
+    //static void AddEvent(RefPtr<PickerBaseComponent>& picker, const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_DATEPICKER_H

@@ -347,7 +347,9 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSIndexer>::Declare("AlphabetIndexer");
     JSClass<JSIndexer>::StaticMethod("create", &JSIndexer::Create);
+    // API7 onSelected deprecated
     JSClass<JSIndexer>::StaticMethod("onSelected", &JSIndexer::JsOnSelected);
+    JSClass<JSIndexer>::StaticMethod("onSelect", &JSIndexer::JsOnSelected);
     JSClass<JSIndexer>::StaticMethod("color", &JSIndexer::SetColor, opt);
     JSClass<JSIndexer>::StaticMethod("selectedColor", &JSIndexer::SetSelectedColor, opt);
     JSClass<JSIndexer>::StaticMethod("popupColor", &JSIndexer::SetPopupColor, opt);
@@ -360,7 +362,7 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("itemSize", &JSIndexer::SetItemSize, opt);
     JSClass<JSIndexer>::StaticMethod("alignStyle", &JSIndexer::SetAlignStyle, opt);
     JSClass<JSIndexer>::StaticMethod("onRequestPopupData", &JSIndexer::JsOnRequestPopupData, opt);
-    JSClass<JSIndexer>::StaticMethod("onPopupSelected", &JSIndexer::JsOnPopupSelected, opt);
+    JSClass<JSIndexer>::StaticMethod("onPopupSelect", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSIndexer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSIndexer>::Inherit<JSContainerBase>();
