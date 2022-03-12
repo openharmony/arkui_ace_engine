@@ -232,32 +232,33 @@ bool SetDomAttributes(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementO
             LOGW("key is null. Ignoring!");
             continue;
         }
+        std::string keyString = key;
         JSValue val = JS_GetProperty(ctx, fromMap, pTab[i].atom);
         if (JS_IsString(val) || JS_IsNumber(val) || JS_IsBool(val)) {
             ScopedString styleVal(ctx, val);
             const char* valStr = styleVal.get();
             LOGD("SetDomAttributes: key: %{private}s, attr: %{private}s", key, valStr);
-            if (strcmp(key, DOM_ID) == 0) {
+            if (keyString.compare(DOM_ID) == 0) {
                 command.SetId(valStr);
-            } else if (strcmp(key, DOM_TARGET) == 0) {
+            } else if (keyString.compare(DOM_TARGET) == 0) {
                 command.SetTarget(valStr);
-            } else if (strcmp(key, DOM_SHARE_ID) == 0) {
+            } else if (keyString.compare(DOM_SHARE_ID) == 0) {
                 command.SetShareId(valStr);
             }
             attrs.emplace_back(key, valStr);
-            if (strcmp(key, DOM_SHOW) == 0) {
+            if (keyString.compare(DOM_SHOW) == 0) {
                 hasShowAttr = true;
             }
         } else if (JS_IsArray(ctx, val)) {
-            if (strcmp(key, "datasets") == 0) {
+            if (keyString.compare("datasets") == 0) {
                 auto chartBridge = AceType::MakeRefPtr<ChartBridge>();
                 chartBridge->GetAttrDatasets(ctx, val);
                 command.SetDatasets(chartBridge->GetDatasets());
-            } else if (strcmp(key, "images") == 0) {
+            } else if (keyString.compare("images") == 0) {
                 std::vector<ImageProperties> images;
                 GetAttrImages(ctx, val, images);
                 command.SetImagesAttr(std::move(images));
-            } else if (strcmp(key, "segments") == 0) {
+            } else if (keyString.compare("segments") == 0) {
                 auto chartBridge = AceType::MakeRefPtr<ChartBridge>();
                 chartBridge->ParseAttrSegmentArray(ctx, val);
                 command.SetSegments(chartBridge->GetSegments());
@@ -268,24 +269,24 @@ bool SetDomAttributes(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementO
                 attrs.emplace_back(key, valStr);
             }
         } else if (JS_IsObject(val)) {
-            if (strcmp(key, "options") == 0) {
+            if (keyString.compare("options") == 0) {
                 auto chartBridge = AceType::MakeRefPtr<ChartBridge>();
                 chartBridge->GetAttrOptionsObject(ctx, val);
                 command.SetOptions(chartBridge->GetChartOptions());
-            } else if (strcmp(key, "segments") == 0) {
+            } else if (keyString.compare("segments") == 0) {
                 auto chartBridge = AceType::MakeRefPtr<ChartBridge>();
                 chartBridge->ParseAttrSingleSegment(ctx, val);
                 command.SetSegments(chartBridge->GetSegments());
-            } else if (strcmp(key, DOM_CLOCK_CONFIG) == 0) {
+            } else if (keyString.compare(DOM_CLOCK_CONFIG) == 0) {
                 auto clockBridge = AceType::MakeRefPtr<ClockBridge>();
                 clockBridge->ParseClockConfig(ctx, val);
                 command.SetClockConfig(clockBridge->GetClockConfig());
-            } else if (strcmp(key, DOM_NODE_TAG_LABEL) == 0) {
+            } else if (keyString.compare(DOM_NODE_TAG_LABEL) == 0) {
                 auto stepperBridge = AceType::MakeRefPtr<StepperBridge>();
                 StepperLabels label;
                 stepperBridge->GetAttrLabel(ctx, val, label);
                 command.SetStepperLabel(label);
-            } else if (strcmp(key, DOM_BADGE_CONFIG) == 0) {
+            } else if (keyString.compare(DOM_BADGE_CONFIG) == 0) {
                 auto badgeBridge = AceType::MakeRefPtr<BadgeBridge>();
                 badgeBridge->ParseBadgeConfig(ctx, val);
                 command.SetBadgeConfig(badgeBridge->GetBadgeConfig());
@@ -424,6 +425,7 @@ void SetDomStyle(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementOperat
             LOGW("key is null. Ignoring!");
             continue;
         }
+        std::string keyString = key;
         JSValue val = JS_GetProperty(ctx, fromMap, pTab[i].atom);
         if (JS_IsString(val) || JS_IsNumber(val) || JS_IsBool(val)) {
             ScopedString styleVal(ctx, val);
@@ -431,26 +433,26 @@ void SetDomStyle(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementOperat
             LOGD("SetDomStyle: key: %{private}s, style: %{private}s", key, valStr);
             styles.emplace_back(key, valStr);
         } else if (JS_IsArray(ctx, val)) {
-            if (strcmp(key, DOM_TEXT_FONT_FAMILY) == 0) {
+            if (keyString.compare(DOM_TEXT_FONT_FAMILY) == 0) {
                 // Deal with special case such as fontFamily, suppose all the keys in the array are the same.
                 std::string familyStyle;
                 GetStyleFamilyValue(ctx, val, familyStyle);
                 styles.emplace_back(key, familyStyle);
-            } else if (strcmp(key, DOM_ANIMATION_NAME) == 0) {
+            } else if (keyString.compare(DOM_ANIMATION_NAME) == 0) {
                 // Deal with special case animationName, it different with fontfamily,
                 // the keys in the array are different.
                 std::vector<std::unordered_map<std::string, std::string>> animationStyles;
                 GetStyleAnimationName(ctx, val, animationStyles);
                 command.SetAnimationStyles(std::move(animationStyles));
-            } else if (strcmp(key, DOM_TRANSITION_ENTER) == 0) {
+            } else if (keyString.compare(DOM_TRANSITION_ENTER) == 0) {
                 std::vector<std::unordered_map<std::string, std::string>> transitionEnter;
                 GetStyleAnimationName(ctx, val, transitionEnter);
                 command.SetTransitionEnter(std::move(transitionEnter));
-            } else if (strcmp(key, DOM_TRANSITION_EXIT) == 0) {
+            } else if (keyString.compare(DOM_TRANSITION_EXIT) == 0) {
                 std::vector<std::unordered_map<std::string, std::string>> transitionExit;
                 GetStyleAnimationName(ctx, val, transitionExit);
                 command.SetTransitionExit(std::move(transitionExit));
-            } else if (strcmp(key, DOM_SHARED_TRANSITION_NAME) == 0) {
+            } else if (keyString.compare(DOM_SHARED_TRANSITION_NAME) == 0) {
                 std::vector<std::unordered_map<std::string, std::string>> sharedTransitionName;
                 GetStyleAnimationName(ctx, val, sharedTransitionName);
                 command.SetSharedTransitionName(std::move(sharedTransitionName));
@@ -1997,7 +1999,8 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
         page->PushCommand(Referenced::MakeRefPtr<JsCommandCallDomElementMethod>(nodeId, methodName.get(), args.get()));
     }
     // focus method should delayed util show attribute update.
-    if (page->CheckPageCreated() && strcmp(DOM_FOCUS, methodName.get()) != 0) {
+    if (page->CheckPageCreated() && strlen(DOM_FOCUS) >= strlen(methodName.get()) &&
+        strcmp(DOM_FOCUS, methodName.get()) != 0) {
         instance->GetDelegate()->TriggerPageUpdate(page->GetPageId(), true);
     }
     return resultValue;

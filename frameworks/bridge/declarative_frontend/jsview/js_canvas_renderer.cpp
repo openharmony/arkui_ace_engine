@@ -630,6 +630,10 @@ void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
 {
     if (info[0]->IsObject()) {
         JSRenderImage* jsImage = JSRef<JSObject>::Cast(info[0])->Unwrap<JSRenderImage>();
+        if (jsImage == nullptr) {
+            LOGE("jsImage is null");
+            return;
+        }
         std::string imageSrc = jsImage->GetSrc();
         double imgWidth = jsImage->GetWidth();
         double imgHeight = jsImage->GetHeight();
@@ -804,13 +808,13 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
         data = pool_->GetImageData(left, top, width, height);
     }
 
-    final_height = data->dirtyHeight;
-    final_width = data->dirtyWidth;
+    final_height = static_cast<double>(data->dirtyHeight);
+    final_width = static_cast<double>(data->dirtyWidth);
 
     JSRef<JSArray> colorArray = JSRef<JSArray>::New();
     uint32_t count = 0;
-    for (auto i = 0; i < final_height; i++) {
-        for (auto j = 0; j < final_width; j++) {
+    for (int32_t i = 0; i < final_height; i++) {
+        for (int32_t j = 0; j < final_width; j++) {
             int32_t idx = i * data->dirtyWidth + j;
             auto pixel = data->data[idx];
 
@@ -851,8 +855,8 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     } else {
         canvasData = pool_->GetImageData(left, top, width, height);
     }
-    final_height = canvasData->dirtyHeight;
-    final_width = canvasData->dirtyWidth;
+    final_height = static_cast<uint32_t>(canvasData->dirtyHeight);
+    final_width = static_cast<uint32_t>(canvasData->dirtyWidth);
     uint32_t length = final_height * final_width;
     uint32_t* data = new uint32_t[length];
     for (uint32_t i = 0; i < final_height; i++) {
@@ -868,8 +872,8 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
     options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
-    options.size.width = final_width;
-    options.size.height = final_height;
+    options.size.width = static_cast<int32_t>(final_width);
+    options.size.height = static_cast<int32_t>(final_height);
     options.editable = true;
     std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(data, length, options);
 

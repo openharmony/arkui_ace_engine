@@ -60,7 +60,7 @@ std::string JsApiPerf::PrintToLogs() const
             result.append("#");
         }
         result.append("average#");
-        result.append(std::to_string(sum / item.second.size()));
+        result.append(std::to_string(static_cast<uint64_t>(sum) / item.second.size()));
         result.append("\n");
     }
 

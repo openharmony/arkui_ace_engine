@@ -28,7 +28,7 @@ void JSStepper::Create(const JSCallbackInfo& info)
 {
     std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
     auto stepperComponent = AceType::MakeRefPtr<OHOS::Ace::StepperComponent>(componentChildren);
-    int32_t index = 0;
+    uint32_t index = 0;
     if (info.Length() < 1 || !info[0]->IsObject()) {
         index = 0;
     } else {

@@ -122,6 +122,10 @@ void JSRenderingContext::Constructor(const JSCallbackInfo& args)
         if (args[0]->IsObject()) {
             JSRenderingContextSettings* jsContextSetting
                 = JSRef<JSObject>::Cast(args[0])->Unwrap<JSRenderingContextSettings>();
+            if (jsContextSetting == nullptr) {
+                LOGE("jsContextSetting is null");
+                return;
+            }
             bool anti = jsContextSetting->GetAntialias();
             jsRenderContext->SetAnti(anti);
         }
