@@ -245,9 +245,9 @@ void JsFrontend::Destroy()
     CHECK_RUN_ON(JS);
     LOGI("JsFrontend Destroy begin.");
     // To guarantee the jsEngine_ and delegate_ released in js thread
-    jsEngine_.Reset();
     delegate_.Reset();
     handler_.Reset();
+    jsEngine_.Reset();
     LOGI("JsFrontend Destroy end.");
 }
 
