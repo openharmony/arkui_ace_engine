@@ -304,6 +304,27 @@ void ButtonComponent::SetDeclaration(const RefPtr<ButtonDeclaration>& declaratio
     }
 }
 
+void ButtonComponent::FitTextHeight(AnimatableDimension& height)
+{
+    if (isDeclareHeight_) {
+        return;
+    }
+    auto padding = AceType::DynamicCast<PaddingComponent>(GetChildren().front());
+    if (padding == nullptr) {
+        LOGW("Padding component get failed");
+        return;
+    }
+    auto text = AceType::DynamicCast<TextComponent>(padding->GetChild());
+    if (text == nullptr) {
+        LOGW("Text component get failed");
+        return;
+    }
+    auto fontSize = text->GetTextStyle().GetFontSize();
+    if (height.Value() < fontSize.Value()) {
+        height = fontSize;
+    }
+}
+
 uint32_t ButtonComponent::Compare(const RefPtr<Component>& component) const
 {
     auto button = AceType::DynamicCast<ButtonComponent>(component);

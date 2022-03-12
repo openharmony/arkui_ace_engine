@@ -449,6 +449,7 @@ void JSButton::JsHeight(const JSCallbackInfo& info)
     }
     if (!stack->IsVisualStateSet()) {
         buttonComponent->SetHeight(value, option);
+        buttonComponent->SetDeclareHeight(true);
     } else {
         buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
             ButtonStateAttribute::HEIGHT, AnimatableDimension(value, option), stack->GetVisualState());
@@ -499,6 +500,7 @@ void JSButton::JsSize(const JSCallbackInfo& info)
     if (ParseJsDimensionVp(heightValue, height)) {
         if (!stack->IsVisualStateSet()) {
             buttonComponent->SetHeight(height, stack->GetImplicitAnimationOption());
+            buttonComponent->SetDeclareHeight(true);
         } else {
             buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
                 ButtonStateAttribute::HEIGHT, AnimatableDimension(height, option), stack->GetVisualState());
