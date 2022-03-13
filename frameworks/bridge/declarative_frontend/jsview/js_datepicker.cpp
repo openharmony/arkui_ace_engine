@@ -84,6 +84,8 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("create", &JSDatePicker::Create, opt);
     JSClass<JSDatePicker>::StaticMethod("lunar", &JSDatePicker::SetLunar);
     JSClass<JSDatePicker>::StaticMethod("onChange", &JSDatePicker::OnChange);
+    // keep compatible, need remove after
+    JSClass<JSDatePicker>::StaticMethod("useMilitaryTime", &JSDatePicker::UseMilitaryTime);
     JSClass<JSDatePicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSDatePicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSDatePicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -101,7 +103,26 @@ void JSDatePicker::Create(const JSCallbackInfo& info)
         return;
     }
 
-    CreateDatePicker(JSRef<JSObject>::Cast(info[0]));
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    DatePickerType pickerType = DatePickerType::DATE;
+    auto type = paramObject->GetProperty("type");
+    if (type->IsNumber()) {
+        pickerType = static_cast<DatePickerType>(type->ToNumber<int32_t>());
+    }
+    switch (pickerType) {
+        case DatePickerType::TIME: {
+            CreateTimePicker(paramObject);
+            break;
+        }
+        case DatePickerType::DATE: {
+            CreateDatePicker(paramObject);
+            break;
+        }
+        default: {
+            LOGE("Undefined date picker type.");
+            break;
+        }
+    }
 }
 
 void JSDatePicker::SetLunar(bool isLunar)
@@ -113,6 +134,17 @@ void JSDatePicker::SetLunar(bool isLunar)
         return;
     }
     datePicker->SetShowLunar(isLunar);
+}
+
+void JSDatePicker::UseMilitaryTime(bool isUseMilitaryTime)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto timePicker = AceType::DynamicCast<PickerTimeComponent>(component);
+    if (!timePicker) {
+        LOGE("PickerTimeComponent is null");
+        return;
+    }
+    timePicker->SetHour24(isUseMilitaryTime);
 }
 
 void JSDatePicker::OnChange(const JSCallbackInfo& info)
@@ -133,6 +165,50 @@ void JSDatePicker::OnChange(const JSCallbackInfo& info)
     if (datePicker) {
         datePicker->SetOnChange(onChangeId);
     }
+}
+
+PickerDate JSDatePicker::ParseDate(const JSRef<JSVal>& dateVal)
+{
+    auto pickerDate = PickerDate();
+    if (!dateVal->IsObject()) {
+        return pickerDate;
+    }
+    auto dateObj = JSRef<JSObject>::Cast(dateVal);
+    auto yearFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getFullYear"));
+    auto monthFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getMonth"));
+    auto dateFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getDate"));
+    JSRef<JSVal> year = yearFunc->Call(dateObj);
+    JSRef<JSVal> month = monthFunc->Call(dateObj);
+    JSRef<JSVal> date = dateFunc->Call(dateObj);
+
+    if (year->IsNumber() && month->IsNumber() && date->IsNumber()) {
+        pickerDate.SetYear(year->ToNumber<int32_t>());
+        pickerDate.SetMonth(month->ToNumber<int32_t>() + 1); // 0-11 means 1 to 12 months
+        pickerDate.SetDay(date->ToNumber<int32_t>());
+    }
+    return pickerDate;
+}
+
+PickerTime JSDatePicker::ParseTime(const JSRef<JSVal>& timeVal)
+{
+    auto pickerTime = PickerTime();
+    if (!timeVal->IsObject()) {
+        return pickerTime;
+    }
+    auto timeObj = JSRef<JSObject>::Cast(timeVal);
+    auto hourFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getHours"));
+    auto minuteFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getMinutes"));
+    auto secondFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getSeconds"));
+    JSRef<JSVal> hour = hourFunc->Call(timeObj);
+    JSRef<JSVal> minute = minuteFunc->Call(timeObj);
+    JSRef<JSVal> second = secondFunc->Call(timeObj);
+
+    if (hour->IsNumber() && minute->IsNumber() && second->IsNumber()) {
+        pickerTime.SetHour(hour->ToNumber<int32_t>());
+        pickerTime.SetMinute(minute->ToNumber<int32_t>());
+        pickerTime.SetSecond(second->ToNumber<int32_t>());
+    }
+    return pickerTime;
 }
 
 void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
@@ -173,6 +249,21 @@ void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
     ViewStackProcessor::GetInstance()->Push(datePicker);
 }
 
+void JSDatePickerDialog::CreateTimePicker(RefPtr<Component> &component, const JSRef<JSObject>& paramObj)
+{
+    auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
+    auto selectedTime = paramObj->GetProperty("selected");
+    auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
+    bool isUseMilitaryTime = useMilitaryTime->ToBoolean();
+    if (selectedTime->IsObject()) {
+        timePicker->SetSelectedTime(ParseTime(selectedTime));
+    }
+    timePicker->SetIsDialog(false);
+    timePicker->SetIsCreateDialogComponent(true);
+    timePicker->SetHour24(isUseMilitaryTime);
+    component = timePicker;
+}
+
 PickerDate JSDatePicker::ParseDate(const JSRef<JSVal>& dateVal)
 {
     auto pickerDate = PickerDate();
@@ -210,15 +301,39 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
         return;
     }
 
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    DatePickerType pickerType = DatePickerType::DATE;
+    auto type = paramObject->GetProperty("type");
+    if (type->IsNumber()) {
+        pickerType = static_cast<DatePickerType>(type->ToNumber<int32_t>());
+    }
+
     RefPtr<Component> component;
-    CreateDatePicker(component, JSRef<JSObject>::Cast(info[0]));
+    switch (pickerType) {
+        case DatePickerType::TIME: {
+            CreateTimePicker(component, paramObject);
+            break;
+        }
+        case DatePickerType::DATE: {
+            CreateDatePicker(component, paramObject);
+            break;
+        }
+        default: {
+            LOGE("Undefined date picker type.");
+            return;
+        }
+    }
 
     auto datePicker = AceType::DynamicCast<PickerBaseComponent>(component);
     DialogProperties properties {};
     properties.alignment = DialogAlignment::CENTER;
     properties.customComponent = datePicker;
 
-    AddEvent(datePicker, info, DatePickerType::DATE);
+    if (pickerType == DatePickerType::DATE) {
+        AddEvent(datePicker, info, DatePickerType::DATE);
+    } else {
+        AddEvent(datePicker, info, DatePickerType::TIME);
+    }
     datePicker->SetDialogName("DatePickerDialog");
     datePicker->OpenDialog(properties);
 }
@@ -256,6 +371,26 @@ void JSDatePickerDialog::CreateDatePicker(RefPtr<Component> &component, const JS
     component = datePicker;
 }
 
+void JSDatePickerDialog::CreateTimePicker(const JSRef<JSObject>& paramObj)
+{
+    auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
+    auto selectedTime = paramObj->GetProperty("selected");
+    if (selectedTime->IsObject()) {
+        timePicker->SetSelectedTime(ParseTime(selectedTime));
+    }
+    timePicker->SetIsDialog(false);
+    timePicker->SetHasButtons(false);
+
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("timePicker Theme is null");
+        return;
+    }
+
+    timePicker->SetTheme(theme);
+    ViewStackProcessor::GetInstance()->Push(timePicker);
+}
+
 PickerDate JSDatePickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
 {
     auto pickerDate = PickerDate();
@@ -276,6 +411,28 @@ PickerDate JSDatePickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
         pickerDate.SetDay(date->ToNumber<int32_t>());
     }
     return pickerDate;
+}
+
+PickerTime JSDatePickerDialog::ParseTime(const JSRef<JSVal>& timeVal)
+{
+    auto pickerTime = PickerTime();
+    if (!timeVal->IsObject()) {
+        return pickerTime;
+    }
+    auto timeObj = JSRef<JSObject>::Cast(timeVal);
+    auto hourFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getHours"));
+    auto minuteFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getMinutes"));
+    auto secondFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getSeconds"));
+    JSRef<JSVal> hour = hourFunc->Call(timeObj);
+    JSRef<JSVal> minute = minuteFunc->Call(timeObj);
+    JSRef<JSVal> second = secondFunc->Call(timeObj);
+
+    if (hour->IsNumber() && minute->IsNumber() && second->IsNumber()) {
+        pickerTime.SetHour(hour->ToNumber<int32_t>());
+        pickerTime.SetMinute(minute->ToNumber<int32_t>());
+        pickerTime.SetSecond(second->ToNumber<int32_t>());
+    }
+    return pickerTime;
 }
 
 void JSTimePicker::JSBind(BindingTarget globalObj)

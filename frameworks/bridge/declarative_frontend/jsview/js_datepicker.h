@@ -29,10 +29,16 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void SetLunar(bool isLunar);
     static void OnChange(const JSCallbackInfo& info);
+    // keep compatible, need remove after
+    static void UseMilitaryTime(bool isUseMilitaryTime);
 
 private:
     static void CreateDatePicker(const JSRef<JSObject>& paramObj);
+    // keep compatible, need remove after
+    static void CreateTimePicker(const JSRef<JSObject>& paramObj);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
+    // keep compatible, need remove after
+    static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
 };
 
 class JSDatePickerDialog {
@@ -42,7 +48,11 @@ public:
 
 private:
     static void CreateDatePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
+    // keep compatible, need remove after
+    static void CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
+    // keep compatible, need remove after
+    static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
 };
 
 class JSTimePicker : public JSViewAbstract {
