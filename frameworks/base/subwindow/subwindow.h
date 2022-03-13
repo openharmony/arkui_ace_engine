@@ -30,6 +30,7 @@ public:
     virtual void InitContainer() = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
     virtual void CloseMenu() = 0;
+    virtual void ClearMenu() {};
 
     int32_t GetSubwindowId()
     {
