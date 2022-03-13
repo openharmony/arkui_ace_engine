@@ -31,7 +31,6 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_runtime.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_value.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_group_js_bridge.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_syscap_module.h"
@@ -40,6 +39,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_api_perf.h"
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_stateMgmt_abc_end[];
@@ -339,15 +339,12 @@ JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 
     if (runtime_) {
         runtime_->RegisterUncaughtExceptionHandler(nullptr);
-        // reset runtime in utils
-        JsiDeclarativeUtils::SetRuntime(nullptr, runtime_);
         if (globalRuntime_ != runtime_) {
             runtime_->Reset();
         }
     }
     runtime_.reset();
     runtime_ = nullptr;
-    JsiDeclarativeUtils::SetCurrentState(JsErrorType::DESTROY_PAGE_ERROR, instanceId_, "", nullptr);
 }
 
 bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
@@ -380,11 +377,8 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         return false;
     }
 
-    // set new runtime
-    JsiDeclarativeUtils::SetRuntime(runtime_);
-
     runtime_->SetEmbedderData(this);
-    runtime_->RegisterUncaughtExceptionHandler(JsiDeclarativeUtils::ReportJsErrorEvent);
+    runtime_->RegisterUncaughtExceptionHandler(JsiBaseUtils::ReportJsErrorEvent);
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     for (const auto& [key, value] : extraNativeObject) {
@@ -433,7 +427,6 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         bool contentStorageResult = runtime_->EvaluateJsCode((uint8_t*)_binary_contentStorage_abc_start,
             _binary_contentStorage_abc_end - _binary_contentStorage_abc_start);
         if (!contentStorageResult) {
-            JsiDeclarativeUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_);
             LOGE("EvaluateJsCode stateMgmt failed");
         }
     }
@@ -441,13 +434,11 @@ void JsiDeclarativeEngineInstance::InitAceModule()
     bool stateMgmtResult = runtime_->EvaluateJsCode(
         (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
     if (!stateMgmtResult) {
-        JsiDeclarativeUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_);
         LOGE("EvaluateJsCode stateMgmt failed");
     }
     bool jsEnumStyleResult = runtime_->EvaluateJsCode(
         (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
     if (!jsEnumStyleResult) {
-        JsiDeclarativeUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_);
         LOGE("EvaluateJsCode jsEnumStyle failed");
     }
 }
@@ -491,7 +482,6 @@ void JsiDeclarativeEngineInstance::PreInitAceModule(void* runtime)
     bool evalResult = arkRuntime->EvaluateJsCode(
         (uint8_t*)_binary_contentStorage_abc_start, _binary_contentStorage_abc_end - _binary_contentStorage_abc_start);
     if (!evalResult) {
-        JsiDeclarativeUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, 0);
         LOGE("PreInitAceModule EvaluateJsCode stateMgmt failed");
     }
     isModulePreloaded_ = evalResult;
@@ -876,7 +866,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::Initialize");
     LOGI("JsiDeclarativeEngine Initialize");
     ACE_DCHECK(delegate);
-    engineInstance_ = AceType::MakeRefPtr<JsiDeclarativeEngineInstance>(delegate, instanceId_);
+    engineInstance_ = AceType::MakeRefPtr<JsiDeclarativeEngineInstance>(delegate);
     auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime_);
     std::shared_ptr<ArkJSRuntime> arkRuntime;
     EcmaVM* vm = nullptr;
@@ -1024,7 +1014,6 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
 
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
-    JsiDeclarativeUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_, page->GetUrl(), page);
 
     // get source map
     std::string jsSourceMap;
@@ -1292,8 +1281,6 @@ void JsiDeclarativeEngine::DestroyApplication(const std::string& packageName)
 {
     LOGI("JsiDeclarativeEngine DestroyApplication, packageName %{public}s", packageName.c_str());
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    JsiDeclarativeUtils::SetCurrentState(
-        JsErrorType::DESTROY_APP_ERROR, instanceId_, "", engineInstance_->GetStagingPage());
 
     CallAppFunc("onDestroy");
 }

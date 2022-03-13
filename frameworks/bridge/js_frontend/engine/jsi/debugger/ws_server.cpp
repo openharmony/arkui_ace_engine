@@ -31,7 +31,7 @@ void WsServer::RunServer()
         int appPid = getpid();
         std::string pidStr = std::to_string(appPid);
         std::string sockName = '\0' + pidStr + componentName_;
-        LOGI("WsServer RunServer: %{private}d%{private}s", appPid, componentName_.c_str());
+        LOGI("WsServer RunServer: %{public}d%{public}s", appPid, componentName_.c_str());
         localSocket::endpoint endPoint(sockName);
         localSocket::socket socket(ioContext);
         localSocket::acceptor acceptor(ioContext, endPoint);
@@ -43,7 +43,7 @@ void WsServer::RunServer()
             beast::flat_buffer buffer;
             webSocket_->read(buffer);
             std::string message = boost::beast::buffers_to_string(buffer.data());
-            LOGI("WsServer OnMessage: %{private}s", message.c_str());
+            LOGI("WsServer OnMessage: %{public}s", message.c_str());
             ideMsgQueue.push(std::move(message));
             wsOnMessage_();
         }
@@ -52,7 +52,7 @@ void WsServer::RunServer()
             LOGE("Error system_error");
         }
     } catch (const std::exception& e) {
-        LOGE("Error exception, %{private}s", e.what());
+        LOGE("Error exception, %{public}s", e.what());
     }
 }
 
@@ -64,7 +64,7 @@ void WsServer::StopServer()
 
 void WsServer::SendReply(const std::string& message) const
 {
-    LOGI("WsServer SendReply: %{private}s", message.c_str());
+    LOGI("WsServer SendReply: %{public}s", message.c_str());
     try {
         boost::beast::multi_buffer buffer;
         boost::beast::ostream(buffer) << message;

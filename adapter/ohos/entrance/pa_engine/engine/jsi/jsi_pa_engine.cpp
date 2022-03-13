@@ -28,7 +28,7 @@
 #include "base/log/log.h"
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_utils.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 #include "js_backend_timer_module.h"
 
 extern const char _binary_paMgmt_abc_start[];
@@ -326,8 +326,6 @@ JsiPaEngineInstance::~JsiPaEngineInstance()
 {
     if (runtime_) {
         runtime_->RegisterUncaughtExceptionHandler(nullptr);
-        // reset runtime in utils
-        JsiUtils::SetRuntime(nullptr, runtime_);
         runtime_->Reset();
     }
     runtime_.reset();
@@ -471,7 +469,6 @@ void JsiPaEngineInstance::EvaluateJsCode()
     ACE_SCOPED_TRACE("JsiPaEngineInstance::EvaluateJsCode");
     LOGD("JsiPaEngineInstance EvaluateJsCode");
 
-    JsiUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_);
     // load jsfwk
     if (!runtime_->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
         LOGE("Failed to load js framework!");
@@ -505,9 +502,6 @@ bool JsiPaEngineInstance::InitJsEnv(bool debuggerMode, const std::unordered_map<
         return false;
     }
 
-    // set new runtime
-    JsiUtils::SetRuntime(runtime_);
-
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     for (const auto& [key, value] : extraNativeObject) {
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
@@ -522,7 +516,7 @@ bool JsiPaEngineInstance::InitJsEnv(bool debuggerMode, const std::unordered_map<
     EvaluateJsCode();
 
     runtime_->SetEmbedderData(this);
-    runtime_->RegisterUncaughtExceptionHandler(JsiUtils::ReportJsErrorEvent);
+    runtime_->RegisterUncaughtExceptionHandler(JsiBaseUtils::ReportJsErrorEvent);
     LOGI("JsiPaEngineInstance InitJsEnv success");
     return true;
 }
@@ -539,7 +533,6 @@ bool JsiPaEngineInstance::FireJsEvent(const std::string& eventStr)
     }
 
     const std::vector<shared_ptr<JsValue>>& argv = { runtime_->ParseJson(eventStr) };
-    JsiUtils::SetCurrentState(JsErrorType::FIRE_EVENT_ERROR, instanceId_);
     func->Call(runtime_, global, argv, argv.size());
     return true;
 }
@@ -766,7 +759,6 @@ void JsiPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
     ACE_DCHECK(engineInstance_);
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
-    JsiUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_);
 
     // js file to abc file and execute abc file
     const char js_ext[] = ".js";
