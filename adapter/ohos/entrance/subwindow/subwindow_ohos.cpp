@@ -183,7 +183,12 @@ void SubwindowOhos::AddMenu(const RefPtr<Component>& newComponent)
         return;
     }
     // Push the component
+    stack->PopMenu();
     stack->PushComponent(newComponent);
+    popup_ = AceType::DynamicCast<SelectPopupComponent>(newComponent);
+    if (!popup_) {
+        LOGE("Add menu failed, this is not a popup component.");
+    }
     LOGI("Subwindow push new component end.");
 }
 
@@ -202,6 +207,7 @@ void SubwindowOhos::ClearMenu()
         LOGE("Get context failed, it is null");
     }
     context->FlushPipelineImmediately();
+    HideWindow();
     LOGI("Subwindow clear menu end.");
 }
 
@@ -215,8 +221,9 @@ void SubwindowOhos::ShowMenu(const RefPtr<Component>& newComponent)
 void SubwindowOhos::CloseMenu()
 {
     LOGI("Close the menu");
-    ClearMenu();
-    HideWindow();
+    if (popup_) {
+        popup_->CloseContextMenu();
+    }
 }
 
 RefPtr<StackElement> SubwindowOhos::GetStack()
