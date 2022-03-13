@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
-
 namespace OHOS::Ace::Framework {
 int32_t GetLineOffset()
 {
@@ -24,13 +22,8 @@ int32_t GetLineOffset()
     return offset;
 }
 
-RefPtr<JsAcePage> GetRunningPage(const AceType *data)
+RefPtr<JsAcePage> GetRunningPage([[maybe_unused]] const AceType *data)
 {
-    if (data == nullptr || !AceType::InstanceOf<JsiEngineInstance>(data)) {
-        return nullptr;
-    }
-    auto instance = static_cast<const JsiEngineInstance *>(data);
-
-    return instance->GetRunningPage();
+    return nullptr;
 }
 } // namespace OHOS::Ace::Framework

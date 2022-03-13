@@ -21,7 +21,6 @@
 #include "base/memory/ace_type.h"
 #include "frameworks/bridge/codec/function_call.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_utils.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 
 namespace OHOS::Ace::Framework {
@@ -370,7 +369,6 @@ std::string JsiDeclarativeGroupJsBridge::SerializationObjectToString(
         LOGE("SerializationObjectToString error: JSON has no attribute stringify");
         return "";
     }
-    JsiDeclarativeUtils::SetCurrentState(JsErrorType::STRINGIFY_ERROR);
     shared_ptr<JsValue> strValue = jsFunc->Call(runtime, runtime->NewUndefined(), { val }, 1);
     if (strValue->IsUndefined(runtime)) {
         LOGE("SerializationObjectToString error: js call error.");
@@ -467,7 +465,6 @@ void JsiDeclarativeGroupJsBridge::CallModuleJsCallback(
         }
         std::vector<shared_ptr<JsValue>> argv = { callBackResult };
 
-        JsiDeclarativeUtils::SetCurrentState();
         // Pass only 1 parameter, call promise resolve call back.
         jsFunc->Call(runtime_, global, argv, 1);
         itFunc->second.rejectCallback = runtime_->NewUndefined();

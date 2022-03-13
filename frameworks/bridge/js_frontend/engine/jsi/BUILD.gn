@@ -33,6 +33,7 @@ template("js_engine_ark") {
       "jsi_animation_bridge.cpp",
       "jsi_animator_bridge.cpp",
       "jsi_badge_bridge.cpp",
+      "jsi_base_utils.cpp",
       "jsi_canvas_bridge.cpp",
       "jsi_chart_bridge.cpp",
       "jsi_clock_bridge.cpp",

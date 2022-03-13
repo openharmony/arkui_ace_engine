@@ -153,7 +153,6 @@ void CallAnimationFinishJs(const WeakPtr<JsiAnimationBridge>& bridgeWeak, shared
         LOGD("cannot find 'CallAnimationFinishJs' function from animation object, maybe no callback at all.");
         return;
     }
-    JsiUtils::SetCurrentState(JsErrorType::ANIMATION_FINISH_ERROR, 0, "", page);
     jsFunc->Call(runtime, runtime->GetGlobal(), {}, 0);
 }
 
@@ -182,7 +181,6 @@ void CallAnimationCancelJs(const WeakPtr<JsiAnimationBridge>& bridgeWeak, shared
         return;
     }
 
-    JsiUtils::SetCurrentState(JsErrorType::ANIMATION_CANCEL_ERROR, 0, "", page);
     LOGD("animation oncancel event call");
     jsFunc->Call(runtime, runtime->GetGlobal(), {}, 0);
 }

@@ -100,9 +100,10 @@ template("js_pa_engine_ark") {
       "$ace_root/adapter/ohos/entrance/pa_engine/engine/common/js_backend_timer_module.cpp",
       "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.cpp",
       "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_value.cpp",
-      "$ace_root/frameworks/bridge/js_frontend/engine/jsi/jsi_utils.cpp",
+      "$ace_root/frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.cpp",
       "jsi_pa_engine.cpp",
       "jsi_pa_engine_loader.cpp",
+      "jsi_pa_utils.cpp",
     ]
 
     deps += [ ":gen_obj_src_abc_proxyclass" ]
