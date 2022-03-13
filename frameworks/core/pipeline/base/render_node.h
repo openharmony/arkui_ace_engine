@@ -279,6 +279,11 @@ public:
         return false;
     }
 
+    virtual bool IsNotSiblingAddRecognizerToResult()
+    {
+        return true;
+    }
+
     virtual Point GetTransformPoint(const Point& point)
     {
         return point;
