@@ -72,7 +72,7 @@ if (defined(is_experiment_build) && is_experiment_build) {
   accessibility_support = true
 }
 
-if (defined(web_components_support) && web_components_support) {
+if (defined(web_components_support) && web_components_support && product_name == "rk3568") {
   defines += [ "WEB_SUPPORTED" ]
 }
 
