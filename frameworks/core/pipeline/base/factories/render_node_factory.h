@@ -25,7 +25,7 @@ namespace OHOS::Ace {
 
 constexpr size_t FLEX_CACHE_SIZE = 50;
 constexpr size_t FLEX_ITEM_CACHE_SIZE = 200;
-constexpr bool USE_CACHE = true;
+constexpr bool USE_CACHE = false;
 class RenderNode;
 class RenderNodeFactory : public virtual AceType {
     DECLARE_ACE_TYPE(RenderNodeFactory, AceType);
