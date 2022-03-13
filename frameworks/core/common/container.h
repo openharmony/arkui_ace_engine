@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,7 @@ using DragEventCallBack = std::function<void(int32_t x, int32_t y, const DragEve
 
 constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
 constexpr int32_t INSTANCE_ID_PLATFORM = -2;
+constexpr int32_t MIN_PLUGIN_SUBCONTAINER_ID = 2000000;
 
 class ACE_FORCE_EXPORT_WITH_PREVIEW Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);

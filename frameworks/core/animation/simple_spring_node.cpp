@@ -91,7 +91,7 @@ void SimpleSpringNode::EndToValue(double endValue, double velocity)
         if (controlNode->IsAnimateToEnd()) {
             startTime_ = context->GetTimeFromExternalTimer() - static_cast<uint64_t>(FRAME_SCHEDULED);
         } else {
-            startTime_ = context->GetTimeFromExternalTimer() - (int64_t)(GetFrameDelta() * FRAME_SCHEDULED);
+            startTime_ = context->GetTimeFromExternalTimer() - static_cast<uint64_t>(GetFrameDelta() * FRAME_SCHEDULED);
         }
         spring_->SetAccuracy(valueAccuracy_);
         spring_->Reset(value_, endValue, velocity_, springProperty_);

@@ -20,6 +20,7 @@ config("ace_jsoncpp_config") {
 }
 
 ohos_source_set("ace_jsoncpp") {
+  part_name = ace_engine_part
   public_configs = [ ":ace_jsoncpp_config" ]
 
   sources = [

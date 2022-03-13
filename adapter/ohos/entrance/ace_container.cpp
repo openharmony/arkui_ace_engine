@@ -583,8 +583,13 @@ void AceContainer::DestroyContainer(int32_t instanceId)
         taskExecutor->PostSyncTask([] { LOGI("Wait JS thread..."); }, TaskExecutor::TaskType::JS);
     }
     container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
-    EngineHelper::RemoveEngine(instanceId);
-    AceEngine::Get().RemoveContainer(instanceId);
+    if (taskExecutor) {
+        taskExecutor->PostTask([instanceId] {
+            LOGI("Remove on Platform thread...");
+            EngineHelper::RemoveEngine(instanceId);
+            AceEngine::Get().RemoveContainer(instanceId);
+        }, TaskExecutor::TaskType::PLATFORM);
+    }
 }
 
 void AceContainer::SetView(
@@ -739,16 +744,24 @@ void AceContainer::TriggerGarbageCollection()
         TaskExecutor::TaskType::JS);
 }
 
-void AceContainer::SetContentStorage(NativeReference* storage, NativeReference* context)
+void AceContainer::SetLocalStorage(NativeReference* storage, NativeReference* context)
 {
-    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
-    auto jsEngine = declarativeFrontend->GetJsEngine();
-    if (context) {
-        jsEngine->SetContext(instanceId_, context);
-    }
-    if (storage) {
-        jsEngine->SetContentStorage(instanceId_, storage);
-    }
+    ContainerScope scope(instanceId_);
+    taskExecutor_->PostTask(
+        [frontend = WeakPtr<Frontend>(frontend_), storage, context, id = instanceId_] {
+            auto sp = frontend.Upgrade();
+            if (sp) {
+                auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(sp);
+                auto jsEngine = declarativeFrontend->GetJsEngine();
+                if (context) {
+                    jsEngine->SetContext(id, context);
+                }
+                if (storage) {
+                    jsEngine->SetLocalStorage(id, storage);
+                }
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void AceContainer::AddAssetPath(

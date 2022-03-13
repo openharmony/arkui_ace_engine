@@ -18,13 +18,12 @@ template("declarative_js_engine_qjs") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
 
     configs = [ "$ace_root:ace_config" ]
 
     sources = [
-      "content_storage_set.cpp",
-      "js_converter.cpp",
       "modules/qjs_curves_module.cpp",
       "modules/qjs_matrix4_module.cpp",
       "modules/qjs_module_manager.cpp",

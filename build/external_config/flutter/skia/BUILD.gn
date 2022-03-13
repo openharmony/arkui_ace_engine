@@ -76,6 +76,7 @@ template("make_skia_deps") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set("ace_skia_$platform") {
+    part_name = ace_engine_part
     license_file = "$flutter_root/skia/LICENSE"
     if (platform == "ohos" &&
         (!defined(config.disable_gpu) || !config.disable_gpu) &&
@@ -321,6 +322,7 @@ template("ace_skia_opts") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines = [
       "SK_SUPPORT_ATLAS_TEXT=1",
       "SK_GAMMA_APPLY_TO_A8",
@@ -397,6 +399,7 @@ template("ace_skia_core") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
     defines += ace_skia_common_defines
     cflags_cc += invoker.cflags_cc
@@ -919,6 +922,7 @@ template("ace_skia_ext") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
     defines += [ "OHOS_ACE_SKIA_EXT" ]
     configs = [ ":ace_skia_ext_config" ]
@@ -993,6 +997,7 @@ config("ace_jpeg_config") {
 }
 
 ohos_source_set("ace_jpeg") {
+  part_name = ace_engine_part
   configs = [ ":ace_jpeg_config" ]
   configs += [ "$ace_root/build:reduce_eh_frame_config" ]
 
@@ -1027,6 +1032,7 @@ config("ace_skcms_config") {
 }
 
 ohos_source_set("ace_skcms") {
+  part_name = ace_engine_part
   configs = [ ":ace_skcms_config" ]
   configs += [ "$ace_root/build:reduce_eh_frame_config" ]
   sources = [ "$flutter_root/skia/third_party/skcms/skcms.cc" ]
@@ -1054,6 +1060,7 @@ template("ace_pdf") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
     defines += ace_skia_common_defines
@@ -1150,6 +1157,7 @@ template("ace_gpu") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
     defines += ace_skia_common_defines
     defines += [ "SK_DISABLE_REDUCE_OPLIST_SPLITTING" ]
@@ -1511,6 +1519,7 @@ config("ace_typeface_freetype_config") {
 }
 
 ohos_source_set("ace_typeface_freetype") {
+  part_name = ace_engine_part
   defines = ace_skia_common_defines
   defines += [ "SK_FREETYPE_MINIMUM_RUNTIME_VERSION=(((FREETYPE_MAJOR) << 24) | ((FREETYPE_MINOR) << 16) | ((FREETYPE_PATCH) << 8))" ]
   configs = [
@@ -1539,6 +1548,7 @@ config("ace_gif_config") {
 }
 
 ohos_source_set("ace_gif") {
+  part_name = ace_engine_part
   defines = ace_skia_common_defines
   configs = [ ":ace_gif_config" ]
   configs += [ "$ace_root/build:reduce_eh_frame_config" ]
@@ -1563,6 +1573,7 @@ config("ace_xml_config") {
 }
 
 ohos_source_set("ace_xml") {
+  part_name = ace_engine_part
   configs = [
     ":ace_xml_config",
     ":skia_deps_include_config",
@@ -1600,6 +1611,7 @@ template("ace_fontmgr") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     configs = [
       ":ace_fontmgr_config",
       ":skia_deps_include_config",
@@ -1697,6 +1709,7 @@ config("ace_fontmgr_standard_config") {
 }
 
 ohos_source_set("ace_fontmgr_standard") {
+  part_name = ace_engine_part
   configs = [
     ":ace_fontmgr_config",
     ":ace_fontmgr_standard_config",
@@ -1756,6 +1769,7 @@ config("ace_webp_config") {
 }
 
 ohos_source_set("ace_webp") {
+  part_name = ace_engine_part
   configs = [ ":ace_webp_config" ]
   configs += [ "$ace_root/build:reduce_eh_frame_config" ]
   sources = [
@@ -1788,6 +1802,7 @@ template("ace_png") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
     defines += ace_skia_common_defines
     cflags_cc += invoker.cflags_cc
@@ -1842,6 +1857,7 @@ config("ace_heif_config") {
 }
 
 ohos_source_set("ace_heif") {
+  part_name = ace_engine_part
   configs = [ ":ace_heif_config" ]
   configs += [ "$ace_root/build:reduce_eh_frame_config" ]
   sources = [ "$flutter_root/skia/src/codec/SkHeifCodec.cpp" ]
@@ -1872,6 +1888,7 @@ template("ace_svg_model") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
     configs = []
     if (platform == "ohos" && defined(config.enable_native_view) &&

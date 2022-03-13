@@ -105,6 +105,7 @@ template("build_component") {
           }
         }
       }
+      part_name = ace_engine_part
     }
   }
 

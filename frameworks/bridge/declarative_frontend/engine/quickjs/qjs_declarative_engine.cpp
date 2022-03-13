@@ -233,7 +233,10 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         return;
     }
 
-    JSValue compiled = engineInstance_->CompileSource(url, jsContent.c_str(), jsContent.size());
+    // inject the file URI from which we are loading into the source code
+    jsContent= "const getFilePath = function() { return '" + url + "'};" + jsContent;
+
+    JSValue compiled = engineInstance_->CompileSource(GetInstanceName(), url, jsContent.c_str(), jsContent.size());
     if (JS_IsException(compiled)) {
         LOGE("js compilation failed url=[%{public}s]", url.c_str());
         return;

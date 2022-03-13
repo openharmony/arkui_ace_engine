@@ -36,6 +36,7 @@ config("ace_libfreetype2_config") {
 }
 
 ohos_source_set("ace_libfreetype2") {
+  part_name = ace_engine_part
   license_file =
       "$flutter_root/skia/third_party/externals/freetype/docs/LICENSE.TXT"
   configs = [ ":ace_libfreetype2_config" ]

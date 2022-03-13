@@ -51,7 +51,7 @@ double GetSystemTimeZone()
     struct timezone timeZone;
     gettimeofday(&currentTime, &timeZone);
     int32_t minutesWest = timeZone.tz_minuteswest;
-    double hoursWest = minutesWest / TOTAL_MINUTE_OF_HOUR;
+    double hoursWest = static_cast<double>(minutesWest / TOTAL_MINUTE_OF_HOUR);
     return hoursWest;
 }
 } // namespace

@@ -223,24 +223,18 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         ImageCache::SetCacheFileInfo();
     });
 
-    int32_t width = window_->GetRect().width_;
-    int32_t height = window_->GetRect().height_;
-    LOGI("UIContent Initialize: width: %{public}d, height: %{public}d", width, height);
-
-    // get density
-    auto density = 1.0f;
-    if (updateConfig_) {
-        density = config_.Density();
-    } else {
-        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-        if (defaultDisplay) {
-            density = defaultDisplay->GetVirtualPixelRatio();
-            LOGI("UIContent: Default display density set: %{public}f", density);
-        } else {
-            LOGI("UIContent: Default display is null, set density failed. Use default density: %{public}f", density);
-        }
+    int32_t deviceWidth = 0;
+    int32_t deviceHeight = 0;
+    float density = 1.0f;
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (defaultDisplay) {
+        density = defaultDisplay->GetVirtualPixelRatio();
+        deviceWidth = defaultDisplay->GetWidth();
+        deviceHeight = defaultDisplay->GetHeight();
+        LOGI("UIContent: deviceWidth: %{public}d, deviceHeight: %{public}d, default density: %{public}f", deviceWidth,
+            deviceHeight, density);
     }
-    SystemProperties::InitDeviceInfo(width, height, height >= width ? 0 : 1, density, false);
+    SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     SystemProperties::SetColorMode(ColorMode::LIGHT);
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
@@ -411,14 +405,13 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 
     Ace::Platform::UIEnvCallback callback = nullptr;
 #ifdef ENABLE_ROSEN_BACKEND
-    callback = [ window, id = instanceId_, container] (
-        const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) {
+    callback = [window, id = instanceId_, container](const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) {
         if (SystemProperties::GetRosenBackendEnabled()) {
             auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
             if (rsUiDirector != nullptr) {
                 rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
                 rsUiDirector->SetUITaskRunner(
-                    [ taskExecutor = container->GetTaskExecutor(), id ](const std::function<void()>& task) {
+                    [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
                         ContainerScope scope(id);
                         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
                     });
@@ -433,16 +426,16 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     };
 #endif
     // set view
-    Platform::AceContainer::SetView(flutterAceView, density, width, height, window_->GetWindowId(), callback);
-    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, config_.Orientation());
+    Platform::AceContainer::SetView(flutterAceView, density, 0, 0, window_->GetWindowId(), callback);
+    Platform::FlutterAceView::SurfaceChanged(flutterAceView, 0, 0, config_.Orientation());
     auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
     if (!storage) {
-        container->SetContentStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
+        container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
     } else {
-        container->SetContentStorage(
+        LOGI("SetLocalStorage %{public}d", storage->TypeOf());
+        container->SetLocalStorage(
             nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
     }
-
     InitWindowCallback(info);
 }
 
@@ -498,7 +491,7 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
 {
     LOGI("AceAbility::OnKeyUp called,touchEvent info: keyCode is %{private}d,"
          "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
-         touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
+        touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (container) {
         auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());

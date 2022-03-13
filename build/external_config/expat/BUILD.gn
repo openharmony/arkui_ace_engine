@@ -35,6 +35,7 @@ config("libexpat_config") {
 }
 
 ohos_source_set("ace_libexpat") {
+  part_name = ace_engine_part
   configs = [ ":ace_libexpat_config" ]
   public_configs = [ ":libexpat_config" ]
 

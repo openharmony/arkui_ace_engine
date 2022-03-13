@@ -1,1 +1,1 @@
-{"persistentSay":"Hello","persistentSubject":"World","existingPropToPersist":123,"newProp":"new property value"}
+{"existingPropToPersist":123,"persistentSay":"Terve","persistentSubject":"Maailma","newProp":"new property value"}

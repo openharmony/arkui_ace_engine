@@ -866,10 +866,10 @@ void JSViewAbstract::ParseAndSetTransitionOption(std::unique_ptr<JsonValue>& tra
 {
     TransitionType transitionType = ParseTransitionType(transitionArgs->GetString("type", "All"));
     bool hasEffect = false;
-    hasEffect |= ParseAndSetOpacityTransition(transitionArgs, transitionType);
-    hasEffect |= ParseAndSetTranslateTransition(transitionArgs, transitionType);
-    hasEffect |= ParseAndSetScaleTransition(transitionArgs, transitionType);
-    hasEffect |= ParseAndSetRotateTransition(transitionArgs, transitionType);
+    hasEffect = ParseAndSetOpacityTransition(transitionArgs, transitionType) || hasEffect;
+    hasEffect = ParseAndSetTranslateTransition(transitionArgs, transitionType) || hasEffect;
+    hasEffect = ParseAndSetScaleTransition(transitionArgs, transitionType) || hasEffect;
+    hasEffect = ParseAndSetRotateTransition(transitionArgs, transitionType) || hasEffect;
     if (!hasEffect) {
         SetDefaultTransition(transitionType);
     }
@@ -2386,7 +2386,7 @@ bool JSViewAbstract::ParseJsInteger(const JSRef<JSVal>& jsValue, uint32_t& resul
     }
 
     if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        result = themeConstants->GetInt(resId->ToNumber<uint32_t>());
+        result = static_cast<uint32_t>(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
         return true;
     } else {
         return false;

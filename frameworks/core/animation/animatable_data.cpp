@@ -37,10 +37,10 @@ Color AnimatableData<Color>::Blend(
     float startR = start.GetRed();
     float startG = start.GetGreen();
     float startB = start.GetBlue();
-    int32_t alpha = startA + (end.GetAlpha() - startA) * process;
-    int32_t red = startR + (end.GetRed() - startR) * process;
-    int32_t green = startG + (end.GetGreen() - startG) * process;
-    int32_t blue = startB + (end.GetBlue() - startB) * process;
+    uint8_t alpha = static_cast<uint8_t>(startA + (end.GetAlpha() - startA) * process);
+    uint8_t red = static_cast<uint8_t>(startR + (end.GetRed() - startR) * process);
+    uint8_t green = static_cast<uint8_t>(startG + (end.GetGreen() - startG) * process);
+    uint8_t blue = static_cast<uint8_t>(startB + (end.GetBlue() - startB) * process);
     return Color::FromARGB(alpha, red, green, blue);
 }
 

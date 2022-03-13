@@ -169,6 +169,7 @@ void DeclarativeFrontend::Destroy()
     // To guarantee the jsEngine_ and delegate_ released in js thread
     delegate_.Reset();
     handler_.Reset();
+    jsEngine_->Destroy();
     jsEngine_.Reset();
     LOGI("DeclarativeFrontend Destroy end.");
 }
@@ -974,7 +975,7 @@ void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, c
             fixParam = fixParam.substr(startPos, endPos - startPos + 1);
         }
         if (delegate_) {
-            delegate_->GetUiTask().PostTask([&eventMarker, fixParam] { eventMarker.CallUiStrFunction(fixParam); });
+            delegate_->GetUiTask().PostTask([eventMarker, fixParam] { eventMarker.CallUiStrFunction(fixParam); });
         }
     } else {
         delegate_->FireAsyncEvent(eventMarker.GetData().eventId, param, "");

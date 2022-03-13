@@ -224,7 +224,7 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     buttonsLenInt = SHOW_DIALOG_BUTTON_NUM_MAX;
                     LOGE("Supports 1 - 3 buttons");
                 }
-                for (int j = 0; j < buttonsLenInt; j++) {
+                for (uint32_t j = 0; j < buttonsLenInt; j++) {
                     napi_get_element(env, asyncContext->buttonsNApi, index, &buttonArray);
                     index++;
                     napi_get_named_property(env, buttonArray, "text", &textNApi);
@@ -398,9 +398,9 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                     napi_typeof(env, textNApi, &valueType);
                     if (valueType == napi_string) {
                         size_t textLen = GetParamLen(textNApi) + 1;
-                        char text[textLen + 1];
-                        napi_get_value_string_utf8(env, textNApi, text, textLen, &ret);
-                        textString = text;
+                        std::unique_ptr<char[]> text = std::make_unique<char[]>(textLen + 1);
+                        napi_get_value_string_utf8(env, textNApi, text.get(), textLen, &ret);
+                        textString = text.get();
                     } else if (valueType == napi_object) {
                         int32_t id = 0;
                         int32_t type = 0;

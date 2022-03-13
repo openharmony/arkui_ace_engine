@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,7 +83,7 @@ int64_t PluginManager::GetPluginSubContainerId()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (pluginSubContainerMap_.empty()) {
-        return 0;
+        return MIN_PLUGIN_SUBCONTAINER_ID;
     }
     return pluginSubContainerMap_.rbegin()->first + 1;
 }
@@ -96,5 +96,32 @@ int32_t PluginManager::StartAbility(
         return -1;
     }
     return pluginUtils_->StartAbility(bundleName, abilityName, params);
+}
+
+void PluginManager::AddPluginParentContainer(int64_t pluginId, int32_t pluginParentContainerId)
+{
+    std::lock_guard<std::mutex> lock(parentContainerMutex_);
+    auto result = parentContainerMap_.try_emplace(pluginId, pluginParentContainerId);
+    if (!result.second) {
+        LOGW("already have pluginSubContainer of this instance, pluginId: %{public}ld", static_cast<long>(pluginId));
+    }
+}
+
+void PluginManager::RemovePluginParentContainer(int64_t pluginId)
+{
+    std::lock_guard<std::mutex> lock(parentContainerMutex_);
+    parentContainerMap_.erase(pluginId);
+}
+
+int64_t PluginManager::GetPluginParentContainerId(int64_t pluginId)
+{
+    std::lock_guard<std::mutex> lock(parentContainerMutex_);
+    auto result = parentContainerMap_.find(pluginId);
+    if (result != parentContainerMap_.end()) {
+        return result->second;
+    } else {
+        LOGW("ParentContainerId is empty.");
+        return 0;
+    }
 }
 } // namespace OHOS::Ace

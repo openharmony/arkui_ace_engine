@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,7 +94,7 @@ public:
         return frontendDelegate_;
     }
 
-    JSValue CompileSource(std::string url, const char* buf, size_t bufSize);
+    JSValue CompileSource(std::string instanceName, std::string url, const char* buf, size_t bufSize);
 
     void CallPlatformFunction(const std::string& channel, std::vector<uint8_t>&& data, int32_t id, int32_t groupType)
     {

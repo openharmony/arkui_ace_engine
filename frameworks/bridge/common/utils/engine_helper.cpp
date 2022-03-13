@@ -31,7 +31,7 @@ void EngineHelper::AddEngine(int32_t id, WeakPtr<Framework::JsEngine> engine)
 RefPtr<Framework::JsEngine> EngineHelper::GetEngine(int32_t id)
 {
     std::shared_lock<std::shared_mutex> lock(mutex_);
-    if (id >= MIN_SUBCONTAINER_ID) {
+    if (id >= MIN_SUBCONTAINER_ID && id < MIN_PLUGIN_SUBCONTAINER_ID) {
         id = SubwindowManager::GetInstance()->GetParentContainerId(id);
     }
     auto iter = engineWeakMap_.find(id);

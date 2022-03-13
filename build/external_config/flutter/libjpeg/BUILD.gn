@@ -34,6 +34,7 @@ config("ace_libjpeg_config") {
 }
 
 ohos_source_set("ace_libjpeg") {
+  part_name = ace_engine_part
   license_file =
       "$flutter_root/skia/third_party/externals/libjpeg-turbo/LICENSE.md"
   configs = [ ":ace_libjpeg_config" ]

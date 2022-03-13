@@ -68,7 +68,8 @@ public:
     static void PostJsTask(const shared_ptr<JsRuntime>&, std::function<void()>&& task);
     static void TriggerPageUpdate(const shared_ptr<JsRuntime>&);
     static RefPtr<PipelineContext> GetPipelineContext(const shared_ptr<JsRuntime>& runtime);
-    static void PreInitAceModule(void* runtime);
+    static void PreloadAceModule(void* runtime);
+
     WeakPtr<JsMessageDispatcher> GetJsMessageDispatcher() const
     {
         return dispatcher_;
@@ -171,6 +172,8 @@ public:
 
     bool Initialize(const RefPtr<FrontendDelegate>& delegate) override;
 
+    void Destroy() override;
+
     // Load and initialize a JS bundle into the JS Framework
     void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
 
@@ -228,9 +231,7 @@ public:
 
     void RunGarbageCollection() override;
 
-    void SetContentStorage(int32_t instanceId, NativeReference* storage) override;
-
-    void SetContext(int32_t instanceId, NativeReference* context) override;
+    void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 

@@ -22,6 +22,11 @@
 
 namespace OHOS::Ace::Framework {
 
+enum class DialogOperation {
+    DIALOG_OPEN = 0,
+    DIALOG_CLOSE,
+};
+
 class JSCustomDialogController {
 public:
     explicit JSCustomDialogController(JSView* ownerView) : ownerView_(ownerView) {};
@@ -37,14 +42,17 @@ public:
 private:
     void ShowDialog();
     void CloseDialog();
+    void NotifyDialogOperation(DialogOperation operation);
 
     JSView* ownerView_ = nullptr;
     bool isShown_ = false;
+    bool pending_ = false;
     DialogProperties dialogProperties_;
     RefPtr<JsFunction> jsBuilderFunction_;
     RefPtr<JsFunction> jsCancelFunction_;
     RefPtr<Component> customDialog_;
     RefPtr<DialogComponent> dialogComponent_;
+    std::list<DialogOperation> dialogOperation_;
 };
 
 } // namespace OHOS::Ace::Framework

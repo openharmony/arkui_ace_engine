@@ -20,7 +20,6 @@
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
 
 namespace OHOS::Ace::Framework {
-
 template<typename T>
 void QJSObject::SetProperty(const char* prop, T value) const
 {
@@ -34,7 +33,11 @@ U* QJSObject::Unwrap() const
 }
 
 template<typename U>
-void QJSObject::Wrap(U* data) const {}
+void QJSObject::Wrap(U* data) const
+{
+    // add registered class check
+    JS_SetOpaque(GetHandle(), static_cast<void*>(data));
+}
 
 template<typename T>
 T QJSValue::ToNumber() const
@@ -90,5 +93,4 @@ void QJSException::ThrowTypeError(const char* format, Args... args)
 {
     JS_ThrowTypeError(QJSContext::Current(), format, args...);
 }
-
 }; // namespace OHOS::Ace::Framework
