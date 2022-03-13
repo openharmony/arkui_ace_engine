@@ -249,41 +249,24 @@ void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
     ViewStackProcessor::GetInstance()->Push(datePicker);
 }
 
-void JSDatePickerDialog::CreateTimePicker(RefPtr<Component> &component, const JSRef<JSObject>& paramObj)
+void JSDatePicker::CreateTimePicker(const JSRef<JSObject>& paramObj)
 {
     auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
     auto selectedTime = paramObj->GetProperty("selected");
-    auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
-    bool isUseMilitaryTime = useMilitaryTime->ToBoolean();
     if (selectedTime->IsObject()) {
         timePicker->SetSelectedTime(ParseTime(selectedTime));
     }
     timePicker->SetIsDialog(false);
-    timePicker->SetIsCreateDialogComponent(true);
-    timePicker->SetHour24(isUseMilitaryTime);
-    component = timePicker;
-}
+    timePicker->SetHasButtons(false);
 
-PickerDate JSDatePicker::ParseDate(const JSRef<JSVal>& dateVal)
-{
-    auto pickerDate = PickerDate();
-    if (!dateVal->IsObject()) {
-        return pickerDate;
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("timePicker Theme is null");
+        return;
     }
-    auto dateObj = JSRef<JSObject>::Cast(dateVal);
-    auto yearFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getFullYear"));
-    auto monthFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getMonth"));
-    auto dateFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getDate"));
-    JSRef<JSVal> year = yearFunc->Call(dateObj);
-    JSRef<JSVal> month = monthFunc->Call(dateObj);
-    JSRef<JSVal> date = dateFunc->Call(dateObj);
 
-    if (year->IsNumber() && month->IsNumber() && date->IsNumber()) {
-        pickerDate.SetYear(year->ToNumber<int32_t>());
-        pickerDate.SetMonth(month->ToNumber<int32_t>() + 1); // 0-11 means 1 to 12 months
-        pickerDate.SetDay(date->ToNumber<int32_t>());
-    }
-    return pickerDate;
+    timePicker->SetTheme(theme);
+    ViewStackProcessor::GetInstance()->Push(timePicker);
 }
 
 void JSDatePickerDialog::JSBind(BindingTarget globalObj)
@@ -371,24 +354,19 @@ void JSDatePickerDialog::CreateDatePicker(RefPtr<Component> &component, const JS
     component = datePicker;
 }
 
-void JSDatePickerDialog::CreateTimePicker(const JSRef<JSObject>& paramObj)
+void JSDatePickerDialog::CreateTimePicker(RefPtr<Component> &component, const JSRef<JSObject>& paramObj)
 {
     auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
     auto selectedTime = paramObj->GetProperty("selected");
+    auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
+    bool isUseMilitaryTime = useMilitaryTime->ToBoolean();
     if (selectedTime->IsObject()) {
         timePicker->SetSelectedTime(ParseTime(selectedTime));
     }
     timePicker->SetIsDialog(false);
-    timePicker->SetHasButtons(false);
-
-    auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("timePicker Theme is null");
-        return;
-    }
-
-    timePicker->SetTheme(theme);
-    ViewStackProcessor::GetInstance()->Push(timePicker);
+    timePicker->SetIsCreateDialogComponent(true);
+    timePicker->SetHour24(isUseMilitaryTime);
+    component = timePicker;
 }
 
 PickerDate JSDatePickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
