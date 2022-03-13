@@ -188,11 +188,6 @@ public:
         return mode_ == SliderMode::INSET && GreatNotEqual(step_, DEFAULT_STEP);
     }
 
-    double GetThickness()
-    {
-        return thickness_;
-    }
-    
 protected:
     static TouchRegionPoint GetTopTouchRegion(const Vertex& center, double width, double height);
     static TouchRegionPoint GetBotTouchRegion(const Vertex& center, double width, double height);

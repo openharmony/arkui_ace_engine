@@ -31,14 +31,6 @@ const std::unordered_map<std::string,
     { "constructor", [](const SliderComposedElement& inspector) { return inspector.GetConstructor(); } }
 };
 
-const std::unordered_map<std::string, std::function<std::string(const SliderComposedElement&)>> CREATE_JSON_STRING_MAP {
-    { "blockColor", [](const SliderComposedElement& inspector) { return inspector.GetBlockColor(); } },
-    { "trackColor", [](const SliderComposedElement& inspector) { return inspector.GetTrackColor(); } },
-    { "selectedColor", [](const SliderComposedElement& inspector) { return inspector.GetSelectedColor(); } },
-    { "showSteps", [](const SliderComposedElement& inspector) { return inspector.GetShowSteps(); } },
-    { "showTips", [](const SliderComposedElement& inspector) { return inspector.GetShowTips(); } }
-};
-
 } // namespace
 
 void SliderComposedElement::Dump()
@@ -62,9 +54,6 @@ std::unique_ptr<JsonValue> SliderComposedElement::ToJsonObject() const
     for (const auto& value : CREATE_JSON_MAP) {
         resultJson->Put(value.first.c_str(), value.second(*this));
     }
-    for (const auto& value : CREATE_JSON_STRING_MAP) {
-        resultJson->Put(value.first.c_str(), value.second(*this).c_str());
-    }
     return resultJson;
 }
 
@@ -78,7 +67,11 @@ std::unique_ptr<JsonValue> SliderComposedElement::GetConstructor() const
     jsonValue->Put("step", GetStep().c_str());
     jsonValue->Put("style", GetStyle().c_str());
     jsonValue->Put("reverse", GetReverse().c_str());
-    jsonValue->Put("trackThickness", GetThickness().c_str());
+    jsonValue->Put("blockColor", GetBlockColor().c_str());
+    jsonValue->Put("trackColor", GetTrackColor().c_str());
+    jsonValue->Put("selectedColor", GetSelectedColor().c_str());
+    jsonValue->Put("showSteps", GetShowSteps().c_str());
+    jsonValue->Put("showTips", GetShowTips().c_str());
     return jsonValue;
 }
 
@@ -153,15 +146,6 @@ std::string SliderComposedElement::GetReverse() const
         return ConvertBoolToString(renderSlider->GetIsReverse());
     }
     return "false";
-}
-
-std::string SliderComposedElement::GetThickness() const
-{
-    auto renderSlider = GetRenderSlider();
-    if (renderSlider) {
-        return StringUtils::DoubleToString(renderSlider->GetThickness());
-    }
-    return "";
 }
 
 std::string SliderComposedElement::GetBlockColor() const
