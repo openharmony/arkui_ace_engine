@@ -21,7 +21,6 @@
 #include "core/components/picker/picker_base_component.h"
 
 namespace OHOS::Ace::Framework {
-
 class JSDatePicker : public JSViewAbstract {
 public:
     static void Create(const JSCallbackInfo& info);
