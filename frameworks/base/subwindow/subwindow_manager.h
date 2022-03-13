@@ -60,6 +60,7 @@ public:
 
     void ShowMenu(const RefPtr<Component>& newComponent);
     void CloseMenu();
+    void ClearMenu();
 
 private:
     static std::mutex instanceMutex_;
@@ -79,7 +80,6 @@ private:
     std::string currentSubwindowName_;
 
     RefPtr<Subwindow> currentSubwindow_;
-    bool isShow_ = false;
 };
 
 } // namespace OHOS::Ace

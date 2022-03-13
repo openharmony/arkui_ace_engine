@@ -25,6 +25,7 @@
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
 #include "base/log/log.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
@@ -238,6 +239,11 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
         return false;
     }
 
+    // When the container is for menu, it need close the menu first.
+    if (container->IsSubContainer()) {
+        SubwindowManager::GetInstance()->CloseMenu();
+        return true;
+    }
     ContainerScope scope(instanceId);
     auto context = container->GetPipelineContext();
     if (!context) {
@@ -929,8 +935,10 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         },
         TaskExecutor::TaskType::UI);
     aceView_->Launch();
-    AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
+
+    // Only MainWindow instance will be registered to watch dog.
     if (!isSubContainer_) {
+        AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
         frontend_->AttachPipelineContext(pipelineContext_);
     } else {
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);

@@ -182,7 +182,16 @@ void SelectPopupComponent::ShowContextMenu(const Offset& offset)
 void SelectPopupComponent::CloseContextMenu()
 {
     LOGI("Close Contextmenu.");
-    SubwindowManager::GetInstance()->CloseMenu();
+    if (refreshAnimationCallback_ && animationController_) {
+        hideOption_.ClearListeners();
+        refreshAnimationCallback_(hideOption_, false);
+        animationController_->AddStopListener([]() {
+            SubwindowManager::GetInstance()->ClearMenu();
+        });
+        animationController_->Play();
+    } else {
+        SubwindowManager::GetInstance()->ClearMenu();
+    }
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     auto parentNode = node_->GetParentNode();
     if (parentNode) {
