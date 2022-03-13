@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,15 +32,19 @@ constexpr char DEFAULT_TAB_BAR_NAME[] = "TabBar";
 
 void JSTabContent::Create()
 {
-    auto tabsComponent = AceType::DynamicCast<TabsComponent>(ViewStackProcessor::GetInstance()->GetTopTabs());
+    auto tabsComponent = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetTopTabs());
     if (tabsComponent) {
         auto tabBar = tabsComponent->GetTabBarChild();
         std::list<RefPtr<Component>> components;
-        auto tabContentItemComponent = AceType::MakeRefPtr<TabContentItemComponent>(components);
+        auto tabContentItemComponent = AceType::MakeRefPtr<V2::TabContentItemComponent>(components);
         tabContentItemComponent->SetCrossAxisSize(CrossAxisSize::MAX);
         tabContentItemComponent->SetTabsComponent(AceType::WeakClaim(AceType::RawPtr(tabsComponent)));
         tabBar->AppendChild(CreateTabBarLabelComponent(tabContentItemComponent, std::string(DEFAULT_TAB_BAR_NAME)));
         ViewStackProcessor::GetInstance()->Push(tabContentItemComponent);
+        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        if (box) {
+            box->SetBoxClipFlag(true);
+        }
     } else {
         LOGE("fail to create tab content due to tabs missing");
     }
@@ -49,12 +53,12 @@ void JSTabContent::Create()
 void JSTabContent::SetTabBar(const JSCallbackInfo& info)
 {
     auto tabContentItemComponent =
-        AceType::DynamicCast<TabContentItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+        AceType::DynamicCast<V2::TabContentItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!tabContentItemComponent) {
         return;
     }
     auto weakTabs = tabContentItemComponent->GetTabsComponent();
-    RefPtr<TabsComponent> tabs = weakTabs.Upgrade();
+    auto tabs = weakTabs.Upgrade();
     if (!tabs) {
         LOGE("can not get Tabs parent component error.");
         return;
@@ -97,7 +101,7 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
 }
 
 RefPtr<Component> JSTabContent::ProcessTabBarBuilderFunction(
-    RefPtr<TabContentItemComponent>& tabContent, const JSRef<JSObject> builderFunc)
+    RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSObject> builderFunc)
 {
     tabContent->SetBarText("custom");
     ScopedViewStackProcessor builderViewStackProcessor;
@@ -109,7 +113,7 @@ RefPtr<Component> JSTabContent::ProcessTabBarBuilderFunction(
 }
 
 RefPtr<TextComponent> JSTabContent::CreateTabBarLabelComponent(
-    RefPtr<TabContentItemComponent>& tabContent, const std::string& labelStr)
+    RefPtr<V2::TabContentItemComponent>& tabContent, const std::string& labelStr)
 {
     tabContent->SetBarText(labelStr);
     auto text = AceType::MakeRefPtr<TextComponent>(labelStr);
@@ -123,7 +127,7 @@ RefPtr<TextComponent> JSTabContent::CreateTabBarLabelComponent(
 }
 
 RefPtr<TextComponent> JSTabContent::ProcessTabBarLabel(
-    RefPtr<TabContentItemComponent>& tabContent, JSRef<JSVal> labelVal)
+    RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSVal> labelVal)
 {
     std::string textStr;
     if (!ParseJsString(labelVal, textStr)) {
@@ -133,7 +137,7 @@ RefPtr<TextComponent> JSTabContent::ProcessTabBarLabel(
 }
 
 RefPtr<Component> JSTabContent::ProcessTabBarTextIconPair(
-    RefPtr<TabContentItemComponent>& tabContent, JSRef<JSVal> textVal, JSRef<JSVal> iconVal)
+    RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSVal> textVal, JSRef<JSVal> iconVal)
 {
     std::string iconUri;
     if (!ParseJsMedia(iconVal, iconUri)) {

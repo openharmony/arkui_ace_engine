@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,34 +13,38 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_SWIPER_SWIPER_ELEMENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_SWIPER_SWIPER_ELEMENT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_TABS__TAB_CONTENT_PROXY_ELEMENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_TABS__TAB_CONTENT_PROXY_ELEMENT_H
 
+#include <list>
+#include <unordered_map>
+
+#include "core/components/tab_bar/tab_content_element.h"
+#include "core/components/tab_bar/tab_controller.h"
 #include "core/components_v2/common/element_proxy.h"
 #include "core/focus/focus_node.h"
-#include "core/pipeline/base/render_element.h"
 
 namespace OHOS::Ace::V2 {
 
-class SwiperElement : public RenderElement, public FocusGroup, public FlushEvent, private V2::ElementProxyHost {
-    DECLARE_ACE_TYPE(SwiperElement, RenderElement, FocusGroup, FlushEvent);
+class TabContentProxyElement : public TabContentElement, private ElementProxyHost {
+    DECLARE_ACE_TYPE(TabContentElement, TabContentElement);
 
 public:
-    void PerformBuild() override;
-    bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
+    explicit TabContentProxyElement(const std::list<RefPtr<Component>>& contents) : TabContentElement(contents) {};
+    ~TabContentProxyElement() override = default;
 
-    bool BuildChildByIndex(int32_t index);
-    void DeleteChildByIndex(int32_t index);
-    void OnPostFlush() override;
+    void PerformBuild() override;
+    void Update() override;
+
+    void ChangeByBar(int32_t index, bool isFromController = false) override;
+    void PrepareContent(int32_t index) override;
 
 private:
-    RefPtr<RenderNode> CreateRenderNode() override;
-    void ApplyRenderChild(const RefPtr<RenderElement>& renderChild) override;
-
     RefPtr<Element> OnUpdateElement(const RefPtr<Element>& element, const RefPtr<Component>& component) override;
     RefPtr<Component> OnMakeEmptyComponent() override;
     void OnDataSourceUpdated(size_t startIndex) override;
 };
 
 } // namespace OHOS::Ace::V2
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_SWIPER_SWIPER_ELEMENT_H
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_TABS__TAB_CONTENT_PROXY_ELEMENT_H

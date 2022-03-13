@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,18 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TAB_BAR_TABS_ELEMENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TAB_BAR_TABS_ELEMENT_H
 
-#include "core/components/tab_bar/tabs_component.h"
-#include "core/pipeline/base/component_group_element.h"
+#include "core/components_v2/tabs/tab_content_item_component.h"
 
-namespace OHOS::Ace {
+#include "core/components_v2/tabs/tab_content_item_element.h"
 
-class TabsElement : public ComponentGroupElement {
-    DECLARE_ACE_TYPE(TabsElement, ComponentGroupElement);
-};
+namespace OHOS::Ace::V2 {
 
-} // namespace OHOS::Ace
+TabContentItemComponent::TabContentItemComponent(std::list<RefPtr<Component>>& children)
+    : ColumnComponent(FlexAlign::FLEX_START, FlexAlign::FLEX_START, children)
+{}
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TAB_BAR_TABS_ELEMENT_H
+RefPtr<Element> TabContentItemComponent::CreateElement()
+{
+    return AceType::MakeRefPtr<TabContentItemElement>();
+}
+
+} // namespace OHOS::Ace::V2
