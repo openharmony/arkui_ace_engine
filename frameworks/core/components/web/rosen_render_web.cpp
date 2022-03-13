@@ -22,6 +22,15 @@
 
 namespace OHOS::Ace {
 
+void RosenRenderWeb::Update(const RefPtr<Component>& component)
+{
+    RenderWeb::Update(component);
+
+    if (GetRSNode()) {
+        GetRSNode()->SetBackgroundColor(Color::WHITE.GetValue());
+    }
+}
+
 void RosenRenderWeb::PerformLayout()
 {
     RenderWeb::PerformLayout();
