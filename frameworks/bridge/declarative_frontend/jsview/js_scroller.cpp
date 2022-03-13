@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,10 @@
 
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-
 #include "base/geometry/axis.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/animation/curves.h"
 #include "core/components/common/layout/align_declaration.h"
 
@@ -39,15 +38,9 @@ constexpr AlignDeclaration::Edge EDGE_TABLE[] = {
 };
 
 // corresponding to EDGE_TABLE[]
-constexpr ScrollEdgeType EDGE_TYPE_TABLE[] = {
-    ScrollEdgeType::SCROLL_TOP,
-    ScrollEdgeType::SCROLL_NONE,
-    ScrollEdgeType::SCROLL_BOTTOM,
-    ScrollEdgeType::SCROLL_NONE,
-    ScrollEdgeType::SCROLL_TOP,
-    ScrollEdgeType::SCROLL_NONE,
-    ScrollEdgeType::SCROLL_BOTTOM
-};
+constexpr ScrollEdgeType EDGE_TYPE_TABLE[] = { ScrollEdgeType::SCROLL_TOP, ScrollEdgeType::SCROLL_NONE,
+    ScrollEdgeType::SCROLL_BOTTOM, ScrollEdgeType::SCROLL_NONE, ScrollEdgeType::SCROLL_TOP, ScrollEdgeType::SCROLL_NONE,
+    ScrollEdgeType::SCROLL_BOTTOM };
 
 const LinearMapNode<RefPtr<Curve>> CURVE_MAP[] = {
     { "ease", Curves::EASE },
@@ -122,6 +115,10 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     } else {
         LOGD("ScrollTo(%lf, %lf)", xOffset.Value(), yOffset.Value());
     }
+    if (!controller_) {
+        LOGE("controller_ is nullptr");
+        return;
+    }
     auto direction = controller_->GetScrollDirection();
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
     controller_->AnimateTo(position, duration, curve);
@@ -134,8 +131,11 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
         LOGW("Invalid params");
         return;
     }
-
-    LOGD("ScrollEdge(%d)", static_cast<int32_t>(edge));
+    if (!controller_) {
+        LOGE("controller_ is nullptr");
+        return;
+    }
+    LOGD("ScrollEdge(%{public}d)", static_cast<int32_t>(edge));
     ScrollEdgeType edgeType = EDGE_TYPE_TABLE[static_cast<int32_t>(edge)];
     controller_->ScrollToEdge(edgeType, true);
 }
@@ -145,6 +145,10 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
     int32_t index = 0;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], index)) {
         LOGW("Invalid params");
+        return;
+    }
+    if (!controller_) {
+        LOGE("controller_ is nullptr");
         return;
     }
     controller_->JumpTo(index, SCROLL_FROM_JUMP);
@@ -166,15 +170,21 @@ void JSScroller::ScrollPage(const JSCallbackInfo& args)
 
     Axis direction = Axis::NONE;
     ConvertFromJSValue(obj->GetProperty("direction"), DIRECTION_TABLE, direction);
-
-    LOGD("ScrollPage(%s, %d)", next ? "true" : "false", static_cast<int32_t>(direction));
+    if (!controller_) {
+        LOGE("controller_ is nullptr");
+        return;
+    }
+    LOGD("ScrollPage(%{public}s, %{public}d)", next ? "true" : "false", static_cast<int32_t>(direction));
     controller_->ScrollPage(!next, true);
 }
 
 void JSScroller::CurrentOffset(const JSCallbackInfo& args)
 {
     LOGD("CurrentOffset()");
-
+    if (!controller_) {
+        LOGE("controller_ is nullptr");
+        return;
+    }
     auto retObj = JSRef<JSObject>::New();
     auto offset = controller_->GetCurrentOffset();
     retObj->SetProperty("xOffset", offset.GetX());

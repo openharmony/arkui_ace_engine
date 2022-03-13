@@ -126,8 +126,6 @@ class RenderGridLayout : public RenderNode {
 public:
     static RefPtr<RenderNode> Create();
 
-    void OnChildAdded(const RefPtr<RenderNode>& renderNode) override;
-
     void Update(const RefPtr<Component>& component) override;
 
     void PerformLayout() override;
@@ -248,7 +246,7 @@ protected:
 
     const RefPtr<RenderGridLayout> GetPreTargetRenderGrid() const
     {
-        return preTargetRenderGrid_;
+        return preTargetRenderGrid_.Upgrade();
     }
 
     void SetMainTargetRenderGrid(const RefPtr<RenderGridLayout>& mainTargetRenderGrid)
@@ -258,7 +256,7 @@ protected:
 
     const RefPtr<RenderGridLayout> GetMainTargetRenderGrid() const
     {
-        return mainTargetRenderGrid_;
+        return mainTargetRenderGrid_.Upgrade();
     }
 
     void SetLongPressPoint(const Point& lastLongPressPoint)
@@ -437,8 +435,8 @@ protected:
     std::map<int32_t, std::map<int32_t, Size>> gridCells_;
 
     RefPtr<GestureRecognizer> dragDropGesture_;
-    RefPtr<RenderGridLayout> preTargetRenderGrid_ = nullptr;
-    RefPtr<RenderGridLayout> mainTargetRenderGrid_ = nullptr;
+    WeakPtr<RenderGridLayout> preTargetRenderGrid_ = nullptr;
+    WeakPtr<RenderGridLayout> mainTargetRenderGrid_ = nullptr;
 
     // The list of renderNodes of items in the grid
     std::vector<RefPtr<RenderNode>> itemsInGrid_;

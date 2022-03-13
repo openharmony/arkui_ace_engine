@@ -92,6 +92,7 @@ void TabController::SetPendingIndex(int32_t index)
         return;
     }
     pendingIndex_ = index;
+    indexDefined_ = false;
 }
 
 void TabController::SetIndexByController(int32_t index, bool blockEvent)
@@ -103,7 +104,6 @@ void TabController::SetIndexByController(int32_t index, bool blockEvent)
     if (index >= totalCount_) {
         LOGI("index is large than total, %{public}d, %{public}d", index, totalCount_);
         SetPendingIndex(index);
-        indexDefined_ = false;
         return;
     }
     indexDefined_ = true;
