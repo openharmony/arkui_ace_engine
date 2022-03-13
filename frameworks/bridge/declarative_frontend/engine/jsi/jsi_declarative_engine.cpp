@@ -338,6 +338,7 @@ JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 
     if (runtime_) {
         runtime_->RegisterUncaughtExceptionHandler(nullptr);
+        runtime_->Reset();
     }
     runtime_.reset();
     runtime_ = nullptr;
