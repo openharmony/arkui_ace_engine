@@ -41,7 +41,7 @@ public:
     static void SetMinCount(int32_t minCount);
     static void CellLength(int32_t cellLength);
     static void SetLayoutDirection(int32_t value);
-    static void SetDirection(int32_t value);
+    static void SetDirection(const std::string& dir);
     static void SetSupportAnimation(bool supportAnimation);
     static void JsOnGridDragEnter(const JSCallbackInfo& info);
     static void JsOnGridDragMove(const JSCallbackInfo& info);

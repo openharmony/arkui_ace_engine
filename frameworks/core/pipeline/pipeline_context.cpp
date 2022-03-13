@@ -1985,10 +1985,10 @@ void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height)
     }
     if (GetIsDeclarative()) {
         viewScale_ = DEFAULT_VIEW_SCALE;
-        designWidthScale_ = static_cast<float>(width) / windowConfig.designWidth;
+        designWidthScale_ = static_cast<double>(width) / windowConfig.designWidth;
         windowConfig.designWidthScale = designWidthScale_;
     } else {
-        viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<float>(width) / windowConfig.designWidth;
+        viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
         if (NearZero(viewScale_)) {
             LOGE("the view scale is zero");
             return;
