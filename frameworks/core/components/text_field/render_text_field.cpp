@@ -384,8 +384,7 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
 
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         Offset rightClickOffset = event.GetOffset();
-        bool singleHandle = (GetEditingValue().selection.GetStart() == GetEditingValue().selection.GetEnd());
-        ShowTextOverlay(rightClickOffset, singleHandle);
+        ShowTextOverlay(rightClickOffset, false);
     }
 
     return true;
@@ -529,6 +528,7 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     if (clickInfo.GetSourceDevice() == SourceType::MOUSE) {
         StartTwinkling();
     } else {
+        StartTwinkling();
         ShowTextOverlay(globalPosition, true);
     }
     auto context = GetContext().Upgrade();
@@ -650,13 +650,6 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
 
     // Pop text overlay before push.
     PopTextOverlay();
-
-    // If there is no text, don't show overlay.
-    if (isSingleHandle && GetEditingValue().text.empty()) {
-        StartTwinkling();
-        return;
-    }
-    StopTwinkling();
 
     textOverlay_ =
         AceType::MakeRefPtr<TextOverlayComponent>(GetThemeManager(), context_.Upgrade()->GetAccessibilityManager());

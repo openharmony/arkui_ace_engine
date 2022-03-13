@@ -386,6 +386,16 @@ public:
     {
         return declaration_->GetWebSrc();
     }
+	
+    void SetData(const std::string& data)
+    {
+        declaration_->SetWebData(data);
+    }
+
+    const std::string& GetData() const
+    {
+        return declaration_->GetWebData();
+    }
 
     void SetPageStartedEventId(const EventMarker& pageStartedEventId)
     {

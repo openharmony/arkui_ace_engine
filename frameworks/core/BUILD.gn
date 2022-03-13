@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -325,6 +325,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_v2/list:ace_core_components_list_v2_$platform",
       "$ace_root/frameworks/core/components_v2/pattern_lock:ace_core_components_pattern_lock_$platform",
       "$ace_root/frameworks/core/components_v2/swiper:ace_core_components_swiper_v2_$platform",
+      "$ace_root/frameworks/core/components_v2/tabs:ace_core_components_tabs_v2_$platform",
     ]
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
@@ -339,10 +340,7 @@ template("ace_core_source_set") {
 
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      deps += [
-        "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform",
-        "$ace_root/frameworks/core/components_v2/richtext:ace_core_components_richtext_v2_$platform",
-      ]
+      deps += [ "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform" ]
     }
 
     # xcomponent components supports phone, TV and wearable except PC Preview

@@ -92,7 +92,7 @@ bool AceResKeyParser::Parse(const std::string& deviceResConfigTag, std::vector<K
         ParseResolution,
         ParseDefaults,
     };
-    const int32_t FUNC_LEN = sizeof(functions) / sizeof(functions[0]);
+    const int32_t FUNC_LEN = static_cast<int32_t>(sizeof(functions) / sizeof(functions[0]));
     if (!keyParts.empty()) {
         if (!ParseMatch(keyParts, keyParams, functions, FUNC_LEN, styleRes)) {
             LOGE("Invalid config:%{public}s", deviceResConfigTag.c_str());
@@ -118,7 +118,7 @@ bool AceResKeyParser::DeclarativeParse(const std::string& deviceResConfigTag, st
         ParseResolution,
         ParseDefaults,
     };
-    const int32_t FUNC_LEN = sizeof(functions) / sizeof(functions[0]);
+    const int32_t FUNC_LEN = static_cast<int32_t>(sizeof(functions) / sizeof(functions[0]));
     if (!reskeyParts.empty()) {
         if (!ParseMatch(reskeyParts, keyParams, functions, FUNC_LEN, true)) {
             LOGE("Invalid config:%{public}s", resConfigTag.c_str());

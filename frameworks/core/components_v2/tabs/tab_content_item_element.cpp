@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,23 @@
  * limitations under the License.
  */
 
-#include "core/components_v2/richtext/rich_text_component.h"
+#include "core/components_v2/tabs/tab_content_item_element.h"
 
-#include "core/components_v2/richtext/render_rich_text.h"
-#include "core/components_v2/richtext/rich_text_element.h"
+#include "core/components/flex/flex_element.h"
+#include "core/components_v2/tabs/tab_content_item_component.h"
 
 namespace OHOS::Ace::V2 {
-RichTextComponent::RichTextComponent()
+
+void TabContentItemElement::Update()
 {
-    webComponent_ = AceType::MakeRefPtr<WebComponent>("");
-    SetChild(webComponent_);
+    auto component = AceType::DynamicCast<TabContentItemComponent>(component_);
+    if (!component) {
+        LOGE("TabContentItemComponent is null");
+        return;
+    }
+    barIcon_ = component->GetBarIcon();
+    barText_ = component->GetBarText();
+    FlexElement::Update();
 }
 
-RefPtr<RenderNode> RichTextComponent::CreateRenderNode()
-{
-    return AceType::MakeRefPtr<RenderRichText>();
-}
-
-RefPtr<Element> RichTextComponent::CreateElement()
-{
-    return AceType::MakeRefPtr<RichTextElement>();
-}
-} // namespace OHOS::Ace::V2
+} // namespace OHOS::Ace::v2

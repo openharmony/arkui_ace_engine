@@ -214,12 +214,12 @@ void ImageCache::WriteCacheFile(const std::string& url, const void * const data,
     cacheFileInfo_.emplace_back(cacheNetworkFilePath, size, time(nullptr));
     // check if cache files too big.
     if (cacheFileSize_ > static_cast<int32_t>(cacheFileLimit_)) {
-        int32_t removeCount = cacheFileInfo_.size() * clearCacheFileRatio_;
-        uint32_t removeSize = 0;
+        int32_t removeCount = static_cast<int32_t>(cacheFileInfo_.size() * clearCacheFileRatio_);
+        int32_t removeSize = 0;
         auto iter = cacheFileInfo_.begin();
         int32_t count = 0;
         while (count < removeCount) {
-            removeSize += iter->fileSize;
+            removeSize += static_cast<int32_t>(iter->fileSize);
             removeVector.push_back(iter->filePath);
             iter++;
             count++;

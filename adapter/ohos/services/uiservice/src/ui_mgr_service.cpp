@@ -303,6 +303,11 @@ int UIMgrService::ShowDialog(const std::string& name,
         return UI_SERVICE_POST_TASK_FAILED;
     }
 
+    if (dialogWindow == nullptr) {
+        HILOG_ERROR("No window available");
+        return UI_SERVICE_CREATE_WINDOW_FAILED;
+    }
+
     int32_t windowWidth = static_cast<int32_t>(dialogWindow->GetRect().width_);
     int32_t windowHeight = static_cast<int32_t>(dialogWindow->GetRect().height_);
     int32_t windowx = static_cast<int32_t>(dialogWindow->GetRect().posX_);

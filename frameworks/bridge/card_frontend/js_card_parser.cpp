@@ -1376,8 +1376,8 @@ void JsCardParser::ParseMultiVariable(
     value = "";
     // Splicing Between Variables and constants,like variable = "my name is {{name}}, and i am from {{city}}."
     while (variable.find("{{") != std::string::npos && variable.find("}}") != std::string::npos) {
-        int32_t startPos = static_cast<int32_t>(variable.find("{{"));
-        int32_t endPos = static_cast<int32_t>(variable.find("}}"));
+        auto startPos = variable.find("{{");
+        auto endPos = variable.find("}}");
         if (endPos < startPos) {
             break;
         }
@@ -1912,7 +1912,8 @@ void JsCardParser::ProcessRepeatNode(const RefPtr<Framework::JsAcePage>& page,
                 auto nodeId = iter->second.first[i];
                 page->PushCommand(Referenced::MakeRefPtr<JsCommandRemoveDomElement>(nodeId));
             }
-            iter->second.first.erase(iter->second.first.end() - (array.size() - repeatValue->GetArraySize() * factor),
+            iter->second.first.erase(
+                iter->second.first.end() - (array.size() - static_cast<size_t>(repeatValue->GetArraySize() * factor)),
                 iter->second.first.end());
         }
         nodeId_ += iter->second.second;

@@ -40,6 +40,7 @@ enum {
     NO_CALLBACK_FOR_KEY,
     UI_SERVICE_INVALID_PARAMETER,
     UI_SERVICE_GET_PROXY_FAILED,
+    UI_SERVICE_CREATE_WINDOW_FAILED,
 };
 }  // namespace Ace
 }  // namespace OHOS

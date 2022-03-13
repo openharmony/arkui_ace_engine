@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -103,13 +103,12 @@ void TabContentElement::Update()
             LOGE("Get tabContent failed");
             return;
         }
-        tabContent->SetUpdateType(UpdateType::REBUILD);
         contents_ = tabContent->GetChildren();
         auto controller = tabContent->GetController();
         if (controller && (controller_ != controller)) {
             // Get index from old controller before replace.
             if (!controller->IsIndexDefined() && controller_) {
-                controller->SetIndex(controller_->GetIndex());
+                controller->SetIndexWithoutChangeContent(controller_->GetIndex());
             }
             controller_ = controller;
         }
@@ -119,8 +118,9 @@ void TabContentElement::Update()
         }
         controller_->SetContentElement(AceType::Claim(this));
         if (controller_->GetIndex() >= static_cast<int32_t>(contents_.size())) {
-            controller_->SetIndex(contents_.size() - 1);
+            controller_->SetIndexWithoutChangeContent(static_cast<int32_t>(contents_.size()) - 1);
         }
+        controller_->SetTotalCount(static_cast<int32_t>(contents_.size()));
         newComponentBuild_ = true;
     }
     ComponentGroupElement::Update();
@@ -131,11 +131,6 @@ void TabContentElement::PerformBuild()
     if (contents_.empty()) {
         LOGD("contents is empty");
         ComponentGroupElement::PerformBuild();
-        return;
-    }
-    auto context = context_.Upgrade();
-    if (context && context->GetIsDeclarative()) {
-        PerformBuildForDeclarative();
         return;
     }
     RefPtr<RenderTabContent> tabContent = AceType::DynamicCast<RenderTabContent>(renderNode_);
@@ -167,56 +162,6 @@ void TabContentElement::PerformBuild()
         UpdateChild(childIter->second, *it);
     }
 
-    // process for new content requested by drag
-    if (target == newIndex_) {
-        tabContent->UpdateDragPosition(newIndex_);
-        newIndex_ = -1;
-    }
-    // process for new content requested by tab bar
-    if (target == newBarIndex_) {
-        tabContent->ChangeScroll(newBarIndex_, fromController_);
-        UpdateLastFocusNode();
-        newBarIndex_ = -1;
-    }
-    lastIndex_ = target;
-    fromController_ = false;
-}
-
-void TabContentElement::PerformBuildForDeclarative()
-{
-    RefPtr<RenderTabContent> tabContent = AceType::DynamicCast<RenderTabContent>(renderNode_);
-    if (!tabContent || !controller_ || !renderNode_) {
-        LOGW("tabContent or controller is null.");
-        return;
-    }
-    if (newComponentBuild_) {
-        newComponentBuild_ = false;
-        ComponentGroupElement::PerformBuild();
-        int32_t index = 0;
-        for (const auto& element : children_) {
-            focusIndexMap_.emplace(index);
-            childMap_[index] = element;
-            auto renderChild = element->GetRenderNode();
-            if (renderChild) {
-                tabContent->AddChildContent(index, renderChild);
-            }
-            index++;
-        }
-        if (!childMap_.empty()) {
-            auto maxValue = childMap_.cbegin()->first;
-            for (int32_t remove = index; remove < maxValue; remove++) {
-                focusIndexMap_.erase(remove);
-                childMap_.erase(remove);
-                tabContent->RemoveChildContent(remove);
-            }
-        }
-    }
-    // Do index change.
-    if (newIndex_ >= static_cast<int32_t>(contents_.size())) {
-        newIndex_ = contents_.size() - 1;
-    }
-    int32_t target = newIndex_ >= 0 ? newIndex_ : controller_->GetIndex();
-    LOGD("change to target: %{public}d", target);
     // process for new content requested by drag
     if (target == newIndex_) {
         tabContent->UpdateDragPosition(newIndex_);
