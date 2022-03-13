@@ -73,11 +73,6 @@ const std::map<bool, std::map<bool, std::map<bool, KeyDirection>>> DIRECTION_MAP
 
 } // namespace
 
-void RenderGridLayout::OnChildAdded(const RefPtr<RenderNode>& renderNode)
-{
-    RenderNode::OnChildAdded(renderNode);
-}
-
 void RenderGridLayout::Update(const RefPtr<Component>& component)
 {
     const RefPtr<GridLayoutComponent> grid = AceType::DynamicCast<GridLayoutComponent>(component);
@@ -845,6 +840,7 @@ void RenderGridLayout::PerformLayout()
     needRestoreScene_ = false;
     isDragChangeLayout_ = false;
     gridMatrix_.clear();
+    itemsInGrid_.clear();
     if (GetChildren().empty()) {
         return;
     }
@@ -924,10 +920,10 @@ void RenderGridLayout::BackGridMatrix()
         gridItemPosition_.clear();
         std::map<int32_t, GridItemIndexPosition> backData;
         ParseRestoreScenePosition(gridMatrixBack_, backData);
-        for (auto iter = backData.begin(); iter != backData.end(); iter++) {
-            if (iter->first >= 0 && iter->first < (int32_t)itemsInGrid_.size()) {
-                auto item = itemsInGrid_[iter->first];
-                gridItemPosition_[iter->first] = Point(item->GetPosition().GetX(), item->GetPosition().GetY());
+        for (auto& iter : backData) {
+            if (iter.first >= 0 && iter.first < (int32_t)itemsInGrid_.size()) {
+                auto item = itemsInGrid_[iter.first];
+                gridItemPosition_[iter.first] = Point(item->GetPosition().GetX(), item->GetPosition().GetY());
             }
         }
     }
@@ -1711,6 +1707,11 @@ void RenderGridLayout::PerformLayoutForEditGrid()
             ++itemIndex;
             LOGD("%{public}d %{public}d %{public}d %{public}d", rowIndex, colIndex, itemRowSpan, itemColSpan);
         }
+    }
+    auto hiddenItem = dragingItemRenderNode_.Upgrade();
+    if (hiddenItem) {
+        hiddenItem->SetVisible(false);
+        DisableChild(hiddenItem, dragingItemIndex_);
     }
 }
 
