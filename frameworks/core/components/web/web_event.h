@@ -85,7 +85,7 @@ public:
 
     const std::string& GetReason() const
     {
-        return encoding_;
+        return reason_;
     }
 
     int32_t GetStatusCode() const
