@@ -261,7 +261,9 @@ void AceContainer::OnShow(int32_t instanceId)
 
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    if (front) {
+
+    // When it is subContainer, no need call the OnShow, because the frontend is the same the parent container.
+    if (front && !container->IsSubContainer()) {
         front->UpdateState(Frontend::State::ON_SHOW);
         front->OnShow();
     }
@@ -280,7 +282,9 @@ void AceContainer::OnHide(int32_t instanceId)
     }
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    if (front) {
+
+    // When it is subContainer, no need call the OnHide, because the frontend is the same the parent container.
+    if (front && !container->IsSubContainer()) {
         front->UpdateState(Frontend::State::ON_HIDE);
         front->OnHide();
         auto taskExecutor = container->GetTaskExecutor();
@@ -305,7 +309,9 @@ void AceContainer::OnActive(int32_t instanceId)
 
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    if (front) {
+
+    // When it is subContainer, no need call the OnActive, because the frontend is the same the parent container.
+    if (front && !container->IsSubContainer()) {
         front->OnActive();
     }
     // TODO: remove it after ability fix onshow lifecyle.
@@ -321,10 +327,14 @@ void AceContainer::OnInactive(int32_t instanceId)
     if (!container) {
         return;
     }
-
+    if (container->IsSubContainer()) {
+        SubwindowManager::GetInstance()->CloseMenu();
+    }
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    if (front) {
+
+    // When it is subContainer, no need call the OnInactive, because the frontend is the same the parent container.
+    if (front && !container->IsSubContainer()) {
         front->OnInactive();
     }
     // TODO: remove it after ability fix onshow lifecyle.
