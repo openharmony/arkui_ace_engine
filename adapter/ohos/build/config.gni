@@ -66,8 +66,11 @@ enable_rosen_backend = true
 enable_standard_input = true
 build_container_scope_lib = true
 
-if (defined(is_experiment_build) && is_experiment_build) {
+if (product_name == "rk3568") {
   web_components_support = true
+}
+
+if (defined(is_experiment_build) && is_experiment_build) {
   enable_system_clipboard = true
   accessibility_support = true
 }
