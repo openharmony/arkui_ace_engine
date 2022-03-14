@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 
 namespace OHOS::Ace::Framework {
 class XComponentClient {
@@ -90,6 +91,7 @@ public:
 
 private:
     static EventMarker GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys);
+    static RefPtr<JSXComponentController> jsXComponentController_;
 };
 }
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_XCOMPONENT_H

@@ -33,6 +33,16 @@ public:
     void GetSurfaceId(const JSCallbackInfo& args);
     void SetSurfaceConfig(const JSCallbackInfo& args);
 
+    void GetXComponentContext(const JSCallbackInfo& args)
+    {
+        args.SetReturnValue(renderContext_);
+    }
+
+    void SetXComponentContext(const JSRef<JSVal> &renderContext)
+    {
+        renderContext_ = renderContext;
+    }
+
     RefPtr<XComponentController> GetController() const
     {
         return xcomponentController_;
@@ -45,6 +55,7 @@ public:
 
 private:
     RefPtr<XComponentController> xcomponentController_;
+    JSRef<JSVal> renderContext_;
     ACE_DISALLOW_COPY_AND_MOVE(JSXComponentController);
 };
 } // namespace OHOS::Ace::Framework
