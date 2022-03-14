@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,17 +34,6 @@ void SelectPopupElement::PerformBuild()
                 element->OnRefreshAnimation(option, isIn);
             }
         });
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    auto manager = context->GetAccessibilityManager();
-    if (manager) {
-        auto node = manager->GetAccessibilityNodeById(component->GetSelectPopupId());
-        auto stackElement = component->GetStackElement();
-        if (node && stackElement) {
-            node->SetZIndexToChild(stackElement->GetChildrenSize());
-            manager->ClearNodeRectInfo(node, false);
-        }
-    }
-#endif
     }
     SoleChildElement::PerformBuild();
     auto tween = GetTween(AceType::Claim(this));
@@ -55,6 +44,19 @@ void SelectPopupElement::PerformBuild()
     if (render) {
         render->UpdateRenders();
     }
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    if (context && component) {
+        auto manager = context->GetAccessibilityManager();
+        if (manager) {
+            auto node = manager->GetAccessibilityNodeById(component->GetSelectPopupId());
+            auto stackElement = component->GetStackElement();
+            if (node && stackElement) {
+                node->SetZIndexToChild(stackElement->GetChildrenSize());
+                manager->ClearNodeRectInfo(node, false);
+            }
+        }
+    }
+#endif
 }
 
 RefPtr<TweenElement> SelectPopupElement::GetTween(const RefPtr<Element>& element) const
