@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -789,6 +789,15 @@ void PluginFrontend::NotifyAppStorage(const std::string& key, const std::string&
         return;
     }
     delegate_->NotifyAppStorage(jsEngine_, key, value);
+}
+
+void PluginFrontend::UpdatePlugin(const std::string& content)
+{
+    if (!delegate_) {
+        LOGW("delegate is null, return false");
+        return;
+    }
+    delegate_->UpdatePlugin(content);
 }
 
 void PluginEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)

@@ -1088,7 +1088,6 @@ void PluginFrontendDelegate::LoadPage(
     auto document = AceType::MakeRefPtr<DOMDocument>(pageId);
     auto page = AceType::MakeRefPtr<JsAcePage>(pageId, document, target.url, target.container);
     page->SetPageParams(params);
-    page->SetUsePluginComponent(true);
     page->SetPluginComponentJsonData(params);
     page->SetFlushCallback([weak = AceType::WeakClaim(this), isMainPage](const RefPtr<JsAcePage>& acePage) {
         auto delegate = weak.Upgrade();
@@ -1260,6 +1259,7 @@ void PluginFrontendDelegate::OnPushPageSuccess(
     std::lock_guard<std::mutex> lock(mutex_);
     AddPageLocked(page);
     pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url});
+    page->FireDeclarativeOnUpdateWithValueParamsCallback(page->GetPluginComponentJsonData());
     if (pageRouteStack_.size() >= MAX_ROUTER_STACK) {
         isRouteStackFull_ = true;
         EventReport::SendPageRouterException(PageRouterExcepType::PAGE_STACK_OVERFLOW_ERR, page->GetUrl());
@@ -1723,5 +1723,14 @@ void PluginFrontendDelegate::AttachPipelineContext(const RefPtr<PipelineContext>
 RefPtr<PipelineContext> PluginFrontendDelegate::GetPipelineContext()
 {
     return pipelineContextHolder_.Get();
+}
+
+void PluginFrontendDelegate::UpdatePlugin(const std::string& content)
+{
+    auto pageId = GetRunningPageId();
+    auto page = GetPage(pageId);
+    if (page) {
+        page->FireDeclarativeOnUpdateWithValueParamsCallback(content);
+    }
 }
 } // namespace OHOS::Ace::Framework

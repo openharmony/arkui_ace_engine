@@ -191,12 +191,12 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::EcmaVM* vm, panda::Local<p
     page->SetDeclarativeOnPageDisAppearCallback([view]() { view->FireOnHide(); });
     page->SetDeclarativeOnBackPressCallback([view]() { return view->FireOnBackPress(); });
     page->SetDeclarativeOnPageRefreshCallback([view]() { view->MarkNeedUpdate(); });
-
-    if (page->IsUsePluginComponent()) {
-        if (!page->GetPluginComponentJsonData().empty()) {
-            view->ExecuteUpdateWithValueParams(page->GetPluginComponentJsonData());
-        }
-    }
+    page->SetDeclarativeOnUpdateWithValueParamsCallback(
+        [view](const std::string& params) {
+            if (view && !params.empty()) {
+                view->ExecuteUpdateWithValueParams(params);
+            }
+        });
 
     return panda::JSValueRef::Undefined(vm);
 }

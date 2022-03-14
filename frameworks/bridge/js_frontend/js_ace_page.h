@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -245,16 +245,6 @@ public:
         useBoxWrap_ = useBoxWrap;
     }
 
-    bool IsUsePluginComponent() const
-    {
-        return usePluginComponent_;
-    }
-
-    void SetUsePluginComponent(bool usePluginComponent)
-    {
-        usePluginComponent_ = usePluginComponent;
-    }
-
     const std::string& GetPluginComponentJsonData() const
     {
         return pluginComponentJsonData_;
@@ -322,6 +312,11 @@ public:
         onPageRefresh_ = callback;
     }
 
+    void SetDeclarativeOnUpdateWithValueParamsCallback(std::function<void(const std::string&)>&& callback)
+    {
+        onUpdateWithValueParams_ = callback;
+    }
+
     void FireDeclarativeOnPageAppearCallback() const
     {
         if (onPageAppear_) {
@@ -351,6 +346,13 @@ public:
         }
     }
 
+    void FireDeclarativeOnUpdateWithValueParamsCallback(const std::string& params) const
+    {
+        if (onUpdateWithValueParams_) {
+            onUpdateWithValueParams_(params);
+        }
+    }
+
     void OnJsEngineDestroy();
 
 private:
@@ -372,7 +374,6 @@ private:
     RefPtr<RevSourceMap> appMap_;
     bool useLiteStyle_ = false;
     bool useBoxWrap_ = false;
-    bool usePluginComponent_ = false;
     std::string pluginComponentJsonData_;
 
     std::vector<RefPtr<JsCommand>> jsCommands_;
@@ -398,6 +399,7 @@ private:
     std::function<void()> onPageDisAppear_;
     std::function<bool()> onBackPress_;
     std::function<void()> onPageRefresh_;
+    std::function<void(const std::string&)> onUpdateWithValueParams_;
 };
 
 } // namespace OHOS::Ace::Framework

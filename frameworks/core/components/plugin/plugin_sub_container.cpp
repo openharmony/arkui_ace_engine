@@ -118,22 +118,22 @@ void PluginSubContainer::Destroy()
 void PluginSubContainer::UpdateRootElmentSize()
 {
     auto pluginComponet = AceType::DynamicCast<PluginComponent>(pluginComponent_);
-    Dimension rootWidht = 0.0_vp;
+    Dimension rootWidth = 0.0_vp;
     Dimension rootHeight = 0.0_vp;
     if (pluginComponet) {
-        rootWidht = pluginComponet->GetWidth();
+        rootWidth = pluginComponet->GetWidth();
         rootHeight = pluginComponet->GetHeight();
     }
 
-    if (rootWidht_ == rootWidht && rootHeight == rootHeight) {
+    if (rootWidth_ == rootWidth && rootHeight == rootHeight) {
         LOGE("size not changed, should not change");
         return;
     }
 
-    surfaceWidth_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootWidht);
+    surfaceWidth_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootWidth);
     surfaceHeight_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootHeight);
     if (pipelineContext_) {
-        pipelineContext_->SetRootSize(density_, rootWidht.Value(), rootHeight.Value());
+        pipelineContext_->SetRootSize(density_, rootWidth.Value(), rootHeight.Value());
     }
 }
 
@@ -297,9 +297,12 @@ RefPtr<FlutterAssetManager> PluginSubContainer::SetAssetManager(const std::strin
 
 void PluginSubContainer::UpdatePlugin(const std::string& content)
 {
+    ContainerScope scope(instanceId_);
+
     if (!frontend_) {
         LOGE("update plugin fial due to could not find plugin front end");
         return;
     }
+    frontend_->UpdatePlugin(content);
 }
 } // namespace OHOS::Ace
