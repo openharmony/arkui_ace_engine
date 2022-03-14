@@ -65,8 +65,8 @@ enum OH_NativeXComponent_TouchEventType {
 };
 
 #define OH_NATIVE_XCOMPONENT_OBJ ("__NATIVE_XCOMPONENT_OBJ__")
-const int32_t OH_XCOMPONENT_ID_LEN_MAX = 128;
-const int32_t OH_MAX_TOUCH_POINTS_NUMBER = 10;
+const uint32_t OH_XCOMPONENT_ID_LEN_MAX = 128;
+const uint32_t OH_MAX_TOUCH_POINTS_NUMBER = 10;
 
 struct OH_NativeXComponent_TouchPoint {
     // Point ID of contact between the finger and the screen.
@@ -116,7 +116,7 @@ struct OH_NativeXComponent_TouchEvent {
     // all points on the touch screen.
     OH_NativeXComponent_TouchPoint touchPoints[OH_MAX_TOUCH_POINTS_NUMBER];
     // number of touchPointers
-    int32_t numPoints = 0;
+    uint32_t numPoints = 0;
 };
 
 /**
