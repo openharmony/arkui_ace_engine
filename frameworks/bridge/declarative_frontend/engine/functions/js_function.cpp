@@ -80,7 +80,9 @@ void JsFunction::ExecuteNew(const std::vector<std::string>& keys, const std::str
 {
     JSRef<JSVal> jsVal;
     XComponentClient::GetInstance().GetJSVal(jsVal);
-    jsXComponentController->SetXComponentContext(jsVal);
+    if (jsXComponentController) {
+        jsXComponentController->SetXComponentContext(jsVal);
+    }
     JsFunction::ExecuteJS(1, &jsVal);
 }
 
