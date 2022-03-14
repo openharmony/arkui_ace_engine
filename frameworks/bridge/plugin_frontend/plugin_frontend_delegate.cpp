@@ -713,7 +713,7 @@ void PluginFrontendDelegate::Push(const PageTarget& target, const std::string& p
     if (!pagePath.empty()) {
         LoadPage(GenerateNextPageId(), PageTarget(pagePath, target.container), false, params);
     } else {
-        LOGW("this uri not support in route push.");
+        LOGW("[Engine Log] this uri not support in route push.");
     }
 }
 
@@ -728,7 +728,7 @@ void PluginFrontendDelegate::Replace(const PageTarget& target, const std::string
     if (!pagePath.empty()) {
         LoadReplacePage(GenerateNextPageId(), PageTarget(pagePath, target.container), params);
     } else {
-        LOGW("this uri not support in route replace.");
+        LOGW("[Engine Log] this uri not support in route replace.");
     }
 }
 
@@ -783,7 +783,7 @@ void PluginFrontendDelegate::BackWithTarget(const PageTarget& target, const std:
             }
             PopToPage(pagePath);
         } else {
-            LOGW("this uri not support in route Back.");
+            LOGW("[Engine Log] this uri not support in route Back.");
         }
     }
 }
