@@ -126,13 +126,18 @@ void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey func
             LOGE("text field is null");
             return;
         }
-        switch (functionKey) {
-            case MiscServices::FunctionKey::CONFIRM:
-                client->PerformDefaultAction();
+        ContainerScope scope(client->instanceId_);
+        TextInputAction action_ = static_cast<TextInputAction>(functionKey);
+        switch (action_) {
+            case TextInputAction::DONE:
+            case TextInputAction::NEXT:
+            case TextInputAction::SEARCH:
+            case TextInputAction::SEND:
+            case TextInputAction::GO:
+                client->PerformAction(action_);
                 break;
-            case MiscServices::FunctionKey::NONE:
             default:
-                LOGE("FunctionKey is not support: %{public}d", functionKey);
+                LOGE("TextInputAction  is not support: %{public}d", action_);
                 break;
         }
     };
