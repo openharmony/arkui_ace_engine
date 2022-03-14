@@ -317,6 +317,8 @@ public:
         onIsCurrentFocus_ = onIsCurrentFocus;
     }
 
+    int32_t instanceId_ = -1;
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
