@@ -122,7 +122,9 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("fontStyle", &JSTextInput::SetFontStyle);
     JSClass<JSTextInput>::StaticMethod("fontFamily", &JSTextInput::SetFontFamily);
     JSClass<JSTextInput>::StaticMethod("inputFilter", &JSTextInput::SetInputFilter);
+    // API7 onEditChanged deprecated
     JSClass<JSTextInput>::StaticMethod("onEditChanged", &JSTextInput::SetOnEditChanged);
+    JSClass<JSTextInput>::StaticMethod("onEditChange", &JSTextInput::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onSubmit", &JSTextInput::SetOnSubmit);
     JSClass<JSTextInput>::StaticMethod("onChange", &JSTextInput::SetOnChange);
     JSClass<JSTextInput>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);

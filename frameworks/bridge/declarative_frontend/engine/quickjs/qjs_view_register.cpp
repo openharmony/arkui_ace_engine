@@ -825,6 +825,8 @@ void JsRegisterViews(BindingTarget globalObj)
     JSText::JSBind(globalObj);
     JSDatePicker::JSBind(globalObj);
     JSDatePickerDialog::JSBind(globalObj);
+    JSTimePicker::JSBind(globalObj);
+    JSTimePickerDialog::JSBind(globalObj);
     JSSpan::JSBind(globalObj);
     JSButton::JSBind(globalObj);
     JSCanvas::JSBind(globalObj);
