@@ -327,9 +327,6 @@ void AceContainer::OnInactive(int32_t instanceId)
     if (!container) {
         return;
     }
-    if (container->IsSubContainer()) {
-        SubwindowManager::GetInstance()->CloseMenu();
-    }
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
 
