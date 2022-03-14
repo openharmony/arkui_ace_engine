@@ -669,6 +669,7 @@ var HoverEffect;
   HoverEffect[HoverEffect["Auto"] = 4] = "Auto";
   HoverEffect[HoverEffect["Scale"] = 2] = "Scale";
   HoverEffect[HoverEffect["Board"] = 3] = "Board";
+  HoverEffect[HoverEffect["Highlight"] = 3] = "Highlight";
   HoverEffect[HoverEffect["None"] = 0] = "None";
 })(HoverEffect || (HoverEffect = {}));
 
