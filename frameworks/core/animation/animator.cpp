@@ -18,6 +18,8 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/animation/scheduler.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
 #include "core/pipeline/pipeline_context.h"
 
@@ -757,7 +759,8 @@ bool Animator::StartInnerAsync()
         }
     };
 
-    auto stopCallback = [weak = AceType::WeakClaim(this)]() -> void {
+    auto stopCallback = [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() -> void {
+        ContainerScope scope(id);
         auto controller = weak.Upgrade();
         if (controller == nullptr) {
             LOGE("notify stop failed, controller is null");

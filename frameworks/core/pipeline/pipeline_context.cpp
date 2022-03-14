@@ -3181,7 +3181,9 @@ void PipelineContext::AddKeyFrame(
     }
 
     pendingImplicitLayout_.push(false);
-    auto propertyChangeCallback = [weak = AceType::WeakClaim(this), callback = propertyCallback]() {
+    auto propertyChangeCallback = [weak = AceType::WeakClaim(this), callback = propertyCallback,
+                                      id = Container::CurrentId()]() {
+        ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
             LOGE("failed to add key frame, context is null!");
@@ -3208,7 +3210,9 @@ void PipelineContext::AddKeyFrame(float fraction, const std::function<void()>& p
     }
 
     pendingImplicitLayout_.push(false);
-    auto propertyChangeCallback = [weak = AceType::WeakClaim(this), callback = propertyCallback]() {
+    auto propertyChangeCallback = [weak = AceType::WeakClaim(this), callback = propertyCallback,
+                                      id = Container::CurrentId()]() {
+        ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
             LOGE("failed to add key frame, context is null!");

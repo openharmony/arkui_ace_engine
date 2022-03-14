@@ -20,6 +20,7 @@
 
 #include "base/subwindow/subwindow.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/components/select_popup/select_popup_component.h"
 #include "core/components/stack/stack_element.h"
 
 namespace OHOS::Rosen {
@@ -40,11 +41,11 @@ public:
     void InitContainer() override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
     void CloseMenu() override;
+    void ClearMenu() override;
 
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
-    void ClearMenu();
     void ShowWindow();
     void HideWindow();
 
@@ -54,6 +55,7 @@ private:
     int32_t childContainerId_ = -1;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     sptr<OHOS::Rosen::Window> window_ = nullptr;
+    RefPtr<SelectPopupComponent> popup_;
 };
 
 } // namespace OHOS::Ace

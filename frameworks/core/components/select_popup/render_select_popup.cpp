@@ -260,7 +260,8 @@ void RenderSelectPopup::CreateAnimation()
         return;
     }
     if (selectPopup_) {
-        CreatePopupAnimation(selectPopup_->IsMenu());
+        // When the popup is used for contextmenu, add the animation, the same with menu.
+        CreatePopupAnimation(selectPopup_->IsMenu() || selectPopup_->IsContextMenu());
     }
     animationCreated_ = true;
 }
@@ -305,9 +306,6 @@ void RenderSelectPopup::PerformLayout()
     normalPadding_ = NormalizeToPx(rrectSize_);
     globalRightBottom_ = Offset() + renderRoot_->GetLayoutSize();
     double outPadding = NormalizeToPx(4.0_vp); // the out padding is 4dp from doc.
-    if (isContextMenu_) {
-        outPadding = 0.0;
-    }
     Size totalSize;
     double fixHeight = 0.0;
     if (renderTitleBox_) {
@@ -401,6 +399,7 @@ void RenderSelectPopup::HandleRawEvent(const Offset& clickPosition)
 
 void RenderSelectPopup::ProcessTouchDown(const TouchEventInfo& info)
 {
+    LOGI("ProcessTouchDown");
     auto touches = info.GetTouches();
     if (touches.empty()) {
         LOGE("touch event info is empty.");
@@ -412,6 +411,7 @@ void RenderSelectPopup::ProcessTouchDown(const TouchEventInfo& info)
 
 void RenderSelectPopup::ProcessTouchUp(const TouchEventInfo& info)
 {
+    LOGI("ProcessTouchUp");
     auto touches = info.GetTouches();
     if (touches.empty()) {
         LOGE("touch event info is empty.");
@@ -428,14 +428,14 @@ void RenderSelectPopup::ProcessTouchUp(const TouchEventInfo& info)
     }
 
     auto offset = touches.front().GetGlobalLocation();
-    if (!isContextMenu_) {
-        firstFingerUpOffset_ = offset;
-        if ((offset - firstFingerDownOffset_).GetDistance() <= DEFAULT_DISTANCE) {
+    firstFingerUpOffset_ = offset;
+    if ((offset - firstFingerDownOffset_).GetDistance() <= DEFAULT_DISTANCE) {
+        if (isContextMenu_) {
+            selectPopup_->CloseContextMenu();
+        } else {
             selectPopup_->HideDialog(SELECT_INVALID_INDEX);
-            firstFingerDownOffset_ = Offset();
         }
-    } else {
-        HandleRawEvent(offset);
+        firstFingerDownOffset_ = Offset();
     }
 }
 
