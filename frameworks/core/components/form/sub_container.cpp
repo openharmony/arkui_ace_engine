@@ -126,7 +126,7 @@ void SubContainer::UpdateSurfaceSize()
 }
 
 void SubContainer::RunCard(const int64_t id, const std::string path, const std::string module, const std::string data,
-    const std::map<std::string, std::pair<int, int32_t>> imageDataMap)
+    const std::map<std::string, std::pair<int, int32_t>> imageDataMap, const std::string formSrc)
 {
     if (id == runningCardId_) {
         LOGE("the card is showing, no need run again");
@@ -138,7 +138,6 @@ void SubContainer::RunCard(const int64_t id, const std::string path, const std::
     }
 
     frontend_->ResetPageLoadState();
-
     LOGI("run card path:%{private}s, module:%{private}s, data:%{private}s", path.c_str(), module.c_str(), data.c_str());
     RefPtr<FlutterAssetManager> flutterAssetManager;
     flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
@@ -150,16 +149,18 @@ void SubContainer::RunCard(const int64_t id, const std::string path, const std::
         auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
         std::string temp1 = "assets/js/" + module + "/";
         std::string temp2 = "assets/js/share/";
+        std::string temp3 = formSrc;
         std::vector<std::string> basePaths;
         basePaths.push_back(temp1);
         basePaths.push_back(temp2);
-
+        basePaths.push_back("./");
+        basePaths.push_back("./js/");
         if (assetProvider->Initialize(path, basePaths)) {
             LOGI("push card asset provider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
         }
     }
-
+    frontend_->SetFormSrc(formSrc);
     auto&& window = std::make_unique<FormWindow>(outSidePipelineContext_);
 
     pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
