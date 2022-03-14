@@ -30,7 +30,7 @@ const std::unordered_map<std::string, std::function<std::string(const SideBarCom
     { "showSideBar", [](const SideBarComposedElement& inspector) { return inspector.GetShowSideBar(); } },
     { "controlButton", [](const SideBarComposedElement& inspector) { return inspector.GetControlButton(); } },
     { "showControlButton", [](const SideBarComposedElement& inspector) { return inspector.GetShowControlButton(); } },
-    { "sidebarWidth", [](const SideBarComposedElement& inspector) { return inspector.GetSideBarWidth(); } },
+    { "sideBarWidth", [](const SideBarComposedElement& inspector) { return inspector.GetSideBarWidth(); } },
     { "minSideBarWidth", [](const SideBarComposedElement& inspector) { return inspector.GetMinSideBarWidth(); } },
     { "maxSideBarWidth", [](const SideBarComposedElement& inspector) { return inspector.GetMaxSideBarWidth(); } }
 };
@@ -44,7 +44,7 @@ void SideBarComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(std::string("showSideBar: ").append(GetShowSideBar()));
     DumpLog::GetInstance().AddDesc(std::string("controlButton: ").append(GetControlButton()));
     DumpLog::GetInstance().AddDesc(std::string("showControlButton: ").append(GetShowControlButton()));
-    DumpLog::GetInstance().AddDesc(std::string("sidebarWidth: ").append(GetSideBarWidth()));
+    DumpLog::GetInstance().AddDesc(std::string("sideBarWidth: ").append(GetSideBarWidth()));
     DumpLog::GetInstance().AddDesc(std::string("minSideBarWidth: ").append(GetMinSideBarWidth()));
     DumpLog::GetInstance().AddDesc(std::string("maxSideBarWidth: ").append(GetMaxSideBarWidth()));
 }
@@ -112,27 +112,27 @@ std::string SideBarComposedElement::GetSideBarWidth() const
 {
     auto render = GetRenderSideBar();
     if (render) {
-        return render->GetSideBarWidth().ToString().c_str();
+        return std::to_string(render->GetSideBarWidth().Value()).c_str();
     }
-    return "200vp";
+    return "200";
 }
 
 std::string SideBarComposedElement::GetMinSideBarWidth() const
 {
     auto render = GetRenderSideBar();
     if (render) {
-        return render->GetSideBarMinWidth().ToString().c_str();
+        return std::to_string(render->GetSideBarMinWidth().Value()).c_str();
     }
-    return "200vp";
+    return "200";
 }
 
 std::string SideBarComposedElement::GetMaxSideBarWidth() const
 {
     auto render = GetRenderSideBar();
     if (render) {
-        return render->GetSideBarMaxWidth().ToString().c_str();
+        return std::to_string(render->GetSideBarMaxWidth().Value()).c_str();
     }
-    return "280vp";
+    return "280";
 }
 
 RefPtr<RenderSideBarContainer> SideBarComposedElement::GetRenderSideBar() const
