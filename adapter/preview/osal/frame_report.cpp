@@ -105,4 +105,14 @@ void FrameReport::BeginProcessPostFlush()
 {
     beginProcessPostFunc_ = nullptr;
 }
+
+void FrameReport::BeginListFling()
+{
+    beginListFlingFunc_ = nullptr;
+}
+
+void FrameReport::EndListFling()
+{
+    endListFlingFunc_ = nullptr;
+}
 }  // namespace ACE

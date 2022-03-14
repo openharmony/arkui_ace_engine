@@ -18,6 +18,7 @@
 #include <cmath>
 
 #include "base/log/log.h"
+#include "base/log/frame_report.h"
 #include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
@@ -38,6 +39,10 @@ void DragRecognizer::OnAccepted(size_t touchId)
     if (iter == dragFingers_.end()) {
         LOGE("the dragFingers_ is not ready to receive accepted, id is %{public}zu", touchId);
         return;
+    }
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginListFling();
     }
 
     auto& dragInfo = iter->second;
@@ -164,6 +169,10 @@ void DragRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
 
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndListFling();
+    }
+
     auto& dragInfo = iter->second;
     dragInfo.velocityTracker_.UpdateTouchPoint(event, true);
     if (dragInfo.states_ == DetectState::DETECTED) {
@@ -215,6 +224,10 @@ void DragRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (iter == dragFingers_.end()) {
         LOGE("the dragFingers_ is not ready to receive touch cancel event, id is %{public}d", event.id);
         return;
+    }
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndListFling();
     }
 
     auto& dragInfo = iter->second;

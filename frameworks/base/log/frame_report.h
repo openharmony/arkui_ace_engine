@@ -35,6 +35,8 @@ using EndFlushRenderFunc = void(*)();
 using BeginFlushRenderFinishFunc = void(*)();
 using EndFlushRenderFinishFunc = void(*)();
 using BeginProcessPostFlushFunc = void(*)();
+using BeginListFlingFunc = void(*)();
+using EndListFlingFunc = void(*)();
 
 class ACE_EXPORT FrameReport final {
 public:
@@ -53,6 +55,8 @@ public:
     void BeginFlushRenderFinish();
     void EndFlushRenderFinish();
     void BeginProcessPostFlush();
+    void BeginListFling();
+    void EndListFling();
 
 private:
     FrameReport();
@@ -76,6 +80,8 @@ private:
     ACE_EXPORT BeginFlushRenderFinishFunc beginFlushRenderFinishFunc_ = nullptr;
     ACE_EXPORT EndFlushRenderFinishFunc endFlushRenderFinishFunc_ = nullptr;
     ACE_EXPORT BeginProcessPostFlushFunc beginProcessPostFunc_ = nullptr;
+    ACE_EXPORT BeginListFlingFunc beginListFlingFunc_ = nullptr;
+    ACE_EXPORT EndListFlingFunc endListFlingFunc_ = nullptr;
 };
 }
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_FRAME_REPORT_H
