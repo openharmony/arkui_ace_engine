@@ -57,7 +57,7 @@ void FlutterRenderQrcode::DrawQRCode(
     if (qrcode_->GetType() == QrcodeType::CIRCLE) {
         int32_t smallSquareWidth = size / sqrt(2);
         canvas->canvas()->drawBitmap(ProcessQrcodeData(smallSquareWidth, qrCode),
-            topLeft.GetX() + (size - smallSquareWidth) / 2, topLeft.GetY() + (size - smallSquareWidth) / 2);
+            topLeft.GetX() + (size - smallSquareWidth) / 2.0, topLeft.GetY() + (size - smallSquareWidth) / 2.0);
     }
 }
 

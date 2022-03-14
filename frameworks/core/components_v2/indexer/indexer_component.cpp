@@ -147,8 +147,8 @@ void IndexerComponent::BuildTextItem(const std::u16string& strSection, const std
 
 void IndexerComponent::BuildIndexerItems()
 {
-    int32_t length = labelLocal_.size();
-    if (length <= 0) {
+    uint32_t length = labelLocal_.size();
+    if (length == 0) {
         LOGE("[indexer] invalid section string");
         return;
     }
@@ -156,7 +156,7 @@ void IndexerComponent::BuildIndexerItems()
     BuildBubbleBox();
     itemCount_ = 0;
 
-    for (int32_t i = 0; i < length; ++i) {
+    for (uint32_t i = 0; i < length; ++i) {
         std::u16string strItem = labelLocal_[i];
         BuildTextItem(sectionsLocal_[i], strItem);
     }

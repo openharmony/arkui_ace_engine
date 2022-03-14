@@ -672,7 +672,7 @@ sk_sp<SkShader> RosenRenderTextField::MakeGradientShader(double shadeWidth) cons
     float pos[] = { 0.0f, posLeft, posRight, 1.0f };
 
     int32_t start = 0;
-    int32_t renderCount = sizeof(pos) / sizeof(pos[0]);
+    int32_t renderCount = static_cast<int32_t>(sizeof(pos) / sizeof(pos[0]));
     int32_t totalCount = renderCount;
     if (!needShadeLeft) {
         start = 2;

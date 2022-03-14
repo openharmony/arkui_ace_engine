@@ -225,7 +225,7 @@ void ImageCache::WriteCacheFile(const std::string& url, const void * const data,
             count++;
         }
         cacheFileInfo_.erase(cacheFileInfo_.begin(), iter);
-        cacheFileSize_ -= removeSize;
+        cacheFileSize_ -= static_cast<int32_t>(removeSize);
     }
     // 3. clear files removed from cache list.
     ClearCacheFile(removeVector);

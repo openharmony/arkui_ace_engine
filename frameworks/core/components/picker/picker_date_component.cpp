@@ -687,16 +687,16 @@ bool PickerDateComponent::GetLunarLeapMonth(uint32_t year, uint32_t& outLeapMont
         return false;
     }
 
-    outLeapMonth = leapMonth;
+    outLeapMonth = static_cast<uint32_t>(leapMonth);
     return true;
 }
 
 uint32_t PickerDateComponent::GetLunarMaxDay(uint32_t year, uint32_t month, bool isLeap) const
 {
     if (isLeap) {
-        return LunarCalculator::GetLunarLeapDays(year);
+        return static_cast<uint32_t>(LunarCalculator::GetLunarLeapDays(year));
     } else {
-        return LunarCalculator::GetLunarMonthDays(year, month);
+        return static_cast<uint32_t>(LunarCalculator::GetLunarMonthDays(year, month));
     }
 }
 
