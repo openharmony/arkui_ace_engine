@@ -26,6 +26,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_helpers.h"
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
@@ -553,7 +554,72 @@ void QJSDeclarativeEngine::FireSyncEvent(const std::string& eventId, const std::
     LOGW("QJSDeclarativeEngine FireSyncEvent is unusable");
 }
 
-void QJSDeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId) {}
+void QJSDeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
+{
+    nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
+    nativeXComponent_ = new OH_NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
+
+    RefPtr<XComponentComponent> xcomponent;
+    OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponent(xcomponent);
+    if (!xcomponent) {
+        LOGE("FireExternalEvent xcomponent is null.");
+        return;
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("FireExternalEvent Current container null");
+        return;
+    }
+
+    void* nativeWindow = nullptr;
+#ifdef OHOS_STANDARD_SYSTEM
+    nativeWindow = const_cast<void*>(xcomponent->GetNativeWindow());
+#endif
+
+    if (!nativeWindow) {
+        LOGE("FireExternalEvent nativeWindow invalid");
+        return;
+    }
+    nativeXComponentImpl_->SetSurface(nativeWindow);
+    nativeXComponentImpl_->SetXComponentId(xcomponent->GetId());
+
+    auto nativeEngine = static_cast<QuickJSNativeEngine*>(nativeEngine_);
+    if (nativeEngine == nullptr) {
+        LOGE("nativeEngine is null");
+        return;
+    }
+
+    std::string args;
+    auto renderContext = nativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true, args,
+        OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_));
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Make(renderContext);
+    auto getJSValCallback = [obj](JSRef<JSVal>& jsVal) {
+        jsVal = obj;
+        return true;
+    };
+    XComponentClient::GetInstance().RegisterJSValCallback(getJSValCallback);
+
+    auto task = [weak = WeakClaim(this), xcomponent]() {
+        auto pool = xcomponent->GetTaskPool();
+        if (!pool) {
+            return;
+        }
+        auto bridge = weak.Upgrade();
+        if (bridge) {
+            pool->NativeXComponentInit(
+                bridge->nativeXComponent_, AceType::WeakClaim(AceType::RawPtr(bridge->nativeXComponentImpl_)));
+        }
+    };
+
+    auto delegate = engineInstance_->GetDelegate();
+    if (!delegate) {
+        LOGE("Delegate is null");
+        return;
+    }
+    delegate->PostSyncTaskToPage(task);
+}
 
 void QJSDeclarativeEngine::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher)
 {
