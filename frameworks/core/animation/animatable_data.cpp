@@ -64,7 +64,8 @@ BackgroundImageSize AnimatableData<BackgroundImageSize>::Blend(
     const BackgroundImageSize& start, const BackgroundImageSize& end, float process)
 {
     float scaleA = process;
-    float scaleB = 1.0f - process;
+    float tmp = 1.0f;
+    float scaleB = tmp - process;
     return start * scaleB + end * scaleA;
 }
 

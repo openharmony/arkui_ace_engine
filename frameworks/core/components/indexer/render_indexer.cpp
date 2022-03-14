@@ -203,7 +203,7 @@ void RenderIndexer::InitIndexTable()
 
 void RenderIndexer::UpdateItems()
 {
-    if (nonItemCount_ + items_.size() == GetChildren().size()) {
+    if (static_cast<uint32_t>(nonItemCount_) + items_.size() == GetChildren().size()) {
         LOGD("[indexer] no need update Items");
         return;
     }

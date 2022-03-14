@@ -129,12 +129,12 @@ void ImageAnimatorElement::PerformBuild()
         }
     }));
     animator_->RemoveStopListener(stopCallbackId_);
-    stopCallbackId_ = animator_->AddStopListener([weak = WeakClaim(this)]() {
+    stopCallbackId_ = static_cast<int64_t>(animator_->AddStopListener([weak = WeakClaim(this)]() {
         auto imageAnimator = weak.Upgrade();
         if (imageAnimator) {
             imageAnimator->isSetDuration_ = false;
         }
-    });
+    }));
 
     // for declarative frontend.
     if (context_.Upgrade() && context_.Upgrade()->GetIsDeclarative()) {
