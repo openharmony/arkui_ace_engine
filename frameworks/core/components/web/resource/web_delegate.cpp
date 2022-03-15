@@ -671,30 +671,30 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
     SetWebCallBack();
     if (!pipelineContext->GetIsDeclarative()) {
         RegisterOHOSWebEventAndMethord();
+    } else {
+        onPageFinishedV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webComponent_->GetPageFinishedEventId(), pipelineContext);
+        onPageStartedV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webComponent_->GetPageStartedEventId(), pipelineContext);
+        onProgressChangeV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webComponent_->GetProgressChangeEventId(), pipelineContext);
+        onTitleReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webComponent_->GetTitleReceiveEventId(), pipelineContext);
+        onGeolocationHideV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webComponent_->GetGeolocationHideEventId(), pipelineContext);
+        onGeolocationShowV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webComponent_->GetGeolocationShowEventId(), pipelineContext);
+        onFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webComponent_->GetOnFocusEventId(), pipelineContext);
+        onRequestFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webComponent_->GetRequestFocusEventId(), pipelineContext);
+        onErrorReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webComponent_->GetPageErrorEventId(), pipelineContext);
+        onHttpErrorReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webComponent_->GetHttpErrorEventId(), pipelineContext);
+        onDownloadStartV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webComponent_->GetDownloadStartEventId(), pipelineContext);
     }
-    
-    onPageFinishedV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-        webComponent_->GetPageFinishedEventId(), pipelineContext);
-    onPageStartedV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-        webComponent_->GetPageStartedEventId(), pipelineContext);
-    onProgressChangeV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-        webComponent_->GetProgressChangeEventId(), pipelineContext);
-    onTitleReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-        webComponent_->GetTitleReceiveEventId(), pipelineContext);
-    onGeolocationHideV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-        webComponent_->GetGeolocationHideEventId(), pipelineContext);
-    onGeolocationShowV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-        webComponent_->GetGeolocationShowEventId(), pipelineContext);
-    onFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-        webComponent_->GetOnFocusEventId(), pipelineContext);
-    onRequestFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-        webComponent_->GetRequestFocusEventId(), pipelineContext);
-    onErrorReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-        webComponent_->GetPageErrorEventId(), pipelineContext);
-    onHttpErrorReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-        webComponent_->GetHttpErrorEventId(), pipelineContext);
-    onDownloadStartV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-        webComponent_->GetDownloadStartEventId(), pipelineContext);
 }
 
 void WebDelegate::RegisterOHOSWebEventAndMethord()
