@@ -817,6 +817,8 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
         return false;
     }
 
+    instanceId_ = ContainerScope::CurrentId();
+
     if (softKeyboardEnabled_) {
         LOGI("RenderTextField::CloseKeyboard: Request open soft keyboard");
 #if defined(ENABLE_STANDARD_INPUT)

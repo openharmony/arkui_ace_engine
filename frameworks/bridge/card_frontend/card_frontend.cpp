@@ -86,13 +86,18 @@ void CardFrontend::ParseManifest() const
 
 void CardFrontend::RunPage(int32_t pageId, const std::string& url, const std::string& params)
 {
-    ParseManifest();
+
     std::string urlPath;
-    if (!url.empty()) {
-        urlPath = manifestParser_->GetRouter()->GetPagePath(url, FILE_TYPE_JSON);
-    }
-    if (urlPath.empty()) {
-        urlPath = manifestParser_->GetRouter()->GetEntry(FILE_TYPE_JSON);
+    if (GetFormSrc().empty()) {
+        ParseManifest();
+        if (!url.empty()) {
+            urlPath = manifestParser_->GetRouter()->GetPagePath(url, FILE_TYPE_JSON);
+        }
+        if (urlPath.empty()) {
+            urlPath = manifestParser_->GetRouter()->GetEntry(FILE_TYPE_JSON);
+        }
+    } else {
+        urlPath = GetFormSrcPath(GetFormSrc(), FILE_TYPE_JSON);
     }
     if (urlPath.empty()) {
         LOGE("fail to run page due to path url is empty");
@@ -107,6 +112,21 @@ void CardFrontend::RunPage(int32_t pageId, const std::string& url, const std::st
             }
         },
         TaskExecutor::TaskType::JS);
+}
+
+std::string CardFrontend::GetFormSrcPath(const std::string& uri, const std::string& suffix) const
+{
+    if (uri.empty()) {
+        LOGW("page uri is empty");
+        return "";
+    }
+    // the case uri is starts with "/" and "/" is the mainPage
+    if (uri.size() != 0) {
+        return uri + suffix;
+    }
+
+    LOGE("can't find this page %{private}s path", uri.c_str());
+    return "";
 }
 
 RefPtr<AcePage> CardFrontend::GetPage(int32_t pageId) const

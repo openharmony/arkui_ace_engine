@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -118,6 +118,7 @@ void DOMStepperItem::AddStepperItem(const RefPtr<DOMNode>& node, int32_t slot)
             flexDirection_, flexMainAlign_, flexCrossAlign_, std::list<RefPtr<Component>>());
     }
     flexComponent_->InsertChild(slot, childComponent);
+    Component::MergeRSNode(childComponent, flexComponent_);
 }
 
 void DOMStepperItem::RemoveStepperItem(const RefPtr<DOMNode>& node)

@@ -1809,7 +1809,8 @@ RefPtr<Frontend> PipelineContext::GetFrontend() const
 
 void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    if (!rootElement_ || !rootElement_->GetRenderNode()) {
+    static const bool IsWindowSizeAnimationEnabled = SystemProperties::IsWindowSizeAnimationEnabled();
+    if (!rootElement_ || !rootElement_->GetRenderNode() || !IsWindowSizeAnimationEnabled) {
         LOGE("RootNodeAnimation: no rootelement found, no animation configured");
         SetRootSizeWithWidthHeight(width, height);
         return;
@@ -1829,6 +1830,7 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
                 FlushLayout();
             });
             break;
+            [[fallthrough]];
         }
         case WindowSizeChangeReason::ROTATION:
         case WindowSizeChangeReason::RESIZE:

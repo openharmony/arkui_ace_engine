@@ -30,6 +30,11 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
+
+constexpr char CANVAS_TYPE_WEBGL[] = "webgl";
+constexpr char CANVAS_TYPE_WEBGL2[] = "webgl2";
+constexpr char CANVAS_WEBGL_SO[] = "webglnapi";
+
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue> jsValue)
 {
@@ -165,6 +170,23 @@ inline NodeId GetCurrentNodeId(const shared_ptr<JsRuntime>& runtime, const share
     return id < 0 ? 0 : id;
 }
 
+void PushTaskToPageById(const shared_ptr<JsRuntime>& runtime, NodeId id,
+    const std::function<void(const RefPtr<CanvasTaskPool>&)>& task)
+{
+    auto command = Referenced::MakeRefPtr<JsCommandContextOperation>(id, task);
+    // push command
+    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (!engine) {
+        LOGE("engine is null.");
+        return;
+    }
+    auto page = engine->GetRunningPage();
+    if (!page) {
+        LOGE("page is null.");
+        return;
+    }
+    page->PushCommand(command);
+}
 void PushTaskToPage(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::function<void(const RefPtr<CanvasTaskPool>&)>& task)
 {
@@ -239,9 +261,36 @@ std::unordered_map<int32_t, Pattern> JsiCanvasBridge::pattern_;
 std::unordered_map<int32_t, Gradient> JsiCanvasBridge::gradientColors_;
 std::unordered_map<int32_t, RefPtr<CanvasPath2D>> JsiCanvasBridge::path2Ds_;
 
+JsiCanvasBridge::~JsiCanvasBridge()
+{
+    if (webglRenderContext_) {
+        delete webglRenderContext_;
+        webglRenderContext_ = nullptr;
+    }
+    if (webgl2RenderContext_) {
+        delete webgl2RenderContext_;
+        webgl2RenderContext_ = nullptr;
+    }
+}
+
 void JsiCanvasBridge::HandleJsContext(const shared_ptr<JsRuntime>& runtime, NodeId id, const std::string& args)
 {
     LOGD("JsiCanvasBridge::HandleJsContext");
+    std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
+    if (argsValue && argsValue->IsArray() && argsValue->GetArraySize() > 0) {
+        auto typeArg = argsValue->GetArrayItem(0);
+        if (typeArg && typeArg->IsString()) {
+            std::string type = typeArg->GetString();
+            if (type == std::string(CANVAS_TYPE_WEBGL)) {
+                HandleWebglContext(runtime, id, args, webglRenderContext_);
+                return;
+            } else if (type == std::string(CANVAS_TYPE_WEBGL2)) {
+                HandleWebglContext(runtime, id, args, webgl2RenderContext_);
+                return;
+            }
+        }
+    }
+
     renderContext_ = runtime->NewObject();
     const std::vector<std::pair<const std::string, RegisterFunctionType>> contextTable = {
         { "createLinearGradient", JsCreateLinearGradient },
@@ -320,6 +369,80 @@ void JsiCanvasBridge::HandleJsContext(const shared_ptr<JsRuntime>& runtime, Node
         }
     }
     JsSetAntiAlias(runtime, id, args);
+}
+
+void JsiCanvasBridge::HandleWebglContext(const shared_ptr<JsRuntime>& runtime,
+    NodeId id, const std::string& args, CanvasRenderContextBase*& canvasRenderContext)
+{
+    LOGD("JsiCanvasBridge::HandleWebglContext");
+    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (!engine) {
+        LOGE("engine is null.");
+        return;
+    }
+
+    auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetArkNativeEngine());
+    if (!nativeEngine) {
+        LOGE("NativeEngine is null");
+        return;
+    }
+
+    std::string moduleName(CANVAS_WEBGL_SO);
+    std::string pluginId(std::to_string(id));
+    auto arkObjectRef = nativeEngine->GetModuleFromName(
+        moduleName, false, pluginId, args, WEBGL_RENDER_CONTEXT_NAME, reinterpret_cast<void**>(&canvasRenderContext));
+    if (!canvasRenderContext) {
+        LOGE("CanvasBridge invalid canvasRenderContext");
+        return;
+    }
+
+    renderContext_ = runtime->NewObject();
+    auto renderContext = std::static_pointer_cast<ArkJSValue>(renderContext_);
+    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    LocalScope scope(pandaRuntime->GetEcmaVm());
+    Local<ObjectRef> obj = arkObjectRef->ToObject(pandaRuntime->GetEcmaVm());
+    if (obj.CheckException()) {
+        LOGE("Get local object failed.");
+        return;
+    }
+    renderContext->SetValue(pandaRuntime, obj);
+
+    auto page = engine->GetRunningPage();
+    if (!page) {
+        LOGE("page is null.");
+        return;
+    }
+
+    auto task = [canvasRenderContext, page, id]() {
+        auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
+        if (!canvas) {
+            return;
+        }
+        auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
+        auto pool = paintChild->GetTaskPool();
+        if (!pool) {
+            return;
+        }
+        pool->WebGLInit(canvasRenderContext);
+    };
+
+    auto delegate = engine->GetFrontendDelegate();
+    if (!delegate) {
+        LOGE("ToDataURL failed. delegate is null.");
+        return;
+    }
+
+    delegate->PostSyncTaskToPage(task);
+
+    canvasRenderContext->Init();
+
+    auto onWebGLUpdateCallback = [runtime, id]() {
+        auto task = [](const RefPtr<CanvasTaskPool>& pool) {
+            pool->WebGLUpdate();
+        };
+        PushTaskToPageById(runtime, id, task);
+    };
+    canvasRenderContext->SetUpdateCallback(onWebGLUpdateCallback);
 }
 
 void JsiCanvasBridge::HandleToDataURL(const shared_ptr<JsRuntime>& runtime, NodeId id, const std::string& args)
@@ -1679,8 +1802,8 @@ shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>&
     delegate->PostSyncTaskToPage(task);
 
     // 1 Get data from canvas
-    uint32_t final_height = imageData->dirtyHeight;
-    uint32_t final_width = imageData->dirtyWidth;
+    uint32_t final_height = static_cast<uint32_t>(imageData->dirtyHeight);
+    uint32_t final_width = static_cast<uint32_t>(imageData->dirtyWidth);
     uint32_t length = final_height * final_width;
     uint32_t* data = new uint32_t[length];
     for (uint32_t i = 0; i < final_height; i++) {

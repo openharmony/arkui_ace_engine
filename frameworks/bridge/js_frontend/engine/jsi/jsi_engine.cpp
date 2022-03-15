@@ -3165,6 +3165,7 @@ JsiEngine::~JsiEngine()
     if (nativeEngine_ != nullptr) {
         nativeEngine_->CancelCheckUVLoop();
         delete nativeEngine_;
+        nativeEngine_ = nullptr;
     }
 }
 

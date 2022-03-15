@@ -776,7 +776,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(
         }
     }
     // childs.
-    if (mode & PREFETCH_CHILDREN) {
+    if (umode & static_cast<uint32_t>(PREFETCH_CHILDREN)) {
         auto childs = node->GetChildList();
         for (const auto& item : node->GetChildList()) {
             UpdateAccessibilityNodeInfo(item, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
