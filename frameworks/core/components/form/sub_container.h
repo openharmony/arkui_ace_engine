@@ -37,7 +37,7 @@ public:
 
     void Initialize();
     void RunCard(const int64_t id, const std::string path, const std::string module, const std::string data,
-        std::map<std::string, std::pair<int, int32_t>> imageDataMap);
+        std::map<std::string, std::pair<int, int32_t>> imageDataMap, const std::string formSrc);
     void UpdateCard(const std::string content, std::map<std::string, std::pair<int, int32_t>> imageDataMap);
     void Destroy();
     void GetNamesOfSharedImage(std::vector<std::string>& picNameArray);

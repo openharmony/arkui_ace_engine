@@ -61,6 +61,7 @@ public:
 
     void LoadPluginJsCode(std::string&& jsCode) const override {}
     void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const override {}
+    std::string GetFormSrcPath(const std::string& uri, const std::string& suffix) const;
 
     // application lifecycle.
     void UpdateState(Frontend::State state) override {}
@@ -148,6 +149,16 @@ public:
         cardHapPath_ = path;
     }
 
+    std::string GetFormSrc() const
+    {
+        return formSrc_;
+    }
+
+    void SetFormSrc(std::string formSrc)
+    {
+        formSrc_ = formSrc;
+    }
+
 private:
     void UpdatePageData(const std::string& dataList);
     void LoadPage(const std::string& urlPath, const std::string& params);
@@ -175,6 +186,7 @@ private:
     RefPtr<Framework::CardFrontendDelegate> delegate_;
     Framework::PageIdPool pageIdPool_;
     RefPtr<Framework::JsCardParser> parseJsCard_;
+    std::string formSrc_;
 };
 
 class CardEventHandler : public AceEventHandler {
