@@ -319,28 +319,21 @@ bool FindFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityNode>&
     return false;
 }
 
-bool FindText(const RefPtr<AccessibilityNode>& node, const std::string& text, RefPtr<AccessibilityNode>& resultNode)
+void FindText(
+    const RefPtr<AccessibilityNode>& node, const std::string& text, std::list<RefPtr<AccessibilityNode>>& nodeList)
 {
     LOGI("FindText nodeId(%{public}d)", node->GetNodeId());
-    if ((node->GetText().find(text) != std::string::npos)) {
-        resultNode = node;
-        LOGI("FindText nodeId(%{public}d)", resultNode->GetNodeId());
-        return true;
+    if ((node != nullptr) && (node->GetText().find(text) != std::string::npos)) {
+        LOGI("FindText find nodeId(%{public}d)", node->GetNodeId());
+        nodeList.push_back(node);
     }
     if (!node->GetChildList().empty()) {
-        for (const auto& item : node->GetChildList()) {
-            if (resultNode != nullptr) {
-                return true;
-            }
-            if (FindText(item, text, resultNode)) {
-                LOGI("FindText nodeId:%{public}d", resultNode->GetNodeId());
-                return true;
-            }
+        for (const auto& child : node->GetChildList()) {
+            FindText(child, text, nodeList);
         }
     }
-
-    return false;
 }
+
 } // namespace
 
 JsAccessibilityManager::~JsAccessibilityManager()
@@ -835,7 +828,6 @@ void JsAccessibilityManager::SearchElementInfosByText(const long elementId, cons
         return;
     }
 
-    AccessibilityElementInfo nodeInfo;
     NodeId nodeId = static_cast<NodeId>(elementId);
     if (elementId == -1) {
         return;
@@ -848,15 +840,16 @@ void JsAccessibilityManager::SearchElementInfosByText(const long elementId, cons
     }
 
     std::list<AccessibilityElementInfo> infos;
-    RefPtr<AccessibilityNode> resultNode = nullptr;
-    bool status = FindText(node, text, resultNode);
-    LOGI("FindText status:%{public}d", status);
-
-    if ((status) && (resultNode != nullptr)) {
-        LOGI("FindText text NodeId:%{public}d", resultNode->GetNodeId());    
-        UpdateAccessibilityNodeInfo(resultNode, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
-            jsAccessibilityManager->GetRootNodeId());
-        infos.push_back(nodeInfo);
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    FindText(node, text, nodeList);
+    if (!nodeList.empty()) {
+        for (const auto& node : nodeList) {
+            LOGI(" FindText end nodeId:%{public}d", node->GetNodeId());
+            AccessibilityElementInfo nodeInfo;
+            UpdateAccessibilityNodeInfo(node, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
+                jsAccessibilityManager->GetRootNodeId());
+            infos.emplace_back(nodeInfo);
+        }
     }
 
     LOGI("SetSearchElementInfoByTextResult infos.size(%{public}d)", infos.size());
