@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -440,9 +440,35 @@ void SetDomStyle(
             LOGD("value of unsupported type. Ignoring!");
         }
     }
+
+    bool isIine = false;
+    for (int i = 0; i < styles.size(); i++) {
+        std::string key = styles[i].first;
+        std::string value = styles[i].second;
+        if (key == "display" && value == "inline") {
+            isIine = true;
+            break;
+        }
+    }
+
+    if (isIine) {
+        std::vector < std::pair < std::string, std::string >> stylesFinaly;
+        for (int i = 0; i < styles.size(); i++) {
+            std::string key = styles[i].first;
+            std::string value = styles[i].second;
+            if (key == "width" || key == "height" || key.find("margin") != std::string::npos ||
+                key.find("padding") != std::string::npos) {
+                continue;
+            } else {
+                stylesFinaly.emplace_back(key, value);
+            }
+        }
+        command.SetStyles(std::move(stylesFinaly));
+    } else {
+        command.SetStyles(std::move(styles));
+    }
     auto pipelineContext = GetFrontendDelegate(runtime)->GetPipelineContext();
     command.SetPipelineContext(pipelineContext);
-    command.SetStyles(std::move(styles));
 }
 
 void AddDomEvent(

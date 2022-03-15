@@ -1295,6 +1295,71 @@ void DOMNode::CompositeComponents()
     }
 }
 
+void DOMNode::SetDisplayType()
+{
+    static std::unordered_map<std::string, DisplayType> types = {
+        { DOM_NODE_TAG_DIV, DisplayType::FLEX },
+        { DOM_NODE_TAG_BADGE, DisplayType::BLOCK },
+        { DOM_NODE_TAG_DIALOG, DisplayType::BLOCK },
+        { DOM_NODE_TAG_FORM, DisplayType::BLOCK },
+        { DOM_NODE_TAG_LIST, DisplayType::BLOCK },
+        { DOM_NODE_TAG_LIST_ITEM, DisplayType::BLOCK },
+        { DOM_NODE_TAG_LIST_ITEM_GROUP, DisplayType::BLOCK },
+        { DOM_NODE_TAG_PANEL, DisplayType::BLOCK },
+        { DOM_NODE_TAG_POPUP, DisplayType::BLOCK },
+        { DOM_NODE_TAG_REFRESH, DisplayType::BLOCK },
+        { DOM_NODE_TAG_STACK, DisplayType::BLOCK },
+        { DOM_NODE_TAG_STEPPER, DisplayType::BLOCK },
+        { DOM_NODE_TAG_STEPPER_ITEM, DisplayType::BLOCK },
+        { DOM_NODE_TAG_SWIPER, DisplayType::BLOCK },
+        { DOM_NODE_TAG_TABS, DisplayType::BLOCK },
+        { DOM_NODE_TAG_TAB_BAR, DisplayType::BLOCK },
+        { DOM_NODE_TAG_TAB_CONTENT, DisplayType::BLOCK },
+
+        { DOM_NODE_TAG_BUTTON, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_CHART, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_DIVIDER, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_IMAGE, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_IMAGE_ANIMATOR, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_INPUT, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_LABEL, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_MARQUEE, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_MENU, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_OPTION, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_PICKER_DIALOG, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_PICKER_VIEW, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_PIECE, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_PROGRESS, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_QRCODE, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_RATING, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_RICH_TEXT, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_SEARCH, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_SELECT, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_SLIDER, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_SPAN, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_SWITCH, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_TEXT, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_TEXTAREA, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_TOOL_BAR, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_TOOL_BAR_ITEM, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_TOGGLE, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_WEB, DisplayType::INLINE_BLOCK },
+    };
+    DisplayType displayType = GetDisplay();
+    if (displayType == DisplayType::NO_SETTING) {
+        auto item = types.find(GetTag());
+        if (item != types.end()) {
+            displayType = item->second;
+        }
+    }
+    if (flexItemComponent_) {
+        flexItemComponent_->SetDisplayType(displayType);
+    }
+    if (boxComponent_) {
+        boxComponent_->SetDisplayType(displayType);
+    }
+}
+
 void DOMNode::UpdateFlexItemComponent()
 {
     if (!declaration_ || !flexItemComponent_) {
@@ -1353,7 +1418,10 @@ void DOMNode::UpdateFlexItemComponent()
         }
     }
     // If set display, this flexItem is ignored.
-    flexItemComponent_->SetIsHidden(GetDisplay() == DisplayType::NONE);
+    if (GetDisplay() == DisplayType::NONE) {
+        flexItemComponent_->SetIsHidden(GetDisplay() == DisplayType::NONE);
+    }
+    SetDisplayType();
 }
 
 void DOMNode::UpdateUiComponents()
@@ -1418,6 +1486,7 @@ void DOMNode::UpdateBoxComponent()
             boxComponent_->SetLayoutInBoxFlag(commonStyle.layoutInBox);
         }
     }
+    SetDisplayType();
 
     if (flexItemComponent_) {
         boxComponent_->SetDeliverMinToChild(false);

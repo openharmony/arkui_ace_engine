@@ -1076,9 +1076,21 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
             [](const std::string& value, Declaration& declaration) {
                 auto& displayStyle = declaration.MaybeResetStyle<CommonDisplayStyle>(StyleTag::COMMON_DISPLAY_STYLE);
                 if (displayStyle.IsValid()) {
-                    displayStyle.display = (value == DOM_DISPLAY_NONE)
-                                               ? DisplayType::NONE
-                                               : (value == DOM_DISPLAY_GRID) ? DisplayType::GRID : DisplayType::FLEX;
+                    if (value == DOM_DISPLAY_NONE) {
+                        displayStyle.display = DisplayType::NONE;
+                    } else if (value == DOM_DISPLAY_GRID) {
+                        displayStyle.display = DisplayType::GRID;
+                    } else if (value == DOM_DISPLAY_FLEX) {
+                        displayStyle.display = DisplayType::FLEX;
+                    } else if (value == DOM_DISPLAY_BLOCK) {
+                        displayStyle.display = DisplayType::BLOCK;
+                    } else if (value == DOM_DISPLAY_INLINE) {
+                        displayStyle.display = DisplayType::INLINE;
+                    } else if (value == DOM_DISPLAY_INLINE_BLOCK) {
+                        displayStyle.display = DisplayType::INLINE_BLOCK;
+                    } else if (value == DOM_DISPLAY_INLINE_FLEX) {
+                        displayStyle.display = DisplayType::INLINE_FLEX;
+                    }
                     declaration.hasDisplayStyle_ = true;
                 }
             } },

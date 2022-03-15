@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -168,6 +168,15 @@ public:
         isHidden_ = isHidden;
     }
 
+    DisplayType GetDisplayType() const
+    {
+        return displayType_;
+    }
+
+    void SetDisplayType(DisplayType displayType)
+    {
+        displayType_ = displayType;
+    }
     void SetGridColumnInfoBuilder(const RefPtr<GridColumnInfo::Builder>& gridColumnInfoBuilder)
     {
         gridColumnInfoBuilder_ = gridColumnInfoBuilder;
@@ -197,6 +206,7 @@ private:
 
     FlexAlign alignSelf_ = FlexAlign::AUTO;
     RefPtr<GridColumnInfo::Builder> gridColumnInfoBuilder_;
+    DisplayType displayType_ = DisplayType::NO_SETTING;
 };
 
 } // namespace OHOS::Ace

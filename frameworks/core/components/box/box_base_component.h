@@ -360,6 +360,15 @@ public:
         return pixelMap_;
     }
 
+    DisplayType GetDisplayType() const
+    {
+        return displayType_;
+    }
+
+    void SetDisplayType(DisplayType displayType)
+    {
+        displayType_ = displayType;
+    }
 private:
     Alignment align_;
     LayoutParam constraints_ = LayoutParam(Size(), Size()); // no constraints when init
@@ -389,6 +398,7 @@ private:
     AlignDeclarationPtr alignPtr_ = nullptr;
     AlignDeclaration::Edge alignSide_ { AlignDeclaration::Edge::AUTO };
     Dimension alignOffset_;
+    DisplayType displayType_ = DisplayType::NO_SETTING;
 };
 
 } // namespace OHOS::Ace
