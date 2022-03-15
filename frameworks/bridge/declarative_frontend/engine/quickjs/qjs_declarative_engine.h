@@ -18,6 +18,7 @@
 
 #include <unordered_map>
 
+#include "core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine_instance.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_group_js_bridge.h"
@@ -105,6 +106,8 @@ public:
     void ReplaceJSContent(const std::string& url, const std::string componentName);
 #endif
 
+     RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
+     OH_NativeXComponent *nativeXComponent_ = nullptr;
 private:
     void RegisterWorker();
     void RegisterInitWorkerFunc();
