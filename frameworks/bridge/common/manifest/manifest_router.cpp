@@ -50,7 +50,7 @@ std::string ManifestRouter::GetPagePath(const std::string& uri, const std::strin
         return uri;
     }
 
-    LOGE("can't find this page %{private}s path", uri.c_str());
+    LOGE("[Engine Log] can't find this page %{private}s path", uri.c_str());
     return "";
 }
 

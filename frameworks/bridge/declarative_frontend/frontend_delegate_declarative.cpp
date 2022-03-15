@@ -792,7 +792,7 @@ void FrontendDelegateDeclarative::Push(const PageTarget& target, const std::stri
     if (!pagePath.empty()) {
         LoadPage(GenerateNextPageId(), PageTarget(pagePath, target.container), false, params);
     } else {
-        LOGW("this uri not support in route push.");
+        LOGW("[Engine Log] this uri not support in route push.");
     }
 }
 
@@ -808,7 +808,7 @@ void FrontendDelegateDeclarative::Replace(const PageTarget& target, const std::s
     if (!pagePath.empty()) {
         LoadReplacePage(GenerateNextPageId(), PageTarget(pagePath, target.container), params);
     } else {
-        LOGW("this uri not support in route replace.");
+        LOGW("[Engine Log] this uri not support in route replace.");
     }
 }
 
@@ -882,7 +882,7 @@ void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const
             }
             PopToPage(pagePath);
         } else {
-            LOGW("this uri not support in route Back.");
+            LOGW("[Engine Log] this uri not support in route Back.");
         }
     }
 }
