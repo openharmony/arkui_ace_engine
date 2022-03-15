@@ -86,6 +86,7 @@ template("declarative_js_engine_ark") {
       "jsi_types.cpp",
       "jsi_view_register.cpp",
       "modules/jsi_app_module.cpp",
+      "modules/jsi_context_module.cpp",
       "modules/jsi_curves_module.cpp",
       "modules/jsi_matrix4_module.cpp",
       "modules/jsi_module_manager.cpp",

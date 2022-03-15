@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
+
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/core/common/container.h"
 
@@ -59,7 +60,6 @@ void JSLocalStorage::GetShared(const JSCallbackInfo& info)
     auto it = storages_.find(currentInstance);
     if (it == storages_.end()) {
         LOGW("LocalStorage with ID %{public}d not found!", currentInstance);
-        JSException::Throw("LocalStorage with ID %d not found!", currentInstance);
         return;
     }
     LOGI("JSLocalStorage::GetShared find ID:%{public}d", currentInstance);
