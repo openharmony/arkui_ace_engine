@@ -565,7 +565,7 @@ void FrontendDelegateImpl::Push(const std::string& uri, const std::string& param
         LoadPage(GenerateNextPageId(), pagePath, false, params);
     } else {
         isPagePathInvalid_ = false;
-        LOGW("this uri not support in route push.");
+        LOGW("[Engine Log] this uri not support in route push.");
     }
 
     if (taskExecutor_) {
@@ -596,7 +596,7 @@ void FrontendDelegateImpl::Replace(const std::string& uri, const std::string& pa
     if (!pagePath.empty()) {
         LoadReplacePage(GenerateNextPageId(), pagePath, params);
     } else {
-        LOGW("this uri not support in route replace.");
+        LOGW("[Engine Log] this uri not support in route replace.");
     }
 }
 
@@ -635,7 +635,7 @@ void FrontendDelegateImpl::BackImplement(const std::string& uri)
         if (!pagePath.empty()) {
             PopToPage(pagePath);
         } else {
-            LOGW("this uri not support in route Back.");
+            LOGW("[Engine Log] this uri not support in route Back.");
         }
     }
 
