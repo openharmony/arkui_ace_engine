@@ -169,7 +169,7 @@ class ACE_EXPORT WebDialogEvent : public BaseEventInfo {
 
 public:
     WebDialogEvent(const std::string& url, const std::string& message, const RefPtr<Result>& result)
-        : BaseEventInfo("WebDialogEvent"), url_(url) {}
+        : BaseEventInfo("WebDialogEvent"), url_(url), result_(result) {}
     ~WebDialogEvent() = default;
 
     const std::string& GetUrl() const

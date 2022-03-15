@@ -32,8 +32,8 @@ public:
     static void JSBind(BindingTarget globalObj)
     {
         JSClass<JSWebDialog>::Declare("WebDialog");
-        JSClass<JSWebDialog>::CustomMethod("confirm", &JSWebDialog::Confirm);
-        JSClass<JSWebDialog>::CustomMethod("cancel", &JSWebDialog::Cancel);
+        JSClass<JSWebDialog>::CustomMethod("handleConfirm", &JSWebDialog::Confirm);
+        JSClass<JSWebDialog>::CustomMethod("handleCancel", &JSWebDialog::Cancel);
         JSClass<JSWebDialog>::Bind(globalObj, &JSWebDialog::Constructor, &JSWebDialog::Destructor);
     }
 
