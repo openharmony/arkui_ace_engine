@@ -232,7 +232,7 @@ void IndexerComponent::BuildCollapseItem()
 
 void IndexerComponent::BuildIndexerItems()
 {
-    uint32_t length = labelLocal_.size();
+    uint32_t length = static_cast<uint32_t>(labelLocal_.size());
     if (length == 0) {
         LOGE("[indexer] invalid section string");
         return;
