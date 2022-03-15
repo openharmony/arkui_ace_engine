@@ -373,7 +373,7 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJs
         }
         hasCreated_ = true;
         onFormAcquiredCallback_(runningCardId_, formJsInfo.jsFormCodePath + "/", formJsInfo.formName,
-            formJsInfo.formData, formJsInfo.imageDataMap);
+            formJsInfo.formData, formJsInfo.imageDataMap, formJsInfo.formSrc);
     } else {
         if (formJsInfo.formData.empty()) {
             LOGE("update form data success, but data is empty!!!");
