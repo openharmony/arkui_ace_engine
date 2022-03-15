@@ -29,6 +29,7 @@ class JsiCanvasBridge : public BaseCanvasBridge {
     DECLARE_ACE_TYPE(JsiCanvasBridge, BaseCanvasBridge)
 
 public:
+    virtual ~JsiCanvasBridge();
     void HandleJsContext(const shared_ptr<JsRuntime>& runtime, NodeId id, const std::string& args);
     void HandleToDataURL(const shared_ptr<JsRuntime>& runtime, NodeId id, const std::string& args);
 
@@ -254,9 +255,13 @@ private:
     static void JsSetAntiAlias(const shared_ptr<JsRuntime>& runtime, NodeId id, const std::string& args);
     static RefPtr<CanvasPath2D> JsMakePath2D(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
         const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
-
+    void HandleWebglContext(const shared_ptr<JsRuntime>& runtime,
+        NodeId id, const std::string& args, CanvasRenderContextBase*& canvasRenderContext);
     shared_ptr<JsValue> renderContext_;
     shared_ptr<JsValue> dataURL_;
+
+    CanvasRenderContextBase* webglRenderContext_ = nullptr;
+    CanvasRenderContextBase* webgl2RenderContext_ = nullptr;
 
     static int32_t gradientCount_;
     static int32_t patternCount_;
