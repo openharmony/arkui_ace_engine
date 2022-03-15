@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,10 +75,14 @@ void JsFunction::Execute(const std::vector<std::string>& keys, const std::string
     JsFunction::ExecuteJS(1, &paramObj);
 }
 
-void JsFunction::ExecuteNew(const std::vector<std::string>& keys, const std::string& param)
+void JsFunction::ExecuteNew(const std::vector<std::string>& keys, const std::string& param,
+    RefPtr<JSXComponentController>& jsXComponentController)
 {
     JSRef<JSVal> jsVal;
     XComponentClient::GetInstance().GetJSVal(jsVal);
+    if (jsXComponentController) {
+        jsXComponentController->SetXComponentContext(jsVal);
+    }
     JsFunction::ExecuteJS(1, &jsVal);
 }
 
