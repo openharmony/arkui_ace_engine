@@ -36,7 +36,6 @@ public:
     bool PopBubble();
     void FirePopEvent();
     bool HandleMouseEvent(const MouseEvent& event) override;
-    WeakPtr<RenderNode> CheckHoverNode() override;
 
 protected:
     enum class ErrorPositionType {
