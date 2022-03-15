@@ -178,7 +178,7 @@ void JSCalendar::SetOffDays(int32_t offDays)
     std::string result;
     const static int32_t dayOfWeek = 7;
     for (auto i = 0; i < dayOfWeek; ++i) {
-        if (bit & offDays) {
+        if (bit & static_cast<uint32_t>(offDays)) {
             result += std::to_string(i);
             result += ",";
         }

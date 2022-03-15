@@ -74,7 +74,7 @@ int ConsoleLogOhos::GetLineNumber()
     return -1;
 }
 
-const std::string& ConsoleLogOhos::GetLog()
+std::string ConsoleLogOhos::GetLog()
 {
     if (message_) {
         return message_->Log();
@@ -90,7 +90,7 @@ int ConsoleLogOhos::GetLogLevel()
     return -1;
 }
 
-const std::string& ConsoleLogOhos::GetSourceId()
+std::string ConsoleLogOhos::GetSourceId()
 {
     if (message_) {
         return message_->SourceId();

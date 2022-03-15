@@ -43,11 +43,11 @@ public:
 
     int GetLineNumber() override;
 
-    const std::string& GetLog() override;
+    std::string GetLog() override;
 
     int GetLogLevel() override;
 
-    const std::string& GetSourceId() override;
+    std::string GetSourceId() override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message_;
