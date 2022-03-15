@@ -326,6 +326,7 @@ void AceContainer::OnInactive(int32_t instanceId)
     if (!context) {
         return;
     }
+    context->RootLostFocus();
 }
 
 bool AceContainer::OnStartContinuation(int32_t instanceId)
