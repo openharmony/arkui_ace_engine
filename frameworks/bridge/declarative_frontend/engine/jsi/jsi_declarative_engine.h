@@ -130,6 +130,7 @@ private:
     void InitPerfUtilModule(); // add perfutil object to global
     void InitJsExportsUtilObject();
     void InitJsNativeModuleObject();
+    void InitJsContextModuleObject();
     void InitGroupJsBridge();
 
     static thread_local std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
@@ -230,6 +231,8 @@ public:
     void RunGarbageCollection() override;
 
     void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
+
+    void SetContext(int32_t instanceId, NativeReference* context) override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
