@@ -382,7 +382,7 @@ group("unittest") {
   testonly = true
 
   deps = [
-    ":RenderTabBarTest",
+    #":RenderTabBarTest",
 
     #":RenderTabContentTest",
 
