@@ -335,7 +335,7 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterIdleCallback(idleCallback);
 }
 
-void AceContainer::CreateContainer(int32_t instanceId, FrontendType type)
+void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, const AceRunArgs& runArgs)
 {
 #ifdef USE_GLFW_WINDOW
     std::call_once(onceFlag_, [] {
@@ -358,6 +358,9 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type)
     if (front) {
         front->UpdateState(Frontend::State::ON_CREATE);
         front->SetJsMessageDispatcher(aceContainer);
+        if (type == FrontendType::JS_CARD && runArgs.projectModel == ProjectModel::STAGE) {
+            static_cast<CardFrontend*>(RawPtr(front))->SetFormSrc(runArgs.url);
+        }
     }
     auto platMessageBridge = aceContainer->GetMessageBridge();
     platMessageBridge->SetJsMessageDispatcher(aceContainer);

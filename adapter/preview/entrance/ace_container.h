@@ -48,7 +48,7 @@ class AceContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
 public:
-    static void CreateContainer(int32_t instanceId, FrontendType type);
+    static void CreateContainer(int32_t instanceId, FrontendType type, const AceRunArgs& runArgs);
     static void DestroyContainer(int32_t instanceId);
 
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);

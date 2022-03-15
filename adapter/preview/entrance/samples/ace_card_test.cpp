@@ -26,6 +26,8 @@ namespace {
 constexpr int32_t GET_INSPECTOR_TREE_TIMES = 12;
 constexpr int32_t GET_INSPECTOR_TREE_INTERVAL = 5000;
 constexpr char FILE_NAME[] = "InspectorTree.txt";
+constexpr char MAX_ARGS_COUNT = 2;
+constexpr char MODEL_STAGE[] = "stage";
 // card default width and height:
 // 2*1 (150*54)
 // 2*2 (150*150)
@@ -36,19 +38,21 @@ constexpr int32_t CARD_DEFAULT_HEIGHT = 344;
 
 } // namespace
 
-int main()
+int main(int argc, const char* argv[])
 {
     auto&& renderCallback = [](const void*, const size_t bufferSize, const int32_t width,
                                 const int32_t height) -> bool { return true; };
 
 #ifdef MAC_PLATFORM
     std::string assetPathJs = "/Volumes/SSD2T/daily-test/preview/js/default_card";
+    std::string url = "ets/pages/card/index/index";
     std::string appResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/AppResources";
     std::string systemResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/SystemResources";
     std::string fontBasePath = "/Volumes/SSD2T/daily-test/preview/js/fonts";
     constexpr double density = 2;
 #else
     std::string assetPathJs = "D:\\Workspace\\preview\\js\\default_card";
+    std::string url = "ets\\pages\\card\\index\\index";
     std::string appResourcesPath = "D:\\Workspace\\preview\\js\\AppResources\\assets\\entry";
     std::string systemResourcesPath = "D:\\Workspace\\preview\\js\\SystemResources\\assets\\entry";
     std::string fontBasePath = "D:\\Workspace\\preview\\js\\fonts";
@@ -57,6 +61,7 @@ int main()
 
     OHOS::Ace::Platform::AceRunArgs args = {
         .assetPath = assetPathJs,
+        .url = url,
         .systemResourcesPath = systemResourcesPath,
         .appResourcesPath = appResourcesPath,
         .fontBasePath = fontBasePath,
@@ -68,6 +73,9 @@ int main()
         .formsEnabled = true,
         .onRender = std::move(renderCallback),
     };
+    if (argc == MAX_ARGS_COUNT && !std::strcmp(argv[1], MODEL_STAGE)) {
+        args.projectModel = OHOS::Ace::Platform::ProjectModel::STAGE;
+    }
 
     auto ability = OHOS::Ace::Platform::AceAbility::CreateInstance(args);
     if (!ability) {
