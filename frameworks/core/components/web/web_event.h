@@ -25,9 +25,9 @@ public:
     ~WebConsoleLog() = default;
 
     virtual int GetLineNumber() = 0;
-    virtual const std::string& GetLog() = 0;
+    virtual std::string GetLog() = 0;
     virtual int GetLogLevel() = 0;
-    virtual const std::string& GetSourceId() = 0;
+    virtual std::string GetSourceId() = 0;
 };
 
 class ACE_EXPORT WebError : public AceType {

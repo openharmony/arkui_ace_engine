@@ -818,13 +818,13 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
         data = pool_->GetImageData(left, top, width, height);
     }
 
-    final_height = static_cast<double>(data->dirtyHeight);
-    final_width = static_cast<double>(data->dirtyWidth);
+    final_height = static_cast<uint32_t>(data->dirtyHeight);
+    final_width = static_cast<uint32_t>(data->dirtyWidth);
 
     JSRef<JSArray> colorArray = JSRef<JSArray>::New();
     uint32_t count = 0;
-    for (int32_t i = 0; i < final_height; i++) {
-        for (int32_t j = 0; j < final_width; j++) {
+    for (uint32_t i = 0; i < final_height; i++) {
+        for (uint32_t j = 0; j < final_width; j++) {
             int32_t idx = i * data->dirtyWidth + j;
             auto pixel = data->data[idx];
 

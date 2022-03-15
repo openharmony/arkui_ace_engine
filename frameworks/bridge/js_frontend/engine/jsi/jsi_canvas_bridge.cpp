@@ -1802,8 +1802,8 @@ shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>&
     delegate->PostSyncTaskToPage(task);
 
     // 1 Get data from canvas
-    uint32_t final_height = imageData->dirtyHeight;
-    uint32_t final_width = imageData->dirtyWidth;
+    uint32_t final_height = static_cast<uint32_t>(imageData->dirtyHeight);
+    uint32_t final_width = static_cast<uint32_t>(imageData->dirtyWidth);
     uint32_t length = final_height * final_width;
     uint32_t* data = new uint32_t[length];
     for (uint32_t i = 0; i < final_height; i++) {
