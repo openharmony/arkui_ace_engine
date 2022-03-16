@@ -240,6 +240,8 @@ public:
 
     static int GetArkProperties();
 
+    static std::string GetAsmInterOption();
+
     static bool IsScoringEnabled(const std::string& name);
 
     static void SetWindowPos(int32_t x, int32_t y)
