@@ -68,7 +68,6 @@ public:
     // override Rosen::IWindowChangeListener virtual callback function
     void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override;
     void OnModeChange(OHOS::Rosen::WindowMode mode) override;
-    static WindowSizeChangeReason Convert2WindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason reason);
 
     void Dump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 

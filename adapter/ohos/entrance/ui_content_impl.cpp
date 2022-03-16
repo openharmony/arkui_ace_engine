@@ -537,7 +537,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         metrics.device_pixel_ratio = config.Density();
         Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
         Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
-            AceAbility::Convert2WindowSizeChangeReason(reason));
+            static_cast<WindowSizeChangeReason>(reason));
     }
     config_ = config;
     updateConfig_ = true;
