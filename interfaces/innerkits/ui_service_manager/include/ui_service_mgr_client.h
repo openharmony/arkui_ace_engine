@@ -57,7 +57,8 @@ public:
                        int y,
                        int width,
                        int height,
-                       DialogCallback callback);
+                       DialogCallback callback,
+                       int* id = nullptr);
 
     ErrCode CancelDialog(int32_t id);
 
