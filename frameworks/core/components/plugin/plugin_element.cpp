@@ -61,6 +61,7 @@ void PluginElement::Update()
             pluginSubContainer_->UpdateRootElmentSize();
             pluginSubContainer_->UpdateSurfaceSize();
         }
+        pluginSubContainer_->UpdatePlugin(plugin->GetData());
         return;
     }
 

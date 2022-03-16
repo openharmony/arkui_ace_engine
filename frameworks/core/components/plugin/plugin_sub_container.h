@@ -98,7 +98,7 @@ private:
 
     double surfaceWidth_ = 1.0f;
     double surfaceHeight_ = 1.0f;
-    Dimension rootWidht_ = 0.0_vp;
+    Dimension rootWidth_ = 0.0_vp;
     Dimension rootHeight_ = 0.0_vp;
     double density_ = 1.0f;
 };
