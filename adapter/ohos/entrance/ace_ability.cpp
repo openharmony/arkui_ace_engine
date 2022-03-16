@@ -605,30 +605,43 @@ void AceAbility::OnRemoteTerminated()
 
 void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason)
 {
-    uint32_t width = rect.width_;
-    uint32_t height = rect.height_;
-    LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d", width,
-        height, rect.posX_, rect.posY_);
-    SystemProperties::SetDeviceOrientation(height >= width ? 0 : 1);
-    SystemProperties::SetWindowPos(rect.posX_, rect.posY_);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
-        LOGE("container may be destroyed.");
+        LOGE("OnSizeChange: container is null.");
         return;
     }
-    auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
-
-    if (!flutterAceView) {
-        LOGE("flutterAceView is null");
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("OnSizeChange: taskExecutor is null.");
         return;
     }
+    taskExecutor->PostTask([rect, abilityId = abilityId_, density = density_, reason]() {
+        uint32_t width = rect.width_;
+        uint32_t height = rect.height_;
+        LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d",
+            width, height, rect.posX_, rect.posY_);
+        SystemProperties::SetDeviceOrientation(height >= width ? 0 : 1);
+        SystemProperties::SetWindowPos(rect.posX_, rect.posY_);
+        auto container = Platform::AceContainer::GetContainer(abilityId);
+        if (!container) {
+            LOGE("container may be destroyed.");
+            return;
+        }
+        auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
 
-    flutter::ViewportMetrics metrics;
-    metrics.physical_width = width;
-    metrics.physical_height = height;
-    metrics.device_pixel_ratio = density_;
-    Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0, Convert2WindowSizeChangeReason(reason));
+        if (!flutterAceView) {
+            LOGE("flutterAceView is null");
+            return;
+        }
+
+        flutter::ViewportMetrics metrics;
+        metrics.physical_width = width;
+        metrics.physical_height = height;
+        metrics.device_pixel_ratio = density;
+        Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
+        Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0,
+            Convert2WindowSizeChangeReason(reason));
+    }, TaskExecutor::TaskType::PLATFORM);
 }
 
 void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)
