@@ -1696,8 +1696,8 @@ shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>&
     options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
     options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
-    options.size.width = final_width;
-    options.size.height = final_height;
+    options.size.width = static_cast<int32_t>(final_width);
+    options.size.height = static_cast<int32_t>(final_height);
     options.editable = true;
     std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(data, length, options);
     delete[] data;
