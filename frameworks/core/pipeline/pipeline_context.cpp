@@ -344,6 +344,22 @@ void PipelineContext::ShowContainerTitle(bool isShow)
     }
 }
 
+void PipelineContext::BlurWindowWithDrag(bool isBlur)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        LOGW("BlurWindowWithDrag failed, Window modal is not container.");
+        return;
+    }
+    if (!rootElement_) {
+        LOGW("BlurWindowWithDrag failed, rootElement_ is null.");
+        return;
+    }
+    auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
+    if (containerModal) {
+        containerModal->BlurWindow(isBlur);
+    }
+}
+
 RefPtr<StageElement> PipelineContext::GetStageElement() const
 {
     CHECK_RUN_ON(UI);
@@ -1832,9 +1848,19 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             break;
             [[fallthrough]];
         }
+        case WindowSizeChangeReason::DRAG: {
+            BlurWindowWithDrag(true);
+            isDragStart_ = true;
+            break;
+        }
+        case WindowSizeChangeReason::DRAG_END: {
+            BlurWindowWithDrag(false);
+            isDragStart_ = false;
+            SetRootSizeWithWidthHeight(width, height);
+            break;
+        }
         case WindowSizeChangeReason::ROTATION:
         case WindowSizeChangeReason::RESIZE:
-        case WindowSizeChangeReason::DRAG:
         case WindowSizeChangeReason::UNDEFINED:
         default: {
             LOGD("PipelineContext::RootNodeAnimation : unsupported type, no animation added");
@@ -1853,6 +1879,10 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         return;
     }
 #endif
+    if (type == WindowSizeChangeReason::DRAG && isDragStart_) {
+        LOGD("Type is drag, no need change size.");
+        return;
+    }
 
     for (auto&& [id, callback] : surfaceChangedCallbackMap_) {
         if (callback) {
