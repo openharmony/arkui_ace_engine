@@ -16,6 +16,7 @@
 #include "core/pipeline/pipeline_context.h"
 
 #include <utility>
+#include <fstream>
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_node.h"
@@ -902,7 +903,7 @@ void PipelineContext::Dump(const std::vector<std::string>& params) const
     } else if (params[0] == "-memory") {
         MemoryMonitor::GetInstance().Dump();
 #endif
-    } else if (params[0] == "-accessibility") {
+    } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
         DumpAccessibility(params);
     } else if (params[0] == "-rotation" && params.size() >= 2) {
         DumpLog::GetInstance().Print("Dump rotation");
@@ -933,45 +934,22 @@ void PipelineContext::Dump(const std::vector<std::string>& params) const
 
 void PipelineContext::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
-    if (params.empty()) {
-        LOGW("params is empty now, it's illegal!");
-        return;
+    if (!SystemProperties::GetDebugEnabled()) {
+        std::unique_ptr<std::ostream> ss = std::make_unique<std::ostringstream>();
+        DumpLog::GetInstance().SetDumpFile(std::move(ss));
+        Dump(params);
+        auto& result = DumpLog::GetInstance().GetDumpFile();
+        auto o = static_cast<std::ostringstream*>(result.get());
+        info.emplace_back(o->str().substr(0, DumpLog::MAX_DUMP_LENGTH));
+        DumpLog::GetInstance().Reset();
+    } else {
+        auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
+        std::unique_ptr<std::ostream> ss = std::make_unique<std::ofstream>(dumpFilePath);
+        DumpLog::GetInstance().SetDumpFile(std::move(ss));
+        Dump(params);
+        info.emplace_back("dumpFilePath: " + dumpFilePath);
+        DumpLog::GetInstance().Reset();
     }
-
-    // GetLastPage must run on UI
-    taskExecutor_->PostSyncTask(
-        [&params, &info, weak = AceType::WeakClaim(this)]() {
-            auto context = weak.Upgrade();
-            if (!context) {
-                return;
-            }
-            if (params[0] == "-element") {
-                if (params.size() > 1 && params[1] == "-lastpage") {
-                    context->GetLastPage()->DumpTree(0, info);
-                } else {
-                    context->GetRootElement()->DumpTree(0, info);
-                }
-            } else if (params[0] == "-render") {
-                if (params.size() > 1 && params[1] == "-lastpage") {
-                    context->GetLastPage()->GetRenderNode()->DumpTree(0, info);
-                } else {
-                    context->GetRootElement()->GetRenderNode()->DumpTree(0, info);
-                }
-            } else if (params[0] == "-inspector") {
-                auto accessibilityManager = context->GetAccessibilityManager();
-                if (!accessibilityManager) {
-                    return;
-                }
-                if (params.size() == 1) {
-                    accessibilityManager->DumpTree(0, 0, info);
-                } else {
-                    accessibilityManager->DumpHandleEvent(params);
-                }
-            } else {
-                DumpLog::GetInstance().Print("Error: Unsupported dump params!");
-            }
-        },
-        TaskExecutor::TaskType::UI);
 }
 
 RefPtr<StackElement> PipelineContext::GetLastStack() const

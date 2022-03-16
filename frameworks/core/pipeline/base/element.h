@@ -70,7 +70,6 @@ public:
     virtual void PerformBuild() {}
     virtual void Update() {}
     virtual void DumpTree(int32_t depth);
-    virtual void DumpTree(int32_t depth, std::vector<std::string>& info);
     virtual void Dump();
     virtual bool CanUpdate(const RefPtr<Component>& newComponent);
 

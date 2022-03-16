@@ -32,22 +32,19 @@ class DumpLog : public Singleton<DumpLog> {
 public:
     using DumpFile = std::unique_ptr<FILE, decltype(&fclose)>;
 
-    void SetDumpFile(DumpFile&& file)
+    void SetDumpFile(std::unique_ptr<std::ostream> file)
     {
-        dumpFile_ = std::move(file);
+        ostream_ = std::move(file);
     }
-    const DumpFile& GetDumpFile() const
+
+    const std::unique_ptr<std::ostream>& GetDumpFile() const
     {
-        return dumpFile_;
+        return ostream_;
     }
 
     void Print(int32_t depth, const std::string& className, int32_t childSize);
     void Print(const std::string& content);
     void Print(int32_t depth, const std::string& content);
-
-    void PrintToString(int32_t depth, const std::string& className, int32_t childSize, std::vector<std::string>& info);
-    void PrintToString(const std::string& content, std::vector<std::string>& info);
-    void PrintToString(int32_t depth, const std::string& content, std::vector<std::string>& info);
 
     void Reset();
 
@@ -88,10 +85,11 @@ public:
         description_.push_back(stream.str());
     }
 
-private:
-    DumpFile dumpFile_ { nullptr, &fclose };
-    std::vector<std::string> description_;
+    static const size_t MAX_DUMP_LENGTH = 100000;
 
+private:
+    std::vector<std::string> description_;
+    std::unique_ptr<std::ostream> ostream_ { nullptr };
     ACE_DISALLOW_MOVE(DumpLog);
 };
 

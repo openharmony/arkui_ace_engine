@@ -336,8 +336,6 @@ public:
 
     virtual void DumpTree(int32_t depth);
 
-    virtual void DumpTree(int32_t depth, std::vector<std::string>& info);
-
     virtual void Dump();
 
     enum class BridgeType { NONE, ROSEN, FLUTTER };
