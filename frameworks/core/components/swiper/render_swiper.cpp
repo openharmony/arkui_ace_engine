@@ -3007,8 +3007,8 @@ void RenderSwiper::LoadItems()
 
 void RenderSwiper::LoadLazyItems(bool swipeToNext)
 {
-    if (static_cast<int32_t>(items_.size()) == itemCount_) {
-        // all item in caches
+    if (!buildChildByIndex_) {
+        // not lazy foreach case.
         return;
     }
     if (swipeToNext) {
