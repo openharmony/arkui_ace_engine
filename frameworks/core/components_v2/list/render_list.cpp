@@ -1510,8 +1510,7 @@ void RenderList::CreateDragDropRecognizer()
                     Point point = info.GetGlobalPoint() - targetRenderlist->GetGlobalOffset();
                     auto newListItem = targetRenderlist->FindCurrentListItem(point);
                     if (static_cast<int32_t>(targetRenderlist->GetIndexByListItem(newListItem)) > -1) {
-                        renderList->insertItemIndex_ =
-                            static_cast<int32_t>(targetRenderlist->GetIndexByListItem(newListItem));
+                        renderList->insertItemIndex_ = targetRenderlist->GetIndexByListItem(newListItem);
                     }
                     if (targetRenderlist == renderList) {
                         (targetRenderlist->GetOnItemDragMove())(dragInfo,
