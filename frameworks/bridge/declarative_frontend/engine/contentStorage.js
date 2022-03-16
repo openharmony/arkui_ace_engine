@@ -618,7 +618,7 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
     */
     aboutToBeDeleted() {
         // unregister from parent of this link
-        this.linkedParentProperty_.unlinkSuscriber(this.id__());
+        this.linkedParentProperty_.unlinkSuscriber(this.id());
         // unregister from the ObservedObject
         ObservedObject.removeOwningProperty(this.getObject(), this);
         super.aboutToBeDeleted();
