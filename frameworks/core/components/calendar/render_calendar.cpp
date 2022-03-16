@@ -148,7 +148,7 @@ void RenderCalendar::OnDataChanged(const CalendarDaysOfMonth& daysOfMonth)
             calendarDays_ = daysOfMonth.days;
         }
         // the number of rows will be 5 or 6, and week number height is half of the date number
-        rowCount_ = colCount_ ? static_cast<int32_t>(daysOfMonth.days.size() / colCount_) : 0;
+        rowCount_ = colCount_ ? static_cast<int32_t>(daysOfMonth.days.size()) / colCount_ : 0;
         UpdateBreakInformation();
         isNeedRepaint_ = true;
         MarkNeedLayout();
