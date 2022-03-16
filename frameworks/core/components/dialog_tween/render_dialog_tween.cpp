@@ -630,11 +630,6 @@ void RenderDialogTween::RemoveBackendEvent(const RefPtr<DialogTweenComponent>& c
     BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(component->GetOnCompleteId());
 }
 
-WeakPtr<RenderNode> RenderDialogTween::CheckHoverNode()
-{
-    return AceType::WeakClaim<RenderNode>(this);
-}
-
 bool RenderDialogTween::HandleMouseEvent(const MouseEvent& event)
 {
     if (event.button != MouseButton::NONE_BUTTON && event.button != MouseButton::LEFT_BUTTON &&
