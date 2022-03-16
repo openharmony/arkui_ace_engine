@@ -165,7 +165,9 @@ public:
         if (args[2]->IsBoolean()) {
             retain = args[2]->ToBoolean();
         }
-        webGeolocation_->Invoke(origin, allow, retain);
+        if (webGeolocation_) {
+            webGeolocation_->Invoke(origin, allow, retain);
+        }
     }
 
 private:
