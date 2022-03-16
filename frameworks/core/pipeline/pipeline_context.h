@@ -462,6 +462,8 @@ public:
 
     void ShowContainerTitle(bool isShow);
 
+    void BlurWindowWithDrag(bool isBlur);
+
     RefPtr<StageElement> GetStageElement() const;
 
     RefPtr<ComposedElement> GetComposedElementById(const ComposeId& id);
@@ -1379,6 +1381,7 @@ private:
     bool isJsPlugin_ = false;
     bool useLiteStyle_ = false;
     bool isFirstLoaded_ = true;
+    bool isDragStart_ = false;
     uint64_t flushAnimationTimestamp_ = 0;
     TimeProvider timeProvider_;
     OnPageShowCallBack onPageShowCallBack_;

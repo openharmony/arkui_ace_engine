@@ -30,6 +30,7 @@ public:
     RefPtr<OverlayElement> GetOverlayElement() const;
     RefPtr<StageElement> GetStageElement() const;
     void ShowTitle(bool isShow);
+    void BlurWindow(bool isBlur);
     void Update() override;
     void PerformBuild() override;
 
@@ -43,6 +44,7 @@ private:
     RefPtr<BoxElement> floatingTitleBox_;
     RefPtr<RowComponent> titleChildrenRow_;
     RefPtr<RowComponent> floatingTitleChildrenRow_;
+    float density_ = 1.0f;
 };
 
 } // namespace OHOS::Ace
