@@ -181,7 +181,8 @@ int UIServiceMgrProxy::ShowDialog(const std::string& name,
                                   int y,
                                   int width,
                                   int height,
-                                  const sptr<OHOS::Ace::IDialogCallback>& dialogCallback)
+                                  const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
+                                  int* id)
 {
     MessageParcel dataParcel;
     MessageParcel reply;
@@ -237,6 +238,10 @@ int UIServiceMgrProxy::ShowDialog(const std::string& name,
     if (error != NO_ERROR) {
         HILOG_ERROR("Request fail, error: %{public}d", error);
         return error;
+    }
+
+    if (id != nullptr) {
+        *id = reply.ReadInt32();
     }
     return reply.ReadInt32();
 }

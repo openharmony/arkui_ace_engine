@@ -168,7 +168,8 @@ int UIMgrService::ShowDialog(const std::string& name,
                              int y,
                              int width,
                              int height,
-                             const sptr<OHOS::Ace::IDialogCallback>& dialogCallback)
+                             const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
+                             int* id)
 {
     HILOG_INFO("Show dialog in service start");
     if (handler_ == nullptr) {
@@ -177,6 +178,9 @@ int UIMgrService::ShowDialog(const std::string& name,
     }
 
     int32_t dialogId = gDialogId.fetch_add(1, std::memory_order_relaxed);
+    if (id != nullptr) {
+        *id = dialogId;
+    }
     HILOG_INFO("Show dialog id: %{public}d", dialogId);
     sptr<OHOS::Rosen::Window> dialogWindow = nullptr;
     auto showDialogCallback = [&]() {

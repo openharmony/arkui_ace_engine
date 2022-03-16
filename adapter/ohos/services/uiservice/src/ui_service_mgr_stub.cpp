@@ -141,8 +141,10 @@ int UIServiceMgrStub::ShowDialogInner(MessageParcel &data, MessageParcel &reply)
     int y = data.ReadInt32();
     int width = data.ReadInt32();
     int height = data.ReadInt32();
+    int id = 0;
     auto dialogCallback = iface_cast<OHOS::Ace::IDialogCallback>(data.ReadParcelable<IRemoteObject>());
-    int32_t result = ShowDialog(name, params, windowType, x, y, width, height, dialogCallback);
+    int32_t result = ShowDialog(name, params, windowType, x, y, width, height, dialogCallback, &id);
+    reply.WriteInt32(id);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
