@@ -745,3 +745,12 @@ var MessageLevel
   MessageLevel[MessageLevel["Error"] = 4] = "Error";
   MessageLevel[MessageLevel["Log"] = 5] = "Log";
 })(MessageLevel || (MessageLevel = {}));
+
+var ProgressType
+(function (ProgressType) {
+  ProgressType[ProgressType["Linear"] = 1] = "Linear";
+  ProgressType[ProgressType["Ring"] = 2] = "Ring";
+  ProgressType[ProgressType["Eclipse"] = 3] = "Eclipse";
+  ProgressType[ProgressType["ScaleRing"] = 4] = "ScaleRing";
+  ProgressType[ProgressType["Capsule"] = 5] = "Capsule";
+})(ProgressType || (ProgressType = {}));
