@@ -564,7 +564,7 @@ void JsAccessibilityManager::DumpProperty(const std::vector<std::string>& params
         DumpLog::GetInstance().Print("Error: params length is illegal!");
         return;
     }
-    if (params[0] != DUMP_ORDER) {
+    if (params[0] != DUMP_ORDER && params[0] != DUMP_INSPECTOR) {
         DumpLog::GetInstance().Print("Error: not accessibility dump order!");
         return;
     }
