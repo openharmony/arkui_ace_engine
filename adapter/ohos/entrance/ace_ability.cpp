@@ -639,25 +639,14 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeCha
         metrics.physical_height = height;
         metrics.device_pixel_ratio = density;
         Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-        Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0,
-            Convert2WindowSizeChangeReason(reason));
+        Platform::FlutterAceView::SurfaceChanged(
+            flutterAceView, width, height, 0, static_cast<WindowSizeChangeReason>(reason));
     }, TaskExecutor::TaskType::PLATFORM);
 }
 
 void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)
 {
     LOGI("AceAbility::OnModeChange");
-}
-
-WindowSizeChangeReason AceAbility::Convert2WindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason reason)
-{
-    auto reasonValue = static_cast<uint32_t>(reason);
-    constexpr uint32_t MAX_REASON_VALUE = 5;
-    if (reasonValue > MAX_REASON_VALUE) {
-        LOGE("AceAbility: unsupported WindowSizeChangeReason");
-        return WindowSizeChangeReason::UNDEFINED;
-    }
-    return static_cast<WindowSizeChangeReason>(reasonValue);
 }
 
 void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
