@@ -26,6 +26,7 @@
 #include "core/components/display/render_display.h"
 #include "core/components/flex/flex_item_element.h"
 #include "core/components/flex/render_flex_item.h"
+#include "core/components/focusable/focusable_element.h"
 #include "core/components/popup/popup_element_v2.h"
 #include "core/components/text/render_text.h"
 #include "core/components/text/text_element.h"
@@ -1542,11 +1543,11 @@ bool InspectorComposedElement::GetCheckable() const
 }
 bool InspectorComposedElement::GetFocusable() const
 {
-    auto node = GetAccessibilityNode();
-    if (!node) {
+    auto focusableElement = GetContentElement<FocusableElement>(FocusableElement::TypeId(), false);
+    if (!focusableElement) {
         return false;
     }
-    return node->GetFocusableState();
+    return focusableElement->IsFocusable();
 }
 bool InspectorComposedElement::GetScrollable() const
 {
