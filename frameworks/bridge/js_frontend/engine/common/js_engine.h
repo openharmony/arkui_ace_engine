@@ -44,16 +44,17 @@ public:
     virtual ~JsEngineInstance() = default;
 
     virtual void FlushCommandBuffer(void* context, const std::string& command);
-    static NativeEngine* GetNativeEngine()
+    NativeEngine* GetNativeEngine()
     {
         return nativeEngine_;
     }
-    static void SetNativeEngine(NativeEngine* nativeEngine)
+    void SetNativeEngine(NativeEngine* nativeEngine)
     {
         nativeEngine_ = nativeEngine;
     }
+
 protected:
-    static thread_local NativeEngine* nativeEngine_;
+    NativeEngine* nativeEngine_ = nullptr;
 };
 
 class JsEngine : public AceType {
@@ -128,7 +129,10 @@ public:
 
     virtual void OnMemoryLevel(const int32_t code) {}
 
-    virtual bool OnStartContinuation() { return false; }
+    virtual bool OnStartContinuation()
+    {
+        return false;
+    }
 
     virtual void OnCompleteContinuation(int32_t code) {}
 
@@ -136,7 +140,10 @@ public:
 
     virtual void OnSaveData(std::string& data) {}
 
-    virtual bool OnRestoreData(const std::string& data) { return false; }
+    virtual bool OnRestoreData(const std::string& data)
+    {
+        return false;
+    }
 
     virtual void MediaQueryCallback(const std::string& callbackId, const std::string& args)
     {
@@ -151,11 +158,17 @@ public:
 
     virtual void RunGarbageCollection() = 0;
 
+    virtual std::string GetStacktraceMessage()
+    {
+        return "";
+    }
+
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
 
     virtual RefPtr<GroupJsBridge> GetGroupJsBridge() = 0;
 
-    virtual ACE_EXPORT FrontendDelegate* GetFrontend() {
+    virtual ACE_EXPORT FrontendDelegate* GetFrontend()
+    {
         return nullptr;
     }
 
@@ -208,7 +221,7 @@ public:
         return nullptr;
     }
 
-    static NativeEngine* GetNativeEngine()
+    NativeEngine* GetNativeEngine()
     {
         return nativeEngine_;
     }
@@ -229,7 +242,7 @@ public:
 #endif
 
 protected:
-    static thread_local NativeEngine* nativeEngine_;
+    NativeEngine* nativeEngine_ = nullptr;
     std::function<void(JsEngine*)> mediaUpdateCallback_;
 
 private:
