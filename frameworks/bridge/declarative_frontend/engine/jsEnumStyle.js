@@ -737,6 +737,15 @@ var MixedMode;
   MixedMode[MixedMode["None"] = 2] = "None";
 })(MixedMode || (MixedMode = {}));
 
+var ProgressType;
+(function (ProgressType) {
+  ProgressType[ProgressType["Linear"] = 0] = "Linear";
+  ProgressType[ProgressType["Ring"] = 1] = "Ring";
+  ProgressType[ProgressType["Eclipse"] = 2] = "Eclipse";
+  ProgressType[ProgressType["ScaleRing"] = 3] = "ScaleRing";
+  ProgressType[ProgressType["Capsule"] = 4] = "Capsule";
+})(ProgressType || (ProgressType = {}));
+
 var MessageLevel
 (function (MessageLevel) {
   MessageLevel[MessageLevel["Debug"] = 1] = "Debug";
@@ -745,12 +754,3 @@ var MessageLevel
   MessageLevel[MessageLevel["Error"] = 4] = "Error";
   MessageLevel[MessageLevel["Log"] = 5] = "Log";
 })(MessageLevel || (MessageLevel = {}));
-
-var ProgressType
-(function (ProgressType) {
-  ProgressType[ProgressType["Linear"] = 1] = "Linear";
-  ProgressType[ProgressType["Ring"] = 2] = "Ring";
-  ProgressType[ProgressType["Eclipse"] = 3] = "Eclipse";
-  ProgressType[ProgressType["ScaleRing"] = 4] = "ScaleRing";
-  ProgressType[ProgressType["Capsule"] = 5] = "Capsule";
-})(ProgressType || (ProgressType = {}));
