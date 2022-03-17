@@ -32,10 +32,11 @@ public:
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
 
+    std::string ProgressOptions() const;
     std::string GetValue() const;
     std::string GetTotal() const;
-    std::string GetStyle() const;
     std::string GetColor() const;
+    std::string GetTypeProgress() const;
     std::unique_ptr<JsonValue> GetCircularStyle() const;
 
 private:
