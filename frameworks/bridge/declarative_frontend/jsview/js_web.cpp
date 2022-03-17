@@ -986,7 +986,7 @@ void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)
 
 void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
 {
-    LOGI("JSWebController add js interface");
+    LOGI("JSWeb add js interface");
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
     }
