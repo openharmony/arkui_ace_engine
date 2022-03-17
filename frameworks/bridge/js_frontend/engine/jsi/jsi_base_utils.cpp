@@ -72,6 +72,34 @@ std::string JsiBaseUtils::GenerateSummaryBody(std::shared_ptr<JsValue> error, st
     return summaryBody;
 }
 
+std::string JsiBaseUtils::TransSourceStack(RefPtr<JsAcePage> runningPage, const std::string& rawStack)
+{
+    if (!runningPage) {
+        return rawStack;
+    }
+    std::string stacktrace = "Stacktrace:\n";
+    stacktrace.append(rawStack).append("\n");
+    std::string summaryBody;
+    RefPtr<RevSourceMap> pageMap;
+    RefPtr<RevSourceMap> appMap;
+    if (runningPage) {
+        auto pageUrl = runningPage->GetUrl();
+        summaryBody.append(" Page: ").append(pageUrl).append("\n");
+        pageMap = runningPage->GetPageMap();
+        appMap = runningPage->GetAppMap();
+    }
+
+    if (pageMap || appMap) {
+        std::string tempStack = JsiBaseUtils::JsiDumpSourceFile(stacktrace, pageMap, appMap);
+        summaryBody.append(tempStack);
+    } else {
+        summaryBody.append("Cannot get SourceMap info, dump raw stack:\n");
+        summaryBody.append(stacktrace);
+    }
+
+    return summaryBody;
+}
+
 std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const RefPtr<RevSourceMap>& pageMap,
     const RefPtr<RevSourceMap>& appMap)
 {

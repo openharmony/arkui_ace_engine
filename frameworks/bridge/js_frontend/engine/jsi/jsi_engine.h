@@ -147,6 +147,8 @@ public:
 
     void RunGarbageCollection() override;
 
+    std::string GetStacktraceMessage() override;
+
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
     virtual FrontendDelegate* GetFrontend() override
