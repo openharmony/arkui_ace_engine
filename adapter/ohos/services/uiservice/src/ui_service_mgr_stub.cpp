@@ -68,7 +68,7 @@ int UIServiceMgrStub::RegisterCallBackInner(MessageParcel& data, MessageParcel& 
         return ERR_INVALID_VALUE;
     }
 
-    auto uiService = iface_cast<IUIService>(data.ReadParcelable<IRemoteObject>());
+    auto uiService = iface_cast<IUIService>(data.ReadRemoteObject());
     int32_t result = RegisterCallBack(*want, uiService);
     reply.WriteInt32(result);
     return NO_ERROR;
@@ -142,7 +142,7 @@ int UIServiceMgrStub::ShowDialogInner(MessageParcel &data, MessageParcel &reply)
     int width = data.ReadInt32();
     int height = data.ReadInt32();
     int id = 0;
-    auto dialogCallback = iface_cast<OHOS::Ace::IDialogCallback>(data.ReadParcelable<IRemoteObject>());
+    auto dialogCallback = iface_cast<OHOS::Ace::IDialogCallback>(data.ReadRemoteObject());
     int32_t result = ShowDialog(name, params, windowType, x, y, width, height, dialogCallback, &id);
     reply.WriteInt32(id);
     reply.WriteInt32(result);
