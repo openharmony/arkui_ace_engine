@@ -338,6 +338,27 @@ void JSWebController::GetHitTestResult(const JSCallbackInfo& args)
     }
 }
 
+void JSWebController::SetJavascriptCallBackImpl()
+{
+    if (!webController_ || jsRegisterCallBackInit_) {
+        return;
+    }
+
+    LOGI("JSWebController set webview javascript CallBack");
+    jsRegisterCallBackInit_ = true;
+    WebController::JavaScriptCallBackImpl callback =
+        [weak = WeakClaim(this)](
+        const std::string& objectName, const std::string& objectMethod,
+        const std::vector<std::shared_ptr<WebJSValue>>& args) {
+        auto jsWebController = weak.Upgrade();
+        if (jsWebController == nullptr) {
+            return std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
+        }
+        return jsWebController->GetJavaScriptResult(objectName, objectMethod, args);
+    };
+    webController_->SetJavaScriptCallBackImpl(std::move(callback));
+}
+
 void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
 {
     LOGI("JSWebController add js interface");
@@ -349,22 +370,7 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
         return;
     }
     // Init webview callback
-    if (!jsRegisterCallBackInit_) {
-        LOGI("JSWebController set webview javascript CallBack");
-        jsRegisterCallBackInit_ = true;
-        WebController::JavaScriptCallBackImpl callback =
-            [execCtx = args.GetExecutionContext(), weak = WeakClaim(this)](
-            const std::string& objectName, const std::string& objectMethod,
-            const std::vector<std::shared_ptr<WebJSValue>>& args) {
-            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-            auto jsWebController = weak.Upgrade();
-            if (jsWebController == nullptr) {
-                return std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
-            }
-            return jsWebController->GetJavaScriptResult(objectName, objectMethod, args);
-        };
-        webController_->SetJavaScriptCallBackImpl(std::move(callback));
-    }
+    SetJavascriptCallBackImpl();
 
     // options
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
@@ -405,21 +411,7 @@ void JSWebController::InitJavascriptInterface()
         return;
     }
     // Init webview callback
-    if (!jsRegisterCallBackInit_) {
-        LOGI("JSWebController set webview javascript CallBack");
-        jsRegisterCallBackInit_ = true;
-        WebController::JavaScriptCallBackImpl callback =
-            [weak = WeakClaim(this)](
-            const std::string& objectName, const std::string& objectMethod,
-            const std::vector<std::shared_ptr<WebJSValue>>& args) {
-            auto jsWebController = weak.Upgrade();
-            if (jsWebController == nullptr) {
-                return std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
-            }
-            return jsWebController->GetJavaScriptResult(objectName, objectMethod, args);
-        };
-        webController_->SetJavaScriptCallBackImpl(std::move(callback));
-    }
+    SetJavascriptCallBackImpl();
     for (auto& entry : methods_) {
         webController_->AddJavascriptInterface(entry.first, entry.second);
     }

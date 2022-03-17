@@ -66,6 +66,7 @@ public:
 
 protected:
     void InitJavascriptInterface();
+    void SetJavascriptCallBackImpl();
     std::shared_ptr<WebJSValue> GetJavaScriptResult(
         const std::string& objectName,
         const std::string& objectMethod,
