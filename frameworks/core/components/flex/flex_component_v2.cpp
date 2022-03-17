@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,6 +49,10 @@ RefPtr<Component> AddFlexItemComponent(const RefPtr<Component>& component)
         auto newFlexItem = AceType::MakeRefPtr<FlexItemComponent>(0.0, 1.0, 0.0);
         newFlexItem->SetChild(composedChild);
         composedComponent->SetChild(newFlexItem);
+        if (composedChild) {
+            // extend already marked component group with flex item component
+            Component::ExtendRSNode(newFlexItem, composedChild);
+        }
         return component;
     }
 
@@ -56,6 +60,10 @@ RefPtr<Component> AddFlexItemComponent(const RefPtr<Component>& component)
     if (!multiComposedComponent) {
         auto newFlexItem = AceType::MakeRefPtr<FlexItemComponent>(0.0, 1.0, 0.0);
         newFlexItem->SetChild(component);
+        if (component) {
+            // extend already marked component group with flex item component
+            Component::ExtendRSNode(newFlexItem, component);
+        }
         return newFlexItem;
     }
 
