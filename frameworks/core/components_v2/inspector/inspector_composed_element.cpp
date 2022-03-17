@@ -1543,7 +1543,7 @@ bool InspectorComposedElement::GetCheckable() const
 }
 bool InspectorComposedElement::GetFocusable() const
 {
-    auto focusableElement = GetContentElement<FocusableElement>(FocusableElement::TypeId());
+    auto focusableElement = GetContentElement<FocusableElement>(FocusableElement::TypeId(), false);
     if (!focusableElement) {
         return false;
     }
