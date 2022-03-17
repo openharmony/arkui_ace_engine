@@ -77,7 +77,7 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const R
 {
     std::string ans = "";
     std::string tempStack = stackStr;
-    int32_t appFlag = tempStack.find("app_.js");
+    int32_t appFlag = static_cast<int32_t>(tempStack.find("app_.js"));
     bool isAppPage = appFlag > 0 && appMap;
 
     // find per line of stack
@@ -128,7 +128,7 @@ void JsiBaseUtils::GetPosInfo(const std::string& temp, std::string& line, std::s
     // 0 for colum, 1 for row
     int32_t flag = 0;
     // find line, column
-    for (int32_t i = temp.length() - 1; i > 0; i--) {
+    for (int32_t i = static_cast<int32_t>(temp.length()) - 1; i > 0; i--) {
         if (temp[i] == ':') {
             flag += 1;
             continue;
