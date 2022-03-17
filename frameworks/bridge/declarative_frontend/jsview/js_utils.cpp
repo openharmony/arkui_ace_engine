@@ -19,6 +19,7 @@
 
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -33,7 +34,12 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
         LOGE("info[0] is not an object when try CreatePixelMapFromNapiValue");
         return nullptr;
     }
-    auto nativeEngine = JsEngine::GetNativeEngine();
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        LOGE("CreatePixelMapFromNapiValue engine is null");
+        return nullptr;
+    }
+    auto nativeEngine = engine->GetNativeEngine();
     if (nativeEngine == nullptr) {
         LOGE("nativeEngine is nullptr.");
         return nullptr;
