@@ -297,7 +297,7 @@ public:
 private:
     FlexDirection direction_ = FlexDirection::COLUMN;
     FlexAlign flexAlign_ = FlexAlign::CENTER;
-    EdgeEffect edgeEffect_ = EdgeEffect::SPRING;
+    EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     double width_ = -1.0;
     double height_ = -1.0;
     int32_t columnCount_ = 1;
