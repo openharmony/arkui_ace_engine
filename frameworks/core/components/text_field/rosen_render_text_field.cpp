@@ -452,7 +452,7 @@ Size RosenRenderTextField::Measure()
         if (layoutParamChanged) {
             lastLayoutParam_ = std::make_optional(GetLayoutParam());
         }
-        bool needNotifyChangeEvent = !isValueFromFront_ || (isValueFromFront_ && layoutParamChanged);
+        bool needNotifyChangeEvent = !isValueFromFront_ || layoutParamChanged;
         // If height or lines is changed, make needNotifyChangeEvent_ true to notify change event.
         if (needNotifyChangeEvent && (!NearEqual(textHeight_, textHeight) || textLines_ != textLines)) {
             needNotifyChangeEvent_ = true;

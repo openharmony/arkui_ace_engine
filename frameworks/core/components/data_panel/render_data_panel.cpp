@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -200,7 +200,7 @@ void RenderProgressDataPanel::PrepareAnimation()
             animationTime = animationDuring_.count() * SECOND_TO_MILLISECOND;
         }
 
-        if (animationTime < MIN_TRANSITION_TIME || previousPercentValue_ == 100.0) {
+        if (animationTime < MIN_TRANSITION_TIME || NearEqual(previousPercentValue_, 100.0)) {
             animationTime = MIN_TRANSITION_TIME;
         } else if (animationTime > MAX_TRANSITION_TIME) {
             animationTime = MAX_TRANSITION_TIME;

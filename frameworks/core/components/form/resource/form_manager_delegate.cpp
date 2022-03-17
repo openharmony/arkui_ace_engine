@@ -187,7 +187,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineContext>&
         auto resRegister = weakRes.Upgrade();
         auto context = delegate->context_.Upgrade();
         if (!resRegister || !context) {
-            LOGE("resouce register or context is null");
+            LOGE("resource register or context is null");
             delegate->OnFormError("internal error");
             return;
         }

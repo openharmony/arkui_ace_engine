@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,7 +52,7 @@ RefPtr<PipelineContext> PluginManagerResourceTest::GetPipelineContext(const RefP
 
 /**
  * @tc.name: PluginManagerResourceGetId001
- * @tc.desc: Verify the GetId Interface of PluginManagerResource work sucess.
+ * @tc.desc: Verify the GetId Interface of PluginManagerResource work success.
  * @tc.type: FUNC
  */
 HWTEST_F(PluginManagerResourceTest, PluginManagerResourceGetId001, TestSize.Level1)
@@ -74,7 +74,7 @@ HWTEST_F(PluginManagerResourceTest, PluginManagerResourceGetId001, TestSize.Leve
 
 /**
  * @tc.name: PluginManagerResourceGetHashCode001
- * @tc.desc: Verify the GetHashCode Interface of PluginManagerResource work sucess.
+ * @tc.desc: Verify the GetHashCode Interface of PluginManagerResource work success.
  * @tc.type: FUNC
  */
 HWTEST_F(PluginManagerResourceTest, PluginManagerResourceGetHashCode001, TestSize.Level1)
@@ -96,7 +96,7 @@ HWTEST_F(PluginManagerResourceTest, PluginManagerResourceGetHashCode001, TestSiz
 
 /**
  * @tc.name: PluginManagerResourceGetIntParam001
- * @tc.desc: Verify the GetIntParam Interface of PluginManagerResource work sucess.
+ * @tc.desc: Verify the GetIntParam Interface of PluginManagerResource work success.
  * @tc.type: FUNC
  */
 HWTEST_F(PluginManagerResourceTest, PluginManagerResourceGetIntParam001, TestSize.Level1)
@@ -120,7 +120,7 @@ HWTEST_F(PluginManagerResourceTest, PluginManagerResourceGetIntParam001, TestSiz
 
 /**
  * @tc.name: PluginManagerResourceMakeResourceHash001
- * @tc.desc: Verify the MakeResourceHash Interface of PluginManagerResource work sucess.
+ * @tc.desc: Verify the MakeResourceHash Interface of PluginManagerResource work success.
  * @tc.type: FUNC
  */
 HWTEST_F(PluginManagerResourceTest, PluginManagerResourceMakeResourceHash001, TestSize.Level1)
@@ -143,7 +143,7 @@ HWTEST_F(PluginManagerResourceTest, PluginManagerResourceMakeResourceHash001, Te
 
 /**
  * @tc.name: PluginManagerResourceMakeEventHash001
- * @tc.desc: Verify the MakeEventHash Interface of PluginManagerResource work sucess.
+ * @tc.desc: Verify the MakeEventHash Interface of PluginManagerResource work success.
  * @tc.type: FUNC
  */
 HWTEST_F(PluginManagerResourceTest, PluginManagerResourceMakeEventHash001, TestSize.Level1)
@@ -166,7 +166,7 @@ HWTEST_F(PluginManagerResourceTest, PluginManagerResourceMakeEventHash001, TestS
 
 /**
  * @tc.name: PluginManagerResourceMakeMethodHash001
- * @tc.desc: Verify the MakeMethodHash Interface of PluginManagerResource work sucess.
+ * @tc.desc: Verify the MakeMethodHash Interface of PluginManagerResource work success.
  * @tc.type: FUNC
  */
 HWTEST_F(PluginManagerResourceTest, PluginManagerResourceMakeMethodHash001, TestSize.Level1)
@@ -189,7 +189,7 @@ HWTEST_F(PluginManagerResourceTest, PluginManagerResourceMakeMethodHash001, Test
 
 /**
  * @tc.name: PluginManagerResourceGetStringParam001
- * @tc.desc: Verify the GetStringParam Interface of PluginManagerResource work sucess.
+ * @tc.desc: Verify the GetStringParam Interface of PluginManagerResource work success.
  * @tc.type: FUNC
  */
 HWTEST_F(PluginManagerResourceTest, PluginManagerResourceGetStringParam001, TestSize.Level1)
@@ -213,7 +213,7 @@ HWTEST_F(PluginManagerResourceTest, PluginManagerResourceGetStringParam001, Test
 
 /**
  * @tc.name: PluginManagerParseMapFromString001
- * @tc.desc: Verify the ParseMapFromString Interface of PluginManagerResource work sucess.
+ * @tc.desc: Verify the ParseMapFromString Interface of PluginManagerResource work success.
  * @tc.type: FUNC
  */
 HWTEST_F(PluginManagerResourceTest, PluginManagerParseMapFromString001, TestSize.Level1)

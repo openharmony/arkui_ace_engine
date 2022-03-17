@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,8 +52,6 @@ public:
  * @tc.name: MouseHoverTest001
  * @tc.desc: test mouse enter callback.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDH
- * @tc.author: jiachunhui
  */
 HWTEST_F(MouseHoverTest, MouseHoverTest001, TestSize.Level1)
 {
@@ -93,8 +91,6 @@ HWTEST_F(MouseHoverTest, MouseHoverTest001, TestSize.Level1)
  * @tc.name: MouseHoverTest002
  * @tc.desc: test mouse illegal exit callback.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDH
- * @tc.author: jiachunhui
  */
 HWTEST_F(MouseHoverTest, MouseHoverTest002, TestSize.Level1)
 {
@@ -134,8 +130,6 @@ HWTEST_F(MouseHoverTest, MouseHoverTest002, TestSize.Level1)
  * @tc.name: MouseHoverTest003
  * @tc.desc: test mouse illegal enter callback.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDI
- * @tc.author: jiachunhui
  */
 HWTEST_F(MouseHoverTest, MouseHoverTest003, TestSize.Level1)
 {
@@ -176,8 +170,6 @@ HWTEST_F(MouseHoverTest, MouseHoverTest003, TestSize.Level1)
  * @tc.name: MouseHoverTest004
  * @tc.desc: test mouse exit callback.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDI
- * @tc.author: jiachunhui
  */
 HWTEST_F(MouseHoverTest, MouseHoverTest004, TestSize.Level1)
 {

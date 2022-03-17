@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,22 +72,22 @@ public:
 
     double Left() const
     {
-        return width_ > 0.0 ? x_ : x_ + width_;
+        return GreatNotEqual(width_, 0.0) ? x_ : x_ + width_;
     }
 
     double Top() const
     {
-        return height_ > 0.0 ? y_ : y_ + height_;
+        return GreatNotEqual(height_, 0.0) ? y_ : y_ + height_;
     }
 
     double Right() const
     {
-        return width_ > 0.0 ? x_ + width_ : x_;
+        return GreatNotEqual(width_, 0.0) ? x_ + width_ : x_;
     }
 
     double Bottom() const
     {
-        return height_ > 0.0 ? y_ + height_ : y_;
+        return GreatNotEqual(height_, 0.0) ? y_ + height_ : y_;
     }
 
     double Width() const
@@ -342,16 +342,12 @@ public:
             offset.SetX(std::max(0.0, std::min(magnet.Left() - Left(), magnet.Right() - Right())));
         } else if (Right() > magnet.Right()) {
             offset.SetX(std::min(0.0, std::max(magnet.Left() - Left(), magnet.Right() - Right())));
-        } else {
-            // No need to offset.
         }
 
         if (Top() < magnet.Top()) {
             offset.SetY(std::max(0.0, std::min(magnet.Top() - Top(), magnet.Bottom() - Bottom())));
         } else if (Bottom() > magnet.Bottom()) {
             offset.SetY(std::min(0.0, std::max(magnet.Top() - Top(), magnet.Bottom() - Bottom())));
-        } else {
-            // No need to offset.
         }
 
         *this += offset;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,6 +59,10 @@ void JSSwiper::JsRemoteMessage(const JSCallbackInfo& info)
     JSInteractableView::JsRemoteMessage(info, remoteMessageEventId);
     auto stack = ViewStackProcessor::GetInstance();
     auto swiperComponent = AceType::DynamicCast<SwiperComponent>(stack->GetMainComponent());
+    if (!swiperComponent) {
+        LOGE("swiperComponent is null");
+        return;
+    }
     swiperComponent->SetRemoteMessageEventId(remoteMessageEventId);
 }
 
@@ -256,7 +260,6 @@ void JSSwiper::SetCancelSwipeOnOtherAxis(bool cancel)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    // TODO: swiper->SetCancelSwipeOnOtherAxis(cancel) is no longer supported. check whether need this method
 }
 
 void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)

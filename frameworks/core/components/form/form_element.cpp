@@ -41,7 +41,7 @@ void FormElement::Update()
 {
     auto form = AceType::DynamicCast<FormComponent>(component_);
     if (!form) {
-        LOGE("could not get form componet for update");
+        LOGE("could not get form component for update");
         return;
     }
 
@@ -51,7 +51,7 @@ void FormElement::Update()
         info.dimension != cardInfo_.dimension) {
         cardInfo_ = info;
     } else {
-        // for update form componet
+        // for update form component
         if (cardInfo_.allowUpate != info.allowUpate) {
             cardInfo_.allowUpate = info.allowUpate;
             LOGI(" update card allow info:%{public}d", cardInfo_.allowUpate);
@@ -375,7 +375,7 @@ void FormElement::CreateCardContainer()
     subContainer_->SetFormComponet(component_);
     auto form = AceType::DynamicCast<FormComponent>(component_);
     if (!form) {
-        LOGE("form componet is null when try adding nonmatched container to form manager.");
+        LOGE("form component is null when try adding nonmatched container to form manager.");
         return;
     }
     auto info = form->GetFormRequestionInfo();

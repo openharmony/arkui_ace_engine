@@ -122,7 +122,7 @@ std::string GetLogContent(
 shared_ptr<JsValue> AppLogPrint(
     const shared_ptr<JsRuntime>& runtime, JsLogLevel level, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    // Should have at least 1 parameters.
+    // Should have at least 1 parameter.
     if (argc == 0) {
         LOGE("the arg is error");
         return runtime->NewUndefined();
@@ -778,7 +778,6 @@ RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetRunningPage(int32_t instanceI
         return nullptr;
     }
     auto engineInstance = jsiEngine->GetEngineInstance();
-    LOGD("GetRunningPage id:%{public}d instance:%{public}p", instanceId, RawPtr(engineInstance));
     if (engineInstance == nullptr) {
         LOGE("engineInstance is nullptr");
         return nullptr;

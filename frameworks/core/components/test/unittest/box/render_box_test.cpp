@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,8 +71,6 @@ void RenderBoxTest::TearDown() {}
  * @tc.name: RenderBoxTest001
  * @tc.desc: Verify Box PerformLayout when align TOP_LEFT.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest001, TestSize.Level1)
 {
@@ -113,8 +111,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest001, TestSize.Level1)
  * @tc.name: RenderBoxTest002
  * @tc.desc: Verify Box PerformLayout when align TOP_CENTER.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest002, TestSize.Level1)
 {
@@ -155,8 +151,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest002, TestSize.Level1)
  * @tc.name: RenderBoxTest003
  * @tc.desc: Verify Box PerformLayout when align TOP_RIGHT.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest003, TestSize.Level1)
 {
@@ -197,8 +191,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest003, TestSize.Level1)
  * @tc.name: RenderBoxTest004
  * @tc.desc: Verify Box PerformLayout when align CENTER_LEFT.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest004, TestSize.Level1)
 {
@@ -239,8 +231,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest004, TestSize.Level1)
  * @tc.name: RenderBoxTest005
  * @tc.desc: Verify Box PerformLayout when align CENTER.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest005, TestSize.Level1)
 {
@@ -281,8 +271,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest005, TestSize.Level1)
  * @tc.name: RenderBoxTest006
  * @tc.desc: Verify Box PerformLayout when align CENTER_RIGHT.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest006, TestSize.Level1)
 {
@@ -323,8 +311,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest006, TestSize.Level1)
  * @tc.name: RenderBoxTest007
  * @tc.desc: Verify Box PerformLayout when align BOTTOM_LEFT.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest007, TestSize.Level1)
 {
@@ -365,8 +351,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest007, TestSize.Level1)
  * @tc.name: RenderBoxTest008
  * @tc.desc: Verify Box PerformLayout when align BOTTOM_CENTER.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest008, TestSize.Level1)
 {
@@ -407,8 +391,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest008, TestSize.Level1)
  * @tc.name: RenderBoxTest009
  * @tc.desc: Verify Box PerformLayout when align BOTTOM_RIGHT.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest009, TestSize.Level1)
 {
@@ -449,8 +431,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest009, TestSize.Level1)
  * @tc.name: RenderBoxTest010
  * @tc.desc: Verify Box PerformLayout when same margin.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTV
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest010, TestSize.Level1)
 {
@@ -490,8 +470,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest010, TestSize.Level1)
  * @tc.name: RenderBoxTest011
  * @tc.desc: Verify Box PerformLayout when diff margin.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTV
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest011, TestSize.Level1)
 {
@@ -531,8 +509,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest011, TestSize.Level1)
  * @tc.name: RenderBoxTest012
  * @tc.desc: Verify Box PerformLayout when invalid margin.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTV
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest012, TestSize.Level1)
 {
@@ -572,8 +548,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest012, TestSize.Level1)
  * @tc.name: RenderBoxTest013
  * @tc.desc: Verify Box PerformLayout when same padding.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU0
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest013, TestSize.Level1)
 {
@@ -613,8 +587,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest013, TestSize.Level1)
  * @tc.name: RenderBoxTest014
  * @tc.desc: Verify Box PerformLayout when diff padding.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU0
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest014, TestSize.Level1)
 {
@@ -654,8 +626,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest014, TestSize.Level1)
  * @tc.name: RenderBoxTest015
  * @tc.desc: Verify Box PerformLayout when invalid padding.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU0
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest015, TestSize.Level1)
 {
@@ -695,8 +665,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest015, TestSize.Level1)
  * @tc.name: RenderBoxTest016
  * @tc.desc: Verify Box PerformLayout when valid width and height.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU1
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest016, TestSize.Level1)
 {
@@ -732,8 +700,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest016, TestSize.Level1)
  * @tc.name: RenderBoxTest017
  * @tc.desc: Verify Box PerformLayout when invalid width and valid height.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU1
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest017, TestSize.Level1)
 {
@@ -769,8 +735,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest017, TestSize.Level1)
  * @tc.name: RenderBoxTest018
  * @tc.desc: Verify Box PerformLayout when valid width and invalid height.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU1
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest018, TestSize.Level1)
 {
@@ -806,8 +770,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest018, TestSize.Level1)
  * @tc.name: RenderBoxTest019
  * @tc.desc: Verify Box PerformLayout when invalid width and height.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU1
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest019, TestSize.Level1)
 {
@@ -843,8 +805,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest019, TestSize.Level1)
  * @tc.name: RenderBoxTest020
  * @tc.desc: Verify Box PerformLayout when Constraints(min < max < item).
  * @tc.type: FUNC
- * @tc.require: AR000DAQTS
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest020, TestSize.Level1)
 {
@@ -885,8 +845,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest020, TestSize.Level1)
  * @tc.name: RenderBoxTest021
  * @tc.desc: Verify Box PerformLayout when Constraints(item < min < max).
  * @tc.type: FUNC
- * @tc.require: AR000DAQTS
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest021, TestSize.Level1)
 {
@@ -927,8 +885,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest021, TestSize.Level1)
  * @tc.name: RenderBoxTest022
  * @tc.desc: Verify Box PerformLayout when Constraints(item < min = max).
  * @tc.type: FUNC
- * @tc.require: AR000DAQTS
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest022, TestSize.Level1)
 {
@@ -969,8 +925,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest022, TestSize.Level1)
  * @tc.name: RenderBoxTest023
  * @tc.desc: Verify Box PerformLayout when Constraints(item < min = max).
  * @tc.type: FUNC
- * @tc.require: AR000DAQTS
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest023, TestSize.Level1)
 {
@@ -1011,8 +965,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest023, TestSize.Level1)
  * @tc.name: RenderBoxTest024
  * @tc.desc: Verify Box PerformLayout when invalid Constraints(min > max).
  * @tc.type: FUNC
- * @tc.require: AR000DAQTS
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest024, TestSize.Level1)
 {
@@ -1053,8 +1005,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest024, TestSize.Level1)
  * @tc.name: RenderBoxTest025
  * @tc.desc: Verify Box PerformLayout when background decoration(shadow).
  * @tc.type: FUNC
- * @tc.require: AR000DAQTT
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest025, TestSize.Level1)
 {
@@ -1100,8 +1050,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest025, TestSize.Level1)
  * @tc.name: RenderBoxTest026
  * @tc.desc: Verify Box PerformLayout when background decoration(color&image).
  * @tc.type: FUNC
- * @tc.require: AR000DAQTT
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest026, TestSize.Level1)
 {
@@ -1144,8 +1092,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest026, TestSize.Level1)
  * @tc.name: RenderBoxTest027
  * @tc.desc: Verify Box PerformLayout when background decoration(border).
  * @tc.type: FUNC
- * @tc.require: AR000DAQTT
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest027, TestSize.Level1)
 {
@@ -1184,8 +1130,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest027, TestSize.Level1)
  * @tc.name: RenderBoxTest028
  * @tc.desc: Verify Box PerformLayout when front decoration(shadow&border).
  * @tc.type: FUNC
- * @tc.require: AR000DAQTU
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest028, TestSize.Level1)
 {
@@ -1233,8 +1177,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest028, TestSize.Level1)
  * @tc.name: RenderBoxTest029
  * @tc.desc: Verify Box PerformLayout when front decoration(color&image).
  * @tc.type: FUNC
- * @tc.require: AR000DAQTU
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest029, TestSize.Level1)
 {
@@ -1277,8 +1219,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest029, TestSize.Level1)
  * @tc.name: RenderBoxTest030
  * @tc.desc: Verify Box PerformLayout when set background color.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU2
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest030, TestSize.Level1)
 {
@@ -1314,8 +1254,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest030, TestSize.Level1)
  * @tc.name: RenderBoxTest031
  * @tc.desc: Verify Box PerformLayout when default background color.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU2
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest031, TestSize.Level1)
 {
@@ -1350,8 +1288,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest031, TestSize.Level1)
  * @tc.name: RenderBoxTest032
  * @tc.desc: Verify Box PerformLayout when set gradients color backDecoration.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU9
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest032, TestSize.Level1)
 {
@@ -1391,8 +1327,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest032, TestSize.Level1)
  * @tc.name: RenderBoxTest033
  * @tc.desc: Verify Box PerformLayout when set gradients color frontDecoration.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU9
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest033, TestSize.Level1)
 {
@@ -1432,8 +1366,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest033, TestSize.Level1)
  * @tc.name: RenderBoxTest034
  * @tc.desc: Verify BoxBase PerformLayout when align TOP_LEFT.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU9
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest034, TestSize.Level1)
 {
@@ -1474,8 +1406,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest034, TestSize.Level1)
  * @tc.name: RenderBoxTest035
  * @tc.desc: Verify BoxBase PerformLayout when align TOP_CENTER.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest035, TestSize.Level1)
 {
@@ -1516,8 +1446,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest035, TestSize.Level1)
  * @tc.name: RenderBoxTest036
  * @tc.desc: Verify BoxBase PerformLayout when align TOP_RIGHT.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest036, TestSize.Level1)
 {
@@ -1558,8 +1486,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest036, TestSize.Level1)
  * @tc.name: RenderBoxTest037
  * @tc.desc: Verify BoxBase PerformLayout when align CENTER_LEFT.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest037, TestSize.Level1)
 {
@@ -1600,8 +1526,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest037, TestSize.Level1)
  * @tc.name: RenderBoxTest038
  * @tc.desc: Verify BoxBase PerformLayout when align CENTER.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest038, TestSize.Level1)
 {
@@ -1642,8 +1566,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest038, TestSize.Level1)
  * @tc.name: RenderBoxTest039
  * @tc.desc: Verify BoxBase PerformLayout when align CENTER_RIGHT.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest039, TestSize.Level1)
 {
@@ -1684,8 +1606,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest039, TestSize.Level1)
  * @tc.name: RenderBoxTest040
  * @tc.desc: Verify BoxBase PerformLayout when align BOTTOM_LEFT.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest040, TestSize.Level1)
 {
@@ -1726,8 +1646,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest040, TestSize.Level1)
  * @tc.name: RenderBoxTest041
  * @tc.desc: Verify BoxBase PerformLayout when align BOTTOM_CENTER.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest041, TestSize.Level1)
 {
@@ -1768,8 +1686,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest041, TestSize.Level1)
  * @tc.name: RenderBoxTest042
  * @tc.desc: Verify BoxBase PerformLayout when align BOTTOM_RIGHT.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest042, TestSize.Level1)
 {
@@ -1810,8 +1726,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest042, TestSize.Level1)
  * @tc.name: RenderBoxTest043
  * @tc.desc: Verify BoxBase PerformLayout when same margin.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTV
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest043, TestSize.Level1)
 {
@@ -1851,8 +1765,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest043, TestSize.Level1)
  * @tc.name: RenderBoxTest044
  * @tc.desc: Verify BoxBase PerformLayout when diff margin.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTV
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest044, TestSize.Level1)
 {
@@ -1892,8 +1804,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest044, TestSize.Level1)
  * @tc.name: RenderBoxTest045
  * @tc.desc: Verify BoxBase PerformLayout when invalid margin.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTV
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest045, TestSize.Level1)
 {
@@ -1933,8 +1843,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest045, TestSize.Level1)
  * @tc.name: RenderBoxTest046
  * @tc.desc: Verify BoxBase PerformLayout when same padding.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU0
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest046, TestSize.Level1)
 {
@@ -1974,8 +1882,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest046, TestSize.Level1)
  * @tc.name: RenderBoxTest047
  * @tc.desc: Verify BoxBase PerformLayout when diff padding.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU0
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest047, TestSize.Level1)
 {
@@ -2015,8 +1921,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest047, TestSize.Level1)
  * @tc.name: RenderBoxTest048
  * @tc.desc: Verify BoxBase PerformLayout when invalid padding.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU0
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest048, TestSize.Level1)
 {
@@ -2056,8 +1960,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest048, TestSize.Level1)
  * @tc.name: RenderBoxTest049
  * @tc.desc: Verify BoxBase PerformLayout when valid width and height.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU1
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest049, TestSize.Level1)
 {
@@ -2093,8 +1995,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest049, TestSize.Level1)
  * @tc.name: RenderBoxTest050
  * @tc.desc: Verify BoxBase PerformLayout when invalid width and valid height.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU1
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest050, TestSize.Level1)
 {
@@ -2130,8 +2030,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest050, TestSize.Level1)
  * @tc.name: RenderBoxTest051
  * @tc.desc: Verify BoxBase PerformLayout when valid width and invalid height.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU1
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest051, TestSize.Level1)
 {
@@ -2167,8 +2065,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest051, TestSize.Level1)
  * @tc.name: RenderBoxTest052
  * @tc.desc: Verify BoxBase PerformLayout when invalid width and height.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU1
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest052, TestSize.Level1)
 {
@@ -2204,8 +2100,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest052, TestSize.Level1)
  * @tc.name: RenderBoxTest053
  * @tc.desc: Verify BoxBase PerformLayout when Constraints(min < max < item).
  * @tc.type: FUNC
- * @tc.require: AR000DAQTS
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest053, TestSize.Level1)
 {
@@ -2246,8 +2140,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest053, TestSize.Level1)
  * @tc.name: RenderBoxTest054
  * @tc.desc: Verify BoxBase PerformLayout when Constraints(item < min < max).
  * @tc.type: FUNC
- * @tc.require: AR000DAQTS
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest054, TestSize.Level1)
 {
@@ -2288,8 +2180,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest054, TestSize.Level1)
  * @tc.name: RenderBoxTest055
  * @tc.desc: Verify BoxBase PerformLayout when Constraints(item < min = max).
  * @tc.type: FUNC
- * @tc.require: AR000DAQTS
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest055, TestSize.Level1)
 {
@@ -2330,8 +2220,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest055, TestSize.Level1)
  * @tc.name: RenderBoxTest056
  * @tc.desc: Verify BoxBase PerformLayout when Constraints(item < min = max).
  * @tc.type: FUNC
- * @tc.require: AR000DAQTS
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest056, TestSize.Level1)
 {
@@ -2372,8 +2260,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest056, TestSize.Level1)
  * @tc.name: RenderBoxTest057
  * @tc.desc: Verify BoxBase PerformLayout when invalid Constraints(min > max).
  * @tc.type: FUNC
- * @tc.require: AR000DAQTS
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest057, TestSize.Level1)
 {
@@ -2414,8 +2300,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest057, TestSize.Level1)
  * @tc.name: RenderBoxTest058
  * @tc.desc: Verify Box PerformLayout when user had set LayoutInBox.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1V6
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest058, TestSize.Level1)
 {
@@ -2456,8 +2340,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest058, TestSize.Level1)
  * @tc.name: RenderBoxTest059
  * @tc.desc: Verify Box PerformLayout when user had set LayoutInBox.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1V6
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest059, TestSize.Level1)
 {
@@ -2499,8 +2381,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest059, TestSize.Level1)
  * @tc.name: RenderBoxTest060
  * @tc.desc: Verify Box PerformLayout when user had set LayoutInBox.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1V6
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderBoxTest, RenderBoxTest060, TestSize.Level1)
 {
@@ -2542,8 +2422,6 @@ HWTEST_F(RenderBoxTest, RenderBoxTest060, TestSize.Level1)
  * @tc.name: RenderBoxScrollpageChangeTest001
  * @tc.desc: Verify Box Layout When scrollpage is true.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SR
- * @tc.author: chenlien
  */
 HWTEST_F(RenderBoxTest, RenderBoxScrollpageChangeTest001, TestSize.Level1)
 {
@@ -2582,8 +2460,6 @@ HWTEST_F(RenderBoxTest, RenderBoxScrollpageChangeTest001, TestSize.Level1)
  * @tc.name: RenderBoxScrollpageChangeTest002
  * @tc.desc: Verify Box Layout When scrollpage is true.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SR
- * @tc.author: chenlien
  */
 HWTEST_F(RenderBoxTest, RenderBoxScrollpageChangeTest002, TestSize.Level1)
 {

@@ -37,7 +37,7 @@ void JSXComponent::JSBind(BindingTarget globalObj)
 void JSXComponent::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("xcomponent create error, info is non-valid");
+        LOGI("xcomponent create error, info is invalid");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -48,7 +48,7 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     auto xcomponentComponent = AceType::MakeRefPtr<OHOS::Ace::XComponentComponent>("xcomponent");
 
     if (!id->IsString()) {
-        LOGI("xcomponent create error, id is non-valid");
+        LOGI("xcomponent create error, id is invalid");
         return;
     }
     xcomponentComponent->SetId(id->ToString());

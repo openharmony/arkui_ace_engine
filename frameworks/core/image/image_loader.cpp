@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,7 +58,7 @@ std::string ImageLoader::RemovePathHead(const std::string& uri)
 {
     auto iter = uri.find_first_of(':');
     if (iter == std::string::npos) {
-        LOGW("No scheme, not a File or Memory path! The path is %{private}s", uri.c_str());
+        LOGW("No scheme, not a File or Memory path");
         return std::string();
     }
     std::string head = uri.substr(0, iter);
@@ -415,13 +415,13 @@ sk_sp<SkData> ResourceImageLoader::LoadImageData(
     if (GetResourceId(uri, themeContants, resId)) {
         auto ret = themeContants->GetMediaResource(resId, osstream);
         if (!ret) {
-            LOGE("get resId image(%{public}s) from resource manager failed", uri.c_str());
+            LOGE("get resId image from resource manager failed");
             return nullptr;
         }
     } else if (GetResourceId(uri, themeContants, path)) {
         auto ret = themeContants->GetMediaResource(path, osstream);
         if (!ret) {
-            LOGE("get path image(%{public}s) from resource manager failed", uri.c_str());
+            LOGE("get path image from resource manager failed");
             return nullptr;
         }
     } else {

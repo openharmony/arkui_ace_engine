@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,7 @@ HWTEST_F(PluginComponentTest, PluginComponentCreateElement001, TestSize.Level1)
     RefPtr<Element> element = pluginComponent->CreateElement();
     EXPECT_TRUE(element != nullptr);
 
-    // for element destory
+    // for element destroy
     auto pluginElement = AceType::DynamicCast<PluginElement>(element);
     EXPECT_TRUE(pluginElement != nullptr);
     RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();

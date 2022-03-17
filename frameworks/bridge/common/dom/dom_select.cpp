@@ -50,6 +50,10 @@ void DOMSelect::ResetInitializedStyle()
 
 void DOMSelect::InitializeStyle()
 {
+    if (!selectComponent_) {
+        LOGE("selectComponent is null");
+        return;
+    }
     selectComponent_->InitTheme(GetThemeManager());
     theme_ = GetTheme<SelectTheme>();
     if (theme_ && selectComponent_) {

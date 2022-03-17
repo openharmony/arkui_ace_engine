@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,8 +51,6 @@ void DisplayCreatorTest::TearDown() {}
  * @tc.name: DisplayCreator001
  * @tc.desc: Verify DisplayCreator can create display component with child.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8 AR000DAUL9
- * @tc.author: caocan
  */
 HWTEST_F(DisplayCreatorTest, DisplayCreator001, TestSize.Level1)
 {
@@ -89,8 +87,6 @@ HWTEST_F(DisplayCreatorTest, DisplayCreator001, TestSize.Level1)
  * @tc.name: DisplayCreator002
  * @tc.desc: Verify DisplayCreator can handle exception of no child.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8 AR000DAUL9
- * @tc.author: caocan
  */
 HWTEST_F(DisplayCreatorTest, DisplayCreator002, TestSize.Level1)
 {
@@ -116,8 +112,6 @@ HWTEST_F(DisplayCreatorTest, DisplayCreator002, TestSize.Level1)
  * @tc.name: DisplayCreator003
  * @tc.desc: Verify DisplayCreator can create display component with visible and child.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8
- * @tc.author: caocan
  */
 HWTEST_F(DisplayCreatorTest, DisplayCreator003, TestSize.Level1)
 {
@@ -151,8 +145,6 @@ HWTEST_F(DisplayCreatorTest, DisplayCreator003, TestSize.Level1)
  * @tc.name: DisplayCreator004
  * @tc.desc: Verify DisplayCreator can create display component with visible and child.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8
- * @tc.author: caocan
  */
 HWTEST_F(DisplayCreatorTest, DisplayCreator004, TestSize.Level1)
 {
@@ -186,8 +178,6 @@ HWTEST_F(DisplayCreatorTest, DisplayCreator004, TestSize.Level1)
  * @tc.name: DisplayCreator005
  * @tc.desc: Verify DisplayCreator can create display component with visible and child.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8
- * @tc.author: caocan
  */
 HWTEST_F(DisplayCreatorTest, DisplayCreator005, TestSize.Level1)
 {
@@ -221,8 +211,6 @@ HWTEST_F(DisplayCreatorTest, DisplayCreator005, TestSize.Level1)
  * @tc.name: DisplayCreator006
  * @tc.desc: Verify DisplayCreator can create display component with child and wrong visible value.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8
- * @tc.author: caocan
  */
 HWTEST_F(DisplayCreatorTest, DisplayCreator006, TestSize.Level1)
 {
@@ -256,8 +244,6 @@ HWTEST_F(DisplayCreatorTest, DisplayCreator006, TestSize.Level1)
  * @tc.name: DisplayCreator007
  * @tc.desc: Verify DisplayCreator can create display component with child and wrong visible value.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8
- * @tc.author: caocan
  */
 HWTEST_F(DisplayCreatorTest, DisplayCreator007, TestSize.Level1)
 {
@@ -291,8 +277,6 @@ HWTEST_F(DisplayCreatorTest, DisplayCreator007, TestSize.Level1)
  * @tc.name: DisplayCreator008
  * @tc.desc: Verify DisplayCreator can create display component with child and opacity.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL9
- * @tc.author: caocan
  */
 HWTEST_F(DisplayCreatorTest, DisplayCreator008, TestSize.Level1)
 {
@@ -326,8 +310,6 @@ HWTEST_F(DisplayCreatorTest, DisplayCreator008, TestSize.Level1)
  * @tc.name: DisplayCreator009
  * @tc.desc: Verify DisplayCreator can create display component with child and opacity.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL9
- * @tc.author: caocan
  */
 HWTEST_F(DisplayCreatorTest, DisplayCreator009, TestSize.Level1)
 {
@@ -361,8 +343,6 @@ HWTEST_F(DisplayCreatorTest, DisplayCreator009, TestSize.Level1)
  * @tc.name: DisplayCreator010
  * @tc.desc: Verify DisplayCreator can create display component with child and wrong opacity value.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL9
- * @tc.author: caocan
  */
 HWTEST_F(DisplayCreatorTest, DisplayCreator010, TestSize.Level1)
 {
@@ -396,8 +376,6 @@ HWTEST_F(DisplayCreatorTest, DisplayCreator010, TestSize.Level1)
  * @tc.name: DisplayCreator011
  * @tc.desc: Verify DisplayCreator can create display component with child and wrong opacity value.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL9
- * @tc.author: caocan
  */
 HWTEST_F(DisplayCreatorTest, DisplayCreator011, TestSize.Level1)
 {
@@ -431,8 +409,6 @@ HWTEST_F(DisplayCreatorTest, DisplayCreator011, TestSize.Level1)
  * @tc.name: DisplayCreator012
  * @tc.desc: Verify DisplayCreator can create display component with child and opacity.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL9
- * @tc.author: caocan
  */
 HWTEST_F(DisplayCreatorTest, DisplayCreator012, TestSize.Level1)
 {
@@ -466,8 +442,6 @@ HWTEST_F(DisplayCreatorTest, DisplayCreator012, TestSize.Level1)
  * @tc.name: DisplayCreator013
  * @tc.desc: Verify DisplayCreator can create display component with child and wrong opacity value.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL9
- * @tc.author: caocan
  */
 HWTEST_F(DisplayCreatorTest, DisplayCreator013, TestSize.Level1)
 {

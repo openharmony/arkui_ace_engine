@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -315,7 +315,7 @@ void RenderListItem::HandleItemEffect(bool isFromRotate)
         if (needVibrate_ && lastState_ == ItemState::NEARBY && currentState_ == ItemState::FOCUS && vibrator_) {
             vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH1);
         }
-        if (rotationVibrate_ && isFromRotate) {
+        if (rotationVibrate_ && isFromRotate && vibrator_) {
             vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH1);
         }
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -560,7 +560,7 @@ void RosenRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context,
         segmentSize = static_cast<double>(segment.size());
     }
     for (uint32_t i = 0; i < segment.size(); i++) {
-        if (segment[i].GetValue() == 0.0) {
+        if (NearEqual(segment[i].GetValue(), 0.0)) {
             segmentSize -= 1;
         }
     }
@@ -573,7 +573,7 @@ void RosenRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context,
     PaintBackground(context, offset, totalWidth, height);
     for (uint32_t i = 0; i < segment.size(); i++) {
         auto segmentWidth = segment[i].GetValue();
-        if (segmentWidth == 0.0) {
+        if (NearEqual(segmentWidth, 0.0)) {
             continue;
         }
         auto segmentStartColor = segment[i].GetStartColor();

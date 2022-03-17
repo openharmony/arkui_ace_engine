@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,8 +60,6 @@ public:
  * @tc.name: MouseHoverAnimationTest001
  * @tc.desc: test mouse enter animation.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDL
- * @tc.author: jiachunhui
  */
 HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest001, TestSize.Level1)
 {
@@ -101,8 +99,6 @@ HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest001, TestSize.Level1)
  * @tc.name: MouseHoverAnimationTest002
  * @tc.desc: test mouse enter animation.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDL
- * @tc.author: jiachunhui
  */
 HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest002, TestSize.Level1)
 {
@@ -142,8 +138,6 @@ HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest002, TestSize.Level1)
  * @tc.name: MouseHoverAnimationTest003
  * @tc.desc: test mouse exit animation.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDL
- * @tc.author: jiachunhui
  */
 HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest003, TestSize.Level1)
 {
@@ -189,8 +183,6 @@ HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest003, TestSize.Level1)
  * @tc.name: MouseHoverAnimationTest004
  * @tc.desc: test mouse exit animation.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDL
- * @tc.author: jiachunhui
  */
 HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest004, TestSize.Level1)
 {
@@ -236,8 +228,6 @@ HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest004, TestSize.Level1)
  * @tc.name: MouseHoverAnimationTest005
  * @tc.desc: test mouse exit animation.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDM
- * @tc.author: jiachunhui
  */
 HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest005, TestSize.Level1)
 {
@@ -277,8 +267,6 @@ HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest005, TestSize.Level1)
  * @tc.name: MouseHoverAnimationTest006
  * @tc.desc: test mouse exit animation.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDM
- * @tc.author: jiachunhui
  */
 HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest006, TestSize.Level1)
 {
@@ -318,8 +306,6 @@ HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest006, TestSize.Level1)
  * @tc.name: MouseHoverAnimationTest007
  * @tc.desc: test mouse exit animation.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDM
- * @tc.author: jiachunhui
  */
 HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest007, TestSize.Level1)
 {
@@ -365,8 +351,6 @@ HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest007, TestSize.Level1)
  * @tc.name: MouseHoverAnimationTest008
  * @tc.desc: test mouse exit animation.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDM
- * @tc.author: jiachunhui
  */
 HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest008, TestSize.Level1)
 {
@@ -412,8 +396,6 @@ HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest008, TestSize.Level1)
  * @tc.name: MouseHoverAnimationTest009
  * @tc.desc: test parent and child mouse enter/exit animation.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDN
- * @tc.author: jiachunhui
  */
 HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest009, TestSize.Level1)
 {
@@ -486,8 +468,6 @@ HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest009, TestSize.Level1)
  * @tc.name: MouseHoverAnimationTest010
  * @tc.desc: test parent and child mouse enter/exit animation.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDO
- * @tc.author: jiachunhui
  */
 HWTEST_F(MouseHoverAnimationTest, MouseHoverAnimationTest010, TestSize.Level1)
 {

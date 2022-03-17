@@ -113,7 +113,6 @@ public:
         if (unit_ == DimensionUnit::PX) {
             return SystemProperties::Px2Vp(value_);
         }
-        // TODO: add fp and lpx convert.
         return 0;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,8 +67,6 @@ public:
  * @tc.name: RenderBubbleUpdate001
  * @tc.desc: Verify the Update Interface of RenderBubble work correctly with bubble component.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOV AR000DBAP0 AR000DBAP1 AR000DBAP2
- * @tc.author: caocan
  */
 HWTEST_F(RenderBubbleTest, RenderBubbleUpdate001, TestSize.Level1)
 {
@@ -97,8 +95,6 @@ HWTEST_F(RenderBubbleTest, RenderBubbleUpdate001, TestSize.Level1)
  * @tc.name: RenderBubblePerformLayout001
  * @tc.desc: Verify PerformLayout interface of RenderBubble works correctly with left placement.
  * @tc.type: FUNC
- * @tc.require: AR000DBAP1
- * @tc.author: caocan
  */
 HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout001, TestSize.Level1)
 {
@@ -131,8 +127,6 @@ HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout001, TestSize.Level1)
  * @tc.name: RenderBubblePerformLayout002
  * @tc.desc: Verify PerformLayout interface of RenderBubble works correctly with right placement.
  * @tc.type: FUNC
- * @tc.require: AR000DBAP1
- * @tc.author: caocan
  */
 HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout002, TestSize.Level1)
 {
@@ -165,8 +159,6 @@ HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout002, TestSize.Level1)
  * @tc.name: RenderBubblePerformLayout003
  * @tc.desc: Verify PerformLayout interface of RenderBubble works correctly with top placement.
  * @tc.type: FUNC
- * @tc.require: AR000DBAP1
- * @tc.author: caocan
  */
 HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout003, TestSize.Level1)
 {
@@ -199,8 +191,6 @@ HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout003, TestSize.Level1)
  * @tc.name: RenderBubblePerformLayout004
  * @tc.desc: Verify PerformLayout interface of RenderBubble works correctly with bottom placement.
  * @tc.type: FUNC
- * @tc.require: AR000DBAP1
- * @tc.author: caocan
  */
 HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout004, TestSize.Level1)
 {
@@ -233,8 +223,6 @@ HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout004, TestSize.Level1)
  * @tc.name: RenderBubblePerformLayout005
  * @tc.desc: Verify PerformLayout interface of RenderBubble works correctly with topLeft placement.
  * @tc.type: FUNC
- * @tc.require: AR000DBAP1
- * @tc.author: caocan
  */
 HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout005, TestSize.Level1)
 {
@@ -267,8 +255,6 @@ HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout005, TestSize.Level1)
  * @tc.name: RenderBubblePerformLayout006
  * @tc.desc: Verify PerformLayout interface of RenderBubble works correctly with topRight placement.
  * @tc.type: FUNC
- * @tc.require: AR000DBAP1
- * @tc.author: caocan
  */
 HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout006, TestSize.Level1)
 {
@@ -301,8 +287,6 @@ HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout006, TestSize.Level1)
  * @tc.name: RenderBubblePerformLayout007
  * @tc.desc: Verify PerformLayout interface of RenderBubble works correctly with bottomLeft placement.
  * @tc.type: FUNC
- * @tc.require: AR000DBAP1
- * @tc.author: caocan
  */
 HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout007, TestSize.Level1)
 {
@@ -335,8 +319,6 @@ HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout007, TestSize.Level1)
  * @tc.name: RenderBubblePerformLayout008
  * @tc.desc: Verify PerformLayout interface of RenderBubble works correctly with bottomRight placement.
  * @tc.type: FUNC
- * @tc.require: AR000DBAP1
- * @tc.author: caocan
  */
 HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout008, TestSize.Level1)
 {
@@ -369,8 +351,6 @@ HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout008, TestSize.Level1)
  * @tc.name: RenderBubblePerformLayout009
  * @tc.desc: Verify PerformLayout interface of RenderBubble works correctly with negative dx.
  * @tc.type: FUNC
- * @tc.require: AR000DBAP1
- * @tc.author: caocan
  */
 HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout009, TestSize.Level1)
 {
@@ -403,8 +383,6 @@ HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout009, TestSize.Level1)
  * @tc.name: RenderBubblePerformLayout010
  * @tc.desc: Verify PerformLayout interface of RenderBubble works correctly with dx over screen.
  * @tc.type: FUNC
- * @tc.require: AR000DBAP1
- * @tc.author: caocan
  */
 HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout010, TestSize.Level1)
 {
@@ -437,8 +415,6 @@ HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout010, TestSize.Level1)
  * @tc.name: RenderBubblePerformLayout011
  * @tc.desc: Verify PerformLayout interface of RenderBubble works correctly with bottomRight placement.
  * @tc.type: FUNC
- * @tc.require: AR000DBAP1
- * @tc.author: caocan
  */
 HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout011, TestSize.Level1)
 {
