@@ -477,9 +477,10 @@ void JSWebController::RemoveJavascriptInterface(const JSCallbackInfo& args)
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], objName)) {
         return;
     }
-    if (objectorMap_.find(objName) != objectorMap_.end()) {
-        objectorMap_.erase(objName);
+    if (objectorMap_.find(objName) == objectorMap_.end()) {
+        return;
     }
+    objectorMap_.erase(objName);
     if (webController_) {
         webController_->RemoveJavascriptInterface(objName, {});
     }
