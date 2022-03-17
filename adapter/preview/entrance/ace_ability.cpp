@@ -110,13 +110,13 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     });
     if (runArgs_.formsEnabled) {
         LOGI("CreateContainer with JS_CARD frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS_CARD);
+        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS_CARD, runArgs_);
     } else if (runArgs_.aceVersion == AceVersion::ACE_1_0) {
         LOGI("CreateContainer with JS frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS);
+        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS, runArgs_);
     } else if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
         LOGI("CreateContainer with JSDECLARATIVE frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::DECLARATIVE_JS);
+        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::DECLARATIVE_JS, runArgs_);
     } else {
         LOGE("UnKnown frontend type");
     }
@@ -176,17 +176,21 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
 
 void AceAbility::InitEnv()
 {
-    if (runArgs_.projectModel == ProjectModel::STAGE) {
-        std::string appResourcesPath(runArgs_.appResourcesPath);
-        if (!OHOS::Ace::Framework::EndWith(appResourcesPath, DELIMITER)) {
-            appResourcesPath.append(DELIMITER);
-        }
-        AceContainer::AddAssetPath(ACE_INSTANCE_ID,
-            "", { runArgs_.assetPath, appResourcesPath.append(ASSET_PATH_SHARE_STAGE) });
-    } else {
-        AceContainer::AddAssetPath(ACE_INSTANCE_ID,
-            "", { runArgs_.assetPath, GetCustomAssetPath(runArgs_.assetPath).append(ASSET_PATH_SHARE) });
+    std::vector<std::string> paths;
+    paths.push_back(runArgs_.assetPath);
+    std::string appResourcesPath(runArgs_.appResourcesPath);
+    if (!OHOS::Ace::Framework::EndWith(appResourcesPath, DELIMITER)) {
+        appResourcesPath.append(DELIMITER);
     }
+    if (runArgs_.projectModel == ProjectModel::STAGE) {
+        paths.push_back(appResourcesPath + ASSET_PATH_SHARE_STAGE);
+    } else {
+        paths.push_back(GetCustomAssetPath(runArgs_.assetPath) + ASSET_PATH_SHARE);
+    }
+    if (runArgs_.formsEnabled) {
+        paths.push_back(GetCustomAssetPath(runArgs_.assetPath + DELIMITER + runArgs_.url));
+    }
+    AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
 
     AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.systemResourcesPath,
         runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
