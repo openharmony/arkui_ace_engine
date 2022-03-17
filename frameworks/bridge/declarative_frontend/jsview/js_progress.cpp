@@ -55,7 +55,7 @@ void JSProgress::Create(const JSCallbackInfo& info)
 
     auto progressType = ProgressType::LINEAR;
     auto jsStyle = paramObject->GetProperty("type");
-    if (jsStyle->IsNull()) {
+    if (jsStyle->IsNull() || jsStyle->IsUndefined()) {
         jsStyle = paramObject->GetProperty("style");
     }
 
