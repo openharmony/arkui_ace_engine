@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_STEPPER_ITEM_COMPOSED_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_STEPPER_ITEM_COMPOSED_ELEMENT_H
 
-#include "core/components/flex/flex_element.h"
-#include "core/components/stepper/stepper_element.h"
 #include "core/components/stepper/stepper_item_element.h"
 #include "core/components/stepper/render_stepper.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
