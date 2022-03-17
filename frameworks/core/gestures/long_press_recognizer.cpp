@@ -74,8 +74,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         pointsCount_++;
         AddToReferee(event.id, AceType::Claim(this));
         if (pointsCount_ == fingers_) {
-	    if (useCatchMode_) {
-		state_ = DetectState::DETECTING;
+            if (useCatchMode_) {
+                state_ = DetectState::DETECTING;
                 DeadlineTimer(duration_, false);
             } else {
                 DeadlineTimer(duration_, true);
@@ -172,15 +172,15 @@ void LongPressRecognizer::DeadlineTimer(int32_t time, bool isAccept)
     }
     auto&& callback = [weakPtr = AceType::WeakClaim(this), isAccept]() {
         auto refPtr = weakPtr.Upgrade();
-	if (!isAccept) {
-            if (refPtr) {
+        if (refPtr) {
+            if (!isAccept) {
                 refPtr->HandleOverdueDeadline();
             } else {
-                LOGI("fail to handle overdue deadline due to context is nullptr");
+                refPtr->OnAccepted();
             }
-	} else {
-            refPtr->OnAccepted();
-	}
+        } else {
+            LOGI("fail to handle overdue deadline due to context is nullptr");
+        }
     };
     deadlineTimer_.Reset(callback);
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
