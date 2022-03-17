@@ -17,9 +17,8 @@
 
 #include <cerrno>
 #include <csignal>
-#include <shared_mutex>
-
 #include <pthread.h>
+#include <shared_mutex>
 
 #include "flutter/fml/thread.h"
 
@@ -27,6 +26,7 @@
 #include "base/log/log.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 
@@ -134,7 +134,7 @@ void InitializeGcTrigger()
 
 class ThreadWatcher final : public Referenced {
 public:
-    ThreadWatcher(int32_t instanceId, TaskExecutor::TaskType type);
+    ThreadWatcher(int32_t instanceId, TaskExecutor::TaskType type, bool useUIAsJSThread = false);
     ~ThreadWatcher() override;
 
     void SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor);
@@ -167,9 +167,11 @@ private:
     std::queue<uint64_t> inputTaskIds_;
     bool canShowDialog_ = true;
     int32_t showDialogCount_ = 0;
+    bool useUIAsJSThread_ = false;
 };
 
-ThreadWatcher::ThreadWatcher(int32_t instanceId, TaskExecutor::TaskType type) : instanceId_(instanceId), type_(type)
+ThreadWatcher::ThreadWatcher(int32_t instanceId, TaskExecutor::TaskType type, bool useUIAsJSThread)
+    : instanceId_(instanceId), type_(type), useUIAsJSThread_(useUIAsJSThread)
 {
     InitThreadName();
     PostTaskToTaskRunner(
@@ -239,7 +241,7 @@ void ThreadWatcher::DetonatedBomb()
 {
     std::shared_lock<std::shared_mutex> lock(mutex_);
     if (inputTaskIds_.empty()) {
-            return;
+        return;
     }
 
     uint64_t currentTime = GetMilliseconds();
@@ -356,8 +358,15 @@ void ThreadWatcher::HiviewReport() const
 
 void ThreadWatcher::RawReport(RawEventType type) const
 {
+    std::string message;
+    if (type == RawEventType::FREEZE &&
+        (type_ == TaskExecutor::TaskType::JS || (useUIAsJSThread_ && (type_ == TaskExecutor::TaskType::UI)))) {
+        auto engine = EngineHelper::GetEngine(instanceId_);
+        message = engine ? engine->GetStacktraceMessage() : "";
+    }
     EventReport::ANRRawReport(type, AceApplicationInfo::GetInstance().GetUid(),
-        AceApplicationInfo::GetInstance().GetPackageName(), AceApplicationInfo::GetInstance().GetProcessName());
+        AceApplicationInfo::GetInstance().GetPackageName(), AceApplicationInfo::GetInstance().GetProcessName(),
+        message);
 }
 
 void ThreadWatcher::ShowDialog() const
@@ -412,7 +421,7 @@ void WatchDog::Register(int32_t instanceId, const RefPtr<TaskExecutor>& taskExec
 {
     Watchers watchers = {
         .jsWatcher = AceType::MakeRefPtr<ThreadWatcher>(instanceId, TaskExecutor::TaskType::JS),
-        .uiWatcher = AceType::MakeRefPtr<ThreadWatcher>(instanceId, TaskExecutor::TaskType::UI),
+        .uiWatcher = AceType::MakeRefPtr<ThreadWatcher>(instanceId, TaskExecutor::TaskType::UI, useUIAsJSThread),
     };
     watchers.uiWatcher->SetTaskExecutor(taskExecutor);
     if (!useUIAsJSThread) {
