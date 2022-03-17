@@ -14,10 +14,10 @@
  */
 
 /**
- * @addtogroup ACE
+ * @addtogroup OH_NativeXComponent Native XComponent
  * @{
  *
- * @brief Provides functions to set and obtain data and callbacks of xcomponent.
+ * @brief Describes the surface and touch event held by the ArkUI XComponent, which can be used for EGL/OpenGLES and media data input and displayed on the ArkUI XComponent.
  *
  * @since 8
  * @version 1.0
@@ -26,7 +26,7 @@
 /**
  * @file native_interface_xcomponent.h
  *
- * @brief Declares APIs to get data from native xcomponent.
+ * @brief  API for accessing a Native XComponent.
  *
  * @since 8
  * @version 1.0
@@ -42,25 +42,30 @@ extern "C" {
 #endif
 
 /**
- * @brief Enumerates the returned value type.
+ * @brief Enumerates the API access states
  *
  * @since 8
  * @version 1.0
  */
 enum {
-    /* Success result */
+    /** Success. */
     OH_NATIVEXCOMPONENT_RESULT_SUCCESS = 0,
-    /* Failed result */
+    /** Failed. */
     OH_NATIVEXCOMPONENT_RESULT_FAILED = -1,
-    /* Invalid parameters */
+    /** Invalid parameters. */
     OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER = -2,
 };
 
 enum OH_NativeXComponent_TouchEventType {
+    /** Trigger a touch event when a finger is pressed. */
     OH_NATIVEXCOMPONENT_DOWN = 0,
+    /** Trigger a touch event when a finger is lifted. */
     OH_NATIVEXCOMPONENT_UP,
+    /** Trigger a touch event when a finger moves on the screen in pressed state. */
     OH_NATIVEXCOMPONENT_MOVE,
+    /** Trigger an event when a touch event is canceled. */
     OH_NATIVEXCOMPONENT_CANCEL,
+    /** Invalid touch type. */
     OH_NATIVEXCOMPONENT_UNKNOWN,
 };
 
@@ -69,58 +74,58 @@ const uint32_t OH_XCOMPONENT_ID_LEN_MAX = 128;
 const uint32_t OH_MAX_TOUCH_POINTS_NUMBER = 10;
 
 struct OH_NativeXComponent_TouchPoint {
-    // Point ID of contact between the finger and the screen.
+    /** Unique identifier of a finger. */
     int32_t id = 0;
-    // Horizontal distance of the touch point relative to the upper left corner of screen.
+    /** X coordinate of the touch point relative to the left edge of the screen. */
     float screenX = 0.0;
-    // Vertical distance of the touch point relative to the upper left corner of screen.
+    /** Y coordinate of the touch point relative to the upper edge of the screen. */
     float screenY = 0.0;
-    // Horizontal distance of the touch point relative to the upper left corner of touched element.
+    /** X coordinate of the touch point relative to the left edge of the element to touch. */
     float x = 0.0;
-    // Vertical distance of the touch point relative to the upper left corner of touched element.
+    /** Y coordinate of the touch point relative to the upper edge of the element to touch. */
     float y = 0.0;
-    // Touch type of the touch event.
+    /** Touch type of the touch event. */
     OH_NativeXComponent_TouchEventType type = OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UNKNOWN;
-    // Contacted surface size of encircling the user and the touch screen.
+    /** Contact area between the finger pad and the screen. */
     double size = 0.0;
-    // Pressure of finger squeezing the touch screen.
+    /** Pressure of the current touch event. */
     float force = 0.0;
-    // Timestamp of the touch event.
+    /** Timestamp of the current touch event. */
     long long timeStamp = 0;
-    // whether the dot is pressed
+    /** Whether the current point is pressed. */
     bool isPressed = false;
 };
 
-// the active changed point info
+// Represents the touch point information.
 struct OH_NativeXComponent_TouchEvent {
-    // Point ID of contact between the finger and the screen.
+    /** Unique identifier of a finger. */
     int32_t id = 0;
-    // Horizontal distance of the touch point relative to the upper left corner of screen.
+    /** X coordinate of the touch point relative to the left edge of the screen. */
     float screenX = 0.0;
-    // Vertical distance of the touch point relative to the upper left corner of screen.
+    /** Y coordinate of the touch point relative to the upper edge of the screen. */
     float screenY = 0.0;
-    // Horizontal distance of the touch point relative to the upper left corner of the element to touch.
+    /** X coordinate of the touch point relative to the left edge of the element to touch. */
     float x = 0.0;
-    // Vertical distance of the touch point relative to the upper left corner of the element to touch.
+    /** Y coordinate of the touch point relative to the upper edge of the element to touch. */
     float y = 0.0;
-    // Touch type of the touch event.
+    /** Touch type of the touch event. */
     OH_NativeXComponent_TouchEventType type = OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UNKNOWN;
-    // Contacted surface size of encircling the user and the touch screen.
+    /** Contact area between the finger pad and the screen. */
     double size = 0.0;
-    // Pressure of finger squeezing the touch screen.
+    /** Pressure of the current touch event. */
     float force = 0.0;
-    // Device Id.
+    /** ID of the device where the current touch event is generated. */
     int64_t deviceId = 0;
-    // Timestamp of the touch event.
+    /** Timestamp of the current touch event. */
     long long timeStamp = 0;
-    // all points on the touch screen.
+    /** Array of the current touch points. */
     OH_NativeXComponent_TouchPoint touchPoints[OH_MAX_TOUCH_POINTS_NUMBER];
-    // number of touchPointers
+    /** Number of current touch points */
     uint32_t numPoints = 0;
 };
 
 /**
- * @brief Defines the <b>NativeXComponent</b> object, which is usually accessed via pointers.
+ * @brief Provides an encapsulated <b>OH_NativeXComponent</b> instance.
  *
  * @since 8
  * @version 1.0
@@ -128,48 +133,48 @@ struct OH_NativeXComponent_TouchEvent {
 typedef struct OH_NativeXComponent OH_NativeXComponent;
 
 /**
- * @brief Defines the <b>NativeXComponentCallback</b> struct, which holding the surface lifecycle callbacks.
+ * @brief Registers the surface lifecycle and touch event callbacks.
  *
  * @since 8
  * @version 1.0
  */
 typedef struct OH_NativeXComponent_Callback {
-    /* Called when the native surface is created or recreated. */
+    /** Called when the surface is created. */
     void (*OnSurfaceCreated)(OH_NativeXComponent* component, void* window);
-    /* Called when the native surface is changed. */
+    /**
+     * Called when the surface is changed.\n
+     * This API is defined but not implemented in OpenHarmony 3.1 Release. It will be available for use in OpenHarmony 3.1 MR.\n
+     */
     void (*OnSurfaceChanged)(OH_NativeXComponent* component, void* window);
-    /* Called when the native surface is destroyed. */
+    /** Called when the surface is destroyed. */
     void (*OnSurfaceDestroyed)(OH_NativeXComponent* component, void* window);
-    /* Called when touch event is triggered. */
+    /** Called when a touch event is triggered. */
     void (*DispatchTouchEvent)(OH_NativeXComponent* component, void* window);
 } OH_NativeXComponent_Callback;
 
 /**
- * @brief Obtains the id of the xcomponent.
+ * @brief Obtains the ID of the ArkUI XComponent.
  *
- * @param component Indicates the pointer to this <b>NativeXComponent</b> instance.
- * @param id Indicates the char buffer to keep the ID of the xcomponent.
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param id Indicates the char buffer to keep the ID of this <b>OH_NativeXComponent</b> instance.\n
  *        Notice that a null-terminator will be append to the char buffer, so the size of the
- *        char buffer should be at least as large as the size of the real id length plus 1.
- *        The size of the char buffer is recommend to be [OH_XCOMPONENT_ID_LEN_MAX + 1]
- * @param size is an in-out param.
- *        [in] Indicates the length of the id char buffer (including null-terminator).
- *             The referenced value of 'size' should be in the range (0, OH_XCOMPONENT_ID_LEN_MAX + 1]
- *        [out] Receives the length of the id (not include null-terminator).
- * @return Returns the execution result.
+ *        char buffer should be at least as large as the size of the real id length plus 1.\n
+ *        It is recommended that the size of the char buffer be [OH_XCOMPONENT_ID_LEN_MAX + 1].
+ * @param size Indicates the pointer to the length of <b>id</b>, which you can set and receive.
+ * @return Returns the status code of the execution.
  * @since 8
  * @version 1.0
  */
 int32_t OH_NativeXComponent_GetXComponentId(OH_NativeXComponent* component, char* id, uint64_t* size);
 
 /**
- * @brief Obtains the size of the xcomponent.
+ * @brief Obtains the size of the surface held by the ArkUI XComponent.
  *
- * @param component Indicates the pointer to this <b>NativeXComponent</b> instance.
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
  * @param window Indicates the native window handler.
- * @param width Indicates pointer to the width of the xcomponent.
- * @param height Indicates pointer to the height of the xcomponent.
- * @return Returns the execution result.
+ * @param width Indicates the pointer to the width of the current surface.
+ * @param height Indicates the pointer to the height of the current surface.
+ * @return Returns the status code of the execution.
  * @since 8
  * @version 1.0
  */
@@ -177,13 +182,13 @@ int32_t OH_NativeXComponent_GetXComponentSize(
     OH_NativeXComponent* component, const void* window, uint64_t* width, uint64_t* height);
 
 /**
- * @brief Obtains the offset of the xcomponent.
+ * @brief Obtains the offset of the surface held by the ArkUI XComponent.
  *
- * @param component Indicates the pointer to this <b>NativeXComponent</b> instance.
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
  * @param window Indicates the native window handler.
- * @param x Indicates pointer to the horizontal coordinate of xcomponent relative to upper left corner of screen.
- * @param y Indicates pointer to the vertical coordinate of xcomponent relative to upper left corner of screen.
- * @return Returns the execution result.
+ * @param x Indicates the pointer to the x coordinate of the current surface.
+ * @param y Indicates the pointer to the y coordinate of the current surface.
+ * @return Returns the status code of the execution.
  * @since 8
  * @version 1.0
  */
@@ -191,12 +196,12 @@ int32_t OH_NativeXComponent_GetXComponentOffset(
     OH_NativeXComponent* component, const void* window, double* x, double* y);
 
 /**
- * @brief Obtains the information of touch event.
+ * @brief Obtains the touch event dispatched by the ArkUI XComponent.
  *
- * @param component Indicates the pointer to this <b>NativeXComponent</b> instance.
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
  * @param window Indicates the native window handler.
- * @param touchInfo Indicates pointer to the current touch information.
- * @return Returns the execution result.
+ * @param touchEvent Indicates the pointer to the current touch event.
+ * @return Returns the status code of the execution.
  * @since 8
  * @version 1.0
  */
@@ -204,11 +209,11 @@ int32_t OH_NativeXComponent_GetTouchEvent(
     OH_NativeXComponent* component, const void* window, OH_NativeXComponent_TouchEvent* touchEvent);
 
 /**
- * @brief Set the callback to the xcomponent.
+ * @brief Registers a callback for this <b>OH_NativeXComponent</b> instance.
  *
- * @param component Indicates the pointer to this <b>NativeXComponent</b> instance.
- * @param callback Indicates the callbacks of the native surface lifecycle.
- * @return Returns the execution result.
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param callback Indicates the pointer to a surface lifecycle and touch event callback.
+ * @return Returns the status code of the execution.
  * @since 8
  * @version 1.0
  */
