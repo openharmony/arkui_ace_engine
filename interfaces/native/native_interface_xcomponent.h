@@ -17,7 +17,8 @@
  * @addtogroup OH_NativeXComponent Native XComponent
  * @{
  *
- * @brief Describes the surface and touch event held by the ArkUI XComponent, which can be used for EGL/OpenGLES and media data input and displayed on the ArkUI XComponent.
+ * @brief Describes the surface and touch event held by the ArkUI XComponent, which can be used for the EGL/OpenGL ES\n
+ *        and media data input and displayed on the ArkUI XComponent.
  *
  * @since 8
  * @version 1.0
@@ -26,7 +27,7 @@
 /**
  * @file native_interface_xcomponent.h
  *
- * @brief  API for accessing a Native XComponent.
+ * @brief Declares APIs for accessing a Native XComponent.
  *
  * @since 8
  * @version 1.0
@@ -42,13 +43,13 @@ extern "C" {
 #endif
 
 /**
- * @brief Enumerates the API access states
+ * @brief Enumerates the API access states.
  *
  * @since 8
  * @version 1.0
  */
 enum {
-    /** Success. */
+    /** Successful. */
     OH_NATIVEXCOMPONENT_RESULT_SUCCESS = 0,
     /** Failed. */
     OH_NATIVEXCOMPONENT_RESULT_FAILED = -1,
@@ -120,7 +121,7 @@ struct OH_NativeXComponent_TouchEvent {
     long long timeStamp = 0;
     /** Array of the current touch points. */
     OH_NativeXComponent_TouchPoint touchPoints[OH_MAX_TOUCH_POINTS_NUMBER];
-    /** Number of current touch points */
+    /** Number of current touch points. */
     uint32_t numPoints = 0;
 };
 
@@ -143,7 +144,8 @@ typedef struct OH_NativeXComponent_Callback {
     void (*OnSurfaceCreated)(OH_NativeXComponent* component, void* window);
     /**
      * Called when the surface is changed.\n
-     * This API is defined but not implemented in OpenHarmony 3.1 Release. It will be available for use in OpenHarmony 3.1 MR.\n
+     * This API is defined but not implemented in OpenHarmony 3.1 Release. It will be available for use in\n
+     * OpenHarmony 3.1 MR.
      */
     void (*OnSurfaceChanged)(OH_NativeXComponent* component, void* window);
     /** Called when the surface is destroyed. */
@@ -157,7 +159,7 @@ typedef struct OH_NativeXComponent_Callback {
  *
  * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
  * @param id Indicates the char buffer to keep the ID of this <b>OH_NativeXComponent</b> instance.\n
- *        Notice that a null-terminator will be append to the char buffer, so the size of the
+ *        Notice that a null-terminator will be appended to the char buffer, so the size of the\n
  *        char buffer should be at least as large as the size of the real id length plus 1.\n
  *        It is recommended that the size of the char buffer be [OH_XCOMPONENT_ID_LEN_MAX + 1].
  * @param size Indicates the pointer to the length of <b>id</b>, which you can set and receive.
