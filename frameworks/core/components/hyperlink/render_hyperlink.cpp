@@ -95,7 +95,10 @@ void RenderHyperlink::JumpToAddress()
          "Perform this operation on the emulator or a real device instead.");
     return;
 #endif
-    hyperlinkResources_->StartAbility(address_);
+    auto context = context_.Upgrade();
+    if (context) {
+        context->HyperlinkStartAbility(address_);
+    }
 }
 
 void RenderHyperlink::SetImageChildColor(const RefPtr<Component> node)

@@ -124,9 +124,12 @@ using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
 using AcePlatformFinish = std::function<void()>;
+using AcePlatformStartAbility = std::function<void(const std::string& address)>;
 class AcePlatformEventCallback final : public Platform::PlatformEventCallback {
 public:
     explicit AcePlatformEventCallback(AcePlatformFinish onFinish) : onFinish_(onFinish) {}
+    AcePlatformEventCallback(AcePlatformFinish onFinish, AcePlatformStartAbility onStartAbility)
+        : onFinish_(onFinish), onStartAbility_(onStartAbility) {}
 
     ~AcePlatformEventCallback() = default;
 
@@ -138,6 +141,14 @@ public:
         }
     }
 
+    virtual void OnStartAbility(const std::string& address)
+    {
+        LOGI("AcePlatformEventCallback OnStartAbility");
+        if (onStartAbility_) {
+            onStartAbility_(address);
+        }
+    }
+
     virtual void OnStatusBarBgColorChanged(uint32_t color)
     {
         LOGI("AcePlatformEventCallback OnStatusBarBgColorChanged");
@@ -145,6 +156,7 @@ public:
 
 private:
     AcePlatformFinish onFinish_;
+    AcePlatformStartAbility onStartAbility_;
 };
 
 int32_t AceAbility::instanceId_ = 0;
@@ -254,7 +266,13 @@ void AceAbility::OnStart(const Want& want)
 
     // create container
     Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, srcPath, shared_from_this(),
-        std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); }));
+        std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); },
+            [this](const std::string& address) {
+                AAFwk::Want want;
+                want.AddEntity(Want::ENTITY_BROWSER);
+                want.SetParam("address", address);
+                this->StartAbility(want);
+            }));
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
         LOGE("container is null, set configuration failed.");

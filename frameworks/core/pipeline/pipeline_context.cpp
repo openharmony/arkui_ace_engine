@@ -2111,6 +2111,16 @@ void PipelineContext::Finish(bool autoFinish) const
     }
 }
 
+void PipelineContext::HyperlinkStartAbility(const std::string& address) const
+{
+    CHECK_RUN_ON(UI);
+    if (startAbilityHandler_) {
+        startAbilityHandler_(address);
+    } else {
+        LOGE("Hyperlink fail to start ability due to handler is nullptr");
+    }
+}
+
 void PipelineContext::RequestFullWindow(int32_t duration)
 {
     CHECK_RUN_ON(UI);
