@@ -1750,6 +1750,7 @@ void Declaration::AddEvent(int32_t pageId, const std::string& eventId, const std
                 auto& gestureEvent = declaration.MaybeResetEvent<CommonGestureEvent>(EventTag::COMMON_GESTURE_EVENT);
                 if (gestureEvent.IsValid()) {
                     gestureEvent.doubleClick.eventMarker = EventMarker(eventId, DOM_DOUBLE_CLICK, pageId);
+                    gestureEvent.doubleClick.eventMarker.SetCatchMode(false);
                     gestureEvent.doubleClick.isRefreshed = true;
                 }
             } },
@@ -1838,6 +1839,7 @@ void Declaration::AddEvent(int32_t pageId, const std::string& eventId, const std
                 auto& gestureEvent = declaration.MaybeResetEvent<CommonGestureEvent>(EventTag::COMMON_GESTURE_EVENT);
                 if (gestureEvent.IsValid()) {
                     gestureEvent.longPress.eventMarker = EventMarker(eventId, DOM_LONG_PRESS, pageId);
+                    gestureEvent.longPress.eventMarker.SetCatchMode(false);
                     gestureEvent.longPress.isRefreshed = true;
                 }
             } },
@@ -1894,6 +1896,7 @@ void Declaration::AddEvent(int32_t pageId, const std::string& eventId, const std
                 auto& swipeEvent = declaration.MaybeResetEvent<CommonSwipeEvent>(EventTag::COMMON_SWIPE_EVENT);
                 if (swipeEvent.IsValid()) {
                     swipeEvent.swipe.eventMarker = EventMarker(eventId, DOM_SWIPE, pageId);
+                    swipeEvent.swipe.eventMarker.SetCatchMode(false);
                     swipeEvent.swipe.isRefreshed = true;
                 }
             } },

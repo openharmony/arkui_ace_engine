@@ -203,6 +203,16 @@ void RenderGestureListener::SetOnDoubleClickCallback(const RefPtr<GestureListene
         return;
     }
     SetOnDoubleClickCallback(AceAsyncEvent<void(const ClickInfo&)>::Create(onDoubleClickId, context_));
+    if (!onDoubleClickId.GetCatchMode()) {
+        static const int32_t bubbleModeVersion = 6;
+        auto pipeline = context_.Upgrade();
+        if (pipeline && pipeline->GetMinPlatformVersion() >= bubbleModeVersion) {
+            doubleClickRecognizer_->SetUseCatchMode(false);
+            return;
+        }
+    }
+    doubleClickRecognizer_->SetUseCatchMode(true);
+    doubleClickRecognizer_->SetIsExternalGesture(true);
 }
 
 void RenderGestureListener::SetOnLongPressCallback(const RefPtr<GestureListenerComponent>& component)
@@ -212,6 +222,16 @@ void RenderGestureListener::SetOnLongPressCallback(const RefPtr<GestureListenerC
         return;
     }
     SetOnLongPressCallback(AceAsyncEvent<void(const LongPressInfo&)>::Create(onLongPressId, context_));
+    if (!onLongPressId.GetCatchMode()) {
+        static const int32_t bubbleModeVersion = 6;
+        auto pipeline = context_.Upgrade();
+        if (pipeline && pipeline->GetMinPlatformVersion() >= bubbleModeVersion) {
+            longPressRecognizer_->SetUseCatchMode(false);
+            return;
+        }
+    }
+    longPressRecognizer_->SetUseCatchMode(true);
+    longPressRecognizer_->SetIsExternalGesture(true);
 }
 
 void RenderGestureListener::SetOnPinchStartCallback(const RefPtr<GestureListenerComponent>& component)
