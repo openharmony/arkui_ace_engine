@@ -136,7 +136,7 @@ void WebDelegate::ReleasePlatformResource()
 void WebGeolocationOhos::Invoke(const std::string &origin, const bool& allow, const bool& retain)
 {
     if (geolocationCallback_) {
-        geolocationCallback_->GeolocationCallbackInvoke(origin, allow, retain);
+        LOGE("The invoke method is not supported");
     }
 }
 
