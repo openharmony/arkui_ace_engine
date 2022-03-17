@@ -339,7 +339,7 @@ void AceContainer::OnInactive(int32_t instanceId)
     if (!context) {
         return;
     }
-    context->RootLostFocus();
+    context->GetTaskExecutor()->PostTask([context]() { context->RootLostFocus(); }, TaskExecutor::TaskType::UI);
 }
 
 bool AceContainer::OnStartContinuation(int32_t instanceId)
