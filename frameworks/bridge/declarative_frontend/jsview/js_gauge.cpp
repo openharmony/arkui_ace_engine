@@ -139,7 +139,7 @@ void JSGauge::SetColors(const JSCallbackInfo& info)
 
 void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 && !info[0]->IsNumber()) {
+    if (info.Length() < 1) {
         LOGE(" JSGauge::SetStrokeWidth::The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
