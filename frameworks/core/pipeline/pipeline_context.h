@@ -322,6 +322,13 @@ public:
         finishEventHandler_ = std::move(listener);
     }
 
+    using StartAbilityHandler = std::function<void(const std::string& address)>;
+    void SetStartAbilityHandler(StartAbilityHandler&& listener)
+    {
+        startAbilityHandler_ = std::move(listener);
+    }
+    void HyperlinkStartAbility(const std::string& address) const;
+
     using ActionEventHandler = std::function<void(const std::string& action)>;
     void SetActionEventHandler(ActionEventHandler&& listener)
     {
@@ -1325,6 +1332,7 @@ private:
     EventManager eventManager_;
     EventTrigger eventTrigger_;
     FinishEventHandler finishEventHandler_;
+    StartAbilityHandler startAbilityHandler_;
     ActionEventHandler actionEventHandler_;
     StatusBarEventHandler statusBarBgColorEventHandler_;
     PopupEventHandler popupEventHandler_;

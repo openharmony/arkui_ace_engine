@@ -82,11 +82,15 @@ WindowMode GetWindowMode(OHOS::Rosen::Window* window)
 static std::atomic<int32_t> gInstanceId = 0;
 static std::atomic<int32_t> gSubInstanceId = 1000000;
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
+const int32_t REQUEST_CODE = -1;
 
 using ContentFinishCallback = std::function<void()>;
+using ContentStartAbilityCallback = std::function<void(const std::string& address)>;
 class ContentEventCallback final : public Platform::PlatformEventCallback {
 public:
     explicit ContentEventCallback(ContentFinishCallback onFinish) : onFinish_(onFinish) {}
+    ContentEventCallback(ContentFinishCallback onFinish, ContentStartAbilityCallback onStartAbility)
+        : onFinish_(onFinish), onStartAbility_(onStartAbility) {}
     ~ContentEventCallback() = default;
 
     virtual void OnFinish() const
@@ -97,6 +101,14 @@ public:
         }
     }
 
+    virtual void OnStartAbility(const std::string& address)
+    {
+        LOGI("UIContent OnStartAbility");
+        if (onStartAbility_) {
+            onStartAbility_(address);
+        }
+    }
+
     virtual void OnStatusBarBgColorChanged(uint32_t color)
     {
         LOGI("UIContent OnStatusBarBgColorChanged");
@@ -104,6 +116,7 @@ public:
 
 private:
     ContentFinishCallback onFinish_;
+    ContentStartAbilityCallback onStartAbility_;
 };
 
 extern "C" ACE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtime)
@@ -368,6 +381,20 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
             if (abilityContext) {
                 abilityContext->CloseAbility();
+            }
+        }, [context = context_](const std::string& address) {
+            auto sharedContext = context.lock();
+            if (!sharedContext) {
+                return;
+            }
+            auto abilityContext =
+                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+            if (abilityContext) {
+                LOGI("start ability with url = %{private}s", address.c_str());
+                AAFwk::Want want;
+                want.AddEntity(Want::ENTITY_BROWSER);
+                want.SetParam("address", address);
+                abilityContext->StartAbility(want, REQUEST_CODE);
             }
         }));
     container->SetWindowName(window_->GetWindowName());

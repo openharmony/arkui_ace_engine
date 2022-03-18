@@ -894,6 +894,31 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     };
     pipelineContext_->SetFinishEventHandler(finishEventHandler);
 
+    auto&& startAbilityHandler = [weak = WeakClaim(this), instanceId](const std::string& address) {
+        auto container = weak.Upgrade();
+        if (!container) {
+            LOGE("StartAbilityHandler container is null!");
+            return;
+        }
+        ContainerScope scope(instanceId);
+        auto context = container->GetPipelineContext();
+        if (!context) {
+            LOGE("StartAbilityHandler context is null!");
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakPtr<AceContainer>(container), address]() {
+                auto container = weak.Upgrade();
+                if (!container) {
+                    LOGE("Start ability task, container is null!");
+                    return;
+                }
+                container->OnStartAbility(address);
+            },
+            TaskExecutor::TaskType::PLATFORM);
+    };
+    pipelineContext_->SetStartAbilityHandler(startAbilityHandler);
+
     auto&& setStatusBarEventHandler = [weak = WeakClaim(this), instanceId](const Color& color) {
         auto container = weak.Upgrade();
         if (!container) {
