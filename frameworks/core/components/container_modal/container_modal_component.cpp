@@ -122,6 +122,7 @@ RefPtr<ButtonComponent> ContainerModalComponent::BuildControlButton(
     button->SetHeight(TITLE_BUTTON_SIZE);
     button->SetType(ButtonType::CIRCLE);
     button->SetBackgroundColor(TITLE_BUTTON_BACKGROUND_COLOR);
+    button->SetClickedColor(TITLE_BUTTON_CLICKED_COLOR);
     button->SetClickFunction(std::move(clickCallback));
     return button;
 }
