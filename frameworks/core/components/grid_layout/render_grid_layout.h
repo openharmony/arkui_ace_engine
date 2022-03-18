@@ -529,7 +529,7 @@ protected:
     RefPtr<Animator> flexController_;
     bool supportAnimation_ = false;
     bool dragAnimation_ = false;
-    EdgeEffect edgeEffect_ = EdgeEffect::SPRING;
+    EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     std::atomic<bool> needRunAnimation_;
     std::map<std::string, std::function<void()>> animationFinishedFuncList_;
     std::mutex animationLock_;
