@@ -34,7 +34,8 @@ const Color CONTAINER_BACKGROUND_COLOR = Color(0xf2e6e7ed);
 const Color CONTAINER_BORDER_COLOR = Color(0x33000000);
 const Color TITLE_TEXT_COLOR = Color(0xe5000000);
 const Color CONTENT_BACKGROUND_COLOR = Color(0xffffffff);
-const Color TITLE_BUTTON_BACKGROUND_COLOR = Color(0x33000000);
+const Color TITLE_BUTTON_BACKGROUND_COLOR = Color(0x19000000);
+const Color TITLE_BUTTON_CLICKED_COLOR = Color(0x33000000);
 
 } // namespace OHOS::Ace
 
