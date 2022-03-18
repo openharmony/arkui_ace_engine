@@ -77,14 +77,20 @@ void RosenRenderSlider::PerformLayout()
     LOGD("Slider::PerformLayout totalRatio_:%{public}lf, trackLength:%{public}lf", totalRatio_, trackLength_);
     if (direction_ == Axis::VERTICAL) {
         double dxOffset = GetLayoutSize().Width() * HALF;
-        double dyOffset = NormalizeToPx(SLIDER_PADDING_DP) + trackLength_ * totalRatio_;
+        double dyOffset = isReverse_ ? GetLayoutSize().Height() - NormalizeToPx(SLIDER_PADDING_DP) -
+            trackLength_ * totalRatio_ : NormalizeToPx(SLIDER_PADDING_DP) + trackLength_ * totalRatio_;
         ProcessBlock(Offset(dxOffset, dyOffset));
         ProcessTrack(Offset(dxOffset, dyOffset));
         SetTipPosition(dyOffset);
     } else {
-        double dxOffset = (GetTextDirection() == TextDirection::LTR)
-                              ? NormalizeToPx(SLIDER_PADDING_DP) + trackLength_ * totalRatio_
-                              : GetLayoutSize().Width() - NormalizeToPx(SLIDER_PADDING_DP) - trackLength_ * totalRatio_;
+        double dxOffset = 0.0;
+        if ((GetTextDirection() == TextDirection::LTR &&
+            !isReverse_) || (GetTextDirection() == TextDirection::RTL && isReverse_)) {
+            dxOffset = NormalizeToPx(SLIDER_PADDING_DP) + trackLength_ * totalRatio_;
+        } else if ((GetTextDirection() == TextDirection::RTL &&
+            !isReverse_) || (GetTextDirection() == TextDirection::LTR && isReverse_)) {
+            dxOffset = GetLayoutSize().Width() - NormalizeToPx(SLIDER_PADDING_DP) - trackLength_ * totalRatio_;
+        }
         double dyOffset = GetLayoutSize().Height() * HALF;
         ProcessBlock(Offset(dxOffset, dyOffset));
         ProcessTrack(Offset(dxOffset, dyOffset));
