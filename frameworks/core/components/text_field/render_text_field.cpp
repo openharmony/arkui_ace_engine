@@ -608,8 +608,7 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
         return;
     }
 
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE &&
-        SystemProperties::GetDeviceType() != DeviceType::CAR) {
+    if (!IsSelectiveDevice()) {
         StartTwinkling();
         return;
     }
@@ -1261,7 +1260,7 @@ void RenderTextField::UpdateFocusAnimation()
         Offset offset;
         Size size;
         Radius deflateRadius;
-        if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+        if (IsSelectiveDevice()) {
             double focusOffset = NormalizeToPx(OFFSET_FOCUS);
             offset = Offset(focusOffset, focusOffset);
             size = Size(focusOffset * 2.0, focusOffset * 2.0);
@@ -1321,7 +1320,7 @@ void RenderTextField::UpdateIcon(const RefPtr<TextFieldComponent>& textField)
 
 void RenderTextField::UpdatePasswordIcon(const RefPtr<TextFieldComponent>& textField)
 {
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE) {
+    if (!IsSelectiveDevice()) {
         return;
     }
     if (!showPasswordIcon_) {
