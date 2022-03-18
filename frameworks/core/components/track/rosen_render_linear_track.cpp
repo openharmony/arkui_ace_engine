@@ -107,24 +107,31 @@ void RosenRenderLinearTrack::Paint(RenderContext& context, const Offset& offset)
     if (!NearEqual(GetTotalRatio(), 0.0)) {
         SkPaint selectPaint;
         selectPaint.setAntiAlias(true);
+        double startRect = 0.0;
+        double endRect = 0.0;
         if (direction_ == Axis::VERTICAL) {
-            const double startRect = offset.GetY();
-            const double endRect = startRect + trackHeight + trackLength * GetTotalRatio();
+            startRect = isReverse_ ? offset.GetY() + GetLayoutSize().Height() : offset.GetY();
+            endRect = isReverse_ ? startRect - trackHeight - trackLength * GetTotalRatio()
+                                : startRect + trackHeight + trackLength * GetTotalRatio();
             SkRRect selectRect = SkRRect::MakeRectXY({ offset.GetX(), startRect, offset.GetX() + trackHeight, endRect },
                 trackHeight * HALF, trackHeight * HALF);
             selectPaint.setShader(
                 BlendSkShader({ offset.GetX(), startRect }, GetSelectColor().GetValue(), playAnimation_));
             canvas->drawRRect(selectRect, selectPaint);
-        } else {
-            const double startRect = leftToRight_ ? offset.GetX() : offset.GetX() + GetLayoutSize().Width();
-            const double endRect = leftToRight_ ? startRect + trackHeight + trackLength * GetTotalRatio()
-                                                : startRect - trackHeight - trackLength * GetTotalRatio();
-            SkRRect selectRect = SkRRect::MakeRectXY({ startRect, offset.GetY(), endRect, offset.GetY() + trackHeight },
-                trackHeight * HALF, trackHeight * HALF);
-            selectPaint.setShader(BlendSkShader({ startRect + scanHighLightValue_ * trackLength, offset.GetY() },
-                GetSelectColor().GetValue(), playAnimation_));
-            canvas->drawRRect(selectRect, selectPaint);
+            return;
         }
+        if ((leftToRight_ && !isReverse_) || (!leftToRight_ && isReverse_)) {
+            startRect = offset.GetX();
+            endRect = startRect + trackHeight + trackLength * GetTotalRatio();
+        } else {
+            startRect = offset.GetX() + GetLayoutSize().Width();
+            endRect = startRect - trackHeight - trackLength * GetTotalRatio();
+        }
+        SkRRect selectRect = SkRRect::MakeRectXY({ startRect, offset.GetY(), endRect, offset.GetY() + trackHeight },
+                trackHeight * HALF, trackHeight * HALF);
+        selectPaint.setShader(BlendSkShader({ startRect + scanHighLightValue_ * trackLength, offset.GetY() },
+            GetSelectColor().GetValue(), playAnimation_));
+        canvas->drawRRect(selectRect, selectPaint);
     }
 }
 
@@ -247,16 +254,23 @@ void RosenRenderLinearTrack::PaintSliderTrack(RenderContext& context, const Offs
         selectPaint.setStyle(SkPaint::Style::kStroke_Style);
         selectPaint.setStrokeWidth(trackHeight);
         selectPaint.setStrokeCap(SkPaint::kRound_Cap);
+        double fromOffset = 0.0;
+        double toOffset = 0.0;
         if (direction_ == Axis::VERTICAL) {
-            const double fromY = offset.GetY();
-            const double toY = fromY + trackLength * GetTotalRatio();
-            canvas->drawLine(dxOffset, fromY, dxOffset, toY, selectPaint);
-        } else {
-            const double fromX = leftToRight_ ? offset.GetX() : offset.GetX() + trackLength;
-            const double toX =
-                leftToRight_ ? fromX + trackLength * GetTotalRatio() : fromX - trackLength * GetTotalRatio();
-            canvas->drawLine(fromX, dyOffset, toX, dyOffset, selectPaint);
+            fromOffset = isReverse_ ? offset.GetY() + trackLength : offset.GetY();
+            toOffset = isReverse_ ?
+                fromOffset - trackLength * GetTotalRatio() : fromOffset + trackLength * GetTotalRatio();
+            canvas->drawLine(dxOffset, fromOffset, dxOffset, toOffset, selectPaint);
+            return;
         }
+        if (((leftToRight_ && !isReverse_)) || ((!leftToRight_ && isReverse_))) {
+            fromOffset = offset.GetX();
+            toOffset = fromOffset + trackLength * GetTotalRatio();
+        } else {
+            fromOffset = offset.GetX() + trackLength;
+            toOffset = fromOffset - trackLength * GetTotalRatio();
+        }
+        canvas->drawLine(fromOffset, dyOffset, toOffset, dyOffset, selectPaint);
     }
 }
 
