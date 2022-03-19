@@ -23,7 +23,25 @@ namespace OHOS::Ace::Framework {
 
 void JSContextMenu::Close(const JSCallbackInfo& args)
 {
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
     SubwindowManager::GetInstance()->CloseMenu();
+#else
+    // Close context menu.
+    auto container = Container::Current();
+    if (container) {
+        auto context = container->GetPipelineContext();
+        auto executor = Container::CurrentTaskExecutor();
+        if (executor) {
+            executor->PostTask(
+                [context]() {
+                    if (context) {
+                        context->CloseContextMenu();
+                    }
+                },
+                TaskExecutor::TaskType::UI);
+        }
+    }
+#endif
     args.SetReturnValue(args.This());
 }
 

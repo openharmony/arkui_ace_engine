@@ -65,6 +65,7 @@ pa_engine_path = "adapter/ohos/entrance/pa_engine"
 enable_rosen_backend = true
 enable_standard_input = true
 build_container_scope_lib = true
+multiple_window_support = true
 
 if (product_name == "rk3568") {
   web_components_support = true
@@ -105,6 +106,10 @@ if (enable_rosen_backend) {
 
 if (enable_standard_input) {
   defines += [ "ENABLE_STANDARD_INPUT" ]
+}
+
+if (multiple_window_support) {
+  defines += [ "MULTIPLE_WINDOW_SUPPORTED" ]
 }
 
 cflags_cc = [
