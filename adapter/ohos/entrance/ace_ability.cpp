@@ -36,6 +36,7 @@
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/utils.h"
+#include "base/geometry/rect.h"
 #include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
@@ -190,6 +191,10 @@ void AceAbility::OnStart(const Want& want)
     // register drag event callback
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener(this);
     window->RegisterDragListener(dragWindowListener);
+
+    // register drag event callback
+    OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener(this);
+    window->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener);
 
     int32_t width = window->GetRect().width_;
     int32_t height = window->GetRect().height_;
@@ -667,6 +672,34 @@ void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)
     LOGI("AceAbility::OnModeChange");
 }
 
+void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
+{
+    auto rect = info->rect_;
+    auto type = info->type_;
+    Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    LOGI("AceAbility::OccupiedAreaChange rect:%{public}s type: %{public}d", keyboardRect.ToString().c_str(), type);
+    if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
+        auto container = Platform::AceContainer::GetContainer(abilityId_);
+        if (!container) {
+            LOGE("container may be destroyed.");
+            return;
+        }
+        auto taskExecutor = container->GetTaskExecutor();
+        if (!taskExecutor) {
+            LOGE("OnSizeChange: taskExecutor is null.");
+            return;
+        }
+
+        ContainerScope scope(abilityId_);
+        taskExecutor->PostTask([container, keyboardRect] {
+            auto context = container->GetPipelineContext();
+            if (context != nullptr) {
+                context->OnVirtualKeyboardAreaChange(keyboardRect);
+            }
+        }, TaskExecutor::TaskType::UI);
+    }
+}
+
 void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     auto container = Platform::AceContainer::GetContainer(abilityId_);
@@ -674,10 +707,18 @@ void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::s
         LOGE("container may be destroyed.");
         return;
     }
-    auto context = container->GetPipelineContext();
-    if (context != nullptr) {
-        context->DumpInfo(params, info);
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("OnSizeChange: taskExecutor is null.");
+        return;
     }
+    ContainerScope scope(abilityId_);
+    taskExecutor->PostSyncTask([container, params, &info] {
+        auto context = container->GetPipelineContext();
+        if (context != nullptr) {
+            context->DumpInfo(params, info);
+        }
+    }, TaskExecutor::TaskType::UI);
 }
 
 void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)

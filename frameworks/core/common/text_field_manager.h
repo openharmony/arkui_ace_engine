@@ -32,7 +32,7 @@ public:
     ~TextFieldManager() override = default;
 
     void SetClickPosition(const Offset& position) override;
-    const Offset& GetClickPosition();
+    const Offset& GetClickPosition() override;
     void MovePage(int32_t pageId, const Offset& rootRect, double offsetHeight) override;
     void SetScrollElement(int32_t pageId, const WeakPtr<ScrollElement>& scrollElement) override;
     void RemovePageId(int32_t pageId) override;
