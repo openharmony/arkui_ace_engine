@@ -382,6 +382,12 @@ protected:
 
     bool ShowCounter() const;
 
+    static bool IsSelectiveDevice()
+    {
+        return (SystemProperties::GetDeviceType() != DeviceType::TV &&
+            SystemProperties::GetDeviceType() != DeviceType::WATCH);
+    }
+
     // Used for compare to the current value and decide whether to UpdateRemoteEditing().
     std::shared_ptr<TextEditingValue> lastKnownRemoteEditingValue_;
 
