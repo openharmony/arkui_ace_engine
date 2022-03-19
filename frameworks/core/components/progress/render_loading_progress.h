@@ -56,6 +56,11 @@ public:
         return loadingMode_;
     }
 
+    Color GetProgressColor() const
+    {
+        return progressColor_;
+    }
+
     void SetLoadingMode(int32_t mode);
 
     void SetDragRange(double minDistance, double maxDistance);

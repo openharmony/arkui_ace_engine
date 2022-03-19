@@ -320,4 +320,8 @@ ACE_EXPORT extern const char DATE_PICKER_DIALOG_ETS_TAG[] = "DatePickerDialog";
 ACE_EXPORT extern const char SIDE_BAR_COMPONENT_TAG[] = "SideBarContainerComponent";
 ACE_EXPORT extern const char SIDE_BAR_ETS_TAG[] = "SideBarContainer";
 
+// loadingProgress
+ACE_EXPORT extern const char LOADING_PROGRESS_COMPONENT_TAG[] = "LoadingProgressComponent";
+ACE_EXPORT extern const char LOADING_PROGRESS_ETS_TAG[] = "LoadingProgress";
+
 } // namespace OHOS::Ace::V2
