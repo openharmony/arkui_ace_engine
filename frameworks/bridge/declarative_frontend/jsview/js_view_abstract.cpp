@@ -3524,7 +3524,9 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     if (!menuComponent) {
         return;
     }
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
     menuComponent->SetIsContextMenu(true);
+#endif
     int32_t responseType = static_cast<int32_t>(ResponseType::LONGPRESS);
     if (info.Length() == 2 && info[1]->IsNumber()) {
         responseType = info[1]->ToNumber<int32_t>();
@@ -3540,7 +3542,11 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
             }
             if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
                 auto showMenu = refPtr->GetTargetCallback();
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
                 showMenu("", info.GetScreenLocation());
+#else
+                showMenu("", info.GetGlobalLocation());
+#endif
             }
         });
     } else if (responseType == static_cast<int32_t>(ResponseType::LONGPRESS)) {
@@ -3553,7 +3559,11 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
                 return;
             }
             auto showMenu = refPtr->GetTargetCallback();
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
             showMenu("", info.GetScreenLocation());
+#else
+            showMenu("", info.GetGlobalLocation());
+#endif
         });
         box->SetOnLongPress(longGesture);
     } else {
