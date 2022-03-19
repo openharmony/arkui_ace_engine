@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,7 @@ namespace {
 
 constexpr int32_t DOUBLE_WIDTH = 2;
 constexpr int32_t DASHED_LINE_LENGTH = 3;
+constexpr int32_t DEL_NUM = 2;
 constexpr float BLUR_SIGMA_SCALE = 0.57735f;
 constexpr float TOP_START = 225.0f;
 constexpr float TOP_END = 270.0f;
@@ -1809,11 +1810,15 @@ void RosenDecorationPainter::SetBorderStyle(
             if (!NearZero(borderLength)) {
                 double count = borderLength / width;
                 double leftLen = fmod((count - DASHED_LINE_LENGTH), (DASHED_LINE_LENGTH + 1));
+                if (NearZero(count - DASHED_LINE_LENGTH)) {
+                    return;
+                }
                 if (leftLen > DASHED_LINE_LENGTH - 1) {
                     delLen = (DASHED_LINE_LENGTH + 1 - leftLen) * width /
-                             (int32_t)((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1) + 2);
+                             static_cast<int32_t>((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1) + DEL_NUM);
                 } else {
-                    addLen = leftLen * width / (int32_t)((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1));
+                    addLen = leftLen * width /
+                             static_cast<int32_t>((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1));
                 }
             }
             const float intervals[] = { width * DASHED_LINE_LENGTH - delLen, width + addLen };
