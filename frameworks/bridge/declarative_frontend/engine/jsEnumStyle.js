@@ -737,6 +737,19 @@ var MixedMode;
   MixedMode[MixedMode["None"] = 2] = "None";
 })(MixedMode || (MixedMode = {}));
 
+var HitTestType;
+(function (HitTestType) {
+  HitTestType[HitTestType["EditText"] = 0] = "EditText";
+  HitTestType[HitTestType["Email"] = 1] = "Email";
+  HitTestType[HitTestType["HttpAnchor"] = 2] = "HttpAnchor";
+  HitTestType[HitTestType["HttpAnchorImg"] = 3] = "HttpAnchorImg";
+  HitTestType[HitTestType["Img"] = 4] = "Img";
+  HitTestType[HitTestType["Map"] = 5] = "Map";
+  HitTestType[HitTestType["Phone"] = 6] = "Phone";
+  HitTestType[HitTestType["Unknown"] = 7] = "Unknown";
+})(HitTestType || (HitTestType = {}));
+
+
 var ProgressType;
 (function (ProgressType) {
   ProgressType[ProgressType["Linear"] = 0] = "Linear";

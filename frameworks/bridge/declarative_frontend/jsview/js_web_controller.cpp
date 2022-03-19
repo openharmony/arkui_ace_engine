@@ -170,12 +170,12 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
             }
             JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
             std::string key;
-            if (!ConvertFromJSValue(obj->GetProperty("key"), key)) {
+            if (!ConvertFromJSValue(obj->GetProperty("headerKey"), key)) {
                 LOGW("can't find key at index %{public}d of additionalHttpHeaders, so skip it.", i);
                 continue;
             }
             std::string value;
-            if (!ConvertFromJSValue(obj->GetProperty("value"), value)) {
+            if (!ConvertFromJSValue(obj->GetProperty("headerValue"), value)) {
                 LOGW("can't find value at index %{public}d of additionalHttpHeaders, so skip it.", i);
                 continue;
             }
@@ -431,7 +431,7 @@ void JSWebController::SetJavascriptInterface(const JSCallbackInfo& args)
         return;
     }
     // options.obj
-    JSRef<JSVal> jsClassObj = obj->GetProperty("obj");
+    JSRef<JSVal> jsClassObj = obj->GetProperty("object");
     if (!jsClassObj->IsObject()) {
         LOGW("JSWebController param obj is not object");
         return;
