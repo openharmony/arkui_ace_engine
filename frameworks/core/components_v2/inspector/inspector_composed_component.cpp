@@ -46,6 +46,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/list_composed_element.h"
 #include "core/components_v2/inspector/list_item_composed_element.h"
+#include "core/components_v2/inspector/loading_progress_composed_element.h"
 #include "core/components_v2/inspector/marquee_composed_element.h"
 #include "core/components_v2/inspector/menu_composed_element.h"
 #include "core/components_v2/inspector/navigation_composed_element.h"
@@ -229,7 +230,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { DATE_PICKER_DIALOG_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::DatePickerDialogComposedElement>(id); } },
     { SIDE_BAR_COMPONENT_TAG,
-        [](const std::string& id) {return AceType::MakeRefPtr<V2::SideBarComposedElement>(id); } }
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::SideBarComposedElement>(id); } },
+    { LOADING_PROGRESS_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::LoadingProgressComposedElement>(id); } }
 };
 
 } // namespace
@@ -303,7 +306,8 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { ALERTDIALOG_COMPONENT_TAG, ALERTDIALOG_ETS_TAG },
     { CUSTOMDIALOG_COMPONENT_TAG, CUSTOMDIALOG_ETS_TAG },
     { DATE_PICKER_DIALOG_COMPONENT_TAG, DATE_PICKER_DIALOG_ETS_TAG },
-    { SIDE_BAR_COMPONENT_TAG, SIDE_BAR_ETS_TAG }
+    { SIDE_BAR_COMPONENT_TAG, SIDE_BAR_ETS_TAG },
+    { LOADING_PROGRESS_COMPONENT_TAG, LOADING_PROGRESS_ETS_TAG }
 };
 
 RefPtr<Element> InspectorComposedComponent::CreateElement()
