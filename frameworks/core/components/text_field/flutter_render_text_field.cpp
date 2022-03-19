@@ -69,7 +69,7 @@ Rect FlutterRenderTextField::GetInnerRect(const Decoration& decoration, const Re
     }
     double iconSpacing = iconImage_ ? NormalizeToPx(iconHotZoneSizeInDimension_) : 0.0;
     double passwordIconSpacing =
-        (keyboard_ == TextInputType::VISIBLE_PASSWORD && SystemProperties::GetDeviceType() == DeviceType::PHONE)
+        (keyboard_ == TextInputType::VISIBLE_PASSWORD && IsSelectiveDevice())
             ? NormalizeToPx(iconHotZoneSizeInDimension_)
             : 0.0;
     if (textDirection_ == TextDirection::RTL) {
@@ -255,8 +255,7 @@ void FlutterRenderTextField::PaintIcon(const Offset& offset, RenderContext& cont
 
 void FlutterRenderTextField::PaintSelection(SkCanvas* canvas) const
 {
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE &&
-        SystemProperties::GetDeviceType() != DeviceType::CAR) {
+    if (!IsSelectiveDevice()) {
         return;
     }
     using namespace Constants;
