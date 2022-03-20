@@ -227,9 +227,10 @@ void RenderTextField::Update(const RefPtr<Component>& component)
             controller_->RemoveObserver(WeakClaim(this));
         }
         controller_ = textField->GetTextEditController();
-        controller_->AddObserver(WeakClaim(this));
     }
     if (controller_) {
+        controller_->RemoveObserver(WeakClaim(this));
+        controller_->AddObserver(WeakClaim(this));
         controller_->SetHint(placeholder_);
         if (textField->IsValueUpdated()) {
             controller_->SetText(textField->GetValue(), false);
