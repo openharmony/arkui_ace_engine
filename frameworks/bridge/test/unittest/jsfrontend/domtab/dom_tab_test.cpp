@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,8 +129,6 @@ void DomTabTest::TearDown() {}
  * @tc.name: DomTabsCreatorTest001
  * @tc.desc: Test tabs node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DD66U
- * @tc.author: litianyu
  */
 HWTEST_F(DomTabTest, DomTabsCreatorTest001, TestSize.Level1)
 {
@@ -153,8 +151,6 @@ HWTEST_F(DomTabTest, DomTabsCreatorTest001, TestSize.Level1)
  * @tc.name: DomTabsCreatorTest002
  * @tc.desc: Test tabs node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DD66U
- * @tc.author: litianyu
  */
 HWTEST_F(DomTabTest, DomTabsCreatorTest002, TestSize.Level1)
 {
@@ -177,8 +173,6 @@ HWTEST_F(DomTabTest, DomTabsCreatorTest002, TestSize.Level1)
  * @tc.name: DomTabsCreatorTest003
  * @tc.desc: Test tabs node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1V3 AR000DQ1V2
- * @tc.author: liujinwei
  */
 HWTEST_F(DomTabTest, DomTabsCreatorTest003, TestSize.Level1)
 {
@@ -200,8 +194,6 @@ HWTEST_F(DomTabTest, DomTabsCreatorTest003, TestSize.Level1)
  * @tc.name: DomTabsCreatorTest004
  * @tc.desc: Test tabs node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1V3 AR000DQ1V2
- * @tc.author: liujinwei
  */
 HWTEST_F(DomTabTest, DomTabsCreatorTest004, TestSize.Level1)
 {
@@ -223,8 +215,6 @@ HWTEST_F(DomTabTest, DomTabsCreatorTest004, TestSize.Level1)
  * @tc.name: DomTabsCreatorTest005
  * @tc.desc: Test tabs node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1V3 AR000DQ1V2
- * @tc.author: liujinwei
  */
 HWTEST_F(DomTabTest, DomTabsCreatorTest005, TestSize.Level1)
 {
@@ -246,8 +236,6 @@ HWTEST_F(DomTabTest, DomTabsCreatorTest005, TestSize.Level1)
  * @tc.name: DomTabBarCreatorTest001
  * @tc.desc: Test tab-bar node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DD670
- * @tc.author: litianyu
  */
 HWTEST_F(DomTabTest, DomTabBarCreatorTest001, TestSize.Level1)
 {
@@ -272,8 +260,6 @@ HWTEST_F(DomTabTest, DomTabBarCreatorTest001, TestSize.Level1)
  * @tc.name: DomTabBarCreatorTest002
  * @tc.desc: Test tab-bar node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DD670
- * @tc.author: litianyu
  */
 HWTEST_F(DomTabTest, DomTabBarCreatorTest002, TestSize.Level1)
 {
@@ -298,8 +284,6 @@ HWTEST_F(DomTabTest, DomTabBarCreatorTest002, TestSize.Level1)
  * @tc.name: DomTabContentCreatorTest001
  * @tc.desc: Test tab-content node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DD672
- * @tc.author: litianyu
  */
 HWTEST_F(DomTabTest, DomTabContentCreatorTest001, TestSize.Level1)
 {
@@ -324,8 +308,6 @@ HWTEST_F(DomTabTest, DomTabContentCreatorTest001, TestSize.Level1)
  * @tc.name: DomTabContentCreatorTest002
  * @tc.desc: Test tab-content node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DD672
- * @tc.author: litianyu
  */
 HWTEST_F(DomTabTest, DomTabContentCreatorTest002, TestSize.Level1)
 {
@@ -350,8 +332,6 @@ HWTEST_F(DomTabTest, DomTabContentCreatorTest002, TestSize.Level1)
  * @tc.name: DomTabContentCreatorTest003
  * @tc.desc: Test tab-content node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DSCD1
- * @tc.author: liujinwei
  */
 HWTEST_F(DomTabTest, DomTabContentCreatorTest003, TestSize.Level1)
 {

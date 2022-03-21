@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,8 +43,6 @@ void DomCardImageTest::TearDown() {}
  * @tc.name: DomCardImageTest001
  * @tc.desc: Verify that DomImage can be created successfully.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBC
- * @tc.author: lixingchi
  */
 HWTEST_F(DomCardImageTest, DomCardImageTest001, TestSize.Level1)
 {
@@ -72,8 +70,6 @@ HWTEST_F(DomCardImageTest, DomCardImageTest001, TestSize.Level1)
  * @tc.name: DomCardImageTest002
  * @tc.desc: Verify that DomImage data binding successfully.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBC
- * @tc.author: lixingchi
  */
 HWTEST_F(DomCardImageTest, DomCardImageTest002, TestSize.Level1)
 {
@@ -105,8 +101,6 @@ HWTEST_F(DomCardImageTest, DomCardImageTest002, TestSize.Level1)
  * @tc.name: DomCardImageTest003
  * @tc.desc: Verify that DomImage styles set successfully.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBC
- * @tc.author: lixingchi
  */
 HWTEST_F(DomCardImageTest, DomCardImageTest003, TestSize.Level1)
 {
@@ -157,8 +151,6 @@ HWTEST_F(DomCardImageTest, DomCardImageTest003, TestSize.Level1)
  * @tc.name: DomCardImageTest004
  * @tc.desc: Verify that DomImage event binding successfully.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBC
- * @tc.author: lixingchi
  */
 HWTEST_F(DomCardImageTest, DomCardImageTest004, TestSize.Level1)
 {
@@ -188,5 +180,4 @@ HWTEST_F(DomCardImageTest, DomCardImageTest004, TestSize.Level1)
     EXPECT_TRUE(gestureEventComponent->GetOnClickId().GetData().eventId == DOM_DEFAULT_ROOT_NODE_ID);
     ASSERT_TRUE(CardTestFactory::GetInstance().GetNodeNumber() == 1);
 }
-
 } // namespace OHOS::Ace::Framework

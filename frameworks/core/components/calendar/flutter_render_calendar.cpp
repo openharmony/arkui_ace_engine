@@ -220,9 +220,9 @@ void FlutterRenderCalendar::DrawWeekAndDates(ScopedCanvas& canvas, Offset offset
     double dailyRowSpace = 0.0;
     static const Dimension dateOffset = 4.0_vp;
     double dayNumberStartY = topPadding_ + weekHeight_ + weekAndDayRowSpace_;
-    if (rowCount_ == 5) {
+    if (rowCount_ == 5) {   // five line calendar
         dailyRowSpace = dailyFiveRowSpace_;
-    } else if (rowCount_ == 6) {
+    } else if (rowCount_ == 6) {    // six line calendar
         dailyRowSpace = dailySixRowSpace_;
     }
     for (int32_t row = 0; row < rowCount_; row++) {

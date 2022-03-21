@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,6 @@ Radius RadiusCreatorTest::CreateFromDsl(const std::string jsonRadiusStr) const
  * @tc.name: RadiusCreator001
  * @tc.desc: Verify RadiusCreator can create radius with value.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU5
  */
 HWTEST_F(RadiusCreatorTest, RadiusCreator001, TestSize.Level1)
 {
@@ -87,7 +86,6 @@ HWTEST_F(RadiusCreatorTest, RadiusCreator001, TestSize.Level1)
  * @tc.name: RadiusCreator002
  * @tc.desc: Verify RadiusCreator can create radius with x | y.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU5
  */
 HWTEST_F(RadiusCreatorTest, RadiusCreator002, TestSize.Level1)
 {
@@ -114,7 +112,6 @@ HWTEST_F(RadiusCreatorTest, RadiusCreator002, TestSize.Level1)
  * @tc.name: RadiusCreator003
  * @tc.desc: Verify RadiusCreator can create radius with className only.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU5
  */
 HWTEST_F(RadiusCreatorTest, RadiusCreator003, TestSize.Level1)
 {

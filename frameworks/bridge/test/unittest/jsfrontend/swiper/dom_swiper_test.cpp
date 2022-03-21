@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -156,8 +156,6 @@ void DomSwiperTest::TearDown() {}
  * @tc.name: DomSwiperCreatorTest001
  * @tc.desc: Test swiper node and child swiper component are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DD66O
- * @tc.author: lijun
  */
 HWTEST_F(DomSwiperTest, DomSwiperCreatorTest001, TestSize.Level1)
 {
@@ -197,8 +195,6 @@ HWTEST_F(DomSwiperTest, DomSwiperCreatorTest001, TestSize.Level1)
  * @tc.name: DomSwiperCreatorTest002
  * @tc.desc: Test set indicator attribute to swiper component successfully.
  * @tc.type: FUNC
- * @tc.require: AR000DD66O
- * @tc.author: lijun
  */
 HWTEST_F(DomSwiperTest, DomSwiperCreatorTest002, TestSize.Level1)
 {
@@ -222,8 +218,6 @@ HWTEST_F(DomSwiperTest, DomSwiperCreatorTest002, TestSize.Level1)
  * @tc.name: DomSwiperCreatorTest003
  * @tc.desc: Test append child to swiper component successfully.
  * @tc.type: FUNC
- * @tc.require: AR000DD66O
- * @tc.author: lijun
  */
 HWTEST_F(DomSwiperTest, DomSwiperCreatorTest003, TestSize.Level1)
 {
@@ -247,8 +241,6 @@ HWTEST_F(DomSwiperTest, DomSwiperCreatorTest003, TestSize.Level1)
  * @tc.name: DomSwiperCreatorTest004
  * @tc.desc: Test set index attribute to swiper component successfully.
  * @tc.type: FUNC
- * @tc.require: AR000DD66O
- * @tc.author: lijun
  */
 HWTEST_F(DomSwiperTest, DomSwiperCreatorTest004, TestSize.Level1)
 {
@@ -272,8 +264,6 @@ HWTEST_F(DomSwiperTest, DomSwiperCreatorTest004, TestSize.Level1)
  * @tc.name: DomSwiperCreatorTest005
  * @tc.desc: Test swiper node and swiper component created successfully with empty input of style and attribute.
  * @tc.type: FUNC
- * @tc.require: AR000DD66O
- * @tc.author: lijun
  */
 HWTEST_F(DomSwiperTest, DomSwiperCreatorTest005, TestSize.Level1)
 {
@@ -310,8 +300,6 @@ HWTEST_F(DomSwiperTest, DomSwiperCreatorTest005, TestSize.Level1)
  * @tc.name: DomSwiperCreatorTest006
  * @tc.desc: Test add event to swiper component successfully.
  * @tc.type: FUNC
- * @tc.require: AR000DD66O
- * @tc.author: lijun
  */
 HWTEST_F(DomSwiperTest, DomSwiperCreatorTest006, TestSize.Level1)
 {

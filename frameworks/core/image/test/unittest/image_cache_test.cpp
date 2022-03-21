@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,8 +39,6 @@ public:
  * @tc.name: MemoryCache001
  * @tc.desc: new image success insert into cache with LRU.
  * @tc.type: FUNC
- * @tc.require: AR000DACKR
- * @tc.author: lushi
  */
 HWTEST_F(ImageCacheTest, MemoryCache001, TestSize.Level1)
 {
@@ -68,8 +66,6 @@ HWTEST_F(ImageCacheTest, MemoryCache001, TestSize.Level1)
  * @tc.name: MemoryCache002
  * @tc.desc: get image success in cache with LRU.
  * @tc.type: FUNC
- * @tc.require: AR000DACKR
- * @tc.author: lushi
  */
 HWTEST_F(ImageCacheTest, MemoryCache002, TestSize.Level1)
 {
@@ -103,8 +99,6 @@ HWTEST_F(ImageCacheTest, MemoryCache002, TestSize.Level1)
  * @tc.name: MemoryCache003
  * @tc.desc: Set memory cache capacity success.
  * @tc.type: FUNC
- * @tc.require: AR000DACKR
- * @tc.author: lushi
  */
 HWTEST_F(ImageCacheTest, MemoryCache003, TestSize.Level1)
 {
@@ -120,8 +114,6 @@ HWTEST_F(ImageCacheTest, MemoryCache003, TestSize.Level1)
  * @tc.name: MemoryCache004
  * @tc.desc: memory cache of image data.
  * @tc.type: FUNC
- * @tc.require: AR000DACKR
- * @tc.author: lushi
  */
 HWTEST_F(ImageCacheTest, MemoryCache004, TestSize.Level1)
 {
@@ -208,8 +200,6 @@ HWTEST_F(ImageCacheTest, MemoryCache004, TestSize.Level1)
  * @tc.name: FileCache001
  * @tc.desc: init cacheFilePath and cacheFileInfo success.
  * @tc.type: FUNC
- * @tc.require: AR000DACKR AR000DACKP
- * @tc.author: lushi
  */
 HWTEST_F(ImageCacheTest, FileCache001, TestSize.Level1)
 {
@@ -239,8 +229,6 @@ HWTEST_F(ImageCacheTest, FileCache001, TestSize.Level1)
  * @tc.name: FileCache002
  * @tc.desc: write data into cacheFilePath success.
  * @tc.type: FUNC
- * @tc.require: AR000DACKR AR000DACKP
- * @tc.author: lushi
  */
 HWTEST_F(ImageCacheTest, FileCache002, TestSize.Level1)
 {
@@ -266,8 +254,6 @@ HWTEST_F(ImageCacheTest, FileCache002, TestSize.Level1)
  * @tc.name: FileCache003
  * @tc.desc: Get data from cacheFilePath success with right url. but null with wrong url.
  * @tc.type: FUNC
- * @tc.require: AR000DACKR AR000DACKP
- * @tc.author: lushi
  */
 HWTEST_F(ImageCacheTest, FileCache003, TestSize.Level1)
 {
@@ -289,8 +275,6 @@ HWTEST_F(ImageCacheTest, FileCache003, TestSize.Level1)
  * @tc.name: FileCache004
  * @tc.desc: clear files from cacheFilePath success while write file exceed limit.
  * @tc.type: FUNC
- * @tc.require: AR000DACKR AR000DACKP
- * @tc.author: lushi
  */
 HWTEST_F(ImageCacheTest, FileCache004, TestSize.Level1)
 {

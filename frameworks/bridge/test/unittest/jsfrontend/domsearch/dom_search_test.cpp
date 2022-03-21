@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -178,7 +178,6 @@ bool IsTv()
  * @tc.name: CreateSearchFromDsl001
  * @tc.desc: Test search node and search component created successfully with all attributes set.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RC
  */
 HWTEST_F(DomSearchTest, CreateSearchFromDsl001, TestSize.Level1)
 {
@@ -221,7 +220,6 @@ HWTEST_F(DomSearchTest, CreateSearchFromDsl001, TestSize.Level1)
  * @tc.name: CreateSearchFromDsl002
  * @tc.desc: Test search node and search component created correctly with no styles and attributes set.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RC
  */
 HWTEST_F(DomSearchTest, CreateSearchFromDsl002, TestSize.Level1)
 {
@@ -263,7 +261,6 @@ HWTEST_F(DomSearchTest, CreateSearchFromDsl002, TestSize.Level1)
  * @tc.name: CreateSearchFromDsl003
  * @tc.desc: Test search node and search component created correctly with invalid text styles and attributes set.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RC
  */
 HWTEST_F(DomSearchTest, CreateSearchFromDsl003, TestSize.Level1)
 {
@@ -304,7 +301,6 @@ HWTEST_F(DomSearchTest, CreateSearchFromDsl003, TestSize.Level1)
  * @tc.name: CreateSearchFromDsl004
  * @tc.desc: Test search node and search component created correctly with paddingStart and paddingEnd styles.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RC
  */
 HWTEST_F(DomSearchTest, CreateSearchFromDsl004, TestSize.Level1)
 {

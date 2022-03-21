@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -265,8 +265,6 @@ void AnimationDomTest::TearDown() {}
  * @tc.name: AnimationDomTest001
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000DQ20L
- * @tc.author: jiachunhui
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest001, TestSize.Level1)
 {
@@ -294,8 +292,6 @@ HWTEST_F(AnimationDomTest, AnimationDomTest001, TestSize.Level1)
  * @tc.name: AnimationDomTest002
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000DQ20M
- * @tc.author: jiachunhui
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest002, TestSize.Level1)
 {
@@ -325,8 +321,6 @@ HWTEST_F(AnimationDomTest, AnimationDomTest002, TestSize.Level1)
  * @tc.name: AnimationDomTest003
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000DQ20M
- * @tc.author: jiachunhui
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest003, TestSize.Level1)
 {
@@ -358,8 +352,6 @@ HWTEST_F(AnimationDomTest, AnimationDomTest003, TestSize.Level1)
  * @tc.name: AnimationDomTest004
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000DQ20M
- * @tc.author: jiachunhui
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest004, TestSize.Level1)
 {
@@ -391,8 +383,6 @@ HWTEST_F(AnimationDomTest, AnimationDomTest004, TestSize.Level1)
  * @tc.name: AnimationDomTest005
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000DQ20K
- * @tc.author: jiachunhui
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest005, TestSize.Level1)
 {
@@ -427,8 +417,6 @@ HWTEST_F(AnimationDomTest, AnimationDomTest005, TestSize.Level1)
  * @tc.name: AnimationDomTest006
  * @tc.desc: Serial animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000DQ2V6
- * @tc.author: jiangdayuan
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest006, TestSize.Level1)
 {
@@ -461,8 +449,6 @@ HWTEST_F(AnimationDomTest, AnimationDomTest006, TestSize.Level1)
  * @tc.name: AnimationDomTest007
  * @tc.desc: Serial animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000DQ20O
- * @tc.author: jiangdayuan
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest007, TestSize.Level1)
 {
@@ -504,8 +490,6 @@ HWTEST_F(AnimationDomTest, AnimationDomTest007, TestSize.Level1)
  * @tc.name: AnimationDomTest008
  * @tc.desc: Serial animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000DQ20P
- * @tc.author: jiangdayuan
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest008, TestSize.Level1)
 {
@@ -541,8 +525,6 @@ HWTEST_F(AnimationDomTest, AnimationDomTest008, TestSize.Level1)
  * @tc.name: AnimationDomTest009
  * @tc.desc: Serial animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000DQ20Q
- * @tc.author: jiangdayuan
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest009, TestSize.Level1)
 {
@@ -574,8 +556,6 @@ HWTEST_F(AnimationDomTest, AnimationDomTest009, TestSize.Level1)
  * @tc.name: AnimationDomTest010
  * @tc.desc: Serial animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000DQ20Q
- * @tc.author: jiangdayuan
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest010, TestSize.Level1)
 {
@@ -606,8 +586,6 @@ HWTEST_F(AnimationDomTest, AnimationDomTest010, TestSize.Level1)
  * @tc.name: AnimationDomTest011
  * @tc.desc: Serial animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000DQ20Q
- * @tc.author: jiangdayuan
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest011, TestSize.Level1)
 {
@@ -647,8 +625,6 @@ HWTEST_F(AnimationDomTest, AnimationDomTest011, TestSize.Level1)
  * @tc.name: AnimationDomTest012
  * @tc.desc: backgroundPosition parse
  * @tc.type: FUNC
- * @tc.require: AR000FL0U9
- * @tc.author: zhouzebin
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest012, TestSize.Level1)
 {
@@ -668,8 +644,6 @@ HWTEST_F(AnimationDomTest, AnimationDomTest012, TestSize.Level1)
  * @tc.name: AnimationDomTest013
  * @tc.desc: backgroundPosition parse
  * @tc.type: FUNC
- * @tc.require: AR000FL0U9
- * @tc.author: zhouzebin
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest013, TestSize.Level1)
 {
@@ -709,8 +683,6 @@ HWTEST_F(AnimationDomTest, AnimationDomTest013, TestSize.Level1)
  * @tc.name: AnimationDomTest014
  * @tc.desc: backgroundPosition parse
  * @tc.type: FUNC
- * @tc.require: AR000FL0U9
- * @tc.author: zhouzebin
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest014, TestSize.Level1)
 {
@@ -780,8 +752,6 @@ HWTEST_F(AnimationDomTest, AnimationDomTest014, TestSize.Level1)
  * @tc.name: AnimationDomTest015
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000FL0U7
- * @tc.author: zhouzebin
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest015, TestSize.Level1)
 {
@@ -809,8 +779,6 @@ HWTEST_F(AnimationDomTest, AnimationDomTest015, TestSize.Level1)
  * @tc.name: AnimationDomCurveTest002
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000DQ2SB
- * @tc.author: jiachunhui
  */
 HWTEST_F(AnimationDomTest, AnimationDomCurveTest002, TestSize.Level1)
 {
@@ -838,8 +806,6 @@ HWTEST_F(AnimationDomTest, AnimationDomCurveTest002, TestSize.Level1)
  * @tc.name: AnimationDomCurveTest003
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000DQ1VC
- * @tc.author: jiachunhui
  */
 HWTEST_F(AnimationDomTest, AnimationDomCurveTest003, TestSize.Level1)
 {
@@ -867,8 +833,6 @@ HWTEST_F(AnimationDomTest, AnimationDomCurveTest003, TestSize.Level1)
  * @tc.name: AnimationDomCurveTest004
  * @tc.desc: Animation steps parse check
  * @tc.type: FUNC
- * @tc.require: AR000DQ1VC
- * @tc.author: zhouzebin
  */
 HWTEST_F(AnimationDomTest, AnimationDomCurveTest004, TestSize.Level1)
 {

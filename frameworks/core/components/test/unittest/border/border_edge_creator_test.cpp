@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,6 @@ BorderEdge BorderEdgeCreatorTest::CreateFromDsl(const std::string jsonBorderEdge
  * @tc.name: BorderEdgeCreator001
  * @tc.desc: Verify BorderEdgeCreator can create border edge with width | color | style.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU5
  */
 HWTEST_F(BorderEdgeCreatorTest, BorderEdgeCreator001, TestSize.Level1)
 {
@@ -93,7 +92,6 @@ HWTEST_F(BorderEdgeCreatorTest, BorderEdgeCreator001, TestSize.Level1)
  * @tc.name: BorderEdgeCreator002
  * @tc.desc: Verify BorderEdgeCreator can create border edge with className only.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU5
  */
 HWTEST_F(BorderEdgeCreatorTest, BorderEdgeCreator002, TestSize.Level1)
 {

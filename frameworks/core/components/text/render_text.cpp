@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -425,7 +425,6 @@ EventMarker RenderText::GetEventMarker(int32_t position, GestureType type)
 
 void RenderText::OnStatusChanged(OHOS::Ace::RenderStatus renderStatus)
 {
-    // TODO add focus color when focus is ready in declarative.
     auto context = context_.Upgrade();
     if (context && context->GetIsDeclarative()) {
         return;
