@@ -153,8 +153,18 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    JSRef<JSVal> valUrl = obj->GetProperty("url");
     std::string url;
-    if (!ConvertFromJSValue(obj->GetProperty("url"), url)) {
+    if (valUrl->IsObject()) {
+        // same as src process of JSWeb::Create
+        std::string webSrc;
+        if (!JSViewAbstract::ParseJsMedia(valUrl, webSrc)) {
+            LOGE("JSWebController failed to parse url object");
+            return;
+        }
+        int np = webSrc.find_first_of("/");
+        url = (np < 0) ? webSrc : webSrc.erase(np, 1);
+    } else if (!ConvertFromJSValue(valUrl, url)) {
         LOGW("can't find url.");
         return;
     }
@@ -181,15 +191,16 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
             }
             httpHeaders[key] = value;
         }
-        LOGD("httpHeaders size:%{public}d", (int)httpHeaders.size());
     }
     if (webController_) {
         webController_->LoadUrl(url, httpHeaders);
     }
+    LOGI("JSWebController load url:%{private}s, httpHeaders:%{public}d", url.c_str(), (int)httpHeaders.size());
 }
 
 void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)
 {
+    LOGI("JSWebController excute typescript");
     if (args.Length() < 1 || !args[0]->IsObject()) {
         LOGW("invalid excute params");
         return;
