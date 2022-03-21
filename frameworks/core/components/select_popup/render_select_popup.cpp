@@ -35,6 +35,7 @@ RenderSelectPopup::RenderSelectPopup()
     rawDetector_->SetOnTouchDown([weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto selectPopup = weak.Upgrade();
         if (selectPopup) {
+            selectPopup->ProcessTouchDown(info);
             selectPopup->HandleRawEvent(info.GetTouches().front().GetLocalLocation());
         }
     });
@@ -406,6 +407,12 @@ void RenderSelectPopup::ProcessTouchDown(const TouchEventInfo& info)
         return;
     }
 
+    auto clickPosition = touches.front().GetLocalLocation();
+    if (!touchRegion_.ContainsInRegion(clickPosition.GetX(), clickPosition.GetY())) {
+        LOGI("Do not contains the touch region.");
+        return;
+    }
+
     firstFingerDownOffset_ = touches.front().GetGlobalLocation();
 }
 
@@ -415,6 +422,12 @@ void RenderSelectPopup::ProcessTouchUp(const TouchEventInfo& info)
     auto touches = info.GetTouches();
     if (touches.empty()) {
         LOGE("touch event info is empty.");
+        return;
+    }
+
+    auto clickPosition = touches.front().GetLocalLocation();
+    if (!touchRegion_.ContainsInRegion(clickPosition.GetX(), clickPosition.GetY())) {
+        LOGI("Do not contains the touch region.");
         return;
     }
 
@@ -451,16 +464,6 @@ void RenderSelectPopup::OnTouchTestHit(
     if (!clickDetector_) {
         clickDetector_ = AceType::MakeRefPtr<ClickRecognizer>();
     }
-
-    rawDetector_->SetOnTouchDown([weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
-        auto ref = weak.Upgrade();
-        if (!ref) {
-            LOGE("renderSelectPopup upgrade fail.");
-            return;
-        }
-
-        ref->ProcessTouchDown(info);
-    });
 
     rawDetector_->SetOnTouchUp([weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
         auto ref = weak.Upgrade();
