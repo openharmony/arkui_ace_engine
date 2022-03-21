@@ -380,7 +380,7 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
         return;
     }
     // options.obj
-    JSRef<JSVal> jsClassObj = obj->GetProperty("obj");
+    JSRef<JSVal> jsClassObj = obj->GetProperty("object");
     if (!jsClassObj->IsObject()) {
         LOGW("JSWebController param obj is not object");
         return;
