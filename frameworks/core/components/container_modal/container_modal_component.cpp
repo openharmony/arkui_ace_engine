@@ -20,7 +20,6 @@
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/container_modal/container_modal_element.h"
 #include "core/components/container_modal/render_container_modal.h"
-#include "core/components/flex/flex_item_component.h"
 #include "core/components/image/image_component.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/text/text_component.h"
@@ -122,6 +121,7 @@ RefPtr<ButtonComponent> ContainerModalComponent::BuildControlButton(
     button->SetHeight(TITLE_BUTTON_SIZE);
     button->SetType(ButtonType::CIRCLE);
     button->SetBackgroundColor(TITLE_BUTTON_BACKGROUND_COLOR);
+    button->SetClickedColor(TITLE_BUTTON_CLICKED_COLOR);
     button->SetClickFunction(std::move(clickCallback));
     return button;
 }

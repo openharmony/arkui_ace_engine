@@ -29,8 +29,9 @@ namespace {
 constexpr uint32_t COLUMN_CHILD_NUM = 2;
 constexpr uint32_t SPLIT_BUTTON_POSITION = 2;
 constexpr uint32_t BLUR_WINDOW_RADIUS = 100;
-constexpr uint32_t TITLE_POPUP_TIME = 500;    // 500ms
-constexpr double TITLE_POPUP_DISTANCE = 48.0; // 48vp height of title
+constexpr uint32_t TITLE_POPUP_TIME = 200;          // 200ms
+constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0;   // 5.0px
+constexpr double TITLE_POPUP_DISTANCE = 48.0;       // 48vp height of title
 
 } // namespace
 
@@ -266,7 +267,7 @@ void ContainerModalElement::Update()
         if (!containerElement || info.GetAction() != MouseAction::MOVE) {
             return;
         }
-        if (info.GetLocalLocation().GetY() <= 1.0 && containerElement->CanShowFloatingTitle()) {
+        if (info.GetLocalLocation().GetY() <= MOUSE_MOVE_POPUP_DISTANCE && containerElement->CanShowFloatingTitle()) {
             containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
             containerElement->controller_->ClearStopListeners();
             containerElement->controller_->Forward();
