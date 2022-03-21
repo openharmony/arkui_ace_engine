@@ -91,6 +91,7 @@ private:
     bool isDragable_ = false;
     bool isDraging_ = false;
     bool init_ = true;
+    bool popDialog_ = false;
     Offset topLeftPoint_;
     TouchRegion maskDragRegion_;
     WeakPtr<DialogTweenComponent> weakDialogTweenComponent_;
