@@ -1068,7 +1068,7 @@ void RenderScroll::UpdateTouchRect()
     }
 }
 
-bool RenderScroll::isScrollable(AxisDirection direction)
+bool RenderScroll::IsAxisScrollable(AxisDirection direction)
 {
     if (axis_ == Axis::VERTICAL) {
         if (direction == AxisDirection::UP && IsAtTop()) {
