@@ -161,6 +161,7 @@ void SubContainer::RunCard(const int64_t id, const std::string path, const std::
         }
     }
     frontend_->SetFormSrc(formSrc);
+    frontend_->SetCardWindowConfig(GetWindowConfig());
     auto&& window = std::make_unique<FormWindow>(outSidePipelineContext_);
 
     pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
