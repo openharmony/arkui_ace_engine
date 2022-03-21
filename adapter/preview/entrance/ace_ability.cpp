@@ -466,8 +466,8 @@ std::string AceAbility::GetDefaultJSONTree()
 bool AceAbility::OperateComponent(const std::string& attrsJson)
 {
     // fastPreview not support databind
-    if (attrsJson.find("this.") != std::string::npos) {
-        LOGE("fastPreview is not support databind,the attrsJson contains 'this.'");
+    if (attrsJson.find("this.") != std::string::npos || attrsJson.find("$r") != std::string::npos) {
+        LOGE("fastPreview is not support databind,the attrsJson contains 'this.' or '$r'");
         return false;
     }
 
