@@ -1844,14 +1844,12 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             break;
             [[fallthrough]];
         }
-        case WindowSizeChangeReason::DRAG: {
+        case WindowSizeChangeReason::DRAG_START: {
             BlurWindowWithDrag(true);
-            isDragStart_ = true;
             break;
         }
         case WindowSizeChangeReason::DRAG_END: {
             BlurWindowWithDrag(false);
-            isDragStart_ = false;
             SetRootSizeWithWidthHeight(width, height);
             break;
         }
@@ -1868,15 +1866,17 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     CHECK_RUN_ON(UI);
+    LOGI("PipelineContext: OnSurfaceChanged start.");
     // Refresh the screen when developers customize the resolution and screen density on the PC preview.
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-    if (width_ == width && height_ == height && isSurfaceReady_ && type != WindowSizeChangeReason::DRAG_END) {
+    if (width_ == width && height_ == height && isSurfaceReady_ && type != WindowSizeChangeReason::DRAG_START &&
+        type != WindowSizeChangeReason::DRAG_END) {
         LOGI("Surface size is same, no need update");
         return;
     }
 #endif
-    if (type == WindowSizeChangeReason::DRAG && isDragStart_) {
-        LOGD("Type is drag, no need change size.");
+    if (type == WindowSizeChangeReason::DRAG) {
+        LOGI("WindowSizeChangeReason is drag, no need change size.");
         return;
     }
 
