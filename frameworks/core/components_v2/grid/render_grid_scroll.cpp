@@ -1450,7 +1450,7 @@ void RenderGridScroll::OnPredictLayout(int64_t deadline)
     }
 }
 
-bool RenderGridScroll::isScrollable(AxisDirection direction)
+bool RenderGridScroll::IsAxisScrollable(AxisDirection direction)
 {
     if (isVertical_) {
         if (direction == AxisDirection::UP && reachHead_) {
