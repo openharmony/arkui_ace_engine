@@ -676,6 +676,10 @@ void JSWeb::OnPageFinish(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!webComponent) {
+        LOGE("webComponent is null");
+        return;
+    }
     webComponent->SetPageFinishedEventId(eventMarker);
 }
 

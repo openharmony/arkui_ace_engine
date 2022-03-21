@@ -36,8 +36,8 @@ class JsonUtilsTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
+    void SetUp() const override;
+    void TearDown() const override;
 };
 
 void JsonUtilsTest::SetUpTestCase()

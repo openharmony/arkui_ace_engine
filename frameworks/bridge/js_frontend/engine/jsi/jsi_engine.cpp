@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1629,6 +1629,10 @@ shared_ptr<JsValue> JsHandlePageRoute(
     params = routerParamsData->ToString();
 
     auto engineInstance = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (!engineInstance) {
+        LOGE("engineInstance is null");
+        return runtime->NewNull();
+    }
     // Operator map for page route.
     static const LinearMapNode<shared_ptr<JsValue> (*)(const std::string&, const std::string&, JsiEngineInstance&)>
         pageRouteOperators[] = {

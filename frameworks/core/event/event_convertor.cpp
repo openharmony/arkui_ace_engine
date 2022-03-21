@@ -57,6 +57,8 @@ void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>
                 break;
             case AceActionData::ActionType::UNKNOWN:
                 break;
+            default:
+                break;
         }
         current++;
     }
