@@ -164,8 +164,9 @@ bool FlutterAceView::HandleTouchEvent(const TouchEvent& touchEvent)
 
     LOGD("HandleTouchEvent touchEvent.x: %lf, touchEvent.y: %lf, touchEvent.size: %lf",
         touchEvent.x, touchEvent.y, touchEvent.size);
+    auto event = touchEvent.UpdatePointers();
     if (touchEventCallback_) {
-        touchEventCallback_(touchEvent);
+        touchEventCallback_(event);
     }
 
     return true;
