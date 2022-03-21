@@ -32,7 +32,6 @@ void RosenRenderGridLayout::Update(const RefPtr<Component>& component)
 
 void RosenRenderGridLayout::Paint(RenderContext& context, const Offset& offset)
 {
-    RenderNode::Paint(context, offset);
     for (const auto& child : GetChildren()) {
         auto gridLayoutItem = FindChildOfClass<RenderGridLayoutItem>(child);
         if (gridLayoutItem && gridLayoutItem->IsSelected()) {
