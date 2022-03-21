@@ -2758,7 +2758,9 @@ void PipelineContext::FlushBuildAndLayoutBeforeSurfaceReady()
 
 void PipelineContext::RootLostFocus() const
 {
-    rootElement_->LostFocus();
+    if (rootElement_) {
+        rootElement_->LostFocus();
+    }
 }
 
 void PipelineContext::AddPageUpdateTask(std::function<void()>&& task, bool directExecute)
