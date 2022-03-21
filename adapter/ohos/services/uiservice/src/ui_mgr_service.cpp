@@ -297,6 +297,21 @@ int UIMgrService::ShowDialog(const std::string& name,
         Ace::Platform::AceContainer::SetUIWindow(dialogId, dialogWindow);
         Ace::Platform::FlutterAceView::SurfaceChanged(flutterAceView, windowWidth, windowHeight, 0);
 
+        auto taskExecutor = container->GetTaskExecutor();
+        if (taskExecutor) {
+            taskExecutor->PostTask([dialogId]() {
+                auto container = Ace::Platform::AceContainer::GetContainer(dialogId);
+                if (container) {
+                    auto context = container->GetPipelineContext();
+                    if (context) {
+                        HILOG_INFO("set bg color TRANSPARENT");
+                        context->SetRootBgColor(Color::TRANSPARENT);
+                    }
+                }
+            },
+            TaskExecutor::TaskType::UI);
+        }
+
         // run page.
         Ace::Platform::AceContainer::RunPage(
             dialogId, Ace::Platform::AceContainer::GetContainer(dialogId)->GeneratePageId(), "", params);
