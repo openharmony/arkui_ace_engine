@@ -906,7 +906,7 @@ bool RenderNode::AxisDetect(const Point& globalPoint, const Point& parentLocalPo
         if (touchable_ && rect.IsInRegion(transformPoint)) {
             if (!axisNode.Upgrade()) {
                 axisNode = CheckAxisNode();
-                if (axisNode.Upgrade() && !(axisNode.Upgrade()->isScrollable(direction))) {
+                if (axisNode.Upgrade() && !(axisNode.Upgrade()->IsAxisScrollable(direction))) {
                     axisNode = nullptr;
                 }
             }

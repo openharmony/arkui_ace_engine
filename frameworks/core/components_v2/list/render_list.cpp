@@ -360,6 +360,7 @@ void RenderList::PerformLayout()
     }
 
     realMainSize_ = curMainPos - currentOffset_;
+    isAxisResponse_ = true;
 }
 
 Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutParam)
@@ -1672,7 +1673,7 @@ size_t RenderList::CalculateInsertIndex(
     return DEFAULT_INDEX;
 }
 
-bool RenderList::isScrollable(AxisDirection direction)
+bool RenderList::IsAxisScrollable(AxisDirection direction)
 {
     if (vertical_) {
         if (direction == AxisDirection::UP && reachStart_) {
@@ -1703,7 +1704,10 @@ void RenderList::HandleAxisEvent(const AxisEvent& event)
         degree = event.verticalAxis;
     }
     double offset = SystemProperties::Vp2Px(DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP * degree / MOUSE_WHEEL_DEGREES);
-    UpdateScrollPosition(-offset, SCROLL_FROM_ROTATE);
+    if (isAxisResponse_) {
+        isAxisResponse_ = false;
+        UpdateScrollPosition(-offset, SCROLL_FROM_ROTATE);
+    }
 }
 
 WeakPtr<RenderNode> RenderList::CheckAxisNode()
