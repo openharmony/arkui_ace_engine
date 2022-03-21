@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,12 +11,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-
-/*
- * Copyright (c) Huawei Technologies Co., Ltd. 2019-2020. All rights reserved.
- * Description: Implement RenderScroll.
- * Create: 2019/12/25
  */
 
 #include "core/components/scroll/render_scroll.h"
@@ -384,18 +378,20 @@ bool RenderScroll::ScrollPageByChild(Offset& delta, int32_t source)
 bool RenderScroll::IsOutOfBottomBoundary()
 {
     if (IsRowReverse()) {
-        return GetMainOffset(currentOffset_) <= (GetMainSize(viewPort_) - mainScrollExtent_) && ReachMaxCount();
+        return LessOrEqual(GetMainOffset(currentOffset_), (GetMainSize(viewPort_) - mainScrollExtent_)) &&
+                 ReachMaxCount();
     } else {
-        return GetMainOffset(currentOffset_) >= (mainScrollExtent_ - GetMainSize(viewPort_)) && ReachMaxCount();
+        return GreatOrEqual(GetMainOffset(currentOffset_), (mainScrollExtent_ - GetMainSize(viewPort_))) &&
+                 ReachMaxCount();
     }
 }
 
 bool RenderScroll::IsOutOfTopBoundary()
 {
     if (IsRowReverse()) {
-        return GetMainOffset(currentOffset_) >= 0.0;
+        return GreatOrEqual(GetMainOffset(currentOffset_), 0.0);
     } else {
-        return GetMainOffset(currentOffset_) <= 0.0;
+        return LessOrEqual(GetMainOffset(currentOffset_), 0.0);
     }
 }
 

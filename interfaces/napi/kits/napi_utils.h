@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,13 +57,13 @@ void ReplaceHolder(std::string& originStr, std::vector<std::string>& params, int
     }
     std::string::const_iterator start = originStr.begin();
     std::string::const_iterator end = originStr.end();
-    std::smatch matchs;
+    std::smatch matches;
     bool shortHolderType = false;
     bool firstMatch = true;
     int searchTime = 0;
-    while (std::regex_search(start, end, matchs, RESOURCE_APP_STRING_PLACEHOLDER)) {
-        std::string pos = matchs[2];
-        std::string type = matchs[4];
+    while (std::regex_search(start, end, matches, RESOURCE_APP_STRING_PLACEHOLDER)) {
+        std::string pos = matches[2];
+        std::string type = matches[4];
         if (firstMatch) {
             firstMatch = false;
             shortHolderType = pos.length() == 0;
@@ -83,8 +83,8 @@ void ReplaceHolder(std::string& originStr, std::vector<std::string>& params, int
         }
         replaceContentStr = params[index];
 
-        originStr.replace(matchs[0].first - originStr.begin(), matchs[0].length(), replaceContentStr);
-        start = originStr.begin() + matchs.prefix().length() + replaceContentStr.length();
+        originStr.replace(matches[0].first - originStr.begin(), matches[0].length(), replaceContentStr);
+        start = originStr.begin() + matches.prefix().length() + replaceContentStr.length();
         end = originStr.end();
         searchTime++;
     }

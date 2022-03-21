@@ -346,6 +346,10 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
             func->Execute(info);
         };
         RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(DEFAULT_TAP_COUNTS, DEFAULT_TAP_FINGERS);
+        if (!tapGesture) {
+            LOGE("tapGesture is null");
+            return;
+        }
         tapGesture->SetOnActionId(clickId);
         auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
         if (tapGesture) {

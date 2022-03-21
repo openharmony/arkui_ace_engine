@@ -561,7 +561,7 @@ void RenderSwiper::InitAccessibilityEventListener()
 void RenderSwiper::UpdateIndex(int32_t index)
 {
     // can't change index when stretch indicator, as stretch direct is single.
-    if (index >= 0 && stretchRate_ == 0.0) {
+    if (index >= 0 && NearEqual(stretchRate_, 0.0)) {
         if (index >= itemCount_) {
             index = itemCount_ - 1;
         }
@@ -2468,7 +2468,6 @@ void RenderSwiper::DragIndicatorEnd()
 
 void RenderSwiper::DragEdgeStretch(double offset)
 {
-    // different with emui
     const double longPressDragStrechLongest = DRAG_STRETCH_LONGEST_DP * scale_;
     if (offset >= longPressDragStrechLongest) {
         UpdateEdgeStretchRate(DRAG_OFFSET_MAX);

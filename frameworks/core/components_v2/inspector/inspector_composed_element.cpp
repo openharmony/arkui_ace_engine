@@ -650,7 +650,7 @@ std::string InspectorComposedElement::GetRect()
             rect = rect.Constrain(parent->GetRect());
         }
     }
-    if (GetClipFlag()) {
+    if (accessibilityNode_ && GetClipFlag()) {
         accessibilityNode_->SetClipFlagToChild(true);
     }
     isRectValid_ = rect.IsValid();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -167,54 +167,6 @@ private:
  * methods.
  *
  *  \code{.cpp}
- *  class TwoDPoint {
- *  public:
- *      TwoDPoint(float x, float y) : x_(x), y_(y) {}
- *      ~TwoDPoint() {}
- *
- *      void SetX(float x) { x_ = x; }
- *      void SetY(float y) { y_ = y; }
- *      virtual void Print() { std::cout << "Point(" << x_ << ", " << y_ << ")" << std::endl; }
- *
- *      static void Parse(const JSCallbackInfo& info) {
- *          JSRef<JSVal> arg = info[0];
- *          if (arg->IsString()) {
- *              std::string strArg = arg->ToString();
- *              TwoDPoint* instance = ParseFromString();
- *              if (instance) {
- *                  info.SetReturnValue(instance);
- *              } else {
- *                  JSException::Throw("Error parsing Point2(%s)", strArg.c_str());
- *              }
- *          } else {
- *              JSException::Throw("Point2.Parse: Argument is not a string!");
- *          }
- *      }
- *
- *      float GetX() { return x_; }
- *      float GetY() { return y_; }
- *  private:
- *      static TwoDPoint* ParseFromString(const std::string& str) {
- *          // some parsing code:
- *          auto [x,y] = Parse(str);
- *          return new TwoDPoint(x,y);
- *      }
- *      float x_;
- *      float y_;
- *  };
- *
- *  class ThreeDPoint : public TwoDPoint {
- *  public:
- *      ThreeDPoint(float x, float y, float z) : TwoDPoint(x,y) : z_(z) {}
- *      ~ThreeDPoint() {}
- *
- *      void SetZ(float z) { z_ = z; }
- *      virtual void Print() override { std::cout << "Point(" << x_ << ", " << y_ << ", " << z_ << ")" << std::endl; }
- *
- *      float GetZ() { return z_; }
- *  private:
- *      float z_;
- *  };
  *
  *  // We are using V8 engine for this example:
  *  template<typename C>

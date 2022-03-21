@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_group_js_bridge.h"
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-// TODO: DO NOT include adapter includes
 #include "adapter/preview/entrance/ace_container.h"
 #include "core/common/ace_engine.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine_instance.h"
@@ -150,7 +149,7 @@ void QuickJsGroupJsBridge::QuickJsPrintException(JSContext* context, int32_t exp
     if (JS_IsString(jsMsg)) {
         size_t msgLen = 0;
         const char* msg = JS_ToCStringLen(context, &msgLen, jsMsg);
-        if (msg == NULL) {
+        if (msg == nullptr) {
             JS_FreeValue(context, JS_GetException(context));
         } else {
             expMsg.assign(msg, msgLen);

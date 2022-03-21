@@ -239,7 +239,6 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         LOGE("js compilation failed url=[%{public}s]", url.c_str());
         return;
     }
-    // Todo: check the fail.
     engineInstance_->ExecuteDocumentJS(compiled);
     js_std_loop(engineInstance_->GetQJSContext());
 }

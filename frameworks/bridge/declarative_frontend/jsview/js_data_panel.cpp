@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,13 +72,13 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
             return;
         }
         auto value = item->GetDouble();
-        if (value <= 0.0) {
+        if (LessOrEqual(value, 0.0)) {
             value = 0.0;
         }
         valueSum += value;
-        if (valueSum >= max && max > 0) {
+        if (GreatOrEqual(valueSum, max) && max > 0) {
             value = max - (valueSum - value);
-            if (value == 0.0) {
+            if (NearEqual(value, 0.0)) {
                 break;
             }
             Segment segment;
@@ -92,7 +92,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
         segment.SetColorType(SegmentStyleType::NONE);
         component->AppendSegment(segment);
     }
-    if (max <= 0.0) {
+    if (LessOrEqual(max, 0.0)) {
         max = valueSum;
     }
     component->SetMaxValue(max);

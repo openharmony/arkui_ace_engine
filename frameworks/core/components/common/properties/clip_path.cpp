@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -329,7 +329,7 @@ RefPtr<ClipPath> ClipPath::CreateShape(const std::string& value)
             break;
         }
         default: {
-            LOGE("basic shape type is none or invalid, clipPath value is %{public}s", data.c_str());
+            LOGE("basic shape type is none or invalid");
             break;
         }
     }

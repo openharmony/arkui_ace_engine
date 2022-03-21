@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,8 +100,6 @@ RefPtr<ClockComponent> ClockComponentTest::CreateAndUpdateClockComponent(UpdateC
  * @tc.name: UpdateClock001
  * @tc.desc: Test when clock component receives valid settings, it updates all settings correctly.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBN
- * @tc.author: chenxuankai
  */
 HWTEST_F(ClockComponentTest, UpdateClock001, TestSize.Level1)
 {
@@ -154,8 +152,6 @@ HWTEST_F(ClockComponentTest, UpdateClock001, TestSize.Level1)
  * @tc.name: UpdateClock002
  * @tc.desc: Test when clock component receives incomplete settings, it updates all settings as expected.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBN
- * @tc.author: chenxuankai
  */
 HWTEST_F(ClockComponentTest, UpdateClock002, TestSize.Level1)
 {
@@ -196,8 +192,6 @@ HWTEST_F(ClockComponentTest, UpdateClock002, TestSize.Level1)
  * @tc.name: UpdateClock003
  * @tc.desc: Test when clock component receives invalid settings, it updates all settings correctly.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBN
- * @tc.author: chenxuankai
  */
 HWTEST_F(ClockComponentTest, UpdateClock003, TestSize.Level1)
 {

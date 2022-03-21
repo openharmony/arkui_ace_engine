@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,7 +60,6 @@ protected:
  * @tc.name: CameraComponentTest001
  * @tc.desc: Checking the default value of cameracomponent
  * @tc.type: FUNC
- * @tc.require: AR000FJU19
  */
 HWTEST_F(CameraComponentTest, CameraComponentTest001, TestSize.Level1)
 {
@@ -73,7 +72,6 @@ HWTEST_F(CameraComponentTest, CameraComponentTest001, TestSize.Level1)
  * @tc.name: CameraComponentTest002
  * @tc.desc: Checking the default value of cameracomponent
  * @tc.type: FUNC
- * @tc.require: AR000FJU19
  */
 HWTEST_F(CameraComponentTest, CameraComponentTest002, TestSize.Level1)
 {
@@ -86,7 +84,6 @@ HWTEST_F(CameraComponentTest, CameraComponentTest002, TestSize.Level1)
  * @tc.name: CameraComponentTest003
  * @tc.desc: Verify the takePhoto works fine when triggering camera takephoto.
  * @tc.type: FUNC
- * @tc.require: AR000FJU1A
  */
 HWTEST_F(CameraComponentTest, CameraComponentTest003, TestSize.Level1)
 {
@@ -108,7 +105,6 @@ HWTEST_F(CameraComponentTest, CameraComponentTest003, TestSize.Level1)
  * @tc.name: CameraComponentTest004
  * @tc.desc: Verify the StartRecord interface works fine when triggering camera StartRecord.
  * @tc.type: FUNC
- * @tc.require: AR000FJU1B
  */
 HWTEST_F(CameraComponentTest, CameraComponentTest004, TestSize.Level1)
 {
@@ -127,7 +123,6 @@ HWTEST_F(CameraComponentTest, CameraComponentTest004, TestSize.Level1)
  * @tc.name: CameraComponentTest005
  * @tc.desc: Verify the CloseRecorder interface works fine when triggering camera StartRecord.
  * @tc.type: FUNC
- * @tc.require: AR000FJU1B
  */
 HWTEST_F(CameraComponentTest, CameraComponentTest005, TestSize.Level1)
 {

@@ -326,7 +326,6 @@ void AceAbility::OnStart(const Want& want)
             if (rsUiDirector != nullptr) {
                 rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
 
-                // todo regist on size change()
                 window->RegisterWindowChangeListener(thisAbility);
 
                 rsUiDirector->SetUITaskRunner(
@@ -369,7 +368,6 @@ void AceAbility::OnStart(const Want& want)
 
         AAFwk::Want want;
         want.SetElementName(bundle, ability);
-        // want.SetParam(Constants::PARAM_FORM_IDENTITY_KEY, std::to_string(formJsInfo_.formId));
         this->StartAbility(want);
     };
 
@@ -633,7 +631,8 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeCha
         LOGE("OnSizeChange: taskExecutor is null.");
         return;
     }
-    taskExecutor->PostTask([rect, abilityId = abilityId_, density = density_, reason]() {
+    taskExecutor->PostTask(
+        [rect, abilityId = abilityId_, density = density_, reason]() {
         uint32_t width = rect.width_;
         uint32_t height = rect.height_;
         LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d",
@@ -646,12 +645,10 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeCha
             return;
         }
         auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
-
         if (!flutterAceView) {
             LOGE("flutterAceView is null");
             return;
         }
-
         flutter::ViewportMetrics metrics;
         metrics.physical_width = width;
         metrics.physical_height = height;
@@ -659,7 +656,8 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeCha
         Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
         Platform::FlutterAceView::SurfaceChanged(
             flutterAceView, width, height, 0, static_cast<WindowSizeChangeReason>(reason));
-    }, TaskExecutor::TaskType::PLATFORM);
+    },
+    TaskExecutor::TaskType::PLATFORM);
 }
 
 void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)

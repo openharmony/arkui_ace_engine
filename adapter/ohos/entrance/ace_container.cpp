@@ -314,7 +314,6 @@ void AceContainer::OnActive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         front->OnActive();
     }
-    // TODO: remove it after ability fix onshow lifecyle.
     auto context = container->GetPipelineContext();
     if (!context) {
         return;
@@ -334,7 +333,6 @@ void AceContainer::OnInactive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         front->OnInactive();
     }
-    // TODO: remove it after ability fix onshow lifecyle.
     auto context = container->GetPipelineContext();
     if (!context) {
         return;

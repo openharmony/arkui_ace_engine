@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@ constexpr int32_t CIRCLE_NUMBER = 50;
 constexpr float SHADOW_BLUR_RADIUS = 5.0f;
 constexpr double DIAMETER_TO_THICKNESS_RATIO = 0.12;
 constexpr double FIXED_WIDTH = 1.0;
+constexpr int32_t SEGMENT_MAX_NUMBER = 9;
 
 } // namespace
 
@@ -580,7 +581,7 @@ void FlutterRenderPercentageDataPanel::PaintLinearProgress(RenderContext& contex
         segmentSize = static_cast<double>(segment.size());
     }
     for (uint32_t i = 0; i < segment.size(); i++) {
-        if (segment[i].GetValue() == 0.0) {
+        if (NearEqual(segment[i].GetValue(), 0.0)) {
             segmentSize -= 1;
         }
     }
@@ -595,15 +596,15 @@ void FlutterRenderPercentageDataPanel::PaintLinearProgress(RenderContext& contex
     auto valueSum = 0.0;
     PaintBackground(context, offset, totalWidth, height);
     for (uint32_t i = 0; i < segment.size(); i++) {
-        if (i == 0 && segment[0].GetValue() == 0.0) {
+        if (i == 0 && NearEqual(segment[0].GetValue(), 0.0)) {
             for (uint32_t j = 0; j < segment.size(); j++) {
-                if (segment[j].GetValue() != 0.0 && i == 0) {
+                if (!NearEqual(segment[j].GetValue(), 0.0) && i == 0) {
                     i = j;
                 }
             }
         }
         auto segmentWidth = segment[i].GetValue();
-        if (segmentWidth == 0.0) {
+        if (NearEqual(segmentWidth, 0.0)) {
             continue;
         }
         valueSum += segmentWidth;
@@ -617,7 +618,7 @@ void FlutterRenderPercentageDataPanel::PaintLinearProgress(RenderContext& contex
         PaintColorSegment(context, offset, segmentWidth * scaleMaxValue, widthSegment, height, segmentStartColor,
             segmentEndColor, isFull, isStart);
         widthSegment += segment[i].GetValue() * scaleMaxValue;
-        if (isFull && segment.size() == 9) {
+        if (isFull && segment.size() == SEGMENT_MAX_NUMBER) {
             return;
         }
         PaintSpace(context, offset, spaceWidth, widthSegment, height);

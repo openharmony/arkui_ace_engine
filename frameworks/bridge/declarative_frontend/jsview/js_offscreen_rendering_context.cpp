@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -155,6 +155,9 @@ void JSOffscreenRenderingContext::Destructor(JSOffscreenRenderingContext* contex
 {
     if (context != nullptr) {
         context->DecRefCount();
+    } else {
+        LOGE("comtext is null");
+        return;
     }
     std::lock_guard<std::mutex> lock(mutex_);
     offscreenCanvasMap_.erase(context->GetId());

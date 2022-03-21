@@ -1289,6 +1289,9 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
             onLayoutReady_ =
                 AceAsyncEvent<void(const std::string&)>::Create(renderComponent->GetOnLayoutReadyMarker(), context_);
         }
+    } else {
+        LOGE("renderComponent is null");
+        return;
     }
     auto context = context_.Upgrade();
     if (context != nullptr) {

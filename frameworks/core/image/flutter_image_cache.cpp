@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,10 +37,8 @@ RefPtr<CachedImageData> FlutterImageCache::GetDataFromCacheFile(const std::strin
 {
     std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
     if (!GetFromCacheFileInner(filePath)) {
-        LOGD("file : %{public}s not cached, return nullptr", filePath.c_str());
+        LOGD("file not cached, return nullptr");
         return nullptr;
-    } else {
-        LOGD("file : %{public}s cached found", filePath.c_str());
     }
     auto cacheFileLoader = AceType::MakeRefPtr<FileImageLoader>();
     auto data = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)));

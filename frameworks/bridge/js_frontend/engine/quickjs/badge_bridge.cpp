@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,6 @@ namespace OHOS::Ace::Framework {
 
 void BadgeBridge::ParseBadgeConfig(JSContext* ctx, JSValue valObject)
 {
-    // TODO: these codes are duplicate, need to refactor.
     JSPropertyEnum* pTab = nullptr;
     uint32_t len = 0;
     if (!CheckAndGetJsProperty(ctx, valObject, &pTab, &len)) {

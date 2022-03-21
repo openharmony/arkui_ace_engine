@@ -121,6 +121,10 @@ public:
         NAPI_ASSERT(env, (argc == 2 && thisVar != nullptr && cb != nullptr), "Invalid arguments");
 
         MediaQueryListener* listener = GetListener(env, thisVar);
+        if (!listener) {
+            LOGE("listener is null");
+            return nullptr;
+        }
         auto iter = listener->FindCbList(cb);
         if (iter != listener->cbList_.end()) {
             return nullptr;
@@ -142,6 +146,10 @@ public:
         napi_value cb = nullptr;
         size_t argc = ParseArgs(env, info, thisVar, cb);
         MediaQueryListener* listener = GetListener(env, thisVar);
+        if (!listener) {
+            LOGE("listener is null");
+            return nullptr;
+        }
         if (argc == 1) {
             for (auto& item : listener->cbList_) {
                 napi_delete_reference(listener->env_, item);

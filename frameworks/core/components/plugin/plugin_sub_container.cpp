@@ -125,7 +125,7 @@ void PluginSubContainer::UpdateRootElmentSize()
         rootHeight = pluginComponet->GetHeight();
     }
 
-    if (rootWidth_ == rootWidth && rootHeight == rootHeight) {
+    if (rootWidth_ == rootWidth && rootHeight_ == rootHeight) {
         LOGE("size not changed, should not change");
         return;
     }

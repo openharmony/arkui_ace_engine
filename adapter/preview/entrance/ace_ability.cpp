@@ -80,7 +80,7 @@ void SetPhysicalDeviceFonts(bool& physicalDeviceFontsEnabled)
 
 void SetFontBasePath(std::string& basePath)
 {
-    LOGI("Physical devices font base path is %s", basePath.c_str());
+    LOGI("Set basic path of physical device font");
     basePath = basePath.append(DELIMITER);
     SkFontMgr_Config_Parser::setFontBasePathCallback(basePath);
 }

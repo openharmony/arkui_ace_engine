@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,8 +66,6 @@ void ButtonCreatorTest::TearDown() {}
  * @tc.name: ParseProperties001
  * @tc.desc: All parsed correctly when all properties are configured.
  * @tc.type: FUNC
- * @tc.require: AR000DAQV5 AR000DAQV3 AR000DAQV0 AR000DAQUU AR000DAQV4 AR000DAQV1
- * @tc.author: changjia
  */
 HWTEST_F(ButtonCreatorTest, ParseProperties001, TestSize.Level1)
 {
@@ -112,8 +110,6 @@ HWTEST_F(ButtonCreatorTest, ParseProperties001, TestSize.Level1)
  * @tc.name: ParseProperties002
  * @tc.desc: All properties have the same value as the default when no property is configured.
  * @tc.type: FUNC
- * @tc.require: AR000DAQV5 AR000DAQV3 AR000DAQV0
- * @tc.author: changjia
  */
 HWTEST_F(ButtonCreatorTest, ParseProperties002, TestSize.Level1)
 {
