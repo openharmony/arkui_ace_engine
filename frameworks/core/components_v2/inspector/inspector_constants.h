@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -173,6 +173,8 @@ ACE_EXPORT extern const char DIVIDER_ETS_TAG[];
 // checkbox
 ACE_EXPORT extern const char CHECKBOX_COMPONENT_TAG[];
 ACE_EXPORT extern const char CHECKBOX_ETS_TAG[];
+ACE_EXPORT extern const char CHECK_BOX_COMPONENT_TAG[];
+ACE_EXPORT extern const char CHECK_BOX_ETS_TAG[];
 
 // switch
 ACE_EXPORT extern const char SWITCH_COMPONENT_TAG[];
@@ -334,6 +336,10 @@ ACE_EXPORT extern const char SIDE_BAR_ETS_TAG[];
 // loadingProgress
 ACE_EXPORT extern const char LOADING_PROGRESS_COMPONENT_TAG[];
 ACE_EXPORT extern const char LOADING_PROGRESS_ETS_TAG[];
+
+// checkboxGroup
+ACE_EXPORT extern const char CHECKBOXGROUP_COMPONENT_TAG[];
+ACE_EXPORT extern const char CHECKBOXGROUP_ETS_TAG[];
 
 } // namespace OHOS::Ace::V2
 
