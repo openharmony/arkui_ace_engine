@@ -21,6 +21,7 @@ build_component("inspector_v2") {
     "blank_composed_element.cpp",
     "button_composed_element.cpp",
     "calendar_composed_element.cpp",
+    "checkboxGroup_composed_element.cpp",
     "checkbox_composed_element.cpp",
     "column_composed_element.cpp",
     "column_split_composed_element.cpp",
