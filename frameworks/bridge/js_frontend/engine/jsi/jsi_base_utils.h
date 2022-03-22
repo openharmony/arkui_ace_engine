@@ -27,6 +27,7 @@ RefPtr<JsAcePage> GetRunningPage(const AceType *data);
 class JsiBaseUtils {
 public:
     static void ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::shared_ptr<JsRuntime> runtime);
+    static std::string TransSourceStack(RefPtr<JsAcePage> runningPage, const std::string& rawStack);
 
 private:
     static std::string GenerateSummaryBody(std::shared_ptr<JsValue> error, std::shared_ptr<JsRuntime> runtime);

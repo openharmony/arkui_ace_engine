@@ -148,7 +148,7 @@ void RenderCalendar::OnDataChanged(const CalendarDaysOfMonth& daysOfMonth)
             calendarDays_ = daysOfMonth.days;
         }
         // the number of rows will be 5 or 6, and week number height is half of the date number
-        rowCount_ = colCount_ ? daysOfMonth.days.size() / colCount_ : 0;
+        rowCount_ = colCount_ ? static_cast<int32_t>(daysOfMonth.days.size()) / colCount_ : 0;
         UpdateBreakInformation();
         isNeedRepaint_ = true;
         MarkNeedLayout();
@@ -169,7 +169,7 @@ void RenderCalendar::OnDataChanged(const CalendarDaysOfMonth& daysOfMonth)
         OnStatusChanged(RenderStatus::FOCUS);
     }
     // the number of rows will be 5 or 6, and week number height is half of the date number
-    rowCount_ = colCount_ ? daysOfMonth.days.size() / static_cast<double>(colCount_) : 0;
+    rowCount_ = colCount_ ? static_cast<int32_t>(daysOfMonth.days.size()) / colCount_ : 0;
     calendarController_->JumpMonth();
     hasRequestFocus_ = false;
     cardCalendar_ ? MarkNeedLayout() : MarkNeedRender();

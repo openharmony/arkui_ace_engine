@@ -389,21 +389,24 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 #endif
 
     LocalScope socpe(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
-    InitGlobalObjectTemplate();
+    if (!isModulePreloaded_) {
+        InitGlobalObjectTemplate();
+    }
 
     // no need to initialize functions on global when use shared runtime
     if (usingSharedRuntime_ && isModuleInitialized_) {
         LOGI("InitJsEnv SharedRuntime has initialized, skip...");
     } else {
-        InitConsoleModule();
-        InitAceModule();
-        InitPerfUtilModule();
-        InitJsExportsUtilObject();
-        InitJsNativeModuleObject();
-        InitGroupJsBridge();
-        if (usingSharedRuntime_) {
-            globalRuntime_ = runtime_;
+        if (!isModulePreloaded_) {
+            InitConsoleModule();
+            InitAceModule();
+            InitJsExportsUtilObject();
+            InitJsNativeModuleObject();
+            InitPerfUtilModule();
         }
+#ifndef OHOS_STANDARD_SYSTEM
+        InitGroupJsBridge();
+#endif
     }
 
     if (usingSharedRuntime_) {
@@ -452,25 +455,33 @@ extern "C" ACE_EXPORT void OHOS_ACE_PreInitAceModule(void* runtime)
 
 void JsiDeclarativeEngineInstance::PreInitAceModule(void* runtime)
 {
-    auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime);
-    std::shared_ptr<ArkJSRuntime> arkRuntime;
-    EcmaVM* vm = nullptr;
-    if (!sharedRuntime) {
-        LOGI("PreInitAceModule will not use sharedRuntime");
-    } else {
-        arkRuntime = std::make_shared<ArkJSRuntime>();
-        auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
-        vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
-        if (vm == nullptr) {
-            LOGE("PreInitAceModule NativeDeclarativeEngine Initialize, vm is null");
-            return;
-        }
-        if (!arkRuntime->InitializeFromExistVM(vm)) {
-            LOGE("PreInitAceModule Ark Engine initialize runtime failed");
-            return;
-        }
+    if (isModulePreloaded_) {
+        LOGE("PreloadAceModule already preloaded");
+        return;
     }
+    auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime);
 
+    if (!sharedRuntime) {
+        LOGE("PreloadAceModule null runtime");
+        return;
+    }
+    std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
+    auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
+    EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
+    if (vm == nullptr) {
+        LOGE("PreloadAceModule NativeDeclarativeEngine Initialize, vm is null");
+        return;
+    }
+    if (!arkRuntime->InitializeFromExistVM(vm)) {
+        LOGE("PreloadAceModule Ark Engine initialize runtime failed");
+        return;
+    }
+    LocalScope scope(vm);
+    globalRuntime_ = arkRuntime;
+    // preload js views
+    JsRegisterViews(JSNApi::GetGlobalObject(vm));
+
+    // preload aceConsole
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
     shared_ptr<JsValue> aceConsoleObj = arkRuntime->NewObject();
     aceConsoleObj->SetProperty(arkRuntime, "log", arkRuntime->NewFunction(JsDebugLogPrint));
@@ -480,12 +491,45 @@ void JsiDeclarativeEngineInstance::PreInitAceModule(void* runtime)
     aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsErrorLogPrint));
     global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
 
+    // preload perfutil
+    shared_ptr<JsValue> perfObj = arkRuntime->NewObject();
+    perfObj->SetProperty(arkRuntime, "printlog", arkRuntime->NewFunction(JsPerfPrint));
+    perfObj->SetProperty(arkRuntime, "sleep", arkRuntime->NewFunction(JsPerfSleep));
+    perfObj->SetProperty(arkRuntime, "begin", arkRuntime->NewFunction(JsPerfBegin));
+    perfObj->SetProperty(arkRuntime, "end", arkRuntime->NewFunction(JsPerfEnd));
+    global->SetProperty(arkRuntime, "perfutil", perfObj);
+
+    // preload exports and requireNative
+    shared_ptr<JsValue> exportsUtilObj = arkRuntime->NewObject();
+    global->SetProperty(arkRuntime, "exports", exportsUtilObj);
+    global->SetProperty(arkRuntime, "requireNativeModule", arkRuntime->NewFunction(RequireNativeModule));
+
+    // preload js enums
+    bool jsEnumStyleResult = arkRuntime->EvaluateJsCode(
+        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
+    if (!jsEnumStyleResult) {
+        LOGE("EvaluateJsCode jsEnumStyle failed");
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    // preload state management
+    isModulePreloaded_ = arkRuntime->EvaluateJsCode(
+        (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
+    if (!isModulePreloaded_) {
+        LOGE("PreloadAceModule EvaluateJsCode stateMgmt failed");
+    }
+
+    // preload contentStorage
     bool evalResult = arkRuntime->EvaluateJsCode(
         (uint8_t*)_binary_contentStorage_abc_start, _binary_contentStorage_abc_end - _binary_contentStorage_abc_start);
     if (!evalResult) {
         LOGE("PreInitAceModule EvaluateJsCode stateMgmt failed");
     }
-    isModulePreloaded_ = evalResult;
+
+    isModulePreloaded_ = isModulePreloaded_ && evalResult;
+    globalRuntime_ = nullptr;
+    LOGI("PreloadAceModule loaded:%{public}d", isModulePreloaded_);
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule()
@@ -771,6 +815,9 @@ RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetStagingPage(int32_t instanceI
 
 shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::GetCurrentRuntime()
 {
+    if (globalRuntime_) {
+        return globalRuntime_;
+    }
     auto engine = EngineHelper::GetCurrentEngine();
     auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
     if (!jsiEngine) {
@@ -1357,6 +1404,22 @@ void JsiDeclarativeEngine::RunGarbageCollection()
     if (engineInstance_ && engineInstance_->GetJsRuntime()) {
         engineInstance_->GetJsRuntime()->RunGC();
     }
+}
+
+std::string JsiDeclarativeEngine::GetStacktraceMessage()
+{
+    auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
+    if (!arkNativeEngine) {
+        LOGE("GetStacktraceMessage arkNativeEngine is nullptr");
+        return "";
+    }
+
+    arkNativeEngine->SuspendVM();
+    std::string stack = arkNativeEngine->BuildNativeAndJsBackStackTrace();
+    arkNativeEngine->ResumeVM();
+
+    auto runningPage = engineInstance_ ? engineInstance_->GetRunningPage() : nullptr;
+    return JsiBaseUtils::TransSourceStack(runningPage, stack);
 }
 
 void JsiDeclarativeEngine::SetContentStorage(int32_t instanceId, NativeReference* nativeValue)

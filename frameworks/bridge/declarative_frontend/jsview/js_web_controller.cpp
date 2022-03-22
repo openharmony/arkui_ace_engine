@@ -153,8 +153,18 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    JSRef<JSVal> valUrl = obj->GetProperty("url");
     std::string url;
-    if (!ConvertFromJSValue(obj->GetProperty("url"), url)) {
+    if (valUrl->IsObject()) {
+        // same as src process of JSWeb::Create
+        std::string webSrc;
+        if (!JSViewAbstract::ParseJsMedia(valUrl, webSrc)) {
+            LOGE("JSWebController failed to parse url object");
+            return;
+        }
+        int np = webSrc.find_first_of("/");
+        url = (np < 0) ? webSrc : webSrc.erase(np, 1);
+    } else if (!ConvertFromJSValue(valUrl, url)) {
         LOGW("can't find url.");
         return;
     }
@@ -170,26 +180,27 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
             }
             JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
             std::string key;
-            if (!ConvertFromJSValue(obj->GetProperty("key"), key)) {
+            if (!ConvertFromJSValue(obj->GetProperty("headerKey"), key)) {
                 LOGW("can't find key at index %{public}d of additionalHttpHeaders, so skip it.", i);
                 continue;
             }
             std::string value;
-            if (!ConvertFromJSValue(obj->GetProperty("value"), value)) {
+            if (!ConvertFromJSValue(obj->GetProperty("headerValue"), value)) {
                 LOGW("can't find value at index %{public}d of additionalHttpHeaders, so skip it.", i);
                 continue;
             }
             httpHeaders[key] = value;
         }
-        LOGD("httpHeaders size:%{public}d", (int)httpHeaders.size());
     }
     if (webController_) {
         webController_->LoadUrl(url, httpHeaders);
     }
+    LOGI("JSWebController load url:%{private}s, httpHeaders:%{public}d", url.c_str(), (int)httpHeaders.size());
 }
 
 void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)
 {
+    LOGI("JSWebController excute typescript");
     if (args.Length() < 1 || !args[0]->IsObject()) {
         LOGW("invalid excute params");
         return;
@@ -363,7 +374,7 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
         return;
     }
     // options.obj
-    JSRef<JSVal> jsClassObj = obj->GetProperty("obj");
+    JSRef<JSVal> jsClassObj = obj->GetProperty("object");
     if (!jsClassObj->IsObject()) {
         LOGW("JSWebController param obj is not object");
         return;
@@ -431,7 +442,7 @@ void JSWebController::SetJavascriptInterface(const JSCallbackInfo& args)
         return;
     }
     // options.obj
-    JSRef<JSVal> jsClassObj = obj->GetProperty("obj");
+    JSRef<JSVal> jsClassObj = obj->GetProperty("object");
     if (!jsClassObj->IsObject()) {
         LOGW("JSWebController param obj is not object");
         return;
@@ -466,9 +477,10 @@ void JSWebController::RemoveJavascriptInterface(const JSCallbackInfo& args)
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], objName)) {
         return;
     }
-    if (objectorMap_.find(objName) != objectorMap_.end()) {
-        objectorMap_.erase(objName);
+    if (objectorMap_.find(objName) == objectorMap_.end()) {
+        return;
     }
+    objectorMap_.erase(objName);
     if (webController_) {
         webController_->RemoveJavascriptInterface(objName, {});
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,7 +89,7 @@ void RosenRenderXComponent::DumpTree(int32_t depth)
 
 std::shared_ptr<RSNode> RosenRenderXComponent::CreateRSNode() const
 {
-    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig;
+    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = "RosenRenderXComponent"};
     return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
 }
 

@@ -48,7 +48,7 @@ int UIServiceMgrProxy::RegisterCallBack(const AAFwk::Want& want, const sptr<IUIS
         HILOG_ERROR("register callback fail, uiService is nullptr");
         return ERR_INVALID_VALUE;
     }
-    if (!data.WriteParcelable(uiService->AsObject())) {
+    if (!data.WriteRemoteObject(uiService->AsObject())) {
         HILOG_ERROR("register callback fail, uiService error");
         return ERR_INVALID_VALUE;
     }
@@ -181,7 +181,8 @@ int UIServiceMgrProxy::ShowDialog(const std::string& name,
                                   int y,
                                   int width,
                                   int height,
-                                  const sptr<OHOS::Ace::IDialogCallback>& dialogCallback)
+                                  const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
+                                  int* id)
 {
     MessageParcel dataParcel;
     MessageParcel reply;
@@ -228,7 +229,7 @@ int UIServiceMgrProxy::ShowDialog(const std::string& name,
         HILOG_ERROR("dialogCallback is nullptr");
         return ERR_INVALID_VALUE;
     }
-    if (!dataParcel.WriteParcelable(dialogCallback->AsObject())) {
+    if (!dataParcel.WriteRemoteObject(dialogCallback->AsObject())) {
         HILOG_ERROR("dialogCallback error");
         return ERR_INVALID_VALUE;
     }
@@ -237,6 +238,10 @@ int UIServiceMgrProxy::ShowDialog(const std::string& name,
     if (error != NO_ERROR) {
         HILOG_ERROR("Request fail, error: %{public}d", error);
         return error;
+    }
+
+    if (id != nullptr) {
+        *id = reply.ReadInt32();
     }
     return reply.ReadInt32();
 }

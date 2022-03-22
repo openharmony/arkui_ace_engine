@@ -1745,7 +1745,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             return;
         }
         auto showDialog = refPtr->GetTargetCallback();
-        showDialog("", info.GetGlobalLocation());
+        showDialog("BindMenu", info.GetGlobalLocation());
     });
     click->SetOnClick(tapGesture);
     auto menuTheme = GetTheme<SelectTheme>();

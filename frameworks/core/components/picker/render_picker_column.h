@@ -39,6 +39,11 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
 
+    bool IsUseOnly() override
+    {
+        return true;
+    }
+
     void UpdateOffset(double value)
     {
         xOffset_ = value;

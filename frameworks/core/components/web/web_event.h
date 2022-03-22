@@ -25,9 +25,9 @@ public:
     ~WebConsoleLog() = default;
 
     virtual int GetLineNumber() = 0;
-    virtual const std::string& GetLog() = 0;
+    virtual std::string GetLog() = 0;
     virtual int GetLogLevel() = 0;
-    virtual const std::string& GetSourceId() = 0;
+    virtual std::string GetSourceId() = 0;
 };
 
 class ACE_EXPORT WebError : public AceType {
@@ -85,7 +85,7 @@ public:
 
     const std::string& GetReason() const
     {
-        return encoding_;
+        return reason_;
     }
 
     int32_t GetStatusCode() const
@@ -169,7 +169,7 @@ class ACE_EXPORT WebDialogEvent : public BaseEventInfo {
 
 public:
     WebDialogEvent(const std::string& url, const std::string& message, const RefPtr<Result>& result)
-        : BaseEventInfo("WebDialogEvent"), url_(url) {}
+        : BaseEventInfo("WebDialogEvent"), url_(url), result_(result) {}
     ~WebDialogEvent() = default;
 
     const std::string& GetUrl() const

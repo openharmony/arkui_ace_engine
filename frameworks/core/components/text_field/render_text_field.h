@@ -317,6 +317,8 @@ public:
         onIsCurrentFocus_ = onIsCurrentFocus;
     }
 
+    int32_t instanceId_ = -1;
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -379,6 +381,12 @@ protected:
     }
 
     bool ShowCounter() const;
+
+    static bool IsSelectiveDevice()
+    {
+        return (SystemProperties::GetDeviceType() != DeviceType::TV &&
+            SystemProperties::GetDeviceType() != DeviceType::WATCH);
+    }
 
     // Used for compare to the current value and decide whether to UpdateRemoteEditing().
     std::shared_ptr<TextEditingValue> lastKnownRemoteEditingValue_;

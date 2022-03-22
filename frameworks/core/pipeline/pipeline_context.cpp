@@ -343,6 +343,22 @@ void PipelineContext::ShowContainerTitle(bool isShow)
     }
 }
 
+void PipelineContext::BlurWindowWithDrag(bool isBlur)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        LOGW("BlurWindowWithDrag failed, Window modal is not container.");
+        return;
+    }
+    if (!rootElement_) {
+        LOGW("BlurWindowWithDrag failed, rootElement_ is null.");
+        return;
+    }
+    auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
+    if (containerModal) {
+        containerModal->BlurWindow(isBlur);
+    }
+}
+
 RefPtr<StageElement> PipelineContext::GetStageElement() const
 {
     CHECK_RUN_ON(UI);
@@ -1594,7 +1610,9 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         }
     }
     rootElement_->HandleSpecifiedKey(event);
-    NotifyDestroyEventDismiss();
+    if (event.code == KeyCode::KEY_BACK) {
+        NotifyDestroyEventDismiss();
+    }
     SetShortcutKey(event);
     return eventManager_.DispatchKeyEvent(event, rootElement_);
 }
@@ -1790,6 +1808,24 @@ void PipelineContext::OnActionEvent(const std::string& action)
     }
 }
 
+void PipelineContext::OnVirtualKeyboardAreaChange(Rect keyboardArea)
+{
+    CHECK_RUN_ON(UI);
+    double keyboardHeight = keyboardArea.Height();
+    double positionY = 0;
+    if (textFieldManager_) {
+        positionY = textFieldManager_->GetClickPosition().GetY();
+    }
+    double offsetFix = (height_ - positionY) > 100.0 ? keyboardHeight - (height_ - positionY) / 2.0 : keyboardHeight;
+    LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f", positionY,
+        (height_ - keyboardHeight), offsetFix);
+    if (NearZero(keyboardHeight)) {
+        SetRootSizeWithWidthHeight(width_, height_, 0);
+    } else if (positionY > (height_ - keyboardHeight) && offsetFix > 0.0) {
+        SetRootSizeWithWidthHeight(width_, height_, -offsetFix);
+    }
+}
+
 void PipelineContext::FlushPipelineImmediately()
 {
     CHECK_RUN_ON(UI);
@@ -1808,7 +1844,8 @@ RefPtr<Frontend> PipelineContext::GetFrontend() const
 
 void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    if (!rootElement_ || !rootElement_->GetRenderNode()) {
+    static const bool IsWindowSizeAnimationEnabled = SystemProperties::IsWindowSizeAnimationEnabled();
+    if (!rootElement_ || !rootElement_->GetRenderNode() || !IsWindowSizeAnimationEnabled) {
         LOGE("RootNodeAnimation: no rootelement found, no animation configured");
         SetRootSizeWithWidthHeight(width, height);
         return;
@@ -1828,10 +1865,21 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
                 FlushLayout();
             });
             break;
+            [[fallthrough]];
+        }
+        case WindowSizeChangeReason::DRAG: {
+            BlurWindowWithDrag(true);
+            isDragStart_ = true;
+            break;
+        }
+        case WindowSizeChangeReason::DRAG_END: {
+            BlurWindowWithDrag(false);
+            isDragStart_ = false;
+            SetRootSizeWithWidthHeight(width, height);
+            break;
         }
         case WindowSizeChangeReason::ROTATION:
         case WindowSizeChangeReason::RESIZE:
-        case WindowSizeChangeReason::DRAG:
         case WindowSizeChangeReason::UNDEFINED:
         default: {
             LOGD("PipelineContext::RootNodeAnimation : unsupported type, no animation added");
@@ -1845,11 +1893,15 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     CHECK_RUN_ON(UI);
     // Refresh the screen when developers customize the resolution and screen density on the PC preview.
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-    if (width_ == width && height_ == height && isSurfaceReady_) {
+    if (width_ == width && height_ == height && isSurfaceReady_ && type != WindowSizeChangeReason::DRAG_END) {
         LOGI("Surface size is same, no need update");
         return;
     }
 #endif
+    if (type == WindowSizeChangeReason::DRAG && isDragStart_) {
+        LOGD("Type is drag, no need change size.");
+        return;
+    }
 
     for (auto&& [id, callback] : surfaceChangedCallbackMap_) {
         if (callback) {
@@ -1969,7 +2021,7 @@ double PipelineContext::ConvertPxToVp(const Dimension& dimension) const
     return dimension.Value();
 }
 
-void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height)
+void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height, int32_t offset)
 {
     CHECK_RUN_ON(UI);
     auto frontend = weakFrontend_.Upgrade();
@@ -1997,7 +2049,7 @@ void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height)
     dipScale_ = density_ / viewScale_;
     rootHeight_ = height / viewScale_;
     rootWidth_ = width / viewScale_;
-    SetRootRect(rootWidth_, rootHeight_);
+    SetRootRect(rootWidth_, rootHeight_, offset);
     GridSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
 }
 
@@ -2017,14 +2069,14 @@ void PipelineContext::SetRootSize(double density, int32_t width, int32_t height)
         TaskExecutor::TaskType::UI);
 }
 
-void PipelineContext::SetRootRect(double width, double height) const
+void PipelineContext::SetRootRect(double width, double height, double offset) const
 {
     CHECK_RUN_ON(UI);
     if (NearZero(viewScale_) || !rootElement_) {
         LOGW("the view scale is zero or root element is nullptr");
         return;
     }
-    const Rect paintRect(0.0, 0.0, width, height);
+    const Rect paintRect(0.0, offset, width, height);
     auto rootNode = AceType::DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
     if (!rootNode) {
         return;
@@ -2540,6 +2592,7 @@ void PipelineContext::OnHide()
             }
 #endif
             context->NotifyPopupDismiss();
+            context->OnVirtualKeyboardAreaChange(Rect());
             const auto& rootElement = context->rootElement_;
             if (!rootElement) {
                 LOGE("render element is null!");
@@ -2718,7 +2771,9 @@ void PipelineContext::FlushBuildAndLayoutBeforeSurfaceReady()
 
 void PipelineContext::RootLostFocus() const
 {
-    rootElement_->LostFocus();
+    if (rootElement_) {
+        rootElement_->LostFocus();
+    }
 }
 
 void PipelineContext::AddPageUpdateTask(std::function<void()>&& task, bool directExecute)

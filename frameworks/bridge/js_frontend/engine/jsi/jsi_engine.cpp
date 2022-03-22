@@ -3481,6 +3481,22 @@ void JsiEngine::RunGarbageCollection()
     }
 }
 
+std::string JsiEngine::GetStacktraceMessage()
+{
+    auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
+    if (!arkNativeEngine) {
+        LOGE("GetStacktraceMessage arkNativeEngine is nullptr");
+        return "";
+    }
+
+    arkNativeEngine->SuspendVM();
+    std::string stack = arkNativeEngine->BuildNativeAndJsBackStackTrace();
+    arkNativeEngine->ResumeVM();
+
+    auto runningPage = engineInstance_ ? engineInstance_->GetRunningPage() : nullptr;
+    return JsiBaseUtils::TransSourceStack(runningPage, stack);
+}
+
 RefPtr<GroupJsBridge> JsiEngine::GetGroupJsBridge()
 {
     return AceType::MakeRefPtr<JsiGroupJsBridge>();

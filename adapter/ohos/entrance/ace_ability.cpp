@@ -36,6 +36,7 @@
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/utils.h"
+#include "base/geometry/rect.h"
 #include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
@@ -178,6 +179,10 @@ void AceAbility::OnStart(const Want& want)
     // register drag event callback
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener(this);
     window->RegisterDragListener(dragWindowListener);
+
+    // register drag event callback
+    OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener(this);
+    window->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener);
 
     int32_t width = window->GetRect().width_;
     int32_t height = window->GetRect().height_;
@@ -605,30 +610,43 @@ void AceAbility::OnRemoteTerminated()
 
 void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason)
 {
-    uint32_t width = rect.width_;
-    uint32_t height = rect.height_;
-    LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d", width,
-        height, rect.posX_, rect.posY_);
-    SystemProperties::SetDeviceOrientation(height >= width ? 0 : 1);
-    SystemProperties::SetWindowPos(rect.posX_, rect.posY_);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
-        LOGE("container may be destroyed.");
+        LOGE("OnSizeChange: container is null.");
         return;
     }
-    auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
-
-    if (!flutterAceView) {
-        LOGE("flutterAceView is null");
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("OnSizeChange: taskExecutor is null.");
         return;
     }
+    taskExecutor->PostTask([rect, abilityId = abilityId_, density = density_, reason]() {
+        uint32_t width = rect.width_;
+        uint32_t height = rect.height_;
+        LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d",
+            width, height, rect.posX_, rect.posY_);
+        SystemProperties::SetDeviceOrientation(height >= width ? 0 : 1);
+        SystemProperties::SetWindowPos(rect.posX_, rect.posY_);
+        auto container = Platform::AceContainer::GetContainer(abilityId);
+        if (!container) {
+            LOGE("container may be destroyed.");
+            return;
+        }
+        auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
 
-    flutter::ViewportMetrics metrics;
-    metrics.physical_width = width;
-    metrics.physical_height = height;
-    metrics.device_pixel_ratio = density_;
-    Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0, Convert2WindowSizeChangeReason(reason));
+        if (!flutterAceView) {
+            LOGE("flutterAceView is null");
+            return;
+        }
+
+        flutter::ViewportMetrics metrics;
+        metrics.physical_width = width;
+        metrics.physical_height = height;
+        metrics.device_pixel_ratio = density;
+        Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
+        Platform::FlutterAceView::SurfaceChanged(
+            flutterAceView, width, height, 0, static_cast<WindowSizeChangeReason>(reason));
+    }, TaskExecutor::TaskType::PLATFORM);
 }
 
 void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)
@@ -636,15 +654,32 @@ void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)
     LOGI("AceAbility::OnModeChange");
 }
 
-WindowSizeChangeReason AceAbility::Convert2WindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason reason)
+void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
 {
-    auto reasonValue = static_cast<uint32_t>(reason);
-    constexpr uint32_t MAX_REASON_VALUE = 5;
-    if (reasonValue > MAX_REASON_VALUE) {
-        LOGE("AceAbility: unsupported WindowSizeChangeReason");
-        return WindowSizeChangeReason::UNDEFINED;
+    auto rect = info->rect_;
+    auto type = info->type_;
+    Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    LOGI("AceAbility::OccupiedAreaChange rect:%{public}s type: %{public}d", keyboardRect.ToString().c_str(), type);
+    if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
+        auto container = Platform::AceContainer::GetContainer(abilityId_);
+        if (!container) {
+            LOGE("container may be destroyed.");
+            return;
+        }
+        auto taskExecutor = container->GetTaskExecutor();
+        if (!taskExecutor) {
+            LOGE("OnSizeChange: taskExecutor is null.");
+            return;
+        }
+
+        ContainerScope scope(abilityId_);
+        taskExecutor->PostTask([container, keyboardRect] {
+            auto context = container->GetPipelineContext();
+            if (context != nullptr) {
+                context->OnVirtualKeyboardAreaChange(keyboardRect);
+            }
+        }, TaskExecutor::TaskType::UI);
     }
-    return static_cast<WindowSizeChangeReason>(reasonValue);
 }
 
 void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
@@ -654,10 +689,18 @@ void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::s
         LOGE("container may be destroyed.");
         return;
     }
-    auto context = container->GetPipelineContext();
-    if (context != nullptr) {
-        context->DumpInfo(params, info);
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("OnSizeChange: taskExecutor is null.");
+        return;
     }
+    ContainerScope scope(abilityId_);
+    taskExecutor->PostSyncTask([container, params, &info] {
+        auto context = container->GetPipelineContext();
+        if (context != nullptr) {
+            context->DumpInfo(params, info);
+        }
+    }, TaskExecutor::TaskType::UI);
 }
 
 void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)

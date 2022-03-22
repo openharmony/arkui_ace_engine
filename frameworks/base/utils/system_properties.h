@@ -258,6 +258,11 @@ public:
         return windowPosY_;
     }
 
+    static bool IsWindowSizeAnimationEnabled()
+    {
+        return windowAnimationEnabled_;
+    }
+
 private:
     static bool traceEnabled_;
     static bool accessibilityEnabled_;
@@ -280,6 +285,7 @@ private:
     static ScreenShape screenShape_;
     static LongScreenType LongScreen_;
     static bool rosenBackendEnabled_;
+    static bool windowAnimationEnabled_;
     static bool debugEnabled_;
     static int32_t windowPosX_;
     static int32_t windowPosY_;

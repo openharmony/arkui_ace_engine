@@ -345,7 +345,7 @@ bool RenderMultiChildScroll::ReachMaxCount() const
 
 void RenderMultiChildScroll::OnPredictLayout(int64_t deadline)
 {
-    int32_t childrenSize = static_cast<uint32_t>(GetChildren().size());
+    int32_t childrenSize = static_cast<int32_t>(GetChildren().size());
     if (currentIndex_ < 0 || currentIndex_ >= childrenSize || childrenSize == 0) {
         LOGE("invalid current index: %{public}d, size is: %{public}d", currentIndex_, childrenSize);
         return;

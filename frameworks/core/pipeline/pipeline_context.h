@@ -239,6 +239,8 @@ public:
 
     void OnActionEvent(const std::string& action);
 
+    void OnVirtualKeyboardAreaChange(Rect keyboardArea);
+
     // Set card position for barrierfree
     void SetCardViewPosition(int id, float offsetX, float offsetY);
 
@@ -461,6 +463,8 @@ public:
     void RefreshStageFocus();
 
     void ShowContainerTitle(bool isShow);
+
+    void BlurWindowWithDrag(bool isBlur);
 
     RefPtr<StageElement> GetStageElement() const;
 
@@ -1228,8 +1232,8 @@ private:
     void FlushPageUpdateTasks();
     void ProcessPreFlush();
     void ProcessPostFlush();
-    void SetRootSizeWithWidthHeight(int32_t width, int32_t height);
-    void SetRootRect(double width, double height) const;
+    void SetRootSizeWithWidthHeight(int32_t width, int32_t height, int32_t offset = 0);
+    void SetRootRect(double width, double height, double offset = 0.0) const;
     void FlushBuildAndLayoutBeforeSurfaceReady();
     void FlushAnimationTasks();
     void DumpAccessibility(const std::vector<std::string>& params) const;
@@ -1379,6 +1383,7 @@ private:
     bool isJsPlugin_ = false;
     bool useLiteStyle_ = false;
     bool isFirstLoaded_ = true;
+    bool isDragStart_ = false;
     uint64_t flushAnimationTimestamp_ = 0;
     TimeProvider timeProvider_;
     OnPageShowCallBack onPageShowCallBack_;

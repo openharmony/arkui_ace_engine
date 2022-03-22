@@ -28,8 +28,10 @@ namespace {
 
 constexpr uint32_t COLUMN_CHILD_NUM = 2;
 constexpr uint32_t SPLIT_BUTTON_POSITION = 2;
-constexpr uint32_t TITLE_POPUP_TIME = 500;     // 500ms
-constexpr double TITLE_POPUP_DISTANCE = 100.0; // 100px
+constexpr uint32_t BLUR_WINDOW_RADIUS = 100;
+constexpr uint32_t TITLE_POPUP_TIME = 200;          // 200ms
+constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0;   // 5.0px
+constexpr double TITLE_POPUP_DISTANCE = 48.0;       // 48vp height of title
 
 } // namespace
 
@@ -182,8 +184,8 @@ void ContainerModalElement::PerformBuild()
         controller_->SetDuration(TITLE_POPUP_TIME);
         controller_->SetFillMode(FillMode::FORWARDS);
         auto translateY = AceType::MakeRefPtr<CurveAnimation<DimensionOffset>>(
-            DimensionOffset(Dimension(), Dimension(-TITLE_POPUP_DISTANCE)), DimensionOffset(Dimension(), Dimension()),
-            Curves::FRICTION);
+            DimensionOffset(Dimension(), Dimension(-TITLE_POPUP_DISTANCE * density_)),
+            DimensionOffset(Dimension(), Dimension()), Curves::FRICTION);
         TweenOption option;
         option.SetTranslateAnimations(AnimationType::TRANSLATE_Y, translateY);
         auto containerBox = AceType::DynamicCast<BoxElement>(GetFirstChild());
@@ -240,6 +242,10 @@ void ContainerModalElement::Update()
         LOGE("ContainerModalElement update failed, container box component is null.");
         return;
     }
+    auto context = context_.Upgrade();
+    if (context) {
+        density_ = context->GetDensity();
+    }
 
     // touch top to pop-up title bar.
     containerBox->SetOnTouchMoveId([week = WeakClaim(this)](const TouchEventInfo& info) {
@@ -247,7 +253,8 @@ void ContainerModalElement::Update()
         if (!containerElement || !containerElement->CanShowFloatingTitle()) {
             return;
         }
-        if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <= TITLE_POPUP_DISTANCE) {
+        if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <=
+            (TITLE_POPUP_DISTANCE * containerElement->density_)) {
             containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
             containerElement->controller_->ClearStopListeners();
             containerElement->controller_->Forward();
@@ -260,12 +267,13 @@ void ContainerModalElement::Update()
         if (!containerElement || info.GetAction() != MouseAction::MOVE) {
             return;
         }
-        if (info.GetLocalLocation().GetY() <= TITLE_POPUP_DISTANCE && containerElement->CanShowFloatingTitle()) {
+        if (info.GetLocalLocation().GetY() <= MOUSE_MOVE_POPUP_DISTANCE && containerElement->CanShowFloatingTitle()) {
             containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
             containerElement->controller_->ClearStopListeners();
             containerElement->controller_->Forward();
         }
-        if (info.GetLocalLocation().GetY() > TITLE_POPUP_DISTANCE && containerElement->CanHideFloatingTitle()) {
+        if (info.GetLocalLocation().GetY() > (TITLE_POPUP_DISTANCE * containerElement->density_) &&
+            containerElement->CanHideFloatingTitle()) {
             containerElement->controller_->AddStopListener([weak] {
                 auto container = weak.Upgrade();
                 container->floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
@@ -355,6 +363,27 @@ void ContainerModalElement::ChangeFloatingTitleIcon()
     } else {
         rowElement->SetUpdateComponent(titleChildrenRow_);
         splitButton->SetHidden(true);
+    }
+}
+
+void ContainerModalElement::BlurWindow(bool isBlur)
+{
+    auto containerBox = AceType::DynamicCast<BoxElement>(GetFirstChild());
+    if (!containerBox) {
+        LOGE("ContainerModalElement BlurWindow failed, container box element is null!");
+        return;
+    }
+    auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
+    if (!containerRenderBox) {
+        LOGE("ContainerModalElement BlurWindow failed, container box render is null!");
+        return;
+    }
+    if (isBlur) {
+        auto frontDecoration = AceType::MakeRefPtr<Decoration>();
+        frontDecoration->SetBlurRadius(Dimension(BLUR_WINDOW_RADIUS));
+        containerRenderBox->SetFrontDecoration(frontDecoration);
+    } else {
+        containerRenderBox->SetFrontDecoration(nullptr);
     }
 }
 

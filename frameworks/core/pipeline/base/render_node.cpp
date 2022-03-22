@@ -174,8 +174,9 @@ void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)
         child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId());
     }
 #ifdef ENABLE_ROSEN_BACKEND
-    else if (SystemProperties::GetRosenBackendEnabled() && child->HasDisappearingTransition(child->GetNodeId())) {
-        // if rosen backend is enabled, kick off a disappearing transition
+    // To avoid redundant transition animation, only trigger transition when head render node is removed
+    else if (child->IsHeadRenderNode() && child->HasDisappearingTransition(child->GetNodeId())) {
+        // kick off a disappearing transition
         child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId());
     }
     if (rsNode_ && rsNode_ == child->rsNode_) {
@@ -770,7 +771,7 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
         }
     }
     auto endSize = result.size();
-    return dispatchSuccess || beforeSize != endSize;
+    return (dispatchSuccess || beforeSize != endSize) && IsNotSiblingAddRecognizerToResult();
 }
 
 RefPtr<RenderNode> RenderNode::FindDropChild(const Point& globalPoint, const Point& parentLocalPoint)
@@ -905,7 +906,7 @@ bool RenderNode::AxisDetect(const Point& globalPoint, const Point& parentLocalPo
         if (touchable_ && rect.IsInRegion(transformPoint)) {
             if (!axisNode.Upgrade()) {
                 axisNode = CheckAxisNode();
-                if (axisNode.Upgrade() && !(axisNode.Upgrade()->isScrollable(direction))) {
+                if (axisNode.Upgrade() && !(axisNode.Upgrade()->IsAxisScrollable(direction))) {
                     axisNode = nullptr;
                 }
             }
@@ -1613,8 +1614,9 @@ void RenderNode::NotifyTransition(TransitionType type, int32_t nodeId)
         if (GetRSNode() == nullptr) {
             return;
         }
+        // call OnRSTransition for all render_nodes sharing this RSNode
         OnRSTransition(type);
-        if (!isTailRenderNode_) {
+        if (isTailRenderNode_) {
             return;
         }
         for (auto& child : children_) {
