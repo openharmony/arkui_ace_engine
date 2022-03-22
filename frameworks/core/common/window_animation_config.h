@@ -23,6 +23,7 @@ enum class WindowSizeChangeReason : uint32_t {
     RECOVER,
     ROTATION,
     DRAG,
+    DRAG_START,
     DRAG_END,
     RESIZE,
     MOVE,
