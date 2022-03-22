@@ -23,6 +23,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/utils.h"
+#include "core/components/theme/app_theme.h"
 
 #include "hilog_wrapper.h"
 #include "if_system_ability_manager.h"
@@ -161,6 +162,18 @@ std::shared_ptr<OHOS::AppExecFwk::Ability> UIMgrService::CreateAbility()
     return sharedAbility;
 }
 
+static void SetDialogBackgroundColor(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)
+{
+    auto themeManager = context->GetThemeManager();
+    if (themeManager) {
+        auto appTheme = themeManager->GetTheme<AppTheme>();
+        if (appTheme) {
+            HILOG_INFO("set bg color TRANSPARENT");
+            appTheme->SetBackgroundColor(Color::TRANSPARENT);
+        }
+    }
+}
+
 int UIMgrService::ShowDialog(const std::string& name,
                              const std::string& params,
                              OHOS::Rosen::WindowType windowType,
@@ -265,30 +278,35 @@ int UIMgrService::ShowDialog(const std::string& name,
         Ace::Platform::AceContainer::AddAssetPath(dialogId, packagePathStr, assetBasePathStr);
 
         Ace::Platform::UIEnvCallback callback = nullptr;
+        callback =
 #ifdef ENABLE_ROSEN_BACKEND
-        callback = [dialogWindow, listener, dialogId] (
-            const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
-            if (SystemProperties::GetRosenBackendEnabled()) {
-                auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-                if (rsUiDirector != nullptr) {
-                    rsUiDirector->SetRSSurfaceNode(dialogWindow->GetSurfaceNode());
-                    dialogWindow->RegisterWindowChangeListener(listener);
+            [dialogWindow, listener, dialogId] (const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
+                if (SystemProperties::GetRosenBackendEnabled()) {
+                    auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+                    if (rsUiDirector != nullptr) {
+                        rsUiDirector->SetRSSurfaceNode(dialogWindow->GetSurfaceNode());
+                        dialogWindow->RegisterWindowChangeListener(listener);
 
-                    rsUiDirector->SetUITaskRunner(
-                        [taskExecutor = Ace::Platform::AceContainer::GetContainer(dialogId)->GetTaskExecutor()]
-                            (const std::function<void()>& task) {
-                                taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-                            });
-                    if (context != nullptr) {
-                        context->SetRSUIDirector(rsUiDirector);
+                        rsUiDirector->SetUITaskRunner(
+                            [taskExecutor = Ace::Platform::AceContainer::GetContainer(dialogId)->GetTaskExecutor()]
+                                (const std::function<void()>& task) {
+                                    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                                });
+                        if (context != nullptr) {
+                            context->SetRSUIDirector(rsUiDirector);
+                        }
+                        rsUiDirector->Init();
+                        HILOG_INFO("Init Rosen Backend");
                     }
-                    rsUiDirector->Init();
-                    HILOG_INFO("Init Rosen Backend");
+                } else {
+                    HILOG_INFO("not Init Rosen Backend");
                 }
-            } else {
-                HILOG_INFO("not Init Rosen Backend");
+                SetDialogBackgroundColor(context);
+            };
+#else
+            [] (const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) {
+                SetDialogBackgroundColor(context);
             }
-        };
 #endif
 
         // set view
@@ -296,21 +314,6 @@ int UIMgrService::ShowDialog(const std::string& name,
             flutterAceView, density_, windowWidth, windowHeight, dialogWindow->GetWindowId(), callback);
         Ace::Platform::AceContainer::SetUIWindow(dialogId, dialogWindow);
         Ace::Platform::FlutterAceView::SurfaceChanged(flutterAceView, windowWidth, windowHeight, 0);
-
-        auto taskExecutor = container->GetTaskExecutor();
-        if (taskExecutor) {
-            taskExecutor->PostTask([dialogId]() {
-                auto container = Ace::Platform::AceContainer::GetContainer(dialogId);
-                if (container) {
-                    auto context = container->GetPipelineContext();
-                    if (context) {
-                        HILOG_INFO("set bg color TRANSPARENT");
-                        context->SetRootBgColor(Color::TRANSPARENT);
-                    }
-                }
-            },
-            TaskExecutor::TaskType::UI);
-        }
 
         // run page.
         Ace::Platform::AceContainer::RunPage(
