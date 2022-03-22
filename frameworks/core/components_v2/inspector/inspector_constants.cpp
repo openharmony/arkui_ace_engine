@@ -247,7 +247,7 @@ ACE_EXPORT extern const char REFRESH_ETS_TAG[] = "Refresh";
 ACE_EXPORT extern const char DATE_PICKER_COMPONENT_TAG[] = "PickerDateComponent";
 ACE_EXPORT extern const char DATE_PICKER_ETS_TAG[] = "DatePicker";
 ACE_EXPORT extern const char TIME_PICKER_COMPONENT_TAG[] = "PickerTimeComponent";
-ACE_EXPORT extern const char TIME_PICKER_ETS_TAG[] = "DatePicker";
+ACE_EXPORT extern const char TIME_PICKER_ETS_TAG[] = "TimePicker";
 
 // Radio
 ACE_EXPORT extern const char RADIO_COMPONENT_TAG[] = "RadioComponent<VALUE_TYPE>";
@@ -329,5 +329,9 @@ ACE_EXPORT extern const char LOADING_PROGRESS_ETS_TAG[] = "LoadingProgress";
 // checkboxGroup
 const char CHECKBOXGROUP_COMPONENT_TAG[] = "CheckboxGroupComponent";
 const char CHECKBOXGROUP_ETS_TAG[] = "CheckboxGroup";
+
+// timePickerdialog
+ACE_EXPORT extern const char TIME_PICKER_DIALOG_COMPONENT_TAG[] = "TimePickerDialog";
+ACE_EXPORT extern const char TIME_PICKER_DIALOG_ETS_TAG[] = "TimePickerDialog";
 
 } // namespace OHOS::Ace::V2

@@ -85,6 +85,7 @@
 #include "core/components_v2/inspector/textinput_composed_element.h"
 #include "core/components_v2/inspector/texttimer_composed_element.h"
 #include "core/components_v2/inspector/time_picker_composed_element.h"
+#include "core/components_v2/inspector/time_picker_dialog_composed_element.h"
 #include "core/components_v2/inspector/toggle_composed_element.h"
 #include "core/components_v2/inspector/wrap_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
@@ -237,7 +238,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { LOADING_PROGRESS_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::LoadingProgressComposedElement>(id); } },
     { CHECKBOXGROUP_COMPONENT_TAG,
-        [](const std::string& id) {return AceType::MakeRefPtr<V2::CheckboxGroupComposedElement>(id); } }
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::CheckboxGroupComposedElement>(id); } },
+    { TIME_PICKER_DIALOG_COMPONENT_TAG,
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::TimePickerDialogComposedElement>(id); } }
 };
 
 } // namespace
@@ -314,7 +317,8 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { DATE_PICKER_DIALOG_COMPONENT_TAG, DATE_PICKER_DIALOG_ETS_TAG },
     { SIDE_BAR_COMPONENT_TAG, SIDE_BAR_ETS_TAG },
     { LOADING_PROGRESS_COMPONENT_TAG, LOADING_PROGRESS_ETS_TAG },
-    { CHECKBOXGROUP_COMPONENT_TAG, CHECKBOXGROUP_ETS_TAG }
+    { CHECKBOXGROUP_COMPONENT_TAG, CHECKBOXGROUP_ETS_TAG },
+    { TIME_PICKER_DIALOG_COMPONENT_TAG, TIME_PICKER_DIALOG_ETS_TAG}
 };
 
 RefPtr<Element> InspectorComposedComponent::CreateElement()

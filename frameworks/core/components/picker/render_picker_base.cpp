@@ -14,6 +14,7 @@
  */
 
 #include "core/components/picker/render_picker_base.h"
+#include "core/components/picker/picker_date_component.h"
 
 #include <numeric>
 
@@ -70,6 +71,12 @@ void RenderPickerBase::Update(const RefPtr<Component>& component)
         type_ = "DatePickerType.Time";
     } else {
         type_ = "DatePickerType.Date";
+    }
+
+    auto datePicker = AceType::DynamicCast<PickerDateComponent>(component);
+    if (datePicker) {
+        startDateSolar_ = datePicker->GetStartDate();
+        endDateSolar_ = datePicker->GetEndDate();
     }
 
     columnHeight_ = picker->GetColumnHeight();
