@@ -28,11 +28,9 @@ namespace OHOS::Ace::V2 {
 namespace {
 const std::unordered_map<std::string, std::function<std::string(const DatePickerComposedElement&)>> CREATE_JSON_MAP {
     { "lunar", [](const DatePickerComposedElement& inspector) { return inspector.GetLunar(); } },
-    { "useMilitaryTime", [](const DatePickerComposedElement& inspector) { return inspector.GetUseMilitaryTime(); } },
     { "start", [](const DatePickerComposedElement& inspector) { return inspector.GetStart(); } },
     { "end", [](const DatePickerComposedElement& inspector) { return inspector.GetEnd(); } },
-    { "selected", [](const DatePickerComposedElement& inspector) { return inspector.GetSelected(); } },
-    { "type", [](const DatePickerComposedElement& inspector) { return inspector.GetDatePickerType(); } }
+    { "selected", [](const DatePickerComposedElement& inspector) { return inspector.GetSelected(); } }
 };
 }
 
@@ -40,11 +38,9 @@ void DatePickerComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
     DumpLog::GetInstance().AddDesc(std::string("lunar: ").append(GetLunar()));
-    DumpLog::GetInstance().AddDesc(std::string("useMilitaryTime: ").append(GetUseMilitaryTime()));
     DumpLog::GetInstance().AddDesc(std::string("start: ").append(GetStart()));
     DumpLog::GetInstance().AddDesc(std::string("end: ").append(GetEnd()));
     DumpLog::GetInstance().AddDesc(std::string("selected: ").append(GetSelected()));
-    DumpLog::GetInstance().AddDesc(std::string("type: ").append(GetDatePickerType()));
 }
 
 std::unique_ptr<JsonValue> DatePickerComposedElement::ToJsonObject() const
@@ -61,25 +57,6 @@ std::string DatePickerComposedElement::GetLunar() const
     auto render = GetRenderPickerBase();
     auto showLunar = render ? render->GetPickerBaseComponent()->IsShowLunar() : false;
     return ConvertBoolToString(showLunar);
-}
-
-std::string DatePickerComposedElement::GetUseMilitaryTime() const
-{
-    auto render = GetRenderPickerBase();
-    auto useMilitaryTime = true;
-    if (render) {
-        auto columns = render->GetRenderPickerColumn();
-        for (const auto& column : columns) {
-            if (!column) {
-                continue;
-            }
-            if (column->GetColumnTag() == PickerBaseComponent::PICKER_AMPM_COLUMN) {
-                useMilitaryTime = false;
-                break;
-            }
-        }
-    }
-    return ConvertBoolToString(useMilitaryTime);
 }
 
 std::string DatePickerComposedElement::GetStart() const
@@ -128,15 +105,6 @@ std::string DatePickerComposedElement::GetSelected() const
         return selectedDate;
     }
     return "";
-}
-
-std::string DatePickerComposedElement::GetDatePickerType() const
-{
-    auto render = GetRenderPickerBase();
-    if (render) {
-        return render->GetType();
-    }
-    return "DatePickerType.Time";
 }
 
 RefPtr<RenderPickerBase> DatePickerComposedElement::GetRenderPickerBase() const
