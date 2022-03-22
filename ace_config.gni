@@ -82,7 +82,11 @@ if (is_standard_system) {
   hilog_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   ark_runtime_path = "//ark/runtime_core"
 } else {
-  ace_engine_part = "ace_engine_full"
+  if (is_cross_platform_build) {
+    ace_engine_part = "ace_engine_cross"
+  } else {
+    ace_engine_part = "ace_engine_full"
+  }
   hilog_deps = [ "hilog:libhilog" ]
   ark_runtime_path = "//ark/runtime"
 }
