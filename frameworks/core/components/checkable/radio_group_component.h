@@ -65,11 +65,8 @@ private:
             if (refPtr) {
                 if (isDeclarative_) {
                     if (counts > 1) {
-                        bool isChecked = refPtr->GetGroupValue() == refPtr->GetValue();
                         refPtr->SetGroupValue(newValue);
-                        if (isChecked != (refPtr->GetValue() == newValue)) {
-                            refPtr->UpdateGroupValue(newValue);
-                        }
+                        refPtr->UpdateGroupValue(newValue);
                     } else {
                         if (refPtr->GetOriginChecked()) {
                             refPtr->SetGroupValue(newValue);
