@@ -375,6 +375,11 @@ int32_t AccessibilityNodeManager::GenerateNextAccessibilityId()
 RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateSpecializedNode(
     const std::string& tag, int32_t nodeId, int32_t parentNodeId)
 {
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    if (IsDeclarative()) {
+        return nullptr;
+    }
+#endif
     if (nodeId < ROOT_STACK_BASE) {
         return nullptr;
     }
