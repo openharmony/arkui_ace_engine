@@ -100,19 +100,20 @@ foreach(item, ace_platforms) {
           defines += config.defines
         }
       }
+      if (defined(engine.have_debug) && engine.have_debug) {
+        js_engine_qjs("js_engine_bridge_qjs_debug_$platform") {
+          platform = item.name
+          defines = engine.engine_defines
+          use_js_debug = true
+          config = {
+          }
 
-      js_engine_qjs("js_engine_bridge_qjs_debug_$platform") {
-        platform = item.name
-        defines = engine.engine_defines
-        use_js_debug = true
-        config = {
-        }
-
-        if (defined(item.config)) {
-          config = item.config
-        }
-        if (defined(config.defines)) {
-          defines += config.defines
+          if (defined(item.config)) {
+            config = item.config
+          }
+          if (defined(config.defines)) {
+            defines += config.defines
+          }
         }
       }
     }

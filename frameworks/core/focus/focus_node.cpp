@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cinttypes>
 
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
@@ -237,7 +238,7 @@ bool FocusNode::OnKeyEvent(const KeyEvent& keyEvent)
         }
         LOGI("FocusNode::OnKeyEvent: Do key callback on %{public}s with key event{ Code(%{public}d), "
              "Action(%{public}d), "
-             "SourceType(%{public}d), DeviceId(%{public}lld), Time(%{public}lld) }. Return: %{public}d",
+             "SourceType(%{public}d), DeviceId(%{public}" PRId64 "), Time(%{public}lld) }. Return: %{public}d",
             AceType::TypeName(this), info->GetKeyCode(), info->GetKeyType(), info->GetSourceDevice(),
             info->GetDeviceId(), info->GetTimeStamp().time_since_epoch().count(), info->IsStopPropagation());
         onKeyEventCallback_(info);
@@ -285,7 +286,8 @@ void FocusNode::OnClick(const KeyEvent& event)
         info->SetSourceDevice(static_cast<SourceType>(event.sourceType));
         info->SetDeviceId(event.deviceId);
         LOGI("FocusNode::OnClick: Do click callback on %{public}s with key event{ Global(%{public}f,%{public}f), "
-             "Local(%{public}f,%{public}f), SourceType(%{public}d), DeviceId(%{public}lld), Time(%{public}lld) }",
+             "Local(%{public}f,%{public}f), SourceType(%{public}d), DeviceId(%{public}" PRId64
+             "), Time(%{public}lld) }",
             AceType::TypeName(this), info->GetGlobalLocation().GetX(), info->GetGlobalLocation().GetY(),
             info->GetLocalLocation().GetX(), info->GetLocalLocation().GetY(), info->GetSourceDevice(),
             info->GetDeviceId(), info->GetTimeStamp().time_since_epoch().count());

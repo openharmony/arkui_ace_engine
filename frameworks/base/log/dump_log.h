@@ -18,9 +18,11 @@
 
 #include <cstdio>
 #include <memory>
+#include <streambuf>
 #include <sstream>
 #include <vector>
 
+#include "base/log/log.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/singleton.h"
 
@@ -30,7 +32,49 @@ class DumpLog : public Singleton<DumpLog> {
     DECLARE_SINGLETON(DumpLog);
 
 public:
-    using DumpFile = std::unique_ptr<FILE, decltype(&fclose)>;
+    class DumpFileBuf : public std::streambuf {
+    public:
+        DumpFileBuf(FILE* file) : file_(file) {}
+        ~DumpFileBuf()
+        {
+            if (file_ && fclose(file_)) {
+                LOGE("DumpFileBuf close file failed!");
+            }
+        }
+
+        int_type overflow(int_type c) override
+        {
+            if (c != EOF) {
+                if (fwrite(&c, 1, 1, file_) != 1) {
+                    return EOF;
+                }
+            }
+            return c;
+        }
+
+        std::streamsize xsputn(const char* str, std::streamsize num) override
+        {
+            return fwrite(str, 1, num, file_);
+        }
+
+    private:
+        FILE* file_;
+    };
+
+    class DumpFile : public std::ostream {
+    public:
+        DumpFile(FILE* file) : std::ostream(0), buf_(file)
+        {
+            rdbuf(&buf_);
+        }
+    protected:
+        DumpFileBuf buf_;
+    };
+
+    void SetDumpFile(DumpFile* file)
+    {
+        ostream_.reset(file);
+    }
 
     void SetDumpFile(std::unique_ptr<std::ostream> file)
     {

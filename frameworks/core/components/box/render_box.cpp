@@ -16,6 +16,7 @@
 #include "core/components/box/render_box.h"
 
 #include <algorithm>
+#include <cinttypes>
 #include <cstdint>
 
 #include "base/geometry/offset.h"
@@ -1104,7 +1105,7 @@ bool RenderBox::HandleMouseEvent(const MouseEvent& event)
     info.SetSourceDevice(event.sourceType);
     LOGI("RenderBox::HandleMouseEvent: Do mouse callback with mouse event{ Global(%{public}f,%{public}f), "
          "Local(%{public}f,%{public}f)}, Button(%{public}d), Action(%{public}d), Time(%{public}lld), "
-         "DeviceId(%{public}lld, SourceType(%{public}d) }. Return: %{public}d",
+         "DeviceId(%{public}" PRId64 ", SourceType(%{public}d) }. Return: %{public}d",
         info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetLocalLocation().GetX(),
         info.GetLocalLocation().GetY(), info.GetButton(), info.GetAction(),
         info.GetTimeStamp().time_since_epoch().count(), info.GetDeviceId(), info.GetSourceDevice(),
