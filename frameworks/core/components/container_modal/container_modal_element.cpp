@@ -31,7 +31,7 @@ constexpr uint32_t SPLIT_BUTTON_POSITION = 2;
 constexpr uint32_t BLUR_WINDOW_RADIUS = 100;
 constexpr uint32_t TITLE_POPUP_TIME = 200;          // 200ms
 constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0;   // 5.0px
-constexpr double TITLE_POPUP_DISTANCE = 48.0;       // 48vp height of title
+constexpr double TITLE_POPUP_DISTANCE = 37.0;       // 37vp height of title
 
 } // namespace
 
