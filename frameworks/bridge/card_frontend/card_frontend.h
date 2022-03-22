@@ -159,6 +159,16 @@ public:
         formSrc_ = formSrc;
     }
 
+    WindowConfig& GetCardWindowConfig()
+    {
+        return cardWindowConfig_;
+    }
+
+    void SetCardWindowConfig(WindowConfig cardWindowConfig)
+    {
+        cardWindowConfig_ = cardWindowConfig;
+    }
+
 private:
     void UpdatePageData(const std::string& dataList);
     void LoadPage(const std::string& urlPath, const std::string& params);
@@ -187,6 +197,7 @@ private:
     Framework::PageIdPool pageIdPool_;
     RefPtr<Framework::JsCardParser> parseJsCard_;
     std::string formSrc_;
+    WindowConfig cardWindowConfig_;
 };
 
 class CardEventHandler : public AceEventHandler {
