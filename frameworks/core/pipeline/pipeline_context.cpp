@@ -3197,6 +3197,14 @@ void PipelineContext::OpenImplicitAnimation(
     pendingImplicitLayout_.push(false);
     FlushLayout();
 
+    auto wrapFinishCallback = [weak = AceType::WeakClaim(this), finishCallback]() {
+        auto context = weak.Upgrade();
+        if (!context) {
+            return;
+        }
+        context->GetTaskExecutor()->PostTask([finishCallback]() { finishCallback(); }, TaskExecutor::TaskType::UI);
+    };
+
     Rosen::RSAnimationTimingProtocol timingProtocol;
     timingProtocol.SetDuration(option.GetDuration());
     timingProtocol.SetStartDelay(option.GetDelay());
@@ -3206,7 +3214,7 @@ void PipelineContext::OpenImplicitAnimation(
                                 option.GetAnimationDirection() == AnimationDirection::ALTERNATE);
     timingProtocol.SetAutoReverse(option.GetAnimationDirection() == AnimationDirection::ALTERNATE ||
                                   option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
-    RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), finishCallback);
+    RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), wrapFinishCallback);
 #endif
 }
 
