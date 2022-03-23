@@ -144,8 +144,8 @@ public:
 
     bool IsInRegion(const Point& point) const
     {
-        return (point.GetX() > x_) && (point.GetX() <= (x_ + width_)) && (point.GetY() > y_) &&
-               (point.GetY() <= (y_ + height_));
+        return (point.GetX() >= x_) && (point.GetX() < (x_ + width_)) && (point.GetY() >= y_) &&
+               (point.GetY() < (y_ + height_));
     }
 
     bool IsWrappedBy(const Rect& other) const
