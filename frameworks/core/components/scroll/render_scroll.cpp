@@ -1074,24 +1074,8 @@ void RenderScroll::UpdateTouchRect()
 
 bool RenderScroll::IsAxisScrollable(AxisDirection direction)
 {
-    if (axis_ == Axis::VERTICAL) {
-        if (direction == AxisDirection::UP && IsAtTop()) {
-            return false;
-        } else if (direction == AxisDirection::DOWN && IsAtBottom()) {
-            return false;
-        } else if (direction == AxisDirection::NONE) {
-            return false;
-        }
-    } else {
-        if (direction == AxisDirection::LEFT && IsAtTop()) {
-            return false;
-        } else if (direction == AxisDirection::RIGHT && IsAtBottom()) {
-            return false;
-        } else if (direction == AxisDirection::NONE) {
-            return false;
-        }
-    }
-    return true;
+    return (((direction == AxisDirection::UP || direction == AxisDirection::LEFT) && !IsAtTop()) ||
+        ((direction == AxisDirection::DOWN || direction == AxisDirection::RIGHT) && !IsAtBottom()));
 }
 
 void RenderScroll::HandleAxisEvent(const AxisEvent& event)
