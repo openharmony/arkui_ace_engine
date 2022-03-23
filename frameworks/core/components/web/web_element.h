@@ -23,10 +23,12 @@
 namespace OHOS::Ace {
 
 class WebElement : public RenderElement, public FocusNode {
-    DECLARE_ACE_TYPE(WebElement, RenderElement);
+    DECLARE_ACE_TYPE(WebElement, RenderElement, FocusNode);
 
 public:
     void SetNewComponent(const RefPtr<Component>& newComponent) override;
+
+    void Update() override;
 
     void OnFocus() override;
 
