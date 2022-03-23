@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3276,7 +3276,6 @@ bool V8EngineInstance::InitJsEnv()
     // create Isolate
     create_params_.array_buffer_allocator = v8::ArrayBuffer::Allocator::NewDefaultAllocator();
 #if defined(USE_EXTERNAL_V8_SNAPSHOT)
-    // TODO: get snapshot_blob from external file
 #else
     static v8::StartupData snapshotBlob = {
         .data = _binary_strip_native_min_js_bin_start,

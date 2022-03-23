@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,8 +129,6 @@ void DomTextTest::TearDown() {}
  * @tc.name: DomTextTest001
  * @tc.desc: Verify that DomText can be created.
  * @tc.type: FUNC
- * @tc.require: AR000DD66E
- * @tc.author: liwenzhen
  */
 HWTEST_F(DomTextTest, DomTextTest001, TestSize.Level1)
 {
@@ -155,8 +153,6 @@ HWTEST_F(DomTextTest, DomTextTest001, TestSize.Level1)
  * @tc.name: DomTextTest002
  * @tc.desc: Verify that DomText can be set styles.
  * @tc.type: FUNC
- * @tc.require: AR000DD66E AR000FRTPP
- * @tc.author: liwenzhen
  */
 HWTEST_F(DomTextTest, DomTextTest002, TestSize.Level1)
 {
@@ -202,8 +198,6 @@ HWTEST_F(DomTextTest, DomTextTest002, TestSize.Level1)
  * @tc.name: DomTextTest003
  * @tc.desc: Verify that DomText can be set styles to the default values when styles' attributes are invalid.
  * @tc.type: FUNC
- * @tc.require: AR000DD66E
- * @tc.author: liwenzhen
  */
 HWTEST_F(DomTextTest, DomTextTest003, TestSize.Level1)
 {
@@ -259,8 +253,6 @@ HWTEST_F(DomTextTest, DomTextTest003, TestSize.Level1)
  * @tc.name: DomTextTest004
  * @tc.desc: Verify that DomText's style can be initialized to default values when no styles are set manually.
  * @tc.type: FUNC
- * @tc.require: AR000DD66E
- * @tc.author: liwenzhen
  */
 HWTEST_F(DomTextTest, DomTextTest004, TestSize.Level1)
 {
@@ -304,8 +296,6 @@ HWTEST_F(DomTextTest, DomTextTest004, TestSize.Level1)
  * @tc.name: DomTextTest005
  * @tc.desc: Verify that DomText can be created.
  * @tc.type: FUNC
- * @tc.require: AR000FRTPP
- * @tc.author: caocan
  */
 HWTEST_F(DomTextTest, DomTextTest005, TestSize.Level1)
 {
@@ -336,8 +326,6 @@ HWTEST_F(DomTextTest, DomTextTest005, TestSize.Level1)
  * @tc.name: DomTextTest006
  * @tc.desc: Verify that DomText can be created.
  * @tc.type: FUNC
- * @tc.require: AR000FRTPP
- * @tc.author: caocan
  */
 HWTEST_F(DomTextTest, DomTextTest006, TestSize.Level1)
 {

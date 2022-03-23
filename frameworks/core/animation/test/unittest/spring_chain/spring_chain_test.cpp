@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,8 +144,6 @@ protected:
  * @tc.name: SpringChainTest001
  * @tc.desc: Test SpringChain init
  * @tc.type: FUNC
- * @tc.require: AR000F3CD8
- * @tc.author: zhouzebin
  */
 HWTEST_F(SpringChainTest, SpringChainTest001, TestSize.Level1)
 {
@@ -167,8 +165,6 @@ HWTEST_F(SpringChainTest, SpringChainTest001, TestSize.Level1)
  * @tc.name: SpringChainTest002
  * @tc.desc: Test SpringChain default Param Transfer
  * @tc.type: FUNC
- * @tc.require: AR000F3CD9
- * @tc.author: zhouzebin
  */
 HWTEST_F(SpringChainTest, SpringChainTest002, TestSize.Level1)
 {
@@ -194,8 +190,6 @@ HWTEST_F(SpringChainTest, SpringChainTest002, TestSize.Level1)
  * @tc.name: SpringChainTest003
  * @tc.desc: Test SpringChain Linear Param Transfer
  * @tc.type: FUNC
- * @tc.require: AR000F3CDB
- * @tc.author: zhouzebin
  */
 HWTEST_F(SpringChainTest, SpringChainTest003, TestSize.Level1)
 {
@@ -221,8 +215,6 @@ HWTEST_F(SpringChainTest, SpringChainTest003, TestSize.Level1)
  * @tc.name: SpringChainTest004
  * @tc.desc: Test SpringChain Transfer Next
  * @tc.type: FUNC
- * @tc.require: AR000F3CDA
- * @tc.author: zhouzebin
  */
 HWTEST_F(SpringChainTest, SpringChainTest004, TestSize.Level1)
 {

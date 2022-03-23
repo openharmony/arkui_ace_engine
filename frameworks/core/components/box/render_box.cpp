@@ -593,7 +593,6 @@ void RenderBox::UpdateFrontDecoration(const RefPtr<Decoration>& newDecoration)
     frontDecoration_->SetHueRotate(newDecoration->GetHueRotate());
 }
 
-// TODO: OLEG align with state attributes
 void RenderBox::UpdateStyleFromRenderNode(PropertyAnimatableType type)
 {
     // Operator map for styles

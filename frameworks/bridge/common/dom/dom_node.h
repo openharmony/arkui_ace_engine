@@ -505,7 +505,6 @@ public:
 
     virtual void AdjustSpecialParamInLiteMode() {}
 
-    // TODO delete those method form dom node, use declaration.
     virtual void SetAttr(const std::vector<std::pair<std::string, std::string>>& attrs);
     virtual void SetStyle(const std::vector<std::pair<std::string, std::string>>& styles);
     virtual void AddEvent(int32_t pageId, const std::vector<std::string>& events);
@@ -823,7 +822,6 @@ protected:
 
     void OnChecked(bool isChecked);
 
-    // TODO delete those method from dom node.
     // Each subclass needs to override this function to obtain the properties. If it returns true, it means that the
     // property has been consumed. If it returns false, it means it is handed over to the parent class.
     virtual bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr)

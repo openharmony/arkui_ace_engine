@@ -1,4 +1,4 @@
-#  Copyright (c) 2021 Huawei Device Co., Ltd.
+#  Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -25,7 +25,7 @@
 #  // __BASE is used for defining the basic info of the event.
 #  // "type" optional values are: FAULT, STATISTICS, SECURITY, BEHAVIOR.
 #  // "level" optional values are: CRITICAL, MINOR.
-#  // "tag" set tags with may used by subscriber of this event, multiple tags devided by space.
+#  // "tag" set tags with may used by subscriber of this event, multiple tags divided by space.
 #  // "desc" full description of this event.
 #  @PARAMETER: {type: parameter type, arrsize: array length(optional), desc: parameter description}.
 #  // follow the __BASE block, each line defines a parameter of this event.

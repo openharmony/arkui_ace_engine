@@ -2051,7 +2051,6 @@ void RenderList::MultiSelectAllWhenCtrlA()
 
 int32_t RenderList::RequestNextFocus(bool vertical, bool reverse)
 {
-    // TODO rightToLeft_ need initial
     bool rightToLeft_ = false;
     int32_t moveStep = DIRECTION_MAP.at(rightToLeft_).at(vertical_).at(vertical).at(reverse);
     if (moveStep == STEP_INVALID) {

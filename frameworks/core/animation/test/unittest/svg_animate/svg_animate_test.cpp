@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -166,8 +166,6 @@ protected:
  * @tc.name: SvgAnimateTest
  * @tc.desc: Verify the property animation process for type double
  * @tc.type: FUNC
- * @tc.require: AR000FL0TR
- * @tc.author: chenlien
  */
 HWTEST_F(SvgAnimateTest, SvgAnimateTest001, TestSize.Level1)
 {
@@ -206,8 +204,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest001, TestSize.Level1)
  * @tc.name: SvgAnimateTest002
  * @tc.desc: Verify the property animation process for type color
  * @tc.type: FUNC
- * @tc.require: AR000FL0TR
- * @tc.author: chenlien
  */
 HWTEST_F(SvgAnimateTest, SvgAnimateTest002, TestSize.Level1)
 {
@@ -246,8 +242,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest002, TestSize.Level1)
  * @tc.name: SvgAnimateTest003
  * @tc.desc: Verify the property animation process for type dimension
  * @tc.type: FUNC
- * @tc.require: AR000FL0TR
- * @tc.author: chenlien
  */
 HWTEST_F(SvgAnimateTest, SvgAnimateTest003, TestSize.Level1)
 {
@@ -286,8 +280,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest003, TestSize.Level1)
  * @tc.name: SvgAnimateTest004
  * @tc.desc: Verify the property keyframe animation process for type dimension
  * @tc.type: FUNC
- * @tc.require: AR000FL0TR
- * @tc.author: chenlien
  */
 HWTEST_F(SvgAnimateTest, SvgAnimateTest004, TestSize.Level1)
 {
@@ -326,8 +318,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest004, TestSize.Level1)
  * @tc.name: SvgAnimateTest005
  * @tc.desc: Verify the property keyframe with keyTimes animation process for type dimension
  * @tc.type: FUNC
- * @tc.require: AR000FL0TR
- * @tc.author: chenlien
  */
 HWTEST_F(SvgAnimateTest, SvgAnimateTest005, TestSize.Level1)
 {
@@ -368,8 +358,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest005, TestSize.Level1)
  * @tc.name: SvgAnimateTest006
  * @tc.desc: Verify the property keyframe animation with keysplines process for type dimension
  * @tc.type: FUNC
- * @tc.require: AR000FL0TR
- * @tc.author: chenlien
  */
 HWTEST_F(SvgAnimateTest, SvgAnimateTest006, TestSize.Level1)
 {
@@ -412,8 +400,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest006, TestSize.Level1)
  * @tc.name: SvgAnimateTest007
  * @tc.desc: Verify the property keyframe animation with discrete calcMode process for type dimension
  * @tc.type: FUNC
- * @tc.require: AR000FL0TR
- * @tc.author: chenlien
  */
 HWTEST_F(SvgAnimateTest, SvgAnimateTest007, TestSize.Level1)
 {
@@ -454,8 +440,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest007, TestSize.Level1)
  * @tc.name: SvgAnimateTest008
  * @tc.desc: Verify the property keyframe animation with paced calcMode process for type dimension
  * @tc.type: FUNC
- * @tc.require: AR000FL0TR
- * @tc.author: chenlien
  */
 HWTEST_F(SvgAnimateTest, SvgAnimateTest008, TestSize.Level1)
 {
@@ -496,8 +480,6 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest008, TestSize.Level1)
  * @tc.name: SvgAnimateTest009
  * @tc.desc: Verify the motion animate
  * @tc.type: FUNC
- * @tc.require: AR000FL0TS
- * @tc.author: chenlien
  */
 HWTEST_F(SvgAnimateTest, SvgAnimateTest009, TestSize.Level1)
 {

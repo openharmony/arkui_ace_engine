@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -136,7 +136,6 @@ void ManifestWindowTest::TearDown() {}
  * @tc.name: ManifestParseDesignWidth001
  * @tc.desc: Design width in manifest can be parsed correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DSSAT
  */
 HWTEST_F(ManifestWindowTest, ManifestParseDesignWidth001, TestSize.Level0)
 {
@@ -151,7 +150,6 @@ HWTEST_F(ManifestWindowTest, ManifestParseDesignWidth001, TestSize.Level0)
  * @tc.name: ManifestParseDesignWidth002
  * @tc.desc: Design width of negative value in manifest can be parsed correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DSSAT
  */
 HWTEST_F(ManifestWindowTest, ManifestParseDesignWidth002, TestSize.Level0)
 {
@@ -166,7 +164,6 @@ HWTEST_F(ManifestWindowTest, ManifestParseDesignWidth002, TestSize.Level0)
  * @tc.name: ManifestParseDesignWidth003
  * @tc.desc: Design width of zero value in manifest can be parsed correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DSSAT
  */
 HWTEST_F(ManifestWindowTest, ManifestParseDesignWidth003, TestSize.Level0)
 {
@@ -181,7 +178,6 @@ HWTEST_F(ManifestWindowTest, ManifestParseDesignWidth003, TestSize.Level0)
  * @tc.name: ManifestParseDesignWidth004
  * @tc.desc: Design width of over limit value in manifest can be parsed correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DSSAT
  */
 HWTEST_F(ManifestWindowTest, ManifestParseDesignWidth004, TestSize.Level0)
 {
@@ -196,7 +192,6 @@ HWTEST_F(ManifestWindowTest, ManifestParseDesignWidth004, TestSize.Level0)
  * @tc.name: ManifestParseDesignWidth005
  * @tc.desc: Design width of value not number in manifest can be parsed correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DSSAT
  */
 HWTEST_F(ManifestWindowTest, ManifestParseDesignWidth005, TestSize.Level0)
 {
@@ -211,7 +206,6 @@ HWTEST_F(ManifestWindowTest, ManifestParseDesignWidth005, TestSize.Level0)
  * @tc.name: ManifestParseDesignWidth006
  * @tc.desc: No design width config in manifest can be parsed correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DSSAT
  */
 HWTEST_F(ManifestWindowTest, ManifestParseDesignWidth006, TestSize.Level0)
 {
@@ -226,7 +220,6 @@ HWTEST_F(ManifestWindowTest, ManifestParseDesignWidth006, TestSize.Level0)
  * @tc.name: ManifestParseAutoDesignWidth001
  * @tc.desc: Auto design width in manifest can be parsed correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DSSAT
  */
 HWTEST_F(ManifestWindowTest, ManifestParseAutoDesignWidth001, TestSize.Level0)
 {
@@ -241,7 +234,6 @@ HWTEST_F(ManifestWindowTest, ManifestParseAutoDesignWidth001, TestSize.Level0)
  * @tc.name: ManifestParseAutoDesignWidth002
  * @tc.desc: Auto design width of "false" in manifest can be parsed correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DSSAT
  */
 HWTEST_F(ManifestWindowTest, ManifestParseAutoDesignWidth002, TestSize.Level0)
 {
@@ -256,7 +248,6 @@ HWTEST_F(ManifestWindowTest, ManifestParseAutoDesignWidth002, TestSize.Level0)
  * @tc.name: ManifestParseAutoDesignWidth003
  * @tc.desc: Auto design width with wrong format in manifest can be parsed correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DSSAT
  */
 HWTEST_F(ManifestWindowTest, ManifestParseAutoDesignWidth003, TestSize.Level0)
 {
@@ -271,7 +262,6 @@ HWTEST_F(ManifestWindowTest, ManifestParseAutoDesignWidth003, TestSize.Level0)
  * @tc.name: ManifestParseAutoDesignWidth004
  * @tc.desc: Auto design width not config in manifest can be parsed correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DSSAT
  */
 HWTEST_F(ManifestWindowTest, ManifestParseAutoDesignWidth004, TestSize.Level0)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2000 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,6 @@
 
 namespace __detail__ {
 
-// TODO(cvetan): This can be generalized
 template<typename... Types>
 std::tuple<Types...> ToTuple(const v8::FunctionCallbackInfo<v8::Value>& argv)
 {
@@ -163,7 +162,6 @@ private:
     static thread_local std::unordered_map<v8::Isolate*, v8::Persistent<v8::FunctionTemplate>> functionTemplates_;
     static thread_local std::unordered_map<std::string, v8::Local<v8::FunctionTemplate>> staticPropertyNames_;
     static thread_local std::mutex mutex_;
-    // TODO(cvetan): Remove
     static thread_local FunctionCallback constructor_;
     static thread_local JSFunctionCallback jsConstructor_;
     static thread_local JSDestructorCallback<C> jsDestructor_;

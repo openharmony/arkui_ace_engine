@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,8 +73,6 @@ std::unique_ptr<Border> BorderCreatorTest::CreateFromDsl(const std::string jsonB
  * @tc.name: BoxCreator001
  * @tc.desc: Verify BorderCreator can create a border with four identical edges.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU4
- * @tc.author: chenlien
  */
 HWTEST_F(BorderCreatorTest, BoxCreator001, TestSize.Level1)
 {
@@ -117,8 +115,6 @@ HWTEST_F(BorderCreatorTest, BoxCreator001, TestSize.Level1)
  * @tc.name: BorderCreator002
  * @tc.desc: Verify that borderCreator can independently create four borders: up, down, left, and right.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU5
- * @tc.author: chenlien
  */
 HWTEST_F(BorderCreatorTest, BorderCreator002, TestSize.Level1)
 {
@@ -165,8 +161,6 @@ HWTEST_F(BorderCreatorTest, BorderCreator002, TestSize.Level1)
  * @tc.name: BorderCreator003
  * @tc.desc: Verify BorderCreator can create border with left.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU4
- * @tc.author: chenlien
  */
 HWTEST_F(BorderCreatorTest, BorderCreator003, TestSize.Level1)
 {
@@ -201,8 +195,6 @@ HWTEST_F(BorderCreatorTest, BorderCreator003, TestSize.Level1)
  * @tc.name: BorderCreator004
  * @tc.desc: Verify BorderCreator can create border with className only.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU4
- * @tc.author: chenlien
  */
 HWTEST_F(BorderCreatorTest, BorderCreator004, TestSize.Level1)
 {
@@ -233,8 +225,6 @@ HWTEST_F(BorderCreatorTest, BorderCreator004, TestSize.Level1)
  * @tc.name: BorderCreator005
  * @tc.desc: Verify BorderCreator can create border with value and radius.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU5
- * @tc.author: chenlien
  */
 HWTEST_F(BorderCreatorTest, BorderCreator005, TestSize.Level1)
 {
@@ -277,8 +267,6 @@ HWTEST_F(BorderCreatorTest, BorderCreator005, TestSize.Level1)
  * @tc.desc: Verify BorderCreator can create border with value and four radius:topLeft and topRight and bottomLeft and
  * bottomRight.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU7
- * @tc.author: chenlien
  */
 HWTEST_F(BorderCreatorTest, BorderCreator006, TestSize.Level1)
 {
@@ -324,8 +312,6 @@ HWTEST_F(BorderCreatorTest, BorderCreator006, TestSize.Level1)
  * @tc.name: BorderCreator007
  * @tc.desc: Verify BorderCreator can create border with value and topLeft radius.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU7
- * @tc.author: chenlien
  */
 HWTEST_F(BorderCreatorTest, BorderCreator007, TestSize.Level1)
 {
