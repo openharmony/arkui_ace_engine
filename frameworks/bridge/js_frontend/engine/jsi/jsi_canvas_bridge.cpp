@@ -44,7 +44,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtim
         return nullptr;
     }
 
-    auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetArkNativeEngine());
+    auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetNativeEngine());
     if (!nativeEngine) {
         LOGE("NativeEngine is null");
         return nullptr;
@@ -381,7 +381,7 @@ void JsiCanvasBridge::HandleWebglContext(const shared_ptr<JsRuntime>& runtime,
         return;
     }
 
-    auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetArkNativeEngine());
+    auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetNativeEngine());
     if (!nativeEngine) {
         LOGE("NativeEngine is null");
         return;
@@ -1830,7 +1830,7 @@ shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>&
     }
 
     // 3 pixelmap to NapiValue
-    auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetArkNativeEngine());
+    auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetNativeEngine());
     if (!nativeEngine) {
         LOGE("NativeEngine is null");
         return runtime->NewUndefined();
