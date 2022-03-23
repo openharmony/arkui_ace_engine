@@ -42,7 +42,7 @@ constexpr int32_t INVALID_PAGE_ID = -1;
 constexpr int32_t MAX_ROUTER_STACK = 32;
 constexpr int32_t TOAST_TIME_MAX = 10000;    // ms
 constexpr int32_t TOAST_TIME_DEFAULT = 1500; // ms
-constexpr int32_t MAX_PAGE_ID_SIZE = 1024;
+constexpr int32_t MAX_PAGE_ID_SIZE = sizeof(uint64_t) * 8;
 constexpr int32_t NANO_TO_MILLI = 1000000; // nanosecond to millisecond
 constexpr int32_t TO_MILLI = 1000;         // second to millisecond
 constexpr int32_t CALLBACK_ERRORCODE_SUCCESS = 0;
@@ -59,8 +59,6 @@ const char STYLES_FOLDER[] = "styles/";
 const char I18N_FILE_SUFFIX[] = "/properties/string.json";
 
 } // namespace
-
-std::atomic<uint64_t> FrontendDelegateDeclarative::pageIdPool_ = 0;
 
 int32_t FrontendDelegateDeclarative::GenerateNextPageId()
 {
@@ -130,9 +128,6 @@ FrontendDelegateDeclarative::~FrontendDelegateDeclarative()
 {
     CHECK_RUN_ON(JS);
     LOG_DESTROY();
-    for (auto item = pageRouteStack_.begin(); item != pageRouteStack_.end(); ++item) {
-        RecyclePageId(item->pageId);
-    }
 }
 
 int32_t FrontendDelegateDeclarative::GetMinPlatformVersion()

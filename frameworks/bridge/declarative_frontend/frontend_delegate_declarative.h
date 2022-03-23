@@ -287,7 +287,7 @@ private:
     void ResetStagingPage();
     void FlushAnimationTasks();
 
-    static std::atomic<uint64_t> pageIdPool_;
+    std::atomic<uint64_t> pageIdPool_;
     int32_t callbackCnt_ = 0;
     int32_t pageId_ = -1;
     bool isRouteStackFull_ = false;
