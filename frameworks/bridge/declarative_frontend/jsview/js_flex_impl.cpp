@@ -47,6 +47,7 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
         LOGI("No input args, use default row setting");
         RefPtr<RowComponent> row =
             AceType::MakeRefPtr<OHOS::Ace::RowComponent>(FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
+        row->SetInspectorTag("FlexComponentV2");
         ViewStackProcessor::GetInstance()->Push(row);
         return;
     }
@@ -54,6 +55,7 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
         LOGW("arg is not a object, use default row setting");
         RefPtr<RowComponent> row =
             AceType::MakeRefPtr<OHOS::Ace::RowComponent>(FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
+        row->SetInspectorTag("FlexComponentV2");
         ViewStackProcessor::GetInstance()->Push(row);
         return;
     }
