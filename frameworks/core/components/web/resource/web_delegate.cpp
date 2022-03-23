@@ -677,7 +677,25 @@ void WebDelegate::HideWebView()
 void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surface> surface)
 {
     state_ = State::CREATING;
+    // obtain hap data path
+    auto container = Container::Current();
+    if (container == nullptr) {
+        LOGE("Fail to get container");
+        return;
+    }
+    const std::string& bundlePath = container->GetBundlePath();
+    const std::string& filesDataPath = container->GetFilesDataPath();
+    std::string baseDir = "base";
+    std::size_t baseIndex = filesDataPath.find(baseDir);
+    if (baseIndex == std::string::npos) {
+        LOGE("Fail to parse hap data base path");
+        return;
+    }
+    std::string dataPath = filesDataPath.substr(0, baseIndex + baseDir.length());
+    bundlePath_ = bundlePath;
+    bundleDataPath_ = dataPath;
     // load webview so
+    OHOS::NWeb::NWebHelper::Instance().SetBundlePath(bundlePath_);
     if (!OHOS::NWeb::NWebHelper::Instance().Init()) {
         LOGE("Fail to init NWebHelper");
         return;
@@ -1012,10 +1030,10 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
                 return;
             }
             OHOS::NWeb::NWebInitArgs initArgs;
-            const std::string& app_path = GetDataPath();
-            if (!app_path.empty()) {
-                initArgs.web_engine_args_to_add.push_back(std::string("--user-data-dir=").append(app_path));
-            }
+            initArgs.web_engine_args_to_add.push_back(
+                std::string("--user-data-dir=").append(delegate->bundleDataPath_));
+            initArgs.web_engine_args_to_add.push_back(
+                std::string("--bundle-installation-dir=").append(delegate->bundlePath_));
             sptr<Surface> surface = surfaceWeak.promote();
             if (surface == nullptr) {
                 LOGE("surface is nullptr or has expired");
