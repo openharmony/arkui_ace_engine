@@ -71,6 +71,12 @@ std::shared_ptr<WebJSValue> ParseValue(
 }
 }
 
+JSWebController::JSWebController()
+{
+    instanceId_ = Container::CurrentId();
+}
+
+
 std::shared_ptr<WebJSValue> JSWebController::GetJavaScriptResult(
     const std::string& objectName,
     const std::string& objectMethod,
@@ -147,6 +153,7 @@ void JSWebController::Reload() const
 
 void JSWebController::LoadUrl(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     if (args.Length() < 1 || !args[0]->IsObject()) {
         LOGW("invalid url params");
         return;
@@ -201,6 +208,7 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
 void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)
 {
     LOGI("JSWebController excute typescript");
+    ContainerScope scope(instanceId_);
     if (args.Length() < 1 || !args[0]->IsObject()) {
         LOGW("invalid excute params");
         return;
@@ -231,6 +239,7 @@ void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)
 
 void JSWebController::LoadDataWithBaseUrl(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
 
@@ -262,6 +271,7 @@ void JSWebController::LoadDataWithBaseUrl(const JSCallbackInfo& args)
 void JSWebController::Backward(const JSCallbackInfo& args)
 {
     LOGI("JSWebController Start backward.");
+    ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->Backward();
     }
@@ -270,6 +280,7 @@ void JSWebController::Backward(const JSCallbackInfo& args)
 void JSWebController::Forward(const JSCallbackInfo& args)
 {
     LOGI("JSWebController Start forward.");
+    ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->Forward();
     }
@@ -278,6 +289,7 @@ void JSWebController::Forward(const JSCallbackInfo& args)
 void JSWebController::AccessStep(const JSCallbackInfo& args)
 {
     LOGI("JSWebController start accessStep.");
+    ContainerScope scope(instanceId_);
     int32_t step = 0;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], step)) {
         LOGE("AccessStep parameter is invalid.");
@@ -294,6 +306,7 @@ void JSWebController::AccessStep(const JSCallbackInfo& args)
 void JSWebController::AccessBackward(const JSCallbackInfo& args)
 {
     LOGI("JSWebController start accessBackward.");
+    ContainerScope scope(instanceId_);
     if (webController_) {
         auto canAccess = webController_->AccessBackward();
         auto jsVal = JSVal(ToJSValue(canAccess));
@@ -305,6 +318,7 @@ void JSWebController::AccessBackward(const JSCallbackInfo& args)
 void JSWebController::AccessForward(const JSCallbackInfo& args)
 {
     LOGI("JSWebController start accessForward.");
+    ContainerScope scope(instanceId_);
     if (webController_) {
         auto canAccess = webController_->AccessForward();
         auto jsVal = JSVal(ToJSValue(canAccess));
@@ -316,6 +330,7 @@ void JSWebController::AccessForward(const JSCallbackInfo& args)
 void JSWebController::Refresh(const JSCallbackInfo& args)
 {
     LOGI("JSWebController Refresh");
+    ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->Refresh();
     }
@@ -324,6 +339,7 @@ void JSWebController::Refresh(const JSCallbackInfo& args)
 void JSWebController::StopLoading(const JSCallbackInfo& args)
 {
     LOGI("JSWebController StopLoading");
+    ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->StopLoading();
     }
@@ -332,6 +348,7 @@ void JSWebController::StopLoading(const JSCallbackInfo& args)
 void JSWebController::GetHitTestResult(const JSCallbackInfo& args)
 {
     LOGI("JSWebController get his test result");
+    ContainerScope scope(instanceId_);
     if (webController_) {
         int result = webController_->GetHitTestResult();
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
@@ -341,6 +358,7 @@ void JSWebController::GetHitTestResult(const JSCallbackInfo& args)
 void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
 {
     LOGI("JSWebController add js interface");
+    ContainerScope scope(instanceId_);
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
     }
@@ -473,6 +491,7 @@ void JSWebController::SetJavascriptInterface(const JSCallbackInfo& args)
 void JSWebController::RemoveJavascriptInterface(const JSCallbackInfo& args)
 {
     LOGI("JSWebController remove js interface");
+    ContainerScope scope(instanceId_);
     std::string objName;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], objName)) {
         return;
@@ -488,6 +507,7 @@ void JSWebController::RemoveJavascriptInterface(const JSCallbackInfo& args)
 
 void JSWebController::OnInactive(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->OnInactive();
     }
@@ -495,6 +515,7 @@ void JSWebController::OnInactive(const JSCallbackInfo& args)
 
 void JSWebController::OnActive(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->OnActive();
     }
@@ -502,6 +523,7 @@ void JSWebController::OnActive(const JSCallbackInfo& args)
 
 void JSWebController::Zoom(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     float factor = 1.0;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], factor)) {
         LOGE("Zoom parameter is invalid.");
@@ -515,6 +537,7 @@ void JSWebController::Zoom(const JSCallbackInfo& args)
 void JSWebController::RequestFocus(const JSCallbackInfo& args)
 {
     LOGI("JSWebController request focus");
+    ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->RequestFocus();
     }
