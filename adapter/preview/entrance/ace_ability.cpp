@@ -132,7 +132,6 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     resConfig.SetDensity(SystemProperties::GetResolution());
     resConfig.SetDeviceType(SystemProperties::GetDeviceType());
     container->SetResourceConfiguration(resConfig);
-    container->SetPageProfile((runArgs_.projectModel == ProjectModel::STAGE) ? runArgs_.pageProfile + ".json" : "");
 }
 
 AceAbility::~AceAbility()
@@ -187,11 +186,20 @@ void AceAbility::InitEnv()
     } else {
         paths.push_back(GetCustomAssetPath(runArgs_.assetPath) + ASSET_PATH_SHARE);
     }
-    if (runArgs_.formsEnabled) {
-        paths.push_back(GetCustomAssetPath(runArgs_.assetPath + DELIMITER + runArgs_.url));
-    }
     AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
 
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGE("container is null, initialize the environment failed.");
+        return;
+    }
+    if (runArgs_.projectModel == ProjectModel::STAGE) {
+        if (runArgs_.formsEnabled) {
+            container->SetStageCardConfig(runArgs_.pageProfile, runArgs_.url);
+        } else {
+            container->SetPageProfile((runArgs_.pageProfile.empty() ? "" : runArgs_.pageProfile + ".json"));
+        }
+    }
     AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.systemResourcesPath,
         runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
 
@@ -212,7 +220,6 @@ void AceAbility::InitEnv()
     // Should make it possible to update surface changes by using viewWidth and viewHeight.
     view->NotifySurfaceChanged(runArgs_.deviceWidth, runArgs_.deviceHeight);
     view->NotifyDensityChanged(runArgs_.deviceConfig.density);
-
 }
 
 void AceAbility::Start()

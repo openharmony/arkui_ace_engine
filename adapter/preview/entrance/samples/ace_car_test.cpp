@@ -41,17 +41,17 @@ int main(int argc, const char* argv[])
 #ifdef MAC_PLATFORM
     std::string assetPathJs = "/Volumes/SSD2T/daily-test/preview/js/default";
     std::string assetPathEts = "/Volumes/SSD2T/daily-test/preview/js/default_2.0";
-    std::string assetPathEtsStage = "/Volumes/SSD2T/daily-test/preview/js/ets";
+    std::string assetPathEtsStage = "/Volumes/SSD2T/daily-test/preview/js/default_stage/ets";
     std::string appResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/AppResources";
-    std::string appResourcesPathStage = "/Volumes/SSD2T/daily-test/preview/js";
+    std::string appResourcesPathStage = "/Volumes/SSD2T/daily-test/preview/js/default_stage";
     std::string systemResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/SystemResources";
     std::string fontBasePath = "/Volumes/SSD2T/daily-test/preview/js/fonts";
 #else
     std::string assetPathJs = "D:\\Workspace\\preview\\js\\default";
     std::string assetPathEts = "D:\\Workspace\\preview\\js\\default_2.0";
-    std::string assetPathEtsStage = "D:\\Workspace\\preview\\js\\ets";
+    std::string assetPathEtsStage = "D:\\Workspace\\preview\\js\\default_stage\\ets";
     std::string appResourcesPath = "D:\\Workspace\\preview\\js\\AppResources\\assets\\entry";
-    std::string appResourcesPathStage = "D:\\Workspace\\preview\\js";
+    std::string appResourcesPathStage = "D:\\Workspace\\preview\\js\\default_stage";
     std::string systemResourcesPath = "D:\\Workspace\\preview\\js\\SystemResources\\assets\\entry";
     std::string fontBasePath = "D:\\Workspace\\preview\\js\\fonts";
 #endif
