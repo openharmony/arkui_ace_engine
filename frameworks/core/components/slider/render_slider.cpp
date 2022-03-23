@@ -324,8 +324,9 @@ void RenderSlider::FireMovingEvent(SliderEvent mode)
             case SliderEvent::MOVE_MOVING:
                 jsonResult->Put("isEnd", "false");
                 jsonResult->Put("mode", "move");
-                if (onChange_) {
+                if (onChange_ && !NearEqual(value_, preMovingValue_)) {
                     onChange_(value_, static_cast<int>(SliderEvent::MOVE_MOVING));
+                    preMovingValue_ = value_;
                 }
                 break;
             case SliderEvent::MOVE_END:

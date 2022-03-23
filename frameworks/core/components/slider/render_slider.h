@@ -279,6 +279,7 @@ protected:
 private:
     // Slider render information
     double value_ = DEFAULT_VALUE;
+    double preMovingValue_ = DEFAULT_VALUE;
     std::function<void(const std::string&)> onMoveEnd_;
     std::function<void(const std::string&)> onMoving_;
 
