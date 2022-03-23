@@ -456,6 +456,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetAssetManager(flutterAssetManager);
+    container->SetBundlePath(context->GetBundleCodeDir());
+    container->SetFilesDataPath(context->GetFilesDir());
 
     if (window_->IsDecorEnable()) {
         LOGI("Container modal is enabled.");

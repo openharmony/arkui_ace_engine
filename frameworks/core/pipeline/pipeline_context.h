@@ -1467,6 +1467,7 @@ private:
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
 
     bool isSubPipeline_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
 

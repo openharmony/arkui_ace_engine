@@ -241,6 +241,9 @@ private:
     EventCallbackV2 onDownloadStartV2_;
     EventCallbackV2 onFocusV2_;
 
+    std::string bundlePath_;
+    std::string bundleDataPath_;
+
 #endif
 };
 
