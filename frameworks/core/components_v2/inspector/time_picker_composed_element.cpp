@@ -15,8 +15,6 @@
 
 #include "core/components_v2/inspector/time_picker_composed_element.h"
 
-#include <unordered_map>
-
 #include "base/log/dump_log.h"
 #include "core/components/picker/picker_base_element.h"
 #include "core/components_v2/inspector/utils.h"
@@ -24,7 +22,7 @@
 namespace OHOS::Ace::V2 {
 namespace {
 const std::unordered_map<std::string, std::function<std::string(const TimePickerComposedElement&)>> CREATE_JSON_MAP {
-    { "lunar", [](const TimePickerComposedElement& inspector) { return inspector.GetLunar(); } },
+    { "selected", [](const TimePickerComposedElement& inspector) { return inspector.GetSelected(); } },
     { "useMilitaryTime", [](const TimePickerComposedElement& inspector) { return inspector.GetUseMilitaryTime(); } }
 };
 }
@@ -32,7 +30,7 @@ const std::unordered_map<std::string, std::function<std::string(const TimePicker
 void TimePickerComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
-    DumpLog::GetInstance().AddDesc(std::string("lunar: ").append(GetLunar()));
+    DumpLog::GetInstance().AddDesc(std::string("select: ").append(GetSelected()));
     DumpLog::GetInstance().AddDesc(std::string("useMilitaryTime: ").append(GetUseMilitaryTime()));
 }
 
@@ -45,11 +43,20 @@ std::unique_ptr<JsonValue> TimePickerComposedElement::ToJsonObject() const
     return resultJson;
 }
 
-std::string TimePickerComposedElement::GetLunar() const
+std::string TimePickerComposedElement::GetSelected() const
 {
     auto render = GetRenderPickerBase();
-    auto showLunar = render ? render->GetPickerBaseComponent()->IsShowLunar() : false;
-    return ConvertBoolToString(showLunar);
+    if (render) {
+        auto start = render->GetSelectedDate();
+        std::string selectedDate;
+        selectedDate += std::to_string(start.GetYear());
+        selectedDate += "-";
+        selectedDate += std::to_string(start.GetMonth());
+        selectedDate += "-";
+        selectedDate += std::to_string(start.GetDay());
+        return selectedDate;
+    }
+    return "";
 }
 
 std::string TimePickerComposedElement::GetUseMilitaryTime() const

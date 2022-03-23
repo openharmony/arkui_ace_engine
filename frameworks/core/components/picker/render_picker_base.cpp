@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "core/components/picker/render_picker_base.h"
+#include "core/components/picker/picker_date_component.h"
 
 #include <numeric>
 
@@ -70,6 +71,12 @@ void RenderPickerBase::Update(const RefPtr<Component>& component)
         type_ = "DatePickerType.Time";
     } else {
         type_ = "DatePickerType.Date";
+    }
+
+    auto datePicker = AceType::DynamicCast<PickerDateComponent>(component);
+    if (datePicker) {
+        startDateSolar_ = datePicker->GetStartDate();
+        endDateSolar_ = datePicker->GetEndDate();
     }
 
     columnHeight_ = picker->GetColumnHeight();
@@ -329,7 +336,8 @@ void RenderPickerBase::LayoutBoxes()
         layout.SetFixedSize(outerSize);
         outBox_->SetPosition(Offset(x, y));
         outBox_->Layout(layout);
-        box_->SetPosition(Offset(0.0, 0.0));
+        double boxY = NormalizeToPx(theme->GetButtonHeight() + theme->GetButtonTopPadding());
+        box_->SetPosition(Offset(0.0, boxY));
         layout.SetFixedSize(innerSize);
         box_->Layout(layout);
     }

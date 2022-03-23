@@ -31,7 +31,7 @@ public:
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
 
-    std::string GetLunar() const;
+    std::string GetSelected() const;
     std::string GetUseMilitaryTime() const;
 
 private:
