@@ -123,6 +123,11 @@ public:
         isDebugMode_ = isDebugMode;
     }
 
+    void SetRootView(int32_t pageId, panda::Global<panda::ObjectRef> value)
+    {
+        rootViewMap_.emplace(pageId, value);
+    }
+
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global
@@ -133,7 +138,7 @@ private:
     void InitJsContextModuleObject();
     void InitGroupJsBridge();
 
-    static thread_local std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
+    std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
     static std::map<std::string, std::string> mediaResourceFileMap_;
 
