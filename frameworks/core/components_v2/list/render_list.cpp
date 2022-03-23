@@ -1678,24 +1678,8 @@ size_t RenderList::CalculateInsertIndex(
 
 bool RenderList::IsAxisScrollable(AxisDirection direction)
 {
-    if (vertical_) {
-        if (direction == AxisDirection::UP && reachStart_) {
-            return false;
-        } else if (direction == AxisDirection::DOWN && reachEnd_) {
-            return false;
-        } else if (direction == AxisDirection::NONE) {
-            return false;
-        }
-    } else {
-        if (direction == AxisDirection::LEFT && reachStart_) {
-            return false;
-        } else if (direction == AxisDirection::RIGHT && reachEnd_) {
-            return false;
-        } else if (direction == AxisDirection::NONE) {
-            return false;
-        }
-    }
-    return true;
+    return (((direction == AxisDirection::UP || direction == AxisDirection::LEFT) && !reachStart_) ||
+        ((direction == AxisDirection::DOWN || direction == AxisDirection::RIGHT) && !reachEnd_));
 }
 
 void RenderList::HandleAxisEvent(const AxisEvent& event)
