@@ -553,7 +553,7 @@ void GetPackageInfo(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsVal
     }
 
     int32_t len = arg->GetArrayLength(runtime);
-    if (len < PAG_INFO_ARGS_LEN) {
+    if (len < static_cast<int32_t>(PAG_INFO_ARGS_LEN)) {
         LOGE("GetPackageInfo: invalid callback value");
         return;
     }
@@ -3073,7 +3073,7 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
 
     nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
-    engineInstance_->SetArkNativeEngine(nativeEngine_);
+    engineInstance_->SetNativeEngine(nativeEngine_);
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
 
@@ -3093,13 +3093,20 @@ void JsiEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_, id = instanceId_](bool needSync) {
+    auto&& postTask = [weakDelegate, weakEngine = AceType::WeakClaim(this), id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([nativeEngine, needSync, id]() {
+
+        delegate->PostJsTask([weakEngine, needSync, id]() {
+            auto jsEngine = weakEngine.Upgrade();
+            if (jsEngine == nullptr) {
+                LOGW("jsEngine is nullptr");
+                return;
+            }
+            auto nativeEngine = jsEngine->GetNativeEngine();
             if (nativeEngine == nullptr) {
                 return;
             }
@@ -3166,10 +3173,14 @@ void JsiEngine::RegisterWorker()
 
 JsiEngine::~JsiEngine()
 {
+    LOG_DESTROY();
     if (nativeEngine_ != nullptr) {
         nativeEngine_->CancelCheckUVLoop();
         delete nativeEngine_;
         nativeEngine_ = nullptr;
+    }
+    if (engineInstance_) {
+        engineInstance_->SetNativeEngine(nullptr);
     }
 }
 
