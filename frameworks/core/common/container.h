@@ -147,6 +147,22 @@ public:
         return settings_;
     }
 
+    void SetBundlePath(const std::string& path) {
+        bundlePath_ = path;
+    }
+
+    const std::string& GetBundlePath() const {
+        return bundlePath_;
+    }
+
+    void SetFilesDataPath(const std::string& path) {
+        filesDataPath_ = path;
+    }
+
+    const std::string& GetFilesDataPath() const {
+        return filesDataPath_;
+    }
+
     virtual void SetViewFirstUpdating(std::chrono::time_point<std::chrono::high_resolution_clock> time) {}
 
     virtual void UpdateResourceConfiguration(const std::string& jsonStr) {}
@@ -163,6 +179,8 @@ protected:
 
 private:
     std::string moduleName_;
+    std::string bundlePath_;
+    std::string filesDataPath_;
     Settings settings_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };

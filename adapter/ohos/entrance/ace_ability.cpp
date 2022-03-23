@@ -288,6 +288,8 @@ void AceAbility::OnStart(const Want& want)
         aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
         container->SetResourceConfiguration(aceResCfg);
         container->SetPackagePathStr(resPath);
+        container->SetBundlePath(abilityContext->GetBundleCodeDir());
+        container->SetFilesDataPath(abilityContext->GetFilesDir());
     }
     container->SetWindowName(window->GetWindowName());
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), abilityId_);
