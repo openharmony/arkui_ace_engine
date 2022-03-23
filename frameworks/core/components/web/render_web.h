@@ -72,6 +72,7 @@ public:
 
 protected:
     RefPtr<WebDelegate> delegate_;
+    RefPtr<WebComponent> web_;
     Size drawSize_;
     bool isUrlLoaded_ = false;
 
