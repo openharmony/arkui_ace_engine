@@ -57,6 +57,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         LOGE("WebComponent is null");
         return;
     }
+    web_ = web;
     if (delegate_) {
         delegate_->UpdateJavaScriptEnabled(web->GetJsEnabled());
         delegate_->UpdateBlockNetworkImage(web->GetOnLineImageAccessEnabled());
@@ -70,10 +71,6 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         if (!userAgent.empty()) {
             delegate_->UpdateUserAgent(userAgent);
         }
-    }
-
-    if (!component) {
-        return;
     }
     MarkNeedLayout();
 }
@@ -154,6 +151,9 @@ void RenderWeb::HandleTouchUp(const TouchEventInfo& info)
     }
     for (auto& touchPoint : touchInfos) {
         delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y);
+    }
+    if (web_ && !touchInfos.empty()) {
+        web_->RequestFocus();
     }
 }
 
