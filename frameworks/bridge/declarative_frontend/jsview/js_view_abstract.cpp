@@ -372,11 +372,9 @@ bool ParseLocationProps(const JSCallbackInfo& info, AnimatableDimension& x, Anim
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> xVal = sizeObj->GetProperty("x");
     JSRef<JSVal> yVal = sizeObj->GetProperty("y");
-    if (JSViewAbstract::ParseJsAnimatableDimensionVp(xVal, x) ||
-        JSViewAbstract::ParseJsAnimatableDimensionVp(yVal, y)) {
-        return true;
-    }
-    return false;
+    bool hasX = JSViewAbstract::ParseJsAnimatableDimensionVp(xVal, x);
+    bool hasY = JSViewAbstract::ParseJsAnimatableDimensionVp(yVal, y);
+    return hasX || hasY;
 }
 
 #ifndef WEARABLE_PRODUCT
