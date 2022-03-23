@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -332,12 +332,12 @@ int UIMgrService::ShowDialog(const std::string& name,
 
     int32_t windowWidth = static_cast<int32_t>(dialogWindow->GetRect().width_);
     int32_t windowHeight = static_cast<int32_t>(dialogWindow->GetRect().height_);
-    int32_t windowx = static_cast<int32_t>(dialogWindow->GetRect().posX_);
-    int32_t windowy = static_cast<int32_t>(dialogWindow->GetRect().posY_);
+    int32_t windowX = static_cast<int32_t>(dialogWindow->GetRect().posX_);
+    int32_t windowY = static_cast<int32_t>(dialogWindow->GetRect().posY_);
     HILOG_INFO("Show dialog: size: width: %{public}d, height: %{public}d, pos: x: %{public}d, y: %{public}d",
-        windowWidth, windowHeight, windowx, windowy);
+        windowWidth, windowHeight, windowX, windowY);
     dialogWindow->Show();
-    dialogWindow->MoveTo(windowx, windowy);
+    dialogWindow->MoveTo(windowX, windowY);
     dialogWindow->Resize(windowWidth, windowHeight);
 
     HILOG_INFO("Show dialog in service end");

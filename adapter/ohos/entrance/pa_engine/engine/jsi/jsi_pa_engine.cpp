@@ -306,12 +306,12 @@ shared_ptr<JsValue> AsyncFuncCallBack(const shared_ptr<JsRuntime>& runtime, cons
 
 inline std::string ToJSONStringInt(std::string sKey, std::string sValue)
 {
-    char szDoubleQutoes[] = "\"";
+    char szDoubleQuotes[] = "\"";
     char szColon[] = ":";
     std::string strResult;
-    strResult.append(szDoubleQutoes);
+    strResult.append(szDoubleQuotes);
     strResult.append(sKey);
-    strResult.append(szDoubleQutoes);
+    strResult.append(szDoubleQuotes);
 
     strResult.append(szColon);
     strResult.append(sValue);

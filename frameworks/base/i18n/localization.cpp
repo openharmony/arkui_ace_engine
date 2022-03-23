@@ -809,7 +809,7 @@ std::string Localization::GetErrorDescription(const std::string& errorIndex)
 
 const std::vector<std::string>& Localization::GetLanguageList(const std::string& language)
 {
-    static const LinearMapNode<std::vector<std::string>> mulitiLanguageMap[] = {
+    static const LinearMapNode<std::vector<std::string>> multiLanguageMap[] = {
         { "am", { "am" } },
         { "ar", { "ar" } },
         { "as", { "as" } },
@@ -886,12 +886,12 @@ const std::vector<std::string>& Localization::GetLanguageList(const std::string&
         { "zh", { "zh-CN", "zh-HK", "zh-TW" } },
         { "zz", { "zz-ZX" } },
     };
-    int64_t list = BinarySearchFindIndex(mulitiLanguageMap, ArraySize(mulitiLanguageMap), language.c_str());
+    int64_t list = BinarySearchFindIndex(multiLanguageMap, ArraySize(multiLanguageMap), language.c_str());
     if (list == -1) {
         static const std::vector<std::string> defaultLanguage = { "en-US" };
         return defaultLanguage;
     }
-    return mulitiLanguageMap[list].value;
+    return multiLanguageMap[list].value;
 }
 
 std::mutex Localization::mutex_;
