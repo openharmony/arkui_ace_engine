@@ -291,14 +291,17 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
         pickerType = static_cast<DatePickerType>(type->ToNumber<int32_t>());
     }
 
+    std::string name;
     RefPtr<Component> component;
     switch (pickerType) {
         case DatePickerType::TIME: {
             CreateTimePicker(component, paramObject);
+            name = "TimePickerDialog";
             break;
         }
         case DatePickerType::DATE: {
             CreateDatePicker(component, paramObject);
+            name = "DatePickerDialog";
             break;
         }
         default: {
@@ -317,7 +320,7 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     } else {
         AddEvent(datePicker, info, DatePickerType::TIME);
     }
-    datePicker->SetDialogName("DatePickerDialog");
+    datePicker->SetDialogName(name);
     datePicker->OpenDialog(properties);
 }
 

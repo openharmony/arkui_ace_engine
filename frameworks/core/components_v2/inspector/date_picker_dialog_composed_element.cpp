@@ -48,11 +48,9 @@ std::string DatePickerDialogComposedElement::GetShow() const
     auto jsonValue = JsonUtil::Create(false);
     auto jsonShow = JsonUtil::Create(false);
     jsonValue->Put("lunar", GetLunar().c_str());
-    jsonValue->Put("useMilitaryTime", GetUseMilitaryTime().c_str());
     jsonValue->Put("start", GetStart().c_str());
     jsonValue->Put("end", GetEnd().c_str());
     jsonValue->Put("selected", GetSelected().c_str());
-    jsonValue->Put("type", GetDatePickerType().c_str());
     jsonShow->Put("show", jsonValue);
     return jsonShow->ToString();
 }
@@ -62,25 +60,6 @@ std::string DatePickerDialogComposedElement::GetLunar() const
     auto render = GetRenderPickerBase();
     auto showLunar = render ? render->GetPickerBaseComponent()->IsShowLunar() : false;
     return ConvertBoolToString(showLunar);
-}
-
-std::string DatePickerDialogComposedElement::GetUseMilitaryTime() const
-{
-    auto render = GetRenderPickerBase();
-    auto useMilitaryTime = true;
-    if (render) {
-        auto columns = render->GetRenderPickerColumn();
-        for (const auto& column : columns) {
-            if (!column) {
-                continue;
-            }
-            if (column->GetColumnTag() == PickerBaseComponent::PICKER_AMPM_COLUMN) {
-                useMilitaryTime = false;
-                break;
-            }
-        }
-    }
-    return ConvertBoolToString(useMilitaryTime);
 }
 
 std::string DatePickerDialogComposedElement::GetStart() const
@@ -129,15 +108,6 @@ std::string DatePickerDialogComposedElement::GetSelected() const
         return selectedDate;
     }
     return "";
-}
-
-std::string DatePickerDialogComposedElement::GetDatePickerType() const
-{
-    auto render = GetRenderPickerBase();
-    if (render) {
-        return render->GetType();
-    }
-    return "DatePickerType.Time";
 }
 
 RefPtr<RenderPickerBase> DatePickerDialogComposedElement::GetRenderPickerBase() const
