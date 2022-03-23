@@ -48,6 +48,7 @@ template("ace_osal_preview_source_set") {
       "log_wrapper.cpp",
       "response_data.cpp",
       "ressched_report.cpp",
+      "stage_card_parser.cpp",
       "system_properties.cpp",
     ]
 
