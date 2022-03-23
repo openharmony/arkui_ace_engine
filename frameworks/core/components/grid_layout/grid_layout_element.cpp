@@ -80,9 +80,9 @@ void GridLayoutElement::ApplyRenderChild(const RefPtr<RenderElement>& renderChil
         LOGE("fail to create proxy node");
         return;
     }
+    renderNode_->AddChild(proxy);
     proxy->AddChild(renderChild->GetRenderNode());
     proxy->Attach(context_);
-    renderNode_->AddChild(proxy);
 }
 
 void GridLayoutElement::PerformBuild()
