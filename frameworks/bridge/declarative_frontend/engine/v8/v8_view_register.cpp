@@ -434,7 +434,10 @@ void Fp2Px(const v8::FunctionCallbackInfo<v8::Value>& args)
         return;
     }
     auto pipelineContext = container->GetPipelineContext();
-    double fontScale = pipelineContext->GetFontScale();
+    double fontScale = 1.0;
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
     double pxValue = fpValue * density * fontScale;
 
     int32_t result = GreatOrEqual(pxValue, 0) ? (pxValue + 0.5) : (pxValue - 0.5);
@@ -468,7 +471,10 @@ void Px2Fp(const v8::FunctionCallbackInfo<v8::Value>& args)
         return;
     }
     auto pipelineContext = container->GetPipelineContext();
-    double fontScale = pipelineContext->GetFontScale();
+    double fontScale = 1.0;
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
     double ratio = density * fontScale;
     double fpValue = pxValue / ratio;
 
