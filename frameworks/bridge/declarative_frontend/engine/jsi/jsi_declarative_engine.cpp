@@ -697,8 +697,6 @@ void JsiDeclarativeEngineInstance::InitGroupJsBridge()
     }
 }
 
-thread_local std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> JsiDeclarativeEngineInstance::rootViewMap_;
-
 void JsiDeclarativeEngineInstance::RootViewHandle(panda::Local<panda::ObjectRef> value)
 {
     LOGD("RootViewHandle");
@@ -709,7 +707,18 @@ void JsiDeclarativeEngineInstance::RootViewHandle(panda::Local<panda::ObjectRef>
             LOGE("ark engine is null");
             return;
         }
-        rootViewMap_.emplace(page->GetPageId(), panda::Global<panda::ObjectRef>(arkRuntime->GetEcmaVm(), value));
+        auto engine = EngineHelper::GetCurrentEngine();
+        auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
+        if (!jsiEngine) {
+            LOGE("jsiEngine is null");
+            return;
+        }
+        auto engineInstance = jsiEngine->GetEngineInstance();
+        if (engineInstance == nullptr) {
+            LOGE("engineInstance is nullptr");
+            return;
+        }
+        engineInstance->SetRootView(page->GetPageId(), panda::Global<panda::ObjectRef>(arkRuntime->GetEcmaVm(), value));
     }
 }
 
