@@ -178,6 +178,8 @@ public:
 
     void RunNativeEngineLoop();
 
+    void SetStageCardConfig(const std::string& pageProfile, const std::string& selectUrl);
+
     void SetPageProfile(const std::string& pageProfile)
     {
         pageProfile_ = pageProfile;
