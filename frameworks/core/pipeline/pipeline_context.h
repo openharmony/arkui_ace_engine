@@ -1217,6 +1217,12 @@ public:
     {
         return isSubPipeline_;
     }
+
+    bool GetIsDragStart() const
+    {
+        return isDragStart_;
+    }
+
 private:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     void FlushPipelineWithoutAnimation();
@@ -1383,6 +1389,8 @@ private:
     bool isJsPlugin_ = false;
     bool useLiteStyle_ = false;
     bool isFirstLoaded_ = true;
+    bool isDragStart_ = false;
+    bool isFirstDrag_ = true;
     uint64_t flushAnimationTimestamp_ = 0;
     TimeProvider timeProvider_;
     OnPageShowCallBack onPageShowCallBack_;

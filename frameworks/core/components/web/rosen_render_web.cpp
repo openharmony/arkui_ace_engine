@@ -59,6 +59,9 @@ void RosenRenderWeb::Paint(RenderContext& context, const Offset& offset)
         LOGE("OnAttachContext context null");
         return;
     }
+    if (pipelineContext->GetIsDragStart()) {
+        drawSize_ = Size(1.0, 1.0);
+    }
     if (drawSize_.Width() > pipelineContext->GetRootWidth() || drawSize_.Height() > pipelineContext->GetRootHeight()) {
         LOGE("Web drawSize height or width is invalid");
     }
