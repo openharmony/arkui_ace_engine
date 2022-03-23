@@ -1845,10 +1845,19 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             [[fallthrough]];
         }
         case WindowSizeChangeReason::DRAG_START: {
+            isDragStart_ = true;
             BlurWindowWithDrag(true);
             break;
         }
+        case WindowSizeChangeReason::DRAG: {
+            isFirstDrag_ = false;
+            // Refresh once when first dragging.
+            SetRootSizeWithWidthHeight(width, height);
+            break;
+        }
         case WindowSizeChangeReason::DRAG_END: {
+            isDragStart_ = false;
+            isFirstDrag_ = true;
             BlurWindowWithDrag(false);
             SetRootSizeWithWidthHeight(width, height);
             break;
@@ -1875,7 +1884,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         return;
     }
 #endif
-    if (type == WindowSizeChangeReason::DRAG) {
+    if (type == WindowSizeChangeReason::DRAG && isDragStart_ && !isFirstDrag_) {
         LOGI("WindowSizeChangeReason is drag, no need change size.");
         return;
     }
