@@ -525,7 +525,7 @@ struct KeyEvent final {
     // identify the click event, you can use CLICK event.
     int32_t repeatTime = 0;
     TimeStamp timeStamp;
-    int32_t metaKey;
+    int32_t metaKey = 0;
     int64_t deviceId = 0;
     SourceType sourceType { SourceType::NONE };
 };

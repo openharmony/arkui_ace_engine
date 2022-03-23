@@ -17,7 +17,6 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
-#include "core/event/axis_event.h"
 #include "core/gestures/gesture_referee.h"
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/base/render_node.h"
@@ -136,16 +135,25 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
     auto hoverNodePre = mouseHoverNodePre_.Upgrade();
     if (event.action == MouseAction::PRESS) {
         if (hoverNodeCur) {
-            hoverNodeCur->StopMouseHoverAnimation();
+            hoverNodeCur->AnimateMouseHoverExit();
             hoverNodeCur->OnMouseClickDownAnimation();
         }
     } else if (event.action == MouseAction::RELEASE) {
         if (hoverNodeCur) {
-            hoverNodeCur->StopMouseHoverAnimation();
             hoverNodeCur->OnMouseClickUpAnimation();
+            hoverNodeCur->AnimateMouseHoverEnter();
         }
-    } else {
-        if (event.button == MouseButton::NONE_BUTTON && hoverNodeCur != hoverNodePre) {
+    } else if (event.button != MouseButton::NONE_BUTTON && event.action == MouseAction::MOVE) {
+        if (hoverNodeCur != hoverNodePre) {
+            if (hoverNodePre) {
+                hoverNodePre->OnMouseClickUpAnimation();
+            }
+            if (hoverNodeCur) {
+                hoverNodeCur->OnMouseClickDownAnimation();
+            }
+        }
+    } else if (event.button == MouseButton::NONE_BUTTON && event.action == MouseAction::MOVE) {
+        if (hoverNodeCur != hoverNodePre) {
             if (hoverNodeCur) {
                 hoverNodeCur->AnimateMouseHoverEnter();
             }
@@ -153,24 +161,24 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
                 hoverNodePre->AnimateMouseHoverExit();
             }
         }
-        for (const auto& wp : mouseHoverTestResults_) {
-            // get all current hover nodes while it's not in previous hover nodes. Thoes nodes are new hoverd
-            auto it = std::find(mouseHoverTestResultsPre_.begin(), mouseHoverTestResultsPre_.end(), wp);
-            if (it == mouseHoverTestResultsPre_.end()) {
-                auto hoverNode = wp.Upgrade();
-                if (hoverNode) {
-                    hoverNode->HandleMouseHoverEvent(MouseState::HOVER);
-                }
+    }
+    for (const auto& wp : mouseHoverTestResultsPre_) {
+        // get all previous hover nodes while it's not in current hover nodes. Those nodes exit hoverd
+        auto it = std::find(mouseHoverTestResults_.begin(), mouseHoverTestResults_.end(), wp);
+        if (it == mouseHoverTestResults_.end()) {
+            auto hoverNode = wp.Upgrade();
+            if (hoverNode) {
+                hoverNode->HandleMouseHoverEvent(MouseState::NONE);
             }
         }
-        for (const auto& wp : mouseHoverTestResultsPre_) {
-            // get all previous hover nodes while it's not in current hover nodes. Those nodes exit hoverd
-            auto it = std::find(mouseHoverTestResults_.begin(), mouseHoverTestResults_.end(), wp);
-            if (it == mouseHoverTestResults_.end()) {
-                auto hoverNode = wp.Upgrade();
-                if (hoverNode) {
-                    hoverNode->HandleMouseHoverEvent(MouseState::NONE);
-                }
+    }
+    for (const auto& wp : mouseHoverTestResults_) {
+        // get all current hover nodes while it's not in previous hover nodes. Thoes nodes are new hoverd
+        auto it = std::find(mouseHoverTestResultsPre_.begin(), mouseHoverTestResultsPre_.end(), wp);
+        if (it == mouseHoverTestResultsPre_.end()) {
+            auto hoverNode = wp.Upgrade();
+            if (hoverNode) {
+                hoverNode->HandleMouseHoverEvent(MouseState::HOVER);
             }
         }
     }

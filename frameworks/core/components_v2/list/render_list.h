@@ -217,7 +217,7 @@ public:
 
     void HandleAxisEvent(const AxisEvent& event) override;
 
-    bool isScrollable(AxisDirection direction) override;
+    bool IsAxisScrollable(AxisDirection direction) override;
 
     WeakPtr<RenderNode> CheckAxisNode() override;
 
@@ -380,6 +380,8 @@ private:
     bool isMultiSelectable_ = false;
     void ClearMultiSelect();
     bool mouseIsHover_ = false;
+
+    bool isAxisResponse_ = true;
 
     void MultiSelectWithoutKeyboard(const Rect& selectedZone);
     void HandleMouseEventWithoutKeyboard(const MouseEvent& event);

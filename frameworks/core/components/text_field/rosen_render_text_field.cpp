@@ -69,7 +69,7 @@ Rect RosenRenderTextField::GetInnerRect(const Decoration& decoration, const Rect
     }
     double iconSpacing = iconImage_ ? NormalizeToPx(iconHotZoneSizeInDimension_) : 0.0;
     double passwordIconSpacing =
-        (keyboard_ == TextInputType::VISIBLE_PASSWORD && SystemProperties::GetDeviceType() == DeviceType::PHONE)
+        (keyboard_ == TextInputType::VISIBLE_PASSWORD && IsSelectiveDevice())
             ? NormalizeToPx(iconHotZoneSizeInDimension_)
             : 0.0;
     if (textDirection_ == TextDirection::RTL) {
@@ -250,8 +250,7 @@ void RosenRenderTextField::PaintIcon(const Offset& offset, RenderContext& contex
 
 void RosenRenderTextField::PaintSelection(SkCanvas* canvas) const
 {
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE &&
-        SystemProperties::GetDeviceType() != DeviceType::CAR) {
+    if (!IsSelectiveDevice()) {
         return;
     }
     using namespace Constants;
@@ -672,7 +671,7 @@ sk_sp<SkShader> RosenRenderTextField::MakeGradientShader(double shadeWidth) cons
     float pos[] = { 0.0f, posLeft, posRight, 1.0f };
 
     int32_t start = 0;
-    int32_t renderCount = sizeof(pos) / sizeof(pos[0]);
+    int32_t renderCount = static_cast<int32_t>(sizeof(pos) / sizeof(pos[0]));
     int32_t totalCount = renderCount;
     if (!needShadeLeft) {
         start = 2;

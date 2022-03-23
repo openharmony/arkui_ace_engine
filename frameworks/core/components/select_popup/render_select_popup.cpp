@@ -568,11 +568,6 @@ bool RenderSelectPopup::ScreenDirectionSwitched()
     return switched;
 }
 
-WeakPtr<RenderNode> RenderSelectPopup::CheckHoverNode()
-{
-    return AceType::WeakClaim<RenderNode>(this);
-}
-
 bool RenderSelectPopup::HandleMouseEvent(const MouseEvent& event)
 {
     if (event.button != MouseButton::NONE_BUTTON && event.button != MouseButton::LEFT_BUTTON &&

@@ -228,6 +228,8 @@ public:
 
     void RunGarbageCollection() override;
 
+    std::string GetStacktraceMessage() override;
+
     void SetContentStorage(int32_t instanceId, NativeReference* storage) override;
 
     void SetContext(int32_t instanceId, NativeReference* context) override;

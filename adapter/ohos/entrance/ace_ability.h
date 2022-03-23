@@ -30,7 +30,8 @@ namespace OHOS::Ace {
 
 class AceAbility final : public OHOS::AppExecFwk::Ability,
                          public OHOS::Rosen::IWindowChangeListener,
-                         public OHOS::Rosen::IWindowDragListener {
+                         public OHOS::Rosen::IWindowDragListener,
+                         public OHOS::Rosen::IOccupiedAreaChangeListener {
 public:
     AceAbility()
     {
@@ -68,7 +69,8 @@ public:
     // override Rosen::IWindowChangeListener virtual callback function
     void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override;
     void OnModeChange(OHOS::Rosen::WindowMode mode) override;
-    static WindowSizeChangeReason Convert2WindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason reason);
+    // override Rosen::IOccupiedAreaChangeListener virtual callback function
+    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info) override;
 
     void Dump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 

@@ -133,7 +133,8 @@ ErrCode UIServiceMgrClient::ShowDialog(const std::string& name,
                                        int y,
                                        int width,
                                        int height,
-                                       DialogCallback callback)
+                                       DialogCallback callback,
+                                       int* id)
 {
     if (remoteObject_ == nullptr) {
         ErrCode err = Connect();
@@ -148,7 +149,7 @@ ErrCode UIServiceMgrClient::ShowDialog(const std::string& name,
         HILOG_ERROR("doms is nullptr");
         return UI_SERVICE_GET_PROXY_FAILED;
     }
-    return doms->ShowDialog(name, params, windowType, x, y, width, height, dialogCallbackStub);
+    return doms->ShowDialog(name, params, windowType, x, y, width, height, dialogCallbackStub, id);
 }
 
 ErrCode UIServiceMgrClient::CancelDialog(int32_t id)

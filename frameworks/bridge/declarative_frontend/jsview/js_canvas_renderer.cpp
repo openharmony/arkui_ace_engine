@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_canvas_renderer.h"
 
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -808,13 +809,13 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
         data = pool_->GetImageData(left, top, width, height);
     }
 
-    final_height = static_cast<double>(data->dirtyHeight);
-    final_width = static_cast<double>(data->dirtyWidth);
+    final_height = static_cast<uint32_t>(data->dirtyHeight);
+    final_width = static_cast<uint32_t>(data->dirtyWidth);
 
     JSRef<JSArray> colorArray = JSRef<JSArray>::New();
     uint32_t count = 0;
-    for (int32_t i = 0; i < final_height; i++) {
-        for (int32_t j = 0; j < final_width; j++) {
+    for (uint32_t i = 0; i < final_height; i++) {
+        for (uint32_t j = 0; j < final_width; j++) {
             int32_t idx = i * data->dirtyWidth + j;
             auto pixel = data->data[idx];
 
@@ -877,15 +878,13 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     options.editable = true;
     std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(data, length, options);
 
-    // 3 piexclmap to NapiValue
-    NativeEngine* nativeEngine = nullptr;
-#ifdef USE_V8_ENGINE
-    nativeEngine = V8DeclarativeEngineInstance::GetNativeEngine();
-#elif USE_QUICKJS_ENGINE
-    nativeEngine = QJSDeclarativeEngineInstance::GetNativeEngine();
-#elif USE_ARK_ENGINE
-    nativeEngine = JsiDeclarativeEngineInstance::GetNativeEngine();
-#endif
+    // 3 pixelmap to NapiValue
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        LOGE("JsGetPixelMap engine is null");
+        return;
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     std::shared_ptr<OHOS::Media::PixelMap> sharedPixelmap(pixelmap.release());
     napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, sharedPixelmap);

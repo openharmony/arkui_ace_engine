@@ -168,7 +168,9 @@ void RenderCheckbox::HandleClick()
             }
         } else if (!(component_->GetCheckboxName().empty())) {
             component_->SetValue(!component_->GetValue());
-            component_->GetGroup()->SetGroupStatus();
+            if (component_->GetGroup()) {
+                component_->GetGroup()->SetGroupStatus();
+            }
         }
     }
     UpdateUIStatus();

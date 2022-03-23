@@ -105,8 +105,8 @@ HWTEST_F(UIServiceMgrStubTest, UIServiceMgrStubTest_RegisterCallBack_0100, TestS
         HILOG_ERROR("register observer fail, uiService is nullptr");
         return;
     }
-    if (!data.WriteParcelable(iUIService->AsObject())) {
-        GTEST_LOG_(ERROR) << "data.WriteParcelable(iUIService->AsObject()) retval is false end";
+    if (!data.WriteRemoteObject(iUIService->AsObject())) {
+        GTEST_LOG_(ERROR) << "data.WriteRemoteObject(iUIService->AsObject()) retval is false end";
         return;
     }
 
@@ -150,8 +150,8 @@ HWTEST_F(UIServiceMgrStubTest, UIServiceMgrStubTest_UnregisterCallBack_0100, Tes
         HILOG_ERROR("register observer fail, uiService is nullptr");
         return;
     }
-    if (!data.WriteParcelable(iUIService->AsObject())) {
-        GTEST_LOG_(ERROR) << "data.WriteParcelable(iUIService->AsObject()) retval is false end";
+    if (!data.WriteRemoteObject(iUIService->AsObject())) {
+        GTEST_LOG_(ERROR) << "data.WriteRemoteObject(iUIService->AsObject()) retval is false end";
         return;
     }
 

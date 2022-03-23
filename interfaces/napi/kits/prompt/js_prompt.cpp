@@ -388,7 +388,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                     buttonsLenInt = SHOW_ACTION_MENU_BUTTON_NUM_MAX;
                     LOGE("Supports 1 - 6 buttons");
                 }
-                for (int j = 0; j < buttonsLenInt; j++) {
+                for (uint32_t j = 0; j < buttonsLenInt; j++) {
                     napi_get_element(env, asyncContext->buttonsNApi, index, &buttonArray);
                     index++;
                     napi_get_named_property(env, buttonArray, "text", &textNApi);

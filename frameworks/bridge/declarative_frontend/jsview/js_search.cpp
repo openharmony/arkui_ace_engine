@@ -140,7 +140,6 @@ void InitializeComponent(OHOS::Ace::RefPtr<OHOS::Ace::SearchComponent>& searchCo
                          const OHOS::Ace::RefPtr<OHOS::Ace::SearchTheme>& searchTheme,
                          const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme)
 {
-    textFieldComponent->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     textFieldComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
 
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();

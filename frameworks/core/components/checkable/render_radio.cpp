@@ -147,6 +147,9 @@ bool RenderRadio::UpdateGroupValue(const std::string& groupValue)
     if (valueChangeEvent_) {
         valueChangeEvent_(groupValue_);
     }
+    if (onChange_) {
+        onChange_(checked_);
+    }
     return needRender;
 }
 
@@ -174,9 +177,6 @@ void RenderRadio::HandleClick()
     }
     if (onClick_) {
         onClick_();
-    }
-    if (onChange_) {
-        onChange_(checked_);
     }
 }
 

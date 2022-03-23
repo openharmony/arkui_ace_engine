@@ -279,6 +279,11 @@ public:
         return false;
     }
 
+    virtual bool IsNotSiblingAddRecognizerToResult()
+    {
+        return true;
+    }
+
     virtual Point GetTransformPoint(const Point& point)
     {
         return point;
@@ -762,7 +767,7 @@ public:
     virtual void OnMouseClickDownAnimation() {}
     virtual void OnMouseClickUpAnimation() {}
     virtual void StopMouseHoverAnimation() {}
-    virtual bool isScrollable(AxisDirection direction)
+    virtual bool IsAxisScrollable(AxisDirection direction)
     {
         return false;
     }

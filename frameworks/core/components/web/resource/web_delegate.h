@@ -43,11 +43,11 @@ public:
 
     int GetLineNumber() override;
 
-    const std::string& GetLog() override;
+    std::string GetLog() override;
 
     int GetLogLevel() override;
 
-    const std::string& GetSourceId() override;
+    std::string GetSourceId() override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message_;
@@ -185,6 +185,7 @@ private:
     void ExecuteTypeScript(const std::string& jscode, const std::function<void(std::string)>&& callback);
     void LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
         const std::string& encoding, const std::string& historyUrl);
+    void LoadDataWithRichText(const std::string& data);
     void Refresh();
     void StopLoading();
     void AddJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);

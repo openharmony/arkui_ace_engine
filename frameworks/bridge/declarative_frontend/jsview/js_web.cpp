@@ -32,8 +32,8 @@ public:
     static void JSBind(BindingTarget globalObj)
     {
         JSClass<JSWebDialog>::Declare("WebDialog");
-        JSClass<JSWebDialog>::CustomMethod("confirm", &JSWebDialog::Confirm);
-        JSClass<JSWebDialog>::CustomMethod("cancel", &JSWebDialog::Cancel);
+        JSClass<JSWebDialog>::CustomMethod("handleConfirm", &JSWebDialog::Confirm);
+        JSClass<JSWebDialog>::CustomMethod("handleCancel", &JSWebDialog::Cancel);
         JSClass<JSWebDialog>::Bind(globalObj, &JSWebDialog::Constructor, &JSWebDialog::Destructor);
     }
 
@@ -165,7 +165,9 @@ public:
         if (args[2]->IsBoolean()) {
             retain = args[2]->ToBoolean();
         }
-        webGeolocation_->Invoke(origin, allow, retain);
+        if (webGeolocation_) {
+            webGeolocation_->Invoke(origin, allow, retain);
+        }
     }
 
 private:

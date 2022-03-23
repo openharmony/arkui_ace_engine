@@ -65,7 +65,6 @@ public:
     }
 
     bool HandleMouseEvent(const MouseEvent& event) override;
-    WeakPtr<RenderNode> CheckHoverNode() override;
 
     void ProcessTouchDown(const TouchEventInfo& info);
     void ProcessTouchUp(const TouchEventInfo& info);
