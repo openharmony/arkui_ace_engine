@@ -162,8 +162,8 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
             LOGE("JSWebController failed to parse url object");
             return;
         }
-        int np = webSrc.find_first_of("/");
-        url = (np < 0) ? webSrc : webSrc.erase(np, 1);
+        auto np = webSrc.find_first_of("/");
+        url = (np == std::string::npos) ? webSrc : webSrc.erase(np, 1);
     } else if (!ConvertFromJSValue(valUrl, url)) {
         LOGW("can't find url.");
         return;
