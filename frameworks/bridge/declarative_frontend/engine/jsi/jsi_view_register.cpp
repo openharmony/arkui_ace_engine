@@ -676,7 +676,10 @@ panda::Local<panda::JSValueRef> Px2Fp(panda::EcmaVM* vm, panda::Local<panda::JSV
         return panda::JSValueRef::Undefined(vm);
     }
     auto pipelineContext = container->GetPipelineContext();
-    double fontScale = pipelineContext->GetFontScale();
+    double fontScale = 1.0;
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
     double ratio = density * fontScale;
     double fpValue = pxValue / ratio;
     return panda::NumberRef::New(vm, fpValue);
