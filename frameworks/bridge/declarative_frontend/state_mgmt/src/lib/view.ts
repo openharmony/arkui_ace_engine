@@ -56,6 +56,8 @@ abstract class View extends NativeView implements
 
   propertyHasChanged(info?: PropertyInfo): void {
     if (info) {
+      // need to sync container instanceId to switch instanceId in C++ side.
+      this.syncInstanceId();
       if (this.propsUsedForRender.has(info)) {
         console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View needs update`);
         this.markNeedUpdate();
@@ -67,6 +69,7 @@ abstract class View extends NativeView implements
         console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. calling @Watch function`);
         cb.call(this, info);
       }
+      this.restoreInstanceId();
     } // if info avail.
   }
 

@@ -44,6 +44,11 @@ public:
     RefPtr<PageTransitionComponent> BuildPageTransitionComponent();
 
     void MarkNeedUpdate();
+
+    void SyncInstanceId();
+
+    void RestoreInstanceId();
+
     bool NeedsUpdate()
     {
         return needsUpdate_;
@@ -151,6 +156,9 @@ private:
 
     // view id for custom view itself
     std::string viewId_;
+
+    int32_t instanceId_ = -1;
+    int32_t restoreInstanceId_ = -1;
 
     WeakPtr<OHOS::Ace::ComposedElement> element_ = nullptr;
     bool needsUpdate_ = false;

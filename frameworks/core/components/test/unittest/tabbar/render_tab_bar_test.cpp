@@ -264,11 +264,11 @@ HWTEST_F(RenderTabBarTest, RenderTabBarTest004, TestSize.Level1)
      */
     renderRoot->PerformLayout();
     renderTabBar->SetIndex(-1);
-    ASSERT_EQ(renderTabBar->GetIndex(), 0);
+    ASSERT_EQ(renderTabBar->GetIndex(), 1);
     renderTabBar->SetIndex(1);
     ASSERT_EQ(renderTabBar->GetIndex(), 1);
     renderTabBar->SetIndex(SMALLTABSIZE);
-    ASSERT_EQ(renderTabBar->GetIndex(), 0);
+    ASSERT_EQ(renderTabBar->GetIndex(), 1);
 }
 
 } // namespace OHOS::Ace

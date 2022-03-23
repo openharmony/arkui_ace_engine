@@ -336,7 +336,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         if (hapInfo) {
             pageProfile = hapInfo->pages;
             const std::string profilePrefix = "@profile:";
-            if (pageProfile.find(profilePrefix) == 0) {
+            if (pageProfile.compare(0, profilePrefix.size(), profilePrefix) == 0) {
                 pageProfile = pageProfile.substr(profilePrefix.length()).append(".json");
             }
             LOGI("In stage mode, pageProfile:%{public}s", pageProfile.c_str());
@@ -531,8 +531,7 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (container) {
         auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
-        Platform::FlutterAceView::DispatchKeyEvent(aceView, touchEvent);
-        return true;
+        return Platform::FlutterAceView::DispatchKeyEvent(aceView, touchEvent);
     }
     return false;
 }
