@@ -41,7 +41,6 @@ public:
     bool PopDialog();
     void SetAnimator(const RefPtr<Animator>& animator_);
     bool HandleMouseEvent(const MouseEvent& event) override;
-    WeakPtr<RenderNode> CheckHoverNode() override;
 
 protected:
     void OnTouchTestHit(
@@ -92,6 +91,7 @@ private:
     bool isDragable_ = false;
     bool isDraging_ = false;
     bool init_ = true;
+    bool popDialog_ = false;
     Offset topLeftPoint_;
     TouchRegion maskDragRegion_;
     WeakPtr<DialogTweenComponent> weakDialogTweenComponent_;

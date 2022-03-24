@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,8 +150,6 @@ void CheckableCreatorTest::TearDown() {}
  * @tc.name: CheckableCreator001
  * @tc.desc: Test parse checkbox's field successfully from the right fields dsl json of checkbox component.
  * @tc.type: FUNC
- * @tc.require: AR000DAR24 AR000DAR25
- * @tc.author: kouxinxin
  */
 HWTEST_F(CheckableCreatorTest, CheckableCreator001, TestSize.Level1)
 {
@@ -180,8 +178,6 @@ HWTEST_F(CheckableCreatorTest, CheckableCreator001, TestSize.Level1)
  * @tc.name: CheckableCreator002
  * @tc.desc: Test parse checkbox's field successfully from no field dsl json of checkbox component.
  * @tc.type: FUNC
- * @tc.require: AR000DAR24 AR000DAR25
- * @tc.author: kouxinxin
  */
 HWTEST_F(CheckableCreatorTest, CheckableCreator002, TestSize.Level1)
 {
@@ -198,8 +194,6 @@ HWTEST_F(CheckableCreatorTest, CheckableCreator002, TestSize.Level1)
  * @tc.name: CheckableCreator003
  * @tc.desc: Test parse checkbox's field successfully from the type error fields dsl json of checkbox component.
  * @tc.type: FUNC
- * @tc.require: AR000DAR24 AR000DAR25
- * @tc.author: kouxinxin
  */
 HWTEST_F(CheckableCreatorTest, CheckableCreator003, TestSize.Level1)
 {
@@ -223,8 +217,6 @@ HWTEST_F(CheckableCreatorTest, CheckableCreator003, TestSize.Level1)
  * @tc.name: CheckableCreator004
  * @tc.desc: Test parse switch's field successfully from the right fields dsl json of switch component.
  * @tc.type: FUNC
- * @tc.require: AR000DAR21 AR000DAR22
- * @tc.author: kouxinxin
  */
 HWTEST_F(CheckableCreatorTest, CheckableCreator004, TestSize.Level1)
 {
@@ -252,8 +244,6 @@ HWTEST_F(CheckableCreatorTest, CheckableCreator004, TestSize.Level1)
  * @tc.name: CheckableCreator005
  * @tc.desc: Test parse switch's field successfully from no field dsl json of switch component.
  * @tc.type: FUNC
- * @tc.require: AR000DAR21 AR000DAR22
- * @tc.author: kouxinxin
  */
 HWTEST_F(CheckableCreatorTest, CheckableCreator005, TestSize.Level1)
 {
@@ -270,8 +260,6 @@ HWTEST_F(CheckableCreatorTest, CheckableCreator005, TestSize.Level1)
  * @tc.name: CheckableCreator006
  * @tc.desc: Test parse switch's field successfully from the type error fields dsl json of switch component.
  * @tc.type: FUNC
- * @tc.require: AR000DAR21 AR000DAR22
- * @tc.author: kouxinxin
  */
 HWTEST_F(CheckableCreatorTest, CheckableCreator006, TestSize.Level1)
 {
@@ -295,8 +283,6 @@ HWTEST_F(CheckableCreatorTest, CheckableCreator006, TestSize.Level1)
  * @tc.name: CheckableCreator007
  * @tc.desc: Test parse radio's field successfully from the right fields dsl json of radio component.
  * @tc.type: FUNC
- * @tc.require: AR000DBSKK AR000DBSKL AR000DBSKJ
- * @tc.author: kouxinxin
  */
 HWTEST_F(CheckableCreatorTest, CheckableCreator007, TestSize.Level1)
 {
@@ -326,8 +312,6 @@ HWTEST_F(CheckableCreatorTest, CheckableCreator007, TestSize.Level1)
  * @tc.name: CheckableCreator008
  * @tc.desc: Test parse radio's field successfully from no field dsl json of radio component.
  * @tc.type: FUNC
- * @tc.require: AR000DBSKK AR000DBSKL AR000DBSKJ
- * @tc.author: kouxinxin
  */
 HWTEST_F(CheckableCreatorTest, CheckableCreator008, TestSize.Level1)
 {
@@ -344,8 +328,6 @@ HWTEST_F(CheckableCreatorTest, CheckableCreator008, TestSize.Level1)
  * @tc.name: CheckableCreator009
  * @tc.desc: Test parse radio's field successfully from the type error fields dsl json of radio component.
  * @tc.type: FUNC
- * @tc.require: AR000DBSKK AR000DBSKL AR000DBSKJ
- * @tc.author: kouxinxin
  */
 HWTEST_F(CheckableCreatorTest, CheckableCreator009, TestSize.Level1)
 {

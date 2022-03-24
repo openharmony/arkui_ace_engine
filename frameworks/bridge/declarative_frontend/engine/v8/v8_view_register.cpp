@@ -191,7 +191,6 @@ void JsLoadDocument(const v8::FunctionCallbackInfo<v8::Value>& args)
 
 void JsDumpMemoryStats(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
-    // TODO: Implement for v8
     LOGD("dumpMemoryStats: Not Implemented for V8. UnSupported");
 }
 
@@ -733,7 +732,6 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
 void JsRegisterViews(BindingTarget globalObj)
 {
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    // FIXME These do not belong to views, move somewhere else
     globalObj->Set(v8::String::NewFromUtf8(isolate, "loadDocument").ToLocalChecked(),
         v8::FunctionTemplate::New(isolate, JsLoadDocument));
     globalObj->Set(v8::String::NewFromUtf8(isolate, "dumpMemoryStats").ToLocalChecked(),

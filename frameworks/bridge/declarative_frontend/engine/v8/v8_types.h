@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,11 +144,9 @@ public:
     void SetPropertyJsonObject(const char* prop, const char* value) const;
     void SetPropertyObject(const char* prop, V8Ref<V8Value> value) const;
 
-    // TODO(cvetan): Make private
     V8Object(v8::Local<v8::Object> obj);
 };
 
-// TODO(cvetan): Rename to V8Function when we get rid of the current V8Function
 /**
  * @brief A wrapper around v8::Function
  *
@@ -156,7 +154,6 @@ public:
 class V8Funktion : public V8Type<v8::Function> {
 public:
     V8Funktion();
-    // TODO(cvetan): Make private
     V8Funktion(v8::Local<v8::Function> obj);
     ~V8Funktion() override = default;
 

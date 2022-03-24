@@ -54,7 +54,10 @@ void JSProgress::Create(const JSCallbackInfo& info)
     }
 
     auto progressType = ProgressType::LINEAR;
-    auto jsStyle = paramObject->GetProperty("style");
+    auto jsStyle = paramObject->GetProperty("type");
+    if (jsStyle->IsNull() || jsStyle->IsUndefined()) {
+        jsStyle = paramObject->GetProperty("style");
+    }
 
     auto progressStyle = static_cast<ProgressStyle>(jsStyle->ToNumber<int32_t>());
     if (progressStyle == ProgressStyle::Eclipse) {

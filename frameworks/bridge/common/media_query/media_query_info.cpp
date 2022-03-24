@@ -33,6 +33,8 @@ std::string MediaQueryInfo::GetDeviceType()
             return "car";
         case DeviceType::WATCH:
             return "wearable";
+        case DeviceType::TABLET:
+            return "tablet";
         default:
             return "phone";
     }

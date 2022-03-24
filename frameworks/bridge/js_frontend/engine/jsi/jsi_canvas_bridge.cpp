@@ -44,7 +44,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtim
         return nullptr;
     }
 
-    auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetArkNativeEngine());
+    auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetNativeEngine());
     if (!nativeEngine) {
         LOGE("NativeEngine is null");
         return nullptr;
@@ -381,7 +381,7 @@ void JsiCanvasBridge::HandleWebglContext(const shared_ptr<JsRuntime>& runtime,
         return;
     }
 
-    auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetArkNativeEngine());
+    auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetNativeEngine());
     if (!nativeEngine) {
         LOGE("NativeEngine is null");
         return;
@@ -1819,8 +1819,8 @@ shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>&
     options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
     options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
-    options.size.width = final_width;
-    options.size.height = final_height;
+    options.size.width = static_cast<int32_t>(final_width);
+    options.size.height = static_cast<int32_t>(final_height);
     options.editable = true;
     std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(data, length, options);
     delete[] data;
@@ -1830,7 +1830,7 @@ shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>&
     }
 
     // 3 pixelmap to NapiValue
-    auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetArkNativeEngine());
+    auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetNativeEngine());
     if (!nativeEngine) {
         LOGE("NativeEngine is null");
         return runtime->NewUndefined();

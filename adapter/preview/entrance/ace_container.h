@@ -48,7 +48,7 @@ class AceContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
 public:
-    static void CreateContainer(int32_t instanceId, FrontendType type);
+    static void CreateContainer(int32_t instanceId, FrontendType type, const AceRunArgs& runArgs);
     static void DestroyContainer(int32_t instanceId);
 
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
@@ -177,6 +177,8 @@ public:
     void LoadDocument(const std::string& url, const std::string& componentName);
 
     void RunNativeEngineLoop();
+
+    void SetStageCardConfig(const std::string& pageProfile, const std::string& selectUrl);
 
     void SetPageProfile(const std::string& pageProfile)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,6 @@ void JsUtilsTest::TearDown() {}
  * @tc.name: ParseDimensionId001
  * @tc.desc: Test parse string contains platform style id reference.
  * @tc.type: FUNC
- * @tc.require: AR000DVLH5
  */
 HWTEST_F(JsUtilsTest, ParseDimensionId001, TestSize.Level1)
 {
@@ -71,7 +70,6 @@ HWTEST_F(JsUtilsTest, ParseDimensionId001, TestSize.Level1)
  * @tc.name: ParseDimensionId002
  * @tc.desc: Test parse string contains platform style id reference, id not found.
  * @tc.type: FUNC
- * @tc.require: AR000DVLH5
  */
 HWTEST_F(JsUtilsTest, ParseDimensionId002, TestSize.Level1)
 {
@@ -91,7 +89,6 @@ HWTEST_F(JsUtilsTest, ParseDimensionId002, TestSize.Level1)
  * @tc.name: ParseDimensionId003
  * @tc.desc: Test parse string contains platform style id which format is error.
  * @tc.type: FUNC
- * @tc.require: AR000DVLH5
  */
 HWTEST_F(JsUtilsTest, ParseDimensionId003, TestSize.Level1)
 {
@@ -109,7 +106,6 @@ HWTEST_F(JsUtilsTest, ParseDimensionId003, TestSize.Level1)
  * @tc.name: ParseDimensionId004
  * @tc.desc: Test parse string contains platform style id reference, id not found.
  * @tc.type: FUNC
- * @tc.require: AR000FDGO4
  */
 HWTEST_F(JsUtilsTest, ParseDimensionId004, TestSize.Level1)
 {

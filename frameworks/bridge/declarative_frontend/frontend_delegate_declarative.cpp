@@ -60,8 +60,6 @@ const char I18N_FILE_SUFFIX[] = "/properties/string.json";
 
 } // namespace
 
-std::atomic<uint64_t> FrontendDelegateDeclarative::pageIdPool_ = 0;
-
 int32_t FrontendDelegateDeclarative::GenerateNextPageId()
 {
     for (int32_t idx = 0; idx < MAX_PAGE_ID_SIZE; ++idx) {
@@ -792,7 +790,7 @@ void FrontendDelegateDeclarative::Push(const PageTarget& target, const std::stri
     if (!pagePath.empty()) {
         LoadPage(GenerateNextPageId(), PageTarget(pagePath, target.container), false, params);
     } else {
-        LOGW("this uri not support in route push.");
+        LOGW("[Engine Log] this uri not support in route push.");
     }
 }
 
@@ -808,7 +806,7 @@ void FrontendDelegateDeclarative::Replace(const PageTarget& target, const std::s
     if (!pagePath.empty()) {
         LoadReplacePage(GenerateNextPageId(), PageTarget(pagePath, target.container), params);
     } else {
-        LOGW("this uri not support in route replace.");
+        LOGW("[Engine Log] this uri not support in route replace.");
     }
 }
 
@@ -882,7 +880,7 @@ void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const
             }
             PopToPage(pagePath);
         } else {
-            LOGW("this uri not support in route Back.");
+            LOGW("[Engine Log] this uri not support in route Back.");
         }
     }
 }
@@ -1761,7 +1759,7 @@ void FrontendDelegateDeclarative::LoadReplacePage(int32_t pageId, const PageTarg
         pageParamMap_[pageId] = params;
     }
     auto url = target.url;
-    LOGD("FrontendDelegateDeclarative LoadReplacePage[%{private}d]: %{private}s.", pageId, url.c_str());
+    LOGI("FrontendDelegateDeclarative LoadReplacePage[%{private}d]: %{private}s.", pageId, url.c_str());
     if (pageId == INVALID_PAGE_ID) {
         LOGW("FrontendDelegateDeclarative, invalid page id");
         EventReport::SendPageRouterException(PageRouterExcepType::REPLACE_PAGE_ERR, url);

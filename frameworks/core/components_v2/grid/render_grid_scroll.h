@@ -139,7 +139,7 @@ public:
 
     void HandleAxisEvent(const AxisEvent& event) override;
 
-    bool isScrollable(AxisDirection direction) override;
+    bool IsAxisScrollable(AxisDirection direction) override;
 
     WeakPtr<RenderNode> CheckAxisNode() override;
 

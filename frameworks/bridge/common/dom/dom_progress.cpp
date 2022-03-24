@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,7 @@ Gradient ParseGradient(const DOMProgress& progress, const std::string& value)
         return gradient;
     }
     auto gradientValue = gradientJson->GetValue(DOM_VALUES);
-    if (gradientValue == nullptr || !gradientValue->IsArray() || gradientValue->GetArraySize() <= 0) {
+    if ((gradientValue == nullptr) || (!gradientValue->IsArray()) || (gradientValue->GetArraySize() <= 0)) {
         LOGW("gradientValue json param error");
         return gradient;
     }

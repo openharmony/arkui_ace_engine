@@ -167,6 +167,13 @@ public:
         }
     }
 
+    void OnStartAbility(const std::string& address)
+    {
+        if (platformEventCallback_) {
+            platformEventCallback_->OnStartAbility(address);
+        }
+    }
+
     int32_t GeneratePageId()
     {
         return pageId_++;

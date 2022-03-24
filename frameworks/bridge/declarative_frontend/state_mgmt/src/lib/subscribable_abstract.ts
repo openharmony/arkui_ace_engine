@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@
  * decorated variables to share the same instance to a SubscribaleAbstract
  * object. Each such decorated variable implementation makes its own
  * subscription to the SubscribaleAbstract object. Hence, when both variables
- * have unsubscribed the SubscribaleAbstract may do its own de-initilization.,
+ * have unsubscribed the SubscribaleAbstract may do its own de-initilialization.,
  * e.g. release held external resources.
  *
  * How to extend:

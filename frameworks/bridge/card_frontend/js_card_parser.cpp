@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1562,7 +1562,6 @@ bool JsCardParser::ParseSpecialVariable(std::string& value)
 
 bool JsCardParser::GetVariable(std::string& value, const std::unique_ptr<JsonValue>& dataJson)
 {
-    LOGD("GetVariable value :%{private}s dataJson:%{private}s", value.c_str(), dataJson->ToString().c_str());
     auto key = value;
     if (!repeatJson_->Contains(key) && isRepeat_) {
         return false;
@@ -1571,6 +1570,7 @@ bool JsCardParser::GetVariable(std::string& value, const std::unique_ptr<JsonVal
     if (!dataJson) {
         return false;
     }
+    LOGD("GetVariable value :%{private}s dataJson:%{private}s", value.c_str(), dataJson->ToString().c_str());
     auto dataValue = dataJson->GetValue(key);
     if (isRepeat_) {
         dataValue = repeatJson_->GetValue(key);

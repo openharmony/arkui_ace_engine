@@ -1450,26 +1450,10 @@ void RenderGridScroll::OnPredictLayout(int64_t deadline)
     }
 }
 
-bool RenderGridScroll::isScrollable(AxisDirection direction)
+bool RenderGridScroll::IsAxisScrollable(AxisDirection direction)
 {
-    if (isVertical_) {
-        if (direction == AxisDirection::UP && reachHead_) {
-            return false;
-        } else if (direction == AxisDirection::DOWN && reachTail_) {
-            return false;
-        } else if (direction == AxisDirection::NONE) {
-            return false;
-        }
-    } else {
-        if (direction == AxisDirection::LEFT && reachHead_) {
-            return false;
-        } else if (direction == AxisDirection::RIGHT && reachTail_) {
-            return false;
-        } else if (direction == AxisDirection::NONE) {
-            return false;
-        }
-    }
-    return true;
+    return (((direction == AxisDirection::UP || direction == AxisDirection::LEFT) && !reachHead_) ||
+        ((direction == AxisDirection::DOWN || direction == AxisDirection::RIGHT) && !reachTail_));
 }
 
 void RenderGridScroll::HandleAxisEvent(const AxisEvent& event)

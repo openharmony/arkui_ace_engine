@@ -331,9 +331,9 @@ protected:
 
     // it should be cells which has item in
     bool MoveItemsBackward(int32_t fromRow, int32_t fromColum, int32_t toRow, int32_t toColum);
-    void UpdateMatrixByIndexStrong(int32_t index, int32_t row, int32_t colum);
+    void UpdateMatrixByIndexStrong(int32_t index, int32_t row, int32_t column);
     void UpdateCurInsertPos(int32_t curInsertRow, int32_t curInsertColum);
-    int32_t CalIndexForItemByRowAndColum(int32_t row, int32_t colum);
+    int32_t CalIndexForItemByRowAndColum(int32_t row, int32_t column);
 
     // If the first is equal the second, return true, else return false.
     bool SortCellIndex(int32_t rowFirst, int32_t columFirst, int32_t rowSecond, int32_t columSecond, bool& firstIsPre);
@@ -529,7 +529,7 @@ protected:
     RefPtr<Animator> flexController_;
     bool supportAnimation_ = false;
     bool dragAnimation_ = false;
-    EdgeEffect edgeEffect_ = EdgeEffect::SPRING;
+    EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     std::atomic<bool> needRunAnimation_;
     std::map<std::string, std::function<void()>> animationFinishedFuncList_;
     std::mutex animationLock_;

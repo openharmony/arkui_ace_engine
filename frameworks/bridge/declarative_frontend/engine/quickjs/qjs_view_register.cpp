@@ -189,13 +189,12 @@ static JSValue JsLoadDocument(JSContext* ctx, JSValueConst new_target, int argc,
     page->SetDeclarativeOnPageAppearCallback([view]() { view->FireOnShow(); });
     page->SetDeclarativeOnPageDisAppearCallback([view]() { view->FireOnHide(); });
     page->SetDeclarativeOnPageRefreshCallback([view]() { view->MarkNeedUpdate(); });
-
-    if (page->IsUsePluginComponent()) {
-        LOGI("Load Document UsePluginComponent");
-        if (!page->GetPluginComponentJsonData().empty()) {
-            view->ExecuteUpdateWithValueParams(page->GetPluginComponentJsonData());
-        }
-    }
+    page->SetDeclarativeOnUpdateWithValueParamsCallback(
+        [view](const std::string& params) {
+            if (view && !params.empty()) {
+                view->ExecuteUpdateWithValueParams(params);
+            }
+        });
 
     return JS_UNDEFINED;
 }

@@ -336,8 +336,6 @@ public:
 
     virtual void DumpTree(int32_t depth);
 
-    virtual void DumpTree(int32_t depth, std::vector<std::string>& info);
-
     virtual void Dump();
 
     enum class BridgeType { NONE, ROSEN, FLUTTER };
@@ -767,7 +765,7 @@ public:
     virtual void OnMouseClickDownAnimation() {}
     virtual void OnMouseClickUpAnimation() {}
     virtual void StopMouseHoverAnimation() {}
-    virtual bool isScrollable(AxisDirection direction)
+    virtual bool IsAxisScrollable(AxisDirection direction)
     {
         return false;
     }

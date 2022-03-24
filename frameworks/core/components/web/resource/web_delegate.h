@@ -116,19 +116,8 @@ public:
 #ifdef OHOS_STANDARD_SYSTEM
     void InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surface> surface = nullptr);
     void InitWebViewWithWindow();
-    void ShowWebView()
-    {
-        if (window_) {
-            window_->Show();
-        }
-    }
-
-    void HideWebView()
-    {
-        if (window_) {
-            window_->Hide();
-        }
-    }
+    void ShowWebView();
+    void HideWebView();
     void Resize(const double& width, const double& height);
     void UpdateUserAgent(const std::string& userAgent);
     void UpdateJavaScriptEnabled(const bool& isJsEnabled);
@@ -185,6 +174,7 @@ private:
     void ExecuteTypeScript(const std::string& jscode, const std::function<void(std::string)>&& callback);
     void LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
         const std::string& encoding, const std::string& historyUrl);
+    void LoadDataWithRichText(const std::string& data);
     void Refresh();
     void StopLoading();
     void AddJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
@@ -239,6 +229,9 @@ private:
     EventCallbackV2 onHttpErrorReceiveV2_;
     EventCallbackV2 onDownloadStartV2_;
     EventCallbackV2 onFocusV2_;
+
+    std::string bundlePath_;
+    std::string bundleDataPath_;
 
 #endif
 };

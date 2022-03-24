@@ -314,7 +314,6 @@ void AceContainer::OnActive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         front->OnActive();
     }
-    // TODO: remove it after ability fix onshow lifecyle.
     auto context = container->GetPipelineContext();
     if (!context) {
         return;
@@ -334,12 +333,11 @@ void AceContainer::OnInactive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         front->OnInactive();
     }
-    // TODO: remove it after ability fix onshow lifecyle.
     auto context = container->GetPipelineContext();
     if (!context) {
         return;
     }
-    context->RootLostFocus();
+    context->GetTaskExecutor()->PostTask([context]() { context->RootLostFocus(); }, TaskExecutor::TaskType::UI);
 }
 
 bool AceContainer::OnStartContinuation(int32_t instanceId)
@@ -893,6 +891,31 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
             TaskExecutor::TaskType::PLATFORM);
     };
     pipelineContext_->SetFinishEventHandler(finishEventHandler);
+
+    auto&& startAbilityHandler = [weak = WeakClaim(this), instanceId](const std::string& address) {
+        auto container = weak.Upgrade();
+        if (!container) {
+            LOGE("StartAbilityHandler container is null!");
+            return;
+        }
+        ContainerScope scope(instanceId);
+        auto context = container->GetPipelineContext();
+        if (!context) {
+            LOGE("StartAbilityHandler context is null!");
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakPtr<AceContainer>(container), address]() {
+                auto container = weak.Upgrade();
+                if (!container) {
+                    LOGE("Start ability task, container is null!");
+                    return;
+                }
+                container->OnStartAbility(address);
+            },
+            TaskExecutor::TaskType::PLATFORM);
+    };
+    pipelineContext_->SetStartAbilityHandler(startAbilityHandler);
 
     auto&& setStatusBarEventHandler = [weak = WeakClaim(this), instanceId](const Color& color) {
         auto container = weak.Upgrade();

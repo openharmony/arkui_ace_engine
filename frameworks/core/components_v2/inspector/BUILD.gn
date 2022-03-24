@@ -21,6 +21,7 @@ build_component("inspector_v2") {
     "blank_composed_element.cpp",
     "button_composed_element.cpp",
     "calendar_composed_element.cpp",
+    "checkboxGroup_composed_element.cpp",
     "checkbox_composed_element.cpp",
     "column_composed_element.cpp",
     "column_split_composed_element.cpp",
@@ -45,6 +46,7 @@ build_component("inspector_v2") {
     "inspector_constants.cpp",
     "list_composed_element.cpp",
     "list_item_composed_element.cpp",
+    "loading_progress_composed_element.cpp",
     "marquee_composed_element.cpp",
     "menu_composed_element.cpp",
     "navigation_composed_element.cpp",
@@ -82,6 +84,7 @@ build_component("inspector_v2") {
     "textinput_composed_element.cpp",
     "texttimer_composed_element.cpp",
     "time_picker_composed_element.cpp",
+    "time_picker_dialog_composed_element.cpp",
     "toggle_composed_element.cpp",
     "wrap_composed_element.cpp",
   ]

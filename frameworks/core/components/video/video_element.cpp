@@ -276,20 +276,9 @@ void VideoElement::RegistMediaPlayerEvent()
         });
     };
 
-    auto&& endOfStreamEvent = [videoElement, uiTaskExecutor] {
-        uiTaskExecutor.PostSyncTask([&videoElement] {
-            auto video = videoElement.Upgrade();
-            if (video) {
-                LOGD("OnCompletion");
-                video->OnCompletion();
-            }
-        });
-    };
-
     mediaPlayerCallback_ = std::make_shared<MediaPlayerCallback>(ContainerScope::CurrentId());
     mediaPlayerCallback_->SetPositionUpdatedEvent(positionUpdatedEvent);
     mediaPlayerCallback_->SetStateChangedEvent(stateChangedEvent);
-    mediaPlayerCallback_->SetEndOfStreamEvent(endOfStreamEvent);
     mediaPlayer_->SetPlayerCallback(mediaPlayerCallback_);
 }
 
@@ -1189,6 +1178,8 @@ void VideoElement::OnPlayerStatus(PlaybackStatus status)
                     video->OnPrepared(videoSize.Width(), videoSize.Height(), false, duration, 0, true);
                 }
             });
+    } else if (status == PlaybackStatus::PLAYBACK_COMPLETE) {
+        OnCompletion();
     }
 #endif
 }
@@ -1230,6 +1221,7 @@ void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
 
 void VideoElement::OnCompletion()
 {
+    LOGI("VideoElement::OnCompletion");
     currentPos_ = duration_;
     IntTimeToText(currentPos_, currentPosText_);
 
@@ -1245,7 +1237,7 @@ void VideoElement::OnCompletion()
         } else {
             param = std::string("\"finish\",{").append("}");
         }
-        LOGE("video onFinish event: %s ", param.c_str());
+        LOGI("video onFinish event: %s ", param.c_str());
         onFinish_(param);
     }
 }

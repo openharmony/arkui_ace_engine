@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,7 +65,7 @@ HWTEST_F(RenderPluginTest, UpdatePlugin001, TestSize.Level1)
      * @tc.expected: step2. RenderPlugin is updated with correct settings.
      */
     renderPlugin->Update(pluginComponent);
-    EXPECT_EQ(renderPlugin->rootWidht_, PLUGIN_WIDTH);
+    EXPECT_EQ(renderPlugin->rootWidth_, PLUGIN_WIDTH);
     EXPECT_EQ(renderPlugin->rootHeight_, PLUGIN_HEIGHT);
 }
 
@@ -100,7 +100,7 @@ HWTEST_F(RenderPluginTest, RenderPluginPerformLayout001, TestSize.Level1)
      * @tc.expected: step2. RenderPlugin is updated with correct settings.
      */
     renderPlugin->Update(pluginComponent);
-    EXPECT_EQ(renderPlugin->rootWidht_, PLUGIN_WIDTH);
+    EXPECT_EQ(renderPlugin->rootWidth_, PLUGIN_WIDTH);
     EXPECT_EQ(renderPlugin->rootHeight_, PLUGIN_HEIGHT);
 
     /**

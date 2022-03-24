@@ -120,6 +120,11 @@ int SystemProperties::GetArkProperties()
     return system::GetIntParameter<int>("persist.ark.properties", -1);
 }
 
+std::string SystemProperties::GetAsmInterOption()
+{
+    return system::GetParameter("persist.ark.asminter", "");
+}
+
 bool SystemProperties::IsScoringEnabled(const std::string& name)
 {
     if (name.empty()) {

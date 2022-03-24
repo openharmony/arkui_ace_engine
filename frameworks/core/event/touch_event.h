@@ -137,6 +137,32 @@ struct TouchEvent final {
         return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, (screenX - offsetX) / scale,
             (screenY - offsetY) / scale, type, time, size, force, deviceId, sourceType, temp };
     }
+
+    TouchEvent UpdatePointers() const
+    {
+        TouchPoint point { .id = id,
+            .x = x,
+            .y = y,
+            .screenX = screenX,
+            .screenY = screenY,
+            .downTime = time,
+            .size = size,
+            .force = force,
+            .isPressed = (type == TouchType::DOWN) };
+        TouchEvent event { .id = id,
+            .x = x,
+            .y = y,
+            .screenX = screenX,
+            .screenY = screenY,
+            .type = type,
+            .time = time,
+            .size = size,
+            .force = force,
+            .deviceId = deviceId,
+            .sourceType = sourceType };
+        event.pointers.emplace_back(std::move(point));
+        return event;
+    }
 };
 
 class TouchCallBackInfo : public BaseEventInfo {

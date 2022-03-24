@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,13 +39,11 @@ public:
 std::shared_ptr<UIServiceMgrClient> MockUIServiceMgrClient::GetInstance()
 {
     if (instance_ == nullptr) {
-        if (instance_ == nullptr) {
-            std::shared_ptr<UIServiceMgrClient> client = std::make_shared<MockUIServiceMgrClient>();
-            if (client != nullptr) {
-                ((MockUIServiceMgrClient *)client.get())->Connect();
-            }
-            instance_ = client;
+        std::shared_ptr<UIServiceMgrClient> client = std::make_shared<MockUIServiceMgrClient>();
+        if (client != nullptr) {
+            ((MockUIServiceMgrClient *)client.get())->Connect();
         }
+        instance_ = client;
     }
     return instance_;
 }

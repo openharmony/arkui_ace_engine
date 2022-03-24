@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -311,7 +311,6 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
 
 void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen::Window> window)
 {
-    LOGI(">>> FlutterAceView::SurfaceCreated, pWnd:%{public}p", &(*window));
     if (window == nullptr) {
         LOGE("FlutterAceView::SurfaceCreated, window is nullptr");
         return;
@@ -320,7 +319,7 @@ void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen
         LOGE("FlutterAceView::SurfaceCreated, view is nullptr");
         return;
     }
-
+    LOGI(">>> FlutterAceView::SurfaceCreated, pWnd:%{public}p", &(*window));
     auto platformView = view->GetShellHolder()->GetPlatformView();
     LOGI("FlutterAceView::SurfaceCreated, GetPlatformView");
     if (platformView && !SystemProperties::GetRosenBackendEnabled()) {

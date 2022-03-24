@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -405,11 +405,9 @@ bool ListElement::BuildListComponent(const RefPtr<Component>& component)
     renderList_->AddListItem(index, itemProxy);
     itemProxy->SetHidden(false);
     if (accessibilityDisabled_) {
-        if (accessibilityDisabled_) {
-            auto renderNode = element->GetRenderNode();
-            if (renderNode) {
-                renderNode->SetNeedUpdateAccessibility(false);
-            }
+        auto renderNode = element->GetRenderNode();
+        if (renderNode) {
+            renderNode->SetNeedUpdateAccessibility(false);
         }
     }
     // recover visible state.

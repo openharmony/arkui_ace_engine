@@ -82,11 +82,15 @@ WindowMode GetWindowMode(OHOS::Rosen::Window* window)
 static std::atomic<int32_t> gInstanceId = 0;
 static std::atomic<int32_t> gSubInstanceId = 1000000;
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
+const int32_t REQUEST_CODE = -1;
 
 using ContentFinishCallback = std::function<void()>;
+using ContentStartAbilityCallback = std::function<void(const std::string& address)>;
 class ContentEventCallback final : public Platform::PlatformEventCallback {
 public:
     explicit ContentEventCallback(ContentFinishCallback onFinish) : onFinish_(onFinish) {}
+    ContentEventCallback(ContentFinishCallback onFinish, ContentStartAbilityCallback onStartAbility)
+        : onFinish_(onFinish), onStartAbility_(onStartAbility) {}
     ~ContentEventCallback() = default;
 
     virtual void OnFinish() const
@@ -97,6 +101,14 @@ public:
         }
     }
 
+    virtual void OnStartAbility(const std::string& address)
+    {
+        LOGI("UIContent OnStartAbility");
+        if (onStartAbility_) {
+            onStartAbility_(address);
+        }
+    }
+
     virtual void OnStatusBarBgColorChanged(uint32_t color)
     {
         LOGI("UIContent OnStatusBarBgColorChanged");
@@ -104,6 +116,7 @@ public:
 
 private:
     ContentFinishCallback onFinish_;
+    ContentStartAbilityCallback onStartAbility_;
 };
 
 extern "C" ACE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtime)
@@ -111,6 +124,43 @@ extern "C" ACE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtim
     LOGI("Ace lib loaded, CreateUIContent.");
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime);
 }
+
+class OccupiedAreaChangeListener : public OHOS::Rosen::IOccupiedAreaChangeListener {
+public:
+    explicit OccupiedAreaChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~OccupiedAreaChangeListener() = default;
+
+    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
+    {
+        auto rect = info->rect_;
+        auto type = info->type_;
+        Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        LOGI("UIContent::OccupiedAreaChange rect:%{public}s type: %{public}d", keyboardRect.ToString().c_str(), type);
+        if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
+            auto container = Platform::AceContainer::GetContainer(instanceId_);
+            if (!container) {
+                LOGE("container may be destroyed.");
+                return;
+            }
+            auto taskExecutor = container->GetTaskExecutor();
+            if (!taskExecutor) {
+                LOGE("OnSizeChange: taskExecutor is null.");
+                return;
+            }
+
+            ContainerScope scope(instanceId_);
+            taskExecutor->PostTask([container, keyboardRect] {
+                auto context = container->GetPipelineContext();
+                if (context != nullptr) {
+                    context->OnVirtualKeyboardAreaChange(keyboardRect);
+                }
+            }, TaskExecutor::TaskType::UI);
+        }
+    }
+
+private:
+    int32_t instanceId_ = -1;
+};
 
 class DragWindowListener : public OHOS::Rosen::IWindowDragListener {
 public:
@@ -369,6 +419,20 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             if (abilityContext) {
                 abilityContext->CloseAbility();
             }
+        }, [context = context_](const std::string& address) {
+            auto sharedContext = context.lock();
+            if (!sharedContext) {
+                return;
+            }
+            auto abilityContext =
+                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+            if (abilityContext) {
+                LOGI("start ability with url = %{private}s", address.c_str());
+                AAFwk::Want want;
+                want.AddEntity(Want::ENTITY_BROWSER);
+                want.SetParam("address", address);
+                abilityContext->StartAbility(want, REQUEST_CODE);
+            }
         }));
     container->SetWindowName(window_->GetWindowName());
 
@@ -392,6 +456,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetAssetManager(flutterAssetManager);
+    container->SetBundlePath(context->GetBundleCodeDir());
+    container->SetFilesDataPath(context->GetFilesDir());
 
     if (window_->IsDecorEnable()) {
         LOGI("Container modal is enabled.");
@@ -530,16 +596,37 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     SystemProperties::SetDeviceOrientation(config.Height() >= config.Width() ? 0 : 1);
     SystemProperties::SetWindowPos(config.Left(), config.Top());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
-    if (container) {
-        auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
-        flutter::ViewportMetrics metrics;
-        metrics.physical_width = config.Width();
-        metrics.physical_height = config.Height();
-        metrics.device_pixel_ratio = config.Density();
-        Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
-        Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
-            AceAbility::Convert2WindowSizeChangeReason(reason));
+    if (!container) {
+        LOGE("UpdateViewportConfig: container is null.");
+        return;
     }
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("UpdateViewportConfig: taskExecutor is null.");
+        return;
+    }
+    taskExecutor->PostTask(
+        [config, instanceId = instanceId_, reason]() {
+            auto container = Platform::AceContainer::GetContainer(instanceId);
+            if (!container) {
+                LOGE("container may be destroyed.");
+                return;
+            }
+
+            auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
+            if (!aceView) {
+                LOGE("aceView is null");
+                return;
+            }
+            flutter::ViewportMetrics metrics;
+            metrics.physical_width = config.Width();
+            metrics.physical_height = config.Height();
+            metrics.device_pixel_ratio = config.Density();
+            Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
+            Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
+                static_cast<WindowSizeChangeReason>(reason));
+        },
+        TaskExecutor::TaskType::PLATFORM);
     config_ = config;
     updateConfig_ = true;
 }
@@ -657,6 +744,8 @@ void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::A
 
     dragWindowListener_ = new DragWindowListener(instanceId_);
     window->RegisterDragListener(dragWindowListener_);
+    occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
+    window->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
 }
 
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window)

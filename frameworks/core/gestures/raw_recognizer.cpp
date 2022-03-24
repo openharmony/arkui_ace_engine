@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,7 +114,6 @@ bool RawRecognizer::HandleEvent(const TouchEvent& point)
 TouchEventInfo RawRecognizer::CreateTouchEventInfo(
     const std::string& type, const TouchEvent& point, bool ignoreCurrent) const
 {
-    // TODO: add mini version judge.
     auto useNewVersion = true;
     TouchEventInfo info(type);
     if (useNewVersion) {

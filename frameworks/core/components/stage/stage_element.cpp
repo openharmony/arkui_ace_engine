@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -324,15 +324,15 @@ bool StageElement::PerformPushPageTransition(const RefPtr<Element>& elementIn, c
         transitionIn->SetDeclarativeDirection(TransitionDirection::TRANSITION_IN);
         transitionOut->SetDeclarativeDirection(TransitionDirection::TRANSITION_OUT);
     }
+    if (!pageIn || !pageOut) {
+        LOGE("push page failed. page in / out is null.");
+        return false;
+    }
     LOGD("notify push page event. page id: in: %{public}d, out: %{public}d", pageIn->GetPageId(), pageOut->GetPageId());
     NotifyPageTransitionListeners(TransitionEvent::PUSH_START, pageIn, pageOut);
     ACE_SCOPED_TRACE("PUSH_START");
     if (!InitTransition(transitionIn, transitionOut, TransitionEvent::PUSH_START)) {
         LOGW("init transition failed, skip push transition.");
-        return false;
-    }
-    if (!pageIn || !pageOut) {
-        LOGE("push page failed. page in / out is null.");
         return false;
     }
     if ((!controllerIn_) || (!controllerOut_)) {

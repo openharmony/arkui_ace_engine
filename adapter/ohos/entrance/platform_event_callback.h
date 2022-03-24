@@ -25,6 +25,7 @@ public:
     PlatformEventCallback() = default;
     virtual ~PlatformEventCallback() = default;
     virtual void OnFinish() const = 0;
+    virtual void OnStartAbility(const std::string& address) {};
     virtual void OnStatusBarBgColorChanged(uint32_t color) = 0;
 
 private:

@@ -41,6 +41,7 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
     RuntimeOption option;
     option.SetGcType(RuntimeOption::GC_TYPE::GEN_GC);
     option.SetArkProperties(SystemProperties::GetArkProperties());
+    option.SetAsmInterOption(SystemProperties::GetAsmInterOption());
     const int64_t poolSize = 0x10000000;  // 256M
     option.SetGcPoolSize(poolSize);
     option.SetLogLevel(RuntimeOption::LOG_LEVEL::ERROR);

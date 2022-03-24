@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,8 +58,6 @@ void PaddingCreatorTest::TearDown() {}
  * @tc.name: PaddingCreator001
  * @tc.desc: Verify PaddingCreator can create padding component with padding and child.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUF
- * @tc.author: jinwuwen
  */
 HWTEST_F(PaddingCreatorTest, PaddingCreator001, TestSize.Level1)
 {
@@ -99,8 +97,6 @@ HWTEST_F(PaddingCreatorTest, PaddingCreator001, TestSize.Level1)
  * @tc.name: PaddingCreator002
  * @tc.desc: Verify PaddingCreator can create padding component with className only.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUF
- * @tc.author: jinwuwen
  */
 HWTEST_F(PaddingCreatorTest, PaddingCreator002, TestSize.Level1)
 {
@@ -131,8 +127,6 @@ HWTEST_F(PaddingCreatorTest, PaddingCreator002, TestSize.Level1)
  * @tc.name: PaddingCreator003
  * @tc.desc: Verify PaddingCreator can create padding component with directions params only
  * @tc.type: FUNC
- * @tc.require: AR000DAQUF
- * @tc.author: jinwuwen
  */
 HWTEST_F(PaddingCreatorTest, PaddingCreator003, TestSize.Level1)
 {
@@ -178,8 +172,6 @@ HWTEST_F(PaddingCreatorTest, PaddingCreator003, TestSize.Level1)
  * @tc.name: PaddingCreator004
  * @tc.desc: Verify PaddingCreator can create padding component with value param and other directions params
  * @tc.type: FUNC
- * @tc.require: AR000DAQUF
- * @tc.author: jinwuwen
  */
 HWTEST_F(PaddingCreatorTest, PaddingCreator004, TestSize.Level1)
 {
@@ -223,8 +215,6 @@ HWTEST_F(PaddingCreatorTest, PaddingCreator004, TestSize.Level1)
  * @tc.name: PaddingCreator005
  * @tc.desc: Verify PaddingCreator can create padding component with directions param negative
  * @tc.type: FUNC
- * @tc.require: AR000DAQUF
- * @tc.author: jinwuwen
  */
 HWTEST_F(PaddingCreatorTest, PaddingCreator005, TestSize.Level1)
 {

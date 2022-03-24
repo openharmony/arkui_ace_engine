@@ -80,7 +80,7 @@ void SetPhysicalDeviceFonts(bool& physicalDeviceFontsEnabled)
 
 void SetFontBasePath(std::string& basePath)
 {
-    LOGI("Physical devices font base path is %s", basePath.c_str());
+    LOGI("Set basic path of physical device font");
     basePath = basePath.append(DELIMITER);
     SkFontMgr_Config_Parser::setFontBasePathCallback(basePath);
 }
@@ -110,13 +110,13 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     });
     if (runArgs_.formsEnabled) {
         LOGI("CreateContainer with JS_CARD frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS_CARD);
+        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS_CARD, runArgs_);
     } else if (runArgs_.aceVersion == AceVersion::ACE_1_0) {
         LOGI("CreateContainer with JS frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS);
+        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS, runArgs_);
     } else if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
         LOGI("CreateContainer with JSDECLARATIVE frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::DECLARATIVE_JS);
+        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::DECLARATIVE_JS, runArgs_);
     } else {
         LOGE("UnKnown frontend type");
     }
@@ -132,7 +132,6 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     resConfig.SetDensity(SystemProperties::GetResolution());
     resConfig.SetDeviceType(SystemProperties::GetDeviceType());
     container->SetResourceConfiguration(resConfig);
-    container->SetPageProfile((runArgs_.projectModel == ProjectModel::STAGE) ? runArgs_.pageProfile + ".json" : "");
 }
 
 AceAbility::~AceAbility()
@@ -176,18 +175,31 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
 
 void AceAbility::InitEnv()
 {
-    if (runArgs_.projectModel == ProjectModel::STAGE) {
-        std::string appResourcesPath(runArgs_.appResourcesPath);
-        if (!OHOS::Ace::Framework::EndWith(appResourcesPath, DELIMITER)) {
-            appResourcesPath.append(DELIMITER);
-        }
-        AceContainer::AddAssetPath(ACE_INSTANCE_ID,
-            "", { runArgs_.assetPath, appResourcesPath.append(ASSET_PATH_SHARE_STAGE) });
-    } else {
-        AceContainer::AddAssetPath(ACE_INSTANCE_ID,
-            "", { runArgs_.assetPath, GetCustomAssetPath(runArgs_.assetPath).append(ASSET_PATH_SHARE) });
+    std::vector<std::string> paths;
+    paths.push_back(runArgs_.assetPath);
+    std::string appResourcesPath(runArgs_.appResourcesPath);
+    if (!OHOS::Ace::Framework::EndWith(appResourcesPath, DELIMITER)) {
+        appResourcesPath.append(DELIMITER);
     }
+    if (runArgs_.projectModel == ProjectModel::STAGE) {
+        paths.push_back(appResourcesPath + ASSET_PATH_SHARE_STAGE);
+    } else {
+        paths.push_back(GetCustomAssetPath(runArgs_.assetPath) + ASSET_PATH_SHARE);
+    }
+    AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
 
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGE("container is null, initialize the environment failed.");
+        return;
+    }
+    if (runArgs_.projectModel == ProjectModel::STAGE) {
+        if (runArgs_.formsEnabled) {
+            container->SetStageCardConfig(runArgs_.pageProfile, runArgs_.url);
+        } else {
+            container->SetPageProfile((runArgs_.pageProfile.empty() ? "" : runArgs_.pageProfile + ".json"));
+        }
+    }
     AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.systemResourcesPath,
         runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
 
@@ -208,7 +220,6 @@ void AceAbility::InitEnv()
     // Should make it possible to update surface changes by using viewWidth and viewHeight.
     view->NotifySurfaceChanged(runArgs_.deviceWidth, runArgs_.deviceHeight);
     view->NotifyDensityChanged(runArgs_.deviceConfig.density);
-
 }
 
 void AceAbility::Start()
@@ -466,8 +477,8 @@ std::string AceAbility::GetDefaultJSONTree()
 bool AceAbility::OperateComponent(const std::string& attrsJson)
 {
     // fastPreview not support databind
-    if (attrsJson.find("this.") != std::string::npos) {
-        LOGE("fastPreview is not support databind,the attrsJson contains 'this.'");
+    if (attrsJson.find("this.") != std::string::npos || attrsJson.find("$r") != std::string::npos) {
+        LOGE("fastPreview is not support databind,the attrsJson contains 'this.' or '$r'");
         return false;
     }
 

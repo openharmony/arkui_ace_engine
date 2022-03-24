@@ -123,6 +123,11 @@ public:
         isDebugMode_ = isDebugMode;
     }
 
+    void SetRootView(int32_t pageId, panda::Global<panda::ObjectRef> value)
+    {
+        rootViewMap_.emplace(pageId, value);
+    }
+
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global
@@ -130,9 +135,10 @@ private:
     void InitPerfUtilModule(); // add perfutil object to global
     void InitJsExportsUtilObject();
     void InitJsNativeModuleObject();
+    void InitJsContextModuleObject();
     void InitGroupJsBridge();
 
-    static thread_local std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
+    std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
     static std::map<std::string, std::string> mediaResourceFileMap_;
 
@@ -229,7 +235,11 @@ public:
 
     void RunGarbageCollection() override;
 
+    std::string GetStacktraceMessage() override;
+
     void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
+
+    void SetContext(int32_t instanceId, NativeReference* context) override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 

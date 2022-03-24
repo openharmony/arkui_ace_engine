@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/jsview/js_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/container_scope.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/base/multi_composed_component.h"
@@ -72,6 +73,7 @@ private:
     static void Constructor(const JSCallbackInfo& args)
     {
         auto listener = Referenced::MakeRefPtr<JSDataChangeListener>();
+        listener->instanceId_ = ContainerScope::CurrentId();
         listener->IncRefCount();
         args.SetReturnValue(Referenced::RawPtr(listener));
     }
@@ -125,6 +127,7 @@ private:
     template<class... Args>
     void NotifyAll(void (V2::DataChangeListener::*method)(Args...), Args... args)
     {
+        ContainerScope scope(instanceId_);
         for (auto it = listeners_.begin(); it != listeners_.end();) {
             auto listener = it->Upgrade();
             if (!listener) {
@@ -137,6 +140,7 @@ private:
     }
 
     std::set<WeakPtr<V2::DataChangeListener>> listeners_;
+    int32_t instanceId_ = -1;
 };
 
 namespace {

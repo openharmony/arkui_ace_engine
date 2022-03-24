@@ -369,6 +369,25 @@ void WebDelegate::LoadDataWithBaseUrl(const std::string& baseUrl, const std::str
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::LoadDataWithRichText(const std::string& data)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), data]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->webview_) {
+                delegate->webview_->LoadWithDataAndBaseUrl("", data, "", "", "");
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::Refresh()
 {
     auto context = context_.Upgrade();
@@ -635,10 +654,48 @@ void WebDelegate::InitWebEvent()
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
+void WebDelegate::ShowWebView()
+{
+    if (window_) {
+        window_->Show();
+    }
+
+    LOGI("OnContinue webview");
+    OnActive();
+}
+
+void WebDelegate::HideWebView()
+{
+    if (window_) {
+        window_->Hide();
+    }
+
+    LOGI("OnPause webview");
+    OnInactive();
+}
+
 void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surface> surface)
 {
     state_ = State::CREATING;
+    // obtain hap data path
+    auto container = Container::Current();
+    if (container == nullptr) {
+        LOGE("Fail to get container");
+        return;
+    }
+    const std::string& bundlePath = container->GetBundlePath();
+    const std::string& filesDataPath = container->GetFilesDataPath();
+    std::string baseDir = "base";
+    std::size_t baseIndex = filesDataPath.find(baseDir);
+    if (baseIndex == std::string::npos) {
+        LOGE("Fail to parse hap data base path");
+        return;
+    }
+    std::string dataPath = filesDataPath.substr(0, baseIndex + baseDir.length());
+    bundlePath_ = bundlePath;
+    bundleDataPath_ = dataPath;
     // load webview so
+    OHOS::NWeb::NWebHelper::Instance().SetBundlePath(bundlePath_);
     if (!OHOS::NWeb::NWebHelper::Instance().Init()) {
         LOGE("Fail to init NWebHelper");
         return;
@@ -973,10 +1030,10 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
                 return;
             }
             OHOS::NWeb::NWebInitArgs initArgs;
-            const std::string& app_path = GetDataPath();
-            if (!app_path.empty()) {
-                initArgs.web_engine_args_to_add.push_back(std::string("--user-data-dir=").append(app_path));
-            }
+            initArgs.web_engine_args_to_add.push_back(
+                std::string("--user-data-dir=").append(delegate->bundleDataPath_));
+            initArgs.web_engine_args_to_add.push_back(
+                std::string("--bundle-installation-dir=").append(delegate->bundlePath_));
             sptr<Surface> surface = surfaceWeak.promote();
             if (surface == nullptr) {
                 LOGE("surface is nullptr or has expired");
@@ -993,7 +1050,7 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
                 return;
             }
             if (!component->GetData().empty()) {
-                delegate->LoadDataWithBaseUrl("", component->GetData(), "", "", "");
+                delegate->LoadDataWithRichText(component->GetData());
             }
             auto nweb_handler = std::make_shared<WebClientImpl>(Container::CurrentId());
             nweb_handler->SetWebDelegate(weak);

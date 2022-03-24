@@ -75,6 +75,7 @@ private:
     int32_t instanceId_ = -1;
     bool updateConfig_ = false;
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener_ = nullptr;
+    OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener_ = nullptr;
 };
 
 } // namespace OHOS::Ace

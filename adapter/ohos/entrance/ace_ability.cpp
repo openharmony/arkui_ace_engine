@@ -36,6 +36,7 @@
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/utils.h"
+#include "base/geometry/rect.h"
 #include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
@@ -124,9 +125,12 @@ using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
 using AcePlatformFinish = std::function<void()>;
+using AcePlatformStartAbility = std::function<void(const std::string& address)>;
 class AcePlatformEventCallback final : public Platform::PlatformEventCallback {
 public:
     explicit AcePlatformEventCallback(AcePlatformFinish onFinish) : onFinish_(onFinish) {}
+    AcePlatformEventCallback(AcePlatformFinish onFinish, AcePlatformStartAbility onStartAbility)
+        : onFinish_(onFinish), onStartAbility_(onStartAbility) {}
 
     ~AcePlatformEventCallback() = default;
 
@@ -138,6 +142,14 @@ public:
         }
     }
 
+    virtual void OnStartAbility(const std::string& address)
+    {
+        LOGI("AcePlatformEventCallback OnStartAbility");
+        if (onStartAbility_) {
+            onStartAbility_(address);
+        }
+    }
+
     virtual void OnStatusBarBgColorChanged(uint32_t color)
     {
         LOGI("AcePlatformEventCallback OnStatusBarBgColorChanged");
@@ -145,6 +157,7 @@ public:
 
 private:
     AcePlatformFinish onFinish_;
+    AcePlatformStartAbility onStartAbility_;
 };
 
 int32_t AceAbility::instanceId_ = 0;
@@ -178,6 +191,10 @@ void AceAbility::OnStart(const Want& want)
     // register drag event callback
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener(this);
     window->RegisterDragListener(dragWindowListener);
+
+    // register drag event callback
+    OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener(this);
+    window->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener);
 
     int32_t width = window->GetRect().width_;
     int32_t height = window->GetRect().height_;
@@ -254,7 +271,13 @@ void AceAbility::OnStart(const Want& want)
 
     // create container
     Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, srcPath, shared_from_this(),
-        std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); }));
+        std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); },
+            [this](const std::string& address) {
+                AAFwk::Want want;
+                want.AddEntity(Want::ENTITY_BROWSER);
+                want.SetParam("address", address);
+                this->StartAbility(want);
+            }));
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
         LOGE("container is null, set configuration failed.");
@@ -265,6 +288,8 @@ void AceAbility::OnStart(const Want& want)
         aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
         container->SetResourceConfiguration(aceResCfg);
         container->SetPackagePathStr(resPath);
+        container->SetBundlePath(abilityContext->GetBundleCodeDir());
+        container->SetFilesDataPath(abilityContext->GetFilesDir());
     }
     container->SetWindowName(window->GetWindowName());
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), abilityId_);
@@ -308,7 +333,6 @@ void AceAbility::OnStart(const Want& want)
             if (rsUiDirector != nullptr) {
                 rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
 
-                // todo regist on size change()
                 window->RegisterWindowChangeListener(thisAbility);
 
                 rsUiDirector->SetUITaskRunner(
@@ -351,7 +375,6 @@ void AceAbility::OnStart(const Want& want)
 
         AAFwk::Want want;
         want.SetElementName(bundle, ability);
-        // want.SetParam(Constants::PARAM_FORM_IDENTITY_KEY, std::to_string(formJsInfo_.formId));
         this->StartAbility(want);
     };
 
@@ -615,7 +638,8 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeCha
         LOGE("OnSizeChange: taskExecutor is null.");
         return;
     }
-    taskExecutor->PostTask([rect, abilityId = abilityId_, density = density_, reason]() {
+    taskExecutor->PostTask(
+        [rect, abilityId = abilityId_, density = density_, reason]() {
         uint32_t width = rect.width_;
         uint32_t height = rect.height_;
         LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d",
@@ -628,20 +652,19 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeCha
             return;
         }
         auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
-
         if (!flutterAceView) {
             LOGE("flutterAceView is null");
             return;
         }
-
         flutter::ViewportMetrics metrics;
         metrics.physical_width = width;
         metrics.physical_height = height;
         metrics.device_pixel_ratio = density;
         Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-        Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0,
-            Convert2WindowSizeChangeReason(reason));
-    }, TaskExecutor::TaskType::PLATFORM);
+        Platform::FlutterAceView::SurfaceChanged(
+            flutterAceView, width, height, 0, static_cast<WindowSizeChangeReason>(reason));
+    },
+    TaskExecutor::TaskType::PLATFORM);
 }
 
 void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)
@@ -649,15 +672,32 @@ void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)
     LOGI("AceAbility::OnModeChange");
 }
 
-WindowSizeChangeReason AceAbility::Convert2WindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason reason)
+void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
 {
-    auto reasonValue = static_cast<uint32_t>(reason);
-    constexpr uint32_t MAX_REASON_VALUE = 5;
-    if (reasonValue > MAX_REASON_VALUE) {
-        LOGE("AceAbility: unsupported WindowSizeChangeReason");
-        return WindowSizeChangeReason::UNDEFINED;
+    auto rect = info->rect_;
+    auto type = info->type_;
+    Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    LOGI("AceAbility::OccupiedAreaChange rect:%{public}s type: %{public}d", keyboardRect.ToString().c_str(), type);
+    if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
+        auto container = Platform::AceContainer::GetContainer(abilityId_);
+        if (!container) {
+            LOGE("container may be destroyed.");
+            return;
+        }
+        auto taskExecutor = container->GetTaskExecutor();
+        if (!taskExecutor) {
+            LOGE("OnSizeChange: taskExecutor is null.");
+            return;
+        }
+
+        ContainerScope scope(abilityId_);
+        taskExecutor->PostTask([container, keyboardRect] {
+            auto context = container->GetPipelineContext();
+            if (context != nullptr) {
+                context->OnVirtualKeyboardAreaChange(keyboardRect);
+            }
+        }, TaskExecutor::TaskType::UI);
     }
-    return static_cast<WindowSizeChangeReason>(reasonValue);
 }
 
 void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
@@ -667,10 +707,18 @@ void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::s
         LOGE("container may be destroyed.");
         return;
     }
-    auto context = container->GetPipelineContext();
-    if (context != nullptr) {
-        context->DumpInfo(params, info);
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("OnSizeChange: taskExecutor is null.");
+        return;
     }
+    ContainerScope scope(abilityId_);
+    taskExecutor->PostSyncTask([container, params, &info] {
+        auto context = container->GetPipelineContext();
+        if (context != nullptr) {
+            context->DumpInfo(params, info);
+        }
+    }, TaskExecutor::TaskType::UI);
 }
 
 void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)

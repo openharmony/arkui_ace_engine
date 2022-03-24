@@ -239,6 +239,8 @@ public:
 
     void OnActionEvent(const std::string& action);
 
+    void OnVirtualKeyboardAreaChange(Rect keyboardArea);
+
     // Set card position for barrierfree
     void SetCardViewPosition(int id, float offsetX, float offsetY);
 
@@ -321,6 +323,13 @@ public:
     {
         finishEventHandler_ = std::move(listener);
     }
+
+    using StartAbilityHandler = std::function<void(const std::string& address)>;
+    void SetStartAbilityHandler(StartAbilityHandler&& listener)
+    {
+        startAbilityHandler_ = std::move(listener);
+    }
+    void HyperlinkStartAbility(const std::string& address) const;
 
     using ActionEventHandler = std::function<void(const std::string& action)>;
     void SetActionEventHandler(ActionEventHandler&& listener)
@@ -461,6 +470,8 @@ public:
     void RefreshStageFocus();
 
     void ShowContainerTitle(bool isShow);
+
+    void BlurWindowWithDrag(bool isBlur);
 
     RefPtr<StageElement> GetStageElement() const;
 
@@ -1213,6 +1224,12 @@ public:
     {
         return isSubPipeline_;
     }
+
+    bool GetIsDragStart() const
+    {
+        return isDragStart_;
+    }
+
 private:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     void FlushPipelineWithoutAnimation();
@@ -1228,8 +1245,8 @@ private:
     void FlushPageUpdateTasks();
     void ProcessPreFlush();
     void ProcessPostFlush();
-    void SetRootSizeWithWidthHeight(int32_t width, int32_t height);
-    void SetRootRect(double width, double height) const;
+    void SetRootSizeWithWidthHeight(int32_t width, int32_t height, int32_t offset = 0);
+    void SetRootRect(double width, double height, double offset = 0.0) const;
     void FlushBuildAndLayoutBeforeSurfaceReady();
     void FlushAnimationTasks();
     void DumpAccessibility(const std::vector<std::string>& params) const;
@@ -1323,6 +1340,7 @@ private:
     EventManager eventManager_;
     EventTrigger eventTrigger_;
     FinishEventHandler finishEventHandler_;
+    StartAbilityHandler startAbilityHandler_;
     ActionEventHandler actionEventHandler_;
     StatusBarEventHandler statusBarBgColorEventHandler_;
     PopupEventHandler popupEventHandler_;
@@ -1379,6 +1397,8 @@ private:
     bool isJsPlugin_ = false;
     bool useLiteStyle_ = false;
     bool isFirstLoaded_ = true;
+    bool isDragStart_ = false;
+    bool isFirstDrag_ = true;
     uint64_t flushAnimationTimestamp_ = 0;
     TimeProvider timeProvider_;
     OnPageShowCallBack onPageShowCallBack_;
@@ -1455,6 +1475,7 @@ private:
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
 
     bool isSubPipeline_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
 

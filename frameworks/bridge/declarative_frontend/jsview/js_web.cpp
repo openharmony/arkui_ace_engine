@@ -165,7 +165,9 @@ public:
         if (args[2]->IsBoolean()) {
             retain = args[2]->ToBoolean();
         }
-        webGeolocation_->Invoke(origin, allow, retain);
+        if (webGeolocation_) {
+            webGeolocation_->Invoke(origin, allow, retain);
+        }
     }
 
 private:
@@ -544,7 +546,7 @@ JSRef<JSVal> LoadWebOnFocusEventToJSValue(const LoadWebOnFocusEvent& eventInfo)
 void JSWeb::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("web create error, info is non-valid");
+        LOGI("web create error, info is invalid");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -570,7 +572,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
     auto controllerObj = paramObject->GetProperty("controller");
     if (!controllerObj->IsObject()) {
-        LOGI("web create error, controller is non-valid");
+        LOGI("web create error, controller is invalid");
         return;
     }
     auto controller = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSWebController>();
@@ -674,6 +676,10 @@ void JSWeb::OnPageFinish(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!webComponent) {
+        LOGE("webComponent is null");
+        return;
+    }
     webComponent->SetPageFinishedEventId(eventMarker);
 }
 
@@ -984,7 +990,7 @@ void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)
 
 void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
 {
-    LOGI("JSWebController add js interface");
+    LOGI("JSWeb add js interface");
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
     }

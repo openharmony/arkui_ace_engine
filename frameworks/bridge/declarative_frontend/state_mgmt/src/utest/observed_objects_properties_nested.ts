@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,7 +63,7 @@ const nestedObsObjProps = tsuite("Nested Observed Object and Properties", () => 
 
   tcase("Two views having a property referring to a1: ClassA", () => {
 
-    // View of property class B, has a propery v1b1
+    // View of property class B, has a property v1b1
     let v1p1b1 = new SubscribingView("v1p1b1");
     let p1b1: ObservedPropertyObjectAbstract<ClassB> = new ObservedPropertyObject<ClassB>(new ClassB(new ClassA(47)), v1p1b1, "p1-b1");
     let v1p1b1Spy = spyOn(v1p1b1, "propertyHasChanged");

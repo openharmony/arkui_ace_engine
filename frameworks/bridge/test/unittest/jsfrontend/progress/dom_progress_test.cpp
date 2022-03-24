@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,8 +49,6 @@ void DomProgressTest::TearDown() {}
  * @tc.name: DomProgressCreatorTest001
  * @tc.desc: Test create progress node successfully and progress component create as desire.
  * @tc.type: FUNC
- * @tc.require: AR000DD66A AR000DQ1OQ
- * @tc.author: wangchun
  */
 HWTEST_F(DomProgressTest, DomProgressCreatorTest001, TestSize.Level1)
 {
@@ -102,8 +100,6 @@ HWTEST_F(DomProgressTest, DomProgressCreatorTest001, TestSize.Level1)
  * @tc.name: DomProgressCreatorTest002
  * @tc.desc: Set percent,secondaryPercent = 100 when percent > 100 secondaryPercent > 100.
  * @tc.type: FUNC
- * @tc.require: AR000DD66A AR000DQ1OQ
- * @tc.author: wangchun
  */
 HWTEST_F(DomProgressTest, DomProgressCreatorTest002, TestSize.Level1)
 {
@@ -149,8 +145,6 @@ HWTEST_F(DomProgressTest, DomProgressCreatorTest002, TestSize.Level1)
  * @tc.name: DomProgressCreatorTest003
  * @tc.desc: Test create progress node successfully and stroke-width create as desire.
  * @tc.type: FUNC
- * @tc.require: AR000DD66A
- * @tc.author: wangchun
  */
 HWTEST_F(DomProgressTest, DomProgressCreatorTest003, TestSize.Level1)
 {
@@ -195,8 +189,6 @@ HWTEST_F(DomProgressTest, DomProgressCreatorTest003, TestSize.Level1)
  * @tc.name: DomProgressCreatorTest004
  * @tc.desc: Set percent, secondaryPercent = 0 when percent < 0, secondaryPercent < 0.
  * @tc.type: FUNC
- * @tc.require: AR000DD66A AR000DQ1OQ
- * @tc.author: wangchun
  */
 HWTEST_F(DomProgressTest, DomProgressCreatorTest004, TestSize.Level1)
 {
@@ -242,8 +234,6 @@ HWTEST_F(DomProgressTest, DomProgressCreatorTest004, TestSize.Level1)
  * @tc.name: DomProgressCreatorTest005
  * @tc.desc: Set style color and effect to the ring and comet.
  * @tc.type: FUNC
- * @tc.require: AR000F3CAF
- * @tc.author: zhongjianfei
  */
 HWTEST_F(DomProgressTest, DomProgressCreatorTest005, TestSize.Level1)
 {
@@ -281,8 +271,6 @@ HWTEST_F(DomProgressTest, DomProgressCreatorTest005, TestSize.Level1)
  * @tc.name: DomProgressCreatorTest006
  * @tc.desc: Set style color & cometColor and only effect color.
  * @tc.type: FUNC
- * @tc.require: AR000F3CAG
- * @tc.author: zhongjianfei
  */
 HWTEST_F(DomProgressTest, DomProgressCreatorTest006, TestSize.Level1)
 {
@@ -320,8 +308,6 @@ HWTEST_F(DomProgressTest, DomProgressCreatorTest006, TestSize.Level1)
  * @tc.name: DomProgressCreatorTest007
  * @tc.desc: Set style ringColor & cometColor and only effect to ring and comet.
  * @tc.type: FUNC
- * @tc.require: AR000F3CAH
- * @tc.author: zhongjianfei
  */
 HWTEST_F(DomProgressTest, DomProgressCreatorTest007, TestSize.Level1)
 {
@@ -359,8 +345,6 @@ HWTEST_F(DomProgressTest, DomProgressCreatorTest007, TestSize.Level1)
  * @tc.name: DomProgressCreatorTest008
  * @tc.desc: Set none color style and effect the default color.
  * @tc.type: FUNC
- * @tc.require: AR000F3CAI
- * @tc.author: zhongjianfei
  */
 HWTEST_F(DomProgressTest, DomProgressCreatorTest008, TestSize.Level1)
 {

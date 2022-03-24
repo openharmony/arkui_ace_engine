@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,8 +71,6 @@ RefPtr<Decoration> DecorationCreatorTest::CreateFromDsl(const std::string conten
  * @tc.name: DecorationCreator001
  * @tc.desc: Verify DecorationCreator can create a decoration with shadows.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU7
- * @tc.author: chenlien
  */
 HWTEST_F(DecorationCreatorTest, DecorationCreator001, TestSize.Level1)
 {
@@ -108,8 +106,6 @@ HWTEST_F(DecorationCreatorTest, DecorationCreator001, TestSize.Level1)
  * @tc.name: DecorationCreator002
  * @tc.desc: Verify DecorationCreator can create a decoration with only empty shadowList.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU7
- * @tc.author: chenlien
  */
 HWTEST_F(DecorationCreatorTest, DecorationCreator002, TestSize.Level1)
 {
@@ -135,8 +131,6 @@ HWTEST_F(DecorationCreatorTest, DecorationCreator002, TestSize.Level1)
  * @tc.name: DecorationCreator003
  * @tc.desc: Verify DecorationCreator can create a decoration with only color property.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU8
- * @tc.author: chenlien
  */
 HWTEST_F(DecorationCreatorTest, DecorationCreator003, TestSize.Level1)
 {
@@ -165,8 +159,6 @@ HWTEST_F(DecorationCreatorTest, DecorationCreator003, TestSize.Level1)
  * @tc.name: DecorationCreator004
  * @tc.desc: Verify DecorationCreator can create a decoration with only gradient property.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU9
- * @tc.author: chenlien
  */
 HWTEST_F(DecorationCreatorTest, DecorationCreator004, TestSize.Level1)
 {
@@ -196,8 +188,6 @@ HWTEST_F(DecorationCreatorTest, DecorationCreator004, TestSize.Level1)
  * @tc.name: DecorationCreator005
  * @tc.desc: Verify DecorationCreator can create a decoration with only image property.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUA
- * @tc.author: chenlien
  */
 HWTEST_F(DecorationCreatorTest, DecorationCreator005, TestSize.Level1)
 {
@@ -227,8 +217,6 @@ HWTEST_F(DecorationCreatorTest, DecorationCreator005, TestSize.Level1)
  * @tc.name: DecorationCreator006
  * @tc.desc: Verify DecorationCreator can create a decoration with only border property.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUB
- * @tc.author: chenlien
  */
 HWTEST_F(DecorationCreatorTest, DecorationCreator006, TestSize.Level1)
 {
@@ -265,8 +253,6 @@ HWTEST_F(DecorationCreatorTest, DecorationCreator006, TestSize.Level1)
  * @tc.name: DecorationCreator007
  * @tc.desc: Verify DecorationCreator can create a decoration with only className.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUB
- * @tc.author: chenlien
  */
 HWTEST_F(DecorationCreatorTest, DecorationCreator007, TestSize.Level1)
 {
@@ -292,8 +278,6 @@ HWTEST_F(DecorationCreatorTest, DecorationCreator007, TestSize.Level1)
  * @tc.name: DecorationCreator008
  * @tc.desc: Verify DecorationCreator can create a decoration with only border property.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUB
- * @tc.author: chenlien
  */
 HWTEST_F(DecorationCreatorTest, DecorationCreator008, TestSize.Level1)
 {
@@ -320,8 +304,6 @@ HWTEST_F(DecorationCreatorTest, DecorationCreator008, TestSize.Level1)
  * @tc.name: DecorationCreator009
  * @tc.desc: Verify DecorationCreator can create a decoration with only color property.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU8
- * @tc.author: chenlien
  */
 HWTEST_F(DecorationCreatorTest, DecorationCreator009, TestSize.Level1)
 {

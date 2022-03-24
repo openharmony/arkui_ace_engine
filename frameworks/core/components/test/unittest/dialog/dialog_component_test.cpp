@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,8 +128,6 @@ std::list<RefPtr<ButtonComponent>> DialogComponentTest::BuildActions(int32_t act
  * @tc.name: DialogComponentBuild001
  * @tc.desc: Verify the Build Interface of DialogComponent work correctly with title.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E
- * @tc.author: caocan
  */
 HWTEST_F(DialogComponentTest, DialogComponentBuild001, TestSize.Level1)
 {
@@ -172,8 +170,6 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild001, TestSize.Level1)
  * @tc.name: DialogComponentBuild002
  * @tc.desc: Verify the Build Interface of DialogComponent work correctly with content.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E
- * @tc.author: caocan
  */
 HWTEST_F(DialogComponentTest, DialogComponentBuild002, TestSize.Level1)
 {
@@ -205,8 +201,6 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild002, TestSize.Level1)
  * @tc.name: DialogComponentBuild003
  * @tc.desc: Verify the Build Interface of DialogComponent work correctly with actions.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E
- * @tc.author: caocan
  */
 HWTEST_F(DialogComponentTest, DialogComponentBuild003, TestSize.Level1)
 {
@@ -236,8 +230,6 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild003, TestSize.Level1)
  * @tc.name: DialogComponentBuild004
  * @tc.desc: Verify the Build Interface of DialogComponent work correctly with title and content.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E
- * @tc.author: caocan
  */
 HWTEST_F(DialogComponentTest, DialogComponentBuild004, TestSize.Level1)
 {
@@ -291,8 +283,6 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild004, TestSize.Level1)
  * @tc.name: DialogComponentBuild005
  * @tc.desc: Verify the Build Interface of DialogComponent work correctly with title and actions.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E
- * @tc.author: caocan
  */
 HWTEST_F(DialogComponentTest, DialogComponentBuild005, TestSize.Level1)
 {
@@ -344,8 +334,6 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild005, TestSize.Level1)
  * @tc.name: DialogComponentBuild006
  * @tc.desc: Verify the Build Interface of DialogComponent work correctly with content and actions.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E
- * @tc.author: caocan
  */
 HWTEST_F(DialogComponentTest, DialogComponentBuild006, TestSize.Level1)
 {
@@ -386,8 +374,6 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild006, TestSize.Level1)
  * @tc.name: DialogComponentBuild007
  * @tc.desc: Verify the Build Interface of DialogComponent work correctly with title, content and actions.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E
- * @tc.author: caocan
  */
 HWTEST_F(DialogComponentTest, DialogComponentBuild007, TestSize.Level1)
 {
@@ -459,8 +445,6 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild007, TestSize.Level1)
  * @tc.desc: Verify the Build Interface of DialogComponent work correctly with
  *           title, titlePadding, content, contentPadding and actions.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E AR000DAR2F
- * @tc.author: caocan
  */
 HWTEST_F(DialogComponentTest, DialogComponentBuild008, TestSize.Level1)
 {
@@ -533,8 +517,6 @@ HWTEST_F(DialogComponentTest, DialogComponentBuild008, TestSize.Level1)
  * @tc.name: DialogComponentBuild009
  * @tc.desc: Verify the Build Interface of DialogComponent work correctly with content and actions.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E AR000DAR2F
- * @tc.author: caocan
  */
 HWTEST_F(DialogComponentTest, DialogComponentBuild009, TestSize.Level1)
 {

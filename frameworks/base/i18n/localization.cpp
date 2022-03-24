@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -413,7 +413,7 @@ bool Localization::GetHourFormat(bool& isAmPm, bool& hasZero)
         return true;
     }
 
-    LOGE("hour format is unknow[%{public}s]", result.c_str());
+    LOGE("hour format is unknown[%{public}s]", result.c_str());
     return false;
 }
 

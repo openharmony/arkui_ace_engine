@@ -32,6 +32,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_value.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_group_js_bridge.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_context_module.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_syscap_module.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_timer_module.h"
@@ -121,7 +122,7 @@ std::string GetLogContent(
 shared_ptr<JsValue> AppLogPrint(
     const shared_ptr<JsRuntime>& runtime, JsLogLevel level, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    // Should have at least 1 parameters.
+    // Should have at least 1 parameter.
     if (argc == 0) {
         LOGE("the arg is error");
         return runtime->NewUndefined();
@@ -401,6 +402,9 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
             InitJsNativeModuleObject();
             InitPerfUtilModule();
         }
+        if (!isModuleInitialized_) {
+            InitJsContextModuleObject();
+        }
         InitGroupJsBridge();
     }
 
@@ -663,6 +667,11 @@ void JsiDeclarativeEngineInstance::InitJsNativeModuleObject()
     }
 }
 
+void JsiDeclarativeEngineInstance::InitJsContextModuleObject()
+{
+    JsiContextModule::GetInstance()->InitContextModule(runtime_, runtime_->GetGlobal());
+}
+
 void JsiDeclarativeEngineInstance::InitGlobalObjectTemplate()
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
@@ -678,8 +687,6 @@ void JsiDeclarativeEngineInstance::InitGroupJsBridge()
     }
 }
 
-thread_local std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> JsiDeclarativeEngineInstance::rootViewMap_;
-
 void JsiDeclarativeEngineInstance::RootViewHandle(panda::Local<panda::ObjectRef> value)
 {
     LOGD("RootViewHandle");
@@ -690,7 +697,18 @@ void JsiDeclarativeEngineInstance::RootViewHandle(panda::Local<panda::ObjectRef>
             LOGE("ark engine is null");
             return;
         }
-        rootViewMap_.emplace(page->GetPageId(), panda::Global<panda::ObjectRef>(arkRuntime->GetEcmaVm(), value));
+        auto engine = EngineHelper::GetCurrentEngine();
+        auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
+        if (!jsiEngine) {
+            LOGE("jsiEngine is null");
+            return;
+        }
+        auto engineInstance = jsiEngine->GetEngineInstance();
+        if (engineInstance == nullptr) {
+            LOGE("engineInstance is nullptr");
+            return;
+        }
+        engineInstance->SetRootView(page->GetPageId(), panda::Global<panda::ObjectRef>(arkRuntime->GetEcmaVm(), value));
     }
 }
 
@@ -769,7 +787,6 @@ RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetRunningPage(int32_t instanceI
         return nullptr;
     }
     auto engineInstance = jsiEngine->GetEngineInstance();
-    LOGD("GetRunningPage id:%{public}d instance:%{public}p", instanceId, RawPtr(engineInstance));
     if (engineInstance == nullptr) {
         LOGE("engineInstance is nullptr");
         return nullptr;
@@ -881,6 +898,7 @@ void JsiDeclarativeEngine::Destroy()
 
 #ifdef USE_ARK_ENGINE
     JSLocalStorage::RemoveStorage(instanceId_);
+    JsiContextModule::RemoveContext(instanceId_);
 #endif
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
@@ -1388,6 +1406,26 @@ void JsiDeclarativeEngine::RunGarbageCollection()
     }
 }
 
+std::string JsiDeclarativeEngine::GetStacktraceMessage()
+{
+    auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
+    if (!arkNativeEngine) {
+        LOGE("GetStacktraceMessage arkNativeEngine is nullptr");
+        return "";
+    }
+    std::string stack;
+    arkNativeEngine->SuspendVM();
+    bool getStackSuccess = arkNativeEngine->BuildNativeAndJsBackStackTrace(stack);
+    arkNativeEngine->ResumeVM();
+    if (!getStackSuccess) {
+        LOGE("GetStacktraceMessage arkNativeEngine get stack failed");
+        return "";
+    }
+
+    auto runningPage = engineInstance_ ? engineInstance_->GetRunningPage() : nullptr;
+    return JsiBaseUtils::TransSourceStack(runningPage, stack);
+}
+
 void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* nativeValue)
 {
     LOGI("SetLocalStorage instanceId:%{public}d", instanceId);
@@ -1398,6 +1436,27 @@ void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* 
         JSLocalStorage::AddStorage(instanceId, storage);
     } else {
         LOGI("SetLocalStorage instanceId:%{public}d invalid storage", instanceId);
+    }
+#endif
+}
+
+void JsiDeclarativeEngine::SetContext(int32_t instanceId, NativeReference* nativeValue)
+{
+    LOGI("SetContext instanceId:%{public}d", instanceId);
+#ifdef USE_ARK_ENGINE
+    NativeValue* value = *nativeValue;
+    Global<JSValueRef> globalRef = *value;
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (!arkRuntime || !arkRuntime->GetEcmaVm()) {
+        LOGE("SetContext null ark runtime");
+        return;
+    }
+    auto localRef = globalRef.ToLocal(arkRuntime->GetEcmaVm());
+    std::shared_ptr<JsValue> jsValue = std::make_shared<ArkJSValue>(arkRuntime, localRef);
+    if (jsValue->IsObject(arkRuntime)) {
+        JsiContextModule::AddContext(instanceId_, jsValue);
+    } else {
+        LOGI("SetContext instanceId:%{public}d invalid context", instanceId);
     }
 #endif
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -359,7 +359,6 @@ void FrontendDelegateImpl::OnInactive()
 {
     LOGD("JsFrontend OnInactive");
     FireAsyncEvent("_root", std::string("\"viewinactive\",null,null"), std::string(""));
-    // TODO: Deprecated
     FireAsyncEvent("_root", std::string("\"viewsuspended\",null,null"), std::string(""));
 }
 
@@ -565,7 +564,7 @@ void FrontendDelegateImpl::Push(const std::string& uri, const std::string& param
         LoadPage(GenerateNextPageId(), pagePath, false, params);
     } else {
         isPagePathInvalid_ = false;
-        LOGW("this uri not support in route push.");
+        LOGW("[Engine Log] this uri not support in route push.");
     }
 
     if (taskExecutor_) {
@@ -596,7 +595,7 @@ void FrontendDelegateImpl::Replace(const std::string& uri, const std::string& pa
     if (!pagePath.empty()) {
         LoadReplacePage(GenerateNextPageId(), pagePath, params);
     } else {
-        LOGW("this uri not support in route replace.");
+        LOGW("[Engine Log] this uri not support in route replace.");
     }
 }
 
@@ -635,7 +634,7 @@ void FrontendDelegateImpl::BackImplement(const std::string& uri)
         if (!pagePath.empty()) {
             PopToPage(pagePath);
         } else {
-            LOGW("this uri not support in route Back.");
+            LOGW("[Engine Log] this uri not support in route Back.");
         }
     }
 

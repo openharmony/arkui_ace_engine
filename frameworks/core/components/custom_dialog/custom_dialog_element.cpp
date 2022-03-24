@@ -87,11 +87,11 @@ void CustomDialogElement::ShowDialog()
     // use accessibility node already created with dom node in JS app
     baseDialog->SetCustomDialogId(StringUtils::StringToInt(GetId()));
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    auto mananger = context->GetAccessibilityManager();
-    if (mananger) {
-        auto node = mananger->GetAccessibilityNodeById(StringUtils::StringToInt(GetId()));
+    auto manager = context->GetAccessibilityManager();
+    if (manager) {
+        auto node = manager->GetAccessibilityNodeById(StringUtils::StringToInt(GetId()));
         node->SetZIndexToChild(stackElement->GetChildrenSize());
-        mananger->ClearNodeRectInfo(node, isPopDialog_);
+        manager->ClearNodeRectInfo(node, isPopDialog_);
     }
 #endif
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,8 +53,6 @@ void DialogCreatorTest::TearDown() {}
  * @tc.name: DialogCreator001
  * @tc.desc: Verify DialogCreator can create dialog component with content.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E
- * @tc.author: caocan
  */
 HWTEST_F(DialogCreatorTest, DialogCreator001, TestSize.Level1)
 {
@@ -95,8 +93,6 @@ HWTEST_F(DialogCreatorTest, DialogCreator001, TestSize.Level1)
  * @tc.name: DialogCreator002
  * @tc.desc: Verify DialogCreator can create dialog component with wrong content type.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E
- * @tc.author: caocan
  */
 HWTEST_F(DialogCreatorTest, DialogCreator002, TestSize.Level1)
 {
@@ -129,8 +125,6 @@ HWTEST_F(DialogCreatorTest, DialogCreator002, TestSize.Level1)
  * @tc.name: DialogCreator003
  * @tc.desc: Verify DialogCreator can create dialog component with title.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E
- * @tc.author: caocan
  */
 HWTEST_F(DialogCreatorTest, DialogCreator003, TestSize.Level1)
 {
@@ -165,8 +159,6 @@ HWTEST_F(DialogCreatorTest, DialogCreator003, TestSize.Level1)
  * @tc.name: DialogCreator004
  * @tc.desc: Verify DialogCreator can create dialog component with wrong title type.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E
- * @tc.author: caocan
  */
 HWTEST_F(DialogCreatorTest, DialogCreator004, TestSize.Level1)
 {
@@ -199,8 +191,6 @@ HWTEST_F(DialogCreatorTest, DialogCreator004, TestSize.Level1)
  * @tc.name: DialogCreator005
  * @tc.desc: Verify DialogCreator can create dialog component with contentPadding.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2F
- * @tc.author: caocan
  */
 HWTEST_F(DialogCreatorTest, DialogCreator005, TestSize.Level1)
 {
@@ -233,8 +223,6 @@ HWTEST_F(DialogCreatorTest, DialogCreator005, TestSize.Level1)
  * @tc.name: DialogCreator006
  * @tc.desc: Verify DialogCreator can create dialog component with wrong title type.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2F
- * @tc.author: caocan
  */
 HWTEST_F(DialogCreatorTest, DialogCreator006, TestSize.Level1)
 {
@@ -267,8 +255,6 @@ HWTEST_F(DialogCreatorTest, DialogCreator006, TestSize.Level1)
  * @tc.name: DialogCreator007
  * @tc.desc: Verify DialogCreator can create dialog component with titlePadding.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2F
- * @tc.author: caocan
  */
 HWTEST_F(DialogCreatorTest, DialogCreator007, TestSize.Level1)
 {
@@ -301,8 +287,6 @@ HWTEST_F(DialogCreatorTest, DialogCreator007, TestSize.Level1)
  * @tc.name: DialogCreator008
  * @tc.desc: Verify DialogCreator can create dialog component with wrong titlePadding type.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2F
- * @tc.author: caocan
  */
 HWTEST_F(DialogCreatorTest, DialogCreator008, TestSize.Level1)
 {
@@ -335,8 +319,6 @@ HWTEST_F(DialogCreatorTest, DialogCreator008, TestSize.Level1)
  * @tc.name: DialogCreator009
  * @tc.desc: Verify DialogCreator can create dialog component with autoCancel.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E
- * @tc.author: caocan
  */
 HWTEST_F(DialogCreatorTest, DialogCreator009, TestSize.Level1)
 {
@@ -366,8 +348,6 @@ HWTEST_F(DialogCreatorTest, DialogCreator009, TestSize.Level1)
  * @tc.name: DialogCreator010
  * @tc.desc: Verify DialogCreator can create dialog component with wrong autoCancel type.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E
- * @tc.author: caocan
  */
 HWTEST_F(DialogCreatorTest, DialogCreator010, TestSize.Level1)
 {
@@ -397,8 +377,6 @@ HWTEST_F(DialogCreatorTest, DialogCreator010, TestSize.Level1)
  * @tc.name: DialogCreator011
  * @tc.desc: Verify DialogCreator can create dialog component with backgroundColor.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2F
- * @tc.author: caocan
  */
 HWTEST_F(DialogCreatorTest, DialogCreator011, TestSize.Level1)
 {
@@ -432,8 +410,6 @@ HWTEST_F(DialogCreatorTest, DialogCreator011, TestSize.Level1)
  * @tc.name: DialogCreator012
  * @tc.desc: Verify DialogCreator can create dialog component with wrong backgroundColor type.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2F
- * @tc.author: caocan
  */
 HWTEST_F(DialogCreatorTest, DialogCreator012, TestSize.Level1)
 {
@@ -466,8 +442,6 @@ HWTEST_F(DialogCreatorTest, DialogCreator012, TestSize.Level1)
  * @tc.name: DialogCreator013
  * @tc.desc: Verify DialogCreator can create dialog component with actions.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E
- * @tc.author: caocan
  */
 HWTEST_F(DialogCreatorTest, DialogCreator013, TestSize.Level1)
 {
@@ -511,8 +485,6 @@ HWTEST_F(DialogCreatorTest, DialogCreator013, TestSize.Level1)
  * @tc.name: DialogCreator014
  * @tc.desc: Verify DialogCreator can create dialog component with wrong action type.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2E
- * @tc.author: caocan
  */
 HWTEST_F(DialogCreatorTest, DialogCreator014, TestSize.Level1)
 {

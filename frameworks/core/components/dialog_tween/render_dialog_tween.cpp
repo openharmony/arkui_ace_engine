@@ -90,8 +90,9 @@ RenderDialogTween::RenderDialogTween()
 
 RenderDialogTween::~RenderDialogTween()
 {
-    if (onStatusChanged_) {
+    if (!popDialog_ && onStatusChanged_) {
         onStatusChanged_(false);
+        popDialog_ = true;
     }
     auto dialogTweenComponent = weakDialogTweenComponent_.Upgrade();
     if (dialogTweenComponent) {
@@ -213,12 +214,18 @@ void RenderDialogTween::HandleDragUpdate(const Offset& currentPoint)
 
 void RenderDialogTween::CallOnSuccess(int32_t successType)
 {
+    if (onStatusChanged_) {
+        onStatusChanged_(false);
+        popDialog_ = true;
+    }
     const auto context = context_.Upgrade();
     if (!context) {
+        LOGE("the context is null");
         return;
     }
     const auto& lastStack = context->GetLastStack();
     if (!lastStack) {
+        LOGE("the lastStack is null");
         return;
     }
     if (animator_) {
@@ -518,12 +525,18 @@ void RenderDialogTween::OnTouchTestHit(
 
 bool RenderDialogTween::PopDialog()
 {
+    if (onStatusChanged_) {
+        onStatusChanged_(false);
+        popDialog_ = true;
+    }
     const auto context = context_.Upgrade();
     if (!context) {
+        LOGE("the context is null");
         return false;
     }
     const auto& lastStack = context->GetLastStack();
     if (!lastStack) {
+        LOGE("the lastStack is null");
         return false;
     }
     if (animator_) {
@@ -628,11 +641,6 @@ void RenderDialogTween::RemoveBackendEvent(const RefPtr<DialogTweenComponent>& c
     BackEndEventManager<void(int32_t)>::GetInstance().RemoveBackEndEvent(component->GetOnSuccessId());
     BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(component->GetOnCancelId());
     BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(component->GetOnCompleteId());
-}
-
-WeakPtr<RenderNode> RenderDialogTween::CheckHoverNode()
-{
-    return AceType::WeakClaim<RenderNode>(this);
 }
 
 bool RenderDialogTween::HandleMouseEvent(const MouseEvent& event)

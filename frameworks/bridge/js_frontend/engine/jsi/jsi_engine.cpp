@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -553,7 +553,7 @@ void GetPackageInfo(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsVal
     }
 
     int32_t len = arg->GetArrayLength(runtime);
-    if (len < PAG_INFO_ARGS_LEN) {
+    if (len < static_cast<int32_t>(PAG_INFO_ARGS_LEN)) {
         LOGE("GetPackageInfo: invalid callback value");
         return;
     }
@@ -1629,6 +1629,10 @@ shared_ptr<JsValue> JsHandlePageRoute(
     params = routerParamsData->ToString();
 
     auto engineInstance = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (!engineInstance) {
+        LOGE("engineInstance is null");
+        return runtime->NewNull();
+    }
     // Operator map for page route.
     static const LinearMapNode<shared_ptr<JsValue> (*)(const std::string&, const std::string&, JsiEngineInstance&)>
         pageRouteOperators[] = {
@@ -3069,7 +3073,7 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
 
     nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
-    engineInstance_->SetArkNativeEngine(nativeEngine_);
+    engineInstance_->SetNativeEngine(nativeEngine_);
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
 
@@ -3089,13 +3093,20 @@ void JsiEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_, id = instanceId_](bool needSync) {
+    auto&& postTask = [weakDelegate, weakEngine = AceType::WeakClaim(this), id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([nativeEngine, needSync, id]() {
+
+        delegate->PostJsTask([weakEngine, needSync, id]() {
+            auto jsEngine = weakEngine.Upgrade();
+            if (jsEngine == nullptr) {
+                LOGW("jsEngine is nullptr");
+                return;
+            }
+            auto nativeEngine = jsEngine->GetNativeEngine();
             if (nativeEngine == nullptr) {
                 return;
             }
@@ -3162,10 +3173,14 @@ void JsiEngine::RegisterWorker()
 
 JsiEngine::~JsiEngine()
 {
+    LOG_DESTROY();
     if (nativeEngine_ != nullptr) {
         nativeEngine_->CancelCheckUVLoop();
         delete nativeEngine_;
         nativeEngine_ = nullptr;
+    }
+    if (engineInstance_) {
+        engineInstance_->SetNativeEngine(nullptr);
     }
 }
 
@@ -3480,6 +3495,26 @@ void JsiEngine::RunGarbageCollection()
     if (engineInstance_ && engineInstance_->GetJsRuntime()) {
         engineInstance_->GetJsRuntime()->RunGC();
     }
+}
+
+std::string JsiEngine::GetStacktraceMessage()
+{
+    auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
+    if (!arkNativeEngine) {
+        LOGE("GetStacktraceMessage arkNativeEngine is nullptr");
+        return "";
+    }
+    std::string stack;
+    arkNativeEngine->SuspendVM();
+    bool getStackSuccess = arkNativeEngine->BuildNativeAndJsBackStackTrace(stack);
+    arkNativeEngine->ResumeVM();
+    if (!getStackSuccess) {
+        LOGE("GetStacktraceMessage arkNativeEngine get stack failed");
+        return "";
+    }
+
+    auto runningPage = engineInstance_ ? engineInstance_->GetRunningPage() : nullptr;
+    return JsiBaseUtils::TransSourceStack(runningPage, stack);
 }
 
 RefPtr<GroupJsBridge> JsiEngine::GetGroupJsBridge()

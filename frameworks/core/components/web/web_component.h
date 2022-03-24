@@ -683,6 +683,11 @@ public:
         consoleImpl_ = std::move(consoleImpl);
     }
 
+    void SetFocusElement(const WeakPtr<FocusNode>& focusElement)
+    {
+        focusElement_ = focusElement;
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;

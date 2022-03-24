@@ -1246,6 +1246,10 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
         return;
     }
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    if (!boxComponent) {
+        LOGE("boxComponent is null");
+        return;
+    }
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     boxComponent->SetAspectRatio(value, option);
 }
@@ -1478,6 +1482,10 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
         return;
     }
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    if (!boxComponent) {
+        LOGE("boxComponent is null");
+        return;
+    }
     boxComponent->SetGeometryTransitionId(id);
 }
 
@@ -1512,6 +1520,10 @@ void JSViewAbstract::JsBorderColor(const JSCallbackInfo& info)
         BoxComponentHelper::SetBorderColor(GetBackDecoration(), borderColor, option);
     } else {
         auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
+        if (!boxComponent) {
+            LOGE("boxComponent is null");
+            return;
+        }
         boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(BoxStateAttribute::BORDER_COLOR,
             AnimatableColor(borderColor, option), stack->GetVisualState());
         if (!boxComponent->GetStateAttributes()->
@@ -1536,6 +1548,10 @@ void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
 
     auto stack = ViewStackProcessor::GetInstance();
     auto boxComponent = stack->GetBoxComponent();
+    if (!boxComponent) {
+        LOGE("boxComponent is null");
+        return;
+    }
     auto option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
         boxComponent->SetColor(backgroundColor, option);
@@ -1743,7 +1759,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             return;
         }
         auto showDialog = refPtr->GetTargetCallback();
-        showDialog("", info.GetGlobalLocation());
+        showDialog("BindMenu", info.GetGlobalLocation());
     });
     click->SetOnClick(tapGesture);
     auto menuTheme = GetTheme<SelectTheme>();
@@ -1883,7 +1899,10 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
-
+    if (!boxComponent) {
+        LOGE("boxComponent is null");
+        return;
+    }
     Dimension width;
     if (argsPtrItem->Contains("width") && ParseJsonDimensionVp(argsPtrItem->GetValue("width"), width)) {
         if (!stack->IsVisualStateSet()) {
@@ -1952,6 +1971,10 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
         BoxComponentHelper::SetBorderWidth(GetBackDecoration(), borderWidth, option);
     } else {
         auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
+        if (!boxComponent) {
+            LOGE("boxComponent is null");
+            return;
+        }
         boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>
             (BoxStateAttribute::BORDER_WIDTH, AnimatableDimension(borderWidth, option), stack->GetVisualState());
         if (!boxComponent->GetStateAttributes()->
@@ -1980,6 +2003,10 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
         SetBorderRadius(borderRadius, option);
     } else {
         auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
+        if (!boxComponent) {
+            LOGE("boxComponent is null");
+            return;
+        }
         boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_RADIUS,
             AnimatableDimension(borderRadius, option), stack->GetVisualState());
         if (!boxComponent->GetStateAttributes()->
@@ -2833,6 +2860,10 @@ void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
         func->Execute(oldRect, oldOrigin, rect, origin);
     };
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    if (!boxComponent) {
+        LOGE("boxComponent is null");
+        return;
+    }
     boxComponent->GetEventExtensions()->GetOnAreaChangeExtension()->AddOnAreaChangeEvent(
         std::move(onAreaChangeCallback));
 }
@@ -2967,6 +2998,10 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
         }
     } else {
         auto boxComponent = stack->GetBoxComponent();
+        if (!boxComponent) {
+            LOGE("boxComponent is null");
+            return;
+        }
         boxComponent->GetStateAttributes()->AddAttribute<Gradient>
             (BoxStateAttribute::GRADIENT, lineGradient, stack->GetVisualState());
         if (!boxComponent->GetStateAttributes()->
@@ -3035,6 +3070,10 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
         }
     } else {
         auto boxComponent = stack->GetBoxComponent();
+        if (!boxComponent) {
+            LOGE("boxComponent is null");
+            return;
+        }
         boxComponent->GetStateAttributes()->AddAttribute<Gradient>
             (BoxStateAttribute::GRADIENT, radialGradient, stack->GetVisualState());
         if (!boxComponent->GetStateAttributes()->
@@ -3116,6 +3155,10 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
         }
     } else {
         auto boxComponent = stack->GetBoxComponent();
+        if (!boxComponent) {
+            LOGE("boxComponent is null");
+            return;
+        }
         boxComponent->GetStateAttributes()->AddAttribute<Gradient>
             (BoxStateAttribute::GRADIENT, sweepGradient, stack->GetVisualState());
         if (!boxComponent->GetStateAttributes()->
@@ -3522,7 +3565,9 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     if (!menuComponent) {
         return;
     }
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
     menuComponent->SetIsContextMenu(true);
+#endif
     int32_t responseType = static_cast<int32_t>(ResponseType::LONGPRESS);
     if (info.Length() == 2 && info[1]->IsNumber()) {
         responseType = info[1]->ToNumber<int32_t>();
@@ -3538,7 +3583,11 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
             }
             if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
                 auto showMenu = refPtr->GetTargetCallback();
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
                 showMenu("", info.GetScreenLocation());
+#else
+                showMenu("", info.GetGlobalLocation());
+#endif
             }
         });
     } else if (responseType == static_cast<int32_t>(ResponseType::LONGPRESS)) {
@@ -3551,7 +3600,11 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
                 return;
             }
             auto showMenu = refPtr->GetTargetCallback();
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
             showMenu("", info.GetScreenLocation());
+#else
+            showMenu("", info.GetGlobalLocation());
+#endif
         });
         box->SetOnLongPress(longGesture);
     } else {
@@ -3769,6 +3822,10 @@ void JSViewAbstract::SetBorderStyle(int32_t style)
         BoxComponentHelper::SetBorderStyle(GetBackDecoration(), borderStyle);
     } else {
         auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
+        if (!boxComponent) {
+            LOGE("boxComponent is null");
+            return;
+        }
         boxComponent->GetStateAttributes()->AddAttribute<BorderStyle>
             (BoxStateAttribute::BORDER_STYLE, borderStyle, stack->GetVisualState());
         if (!boxComponent->GetStateAttributes()->
@@ -4174,6 +4231,10 @@ void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
         return;
     }
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    if (!boxComponent) {
+        LOGE("boxComponent is null");
+        return;
+    }
     boxComponent->SetMouseAnimationType(static_cast<HoverAnimationType>(info[0]->ToNumber<int32_t>()));
 }
 

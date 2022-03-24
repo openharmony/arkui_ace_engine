@@ -121,7 +121,7 @@ void JSCustomDialogController::DestructorCallback(JSCustomDialogController* cont
 
 void JSCustomDialogController::NotifyDialogOperation(DialogOperation operation)
 {
-    LOGD("JSCustomDialogController(NotifyDialogOperation)");
+    LOGI("JSCustomDialogController(NotifyDialogOperation) operation: %{public}d", operation);
     if (operation == DialogOperation::DIALOG_OPEN) {
         isShown_ = true;
         pending_ = false;
@@ -195,17 +195,18 @@ void JSCustomDialogController::ShowDialog()
 
     auto executor = context->GetTaskExecutor();
     if (!executor) {
-        LOGE("JSCustomDialogController(JsOpenDialog) No Executor. Cannot post task.");
+        LOGE("JSCustomDialogController(ShowDialog) No Executor. Cannot post task.");
         return;
     }
 
     if (pending_) {
+        LOGI("JSCustomDialogController(ShowDialog) current state is pending.");
         dialogOperation_.emplace_back(DialogOperation::DIALOG_OPEN);
         return;
     }
 
     if (isShown_) {
-        LOGD("JSCustomDialogController(JsOpenDialog) CustomDialog has already shown.");
+        LOGI("JSCustomDialogController(ShowDialog) CustomDialog has already shown.");
         return;
     }
 
@@ -213,14 +214,22 @@ void JSCustomDialogController::ShowDialog()
     auto task = [context, dialogProperties = dialogProperties_, this]() mutable {
         if (context) {
             this->dialogComponent_ = context->ShowDialog(dialogProperties, false, "CustomDialog");
+        } else {
+            LOGE("JSCustomDialogController(ShowDialog) context is null.");
         }
         this->NotifyDialogOperation(DialogOperation::DIALOG_OPEN);
     };
     auto stack = context->GetLastStack();
+    auto result = false;
     if (stack) {
-        executor->PostTask(task, TaskExecutor::TaskType::UI);
+        result = executor->PostTask(task, TaskExecutor::TaskType::UI);
     } else {
-        executor->PostDelayedTask(task, TaskExecutor::TaskType::UI, DELAY_TIME_FOR_STACK);
+        LOGE("JSCustomDialogController(ShowDialog) stack is null, post delay task.");
+        result = executor->PostDelayedTask(task, TaskExecutor::TaskType::UI, DELAY_TIME_FOR_STACK);
+    }
+    if (!result) {
+        LOGW("JSCustomDialogController(ShowDialog) fail to post task, reset pending status");
+        pending_ = false;
     }
 }
 
@@ -255,11 +264,12 @@ void JSCustomDialogController::CloseDialog()
     }
     auto executor = context->GetTaskExecutor();
     if (!executor) {
-        LOGE("JSCustomDialogController(JsOpenDialog) No Executor. Cannot post task.");
+        LOGE("JSCustomDialogController(CloseDialog) No Executor. Cannot post task.");
         return;
     }
 
     if (pending_) {
+        LOGI("JSCustomDialogController(CloseDialog) current state is pending.");
         dialogOperation_.emplace_back(DialogOperation::DIALOG_CLOSE);
         return;
     }
@@ -267,23 +277,32 @@ void JSCustomDialogController::CloseDialog()
     pending_ = true;
     auto task = [lastStack, dialogComponent = dialogComponent_, this]() {
         if (!lastStack || !dialogComponent) {
+            LOGI("JSCustomDialogController(CloseDialog) stack or dialog is null.");
+            this->NotifyDialogOperation(DialogOperation::DIALOG_CLOSE);
             return;
         }
         auto animator = dialogComponent->GetAnimator();
         auto dialogId = dialogComponent->GetDialogId();
         if (animator) {
-            animator->AddStopListener([lastStack, dialogId] {
-                if (lastStack) {
-                    lastStack->PopDialog(dialogId);
-                }
-            });
+            if (!dialogComponent->HasStopListenerAdded()) {
+                animator->AddStopListener([lastStack, dialogId] {
+                    if (lastStack) {
+                        lastStack->PopDialog(dialogId);
+                    }
+                });
+                dialogComponent->SetHasStopListenerAdded(true);
+            }
             animator->Play();
         } else {
             lastStack->PopDialog(dialogId);
         }
         this->NotifyDialogOperation(DialogOperation::DIALOG_CLOSE);
     };
-    executor->PostTask(task, TaskExecutor::TaskType::UI);
+    auto result = executor->PostTask(task, TaskExecutor::TaskType::UI);
+    if (!result) {
+        LOGW("JSCustomDialogController(CloseDialog) fail to post task, reset pending status");
+        pending_ = false;
+    }
 }
 
 void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)

@@ -60,7 +60,8 @@ public:
                            int y,
                            int width,
                            int height,
-                           const sptr<OHOS::Ace::IDialogCallback>& dialogCallback) = 0;
+                           const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
+                           int* id = nullptr) = 0;
 
     virtual int CancelDialog(int id) = 0;
 

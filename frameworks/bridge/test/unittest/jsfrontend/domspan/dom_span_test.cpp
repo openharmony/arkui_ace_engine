@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,8 +58,6 @@ void DomSpanTest::TearDown() {}
  * @tc.name: DomSpanTest001
  * @tc.desc: Verify that DomSpan can be created.
  * @tc.type: FUNC
- * @tc.require: AR000DD66C
- * @tc.author: wangchun
  */
 HWTEST_F(DomSpanTest, DomSpanTest001, TestSize.Level1)
 {
@@ -87,8 +85,6 @@ HWTEST_F(DomSpanTest, DomSpanTest001, TestSize.Level1)
  * @tc.name: DomSpanTest002
  * @tc.desc: Verify that DomSpan can be set styles.
  * @tc.type: FUNC
- * @tc.require: AR000DD66C AR000FRTPP
- * @tc.author: wangchun
  */
 HWTEST_F(DomSpanTest, DomSpanTest002, TestSize.Level1)
 {
@@ -151,8 +147,6 @@ HWTEST_F(DomSpanTest, DomSpanTest002, TestSize.Level1)
  * @tc.name: DomSpanTest003
  * @tc.desc: Verify that DomSpan can be set styles to the default values when styles' attributes are invalid.
  * @tc.type: FUNC
- * @tc.require: AR000DD66C
- * @tc.author: wangchun
  */
 HWTEST_F(DomSpanTest, DomSpanTest003, TestSize.Level1)
 {
@@ -198,8 +192,6 @@ HWTEST_F(DomSpanTest, DomSpanTest003, TestSize.Level1)
  * @tc.name: DomSpanTest004
  * @tc.desc: Verify that DomSpan can be created.
  * @tc.type: FUNC
- * @tc.require: AR000FRTPP
- * @tc.author: caocan
  */
 HWTEST_F(DomSpanTest, DomSpanTest004, TestSize.Level1)
 {
@@ -230,8 +222,6 @@ HWTEST_F(DomSpanTest, DomSpanTest004, TestSize.Level1)
  * @tc.name: DomSpanTest005
  * @tc.desc: Verify that DomSpan can be created.
  * @tc.type: FUNC
- * @tc.require: AR000FRTPP
- * @tc.author: caocan
  */
 HWTEST_F(DomSpanTest, DomSpanTest005, TestSize.Level1)
 {

@@ -140,7 +140,11 @@ RefPtr<AcePage> CardFrontend::GetPage(int32_t pageId) const
 WindowConfig& CardFrontend::GetWindowConfig()
 {
     ParseManifest();
-    return manifestParser_->GetWindowConfig();
+    if (GetFormSrc().empty()) {
+        return manifestParser_->GetWindowConfig();
+    } else {
+        return GetCardWindowConfig();
+    }
 }
 
 void CardFrontend::LoadPage(const std::string& urlPath, const std::string& params)

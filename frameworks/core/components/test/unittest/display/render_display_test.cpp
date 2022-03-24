@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,8 +68,6 @@ public:
  * @tc.name: RenderDisplayUpdate001
  * @tc.desc: Verify the Update Interface of RenderDisplay work correctly with display component.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8 AR000DAUL9
- * @tc.author: caocan
  */
 HWTEST_F(RenderDisplayTest, RenderDisplayUpdate001, TestSize.Level1)
 {
@@ -96,8 +94,6 @@ HWTEST_F(RenderDisplayTest, RenderDisplayUpdate001, TestSize.Level1)
  * @tc.name: RenderDisplayUpdate002
  * @tc.desc: Verify the Update Interface of RenderDisplay work correctly with display component.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8 AR000DAUL9
- * @tc.author: caocan
  */
 HWTEST_F(RenderDisplayTest, RenderDisplayUpdate002, TestSize.Level1)
 {
@@ -124,8 +120,6 @@ HWTEST_F(RenderDisplayTest, RenderDisplayUpdate002, TestSize.Level1)
  * @tc.name: RenderDisplayUpdate003
  * @tc.desc: Verify the Update Interface of RenderDisplay work correctly with display component.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8 AR000DAUL9
- * @tc.author: caocan
  */
 HWTEST_F(RenderDisplayTest, RenderDisplayUpdate003, TestSize.Level1)
 {
@@ -152,8 +146,6 @@ HWTEST_F(RenderDisplayTest, RenderDisplayUpdate003, TestSize.Level1)
  * @tc.name: RenderDisplayUpdate004
  * @tc.desc: Verify the Update Interface of RenderDisplay work correctly with display component.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8 AR000DAUL9
- * @tc.author: caocan
  */
 HWTEST_F(RenderDisplayTest, RenderDisplayUpdate004, TestSize.Level1)
 {
@@ -181,8 +173,6 @@ HWTEST_F(RenderDisplayTest, RenderDisplayUpdate004, TestSize.Level1)
  * @tc.name: RenderDisplayUpdate005
  * @tc.desc: Verify the Update Interface of RenderDisplay work correctly with display component.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8 AR000DAUL9
- * @tc.author: caocan
  */
 HWTEST_F(RenderDisplayTest, RenderDisplayUpdate005, TestSize.Level1)
 {
@@ -210,8 +200,6 @@ HWTEST_F(RenderDisplayTest, RenderDisplayUpdate005, TestSize.Level1)
  * @tc.name: RenderDisplayPerformLayout001
  * @tc.desc: Verify PerformLayout interface of RenderDisplay works correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8
- * @tc.author: caocan
  */
 HWTEST_F(RenderDisplayTest, RenderDisplayPerformLayout001, TestSize.Level1)
 {
@@ -239,8 +227,6 @@ HWTEST_F(RenderDisplayTest, RenderDisplayPerformLayout001, TestSize.Level1)
  * @tc.name: RenderDisplayPerformLayout002
  * @tc.desc: Verify PerformLayout interface of RenderDisplay works correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8
- * @tc.author: caocan
  */
 HWTEST_F(RenderDisplayTest, RenderDisplayPerformLayout002, TestSize.Level1)
 {
@@ -268,8 +254,6 @@ HWTEST_F(RenderDisplayTest, RenderDisplayPerformLayout002, TestSize.Level1)
  * @tc.name: RenderDisplayPerformLayout003
  * @tc.desc: Verify PerformLayout interface of RenderDisplay works correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8
- * @tc.author: caocan
  */
 HWTEST_F(RenderDisplayTest, RenderDisplayPerformLayout003, TestSize.Level1)
 {
@@ -297,8 +281,6 @@ HWTEST_F(RenderDisplayTest, RenderDisplayPerformLayout003, TestSize.Level1)
  * @tc.name: RenderDisplayPerformLayout004
  * @tc.desc: Verify PerformLayout interface of RenderDisplay works correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8
- * @tc.author: caocan
  */
 HWTEST_F(RenderDisplayTest, RenderDisplayPerformLayout004, TestSize.Level1)
 {
@@ -334,8 +316,6 @@ HWTEST_F(RenderDisplayTest, RenderDisplayPerformLayout004, TestSize.Level1)
  * @tc.name: RenderDisplayPerformLayout005
  * @tc.desc: Verify PerformLayout interface of RenderDisplay works correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL8
- * @tc.author: caocan
  */
 HWTEST_F(RenderDisplayTest, RenderDisplayPerformLayout005, TestSize.Level1)
 {

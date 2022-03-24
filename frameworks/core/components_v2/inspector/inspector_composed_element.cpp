@@ -650,7 +650,7 @@ std::string InspectorComposedElement::GetRect()
             rect = rect.Constrain(parent->GetRect());
         }
     }
-    if (GetClipFlag()) {
+    if (accessibilityNode_ && GetClipFlag()) {
         accessibilityNode_->SetClipFlagToChild(true);
     }
     isRectValid_ = rect.IsValid();
@@ -1562,7 +1562,7 @@ bool InspectorComposedElement::GetCheckable() const
 }
 bool InspectorComposedElement::GetFocusable() const
 {
-    auto focusableElement = GetContentElement<FocusableElement>(FocusableElement::TypeId());
+    auto focusableElement = GetContentElement<FocusableElement>(FocusableElement::TypeId(), false);
     if (!focusableElement) {
         return false;
     }

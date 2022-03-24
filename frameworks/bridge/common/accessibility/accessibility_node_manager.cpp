@@ -375,6 +375,11 @@ int32_t AccessibilityNodeManager::GenerateNextAccessibilityId()
 RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateSpecializedNode(
     const std::string& tag, int32_t nodeId, int32_t parentNodeId)
 {
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    if (IsDeclarative()) {
+        return nullptr;
+    }
+#endif
     if (nodeId < ROOT_STACK_BASE) {
         return nullptr;
     }
@@ -739,32 +744,6 @@ void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID)
         return;
     }
 
-    std::string info = "ID:";
-    info.append(std::to_string(node->GetNodeId()));
-    if (!node->GetText().empty()) {
-        info.append(" ");
-        info.append("text:");
-        info.append(node->GetText());
-    }
-    DumpLog::GetInstance().AddDesc(info);
-    DumpLog::GetInstance().AddDesc("width: " + std::to_string(node->GetWidth()));
-    DumpLog::GetInstance().AddDesc("height: " + std::to_string(node->GetHeight()));
-    DumpLog::GetInstance().AddDesc("visible: " + std::to_string(node->GetShown() && node->GetVisible()));
-    DumpLog::GetInstance().Print(depth, node->GetTag(), node->GetChildList().size());
-    for (const auto& item : node->GetChildList()) {
-        DumpTree(depth + 1, item->GetNodeId());
-    }
-}
-
-void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID, std::vector<std::string>& infos)
-{
-    auto node = GetAccessibilityNodeFromPage(nodeID);
-    if (!node) {
-        DumpLog::GetInstance().PrintToString(
-            "Error: failed to get accessibility node with ID " + std::to_string(nodeID), infos);
-        return;
-    }
-
     DumpLog::GetInstance().AddDesc("ID: " + std::to_string(node->GetNodeId()));
     DumpLog::GetInstance().AddDesc("text: " + node->GetText());
     DumpLog::GetInstance().AddDesc("top: " + std::to_string(node->GetTop() + SystemProperties::GetWindowPosY()));
@@ -772,9 +751,9 @@ void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID, std::vecto
     DumpLog::GetInstance().AddDesc("width: " + std::to_string(node->GetWidth()));
     DumpLog::GetInstance().AddDesc("height: " + std::to_string(node->GetHeight()));
     DumpLog::GetInstance().AddDesc("visible: " + std::to_string(node->GetShown() && node->GetVisible()));
-    DumpLog::GetInstance().PrintToString(depth, node->GetTag(), node->GetChildList().size(), infos);
+    DumpLog::GetInstance().Print(depth, node->GetTag(), node->GetChildList().size());
     for (const auto& item : node->GetChildList()) {
-        DumpTree(depth + 1, item->GetNodeId(), infos);
+        DumpTree(depth + 1, item->GetNodeId());
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,8 +42,6 @@ void DomVideoTest::TearDown() {}
  * @tc.name: DomVideoCreatorTest001
  * @tc.desc: Test create video node successfully and videocomponent create as desire.
  * @tc.type: FUNC
- * @tc.require: AR000DD67I
- * @tc.author: hesu
  */
 HWTEST_F(DomVideoTest, DomVideoCreatorTest001, TestSize.Level1)
 {
@@ -95,8 +93,6 @@ HWTEST_F(DomVideoTest, DomVideoCreatorTest001, TestSize.Level1)
  * @tc.name: DomVideoCreatorTest002
  * @tc.desc: Test the VideoComponent initialized by default value.
  * @tc.type: FUNC
- * @tc.require: AR000DD67I
- * @tc.author: hesu
  */
 HWTEST_F(DomVideoTest, DomVideoCreatorTest002, TestSize.Level1)
 {
@@ -133,8 +129,6 @@ HWTEST_F(DomVideoTest, DomVideoCreatorTest002, TestSize.Level1)
  * @tc.name: DomVideoCreatorTest003
  * @tc.desc: Test value validation. If src is invalid, create component failed.
  * @tc.type: FUNC
- * @tc.require: AR000DD67I
- * @tc.author: hesu
  */
 HWTEST_F(DomVideoTest, DomVideoCreatorTest003, TestSize.Level1)
 {
@@ -172,8 +166,6 @@ HWTEST_F(DomVideoTest, DomVideoCreatorTest003, TestSize.Level1)
  * @tc.name: DomVideoCreatorTest004
  * @tc.desc: Test add event to Video component.
  * @tc.type: FUNC
- * @tc.require: AR000DD67I
- * @tc.author: hesu
  */
 HWTEST_F(DomVideoTest, DomVideoCreatorTest004, TestSize.Level1)
 {

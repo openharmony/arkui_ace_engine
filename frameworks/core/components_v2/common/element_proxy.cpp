@@ -24,6 +24,7 @@
 #include "base/utils/macros.h"
 #include "core/components/ifelse/if_else_component.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
+#include "core/pipeline/base/component.h"
 #include "core/pipeline/base/composed_component.h"
 
 namespace OHOS::Ace::V2 {
@@ -266,6 +267,10 @@ public:
         LOGI("OnDataReloaded()");
         ACE_SCOPED_TRACE("OnDataReloaded");
 
+        if (!lazyForEachComponent_) {
+            LOGE("lazyForEachCompenent_ is nullptr");
+            return;
+        }
         LazyForEachCache cache(lazyForEachComponent_);
         size_t oldCount = count_;
         count_ = cache.TotalCount();
@@ -482,8 +487,14 @@ private:
     class LazyForEachCache final {
     public:
         explicit LazyForEachCache(const RefPtr<LazyForEachComponent>& component)
-            : lazyForEachComponent_(component), count_(component->TotalCount())
-        {}
+            : lazyForEachComponent_(component)
+        {
+            if (component) {
+                count_ = component->TotalCount();
+            } else {
+                count_ = 0;
+            }
+        }
         ~LazyForEachCache() = default;
 
         RefPtr<ComposedComponent> operator[] (size_t index)
