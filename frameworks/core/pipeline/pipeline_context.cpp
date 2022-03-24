@@ -3202,7 +3202,13 @@ void PipelineContext::OpenImplicitAnimation(
         if (!context) {
             return;
         }
-        context->GetTaskExecutor()->PostTask([finishCallback]() { finishCallback(); }, TaskExecutor::TaskType::UI);
+        context->GetTaskExecutor()->PostTask(
+            [finishCallback]() {
+                if (finishCallback) {
+                    finishCallback();
+                }
+            },
+            TaskExecutor::TaskType::UI);
     };
 
     Rosen::RSAnimationTimingProtocol timingProtocol;
