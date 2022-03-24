@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -287,6 +287,16 @@ public:
     {
         isFocused_ = state;
         OnFocusChange(isFocused_);
+    }
+
+    bool GetAccessibilityFocusedState() const
+    {
+        return isAccessibilityFocused_;
+    }
+
+    void SetAccessibilityFocusedState(bool state)
+    {
+        isAccessibilityFocused_ = state;
     }
 
     bool GetSelectedState() const
@@ -838,6 +848,7 @@ private:
             bool visible_ : 1;
             bool shown_ : 1;
             bool isClicked_ : 1;
+            bool isAccessibilityFocused_ : 1;
         };
         uint64_t bits_ = 0;
     };
