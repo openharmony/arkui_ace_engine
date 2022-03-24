@@ -75,6 +75,27 @@ void AddEvent(RefPtr<PickerBaseComponent>& picker, const JSCallbackInfo& info, D
         picker->SetDialogChangeEvent(changeId);
     }
 }
+
+JSRef<JSVal> DatePickerChangeEventToJSValue(const DatePickerChangeEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(eventInfo.GetSelectedStr());
+    if (!argsPtr) {
+        LOGW("selectedStr is not exist.");
+        return JSRef<JSVal>::Cast(obj);
+    }
+    std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
+    for (auto iter = keys.begin(); iter != keys.end(); iter++) {
+        const std::string key = *iter;
+        const auto value = argsPtr->GetValue(key);
+        if (!value || value->ToString().empty()) {
+            LOGI("key[%{public}s] is not exist.", key.c_str());
+            continue;
+        }
+        obj->SetProperty<std::string>(key.c_str(), value->ToString().c_str());
+    }
+    return JSRef<JSVal>::Cast(obj);
+}
 }
 
 void JSDatePicker::JSBind(BindingTarget globalObj)
@@ -149,22 +170,21 @@ void JSDatePicker::UseMilitaryTime(bool isUseMilitaryTime)
 
 void JSDatePicker::OnChange(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsFunction()) {
-        LOGE("info[0] is not a function.");
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGI("info not function");
         return;
     }
-    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), DatePickerChangeEventToJSValue);
     auto datePicker = AceType::DynamicCast<PickerBaseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    auto onChangeId =
-        EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+    datePicker->SetOnChange(EventMarker(
+        [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
             ACE_SCORING_EVENT("datePicker.onChange");
-            func->Execute(keys, info);
-        });
-    if (datePicker) {
-        datePicker->SetOnChange(onChangeId);
-    }
+            auto eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
+            func->Execute(*eventInfo);
+        }));
 }
 
 PickerDate JSDatePicker::ParseDate(const JSRef<JSVal>& dateVal)

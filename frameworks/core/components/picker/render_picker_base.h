@@ -196,7 +196,7 @@ private:
     PickerDate selectedDate_ = PickerDate::Current();
 
     std::function<void()> onCancelCallback_;
-    std::function<void(const std::string&)> onChangeCallback_;
+    std::function<void(const std::shared_ptr<BaseEventInfo>&)> onChangeCallback_;
     std::function<void(const std::string&)> onColumnChangeCallback_;
     std::function<void(const std::string&)> onDialogAccept_;
     std::function<void()> onDialogCancel_;
