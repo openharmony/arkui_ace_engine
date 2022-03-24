@@ -64,6 +64,16 @@ public:
         return frontendDelegate_;
     }
 
+    void SetArkNativeEngine(ArkNativeEngine* nativeEngine)
+    {
+        nativeEngine_ = nativeEngine;
+    }
+
+    ArkNativeEngine* GetArkNativeEngine() const
+    {
+        return nativeEngine_;
+    }
+
 private:
     void RegisterAceModule();             // add ace object to global
     void RegisterConsoleModule();         // add Console object to global
@@ -86,11 +96,11 @@ private:
     RefPtr<FrontendDelegate> frontendDelegate_;
     int32_t instanceId_ = 0;
     mutable std::mutex mutex_;
+    ArkNativeEngine* nativeEngine_ = nullptr;
     bool isDebugMode_ = true;
 };
 
 class JsiEngine : public JsEngine {
-    DECLARE_ACE_TYPE(JsiEngine, JsEngine);
 public:
     explicit JsiEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~JsiEngine() override;
