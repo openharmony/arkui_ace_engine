@@ -150,8 +150,9 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     }
     fontManager_ = FontManager::Create();
     renderFactory_ = AceType::MakeRefPtr<FlutterRenderFactory>();
+    eventManager_ = AceType::MakeRefPtr<EventManager>();
     UpdateFontWeightScale();
-    eventManager_.SetInstanceId(instanceId);
+    eventManager_->SetInstanceId(instanceId);
 }
 
 PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
@@ -1517,7 +1518,7 @@ RefPtr<RenderNode> PipelineContext::DragTest(
     return nullptr;
 }
 
-void PipelineContext::OnTouchEvent(const TouchEvent& point)
+void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
@@ -1535,7 +1536,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point)
         if (frontEnd && (frontEnd->GetType() == FrontendType::JS_CARD)) {
             touchRestrict.UpdateForbiddenType(TouchRestrict::LONG_PRESS);
         }
-        eventManager_.TouchTest(scalePoint, rootElement_->GetRenderNode(), touchRestrict);
+        eventManager_->TouchTest(scalePoint, rootElement_->GetRenderNode(), touchRestrict, isSubPipe);
 
         for (size_t i = 0; i < touchPluginPipelineContext_.size(); i++) {
             auto pipelineContext = touchPluginPipelineContext_[i].Upgrade();
@@ -1543,8 +1544,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point)
                 continue;
             }
             auto pluginPoint = point.UpdateScalePoint(viewScale_, pipelineContext->GetPluginEventOffset().GetX(),
-                pipelineContext->GetPluginEventOffset().GetY(), point.id + (int32_t)i + 1);
-            pipelineContext->OnTouchEvent(pluginPoint);
+                pipelineContext->GetPluginEventOffset().GetY(), point.id);
+            pipelineContext->OnTouchEvent(pluginPoint, true);
         }
     }
     if (scalePoint.type == TouchType::MOVE) {
@@ -1553,19 +1554,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point)
     if (isKeyEvent_) {
         SetIsKeyEvent(false);
     }
-    eventManager_.DispatchTouchEvent(scalePoint);
-
-    if (scalePoint.type != TouchType::DOWN) {
-        for (size_t i = 0; i < touchPluginPipelineContext_.size(); i++) {
-            auto pipelineContext = touchPluginPipelineContext_[i].Upgrade();
-            if (!pipelineContext || !pipelineContext->rootElement_) {
-                continue;
-            }
-            auto pluginPoint = point.UpdateScalePoint(viewScale_, pipelineContext->GetPluginEventOffset().GetX(),
-                pipelineContext->GetPluginEventOffset().GetY(), point.id + (int32_t)i + 1);
-            pipelineContext->eventManager_.DispatchTouchEvent(pluginPoint);
-        }
+    if (isSubPipe) {
+        return;
     }
+    eventManager_->DispatchTouchEvent(scalePoint);
 }
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
@@ -1591,7 +1583,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     rootElement_->HandleSpecifiedKey(event);
     NotifyDestroyEventDismiss();
     SetShortcutKey(event);
-    return eventManager_.DispatchKeyEvent(event, rootElement_);
+    return eventManager_->DispatchKeyEvent(event, rootElement_);
 }
 
 void PipelineContext::SetShortcutKey(const KeyEvent& event)
@@ -1638,9 +1630,9 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     }
 
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
-    eventManager_.MouseTest(scaleEvent, rootElement_->GetRenderNode());
-    eventManager_.DispatchMouseEvent(scaleEvent);
-    eventManager_.DispatchMouseHoverEvent(scaleEvent);
+    eventManager_->MouseTest(scaleEvent, rootElement_->GetRenderNode());
+    eventManager_->DispatchMouseEvent(scaleEvent);
+    eventManager_->DispatchMouseHoverEvent(scaleEvent);
     FlushMessages();
 }
 
@@ -1649,8 +1641,8 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
     LOGI("OnAxisEvent: x=%{public}f, y=%{public}f, horizontalAxis=%{public}f, verticalAxis=%{public}f", event.x,
         event.y, event.horizontalAxis, event.verticalAxis);
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
-    eventManager_.AxisTest(scaleEvent, rootElement_->GetRenderNode());
-    eventManager_.DispatchAxisEvent(scaleEvent);
+    eventManager_->AxisTest(scaleEvent, rootElement_->GetRenderNode());
+    eventManager_->DispatchAxisEvent(scaleEvent);
 }
 
 void PipelineContext::AddToHoverList(const RefPtr<RenderNode>& node)
@@ -1691,7 +1683,7 @@ bool PipelineContext::OnRotationEvent(const RotationEvent& event) const
         return false;
     }
 
-    return eventManager_.DispatchRotationEvent(event, stackRenderNode, requestedRenderNode_.Upgrade());
+    return eventManager_->DispatchRotationEvent(event, stackRenderNode, requestedRenderNode_.Upgrade());
 }
 
 void PipelineContext::SetCardViewPosition(int id, float offsetX, float offsetY)
@@ -2340,7 +2332,7 @@ void PipelineContext::Destroy()
     hoverNodes_.clear();
     drawDelegate_.reset();
     renderFactory_.Reset();
-    eventManager_.ClearResults();
+    eventManager_->ClearResults();
     nodesToNotifyOnPreDraw_.clear();
     nodesNeedDrawOnPixelMap_.clear();
     layoutTransitionNodeSet_.clear();

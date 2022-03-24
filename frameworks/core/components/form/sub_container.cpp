@@ -168,6 +168,8 @@ void SubContainer::RunCard(const int64_t id, const std::string path, const std::
         std::move(window), taskExecutor_, assetManager_, nullptr, frontend_, instanceId_);
     ContainerScope scope(instanceId_);
     density_ = outSidePipelineContext_.Upgrade()->GetDensity();
+    auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();
+    pipelineContext_->SetEventManager(eventManager);
     ProcessSharedImage(imageDataMap);
     UpdateRootElmentSize();
     pipelineContext_->SetIsJsCard(true);
