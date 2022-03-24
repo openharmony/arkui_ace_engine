@@ -20,11 +20,6 @@ namespace OHOS::Ace {
 StageCardParser::StageCardParser() : manifestWindow_(Referenced::MakeRefPtr<Framework::ManifestWindow>())
 {}
 
-WindowConfig& StageCardParser::GetWindowConfig()
-{
-    return manifestWindow_->GetWindowConfig();
-}
-
 void StageCardParser::Parse(const std::string& contents, const std::string& selectUrl)
 {
     auto rootJson = JsonUtil::ParseJsonString(contents);
@@ -47,10 +42,88 @@ void StageCardParser::Parse(const std::string& contents, const std::string& sele
         LOGE("The configuration information for the url %{public}s does not exist", selectUrl.c_str());
         return;
     }
-    colorMode_ = formConfig->GetString("colorMode");
+
+    auto supportDimensions = formConfig->GetValue("supportDimensions");
+    if (supportDimensions && supportDimensions->IsArray()) {
+        for (index = 0; index < supportDimensions->GetArraySize(); ++index) {
+            auto supportDimension = supportDimensions->GetArrayItem(index);
+            if (supportDimension && supportDimension->IsString()) {
+                supportDimensions_.push_back(supportDimension->GetString());
+            }
+        }
+    }
+
+    colorMode_ = formConfig->GetString("colorMode", "auto");
     defaultDimension_ = formConfig->GetString("defaultDimension");
     description_ = formConfig->GetString("description");
+    formConfigAbility_ = formConfig->GetString("formConfigAbility");
+    isDefault_ = formConfig->GetBool("updateEnabled", true);
+    name_ = formConfig->GetString("name");
+    scheduledUpdateTime_ = formConfig->GetString("scheduledUpdateTime");
+    src_ = formConfig->GetString("src");
+    updateDuration_ = formConfig->GetUInt("updateDuration", 1);
+    updateEnabled_ = formConfig->GetBool("updateEnabled", true);
     manifestWindow_->WindowParse(formConfig);
+}
+
+const std::string& StageCardParser::GetColorMode() const
+{
+    return colorMode_;
+}
+
+const std::string& StageCardParser::GetDefaultDimension() const
+{
+    return defaultDimension_;
+}
+
+const std::string& StageCardParser::GetDescription() const
+{
+    return description_;
+}
+
+const std::string& StageCardParser::GetFormConfigAbility() const
+{
+    return formConfigAbility_;
+}
+
+bool StageCardParser::GetIsDefault() const
+{
+    return isDefault_;
+}
+
+const std::string& StageCardParser::GetName() const
+{
+    return name_;
+}
+
+const std::string& StageCardParser::GetScheduledUpdateTime() const
+{
+    return scheduledUpdateTime_;
+}
+
+const std::string& StageCardParser::GetSrc() const
+{
+    return src_;
+}
+
+const std::vector<std::string>& StageCardParser::GetSupportDimensions() const
+{
+    return supportDimensions_;
+}
+
+uint32_t StageCardParser::GetUpdateDuration() const
+{
+    return updateDuration_;
+}
+
+bool StageCardParser::GetUpdateEnabled() const
+{
+    return updateEnabled_;
+}
+
+WindowConfig& StageCardParser::GetWindowConfig() const
+{
+    return manifestWindow_->GetWindowConfig();
 }
 
 } // namespace OHOS::Ace::Framework
