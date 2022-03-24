@@ -64,6 +64,7 @@ void RosenRenderWeb::Paint(RenderContext& context, const Offset& offset)
     }
     if (drawSize_.Width() > pipelineContext->GetRootWidth() || drawSize_.Height() > pipelineContext->GetRootHeight()) {
         LOGE("Web drawSize height or width is invalid");
+        return;
     }
     if (delegate_) {
         LOGI("Web paint drawSize width = %{public}f, height = %{public}f", drawSize_.Width(), drawSize_.Height());
