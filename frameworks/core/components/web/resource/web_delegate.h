@@ -116,19 +116,8 @@ public:
 #ifdef OHOS_STANDARD_SYSTEM
     void InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surface> surface = nullptr);
     void InitWebViewWithWindow();
-    void ShowWebView()
-    {
-        if (window_) {
-            window_->Show();
-        }
-    }
-
-    void HideWebView()
-    {
-        if (window_) {
-            window_->Hide();
-        }
-    }
+    void ShowWebView();
+    void HideWebView();
     void Resize(const double& width, const double& height);
     void UpdateUserAgent(const std::string& userAgent);
     void UpdateJavaScriptEnabled(const bool& isJsEnabled);
