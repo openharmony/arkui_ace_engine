@@ -383,6 +383,7 @@ void RenderSwiper::PerformLayout()
 
     // layout indicator
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
+        SystemProperties::GetDeviceType() == DeviceType::TABLET ||
         SystemProperties::GetDeviceType() == DeviceType::CAR) {
         LayoutIndicator(swiperIndicatorData_);
     } else {
