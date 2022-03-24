@@ -164,7 +164,6 @@ private:
 
     int32_t instanceId_ = 0;
     RefPtr<JsiEngineInstance> engineInstance_;
-    ArkNativeEngine* nativeEngine_ = nullptr;
 };
 } // namespace OHOS::Ace::Framework
 
