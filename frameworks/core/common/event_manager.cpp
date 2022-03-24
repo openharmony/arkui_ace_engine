@@ -23,8 +23,8 @@
 
 namespace OHOS::Ace {
 
-void EventManager::TouchTest(
-    const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict)
+void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
+    const TouchRestrict& touchRestrict, bool needAppend)
 {
     ContainerScope scope(instanceId_);
 
@@ -40,6 +40,10 @@ void EventManager::TouchTest(
     const Point point { touchPoint.x, touchPoint.y, touchPoint.sourceType };
     // For root node, the parent local point is the same as global point.
     renderNode->TouchTest(point, point, touchRestrict, hitTestResult);
+    if (needAppend) {
+        TouchTestResult prevHitTestResult = touchTestResults_[touchPoint.id];
+        hitTestResult.splice(hitTestResult.end(), prevHitTestResult);
+    }
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
 }
 

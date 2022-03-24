@@ -215,7 +215,7 @@ public:
     void RemoveScheduleTask(uint32_t id);
 
     // Called by view when touch event received.
-    void OnTouchEvent(const TouchEvent& point);
+    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false);
 
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
@@ -1063,7 +1063,12 @@ public:
 
     void SetShortcutKey(const KeyEvent& event);
 
-    EventManager GetEventManager() const
+    void SetEventManager(const RefPtr<EventManager> eventManager)
+    {
+        eventManager_ = eventManager;
+    }
+
+    RefPtr<EventManager> GetEventManager() const
     {
         return eventManager_;
     }
@@ -1337,7 +1342,7 @@ private:
 #endif
     RefPtr<SharedTransitionController> sharedTransitionController_;
     RefPtr<CardTransitionController> cardTransitionController_;
-    EventManager eventManager_;
+    RefPtr<EventManager> eventManager_;
     EventTrigger eventTrigger_;
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;
