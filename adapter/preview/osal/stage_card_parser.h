@@ -31,12 +31,31 @@ public:
     StageCardParser();
     ~StageCardParser() override = default;
     void Parse(const std::string& contents, const std::string& selectUrl);
-    WindowConfig& GetWindowConfig();
+    const std::string& GetColorMode() const;
+    const std::string& GetDefaultDimension() const;
+    const std::string& GetDescription() const;
+    const std::string& GetFormConfigAbility() const;
+    bool GetIsDefault() const;
+    const std::string& GetName() const;
+    const std::string& GetScheduledUpdateTime() const;
+    const std::string& GetSrc() const;
+    const std::vector<std::string>& GetSupportDimensions() const;
+    uint32_t GetUpdateDuration() const;
+    bool GetUpdateEnabled() const;
+    WindowConfig& GetWindowConfig() const;
 
 private:
     std::string colorMode_;
     std::string defaultDimension_;
     std::string description_;
+    std::string formConfigAbility_;
+    bool isDefault_;
+    std::string name_;
+    std::string scheduledUpdateTime_;
+    std::string src_;
+    std::vector<std::string> supportDimensions_;
+    uint32_t updateDuration_;
+    bool updateEnabled_;
     RefPtr<Framework::ManifestWindow> manifestWindow_;
     ACE_DISALLOW_COPY_AND_MOVE(StageCardParser);
 };
