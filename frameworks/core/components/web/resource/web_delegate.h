@@ -214,7 +214,7 @@ private:
     Method isPagePathInvalidMethod_;
     State state_ {State::WAITINGFORSIZE};
 #ifdef OHOS_STANDARD_SYSTEM
-    std::shared_ptr<OHOS::NWeb::NWeb> webview_;
+    std::shared_ptr<OHOS::NWeb::NWeb> nweb_;
     sptr<Rosen::Window> window_;
     bool isCreateWebView_ = false;
 
