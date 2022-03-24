@@ -69,6 +69,7 @@ RenderTextField::RenderTextField()
 
 RenderTextField::~RenderTextField()
 {
+    LOGI("Destruction text field.");
     if (controller_) {
         controller_->Clear();
         controller_->RemoveObserver(WeakClaim(this));
@@ -88,6 +89,7 @@ RenderTextField::~RenderTextField()
     // If soft keyboard is still exist, close it.
     if (HasConnection()) {
 #if defined(ENABLE_STANDARD_INPUT)
+        LOGI("Destruction text field, close input method.");
         MiscServices::InputMethodController::GetInstance()->Close();
 #else
         connection_->Close(GetInstanceId());
