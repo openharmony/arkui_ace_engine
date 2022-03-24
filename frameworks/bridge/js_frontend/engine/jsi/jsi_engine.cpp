@@ -3072,7 +3072,8 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         return false;
     }
 
-    nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
+    auto nativeEngine = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
+    nativeEngine_ = nativeEngine;
     engineInstance_->SetNativeEngine(nativeEngine_);
     SetPostTask(nativeEngine_);
     nativeEngine_->CheckUVLoop();
@@ -3081,7 +3082,7 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetLibPath();
         if (!packagePath.empty()) {
-            nativeEngine_->SetPackagePath(packagePath);
+            nativeEngine->SetPackagePath(packagePath);
         }
     }
     RegisterWorker();
