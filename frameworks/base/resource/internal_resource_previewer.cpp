@@ -299,26 +299,26 @@ extern uint8_t* _binary_fa_black_clock_widget_second_png_end;
 // Use objcopy transform to compiled object file.
 // The following parameters represent the beginning and end of the file.
 extern uint8_t _binary_ic_public_drawer_svg_start[];
-extern uint8_t _binary_ic_public_drawer_svg_end[];
+extern uint8_t* _binary_ic_public_drawer_svg_end;
 // binary/container_modal_window_close.svg
 extern uint8_t _binary_container_modal_window_close_svg_start[];
-extern uint8_t _binary_container_modal_window_close_svg_end[];
+extern uint8_t* _binary_container_modal_window_close_svg_end;
 
 // binary/container_modal_window_maximize.svg
 extern uint8_t _binary_container_modal_window_maximize_svg_start[];
-extern uint8_t _binary_container_modal_window_maximize_svg_end[];
+extern uint8_t* _binary_container_modal_window_maximize_svg_end;
 
 // binary/container_modal_window_minimize.svg
 extern uint8_t _binary_container_modal_window_minimize_svg_start[];
-extern uint8_t _binary_container_modal_window_minimize_svg_end[];
+extern uint8_t* _binary_container_modal_window_minimize_svg_end;
 
 // binary/container_modal_window_recover.svg
 extern uint8_t _binary_container_modal_window_recover_svg_start[];
-extern uint8_t _binary_container_modal_window_recover_svg_end[];
+extern uint8_t* _binary_container_modal_window_recover_svg_end;
 
 // binary/container_modal_window_split_left.svg
 extern uint8_t _binary_container_modal_window_split_left_svg_start[];
-extern uint8_t _binary_container_modal_window_split_left_svg_end[];
+extern uint8_t* _binary_container_modal_window_split_left_svg_end;
 
 namespace OHOS::Ace {
 namespace {
