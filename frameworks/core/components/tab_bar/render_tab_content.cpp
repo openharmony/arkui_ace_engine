@@ -127,10 +127,17 @@ void RenderTabContent::Initialize(const WeakPtr<PipelineContext>& context)
                 tabContent->HandleDragEnd();
             }
         });
+        dragDetector_->SetOnDragCancel([weakContent = AceType::WeakClaim(this)]() {
+            auto tabContent = weakContent.Upgrade();
+            if (tabContent) {
+                tabContent->HandleDragEnd();
+            }
+        });
     } else {
         dragDetector_->SetOnDragStart([](const DragStartInfo& info) {});
         dragDetector_->SetOnDragUpdate([](const DragUpdateInfo& info) {});
         dragDetector_->SetOnDragEnd([](const DragEndInfo& info) {});
+        dragDetector_->SetOnDragCancel([]() {});
     }
 }
 
