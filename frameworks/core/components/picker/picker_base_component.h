@@ -176,6 +176,23 @@ private:
     PickerTime time_;
 };
 
+class ACE_EXPORT DatePickerChangeEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(DatePickerChangeEvent, BaseEventInfo);
+
+public:
+    explicit DatePickerChangeEvent(const std::string& str) : BaseEventInfo
+        ("DatePickerChangeEvent"), selectedStr_(str) {}
+    ~DatePickerChangeEvent() = default;
+
+    const std::string& GetSelectedStr() const
+    {
+        return selectedStr_;
+    }
+
+private:
+    std::string selectedStr_;
+};
+
 class ACE_EXPORT PickerBaseComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(PickerBaseComponent, SoleChildComponent);
 
