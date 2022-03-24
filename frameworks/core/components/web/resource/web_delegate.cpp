@@ -654,6 +654,26 @@ void WebDelegate::InitWebEvent()
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
+void WebDelegate::ShowWebView()
+{
+    if (window_) {
+        window_->Show();
+    }
+
+    LOGI("OnContinue webview");
+    OnActive();
+}
+
+void WebDelegate::HideWebView()
+{
+    if (window_) {
+        window_->Hide();
+    }
+
+    LOGI("OnPause webview");
+    OnInactive();
+}
+
 void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surface> surface)
 {
     state_ = State::CREATING;
