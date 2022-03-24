@@ -33,20 +33,6 @@ void RosenRenderRemoteWindow::Update(const RefPtr<Component>& component)
         SetRSNode(surfaceNode);
         // create corresponding RSRenderNode in Render Thread
         surfaceNode->CreateNodeInRenderThread(true);
-        // after updating RSNode, we need to explicitly sync geometry
-        MarkNeedSyncGeometryProperties();
     }
-}
-
-void RosenRenderRemoteWindow::SyncGeometryProperties()
-{
-    auto rsNode = GetRSNode();
-    if (!rsNode) {
-        return;
-    }
-    Offset paintOffset = GetPaintOffset();
-    // for surface nodes, only bounds is used
-    rsNode->SetBounds(paintOffset.GetX(), paintOffset.GetY(), drawSize_.Width(), drawSize_.Height());
-    rsNode->SetFrame(paintOffset.GetX(), paintOffset.GetY(), drawSize_.Width(), drawSize_.Height());
 }
 } // namespace OHOS::Ace
