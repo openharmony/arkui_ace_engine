@@ -1383,7 +1383,6 @@ bool JsiDeclarativeEngine::CallAppFunc(const std::string& appFuncName, std::vect
     }
     shared_ptr<JsValue> func = defaultObject->GetProperty(runtime, appFuncName);
     if (!func || !func->IsFunction(runtime)) {
-        LOGE("%{public}s not found or is not a function!", appFuncName.c_str());
         return false;
     }
     shared_ptr<JsValue> result;
