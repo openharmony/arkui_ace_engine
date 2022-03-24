@@ -895,7 +895,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextInputController", JSTextInputController::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
     { "Checkbox", JSCheckbox::JSBind },
-    { "CheckboxGroup", JSCheckboxGroup::JSBind }
+    { "CheckboxGroup", JSCheckboxGroup::JSBind },
+    { "Refresh", JSRefresh::JSBind }
 };
 
 void RegisterAllModule(BindingTarget globalObj)
