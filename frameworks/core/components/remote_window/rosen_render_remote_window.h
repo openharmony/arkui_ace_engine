@@ -27,11 +27,6 @@ public:
     ~RosenRenderRemoteWindow() override = default;
 
     void Update(const RefPtr<Component>& component) override;
-    bool HasGeometryProperties() const override
-    {
-        return true;
-    }
-    void SyncGeometryProperties() override;
 };
 } // namespace OHOS::Ace
 

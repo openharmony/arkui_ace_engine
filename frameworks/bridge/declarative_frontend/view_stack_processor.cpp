@@ -619,7 +619,6 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     } else if (!components.empty() && (
         AceType::InstanceOf<BoxComponent>(mainComponent) ||
         AceType::InstanceOf<FormComponent>(mainComponent) ||
-        AceType::InstanceOf<RemoteWindowComponent>(mainComponent) ||
         AceType::InstanceOf<TextFieldComponent>(mainComponent) ||
         AceType::InstanceOf<TextureComponent>(mainComponent) ||
         AceType::InstanceOf<WebComponent>(mainComponent) ||

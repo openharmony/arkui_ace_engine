@@ -2066,6 +2066,31 @@ void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
 #endif
 }
 
+void RenderNode::SetRSNode(const std::shared_ptr<RSNode>& rsNode)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsNode_ == rsNode) {
+        return;
+    }
+
+    // backup previous RSNode before overwriting it
+    auto prevNode = rsNode_;
+    rsNode_ = rsNode;
+
+    // recursively replace RSNode in all render_nodes of JSView
+    auto parent = GetParent().Upgrade();
+    while (parent && !parent->IsTailRenderNode()) {
+        parent->rsNode_ = rsNode;
+        parent = parent->GetParent().Upgrade();
+    }
+
+    // copy render properties from previous RSNode
+    rsNode->CopyPropertiesFrom(*prevNode);
+    // rebuild RSNode hierarchy
+    MarkParentNeedRender();
+#endif
+}
+
 void RenderNode::MarkParentNeedRender() const
 {
     auto renderNode = parent_.Upgrade();
