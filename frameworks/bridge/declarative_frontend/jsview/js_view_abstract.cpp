@@ -2307,7 +2307,7 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
         LOGE("JSImage::Create ParseJsMedia type is wrong");
         return false;
     }
-    LOGE("input value is not string or number, using PixelMap");
+    LOGI("input value is not string or number, using PixelMap");
     return false;
 }
 
