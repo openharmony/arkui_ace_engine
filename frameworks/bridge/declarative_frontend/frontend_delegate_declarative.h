@@ -282,7 +282,12 @@ private:
 
     int32_t GetRunningPageId() const;
     std::string GetRunningPageUrl() const;
-    int32_t GetPageIdByUrl(const std::string& url, bool isRestore = false);
+    int32_t GetPageIdByUrl(const std::string& url, bool& isRestore);
+    int32_t GetPageIdByUrl(const std::string& url)
+    {
+        bool tmp = false;
+        return GetPageIdByUrl(url, tmp);
+    }
 
     void ResetStagingPage();
     void FlushAnimationTasks();
