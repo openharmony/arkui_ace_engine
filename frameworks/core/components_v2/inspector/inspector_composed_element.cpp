@@ -293,6 +293,7 @@ void InspectorComposedElement::AddComposedComponentId()
     if (accessibilityEnabled_) {
         accessibilityNode_ =
             InspectorComposedComponent::CreateAccessibilityNode(inspectorTag_, inspectorId_, inspectorParentId_, -1);
+        accessibilityNode_->SetJsComponentId(key_);
     }
 }
 

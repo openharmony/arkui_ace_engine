@@ -93,7 +93,7 @@ private:
     class JsInteractionOperation : public Accessibility::AccessibilityElementOperator {
     public:
         virtual ~JsInteractionOperation() = default;
-        // Accessibility overide.
+        // Accessibility override.
         void SearchElementInfoByAccessibilityId(const long elementId, const int requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback, const int mode) override;
         void SearchElementInfosByText(const long elementId, const std::string& text, const int requestId,
