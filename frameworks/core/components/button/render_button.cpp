@@ -815,7 +815,7 @@ void RenderButton::PlayFocusAnimation(bool isFocus)
         UpdateFocusAnimation(INIT_SCALE);
         return;
     }
-    if (!isOpacityAnimation_) {
+    if (!isOpacityAnimation_ && isTv_) {
         isOpacityAnimation_ = true;
     }
     if (isFocus) {
