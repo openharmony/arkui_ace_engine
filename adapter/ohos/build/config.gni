@@ -67,6 +67,10 @@ enable_standard_input = true
 build_container_scope_lib = true
 multiple_window_support = true
 
+if (product_name == "rk3568") {
+  web_components_support = true
+}
+
 if (defined(is_experiment_build) && is_experiment_build) {
   web_components_support = true
   enable_system_clipboard = true
