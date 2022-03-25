@@ -1477,6 +1477,7 @@ private:
     RefPtr<RenderNode> initRenderNode_;
     std::string customDragInfo_;
     Offset pageOffset_;
+    Offset rootOffset_;
 
     std::unordered_map<int32_t, WeakPtr<RenderElement>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
