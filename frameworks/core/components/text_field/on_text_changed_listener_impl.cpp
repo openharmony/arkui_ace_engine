@@ -119,6 +119,9 @@ void OnTextChangedListenerImpl::SendKeyboardInfo(const MiscServices::KeyboardInf
 void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatus status)
 {
     LOGI("[OnTextChangedListenerImpl] HandleKeyboardStatus status: %{public}d", status);
+    if (status == MiscServices::KeyboardStatus::NONE) {
+        return;
+    }
     SetKeyboardStatus(status == MiscServices::KeyboardStatus::SHOW);
 }
 
