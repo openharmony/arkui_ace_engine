@@ -266,6 +266,10 @@ public:
         LOGI("OnDataReloaded()");
         ACE_SCOPED_TRACE("OnDataReloaded");
 
+        if (!lazyForEachComponent_) {
+            LOGE("lazyForEachComponent_ is nullptr");
+            return;
+        }
         LazyForEachCache cache(lazyForEachComponent_);
         size_t oldCount = count_;
         count_ = cache.TotalCount();

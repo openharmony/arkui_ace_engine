@@ -25,6 +25,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_helpers.h"
@@ -115,6 +116,22 @@ RefPtr<JsAcePage> QJSDeclarativeEngineInstance::GetStagingPage(JSContext* ctx)
         LOGE("QJS context has no ref to engine instance. Failed!");
         return nullptr;
     }
+}
+
+JSContext* QJSDeclarativeEngineInstance::GetCurrentContext()
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    auto qjsEngine = AceType::DynamicCast<QJSDeclarativeEngine>(engine);
+    if (!qjsEngine) {
+        LOGE("qjsEngine is null");
+        return nullptr;
+    }
+    auto engineInstance = qjsEngine->GetEngineInstance();
+    if (engineInstance == nullptr) {
+        LOGE("engineInstance is nullptr");
+        return nullptr;
+    }
+    return engineInstance->GetQJSContext();
 }
 
 void QJSDeclarativeEngineInstance::PushJSCommand(const RefPtr<JsCommand>& jsCommand, bool forcePush) const
