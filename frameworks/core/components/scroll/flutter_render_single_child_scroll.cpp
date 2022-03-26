@@ -26,15 +26,13 @@ RenderLayer FlutterRenderSingleChildScroll::GetRenderLayer()
 {
     if (!layer_) {
         // layer should add parent padding size to avoid clip
-        auto maxWidth = viewPort_.Width();
-        auto maxHeight = viewPort_.Height();
-        auto parent = GetParent().Upgrade();
-        if (parent) {
-            auto parentBox = AceType::DynamicCast<RenderBox>(parent);
-            if (parentBox) {
-                maxWidth += parentBox->GetPaddingSize().Width();
-                maxHeight += parentBox->GetPaddingSize().Height();
-            }
+        auto maxWidth = GetLayoutParam().GetMaxSize().Width();
+        auto maxHeight = GetLayoutParam().GetMaxSize().Height();
+        if (NearEqual(maxWidth, Size::INFINITE_SIZE)) {
+            maxWidth = viewPort_.Width();
+        }
+        if (NearEqual(maxHeight, Size::INFINITE_SIZE)) {
+            maxHeight = viewPort_.Height();
         }
         layer_ = AceType::MakeRefPtr<Flutter::ClipLayer>(0.0, maxWidth, 0.0, maxHeight, Flutter::Clip::HARD_EDGE);
     }
@@ -43,6 +41,17 @@ RenderLayer FlutterRenderSingleChildScroll::GetRenderLayer()
 
 void FlutterRenderSingleChildScroll::Paint(RenderContext& context, const Offset& offset)
 {
+    auto maxWidth = viewPort_.Width();
+    auto maxHeight = viewPort_.Height();
+    auto parent = GetParent().Upgrade();
+    if (parent) {
+        auto parentBox = AceType::DynamicCast<RenderBox>(parent);
+        if (parentBox) {
+            maxWidth += parentBox->GetPaddingSize().Width();
+            maxHeight += parentBox->GetPaddingSize().Height();
+        }
+    }
+    layer_->SetClip(0.0, maxWidth, 0.0, maxHeight, Flutter::Clip::HARD_EDGE);
     RenderNode::Paint(context, offset);
 
     const auto renderContext = static_cast<FlutterRenderContext*>(&context);

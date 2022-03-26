@@ -56,6 +56,7 @@ void FlutterRenderSwiper::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
+        SystemProperties::GetDeviceType() == DeviceType::TABLET ||
         SystemProperties::GetDeviceType() == DeviceType::CAR) {
         DrawIndicator(context, offset);
     } else {
