@@ -314,10 +314,6 @@ void AceContainer::OnActive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         front->OnActive();
     }
-    auto context = container->GetPipelineContext();
-    if (!context) {
-        return;
-    }
 }
 
 void AceContainer::OnInactive(int32_t instanceId)

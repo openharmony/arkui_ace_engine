@@ -588,6 +588,8 @@ public:
 
     void FlushFocus();
 
+    void WindowFocus(bool isFocus) const;
+
     void SetIsRightToLeft(bool isRightToLeft)
     {
         isRightToLeft_ = isRightToLeft;

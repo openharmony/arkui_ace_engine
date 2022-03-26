@@ -38,6 +38,7 @@ public:
     RefPtr<Element> CreateElement() override;
     RefPtr<RenderNode> CreateRenderNode() override;
     void BuildInnerChild();
+    std::list<RefPtr<Component>> BuildTitleChildren(bool isFloating, bool isFocus = true);
 
     RefPtr<ImageComponent> GetTitleIcon() const
     {
@@ -49,31 +50,18 @@ public:
         return titleLabel_;
     }
 
-    RefPtr<RowComponent> GetTitleChildrenRow() const
-    {
-        return titleChildrenRow_;
-    }
-
-    RefPtr<RowComponent> GetFloatingTitleChildrenRow() const
-    {
-        return floatingTitleChildrenRow_;
-    }
-
 private:
     RefPtr<Component> BuildTitle();
     RefPtr<Component> BuildFloatingTitle();
     RefPtr<Component> BuildContent();
     RefPtr<ButtonComponent> BuildControlButton(
-        InternalResource::ResourceId icon, std::function<void()>&& clickCallback);
-    std::list<RefPtr<Component>> BuildTitleChildren(bool isFloating);
+        InternalResource::ResourceId icon, std::function<void()>&& clickCallback, bool isFocus);
     static RefPtr<Component> SetPadding(
         const RefPtr<Component>& component, const Dimension& leftPadding, const Dimension& rightPadding);
 
     WeakPtr<PipelineContext> context_;
     RefPtr<ImageComponent> titleIcon_;
     RefPtr<TextComponent> titleLabel_;
-    RefPtr<RowComponent> titleChildrenRow_;
-    RefPtr<RowComponent> floatingTitleChildrenRow_;
 };
 
 } // namespace OHOS::Ace
