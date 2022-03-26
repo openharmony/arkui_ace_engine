@@ -156,7 +156,7 @@ private:
     void DetonatedBomb();
 
     mutable std::shared_mutex mutex_;
-    int32_t instanceId_;
+    int32_t instanceId_ = 0;
     TaskExecutor::TaskType type_;
     std::string threadName_;
     int32_t loopTime_ = 0;
@@ -364,6 +364,14 @@ void ThreadWatcher::RawReport(RawEventType type) const
         auto engine = EngineHelper::GetEngine(instanceId_);
         message = engine ? engine->GetStacktraceMessage() : "";
     }
+    int32_t tid = 0;
+    auto taskExecutor = taskExecutor_.Upgrade();
+    if (taskExecutor) {
+        tid = taskExecutor->GetTid(type_);
+    }
+    std::string threadInfo = "Blocked thread id = " + std::to_string(tid) + "\n";
+    threadInfo += "JSVM instance id = " + std::to_string(instanceId_) + "\n";
+    message = threadInfo + message;
     EventReport::ANRRawReport(type, AceApplicationInfo::GetInstance().GetUid(),
         AceApplicationInfo::GetInstance().GetPackageName(), AceApplicationInfo::GetInstance().GetProcessName(),
         message);
