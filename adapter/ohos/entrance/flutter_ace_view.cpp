@@ -208,7 +208,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
     LOGI("ConvertMouseEvent: (x,y): (%{public}f,%{public}f). Button: %{public}d. Action: %{public}d. "
          "DeviceType: %{public}d. PressedButton: %{public}d. Time: %{public}lld",
         events.x, events.y, events.button, events.action, events.sourceType, events.pressedButtons,
-        pointerEvent->GetActionTime());
+        (long long)pointerEvent->GetActionTime());
 }
 
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event)
@@ -233,7 +233,8 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     event.time = time;
     LOGI("ConvertAxisEvent: (x,y): (%{public}f,%{public}f). HorizontalAxis: %{public}f. VerticalAxis: %{public}f. "
          "DeviceType: %{public}d. Time: %{public}lld",
-        event.x, event.y, event.horizontalAxis, event.verticalAxis, event.sourceType, pointerEvent->GetActionTime());
+        event.x, event.y, event.horizontalAxis, event.verticalAxis, event.sourceType,
+        (long long)pointerEvent->GetActionTime());
 }
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
