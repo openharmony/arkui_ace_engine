@@ -68,6 +68,7 @@ public:
 
     static RefPtr<JsAcePage> GetRunningPage(JSContext* ctx);
     static RefPtr<JsAcePage> GetStagingPage(JSContext* ctx);
+    static JSContext* GetCurrentContext();
 
     void SetStagingPage(const RefPtr<JsAcePage>& page);
 
