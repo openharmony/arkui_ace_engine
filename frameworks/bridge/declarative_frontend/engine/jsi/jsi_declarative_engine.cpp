@@ -725,6 +725,7 @@ void JsiDeclarativeEngineInstance::RootViewHandle(panda::Local<panda::ObjectRef>
 void JsiDeclarativeEngineInstance::DestroyRootViewHandle(int32_t pageId)
 {
     CHECK_RUN_ON(JS);
+    JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     if (rootViewMap_.count(pageId) != 0) {
         auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
         if (!arkRuntime) {
@@ -732,8 +733,10 @@ void JsiDeclarativeEngineInstance::DestroyRootViewHandle(int32_t pageId)
             return;
         }
         panda::Local<panda::ObjectRef> rootView = rootViewMap_[pageId].ToLocal(arkRuntime->GetEcmaVm());
-        JSView* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
-        jsView->Destroy(nullptr);
+        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
+        if (jsView != nullptr) {
+            jsView->Destroy(nullptr);
+        }
         rootViewMap_[pageId].FreeGlobalHandleAddr();
         rootViewMap_.erase(pageId);
     }
@@ -742,6 +745,7 @@ void JsiDeclarativeEngineInstance::DestroyRootViewHandle(int32_t pageId)
 void JsiDeclarativeEngineInstance::DestroyAllRootViewHandle()
 {
     CHECK_RUN_ON(JS);
+    JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     if (rootViewMap_.size() > 0) {
         LOGI("DestroyAllRootViewHandle release left %{private}zu views ", rootViewMap_.size());
     }
@@ -753,8 +757,10 @@ void JsiDeclarativeEngineInstance::DestroyAllRootViewHandle()
     for (const auto& pair : rootViewMap_) {
         auto globalRootView = pair.second;
         panda::Local<panda::ObjectRef> rootView = globalRootView.ToLocal(arkRuntime->GetEcmaVm());
-        JSView* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
-        jsView->Destroy(nullptr);
+        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
+        if (jsView != nullptr) {
+            jsView->Destroy(nullptr);
+        }
         globalRootView.FreeGlobalHandleAddr();
     }
     rootViewMap_.clear();

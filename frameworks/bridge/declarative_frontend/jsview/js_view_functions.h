@@ -66,7 +66,7 @@ public:
     }
 
 private:
-    JSWeak<JSVal> jsObject_;
+    JSWeak<JSObject> jsObject_;
     JSWeak<JSFunc> jsAppearFunc_;
     JSWeak<JSFunc> jsDisappearFunc_;
     JSWeak<JSFunc> jsAboutToRenderFunc_;

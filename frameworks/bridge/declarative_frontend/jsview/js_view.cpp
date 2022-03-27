@@ -61,7 +61,9 @@ RefPtr<OHOS::Ace::Component> JSView::CreateComponent()
         }
         if (jsView->element_.Invalid()) {
             ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
-            jsView->jsViewFunction_->ExecuteAppear();
+            if (jsView->jsViewFunction_) {
+                jsView->jsViewFunction_->ExecuteAppear();
+            }
         }
         jsView->element_ = element;
         // add render function callback to element. when the element rebuilds due
@@ -112,15 +114,15 @@ RefPtr<OHOS::Ace::Component> JSView::InternalRender(const RefPtr<Component>& par
     {
         ACE_SCORING_EVENT("Component[" + viewId_ + "].AboutToRender");
         jsViewFunction_->ExecuteAboutToRender();
-        }
+    }
     {
         ACE_SCORING_EVENT("Component[" + viewId_ + "].Build");
         jsViewFunction_->ExecuteRender();
-        }
+    }
     {
         ACE_SCORING_EVENT("Component[" + viewId_ + "].OnRenderDone");
         jsViewFunction_->ExecuteOnRenderDone();
-        }
+    }
     CleanUpAbandonedChild();
     jsViewFunction_->Destroy(this);
     auto buildComponent = ViewStackProcessor::GetInstance()->Finish();
@@ -171,7 +173,12 @@ void JSView::Destroy(JSView* parentCustomView)
 void JSView::Create(const JSCallbackInfo& info)
 {
     if (info[0]->IsObject()) {
-        JSRefPtr<JSView> view = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+        auto* view = object->Unwrap<JSView>();
+        if (view == nullptr) {
+            LOGE("JSView is null");
+            return;
+        }
         ViewStackProcessor::GetInstance()->Push(view->CreateComponent(), true);
     } else {
         LOGE("JSView Object is expected.");
@@ -209,8 +216,7 @@ void JSView::FindChildById(const JSCallbackInfo& info)
     LOGD("JSView::FindChildById");
     if (info[0]->IsNumber() || info[0]->IsString()) {
         std::string viewId = info[0]->ToString();
-        JSRefPtr<JSView> jsView = GetChildById(viewId);
-        info.SetReturnValue(jsView.Get());
+        info.SetReturnValue(GetChildById(viewId));
     } else {
         LOGE("JSView FindChildById with invalid arguments.");
         JSException::Throw("%s", "JSView FindChildById with invalid arguments.");
@@ -237,9 +243,13 @@ void JSView::ConstructorCallback(const JSCallbackInfo& info)
         info.SetReturnValue(AceType::RawPtr(instance));
         if (!info[1]->IsUndefined() && info[1]->IsObject()) {
             JSRef<JSObject> parentObj = JSRef<JSObject>::Cast(info[1]);
-            JSView* parentView = parentObj->Unwrap<JSView>();
-            parentView->AddChildById(viewId, info.This());
+            auto* parentView = parentObj->Unwrap<JSView>();
+            if (parentView != nullptr) {
+                auto id = parentView->AddChildById(viewId, info.This());
+                instance->id_ = id;
+            }
         }
+        LOGD("JSView ConstructorCallback: %{public}s", instance->id_.c_str());
     } else {
         LOGE("JSView creation with invalid arguments.");
         JSException::Throw("%s", "JSView creation with invalid arguments.");
@@ -248,6 +258,10 @@ void JSView::ConstructorCallback(const JSCallbackInfo& info)
 
 void JSView::DestructorCallback(JSView* view)
 {
+    if (view == nullptr) {
+        LOGE("DestructorCallback failed: the view is nullptr");
+        return;
+    }
     LOGD("JSView(DestructorCallback) start");
     view->DecRefCount();
     LOGD("JSView(DestructorCallback) end");
@@ -257,7 +271,10 @@ void JSView::DestroyChild(JSView* parentCustomView)
 {
     LOGD("JSView::DestroyChild start");
     for (auto child : customViewChildren_) {
-        child.second->Destroy(this);
+        auto* view = child.second->Unwrap<JSView>();
+        if (view != nullptr) {
+            view->Destroy(this);
+        }
         child.second.Reset();
     }
     LOGD("JSView::DestroyChild end");
@@ -273,7 +290,10 @@ void JSView::CleanUpAbandonedChild()
         if (found == lastAccessedViewIds_.end()) {
             LOGD(" found abandoned view with id %{public}s", startIter->first.c_str());
             removedViewIds.emplace_back(startIter->first);
-            startIter->second->Destroy(this);
+            auto* view = startIter->second->Unwrap<JSView>();
+            if (view != nullptr) {
+                view->Destroy(this);
+            }
             startIter->second.Reset();
         }
         ++startIter;
@@ -286,7 +306,7 @@ void JSView::CleanUpAbandonedChild()
     lastAccessedViewIds_.clear();
 }
 
-JSRefPtr<JSView> JSView::GetChildById(const std::string& viewId)
+JSRef<JSObject> JSView::GetChildById(const std::string& viewId)
 {
     auto id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
     auto found = customViewChildren_.find(id);
@@ -294,22 +314,27 @@ JSRefPtr<JSView> JSView::GetChildById(const std::string& viewId)
         ChildAccessedById(id);
         return found->second;
     }
-    return JSRefPtr<JSView>();
+    return {};
 }
 
-void JSView::AddChildById(const std::string& viewId, const JSRefPtr<JSView>& obj)
+std::string JSView::AddChildById(const std::string& viewId, const JSRef<JSObject>& obj)
 {
     auto id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
     customViewChildren_.emplace(id, obj);
     ChildAccessedById(id);
+    return id;
 }
 
 void JSView::RemoveChildGroupById(const std::string& viewId)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     if (viewId.empty()) {
         auto removeView = customViewChildren_.find(viewId);
         if (removeView != customViewChildren_.end()) {
-            removeView->second->Destroy(this);
+            auto* view = removeView->second->Unwrap<JSView>();
+            if (view != nullptr) {
+                view->Destroy(this);
+            }
             removeView->second.Reset();
             customViewChildren_.erase(removeView);
         }
@@ -321,7 +346,10 @@ void JSView::RemoveChildGroupById(const std::string& viewId)
     while (startIter != endIter) {
         if (StartWith(startIter->first, viewId)) {
             removedViewIds.emplace_back(startIter->first);
-            startIter->second->Destroy(this);
+            auto* view = startIter->second->Unwrap<JSView>();
+            if (view != nullptr) {
+                view->Destroy(this);
+            }
             startIter->second.Reset();
         }
         ++startIter;

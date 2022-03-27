@@ -17,6 +17,8 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_BINDINGS_H
 
 #include "ecmascript/napi/include/jsnapi.h"
+
+#include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
 
 namespace __detail__ {
@@ -127,6 +129,8 @@ private:
     static panda::Local<panda::JSValueRef> ConstructorInterceptor(panda::ecmascript::EcmaVM* vm,
         panda::Local<panda::JSValueRef> thisObj, panda::Local<panda::JSValueRef> newTarget,
         const panda::Local<panda::JSValueRef> argv[], int32_t argc, void* data);
+
+    static void DestructorInterceptor(void* nativePtr, void* data);
 
     static panda::Local<panda::JSValueRef> JSConstructorInterceptor(panda::ecmascript::EcmaVM* vm,
         panda::Local<panda::JSValueRef> thisObj, panda::Local<panda::JSValueRef> newTarget,
