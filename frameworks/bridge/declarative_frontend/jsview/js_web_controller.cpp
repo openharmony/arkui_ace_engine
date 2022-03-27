@@ -74,8 +74,8 @@ std::shared_ptr<WebJSValue> ParseValue(
 JSWebController::JSWebController()
 {
     instanceId_ = Container::CurrentId();
+    LOGI("instanceId_ is %{public}d", instanceId_);
 }
-
 
 std::shared_ptr<WebJSValue> JSWebController::GetJavaScriptResult(
     const std::string& objectName,
@@ -208,6 +208,10 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
 void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)
 {
     LOGI("JSWebController excute typescript");
+    if (instanceId_ == -1) {
+        LOGW("ExecuteTypeScript instance is valid");
+        return;
+    }
     ContainerScope scope(instanceId_);
     if (args.Length() < 1 || !args[0]->IsObject()) {
         LOGW("invalid excute params");
