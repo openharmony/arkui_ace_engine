@@ -510,6 +510,7 @@ void ParseCustomPopupParam(
     popupComponent->SetCustomComponent(customComponent);
 
     auto popupParam = popupComponent->GetPopupParam();
+    popupParam->SetUseCustomComponent(true);
     auto placementValue = popupObj->GetProperty("placement");
     if (placementValue->IsNumber()) {
         auto placement = placementValue->ToNumber<int32_t>();

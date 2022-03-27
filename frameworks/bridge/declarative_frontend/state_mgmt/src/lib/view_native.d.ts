@@ -16,6 +16,8 @@
 declare class NativeView {
   constructor(compilerAssignedUniqueChildId: string, parent: View);
   markNeedUpdate(): void;
+  syncInstanceId(): void;
+  restoreInstanceId(): void;
   getContentStorage() : ContentStorage;
   getContext() : Context;
 
