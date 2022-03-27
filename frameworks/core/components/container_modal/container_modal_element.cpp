@@ -29,9 +29,9 @@ namespace {
 constexpr uint32_t COLUMN_CHILD_NUM = 2;
 constexpr uint32_t SPLIT_BUTTON_POSITION = 2;
 constexpr uint32_t BLUR_WINDOW_RADIUS = 100;
-constexpr uint32_t TITLE_POPUP_TIME = 200;          // 200ms
-constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0;   // 5.0px
-constexpr double TITLE_POPUP_DISTANCE = 37.0;       // 37vp height of title
+constexpr uint32_t TITLE_POPUP_TIME = 200;        // 200ms
+constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0; // 5.0px
+constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 
 } // namespace
 
@@ -113,6 +113,12 @@ void ContainerModalElement::ShowTitle(bool isShow)
         LOGE("ContainerModalElement showTitle failed, container box element is null!");
         return;
     }
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("ContainerModalElement showTitle failed, context is null.");
+        return;
+    }
+    windowMode_ = context->FireWindowGetModeCallBack();
 
     // full screen need to hide border and padding.
     auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
@@ -199,6 +205,17 @@ void ContainerModalElement::PerformBuild()
             LOGE("ContainerModalElement PerformBuild failed, stack element is null!");
             return;
         }
+        auto column = AceType::DynamicCast<ColumnElement>(stackElement->GetFirstChild());
+        if (!column || column->GetChildren().size() != COLUMN_CHILD_NUM) {
+            // column should have 2 children, title and content.
+            LOGE("ContainerModalElement PerformBuild failed, column  element is null or children size error!");
+            return;
+        }
+
+        auto titleDisplay = AceType::DynamicCast<DisplayElement>(column->GetFirstChild());
+        if (titleDisplay) {
+            titleBox_ = AceType::DynamicCast<BoxElement>(titleDisplay->GetFirstChild());
+        }
 
         auto tween = AceType::DynamicCast<TweenElement>(stackElement->GetLastChild());
         if (!tween) {
@@ -219,9 +236,9 @@ void ContainerModalElement::PerformBuild()
     }
 
     // The first time it starts up, it needs to hide title if mode as follows.
-    auto mode = context_.Upgrade()->FireWindowGetModeCallBack();
-    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-        mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+    windowMode_ = context_.Upgrade()->FireWindowGetModeCallBack();
+    if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         ShowTitle(false);
     }
 }
@@ -230,14 +247,12 @@ void ContainerModalElement::Update()
 {
     RenderElement::Update();
 
-    const auto container = AceType::DynamicCast<ContainerModalComponent>(component_);
-    if (!container) {
+    containerModalComponent_ = AceType::DynamicCast<ContainerModalComponent>(component_);
+    if (!containerModalComponent_) {
         LOGE("ContainerModalElement update failed, container modal component is null.");
         return;
     }
-    titleChildrenRow_ = container->GetTitleChildrenRow();
-    floatingTitleChildrenRow_ = container->GetFloatingTitleChildrenRow();
-    auto containerBox = AceType::DynamicCast<BoxComponent>(container->GetChild());
+    auto containerBox = AceType::DynamicCast<BoxComponent>(containerModalComponent_->GetChild());
     if (!containerBox) {
         LOGE("ContainerModalElement update failed, container box component is null.");
         return;
@@ -300,14 +315,12 @@ void ContainerModalElement::Update()
 
 bool ContainerModalElement::CanShowFloatingTitle()
 {
-    auto context = context_.Upgrade();
-    if (!context || !floatingTitleDisplay_ || !controller_) {
-        LOGI("Show floating title failed, context, floatingTitleDisplay or controller is null.");
+    if (!floatingTitleDisplay_ || !controller_) {
+        LOGI("Show floating title failed, floatingTitleDisplay or controller is null.");
         return false;
     }
-    auto mode = context->FireWindowGetModeCallBack();
-    if (mode != WindowMode::WINDOW_MODE_FULLSCREEN && mode != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
-        mode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+    if (windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN && windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
+        windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         LOGI("Window is not full screen or split screen, can not show floating title.");
         return false;
     }
@@ -331,17 +344,21 @@ bool ContainerModalElement::CanHideFloatingTitle()
     return true;
 }
 
-void ContainerModalElement::ChangeFloatingTitleIcon()
+void ContainerModalElement::ChangeFloatingTitleIcon(bool isFocus)
 {
-    if (!floatingTitleBox_ || !titleChildrenRow_ || !floatingTitleChildrenRow_) {
+    if (!floatingTitleBox_ || !containerModalComponent_) {
         LOGE("ChangeFloatingTitleIcon failed.");
         return;
     }
-    auto context = context_.Upgrade();
-    if (!context) {
-        LOGE("ChangeFloatingTitleIcon failed, context is null.");
+    auto renderFloatingTitleBox = AceType::DynamicCast<RenderBox>(floatingTitleBox_->GetRenderNode());
+    if (!renderFloatingTitleBox) {
+        LOGE("ChangeFloatingTitleIcon failed, render floating title box is null.");
         return;
     }
+    auto backDecoration = renderFloatingTitleBox->GetBackDecoration();
+    backDecoration->SetBackgroundColor(isFocus ? CONTAINER_BACKGROUND_COLOR : CONTAINER_BACKGROUND_COLOR_LOST_FOCUS);
+    renderFloatingTitleBox->SetBackDecoration(backDecoration);
+
     auto rowElement = AceType::DynamicCast<RowElement>(floatingTitleBox_->GetFirstChild());
     if (!rowElement) {
         LOGE("ChangeFloatingTitleIcon failed, row element is null.");
@@ -356,14 +373,33 @@ void ContainerModalElement::ChangeFloatingTitleIcon()
     std::advance(iterator, SPLIT_BUTTON_POSITION);
     auto splitButton = AceType::DynamicCast<RenderPadding>(*iterator);
 
-    auto mode = context->FireWindowGetModeCallBack();
-    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        rowElement->SetUpdateComponent(floatingTitleChildrenRow_);
+    if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        auto floatingTitleChildrenRow = AceType::MakeRefPtr<RowComponent>(
+            FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(true, isFocus));
+        rowElement->SetUpdateComponent(floatingTitleChildrenRow);
         splitButton->SetHidden(false);
     } else {
-        rowElement->SetUpdateComponent(titleChildrenRow_);
+        auto titleChildrenRow = AceType::MakeRefPtr<RowComponent>(
+            FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false, isFocus));
+        rowElement->SetUpdateComponent(titleChildrenRow);
         splitButton->SetHidden(true);
     }
+}
+
+void ContainerModalElement::ChangeTitleIcon(bool isFocus)
+{
+    if (!titleBox_ || !containerModalComponent_) {
+        LOGE("ChangeTitleIcon failed.");
+        return;
+    }
+    auto rowElement = AceType::DynamicCast<RowElement>(titleBox_->GetFirstChild());
+    if (!rowElement) {
+        LOGE("ChangeTitleIcon failed, row element is null.");
+        return;
+    }
+    auto titleChildrenRow = AceType::MakeRefPtr<RowComponent>(
+        FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false, isFocus));
+    rowElement->SetUpdateComponent(titleChildrenRow);
 }
 
 void ContainerModalElement::BlurWindow(bool isBlur)
@@ -384,6 +420,32 @@ void ContainerModalElement::BlurWindow(bool isBlur)
         containerRenderBox->SetFrontDecoration(frontDecoration);
     } else {
         containerRenderBox->SetFrontDecoration(nullptr);
+    }
+}
+
+void ContainerModalElement::WindowFocus(bool isFocus)
+{
+    auto containerBox = AceType::DynamicCast<BoxElement>(GetFirstChild());
+    if (!containerBox) {
+        LOGE("ContainerModalElement WindowFocus failed, container box element is null!");
+        return;
+    }
+
+    auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
+    if (containerRenderBox) {
+        auto containerDecoration = containerRenderBox->GetBackDecoration();
+        containerDecoration->SetBackgroundColor(
+            isFocus ? CONTAINER_BACKGROUND_COLOR : CONTAINER_BACKGROUND_COLOR_LOST_FOCUS);
+        auto border = containerDecoration->GetBorder();
+        border.SetColor(isFocus ? CONTAINER_BORDER_COLOR : CONTAINER_BORDER_COLOR_LOST_FOCUS);
+        containerDecoration->SetBorder(border);
+        containerRenderBox->SetBackDecoration(containerDecoration);
+    }
+    if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        ChangeFloatingTitleIcon(isFocus);
+    } else {
+        ChangeTitleIcon(isFocus);
     }
 }
 

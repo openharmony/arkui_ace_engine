@@ -628,7 +628,6 @@ void PipelineContext::FlushRender()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushRender();
     }
-
 }
 
 void PipelineContext::FlushRenderFinish()
@@ -2761,6 +2760,22 @@ void PipelineContext::RootLostFocus() const
 {
     if (rootElement_) {
         rootElement_->LostFocus();
+    }
+}
+
+void PipelineContext::WindowFocus(bool isFocus) const
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        LOGW("WindowFocus failed, Window modal is not container.");
+        return;
+    }
+    if (!rootElement_) {
+        LOGW("WindowFocus failed, rootElement_ is null.");
+        return;
+    }
+    auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
+    if (containerModal) {
+        containerModal->WindowFocus(isFocus);
     }
 }
 

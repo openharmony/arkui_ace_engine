@@ -434,6 +434,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 abilityContext->StartAbility(want, REQUEST_CODE);
             }
         }));
+    if (!container) {
+        LOGE("Create container is null.");
+        return;
+    }
     container->SetWindowName(window_->GetWindowName());
 
     // Mark the relationship between windowId and containerId, it is 1:1
@@ -459,7 +463,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetBundlePath(context->GetBundleCodeDir());
     container->SetFilesDataPath(context->GetFilesDir());
 
-    if (window_->IsDecorEnable()) {
+    if (window_->IsDecorEnable() && SystemProperties::GetDeviceType() == DeviceType::TABLET) {
         LOGI("Container modal is enabled.");
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
@@ -493,7 +497,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 #endif
     // set view
     Platform::AceContainer::SetView(flutterAceView, density, 0, 0, window_->GetWindowId(), callback);
-    Platform::FlutterAceView::SurfaceChanged(flutterAceView, 0, 0, config_.Orientation());
+    Platform::FlutterAceView::SurfaceChanged(flutterAceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
     auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
     if (!storage) {
         container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
@@ -519,14 +523,50 @@ void UIContentImpl::Background()
 
 void UIContentImpl::Focus()
 {
-    LOGI("Active UIContent");
+    LOGI("UIContent window focus");
     Platform::AceContainer::OnActive(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("Window focus failed: container is null.");
+        return;
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("Window focus failed: taskExecutor is null.");
+        return;
+    }
+    taskExecutor->PostTask([container]() {
+        auto pipelineContext = container->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGE("Window focus failed, pipeline context is null.");
+            return;
+        }
+        pipelineContext->WindowFocus(true);
+    }, TaskExecutor::TaskType::UI);
 }
 
 void UIContentImpl::UnFocus()
 {
-    LOGI("Inactive UIContent");
+    LOGI("UIContent window unFocus");
     Platform::AceContainer::OnInactive(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("Window unFocus failed: container is null.");
+        return;
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("Window unFocus failed: taskExecutor is null.");
+        return;
+    }
+    taskExecutor->PostTask([container]() {
+        auto pipelineContext = container->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGE("Window unFocus failed, pipeline context is null.");
+            return;
+        }
+        pipelineContext->WindowFocus(false);
+    }, TaskExecutor::TaskType::UI);
 }
 
 void UIContentImpl::Destroy()
@@ -627,8 +667,6 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
                 static_cast<WindowSizeChangeReason>(reason));
         },
         TaskExecutor::TaskType::PLATFORM);
-    config_ = config;
-    updateConfig_ = true;
 }
 
 void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode)
@@ -639,18 +677,25 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode)
         LOGE("UpdateWindowMode failed, get container(id=%{public}d) failed", instanceId_);
         return;
     }
-    auto pipelineContext = container->GetPipelineContext();
-    if (!pipelineContext) {
-        LOGE("UpdateWindowMode failed, pipeline context is null.");
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("UpdateWindowMode failed: taskExecutor is null.");
         return;
     }
-    if (mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FULLSCREEN ||
-        mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-        mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        pipelineContext->ShowContainerTitle(false);
-    } else {
-        pipelineContext->ShowContainerTitle(true);
-    }
+    taskExecutor->PostTask([container, mode]() {
+        auto pipelineContext = container->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGE("UpdateWindowMode failed, pipeline context is null.");
+            return;
+        }
+        if (mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FULLSCREEN ||
+            mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            pipelineContext->ShowContainerTitle(false);
+        } else {
+            pipelineContext->ShowContainerTitle(true);
+        }
+    }, TaskExecutor::TaskType::UI);
 }
 
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
