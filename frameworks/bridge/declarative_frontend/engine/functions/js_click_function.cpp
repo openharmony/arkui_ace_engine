@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ void JsClickFunction::Execute()
 #ifdef USE_V8_ENGINE
     V8DeclarativeEngineInstance::TriggerPageUpdate();
 #elif USE_QUICKJS_ENGINE
-    QJSDeclarativeEngineInstance::TriggerPageUpdate(QJSContext::Current());
+    QJSDeclarativeEngineInstance::TriggerPageUpdate(QJSDeclarativeEngineInstance::GetCurrentContext());
 #elif USE_ARK_ENGINE
     JsiDeclarativeEngineInstance::TriggerPageUpdate(JsiDeclarativeEngineInstance::GetCurrentRuntime());
 #endif

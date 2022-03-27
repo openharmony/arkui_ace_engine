@@ -352,8 +352,10 @@ template("ace_core_source_set") {
 
     if (defined(config.form_components_support) &&
         config.form_components_support) {
-      sources += [ "common/form_manager.cpp" ]
-      deps += [ "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform" ]
+      if (!use_mingw_win && !use_mac) {
+        sources += [ "common/form_manager.cpp" ]
+        deps += [ "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform" ]
+      }
     }
 
     if (defined(config.build_container_scope_lib) &&
