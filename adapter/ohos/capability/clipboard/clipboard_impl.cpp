@@ -33,7 +33,7 @@ void ClipboardImpl::SetData(const std::string& data)
             [data]() {
                 auto pasteData = OHOS::MiscServices::PasteboardClient::GetInstance()->CreatePlainTextData(data);
                 if (!pasteData) {
-                    LOGE("cteate SystemKeyboardData fail from MiscServices");
+                    LOGE("create SystemKeyboardData fail from MiscServices");
                     return;
                 }
                 OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);

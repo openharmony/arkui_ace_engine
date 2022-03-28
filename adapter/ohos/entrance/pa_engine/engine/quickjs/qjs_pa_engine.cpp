@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -594,12 +594,12 @@ inline std::string GetJsStringVal(JSContext* ctx, JSValueConst value)
 
 inline std::string ToJSONStringInt(std::string sKey, std::string sValue)
 {
-    char szDoubleQutoes[] = "\"";
+    char szDoubleQuotes[] = "\"";
     char szColon[] = ":";
     std::string strResult;
-    strResult.append(szDoubleQutoes);
+    strResult.append(szDoubleQuotes);
     strResult.append(sKey);
-    strResult.append(szDoubleQutoes);
+    strResult.append(szDoubleQuotes);
 
     strResult.append(szColon);
     strResult.append(sValue);
@@ -608,17 +608,17 @@ inline std::string ToJSONStringInt(std::string sKey, std::string sValue)
 
 inline std::string ToJSONString(std::string sKey, std::string sValue)
 {
-    char szDoubleQutoes[] = "\"";
+    char szDoubleQuotes[] = "\"";
     char szColon[] = ":";
     std::string strResult;
-    strResult.append(szDoubleQutoes);
+    strResult.append(szDoubleQuotes);
     strResult.append(sKey);
-    strResult.append(szDoubleQutoes);
+    strResult.append(szDoubleQuotes);
 
     strResult.append(szColon);
-    strResult.append(szDoubleQutoes);
+    strResult.append(szDoubleQuotes);
     strResult.append(sValue);
-    strResult.append(szDoubleQutoes);
+    strResult.append(szDoubleQuotes);
     return strResult;
 }
 
@@ -649,7 +649,7 @@ void QjsPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
 
     JS_FreeValue(ctx, CppToJSRet);
 
-    // call onstart
+    // call onStart
     JSValue paObj;
     paObj = Framework::QJSUtils::GetPropertyStr(ctx, globalObj, "pa");
     if (!JS_IsObject(paObj)) {

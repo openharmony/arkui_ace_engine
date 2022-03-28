@@ -356,7 +356,7 @@ void AceAbility::OnStart(const Want& want)
     Platform::AceContainer::SetView(flutterAceView, density_, width, height, window->GetWindowId(), callback);
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
 
-    // action event hadnler
+    // action event handler
     auto&& actionEventHandler = [this](const std::string& action) {
         LOGI("on Action called to event handler");
 
