@@ -41,11 +41,6 @@ HdcRegister::HdcRegister(): registerHandler_(nullptr)
     LoadRegisterSo();
 }
 
-HdcRegister::~HdcRegister()
-{
-    StopHdcRegister();
-}
-
 HdcRegister& HdcRegister::Get()
 {
     static HdcRegister hdcRegister;
