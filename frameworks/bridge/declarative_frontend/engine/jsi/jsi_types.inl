@@ -14,7 +14,7 @@
  */
 
 #include "frameworks/base/utils/string_utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_runtime.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_ref.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 

@@ -50,7 +50,11 @@ class PandaFunctionData;
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ArkJSRuntime final : public JsRuntime, public std::enable_shared_from_this<ArkJSRuntime> {
 public:
+#if !defined(WINDOWS_PLATFORM)
+    bool StartDebugger(const char *libraryPath, EcmaVM *vm) const;
+#endif
     bool Initialize(const std::string &libraryPath, bool isDebugMode) override;
+    bool InitializeFromExistVM(EcmaVM* vm);
     void Reset() override;
     void SetLogPrint(LOG_PRINT out) override;
     shared_ptr<JsValue> EvaluateJsCode(const std::string &src) override;
@@ -85,7 +89,8 @@ private:
     LOG_PRINT print_ { nullptr };
     UncaughtExceptionCallback uncaughtErrorHandler_ { nullptr };
     std::string libPath_ {};
-    bool isDebugMode_ {true};
+    bool usingExistVM_ = false;
+    bool isDebugMode_ = true;
 };
 
 class PandaFunctionData {

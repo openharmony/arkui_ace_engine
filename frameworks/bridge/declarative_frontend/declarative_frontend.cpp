@@ -568,16 +568,6 @@ void DeclarativeFrontend::TransferJsResponseDataPreview(int callbackId, int32_t 
 {
     delegate_->TransferJsResponseDataPreview(callbackId, code, responseData);
 }
-
-void DeclarativeFrontend::ReplaceJSContent(const std::string& url, const std::string componentName) const
-{
-    auto jsEngineInstance = AceType::DynamicCast<Framework::QJSDeclarativeEngine>(jsEngine_);
-    if (!jsEngineInstance) {
-        LOGE("jsEngineInstance is null");
-        return;
-    }
-    jsEngineInstance->ReplaceJSContent(url, componentName);
-}
 #endif
 
 void DeclarativeFrontend::TransferJsPluginGetError(int callbackId, int32_t errorCode, std::string&& errorMessage) const

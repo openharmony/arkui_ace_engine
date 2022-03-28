@@ -90,7 +90,9 @@ template("declarative_js_engine") {
     part_name = ace_engine_part
     defines += invoker.defines
     if (target_cpu == "arm64") {
-      defines += [ "_ARM64_" ]
+      if (!is_mingw) {
+        defines += [ "_ARM64_" ]
+      }
     }
 
     deps = []

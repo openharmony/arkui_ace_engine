@@ -584,4 +584,12 @@ void JsiGroupJsBridge::Destroy()
     runtime_.reset();
 }
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+void JsiGroupJsBridge::TriggerModuleJsCallbackPreview(
+    int32_t callbackId, int32_t code, OHOS::Ace::ResponseData responseData)
+{
+    LOGE("WAIT FOR IMPLEMENTED");
+}
+#endif
+
 } // namespace OHOS::Ace::Framework

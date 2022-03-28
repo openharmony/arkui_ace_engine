@@ -20,8 +20,8 @@
 #include <unordered_map>
 
 #include "base/utils/noncopyable.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/ark/include/js_runtime.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/ark/include/js_value.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/js_value.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_timer_module.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_syscap_module.h"
 

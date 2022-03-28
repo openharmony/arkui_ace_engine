@@ -329,7 +329,9 @@ void JsiCanvasBridge::HandleJsContext(const shared_ptr<JsRuntime>& runtime, Node
         { "createImageData", JsCreateImageData },
         { "putImageData", JsPutImageData },
         { "getImageData", JsGetImageData },
+#ifdef PIXEL_MAP_SUPPORTED
         { "getPixelMap", JsGetPixelMap },
+#endif
         { "getJsonData", JsGetJsonData },
         { "transferFromImageBitmap", JsTransferFromImageBitmap },
         { "drawBitmapMesh", JsDrawBitmapMesh },

@@ -46,11 +46,28 @@ template("js_engine_ark") {
       "jsi_list_bridge.cpp",
       "jsi_offscreen_canvas_bridge.cpp",
       "jsi_stepper_bridge.cpp",
-      "jsi_utils.cpp",
       "jsi_xcomponent_bridge.cpp",
     ]
 
-    deps = [ "//third_party/jsframework:ark_build" ]
+    if (defined(config.use_build_in_js_engine) &&
+        config.use_build_in_js_engine) {
+      defines += [ "BUILT_IN_JS_ENGINE" ]
+    }
+
+    deps = []
+    if (defined(config.build_for_preview) && config.build_for_preview) {
+      sources += [ "jsi_utils_windows.cpp" ]
+      deps +=
+          [ "//foundation/ace/napi/native_engine/impl/ark:ace_napi_impl_ark" ]
+    } else {
+      sources += [ "jsi_utils.cpp" ]
+      deps += [ "//third_party/jsframework:ark_build" ]
+      external_deps = [
+        "multimedia_image_standard:image",
+        "multimedia_image_standard:image_native",
+        "napi:ace_napi",
+      ]
+    }
     if (target_cpu == "arm64") {
       defines += [ "APP_USE_ARM64" ]
     } else if (target_cpu == "arm") {
@@ -59,11 +76,6 @@ template("js_engine_ark") {
     deps += [
       "//ark/js_runtime:libark_jsruntime",
       "//foundation/ace/napi:ace_napi_ark",
-    ]
-    external_deps = [
-      "multimedia_image_standard:image",
-      "multimedia_image_standard:image_native",
-      "napi:ace_napi",
     ]
   }
 }
