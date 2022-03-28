@@ -169,6 +169,12 @@ public:
         visualState_ = VisualState::NOTSET;
     }
 
+    void ClearStack()
+    {
+        auto emptyStack = std::stack<std::unordered_map<std::string, RefPtr<Component>>>();
+        componentsStack_.swap(emptyStack);
+    }
+
 private:
     ViewStackProcessor();
 

@@ -100,12 +100,14 @@ void SelectPopupComponent::InnerHideDialog(uint32_t index)
     }
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    auto parentNode = node_->GetParentNode();
-    if (parentNode) {
-        parentNode->SetLeft(0);
-        parentNode->SetTop(0);
-        parentNode->SetWidth(0);
-        parentNode->SetHeight(0);
+    if (node_) {
+        auto parentNode = node_->GetParentNode();
+        if (parentNode) {
+            parentNode->SetLeft(0);
+            parentNode->SetTop(0);
+            parentNode->SetWidth(0);
+            parentNode->SetHeight(0);
+        }
     }
 #endif
     auto manager = manager_.Upgrade();
