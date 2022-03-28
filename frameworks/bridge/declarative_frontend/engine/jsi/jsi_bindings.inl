@@ -366,7 +366,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalJSMemberFunctionCallback(pa
     T* instance = static_cast<T*>(ptr);
     int index = *(static_cast<int*>(data));
     auto binding = ThisJSClass::GetFunctionBinding(index);
-    LOGD("InternalmemberFunctionCallback: Calling %s::%s", ThisJSClass::JSName(), binding->Name());
+    LOGD("InternalmemberFunctionCallback: Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
 
     auto fnPtr = static_cast<FunctionBinding<T, void, const JSCallbackInfo&>*>(binding)->Get();
     JsiCallbackInfo info(vm, thisObj, argc, argv);
@@ -531,18 +531,26 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSConstructorInterceptor(panda::Ecm
         jsConstructor_(info);
         auto retVal = info.GetReturnValue();
         if (retVal.valueless_by_exception()) {
-            LOGE("Constructor of %s must return a value!", ThisJSClass::JSName());
+            LOGE("Constructor of %{public}s must return a value!", ThisJSClass::JSName());
             return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
         }
         auto instance = std::get_if<void*>(&retVal);
         if (instance) {
             Local<ObjectRef>(thisObj)->SetNativePointerFieldCount(1);
-            Local<ObjectRef>(thisObj)->SetNativePointerField(0, *instance);
-            LOGD("Constructed %s", ThisJSClass::JSName());
+            Local<ObjectRef>(thisObj)->SetNativePointerField(0, *instance, &JsiClass<C>::DestructorInterceptor);
+            LOGD("Constructed %{public}s", ThisJSClass::JSName());
             return thisObj;
         }
     }
     return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
+}
+
+template<typename C>
+void JsiClass<C>::DestructorInterceptor(void* nativePtr, void* data)
+{
+    if (jsDestructor_) {
+        jsDestructor_(reinterpret_cast<C*>(nativePtr));
+    }
 }
 
 template<typename C>

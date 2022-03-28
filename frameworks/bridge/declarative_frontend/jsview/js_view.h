@@ -36,7 +36,7 @@ class JSView;
 class JSView : public JSViewAbstract, public Referenced {
 public:
     JSView(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction);
-    virtual ~JSView();
+    ~JSView() override;
 
     RefPtr<OHOS::Ace::Component> InternalRender(const RefPtr<Component>& parent);
     void Destroy(JSView* parentCustomView);
@@ -75,7 +75,7 @@ public:
      * Retries the customview child for recycling
      * always use FindChildById to be certain before calling this method
      */
-    JSRefPtr<JSView> GetChildById(const std::string& viewId);
+    JSRef<JSObject> GetChildById(const std::string& viewId);
 
     void FindChildById(const JSCallbackInfo& info);
 
@@ -119,7 +119,7 @@ public:
      * and it can be reterieved for recycling in next render function
      * In next render call if this child is not recycled, it will be destroyed.
      */
-    void AddChildById(const std::string& viewId, const JSRefPtr<JSView>& obj);
+    std::string AddChildById(const std::string& viewId, const JSRef<JSObject>& obj);
 
     void RemoveChildGroupById(const std::string& viewId);
 
@@ -156,9 +156,11 @@ private:
 
     RefPtr<ViewFunctions> jsViewFunction_;
 
+    // unique view id for custom view to recycle.
+    std::string id_;
     // hold handle to the native and javascript object to keep them alive
     // until they are abandoned
-    std::unordered_map<std::string, JSRefPtr<JSView>> customViewChildren_;
+    std::unordered_map<std::string, JSRef<JSObject>> customViewChildren_;
     // a set of valid viewids on a renderfuntion excution
     // its cleared after cleaning up the abandoned child.
     std::unordered_set<std::string> lastAccessedViewIds_;
