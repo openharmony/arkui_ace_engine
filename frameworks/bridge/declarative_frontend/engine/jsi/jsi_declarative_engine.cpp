@@ -1425,7 +1425,9 @@ std::string JsiDeclarativeEngine::GetStacktraceMessage()
     arkNativeEngine->SuspendVM();
     std::string stack = arkNativeEngine->BuildNativeAndJsBackStackTrace();
     arkNativeEngine->ResumeVM();
-
+    if (stack.empty()) {
+        return "JS stack backtrace is empty";
+    }
     auto runningPage = engineInstance_ ? engineInstance_->GetRunningPage() : nullptr;
     return JsiBaseUtils::TransSourceStack(runningPage, stack);
 }
