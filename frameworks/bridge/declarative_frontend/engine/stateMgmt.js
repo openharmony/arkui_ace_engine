@@ -1746,6 +1746,8 @@ class View extends NativeView {
     }
     propertyHasChanged(info) {
         if (info) {
+            // need to sync container instanceId to switch instanceId in C++ side.
+            this.syncInstanceId();
             if (this.propsUsedForRender.has(info)) {
                 console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View needs update`);
                 this.markNeedUpdate();
@@ -1758,6 +1760,7 @@ class View extends NativeView {
                 console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. calling @Watch function`);
                 cb.call(this, info);
             }
+            this.restoreInstanceId();
         } // if info avail.
     }
     propertyRead(info) {

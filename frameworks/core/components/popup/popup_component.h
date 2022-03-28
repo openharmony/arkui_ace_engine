@@ -177,12 +177,23 @@ public:
         enableArrow_ = enableArrow;
     }
 
+    bool IsUseCustom() const
+    {
+        return useCustom_;
+    }
+
+    void SetUseCustomComponent(bool useCustom)
+    {
+        useCustom_ = useCustom;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
     bool enableArrow_ = true;
     bool isMaskColorSetted_ = false;
     bool isBackgrouhdColorSetted_ = false;
+    bool useCustom_ = false;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;
