@@ -279,6 +279,7 @@ void QJSDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::s
 #endif
 RefPtr<Component> QJSDeclarativeEngine::GetNewComponentWithJsCode(const std::string& jsCode)
 {
+    ViewStackProcessor::GetInstance()->ClearStack();
     bool result = engineInstance_->InitAceModules(jsCode.c_str(), jsCode.length(), "AddComponent");
     if (!result) {
         LOGE("execute addComponent failed,script=[%{public}s]", jsCode.c_str());
