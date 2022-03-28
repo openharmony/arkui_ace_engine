@@ -83,10 +83,8 @@ void RenderWeb::PerformLayout()
     }
 
     // render web do not support child.
-    drawSize_ = Size(GetLayoutParam().GetMaxSize().Width(),
-                     (GetLayoutParam().GetMaxSize().Height() == Size::INFINITE_SIZE) ?
-                     Size::INFINITE_SIZE :
-                     (GetLayoutParam().GetMaxSize().Height()));
+    drawSize_ = Size(GetLayoutParam().GetMaxSize().Width(), GetLayoutParam().GetMaxSize().Height());
+
     SetLayoutSize(drawSize_);
     SetNeedLayout(false);
     MarkNeedRender();
