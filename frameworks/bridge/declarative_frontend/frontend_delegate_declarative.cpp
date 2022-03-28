@@ -870,9 +870,10 @@ void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const
         LOGD("router.Back pagePath = %{private}s", pagePath.c_str());
         if (!pagePath.empty()) {
             bool isRestore = false;
-            pageId_ = GetPageIdByUrl(target.url, isRestore);
+            pageId_ = GetPageIdByUrl(pagePath, isRestore);
             if (isRestore) {
                 LoadPage(pageId_, PageTarget(pagePath), false, params, true);
+                return;
             }
             if (!params.empty()) {
                 std::lock_guard<std::mutex> lock(mutex_);
@@ -1859,7 +1860,7 @@ std::string FrontendDelegateDeclarative::GetRunningPageUrl() const
     return pageUrl;
 }
 
-int32_t FrontendDelegateDeclarative::GetPageIdByUrl(const std::string& url, bool isRestore)
+int32_t FrontendDelegateDeclarative::GetPageIdByUrl(const std::string& url, bool& isRestore)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     auto pageIter = std::find_if(std::rbegin(pageRouteStack_), std::rend(pageRouteStack_),
