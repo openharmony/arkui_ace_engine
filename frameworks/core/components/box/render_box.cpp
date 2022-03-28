@@ -172,21 +172,31 @@ void RenderBox::Update(const RefPtr<Component>& component)
             stateAttributeList_ = box->GetStateAttributes();
         }
         OnStatusStyleChanged(disabled_ ? VisualState::DISABLED : VisualState::NORMAL);
+
+        onTouchUpId_ = box->GetOnTouchUpId();
+        onTouchDownId_ = box->GetOnTouchDownId();
+        onTouchMoveId_ = box->GetOnTouchMoveId();
         auto wp = AceType::WeakClaim(this);
         touchRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
-        touchRecognizer_->SetOnTouchDown([wp](const TouchEventInfo&) {
+        touchRecognizer_->SetOnTouchDown([wp](const TouchEventInfo& touchInfo) {
             auto box = wp.Upgrade();
             if (box) {
                 box->HandleTouchEvent(true);
             }
+            if (box->onTouchDownId_) {
+                box->onTouchDownId_(touchInfo);
+            }
         });
-        touchRecognizer_->SetOnTouchUp([wp](const TouchEventInfo&) {
+        touchRecognizer_->SetOnTouchUp([wp](const TouchEventInfo& touchInfo) {
             auto box = wp.Upgrade();
             if (box) {
                 box->HandleTouchEvent(false);
             }
+            if (box->onTouchUpId_) {
+                box->onTouchUpId_(touchInfo);
+            }
         });
-        touchRecognizer_->SetOnTouchMove(box->GetOnTouchMoveId());
+        touchRecognizer_->SetOnTouchMove(onTouchMoveId_);
     }
     // In each update, the extensions will be updated with new one.
     if (eventExtensions_ && eventExtensions_->HasOnAreaChangeExtension()) {

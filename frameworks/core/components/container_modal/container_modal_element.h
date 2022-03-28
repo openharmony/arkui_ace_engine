@@ -49,6 +49,8 @@ private:
     RefPtr<BoxElement> titleBox_;
     RefPtr<ContainerModalComponent> containerModalComponent_;
     float density_ = 1.0f;
+    float moveX_ = 0.0f;
+    float moveY_ = 0.0f;
 };
 
 } // namespace OHOS::Ace

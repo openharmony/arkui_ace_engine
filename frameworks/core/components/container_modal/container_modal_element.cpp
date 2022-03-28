@@ -31,6 +31,8 @@ constexpr uint32_t SPLIT_BUTTON_POSITION = 2;
 constexpr uint32_t BLUR_WINDOW_RADIUS = 100;
 constexpr uint32_t TITLE_POPUP_TIME = 200;        // 200ms
 constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0; // 5.0px
+constexpr double MOVE_POPUP_DISTANCE_X = 10.0;    // 10.0px
+constexpr double MOVE_POPUP_DISTANCE_Y = 20.0;    // 20.0px
 constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 
 } // namespace
@@ -259,8 +261,17 @@ void ContainerModalElement::Update()
     }
     auto context = context_.Upgrade();
     if (context) {
-        density_ = context->GetDensity();
+        density_ = (float)context->GetDensity();
     }
+
+    containerBox->SetOnTouchDownId([week = WeakClaim(this)](const TouchEventInfo& info) {
+        auto containerElement = week.Upgrade();
+        if (containerElement && info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <=
+                                    (TITLE_POPUP_DISTANCE * containerElement->density_)) {
+            containerElement->moveX_ = (float)info.GetChangedTouches().begin()->GetGlobalLocation().GetX();
+            containerElement->moveY_ = (float)info.GetChangedTouches().begin()->GetGlobalLocation().GetY();
+        }
+    });
 
     // touch top to pop-up title bar.
     containerBox->SetOnTouchMoveId([week = WeakClaim(this)](const TouchEventInfo& info) {
@@ -268,8 +279,13 @@ void ContainerModalElement::Update()
         if (!containerElement || !containerElement->CanShowFloatingTitle()) {
             return;
         }
-        if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <=
+        if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() >
             (TITLE_POPUP_DISTANCE * containerElement->density_)) {
+            return;
+        }
+        auto deltaMoveX = fabs(info.GetChangedTouches().begin()->GetGlobalLocation().GetX() - containerElement->moveX_);
+        auto deltaMoveY = info.GetChangedTouches().begin()->GetGlobalLocation().GetY() - containerElement->moveY_;
+        if (deltaMoveX <= MOVE_POPUP_DISTANCE_X && deltaMoveY >= MOVE_POPUP_DISTANCE_Y) {
             containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
             containerElement->controller_->ClearStopListeners();
             containerElement->controller_->Forward();

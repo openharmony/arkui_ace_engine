@@ -190,7 +190,7 @@ private:
     RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
 
     UploadSuccessCallback uploadSuccessCallback_;
-    double dipScale_ = 0.;
+    double dipScale_ = 0.0;
 };
 
 } // namespace OHOS::Ace
