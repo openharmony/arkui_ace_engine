@@ -1814,7 +1814,7 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
 {
     static const bool IsWindowSizeAnimationEnabled = SystemProperties::IsWindowSizeAnimationEnabled();
     if (!rootElement_ || !rootElement_->GetRenderNode() || !IsWindowSizeAnimationEnabled) {
-        LOGE("RootNodeAnimation: no rootelement found, no animation configured");
+        LOGE("RootNodeAnimation: no root element found, no animation configured");
         SetRootSizeWithWidthHeight(width, height);
         return;
     }
@@ -1822,7 +1822,7 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
     switch (type) {
         case WindowSizeChangeReason::RECOVER:
         case WindowSizeChangeReason::MAXIMIZE: {
-            LOGD("PipelineContext::Rootnodeanimation, width = %{private}d, height = %{private}d", width, height);
+            LOGD("PipelineContext::Root node animation, width = %{private}d, height = %{private}d", width, height);
             AnimationOption option;
             constexpr int32_t duration = 400;
             option.SetDuration(duration);

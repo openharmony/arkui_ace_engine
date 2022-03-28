@@ -17,7 +17,6 @@
 
 #include <atomic>
 #include <cinttypes>
-#include <regex>
 
 #include "ability_context.h"
 #include "ability_info.h"
@@ -41,7 +40,6 @@
 #include "base/geometry/rect.h"
 #include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
@@ -54,28 +52,6 @@ namespace {
 const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
 const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
-
-WindowMode GetWindowMode(OHOS::Rosen::Window* window)
-{
-    if (!window) {
-        LOGE("Get window mode failed, window is null!");
-        return WindowMode::WINDOW_MODE_UNDEFINED;
-    }
-    switch (window->GetMode()) {
-        case OHOS::Rosen::WindowMode::WINDOW_MODE_FULLSCREEN:
-            return WindowMode::WINDOW_MODE_FULLSCREEN;
-        case OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY:
-            return WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
-        case OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY:
-            return WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
-        case OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING:
-            return WindowMode::WINDOW_MODE_FLOATING;
-        case OHOS::Rosen::WindowMode::WINDOW_MODE_PIP:
-            return WindowMode::WINDOW_MODE_PIP;
-        default:
-            return WindowMode::WINDOW_MODE_UNDEFINED;
-    }
-}
 
 } // namespace
 
@@ -715,15 +691,20 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
 
 void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info)
 {
-    LOGE("UIContent InitWindowCallback");
+    LOGI("UIContent InitWindowCallback");
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (!container) {
-        LOGE("get container(id=%{public}d) failed", instanceId_);
+        LOGE("InitWindowCallback failed, container(id=%{public}d) is null.", instanceId_);
         return;
     }
     auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
-        LOGE("get pipeline context failed");
+        LOGE("InitWindowCallback failed, pipelineContext is null.");
+        return;
+    }
+    auto& window = window_;
+    if (!window) {
+        LOGE("InitWindowCallback failed, window is null.");
         return;
     }
     if (info != nullptr) {
@@ -731,53 +712,28 @@ void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::A
         pipelineContext->SetAppIconId(info->iconId);
     }
 
-    auto& window = window_;
-    pipelineContext->SetWindowMinimizeCallBack([&window]() -> bool {
-        if (!window) {
-            return false;
-        }
-        return (OHOS::Rosen::WMError::WM_OK == window->Minimize());
-    });
+    pipelineContext->SetWindowMinimizeCallBack(
+        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Minimize()); });
 
-    pipelineContext->SetWindowMaximizeCallBack([&window]() -> bool {
-        if (!window) {
-            return false;
-        }
-        return (OHOS::Rosen::WMError::WM_OK == window->Maximize());
-    });
+    pipelineContext->SetWindowMaximizeCallBack(
+        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Maximize()); });
 
-    pipelineContext->SetWindowRecoverCallBack([&window]() -> bool {
-        if (!window) {
-            return false;
-        }
-        return (OHOS::Rosen::WMError::WM_OK == window->Recover());
-    });
+    pipelineContext->SetWindowRecoverCallBack(
+        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Recover()); });
 
-    pipelineContext->SetWindowCloseCallBack([&window]() -> bool {
-        if (!window) {
-            return false;
-        }
-        return (OHOS::Rosen::WMError::WM_OK == window->Close());
-    });
+    pipelineContext->SetWindowCloseCallBack(
+        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Close()); });
 
-    pipelineContext->SetWindowStartMoveCallBack([&window]() {
-        if (!window) {
-            return;
-        }
-        window->StartMove();
-    });
+    pipelineContext->SetWindowStartMoveCallBack([window]() { window->StartMove(); });
 
-    pipelineContext->SetWindowSplitCallBack([&window]() -> bool {
-        if (!window) {
-            return false;
-        }
+    pipelineContext->SetWindowSplitCallBack([window]() -> bool {
         return (
             OHOS::Rosen::WMError::WM_OK == window->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
     });
 
-    pipelineContext->SetWindowGetModeCallBack([&window]() -> WindowMode { return GetWindowMode(window); });
+    pipelineContext->SetWindowGetModeCallBack([window]() -> WindowMode { return (WindowMode)window->GetMode(); });
 
-    pipelineContext->SetGetWindowRectImpl([&window]() -> Rect {
+    pipelineContext->SetGetWindowRectImpl([window]() -> Rect {
         Rect rect;
         if (!window) {
             return rect;
