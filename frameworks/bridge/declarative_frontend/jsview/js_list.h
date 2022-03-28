@@ -26,6 +26,8 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& args);
 
+    static void JsWidth(const JSCallbackInfo& info);
+    static void JsHeight(const JSCallbackInfo& info);
     static void ScrollCallback(const JSCallbackInfo& args);
     static void ReachStartCallback(const JSCallbackInfo& args);
     static void ReachEndCallback(const JSCallbackInfo& args);

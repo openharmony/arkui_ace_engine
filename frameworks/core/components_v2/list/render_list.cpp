@@ -233,6 +233,8 @@ void RenderList::Update(const RefPtr<Component>& component)
 
 
     isMultiSelectable_  = component_->GetMultiSelectable();
+    hasHeight_ = component_->GetHasHeight();
+    hasWidth_ = component_->GetHasWidth();
 
     MarkNeedLayout();
 }
@@ -346,7 +348,7 @@ void RenderList::PerformLayout()
     auto layoutSize = SetItemsPosition(mainSize, innerLayout);
 
     // Set layout size of list component itself
-    if (fixedMainSize_) {
+    if ((hasHeight_ && vertical_) || (hasWidth_ && !vertical_)) {
         SetLayoutSize(GetLayoutParam().GetMaxSize());
     } else {
         SetLayoutSize(GetLayoutParam().Constrain(layoutSize));
