@@ -166,6 +166,26 @@ public:
         return onTouchMoveId_;
     }
 
+    void SetOnTouchUpId(const OnTouchEventCallback& onTouchUpId)
+    {
+        onTouchUpId_ = onTouchUpId;
+    }
+
+    const OnTouchEventCallback& GetOnTouchUpId() const
+    {
+        return onTouchUpId_;
+    }
+
+    void SetOnTouchDownId(const OnTouchEventCallback& onTouchDownId)
+    {
+        onTouchDownId_ = onTouchDownId;
+    }
+
+    const OnTouchEventCallback& GetOnTouchDownId() const
+    {
+        return onTouchDownId_;
+    }
+
     RefPtr<Gesture> GetOnClick() const
     {
         return onClickId_;
@@ -337,6 +357,8 @@ private:
     OnHoverCallback onHoverId_;
     OnMouseCallback onMouseId_;
     OnTouchEventCallback onTouchMoveId_;
+    OnTouchEventCallback onTouchUpId_;
+    OnTouchEventCallback onTouchDownId_;
     RefPtr<Gesture> onClickId_;
     RefPtr<Gesture> onLongPressId_;
     RefPtr<Gesture> onDoubleClickId_;
