@@ -104,14 +104,14 @@ bool AceUnwrapInt32FromJS2(napi_env env, napi_value param, int& value)
     return result;
 }
 
-napi_value AceWrapLongToJS(napi_env env, long value)
+napi_value AceWrapLongToJS(napi_env env, int64_t value)
 {
     napi_value result = nullptr;
     NAPI_CALL(env, napi_create_int32(env, value, &result));
     return result;
 }
 
-long AceUnwrapLongFromJS(napi_env env, napi_value param, long defaultValue)
+int64_t AceUnwrapLongFromJS(napi_env env, napi_value param, int64_t defaultValue)
 {
     int value = 0;
     if (napi_get_value_int32(env, param, &value) == napi_ok) {
@@ -121,7 +121,7 @@ long AceUnwrapLongFromJS(napi_env env, napi_value param, long defaultValue)
     }
 }
 
-bool AceUnwrapLongFromJS2(napi_env env, napi_value param, long& value)
+bool AceUnwrapLongFromJS2(napi_env env, napi_value param, int64_t& value)
 {
     bool result = false;
     int natValue = 0;
@@ -323,7 +323,7 @@ bool AceUnwrapArrayInt32FromJS(napi_env env, napi_value param, std::vector<int>&
     return true;
 }
 
-napi_value AceWrapArrayLongToJS(napi_env env, const std::vector<long>& value)
+napi_value AceWrapArrayLongToJS(napi_env env, const std::vector<int64_t>& value)
 {
     napi_value jsArray = nullptr;
     napi_value jsValue = nullptr;
@@ -341,11 +341,11 @@ napi_value AceWrapArrayLongToJS(napi_env env, const std::vector<long>& value)
     return jsArray;
 }
 
-bool AceUnwrapArrayLongFromJS(napi_env env, napi_value param, std::vector<long>& value)
+bool AceUnwrapArrayLongFromJS(napi_env env, napi_value param, std::vector<int64_t>& value)
 {
     uint32_t arraySize = 0;
     napi_value jsValue = nullptr;
-    long natValue = 0;
+    int64_t natValue = 0;
 
     if (!AceIsArrayForNapiValue(env, param, arraySize)) {
         return false;

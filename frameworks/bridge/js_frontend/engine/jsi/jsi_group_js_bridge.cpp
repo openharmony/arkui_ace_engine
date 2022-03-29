@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -229,7 +229,7 @@ shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequestSync(const shared_ptr<JsRu
     auto dispatcher = engine->GetJsMessageDispatcher().Upgrade();
 
     uint8_t* resData = nullptr;
-    long position = 0;
+    int64_t position = 0;
     if (dispatcher) {
         dispatcher->DispatchSync(strGroupName, std::move(encodeBuf), &resData, position);
     } else {

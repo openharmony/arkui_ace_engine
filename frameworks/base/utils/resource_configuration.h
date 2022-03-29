@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,12 +111,12 @@ public:
         return resourceConfiguration_;
     }
 
-    void SetResourceHandlers(const std::vector<long long>& resourcehandlers)
+    void SetResourceHandlers(const std::vector<int64_t>& resourcehandlers)
     {
         resourcehandlers_ = resourcehandlers;
     }
 
-    std::vector<long long> GetResourceHandlers() const
+    std::vector<int64_t> GetResourceHandlers() const
     {
         return resourcehandlers_;
     }
@@ -155,7 +155,7 @@ public:
 
 private:
     ResourceConfiguration resourceConfiguration_;
-    std::vector<long long> resourcehandlers_;
+    std::vector<int64_t> resourcehandlers_;
     std::string packagePath_;
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     std::string systemPackagePath_;

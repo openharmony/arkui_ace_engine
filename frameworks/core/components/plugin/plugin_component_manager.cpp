@@ -26,7 +26,7 @@
 #include "base/log/log.h"
 
 namespace OHOS::Ace {
-constexpr long FOO_MAX_LEN = 20 * 1024 * 1024;
+constexpr int64_t FOO_MAX_LEN = 20 * 1024 * 1024;
 std::shared_ptr<PluginComponentManager> PluginComponentManager::instance_ = nullptr;
 std::mutex PluginComponentManager::mutex_;
 
@@ -194,7 +194,7 @@ bool PluginComponentManager::GetTemplatePathFromJsonFile(
         return false;
     }
 
-    long size = std::ftell(file.get());
+    int64_t size = std::ftell(file.get());
     if (size == -1L || size == 0L || size > FOO_MAX_LEN) {
         return false;
     }

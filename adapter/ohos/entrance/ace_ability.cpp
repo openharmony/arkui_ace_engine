@@ -91,7 +91,7 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePathStr, cons
         return FrontendType::JS;
     }
 
-    long size = std::ftell(file.get());
+    int64_t size = std::ftell(file.get());
     if (size == -1L) {
         return FrontendType::JS;
     }
