@@ -21,7 +21,7 @@
 namespace OHOS::Ace::Framework {
 namespace {
 
-JSRef<JSObject> CreareAreaObject(const Rect& rect, const Offset& origin)
+JSRef<JSObject> CreateAreaObject(const Rect& rect, const Offset& origin)
 {
     JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
     JSRef<JSObject> area = objectTemplate->NewInstance();
@@ -47,8 +47,8 @@ JSRef<JSObject> CreareAreaObject(const Rect& rect, const Offset& origin)
 void JsOnAreaChangeFunction::Execute(
     const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)
 {
-    auto oldArea = CreareAreaObject(oldRect, oldOrigin);
-    auto area = CreareAreaObject(rect, origin);
+    auto oldArea = CreateAreaObject(oldRect, oldOrigin);
+    auto area = CreateAreaObject(rect, origin);
     JSRef<JSVal> params[2];
     params[0] = oldArea;
     params[1] = area;

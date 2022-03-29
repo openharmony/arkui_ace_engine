@@ -256,7 +256,6 @@ void ImageProvider::UploadImageToGPUForRender(
     // If want to dump draw command or gpu disabled, should use CPU image.
     callback({ image, renderTaskHolder->unrefQueue });
 #else
-
     auto rasterizedImage = image->makeRasterImage();
     if (!rasterizedImage) {
         LOGW("Rasterize image failed. callback.");

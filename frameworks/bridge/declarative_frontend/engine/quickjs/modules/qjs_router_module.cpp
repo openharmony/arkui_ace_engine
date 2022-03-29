@@ -190,7 +190,7 @@ JSValue PageGetParams(JSContext* ctx, JSValueConst value, int32_t argc, JSValueC
 {
     auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
-        LOGE("Can not cast Context to QJSDelcarativeEngineInstance object.");
+        LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
         return JS_NULL;
     }
     std::string paramsStr = instance->GetDelegate()->GetParams();
@@ -207,7 +207,7 @@ JSValue PostponePageTransition(JSContext* ctx, JSValueConst value, int32_t argc,
 {
     auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
-        LOGE("Can not cast Context to QJSDelcarativeEngineInstance object.");
+        LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
         return JS_NULL;
     }
     instance->GetDelegate()->PostponePageTransition();
@@ -218,7 +218,7 @@ JSValue LaunchPageTransition(JSContext* ctx, JSValueConst value, int32_t argc, J
 {
     auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
-        LOGE("Can not cast Context to QJSDelcarativeEngineInstance object.");
+        LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
         return JS_NULL;
     }
     instance->GetDelegate()->LaunchPageTransition();

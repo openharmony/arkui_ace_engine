@@ -133,26 +133,24 @@ void AceContainer::Destroy()
 {
     ContainerScope scope(instanceId_);
     if (pipelineContext_ && taskExecutor_) {
-        if (taskExecutor_) {
-            // 1. Destroy Pipeline on UI thread.
-            RefPtr<PipelineContext> context;
-            context.Swap(pipelineContext_);
-            taskExecutor_->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
+        // 1. Destroy Pipeline on UI thread.
+        RefPtr<PipelineContext> context;
+        context.Swap(pipelineContext_);
+        taskExecutor_->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
 
-            if (isSubContainer_) {
-                // SubAcecontainer just return.
-                return;
-            }
-            // 2. Destroy Frontend on JS thread.
-            RefPtr<Frontend> frontend;
-            frontend_.Swap(frontend);
-            taskExecutor_->PostTask(
-                [frontend]() {
-                    frontend->UpdateState(Frontend::State::ON_DESTROY);
-                    frontend->Destroy();
-                },
-                TaskExecutor::TaskType::JS);
+        if (isSubContainer_) {
+            // SubAcecontainer just return.
+            return;
         }
+        // 2. Destroy Frontend on JS thread.
+        RefPtr<Frontend> frontend;
+        frontend_.Swap(frontend);
+        taskExecutor_->PostTask(
+            [frontend]() {
+                frontend->UpdateState(Frontend::State::ON_DESTROY);
+                frontend->Destroy();
+            },
+            TaskExecutor::TaskType::JS);
     }
     resRegister_.Reset();
     assetManager_.Reset();

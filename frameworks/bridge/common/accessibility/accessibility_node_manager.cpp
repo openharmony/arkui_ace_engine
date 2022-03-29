@@ -734,7 +734,7 @@ bool AccessibilityNodeManager::GetDefaultAttrsByType(
 void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID)
 {
     if (!DumpLog::GetInstance().GetDumpFile()) {
-        LOGE("AccessibilityNodeManager::GetDumpFile fail:%p", &(DumpLog::GetInstance()));
+        LOGE("AccessibilityNodeManager::GetDumpFile fail");
         return;
     }
 

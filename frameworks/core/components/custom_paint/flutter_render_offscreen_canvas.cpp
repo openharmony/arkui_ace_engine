@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,7 +74,7 @@ std::string GetMimeType(const std::string& args)
 }
 
 // Quality need between 0.0 and 1.0 for MimeType jpeg and webp
-double GetQuality(const std::string args, const double quality)
+double GetQuality(const std::string& args, const double quality)
 {
     std::string type = args;
     auto mimeType = GetMimeType(type);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -857,8 +857,6 @@ protected:
  * @tc.name: PushPageTest001
  * @tc.desc: test scale animation in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGV
- * @tc.author: zhouzebin
  */
 HWTEST_F(TransitionElementTest, PushPageTest001, TestSize.Level1)
 {
@@ -897,10 +895,6 @@ HWTEST_F(TransitionElementTest, PushPageTest001, TestSize.Level1)
     GetTransitionGroupFromTransition(transitionB_);
     GetTransitionGroupFromTransition(transitionA_);
     EXPECT_NE(transitionA_.pageTransitionElement_, transitionB_.pageTransitionElement_);
-    LOGD("transition in: content display render %{public}p, transform render %{public}p",
-        &(*transitionB_.displayRenderContent_.Upgrade()), &(*transitionB_.transformRenderContent_.Upgrade()));
-    LOGD("transition out: content display render %{public}p, transform render %{public}p",
-        &(*transitionA_.displayRenderContent_.Upgrade()), &(*transitionA_.transformRenderContent_.Upgrade()));
     EXPECT_TRUE(transitionB_.displayRenderContent_.Upgrade()->GetHidden());
     EXPECT_EQ(VisibleType::VISIBLE, transitionA_.displayRenderContent_.Upgrade()->GetVisibleType());
 
@@ -923,8 +917,6 @@ HWTEST_F(TransitionElementTest, PushPageTest001, TestSize.Level1)
  * @tc.name: PushPageTest002
  * @tc.desc: test translate animation in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1VJ
- * @tc.author: jiangdayuan
  */
 HWTEST_F(TransitionElementTest, PushPageTest002, TestSize.Level1)
 {
@@ -961,8 +953,6 @@ HWTEST_F(TransitionElementTest, PushPageTest002, TestSize.Level1)
  * @tc.name: TransitionUIStandardTest001
  * @tc.desc: test ui standard for transition
  * @tc.type: FUNC
- * @tc.require: AR000DBTLT
- * @tc.author: zhouzebin
  */
 HWTEST_F(TransitionElementTest, TransitionUIStandardTest001, TestSize.Level1)
 {
@@ -1017,8 +1007,6 @@ HWTEST_F(TransitionElementTest, TransitionUIStandardTest001, TestSize.Level1)
  * @tc.name: TransitionUIStandardTest002
  * @tc.desc: test phone push transition
  * @tc.type: FUNC
- * @tc.require: AR000DQ1VF
- * @tc.author: zhouzebin
  */
 HWTEST_F(TransitionElementTest, TransitionUIStandardTest002, TestSize.Level1)
 {
@@ -1070,8 +1058,6 @@ HWTEST_F(TransitionElementTest, TransitionUIStandardTest002, TestSize.Level1)
  * @tc.name: TransitionUIStandardTest003
  * @tc.desc: test watch push transition
  * @tc.type: FUNC
- * @tc.require: AR000DQ1VG
- * @tc.author: jiangdayuan
  */
 HWTEST_F(TransitionElementTest, TransitionUIStandardTest003, TestSize.Level1)
 {
@@ -1123,8 +1109,6 @@ HWTEST_F(TransitionElementTest, TransitionUIStandardTest003, TestSize.Level1)
  * @tc.name: TransitionUIStandardTest004
  * @tc.desc: test watch pop transition
  * @tc.type: FUNC
- * @tc.require: AR000DR6DE
- * @tc.author: jiangdayuan
  */
 HWTEST_F(TransitionElementTest, TransitionUIStandardTest004, TestSize.Level1)
 {
@@ -1148,8 +1132,6 @@ HWTEST_F(TransitionElementTest, TransitionUIStandardTest004, TestSize.Level1)
  * @tc.name: TransitionUIStandardTest005
  * @tc.desc: test phone pop transition
  * @tc.type: FUNC
- * @tc.require: AR000DQ1VE
- * @tc.author: jiangdayuan
  */
 HWTEST_F(TransitionElementTest, TransitionUIStandardTest005, TestSize.Level1)
 {
@@ -1174,8 +1156,6 @@ HWTEST_F(TransitionElementTest, TransitionUIStandardTest005, TestSize.Level1)
  * @tc.name: OneShotTransitionTest001
  * @tc.desc: test tv push transition with shared element with custom page transition parameters.
  * @tc.type: FUNC
- * @tc.require: AR000DR6TF
- * @tc.author: zhouzebin
  */
 HWTEST_F(TransitionElementTest, OneShotTransitionTest001, TestSize.Level1)
 {
@@ -1221,8 +1201,6 @@ HWTEST_F(TransitionElementTest, OneShotTransitionTest001, TestSize.Level1)
  * @tc.name: OneShotTransitionTest002
  * @tc.desc: test phone pop transition with shared element with default page transition parameters.
  * @tc.type: FUNC
- * @tc.require: AR000DQ2TV
- * @tc.author: zhouzebin
  */
 HWTEST_F(TransitionElementTest, OneShotTransitionTest002, TestSize.Level1)
 {
@@ -1250,8 +1228,6 @@ HWTEST_F(TransitionElementTest, OneShotTransitionTest002, TestSize.Level1)
  * @tc.name: OneShotTransitionTest003
  * @tc.desc: test watch pop transition with shared element with default page transition parameters.
  * @tc.type: FUNC
- * @tc.require: AR000DQ203
- * @tc.author: zhouzebin
  */
 HWTEST_F(TransitionElementTest, OneShotTransitionTest003, TestSize.Level1)
 {
@@ -1279,8 +1255,6 @@ HWTEST_F(TransitionElementTest, OneShotTransitionTest003, TestSize.Level1)
  * @tc.name: PushPageCardTransitionTest001
  * @tc.desc: test card container size and offset animation in card push transition.
  * @tc.type: FUNC
- * @tc.require: AR000F3C9H
- * @tc.author: chenlien
  */
 HWTEST_F(TransitionElementTest, PushPageCardTransitionTest001, TestSize.Level1)
 {
@@ -1321,8 +1295,6 @@ HWTEST_F(TransitionElementTest, PushPageCardTransitionTest001, TestSize.Level1)
  * @tc.name: PushPageCardTransitionTest002
  * @tc.desc: test Opacity animation in card push transition.
  * @tc.type: FUNC
- * @tc.require: AR000F3C9H
- * @tc.author: chenlien
  */
 HWTEST_F(TransitionElementTest, PushPageCardTransitionTest002, TestSize.Level1)
 {
@@ -1363,8 +1335,6 @@ HWTEST_F(TransitionElementTest, PushPageCardTransitionTest002, TestSize.Level1)
  * @tc.name: PopPageCardTransitionTest001
  * @tc.desc: test clip size and offset animation in card pop transition.
  * @tc.type: FUNC
- * @tc.require: AR000F3CA6
- * @tc.author: chenlien
  */
 HWTEST_F(TransitionElementTest, PopPageCardTransitionTest001, TestSize.Level1)
 {
@@ -1398,8 +1368,6 @@ HWTEST_F(TransitionElementTest, PopPageCardTransitionTest001, TestSize.Level1)
  * @tc.name: PopPageCardTransitionTest002
  * @tc.desc: test opacity animation in card pop transition.
  * @tc.type: FUNC
- * @tc.require: AR000F3CA6
- * @tc.author: chenlien
  */
 HWTEST_F(TransitionElementTest, PopPageCardTransitionTest002, TestSize.Level1)
 {

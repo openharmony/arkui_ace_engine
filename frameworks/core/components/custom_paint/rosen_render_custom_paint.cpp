@@ -1554,11 +1554,11 @@ void RosenRenderCustomPaint::Mesh(SkBitmap& bitmap, int column, int row,
         flags |= SkVertices::kHasColors_BuilderFlag;
     }
     SkVertices::Builder builder(SkVertices::kTriangles_VertexMode, vertCounts, indexCount, flags);
-    if (memcpy_s(builder.positions(), vertCounts * sizeof(SkPoint), vertices, vertCounts * sizeof(SkPoint)) != 0) {
+    if (memcpy_s(builder.positions(), vertCounts * sizeof(SkPoint), vertices, vertCounts * sizeof(SkPoint)) != EOK) {
         return;
     }
     if (colors) {
-        if (memcpy_s(builder.colors(), vertCounts * sizeof(SkColor), colors, vertCounts * sizeof(SkColor)) != 0) {
+        if (memcpy_s(builder.colors(), vertCounts * sizeof(SkColor), colors, vertCounts * sizeof(SkColor)) != EOK) {
             return;
         }
     }

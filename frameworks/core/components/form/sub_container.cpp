@@ -83,22 +83,22 @@ void SubContainer::Destroy()
 void SubContainer::UpdateRootElmentSize()
 {
     auto formComponet = AceType::DynamicCast<FormComponent>(formComponent_);
-    Dimension rootWidht = 0.0_vp;
+    Dimension rootWidth = 0.0_vp;
     Dimension rootHeight = 0.0_vp;
     if (formComponet) {
-        rootWidht = formComponet->GetWidth();
+        rootWidth = formComponet->GetWidth();
         rootHeight = formComponet->GetHeight();
     }
 
-    if (rootWidht_ == rootWidht && rootHeight == rootHeight) {
+    if (rootWidht_ == rootWidth && rootHeight_ == rootHeight) {
         LOGE("size not changed, should not change");
         return;
     }
 
-    surfaceWidth_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootWidht);
+    surfaceWidth_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootWidth);
     surfaceHeight_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootHeight);
     if (pipelineContext_) {
-        pipelineContext_->SetRootSize(density_, rootWidht.Value(), rootHeight.Value());
+        pipelineContext_->SetRootSize(density_, rootWidth.Value(), rootHeight.Value());
     }
 }
 

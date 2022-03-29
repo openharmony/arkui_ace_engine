@@ -233,7 +233,9 @@ std::string AceUnwrapStringFromJS(napi_env env, napi_value param, const std::str
     if (buf == nullptr) {
         return value;
     }
-    memset_s(buf, size + 1, 0, size + 1);
+    if (memset_s(buf, size + 1, 0, size + 1) != EOK) {
+        return value;
+    }
 
     bool rev = napi_get_value_string_utf8(env, param, buf, size + 1, &size) == napi_ok;
     if (rev) {
@@ -263,7 +265,9 @@ bool AceUnwrapStringFromJS2(napi_env env, napi_value param, std::string& value)
     if (buf == nullptr) {
         return false;
     }
-    memset_s(buf, (size + 1), 0, (size + 1));
+    if (memset_s(buf, (size + 1), 0, (size + 1)) != EOK) {
+        return false;
+    }
 
     bool rev = napi_get_value_string_utf8(env, param, buf, size + 1, &size) == napi_ok;
     if (rev) {

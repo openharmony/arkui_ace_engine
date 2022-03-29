@@ -83,7 +83,7 @@ private:
 
     bool SetTextStyleOperators(const std::pair<std::string, std::string>& style);
 
-    bool SetTextBackgoundColor(const std::pair<std::string, std::string>& style);
+    bool SetTextBackgroundColor(const std::pair<std::string, std::string>& style);
     bool SetColumnHeight(const std::pair<std::string, std::string>& style);
 
     bool hasValue_ = true;

@@ -73,7 +73,7 @@ std::string GetMimeType(const std::string& args)
 }
 
 // Quality need between 0.0 and 1.0 for MimeType jpeg and webp
-double GetQuality(const std::string args, const double quality)
+double GetQuality(const std::string& args, const double quality)
 {
     std::string type = args;
     auto mimeType = GetMimeType(type);
