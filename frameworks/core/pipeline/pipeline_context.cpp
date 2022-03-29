@@ -1789,8 +1789,10 @@ void PipelineContext::OnVirtualKeyboardAreaChange(Rect keyboardArea)
         (height_ - keyboardHeight), offsetFix);
     if (NearZero(keyboardHeight)) {
         SetRootSizeWithWidthHeight(width_, height_, 0);
+        rootOffset_.SetY(0.0);
     } else if (positionY > (height_ - keyboardHeight) && offsetFix > 0.0) {
         SetRootSizeWithWidthHeight(width_, height_, -offsetFix);
+        rootOffset_.SetY(-offsetFix);
     }
 }
 
@@ -2712,8 +2714,10 @@ void PipelineContext::RemoveFontNode(const WeakPtr<RenderNode>& node)
 
 void PipelineContext::SetClickPosition(const Offset& position) const
 {
+    LOGI("SetClickPosition position:%{public}s rootOffest:%{public}s", position.ToString().c_str(),
+        rootOffset_.ToString().c_str());
     if (textFieldManager_) {
-        textFieldManager_->SetClickPosition(position);
+        textFieldManager_->SetClickPosition(position - rootOffset_);
     }
 }
 

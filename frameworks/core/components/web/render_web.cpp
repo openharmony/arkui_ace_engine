@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include "base/log/log.h"
+#include "core/common/manager_interface.h"
 #include "core/components/web/resource/web_resource.h"
 #include "core/event/ace_event_helper.h"
 
@@ -133,6 +134,11 @@ void RenderWeb::HandleTouchDown(const TouchEventInfo& info)
     }
     for (auto& touchPoint : touchInfos) {
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y);
+    }
+    // clear the recording position, for not move content when virtual keyboard popup when web get focused.
+    auto context = GetContext().Upgrade();
+    if (context && context->GetTextFieldManager()) {
+        context->GetTextFieldManager()->SetClickPosition(Offset());
     }
 }
 
