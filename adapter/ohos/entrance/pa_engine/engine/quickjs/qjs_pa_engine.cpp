@@ -701,7 +701,7 @@ void QjsPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
             AppExecFwk::ConvertAbilityInfo(reinterpret_cast<napi_env>(nativeEngine_), abilityInfoInstance);
 
         NativeValue* abilityInfoNative = reinterpret_cast<NativeValue*>(abilityInfoNapi);
-        JSValue abilityInfoJS = (JSValue)*abilityInfoNative;
+        JSValue abilityInfoJS = static_cast<JSValue>(*abilityInfoNative);
         JSValueConst argv[] = { abilityInfoJS };
         retVal = Framework::QJSUtils::Call(ctx, paStartFunc, paObj, countof(argv), argv);
     } else {
