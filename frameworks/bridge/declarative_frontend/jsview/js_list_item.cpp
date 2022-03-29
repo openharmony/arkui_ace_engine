@@ -99,6 +99,16 @@ void JSListItem::SelectCallback(const JSCallbackInfo& args)
     listItem->SetOnSelectId(onSelectId);
 }
 
+void JSListItem::JsBorderRadius(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBorderRadius(info);
+    Dimension borderRadius;
+    if (!JSViewAbstract::ParseJsDimensionVp(info[0], borderRadius)) {
+        return;
+    }
+    JSViewSetProperty(&V2::ListItemComponent::SetBorderRadius, borderRadius);
+}
+
 void JSListItem::JSBind(BindingTarget globalObj)
 {
     JSClass<JSListItem>::Declare("ListItem");
@@ -108,6 +118,7 @@ void JSListItem::JSBind(BindingTarget globalObj)
     JSClass<JSListItem>::StaticMethod("editable", &JSListItem::SetEditable);
     JSClass<JSListItem>::StaticMethod("selectable", &JSListItem::SetSelectable);
     JSClass<JSListItem>::StaticMethod("onSelect", &JSListItem::SelectCallback);
+    JSClass<JSListItem>::StaticMethod("borderRadius", &JSListItem::JsBorderRadius);
 
     JSClass<JSListItem>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSListItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);

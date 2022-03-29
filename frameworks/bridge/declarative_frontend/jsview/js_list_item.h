@@ -30,6 +30,7 @@ public:
     static void SetEditable(const JSCallbackInfo& args);
     static void SetSelectable(bool selectable);
     static void SelectCallback(const JSCallbackInfo& args);
+    static void JsBorderRadius(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
