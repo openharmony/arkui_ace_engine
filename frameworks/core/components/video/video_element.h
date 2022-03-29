@@ -192,6 +192,7 @@ private:
     std::shared_ptr<OHOS::Media::Player> mediaPlayer_ = nullptr;
     ::OHOS::sptr<::OHOS::Subwindow> subWindow_ = nullptr;
     std::shared_ptr<MediaPlayerCallback> mediaPlayerCallback_ = nullptr;
+    sptr<Surface> mediaSurface_ = nullptr;
 #endif
 };
 

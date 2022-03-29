@@ -407,6 +407,7 @@ void VideoElement::PreparePlayer()
         LOGE("Player SetVideoSurface failed");
         return;
     }
+    mediaSurface_ = producerSurface;
     if (mediaPlayer_->PrepareAsync() != 0) {
         LOGE("Player prepare failed");
         return;

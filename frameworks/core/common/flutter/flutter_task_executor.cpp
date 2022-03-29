@@ -55,7 +55,9 @@ TaskExecutor::Task WrapTaskWithContainer(TaskExecutor::Task&& task, int32_t id)
 {
     auto wrappedTask = [originTask = std::move(task), id]() {
         ContainerScope scope(id);
-        originTask();
+        if (originTask) {
+            originTask();
+        }
     };
     return wrappedTask;
 }
