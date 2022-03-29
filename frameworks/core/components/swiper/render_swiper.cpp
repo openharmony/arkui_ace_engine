@@ -20,6 +20,7 @@
 #include "core/animation/curve_animation.h"
 #include "core/animation/friction_motion.h"
 #include "core/animation/keyframe.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/frontend.h"
 #include "core/components/align/render_align.h"
 #include "core/components/display/render_display.h"
@@ -3175,12 +3176,33 @@ bool RenderSwiper::IsChildrenTouchEnable()
 
 void RenderSwiper::OnPaintFinish()
 {
-    for (const auto& child : GetChildren()) {
-        child->SetAccessibilityVisible(false);
-        child->ClearAccessibilityRect();
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        return;
     }
 
-    RenderNode::OnPaintFinish();
+    Rect itemRect;
+    Rect viewPortRect(GetGlobalOffset(), GetChildViewPort());
+    for (const auto& item : GetChildren()) {
+        auto node = item->GetAccessibilityNode().Upgrade();
+        if (!node) {
+            continue;
+        }
+        bool visible = GetVisible();
+        if (visible) {
+            itemRect.SetSize(item->GetLayoutSize());
+            itemRect.SetOffset(item->GetGlobalOffset());
+            visible = itemRect.IsIntersectWith(viewPortRect);
+        }
+        item->SetAccessibilityVisible(visible);
+        if (visible) {
+            Rect clampRect = itemRect.Constrain(viewPortRect);
+            if (clampRect != itemRect) {
+                item->SetAccessibilityRect(clampRect);
+            }
+        } else {
+            item->NotifyPaintFinish();
+        }
+    }
 }
 
 } // namespace OHOS::Ace
