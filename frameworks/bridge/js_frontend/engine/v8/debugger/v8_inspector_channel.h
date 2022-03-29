@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ namespace V8Debugger {
 class V8InspectorChannel final : public v8_inspector::V8Inspector::Channel {
 public:
     explicit V8InspectorChannel(const std::function<void(std::string)>& onResponse) : v8OnResponse(onResponse) {}
-    ~V8InspectorChannel() {};
+    ~V8InspectorChannel() {}
     void sendResponse(int callId, std::unique_ptr<v8_inspector::StringBuffer> message) override;
     void sendNotification(std::unique_ptr<v8_inspector::StringBuffer> message) override;
     void flushProtocolNotifications() override;

@@ -167,7 +167,7 @@ private:
 
 class MouseEventResult {
 public:
-    explicit MouseEventResult(const std::string& type) : mouseEventInfo_(type) {};
+    explicit MouseEventResult(const std::string& type) : mouseEventInfo_(type) {}
     ~MouseEventResult() = default;
 
     const MouseEventInfo& GetMouseEventInfo() const

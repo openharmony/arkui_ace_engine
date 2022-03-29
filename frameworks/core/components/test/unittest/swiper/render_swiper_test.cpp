@@ -73,7 +73,7 @@ int64_t GetTickCount()
 
 class TestSwiperEventHander : public MockEventHandler {
 public:
-    explicit TestSwiperEventHander(SwiperEventCallback eventCallback) : eventCallback_(eventCallback) {};
+    explicit TestSwiperEventHander(SwiperEventCallback eventCallback) : eventCallback_(eventCallback) {}
     ~TestSwiperEventHander() = default;
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param)

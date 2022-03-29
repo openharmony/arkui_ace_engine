@@ -79,7 +79,7 @@ public:
     void RemoveNode(const RefPtr<DOMNode>& node);
     virtual void Mount(int32_t slot);
     void GenerateComponentNode();
-    virtual void OnPageLoadFinish() {};
+    virtual void OnPageLoadFinish() {}
 
     virtual void SetShowAttr(const std::string& showValue);
 
@@ -370,7 +370,7 @@ public:
     }
 
     // Initialize node theme style when created.
-    virtual void InitializeStyle() {};
+    virtual void InitializeStyle() {}
 
     void OnActive(bool isActive);
 
@@ -641,10 +641,10 @@ public:
     }
 
 protected:
-    virtual void OnMounted(const RefPtr<DOMNode>& parentNode) {};
-    virtual void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) {};
-    virtual void OnChildNodeRemoved(const RefPtr<DOMNode>& child) {};
-    virtual void OnSetStyleFinished() {};
+    virtual void OnMounted(const RefPtr<DOMNode>& parentNode) {}
+    virtual void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) {}
+    virtual void OnChildNodeRemoved(const RefPtr<DOMNode>& child) {}
+    virtual void OnSetStyleFinished() {}
     // Confirm declaration is exist before call GetClickId and GetLongPressId.
     virtual const EventMarker& GetClickId()
     {
@@ -783,10 +783,10 @@ protected:
     virtual RefPtr<Component> CompositeSpecializedComponent(const std::vector<RefPtr<SingleChild>>& components);
 
     // Subclasses need to override this interface to update component with declaration.
-    virtual void UpdateSpecializedComponentWithDeclaration() {};
+    virtual void UpdateSpecializedComponentWithDeclaration() {}
 
     // Subclasses need to override this interface to implement the dynamic creation of subclass specialized components.
-    virtual void PrepareSpecializedComponent() {};
+    virtual void PrepareSpecializedComponent() {}
 
     virtual void CompositeComponents();
 
@@ -797,7 +797,7 @@ protected:
     virtual void UpdatePositionAnimations(const RefPtr<Component> componet);
 
     // Subclasses need to override this interface to implement reset initialization style before any frontend style set.
-    virtual void ResetInitializedStyle() {};
+    virtual void ResetInitializedStyle() {}
 
     virtual bool IsLeafNode() const
     {
@@ -843,7 +843,7 @@ protected:
         return false;
     }
 
-    virtual void CallSpecializedMethod(const std::string& method, const std::string& args) {};
+    virtual void CallSpecializedMethod(const std::string& method, const std::string& args) {}
 
     // When the multi-mode input subscript is set to auto, need to determine whether the current component has the
     // ability to support the subscript.

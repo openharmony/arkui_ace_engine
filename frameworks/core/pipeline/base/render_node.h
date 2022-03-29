@@ -1159,12 +1159,12 @@ protected:
             }
         }
     };
-    virtual void OnPositionChanged() {};
-    virtual void OnSizeChanged() {};
-    virtual void OnRenderFinish(RenderContext& context) {};
-    virtual void OnStatusChanged(RenderStatus renderStatus) {};
-    virtual void OnHiddenChanged(bool hidden) {};
-    virtual void OnWindowBlurChanged() {};
+    virtual void OnPositionChanged() {}
+    virtual void OnSizeChanged() {}
+    virtual void OnRenderFinish(RenderContext& context) {}
+    virtual void OnStatusChanged(RenderStatus renderStatus) {}
+    virtual void OnHiddenChanged(bool hidden) {}
+    virtual void OnWindowBlurChanged() {}
     virtual bool MarkNeedRenderSpecial();
 
     double GetHighestChildBaseline(TextBaseline baseline);
@@ -1188,7 +1188,7 @@ protected:
     }
 
     virtual std::shared_ptr<RSNode> CreateRSNode() const;
-    virtual void OnRSTransition(TransitionType type) {};
+    virtual void OnRSTransition(TransitionType type) {}
     // JSview boundary, all nodes in [head, tail] share the same RSNode
     bool IsHeadRenderNode() const
     {

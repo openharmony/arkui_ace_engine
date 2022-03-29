@@ -249,7 +249,7 @@ bool RevSourceMap::VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans
     if (continuation) {
         LOGE("the arg is error");
         return false;
-    };
+    }
     return true;
 };
 

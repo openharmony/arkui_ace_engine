@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ class WsServer {
 public:
     explicit WsServer(std::function<void(std::string)> onMessage, std::string sockName) : tid(0), instanceId(0),
         endPoint(sockName), socket(ioContext), acceptor(ioContext, endPoint), wsOnMessage(std::move(onMessage)) {}
-    ~WsServer() {};
+    ~WsServer() {}
     void RunServer();
     void SendMessage(const std::string& message) const;
     void SetTerminateExecutionFlag(bool flag);

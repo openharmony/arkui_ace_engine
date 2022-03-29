@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,7 +66,7 @@ class MockRenderTabBarItem : public RenderTabBarItem {};
 
 class TestTabContentEventHandler : public MockEventHandler {
 public:
-    explicit TestTabContentEventHandler(TabContentEventCallback eventCallback) : eventCallback_(eventCallback) {};
+    explicit TestTabContentEventHandler(TabContentEventCallback eventCallback) : eventCallback_(eventCallback) {}
     ~TestTabContentEventHandler() = default;
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param)

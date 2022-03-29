@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,7 +110,7 @@ public:
     virtual void TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const = 0;
 
     // get system plugin used in application
-    virtual void GetPluginsUsed(std::string& data) {};
+    virtual void GetPluginsUsed(std::string& data) {}
 
     // get js code from plugin and load in js engine
     virtual void LoadPluginJsCode(std::string&& jsCode) const = 0;
@@ -133,7 +133,7 @@ public:
     virtual void OnHide() = 0;
 
     // when configuration update
-    virtual void OnConfigurationUpdated(const std::string& data) {};
+    virtual void OnConfigurationUpdated(const std::string& data) {}
 
     virtual void OnSaveAbilityState (std::string& data) = 0;
 
@@ -171,14 +171,14 @@ public:
 
     virtual void OnSurfaceChanged(int32_t width, int32_t height) = 0;
 
-    virtual void TriggerGarbageCollection() {};
+    virtual void TriggerGarbageCollection() {}
 
-    virtual void RebuildAllPages() {};
+    virtual void RebuildAllPages() {}
 
-    virtual void SetColorMode(ColorMode colorMode) {};
+    virtual void SetColorMode(ColorMode colorMode) {}
 
     // navigator component call router
-    virtual void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) {};
+    virtual void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) {}
 
     // distribute
     virtual std::string RestoreRouterStack(const std::string& contentInfo)
@@ -190,9 +190,9 @@ public:
         return "";
     }
 
-    virtual void NotifyAppStorage(const std::string& key, const std::string& value) {};
+    virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    virtual void RunNativeEngineLoop() {};
+    virtual void RunNativeEngineLoop() {}
 #endif
 
     // Disallow pop last page

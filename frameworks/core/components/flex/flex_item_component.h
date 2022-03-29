@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,9 +28,9 @@ class FlexItemComponent : public SoleChildComponent {
 
 public:
     FlexItemComponent(double flexGrow, double flexShrink, double flexBasis)
-        : flexGrow_(flexGrow), flexShrink_(flexShrink), flexBasis_(Dimension(flexBasis)) {};
+        : flexGrow_(flexGrow), flexShrink_(flexShrink), flexBasis_(Dimension(flexBasis)) {}
     FlexItemComponent(double flexGrow, double flexShrink, const Dimension& flexBasis)
-        : flexGrow_(flexGrow), flexShrink_(flexShrink), flexBasis_(flexBasis) {};
+        : flexGrow_(flexGrow), flexShrink_(flexShrink), flexBasis_(flexBasis) {}
     FlexItemComponent(double flexGrow, double flexShrink, double flexBasis, const RefPtr<Component>& child)
         : SoleChildComponent(child), flexGrow_(flexGrow), flexShrink_(flexShrink), flexBasis_(Dimension(flexBasis)) {}
     FlexItemComponent(double flexGrow, double flexShrink, const Dimension& flexBasis, const RefPtr<Component>& child)

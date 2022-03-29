@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,7 +55,7 @@ struct ACE_EXPORT ScaleOperation {
 
 struct ACE_EXPORT SkewOperation {
     SkewOperation() = default;
-    SkewOperation(float x, float y) : skewX(x), skewY(y) {};
+    SkewOperation(float x, float y) : skewX(x), skewY(y) {}
     bool operator==(const SkewOperation& other) const
     {
         return NearEqual(skewX, other.skewX) && NearEqual(skewY, other.skewY);
@@ -68,7 +68,7 @@ struct ACE_EXPORT SkewOperation {
 
 struct ACE_EXPORT RotateOperation {
     RotateOperation() = default;
-    RotateOperation(float x, float y, float z, float angle) : dx(x), dy(y), dz(z), angle(angle) {};
+    RotateOperation(float x, float y, float z, float angle) : dx(x), dy(y), dz(z), angle(angle) {}
     bool operator==(const RotateOperation& other) const
     {
         return NearEqual(dx, other.dx) && NearEqual(dy, other.dy) && NearEqual(dz, other.dz) &&
@@ -84,7 +84,7 @@ struct ACE_EXPORT RotateOperation {
 
 struct ACE_EXPORT PerspectiveOperation {
     PerspectiveOperation() = default;
-    PerspectiveOperation(const Dimension& dis) : distance(dis) {};
+    PerspectiveOperation(const Dimension& dis) : distance(dis) {}
     bool operator==(const PerspectiveOperation& other) const
     {
         return distance == other.distance;
@@ -115,7 +115,7 @@ enum class TransformOperationType {
 };
 
 struct ACE_EXPORT TransformOperation {
-    TransformOperation() : type_(TransformOperationType::UNDEFINED) {};
+    TransformOperation() : type_(TransformOperationType::UNDEFINED) {}
 
     TransformOperationType type_ = TransformOperationType::UNDEFINED;
     Matrix4 matrix4_ = Matrix4::CreateIdentity();

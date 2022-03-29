@@ -94,7 +94,7 @@ int64_t GetTickCount()
 
 class TestCheckableEventHander : public MockEventHandler {
 public:
-    explicit TestCheckableEventHander(const CheckableEventCallback& eventCallback) : eventCallback_(eventCallback) {};
+    explicit TestCheckableEventHander(const CheckableEventCallback& eventCallback) : eventCallback_(eventCallback) {}
     ~TestCheckableEventHander() = default;
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param)

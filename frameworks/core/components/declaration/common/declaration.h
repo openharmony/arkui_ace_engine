@@ -428,7 +428,7 @@ protected:
         return false;
     }
 
-    virtual void CallSpecializedMethod(const std::string& method, const std::string& args) {};
+    virtual void CallSpecializedMethod(const std::string& method, const std::string& args) {}
 
     // When the multi-mode input subscript is set to auto, need to determine whether the current component has the
     // ability to support the subscript.

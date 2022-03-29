@@ -170,7 +170,7 @@ private:
 class V8ObjTemplate : public V8Type<v8::ObjectTemplate> {
 public:
     V8ObjTemplate() = default;
-    V8ObjTemplate(v8::Local<v8::ObjectTemplate> obj) : V8Type(obj) {};
+    V8ObjTemplate(v8::Local<v8::ObjectTemplate> obj) : V8Type(obj) {}
 
     void SetInternalFieldCount(int32_t count) const;
     V8Ref<V8Object> NewInstance() const;

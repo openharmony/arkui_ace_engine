@@ -76,9 +76,9 @@ TransitionRecord g_transitionRecord;
 
 } // namespace
 
-CardTransitionController::CardTransitionController(const WeakPtr<PipelineContext>& context) {};
+CardTransitionController::CardTransitionController(const WeakPtr<PipelineContext>& context) {}
 
-void CardTransitionController::RegisterTransitionListener() {};
+void CardTransitionController::RegisterTransitionListener() {}
 
 RRect CardTransitionController::GetCardRect(const ComposeId& composeId) const
 {

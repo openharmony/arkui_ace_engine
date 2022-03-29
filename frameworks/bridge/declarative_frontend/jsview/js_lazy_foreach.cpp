@@ -249,7 +249,7 @@ class JSLazyForEachComponent : public V2::LazyForEachComponent {
     DECLARE_ACE_TYPE(JSLazyForEachComponent, V2::LazyForEachComponent);
 
 public:
-    explicit JSLazyForEachComponent(const std::string& id) : V2::LazyForEachComponent(id) {};
+    explicit JSLazyForEachComponent(const std::string& id) : V2::LazyForEachComponent(id) {}
     ~JSLazyForEachComponent() override
     {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_);
