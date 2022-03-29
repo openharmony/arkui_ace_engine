@@ -30,7 +30,7 @@ class ACE_EXPORT SubContainer : public virtual AceType {
 public:
     using OnFormAcquiredCallback = std::function<void(const size_t)>;
 
-    SubContainer(const WeakPtr<PipelineContext>& context) : outSidePipelineContext_(context) {}
+    explicit SubContainer(const WeakPtr<PipelineContext>& context) : outSidePipelineContext_(context) {}
     SubContainer(const WeakPtr<PipelineContext>& context, int32_t instanceId)
         : outSidePipelineContext_(context), instanceId_(instanceId)
     {}

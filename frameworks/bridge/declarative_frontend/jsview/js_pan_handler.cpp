@@ -107,6 +107,8 @@ void JSPanHandler::JsHandlerOnPan(PanEvent action, const JSCallbackInfo& args)
             case PanEvent::CANCEL:
                 jsOnCancelFunc_ = handlerFunc;
                 break;
+            default:
+                break;
         }
     }
     args.ReturnSelf();

@@ -100,6 +100,8 @@ std::string ColumnComposedElement::GetHorizontalAlign() const
                     return "HorizontalAlign::Center";
                 case HorizontalAlign::END:
                     return "HorizontalAlign::End";
+                default:
+                    break;
             }
         }
     }

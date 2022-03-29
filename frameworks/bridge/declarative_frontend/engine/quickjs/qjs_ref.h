@@ -156,7 +156,7 @@ public:
         value_ = rhs.value_;
     }
 
-    QJSWeak(const QJSRef<T>& rhs) : value_(rhs.Get()) {}
+    explicit QJSWeak(const QJSRef<T>& rhs) : value_(rhs.Get()) {}
 
     QJSWeak(QJSWeak<T>&& rhs) : value_(std::move(rhs)) {}
 

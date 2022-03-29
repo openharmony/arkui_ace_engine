@@ -24,7 +24,7 @@ class ListItemGroupComponent : public ListItemComponent {
     DECLARE_ACE_TYPE(ListItemGroupComponent, ListItemComponent);
 
 public:
-    ListItemGroupComponent(const std::string& type);
+    explicit ListItemGroupComponent(const std::string& type);
     ~ListItemGroupComponent() override = default;
 
     RefPtr<Element> CreateElement() override;

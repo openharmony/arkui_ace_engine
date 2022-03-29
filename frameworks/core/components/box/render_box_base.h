@@ -288,7 +288,7 @@ public:
     }
 
 protected:
-    virtual void ClearRenderObject() override;
+    void ClearRenderObject() override;
     virtual Offset GetBorderOffset() const;
     virtual Radius GetBorderRadius() const;
 

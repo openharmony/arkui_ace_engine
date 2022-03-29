@@ -47,7 +47,7 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     void OnPaintFinish() override;
-    virtual void OnStatusStyleChanged(const VisualState state) override;
+    void OnStatusStyleChanged(const VisualState state) override;
 
     void OnAttachContext() override
     {

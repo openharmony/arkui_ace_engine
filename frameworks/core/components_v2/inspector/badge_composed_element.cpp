@@ -79,6 +79,8 @@ std::string BadgeComposedElement::GetBadgePosition(void) const
                 return std::string("BadgePosition.Right");
             case BadgePosition::LEFT:
                 return std::string("BadgePosition.Left");
+            default:
+                break;
         }
     }
     return std::string("-");

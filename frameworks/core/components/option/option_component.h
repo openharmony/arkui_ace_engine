@@ -32,7 +32,7 @@ class ACE_EXPORT OptionComponent : public ComponentGroup {
 
 public:
     OptionComponent() = default;
-    OptionComponent(const RefPtr<SelectTheme>& theme);
+    explicit OptionComponent(const RefPtr<SelectTheme>& theme);
     ~OptionComponent() override = default;
 
     RefPtr<RenderNode> CreateRenderNode() override;

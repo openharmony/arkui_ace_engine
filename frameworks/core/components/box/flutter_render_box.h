@@ -51,7 +51,7 @@ public:
     void UpdateLayer();
 
 protected:
-    virtual bool MaybeRelease() override;
+    bool MaybeRelease() override;
 
     void OnVisibleChanged() override
     {

@@ -54,7 +54,7 @@ public:
 
     FormManagerDelegate() = delete;
     ~FormManagerDelegate() override;
-    FormManagerDelegate(const WeakPtr<PipelineContext>& context)
+    explicit FormManagerDelegate(const WeakPtr<PipelineContext>& context)
         : FormManagerResource("formAdaptor", context),
           state_(State::WAITINGFORSIZE) {}
 

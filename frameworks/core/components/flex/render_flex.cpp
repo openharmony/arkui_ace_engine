@@ -1164,6 +1164,8 @@ bool RenderFlex::GetAlignDeclarationOffset(AlignDeclarationPtr alignDeclarationP
                 offset = offset + Offset(GetLayoutSize().Width(), 0);
                 break;
             }
+            default:
+                break;
         }
         offset.SetY(0.0);
     } else {
@@ -1181,6 +1183,8 @@ bool RenderFlex::GetAlignDeclarationOffset(AlignDeclarationPtr alignDeclarationP
             case VerticalAlign::BASELINE:
             case VerticalAlign::NONE:
                 return false;
+            default:
+                break;
         }
         offset.SetX(0.0);
     }

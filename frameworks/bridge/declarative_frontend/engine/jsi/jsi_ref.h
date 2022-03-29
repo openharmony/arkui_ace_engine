@@ -178,7 +178,7 @@ public:
         rhs.value_.Reset();
     }
 
-    JsiWeak(const JsiRef<T>& rhs) : value_(rhs.Get())
+    explicit JsiWeak(const JsiRef<T>& rhs) : value_(rhs.Get())
     {
         value_.SetWeak();
     }

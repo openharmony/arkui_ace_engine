@@ -333,6 +333,8 @@ void RenderTransform::ParseDimension(TransformOperation& effect)
         case TransformOperationType::MATRIX:
         case TransformOperationType::UNDEFINED:
             break;
+        default:
+            break;
     }
 }
 

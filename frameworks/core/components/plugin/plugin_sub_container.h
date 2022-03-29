@@ -28,7 +28,7 @@ class ACE_EXPORT PluginSubContainer : public virtual AceType {
 public:
     using OnPluginAcquiredCallback = std::function<void(const size_t)>;
 
-    PluginSubContainer(const WeakPtr<PipelineContext>& context) : outSidePipelineContext_(context) {}
+    explicit PluginSubContainer(const WeakPtr<PipelineContext>& context) : outSidePipelineContext_(context) {}
     ~PluginSubContainer() = default;
 
     void Initialize();

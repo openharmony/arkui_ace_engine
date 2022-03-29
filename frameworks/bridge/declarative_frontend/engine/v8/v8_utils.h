@@ -28,7 +28,7 @@ namespace V8Utils {
 
 class ScopedString {
 public:
-    ScopedString(v8::Local<v8::Value> str)
+    explicit ScopedString(v8::Local<v8::Value> str)
     {
         auto isolate = v8::Isolate::GetCurrent();
         v8::String::Utf8Value s(isolate, str);

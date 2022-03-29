@@ -36,7 +36,7 @@ class GridEventInfo : public BaseEventInfo, public EventToJSONStringAdapter {
     DECLARE_RELATIONSHIP_OF_CLASSES(GridEventInfo, BaseEventInfo, EventToJSONStringAdapter);
 
 public:
-    GridEventInfo(int32_t scrollIndex) : BaseEventInfo("grid"), scrollIndex_(scrollIndex) {}
+    explicit GridEventInfo(int32_t scrollIndex) : BaseEventInfo("grid"), scrollIndex_(scrollIndex) {}
 
     ~GridEventInfo() = default;
 

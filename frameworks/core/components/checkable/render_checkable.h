@@ -46,8 +46,8 @@ class RenderCheckable : public RenderNode {
 public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
-    virtual void OnMouseHoverEnterTest() override;
-    virtual void OnMouseHoverExitTest() override;
+    void OnMouseHoverEnterTest() override;
+    void OnMouseHoverExitTest() override;
     virtual void HandleClick();
     void ApplyAspectRatio(Size& drawSize) const;
     void InitClickRecognizer(bool catchMode);

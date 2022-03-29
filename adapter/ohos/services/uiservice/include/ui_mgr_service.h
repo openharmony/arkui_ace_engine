@@ -49,16 +49,16 @@ public:
     void OnStop() override;
     UIServiceRunningState QueryServiceState() const;
 
-    virtual int RegisterCallBack(const AAFwk::Want& want, const sptr<IUIService>& uiService) override;
-    virtual int UnregisterCallBack(const AAFwk::Want& want) override;
-    virtual int Push(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
+    int RegisterCallBack(const AAFwk::Want& want, const sptr<IUIService>& uiService) override;
+    int UnregisterCallBack(const AAFwk::Want& want) override;
+    int Push(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
         const std::string& data, const std::string& extraData) override;
 
-    virtual int Request(const AAFwk::Want& want, const std::string& name, const std::string& data) override;
-    virtual int ReturnRequest(const AAFwk::Want& want, const std::string& source, const std::string& data,
+    int Request(const AAFwk::Want& want, const std::string& name, const std::string& data) override;
+    int ReturnRequest(const AAFwk::Want& want, const std::string& source, const std::string& data,
         const std::string& extraData) override;
 
-    virtual int ShowDialog(const std::string& name,
+    int ShowDialog(const std::string& name,
                            const std::string& params,
                            OHOS::Rosen::WindowType windowType,
                            int x,
@@ -68,7 +68,7 @@ public:
                            const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
                            int* id = nullptr) override;
 
-    virtual int CancelDialog(int id) override;
+    int CancelDialog(int id) override;
 
     /**
      * GetEventHandler, get the ui_service manager service's handler.

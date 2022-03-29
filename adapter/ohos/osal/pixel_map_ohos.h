@@ -27,7 +27,7 @@ class PixelMapOhos : public PixelMap {
     DECLARE_ACE_TYPE(PixelMapOhos, PixelMap)
 
 public:
-    PixelMapOhos(std::shared_ptr<Media::PixelMap> pixmap) : pixmap_(pixmap) {};
+    explicit PixelMapOhos(std::shared_ptr<Media::PixelMap> pixmap) : pixmap_(pixmap) {};
     ~PixelMapOhos() = default;
     static PixelFormat PixelFormatConverter(Media::PixelFormat pixelFormat);
     static AlphaType AlphaTypeConverter(Media::AlphaType alphaType);
