@@ -161,15 +161,18 @@ void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
         }
         return;
     }
-    if (!canvasCache_.readyToDraw()) {
+    if (!canvasCache_.readyToDraw() || lastLayoutSize_ != GetLayoutSize()) {
         auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale,
             SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
+        canvasCache_.reset();
+        cacheBitmap_.reset();
         canvasCache_.allocPixels(imageInfo);
         cacheBitmap_.allocPixels(imageInfo);
         canvasCache_.eraseColor(SK_ColorTRANSPARENT);
         cacheBitmap_.eraseColor(SK_ColorTRANSPARENT);
         skCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
         cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
+        lastLayoutSize_ = GetLayoutSize();
     }
     skCanvas_->scale(viewScale, viewScale);
     // paint tasks
