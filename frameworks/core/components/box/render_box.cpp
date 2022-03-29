@@ -180,18 +180,20 @@ void RenderBox::Update(const RefPtr<Component>& component)
         touchRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
         touchRecognizer_->SetOnTouchDown([wp](const TouchEventInfo& touchInfo) {
             auto box = wp.Upgrade();
-            if (box) {
-                box->HandleTouchEvent(true);
+            if (!box) {
+                return;
             }
+            box->HandleTouchEvent(true);
             if (box->onTouchDownId_) {
                 box->onTouchDownId_(touchInfo);
             }
         });
         touchRecognizer_->SetOnTouchUp([wp](const TouchEventInfo& touchInfo) {
             auto box = wp.Upgrade();
-            if (box) {
-                box->HandleTouchEvent(false);
+            if (!box) {
+                return;
             }
+            box->HandleTouchEvent(false);
             if (box->onTouchUpId_) {
                 box->onTouchUpId_(touchInfo);
             }
