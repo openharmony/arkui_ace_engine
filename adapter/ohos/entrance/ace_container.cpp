@@ -37,10 +37,8 @@
 #include "core/common/text_field_manager.h"
 #include "core/common/watch_dog.h"
 #include "core/common/window.h"
-#include "core/components/theme/app_theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager.h"
-#include "core/pipeline/base/element.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/card_frontend/card_frontend.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -551,6 +549,8 @@ void AceContainer::InitializeCallback()
             [context, x, y, action]() { context->OnDragEvent(x, y, action); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterDragEventCallback(dragEventCallback);
+
+    InitWindowCallback();
 }
 
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName,
@@ -1076,5 +1076,48 @@ void AceContainer::InitializeSubContainer(int32_t parentContainerId)
     auto taskExec = AceEngine::Get().GetContainer(parentContainerId)->GetTaskExecutor();
     taskExecutor_ = AceType::DynamicCast<FlutterTaskExecutor>(std::move(taskExec));
     GetSettings().useUIAsJSThread = true;
+}
+
+void AceContainer::InitWindowCallback()
+{
+    LOGI("AceContainer InitWindowCallback");
+    auto aceAbility = aceAbility_.lock();
+    if (aceAbility == nullptr) {
+        LOGW("AceContainer::InitWindowCallback failed, aceAbility is null.");
+        return;
+    }
+    if (pipelineContext_ == nullptr) {
+        LOGE("AceContainer::InitWindowCallback failed, pipelineContext_ is null.");
+        return;
+    }
+    auto& window = aceAbility->GetWindow();
+    if (window == nullptr) {
+        LOGE("AceContainer::InitWindowCallback failed, window is null.");
+        return;
+    }
+    std::shared_ptr<AppExecFwk::AbilityInfo> info = aceAbility->GetAbilityInfo();
+    if (info != nullptr) {
+        pipelineContext_->SetAppLabelId(info->labelId);
+        pipelineContext_->SetAppIconId(info->iconId);
+    }
+    pipelineContext_->SetWindowMinimizeCallBack(
+        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Minimize()); });
+    pipelineContext_->SetWindowMaximizeCallBack(
+        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Maximize()); });
+
+    pipelineContext_->SetWindowRecoverCallBack(
+        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Recover()); });
+
+    pipelineContext_->SetWindowCloseCallBack(
+        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Close()); });
+
+    pipelineContext_->SetWindowStartMoveCallBack([window]() { window->StartMove(); });
+
+    pipelineContext_->SetWindowSplitCallBack([window]() -> bool {
+        return (
+            OHOS::Rosen::WMError::WM_OK == window->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
+    });
+
+    pipelineContext_->SetWindowGetModeCallBack([window]() -> WindowMode { return (WindowMode)window->GetMode(); });
 }
 } // namespace OHOS::Ace::Platform
