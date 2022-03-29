@@ -31,6 +31,6 @@ private:
     static void ProcessSystemParam(std::unique_ptr<JsonValue>& infoList);
 };
 
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::Framework
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_PLUGIN_ADAPTER_PLUGIN_BRIDGE_H

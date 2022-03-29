@@ -27,4 +27,4 @@ void SideBarContainerElement::PerformBuild()
     sidebarContainer->Build();
     StackElement::PerformBuild();
 }
-}
+} // namespace OHOS::Ace

@@ -178,4 +178,4 @@ void IndexerComponent::UpdateTextStyle()
         }
     }
 }
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::V2

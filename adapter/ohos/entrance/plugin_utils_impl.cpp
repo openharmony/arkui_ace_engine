@@ -28,4 +28,4 @@ int32_t PluginUtilsImpl::StartAbility(
     int32_t error = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want);
     return error;
 }
-}
+} // namespace OHOS::Ace

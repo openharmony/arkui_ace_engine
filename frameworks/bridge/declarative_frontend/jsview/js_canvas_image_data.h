@@ -103,6 +103,6 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(JSCanvasImageData);
 };
 
-} // OHOS::Ace::Framework
+} // namespace OHOS::Ace::Framework
 
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CANVAS_IMAGE_DATA_H

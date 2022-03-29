@@ -22,4 +22,4 @@ std::string IndexerEventInfo::ToJSONString() const
                 .append(std::to_string(selectedIndex_))
                 .append("},null");
 }
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::V2

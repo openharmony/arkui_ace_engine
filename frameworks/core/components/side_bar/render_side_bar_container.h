@@ -142,6 +142,6 @@ private:
     Rect exceptRegion_;
 };
 
-}
+} // namespace OHOS::Ace
 
-#endif
+#endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_RENDER_SIDE_BAR_CONTAINER_H

@@ -37,6 +37,6 @@ public:
 private:
     int32_t selectedIndex_ = 0;
 };
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_INDEXER_V2_INDEXER_EVENT_INFO_H

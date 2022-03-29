@@ -146,4 +146,4 @@ void AnimatableDimension::ResetAnimatableDimension()
     context_ = nullptr;
     animationCallback_ = nullptr;
 }
-}
+} // namespace OHOS::Ace

@@ -66,4 +66,4 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
 #endif
 }
 void ClipboardImpl::Clear() {}
-} // namespace OHOS::Ace::Platform
+} // namespace OHOS::Ace

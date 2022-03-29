@@ -191,6 +191,6 @@ public:
 protected:
     void InitSpecialized() override;
 };
-}
+} // namespace OHOS::Ace
 
-#endif
+#endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_SIDE_BAR_DECLARATION_H

@@ -93,5 +93,5 @@ private:
     static EventMarker GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys);
     static RefPtr<JSXComponentController> jsXComponentController_;
 };
-}
+} // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_XCOMPONENT_H

@@ -160,6 +160,6 @@ private:
     SideStatus sideStatus_ = SideStatus::AUTO;
 };
 
-}
+} // namespace OHOS::Ace
 
-#endif
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SIDE_BAR_CONTAINER_COMPONENT_H

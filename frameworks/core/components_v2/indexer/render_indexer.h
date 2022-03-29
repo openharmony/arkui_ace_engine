@@ -183,5 +183,5 @@ protected:
     OnSelectedFunc selectedEventFun_;
     IndexerComponent::OnRequestPopupDataFunc requestPopupDataEventFun_;
 };
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_INDEXER_V2_RENDER_INDEXER_H

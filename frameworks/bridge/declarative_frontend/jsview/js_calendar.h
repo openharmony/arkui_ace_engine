@@ -54,6 +54,6 @@ private:
     static RefPtr<CalendarComponentV2> GetComponent();
 };
 
-} // OHOS::Ace::Framework
+} // namespace OHOS::Ace::Framework
 
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CALENDAR_H
