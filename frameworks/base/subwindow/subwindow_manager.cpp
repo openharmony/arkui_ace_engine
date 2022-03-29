@@ -94,7 +94,7 @@ int32_t SubwindowManager::GetParentContainerId(int32_t containerId)
 void SubwindowManager::AddSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow)
 {
     if (!subwindow) {
-        LOGE("Add subwindow failed, the subwndow is null.");
+        LOGE("Add subwindow failed, the subwindow is null.");
         return;
     }
     LOGI("Add subwindow into map, instanceId is %{public}d, subwindow id is %{public}d.", instanceId,

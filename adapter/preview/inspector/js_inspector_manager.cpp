@@ -294,6 +294,9 @@ const WeakPtr<Element>& JsInspectorManager::GetRootElement()
         return nullptr;
     }
     auto InspectorComponentElement = GetInspectorElementById(child.front()->GetNodeId());
+    if (!InspectorComponentElement) {
+        return nullptr;
+    }
     return InspectorComponentElement->GetElementParent();
 }
 

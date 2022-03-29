@@ -572,7 +572,7 @@ LunarDate Localization::GetLunarDate(Date date)
     // 0 means January,  1 means February, so month + 1
     dateRet.month = static_cast<uint32_t>(lunarMonth) + 1;
     dateRet.day = static_cast<uint32_t>(lunarDate);
-    dateRet.isLeapMonth = isLeapMonth == 0 ? false : true;
+    dateRet.isLeapMonth = !(isLeapMonth == 0);
     return dateRet;
 }
 

@@ -291,7 +291,7 @@ void DOMProgress::InitProgressIfNeed()
 {
     auto theme = GetTheme<ProgressTheme>();
     if (type_ == ProgressType::CIRCLE) {
-        // Width_ and height_ in circluar progress are usually the same with diameter in loading progress component.
+        // Width_ and height_ in circular progress are usually the same with diameter in loading progress component.
         // If width_ and height_ are different, choose smaller one as diameter.
         if (!loadingProgressChild_) {
             loadingProgressChild_ = AceType::MakeRefPtr<LoadingProgressComponent>();
