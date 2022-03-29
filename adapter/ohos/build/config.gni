@@ -48,6 +48,12 @@ foreach(product, enable_accessibility_product_list) {
   }
 }
 
+foreach(product, enable_web_product_list) {
+  if ("${product_name}" == product) {
+    web_components_support = true
+  }
+}
+
 use_external_icu = "shared"
 use_curl_download = true
 ohos_standard_fontmgr = true
@@ -66,10 +72,6 @@ enable_rosen_backend = true
 enable_standard_input = true
 build_container_scope_lib = true
 multiple_window_support = true
-
-if (product_name == "rk3568") {
-  web_components_support = true
-}
 
 if (defined(is_experiment_build) && is_experiment_build) {
   enable_system_clipboard = true
