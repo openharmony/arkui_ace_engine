@@ -28,8 +28,8 @@
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_runtime.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_value.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_group_js_bridge.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_context_module.h"
@@ -43,215 +43,27 @@
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 
+#ifndef WINDOWS_PLATFORM
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_start[];
 extern const char _binary_jsEnumStyle_abc_end[];
+#endif
 
 namespace OHOS::Ace::Framework {
 namespace {
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+const char COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW[] = "loadDocument(new";
+const char LEFT_PARENTTHESIS[] = "(";
+constexpr int32_t LOAD_DOCUMENT_STR_LENGTH = 16;
+#endif
 
 #ifdef APP_USE_ARM
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 #else
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
 #endif
-
-std::string ParseLogContent(const std::vector<std::string>& params)
-{
-    std::string ret;
-    if (params.empty()) {
-        return ret;
-    }
-    std::string formatStr = params[0];
-    int32_t size = static_cast<int32_t>(params.size());
-    int32_t len = static_cast<int32_t>(formatStr.size());
-    int32_t pos = 0;
-    int32_t count = 1;
-    for (; pos < len; ++pos) {
-        if (count >= size) {
-            break;
-        }
-        if (formatStr[pos] == '%') {
-            if (pos + 1 >= len) {
-                break;
-            }
-            switch (formatStr[pos + 1]) {
-                case 's':
-                case 'j':
-                case 'd':
-                case 'O':
-                case 'o':
-                case 'i':
-                case 'f':
-                case 'c':
-                    ret += params[count++];
-                    ++pos;
-                    break;
-                case '%':
-                    ret += formatStr[pos];
-                    ++pos;
-                    break;
-                default:
-                    ret += formatStr[pos];
-                    break;
-            }
-        } else {
-            ret += formatStr[pos];
-        }
-    }
-    if (pos < len) {
-        ret += formatStr.substr(pos, len - pos);
-    }
-    return ret;
-}
-
-std::string GetLogContent(
-    const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    if (argc == 1) {
-        return argv[0]->ToString(runtime);
-    }
-    std::vector<std::string> params;
-    for (int32_t i = 0; i < argc; ++i) {
-        params.emplace_back(argv[i]->ToString(runtime));
-    }
-    return ParseLogContent(params);
-}
-
-shared_ptr<JsValue> AppLogPrint(
-    const shared_ptr<JsRuntime>& runtime, JsLogLevel level, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    // Should have at least 1 parameter.
-    if (argc == 0) {
-        LOGE("the arg is error");
-        return runtime->NewUndefined();
-    }
-    std::string content = GetLogContent(runtime, argv, argc);
-    switch (level) {
-        case JsLogLevel::DEBUG:
-            APP_LOGD("app Log: %{public}s", content.c_str());
-            break;
-        case JsLogLevel::INFO:
-            APP_LOGI("app Log: %{public}s", content.c_str());
-            break;
-        case JsLogLevel::WARNING:
-            APP_LOGW("app Log: %{public}s", content.c_str());
-            break;
-        case JsLogLevel::ERROR:
-            APP_LOGE("app Log: %{public}s", content.c_str());
-            break;
-    }
-
-    return runtime->NewUndefined();
-}
-
-// native implementation for js function: console.debug()
-shared_ptr<JsValue> AppDebugLogPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
-    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    return AppLogPrint(runtime, JsLogLevel::DEBUG, argv, argc);
-}
-
-// native implementation for js function: console.info()
-shared_ptr<JsValue> AppInfoLogPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
-    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    return AppLogPrint(runtime, JsLogLevel::INFO, argv, argc);
-}
-
-// native implementation for js function: console.warn()
-shared_ptr<JsValue> AppWarnLogPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
-    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    return AppLogPrint(runtime, JsLogLevel::WARNING, argv, argc);
-}
-
-// native implementation for js function: console.error()
-shared_ptr<JsValue> AppErrorLogPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
-    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    return AppLogPrint(runtime, JsLogLevel::ERROR, argv, argc);
-}
-
-shared_ptr<JsValue> JsLogPrint(
-    const shared_ptr<JsRuntime>& runtime, JsLogLevel level, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    // Should have 1 parameters.
-    if (argc == 0) {
-        LOGE("the arg is error");
-        return runtime->NewUndefined();
-    }
-
-    std::string content = GetLogContent(runtime, argv, argc);
-    switch (level) {
-        case JsLogLevel::DEBUG:
-            LOGD("ace Log: %{public}s", content.c_str());
-            break;
-        case JsLogLevel::INFO:
-            LOGI("ace Log: %{public}s", content.c_str());
-            break;
-        case JsLogLevel::WARNING:
-            LOGW("ace Log: %{public}s", content.c_str());
-            break;
-        case JsLogLevel::ERROR:
-            LOGE("ace Log: %{public}s", content.c_str());
-            break;
-    }
-
-    shared_ptr<JsValue> ret = runtime->NewUndefined();
-    return ret;
-}
-
-int PrintLog(int id, int level, const char* tag, const char* fmt, const char* message)
-{
-    switch (JsLogLevel(level - 3)) {
-        case JsLogLevel::INFO:
-            LOGI("%{public}s::%{public}s", tag, message);
-            break;
-        case JsLogLevel::WARNING:
-            LOGW("%{public}s::%{public}s", tag, message);
-            break;
-        case JsLogLevel::ERROR:
-            LOGE("%{public}s::%{public}s", tag, message);
-            break;
-        case JsLogLevel::DEBUG:
-            LOGD("%{public}s::%{public}s", tag, message);
-            break;
-        default:
-            LOGF("%{public}s::%{public}s", tag, message);
-            break;
-    }
-    return 0;
-}
-
-// native implementation for js function: aceConsole.debug()
-shared_ptr<JsValue> JsDebugLogPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
-    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    return JsLogPrint(runtime, JsLogLevel::DEBUG, std::move(argv), argc);
-}
-
-// native implementation for js function: aceConsole.info()
-shared_ptr<JsValue> JsInfoLogPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
-    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    return JsLogPrint(runtime, JsLogLevel::INFO, std::move(argv), argc);
-}
-
-// native implementation for js function: aceConsole.warn()
-shared_ptr<JsValue> JsWarnLogPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
-    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    return JsLogPrint(runtime, JsLogLevel::WARNING, std::move(argv), argc);
-}
-
-// native implementation for js function: aceConsole.error()
-shared_ptr<JsValue> JsErrorLogPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
-    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    return JsLogPrint(runtime, JsLogLevel::ERROR, std::move(argv), argc);
-}
 
 // native implementation for js function: perfutil.print()
 shared_ptr<JsValue> JsPerfPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -310,7 +122,6 @@ shared_ptr<JsValue> RequireNativeModule(const shared_ptr<JsRuntime>& runtime, co
 
     return runtime->NewNull();
 }
-
 } // namespace
 
 // -----------------------
@@ -426,6 +237,7 @@ bool JsiDeclarativeEngineInstance::FireJsEvent(const std::string& eventStr)
 
 void JsiDeclarativeEngineInstance::InitAceModule()
 {
+#ifndef WINDOWS_PLATFORM
     bool stateMgmtResult = runtime_->EvaluateJsCode(
         (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
     if (!stateMgmtResult) {
@@ -436,6 +248,7 @@ void JsiDeclarativeEngineInstance::InitAceModule()
     if (!jsEnumStyleResult) {
         LOGE("EvaluateJsCode jsEnumStyle failed");
     }
+#endif
 }
 
 extern "C" ACE_EXPORT void OHOS_ACE_PreloadAceModule(void* runtime)
@@ -475,11 +288,11 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     // preload aceConsole
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
     shared_ptr<JsValue> aceConsoleObj = arkRuntime->NewObject();
-    aceConsoleObj->SetProperty(arkRuntime, "log", arkRuntime->NewFunction(JsDebugLogPrint));
-    aceConsoleObj->SetProperty(arkRuntime, "debug", arkRuntime->NewFunction(JsDebugLogPrint));
-    aceConsoleObj->SetProperty(arkRuntime, "info", arkRuntime->NewFunction(JsInfoLogPrint));
-    aceConsoleObj->SetProperty(arkRuntime, "warn", arkRuntime->NewFunction(JsWarnLogPrint));
-    aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsErrorLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "log", arkRuntime->NewFunction(JsiBaseUtils::JsDebugLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "debug", arkRuntime->NewFunction(JsiBaseUtils::JsDebugLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "info", arkRuntime->NewFunction(JsiBaseUtils::JsInfoLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "warn", arkRuntime->NewFunction(JsiBaseUtils::JsWarnLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsiBaseUtils::JsErrorLogPrint));
     global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
 
     // preload perfutil
@@ -495,6 +308,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     global->SetProperty(arkRuntime, "exports", exportsUtilObj);
     global->SetProperty(arkRuntime, "requireNativeModule", arkRuntime->NewFunction(RequireNativeModule));
 
+#ifndef WINDOWS_PLATFORM
     // preload js enums
     bool jsEnumStyleResult = arkRuntime->EvaluateJsCode(
         (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
@@ -514,6 +328,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     isModulePreloaded_ = evalResult;
     globalRuntime_ = nullptr;
     LOGI("PreloadAceModule loaded:%{public}d", isModulePreloaded_);
+#endif
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule()
@@ -525,11 +340,11 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
     // app log method
     if (!usingSharedRuntime_) {
         shared_ptr<JsValue> consoleObj = runtime_->NewObject();
-        consoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(AppDebugLogPrint));
-        consoleObj->SetProperty(runtime_, "debug", runtime_->NewFunction(AppDebugLogPrint));
-        consoleObj->SetProperty(runtime_, "info", runtime_->NewFunction(AppInfoLogPrint));
-        consoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(AppWarnLogPrint));
-        consoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(AppErrorLogPrint));
+        consoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(JsiBaseUtils::AppDebugLogPrint));
+        consoleObj->SetProperty(runtime_, "debug", runtime_->NewFunction(JsiBaseUtils::AppDebugLogPrint));
+        consoleObj->SetProperty(runtime_, "info", runtime_->NewFunction(JsiBaseUtils::AppInfoLogPrint));
+        consoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(JsiBaseUtils::AppWarnLogPrint));
+        consoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(JsiBaseUtils::AppErrorLogPrint));
         global->SetProperty(runtime_, "console", consoleObj);
     }
 
@@ -540,77 +355,12 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
 
     // js framework log method
     shared_ptr<JsValue> aceConsoleObj = runtime_->NewObject();
-    aceConsoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(JsDebugLogPrint));
-    aceConsoleObj->SetProperty(runtime_, "debug", runtime_->NewFunction(JsDebugLogPrint));
-    aceConsoleObj->SetProperty(runtime_, "info", runtime_->NewFunction(JsInfoLogPrint));
-    aceConsoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(JsWarnLogPrint));
-    aceConsoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(JsErrorLogPrint));
+    aceConsoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(JsiBaseUtils::JsDebugLogPrint));
+    aceConsoleObj->SetProperty(runtime_, "debug", runtime_->NewFunction(JsiBaseUtils::JsDebugLogPrint));
+    aceConsoleObj->SetProperty(runtime_, "info", runtime_->NewFunction(JsiBaseUtils::JsInfoLogPrint));
+    aceConsoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(JsiBaseUtils::JsWarnLogPrint));
+    aceConsoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(JsiBaseUtils::JsErrorLogPrint));
     global->SetProperty(runtime_, "aceConsole", aceConsoleObj);
-}
-
-std::string GetLogContent(NativeEngine* nativeEngine, NativeCallbackInfo* info)
-{
-    std::string content;
-    for (size_t i = 0; i < info->argc; ++i) {
-        if (info->argv[i]->TypeOf() != NATIVE_STRING) {
-            LOGE("argv is not NativeString");
-            continue;
-        }
-        auto nativeString = reinterpret_cast<NativeString*>(info->argv[i]->GetInterface(NativeString::INTERFACE_ID));
-        size_t bufferSize = nativeString->GetLength();
-        size_t strLength = 0;
-        char* buffer = new char[bufferSize + 1] { 0 };
-        nativeString->GetCString(buffer, bufferSize + 1, &strLength);
-        content.append(buffer);
-        delete[] buffer;
-    }
-    return content;
-}
-
-NativeValue* AppLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info, JsLogLevel level)
-{
-    // Should have at least 1 parameters.
-    if (info->argc == 0) {
-        LOGE("the arg is error");
-        return nativeEngine->CreateUndefined();
-    }
-    std::string content = GetLogContent(nativeEngine, info);
-    switch (level) {
-        case JsLogLevel::DEBUG:
-            APP_LOGD("app Log: %{public}s", content.c_str());
-            break;
-        case JsLogLevel::INFO:
-            APP_LOGI("app Log: %{public}s", content.c_str());
-            break;
-        case JsLogLevel::WARNING:
-            APP_LOGW("app Log: %{public}s", content.c_str());
-            break;
-        case JsLogLevel::ERROR:
-            APP_LOGE("app Log: %{public}s", content.c_str());
-            break;
-    }
-
-    return nativeEngine->CreateUndefined();
-}
-
-NativeValue* AppDebugLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
-{
-    return AppLogPrint(nativeEngine, info, JsLogLevel::DEBUG);
-}
-
-NativeValue* AppInfoLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
-{
-    return AppLogPrint(nativeEngine, info, JsLogLevel::INFO);
-}
-
-NativeValue* AppWarnLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
-{
-    return AppLogPrint(nativeEngine, info, JsLogLevel::WARNING);
-}
-
-NativeValue* AppErrorLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
-{
-    return AppLogPrint(nativeEngine, info, JsLogLevel::ERROR);
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule(ArkNativeEngine* engine)
@@ -909,7 +659,9 @@ void JsiDeclarativeEngine::Destroy()
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     if (!runtime_ && nativeEngine_ != nullptr) {
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
+#endif
         engineInstance_->DestroyAllRootViewHandle();
         delete nativeEngine_;
         nativeEngine_ = nullptr;
@@ -967,7 +719,9 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     engineInstance_->SetNativeEngine(nativeEngine_);
     if (!sharedRuntime) {
         SetPostTask(nativeEngine_);
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         nativeEngine_->CheckUVLoop();
+#endif
 
         if (delegate && delegate->GetAssetManager()) {
             std::string packagePath = delegate->GetAssetManager()->GetLibPath();
@@ -1026,11 +780,13 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         }
         instance->InitConsoleModule(arkNativeEngine);
 
+#ifndef WINDOWS_PLATFORM
         std::vector<uint8_t> buffer((uint8_t*)_binary_jsEnumStyle_abc_start, (uint8_t*)_binary_jsEnumStyle_abc_end);
         auto stateMgmtResult = arkNativeEngine->RunBufferScript(buffer);
         if (stateMgmtResult == nullptr) {
             LOGE("init worker error");
         }
+#endif
     };
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
@@ -1132,6 +888,41 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         }
     }
 }
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+void JsiDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::string componentName)
+{
+    ACE_DCHECK(engineInstance_);
+    // replace the component name in the last loadDocument from current js content.
+    std::string::size_type loadDocomentPos = 0;
+    std::string::size_type  lastLoadDocomentPos = 0;
+    while ((loadDocomentPos = preContent_.find(COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW, loadDocomentPos))
+           != std::string::npos) {
+        lastLoadDocomentPos = loadDocomentPos;
+        loadDocomentPos++;
+    }
+
+    std::string::size_type position = lastLoadDocomentPos + LOAD_DOCUMENT_STR_LENGTH;
+    std::string::size_type finalPostion = 0;
+    while ((position = preContent_.find(LEFT_PARENTTHESIS, position)) != std::string::npos) {
+        if (position > loadDocomentPos + LOAD_DOCUMENT_STR_LENGTH) {
+            finalPostion = position;
+            break;
+        }
+        position++;
+    }
+    std::string dstReplaceStr = COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW;
+    dstReplaceStr += " " + componentName;
+    preContent_.replace(lastLoadDocomentPos, finalPostion - lastLoadDocomentPos, dstReplaceStr);
+
+    if (engineInstance_ == nullptr) {
+        LOGE("engineInstance is nullptr");
+        return;
+    }
+
+    engineInstance_->GetDelegate()->Replace(url, "");
+}
+#endif
 
 void JsiDeclarativeEngine::UpdateRunningPage(const RefPtr<JsAcePage>& page)
 {

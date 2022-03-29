@@ -108,7 +108,7 @@ public:
     }
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    void ReplaceJSContent(const std::string& url, const std::string componentName);
+    void ReplaceJSContent(const std::string& url, const std::string componentName) override;
 #endif
 
      RefPtr<NativeXComponentImpl> nativeXComponentImpl_;

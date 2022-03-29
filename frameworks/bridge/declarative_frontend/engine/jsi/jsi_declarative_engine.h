@@ -30,7 +30,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_page.h"
 #include "core/components/xcomponent/native_interface_xcomponent_impl.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/ark/include/js_runtime.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
@@ -265,6 +265,10 @@ public:
         return renderContext_;
     }
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void ReplaceJSContent(const std::string& url, const std::string componentName) override;
+#endif
+
 private:
     bool CallAppFunc(const std::string& appFuncName);
 
@@ -289,6 +293,10 @@ private:
     int32_t instanceId_ = 0;
     void* runtime_ = nullptr;
     shared_ptr<JsValue> renderContext_;
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    std::string preContent_ = "";
+#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };

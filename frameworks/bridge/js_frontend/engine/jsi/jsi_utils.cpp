@@ -18,7 +18,7 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
 
 namespace OHOS::Ace::Framework {
-int32_t GetLineOffset()
+int32_t GetLineOffset(const AceType *data)
 {
     const int32_t offset = 14;
     return offset;

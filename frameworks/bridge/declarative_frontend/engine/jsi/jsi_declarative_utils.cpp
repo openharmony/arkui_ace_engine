@@ -18,7 +18,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
 namespace OHOS::Ace::Framework {
-int32_t GetLineOffset()
+int32_t GetLineOffset(const AceType *data)
 {
     return 0;
 }

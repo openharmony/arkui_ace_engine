@@ -242,6 +242,14 @@ public:
     static PixelMapNapiEntry GetPixelMapNapiEntry();
 #endif
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    virtual void ReplaceJSContent(const std::string& url, const std::string componentName)
+    {
+        LOGE("V8 does not support replaceJSContent");
+        return;
+    }
+#endif
+
 protected:
     NativeEngine* nativeEngine_ = nullptr;
     std::function<void(JsEngine*)> mediaUpdateCallback_;

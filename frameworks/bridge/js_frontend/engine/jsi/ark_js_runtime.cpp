@@ -40,8 +40,10 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
     LOGI("Ark: create jsvm");
     RuntimeOption option;
     option.SetGcType(RuntimeOption::GC_TYPE::GEN_GC);
+#ifndef WINDOWS_PLATFORM
     option.SetArkProperties(SystemProperties::GetArkProperties());
     option.SetAsmInterOption(SystemProperties::GetAsmInterOption());
+#endif
     const int64_t poolSize = 0x10000000;  // 256M
     option.SetGcPoolSize(poolSize);
     option.SetLogLevel(RuntimeOption::LOG_LEVEL::ERROR);
@@ -54,11 +56,23 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
     return vm_ != nullptr;
 }
 
+bool ArkJSRuntime::InitializeFromExistVM(EcmaVM* vm)
+{
+    vm_ = vm;
+    usingExistVM_ = true;
+    LOGI("InitializeFromExistVM %{public}p", vm);
+    return vm_ != nullptr;
+}
+
 void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
-        JSNApi::StopDebugger(libPath_.c_str());
-        JSNApi::DestroyJSVM(vm_);
+        if (!usingExistVM_) {
+#ifndef WINDOWS_PLATFORM
+            JSNApi::StopDebugger(libPath_.c_str());
+#endif
+            JSNApi::DestroyJSVM(vm_);
+        }
         vm_ = nullptr;
     }
     for (auto data : dataList_) {
@@ -91,7 +105,9 @@ bool ArkJSRuntime::ExecuteJsBin(const std::string &fileName)
     JSExecutionScope executionScope(vm_);
     static bool debugFlag = true;
     if (debugFlag && !libPath_.empty()) {
+#ifndef WINDOWS_PLATFORM
         JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_);
+#endif
         debugFlag = false;
     }
     LocalScope scope(vm_);
