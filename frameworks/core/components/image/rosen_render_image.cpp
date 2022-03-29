@@ -803,9 +803,6 @@ void RosenRenderImage::UpLoadImageDataForPaint()
     if (NeedUploadImageObjToGpu()) {
         imageLoadingStatus_ = ImageLoadingStatus::LOADING;
         if (imageObj_) {
-            if (GetAdaptiveFrameRectFlag()) {
-                resizeTarget_ = rawImageSize_;
-            }
             previousResizeTarget_ = resizeTarget_;
             RosenRenderImage::UploadImageObjToGpuForRender(imageObj_, GetContext(), renderTaskHolder_,
                 uploadSuccessCallback_, failedCallback_, resizeTarget_, forceResize_, syncMode_);
