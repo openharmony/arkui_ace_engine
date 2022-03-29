@@ -166,4 +166,4 @@ bool HdcJdwpSimulator::Connect()
     uv_pipe_connect(connect_, &ctxPoint_->pipe, jdwpCtrlName.c_str(), ConnectJdwp);
     return true;
 }
-}
+} // namespace OHOS::Ace

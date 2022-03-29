@@ -162,4 +162,4 @@ void BadgeComposedElement::DeleteChildWithSlot(int32_t slot)
     LOGD("badge DeleteChildWithSlot");
 }
 
-}
+} // namespace OHOS::Ace::V2

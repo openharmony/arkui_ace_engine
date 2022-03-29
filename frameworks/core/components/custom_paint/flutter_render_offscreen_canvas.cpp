@@ -1730,4 +1730,4 @@ void FlutterRenderOffscreenCanvas::SetColorFilter(float matrix[20])
     imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
 }
-}
+} // namespace OHOS::Ace

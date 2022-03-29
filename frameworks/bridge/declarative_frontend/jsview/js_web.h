@@ -57,5 +57,5 @@ public:
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
 };
-}
+} // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_H
