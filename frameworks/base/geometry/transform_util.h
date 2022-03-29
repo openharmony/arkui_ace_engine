@@ -84,7 +84,7 @@ struct ACE_EXPORT RotateOperation {
 
 struct ACE_EXPORT PerspectiveOperation {
     PerspectiveOperation() = default;
-    PerspectiveOperation(const Dimension& dis) : distance(dis) {};
+    explicit PerspectiveOperation(const Dimension& dis) : distance(dis) {};
     bool operator==(const PerspectiveOperation& other) const
     {
         return distance == other.distance;

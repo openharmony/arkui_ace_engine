@@ -173,7 +173,7 @@ class Camera : public virtual AceType {
 public:
     using PrepareEventListener = std::function<void()>;
 
-    Camera(const WeakPtr<PipelineContext> &context)
+    explicit Camera(const WeakPtr<PipelineContext> &context)
         : context_(context) {}
     ~Camera() override = default;
 

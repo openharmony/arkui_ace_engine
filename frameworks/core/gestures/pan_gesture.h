@@ -37,7 +37,7 @@ public:
         direction_ = direction;
         distance_ = distance;
     };
-    PanGesture(RefPtr<PanGestureOption> panGestureOption)
+    explicit PanGesture(RefPtr<PanGestureOption> panGestureOption)
     {
         panGestureOption_ = panGestureOption;
     };

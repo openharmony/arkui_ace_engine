@@ -35,8 +35,8 @@ public:
     ~JSRefPtrImpl() {}
 
     // Conversion from the implementation detail to JSRefPtr
-    JSRefPtrImpl(const ImplDetail& rhs) : object_(rhs) {}
-    JSRefPtrImpl(ImplDetail&& rhs) : object_(std::move(rhs)) {}
+    explicit JSRefPtrImpl(const ImplDetail& rhs) : object_(rhs) {}
+    explicit JSRefPtrImpl(ImplDetail&& rhs) : object_(std::move(rhs)) {}
 
     JSRefPtrImpl(const JSRefPtrImpl<T, ImplDetail>& rhs) : object_(rhs.object_) {}
     JSRefPtrImpl(JSRefPtrImpl<T, ImplDetail>&& rhs) : object_(std::move(rhs.object_)) {}

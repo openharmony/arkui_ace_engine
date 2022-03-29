@@ -28,7 +28,7 @@ class JSPageTransition : public AceType {
 
 public:
     JSPageTransition() = default;
-    virtual ~JSPageTransition() override = default;
+    ~JSPageTransition() override = default;
 
     static void JSBind(BindingTarget globalObj);
 

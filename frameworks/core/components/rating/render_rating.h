@@ -131,9 +131,9 @@ protected:
     void HandleActionScroll(bool isForward);
     bool StarMovingForward();
     bool StarMovingBackward();
-    virtual void OnMouseHoverEnterTest() override;
-    virtual void OnMouseHoverExitTest() override;
-    virtual bool MouseHoverTest(const Point& parentLocalPoint) override;
+    void OnMouseHoverEnterTest() override;
+    void OnMouseHoverExitTest() override;
+    bool MouseHoverTest(const Point& parentLocalPoint) override;
     virtual void PaintFocus(
         const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context) {}
     virtual void PaintFocus(

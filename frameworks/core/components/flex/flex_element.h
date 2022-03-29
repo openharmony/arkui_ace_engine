@@ -32,7 +32,7 @@ public:
     bool AcceptFocusByRectOfLastFocus(const Rect& rect) override;
 
 protected:
-    virtual RefPtr<RenderNode> GetCachedRenderNode() override
+    RefPtr<RenderNode> GetCachedRenderNode() override
     {
         auto context = GetContext().Upgrade();
         if (context) {

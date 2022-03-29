@@ -28,7 +28,7 @@ class AnimatorInfo : public AceType {
 
 public:
     AnimatorInfo() = default;
-    virtual ~AnimatorInfo() override = default;
+    ~AnimatorInfo() override = default;
 
     void SetAnimator(const RefPtr<Animator>& animator)
     {

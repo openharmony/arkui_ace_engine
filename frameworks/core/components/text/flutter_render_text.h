@@ -35,8 +35,8 @@ public:
     double GetTextWidth() override;
 
 protected:
-    virtual bool MaybeRelease() override;
-    virtual void ClearRenderObject() override;
+    bool MaybeRelease() override;
+    void ClearRenderObject() override;
 
 private:
     Size Measure() override;

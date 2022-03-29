@@ -31,7 +31,7 @@ class PatternCompleteEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(PatternCompleteEvent, BaseEventInfo);
 
 public:
-    PatternCompleteEvent(std::vector<int> input) : BaseEventInfo("patternCompleteEvent"), input_(input) {}
+    explicit PatternCompleteEvent(std::vector<int> input) : BaseEventInfo("patternCompleteEvent"), input_(input) {}
     ~PatternCompleteEvent() = default;
     std::vector<int> GetInput() const
     {

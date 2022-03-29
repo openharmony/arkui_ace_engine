@@ -55,7 +55,7 @@ protected:
     void OnOpacityAnimationCallback();
     void OnHiddenChanged(bool hidden) override;
     void OnVisibleChanged() override;
-    virtual void ClearRenderObject() override;
+    void ClearRenderObject() override;
     void OnRSTransition(TransitionType type) override;
 
 private:

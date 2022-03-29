@@ -34,8 +34,7 @@ class UIServiceMgrStub : public IRemoteStub<IUIServiceMgr> {
 public:
     UIServiceMgrStub();
     virtual ~UIServiceMgrStub();
-    virtual int OnRemoteRequest(
-        uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
+    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
     int RegisterCallBackInner(MessageParcel& data, MessageParcel& reply);

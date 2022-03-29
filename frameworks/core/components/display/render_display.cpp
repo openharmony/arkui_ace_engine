@@ -227,6 +227,8 @@ void RenderDisplay::OnStatusStyleChanged(VisualState componentState)
                 }
                 opacity_ = static_cast<uint8_t>(round(animatableOpacity_.GetValue() * UINT8_MAX));
             } break;
+            default:
+                break;
         }
     }
     if (updated) {

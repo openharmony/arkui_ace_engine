@@ -41,11 +41,11 @@ public:
     JsiType(JsiType&& rhs);
     virtual ~JsiType();
 
-    JsiType(panda::Local<T> val);
-    JsiType(panda::Global<T> other);
+    explicit JsiType(panda::Local<T> val);
+    explicit JsiType(panda::Global<T> other);
 
     template<typename S>
-    JsiType(panda::Local<S> val);
+    explicit JsiType(panda::Local<S> val);
 
     JsiType& operator=(const JsiType& rhs);
     JsiType& operator=(JsiType&& rhs);
@@ -100,7 +100,7 @@ public:
 class JsiArray : public JsiType<panda::ArrayRef> {
 public:
     JsiArray();
-    JsiArray(panda::Local<panda::ArrayRef> val);
+    explicit JsiArray(panda::Local<panda::ArrayRef> val);
     ~JsiArray() override = default;
     JsiRef<JsiValue> GetValueAt(size_t index) const;
     void SetValueAt(size_t index, JsiRef<JsiValue> value) const;
@@ -116,7 +116,7 @@ public:
 class JsiObject : public JsiType<panda::ObjectRef> {
 public:
     JsiObject();
-    JsiObject(panda::Local<panda::ObjectRef> val);
+    explicit JsiObject(panda::Local<panda::ObjectRef> val);
     bool IsUndefined() const;
     ~JsiObject() override = default;
     enum InternalFieldIndex { INSTANCE = 0 };
@@ -146,7 +146,7 @@ public:
 class JsiFunction : public JsiType<panda::FunctionRef> {
 public:
     JsiFunction();
-    JsiFunction(panda::Local<panda::FunctionRef> val);
+    explicit JsiFunction(panda::Local<panda::FunctionRef> val);
     ~JsiFunction() override = default;
 
     JsiRef<JsiValue> Call(JsiRef<JsiValue> thisVal, int argc = 0, JsiRef<JsiValue> argv[] = nullptr) const;
@@ -158,7 +158,7 @@ public:
 class JsiObjTemplate : public JsiObject {
 public:
     JsiObjTemplate() = default;
-    JsiObjTemplate(panda::Local<panda::ObjectRef> val);
+    explicit JsiObjTemplate(panda::Local<panda::ObjectRef> val);
     ~JsiObjTemplate() override = default;
 
     void SetInternalFieldCount(int32_t count) const;

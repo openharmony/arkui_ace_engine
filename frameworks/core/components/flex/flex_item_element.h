@@ -24,7 +24,7 @@ class FlexItemElement : public SoleChildElement {
     DECLARE_ACE_TYPE(FlexItemElement, SoleChildElement);
 
 protected:
-    virtual RefPtr<RenderNode> GetCachedRenderNode() override
+    RefPtr<RenderNode> GetCachedRenderNode() override
     {
         auto context = GetContext().Upgrade();
         if (context) {

@@ -24,7 +24,7 @@ namespace OHOS::Ace {
 class QjsPaEngineLoader : public JsBackendEngineLoader, public Singleton<QjsPaEngineLoader> {
     DECLARE_SINGLETON(QjsPaEngineLoader)
 public:
-    virtual RefPtr<JsBackendEngine> CreateJsBackendEngine(int32_t instanceId) const final;
+    RefPtr<JsBackendEngine> CreateJsBackendEngine(int32_t instanceId) const final;
 };
 
 } // namespace OHOS::Ace

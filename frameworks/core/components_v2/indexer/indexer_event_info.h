@@ -22,7 +22,7 @@ namespace OHOS::Ace::V2 {
 class IndexerEventInfo : public BaseEventInfo, public EventToJSONStringAdapter {
     DECLARE_RELATIONSHIP_OF_CLASSES(IndexerEventInfo, BaseEventInfo, EventToJSONStringAdapter);
 public:
-    IndexerEventInfo(int32_t selectedIndex) : BaseEventInfo("indexer"), selectedIndex_(selectedIndex)
+    explicit IndexerEventInfo(int32_t selectedIndex) : BaseEventInfo("indexer"), selectedIndex_(selectedIndex)
     {}
 
     ~IndexerEventInfo() = default;

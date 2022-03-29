@@ -211,7 +211,7 @@ public:
     void GetColorsAndRepeating(std::unique_ptr<JsonValue>& resultJson, const Gradient& gradient) const;
 
     // bindpopup
-    virtual std::string GetBindPopup() const override;
+    std::string GetBindPopup() const override;
     virtual AceType::IdType GetTargetTypeId() const
     {
         return AceType::TypeId(this);

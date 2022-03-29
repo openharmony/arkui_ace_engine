@@ -146,8 +146,8 @@ public:
     }
 
 protected:
-    virtual void ClearRenderObject() override;
-    virtual bool MaybeRelease() override;
+    void ClearRenderObject() override;
+    bool MaybeRelease() override;
 
 private:
     double flexGrow_ = 0.0;

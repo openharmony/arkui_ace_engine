@@ -1700,6 +1700,8 @@ void RosenRenderOffscreenCanvas::SetHueRotateFilter(const std::string& filterPar
             matrix[1] = matrix[7] = matrix[10] = 1 - N;
             matrix[18] = 1.0f;
             break;
+        default:
+            break;
     }
     SetColorFilter(matrix);
 }

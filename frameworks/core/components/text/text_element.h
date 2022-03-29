@@ -24,7 +24,7 @@ class TextElement : public ComponentGroupElement {
     DECLARE_ACE_TYPE(TextElement, ComponentGroupElement);
 
 protected:
-    virtual RefPtr<RenderNode> GetCachedRenderNode() override
+    RefPtr<RenderNode> GetCachedRenderNode() override
     {
         auto context = GetContext().Upgrade();
         if (context) {

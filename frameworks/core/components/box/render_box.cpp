@@ -1766,6 +1766,8 @@ void RenderBox::OnStatusStyleChanged(const VisualState state)
                 LOGD("Setting Gradient state %{public}d", state);
                 GetBackDecoration()->SetGradient(gradientState->value_);
             } break;
+            default:
+                break;
         }
     }
     if (updated) {
