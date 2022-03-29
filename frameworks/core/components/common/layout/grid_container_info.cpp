@@ -16,6 +16,7 @@
 #include "core/components/common/layout/grid_container_info.h"
 
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 
@@ -38,21 +39,24 @@ void GridContainerInfo::BuildColumnWidth()
 
 void GridContainerInfo::BuildColumnWidth(double width)
 {
-    containerWidth_ = width;
     SystemGridInfo systemGridInfo;
     if (sizeType_ != GridSizeType::UNDEFINED && currentSizeType_ == GridSizeType::UNDEFINED) {
         systemGridInfo = GridSystemManager::GetInstance().GetSystemGridInfo(sizeType_);
         // using fix size type
         currentSizeType_ = sizeType_;
     } else {
-        systemGridInfo = GridSystemManager::GetInstance().GetSystemGridInfo(templateType_, containerWidth_);
+        systemGridInfo = GridSystemManager::GetInstance().GetSystemGridInfo(templateType_, width);
         if (currentSizeType_ != systemGridInfo.sizeType) {
             // system size changed
             currentSizeType_ = systemGridInfo.sizeType;
         } else {
-            return;
+            if (NearEqual(containerWidth_, width)) {
+                LOGW("container width not changed.");
+                return;
+            }
         }
     }
+    containerWidth_ = width;
     double dipScale = GridSystemManager::GetInstance().GetDipScale();
     // if not define the prop, use system grid define
     int32_t columns = GetValue(columns_, systemGridInfo.columns, UNDEFINED_INT);
