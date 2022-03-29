@@ -13,4 +13,7 @@
 
 enable_accessibility_product_list = [ "rk3568" ]
 
-enable_web_product_list = [ "rk3568" ]
+enable_web_product_list = [
+  "rk3568",
+  "m40",
+]
