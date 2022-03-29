@@ -1572,7 +1572,10 @@ void RosenDecorationPainter::PaintColorAndImage(
     if (backColor != Color::TRANSPARENT) {
         rsNode->SetBackgroundColor(backColor.GetValue());
         paintBgColor = true;
+    } else {
+        rsNode->SetBackgroundColor(Color::TRANSPARENT.GetValue());
     }
+
     if (animationColor != Color::TRANSPARENT) {
         rsNode->SetBackgroundColor(animationColor.GetValue());
     }
