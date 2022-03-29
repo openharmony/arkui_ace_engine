@@ -142,6 +142,7 @@ private:
     RefPtr<ImageObject> imageObj_ = nullptr;
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
     CanvasImage canvasImage_;
+    Size lastLayoutSize_;
 };
 
 } // namespace OHOS::Ace
