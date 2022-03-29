@@ -107,6 +107,7 @@ private:
 
     void OnDataMoved(const JSCallbackInfo& args)
     {
+        ContainerScope scope(instanceId_);
         size_t from = 0;
         size_t to = 0;
         if (args.Length() < 2 || !ConvertFromJSValue(args[0], from) || !ConvertFromJSValue(args[1], to)) {
@@ -118,6 +119,7 @@ private:
     template<class... Args>
     void NotifyAll(void (V2::DataChangeListener::*method)(Args...), const JSCallbackInfo& args)
     {
+        ContainerScope scope(instanceId_);
         size_t index = 0;
         if (args.Length() > 0 && ConvertFromJSValue(args[0], index)) {
             NotifyAll(method, index);
@@ -362,7 +364,6 @@ public:
 
     void SetParentViewObj(const JSRef<JSObject>& parentViewObj)
     {
-        parentViewObj_ = parentViewObj;
         parentView_ = parentViewObj->Unwrap<JSView>();
     }
 
@@ -401,7 +402,6 @@ private:
 
     JSExecutionContext context_;
 
-    JSRef<JSObject> parentViewObj_;
     JSView* parentView_ = nullptr;
 
     JSRef<JSObject> dataSourceObj_;
