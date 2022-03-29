@@ -609,9 +609,9 @@ void RenderSwiper::HandleTouchDown(const TouchEventInfo& info)
         return;
     }
 
+    fingerId_ = locationInfo.GetFingerId();
     GetIndicatorCurrentRect(swiperIndicatorData_);
     if (indicatorRect_.IsInRegion(touchPoint)) {
-        fingerId_ = locationInfo.GetFingerId();
         startTimeStamp_ = GetTickCount();
         if (isIndicatorAnimationStart_) {
             touchContentType_ = TouchContentType::TOUCH_NONE;
@@ -645,17 +645,17 @@ void RenderSwiper::HandleTouchUp(const TouchEventInfo& info)
     } else if (!info.GetChangedTouches().empty()) {
         fingerId = info.GetChangedTouches().front().GetFingerId();
     }
-    if (fingerId_ >= 0 && fingerId != fingerId_) {
+    if ((fingerId_ >= 0 && fingerId != fingerId_) || fingerId_ == -1) {
         return;
     }
-
+    
+    fingerId_ = -1;
     // indicator zone
     if (touchContentType_ == TouchContentType::TOUCH_NONE) {
         LOGD(" touch content type is none");
         return;
     } else if (touchContentType_ == TouchContentType::TOUCH_INDICATOR) {
         if (swiperIndicatorData_.isPressed) {
-            fingerId_ = -1;
             if (isDragStart_) {
                 // reset flag of isPressed by function of HandleDragEnd.
                 isDragStart_ = false;
