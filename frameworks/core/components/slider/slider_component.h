@@ -216,7 +216,7 @@ public:
         thickness_ = thickness;
     }
 
-    ACE_DEFINE_COMPONENT_EVENT(OnChange, void(double,int));
+    ACE_DEFINE_COMPONENT_EVENT(OnChange, void(double, int));
 
 private:
     ProgressData data_;

@@ -179,7 +179,7 @@ void RenderPatternLockTest::SetUpTestCase() {}
 void RenderPatternLockTest::TearDownTestCase() {}
 void RenderPatternLockTest::SetUp()
 {
-    context_= MockRenderCommon::GetMockContext();
+    context_ = MockRenderCommon::GetMockContext();
     renderPatternLock_ = AceType::MakeRefPtr<MockRenderPatternLock>();
     renderPatternLock_->Attach(context_);
 }
