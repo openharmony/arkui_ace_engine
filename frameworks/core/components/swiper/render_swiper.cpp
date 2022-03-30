@@ -978,7 +978,6 @@ void RenderSwiper::StartSpringMotion(double mainPosition, double mainVelocity,
         controller_->RemoveInterpolator(translate_);
         isAnimationAlreadyAdded_ = false;
     }
-    isIndicatorAnimationStart_ = true;
     scrollMotion_ = AceType::MakeRefPtr<ScrollMotion>(mainPosition, mainVelocity, extent,
         initExtent, DEFAULT_OVER_SPRING_PROPERTY);
     scrollMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double position) {
@@ -992,8 +991,6 @@ void RenderSwiper::StartSpringMotion(double mainPosition, double mainVelocity,
     springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
         if (swiper) {
-            swiper->isIndicatorAnimationStart_ = false;
-
             swiper->RestoreAutoPlay();
             swiper->ResetCachedChildren();
             swiper->UpdateOneItemOpacity(MAX_OPACITY, swiper->currentIndex_);
