@@ -153,9 +153,9 @@ void WebClientImpl::OnGeolocationShow(const std::string& origin,
     delegate->OnGeolocationPermissionsShowPrompt(origin, callback);
 }
 
-void WebClientImpl::SetNWeb(std::shared_ptr<OHOS::NWeb::NWeb> webview)
+void WebClientImpl::SetNWeb(std::shared_ptr<OHOS::NWeb::NWeb> nweb)
 {
-    webviewWeak_ = webview;
+    webviewWeak_ = nweb;
 }
 
 void WebClientImpl::OnProxyDied()
