@@ -309,7 +309,6 @@ protected:
     void CalculateSelfLayoutSize();
     void CalculateChildPosition();
     void AdjustSizeByAspectRatio();
-    void PerformLayoutInLiteMode();
     virtual void OnAnimationCallback();
 
     AnimatableDimension width_ { AnimatableDimension(-1.0, DimensionUnit::PX) };  // exclude margin
