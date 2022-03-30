@@ -355,6 +355,27 @@ public:
         indicator_ = indicator;
     }
 
+    bool operator==(const SwiperDeclaration& swiper) const
+    {
+        return GetDuration() == swiper.GetDuration() &&
+            GetAxis() == swiper.GetAxis() &&
+            IsLoop() == swiper.IsLoop() &&
+            IsAutoPlay() == swiper.IsAutoPlay() &&
+            GetAutoPlayInterval() == swiper.GetAutoPlayInterval() &&
+            GetCachedSize() == swiper.GetCachedSize() &&
+            IsAnimationOpacity() == swiper.IsAnimationOpacity() &&
+            GetEdgeEffect() == swiper.GetEdgeEffect() &&
+            GetDigitalIndicator() == swiper.GetDigitalIndicator() &&
+            GetDisplayMode() == swiper.GetDisplayMode() &&
+            GetAnimationCurve() == swiper.GetAnimationCurve() &&
+            GetItemSpace() == swiper.GetItemSpace() &&
+            GetFadeColor() == swiper.GetFadeColor() &&
+            GetPreviousMargin() == swiper.GetPreviousMargin() &&
+            GetNextMargin() == swiper.GetNextMargin() &&
+            IsShowIndicator() == swiper.IsShowIndicator() &&
+            GetDisplayCount() == swiper.GetDisplayCount();
+    }
+
 protected:
     void InitSpecialized() override;
     bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;

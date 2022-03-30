@@ -201,6 +201,17 @@ public:
         return curve_;
     }
 
+    bool operator==(const SwiperComponent& swiper) const
+    {
+        return *declaration_ == *swiper.declaration_ &&
+            show_ == swiper.show_ &&
+            slideContinued_ == swiper.slideContinued_ &&
+            disableRation_ == swiper.disableRation_ &&
+            disableSwipe_ == swiper.disableSwipe_ &&
+            mainSwiperSize_ == swiper.mainSwiperSize_ &&
+            curve_ == swiper.curve_;
+    }
+
 private:
     RefPtr<SwiperDeclaration> declaration_;
     bool show_ { true };
