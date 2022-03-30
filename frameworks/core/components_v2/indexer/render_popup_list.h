@@ -44,7 +44,7 @@ public:
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
-    virtual bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
+    bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
         TouchTestResult& result) override;
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;

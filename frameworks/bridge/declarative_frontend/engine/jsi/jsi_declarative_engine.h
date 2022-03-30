@@ -171,7 +171,7 @@ class JsiDeclarativeEngine : public JsEngine {
     DECLARE_ACE_TYPE(JsiDeclarativeEngine, JsEngine)
 public:
     JsiDeclarativeEngine(int32_t instanceId, void* runtime) : instanceId_(instanceId), runtime_(runtime) {}
-    JsiDeclarativeEngine(int32_t instanceId) : instanceId_(instanceId) {}
+    explicit JsiDeclarativeEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~JsiDeclarativeEngine() override;
 
     bool Initialize(const RefPtr<FrontendDelegate>& delegate) override;
@@ -243,7 +243,7 @@ public:
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
-    virtual FrontendDelegate* GetFrontend() override
+    FrontendDelegate* GetFrontend() override
     {
         return AceType::RawPtr(engineInstance_->GetDelegate());
     }

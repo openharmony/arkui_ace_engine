@@ -51,7 +51,7 @@ private:
 class UIServiceCallbackRecipient : public IRemoteObject::DeathRecipient {
 public:
     using RemoteDiedHandler = std::function<void(const wptr<IRemoteObject>&)>;
-    UIServiceCallbackRecipient(RemoteDiedHandler handler);
+    explicit UIServiceCallbackRecipient(RemoteDiedHandler handler);
     virtual ~UIServiceCallbackRecipient();
     virtual void OnRemoteDied(const wptr<IRemoteObject>& remote);
 

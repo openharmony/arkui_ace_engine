@@ -35,7 +35,7 @@ template<class AttributeID>
 class StateAttributeBase : public virtual AceType {
     DECLARE_ACE_TYPE(StateAttributeBase<AttributeID>, AceType);
 public:
-    StateAttributeBase(AttributeID id) : id_(id) {}
+    explicit StateAttributeBase(AttributeID id) : id_(id) {}
     virtual ~StateAttributeBase() {}
     AttributeID id_;
 };

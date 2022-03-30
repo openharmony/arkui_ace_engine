@@ -524,4 +524,4 @@ bool BackendDelegateImpl::GetResourceData(const std::string& fileUri, std::vecto
     return true;
 }
 
-} // namespace OHOS::Ace::Framework
+} // namespace OHOS::Ace

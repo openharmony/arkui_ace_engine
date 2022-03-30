@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1700,6 +1700,8 @@ void RosenRenderOffscreenCanvas::SetHueRotateFilter(const std::string& filterPar
             matrix[1] = matrix[7] = matrix[10] = 1 - N;
             matrix[18] = 1.0f;
             break;
+        default:
+            break;
     }
     SetColorFilter(matrix);
 }
@@ -1716,4 +1718,4 @@ void RosenRenderOffscreenCanvas::SetColorFilter(float matrix[20])
     imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
 }
-}
+} // namespace OHOS::Ace

@@ -29,7 +29,7 @@ class TabContentElement : public ComponentGroupElement, public FocusGroup {
     DECLARE_ACE_TYPE(TabContentElement, ComponentGroupElement, FocusGroup);
 
 public:
-    TabContentElement(const std::list<RefPtr<Component>>& contents);
+    explicit TabContentElement(const std::list<RefPtr<Component>>& contents);
     ~TabContentElement() override = default;
 
     void PerformBuild() override;

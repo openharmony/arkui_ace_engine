@@ -186,4 +186,4 @@ void SideBarContainerComponent::SetClickedFunction(std::function<void()>&& click
 {
     buttonClick_ = std::move(clickCallback);
 }
-}
+} // namespace OHOS::Ace

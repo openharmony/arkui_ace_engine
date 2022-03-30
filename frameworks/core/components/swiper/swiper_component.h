@@ -33,7 +33,7 @@ class ACE_EXPORT SwiperChangeEvent : public BaseEventInfo, public EventToJSONStr
     DECLARE_RELATIONSHIP_OF_CLASSES(SwiperChangeEvent, BaseEventInfo, EventToJSONStringAdapter);
 
 public:
-    SwiperChangeEvent(int32_t index) : BaseEventInfo("SwiperChangeEvent"), index_(index) {}
+    explicit SwiperChangeEvent(int32_t index) : BaseEventInfo("SwiperChangeEvent"), index_(index) {}
     ~SwiperChangeEvent() = default;
 
     int32_t GetIndex() const

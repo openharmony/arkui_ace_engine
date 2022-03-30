@@ -27,7 +27,7 @@ DECLARE_ACE_TYPE(RenderPlugin, RenderSubContainer);
 public:
     static RefPtr<RenderNode> Create();
 
-    virtual ~RenderPlugin() override = default;
+    ~RenderPlugin() override = default;
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;

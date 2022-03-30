@@ -57,7 +57,7 @@ public:
     void FireExternalEvent(const std::string& componentId, const uint32_t nodeId) override;
 
     // Timer callback
-    virtual void TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval) override;
+    void TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval) override;
 
     void TimerCallJs(const std::string& callbackId, bool isInterval);
 
@@ -97,7 +97,7 @@ public:
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
-    virtual FrontendDelegate* GetFrontend() override
+    FrontendDelegate* GetFrontend() override
     {
         return AceType::RawPtr(engineInstance_->GetDelegate());
     }

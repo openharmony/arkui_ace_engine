@@ -35,7 +35,7 @@ public:
     }
 
     // do not add explicit for this constructor.
-    AnimatableData(const T& value) : value_(value) {}
+    explicit AnimatableData(const T& value) : value_(value) {}
     ~AnimatableData() = default;
 
     virtual T Animate(const T& start, const T& end, float process)

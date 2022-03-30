@@ -222,6 +222,8 @@ std::string GridComposedElement::DisplayModeToString(DisplayMode displayMode) co
             return "BarState.Auto";
         case DisplayMode::ON:
             return "BarState.On";
+        default:
+            break;
     }
     return "BarState.Off";
 }

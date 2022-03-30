@@ -96,6 +96,8 @@ JSValue JsLogPrint(JSContext* ctx, JsLogLevel level, JSValueConst value, int32_t
         case JsLogLevel::ERROR:
             LOGE("ace Log: %{public}s", printLog.c_str());
             break;
+        default:
+            break;
     }
 
     return JS_NULL;

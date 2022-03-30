@@ -28,7 +28,7 @@ namespace OHOS {
 namespace Ace {
 class DialogCallbackStub : public IRemoteStub<IDialogCallback> {
 public:
-    DialogCallbackStub(DialogCallback callback);
+    explicit DialogCallbackStub(DialogCallback callback);
     virtual ~DialogCallbackStub();
 
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
@@ -49,7 +49,7 @@ private:
 class DialogCallbackRecipient : public IRemoteObject::DeathRecipient {
 public:
     using RemoteDiedHandler = std::function<void(const wptr<IRemoteObject> &)>;
-    DialogCallbackRecipient(RemoteDiedHandler handler);
+    explicit DialogCallbackRecipient(RemoteDiedHandler handler);
     virtual ~DialogCallbackRecipient();
     virtual void OnRemoteDied(const wptr<IRemoteObject> &remote);
 

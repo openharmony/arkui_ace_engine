@@ -25,14 +25,14 @@
 namespace OHOS::Ace {
 
 struct CachedImage {
-    CachedImage(const fml::RefPtr<flutter::CanvasImage>& image) : imagePtr(image) {}
+    explicit CachedImage(const fml::RefPtr<flutter::CanvasImage>& image) : imagePtr(image) {}
     fml::RefPtr<flutter::CanvasImage> imagePtr;
 };
 
 struct SkiaCachedImageData : public CachedImageData {
     DECLARE_ACE_TYPE(SkiaCachedImageData, CachedImageData);
 public:
-    SkiaCachedImageData(const sk_sp<SkData>& data) : imageData(data) {}
+    explicit SkiaCachedImageData(const sk_sp<SkData>& data) : imageData(data) {}
     ~SkiaCachedImageData() override = default;
 
     size_t GetSize() override
@@ -55,7 +55,7 @@ public:
     FlutterImageCache() = default;
     ~FlutterImageCache() override = default;
     void Clear() override;
-    virtual RefPtr<CachedImageData> GetDataFromCacheFile(const std::string& filePath) override;
+    RefPtr<CachedImageData> GetDataFromCacheFile(const std::string& filePath) override;
 };
 
 } // namespace OHOS::Ace

@@ -166,5 +166,5 @@ private:
     Color selectedBgColor_;
     bool isPrimary_ = false;
 };
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_INDEXER_ITEM_COMPONENT_H

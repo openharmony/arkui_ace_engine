@@ -28,7 +28,7 @@ class ContainerModalComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(ContainerModalComponent, SoleChildComponent);
 
 public:
-    ContainerModalComponent(const WeakPtr<PipelineContext>& context)
+    explicit ContainerModalComponent(const WeakPtr<PipelineContext>& context)
     {
         context_ = context;
     }

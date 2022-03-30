@@ -2801,6 +2801,8 @@ void JsLogPrint(const v8::FunctionCallbackInfo<v8::Value>& args)
         case JsLogLevel::ERROR:
             LOGE("ace Log: %{public}s", fullString.c_str());
             break;
+        default:
+            break;
     }
 }
 

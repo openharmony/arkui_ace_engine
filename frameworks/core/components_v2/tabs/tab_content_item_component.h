@@ -26,7 +26,7 @@ class ACE_EXPORT TabContentItemComponent : public ColumnComponent {
     DECLARE_ACE_TYPE(TabContentItemComponent, ColumnComponent);
 
 public:
-    TabContentItemComponent(std::list<RefPtr<Component>>& children);
+    explicit TabContentItemComponent(std::list<RefPtr<Component>>& children);
     ~TabContentItemComponent() override = default;
 
     RefPtr<Element> CreateElement() override;

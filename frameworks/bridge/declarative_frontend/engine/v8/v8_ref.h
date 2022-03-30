@@ -185,7 +185,7 @@ public:
         rhs.object_.Reset();
     }
 
-    V8Weak(const V8Ref<T>& rhs) : object_(rhs.Get())
+    explicit V8Weak(const V8Ref<T>& rhs) : object_(rhs.Get())
     {
         object_.SetWeak();
     }

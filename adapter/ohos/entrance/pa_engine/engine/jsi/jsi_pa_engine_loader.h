@@ -24,7 +24,7 @@ namespace OHOS::Ace {
 class JsiPaEngineLoader : public JsBackendEngineLoader, public Singleton<JsiPaEngineLoader> {
     DECLARE_SINGLETON(JsiPaEngineLoader)
 public:
-    virtual RefPtr<JsBackendEngine> CreateJsBackendEngine(int32_t instanceId) const final;
+    RefPtr<JsBackendEngine> CreateJsBackendEngine(int32_t instanceId) const final;
 };
 
 } // namespace OHOS::Ace

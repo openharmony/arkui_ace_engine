@@ -2113,4 +2113,4 @@ JSValue OffscreenCanvasBridge::JsMeasureText(
     JS_SetPropertyStr(ctx, textMetrics, "height", JS_NewFloat64(ctx, height));
     return textMetrics;
 }
-}
+} // namespace OHOS::Ace::Framework

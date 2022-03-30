@@ -26,4 +26,4 @@ void IndexerElement::PerformBuild()
         ComponentGroupElement::PerformBuild();
     }
 }
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::V2

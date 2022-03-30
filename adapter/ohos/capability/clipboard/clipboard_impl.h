@@ -43,6 +43,6 @@ public:
     }
 };
 
-} // namespace OHOS::Ace::Platform
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_CLIPBOARD_CLIPBOARD_IMPL_H

@@ -432,6 +432,8 @@ void TransformOperations::ParseOperationToMatrix(TransformOperation& operation)
         case TransformOperationType::MATRIX:
         case TransformOperationType::UNDEFINED:
             break;
+        default:
+            break;
     }
 }
 

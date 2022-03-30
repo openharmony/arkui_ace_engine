@@ -38,7 +38,7 @@ class ACE_EXPORT PopupListItemComponent : public ComponentGroup {
 
 public:
     PopupListItemComponent() = default;
-    PopupListItemComponent(const std::string& label) {
+    explicit PopupListItemComponent(const std::string& label) {
         label_ = label;
         BuildItem();
     };

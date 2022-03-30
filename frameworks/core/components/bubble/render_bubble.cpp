@@ -173,6 +173,8 @@ void RenderBubble::InitTargetSizeAndPosition()
     }
     auto targetElement = context->GetComposedElementById(targetId_);
     if (!targetElement) {
+        LOGE("Get target element by target id return null");
+        isShow_ = false;
         return;
     }
     auto targetRender = targetElement->GetRenderNode();
@@ -376,6 +378,10 @@ bool RenderBubble::PopBubble()
         return false;
     }
     stackElement->PopPopup(bubbleComponent_->GetId());
+    auto stateChangeEvent = bubbleComponent_->GetStateChangeEvent();
+    if (stateChangeEvent) {
+        stateChangeEvent(false);
+    }
 
     auto context = context_.Upgrade();
     if (!context) {

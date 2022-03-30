@@ -72,7 +72,7 @@ public:
     std::string GetSelectedObject(bool isColumnChange,
         const std::string& changeColumnTag, int32_t status = -1) const override;
 
-    virtual void OnSelectedSaving() override;
+    void OnSelectedSaving() override;
 
     void OnDataLinking(const std::string& tag, bool isAdd, uint32_t index,
         std::vector<std::string>& resultTags) override;

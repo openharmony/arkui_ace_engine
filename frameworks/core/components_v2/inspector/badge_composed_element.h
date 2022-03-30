@@ -45,6 +45,6 @@ private:
     OHOS::Ace::RefPtr<OHOS::Ace::RenderBadge> GetRenderBadge() const;
 };
 
-}
+} // namespace OHOS::Ace::V2
 
-#endif
+#endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_BADGE_COMPOSED_ELEMENT_H

@@ -870,6 +870,8 @@ void RenderButton::OnStatusStyleChanged(const VisualState state)
                 buttonComponent_->SetWidth(valueState->value_);
                 width_ = valueState->value_;
             } break;
+            default:
+                break;
         }
     }
     MarkNeedLayout();

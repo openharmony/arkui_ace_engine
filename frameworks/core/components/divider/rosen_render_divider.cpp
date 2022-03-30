@@ -48,6 +48,8 @@ void RosenRenderDivider::Paint(RenderContext& context, const Offset& offset)
         case LineCap::ROUND:
             paint.setStrokeCap(SkPaint::Cap::kRound_Cap);
             break;
+        default:
+            break;
     }
     dividerLength_ =
         vertical_ ? GetLayoutSize().Height() - constrainStrokeWidth_ : GetLayoutSize().Width() - constrainStrokeWidth_;

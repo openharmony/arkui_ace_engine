@@ -1714,6 +1714,8 @@ void FlutterRenderOffscreenCanvas::SetHueRotateFilter(const std::string& filterP
             matrix[1] = matrix[7] = matrix[10] = 1 - N;
             matrix[18] = 1.0f;
             break;
+        default:
+            break;
     }
     SetColorFilter(matrix);
 }
@@ -1730,4 +1732,4 @@ void FlutterRenderOffscreenCanvas::SetColorFilter(float matrix[20])
     imagePaint_.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
 }
-}
+} // namespace OHOS::Ace

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -168,6 +168,6 @@ private:
     static JSValue JsHandleStyleSetter(
         JSContext* ctx, JSValueConst value, JSValueConst proto, FunctionCode functionCode);
 };
-}
+} // namespace OHOS::Ace::Framework
 
-#endif
+#endif  // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_QUICKJS_OFFSCREEN_CANVAS_BRIDGE_H
