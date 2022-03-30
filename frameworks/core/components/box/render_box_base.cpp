@@ -633,51 +633,6 @@ void RenderBoxBase::PerformLayout()
     }
 }
 
-void RenderBoxBase::PerformLayoutInLiteMode()
-{
-    // Lite must has width and height
-    CalculateWidth();
-    CalculateHeight();
-    ConvertMarginPaddingToPx();
-    if (NearEqual(selfMaxWidth_, Size::INFINITE_SIZE) && !selfDefineWidth_) {
-        selfMaxWidth_ = GetLayoutParam().GetMaxSize().Width();
-    }
-    if (NearEqual(selfMaxHeight_, Size::INFINITE_SIZE) && !selfDefineHeight_) {
-        selfMaxHeight_ = GetLayoutParam().GetMaxSize().Height();
-    }
-    Size selfMax = Size(selfMaxWidth_, selfMaxHeight_) + margin_.GetLayoutSize();
-    Size selfMin = Size(selfMinWidth_, selfMinHeight_) + margin_.GetLayoutSize();
-    // Do not constrain param in lite mode
-    selfLayoutParam_.SetMaxSize(selfMax);
-    selfLayoutParam_.SetMinSize(selfMin);
-    SetChildLayoutParam();
-    double width = 0.0;
-    double height = 0.0;
-    Size borderSize = GetBorderSize();
-    childSize_ = GetChildren().front()->GetLayoutSize();
-    if (selfDefineWidth_) {
-        width = selfMax.Width() - margin_.GetLayoutSize().Width();
-    } else {
-        width = childSize_.Width() + padding_.GetLayoutSize().Width() + borderSize.Width();
-    }
-    if (selfDefineHeight_) {
-        height = selfMax.Height() - margin_.GetLayoutSize().Height();
-    } else {
-        height = childSize_.Height() + padding_.GetLayoutSize().Height() + borderSize.Height();
-    }
-    double targetHeight = padding_.GetLayoutSize().Height() + borderSize.Height();
-    targetHeight = targetHeight > height ? targetHeight : height;
-    double targetWidth = padding_.GetLayoutSize().Width() + borderSize.Width();
-    targetHeight = targetWidth > width ? targetWidth : width;
-    // Determine self size, not use constrain.
-    paintSize_ = Size(targetWidth, targetHeight);
-    selfLayoutSize_ = paintSize_ + margin_.GetLayoutSize();
-    touchArea_.SetOffset(margin_.GetOffset());
-    touchArea_.SetSize(paintSize_);
-    SetLayoutSize(selfLayoutSize_);
-    CalculateChildPosition();
-}
-
 void RenderBoxBase::Update(const RefPtr<Component>& component)
 {
     const RefPtr<BoxBaseComponent> box = AceType::DynamicCast<BoxBaseComponent>(component);
@@ -756,9 +711,6 @@ void RenderBoxBase::Dump()
     }
     Size borderSize = GetBorderSize();
     Radius radius = GetBorderRadius();
-    DumpLog::GetInstance().AddDesc("BoxFlex: " + std::to_string(static_cast<int32_t>(flex_)) +
-                                   ", BGcolor: " + std::to_string(GetColor().GetValue()) + ", BoxSizing: " +
-                                   std::to_string(static_cast<int32_t>(boxSizing_)) + ", Align: " + align_.ToString());
     DumpLog::GetInstance().AddDesc(std::string("WH: ")
                                        .append(Size(width_.Value(), height_.Value()).ToString())
                                        .append(", Margin: ")
@@ -768,23 +720,17 @@ void RenderBoxBase::Dump()
                                        .append(", Border: ")
                                        .append(borderSize.ToString())
                                        .append(", Radius: ")
-                                       .append(radius.GetX().ToString()));
-    DumpLog::GetInstance().AddDesc(std::string("Constraints: ")
+                                       .append(radius.GetX().ToString())
+                                       .append(", Constraints: ")
                                        .append(constraints_.ToString())
-                                       .append(", ChildLayout: ")
-                                       .append(childLayoutParam_.ToString()));
-    DumpLog::GetInstance().AddDesc(std::string("PaintSize: ")
-                                       .append(paintSize_.ToString())
-                                       .append(", TouchArea: ")
-                                       .append(touchArea_.ToString()));
+                                       .append(", BGcolor: ")
+                                       .append(std::to_string(GetColor().GetValue())));
     DumpLog::GetInstance().AddDesc(std::string("SelfSize: ")
                                        .append(selfLayoutSize_.ToString())
                                        .append(", ChildSize: ")
                                        .append(childSize_.ToString())
                                        .append(", ChildPos: ")
                                        .append(childPosition_.ToString()));
-    DumpLog::GetInstance().AddDesc(std::string("alignOffset: ")
-                                       .append(alignOffset_.ToString()));
     if (gridColumnInfo_) {
         DumpLog::GetInstance().AddDesc(std::string("GridColumnInfo"));
     }
