@@ -22,7 +22,7 @@ namespace OHOS::Ace {
 
 class ClipboardImpl : public Clipboard {
 public:
-    explicit ClipboardImpl(const RefPtr<TaskExecutor>& taskExecutor) : Clipboard(taskExecutor) {};
+    explicit ClipboardImpl(const RefPtr<TaskExecutor>& taskExecutor) : Clipboard(taskExecutor) {}
     ~ClipboardImpl() override = default;
 
     // Implement Clipboard

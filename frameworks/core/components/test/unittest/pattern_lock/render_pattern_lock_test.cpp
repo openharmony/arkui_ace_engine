@@ -59,7 +59,7 @@ Offset GetPointOutOfActiveAreaBoundary(const Offset& cellCenter)
 }
 class TestPatternLockEventHander : public AceEventHandler {
 public:
-    explicit TestPatternLockEventHander(PatternLockEventCallback eventCallback) : eventCallback_(eventCallback) {};
+    explicit TestPatternLockEventHander(PatternLockEventCallback eventCallback) : eventCallback_(eventCallback) {}
     ~TestPatternLockEventHander() = default;
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param) override {};

@@ -112,7 +112,7 @@ class ACE_EXPORT ShapeContainerComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(ShapeContainerComponent, ComponentGroup);
 
 public:
-    explicit ShapeContainerComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children) {};
+    explicit ShapeContainerComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children) {}
     ~ShapeContainerComponent() override = default;
     RefPtr<RenderNode> CreateRenderNode() override;
     RefPtr<Element> CreateElement() override;

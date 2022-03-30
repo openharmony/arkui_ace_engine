@@ -41,7 +41,7 @@ public:
 
 class GridDragEventResult {
 public:
-    explicit GridDragEventResult() {};
+    explicit GridDragEventResult() {}
     ~GridDragEventResult() = default;
     void SetLongPress(bool longPress)
     {

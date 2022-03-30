@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ class ACE_EXPORT BaseComposedComponent : public Component {
     DECLARE_ACE_TYPE(BaseComposedComponent, Component);
 
 public:
-    BaseComposedComponent(const ComposeId& id, const std::string& name) : id_(id), name_(name) {};
+    BaseComposedComponent(const ComposeId& id, const std::string& name) : id_(id), name_(name) {}
     ~BaseComposedComponent() override = default;
 
     const std::string& GetName() const

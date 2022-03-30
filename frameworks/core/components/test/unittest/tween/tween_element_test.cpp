@@ -45,9 +45,9 @@ Platform::JniEnvironment::JniEnvironment() {}
 
 Platform::JniEnvironment::~JniEnvironment() = default;
 
-CardTransitionController::CardTransitionController(const WeakPtr<PipelineContext>& context) {};
+CardTransitionController::CardTransitionController(const WeakPtr<PipelineContext>& context) {}
 
-void CardTransitionController::RegisterTransitionListener() {};
+void CardTransitionController::RegisterTransitionListener() {}
 
 RRect CardTransitionController::GetCardRect(const ComposeId& composeId) const
 {

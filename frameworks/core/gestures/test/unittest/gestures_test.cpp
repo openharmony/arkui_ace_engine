@@ -63,7 +63,7 @@ const std::string TOUCH_CANCEL_TYPE = "onTouchCancel";
 
 class TouchEventResult {
 public:
-    explicit TouchEventResult(const std::string& type) : touchEventInfo_(type) {};
+    explicit TouchEventResult(const std::string& type) : touchEventInfo_(type) {}
     ~TouchEventResult() = default;
 
     const TouchEventInfo& GetTouchEventInfo() const
@@ -82,7 +82,7 @@ private:
 
 class LongPressEventResult {
 public:
-    explicit LongPressEventResult() : longPressInfo_(0) {};
+    explicit LongPressEventResult() : longPressInfo_(0) {}
     ~LongPressEventResult() = default;
 
     void SetLongPress(bool longPress)
@@ -112,7 +112,7 @@ private:
 
 class ClickEventResult {
 public:
-    explicit ClickEventResult() : clickInfo_(0) {};
+    explicit ClickEventResult() : clickInfo_(0) {}
     ~ClickEventResult() = default;
 
     const ClickInfo& GetClickInfo() const
@@ -131,7 +131,7 @@ private:
 
 class GestureRefereeResult {
 public:
-    GestureRefereeResult() : gestureName_("") {};
+    GestureRefereeResult() : gestureName_("") {}
     ~GestureRefereeResult() = default;
 
     void SetGestureName(const std::string& gestureName)
@@ -150,7 +150,7 @@ private:
 
 class DragEventResult {
 public:
-    DragEventResult() : dragStartInfo_(0), dragUpdateInfo_(0), dragEndInfo_(0) {};
+    DragEventResult() : dragStartInfo_(0), dragUpdateInfo_(0), dragEndInfo_(0) {}
     ~DragEventResult() = default;
 
     void SetDragStart(const DragStartInfo& info)

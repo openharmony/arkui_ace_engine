@@ -56,7 +56,7 @@ enum class DragDirection {
 
 class TestPulldownEventHandler : public AceEventHandler {
 public:
-    explicit TestPulldownEventHandler(PulldownEventCallback eventCallback) : eventCallback_(eventCallback) {};
+    explicit TestPulldownEventHandler(PulldownEventCallback eventCallback) : eventCallback_(eventCallback) {}
     ~TestPulldownEventHandler() override = default;
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param) override

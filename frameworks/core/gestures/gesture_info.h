@@ -487,7 +487,7 @@ class ACE_EXPORT Gesture : public virtual AceType {
 
 public:
     Gesture() = default;
-    explicit Gesture(int32_t fingers) : fingers_(fingers) {};
+    explicit Gesture(int32_t fingers) : fingers_(fingers) {}
     ~Gesture() override = default;
 
     void SetOnActionId(const GestureEventFunc& onActionId)

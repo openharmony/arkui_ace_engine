@@ -75,7 +75,7 @@ int64_t GetTickCount()
 
 class TestRatingEventHandler : public MockEventHandler {
 public:
-    explicit TestRatingEventHandler(const RatingEventCallback& eventCallback) : eventCallback_(eventCallback) {};
+    explicit TestRatingEventHandler(const RatingEventCallback& eventCallback) : eventCallback_(eventCallback) {}
     ~TestRatingEventHandler() = default;
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param)

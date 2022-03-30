@@ -37,7 +37,7 @@ class ACE_FORCE_EXPORT_WITH_PREVIEW ThemeConstants : public AceType {
     DECLARE_ACE_TYPE(ThemeConstants, AceType);
 
 public:
-    explicit ThemeConstants(RefPtr<ResourceAdapter> resourceAdapter) : resAdapter_(resourceAdapter) {};
+    explicit ThemeConstants(RefPtr<ResourceAdapter> resourceAdapter) : resAdapter_(resourceAdapter) {}
     ~ThemeConstants() override = default;
 
     /*

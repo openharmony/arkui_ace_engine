@@ -40,8 +40,8 @@ public:
 
     void Adjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal);
 
-    virtual void OnAccepted() {};
-    virtual void OnRejected() {};
+    virtual void OnAccepted() {}
+    virtual void OnRejected() {}
 
     std::set<size_t> refereePointers_;
 

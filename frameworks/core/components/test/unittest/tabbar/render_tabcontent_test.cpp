@@ -66,7 +66,7 @@ class MockRenderTabBarItem : public RenderTabBarItem {};
 
 class TestTabContentEventHandler : public MockEventHandler {
 public:
-    explicit TestTabContentEventHandler(TabContentEventCallback eventCallback) : eventCallback_(eventCallback) {};
+    explicit TestTabContentEventHandler(TabContentEventCallback eventCallback) : eventCallback_(eventCallback) {}
     ~TestTabContentEventHandler() = default;
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param)

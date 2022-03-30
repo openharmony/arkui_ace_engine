@@ -39,7 +39,7 @@ const std::string TOUCH_CANCEL_TYPE = "onTouchCancel";
 
 class TouchEventResult {
 public:
-    explicit TouchEventResult(const std::string& type) : touchEventInfo_(type) {};
+    explicit TouchEventResult(const std::string& type) : touchEventInfo_(type) {}
     ~TouchEventResult() = default;
 
     const TouchEventInfo& GetTouchEventInfo() const
@@ -57,7 +57,7 @@ private:
 
 class ClickEventResult {
 public:
-    ClickEventResult() : clickInfo_(0) {};
+    ClickEventResult() : clickInfo_(0) {}
     ~ClickEventResult() = default;
 
     const ClickInfo& GetClickInfo() const
@@ -76,7 +76,7 @@ private:
 
 class LongPressEventResult {
 public:
-    LongPressEventResult() : longPressInfo_(0) {};
+    LongPressEventResult() : longPressInfo_(0) {}
     ~LongPressEventResult() = default;
 
     void SetLongPress(bool longPress)

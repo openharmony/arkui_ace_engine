@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,7 @@ class FlutterTextFactory final : public virtual RenderNodeFactory {
     DECLARE_ACE_TYPE(FlutterTextFactory, RenderNodeFactory);
 
 public:
-    FlutterTextFactory(): RenderNodeFactory(TEXT_CACHE_SIZE) {};
+    FlutterTextFactory(): RenderNodeFactory(TEXT_CACHE_SIZE) {}
 
     ACE_DISALLOW_COPY_AND_MOVE(FlutterTextFactory);
 };
@@ -41,7 +41,7 @@ class FlutterImageFactory final : public virtual RenderNodeFactory {
     DECLARE_ACE_TYPE(FlutterImageFactory, RenderNodeFactory);
 
 public:
-    FlutterImageFactory(): RenderNodeFactory(IMAGE_CACHE_SIZE) {};
+    FlutterImageFactory(): RenderNodeFactory(IMAGE_CACHE_SIZE) {}
 
     ACE_DISALLOW_COPY_AND_MOVE(FlutterImageFactory);
 };
@@ -50,7 +50,7 @@ class FlutterBoxFactory final : public virtual RenderNodeFactory {
     DECLARE_ACE_TYPE(FlutterBoxFactory, RenderNodeFactory);
 
 public:
-    FlutterBoxFactory(): RenderNodeFactory(BOX_CACHE_SIZE) {};
+    FlutterBoxFactory(): RenderNodeFactory(BOX_CACHE_SIZE) {}
 
     ACE_DISALLOW_COPY_AND_MOVE(FlutterBoxFactory);
 };

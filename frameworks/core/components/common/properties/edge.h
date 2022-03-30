@@ -31,26 +31,26 @@ namespace OHOS::Ace {
 class ACE_EXPORT Edge {
 public:
     Edge() = default;
-    explicit Edge(double value) : Edge(value, value, value, value) {};
-    explicit Edge(const Dimension& value) : Edge(value, value, value, value) {};
-    explicit Edge(const std::string& value) : Edge(value, value, value, value) {};
-    explicit Edge(const CalcDimension& value) : Edge(value, value, value, value) {};
+    explicit Edge(double value) : Edge(value, value, value, value) {}
+    explicit Edge(const Dimension& value) : Edge(value, value, value, value) {}
+    explicit Edge(const std::string& value) : Edge(value, value, value, value) {}
+    explicit Edge(const CalcDimension& value) : Edge(value, value, value, value) {}
     Edge(double left, double top, double right, double bottom, DimensionUnit unit = DimensionUnit::PX)
         : left_(Dimension(left, unit)), top_(Dimension(top, unit)), right_(Dimension(right, unit)),
-          bottom_(Dimension(bottom, unit)) {};
+          bottom_(Dimension(bottom, unit)) {}
     Edge(const std::string& left, const std::string& top, const std::string& right, const std::string& bottom,
         DimensionUnit unit = DimensionUnit::CALC) : left_(CalcDimension(left, unit)), top_(CalcDimension(top, unit)),
-        right_(CalcDimension(right, unit)), bottom_(CalcDimension(bottom, unit)) {};
+        right_(CalcDimension(right, unit)), bottom_(CalcDimension(bottom, unit)) {}
     Edge(const CalcDimension& left, const CalcDimension& top, const CalcDimension& right, const CalcDimension& bottom)
-        : left_(left), top_(top), right_(right), bottom_(bottom) {};
+        : left_(left), top_(top), right_(right), bottom_(bottom) {}
     Edge(const Dimension& left, const Dimension& top, const Dimension& right, const Dimension& bottom,
          const AnimationOption& option)
         : left_(AnimatableDimension(left, option)), top_(AnimatableDimension(top, option)),
-          right_(AnimatableDimension(right, option)), bottom_(AnimatableDimension(bottom, option)) {};
+          right_(AnimatableDimension(right, option)), bottom_(AnimatableDimension(bottom, option)) {}
     Edge(const CalcDimension& left, const CalcDimension& top, const CalcDimension& right, const CalcDimension& bottom,
          const AnimationOption& option)
         : left_(AnimatableDimension(left, option)), top_(AnimatableDimension(top, option)),
-          right_(AnimatableDimension(right, option)), bottom_(AnimatableDimension(bottom, option)) {};
+          right_(AnimatableDimension(right, option)), bottom_(AnimatableDimension(bottom, option)) {}
 
     virtual ~Edge() = default;
 
@@ -198,11 +198,11 @@ protected:
 class EdgePx : public Edge {
 public:
     EdgePx() = default;
-    explicit EdgePx(double value) : EdgePx(value, value, value, value) {};
-    explicit EdgePx(const std::string& value) : EdgePx(value, value, value, value) {};
-    EdgePx(double left, double top, double right, double bottom) : Edge(left, top, right, bottom) {};
+    explicit EdgePx(double value) : EdgePx(value, value, value, value) {}
+    explicit EdgePx(const std::string& value) : EdgePx(value, value, value, value) {}
+    EdgePx(double left, double top, double right, double bottom) : Edge(left, top, right, bottom) {}
     EdgePx(const std::string& left, const std::string& top, const std::string& right, const std::string& bottom)
-        : Edge(left, top, right, bottom) {};
+        : Edge(left, top, right, bottom) {}
     ~EdgePx() override = default;
 
     double LeftPx() const

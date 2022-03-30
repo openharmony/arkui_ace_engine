@@ -31,7 +31,7 @@ void RenderTransform::Translate(const Dimension& x, const Dimension& y, const Di
 
 void RenderTransform::Scale(float x, float y, float z) {}
 
-void RenderTransform::Skew(float x, float y) {};
+void RenderTransform::Skew(float x, float y) {}
 
 void RenderTransform::Perspective(const Dimension& distance) {}
 

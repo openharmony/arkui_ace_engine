@@ -116,7 +116,7 @@ using DataAbilityPredicatesGetNativeObject = OHOS::NativeRdb::DataAbilityPredica
 
 class JsiPaEngine : public JsBackendEngine {
 public:
-    explicit JsiPaEngine(int32_t instanceId) : instanceId_(instanceId) {};
+    explicit JsiPaEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~JsiPaEngine() override;
 
     bool Initialize(const RefPtr<BackendDelegate>& delegate) override;

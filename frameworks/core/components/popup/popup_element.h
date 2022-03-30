@@ -25,7 +25,7 @@ class PopupElement : public ComposedElement {
     DECLARE_ACE_TYPE(PopupElement, ComposedElement);
 
 public:
-    explicit PopupElement(const ComposeId& id) : ComposedElement(id) {};
+    explicit PopupElement(const ComposeId& id) : ComposedElement(id) {}
     ~PopupElement() override = default;
 
     void PerformBuild() override;

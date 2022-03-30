@@ -133,7 +133,7 @@ class ElasticsCurve final : public Curve {
     DECLARE_ACE_TYPE(ElasticsCurve, Curve);
 
 public:
-    explicit ElasticsCurve(float tension) : tension_(tension) {};
+    explicit ElasticsCurve(float tension) : tension_(tension) {}
     ~ElasticsCurve() override = default;
     float MoveInternal(float time) override
     {
@@ -155,7 +155,7 @@ class StepsCurve : public Curve {
 
 public:
     explicit StepsCurve(int32_t steps, StepsCurvePosition position = StepsCurvePosition::START)
-        : steps_(steps <= 0 ? 1 : steps), position_(position) {};
+        : steps_(steps <= 0 ? 1 : steps), position_(position) {}
     ~StepsCurve() override = default;
 
     float MoveInternal(float time) override

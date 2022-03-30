@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,7 +83,7 @@ public:
     ScrollBar() = default;
     explicit ScrollBar(
         DisplayMode displayMode, ShapeMode shapeMode = ShapeMode::RECT, PositionMode positionMode = PositionMode::RIGHT)
-        : displayMode_(displayMode), shapeMode_(shapeMode), positionMode_(positionMode) {};
+        : displayMode_(displayMode), shapeMode_(shapeMode), positionMode_(positionMode) {}
     ~ScrollBar() override = default;
 
     bool InBarRegion(const Point& point) const;

@@ -50,7 +50,7 @@ protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
-    virtual void UpdateBorderRadius() {};
+    virtual void UpdateBorderRadius() {}
     void HandleTouch();
     Offset GetChildPosition(const Size& childSize);
     Offset GetPositionWithPlacement(const Size& childSize, const Offset& topPosition, const Offset& bottomPosition,

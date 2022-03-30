@@ -249,7 +249,7 @@ RefPtr<RenderNode> RenderText::Create()
     return AceType::MakeRefPtr<MockRenderText>();
 }
 
-void RenderPositioned::Update(const RefPtr<Component>& component) {};
+void RenderPositioned::Update(const RefPtr<Component>& component) {}
 
 void RenderPositioned::SetLeft(const Dimension& left) {}
 
@@ -259,8 +259,8 @@ void RenderPositioned::SetRight(const Dimension& right) {}
 
 void RenderPositioned::SetBottom(const Dimension& bottom) {}
 
-SharedTransitionController::SharedTransitionController(const WeakPtr<PipelineContext>& context) {};
-void SharedTransitionController::RegisterTransitionListener() {};
+SharedTransitionController::SharedTransitionController(const WeakPtr<PipelineContext>& context) {}
+void SharedTransitionController::RegisterTransitionListener() {}
 bool SharedTransitionController::HasSharedTransition(TransitionEvent event)
 {
     return false;
@@ -271,9 +271,9 @@ RefPtr<Element> SharedTransitionElement::GetContentElement() const
     return nullptr;
 }
 
-CardTransitionController::CardTransitionController(const WeakPtr<PipelineContext>& context) {};
+CardTransitionController::CardTransitionController(const WeakPtr<PipelineContext>& context) {}
 
-void CardTransitionController::RegisterTransitionListener() {};
+void CardTransitionController::RegisterTransitionListener() {}
 
 RRect CardTransitionController::GetCardRect(const ComposeId& composeId) const
 {

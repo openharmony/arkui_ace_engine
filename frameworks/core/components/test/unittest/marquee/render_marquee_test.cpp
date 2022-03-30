@@ -49,7 +49,7 @@ uint64_t g_runningNano = 0;
 
 class TestMarqueeEventHandler : public MockEventHandler {
 public:
-    explicit TestMarqueeEventHandler(MarqueeEventCallback callback) : callback_(callback) {};
+    explicit TestMarqueeEventHandler(MarqueeEventCallback callback) : callback_(callback) {}
     ~TestMarqueeEventHandler() = default;
 
     void HandleAsyncEvent(const EventMarker& eventMarker) override

@@ -122,7 +122,7 @@ using DataAbilityPredicatesGetNativeObject = OHOS::NativeRdb::DataAbilityPredica
 
 class QjsPaEngine : public JsBackendEngine {
 public:
-    explicit QjsPaEngine(int32_t instanceId) : instanceId_(instanceId) {};
+    explicit QjsPaEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~QjsPaEngine() override;
 
     bool Initialize(const RefPtr<BackendDelegate>& delegate) override;
