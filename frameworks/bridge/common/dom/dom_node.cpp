@@ -29,6 +29,7 @@
 #include "core/components/video/texture_component.h"
 #include "core/components/web/web_component.h"
 #include "core/components/xcomponent/xcomponent_component.h"
+#include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/dom/dom_div.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -175,6 +176,15 @@ void DOMNode::AddEvent(int32_t pageId, const std::vector<std::string>& events)
         if (!AddSpecializedEvent(pageId, event)) {
             tempEvents.emplace_back(event);
         }
+        if (event == "dragstart") {
+            auto onDragStartId = [](const RefPtr<DragEvent>& info, const std::string &extraParams) -> DragItemInfo {
+                DragItemInfo itemInfo;
+                itemInfo.pixelMap = DOMDocument::pixelMap_;
+                return itemInfo;
+            };
+            boxComponent_->SetOnDragStartId(onDragStartId);
+        }
+
     }
     if (declaration_) {
         declaration_->AddEvent(pageId, GetNodeIdForEvent(), tempEvents);
@@ -1868,6 +1878,14 @@ void DOMNode::UpdateGestureEventComponent()
         gestureEventComponent_->SetOnFreeDragStartId(GetDragStartId());
         gestureEventComponent_->SetOnFreeDragUpdateId(GetDragId());
         gestureEventComponent_->SetOnFreeDragEndId(GetDragEndId());
+        auto onDragStartGestureId = []() -> GestureItemInfo {
+            GestureItemInfo itemInfo;
+            itemInfo.pixelMap = DOMDocument::pixelMap_;
+            itemInfo.offsetX = DOMDocument::pixelMapOffsetX_;
+            itemInfo.offsetY = DOMDocument::pixelMapOffsetY_;
+            return itemInfo;
+        };
+        gestureEventComponent_->SetOnDragStartId(onDragStartGestureId);
     }
 }
 

@@ -86,6 +86,10 @@ public:
         return proxyRelatedNode_;
     }
 
+    static RefPtr<PixelMap> pixelMap_;
+    static int32_t pixelMapOffsetX_;
+    static int32_t pixelMapOffsetY_;
+
 private:
     NodeId rootNodeId_ = DOM_ROOT_NODE_ID_BASE;
 

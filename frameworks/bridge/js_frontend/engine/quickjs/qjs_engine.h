@@ -180,6 +180,7 @@ public:
     }
 
 private:
+    bool IsDragEvent(const std::string& param);
     JSRuntime* runtime_ = nullptr;
     JSContext* context_ = nullptr;
     RefPtr<FrontendDelegate> frontendDelegate_;
@@ -275,6 +276,7 @@ public:
             nativeEngine_->Loop(LOOP_NOWAIT, false);
         }
     }
+    static std::map<const std::string, std::string> dataMap_;
 
 private:
     void GetLoadOptions(std::string& optionStr, bool isMainPage, const RefPtr<JsAcePage>& page);

@@ -22,6 +22,12 @@
 
 namespace OHOS::Ace {
 
+struct GestureItemInfo {
+    int32_t offsetX;
+    int32_t offsetY;
+    RefPtr<PixelMap> pixelMap;
+};
+using OnGestureFunc = std::function<GestureItemInfo()>;
 class GestureListenerComponent final : public SoleChildComponent {
     DECLARE_ACE_TYPE(GestureListenerComponent, SoleChildComponent);
 
@@ -231,6 +237,15 @@ public:
         isVisible_ = isVisible;
     }
 
+    OnGestureFunc GetOnDragStartId() const
+    {
+        return onDragStartId_;
+    }
+    void SetOnDragStartId(const OnGestureFunc& onDragStartId)
+    {
+        onDragStartId_ = onDragStartId;
+    }
+
 private:
     EventMarker remoteMessage_;
     EventMarker onClickId_;
@@ -254,6 +269,7 @@ private:
     EventMarker onFreeDragCancelId_;
 
     bool isVisible_ = true;
+    OnGestureFunc onDragStartId_;
 };
 
 } // namespace OHOS::Ace

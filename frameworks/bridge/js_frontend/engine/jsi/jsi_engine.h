@@ -36,7 +36,7 @@ public:
         : frontendDelegate_(delegate), instanceId_(instanceId)
     {}
     ~JsiEngineInstance() override;
-
+    static std::map<const std::string, std::string> dataMap_;
     RefPtr<JsAcePage> GetRunningPage() const;
     void SetRunningPage(const RefPtr<JsAcePage>& page);
     RefPtr<JsAcePage> GetStagingPage() const;
@@ -73,6 +73,7 @@ private:
     void RegisterHiViewModule();          // add hiView object to global
     void RegisterI18nPluralRulesModule(); // add i18nPluralRules object to global
     void InitGroupJsBridge();
+    bool IsDragEvent(const std::string& param);
 
     int32_t GetInstanceId() const
     {

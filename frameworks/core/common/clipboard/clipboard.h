@@ -28,7 +28,7 @@ public:
     ~Clipboard() override = default;
 
     virtual void SetData(const std::string& data) = 0;
-    virtual void GetData(const std::function<void(const std::string&)>& callback) = 0;
+    virtual void GetData(const std::function<void(const std::string&)>& callback, bool syncMode = false) = 0;
     virtual void Clear() = 0;
 
 protected:

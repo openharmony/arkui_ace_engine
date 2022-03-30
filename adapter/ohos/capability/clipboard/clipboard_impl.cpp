@@ -46,7 +46,7 @@ void ClipboardImpl::SetData(const std::string& data)
 #endif
 }
 
-void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callback)
+void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callback, bool syncMode)
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
     if (taskExecutor_) {
@@ -72,14 +72,23 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
                 result = *textData;
             },
             TaskExecutor::TaskType::PLATFORM);
-
-        taskExecutor_->PostTask([callback, result]() { callback(result); }, TaskExecutor::TaskType::UI);
+        if (syncMode) {
+            callback(result);
+        } else {
+            taskExecutor_->PostTask([callback, result]() { callback(result); }, TaskExecutor::TaskType::UI);
+        }
     }
 #else
     LOGI("Current device doesn't support system clipboard");
-    taskExecutor_->PostTask(
-        [callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_)), textData = g_clipboard]() { callback(textData); },
-        TaskExecutor::TaskType::UI);
+    if (syncMode) {
+        callback(g_clipboard);
+    } else {
+        taskExecutor_->PostTask(
+            [callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_)), textData = g_clipboard]() {
+                callback(textData);
+            },
+            TaskExecutor::TaskType::UI);
+    }
 #endif
 }
 
