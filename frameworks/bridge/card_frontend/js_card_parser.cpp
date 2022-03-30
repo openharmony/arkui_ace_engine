@@ -1327,7 +1327,7 @@ void JsCardParser::UpdateDomNode(const RefPtr<Framework::JsAcePage>& page, const
     if (shouldShow && hasShownAttr) {
         attrs.emplace_back(std::make_pair("show", TRUE));
     }
-    ParseAttributes(rootJson, selfId, attrs, (JsCommandDomElementOperator*)ptr, dataJson, propsJson);
+    ParseAttributes(rootJson, selfId, attrs, static_cast<JsCommandDomElementOperator*>(ptr), dataJson, propsJson);
     if (!shouldShow && hasShownAttr) {
         attrs.emplace_back(std::make_pair("show", FALSE));
     }

@@ -49,6 +49,7 @@ RefPtr<JsAcePage> GetCurrentPage()
     auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
     return page;
 #endif
+    return nullptr;
 }
 
 RefPtr<AnimatorInfo> GetAnimatorInfo(const std::string& animatorId, const RefPtr<JsAcePage>& page)
