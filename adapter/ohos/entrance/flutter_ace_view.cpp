@@ -298,8 +298,7 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
     settings.use_current_event_runner = useCurrentEventRunner;
     LOGI("software render: %{public}s", settings.enable_software_rendering ? "true" : "false");
     LOGI("use platform as ui thread: %{public}s", settings.platform_as_ui_thread ? "true" : "false");
-    settings.idle_notification_callback = [weak = WeakClaim(aceSurface)](int64_t deadline) {
-        auto aceSurface = weak.Upgrade();
+    settings.idle_notification_callback = [aceSurface](int64_t deadline) {
         if (aceSurface != nullptr) {
             aceSurface->ProcessIdleEvent(deadline);
         }
