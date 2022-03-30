@@ -50,6 +50,7 @@ void RenderListItem::Update(const RefPtr<Component>& component)
 
     onSelectId_ = item->GetOnSelectId();
     selectable_ = item->GetSelectable();
+    borderRadius_ = item->GetBorderRadius();
 
     MarkNeedLayout();
 }
