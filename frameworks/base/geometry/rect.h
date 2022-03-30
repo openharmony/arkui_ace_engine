@@ -238,6 +238,12 @@ public:
         return !(other.Right() < Left() || other.Left() > Right() || other.Bottom() < Top() || other.Top() > Bottom());
     }
 
+    bool IsIntersectByCommonSideWith(const Rect& other) const
+    {
+        return !(
+            other.Right() <= Left() || other.Left() >= Right() || other.Bottom() <= Top() || other.Top() >= Bottom());
+    }
+
     Rect IntersectRect(const Rect& other) const
     {
         double left = std::max(Left(), other.Left());

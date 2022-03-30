@@ -348,7 +348,10 @@ JsAccessibilityManager::~JsAccessibilityManager()
 bool JsAccessibilityManager::SubscribeStateObserver(const int eventType)
 {
     LOGI("JsAccessibilityManager::SubscribeStateObserver");
-    stateObserver_ = std::make_shared<JsAccessibilityStateObserver>();
+    if (!stateObserver_) {
+        stateObserver_ = std::make_shared<JsAccessibilityStateObserver>();
+    }
+
     stateObserver_->SetHandler(WeakClaim(this));
 
     auto instance = AccessibilitySystemAbilityClient::GetInstance();
@@ -364,8 +367,9 @@ bool JsAccessibilityManager::SubscribeStateObserver(const int eventType)
 bool JsAccessibilityManager::UnsubscribeStateObserver(const int eventType)
 {
     LOGI("JsAccessibilityManager::UnsubscribeStateObserver");
-    stateObserver_ = std::make_shared<JsAccessibilityStateObserver>();
-    stateObserver_->SetHandler(WeakClaim(this));
+    if (!stateObserver_) {
+        return false;
+    }
 
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     if (instance == nullptr) {
@@ -383,6 +387,12 @@ void JsAccessibilityManager::InitializeCallback()
     if (IsRegister()) {
         return;
     }
+
+    auto client = AccessibilitySystemAbilityClient::GetInstance();
+    if (!client) {
+        return;
+    }
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(client->IsEnabled());
 
     SubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
 
@@ -1116,6 +1126,7 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
                 } else {
                     jsAccessibilityManager->DeregisterInteractionOperation();
                 }
+                AceApplicationInfo::GetInstance().SetAccessibilityEnabled(state);
             },
             TaskExecutor::TaskType::UI);
     }
