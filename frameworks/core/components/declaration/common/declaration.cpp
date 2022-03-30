@@ -1665,6 +1665,32 @@ void Declaration::AddEvent(int32_t pageId, const std::string& eventId, const std
                 gestureEvent.click.isRefreshed = true;
             }
           } },
+	{ DOM_CATCH_BUBBLE_DOUBLE_CLICK,
+            [](int32_t pageId, const std::string& eventId, Declaration& declaration) {
+                auto& gestureEvent = declaration.MaybeResetEvent<CommonGestureEvent>(EventTag::COMMON_GESTURE_EVENT);
+                if (gestureEvent.IsValid()) {
+                    gestureEvent.doubleClick.eventMarker = EventMarker(eventId, DOM_CATCH_BUBBLE_DOUBLE_CLICK, pageId);
+                    gestureEvent.doubleClick.eventMarker.SetCatchMode(true);
+                    gestureEvent.doubleClick.isRefreshed = true;
+                }
+            } },
+	{ DOM_CATCH_BUBBLE_LONG_PRESS,
+             [](int32_t pageId, const std::string& eventId, Declaration& declaration) {
+                 auto& gestureEvent = declaration.MaybeResetEvent<CommonGestureEvent>(EventTag::COMMON_GESTURE_EVENT);
+                 if (gestureEvent.IsValid()) {
+                     gestureEvent.longPress.eventMarker = EventMarker(eventId, DOM_CATCH_BUBBLE_LONG_PRESS, pageId);
+                     gestureEvent.longPress.eventMarker.SetCatchMode(true);
+                     gestureEvent.longPress.isRefreshed = true;
+                 }
+             } },
+	{ DOM_CATCH_BUBBLE_SWIPE,
+            [](int32_t pageId, const std::string& eventId, Declaration& declaration) {
+                auto& swipeEvent = declaration.MaybeResetEvent<CommonSwipeEvent>(EventTag::COMMON_SWIPE_EVENT);
+                if (swipeEvent.IsValid()) {
+                    swipeEvent.catchBubbleSwipe.eventMarker = EventMarker(eventId, DOM_CATCH_BUBBLE_SWIPE, pageId);
+                    swipeEvent.catchBubbleSwipe.isRefreshed = true;
+                }
+            } },
         { DOM_CATCH_BUBBLE_TOUCH_CANCEL,
             [](int32_t pageId, const std::string& eventId, Declaration& declaration) {
                 auto& rawEvent = declaration.MaybeResetEvent<CommonRawEvent>(EventTag::COMMON_RAW_EVENT);

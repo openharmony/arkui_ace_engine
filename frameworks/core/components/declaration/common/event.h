@@ -121,6 +121,9 @@ struct CommonMouseEvent : Event {
 
 struct CommonSwipeEvent : Event {
     EventParam swipe;
+    EventParam catchBubbleSwipe;
+    EventParam captureSwipe;
+    EventParam catchCaptureSwipe;
 };
 
 struct CommonAttachEvent : Event {

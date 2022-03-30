@@ -73,7 +73,7 @@ std::string SwipeEventInfo::ToJsonParamInfo() const
     return jsonValue->ToString();
 }
 
-bool SwipeRecognizer::HandleEvent(const TouchEvent& point)
+bool SwipeRecognizer::HandleEvent(const TouchEvent& point, uint32_t stage)
 {
     switch (point.type) {
         case TouchType::DOWN: {
@@ -84,13 +84,25 @@ bool SwipeRecognizer::HandleEvent(const TouchEvent& point)
             break;
         }
         case TouchType::UP: {
+	    auto callback = swipeCallback_[stage];
+	    auto callbackCatch = swipeCatchCallback_[stage];
             auto& status = statusMap_[point.id];
-            if (status.second && swipeCallback_) {
+            
+	    if (status.second && callbackCatch) {
                 auto direction = GetSwipeDirection(status.first, point);
                 if (direction == SwipeEventInfo::SwipeDirection::NONE) {
                     return true;
                 }
-                swipeCallback_(SwipeEventInfo(direction, GetSwipeDistance(direction, status.first, point)));
+                callbackCatch(SwipeEventInfo(direction, GetSwipeDistance(direction, status.first, point)));
+                return false;
+            }
+
+            if (status.second && callback) {
+                auto direction = GetSwipeDirection(status.first, point);
+                if (direction == SwipeEventInfo::SwipeDirection::NONE) {
+                    return true;
+                }
+		        callback(SwipeEventInfo(direction, GetSwipeDistance(direction, status.first, point)));
             }
             break;
         }
@@ -110,8 +122,28 @@ bool SwipeRecognizer::HandleEvent(const TouchEvent& point)
     return true;
 }
 
+bool SwipeRecognizer::HandleEvent(const TouchEvent& point)
+{
+    return HandleEvent(point, EventStage::BUBBLE);
+}
+
 bool SwipeRecognizer::DispatchEvent(const TouchEvent& point)
 {
+    HandleEvent(point, EventStage::CAPTURE);
+    CatchSwipeCallback catchCallback;
+    catchCallback = swipeCatchCallback_[EventStage::CAPTURE];
+
+    auto& status = statusMap_[point.id];
+            if (status.second) {
+                auto direction = GetSwipeDirection(status.first, point);
+                if (direction == SwipeEventInfo::SwipeDirection::NONE) {
+                    return true;
+                }
+		if (catchCallback) {
+                   catchCallback(SwipeEventInfo(direction, GetSwipeDistance(direction, status.first, point)));
+                   return false;
+                }
+    }
     return true;
 }
 

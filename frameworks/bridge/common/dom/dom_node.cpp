@@ -1775,11 +1775,18 @@ void DOMNode::UpdateTouchEventComponent()
     }
 
     auto& swipeEvent = static_cast<CommonSwipeEvent&>(declaration_->GetEvent(EventTag::COMMON_SWIPE_EVENT));
-    if (swipeEvent.IsValid() && !swipeEvent.swipe.eventMarker.IsEmpty()) {
-        if (!touchEventComponent_) {
-            touchEventComponent_ = AceType::MakeRefPtr<TouchListenerComponent>();
+    if (swipeEvent.IsValid()) {
+        for (uint32_t eventAction = 0; eventAction < EventAction::SIZE; eventAction++) {
+            for (uint32_t eventStage = 0; eventStage < EventStage::SIZE; eventStage++) {
+		        EventMarker& eventMarker = GetSwipeId(eventAction, eventStage);
+		        if (!eventMarker.IsEmpty()) {
+		            if (!touchEventComponent_) {
+                        touchEventComponent_ = AceType::MakeRefPtr<TouchListenerComponent>();
+                    }
+                    touchEventComponent_->SetSwipeEvent(eventMarker, eventAction, eventStage);
+		        }
+            }
         }
-        touchEventComponent_->SetOnSwipeId(swipeEvent.swipe.eventMarker);
     }
 
     auto& touchableAttr =

@@ -180,6 +180,7 @@ public:
 
     void SetOnDoubleClick(const EventMarker& eventMarker)
     {
+	    ACE_DCHECK(gestureEventComponent_);
         gestureEventComponent_->SetOnDoubleClickId(eventMarker);
     }
 
@@ -200,6 +201,7 @@ public:
 
     void SetOnLongPress(const EventMarker& eventMarker)
     {
+	    ACE_DCHECK(gestureEventComponent_);
         gestureEventComponent_->SetOnLongPressId(eventMarker);
     }
 
@@ -653,7 +655,7 @@ protected:
         auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
         return gestureEvent.IsValid() ? gestureEvent.click.eventMarker : defaultMarker;
     };
-    const EventMarker& GetDoubleClickId()
+    virtual const EventMarker& GetDoubleClickId()
     {
         static EventMarker defaultMarker;
         auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
@@ -701,7 +703,7 @@ protected:
         auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
         return gestureEvent.IsValid() ? gestureEvent.dragDrop.eventMarker : defaultMarker;
     };
-    const EventMarker& GetLongPressId()
+    virtual const EventMarker& GetLongPressId()
     {
         static EventMarker defaultMarker;
         auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
@@ -731,6 +733,28 @@ protected:
         auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
         return gestureEvent.IsValid() ? gestureEvent.pinchCancel.eventMarker : defaultMarker;
     };
+
+    EventMarker& GetSwipeId(uint32_t action, uint32_t stage)
+    {
+        static EventMarker defaultMarker;
+        if (!declaration_) {
+            return defaultMarker;
+        }
+        auto& swipeEvent = declaration_->MaybeResetEvent<CommonSwipeEvent>(EventTag::COMMON_SWIPE_EVENT);
+        if (!swipeEvent.IsValid()) {
+            return defaultMarker;
+        }
+        if (action == EventAction::ON && stage == EventStage::CAPTURE) {
+            return swipeEvent.captureSwipe.eventMarker;
+        } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE) {
+            return swipeEvent.catchBubbleSwipe.eventMarker;
+        } else if (action == EventAction::CATCH && stage == EventStage::CAPTURE) {
+            return swipeEvent.catchCaptureSwipe.eventMarker;
+        } else if (action == EventAction::ON && stage == EventStage::BUBBLE) {
+            return swipeEvent.swipe.eventMarker;
+        }
+        return defaultMarker;
+    }
 
     // Confirm declaration exist and support raw event before call GetTouchId.
     EventMarker& GetTouchId(uint32_t action, uint32_t stage, uint32_t type)
