@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@ public:
         bool replyToComponent = false) const = 0;
 
     virtual void DispatchSync(
-        const std::string& group, std::vector<uint8_t>&& data, uint8_t** resData, long& position) const = 0;
+        const std::string& group, std::vector<uint8_t>&& data, uint8_t** resData, int64_t& position) const = 0;
 
     virtual void DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const = 0;
 };

@@ -92,7 +92,7 @@ struct OH_NativeXComponent_TouchPoint {
     /** Pressure of the current touch event. */
     float force = 0.0;
     /** Timestamp of the current touch event. */
-    long long timeStamp = 0;
+    int64_t timeStamp = 0;
     /** Whether the current point is pressed. */
     bool isPressed = false;
 };
@@ -118,7 +118,7 @@ struct OH_NativeXComponent_TouchEvent {
     /** ID of the device where the current touch event is generated. */
     int64_t deviceId = 0;
     /** Timestamp of the current touch event. */
-    long long timeStamp = 0;
+    int64_t timeStamp = 0;
     /** Array of the current touch points. */
     OH_NativeXComponent_TouchPoint touchPoints[OH_MAX_TOUCH_POINTS_NUMBER];
     /** Number of current touch points. */

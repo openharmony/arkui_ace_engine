@@ -84,7 +84,7 @@ std::unique_ptr<fml::Mapping> FileAssetProvider::GetAsMapping(const std::string&
             continue;
         }
 
-        long size = std::ftell(fp);
+        int64_t size = std::ftell(fp);
         uint8_t* dataArray = new (std::nothrow) uint8_t[size];
         if (dataArray == nullptr) {
             LOGE("new uint8_t array failed");

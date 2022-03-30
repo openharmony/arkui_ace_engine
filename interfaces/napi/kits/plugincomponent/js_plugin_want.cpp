@@ -270,7 +270,7 @@ bool AceInnerWrapWantParamsArrayChar(napi_env env, napi_value jsObject, const st
     }
 
     std::vector<std::string> natArray;
-    for (long i = 0; i < size; i++) {
+    for (int64_t i = 0; i < size; i++) {
         sptr<AAFwk::IInterface> iface = nullptr;
         if (ao->Get(i, iface) == ERR_OK) {
             AAFwk::IChar *iValue = AAFwk::IChar::Query(iface);
@@ -299,7 +299,7 @@ bool AceInnerWrapWantParamsArrayString(napi_env env, napi_value jsObject, const 
     }
 
     std::vector<std::string> natArray;
-    for (long i = 0; i < size; i++) {
+    for (int64_t i = 0; i < size; i++) {
         sptr<AAFwk::IInterface> iface = nullptr;
         if (ao->Get(i, iface) == ERR_OK) {
             AAFwk::IString *iValue = AAFwk::IString::Query(iface);
@@ -326,7 +326,7 @@ bool AceInnerWrapWantParamsArrayBool(napi_env env, napi_value jsObject, const st
     }
 
     std::vector<bool> natArray;
-    for (long i = 0; i < size; i++) {
+    for (int64_t i = 0; i < size; i++) {
         sptr<AAFwk::IInterface> iface = nullptr;
         if (ao->Get(i, iface) == ERR_OK) {
             AAFwk::IBoolean *iValue = AAFwk::IBoolean::Query(iface);
@@ -353,7 +353,7 @@ bool AceInnerWrapWantParamsArrayShort(napi_env env, napi_value jsObject, const s
     }
 
     std::vector<int> natArray;
-    for (long i = 0; i < size; i++) {
+    for (int64_t i = 0; i < size; i++) {
         sptr<AAFwk::IInterface> iface = nullptr;
         if (ao->Get(i, iface) == ERR_OK) {
             AAFwk::IShort *iValue = AAFwk::IShort::Query(iface);
@@ -379,7 +379,7 @@ bool AceInnerWrapWantParamsArrayByte(napi_env env, napi_value jsObject, const st
     }
 
     std::vector<int> natArray;
-    for (long i = 0; i < size; i++) {
+    for (int64_t i = 0; i < size; i++) {
         sptr<AAFwk::IInterface> iface = nullptr;
         if (ao->Get(i, iface) == ERR_OK) {
             AAFwk::IByte *iValue = AAFwk::IByte::Query(iface);
@@ -407,7 +407,7 @@ bool AceInnerWrapWantParamsArrayInt32(napi_env env, napi_value jsObject, const s
     }
 
     std::vector<int> natArray;
-    for (long i = 0; i < size; i++) {
+    for (int64_t i = 0; i < size; i++) {
         sptr<AAFwk::IInterface> iface = nullptr;
         if (ao->Get(i, iface) == ERR_OK) {
             AAFwk::IInteger *iValue = AAFwk::IInteger::Query(iface);
@@ -434,7 +434,7 @@ bool AceInnerWrapWantParamsArrayInt64(napi_env env, napi_value jsObject, const s
     }
 
     std::vector<int64_t> natArray;
-    for (long i = 0; i < size; i++) {
+    for (int64_t i = 0; i < size; i++) {
         sptr<AAFwk::IInterface> iface = nullptr;
         if (ao->Get(i, iface) == ERR_OK) {
             AAFwk::ILong *iValue = AAFwk::ILong::Query(iface);
@@ -461,7 +461,7 @@ bool AceInnerWrapWantParamsArrayFloat(napi_env env, napi_value jsObject, const s
     }
 
     std::vector<double> natArray;
-    for (long i = 0; i < size; i++) {
+    for (int64_t i = 0; i < size; i++) {
         sptr<AAFwk::IInterface> iface = nullptr;
         if (ao->Get(i, iface) == ERR_OK) {
             AAFwk::IFloat *iValue = AAFwk::IFloat::Query(iface);
@@ -488,7 +488,7 @@ bool AceInnerWrapWantParamsArrayDouble(napi_env env, napi_value jsObject, const 
     }
 
     std::vector<double> natArray;
-    for (long i = 0; i < size; i++) {
+    for (int64_t i = 0; i < size; i++) {
         sptr<AAFwk::IInterface> iface = nullptr;
         if (ao->Get(i, iface) == ERR_OK) {
             AAFwk::IDouble *iValue = AAFwk::IDouble::Query(iface);
@@ -606,7 +606,7 @@ bool AceInnerSetWantParamsArrayInt(const std::string& key, const std::vector<int
     }
 }
 
-bool AceInnerSetWantParamsArrayLong(const std::string& key, const std::vector<long>& value,
+bool AceInnerSetWantParamsArrayLong(const std::string& key, const std::vector<int64_t>& value,
     AAFwk::WantParams& wantParams)
 {
     size_t size = value.size();

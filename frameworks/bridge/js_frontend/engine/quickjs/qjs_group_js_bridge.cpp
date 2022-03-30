@@ -679,7 +679,7 @@ JSValue QuickJsGroupJsBridge::ProcessJsRequestSync(
     }
 
     uint8_t* resData = nullptr;
-    long position = 0;
+    int64_t position = 0;
 
     if (!instance->CallPlatformFunctionSync(strGroupName, std::move(encodeBuf), &resData, position)) {
         LOGE("CallPlatformFunctionSync fail");

@@ -270,7 +270,7 @@ void V8GroupJsBridge::ProcessJsRequestSync(const v8::FunctionCallbackInfo<v8::Va
     auto dispatcherUpgrade = (*dispatcher).Upgrade();
 
     uint8_t* resData = nullptr;
-    long position = 0;
+    int64_t position = 0;
 
     if (dispatcherUpgrade != nullptr) {
         dispatcherUpgrade->DispatchSync(strGroupName, std::move(encodeBuf), &resData, position);

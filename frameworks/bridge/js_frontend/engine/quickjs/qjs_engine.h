@@ -124,7 +124,7 @@ public:
     }
 
     bool CallPlatformFunctionSync(
-        const std::string& channel, std::vector<uint8_t>&& data, uint8_t** resData, long& position)
+        const std::string& channel, std::vector<uint8_t>&& data, uint8_t** resData, int64_t& position)
     {
         auto dispatcher = dispatcher_.Upgrade();
         if (dispatcher) {
