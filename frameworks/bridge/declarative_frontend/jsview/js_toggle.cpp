@@ -185,7 +185,7 @@ void JSToggle::JsSize(const JSCallbackInfo& info)
 void JSToggle::OnChange(const JSCallbackInfo& args)
 {
     if (JSViewBindEvent(&ToggleComponent::SetOnChange, args) ||
-        JSViewBindEvent(&CheckboxComponent::SetOnChange, args)) {
+        JSViewBindEvent(&CheckableComponent::SetOnChange, args)) {
     } else {
         LOGW("Failed to bind event");
     }
