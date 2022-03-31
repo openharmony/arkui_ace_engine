@@ -253,6 +253,7 @@ void JSButton::SetDefaultAttributes(const RefPtr<ButtonComponent>& buttonCompone
     buttonComponent->SetHeight(buttonTheme->GetHeight());
     buttonComponent->SetBackgroundColor(buttonTheme->GetBgColor());
     buttonComponent->SetClickedColor(buttonComponent->GetBackgroundColor().BlendColor(buttonTheme->GetClickedColor()));
+    buttonComponent->SetHoverColor(buttonTheme->GetHoverColor());
 }
 
 void JSButton::SetTypeAndStateEffect(const JSRef<JSObject>& obj, const RefPtr<ButtonComponent>& buttonComponent)
