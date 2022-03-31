@@ -65,7 +65,6 @@ public:
             if (!swipeRecognizer_) {
                 swipeRecognizer_ = AceType::MakeRefPtr<SwipeRecognizer>();
             }
-            swipeRecognizer_->AddSwipeCallback(onSwipeCallback);
         }
     }
 
