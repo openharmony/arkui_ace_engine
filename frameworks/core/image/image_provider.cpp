@@ -49,7 +49,7 @@ void ImageProvider::FetchImageObject(
     OnPostBackgroundTask onBackgroundTaskPostCallback)
 {
     auto task = [context, imageInfo, successCallback, failedCallback, useSkiaSvg, renderTaskHolder,
-                    uploadSuccessCallback, needAutoResize, id = Container::CurrentId()]() mutable {
+                    uploadSuccessCallback, needAutoResize, id = Container::CurrentId(), syncMode]() mutable {
         ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
@@ -66,12 +66,20 @@ void ImageProvider::FetchImageObject(
             imageObj = GeneraterAceImageObject(imageInfo, pipelineContext, useSkiaSvg);
         }
         if (!imageObj) { // if it fails to generate an image object, trigger fail callback.
+            if (syncMode) {
+                failedCallback(imageInfo);
+                return;
+            }
             taskExecutor->PostTask(
                 [failedCallback, imageInfo] { failedCallback(imageInfo); }, TaskExecutor::TaskType::UI);
             return;
         }
-        taskExecutor->PostTask([successCallback, imageInfo, imageObj]() { successCallback(imageInfo, imageObj); },
-            TaskExecutor::TaskType::UI);
+        if (syncMode) {
+            successCallback(imageInfo, imageObj);
+        } else {
+            taskExecutor->PostTask([successCallback, imageInfo, imageObj]() { successCallback(imageInfo, imageObj); },
+                TaskExecutor::TaskType::UI);
+        }
         bool canStartUploadImageObj = !needAutoResize && (imageObj->GetFrameCount() == 1);
         if (canStartUploadImageObj) {
             bool forceResize = (!imageObj->IsSvg()) && (imageInfo.IsSourceDimensionValid());

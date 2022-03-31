@@ -123,6 +123,7 @@ RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(const WeakPtr<PipelineCon
     }
 
     InitFliterFunc();
+    InitImageCallbacks();
 }
 void RosenRenderOffscreenCanvas::AddRect(const Rect& rect)
 {
@@ -258,6 +259,104 @@ void RosenRenderOffscreenCanvas::InitImagePaint()
     SetPaintImage();
 }
 
+void RosenRenderOffscreenCanvas::InitImageCallbacks()
+{
+    imageObjSuccessCallback_ = [weak = AceType::WeakClaim(this)](
+        ImageSourceInfo info, const RefPtr<ImageObject>& imageObj) {
+        auto render = weak.Upgrade();
+        if (render->loadingSource_ == info) {
+            render->ImageObjReady(imageObj);
+            return;
+        } else {
+            LOGE("image sourceInfo_ check error, : %{public}s vs %{public}s",
+                render->loadingSource_.ToString().c_str(), info.ToString().c_str());
+        }
+    };
+
+    failedCallback_ = [weak = AceType::WeakClaim(this)](ImageSourceInfo info) {
+        auto render = weak.Upgrade();
+        LOGE("failedCallback_");
+        render->ImageObjFailed();
+    };
+
+    uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)](
+        ImageSourceInfo sourceInfo, const fml::RefPtr<flutter::CanvasImage>& image) {};
+
+    onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)](CancelableTask task) {};
+}
+
+void RosenRenderOffscreenCanvas::ImageObjReady(const RefPtr<ImageObject>& imageObj)
+{
+    if (imageObj->IsSvg()) {
+        skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj)->GetSkiaDom();
+        currentSource_ = loadingSource_;
+    } else {
+        LOGE("image is not svg");
+    }
+}
+
+void RosenRenderOffscreenCanvas::ImageObjFailed()
+{
+    loadingSource_.SetSrc("");
+    currentSource_.SetSrc("");
+    skiaDom_ = nullptr;
+}
+
+void RosenRenderOffscreenCanvas::DrawSvgImage(const CanvasImage& canvasImage)
+{
+    const auto skCanvas =
+        globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+
+    // Make the ImageSourceInfo
+    canvasImage_ = canvasImage;
+    loadingSource_ = ImageSourceInfo(canvasImage.src);
+
+    // get the ImageObject
+    if (currentSource_ != loadingSource_) {
+        ImageProvider::FetchImageObject(loadingSource_, imageObjSuccessCallback_, uploadSuccessCallback_,
+            failedCallback_, pipelineContext_, true, true, true, renderTaskHolder_, onPostBackgroundTask_);
+    }
+
+    // draw the svg
+    if (skiaDom_) {
+        SkRect srcRect;
+        SkRect dstRect;
+        Offset startPoint;
+        double scaleX = 1.0f;
+        double scaleY = 1.0f;
+        switch (canvasImage.flag) {
+            case 0:
+                srcRect = SkRect::MakeXYWH(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+                dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy,
+                    skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+                break;
+            case 1: {
+                srcRect = SkRect::MakeXYWH(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+                dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+                break;
+            }
+            case 2: {
+                srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+                dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+                break;
+            }
+            default:
+                break;
+        }
+        scaleX = dstRect.width() / srcRect.width();
+        scaleY = dstRect.height() / srcRect.height();
+        startPoint = Offset(dstRect.left(), dstRect.top())
+           - Offset(srcRect.left() * scaleX, srcRect.top() * scaleY);
+
+        skCanvas->save();
+        skCanvas->clipRect(dstRect);
+        skCanvas->translate(startPoint.GetX(), startPoint.GetY());
+        skCanvas->scale(scaleX, scaleY);
+        skiaDom_->render(skCanvas);
+        skCanvas->restore();
+    }
+}
+
 void RosenRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, double width, double height)
 {
     if (!flutter::UIDartState::Current()) {
@@ -266,6 +365,12 @@ void RosenRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, doubl
 
     auto context = pipelineContext_.Upgrade();
     if (!context) {
+        return;
+    }
+
+    std::string::size_type tmp = canvasImage.src.find(".svg");
+    if (tmp != std::string::npos) {
+        DrawSvgImage(canvasImage);
         return;
     }
 
