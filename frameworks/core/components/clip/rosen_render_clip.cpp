@@ -22,23 +22,6 @@
 
 namespace OHOS::Ace {
 
-void RosenRenderClip::Update(const RefPtr<Component>& component)
-{
-    RenderClip::Update(component);
-
-    auto rsNode = GetRSNode();
-    if (!rsNode) {
-        return;
-    }
-    auto context = context_.Upgrade();
-    if (!context) {
-        return;
-    }
-    double dipScale = context->GetDipScale();
-    rsNode->SetCornerRadius(topLeftRadius_.GetX().ConvertToPx(dipScale));
-    rsNode->SetClipToBounds(true);
-}
-
 void RosenRenderClip::SetOffsetX(double offsetX)
 {
     RenderClip::SetOffsetX(offsetX);
@@ -69,6 +52,14 @@ void RosenRenderClip::SyncGeometryProperties()
     if (!rsNode) {
         return;
     }
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    double dipScale = context->GetDipScale();
+    rsNode->SetCornerRadius(topLeftRadius_.GetX().ConvertToPx(dipScale));
+    rsNode->SetClipToBounds(true);
+
     Rect paintSize = GetTransitionPaintRect();
     Offset paintOffset = GetPaintOffset();
     Offset clipOffset = paintOffset + Offset(offsetX_, offsetY_);

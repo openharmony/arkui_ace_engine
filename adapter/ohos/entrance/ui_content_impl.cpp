@@ -511,6 +511,7 @@ void UIContentImpl::Focus()
         LOGE("Window focus failed: taskExecutor is null.");
         return;
     }
+    ContainerScope scope(instanceId_);
     taskExecutor->PostTask([container]() {
         auto pipelineContext = container->GetPipelineContext();
         if (!pipelineContext) {
@@ -535,6 +536,7 @@ void UIContentImpl::UnFocus()
         LOGE("Window unFocus failed: taskExecutor is null.");
         return;
     }
+    ContainerScope scope(instanceId_);
     taskExecutor->PostTask([container]() {
         auto pipelineContext = container->GetPipelineContext();
         if (!pipelineContext) {
@@ -608,7 +610,6 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
 {
     LOGI("UIContent UpdateViewportConfig %{public}s", config.ToString().c_str());
     SystemProperties::SetResolution(config.Density());
-    SystemProperties::SetColorMode(ColorMode::LIGHT);
     SystemProperties::SetDeviceOrientation(config.Height() >= config.Width() ? 0 : 1);
     SystemProperties::SetWindowPos(config.Left(), config.Top());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -621,17 +622,10 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         LOGE("UpdateViewportConfig: taskExecutor is null.");
         return;
     }
-    taskExecutor->PostTask(
-        [config, instanceId = instanceId_, reason]() {
-            auto container = Platform::AceContainer::GetContainer(instanceId);
-            if (!container) {
-                LOGE("container may be destroyed.");
-                return;
-            }
-
+    taskExecutor->PostTask([config, container, reason]() {
             auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
             if (!aceView) {
-                LOGE("aceView is null");
+                LOGE("UpdateViewportConfig: aceView is null.");
                 return;
             }
             flutter::ViewportMetrics metrics;
@@ -641,8 +635,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
             Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
                 static_cast<WindowSizeChangeReason>(reason));
-        },
-        TaskExecutor::TaskType::PLATFORM);
+        }, TaskExecutor::TaskType::PLATFORM);
 }
 
 void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode)
@@ -658,6 +651,7 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode)
         LOGE("UpdateWindowMode failed: taskExecutor is null.");
         return;
     }
+    ContainerScope scope(instanceId_);
     taskExecutor->PostTask([container, mode]() {
         auto pipelineContext = container->GetPipelineContext();
         if (!pipelineContext) {
@@ -765,7 +759,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window)
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext;
     container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
         runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
-            // Subwindow ,just return.
+            // Sub-window ,just return.
             LOGI("Content event callback");
         }),
         false, true);

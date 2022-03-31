@@ -16,10 +16,11 @@
 #include "core/components/container_modal/container_modal_element.h"
 
 #include "core/components/box/box_element.h"
+#include "core/components/clip/clip_element.h"
+#include "core/components/clip/render_clip.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/container_modal/render_container_modal.h"
 #include "core/components/flex/flex_element.h"
-#include "core/components/flex/flex_item_element.h"
 #include "core/components/padding/render_padding.h"
 #include "core/gestures/tap_gesture.h"
 
@@ -60,7 +61,13 @@ RefPtr<StackElement> ContainerModalElement::GetStackElement() const
     }
 
     // Get second child : content
-    auto contentBox = AceType::DynamicCast<BoxElement>(column->GetLastChild());
+    auto clip = AceType::DynamicCast<ClipElement>(column->GetLastChild());
+    if (!clip) {
+        LOGE("Get stack element failed, clip element is null!");
+        return {};
+    }
+
+    auto contentBox = AceType::DynamicCast<BoxElement>(clip->GetFirstChild());
     if (!contentBox) {
         LOGE("Get stack element failed, content box element is null!");
         return {};
@@ -153,17 +160,15 @@ void ContainerModalElement::ShowTitle(bool isShow)
         return;
     }
 
-    // full screen need to hide border.
-    auto contentRenderBox = AceType::DynamicCast<RenderBox>(column->GetLastChild()->GetRenderNode());
-    if (contentRenderBox) {
-        auto contentDecoration = AceType::MakeRefPtr<Decoration>();
-        contentDecoration->SetBackgroundColor(CONTENT_BACKGROUND_COLOR);
-        if (isShow) {
-            Border contentBorder;
-            contentBorder.SetBorderRadius(Radius(CONTAINER_INNER_RADIUS));
-            contentDecoration->SetBorder(contentBorder);
-        }
-        contentRenderBox->SetBackDecoration(contentDecoration);
+    // full screen need to hide content border radius.
+    auto clip = AceType::DynamicCast<ClipElement>(column->GetLastChild());
+    if (!clip) {
+        LOGE("ContainerModalElement showTitle failed, clip element is null!");
+        return;
+    }
+    auto renderClip = AceType::DynamicCast<RenderClip>(clip->GetRenderNode());
+    if (renderClip) {
+        isShow ? renderClip->SetClipRadius(Radius(CONTAINER_INNER_RADIUS)) : renderClip->SetClipRadius(Radius(0.0));
     }
 
     // Get first child : title
