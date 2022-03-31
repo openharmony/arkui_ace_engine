@@ -197,7 +197,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 #endif
 
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
-    if (!isModulePreloaded_) {
+    if (!isModulePreloaded_ || (ContainerScope::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID)) {
         InitGlobalObjectTemplate();
     }
 
@@ -206,7 +206,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     if (usingSharedRuntime_ && isModuleInitialized_) {
         LOGI("InitJsEnv SharedRuntime has initialized, skip...");
     } else {
-        if (!isModulePreloaded_) {
+        if (!isModulePreloaded_ || (ContainerScope::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID)) {
             InitConsoleModule();
             InitAceModule();
             InitJsExportsUtilObject();
@@ -259,7 +259,7 @@ extern "C" ACE_EXPORT void OHOS_ACE_PreloadAceModule(void* runtime)
 
 void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
 {
-    if (isModulePreloaded_) {
+    if (isModulePreloaded_ && (ContainerScope::CurrentId() < MIN_PLUGIN_SUBCONTAINER_ID)) {
         LOGE("PreloadAceModule already preloaded");
         return;
     }
@@ -348,7 +348,7 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
         global->SetProperty(runtime_, "console", consoleObj);
     }
 
-    if (isModulePreloaded_) {
+    if (isModulePreloaded_ && (ContainerScope::CurrentId() < MIN_PLUGIN_SUBCONTAINER_ID)) {
         LOGD("console module has already preloaded");
         return;
     }
