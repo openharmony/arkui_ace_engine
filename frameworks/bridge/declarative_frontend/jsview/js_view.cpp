@@ -257,13 +257,22 @@ void JSView::DestructorCallback(JSView* view)
 void JSView::DestroyChild(JSView* parentCustomView)
 {
     LOGD("JSView::DestroyChild start");
-    for (auto child : customViewChildren_) {
+    for (auto&& child : customViewChildren_) {
         auto* view = child.second->Unwrap<JSView>();
         if (view != nullptr) {
             view->Destroy(this);
         }
         child.second.Reset();
     }
+    customViewChildren_.clear();
+    for (auto&& lazyChild : customViewChildrenWithLazy_) {
+        auto* view = lazyChild.second->Unwrap<JSView>();
+        if (view != nullptr) {
+            view->Destroy(this);
+        }
+        lazyChild.second.Reset();
+    }
+    customViewChildrenWithLazy_.clear();
     LOGD("JSView::DestroyChild end");
 }
 
@@ -301,50 +310,64 @@ JSRef<JSObject> JSView::GetChildById(const std::string& viewId)
         ChildAccessedById(id);
         return found->second;
     }
+    auto lazyItem = customViewChildrenWithLazy_.find(id);
+    if (lazyItem != customViewChildrenWithLazy_.end()) {
+        return lazyItem->second;
+    }
     return {};
 }
 
 std::string JSView::AddChildById(const std::string& viewId, const JSRef<JSObject>& obj)
 {
     auto id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
-    customViewChildren_.emplace(id, obj);
-    ChildAccessedById(id);
+    JSView* jsview = nullptr;
+    if (isLazyForEachProcessed_) {
+        auto result = customViewChildrenWithLazy_.try_emplace(id, obj);
+        if (!result.second) {
+            jsview = result.first->second->Unwrap<JSView>();
+            result.first->second = obj;
+        }
+        lazyItemGroups_[lazyItemGroupId_].emplace_back(id);
+    } else {
+        auto result = customViewChildren_.try_emplace(id, obj);
+        if (!result.second) {
+            jsview = result.first->second->Unwrap<JSView>();
+            result.first->second = obj;
+        }
+        ChildAccessedById(id);
+    }
+    if (jsview != nullptr) {
+        jsview->Destroy(this);
+    }
     return id;
 }
 
 void JSView::RemoveChildGroupById(const std::string& viewId)
 {
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
-    if (viewId.empty()) {
-        auto removeView = customViewChildren_.find(viewId);
-        if (removeView != customViewChildren_.end()) {
+    LOGD("RemoveChildGroupById in lazy for each case: %{public}s", viewId.c_str());
+    auto iter = lazyItemGroups_.find(viewId);
+    if (iter == lazyItemGroups_.end()) {
+        LOGI("can not find this groud to delete: %{public}s", viewId.c_str());
+        return;
+    }
+    std::vector<std::string> removedViewIds;
+    for (auto&& item : iter->second) {
+        auto removeView = customViewChildrenWithLazy_.find(item);
+        if (removeView != customViewChildrenWithLazy_.end()) {
             auto* view = removeView->second->Unwrap<JSView>();
             if (view != nullptr) {
                 view->Destroy(this);
             }
             removeView->second.Reset();
-            customViewChildren_.erase(removeView);
+            removedViewIds.emplace_back(item);
         }
-        return;
-    }
-    auto startIter = customViewChildren_.begin();
-    auto endIter = customViewChildren_.end();
-    std::vector<std::string> removedViewIds;
-    while (startIter != endIter) {
-        if (StartWith(startIter->first, viewId)) {
-            removedViewIds.emplace_back(startIter->first);
-            auto* view = startIter->second->Unwrap<JSView>();
-            if (view != nullptr) {
-                view->Destroy(this);
-            }
-            startIter->second.Reset();
-        }
-        ++startIter;
     }
 
     for (auto&& removeId : removedViewIds) {
-        customViewChildren_.erase(removeId);
+        customViewChildrenWithLazy_.erase(removeId);
     }
+    lazyItemGroups_.erase(iter);
 }
 
 void JSView::ChildAccessedById(const std::string& viewId)
