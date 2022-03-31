@@ -26,6 +26,7 @@ namespace OHOS::Ace::Framework {
 JSView::JSView(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction) : viewId_(viewId)
 {
     jsViewFunction_ = AceType::MakeRefPtr<ViewFunctions>(jsObject, jsRenderFunction);
+    instanceId_ = Container::CurrentId();
     LOGD("JSView constructor");
 }
 
@@ -132,7 +133,7 @@ RefPtr<OHOS::Ace::Component> JSView::InternalRender(const RefPtr<Component>& par
  */
 void JSView::MarkNeedUpdate()
 {
-    ACE_DCHECK((!GetElement().Invalid()) && "JSView's ComposedElement must be created before requesting an update");
+    ACE_DCHECK((!GetElement().Invalid()));
     ACE_SCOPED_TRACE("JSView::MarkNeedUpdate");
 
     auto element = GetElement().Upgrade();
@@ -140,6 +141,17 @@ void JSView::MarkNeedUpdate()
         element->MarkDirty();
     }
     needsUpdate_ = true;
+}
+
+void JSView::SyncInstanceId()
+{
+    restoreInstanceId_ = Container::CurrentId();
+    ContainerScope::UpdateCurrent(instanceId_);
+}
+
+void JSView::RestoreInstanceId()
+{
+    ContainerScope::UpdateCurrent(restoreInstanceId_);
 }
 
 void JSView::Destroy(JSView* parentCustomView)
@@ -177,6 +189,8 @@ void JSView::JSBind(BindingTarget object)
     JSClass<JSView>::Declare("NativeView");
     JSClass<JSView>::StaticMethod("create", &JSView::Create);
     JSClass<JSView>::Method("markNeedUpdate", &JSView::MarkNeedUpdate);
+    JSClass<JSView>::Method("syncInstanceId", &JSView::SyncInstanceId);
+    JSClass<JSView>::Method("restoreInstanceId", &JSView::RestoreInstanceId);
     JSClass<JSView>::Method("needsUpdate", &JSView::NeedsUpdate);
     JSClass<JSView>::Method("markStatic", &JSView::MarkStatic);
     JSClass<JSView>::CustomMethod("findChildById", &JSView::FindChildById);

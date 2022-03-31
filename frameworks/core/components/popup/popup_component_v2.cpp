@@ -31,15 +31,14 @@ constexpr Dimension DEFAULT_FONT_SIZE = 14.0_fp;
 constexpr Dimension BUTTON_PADDING = 8.0_fp;
 constexpr Dimension BUTTON_ZERO_PADDING = 0.0_fp;
 
-}
+} // namespace
 
 RefPtr<Element> PopupComponentV2::CreateElement()
 {
     return AceType::MakeRefPtr<PopupElementV2>(GetId());
 }
 
-void PopupComponentV2::Initialization(
-    const RefPtr<ThemeManager>& themeManager, const WeakPtr<PipelineContext>& context)
+void PopupComponentV2::Initialization(const RefPtr<ThemeManager>& themeManager, const WeakPtr<PipelineContext>& context)
 {
     if (hasInitialization_) {
         return;
@@ -75,11 +74,12 @@ void PopupComponentV2::Initialization(
         box->SetBackDecoration(decoration);
     }
     decoration->SetBorderRadius(popupTheme->GetRadius());
-    auto padding = popupTheme->GetPadding();
-    box->SetPadding(padding);
+    if (!customComponent_) {
+        auto padding = popupTheme->GetPadding();
+        box->SetPadding(padding);
+        GetPopupParam()->SetPadding(padding);
+    }
     box->SetChild(child);
-
-    GetPopupParam()->SetPadding(padding);
     GetPopupParam()->SetBorder(decoration->GetBorder());
     if (!GetPopupParam()->IsMaskColorSetted()) {
         GetPopupParam()->SetMaskColor(popupTheme->GetMaskColor());
@@ -120,12 +120,10 @@ const RefPtr<Component> PopupComponentV2::CreateMessage()
 const RefPtr<Component> PopupComponentV2::CreateButtons()
 {
     std::list<RefPtr<Component>> rowChildren;
-    rowChildren.emplace_back(
-        SetPadding(CreateButton(primaryButtonProperties_),
-            Edge(BUTTON_PADDING, BUTTON_ZERO_PADDING, BUTTON_PADDING, BUTTON_ZERO_PADDING)));
-    rowChildren.emplace_back(
-        SetPadding(CreateButton(secondaryButtonProperties_),
-            Edge(BUTTON_PADDING, BUTTON_ZERO_PADDING, BUTTON_PADDING, BUTTON_ZERO_PADDING)));
+    rowChildren.emplace_back(SetPadding(CreateButton(primaryButtonProperties_),
+        Edge(BUTTON_PADDING, BUTTON_ZERO_PADDING, BUTTON_PADDING, BUTTON_ZERO_PADDING)));
+    rowChildren.emplace_back(SetPadding(CreateButton(secondaryButtonProperties_),
+        Edge(BUTTON_PADDING, BUTTON_ZERO_PADDING, BUTTON_PADDING, BUTTON_ZERO_PADDING)));
     auto row = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_END, FlexAlign::CENTER, rowChildren);
     row->SetMainAxisSize(MainAxisSize::MIN);
     auto box = AceType::MakeRefPtr<BoxComponent>();

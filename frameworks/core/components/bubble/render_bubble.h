@@ -67,6 +67,7 @@ protected:
     // Is there has enough space for showing arrow.
     bool showTopArrow_ = true;
     bool showBottomArrow_ = true;
+    bool useCustom_ = false;
     Edge padding_;
     Edge margin_;
     Border border_;
