@@ -55,9 +55,8 @@ void FlutterRenderSwiper::Paint(RenderContext& context, const Offset& offset)
         LOGD("swiper has not default indicator");
         return;
     }
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-        SystemProperties::GetDeviceType() == DeviceType::TABLET ||
-        SystemProperties::GetDeviceType() == DeviceType::CAR) {
+    // indicator style in tv is different.
+    if (SystemProperties::GetDeviceType() != DeviceType::TV) {
         DrawIndicator(context, offset);
     } else {
         if (indicator_->GetIndicatorMask()) {

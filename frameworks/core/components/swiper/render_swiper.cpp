@@ -140,6 +140,60 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
         MarkNeedRender();
         return;
     }
+
+    const auto& swiperController = swiper->GetSwiperController();
+    if (swiperController) {
+        auto weak = AceType::WeakClaim(this);
+        swiperController->SetSwipeToImpl([weak](int32_t index, bool reverse) {
+            auto swiper = weak.Upgrade();
+            if (swiper) {
+                swiper->SwipeTo(index, reverse);
+            }
+        });
+        swiperController->SetShowPrevImpl([weak]() {
+            auto swiper = weak.Upgrade();
+            if (swiper) {
+                swiper->ShowPrevious();
+            }
+        });
+        swiperController->SetShowNextImpl([weak]() {
+            auto swiper = weak.Upgrade();
+            if (swiper) {
+                swiper->ShowNext();
+            }
+        });
+        swiperController->SetFinishImpl([weak]() {
+            auto swiper = weak.Upgrade();
+            if (swiper) {
+                swiper->FinishAllSwipeAnimation(true);
+            }
+        });
+    }
+
+    const auto& rotationController = swiper->GetRotationController();
+    if (rotationController) {
+        auto weak = AceType::WeakClaim(this);
+        rotationController->SetRequestRotationImpl(weak, context_);
+    }
+
+    changeEvent_ =
+        AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(swiper->GetChangeEventId(), context_);
+    animationFinishEvent_ = AceAsyncEvent<void()>::Create(swiper->GetAnimationFinishEventId(), context_);
+    rotationEvent_ = AceAsyncEvent<void(const std::string&)>::Create(swiper->GetRotationEventId(), context_);
+    auto clickId = swiper->GetClickEventId();
+    catchMode_ = true;
+    if (!clickId.IsEmpty()) {
+        catchMode_ = clickId.GetCatchMode();
+    }
+    clickEvent_ = AceAsyncEvent<void(const std::shared_ptr<ClickInfo>&)>::Create(clickId, context_);
+    remoteMessageEvent_ = AceAsyncEvent<void(const std::shared_ptr<ClickInfo>&)>::Create(
+        swiper->GetRemoteMessageEventId(), context_);
+    RegisterChangeEndListener(COMPONENT_CHANGE_END_LISTENER_KEY, swiper->GetChangeEndListener());
+    if (swiper && swiper_ && (*swiper == *swiper_) && currentIndex_ == static_cast<int32_t>(swiper->GetIndex())) {
+        LOGI("swiper not changed");
+        swiper_ = swiper;
+        return;
+    }
     fadeColor_ = swiper->GetFadeColor();
     scale_ = context->GetDipScale();
 
@@ -186,56 +240,9 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     indicator_ = swiper->GetIndicator();
     mainSwiperSize_ = swiper->GetMainSwiperSize();
     digitalIndicator_ = swiper->GetDigitalIndicator();
-    changeEvent_ =
-        AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(swiper->GetChangeEventId(), context_);
-    animationFinishEvent_ = AceAsyncEvent<void()>::Create(swiper->GetAnimationFinishEventId(), context_);
-    rotationEvent_ = AceAsyncEvent<void(const std::string&)>::Create(swiper->GetRotationEventId(), context_);
-    auto clickId = swiper->GetClickEventId();
-    catchMode_ = true;
-    if (!clickId.IsEmpty()) {
-        catchMode_ = clickId.GetCatchMode();
-    }
-    clickEvent_ = AceAsyncEvent<void(const std::shared_ptr<ClickInfo>&)>::Create(clickId, context_);
-    remoteMessageEvent_ = AceAsyncEvent<void(const std::shared_ptr<ClickInfo>&)>::Create(
-        swiper->GetRemoteMessageEventId(), context_);
-    RegisterChangeEndListener(COMPONENT_CHANGE_END_LISTENER_KEY, swiper->GetChangeEndListener());
     show_ = swiper->IsShow();
     axis_ = swiper->GetAxis();
     needReverse_ = (swiper->GetTextDirection() == TextDirection::RTL) && (axis_ == Axis::HORIZONTAL);
-    const auto& swiperController = swiper->GetSwiperController();
-    if (swiperController) {
-        auto weak = AceType::WeakClaim(this);
-        swiperController->SetSwipeToImpl([weak](int32_t index, bool reverse) {
-            auto swiper = weak.Upgrade();
-            if (swiper) {
-                swiper->SwipeTo(index, reverse);
-            }
-        });
-        swiperController->SetShowPrevImpl([weak]() {
-            auto swiper = weak.Upgrade();
-            if (swiper) {
-                swiper->ShowPrevious();
-            }
-        });
-        swiperController->SetShowNextImpl([weak]() {
-            auto swiper = weak.Upgrade();
-            if (swiper) {
-                swiper->ShowNext();
-            }
-        });
-        swiperController->SetFinishImpl([weak]() {
-            auto swiper = weak.Upgrade();
-            if (swiper) {
-                swiper->FinishAllSwipeAnimation(true);
-            }
-        });
-    }
-
-    const auto& rotationController = swiper->GetRotationController();
-    if (rotationController) {
-        auto weak = AceType::WeakClaim(this);
-        rotationController->SetRequestRotationImpl(weak, context_);
-    }
     disableSwipe_ = swiper->GetDisableSwipe();
     disableRotation_ = swiper->GetDisableRotation();
     itemspace_ = swiper->GetItemSpace();
@@ -379,13 +386,11 @@ void RenderSwiper::PerformLayout()
                               : -swiperHeight_ + prevMargin_ + nextMargin_;
     }
     nextItemOffset_ = -prevItemOffset_;
-    UpdateChildPosition(0, currentIndex_, true);
+    UpdateChildPosition(std::fmod(scrollOffset_, nextItemOffset_), currentIndex_, true);
     quickTrunItem_ = false;
 
-    // layout indicator
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-        SystemProperties::GetDeviceType() == DeviceType::TABLET ||
-        SystemProperties::GetDeviceType() == DeviceType::CAR) {
+    // layout indicator, indicator style in tv is different.
+    if (SystemProperties::GetDeviceType() != DeviceType::TV) {
         LayoutIndicator(swiperIndicatorData_);
     } else {
         UpdateIndicator();
