@@ -92,6 +92,8 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("optionBgColor", &JSSelect::OptionBgColor, opt);
     JSClass<JSSelect>::StaticMethod("optionFont", &JSSelect::OptionFont, opt);
     JSClass<JSSelect>::StaticMethod("optionFontColor", &JSSelect::OptionFontColor, opt);
+    JSClass<JSSelect>::StaticMethod("onSelect", &JSSelect::OnSelected, opt);
+    // API7 onSelected deprecated
     JSClass<JSSelect>::StaticMethod("onSelected", &JSSelect::OnSelected, opt);
     JSClass<JSSelect>::StaticMethod("width", &JSSelect::JsWidth);
     JSClass<JSSelect>::StaticMethod("height", &JSSelect::JsHeight);
