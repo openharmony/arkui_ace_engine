@@ -22,7 +22,10 @@
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkShader.h"
 
+#include "base/image/pixel_map.h"
+#include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/common/frontend.h"
 #include "core/components/align/render_align.h"
 #include "core/components/common/properties/radius.h"
@@ -298,6 +301,60 @@ void RosenRenderImage::Update(const RefPtr<Component>& component)
     FetchImageObject();
 }
 
+std::function<void()> RosenRenderImage::GenerateThumbnailLoadTask()
+{
+    return [sourceInfo = sourceInfo_, pipelineContext = GetContext(), weak = AceType::WeakClaim(this),
+               id = Container::CurrentId()]() {
+        ContainerScope scope(id);
+        auto context = pipelineContext.Upgrade();
+        if (!context) {
+            LOGE("pipeline context is null when try start thumbnailLoadTask, uri: %{private}s",
+                sourceInfo.GetSrc().c_str());
+            return;
+        }
+        auto dataProvider = context->GetDataProviderManager();
+        if (!dataProvider) {
+            LOGE("the data provider is null when try load thumbnail resource, uri: %{private}s",
+                sourceInfo.GetSrc().c_str());
+            return;
+        }
+        void* pixmapMediaUniquePtr = dataProvider->GetDataProviderThumbnailResFromUri(sourceInfo.GetSrc());
+        auto pixmapOhos = PixelMap::CreatePixelMapFromDataAbility(pixmapMediaUniquePtr);
+        auto taskExecutor = context->GetTaskExecutor();
+        if (!taskExecutor) {
+            return;
+        }
+        if (!pixmapOhos) {
+            LOGW("pixmapOhos is null, uri: %{private}s", sourceInfo.GetSrc().c_str());
+            taskExecutor->PostTask(
+                [weak, sourceInfo] {
+                    auto renderImage = weak.Upgrade();
+                    if (!renderImage) {
+                        LOGE("renderImage is null when try trigger load thumbnail fail event, "
+                             "uri: %{private}s",
+                            sourceInfo.GetSrc().c_str());
+                        return;
+                    }
+                    renderImage->failedCallback_(sourceInfo);
+                },
+                TaskExecutor::TaskType::UI);
+            return;
+        }
+        taskExecutor->PostTask(
+            [weak, pixmapOhos, sourceInfo] {
+                auto renderImage = weak.Upgrade();
+                if (!renderImage) {
+                    LOGE("renderImage is null when try load thumbnail data ability, "
+                         "uri: %{private}s",
+                        sourceInfo.GetSrc().c_str());
+                    return;
+                }
+                renderImage->UpdatePixmap(pixmapOhos);
+            },
+            TaskExecutor::TaskType::UI);
+    };
+}
+
 void RosenRenderImage::FetchImageObject()
 {
     LOGD("fetch obj : %{public}s", sourceInfo_.ToString().c_str());
@@ -321,6 +378,10 @@ void RosenRenderImage::FetchImageObject()
     rawImageSizeUpdated_ = false;
     SrcType srcType = sourceInfo_.GetSrcType();
     switch (srcType) {
+        case SrcType::DATA_ABILITY_DECODED: {
+            BackgroundTaskExecutor::GetInstance().PostTask(GenerateThumbnailLoadTask());
+            break;
+        }
         case SrcType::PIXMAP: {
             UpdatePixmap(sourceInfo_.GetPixmap());
             break;
@@ -330,19 +391,11 @@ void RosenRenderImage::FetchImageObject()
             break;
         }
         default: {
-            bool syncMode = (context->IsBuildingFirstPage() &&
-                            frontend->GetType() == FrontendType::JS_CARD &&
-                            sourceInfo_.GetSrcType() != SrcType::NETWORK) || syncMode_;
-            ImageProvider::FetchImageObject(
-                sourceInfo_,
-                imageObjSuccessCallback_,
-                uploadSuccessCallback_,
-                failedCallback_,
-                GetContext(),
-                syncMode,
-                useSkiaSvg_,
-                autoResize_,
-                renderTaskHolder_,
+            bool syncMode = (context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD &&
+                                sourceInfo_.GetSrcType() != SrcType::NETWORK) ||
+                            syncMode_;
+            ImageProvider::FetchImageObject(sourceInfo_, imageObjSuccessCallback_, uploadSuccessCallback_,
+                failedCallback_, GetContext(), syncMode, useSkiaSvg_, autoResize_, renderTaskHolder_,
                 onPostBackgroundTask_);
             break;
         }
@@ -411,6 +464,7 @@ void RosenRenderImage::ProcessPixmapForPaint()
         return;
     }
     FireLoadEvent(rawImageSize_);
+    RemoveChild(renderAltImage_);
     renderAltImage_ = nullptr;
 }
 

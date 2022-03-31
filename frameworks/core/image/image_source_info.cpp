@@ -40,6 +40,12 @@ bool ImageSourceInfo::IsValidBase64Head(const std::string& uri, const std::strin
     return std::regex_match(base64Head, regular);
 }
 
+bool ImageSourceInfo::IsUriOfDataAbilityEncoded(const std::string& uri, const std::string& pattern)
+{
+    std::regex regular(pattern);
+    return std::regex_match(uri, regular);
+}
+
 SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
 {
     if (uri.empty()) {
@@ -68,6 +74,9 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     } else if (head == "resource") {
         return SrcType::RESOURCE;
     } else if (head == "dataability") {
+        if (IsUriOfDataAbilityEncoded(uri, "^dataability://.*?/media/.*/thumbnail/.*$")) {
+            return SrcType::DATA_ABILITY_DECODED;
+        }
         return SrcType::DATA_ABILITY;
     } else {
         return SrcType::UNSUPPORTED;

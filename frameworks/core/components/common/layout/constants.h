@@ -304,6 +304,7 @@ enum class SrcType {
     INTERNAL, // internal cached file resource
     RESOURCE,
     DATA_ABILITY,
+    DATA_ABILITY_DECODED,
     RESOURCE_ID, // default resource which src is internal resource id
     PIXMAP,
 };
