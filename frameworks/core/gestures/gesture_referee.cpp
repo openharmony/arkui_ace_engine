@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 #include "core/gestures/click_recognizer.h"
-#include "core/gestures/gesture_referee.h"
-
 #include "core/gestures/gesture_recognizer.h"
+#include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
 

@@ -74,8 +74,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         pointsCount_++;
         AddToReferee(event.id, AceType::Claim(this));
         if (pointsCount_ == fingers_) {
+            state_ = DetectState::DETECTING;
             if (useCatchMode_) {
-                state_ = DetectState::DETECTING;
                 DeadlineTimer(duration_, false);
             } else {
                 DeadlineTimer(duration_, true);

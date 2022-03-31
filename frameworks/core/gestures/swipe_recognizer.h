@@ -68,6 +68,7 @@ public:
     {
         swipeCatchCallback_[stage] = eventCallback;
     }
+
 private:
     std::unordered_map<int32_t, std::pair<TouchEvent, bool>> statusMap_;
     SwipeCallback swipeCallback_[EventStage::SIZE];

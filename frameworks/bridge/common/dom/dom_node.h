@@ -180,7 +180,7 @@ public:
 
     void SetOnDoubleClick(const EventMarker& eventMarker)
     {
-	    ACE_DCHECK(gestureEventComponent_);
+        ACE_DCHECK(gestureEventComponent_);
         gestureEventComponent_->SetOnDoubleClickId(eventMarker);
     }
 
@@ -201,7 +201,7 @@ public:
 
     void SetOnLongPress(const EventMarker& eventMarker)
     {
-	    ACE_DCHECK(gestureEventComponent_);
+        ACE_DCHECK(gestureEventComponent_);
         gestureEventComponent_->SetOnLongPressId(eventMarker);
     }
 
@@ -748,8 +748,6 @@ protected:
             return swipeEvent.captureSwipe.eventMarker;
         } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE) {
             return swipeEvent.catchBubbleSwipe.eventMarker;
-        } else if (action == EventAction::CATCH && stage == EventStage::CAPTURE) {
-            return swipeEvent.catchCaptureSwipe.eventMarker;
         } else if (action == EventAction::ON && stage == EventStage::BUBBLE) {
             return swipeEvent.swipe.eventMarker;
         }
