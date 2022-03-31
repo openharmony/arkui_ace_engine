@@ -2112,6 +2112,12 @@ void RenderSwiper::IndicatorSwipeNext()
     StartIndicatorAnimation(currentIndex_, toIndex, currentIndex_ == itemCount_ - 1);
 }
 
+bool RenderSwiper::HandleMouseEvent(const MouseEvent& event)
+{
+    const Point point { event.x, event.y};
+    return MouseHoverTest(point);
+}
+
 bool RenderSwiper::MouseHoverTest(const Point& parentLocalPoint)
 {
     auto context = context_.Upgrade();
