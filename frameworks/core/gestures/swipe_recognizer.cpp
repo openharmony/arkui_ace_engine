@@ -130,8 +130,6 @@ bool SwipeRecognizer::HandleEvent(const TouchEvent& point)
 bool SwipeRecognizer::DispatchEvent(const TouchEvent& point)
 {
     HandleEvent(point, EventStage::CAPTURE);
-    CatchSwipeCallback catchCallback;
-    catchCallback = swipeCatchCallback_[EventStage::CAPTURE];
 
     auto& status = statusMap_[point.id];
     if (status.second) {
@@ -139,6 +137,8 @@ bool SwipeRecognizer::DispatchEvent(const TouchEvent& point)
         if (direction == SwipeEventInfo::SwipeDirection::NONE) {
             return true;
         }
+        CatchSwipeCallback catchCallback;
+        catchCallback = swipeCatchCallback_[EventStage::CAPTURE];
         if (catchCallback) {
             catchCallback(SwipeEventInfo(direction, GetSwipeDistance(direction, status.first, point)));
             return false;
