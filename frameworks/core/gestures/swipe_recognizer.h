@@ -59,11 +59,6 @@ public:
 
     bool DispatchEvent(const TouchEvent& point) override;
 
-    void AddSwipeCallback(const SwipeCallback& swipeCallback)
-    {
-        swipeCallback_ = swipeCallback;
-    }
-
     void SetSwipeCallback(const SwipeCallback& eventCallback, uint32_t stage)
     {
         swipeCallback_[stage] = eventCallback;

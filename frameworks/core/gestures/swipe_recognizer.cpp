@@ -84,11 +84,11 @@ bool SwipeRecognizer::HandleEvent(const TouchEvent& point, uint32_t stage)
             break;
         }
         case TouchType::UP: {
-	    auto callback = swipeCallback_[stage];
-	    auto callbackCatch = swipeCatchCallback_[stage];
+            auto callback = swipeCallback_[stage];
+            auto callbackCatch = swipeCatchCallback_[stage];
             auto& status = statusMap_[point.id];
             
-	    if (status.second && callbackCatch) {
+            if (status.second && callbackCatch) {
                 auto direction = GetSwipeDirection(status.first, point);
                 if (direction == SwipeEventInfo::SwipeDirection::NONE) {
                     return true;
@@ -102,7 +102,7 @@ bool SwipeRecognizer::HandleEvent(const TouchEvent& point, uint32_t stage)
                 if (direction == SwipeEventInfo::SwipeDirection::NONE) {
                     return true;
                 }
-		        callback(SwipeEventInfo(direction, GetSwipeDistance(direction, status.first, point)));
+                callback(SwipeEventInfo(direction, GetSwipeDistance(direction, status.first, point)));
             }
             break;
         }
@@ -134,15 +134,15 @@ bool SwipeRecognizer::DispatchEvent(const TouchEvent& point)
     catchCallback = swipeCatchCallback_[EventStage::CAPTURE];
 
     auto& status = statusMap_[point.id];
-            if (status.second) {
-                auto direction = GetSwipeDirection(status.first, point);
-                if (direction == SwipeEventInfo::SwipeDirection::NONE) {
-                    return true;
-                }
-		if (catchCallback) {
-                   catchCallback(SwipeEventInfo(direction, GetSwipeDistance(direction, status.first, point)));
-                   return false;
-                }
+    if (status.second) {
+        auto direction = GetSwipeDirection(status.first, point);
+        if (direction == SwipeEventInfo::SwipeDirection::NONE) {
+            return true;
+        }
+        if (catchCallback) {
+            catchCallback(SwipeEventInfo(direction, GetSwipeDistance(direction, status.first, point)));
+            return false;
+        }
     }
     return true;
 }

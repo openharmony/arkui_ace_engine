@@ -1657,15 +1657,15 @@ void Declaration::AddEvent(int32_t pageId, const std::string& eventId, const std
                 }
             } },
         { DOM_CATCH_BUBBLE_CLICK,
-          [](int32_t pageId, const std::string& eventId, Declaration& declaration) {
-            auto& gestureEvent = declaration.MaybeResetEvent<CommonGestureEvent>(EventTag::COMMON_GESTURE_EVENT);
-            if (gestureEvent.IsValid()) {
-                gestureEvent.click.eventMarker = EventMarker(eventId, DOM_CATCH_BUBBLE_CLICK, pageId);
-                gestureEvent.click.eventMarker.SetCatchMode(true);
-                gestureEvent.click.isRefreshed = true;
-            }
-          } },
-	{ DOM_CATCH_BUBBLE_DOUBLE_CLICK,
+            [](int32_t pageId, const std::string& eventId, Declaration& declaration) {
+                auto& gestureEvent = declaration.MaybeResetEvent<CommonGestureEvent>(EventTag::COMMON_GESTURE_EVENT);
+                if (gestureEvent.IsValid()) {
+                    gestureEvent.click.eventMarker = EventMarker(eventId, DOM_CATCH_BUBBLE_CLICK, pageId);
+                    gestureEvent.click.eventMarker.SetCatchMode(true);
+                    gestureEvent.click.isRefreshed = true;
+                }
+            } },
+        { DOM_CATCH_BUBBLE_DOUBLE_CLICK,
             [](int32_t pageId, const std::string& eventId, Declaration& declaration) {
                 auto& gestureEvent = declaration.MaybeResetEvent<CommonGestureEvent>(EventTag::COMMON_GESTURE_EVENT);
                 if (gestureEvent.IsValid()) {
@@ -1674,7 +1674,7 @@ void Declaration::AddEvent(int32_t pageId, const std::string& eventId, const std
                     gestureEvent.doubleClick.isRefreshed = true;
                 }
             } },
-	{ DOM_CATCH_BUBBLE_LONG_PRESS,
+        { DOM_CATCH_BUBBLE_LONG_PRESS,
              [](int32_t pageId, const std::string& eventId, Declaration& declaration) {
                  auto& gestureEvent = declaration.MaybeResetEvent<CommonGestureEvent>(EventTag::COMMON_GESTURE_EVENT);
                  if (gestureEvent.IsValid()) {
@@ -1683,7 +1683,7 @@ void Declaration::AddEvent(int32_t pageId, const std::string& eventId, const std
                      gestureEvent.longPress.isRefreshed = true;
                  }
              } },
-	{ DOM_CATCH_BUBBLE_SWIPE,
+        { DOM_CATCH_BUBBLE_SWIPE,
             [](int32_t pageId, const std::string& eventId, Declaration& declaration) {
                 auto& swipeEvent = declaration.MaybeResetEvent<CommonSwipeEvent>(EventTag::COMMON_SWIPE_EVENT);
                 if (swipeEvent.IsValid()) {

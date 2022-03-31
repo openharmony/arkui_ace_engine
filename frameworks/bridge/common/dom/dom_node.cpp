@@ -1778,13 +1778,13 @@ void DOMNode::UpdateTouchEventComponent()
     if (swipeEvent.IsValid()) {
         for (uint32_t eventAction = 0; eventAction < EventAction::SIZE; eventAction++) {
             for (uint32_t eventStage = 0; eventStage < EventStage::SIZE; eventStage++) {
-		        EventMarker& eventMarker = GetSwipeId(eventAction, eventStage);
-		        if (!eventMarker.IsEmpty()) {
-		            if (!touchEventComponent_) {
+                EventMarker& eventMarker = GetSwipeId(eventAction, eventStage);
+                if (!eventMarker.IsEmpty()) {
+                    if (!touchEventComponent_) {
                         touchEventComponent_ = AceType::MakeRefPtr<TouchListenerComponent>();
                     }
                     touchEventComponent_->SetSwipeEvent(eventMarker, eventAction, eventStage);
-		        }
+                }
             }
         }
     }
