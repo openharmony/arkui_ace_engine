@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,8 +53,6 @@ void DividerCreatorTest::TearDown() {}
  * @tc.name: DividerCreator001
  * @tc.desc: Verify DividerCreator can create divider component with content.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1Q5
- * @tc.author: jiangyingjie
  */
 HWTEST_F(DividerCreatorTest, DividerCreator001, TestSize.Level1)
 {
@@ -85,8 +83,6 @@ HWTEST_F(DividerCreatorTest, DividerCreator001, TestSize.Level1)
  * @tc.name: DividerCreator002
  * @tc.desc: Verify DividerCreator can create divider component with content.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1Q4
- * @tc.author: jiangyingjie
  */
 HWTEST_F(DividerCreatorTest, DividerCreator002, TestSize.Level1)
 {

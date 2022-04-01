@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -381,6 +381,12 @@ protected:
     }
 
     bool ShowCounter() const;
+
+    static bool IsSelectiveDevice()
+    {
+        return (SystemProperties::GetDeviceType() != DeviceType::TV &&
+            SystemProperties::GetDeviceType() != DeviceType::WATCH);
+    }
 
     // Used for compare to the current value and decide whether to UpdateRemoteEditing().
     std::shared_ptr<TextEditingValue> lastKnownRemoteEditingValue_;

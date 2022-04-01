@@ -21,20 +21,25 @@ namespace OHOS::Ace {
 const Dimension CONTAINER_INNER_RADIUS = 14.0_vp;
 const Dimension CONTAINER_OUTER_RADIUS = 16.0_vp;
 const Dimension CONTAINER_BORDER_WIDTH = 1.0_vp;
-const Dimension CONTAINER_TITLE_HEIGHT = 48.0_vp;
-const Dimension TITLE_PADDING_START = 24.0_vp;
-const Dimension TITLE_PADDING_END = 24.0_vp;
+const Dimension CONTAINER_TITLE_HEIGHT = 37.0_vp;
+const Dimension TITLE_PADDING_START = 20.0_vp;
+const Dimension TITLE_PADDING_END = 20.0_vp;
 const Dimension ZERO_PADDING = 0.0_vp;
-const Dimension TITLE_ELEMENT_MARGIN_HORIZONTAL = 16.0_vp;
+const Dimension TITLE_ELEMENT_MARGIN_HORIZONTAL = 12.0_vp;
 const Dimension TITLE_ICON_SIZE = 20.0_vp;
 const Dimension TITLE_BUTTON_SIZE = 24.0_vp;
 const Dimension TITLE_TEXT_FONT_SIZE = 16.0_fp;
 const Dimension CONTENT_PADDING = 4.0_vp;
 const Color CONTAINER_BACKGROUND_COLOR = Color(0xf2e6e7ed);
+const Color CONTAINER_BACKGROUND_COLOR_LOST_FOCUS = Color(0xfff2f2f2);
 const Color CONTAINER_BORDER_COLOR = Color(0x33000000);
-const Color TITLE_TEXT_COLOR = Color(0xe5000000);
+const Color CONTAINER_BORDER_COLOR_LOST_FOCUS = Color(0x19000000);
+const Color TITLE_TEXT_COLOR = Color(0xff000000);
+const Color TITLE_TEXT_COLOR_LOST_FOCUS = Color(0x66000000);
 const Color CONTENT_BACKGROUND_COLOR = Color(0xffffffff);
-const Color TITLE_BUTTON_BACKGROUND_COLOR = Color(0x33000000);
+const Color TITLE_BUTTON_BACKGROUND_COLOR = Color(0x19000000);
+const Color TITLE_BUTTON_BACKGROUND_COLOR_LOST_FOCUS = Color(0x0a000000);
+const Color TITLE_BUTTON_CLICKED_COLOR = Color(0x33000000);
 
 } // namespace OHOS::Ace
 

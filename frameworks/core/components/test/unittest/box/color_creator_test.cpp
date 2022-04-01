@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,6 @@ Color ColorCreatorTest::CreateFromDsl(const std::string jsonColorStr) const
  * @tc.name: ColorCreator001
  * @tc.desc: Verify ColorCreator can create color with value.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU2
  */
 HWTEST_F(ColorCreatorTest, ColorCreator001, TestSize.Level1)
 {
@@ -86,7 +85,6 @@ HWTEST_F(ColorCreatorTest, ColorCreator001, TestSize.Level1)
  * @tc.name: ColorCreator002
  * @tc.desc: Verify ColorCreator can create color with ARGB.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU2
  */
 HWTEST_F(ColorCreatorTest, ColorCreator002, TestSize.Level1)
 {
@@ -114,7 +112,6 @@ HWTEST_F(ColorCreatorTest, ColorCreator002, TestSize.Level1)
  * @tc.name: ColorCreator003
  * @tc.desc: Verify ColorCreator can create color with RGBO.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU2
  */
 HWTEST_F(ColorCreatorTest, ColorCreator003, TestSize.Level1)
 {
@@ -142,7 +139,6 @@ HWTEST_F(ColorCreatorTest, ColorCreator003, TestSize.Level1)
  * @tc.name: ColorCreator004
  * @tc.desc: Verify ColorCreator can create color with one of RGB.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU2
  */
 HWTEST_F(ColorCreatorTest, ColorCreator004, TestSize.Level1)
 {
@@ -169,7 +165,6 @@ HWTEST_F(ColorCreatorTest, ColorCreator004, TestSize.Level1)
  * @tc.name: ColorCreator005
  * @tc.desc: Verify ColorCreator can create color with className only.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU2
  */
 HWTEST_F(ColorCreatorTest, ColorCreator005, TestSize.Level1)
 {

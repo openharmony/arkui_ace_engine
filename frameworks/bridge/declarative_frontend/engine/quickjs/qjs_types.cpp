@@ -25,7 +25,7 @@ namespace OHOS::Ace::Framework {
 void PrintRefCount(JSValue val)
 {
     if (JS_VALUE_HAS_REF_COUNT(val)) {
-        JSRefCountHeader* p = (JSRefCountHeader*)JS_VALUE_GET_PTR(val);
+        JSRefCountHeader* p = static_cast<JSRefCountHeader*>(JS_VALUE_GET_PTR(val));
         LOGE("Ref count of value: %d", p->ref_count);
     } else {
         LOGE("no ref count");

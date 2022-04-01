@@ -197,6 +197,9 @@ void RosenRenderListItem::PaintWithFocusEffect(RenderContext& context, const Off
         decorationPainter->SetMargin(GetMarginInPx());
         auto canvas = static_cast<RosenRenderContext&>(context).GetCanvas();
         decorationPainter->PaintDecoration(offset, canvas, context);
+    } else {
+        auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
+        rsNode->SetBackgroundColor(Color::TRANSPARENT.GetValue());
     }
 }
 

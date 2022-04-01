@@ -28,7 +28,7 @@ class ACE_EXPORT ForEachElement : public MultiComposedElement {
     DECLARE_ACE_TYPE(ForEachElement, MultiComposedElement);
 
 public:
-    explicit ForEachElement(const ComposeId& id) : MultiComposedElement(id) {};
+    explicit ForEachElement(const ComposeId& id) : MultiComposedElement(id) {}
     ~ForEachElement() override = default;
 };
 

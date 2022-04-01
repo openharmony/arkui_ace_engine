@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1450,26 +1450,10 @@ void RenderGridScroll::OnPredictLayout(int64_t deadline)
     }
 }
 
-bool RenderGridScroll::isScrollable(AxisDirection direction)
+bool RenderGridScroll::IsAxisScrollable(AxisDirection direction)
 {
-    if (isVertical_) {
-        if (direction == AxisDirection::UP && reachHead_) {
-            return false;
-        } else if (direction == AxisDirection::DOWN && reachTail_) {
-            return false;
-        } else if (direction == AxisDirection::NONE) {
-            return false;
-        }
-    } else {
-        if (direction == AxisDirection::LEFT && reachHead_) {
-            return false;
-        } else if (direction == AxisDirection::RIGHT && reachTail_) {
-            return false;
-        } else if (direction == AxisDirection::NONE) {
-            return false;
-        }
-    }
-    return true;
+    return (((direction == AxisDirection::UP || direction == AxisDirection::LEFT) && !reachHead_) ||
+        ((direction == AxisDirection::DOWN || direction == AxisDirection::RIGHT) && !reachTail_));
 }
 
 void RenderGridScroll::HandleAxisEvent(const AxisEvent& event)

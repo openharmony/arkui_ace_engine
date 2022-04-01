@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,7 @@ Gradient ParseGradient(const DOMProgress& progress, const std::string& value)
         return gradient;
     }
     auto gradientValue = gradientJson->GetValue(DOM_VALUES);
-    if (gradientValue == nullptr || !gradientValue->IsArray() || gradientValue->GetArraySize() <= 0) {
+    if ((gradientValue == nullptr) || (!gradientValue->IsArray()) || (gradientValue->GetArraySize() <= 0)) {
         LOGW("gradientValue json param error");
         return gradient;
     }
@@ -291,7 +291,7 @@ void DOMProgress::InitProgressIfNeed()
 {
     auto theme = GetTheme<ProgressTheme>();
     if (type_ == ProgressType::CIRCLE) {
-        // Width_ and height_ in circluar progress are usually the same with diameter in loading progress component.
+        // Width_ and height_ in circular progress are usually the same with diameter in loading progress component.
         // If width_ and height_ are different, choose smaller one as diameter.
         if (!loadingProgressChild_) {
             loadingProgressChild_ = AceType::MakeRefPtr<LoadingProgressComponent>();

@@ -37,7 +37,7 @@ public:
     static void ConstructorCallback(const JSCallbackInfo& args);
     static void DestructorCallback(VerticalAlignDeclaration* obj);
 
-    virtual VerticalAlign GetVerticalAlign() const override
+    VerticalAlign GetVerticalAlign() const override
     {
         return align_;
     }

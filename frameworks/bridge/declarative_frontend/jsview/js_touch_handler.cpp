@@ -106,6 +106,8 @@ void JSTouchHandler::JsHandlerOnTouch(TouchEvent action, const JSCallbackInfo& a
             case TouchEvent::CANCEL:
                 jsOnCancelFunc_ = handlerFunc;
                 break;
+            default:
+                break;
         }
     }
     args.ReturnSelf();

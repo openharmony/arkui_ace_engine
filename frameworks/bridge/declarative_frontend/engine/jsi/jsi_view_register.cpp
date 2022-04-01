@@ -641,7 +641,10 @@ panda::Local<panda::JSValueRef> Fp2Px(panda::EcmaVM* vm, panda::Local<panda::JSV
         return panda::JSValueRef::Undefined(vm);
     }
     auto pipelineContext = container->GetPipelineContext();
-    double fontScale = pipelineContext->GetFontScale();
+    double fontScale = 1.0;
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
     double pxValue = fpValue * density * fontScale;
     return panda::NumberRef::New(vm, pxValue);
 }
@@ -670,7 +673,10 @@ panda::Local<panda::JSValueRef> Px2Fp(panda::EcmaVM* vm, panda::Local<panda::JSV
         return panda::JSValueRef::Undefined(vm);
     }
     auto pipelineContext = container->GetPipelineContext();
-    double fontScale = pipelineContext->GetFontScale();
+    double fontScale = 1.0;
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
     double ratio = density * fontScale;
     double fpValue = pxValue / ratio;
     return panda::NumberRef::New(vm, fpValue);
@@ -889,7 +895,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextInputController", JSTextInputController::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
     { "Checkbox", JSCheckbox::JSBind },
-    { "CheckboxGroup", JSCheckboxGroup::JSBind }
+    { "CheckboxGroup", JSCheckboxGroup::JSBind },
+    { "Refresh", JSRefresh::JSBind }
 };
 
 void RegisterAllModule(BindingTarget globalObj)

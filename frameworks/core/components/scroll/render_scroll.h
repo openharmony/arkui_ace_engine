@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,10 +54,10 @@ public:
     virtual bool ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish = nullptr);
     virtual void JumpToPosition(double position, int32_t source = SCROLL_FROM_JUMP);
     // notify start position in global main axis
-    virtual void NotifyDragStart(double startPosition) {};
+    virtual void NotifyDragStart(double startPosition) {}
     // notify drag offset in global main axis
-    virtual void NotifyDragUpdate(double dragOffset, int32_t source) {};
-    virtual void ProcessScrollOverCallback(double velocity) {};
+    virtual void NotifyDragUpdate(double dragOffset, int32_t source) {}
+    virtual void ProcessScrollOverCallback(double velocity) {}
     void AnimateTo(double position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true,
         const std::function<void()>& onFinish = nullptr);
     bool AnimateToTarget(const ComposeId& targetId, float duration, const RefPtr<Curve>& curve,
@@ -206,7 +206,7 @@ public:
 
     void HandleAxisEvent(const AxisEvent& event) override;
 
-    bool isScrollable(AxisDirection direction) override;
+    bool IsAxisScrollable(AxisDirection direction) override;
 
     WeakPtr<RenderNode> CheckAxisNode() override;
 
@@ -221,7 +221,7 @@ protected:
     void InitScrollBar(const RefPtr<ScrollBar>& scrollBar);
     void InitScrollBarProxy();
 
-    virtual void AdjustTouchRestrict(TouchRestrict& touchRestrict) {};
+    virtual void AdjustTouchRestrict(TouchRestrict& touchRestrict) {}
 
     Edge padding_;
     Axis axis_ = Axis::FREE;

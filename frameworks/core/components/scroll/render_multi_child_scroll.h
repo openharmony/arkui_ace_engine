@@ -94,6 +94,11 @@ public:
         return scrollVibrate_;
     }
 
+    bool IsUseOnly() override
+    {
+        return true;
+    }
+
 protected:
     void OnPredictLayout(int64_t deadline) override;
     void PerformLayout() override;

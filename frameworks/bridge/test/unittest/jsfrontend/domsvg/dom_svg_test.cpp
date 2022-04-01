@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,8 +74,6 @@ void DomSvgTest::CheckPresentationAttrs(const RefPtr<SvgBaseDeclaration>& baseDe
  * @tc.name: DomSvgTest001
  * @tc.desc: Verify that DomSvg can be created and set attrs correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TG
- * @tc.author: chenlien
  */
 HWTEST_F(DomSvgTest, DomSvgTest001, TestSize.Level1)
 {
@@ -123,8 +121,6 @@ HWTEST_F(DomSvgTest, DomSvgTest001, TestSize.Level1)
  * @tc.name: DomSvgTest002
  * @tc.desc: Verify that DomSvg can be created and set common attrs correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TG
- * @tc.author: chenlien
  */
 HWTEST_F(DomSvgTest, DomSvgTest002, TestSize.Level1)
 {
@@ -185,8 +181,6 @@ HWTEST_F(DomSvgTest, DomSvgTest002, TestSize.Level1)
  * @tc.name: DomSvgTest003
  * @tc.desc: Verify that DomSvgRect can be created and set attrs correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TH
- * @tc.author: chenlien
  */
 HWTEST_F(DomSvgTest, DomSvgTest003, TestSize.Level1)
 {
@@ -238,8 +232,6 @@ HWTEST_F(DomSvgTest, DomSvgTest003, TestSize.Level1)
  * @tc.name: DomSvgTest004
  * @tc.desc: Verify that DomSvgCircle can be created and set attrs correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TH
- * @tc.author: chenlien
  */
 HWTEST_F(DomSvgTest, DomSvgTest004, TestSize.Level1)
 {
@@ -279,8 +271,6 @@ HWTEST_F(DomSvgTest, DomSvgTest004, TestSize.Level1)
  * @tc.name: DomSvgTest005
  * @tc.desc: Verify that DomSvgEllipse can be created and set attrs correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TJ
- * @tc.author: chenlien
  */
 HWTEST_F(DomSvgTest, DomSvgTest005, TestSize.Level1)
 {
@@ -324,8 +314,6 @@ HWTEST_F(DomSvgTest, DomSvgTest005, TestSize.Level1)
  * @tc.name: DomSvgTest006
  * @tc.desc: Verify that DomSvgPath can be created and set attrs correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TK
- * @tc.author: chenlien
  */
 HWTEST_F(DomSvgTest, DomSvgTest006, TestSize.Level1)
 {
@@ -357,8 +345,6 @@ HWTEST_F(DomSvgTest, DomSvgTest006, TestSize.Level1)
  * @tc.name: DomSvgTest007
  * @tc.desc: Verify that DomSvgLine can be created and set attrs correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TL
- * @tc.author: chenlien
  */
 HWTEST_F(DomSvgTest, DomSvgTest007, TestSize.Level1)
 {
@@ -402,8 +388,6 @@ HWTEST_F(DomSvgTest, DomSvgTest007, TestSize.Level1)
  * @tc.name: DomSvgTest008
  * @tc.desc: Verify that DomSvgPolyline can be created and set attrs correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TM
- * @tc.author: chenlien
  */
 HWTEST_F(DomSvgTest, DomSvgTest008, TestSize.Level1)
 {
@@ -435,8 +419,6 @@ HWTEST_F(DomSvgTest, DomSvgTest008, TestSize.Level1)
  * @tc.name: DomSvgTest009
  * @tc.desc: Verify that DomSvgPolygon can be created and set attrs correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TN
- * @tc.author: chenlien
  */
 HWTEST_F(DomSvgTest, DomSvgTest009, TestSize.Level1)
 {
@@ -468,8 +450,6 @@ HWTEST_F(DomSvgTest, DomSvgTest009, TestSize.Level1)
  * @tc.name: DomSvgTest010
  * @tc.desc: Verify that DomSvgAnimate can be created and set attrs correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TR
- * @tc.author: chenlien
  */
 HWTEST_F(DomSvgTest, DomSvgTest010, TestSize.Level1)
 {
@@ -529,8 +509,6 @@ HWTEST_F(DomSvgTest, DomSvgTest010, TestSize.Level1)
  * @tc.name: DomSvgTest011
  * @tc.desc: Verify that DomSvgAnimateMotion can be created and set attrs correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TS
- * @tc.author: chenlien
  */
 HWTEST_F(DomSvgTest, DomSvgTest011, TestSize.Level1)
 {

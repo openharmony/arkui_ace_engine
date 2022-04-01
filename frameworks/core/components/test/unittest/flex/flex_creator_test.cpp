@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,8 +75,6 @@ RefPtr<Component> FlexCreatorTest::CreateComponent(const std::string& testJson)
  * @tc.name: FlexClassname001
  * @tc.desc: Check flex component with right classname can create correctly
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH
- * @tc.author: yangfan
  */
 HWTEST_F(FlexCreatorTest, FlexClassname001, TestSize.Level1)
 {
@@ -115,8 +113,6 @@ HWTEST_F(FlexCreatorTest, FlexClassname001, TestSize.Level1)
  * @tc.name: FlexClassname002
  * @tc.desc: Check flex component with wrong classname cannot create
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH
- * @tc.author: yangfan
  */
 HWTEST_F(FlexCreatorTest, FlexClassname002, TestSize.Level1)
 {
@@ -147,8 +143,6 @@ HWTEST_F(FlexCreatorTest, FlexClassname002, TestSize.Level1)
  * @tc.name: FlexProperties001
  * @tc.desc: Check flex component with properties bigger than enum in the json returns default properties
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH
- * @tc.author: yangfan
  */
 HWTEST_F(FlexCreatorTest, FlexProperties001, TestSize.Level1)
 {
@@ -187,8 +181,6 @@ HWTEST_F(FlexCreatorTest, FlexProperties001, TestSize.Level1)
  * @tc.name: FlexProperties002
  * @tc.desc: Check flex component with properties smaller than enum in the json returns default properties
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH
- * @tc.author: yangfan
  */
 HWTEST_F(FlexCreatorTest, FlexProperties002, TestSize.Level1)
 {
@@ -227,8 +219,6 @@ HWTEST_F(FlexCreatorTest, FlexProperties002, TestSize.Level1)
  * @tc.name: FlexProperties003
  * @tc.desc: Check flex component with no crossAxisAlign in the json returns default crossAxisAlign
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH
- * @tc.author: yangfan
  */
 HWTEST_F(FlexCreatorTest, FlexProperties003, TestSize.Level1)
 {
@@ -270,8 +260,6 @@ HWTEST_F(FlexCreatorTest, FlexProperties003, TestSize.Level1)
  * @tc.name: FlexProperties004
  * @tc.desc: Check flex component with no mainAxisAlign in the json returns default mainAxisAlign
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH
- * @tc.author: yangfan
  */
 HWTEST_F(FlexCreatorTest, FlexProperties004, TestSize.Level1)
 {
@@ -313,8 +301,6 @@ HWTEST_F(FlexCreatorTest, FlexProperties004, TestSize.Level1)
  * @tc.name: FlexChild001
  * @tc.desc: Verify flex component with single flex child is correct when load the json
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH
- * @tc.author: yangfan
  */
 HWTEST_F(FlexCreatorTest, FlexChild001, TestSize.Level1)
 {
@@ -362,8 +348,6 @@ HWTEST_F(FlexCreatorTest, FlexChild001, TestSize.Level1)
  * @tc.name: FlexChild002
  * @tc.desc: Verify flex component with two flex child is correct when load the json
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH
- * @tc.author: yangfan
  */
 HWTEST_F(FlexCreatorTest, FlexChild002, TestSize.Level1)
 {
@@ -423,8 +407,6 @@ HWTEST_F(FlexCreatorTest, FlexChild002, TestSize.Level1)
  * @tc.name: FlexChild003
  * @tc.desc: Verify flex component with complex child is correct when load the json
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH
- * @tc.author: yangfan
  */
 HWTEST_F(FlexCreatorTest, FlexChild003, TestSize.Level1)
 {
@@ -487,8 +469,6 @@ HWTEST_F(FlexCreatorTest, FlexChild003, TestSize.Level1)
  * @tc.name: FlexChild004
  * @tc.desc: Verify flex component with no child is correct when load the json
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH
- * @tc.author: yangfan
  */
 HWTEST_F(FlexCreatorTest, FlexChild004, TestSize.Level1)
 {

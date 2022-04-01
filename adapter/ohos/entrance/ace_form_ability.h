@@ -50,7 +50,7 @@ public:
      *
      * @return Returns the created FormProviderInfo object.
      */
-    virtual OHOS::AppExecFwk::FormProviderInfo OnCreate(const OHOS::AAFwk::Want& want) override;
+    OHOS::AppExecFwk::FormProviderInfo OnCreate(const OHOS::AAFwk::Want& want) override;
 
     /**
      * @brief Called to notify the form provider that a specified form has been deleted. Override this method if
@@ -59,7 +59,7 @@ public:
      * @param formId Indicates the ID of the deleted form.
      * @return None.
      */
-    virtual void OnDelete(const int64_t formId) override;
+    void OnDelete(const int64_t formId) override;
 
     /**
      * @brief Called to notify the form provider to update a specified form.
@@ -67,7 +67,7 @@ public:
      * @param formId Indicates the ID of the form to update.
      * @param message Form event message.
      */
-    virtual void OnTriggerEvent(const int64_t formId, const std::string& message) override;
+    void OnTriggerEvent(const int64_t formId, const std::string& message) override;
 
     /**
      * @brief Called to notify the form provider to update a specified form.
@@ -75,7 +75,7 @@ public:
      * @param formId Indicates the ID of the form to update.
      * @return none.
      */
-    virtual void OnUpdate(const int64_t formId) override;
+    void OnUpdate(const int64_t formId) override;
 
     /**
      * @brief Called when the form provider is notified that a temporary form is successfully converted to
@@ -84,7 +84,7 @@ public:
      * @param formId Indicates the ID of the form.
      * @return None.
      */
-    virtual void OnCastTemptoNormal(const int64_t formId) override;
+    void OnCastTemptoNormal(const int64_t formId) override;
 
     /**
      * @brief Called when the form provider receives form events from the fms.
@@ -95,7 +95,7 @@ public:
      *                      and FORM_INVISIBLE means that the form becomes invisible.
      * @return none.
      */
-    virtual void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap) override;
+    void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap) override;
 
 private:
     void LoadFormEnv(const OHOS::AAFwk::Want& want);

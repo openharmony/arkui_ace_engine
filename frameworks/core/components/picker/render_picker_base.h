@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -196,7 +196,7 @@ private:
     PickerDate selectedDate_ = PickerDate::Current();
 
     std::function<void()> onCancelCallback_;
-    std::function<void(const std::string&)> onChangeCallback_;
+    std::function<void(const std::shared_ptr<BaseEventInfo>&)> onChangeCallback_;
     std::function<void(const std::string&)> onColumnChangeCallback_;
     std::function<void(const std::string&)> onDialogAccept_;
     std::function<void()> onDialogCancel_;

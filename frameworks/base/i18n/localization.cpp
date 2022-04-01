@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -413,7 +413,7 @@ bool Localization::GetHourFormat(bool& isAmPm, bool& hasZero)
         return true;
     }
 
-    LOGE("hour format is unknow[%{public}s]", result.c_str());
+    LOGE("hour format is unknown[%{public}s]", result.c_str());
     return false;
 }
 
@@ -572,7 +572,7 @@ LunarDate Localization::GetLunarDate(Date date)
     // 0 means January,  1 means February, so month + 1
     dateRet.month = static_cast<uint32_t>(lunarMonth) + 1;
     dateRet.day = static_cast<uint32_t>(lunarDate);
-    dateRet.isLeapMonth = isLeapMonth == 0 ? false : true;
+    dateRet.isLeapMonth = !(isLeapMonth == 0);
     return dateRet;
 }
 
@@ -809,7 +809,7 @@ std::string Localization::GetErrorDescription(const std::string& errorIndex)
 
 const std::vector<std::string>& Localization::GetLanguageList(const std::string& language)
 {
-    static const LinearMapNode<std::vector<std::string>> mulitiLanguageMap[] = {
+    static const LinearMapNode<std::vector<std::string>> multiLanguageMap[] = {
         { "am", { "am" } },
         { "ar", { "ar" } },
         { "as", { "as" } },
@@ -886,12 +886,12 @@ const std::vector<std::string>& Localization::GetLanguageList(const std::string&
         { "zh", { "zh-CN", "zh-HK", "zh-TW" } },
         { "zz", { "zz-ZX" } },
     };
-    int64_t list = BinarySearchFindIndex(mulitiLanguageMap, ArraySize(mulitiLanguageMap), language.c_str());
+    int64_t list = BinarySearchFindIndex(multiLanguageMap, ArraySize(multiLanguageMap), language.c_str());
     if (list == -1) {
         static const std::vector<std::string> defaultLanguage = { "en-US" };
         return defaultLanguage;
     }
-    return mulitiLanguageMap[list].value;
+    return multiLanguageMap[list].value;
 }
 
 std::mutex Localization::mutex_;

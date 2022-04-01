@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ class ACE_EXPORT ColumnSplitComponent : public SplitContainerComponent {
     DECLARE_ACE_TYPE(ColumnSplitComponent, SplitContainerComponent)
 
 public:
-    explicit ColumnSplitComponent(const std::list<RefPtr<Component>>& children) : SplitContainerComponent(children) {};
+    explicit ColumnSplitComponent(const std::list<RefPtr<Component>>& children) : SplitContainerComponent(children) {}
     ~ColumnSplitComponent() override = default;
 
     RefPtr<Element> CreateElement() override;

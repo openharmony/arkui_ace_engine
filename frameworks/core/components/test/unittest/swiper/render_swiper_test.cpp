@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,7 +73,7 @@ int64_t GetTickCount()
 
 class TestSwiperEventHander : public MockEventHandler {
 public:
-    explicit TestSwiperEventHander(SwiperEventCallback eventCallback) : eventCallback_(eventCallback) {};
+    explicit TestSwiperEventHander(SwiperEventCallback eventCallback) : eventCallback_(eventCallback) {}
     ~TestSwiperEventHander() = default;
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param)
@@ -321,7 +321,6 @@ void SwiperComponentTest::DragSwiper(const DragDirection& dragDirection)
  * @tc.desc: Test when the swiper component is listening index changes, Can receive event callback when the index
  * changes.
  * @tc.type: FUNC
- * @tc.require: AR000DAQVD
  */
 HWTEST_F(SwiperComponentTest, RenderSwiper001, TestSize.Level1)
 {
@@ -358,7 +357,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper001, TestSize.Level1)
  * @tc.desc: Test the invalid index value to create a swiper component. The component can be successfully created, but
  * the initial swiper display page is the default value.
  * @tc.type: FUNC
- * @tc.require: AR000DAQVE
  */
 HWTEST_F(SwiperComponentTest, RenderSwiper002, TestSize.Level1)
 {
@@ -382,7 +380,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper002, TestSize.Level1)
  * @tc.desc: The test did not set the index property of the swiper component, and the initial display page of swiper was
  * the first page.
  * @tc.type: FUNC
- * @tc.require: AR000DAQVE
  */
 HWTEST_F(SwiperComponentTest, RenderSwiper003, TestSize.Level1)
 {
@@ -403,7 +400,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper003, TestSize.Level1)
  * @tc.desc: Test set the index property of the swiper component. The initial swiper display page is the page specified
  * by index.
  * @tc.type: FUNC
- * @tc.require: AR000DAQVE
  */
 HWTEST_F(SwiperComponentTest, RenderSwiper004, TestSize.Level1)
 {
@@ -431,7 +427,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper004, TestSize.Level1)
  * @tc.desc: Tests that when the component is set to play automatically and the playback duration is not set, the
  * sub-component will be played backward according to the default duration.
  * @tc.type: FUNC
- * @tc.require: AR000DAQVF
  */
 HWTEST_F(SwiperComponentTest, RenderSwiper005, TestSize.Level2)
 {
@@ -464,7 +459,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper005, TestSize.Level2)
  * @tc.desc: Test that when the component is set to play automatically and the playback duration is set, the
  * sub-component will be played backwards according to the set duration.
  * @tc.type: FUNC
- * @tc.require: AR000DAQVF
  */
 HWTEST_F(SwiperComponentTest, RenderSwiper006, TestSize.Level2)
 {
@@ -500,7 +494,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper006, TestSize.Level2)
  * @tc.name: RenderSwiper007
  * @tc.desc: Test that when the component support cyclic sliding, it can right slide from the first.
  * @tc.type: FUNC
- * @tc.require: AR000DAQVH
  */
 HWTEST_F(SwiperComponentTest, RenderSwiper007, TestSize.Level1)
 {
@@ -528,7 +521,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper007, TestSize.Level1)
 /**
  * @tc.name: RenderSwiper008
  * @tc.desc: Test that when the component support cyclic sliding, it can left slide from the last.
- * @tc.require: AR000DAQVH
  */
 HWTEST_F(SwiperComponentTest, RenderSwiper008, TestSize.Level1)
 {
@@ -561,7 +553,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper008, TestSize.Level1)
  * @tc.name: RenderSwiper009
  * @tc.desc: Test that when the component does not support cyclic sliding, it cannot right slide from the first.
  * @tc.type: FUNC
- * @tc.require: AR000DAQVH
  */
 HWTEST_F(SwiperComponentTest, RenderSwiper009, TestSize.Level1)
 {
@@ -589,7 +580,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper009, TestSize.Level1)
  * @tc.name: RenderSwiper010
  * @tc.desc: Test that when the component does not support cyclic sliding, it cannot left slide from the last.
  * @tc.type: FUNC
- * @tc.require: AR000DAQVH
  */
 HWTEST_F(SwiperComponentTest, RenderSwiper010, TestSize.Level1)
 {
@@ -622,7 +612,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper010, TestSize.Level1)
  * @tc.desc: Test when the number of swiper sub-components is only 1, the component is set to cyclic sliding and will
  * not be cyclic sliding.
  * @tc.type: FUNC
- * @tc.require: AR000DAQVH
  */
 HWTEST_F(SwiperComponentTest, RenderSwiper011, TestSize.Level1)
 {
@@ -657,7 +646,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper011, TestSize.Level1)
  * @tc.name: RenderSwiper012
  * @tc.desc: Test that when the component does not support cyclic sliding, it cannot left slide from the last.
  * @tc.type: FUNC
- * @tc.require: AR000DAQVI
  */
 HWTEST_F(SwiperComponentTest, RenderSwiper012, TestSize.Level2)
 {
@@ -693,7 +681,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper012, TestSize.Level2)
  * @tc.desc: Test component can be extended to a specified page other than the current page through the swipeTo
  * interface
  * @tc.type: FUNC
- * @tc.require: AR000DAQVE
  */
 HWTEST_F(SwiperComponentTest, RenderSwiper013, TestSize.Level1)
 {
@@ -723,7 +710,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper013, TestSize.Level1)
  * @tc.name: RenderSwiper014
  * @tc.desc: Test component can be extended to jump to next page circular through the showNext interface.
  * @tc.type: FUNC
- * @tc.require: AR000E0LJT
  */
 HWTEST_F(SwiperComponentTest, RenderSwiper014, TestSize.Level1)
 {
@@ -764,7 +750,6 @@ HWTEST_F(SwiperComponentTest, RenderSwiper014, TestSize.Level1)
  * @tc.name: RenderSwiper015
  * @tc.desc: Test component can be extended to jump to previous page circular through the showPrevious interface.
  * @tc.type: FUNC
- * @tc.require: AR000E0LJU
  */
 HWTEST_F(SwiperComponentTest, RenderSwiper015, TestSize.Level1)
 {
@@ -806,12 +791,11 @@ HWTEST_F(SwiperComponentTest, RenderSwiper015, TestSize.Level1)
  * @tc.name: Indicator001
  * @tc.desc: Test animation of indicator move to the next page.
  * @tc.type: FUNC
- * @tc.require: AR000F3CC1 AR000F3CC5
  */
 HWTEST_F(SwiperComponentTest, Indicator001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a swiper render, init animation resouce.
+     * @tc.steps: step1. Build a swiper render, init animation resource.
      */
     RefPtr<SwiperIndicatorTest> swiperIndicator = SwiperIndicatorTest::CreateIndicatorTest(context_);
 
@@ -838,12 +822,11 @@ HWTEST_F(SwiperComponentTest, Indicator001, TestSize.Level1)
  * @tc.name: Indicator002
  * @tc.desc: Test the offset of move indicator.
  * @tc.type: FUNC
- * @tc.require: AR000F3CC1 AR000F3CC5
  */
 HWTEST_F(SwiperComponentTest, Indicator002, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Build a swiper render, init animation resouce.
+     * @tc.steps: step1. Build a swiper render, init animation resource.
      */
     RefPtr<SwiperIndicatorTest> swiperIndicator = SwiperIndicatorTest::CreateIndicatorTest(context_);
 
@@ -869,12 +852,11 @@ HWTEST_F(SwiperComponentTest, Indicator002, TestSize.Level0)
  * @tc.name: Indicator003
  * @tc.desc: Test animation of indicator move to the last page.
  * @tc.type: FUNC
- * @tc.require: AR000F3CC2 AR000F3CC5
  */
 HWTEST_F(SwiperComponentTest, Indicator003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a swiper render, init animation resouce.
+     * @tc.steps: step1. Build a swiper render, init animation resource.
      */
     RefPtr<SwiperIndicatorTest> swiperIndicator = SwiperIndicatorTest::CreateIndicatorTest(context_);
 
@@ -901,12 +883,11 @@ HWTEST_F(SwiperComponentTest, Indicator003, TestSize.Level1)
  * @tc.name: Indicator004
  * @tc.desc: Test the offset of move indicator.
  * @tc.type: FUNC
- * @tc.require: AR000F3CC2 AR000F3CC5
  */
 HWTEST_F(SwiperComponentTest, Indicator004, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Build a swiper render, init animation resouce.
+     * @tc.steps: step1. Build a swiper render, init animation resource.
      */
     RefPtr<SwiperIndicatorTest> swiperIndicator = SwiperIndicatorTest::CreateIndicatorTest(context_);
 
@@ -933,7 +914,6 @@ HWTEST_F(SwiperComponentTest, Indicator004, TestSize.Level0)
  * @tc.name: Indicator005
  * @tc.desc: Test the offset of forward dragging indicator.
  * @tc.type: FUNC
- * @tc.require: AR000F3CC3 AR000F3CC4
  */
 HWTEST_F(SwiperComponentTest, Indicator005, TestSize.Level0)
 {
@@ -970,7 +950,6 @@ HWTEST_F(SwiperComponentTest, Indicator005, TestSize.Level0)
  * @tc.name: Indicator006
  * @tc.desc: Test the offset of reverse dragging indicator at edge position.
  * @tc.type: FUNC
- * @tc.require: AR000F3CC3 AR000F3CC4
  */
 HWTEST_F(SwiperComponentTest, Indicator006, TestSize.Level0)
 {
@@ -1006,7 +985,6 @@ HWTEST_F(SwiperComponentTest, Indicator006, TestSize.Level0)
  * @tc.name: Indicator007
  * @tc.desc: Test the offset of reverse dragging indicator at middle position.
  * @tc.type: FUNC
- * @tc.require: AR000F3CC3 AR000F3CC4
  */
 HWTEST_F(SwiperComponentTest, Indicator007, TestSize.Level0)
 {
@@ -1043,7 +1021,6 @@ HWTEST_F(SwiperComponentTest, Indicator007, TestSize.Level0)
  * @tc.name: Indicator008
  * @tc.desc: Test the center position of point is correct.
  * @tc.type: FUNC
- * @tc.require: AR000F3CC5
  */
 HWTEST_F(SwiperComponentTest, Indicator008, TestSize.Level0)
 {
@@ -1077,7 +1054,6 @@ HWTEST_F(SwiperComponentTest, Indicator008, TestSize.Level0)
  * @tc.name: Indicator009
  * @tc.desc: Test the indicator offset can't be changed by drag when it is zoomming..
  * @tc.type: FUNC
- * @tc.require: AR000F3CC5
  */
 HWTEST_F(SwiperComponentTest, Indicator009, TestSize.Level0)
 {
@@ -1124,7 +1100,6 @@ HWTEST_F(SwiperComponentTest, Indicator009, TestSize.Level0)
  * @tc.name: Indicator010
  * @tc.desc: Test the focus changed when indicator drag offset 14.0dp.
  * @tc.type: FUNC
- * @tc.require: AR000F3CC5
  */
 HWTEST_F(SwiperComponentTest, Indicator010, TestSize.Level0)
 {
@@ -1152,7 +1127,6 @@ HWTEST_F(SwiperComponentTest, Indicator010, TestSize.Level0)
  * @tc.name: Indicator011
  * @tc.desc: Test the twice click event can't start new animation when indicator is in moving animation.
  * @tc.type: FUNC
- * @tc.require: AR000F3CC5
  */
 HWTEST_F(SwiperComponentTest, Indicator011, TestSize.Level0)
 {
@@ -1180,7 +1154,6 @@ HWTEST_F(SwiperComponentTest, Indicator011, TestSize.Level0)
  * @tc.name: Indicator012
  * @tc.desc: Test the indicator moving distance when indicator moving animation cross multiple dots.
  * @tc.type: FUNC
- * @tc.require: AR000F3CC5
  */
 HWTEST_F(SwiperComponentTest, Indicator012, TestSize.Level0)
 {
@@ -1216,7 +1189,6 @@ HWTEST_F(SwiperComponentTest, Indicator012, TestSize.Level0)
  * @tc.name: Indicator013
  * @tc.desc: Test the swiper refuse layout during animation unless forced.
  * @tc.type: FUNC
- * @tc.require: DTS2021042001065
  */
 HWTEST_F(SwiperComponentTest, Indicator013, TestSize.Level0)
 {

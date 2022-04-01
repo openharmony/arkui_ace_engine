@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,8 +65,6 @@ void DomLabelTest::TearDown() {}
  * @tc.name: DomLabelTest001
  * @tc.desc: Verify that DomLabel can be created.
  * @tc.type: FUNC
- * @tc.require: AR000DAR18
- * @tc.author: hushilong
  */
 HWTEST_F(DomLabelTest, DomLabelTest001, TestSize.Level1)
 {
@@ -109,8 +107,6 @@ HWTEST_F(DomLabelTest, DomLabelTest001, TestSize.Level1)
  * @tc.name: DomLabelTest002
  * @tc.desc: Verify that DomLabel can be set styles.
  * @tc.type: FUNC
- * @tc.require: AR000DAR18
- * @tc.author: hushilong
  */
 HWTEST_F(DomLabelTest, DomLabelTest002, TestSize.Level1)
 {

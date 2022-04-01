@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,34 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 class SubscriberManager {
     constructor() {
         this.subscriberById_ = new Map();
@@ -1773,6 +1746,8 @@ class View extends NativeView {
     }
     propertyHasChanged(info) {
         if (info) {
+            // need to sync container instanceId to switch instanceId in C++ side.
+            this.syncInstanceId();
             if (this.propsUsedForRender.has(info)) {
                 console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View needs update`);
                 this.markNeedUpdate();
@@ -1785,6 +1760,7 @@ class View extends NativeView {
                 console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. calling @Watch function`);
                 cb.call(this, info);
             }
+            this.restoreInstanceId();
         } // if info avail.
     }
     propertyRead(info) {
@@ -1805,7 +1781,6 @@ class View extends NativeView {
     }
     aboutToContinueRender() {
         // do not reset
-        //this.propsUsedForRender = new Set<string>();
         this.isRenderingInProgress = true;
     }
     onRenderDone() {

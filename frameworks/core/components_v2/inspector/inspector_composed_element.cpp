@@ -650,7 +650,7 @@ std::string InspectorComposedElement::GetRect()
             rect = rect.Constrain(parent->GetRect());
         }
     }
-    if (GetClipFlag()) {
+    if (accessibilityNode_ && GetClipFlag()) {
         accessibilityNode_->SetClipFlagToChild(true);
     }
     isRectValid_ = rect.IsValid();
@@ -869,22 +869,22 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetBackgroundImagePosition(
 std::unique_ptr<JsonValue> InspectorComposedElement::GetAlignmentType(double width, double height) const
 {
     auto jsonValue = JsonUtil::Create(false);
-    if (width == 0) {
-        if (height == 0) {
+    if (NearZero(width)) {
+        if (NearZero(height)) {
             jsonValue->Put("x", "Alignment.TopStart");
             return jsonValue->GetValue("x");
-        } else if (height == 50) {
+        } else if (NearEqual(height, 50.0)) { // Determine whether the vertical element is centered
             jsonValue->Put("x", "Alignment.Start");
             return jsonValue->GetValue("x");
         } else {
             jsonValue->Put("x", "Alignment.BottomStart");
             return jsonValue->GetValue("x");
         }
-    } else if (width == 50) {
-        if (height == 0) {
+    } else if (NearEqual(width, 50.0)) {  // Judge whether the horizontal element is centered
+        if (NearZero(height)) {
             jsonValue->Put("x", "Alignment.Top");
             return jsonValue->GetValue("x");
-        } else if (height == 50) {
+        } else if (NearEqual(height, 50)) {
             jsonValue->Put("x", "Alignment.Center");
             return jsonValue->GetValue("x");
         } else {
@@ -892,10 +892,10 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetAlignmentType(double wid
             return jsonValue->GetValue("x");
         }
     } else {
-        if (height == 0) {
+        if (NearZero(height)) {
             jsonValue->Put("x", "Alignment.TopEnd");
             return jsonValue->GetValue("x");
-        } else if (height == 50) {
+        } else if (NearEqual(height, 50.0)) {
             jsonValue->Put("x", "Alignment.End");
             return jsonValue->GetValue("x");
         } else {

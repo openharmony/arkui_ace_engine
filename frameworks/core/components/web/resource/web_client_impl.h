@@ -50,7 +50,7 @@ public:
     explicit WebClientImpl(int32_t instanceId) : instanceId_(instanceId) {}
     ~WebClientImpl() = default;
 
-    void SetNWeb(std::shared_ptr<OHOS::NWeb::NWeb> webview) override;
+    void SetNWeb(std::shared_ptr<OHOS::NWeb::NWeb> nweb) override;
     void OnProxyDied() override;
     void OnRouterPush(const std::string& param) override;
     bool OnConsoleLog(const OHOS::NWeb::NWebConsoleLog& message) override;

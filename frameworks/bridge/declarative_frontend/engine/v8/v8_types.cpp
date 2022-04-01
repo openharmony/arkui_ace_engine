@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,7 +115,6 @@ void V8Object::SetPropertyObject(const char* prop, V8Ref<V8Value> value) const
 }
 
 V8Object::V8Object() : V8Type() {}
-// TODO(cvetan): Make private
 V8Object::V8Object(v8::Local<v8::Object> obj) : V8Type(obj) {}
 
 V8Funktion::V8Funktion() {}

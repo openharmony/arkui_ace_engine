@@ -86,7 +86,7 @@ void JsiXComponentBridge::HandleContext(const shared_ptr<JsRuntime>& runtime, No
     nativeXcomponentImpl_->SetSurface(nativeWindow);
     nativeXcomponentImpl_->SetXComponentId(xcomponent->GetId());
 
-    auto nativeEngine = static_cast<ArkNativeEngine*>(engineInstance->GetArkNativeEngine());
+    auto nativeEngine = static_cast<ArkNativeEngine*>(engineInstance->GetNativeEngine());
     if (!nativeEngine) {
         LOGE("NativeEngine is null");
         return;

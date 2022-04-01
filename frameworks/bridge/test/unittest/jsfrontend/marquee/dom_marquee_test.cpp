@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,8 +93,6 @@ void DomMarqueeTest::TearDown() {}
  * @tc.name: DomMarqueeCreateFromDsl001
  * @tc.desc: Test DOMMarquee can be created with custom attributes.
  * @tc.type: FUNC
- * @tc.require: AR000DD66I
- * @tc.author: liruokun
  */
 HWTEST_F(DomMarqueeTest, DomMarqueeCreateFromDsl001, TestSize.Level1)
 {
@@ -132,8 +130,6 @@ HWTEST_F(DomMarqueeTest, DomMarqueeCreateFromDsl001, TestSize.Level1)
  * @tc.name: DomMarqueeCreateFromDsl002
  * @tc.desc: Test DOMMarquee can be created with default attributes.
  * @tc.type: FUNC
- * @tc.require: AR000DD66I
- * @tc.author: liruokun
  */
 HWTEST_F(DomMarqueeTest, DomMarqueeCreateFromDsl002, TestSize.Level1)
 {

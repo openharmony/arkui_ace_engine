@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -375,6 +375,11 @@ int32_t AccessibilityNodeManager::GenerateNextAccessibilityId()
 RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateSpecializedNode(
     const std::string& tag, int32_t nodeId, int32_t parentNodeId)
 {
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    if (IsDeclarative()) {
+        return nullptr;
+    }
+#endif
     if (nodeId < ROOT_STACK_BASE) {
         return nullptr;
     }
@@ -729,7 +734,7 @@ bool AccessibilityNodeManager::GetDefaultAttrsByType(
 void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID)
 {
     if (!DumpLog::GetInstance().GetDumpFile()) {
-        LOGE("AccessibilityNodeManager::GetDumpFile fail:%p", &(DumpLog::GetInstance()));
+        LOGE("AccessibilityNodeManager::GetDumpFile fail");
         return;
     }
 

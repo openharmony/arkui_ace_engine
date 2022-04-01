@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -249,7 +249,7 @@ class TitleBarMenuBuilder : public virtual AceType, public virtual CommonBuilder
 public:
     explicit TitleBarMenuBuilder(const RefPtr<NavigationBarData>& data)
         : CommonBuilder(data->theme), menu_(data->menu), imageFill_(data->imageFill),
-          allMenuItems_(data->allMenuItems) {};
+          allMenuItems_(data->allMenuItems) {}
     ~TitleBarMenuBuilder() = default;
 
     const std::map<std::string, NavigationBarComponent::MenuItemInBar>& GetMenuItemsInBar() const

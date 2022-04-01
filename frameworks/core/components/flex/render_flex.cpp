@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1164,6 +1164,8 @@ bool RenderFlex::GetAlignDeclarationOffset(AlignDeclarationPtr alignDeclarationP
                 offset = offset + Offset(GetLayoutSize().Width(), 0);
                 break;
             }
+            default:
+                break;
         }
         offset.SetY(0.0);
     } else {
@@ -1181,6 +1183,8 @@ bool RenderFlex::GetAlignDeclarationOffset(AlignDeclarationPtr alignDeclarationP
             case VerticalAlign::BASELINE:
             case VerticalAlign::NONE:
                 return false;
+            default:
+                break;
         }
         offset.SetX(0.0);
     }

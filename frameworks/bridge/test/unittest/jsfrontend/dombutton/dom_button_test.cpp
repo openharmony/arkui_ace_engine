@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,8 +69,6 @@ void DomButtonTest::TearDown() {}
  * @tc.desc: All attribute and style values are equal to the default from theme when there are no user-defined
  *           attributes or styles.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1OE AR000DQ1OI
- * @tc.author: changjia
  */
 HWTEST_F(DomButtonTest, SetAttributesAndStyles001, TestSize.Level1)
 {
@@ -114,8 +112,6 @@ HWTEST_F(DomButtonTest, SetAttributesAndStyles001, TestSize.Level1)
  * @tc.name: SetAttributesAndStyles002
  * @tc.desc: The focus color is equal to background color when type is capsule and background color defined by user.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1OE AR000DQ1OI
- * @tc.author: changjia
  */
 HWTEST_F(DomButtonTest, SetAttributesAndStyles002, TestSize.Level1)
 {
@@ -145,8 +141,6 @@ HWTEST_F(DomButtonTest, SetAttributesAndStyles002, TestSize.Level1)
  * @tc.name: SetAttributesAndStyles003
  * @tc.desc: The background color is transparent when type is text.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1OE AR000DQ1OI
- * @tc.author: changjia
  */
 HWTEST_F(DomButtonTest, SetAttributesAndStyles003, TestSize.Level1)
 {
@@ -175,8 +169,6 @@ HWTEST_F(DomButtonTest, SetAttributesAndStyles003, TestSize.Level1)
  * @tc.name: SetAttributesAndStyles004
  * @tc.desc: The width and height are equal to double radius when type is circle and just radius defined.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1OE AR000DQ1OI
- * @tc.author: changjia
  */
 HWTEST_F(DomButtonTest, SetAttributesAndStyles004, TestSize.Level1)
 {
@@ -214,8 +206,6 @@ HWTEST_F(DomButtonTest, SetAttributesAndStyles004, TestSize.Level1)
  * @tc.name: SetAttributesAndStyles005
  * @tc.desc: The diameter and color of progress are equal to user-defined in waiting state.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1OE AR000DQ1OI
- * @tc.author: changjia
  */
 HWTEST_F(DomButtonTest, SetAttributesAndStyles005, TestSize.Level1)
 {
@@ -255,8 +245,6 @@ HWTEST_F(DomButtonTest, SetAttributesAndStyles005, TestSize.Level1)
  * @tc.name: SetAttributesAndStyles006
  * @tc.desc: The attributes and styles are equal to user-defined.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1OE AR000DQ1OI
- * @tc.author: changjia
  */
 HWTEST_F(DomButtonTest, SetAttributesAndStyles006, TestSize.Level1)
 {

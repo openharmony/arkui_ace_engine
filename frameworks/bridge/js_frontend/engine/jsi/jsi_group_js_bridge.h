@@ -19,6 +19,10 @@
 #include <map>
 #include <string>
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#include "adapter/preview/osal/request_data.h"
+#include "adapter/preview/osal/response_data.h"
+#endif
 #include "base/memory/ace_type.h"
 #include "base/utils/singleton.h"
 #include "frameworks/bridge/codec/standard_function_codec.h"
@@ -64,6 +68,11 @@ public:
         int32_t callbackId, int32_t errorCode, std::string&& errorMessage) override;
 
     void TriggerEventJsCallback(int32_t callbackId, int32_t code, std::vector<uint8_t>&& eventData) override;
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void TriggerModuleJsCallbackPreview(
+        int32_t callbackId, int32_t code, OHOS::Ace::ResponseData responseData) override;
+#endif
 
     void LoadPluginJsCode(std::string&& jsCode) override;
 

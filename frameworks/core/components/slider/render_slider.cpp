@@ -357,6 +357,8 @@ void RenderSlider::FireMovingEvent(SliderEvent mode)
                     onChange_(value_, static_cast<int>(SliderEvent::FOCUS));
                 }
                 break;
+            default:
+                break;
         }
         jsonResult->Put("value", value_);
         if (onMoving_) {

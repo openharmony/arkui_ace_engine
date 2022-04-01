@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,7 +101,7 @@ class SharedTransitionExchange : public SharedTransitionEffect {
 
 public:
     explicit SharedTransitionExchange(const ShareId& shareId)
-        : SharedTransitionEffect(shareId, SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE) {};
+        : SharedTransitionEffect(shareId, SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE) {}
     ~SharedTransitionExchange() override = default;
     bool CreateAnimation(TweenOption& option, TransitionEvent event, bool isLazy) override;
     bool ApplyAnimation(RefPtr<OverlayElement>& overlay, RefPtr<Animator>& controller, TweenOption& option,
@@ -123,7 +123,7 @@ class SharedTransitionStatic : public SharedTransitionEffect {
 
 public:
     explicit SharedTransitionStatic(const ShareId& shareId)
-        : SharedTransitionEffect(shareId, SharedTransitionEffectType::SHARED_EFFECT_STATIC) {};
+        : SharedTransitionEffect(shareId, SharedTransitionEffectType::SHARED_EFFECT_STATIC) {}
     ~SharedTransitionStatic() override = default;
     bool CreateAnimation(TweenOption& option, TransitionEvent event, bool isLazy) override;
     // the dest page and source page elements are in effect

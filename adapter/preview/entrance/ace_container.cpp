@@ -19,6 +19,7 @@
 
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/entrance/dir_asset_provider.h"
+#include "adapter/preview/osal/stage_card_parser.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -170,6 +171,24 @@ void AceContainer::InitializeFrontend()
 void AceContainer::RunNativeEngineLoop()
 {
     taskExecutor_->PostTask([frontend = frontend_]() { frontend->RunNativeEngineLoop(); }, TaskExecutor::TaskType::JS);
+}
+
+void AceContainer::SetStageCardConfig(const std::string& pageProfile, const std::string& selectUrl)
+{
+    std::string fullPageProfile = pageProfile + ".json";
+    std::string formConfigs;
+    RefPtr<StageCardParser> stageCardParser = AceType::MakeRefPtr<StageCardParser>();
+    if (!Framework::GetAssetContentImpl(assetManager_, fullPageProfile, formConfigs)) {
+        LOGI("Can not load the form config.");
+        return;
+    }
+    const std::string prefix("./js/");
+    stageCardParser->Parse(formConfigs, prefix + selectUrl);
+    auto cardFront = static_cast<CardFrontend*>(RawPtr(frontend_));
+    if (cardFront) {
+        cardFront->SetFormSrc(selectUrl);
+        cardFront->SetCardWindowConfig(stageCardParser->GetWindowConfig());
+    }
 }
 
 void AceContainer::InitializeCallback()
@@ -335,7 +354,7 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterIdleCallback(idleCallback);
 }
 
-void AceContainer::CreateContainer(int32_t instanceId, FrontendType type)
+void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, const AceRunArgs& runArgs)
 {
 #ifdef USE_GLFW_WINDOW
     std::call_once(onceFlag_, [] {
@@ -451,7 +470,7 @@ void AceContainer::UpdateResourceConfiguration(const std::string& jsonStr)
 
 void AceContainer::NativeOnConfigurationUpdated(int32_t instanceId)
 {
-    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    auto container = GetContainerInstance(instanceId);
     if (!container) {
         return;
     }
@@ -562,7 +581,7 @@ bool AceContainer::Dump(const std::vector<std::string>& params)
 
 void AceContainer::AddRouterChangeCallback(int32_t instanceId, const OnRouterChangeCallback& onRouterChangeCallback)
 {
-    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    auto container = GetContainerInstance(instanceId);
     if (!container) {
         return;
     }
@@ -577,37 +596,32 @@ void AceContainer::AddRouterChangeCallback(int32_t instanceId, const OnRouterCha
 void AceContainer::AddAssetPath(
     int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths)
 {
-    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    auto container = GetContainerInstance(instanceId);
     if (!container) {
         return;
     }
 
-    for (const auto& path : paths) {
-        RefPtr<FlutterAssetManager> flutterAssetManager;
-        if (container->assetManager_) {
-            flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
-        } else {
-            flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-            container->assetManager_ = flutterAssetManager;
-            if (container->frontend_) {
-                container->frontend_->SetAssetManager(flutterAssetManager);
-            }
+    if (!container->assetManager_) {
+        RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+        container->assetManager_ = flutterAssetManager;
+        if (container->frontend_) {
+            container->frontend_->SetAssetManager(flutterAssetManager);
         }
+    }
 
-        if (flutterAssetManager) {
-            LOGD("Current path is: %{private}s", path.c_str());
-            auto dirAssetProvider = AceType::MakeRefPtr<DirAssetProvider>(
-                path, std::make_unique<flutter::DirectoryAssetBundle>(
-                          fml::OpenDirectory(path.c_str(), false, fml::FilePermission::kRead)));
-            flutterAssetManager->PushBack(std::move(dirAssetProvider));
-        }
+    for (const auto& path : paths) {
+        LOGD("Current path is: %{private}s", path.c_str());
+        auto dirAssetProvider = AceType::MakeRefPtr<DirAssetProvider>(
+            path, std::make_unique<flutter::DirectoryAssetBundle>(
+                        fml::OpenDirectory(path.c_str(), false, fml::FilePermission::kRead)));
+        container->assetManager_->PushBack(std::move(dirAssetProvider));
     }
 }
 
 void AceContainer::SetResourcesPathAndThemeStyle(int32_t instanceId, const std::string& systemResourcesPath,
     const std::string& appResourcesPath, const int32_t& themeId, const ColorMode& colorMode)
 {
-    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    auto container = GetContainerInstance(instanceId);
     if (!container) {
         return;
     }
@@ -782,7 +796,7 @@ void AceContainer::InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs)
         runArgs.isRound);
     SystemProperties::InitDeviceType(runArgs.deviceConfig.deviceType);
     SystemProperties::SetColorMode(runArgs.deviceConfig.colorMode);
-    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    auto container = GetContainerInstance(instanceId);
     if (!container) {
         LOGE("container is null, AceContainer::InitDeviceInfo failed.");
         return;
@@ -813,11 +827,16 @@ void AceContainer::LoadDocument(const std::string& url, const std::string& compo
         LOGE("frontend is null, AceContainer::LoadDocument failed");
         return;
     }
+    auto jsEngine = frontend->GetJsEngine();
+    if (!jsEngine) {
+        LOGE("jsEngine is null, AceContainer::LoadDocument failed");
+        return;
+    }
     std::string dstUrl = url + COMPONENT_PREVIEW + componentName;
     taskExecutor_->PostTask(
-        [front = frontend, componentName, dstUrl]() {
+        [front = frontend, componentName, dstUrl, jsEngine]() {
             front->SetPagePath(dstUrl);
-            front->ReplaceJSContent(dstUrl, componentName);
+            jsEngine->ReplaceJSContent(dstUrl, componentName);
         },
         TaskExecutor::TaskType::JS);
 }

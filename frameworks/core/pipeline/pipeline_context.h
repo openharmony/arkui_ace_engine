@@ -215,7 +215,7 @@ public:
     void RemoveScheduleTask(uint32_t id);
 
     // Called by view when touch event received.
-    void OnTouchEvent(const TouchEvent& point);
+    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false);
 
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
@@ -238,6 +238,8 @@ public:
     void OnIdle(int64_t deadline);
 
     void OnActionEvent(const std::string& action);
+
+    void OnVirtualKeyboardAreaChange(Rect keyboardArea);
 
     // Set card position for barrierfree
     void SetCardViewPosition(int id, float offsetX, float offsetY);
@@ -585,6 +587,8 @@ public:
     void RootLostFocus() const;
 
     void FlushFocus();
+
+    void WindowFocus(bool isFocus) const;
 
     void SetIsRightToLeft(bool isRightToLeft)
     {
@@ -1061,7 +1065,12 @@ public:
 
     void SetShortcutKey(const KeyEvent& event);
 
-    EventManager GetEventManager() const
+    void SetEventManager(const RefPtr<EventManager> eventManager)
+    {
+        eventManager_ = eventManager;
+    }
+
+    RefPtr<EventManager> GetEventManager() const
     {
         return eventManager_;
     }
@@ -1222,6 +1231,12 @@ public:
     {
         return isSubPipeline_;
     }
+
+    bool GetIsDragStart() const
+    {
+        return isDragStart_;
+    }
+
 private:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     void FlushPipelineWithoutAnimation();
@@ -1237,8 +1252,8 @@ private:
     void FlushPageUpdateTasks();
     void ProcessPreFlush();
     void ProcessPostFlush();
-    void SetRootSizeWithWidthHeight(int32_t width, int32_t height);
-    void SetRootRect(double width, double height) const;
+    void SetRootSizeWithWidthHeight(int32_t width, int32_t height, int32_t offset = 0);
+    void SetRootRect(double width, double height, double offset = 0.0) const;
     void FlushBuildAndLayoutBeforeSurfaceReady();
     void FlushAnimationTasks();
     void DumpAccessibility(const std::vector<std::string>& params) const;
@@ -1329,7 +1344,7 @@ private:
 #endif
     RefPtr<SharedTransitionController> sharedTransitionController_;
     RefPtr<CardTransitionController> cardTransitionController_;
-    EventManager eventManager_;
+    RefPtr<EventManager> eventManager_;
     EventTrigger eventTrigger_;
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;
@@ -1390,6 +1405,7 @@ private:
     bool useLiteStyle_ = false;
     bool isFirstLoaded_ = true;
     bool isDragStart_ = false;
+    bool isFirstDrag_ = true;
     uint64_t flushAnimationTimestamp_ = 0;
     TimeProvider timeProvider_;
     OnPageShowCallBack onPageShowCallBack_;
@@ -1461,11 +1477,13 @@ private:
     RefPtr<RenderNode> initRenderNode_;
     std::string customDragInfo_;
     Offset pageOffset_;
+    Offset rootOffset_;
 
     std::unordered_map<int32_t, WeakPtr<RenderElement>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
 
     bool isSubPipeline_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
 

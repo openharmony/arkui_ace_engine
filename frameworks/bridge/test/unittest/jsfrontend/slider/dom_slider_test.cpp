@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,8 +83,6 @@ void DomSliderTest::TearDown() {}
  * @tc.name: DomSliderCreator001
  * @tc.desc: Test slider node and child slider component are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DD67C
- * @tc.author: lijun
  */
 HWTEST_F(DomSliderTest, DomSliderCreatorTest001, TestSize.Level1)
 {
@@ -149,8 +147,6 @@ HWTEST_F(DomSliderTest, DomSliderCreatorTest001, TestSize.Level1)
  * @tc.name: DomSliderCreator002
  * @tc.desc: Test slider node and child slider component are created defaultly.
  * @tc.type: FUNC
- * @tc.require: AR000DD67C
- * @tc.author: lijun
  */
 HWTEST_F(DomSliderTest, DomSliderCreatorTest002, TestSize.Level1)
 {
@@ -193,8 +189,6 @@ HWTEST_F(DomSliderTest, DomSliderCreatorTest002, TestSize.Level1)
  * @tc.name: DomSliderCreator003
  * @tc.desc: Test add event to slider component successfully.
  * @tc.type: FUNC
- * @tc.require: AR000DD67C
- * @tc.author: lijun
  */
 HWTEST_F(DomSliderTest, DomSliderCreatorTest003, TestSize.Level1)
 {
@@ -225,8 +219,6 @@ HWTEST_F(DomSliderTest, DomSliderCreatorTest003, TestSize.Level1)
  * @tc.name: DomSliderCreator004
  * @tc.desc: Test slider node and child slider component are created successfully when min < 0.
  * @tc.type: FUNC
- * @tc.require: AR000DD67C
- * @tc.author: lijun
  */
 HWTEST_F(DomSliderTest, DomSliderCreatorTest004, TestSize.Level1)
 {
@@ -275,8 +267,6 @@ HWTEST_F(DomSliderTest, DomSliderCreatorTest004, TestSize.Level1)
  * @tc.name: DomSliderCreator005
  * @tc.desc: Test slider node and child slider component are created successfully when min > max.
  * @tc.type: FUNC
- * @tc.require: AR000DD67C
- * @tc.author: lijun
  */
 HWTEST_F(DomSliderTest, DomSliderCreatorTest005, TestSize.Level1)
 {
@@ -325,8 +315,6 @@ HWTEST_F(DomSliderTest, DomSliderCreatorTest005, TestSize.Level1)
  * @tc.name: DomSliderCreator006
  * @tc.desc: Test slider node and child slider component are created successfully when min > value.
  * @tc.type: FUNC
- * @tc.require: AR000DD67C
- * @tc.author: lijun
  */
 HWTEST_F(DomSliderTest, DomSliderCreatorTest006, TestSize.Level1)
 {
@@ -375,8 +363,6 @@ HWTEST_F(DomSliderTest, DomSliderCreatorTest006, TestSize.Level1)
  * @tc.name: DomSliderCreator007
  * @tc.desc: Test slider node and child slider component are created successfully when max < value.
  * @tc.type: FUNC
- * @tc.require: AR000DD67C
- * @tc.author: lijun
  */
 HWTEST_F(DomSliderTest, DomSliderCreatorTest007, TestSize.Level1)
 {
@@ -425,8 +411,6 @@ HWTEST_F(DomSliderTest, DomSliderCreatorTest007, TestSize.Level1)
  * @tc.name: DomSliderCreator008
  * @tc.desc: Test slider node and child slider component are created successfully when step < 0.
  * @tc.type: FUNC
- * @tc.require: AR000DD67C
- * @tc.author: lijun
  */
 HWTEST_F(DomSliderTest, DomSliderCreatorTest008, TestSize.Level1)
 {
@@ -475,8 +459,6 @@ HWTEST_F(DomSliderTest, DomSliderCreatorTest008, TestSize.Level1)
  * @tc.name: DomSliderCreator009
  * @tc.desc: Test slider node and child slider component are created successfully when step > max - min.
  * @tc.type: FUNC
- * @tc.require: AR000DD67C
- * @tc.author: lijun
  */
 HWTEST_F(DomSliderTest, DomSliderCreatorTest009, TestSize.Level1)
 {
@@ -525,8 +507,6 @@ HWTEST_F(DomSliderTest, DomSliderCreatorTest009, TestSize.Level1)
  * @tc.name: DomSliderCreator010
  * @tc.desc: Test slider node and child slider component are created successfully when step > max - min.
  * @tc.type: FUNC
- * @tc.require: AR000F3L38
- * @tc.author: jinwuwen
  */
 HWTEST_F(DomSliderTest, DomSliderCreatorTest010, TestSize.Level1)
 {
@@ -574,8 +554,6 @@ HWTEST_F(DomSliderTest, DomSliderCreatorTest010, TestSize.Level1)
  * @tc.name: DomSliderCreator011
  * @tc.desc: Test slider node and child slider component are created successfully when step > max - min.
  * @tc.type: FUNC
- * @tc.require: AR000F3L39
- * @tc.author: jinwuwen
  */
 HWTEST_F(DomSliderTest, DomSliderCreatorTest011, TestSize.Level1)
 {
@@ -623,8 +601,6 @@ HWTEST_F(DomSliderTest, DomSliderCreatorTest011, TestSize.Level1)
  * @tc.name: DomSliderCreator012
  * @tc.desc: Test slider node and child slider component are created successfully when step > max - min.
  * @tc.type: FUNC
- * @tc.require: AR000F3L39
- * @tc.author: jinwuwen
  */
 HWTEST_F(DomSliderTest, DomSliderCreatorTest012, TestSize.Level1)
 {

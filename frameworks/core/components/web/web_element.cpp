@@ -37,6 +37,14 @@ void WebElement::SetNewComponent(const RefPtr<Component>& newComponent)
     }
 }
 
+void WebElement::Update()
+{
+    RenderElement::Update();
+    if (webComp_) {
+        webComp_->SetFocusElement(AceType::WeakClaim(this));
+    }
+}
+
 void WebElement::OnFocus()
 {
     FocusNode::OnFocus();

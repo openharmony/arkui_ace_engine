@@ -232,4 +232,4 @@ void FrameReport::EndListFling()
         LOGE("frame-ace:[EndListFling]load EndListFling function failed!");
     }
 }
-} // namesapce OHOS::Ace
+} // namespace OHOS::Ace

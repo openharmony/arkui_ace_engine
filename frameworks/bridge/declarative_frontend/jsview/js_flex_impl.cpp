@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,7 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
         LOGI("No input args, use default row setting");
         RefPtr<RowComponent> row =
             AceType::MakeRefPtr<OHOS::Ace::RowComponent>(FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
+        row->SetInspectorTag("FlexComponentV2");
         ViewStackProcessor::GetInstance()->Push(row);
         return;
     }
@@ -54,6 +55,7 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
         LOGW("arg is not a object, use default row setting");
         RefPtr<RowComponent> row =
             AceType::MakeRefPtr<OHOS::Ace::RowComponent>(FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
+        row->SetInspectorTag("FlexComponentV2");
         ViewStackProcessor::GetInstance()->Push(row);
         return;
     }

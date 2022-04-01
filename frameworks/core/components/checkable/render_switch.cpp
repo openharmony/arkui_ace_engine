@@ -247,9 +247,13 @@ void RenderSwitch::HandleDragEnd(const OHOS::Ace::Offset& updatePoint)
         std::string res = checked_ ? "true" : "false";
         changeEvent_(std::string("\"change\",{\"checked\":").append(res.append("},null")));
     }
+    bool isNeedCallback = (oldChecked_ != checked_);
     oldChecked_ = checked_;
     InitCurrentPointPosition();
     UpdateUIStatus();
+    if (onChange_ && isNeedCallback) {
+        onChange_(checked_);
+    }
     MarkNeedRender();
 }
 

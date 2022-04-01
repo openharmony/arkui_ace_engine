@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -297,8 +297,8 @@ void RenderLoadingProgress::SetDragDistance(double distance)
         return;
     }
     curDistance_ = distance;
-    double precent = (curDistance_ - minDistance_) / (maxDistance_ - minDistance_);
-    double scale = RING_SCALE_BEGIN + RING_SCALE_RANGE * precent;
+    double percent = (curDistance_ - minDistance_) / (maxDistance_ - minDistance_);
+    double scale = RING_SCALE_BEGIN + RING_SCALE_RANGE * percent;
     switch (loadingMode_) {
         case MODE_LOOP: {
             return;
@@ -307,11 +307,11 @@ void RenderLoadingProgress::SetDragDistance(double distance)
             exitScale_ = 1.0;
             exitAlpha_ = 1.0;
             dragScale_ = scale;
-            dragAlpha_ = precent;
+            dragAlpha_ = percent;
             // Update Comet Para when drag distance changed.
             CometParam para;
             para.alpha = floor(UINT8_MAX * dragAlpha_);
-            para.angular = DRAG_ANGLE_BEGIN + DRAG_ANGLE_RANGE * precent;
+            para.angular = DRAG_ANGLE_BEGIN + DRAG_ANGLE_RANGE * percent;
             if (para.angular < 0.0) {
                 para.angular = para.angular + 360.0;
             }
@@ -323,7 +323,7 @@ void RenderLoadingProgress::SetDragDistance(double distance)
             dragScale_ = 1.0;
             dragAlpha_ = 1.0;
             exitScale_ = scale;
-            exitAlpha_ = precent;
+            exitAlpha_ = percent;
             break;
         }
         default: {
@@ -385,7 +385,7 @@ void RenderLoadingProgress::UpdateLoadingSize(double diameter)
     }
 }
 
-void RenderLoadingProgress::CalculateValue(int32_t start, int32_t end, double precent)
+void RenderLoadingProgress::CalculateValue(int32_t start, int32_t end, double percent)
 {
     if (start == end) {
         ringWidth_ = NormalizeToPx(MODE_RING_WIDTH[start]);
@@ -395,15 +395,15 @@ void RenderLoadingProgress::CalculateValue(int32_t start, int32_t end, double pr
         ringBgBlurRadius_ = NormalizeToPx(MODE_RING_BG_BLUR_RADIUS[start]);
     } else {
         ringWidth_ = NormalizeToPx(MODE_RING_WIDTH[start] +
-            (MODE_RING_WIDTH[end] - MODE_RING_WIDTH[start]) * precent);
+            (MODE_RING_WIDTH[end] - MODE_RING_WIDTH[start]) * percent);
         cometRadius_ = NormalizeToPx(MODE_COMET_RADIUS[start] +
-            (MODE_COMET_RADIUS[end] - MODE_COMET_RADIUS[start]) * precent);
+            (MODE_COMET_RADIUS[end] - MODE_COMET_RADIUS[start]) * percent);
         ringBlurRadius_ = NormalizeToPx(MODE_RING_BLUR_RADIUS[start] +
-            (MODE_RING_BLUR_RADIUS[end] - MODE_RING_BLUR_RADIUS[start]) * precent);
+            (MODE_RING_BLUR_RADIUS[end] - MODE_RING_BLUR_RADIUS[start]) * percent);
         ringBgWidth_ = NormalizeToPx(MODE_RING_BG_WIDTH[start] +
-            (MODE_RING_BG_WIDTH[end] - MODE_RING_BG_WIDTH[start]) * precent);
+            (MODE_RING_BG_WIDTH[end] - MODE_RING_BG_WIDTH[start]) * percent);
         ringBgBlurRadius_ = NormalizeToPx(MODE_RING_BG_BLUR_RADIUS[start] +
-            (MODE_RING_BG_BLUR_RADIUS[end] - MODE_RING_BG_BLUR_RADIUS[start]) * precent);
+            (MODE_RING_BG_BLUR_RADIUS[end] - MODE_RING_BG_BLUR_RADIUS[start]) * percent);
     }
 }
 

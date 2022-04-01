@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -139,7 +139,7 @@ void JSGauge::SetColors(const JSCallbackInfo& info)
 
 void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 && !info[0]->IsNumber()) {
+    if (info.Length() < 1) {
         LOGE(" JSGauge::SetStrokeWidth::The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }

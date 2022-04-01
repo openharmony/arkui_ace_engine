@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,6 +69,7 @@ RenderTextField::RenderTextField()
 
 RenderTextField::~RenderTextField()
 {
+    LOGI("Destruction text field.");
     if (controller_) {
         controller_->Clear();
         controller_->RemoveObserver(WeakClaim(this));
@@ -88,6 +89,7 @@ RenderTextField::~RenderTextField()
     // If soft keyboard is still exist, close it.
     if (HasConnection()) {
 #if defined(ENABLE_STANDARD_INPUT)
+        LOGI("Destruction text field, close input method.");
         MiscServices::InputMethodController::GetInstance()->Close();
 #else
         connection_->Close(GetInstanceId());
@@ -608,8 +610,7 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
         return;
     }
 
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE &&
-        SystemProperties::GetDeviceType() != DeviceType::CAR) {
+    if (!IsSelectiveDevice()) {
         StartTwinkling();
         return;
     }
@@ -1261,7 +1262,7 @@ void RenderTextField::UpdateFocusAnimation()
         Offset offset;
         Size size;
         Radius deflateRadius;
-        if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+        if (IsSelectiveDevice()) {
             double focusOffset = NormalizeToPx(OFFSET_FOCUS);
             offset = Offset(focusOffset, focusOffset);
             size = Size(focusOffset * 2.0, focusOffset * 2.0);
@@ -1321,7 +1322,7 @@ void RenderTextField::UpdateIcon(const RefPtr<TextFieldComponent>& textField)
 
 void RenderTextField::UpdatePasswordIcon(const RefPtr<TextFieldComponent>& textField)
 {
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE) {
+    if (!IsSelectiveDevice()) {
         return;
     }
     if (!showPasswordIcon_) {

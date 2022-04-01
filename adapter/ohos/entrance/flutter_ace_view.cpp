@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -208,7 +208,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
     LOGI("ConvertMouseEvent: (x,y): (%{public}f,%{public}f). Button: %{public}d. Action: %{public}d. "
          "DeviceType: %{public}d. PressedButton: %{public}d. Time: %{public}lld",
         events.x, events.y, events.button, events.action, events.sourceType, events.pressedButtons,
-        pointerEvent->GetActionTime());
+        (long long)pointerEvent->GetActionTime());
 }
 
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event)
@@ -233,7 +233,8 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     event.time = time;
     LOGI("ConvertAxisEvent: (x,y): (%{public}f,%{public}f). HorizontalAxis: %{public}f. VerticalAxis: %{public}f. "
          "DeviceType: %{public}d. Time: %{public}lld",
-        event.x, event.y, event.horizontalAxis, event.verticalAxis, event.sourceType, pointerEvent->GetActionTime());
+        event.x, event.y, event.horizontalAxis, event.verticalAxis, event.sourceType,
+        (long long)pointerEvent->GetActionTime());
 }
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
@@ -311,7 +312,6 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
 
 void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen::Window> window)
 {
-    LOGI(">>> FlutterAceView::SurfaceCreated, pWnd:%{public}p", &(*window));
     if (window == nullptr) {
         LOGE("FlutterAceView::SurfaceCreated, window is nullptr");
         return;
@@ -320,7 +320,7 @@ void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen
         LOGE("FlutterAceView::SurfaceCreated, view is nullptr");
         return;
     }
-
+    LOGI(">>> FlutterAceView::SurfaceCreated, pWnd:%{public}p", &(*window));
     auto platformView = view->GetShellHolder()->GetPlatformView();
     LOGI("FlutterAceView::SurfaceCreated, GetPlatformView");
     if (platformView && !SystemProperties::GetRosenBackendEnabled()) {

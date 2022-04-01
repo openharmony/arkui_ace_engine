@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -191,6 +191,7 @@ void SvgDom::ParseIdAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string&
     auto svgNode = weakSvgNode.Upgrade();
     if (!svgNode) {
         LOGE("ParseIdAttr failed, svgNode is null");
+        return;
     }
     svgNode->SetNodeId(value);
     svgNode->SetAttr(DOM_ID, value);
@@ -202,6 +203,7 @@ void SvgDom::ParseFillAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::strin
     auto svgNode = weakSvgNode.Upgrade();
     if (!svgNode) {
         LOGE("ParseFillAttr failed, svgNode is null");
+        return;
     }
     if (fillColor_) {
         std::stringstream stream;
@@ -218,6 +220,7 @@ void SvgDom::ParseClassAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::stri
     auto svgNode = weakSvgNode.Upgrade();
     if (!svgNode) {
         LOGE("ParseClassAttr failed, svgNode is null");
+        return;
     }
     std::vector<std::string> styleNameVector;
     StringUtils::SplitStr(value, " ", styleNameVector);
@@ -237,6 +240,7 @@ void SvgDom::ParseStyleAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::stri
     auto svgNode = weakSvgNode.Upgrade();
     if (!svgNode) {
         LOGE("ParseStyleAttr failed, svgNode is null");
+        return;
     }
     std::vector<std::string> attrPairVector;
     StringUtils::SplitStr(value, ";", attrPairVector);

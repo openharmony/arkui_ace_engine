@@ -60,8 +60,6 @@ const char I18N_FILE_SUFFIX[] = "/properties/string.json";
 
 } // namespace
 
-std::atomic<uint64_t> FrontendDelegateDeclarative::pageIdPool_ = 0;
-
 int32_t FrontendDelegateDeclarative::GenerateNextPageId()
 {
     for (int32_t idx = 0; idx < MAX_PAGE_ID_SIZE; ++idx) {
@@ -872,9 +870,10 @@ void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const
         LOGD("router.Back pagePath = %{private}s", pagePath.c_str());
         if (!pagePath.empty()) {
             bool isRestore = false;
-            pageId_ = GetPageIdByUrl(target.url, isRestore);
+            pageId_ = GetPageIdByUrl(pagePath, isRestore);
             if (isRestore) {
                 LoadPage(pageId_, PageTarget(pagePath), false, params, true);
+                return;
             }
             if (!params.empty()) {
                 std::lock_guard<std::mutex> lock(mutex_);
@@ -1761,7 +1760,7 @@ void FrontendDelegateDeclarative::LoadReplacePage(int32_t pageId, const PageTarg
         pageParamMap_[pageId] = params;
     }
     auto url = target.url;
-    LOGD("FrontendDelegateDeclarative LoadReplacePage[%{private}d]: %{private}s.", pageId, url.c_str());
+    LOGI("FrontendDelegateDeclarative LoadReplacePage[%{private}d]: %{private}s.", pageId, url.c_str());
     if (pageId == INVALID_PAGE_ID) {
         LOGW("FrontendDelegateDeclarative, invalid page id");
         EventReport::SendPageRouterException(PageRouterExcepType::REPLACE_PAGE_ERR, url);
@@ -1861,7 +1860,7 @@ std::string FrontendDelegateDeclarative::GetRunningPageUrl() const
     return pageUrl;
 }
 
-int32_t FrontendDelegateDeclarative::GetPageIdByUrl(const std::string& url, bool isRestore)
+int32_t FrontendDelegateDeclarative::GetPageIdByUrl(const std::string& url, bool& isRestore)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     auto pageIter = std::find_if(std::rbegin(pageRouteStack_), std::rend(pageRouteStack_),

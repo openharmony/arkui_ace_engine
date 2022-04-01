@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,6 +78,7 @@ void RenderBubble::Update(const RefPtr<Component>& component)
     arrowOffset_ = bubble->GetPopupParam()->GetArrowOffset();
     targetId_ = bubble->GetPopupParam()->GetTargetId();
     weakStack_ = bubble->GetWeakStack();
+    useCustom_ = bubble->GetPopupParam()->IsUseCustom();
     SetDisableTouchEvent(bubble->IsDisabledStatus());
     SetInterceptTouchEvent(bubbleComponent_->GetPopupParam()->HasAction() || bubble->IsDisabledStatus());
 
@@ -145,14 +146,17 @@ void RenderBubble::PerformLayout()
     InitTargetSizeAndPosition();
     SetLayoutSize(GetLayoutParam().GetMaxSize());
     LayoutParam innerLayout = GetLayoutParam();
-    if (SystemProperties::GetDevcieOrientation() == DeviceOrientation::PORTRAIT) {
-        innerLayout.SetMaxSize(Size(
-            innerLayout.GetMaxSize().Width() - NormalizeToPx(GRID_MARGIN_PORTRAIT), innerLayout.GetMaxSize().Height()));
-    } else {
-        double colWidth =
-            (innerLayout.GetMaxSize().Width() - NormalizeToPx(GRID_SPACING_TOTAL)) / GRID_NUMBER_LANDSCAPE;
-        innerLayout.SetMaxSize(Size(
-            colWidth * BUBBLR_GRID_MAX_LANDSCAPE + NormalizeToPx(GRID_SPACING) * 5, innerLayout.GetMaxSize().Height()));
+    if (!useCustom_) {
+        if (SystemProperties::GetDevcieOrientation() == DeviceOrientation::PORTRAIT) {
+            innerLayout.SetMaxSize(Size(innerLayout.GetMaxSize().Width() - NormalizeToPx(GRID_MARGIN_PORTRAIT),
+                innerLayout.GetMaxSize().Height()));
+        } else {
+            static const int32_t gridGaps = 5;
+            double colWidth =
+                (innerLayout.GetMaxSize().Width() - NormalizeToPx(GRID_SPACING_TOTAL)) / GRID_NUMBER_LANDSCAPE;
+            innerLayout.SetMaxSize(Size(colWidth * BUBBLR_GRID_MAX_LANDSCAPE + NormalizeToPx(GRID_SPACING) * gridGaps,
+                innerLayout.GetMaxSize().Height()));
+        }
     }
     if (!GetChildren().empty()) {
         const auto& child = GetChildren().front();
@@ -173,6 +177,8 @@ void RenderBubble::InitTargetSizeAndPosition()
     }
     auto targetElement = context->GetComposedElementById(targetId_);
     if (!targetElement) {
+        LOGE("Get target element by target id return null");
+        isShow_ = false;
         return;
     }
     auto targetRender = targetElement->GetRenderNode();
@@ -376,6 +382,10 @@ bool RenderBubble::PopBubble()
         return false;
     }
     stackElement->PopPopup(bubbleComponent_->GetId());
+    auto stateChangeEvent = bubbleComponent_->GetStateChangeEvent();
+    if (stateChangeEvent) {
+        stateChangeEvent(false);
+    }
 
     auto context = context_.Upgrade();
     if (!context) {

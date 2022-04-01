@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,7 @@ HWTEST_F(PluginElementTest, PluginElementCreateRenderNodeTest001, TestSize.Level
      */
     PluginElement element;
 
-    // for element destory
+    // for element destroy
     RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
     auto pipelineContext = PluginElementTest::GetPipelineContext(pluginFrontend);
     PluginManagerDelegate pluginManagerDelegate(pipelineContext);
@@ -114,7 +114,7 @@ HWTEST_F(PluginElementTest, PluginElementInitEvent001, TestSize.Level1)
      */
     PluginElement element;
 
-    // for element destory
+    // for element destroy
     RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
     auto pipelineContext = PluginElementTest::GetPipelineContext(pluginFrontend);
     PluginManagerDelegate pluginManagerDelegate(pipelineContext);
@@ -148,7 +148,7 @@ HWTEST_F(PluginElementTest, PluginElementPrepare001, TestSize.Level1)
      */
     PluginElement element;
 
-    // for element destory
+    // for element destroy
     RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
     auto pipelineContext = PluginElementTest::GetPipelineContext(pluginFrontend);
     PluginManagerDelegate pluginManagerDelegate(pipelineContext);
@@ -175,7 +175,7 @@ HWTEST_F(PluginElementTest, PluginElementGetPackagePath001, TestSize.Level1)
      */
     PluginElement element;
 
-    // for element destory
+    // for element destroy
     RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
     auto pipelineContext = PluginElementTest::GetPipelineContext(pluginFrontend);
     PluginManagerDelegate pluginManagerDelegate(pipelineContext);
@@ -214,7 +214,7 @@ HWTEST_F(PluginElementTest, PluginElementGetPackagePath002, TestSize.Level1)
      */
     PluginElement element;
 
-    // for element destory
+    // for element destroy
     RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
     auto pipelineContext = PluginElementTest::GetPipelineContext(pluginFrontend);
     PluginManagerDelegate pluginManagerDelegate(pipelineContext);
@@ -253,7 +253,7 @@ HWTEST_F(PluginElementTest, PluginElementGetPackagePath003, TestSize.Level1)
      */
     PluginElement element;
 
-    // for element destory
+    // for element destroy
     RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
     auto pipelineContext = PluginElementTest::GetPipelineContext(pluginFrontend);
     PluginManagerDelegate pluginManagerDelegate(pipelineContext);
@@ -292,7 +292,7 @@ HWTEST_F(PluginElementTest, PluginElementGetPackagePath004, TestSize.Level1)
      */
     PluginElement element;
 
-    // for element destory
+    // for element destroy
     RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
     auto pipelineContext = PluginElementTest::GetPipelineContext(pluginFrontend);
     PluginManagerDelegate pluginManagerDelegate(pipelineContext);

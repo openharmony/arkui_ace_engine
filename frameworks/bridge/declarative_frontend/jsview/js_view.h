@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ class JSView;
 class JSView : public JSViewAbstract, public Referenced {
 public:
     JSView(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction);
-    virtual ~JSView();
+    ~JSView() override;
 
     RefPtr<OHOS::Ace::Component> InternalRender(const RefPtr<Component>& parent);
     void Destroy(JSView* parentCustomView);
@@ -44,6 +44,11 @@ public:
     RefPtr<PageTransitionComponent> BuildPageTransitionComponent();
 
     void MarkNeedUpdate();
+
+    void SyncInstanceId();
+
+    void RestoreInstanceId();
+
     bool NeedsUpdate()
     {
         return needsUpdate_;
@@ -75,7 +80,7 @@ public:
      * Retries the customview child for recycling
      * always use FindChildById to be certain before calling this method
      */
-    JSRefPtr<JSView> GetChildById(const std::string& viewId);
+    JSRef<JSObject> GetChildById(const std::string& viewId);
 
     void FindChildById(const JSCallbackInfo& info);
 
@@ -114,12 +119,24 @@ public:
         jsViewFunction_->ExecuteUpdateWithValueParams(jsonData);
     }
 
+    void MarkLazyForEachProcess(const std::string& groudId)
+    {
+        isLazyForEachProcessed_ = true;
+        lazyItemGroupId_ = groudId;
+    }
+
+    void ResetLazyForEachProcess()
+    {
+        isLazyForEachProcessed_ = false;
+        lazyItemGroupId_ = "";
+    }
+
     /**
      * New CustomView child will be added to the map.
      * and it can be reterieved for recycling in next render function
      * In next render call if this child is not recycled, it will be destroyed.
      */
-    void AddChildById(const std::string& viewId, const JSRefPtr<JSView>& obj);
+    std::string AddChildById(const std::string& viewId, const JSRef<JSObject>& obj);
 
     void RemoveChildGroupById(const std::string& viewId);
 
@@ -150,15 +167,31 @@ private:
     // view id for custom view itself
     std::string viewId_;
 
+    int32_t instanceId_ = -1;
+    int32_t restoreInstanceId_ = -1;
+
     WeakPtr<OHOS::Ace::ComposedElement> element_ = nullptr;
     bool needsUpdate_ = false;
     bool isStatic_ = false;
+    bool isLazyForEachProcessed_ = false;
+    std::string lazyItemGroupId_;
 
     RefPtr<ViewFunctions> jsViewFunction_;
 
+    // unique view id for custom view to recycle.
+    std::string id_;
     // hold handle to the native and javascript object to keep them alive
     // until they are abandoned
-    std::unordered_map<std::string, JSRefPtr<JSView>> customViewChildren_;
+    std::unordered_map<std::string, JSRef<JSObject>> customViewChildren_;
+
+    // hold handle to the native and javascript object to keep them alive
+    // until they are abandoned used by lazyForEach
+    std::unordered_map<std::string, JSRef<JSObject>> customViewChildrenWithLazy_;
+
+    // hold js view ids by lazy item ground.
+    // until they are abandoned used by lazyForEach
+    std::unordered_map<std::string, std::list<std::string>> lazyItemGroups_;
+
     // a set of valid viewids on a renderfuntion excution
     // its cleared after cleaning up the abandoned child.
     std::unordered_set<std::string> lastAccessedViewIds_;

@@ -16,6 +16,7 @@
 #include "core/components/box/render_box.h"
 
 #include <algorithm>
+#include <cinttypes>
 #include <cstdint>
 
 #include "base/geometry/offset.h"
@@ -171,21 +172,33 @@ void RenderBox::Update(const RefPtr<Component>& component)
             stateAttributeList_ = box->GetStateAttributes();
         }
         OnStatusStyleChanged(disabled_ ? VisualState::DISABLED : VisualState::NORMAL);
+
+        onTouchUpId_ = box->GetOnTouchUpId();
+        onTouchDownId_ = box->GetOnTouchDownId();
+        onTouchMoveId_ = box->GetOnTouchMoveId();
         auto wp = AceType::WeakClaim(this);
         touchRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
-        touchRecognizer_->SetOnTouchDown([wp](const TouchEventInfo&) {
+        touchRecognizer_->SetOnTouchDown([wp](const TouchEventInfo& touchInfo) {
             auto box = wp.Upgrade();
-            if (box) {
-                box->HandleTouchEvent(true);
+            if (!box) {
+                return;
+            }
+            box->HandleTouchEvent(true);
+            if (box->onTouchDownId_) {
+                box->onTouchDownId_(touchInfo);
             }
         });
-        touchRecognizer_->SetOnTouchUp([wp](const TouchEventInfo&) {
+        touchRecognizer_->SetOnTouchUp([wp](const TouchEventInfo& touchInfo) {
             auto box = wp.Upgrade();
-            if (box) {
-                box->HandleTouchEvent(false);
+            if (!box) {
+                return;
+            }
+            box->HandleTouchEvent(false);
+            if (box->onTouchUpId_) {
+                box->onTouchUpId_(touchInfo);
             }
         });
-        touchRecognizer_->SetOnTouchMove(box->GetOnTouchMoveId());
+        touchRecognizer_->SetOnTouchMove(onTouchMoveId_);
     }
     // In each update, the extensions will be updated with new one.
     if (eventExtensions_ && eventExtensions_->HasOnAreaChangeExtension()) {
@@ -592,7 +605,6 @@ void RenderBox::UpdateFrontDecoration(const RefPtr<Decoration>& newDecoration)
     frontDecoration_->SetHueRotate(newDecoration->GetHueRotate());
 }
 
-// TODO: OLEG align with state attributes
 void RenderBox::UpdateStyleFromRenderNode(PropertyAnimatableType type)
 {
     // Operator map for styles
@@ -1104,7 +1116,7 @@ bool RenderBox::HandleMouseEvent(const MouseEvent& event)
     info.SetSourceDevice(event.sourceType);
     LOGI("RenderBox::HandleMouseEvent: Do mouse callback with mouse event{ Global(%{public}f,%{public}f), "
          "Local(%{public}f,%{public}f)}, Button(%{public}d), Action(%{public}d), Time(%{public}lld), "
-         "DeviceId(%{public}lld, SourceType(%{public}d) }. Return: %{public}d",
+         "DeviceId(%{public}" PRId64 ", SourceType(%{public}d) }. Return: %{public}d",
         info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetLocalLocation().GetX(),
         info.GetLocalLocation().GetY(), info.GetButton(), info.GetAction(),
         info.GetTimeStamp().time_since_epoch().count(), info.GetDeviceId(), info.GetSourceDevice(),
@@ -1754,6 +1766,8 @@ void RenderBox::OnStatusStyleChanged(const VisualState state)
                 LOGD("Setting Gradient state %{public}d", state);
                 GetBackDecoration()->SetGradient(gradientState->value_);
             } break;
+            default:
+                break;
         }
     }
     if (updated) {

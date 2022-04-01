@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,10 @@ void JSSlidingPanel::Create(const JSCallbackInfo& info)
         auto isShow = info[0]->ToBoolean();
         auto component = ViewStackProcessor::GetInstance()->GetDisplayComponent();
         auto display = AceType::DynamicCast<DisplayComponent>(component);
+        if (!display) {
+            LOGE("display is null");
+            return;
+        }
         display->SetVisible(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
     }
 }
@@ -67,8 +71,6 @@ void JSSlidingPanel::JSBind(BindingTarget globalObj)
     JSClass<JSSlidingPanel>::StaticMethod("fullHeight", &JSSlidingPanel::SetFullHeight, opt);
     JSClass<JSSlidingPanel>::StaticMethod("halfHeight", &JSSlidingPanel::SetHalfHeight, opt);
     JSClass<JSSlidingPanel>::StaticMethod("miniHeight", &JSSlidingPanel::SetMiniHeight, opt);
-
-    // box style TODO: missing borderstyle in box.
     JSClass<JSSlidingPanel>::StaticMethod("backgroundColor", JsBackgroundColor);
     JSClass<JSSlidingPanel>::StaticMethod("border", JsPanelBorder);
     JSClass<JSSlidingPanel>::StaticMethod("borderWidth", JsPanelBorderWidth);
@@ -309,6 +311,10 @@ void JSSlidingPanel::SetShow(bool isShow)
 {
     auto component = ViewStackProcessor::GetInstance()->GetDisplayComponent();
     auto display = AceType::DynamicCast<DisplayComponent>(component);
+    if (!display) {
+        LOGE("display is null");
+        return;
+    }
     display->SetVisible(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
 }
 

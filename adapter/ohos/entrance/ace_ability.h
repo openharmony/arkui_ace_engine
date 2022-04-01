@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,9 @@ namespace OHOS::Ace {
 
 class AceAbility final : public OHOS::AppExecFwk::Ability,
                          public OHOS::Rosen::IWindowChangeListener,
-                         public OHOS::Rosen::IWindowDragListener {
+                         public OHOS::Rosen::IWindowDragListener,
+                         public OHOS::Rosen::IOccupiedAreaChangeListener,
+                         public OHOS::Rosen::IInputEventListener {
 public:
     AceAbility()
     {
@@ -46,9 +48,6 @@ public:
     void OnForeground(const OHOS::AAFwk::Want& want) override;
     void OnBackground() override;
     void OnBackPressed() override;
-    void OnKeyUp(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    void OnKeyDown(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    void OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
     void OnRestoreAbilityState(const OHOS::AppExecFwk::PacMap& inState) override;
     void OnSaveAbilityState(OHOS::AppExecFwk::PacMap& outState) override;
@@ -65,9 +64,17 @@ public:
 
     // override Rosen::IWindowDragListener virtual callback function
     void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event) override;
+
     // override Rosen::IWindowChangeListener virtual callback function
     void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override;
     void OnModeChange(OHOS::Rosen::WindowMode mode) override;
+
+    // override Rosen::IOccupiedAreaChangeListener virtual callback function
+    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info) override;
+
+    // override Rosen::IInputEventListener virtual callback function
+    void OnPointerInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
 
     void Dump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 

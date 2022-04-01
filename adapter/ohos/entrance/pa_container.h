@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,7 +106,7 @@ public:
     bool Dump(const std::vector<std::string>& params) override;
 
     void DispatchSync(
-        const std::string& group, std::vector<uint8_t>&& data, uint8_t** resData, long& position) const override
+        const std::string& group, std::vector<uint8_t>&& data, uint8_t** resData, int64_t& position) const override
     {}
 
     void OnFinish()

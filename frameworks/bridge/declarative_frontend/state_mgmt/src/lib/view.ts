@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,6 +105,8 @@ abstract class View extends NativeView implements
 
   propertyHasChanged(info?: PropertyInfo): void {
     if (info) {
+      // need to sync container instanceId to switch instanceId in C++ side.
+      this.syncInstanceId();
       if (this.propsUsedForRender.has(info)) {
         console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View needs update`);
         this.markNeedUpdate();
@@ -116,6 +118,7 @@ abstract class View extends NativeView implements
         console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. calling @Watch function`);
         cb.call(this, info);
       }
+      this.restoreInstanceId();
     } // if info avail.
   }
 
@@ -141,7 +144,6 @@ abstract class View extends NativeView implements
 
   public aboutToContinueRender(): void {
     // do not reset
-    //this.propsUsedForRender = new Set<string>();
     this.isRenderingInProgress = true;
   }
 

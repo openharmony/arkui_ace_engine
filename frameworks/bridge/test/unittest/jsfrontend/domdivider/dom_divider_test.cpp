@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,8 +69,6 @@ void DomDividerTest::TearDown() {}
  * @tc.name: DomDividerCreatorTest001
  * @tc.desc: Test divider node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1Q5 AR000DQ1Q6
- * @tc.author: jiangyingjie
  */
 HWTEST_F(DomDividerTest, DomDividerCreatorTest001, TestSize.Level1)
 {
@@ -100,8 +98,6 @@ HWTEST_F(DomDividerTest, DomDividerCreatorTest001, TestSize.Level1)
  * @tc.name: DomDividerCreatorTest002
  * @tc.desc: Test divider node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1Q4 AR000DQ1Q6
- * @tc.author: jiangyingjie
  */
 HWTEST_F(DomDividerTest, DomDividerCreatorTest002, TestSize.Level1)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -270,7 +270,7 @@ void V8GroupJsBridge::ProcessJsRequestSync(const v8::FunctionCallbackInfo<v8::Va
     auto dispatcherUpgrade = (*dispatcher).Upgrade();
 
     uint8_t* resData = nullptr;
-    long position = 0;
+    int64_t position = 0;
 
     if (dispatcherUpgrade != nullptr) {
         dispatcherUpgrade->DispatchSync(strGroupName, std::move(encodeBuf), &resData, position);
@@ -521,7 +521,7 @@ void V8GroupJsBridge::TriggerModuleJsCallback(int32_t callbackId, int32_t code, 
             callbackId);
         code = PLUGIN_REQUEST_FAIL;
         std::string errorString = std::string("{\"code\":").append(std::to_string(code)).append(",")
-            .append("\"data\":\"invalid reponse data\"}");
+            .append("\"data\":\"invalid response data\"}");
         callBackResult = v8::String::NewFromUtf8(isolate_, errorString.c_str()).ToLocalChecked();
     }
     CallModuleJsCallback(callbackId, code, callBackResult);

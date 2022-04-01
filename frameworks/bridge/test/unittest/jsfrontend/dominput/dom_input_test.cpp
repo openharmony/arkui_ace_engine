@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,8 +80,6 @@ void DomInputTest::TearDown() {}
  * @tc.name: DomInputCreatorTest001
  * @tc.desc: Test textfield component are created as default.
  * @tc.type: FUNC
- * @tc.require: AR000DAR18
- * @tc.author: hushilong
  */
 HWTEST_F(DomInputTest, DomInputCreatorTest001, TestSize.Level1)
 {
@@ -128,8 +126,6 @@ HWTEST_F(DomInputTest, DomInputCreatorTest001, TestSize.Level1)
  * @tc.name: DomInputCreatorTest002
  * @tc.desc: Test textfield component are created with all style and attribute.
  * @tc.type: FUNC
- * @tc.require: AR000DD674 AR000DAR18 AR000DAR14 AR000DAR15 AR000DAR19 AR000DBI81 AR000DBI82
- * @tc.author: hushilong
  */
 HWTEST_F(DomInputTest, DomInputCreatorTest002, TestSize.Level1)
 {
@@ -212,8 +208,6 @@ HWTEST_F(DomInputTest, DomInputCreatorTest002, TestSize.Level1)
  * @tc.name: DomInputCreatorTest003
  * @tc.desc: Test input component are created with event.
  * @tc.type: FUNC
- * @tc.require: AR000DD674 AR000BDI8S
- * @tc.author: hushilong
  */
 HWTEST_F(DomInputTest, DomInputCreatorTest003, TestSize.Level1)
 {
@@ -252,8 +246,6 @@ HWTEST_F(DomInputTest, DomInputCreatorTest003, TestSize.Level1)
  * @tc.name: DomInputCreatorTest004
  * @tc.desc: Test button component are created as default.
  * @tc.type: FUNC
- * @tc.require: AR000DD674
- * @tc.author: hushilong
  */
 HWTEST_F(DomInputTest, DomInputCreatorTest004, TestSize.Level1)
 {
@@ -291,8 +283,6 @@ HWTEST_F(DomInputTest, DomInputCreatorTest004, TestSize.Level1)
  * @tc.name: DomInputCreatorTest005
  * @tc.desc: Test button component are created with all style and attribute.
  * @tc.type: FUNC
- * @tc.require: AR000DD674
- * @tc.author: hushilong
  */
 HWTEST_F(DomInputTest, DomInputCreatorTest005, TestSize.Level1)
 {
@@ -353,8 +343,6 @@ HWTEST_F(DomInputTest, DomInputCreatorTest005, TestSize.Level1)
  * @tc.name: DomInputCreatorTest006
  * @tc.desc: Test input component are created with event.
  * @tc.type: FUNC
- * @tc.require: AR000DD674
- * @tc.author: hushilong
  */
 HWTEST_F(DomInputTest, DomInputCreatorTest006, TestSize.Level1)
 {
@@ -388,8 +376,6 @@ HWTEST_F(DomInputTest, DomInputCreatorTest006, TestSize.Level1)
  * @tc.name: DomInputCreatorTest007
  * @tc.desc: Test checkbox component are created as default.
  * @tc.type: FUNC
- * @tc.require: AR000DD674
- * @tc.author: hushilong
  */
 HWTEST_F(DomInputTest, DomInputCreatorTest007, TestSize.Level1)
 {
@@ -425,8 +411,6 @@ HWTEST_F(DomInputTest, DomInputCreatorTest007, TestSize.Level1)
  * @tc.name: DomInputCreatorTest008
  * @tc.desc: Test checkbox component are created with all style and attribute.
  * @tc.type: FUNC
- * @tc.require: AR000DD674
- * @tc.author: hushilong
  */
 HWTEST_F(DomInputTest, DomInputCreatorTest008, TestSize.Level1)
 {
@@ -478,8 +462,6 @@ HWTEST_F(DomInputTest, DomInputCreatorTest008, TestSize.Level1)
  * @tc.name: DomInputCreatorTest009
  * @tc.desc: Test input component are created with event.
  * @tc.type: FUNC
- * @tc.require: AR000DD674
- * @tc.author: hushilong
  */
 HWTEST_F(DomInputTest, DomInputCreatorTest009, TestSize.Level1)
 {
@@ -513,8 +495,6 @@ HWTEST_F(DomInputTest, DomInputCreatorTest009, TestSize.Level1)
  * @tc.name: DomInputCreatorTest010
  * @tc.desc: Test radio component are created as default.
  * @tc.type: FUNC
- * @tc.require: AR000DD674
- * @tc.author: hushilong
  */
 HWTEST_F(DomInputTest, DomInputCreatorTest010, TestSize.Level1)
 {
@@ -550,8 +530,6 @@ HWTEST_F(DomInputTest, DomInputCreatorTest010, TestSize.Level1)
  * @tc.name: DomInputCreatorTest012
  * @tc.desc: Test input component are created with event.
  * @tc.type: FUNC
- * @tc.require: AR000DD674
- * @tc.author: hushilong
  */
 HWTEST_F(DomInputTest, DomInputCreatorTest012, TestSize.Level1)
 {

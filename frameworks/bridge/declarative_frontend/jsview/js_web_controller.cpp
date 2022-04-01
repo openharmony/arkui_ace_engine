@@ -71,6 +71,12 @@ std::shared_ptr<WebJSValue> ParseValue(
 }
 }
 
+JSWebController::JSWebController()
+{
+    instanceId_ = Container::CurrentId();
+}
+
+
 std::shared_ptr<WebJSValue> JSWebController::GetJavaScriptResult(
     const std::string& objectName,
     const std::string& objectMethod,
@@ -147,6 +153,7 @@ void JSWebController::Reload() const
 
 void JSWebController::LoadUrl(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     if (args.Length() < 1 || !args[0]->IsObject()) {
         LOGW("invalid url params");
         return;
@@ -162,8 +169,8 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
             LOGE("JSWebController failed to parse url object");
             return;
         }
-        int np = webSrc.find_first_of("/");
-        url = (np < 0) ? webSrc : webSrc.erase(np, 1);
+        auto np = webSrc.find_first_of("/");
+        url = (np == std::string::npos) ? webSrc : webSrc.erase(np, 1);
     } else if (!ConvertFromJSValue(valUrl, url)) {
         LOGW("can't find url.");
         return;
@@ -180,12 +187,12 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
             }
             JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
             std::string key;
-            if (!ConvertFromJSValue(obj->GetProperty("key"), key)) {
+            if (!ConvertFromJSValue(obj->GetProperty("headerKey"), key)) {
                 LOGW("can't find key at index %{public}d of additionalHttpHeaders, so skip it.", i);
                 continue;
             }
             std::string value;
-            if (!ConvertFromJSValue(obj->GetProperty("value"), value)) {
+            if (!ConvertFromJSValue(obj->GetProperty("headerValue"), value)) {
                 LOGW("can't find value at index %{public}d of additionalHttpHeaders, so skip it.", i);
                 continue;
             }
@@ -201,6 +208,7 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
 void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)
 {
     LOGI("JSWebController excute typescript");
+    ContainerScope scope(instanceId_);
     if (args.Length() < 1 || !args[0]->IsObject()) {
         LOGW("invalid excute params");
         return;
@@ -231,6 +239,7 @@ void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)
 
 void JSWebController::LoadDataWithBaseUrl(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
 
@@ -262,6 +271,7 @@ void JSWebController::LoadDataWithBaseUrl(const JSCallbackInfo& args)
 void JSWebController::Backward(const JSCallbackInfo& args)
 {
     LOGI("JSWebController Start backward.");
+    ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->Backward();
     }
@@ -270,6 +280,7 @@ void JSWebController::Backward(const JSCallbackInfo& args)
 void JSWebController::Forward(const JSCallbackInfo& args)
 {
     LOGI("JSWebController Start forward.");
+    ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->Forward();
     }
@@ -278,6 +289,7 @@ void JSWebController::Forward(const JSCallbackInfo& args)
 void JSWebController::AccessStep(const JSCallbackInfo& args)
 {
     LOGI("JSWebController start accessStep.");
+    ContainerScope scope(instanceId_);
     int32_t step = 0;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], step)) {
         LOGE("AccessStep parameter is invalid.");
@@ -294,6 +306,7 @@ void JSWebController::AccessStep(const JSCallbackInfo& args)
 void JSWebController::AccessBackward(const JSCallbackInfo& args)
 {
     LOGI("JSWebController start accessBackward.");
+    ContainerScope scope(instanceId_);
     if (webController_) {
         auto canAccess = webController_->AccessBackward();
         auto jsVal = JSVal(ToJSValue(canAccess));
@@ -305,6 +318,7 @@ void JSWebController::AccessBackward(const JSCallbackInfo& args)
 void JSWebController::AccessForward(const JSCallbackInfo& args)
 {
     LOGI("JSWebController start accessForward.");
+    ContainerScope scope(instanceId_);
     if (webController_) {
         auto canAccess = webController_->AccessForward();
         auto jsVal = JSVal(ToJSValue(canAccess));
@@ -316,6 +330,7 @@ void JSWebController::AccessForward(const JSCallbackInfo& args)
 void JSWebController::Refresh(const JSCallbackInfo& args)
 {
     LOGI("JSWebController Refresh");
+    ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->Refresh();
     }
@@ -324,6 +339,7 @@ void JSWebController::Refresh(const JSCallbackInfo& args)
 void JSWebController::StopLoading(const JSCallbackInfo& args)
 {
     LOGI("JSWebController StopLoading");
+    ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->StopLoading();
     }
@@ -332,15 +348,38 @@ void JSWebController::StopLoading(const JSCallbackInfo& args)
 void JSWebController::GetHitTestResult(const JSCallbackInfo& args)
 {
     LOGI("JSWebController get his test result");
+    ContainerScope scope(instanceId_);
     if (webController_) {
         int result = webController_->GetHitTestResult();
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
     }
 }
 
+void JSWebController::SetJavascriptCallBackImpl()
+{
+    if (!webController_ || jsRegisterCallBackInit_) {
+        return;
+    }
+
+    LOGI("JSWebController set webview javascript CallBack");
+    jsRegisterCallBackInit_ = true;
+    WebController::JavaScriptCallBackImpl callback =
+        [weak = WeakClaim(this)](
+        const std::string& objectName, const std::string& objectMethod,
+        const std::vector<std::shared_ptr<WebJSValue>>& args) {
+        auto jsWebController = weak.Upgrade();
+        if (jsWebController == nullptr) {
+            return std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
+        }
+        return jsWebController->GetJavaScriptResult(objectName, objectMethod, args);
+    };
+    webController_->SetJavaScriptCallBackImpl(std::move(callback));
+}
+
 void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
 {
     LOGI("JSWebController add js interface");
+    ContainerScope scope(instanceId_);
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
     }
@@ -349,22 +388,7 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
         return;
     }
     // Init webview callback
-    if (!jsRegisterCallBackInit_) {
-        LOGI("JSWebController set webview javascript CallBack");
-        jsRegisterCallBackInit_ = true;
-        WebController::JavaScriptCallBackImpl callback =
-            [execCtx = args.GetExecutionContext(), weak = WeakClaim(this)](
-            const std::string& objectName, const std::string& objectMethod,
-            const std::vector<std::shared_ptr<WebJSValue>>& args) {
-            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-            auto jsWebController = weak.Upgrade();
-            if (jsWebController == nullptr) {
-                return std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
-            }
-            return jsWebController->GetJavaScriptResult(objectName, objectMethod, args);
-        };
-        webController_->SetJavaScriptCallBackImpl(std::move(callback));
-    }
+    SetJavascriptCallBackImpl();
 
     // options
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
@@ -374,7 +398,7 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
         return;
     }
     // options.obj
-    JSRef<JSVal> jsClassObj = obj->GetProperty("obj");
+    JSRef<JSVal> jsClassObj = obj->GetProperty("object");
     if (!jsClassObj->IsObject()) {
         LOGW("JSWebController param obj is not object");
         return;
@@ -405,21 +429,7 @@ void JSWebController::InitJavascriptInterface()
         return;
     }
     // Init webview callback
-    if (!jsRegisterCallBackInit_) {
-        LOGI("JSWebController set webview javascript CallBack");
-        jsRegisterCallBackInit_ = true;
-        WebController::JavaScriptCallBackImpl callback =
-            [weak = WeakClaim(this)](
-            const std::string& objectName, const std::string& objectMethod,
-            const std::vector<std::shared_ptr<WebJSValue>>& args) {
-            auto jsWebController = weak.Upgrade();
-            if (jsWebController == nullptr) {
-                return std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
-            }
-            return jsWebController->GetJavaScriptResult(objectName, objectMethod, args);
-        };
-        webController_->SetJavaScriptCallBackImpl(std::move(callback));
-    }
+    SetJavascriptCallBackImpl();
     for (auto& entry : methods_) {
         webController_->AddJavascriptInterface(entry.first, entry.second);
     }
@@ -442,7 +452,7 @@ void JSWebController::SetJavascriptInterface(const JSCallbackInfo& args)
         return;
     }
     // options.obj
-    JSRef<JSVal> jsClassObj = obj->GetProperty("obj");
+    JSRef<JSVal> jsClassObj = obj->GetProperty("object");
     if (!jsClassObj->IsObject()) {
         LOGW("JSWebController param obj is not object");
         return;
@@ -473,13 +483,15 @@ void JSWebController::SetJavascriptInterface(const JSCallbackInfo& args)
 void JSWebController::RemoveJavascriptInterface(const JSCallbackInfo& args)
 {
     LOGI("JSWebController remove js interface");
+    ContainerScope scope(instanceId_);
     std::string objName;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], objName)) {
         return;
     }
-    if (objectorMap_.find(objName) != objectorMap_.end()) {
-        objectorMap_.erase(objName);
+    if (objectorMap_.find(objName) == objectorMap_.end()) {
+        return;
     }
+    objectorMap_.erase(objName);
     if (webController_) {
         webController_->RemoveJavascriptInterface(objName, {});
     }
@@ -487,6 +499,7 @@ void JSWebController::RemoveJavascriptInterface(const JSCallbackInfo& args)
 
 void JSWebController::OnInactive(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->OnInactive();
     }
@@ -494,6 +507,7 @@ void JSWebController::OnInactive(const JSCallbackInfo& args)
 
 void JSWebController::OnActive(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->OnActive();
     }
@@ -501,6 +515,7 @@ void JSWebController::OnActive(const JSCallbackInfo& args)
 
 void JSWebController::Zoom(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     float factor = 1.0;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], factor)) {
         LOGE("Zoom parameter is invalid.");
@@ -514,6 +529,7 @@ void JSWebController::Zoom(const JSCallbackInfo& args)
 void JSWebController::RequestFocus(const JSCallbackInfo& args)
 {
     LOGI("JSWebController request focus");
+    ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->RequestFocus();
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,7 +58,6 @@ void JSFlex::SetJustifyContent(int32_t value)
             }
         }
     } else {
-        // FIXME: we have a design issue here, setters return void, can not signal error to JS
         LOGE("invalid value for justifyContent");
     }
 }
@@ -79,7 +78,6 @@ void JSFlex::SetAlignItems(int32_t value)
             }
         }
     } else {
-        // FIXME: we have a design issue here, setters return void, can not signal error to JS
         LOGE("invalid value for justifyContent");
     }
 }
@@ -97,7 +95,6 @@ void JSFlex::SetAlignContent(int32_t value)
             wrap->SetAlignment((WrapAlignment)value);
         }
     } else {
-        // FIXME: we have a design issue here, setters return void, can not signal error to JS
         LOGE("invalid value for justifyContent");
     }
 }

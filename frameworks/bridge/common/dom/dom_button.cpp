@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -475,7 +475,6 @@ void DOMButton::PrepareBackDecorationStyle()
     }
     auto border = backDecoration_->GetBorder();
     if (!HasBorderRadiusStyle() || buttonDeclaration_->GetRadiusState()) {
-        // TODO: only check dimension unit now, should refactor calculate dimension in render.
         if (buttonDeclaration_->GetRectRadius().Unit() == border.Top().GetWidth().Unit()) {
             backDecoration_->SetBorderRadius(Radius(buttonDeclaration_->GetRectRadius() + border.Top().GetWidth()));
         }

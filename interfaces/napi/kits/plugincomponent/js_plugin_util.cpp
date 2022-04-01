@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,14 +104,14 @@ bool AceUnwrapInt32FromJS2(napi_env env, napi_value param, int& value)
     return result;
 }
 
-napi_value AceWrapLongToJS(napi_env env, long value)
+napi_value AceWrapLongToJS(napi_env env, int64_t value)
 {
     napi_value result = nullptr;
     NAPI_CALL(env, napi_create_int32(env, value, &result));
     return result;
 }
 
-long AceUnwrapLongFromJS(napi_env env, napi_value param, long defaultValue)
+int64_t AceUnwrapLongFromJS(napi_env env, napi_value param, int64_t defaultValue)
 {
     int value = 0;
     if (napi_get_value_int32(env, param, &value) == napi_ok) {
@@ -121,7 +121,7 @@ long AceUnwrapLongFromJS(napi_env env, napi_value param, long defaultValue)
     }
 }
 
-bool AceUnwrapLongFromJS2(napi_env env, napi_value param, long& value)
+bool AceUnwrapLongFromJS2(napi_env env, napi_value param, int64_t& value)
 {
     bool result = false;
     int natValue = 0;
@@ -233,7 +233,9 @@ std::string AceUnwrapStringFromJS(napi_env env, napi_value param, const std::str
     if (buf == nullptr) {
         return value;
     }
-    memset_s(buf, size + 1, 0, size + 1);
+    if (memset_s(buf, size + 1, 0, size + 1) != EOK) {
+        return value;
+    }
 
     bool rev = napi_get_value_string_utf8(env, param, buf, size + 1, &size) == napi_ok;
     if (rev) {
@@ -263,7 +265,9 @@ bool AceUnwrapStringFromJS2(napi_env env, napi_value param, std::string& value)
     if (buf == nullptr) {
         return false;
     }
-    memset_s(buf, (size + 1), 0, (size + 1));
+    if (memset_s(buf, (size + 1), 0, (size + 1)) != EOK) {
+        return false;
+    }
 
     bool rev = napi_get_value_string_utf8(env, param, buf, size + 1, &size) == napi_ok;
     if (rev) {
@@ -319,7 +323,7 @@ bool AceUnwrapArrayInt32FromJS(napi_env env, napi_value param, std::vector<int>&
     return true;
 }
 
-napi_value AceWrapArrayLongToJS(napi_env env, const std::vector<long>& value)
+napi_value AceWrapArrayLongToJS(napi_env env, const std::vector<int64_t>& value)
 {
     napi_value jsArray = nullptr;
     napi_value jsValue = nullptr;
@@ -337,11 +341,11 @@ napi_value AceWrapArrayLongToJS(napi_env env, const std::vector<long>& value)
     return jsArray;
 }
 
-bool AceUnwrapArrayLongFromJS(napi_env env, napi_value param, std::vector<long>& value)
+bool AceUnwrapArrayLongFromJS(napi_env env, napi_value param, std::vector<int64_t>& value)
 {
     uint32_t arraySize = 0;
     napi_value jsValue = nullptr;
-    long natValue = 0;
+    int64_t natValue = 0;
 
     if (!AceIsArrayForNapiValue(env, param, arraySize)) {
         return false;

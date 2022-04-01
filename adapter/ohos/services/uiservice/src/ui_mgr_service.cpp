@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/utils.h"
+#include "core/components/theme/app_theme.h"
 
 #include "hilog_wrapper.h"
 #include "if_system_ability_manager.h"
@@ -161,6 +162,18 @@ std::shared_ptr<OHOS::AppExecFwk::Ability> UIMgrService::CreateAbility()
     return sharedAbility;
 }
 
+static void SetDialogBackgroundColor(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)
+{
+    auto themeManager = context->GetThemeManager();
+    if (themeManager) {
+        auto appTheme = themeManager->GetTheme<AppTheme>();
+        if (appTheme) {
+            HILOG_INFO("set bg color TRANSPARENT");
+            appTheme->SetBackgroundColor(Color::TRANSPARENT);
+        }
+    }
+}
+
 int UIMgrService::ShowDialog(const std::string& name,
                              const std::string& params,
                              OHOS::Rosen::WindowType windowType,
@@ -265,30 +278,35 @@ int UIMgrService::ShowDialog(const std::string& name,
         Ace::Platform::AceContainer::AddAssetPath(dialogId, packagePathStr, assetBasePathStr);
 
         Ace::Platform::UIEnvCallback callback = nullptr;
+        callback =
 #ifdef ENABLE_ROSEN_BACKEND
-        callback = [dialogWindow, listener, dialogId] (
-            const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
-            if (SystemProperties::GetRosenBackendEnabled()) {
-                auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-                if (rsUiDirector != nullptr) {
-                    rsUiDirector->SetRSSurfaceNode(dialogWindow->GetSurfaceNode());
-                    dialogWindow->RegisterWindowChangeListener(listener);
+            [dialogWindow, listener, dialogId] (const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
+                if (SystemProperties::GetRosenBackendEnabled()) {
+                    auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+                    if (rsUiDirector != nullptr) {
+                        rsUiDirector->SetRSSurfaceNode(dialogWindow->GetSurfaceNode());
+                        dialogWindow->RegisterWindowChangeListener(listener);
 
-                    rsUiDirector->SetUITaskRunner(
-                        [taskExecutor = Ace::Platform::AceContainer::GetContainer(dialogId)->GetTaskExecutor()]
-                            (const std::function<void()>& task) {
-                                taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-                            });
-                    if (context != nullptr) {
-                        context->SetRSUIDirector(rsUiDirector);
+                        rsUiDirector->SetUITaskRunner(
+                            [taskExecutor = Ace::Platform::AceContainer::GetContainer(dialogId)->GetTaskExecutor()]
+                                (const std::function<void()>& task) {
+                                    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                                });
+                        if (context != nullptr) {
+                            context->SetRSUIDirector(rsUiDirector);
+                        }
+                        rsUiDirector->Init();
+                        HILOG_INFO("Init Rosen Backend");
                     }
-                    rsUiDirector->Init();
-                    HILOG_INFO("Init Rosen Backend");
+                } else {
+                    HILOG_INFO("not Init Rosen Backend");
                 }
-            } else {
-                HILOG_INFO("not Init Rosen Backend");
+                SetDialogBackgroundColor(context);
+            };
+#else
+            [] (const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) {
+                SetDialogBackgroundColor(context);
             }
-        };
 #endif
 
         // set view
@@ -314,12 +332,12 @@ int UIMgrService::ShowDialog(const std::string& name,
 
     int32_t windowWidth = static_cast<int32_t>(dialogWindow->GetRect().width_);
     int32_t windowHeight = static_cast<int32_t>(dialogWindow->GetRect().height_);
-    int32_t windowx = static_cast<int32_t>(dialogWindow->GetRect().posX_);
-    int32_t windowy = static_cast<int32_t>(dialogWindow->GetRect().posY_);
+    int32_t windowX = static_cast<int32_t>(dialogWindow->GetRect().posX_);
+    int32_t windowY = static_cast<int32_t>(dialogWindow->GetRect().posY_);
     HILOG_INFO("Show dialog: size: width: %{public}d, height: %{public}d, pos: x: %{public}d, y: %{public}d",
-        windowWidth, windowHeight, windowx, windowy);
+        windowWidth, windowHeight, windowX, windowY);
     dialogWindow->Show();
-    dialogWindow->MoveTo(windowx, windowy);
+    dialogWindow->MoveTo(windowX, windowY);
     dialogWindow->Resize(windowWidth, windowHeight);
 
     HILOG_INFO("Show dialog in service end");

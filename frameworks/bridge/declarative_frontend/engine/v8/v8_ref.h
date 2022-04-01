@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,6 @@ public:
     using wrappedT = v8::Local<v8::Object>;
 
     V8Ref() {}
-    // TODO(cvetan) make private
     explicit V8Ref(const T& val) : object_(val) {}
     ~V8Ref()
     {
@@ -186,7 +185,7 @@ public:
         rhs.object_.Reset();
     }
 
-    V8Weak(const V8Ref<T>& rhs) : object_(rhs.Get())
+    explicit V8Weak(const V8Ref<T>& rhs) : object_(rhs.Get())
     {
         object_.SetWeak();
     }

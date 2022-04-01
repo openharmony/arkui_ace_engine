@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 
+#include "core/common/container_scope.h"
 #include "core/components/common/properties/animation_option.h"
 
 #ifdef USE_V8_ENGINE
@@ -100,7 +101,9 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
-        onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                            id = Container::CurrentId()]() {
+            ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Execute();
         };
@@ -141,7 +144,9 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
-        onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+        onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                            id = Container::CurrentId()]() {
+            ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Execute();
         };

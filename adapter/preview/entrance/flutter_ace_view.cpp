@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,8 +164,9 @@ bool FlutterAceView::HandleTouchEvent(const TouchEvent& touchEvent)
 
     LOGD("HandleTouchEvent touchEvent.x: %lf, touchEvent.y: %lf, touchEvent.size: %lf",
         touchEvent.x, touchEvent.y, touchEvent.size);
+    auto event = touchEvent.UpdatePointers();
     if (touchEventCallback_) {
-        touchEventCallback_(touchEvent);
+        touchEventCallback_(event);
     }
 
     return true;

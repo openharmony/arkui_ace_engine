@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,11 +53,11 @@ RefPtr<CheckboxComponent> DOMCheckboxUtil::CreateComponentAndSetChildAttr(
         component->SetHorizontalPadding(Dimension(0));
         component->SetHotZoneVerticalPadding(Dimension(0));
     }
-    if (LessOrEqual(node.GetWidth().Value(), 0.0)) {
+    if (LessOrEqual(node.GetWidth().Value(), 0.0) && boxComponent) {
         node.SetWidth(theme->GetWidth());
         boxComponent->SetWidth(theme->GetWidth().Value(), theme->GetWidth().Unit());
     }
-    if (LessOrEqual(node.GetHeight().Value(), 0.0)) {
+    if (LessOrEqual(node.GetHeight().Value(), 0.0) && boxComponent) {
         node.SetHeight(theme->GetHeight());
         boxComponent->SetHeight(theme->GetHeight().Value(), theme->GetHeight().Unit());
     }

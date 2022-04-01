@@ -60,7 +60,7 @@ public:
 
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessPluginUninstall(const int64_t PluginId);
-    void OnDeathReceived() {};
+    void OnDeathReceived() {}
 #endif
 
 private:

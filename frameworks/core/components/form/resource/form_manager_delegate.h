@@ -38,7 +38,7 @@ public:
     using OnFormUpdateCallbackForJava = std::function<void(int64_t, const std::string&)>;
     using OnFormAcquiredCallback
         = std::function<void(int64_t, const std::string&, const std::string&,
-         const std::string&, const std::map<std::string, std::pair<int, int32_t>>&, const std::string&)>;
+         const std::string&, const std::map<std::string, std::pair<int, int32_t>>&, const AppExecFwk::FormJsInfo&)>;
     using OnFormUpdateCallback = std::function<void(int64_t, const std::string&,
         const std::map<std::string, std::pair<int, int32_t>>&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
@@ -54,7 +54,7 @@ public:
 
     FormManagerDelegate() = delete;
     ~FormManagerDelegate() override;
-    FormManagerDelegate(const WeakPtr<PipelineContext>& context)
+    explicit FormManagerDelegate(const WeakPtr<PipelineContext>& context)
         : FormManagerResource("formAdaptor", context),
           state_(State::WAITINGFORSIZE) {}
 

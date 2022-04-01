@@ -164,6 +164,16 @@ void DOMSwitch::PrepareSpecializedComponent()
             backDecoration->SetBorderRadius(Radius(BOX_HOVER_RADIUS));
             boxComponent_->SetBackDecoration(backDecoration);
         }
+        RefPtr<SwitchTheme> theme = GetTheme<SwitchTheme>();
+        if (switchChild_->GetShowText()) {
+            return;
+        }
+        if (boxComponent_->GetHeightDimension().Value() < 0.0 && theme) {
+            boxComponent_->SetHeight(theme->GetHeight().Value(), theme->GetHeight().Unit());
+        }
+        if (boxComponent_->GetWidthDimension().Value() < 0.0 && theme) {
+            boxComponent_->SetWidth(theme->GetWidth().Value(), theme->GetWidth().Unit());
+        }
     }
     if (HasCheckedPseudo()) {
         PrepareCheckedListener();
@@ -185,16 +195,6 @@ void DOMSwitch::PrepareSpecializedComponent()
         }
     }
 #endif
-    RefPtr<SwitchTheme> theme = GetTheme<SwitchTheme>();
-    if (switchChild_->GetShowText()) {
-        return;
-    }
-    if (boxComponent_->GetHeightDimension().Value() < 0.0 && theme) {
-        boxComponent_->SetHeight(theme->GetHeight().Value(), theme->GetHeight().Unit());
-    }
-    if (boxComponent_->GetWidthDimension().Value() < 0.0 && theme) {
-        boxComponent_->SetWidth(theme->GetWidth().Value(), theme->GetWidth().Unit());
-    }
 }
 
 } // namespace OHOS::Ace::Framework

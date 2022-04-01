@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -132,7 +132,7 @@ class AppStorage extends LocalStorage {
    * Before deleting a prop from app storage all its subscribers need to
    * unsubscribe from the property.
    * This method fails and returns false if given property still has subscribers
-   * Another reason for failing is unkmown property.
+   * Another reason for failing is unknown property.
    *
    * @param propName
    * @returns false if method failed
@@ -207,7 +207,6 @@ class AppStorage extends LocalStorage {
   }
 
   public static IsMutable(key: string): boolean {
-    // FIXME(cvetan): No mechanism for immutable/mutable properties
     return true;
   }
 

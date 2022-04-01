@@ -270,7 +270,7 @@ protected:
     void PrintImageLog(const Size& srcSize, const BackgroundImageSize& imageSize, ImageRepeat imageRepeat,
         const BackgroundImagePosition& imagePosition) const;
     Size CalculateBackupImageSize(const Size& pictureSize);
-    virtual void ClearRenderObject() override;
+    void ClearRenderObject() override;
     virtual void LayoutImageObject() {}
 
     std::string imageAlt_;

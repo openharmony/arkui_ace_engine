@@ -26,6 +26,7 @@
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/scroll/scroll_fade_effect.h"
 #include "core/components/scroll/scroll_spring_effect.h"
+#include "core/components/text_field/text_field_component.h"
 #include "core/components/video/texture_component.h"
 #include "core/components/web/web_component.h"
 #include "core/components/xcomponent/xcomponent_component.h"
@@ -1266,6 +1267,7 @@ void DOMNode::CompositeComponents()
     auto mainComponent = GetSpecializedComponent();
     if (!components.empty() &&
         (AceType::InstanceOf<TextureComponent>(mainComponent) ||
+        AceType::InstanceOf<TextFieldComponent>(mainComponent) ||
         AceType::InstanceOf<ListComponent>(mainComponent) ||
         AceType::InstanceOf<ListItemComponent>(mainComponent) ||
         AceType::InstanceOf<WebComponent>(mainComponent) ||

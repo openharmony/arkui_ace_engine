@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,7 +48,7 @@ int UIServiceMgrProxy::RegisterCallBack(const AAFwk::Want& want, const sptr<IUIS
         HILOG_ERROR("register callback fail, uiService is nullptr");
         return ERR_INVALID_VALUE;
     }
-    if (!data.WriteParcelable(uiService->AsObject())) {
+    if (!data.WriteRemoteObject(uiService->AsObject())) {
         HILOG_ERROR("register callback fail, uiService error");
         return ERR_INVALID_VALUE;
     }
@@ -229,7 +229,7 @@ int UIServiceMgrProxy::ShowDialog(const std::string& name,
         HILOG_ERROR("dialogCallback is nullptr");
         return ERR_INVALID_VALUE;
     }
-    if (!dataParcel.WriteParcelable(dialogCallback->AsObject())) {
+    if (!dataParcel.WriteRemoteObject(dialogCallback->AsObject())) {
         HILOG_ERROR("dialogCallback error");
         return ERR_INVALID_VALUE;
     }

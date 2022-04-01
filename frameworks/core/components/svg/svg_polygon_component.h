@@ -26,7 +26,7 @@ class SvgPolygonComponent : public ComponentGroup {
 
 public:
     SvgPolygonComponent();
-    SvgPolygonComponent(bool isClose);
+    explicit SvgPolygonComponent(bool isClose);
     explicit SvgPolygonComponent(const std::list<RefPtr<Component>>& children);
     ~SvgPolygonComponent() override = default;
     void InitDeclaration();

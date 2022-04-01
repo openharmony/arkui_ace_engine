@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,16 +64,6 @@ public:
         return frontendDelegate_;
     }
 
-    void SetArkNativeEngine(ArkNativeEngine* nativeEngine)
-    {
-        nativeEngine_ = nativeEngine;
-    }
-
-    ArkNativeEngine* GetArkNativeEngine() const
-    {
-        return nativeEngine_;
-    }
-
 private:
     void RegisterAceModule();             // add ace object to global
     void RegisterConsoleModule();         // add Console object to global
@@ -96,11 +86,11 @@ private:
     RefPtr<FrontendDelegate> frontendDelegate_;
     int32_t instanceId_ = 0;
     mutable std::mutex mutex_;
-    ArkNativeEngine* nativeEngine_ = nullptr;
     bool isDebugMode_ = true;
 };
 
 class JsiEngine : public JsEngine {
+    DECLARE_ACE_TYPE(JsiEngine, JsEngine);
 public:
     explicit JsiEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~JsiEngine() override;
@@ -147,9 +137,11 @@ public:
 
     void RunGarbageCollection() override;
 
+    std::string GetStacktraceMessage() override;
+
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
-    virtual FrontendDelegate* GetFrontend() override
+    FrontendDelegate* GetFrontend() override
     {
         return AceType::RawPtr(engineInstance_->GetDelegate());
     }
@@ -172,7 +164,6 @@ private:
 
     int32_t instanceId_ = 0;
     RefPtr<JsiEngineInstance> engineInstance_;
-    ArkNativeEngine* nativeEngine_ = nullptr;
 };
 } // namespace OHOS::Ace::Framework
 

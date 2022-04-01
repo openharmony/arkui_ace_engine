@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -140,8 +140,6 @@ void CalendarController::JumpToMonth(const CalendarMonth& calendarMonth, int32_t
         // changed
         int32_t lastIndex = (destIndex + DISTANCE_FORM_LAST) % MAX_MONTH_CACHE_NUM;
         dataAdapter_->AddPendingRequest(CalendarMonth::GetLastMonth(calendarMonth), lastIndex);
-    } else {
-        // ignore
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -103,8 +103,8 @@ void V8Class<C>::Method(const char* name, R (Base::*func)(Args...), int id)
 {
     v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
     std::lock_guard<std::mutex> lock(mutex_);
-    auto& funtionTemplate = functionTemplates_[isolate];
-    funtionTemplate.Get(isolate)->PrototypeTemplate()->Set(isolate, name,
+    auto& functionTemplate = functionTemplates_[isolate];
+    functionTemplate.Get(isolate)->PrototypeTemplate()->Set(isolate, name,
         v8::FunctionTemplate::New(isolate, MethodCallback<Base, R, Args...>, v8::Integer::New(isolate, id)));
 }
 
@@ -114,8 +114,8 @@ void V8Class<C>::CustomMethod(const char* name, MemberFunctionCallback<T> callba
 {
     v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
     std::lock_guard<std::mutex> lock(mutex_);
-    auto& funtionTemplate = functionTemplates_[isolate];
-    funtionTemplate.Get(isolate)->PrototypeTemplate()->Set(isolate, name,
+    auto& functionTemplate = functionTemplates_[isolate];
+    functionTemplate.Get(isolate)->PrototypeTemplate()->Set(isolate, name,
         v8::FunctionTemplate::New(isolate,
             InternalMemberFunctionCallback<T, const v8::FunctionCallbackInfo<v8::Value>&>,
             v8::Integer::New(isolate, id)));
@@ -126,8 +126,8 @@ void V8Class<C>::CustomMethod(const char* name, FunctionCallback callback)
 {
     v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
     std::lock_guard<std::mutex> lock(mutex_);
-    auto& funtionTemplate = functionTemplates_[isolate];
-    funtionTemplate.Get(isolate)->PrototypeTemplate()->Set(
+    auto& functionTemplate = functionTemplates_[isolate];
+    functionTemplate.Get(isolate)->PrototypeTemplate()->Set(
         isolate, name, v8::FunctionTemplate::New(isolate, callback));
 }
 
@@ -137,8 +137,8 @@ void V8Class<C>::CustomMethod(const char* name, JSMemberFunctionCallback<T> call
 {
     v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
     std::lock_guard<std::mutex> lock(mutex_);
-    auto& funtionTemplate = functionTemplates_[isolate];
-    funtionTemplate.Get(isolate)->PrototypeTemplate()->Set(isolate, name,
+    auto& functionTemplate = functionTemplates_[isolate];
+    functionTemplate.Get(isolate)->PrototypeTemplate()->Set(isolate, name,
         v8::FunctionTemplate::New(
             isolate, InternalMemberFunctionCallback<T, const JSCallbackInfo&>, v8::Integer::New(isolate, id)));
 }
@@ -150,9 +150,9 @@ void V8Class<C>::CustomProperty(const char* name, MemberFunctionGetCallback<T> c
 {
     v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
     std::lock_guard<std::mutex> lock(mutex_);
-    auto& funtionTemplate = functionTemplates_[isolate];
+    auto& functionTemplate = functionTemplates_[isolate];
 
-    funtionTemplate.Get(isolate)->PrototypeTemplate()->SetAccessorProperty(
+    functionTemplate.Get(isolate)->PrototypeTemplate()->SetAccessorProperty(
         v8::Local<v8::Name>::Cast(V8ValueConvertor::toV8Value<std::string>(name)),
         v8::FunctionTemplate::New(isolate,
             InternalMemberFunctionCallback<T, const v8::FunctionCallbackInfo<v8::Value>&>,
@@ -167,8 +167,8 @@ void V8Class<C>::CustomProperty(const char* name, FunctionGetCallback getter, Fu
 {
     v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
     std::lock_guard<std::mutex> lock(mutex_);
-    auto& funtionTemplate = functionTemplates_[isolate];
-    funtionTemplate.Get(isolate)->PrototypeTemplate()->SetAccessorProperty(
+    auto& functionTemplate = functionTemplates_[isolate];
+    functionTemplate.Get(isolate)->PrototypeTemplate()->SetAccessorProperty(
         v8::Local<v8::Name>::Cast(V8ValueConvertor::toV8Value<std::string>(name)),
         v8::FunctionTemplate::New(isolate, getter),
         v8::FunctionTemplate::New(isolate, setter));
@@ -181,8 +181,8 @@ void V8Class<C>::CustomProperty(const char* name, JSMemberFunctionCallback<T> ca
 {
     v8::Isolate* isolate = V8DeclarativeEngineInstance::GetV8Isolate();
     std::lock_guard<std::mutex> lock(mutex_);
-    auto& funtionTemplate = functionTemplates_[isolate];
-    funtionTemplate.Get(isolate)->PrototypeTemplate()->SetAccessorProperty(
+    auto& functionTemplate = functionTemplates_[isolate];
+    functionTemplate.Get(isolate)->PrototypeTemplate()->SetAccessorProperty(
         v8::Local<v8::Name>::Cast(V8ValueConvertor::toV8Value<std::string>(name)),
         v8::FunctionTemplate::New(
             isolate, InternalMemberFunctionCallback<T, const JSCallbackInfo&>, v8::Integer::New(isolate, getterId)),

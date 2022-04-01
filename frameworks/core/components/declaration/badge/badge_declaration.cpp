@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,12 +49,12 @@ bool BadgeDeclaration::SetSpecializedAttr(const std::pair<std::string, std::stri
 {
     static const LinearMapNode<void (*)(BadgeDeclaration&, const std::string&)> badgeAttrOperators[] = {
         { DOM_BADGE_COUNT, [](BadgeDeclaration& declaration, const std::string& value) {
-            declaration.SetMessageCount(static_cast<long long>(StringUtils::StringToLongInt(value)));
+            declaration.SetMessageCount(static_cast<int64_t>(StringUtils::StringToLongInt(value)));
             } },
         { DOM_BADGE_LABEL,
             [](BadgeDeclaration& declaration, const std::string& value) { declaration.SetBadgeLabel(value); } },
         { DOM_BADGE_MAX_COUNT, [](BadgeDeclaration& declaration, const std::string& value) {
-            declaration.SetMaxCount(static_cast<long long>(StringUtils::StringToLongInt(value)));
+            declaration.SetMaxCount(static_cast<int64_t>(StringUtils::StringToLongInt(value)));
             } },
         { DOM_BADGE_PLACEMENT,
             [](BadgeDeclaration& declaration, const std::string& value) {

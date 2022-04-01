@@ -82,7 +82,7 @@ void WebComponent::RequestFocus()
 {
     auto focus = focusElement_.Upgrade();
     if (focus) {
-        focus->RequestFocus();
+        focus->RequestFocusImmediately();
     }
 }
 

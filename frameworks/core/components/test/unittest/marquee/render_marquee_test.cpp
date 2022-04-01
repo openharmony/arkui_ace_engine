@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ uint64_t g_runningNano = 0;
 
 class TestMarqueeEventHandler : public MockEventHandler {
 public:
-    explicit TestMarqueeEventHandler(MarqueeEventCallback callback) : callback_(callback) {};
+    explicit TestMarqueeEventHandler(MarqueeEventCallback callback) : callback_(callback) {}
     ~TestMarqueeEventHandler() = default;
 
     void HandleAsyncEvent(const EventMarker& eventMarker) override

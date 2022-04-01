@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,12 +150,24 @@ void RosenRenderList::PaintItemZone(RenderContext& context, const RefPtr<RenderL
     SkRect skRect = SkRect::MakeXYWH(item->GetPaintRect().GetOffset().GetX(), item->GetPaintRect().GetOffset().GetY(),
         item->GetPaintRect().Width(), item->GetPaintRect().Height());
 
+    SkRRect rrect = SkRRect::MakeEmpty();
+    SkVector rectRadii[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
+    rectRadii[SkRRect::kUpperLeft_Corner] =
+        SkPoint::Make(NormalizeToPx(item->GetBorderRadius()), NormalizeToPx(item->GetBorderRadius()));
+    rectRadii[SkRRect::kUpperRight_Corner] =
+        SkPoint::Make(NormalizeToPx(item->GetBorderRadius()), NormalizeToPx(item->GetBorderRadius()));
+    rectRadii[SkRRect::kLowerRight_Corner] =
+        SkPoint::Make(NormalizeToPx(item->GetBorderRadius()), NormalizeToPx(item->GetBorderRadius()));
+    rectRadii[SkRRect::kLowerLeft_Corner] =
+        SkPoint::Make(NormalizeToPx(item->GetBorderRadius()), NormalizeToPx(item->GetBorderRadius()));
+    rrect.setRectRadii(skRect, rectRadii);
+
     SkPaint fillGeometry;
     fillGeometry.setAntiAlias(true);
     fillGeometry.setStyle(SkPaint::Style::kFill_Style);
     fillGeometry.setColor(0x1A0A59f7);
 
-    canvas->drawRect(skRect, fillGeometry);
+    canvas->drawRRect(rrect, fillGeometry);
 }
 
 } // namespace OHOS::Ace::V2

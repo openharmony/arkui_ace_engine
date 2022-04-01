@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -347,6 +347,10 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
             func->Execute(info);
         };
         RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(DEFAULT_TAP_COUNTS, DEFAULT_TAP_FINGERS);
+        if (!tapGesture) {
+            LOGE("tapGesture is null");
+            return;
+        }
         tapGesture->SetOnActionId(clickId);
         auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
         if (tapGesture) {
