@@ -217,6 +217,7 @@ void JsiClass<C>::Bind(BindingTarget t, FunctionCallback ctor)
     constructor_ = ctor;
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
+    LocalScope scope(vm);
     classFunction_ = panda::Global<panda::FunctionRef>(
         vm, panda::FunctionRef::NewClassFunction(vm, ConstructorInterceptor, nullptr, nullptr));
     classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
@@ -251,6 +252,7 @@ void JsiClass<C>::Bind(
     jsGcMark_ = gcMark;
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
+    LocalScope scope(vm);
     classFunction_ = panda::Global<panda::FunctionRef>(
         vm, panda::FunctionRef::NewClassFunction(vm, JSConstructorInterceptor, nullptr, nullptr));
     classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
@@ -285,6 +287,7 @@ void JsiClass<C>::Bind(BindingTarget t, JSDestructorCallback<C> dtor, JSGCMarkCa
     jsGcMark_ = gcMark;
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
+    LocalScope scope(vm);
     classFunction_ = panda::Global<panda::FunctionRef>(
         vm, panda::FunctionRef::NewClassFunction(vm, InternalConstructor<Args...>, nullptr, nullptr));
     classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
