@@ -303,6 +303,11 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     }
 
 #ifdef OHOS_STANDARD_SYSTEM
+    if (type == "router") {
+        AppExecFwk::FormMgr::GetInstance().RouterEvent(runningCardId_);
+        return;
+    }
+
     AAFwk::Want want;
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, (long)runningCardId_);
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_MESSAGE_KEY, action);
@@ -406,6 +411,14 @@ void FormManagerDelegate::OnDeathReceived()
         LOGE("relink to form manager fail!!!");
     }
 }
-#endif
 
+std::string FormManagerDelegate::WrapAction(const std::string& action)
+{
+    auto eventAction = JsonUtil::ParseJsonString(action);
+    if (!eventAction->Contains("bundleName")) {
+        eventAction->Put("bundleName", wantCache_.GetElement().GetBundleName().c_str());
+    }
+    return eventAction->ToString();
+}
+#endif
 } // namespace OHOS::Ace
