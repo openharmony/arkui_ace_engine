@@ -582,6 +582,7 @@ void AceContainer::DestroyContainer(int32_t instanceId)
         LOGE("no AceContainer with id %{private}d in AceEngine", instanceId);
         return;
     }
+    HdcRegister::Get().StopHdcRegister();
     container->Destroy();
     auto taskExecutor = container->GetTaskExecutor();
     if (taskExecutor) {
