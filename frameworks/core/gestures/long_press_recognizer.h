@@ -39,8 +39,10 @@ class LongPressRecognizer : public MultiFingersRecognizer {
 
 public:
     explicit LongPressRecognizer(const WeakPtr<PipelineContext>& context) : context_(context) {}
-    LongPressRecognizer(const WeakPtr<PipelineContext>& context, int32_t duration, int32_t fingers, bool repeat)
-        : context_(context), duration_(duration), repeat_(repeat)
+    LongPressRecognizer(const WeakPtr<PipelineContext>& context, int32_t duration, int32_t fingers, bool repeat,
+        bool isForDrag = false, bool isDisableMouseLeft = false)
+        : context_(context), duration_(duration), repeat_(repeat), isForDrag_(isForDrag),
+          isDisableMouseLeft_(isDisableMouseLeft)
     {
         fingers_ = fingers;
     }
@@ -80,6 +82,8 @@ private:
     TimeStamp time_;
     bool pendingEnd_ = false;
     bool pendingCancel_ = false;
+    bool isForDrag_ = false;
+    bool isDisableMouseLeft_ = false;
 };
 
 } // namespace OHOS::Ace

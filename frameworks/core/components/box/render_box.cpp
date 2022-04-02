@@ -152,8 +152,8 @@ void RenderBox::Update(const RefPtr<Component>& component)
             onDomDragDrop_ = AceAsyncEvent<void(const DragEndInfo&)>::Create(box->GetOnDomDragDrop(), context_);
         }
         if (!box->GetRemoteMessageEvent().IsEmpty()) {
-            remoteMessageEvent_ = AceAsyncEvent<void(const std::shared_ptr<ClickInfo>&)>::Create(
-                box->GetRemoteMessageEvent(), context_);
+            remoteMessageEvent_ =
+                AceAsyncEvent<void(const std::shared_ptr<ClickInfo>&)>::Create(box->GetRemoteMessageEvent(), context_);
         }
 
         auto context = GetContext().Upgrade();
@@ -241,8 +241,8 @@ void RenderBox::CreateDragDropRecognizer()
     }
 
     auto context = GetContext();
-    auto longPressRecognizer =
-        AceType::MakeRefPtr<OHOS::Ace::LongPressRecognizer>(context, DEFAULT_DURATION, DEFAULT_FINGERS, false);
+    auto longPressRecognizer = AceType::MakeRefPtr<OHOS::Ace::LongPressRecognizer>(
+        context, DEFAULT_DURATION, DEFAULT_FINGERS, false, true, false);
     PanDirection panDirection;
     auto panRecognizer =
         AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(context, DEFAULT_FINGERS, panDirection, DEFAULT_DISTANCE);
@@ -305,7 +305,7 @@ DragItemInfo RenderBox::GenerateDragItemInfo(const RefPtr<PipelineContext>& cont
     selectedItemSize_ = GetLayoutSize();
     auto extraParams = JsonUtil::Create(true);
     SetSelectedIndex(info);
-    if (selectedIndex_  != DEFAULT_INDEX) {
+    if (selectedIndex_ != DEFAULT_INDEX) {
         extraParams->Put("selectedIndex", selectedIndex_);
     }
 
@@ -339,8 +339,8 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
                 auto rect = pipelineContext->GetCurrentWindowRect();
                 dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
                     static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
-                    static_cast<int32_t>(info.GetGlobalPoint().GetY()) + rect.Top(),
-                    dragItemInfo.pixelMap->GetWidth(), dragItemInfo.pixelMap->GetHeight());
+                    static_cast<int32_t>(info.GetGlobalPoint().GetY()) + rect.Top(), dragItemInfo.pixelMap->GetWidth(),
+                    dragItemInfo.pixelMap->GetHeight());
                 dragWindow_->SetOffset(rect.Left(), rect.Top());
                 dragWindow_->DrawPixelMap(dragItemInfo.pixelMap);
             }
@@ -372,14 +372,14 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
 void RenderBox::PanOnActionUpdate(const GestureEvent& info)
 {
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-        if (isDragRenderBox_ && dragWindow_) {
-            int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
-            int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
-            if (dragWindow_) {
-                dragWindow_->MoveTo(x, y);
-            }
-            return;
+    if (isDragRenderBox_ && dragWindow_) {
+        int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
+        int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
+        if (dragWindow_) {
+            dragWindow_->MoveTo(x, y);
         }
+        return;
+    }
 #endif
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
@@ -433,29 +433,29 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
         return;
     }
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-        if (isDragRenderBox_) {
-            isDragRenderBox_ = false;
+    if (isDragRenderBox_) {
+        isDragRenderBox_ = false;
 
-            if (GetOnDrop()) {
-                RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
-                RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
-                event->SetPasteData(pasteData);
-                event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
-                event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+        if (GetOnDrop()) {
+            RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+            RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
+            event->SetPasteData(pasteData);
+            event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+            event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
 
-                auto extraParams = JsonUtil::Create(true);
-                extraParams->Put("selectedIndex", selectedIndex_);
-                extraParams->Put("insertIndex", insertIndex_);
-                (GetOnDrop())(event, extraParams->ToString());
-                pipelineContext->SetInitRenderNode(nullptr);
-            }
+            auto extraParams = JsonUtil::Create(true);
+            extraParams->Put("selectedIndex", selectedIndex_);
+            extraParams->Put("insertIndex", insertIndex_);
+            (GetOnDrop())(event, extraParams->ToString());
+            pipelineContext->SetInitRenderNode(nullptr);
         }
+    }
 
-        if (dragWindow_) {
-            dragWindow_->Destory();
-            dragWindow_ = nullptr;
-            return;
-        }
+    if (dragWindow_) {
+        dragWindow_->Destory();
+        dragWindow_ = nullptr;
+        return;
+    }
 #endif
     RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
     RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
@@ -1104,7 +1104,7 @@ bool RenderBox::HandleMouseEvent(const MouseEvent& event)
     if (!onMouse_) {
         return false;
     }
-    
+
     MouseInfo info;
     info.SetButton(event.button);
     info.SetAction(event.action);
@@ -1527,8 +1527,8 @@ double RenderBox::GetWindowBlurProgress() const
     return 0.0;
 }
 
-bool RenderBox::TouchTest(const Point& globalPoint, const Point& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result)
+bool RenderBox::TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
+    TouchTestResult& result)
 {
     if (recognizerHierarchy_.empty()) {
         return RenderBoxBase::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
@@ -1660,10 +1660,7 @@ void RenderBox::UpdateGestureRecognizerHierarchy(
     if (!success) {
         recognizerHierarchy_.clear();
         for (auto const& level : hierarchy) {
-            recognizerHierarchy_.emplace_back(
-                level.first,
-                std::vector<RefPtr<GestureRecognizer>>()
-                );
+            recognizerHierarchy_.emplace_back(level.first, std::vector<RefPtr<GestureRecognizer>>());
 
             for (auto const& gesture : level.second) {
                 auto recognizer = gesture->CreateRecognizer(context_);
@@ -1726,8 +1723,7 @@ void RenderBox::OnStatusStyleChanged(const VisualState state)
             case BoxStateAttribute::BORDER_WIDTH: {
                 auto widthState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
-                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf",
-                    state, widthState->value_.Value());
+                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf", state, widthState->value_.Value());
                 BoxComponentHelper::SetBorderWidth(GetBackDecoration(), widthState->value_);
             } break;
 
@@ -1741,8 +1737,7 @@ void RenderBox::OnStatusStyleChanged(const VisualState state)
             case BoxStateAttribute::WIDTH: {
                 auto valueState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
-                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf",
-                    state, valueState->value_.Value());
+                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf", state, valueState->value_.Value());
                 width_ = valueState->value_;
             } break;
 

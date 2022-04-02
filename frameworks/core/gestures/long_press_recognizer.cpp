@@ -15,6 +15,7 @@
 
 #include "core/gestures/long_press_recognizer.h"
 
+#include "core/event/ace_events.h"
 #include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
@@ -61,10 +62,18 @@ void LongPressRecognizer::OnRejected()
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    if (isDisableMouseLeft_ && event.sourceType == SourceType::MOUSE) {
+        LOGI("mouse left button is disabled for long press recognizer.");
+        return;
+    }
     if (fingers_ > MAX_FINGERS) {
         return;
     }
     LOGD("long press recognizer receives touch down event, begin to detect long press event");
+    int32_t curDuration = duration_;
+    if (isForDrag_ && event.sourceType == SourceType::MOUSE) {
+        curDuration = 0;
+    }
     if ((touchRestrict_.forbiddenType & TouchRestrict::LONG_PRESS) == TouchRestrict::LONG_PRESS) {
         LOGI("the long press is forbidden");
         return;
@@ -75,7 +84,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         AddToReferee(event.id, AceType::Claim(this));
         if (pointsCount_ == fingers_) {
             state_ = DetectState::DETECTING;
-            DeadlineTimer(duration_);
+            DeadlineTimer(curDuration);
         }
     } else {
         LOGW("the state is not ready for detecting long press gesture, state id %{public}d, id is %{public}d",

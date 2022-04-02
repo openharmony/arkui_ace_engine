@@ -231,8 +231,7 @@ void RenderList::Update(const RefPtr<Component>& component)
         CreateDragDropRecognizer();
     }
 
-
-    isMultiSelectable_  = component_->GetMultiSelectable();
+    isMultiSelectable_ = component_->GetMultiSelectable();
     hasHeight_ = component_->GetHasHeight();
     hasWidth_ = component_->GetHasWidth();
 
@@ -1678,18 +1677,14 @@ size_t RenderList::CalculateInsertIndex(
 
 bool RenderList::IsAxisScrollable(AxisDirection direction)
 {
-    return (((direction == AxisDirection::UP || direction == AxisDirection::LEFT) && !reachStart_) ||
-        ((direction == AxisDirection::DOWN || direction == AxisDirection::RIGHT) && !reachEnd_));
+    return (((AxisEvent::IsDirectionUp(direction) || AxisEvent::IsDirectionLeft(direction)) && !reachStart_) ||
+            ((AxisEvent::IsDirectionDown(direction) || AxisEvent::IsDirectionRight(direction)) && !reachEnd_));
 }
 
 void RenderList::HandleAxisEvent(const AxisEvent& event)
 {
-    double degree = 0.0f;
-    if (!NearZero(event.horizontalAxis)) {
-        degree = event.horizontalAxis;
-    } else if (!NearZero(event.verticalAxis)) {
-        degree = event.verticalAxis;
-    }
+    double degree =
+        GreatOrEqual(fabs(event.verticalAxis), fabs(event.horizontalAxis)) ? event.verticalAxis : event.horizontalAxis;
     double offset = SystemProperties::Vp2Px(DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP * degree / MOUSE_WHEEL_DEGREES);
     if (isAxisResponse_) {
         isAxisResponse_ = false;
@@ -1885,8 +1880,8 @@ void RenderList::HandleMouseEventWhenShiftDown(const MouseEvent& event)
     }
 }
 
-void RenderList::MultiSelectAllInRange(const RefPtr<RenderListItem>& firstItem,
-    const RefPtr<RenderListItem>& secondItem)
+void RenderList::MultiSelectAllInRange(
+    const RefPtr<RenderListItem>& firstItem, const RefPtr<RenderListItem>& secondItem)
 {
     ClearMultiSelect();
     if (!firstItem) {

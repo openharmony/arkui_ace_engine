@@ -15,16 +15,14 @@
 
 #include "core/components/scroll/render_scroll.h"
 
+#include <chrono>
+
 #include "base/geometry/axis.h"
-
-
 #include "core/animation/curve_animation.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/event/ace_event_helper.h"
 #include "core/gestures/timeout_recognizer.h"
 #include "core/pipeline/base/composed_element.h"
-
-#include <chrono>
 
 namespace OHOS::Ace {
 namespace {
@@ -379,10 +377,10 @@ bool RenderScroll::IsOutOfBottomBoundary()
 {
     if (IsRowReverse()) {
         return LessOrEqual(GetMainOffset(currentOffset_), (GetMainSize(viewPort_) - mainScrollExtent_)) &&
-                 ReachMaxCount();
+               ReachMaxCount();
     } else {
         return GreatOrEqual(GetMainOffset(currentOffset_), (mainScrollExtent_ - GetMainSize(viewPort_))) &&
-                 ReachMaxCount();
+               ReachMaxCount();
     }
 }
 
@@ -1070,18 +1068,14 @@ void RenderScroll::UpdateTouchRect()
 
 bool RenderScroll::IsAxisScrollable(AxisDirection direction)
 {
-    return (((direction == AxisDirection::UP || direction == AxisDirection::LEFT) && !IsAtTop()) ||
-        ((direction == AxisDirection::DOWN || direction == AxisDirection::RIGHT) && !IsAtBottom()));
+    return (((AxisEvent::IsDirectionUp(direction) || AxisEvent::IsDirectionLeft(direction)) && !IsAtTop()) ||
+            ((AxisEvent::IsDirectionDown(direction) || AxisEvent::IsDirectionRight(direction)) && !IsAtBottom()));
 }
 
 void RenderScroll::HandleAxisEvent(const AxisEvent& event)
 {
-    double degree = 0.0f;
-    if (!NearZero(event.horizontalAxis)) {
-        degree = event.horizontalAxis;
-    } else if (!NearZero(event.verticalAxis)) {
-        degree = event.verticalAxis;
-    }
+    double degree =
+        GreatOrEqual(fabs(event.verticalAxis), fabs(event.horizontalAxis)) ? event.verticalAxis : event.horizontalAxis;
     double offset = SystemProperties::Vp2Px(DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP * degree / MOUSE_WHEEL_DEGREES);
     Offset delta;
     if (axis_ == Axis::VERTICAL) {

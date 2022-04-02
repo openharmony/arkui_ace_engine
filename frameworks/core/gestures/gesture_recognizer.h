@@ -22,6 +22,7 @@
 
 #include "gesture_referee.h"
 
+#include "core/event/axis_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
 
@@ -58,6 +59,7 @@ public:
         return true;
     }
     bool HandleEvent(const TouchEvent& point) override;
+    bool HandleEvent(const AxisEvent& event) override;
 
     // Coordinate offset is used to calculate the local location of the touch point in the render node.
     void SetCoordinateOffset(const Offset& coordinateOffset)
@@ -158,6 +160,10 @@ protected:
     virtual void HandleTouchUpEvent(const TouchEvent& event) = 0;
     virtual void HandleTouchMoveEvent(const TouchEvent& event) = 0;
     virtual void HandleTouchCancelEvent(const TouchEvent& event) = 0;
+    virtual void HandleTouchDownEvent(const AxisEvent& event) {}
+    virtual void HandleTouchUpEvent(const AxisEvent& event) {}
+    virtual void HandleTouchMoveEvent(const AxisEvent& event) {}
+    virtual void HandleTouchCancelEvent(const AxisEvent& event) {}
 
     virtual void AddToReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer);
     virtual void DelFromReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer);
