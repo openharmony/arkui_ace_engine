@@ -1407,7 +1407,7 @@ void RenderGridScroll::OnPaintFinish()
 
 void RenderGridScroll::OnPredictLayout(int64_t deadline)
 {
-    auto startTime = GetSysTimestamp();  // unit: ns
+    auto startTime = GetSysTimestamp(); // unit: ns
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -1452,18 +1452,14 @@ void RenderGridScroll::OnPredictLayout(int64_t deadline)
 
 bool RenderGridScroll::IsAxisScrollable(AxisDirection direction)
 {
-    return (((direction == AxisDirection::UP || direction == AxisDirection::LEFT) && !reachHead_) ||
-        ((direction == AxisDirection::DOWN || direction == AxisDirection::RIGHT) && !reachTail_));
+    return (((AxisEvent::IsDirectionUp(direction) || AxisEvent::IsDirectionLeft(direction)) && !reachHead_) ||
+            ((AxisEvent::IsDirectionLeft(direction) || AxisEvent::IsDirectionRight(direction)) && !reachTail_));
 }
 
 void RenderGridScroll::HandleAxisEvent(const AxisEvent& event)
 {
-    double degree = 0.0f;
-    if (!NearZero(event.horizontalAxis)) {
-        degree = event.horizontalAxis;
-    } else if (!NearZero(event.verticalAxis)) {
-        degree = event.verticalAxis;
-    }
+    double degree =
+        GreatOrEqual(fabs(event.verticalAxis), fabs(event.horizontalAxis)) ? event.verticalAxis : event.horizontalAxis;
     double offset = SystemProperties::Vp2Px(DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP * degree / MOUSE_WHEEL_DEGREES);
     UpdateScrollPosition(-offset, SCROLL_FROM_ROTATE);
 }

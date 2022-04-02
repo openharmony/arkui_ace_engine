@@ -96,7 +96,6 @@ struct WindowBlurInfo {
     std::vector<RRect> coords_;
 };
 
-
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 using SubscribeCtrlACallback = std::function<void()>;
 
@@ -124,8 +123,8 @@ public:
 
     // This is used for subwindow, when the subwindow is created,a new subrootElement will be built
     RefPtr<Element> SetupSubRootElement();
-    RefPtr<DialogComponent> ShowDialog(const DialogProperties& dialogProperties, bool isRightToLeft,
-        const std::string& inspectorTag = "");
+    RefPtr<DialogComponent> ShowDialog(
+        const DialogProperties& dialogProperties, bool isRightToLeft, const std::string& inspectorTag = "");
     void CloseContextMenu();
     void GetBoundingRectData(int32_t nodeId, Rect& rect);
 
@@ -1263,6 +1262,7 @@ private:
     void ExitAnimation();
     void CreateGeometryTransition();
     void CorrectPosition();
+    void CreateTouchEventOnZoom(const AxisEvent& event);
 
     template<typename T>
     struct NodeCompare {
@@ -1330,6 +1330,11 @@ private:
     InitDragEventListener initDragEventListener_;
     GetViewScaleCallback getViewScaleCallback_;
     std::stack<bool> pendingImplicitLayout_;
+    std::vector<KeyCode> pressedKeyCodes;
+    TouchEvent zoomEventA_;
+    TouchEvent zoomEventB_;
+    bool isOnScrollZoomEvent_ = false;
+    bool isKeyCtrlPressed_ = false;
 
     Rect transparentHole_;
     // use for traversing cliping hole

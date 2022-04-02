@@ -395,8 +395,7 @@ private:
     void MultiSelectWhenShiftDown(const Rect& selectedZone);
     RefPtr<RenderListItem> GetPressItemWhenShiftDown(const Rect& selectedZone);
     void HandleMouseEventWhenShiftDown(const MouseEvent& event);
-    void MultiSelectAllInRange(const RefPtr<RenderListItem>& firstItem,
-        const RefPtr<RenderListItem>& secondItem);
+    void MultiSelectAllInRange(const RefPtr<RenderListItem>& firstItem, const RefPtr<RenderListItem>& secondItem);
     RefPtr<RenderListItem> firstItemWithShift_;
     RefPtr<RenderListItem> secondItemWithShift_;
 

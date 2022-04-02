@@ -15,8 +15,14 @@
 
 #include "core/pipeline/pipeline_context.h"
 
-#include <utility>
 #include <fstream>
+#include <utility>
+
+#include "base/memory/referenced.h"
+#include "base/utils/utils.h"
+#include "core/event/ace_events.h"
+#include "core/event/axis_event.h"
+#include "core/event/touch_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_node.h"
@@ -90,6 +96,8 @@ constexpr char JS_THREAD_NAME[] = "JS";
 constexpr char UI_THREAD_NAME[] = "UI";
 constexpr int32_t DEFAULT_VIEW_SCALE = 1;
 constexpr uint32_t DEFAULT_MODAL_COLOR = 0x00000000;
+constexpr float ZOOM_DISTANCE_DEFAULT = 50.0;       // TODO: Need confirm value
+constexpr float ZOOM_DISTANCE_MOVE_PER_WHEEL = 5.0; // TODO: Need confirm value
 
 PipelineContext::TimeProvider g_defaultTimeProvider = []() -> uint64_t {
     struct timespec ts;
@@ -1582,6 +1590,25 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     rootElement_->HandleSpecifiedKey(event);
     NotifyDestroyEventDismiss();
     SetShortcutKey(event);
+
+    pressedKeyCodes = event.pressedCodes;
+    isKeyCtrlPressed_ = !pressedKeyCodes.empty() && (pressedKeyCodes.back() == KeyCode::KEY_CTRL_LEFT ||
+                                                        pressedKeyCodes.back() == KeyCode::KEY_CTRL_RIGHT);
+    if ((event.code == KeyCode::KEY_CTRL_LEFT || event.code == KeyCode::KEY_CTRL_RIGHT) &&
+        event.action == KeyAction::UP) {
+        if (isOnScrollZoomEvent_) {
+            zoomEventA_.type = TouchType::UP;
+            zoomEventB_.type = TouchType::UP;
+            LOGI("Send TouchEventA(%{public}f, %{public}f, %{public}zu)", zoomEventA_.x, zoomEventA_.y,
+                zoomEventA_.type);
+            OnTouchEvent(zoomEventA_);
+            LOGI("Send TouchEventB(%{public}f, %{public}f, %{public}zu)", zoomEventB_.x, zoomEventB_.y,
+                zoomEventB_.type);
+            OnTouchEvent(zoomEventB_);
+            isOnScrollZoomEvent_ = false;
+        }
+    }
+
     return eventManager_->DispatchKeyEvent(event, rootElement_);
 }
 
@@ -1618,30 +1645,96 @@ void PipelineContext::SetShortcutKey(const KeyEvent& event)
 void PipelineContext::OnMouseEvent(const MouseEvent& event)
 {
     CHECK_RUN_ON(UI);
-    LOGD("OnMouseEvent: x=%{public}f, y=%{public}f, type=%{public}d. button=%{public}d, pressbutton=%{public}d}",
-        event.x, event.y, event.action, event.button, event.pressedButtons);
 
     if ((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
             event.action == MouseAction::MOVE) &&
         (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
         auto touchPoint = event.CreateTouchPoint();
+        LOGD("Mouse event to touch: button is %{public}d, action is %{public}d", event.button, event.action);
         OnTouchEvent(touchPoint);
     }
 
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    LOGD(
+        "MouseEvent (x,y): (%{public}f,%{public}f), button: %{public}d, action: %{public}d, pressedButtons: %{public}d",
+        scaleEvent.x, scaleEvent.y, scaleEvent.action, scaleEvent.button, scaleEvent.pressedButtons);
     eventManager_->MouseTest(scaleEvent, rootElement_->GetRenderNode());
     eventManager_->DispatchMouseEvent(scaleEvent);
     eventManager_->DispatchMouseHoverEvent(scaleEvent);
     FlushMessages();
 }
 
+void PipelineContext::CreateTouchEventOnZoom(const AxisEvent& event)
+{
+    zoomEventA_.id = 0;
+    zoomEventB_.id = 1;
+    zoomEventA_.type = zoomEventB_.type = TouchType::UNKNOWN;
+    zoomEventA_.time = zoomEventB_.time = event.time;
+    zoomEventA_.deviceId = zoomEventB_.deviceId = event.deviceId;
+    zoomEventA_.sourceType = zoomEventB_.sourceType = SourceType::MOUSE;
+    if (!isOnScrollZoomEvent_) {
+        zoomEventA_.x = zoomEventA_.screenX = event.x - ZOOM_DISTANCE_DEFAULT;
+        zoomEventA_.y = zoomEventA_.screenY = event.y;
+        zoomEventA_.type = TouchType::DOWN;
+        zoomEventB_.x = zoomEventB_.screenX = event.x + ZOOM_DISTANCE_DEFAULT;
+        zoomEventB_.y = zoomEventB_.screenY = event.y;
+        zoomEventB_.type = TouchType::DOWN;
+        LOGI("Send TouchEventA(%{public}f, %{public}f, %{public}zu)", zoomEventA_.x, zoomEventA_.y, zoomEventA_.type);
+        OnTouchEvent(zoomEventA_);
+        LOGI("Send TouchEventB(%{public}f, %{public}f, %{public}zu)", zoomEventB_.x, zoomEventB_.y, zoomEventB_.type);
+        OnTouchEvent(zoomEventB_);
+        isOnScrollZoomEvent_ = true;
+    }
+    if (LessOrEqual(event.verticalAxis, 0.0)) {
+        zoomEventA_.x = zoomEventA_.screenX -= ZOOM_DISTANCE_MOVE_PER_WHEEL;
+        zoomEventA_.type = TouchType::MOVE;
+        LOGI("Send TouchEventA(%{public}f, %{public}f, %{public}zu)", zoomEventA_.x, zoomEventA_.y, zoomEventA_.type);
+        OnTouchEvent(zoomEventA_);
+        zoomEventB_.x = zoomEventB_.screenX += ZOOM_DISTANCE_MOVE_PER_WHEEL;
+        zoomEventB_.type = TouchType::MOVE;
+        LOGI("Send TouchEventB(%{public}f, %{public}f, %{public}zu)", zoomEventB_.x, zoomEventB_.y, zoomEventB_.type);
+        OnTouchEvent(zoomEventB_);
+    } else {
+        if (!NearEqual(zoomEventA_.x, event.x)) {
+            zoomEventA_.x = zoomEventA_.screenX += ZOOM_DISTANCE_MOVE_PER_WHEEL;
+            zoomEventA_.type = TouchType::MOVE;
+            LOGI("Send TouchEventA(%{public}f, %{public}f, %{public}zu)", zoomEventA_.x, zoomEventA_.y,
+                zoomEventA_.type);
+            OnTouchEvent(zoomEventA_);
+        }
+        if (!NearEqual(zoomEventB_.x, event.x)) {
+            zoomEventB_.x = zoomEventB_.screenX -= ZOOM_DISTANCE_MOVE_PER_WHEEL;
+            zoomEventB_.type = TouchType::MOVE;
+            LOGI("Send TouchEventB(%{public}f, %{public}f, %{public}zu)", zoomEventB_.x, zoomEventB_.y,
+                zoomEventB_.type);
+            OnTouchEvent(zoomEventB_);
+        }
+    }
+}
+
 void PipelineContext::OnAxisEvent(const AxisEvent& event)
 {
-    LOGI("OnAxisEvent: x=%{public}f, y=%{public}f, horizontalAxis=%{public}f, verticalAxis=%{public}f", event.x,
-        event.y, event.horizontalAxis, event.verticalAxis);
+    if (isKeyCtrlPressed_ && !NearZero(event.verticalAxis) &&
+        (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE)) {
+        CreateTouchEventOnZoom(event);
+        return;
+    }
+
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
-    eventManager_->AxisTest(scaleEvent, rootElement_->GetRenderNode());
-    eventManager_->DispatchAxisEvent(scaleEvent);
+    LOGD("AxisEvent (x,y): (%{public}f,%{public}f), horizontalAxis: %{public}f, verticalAxis: %{public}f, action: "
+         "%{public}d",
+        scaleEvent.x, scaleEvent.y, scaleEvent.horizontalAxis, scaleEvent.verticalAxis, scaleEvent.action);
+
+    if (event.action == AxisAction::BEGIN) {
+        TouchRestrict touchRestrict { TouchRestrict::NONE };
+        eventManager_->TouchTest(scaleEvent, rootElement_->GetRenderNode(), touchRestrict);
+    }
+    eventManager_->DispatchTouchEvent(scaleEvent);
+
+    if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
+        eventManager_->AxisTest(scaleEvent, rootElement_->GetRenderNode());
+        eventManager_->DispatchAxisEvent(scaleEvent);
+    }
 }
 
 void PipelineContext::AddToHoverList(const RefPtr<RenderNode>& node)

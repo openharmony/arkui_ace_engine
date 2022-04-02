@@ -3593,8 +3593,8 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         });
     } else if (responseType == static_cast<int32_t>(ResponseType::LONGPRESS)) {
         auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        RefPtr<Gesture> longGesture =
-            AceType::MakeRefPtr<LongPressGesture>(DEFAULT_LONG_PRESS_FINGER, false, DEFAULT_LONG_PRESS_DURATION);
+        RefPtr<Gesture> longGesture = AceType::MakeRefPtr<LongPressGesture>(
+            DEFAULT_LONG_PRESS_FINGER, false, DEFAULT_LONG_PRESS_DURATION, false, true);
         longGesture->SetOnActionId([weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent)](const GestureEvent& info) {
             auto refPtr = weak.Upgrade();
             if (!refPtr) {
