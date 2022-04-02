@@ -92,7 +92,7 @@ JSRef<JSVal> DatePickerChangeEventToJSValue(const DatePickerChangeEvent& eventIn
             LOGI("key[%{public}s] is not exist.", key.c_str());
             continue;
         }
-        obj->SetProperty<std::string>(key.c_str(), value->ToString().c_str());
+        obj->SetProperty<int32_t>(key.c_str(), value->GetInt());
     }
     return JSRef<JSVal>::Cast(obj);
 }
