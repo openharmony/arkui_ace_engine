@@ -502,6 +502,31 @@ void RenderRating::ConstrainScore(double& score, double lowerBoundary, double up
     }
 }
 
+WeakPtr<RenderNode> RenderRating::CheckHoverNode()
+{
+    return AceType::WeakClaim<RenderNode>(this);
+}
+
+bool RenderRating::HandleMouseEvent(const MouseEvent& event)
+{
+    OnMouseHoverEnterTest();
+    if (NearZero(singleWidth_)) {
+        return false;
+    }
+    auto localPoint = event.GetScreenOffset() - GetGlobalOffset();
+    double offsetDeltaX = (GetLayoutSize().Width() - ratingSize_.Width()) / 2.0;
+    int32_t starIndex = (int32_t)floor((localPoint.GetX() - offsetDeltaX) / singleWidth_);
+    if (onHover_) {
+        PlayEventEffectAnimation(starIndex);
+    }
+    return true;
+}
+
+void RenderRating::AnimateMouseHoverEnter()
+{
+    OnMouseHoverEnterTest();
+}
+
 void RenderRating::OnMouseHoverEnterTest()
 {
     operationEvent_ = OperationEvent::RATING_MOUSE_EVENT;
@@ -509,6 +534,11 @@ void RenderRating::OnMouseHoverEnterTest()
         focusAnimation_->CancelFocusAnimation();
     }
     onHover_ = true;
+}
+
+void RenderRating::AnimateMouseHoverExit()
+{
+    OnMouseHoverExitTest();
 }
 
 void RenderRating::OnMouseHoverExitTest()

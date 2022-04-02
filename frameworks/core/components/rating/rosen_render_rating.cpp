@@ -44,7 +44,7 @@ void RosenRenderRating::Paint(RenderContext& context, const Offset& offset)
         double focusRadius = singleWidth_ - imageVerticalOffset * 2;
         RequestFocusAnimation(animationOffset + GetGlobalOffset(), Size(focusRadius, focusRadius), focusRadius);
     }
-    if (IsPhone() && !isIndicator_) {
+    if ((IsPhone() || IsTablet()) && !isIndicator_) {
         PaintHoverRect(canvas);
     }
     PaintRatingBar(context, canvas);
