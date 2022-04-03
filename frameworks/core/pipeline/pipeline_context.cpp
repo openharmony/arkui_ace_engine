@@ -1084,8 +1084,10 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
         RefPtr<DisplayComponent> display = AceType::MakeRefPtr<DisplayComponent>(pageComponent);
         stageElement->PushPage(display);
     }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+
+#if defined(ENABLE_NATIVE_VIEW) || defined(ENABLE_ROSEN_BACKEND)
     if (GetIsDeclarative()) {
+        // if not use flutter scheduler, can flush pipeline immediately.
         if (isSurfaceReady_) {
             FlushPipelineImmediately();
         } else {
