@@ -719,9 +719,9 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
  * limitations under the License.
  */
 class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
-    constructor(linkSouce, owningChildView, thisPropertyName) {
+    constructor(linkSource, owningChildView, thisPropertyName) {
         super(owningChildView, thisPropertyName);
-        this.linkedParentProperty_ = linkSouce;
+        this.linkedParentProperty_ = linkSource;
         // register to the parent property
         this.linkedParentProperty_.subscribeMe(this);
         // register to the ObservedObject
@@ -1967,6 +1967,7 @@ class PersistentStorage {
         });
         this.links_.clear();
         SubscriberManager.Get().delete(this.id__());
+        PersistentStorage.Storage_.clear();
     }
     id__() {
         return this.id_;
@@ -1987,7 +1988,6 @@ class PersistentStorage {
     }
 }
 PersistentStorage.Instance_ = undefined;
-;
 /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -2129,3 +2129,4 @@ Environment.Instance_ = undefined;
  * limitations under the License.
  */
 console.debug("ACE State Mgmt init ...");
+PersistentStorage.ConfigureBackend(new Storage());

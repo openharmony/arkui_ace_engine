@@ -17,12 +17,15 @@
 
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
 #include "core/common/clipboard/clipboard_proxy.h"
+#include "core/common/storage/storage_proxy.h"
+#include "adapter/ohos/capability/preference/storage_impl.h"
 
 namespace OHOS::Ace {
 
 void CapabilityRegistry::Register()
 {
     ClipboardProxy::GetInstance()->SetDelegate(std::make_unique<ClipboardProxyImpl>());
+    StorageProxy::GetInstance()->SetDelegate(std::make_unique<StorageProxyImpl>());
 }
 
 } // namespace OHOS::Ace

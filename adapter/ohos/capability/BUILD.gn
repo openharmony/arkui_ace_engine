@@ -24,16 +24,27 @@ template("ace_capability_ohos_source_set") {
 
     configs = [ "$ace_root:ace_config" ]
 
-    sources = [ "clipboard/clipboard_impl.cpp" ]
-
+    sources = [
+      "clipboard/clipboard_impl.cpp",
+      "preference/storage_impl.cpp",
+    ]
+    include_dirs = [ "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_preferences/include/" ]
+    external_deps = []
     if (defined(config.enable_system_clipboard) &&
         config.enable_system_clipboard) {
       external_deps = [
         "ability_base:want",
         "ipc:ipc_core",
+        "native_appdatamgr:native_preferences",
         "pasteboard_native:pasteboard_client",
       ]
       defines += [ "SYSTEM_CLIPBOARD_SUPPORTED" ]
+    } else {
+      external_deps = [
+        "ability_base:want",
+        "ipc:ipc_core",
+        "native_appdatamgr:native_preferences",
+      ]
     }
   }
 }
