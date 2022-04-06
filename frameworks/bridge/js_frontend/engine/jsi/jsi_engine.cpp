@@ -1641,7 +1641,7 @@ shared_ptr<JsValue> JsHandlePageRoute(
             { ROUTE_PAGE_BACK,
                 [](const std::string& uri, const std::string& params, JsiEngineInstance& instance) {
                     LOGD("JsBackRoute uri = %{private}s", uri.c_str());
-                    instance.GetFrontendDelegate()->Back(uri);
+                    instance.GetFrontendDelegate()->Back(uri, params);
                     return instance.GetJsRuntime()->NewNull();
                 } },
             { ROUTE_PAGE_CLEAR,

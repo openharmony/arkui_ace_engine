@@ -928,7 +928,7 @@ JSValue JsHandlePageRoute(JSContext* ctx, JSValueConst argv, const std::string& 
             { ROUTE_PAGE_BACK,
                 [](const std::string& uri, const std::string& params, QjsEngineInstance& instance) {
                     LOGD("JsBackRoute uri = %{private}s", uri.c_str());
-                    instance.GetDelegate()->Back(uri);
+                    instance.GetDelegate()->Back(uri, params);
                     return JS_NULL;
                 } },
             { ROUTE_PAGE_CLEAR,

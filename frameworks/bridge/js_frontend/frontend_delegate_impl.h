@@ -261,7 +261,7 @@ public:
     // FrontendDelegate overrides.
     void Push(const std::string& uri, const std::string& params) override;
     void Replace(const std::string& uri, const std::string& params) override;
-    void Back(const std::string& uri, const std::string& params = "") override;
+    void Back(const std::string& uri, const std::string& params) override;
     void PostponePageTransition() override;
     void LaunchPageTransition() override;
     void Clear() override;
@@ -418,7 +418,7 @@ private:
     void FlushAnimationTasks();
     void ParseManifest();
 
-    void BackImplement(const std::string& uri);
+    void BackImplement(const std::string& uri, const std::string& params);
 
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;
@@ -427,6 +427,7 @@ private:
     bool isStagingPageExist_ = false;
     std::string mainPagePath_;
     std::string backUri_;
+    std::string backParam_;
     std::vector<PageInfo> pageRouteStack_;
     std::unordered_map<int32_t, RefPtr<JsAcePage>> pageMap_;
     std::unordered_map<int32_t, std::string> pageParamMap_;
