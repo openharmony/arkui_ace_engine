@@ -80,6 +80,10 @@ public:
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) = 0;
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode) = 0;
 
+    // Window color
+    virtual uint32_t GetBackgroundColor() = 0;
+    virtual void SetBackgroundColor(uint32_t color) = 0;
+
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
 };
 

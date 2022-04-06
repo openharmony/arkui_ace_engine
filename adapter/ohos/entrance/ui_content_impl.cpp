@@ -553,6 +553,39 @@ void UIContentImpl::Destroy()
     Platform::AceContainer::DestroyContainer(instanceId_);
 }
 
+
+uint32_t UIContentImpl::GetBackgroundColor()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("GetBackgroundColor failed: container is null. return 0x000000");
+        return 0x000000;
+    }
+    auto pipeline = container->GetPipelineContext();
+    if (!pipeline) {
+        LOGE("GetBackgroundColor failed: pipeline is null. return 0x000000");
+        return 0x000000;
+    }
+    LOGI("UIContentImpl::GetBackgroundColor, value is %{public}d", pipeline->GetRootBgColor().GetValue());
+    return pipeline->GetRootBgColor().GetValue();
+}
+
+void UIContentImpl::SetBackgroundColor(uint32_t color)
+{
+    LOGI("UIContentImpl::SetBackgroundColor color is %{public}d", color);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("SetBackgroundColor failed: container is null.");
+        return;
+    }
+    auto pipeline = container->GetPipelineContext();
+    if (!pipeline) {
+        LOGE("SetBackgroundColor failed: pipeline is null. return 0x000000");
+        return;
+    }
+    pipeline->SetRootBgColor(Color(color));
+}
+
 bool UIContentImpl::ProcessBackPressed()
 {
     LOGI("UIContent ProcessBackPressed");
