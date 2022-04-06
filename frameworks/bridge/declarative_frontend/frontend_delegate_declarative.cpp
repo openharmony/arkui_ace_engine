@@ -468,7 +468,7 @@ void FrontendDelegateDeclarative::OnBackGround()
         TaskExecutor::TaskType::JS);
 }
 
-void FrontendDelegateDeclarative::OnForground()
+void FrontendDelegateDeclarative::OnForeground()
 {
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {

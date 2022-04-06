@@ -46,6 +46,7 @@ public:
     void Focus() override;
     void UnFocus() override;
     void Destroy() override;
+    void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
     // distribute
     void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) override;
