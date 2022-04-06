@@ -53,8 +53,7 @@ void StorageImpl::Clear()
         return;
     }
     pref->Clear();
-    LOGI("Clear preferences");
-    NativePreferences::PreferencesHelper::RemovePreferencesFromCache(fileName_);
+    LOGI("StorageImpl: Clear preferences");
     NativePreferences::PreferencesHelper::DeletePreferences(fileName_);
 }
 
@@ -65,7 +64,7 @@ void StorageImpl::Delete(const std::string& key)
         LOGE("StorageImpl: Preference get null");
         return;
     }
-    LOGI("Delete preference with key %{public}s", key.c_str());
+    LOGI("StorageImpl: Delete preference with key %{public}s", key.c_str());
     pref->Delete(key);
     pref->FlushSync();
 }
