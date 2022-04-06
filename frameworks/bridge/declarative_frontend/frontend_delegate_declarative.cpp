@@ -1306,7 +1306,9 @@ void FrontendDelegateDeclarative::LoadPage(
             page->FlushCommands();
             // just make sure the pipelineContext is created.
             auto pipeline = delegate->pipelineContextHolder_.Get();
-            pipeline->SetMinPlatformVersion(delegate->GetMinPlatformVersion());
+            if (delegate->GetMinPlatformVersion() > 0) {
+                pipeline->SetMinPlatformVersion(delegate->GetMinPlatformVersion());
+            }
             delegate->taskExecutor_->PostTask(
                 [weak, page] {
                     auto delegate = weak.Upgrade();
