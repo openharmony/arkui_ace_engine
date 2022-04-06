@@ -1979,6 +1979,9 @@ void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail)
     if (isHead && !rsNode_) {
         // create RSNode in first node of JSview
         rsNode_ = CreateRSNode();
+    } else if (!isHead && rsNode_) {
+        // destroy unneeded RSNode
+        rsNode_ = nullptr;
     }
 #endif
 }
