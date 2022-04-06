@@ -34,8 +34,6 @@ config("standard_camera_config") {
     "//foundation/multimedia/camera_standard/services/camera_service/binder/client/include",
     "//foundation/multimedia/camera_standard/services/camera_service/binder/server/include",
     "//foundation/multimedia/camera_standard/services/camera_service/include",
-    "//foundation/multimedia/media_standard/interfaces/innerkits/native/media/include",
-    "//foundation/multimedia/media_standard/interfaces/kits/native/include",
     "//utils/native/base/include",
   ]
 }
