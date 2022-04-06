@@ -2897,6 +2897,9 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
         return;
     }
 
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    popupParam->SetTargetMargin(boxComponent->GetMargin());
+
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     if (!inspector) {
         LOGE("this component does not have inspector");
