@@ -578,12 +578,20 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
         LOGE("SetBackgroundColor failed: container is null.");
         return;
     }
-    auto pipeline = container->GetPipelineContext();
-    if (!pipeline) {
-        LOGE("SetBackgroundColor failed: pipeline is null. return 0x000000");
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("SetBackgroundColor failed: taskExecutor is null.");
         return;
     }
-    pipeline->SetRootBgColor(Color(color));
+    taskExecutor->PostTask([container, bgColor = color]() {
+        auto pipelineContext = container->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGE("SetBackgroundColor failed, pipeline context is null.");
+            return;
+        }
+        pipelineContext->SetRootBgColor(Color(bgColor));
+    }, TaskExecutor::TaskType::UI);
 }
 
 bool UIContentImpl::ProcessBackPressed()

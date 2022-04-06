@@ -2169,14 +2169,15 @@ void PipelineContext::SetRootRect(double width, double height, double offset) co
 
 void PipelineContext::SetRootBgColor(const Color& color)
 {
+    LOGI("PipelineContext::SetRootBgColor set bgColor %{public}d", color.GetValue());
     rootBgColor_ = color;
     if (!themeManager_) {
-        LOGE("PipelineContext::SetRootBgColor:themeManager_ is nullptr!");
+        LOGW("PipelineContext::SetRootBgColor:themeManager_ is nullptr!");
         return;
     }
     auto appTheme = themeManager_->GetTheme<AppTheme>();
     if (!appTheme) {
-        LOGE("GetTheme failed!");
+        LOGW("GetTheme failed!");
         return;
     }
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
