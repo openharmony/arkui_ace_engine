@@ -2862,8 +2862,11 @@ void PipelineContext::RootLostFocus() const
     }
 }
 
-void PipelineContext::WindowFocus(bool isFocus) const
+void PipelineContext::WindowFocus(bool isFocus)
 {
+    if (!isFocus) {
+        OnVirtualKeyboardAreaChange(Rect());
+    }
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         LOGW("WindowFocus failed, Window modal is not container.");
         return;
