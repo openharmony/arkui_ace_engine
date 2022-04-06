@@ -475,6 +475,14 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     Platform::AceContainer::SetView(flutterAceView, density, 0, 0, window_->GetWindowId(), callback);
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
     auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
+    // Set sdk version in module json mode
+    if (isModelJson) {
+        auto pipeline = container->GetPipelineContext();
+        if (pipeline && appInfo) {
+            LOGI("SetMinPlatformVersion code is %{public}d", appInfo->minCompatibleVersionCode);
+            pipeline->SetMinPlatformVersion(appInfo->minCompatibleVersionCode);
+        }
+    }
     if (!storage) {
         container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
     } else {

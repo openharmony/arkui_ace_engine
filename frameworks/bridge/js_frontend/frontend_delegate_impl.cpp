@@ -1144,7 +1144,9 @@ void FrontendDelegateImpl::LoadPage(int32_t pageId, const std::string& url, bool
                 LOGE("the pipeline context is nullptr");
                 return;
             }
-            pipelineContext->SetMinPlatformVersion(delegate->GetMinPlatformVersion());
+            if (delegate->GetMinPlatformVersion() > 0) {
+                pipelineContext->SetMinPlatformVersion(delegate->GetMinPlatformVersion());
+            }
             delegate->taskExecutor_->PostTask(
                 [weak, page] {
                     auto delegate = weak.Upgrade();
