@@ -24,15 +24,13 @@ namespace OHOS::Ace::Framework {
 // NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto PANDA_MAIN_FUNCTION = "_GLOBAL::func_main_0";
 
-Local<JSValueRef> FunctionCallback(EcmaVM *vm, Local<JSValueRef> thisValue,
-                                   const Local<JSValueRef> argument[],  // NOLINT(modernize-avoid-c-arrays)
-                                   int32_t length, void *data)
+Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo *info)
 {
-    auto package = reinterpret_cast<PandaFunctionData *>(data);
+    auto package = reinterpret_cast<PandaFunctionData *>(info->GetData());
     if (package == nullptr) {
-        return JSValueRef::Undefined(vm);
+        return JSValueRef::Undefined(info->GetVM());
     }
-    return package->Callback(thisValue, argument, length);
+    return package->Callback(info);
 }
 
 bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
@@ -189,7 +187,7 @@ shared_ptr<JsValue> ArkJSRuntime::NewFunction(RegisterFunctionType func)
     LocalScope scope(vm_);
     auto data = new PandaFunctionData(shared_from_this(), func);
     dataList_.emplace_back(data);
-    return std::make_shared<ArkJSValue>(shared_from_this(), FunctionRef::New(vm_, FunctionCallback, data));
+    return std::make_shared<ArkJSValue>(shared_from_this(), FunctionRef::New(vm_, FunctionCallback, nullptr, data));
 }
 
 shared_ptr<JsValue> ArkJSRuntime::NewNativePointer(void *ptr)
@@ -220,18 +218,18 @@ void ArkJSRuntime::ExecutePendingJob()
     JSNApi::ExecutePendingJob(vm_);
 }
 
-Local<JSValueRef> PandaFunctionData::Callback(const Local<JSValueRef> &thisValue,
-                                              const Local<JSValueRef> argument[],  // NOLINT(modernize-avoid-c-arrays)
-                                              int32_t length) const
+Local<JSValueRef> PandaFunctionData::Callback(panda::JsiRuntimeCallInfo *info) const
 {
     EscapeLocalScope scope(runtime_->GetEcmaVm());
-    shared_ptr<JsValue> thisPtr = std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(runtime_, thisValue));
+    shared_ptr<JsValue> thisPtr =
+        std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(runtime_, info->GetThisRef()));
 
     std::vector<shared_ptr<JsValue>> argv;
+    uint32_t length = info->GetArgsNumber();
     argv.reserve(length);
     for (int i = 0; i < length; ++i) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        argv.emplace_back(std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(runtime_, argument[i])));
+        argv.emplace_back(
+            std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(runtime_, info->GetCallArgRef(i))));
     }
     shared_ptr<JsValue> result = func_(runtime_, thisPtr, argv, length);
     return scope.Escape(std::static_pointer_cast<ArkJSValue>(result)->GetValue(runtime_));

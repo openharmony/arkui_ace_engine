@@ -106,14 +106,10 @@ public:
     NO_MOVE_SEMANTIC(PandaFunctionData);
 
 private:
-    Local<JSValueRef> Callback(const Local<JSValueRef> &thisValue,
-                               const Local<JSValueRef> argument[],  // NOLINT(modernize-avoid-c-arrays)
-                               int32_t length) const;
+    Local<JSValueRef> Callback(panda::JsiRuntimeCallInfo *info) const;
     shared_ptr<ArkJSRuntime> runtime_;
     RegisterFunctionType func_;
-    friend Local<JSValueRef> FunctionCallback(EcmaVM *vm, Local<JSValueRef> thisValue,
-                                              const Local<JSValueRef> argument[],  // NOLINT(modernize-avoid-c-arrays)
-                                              int32_t length, void *data);
+    friend Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo *info);
 };
 }  // namespace OHOS::Ace::Framework
 #endif  // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_RUNTIME_H
