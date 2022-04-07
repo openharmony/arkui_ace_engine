@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,46 @@ public:
     void SetChecked(bool checked)
     {
         checked_ = checked;
+    }
+
+    bool GetCheckBoxValue() const
+    {
+        if (component_) {
+            return component_->GetValue();
+        }
+        return false;
+    }
+
+    const std::string& GetBelongGroup() const
+    {
+        if (component_) {
+            return component_->GetBelongGroup();
+        }
+        return "";
+    }
+
+    const std::string& GetCheckboxName() const
+    {
+        if (component_) {
+            return component_->GetCheckboxName();
+        }
+        return "";
+    }
+
+    const std::string& GetGroupName() const
+    {
+        if (component_) {
+            return component_->GetGroupName();
+        }
+        return "";
+    }
+
+    const Color& GetSelectedColor() const
+    {
+        if (component_) {
+            return component_->GetActiveColor();
+        }
+        return Color::TRANSPARENT;
     }
 
     void UpdateUIStatus() override
@@ -80,7 +120,6 @@ protected:
     SelectStatus status_ = SelectStatus::ALL;
     SelectStatus lastStatus_ = SelectStatus::ALL;
     double shapeScale_ = 1.0;
-    std::string checkboxGroupName_ = "";
     RefPtr<CheckboxComponent> component_;
     bool isGroup_ = false;
     bool selectAll_ = false;
