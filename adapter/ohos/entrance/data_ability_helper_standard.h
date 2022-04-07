@@ -18,6 +18,8 @@
 
 #include "base/resource/data_ability_helper.h"
 
+#include "pixel_map.h"
+
 namespace OHOS::AppExecFwk {
     class DataAbilityHelper;
     class Context;
@@ -33,6 +35,7 @@ namespace OHOS {
 
 namespace OHOS::Ace {
 
+using DataAbilityThumbnailQueryImpl = std::function<std::unique_ptr<Media::PixelMap>(const std::string&)>;
 class DataAbilityHelperStandard : public DataAbilityHelper {
     DECLARE_ACE_TYPE(DataAbilityHelperStandard, DataAbilityHelper)
 
@@ -42,12 +45,15 @@ public:
     ~DataAbilityHelperStandard() override = default;
 
     int32_t OpenFile(const std::string& uriStr, const std::string& mode) override;
+    void* QueryThumbnailResFromDataAbility(const std::string& uri) override;
 
 private:
     bool useStageModel_ = false;
     std::shared_ptr<AppExecFwk::DataAbilityHelper> dataAbilityHelper_;
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext_;
     std::shared_ptr<OHOS::Uri> uri_;
+    DataAbilityThumbnailQueryImpl dataAbilityThumbnailQueryImpl_;
+    std::unique_ptr<Media::PixelMap> pixmap_;
 };
 
 } // namespace OHOS::Ace

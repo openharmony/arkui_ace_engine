@@ -28,6 +28,16 @@ std::unique_ptr<DataProviderRes> DataProviderManager::GetDataProviderResFromUri(
     }
     return nullptr;
 }
+ 
+void* DataProviderManagerStandard::GetDataProviderThumbnailResFromUri(const std::string& uriStr)
+{
+    InitHelper();
+    if (!helper_) {
+        LOGE("data ability helper is null when try query thumbnail resource, uri: %{private}s", uriStr.c_str());
+        return nullptr;
+    }
+    return helper_->QueryThumbnailResFromDataAbility(uriStr);
+}
 
 std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderResFromUri(const std::string& uriStr)
 {
