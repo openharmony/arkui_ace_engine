@@ -95,6 +95,10 @@ public:
     {
         return SystemProperties::GetDeviceType() == DeviceType::PHONE;
     }
+    bool IsTablet() const
+    {
+        return SystemProperties::GetDeviceType() == DeviceType::TABLET;
+    }
     void CalculateRatingSize();
     void FireChangeEvent();
     void SetFocusAnimation(const RefPtr<RenderFocusAnimation>& focusAnimation)
@@ -134,6 +138,10 @@ protected:
     void OnMouseHoverEnterTest() override;
     void OnMouseHoverExitTest() override;
     bool MouseHoverTest(const Point& parentLocalPoint) override;
+    void AnimateMouseHoverEnter() override;
+    void AnimateMouseHoverExit() override;
+    WeakPtr<RenderNode> CheckHoverNode() override;
+    virtual bool HandleMouseEvent(const MouseEvent& event) override;
     virtual void PaintFocus(
         const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context) {}
     virtual void PaintFocus(
