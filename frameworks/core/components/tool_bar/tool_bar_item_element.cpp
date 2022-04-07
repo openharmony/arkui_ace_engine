@@ -58,7 +58,7 @@ void ToolBarItemElement::Update()
         if (optionChildrenCallBack_ && renderNode_) {
             auto renderToolBarItem = AceType::DynamicCast<RenderToolBarItem>(renderNode_);
             if (renderToolBarItem) {
-                IniteSelectPopup();
+                InitSelectPopup();
                 renderToolBarItem->Initialize();
             }
         }
@@ -66,7 +66,7 @@ void ToolBarItemElement::Update()
     SoleChildElement::Update();
 }
 
-void ToolBarItemElement::IniteSelectPopup()
+void ToolBarItemElement::InitSelectPopup()
 {
     if (!popup_) {
         popup_ = AceType::MakeRefPtr<SelectPopupComponent>();
@@ -81,6 +81,7 @@ void ToolBarItemElement::IniteSelectPopup()
             RefPtr<OptionComponent> option = AceType::DynamicCast<OptionComponent>(pos);
             if (option) {
                 option->InitTheme(GetThemeManager());
+                option->SetSelectable(false);
                 popup_->AppendSelectOption(option);
             }
         }
