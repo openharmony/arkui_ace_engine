@@ -79,7 +79,7 @@ public:
     void OnJSCallback(const std::string& callbackId, const std::string& data);
     bool OnPageBackPress();
     void OnBackGround();
-    void OnForground();
+    void OnForeground();
     void OnConfigurationUpdated(const std::string& data);
     void OnSaveAbilityState(std::string& data);
     void OnRestoreAbilityState(const std::string& data);

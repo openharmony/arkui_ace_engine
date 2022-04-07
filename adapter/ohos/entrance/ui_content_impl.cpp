@@ -52,6 +52,7 @@ namespace {
 const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
 const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
+const std::string START_PARAMS_KEY = "__startParams";
 
 } // namespace
 
@@ -561,6 +562,13 @@ void UIContentImpl::Destroy()
     Platform::AceContainer::DestroyContainer(instanceId_);
 }
 
+void UIContentImpl::OnNewWant(const OHOS::AAFwk::Want& want)
+{
+    LOGI("UIContent OnNewWant");
+    Platform::AceContainer::OnShow(instanceId_);
+    std::string params = want.GetStringParam(START_PARAMS_KEY);
+    Platform::AceContainer::OnNewRequest(instanceId_, params);
+}
 
 uint32_t UIContentImpl::GetBackgroundColor()
 {

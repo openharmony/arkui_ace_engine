@@ -37,6 +37,10 @@ enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
 }
 
+namespace AAFwk {
+class Want;
+}
+
 namespace MMI {
 class PointerEvent;
 class KeyEvent;
@@ -65,6 +69,7 @@ public:
     virtual void Focus() = 0;
     virtual void UnFocus() = 0;
     virtual void Destroy() = 0;
+    virtual void OnNewWant(const OHOS::AAFwk::Want& want) = 0;
 
     // distribute
     virtual void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) = 0;
