@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,9 +32,10 @@ public:
 
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
-    std::string GetChecked() const;
+    std::string GetCheckBoxName() const;
+    std::string GetCheckBoxGroup() const;
     std::string GetSelectedColor() const;
-    std::string GetToggleType() const;
+    std::string GetSelect() const;
 
     AceType::IdType GetTargetTypeId() const override
     {
@@ -47,4 +48,4 @@ private:
 
 } // namespace OHOS::Ace::V2
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_STACK_COMPOSED_ELEMENT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_CHECKBOX_COMPOSED_ELEMENT_H

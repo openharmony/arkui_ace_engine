@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,9 +25,10 @@ namespace OHOS::Ace::V2 {
 namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const CheckboxComposedElement&)>> CREATE_JSON_MAP {
-    { "isOn", [](const CheckboxComposedElement& inspector) { return inspector.GetChecked(); } },
+    { "name", [](const CheckboxComposedElement& inspector) { return inspector.GetCheckBoxName(); } },
+    { "group", [](const CheckboxComposedElement& inspector) { return inspector.GetCheckBoxGroup(); } },
     { "selectedColor", [](const CheckboxComposedElement& inspector) { return inspector.GetSelectedColor(); } },
-    { "type", [](const CheckboxComposedElement& inspector) { return inspector.GetToggleType(); } }
+    { "select", [](const CheckboxComposedElement& inspector) { return inspector.GetSelect(); } }
 };
 
 } // namespace
@@ -35,9 +36,10 @@ const std::unordered_map<std::string, std::function<std::string(const CheckboxCo
 void CheckboxComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
-    DumpLog::GetInstance().AddDesc(std::string("isOn: ").append(GetChecked()));
+    DumpLog::GetInstance().AddDesc(std::string("name: ").append(GetCheckBoxName()));
+    DumpLog::GetInstance().AddDesc(std::string("group: ").append(GetCheckBoxGroup()));
     DumpLog::GetInstance().AddDesc(std::string("selectedColor: ").append(GetSelectedColor()));
-    DumpLog::GetInstance().AddDesc(std::string("type: ").append(GetToggleType()));
+    DumpLog::GetInstance().AddDesc(std::string("select: ").append(GetSelect()));
 }
 
 std::unique_ptr<JsonValue> CheckboxComposedElement::ToJsonObject() const
@@ -49,16 +51,31 @@ std::unique_ptr<JsonValue> CheckboxComposedElement::ToJsonObject() const
     return resultJson;
 }
 
-std::string CheckboxComposedElement::GetChecked() const
+std::string CheckboxComposedElement::GetCheckBoxName() const
 {
     auto renderCheckbox = GetRenderCheckbox();
-    auto checked = renderCheckbox ? renderCheckbox->GetChecked() : false;
-    return ConvertBoolToString(checked);
+    if (renderCheckbox) {
+        return renderCheckbox->GetCheckboxName().c_str();
+    }
+    return "";
 }
 
-std::string CheckboxComposedElement::GetToggleType() const
+std::string CheckboxComposedElement::GetCheckBoxGroup() const
 {
-    return std::string("ToggleType.Checkbox");
+    auto renderCheckbox = GetRenderCheckbox();
+    if (renderCheckbox) {
+        return renderCheckbox->GetBelongGroup().c_str();
+    }
+    return "";
+}
+
+std::string CheckboxComposedElement::GetSelect() const
+{
+    auto renderCheckbox = GetRenderCheckbox();
+    if (renderCheckbox) {
+        return ConvertBoolToString(renderCheckbox->GetCheckBoxValue());
+    }
+    return "false";
 }
 
 std::string CheckboxComposedElement::GetSelectedColor() const
