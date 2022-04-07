@@ -20,6 +20,7 @@
 
 #include "base/thread/task_executor.h"
 #include "core/common/frontend.h"
+#include "core/pipeline/base/render_node.h"
 #include "frameworks/bridge/card_frontend/card_frontend.h"
 #include "frameworks/core/pipeline/pipeline_context.h"
 
@@ -29,6 +30,7 @@ class ACE_EXPORT SubContainer : public virtual AceType {
 
 public:
     using OnFormAcquiredCallback = std::function<void(const size_t)>;
+    using ActionEventHandler = std::function<void(const std::string& action)>;
 
     explicit SubContainer(const WeakPtr<PipelineContext>& context) : outSidePipelineContext_(context) {}
     SubContainer(const WeakPtr<PipelineContext>& context, int32_t instanceId)
@@ -48,14 +50,14 @@ public:
         const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineContext>& pipelineContext, int len);
     void ProcessSharedImage(const std::map<std::string, std::pair<int, int32_t>> imageDataMap);
 
-    void SetFormElement(const WeakPtr<Element>& element)
+    void SetRenderNode(const RefPtr<RenderNode>& renderNode)
     {
-        formElement_ = element;
+        renderNode_ = renderNode;
     }
 
-    const WeakPtr<Element> GetFormElement() const
+    void SetActionEventHandler(ActionEventHandler&& listener)
     {
-        return formElement_;
+        subActionEventHandler_ = std::move(listener);
     }
 
     void SetFormComponet(const RefPtr<Component>& mountPoint)
@@ -111,12 +113,13 @@ private:
     WeakPtr<PipelineContext> outSidePipelineContext_;
     RefPtr<AssetManager> assetManager_;
     int32_t instanceId_;
+    ActionEventHandler subActionEventHandler_;
 
     int64_t runningCardId_ = 0;
     bool allowUpdate_ = true;
 
     RefPtr<Component> formComponent_;
-    WeakPtr<Element> formElement_;
+    RefPtr<RenderNode>& renderNode_;
     OnFormAcquiredCallback onFormAcquiredCallback_;
     WindowConfig cardWindowConfig_;
 

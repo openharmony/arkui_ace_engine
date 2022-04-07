@@ -201,21 +201,7 @@ void SubContainer::RunCard(const int64_t id, const std::string path, const std::
             TaskExecutor::TaskType::UI);
     }
 
-    auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
-        auto container = weak.Upgrade();
-        if (!container) {
-            LOGE("ActionEventHandler sub container is null!");
-            return;
-        }
-        auto form = AceType::DynamicCast<FormElement>(container->GetFormElement().Upgrade());
-        if (!form) {
-            LOGE("ActionEventHandler form is null!");
-            return;
-        }
-
-        form->OnActionEvent(action);
-    };
-    pipelineContext_->SetActionEventHandler(actionEventHandler);
+    pipelineContext_->SetActionEventHandler(std::move(subActionEventHandler_));
 
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
 
@@ -238,22 +224,12 @@ void SubContainer::RunCard(const int64_t id, const std::string path, const std::
         UpdateSurfaceSize();
     }
 
-    auto form = AceType::DynamicCast<FormElement>(GetFormElement().Upgrade());
-    if (!form) {
-        LOGE("set draw delegate could not get form element");
-        return;
-    }
-    auto renderNode = form->GetRenderNode();
+    auto renderNode = AceType::DynamicCast<RenderForm>(renderNode_);
     if (!renderNode) {
-        LOGE("set draw delegate could not get render node");
-        return;
-    }
-    auto formRender = AceType::DynamicCast<RenderForm>(renderNode);
-    if (!formRender) {
         LOGE("set draw delegate could not get render form");
         return;
     }
-    pipelineContext_->SetDrawDelegate(formRender->GetDrawDelegate());
+    pipelineContext_->SetDrawDelegate(renderNode->GetDrawDelegate());
 
     frontend_->RunPage(0, "", data);
 }

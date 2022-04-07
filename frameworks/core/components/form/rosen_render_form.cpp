@@ -26,16 +26,21 @@ std::unique_ptr<DrawDelegate> RosenRenderForm::GetDrawDelegate()
 {
     auto drawDelegate = std::make_unique<DrawDelegate>();
 
-    drawDelegate->SetDrawRSFrameCallback([this](std::shared_ptr<RSNode>& node, const Rect& dirty) {
-        if (!GetRSNode()) {
-            SyncRSNodeBoundary(true, true);
-        }
-        auto rsNode = GetRSNode();
-        rsNode->AddChild(node, -1);
+    drawDelegate->SetDrawRSFrameCallback(
+        [weakForm = WeakClaim(this)](std::shared_ptr<RSNode>& node, const Rect& dirty) {
+            auto form = weakForm.Upgrade();
+            if (!form) {
+                return;
+            }
+            if (!form->GetRSNode()) {
+                form->SyncRSNodeBoundary(true, true);
+            }
+            auto rsNode = form->GetRSNode();
+            rsNode->AddChild(node, -1);
 
-        MarkNeedLayout(true, true);
-        MarkNeedRender(true);
-    });
+            form->MarkNeedLayout(true, true);
+            form->MarkNeedRender(true);
+        });
 
     return drawDelegate;
 }

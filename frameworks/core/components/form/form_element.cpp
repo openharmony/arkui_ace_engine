@@ -87,7 +87,7 @@ void FormElement::Update()
 
 void FormElement::PerformBuild()
 {
-    subContainer_->SetFormElement(AceType::WeakClaim(this));
+
 }
 
 void FormElement::InitEvent(const RefPtr<FormComponent>& component)
@@ -375,6 +375,7 @@ void FormElement::CreateCardContainer()
     }
     subContainer_->Initialize();
     subContainer_->SetFormComponet(component_);
+    subContainer_->SetRenderNode(GetRenderNode());
     auto form = AceType::DynamicCast<FormComponent>(component_);
     if (!form) {
         LOGE("form component is null when try adding nonmatched container to form manager.");
@@ -403,6 +404,17 @@ void FormElement::CreateCardContainer()
             }
         });
     });
+
+    auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
+        auto form = weak.Upgrade();
+        if (!form) {
+            LOGE("ActionEventHandler form is null!");
+            return;
+        }
+
+        form->OnActionEvent(action);
+    };
+    subContainer_->SetActionEventHandler(actionEventHandler);
 }
 
 RefPtr<RenderNode> FormElement::CreateRenderNode()
