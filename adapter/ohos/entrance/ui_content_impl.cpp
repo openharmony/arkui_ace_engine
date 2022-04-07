@@ -496,69 +496,31 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 
 void UIContentImpl::Foreground()
 {
-    LOGI("Show UIContent");
+    LOGI("UIContentImpl: window foreground");
     Platform::AceContainer::OnShow(instanceId_);
 }
 
 void UIContentImpl::Background()
 {
-    LOGI("Hide UIContent");
+    LOGI("UIContentImpl: window background");
     Platform::AceContainer::OnHide(instanceId_);
 }
 
 void UIContentImpl::Focus()
 {
-    LOGI("UIContent window focus");
+    LOGI("UIContentImpl: window focus");
     Platform::AceContainer::OnActive(instanceId_);
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    if (!container) {
-        LOGE("Window focus failed: container is null.");
-        return;
-    }
-    auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("Window focus failed: taskExecutor is null.");
-        return;
-    }
-    ContainerScope scope(instanceId_);
-    taskExecutor->PostTask([container]() {
-        auto pipelineContext = container->GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("Window focus failed, pipeline context is null.");
-            return;
-        }
-        pipelineContext->WindowFocus(true);
-    }, TaskExecutor::TaskType::UI);
 }
 
 void UIContentImpl::UnFocus()
 {
-    LOGI("UIContent window unFocus");
+    LOGI("UIContentImpl: window unFocus");
     Platform::AceContainer::OnInactive(instanceId_);
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    if (!container) {
-        LOGE("Window unFocus failed: container is null.");
-        return;
-    }
-    auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("Window unFocus failed: taskExecutor is null.");
-        return;
-    }
-    ContainerScope scope(instanceId_);
-    taskExecutor->PostTask([container]() {
-        auto pipelineContext = container->GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("Window unFocus failed, pipeline context is null.");
-            return;
-        }
-        pipelineContext->WindowFocus(false);
-    }, TaskExecutor::TaskType::UI);
 }
 
 void UIContentImpl::Destroy()
 {
-    LOGI("Destroy UIContent");
+    LOGI("UIContentImpl: window destroy");
     Platform::AceContainer::DestroyContainer(instanceId_);
 }
 
