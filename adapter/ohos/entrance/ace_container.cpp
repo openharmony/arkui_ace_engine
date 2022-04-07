@@ -310,12 +310,28 @@ void AceContainer::OnActive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         front->OnActive();
     }
+
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null, OnActive failed.");
+        return;
+    }
+
+    taskExecutor->PostTask([container]() {
+        auto pipelineContext = container->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGE("pipeline context is null, OnActive failed.");
+            return;
+        }
+        pipelineContext->WindowFocus(true);
+    }, TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::OnInactive(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
+        LOGE("container is null, OnInactive failed.");
         return;
     }
     ContainerScope scope(instanceId);
@@ -325,11 +341,22 @@ void AceContainer::OnInactive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         front->OnInactive();
     }
-    auto context = container->GetPipelineContext();
-    if (!context) {
+
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null, OnInactive failed.");
         return;
     }
-    context->GetTaskExecutor()->PostTask([context]() { context->RootLostFocus(); }, TaskExecutor::TaskType::UI);
+
+    taskExecutor->PostTask([container]() {
+        auto pipelineContext = container->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGE("pipeline context is null, OnInactive failed.");
+            return;
+        }
+        pipelineContext->WindowFocus(false);
+        pipelineContext->RootLostFocus();
+    }, TaskExecutor::TaskType::UI);
 }
 
 bool AceContainer::OnStartContinuation(int32_t instanceId)
