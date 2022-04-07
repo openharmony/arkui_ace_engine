@@ -28,6 +28,7 @@ public:
     ~DataAbilityHelper() override = default;
 
     virtual int32_t OpenFile(const std::string& uriStr, const std::string& mode) = 0;
+    virtual void* QueryThumbnailResFromDataAbility(const std::string& uri) = 0;
 };
 
 } // namespace OHOS::Ace

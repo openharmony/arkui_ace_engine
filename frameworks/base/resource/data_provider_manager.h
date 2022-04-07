@@ -48,6 +48,7 @@ public:
     ~DataProviderManagerInterface() override = default;
 
     virtual std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) = 0;
+    virtual void* GetDataProviderThumbnailResFromUri(const std::string& uriStr) = 0;
 };
 
 using DataProviderImpl = std::function<std::unique_ptr<DataProviderRes>(const std::string& uriStr)>;
@@ -58,6 +59,10 @@ public:
     ~DataProviderManager() override = default;
 
     std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) override;
+    void* GetDataProviderThumbnailResFromUri(const std::string& uriStr) override
+    {
+        return nullptr;
+    };
 
 private:
     DataProviderImpl platformImpl_;
@@ -73,6 +78,7 @@ public:
     ~DataProviderManagerStandard() override = default;
 
     std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) override;
+    void* GetDataProviderThumbnailResFromUri(const std::string& uriStr) override;
 
     const RefPtr<DataAbilityHelper>& GetDataAbilityHelper()
     {

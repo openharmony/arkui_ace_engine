@@ -2037,7 +2037,7 @@ void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!rsNode_) {
-        LOGW("Parent render_node has no RSNode, creating now.");
+        LOGD("Parent render_node has no RSNode, creating now.");
         SyncRSNodeBoundary(true, true);
     }
     if (IsTailRenderNode()) {

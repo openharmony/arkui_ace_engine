@@ -68,10 +68,22 @@ AlphaType PixelMapOhos::AlphaTypeConverter(Media::AlphaType alphaType)
 RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
 {
     std::shared_ptr<Media::PixelMap>* pixmapPtr = reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(rawPtr);
-    if (*pixmapPtr == nullptr) {
-        LOGE("pixmap pointer is nullptr.");
+    if (pixmapPtr == nullptr || *pixmapPtr == nullptr) {
+        LOGW("pixmap pointer is nullptr when CreatePixelMap.");
+        return nullptr;
     }
     return AceType::MakeRefPtr<PixelMapOhos>(*pixmapPtr);
+}
+ 
+RefPtr<PixelMap> PixelMap::CreatePixelMapFromDataAbility(void* uniquePtr)
+{
+    std::unique_ptr<Media::PixelMap>* pixmapPtr = reinterpret_cast<std::unique_ptr<Media::PixelMap>*>(uniquePtr);
+    if (pixmapPtr == nullptr || *pixmapPtr == nullptr) {
+        LOGW("pixmap pointer is nullptr when CreatePixelMapFromDataAbility.");
+        return nullptr;
+    }
+    auto rawPtr = (*pixmapPtr).release();
+    return AceType::MakeRefPtr<PixelMapOhos>(std::shared_ptr<Media::PixelMap>(rawPtr));
 }
 
 int32_t PixelMapOhos::GetWidth() const
