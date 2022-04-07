@@ -491,7 +491,8 @@ bool AceAbility::OperateComponent(const std::string& attrsJson)
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     auto taskExecutor = container->GetTaskExecutor();
     taskExecutor->PostTask(
-        [attrsJson] {
+        [attrsJson, instanceId = ACE_INSTANCE_ID] {
+          ContainerScope scope(instanceId);
           bool result = OHOS::Ace::Framework::InspectorClient::GetInstance().OperateComponent(attrsJson);
           if (!result) {
               OHOS::Ace::Framework::InspectorClient::GetInstance().CallFastPreviewErrorCallback(attrsJson);
