@@ -65,6 +65,7 @@ template("ace_ohos_standard_source_set") {
       "//foundation/windowmanager/interfaces/innerkits",
       "//third_party/node/src",
       "//utils/native/base/include",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_preferences/include/",
     ]
 
     deps = [
@@ -97,6 +98,7 @@ template("ace_ohos_standard_source_set") {
       "ipc:ipc_core",
       "napi:ace_napi",
       "native_appdatamgr:native_dataability",
+      "native_appdatamgr:native_preferences",
       "native_appdatamgr:native_rdb",
     ]
   }
