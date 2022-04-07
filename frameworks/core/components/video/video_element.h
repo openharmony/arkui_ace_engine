@@ -28,7 +28,7 @@
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "core/components/video/media_player_callback.h"
-#include "foundation/multimedia/media_standard/interfaces/innerkits/native/media/include/player.h"
+#include "foundation/multimedia/media_standard/interfaces/inner_api/native/player.h"
 #include "window_manager.h"
 #endif
 
