@@ -22,7 +22,7 @@ std::shared_ptr<NativePreferences::Preferences> StorageImpl::GetPreference(const
     return NativePreferences::PreferencesHelper::GetPreferences(fileName, errCode_);
 }
 
-void StorageImpl::Set(const std::string& key, const std::string& value)
+void StorageImpl::SetString(const std::string& key, const std::string& value)
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     if (!pref) {
@@ -34,7 +34,7 @@ void StorageImpl::Set(const std::string& key, const std::string& value)
     pref->Flush();
 }
 
-std::string StorageImpl::Get(const std::string& key)
+std::string StorageImpl::GetString(const std::string& key)
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     if (!pref) {
