@@ -16,11 +16,13 @@
 #include "core/components/plugin/plugin_element.h"
 
 #include "core/common/plugin_manager.h"
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "frameworks/base/utils/string_utils.h"
 #include "frameworks/core/components/plugin/plugin_component.h"
 #include "frameworks/core/components/plugin/plugin_component_manager.h"
 #include "frameworks/core/components/plugin/render_plugin.h"
 #include "frameworks/core/components/plugin/resource/plugin_manager_delegate.h"
+#include "os_account_manager.h"
 
 namespace OHOS::Ace {
 PluginElement::~PluginElement()
@@ -224,6 +226,7 @@ void PluginElement::RunPluginContainer()
     pluginSubContainerId_ = PluginManager::GetInstance().GetPluginSubContainerId();
     PluginManager::GetInstance().AddPluginSubContainer(pluginSubContainerId_, pluginSubContainer_);
     PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, Container::CurrentId());
+    flutter::UIDartState::Current()->AddPluginParentContainer(pluginSubContainerId_, Container::CurrentId());
     pluginSubContainer_->SetInstanceId(pluginSubContainerId_);
     pluginSubContainer_->Initialize();
     pluginSubContainer_->SetPluginComponet(component_);
@@ -317,9 +320,16 @@ std::string PluginElement::GetPackagePathByWant(const WeakPtr<PluginElement>& we
         return packagePathStr;
     }
 
+    std::vector<int32_t> userIds;
+    ErrCode errCode = AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
+    if (errCode != ERR_OK) {
+        pluginElement->HandleOnErrorEvent("1", "Query Active OsAccountIds failed!");
+        return packagePathStr;
+    }
     if (strList.size() == 1) {
         AppExecFwk::BundleInfo bundleInfo;
-        bool ret = bms->GetBundleInfo(strList[0], AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo);
+        bool ret = bms->GetBundleInfo(strList[0], AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo,
+            userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID);
         if (!ret) {
             LOGE("Bms get bundleName failed!");
             pluginElement->HandleOnErrorEvent("1", "Bms get bundleName failed!");
@@ -331,7 +341,8 @@ std::string PluginElement::GetPackagePathByWant(const WeakPtr<PluginElement>& we
         AppExecFwk::AbilityInfo abilityInfo;
         AppExecFwk::ElementName element("", strList[0], strList[1]);
         want.SetElement(element);
-        bool ret = bms->QueryAbilityInfo(want, abilityInfo);
+        bool ret = bms->QueryAbilityInfo(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT,
+            userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID, abilityInfo);
         if (!ret) {
             LOGE("Bms get abilityInfo failed!");
             pluginElement->HandleOnErrorEvent("1", "Bms get bundleName failed!");
