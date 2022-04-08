@@ -1002,7 +1002,7 @@ void RenderSwiper::StartSpringMotion(double mainPosition, double mainVelocity,
             swiper->UpdateOneItemOpacity(MAX_OPACITY, swiper->currentIndex_);
             swiper->UpdateOneItemOpacity(MAX_OPACITY, swiper->currentIndex_);
             swiper->ExecuteMoveCallback(swiper->currentIndex_);
-            swiper->MarkNeedLayout();
+            swiper->MarkNeedLayout(true);
         }
     });
 }
@@ -1105,7 +1105,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
             swiper->UpdateOneItemOpacity(MAX_OPACITY, fromIndex);
             swiper->UpdateOneItemOpacity(MAX_OPACITY, toIndex);
             swiper->ExecuteMoveCallback(swiper->currentIndex_);
-            swiper->MarkNeedLayout();
+            swiper->MarkNeedLayout(true);
         }
     });
 
@@ -1322,7 +1322,7 @@ void RenderSwiper::DoSwipeToAnimation(int32_t fromIndex, int32_t toIndex, bool r
             swiper->RestoreAutoPlay();
             swiper->FireItemChangedEvent(true);
             swiper->ResetCachedChildren();
-            swiper->MarkNeedLayout();
+            swiper->MarkNeedLayout(true);
         }
     });
     swipeToController_->SetDuration(duration_);
@@ -1540,7 +1540,7 @@ void RenderSwiper::UpdateScrollPosition(double dragDelta)
         UpdateOneItemOpacity(MAX_OPACITY, currentIndex_);
         ExecuteMoveCallback(currentIndex_);
         ResetIndicatorPosition();
-        MarkNeedLayout();
+        MarkNeedLayout(true);
         // drag length is greater than swiper's width, don't need to move position
         LOGD("scroll to next page index[%{public}d] from index[%{public}d], scroll offset:%{public}lf",
             currentIndex_, outItemIndex_, scrollOffset_);
@@ -2673,7 +2673,7 @@ void RenderSwiper::FinishAllSwipeAnimation(bool useFinish)
         FireSwiperControllerFinishEvent();
     }
     quickTrunItem_ = true;
-    MarkNeedLayout();
+    MarkNeedLayout(true);
 }
 
 bool RenderSwiper::IsAnimatorStopped() const
@@ -2851,7 +2851,7 @@ void RenderSwiper::StartIndicatorAnimation(int32_t fromIndex, int32_t toIndex, b
             swiper->outItemIndex_ = fromIndex;
             swiper->currentIndex_ = toIndex;
             swiper->UpdateIndicatorSpringStatus(SpringStatus::FOCUS_SWITCH);
-            swiper->MarkNeedLayout();
+            swiper->MarkNeedLayout(true);
         }
     });
     indicatorController_->Play();
@@ -3067,7 +3067,7 @@ void RenderSwiper::OnDataSourceUpdated(int32_t totalCount, int32_t startIndex)
 {
     items_.clear();
     UpdateItemCount(totalCount);
-    MarkNeedLayout();
+    MarkNeedLayout(true);
 }
 
 void RenderSwiper::ClearItems(const RefPtr<Component>& lazyForEachComponent, int32_t index)
