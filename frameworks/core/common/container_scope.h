@@ -44,11 +44,7 @@ public:
     static void SetScopeNotify(std::function<void(int32_t)>&& notify);
 
 private:
-#ifndef WINDOWS_PLATFORM
     static thread_local int32_t currentId_;
-#else
-    static int32_t currentId_;
-#endif
     int32_t restoreId_ = -1;
     static std::function<void(int32_t)> updateScopeNotify_;
 
