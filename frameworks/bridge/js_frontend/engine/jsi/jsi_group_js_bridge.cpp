@@ -488,15 +488,10 @@ void JsiGroupJsBridge::TriggerModulePluginGetErrorCallback(
                 callbackId);
             return;
         }
-
-        std::string emptyReplyWithErrorMessage = std::string("{\"code\":")
-                                                     .append(std::to_string(errorCode))
-                                                     .append(",")
-                                                     .append("\"data\":\"")
-                                                     .append(errorMessage)
-                                                     .append("\"}");
-
-        shared_ptr<JsValue> emptyReplyCallback = runtime_->NewString(emptyReplyWithErrorMessage);
+        auto resultJson = JsonUtil::Create(true);
+        resultJson->Put(std::string("code").c_str(), errorCode);
+        resultJson->Put(std::string("data").c_str(), errorMessage.c_str());
+        shared_ptr<JsValue> emptyReplyCallback = runtime_-> NewString(resultJson->ToString().c_str());
         std::vector<shared_ptr<JsValue>> argv;
         argv.push_back(emptyReplyCallback);
         int32_t len = 1;
