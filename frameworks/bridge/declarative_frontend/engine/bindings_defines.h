@@ -83,21 +83,15 @@ constexpr const JavascriptEngine cCurrentJSEngine = JavascriptEngine::V8;
 #include "ecmascript/napi/include/jsnapi.h"
 
 using BindingTarget = panda::Local<panda::ObjectRef>;
-using FunctionCallback = panda::Local<panda::JSValueRef>(*)(
-    panda::EcmaVM*, panda::Local<panda::JSValueRef>, const panda::Local<panda::JSValueRef> [], int32_t, void*);
-using FunctionGetCallback = panda::Local<panda::JSValueRef>(*)(
-        panda::EcmaVM*, panda::Local<panda::JSValueRef>, const panda::Local<panda::JSValueRef> [], int32_t, void*);
-using FunctionSetCallback = panda::Local<panda::JSValueRef>(*)(
-        panda::EcmaVM*, panda::Local<panda::JSValueRef>, const panda::Local<panda::JSValueRef> [], int32_t, void*);
+using FunctionCallback = panda::Local<panda::JSValueRef>(*)(panda::JsiRuntimeCallInfo*);
+using FunctionGetCallback = panda::Local<panda::JSValueRef>(*)(panda::JsiRuntimeCallInfo*);
+using FunctionSetCallback = panda::Local<panda::JSValueRef>(*)(panda::JsiRuntimeCallInfo*);
 template<typename T>
-using MemberFunctionCallback = panda::Local<panda::JSValueRef>(T::*)(
-    panda::EcmaVM*, panda::Local<panda::JSValueRef>, const panda::Local<panda::JSValueRef> [], int32_t, void*);
+using MemberFunctionCallback = panda::Local<panda::JSValueRef>(T::*)(panda::JsiRuntimeCallInfo*);
 template<typename T>
-using MemberFunctionGetCallback = panda::Local<panda::JSValueRef>(T::*)(
-    panda::EcmaVM*, panda::Local<panda::JSValueRef>, const panda::Local<panda::JSValueRef> [], int32_t, void*);
+using MemberFunctionGetCallback = panda::Local<panda::JSValueRef>(T::*)(panda::JsiRuntimeCallInfo*);
 template<typename T>
-using MemberFunctionSetCallback = panda::Local<panda::JSValueRef>(T::*)(
-    panda::EcmaVM*, panda::Local<panda::JSValueRef>, const panda::Local<panda::JSValueRef> [], int32_t, void*);
+using MemberFunctionSetCallback = panda::Local<panda::JSValueRef>(T::*)(panda::JsiRuntimeCallInfo*);
 using ExoticGetterCallback = int;
 using ExoticSetterCallback = int;
 using ExoticHasPropertyCallback = int;

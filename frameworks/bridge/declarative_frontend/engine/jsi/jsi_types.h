@@ -30,8 +30,7 @@
 
 namespace OHOS::Ace::Framework {
 
-using JsiFunctionCallback = panda::Local<panda::JSValueRef> (*)(panda::ecmascript::EcmaVM*,
-    panda::Local<panda::JSValueRef>, const panda::Local<panda::JSValueRef>[], int32_t, void*);
+using JsiFunctionCallback = panda::Local<panda::JSValueRef> (*)(panda::JsiRuntimeCallInfo*);
 
 template<typename T>
 class JsiType {
@@ -174,8 +173,7 @@ struct JsiExecutionContext {
 
 class JsiCallbackInfo {
 public:
-    JsiCallbackInfo(panda::ecmascript::EcmaVM* vm, panda::Local<panda::JSValueRef> thisObj, int32_t argc,
-        const panda::Local<panda::JSValueRef>* argv);
+    JsiCallbackInfo(panda::JsiRuntimeCallInfo* info);
     ~JsiCallbackInfo();
     JsiCallbackInfo(const JsiCallbackInfo&) = delete;
     JsiCallbackInfo& operator=(const JsiCallbackInfo&) = delete;
@@ -199,14 +197,11 @@ public:
 
     JsiExecutionContext GetExecutionContext() const
     {
-        return JsiExecutionContext { vm_ };
+        return JsiExecutionContext { info_->GetVM() };
     }
 
 private:
-    panda::ecmascript::EcmaVM* vm_ = nullptr;
-    panda::Global<panda::JSValueRef> thisObj_;
-    int argc_;
-    std::vector<panda::Global<panda::JSValueRef>> argv_;
+    panda::JsiRuntimeCallInfo* info_ = nullptr;
 
     mutable std::variant<void*, panda::Global<panda::JSValueRef>> retVal_;
 };

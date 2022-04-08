@@ -39,15 +39,15 @@ JSValue JsStopPropagation(JSContext* ctx, JSValueConst new_target, int argc, JSV
 }
 
 #elif USE_ARK_ENGINE
-Local<JSValueRef> JsStopPropagation(
-    EcmaVM* vm, Local<JSValueRef> thisObj, const Local<JSValueRef> argv[], int32_t argc, void* data)
+Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info)
 {
+    Local<JSValueRef> thisObj = info->GetThisRef();
     auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
     if (eventInfo) {
         LOGD("JsStopPropagation is trigger");
         eventInfo->SetStopPropagation(true);
     }
-    return JSValueRef::Undefined(vm);
+    return JSValueRef::Undefined(info->GetVM());
 }
 #endif
 
