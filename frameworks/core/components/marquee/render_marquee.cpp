@@ -35,6 +35,10 @@ bool IsPlayingAnimation(const RefPtr<Animator>& controller)
 
 void RenderMarquee::Start()
 {
+    if (!NeedMarquee()) {
+        LOGD("Needn't marquee");
+        return;
+    }
     LOGD("StartAnimation called.");
     if ((!childText_) || (!controller_)) {
         startAfterLayout_ = true;
@@ -287,15 +291,9 @@ void RenderMarquee::PerformLayout()
     SetLayoutSize(layoutSize);
     LOGD("layoutSize: %{public}s, child: %{public}s", layoutSize.ToString().c_str(),
         childText_->GetLayoutSize().ToString().c_str());
-    const static int32_t PLATFORM_VERSION_SIX = 6;
-    auto context = GetContext().Upgrade();
-    if (context && !context->GetIsDeclarative()) {
-        if (context->GetMinPlatformVersion() >= PLATFORM_VERSION_SIX) {
-            if (childText_->GetLayoutSize().Width() <= layoutSize.Width()) {
-                childText_->SetPosition(Offset(0.0, 0.0));
-                return;
-            }
-        }
+    if (!NeedMarquee()) {
+        childText_->SetPosition(Offset(0.0, 0.0));
+        return;
     }
     if (lastLayoutSize_ != childText_->GetLayoutSize() && IsPlayingAnimation(controller_)) {
         UpdateAnimation();
@@ -344,6 +342,23 @@ void RenderMarquee::GetMarqueeCallback(const RefPtr<Component>& component)
     if (marquee->GetOnFinish()) {
         onFinishEvent_ = *marquee->GetOnFinish();
     }
+}
+
+bool RenderMarquee::NeedMarquee() const
+{
+    if (!childText_) {
+        return true;
+    }
+    const static int32_t PLATFORM_VERSION_SIX = 6;
+    auto context = GetContext().Upgrade();
+    if (context && !context->GetIsDeclarative()) {
+        if (context->GetMinPlatformVersion() >= PLATFORM_VERSION_SIX) {
+            if (childText_->GetLayoutSize().Width() <= GetLayoutSize().Width()) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 } // namespace OHOS::Ace
