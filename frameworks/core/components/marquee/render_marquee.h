@@ -84,6 +84,7 @@ private:
     void UpdateChildPosition(double position);
     void OnAnimationStart();
     void OnAnimationStop();
+    bool NeedMarquee() const;
 
     RefPtr<RenderNode> childText_;
     RefPtr<Animator> controller_;
