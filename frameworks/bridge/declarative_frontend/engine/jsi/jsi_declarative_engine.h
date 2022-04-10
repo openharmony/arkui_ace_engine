@@ -128,6 +128,19 @@ public:
         rootViewMap_.emplace(pageId, value);
     }
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
+    {
+        auto dispatcher = dispatcher_.Upgrade();
+        if (dispatcher) {
+            dispatcher->CallCurlFunction(requestData, callbackId);
+            return true;
+        } else {
+            LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+            return false;
+        }
+    }
+#endif
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global

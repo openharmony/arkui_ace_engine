@@ -22,6 +22,7 @@
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 #include "adapter/preview/osal/request_data.h"
 #include "adapter/preview/osal/response_data.h"
+#include "frameworks/base/utils/linear_map.h"
 #endif
 #include "base/memory/ace_type.h"
 #include "base/utils/singleton.h"
@@ -77,6 +78,9 @@ public:
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     void TriggerModuleJsCallbackPreview(int32_t callbackId, int32_t code, ResponseData responseData) override;
+    void GetRequestData(const shared_ptr<JsValue>& valObject, OHOS::Ace::RequestData& requestData);
+    ParseJsDataResult ParseRequestData(
+    int32_t argc, const std::vector<shared_ptr<JsValue>>& argv, OHOS::Ace::RequestData& requestData, int32_t requestId);
 #endif
 
 private:
@@ -107,9 +111,6 @@ private:
     static void ProcessParseJsError(
         ParseJsDataResult errorType, const shared_ptr<JsRuntime>& runtime, int32_t callbackId);
 
-    static std::string SerializationObjectToString(
-        const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& val);
-
     // JsSendGroupMessage is mapped to the Js function[SendGroupMessage]
     // contains three parameters: groupName, message, callback function
     static shared_ptr<JsValue> ProcessJsRequest(const shared_ptr<JsRuntime>& runtime,
@@ -120,12 +121,20 @@ private:
     static shared_ptr<JsValue> ProcessJsRequestSync(const shared_ptr<JsRuntime>& runtime,
         const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
 
+    static std::string SerializationObjectToString(
+        const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& val);
+
     EventCallbackMap eventCallBackFuncs_;
     ModuleCallbackMap moduleCallBackFuncs_;
     RequestIdCallbackIdMap requestIdCallbackIdMap_;
     std::atomic_int pendingCallbackId_;
 
     shared_ptr<JsRuntime> runtime_;
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    static const LinearMapNode<void (*)(const char*, RequestData&)> fetchRequestDataMap1[];
+    static const LinearMapNode<void (*)(shared_ptr<JsRuntime>,
+        const shared_ptr<JsValue>&, RequestData&)> fetchRequestDataMap2[];
+#endif
 };
 
 } // namespace OHOS::Ace::Framework
