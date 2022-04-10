@@ -27,7 +27,7 @@
 namespace OHOS::Ace::V2 {
 
 class TabContentProxyElement : public TabContentElement, private ElementProxyHost {
-    DECLARE_ACE_TYPE(TabContentElement, TabContentElement);
+    DECLARE_ACE_TYPE(TabContentProxyElement, TabContentElement);
 
 public:
     explicit TabContentProxyElement(const std::list<RefPtr<Component>>& contents) : TabContentElement(contents) {};

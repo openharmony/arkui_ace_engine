@@ -160,21 +160,19 @@ void StaticImageObject::UploadToGpuForRender(
             return;
         }
         auto image = ImageProvider::ResizeSkImage(rawImage, imageSource.GetSrc(), imageSize, forceResize);
-        auto callback =
-            [successCallback, imageSource, taskExecutor, imageCache, imageSize](flutter::SkiaGPUObject<SkImage> image) {
-                auto canvasImage = flutter::CanvasImage::Create();
-                canvasImage->set_image(std::move(image));
-                if (imageCache) {
-                    LOGD("cache image key: %{public}s", GenerateCacheKey(imageSource, imageSize).c_str());
-                    imageCache->CacheImage(
-                        GenerateCacheKey(imageSource, imageSize),
-                        std::make_shared<CachedImage>(canvasImage));
-                }
-                taskExecutor->PostTask(
-                    [ successCallback, imageSource, canvasImage ] {
-                        successCallback(imageSource, canvasImage);
-                    },
-                    TaskExecutor::TaskType::UI);
+        auto callback = [successCallback, imageSource, taskExecutor, imageCache, imageSize,
+                            id = Container::CurrentId()](flutter::SkiaGPUObject<SkImage> image) {
+            ContainerScope scope(id);
+            auto canvasImage = flutter::CanvasImage::Create();
+            canvasImage->set_image(std::move(image));
+            if (imageCache) {
+                LOGD("cache image key: %{public}s", GenerateCacheKey(imageSource, imageSize).c_str());
+                imageCache->CacheImage(
+                    GenerateCacheKey(imageSource, imageSize), std::make_shared<CachedImage>(canvasImage));
+            }
+            taskExecutor->PostTask(
+                [successCallback, imageSource, canvasImage] { successCallback(imageSource, canvasImage); },
+                TaskExecutor::TaskType::UI);
         };
         ImageProvider::UploadImageToGPUForRender(image, callback, renderTaskHolder);
     };
