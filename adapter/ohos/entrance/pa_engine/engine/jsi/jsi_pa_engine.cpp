@@ -1536,12 +1536,35 @@ void JsiPaEngine::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEven
     CallFunc(func, argv);
 }
 
-void JsiPaEngine::OnAcquireState(const OHOS::AAFwk::Want &want)
+int32_t JsiPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want &want)
 {
-    LOGI("JsiPaEngine OnAcquireState");
+    LOGI("JsiPaEngine OnAcquireFormState");
+    ACE_DCHECK(engineInstance_);
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+
     const std::vector<shared_ptr<JsValue>>& argv = { WantToJsValue(want) };
-    auto func = GetPaFunc("onAcquireState");
-    CallFunc(func, argv);
+    auto func = GetPaFunc("onAcquireFormState");
+
+    if (func == nullptr) {
+        LOGI("no OnAcquireFormState!");
+        return (int32_t)AppExecFwk::FormState::DEFAULT;
+    }
+
+    auto result = CallFunc(func, argv);
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(result);
+    if (arkJSValue->IsException(runtime)) {
+        LOGE("JsiPaEngine CallFunc FAILED!");
+        return (int32_t)AppExecFwk::FormState::DEFAULT;
+    }
+
+    if (!arkJSValue->IsInt32(runtime)) {
+        LOGE("invalid return value!");
+        return (int32_t)AppExecFwk::FormState::DEFAULT;
+    }
+
+    int32_t formState = arkJSValue->ToInt32(runtime);
+    LOGI("JsiPaEngine OnAcquireFormState, formState: %{public}d", formState);
+    return formState;
 }
 
 } // namespace OHOS::Ace
