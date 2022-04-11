@@ -133,7 +133,9 @@ void NavigationContainerComponent::Build(const WeakPtr<PipelineContext>& context
     RefPtr<ColumnComponent> fixPart = AceType::MakeRefPtr<ColumnComponent>(
         FlexAlign::FLEX_START, FlexAlign::FLEX_START, std::list<RefPtr<OHOS::Ace::Component>>());
     fixPart->AppendChild(NavigationBarBuilder(declaration_, "navigationBar", direction_).Build(context, menuCount));
-    fixPart->AppendChild(AceType::MakeRefPtr<FlexItemComponent>(1.0, 1.0, 0.0, originalContent));
+    auto originalFlexItem = AceType::MakeRefPtr<FlexItemComponent>(1.0, 1.0, 0.0, originalContent);
+    originalFlexItem->SetFlexWeight(1.0);
+    fixPart->AppendChild(originalFlexItem);
     tabController_ = TabController::GetController(GetGlobalTabControllerId());
     fixPart->AppendChild(NavigationContainerComponent::BuildToolBar(declaration_, tabController_));
 
