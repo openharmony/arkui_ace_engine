@@ -15,14 +15,15 @@
 
 #include "core/components/plugin/plugin_element.h"
 
-#include "core/common/plugin_manager.h"
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "os_account_manager.h"
+
+#include "core/common/plugin_manager.h"
 #include "frameworks/base/utils/string_utils.h"
 #include "frameworks/core/components/plugin/plugin_component.h"
 #include "frameworks/core/components/plugin/plugin_component_manager.h"
 #include "frameworks/core/components/plugin/render_plugin.h"
 #include "frameworks/core/components/plugin/resource/plugin_manager_delegate.h"
-#include "os_account_manager.h"
 
 namespace OHOS::Ace {
 PluginElement::~PluginElement()

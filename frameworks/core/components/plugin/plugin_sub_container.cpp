@@ -175,6 +175,8 @@ void PluginSubContainer::RunPlugin(
         frontend_, instanceId_);
 
     density_ = outSidePipelineContext_.Upgrade()->GetDensity();
+    auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();
+    pipelineContext_->SetEventManager(eventManager);
     UpdateRootElmentSize();
     pipelineContext_->SetIsJsPlugin(true);
 

@@ -137,6 +137,7 @@ private:
     void InitJsNativeModuleObject();
     void InitJsContextModuleObject();
     void InitGroupJsBridge();
+    static bool IsPlugin();
 
     std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
