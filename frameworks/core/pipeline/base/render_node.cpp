@@ -820,7 +820,10 @@ bool RenderNode::MouseDetect(const Point& globalPoint, const Point& parentLocalP
     for (auto& rect : GetTouchRectList()) {
         if (touchable_ && rect.IsInRegion(transformPoint)) {
             if (!hoverNode.Upgrade()) {
-                hoverNode = CheckHoverNode();
+                if (hoverAnimationType_ != HoverAnimationType::UNKNOWN) {
+                    hoverNode = AceType::WeakClaim<RenderNode>(this);
+                    LOGI("Got hoverEffect node: %{public}s", AceType::TypeName(this));
+                }
             }
             hoverList.emplace_back(AceType::WeakClaim<RenderNode>(this));
             // Calculates the coordinate offset in this node.

@@ -61,6 +61,7 @@ void RenderRating::Update(const RefPtr<Component>& component)
         hoverColor_ = rating->GetHoverColor();
         starColorActive_ = rating->GetStarColorActive().GetValue();
         starColorInactive_ = rating->GetStarColorInactive().GetValue();
+        hoverAnimationType_ = rating->GetMouseAnimationType();
 
         ProcessAttributes(isUpdateAll);
 
@@ -500,11 +501,6 @@ void RenderRating::ConstrainScore(double& score, double lowerBoundary, double up
     if (LessOrEqual(score, lowerBoundary)) {
         score = lowerBoundary;
     }
-}
-
-WeakPtr<RenderNode> RenderRating::CheckHoverNode()
-{
-    return AceType::WeakClaim<RenderNode>(this);
 }
 
 bool RenderRating::HandleMouseEvent(const MouseEvent& event)

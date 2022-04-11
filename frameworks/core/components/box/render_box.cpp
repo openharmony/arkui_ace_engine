@@ -98,9 +98,8 @@ void RenderBox::Update(const RefPtr<Component>& component)
         UpdateBackDecoration(box->GetBackDecoration());
         UpdateFrontDecoration(box->GetFrontDecoration());
         hoverColorBegin_ = box->GetColor();
-        animationType_ = box->GetMouseAnimationType();
-        hoverAnimationType_ = animationType_;
-        isZoom = animationType_ == HoverAnimationType::SCALE;
+        hoverAnimationType_ = box->GetMouseAnimationType();
+        isZoom = hoverAnimationType_ == HoverAnimationType::SCALE;
         MarkNeedLayout();
 
         responseRegion_ = box->GetResponseRegion();
@@ -818,7 +817,7 @@ void RenderBox::ClearRenderObject()
     controllerExit_ = nullptr;
     colorAnimationEnter_ = nullptr;
     colorAnimationExit_ = nullptr;
-    animationType_ = HoverAnimationType::NONE;
+    hoverAnimationType_ = HoverAnimationType::UNKNOWN;
     hoverColor_ = Color::TRANSPARENT;
     for (size_t i = 0; i < recognizers_.size(); i++) {
         recognizers_[i] = nullptr;
@@ -895,7 +894,7 @@ void RenderBox::OnMouseHoverEnterAnimation()
         controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
     }
     colorAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-    if (animationType_ == HoverAnimationType::OPACITY) {
+    if (hoverAnimationType_ == HoverAnimationType::OPACITY) {
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
         }
@@ -916,7 +915,7 @@ void RenderBox::OnMouseHoverExitAnimation()
         controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
     }
     colorAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-    if (animationType_ == HoverAnimationType::OPACITY) {
+    if (hoverAnimationType_ == HoverAnimationType::OPACITY) {
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
         }
@@ -932,11 +931,6 @@ void RenderBox::OnMouseHoverExitAnimation()
     controllerExit_->SetDuration(HOVER_ANIMATION_DURATION);
     controllerExit_->Play();
     controllerExit_->SetFillMode(FillMode::FORWARDS);
-}
-
-WeakPtr<RenderNode> RenderBox::CheckHoverNode()
-{
-    return AceType::WeakClaim<RenderNode>(this);
 }
 
 void RenderBox::CreateFloatAnimation(RefPtr<KeyframeAnimation<float>>& floatAnimation, float beginValue, float endValue)
@@ -992,12 +986,12 @@ void RenderBox::AnimateMouseHoverEnter()
 
 void RenderBox::MouseHoverEnterTest()
 {
-    LOGD("RenderBox::MouseHoverEnterTest in. animationType_ = %{public}d", animationType_);
+    LOGD("RenderBox::MouseHoverEnterTest in. hoverAnimationType_ = %{public}d", hoverAnimationType_);
     ResetController(controllerExit_);
     if (!controllerEnter_) {
         controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
     }
-    if (animationType_ == HoverAnimationType::SCALE) {
+    if (hoverAnimationType_ == HoverAnimationType::SCALE) {
         if (!scaleAnimationEnter_) {
             scaleAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
         }
@@ -1005,7 +999,7 @@ void RenderBox::MouseHoverEnterTest()
         controllerEnter_->ClearInterpolators();
         controllerEnter_->AddInterpolator(scaleAnimationEnter_);
         isHoveredScale = true;
-    } else if (animationType_ == HoverAnimationType::BOARD) {
+    } else if (hoverAnimationType_ == HoverAnimationType::BOARD) {
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
         }
@@ -1041,19 +1035,19 @@ void RenderBox::AnimateMouseHoverExit()
 
 void RenderBox::MouseHoverExitTest()
 {
-    LOGD("RenderBox::MouseHoverExitTest in. animationType_ = %{public}d", animationType_);
+    LOGD("RenderBox::MouseHoverExitTest in. hoverAnimationType_ = %{public}d", hoverAnimationType_);
     ResetController(controllerEnter_);
     if (!controllerExit_) {
         controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
     }
-    if (animationType_ == HoverAnimationType::SCALE) {
+    if (hoverAnimationType_ == HoverAnimationType::SCALE) {
         scaleAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
         auto begin = scale_;
         CreateFloatAnimation(scaleAnimationExit_, begin, 1.0);
         controllerExit_->ClearInterpolators();
         controllerExit_->AddInterpolator(scaleAnimationExit_);
         isHoveredScale = false;
-    } else if (animationType_ == HoverAnimationType::BOARD) {
+    } else if (hoverAnimationType_ == HoverAnimationType::BOARD) {
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
         }

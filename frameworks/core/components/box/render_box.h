@@ -188,7 +188,6 @@ public:
     void AnimateMouseHoverExit() override;
     bool HandleMouseEvent(const MouseEvent& event) override;
     void HandleMouseHoverEvent(MouseState mouseState) override;
-    WeakPtr<RenderNode> CheckHoverNode() override;
 
     bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
         TouchTestResult& result) override;
@@ -290,7 +289,6 @@ protected:
     RefPtr<KeyframeAnimation<Color>> colorAnimationExit_;
     RefPtr<KeyframeAnimation<float>> scaleAnimationEnter_;
     RefPtr<KeyframeAnimation<float>> scaleAnimationExit_;
-    HoverAnimationType animationType_ = HoverAnimationType::NONE;
     Color hoverColorBegin_ = Color::TRANSPARENT;
     Color hoverColor_ = Color::TRANSPARENT;
     float scale_ = 1.0f;

@@ -348,7 +348,7 @@ private:
     RefPtr<Decoration> backDecoration_;
     RefPtr<Decoration> frontDecoration_;
     bool decorationUpdateFlag_ = false;
-    HoverAnimationType animationType_ = HoverAnimationType::NONE;
+    HoverAnimationType animationType_ = HoverAnimationType::UNKNOWN;
     OnDragFunc onDragStartId_;
     OnDropFunc onDragEnterId_;
     OnDropFunc onDragMoveId_;

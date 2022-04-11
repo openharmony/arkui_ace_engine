@@ -1123,8 +1123,8 @@ void RosenRenderBox::OnAttachContext()
 
 void RosenRenderBox::AnimateMouseHoverEnter()
 {
-    LOGD("RosenRenderBox::AnimateMouseHoverEnter in. animationType_ = %{public}d", animationType_);
-    if (animationType_ == HoverAnimationType::SCALE) {
+    LOGD("RosenRenderBox::AnimateMouseHoverEnter in. hoverAnimationType_ = %{public}d", hoverAnimationType_);
+    if (hoverAnimationType_ == HoverAnimationType::SCALE) {
         isHoveredScale = true;
         auto rsNode = GetRSNode();
         if (!rsNode) {
@@ -1144,7 +1144,7 @@ void RosenRenderBox::AnimateMouseHoverEnter()
                 }
             },
             []() {});
-    } else if (animationType_ == HoverAnimationType::BOARD) {
+    } else if (hoverAnimationType_ == HoverAnimationType::BOARD) {
         ResetController(controllerExit_);
         if (!controllerEnter_) {
             controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
@@ -1169,8 +1169,8 @@ void RosenRenderBox::AnimateMouseHoverEnter()
 
 void RosenRenderBox::AnimateMouseHoverExit()
 {
-    LOGI("RosenRenderBox::AnimateMouseHoverExit in. animationType_ = %{public}d", animationType_);
-    if (animationType_ == HoverAnimationType::SCALE) {
+    LOGI("RosenRenderBox::AnimateMouseHoverExit in. hoverAnimationType_ = %{public}d", hoverAnimationType_);
+    if (hoverAnimationType_ == HoverAnimationType::SCALE) {
         isHoveredScale = true;
         auto rsNode = GetRSNode();
         float scaleBegin = SCALE_CHANGED;
@@ -1187,7 +1187,7 @@ void RosenRenderBox::AnimateMouseHoverExit()
                 }
             },
             []() {});
-    } else if (animationType_ == HoverAnimationType::BOARD) {
+    } else if (hoverAnimationType_ == HoverAnimationType::BOARD) {
         ResetController(controllerEnter_);
         if (!controllerExit_) {
             controllerExit_ = AceType::MakeRefPtr<Animator>(context_);

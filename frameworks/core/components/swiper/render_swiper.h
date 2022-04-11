@@ -298,10 +298,6 @@ public:
     {
         return axis_ == Axis::VERTICAL;
     }
-    WeakPtr<RenderNode> CheckHoverNode() override
-    {
-        return AceType::WeakClaim<RenderNode>(this);
-    }
 
     bool HandleMouseEvent(const MouseEvent& event) override;
     bool RefuseUpdatePosition(int32_t index);
