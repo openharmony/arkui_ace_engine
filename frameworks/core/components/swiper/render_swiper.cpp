@@ -1256,12 +1256,16 @@ double RenderSwiper::CalculateEndOffset(int32_t fromIndex, int32_t toIndex, bool
 {
     double end = 0.0;
     auto context = GetContext().Upgrade();
+    double translateRatio = TRANSLATE_RATIO;
+    if (context && context->GetIsDeclarative()) {
+        translateRatio = 1.0;
+    }
     if (fromIndex > toIndex) {
         // default move to back position, if need reverse direction move to front position.
-        end = reverse ? prevItemOffset_ / TRANSLATE_RATIO : nextItemOffset_ / TRANSLATE_RATIO;
+        end = reverse ? prevItemOffset_ / translateRatio : nextItemOffset_ / translateRatio;
     } else {
         // default move to front position, if need reverse direction move to back position.
-        end = reverse ? nextItemOffset_ / TRANSLATE_RATIO : prevItemOffset_ / TRANSLATE_RATIO;
+        end = reverse ? nextItemOffset_ / translateRatio : prevItemOffset_ / translateRatio;
     }
     if (context && context->IsJsCard()) {
         if (loop_) {
