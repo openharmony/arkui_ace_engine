@@ -42,7 +42,7 @@ void RenderCoverage::PerformLayout()
     LayoutParam innerLayout = GetLayoutParam();
     auto firstChild = children.begin();
     if (firstChild == children.end()) {
-        LOGE("RenderCoverage: firstChild is null.");
+        LOGD("RenderCoverage: firstChild is null.");
         return;
     }
     (*firstChild)->Layout(innerLayout);
@@ -51,7 +51,7 @@ void RenderCoverage::PerformLayout()
 
     auto secondChild = ++firstChild;
     if (secondChild == children.end()) {
-        LOGE("RenderCoverage: secondChild is null.");
+        LOGD("RenderCoverage: secondChild is null.");
         return;
     }
     LayoutParam secondChildLayoutParam;

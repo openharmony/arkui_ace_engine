@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,14 @@
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/bubble/bubble_element.h"
+#include "core/components/common/properties/animation_option.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/dialog/dialog_element.h"
 #include "core/components/drop_filter/drop_filter_element.h"
 #include "core/components/page/page_element.h"
 #include "core/components/picker/picker_base_element.h"
 #include "core/components/popup/popup_component.h"
+#include "core/components/popup/popup_theme.h"
 #include "core/components/select_popup/select_popup_element.h"
 #include "core/components/text_overlay/text_overlay_element.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
@@ -184,7 +186,7 @@ void StackElement::PerformPopupChild(PopupComponentInfo& popupComponentInfo)
             PerformDirectPop();
             break;
         default:
-            LOGD("Dont't need pop popup component");
+            LOGD("Don't need pop popup component");
     }
 }
 
@@ -324,10 +326,32 @@ void StackElement::PerformPopTextOverlay()
 void StackElement::PerformPopPopup(const ComposeId& id)
 {
     for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
-        auto child = DynamicCast<BubbleElement>(*iter);
+        auto child = DynamicCast<TweenElement>(*iter);
         if (child && child->GetId() == id) {
-            child->FirePopEvent();
-            UpdateChild(child, nullptr);
+            auto themeManager = GetThemeManager();
+            if (!themeManager) {
+                LOGE("themeManager is null!");
+                return;
+            }
+
+            auto theme = themeManager->GetTheme<PopupTheme>();
+            auto hideAlphaAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(1.0f, 0.0f, Curves::FAST_OUT_SLOW_IN);
+            TweenOption hideOption;
+            hideOption.SetDuration(theme->GetHideTime());
+            hideOption.SetOpacityAnimation(hideAlphaAnimation);
+
+            auto animator = child->GetController();
+            animator->ClearAllListeners();
+            child->SetOption(hideOption);
+            child->ApplyOptions();
+            child->ApplyKeyframes();
+            animator->AddStopListener([weakStack = AceType::WeakClaim(this), child] {
+                auto lastStack = weakStack.Upgrade();
+                if (lastStack) {
+                    lastStack->UpdateChild(child, nullptr);
+                }
+            });
+            animator->Play();
             break;
         }
     }

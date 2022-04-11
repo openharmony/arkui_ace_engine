@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ namespace OHOS::Ace::Framework {
 
 class ACE_EXPORT StandardCodecBufferReader final {
 public:
-    explicit StandardCodecBufferReader(const std::vector<uint8_t>& buffer) : byteBufferReader_(buffer) {};
+    explicit StandardCodecBufferReader(const std::vector<uint8_t>& buffer) : byteBufferReader_(buffer) {}
     ~StandardCodecBufferReader() = default;
 
     bool ReadData(CodecData& resultData);
@@ -43,7 +43,7 @@ private:
 
 class StandardCodecBufferWriter final {
 public:
-    explicit StandardCodecBufferWriter(std::vector<uint8_t>& buffer) : byteBufferWriter_(buffer) {};
+    explicit StandardCodecBufferWriter(std::vector<uint8_t>& buffer) : byteBufferWriter_(buffer) {}
     ~StandardCodecBufferWriter() = default;
 
     void WriteData(const CodecData& data);

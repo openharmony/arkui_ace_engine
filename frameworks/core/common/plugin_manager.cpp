@@ -33,7 +33,7 @@ void PluginManager::AddPluginSubContainer(int64_t pluginId, const RefPtr<PluginS
     std::lock_guard<std::mutex> lock(mutex_);
     auto result = pluginSubContainerMap_.try_emplace(pluginId, pluginSubContainer);
     if (!result.second) {
-        LOGW("already have pluginSubContainer of this instance, pluginId: %{public}ld", static_cast<long>(pluginId));
+        LOGW("already have pluginSubContainer of this instance");
     }
 }
 

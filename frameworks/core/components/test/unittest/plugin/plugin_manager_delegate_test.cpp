@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +53,7 @@ RefPtr<PipelineContext> PluginManagerDelegateTest::GetPipelineContext(const RefP
 
 /**
  * @tc.name: PluginManagerDelegateAddPluginCompleteCallback001
- * @tc.desc: Verify the AddPluginCompleteCallback Interface of PluginManagerDelegate work sucess.
+ * @tc.desc: Verify the AddPluginCompleteCallback Interface of PluginManagerDelegate work success.
  * @tc.type: FUNC
  */
 HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateAddPluginCompleteCallback001, TestSize.Level1)
@@ -103,7 +103,7 @@ HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateCreatePlatformResource0
 
 /**
  * @tc.name: PluginManagerDelegateAddPluginUpdateCallback001
- * @tc.desc: Verify the AddPluginUpdateCallback Interface of PluginManagerDelegate work sucess.
+ * @tc.desc: Verify the AddPluginUpdateCallback Interface of PluginManagerDelegate work success.
  * @tc.type: FUNC
  */
 HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateAddPluginUpdateCallback001, TestSize.Level1)
@@ -153,7 +153,7 @@ HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateAddPluginUpdateCallback
 
 /**
  * @tc.name: PluginManagerDelegateAddPluginErrorCallback001
- * @tc.desc: Verify the AddPluginErrorCallback Interface of PluginManagerDelegate work sucess.
+ * @tc.desc: Verify the AddPluginErrorCallback Interface of PluginManagerDelegate work success.
  * @tc.type: FUNC
  */
 HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateAddPluginErrorCallback001, TestSize.Level1)
@@ -203,7 +203,7 @@ HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateAddPluginErrorCallback0
 
 /**
  * @tc.name: PluginManagerDelegateOnPluginAcquired001
- * @tc.desc: Verify the OnPluginAcquired Interface of PluginManagerDelegate work sucess.
+ * @tc.desc: Verify the OnPluginAcquired Interface of PluginManagerDelegate work success.
  * @tc.type: FUNC
  */
 HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateOnPluginAcquired001, TestSize.Level1)
@@ -226,7 +226,7 @@ HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateOnPluginAcquired001, Te
 
 /**
  * @tc.name: PluginManagerDelegateOnPluginUpdate001
- * @tc.desc: Verify the OnPluginUpdate Interface of PluginManagerDelegate work sucess.
+ * @tc.desc: Verify the OnPluginUpdate Interface of PluginManagerDelegate work success.
  * @tc.type: FUNC
  */
 HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateOnPluginUpdate001, TestSize.Level1)
@@ -277,7 +277,7 @@ HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateOnPluginError001, TestS
 
 /**
  * @tc.name: PluginManagerDelegateRegisterEvent001
- * @tc.desc: Verify the RegisterEvent Interface of PluginManagerDelegate work sucess.
+ * @tc.desc: Verify the RegisterEvent Interface of PluginManagerDelegate work success.
  * @tc.type: FUNC
  */
 HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateRegisterEvent001, TestSize.Level1)

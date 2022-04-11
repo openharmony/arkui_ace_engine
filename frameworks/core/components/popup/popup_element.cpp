@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,10 @@
 #include "base/utils/string_utils.h"
 #include "core/components/box/render_box.h"
 #include "core/components/bubble/bubble_component.h"
+#include "core/components/common/properties/shadow_config.h"
+#include "core/components/popup/popup_theme.h"
 #include "core/components/stack/stack_element.h"
+#include "core/components/tween/tween_component.h"
 
 namespace OHOS::Ace {
 
@@ -49,18 +52,30 @@ void PopupElement::PerformBuild()
 
 bool PopupElement::ShowPopup()
 {
-    if (!popup_) {
-        return false;
-    }
-
     const auto context = context_.Upgrade();
     if (!context) {
         return false;
     }
 
-    if (popup_->GetPopupParam()->GetTargetId().empty()) {
+    if (!popup_ || popup_->GetPopupParam()->GetTargetId().empty()) {
         return false;
     }
+
+    if (!GetThemeManager()) {
+        return false;
+    }
+
+    auto theme = GetThemeManager()->GetTheme<PopupTheme>();
+    auto showAlphaAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(0.0f, 1.0f, Curves::FAST_OUT_SLOW_IN);
+
+    TweenOption showOption;
+    showOption.SetDuration(theme->GetShowTime());
+    showOption.SetOpacityAnimation(showAlphaAnimation);
+    RefPtr<TweenComponent> tween = AceType::MakeRefPtr<TweenComponent>(popup_->GetId(), popup_->GetId());
+    tween->SetShadow(ShadowConfig::DefaultShadowM);
+    tween->SetIsFirstFrameShow(false);
+    tween->SetAnimationOperation(AnimationOperation::PLAY);
+    tween->SetTweenOption(showOption);
 
     RefPtr<BubbleComponent> bubble = AceType::MakeRefPtr<BubbleComponent>(popup_->GetChild());
     bubble->SetPopupParam(popup_->GetPopupParam());
@@ -79,7 +94,9 @@ bool PopupElement::ShowPopup()
     }
     weakStack_ = WeakClaim(RawPtr(stackElement));
     bubble->SetWeakStack(weakStack_);
-    stackElement->PushComponent(bubble, false);
+    tween->SetChild(bubble);
+
+    stackElement->PushComponent(tween, false);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     auto manager = context->GetAccessibilityManager();
     if (manager) {

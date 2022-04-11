@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,6 @@ inline void TrySaveTargetAndIdNode(const std::string& id, const std::string& tar
     }
 }
 
-// TODO delete this vector after declaration refactor if finished.
 std::vector<std::string> g_declarationNodes =
 {   DOM_NODE_TAG_BADGE,
     DOM_NODE_TAG_BUTTON,

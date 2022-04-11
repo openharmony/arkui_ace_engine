@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,17 +74,17 @@ public:
 
     bool IsTight() const
     {
-        return minSize_.Width() >= maxSize_.Width() && minSize_.Height() >= maxSize_.Height();
+        return (minSize_.Width() >= maxSize_.Width()) && (minSize_.Height() >= maxSize_.Height());
     }
 
     bool IsWidthValid() const
     {
-        return maxSize_.Width() >= minSize_.Width() && maxSize_.Width() > 0.0;
+        return (maxSize_.Width() >= minSize_.Width()) && (maxSize_.Width() > 0.0);
     }
 
     bool IsHeightValid() const
     {
-        return maxSize_.Height() >= minSize_.Height() && maxSize_.Height() > 0.0;
+        return (maxSize_.Height() >= minSize_.Height()) && (maxSize_.Height() > 0.0);
     }
 
     Size Constrain(Size size) const

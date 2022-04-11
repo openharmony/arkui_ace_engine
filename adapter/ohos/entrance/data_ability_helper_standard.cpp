@@ -12,12 +12,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include <dlfcn.h>
+#endif
 
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 
 #include "data_ability_helper.h"
 
+#include "pixel_map.h"
+
 namespace OHOS::Ace {
+namespace {
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+using ThumbnaiNapiEntry = void* (*)(const char*, void*);
+ThumbnaiNapiEntry GetThumbnailNapiEntry()
+{
+    static ThumbnaiNapiEntry thumbnailNapiEntry = nullptr;
+    if (!thumbnailNapiEntry) {
+#ifdef _ARM64_
+        std::string prefix = "/system/lib64/module/";
+#else
+        std::string prefix = "/system/lib/module/";
+#endif
+#ifdef OHOS_STANDARD_SYSTEM
+        std::string napiPluginName = "multimedia/libmedialibrary.z.so";
+#endif
+        auto napiPluginPath = prefix.append(napiPluginName);
+        void* handle = dlopen(napiPluginPath.c_str(), RTLD_LAZY);
+        if (handle == nullptr) {
+            LOGE("Failed to open shared library %{public}s, reason: %{public}s", napiPluginPath.c_str(), dlerror());
+            return nullptr;
+        }
+        thumbnailNapiEntry = reinterpret_cast<ThumbnaiNapiEntry>(dlsym(handle, "OHOS_MEDIA_NativeGetThumbnail"));
+        if (thumbnailNapiEntry == nullptr) {
+            dlclose(handle);
+            LOGE("Failed to get symbol OHOS_MEDIA_NativeGetThumbnail in %{public}s", napiPluginPath.c_str());
+            return nullptr;
+        }
+    }
+    return thumbnailNapiEntry;
+}
+#endif
+
+}
 
 DataAbilityHelperStandard::DataAbilityHelperStandard(const std::shared_ptr<OHOS::AppExecFwk::Context>& context,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& runtimeContext, bool useStageModel)
@@ -25,9 +64,45 @@ DataAbilityHelperStandard::DataAbilityHelperStandard(const std::shared_ptr<OHOS:
     useStageModel_ = useStageModel;
     if (useStageModel) {
         runtimeContext_ = runtimeContext;
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+        dataAbilityThumbnailQueryImpl_ =
+            [runtimeContextWp = runtimeContext_] (const std::string& uri) -> std::unique_ptr<Media::PixelMap> {
+            ThumbnaiNapiEntry thumbnailNapiEntry = GetThumbnailNapiEntry();
+            if (!thumbnailNapiEntry) {
+                LOGE("thumbnailNapiEntry is null");
+                return nullptr;
+            }
+            auto runtimeContextSptr = runtimeContextWp.lock();
+            if (runtimeContextSptr == nullptr) {
+                LOGE("runtimeContext lock fail, uri: %{private}s", uri.c_str());
+                return nullptr;
+            }
+            void* resPtr = thumbnailNapiEntry(uri.c_str(), &runtimeContextSptr);
+            if (resPtr == nullptr) {
+                LOGW("resPtr from native thumbnail is nullptr, uri: %{private}s", uri.c_str());
+                return nullptr;
+            }
+            return std::unique_ptr<Media::PixelMap>(reinterpret_cast<Media::PixelMap*>(resPtr));
+        };
+#endif
     } else {
         dataAbilityHelper_ = AppExecFwk::DataAbilityHelper::Creator(context);
     }
+}
+ 
+void* DataAbilityHelperStandard::QueryThumbnailResFromDataAbility(const std::string& uri)
+{
+    if (!dataAbilityThumbnailQueryImpl_) {
+        LOGW("no impl for thumbnail data query, please make sure you are using thumbnail resource on stage mode. "
+            "uri: %{private}s", uri.c_str());
+        return nullptr;
+    }
+    pixmap_ = dataAbilityThumbnailQueryImpl_(uri);
+    if (!pixmap_) {
+        LOGW("pixel map from thumb nail is nullptr, uri: %{public}s", uri.c_str());
+        return nullptr;
+    }
+    return reinterpret_cast<void*>(&pixmap_);
 }
 
 int32_t DataAbilityHelperStandard::OpenFile(const std::string& uriStr, const std::string& mode)

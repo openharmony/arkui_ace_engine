@@ -25,7 +25,7 @@ namespace OHOS::Ace::Framework {
 
 class JSShareData : public Referenced {
 public:
-    JSShareData(int32_t bufferId);
+    explicit JSShareData(int32_t bufferId);
     ~JSShareData();
 
     static void JSBind(BindingTarget globalObj);

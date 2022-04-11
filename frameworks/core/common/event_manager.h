@@ -33,14 +33,16 @@ class RenderNode;
 class Element;
 using MouseHoverTestList = std::list<WeakPtr<RenderNode>>;
 
-class EventManager {
+class EventManager : public virtual AceType {
 public:
     // After the touch down event is triggered, the touch test is performed to collect the corresponding
     // touch event target list.
-    void TouchTest(
-        const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict);
+    void TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
+        const TouchRestrict& touchRestrict, bool needAppend = false);
+    void TouchTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict);
 
     bool DispatchTouchEvent(const TouchEvent& point);
+    bool DispatchTouchEvent(const AxisEvent& event);
 
     // Distribute the key event to the corresponding root node. If the root node is not processed, return false and the
     // platform will handle it.
@@ -69,6 +71,7 @@ public:
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
+    TouchTestResult axisTouchTestResult_;
     MouseHoverTestList mouseHoverTestResults_;
     MouseHoverTestList mouseHoverTestResultsPre_;
     WeakPtr<RenderNode> mouseHoverNodePre_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -151,8 +151,6 @@ void DomSvgTextTest::TearDown() {}
  * @tc.name: DomSvgTextTest001
  * @tc.desc: Verify that DomSvgText can be created.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TO
- * @tc.author: huye
  */
 HWTEST_F(DomSvgTextTest, DomSvgTextTest001, TestSize.Level1)
 {
@@ -178,8 +176,6 @@ HWTEST_F(DomSvgTextTest, DomSvgTextTest001, TestSize.Level1)
  * @tc.name: DomSvgTextTest002
  * @tc.desc: Verify that DomSvgText can be set styles.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TO
- * @tc.author: huye
  */
 HWTEST_F(DomSvgTextTest, DomSvgTextTest002, TestSize.Level1)
 {
@@ -218,8 +214,6 @@ HWTEST_F(DomSvgTextTest, DomSvgTextTest002, TestSize.Level1)
  * @tc.name: DomSvgTspanTest001
  * @tc.desc: Verify that DomSvgTspan can be created.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TP
- * @tc.author: huye
  */
 HWTEST_F(DomSvgTextTest, DomSvgTspanTest001, TestSize.Level1)
 {
@@ -245,8 +239,6 @@ HWTEST_F(DomSvgTextTest, DomSvgTspanTest001, TestSize.Level1)
  * @tc.name: DomSvgTspanTest002
  * @tc.desc: Verify that DomSvgTspan can be set styles.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TP
- * @tc.author: huye
  */
 HWTEST_F(DomSvgTextTest, DomSvgTspanTest002, TestSize.Level1)
 {
@@ -287,8 +279,6 @@ HWTEST_F(DomSvgTextTest, DomSvgTspanTest002, TestSize.Level1)
  * @tc.name: DomSvgTextPathTest001
  * @tc.desc: Verify that DomSvgTextPath can be created.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TQ
- * @tc.author: huye
  */
 HWTEST_F(DomSvgTextTest, DomSvgTextPathTest001, TestSize.Level1)
 {
@@ -314,8 +304,6 @@ HWTEST_F(DomSvgTextTest, DomSvgTextPathTest001, TestSize.Level1)
  * @tc.name: DomSvgTextPathTest002
  * @tc.desc: Verify that DomSvgTextPath can be set styles.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TQ
- * @tc.author: huye
  */
 HWTEST_F(DomSvgTextTest, DomSvgTextPathTest002, TestSize.Level1)
 {

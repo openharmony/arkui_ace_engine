@@ -23,8 +23,8 @@
 
 namespace OHOS::Ace {
 
-void EventManager::TouchTest(
-    const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict)
+void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
+    const TouchRestrict& touchRestrict, bool needAppend)
 {
     ContainerScope scope(instanceId_);
 
@@ -40,7 +40,27 @@ void EventManager::TouchTest(
     const Point point { touchPoint.x, touchPoint.y, touchPoint.sourceType };
     // For root node, the parent local point is the same as global point.
     renderNode->TouchTest(point, point, touchRestrict, hitTestResult);
+    if (needAppend) {
+        TouchTestResult prevHitTestResult = touchTestResults_[touchPoint.id];
+        hitTestResult.splice(hitTestResult.end(), prevHitTestResult);
+    }
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
+}
+
+void EventManager::TouchTest(
+    const AxisEvent& event, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict)
+{
+    ContainerScope scope(instanceId_);
+
+    ACE_FUNCTION_TRACE();
+    if (!renderNode) {
+        LOGW("renderNode is null.");
+        return;
+    }
+    // collect
+    const Point point { event.x, event.y, event.sourceType };
+    // For root node, the parent local point is the same as global point.
+    renderNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_);
 }
 
 bool EventManager::DispatchTouchEvent(const TouchEvent& point)
@@ -76,6 +96,22 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& point)
     }
     LOGI("the %{public}d touch test result does not exist!", point.id);
     return false;
+}
+
+bool EventManager::DispatchTouchEvent(const AxisEvent& event)
+{
+    ContainerScope scope(instanceId_);
+
+    ACE_FUNCTION_TRACE();
+    for (const auto& entry : axisTouchTestResult_) {
+        if (!entry->HandleEvent(event)) {
+            break;
+        }
+    }
+    if (event.action == AxisAction::END || event.action == AxisAction::NONE) {
+        axisTouchTestResult_.clear();
+    }
+    return true;
 }
 
 bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNode>& focusNode)
@@ -128,9 +164,8 @@ bool EventManager::DispatchMouseEvent(const MouseEvent& event)
             }
         }
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
@@ -196,24 +231,10 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& re
         return;
     }
     const Point point { event.x, event.y };
-    AxisDirection direction = AxisDirection::NONE;
-    if (!NearZero(event.verticalAxis)) {
-        if (LessNotEqual(event.verticalAxis, 0.0f)) {
-            direction = AxisDirection::UP;
-        } else {
-            direction = AxisDirection::DOWN;
-        }
-    }
-    if (!NearZero(event.horizontalAxis)) {
-        if (LessNotEqual(event.horizontalAxis, 0.0f)) {
-            direction = AxisDirection::LEFT;
-        } else {
-            direction = AxisDirection::RIGHT;
-        }
-    }
     WeakPtr<RenderNode> axisNode = nullptr;
-    renderNode->AxisDetect(point, point, axisNode, direction);
+    renderNode->AxisDetect(point, point, axisNode, event.GetDirection());
     axisNode_ = axisNode;
+    LOGI("Current axis node is %{public}s", AceType::TypeName(axisNode_.Upgrade()));
 }
 
 bool EventManager::DispatchAxisEvent(const AxisEvent& event)

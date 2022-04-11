@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include "base/log/log.h"
+#include "core/common/manager_interface.h"
 #include "core/components/web/resource/web_resource.h"
 #include "core/event/ace_event_helper.h"
 
@@ -57,6 +58,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         LOGE("WebComponent is null");
         return;
     }
+    web_ = web;
     if (delegate_) {
         delegate_->UpdateJavaScriptEnabled(web->GetJsEnabled());
         delegate_->UpdateBlockNetworkImage(web->GetOnLineImageAccessEnabled());
@@ -71,10 +73,6 @@ void RenderWeb::Update(const RefPtr<Component>& component)
             delegate_->UpdateUserAgent(userAgent);
         }
     }
-
-    if (!component) {
-        return;
-    }
     MarkNeedLayout();
 }
 
@@ -86,10 +84,8 @@ void RenderWeb::PerformLayout()
     }
 
     // render web do not support child.
-    drawSize_ = Size(GetLayoutParam().GetMaxSize().Width(),
-                     (GetLayoutParam().GetMaxSize().Height() == Size::INFINITE_SIZE) ?
-                     Size::INFINITE_SIZE :
-                     (GetLayoutParam().GetMaxSize().Height()));
+    drawSize_ = Size(GetLayoutParam().GetMaxSize().Width(), GetLayoutParam().GetMaxSize().Height());
+
     SetLayoutSize(drawSize_);
     SetNeedLayout(false);
     MarkNeedRender();
@@ -139,6 +135,11 @@ void RenderWeb::HandleTouchDown(const TouchEventInfo& info)
     for (auto& touchPoint : touchInfos) {
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y);
     }
+    // clear the recording position, for not move content when virtual keyboard popup when web get focused.
+    auto context = GetContext().Upgrade();
+    if (context && context->GetTextFieldManager()) {
+        context->GetTextFieldManager()->SetClickPosition(Offset());
+    }
 }
 
 void RenderWeb::HandleTouchUp(const TouchEventInfo& info)
@@ -154,6 +155,9 @@ void RenderWeb::HandleTouchUp(const TouchEventInfo& info)
     }
     for (auto& touchPoint : touchInfos) {
         delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y);
+    }
+    if (web_ && !touchInfos.empty()) {
+        web_->RequestFocus();
     }
 }
 

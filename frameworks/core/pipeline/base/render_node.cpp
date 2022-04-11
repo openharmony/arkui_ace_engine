@@ -358,8 +358,6 @@ void RenderNode::DumpTree(int32_t depth)
         DumpLog::GetInstance().AddDesc(std::string("TouchRectList: ").append(touchRectList));
         DumpLog::GetInstance().AddDesc(std::string("DirtyRect: ").append(dirtyRect.ToString()));
         DumpLog::GetInstance().AddDesc(std::string("LayoutParam: ").append(layoutParam_.ToString()));
-        DumpLog::GetInstance().AddDesc(
-            std::string("MouseState: ").append(mouseState_ == MouseState::HOVER ? "HOVER" : "NONE"));
 #ifdef ENABLE_ROSEN_BACKEND
         if (rsNode_) {
             DumpLog::GetInstance().AddDesc(rsNode_->DumpNode(depth));
@@ -864,7 +862,7 @@ bool RenderNode::AxisDetect(const Point& globalPoint, const Point& parentLocalPo
         if (touchable_ && rect.IsInRegion(transformPoint)) {
             if (!axisNode.Upgrade()) {
                 axisNode = CheckAxisNode();
-                if (axisNode.Upgrade() && !(axisNode.Upgrade()->isScrollable(direction))) {
+                if (axisNode.Upgrade() && !(axisNode.Upgrade()->IsAxisScrollable(direction))) {
                     axisNode = nullptr;
                 }
             }
@@ -1289,6 +1287,9 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
             onLayoutReady_ =
                 AceAsyncEvent<void(const std::string&)>::Create(renderComponent->GetOnLayoutReadyMarker(), context_);
         }
+    } else {
+        LOGE("renderComponent is null");
+        return;
     }
     auto context = context_.Upgrade();
     if (context != nullptr) {
@@ -2036,7 +2037,7 @@ void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!rsNode_) {
-        LOGW("Parent render_node has no RSNode, creating now.");
+        LOGD("Parent render_node has no RSNode, creating now.");
         SyncRSNodeBoundary(true, true);
     }
     if (IsTailRenderNode()) {

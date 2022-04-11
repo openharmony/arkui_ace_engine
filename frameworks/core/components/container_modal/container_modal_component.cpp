@@ -17,10 +17,10 @@
 
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
+#include "core/components/clip/clip_component.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/container_modal/container_modal_element.h"
 #include "core/components/container_modal/render_container_modal.h"
-#include "core/components/flex/flex_item_component.h"
 #include "core/components/image/image_component.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/text/text_component.h"
@@ -52,7 +52,7 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
     // build title box
     auto titleBox = AceType::MakeRefPtr<BoxComponent>();
     titleBox->SetHeight(CONTAINER_TITLE_HEIGHT);
-    titleChildrenRow_ =
+    auto titleChildrenRow =
         AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, BuildTitleChildren(false));
 
     // handle mouse move
@@ -70,7 +70,7 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
             context->FireWindowStartMoveCallBack();
         }
     });
-    titleBox->SetChild(titleChildrenRow_);
+    titleBox->SetChild(titleChildrenRow);
     auto display = AceType::MakeRefPtr<DisplayComponent>(titleBox);
     return display;
 }
@@ -85,9 +85,9 @@ RefPtr<Component> ContainerModalComponent::BuildFloatingTitle()
     titleBox->SetHeight(CONTAINER_TITLE_HEIGHT);
     titleBox->SetBackDecoration(titleDecoration);
 
-    floatingTitleChildrenRow_ =
+    auto floatingTitleChildrenRow =
         AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, BuildTitleChildren(true));
-    titleBox->SetChild(floatingTitleChildrenRow_);
+    titleBox->SetChild(floatingTitleChildrenRow);
     auto tween = AceType::MakeRefPtr<TweenComponent>("ContainerModal", titleBox);
     return tween;
 }
@@ -96,20 +96,18 @@ RefPtr<Component> ContainerModalComponent::BuildContent()
 {
     auto contentBox = AceType::MakeRefPtr<BoxComponent>();
     contentBox->SetChild(GetChild());
-    Border contentBorder;
-    contentBorder.SetBorderRadius(Radius(CONTAINER_INNER_RADIUS));
     auto contentDecoration = AceType::MakeRefPtr<Decoration>();
     contentDecoration->SetBackgroundColor(CONTENT_BACKGROUND_COLOR);
-    contentDecoration->SetBorder(contentBorder);
     contentBox->SetBackDecoration(contentDecoration);
 
-    // adaptive height
-    contentBox->SetFlexWeight(1.0);
-    return contentBox;
+    auto clip = AceType::MakeRefPtr<ClipComponent>(contentBox);
+    clip->SetClipRadius(Radius(CONTAINER_INNER_RADIUS));
+    clip->SetFlexWeight(1.0);
+    return clip;
 }
 
 RefPtr<ButtonComponent> ContainerModalComponent::BuildControlButton(
-    InternalResource::ResourceId icon, std::function<void()>&& clickCallback)
+    InternalResource::ResourceId icon, std::function<void()>&& clickCallback, bool isFocus)
 {
     auto image = AceType::MakeRefPtr<ImageComponent>(icon);
     image->SetWidth(TITLE_ICON_SIZE);
@@ -121,7 +119,8 @@ RefPtr<ButtonComponent> ContainerModalComponent::BuildControlButton(
     button->SetWidth(TITLE_BUTTON_SIZE);
     button->SetHeight(TITLE_BUTTON_SIZE);
     button->SetType(ButtonType::CIRCLE);
-    button->SetBackgroundColor(TITLE_BUTTON_BACKGROUND_COLOR);
+    button->SetBackgroundColor(isFocus ? TITLE_BUTTON_BACKGROUND_COLOR : TITLE_BUTTON_BACKGROUND_COLOR_LOST_FOCUS);
+    button->SetClickedColor(TITLE_BUTTON_CLICKED_COLOR);
     button->SetClickFunction(std::move(clickCallback));
     return button;
 }
@@ -170,7 +169,7 @@ void ContainerModalComponent::BuildInnerChild()
     SetChild(containerBox);
 }
 
-std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool isFloating)
+std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool isFloating, bool isFocus)
 {
     // title icon
     if (!titleIcon_) {
@@ -182,57 +181,64 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     // title text
     if (!titleLabel_) {
         titleLabel_ = AceType::MakeRefPtr<TextComponent>("");
-        TextStyle style;
-        style.SetFontSize(TITLE_TEXT_FONT_SIZE);
-        style.SetTextColor(TITLE_TEXT_COLOR);
-        style.SetFontWeight(FontWeight::W500);
-        style.SetAllowScale(false);
-        style.SetTextOverflow(TextOverflow::ELLIPSIS);
-        titleLabel_->SetTextStyle(style);
-        titleLabel_->SetFlexWeight(1.0);
     }
+    TextStyle style;
+    style.SetFontSize(TITLE_TEXT_FONT_SIZE);
+    style.SetTextColor(isFocus ? TITLE_TEXT_COLOR : TITLE_TEXT_COLOR_LOST_FOCUS);
+    style.SetFontWeight(FontWeight::W500);
+    style.SetAllowScale(false);
+    style.SetTextOverflow(TextOverflow::ELLIPSIS);
+    titleLabel_->SetTextStyle(style);
+    titleLabel_->SetFlexWeight(1.0);
 
     // title control button
     auto contextWptr = context_;
-    auto titleLeftSplitButton =
-        BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT, [contextWptr]() {
+    auto leftSplitButton = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT
+                                   : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT;
+    auto titleLeftSplitButton = BuildControlButton(leftSplitButton, [contextWptr]() {
             LOGI("left split button clicked");
             auto context = contextWptr.Upgrade();
             if (context) {
                 context->FireWindowSplitCallBack();
             }
-        });
-    auto buttonResourceId = isFloating ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
+        }, isFocus);
+    auto maxRecoverButton = isFloating ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
                                        : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
-    auto titleMaximizeRecoverButton = BuildControlButton(buttonResourceId, [contextWptr]() {
-        auto context = contextWptr.Upgrade();
-        if (context) {
-            auto mode = context->FireWindowGetModeCallBack();
-            if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-                LOGI("recover button clicked");
-                context->FireWindowRecoverCallBack();
-            } else {
-                LOGI("maximize button clicked");
-                context->FireWindowMaximizeCallBack();
+    if (!isFocus) {
+        maxRecoverButton = isFloating ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_RECOVER
+                                      : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE;
+    }
+    auto titleMaximizeRecoverButton = BuildControlButton(maxRecoverButton, [contextWptr]() {
+            auto context = contextWptr.Upgrade();
+            if (context) {
+                auto mode = context->FireWindowGetModeCallBack();
+                if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+                    LOGI("recover button clicked");
+                    context->FireWindowRecoverCallBack();
+                } else {
+                    LOGI("maximize button clicked");
+                    context->FireWindowMaximizeCallBack();
+                }
             }
-        }
-    });
-    auto titleMinimizeButton =
-        BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, [contextWptr]() {
+        }, isFocus);
+    auto minimizeButton = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE
+                                  : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MINIMIZE;
+    auto titleMinimizeButton = BuildControlButton(minimizeButton, [contextWptr]() {
             auto context = contextWptr.Upgrade();
             if (context) {
                 LOGI("minimize button clicked");
                 context->FireWindowMinimizeCallBack();
             }
-        });
-    auto titleCloseButton =
-        BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, [contextWptr]() {
+        }, isFocus);
+    auto closeButton = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE
+                               : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE;
+    auto titleCloseButton = BuildControlButton(closeButton, [contextWptr]() {
             auto context = contextWptr.Upgrade();
             if (context) {
                 LOGI("close button clicked");
                 context->FireWindowCloseCallBack();
             }
-        });
+        }, isFocus);
     std::list<RefPtr<Component>> titleChildren;
     titleChildren.emplace_back(SetPadding(titleIcon_, TITLE_PADDING_START, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     titleChildren.emplace_back(titleLabel_);

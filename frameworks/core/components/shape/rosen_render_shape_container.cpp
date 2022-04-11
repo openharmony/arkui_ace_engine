@@ -75,19 +75,6 @@ void RosenRenderShapeContainer::Paint(RenderContext& context, const Offset& offs
     if (!skCanvas_) {
         return;
     }
-
-    double viewBoxWidth = NormalizePercentToPx(viewBox_.Width(), false);
-    double viewBoxHeight = NormalizePercentToPx(viewBox_.Height(), true);
-    double viewBoxLeft = NormalizePercentToPx(viewBox_.Left(), false);
-    double viewBoxTop = NormalizePercentToPx(viewBox_.Top(), true);
-    if (!GetLayoutSize().IsInfinite() && GreatNotEqual(viewBoxWidth, 0.0) && GreatNotEqual(viewBoxHeight, 0.0)) {
-        double scale = std::min(GetLayoutSize().Width() / viewBoxWidth, GetLayoutSize().Height() / viewBoxHeight);
-        double tx = GetLayoutSize().Width() * 0.5 - (viewBoxWidth * 0.5 + viewBoxLeft) * scale;
-        double ty = GetLayoutSize().Height() * 0.5 - (viewBoxHeight * 0.5 + viewBoxTop) * scale;
-        
-        skCanvas_->scale(scale, scale);
-        skCanvas_->translate(tx, ty);
-    }
     BitmapMesh(context, offset);
 }
 
@@ -124,6 +111,18 @@ void RosenRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset&
     }
 
     // for the child
+    double viewBoxWidth = NormalizePercentToPx(viewBox_.Width(), false);
+    double viewBoxHeight = NormalizePercentToPx(viewBox_.Height(), true);
+    double viewBoxLeft = NormalizePercentToPx(viewBox_.Left(), false);
+    double viewBoxTop = NormalizePercentToPx(viewBox_.Top(), true);
+    if (!GetLayoutSize().IsInfinite() && GreatNotEqual(viewBoxWidth, 0.0) && GreatNotEqual(viewBoxHeight, 0.0)) {
+        double scale = std::min(GetLayoutSize().Width() / viewBoxWidth, GetLayoutSize().Height() / viewBoxHeight);
+        double tx = GetLayoutSize().Width() * 0.5 - (viewBoxWidth * 0.5 + viewBoxLeft) * scale;
+        double ty = GetLayoutSize().Height() * 0.5 - (viewBoxHeight * 0.5 + viewBoxTop) * scale;
+        skOffCanvas_->scale(scale, scale);
+        skOffCanvas_->translate(tx, ty);
+    }
+
     const auto& children = GetChildren();
     for (const auto& item : SortChildrenByZIndex(children)) {
         Offset childOffset = offset;

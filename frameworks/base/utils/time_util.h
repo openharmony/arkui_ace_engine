@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ struct TimeOfNow final {
     double minute_ = 0.0;
     double hour12_ = 0.0; // 12-hour clock
     double hour24_ = 0.0; // 24-hour clock
-    long timeUsec_ = 0L;   // microsecond. 1 second = 1000 millisecond = 1000000 microsecond
+    int64_t timeUsec_ = 0L;   // microsecond. 1 second = 1000 millisecond = 1000000 microsecond
 };
 
 bool IsHoursWestValid(double& hoursWest);

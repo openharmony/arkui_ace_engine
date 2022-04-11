@@ -41,7 +41,7 @@ public:
     static void ConstructorCallback(const JSCallbackInfo& args);
     static void DestructorCallback(HorizontalAlignDeclaration* obj);
 
-    virtual HorizontalAlign GetHorizontalAlign() const override
+    HorizontalAlign GetHorizontalAlign() const override
     {
         return align_;
     }

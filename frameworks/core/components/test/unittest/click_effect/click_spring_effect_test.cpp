@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,8 +57,6 @@ void ClickSpringEffectTest::TearDown() {}
  * @tc.name: ClickSpringEffectTest001
  * @tc.desc: Verify ClickeSpringEffect is work right.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDD AR000F3CDF
- * @tc.author: jiangtao
  */
 HWTEST_F(ClickSpringEffectTest, ClickSpringEffectTest001, TestSize.Level1)
 {
@@ -101,8 +99,6 @@ HWTEST_F(ClickSpringEffectTest, ClickSpringEffectTest001, TestSize.Level1)
  * @tc.name: ClickSpringEffectTest002
  * @tc.desc: Verify ClickeSpringEffect is work right.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDD AR000F3CDF
- * @tc.author: jiangtao
  */
 HWTEST_F(ClickSpringEffectTest, ClickSpringEffectTest002, TestSize.Level1)
 {

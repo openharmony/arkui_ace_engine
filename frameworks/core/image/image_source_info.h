@@ -31,6 +31,7 @@ public:
     static bool IsSVGSource(const std::string& imageSrc, InternalResource::ResourceId resourceId);
     static SrcType ResolveURIType(const std::string& uri);
     static bool IsValidBase64Head(const std::string& uri, const std::string& pattern);
+    static bool IsUriOfDataAbilityEncoded(const std::string& uri, const std::string& pattern);
 
     explicit ImageSourceInfo(
         const std::string& imageSrc,

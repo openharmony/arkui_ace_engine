@@ -288,7 +288,7 @@ public:
     }
 
 protected:
-    virtual void ClearRenderObject() override;
+    void ClearRenderObject() override;
     virtual Offset GetBorderOffset() const;
     virtual Radius GetBorderRadius() const;
 
@@ -309,7 +309,6 @@ protected:
     void CalculateSelfLayoutSize();
     void CalculateChildPosition();
     void AdjustSizeByAspectRatio();
-    void PerformLayoutInLiteMode();
     virtual void OnAnimationCallback();
 
     AnimatableDimension width_ { AnimatableDimension(-1.0, DimensionUnit::PX) };  // exclude margin

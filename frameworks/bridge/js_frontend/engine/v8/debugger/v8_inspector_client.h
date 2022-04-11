@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,7 @@ void DispatchMsgToV8(int sign);
 class V8InspectorClient final : public v8_inspector::V8InspectorClient {
 public:
     V8InspectorClient() = default;
-    ~V8InspectorClient() {};
+    ~V8InspectorClient() {}
     void InitializeClient(const std::unique_ptr<v8::Platform>& platform, const v8::Local<v8::Context>& context,
         const std::function<void(std::string)>& onResponse);
     void DispatchProtocolMessage(const v8_inspector::StringView& messageView) const;

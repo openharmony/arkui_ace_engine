@@ -204,8 +204,8 @@ protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     bool MouseHoverTest(const Point& parentLocalPoint) override;
-    virtual void OnMouseHoverEnterTest() override {}
-    virtual void OnMouseHoverExitTest() override {}
+    void OnMouseHoverEnterTest() override {}
+    void OnMouseHoverExitTest() override {}
 
     void SetOnChange(const std::function<void(double,int)>& value)
     {
@@ -279,6 +279,7 @@ protected:
 private:
     // Slider render information
     double value_ = DEFAULT_VALUE;
+    double preMovingValue_ = DEFAULT_VALUE;
     std::function<void(const std::string&)> onMoveEnd_;
     std::function<void(const std::string&)> onMoving_;
 

@@ -107,6 +107,7 @@ private:
 
     void OnDataMoved(const JSCallbackInfo& args)
     {
+        ContainerScope scope(instanceId_);
         size_t from = 0;
         size_t to = 0;
         if (args.Length() < 2 || !ConvertFromJSValue(args[0], from) || !ConvertFromJSValue(args[1], to)) {
@@ -118,6 +119,7 @@ private:
     template<class... Args>
     void NotifyAll(void (V2::DataChangeListener::*method)(Args...), const JSCallbackInfo& args)
     {
+        ContainerScope scope(instanceId_);
         size_t index = 0;
         if (args.Length() > 0 && ConvertFromJSValue(args[0], index)) {
             NotifyAll(method, index);
@@ -247,7 +249,7 @@ class JSLazyForEachComponent : public V2::LazyForEachComponent {
     DECLARE_ACE_TYPE(JSLazyForEachComponent, V2::LazyForEachComponent);
 
 public:
-    explicit JSLazyForEachComponent(const std::string& id) : V2::LazyForEachComponent(id) {};
+    explicit JSLazyForEachComponent(const std::string& id) : V2::LazyForEachComponent(id) {}
     ~JSLazyForEachComponent() override
     {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_);
@@ -291,11 +293,15 @@ public:
         auto viewStack = ViewStackProcessor::GetInstance();
         auto multiComposed = AceType::MakeRefPtr<MultiComposedComponent>(key, "LazyForEach");
         viewStack->Push(multiComposed);
-
+        if (parentView_) {
+            parentView_->MarkLazyForEachProcess(key);
+        }
         viewStack->PushKey(key);
         itemGenFunc_->Call(JSRef<JSObject>(), 1, &result);
         viewStack->PopKey();
-
+        if (parentView_) {
+            parentView_->ResetLazyForEachProcess();
+        }
         auto component = viewStack->Finish();
         ACE_DCHECK(multiComposed == component);
 
@@ -362,7 +368,6 @@ public:
 
     void SetParentViewObj(const JSRef<JSObject>& parentViewObj)
     {
-        parentViewObj_ = parentViewObj;
         parentView_ = parentViewObj->Unwrap<JSView>();
     }
 
@@ -401,7 +406,6 @@ private:
 
     JSExecutionContext context_;
 
-    JSRef<JSObject> parentViewObj_;
     JSView* parentView_ = nullptr;
 
     JSRef<JSObject> dataSourceObj_;

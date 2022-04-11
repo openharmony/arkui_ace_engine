@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,6 +58,10 @@ void RenderGestureListener::Update(const RefPtr<Component>& component)
 {
     RenderProxy::Update(component);
     auto gestureComponent = AceType::DynamicCast<GestureListenerComponent>(component);
+    if (!gestureComponent) {
+        LOGE("gestureComponent is null");
+        return;
+    }
     ACE_DCHECK(gestureComponent);
     SetRemoteMessageCallback(gestureComponent);
     SetOnClickCallback(gestureComponent);

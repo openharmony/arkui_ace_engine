@@ -187,7 +187,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineContext>&
         auto resRegister = weakRes.Upgrade();
         auto context = delegate->context_.Upgrade();
         if (!resRegister || !context) {
-            LOGE("resouce register or context is null");
+            LOGE("resource register or context is null");
             delegate->OnFormError("internal error");
             return;
         }
@@ -303,8 +303,13 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     }
 
 #ifdef OHOS_STANDARD_SYSTEM
+    if (type == "router") {
+        AppExecFwk::FormMgr::GetInstance().RouterEvent(runningCardId_);
+        return;
+    }
+
     AAFwk::Want want;
-    want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, (long)runningCardId_);
+    want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, (int64_t)runningCardId_);
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_MESSAGE_KEY, action);
     if (AppExecFwk::FormMgr::GetRecoverStatus() == OHOS::AppExecFwk::Constants::IN_RECOVERING) {
         LOGE("form is in recover status, can't do action on form.");
@@ -373,7 +378,7 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJs
         }
         hasCreated_ = true;
         onFormAcquiredCallback_(runningCardId_, formJsInfo.jsFormCodePath + "/", formJsInfo.formName,
-            formJsInfo.formData, formJsInfo.imageDataMap, formJsInfo.formSrc);
+            formJsInfo.formData, formJsInfo.imageDataMap, formJsInfo);
     } else {
         if (formJsInfo.formData.empty()) {
             LOGE("update form data success, but data is empty!!!");
@@ -406,6 +411,14 @@ void FormManagerDelegate::OnDeathReceived()
         LOGE("relink to form manager fail!!!");
     }
 }
-#endif
 
+std::string FormManagerDelegate::WrapAction(const std::string& action)
+{
+    auto eventAction = JsonUtil::ParseJsonString(action);
+    if (!eventAction->Contains("bundleName")) {
+        eventAction->Put("bundleName", wantCache_.GetElement().GetBundleName().c_str());
+    }
+    return eventAction->ToString();
+}
+#endif
 } // namespace OHOS::Ace

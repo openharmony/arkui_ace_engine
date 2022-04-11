@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,8 +59,6 @@ const char STYLES_FOLDER[] = "styles/";
 const char I18N_FILE_SUFFIX[] = "/properties/string.json";
 
 } // namespace
-
-std::atomic<uint64_t> FrontendDelegateDeclarative::pageIdPool_ = 0;
 
 int32_t FrontendDelegateDeclarative::GenerateNextPageId()
 {
@@ -470,7 +468,7 @@ void FrontendDelegateDeclarative::OnBackGround()
         TaskExecutor::TaskType::JS);
 }
 
-void FrontendDelegateDeclarative::OnForground()
+void FrontendDelegateDeclarative::OnForeground()
 {
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
@@ -872,9 +870,10 @@ void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const
         LOGD("router.Back pagePath = %{private}s", pagePath.c_str());
         if (!pagePath.empty()) {
             bool isRestore = false;
-            pageId_ = GetPageIdByUrl(target.url, isRestore);
+            pageId_ = GetPageIdByUrl(pagePath, isRestore);
             if (isRestore) {
                 LoadPage(pageId_, PageTarget(pagePath), false, params, true);
+                return;
             }
             if (!params.empty()) {
                 std::lock_guard<std::mutex> lock(mutex_);
@@ -1307,7 +1306,9 @@ void FrontendDelegateDeclarative::LoadPage(
             page->FlushCommands();
             // just make sure the pipelineContext is created.
             auto pipeline = delegate->pipelineContextHolder_.Get();
-            pipeline->SetMinPlatformVersion(delegate->GetMinPlatformVersion());
+            if (delegate->GetMinPlatformVersion() > 0) {
+                pipeline->SetMinPlatformVersion(delegate->GetMinPlatformVersion());
+            }
             delegate->taskExecutor_->PostTask(
                 [weak, page] {
                     auto delegate = weak.Upgrade();
@@ -1761,7 +1762,7 @@ void FrontendDelegateDeclarative::LoadReplacePage(int32_t pageId, const PageTarg
         pageParamMap_[pageId] = params;
     }
     auto url = target.url;
-    LOGD("FrontendDelegateDeclarative LoadReplacePage[%{private}d]: %{private}s.", pageId, url.c_str());
+    LOGI("FrontendDelegateDeclarative LoadReplacePage[%{private}d]: %{private}s.", pageId, url.c_str());
     if (pageId == INVALID_PAGE_ID) {
         LOGW("FrontendDelegateDeclarative, invalid page id");
         EventReport::SendPageRouterException(PageRouterExcepType::REPLACE_PAGE_ERR, url);
@@ -1861,7 +1862,7 @@ std::string FrontendDelegateDeclarative::GetRunningPageUrl() const
     return pageUrl;
 }
 
-int32_t FrontendDelegateDeclarative::GetPageIdByUrl(const std::string& url, bool isRestore)
+int32_t FrontendDelegateDeclarative::GetPageIdByUrl(const std::string& url, bool& isRestore)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     auto pageIter = std::find_if(std::rbegin(pageRouteStack_), std::rend(pageRouteStack_),

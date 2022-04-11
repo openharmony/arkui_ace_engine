@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,8 +80,6 @@ void RotationTest::TearDown() {}
  * @tc.name: RotationTest001
  * @tc.desc: Build render tree and dispatch rotation event to rotation node, then node accept it and check result.
  * @tc.type: FUNC
- * @tc.require: AR000DQ24K AR000DQ24I
- * @tc.author: h00418034
  */
 HWTEST_F(RotationTest, RotationTest001, TestSize.Level0)
 {
@@ -108,8 +106,6 @@ HWTEST_F(RotationTest, RotationTest001, TestSize.Level0)
  * @tc.name: RotationTest002
  * @tc.desc: Build render tree and dispatch rotation event to rotation node, then node refuse it and check result.
  * @tc.type: FUNC
- * @tc.require: AR000DQ24K AR000DQ24J
- * @tc.author: h00418034
  */
 HWTEST_F(RotationTest, RotationTest002, TestSize.Level0)
 {
@@ -136,8 +132,6 @@ HWTEST_F(RotationTest, RotationTest002, TestSize.Level0)
  * @tc.name: RotationTest003
  * @tc.desc: Build render tree and dispatch rotation event to rotation node, then third node accept it and check result.
  * @tc.type: FUNC
- * @tc.require: AR000DQ24K AR000DQ24J
- * @tc.author: h00418034
  */
 HWTEST_F(RotationTest, RotationTest003, TestSize.Level0)
 {
@@ -165,8 +159,6 @@ HWTEST_F(RotationTest, RotationTest003, TestSize.Level0)
  * @tc.name: RotationTest004
  * @tc.desc: Build render tree and dispatch rotation event to rotation node, then third node refuse it and check result.
  * @tc.type: FUNC
- * @tc.require: AR000DQ24K AR000DQ24J
- * @tc.author: h00418034
  */
 HWTEST_F(RotationTest, RotationTest004, TestSize.Level0)
 {

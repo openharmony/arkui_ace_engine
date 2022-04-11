@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -431,6 +431,8 @@ void TransformOperations::ParseOperationToMatrix(TransformOperation& operation)
         }
         case TransformOperationType::MATRIX:
         case TransformOperationType::UNDEFINED:
+            break;
+        default:
             break;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,10 @@ enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
 }
 
+namespace AAFwk {
+class Want;
+}
+
 namespace MMI {
 class PointerEvent;
 class KeyEvent;
@@ -65,6 +69,7 @@ public:
     virtual void Focus() = 0;
     virtual void UnFocus() = 0;
     virtual void Destroy() = 0;
+    virtual void OnNewWant(const OHOS::AAFwk::Want& want) = 0;
 
     // distribute
     virtual void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) = 0;
@@ -79,6 +84,10 @@ public:
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) = 0;
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode) = 0;
+
+    // Window color
+    virtual uint32_t GetBackgroundColor() = 0;
+    virtual void SetBackgroundColor(uint32_t color) = 0;
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
 };

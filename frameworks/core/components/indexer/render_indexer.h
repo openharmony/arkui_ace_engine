@@ -50,9 +50,9 @@ public:
     void PerformLayout() override;
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
-    virtual bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
+    bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
         TouchTestResult& result) override;
-    virtual bool OnRotation(const RotationEvent& event) override
+    bool OnRotation(const RotationEvent& event) override
     {
         return true;
     }

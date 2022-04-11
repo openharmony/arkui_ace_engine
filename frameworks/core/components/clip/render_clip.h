@@ -43,6 +43,7 @@ public:
             return;
         }
         offsetX_ = offsetX;
+        MarkNeedRender();
     }
 
     virtual void SetOffsetY(double offsetY)
@@ -51,6 +52,7 @@ public:
             return;
         }
         offsetY_ = offsetY;
+        MarkNeedRender();
     }
 
     Rect GetClipRect(const Offset& offset) const;
@@ -61,6 +63,7 @@ public:
             return;
         }
         width_ = width;
+        MarkNeedRender();
     }
 
     virtual void SetHeight(double height)
@@ -69,6 +72,7 @@ public:
             return;
         }
         height_ = height;
+        MarkNeedRender();
     }
 
     double GetHeight() const
@@ -82,6 +86,15 @@ public:
     }
 
     void Dump() override;
+
+    void SetClipRadius(const Radius& clipRadius)
+    {
+        topLeftRadius_ = clipRadius;
+        topRightRadius_ = clipRadius;
+        bottomLeftRadius_ = clipRadius;
+        bottomRightRadius_ = clipRadius;
+        MarkNeedRender();
+    }
 
 protected:
     double width_ = 0.0;

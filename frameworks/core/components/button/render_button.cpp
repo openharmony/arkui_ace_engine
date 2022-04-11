@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -815,7 +815,7 @@ void RenderButton::PlayFocusAnimation(bool isFocus)
         UpdateFocusAnimation(INIT_SCALE);
         return;
     }
-    if (!isOpacityAnimation_) {
+    if (!isOpacityAnimation_ && isTv_) {
         isOpacityAnimation_ = true;
     }
     if (isFocus) {
@@ -870,6 +870,8 @@ void RenderButton::OnStatusStyleChanged(const VisualState state)
                 buttonComponent_->SetWidth(valueState->value_);
                 width_ = valueState->value_;
             } break;
+            default:
+                break;
         }
     }
     MarkNeedLayout();

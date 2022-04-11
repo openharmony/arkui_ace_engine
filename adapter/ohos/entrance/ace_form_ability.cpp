@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,7 +109,6 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
             } else {
                 libPath += "/" + nativeLibraryPath;
             }
-            LOGI("napi lib path = %{private}s", libPath.c_str());
             Platform::PaContainer::AddLibPath(instanceId_, libPath);
         }
     }

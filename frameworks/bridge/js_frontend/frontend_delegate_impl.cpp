@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -359,7 +359,6 @@ void FrontendDelegateImpl::OnInactive()
 {
     LOGD("JsFrontend OnInactive");
     FireAsyncEvent("_root", std::string("\"viewinactive\",null,null"), std::string(""));
-    // TODO: Deprecated
     FireAsyncEvent("_root", std::string("\"viewsuspended\",null,null"), std::string(""));
 }
 
@@ -606,33 +605,40 @@ void FrontendDelegateImpl::Back(const std::string& uri, const std::string& param
     if (pipelineContext) {
         pipelineContext->NotifyDestroyEventDismiss();
     }
-
-    std::lock_guard<std::mutex> lock(mutex_);
-    auto& currentPage = pageRouteStack_.back();
-    if (!pageRouteStack_.empty() && currentPage.isAlertBeforeBackPage) {
-        backUri_ = uri;
-        taskExecutor_->PostTask(
-            [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
-                isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
-                if (context) {
-                    context->ShowDialog(dialogProperties, isRightToLeft);
-                }
-            },
-            TaskExecutor::TaskType::UI);
-    } else {
-        BackImplement(uri);
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        auto& currentPage = pageRouteStack_.back();
+        if (!pageRouteStack_.empty() && currentPage.isAlertBeforeBackPage) {
+            backUri_ = uri;
+            backParam_ = params;
+            taskExecutor_->PostTask(
+                [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
+                    isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
+                    if (context) {
+                        context->ShowDialog(dialogProperties, isRightToLeft);
+                    }
+                },
+                TaskExecutor::TaskType::UI);
+            return;
+        }
     }
+    BackImplement(uri, params);
 }
 
-void FrontendDelegateImpl::BackImplement(const std::string& uri)
+void FrontendDelegateImpl::BackImplement(const std::string& uri, const std::string& params)
 {
     LOGD("router.Back path = %{private}s", uri.c_str());
     if (uri.empty()) {
         PopPage();
     } else {
         std::string pagePath = manifestParser_->GetRouter()->GetPagePath(uri);
+        pageId_ = GetPageIdByUrl(pagePath);
         LOGD("router.Back pagePath = %{private}s", pagePath.c_str());
         if (!pagePath.empty()) {
+            if (!params.empty()) {
+                std::lock_guard<std::mutex> lock(mutex_);
+                pageParamMap_[pageId_] = params;
+            }
             PopToPage(pagePath);
         } else {
             LOGW("[Engine Log] this uri not support in route Back.");
@@ -997,7 +1003,7 @@ void FrontendDelegateImpl::EnableAlertBeforeBackPage(
                     if (!delegate) {
                         return;
                     }
-                    delegate->BackImplement(delegate->backUri_);
+                    delegate->BackImplement(delegate->backUri_, delegate->backParam_);
                 },
                 TaskExecutor::TaskType::JS);
         });
@@ -1145,7 +1151,9 @@ void FrontendDelegateImpl::LoadPage(int32_t pageId, const std::string& url, bool
                 LOGE("the pipeline context is nullptr");
                 return;
             }
-            pipelineContext->SetMinPlatformVersion(delegate->GetMinPlatformVersion());
+            if (delegate->GetMinPlatformVersion() > 0) {
+                pipelineContext->SetMinPlatformVersion(delegate->GetMinPlatformVersion());
+            }
             delegate->taskExecutor_->PostTask(
                 [weak, page] {
                     auto delegate = weak.Upgrade();

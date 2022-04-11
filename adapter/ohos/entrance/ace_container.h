@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -149,7 +149,7 @@ public:
         const std::string& group, std::vector<uint8_t>&& data, int32_t id, bool replyToComponent) const override;
 
     void DispatchSync(
-        const std::string& group, std::vector<uint8_t>&& data, uint8_t** resData, long& position) const override
+        const std::string& group, std::vector<uint8_t>&& data, uint8_t** resData, int64_t& position) const override
     {}
 
     void DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
@@ -164,6 +164,13 @@ public:
     {
         if (platformEventCallback_) {
             platformEventCallback_->OnFinish();
+        }
+    }
+
+    void OnStartAbility(const std::string& address)
+    {
+        if (platformEventCallback_) {
+            platformEventCallback_->OnStartAbility(address);
         }
     }
 
@@ -263,6 +270,7 @@ private:
     void InitializeFrontend();
     void InitializeCallback();
     void InitializeTask();
+    void InitWindowCallback();
 
     void AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
         int32_t windowId, UIEnvCallback callback = nullptr);

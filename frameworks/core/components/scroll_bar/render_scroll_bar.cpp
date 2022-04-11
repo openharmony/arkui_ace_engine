@@ -167,6 +167,8 @@ void RenderScrollBar::InitOpacity()
         case DisplayMode::AUTO:
             opacity_ = 0;
             break;
+        default:
+            break;
     }
     UpdateDisplayOpacity(opacity_);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,12 +25,12 @@ namespace OHOS::Ace {
 class Radius final {
 public:
     Radius() = default;
-    explicit Radius(double value) : Radius(value, value) {};
-    explicit Radius(const Dimension& value) : Radius(value, value) {};
-    explicit Radius(const AnimatableDimension& value) : Radius(value, value) {};
+    explicit Radius(double value) : Radius(value, value) {}
+    explicit Radius(const Dimension& value) : Radius(value, value) {}
+    explicit Radius(const AnimatableDimension& value) : Radius(value, value) {}
     Radius(double x, double y) : x_(Dimension(x)), y_(Dimension(y)) {}
-    Radius(const Dimension& x, const Dimension& y) : x_(x), y_(y) {};
-    Radius(const AnimatableDimension& x, const AnimatableDimension& y) : x_(x), y_(y) {};
+    Radius(const Dimension& x, const Dimension& y) : x_(x), y_(y) {}
+    Radius(const AnimatableDimension& x, const AnimatableDimension& y) : x_(x), y_(y) {}
     ~Radius() = default;
 
     void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)

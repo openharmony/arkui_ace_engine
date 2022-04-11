@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMMON_FLUTTER_FLUTTER_TASK_EXECUTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMMON_FLUTTER_FLUTTER_TASK_EXECUTOR_H
 
-#ifdef ACE_DEBUG
 #include <thread>
 #include <unordered_map>
-#endif
 
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/thread.h"
@@ -46,6 +44,11 @@ public:
     void RemoveTaskObserver() override;
     bool WillRunOnCurrentThread(TaskType type) const final;
 
+    int32_t GetTid(TaskType type) final
+    {
+        return taskTypeTable_[type].tid;
+    }
+
 private:
     bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const final;
     Task WrapTaskWithTraceId(Task&& task, int32_t id) const final;
@@ -55,6 +58,8 @@ private:
     void OnPostSyncTask() const final;
 
     void DumpDeadSyncTask(TaskType from, TaskType to) const;
+    mutable std::unordered_map<std::thread::id, std::thread::id> syncTaskTable_;
+#endif
 
     void FillTaskTypeTable(TaskType type);
     static void FillTaskTypeTable(const WeakPtr<FlutterTaskExecutor>& weak, TaskType type);
@@ -66,10 +71,8 @@ private:
     };
 
     mutable std::mutex tableMutex_;
-    mutable std::unordered_map<std::thread::id, std::thread::id> syncTaskTable_;
     std::unordered_map<TaskType, ThreadInfo> taskTypeTable_;
     static thread_local TaskType localTaskType;
-#endif
 
     std::unique_ptr<fml::Thread> jsThread_;
 

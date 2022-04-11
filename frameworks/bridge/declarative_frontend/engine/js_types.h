@@ -87,7 +87,7 @@ inline auto ToJSValue(T&& val)
     return JsiValueConvertor::toJsiValue(std::forward<T>(val));
 };
 
-Local<JSValueRef> JsStopPropagation(EcmaVM*, Local<JSValueRef>, const Local<JSValueRef> [], int32_t, void*);
+Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info);
 
 #endif
 

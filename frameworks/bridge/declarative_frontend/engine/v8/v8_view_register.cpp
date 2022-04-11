@@ -191,7 +191,6 @@ void JsLoadDocument(const v8::FunctionCallbackInfo<v8::Value>& args)
 
 void JsDumpMemoryStats(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
-    // TODO: Implement for v8
     LOGD("dumpMemoryStats: Not Implemented for V8. UnSupported");
 }
 
@@ -434,7 +433,10 @@ void Fp2Px(const v8::FunctionCallbackInfo<v8::Value>& args)
         return;
     }
     auto pipelineContext = container->GetPipelineContext();
-    double fontScale = pipelineContext->GetFontScale();
+    double fontScale = 1.0;
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
     double pxValue = fpValue * density * fontScale;
 
     int32_t result = GreatOrEqual(pxValue, 0) ? (pxValue + 0.5) : (pxValue - 0.5);
@@ -468,7 +470,10 @@ void Px2Fp(const v8::FunctionCallbackInfo<v8::Value>& args)
         return;
     }
     auto pipelineContext = container->GetPipelineContext();
-    double fontScale = pipelineContext->GetFontScale();
+    double fontScale = 1.0;
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
     double ratio = density * fontScale;
     double fpValue = pxValue / ratio;
 
@@ -727,7 +732,6 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
 void JsRegisterViews(BindingTarget globalObj)
 {
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    // FIXME These do not belong to views, move somewhere else
     globalObj->Set(v8::String::NewFromUtf8(isolate, "loadDocument").ToLocalChecked(),
         v8::FunctionTemplate::New(isolate, JsLoadDocument));
     globalObj->Set(v8::String::NewFromUtf8(isolate, "dumpMemoryStats").ToLocalChecked(),

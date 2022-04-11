@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,18 +39,16 @@ const std::string TEXT_VALUE = "Hello World";
 
 class PopupCreatorTest : public testing::Test {
 public:
-    static void SetUpTestCase() {};
-    static void TearDownTestCase() {};
-    void SetUp() {};
-    void TearDown() {};
+    static void SetUpTestCase() {}
+    static void TearDownTestCase() {}
+    void SetUp() {}
+    void TearDown() {}
 };
 
 /**
  * @tc.name: PopupCreator001
  * @tc.desc: Verify PopupCreator can create popup component with all properties.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOV AR000DBAP0 AR000DBAP1 AR000DBAP2
- * @tc.author: caocan
  */
 HWTEST_F(PopupCreatorTest, PopupCreator001, TestSize.Level1)
 {
@@ -96,8 +94,6 @@ HWTEST_F(PopupCreatorTest, PopupCreator001, TestSize.Level1)
  * @tc.name: PopupCreator002
  * @tc.desc: Verify PopupCreator can handle exception with className only.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOV
- * @tc.author: caocan
  */
 HWTEST_F(PopupCreatorTest, PopupCreator002, TestSize.Level1)
 {
@@ -123,8 +119,6 @@ HWTEST_F(PopupCreatorTest, PopupCreator002, TestSize.Level1)
  * @tc.name: PopupCreator003
  * @tc.desc: Verify PopupCreator can create popup component with child property only.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOV AR000DBAP0 AR000DBAP1 AR000DBAP2
- * @tc.author: caocan
  */
 HWTEST_F(PopupCreatorTest, PopupCreator003, TestSize.Level1)
 {

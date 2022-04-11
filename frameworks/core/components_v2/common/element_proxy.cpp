@@ -24,6 +24,7 @@
 #include "base/utils/macros.h"
 #include "core/components/ifelse/if_else_component.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
+#include "core/pipeline/base/component.h"
 #include "core/pipeline/base/composed_component.h"
 
 namespace OHOS::Ace::V2 {
@@ -162,7 +163,16 @@ private:
 class LazyForEachElementProxy : public ElementProxy, public DataChangeListener {
 public:
     explicit LazyForEachElementProxy(const WeakPtr<ElementProxyHost>& host) : ElementProxy(host) {}
-    ~LazyForEachElementProxy() override = default;
+    ~LazyForEachElementProxy() override
+    {
+        for (auto&& item : children_) {
+            auto viewId = item.second->GetId();
+            if (lazyForEachComponent_) {
+                lazyForEachComponent_->ReleaseChildGroupByComposedId(viewId);
+            }
+        }
+        children_.clear();
+    }
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
@@ -266,6 +276,10 @@ public:
         LOGI("OnDataReloaded()");
         ACE_SCOPED_TRACE("OnDataReloaded");
 
+        if (!lazyForEachComponent_) {
+            LOGE("lazyForEachCompenent_ is nullptr");
+            return;
+        }
         LazyForEachCache cache(lazyForEachComponent_);
         size_t oldCount = count_;
         count_ = cache.TotalCount();
@@ -283,6 +297,7 @@ public:
 
         std::list<std::pair<size_t, RefPtr<ElementProxy>>> items(children_.begin(), children_.end());
         children_.clear();
+        std::list<RefPtr<ElementProxy>> deletedItems;
         auto checkRange = host ? host->GetReloadedCheckNum() : count_;
         for (const auto& [index, child] : items) {
             size_t newIdx = cache[child->GetId()];
@@ -295,12 +310,14 @@ public:
             size_t idx = std::min(index, count_ - 1);
             size_t range = std::max(idx, count_ - 1 - idx);
             range = std::min(range, checkRange);
+            bool recycle = false;
             for (size_t i = 0; i <= range; ++i) {
                 if (idx >= i && !cache.IsInCache(idx - i)) {
                     auto component = cache[idx - i];
                     if (component->GetId() == child->GetId()) {
                         children_.emplace(idx - i, child);
                         child->Update(cache[idx - i], startIndex_ + idx - i);
+                        recycle = true;
                         break;
                     }
                 }
@@ -310,9 +327,19 @@ public:
                     if (component->GetId() == child->GetId()) {
                         children_.emplace(idx + i, child);
                         child->Update(cache[idx + i], startIndex_ + idx + i);
+                        recycle = true;
                         break;
                     }
                 }
+            }
+            if (!recycle) {
+                deletedItems.emplace_back(child);
+            }
+        }
+
+        if (lazyForEachComponent_) {
+            for (auto&& item : deletedItems) {
+                lazyForEachComponent_->ReleaseChildGroupByComposedId(item->GetId());
             }
         }
 
@@ -370,16 +397,25 @@ public:
         }
 
         std::list<std::pair<size_t, RefPtr<ElementProxy>>> items;
+        RefPtr<ElementProxy> deleteItem;
         auto it = children_.begin();
         while (it != children_.end()) {
             if (it->first < index) {
                 ++it;
                 continue;
             }
+            if (it->first == index) {
+                deleteItem = it->second;
+            }
+
             if (it->first > index) {
                 items.emplace_back(it->first - 1, it->second);
             }
             it = children_.erase(it);
+        }
+
+        if (lazyForEachComponent_ && deleteItem) {
+            lazyForEachComponent_->ReleaseChildGroupByComposedId(deleteItem->GetId());
         }
 
         for (const auto& item : items) {
@@ -482,11 +518,17 @@ private:
     class LazyForEachCache final {
     public:
         explicit LazyForEachCache(const RefPtr<LazyForEachComponent>& component)
-            : lazyForEachComponent_(component), count_(component->TotalCount())
-        {}
+            : lazyForEachComponent_(component)
+        {
+            if (component) {
+                count_ = component->TotalCount();
+            } else {
+                count_ = 0;
+            }
+        }
         ~LazyForEachCache() = default;
 
-        RefPtr<ComposedComponent> operator[] (size_t index)
+        RefPtr<ComposedComponent> operator[](size_t index)
         {
             if (index >= count_) {
                 return nullptr;
@@ -504,7 +546,7 @@ private:
             return component;
         }
 
-        size_t operator[] (const ComposeId& id) const
+        size_t operator[](const ComposeId& id) const
         {
             auto it = idCache_.find(id);
             return it == idCache_.end() ? INVALID_INDEX : it->second;
@@ -854,7 +896,6 @@ void ElementProxyHost::AddComposeId(const ComposeId& id)
     composeIds_.emplace(id);
 }
 
-
 void ElementProxyHost::AddActiveComposeId(ComposeId& id)
 {
     activeComposeIds_.emplace(id);
@@ -871,7 +912,7 @@ void ElementProxyHost::ReleaseRedundantComposeIds()
     std::set<ComposeId> idsToRemove;
     std::set_difference(composeIds_.begin(), composeIds_.end(), activeComposeIds_.begin(), activeComposeIds_.end(),
         std::inserter(idsToRemove, idsToRemove.begin()));
-    for (auto const& id: idsToRemove) {
+    for (auto const& id : idsToRemove) {
         ReleaseElementById(id);
     }
     composeIds_ = activeComposeIds_;

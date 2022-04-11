@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,8 +44,6 @@ void DomCardStackTest::TearDown() {}
  * @tc.name: DomCardStackTest001
  * @tc.desc: Verify that DomStack can be created successfully.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBG
- * @tc.author: lixingchi
  */
 HWTEST_F(DomCardStackTest, DomCardStackTest001, TestSize.Level1)
 {
@@ -73,8 +71,6 @@ HWTEST_F(DomCardStackTest, DomCardStackTest001, TestSize.Level1)
  * @tc.name: DomCardStackTest002
  * @tc.desc: Verify that DomStack data binding successfully.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBG
- * @tc.author: lixingchi
  */
 HWTEST_F(DomCardStackTest, DomCardStackTest002, TestSize.Level1)
 {
@@ -106,8 +102,6 @@ HWTEST_F(DomCardStackTest, DomCardStackTest002, TestSize.Level1)
  * @tc.name: DomCardStackTest003
  * @tc.desc: Verify that DomStack append child successfully.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBG
- * @tc.author: lixingchi
  */
 HWTEST_F(DomCardStackTest, DomCardStackTest003, TestSize.Level1)
 {
@@ -151,8 +145,6 @@ HWTEST_F(DomCardStackTest, DomCardStackTest003, TestSize.Level1)
  * @tc.name: DomCardStackTest004
  * @tc.desc: Verify that DomStack styles set successfully.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBG
- * @tc.author: lixingchi
  */
 HWTEST_F(DomCardStackTest, DomCardStackTest004, TestSize.Level1)
 {
@@ -204,8 +196,6 @@ HWTEST_F(DomCardStackTest, DomCardStackTest004, TestSize.Level1)
  * @tc.name: DomCardStackTest005
  * @tc.desc: Verify that DomStack event binding successfully.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBG
- * @tc.author: lixingchi
  */
 HWTEST_F(DomCardStackTest, DomCardStackTest005, TestSize.Level1)
 {

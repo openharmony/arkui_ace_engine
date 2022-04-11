@@ -38,7 +38,7 @@ public:
     void OnClick() override;
 
 private:
-    void IniteSelectPopup();
+    void InitSelectPopup();
 
     bool isEndItem_ = false;
     RefPtr<SelectPopupComponent> popup_;

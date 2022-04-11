@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 
-#include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_runtime.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
 namespace OHOS::Ace::Framework {
@@ -244,7 +244,7 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
 panda::Local<panda::FunctionRef> JsiFunction::New(JsiFunctionCallback func)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    return panda::FunctionRef::New(const_cast<EcmaVM*>(runtime->GetEcmaVm()), func, nullptr);
+    return panda::FunctionRef::New(const_cast<EcmaVM*>(runtime->GetEcmaVm()), func);
 }
 
 // -----------------------
@@ -274,33 +274,20 @@ panda::Local<panda::JSValueRef> JsiObjTemplate::New()
 // -----------------------
 // Implementation of JsiCallBackInfo
 // -----------------------
-JsiCallbackInfo::JsiCallbackInfo(panda::ecmascript::EcmaVM* vm, panda::Local<panda::JSValueRef> thisObj, int32_t argc,
-    const panda::Local<panda::JSValueRef>* argv)
-    : vm_(vm), thisObj_(vm, thisObj), argc_(argc)
-{
-    for (int i = 0; i < argc; i++) {
-        argv_.emplace_back(vm, argv[i]);
-    }
-
-}
+JsiCallbackInfo::JsiCallbackInfo(panda::JsiRuntimeCallInfo* info) : info_(info) {}
 
 JsiCallbackInfo::~JsiCallbackInfo()
 {
-    thisObj_.FreeGlobalHandleAddr();
     auto jsVal = std::get_if<panda::Global<panda::JSValueRef>>(&retVal_);
     if (jsVal) {
         jsVal->FreeGlobalHandleAddr();
     }
-    for (int i = 0; i < argc_; i++) {
-        argv_[i].FreeGlobalHandleAddr();
-    }
-    argv_.clear();
 }
 
 JsiRef<JsiValue> JsiCallbackInfo::operator[](size_t index) const
 {
-    if (static_cast<int32_t>(index) < argc_) {
-        return JsiRef<JsiValue>::Make(argv_[index].ToLocal(vm_));
+    if (static_cast<int32_t>(index) < Length()) {
+        return JsiRef<JsiValue>::Make(info_->GetCallArgRef(index));
     }
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     return JsiRef<JsiValue>::Make(panda::JSValueRef::Undefined(runtime->GetEcmaVm()));
@@ -308,19 +295,20 @@ JsiRef<JsiValue> JsiCallbackInfo::operator[](size_t index) const
 
 JsiRef<JsiObject> JsiCallbackInfo::This() const
 {
-    auto obj = JsiObject { thisObj_.ToLocal(vm_) };
+    auto obj = JsiObject { info_->GetThisRef() };
     auto ref = JsiRef<JsiObject>(obj);
     return ref;
 }
 
 int JsiCallbackInfo::Length() const
 {
-    return argc_;
+    return info_->GetArgsNumber();
 }
 
 void JsiCallbackInfo::ReturnSelf() const
 {
-    retVal_ = thisObj_;
+    panda::Global<panda::JSValueRef> thisObj(info_->GetVM(), info_->GetThisRef());
+    retVal_ = thisObj;
 }
 
 } // namespace OHOS::Ace::Framework

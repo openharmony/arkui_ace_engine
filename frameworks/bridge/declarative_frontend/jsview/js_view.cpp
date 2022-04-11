@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@ namespace OHOS::Ace::Framework {
 JSView::JSView(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction) : viewId_(viewId)
 {
     jsViewFunction_ = AceType::MakeRefPtr<ViewFunctions>(jsObject, jsRenderFunction);
+    instanceId_ = Container::CurrentId();
     LOGD("JSView constructor");
 }
 
@@ -59,7 +60,9 @@ RefPtr<OHOS::Ace::Component> JSView::CreateComponent()
         }
         if (jsView->element_.Invalid()) {
             ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
-            jsView->jsViewFunction_->ExecuteAppear();
+            if (jsView->jsViewFunction_) {
+                jsView->jsViewFunction_->ExecuteAppear();
+            }
         }
         jsView->element_ = element;
         // add render function callback to element. when the element rebuilds due
@@ -110,15 +113,15 @@ RefPtr<OHOS::Ace::Component> JSView::InternalRender(const RefPtr<Component>& par
     {
         ACE_SCORING_EVENT("Component[" + viewId_ + "].AboutToRender");
         jsViewFunction_->ExecuteAboutToRender();
-        }
+    }
     {
         ACE_SCORING_EVENT("Component[" + viewId_ + "].Build");
         jsViewFunction_->ExecuteRender();
-        }
+    }
     {
         ACE_SCORING_EVENT("Component[" + viewId_ + "].OnRenderDone");
         jsViewFunction_->ExecuteOnRenderDone();
-        }
+    }
     CleanUpAbandonedChild();
     jsViewFunction_->Destroy(this);
     auto buildComponent = ViewStackProcessor::GetInstance()->Finish();
@@ -130,7 +133,7 @@ RefPtr<OHOS::Ace::Component> JSView::InternalRender(const RefPtr<Component>& par
  */
 void JSView::MarkNeedUpdate()
 {
-    ACE_DCHECK((!GetElement().Invalid()) && "JSView's ComposedElement must be created before requesting an update");
+    ACE_DCHECK((!GetElement().Invalid()));
     ACE_SCOPED_TRACE("JSView::MarkNeedUpdate");
 
     auto element = GetElement().Upgrade();
@@ -138,6 +141,17 @@ void JSView::MarkNeedUpdate()
         element->MarkDirty();
     }
     needsUpdate_ = true;
+}
+
+void JSView::SyncInstanceId()
+{
+    restoreInstanceId_ = Container::CurrentId();
+    ContainerScope::UpdateCurrent(instanceId_);
+}
+
+void JSView::RestoreInstanceId()
+{
+    ContainerScope::UpdateCurrent(restoreInstanceId_);
 }
 
 void JSView::Destroy(JSView* parentCustomView)
@@ -158,7 +172,12 @@ void JSView::Destroy(JSView* parentCustomView)
 void JSView::Create(const JSCallbackInfo& info)
 {
     if (info[0]->IsObject()) {
-        JSRefPtr<JSView> view = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+        auto* view = object->Unwrap<JSView>();
+        if (view == nullptr) {
+            LOGE("JSView is null");
+            return;
+        }
         ViewStackProcessor::GetInstance()->Push(view->CreateComponent(), true);
     } else {
         LOGE("JSView Object is expected.");
@@ -170,6 +189,8 @@ void JSView::JSBind(BindingTarget object)
     JSClass<JSView>::Declare("NativeView");
     JSClass<JSView>::StaticMethod("create", &JSView::Create);
     JSClass<JSView>::Method("markNeedUpdate", &JSView::MarkNeedUpdate);
+    JSClass<JSView>::Method("syncInstanceId", &JSView::SyncInstanceId);
+    JSClass<JSView>::Method("restoreInstanceId", &JSView::RestoreInstanceId);
     JSClass<JSView>::Method("needsUpdate", &JSView::NeedsUpdate);
     JSClass<JSView>::Method("markStatic", &JSView::MarkStatic);
     JSClass<JSView>::CustomMethod("findChildById", &JSView::FindChildById);
@@ -182,8 +203,7 @@ void JSView::FindChildById(const JSCallbackInfo& info)
     LOGD("JSView::FindChildById");
     if (info[0]->IsNumber() || info[0]->IsString()) {
         std::string viewId = info[0]->ToString();
-        JSRefPtr<JSView> jsView = GetChildById(viewId);
-        info.SetReturnValue(jsView.Get());
+        info.SetReturnValue(GetChildById(viewId));
     } else {
         LOGE("JSView FindChildById with invalid arguments.");
         JSException::Throw("%s", "JSView FindChildById with invalid arguments.");
@@ -210,9 +230,13 @@ void JSView::ConstructorCallback(const JSCallbackInfo& info)
         info.SetReturnValue(AceType::RawPtr(instance));
         if (!info[1]->IsUndefined() && info[1]->IsObject()) {
             JSRef<JSObject> parentObj = JSRef<JSObject>::Cast(info[1]);
-            JSView* parentView = parentObj->Unwrap<JSView>();
-            parentView->AddChildById(viewId, info.This());
+            auto* parentView = parentObj->Unwrap<JSView>();
+            if (parentView != nullptr) {
+                auto id = parentView->AddChildById(viewId, info.This());
+                instance->id_ = id;
+            }
         }
+        LOGD("JSView ConstructorCallback: %{public}s", instance->id_.c_str());
     } else {
         LOGE("JSView creation with invalid arguments.");
         JSException::Throw("%s", "JSView creation with invalid arguments.");
@@ -221,7 +245,11 @@ void JSView::ConstructorCallback(const JSCallbackInfo& info)
 
 void JSView::DestructorCallback(JSView* view)
 {
-    LOGD("JSView(DestructorCallback) start");
+    if (view == nullptr) {
+        LOGE("DestructorCallback failed: the view is nullptr");
+        return;
+    }
+    LOGD("JSView(DestructorCallback) start: %{public}s", view->id_.c_str());
     view->DecRefCount();
     LOGD("JSView(DestructorCallback) end");
 }
@@ -229,10 +257,22 @@ void JSView::DestructorCallback(JSView* view)
 void JSView::DestroyChild(JSView* parentCustomView)
 {
     LOGD("JSView::DestroyChild start");
-    for (auto child : customViewChildren_) {
-        child.second->Destroy(this);
+    for (auto&& child : customViewChildren_) {
+        auto* view = child.second->Unwrap<JSView>();
+        if (view != nullptr) {
+            view->Destroy(this);
+        }
         child.second.Reset();
     }
+    customViewChildren_.clear();
+    for (auto&& lazyChild : customViewChildrenWithLazy_) {
+        auto* view = lazyChild.second->Unwrap<JSView>();
+        if (view != nullptr) {
+            view->Destroy(this);
+        }
+        lazyChild.second.Reset();
+    }
+    customViewChildrenWithLazy_.clear();
     LOGD("JSView::DestroyChild end");
 }
 
@@ -246,7 +286,10 @@ void JSView::CleanUpAbandonedChild()
         if (found == lastAccessedViewIds_.end()) {
             LOGD(" found abandoned view with id %{public}s", startIter->first.c_str());
             removedViewIds.emplace_back(startIter->first);
-            startIter->second->Destroy(this);
+            auto* view = startIter->second->Unwrap<JSView>();
+            if (view != nullptr) {
+                view->Destroy(this);
+            }
             startIter->second.Reset();
         }
         ++startIter;
@@ -259,7 +302,7 @@ void JSView::CleanUpAbandonedChild()
     lastAccessedViewIds_.clear();
 }
 
-JSRefPtr<JSView> JSView::GetChildById(const std::string& viewId)
+JSRef<JSObject> JSView::GetChildById(const std::string& viewId)
 {
     auto id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
     auto found = customViewChildren_.find(id);
@@ -267,42 +310,64 @@ JSRefPtr<JSView> JSView::GetChildById(const std::string& viewId)
         ChildAccessedById(id);
         return found->second;
     }
-    return JSRefPtr<JSView>();
+    auto lazyItem = customViewChildrenWithLazy_.find(id);
+    if (lazyItem != customViewChildrenWithLazy_.end()) {
+        return lazyItem->second;
+    }
+    return {};
 }
 
-void JSView::AddChildById(const std::string& viewId, const JSRefPtr<JSView>& obj)
+std::string JSView::AddChildById(const std::string& viewId, const JSRef<JSObject>& obj)
 {
     auto id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
-    customViewChildren_.emplace(id, obj);
-    ChildAccessedById(id);
+    JSView* jsview = nullptr;
+    if (isLazyForEachProcessed_) {
+        auto result = customViewChildrenWithLazy_.try_emplace(id, obj);
+        if (!result.second) {
+            jsview = result.first->second->Unwrap<JSView>();
+            result.first->second = obj;
+        }
+        lazyItemGroups_[lazyItemGroupId_].emplace_back(id);
+    } else {
+        auto result = customViewChildren_.try_emplace(id, obj);
+        if (!result.second) {
+            jsview = result.first->second->Unwrap<JSView>();
+            result.first->second = obj;
+        }
+        ChildAccessedById(id);
+    }
+    if (jsview != nullptr) {
+        jsview->Destroy(this);
+    }
+    return id;
 }
 
 void JSView::RemoveChildGroupById(const std::string& viewId)
 {
-    if (viewId.empty()) {
-        auto removeView = customViewChildren_.find(viewId);
-        if (removeView != customViewChildren_.end()) {
-            removeView->second->Destroy(this);
-            removeView->second.Reset();
-            customViewChildren_.erase(removeView);
-        }
+    JAVASCRIPT_EXECUTION_SCOPE_STATIC;
+    LOGD("RemoveChildGroupById in lazy for each case: %{public}s", viewId.c_str());
+    auto iter = lazyItemGroups_.find(viewId);
+    if (iter == lazyItemGroups_.end()) {
+        LOGI("can not find this groud to delete: %{public}s", viewId.c_str());
         return;
     }
-    auto startIter = customViewChildren_.begin();
-    auto endIter = customViewChildren_.end();
     std::vector<std::string> removedViewIds;
-    while (startIter != endIter) {
-        if (StartWith(startIter->first, viewId)) {
-            removedViewIds.emplace_back(startIter->first);
-            startIter->second->Destroy(this);
-            startIter->second.Reset();
+    for (auto&& item : iter->second) {
+        auto removeView = customViewChildrenWithLazy_.find(item);
+        if (removeView != customViewChildrenWithLazy_.end()) {
+            auto* view = removeView->second->Unwrap<JSView>();
+            if (view != nullptr) {
+                view->Destroy(this);
+            }
+            removeView->second.Reset();
+            removedViewIds.emplace_back(item);
         }
-        ++startIter;
     }
 
     for (auto&& removeId : removedViewIds) {
-        customViewChildren_.erase(removeId);
+        customViewChildrenWithLazy_.erase(removeId);
     }
+    lazyItemGroups_.erase(iter);
 }
 
 void JSView::ChildAccessedById(const std::string& viewId)

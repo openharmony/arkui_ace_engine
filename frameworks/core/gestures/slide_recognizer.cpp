@@ -1,17 +1,17 @@
 /*
-* Copyright (c) 2021 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "core/gestures/slide_recognizer.h"
 
@@ -24,6 +24,10 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr int32_t MAX_SLIDE_FINGERS = 10;
+constexpr int32_t AXIS_SLIDE_FINGERS = 1;
+constexpr int32_t RATIO_MS_TO_S = 1000;
+constexpr int32_t RATIO_US_TO_MS = 1000;
+constexpr double ANGLE_SUM_OF_TRIANGLE = 180.0;
 
 double ChangeValueRange(double value)
 {
@@ -86,8 +90,35 @@ void SlideRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
 }
 
+void SlideRecognizer::HandleTouchDownEvent(const AxisEvent& event)
+{
+    LOGD("slide recognizer receives touch down event, begin to detect slide event");
+    fingers_ = newFingers_;
+    speed_ = newSpeed_;
+    direction_ = newDirection_;
+
+    if (fingers_ != AXIS_SLIDE_FINGERS) {
+        return;
+    }
+
+    if (direction_.type == SwipeDirection::NONE) {
+        return;
+    }
+
+    axisEventStart_ = event;
+    axisVerticalTotal_ = 0.0;
+    axisHorizontalTotal_ = 0.0;
+    touchDownTime_ = event.time;
+
+    if (state_ == DetectState::READY) {
+        initialAngle_ = ComputeAngle(event);
+        state_ = DetectState::DETECTING;
+    }
+}
+
 void SlideRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    LOGD("slide recognizer receives touch up event");
     auto itr = touchPoints_.find(event.id);
     if (itr == touchPoints_.end()) {
         return;
@@ -142,8 +173,8 @@ void SlideRecognizer::HandleTouchUpEvent(const TouchEvent& event)
                     }
                 }
                 auto slidingTime = event.time - touchDownTime_;
-                auto duration_ms = std::chrono::duration_cast<std::chrono::duration<double,
-                                    std::ratio<1, 1000>>>(slidingTime);
+                auto duration_ms =
+                    std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1000>>>(slidingTime);
                 double slidingSpeed = (distance / duration_ms.count()) * 1000;
                 if (speed_ >= slidingSpeed) {
                     isAvalible = false;
@@ -160,6 +191,34 @@ void SlideRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             slidingEnd_ = true;
         }
     }
+}
+
+void SlideRecognizer::HandleTouchUpEvent(const AxisEvent& event)
+{
+    LOGD("slide recognizer receives touch up event");
+    if (fingers_ != AXIS_SLIDE_FINGERS) {
+        return;
+    }
+    globalPoint_ = Point(event.x, event.y);
+    if (state_ == DetectState::READY) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+
+    if (state_ == DetectState::DETECTING) {
+        return;
+    }
+
+    auto slidingTime = event.time - touchDownTime_;
+    auto duration_ms =
+        std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, RATIO_US_TO_MS>>>(slidingTime);
+    double verticalMoveTotal = axisVerticalTotal_ * DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES;
+    double horizontalMoveTotal = axisHorizontalTotal_ * DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES;
+    resultSpeed_ = Offset(horizontalMoveTotal, verticalMoveTotal).GetDistance() / duration_ms.count() * RATIO_MS_TO_S;
+    if (resultSpeed_ > speed_) {
+        SendCallbackMsg(onAction_);
+    }
+    Reset();
 }
 
 void SlideRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
@@ -202,6 +261,39 @@ void SlideRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     }
 }
 
+void SlideRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
+{
+    LOGD("slide recognizer receives touch move event");
+    if (fingers_ != AXIS_SLIDE_FINGERS) {
+        return;
+    }
+    globalPoint_ = Point(event.x, event.y);
+    if (state_ == DetectState::READY) {
+        axisEventStart_ = event;
+        return;
+    }
+
+    axisVerticalTotal_ += fabs(event.verticalAxis);
+    axisHorizontalTotal_ += fabs(event.horizontalAxis);
+    currentAngle_ = ComputeAngle(event);
+    time_ = event.time;
+
+    if (state_ == DetectState::DETECTING) {
+        if (GreatOrEqual(fabs(currentAngle_), angle_)) {
+            resultAngle_ = ChangeValueRange(currentAngle_);
+        }
+        auto result = ParseAxisOffset();
+        if (result == GestureAcceptResult::ACCEPT) {
+            state_ = DetectState::DETECTED;
+            Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+        } else if (result == GestureAcceptResult::REJECT) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
+    } else if (state_ == DetectState::DETECTED) {
+        resultAngle_ = ChangeValueRange(currentAngle_);
+    }
+}
+
 void SlideRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     LOGD("slide recognizer receives touch cancel event");
@@ -217,6 +309,12 @@ void SlideRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     } else {
         slidingCancel_ = true;
     }
+}
+
+void SlideRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
+{
+    SendCancelMsg();
+    Reset();
 }
 
 SlideRecognizer::GestureAcceptResult SlideRecognizer::ParseFingersOffset() const
@@ -258,8 +356,41 @@ SlideRecognizer::GestureAcceptResult SlideRecognizer::ParseFingersOffset() const
     return GestureAcceptResult::ACCEPT;
 }
 
+SlideRecognizer::GestureAcceptResult SlideRecognizer::ParseAxisOffset() const
+{
+    if ((direction_.type & SwipeDirection::ALL) == SwipeDirection::ALL) {
+        double distance = Offset(axisHorizontalTotal_, axisVerticalTotal_).GetDistance();
+        if (fabs(distance) < DEFAULT_SLIDE_DISTANCE) {
+            return GestureAcceptResult::DETECTING;
+        }
+        return GestureAcceptResult::ACCEPT;
+    }
+
+    if (axisHorizontalTotal_ > axisVerticalTotal_) {
+        if ((direction_.type & SwipeDirection::HORIZONTAL) != 0) {
+            if (axisHorizontalTotal_ < DEFAULT_SLIDE_DISTANCE) {
+                return GestureAcceptResult::DETECTING;
+            }
+        } else {
+            return GestureAcceptResult::REJECT;
+        }
+    } else {
+        if ((direction_.type & SwipeDirection::VERTICAL) != 0) {
+            if (axisVerticalTotal_ < DEFAULT_SLIDE_DISTANCE) {
+                return GestureAcceptResult::DETECTING;
+            }
+        } else {
+            return GestureAcceptResult::REJECT;
+        }
+    }
+
+    return GestureAcceptResult::ACCEPT;
+}
+
 void SlideRecognizer::Reset()
 {
+    axisHorizontalTotal_ = 0.0;
+    axisVerticalTotal_ = 0.0;
     touchPoints_.clear();
     fingersDistance_.clear();
     resultSpeed_ = 0.0;
@@ -275,7 +406,11 @@ void SlideRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         info.SetTimeStamp(time_);
         info.SetGlobalPoint(globalPoint_);
         info.SetAngle(resultAngle_);
-        info.SetSpeed(resultSpeed_);
+        if (deviceType_ == SourceType::MOUSE) {
+            info.SetSpeed(0.0);
+        } else {
+            info.SetSpeed(resultSpeed_);
+        }
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
         (*callback)(info);
@@ -290,8 +425,7 @@ bool SlideRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer)
         return false;
     }
 
-    if (curr->fingers_ != fingers_ || !NearEqual(curr->angle_, angle_) ||
-        curr->priorityMask_ != priorityMask_) {
+    if (curr->fingers_ != fingers_ || !NearEqual(curr->angle_, angle_) || curr->priorityMask_ != priorityMask_) {
         Reset();
         return false;
     }
@@ -337,7 +471,12 @@ double SlideRecognizer::ComputeAngle()
     double fy = touchPoints_[0].y;
     double sx = touchPoints_[1].x;
     double sy = touchPoints_[1].y;
-    return atan2(fy - sy, fx - sx) * 180.0 / M_PI;
+    return atan2(fy - sy, fx - sx) * ANGLE_SUM_OF_TRIANGLE / M_PI;
+}
+
+double SlideRecognizer::ComputeAngle(AxisEvent event)
+{
+    return atan2(event.verticalAxis, event.horizontalAxis) * ANGLE_SUM_OF_TRIANGLE / M_PI;
 }
 
 } // namespace OHOS::Ace

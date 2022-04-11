@@ -54,6 +54,7 @@ public:
     ACE_DEFINE_COMPONENT_PROP(Type, std::string);
     ACE_DEFINE_COMPONENT_PROP(Sticky, StickyMode, StickyMode::NONE);
     ACE_DEFINE_COMPONENT_PROP(EditMode, uint32_t, EditMode::NONE);
+    ACE_DEFINE_COMPONENT_PROP(BorderRadius, Dimension, 0.0_vp);
 
     static RefPtr<ListItemComponent> FindListItem(const RefPtr<Component>& component);
 

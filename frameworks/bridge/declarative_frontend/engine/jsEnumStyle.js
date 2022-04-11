@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -737,6 +737,28 @@ var MixedMode;
   MixedMode[MixedMode["None"] = 2] = "None";
 })(MixedMode || (MixedMode = {}));
 
+var HitTestType;
+(function (HitTestType) {
+  HitTestType[HitTestType["EditText"] = 0] = "EditText";
+  HitTestType[HitTestType["Email"] = 1] = "Email";
+  HitTestType[HitTestType["HttpAnchor"] = 2] = "HttpAnchor";
+  HitTestType[HitTestType["HttpAnchorImg"] = 3] = "HttpAnchorImg";
+  HitTestType[HitTestType["Img"] = 4] = "Img";
+  HitTestType[HitTestType["Map"] = 5] = "Map";
+  HitTestType[HitTestType["Phone"] = 6] = "Phone";
+  HitTestType[HitTestType["Unknown"] = 7] = "Unknown";
+})(HitTestType || (HitTestType = {}));
+
+
+var ProgressType;
+(function (ProgressType) {
+  ProgressType[ProgressType["Linear"] = 0] = "Linear";
+  ProgressType[ProgressType["Ring"] = 1] = "Ring";
+  ProgressType[ProgressType["Eclipse"] = 2] = "Eclipse";
+  ProgressType[ProgressType["ScaleRing"] = 3] = "ScaleRing";
+  ProgressType[ProgressType["Capsule"] = 4] = "Capsule";
+})(ProgressType || (ProgressType = {}));
+
 var MessageLevel
 (function (MessageLevel) {
   MessageLevel[MessageLevel["Debug"] = 1] = "Debug";
@@ -745,12 +767,3 @@ var MessageLevel
   MessageLevel[MessageLevel["Error"] = 4] = "Error";
   MessageLevel[MessageLevel["Log"] = 5] = "Log";
 })(MessageLevel || (MessageLevel = {}));
-
-var ProgressType
-(function (ProgressType) {
-  ProgressType[ProgressType["Linear"] = 1] = "Linear";
-  ProgressType[ProgressType["Ring"] = 2] = "Ring";
-  ProgressType[ProgressType["Eclipse"] = 3] = "Eclipse";
-  ProgressType[ProgressType["ScaleRing"] = 4] = "ScaleRing";
-  ProgressType[ProgressType["Capsule"] = 5] = "Capsule";
-})(ProgressType || (ProgressType = {}));

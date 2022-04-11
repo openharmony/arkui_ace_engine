@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ class ACE_EXPORT SwiperChangeEvent : public BaseEventInfo, public EventToJSONStr
     DECLARE_RELATIONSHIP_OF_CLASSES(SwiperChangeEvent, BaseEventInfo, EventToJSONStringAdapter);
 
 public:
-    SwiperChangeEvent(int32_t index) : BaseEventInfo("SwiperChangeEvent"), index_(index) {}
+    explicit SwiperChangeEvent(int32_t index) : BaseEventInfo("SwiperChangeEvent"), index_(index) {}
     ~SwiperChangeEvent() = default;
 
     int32_t GetIndex() const
@@ -199,6 +199,17 @@ public:
     const RefPtr<Curve>& GetCurve() const
     {
         return curve_;
+    }
+
+    bool operator==(const SwiperComponent& swiper) const
+    {
+        return *declaration_ == *swiper.declaration_ &&
+            show_ == swiper.show_ &&
+            slideContinued_ == swiper.slideContinued_ &&
+            disableRation_ == swiper.disableRation_ &&
+            disableSwipe_ == swiper.disableSwipe_ &&
+            mainSwiperSize_ == swiper.mainSwiperSize_ &&
+            curve_ == swiper.curve_;
     }
 
 private:

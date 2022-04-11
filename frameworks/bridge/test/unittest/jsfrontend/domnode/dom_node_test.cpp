@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,8 +116,6 @@ void DomNodeTest::TearDown() {}
  * @tc.name: DomNodeTest001
  * @tc.desc: Verify that DomNode can be set width and height.
  * @tc.type: FUNC
- * @tc.require: SR000DD67J
- * @tc.author: wuhaibin
  */
 HWTEST_F(DomNodeTest, DomNodeTest001, TestSize.Level1)
 {
@@ -156,8 +154,6 @@ HWTEST_F(DomNodeTest, DomNodeTest001, TestSize.Level1)
  * @tc.name: DomNodeTest002
  * @tc.desc: Verify that DomNode can be set padding .
  * @tc.type: FUNC
- * @tc.require: SR000DD67J
- * @tc.author: wuhaibin
  */
 HWTEST_F(DomNodeTest, DomNodeTest002, TestSize.Level1)
 {
@@ -206,8 +202,6 @@ HWTEST_F(DomNodeTest, DomNodeTest002, TestSize.Level1)
  * @tc.name: DomNodeTest003
  * @tc.desc: Verify that DomNode can be set margin .
  * @tc.type: FUNC
- * @tc.require: SR000DD67J
- * @tc.author: wuhaibin
  */
 HWTEST_F(DomNodeTest, DomNodeTest003, TestSize.Level1)
 {
@@ -256,8 +250,6 @@ HWTEST_F(DomNodeTest, DomNodeTest003, TestSize.Level1)
  * @tc.name: DomNodeTest004
  * @tc.desc: Verify that DomNode can be set border.
  * @tc.type: FUNC
- * @tc.require: SR000DD67O
- * @tc.author: liwenzhen
  */
 HWTEST_F(DomNodeTest, DomNodeTest004, TestSize.Level1)
 {
@@ -303,8 +295,6 @@ HWTEST_F(DomNodeTest, DomNodeTest004, TestSize.Level1)
  * @tc.name: DomNodeTest005
  * @tc.desc: Verify that DomNode can be set border radius.
  * @tc.type: FUNC
- * @tc.require: SR000DD67O
- * @tc.author: liwenzhen
  */
 HWTEST_F(DomNodeTest, DomNodeTest005, TestSize.Level1)
 {
@@ -351,8 +341,6 @@ HWTEST_F(DomNodeTest, DomNodeTest005, TestSize.Level1)
  * @tc.name: DomNodeTest006
  * @tc.desc: Verify that DomNode can be set background.
  * @tc.type: FUNC
- * @tc.require: SR000DD67U
- * @tc.author: liwenzhen
  */
 HWTEST_F(DomNodeTest, DomNodeTest006, TestSize.Level1)
 {
@@ -409,8 +397,6 @@ HWTEST_F(DomNodeTest, DomNodeTest006, TestSize.Level1)
  * @tc.name: DomNodeTest007
  * @tc.desc: Verify that DomNode can be set minWidth/minHeight/maxWidth/maxHeight.
  * @tc.type: FUNC
- * @tc.require: AR000F3BAI AR000F3BAQ
- * @tc.author: yangfan
  */
 HWTEST_F(DomNodeTest, DomNodeTest007, TestSize.Level1)
 {
@@ -449,8 +435,6 @@ HWTEST_F(DomNodeTest, DomNodeTest007, TestSize.Level1)
  * @tc.name: BoxShadowTest001
  * @tc.desc: Verify that DomNode can be set box shadow.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDQ
- * @tc.author: jiangdayuan
  */
 HWTEST_F(DomNodeTest, BoxShadowTest001, TestSize.Level1)
 {
@@ -488,8 +472,6 @@ HWTEST_F(DomNodeTest, BoxShadowTest001, TestSize.Level1)
  * @tc.name: BoxShadowTest002
  * @tc.desc: Verify that DomNode can be set box shadow.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDQ
- * @tc.author: jiangdayuan
  */
 HWTEST_F(DomNodeTest, BoxShadowTest002, TestSize.Level1)
 {
@@ -539,8 +521,6 @@ HWTEST_F(DomNodeTest, BoxShadowTest002, TestSize.Level1)
  * @tc.name: ClickEffectTest001
  * @tc.desc: Verify that DomNode can be set click-effect.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDD AR000F3CDE AR000F3CDF
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, ClickEffectTest001, TestSize.Level1)
 {
@@ -574,8 +554,6 @@ HWTEST_F(DomNodeTest, ClickEffectTest001, TestSize.Level1)
  * @tc.name: ClickEffectTest002
  * @tc.desc: Verify that DomNode can be set click-effect.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDD AR000F3CDE AR000F3CDF
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, ClickEffectTest002, TestSize.Level1)
 {
@@ -609,8 +587,6 @@ HWTEST_F(DomNodeTest, ClickEffectTest002, TestSize.Level1)
  * @tc.name: ClickEffectTest003
  * @tc.desc: Verify that DomNode can be set click-effect.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDD AR000F3CDE AR000F3CDF
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, ClickEffectTest003, TestSize.Level1)
 {
@@ -644,8 +620,6 @@ HWTEST_F(DomNodeTest, ClickEffectTest003, TestSize.Level1)
  * @tc.name: BoxBlurTest001
  * @tc.desc: Verify that DomNode can be set filter and backdrop-filter.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDU
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, BoxBlurTest001, TestSize.Level1)
 {
@@ -693,8 +667,6 @@ HWTEST_F(DomNodeTest, BoxBlurTest001, TestSize.Level1)
  * @tc.name: DomeNodeTransitionAnimatioOpitionTest001
  * @tc.desc: Verify that DomNode can be set transition-effect.
  * @tc.type: FUNC
- * @tc.require: AR000F3CA9
- * @tc.author: chenlien
  */
 HWTEST_F(DomNodeTest, DomeNodeTransitionAnimatioOpitionTest001, TestSize.Level1)
 {
@@ -727,8 +699,6 @@ HWTEST_F(DomNodeTest, DomeNodeTransitionAnimatioOpitionTest001, TestSize.Level1)
  * @tc.name: WindowBlurTest001
  * @tc.desc: Verify that DomNode can be set window-filter.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDV
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, WindowBlurTest001, TestSize.Level1)
 {
@@ -765,8 +735,6 @@ HWTEST_F(DomNodeTest, WindowBlurTest001, TestSize.Level1)
  * @tc.name: WindowBlurTest002
  * @tc.desc: Verify that DomNode can not be set window-filter invalid value.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDV
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, WindowBlurTest002, TestSize.Level1) {
     /**
@@ -802,8 +770,6 @@ HWTEST_F(DomNodeTest, WindowBlurTest002, TestSize.Level1) {
  * @tc.name: WindowBlurTest003
  * @tc.desc: Verify that DomNode can set window-filter boundary value.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDV
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, WindowBlurTest003, TestSize.Level1) {
     /**
@@ -839,8 +805,6 @@ HWTEST_F(DomNodeTest, WindowBlurTest003, TestSize.Level1) {
  * @tc.name: WindowBlurTest004
  * @tc.desc: Verify that DomNode can not be set window-filter with different unit.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDV
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, WindowBlurTest004, TestSize.Level1) {
     /**
@@ -876,8 +840,6 @@ HWTEST_F(DomNodeTest, WindowBlurTest004, TestSize.Level1) {
  * @tc.name: TransformOriginTest001
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGO
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest001, TestSize.Level1)
 {
@@ -919,8 +881,6 @@ HWTEST_F(DomNodeTest, TransformOriginTest001, TestSize.Level1)
  * @tc.name: TransformOriginTest002
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGO
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest002, TestSize.Level1)
 {
@@ -962,8 +922,6 @@ HWTEST_F(DomNodeTest, TransformOriginTest002, TestSize.Level1)
  * @tc.name: TransformOriginTest003
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000F3CDV
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest003, TestSize.Level1)
 {
@@ -1005,8 +963,6 @@ HWTEST_F(DomNodeTest, TransformOriginTest003, TestSize.Level1)
  * @tc.name: TransformOriginTest004
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGO
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest004, TestSize.Level1)
 {
@@ -1048,8 +1004,6 @@ HWTEST_F(DomNodeTest, TransformOriginTest004, TestSize.Level1)
  * @tc.name: TransformOriginTest005
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGO
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest005, TestSize.Level1)
 {
@@ -1091,8 +1045,6 @@ HWTEST_F(DomNodeTest, TransformOriginTest005, TestSize.Level1)
  * @tc.name: TransformOriginTest006
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGO
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest006, TestSize.Level1)
 {
@@ -1134,8 +1086,6 @@ HWTEST_F(DomNodeTest, TransformOriginTest006, TestSize.Level1)
  * @tc.name: TransformOriginTest007
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGO
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest007, TestSize.Level1)
 {
@@ -1177,8 +1127,6 @@ HWTEST_F(DomNodeTest, TransformOriginTest007, TestSize.Level1)
  * @tc.name: TransformOriginTest008
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGO
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest008, TestSize.Level1)
 {
@@ -1220,8 +1168,6 @@ HWTEST_F(DomNodeTest, TransformOriginTest008, TestSize.Level1)
  * @tc.name: TransformOriginTest009
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGO
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest009, TestSize.Level1)
 {
@@ -1263,8 +1209,6 @@ HWTEST_F(DomNodeTest, TransformOriginTest009, TestSize.Level1)
  * @tc.name: TransformOriginTest010
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGO
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest010, TestSize.Level1)
 {
@@ -1306,8 +1250,6 @@ HWTEST_F(DomNodeTest, TransformOriginTest010, TestSize.Level1)
  * @tc.name: TransformOriginTest011
  * @tc.desc: Verify that DomNode can set transform-origin with one value.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGO
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, TransformOriginTest011, TestSize.Level1)
 {
@@ -1349,8 +1291,6 @@ HWTEST_F(DomNodeTest, TransformOriginTest011, TestSize.Level1)
  * @tc.name: MaskImageTest001
  * @tc.desc: Verify mask on dom created.
  * @tc.type: FUNC
- * @tc.require: SR000FQK77
- * @tc.author: huye
  */
 HWTEST_F(DomNodeTest, MaskImageTest001, TestSize.Level1)
 {
@@ -1382,8 +1322,6 @@ HWTEST_F(DomNodeTest, MaskImageTest001, TestSize.Level1)
  * @tc.name: MaskImageTest002
  * @tc.desc: Verify mask on dom created.
  * @tc.type: FUNC
- * @tc.require: AR000FRTPJ
- * @tc.author: huye
  */
 HWTEST_F(DomNodeTest, MaskImageTest002, TestSize.Level1)
 {
@@ -1415,8 +1353,6 @@ HWTEST_F(DomNodeTest, MaskImageTest002, TestSize.Level1)
  * @tc.name: MaskImageTest003
  * @tc.desc: Verify mask on dom created.
  * @tc.type: FUNC
- * @tc.require: AR000FQK78
- * @tc.author: huye
  */
 HWTEST_F(DomNodeTest, MaskImageTest003, TestSize.Level1)
 {
@@ -1458,8 +1394,6 @@ HWTEST_F(DomNodeTest, MaskImageTest003, TestSize.Level1)
  * @tc.name: MaskImageTest004
  * @tc.desc: Verify mask on dom created.
  * @tc.type: FUNC
- * @tc.require: AR000FRTPJ
- * @tc.author: huye
  */
 HWTEST_F(DomNodeTest, MaskImageTest004, TestSize.Level1)
 {
@@ -1504,8 +1438,6 @@ HWTEST_F(DomNodeTest, MaskImageTest004, TestSize.Level1)
  * @tc.name: MaskImageTest005
  * @tc.desc: Verify mask on dom created.
  * @tc.type: FUNC
- * @tc.require: AR000FQK79
- * @tc.author: huye
  */
 HWTEST_F(DomNodeTest, MaskImageTest005, TestSize.Level1)
 {
@@ -1550,8 +1482,6 @@ HWTEST_F(DomNodeTest, MaskImageTest005, TestSize.Level1)
  * @tc.name: MaskImageTest006
  * @tc.desc: Verify mask on dom created.
  * @tc.type: FUNC
- * @tc.require: AR000FR073
- * @tc.author: huye
  */
 HWTEST_F(DomNodeTest, MaskImageTest006, TestSize.Level1)
 {
@@ -1593,8 +1523,6 @@ HWTEST_F(DomNodeTest, MaskImageTest006, TestSize.Level1)
  * @tc.name: MaskImageTest007
  * @tc.desc: Verify mask on dom created.
  * @tc.type: FUNC
- * @tc.require: AR000FR073
- * @tc.author: huye
  */
 HWTEST_F(DomNodeTest, MaskImageTest007, TestSize.Level1)
 {
@@ -1636,8 +1564,6 @@ HWTEST_F(DomNodeTest, MaskImageTest007, TestSize.Level1)
  * @tc.name: AngleTest001
  * @tc.desc: Verify angle with unit deg.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGQ
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, AngleTest001, TestSize.Level1)
 {
@@ -1670,8 +1596,6 @@ HWTEST_F(DomNodeTest, AngleTest001, TestSize.Level1)
  * @tc.name: AngleTest002
  * @tc.desc: Verify angle with unit grad.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGQ
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, AngleTest002, TestSize.Level1)
 {
@@ -1704,8 +1628,6 @@ HWTEST_F(DomNodeTest, AngleTest002, TestSize.Level1)
  * @tc.name: AngleTest003
  * @tc.desc: Verify angle with unit rad.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGQ
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, AngleTest003, TestSize.Level1)
 {
@@ -1740,8 +1662,6 @@ HWTEST_F(DomNodeTest, AngleTest003, TestSize.Level1)
  * @tc.name: AngleTest004
  * @tc.desc: Verify angle with unit turn.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGQ
- * @tc.author: jiangtao
  */
 HWTEST_F(DomNodeTest, AngleTest004, TestSize.Level1)
 {
@@ -1775,8 +1695,6 @@ HWTEST_F(DomNodeTest, AngleTest004, TestSize.Level1)
  * @tc.name: ClipPathTest001
  * @tc.desc: Verify clippath with circle shape.
  * @tc.type: FUNC
- * @tc.require: AR000FL292
- * @tc.author: chenlien
  */
 HWTEST_F(DomNodeTest, ClipPathTest001, TestSize.Level1)
 {
@@ -1820,8 +1738,6 @@ HWTEST_F(DomNodeTest, ClipPathTest001, TestSize.Level1)
  * @tc.name: ClipPathTest002
  * @tc.desc: Verify clippath with Inset shape.
  * @tc.type: FUNC
- * @tc.require: AR000FL292
- * @tc.author: chenlien
  */
 HWTEST_F(DomNodeTest, ClipPathTest002, TestSize.Level1)
 {
@@ -1874,8 +1790,6 @@ HWTEST_F(DomNodeTest, ClipPathTest002, TestSize.Level1)
  * @tc.name: ClipPathTest003
  * @tc.desc: Verify clippath with ellipse shape.
  * @tc.type: FUNC
- * @tc.require: AR000FL292
- * @tc.author: chenlien
  */
 HWTEST_F(DomNodeTest, ClipPathTest003, TestSize.Level1)
 {
@@ -1919,8 +1833,6 @@ HWTEST_F(DomNodeTest, ClipPathTest003, TestSize.Level1)
  * @tc.name: ClipPathTest004
  * @tc.desc: Verify clippath with polygon shape.
  * @tc.type: FUNC
- * @tc.require: AR000FL292
- * @tc.author: chenlien
  */
 HWTEST_F(DomNodeTest, ClipPathTest004, TestSize.Level1)
 {
@@ -1965,8 +1877,6 @@ HWTEST_F(DomNodeTest, ClipPathTest004, TestSize.Level1)
  * @tc.name: ClipPathTest005
  * @tc.desc: Verify clippath with path shape.
  * @tc.type: FUNC
- * @tc.require: AR000FL292
- * @tc.author: chenlien
  */
 HWTEST_F(DomNodeTest, ClipPathTest005, TestSize.Level1)
 {

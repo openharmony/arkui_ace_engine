@@ -63,7 +63,7 @@ public:
         return nullptr;
     }
 
-    virtual NodeId GetDirtyNodeId() const override;
+    NodeId GetDirtyNodeId() const override;
 
 protected:
     bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;

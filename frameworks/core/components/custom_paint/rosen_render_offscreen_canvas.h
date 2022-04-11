@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_OFFSCREEN_CANVAS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_OFFSCREEN_CANVAS_H
 
+#include "experimental/svg/model/SkSVGDOM.h"
 #include "flutter/lib/ui/painting/path.h"
 #include "flutter/third_party/txt/src/txt/paragraph.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -23,6 +24,8 @@
 
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/custom_paint/render_custom_paint.h"
+#include "core/image/image_source_info.h"
+#include "core/image/image_object.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/offscreen_canvas_bridge.h"
@@ -90,6 +93,15 @@ private:
     std::unique_ptr<SkCanvas> skCanvas_;
     std::map<std::string, setColorFunc> filterFunc_;
     RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
+    ImageSourceInfo loadingSource_;
+    ImageSourceInfo currentSource_;
+    ImageObjSuccessCallback imageObjSuccessCallback_;
+    UploadSuccessCallback uploadSuccessCallback_;
+    FailedCallback failedCallback_;
+    OnPostBackgroundTask onPostBackgroundTask_;
+    sk_sp<SkSVGDOM> skiaDom_ = nullptr;
+    CanvasImage canvasImage_;
+
     void UpdatePaintShader(SkPaint& paint, const Gradient& gradient);
     void UpdatePaintShader(const Pattern& pattern, SkPaint& paint);
     void PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow = false);
@@ -133,6 +145,10 @@ private:
     double BlurStrToDouble(const std::string& str);
     bool IsPercentStr(std::string& percentStr);
     void SetColorFilter(float matrix[20]);
+    void InitImageCallbacks();
+    void ImageObjReady(const RefPtr<ImageObject>& imageObj);
+    void ImageObjFailed();
+    void DrawSvgImage(const CanvasImage& canvasImage);
 };
 } // namespace OHOS::Ace
 

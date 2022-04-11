@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -229,7 +229,7 @@ shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequestSync(const shared_ptr<JsRu
     auto dispatcher = engine->GetJsMessageDispatcher().Upgrade();
 
     uint8_t* resData = nullptr;
-    long position = 0;
+    int64_t position = 0;
     if (dispatcher) {
         dispatcher->DispatchSync(strGroupName, std::move(encodeBuf), &resData, position);
     } else {
@@ -488,15 +488,10 @@ void JsiGroupJsBridge::TriggerModulePluginGetErrorCallback(
                 callbackId);
             return;
         }
-
-        std::string emptyReplyWithErrorMessage = std::string("{\"code\":")
-                                                     .append(std::to_string(errorCode))
-                                                     .append(",")
-                                                     .append("\"data\":\"")
-                                                     .append(errorMessage)
-                                                     .append("\"}");
-
-        shared_ptr<JsValue> emptyReplyCallback = runtime_->NewString(emptyReplyWithErrorMessage);
+        auto resultJson = JsonUtil::Create(true);
+        resultJson->Put(std::string("code").c_str(), errorCode);
+        resultJson->Put(std::string("data").c_str(), errorMessage.c_str());
+        shared_ptr<JsValue> emptyReplyCallback = runtime_-> NewString(resultJson->ToString().c_str());
         std::vector<shared_ptr<JsValue>> argv;
         argv.push_back(emptyReplyCallback);
         int32_t len = 1;
@@ -583,5 +578,13 @@ void JsiGroupJsBridge::Destroy()
     moduleCallBackFuncs_.clear();
     runtime_.reset();
 }
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+void JsiGroupJsBridge::TriggerModuleJsCallbackPreview(
+    int32_t callbackId, int32_t code, OHOS::Ace::ResponseData responseData)
+{
+    LOGE("WAIT FOR IMPLEMENTED");
+}
+#endif
 
 } // namespace OHOS::Ace::Framework

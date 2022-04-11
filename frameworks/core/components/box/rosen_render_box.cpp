@@ -39,8 +39,8 @@ namespace {
 
 constexpr int32_t DOUBLE_WIDTH = 2;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
-constexpr float SCALE_DEFAULT = 1.0;
-constexpr float SCALE_CHANGED = 1.05;
+constexpr float SCALE_DEFAULT = 1.0f;
+constexpr float SCALE_CHANGED = 1.05f;
 const Color BOARD_CHANGED = Color::FromRGBO(0, 0, 0, 0.05);
 const Rosen::RSAnimationTimingCurve SCALE_ANIMATION_TIMING_CURVE =
     Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f);
@@ -507,7 +507,6 @@ bool RosenRenderBox::MaybeRelease()
 
 void RosenRenderBox::UpdateBlurRRect(const SkRRect& rRect, const Offset& offset)
 {
-    //  radius of four edge should be same
     SkVector radius = rRect.radii(SkRRect::kUpperLeft_Corner);
     const SkRect& rect = rRect.rect();
     windowBlurRRect_.SetRectWithSimpleRadius(
@@ -1101,6 +1100,9 @@ void RosenRenderBox::AnimateMouseHoverEnter()
     if (animationType_ == HoverAnimationType::SCALE) {
         isHoveredScale = true;
         auto rsNode = GetRSNode();
+        if (!rsNode) {
+            return;
+        }
         float scaleBegin = SCALE_DEFAULT;
         float scaleEnd = SCALE_CHANGED;
 

@@ -18,7 +18,7 @@
 #include "base/log/log.h"
 #include "native_engine/native_value.h"
 
-#include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_runtime.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
 namespace OHOS::Ace::Framework {

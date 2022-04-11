@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,8 +49,6 @@ void DomCardClockTest::TearDown() {}
  * @tc.name: DomClockDataParse001
  * @tc.desc: Verify that dom clock can be created successfully and the attr is correct.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBA
- * @tc.author: yanshuifeng
  */
 HWTEST_F(DomCardClockTest, DomClockDataParse001, TestSize.Level1)
 {
@@ -109,8 +107,6 @@ HWTEST_F(DomCardClockTest, DomClockDataParse001, TestSize.Level1)
  * @tc.name: DomClockDataParse002
  * @tc.desc: Verify that dom clock can be created successfully and the style is correct.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBA
- * @tc.author: yanshuifeng
  */
 HWTEST_F(DomCardClockTest, DomClockDataParse002, TestSize.Level1)
 {
@@ -148,8 +144,6 @@ HWTEST_F(DomCardClockTest, DomClockDataParse002, TestSize.Level1)
  * @tc.name: DomClockDataParse003
  * @tc.desc: Verify that dom clock can be created successfully and the style is incorrect.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBA
- * @tc.author: gaoquan
  */
 HWTEST_F(DomCardClockTest, DomClockDataParse003, TestSize.Level1)
 {
@@ -186,8 +180,6 @@ HWTEST_F(DomCardClockTest, DomClockDataParse003, TestSize.Level1)
  * @tc.name: DomClockDataUpdate001
  * @tc.desc: Verify that dom clock can be created and updated successfully.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBA
- * @tc.author: gaoquan
  */
 HWTEST_F(DomCardClockTest, DomClockDataUpdate001, TestSize.Level1)
 {
@@ -243,8 +235,6 @@ HWTEST_F(DomCardClockTest, DomClockDataUpdate001, TestSize.Level1)
  * @tc.name: DomClockDataUpdate002
  * @tc.desc: Verify that dom clock can be created and updated successfully.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBA
- * @tc.author: gaoquan
  */
 HWTEST_F(DomCardClockTest, DomClockDataUpdate002, TestSize.Level1)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ class BilateralSpringNode : public SimpleSpringNode {
 
 public:
     BilateralSpringNode(const WeakPtr<PipelineContext>& context, int32_t index, double value)
-        : SimpleSpringNode(context, index, value) {};
+        : SimpleSpringNode(context, index, value) {}
     ~BilateralSpringNode() override = default;
 
     void NotifyNext(double endValue, double initVelocity) override;

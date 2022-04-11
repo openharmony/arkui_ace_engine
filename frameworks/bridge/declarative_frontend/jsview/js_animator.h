@@ -43,7 +43,7 @@ class JSAnimator : public AceType {
 
 public:
     JSAnimator() = default;
-    virtual ~JSAnimator() override = default;
+    ~JSAnimator() override = default;
 
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
@@ -75,7 +75,7 @@ class JSSpringProp : public AceType {
 
 public:
     JSSpringProp() = default;
-    virtual ~JSSpringProp() override = default;
+    ~JSSpringProp() override = default;
 
     static void ConstructorCallback(const JSCallbackInfo& info);
     static void DestructorCallback(JSSpringProp* obj);
@@ -100,7 +100,7 @@ class JSMotion : public AceType {
 
 public:
     JSMotion() = default;
-    virtual ~JSMotion() override = default;
+    ~JSMotion() override = default;
 
     static void ConstructorCallback(const JSCallbackInfo& info);
     static void DestructorCallback(JSMotion* obj);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ void RenderTransform::Translate(const Dimension& x, const Dimension& y, const Di
 
 void RenderTransform::Scale(float x, float y, float z) {}
 
-void RenderTransform::Skew(float x, float y) {};
+void RenderTransform::Skew(float x, float y) {}
 
 void RenderTransform::Perspective(const Dimension& distance) {}
 
@@ -53,7 +53,7 @@ void RenderTransform::Translate(const Dimension& x, const Dimension& y)
 
 void RenderTransform::Scale(float value)
 {
-    LOGD("TransformMock Scale. scale: %{public}f, this:%p", value, this);
+    LOGD("TransformMock Scale. scale: %{public}f", value);
     auto mock = AceType::DynamicCast<MockRenderTransform>(this);
     if (mock) {
         mock->MockScale(value);

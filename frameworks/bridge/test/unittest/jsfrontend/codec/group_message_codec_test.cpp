@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,8 +65,6 @@ void GroupMessageCodecTest::TearDown() {}
  * @tc.name: PrimitiveTypeCodecTest001
  * @tc.desc: Encode a function with one null para to binary, then decode and check decode result.
  * @tc.type: FUNC
- * @tc.require: AR000DB9T1
- * @tc.author: laoyitong
  */
 HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest001, TestSize.Level1)
 {
@@ -102,8 +100,6 @@ HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest001, TestSize.Level1)
  * @tc.name: PrimitiveTypeCodecTest002
  * @tc.desc: Encode a function with one True para to binary, then decode and check decode result.
  * @tc.type: FUNC
- * @tc.require: AR000DB9T1
- * @tc.author: laoyitong
  */
 HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest002, TestSize.Level1)
 {
@@ -141,8 +137,6 @@ HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest002, TestSize.Level1)
  * @tc.name: PrimitiveTypeCodecTest003
  * @tc.desc: Encode a function with one False para to binary, then decode and check decode result.
  * @tc.type: FUNC
- * @tc.require: AR000DB9T1
- * @tc.author: laoyitong
  */
 HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest003, TestSize.Level1)
 {
@@ -180,8 +174,6 @@ HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest003, TestSize.Level1)
  * @tc.name: PrimitiveTypeCodecTest004
  * @tc.desc: Encode a function with one int para to binary, then decode and check decode result.
  * @tc.type: FUNC
- * @tc.require: AR000DB9T1
- * @tc.author: laoyitong
  */
 HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest004, TestSize.Level1)
 {
@@ -218,8 +210,6 @@ HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest004, TestSize.Level1)
  * @tc.name: PrimitiveTypeCodecTest005
  * @tc.desc: Encode a function with one String para to binary, then decode and check decode result.
  * @tc.type: FUNC
- * @tc.require: AR000DB9T1
- * @tc.author: laoyitong
  */
 HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest005, TestSize.Level1)
 {
@@ -257,8 +247,6 @@ HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest005, TestSize.Level1)
  * @tc.desc: Encode a function with int8 array para to binary and check the encode result,
  * then decode and check decode result.
  * @tc.type: FUNC
- * @tc.require: AR000DB9T1
- * @tc.author: laoyitong
  */
 HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest006, TestSize.Level1)
 {
@@ -302,8 +290,6 @@ HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest006, TestSize.Level1)
  * @tc.desc: Encode a function with int8 array para to binary and check the encode result ,then decode and check decode
  * result.
  * @tc.type: FUNC
- * @tc.require: AR000DB9T1
- * @tc.author: laoyitong
  */
 HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest007, TestSize.Level1)
 {
@@ -349,8 +335,6 @@ HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest007, TestSize.Level1)
  * @tc.desc: Encode a function with int8 array para to binary and check the encode result ,then decode and check decode
  * result.
  * @tc.type: FUNC
- * @tc.require: AR000DB9T1
- * @tc.author: laoyitong
  */
 HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest008, TestSize.Level1)
 {
@@ -393,8 +377,6 @@ HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest008, TestSize.Level1)
  * @tc.name: PrimitiveTypeCodecTest009
  * @tc.desc: Encode a function with int8 array para to binary and check the encode result ,then decode and check decode
  * @tc.type: FUNC
- * @tc.require: AR000DB9T1
- * @tc.author: laoyitong
  */
 HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest009, TestSize.Level1)
 {
@@ -444,8 +426,6 @@ HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest009, TestSize.Level1)
  * @tc.name: PrimitiveTypeCodecTest010
  * @tc.desc: Encode a function with int8 array para to binary and check the encode result ,then decode and check decode
  * @tc.type: FUNC
- * @tc.require: AR000DB9T1
- * @tc.author: laoyitong
  */
 HWTEST_F(GroupMessageCodecTest, PrimitiveTypeCodecTest010, TestSize.Level1)
 {

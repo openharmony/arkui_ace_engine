@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,7 +94,7 @@ int64_t GetTickCount()
 
 class TestCheckableEventHander : public MockEventHandler {
 public:
-    explicit TestCheckableEventHander(const CheckableEventCallback& eventCallback) : eventCallback_(eventCallback) {};
+    explicit TestCheckableEventHander(const CheckableEventCallback& eventCallback) : eventCallback_(eventCallback) {}
     ~TestCheckableEventHander() = default;
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param)
@@ -484,7 +484,6 @@ void CheckableComponentTest::TestRadioChangedEvent(bool clickStatusOn)
  * @tc.desc: Test when the state of the checkbox component is on, after clicking, you can listen to the event that the
  * state changes to off
  * @tc.type: FUNC
- * @tc.require: AR000DAR25
  */
 HWTEST_F(CheckableComponentTest, CheckboxRender001, TestSize.Level1)
 {
@@ -507,7 +506,6 @@ HWTEST_F(CheckableComponentTest, CheckboxRender001, TestSize.Level1)
  * @tc.desc: Test when the state of the checkbox component is off, after clicking, you can listen to the event that the
  * state changes to on
  * @tc.type: FUNC
- * @tc.require: AR000DAR25
  */
 HWTEST_F(CheckableComponentTest, CheckboxRender002, TestSize.Level1)
 {
@@ -530,7 +528,6 @@ HWTEST_F(CheckableComponentTest, CheckboxRender002, TestSize.Level1)
  * @tc.desc: Test when the state of the switch component is on, after clicking, you can listen to the event that the
  * state changes to off
  * @tc.type: FUNC
- * @tc.require: AR000DAR22
  */
 HWTEST_F(CheckableComponentTest, SwitchRender001, TestSize.Level1)
 {
@@ -553,7 +550,6 @@ HWTEST_F(CheckableComponentTest, SwitchRender001, TestSize.Level1)
  * @tc.desc: Test when the state of the switch component is off, after clicking, you can listen to the event that the
  * state changes to on
  * @tc.type: FUNC
- * @tc.require: AR000DAR22
  */
 HWTEST_F(CheckableComponentTest, SwitchRender002, TestSize.Level1)
 {
@@ -576,7 +572,6 @@ HWTEST_F(CheckableComponentTest, SwitchRender002, TestSize.Level1)
  * @tc.desc: Test when the switch component is off, the release state does not change when dragging forth less than
  * half of the switch
  * @tc.type: FUNC
- * @tc.require: AR000DAR22
  */
 HWTEST_F(CheckableComponentTest, SwitchRender003, TestSize.Level1)
 {
@@ -599,7 +594,6 @@ HWTEST_F(CheckableComponentTest, SwitchRender003, TestSize.Level1)
  * @tc.desc: Test when the switch component is off, the release state changes when dragging forth more than
  * half of the switch
  * @tc.type: FUNC
- * @tc.require: AR000DAR22
  */
 HWTEST_F(CheckableComponentTest, SwitchRender004, TestSize.Level1)
 {
@@ -622,7 +616,6 @@ HWTEST_F(CheckableComponentTest, SwitchRender004, TestSize.Level1)
  * @tc.desc: Test when the switch component is on, the release state does not change when dragging back less than
  * half of the switch
  * @tc.type: FUNC
- * @tc.require: AR000DAR22
  */
 HWTEST_F(CheckableComponentTest, SwitchRender005, TestSize.Level1)
 {
@@ -642,7 +635,6 @@ HWTEST_F(CheckableComponentTest, SwitchRender005, TestSize.Level1)
  * @tc.desc: Test when the switch component is on, the release state changes when dragging back more than
  * half of the switch
  * @tc.type: FUNC
- * @tc.require: AR000DAR22
  */
 HWTEST_F(CheckableComponentTest, SwitchRender006, TestSize.Level1)
 {
@@ -661,7 +653,6 @@ HWTEST_F(CheckableComponentTest, SwitchRender006, TestSize.Level1)
  * @tc.name: SwitchRender007
  * @tc.desc: Test when the switch component is dragged form off to on and off, the release state does not change
  * @tc.type: FUNC
- * @tc.require: AR000DAR22
  */
 HWTEST_F(CheckableComponentTest, SwitchRender007, TestSize.Level1)
 {
@@ -680,7 +671,6 @@ HWTEST_F(CheckableComponentTest, SwitchRender007, TestSize.Level1)
  * @tc.name: SwitchRender008
  * @tc.desc: Test when the switch component is dragged form on to off and on, the release state does not change
  * @tc.type: FUNC
- * @tc.require: AR000DAR22
  */
 HWTEST_F(CheckableComponentTest, SwitchRender008, TestSize.Level1)
 {
@@ -699,7 +689,6 @@ HWTEST_F(CheckableComponentTest, SwitchRender008, TestSize.Level1)
  * @tc.name: RadioRender001
  * @tc.desc: Test that when the radio component status is off, after clicking, you can listen to the status change event
  * @tc.type: FUNC
- * @tc.require: SR000DBSKI
  */
 HWTEST_F(CheckableComponentTest, RadioRender001, TestSize.Level1)
 {
@@ -720,7 +709,6 @@ HWTEST_F(CheckableComponentTest, RadioRender001, TestSize.Level1)
  * @tc.name: RadioRender002
  * @tc.desc: Test when the radio component status is on, after clicking, you cannot listen to the status change event
  * @tc.type: FUNC
- * @tc.require: SR000DBSKI
  */
 HWTEST_F(CheckableComponentTest, RadioRender002, TestSize.Level1)
 {
@@ -741,7 +729,6 @@ HWTEST_F(CheckableComponentTest, RadioRender002, TestSize.Level1)
  * @tc.name: UpdateTextSwitch001
  * @tc.desc: Test switch component can update with text attributes correctly
  * @tc.type: FUNC
- * @tc.require: AR000DQ1R5 AR000DQ1R6
  */
 HWTEST_F(CheckableComponentTest, UpdateTextSwitch001, TestSize.Level1)
 {
@@ -765,7 +752,6 @@ HWTEST_F(CheckableComponentTest, UpdateTextSwitch001, TestSize.Level1)
  * @tc.name: UpdateTextSwitch002
  * @tc.desc: Test switch component can update correctly when showtext is false
  * @tc.type: FUNC
- * @tc.require: AR000DQ1R5 AR000DQ1R6
  */
 HWTEST_F(CheckableComponentTest, UpdateTextSwitch002, TestSize.Level1)
 {

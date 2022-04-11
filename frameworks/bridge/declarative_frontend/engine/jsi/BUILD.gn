@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -42,7 +42,7 @@ ts2abc_gen_abc("gen_jsEnumStyle_abc") {
 
 gen_obj("abc_proxyclass") {
   input = base_output_path + "/stateMgmt.abc"
-  if (use_mac) {
+  if (use_mac || use_mingw_win) {
     abcproxyclass_obj_path = base_output_path + "/js_proxy_class.c"
   }
   output = abcproxyclass_obj_path
@@ -75,13 +75,9 @@ template("declarative_js_engine_ark") {
     public_configs = [ "//ark/js_runtime:ark_jsruntime_public_config" ]
 
     sources = [
-      "$ace_root/frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.cpp",
-      "ark/ark_js_runtime.cpp",
-      "ark/ark_js_value.cpp",
       "js_converter.cpp",
       "jsi_declarative_engine.cpp",
       "jsi_declarative_group_js_bridge.cpp",
-      "jsi_declarative_utils.cpp",
       "jsi_object_template.cpp",
       "jsi_types.cpp",
       "jsi_view_register.cpp",
@@ -95,16 +91,28 @@ template("declarative_js_engine_ark") {
       "modules/jsi_timer_module.cpp",
     ]
 
+    if (!defined(config.build_for_preview) || !config.build_for_preview) {
+      sources += [
+        "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.cpp",
+        "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_value.cpp",
+        "$ace_root/frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.cpp",
+        "jsi_declarative_utils.cpp",
+      ]
+    }
+
     deps = [ "//ark/js_runtime:libark_jsruntime" ]
 
     # if napi support
     deps += [ "//foundation/ace/napi:ace_napi_ark" ]
     public_deps = [ "//foundation/ace/napi:ace_napi" ]
 
-    deps += [
-      ":gen_obj_src_abc_enum_style",
-      ":gen_obj_src_abc_proxyclass",
-    ]
+    # do not support windows platform
+    if (!is_mingw) {
+      deps += [
+        ":gen_obj_src_abc_enum_style",
+        ":gen_obj_src_abc_proxyclass",
+      ]
+    }
   }
 }
 

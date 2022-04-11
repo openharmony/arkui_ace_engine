@@ -39,7 +39,7 @@ JSValue AppGetInfo(JSContext* ctx, JSValue value, int32_t argc, JSValueConst* ar
 {
     auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
-        LOGE("Can not cast Context to QJSDelcarativeEngineInstance object.");
+        LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
         return JS_NULL;
     }
     auto delegate = instance->GetDelegate();
@@ -63,7 +63,7 @@ JSValue AppTerminate(JSContext* ctx, JSValue value, int32_t argc, JSValueConst* 
 {
     auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
-        LOGE("Can not cast Context to QJSDelcarativeEngineInstance object.");
+        LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
         return JS_NULL;
     }
     auto delegate = instance->GetDelegate();
@@ -157,7 +157,7 @@ JSValue AppSetImageCacheCount(JSContext* ctx, JSValue value, int32_t argc, JSVal
 {
     auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
-        LOGE("Can not cast Context to QJSDelcarativeEngineInstance object.");
+        LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
         return JS_NULL;
     }
     auto delegate = instance->GetDelegate();
@@ -193,7 +193,7 @@ JSValue AppSetImageRawDataCacheSize(JSContext* ctx, JSValue value, int32_t argc,
 {
     auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
-        LOGE("Can not cast Context to QJSDelcarativeEngineInstance object.");
+        LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
         return JS_NULL;
     }
     auto delegate = instance->GetDelegate();
@@ -229,7 +229,7 @@ JSValue AppSetImageFileCacheSize(JSContext* ctx, JSValue value, int32_t argc, JS
 {
     auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
-        LOGE("Can not cast Context to QJSDelcarativeEngineInstance object.");
+        LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
         return JS_NULL;
     }
     auto delegate = instance->GetDelegate();

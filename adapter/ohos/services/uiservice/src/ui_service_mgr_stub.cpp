@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,7 +68,13 @@ int UIServiceMgrStub::RegisterCallBackInner(MessageParcel& data, MessageParcel& 
         return ERR_INVALID_VALUE;
     }
 
-    auto uiService = iface_cast<IUIService>(data.ReadParcelable<IRemoteObject>());
+    auto object = data.ReadRemoteObject();
+    if (object == nullptr) {
+        HILOG_ERROR("RegisterCallBackInner read remote object failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto uiService = iface_cast<IUIService>(object);
     int32_t result = RegisterCallBack(*want, uiService);
     reply.WriteInt32(result);
     return NO_ERROR;
@@ -142,7 +148,12 @@ int UIServiceMgrStub::ShowDialogInner(MessageParcel &data, MessageParcel &reply)
     int width = data.ReadInt32();
     int height = data.ReadInt32();
     int id = 0;
-    auto dialogCallback = iface_cast<OHOS::Ace::IDialogCallback>(data.ReadParcelable<IRemoteObject>());
+    auto object = data.ReadRemoteObject();
+    if (object == nullptr) {
+        HILOG_ERROR("ShowDialogInner read remote object failed");
+        return ERR_INVALID_VALUE;
+    }
+    auto dialogCallback = iface_cast<OHOS::Ace::IDialogCallback>(object);
     int32_t result = ShowDialog(name, params, windowType, x, y, width, height, dialogCallback, &id);
     reply.WriteInt32(id);
     reply.WriteInt32(result);

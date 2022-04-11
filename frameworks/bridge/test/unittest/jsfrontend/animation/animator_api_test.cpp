@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,8 +120,6 @@ void AnimatorApiTest::TearDown() {}
  * @tc.name: AnimatorApiTest001
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000FL0UV
- * @tc.author: jiachunhui
  */
 HWTEST_F(AnimatorApiTest, AnimatorApiTest001, TestSize.Level1)
 {
@@ -160,8 +158,6 @@ HWTEST_F(AnimatorApiTest, AnimatorApiTest001, TestSize.Level1)
  * @tc.name: AnimatorApiTest002
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000FL0UV
- * @tc.author: jiachunhui
  */
 HWTEST_F(AnimatorApiTest, AnimatorApiTest002, TestSize.Level1)
 {
@@ -200,8 +196,6 @@ HWTEST_F(AnimatorApiTest, AnimatorApiTest002, TestSize.Level1)
  * @tc.name: AnimatorApiTest003
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000FL0UV
- * @tc.author: jiachunhui
  */
 HWTEST_F(AnimatorApiTest, AnimatorApiTest003, TestSize.Level1)
 {
@@ -240,8 +234,6 @@ HWTEST_F(AnimatorApiTest, AnimatorApiTest003, TestSize.Level1)
  * @tc.name: AnimatorApiTest004
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000FL0V0
- * @tc.author: jiachunhui
  */
 HWTEST_F(AnimatorApiTest, AnimatorApiTest004, TestSize.Level1)
 {
@@ -280,8 +272,6 @@ HWTEST_F(AnimatorApiTest, AnimatorApiTest004, TestSize.Level1)
  * @tc.name: AnimatorApiTest005
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000FL0V1
- * @tc.author: jiachunhui
  */
 HWTEST_F(AnimatorApiTest, AnimatorApiTest005, TestSize.Level1)
 {
@@ -320,8 +310,6 @@ HWTEST_F(AnimatorApiTest, AnimatorApiTest005, TestSize.Level1)
  * @tc.name: AnimatorApiTest006
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
- * @tc.require: AR000FL0V2
- * @tc.author: jiachunhui
  */
 HWTEST_F(AnimatorApiTest, AnimatorApiTest006, TestSize.Level1)
 {

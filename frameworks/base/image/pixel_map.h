@@ -46,6 +46,7 @@ class ACE_EXPORT PixelMap : public AceType {
 
 public:
     static RefPtr<PixelMap> CreatePixelMap(void* sptrAddr);
+    static RefPtr<PixelMap> CreatePixelMapFromDataAbility(void* uniquePtr);
     virtual int32_t GetWidth() const = 0;
     virtual int32_t GetHeight() const = 0;
     virtual const uint8_t* GetPixels() const = 0;

@@ -30,7 +30,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_page.h"
 #include "core/components/xcomponent/native_interface_xcomponent_impl.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/ark/include/js_runtime.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
@@ -123,6 +123,11 @@ public:
         isDebugMode_ = isDebugMode;
     }
 
+    void SetRootView(int32_t pageId, panda::Global<panda::ObjectRef> value)
+    {
+        rootViewMap_.emplace(pageId, value);
+    }
+
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global
@@ -133,7 +138,7 @@ private:
     void InitJsContextModuleObject();
     void InitGroupJsBridge();
 
-    static thread_local std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
+    std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
     static std::map<std::string, std::string> mediaResourceFileMap_;
 
@@ -166,7 +171,7 @@ class JsiDeclarativeEngine : public JsEngine {
     DECLARE_ACE_TYPE(JsiDeclarativeEngine, JsEngine)
 public:
     JsiDeclarativeEngine(int32_t instanceId, void* runtime) : instanceId_(instanceId), runtime_(runtime) {}
-    JsiDeclarativeEngine(int32_t instanceId) : instanceId_(instanceId) {}
+    explicit JsiDeclarativeEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~JsiDeclarativeEngine() override;
 
     bool Initialize(const RefPtr<FrontendDelegate>& delegate) override;
@@ -230,13 +235,15 @@ public:
 
     void RunGarbageCollection() override;
 
+    std::string GetStacktraceMessage() override;
+
     void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
 
     void SetContext(int32_t instanceId, NativeReference* context) override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
-    virtual FrontendDelegate* GetFrontend() override
+    FrontendDelegate* GetFrontend() override
     {
         return AceType::RawPtr(engineInstance_->GetDelegate());
     }
@@ -257,6 +264,10 @@ public:
     {
         return renderContext_;
     }
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void ReplaceJSContent(const std::string& url, const std::string componentName) override;
+#endif
 
 private:
     bool CallAppFunc(const std::string& appFuncName);
@@ -282,6 +293,10 @@ private:
     int32_t instanceId_ = 0;
     void* runtime_ = nullptr;
     shared_ptr<JsValue> renderContext_;
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    std::string preContent_ = "";
+#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };

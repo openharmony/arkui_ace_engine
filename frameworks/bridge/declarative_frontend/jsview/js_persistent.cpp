@@ -61,7 +61,7 @@ void JSPersistent::Set(const JSCallbackInfo& args)
     return;
 #endif
     if (args.Length() < 2) {
-        LOGW("fail to set persistent data");
+        LOGW("JSPersistent: Fail to set persistent data, args too few");
         return;
     }
     std::string key = args[0]->ToString();
@@ -93,7 +93,7 @@ void JSPersistent::Get(const JSCallbackInfo& args)
     return;
 #endif
     if (args.Length() < 1) {
-        LOGW("fail to Get persistent data");
+        LOGW("JSPersistent: Failed to Get persistent data, args too few");
         return;
     }
     std::string key = args[0]->ToString();
@@ -117,7 +117,7 @@ void JSPersistent::Delete(const JSCallbackInfo& args)
     return;
 #endif
     if (args.Length() < 1) {
-        LOGW("fail to Delete persistent data");
+        LOGW("JSPersistent: Fail to Delete persistent data, args too few");
         return;
     }
     std::string key = args[0]->ToString();

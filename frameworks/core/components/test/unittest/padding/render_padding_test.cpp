@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,8 +80,6 @@ void RenderPaddingTest::TearDown() {}
  * @tc.name: RenderPaddingTest001
  * @tc.desc: Verify PerformLayout can calculate padding properties with a child.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUF
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderPaddingTest, RenderPaddingTest001, TestSize.Level1)
 {

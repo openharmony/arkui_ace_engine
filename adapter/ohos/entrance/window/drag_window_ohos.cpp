@@ -142,13 +142,13 @@ void DragWindowOhos::MoveTo(int32_t x, int32_t y) const
 void DragWindowOhos::Destory() const
 {
     if (!dragWindow_) {
-        LOGE("DragWindowOhos::Destory, the drag window is null.");
+        LOGE("DragWindowOhos::Destroy, the drag window is null.");
         return;
     }
 
     OHOS::Rosen::WMError ret = dragWindow_->Destroy();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DragWindow::Destory, drag window destroy failed, ret: %d", ret);
+        LOGE("DragWindow::Destroy, drag window destroy failed, ret: %d", ret);
     }
 }
 

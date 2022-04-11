@@ -14,7 +14,7 @@
  */
 
 #include "frameworks/base/utils/string_utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_runtime.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_ref.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 
@@ -174,7 +174,7 @@ void JsiCallbackInfo::SetReturnValue(T* instance) const
 template<typename T>
 void JsiCallbackInfo::SetReturnValue(JsiRef<T> val) const
 {
-    retVal_ = panda::Global<panda::JSValueRef>(vm_, val.Get().GetHandle());
+    retVal_ = panda::Global<panda::JSValueRef>(info_->GetVM(), val.Get().GetHandle());
 }
 
 template<typename... Args>

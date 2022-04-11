@@ -331,6 +331,9 @@ private:
     OnDropFunc onDragMove_;
     OnDropFunc onDragLeave_;
     OnDropFunc onDrop_;
+    OnTouchEventCallback onTouchUpId_;
+    OnTouchEventCallback onTouchDownId_;
+    OnTouchEventCallback onTouchMoveId_;
     Point localPoint_;
     UpdateBuilderFunc updateBuilder_;
     RefPtr<RenderBox> preTargetRenderBox_;

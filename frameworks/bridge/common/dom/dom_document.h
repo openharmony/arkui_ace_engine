@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,7 @@ class ACE_EXPORT DOMDocument final : public virtual AceType {
     DECLARE_ACE_TYPE(DOMDocument, AceType);
 
 public:
-    explicit DOMDocument(int32_t pageId) : rootNodeId_(DOM_ROOT_NODE_ID_BASE + pageId) {};
+    explicit DOMDocument(int32_t pageId) : rootNodeId_(DOM_ROOT_NODE_ID_BASE + pageId) {}
     ~DOMDocument() override;
 
     RefPtr<DOMNode> CreateNodeWithId(const std::string& tag, NodeId nodeId, int32_t itemIndex = -1);

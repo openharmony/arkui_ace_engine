@@ -206,7 +206,7 @@ public:
         bool forceResize,
         bool syncMode = false) override;
 
-    virtual void Pause() override
+    void Pause() override
     {
         if (animatedPlayer_) {
             LOGI("animatied image Paused");
@@ -214,7 +214,7 @@ public:
         }
     }
 
-    virtual void Resume() override
+    void Resume() override
     {
         if (animatedPlayer_) {
             LOGI("animatied image Resume");
@@ -236,7 +236,7 @@ class PixelMapImageObject : public ImageObject {
     DECLARE_ACE_TYPE(PixelMapImageObject, ImageObject);
 
 public:
-    PixelMapImageObject(const RefPtr<PixelMap>& pixmap) : pixmap_(pixmap)
+    explicit PixelMapImageObject(const RefPtr<PixelMap>& pixmap) : pixmap_(pixmap)
     {
         imageSize_ = Size(pixmap_->GetWidth(), pixmap_->GetHeight());
     }

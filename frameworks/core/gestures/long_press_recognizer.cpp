@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/gestures/long_press_recognizer.h"
 
+#include "core/event/ace_events.h"
 #include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
@@ -61,10 +62,18 @@ void LongPressRecognizer::OnRejected()
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    if (isDisableMouseLeft_ && event.sourceType == SourceType::MOUSE) {
+        LOGI("mouse left button is disabled for long press recognizer.");
+        return;
+    }
     if (fingers_ > MAX_FINGERS) {
         return;
     }
     LOGD("long press recognizer receives touch down event, begin to detect long press event");
+    int32_t curDuration = duration_;
+    if (isForDrag_ && event.sourceType == SourceType::MOUSE) {
+        curDuration = 0;
+    }
     if ((touchRestrict_.forbiddenType & TouchRestrict::LONG_PRESS) == TouchRestrict::LONG_PRESS) {
         LOGI("the long press is forbidden");
         return;
@@ -77,9 +86,9 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             state_ = DetectState::DETECTING;
 
             if (useCatchMode_) {
-                DeadlineTimer(duration_, false);
+                DeadlineTimer(curDuration, false);
             } else {
-                DeadlineTimer(duration_, true);
+                DeadlineTimer(curDuration, true);
             }
         }
     } else {

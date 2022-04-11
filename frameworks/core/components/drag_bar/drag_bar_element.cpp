@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,8 +37,8 @@ void DragBarElement::OnBlur()
 
 bool DragBarElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
-    if (keyEvent.code == KeyCode::KEY_ENTER || keyEvent.code == KeyCode::KEY_NUMPAD_ENTER ||
-        keyEvent.code == KeyCode::KEY_SPACE) {
+    if ((keyEvent.code == KeyCode::KEY_ENTER) || (keyEvent.code == KeyCode::KEY_NUMPAD_ENTER) ||
+        (keyEvent.code == KeyCode::KEY_SPACE)) {
         auto dragBar = AceType::DynamicCast<RenderDragBar>(renderNode_);
         if (dragBar) {
             dragBar->HandleClick(Offset());

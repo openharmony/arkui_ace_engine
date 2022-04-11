@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,6 @@ bool Validate(v8::Local<v8::Value> val)
     } else if constexpr (std::is_same_v<T, std::string>) {
         return val->IsString();
     } else {
-        // TODO(cvetan): add more
         LOGD("Unhandled type: %s!", V8Utils::ValueTypeAsString(val).c_str());
         return false;
     }

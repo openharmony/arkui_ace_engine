@@ -812,7 +812,6 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
                 if (backgroundStyle.IsValid()) {
                     backgroundStyle.backgroundImage->SetSrc(value, declaration.GetThemeConstants());
                     declaration.backDecoration_->SetImage(backgroundStyle.backgroundImage);
-                    // TODO: need to remain color and image in render box.
                     declaration.backDecoration_->SetBackgroundColor(Color::TRANSPARENT);
                     declaration.hasDecorationStyle_ = true;
                 }

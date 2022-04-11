@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,8 +116,6 @@ void DomRefreshTest::TearDown() {}
  * @tc.name: DomRefreshTest001
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RH
- * @tc.author: liujinwei
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest001, TestSize.Level1)
 {
@@ -142,8 +140,6 @@ HWTEST_F(DomRefreshTest, DomRefreshTest001, TestSize.Level1)
  * @tc.name: DomRefreshTest002
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RK
- * @tc.author: liujinwei
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest002, TestSize.Level1)
 {
@@ -168,8 +164,6 @@ HWTEST_F(DomRefreshTest, DomRefreshTest002, TestSize.Level1)
  * @tc.name: DomRefreshTest003
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RK
- * @tc.author: liujinwei
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest003, TestSize.Level1)
 {
@@ -193,8 +187,6 @@ HWTEST_F(DomRefreshTest, DomRefreshTest003, TestSize.Level1)
  * @tc.name: DomRefreshTest004
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RK
- * @tc.author: liujinwei
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest004, TestSize.Level1)
 {
@@ -217,8 +209,6 @@ HWTEST_F(DomRefreshTest, DomRefreshTest004, TestSize.Level1)
  * @tc.name: DomRefreshTest005
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RK
- * @tc.author: liujinwei
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest005, TestSize.Level1)
 {
@@ -241,8 +231,6 @@ HWTEST_F(DomRefreshTest, DomRefreshTest005, TestSize.Level1)
  * @tc.name: DomRefreshTest006
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RL
- * @tc.author: liujinwei
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest006, TestSize.Level1)
 {
@@ -265,8 +253,6 @@ HWTEST_F(DomRefreshTest, DomRefreshTest006, TestSize.Level1)
  * @tc.name: DomRefreshTest007
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RL
- * @tc.author: liujinwei
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest007, TestSize.Level1)
 {
@@ -289,8 +275,6 @@ HWTEST_F(DomRefreshTest, DomRefreshTest007, TestSize.Level1)
  * @tc.name: DomRefreshTest008
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RJ
- * @tc.author: liujinwei
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest008, TestSize.Level1)
 {
@@ -314,8 +298,6 @@ HWTEST_F(DomRefreshTest, DomRefreshTest008, TestSize.Level1)
  * @tc.name: DomRefreshTest009
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RI
- * @tc.author: liujinwei
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest009, TestSize.Level1)
 {
@@ -340,8 +322,6 @@ HWTEST_F(DomRefreshTest, DomRefreshTest009, TestSize.Level1)
  * @tc.name: DomRefreshTest010
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ4EG
- * @tc.author: liujinwei
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest010, TestSize.Level1)
 {

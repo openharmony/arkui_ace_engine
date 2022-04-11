@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -174,6 +174,23 @@ public:
 private:
     PickerDate date_;
     PickerTime time_;
+};
+
+class ACE_EXPORT DatePickerChangeEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(DatePickerChangeEvent, BaseEventInfo);
+
+public:
+    explicit DatePickerChangeEvent(const std::string& str) : BaseEventInfo
+        ("DatePickerChangeEvent"), selectedStr_(str) {}
+    ~DatePickerChangeEvent() = default;
+
+    const std::string& GetSelectedStr() const
+    {
+        return selectedStr_;
+    }
+
+private:
+    std::string selectedStr_;
 };
 
 class ACE_EXPORT PickerBaseComponent : public SoleChildComponent {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,14 +27,13 @@ namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const ProgressComposedElement&)>> CREATE_JSON_MAP {
     { "value", [](const ProgressComposedElement& inspector) { return inspector.GetValue(); } },
-    { "total", [](const ProgressComposedElement& inspector) { return inspector.GetTotal(); } },
-    { "style", [](const ProgressComposedElement& inspector) { return inspector.GetStyle(); } },
+    { "constructor", [](const ProgressComposedElement& inspector) { return inspector.ProgressOptions(); } },
     { "color", [](const ProgressComposedElement& inspector) { return inspector.GetColor(); } }
 };
 
 using JsonFuncType = std::function<std::unique_ptr<JsonValue>(const ProgressComposedElement&)>;
 const std::unordered_map<std::string, JsonFuncType> CREATE_JSON_JSON_VALUE_MAP {
-    { "circularStyle", [](const ProgressComposedElement& inspector) { return inspector.GetCircularStyle(); } }
+    { "style", [](const ProgressComposedElement& inspector) { return inspector.GetCircularStyle(); } }
 };
 
 } // namespace
@@ -43,8 +42,7 @@ void ProgressComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
     DumpLog::GetInstance().AddDesc(std::string("value: ").append(GetValue()));
-    DumpLog::GetInstance().AddDesc(std::string("total: ").append(GetTotal()));
-    DumpLog::GetInstance().AddDesc(std::string("style: ").append(GetStyle()));
+    DumpLog::GetInstance().AddDesc(std::string("constructor: ").append(ProgressOptions()));
     DumpLog::GetInstance().AddDesc(std::string("color: ").append(GetColor()));
 }
 
@@ -58,6 +56,15 @@ std::unique_ptr<JsonValue> ProgressComposedElement::ToJsonObject() const
         resultJson->Put(value.first.c_str(), value.second(*this));
     }
     return resultJson;
+}
+
+std::string ProgressComposedElement::ProgressOptions() const
+{
+    auto JsonValue = JsonUtil::Create(false);
+    JsonValue->Put("value", GetValue().c_str());
+    JsonValue->Put("total", GetTotal().c_str());
+    JsonValue->Put("type", GetTypeProgress().c_str());
+    return JsonValue->ToString();
 }
 
 std::string ProgressComposedElement::GetValue() const
@@ -78,7 +85,7 @@ std::string ProgressComposedElement::GetTotal() const
     return "100";
 }
 
-std::string ProgressComposedElement::GetStyle() const
+std::string ProgressComposedElement::GetTypeProgress() const
 {
     auto renderProgress = GetRenderProgress();
     if (!renderProgress) {

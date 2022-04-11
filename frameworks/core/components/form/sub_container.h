@@ -19,6 +19,7 @@
 #include "ashmem.h"
 
 #include "base/thread/task_executor.h"
+#include "core/common/frontend.h"
 #include "frameworks/bridge/card_frontend/card_frontend.h"
 #include "frameworks/core/pipeline/pipeline_context.h"
 
@@ -29,7 +30,7 @@ class ACE_EXPORT SubContainer : public virtual AceType {
 public:
     using OnFormAcquiredCallback = std::function<void(const size_t)>;
 
-    SubContainer(const WeakPtr<PipelineContext>& context) : outSidePipelineContext_(context) {}
+    explicit SubContainer(const WeakPtr<PipelineContext>& context) : outSidePipelineContext_(context) {}
     SubContainer(const WeakPtr<PipelineContext>& context, int32_t instanceId)
         : outSidePipelineContext_(context), instanceId_(instanceId)
     {}
@@ -93,6 +94,16 @@ public:
     }
     bool Dump(const std::vector<std::string>& params);
 
+    WindowConfig GetWindowConfig() const
+    {
+        return cardWindowConfig_;
+    }
+
+    void SetWindowConfig(const WindowConfig cardWindowConfig)
+    {
+        cardWindowConfig_ = cardWindowConfig;
+    }
+
 private:
     RefPtr<CardFrontend> frontend_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -107,6 +118,7 @@ private:
     RefPtr<Component> formComponent_;
     WeakPtr<Element> formElement_;
     OnFormAcquiredCallback onFormAcquiredCallback_;
+    WindowConfig cardWindowConfig_;
 
     double surfaceWidth_ = 1.0f;
     double surfaceHeight_ = 1.0f;

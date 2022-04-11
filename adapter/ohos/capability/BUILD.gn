@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,15 +24,19 @@ template("ace_capability_ohos_source_set") {
 
     configs = [ "$ace_root:ace_config" ]
 
-    sources = [ "clipboard/clipboard_impl.cpp" ]
-
+    sources = [
+      "clipboard/clipboard_impl.cpp",
+      "preference/storage_impl.cpp",
+    ]
+    include_dirs = [ "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_preferences/include/" ]
+    external_deps = [
+      "ability_base:want",
+      "ipc:ipc_core",
+      "native_appdatamgr:native_preferences",
+    ]
     if (defined(config.enable_system_clipboard) &&
         config.enable_system_clipboard) {
-      external_deps = [
-        "ability_base:want",
-        "ipc:ipc_core",
-        "pasteboard_native:pasteboard_client",
-      ]
+      external_deps += [ "pasteboard_native:pasteboard_client" ]
       defines += [ "SYSTEM_CLIPBOARD_SUPPORTED" ]
     }
   }

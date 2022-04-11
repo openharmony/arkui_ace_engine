@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,8 +46,6 @@ void DomImageAnimatorTest::TearDown() {}
  * @tc.name: SetAttributes001
  * @tc.desc: Verify that DomImageAnimator can create imageAnimatorComponent correctly.
  * @tc.type: FUNC
- * @tc.require: AR000E3DMF
- * @tc.author: jiachunhui
  */
 HWTEST_F(DomImageAnimatorTest, SetAttributes001, TestSize.Level1)
 {
@@ -78,8 +76,6 @@ HWTEST_F(DomImageAnimatorTest, SetAttributes001, TestSize.Level1)
  * @tc.name: SetAttributes002
  * @tc.desc: Verify that the attributes of imageAnimatorComponent can be set correctly.
  * @tc.type: FUNC
- * @tc.require: AR000E3DMF
- * @tc.author: jiachunhui
  */
 HWTEST_F(DomImageAnimatorTest, SetAttributes002, TestSize.Level1)
 {
@@ -116,8 +112,6 @@ HWTEST_F(DomImageAnimatorTest, SetAttributes002, TestSize.Level1)
  * @tc.name: SetAttributes003
  * @tc.desc: Verify that the attribute of images can be set correctly.
  * @tc.type: FUNC
- * @tc.require: AR000E3DMF
- * @tc.author: jiachunhui
  */
 HWTEST_F(DomImageAnimatorTest, SetAttributes003, TestSize.Level1)
 {

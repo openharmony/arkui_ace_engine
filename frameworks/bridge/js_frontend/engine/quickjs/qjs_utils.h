@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,8 +50,8 @@ class ScopedString {
 public:
     ScopedString(JSContext* ctx, JSValueConst val);
     ScopedString(JSContext* ctx, JSAtom val);
-    ScopedString(JSValueConst val);
-    ScopedString(JSAtom val);
+    explicit ScopedString(JSValueConst val);
+    explicit ScopedString(JSAtom val);
     ScopedString(const ScopedString& rhs) = delete;
     ScopedString& operator=(const ScopedString& rhs) = delete;
     ScopedString(ScopedString&& rhs) = delete;
@@ -122,7 +122,7 @@ public:
      */
     class Scope {
     public:
-        Scope(JSContext* ctx);
+        explicit Scope(JSContext* ctx);
         ~Scope();
 
         static void* operator new(size_t) = delete;
@@ -157,7 +157,7 @@ private:
 
 class QJSHandleScope {
 public:
-    QJSHandleScope(JSContext* ctx);
+    explicit QJSHandleScope(JSContext* ctx);
     ~QJSHandleScope();
 
     static void* operator new(size_t) = delete;

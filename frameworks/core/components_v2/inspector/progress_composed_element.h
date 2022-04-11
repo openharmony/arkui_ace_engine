@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,10 +32,11 @@ public:
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
 
+    std::string ProgressOptions() const;
     std::string GetValue() const;
     std::string GetTotal() const;
-    std::string GetStyle() const;
     std::string GetColor() const;
+    std::string GetTypeProgress() const;
     std::unique_ptr<JsonValue> GetCircularStyle() const;
 
 private:

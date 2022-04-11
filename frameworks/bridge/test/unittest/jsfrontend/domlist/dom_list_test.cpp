@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -142,8 +142,6 @@ void DomListTest::TearDown() {}
  * @tc.name: DomListMotionTest001
  * @tc.desc: Test list node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UR
- * @tc.author: jinwuwen
  */
 HWTEST_F(DomListTest, DomListMotionTest001, TestSize.Level1)
 {
@@ -170,8 +168,6 @@ HWTEST_F(DomListTest, DomListMotionTest001, TestSize.Level1)
  * @tc.name: DomListMotionTest002
  * @tc.desc: Test list node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UR
- * @tc.author: jinwuwen
  */
 HWTEST_F(DomListTest, DomListMotionTest002, TestSize.Level1)
 {
@@ -200,8 +196,6 @@ HWTEST_F(DomListTest, DomListMotionTest002, TestSize.Level1)
  * @tc.name: DomListMotionTest003
  * @tc.desc: Test list node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UR
- * @tc.author: jinwuwen
  */
 HWTEST_F(DomListTest, DomListMotionTest003, TestSize.Level1)
 {
@@ -230,8 +224,6 @@ HWTEST_F(DomListTest, DomListMotionTest003, TestSize.Level1)
  * @tc.name: DomListMotionTest004
  * @tc.desc: Test list node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UR
- * @tc.author: jinwuwen
  */
 HWTEST_F(DomListTest, DomListMotionTest004, TestSize.Level1)
 {
@@ -258,8 +250,6 @@ HWTEST_F(DomListTest, DomListMotionTest004, TestSize.Level1)
  * @tc.name: DomListScrollBarTest001
  * @tc.desc: Test list node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UJ
- * @tc.author: chenlien
  */
 HWTEST_F(DomListTest, DomListScrollBarTest001, TestSize.Level1)
 {
@@ -287,8 +277,6 @@ HWTEST_F(DomListTest, DomListScrollBarTest001, TestSize.Level1)
  * @tc.name: DomListScrollBarTest002
  * @tc.desc: Test list node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UJ
- * @tc.author: chenlien
  */
 HWTEST_F(DomListTest, DomListScrollBarTest002, TestSize.Level1)
 {
@@ -315,8 +303,6 @@ HWTEST_F(DomListTest, DomListScrollBarTest002, TestSize.Level1)
  * @tc.name: DomListScrollBarPolymorphismTest001
  * @tc.desc: Test list node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UM
- * @tc.author: chenlien
  */
 HWTEST_F(DomListTest, DomListScrollBarPolymorphismTest001, TestSize.Level1)
 {
@@ -344,8 +330,6 @@ HWTEST_F(DomListTest, DomListScrollBarPolymorphismTest001, TestSize.Level1)
  * @tc.name: DomListItemExtentTest001
  * @tc.desc: Test list set item extent with length.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UD
- * @tc.author: zhongjianfei
  */
 HWTEST_F(DomListTest, DomListItemExtentTest001, TestSize.Level1)
 {
@@ -373,8 +357,6 @@ HWTEST_F(DomListTest, DomListItemExtentTest001, TestSize.Level1)
  * @tc.name: DomListItemExtentTest002
  * @tc.desc: Test list set item extent with percentage.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UD
- * @tc.author: zhongjianfei
  */
 HWTEST_F(DomListTest, DomListItemExtentTest002, TestSize.Level1)
 {
@@ -402,8 +384,6 @@ HWTEST_F(DomListTest, DomListItemExtentTest002, TestSize.Level1)
  * @tc.name: DomListScrollerTest001
  * @tc.desc: Test list node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1V0
- * @tc.author: chenlien
  */
 HWTEST_F(DomListTest, DomListScrollerTest001, TestSize.Level1)
 {
@@ -430,8 +410,6 @@ HWTEST_F(DomListTest, DomListScrollerTest001, TestSize.Level1)
  * @tc.name: AceListExpansion009
  * @tc.desc: Test list item group node are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TE
- * @tc.author: chenlien
  */
 HWTEST_F(DomListTest, AceListExpansion009, TestSize.Level1)
 {
@@ -458,8 +436,6 @@ HWTEST_F(DomListTest, AceListExpansion009, TestSize.Level1)
  * @tc.name: AceListUpdate001
  * @tc.desc: Test list item attr updateeffect can be set false.
  * @tc.type: FUNC
- * @tc.require: AR000DQ4FT
- * @tc.author: chenlien
  */
 HWTEST_F(DomListTest, AceListUpdate001, TestSize.Level1)
 {
@@ -484,8 +460,6 @@ HWTEST_F(DomListTest, AceListUpdate001, TestSize.Level1)
  * @tc.name: AceListUpdate002
  * @tc.desc: Test list item attr updateeffect can be set true.
  * @tc.type: FUNC
- * @tc.require: AR000DQ4FT
- * @tc.author: chenlien
  */
 HWTEST_F(DomListTest, AceListUpdate002, TestSize.Level1)
 {

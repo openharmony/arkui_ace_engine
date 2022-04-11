@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ void ImageProvider::FetchImageObject(
     OnPostBackgroundTask onBackgroundTaskPostCallback)
 {
     auto task = [context, imageInfo, successCallback, failedCallback, useSkiaSvg, renderTaskHolder,
-                    uploadSuccessCallback, needAutoResize, id = Container::CurrentId()]() mutable {
+                    uploadSuccessCallback, needAutoResize, id = Container::CurrentId(), syncMode]() mutable {
         ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
@@ -66,12 +66,20 @@ void ImageProvider::FetchImageObject(
             imageObj = GeneraterAceImageObject(imageInfo, pipelineContext, useSkiaSvg);
         }
         if (!imageObj) { // if it fails to generate an image object, trigger fail callback.
+            if (syncMode) {
+                failedCallback(imageInfo);
+                return;
+            }
             taskExecutor->PostTask(
                 [failedCallback, imageInfo] { failedCallback(imageInfo); }, TaskExecutor::TaskType::UI);
             return;
         }
-        taskExecutor->PostTask([successCallback, imageInfo, imageObj]() { successCallback(imageInfo, imageObj); },
-            TaskExecutor::TaskType::UI);
+        if (syncMode) {
+            successCallback(imageInfo, imageObj);
+        } else {
+            taskExecutor->PostTask([successCallback, imageInfo, imageObj]() { successCallback(imageInfo, imageObj); },
+                TaskExecutor::TaskType::UI);
+        }
         bool canStartUploadImageObj = !needAutoResize && (imageObj->GetFrameCount() == 1);
         if (canStartUploadImageObj) {
             bool forceResize = (!imageObj->IsSvg()) && (imageInfo.IsSourceDimensionValid());
@@ -169,7 +177,7 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(
         ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
-            LOGW("render image or pipeline has been released. src: %{private}s", src.c_str());
+            LOGW("render image or pipeline has been released.");
             return;
         }
         auto taskExecutor = pipelineContext->GetTaskExecutor();
@@ -179,7 +187,7 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(
         ImageSourceInfo info(src);
         auto imageLoader = ImageLoader::CreateImageLoader(info);
         if (!imageLoader) {
-            LOGE("load image failed when create image loader. src: %{private}s", src.c_str());
+            LOGE("load image failed when create image loader.");
             return;
         }
         auto imageData = imageLoader->LoadImageData(info, context);
@@ -194,7 +202,7 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(
                 }
             }
         }
-        LOGE("svg data wrong! src: %{private}s", src.c_str());
+        LOGE("svg data wrong!");
         taskExecutor->PostTask([failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI);
     };
     CancelableTask cancelableTask(std::move(task));
@@ -256,8 +264,6 @@ void ImageProvider::UploadImageToGPUForRender(
     // If want to dump draw command or gpu disabled, should use CPU image.
     callback({ image, renderTaskHolder->unrefQueue });
 #else
-    // TODO: software render not upload to gpu
-
     auto rasterizedImage = image->makeRasterImage();
     if (!rasterizedImage) {
         LOGW("Rasterize image failed. callback.");

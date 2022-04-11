@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,7 @@ class ACE_FORCE_EXPORT_WITH_PREVIEW ThemeConstants : public AceType {
     DECLARE_ACE_TYPE(ThemeConstants, AceType);
 
 public:
-    explicit ThemeConstants(RefPtr<ResourceAdapter> resourceAdapter) : resAdapter_(resourceAdapter) {};
+    explicit ThemeConstants(RefPtr<ResourceAdapter> resourceAdapter) : resAdapter_(resourceAdapter) {}
     ~ThemeConstants() override = default;
 
     /*

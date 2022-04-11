@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,6 +81,11 @@ public:
         CONTAINER_MODAL_WINDOW_MINIMIZE,
         CONTAINER_MODAL_WINDOW_RECOVER,
         CONTAINER_MODAL_WINDOW_SPLIT_LEFT,
+        CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE,
+        CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE,
+        CONTAINER_MODAL_WINDOW_DEFOCUS_MINIMIZE,
+        CONTAINER_MODAL_WINDOW_DEFOCUS_RECOVER,
+        CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT,
         SVG_END = 20000,
 
         // 20001 - 30000 is reserved for i18n resource.

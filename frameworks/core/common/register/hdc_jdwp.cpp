@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,7 +113,7 @@ void HdcJdwpSimulator::ConnectJdwp(uv_connect_t *connection, int status)
         LOGE("ConnectJdwp new info fail.");
         return;
     }
-    if (memset_s(info, pkgSize, 0, pkgSize) != 0) {
+    if (memset_s(info, pkgSize, 0, pkgSize) != EOK) {
         delete[] info;
         info = nullptr;
         return;
@@ -124,7 +124,7 @@ void HdcJdwpSimulator::ConnectJdwp(uv_connect_t *connection, int status)
     LOGI("ConnectJdwp send pid:%{public}d, pkgName:%{public}s, msglen:%{public}d, ", jsMsg->pid, pkgName.c_str(),
         jsMsg->msgLen);
     bool retFail = false;
-    if (memcpy_s(info + sizeof(JsMsgHeader), pkgName.size(), &pkgName[0], pkgName.size()) != 0) {
+    if (memcpy_s(info + sizeof(JsMsgHeader), pkgName.size(), &pkgName[0], pkgName.size()) != EOK) {
         LOGE("ConnectJdwp memcpy_s fail :%{public}s.", pkgName.c_str());
         retFail = true;
     }
@@ -166,4 +166,4 @@ bool HdcJdwpSimulator::Connect()
     uv_pipe_connect(connect_, &ctxPoint_->pipe, jdwpCtrlName.c_str(), ConnectJdwp);
     return true;
 }
-}
+} // namespace OHOS::Ace

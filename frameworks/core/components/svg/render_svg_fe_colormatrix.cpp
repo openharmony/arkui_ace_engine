@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,9 @@ void RenderSvgFeColorMatrix::Update(const RefPtr<Component> &component)
     if (declaration) {
         type_ = declaration->GetType();
         values_ = declaration->GetValues();
-        memset_s(matrix_, sizeof(matrix_), 0, sizeof(matrix_));
+        if (memset_s(matrix_, sizeof(matrix_), 0, sizeof(matrix_)) != EOK) {
+            return;
+        }
         std::vector<float> matrix;
         StringUtils::StringSpliter(values_, ' ', matrix);
         if (matrix.empty()) {

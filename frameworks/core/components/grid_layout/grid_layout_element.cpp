@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,9 +80,9 @@ void GridLayoutElement::ApplyRenderChild(const RefPtr<RenderElement>& renderChil
         LOGE("fail to create proxy node");
         return;
     }
+    renderNode_->AddChild(proxy);
     proxy->AddChild(renderChild->GetRenderNode());
     proxy->Attach(context_);
-    renderNode_->AddChild(proxy);
 }
 
 void GridLayoutElement::PerformBuild()

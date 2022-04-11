@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,18 +83,16 @@ class RawRecognizer : public TouchEventTarget {
     DECLARE_ACE_TYPE(RawRecognizer, TouchEventTarget);
 
 public:
-    void HandleEvent(const TouchEvent& point, uint32_t stage);
+    void HandleRawEvent(const TouchEvent& point, uint32_t stage);
     bool DispatchEvent(const TouchEvent& point) override;
     bool HandleEvent(const TouchEvent& point) override;
 
-    void SetOnEventCallback(
-        const OnTouchEventCallback& eventCallback, uint32_t stage, uint32_t eventType)
+    void SetOnEventCallback(const OnTouchEventCallback& eventCallback, uint32_t stage, uint32_t eventType)
     {
         onEventCallbacks_[stage][eventType] = eventCallback;
     }
 
-    void SetCatchEventCallback(
-        const CatchTouchEventCallback& eventCallback, uint32_t stage, uint32_t eventType)
+    void SetCatchEventCallback(const CatchTouchEventCallback& eventCallback, uint32_t stage, uint32_t eventType)
     {
         catcheventCallbacks_[stage][eventType] = eventCallback;
     }

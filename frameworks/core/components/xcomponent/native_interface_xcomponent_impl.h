@@ -124,7 +124,7 @@ private:
 }
 
 struct OH_NativeXComponent {
-    OH_NativeXComponent(OHOS::Ace::NativeXComponentImpl* xComponentImpl) : xcomponentImpl_(xComponentImpl) {}
+    explicit OH_NativeXComponent(OHOS::Ace::NativeXComponentImpl* xComponentImpl) : xcomponentImpl_(xComponentImpl) {}
     ~OH_NativeXComponent() {}
     int32_t GetXComponentId(char* id, uint64_t* size);
     int32_t GetNativeWindow(void** window);

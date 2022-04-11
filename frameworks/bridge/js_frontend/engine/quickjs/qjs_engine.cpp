@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -928,7 +928,7 @@ JSValue JsHandlePageRoute(JSContext* ctx, JSValueConst argv, const std::string& 
             { ROUTE_PAGE_BACK,
                 [](const std::string& uri, const std::string& params, QjsEngineInstance& instance) {
                     LOGD("JsBackRoute uri = %{private}s", uri.c_str());
-                    instance.GetDelegate()->Back(uri);
+                    instance.GetDelegate()->Back(uri, params);
                     return JS_NULL;
                 } },
             { ROUTE_PAGE_CLEAR,
@@ -2459,6 +2459,8 @@ JSValue JsLogPrint(JSContext* ctx, JsLogLevel level, JSValueConst value, int32_t
             break;
         case JsLogLevel::ERROR:
             LOGE("ace Log: %{public}s", printLog.c_str());
+            break;
+        default:
             break;
     }
 

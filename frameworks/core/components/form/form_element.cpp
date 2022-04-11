@@ -41,7 +41,7 @@ void FormElement::Update()
 {
     auto form = AceType::DynamicCast<FormComponent>(component_);
     if (!form) {
-        LOGE("could not get form componet for update");
+        LOGE("could not get form component for update");
         return;
     }
 
@@ -51,7 +51,7 @@ void FormElement::Update()
         info.dimension != cardInfo_.dimension) {
         cardInfo_ = info;
     } else {
-        // for update form componet
+        // for update form component
         if (cardInfo_.allowUpate != info.allowUpate) {
             cardInfo_.allowUpate = info.allowUpate;
             LOGI(" update card allow info:%{public}d", cardInfo_.allowUpate);
@@ -240,18 +240,20 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
         int32_t instanceID = context->GetInstanceId();
         formManagerBridge_->AddFormAcquireCallback(
             [weak = WeakClaim(this), instanceID](int64_t id, std::string path, std::string module, std::string data,
-                std::map<std::string, std::pair<int, int32_t>> imageDataMap, std::string formSrc) {
+                std::map<std::string, std::pair<int, int32_t>> imageDataMap, AppExecFwk::FormJsInfo formJsInfo) {
                 ContainerScope scope(instanceID);
                 auto element = weak.Upgrade();
                 auto uiTaskExecutor = SingleTaskExecutor::Make(
                     element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-                uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formSrc,  weak, instanceID] {
+                uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formJsInfo, weak, instanceID] {
                     ContainerScope scope(instanceID);
                     auto form = weak.Upgrade();
                     if (form) {
                         auto container = form->GetSubContainer();
                         if (container) {
-                            container->RunCard(id, path, module, data, imageDataMap, formSrc);
+                            container->SetWindowConfig(
+                                { formJsInfo.formWindow.designWidth, formJsInfo.formWindow.autoDesignWidth });
+                            container->RunCard(id, path, module, data, imageDataMap, formJsInfo.formSrc);
                         }
                     }
                 });
@@ -337,7 +339,8 @@ void FormElement::OnActionEvent(const std::string& action) const
         auto context = GetContext().Upgrade();
         if (context) {
             LOGI("send action evetn to ability to process");
-            context->OnActionEvent(action);
+            context->OnActionEvent(formManagerBridge_->WrapAction(action));
+            formManagerBridge_->OnActionEvent(action);
         }
 #else
         HandleOnRouterEvent(eventAction);
@@ -375,7 +378,7 @@ void FormElement::CreateCardContainer()
     subContainer_->SetFormComponet(component_);
     auto form = AceType::DynamicCast<FormComponent>(component_);
     if (!form) {
-        LOGE("form componet is null when try adding nonmatched container to form manager.");
+        LOGE("form component is null when try adding nonmatched container to form manager.");
         return;
     }
     auto info = form->GetFormRequestionInfo();

@@ -19,6 +19,10 @@
 #include <map>
 #include <string>
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#include "adapter/preview/osal/request_data.h"
+#include "adapter/preview/osal/response_data.h"
+#endif
 #include "base/memory/ace_type.h"
 #include "base/utils/singleton.h"
 #include "frameworks/bridge/codec/standard_function_codec.h"
@@ -70,6 +74,10 @@ public:
     void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) override;
 
     void Destroy() override;
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void TriggerModuleJsCallbackPreview(int32_t callbackId, int32_t code, ResponseData responseData) override;
+#endif
 
 private:
     int32_t GetPendingCallbackIdAndIncrement()

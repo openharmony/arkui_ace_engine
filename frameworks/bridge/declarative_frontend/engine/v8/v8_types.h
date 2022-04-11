@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,11 +47,11 @@ public:
     V8Type(V8Type&& rhs);
     virtual ~V8Type();
 
-    V8Type(v8::Local<T> val);
-    V8Type(CopyablePersistent<T> other);
+    explicit V8Type(v8::Local<T> val);
+    explicit V8Type(CopyablePersistent<T> other);
 
     template<typename S>
-    V8Type(v8::Local<S> val);
+    explicit V8Type(v8::Local<S> val);
 
     V8Type& operator=(const V8Type& rhs);
     V8Type& operator=(V8Type&& rhs);
@@ -83,7 +83,7 @@ private:
 class V8Value : public V8Type<v8::Value> {
 public:
     V8Value();
-    V8Value(v8::Local<v8::Value> val);
+    explicit V8Value(v8::Local<v8::Value> val);
     ~V8Value() override = default;
 
     bool IsFunction() const;
@@ -110,7 +110,7 @@ public:
 class V8Array : public V8Type<v8::Array> {
 public:
     V8Array();
-    V8Array(v8::Local<v8::Array> arr);
+    explicit V8Array(v8::Local<v8::Array> arr);
     ~V8Array() override = default;
     V8Ref<V8Value> GetValueAt(size_t index) const;
     void SetValueAt(size_t index, V8Ref<V8Value> value) const;
@@ -144,11 +144,9 @@ public:
     void SetPropertyJsonObject(const char* prop, const char* value) const;
     void SetPropertyObject(const char* prop, V8Ref<V8Value> value) const;
 
-    // TODO(cvetan): Make private
-    V8Object(v8::Local<v8::Object> obj);
+    explicit V8Object(v8::Local<v8::Object> obj);
 };
 
-// TODO(cvetan): Rename to V8Function when we get rid of the current V8Function
 /**
  * @brief A wrapper around v8::Function
  *
@@ -156,8 +154,7 @@ public:
 class V8Funktion : public V8Type<v8::Function> {
 public:
     V8Funktion();
-    // TODO(cvetan): Make private
-    V8Funktion(v8::Local<v8::Function> obj);
+    explicit V8Funktion(v8::Local<v8::Function> obj);
     ~V8Funktion() override = default;
 
     V8Ref<V8Value> Call(V8Ref<V8Value> thisVal, int argc = 0, V8Ref<V8Value> argv[] = nullptr) const;
@@ -173,7 +170,7 @@ private:
 class V8ObjTemplate : public V8Type<v8::ObjectTemplate> {
 public:
     V8ObjTemplate() = default;
-    V8ObjTemplate(v8::Local<v8::ObjectTemplate> obj) : V8Type(obj) {};
+    explicit V8ObjTemplate(v8::Local<v8::ObjectTemplate> obj) : V8Type(obj) {}
 
     void SetInternalFieldCount(int32_t count) const;
     V8Ref<V8Object> NewInstance() const;
@@ -195,7 +192,7 @@ class V8CallbackInfo {
 public:
     V8CallbackInfo(const v8::FunctionCallbackInfo<v8::Value>& info);
     ~V8CallbackInfo() = default;
-    V8CallbackInfo(const V8CallbackInfo&) = delete;
+    explicit V8CallbackInfo(const V8CallbackInfo&) = delete;
     V8CallbackInfo& operator=(const V8CallbackInfo&) = delete;
 
     V8Ref<V8Value> operator[](size_t index) const;

@@ -37,10 +37,8 @@
 #include "core/common/text_field_manager.h"
 #include "core/common/watch_dog.h"
 #include "core/common/window.h"
-#include "core/components/theme/app_theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager.h"
-#include "core/pipeline/base/element.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/card_frontend/card_frontend.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -135,26 +133,24 @@ void AceContainer::Destroy()
 {
     ContainerScope scope(instanceId_);
     if (pipelineContext_ && taskExecutor_) {
-        if (taskExecutor_) {
-            // 1. Destroy Pipeline on UI thread.
-            RefPtr<PipelineContext> context;
-            context.Swap(pipelineContext_);
-            taskExecutor_->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
+        // 1. Destroy Pipeline on UI thread.
+        RefPtr<PipelineContext> context;
+        context.Swap(pipelineContext_);
+        taskExecutor_->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
 
-            if (isSubContainer_) {
-                // SubAcecontainer just return.
-                return;
-            }
-            // 2. Destroy Frontend on JS thread.
-            RefPtr<Frontend> frontend;
-            frontend_.Swap(frontend);
-            taskExecutor_->PostTask(
-                [frontend]() {
-                    frontend->UpdateState(Frontend::State::ON_DESTROY);
-                    frontend->Destroy();
-                },
-                TaskExecutor::TaskType::JS);
+        if (isSubContainer_) {
+            // SubAcecontainer just return.
+            return;
         }
+        // 2. Destroy Frontend on JS thread.
+        RefPtr<Frontend> frontend;
+        frontend_.Swap(frontend);
+        taskExecutor_->PostTask(
+            [frontend]() {
+                frontend->UpdateState(Frontend::State::ON_DESTROY);
+                frontend->Destroy();
+            },
+            TaskExecutor::TaskType::JS);
     }
     resRegister_.Reset();
     assetManager_.Reset();
@@ -314,17 +310,28 @@ void AceContainer::OnActive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         front->OnActive();
     }
-    // TODO: remove it after ability fix onshow lifecyle.
-    auto context = container->GetPipelineContext();
-    if (!context) {
+
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null, OnActive failed.");
         return;
     }
+
+    taskExecutor->PostTask([container]() {
+        auto pipelineContext = container->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGE("pipeline context is null, OnActive failed.");
+            return;
+        }
+        pipelineContext->WindowFocus(true);
+    }, TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::OnInactive(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
+        LOGE("container is null, OnInactive failed.");
         return;
     }
     ContainerScope scope(instanceId);
@@ -334,12 +341,22 @@ void AceContainer::OnInactive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         front->OnInactive();
     }
-    // TODO: remove it after ability fix onshow lifecyle.
-    auto context = container->GetPipelineContext();
-    if (!context) {
+
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null, OnInactive failed.");
         return;
     }
-    context->RootLostFocus();
+
+    taskExecutor->PostTask([container]() {
+        auto pipelineContext = container->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGE("pipeline context is null, OnInactive failed.");
+            return;
+        }
+        pipelineContext->WindowFocus(false);
+        pipelineContext->RootLostFocus();
+    }, TaskExecutor::TaskType::UI);
 }
 
 bool AceContainer::OnStartContinuation(int32_t instanceId)
@@ -557,6 +574,8 @@ void AceContainer::InitializeCallback()
             [context, x, y, action]() { context->OnDragEvent(x, y, action); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterDragEventCallback(dragEventCallback);
+
+    InitWindowCallback();
 }
 
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName,
@@ -590,6 +609,7 @@ void AceContainer::DestroyContainer(int32_t instanceId)
         LOGE("no AceContainer with id %{private}d in AceEngine", instanceId);
         return;
     }
+    HdcRegister::Get().StopHdcRegister();
     container->Destroy();
     auto taskExecutor = container->GetTaskExecutor();
     if (taskExecutor) {
@@ -894,6 +914,31 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     };
     pipelineContext_->SetFinishEventHandler(finishEventHandler);
 
+    auto&& startAbilityHandler = [weak = WeakClaim(this), instanceId](const std::string& address) {
+        auto container = weak.Upgrade();
+        if (!container) {
+            LOGE("StartAbilityHandler container is null!");
+            return;
+        }
+        ContainerScope scope(instanceId);
+        auto context = container->GetPipelineContext();
+        if (!context) {
+            LOGE("StartAbilityHandler context is null!");
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakPtr<AceContainer>(container), address]() {
+                auto container = weak.Upgrade();
+                if (!container) {
+                    LOGE("Start ability task, container is null!");
+                    return;
+                }
+                container->OnStartAbility(address);
+            },
+            TaskExecutor::TaskType::PLATFORM);
+    };
+    pipelineContext_->SetStartAbilityHandler(startAbilityHandler);
+
     auto&& setStatusBarEventHandler = [weak = WeakClaim(this), instanceId](const Color& color) {
         auto container = weak.Upgrade();
         if (!container) {
@@ -1057,5 +1102,48 @@ void AceContainer::InitializeSubContainer(int32_t parentContainerId)
     auto taskExec = AceEngine::Get().GetContainer(parentContainerId)->GetTaskExecutor();
     taskExecutor_ = AceType::DynamicCast<FlutterTaskExecutor>(std::move(taskExec));
     GetSettings().useUIAsJSThread = true;
+}
+
+void AceContainer::InitWindowCallback()
+{
+    LOGI("AceContainer InitWindowCallback");
+    auto aceAbility = aceAbility_.lock();
+    if (aceAbility == nullptr) {
+        LOGW("AceContainer::InitWindowCallback failed, aceAbility is null.");
+        return;
+    }
+    if (pipelineContext_ == nullptr) {
+        LOGE("AceContainer::InitWindowCallback failed, pipelineContext_ is null.");
+        return;
+    }
+    auto& window = aceAbility->GetWindow();
+    if (window == nullptr) {
+        LOGE("AceContainer::InitWindowCallback failed, window is null.");
+        return;
+    }
+    std::shared_ptr<AppExecFwk::AbilityInfo> info = aceAbility->GetAbilityInfo();
+    if (info != nullptr) {
+        pipelineContext_->SetAppLabelId(info->labelId);
+        pipelineContext_->SetAppIconId(info->iconId);
+    }
+    pipelineContext_->SetWindowMinimizeCallBack(
+        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Minimize()); });
+    pipelineContext_->SetWindowMaximizeCallBack(
+        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Maximize()); });
+
+    pipelineContext_->SetWindowRecoverCallBack(
+        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Recover()); });
+
+    pipelineContext_->SetWindowCloseCallBack(
+        [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Close()); });
+
+    pipelineContext_->SetWindowStartMoveCallBack([window]() { window->StartMove(); });
+
+    pipelineContext_->SetWindowSplitCallBack([window]() -> bool {
+        return (
+            OHOS::Rosen::WMError::WM_OK == window->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
+    });
+
+    pipelineContext_->SetWindowGetModeCallBack([window]() -> WindowMode { return (WindowMode)window->GetMode(); });
 }
 } // namespace OHOS::Ace::Platform

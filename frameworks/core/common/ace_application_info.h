@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,7 +74,6 @@ public:
     virtual bool GetBundleInfo(const std::string& packageName, AceBundleInfo& bundleInfo) = 0;
     virtual double GetLifeTime() const = 0;
 
-    // TODO: move to AceSettings
     virtual std::string GetJsEngineParam(const std::string& key) const = 0;
 
     const std::string& GetCountryOrRegion() const
@@ -154,7 +153,6 @@ protected:
     bool isDebugVersion_ = false;
     bool needDebugBreakpoint_ = false;
 
-    // TODO: move to container
     bool isCardType_ = false;
 
     int userId_ = 0;

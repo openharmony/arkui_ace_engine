@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,8 +39,10 @@ class LongPressRecognizer : public MultiFingersRecognizer {
 
 public:
     explicit LongPressRecognizer(const WeakPtr<PipelineContext>& context) : context_(context) {}
-    LongPressRecognizer(const WeakPtr<PipelineContext>& context, int32_t duration, int32_t fingers, bool repeat)
-        : context_(context), duration_(duration), repeat_(repeat)
+    LongPressRecognizer(const WeakPtr<PipelineContext>& context, int32_t duration, int32_t fingers, bool repeat,
+        bool isForDrag = false, bool isDisableMouseLeft = false)
+        : context_(context), duration_(duration), repeat_(repeat), isForDrag_(isForDrag),
+          isDisableMouseLeft_(isDisableMouseLeft)
     {
         fingers_ = fingers;
     }
@@ -86,6 +88,8 @@ private:
     bool pendingEnd_ = false;
     bool pendingCancel_ = false;
     bool useCatchMode_ = true;
+    bool isForDrag_ = false;
+    bool isDisableMouseLeft_ = false;
 };
 
 } // namespace OHOS::Ace

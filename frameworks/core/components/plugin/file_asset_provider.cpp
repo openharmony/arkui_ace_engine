@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 #include "base/log/log.h"
 
 namespace OHOS::Ace::Plugin {
-constexpr long FOO_MAX_LEN = 20 * 1024 * 1024;
+constexpr int64_t FOO_MAX_LEN = 20 * 1024 * 1024;
 bool FileAssetProvider::Initialize(const std::string& packagePath, const std::vector<std::string>& assetBasePaths)
 {
     ACE_SCOPED_TRACE("Initialize");
@@ -59,7 +59,7 @@ std::unique_ptr<fml::Mapping> FileAssetProvider::GetAsMapping(const std::string&
             continue;
         }
 
-        long size = std::ftell(fp);
+        int64_t size = std::ftell(fp);
         if (size == -1L || size == 0L || size > FOO_MAX_LEN) {
             LOGE("tell file error");
             std::fclose(fp);
