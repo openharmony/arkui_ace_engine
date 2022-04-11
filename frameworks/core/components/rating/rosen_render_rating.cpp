@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,13 @@ void RosenRenderRating::Paint(RenderContext& context, const Offset& offset)
         PaintHoverRect(canvas);
     }
     PaintRatingBar(context, canvas);
+    Offset pressstarOffset = Offset(singleWidth_ * pressstarNum_ + imageVerticalOffset, imageVerticalOffset);
+    if (!isIndicator_ && (SystemProperties::GetDeviceType() == DeviceType::TABLET ||
+    SystemProperties::GetDeviceType() == DeviceType::PHONE) && isPress_) {
+        Offset animationOffset = pressstarOffset + Offset(offsetDeltaX, offsetDeltaY);
+        PaintPress(animationOffset + offset, NormalizeToPx(PRESS_BORDER_RADIUS),
+            Size(singleWidth_, ratingSize_.Height()), context);
+    }
     if (IsPhone() && !isIndicator_ && operationEvent_ == OperationEvent::RATING_KEY_EVENT &&
         operationEvent_ != OperationEvent::RATING_MOUSE_EVENT) {
         // total width of focus border is twice the width of [focusBorderWidth_], border-width + padding-width
@@ -145,6 +152,24 @@ void RosenRenderRating::PaintFocus(
     SkPaint paint;
     SkRRect rRect;
     paint.setColor(RATING_FOCUS_BOARD_COLOR);
+    paint.setStyle(SkPaint::Style::kFill_Style);
+    paint.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kSolid_SkBlurStyle, 1.0));
+    rRect.setRectXY(SkRect::MakeWH(boardSize.Width(), boardSize.Height()), rRectRadius, rRectRadius);
+    rRect.offset(offset.GetX(), offset.GetY());
+    canvas->drawRRect(rRect, paint);
+}
+
+void RosenRenderRating::PaintPress(
+    const Offset& offset, double rRectRadius, const Size& boardSize, RenderContext& context)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    SkPaint paint;
+    SkRRect rRect;
+    paint.setColor(PRESS_COLOR);
     paint.setStyle(SkPaint::Style::kFill_Style);
     paint.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kSolid_SkBlurStyle, 1.0));
     rRect.setRectXY(SkRect::MakeWH(boardSize.Width(), boardSize.Height()), rRectRadius, rRectRadius);
