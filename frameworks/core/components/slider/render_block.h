@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,9 +85,25 @@ public:
         isHover_ = isHover;
     }
 
+    void SetPress(bool isPress)
+    {
+        isPress_ = isPress;
+    }
+
+    SliderMode GetMode() const
+    {
+        return mode_;
+    }
+
+    void SetMode(SliderMode mode)
+    {
+        mode_ = mode;
+    }
+
 protected:
     bool isFocus_ = false;
     bool isHover_ = false;
+    bool isPress_ = false;
     double radiusScale_ = 1.0;
     Dimension blockSize_;
     Dimension hotRegionWidth_;
@@ -96,6 +112,7 @@ protected:
 private:
     Color blockColor_;
     Color hoverColor_;
+    SliderMode mode_ = SliderMode::OUTSET;
 };
 
 } // namespace OHOS::Ace

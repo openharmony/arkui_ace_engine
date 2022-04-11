@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@ namespace {
 
 const Dimension ROUND_RADIUS_PHONE = 12.0_vp;
 const Dimension ROUND_RADIUS_TV = 8.0_vp;
+constexpr uint32_t HOVER_BORDER_COLOR = 0x0C000000;
 
 } // namespace
 
@@ -57,6 +58,11 @@ void RosenRenderOption::PaintBackground(RenderContext& context, const Offset& of
         offset.GetX() + diff, offset.GetY() + diff, size.Width() - 2.0 * diff, size.Height() - 2.0 * diff);
     auto skRRect = SkRRect::MakeRectXY(tempRect, radius, radius);
     path.addRRect(skRRect);
+    if (hovered_) {
+        SkPaint paint;
+        paint.setColor(HOVER_BORDER_COLOR);
+        canvas->drawPath(path, paint);
+    }
 
     SkPaint paint;
     paint.setARGB(backColor_.GetAlpha(), backColor_.GetRed(), backColor_.GetGreen(), backColor_.GetBlue());
@@ -105,6 +111,18 @@ void RosenRenderOption::PaintLine(RenderContext& context, const Offset& offset)
     paint.setARGB(lineColor_.GetAlpha(), lineColor_.GetRed(), lineColor_.GetGreen(), lineColor_.GetBlue());
     paint.setAntiAlias(true);
     canvas->drawPath(path, paint);
+}
+
+void RosenRenderOption::AnimateMouseHoverEnter()
+{
+    hovered_ = true;
+    MarkNeedLayout();
+}
+
+void RosenRenderOption::AnimateMouseHoverExit()
+{
+    hovered_ = false;
+    MarkNeedLayout();
 }
 
 } // namespace OHOS::Ace
