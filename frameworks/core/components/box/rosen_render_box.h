@@ -175,6 +175,7 @@ private:
     void ImageObjFailed();
 
     void PaintAccessibilityFocus(const SkRect& focusRect, RenderContext& context);
+    void PaintFocus(const SkRect& focusRect, RenderContext& context);
 
     RRect windowBlurRRect_;
     void FetchImageData();

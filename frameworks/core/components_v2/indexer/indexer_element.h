@@ -18,6 +18,9 @@
 
 #include "core/focus/focus_node.h"
 #include "core/pipeline/base/component_group_element.h"
+#include "core/components_v2/indexer/render_indexer.h"
+#include "core/components_v2/indexer/render_indexer_item.h"
+
 
 namespace OHOS::Ace::V2 {
 class IndexerElement : public ComponentGroupElement, public FocusNode {
@@ -25,6 +28,12 @@ class IndexerElement : public ComponentGroupElement, public FocusNode {
 
 public:
     void PerformBuild() override;
+    bool OnKeyEvent(const KeyEvent& keyEvent) override;
+    bool IndexMoveUp();
+    bool IndexMoveDown();
+
+private:
+    WeakPtr<RenderIndexerItem> prevFocusedItem_;
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_INDEXER_ELEMENT_H

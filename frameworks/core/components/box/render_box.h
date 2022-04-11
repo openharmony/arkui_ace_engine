@@ -97,6 +97,12 @@ public:
         return frontDecoration_;
     }
 
+    virtual void NeedFocusBorder(bool needFocusBorder)
+    {
+        needFocusBorder_ = needFocusBorder;
+        MarkNeedRender();
+    }
+    
     virtual void SetColor(const Color& color, bool isBackground) // add for animation
     {
         // create decoration automatically while user had not defined
@@ -292,6 +298,7 @@ protected:
     bool isHoveredBoard = false;
     bool isHoveredScale = false;
     bool isAccessibilityFocus_ = false;
+    bool needFocusBorder_ = false;
 
 private:
     void UpdateBackDecoration(const RefPtr<Decoration>& newDecoration);
