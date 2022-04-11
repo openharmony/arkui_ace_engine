@@ -418,7 +418,9 @@ std::string FormManagerDelegate::WrapAction(const std::string& action)
     if (!eventAction->Contains("bundleName")) {
         eventAction->Put("bundleName", wantCache_.GetElement().GetBundleName().c_str());
     }
-    return eventAction->ToString();
+    auto newAction = eventAction->ToString();
+    OHOS::AppExecFwk::FormMgr::GetInstance().UpdateRouterAction(runningCardId_, newAction);
+    return newAction;
 }
 #endif
 } // namespace OHOS::Ace
