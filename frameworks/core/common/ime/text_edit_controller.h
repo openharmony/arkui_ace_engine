@@ -28,10 +28,12 @@ public:
     void SetText(const std::string& newText, bool needFireChangeEvent = true)
     {
         auto value = GetValue();
-        value.text = newText;
-        // Default set selection to the end of text is more consistent with the intuition of user.
-        value.selection.Update(value.GetWideText().length());
-        SetValue(std::move(value), needFireChangeEvent);
+        if (value.text != newText) {
+            value.text = newText;
+            // Default set selection to the end of text is more consistent with the intuition of user.
+            value.selection.Update(static_cast<int32_t>(value.GetWideText().length()));
+            SetValue(std::move(value), needFireChangeEvent);
+        }
     }
 
     void SetHint(const std::string& hint)

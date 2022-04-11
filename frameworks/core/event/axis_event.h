@@ -20,7 +20,6 @@
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
-#include "core/components/scroll/scroll_fade_painter.h"
 #include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
