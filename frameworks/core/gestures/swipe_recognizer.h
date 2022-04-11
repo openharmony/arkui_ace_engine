@@ -55,7 +55,7 @@ class SwipeRecognizer : public TouchEventTarget {
 
 public:
     bool HandleEvent(const TouchEvent& point) override;
-    bool HandleEvent(const TouchEvent& point, uint32_t stage);
+    bool HandleSwipeEvent(const TouchEvent& point, uint32_t stage);
 
     bool DispatchEvent(const TouchEvent& point) override;
 

@@ -73,7 +73,7 @@ std::string SwipeEventInfo::ToJsonParamInfo() const
     return jsonValue->ToString();
 }
 
-bool SwipeRecognizer::HandleEvent(const TouchEvent& point, uint32_t stage)
+bool SwipeRecognizer::HandleSwipeEvent(const TouchEvent& point, uint32_t stage)
 {
     switch (point.type) {
         case TouchType::DOWN: {
@@ -124,12 +124,12 @@ bool SwipeRecognizer::HandleEvent(const TouchEvent& point, uint32_t stage)
 
 bool SwipeRecognizer::HandleEvent(const TouchEvent& point)
 {
-    return HandleEvent(point, EventStage::BUBBLE);
+    return HandleSwipeEvent(point, EventStage::BUBBLE);
 }
 
 bool SwipeRecognizer::DispatchEvent(const TouchEvent& point)
 {
-    HandleEvent(point, EventStage::CAPTURE);
+    HandleSwipeEvent(point, EventStage::CAPTURE);
 
     auto& status = statusMap_[point.id];
     if (status.second) {
