@@ -67,6 +67,10 @@ public:
     {
         instanceId_ = instanceId;
     }
+    int32_t GetInstanceId()
+    {
+        return instanceId_;
+    }
 
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;

@@ -1554,6 +1554,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             }
             auto pluginPoint = point.UpdateScalePoint(viewScale_, pipelineContext->GetPluginEventOffset().GetX(),
                 pipelineContext->GetPluginEventOffset().GetY(), point.id);
+            auto eventManager = pipelineContext->GetEventManager();
+            if (eventManager) {
+                eventManager->SetInstanceId(pipelineContext->GetInstanceId());
+            }
             pipelineContext->OnTouchEvent(pluginPoint, true);
         }
     }
@@ -1567,6 +1571,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         return;
     }
     eventManager_->DispatchTouchEvent(scalePoint);
+    if (scalePoint.type == TouchType::UP) {
+        touchPluginPipelineContext_.clear();
+        eventManager_->SetInstanceId(GetInstanceId());
+    }
 }
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
