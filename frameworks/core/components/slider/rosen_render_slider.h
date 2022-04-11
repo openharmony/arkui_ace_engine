@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,8 @@ public:
     void OnMouseHoverEnterTest() override;
     void OnMouseHoverExitTest() override;
     void OnPaintFinish() override;
+    void PaintVerticalFocus(RenderContext& context, const Offset& offset);
+    void PaintHorizontalFocus(RenderContext& context, const Offset& offset);
 
     RefPtr<RenderBlock> GetRenderBlock()
     {
@@ -67,6 +69,10 @@ private:
     RefPtr<KeyframeAnimation<Color>> colorAnimationEnter_;
     RefPtr<KeyframeAnimation<Color>> colorAnimationExit_;
     bool initialUpdate_ = true;
+
+    RefPtr<Decoration> backDecoration_;
+    Color hoverColorBegin_ = Color::TRANSPARENT;
+    Color hoverColor_ = Color::TRANSPARENT;
 };
 
 } // namespace OHOS::Ace

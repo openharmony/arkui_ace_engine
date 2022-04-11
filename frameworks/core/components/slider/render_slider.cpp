@@ -271,6 +271,38 @@ void RenderSlider::Initialize()
             }
         });
     }
+
+    touchDetector_ = AceType::MakeRefPtr<RawRecognizer>();
+    touchDetector_->SetOnTouchDown([weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
+        auto slider = weak.Upgrade();
+        if (slider) {
+            auto localPosition = info.GetTouches().front().GetLocalLocation();
+            if (slider->blockTouchRegion_.ContainsInRegion(localPosition.GetX(), localPosition.GetY())) {
+                slider->isPress_ = true;
+                slider->MarkNeedLayout();
+            }
+        }
+    });
+
+    touchDetector_->SetOnTouchUp([weak = AceType::WeakClaim(this)](const TouchEventInfo&) {
+        auto slider = weak.Upgrade();
+        if (slider) {
+            slider->isPress_ = false;
+        }
+    });
+}
+
+bool RenderSlider::HandleMouseEvent(const MouseEvent& event)
+{
+    auto localPosition = event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
+    if (blockTouchRegion_.ContainsInRegion(localPosition.GetX(), localPosition.GetY())) {
+        isHover_ = true;
+        MarkNeedLayout();
+    } else {
+        isHover_ = false;
+        MarkNeedLayout();
+    }
+    return true;
 }
 
 bool RenderSlider::MouseHoverTest(const Point& parentLocalPoint)
@@ -550,8 +582,10 @@ void RenderSlider::OnTouchTestHit(
     if (!isValueError_ && !disable_) {
         dragDetector_->SetCoordinateOffset(coordinateOffset);
         clickDetector_->SetCoordinateOffset(coordinateOffset);
+        touchDetector_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(dragDetector_);
         result.emplace_back(clickDetector_);
+        result.emplace_back(touchDetector_);
     }
 }
 
