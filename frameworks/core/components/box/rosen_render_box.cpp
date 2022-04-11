@@ -48,6 +48,11 @@ constexpr uint32_t ACCESSIBILITY_FOCUS_COLOR = 0xbf39b500;
 constexpr double ACCESSIBILITY_FOCUS_WIDTH = 4.0;
 constexpr double ACCESSIBILITY_FOCUS_RADIUS_X = 2.0;
 constexpr double ACCESSIBILITY_FOCUS_RADIUS_Y = 2.0;
+
+constexpr uint32_t FOCUS_COLOR = 0xff0a59f7;
+constexpr double FOCUS_WIDTH = 2.0;
+constexpr double FOCUS_RADIUS_X = 4.0;
+constexpr double FOCUS_RADIUS_Y = 4.0;
 } // namespace
 
 RosenRenderBox::RosenRenderBox()
@@ -326,6 +331,9 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         PaintAccessibilityFocus(focusRect, context);
     }
 
+    if (needFocusBorder_) {
+        PaintFocus(focusRect, context);
+    }
     const auto renderContext = static_cast<RosenRenderContext*>(&context);
     auto rsNode = renderContext->GetRSNode();
     if (rsNode == nullptr) {
@@ -379,6 +387,25 @@ void RosenRenderBox::PaintAccessibilityFocus(const SkRect& focusRect, RenderCont
     paint.setStrokeWidth(ACCESSIBILITY_FOCUS_WIDTH);
 
     SkRRect rRect = SkRRect::MakeRectXY(focusRect, ACCESSIBILITY_FOCUS_RADIUS_X, ACCESSIBILITY_FOCUS_RADIUS_Y);
+    canvas->drawRRect(rRect, paint);
+    canvas->restore();
+}
+
+void RosenRenderBox::PaintFocus(const SkRect& focusRect, RenderContext& context)
+{
+    auto canvas = static_cast<RosenRenderContext&>(context).GetCanvas();
+    if (canvas == nullptr) {
+        LOGE("Canvas is null, save failed.");
+        return;
+    }
+    canvas->save();
+
+    SkPaint paint;
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setColor(FOCUS_COLOR);
+    paint.setStrokeWidth(FOCUS_WIDTH);
+
+    SkRRect rRect = SkRRect::MakeRectXY(focusRect, FOCUS_RADIUS_X, FOCUS_RADIUS_Y);
     canvas->drawRRect(rRect, paint);
     canvas->restore();
 }

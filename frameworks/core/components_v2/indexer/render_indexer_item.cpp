@@ -213,13 +213,14 @@ void RenderIndexerItem::UpdateItemStyle()
         LOGE("Pipeline context upgrade fail!");
         return;
     }
-    if (clicked_) {
+    if (clicked_ || focused_) {
         box->SetColor(selectedBgColor_, true);
         textComponent_->SetTextStyle(activeStyle_);
     } else {
         box->SetColor(Color::TRANSPARENT, true);
         textComponent_->SetTextStyle(normalStyle_);
     }
+    box->NeedFocusBorder(focused_);
     text->Update(textComponent_);
 }
 } // namespace OHOS::Ace::V2
