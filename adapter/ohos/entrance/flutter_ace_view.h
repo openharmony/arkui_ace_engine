@@ -178,7 +178,7 @@ private:
     SurfaceDestroyCallback surfaceDestroyCallback_;
     IdleCallback idleCallback_;
     DragEventCallBack dragEventCallback_;
-    int32_t instanceId_ = 0;
+    int32_t instanceId_ = -1;
     bool viewLaunched_ = false;
     RefPtr<PlatformResRegister> resRegister_;
     KeyEventCallback keyEventCallback_;
