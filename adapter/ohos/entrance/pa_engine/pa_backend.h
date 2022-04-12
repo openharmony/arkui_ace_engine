@@ -84,7 +84,7 @@ public:
     void OnUpdate(const int64_t formId);
     void OnCastTemptoNormal(const int64_t formId);
     void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap);
-    void OnAcquireState(const OHOS::AAFwk::Want& want);
+    int32_t OnAcquireFormState(const OHOS::AAFwk::Want& want);
     sptr<IRemoteObject> OnConnect(const OHOS::AAFwk::Want& want);
     void OnDisConnect(const OHOS::AAFwk::Want& want);
 
