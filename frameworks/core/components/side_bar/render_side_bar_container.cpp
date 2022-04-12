@@ -49,6 +49,38 @@ RefPtr<RenderNode> RenderSideBarContainer::Create()
     return AceType::MakeRefPtr<RenderSideBarContainer>();
 }
 
+void RenderSideBarContainer::CorrectWidth(const Dimension& width, const Dimension& minWidth, const Dimension& maxWidth)
+{
+    if (minWidth > maxWidth) {
+        LOGE("the minSideBarWidth or maxSideBarWidth is illegal, use default value");
+    } else {
+        minSidebarWidth_ = minWidth;
+        maxSidebarWidth_ = maxWidth;
+    }
+
+    if (width < minSidebarWidth_) {
+        sidebarWidth_ = minSidebarWidth_;
+        return;
+    }
+
+    if (width > maxSidebarWidth_) {
+        sidebarWidth_ = maxSidebarWidth_;
+        return;
+    }
+    sidebarWidth_ = width;
+}
+
+void RenderSideBarContainer::Initialize()
+{
+    customSidebarWidth_ = sideBar_->GetSideBarWidth();
+    CorrectWidth(sideBar_->GetSideBarWidth(), sideBar_->GetSideBarMinWidth(), sideBar_->GetSideBarMaxWidth());
+    status_ = sideBar_->GetSideBarStatus();
+    pendingStatus_ = status_;
+    curPosition_ = -sidebarWidth_;
+    InitializeDragAndAnimation();
+    isInitialized_ = true;
+}
+
 void RenderSideBarContainer::Update(const RefPtr<Component>& component)
 {
     sideBar_ = AceType::DynamicCast<SideBarContainerComponent>(component);
@@ -56,7 +88,10 @@ void RenderSideBarContainer::Update(const RefPtr<Component>& component)
         return;
     }
 
-    auto width = sidebarWidth_;
+    if ((sideBar_->GetIsShow() && status_ != SideStatus::SHOW) ||
+        (!sideBar_->GetIsShow() && status_ == SideStatus::SHOW)) {
+        DoSideBarAnimation();
+    }
     showSideBar_ = sideBar_->GetIsShow();
     if (sideBar_->GetSideBarContainerType() == SideBarContainerType::EMBED) {
         style_ = "SideBarContainerType.Embed";
@@ -72,27 +107,19 @@ void RenderSideBarContainer::Update(const RefPtr<Component>& component)
     iconSwitch_ = sideBar_->GetSwitchIcon();
     showControlButton_ = sideBar_->GetShowControlButton();
 
-    auto minWidth = sideBar_->GetSideBarMinWidth();
-    auto maxWidth = sideBar_->GetSideBarMaxWidth();
-    if (!isInitialized_ && sideBar_->IsSideBarwidthDefined()) {
-        width = sideBar_->GetSideBarWidth();
-    }
     exceptRegion_.SetRect(SystemProperties::Vp2Px(sideBar_->GetButtonLeft()),
         SystemProperties::Vp2Px(sideBar_->GetButtonTop()), SystemProperties::Vp2Px(sideBar_->GetButtonWidth()),
         SystemProperties::Vp2Px(sideBar_->GetButtonHeight()));
-    if (width < minWidth || width > maxWidth || minWidth > maxWidth) {
-        LOGE("the minSideBarWidth or maxSideBarWidth is illegal, use default value");
-    } else {
-        sidebarWidth_ = width;
-        minSidebarWidth_ = minWidth;
-        maxSidebarWidth_ = maxWidth;
-    }
+
     if (!isInitialized_) {
-        status_ = sideBar_->GetSideBarStatus();
-        pendingStatus_ = status_;
-        curPosition_ = -sidebarWidth_;
-        InitializeDragAndAnimation();
-        isInitialized_ = true;
+        Initialize();
+    } else {
+        auto width = sidebarWidth_;
+        if (sideBar_->IsSideBarwidthDefined() && customSidebarWidth_ != sideBar_->GetSideBarWidth()) {
+            customSidebarWidth_ = sideBar_->GetSideBarWidth();
+            width = customSidebarWidth_;
+        }
+        CorrectWidth(width, sideBar_->GetSideBarMinWidth(), sideBar_->GetSideBarMaxWidth());
     }
 
     auto weak = AceType::WeakClaim(this);
