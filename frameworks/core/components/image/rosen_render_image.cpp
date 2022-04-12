@@ -709,7 +709,13 @@ void RosenRenderImage::CanvasDrawImageRect(
     int repeatNum = static_cast<int>(imageRepeat_);
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
     if (GetAdaptiveFrameRectFlag()) {
-        recordingCanvas->DrawImageWithParm(image_, fitNum, repeatNum, radius, paint);
+        recordingCanvas->translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
+        Rosen::RsImageInfo rsImageInfo;
+        rsImageInfo.fitNum_ = fitNum;
+        rsImageInfo.repeatNum_ = repeatNum;
+        rsImageInfo.radius_ = radius;
+        rsImageInfo.scale_ = scale_;
+        recordingCanvas->DrawImageWithParm(image_, rsImageInfo, paint);
         return;
     }
     bool isLoading = ((imageLoadingStatus_ == ImageLoadingStatus::LOADING) ||
