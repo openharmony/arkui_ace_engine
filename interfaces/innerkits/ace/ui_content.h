@@ -29,6 +29,7 @@ class Context;
 
 namespace AppExecFwk {
 class Configuration;
+class Ability;
 }
 
 namespace Rosen {
@@ -59,6 +60,7 @@ namespace OHOS::Ace {
 class ACE_EXPORT UIContent {
 public:
     static std::unique_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime);
+    static std::unique_ptr<UIContent> Create(OHOS::AppExecFwk::Ability* ability);
 
     virtual ~UIContent() = default;
 
