@@ -145,7 +145,6 @@ protected:
     bool MouseHoverTest(const Point& parentLocalPoint) override;
     void AnimateMouseHoverEnter() override;
     void AnimateMouseHoverExit() override;
-    WeakPtr<RenderNode> CheckHoverNode() override;
     virtual bool HandleMouseEvent(const MouseEvent& event) override;
     virtual void PaintFocus(
         const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context) {}

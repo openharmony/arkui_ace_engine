@@ -198,6 +198,15 @@ public:
         return stateAttributeList_ != nullptr;
     }
 
+    HoverAnimationType GetMouseAnimationType() const
+    {
+        return animationType_;
+    }
+    void SetMouseAnimationType(HoverAnimationType animationType)
+    {
+        animationType_ = animationType;
+    }
+
 private:
     RefPtr<ButtonDeclaration> declaration_;
     ButtonType type_ { ButtonType::NORMAL };
@@ -213,6 +222,7 @@ private:
     std::array<Radius, 4> radii_ = { Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp) };
     RefPtr<StateAttributes<ButtonStateAttribute>> stateAttributeList_;
     EventMarker keyEnterId_;
+    HoverAnimationType animationType_ = HoverAnimationType::UNKNOWN;
 };
 
 class ButtonBuilder {

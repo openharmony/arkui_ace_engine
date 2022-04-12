@@ -309,11 +309,6 @@ void RenderButton::DisplayFocusAnimation()
     }
 }
 
-WeakPtr<RenderNode> RenderButton::CheckHoverNode()
-{
-    return AceType::WeakClaim<RenderNode>(this);
-}
-
 void RenderButton::AnimateMouseHoverEnter()
 {
     OnMouseHoverEnterTest();
@@ -446,6 +441,7 @@ void RenderButton::Update(const RefPtr<Component>& component)
         defaultClickedColor_ = theme->GetClickedColor();
     }
 
+    hoverAnimationType_ = buttonComponent_->GetMouseAnimationType();
     width_ = buttonComponent_->GetWidth();
     height_ = buttonComponent_->GetHeight();
     buttonComponent_->FitTextHeight(height_);

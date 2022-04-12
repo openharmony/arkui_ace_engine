@@ -271,6 +271,15 @@ public:
     }
 
     ACE_DEFINE_COMPONENT_EVENT(OnChange, void(double));
+    
+    HoverAnimationType GetMouseAnimationType() const
+    {
+        return animationType_;
+    }
+    void SetMouseAnimationType(HoverAnimationType animationType)
+    {
+        animationType_ = animationType;
+    }
 
 private:
     int32_t starNum_ = 5;
@@ -304,6 +313,7 @@ private:
     Color hoverColor_;
     Dimension focusBorderWidth_;
     Dimension focusBorderRadius_;
+    HoverAnimationType animationType_ = HoverAnimationType::UNKNOWN;
 };
 
 } // namespace OHOS::Ace

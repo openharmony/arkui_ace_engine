@@ -292,8 +292,6 @@ void JSImage::Create(const JSCallbackInfo& info)
     ViewStackProcessor::GetInstance()->Push(imageComponent);
     JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(false);
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    boxComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
     if (noPixMap) {
         return;
     }

@@ -75,11 +75,6 @@ public:
 
     void UpdateSelfStatus();
 
-    WeakPtr<RenderNode> CheckHoverNode() override
-    {
-        return AceType::WeakClaim<RenderNode>(this);
-    }
-
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;

@@ -59,6 +59,7 @@ enum class HoverAnimationType : int32_t {
     SCALE,
     BOARD,
     AUTO,
+    UNKNOWN,
 };
 
 // Component is a read-only structure, represent the basic information how to display it.

@@ -751,10 +751,6 @@ public:
     {
         return nullptr;
     }
-    virtual WeakPtr<RenderNode> CheckHoverNode()
-    {
-        return nullptr;
-    }
     virtual void MouseHoverEnterTest() {}
     virtual void MouseHoverExitTest() {}
     virtual void AnimateMouseHoverEnter() {}
@@ -1234,7 +1230,7 @@ protected:
     bool needUpdateAccessibility_ = true;
     bool disabled_ = false;
     bool isResponseRegion_ = false;
-    HoverAnimationType hoverAnimationType_ = HoverAnimationType::AUTO;
+    HoverAnimationType hoverAnimationType_ = HoverAnimationType::UNKNOWN;
     int32_t minPlatformVersion_ = 0;
 
     MouseState mouseState_ = MouseState::NONE;
