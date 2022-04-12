@@ -103,6 +103,8 @@ std::string JsiBaseUtils::TransSourceStack(RefPtr<JsAcePage> runningPage, const 
 std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const RefPtr<RevSourceMap>& pageMap,
     const RefPtr<RevSourceMap>& appMap, const AceType *data)
 {
+    const std::string closeBrace = ")";
+    const std::string openBrace = "(";
     std::string ans = "";
     std::string tempStack = stackStr;
     int32_t appFlag = static_cast<int32_t>(tempStack.find("app_.js"));
@@ -113,12 +115,14 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const R
     ExtractEachInfo(tempStack, res);
 
     // collect error info first
-    ans = ans + res[0] + "\n";
     for (uint32_t i = 1; i < res.size(); i++) {
         std::string temp = res[i];
+        int32_t closeBracePos = temp.find(closeBrace);
+        int32_t openBracePos = temp.find(openBrace);
+
         std::string line = "";
         std::string column = "";
-        GetPosInfo(temp, line, column);
+        GetPosInfo(temp, closeBracePos, line, column);
         if (line.empty() || column.empty()) {
             LOGI("the stack without line info");
             break;
@@ -128,12 +132,13 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const R
         if (sourceInfo.empty()) {
             break;
         }
-        temp = "at " + sourceInfo;
+        temp.replace(openBracePos, closeBracePos - openBracePos + 1, sourceInfo);
         ans = ans + temp + "\n";
     }
     if (ans.empty()) {
         return tempStack;
     }
+    ans = res[0] + "\n" + ans;
     return ans;
 }
 
@@ -148,24 +153,23 @@ void JsiBaseUtils::ExtractEachInfo(const std::string& tempStack, std::vector<std
             tempStr += tempStack[i];
         }
     }
-    res.push_back(tempStr);
+    if (!tempStr.empty()) {
+        res.push_back(tempStr);
+    }
 }
 
-void JsiBaseUtils::GetPosInfo(const std::string& temp, std::string& line, std::string& column)
+void JsiBaseUtils::GetPosInfo(const std::string& temp, int32_t start, std::string& line, std::string& column)
 {
     // 0 for colum, 1 for row
     int32_t flag = 0;
     // find line, column
-    for (int32_t i = static_cast<int32_t>(temp.length()) - 1; i > 0; i--) {
+    for (int32_t i = start - 1; i > 0; i--) {
         if (temp[i] == ':') {
             flag += 1;
             continue;
         }
-        // some stack line may end with ")"
         if (flag == 0) {
-            if (temp[i] >= '0' && temp[i] <= '9') {
-                column = temp[i] + column;
-            }
+            column = temp[i] + column;
         } else if (flag == 1) {
             line = temp[i] + line;
         } else {
