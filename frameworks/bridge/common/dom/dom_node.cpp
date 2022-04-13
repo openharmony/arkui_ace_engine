@@ -1440,6 +1440,11 @@ void DOMNode::UpdateBoxComponent()
             UpdateBoxBorder(borderStyle.border);
         }
         auto& backDecoration = declaration_->GetBackDecoration();
+        if (!declaration_->HasBackGroundColor() && boxComponent_->GetBackDecoration() &&
+            boxComponent_->HasBackgroundColor()) {
+            backDecoration->SetBackgroundColor(boxComponent_->GetBackDecoration()->GetBackgroundColor());
+        }
+
         auto& backgroundStyle =
             static_cast<CommonBackgroundStyle&>(declaration_->GetStyle(StyleTag::COMMON_BACKGROUND_STYLE));
         if (backgroundStyle.IsValid() && backgroundStyle.gradient.IsValid()) {
