@@ -28,6 +28,7 @@ namespace {
 constexpr int32_t DOUBLE_CLICK = 2;
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
 constexpr double DEFAULT_PINCH_DISTANCE = 1.0;
+constexpr int32_t BUBBLE_MODE_VERSION = 6;
 
 }
 
@@ -207,6 +208,15 @@ void RenderGestureListener::SetOnDoubleClickCallback(const RefPtr<GestureListene
         return;
     }
     SetOnDoubleClickCallback(AceAsyncEvent<void(const ClickInfo&)>::Create(onDoubleClickId, context_));
+    if (!onDoubleClickId.GetCatchMode()) {
+        auto pipeline = context_.Upgrade();
+        if (pipeline && pipeline->GetMinPlatformVersion() >= BUBBLE_MODE_VERSION) {
+            doubleClickRecognizer_->SetUseCatchMode(false);
+            return;
+        }
+    }
+    doubleClickRecognizer_->SetUseCatchMode(true);
+    doubleClickRecognizer_->SetIsExternalGesture(true);
 }
 
 void RenderGestureListener::SetOnLongPressCallback(const RefPtr<GestureListenerComponent>& component)
@@ -216,6 +226,15 @@ void RenderGestureListener::SetOnLongPressCallback(const RefPtr<GestureListenerC
         return;
     }
     SetOnLongPressCallback(AceAsyncEvent<void(const LongPressInfo&)>::Create(onLongPressId, context_));
+    if (!onLongPressId.GetCatchMode()) {
+        auto pipeline = context_.Upgrade();
+        if (pipeline && pipeline->GetMinPlatformVersion() >= BUBBLE_MODE_VERSION) {
+            longPressRecognizer_->SetUseCatchMode(false);
+            return;
+        }
+    }
+    longPressRecognizer_->SetUseCatchMode(true);
+    longPressRecognizer_->SetIsExternalGesture(true);
 }
 
 void RenderGestureListener::SetOnPinchStartCallback(const RefPtr<GestureListenerComponent>& component)

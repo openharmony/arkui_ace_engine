@@ -56,6 +56,11 @@ public:
         onLongPress_ = onLongPress;
     }
 
+    void SetUseCatchMode(bool useCatchMode)
+    {
+        useCatchMode_ = useCatchMode;
+    }
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -63,7 +68,7 @@ private:
     void HandleTouchCancelEvent(const TouchEvent& event) override;
     bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
     void HandleOverdueDeadline();
-    void DeadlineTimer(int32_t time);
+    void DeadlineTimer(int32_t time, bool isAccept);
     void DoRepeat();
     void StartRepeatTimer();
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat);
@@ -82,6 +87,7 @@ private:
     TimeStamp time_;
     bool pendingEnd_ = false;
     bool pendingCancel_ = false;
+    bool useCatchMode_ = true;
     bool isForDrag_ = false;
     bool isDisableMouseLeft_ = false;
 };

@@ -54,6 +54,23 @@ void RenderTouchListener::Update(const RefPtr<Component>& component)
                     AceAsyncEvent<void()>::Create(catchEventId, context_), eventStage, touchEventType);
             }
         }
+
+        auto& onEventId = touchComponent->GetSwipeEvent(EventAction::ON, eventStage);
+        if (!onEventId.IsEmpty()) {
+            if (!swipeRecognizer_) {
+                swipeRecognizer_ = AceType::MakeRefPtr<SwipeRecognizer>();
+            }
+            swipeRecognizer_->SetSwipeCallback(
+                AceAsyncEvent<void(const SwipeEventInfo&)>::Create(onEventId, context_), eventStage);
+        }
+        auto& catchEventId = touchComponent->GetSwipeEvent(EventAction::CATCH, eventStage);
+        if (!catchEventId.IsEmpty()) {
+            if (!swipeRecognizer_) {
+                swipeRecognizer_ = AceType::MakeRefPtr<SwipeRecognizer>();
+            }
+            swipeRecognizer_->SetCatchEventCallback(
+                AceAsyncEvent<void(const SwipeEventInfo&)>::Create(catchEventId, context_), eventStage);
+        }
     }
     touchable_ = touchComponent->IsTouchable();
     isVisible_ = touchComponent->IsVisible();
@@ -65,7 +82,6 @@ void RenderTouchListener::Update(const RefPtr<Component>& component)
         rawRecognizer_->SetCatchEventCallback(event, EventStage::CAPTURE, EventType::TOUCH_UP);
         rawRecognizer_->SetCatchEventCallback(event, EventStage::CAPTURE, EventType::TOUCH_MOVE);
     }
-    SetOnSwipe(AceAsyncEvent<void(const SwipeEventInfo&)>::Create(touchComponent->GetOnSwipeId(), context_));
 }
 
 void RenderTouchListener::OnTouchTestHit(

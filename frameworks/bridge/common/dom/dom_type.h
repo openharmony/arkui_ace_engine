@@ -799,7 +799,9 @@ ACE_EXPORT extern const char DOM_DRAG_LEAVE[];
 ACE_EXPORT extern const char DOM_DRAG_DROP[];
 ACE_EXPORT extern const char DOM_CATCH_BUBBLE_CLICK[];
 ACE_EXPORT extern const char DOM_DOUBLE_CLICK[];
+ACE_EXPORT extern const char DOM_CATCH_BUBBLE_DOUBLE_CLICK[];
 ACE_EXPORT extern const char DOM_LONG_PRESS[];
+ACE_EXPORT extern const char DOM_CATCH_BUBBLE_LONG_PRESS[];
 ACE_EXPORT extern const char DOM_PINCH_START[];
 ACE_EXPORT extern const char DOM_PINCH_UPDATE[];
 ACE_EXPORT extern const char DOM_PINCH_END[];
@@ -815,6 +817,7 @@ ACE_EXPORT extern const char DOM_HIDE[];
 ACE_EXPORT extern const char DOM_MOUSE[];
 ACE_EXPORT extern const char DOM_HOVER[];
 ACE_EXPORT extern const char DOM_SWIPE[];
+ACE_EXPORT extern const char DOM_CATCH_BUBBLE_SWIPE[];
 ACE_EXPORT extern const char DOM_ROTATION[];
 ACE_EXPORT extern const char DOM_ANIMATION_FINISH[];
 

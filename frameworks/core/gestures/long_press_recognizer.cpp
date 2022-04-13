@@ -84,7 +84,12 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         AddToReferee(event.id, AceType::Claim(this));
         if (pointsCount_ == fingers_) {
             state_ = DetectState::DETECTING;
-            DeadlineTimer(curDuration);
+
+            if (useCatchMode_) {
+                DeadlineTimer(curDuration, false);
+            } else {
+                DeadlineTimer(curDuration, true);
+            }
         }
     } else {
         LOGW("the state is not ready for detecting long press gesture, state id %{public}d, id is %{public}d",
@@ -168,17 +173,21 @@ void LongPressRecognizer::HandleOverdueDeadline()
     }
 }
 
-void LongPressRecognizer::DeadlineTimer(int32_t time)
+void LongPressRecognizer::DeadlineTimer(int32_t time, bool isAccept)
 {
     auto context = context_.Upgrade();
     if (!context) {
         LOGI("fail to detect long press gesture due to context is nullptr");
         return;
     }
-    auto&& callback = [weakPtr = AceType::WeakClaim(this)]() {
+    auto&& callback = [weakPtr = AceType::WeakClaim(this), isAccept]() {
         auto refPtr = weakPtr.Upgrade();
         if (refPtr) {
-            refPtr->HandleOverdueDeadline();
+            if (!isAccept) {
+                refPtr->HandleOverdueDeadline();
+            } else {
+                refPtr->OnAccepted();
+            }
         } else {
             LOGI("fail to handle overdue deadline due to context is nullptr");
         }
