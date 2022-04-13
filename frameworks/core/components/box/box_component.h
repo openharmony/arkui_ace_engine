@@ -324,6 +324,16 @@ public:
         onLongPressId_ = onLongPressId;
     }
 
+    bool HasBackgroundColor() const
+    {
+        return hasBackgroundColor_;
+    }
+
+    void SetHasBackgroundColor(bool hasBackgroundColor)
+    {
+        hasBackgroundColor_ = hasBackgroundColor;
+    }
+
 private:
     RefPtr<Decoration> backDecoration_;
     RefPtr<Decoration> frontDecoration_;
@@ -352,6 +362,7 @@ private:
     TextDirection inspectorDirection_ { TextDirection::LTR };
     RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_ = nullptr;
     EventMarker remoteMessageId_;
+    bool hasBackgroundColor_;
 };
 
 } // namespace OHOS::Ace
