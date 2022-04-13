@@ -38,6 +38,10 @@ constexpr Dimension PRESS_BORDER_RADIUS = 4.0_vp;
 
 constexpr uint32_t PRESS_COLOR = 0x19000000;
 
+constexpr Dimension FOCUS_BODER_PADING = 2.0_vp;
+
+constexpr uint32_t FOCUS_BODER_COLOR = 0xFF0A59F7;
+
 enum class OperationEvent {
     RATING_TOUCH_EVENT = 0,
     RATING_KEY_EVENT,

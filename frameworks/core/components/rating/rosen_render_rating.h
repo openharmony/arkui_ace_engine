@@ -30,6 +30,7 @@ public:
 
     void Paint(RenderContext& context, const Offset& offset) override;
     void PaintFocus(const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context) override;
+    void PaintFocusForTABLET(const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context);
     void PaintPress(
         const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context);
     void PaintRatingBar(RenderContext& context, SkCanvas* canvas);
