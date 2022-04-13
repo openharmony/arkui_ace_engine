@@ -1005,29 +1005,23 @@ void RosenRenderBox::SyncDecorationToRSNode()
         return;
     }
     dipScale_ = context->GetDipScale();
-    // get raw value from decoration
-    uint32_t borderColor = 0; // transparent
-    uint32_t borderStyle = 0;
-    float borderWidth = 0;
-    float cornerRadius = 0;
     float shadowRadius = 0;
-    uint32_t backgroundColor = 0; // transparent
-    uint32_t foregroundColor = 0; // transparent
+    Border border;
+    Rosen::Vector4f cornerRadius;
     std::shared_ptr<Rosen::RSFilter> backFilter = nullptr;
     std::shared_ptr<Rosen::RSFilter> filter = nullptr;
     if (backDecoration_) {
-        // shape
         if (backDecoration_->GetBorder().HasValue()) {
-            borderColor = backDecoration_->GetBorder().Top().GetColor().GetValue();
-            borderWidth = backDecoration_->GetBorder().Top().GetWidth().ConvertToPx(dipScale_);
-            borderStyle = static_cast<uint32_t>(backDecoration_->GetBorder().Top().GetBorderStyle());
+            border = backDecoration_->GetBorder();
         }
         if (backDecoration_->GetBorder().HasRadius()) {
-            cornerRadius = backDecoration_->GetBorder().TopLeftRadius().GetX().ConvertToPx(dipScale_);
+            cornerRadius.SetValues(
+                backDecoration_->GetBorder().TopLeftRadius().GetX().ConvertToPx(dipScale_),
+                backDecoration_->GetBorder().TopRightRadius().GetX().ConvertToPx(dipScale_),
+                backDecoration_->GetBorder().BottomRightRadius().GetX().ConvertToPx(dipScale_),
+                backDecoration_->GetBorder().BottomLeftRadius().GetX().ConvertToPx(dipScale_)
+            );
         }
-        // background color
-        backgroundColor = backDecoration_->GetBackgroundColor().GetValue();
-        // shadow
         if (!backDecoration_->GetShadows().empty()) {
             shadowRadius = backDecoration_->GetShadows().front().GetBlurRadius();
             shadowRadius = RosenDecorationPainter::ConvertRadiusToSigma(shadowRadius);
@@ -1042,15 +1036,16 @@ void RosenRenderBox::SyncDecorationToRSNode()
         }
     }
     if (frontDecoration_) {
-        // shape
         if (frontDecoration_->GetBorder().HasValue()) {
-            borderColor = frontDecoration_->GetBorder().Top().GetColor().GetValue();
-            borderWidth = frontDecoration_->GetBorder().Top().GetWidth().ConvertToPx(dipScale_);
-            borderStyle = static_cast<uint32_t>(frontDecoration_->GetBorder().Top().GetBorderStyle());
+            border = frontDecoration_->GetBorder();
         }
-        foregroundColor = frontDecoration_->GetBackgroundColor().GetValue();
         if (frontDecoration_->GetBorder().HasRadius()) {
-            cornerRadius = frontDecoration_->GetBorder().TopLeftRadius().GetX().ConvertToPx(dipScale_);
+            cornerRadius.SetValues(
+                frontDecoration_->GetBorder().TopLeftRadius().GetX().ConvertToPx(dipScale_),
+                frontDecoration_->GetBorder().TopRightRadius().GetX().ConvertToPx(dipScale_),
+                frontDecoration_->GetBorder().BottomRightRadius().GetX().ConvertToPx(dipScale_),
+                frontDecoration_->GetBorder().BottomLeftRadius().GetX().ConvertToPx(dipScale_)
+            );
         }
         if (frontDecoration_->GetBlurRadius().IsValid()) {
             float radius = frontDecoration_->GetBlurRadius().ConvertToPx(dipScale_);
@@ -1058,13 +1053,10 @@ void RosenRenderBox::SyncDecorationToRSNode()
             filter = Rosen::RSFilter::CreateBlurFilter(frontblurRadius, frontblurRadius);
         }
     }
-    // set value to rsnode
-    rsNode->SetBorderColor(borderColor);
-    rsNode->SetBorderWidth(borderWidth);
-    rsNode->SetBorderStyle(borderStyle);
+    RosenDecorationPainter::PaintBorder(rsNode, border, dipScale_);
     rsNode->SetCornerRadius(cornerRadius);
-    rsNode->SetBackgroundColor(backgroundColor);
-    rsNode->SetForegroundColor(foregroundColor);
+    rsNode->SetBackgroundColor(backDecoration_ ? backDecoration_->GetBackgroundColor().GetValue() : 0);
+    rsNode->SetForegroundColor(frontDecoration_ ? frontDecoration_->GetBackgroundColor().GetValue() : 0);
     rsNode->SetBackgroundFilter(backFilter);
     rsNode->SetFilter(filter);
     rsNode->SetShadowRadius(shadowRadius);
