@@ -44,6 +44,16 @@ void RosenRenderRating::Paint(RenderContext& context, const Offset& offset)
         double focusRadius = singleWidth_ - imageVerticalOffset * 2;
         RequestFocusAnimation(animationOffset + GetGlobalOffset(), Size(focusRadius, focusRadius), focusRadius);
     }
+
+    if ((SystemProperties::GetDeviceType() == DeviceType::TABLET || SystemProperties::GetDeviceType() ==
+    DeviceType::PHONE) && !isIndicator_ && operationEvent_ == OperationEvent::RATING_KEY_EVENT) {
+        Offset animationOffset = starOffset + Offset(offsetDeltaX, offsetDeltaY);
+        PaintFocusForTABLET(animationOffset, focusBorderRadius_.Value(),
+            Size(singleWidth_, ratingSize_.Height()), context);
+        double focusRadius = singleWidth_;
+        RequestFocusAnimation(animationOffset + GetGlobalOffset(), Size(focusRadius, focusRadius), focusRadius);
+    }
+
     if ((IsPhone() || IsTablet()) && !isIndicator_) {
         PaintHoverRect(canvas);
     }
@@ -154,6 +164,24 @@ void RosenRenderRating::PaintFocus(
     paint.setColor(RATING_FOCUS_BOARD_COLOR);
     paint.setStyle(SkPaint::Style::kFill_Style);
     paint.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kSolid_SkBlurStyle, 1.0));
+    rRect.setRectXY(SkRect::MakeWH(boardSize.Width(), boardSize.Height()), rRectRadius, rRectRadius);
+    rRect.offset(offset.GetX(), offset.GetY());
+    canvas->drawRRect(rRect, paint);
+}
+
+void RosenRenderRating::PaintFocusForTABLET(
+    const Offset& offset, double rRectRadius, const Size& boardSize, RenderContext& context)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    SkPaint paint;
+    SkRRect rRect;
+    paint.setColor(FOCUS_BODER_COLOR);
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setStrokeWidth(NormalizeToPx(FOCUS_BODER_PADING));
     rRect.setRectXY(SkRect::MakeWH(boardSize.Width(), boardSize.Height()), rRectRadius, rRectRadius);
     rRect.offset(offset.GetX(), offset.GetY());
     canvas->drawRRect(rRect, paint);
