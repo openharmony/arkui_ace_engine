@@ -387,7 +387,8 @@ void RenderSwiper::PerformLayout()
                               : -swiperHeight_ + prevMargin_ + nextMargin_;
     }
     nextItemOffset_ = -prevItemOffset_;
-    UpdateChildPosition(std::fmod(scrollOffset_, nextItemOffset_), currentIndex_, true);
+    auto childPosition = NearZero(nextItemOffset_) ? nextItemOffset_ : std::fmod(scrollOffset_, nextItemOffset_);
+    UpdateChildPosition(childPosition, currentIndex_, true);
     quickTrunItem_ = false;
 
     // layout indicator, indicator style in tv is different.
