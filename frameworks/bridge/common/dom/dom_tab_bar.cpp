@@ -38,6 +38,7 @@ void DOMTabBar::InitializeStyle()
     }
     if (boxComponent_) {
         boxComponent_->SetColor(theme->GetBackgroundColor());
+        boxComponent_->SetHasBackgroundColor(true);
     }
     auto paddingDimension = theme->GetPadding();
     padding_ = Edge(paddingDimension.Value(), 0.0, paddingDimension.Value(), 0.0, paddingDimension.Unit());
