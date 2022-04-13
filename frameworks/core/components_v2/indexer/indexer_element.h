@@ -31,6 +31,14 @@ public:
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
     bool IndexMoveUp();
     bool IndexMoveDown();
+    bool CanUpdate(const RefPtr<Component>& newComponent) override
+    {
+        auto context = context_.Upgrade();
+        if (context && context->GetIsDeclarative()) {
+            return false;
+        }
+        return true;
+    }
 
 private:
     WeakPtr<RenderIndexerItem> prevFocusedItem_;

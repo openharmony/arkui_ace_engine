@@ -177,6 +177,7 @@ protected:
     bool isWatch_ = false;
     bool isTv_ = false;
     bool isPhone_ = false;
+    bool isTablet_ = false;
     bool widthDefined_ = false;
     bool heightDefined_ = false;
     bool progressDisplay_ = false;
