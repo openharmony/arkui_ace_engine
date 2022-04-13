@@ -293,11 +293,15 @@ public:
         auto viewStack = ViewStackProcessor::GetInstance();
         auto multiComposed = AceType::MakeRefPtr<MultiComposedComponent>(key, "LazyForEach");
         viewStack->Push(multiComposed);
-
+        if (parentView_) {
+            parentView_->MarkLazyForEachProcess(key);
+        }
         viewStack->PushKey(key);
         itemGenFunc_->Call(JSRef<JSObject>(), 1, &result);
         viewStack->PopKey();
-
+        if (parentView_) {
+            parentView_->ResetLazyForEachProcess();
+        }
         auto component = viewStack->Finish();
         ACE_DCHECK(multiComposed == component);
 

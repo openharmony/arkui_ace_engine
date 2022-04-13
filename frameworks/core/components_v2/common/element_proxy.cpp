@@ -162,7 +162,16 @@ private:
 class LazyForEachElementProxy : public ElementProxy, public DataChangeListener {
 public:
     explicit LazyForEachElementProxy(const WeakPtr<ElementProxyHost>& host) : ElementProxy(host) {}
-    ~LazyForEachElementProxy() override = default;
+    ~LazyForEachElementProxy() override
+    {
+        for (auto&& item : children_) {
+            auto viewId = item.second->GetId();
+            if (lazyForEachComponent_) {
+                lazyForEachComponent_->ReleaseChildGroupByComposedId(viewId);
+            }
+        }
+        children_.clear();
+    }
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
