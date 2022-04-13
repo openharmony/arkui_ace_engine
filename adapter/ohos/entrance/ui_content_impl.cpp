@@ -57,6 +57,7 @@ const std::string START_PARAMS_KEY = "__startParams";
 } // namespace
 
 static std::atomic<int32_t> gInstanceId = 0;
+static std::atomic<int32_t> gSubWindowInstanceId = 100000;
 static std::atomic<int32_t> gSubInstanceId = 1000000;
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
 const int32_t REQUEST_CODE = -1;
@@ -100,6 +101,12 @@ extern "C" ACE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtim
 {
     LOGI("Ace lib loaded, CreateUIContent.");
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime);
+}
+
+extern "C" ACE_EXPORT void* OHOS_ACE_CreateSubWindowUIContent(void* ability)
+{
+    LOGI("Ace lib loaded, Create SubWindowUIContent.");
+    return new UIContentImpl(reinterpret_cast<OHOS::AppExecFwk::Ability*>(ability));
 }
 
 class OccupiedAreaChangeListener : public OHOS::Rosen::IOccupiedAreaChangeListener {
@@ -186,8 +193,18 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     auto object = AbilityRuntime::ConvertNativeValueTo<NativeObject>(ref->Get());
     auto weak = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(object->GetNativePointer());
     context_ = *weak;
+    LOGI("Create UIContentImpl successfully.");
+}
 
-    LOGI("Create UIContentImpl.");
+UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
+{
+    if (ability == nullptr) {
+        LOGE("ability is nullptr");
+        return;
+    }
+    auto weak = static_cast<std::weak_ptr<AbilityRuntime::Context>>(ability->GetAbilityContext());
+    context_ = weak;
+    LOGI("Create UIContentImpl successfully.");
 }
 
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
@@ -384,7 +401,11 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     auto pluginUtils = std::make_shared<PluginUtilsImpl>();
     PluginManager::GetInstance().SetAceAbility(nullptr, pluginUtils);
     // create container
-    instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
+    if (runtime_) {
+        instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
+    } else {
+        instanceId_ = gSubWindowInstanceId.fetch_add(1, std::memory_order_relaxed);
+    }
     auto container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
         context_, info, std::make_unique<ContentEventCallback>([context = context_] {
             auto sharedContext = context.lock();
@@ -420,8 +441,12 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
-    container->GetSettings().SetUsingSharedRuntime(true);
-    container->SetSharedRuntime(runtime_);
+    if (runtime_) {
+        container->GetSettings().SetUsingSharedRuntime(true);
+        container->SetSharedRuntime(runtime_);
+    } else {
+        container->GetSettings().SetUsingSharedRuntime(false);
+    }
     container->SetPageProfile(pageProfile);
     container->Initialize();
     ContainerScope scope(instanceId_);
@@ -475,7 +500,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     // set view
     Platform::AceContainer::SetView(flutterAceView, density, 0, 0, window_->GetWindowId(), callback);
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
-    auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
     // Set sdk version in module json mode
     if (isModelJson) {
         auto pipeline = container->GetPipelineContext();
@@ -484,12 +508,15 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             pipeline->SetMinPlatformVersion(appInfo->minCompatibleVersionCode);
         }
     }
-    if (!storage) {
-        container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
-    } else {
-        LOGI("SetLocalStorage %{public}d", storage->TypeOf());
-        container->SetLocalStorage(
-            nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
+    if (runtime_) {
+        auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
+        if (!storage) {
+            container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
+        } else {
+            LOGI("SetLocalStorage %{public}d", storage->TypeOf());
+            container->SetLocalStorage(
+                nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
+        }
     }
     InitWindowCallback(info);
 }
