@@ -189,7 +189,9 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     remoteMessageEvent_ = AceAsyncEvent<void(const std::shared_ptr<ClickInfo>&)>::Create(
         swiper->GetRemoteMessageEventId(), context_);
     RegisterChangeEndListener(COMPONENT_CHANGE_END_LISTENER_KEY, swiper->GetChangeEndListener());
-    if (swiper && swiper_ && (*swiper == *swiper_) && currentIndex_ == static_cast<int32_t>(swiper->GetIndex())) {
+    auto lazyComponent = swiper->GetLazyForEachComponent();
+    if (swiper && swiper_ && (*swiper == *swiper_) &&
+        currentIndex_ == static_cast<int32_t>(swiper->GetIndex()) && lazyComponent) {
         LOGI("swiper not changed");
         swiper_ = swiper;
         return;
@@ -254,7 +256,6 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     showIndicator_ = swiper->IsShowIndicator();
 
     lazyLoadCacheSize_ = swiper->GetCachedSize() * 2 + swiper->GetDisplayCount();
-    auto lazyComponent = swiper->GetLazyForEachComponent();
     UpdateItemCount(lazyComponent ? static_cast<int32_t>(lazyComponent->TotalCount()) : itemCount_);
     ClearItems(lazyComponent, static_cast<int32_t>(swiper->GetIndex()));
 
