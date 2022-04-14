@@ -50,6 +50,8 @@ constexpr uint8_t TRANSLATE_RATIO = 10;
 constexpr int32_t COMPONENT_CHANGE_END_LISTENER_KEY = 1001;
 constexpr double MIN_SCROLL_OFFSET = 0.5;
 constexpr int32_t DEFAULT_SHOWING_COUNT = 1;
+constexpr int32_t SIZE_RATIO_NORMAL = 2;
+constexpr int32_t SIZE_RATIO_LARGE = 4;
 
 // for watch rotation const param
 constexpr double ROTATION_SENSITIVITY_NORMAL = 1.4;
@@ -1073,7 +1075,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
         end = 0.0;
         needRestore = true;
     }
-    LOGD("translate animation, start=%{public}f, end=%{public}f", start, end);
+    LOGI("translate animation, start=%{public}f, end=%{public}f", start, end);
     translate_ = AceType::MakeRefPtr<CurveAnimation<double>>(start, end, curve_);
     auto weak = AceType::WeakClaim(this);
     translate_->AddListener(Animation<double>::ValueCallback([weak, fromIndex, toIndex, start, end](double value) {
@@ -2045,18 +2047,21 @@ void RenderSwiper::UpdateIndicatorItem(SwiperIndicatorData& indicatorData)
                                        (indicator_->GetHoverSize() - indicator_->GetPressSize()) * zoomDotValue_) / 2.0;
         }
         if (axis_ == Axis::HORIZONTAL) {
-            indicatorData.indicatorItemData[i].height = itemRadius * 2;
-            indicatorData.indicatorItemData[i].width = (i == targetIndex ? itemRadius * 4 : itemRadius * 2);
+            indicatorData.indicatorItemData[i].height = itemRadius * SIZE_RATIO_NORMAL;
+            indicatorData.indicatorItemData[i].width =
+                (i == targetIndex ? itemRadius * SIZE_RATIO_LARGE : itemRadius * SIZE_RATIO_NORMAL);
         } else {
-            indicatorData.indicatorItemData[i].width = itemRadius * 2;
-            indicatorData.indicatorItemData[i].height = (i == targetIndex ? itemRadius * 4 : itemRadius * 2);
+            indicatorData.indicatorItemData[i].width = itemRadius * SIZE_RATIO_NORMAL;
+            indicatorData.indicatorItemData[i].height =
+                (i == targetIndex ? itemRadius * SIZE_RATIO_LARGE : itemRadius * SIZE_RATIO_NORMAL);
         }
         indicatorData.indicatorItemData[i].radius = itemRadius;
 
         centerOffset += paddingStartOffset;
         indicatorData.indicatorItemData[i].center = centerOffset;
         indicatorData.indicatorItemData[i].position = centerOffset -
-            Offset(indicatorData.indicatorItemData[i].width / 2, indicatorData.indicatorItemData[i].height / 2);
+            Offset(indicatorData.indicatorItemData[i].width / SIZE_RATIO_NORMAL,
+                indicatorData.indicatorItemData[i].height / SIZE_RATIO_NORMAL);
         centerOffset += paddingEndOffset;
     }
 }
@@ -3024,6 +3029,10 @@ void RenderSwiper::LoadLazyItems(bool swipeToNext)
 {
     if (!buildChildByIndex_) {
         // not lazy foreach case.
+        return;
+    }
+    if (static_cast<int32_t>(items_.size()) == itemCount_) {
+        // all item in caches
         return;
     }
     if (swipeToNext) {
