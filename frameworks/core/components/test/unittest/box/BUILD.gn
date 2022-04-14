@@ -154,7 +154,8 @@ group("unittest") {
     #":RenderBoxPercentTest",
     ":RenderBoxTest",
   ]
-  deps += [ ":MouseHoverTest" ]
+
+  #deps += [ ":MouseHoverTest" ]
 
   #deps += [ ":MouseHoverAnimationTest" ]
 
