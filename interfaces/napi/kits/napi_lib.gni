@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,27 +13,24 @@
 
 import("//build/ohos.gni")
 import("//foundation/ace/ace_engine/ace_config.gni")
-import("napi_lib.gni")
 
-common_targets = []
-foreach(module, common_napi_libs) {
-  if (use_mac) {
-    ace_napi_lib(module) {
-      platform = "mac"
-    }
-  } else if (use_mingw_win) {
-    ace_napi_lib(module) {
-      platform = "windows"
-    }
-  } else if (!is_cross_platform_build) {
-    ace_napi_lib(module) {
-      platform = "ohos"
-    }
+common_napi_libs = [
+  "configuration",
+  "device",
+  "grid",
+  "mediaquery",
+  "prompt",
+  "router",
+]
+
+template("ace_napi_lib") {
+  forward_variables_from(invoker, "*")
+
+  ohos_shared_library(target_name) {
+    deps = [ "$ace_root/interfaces/napi/kits/$target_name:${target_name}_static_${platform}" ]
+
+    relative_install_dir = "module"
+    part_name = ace_engine_part
+    subsystem_name = "ace"
   }
-  common_targets += [ ":$module" ]
-}
-
-group("napi_group") {
-  deps = common_targets
-  deps += [ "$ace_root/interfaces/napi/kits/plugincomponent:plugincomponent" ]
 }

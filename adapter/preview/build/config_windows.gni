@@ -80,3 +80,6 @@ platform_deps = [
   "//foundation/ace/ace_engine/adapter/preview/inspector:ace_inspector_windows",
   "//foundation/ace/ace_engine/adapter/preview/osal:ace_osal_windows",
 ]
+
+libace_target =
+    "//foundation/ace/ace_engine/adapter/preview/build:libace_engine_windows"
