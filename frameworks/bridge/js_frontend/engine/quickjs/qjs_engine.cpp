@@ -79,6 +79,7 @@ constexpr int32_t MAX_READ_TEXT_LENGTH = 4096;
 const std::regex URI_PARTTEN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
 
 static int32_t globalNodeId = 100000;
+std::map<const std::string, std::string> dataMap_;
 
 int32_t CallEvalBuf(
     JSContext* ctx, const char* buf, size_t bufLen, const char* filename, int32_t evalFlags, int32_t instanceId)
@@ -2501,6 +2502,58 @@ JSValue JsPerfPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCon
     return retString;
 }
 
+JSValue AppClearData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    if ((argv == nullptr) || (argc == 0)) {
+        if (dataMap_.size() > 0) {
+            dataMap_.clear();
+            return JS_TRUE;
+        }
+    }
+    if (dataMap_.count(ScopedString::Stringify(ctx, argv[0])) == 1) {
+        dataMap_.erase(ScopedString::Stringify(ctx, argv[0]));
+        return JS_TRUE;
+    }
+    return JS_FALSE;
+}
+
+JSValue AppSetData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    if ((argv == nullptr) || (argc != 2)) {
+        return JS_EXCEPTION;
+    }
+    std::string key = ScopedString::Stringify(ctx, argv[0]);
+    std::string mapValue =  ScopedString::Stringify(ctx, argv[1]);
+    dataMap_[key] = mapValue;
+    return JS_TRUE;
+}
+
+JSValue AppGetData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    if ((argv == nullptr) || (argc == 0)) {
+        return JS_NULL;
+    }
+    std::string key = ScopedString::Stringify(ctx, argv[0]);
+    if (dataMap_.count(key) == 1) {
+        std::string mapValue = dataMap_[key];
+        return QJSUtils::ParseJSON(ctx, mapValue.c_str(), mapValue.length());
+    }
+    return JS_NULL;
+}
+
+JSValue AppSetDataImage(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto page = GetStagingPage(ctx);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return JS_EXCEPTION;
+    }
+    if ((argv == nullptr) || (argc != 3)) {
+        return JS_EXCEPTION;
+    }
+    return JS_NULL;
+}
+
 JSValue JsPerfSleep(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
     int32_t valInt = 0;
@@ -2930,9 +2983,31 @@ JSValue QjsEngineInstance::FireJsEvent(const std::string& param)
         JS_FreeValue(ctx, globalObj);
         return JS_UNDEFINED;
     }
+    JSValue jsValue = QJSUtils::ParseJSON(ctx, param.c_str(), param.size(), nullptr);
+    if (JS_IsArray(ctx, jsValue)) {
+        JSValue itemVal = JS_GetPropertyUint32(ctx, jsValue, 0);
+        if (JS_IsObject(itemVal)) {
+            JSValue args = JS_GetPropertyStr(ctx, itemVal, "args");
+            if (JS_IsArray(ctx, args)) {
+                JSValue stdDrage = JS_GetPropertyUint32(ctx, args, 1);
+                if (IsDragEvent(ScopedString::Stringify(ctx, stdDrage))) {
+                    JSValue arg2 = JS_GetPropertyUint32(ctx, args, 2);
+                    if (JS_IsObject(arg2)) {
+                        JSValue arg1 = JS_NewObject(ctx);
+                        JS_SetPropertyStr(ctx, arg1, "clearData", JS_NewCFunction(ctx, AppClearData, "clearData", 1));
+                        JS_SetPropertyStr(ctx, arg1, "getData", JS_NewCFunction(ctx, AppGetData, "getData", 1));
+                        JS_SetPropertyStr(ctx, arg1, "setData", JS_NewCFunction(ctx, AppSetData, "setData", 2));
+                        JS_SetPropertyStr(
+                            ctx, arg1, "setDragImage", JS_NewCFunction(ctx, AppSetDataImage, "setDragImage", 3));
+                        JS_SetPropertyStr(ctx, arg2, "dataTransfer", arg1);
+                    }
+                }
+            }
+        }
+    }
     JSValueConst argv[] = {
         QJSUtils::NewString(ctx, std::to_string(runningPage_->GetPageId()).c_str()),
-        QJSUtils::ParseJSON(ctx, param.c_str(), param.size(), nullptr),
+        jsValue,
     };
 
     JSValue retVal = JS_Call(ctx, callJsFunc, globalObj, countof(argv), argv);
@@ -2942,6 +3017,12 @@ JSValue QjsEngineInstance::FireJsEvent(const std::string& param)
 
     // It is up to the caller to check this value. No exception checks here.
     return retVal;
+}
+
+bool QjsEngineInstance::IsDragEvent(const std::string& param)
+{
+    std::string::size_type idx = param.find("drag");
+    return !(idx == std::string::npos);
 }
 
 void QjsEngineInstance::CallJs(const std::string& callbackId, const std::string& args, bool keepAlive, bool isGlobal)

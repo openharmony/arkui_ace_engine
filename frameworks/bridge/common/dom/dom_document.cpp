@@ -112,6 +112,9 @@
 #endif
 
 namespace OHOS::Ace::Framework {
+RefPtr<PixelMap> DOMDocument::pixelMap_;
+int32_t DOMDocument::pixelMapOffsetX_ = 0;
+int32_t DOMDocument::pixelMapOffsetY_ = 0;
 namespace {
 
 // avoid same with root node id

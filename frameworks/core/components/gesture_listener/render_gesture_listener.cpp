@@ -20,6 +20,7 @@
 #include "core/components/root/render_root.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/pipeline_context.h"
+#include "frameworks/bridge/common/dom/dom_document.h"
 
 namespace OHOS::Ace {
 
@@ -31,6 +32,104 @@ constexpr double DEFAULT_PINCH_DISTANCE = 1.0;
 constexpr int32_t BUBBLE_MODE_VERSION = 6;
 
 }
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+void RenderGestureListener::SetDragCallBack(RefPtr<FreeDragRecognizer>& recognizer,
+    RefPtr<GestureListenerComponent> component)
+{
+    auto& onDragStartId = component->GetOnFreeDragStartId();
+    auto& onDragUpdateId = component->GetOnFreeDragUpdateId();
+    auto& onDragEndId = component->GetOnFreeDragEndId();
+    auto& onDragCancelId = component->GetOnFreeDragCancelId();
+    GestureItemInfo dragInfo;
+    OnGestureFunc onDragStart = component->GetOnDragStartId();
+
+    if (!(onDragStartId.IsEmpty() && onDragUpdateId.IsEmpty() && onDragEndId.IsEmpty() &&
+        onDragCancelId.IsEmpty())) {
+        recognizer = AceType::MakeRefPtr<FreeDragRecognizer>();
+        auto pipelineContext = context_.Upgrade();
+        if (!pipelineContext) {
+            LOGE("Context is null.");
+            return;
+        }
+        auto funcStart = AceAsyncEvent<void(const DragStartInfo&)>::Create(onDragStartId, context_);
+        auto funcDragStart = [pipelineContext, weak = AceType::WeakClaim<>(this), funcStart, onDragStart]
+            (const DragStartInfo& info)->void {
+            if (funcStart) {
+                funcStart(info);
+            }
+            GestureItemInfo dragInfo;
+            if (onDragStart) {
+                dragInfo = onDragStart();
+            }
+            if (dragInfo.pixelMap) {
+                auto renderNode = weak.Upgrade();
+                if (!renderNode->dragWindow_) {
+                    auto rect = pipelineContext->GetCurrentWindowRect();
+                    renderNode->dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
+                        static_cast<int32_t>(info.GetGlobalLocation().GetX()) + rect.Left(),
+                        static_cast<int32_t>(info.GetGlobalLocation().GetY()) + rect.Top(),
+                        dragInfo.pixelMap->GetWidth(), dragInfo.pixelMap->GetHeight());
+                    renderNode->dragWindow_->SetOffset(rect.Left(), rect.Top());
+                    renderNode->dragWindow_->DrawPixelMap(dragInfo.pixelMap);
+                }
+            }
+        };
+        auto funcUpdate = AceAsyncEvent<void(const DragUpdateInfo&)>::Create(onDragUpdateId, context_);
+        auto funcDragUpdate = [pipelineContext, weak = AceType::WeakClaim<>(this), funcUpdate, onDragStart]
+            (const DragUpdateInfo& info)->void {
+            if (funcUpdate) {
+                funcUpdate(info);
+            }
+            GestureItemInfo dragInfo;
+            if (onDragStart) {
+                dragInfo = onDragStart();
+            }
+            if (dragInfo.pixelMap) {
+                auto renderNode = weak.Upgrade();
+                if (!renderNode->dragWindow_) {
+                    auto rect = pipelineContext->GetCurrentWindowRect();
+                    renderNode->dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
+                        static_cast<int32_t>(info.GetGlobalLocation().GetX()) + rect.Left(),
+                        static_cast<int32_t>(info.GetGlobalLocation().GetY()) + rect.Top(),
+                        dragInfo.pixelMap->GetWidth(), dragInfo.pixelMap->GetHeight());
+                    renderNode->dragWindow_->SetOffset(rect.Left(), rect.Top());
+                    renderNode->dragWindow_->DrawPixelMap(dragInfo.pixelMap);
+                } else {
+                    int32_t x = static_cast<int32_t>(info.GetGlobalLocation().GetX());
+                    int32_t y = static_cast<int32_t>(info.GetGlobalLocation().GetY());
+                    int32_t offsetX = x + dragInfo.pixelMap->GetWidth() / 2
+                        - dragInfo.offsetX;
+                    int32_t offsetY = y + dragInfo.pixelMap->GetHeight()
+                        - dragInfo.offsetY;
+                    renderNode->dragWindow_->MoveTo(offsetX, offsetY);
+                }
+            }
+        };
+        auto funcEnd = AceAsyncEvent<void(const DragEndInfo&)>::Create(onDragEndId, context_);
+        auto funcDragEnd = [pipelineContext, weak = AceType::WeakClaim<>(this), funcEnd, onDragStart]
+            (const DragEndInfo& info)->void {
+            if (funcEnd) {
+                funcEnd(info);
+            }
+            auto renderNode = weak.Upgrade();
+            GestureItemInfo dragInfo;
+            if (onDragStart) {
+                dragInfo = onDragStart();
+            }
+            if (dragInfo.pixelMap && renderNode->dragWindow_) {
+                if (renderNode->dragWindow_) {
+                    renderNode->dragWindow_->Destory();
+                    renderNode->dragWindow_ = nullptr;
+                }
+            }
+        };
+        recognizer->SetOnDragStart(funcDragStart);
+        recognizer->SetOnDragUpdate(funcDragUpdate);
+        recognizer->SetOnDragEnd(funcDragEnd);
+        recognizer->SetOnDragCancel(AceAsyncEvent<void()>::Create(onDragCancelId, context_));
+    }
+}
+#endif
 
 #define SET_DRAG_CALLBACK(recognizer, type, component)                                                                 \
     do {                                                                                                               \
@@ -74,7 +173,11 @@ void RenderGestureListener::Update(const RefPtr<Component>& component)
     isVisible_ = gestureComponent->IsVisible();
     responseRegion_ = gestureComponent->GetResponseRegion();
     isResponseRegion_ = gestureComponent->IsResponseRegion();
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    SetDragCallBack(freeDragRecognizer_, gestureComponent);
+#else
     SET_DRAG_CALLBACK(freeDragRecognizer_, FreeDrag, gestureComponent);
+#endif
     if (!freeDragRecognizer_) {
         // Horizontal and vertical gestures can only be enabled in the absence of free gesture.
         LOGD("No free drag, update corresponding horizontal and vertical drag!");
