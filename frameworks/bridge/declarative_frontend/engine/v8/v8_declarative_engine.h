@@ -354,6 +354,7 @@ private:
     void TimerCallJs(const std::string& callbackId, bool isInterval);
 
     void InitXComponent();
+    bool InitXComponent(const std::string& componentId);
 
     RefPtr<V8DeclarativeEngineInstance> engineInstance_;
 

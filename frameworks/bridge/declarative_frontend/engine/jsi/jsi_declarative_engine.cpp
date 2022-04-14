@@ -997,12 +997,22 @@ void JsiDeclarativeEngine::InitXComponent()
     nativeXComponent_ = new OH_NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
 }
 
+bool JsiDeclarativeEngine::InitXComponent(const std::string& componentId)
+{
+    ACE_DCHECK(engineInstance_);
+    return OHOS::Ace::Framework::XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(
+        componentId, nativeXComponentImpl_, nativeXComponent_);
+}
+
 void JsiDeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
 {
     CHECK_RUN_ON(JS);
-    InitXComponent();
+    if (!InitXComponent(componentId)) {
+        LOGE("InitXComponent fail");
+        return;
+    };
     RefPtr<XComponentComponent> xcomponent;
-    OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponent(xcomponent);
+    OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId, xcomponent);
     if (!xcomponent) {
         LOGE("FireExternalEvent xcomponent is null.");
         return;

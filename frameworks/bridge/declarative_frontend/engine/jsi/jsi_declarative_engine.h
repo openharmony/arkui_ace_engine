@@ -280,6 +280,7 @@ private:
     void TimerCallJs(const std::string& callbackId) const;
 
     void InitXComponent();
+    bool InitXComponent(const std::string& componentId);
 
     void RegisterWorker();
     void RegisterInitWorkerFunc();

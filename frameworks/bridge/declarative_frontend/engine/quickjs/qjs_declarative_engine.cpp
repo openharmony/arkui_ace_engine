@@ -553,11 +553,15 @@ void QJSDeclarativeEngine::FireSyncEvent(const std::string& eventId, const std::
 
 void QJSDeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
 {
-    nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
-    nativeXComponent_ = new OH_NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
+    if (!OHOS::Ace::Framework::XComponentClient::GetInstance().
+        GetNativeXComponentFromXcomponentsMap(componentId, nativeXComponentImpl_,
+        nativeXComponent_)) {
+        LOGE("InitXComponent fail");
+        return;
+    }
 
     RefPtr<XComponentComponent> xcomponent;
-    OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponent(xcomponent);
+    OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId, xcomponent);
     if (!xcomponent) {
         LOGE("FireExternalEvent xcomponent is null.");
         return;
