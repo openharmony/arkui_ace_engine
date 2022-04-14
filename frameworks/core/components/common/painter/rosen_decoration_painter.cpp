@@ -720,10 +720,9 @@ void RosenDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* can
         LOGE("PaintDecoration failed.");
         return;
     }
-    uint32_t borderColor = 0; // transparent
-    uint32_t borderStyle = 0;
-    float borderWidth = 0;
-    float cornerRadius = 0;
+
+    Border borderFour;
+    Rosen::Vector4f cornerRadius;
     if (decoration_) {
         SkPaint paint;
 
@@ -734,18 +733,19 @@ void RosenDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* can
         Border border = decoration_->GetBorder();
         PaintColorAndImage(offset, canvas, paint, context);
         if (border.HasRadius()) {
-            cornerRadius = NormalizeToPx(border.TopLeftRadius().GetX());
+            cornerRadius.SetValues(
+                NormalizeToPx(border.TopLeftRadius().GetX()),
+                NormalizeToPx(border.TopRightRadius().GetX()),
+                NormalizeToPx(border.BottomRightRadius().GetX()),
+                NormalizeToPx(border.BottomLeftRadius().GetX())
+            );
         }
         if (border.HasValue()) {
-            borderColor = border.Top().GetColor().GetValue();
-            borderWidth = border.Top().GetWidth().ConvertToPx(dipScale_);
-            borderStyle = static_cast<uint32_t>(border.Top().GetBorderStyle());
+            borderFour = border;
         }
     }
+    PaintBorder(rsNode, borderFour, dipScale_);
     rsNode->SetCornerRadius(cornerRadius);
-    rsNode->SetBorderColor(borderColor);
-    rsNode->SetBorderWidth(borderWidth);
-    rsNode->SetBorderStyle(borderStyle);
 }
 
 void RosenDecorationPainter::PaintDecoration(
@@ -766,9 +766,7 @@ void RosenDecorationPainter::PaintDecoration(
         Border border = decoration_->GetBorder();
         PaintColorAndImage(offset, canvas, paint, context);
         if (border.HasValue()) {
-            rsNode->SetBorderColor(border.Top().GetColor().GetValue());
-            rsNode->SetBorderWidth(border.Top().GetWidth().ConvertToPx(dipScale_));
-            rsNode->SetBorderStyle(static_cast<uint32_t>(border.Top().GetBorderStyle()));
+            PaintBorder(rsNode, border, dipScale_);
 
             Gradient gradient = decoration_->GetGradientBorderImage();
             if (gradient.IsValid()) {
@@ -1544,6 +1542,26 @@ void RosenDecorationPainter::PaintBlur(RenderContext& context, const Dimension& 
     }
 }
 
+void RosenDecorationPainter::PaintBorder(std::shared_ptr<RSNode>& rsNode, Border& border, double dipScale)
+{
+    if (!rsNode) {
+        return;
+    }
+    AdjustBorderStyle(border);
+    rsNode->SetBorderColor(border.Left().GetColor().GetValue(),
+                           border.Top().GetColor().GetValue(),
+                           border.Right().GetColor().GetValue(),
+                           border.Bottom().GetColor().GetValue());
+    rsNode->SetBorderWidth(border.Left().GetWidth().ConvertToPx(dipScale),
+                           border.Top().GetWidth().ConvertToPx(dipScale),
+                           border.Right().GetWidth().ConvertToPx(dipScale),
+                           border.Bottom().GetWidth().ConvertToPx(dipScale));
+    rsNode->SetBorderStyle(static_cast<uint32_t>(border.Left().GetBorderStyle()),
+                           static_cast<uint32_t>(border.Top().GetBorderStyle()),
+                           static_cast<uint32_t>(border.Right().GetBorderStyle()),
+                           static_cast<uint32_t>(border.Bottom().GetBorderStyle()));
+}
+
 SkRRect RosenDecorationPainter::GetBoxOuterRRect(const Offset& offset)
 {
     SkRRect outerRRect;
@@ -2273,19 +2291,19 @@ bool RosenDecorationPainter::CheckBorderEdgeForRRect(const Border& border)
 void RosenDecorationPainter::AdjustBorderStyle(Border& border)
 {
     // if not set border style use default border style solid
-    if (border.Left().IsValid() && border.Left().GetBorderStyle() == BorderStyle::NONE) {
+    if (border.Left().GetBorderStyle() == BorderStyle::NONE) {
         border.SetLeftStyle(BorderStyle::SOLID);
     }
 
-    if (border.Top().IsValid() && border.Top().GetBorderStyle() == BorderStyle::NONE) {
+    if (border.Top().GetBorderStyle() == BorderStyle::NONE) {
         border.SetTopStyle(BorderStyle::SOLID);
     }
 
-    if (border.Right().IsValid() && border.Right().GetBorderStyle() == BorderStyle::NONE) {
+    if (border.Right().GetBorderStyle() == BorderStyle::NONE) {
         border.SetRightStyle(BorderStyle::SOLID);
     }
 
-    if (border.Bottom().IsValid() && border.Bottom().GetBorderStyle() == BorderStyle::NONE) {
+    if (border.Bottom().GetBorderStyle() == BorderStyle::NONE) {
         border.SetBottomStyle(BorderStyle::SOLID);
     }
 }

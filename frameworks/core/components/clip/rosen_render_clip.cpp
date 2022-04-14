@@ -57,7 +57,13 @@ void RosenRenderClip::SyncGeometryProperties()
         return;
     }
     double dipScale = context->GetDipScale();
-    rsNode->SetCornerRadius(topLeftRadius_.GetX().ConvertToPx(dipScale));
+    Rosen::Vector4f cornerRadius(
+        topLeftRadius_.GetX().ConvertToPx(dipScale),
+        topRightRadius_.GetX().ConvertToPx(dipScale),
+        bottomRightRadius_.GetX().ConvertToPx(dipScale),
+        bottomLeftRadius_.GetX().ConvertToPx(dipScale)
+    );
+    rsNode->SetCornerRadius(cornerRadius);
     rsNode->SetClipToBounds(true);
 
     Rect paintSize = GetTransitionPaintRect();
