@@ -381,6 +381,9 @@ bool FrontendDelegateImpl::OnStartContinuation()
             ret = delegate->onStartContinuationCallBack_();
         }
     }, TaskExecutor::TaskType::JS);
+    if (!ret) {
+        ret = FireSyncEvent("_root", std::string("\"onStartContinuation\","), std::string(""));
+    }
     return ret;
 }
 
@@ -392,6 +395,7 @@ void FrontendDelegateImpl::OnCompleteContinuation(int32_t code)
             delegate->onCompleteContinuationCallBack_(code);
         }
     }, TaskExecutor::TaskType::JS);
+    FireSyncEvent("_root", std::string("\"onCompleteContinuation\","), std::to_string(code));
 }
 
 void FrontendDelegateImpl::OnRemoteTerminated()
@@ -413,6 +417,9 @@ void FrontendDelegateImpl::OnSaveData(std::string& data)
             delegate->onSaveDataCallBack_(savedData);
         }
     }, TaskExecutor::TaskType::JS);
+    if (savedData.empty()) {
+        FireSyncEvent("_root", std::string("\"onSaveData\","), std::string(""), savedData);
+    }
     std::string pageUri = GetRunningPageUrl();
     data = std::string("{\"url\":\"").append(pageUri).append("\",\"__remoteData\":").append(savedData).append("}");
 }
@@ -426,6 +433,7 @@ bool FrontendDelegateImpl::OnRestoreData(const std::string& data)
             ret = delegate->onRestoreDataCallBack_(data);
         }
     }, TaskExecutor::TaskType::JS);
+    FireSyncEvent("_root", std::string("\"onSaveData\","), data);
     return ret;
 }
 
