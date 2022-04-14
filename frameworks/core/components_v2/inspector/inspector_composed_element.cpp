@@ -167,6 +167,14 @@ InspectorComposedElement::InspectorComposedElement(const ComposeId& id) : Compos
 
 InspectorComposedElement::~InspectorComposedElement()
 {
+    auto popupElemnt = GetPopupElement();
+    if (popupElemnt && popupElemnt->GetPopupComponent()) {
+        auto popupComponent = popupElemnt->GetPopupComponent();
+        if (popupComponent && popupComponent->GetPopupController()) {
+            popupComponent->GetPopupController()->CancelPopup();
+        }
+    }
+
     if (inspectorId_ == -1) {
         return;
     }
@@ -184,6 +192,21 @@ void InspectorComposedElement::OnInactive()
 void InspectorComposedElement::OnActive()
 {
     inspectorId_ = GetCurrentInspectorId();
+}
+
+RefPtr<PopupElementV2> InspectorComposedElement::GetPopupElement() const
+{
+    auto coverageElement = GetContentElement<ComponentGroupElement>(ComponentGroupElement::TypeId(), false);
+    RefPtr<PopupElementV2> popupElement = nullptr;
+    if (coverageElement) {
+        for (const auto& element : coverageElement->GetChildren()) {
+            if (AceType::DynamicCast<PopupElementV2>(element)) {
+                popupElement = AceType::DynamicCast<PopupElementV2>(element);
+            }
+        }
+    }
+
+    return popupElement;
 }
 
 RefPtr<Element> InspectorComposedElement::GetElementChildBySlot(const RefPtr<Element>& element, int32_t& slot) const
