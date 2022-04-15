@@ -392,14 +392,14 @@ void XComponentElement::ReleasePlatformResource()
 void XComponentElement::OnXComponentSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto context = context_.Upgrade();
+    if (context == nullptr) {
+        LOGE("context is nullptr");
+        return;
+    }
+
     if (producerSurface_ != nullptr) {
         if (renderNode_ != nullptr) {
-            auto context = context_.Upgrade();
-            if (context == nullptr) {
-                LOGE("context is nullptr");
-                return;
-            }
-
             float viewScale = context->GetViewScale();
             auto nativeWindow = CreateNativeWindowFromSurface(&producerSurface_);
             if (nativeWindow) {
@@ -411,13 +411,20 @@ void XComponentElement::OnXComponentSize(int64_t textureId, int32_t textureWidth
             }
         }
     }
-    std::string str = "";
     if (!onLoadDone_) {
         onLoadDone_ = true;
-        this->OnTextureSize(X_INVALID_ID, str);
-    }
-#endif
+        auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
+                                                             TaskExecutor::TaskType::PLATFORM);
 
+        platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
+            auto xcomponentElement = weak.Upgrade();
+            if (xcomponentElement) {
+                std::string str = "";
+                xcomponentElement->OnTextureSize(X_INVALID_ID, str);
+            }
+        });
+    }
+#else
     if (texture_) {
         texture_->OnSize(textureId, textureWidth, textureHeight,
                          [weak = WeakClaim(this), textureId](std::string& result) {
@@ -427,6 +434,7 @@ void XComponentElement::OnXComponentSize(int64_t textureId, int32_t textureWidth
                             }
         });
     }
+#endif
 }
 
 void XComponentElement::OnTextureSize(int64_t textureId, std::string& result)
