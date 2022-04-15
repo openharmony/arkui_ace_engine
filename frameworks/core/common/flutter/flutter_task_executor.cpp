@@ -78,7 +78,7 @@ bool PostTaskToTaskRunner(const fml::RefPtr<fml::TaskRunner>& taskRunner, TaskEx
 
 void SetThreadPriority(int32_t priority)
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
     if (setpriority(PRIO_PROCESS, gettid(), priority) < 0) {
         LOGW("Failed to set thread priority, errno = %{private}d", errno);
     }
@@ -298,7 +298,7 @@ void FlutterTaskExecutor::FillTaskTypeTable(TaskType type)
     constexpr size_t MAX_THREAD_NAME_SIZE = 32;
     char threadNameBuf[MAX_THREAD_NAME_SIZE] = { 0 };
     const char* threadName = threadNameBuf;
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #ifdef OHOS_STANDARD_SYSTEM
     if (prctl(PR_GET_NAME, threadNameBuf) < 0) {
         threadName = "unknown";
@@ -313,7 +313,7 @@ void FlutterTaskExecutor::FillTaskTypeTable(TaskType type)
     localTaskType = type;
     ThreadInfo info = {
         .threadId = std::this_thread::get_id(),
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
         .tid = gettid(),
 #endif
         .threadName = threadName,

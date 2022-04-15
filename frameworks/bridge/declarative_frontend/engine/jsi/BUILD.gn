@@ -42,7 +42,7 @@ ts2abc_gen_abc("gen_jsEnumStyle_abc") {
 
 gen_obj("abc_proxyclass") {
   input = base_output_path + "/stateMgmt.abc"
-  if (use_mac || use_mingw_win) {
+  if (use_mac || use_mingw_win || target_ios == "ios") {
     abcproxyclass_obj_path = base_output_path + "/js_proxy_class.c"
   }
   output = abcproxyclass_obj_path

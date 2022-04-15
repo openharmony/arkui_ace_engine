@@ -94,7 +94,7 @@ template("thirdparty_lib_txt") {
     } else if (platform == "windows") {
       sources +=
           [ "$flutter_root/engine/flutter/third_party/txt/src/txt/platform.cc" ]
-    } else if (platform == "mac") {
+    } else if (platform == "mac" || platform == "ios") {
       sources += [
         "$flutter_root/engine/flutter/third_party/txt/src/txt/platform_mac.mm",
       ]

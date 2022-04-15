@@ -31,7 +31,7 @@ void SetThreadName(uint32_t threadNo)
 {
     std::string name("ace.bg.");
     name.append(std::to_string(threadNo));
-#ifdef MAC_PLATFORM
+#if defined(MAC_PLATFORM) || defined(IOS_PLATFORM)
     pthread_setname_np(name.c_str());
 #else
     pthread_setname_np(pthread_self(), name.c_str());

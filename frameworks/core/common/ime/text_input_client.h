@@ -33,6 +33,11 @@ public:
 
     // Requests that this client perform the given action.
     virtual void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) = 0;
+ 
+#if defined(IOS_PLATFORM)
+    virtual const TextEditingValue& GetEditingValue() const {};
+#endif
+
 };
 
 } // namespace OHOS::Ace
