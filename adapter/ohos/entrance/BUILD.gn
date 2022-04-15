@@ -60,12 +60,12 @@ template("ace_ohos_standard_source_set") {
       "//foundation/aafwk/standard/interfaces/innerkits/runtime/include/",
       "//foundation/ace/napi/interfaces/kits",
       "//foundation/ace/napi/native_engine",
-      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_dataability/include",
-      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb/include",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability/include",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/rdb/include",
       "//foundation/windowmanager/interfaces/innerkits",
       "//third_party/node/src",
       "//utils/native/base/include",
-      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_preferences/include/",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/preferences/include/",
     ]
 
     deps = [
