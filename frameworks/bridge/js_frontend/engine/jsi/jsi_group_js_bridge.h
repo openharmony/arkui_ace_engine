@@ -70,8 +70,7 @@ public:
     void TriggerEventJsCallback(int32_t callbackId, int32_t code, std::vector<uint8_t>&& eventData) override;
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    void TriggerModuleJsCallbackPreview(
-        int32_t callbackId, int32_t code, OHOS::Ace::ResponseData responseData) override;
+    void TriggerModuleJsCallbackPreview(int32_t callbackId, int32_t code, ResponseData responseData) override;
 #endif
 
     void LoadPluginJsCode(std::string&& jsCode) override;
