@@ -57,7 +57,7 @@ template("preview_entrance_source") {
         defines -= [ "UNICODE" ]
         include_dirs = [
           "//utils/native/base/include",
-          "//third_party/glfw/include",
+          "//third_party/flutter/glfw/include",
         ]
         deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
         cflags_cc += [ "-DNONLS" ]
@@ -66,7 +66,7 @@ template("preview_entrance_source") {
       if (platform == "mac") {
         include_dirs = [
           "//utils/native/base/include",
-          "//third_party/glfw/include",
+          "//third_party/flutter/glfw/include",
         ]
         deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
       }

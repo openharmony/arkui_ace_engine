@@ -46,7 +46,6 @@
                 "expat",
                 "flutter",
                 "freetype",
-                "glfw",
                 "libpng",
                 "parse5",
                 "qrcodegen",
