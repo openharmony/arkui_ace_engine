@@ -61,6 +61,7 @@ public:
     }
 
     void NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent);
+    void NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent);
 
 protected:
     RefPtr<XComponentDelegate> delegate_;

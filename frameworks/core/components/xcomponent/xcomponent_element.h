@@ -53,8 +53,9 @@ private:
     void SetTouchPoint(const TouchEvent& event);
     void OnXComponentInit(const std::string& param);
     void OnSurfaceInit(const std::string& componentId, const uint32_t nodeId);
-    void RegisterDispatchTouchEventCallback();
+    void RegisterDispatchEventCallback();
     void DispatchTouchEvent(const TouchEvent& event);
+    void DispatchMousehEvent(const MouseEvent& event);
     void OnXComponentSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
     void OnTextureSize(int64_t textureId, std::string& result);
 
@@ -66,6 +67,7 @@ private:
     InitEventCallback onXComponentInit_;
     DestroyEventCallback onXComponentDestroy_;
     OH_NativeXComponent_TouchEvent touchEventPoint_;
+    OH_NativeXComponent_MouseEvent mouseEventPoint_;
     std::string name_;
     std::string idStr_;
     bool hasSendDestroyEvent_ = false;

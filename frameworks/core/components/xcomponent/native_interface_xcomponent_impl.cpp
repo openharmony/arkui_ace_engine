@@ -93,6 +93,19 @@ int32_t OH_NativeXComponent::GetTouchEvent(const void* window, OH_NativeXCompone
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
 
+int32_t OH_NativeXComponent::GetMouseEvent(const void* window, OH_NativeXComponent_MouseEvent* mouseEvent)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    auto surfaceWindow = const_cast<void*>(xcomponentImpl_->GetSurface());
+    if (window != surfaceWindow) {
+        return OH_NATIVEXCOMPONENT_RESULT_FAILED;
+    }
+    (*mouseEvent) = xcomponentImpl_->GetMouseEvent();
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
 int32_t OH_NativeXComponent::RegisterCallback(OH_NativeXComponent_Callback* callback)
 {
     if (xcomponentImpl_ == nullptr) {

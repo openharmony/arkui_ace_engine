@@ -505,7 +505,10 @@ void AceContainer::InitializeCallback()
     auto&& mouseEventCallback = [context = pipelineContext_, id = instanceId_](const MouseEvent& event) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event]() { context->OnMouseEvent(event); }, TaskExecutor::TaskType::UI);
+            [context, event]() {
+                context->OnMouseEvent(event);
+                context->NotifyDispatchMouseEventDismiss(event);
+            }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
 
