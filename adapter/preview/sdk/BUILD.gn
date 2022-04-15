@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/ace/ace_engine/build/ace_lib.gni")
+import("//foundation/ace/ace_engine/interfaces/napi/kits/napi_lib.gni")
 
 if (is_standard_system) {
   system_resource_hap_path =
@@ -117,47 +118,19 @@ if (is_standard_system) {
   }
 
   ohos_copy("copy_napi_modules_shared_library") {
-    mediaquery_path =
-        get_label_info("$ace_root/interfaces/napi/kits/media_query:mediaquery",
-                       "root_out_dir")
-    prompt_path = get_label_info("$ace_root/interfaces/napi/kits/prompt:prompt",
-                                 "root_out_dir")
-    router_path = get_label_info("$ace_root/interfaces/napi/kits/router:router",
-                                 "root_out_dir")
-    configuration_path = get_label_info(
-            "$ace_root/interfaces/napi/kits/configuration:configuration",
-            "root_out_dir")
-    device_path = get_label_info("$ace_root/interfaces/napi/kits/device:device",
-                                 "root_out_dir")
-    grid_path = get_label_info("$ace_root/interfaces/napi/kits/grid:grid",
-                               "root_out_dir")
-    deps = [
-      "$ace_root/interfaces/napi/kits/configuration:configuration",
-      "$ace_root/interfaces/napi/kits/device:device",
-      "$ace_root/interfaces/napi/kits/grid:grid",
-      "$ace_root/interfaces/napi/kits/media_query:mediaquery",
-      "$ace_root/interfaces/napi/kits/prompt:prompt",
-      "$ace_root/interfaces/napi/kits/router:router",
-    ]
-    if (use_mac) {
-      sources = [
-        "$configuration_path/ace/ace_engine_standard/libconfiguration.dylib",
-        "$device_path/ace/ace_engine_standard/libdevice.dylib",
-        "$grid_path/ace/ace_engine_standard/libgrid.dylib",
-        "$mediaquery_path/ace/ace_engine_standard/libmediaquery.dylib",
-        "$prompt_path/ace/ace_engine_standard/libprompt.dylib",
-        "$router_path/ace/ace_engine_standard/librouter.dylib",
-      ]
-    } else {
-      sources = [
-        "$configuration_path/ace/ace_engine_standard/libconfiguration.dll",
-        "$device_path/ace/ace_engine_standard/libdevice.dll",
-        "$grid_path/ace/ace_engine_standard/libgrid.dll",
-        "$mediaquery_path/ace/ace_engine_standard/libmediaquery.dll",
-        "$prompt_path/ace/ace_engine_standard/libprompt.dll",
-        "$router_path/ace/ace_engine_standard/librouter.dll",
-      ]
+    deps = []
+    sources = []
+    foreach(module, common_napi_libs) {
+      out_path = get_label_info("$ace_root/interfaces/napi/kits:${module}",
+                                "root_out_dir")
+      deps += [ "$ace_root/interfaces/napi/kits:${module}" ]
+      if (use_mac) {
+        sources += [ "${out_path}/ace/ace_engine_standard/lib${module}.dylib" ]
+      } else {
+        sources += [ "${out_path}/ace/ace_engine_standard/lib${module}.dll" ]
+      }
     }
+
     outputs =
         [ target_out_dir + "/previewer/common/bin/module/{{source_file_part}}" ]
     module_source_dir = target_out_dir + "/previewer/common/bin/module/"

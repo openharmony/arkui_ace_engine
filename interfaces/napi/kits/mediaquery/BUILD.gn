@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 import("//foundation/ace/ace_engine/ace_config.gni")
 
-template("napi_router_static") {
+template("napi_mediaquery_static") {
   forward_variables_from(invoker, "*")
 
   ohos_static_library(target_name) {
@@ -28,7 +28,7 @@ template("napi_router_static") {
       "$root_out_dir/ace/framework",
     ]
 
-    sources = [ "js_router.cpp" ]
+    sources = [ "js_media_query.cpp" ]
 
     deps = [ "//foundation/ace/napi/:ace_napi" ]
 
@@ -42,7 +42,7 @@ template("napi_router_static") {
 }
 
 foreach(item, ace_platforms) {
-  napi_router_static("router_static_" + item.name) {
+  napi_mediaquery_static("mediaquery_static_" + item.name) {
     defines = []
     cflags_cc = []
     config = {

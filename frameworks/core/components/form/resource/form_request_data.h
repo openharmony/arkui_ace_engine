@@ -21,7 +21,7 @@
 namespace OHOS::Ace {
 
 struct RequestFormInfo {
-    int32_t id = 0;
+    int64_t id = 0;
     std::string cardName;
     std::string bundleName;
     std::string abilityName;

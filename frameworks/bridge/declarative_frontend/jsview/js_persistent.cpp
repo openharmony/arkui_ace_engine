@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +75,7 @@ void JSPersistent::Set(const JSCallbackInfo& args)
     if(!StorageProxy::GetInstance()->GetStorage(executor)) {
         return;
     }
-    StorageProxy::GetInstance()->GetStorage(executor)->Set(key, value);
+    StorageProxy::GetInstance()->GetStorage(executor)->SetString(key, value);
     LOGD("cross window notify, containerId=%{private}d", container->GetInstanceId());
     AceEngine::Get().NotifyContainers(
         [currInstanceId = container->GetInstanceId(), key, value](const RefPtr<Container>& container) {
@@ -103,7 +103,7 @@ void JSPersistent::Get(const JSCallbackInfo& args)
         return;
     }
     auto executor = container->GetTaskExecutor();
-    std::string value = StorageProxy::GetInstance()->GetStorage(executor)->Get(key);
+    std::string value = StorageProxy::GetInstance()->GetStorage(executor)->GetString(key);
     auto returnValue = JSVal(ToJSValue(value));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     args.SetReturnValue(returnPtr);

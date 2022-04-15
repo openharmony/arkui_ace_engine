@@ -242,6 +242,8 @@ int UIMgrService::ShowDialog(const std::string& name,
         auto flutterAceView = Ace::Platform::FlutterAceView::CreateView(dialogId, true);
 
         sptr<OHOS::Rosen::WindowOption> option = new OHOS::Rosen::WindowOption();
+        HILOG_INFO("Show dialog: windowConfig: x: %{public}d, y: %{public}d, width: %{public}d, height: %{public}d",
+            x, y, width, height);
         option->SetWindowRect({ x, y, width, height });
         option->SetWindowType(windowType);
         std::string windowName = "system_dialog_window";
@@ -263,13 +265,9 @@ int UIMgrService::ShowDialog(const std::string& name,
         Ace::Platform::FlutterAceView::SurfaceCreated(flutterAceView, dialogWindow);
 
         // set metrics
-        int32_t windowWidth = dialogWindow->GetRect().width_;
-        int32_t windowHeight = dialogWindow->GetRect().height_;
-        HILOG_INFO("Show dialog: windowConfig: width: %{public}d, height: %{public}d", windowWidth, windowHeight);
-
         flutter::ViewportMetrics metrics;
-        metrics.physical_width = windowWidth;
-        metrics.physical_height = windowHeight;
+        metrics.physical_width = width;
+        metrics.physical_height = height;
         metrics.device_pixel_ratio = density_;
         Ace::Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
 
@@ -311,9 +309,9 @@ int UIMgrService::ShowDialog(const std::string& name,
 
         // set view
         Ace::Platform::AceContainer::SetView(
-            flutterAceView, density_, windowWidth, windowHeight, dialogWindow->GetWindowId(), callback);
+            flutterAceView, density_, width, height, dialogWindow->GetWindowId(), callback);
         Ace::Platform::AceContainer::SetUIWindow(dialogId, dialogWindow);
-        Ace::Platform::FlutterAceView::SurfaceChanged(flutterAceView, windowWidth, windowHeight, 0);
+        Ace::Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
 
         // run page.
         Ace::Platform::AceContainer::RunPage(
@@ -330,15 +328,16 @@ int UIMgrService::ShowDialog(const std::string& name,
         return UI_SERVICE_CREATE_WINDOW_FAILED;
     }
 
+    dialogWindow->Show();
+    dialogWindow->MoveTo(x, y);
+    dialogWindow->Resize(width, height);
+
     int32_t windowWidth = static_cast<int32_t>(dialogWindow->GetRect().width_);
     int32_t windowHeight = static_cast<int32_t>(dialogWindow->GetRect().height_);
     int32_t windowX = static_cast<int32_t>(dialogWindow->GetRect().posX_);
     int32_t windowY = static_cast<int32_t>(dialogWindow->GetRect().posY_);
     HILOG_INFO("Show dialog: size: width: %{public}d, height: %{public}d, pos: x: %{public}d, y: %{public}d",
         windowWidth, windowHeight, windowX, windowY);
-    dialogWindow->Show();
-    dialogWindow->MoveTo(windowX, windowY);
-    dialogWindow->Resize(windowWidth, windowHeight);
 
     HILOG_INFO("Show dialog in service end");
     return NO_ERROR;

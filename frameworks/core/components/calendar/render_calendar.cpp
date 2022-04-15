@@ -399,8 +399,12 @@ void RenderCalendar::UpdateCardCalendarAttr(CardCalendarAttr&& attr)
     if (!context) {
         return;
     }
+    if (showHoliday_ != attr.showHoliday || showLunar_ != attr.showLunar) {
+        isNeedRepaint_ = true;
+    }
     textDirection_ = attr.textDirection;
     showHoliday_ = attr.showHoliday;
+    showLunar_ = attr.showLunar;
     needSlide_ = attr.needSlide;
     offDays_ = attr.offDays;
     axis_ = attr.axis;

@@ -824,6 +824,11 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
         if (textChangeListener_ == nullptr) {
             textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
         }
+        auto context = context_.Upgrade();
+        if (context) {
+            LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
+            MiscServices::InputMethodController::GetInstance()->SetCallingWindow(context->GetWindowId());
+        }
         MiscServices::InputMethodController::GetInstance()->Attach(textChangeListener_);
 #else
         if (!HasConnection()) {
