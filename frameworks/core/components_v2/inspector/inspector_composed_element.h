@@ -20,6 +20,7 @@
 
 #include "core/components/box/render_box.h"
 #include "core/components/display/display_component.h"
+#include "core/components/popup/popup_element_v2.h"
 #include "core/components_v2/inspector/inspector_node.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -273,6 +274,7 @@ protected:
     RefPtr<AccessibilityNode> GetAccessibilityNode() const;
 
 private:
+    RefPtr<PopupElementV2> GetPopupElement() const;
     bool isRectValid_;
     std::string key_;
 };
