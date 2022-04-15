@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,12 +25,16 @@ class ACE_EXPORT StorageProxy : public StorageInterface {
 public:
     ACE_EXPORT static StorageProxy* GetInstance();
     void SetDelegate(std::unique_ptr<StorageInterface>&& delegate);
+    void SetDistributedDelegate(std::unique_ptr<StorageInterface>&& delegate);
     RefPtr<Storage> GetStorage(const RefPtr<TaskExecutor>& taskExecutor) const override;
+    RefPtr<Storage> GetStorage(const std::string& sessionId, std::function<void(const std::string&)>&& notifier,
+        const RefPtr<TaskExecutor>& taskExecutor) const override;
     StorageProxy() = default;
     ~StorageProxy() = default;
 
 private:
     std::unique_ptr<StorageInterface> delegate_;
+    std::unique_ptr<StorageInterface> distributedDelegate_;
     static StorageProxy* inst_;
 };
 

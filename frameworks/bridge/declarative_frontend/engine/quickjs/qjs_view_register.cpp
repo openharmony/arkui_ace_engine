@@ -56,6 +56,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_counter.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_distributed.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
@@ -876,6 +877,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSBlank::JSBind(globalObj);
     JSCalendar::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
+    JSDistributed::JSBind(globalObj);
     JSRadio::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSRenderingContext::JSBind(globalObj);

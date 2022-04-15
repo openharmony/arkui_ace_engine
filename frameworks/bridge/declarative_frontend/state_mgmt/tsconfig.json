@@ -22,6 +22,7 @@
     "src/lib/view_native.d.ts",
     "src/lib/view.ts",
     "src/lib/persistent_storage.ts",
+    "src/lib/distributed_storage.ts",
     "src/lib/environment.ts",
     "src/lib/i_environment_backend.ts",
     "src/index.ts",
