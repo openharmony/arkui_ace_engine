@@ -24,8 +24,8 @@ template("pa_backend") {
     deps = []
 
     include_dirs = [
-      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_dataability/include",
-      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb/include",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability/include",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/rdb/include",
       "//foundation/aafwk/standard/services/common/include",
       "//foundation/aafwk/standard/interfaces/innerkits/uri/include",
       "//foundation/aafwk/standard/interfaces/innerkits/want/include",

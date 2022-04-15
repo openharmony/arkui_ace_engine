@@ -28,7 +28,7 @@ template("ace_capability_ohos_source_set") {
       "clipboard/clipboard_impl.cpp",
       "preference/storage_impl.cpp",
     ]
-    include_dirs = [ "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_preferences/include/" ]
+    include_dirs = [ "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/preferences/include/" ]
     external_deps = [
       "ability_base:want",
       "ipc:ipc_core",
