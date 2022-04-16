@@ -53,6 +53,9 @@ constexpr uint32_t FOCUS_COLOR = 0xff0a59f7;
 constexpr double FOCUS_WIDTH = 2.0;
 constexpr double FOCUS_RADIUS_X = 4.0;
 constexpr double FOCUS_RADIUS_Y = 4.0;
+
+constexpr double BOUNDARY_STROKE_WIDTH = 3.0;
+constexpr double BOUNDARY_CORNER_LENGTH = 8.0;
 } // namespace
 
 RosenRenderBox::RosenRenderBox()
@@ -265,6 +268,97 @@ void RosenRenderBox::PerformLayout()
 #endif
 }
 
+void RosenRenderBox::PaintMargin(RenderContext& context, const Offset& offset)
+{
+    EdgePx margin = RenderBoxBase::margin_;
+    SkPaint skpaint;
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    auto startPointX = offset.GetX();
+    auto startPointY = offset.GetY();
+    auto horizontalRectWidth = GetLayoutSize().Width() - margin.LeftPx() - margin.RightPx();
+    auto verticalRectHeight = GetLayoutSize().Height() - margin.TopPx() - margin.BottomPx();
+    skpaint.setColor(0xB3FFC0CB);
+    skpaint.setStyle(SkPaint::Style::kFill_Style);
+    
+    auto layoutRect = SkRect::MakeXYWH(startPointX, startPointY,
+                                        margin.LeftPx(), margin.TopPx());
+    canvas->drawRect(layoutRect, skpaint);
+
+    layoutRect = SkRect::MakeXYWH(startPointX + GetLayoutSize().Width() - margin.RightPx(), startPointY,
+                                    margin.RightPx(), margin.TopPx());
+    canvas->drawRect(layoutRect, skpaint);
+
+    layoutRect = SkRect::MakeXYWH(startPointX, startPointY + GetLayoutSize().Height() - margin.BottomPx(),
+                                    margin.LeftPx(), margin.BottomPx());
+    canvas->drawRect(layoutRect, skpaint);
+
+    layoutRect = SkRect::MakeXYWH(startPointX + GetLayoutSize().Width() - margin.RightPx(),
+                                    startPointY + GetLayoutSize().Height() - margin.BottomPx(),
+                                    margin.RightPx(), margin.BottomPx());
+    canvas->drawRect(layoutRect, skpaint);
+    
+    layoutRect = SkRect::MakeXYWH(startPointX + margin.LeftPx(), startPointY,
+                                    horizontalRectWidth, margin.TopPx());
+    canvas->drawRect(layoutRect, skpaint);
+
+    layoutRect = SkRect::MakeXYWH(startPointX + margin.LeftPx(), startPointY + GetLayoutSize().Height() - margin.BottomPx(),
+                                    horizontalRectWidth, margin.BottomPx());
+    canvas->drawRect(layoutRect, skpaint);
+
+    layoutRect = SkRect::MakeXYWH(startPointX, startPointY + margin.TopPx(),
+                                    margin.LeftPx(), verticalRectHeight);
+    canvas->drawRect(layoutRect, skpaint);
+
+    layoutRect = SkRect::MakeXYWH(startPointX + GetLayoutSize().Width() - margin.RightPx(), startPointY + margin.TopPx(),
+                                    margin.RightPx(), verticalRectHeight);
+    canvas->drawRect(layoutRect, skpaint);
+}
+
+void RosenRenderBox::PaintCorner(RenderContext& context, const Offset& offset)
+{
+    SkPaint skpaint;
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    auto startPointX = offset.GetX();
+    auto startPointY = offset.GetY();
+    skpaint.setColor(0xFF6633FF);
+    skpaint.setStyle(SkPaint::Style::kStroke_Style);
+    skpaint.setStrokeWidth(BOUNDARY_STROKE_WIDTH);
+    canvas->drawLine(startPointX, startPointY,
+                        startPointX + BOUNDARY_CORNER_LENGTH, startPointY, skpaint);
+
+    canvas->drawLine(startPointX, startPointY,
+                        startPointX, startPointY + BOUNDARY_CORNER_LENGTH, skpaint);
+
+    canvas->drawLine(startPointX + GetLayoutSize().Width() - BOUNDARY_CORNER_LENGTH, startPointY,
+                        startPointX + GetLayoutSize().Width(), startPointY, skpaint);
+
+    canvas->drawLine(startPointX + GetLayoutSize().Width(), startPointY,
+                        startPointX + GetLayoutSize().Width(), startPointY + BOUNDARY_CORNER_LENGTH, skpaint);
+
+    canvas->drawLine(startPointX, startPointY + GetLayoutSize().Height(),
+                        startPointX + BOUNDARY_CORNER_LENGTH, startPointY + GetLayoutSize().Height(), skpaint);
+
+    canvas->drawLine(startPointX, startPointY + GetLayoutSize().Height() - BOUNDARY_CORNER_LENGTH,
+                        startPointX, startPointY + GetLayoutSize().Height(), skpaint);
+
+    canvas->drawLine(startPointX + GetLayoutSize().Width() - BOUNDARY_CORNER_LENGTH, startPointY + GetLayoutSize().Height(),
+                        startPointX + GetLayoutSize().Width(), startPointY + GetLayoutSize().Height(), skpaint);
+    
+    canvas->drawLine(startPointX + GetLayoutSize().Width(), startPointY + GetLayoutSize().Height() - BOUNDARY_CORNER_LENGTH,
+                        startPointX + GetLayoutSize().Width(), startPointY + GetLayoutSize().Height(), skpaint);
+}
+
+void RosenRenderBox::PaintBoundary(RenderContext& context, const Offset& offset)
+{
+    SkPaint skpaint;
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    auto layoutRect = SkRect::MakeXYWH(offset.GetX(), offset.GetY(), GetLayoutSize().Width(), GetLayoutSize().Height());
+    skpaint.setColor(0xFFFF0000);
+    skpaint.setStyle(SkPaint::Style::kStroke_Style);
+    skpaint.setStrokeWidth(BOUNDARY_STROKE_WIDTH);
+    canvas->drawRect(layoutRect, skpaint);
+}
+
 void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
 {
     if (backDecoration_ && backDecoration_->GetImage() && renderImage_ &&
@@ -308,6 +402,11 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         }
     }
     RenderNode::Paint(context, offset);
+    if (RenderBox::needPaintBoxBoundary_) {
+        PaintBoundary(context, offset);
+        PaintCorner(context, offset);
+        PaintMargin(context, offset);
+    }
     if (frontDecoration_) {
         auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
         if (canvas == nullptr) {

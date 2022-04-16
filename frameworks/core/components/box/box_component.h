@@ -354,6 +354,16 @@ public:
         hasBackgroundColor_ = hasBackgroundColor;
     }
 
+    void SetNeedPaintBoundary(bool needPaintBoundary)
+    {
+        needPaintBoundary_ = needPaintBoundary;
+    }
+
+    bool GetNeedPaintBoundary()
+    {
+        return needPaintBoundary_;
+    }
+
 private:
     RefPtr<Decoration> backDecoration_;
     RefPtr<Decoration> frontDecoration_;
@@ -385,6 +395,7 @@ private:
     RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_ = nullptr;
     EventMarker remoteMessageId_;
     bool hasBackgroundColor_;
+    bool needPaintBoundary_ = false;
 };
 
 } // namespace OHOS::Ace

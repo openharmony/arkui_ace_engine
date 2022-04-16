@@ -197,6 +197,9 @@ RefPtr<BoxComponent> ViewStackProcessor::GetBoxComponent()
     }
 
     RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<OHOS::Ace::BoxComponent>();
+    if (SystemProperties::GetPaintBoundaryEnabled()) {
+        boxComponent->SetNeedPaintBoundary(true);
+    }
     wrappingComponentsMap.emplace("box", boxComponent);
     return boxComponent;
 }
@@ -541,6 +544,7 @@ void ViewStackProcessor::DumpStack()
 
 RefPtr<Component> ViewStackProcessor::WrapComponents()
 {
+    
     auto& wrappingComponentsMap = componentsStack_.top();
     std::vector<RefPtr<Component>> components;
 
