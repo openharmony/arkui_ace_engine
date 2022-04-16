@@ -48,7 +48,7 @@ public:
         return false;
     }
 
-    const std::string& GetBelongGroup() const
+    std::string GetBelongGroup() const
     {
         if (component_) {
             return component_->GetBelongGroup();
@@ -56,7 +56,7 @@ public:
         return "";
     }
 
-    const std::string& GetCheckboxName() const
+    std::string GetCheckboxName() const
     {
         if (component_) {
             return component_->GetCheckboxName();
@@ -64,7 +64,7 @@ public:
         return "";
     }
 
-    const std::string& GetGroupName() const
+    std::string GetGroupName() const
     {
         if (component_) {
             return component_->GetGroupName();
