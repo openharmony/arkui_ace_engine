@@ -56,8 +56,8 @@ private:
     void RegisterDispatchEventCallback();
     void DispatchTouchEvent(const TouchEvent& event);
     void DispatchMousehEvent(const MouseEvent& event);
-    void OnXComponentSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
-    void OnTextureSize(int64_t textureId, std::string& result);
+    void OnXComponentSizeInit(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
+    void OnXComponentSizeChange(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
 
     void CreatePlatformResource();
     void ReleasePlatformResource();
@@ -84,6 +84,7 @@ private:
     static std::unordered_map<std::string, uint64_t> surfaceIdMap_;
     RefPtr<XComponentController> xcomponentController_;
     sptr<OHOS::Surface> producerSurface_ = nullptr;
+    struct NativeWindow * nativeWindow_ = nullptr;
 #endif
 };
 } // namespace OHOS::Ace

@@ -22,6 +22,8 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
+#include "core/common/ace_view.h"
+#include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_helpers.h"
@@ -567,15 +569,23 @@ void QJSDeclarativeEngine::FireExternalEvent(const std::string& componentId, con
         return;
     }
 
+    void* nativeWindow = nullptr;
+#ifdef OHOS_STANDARD_SYSTEM
+    nativeWindow = const_cast<void*>(xcomponent->GetNativeWindow());
+#else
     auto container = Container::Current();
     if (!container) {
         LOGE("FireExternalEvent Current container null");
         return;
     }
-
-    void* nativeWindow = nullptr;
-#ifdef OHOS_STANDARD_SYSTEM
-    nativeWindow = const_cast<void*>(xcomponent->GetNativeWindow());
+    auto nativeView = static_cast<AceView*>(container->GetView());
+    if (!nativeView) {
+        LOGE("FireExternalEvent nativeView null");
+        return;
+    }
+    auto textureId = static_cast<uint64_t>(xcomponent->GetTextureId());
+    LOGE("Kee FireExternalEvent textureId = %{public}d", (int)textureId);
+    nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
 #endif
 
     if (!nativeWindow) {

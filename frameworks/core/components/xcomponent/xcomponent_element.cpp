@@ -72,11 +72,18 @@ void XComponentElement::Prepare(const WeakPtr<Element>& parent)
     if (renderNode_) {
         auto renderXComponent = AceType::DynamicCast<RenderXComponent>(renderNode_);
         if (renderXComponent) {
+            renderXComponent->SetXComponentSizeInit(
+                [weak = WeakClaim(this)](int64_t textureId, int32_t width, int32_t height) {
+                    auto xcomponentElement = weak.Upgrade();
+                    if (xcomponentElement) {
+                        xcomponentElement->OnXComponentSizeInit(textureId, width, height);
+                    }
+            });
             renderXComponent->SetXComponentSizeChange(
                 [weak = WeakClaim(this)](int64_t textureId, int32_t width, int32_t height) {
                     auto xcomponentElement = weak.Upgrade();
                     if (xcomponentElement) {
-                        xcomponentElement->OnXComponentSize(textureId, width, height);
+                        xcomponentElement->OnXComponentSizeChange(textureId, width, height);
                     }
             });
 #ifdef OHOS_STANDARD_SYSTEM
@@ -429,7 +436,7 @@ void XComponentElement::ReleasePlatformResource()
 #endif
 }
 
-void XComponentElement::OnXComponentSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
+void XComponentElement::OnXComponentSizeInit(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto context = context_.Upgrade();
@@ -439,49 +446,75 @@ void XComponentElement::OnXComponentSize(int64_t textureId, int32_t textureWidth
     }
 
     if (producerSurface_ != nullptr) {
-        if (renderNode_ != nullptr) {
-            float viewScale = context->GetViewScale();
-            auto nativeWindow = CreateNativeWindowFromSurface(&producerSurface_);
-            if (nativeWindow) {
-                NativeWindowHandleOpt(nativeWindow, SET_BUFFER_GEOMETRY,
-                                      (int)(textureWidth * viewScale), (int)(textureHeight * viewScale));
-                xcomponent_->SetNativeWindow(nativeWindow);
-            } else {
-                LOGE("can not create NativeWindow from surface");
-            }
+        float viewScale = context->GetViewScale();
+        nativeWindow_ = CreateNativeWindowFromSurface(&producerSurface_);
+        if (nativeWindow_) {
+            NativeWindowHandleOpt(nativeWindow_, SET_BUFFER_GEOMETRY,
+                                  (int)(textureWidth * viewScale), (int)(textureHeight * viewScale));
+            xcomponent_->SetNativeWindow(nativeWindow_);
+        } else {
+            LOGE("can not create NativeWindow frome surface");
         }
     }
-    if (!onLoadDone_) {
-        onLoadDone_ = true;
-        auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
-                                                             TaskExecutor::TaskType::PLATFORM);
 
-        platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
-            auto xcomponentElement = weak.Upgrade();
-            if (xcomponentElement) {
-                std::string str = "";
-                xcomponentElement->OnTextureSize(X_INVALID_ID, str);
+    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
+                                                         TaskExecutor::TaskType::PLATFORM);
+    platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
+        auto xcomponentElement = weak.Upgrade();
+        if (xcomponentElement) {
+            if (xcomponentElement->xcomponent_) {
+                xcomponentElement->OnSurfaceInit(
+                    xcomponentElement->xcomponent_->GetId(),
+                    xcomponentElement->xcomponent_->GetNodeId());
+                xcomponentElement->OnXComponentInit("");
             }
-        });
-    }
+        }
+    });
 #else
     if (texture_) {
-        texture_->OnSize(textureId, textureWidth, textureHeight,
-                         [weak = WeakClaim(this), textureId](std::string& result) {
-                            auto xcomponentElement = weak.Upgrade();
-                            if (xcomponentElement) {
-                                xcomponentElement->OnTextureSize(textureId, result);
-                            }
+        texture_->SetSize(textureId, textureWidth, textureHeight,
+                          [weak = WeakClaim(this), textureId](std::string& result) {
+                                auto xcomponentElement = weak.Upgrade();
+                                if (xcomponentElement) {
+                                    if (xcomponentElement->xcomponent_) {
+                                        xcomponentElement->OnSurfaceInit(
+                                            xcomponentElement->xcomponent_->GetId(),
+                                            xcomponentElement->xcomponent_->GetNodeId());
+                                        xcomponentElement->OnXComponentInit("");
+                                    }
+                                }
         });
     }
 #endif
 }
 
-void XComponentElement::OnTextureSize(int64_t textureId, std::string& result)
+void XComponentElement::OnXComponentSizeChange(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
 {
-    if (xcomponent_) {
-        OnSurfaceInit(xcomponent_->GetId(), xcomponent_->GetNodeId());
-        OnXComponentInit("");
+    auto context = context_.Upgrade();
+    if (context == nullptr) {
+        LOGE("context is nullptr");
+        return;
+    }
+    auto renderNode = AceType::DynamicCast<RenderXComponent>(renderNode_);
+    if (renderNode != nullptr) {
+#ifdef OHOS_STANDARD_SYSTEM
+        float viewScale = context->GetViewScale();
+        if (nativeWindow_) {
+            NativeWindowHandleOpt(nativeWindow_, SET_BUFFER_GEOMETRY,
+                                  (int)(textureWidth * viewScale), (int)(textureHeight * viewScale));
+            renderNode->NativeXComponentChange();
+        } else {
+            LOGE("change nativewindow size failed, nativewindow NULL");
+        }
+#endif
+        if (texture_) {
+            texture_->SetSize(textureId, textureWidth, textureHeight,
+                              [renderNode, textureId](std::string& result) {
+                                if (renderNode) {
+                                    renderNode->NativeXComponentChange();
+                                }
+            });
+        }
     }
 }
 
