@@ -79,7 +79,6 @@ template("js_inspector") {
 }
 
 foreach(item, ace_platforms) {
-  platform = item.name
   js_inspector("js_inspector_" + item.name) {
     defines = []
     config = {
