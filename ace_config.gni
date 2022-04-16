@@ -135,8 +135,12 @@ foreach(item, _adapters) {
 
   if (defined(import_var.platforms)) {
     foreach(platform, import_var.platforms) {
-      if (defined(platform.name)) {
-        ace_platforms += [ platform ]
+      if (!is_cross_platform_build || (is_cross_platform_build && defined(
+                                           platform.cross_platform_support) &&
+                                       platform.cross_platform_support)) {
+        if (defined(platform.name)) {
+          ace_platforms += [ platform ]
+        }
       }
     }
   }
