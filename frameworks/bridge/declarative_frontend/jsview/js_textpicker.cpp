@@ -73,6 +73,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
 
     RefPtr<Component> pickerTextComponent = AceType::MakeRefPtr<OHOS::Ace::PickerTextComponent>();
     ViewStackProcessor::GetInstance()->Push(pickerTextComponent);
+    JSInteractableView::SetFocusable(false);
     JSInteractableView::SetFocusNode(true);
 
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();

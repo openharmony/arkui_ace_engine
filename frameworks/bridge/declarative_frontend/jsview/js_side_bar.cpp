@@ -48,6 +48,7 @@ void JSSideBar::Create(const JSCallbackInfo& info)
 
     auto stack = ViewStackProcessor::GetInstance();
     stack->Push(sideBarContainer);
+    JSInteractableView::SetFocusable(false);
     JSInteractableView::SetFocusNode(true);
 }
 

@@ -101,19 +101,19 @@ struct AxisEvent final {
     }
     static bool IsDirectionUp(AxisDirection direction)
     {
-        return (static_cast<int32_t>(direction) & static_cast<int32_t>(AxisDirection::UP));
+        return (static_cast<uint32_t>(direction) & static_cast<uint32_t>(AxisDirection::UP));
     }
     static bool IsDirectionDown(AxisDirection direction)
     {
-        return (static_cast<int32_t>(direction) & static_cast<int32_t>(AxisDirection::DOWN));
+        return (static_cast<uint32_t>(direction) & static_cast<uint32_t>(AxisDirection::DOWN));
     }
     static bool IsDirectionLeft(AxisDirection direction)
     {
-        return (static_cast<int32_t>(direction) & static_cast<int32_t>(AxisDirection::LEFT));
+        return (static_cast<uint32_t>(direction) & static_cast<uint32_t>(AxisDirection::LEFT));
     }
     static bool IsDirectionRight(AxisDirection direction)
     {
-        return (static_cast<int32_t>(direction) & static_cast<int32_t>(AxisDirection::RIGHT));
+        return (static_cast<uint32_t>(direction) & static_cast<uint32_t>(AxisDirection::RIGHT));
     }
 };
 

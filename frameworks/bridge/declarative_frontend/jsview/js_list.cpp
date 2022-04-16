@@ -95,6 +95,7 @@ void JSList::Create(const JSCallbackInfo& args)
     }
 
     ViewStackProcessor::GetInstance()->Push(listComponent);
+    JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);
     args.ReturnSelf();
 }

@@ -290,7 +290,7 @@ void JSImage::Create(const JSCallbackInfo& info)
     RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(src);
     imageComponent->SetUseSkiaSvg(false);
     ViewStackProcessor::GetInstance()->Push(imageComponent);
-    JSInteractableView::SetFocusable(true);
+    JSInteractableView::SetFocusable(false);
     JSInteractableView::SetFocusNode(false);
     if (noPixMap) {
         return;
