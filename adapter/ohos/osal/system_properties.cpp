@@ -56,7 +56,7 @@ bool IsTraceEnabled()
 
 bool IsPaintBoundaryEnabled()
 {
-    return access(ENABLE_PAINT_BOUNDARY_FILE_PATH, F_OK);
+    return access(ENABLE_PAINT_BOUNDARY_FILE_PATH, F_OK) == 0;
 }
 
 bool IsRosenBackendEnabled()
