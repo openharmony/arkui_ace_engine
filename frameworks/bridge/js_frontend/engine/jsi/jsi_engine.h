@@ -64,11 +64,13 @@ public:
         return frontendDelegate_;
     }
 
+    void RegisterFaPlugin();              // load ReatureAbility plugin
+
 private:
     void RegisterAceModule();             // add ace object to global
     void RegisterConsoleModule();         // add Console object to global
-    void RegisterSyscapModule();         // add Syscap object to global
-    void RegisterDocumentModule();         // add dom object to global
+    void RegisterSyscapModule();          // add Syscap object to global
+    void RegisterDocumentModule();        // add dom object to global
     void RegisterPerfUtilModule();        // add perfutil object to global
     void RegisterHiViewModule();          // add hiView object to global
     void RegisterI18nPluralRulesModule(); // add i18nPluralRules object to global

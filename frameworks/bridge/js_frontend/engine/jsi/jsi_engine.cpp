@@ -2869,6 +2869,17 @@ void JsiEngineInstance::RegisterI18nPluralRulesModule()
     global->SetProperty(runtime_, "i18nPluralRules", i18nObj);
 }
 
+void JsiEngineInstance::RegisterFaPlugin()
+{
+    shared_ptr<JsValue> global = runtime_->GetGlobal();
+    shared_ptr<JsValue> requireNapiFunc = global->GetProperty(runtime_, "requireNapi");
+    if (!requireNapiFunc || !requireNapiFunc->IsFunction(runtime_)) {
+        LOGW("requireNapi func not found");
+    }
+    std::vector<shared_ptr<JsValue>> argv = { runtime_->NewString("FeatureAbility") };
+    requireNapiFunc->Call(runtime_, global, argv, argv.size());
+}
+
 bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<std::string, void*>& extraNativeObject)
 {
     ACE_SCOPED_TRACE("JsiEngine::InitJsEnv");
@@ -3041,6 +3052,7 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
             nativeEngine->SetPackagePath(packagePath);
         }
     }
+    engineInstance_->RegisterFaPlugin();
     RegisterWorker();
 
     return true;
