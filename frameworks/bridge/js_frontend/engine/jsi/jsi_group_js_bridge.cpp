@@ -580,8 +580,7 @@ void JsiGroupJsBridge::Destroy()
 }
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-void JsiGroupJsBridge::TriggerModuleJsCallbackPreview(
-    int32_t callbackId, int32_t code, OHOS::Ace::ResponseData responseData)
+void JsiGroupJsBridge::TriggerModuleJsCallbackPreview(int32_t callbackId, int32_t code, ResponseData responseData)
 {
     LOGE("WAIT FOR IMPLEMENTED");
 }
