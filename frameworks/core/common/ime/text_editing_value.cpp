@@ -28,6 +28,8 @@ const char TEXT[] = "text";
 const char HINT[] = "hint";
 const char SELECTION_START[] = "selectionStart";
 const char SELECTION_END[] = "selectionEnd";
+const int  NEXT_CHAR_INDEX_1 = 1;
+const int  NEXT_CHAR_INDEX_2 = 2;
 
 } // namespace
 
@@ -90,8 +92,8 @@ void TextEditingValue::MoveRight()
 
     int32_t nextCharIndex = selection.extentOffset;
     selection.Update(StringUtils::NotInUtf16Bmp(utf16Text[nextCharIndex])
-                         ? std::min(static_cast<int32_t>(utf16Text.length()), nextCharIndex + 2)
-                         : nextCharIndex + 1);
+                         ? std::min(static_cast<int32_t>(utf16Text.length()), nextCharIndex + NEXT_CHAR_INDEX_2)
+                         : nextCharIndex + NEXT_CHAR_INDEX_1);
 }
 
 void TextEditingValue::MoveToPosition(int32_t position)
