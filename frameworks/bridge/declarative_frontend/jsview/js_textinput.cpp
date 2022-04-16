@@ -184,6 +184,8 @@ void JSTextInput::Create(const JSCallbackInfo& info)
     } else {
         LOGI("controller is nullptr");
     }
+    JSInteractableView::SetFocusable(true);
+    JSInteractableView::SetFocusNode(true);
 }
 
 void JSTextInput::SetBackgroundColor(const JSCallbackInfo& info)

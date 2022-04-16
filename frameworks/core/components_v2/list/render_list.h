@@ -225,6 +225,11 @@ public:
 
     std::string ProvideRestoreInfo() override;
 
+    void SetFocusIndex(int32_t focusIndex)
+    {
+        focusIndex_ = focusIndex;
+    }
+
 protected:
     void UpdateAccessibilityAttr();
     bool HandleActionScroll(bool forward);

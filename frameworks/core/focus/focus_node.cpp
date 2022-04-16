@@ -395,12 +395,8 @@ bool FocusGroup::IsFocusable() const
     if (!FocusNode::IsFocusable()) {
         return false;
     }
-    if (focusNodes_.size() > 0) {
-        return std::any_of(focusNodes_.begin(), focusNodes_.end(),
-            [](const RefPtr<FocusNode>& focusNode) { return focusNode->IsFocusable(); });
-    } else {
-        return true;
-    }
+    return std::any_of(focusNodes_.begin(), focusNodes_.end(),
+        [](const RefPtr<FocusNode>& focusNode) { return focusNode->IsFocusable(); });
 }
 
 bool FocusGroup::GoToNextFocus(bool reverse, const Rect& rect)
@@ -470,23 +466,23 @@ bool FocusGroup::OnKeyEvent(const KeyEvent& keyEvent)
     OnFocusMove(keyEvent.code);
     switch (keyEvent.code) {
         case KeyCode::TV_CONTROL_UP:
-            LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'UP' by KeyCode(%{public}d)", keyEvent.code);
+            LOGI("RequestNextFocus 'UP' by KeyCode(%{public}d)", keyEvent.code);
             return RequestNextFocus(true, true, GetRect());
         case KeyCode::TV_CONTROL_DOWN:
-            LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'DOWN' by KeyCode(%{public}d)", keyEvent.code);
+            LOGI("RequestNextFocus 'DOWN' by KeyCode(%{public}d)", keyEvent.code);
             return RequestNextFocus(true, false, GetRect());
         case KeyCode::TV_CONTROL_LEFT:
-            LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'LEFT' by KeyCode(%{public}d)", keyEvent.code);
+            LOGI("RequestNextFocus 'LEFT' by KeyCode(%{public}d)", keyEvent.code);
             return RequestNextFocus(false, !AceApplicationInfo::GetInstance().IsRightToLeft(), GetRect());
         case KeyCode::TV_CONTROL_RIGHT:
-            LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'RIGHT' by KeyCode(%{public}d)", keyEvent.code);
+            LOGI("RequestNextFocus 'RIGHT' by KeyCode(%{public}d)", keyEvent.code);
             return RequestNextFocus(false, AceApplicationInfo::GetInstance().IsRightToLeft(), GetRect());
         case KeyCode::KEY_TAB:
             if (keyEvent.pressedCodes.size() == 1) {
-                LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'TAB' by KeyCode(%{public}d)", keyEvent.code);
+                LOGI("RequestNextFocus 'TAB' by KeyCode(%{public}d)", keyEvent.code);
                 return RequestNextFocus(false, false, GetRect()) || RequestNextFocus(true, false, GetRect());
             } else {
-                LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'SHIFT-TAB' by KeyCode(%{public}d)", keyEvent.code);
+                LOGI("RequestNextFocus 'SHIFT-TAB' by KeyCode(%{public}d)", keyEvent.code);
                 if (keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB }) ||
                     keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_TAB })) {
                     return RequestNextFocus(false, true, GetRect()) || RequestNextFocus(true, true, GetRect());

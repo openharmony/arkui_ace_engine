@@ -222,6 +222,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
         SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]), buttonComponent);
     }
     ViewStackProcessor::GetInstance()->Push(buttonComponent);
+    JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);
 
     buttonComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
@@ -238,6 +239,7 @@ void JSButton::CreateWithChild(const JSCallbackInfo& info)
         SetTypeAndStateEffect(obj, buttonComponent);
     }
     ViewStackProcessor::GetInstance()->Push(buttonComponent);
+    JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);
     buttonComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
 }

@@ -580,6 +580,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         webComponent->SetWebController(controller->GetController());
     }
     ViewStackProcessor::GetInstance()->Push(webComponent);
+    JSInteractableView::SetFocusable(false);
     JSInteractableView::SetFocusNode(true);
 }
 

@@ -44,6 +44,8 @@ public:
     size_t FindPreviousStickyListItem(size_t index) override;
 
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
+    bool UpdateFocusIndex();
+
     void OnPostFlush() override;
 
 private:
