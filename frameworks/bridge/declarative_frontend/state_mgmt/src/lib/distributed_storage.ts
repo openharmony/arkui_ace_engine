@@ -120,7 +120,7 @@ class DistributedStorage implements IMultiPropertiesChangeSubscriber {
     });
 
     this.links_.clear();
-    SubscriberManager.Get().delete(this.id());
+    SubscriberManager.Get().delete(this.id__());
   }
 
   public id__(): number {
