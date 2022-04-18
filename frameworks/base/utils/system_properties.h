@@ -177,9 +177,9 @@ public:
         return rosenBackendEnabled_;
     }
 
-    static bool GetPaintBoundaryEnabled()
+    static bool GetDebugBoundaryEnabled()
     {
-        return paintBoundaryEnabled_;
+        return debugBoundaryEnabled_;
     }
 
     static bool GetTraceEnabled()
@@ -296,7 +296,7 @@ private:
     static bool debugEnabled_;
     static int32_t windowPosX_;
     static int32_t windowPosY_;
-    static bool paintBoundaryEnabled_;
+    static bool debugBoundaryEnabled_;
 };
 
 } // namespace OHOS::Ace

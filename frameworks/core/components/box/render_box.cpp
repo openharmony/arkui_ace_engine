@@ -96,7 +96,7 @@ void RenderBox::Update(const RefPtr<Component>& component)
         inspectorDirection_ = box->GetInspectorDirection();
         RenderBoxBase::Update(component);
         UpdateBackDecoration(box->GetBackDecoration());
-        needPaintBoxBoundary_ = box->GetNeedPaintBoundary();
+        needPaintDebugBoundary_ = box->GetEnableDebugBoundary();
         UpdateFrontDecoration(box->GetFrontDecoration());
         hoverColorBegin_ = box->GetColor();
         hoverAnimationType_ = box->GetMouseAnimationType();

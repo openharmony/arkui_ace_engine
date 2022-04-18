@@ -297,7 +297,7 @@ protected:
     bool isHoveredScale = false;
     bool isAccessibilityFocus_ = false;
     bool needFocusBorder_ = false;
-    bool needPaintBoxBoundary_ = false;
+    bool needPaintDebugBoundary_ = false;
 
 private:
     void UpdateBackDecoration(const RefPtr<Decoration>& newDecoration);

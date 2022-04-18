@@ -354,14 +354,14 @@ public:
         hasBackgroundColor_ = hasBackgroundColor;
     }
 
-    void SetNeedPaintBoundary(bool needPaintBoundary)
+    void SetEnableDebugBoundary(bool enableDebugBoundary)
     {
-        needPaintBoundary_ = needPaintBoundary;
+        enableDebugBoundary_ = enableDebugBoundary;
     }
 
-    bool GetNeedPaintBoundary()
+    bool GetEnableDebugBoundary()
     {
-        return needPaintBoundary_;
+        return enableDebugBoundary_;
     }
 
 private:
@@ -395,7 +395,7 @@ private:
     RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_ = nullptr;
     EventMarker remoteMessageId_;
     bool hasBackgroundColor_;
-    bool needPaintBoundary_ = false;
+    bool enableDebugBoundary_ = false;
 };
 
 } // namespace OHOS::Ace

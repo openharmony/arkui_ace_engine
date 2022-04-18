@@ -74,10 +74,6 @@ public:
     void AnimateMouseHoverEnter() override;
     void AnimateMouseHoverExit() override;
 
-    void PaintBoundary(RenderContext& context, const Offset& offset);
-    void PaintMargin(RenderContext& context, const Offset& offset);
-    void PaintCorner(RenderContext& context, const Offset& offset);
-
 protected:
     bool MaybeRelease() override;
 
