@@ -1629,7 +1629,7 @@ void VideoElement::Stop()
 void VideoElement::SetCurrentTime(float currentPos, SeekMode seekMode)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    if (mediaPlayer_ != nullptr && GreatOrEqual(currentPos, 0.0) && LessNotEqual(currentPos, duration_)) {
+    if (mediaPlayer_ != nullptr && GreatOrEqual(currentPos, 0.0) && LessOrEqual(currentPos, duration_)) {
         LOGI("Video Seek");
         mediaPlayer_->Seek(currentPos * MILLISECONDS_TO_SECONDS, ConvertToMediaSeekMode(seekMode));
     }

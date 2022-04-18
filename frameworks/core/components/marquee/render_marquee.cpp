@@ -349,14 +349,18 @@ bool RenderMarquee::NeedMarquee() const
     if (!childText_) {
         return true;
     }
-    const static int32_t PLATFORM_VERSION_SIX = 6;
     auto context = GetContext().Upgrade();
-    if (context && !context->GetIsDeclarative()) {
-        if (context->GetMinPlatformVersion() >= PLATFORM_VERSION_SIX) {
-            if (childText_->GetLayoutSize().Width() <= GetLayoutSize().Width()) {
-                return false;
-            }
-        }
+    if (!context) {
+        return true;
+    }
+    // Is width of text longer than container.
+    auto needMarquee = (childText_->GetLayoutSize().Width() > GetLayoutSize().Width());
+    if (context->GetIsDeclarative()) {
+        return needMarquee;
+    }
+    const static int32_t PLATFORM_VERSION_SIX = 6;
+    if (context->GetMinPlatformVersion() >= PLATFORM_VERSION_SIX) {
+        return needMarquee;
     }
     return true;
 }
