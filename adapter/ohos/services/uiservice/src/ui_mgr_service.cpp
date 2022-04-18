@@ -381,6 +381,24 @@ int UIMgrService::CancelDialog(int id)
     return NO_ERROR;
 }
 
+int UIMgrService::UpdateDialog(int id, const std::string& data)
+{
+    auto updateDialogCallback = [id, data]() {
+        HILOG_INFO("Update dialog id: %{public}d", id);
+        auto container = Platform::AceContainer::GetContainer(id);
+        if (!container) {
+            HILOG_INFO("Container(%{public}d) not found.", id);
+            return;
+        }
+        Platform::AceContainer::OnDialogUpdated(id, data);
+    };
+    if (!handler_->PostTask(updateDialogCallback)) {
+        return UI_SERVICE_POST_TASK_FAILED;
+    }
+
+    return NO_ERROR;
+}
+
 void UIMgrService::OnStart()
 {
     if (state_ == UIServiceRunningState::STATE_RUNNING) {

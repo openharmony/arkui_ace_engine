@@ -65,6 +65,8 @@ public:
 
     virtual int CancelDialog(int id) = 0;
 
+    virtual int UpdateDialog(int id, const std::string& data) = 0;
+
     enum {
         // ipc id 1-1000 for kit
         // ipc id for RegisterCallBack (1)
@@ -76,6 +78,7 @@ public:
         RETURN_REQUEST,
         SHOW_DIALOG,
         CANCEL_DIALOG,
+        UPDATE_DIALOG,
     };
 };
 }  // namespace Ace

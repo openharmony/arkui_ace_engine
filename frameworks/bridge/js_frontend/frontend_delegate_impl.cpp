@@ -442,6 +442,11 @@ void FrontendDelegateImpl::OnNewRequest(const std::string& data)
     FireSyncEvent("_root", std::string("\"onNewRequest\","), data);
 }
 
+void FrontendDelegateImpl::OnDialogUpdated(const std::string& data)
+{
+    FireSyncEvent("_root", std::string("\"onDialogUpdated\","), data);
+}
+
 void FrontendDelegateImpl::CallPopPage()
 {
     std::lock_guard<std::mutex> lock(mutex_);
