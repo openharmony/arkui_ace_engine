@@ -33,6 +33,7 @@
 #include "core/components/image/image_component.h"
 #include "core/components/image/rosen_render_image.h"
 #include "core/pipeline/base/rosen_render_context.h"
+#include "core/components/common/painter/rosen_debug_boundary_painter.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -308,6 +309,16 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         }
     }
     RenderNode::Paint(context, offset);
+    if (RenderBox::needPaintDebugBoundary_) {
+        auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+        if (canvas == nullptr) {
+            LOGE("Paint canvas is null.");
+            return;
+        }
+        RosenDebugBoundaryPainter::PaintDebugBoundary(canvas, offset, GetLayoutSize());
+        RosenDebugBoundaryPainter::PaintDebugCorner(canvas, offset, GetLayoutSize());
+        RosenDebugBoundaryPainter::PaintDebugMargin(canvas, offset, GetLayoutSize(), RenderBoxBase::margin_);
+    }
     if (frontDecoration_) {
         auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
         if (canvas == nullptr) {
