@@ -97,7 +97,10 @@ RefPtr<Component> ContainerModalComponent::BuildContent()
     auto contentBox = AceType::MakeRefPtr<BoxComponent>();
     contentBox->SetChild(GetChild());
     auto contentDecoration = AceType::MakeRefPtr<Decoration>();
-    contentDecoration->SetBackgroundColor(CONTENT_BACKGROUND_COLOR);
+    auto context = context_.Upgrade();
+    if (context) {
+        contentDecoration->SetBackgroundColor(context->GetAppBgColor());
+    }
     contentBox->SetBackDecoration(contentDecoration);
 
     auto clip = AceType::MakeRefPtr<ClipComponent>(contentBox);

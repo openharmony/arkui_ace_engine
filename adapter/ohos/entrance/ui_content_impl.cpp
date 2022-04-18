@@ -566,28 +566,26 @@ uint32_t UIContentImpl::GetBackgroundColor()
         LOGE("GetBackgroundColor failed: container is null. return 0x000000");
         return 0x000000;
     }
-    auto pipeline = container->GetPipelineContext();
-    if (!pipeline) {
-        LOGE("GetBackgroundColor failed: pipeline is null. return 0x000000");
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("GetBackgroundColor failed: taskExecutor is null.");
         return 0x000000;
     }
     ContainerScope scope(instanceId_);
     uint32_t bgColor = 0x000000;
-    auto taskExecutor = container->GetTaskExecutor();
-    if (taskExecutor) {
-        taskExecutor->PostSyncTask([&bgColor, container]() {
+    taskExecutor->PostSyncTask([&bgColor, container]() {
             if (!container) {
                 LOGE("Post sync task GetBackgroundColor failed: container is null. return 0x000000");
                 return;
             }
-            auto taskPipeline = container->GetPipelineContext();
-            if (!taskPipeline) {
+            auto pipelineContext = container->GetPipelineContext();
+            if (!pipelineContext) {
                 LOGE("Post sync task GetBackgroundColor failed: pipeline is null. return 0x000000");
                 return;
             }
-            bgColor = taskPipeline->GetRootBgColor().GetValue();
+            bgColor = pipelineContext->GetAppBgColor().GetValue();
         }, TaskExecutor::TaskType::UI);
-    }
+
     LOGI("UIContentImpl::GetBackgroundColor, value is %{public}u", bgColor);
     return bgColor;
 }
@@ -612,7 +610,7 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
             LOGE("SetBackgroundColor failed, pipeline context is null.");
             return;
         }
-        pipelineContext->SetRootBgColor(Color(bgColor));
+        pipelineContext->SetAppBgColor(Color(bgColor));
     }, TaskExecutor::TaskType::UI);
 }
 

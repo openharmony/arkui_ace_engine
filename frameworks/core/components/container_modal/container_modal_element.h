@@ -33,6 +33,7 @@ public:
     void ShowTitle(bool isShow);
     void BlurWindow(bool isBlur);
     void WindowFocus(bool isFocus);
+    void SetAppBgColor(const Color& color);
     void Update() override;
     void PerformBuild() override;
 
@@ -47,6 +48,7 @@ private:
     RefPtr<RenderDisplay> floatingTitleDisplay_;
     RefPtr<BoxElement> floatingTitleBox_;
     RefPtr<BoxElement> titleBox_;
+    RefPtr<BoxElement> contentBox_;
     RefPtr<ContainerModalComponent> containerModalComponent_;
     float density_ = 1.0f;
     float moveX_ = 0.0f;
