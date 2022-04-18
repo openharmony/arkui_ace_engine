@@ -196,6 +196,12 @@ shared_ptr<JsValue> ArkJSRuntime::NewNativePointer(void *ptr)
     return std::make_shared<ArkJSValue>(shared_from_this(), NativePointerRef::New(vm_, ptr));
 }
 
+shared_ptr<JsValue> ArkJSRuntime::NewException()
+{
+    LocalScope scope(vm_);
+    return std::make_shared<ArkJSValue>(shared_from_this(), JSValueRef::Exception(vm_));
+}
+
 void ArkJSRuntime::RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback)
 {
     JSNApi::EnableUserUncaughtErrorHandler(vm_);

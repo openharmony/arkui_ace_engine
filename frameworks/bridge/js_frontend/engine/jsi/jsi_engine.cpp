@@ -3015,6 +3015,20 @@ void JsiEngineInstance::CallJs(const std::string& callbackId, const std::string&
     func->Call(runtime_, global, argv, argv.size());
 }
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+bool JsiEngineInstance::CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
+{
+    auto dispatcher = dispatcher_.Upgrade();
+    if (dispatcher) {
+        dispatcher->CallCurlFunction(requestData, callbackId);
+        return true;
+    } else {
+        LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+        return false;
+    }
+}
+#endif
+
 // -----------------------
 // Start JsiEngine
 // -----------------------

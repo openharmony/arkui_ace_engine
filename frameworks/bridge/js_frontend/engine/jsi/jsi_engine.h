@@ -63,6 +63,19 @@ public:
     {
         return frontendDelegate_;
     }
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId);
+#endif
+ 
+    void SetArkNativeEngine(ArkNativeEngine* nativeEngine)
+    {
+        nativeEngine_ = nativeEngine;
+    }
+
+    ArkNativeEngine const *  GetArkNativeEngine() const
+    {
+        return static_cast<ArkNativeEngine*>(nativeEngine_);
+    }
 
     void RegisterFaPlugin();              // load ReatureAbility plugin
 
