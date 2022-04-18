@@ -57,8 +57,8 @@ void RenderRoot::PerformLayout()
     auto appTheme = GetTheme<AppTheme>();
     // Use theme background color to clear canvas.
     if (appTheme && !isBgColorInit_) {
-        bgColor_ = appTheme->GetBackgroundColor();
         if (IsShadowModal(context_)) {
+            bgColor_ = appTheme->GetBackgroundColor();
             auto colorAnimation =
                 AceType::MakeRefPtr<CurveAnimation<Color>>(Color::TRANSPARENT, bgColor_, Curves::FAST_OUT_SLOW_IN);
             bgColor_ = Color::TRANSPARENT;
@@ -108,13 +108,13 @@ void RenderRoot::AnimateToShow(int32_t duration)
     }
 }
 
-void RenderRoot::SetDefaultBgColor()
+void RenderRoot::SetDefaultBgColor(bool isTransparent)
 {
     auto appTheme = GetTheme<AppTheme>();
     if (!appTheme) {
         return;
     }
-    bgColor_ = isContextMenu_ ? Color::TRANSPARENT : appTheme->GetBackgroundColor();
+    bgColor_ = isContextMenu_ || isTransparent ? Color::TRANSPARENT : appTheme->GetBackgroundColor();
     forceColor_ = false;
     MarkNeedRender();
 }

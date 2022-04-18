@@ -559,7 +559,7 @@ void SetAppBackgroundColor(const v8::FunctionCallbackInfo<v8::Value>& args)
     }
     auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext) {
-        pipelineContext->SetRootBgColor(Color::FromString(backgroundColorStr));
+        pipelineContext->SetAppBgColor(Color::FromString(backgroundColorStr));
     }
 }
 

@@ -288,7 +288,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
     SkRRect outerRRect =
         SkRRect::MakeRect(SkRect::MakeLTRB(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom()));
         SkRect focusRect = SkRect::MakeLTRB(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom());
-    Color bgColor = pipeline->GetRootBgColor();
+    Color bgColor = pipeline->GetAppBgColor();
     if (backDecoration_) {
         auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
         if (canvas == nullptr) {

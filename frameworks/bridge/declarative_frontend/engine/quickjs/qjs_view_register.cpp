@@ -744,7 +744,7 @@ JSValue SetAppBackgroundColor(JSContext* ctx, JSValueConst new_target, int argc,
     }
     auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext) {
-        pipelineContext->SetRootBgColor(Color::FromString(backgroundColorStr));
+        pipelineContext->SetAppBgColor(Color::FromString(backgroundColorStr));
     }
     return JS_UNDEFINED;
 }

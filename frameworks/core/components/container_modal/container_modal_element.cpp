@@ -166,6 +166,9 @@ void ContainerModalElement::ShowTitle(bool isShow)
         LOGE("ContainerModalElement showTitle failed, clip element is null!");
         return;
     }
+    if (!contentBox_) {
+        contentBox_ = AceType::DynamicCast<BoxElement>(clip->GetFirstChild());
+    }
     auto renderClip = AceType::DynamicCast<RenderClip>(clip->GetRenderNode());
     if (renderClip) {
         isShow ? renderClip->SetClipRadius(Radius(CONTAINER_INNER_RADIUS)) : renderClip->SetClipRadius(Radius(0.0));
@@ -468,6 +471,22 @@ void ContainerModalElement::WindowFocus(bool isFocus)
     } else {
         ChangeTitleIcon(isFocus);
     }
+}
+
+void ContainerModalElement::SetAppBgColor(const Color& color)
+{
+    if (!contentBox_) {
+        LOGE("SetAppBgColor failed, contentBox_ is nullptr.");
+        return;
+    }
+    auto renderContentBox = AceType::DynamicCast<RenderBox>(contentBox_->GetRenderNode());
+    if (!renderContentBox) {
+        LOGE("SetAppBgColor failed, renderContentBox is nullptr.");
+        return;
+    }
+    auto backDecoration = renderContentBox->GetBackDecoration();
+    backDecoration->SetBackgroundColor(color);
+    renderContentBox->SetBackDecoration(backDecoration);
 }
 
 } // namespace OHOS::Ace
