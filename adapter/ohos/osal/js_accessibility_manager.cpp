@@ -862,7 +862,7 @@ void JsAccessibilityManager::SearchElementInfosByText(const long elementId, cons
         }
     }
 
-    LOGI("SetSearchElementInfoByTextResult infos.size(%{public}d)", infos.size());
+    LOGI("SetSearchElementInfoByTextResult infos.size(%{public}zu)", infos.size());
     callback.SetSearchElementInfoByTextResult(infos, requestId);
 }
 

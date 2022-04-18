@@ -188,12 +188,12 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
             JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
             std::string key;
             if (!ConvertFromJSValue(obj->GetProperty("headerKey"), key)) {
-                LOGW("can't find key at index %{public}d of additionalHttpHeaders, so skip it.", i);
+                LOGW("can't find key at index %{public}zu of additionalHttpHeaders, so skip it.", i);
                 continue;
             }
             std::string value;
             if (!ConvertFromJSValue(obj->GetProperty("headerValue"), value)) {
-                LOGW("can't find value at index %{public}d of additionalHttpHeaders, so skip it.", i);
+                LOGW("can't find value at index %{public}zu of additionalHttpHeaders, so skip it.", i);
                 continue;
             }
             httpHeaders[key] = value;
