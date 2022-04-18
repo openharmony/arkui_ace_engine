@@ -47,7 +47,7 @@ void RosenDebugBoundaryPainter::PaintDebugBoundary(SkCanvas* canvas, const Offse
 }
 
 void RosenDebugBoundaryPainter::PaintDebugMargin(SkCanvas* canvas, const Offset& offset,
-                                                    const Size& layoutSize, const EdgePx margin)
+    const Size& layoutSize, const EdgePx& margin)
 {
     SkPaint skpaint;
     auto startPointX = offset.GetX();
@@ -57,19 +57,19 @@ void RosenDebugBoundaryPainter::PaintDebugMargin(SkCanvas* canvas, const Offset&
     skpaint.setStyle(SkPaint::Style::kFill_Style);
     
     auto layoutRect = SkRect::MakeXYWH(startPointX, startPointY,
-                                            layoutSize.Width(), margin.TopPx());
+        layoutSize.Width(), margin.TopPx());
     canvas->drawRect(layoutRect, skpaint);
 
     layoutRect = SkRect::MakeXYWH(startPointX, startPointY + layoutSize.Height() - margin.BottomPx(),
-                                        layoutSize.Width(), margin.BottomPx());
+        layoutSize.Width(), margin.BottomPx());
     canvas->drawRect(layoutRect, skpaint);
 
     layoutRect = SkRect::MakeXYWH(startPointX, startPointY + margin.TopPx(),
-                                        margin.LeftPx(), verticalRectHeight);
+        margin.LeftPx(), verticalRectHeight);
     canvas->drawRect(layoutRect, skpaint);
 
     layoutRect = SkRect::MakeXYWH(startPointX + layoutSize.Width() - margin.RightPx(), startPointY + margin.TopPx(),
-                                        margin.RightPx(), verticalRectHeight);
+        margin.RightPx(), verticalRectHeight);
     canvas->drawRect(layoutRect, skpaint);
 }
 
@@ -82,20 +82,20 @@ void RosenDebugBoundaryPainter::PaintDebugCorner(SkCanvas* canvas, const Offset&
     skpaint.setStyle(SkPaint::Style::kStroke_Style);
     skpaint.setStrokeWidth(BOUNDARY_STROKE_WIDTH);
     canvas->drawLine(startPointX, startPointY,
-                            startPointX + BOUNDARY_CORNER_LENGTH, startPointY, skpaint);
+        startPointX + BOUNDARY_CORNER_LENGTH, startPointY, skpaint);
     canvas->drawLine(startPointX, startPointY,
-                            startPointX, startPointY + BOUNDARY_CORNER_LENGTH, skpaint);
+        startPointX, startPointY + BOUNDARY_CORNER_LENGTH, skpaint);
     canvas->drawLine(startPointX + layoutSize.Width() - BOUNDARY_CORNER_LENGTH, startPointY,
-                            startPointX + layoutSize.Width(), startPointY, skpaint);
+        startPointX + layoutSize.Width(), startPointY, skpaint);
     canvas->drawLine(startPointX + layoutSize.Width(), startPointY,
-                            startPointX + layoutSize.Width(), startPointY + BOUNDARY_CORNER_LENGTH, skpaint);
+        startPointX + layoutSize.Width(), startPointY + BOUNDARY_CORNER_LENGTH, skpaint);
     canvas->drawLine(startPointX, startPointY + layoutSize.Height(),
-                            startPointX + BOUNDARY_CORNER_LENGTH, startPointY + layoutSize.Height(), skpaint);
+        startPointX + BOUNDARY_CORNER_LENGTH, startPointY + layoutSize.Height(), skpaint);
     canvas->drawLine(startPointX, startPointY + layoutSize.Height() - BOUNDARY_CORNER_LENGTH,
-                            startPointX, startPointY + layoutSize.Height(), skpaint);
+        startPointX, startPointY + layoutSize.Height(), skpaint);
     canvas->drawLine(startPointX + layoutSize.Width() - BOUNDARY_CORNER_LENGTH, startPointY + layoutSize.Height(),
-                            startPointX + layoutSize.Width(), startPointY + layoutSize.Height(), skpaint);
+        startPointX + layoutSize.Width(), startPointY + layoutSize.Height(), skpaint);
     canvas->drawLine(startPointX + layoutSize.Width(), startPointY + layoutSize.Height() - BOUNDARY_CORNER_LENGTH,
-                            startPointX + layoutSize.Width(), startPointY + layoutSize.Height(), skpaint);
+        startPointX + layoutSize.Width(), startPointY + layoutSize.Height(), skpaint);
 }
 }
