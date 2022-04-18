@@ -21,24 +21,18 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/border.h"
-#include "core/components/common/properties/border_edge.h"
-#include "core/components/common/properties/border_image_edge.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
-#include "core/components/image/render_image.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
-
 class RosenDebugBoundaryPainter : public virtual AceType {
     DECLARE_ACE_TYPE(RosenDebugBoundaryPainter, AceType);
 public:
     static void PaintDebugBoundary(SkCanvas* canvas, const Offset& offset, const Size& layoutSize);
     static void PaintDebugMargin(SkCanvas* canvas, const Offset& offset, const Size& layoutSize, const EdgePx margin);
-    static void PaintDebugCorner(SkCanvas* canvas, const Offset& offset, const Size& layoutSize);    
+    static void PaintDebugCorner(SkCanvas* canvas, const Offset& offset, const Size& layoutSize);
 };
-
 }
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_ROSEN_DEBUG_BOUNDARY_PAINTER_H
