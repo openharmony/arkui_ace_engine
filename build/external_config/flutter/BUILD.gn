@@ -437,8 +437,9 @@ template("flutter_engine_shell") {
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
         "$flutter_root/engine/flutter/shell/platform/ohos/platform_view_ohos.cc",
       ]
-      if ((!defined(config.disable_gpu) || !config.disable_gpu) && (!defined(
-                                                                        config.enable_rosen_backend) || !config.enable_rosen_backend)) {
+      if ((!defined(config.disable_gpu) || !config.disable_gpu) &&
+          (!defined(config.enable_rosen_backend) ||
+           !config.enable_rosen_backend)) {
         sources += [
           "$flutter_root/engine/flutter/shell/platform/ohos/ohos_surface_gl.cc",
         ]
@@ -497,8 +498,6 @@ template("flutter_engine_shell") {
       _flutter_framework_headers = [
         "$ios_prefix/framework/Headers/Flutter.h",
         "$ios_prefix/framework/Headers/FlutterAppDelegate.h",
-
-        # "$ios_prefix/framework/Headers/FlutterCallbackCache.h",
         "$ios_prefix/framework/Headers/FlutterDartProject.h",
         "$ios_prefix/framework/Headers/FlutterEngine.h",
         "$ios_prefix/framework/Headers/FlutterHeadlessDartRunner.h",
@@ -514,21 +513,14 @@ template("flutter_engine_shell") {
         "$flutter_root/engine/flutter/shell/platform/darwin/common/command_line.mm",
         "$flutter_root/engine/flutter/shell/common/switches.cc",
         "$flutter_root/engine/flutter/shell/common/switches.h",
-
         "$ios_prefix/framework/Source/FlutterAppDelegate.mm",
         "$ios_prefix/framework/Source/FlutterAppDelegate_Internal.h",
         "$ios_prefix/framework/Source/FlutterBinaryMessengerRelay.mm",
-
-        # "$ios_prefix/framework/Source/FlutterCallbackCache.mm",
-        # "$ios_prefix/framework/Source/FlutterCallbackCache_Internal.h",
         "$ios_prefix/framework/Source/FlutterDartProject.mm",
         "$ios_prefix/framework/Source/FlutterDartProject_Internal.h",
         "$ios_prefix/framework/Source/FlutterEngine.mm",
         "$ios_prefix/framework/Source/FlutterEngine_Internal.h",
         "$ios_prefix/framework/Source/FlutterHeadlessDartRunner.mm",
-
-        # "$ios_prefix/framework/Source/FlutterObservatoryPublisher.h",
-        # "$ios_prefix/framework/Source/FlutterObservatoryPublisher.mm",
         "$ios_prefix/framework/Source/FlutterOverlayView.h",
         "$ios_prefix/framework/Source/FlutterOverlayView.mm",
         "$ios_prefix/framework/Source/FlutterPlatformPlugin.h",
@@ -538,18 +530,10 @@ template("flutter_engine_shell") {
         "$ios_prefix/framework/Source/FlutterPlatformViews_Internal.mm",
         "$ios_prefix/framework/Source/FlutterPluginAppLifeCycleDelegate.mm",
         "$ios_prefix/framework/Source/FlutterTextInputDelegate.h",
-
-        # "$ios_prefix/framework/Source/FlutterTextInputPlugin.h",
-        # "$ios_prefix/framework/Source/FlutterTextInputPlugin.mm",
         "$ios_prefix/framework/Source/FlutterView.h",
         "$ios_prefix/framework/Source/FlutterView.mm",
         "$ios_prefix/framework/Source/FlutterViewController.mm",
         "$ios_prefix/framework/Source/FlutterViewController_Internal.h",
-
-        # "$ios_prefix/framework/Source/accessibility_bridge.h",
-        # "$ios_prefix/framework/Source/accessibility_bridge.mm",
-        # "$ios_prefix/framework/Source/accessibility_text_entry.h",
-        # "$ios_prefix/framework/Source/accessibility_text_entry.mm",
         "$ios_prefix/framework/Source/platform_message_response_darwin.h",
         "$ios_prefix/framework/Source/platform_message_response_darwin.mm",
         "$ios_prefix/framework/Source/platform_message_router.h",
