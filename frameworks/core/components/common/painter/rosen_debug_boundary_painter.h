@@ -30,7 +30,7 @@ class RosenDebugBoundaryPainter : public virtual AceType {
     DECLARE_ACE_TYPE(RosenDebugBoundaryPainter, AceType);
 public:
     static void PaintDebugBoundary(SkCanvas* canvas, const Offset& offset, const Size& layoutSize);
-    static void PaintDebugMargin(SkCanvas* canvas, const Offset& offset, const Size& layoutSize, const EdgePx margin);
+    static void PaintDebugMargin(SkCanvas* canvas, const Offset& offset, const Size& layoutSize, const EdgePx& margin);
     static void PaintDebugCorner(SkCanvas* canvas, const Offset& offset, const Size& layoutSize);
 };
 }
