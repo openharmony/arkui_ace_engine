@@ -56,10 +56,10 @@ bool IsTraceEnabled()
 
 bool IsDebugBoundaryEnabled()
 {
-    if (system::GetParameter("persist.ace.rosen.debug.boundary.enabled", "0") == "1") {
+    if (system::GetParameter("persist.ace.debug.boundary.enabled", "0") == "1") {
         return true;
     }
-    if (system::GetParameter("persist.ace.rosen.debug.boundary.enabled", "0") == "2") {
+    if (system::GetParameter("persist.ace.debug.boundary.enabled", "0") == "2") {
         return false;
     }
     return access(ENABLE_DEBUG_BOUNDARY_FILE_PATH, F_OK) == 0;
