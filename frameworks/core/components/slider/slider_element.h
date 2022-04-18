@@ -27,7 +27,7 @@ class SliderElement : public RenderElement, public FocusNode {
 public:
     bool OnKeyEvent(const KeyEvent& keyEvent) override
     {
-        if (keyEvent.action != KeyAction::UP) {
+        if (keyEvent.action != KeyAction::DOWN) {
             return false;
         }
         auto renderSlider = AceType::DynamicCast<RenderSlider>(renderNode_);

@@ -79,7 +79,7 @@ bool IndexerElement::IndexMoveDown()
 
 bool IndexerElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
-    if (keyEvent.action != KeyAction::UP) {
+    if (keyEvent.action != KeyAction::DOWN) {
         return false;
     }
     if (keyEvent.code == KeyCode::KEY_DPAD_UP) {
