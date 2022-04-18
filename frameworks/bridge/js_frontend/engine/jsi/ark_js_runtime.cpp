@@ -227,7 +227,7 @@ Local<JSValueRef> PandaFunctionData::Callback(panda::JsiRuntimeCallInfo *info) c
     std::vector<shared_ptr<JsValue>> argv;
     uint32_t length = info->GetArgsNumber();
     argv.reserve(length);
-    for (int i = 0; i < length; ++i) {
+    for (uint32_t i = 0; i < length; ++i) {
         argv.emplace_back(
             std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(runtime_, info->GetCallArgRef(i))));
     }

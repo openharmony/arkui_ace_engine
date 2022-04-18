@@ -117,8 +117,8 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const R
     // collect error info first
     for (uint32_t i = 1; i < res.size(); i++) {
         std::string temp = res[i];
-        int32_t closeBracePos = temp.find(closeBrace);
-        int32_t openBracePos = temp.find(openBrace);
+        int32_t closeBracePos = static_cast<int32_t>(temp.find(closeBrace));
+        int32_t openBracePos = static_cast<int32_t>(temp.find(openBrace));
 
         std::string line = "";
         std::string column = "";
