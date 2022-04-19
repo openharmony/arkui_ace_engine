@@ -52,7 +52,10 @@ build_component("plugin") {
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "ipc:ipc_core",
-      "os_account_standard:os_account_innerkits",
     ]
+
+    if (os_account_exists) {
+      external_deps += [ "os_account_standard:os_account_innerkits" ]
+    }
   }
 }

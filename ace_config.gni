@@ -127,6 +127,14 @@ if (enable_dump_drawcmd) {
   ace_common_defines += [ "DUMP_DRAW_CMD" ]
 }
 
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.account_os_account_standard)) {
+  os_account_exists = true
+  ace_common_defines += [ "OS_ACCOUNT_EXISTS" ]
+} else {
+  os_account_exists = false
+}
+
 ace_platforms = []
 
 _ace_adapter_dir = rebase_path("$ace_root/adapter", root_build_dir)
