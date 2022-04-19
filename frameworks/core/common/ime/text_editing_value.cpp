@@ -124,6 +124,14 @@ void TextEditingValue::UpdateSelection(int32_t start, int32_t end)
     selection.Update(start, end);
 }
 
+#if defined(IOS_PLATFORM)
+void TextEditingValue::UpdateCompose(int32_t start, int32_t end)
+{
+    compose.Update(start, end);
+}
+#endif
+
+
 void TextEditingValue::SelectionAwareTextManipulation(const TextManipulation& manipulation)
 {
     if (!manipulation) {
