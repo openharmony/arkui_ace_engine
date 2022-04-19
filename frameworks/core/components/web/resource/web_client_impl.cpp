@@ -208,6 +208,16 @@ void WebClientImpl::OnRouterPush(const std::string& param)
     delegate->OnRouterPush(param);
 }
 
+bool WebClientImpl::OnHandleInterceptUrlLoading(const std::string& url)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+    return delegate->OnHandleInterceptUrlLoading(url);
+}
+
 bool WebClientImpl::OnAlertDialogByJS(
     const std::string &url, const std::string &message, std::shared_ptr<NWeb::NWebJSDialogResult> result)
 {
@@ -232,4 +242,50 @@ bool WebClientImpl::OnConfirmDialogByJS(
     return OnJsCommonDialog(url, message, result, DialogEventType::DIALOG_EVENT_CONFIRM, this);
 }
 
+void WebClientImpl::OnRenderExited(OHOS::NWeb::RenderExitReason reason)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnRenderExited(reason);
+}
+
+void WebClientImpl::OnRefreshAccessedHistory(const std::string& url, bool isReload)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnRefreshAccessedHistory(url, isReload);
+}
+
+bool WebClientImpl::OnFileSelectorShow(
+    std::shared_ptr<NWeb::FileSelectorCallback> callback,
+    std::shared_ptr<NWeb::NWebFileSelectorParams> params)
+{
+    ContainerScope scope(instanceId_);
+    bool jsResult = false;
+    auto param = std::make_shared<FileSelectorEvent>(AceType::MakeRefPtr<FileSelectorParamOhos>(params),
+        AceType::MakeRefPtr<FileSelectorResultOhos>(callback));
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return false;
+    }
+    task->PostSyncTask([webClient = this, &param, &jsResult] {
+        if (webClient == nullptr) {
+            return;
+        }
+        auto delegate = webClient->GetWebDelegate();
+        if (delegate) {
+            jsResult = delegate->OnFileSelectorShow(param.get());
+        }
+        },
+        OHOS::Ace::TaskExecutor::TaskType::JS);
+    LOGI("OnFileSelectorShow result:%{public}d", jsResult);
+    return jsResult;
+}
 } // namespace OHOS::Ace

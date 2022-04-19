@@ -39,6 +39,7 @@ public:
     void Refresh(const JSCallbackInfo& args);
     void StopLoading(const JSCallbackInfo& args);
     void GetHitTestResult(const JSCallbackInfo& args);
+    void GetCookieManager(const JSCallbackInfo& args);
     void AddJavascriptInterface(const JSCallbackInfo& args);
     void RemoveJavascriptInterface(const JSCallbackInfo& args);
     void SetJavascriptInterface(const JSCallbackInfo& args);
@@ -53,6 +54,7 @@ public:
     void AccessStep(const JSCallbackInfo& args);
     void AccessBackward(const JSCallbackInfo& args);
     void AccessForward(const JSCallbackInfo& args);
+    void ClearHistory(const JSCallbackInfo& args);
 
     const RefPtr<WebController>& GetController() const
     {
@@ -80,6 +82,8 @@ private:
     std::unordered_map<std::string, std::vector<std::string>> methods_;
     RefPtr<WebController> webController_;
     ACE_DISALLOW_COPY_AND_MOVE(JSWebController);
+    JSRef<JSObject> jsWebCookie_;
+    bool jsWebCookieInit_ = false;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_CONTROLLER_H

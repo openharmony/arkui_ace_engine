@@ -71,6 +71,72 @@ std::shared_ptr<WebJSValue> ParseValue(
 }
 }
 
+class JSWebCookie : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebCookie>::Declare("WebCookie");
+        JSClass<JSWebCookie>::CustomMethod("setCookie", &JSWebCookie::SetCookie);
+        JSClass<JSWebCookie>::CustomMethod("saveCookieSync", &JSWebCookie::SaveCookieSync);
+        JSClass<JSWebCookie>::Bind(globalObj, JSWebCookie::Constructor, JSWebCookie::Destructor);
+    }
+
+    void SetWebCookie(WebCookie* manager)
+    {
+        if (manager) {
+            manager_ = manager;
+        }
+    }
+
+    void SetCookie(const JSCallbackInfo& args)
+    {
+        if (!manager_) {
+            return;
+        }
+        std::string url;
+        std::string value;
+        bool result = false;
+        if (args[0]->IsString()) {
+            url = args[0]->ToString();
+        }
+        if (args[1]->IsString()) {
+            value = args[1]->ToString();
+        }
+        result = manager_->SetCookie(url, value);
+        auto jsVal = JSVal(ToJSValue(result));
+        auto returnValue = JSRef<JSVal>::Make(jsVal);
+        args.SetReturnValue(returnValue);
+    }
+
+    void SaveCookieSync(const JSCallbackInfo& args)
+    {
+        if (!manager_) {
+            return;
+        }
+        bool result = false;
+        result = manager_->SaveCookieSync();
+        auto jsVal = JSVal(ToJSValue(result));
+        auto returnValue = JSRef<JSVal>::Make(jsVal);
+        args.SetReturnValue(returnValue);
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebCookie = Referenced::MakeRefPtr<JSWebCookie>();
+        jsWebCookie->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebCookie));
+    }
+
+    static void Destructor(JSWebCookie* jsWebCookie)
+    {
+        if (jsWebCookie != nullptr) {
+            jsWebCookie->DecRefCount();
+        }
+    }
+    WebCookie* manager_;
+};
+
 JSWebController::JSWebController()
 {
     instanceId_ = Container::CurrentId();
@@ -125,7 +191,10 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("accessStep", &JSWebController::AccessStep);
     JSClass<JSWebController>::CustomMethod("accessForward", &JSWebController::AccessForward);
     JSClass<JSWebController>::CustomMethod("accessBackward", &JSWebController::AccessBackward);
+    JSClass<JSWebController>::CustomMethod("clearHistory", &JSWebController::ClearHistory);
+    JSClass<JSWebController>::CustomMethod("getCookieManager", &JSWebController::GetCookieManager);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
+    JSWebCookie::JSBind(globalObj);
 }
 
 void JSWebController::Constructor(const JSCallbackInfo& args)
@@ -327,6 +396,15 @@ void JSWebController::AccessForward(const JSCallbackInfo& args)
     }
 }
 
+void JSWebController::ClearHistory(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController clear navigation history.");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        webController_->ClearHistory();
+    }
+}
+
 void JSWebController::Refresh(const JSCallbackInfo& args)
 {
     LOGI("JSWebController Refresh");
@@ -352,6 +430,21 @@ void JSWebController::GetHitTestResult(const JSCallbackInfo& args)
     if (webController_) {
         int result = webController_->GetHitTestResult();
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+    }
+}
+
+void JSWebController::GetCookieManager(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController Start GetCookieManager");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        if (!jsWebCookieInit_) {
+            jsWebCookie_ = JSClass<JSWebCookie>::NewInstance();
+            auto jsWebCookieVal = Referenced::Claim(jsWebCookie_->Unwrap<JSWebCookie>());
+            jsWebCookieVal->SetWebCookie(webController_->GetCookieManager());
+            jsWebCookieInit_ = true;
+        }
+        args.SetReturnValue(jsWebCookie_);
     }
 }
 

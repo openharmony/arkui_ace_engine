@@ -73,7 +73,6 @@ private:
     RefPtr<Result> result_;
 };
 
-
 class JSWebConsoleLog : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -410,6 +409,136 @@ private:
     RefPtr<WebRequest> request_;
 };
 
+class JSFileSelectorParam : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSFileSelectorParam>::Declare("FileSelectorParam");
+        JSClass<JSFileSelectorParam>::CustomMethod("title", &JSFileSelectorParam::GetTitle);
+        JSClass<JSFileSelectorParam>::CustomMethod("mode", &JSFileSelectorParam::GetMode);
+        JSClass<JSFileSelectorParam>::CustomMethod("acceptType", &JSFileSelectorParam::GetAcceptType);
+        JSClass<JSFileSelectorParam>::CustomMethod("isCapture", &JSFileSelectorParam::IsCapture);
+        JSClass<JSFileSelectorParam>::Bind(
+            globalObj, &JSFileSelectorParam::Constructor, &JSFileSelectorParam::Destructor);
+    }
+
+    void SetParam(const FileSelectorEvent& eventInfo)
+    {
+        param_ = eventInfo.GetParam();
+    }
+
+    void GetTitle(const JSCallbackInfo& args)
+    {
+        auto title = JSVal(ToJSValue(param_->GetTitle()));
+        auto descriptionRef = JSRef<JSVal>::Make(title);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetMode(const JSCallbackInfo& args)
+    {
+        auto mode = JSVal(ToJSValue(param_->GetMode()));
+        auto descriptionRef = JSRef<JSVal>::Make(mode);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void IsCapture(const JSCallbackInfo& args)
+    {
+        auto isCapture = JSVal(ToJSValue(param_->IsCapture()));
+        auto descriptionRef = JSRef<JSVal>::Make(isCapture);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetAcceptType(const JSCallbackInfo& args)
+    {
+        auto acceptTypes = param_->GetAcceptType();
+        JSRef<JSArray> result = JSRef<JSArray>::New();
+        std::vector<std::string>::iterator iterator;
+        uint32_t index = 0;
+        for (iterator = acceptTypes.begin(); iterator != acceptTypes.end(); ++iterator) {
+            auto valueStr = JSVal(ToJSValue(*iterator));
+            auto value = JSRef<JSVal>::Make(valueStr);
+            result->SetValueAt(index++, value);
+        }
+        args.SetReturnValue(result);
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jSFilerSelectorParam = Referenced::MakeRefPtr<JSFileSelectorParam>();
+        jSFilerSelectorParam->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jSFilerSelectorParam));
+    }
+
+    static void Destructor(JSFileSelectorParam* jSFilerSelectorParam)
+    {
+        if (jSFilerSelectorParam != nullptr) {
+            jSFilerSelectorParam->DecRefCount();
+        }
+    }
+
+    RefPtr<WebFileSelectorParam> param_;
+};
+
+class JSFileSelectorResult : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSFileSelectorResult>::Declare("FileSelectorResult");
+        JSClass<JSFileSelectorResult>::CustomMethod("handleFileList",
+            &JSFileSelectorResult::HandleFileList);
+        JSClass<JSFileSelectorResult>::Bind(globalObj, &JSFileSelectorResult::Constructor,
+            &JSFileSelectorResult::Destructor);
+    }
+
+    void SetResult(const FileSelectorEvent& eventInfo)
+    {
+        result_ = eventInfo.GetFileSelectorResult();
+    }
+
+    void HandleFileList(const JSCallbackInfo& args)
+    {
+        std::vector<std::string> fileList;
+        if (args[0]->IsArray()) {
+            JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
+            for (size_t i = 0; i < array->Length(); i++) {
+                JSRef<JSVal> val = array->GetValueAt(i);
+                if (!val->IsString()) {
+                    LOGW("file selector list is not string at index %{public}d", i);
+                    continue;
+                }
+                std::string fileName;
+                if (!ConvertFromJSValue(val, fileName)) {
+                    LOGW("can't convert file name at index %{public}d of JSFileSelectorResult, so skip it.", i);
+                    continue;
+                }
+                fileList.push_back(fileName);
+            }
+        }
+
+        if (result_) {
+            result_->HandleFileList(fileList);
+        }
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsFileSelectorResult = Referenced::MakeRefPtr<JSFileSelectorResult>();
+        jsFileSelectorResult->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsFileSelectorResult));
+    }
+
+    static void Destructor(JSFileSelectorResult* jsFileSelectorResult)
+    {
+        if (jsFileSelectorResult != nullptr) {
+            jsFileSelectorResult->DecRefCount();
+        }
+    }
+
+    RefPtr<FileSelectorResult> result_;
+};
+
 void JSWeb::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWeb>::Declare("Web");
@@ -425,6 +554,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onGeolocationHide", &JSWeb::OnGeolocationHide);
     JSClass<JSWeb>::StaticMethod("onGeolocationShow", &JSWeb::OnGeolocationShow);
     JSClass<JSWeb>::StaticMethod("onRequestSelected", &JSWeb::OnRequestFocus);
+    JSClass<JSWeb>::StaticMethod("onFileSelectorShow", &JSWeb::OnFileSelectorShow);
     JSClass<JSWeb>::StaticMethod("javaScriptAccess", &JSWeb::JsEnabled);
     JSClass<JSWeb>::StaticMethod("fileExtendAccess", &JSWeb::ContentAccessEnabled);
     JSClass<JSWeb>::StaticMethod("fileAccess", &JSWeb::FileAccessEnabled);
@@ -432,6 +562,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onDownloadStart", &JSWeb::OnDownloadStart);
     JSClass<JSWeb>::StaticMethod("onErrorReceive", &JSWeb::OnErrorReceive);
     JSClass<JSWeb>::StaticMethod("onHttpErrorReceive", &JSWeb::OnHttpErrorReceive);
+    JSClass<JSWeb>::StaticMethod("onUrlLoadIntercept", &JSWeb::OnUrlLoadIntercept);
     JSClass<JSWeb>::StaticMethod("onlineImageAccess", &JSWeb::OnLineImageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("domStorageAccess", &JSWeb::DomStorageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("imageAccess", &JSWeb::ImageAccessEnabled);
@@ -440,6 +571,13 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
     JSClass<JSWeb>::StaticMethod("javaScriptProxy", &JSWeb::JavaScriptProxy);
     JSClass<JSWeb>::StaticMethod("userAgent", &JSWeb::UserAgent);
+    JSClass<JSWeb>::StaticMethod("onRenderExited", &JSWeb::OnRenderExited);
+    JSClass<JSWeb>::StaticMethod("onRefreshAccessedHistory", &JSWeb::OnRefreshAccessedHistory);
+    JSClass<JSWeb>::StaticMethod("cacheMode", &JSWeb::CacheMode);
+    JSClass<JSWeb>::StaticMethod("overviewModeAccess", &JSWeb::OverviewModeAccess);
+    JSClass<JSWeb>::StaticMethod("fileFromUrlAccess", &JSWeb::FileFromUrlAccess);
+    JSClass<JSWeb>::StaticMethod("databaseAccess", &JSWeb::DatabaseAccess);
+    JSClass<JSWeb>::StaticMethod("textZoomAtio", &JSWeb::TextZoomAtio);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -448,6 +586,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSWebResourceError::JSBind(globalObj);
     JSWebResourceResponse::JSBind(globalObj);
     JSWebConsoleLog::JSBind(globalObj);
+    JSFileSelectorParam::JSBind(globalObj);
+    JSFileSelectorResult::JSBind(globalObj);
 }
 
 JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& eventInfo)
@@ -503,6 +643,13 @@ JSRef<JSVal> LoadWebTitleReceiveEventToJSValue(const LoadWebTitleReceiveEvent& e
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("title", eventInfo.GetTitle());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> UrlLoadInterceptEventToJSValue(const UrlLoadInterceptEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("data", eventInfo.GetData());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -861,6 +1008,28 @@ void JSWeb::OnHttpErrorReceive(const JSCallbackInfo& args)
     webComponent->SetHttpErrorEventId(eventMarker);
 }
 
+void JSWeb::OnUrlLoadIntercept(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnUrlLoadIntercept");
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<UrlLoadInterceptEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), UrlLoadInterceptEventToJSValue);
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) -> bool {
+            auto eventInfo = TypeInfoHelper::DynamicCast<UrlLoadInterceptEvent>(info);
+            JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
+            if (message->IsBoolean()) {
+                return message->ToBoolean();
+            }
+            return false;
+        };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnUrlLoadIntercept(std::move(jsCallback));
+}
+
 void JSWeb::OnFocus(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
@@ -876,6 +1045,50 @@ void JSWeb::OnFocus(const JSCallbackInfo& args)
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetOnFocusEventId(eventMarker);
+}
+
+JSRef<JSVal> FileSelectorEventToJSValue(const FileSelectorEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+
+    JSRef<JSObject> paramObj = JSClass<JSFileSelectorParam>::NewInstance();
+    auto fileSelectorParam = Referenced::Claim(paramObj->Unwrap<JSFileSelectorParam>());
+    fileSelectorParam->SetParam(eventInfo);
+    
+    JSRef<JSObject> resultObj = JSClass<JSFileSelectorResult>::NewInstance();
+    auto fileSelectorResult = Referenced::Claim(resultObj->Unwrap<JSFileSelectorResult>());
+    fileSelectorResult->SetResult(eventInfo);
+
+    obj->SetPropertyObject("result", resultObj);
+    obj->SetPropertyObject("fileSelector", paramObj);
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
+{
+    LOGI("OnFileSelectorShow");
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FileSelectorEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), FileSelectorEventToJSValue);
+    auto jsCallback = [func = std::move(jsFunc)]
+        (const BaseEventInfo* info) -> bool {
+            ACE_SCORING_EVENT("OnFileSelectorShow CallBack");
+            if (func == nullptr) {
+                LOGW("function is null");
+                return false;
+            }
+            auto eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info);
+            JSRef<JSVal> result = func->ExecuteWithValue(*eventInfo);
+            if (result->IsBoolean()) {
+                return result->ToBoolean();
+            }
+            return false;
+        };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnFileSelectorShow(std::move(jsCallback));
 }
 
 void JSWeb::JsEnabled(bool isJsEnabled)
@@ -1012,5 +1225,131 @@ void JSWeb::UserAgent(const std::string& userAgent)
         return;
     }
     webComponent->SetUserAgent(userAgent);
+}
+
+JSRef<JSVal> RenderExitedEventToJSValue(const RenderExitedEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("renderExitReason", eventInfo.GetExitedReason());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> RefreshAccessedHistoryEventToJSValue(const RefreshAccessedHistoryEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("url", eventInfo.GetVisitedUrl());
+    obj->SetProperty("isRefreshed", eventInfo.IsRefreshed());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnRenderExited(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnRenderExited");
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<RenderExitedEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), RenderExitedEventToJSValue);
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<RenderExitedEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetRenderExitedId(eventMarker);
+}
+
+void JSWeb::OnRefreshAccessedHistory(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnRefreshAccessedHistory");
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<RefreshAccessedHistoryEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), RefreshAccessedHistoryEventToJSValue);
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<RefreshAccessedHistoryEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetRefreshAccessedHistoryId(eventMarker);
+}
+
+void JSWeb::CacheMode(int32_t cacheMode)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    auto mode = WebCacheMode::DEFAULT;
+    switch (cacheMode) {
+        case 0:
+            mode = WebCacheMode::DEFAULT;
+            break;
+        case 1:
+            mode = WebCacheMode::USE_CACHE_ELSE_NETWORK;
+            break;
+        case 2:
+            mode = WebCacheMode::USE_NO_CACHE;
+            break;
+        case 3:
+            mode = WebCacheMode::USE_CACHE_ONLY;
+            break;
+        default:
+            mode = WebCacheMode::DEFAULT;
+            break;
+    }
+    webComponent->SetCacheMode(mode);
+}
+
+void JSWeb::OverviewModeAccess(bool isOverviewModeAccessEnabled)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetOverviewModeAccessEnabled(isOverviewModeAccessEnabled);
+}
+
+void JSWeb::FileFromUrlAccess(bool isFileFromUrlAccessEnabled)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetFileFromUrlAccessEnabled(isFileFromUrlAccessEnabled);
+}
+
+void JSWeb::DatabaseAccess(bool isDatabaseAccessEnabled)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetDatabaseAccessEnabled(isDatabaseAccessEnabled);
+}
+
+void JSWeb::TextZoomAtio(int32_t textZoomAtioNum)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetTextZoomAtio(textZoomAtioNum);
 }
 } // namespace OHOS::Ace::Framework
