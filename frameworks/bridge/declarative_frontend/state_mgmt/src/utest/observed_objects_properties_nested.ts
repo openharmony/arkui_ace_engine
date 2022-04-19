@@ -44,7 +44,7 @@ const nestedObsObjProps = tsuite("Nested Observed Object and Properties", () => 
     }
 
     // globally unique id
-    id__(): number {
+    id(): number {
       return this.id_;
     }
 
@@ -52,7 +52,7 @@ const nestedObsObjProps = tsuite("Nested Observed Object and Properties", () => 
     // that the subscriber is about to be deleted
     // hence , unsubscribe
     aboutToBeDeleted(): void {
-      SubscriberManager.Get().delete(this.id__());
+      SubscriberManager.Get().delete(this.id());
     }
 
     // implements IMultiPropertiesChangePublisher

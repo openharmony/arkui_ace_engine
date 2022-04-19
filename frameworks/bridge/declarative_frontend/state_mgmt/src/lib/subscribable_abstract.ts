@@ -98,8 +98,8 @@ abstract class SubscribaleAbstract {
    */
 
   public addOwningProperty(subscriber: IPropertySubscriber): void {
-    console.debug(`SubscribaleAbstract: addOwningProperty: subscriber '${subscriber.id__()}'.`)
-    this.owningProperties_.add(subscriber.id__());
+    console.debug(`SubscribaleAbstract: addOwningProperty: subscriber '${subscriber.id()}'.`)
+    this.owningProperties_.add(subscriber.id());
   }
 
   /**
@@ -110,7 +110,7 @@ abstract class SubscribaleAbstract {
    * and/or IMultiPropertiesChangeSubscriber interfaces
    */
   public removeOwningProperty(property: IPropertySubscriber): void {
-    return this.removeOwningPropertyById(property.id__());
+    return this.removeOwningPropertyById(property.id());
   }
 
   public removeOwningPropertyById(subscriberId: number): void {

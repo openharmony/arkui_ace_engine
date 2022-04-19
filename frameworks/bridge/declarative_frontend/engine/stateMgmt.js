@@ -30,10 +30,10 @@ class SubscriberManager {
         return this.subscriberById_.delete(id);
     }
     add(newSubsriber) {
-        if (this.has(newSubsriber.id__())) {
+        if (this.has(newSubsriber.id())) {
             return false;
         }
-        this.subscriberById_.set(newSubsriber.id__(), newSubsriber);
+        this.subscriberById_.set(newSubsriber.id(), newSubsriber);
         return true;
     }
     /**
@@ -150,8 +150,8 @@ class SubscribaleAbstract {
      * and/or IMultiPropertiesChangeSubscriber interfaces
      */
     addOwningProperty(subscriber) {
-        console.debug(`SubscribaleAbstract: addOwningProperty: subscriber '${subscriber.id__()}'.`);
-        this.owningProperties_.add(subscriber.id__());
+        console.debug(`SubscribaleAbstract: addOwningProperty: subscriber '${subscriber.id()}'.`);
+        this.owningProperties_.add(subscriber.id());
     }
     /**
      * Method used by the framework to ubsubscribing decorated variables
@@ -161,7 +161,7 @@ class SubscribaleAbstract {
      * and/or IMultiPropertiesChangeSubscriber interfaces
      */
     removeOwningProperty(property) {
-        return this.removeOwningPropertyById(property.id__());
+        return this.removeOwningPropertyById(property.id());
     }
     removeOwningPropertyById(subscriberId) {
         console.debug(`SubscribaleAbstract: removeOwningProperty '${subscriberId}'.`);
@@ -216,14 +216,14 @@ class SubscribableHandler {
         console.debug(`SubscribableHandler: construcstor done`);
     }
     addOwningProperty(subscriber) {
-        console.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`);
-        this.owningProperties_.add(subscriber.id__());
+        console.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id()}'.`);
+        this.owningProperties_.add(subscriber.id());
     }
     /*
         the inverse function of createOneWaySync or createTwoWaySync
       */
     removeOwningProperty(property) {
-        return this.removeOwningPropertyById(property.id__());
+        return this.removeOwningPropertyById(property.id());
     }
     removeOwningPropertyById(subscriberId) {
         console.debug(`SubscribableHandler: removeOwningProperty '${subscriberId}'.`);
@@ -399,16 +399,16 @@ class ObservedPropertyAbstract {
         this.id_ = SubscriberManager.Get().MakeId();
         SubscriberManager.Get().add(this);
         if (subscribeMe) {
-            this.subscribers_.add(subscribeMe.id__());
+            this.subscribers_.add(subscribeMe.id());
         }
         if (info) {
             this.info_ = info;
         }
     }
     aboutToBeDeleted() {
-        SubscriberManager.Get().delete(this.id__());
+        SubscriberManager.Get().delete(this.id());
     }
-    id__() {
+    id() {
         return this.id_;
     }
     info() {
@@ -420,8 +420,8 @@ class ObservedPropertyAbstract {
         }
     }
     subscribeMe(subscriber) {
-        console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: subscribeMe: Property new subscriber '${subscriber.id__()}'`);
-        this.subscribers_.add(subscriber.id__());
+        console.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: subscribeMe: Property new subscriber '${subscriber.id()}'`);
+        this.subscribers_.add(subscriber.id());
     }
     /*
       the inverse function of createOneWaySync or createTwoWaySync
@@ -431,7 +431,7 @@ class ObservedPropertyAbstract {
     }
     notifyHasChanged(newValue) {
         //console.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged to newValue '${JSON.stringify(newValue)}', notifying.`)
-        console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
+        console.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
         var registry = SubscriberManager.Get();
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = registry.get(subscribedId);
@@ -444,12 +444,12 @@ class ObservedPropertyAbstract {
                 }
             }
             else {
-                console.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+                console.error(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
             }
         });
     }
     notifyPropertyRead() {
-        console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: propertyRead.`);
+        console.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: propertyRead.`);
         var registry = SubscriberManager.Get();
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = registry.get(subscribedId);
@@ -533,7 +533,7 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
     aboutToBeDeleted(unsubscribeMe) {
         this.unsubscribeFromOwningProperty();
         if (unsubscribeMe) {
-            this.unlinkSuscriber(unsubscribeMe.id__());
+            this.unlinkSuscriber(unsubscribeMe.id());
         }
         super.aboutToBeDeleted();
     }
@@ -545,7 +545,7 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
     // It is NOT called when
     //    thisProp.aObsObj = new ClassA
     hasChanged(newValue) {
-        console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: hasChanged`);
+        console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: hasChanged`);
         this.notifyHasChanged(this.wrappedValue_);
     }
     unsubscribeFromOwningProperty() {
@@ -565,37 +565,37 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
     */
     setValueInternal(newValue) {
         if (typeof newValue !== 'object') {
-            console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
+            console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
             return false;
         }
         this.unsubscribeFromOwningProperty();
         if (ObservedObject.IsObservedObject(newValue)) {
-            console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an ObservedObject already`);
+            console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}'] new value is an ObservedObject already`);
             ObservedObject.addOwningProperty(newValue, this);
             this.wrappedValue_ = newValue;
         }
         else if (newValue instanceof SubscribaleAbstract) {
-            console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an SubscribaleAbstract, subscribiung to it.`);
+            console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}'] new value is an SubscribaleAbstract, subscribiung to it.`);
             this.wrappedValue_ = newValue;
             this.wrappedValue_.addOwningProperty(this);
         }
         else {
-            console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an Object, needs to be wrapped in an ObservedObject.`);
+            console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}'] new value is an Object, needs to be wrapped in an ObservedObject.`);
             this.wrappedValue_ = ObservedObject.createNew(newValue, this);
         }
         return true;
     }
     get() {
-        console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: get`);
+        console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: get`);
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
     set(newValue) {
         if (this.wrappedValue_ == newValue) {
-            console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
+            console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
             return;
         }
-        console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: set, changed`);
+        console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: set, changed`);
         this.setValueInternal(newValue);
         this.notifyHasChanged(newValue);
     }
@@ -660,12 +660,12 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
     }
     aboutToBeDeleted(unsubscribeMe) {
         if (unsubscribeMe) {
-            this.unlinkSuscriber(unsubscribeMe.id__());
+            this.unlinkSuscriber(unsubscribeMe.id());
         }
         super.aboutToBeDeleted();
     }
     hasChanged(newValue) {
-        console.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: hasChanged`);
+        console.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: hasChanged`);
         this.notifyHasChanged(this.wrappedValue_);
     }
     /*
@@ -674,20 +674,20 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
       and also notify with this.aboutToChange();
     */
     setValueInternal(newValue) {
-        console.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}'] new value is of simple type`);
+        console.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}'] new value is of simple type`);
         this.wrappedValue_ = newValue;
     }
     get() {
-        console.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`);
+        console.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`);
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
     set(newValue) {
         if (this.wrappedValue_ == newValue) {
-            console.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
+            console.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
             return;
         }
-        console.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
+        console.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
         this.setValueInternal(newValue);
         this.notifyHasChanged(newValue);
     }
@@ -733,7 +733,7 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
     */
     aboutToBeDeleted() {
         // unregister from parent of this link
-        this.linkedParentProperty_.unlinkSuscriber(this.id__());
+        this.linkedParentProperty_.unlinkSuscriber(this.id());
         // unregister from the ObservedObject
         ObservedObject.removeOwningProperty(this.getObject(), this);
         super.aboutToBeDeleted();
@@ -748,21 +748,21 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
     // this object is subscriber to ObservedObject
     // will call this cb function when property has changed
     hasChanged(newValue) {
-        console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`);
+        console.debug(`SynchedPropertyObjectTwoWay[${this.id()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`);
         this.notifyHasChanged(this.getObject());
     }
     // get 'read through` from the ObservedProperty
     get() {
-        console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: get`);
+        console.debug(`SynchedPropertyObjectTwoWay[${this.id()}, '${this.info() || "unknown"}']: get`);
         return this.getObject();
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
         if (this.getObject() == newValue) {
-            console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+            console.debug(`SynchedPropertyObjectTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
             return;
         }
-        console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+        console.debug(`SynchedPropertyObjectTwoWay[${this.id()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
         ObservedObject.removeOwningProperty(this.getObject(), this);
         this.setObject(newValue);
         ObservedObject.addOwningProperty(this.getObject(), this);
@@ -823,22 +823,22 @@ class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
     // this object is subscriber to ObservedObject
     // will call this cb function when property has changed
     hasChanged(newValue) {
-        console.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`);
+        console.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`);
         this.notifyHasChanged(this.obsObject_);
     }
     // get 'read through` from the ObservedProperty
     get() {
-        console.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: get`);
+        console.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: get`);
         this.notifyPropertyRead();
         return this.obsObject_;
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
         if (this.obsObject_ == newValue) {
-            console.debug(`SynchedPropertyNesedObject[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+            console.debug(`SynchedPropertyNesedObject[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
             return;
         }
-        console.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+        console.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
         // unsubscribe from the old value ObservedObject
         ObservedObject.removeOwningProperty(this.obsObject_, this);
         this.obsObject_ = newValue;
@@ -890,16 +890,16 @@ class SynchedPropertySimpleOneWay extends ObservedPropertySimpleAbstract {
     }
     // get 'read through` from the ObservedProperty
     get() {
-        console.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || "unknown"}']: get returns '${this.wrappedValue_}'`);
+        console.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: get returns '${this.wrappedValue_}'`);
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
     set(newValue) {
         if (this.wrappedValue_ == newValue) {
-            console.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value '${this.wrappedValue_}'- ignoring.`);
+            console.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value '${this.wrappedValue_}'- ignoring.`);
             return;
         }
-        console.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
+        console.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
         this.wrappedValue_ = newValue;
         this.notifyHasChanged(newValue);
     }
@@ -929,11 +929,11 @@ class SynchedPropertySimpleOneWaySubscribing extends SynchedPropertySimpleOneWay
     }
     aboutToBeDeleted() {
         // unregister from parent of this prop
-        this.linkedParentProperty_.unlinkSuscriber(this.id__());
+        this.linkedParentProperty_.unlinkSuscriber(this.id());
         super.aboutToBeDeleted();
     }
     hasChanged(newValue) {
-        console.debug(`SynchedPropertySimpleOneWaySubscribing[${this.id__()}, '${this.info() || "unknown"}']: source property hasChanged'.`);
+        console.debug(`SynchedPropertySimpleOneWaySubscribing[${this.id()}, '${this.info() || "unknown"}']: source property hasChanged'.`);
         this.set(newValue);
     }
     /**
@@ -974,7 +974,7 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     the property.
   */
     aboutToBeDeleted() {
-        this.source_.unlinkSuscriber(this.id__());
+        this.source_.unlinkSuscriber(this.id());
         this.source_ = undefined;
         super.aboutToBeDeleted();
     }
@@ -982,22 +982,22 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     // will call this cb function when property has changed
     // a set (newValue) is not done because get reads through for the source_
     hasChanged(newValue) {
-        console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`);
+        console.debug(`SynchedPropertySimpleTwoWay[${this.id()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`);
         this.notifyHasChanged(newValue);
     }
     // get 'read through` from the ObservedProperty
     get() {
-        console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: get`);
+        console.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: get`);
         this.notifyPropertyRead();
         return this.source_.get();
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
         if (this.source_.get() == newValue) {
-            console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+            console.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
             return;
         }
-        console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+        console.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
         // the source_ ObservedProeprty will call: this.hasChanged(newValue);
         this.notifyHasChanged(newValue);
         return this.source_.set(newValue);
@@ -1741,7 +1741,7 @@ class View extends NativeView {
         this.localStoragebackStore_ = instance;
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
-    id__() {
+    id() {
         return this.id_;
     }
     propertyHasChanged(info) {
@@ -1969,10 +1969,10 @@ class PersistentStorage {
             val.aboutToBeDeleted();
         });
         this.links_.clear();
-        SubscriberManager.Get().delete(this.id__());
+        SubscriberManager.Get().delete(this.id());
         PersistentStorage.Storage_.clear();
     }
-    id__() {
+    id() {
         return this.id_;
     }
     /**
