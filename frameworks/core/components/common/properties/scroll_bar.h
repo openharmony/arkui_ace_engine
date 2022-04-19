@@ -34,6 +34,7 @@ constexpr double DEFAULT_TOPANGLE = 60.0;
 constexpr double DEFAULT_BOTTOMANGLE = 120.0;
 constexpr double DEFAULT_MINANGLE = 10.0;
 constexpr double STRAIGHT_ANGLE = 180.0;
+constexpr Color PRESSED_BLEND_COLOR = Color(0x19000000);
 
 enum class ShapeMode {
     /*
@@ -144,9 +145,9 @@ public:
         foregroundColor_ = foregroundColor;
     }
 
-    const Color& GetForegroundColor() const
+    Color GetForegroundColor() const
     {
-        return foregroundColor_;
+        return IsPressed() ? foregroundColor_.BlendColor(PRESSED_BLEND_COLOR) : foregroundColor_;
     }
 
     double GetTopAngle() const
@@ -297,6 +298,18 @@ public:
     void SetScrollBarController(RefPtr<ScrollBarController> controller)
     {
         barController_ = controller;
+    }
+
+    bool IsPressed() const
+    {
+        return barController_ ?  barController_->IsPressed() : false;
+    }
+
+    void SetIsHover(bool isHover) const
+    {
+        if (barController_) {
+            barController_->SetIsHover(isHover);
+        }
     }
 
 private:

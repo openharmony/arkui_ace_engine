@@ -82,41 +82,81 @@ void ScrollBarController::Initialize(const WeakPtr<PipelineContext>& context)
     }
 }
 
+void ScrollBarController::PlayGrowAnimation()
+{
+    LOGD("start play grow animation.");
+    if (!touchDownCallback_) {
+        return;
+    }
+    if (!touchAnimator_->IsStopped()) {
+        touchAnimator_->Stop();
+    }
+    touchAnimator_->ClearInterpolators();
+    auto activeWidth = activeWidth_.Value();
+    auto inactiveWidth = inactiveWidth_.Value();
+    auto pipeline = context_.Upgrade();
+    if (pipeline) {
+        activeWidth = pipeline->NormalizeToPx(activeWidth_);
+        inactiveWidth = pipeline->NormalizeToPx(inactiveWidth_);
+    }
+
+    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(inactiveWidth, activeWidth, Curves::SHARP);
+    animation->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar && scrollBar->touchDownCallback_) {
+            scrollBar->touchDownCallback_(value);
+            scrollBar->MarkScrollRender();
+        }
+    });
+    touchAnimator_->AddInterpolator(animation);
+    touchAnimator_->SetDuration(BAR_EXPAND_DURATION);
+    touchAnimator_->Play();
+    if (barEndCallback_) {
+        barEndCallback_(UINT8_MAX);
+    }
+}
+
+void ScrollBarController::PlayShrinkAnimation()
+{
+    LOGD("start play shrink animation.");
+    if (!touchUpCallback_) {
+        return;
+    }
+    if (!touchAnimator_->IsStopped()) {
+        touchAnimator_->Stop();
+    }
+    touchAnimator_->ClearInterpolators();
+    auto activeWidth = activeWidth_.Value();
+    auto inactiveWidth = inactiveWidth_.Value();
+    auto pipeline = context_.Upgrade();
+    if (pipeline) {
+        activeWidth = pipeline->NormalizeToPx(activeWidth_);
+        inactiveWidth = pipeline->NormalizeToPx(inactiveWidth_);
+    }
+
+    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(activeWidth, inactiveWidth, Curves::SHARP);
+    animation->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar && scrollBar->touchUpCallback_) {
+            scrollBar->touchUpCallback_(value);
+        }
+    });
+    touchAnimator_->AddInterpolator(animation);
+    touchAnimator_->SetDuration(BAR_SHRINK_DURATION);
+    touchAnimator_->Play();
+}
+
 void ScrollBarController::HandleTouchDown()
 {
     LOGI("handle touch down");
+    isPressed_ = true;
     if (CheckScroll()) {
         isActive_ = true;
         if (vibrator_) {
             vibrator_->Vibrate(VIBRATE_DURATION);
         }
-        if (touchDownCallback_) {
-            if (!touchAnimator_->IsStopped()) {
-                touchAnimator_->Stop();
-            }
-            touchAnimator_->ClearInterpolators();
-            auto activeWidth = activeWidth_.Value();
-            auto inactiveWidth = inactiveWidth_.Value();
-            auto pipeline = context_.Upgrade();
-            if (pipeline) {
-                activeWidth = pipeline->NormalizeToPx(activeWidth_);
-                inactiveWidth = pipeline->NormalizeToPx(inactiveWidth_);
-            }
-
-            auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(inactiveWidth, activeWidth, Curves::SHARP);
-            animation->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
-                auto scrollBar = weakBar.Upgrade();
-                if (scrollBar && scrollBar->touchDownCallback_) {
-                    scrollBar->touchDownCallback_(value);
-                    scrollBar->MarkScrollRender();
-                }
-            });
-            touchAnimator_->AddInterpolator(animation);
-            touchAnimator_->SetDuration(BAR_EXPAND_DURATION);
-            touchAnimator_->Play();
-            if (barEndCallback_) {
-                barEndCallback_(UINT8_MAX);
-            }
+        if (!isHover_) {
+            PlayGrowAnimation();
         }
     }
 }
@@ -132,29 +172,9 @@ void ScrollBarController::MarkScrollRender()
 void ScrollBarController::HandleTouchUp()
 {
     LOGI("handle touch up");
-    if (touchUpCallback_) {
-        if (!touchAnimator_->IsStopped()) {
-            touchAnimator_->Stop();
-        }
-        touchAnimator_->ClearInterpolators();
-        auto activeWidth = activeWidth_.Value();
-        auto inactiveWidth = inactiveWidth_.Value();
-        auto pipeline = context_.Upgrade();
-        if (pipeline) {
-            activeWidth = pipeline->NormalizeToPx(activeWidth_);
-            inactiveWidth = pipeline->NormalizeToPx(inactiveWidth_);
-        }
-
-        auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(activeWidth, inactiveWidth, Curves::SHARP);
-        animation->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
-            auto scrollBar = weakBar.Upgrade();
-            if (scrollBar && scrollBar->touchUpCallback_) {
-                scrollBar->touchUpCallback_(value);
-            }
-        });
-        touchAnimator_->AddInterpolator(animation);
-        touchAnimator_->SetDuration(BAR_SHRINK_DURATION);
-        touchAnimator_->Play();
+    isPressed_ = false;
+    if (!isHover_) {
+        PlayShrinkAnimation();
     }
     if (isActive_) {
         HandleScrollBarEnd();
@@ -283,4 +303,29 @@ bool ScrollBarController::CheckScroll()
     return scroll != nullptr;
 
 }
+
+void ScrollBarController::SetIsHover(bool isHover)
+{
+    LOGD("set scroll bar hover state: %{public}d", isHover);
+    if (isPressed_) {
+        LOGD("scroll bar is pressed now.");
+        return;
+    }
+    if (isHover_ == isHover) {
+        LOGD("hover state is not changed");
+        return;
+    }
+    isHover_ = isHover;
+    if (isHover) {
+        isActive_ = true;
+        PlayGrowAnimation();
+    } else {
+        PlayShrinkAnimation();
+        if (isActive_) {
+            HandleScrollBarEnd();
+        }
+        isActive_ = false;
+    }
+}
+
 } // namespace OHOS::Ace

@@ -19,6 +19,7 @@
 
 #include "base/geometry/axis.h"
 #include "core/animation/curve_animation.h"
+#include "core/common/event_manager.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/event/ace_event_helper.h"
 #include "core/gestures/timeout_recognizer.h"
@@ -706,6 +707,26 @@ void RenderScroll::OnTouchTestHit(
     }
     touchRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(touchRecognizer_);
+}
+
+void RenderScroll::HandleMouseHoverEvent(const MouseState mouseState)
+{
+    LOGI("scroll hover state: %{public}d", mouseState);
+    if (scrollBar_ && mouseState == MouseState::NONE) {
+        scrollBar_->SetIsHover(false);
+    }
+}
+
+bool RenderScroll::HandleMouseEvent(const MouseEvent& event)
+{
+    if (!scrollBar_) {
+        return RenderNode::HandleMouseEvent(event);
+    }
+    auto globalOffset = GetGlobalOffset();
+    auto localPoint = Point(event.x - globalOffset.GetX(), event.y - globalOffset.GetY());
+    bool isScrollBarHover = scrollBar_->InBarRegion(localPoint);
+    scrollBar_->SetIsHover(isScrollBarHover);
+    return isScrollBarHover;
 }
 
 void RenderScroll::JumpToIndex(int32_t index, int32_t source)
