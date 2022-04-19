@@ -32,7 +32,8 @@ class AceAbility final : public OHOS::AppExecFwk::Ability,
                          public OHOS::Rosen::IWindowChangeListener,
                          public OHOS::Rosen::IWindowDragListener,
                          public OHOS::Rosen::IOccupiedAreaChangeListener,
-                         public OHOS::Rosen::IInputEventListener {
+                         public OHOS::Rosen::IInputEventListener,
+                         public OHOS::Rosen::IAceAbilityHandler {
 public:
     AceAbility()
     {
@@ -75,6 +76,10 @@ public:
     // override Rosen::IInputEventListener virtual callback function
     void OnPointerInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+
+    // override Rosen::IAceAbilityHandler virtual callback function
+    void SetBackgroundColor(uint32_t color) override;
+    uint32_t GetBackgroundColor() override;
 
     void Dump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
