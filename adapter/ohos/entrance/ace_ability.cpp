@@ -753,7 +753,7 @@ void AceAbility::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 void AceAbility::SetBackgroundColor(uint32_t color)
 {
     LOGI("AceAbilityHandler::SetBackgroundColor color is %{public}u", color);
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
         LOGE("SetBackgroundColor failed: container is null.");
         return;
@@ -773,9 +773,10 @@ void AceAbility::SetBackgroundColor(uint32_t color)
         pipelineContext->SetAppBgColor(Color(bgColor));
     }, TaskExecutor::TaskType::UI);
 }
+
 uint32_t AceAbility::GetBackgroundColor()
 {
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
         LOGE("AceAbilityHandler GetBackgroundColor failed: container is null. return 0x000000");
         return 0x000000;
