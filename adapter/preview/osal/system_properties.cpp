@@ -157,4 +157,14 @@ bool SystemProperties::GetDebugEnabled()
 {
     return false;
 }
+
+std::string SystemProperties::GetLanguage()
+{
+    return UNDEFINED_PARAM;
+}
+
+std::string SystemProperties::GetRegion()
+{
+    return UNDEFINED_PARAM;
+}
 } // namespace OHOS::Ace

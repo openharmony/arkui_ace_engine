@@ -172,6 +172,10 @@ public:
         return paramDeviceType_;
     }
 
+    static std::string GetLanguage();
+
+    static std::string GetRegion();
+
     static bool GetRosenBackendEnabled()
     {
         return rosenBackendEnabled_;

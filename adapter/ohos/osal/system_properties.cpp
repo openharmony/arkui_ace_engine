@@ -215,13 +215,14 @@ void SystemProperties::InitDeviceInfo(
     resolution_ = resolution;
     deviceWidth_ = deviceWidth;
     deviceHeight_ = deviceHeight;
-    brand_ = system::GetParameter("ro.product.brand", INVALID_PARAM);
-    manufacturer_ = system::GetParameter("ro.product.manufacturer", INVALID_PARAM);
-    model_ = system::GetParameter("ro.product.model", INVALID_PARAM);
-    product_ = system::GetParameter("ro.product.name", INVALID_PARAM);
-    apiVersion_ = system::GetParameter("hw_sc.build.os.apiversion", INVALID_PARAM);
-    releaseType_ = system::GetParameter("hw_sc.build.os.releasetype", INVALID_PARAM);
-    paramDeviceType_ = system::GetParameter("hw_sc.build.os.devicetype", INVALID_PARAM);
+    brand_ = system::GetParameter("const.product.brand", INVALID_PARAM);
+    manufacturer_ = system::GetParameter("const.product.manufacturer", INVALID_PARAM);
+    model_ = system::GetParameter("const.product.model", INVALID_PARAM);
+    product_ = system::GetParameter("const.product.name", INVALID_PARAM);
+    apiVersion_ = system::GetParameter("const.ohos.apiversion", INVALID_PARAM);
+    releaseType_ = system::GetParameter("const.ohos.releasetype", INVALID_PARAM);
+    paramDeviceType_ = system::GetParameter("const.build.characteristics", INVALID_PARAM);
+
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
@@ -267,5 +268,15 @@ void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
 bool SystemProperties::GetDebugEnabled()
 {
     return debugEnabled_;
+}
+
+std::string SystemProperties::GetLanguage()
+{
+    return system::GetParameter("const.global.language", INVALID_PARAM);
+}
+
+std::string SystemProperties::GetRegion()
+{
+    return system::GetParameter("const.global.region", INVALID_PARAM);
 }
 } // namespace OHOS::Ace
