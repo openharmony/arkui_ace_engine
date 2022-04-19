@@ -17,7 +17,6 @@
 
 #include "hilog_wrapper.h"
 #include "js_plugin_util.h"
-#include "ohos/aafwk/base/array_wrapper.h"
 #include "ohos/aafwk/base/bool_wrapper.h"
 #include "ohos/aafwk/base/byte_wrapper.h"
 #include "ohos/aafwk/base/double_wrapper.h"
@@ -27,6 +26,7 @@
 #include "ohos/aafwk/base/short_wrapper.h"
 #include "ohos/aafwk/base/string_wrapper.h"
 #include "ohos/aafwk/base/zchar_wrapper.h"
+#include "ohos/aafwk/content/array_wrapper.h"
 #include "ohos/aafwk/content/want_params_wrapper.h"
 
 namespace OHOS::Ace::Napi {
