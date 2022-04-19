@@ -758,7 +758,7 @@ void AceAbility::SetBackgroundColor(uint32_t color)
         LOGE("SetBackgroundColor failed: container is null.");
         return;
     }
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(abilityId_);
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("SetBackgroundColor failed: taskExecutor is null.");
@@ -786,7 +786,7 @@ uint32_t AceAbility::GetBackgroundColor()
         LOGE("AceAbilityHandler GetBackgroundColor failed: taskExecutor is null.");
         return 0x000000;
     }
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(abilityId_);
     uint32_t bgColor = 0x000000;
     taskExecutor->PostSyncTask([&bgColor, container]() {
             if (!container) {
