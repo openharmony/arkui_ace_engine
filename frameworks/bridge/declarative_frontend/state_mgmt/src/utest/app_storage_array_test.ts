@@ -25,7 +25,7 @@ const testAppStorageArray = tsuite("AppStorage Array", () => {
     }
 
     // globally unique id
-    id__(): number {
+    id(): number {
       return this.id_;
     }
 
@@ -33,8 +33,8 @@ const testAppStorageArray = tsuite("AppStorage Array", () => {
     // that the subscriber is about to be deleted
     // hence , unsubscribe
     aboutToBeDeleted(owningView?: IPropertySubscriber): void {
-      AppStorage.UnsubscribeFromChangesOf("arr", this.id__());
-      SubscriberManager.Get().delete(this.id__());
+      AppStorage.UnsubscribeFromChangesOf("arr", this.id());
+      SubscriberManager.Get().delete(this.id());
     }
 
     // get informed after the property has changed.
@@ -55,7 +55,7 @@ const testAppStorageArray = tsuite("AppStorage Array", () => {
     }
 
     // globally unique id
-    id__(): number {
+    id(): number {
       return this.id_;
     }
 
@@ -63,7 +63,7 @@ const testAppStorageArray = tsuite("AppStorage Array", () => {
     // that the subscriber is about to be deleted
     // hence , unsubscribe
     aboutToBeDeleted(owningView?: IPropertySubscriber): void {
-      SubscriberManager.Get().delete(this.id__());
+      SubscriberManager.Get().delete(this.id());
     }
 
     // get informed after the property has changed.
