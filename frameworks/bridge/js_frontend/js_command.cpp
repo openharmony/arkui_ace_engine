@@ -611,7 +611,7 @@ void JsCommandUpdateDomElementStyles::Execute(const RefPtr<JsAcePage>& page) con
     DisplayType displayType = node->GetDisplay();
     if (displayType == DisplayType::INLINE) {
         std::vector < std::pair < std::string, std::string >> stylesTemp;
-        for (int i = 0; i < styles_.size(); i++) {
+        for (int32_t i = 0; i < styles_.size(); i++) {
             std::string key = styles_[i].first;
             std::string value = styles_[i].second;
             if (key == "width" || key == "height" || key.find("margin") != std::string::npos ||

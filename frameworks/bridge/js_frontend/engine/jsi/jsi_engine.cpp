@@ -442,7 +442,7 @@ void SetDomStyle(
     }
 
     bool isIine = false;
-    for (int i = 0; i < styles.size(); i++) {
+    for (int32_t i = 0; i < styles.size(); i++) {
         std::string key = styles[i].first;
         std::string value = styles[i].second;
         if (key == "display" && value == "inline") {
@@ -453,7 +453,7 @@ void SetDomStyle(
 
     if (isIine) {
         std::vector < std::pair < std::string, std::string >> stylesFinaly;
-        for (int i = 0; i < styles.size(); i++) {
+        for (int32_t i = 0; i < styles.size(); i++) {
             std::string key = styles[i].first;
             std::string value = styles[i].second;
             if (key == "width" || key == "height" || key.find("margin") != std::string::npos ||
