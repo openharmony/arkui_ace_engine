@@ -72,6 +72,7 @@ void RosenRenderCircleBlock::Paint(RenderContext& context, const Offset& offset)
         focusPaint.setColor(FOCUS_BORDER_COLOR);
         focusPaint.setStyle(SkPaint::Style::kStroke_Style);
         focusPaint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_PADDING));
+        focusPaint.setAntiAlias(true);
         canvas->drawCircle(offset.GetX(), offset.GetY(), radius + RADIUS_PADDING, focusPaint);
         SkPaint blockPaint;
         blockPaint.setColor(SkColorSetARGB(GetBlockColor().GetAlpha(), GetBlockColor().GetRed(),

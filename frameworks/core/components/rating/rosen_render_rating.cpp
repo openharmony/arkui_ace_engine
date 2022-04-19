@@ -45,8 +45,7 @@ void RosenRenderRating::Paint(RenderContext& context, const Offset& offset)
         RequestFocusAnimation(animationOffset + GetGlobalOffset(), Size(focusRadius, focusRadius), focusRadius);
     }
 
-    if ((SystemProperties::GetDeviceType() == DeviceType::TABLET || SystemProperties::GetDeviceType() ==
-    DeviceType::PHONE) && !isIndicator_ && operationEvent_ == OperationEvent::RATING_KEY_EVENT) {
+    if ((IsTablet() || IsPhone()) && !isIndicator_ && operationEvent_ == OperationEvent::RATING_KEY_EVENT) {
         Offset animationOffset = starOffset + Offset(offsetDeltaX, offsetDeltaY);
         PaintFocusForTABLET(animationOffset, focusBorderRadius_.Value(),
             Size(singleWidth_, ratingSize_.Height()), context);
@@ -59,8 +58,7 @@ void RosenRenderRating::Paint(RenderContext& context, const Offset& offset)
     }
     PaintRatingBar(context, canvas);
     Offset pressstarOffset = Offset(singleWidth_ * pressstarNum_ + imageVerticalOffset, imageVerticalOffset);
-    if (!isIndicator_ && (SystemProperties::GetDeviceType() == DeviceType::TABLET ||
-    SystemProperties::GetDeviceType() == DeviceType::PHONE) && isPress_) {
+    if (!isIndicator_ && (IsTablet() || IsPhone()) && isPress_) {
         Offset animationOffset = pressstarOffset + Offset(offsetDeltaX, offsetDeltaY);
         PaintPress(animationOffset + offset, NormalizeToPx(PRESS_BORDER_RADIUS),
             Size(singleWidth_, ratingSize_.Height()), context);
@@ -179,9 +177,10 @@ void RosenRenderRating::PaintFocusForTABLET(
     }
     SkPaint paint;
     SkRRect rRect;
-    paint.setColor(FOCUS_BODER_COLOR);
+    paint.setColor(FOCUS_BORDER_COLOR);
     paint.setStyle(SkPaint::Style::kStroke_Style);
-    paint.setStrokeWidth(NormalizeToPx(FOCUS_BODER_PADING));
+    paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_PADDING));
+    paint.setAntiAlias(true);
     rRect.setRectXY(SkRect::MakeWH(boardSize.Width(), boardSize.Height()), rRectRadius, rRectRadius);
     rRect.offset(offset.GetX(), offset.GetY());
     canvas->drawRRect(rRect, paint);

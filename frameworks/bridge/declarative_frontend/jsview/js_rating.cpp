@@ -85,6 +85,14 @@ void JSRating::JSBind(BindingTarget globalObj)
     JSClass<JSRating>::StaticMethod("stepSize", &JSRating::SetStepSize, opt);
     JSClass<JSRating>::StaticMethod("starStyle", &JSRating::SetStarStyle, opt);
     JSClass<JSRating>::StaticMethod("onChange", &JSRating::SetOnChange);
+
+    JSClass<JSRating>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSRating>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSRating>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSRating>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSRating>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSRating>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSRating>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSRating>::Inherit<JSViewAbstract>();
     JSClass<JSRating>::Bind<>(globalObj);
 }

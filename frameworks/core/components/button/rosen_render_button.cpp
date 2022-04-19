@@ -49,6 +49,10 @@ constexpr double PROGRESS_START_ANGLE = 1.5 * M_PI;
 // Definition for animation
 constexpr uint8_t DEFAULT_OPACITY = 255;
 
+constexpr Dimension FOCUS_PADDING = 2.0_vp;
+constexpr Dimension FOCUS_BORDER_WIDTH = 2.0_vp;
+constexpr uint32_t FOCUS_BORDER_COLOR = 0xFF0A59F7;
+
 } // namespace
 
 void RosenRenderButton::PerformLayout()
@@ -106,6 +110,9 @@ void RosenRenderButton::Paint(RenderContext& context, const Offset& offset)
     }
     DrawButton(canvas, offset);
     RenderNode::Paint(context, offset);
+    if (isFocus_ && (isTablet_ || isPhone_)) {
+        PaintFocus(context, offset);
+    }
 }
 
 void RosenRenderButton::PaintButtonAnimation()
@@ -450,6 +457,35 @@ void RosenRenderButton::ConvertToSkVector(const std::array<Radius, 4>& radii, Sk
         skRadii[i].set(SkDoubleToScalar(std::max(radii[i].GetX().ConvertToPx(dipScale), 0.0)),
             SkDoubleToScalar(std::max(radii[i].GetY().ConvertToPx(dipScale), 0.0)));
     }
+}
+
+void RosenRenderButton::PaintFocus(RenderContext& context, const Offset& offset)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        LOGE("paint canvas is null");
+        return;
+    }
+    Size canvasSize = GetLayoutSize();
+    double focusBorderHeight = canvasSize.Height() + NormalizeToPx(FOCUS_PADDING * 2);
+    double focusBorderWidth = canvasSize.Width() + NormalizeToPx(FOCUS_PADDING * 2);
+    double focusRadius = focusBorderHeight / 2;
+    if (!buttonComponent_) {
+        return;
+    }
+    if (buttonComponent_->GetType() == ButtonType::NORMAL) {
+        focusRadius = rrectRadius_ + NormalizeToPx(FOCUS_PADDING);
+    }
+
+    SkPaint paint;
+    paint.setColor(FOCUS_BORDER_COLOR);
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
+    paint.setAntiAlias(true);
+    SkRRect rRect;
+    rRect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
+    rRect.offset(offset.GetX() - NormalizeToPx(FOCUS_PADDING), offset.GetY() - NormalizeToPx(FOCUS_PADDING));
+    canvas->drawRRect(rRect, paint);
 }
 
 } // namespace OHOS::Ace

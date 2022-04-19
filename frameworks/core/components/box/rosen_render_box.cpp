@@ -415,6 +415,7 @@ void RosenRenderBox::PaintFocus(const SkRect& focusRect, RenderContext& context)
     paint.setStyle(SkPaint::Style::kStroke_Style);
     paint.setColor(FOCUS_COLOR);
     paint.setStrokeWidth(FOCUS_WIDTH);
+    paint.setAntiAlias(true);
 
     SkRRect rRect = SkRRect::MakeRectXY(focusRect, FOCUS_RADIUS_X, FOCUS_RADIUS_Y);
     canvas->drawRRect(rRect, paint);
