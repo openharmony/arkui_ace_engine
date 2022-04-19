@@ -30,18 +30,13 @@ using localSocket = boost::asio::local::stream_protocol;
 
 class ConnectServer {
 public:
-    ConnectServer(const std::string& bundle, std::function<void(std::string)> onMessage, bool flagNeedDebugBreakPoint)
-        : bundleName_(bundle), wsOnMessage_(std::move(onMessage))
-    {
-        waitingForDebugger_ = flagNeedDebugBreakPoint;
-    }
+    ConnectServer(const std::string& bundleName, std::function<void(std::string)> onMessage)
+        : bundleName_(bundleName), wsOnMessage_(std::move(onMessage))
+    {}
     ~ConnectServer() = default;
     void RunServer();
     void StopServer();
     void SendMessage(const std::string& message) const;
-    void WaitMessage() const;
-    void Register(int32_t pid);
-    bool waitingForDebugger_;
 
 private:
     volatile bool terminateExecution_ = false;

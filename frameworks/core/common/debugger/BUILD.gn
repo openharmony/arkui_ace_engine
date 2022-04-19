@@ -31,14 +31,9 @@ ohos_shared_library("connectserver_debugger") {
     "BOOST_CLANG",
   ]
 
-  defines += ace_common_defines
+  defines += [ "ACE_LOG_TAG=\"ConnectServer\"" ]
 
-  external_deps = [ "hilog:libhilog" ]
-
-  deps += [
-    "//third_party/boost:boost",
-    "//utils/native/base:utilsecurec",
-  ]
+  external_deps = hilog_deps
 
   include_dirs = [
     "$ace_root",
@@ -46,14 +41,12 @@ ohos_shared_library("connectserver_debugger") {
     "$ace_root/frameworks/core/common/debugger",
     "//third_party/boost",
     "//third_party/boost/boost",
-    "//utils/native/base/include",
   ]
 
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "connect_inspector.cpp",
     "connect_server.cpp",
-    "unix_socket.cpp",
   ]
 
   configs = [ ":connectserver_debugger_config" ]

@@ -17,13 +17,10 @@
 #include <fstream>
 #include <iostream>
 #include <sys/types.h>
-#include <sys/unistd.h>
 #include <thread>
 #include "base/log/log.h"
-#include "frameworks/core/common/debugger/unix_socket.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<UnixSocketClient> g_unixSocket = nullptr;
 
 void ConnectServer::RunServer()
 {
@@ -81,31 +78,6 @@ void ConnectServer::SendMessage(const std::string& message) const
     } catch (std::exception const& e) {
         LOGE("Error exception");
     }
-}
-
-void ConnectServer::WaitMessage() const
-{
-    beast::flat_buffer buffer;
-    webSocket_->read(buffer);
-    std::string message = boost::beast::buffers_to_string(buffer.data());
-    LOGI("receive msg from Debug Manager message=%s", message.c_str());
-    wsOnMessage_(std::move(message));
-}
-
-void ConnectServer::Register(int32_t pid)
-{
-    g_unixSocket = std::make_unique<UnixSocketClient>();
-    int connRes = g_unixSocket->UnixSocketConn();
-    if (connRes < 0) {
-        return;
-    }
-    LOGI("Unix Socket Connect Successfully");
-    int res = g_unixSocket->SendMessage(pid);
-    if (res < 0) {
-        LOGE("Register Failed!");
-        return;
-    }
-    LOGI("Register Successfully!");
 }
 
 } // namespace OHOS::Ace

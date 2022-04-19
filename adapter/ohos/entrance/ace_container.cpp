@@ -29,6 +29,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
+#include "core/common/connect_server_manager.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/flutter/flutter_task_executor.h"
@@ -589,7 +590,8 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
         instanceId, type, isArkApp, aceAbility, std::move(callback), useCurrentEventRunner);
     AceEngine::Get().AddContainer(instanceId, aceContainer);
 
-    HdcRegister::Get().StartHdcRegister();
+    HdcRegister::Get().StartHdcRegister(instanceId);
+    ConnectServerManager::Get().AddInstance(instanceId);
     aceContainer->Initialize();
     ContainerScope scope(instanceId);
     auto front = aceContainer->GetFrontend();
@@ -612,7 +614,7 @@ void AceContainer::DestroyContainer(int32_t instanceId)
         LOGE("no AceContainer with id %{private}d in AceEngine", instanceId);
         return;
     }
-    HdcRegister::Get().StopHdcRegister();
+    HdcRegister::Get().StopHdcRegister(instanceId);
     container->Destroy();
     auto taskExecutor = container->GetTaskExecutor();
     if (taskExecutor) {
@@ -625,6 +627,7 @@ void AceContainer::DestroyContainer(int32_t instanceId)
             LOGI("Remove on Platform thread...");
             EngineHelper::RemoveEngine(instanceId);
             AceEngine::Get().RemoveContainer(instanceId);
+            ConnectServerManager::Get().RemoveInstance(instanceId);
         }, TaskExecutor::TaskType::PLATFORM);
     }
 }

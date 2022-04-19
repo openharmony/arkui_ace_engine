@@ -38,7 +38,7 @@ public:
     virtual ~JsRuntime() = default;
 
     // Prepare js environment, returns true if success.
-    virtual bool Initialize(const std::string &libraryPath, bool isDebugMode) = 0;
+    virtual bool Initialize(const std::string &libraryPath, bool isDebugMode, int32_t instanceId = 0) = 0;
     virtual void Reset() = 0;
     virtual void SetLogPrint(LOG_PRINT out) = 0;
 

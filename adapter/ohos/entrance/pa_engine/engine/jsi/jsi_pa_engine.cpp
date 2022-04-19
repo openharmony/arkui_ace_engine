@@ -290,7 +290,7 @@ bool JsiPaEngineInstance::InitJsEnv(bool debuggerMode, const std::unordered_map<
     if (debuggerMode) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    if (!runtime_->Initialize(libraryPath, isDebugMode_)) {
+    if (!runtime_->Initialize(libraryPath, isDebugMode_, instanceId_)) {
         LOGE("JsiPaEngineInstance initialize runtime failed");
         return false;
     }

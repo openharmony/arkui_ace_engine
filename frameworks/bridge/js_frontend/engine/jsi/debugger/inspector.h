@@ -32,7 +32,7 @@ extern "C" {
 #endif
 #endif /* End of #ifdef __cplusplus */
 
-bool StartDebug(const std::string& componentName, void *vm, bool isDebugMode);
+bool StartDebug(const std::string& componentName, void *vm, bool isDebugMode, int32_t instanceId);
 
 void StopDebug(const std::string& componentName);
 
@@ -45,14 +45,17 @@ void StopDebug(const std::string& componentName);
 class Inspector {
 public:
     Inspector() = default;
-    ~Inspector() {}
+    ~Inspector() = default;
+
+    void OnMessage();
+    void InitializeInspector(const std::string& componentName, int32_t instanceId);
 
     pthread_t tid_;
     std::unique_ptr<WsServer> websocketServer_;
+    void *vm_ = nullptr;
     static constexpr int DEBUGGER_WAIT_SLEEP_TIME = 100;
     volatile bool waitingForDebugger_ = true;
     volatile bool isDispatchingMsg_ = false;
-
 };
 } // namespace OHOS::Ace::Framework
 

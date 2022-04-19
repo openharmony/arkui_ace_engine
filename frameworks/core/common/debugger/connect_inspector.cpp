@@ -15,13 +15,9 @@
 
 #include "frameworks/core/common/debugger/connect_inspector.h"
 #include "base/log/log.h"
-#include "frameworks/core/common/debugger/connect_server.h"
+
 namespace OHOS::Ace {
-std::unique_ptr<ConnectServer> g_connectServer = nullptr;
-void* g_debugger = nullptr;
-std::map<int32_t, std::string> g_infoBuffer;
-bool g_isAttachStart = false;
-int g_ideWaitTime = 100;
+std::unique_ptr<ConnectInspector> g_inspector = nullptr;
 
 void* HandleDebugManager(void* const server)
 {
@@ -31,18 +27,6 @@ void* HandleDebugManager(void* const server)
         return nullptr;
     }
     static_cast<ConnectServer*>(server)->RunServer();
-    return nullptr;
-}
-
-void* HandleHDC(void* const server)
-{
-    LOGI("HandleHDC");
-    if (server == nullptr) {
-        LOGE("HandleHDC server nullptr");
-        return nullptr;
-    }
-    int32_t pid = getpid();
-    static_cast<ConnectServer*>(server)->Register(pid);
     return nullptr;
 }
 
@@ -57,18 +41,10 @@ void OnMessage(const std::string& message)
     std::string checkMessage = "connected";
     if (message.find(checkMessage, 0) != std::string::npos) {
         LOGI("Find the targeted string: %{private}s", message.c_str());
-        if (g_connectServer != nullptr) {
-            g_connectServer->waitingForDebugger_ = false;
-        }
-    }
-
-    checkMessage = "attachStart";
-    if (message.find(checkMessage, 0) != std::string::npos) {
-        LOGI("Find the attach command: %{private}s", message.c_str());
-        g_isAttachStart = true;
-        if (g_connectServer != nullptr) {
-            for (auto it = g_infoBuffer.begin(); it != g_infoBuffer.end(); it++) {
-                g_connectServer->SendMessage(it->second);
+        if (g_inspector != nullptr) {
+            g_inspector->waitingForDebugger_ = false;
+            for (auto &info : g_inspector->infoBuffer_) {
+                SendMessage(info.second);
             }
         }
     }
@@ -76,86 +52,70 @@ void OnMessage(const std::string& message)
 
 void ResetService()
 {
-    if (g_connectServer != nullptr) {
-        g_connectServer->StopServer();
-        g_connectServer.reset();
+    if (g_inspector != nullptr && g_inspector->connectServer_ != nullptr) {
+        g_inspector->connectServer_->StopServer();
+        g_inspector->connectServer_.reset();
     }
 }
 
-void StartServer(const std::string& componentName, const bool flagNeedDebugBreakPoint)
+void StartServer(const std::string& componentName)
 {
     LOGI("StartServer: %{private}s", componentName.c_str());
-    g_connectServer = std::make_unique<ConnectServer>(componentName, std::bind(&OnMessage, std::placeholders::_1),
-                      flagNeedDebugBreakPoint);
+    g_inspector = std::make_unique<ConnectInspector>();
+    g_inspector->connectServer_ = std::make_unique<ConnectServer>(componentName,
+        std::bind(&OnMessage, std::placeholders::_1));
+
     pthread_t tid;
-    if (pthread_create(&tid, nullptr, &HandleDebugManager, static_cast<void*>(g_connectServer.get())) != 0) {
+    if (pthread_create(&tid, nullptr, &HandleDebugManager,
+        static_cast<void*>(g_inspector->connectServer_.get())) != 0) {
         LOGE("pthread_create fail!");
         ResetService();
         return;
     }
-
-    while (g_connectServer->waitingForDebugger_) {
-        usleep(g_ideWaitTime);
-    }
-    LOGI("StartServer connected.");
-}
-
-void StartUnixSocket(const std::string& componentName)
-{
-    LOGI("StartUnixSocket: %{private}s", componentName.c_str());
-    while (g_connectServer == nullptr) {
-        LOGI("Waiting for the Connect Server");
-        usleep(g_ideWaitTime);
-    }
-    LOGI("pid is %{private}d", getpid());
-    pthread_t tid;
-    if (pthread_create(&tid, nullptr, &HandleHDC, static_cast<void*>(g_connectServer.get())) != 0) {
-        LOGE("pthread_create fail!");
-        return;
-    }
+    LOGI("StartServer Continue.");
 }
 
 void StopServer(const std::string& componentName)
 {
     LOGI("StopServer: %{private}s", componentName.c_str());
-    if (g_connectServer != nullptr) {
-        g_connectServer->StopServer();
-        g_connectServer.reset();
-    }
+    ResetService();
     LOGI("StopServer end");
 }
 
-void AddMessage(const int32_t instanceId, const std::string& message)
+void StoreMessage(int32_t instanceId, const std::string& message)
 {
     LOGI("Add message to information buffer.");
-    if (g_infoBuffer.count(instanceId) == 1) {
+    if (g_inspector->infoBuffer_.count(instanceId) == 1) {
         LOGE("The message with the current instance id has been existed.");
         return;
     }
-    g_infoBuffer[instanceId] = message;
+    g_inspector->infoBuffer_[instanceId] = message;
 }
 
-void RemoveMessage(const int32_t instanceId)
+void RemoveMessage(int32_t instanceId)
 {
     LOGI("Remove message from information buffer.");
-    if (g_infoBuffer.count(instanceId) != 1) {
+    if (g_inspector->infoBuffer_.count(instanceId) != 1) {
         LOGE("The message with the current instance id does not exist.");
         return;
     }
-    g_infoBuffer.erase(instanceId);
+    g_inspector->infoBuffer_.erase(instanceId);
 }
 
 void SendMessage(const std::string& message)
 {
     LOGI("Enter SendMessage");
-    if (g_connectServer != nullptr) {
-        g_connectServer->SendMessage(message);
+    if (g_inspector != nullptr && g_inspector->connectServer_ != nullptr && !g_inspector->waitingForDebugger_) {
+        g_inspector->connectServer_->SendMessage(message);
     }
 }
 
-bool IsAttachStart()
+bool WaitForDebugger()
 {
-    return g_isAttachStart;
+    if (g_inspector == nullptr) {
+        return true;
+    }
+    return g_inspector->waitingForDebugger_;
 }
 
 } // namespace OHOS::Ace

@@ -22,6 +22,7 @@
 #include "base/log/event_report.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_view.h"
+#include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -188,7 +189,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     if (debuggerMode) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    if (!usingSharedRuntime_ && !runtime_->Initialize(libraryPath, isDebugMode_)) {
+    if (!usingSharedRuntime_ && !runtime_->Initialize(libraryPath, isDebugMode_, instanceId_)) {
         LOGE("Js Engine initialize runtime failed");
         return false;
     }
@@ -713,6 +714,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         }
         nativeEngine_ = nativeArkEngine;
     }
+    engineInstance_->SetInstanceId(instanceId_);
     engineInstance_->SetDebugMode(NeedDebugBreakPoint());
     bool result = engineInstance_->InitJsEnv(IsDebugVersion(), GetExtraNativeObject(), arkRuntime);
     if (!result) {
@@ -776,7 +778,13 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
 void JsiDeclarativeEngine::RegisterInitWorkerFunc()
 {
     auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
-    auto&& initWorkerFunc = [weakInstance](NativeEngine* nativeEngine) {
+    bool debugVersion = IsDebugVersion();
+    bool debugMode = NeedDebugBreakPoint();
+    std::string libraryPath = "";
+    if (debugVersion) {
+        libraryPath = ARK_DEBUGGER_LIB_PATH;
+    }
+    auto&& initWorkerFunc = [weakInstance, debugMode, libraryPath](NativeEngine* nativeEngine) {
         LOGI("WorkerCore RegisterInitWorkerFunc called");
         if (nativeEngine == nullptr) {
             LOGE("nativeEngine is nullptr");
@@ -792,6 +800,9 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
             LOGE("instance is nullptr");
             return;
         }
+        ConnectServerManager::Get().AddInstance(gettid());
+        auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
+        panda::JSNApi::StartDebugger(libraryPath.c_str(), vm, debugMode, gettid());
         instance->InitConsoleModule(arkNativeEngine);
 
         std::vector<uint8_t> buffer((uint8_t*)_binary_jsEnumStyle_abc_start, (uint8_t*)_binary_jsEnumStyle_abc_end);
@@ -801,6 +812,31 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         }
     };
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
+}
+
+void JsiDeclarativeEngine::RegisterOffWorkerFunc()
+{
+    auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
+    bool debugVersion = IsDebugVersion();
+    auto&& offWorkerFunc = [debugVersion](NativeEngine* nativeEngine) {
+        LOGI("WorkerCore RegisterOffWorkerFunc called");
+        if (!debugVersion) {
+            return;
+        }
+        if (nativeEngine == nullptr) {
+            LOGE("nativeEngine is nullptr");
+            return;
+        }
+        auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
+        if (arkNativeEngine == nullptr) {
+            LOGE("arkNativeEngine is nullptr");
+            return;
+        }
+        ConnectServerManager::Get().RemoveInstance(gettid());
+        auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
+        panda::JSNApi::StopDebugger(vm);
+    };
+    nativeEngine_->SetOffWorkerFunc(offWorkerFunc);
 }
 
 void JsiDeclarativeEngine::RegisterAssetFunc()
@@ -826,6 +862,7 @@ void JsiDeclarativeEngine::RegisterAssetFunc()
 void JsiDeclarativeEngine::RegisterWorker()
 {
     RegisterInitWorkerFunc();
+    RegisterOffWorkerFunc();
     RegisterAssetFunc();
 }
 

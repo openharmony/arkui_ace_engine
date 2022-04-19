@@ -66,7 +66,6 @@ public:
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId);
 #endif
- 
     void SetArkNativeEngine(ArkNativeEngine* nativeEngine)
     {
         nativeEngine_ = nativeEngine;
@@ -174,6 +173,7 @@ private:
     void GetLoadOptions(std::string& optionStr, bool isMainPage, bool hasAppCode);
     void RegisterWorker();
     void RegisterInitWorkerFunc();
+    void RegisterOffWorkerFunc();
     void RegisterAssetFunc();
     bool CallAppFunc(const std::string& appFuncName);
     bool CallAppFunc(const std::string& appFuncName, std::vector<shared_ptr<JsValue>>& argv);
