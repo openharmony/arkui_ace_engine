@@ -200,6 +200,10 @@ void AceAbility::OnStart(const Want& want)
     OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener(this);
     window->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener);
 
+    // register ace ability handler callback
+    OHOS::sptr<OHOS::Rosen::IAceAbilityHandler> aceAbilityHandler(this);
+    window->SetAceAbilityHandler(aceAbilityHandler);
+
     int32_t deviceWidth = 0;
     int32_t deviceHeight = 0;
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
@@ -745,5 +749,60 @@ void AceAbility::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
     }
     flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent);
 }
+
+void AceAbility::SetBackgroundColor(uint32_t color)
+{
+    LOGI("AceAbilityHandler::SetBackgroundColor color is %{public}u", color);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("SetBackgroundColor failed: container is null.");
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("SetBackgroundColor failed: taskExecutor is null.");
+        return;
+    }
+    taskExecutor->PostSyncTask([container, bgColor = color]() {
+        auto pipelineContext = container->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGE("SetBackgroundColor failed, pipeline context is null.");
+            return;
+        }
+        pipelineContext->SetAppBgColor(Color(bgColor));
+    }, TaskExecutor::TaskType::UI);
+}
+uint32_t AceAbility::GetBackgroundColor()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("AceAbilityHandler GetBackgroundColor failed: container is null. return 0x000000");
+        return 0x000000;
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("AceAbilityHandler GetBackgroundColor failed: taskExecutor is null.");
+        return 0x000000;
+    }
+    ContainerScope scope(instanceId_);
+    uint32_t bgColor = 0x000000;
+    taskExecutor->PostSyncTask([&bgColor, container]() {
+            if (!container) {
+                LOGE("Post sync task GetBackgroundColor failed: container is null. return 0x000000");
+                return;
+            }
+            auto pipelineContext = container->GetPipelineContext();
+            if (!pipelineContext) {
+                LOGE("Post sync task GetBackgroundColor failed: pipeline is null. return 0x000000");
+                return;
+            }
+            bgColor = pipelineContext->GetAppBgColor().GetValue();
+        }, TaskExecutor::TaskType::UI);
+
+    LOGI("AceAbilityHandler::GetBackgroundColor, value is %{public}u", bgColor);
+    return bgColor;
+}
+
 } // namespace Ace
 } // namespace OHOS
