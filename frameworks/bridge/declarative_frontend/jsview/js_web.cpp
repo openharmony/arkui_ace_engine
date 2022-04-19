@@ -1074,14 +1074,13 @@ void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
 
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FileSelectorEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), FileSelectorEventToJSValue);
-    auto jsCallback = [func = std::move(jsFunc)]
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
         (const BaseEventInfo* info) -> bool {
             ACE_SCORING_EVENT("OnFileSelectorShow CallBack");
             if (func == nullptr) {
                 LOGW("function is null");
                 return false;
             }
-            execCtx = args.GetExecutionContext();
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info);
             JSRef<JSVal> result = func->ExecuteWithValue(*eventInfo);
