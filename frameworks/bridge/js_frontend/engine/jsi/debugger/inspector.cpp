@@ -114,7 +114,7 @@ bool StartDebug(const std::string& componentName, void *vm, bool isDebugMode)
         LOGE("handle is empty");
         return false;
     }
-    auto initialize = reinterpret_cast<void (*)(const std::function<void(std::string)> &, void *)>(
+    auto initialize = reinterpret_cast<void (*)(const std::function<void(const std::string &)> &, void *)>(
         GetArkDynFunction("InitializeDebugger"));
     if (initialize == nullptr) {
         ResetService();

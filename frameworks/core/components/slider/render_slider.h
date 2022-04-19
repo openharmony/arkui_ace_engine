@@ -26,6 +26,7 @@
 #include "core/components/text/text_component.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/gestures/drag_recognizer.h"
+#include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -192,6 +193,16 @@ public:
     {
         return thickness_;
     }
+
+    bool GetPress() const
+    {
+        return isPress_;
+    }
+
+    bool GetHover() const
+    {
+        return isHover_;
+    }
     
 protected:
     static TouchRegionPoint GetTopTouchRegion(const Vertex& center, double width, double height);
@@ -206,6 +217,7 @@ protected:
     bool MouseHoverTest(const Point& parentLocalPoint) override;
     void OnMouseHoverEnterTest() override {}
     void OnMouseHoverExitTest() override {}
+    bool HandleMouseEvent(const MouseEvent& event) override;
 
     void SetOnChange(const std::function<void(double,int)>& value)
     {
@@ -231,6 +243,7 @@ protected:
     void UpdateAccessibilityAttr();
     void InitAccessibilityEventListener();
     void HandleScrollUpdate(double delta);
+    RefPtr<RawRecognizer> touchDetector_;
 
     bool renderWholeNode_ = true;
 
@@ -285,6 +298,8 @@ private:
 
     // focus information
     bool isFocus_ = false;
+    bool isPress_ = false;
+    bool isHover_ = false;
     bool disable_ = false;
 
     double animationEnd_ = 0.0;

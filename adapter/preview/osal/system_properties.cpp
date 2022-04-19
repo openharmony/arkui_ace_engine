@@ -84,6 +84,7 @@ bool SystemProperties::rosenBackendEnabled_ = false;
 bool SystemProperties::windowAnimationEnabled_ = false;
 int32_t SystemProperties::windowPosX_ = 0;
 int32_t SystemProperties::windowPosY_ = 0;
+bool SystemProperties::debugBoundaryEnabled_ = false;
 
 DeviceType SystemProperties::GetDeviceType()
 {
@@ -155,5 +156,15 @@ bool SystemProperties::IsScoringEnabled(const std::string& name)
 bool SystemProperties::GetDebugEnabled()
 {
     return false;
+}
+
+std::string SystemProperties::GetLanguage()
+{
+    return UNDEFINED_PARAM;
+}
+
+std::string SystemProperties::GetRegion()
+{
+    return UNDEFINED_PARAM;
 }
 } // namespace OHOS::Ace

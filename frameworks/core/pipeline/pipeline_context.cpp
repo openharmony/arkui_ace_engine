@@ -15,8 +15,14 @@
 
 #include "core/pipeline/pipeline_context.h"
 
-#include <utility>
 #include <fstream>
+#include <utility>
+
+#include "base/memory/referenced.h"
+#include "base/utils/utils.h"
+#include "core/event/ace_events.h"
+#include "core/event/axis_event.h"
+#include "core/event/touch_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_node.h"
@@ -90,6 +96,8 @@ constexpr char JS_THREAD_NAME[] = "JS";
 constexpr char UI_THREAD_NAME[] = "UI";
 constexpr int32_t DEFAULT_VIEW_SCALE = 1;
 constexpr uint32_t DEFAULT_MODAL_COLOR = 0x00000000;
+constexpr float ZOOM_DISTANCE_DEFAULT = 50.0;       // TODO: Need confirm value
+constexpr float ZOOM_DISTANCE_MOVE_PER_WHEEL = 5.0; // TODO: Need confirm value
 
 PipelineContext::TimeProvider g_defaultTimeProvider = []() -> uint64_t {
     struct timespec ts;
@@ -822,6 +830,10 @@ RefPtr<Element> PipelineContext::SetupRootElement()
     }
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
+    auto renderRoot = AceType::DynamicCast<RenderRoot>(rootRenderNode);
+    if (renderRoot) {
+        renderRoot->SetDefaultBgColor(windowModal_ == WindowModal::CONTAINER_MODAL);
+    }
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
         LOGI("rosen ui director call set root.");
@@ -1076,8 +1088,10 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
         RefPtr<DisplayComponent> display = AceType::MakeRefPtr<DisplayComponent>(pageComponent);
         stageElement->PushPage(display);
     }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+
+#if defined(ENABLE_NATIVE_VIEW) || defined(ENABLE_ROSEN_BACKEND)
     if (GetIsDeclarative()) {
+        // if not use flutter scheduler, can flush pipeline immediately.
         if (isSurfaceReady_) {
             FlushPipelineImmediately();
         } else {
@@ -1544,6 +1558,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             }
             auto pluginPoint = point.UpdateScalePoint(viewScale_, pipelineContext->GetPluginEventOffset().GetX(),
                 pipelineContext->GetPluginEventOffset().GetY(), point.id);
+            auto eventManager = pipelineContext->GetEventManager();
+            if (eventManager) {
+                eventManager->SetInstanceId(pipelineContext->GetInstanceId());
+            }
             pipelineContext->OnTouchEvent(pluginPoint, true);
         }
     }
@@ -1557,6 +1575,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         return;
     }
     eventManager_->DispatchTouchEvent(scalePoint);
+    if (scalePoint.type == TouchType::UP) {
+        touchPluginPipelineContext_.clear();
+        eventManager_->SetInstanceId(GetInstanceId());
+    }
 }
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
@@ -1582,6 +1604,25 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     rootElement_->HandleSpecifiedKey(event);
     NotifyDestroyEventDismiss();
     SetShortcutKey(event);
+
+    pressedKeyCodes = event.pressedCodes;
+    isKeyCtrlPressed_ = !pressedKeyCodes.empty() && (pressedKeyCodes.back() == KeyCode::KEY_CTRL_LEFT ||
+                                                        pressedKeyCodes.back() == KeyCode::KEY_CTRL_RIGHT);
+    if ((event.code == KeyCode::KEY_CTRL_LEFT || event.code == KeyCode::KEY_CTRL_RIGHT) &&
+        event.action == KeyAction::UP) {
+        if (isOnScrollZoomEvent_) {
+            zoomEventA_.type = TouchType::UP;
+            zoomEventB_.type = TouchType::UP;
+            LOGI("Send TouchEventA(%{public}f, %{public}f, %{public}zu)", zoomEventA_.x, zoomEventA_.y,
+                zoomEventA_.type);
+            OnTouchEvent(zoomEventA_);
+            LOGI("Send TouchEventB(%{public}f, %{public}f, %{public}zu)", zoomEventB_.x, zoomEventB_.y,
+                zoomEventB_.type);
+            OnTouchEvent(zoomEventB_);
+            isOnScrollZoomEvent_ = false;
+        }
+    }
+
     return eventManager_->DispatchKeyEvent(event, rootElement_);
 }
 
@@ -1618,30 +1659,96 @@ void PipelineContext::SetShortcutKey(const KeyEvent& event)
 void PipelineContext::OnMouseEvent(const MouseEvent& event)
 {
     CHECK_RUN_ON(UI);
-    LOGD("OnMouseEvent: x=%{public}f, y=%{public}f, type=%{public}d. button=%{public}d, pressbutton=%{public}d}",
-        event.x, event.y, event.action, event.button, event.pressedButtons);
 
     if ((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
             event.action == MouseAction::MOVE) &&
         (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
         auto touchPoint = event.CreateTouchPoint();
+        LOGD("Mouse event to touch: button is %{public}d, action is %{public}d", event.button, event.action);
         OnTouchEvent(touchPoint);
     }
 
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    LOGD(
+        "MouseEvent (x,y): (%{public}f,%{public}f), button: %{public}d, action: %{public}d, pressedButtons: %{public}d",
+        scaleEvent.x, scaleEvent.y, scaleEvent.action, scaleEvent.button, scaleEvent.pressedButtons);
     eventManager_->MouseTest(scaleEvent, rootElement_->GetRenderNode());
     eventManager_->DispatchMouseEvent(scaleEvent);
     eventManager_->DispatchMouseHoverEvent(scaleEvent);
     FlushMessages();
 }
 
+void PipelineContext::CreateTouchEventOnZoom(const AxisEvent& event)
+{
+    zoomEventA_.id = 0;
+    zoomEventB_.id = 1;
+    zoomEventA_.type = zoomEventB_.type = TouchType::UNKNOWN;
+    zoomEventA_.time = zoomEventB_.time = event.time;
+    zoomEventA_.deviceId = zoomEventB_.deviceId = event.deviceId;
+    zoomEventA_.sourceType = zoomEventB_.sourceType = SourceType::MOUSE;
+    if (!isOnScrollZoomEvent_) {
+        zoomEventA_.x = zoomEventA_.screenX = event.x - ZOOM_DISTANCE_DEFAULT;
+        zoomEventA_.y = zoomEventA_.screenY = event.y;
+        zoomEventA_.type = TouchType::DOWN;
+        zoomEventB_.x = zoomEventB_.screenX = event.x + ZOOM_DISTANCE_DEFAULT;
+        zoomEventB_.y = zoomEventB_.screenY = event.y;
+        zoomEventB_.type = TouchType::DOWN;
+        LOGI("Send TouchEventA(%{public}f, %{public}f, %{public}zu)", zoomEventA_.x, zoomEventA_.y, zoomEventA_.type);
+        OnTouchEvent(zoomEventA_);
+        LOGI("Send TouchEventB(%{public}f, %{public}f, %{public}zu)", zoomEventB_.x, zoomEventB_.y, zoomEventB_.type);
+        OnTouchEvent(zoomEventB_);
+        isOnScrollZoomEvent_ = true;
+    }
+    if (LessOrEqual(event.verticalAxis, 0.0)) {
+        zoomEventA_.x = zoomEventA_.screenX -= ZOOM_DISTANCE_MOVE_PER_WHEEL;
+        zoomEventA_.type = TouchType::MOVE;
+        LOGI("Send TouchEventA(%{public}f, %{public}f, %{public}zu)", zoomEventA_.x, zoomEventA_.y, zoomEventA_.type);
+        OnTouchEvent(zoomEventA_);
+        zoomEventB_.x = zoomEventB_.screenX += ZOOM_DISTANCE_MOVE_PER_WHEEL;
+        zoomEventB_.type = TouchType::MOVE;
+        LOGI("Send TouchEventB(%{public}f, %{public}f, %{public}zu)", zoomEventB_.x, zoomEventB_.y, zoomEventB_.type);
+        OnTouchEvent(zoomEventB_);
+    } else {
+        if (!NearEqual(zoomEventA_.x, event.x)) {
+            zoomEventA_.x = zoomEventA_.screenX += ZOOM_DISTANCE_MOVE_PER_WHEEL;
+            zoomEventA_.type = TouchType::MOVE;
+            LOGI("Send TouchEventA(%{public}f, %{public}f, %{public}zu)", zoomEventA_.x, zoomEventA_.y,
+                zoomEventA_.type);
+            OnTouchEvent(zoomEventA_);
+        }
+        if (!NearEqual(zoomEventB_.x, event.x)) {
+            zoomEventB_.x = zoomEventB_.screenX -= ZOOM_DISTANCE_MOVE_PER_WHEEL;
+            zoomEventB_.type = TouchType::MOVE;
+            LOGI("Send TouchEventB(%{public}f, %{public}f, %{public}zu)", zoomEventB_.x, zoomEventB_.y,
+                zoomEventB_.type);
+            OnTouchEvent(zoomEventB_);
+        }
+    }
+}
+
 void PipelineContext::OnAxisEvent(const AxisEvent& event)
 {
-    LOGI("OnAxisEvent: x=%{public}f, y=%{public}f, horizontalAxis=%{public}f, verticalAxis=%{public}f", event.x,
-        event.y, event.horizontalAxis, event.verticalAxis);
+    if (isKeyCtrlPressed_ && !NearZero(event.verticalAxis) &&
+        (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE)) {
+        CreateTouchEventOnZoom(event);
+        return;
+    }
+
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
-    eventManager_->AxisTest(scaleEvent, rootElement_->GetRenderNode());
-    eventManager_->DispatchAxisEvent(scaleEvent);
+    LOGD("AxisEvent (x,y): (%{public}f,%{public}f), horizontalAxis: %{public}f, verticalAxis: %{public}f, action: "
+         "%{public}d",
+        scaleEvent.x, scaleEvent.y, scaleEvent.horizontalAxis, scaleEvent.verticalAxis, scaleEvent.action);
+
+    if (event.action == AxisAction::BEGIN) {
+        TouchRestrict touchRestrict { TouchRestrict::NONE };
+        eventManager_->TouchTest(scaleEvent, rootElement_->GetRenderNode(), touchRestrict);
+    }
+    eventManager_->DispatchTouchEvent(scaleEvent);
+
+    if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
+        eventManager_->AxisTest(scaleEvent, rootElement_->GetRenderNode());
+        eventManager_->DispatchAxisEvent(scaleEvent);
+    }
 }
 
 void PipelineContext::AddToHoverList(const RefPtr<RenderNode>& node)
@@ -2072,28 +2179,39 @@ void PipelineContext::SetRootRect(double width, double height, double offset) co
     }
 }
 
-void PipelineContext::SetRootBgColor(const Color& color)
+void PipelineContext::SetAppBgColor(const Color& color)
 {
-    rootBgColor_ = color;
+    LOGI("Set bgColor %{public}u", color.GetValue());
+    appBgColor_ = color;
     if (!themeManager_) {
-        LOGE("PipelineContext::SetRootBgColor:themeManager_ is nullptr!");
+        LOGW("themeManager_ is nullptr!");
         return;
     }
     auto appTheme = themeManager_->GetTheme<AppTheme>();
     if (!appTheme) {
-        LOGE("GetTheme failed!");
+        LOGW("appTheme is nullptr!");
+        return;
+    }
+    appTheme->SetBackgroundColor(appBgColor_);
+    if (!rootElement_) {
+        LOGW("rootElement_ is nullptr!");
+        return;
+    }
+    auto renderRoot = DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
+    if (!renderRoot) {
+        LOGW("renderRoot is nullptr!");
         return;
     }
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
-        rootBgColor_ = Color::TRANSPARENT;
-    }
-    appTheme->SetBackgroundColor(rootBgColor_);
-    if (rootElement_) {
-        auto renderRoot = DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
-        if (renderRoot) {
-            renderRoot->SetBgColor(rootBgColor_);
+        auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
+        if (containerModal) {
+            containerModal->SetAppBgColor(appBgColor_);
+            renderRoot->SetBgColor(Color::TRANSPARENT);
+            return;
         }
     }
+    renderRoot->SetBgColor(appBgColor_);
+
 }
 
 void PipelineContext::Finish(bool autoFinish) const
@@ -2241,6 +2359,16 @@ void PipelineContext::NotifyDispatchTouchEventDismiss(const TouchEvent& event) c
     for (auto& iterDispatchTouchEventHander : dispatchTouchEventHandler_) {
         if (iterDispatchTouchEventHander) {
             iterDispatchTouchEventHander(event);
+        }
+    }
+}
+
+void PipelineContext::NotifyDispatchMouseEventDismiss(const MouseEvent& event) const
+{
+    CHECK_RUN_ON(UI);
+    for (auto& iterDispatchMouseEventHander : dispatchMouseEventHandler_) {
+        if (iterDispatchMouseEventHander) {
+            iterDispatchMouseEventHander(event);
         }
     }
 }
@@ -2606,7 +2734,7 @@ void PipelineContext::RefreshRootBgColor() const
     }
     const auto& render = AceType::DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
     if (render) {
-        render->SetDefaultBgColor();
+        render->SetDefaultBgColor(windowModal_ == WindowModal::CONTAINER_MODAL);
     }
 }
 
@@ -2767,8 +2895,11 @@ void PipelineContext::RootLostFocus() const
     }
 }
 
-void PipelineContext::WindowFocus(bool isFocus) const
+void PipelineContext::WindowFocus(bool isFocus)
 {
+    if (!isFocus) {
+        OnVirtualKeyboardAreaChange(Rect());
+    }
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         LOGW("WindowFocus failed, Window modal is not container.");
         return;
@@ -3218,6 +3349,7 @@ void PipelineContext::OpenImplicitAnimation(
                                 option.GetAnimationDirection() == AnimationDirection::ALTERNATE);
     timingProtocol.SetAutoReverse(option.GetAnimationDirection() == AnimationDirection::ALTERNATE ||
                                   option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
+    timingProtocol.SetFillMode(static_cast<Rosen::FillMode>(option.GetFillMode()));
     RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), wrapFinishCallback);
 #endif
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,8 +26,13 @@ namespace {
 
 constexpr double BORDER_WEIGHT = 0.33;
 constexpr double HALF = 0.5;
-constexpr Dimension HOVER_RADIUS = 16.0_vp;
-
+constexpr double RADIUS_PADDING = 4.0;
+constexpr Dimension HOVER_RADIUS = 12.0_vp;
+constexpr Dimension PRESS_RADIUS = 12.0_vp;
+constexpr Dimension FOCUS_BORDER_PADDING = 2.0_vp;
+constexpr uint32_t FOCUS_BORDER_COLOR = 0xFF0A59F7;
+constexpr uint32_t HOVER_BORDER_COLOR = 0x0C000000;
+constexpr uint32_t PRESS_BORDER_COLOR = 0x19000000;
 } // namespace
 
 void RosenRenderCircleBlock::Update(const RefPtr<Component>& component)
@@ -48,20 +53,29 @@ void RosenRenderCircleBlock::Paint(RenderContext& context, const Offset& offset)
 
     if (isHover_) {
         SkPaint hoverPaint;
-        hoverPaint.setColor(GetHoverColor().GetValue());
+        hoverPaint.setColor(HOVER_BORDER_COLOR);
         double hoverRadius = NormalizeToPx(HOVER_RADIUS);
         canvas->drawCircle(offset.GetX(), offset.GetY(), hoverRadius, hoverPaint);
     }
 
+    if (isPress_) {
+        SkPaint pressPaint;
+        pressPaint.setColor(PRESS_BORDER_COLOR);
+        double pressRadius = NormalizeToPx(PRESS_RADIUS);
+        canvas->drawCircle(offset.GetX(), offset.GetY(), pressRadius, pressPaint);
+    }
+
     double radius = NormalizeToPx(blockSize_) * HALF * radiusScale_;
-    if (GetFocus() && SystemProperties::GetDeviceType() == DeviceType::TV) {
+
+    if (GetFocus() && GetMode() == SliderMode::OUTSET) {
+        SkPaint focusPaint;
+        focusPaint.setColor(FOCUS_BORDER_COLOR);
+        focusPaint.setStyle(SkPaint::Style::kStroke_Style);
+        focusPaint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_PADDING));
+        canvas->drawCircle(offset.GetX(), offset.GetY(), radius + RADIUS_PADDING, focusPaint);
         SkPaint blockPaint;
-        // the color value, when the slider get focus
-        static const uint8_t lightBlueA = 255;
-        static const uint8_t lightBlueR = 70;
-        static const uint8_t lightBlueG = 150;
-        static const uint8_t lightBlueB = 236;
-        blockPaint.setColor(SkColorSetARGB(lightBlueA, lightBlueR, lightBlueG, lightBlueB));
+        blockPaint.setColor(SkColorSetARGB(GetBlockColor().GetAlpha(), GetBlockColor().GetRed(),
+            GetBlockColor().GetGreen(), GetBlockColor().GetBlue()));
         canvas->drawCircle(offset.GetX(), offset.GetY(), radius, blockPaint);
     } else {
         SkPaint blockPaint;

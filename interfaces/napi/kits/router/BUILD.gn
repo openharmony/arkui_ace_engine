@@ -14,49 +14,50 @@
 import("//build/ohos.gni")
 import("//foundation/ace/ace_engine/ace_config.gni")
 
-config("router_config") {
-  cflags_cc = [
-    "-std=c++17",
-    "-Wno-c99-designator",
-    "-Wno-unknown-warning-option",
-  ]
+template("napi_router_static") {
+  forward_variables_from(invoker, "*")
+
+  ohos_static_library(target_name) {
+    defines += invoker.defines
+    cflags_cc += invoker.cflags_cc
+
+    include_dirs = [
+      "//foundation/ace",
+      "$ace_root",
+      "$ace_root/frameworks",
+      "$root_out_dir/ace/framework",
+    ]
+
+    sources = [ "js_router.cpp" ]
+
+    deps = [ "//foundation/ace/napi/:ace_napi" ]
+
+    if (defined(config.libace_target)) {
+      deps += [ config.libace_target ]
+    }
+
+    subsystem_name = "ace"
+    part_name = ace_engine_part
+  }
 }
 
-ohos_shared_library("router") {
-  include_dirs = [
-    "//foundation/ace",
-    "$ace_root",
-    "$ace_root/frameworks",
-    "$root_out_dir/ace/framework",
-  ]
+foreach(item, ace_platforms) {
+  napi_router_static("router_static_" + item.name) {
+    defines = []
+    cflags_cc = []
+    config = {
+    }
 
-  sources = [ "js_router.cpp" ]
+    if (defined(item.config)) {
+      config = item.config
+    }
 
-  deps = [
-    "$ace_root/build:libace",
-    "//foundation/ace/napi/:ace_napi",
-  ]
+    if (defined(config.defines)) {
+      defines = config.defines
+    }
 
-  if (use_mingw_win) {
-    deps -= [ "$ace_root/build:libace" ]
-    deps += [ "$ace_root/adapter/preview/build:libace_engine_windows" ]
-    configs = [ ":router_config" ]
-    defines = [
-      "_USE_MATH_DEFINES",
-      "WINDOWS_PLATFORM",
-    ]
-  } else if (use_mac) {
-    deps -= [ "$ace_root/build:libace" ]
-    deps += [ "$ace_root/adapter/preview/build:libace_engine_mac" ]
-    configs = [ ":router_config" ]
-    defines = [
-      "_USE_MATH_DEFINES",
-      "MAC_PLATFORM",
-    ]
+    if (defined(config.cflags_cc)) {
+      cflags_cc = config.cflags_cc
+    }
   }
-
-  relative_install_dir = "module"
-
-  subsystem_name = "ace"
-  part_name = ace_engine_part
 }

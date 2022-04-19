@@ -24,11 +24,11 @@
 namespace __detail__ {
 
 template<typename... Types>
-std::tuple<Types...> ToTuple(const panda::Local<panda::JSValueRef> argv[])
+std::tuple<Types...> ToTuple(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
     int index = 0;
     return {
-        OHOS::Ace::Framework::JsiValueConvertor::fromJsiValue<Types>(argv[index++])...,
+        OHOS::Ace::Framework::JsiValueConvertor::fromJsiValue<Types>(runtimeCallInfo->GetCallArgRef(index++))...,
     };
 }
 
@@ -93,52 +93,32 @@ public:
 
 private:
     template<typename T, typename... Args>
-    static panda::Local<panda::JSValueRef> InternalMemberFunctionCallback(panda::ecmascript::EcmaVM* vm,
-        panda::Local<panda::JSValueRef> thisObj, const panda::Local<panda::JSValueRef> argv[], int32_t argc,
-        void* data);
+    static panda::Local<panda::JSValueRef> InternalMemberFunctionCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo);
 
     template<typename T>
-    static panda::Local<panda::JSValueRef> InternalJSMemberFunctionCallback(panda::EcmaVM* vm,
-        panda::Local<panda::JSValueRef> thisObj, const panda::Local<panda::JSValueRef> argv[], int32_t argc,
-        void* data);
+    static panda::Local<panda::JSValueRef> InternalJSMemberFunctionCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo);
 
     template<typename Class, typename R, typename... Args>
-    static panda::Local<panda::JSValueRef> MethodCallback(panda::ecmascript::EcmaVM* vm,
-        panda::Local<panda::JSValueRef> thisObj, const panda::Local<panda::JSValueRef> argv[], int32_t argc,
-        void* data);
+    static panda::Local<panda::JSValueRef> MethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo);
 
     template<typename Class, typename R, typename... Args>
-    static panda::Local<panda::JSValueRef> JSMethodCallback(panda::ecmascript::EcmaVM* vm,
-        panda::Local<panda::JSValueRef> thisObj, const panda::Local<panda::JSValueRef> argv[], int32_t argc,
-        void* data);
+    static panda::Local<panda::JSValueRef> JSMethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo);
 
     template<typename R, typename... Args>
-    static panda::Local<panda::JSValueRef> StaticMethodCallback(panda::ecmascript::EcmaVM* vm,
-        panda::Local<panda::JSValueRef> thisObj, const panda::Local<panda::JSValueRef> argv[], int32_t argc,
-        void* data);
+    static panda::Local<panda::JSValueRef> StaticMethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo);
 
-    static panda::Local<panda::JSValueRef> JSStaticMethodCallback(panda::ecmascript::EcmaVM* vm,
-        panda::Local<panda::JSValueRef> thisObj, const panda::Local<panda::JSValueRef> argv[], int32_t argc,
-        void* data);
+    static panda::Local<panda::JSValueRef> JSStaticMethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo);
 
     template<typename... Args>
-    static panda::Local<panda::JSValueRef> InternalConstructor(panda::ecmascript::EcmaVM* vm,
-        panda::Local<panda::JSValueRef> thisObj, panda::Local<panda::JSValueRef> newTarget,
-        const panda::Local<panda::JSValueRef> argv[], int32_t argc, void* data);
+    static panda::Local<panda::JSValueRef> InternalConstructor(panda::JsiRuntimeCallInfo *runtimeCallInfo);
 
-    static panda::Local<panda::JSValueRef> ConstructorInterceptor(panda::ecmascript::EcmaVM* vm,
-        panda::Local<panda::JSValueRef> thisObj, panda::Local<panda::JSValueRef> newTarget,
-        const panda::Local<panda::JSValueRef> argv[], int32_t argc, void* data);
+    static panda::Local<panda::JSValueRef> ConstructorInterceptor(panda::JsiRuntimeCallInfo *runtimeCallInfo);
 
     static void DestructorInterceptor(void* nativePtr, void* data);
 
-    static panda::Local<panda::JSValueRef> JSConstructorInterceptor(panda::ecmascript::EcmaVM* vm,
-        panda::Local<panda::JSValueRef> thisObj, panda::Local<panda::JSValueRef> newTarget,
-        const panda::Local<panda::JSValueRef> argv[], int32_t argc, void* data);
+    static panda::Local<panda::JSValueRef> JSConstructorInterceptor(panda::JsiRuntimeCallInfo *runtimeCallInfo);
 
-    static bool CheckIfConstructCall(panda::ecmascript::EcmaVM* vm, panda::Local<panda::JSValueRef> thisObj,
-        panda::Local<panda::JSValueRef> newTarget, const panda::Local<panda::JSValueRef> argv[], int32_t argc,
-        void* data);
+    static bool CheckIfConstructCall(panda::JsiRuntimeCallInfo *runtimeCallInfo);
 
     static thread_local std::unordered_map<std::string, panda::Global<panda::FunctionRef>> staticFunctions_;
     static thread_local std::unordered_map<std::string, panda::Global<panda::FunctionRef>> customFunctions_;

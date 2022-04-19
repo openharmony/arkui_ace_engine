@@ -33,6 +33,7 @@ void JSListItem::Create(const JSCallbackInfo& args)
         listItemComponent->SetType(args[0]->ToString());
     }
     ViewStackProcessor::GetInstance()->Push(listItemComponent);
+    JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);
     args.ReturnSelf();
 }

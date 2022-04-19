@@ -52,10 +52,12 @@ namespace {
 const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
 const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
+const std::string START_PARAMS_KEY = "__startParams";
 
 } // namespace
 
 static std::atomic<int32_t> gInstanceId = 0;
+static std::atomic<int32_t> gSubWindowInstanceId = 100000;
 static std::atomic<int32_t> gSubInstanceId = 1000000;
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
 const int32_t REQUEST_CODE = -1;
@@ -99,6 +101,12 @@ extern "C" ACE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtim
 {
     LOGI("Ace lib loaded, CreateUIContent.");
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime);
+}
+
+extern "C" ACE_EXPORT void* OHOS_ACE_CreateSubWindowUIContent(void* ability)
+{
+    LOGI("Ace lib loaded, Create SubWindowUIContent.");
+    return new UIContentImpl(reinterpret_cast<OHOS::AppExecFwk::Ability*>(ability));
 }
 
 class OccupiedAreaChangeListener : public OHOS::Rosen::IOccupiedAreaChangeListener {
@@ -185,8 +193,18 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     auto object = AbilityRuntime::ConvertNativeValueTo<NativeObject>(ref->Get());
     auto weak = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(object->GetNativePointer());
     context_ = *weak;
+    LOGI("Create UIContentImpl successfully.");
+}
 
-    LOGI("Create UIContentImpl.");
+UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
+{
+    if (ability == nullptr) {
+        LOGE("ability is nullptr");
+        return;
+    }
+    auto weak = static_cast<std::weak_ptr<AbilityRuntime::Context>>(ability->GetAbilityContext());
+    context_ = weak;
+    LOGI("Create UIContentImpl successfully.");
 }
 
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
@@ -326,7 +344,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         if (hapInfo) {
             pageProfile = hapInfo->pages;
             const std::string profilePrefix = "@profile:";
-            if (pageProfile.find(profilePrefix) == 0) {
+            if (pageProfile.compare(0, profilePrefix.size(), profilePrefix) == 0) {
                 pageProfile = pageProfile.substr(profilePrefix.length()).append(".json");
             }
             LOGI("In stage mode, pageProfile:%{public}s", pageProfile.c_str());
@@ -383,7 +401,11 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     auto pluginUtils = std::make_shared<PluginUtilsImpl>();
     PluginManager::GetInstance().SetAceAbility(nullptr, pluginUtils);
     // create container
-    instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
+    if (runtime_) {
+        instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
+    } else {
+        instanceId_ = gSubWindowInstanceId.fetch_add(1, std::memory_order_relaxed);
+    }
     auto container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
         context_, info, std::make_unique<ContentEventCallback>([context = context_] {
             auto sharedContext = context.lock();
@@ -419,8 +441,12 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
-    container->GetSettings().SetUsingSharedRuntime(true);
-    container->SetSharedRuntime(runtime_);
+    if (runtime_) {
+        container->GetSettings().SetUsingSharedRuntime(true);
+        container->SetSharedRuntime(runtime_);
+    } else {
+        container->GetSettings().SetUsingSharedRuntime(false);
+    }
     container->SetPageProfile(pageProfile);
     container->Initialize();
     ContainerScope scope(instanceId_);
@@ -474,81 +500,118 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     // set view
     Platform::AceContainer::SetView(flutterAceView, density, 0, 0, window_->GetWindowId(), callback);
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
-    auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
-    if (!storage) {
-        container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
-    } else {
-        LOGI("SetLocalStorage %{public}d", storage->TypeOf());
-        container->SetLocalStorage(
-            nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
+    // Set sdk version in module json mode
+    if (isModelJson) {
+        auto pipeline = container->GetPipelineContext();
+        if (pipeline && appInfo) {
+            LOGI("SetMinPlatformVersion code is %{public}d", appInfo->minCompatibleVersionCode);
+            pipeline->SetMinPlatformVersion(appInfo->minCompatibleVersionCode);
+        }
+    }
+    if (runtime_) {
+        auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
+        if (!storage) {
+            container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
+        } else {
+            LOGI("SetLocalStorage %{public}d", storage->TypeOf());
+            container->SetLocalStorage(
+                nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
+        }
     }
     InitWindowCallback(info);
 }
 
 void UIContentImpl::Foreground()
 {
-    LOGI("Show UIContent");
+    LOGI("UIContentImpl: window foreground");
     Platform::AceContainer::OnShow(instanceId_);
 }
 
 void UIContentImpl::Background()
 {
-    LOGI("Hide UIContent");
+    LOGI("UIContentImpl: window background");
     Platform::AceContainer::OnHide(instanceId_);
 }
 
 void UIContentImpl::Focus()
 {
-    LOGI("UIContent window focus");
+    LOGI("UIContentImpl: window focus");
     Platform::AceContainer::OnActive(instanceId_);
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    if (!container) {
-        LOGE("Window focus failed: container is null.");
-        return;
-    }
-    auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("Window focus failed: taskExecutor is null.");
-        return;
-    }
-    taskExecutor->PostTask([container]() {
-        auto pipelineContext = container->GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("Window focus failed, pipeline context is null.");
-            return;
-        }
-        pipelineContext->WindowFocus(true);
-    }, TaskExecutor::TaskType::UI);
 }
 
 void UIContentImpl::UnFocus()
 {
-    LOGI("UIContent window unFocus");
+    LOGI("UIContentImpl: window unFocus");
     Platform::AceContainer::OnInactive(instanceId_);
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    if (!container) {
-        LOGE("Window unFocus failed: container is null.");
-        return;
-    }
-    auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("Window unFocus failed: taskExecutor is null.");
-        return;
-    }
-    taskExecutor->PostTask([container]() {
-        auto pipelineContext = container->GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("Window unFocus failed, pipeline context is null.");
-            return;
-        }
-        pipelineContext->WindowFocus(false);
-    }, TaskExecutor::TaskType::UI);
 }
 
 void UIContentImpl::Destroy()
 {
-    LOGI("Destroy UIContent");
+    LOGI("UIContentImpl: window destroy");
     Platform::AceContainer::DestroyContainer(instanceId_);
+}
+
+void UIContentImpl::OnNewWant(const OHOS::AAFwk::Want& want)
+{
+    LOGI("UIContent OnNewWant");
+    Platform::AceContainer::OnShow(instanceId_);
+    std::string params = want.GetStringParam(START_PARAMS_KEY);
+    Platform::AceContainer::OnNewRequest(instanceId_, params);
+}
+
+uint32_t UIContentImpl::GetBackgroundColor()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("GetBackgroundColor failed: container is null. return 0x000000");
+        return 0x000000;
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("GetBackgroundColor failed: taskExecutor is null.");
+        return 0x000000;
+    }
+    ContainerScope scope(instanceId_);
+    uint32_t bgColor = 0x000000;
+    taskExecutor->PostSyncTask([&bgColor, container]() {
+            if (!container) {
+                LOGE("Post sync task GetBackgroundColor failed: container is null. return 0x000000");
+                return;
+            }
+            auto pipelineContext = container->GetPipelineContext();
+            if (!pipelineContext) {
+                LOGE("Post sync task GetBackgroundColor failed: pipeline is null. return 0x000000");
+                return;
+            }
+            bgColor = pipelineContext->GetAppBgColor().GetValue();
+        }, TaskExecutor::TaskType::UI);
+
+    LOGI("UIContentImpl::GetBackgroundColor, value is %{public}u", bgColor);
+    return bgColor;
+}
+
+void UIContentImpl::SetBackgroundColor(uint32_t color)
+{
+    LOGI("UIContentImpl::SetBackgroundColor color is %{public}u", color);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("SetBackgroundColor failed: container is null.");
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("SetBackgroundColor failed: taskExecutor is null.");
+        return;
+    }
+    taskExecutor->PostSyncTask([container, bgColor = color]() {
+        auto pipelineContext = container->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGE("SetBackgroundColor failed, pipeline context is null.");
+            return;
+        }
+        pipelineContext->SetAppBgColor(Color(bgColor));
+    }, TaskExecutor::TaskType::UI);
 }
 
 bool UIContentImpl::ProcessBackPressed()
@@ -577,8 +640,7 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (container) {
         auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
-        Platform::FlutterAceView::DispatchKeyEvent(aceView, touchEvent);
-        return true;
+        return Platform::FlutterAceView::DispatchKeyEvent(aceView, touchEvent);
     }
     return false;
 }
@@ -608,7 +670,6 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
 {
     LOGI("UIContent UpdateViewportConfig %{public}s", config.ToString().c_str());
     SystemProperties::SetResolution(config.Density());
-    SystemProperties::SetColorMode(ColorMode::LIGHT);
     SystemProperties::SetDeviceOrientation(config.Height() >= config.Width() ? 0 : 1);
     SystemProperties::SetWindowPos(config.Left(), config.Top());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -621,17 +682,10 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         LOGE("UpdateViewportConfig: taskExecutor is null.");
         return;
     }
-    taskExecutor->PostTask(
-        [config, instanceId = instanceId_, reason]() {
-            auto container = Platform::AceContainer::GetContainer(instanceId);
-            if (!container) {
-                LOGE("container may be destroyed.");
-                return;
-            }
-
+    taskExecutor->PostTask([config, container, reason]() {
             auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
             if (!aceView) {
-                LOGE("aceView is null");
+                LOGE("UpdateViewportConfig: aceView is null.");
                 return;
             }
             flutter::ViewportMetrics metrics;
@@ -641,8 +695,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
             Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
                 static_cast<WindowSizeChangeReason>(reason));
-        },
-        TaskExecutor::TaskType::PLATFORM);
+        }, TaskExecutor::TaskType::PLATFORM);
 }
 
 void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode)
@@ -658,6 +711,7 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode)
         LOGE("UpdateWindowMode failed: taskExecutor is null.");
         return;
     }
+    ContainerScope scope(instanceId_);
     taskExecutor->PostTask([container, mode]() {
         auto pipelineContext = container->GetPipelineContext();
         if (!pipelineContext) {
@@ -765,7 +819,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window)
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext;
     container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
         runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
-            // Subwindow ,just return.
+            // Sub-window ,just return.
             LOGI("Content event callback");
         }),
         false, true);

@@ -155,7 +155,7 @@ template("flutter_engine_fml") {
       ]
 
       libs = [ "//prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/lib/librpcrt4.a" ]
-    } else if (platform == "mac") {
+    } else if (platform == "mac" || platform == "ios") {
       public_configs = [ ":flutter_engine_fml_mac_config" ]
       sources += [
         "$flutter_root/engine/flutter/fml/platform/darwin/cf_utils.cc",
@@ -486,6 +486,91 @@ template("flutter_engine_shell") {
           "graphic:libagpwindow",
         ]
       }
+    } else if (platform == "ios") {
+      ios_prefix = "$flutter_root/engine/flutter/shell/platform/darwin/ios"
+      include_dirs = [
+        "$ios_prefix",
+        "$ios_prefix/framework/Headers",
+        "$flutter_root/engine/flutter/shell/platform/darwin/common/framework/Headers",
+      ]
+
+      _flutter_framework_headers = [
+        "$ios_prefix/framework/Headers/Flutter.h",
+        "$ios_prefix/framework/Headers/FlutterAppDelegate.h",
+        "$ios_prefix/framework/Headers/FlutterDartProject.h",
+        "$ios_prefix/framework/Headers/FlutterEngine.h",
+        "$ios_prefix/framework/Headers/FlutterHeadlessDartRunner.h",
+        "$ios_prefix/framework/Headers/FlutterPlatformViews.h",
+        "$ios_prefix/framework/Headers/FlutterPlugin.h",
+        "$ios_prefix/framework/Headers/FlutterPluginAppLifeCycleDelegate.h",
+        "$ios_prefix/framework/Headers/FlutterTexture.h",
+        "$ios_prefix/framework/Headers/FlutterViewController.h",
+      ]
+
+      _flutter_shell_ios = [
+        "$flutter_root/engine/flutter/shell/platform/darwin/common/buffer_conversions.mm",
+        "$flutter_root/engine/flutter/shell/platform/darwin/common/command_line.mm",
+        "$flutter_root/engine/flutter/shell/common/switches.cc",
+        "$flutter_root/engine/flutter/shell/common/switches.h",
+        "$ios_prefix/framework/Source/FlutterAppDelegate.mm",
+        "$ios_prefix/framework/Source/FlutterAppDelegate_Internal.h",
+        "$ios_prefix/framework/Source/FlutterBinaryMessengerRelay.mm",
+        "$ios_prefix/framework/Source/FlutterDartProject.mm",
+        "$ios_prefix/framework/Source/FlutterDartProject_Internal.h",
+        "$ios_prefix/framework/Source/FlutterEngine.mm",
+        "$ios_prefix/framework/Source/FlutterEngine_Internal.h",
+        "$ios_prefix/framework/Source/FlutterHeadlessDartRunner.mm",
+        "$ios_prefix/framework/Source/FlutterOverlayView.h",
+        "$ios_prefix/framework/Source/FlutterOverlayView.mm",
+        "$ios_prefix/framework/Source/FlutterPlatformPlugin.h",
+        "$ios_prefix/framework/Source/FlutterPlatformPlugin.mm",
+        "$ios_prefix/framework/Source/FlutterPlatformViews.mm",
+        "$ios_prefix/framework/Source/FlutterPlatformViews_Internal.h",
+        "$ios_prefix/framework/Source/FlutterPlatformViews_Internal.mm",
+        "$ios_prefix/framework/Source/FlutterPluginAppLifeCycleDelegate.mm",
+        "$ios_prefix/framework/Source/FlutterTextInputDelegate.h",
+        "$ios_prefix/framework/Source/FlutterView.h",
+        "$ios_prefix/framework/Source/FlutterView.mm",
+        "$ios_prefix/framework/Source/FlutterViewController.mm",
+        "$ios_prefix/framework/Source/FlutterViewController_Internal.h",
+        "$ios_prefix/framework/Source/platform_message_response_darwin.h",
+        "$ios_prefix/framework/Source/platform_message_response_darwin.mm",
+        "$ios_prefix/framework/Source/platform_message_router.h",
+        "$ios_prefix/framework/Source/platform_message_router.mm",
+        "$ios_prefix/framework/Source/vsync_waiter_ios.h",
+        "$ios_prefix/framework/Source/vsync_waiter_ios.mm",
+        "$ios_prefix/ios_external_texture_gl.h",
+        "$ios_prefix/ios_external_texture_gl.mm",
+        "$ios_prefix/ios_gl_context.h",
+        "$ios_prefix/ios_gl_context.mm",
+        "$ios_prefix/ios_gl_render_target.h",
+        "$ios_prefix/ios_gl_render_target.mm",
+        "$ios_prefix/ios_surface.h",
+        "$ios_prefix/ios_surface.mm",
+        "$ios_prefix/ios_surface_gl.h",
+        "$ios_prefix/ios_surface_gl.mm",
+        "$ios_prefix/ios_surface_software.h",
+        "$ios_prefix/ios_surface_software.mm",
+        "$ios_prefix/platform_view_ios.h",
+        "$ios_prefix/platform_view_ios.mm",
+      ]
+
+      sources += _flutter_framework_headers
+      sources += _flutter_shell_ios
+
+      defines += [
+        "FLUTTER_FRAMEWORK=1",
+        "FLUTTER_RUNTIME_MODE=3",
+      ]
+
+      libs = [
+        "CoreMedia.framework",
+        "CoreVideo.framework",
+        "UIKit.framework",
+        "OpenGLES.framework",
+        "AudioToolbox.framework",
+        "QuartzCore.framework",
+      ]
     }
   }
 }
@@ -563,7 +648,7 @@ template("flutter_engine_lib_ui") {
       "$flutter_root/engine/flutter/lib/ui/window/window.cc",
     ]
 
-    if (platform == "mac" || platform == "windows") {
+    if (platform == "mac" || platform == "windows" || platform == "ios") {
       sources +=
           [ "$flutter_root/engine/flutter/lib/ui/window/pointer_data.cc" ]
     }

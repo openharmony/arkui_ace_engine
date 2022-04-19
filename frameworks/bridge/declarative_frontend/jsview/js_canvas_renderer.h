@@ -126,6 +126,7 @@ public:
     void JsSetTextBaseline(const JSCallbackInfo& info);
     void JsSetImageSmoothingQuality(const JSCallbackInfo& info);
     void JsGetPixelMap(const JSCallbackInfo& info);
+    void JsDrawBitmapMesh(const JSCallbackInfo& info);
 
     void SetComponent(const RefPtr<CanvasTaskPool>& controller)
     {

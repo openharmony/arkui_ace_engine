@@ -27,8 +27,6 @@ public:
     RosenRenderClip() = default;
     ~RosenRenderClip() override = default;
 
-    void Update(const RefPtr<Component>& component) override;
-
     bool HasGeometryProperties() const override
     {
         return true;
@@ -39,9 +37,6 @@ public:
     void SetOffsetY(double offsetY) override;
     void SetWidth(double width) override;
     void SetHeight(double height) override;
-
-private:
-    void UpdateClipSize();
 };
 
 } // namespace OHOS::Ace

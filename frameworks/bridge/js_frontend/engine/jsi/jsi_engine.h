@@ -36,7 +36,7 @@ public:
         : frontendDelegate_(delegate), instanceId_(instanceId)
     {}
     ~JsiEngineInstance() override;
-
+    static std::map<const std::string, std::string> dataMap_;
     RefPtr<JsAcePage> GetRunningPage() const;
     void SetRunningPage(const RefPtr<JsAcePage>& page);
     RefPtr<JsAcePage> GetStagingPage() const;
@@ -63,16 +63,32 @@ public:
     {
         return frontendDelegate_;
     }
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId);
+#endif
+ 
+    void SetArkNativeEngine(ArkNativeEngine* nativeEngine)
+    {
+        nativeEngine_ = nativeEngine;
+    }
+
+    ArkNativeEngine const *  GetArkNativeEngine() const
+    {
+        return static_cast<ArkNativeEngine*>(nativeEngine_);
+    }
+
+    void RegisterFaPlugin();              // load ReatureAbility plugin
 
 private:
     void RegisterAceModule();             // add ace object to global
     void RegisterConsoleModule();         // add Console object to global
-    void RegisterSyscapModule();         // add Syscap object to global
-    void RegisterDocumentModule();         // add dom object to global
+    void RegisterSyscapModule();          // add Syscap object to global
+    void RegisterDocumentModule();        // add dom object to global
     void RegisterPerfUtilModule();        // add perfutil object to global
     void RegisterHiViewModule();          // add hiView object to global
     void RegisterI18nPluralRulesModule(); // add i18nPluralRules object to global
     void InitGroupJsBridge();
+    bool IsDragEvent(const std::string& param);
 
     int32_t GetInstanceId() const
     {

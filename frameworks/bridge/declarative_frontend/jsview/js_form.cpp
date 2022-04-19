@@ -57,7 +57,9 @@ void JSForm::Create(const JSCallbackInfo& info)
     fomInfo.bundleName = bundle->ToString();
     fomInfo.abilityName = ability->ToString();
     fomInfo.moduleName = module->ToString();
-    fomInfo.dimension = dimension->ToNumber<int32_t>();
+    if (!dimension->IsNull() && !dimension->IsEmpty()) {
+        fomInfo.dimension = dimension->ToNumber<int32_t>();
+    }
     fomInfo.temporary = temporary->ToBoolean();
 
     RefPtr<FormComponent> form = AceType::MakeRefPtr<OHOS::Ace::FormComponent>();

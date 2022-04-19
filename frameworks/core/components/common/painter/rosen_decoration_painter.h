@@ -79,6 +79,10 @@ public:
 
     void PaintBlur(RenderContext& context, const Dimension& blurRadius);
 
+    static void AdjustBorderStyle(Border& border);
+
+    static void PaintBorder(std::shared_ptr<RSNode>& rsNode, Border& border, double dipScale);
+
     static void PaintColorBlend(const SkRRect& outerRRect, SkCanvas* canvas, const Color& colorBlend,
         const Color& color);
 
@@ -134,8 +138,6 @@ protected:
     bool CanUsePathRRect(const Border& border, SkPaint& paint);
     bool CanUseInnerRRect(const Border& border);
     bool CanUseFourLine(const Border& border);
-    void AdjustBorderStyle(Border& border);
-
     bool CheckBorderEdgeForRRect(const Border& border);
 
     double NormalizeToPx(const Dimension& dimension) const;

@@ -1,22 +1,23 @@
 /*
-* Copyright (c) 2021-2022 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "core/gestures/pan_recognizer.h"
 
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
+#include "core/event/axis_event.h"
 #include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
@@ -24,6 +25,8 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr int32_t MAX_PAN_FINGERS = 10;
+constexpr double DISTANCE_PER_MOUSE_DEGREE = DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES;
+constexpr int32_t AXIS_PAN_FINGERS = 1;
 
 } // namespace
 
@@ -74,6 +77,26 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
 }
 
+void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
+{
+    LOGD("pan recognizer receives touch down event, begin to detect pan event");
+    if (fingers_ != AXIS_PAN_FINGERS) {
+        return;
+    }
+
+    if (direction_.type == PanDirection::NONE) {
+        return;
+    }
+
+    deviceId_ = event.deviceId;
+    deviceType_ = event.sourceType;
+    lastAxisEvent_ = event;
+
+    if (state_ == DetectState::READY) {
+        state_ = DetectState::DETECTING;
+    }
+}
+
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("pan recognizer receives touch up event");
@@ -119,6 +142,24 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 }
 
+void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
+{
+    LOGD("pan recognizer receives touch up event");
+    if (fingers_ != AXIS_PAN_FINGERS) {
+        return;
+    }
+    globalPoint_ = Point(event.x, event.y);
+
+    if (state_ != DetectState::DETECTED) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+
+    SendCallbackMsg(onActionEnd_);
+    Reset();
+    pendingEnd_ = true; // TODO: Need confirm
+}
+
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pan recognizer receives touch move event");
@@ -157,6 +198,44 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     }
 }
 
+void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
+{
+    LOGD("pan recognizer receives touch move event");
+    if (fingers_ != AXIS_PAN_FINGERS) {
+        return;
+    }
+    globalPoint_ = Point(event.x, event.y);
+    if (state_ == DetectState::READY) {
+        lastAxisEvent_ = event;
+        return;
+    }
+
+    Offset moveDistance = Offset(event.x - lastAxisEvent_.x + event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE,
+        event.y - lastAxisEvent_.y + event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
+    averageDistance_ += moveDistance;
+    lastAxisEvent_ = event;
+    time_ = event.time;
+
+    if (state_ == DetectState::DETECTING) {
+        auto result = IsPanGestureAccept();
+        if (result == GestureAcceptResult::ACCEPT) {
+            state_ = DetectState::DETECTED;
+            Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+        } else if (result == GestureAcceptResult::REJECT) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
+    }
+    if (state_ == DetectState::DETECTED) {
+        if ((direction_.type & PanDirection::VERTICAL) == 0) {
+            averageDistance_.SetY(0.0);
+        } else if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
+            averageDistance_.SetX(0.0);
+        }
+
+        SendCallbackMsg(onActionUpdate_);
+    }
+}
+
 void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     LOGD("pan recognizer receives touch cancel event");
@@ -172,6 +251,14 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     } else {
         pendingCancel_ = true;
     }
+}
+
+void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
+{
+    if (fingers_ != AXIS_PAN_FINGERS) {
+        return;
+    }
+    return HandleTouchCancelEvent(TouchEvent {});
 }
 
 PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const

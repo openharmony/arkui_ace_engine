@@ -53,7 +53,7 @@ config("uiservicems_config") {
     "//third_party/icu/icu4c/source/i18n",
     "//third_party/icu/icu4c/source/ohos",
     "//third_party/icu/icu4c/source",
-    "//base/global/i18n_standard/frameworks/intl/include",
+    "//base/global/i18n/frameworks/intl/include",
   ]
   cflags = []
   if (target_cpu == "arm") {

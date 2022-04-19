@@ -174,7 +174,7 @@ void JsiCallbackInfo::SetReturnValue(T* instance) const
 template<typename T>
 void JsiCallbackInfo::SetReturnValue(JsiRef<T> val) const
 {
-    retVal_ = panda::Global<panda::JSValueRef>(vm_, val.Get().GetHandle());
+    retVal_ = panda::Global<panda::JSValueRef>(info_->GetVM(), val.Get().GetHandle());
 }
 
 template<typename... Args>

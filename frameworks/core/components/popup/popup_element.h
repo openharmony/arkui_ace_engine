@@ -38,6 +38,11 @@ public:
         return false;
     }
 
+    RefPtr<PopupComponent> GetPopupComponent() const
+    {
+        return popup_;
+    }
+
     virtual void OnStateChange(bool isVisible) {}
 
 protected:

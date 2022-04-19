@@ -116,6 +116,7 @@ private:
     void UpdatePixmap(const RefPtr<PixelMap>& pixmap);
     void UpdateSharedMemoryImage(const RefPtr<PipelineContext>& context);
     void ProcessPixmapForPaint();
+    std::function<void()> GenerateThumbnailLoadTask();
 
     sk_sp<SkSVGDOM> skiaDom_;
     RefPtr<SvgDom> svgDom_;

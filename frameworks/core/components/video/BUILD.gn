@@ -33,7 +33,7 @@ build_component("video") {
   if (is_standard_system && !use_mingw_win && !use_mac) {
     include_dirs = [
       "//drivers/peripheral/display/interfaces/include",
-      "//foundation/multimedia/media_standard/interfaces/innerkits/native/include",
+      "//foundation/multimedia/media_standard/interfaces/inner_api/native",
     ]
 
     deps = [ "//foundation/graphic/standard:libwmclient" ]

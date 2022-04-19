@@ -339,7 +339,8 @@ template("ace_skia_opts") {
 
     sources = []
 
-    if (target_cpu == "x86_64" || platform == "windows" || platform == "mac") {
+    if (target_cpu == "x86_64" || platform == "windows" || platform == "mac" ||
+        platform == "ios") {
       cflags -= [ "-march=armv8-a+crc" ]
       sources += [
         "$flutter_root/skia/src/opts/SkOpts_avx.cpp",
@@ -362,6 +363,15 @@ template("ace_skia_opts") {
         "-msse4.2",
       ]
 
+      sources += [
+        "$flutter_root/skia/src/opts/SkOpts_sse41.cpp",
+        "$flutter_root/skia/src/opts/SkOpts_sse42.cpp",
+        "$flutter_root/skia/src/opts/SkOpts_ssse3.cpp",
+      ]
+    } else if (platform == "ios") {
+      if (target_cpu == "x64") {
+        sources -= [ "$flutter_root/skia/src/opts/SkOpts_crc32.cpp" ]
+      }
       sources += [
         "$flutter_root/skia/src/opts/SkOpts_sse41.cpp",
         "$flutter_root/skia/src/opts/SkOpts_sse42.cpp",
@@ -840,6 +850,23 @@ template("ace_skia_core") {
         "AppKit.framework",
         "ApplicationServices.framework",
         "OpenGL.framework",
+      ]
+    } else if (platform == "ios") {
+      sources += [
+        "$flutter_root/skia/src/ports/SkDebug_stdio.cpp",
+        "$flutter_root/skia/src/ports/SkFontHost_mac.cpp",
+        "$flutter_root/skia/src/ports/SkImageEncoder_CG.cpp",
+        "$flutter_root/skia/src/ports/SkImageGeneratorCG.cpp",
+      ]
+      libs = [
+        "CoreFoundation.framework",
+        "CoreGraphics.framework",
+        "CoreText.framework",
+        "ImageIO.framework",
+        "MobileCoreServices.framework",
+
+        # UIKit symbols UIFontWeightXXX may be dlsym'ed.
+        "UIKit.framework",
       ]
     } else {
       # Ohos and Android plarform
@@ -1462,6 +1489,17 @@ template("ace_gpu") {
       ]
       sources += [
         "$flutter_root/skia/src/gpu/gl/mac/GrGLMakeNativeInterface_mac.cpp",
+      ]
+    } else if (platform == "ios") {
+      defines += [
+        "SK_BUILD_FOR_IOS",
+        "SK_ASSUME_GL_ES=1",
+      ]
+      sources -= [
+        "$flutter_root/skia/src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp",
+      ]
+      sources += [
+        "$flutter_root/skia/src/gpu/gl/iOS/GrGLMakeNativeInterface_iOS.cpp",
       ]
     } else {
       if (!defined(config.disable_gpu) || !config.disable_gpu) {

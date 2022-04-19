@@ -93,7 +93,7 @@ template("ace_icu_make_data_assembly") {
       rebase_path(inputs[0], root_build_dir),
       rebase_path(outputs[0], root_build_dir),
     ]
-    if (platform == "mac") {
+    if (platform == "mac" || platform == "ios") {
       args += [ "--mac" ]
     }
   }

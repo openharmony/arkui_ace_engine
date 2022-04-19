@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "core/components/image/render_image.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/gestures/drag_recognizer.h"
+#include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/render_node.h"
 
@@ -32,6 +33,14 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr double EPSILON = 0.000001;
+
+constexpr Dimension PRESS_BORDER_RADIUS = 4.0_vp;
+
+constexpr uint32_t PRESS_COLOR = 0x19000000;
+
+constexpr Dimension FOCUS_BODER_PADING = 2.0_vp;
+
+constexpr uint32_t FOCUS_BODER_COLOR = 0xFF0A59F7;
 
 enum class OperationEvent {
     RATING_TOUCH_EVENT = 0,
@@ -95,6 +104,10 @@ public:
     {
         return SystemProperties::GetDeviceType() == DeviceType::PHONE;
     }
+    bool IsTablet() const
+    {
+        return SystemProperties::GetDeviceType() == DeviceType::TABLET;
+    }
     void CalculateRatingSize();
     void FireChangeEvent();
     void SetFocusAnimation(const RefPtr<RenderFocusAnimation>& focusAnimation)
@@ -134,6 +147,9 @@ protected:
     void OnMouseHoverEnterTest() override;
     void OnMouseHoverExitTest() override;
     bool MouseHoverTest(const Point& parentLocalPoint) override;
+    void AnimateMouseHoverEnter() override;
+    void AnimateMouseHoverExit() override;
+    virtual bool HandleMouseEvent(const MouseEvent& event) override;
     virtual void PaintFocus(
         const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context) {}
     virtual void PaintFocus(
@@ -156,6 +172,7 @@ protected:
     }
 
     int32_t starNum_ = DEFAULT_RATING_STAR_NUM;
+    int32_t pressstarNum_ = DEFAULT_RATING_STAR_NUM;
     double ratingScore_ = DEFAULT_RATING_SCORE;
     double stepSize_ = DEFAULT_RATING_STEP_SIZE;
     double width_ = DEFAULT_RATING_WIDTH;
@@ -186,6 +203,7 @@ protected:
     uint32_t starColorActive_ = 0xFFF7CE00;
     uint32_t starColorInactive_ = 0x19000000;
     Offset hoverOffset_;
+    Offset pressOffset_;
 
     // RenderImage
     void UpdateRenderImage(const RefPtr<ImageComponent>& imageComponent, const ImageFit& imageFit,
@@ -219,11 +237,14 @@ protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     void HandleClick(const Offset& clickPosition);
+    void HandlePressDown(const Offset& pressPosition);
+    void HandlePressUp();
     void CreateColorAnimation(const Color& from, const Color& to, int32_t starIndex, bool isHoverExists);
     void PlayEventEffectAnimation(int32_t starIndex, bool isHoverExists = false);
 
     RefPtr<DragRecognizer> dragDetector_;
     RefPtr<ClickRecognizer> clickDetector_;
+    RefPtr<RawRecognizer> touchDetector_;
 
     Rect animationRect_;
 
@@ -231,6 +252,7 @@ protected:
     OperationEvent operationEvent_ { OperationEvent::RATING_TOUCH_EVENT };
     RefPtr<Animator> eventEffectController_;
     std::unordered_map<int32_t, Color> hoverColorMap_;
+    bool isPress_ = false;
 };
 
 } // namespace OHOS::Ace

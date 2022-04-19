@@ -452,7 +452,7 @@ void JSText::Create(const JSCallbackInfo& info)
 
     auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponentV2>(data);
     ViewStackProcessor::GetInstance()->Push(textComponent);
-    JSInteractableView::SetFocusable(true);
+    JSInteractableView::SetFocusable(false);
     JSInteractableView::SetFocusNode(false);
 
     // Init text style, allowScale is not supported in declarative.
@@ -460,9 +460,6 @@ void JSText::Create(const JSCallbackInfo& info)
     textStyle.SetAllowScale(false);
     textStyle.SetFontSize(DEFAULT_FONT_SIZE);
     textComponent->SetTextStyle(std::move(textStyle));
-
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    boxComponent->SetMouseAnimationType(HoverAnimationType::NONE);
 }
 
 RefPtr<TextComponentV2> JSText::GetComponent()

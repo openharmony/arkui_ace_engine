@@ -60,6 +60,15 @@ int32_t OH_NativeXComponent_GetTouchEvent(
     return component->GetTouchEvent(window, touchEvent);
 }
 
+int32_t OH_NativeXComponent_GetMouseEvent(
+    OH_NativeXComponent* component, const void* window, OH_NativeXComponent_MouseEvent* mouseEvent)
+{
+    if ((component == nullptr) || (window == nullptr) || (mouseEvent == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->GetMouseEvent(window, mouseEvent);
+}
+
 int32_t OH_NativeXComponent_RegisterCallback(OH_NativeXComponent* component, OH_NativeXComponent_Callback* callback)
 {
     if ((component == nullptr) || (callback == nullptr)) {

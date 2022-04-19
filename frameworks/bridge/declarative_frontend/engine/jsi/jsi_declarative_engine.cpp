@@ -43,7 +43,14 @@
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 
-#ifndef WINDOWS_PLATFORM
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+extern const char* _binary_stateMgmt_abc_start[];
+extern const char* _binary_stateMgmt_abc_end[];
+extern const char* _binary_jsEnumStyle_abc_start[];
+extern const char* _binary_jsEnumStyle_abc_end[];
+extern const char* _binary_jsMockSystemPlugin_abc_start[];
+extern const char* _binary_jsMockSystemPlugin_abc_end[];
+#else
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_start[];
@@ -197,7 +204,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 #endif
 
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
-    if (!isModulePreloaded_) {
+    if (!isModulePreloaded_ || IsPlugin()) {
         InitGlobalObjectTemplate();
     }
 
@@ -206,7 +213,8 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     if (usingSharedRuntime_ && isModuleInitialized_) {
         LOGI("InitJsEnv SharedRuntime has initialized, skip...");
     } else {
-        if (!isModulePreloaded_) {
+        InitGroupJsBridge();
+        if (!isModulePreloaded_ || IsPlugin()) {
             InitConsoleModule();
             InitAceModule();
             InitJsExportsUtilObject();
@@ -216,7 +224,6 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         if (!isModuleInitialized_) {
             InitJsContextModuleObject();
         }
-        InitGroupJsBridge();
     }
 
     if (usingSharedRuntime_) {
@@ -237,7 +244,6 @@ bool JsiDeclarativeEngineInstance::FireJsEvent(const std::string& eventStr)
 
 void JsiDeclarativeEngineInstance::InitAceModule()
 {
-#ifndef WINDOWS_PLATFORM
     bool stateMgmtResult = runtime_->EvaluateJsCode(
         (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
     if (!stateMgmtResult) {
@@ -247,6 +253,12 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
     if (!jsEnumStyleResult) {
         LOGE("EvaluateJsCode jsEnumStyle failed");
+    }
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    bool jsMockSystemPlugin = runtime_->EvaluateJsCode((uint8_t*)_binary_jsMockSystemPlugin_abc_start,
+        _binary_jsMockSystemPlugin_abc_end - _binary_jsMockSystemPlugin_abc_start);
+    if (!jsMockSystemPlugin) {
+        LOGE("EvaluateJsCode jsMockSystemPlugin failed");
     }
 #endif
 }
@@ -259,7 +271,7 @@ extern "C" ACE_EXPORT void OHOS_ACE_PreloadAceModule(void* runtime)
 
 void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
 {
-    if (isModulePreloaded_) {
+    if (isModulePreloaded_ && !IsPlugin()) {
         LOGE("PreloadAceModule already preloaded");
         return;
     }
@@ -308,7 +320,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     global->SetProperty(arkRuntime, "exports", exportsUtilObj);
     global->SetProperty(arkRuntime, "requireNativeModule", arkRuntime->NewFunction(RequireNativeModule));
 
-#ifndef WINDOWS_PLATFORM
     // preload js enums
     bool jsEnumStyleResult = arkRuntime->EvaluateJsCode(
         (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
@@ -328,7 +339,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     isModulePreloaded_ = evalResult;
     globalRuntime_ = nullptr;
     LOGI("PreloadAceModule loaded:%{public}d", isModulePreloaded_);
-#endif
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule()
@@ -348,7 +358,7 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
         global->SetProperty(runtime_, "console", consoleObj);
     }
 
-    if (isModulePreloaded_) {
+    if (isModulePreloaded_ && !IsPlugin()) {
         LOGD("console module has already preloaded");
         return;
     }
@@ -636,6 +646,10 @@ void JsiDeclarativeEngineInstance::FlushCommandBuffer(void* context, const std::
     return;
 }
 
+bool JsiDeclarativeEngineInstance::IsPlugin()
+{
+    return (ContainerScope::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID);
+}
 // -----------------------
 // Start JsiDeclarativeEngine
 // -----------------------
@@ -659,7 +673,7 @@ void JsiDeclarativeEngine::Destroy()
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     if (!runtime_ && nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         engineInstance_->DestroyAllRootViewHandle();
@@ -719,7 +733,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     engineInstance_->SetNativeEngine(nativeEngine_);
     if (!sharedRuntime) {
         SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
         nativeEngine_->CheckUVLoop();
 #endif
 
@@ -780,13 +794,11 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         }
         instance->InitConsoleModule(arkNativeEngine);
 
-#ifndef WINDOWS_PLATFORM
         std::vector<uint8_t> buffer((uint8_t*)_binary_jsEnumStyle_abc_start, (uint8_t*)_binary_jsEnumStyle_abc_end);
         auto stateMgmtResult = arkNativeEngine->RunBufferScript(buffer);
         if (stateMgmtResult == nullptr) {
             LOGE("init worker error");
         }
-#endif
     };
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
@@ -815,6 +827,34 @@ void JsiDeclarativeEngine::RegisterWorker()
 {
     RegisterInitWorkerFunc();
     RegisterAssetFunc();
+}
+
+bool JsiDeclarativeEngine::ExecuteAbc(const shared_ptr<JsRuntime> runtime, const std::string fileName)
+{
+    auto delegate = engineInstance_->GetDelegate();
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+    std::string basePath = delegate->GetAssetPath(fileName);
+    if (!basePath.empty()) {
+        std::string abcPath = basePath.append(fileName);
+        LOGD("abcPath is: %{private}s", abcPath.c_str());
+        if (!runtime->ExecuteJsBin(abcPath)) {
+            LOGE("ExecuteJsBin %{private}s failed.", fileName.c_str());
+            return false;
+        }
+    }
+    return true;
+#else
+    std::vector<uint8_t> content;
+    if (!delegate->GetAssetContent(fileName, content)) {
+        LOGD("GetAssetContent \"%{public}s\" failed.", fileName.c_str());
+        return true;
+    }
+    if (!runtime->EvaluateJsCode(content.data(), content.size())) {
+        LOGE("EvaluateJsCode \"%{public}s\" failed.", fileName.c_str());
+        return false;
+    }
+    return true;
+#endif
 }
 
 void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
@@ -846,26 +886,12 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     auto pos = url.rfind(js_ext);
     if (pos != std::string::npos && pos == url.length() - (sizeof(js_ext) - 1)) {
         std::string urlName = url.substr(0, pos) + bin_ext;
-        std::string assetBasePath = delegate->GetAssetPath(urlName);
-        std::string assetPath = assetBasePath.append(urlName);
-        LOGI("assetPath is: %{private}s", assetPath.c_str());
-
         if (isMainPage) {
-            std::string commonsBasePath = delegate->GetAssetPath("commons.abc");
-            if (!commonsBasePath.empty()) {
-                std::string commonsPath = commonsBasePath.append("commons.abc");
-                if (!runtime->ExecuteJsBin(commonsPath)) {
-                    LOGE("ExecuteJsBin \"commons.js\" failed.");
-                    return;
-                }
+            if (!ExecuteAbc(runtime, "commons.abc")) {
+                return;
             }
-            std::string vendorsBasePath = delegate->GetAssetPath("vendors.abc");
-            if (!vendorsBasePath.empty()) {
-                std::string vendorsPath = vendorsBasePath.append("vendors.abc");
-                if (!runtime->ExecuteJsBin(vendorsPath)) {
-                    LOGE("ExecuteJsBin \"vendors.js\" failed.");
-                    return;
-                }
+            if (!ExecuteAbc(runtime, "vendor.abc")) {
+                return;
             }
             std::string appMap;
             if (delegate->GetAssetContent("app.js.map", appMap)) {
@@ -873,17 +899,13 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
             } else {
                 LOGW("app map load failed!");
             }
-            std::string appBasePath = delegate->GetAssetPath("app.abc");
-            std::string appPath = appBasePath.append("app.abc");
-            LOGI("appPath is: %{private}s", appPath.c_str());
-            if (runtime->ExecuteJsBin(appPath)) {
-                CallAppFunc("onCreate");
-            } else {
+            if (!ExecuteAbc(runtime, "app.abc")) {
                 LOGW("ExecuteJsBin \"app.js\" failed.");
+            } else {
+                CallAppFunc("onCreate");
             }
         }
-        if (!runtime->ExecuteJsBin(assetPath)) {
-            LOGE("ExecuteJsBin %{public}s failed.", urlName.c_str());
+        if (!ExecuteAbc(runtime, urlName)) {
             return;
         }
     }

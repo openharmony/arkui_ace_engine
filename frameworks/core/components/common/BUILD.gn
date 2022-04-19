@@ -50,6 +50,7 @@ build_component("common") {
   ]
   rosen_sources = [
     "painter/rosen_checkable_painter.cpp",
+    "painter/rosen_debug_boundary_painter.cpp",
     "painter/rosen_decoration_painter.cpp",
     "painter/rosen_scroll_bar_painter.cpp",
     "painter/rosen_scroll_fade_painter.cpp",

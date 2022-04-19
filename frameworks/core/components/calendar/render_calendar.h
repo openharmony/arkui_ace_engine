@@ -117,6 +117,7 @@ protected:
     bool hasRequestFocus_ = false;
     bool hasTouched_ = false;
     bool showHoliday_ = true;
+    bool showLunar_ = false;
     bool isV2Component_ = false;
     bool needSlide_ = false;
     bool isNeedRepaint_ = false;

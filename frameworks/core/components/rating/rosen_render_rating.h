@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,9 @@ public:
 
     void Paint(RenderContext& context, const Offset& offset) override;
     void PaintFocus(const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context) override;
+    void PaintFocusForTABLET(const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context);
+    void PaintPress(
+        const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context);
     void PaintRatingBar(RenderContext& context, SkCanvas* canvas);
     void PaintImageArea(RenderContext& context, const RefPtr<RenderImage>& renderImage, SkCanvas* canvas,
         const ImageAreaProperties& properties);

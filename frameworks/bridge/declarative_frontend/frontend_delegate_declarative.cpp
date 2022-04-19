@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -468,7 +468,7 @@ void FrontendDelegateDeclarative::OnBackGround()
         TaskExecutor::TaskType::JS);
 }
 
-void FrontendDelegateDeclarative::OnForground()
+void FrontendDelegateDeclarative::OnForeground()
 {
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
@@ -1306,7 +1306,9 @@ void FrontendDelegateDeclarative::LoadPage(
             page->FlushCommands();
             // just make sure the pipelineContext is created.
             auto pipeline = delegate->pipelineContextHolder_.Get();
-            pipeline->SetMinPlatformVersion(delegate->GetMinPlatformVersion());
+            if (delegate->GetMinPlatformVersion() > 0) {
+                pipeline->SetMinPlatformVersion(delegate->GetMinPlatformVersion());
+            }
             delegate->taskExecutor_->PostTask(
                 [weak, page] {
                     auto delegate = weak.Upgrade();

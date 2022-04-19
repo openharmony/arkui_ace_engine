@@ -17,6 +17,7 @@ declare class NativeView {
   constructor(compilerAssignedUniqueChildId: string, parent: View);
   markNeedUpdate(): void;
   findChildById(compilerAssignedUniqueChildId: string): View;
-
+  syncInstanceId(): void;
+  restoreInstanceId(): void;
   static create(newView: View): void;
 }

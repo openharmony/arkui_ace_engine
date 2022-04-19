@@ -350,9 +350,6 @@ void RenderTextField::PerformLayout()
     }
     if (needNotifyChangeEvent_ && (onTextChangeEvent_ || onValueChangeEvent_ || onChange_)) {
         needNotifyChangeEvent_ = false;
-        if (onChange_) {
-            onChange_(GetEditingValue().text);
-        }
         if (onValueChangeEvent_) {
             onValueChangeEvent_(GetEditingValue().text);
         }
@@ -827,6 +824,11 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
         if (textChangeListener_ == nullptr) {
             textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
         }
+        auto context = context_.Upgrade();
+        if (context) {
+            LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
+            MiscServices::InputMethodController::GetInstance()->SetCallingWindow(context->GetWindowId());
+        }
         MiscServices::InputMethodController::GetInstance()->Attach(textChangeListener_);
 #else
         if (!HasConnection()) {
@@ -1119,6 +1121,9 @@ void RenderTextField::UpdateEditingValue(const std::shared_ptr<TextEditingValue>
         if (onValueChange_) {
             onValueChange_();
         }
+        if (onChange_) {
+            onChange_(GetEditingValue().text);
+        }
     }
 }
 
@@ -1213,26 +1218,28 @@ bool RenderTextField::OnKeyEvent(const KeyEvent& event)
 
     if (event.action == KeyAction::DOWN) {
         cursorPositionType_ = CursorPositionType::NONE;
-        bool moved = true;
         if (event.code == KeyCode::TV_CONTROL_LEFT) {
             CursorMoveLeft();
-        } else if (event.code == KeyCode::TV_CONTROL_RIGHT) {
-            CursorMoveRight();
-        } else if (event.code == KeyCode::TV_CONTROL_UP) {
-            CursorMoveUp();
-        } else if (event.code == KeyCode::TV_CONTROL_DOWN) {
-            CursorMoveDown();
-        } else {
-            moved = HandleKeyEvent(event);
-        }
-        if (moved) {
-            // Obscure all glyphs immediately after cursor moved.
             obscureTickPendings_ = 0;
+            return true;
         }
-        return moved;
+        if (event.code == KeyCode::TV_CONTROL_RIGHT) {
+            CursorMoveRight();
+            obscureTickPendings_ = 0;
+            return true;
+        }
+        if (event.code == KeyCode::TV_CONTROL_UP) {
+            CursorMoveUp();
+            obscureTickPendings_ = 0;
+            return true;
+        }
+        if (event.code == KeyCode::TV_CONTROL_DOWN) {
+            CursorMoveDown();
+            obscureTickPendings_ = 0;
+            return true;
+        }
     }
-
-    return false;
+    return HandleKeyEvent(event);
 }
 
 void RenderTextField::UpdateFocusStyles()
@@ -1780,11 +1787,11 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
     if (appendElement.empty()) {
         return false;
     }
-    auto value = GetEditingValue();
-    value.text = value.GetBeforeSelection() + appendElement + value.GetAfterSelection();
-    value.UpdateSelection(
+    auto editingValue = std::make_shared<TextEditingValue>();
+    editingValue->text = GetEditingValue().GetBeforeSelection() + appendElement + GetEditingValue().GetAfterSelection();
+    editingValue->UpdateSelection(
         std::max(GetEditingValue().selection.GetEnd(), 0) + StringUtils::Str8ToStr16(appendElement).length());
-    SetEditingValue(std::move(value));
+    UpdateEditingValue(editingValue);
     MarkNeedLayout();
     return true;
 }

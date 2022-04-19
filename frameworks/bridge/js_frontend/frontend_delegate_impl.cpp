@@ -381,6 +381,9 @@ bool FrontendDelegateImpl::OnStartContinuation()
             ret = delegate->onStartContinuationCallBack_();
         }
     }, TaskExecutor::TaskType::JS);
+    if (!ret) {
+        ret = FireSyncEvent("_root", std::string("\"onStartContinuation\","), std::string(""));
+    }
     return ret;
 }
 
@@ -392,6 +395,7 @@ void FrontendDelegateImpl::OnCompleteContinuation(int32_t code)
             delegate->onCompleteContinuationCallBack_(code);
         }
     }, TaskExecutor::TaskType::JS);
+    FireSyncEvent("_root", std::string("\"onCompleteContinuation\","), std::to_string(code));
 }
 
 void FrontendDelegateImpl::OnRemoteTerminated()
@@ -413,6 +417,9 @@ void FrontendDelegateImpl::OnSaveData(std::string& data)
             delegate->onSaveDataCallBack_(savedData);
         }
     }, TaskExecutor::TaskType::JS);
+    if (savedData.empty()) {
+        FireSyncEvent("_root", std::string("\"onSaveData\","), std::string(""), savedData);
+    }
     std::string pageUri = GetRunningPageUrl();
     data = std::string("{\"url\":\"").append(pageUri).append("\",\"__remoteData\":").append(savedData).append("}");
 }
@@ -426,6 +433,7 @@ bool FrontendDelegateImpl::OnRestoreData(const std::string& data)
             ret = delegate->onRestoreDataCallBack_(data);
         }
     }, TaskExecutor::TaskType::JS);
+    FireSyncEvent("_root", std::string("\"onSaveData\","), data);
     return ret;
 }
 
@@ -605,33 +613,40 @@ void FrontendDelegateImpl::Back(const std::string& uri, const std::string& param
     if (pipelineContext) {
         pipelineContext->NotifyDestroyEventDismiss();
     }
-
-    std::lock_guard<std::mutex> lock(mutex_);
-    auto& currentPage = pageRouteStack_.back();
-    if (!pageRouteStack_.empty() && currentPage.isAlertBeforeBackPage) {
-        backUri_ = uri;
-        taskExecutor_->PostTask(
-            [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
-                isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
-                if (context) {
-                    context->ShowDialog(dialogProperties, isRightToLeft);
-                }
-            },
-            TaskExecutor::TaskType::UI);
-    } else {
-        BackImplement(uri);
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        auto& currentPage = pageRouteStack_.back();
+        if (!pageRouteStack_.empty() && currentPage.isAlertBeforeBackPage) {
+            backUri_ = uri;
+            backParam_ = params;
+            taskExecutor_->PostTask(
+                [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
+                    isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
+                    if (context) {
+                        context->ShowDialog(dialogProperties, isRightToLeft);
+                    }
+                },
+                TaskExecutor::TaskType::UI);
+            return;
+        }
     }
+    BackImplement(uri, params);
 }
 
-void FrontendDelegateImpl::BackImplement(const std::string& uri)
+void FrontendDelegateImpl::BackImplement(const std::string& uri, const std::string& params)
 {
     LOGD("router.Back path = %{private}s", uri.c_str());
     if (uri.empty()) {
         PopPage();
     } else {
         std::string pagePath = manifestParser_->GetRouter()->GetPagePath(uri);
+        pageId_ = GetPageIdByUrl(pagePath);
         LOGD("router.Back pagePath = %{private}s", pagePath.c_str());
         if (!pagePath.empty()) {
+            if (!params.empty()) {
+                std::lock_guard<std::mutex> lock(mutex_);
+                pageParamMap_[pageId_] = params;
+            }
             PopToPage(pagePath);
         } else {
             LOGW("[Engine Log] this uri not support in route Back.");
@@ -996,7 +1011,7 @@ void FrontendDelegateImpl::EnableAlertBeforeBackPage(
                     if (!delegate) {
                         return;
                     }
-                    delegate->BackImplement(delegate->backUri_);
+                    delegate->BackImplement(delegate->backUri_, delegate->backParam_);
                 },
                 TaskExecutor::TaskType::JS);
         });
@@ -1144,7 +1159,9 @@ void FrontendDelegateImpl::LoadPage(int32_t pageId, const std::string& url, bool
                 LOGE("the pipeline context is nullptr");
                 return;
             }
-            pipelineContext->SetMinPlatformVersion(delegate->GetMinPlatformVersion());
+            if (delegate->GetMinPlatformVersion() > 0) {
+                pipelineContext->SetMinPlatformVersion(delegate->GetMinPlatformVersion());
+            }
             delegate->taskExecutor_->PostTask(
                 [weak, page] {
                     auto delegate = weak.Upgrade();

@@ -96,7 +96,6 @@ struct WindowBlurInfo {
     std::vector<RRect> coords_;
 };
 
-
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 using SubscribeCtrlACallback = std::function<void()>;
 
@@ -124,8 +123,8 @@ public:
 
     // This is used for subwindow, when the subwindow is created,a new subrootElement will be built
     RefPtr<Element> SetupSubRootElement();
-    RefPtr<DialogComponent> ShowDialog(const DialogProperties& dialogProperties, bool isRightToLeft,
-        const std::string& inspectorTag = "");
+    RefPtr<DialogComponent> ShowDialog(
+        const DialogProperties& dialogProperties, bool isRightToLeft, const std::string& inspectorTag = "");
     void CloseContextMenu();
     void GetBoundingRectData(int32_t nodeId, Rect& rect);
 
@@ -391,6 +390,13 @@ public:
     }
     void NotifyDispatchTouchEventDismiss(const TouchEvent& event) const;
 
+    using DispatchMouseEventHandler = std::function<void(const MouseEvent& event)>;
+    void SetDispatchMouseEventHandler(DispatchMouseEventHandler&& listener)
+    {
+        dispatchMouseEventHandler_.push_back(std::move(listener));
+    }
+    void NotifyDispatchMouseEventDismiss(const MouseEvent& event) const;
+
     float GetViewScale() const
     {
         return viewScale_;
@@ -588,7 +594,7 @@ public:
 
     void FlushFocus();
 
-    void WindowFocus(bool isFocus) const;
+    void WindowFocus(bool isFocus);
 
     void SetIsRightToLeft(bool isRightToLeft)
     {
@@ -803,11 +809,11 @@ public:
 
     void SetForbidePlatformQuit(bool forbidePlatformQuit);
 
-    void SetRootBgColor(const Color& color);
+    void SetAppBgColor(const Color& color);
 
-    const Color& GetRootBgColor() const
+    const Color& GetAppBgColor() const
     {
-        return rootBgColor_;
+        return appBgColor_;
     }
 
     void SetPhotoCachePath(const std::string& photoCachePath)
@@ -1263,6 +1269,7 @@ private:
     void ExitAnimation();
     void CreateGeometryTransition();
     void CorrectPosition();
+    void CreateTouchEventOnZoom(const AxisEvent& event);
 
     template<typename T>
     struct NodeCompare {
@@ -1330,6 +1337,11 @@ private:
     InitDragEventListener initDragEventListener_;
     GetViewScaleCallback getViewScaleCallback_;
     std::stack<bool> pendingImplicitLayout_;
+    std::vector<KeyCode> pressedKeyCodes;
+    TouchEvent zoomEventA_;
+    TouchEvent zoomEventB_;
+    bool isOnScrollZoomEvent_ = false;
+    bool isKeyCtrlPressed_ = false;
 
     Rect transparentHole_;
     // use for traversing cliping hole
@@ -1356,6 +1368,7 @@ private:
     std::list<IsPagePathInvalidEventHandler> isPagePathInvalidEventHandler_;
     std::list<DestroyEventHandler> destroyEventHandler_;
     std::list<DispatchTouchEventHandler> dispatchTouchEventHandler_;
+    std::list<DispatchMouseEventHandler> dispatchMouseEventHandler_;
 
     RefPtr<ManagerInterface> textFieldManager_;
     RefPtr<PlatformBridge> messageBridge_;
@@ -1422,7 +1435,7 @@ private:
     int32_t frameCount_ = 0;
 #endif
 
-    Color rootBgColor_ = Color::WHITE;
+    Color appBgColor_ = Color::WHITE;
     int32_t width_ = 0;
     int32_t height_ = 0;
     bool isFirstPage_ = true;

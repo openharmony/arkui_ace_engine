@@ -16,6 +16,7 @@
 #include "core/gestures/gesture_recognizer.h"
 
 #include "base/log/log.h"
+#include "core/event/axis_event.h"
 #include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
@@ -38,6 +39,27 @@ bool GestureRecognizer::HandleEvent(const TouchEvent& point)
             HandleTouchCancelEvent(point);
             break;
         default:
+            LOGW("unknown touch type");
+            break;
+    }
+    return true;
+}
+
+bool GestureRecognizer::HandleEvent(const AxisEvent& event)
+{
+    switch (event.action) {
+        case AxisAction::BEGIN:
+            deviceId_ = event.deviceId;
+            deviceType_ = event.sourceType;
+            HandleTouchDownEvent(event);
+        case AxisAction::UPDATE:
+            HandleTouchMoveEvent(event);
+            break;
+        case AxisAction::END:
+            HandleTouchUpEvent(event);
+            break;
+        default:
+            HandleTouchCancelEvent(event);
             LOGW("unknown touch type");
             break;
     }

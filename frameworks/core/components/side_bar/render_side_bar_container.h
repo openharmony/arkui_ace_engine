@@ -27,6 +27,11 @@
 
 namespace OHOS::Ace {
 
+constexpr Dimension DEFAUTL_MAX_SIDEBAR_WIDTH = 280.0_vp;
+constexpr Dimension DEFAUTL_MIN_SIDEBAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAUTL_SIDEBAR_WIDTH = 200.0_vp;
+
+
 class RenderSideBarContainer : public RenderStack {
     DECLARE_ACE_TYPE(RenderSideBarContainer, RenderStack);
 public:
@@ -112,6 +117,8 @@ private:
     void HandleDragEnd();
     void UpdateRenderImage();
     void InitializeDragAndAnimation();
+    void CorrectWidth(const Dimension& width, const Dimension& minWidth, const Dimension& maxWidth);
+    void Initialize();
 
     RefPtr<GestureRecognizer> dragRecognizer_;
     RefPtr<SideBarAnimationController> animationController_;
@@ -134,12 +141,13 @@ private:
     double buttonWidth_ = 32.0;
     double buttonHeight_ = 32.0;
 
-    Dimension sidebarWidth_ = 200.0_vp;
-    Dimension minSidebarWidth_ = 200.0_vp;
-    Dimension maxSidebarWidth_ = 280.0_vp;
+    Dimension sidebarWidth_ = DEFAUTL_SIDEBAR_WIDTH;
+    Dimension minSidebarWidth_ = DEFAUTL_MIN_SIDEBAR_WIDTH;
+    Dimension maxSidebarWidth_ = DEFAUTL_MAX_SIDEBAR_WIDTH;
     Dimension curPosition_ = -sidebarWidth_;
     Dimension preSidebarWidth_;
     Rect exceptRegion_;
+    Dimension customSidebarWidth_;
 };
 
 } // namespace OHOS::Ace

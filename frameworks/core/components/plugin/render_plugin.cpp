@@ -63,16 +63,20 @@ void RenderPlugin::PerformLayout()
 bool RenderPlugin::TouchTest(const Point& globalPoint,
     const Point& parentLocalPoint, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
+    Point transformPoint = GetTransformPoint(parentLocalPoint);
+    if (!InTouchRectList(transformPoint, GetTouchRectList())) {
+        return false;
+    }
+    auto subContext = GetSubPipelineContext();
+    if (!subContext) {
+        LOGE("subContext is null");
+        return false;
+    }
+    subContext->SetPluginEventOffset(GetGlobalOffset());
+
     auto context = GetContext().Upgrade();
     if (context) {
-        auto pluginContext = GetSubPipelineContext();
-        if (pluginContext) {
-            double x = globalPoint.GetX() - pluginContext->GetPluginEventOffset().GetX();
-            double y = globalPoint.GetY() - pluginContext->GetPluginEventOffset().GetY();
-            if (x <= drawSize_.Width() && y <= drawSize_.Height()) {
-                context->SetTouchPipeline(WeakPtr<PipelineContext>(pluginContext));
-            }
-        }
+        context->SetTouchPipeline(WeakPtr<PipelineContext>(subContext));
     }
     return true;
 }

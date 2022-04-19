@@ -719,9 +719,9 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
  * limitations under the License.
  */
 class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
-    constructor(linkSouce, owningChildView, thisPropertyName) {
+    constructor(linkSource, owningChildView, thisPropertyName) {
         super(owningChildView, thisPropertyName);
-        this.linkedParentProperty_ = linkSouce;
+        this.linkedParentProperty_ = linkSource;
         // register to the parent property
         this.linkedParentProperty_.subscribeMe(this);
         // register to the ObservedObject
@@ -1746,6 +1746,8 @@ class View extends NativeView {
     }
     propertyHasChanged(info) {
         if (info) {
+            // need to sync container instanceId to switch instanceId in C++ side.
+            this.syncInstanceId();
             if (this.propsUsedForRender.has(info)) {
                 console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View needs update`);
                 this.markNeedUpdate();
@@ -1758,6 +1760,7 @@ class View extends NativeView {
                 console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. calling @Watch function`);
                 cb.call(this, info);
             }
+            this.restoreInstanceId();
         } // if info avail.
     }
     propertyRead(info) {
@@ -1967,6 +1970,7 @@ class PersistentStorage {
         });
         this.links_.clear();
         SubscriberManager.Get().delete(this.id());
+        PersistentStorage.Storage_.clear();
     }
     id() {
         return this.id_;
@@ -1987,7 +1991,157 @@ class PersistentStorage {
     }
 }
 PersistentStorage.Instance_ = undefined;
-;
+
+class DistributedStorage {
+    constructor(sessionId, statusNotifier) {
+        this.links_ = new Map();
+        this.id_ = SubscriberManager.Get().MakeId();
+        SubscriberManager.Get().add(this);
+        this.aviliable_ = false;
+        this.storage_ = new DistributedObject(sessionId, this);
+        this.notifier_ = statusNotifier;
+    }
+    keys() {
+        let result = [];
+        const it = this.links_.keys();
+        let val = it.next();
+        while (!val.done) {
+            result.push(val.value);
+            val = it.next();
+        }
+        return result;
+    }
+    distributeProp(propName, defaultValue) {
+        if (this.link(propName, defaultValue)) {
+            console.debug(`DistributedStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
+        }
+    }
+    distributeProps(properties) {
+        properties.forEach(property => this.link(property.key, property.defaultValue));
+    }
+    link(propName, defaultValue) {
+        if (defaultValue == null || defaultValue == undefined) {
+            console.error(`DistributedStorage: linkProp for ${propName} called with 'null' or 'undefined' default value!`);
+            return false;
+        }
+        if (this.links_.get(propName)) {
+            console.warn(`DistributedStorage: linkProp: ${propName} is already exist`);
+            return false;
+        }
+        let link = AppStorage.GetOrCreate().link(propName, this);
+        if (link) {
+            console.debug(`DistributedStorage: linkProp ${propName} in AppStorage, using that`);
+            this.links_.set(propName, link);
+            this.setDistributedProp(propName, defaultValue);
+        }
+        else {
+            let returnValue = defaultValue;
+            if (this.aviliable_) {
+                let newValue = this.getDistributedProp(propName);
+                if (newValue == null) {
+                    console.debug(`DistributedStorage: no entry for ${propName}, will initialize with default value`);
+                    this.setDistributedProp(propName, defaultValue);
+                }
+                else {
+                    returnValue = newValue;
+                }
+            }
+            link = AppStorage.GetOrCreate().setAndLink(propName, returnValue, this);
+            this.links_.set(propName, link);
+            console.debug(`DistributedStorage: created new linkProp prop for ${propName}`);
+        }
+        return true;
+    }
+    deleteProp(propName) {
+        let link = this.links_.get(propName);
+        if (link) {
+            link.aboutToBeDeleted();
+            this.links_.delete(propName);
+            if (this.aviliable_) {
+                this.storage_.delete(propName);
+            }
+        }
+        else {
+            console.warn(`DistributedStorage: '${propName}' is not a distributed property warning.`);
+        }
+    }
+    write(key) {
+        let link = this.links_.get(key);
+        if (link) {
+            console.info(`DistributedStorage: write ${key}-${JSON.stringify(link.get())} `);
+            this.setDistributedProp(key, link.get())
+        }
+    }
+    // public required by the interface, use the static method instead!
+    aboutToBeDeleted() {
+        console.debug("DistributedStorage: about to be deleted");
+        this.links_.forEach((val, key, map) => {
+            console.debug(`DistributedStorage: removing ${key}`);
+            val.aboutToBeDeleted();
+        });
+        this.links_.clear();
+        SubscriberManager.Get().delete(this.id__());
+    }
+    id__() {
+        return this.id_;
+    }
+    propertyHasChanged(info) {
+        console.info(`DistributedStorage: property changed info:${JSON.stringify(info)} `);
+        this.write(info);
+    }
+    onDataOnChange(propName) {
+        let link = this.links_.get(propName);
+        let newValue = this.getDistributedProp(propName);
+        if (link && newValue != null) {
+            console.info(`DistributedStorage: dataOnChange[${propName}-${newValue}]`);
+            link.set(newValue)
+        }
+    }
+    onConnected(status) {
+        console.info(`DistributedStorage onConnected: status = ${status}`);
+        if (!this.aviliable_) {
+            this.syncProp();
+            this.aviliable_ = true;
+        }
+        if (this.notifier_ != null) {
+            this.notifier_(status);
+        }
+    }
+    syncProp() {
+        this.links_.forEach((val, key) => {
+            let newValue = this.getDistributedProp(key);
+            if (newValue == null) {
+                this.setDistributedProp(key, val.get());
+            } else {
+                val.set(newValue);
+            }
+        });
+    }
+    setDistributedProp(key, value) {
+        if (!this.aviliable_) {
+            console.warn(`DistributedStorage is not aviliable`);
+            return;
+        }
+        if (typeof value == 'object') {
+            this.storage_.set(key, JSON.stringify(value));
+            return;
+        }
+        this.storage_.set(key, value);
+    }
+    getDistributedProp(key) {
+        let value = this.storage_.get(key);
+        if (typeof value == 'string') {
+            try {
+                let returnValue = JSON.parse(value);
+                return returnValue;
+            }
+            finally {
+                return value;
+            }
+        }
+        return value;
+    }
+}
 /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -2129,3 +2283,4 @@ Environment.Instance_ = undefined;
  * limitations under the License.
  */
 console.debug("ACE State Mgmt init ...");
+PersistentStorage.ConfigureBackend(new Storage());

@@ -75,7 +75,7 @@ public:
     
     void Invoke(const std::string& origin, const bool& allow, const bool& retain) override;
 private:
-    OHOS::NWeb::NWebGeolocationCallbackInterface* geolocationCallback_;
+    std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface> geolocationCallback_;
 };
 
 class WebDelegate : public WebResource {

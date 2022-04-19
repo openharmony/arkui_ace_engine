@@ -820,7 +820,10 @@ bool RenderNode::MouseDetect(const Point& globalPoint, const Point& parentLocalP
     for (auto& rect : GetTouchRectList()) {
         if (touchable_ && rect.IsInRegion(transformPoint)) {
             if (!hoverNode.Upgrade()) {
-                hoverNode = CheckHoverNode();
+                if (hoverAnimationType_ != HoverAnimationType::UNKNOWN) {
+                    hoverNode = AceType::WeakClaim<RenderNode>(this);
+                    LOGI("Got hoverEffect node: %{public}s", AceType::TypeName(this));
+                }
             }
             hoverList.emplace_back(AceType::WeakClaim<RenderNode>(this));
             // Calculates the coordinate offset in this node.
@@ -1979,6 +1982,9 @@ void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail)
     if (isHead && !rsNode_) {
         // create RSNode in first node of JSview
         rsNode_ = CreateRSNode();
+    } else if (!isHead && rsNode_) {
+        // destroy unneeded RSNode
+        rsNode_ = nullptr;
     }
 #endif
 }
@@ -2037,7 +2043,7 @@ void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!rsNode_) {
-        LOGW("Parent render_node has no RSNode, creating now.");
+        LOGD("Parent render_node has no RSNode, creating now.");
         SyncRSNodeBoundary(true, true);
     }
     if (IsTailRenderNode()) {

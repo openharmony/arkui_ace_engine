@@ -38,6 +38,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_checkbox.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_distributed.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
@@ -558,7 +559,7 @@ void SetAppBackgroundColor(const v8::FunctionCallbackInfo<v8::Value>& args)
     }
     auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext) {
-        pipelineContext->SetRootBgColor(Color::FromString(backgroundColorStr));
+        pipelineContext->SetAppBgColor(Color::FromString(backgroundColorStr));
     }
 }
 
@@ -771,6 +772,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSPanHandler::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
+    JSDistributed::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
 
     JSProfiler::JSBind(globalObj);

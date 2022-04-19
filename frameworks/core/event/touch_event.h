@@ -21,6 +21,7 @@
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "core/event/ace_events.h"
+#include "core/event/axis_event.h"
 
 namespace OHOS::Ace {
 
@@ -350,6 +351,10 @@ class ACE_EXPORT TouchEventTarget : public virtual AceType {
 public:
     virtual bool DispatchEvent(const TouchEvent& point) = 0;
     virtual bool HandleEvent(const TouchEvent& point) = 0;
+    virtual bool HandleEvent(const AxisEvent& event)
+    {
+        return true;
+    }
 
     void SetTouchRestrict(const TouchRestrict& touchRestrict)
     {

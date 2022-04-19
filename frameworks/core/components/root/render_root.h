@@ -61,7 +61,7 @@ public:
 
     void SetBgColor(const Color& color);
 
-    void SetDefaultBgColor();
+    void SetDefaultBgColor(bool isTransparent = false);
 
     void NotifyOnShow() const
     {
@@ -81,7 +81,7 @@ protected:
     RenderRoot();
 
     float scale_ = 1.0f;
-    Color bgColor_;
+    Color bgColor_ = Color::WHITE;
     bool forceColor_ = false;
     bool isBgColorInit_ = false;
     bool isReset_ = false;

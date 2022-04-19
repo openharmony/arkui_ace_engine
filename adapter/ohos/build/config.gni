@@ -124,3 +124,5 @@ platform_deps = [
   "//foundation/ace/ace_engine/adapter/ohos/entrance:ace_ohos_standard_entrance",
   "//foundation/ace/ace_engine/adapter/ohos/osal:ace_osal_ohos",
 ]
+
+libace_target = "//foundation/ace/ace_engine/build:libace"

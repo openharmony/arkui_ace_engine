@@ -43,6 +43,7 @@ void JSRating::Create(const JSCallbackInfo& info)
         indicator = getIndicator->ToBoolean();
     }
     auto component = AceType::MakeRefPtr<RatingComponent>();
+    component->SetMouseAnimationType(HoverAnimationType::NONE);
     component->SetRatingScore(rating);
     component->SetIndicator(indicator);
     ViewStackProcessor::GetInstance()->Push(component);

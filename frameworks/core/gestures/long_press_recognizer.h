@@ -39,8 +39,10 @@ class LongPressRecognizer : public MultiFingersRecognizer {
 
 public:
     explicit LongPressRecognizer(const WeakPtr<PipelineContext>& context) : context_(context) {}
-    LongPressRecognizer(const WeakPtr<PipelineContext>& context, int32_t duration, int32_t fingers, bool repeat)
-        : context_(context), duration_(duration), repeat_(repeat)
+    LongPressRecognizer(const WeakPtr<PipelineContext>& context, int32_t duration, int32_t fingers, bool repeat,
+        bool isForDrag = false, bool isDisableMouseLeft = false)
+        : context_(context), duration_(duration), repeat_(repeat), isForDrag_(isForDrag),
+          isDisableMouseLeft_(isDisableMouseLeft)
     {
         fingers_ = fingers;
     }
@@ -54,6 +56,11 @@ public:
         onLongPress_ = onLongPress;
     }
 
+    void SetUseCatchMode(bool useCatchMode)
+    {
+        useCatchMode_ = useCatchMode;
+    }
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -61,7 +68,7 @@ private:
     void HandleTouchCancelEvent(const TouchEvent& event) override;
     bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
     void HandleOverdueDeadline();
-    void DeadlineTimer(int32_t time);
+    void DeadlineTimer(int32_t time, bool isAccept);
     void DoRepeat();
     void StartRepeatTimer();
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat);
@@ -80,6 +87,9 @@ private:
     TimeStamp time_;
     bool pendingEnd_ = false;
     bool pendingCancel_ = false;
+    bool useCatchMode_ = true;
+    bool isForDrag_ = false;
+    bool isDisableMouseLeft_ = false;
 };
 
 } // namespace OHOS::Ace

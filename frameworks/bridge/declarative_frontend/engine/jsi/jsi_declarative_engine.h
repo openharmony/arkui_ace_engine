@@ -128,6 +128,19 @@ public:
         rootViewMap_.emplace(pageId, value);
     }
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
+    {
+        auto dispatcher = dispatcher_.Upgrade();
+        if (dispatcher) {
+            dispatcher->CallCurlFunction(requestData, callbackId);
+            return true;
+        } else {
+            LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+            return false;
+        }
+    }
+#endif
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global
@@ -137,6 +150,7 @@ private:
     void InitJsNativeModuleObject();
     void InitJsContextModuleObject();
     void InitGroupJsBridge();
+    static bool IsPlugin();
 
     std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
@@ -283,6 +297,7 @@ private:
     void RegisterWorker();
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
+    bool ExecuteAbc(const shared_ptr<JsRuntime> runtime, const std::string fileName);
 
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 

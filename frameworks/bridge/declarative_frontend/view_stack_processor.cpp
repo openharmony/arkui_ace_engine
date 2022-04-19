@@ -197,6 +197,9 @@ RefPtr<BoxComponent> ViewStackProcessor::GetBoxComponent()
     }
 
     RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<OHOS::Ace::BoxComponent>();
+    if (SystemProperties::GetDebugBoundaryEnabled()) {
+        boxComponent->SetEnableDebugBoundary(true);
+    }
     wrappingComponentsMap.emplace("box", boxComponent);
     return boxComponent;
 }
@@ -326,7 +329,6 @@ RefPtr<FocusableComponent> ViewStackProcessor::GetFocusableComponent(bool create
     }
     if (createIfNotExist) {
         RefPtr<FocusableComponent> focusableComponent = AceType::MakeRefPtr<OHOS::Ace::FocusableComponent>();
-        focusableComponent->SetFocusable(true);
         wrappingComponentsMap.emplace("focusable", focusableComponent);
         return focusableComponent;
     }

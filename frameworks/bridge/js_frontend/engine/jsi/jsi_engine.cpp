@@ -24,6 +24,7 @@
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
+#include "base/thread/task_executor.h"
 #include "base/utils/time_util.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
@@ -49,6 +50,11 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_stepper_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_xcomponent_bridge.h"
 
+#ifdef PIXEL_MAP_SUPPORTED
+#include "pixel_map.h"
+#include "pixel_map_napi.h"
+#endif
+
 namespace OHOS::Ace::Framework {
 
 #ifdef APP_USE_ARM
@@ -60,6 +66,51 @@ const int32_t MAX_READ_TEXT_LENGTH = 4096;
 const std::regex URI_PARTTEN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
 using std::shared_ptr;
 static int32_t globalNodeId = 100000;
+std::map<const std::string, std::string> JsiEngineInstance::dataMap_;
+RefPtr<Clipboard> clipboard;
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue> jsValue)
+{
+    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (!engine) {
+        LOGE("engine is null.");
+        return nullptr;
+    }
+
+    auto nativeEngine = static_cast<ArkNativeEngine*>(engine->GetNativeEngine());
+    if (!nativeEngine) {
+        LOGE("NativeEngine is null");
+        return nullptr;
+    }
+
+    shared_ptr<ArkJSValue> arkJsValue = std::static_pointer_cast<ArkJSValue>(jsValue);
+    if (!arkJsValue) {
+        LOGE("arkJsValue is null.");
+        return nullptr;
+    }
+    shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (!arkRuntime) {
+        LOGE("arkRuntime is null");
+        return nullptr;
+    }
+
+    JSValueWrapper valueWrapper = arkJsValue->GetValue(arkRuntime);
+    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+
+    PixelMapNapiEntry pixelMapNapiEntry = JsEngine::GetPixelMapNapiEntry();
+    if (!pixelMapNapiEntry) {
+        LOGE("pixelMapNapiEntry is null");
+    }
+    void* pixmapPtrAddr = pixelMapNapiEntry(
+        reinterpret_cast<napi_env>(nativeEngine), reinterpret_cast<napi_value>(nativeValue));
+    if (pixmapPtrAddr == nullptr) {
+        LOGE(" Failed to get pixmap pointer");
+        return nullptr;
+    }
+    return PixelMap::CreatePixelMap(pixmapPtrAddr);
+}
+#endif
 
 RefPtr<JsAcePage> GetStagingPage(const shared_ptr<JsRuntime>& runtime)
 {
@@ -1641,7 +1692,7 @@ shared_ptr<JsValue> JsHandlePageRoute(
             { ROUTE_PAGE_BACK,
                 [](const std::string& uri, const std::string& params, JsiEngineInstance& instance) {
                     LOGD("JsBackRoute uri = %{private}s", uri.c_str());
-                    instance.GetFrontendDelegate()->Back(uri);
+                    instance.GetFrontendDelegate()->Back(uri, params);
                     return instance.GetJsRuntime()->NewNull();
                 } },
             { ROUTE_PAGE_CLEAR,
@@ -2169,6 +2220,142 @@ int GetNodeId(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& a
     return id;
 }
 
+std::shared_ptr<JsValue> AppClearData(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (!clipboard) {
+        auto pipelineContext = GetFrontendDelegate(runtime)->GetPipelineContext();
+        clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipelineContext->GetTaskExecutor());
+    }
+    auto page = GetStagingPage(runtime);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return runtime->NewUndefined();
+    }
+    if (argv.empty() || argc == 0) {
+        if (JsiEngineInstance::dataMap_.size() > 0) {
+            JsiEngineInstance::dataMap_.clear();
+            clipboard->SetData("");
+            return runtime->NewBoolean(true);
+        }
+    }
+    if (JsiEngineInstance::dataMap_.count(argv[0]->ToString(runtime)) == 1) {
+        JsiEngineInstance::dataMap_.erase(argv[0]->ToString(runtime));
+        std::string strResult;
+        strResult.append("{");
+        std::map<const std::string, std::string>::iterator iter = JsiEngineInstance::dataMap_.begin();
+        while (iter != JsiEngineInstance::dataMap_.end()) {
+            std::string key = iter->first;
+            std::string val = iter->second;
+            strResult.append("\"")
+                .append(key)
+                .append("\":")
+                .append(val);
+            ++iter;
+            if (iter != JsiEngineInstance::dataMap_.end()) {
+                strResult.append(",");
+            }
+        }
+        strResult.append("}");
+        clipboard->SetData(strResult);
+        return runtime->NewBoolean(true);
+    }
+    return runtime->NewBoolean(false);
+}
+
+shared_ptr<JsValue> AppSetData(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (!clipboard) {
+        auto pipelineContext = GetFrontendDelegate(runtime)->GetPipelineContext();
+        clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipelineContext->GetTaskExecutor());
+    }
+    auto page = GetStagingPage(runtime);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return runtime->NewUndefined();
+    }
+    if (argv.empty() || argc != 2) {
+        return runtime->NewBoolean(false);
+    }
+    JsiEngineInstance::dataMap_[argv[0]->ToString(runtime)] = argv[1]->GetJsonString(runtime);
+
+    std::string strResult;
+    strResult.append("{");
+    std::map<const std::string, std::string>::iterator iter = JsiEngineInstance::dataMap_.begin();
+    while (iter != JsiEngineInstance::dataMap_.end()) {
+        std::string key = iter->first;
+        std::string val = iter->second;
+        strResult.append("\"")
+                .append(key)
+                .append("\":")
+                .append(val);
+        ++iter;
+        if (iter != JsiEngineInstance::dataMap_.end()) {
+            strResult.append(",");
+        }
+    }
+    strResult.append("}");
+    clipboard->SetData(strResult);
+    return runtime->NewBoolean(true);
+}
+
+shared_ptr<JsValue> AppGetData(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (!clipboard) {
+        auto pipelineContext = GetFrontendDelegate(runtime)->GetPipelineContext();
+        clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipelineContext->GetTaskExecutor());
+    }
+    auto page = GetStagingPage(runtime);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return runtime->NewUndefined();
+    }
+    if (argv.empty() || argc == 0) {
+        LOGE("argc = 0");
+        return runtime->NewBoolean(false);
+    }
+    std::string clipData;
+    std::string* clipDataPtr = &clipData;
+    std::string key = argv[0]->ToString(runtime);
+    auto callback = [key, clipDataPtr](const std::string& data) {
+        auto clipboardObj = JsonUtil::ParseJsonString(data);
+        auto value = clipboardObj->GetValue(key);
+        if (value) {
+            *clipDataPtr = value->ToString();
+        }
+    };
+    clipboard->GetData(callback, true);
+    return runtime->ParseJson(clipData);
+}
+
+shared_ptr<JsValue> AppSetDataImage(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    auto page = GetStagingPage(runtime);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return runtime->NewUndefined();
+    }
+    if (argv.empty() || argc != 3) {
+        return runtime->NewBoolean(false);
+    }
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    DOMDocument::pixelMap_ = CreatePixelMapFromNapiValue(runtime, argv[0]);
+    if (argv[1] && argv[1]->IsInt32(runtime)) {
+        DOMDocument::pixelMapOffsetX_ = argv[1]->ToInt32(runtime);
+    }
+    if (argv[2] && argv[2]->IsInt32(runtime)) {
+        DOMDocument::pixelMapOffsetY_ = argv[2]->ToInt32(runtime);
+    }
+    if (!DOMDocument::pixelMap_) {
+        return runtime->NewUndefined();
+    }
+#endif
+    return runtime->NewUndefined();
+}
+
 shared_ptr<JsValue> JsSetAttribute(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
@@ -2682,6 +2869,17 @@ void JsiEngineInstance::RegisterI18nPluralRulesModule()
     global->SetProperty(runtime_, "i18nPluralRules", i18nObj);
 }
 
+void JsiEngineInstance::RegisterFaPlugin()
+{
+    shared_ptr<JsValue> global = runtime_->GetGlobal();
+    shared_ptr<JsValue> requireNapiFunc = global->GetProperty(runtime_, "requireNapi");
+    if (!requireNapiFunc || !requireNapiFunc->IsFunction(runtime_)) {
+        LOGW("requireNapi func not found");
+    }
+    std::vector<shared_ptr<JsValue>> argv = { runtime_->NewString("FeatureAbility") };
+    requireNapiFunc->Call(runtime_, global, argv, argv.size());
+}
+
 bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<std::string, void*>& extraNativeObject)
 {
     ACE_SCOPED_TRACE("JsiEngine::InitJsEnv");
@@ -2751,6 +2949,26 @@ bool JsiEngineInstance::FireJsEvent(const std::string& eventStr)
     std::vector<shared_ptr<JsValue>> argv;
     argv.push_back(runtime_->NewString(std::to_string(runningPage_->GetPageId())));
     shared_ptr<JsValue> var1 = runtime_->ParseJson(eventStr);
+    if (var1->IsArray(runtime_)) {
+        shared_ptr<JsValue> varArry = var1->GetProperty(runtime_, 0);
+        if (varArry->IsObject(runtime_)) {
+            shared_ptr<JsValue> args = varArry->GetProperty(runtime_, "args");
+            if (args->IsArray(runtime_)) {
+                shared_ptr<JsValue> stdDrage = args->GetProperty(runtime_, 1);
+                if (IsDragEvent(stdDrage->GetJsonString(runtime_))) {
+                    shared_ptr<JsValue> arryType = args->GetProperty(runtime_, 2);
+                    if (arryType->IsObject(runtime_)) {
+                        shared_ptr<JsValue> dataTransfer = runtime_->NewObject();
+                        dataTransfer->SetProperty(runtime_, "clearData", runtime_->NewFunction(AppClearData));
+                        dataTransfer->SetProperty(runtime_, "getData", runtime_->NewFunction(AppGetData));
+                        dataTransfer->SetProperty(runtime_, "setData", runtime_->NewFunction(AppSetData));
+                        dataTransfer->SetProperty(runtime_, "setDragImage", runtime_->NewFunction(AppSetDataImage));
+                        arryType->SetProperty(runtime_, "dataTransfer", dataTransfer);
+                    }
+                }
+            }
+        }
+    }
     argv.push_back(var1);
 
     shared_ptr<JsValue> global = runtime_->GetGlobal();
@@ -2762,6 +2980,12 @@ bool JsiEngineInstance::FireJsEvent(const std::string& eventStr)
     }
     func->Call(runtime_, global, argv, argv.size());
     return true;
+}
+
+bool JsiEngineInstance::IsDragEvent(const std::string& param)
+{
+    std::string::size_type idx = param.find("drag");
+    return !(idx == std::string::npos);
 }
 
 void JsiEngineInstance::CallJs(const std::string& callbackId, const std::string& args, bool keepAlive, bool isGlobal)
@@ -2791,6 +3015,20 @@ void JsiEngineInstance::CallJs(const std::string& callbackId, const std::string&
     func->Call(runtime_, global, argv, argv.size());
 }
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+bool JsiEngineInstance::CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
+{
+    auto dispatcher = dispatcher_.Upgrade();
+    if (dispatcher) {
+        dispatcher->CallCurlFunction(requestData, callbackId);
+        return true;
+    } else {
+        LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+        return false;
+    }
+}
+#endif
+
 // -----------------------
 // Start JsiEngine
 // -----------------------
@@ -2817,7 +3055,7 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     nativeEngine_ = nativeEngine;
     engineInstance_->SetNativeEngine(nativeEngine_);
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
     nativeEngine_->CheckUVLoop();
 #endif
 
@@ -2828,6 +3066,7 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
             nativeEngine->SetPackagePath(packagePath);
         }
     }
+    engineInstance_->RegisterFaPlugin();
     RegisterWorker();
 
     return true;
@@ -2919,7 +3158,7 @@ JsiEngine::~JsiEngine()
 {
     LOG_DESTROY();
     if (nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         delete nativeEngine_;

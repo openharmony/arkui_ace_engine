@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,7 @@ void RenderRating::Update(const RefPtr<Component>& component)
         hoverColor_ = rating->GetHoverColor();
         starColorActive_ = rating->GetStarColorActive().GetValue();
         starColorInactive_ = rating->GetStarColorInactive().GetValue();
+        hoverAnimationType_ = rating->GetMouseAnimationType();
 
         ProcessAttributes(isUpdateAll);
 
@@ -329,9 +330,11 @@ void RenderRating::OnTouchTestHit(
 {
     dragDetector_->SetCoordinateOffset(coordinateOffset);
     clickDetector_->SetCoordinateOffset(coordinateOffset);
+    touchDetector_->SetCoordinateOffset(coordinateOffset);
 
     result.emplace_back(dragDetector_);
     result.emplace_back(clickDetector_);
+    result.emplace_back(touchDetector_);
 }
 
 void RenderRating::HandleClick(const Offset& clickPosition)
@@ -339,6 +342,20 @@ void RenderRating::HandleClick(const Offset& clickPosition)
     HandleTouchEvent(clickPosition);
     FireChangeEvent();
     RequestFocusAnimationForPhone();
+}
+
+void RenderRating::HandlePressDown(const Offset& pressPosition)
+{
+    pressOffset_ = pressPosition;
+    isPress_ = true;
+    pressstarNum_ = floor(pressPosition.GetX() / singleWidth_);
+    MarkNeedLayout();
+}
+
+void RenderRating::HandlePressUp()
+{
+    isPress_ = false;
+    MarkNeedLayout();
 }
 
 void RenderRating::HandleDragUpdate(const Offset& updatePoint)
@@ -410,6 +427,22 @@ void RenderRating::Initialize()
         auto rating = weak.Upgrade();
         if (rating) {
             rating->HandleClick(info.GetLocalLocation());
+        }
+    });
+
+    touchDetector_ = AceType::MakeRefPtr<RawRecognizer>();
+    touchDetector_->SetOnTouchDown([weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto rating = weak.Upgrade();
+        if (rating) {
+            auto localPosition = info.GetTouches().front().GetLocalLocation();
+            rating->HandlePressDown(localPosition);
+        }
+    });
+
+    touchDetector_->SetOnTouchUp([weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto rating = weak.Upgrade();
+        if (rating) {
+            rating->HandlePressUp();
         }
     });
 }
@@ -502,6 +535,26 @@ void RenderRating::ConstrainScore(double& score, double lowerBoundary, double up
     }
 }
 
+bool RenderRating::HandleMouseEvent(const MouseEvent& event)
+{
+    OnMouseHoverEnterTest();
+    if (NearZero(singleWidth_)) {
+        return false;
+    }
+    auto localPoint = event.GetScreenOffset() - GetGlobalOffset();
+    double offsetDeltaX = (GetLayoutSize().Width() - ratingSize_.Width()) / 2.0;
+    int32_t starIndex = (int32_t)floor((localPoint.GetX() - offsetDeltaX) / singleWidth_);
+    if (onHover_) {
+        PlayEventEffectAnimation(starIndex);
+    }
+    return true;
+}
+
+void RenderRating::AnimateMouseHoverEnter()
+{
+    OnMouseHoverEnterTest();
+}
+
 void RenderRating::OnMouseHoverEnterTest()
 {
     operationEvent_ = OperationEvent::RATING_MOUSE_EVENT;
@@ -509,6 +562,11 @@ void RenderRating::OnMouseHoverEnterTest()
         focusAnimation_->CancelFocusAnimation();
     }
     onHover_ = true;
+}
+
+void RenderRating::AnimateMouseHoverExit()
+{
+    OnMouseHoverExitTest();
 }
 
 void RenderRating::OnMouseHoverExitTest()

@@ -197,6 +197,35 @@ void RenderXComponent::NativeXComponentDispatchTouchEvent(const OH_NativeXCompon
     }
 }
 
+void RenderXComponent::NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent)
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("NativeXComponentDispatchTouchEvent context null");
+        return;
+    }
+    float scale = pipelineContext->GetViewScale();
+    float diffX = mouseEvent.x - position_.GetX() * scale;
+    float diffY = mouseEvent.y - position_.GetY() * scale;
+    if ((diffX >= 0) && (diffX <= drawSize_.Width() * scale) && (diffY >= 0) && (diffY <= drawSize_.Height() * scale)) {
+        pipelineContext->GetTaskExecutor()->PostTask(
+            [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, mouseEvent] {
+                auto nXCompImpl = weakNXCompImpl.Upgrade();
+                if (nXComp != nullptr && nXCompImpl) {
+                    nXCompImpl->SetMouseEvent(mouseEvent);
+                    auto surface = const_cast<void*>(nXCompImpl->GetSurface());
+                    auto callback = nXCompImpl->GetCallback();
+                    if (callback != nullptr && callback->DispatchMouseEvent != nullptr) {
+                        callback->DispatchMouseEvent(nXComp, surface);
+                    }
+                } else {
+                    LOGE("Native XComponent nullptr");
+                }
+            },
+            TaskExecutor::TaskType::JS);
+    }
+}
+
 void RenderXComponent::NativeXComponentOffset(const double&x, const double& y)
 {
     auto pipelineContext = context_.Upgrade();

@@ -31,37 +31,38 @@ const std::vector<V2::AlignStyle> ALIGN_STYLE = { V2::AlignStyle::LEFT, V2::Alig
 void JSIndexer::Create(const JSCallbackInfo& args)
 {
     if (args.Length() >= 1 && args[0]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        auto param = JsonUtil::ParseJsonString(args[0]->ToString());
+        if (!param || param->IsNull()) {
+            LOGE("JSIndexer::Create param is null");
+            return;
+        }
         std::vector<std::string> indexerArray;
 
-        JSRef<JSVal> arrayVal = obj->GetProperty("arrayValue");
-        if (!arrayVal->IsArray()) {
+        auto arrayVal = param->GetValue("arrayValue");
+        if (!arrayVal || !arrayVal->IsArray()) {
             LOGW("info is invalid");
             return;
         }
 
-        JSRef<JSArray> array = JSRef<JSArray>::Cast(arrayVal);
-        int32_t length = static_cast<int32_t>(array->Length());
+        size_t length = static_cast<uint32_t>(arrayVal->GetArraySize());
         if (length <= 0) {
             LOGE("info is invalid");
             return;
         }
-        for (int32_t i = 0; i < length; i++) {
-            JSRef<JSVal> value = array->GetValueAt(i);
-            std::string tmp;
-            if (ParseJsString(value, tmp)) {
-                indexerArray.emplace_back(tmp);
+        for (size_t i = 0; i < length; i++) {
+            auto value = arrayVal->GetArrayItem(i);
+            if (!value) {
+                return;
             }
+            indexerArray.emplace_back(value->GetString());
         }
 
-        JSRef<JSVal> selectedVal = obj->GetProperty("selected");
-        if (!selectedVal->IsNumber()) {
-            LOGE("info is invalid");
-            return;
-        }
+        auto selectedVal = param->GetInt("selected", 0);
+
         auto indexerComponent =
-            AceType::MakeRefPtr<V2::IndexerComponent>(indexerArray, selectedVal->ToNumber<int32_t>());
+            AceType::MakeRefPtr<V2::IndexerComponent>(indexerArray, selectedVal);
         ViewStackProcessor::GetInstance()->Push(indexerComponent);
+        JSInteractableView::SetFocusable(true);
         JSInteractableView::SetFocusNode(true);
         args.ReturnSelf();
     }

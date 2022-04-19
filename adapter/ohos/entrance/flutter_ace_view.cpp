@@ -211,6 +211,24 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
         (long long)pointerEvent->GetActionTime());
 }
 
+void GetAxisEventAction(int32_t action, AxisEvent& event)
+{
+    switch (action) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN:
+            event.action = AxisAction::BEGIN;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE:
+            event.action = AxisAction::UPDATE;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END:
+            event.action = AxisAction::END;
+            break;
+        default:
+            event.action = AxisAction::NONE;
+            break;
+    }
+}
+
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event)
 {
     int32_t pointerID = pointerEvent->GetPointerId();
@@ -225,6 +243,9 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     event.y = item.GetLocalY();
     event.horizontalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
     event.verticalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
+    event.pinchAxisScale = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH);
+    int32_t orgAction = pointerEvent->GetPointerAction();
+    GetAxisEventAction(orgAction, event);
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
 
@@ -232,8 +253,8 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     TimeStamp time(microseconds);
     event.time = time;
     LOGI("ConvertAxisEvent: (x,y): (%{public}f,%{public}f). HorizontalAxis: %{public}f. VerticalAxis: %{public}f. "
-         "DeviceType: %{public}d. Time: %{public}lld",
-        event.x, event.y, event.horizontalAxis, event.verticalAxis, event.sourceType,
+         "Action: %{public}d. DeviceType: %{public}d. Time: %{public}lld",
+        event.x, event.y, event.horizontalAxis, event.verticalAxis, event.action, event.sourceType,
         (long long)pointerEvent->GetActionTime());
 }
 

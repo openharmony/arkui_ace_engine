@@ -172,9 +172,18 @@ public:
         return paramDeviceType_;
     }
 
+    static std::string GetLanguage();
+
+    static std::string GetRegion();
+
     static bool GetRosenBackendEnabled()
     {
         return rosenBackendEnabled_;
+    }
+
+    static bool GetDebugBoundaryEnabled()
+    {
+        return debugBoundaryEnabled_;
     }
 
     static bool GetTraceEnabled()
@@ -291,6 +300,7 @@ private:
     static bool debugEnabled_;
     static int32_t windowPosX_;
     static int32_t windowPosY_;
+    static bool debugBoundaryEnabled_;
 };
 
 } // namespace OHOS::Ace

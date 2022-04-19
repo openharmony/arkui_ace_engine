@@ -222,10 +222,10 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
         SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]), buttonComponent);
     }
     ViewStackProcessor::GetInstance()->Push(buttonComponent);
+    JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);
 
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    boxComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
+    buttonComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
 }
 
 void JSButton::CreateWithChild(const JSCallbackInfo& info)
@@ -239,7 +239,9 @@ void JSButton::CreateWithChild(const JSCallbackInfo& info)
         SetTypeAndStateEffect(obj, buttonComponent);
     }
     ViewStackProcessor::GetInstance()->Push(buttonComponent);
+    JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);
+    buttonComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
 }
 
 void JSButton::SetDefaultAttributes(const RefPtr<ButtonComponent>& buttonComponent)
@@ -253,6 +255,7 @@ void JSButton::SetDefaultAttributes(const RefPtr<ButtonComponent>& buttonCompone
     buttonComponent->SetHeight(buttonTheme->GetHeight());
     buttonComponent->SetBackgroundColor(buttonTheme->GetBgColor());
     buttonComponent->SetClickedColor(buttonComponent->GetBackgroundColor().BlendColor(buttonTheme->GetClickedColor()));
+    buttonComponent->SetHoverColor(buttonTheme->GetHoverColor());
 }
 
 void JSButton::SetTypeAndStateEffect(const JSRef<JSObject>& obj, const RefPtr<ButtonComponent>& buttonComponent)

@@ -37,6 +37,7 @@ namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
+    UIContentImpl(OHOS::AppExecFwk::Ability* ability);
     ~UIContentImpl() = default;
 
     // UI content lifecycles
@@ -46,6 +47,7 @@ public:
     void Focus() override;
     void UnFocus() override;
     void Destroy() override;
+    void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
     // distribute
     void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) override;
@@ -60,6 +62,10 @@ public:
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode) override;
+
+    // Window color
+    uint32_t GetBackgroundColor() override;
+    void SetBackgroundColor(uint32_t color) override;
 
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 

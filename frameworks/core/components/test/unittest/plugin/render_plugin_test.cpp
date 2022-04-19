@@ -156,6 +156,6 @@ HWTEST_F(RenderPluginTest, RenderPluginTouchTest001, TestSize.Level1)
     Point globalPoint, parentLocalPoint;
     TouchRestrict touchRestrict;
     TouchTestResult result;
-    EXPECT_EQ(renderPlugin->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result), true);
+    EXPECT_EQ(renderPlugin->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result), false);
 }
 } // namespace OHOS::Ace

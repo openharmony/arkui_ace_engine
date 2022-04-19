@@ -83,18 +83,16 @@ class RawRecognizer : public TouchEventTarget {
     DECLARE_ACE_TYPE(RawRecognizer, TouchEventTarget);
 
 public:
-    void HandleEvent(const TouchEvent& point, uint32_t stage);
+    void HandleRawEvent(const TouchEvent& point, uint32_t stage);
     bool DispatchEvent(const TouchEvent& point) override;
     bool HandleEvent(const TouchEvent& point) override;
 
-    void SetOnEventCallback(
-        const OnTouchEventCallback& eventCallback, uint32_t stage, uint32_t eventType)
+    void SetOnEventCallback(const OnTouchEventCallback& eventCallback, uint32_t stage, uint32_t eventType)
     {
         onEventCallbacks_[stage][eventType] = eventCallback;
     }
 
-    void SetCatchEventCallback(
-        const CatchTouchEventCallback& eventCallback, uint32_t stage, uint32_t eventType)
+    void SetCatchEventCallback(const CatchTouchEventCallback& eventCallback, uint32_t stage, uint32_t eventType)
     {
         catcheventCallbacks_[stage][eventType] = eventCallback;
     }

@@ -299,7 +299,7 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
         decorationPainter->SetRenderImage(renderImage_);
     }
 
-    Color bgColor = pipeline->GetRootBgColor();
+    Color bgColor = pipeline->GetAppBgColor();
     if (backDecoration_) {
         flutter::Canvas* canvas = renderContext->GetCanvas();
         if (canvas == nullptr) {

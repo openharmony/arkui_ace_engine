@@ -676,7 +676,7 @@ bool DeclarativeFrontend::OnBackPressed()
 void DeclarativeFrontend::OnShow()
 {
     if (delegate_) {
-        delegate_->OnForground();
+        delegate_->OnForeground();
     }
 }
 

@@ -22,7 +22,7 @@ template("gen_obj") {
     if (use_mingw_win) {
       objcopy_tool = objcopy_mingw
       script = "$ace_root/build/tools/build_resource_to_bytecode.py"
-    } else if (use_mac) {
+    } else if (use_mac || target_os == "ios") {
       objcopy_tool = objcopy_clang
       script = "$ace_root/build/tools/build_resource_to_bytecode.py"
     } else if (target_cpu == "x86_64") {

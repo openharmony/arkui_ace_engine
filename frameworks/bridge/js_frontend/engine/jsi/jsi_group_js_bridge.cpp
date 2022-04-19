@@ -22,6 +22,11 @@
 #include "frameworks/bridge/codec/function_call.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "adapter/preview/entrance/ace_container.h"
+#include "core/common/ace_engine.h"
+#endif
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -86,7 +91,85 @@ int32_t JsiGroupJsBridge::LoadJsBridgeFunction()
     }
     return JS_CALL_SUCCESS;
 }
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequest(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    ACE_SCOPED_TRACE("ProcessJsRequest");
+    JsiEngineInstance* instance = nullptr;
+    JsiDeclarativeEngineInstance* declarativeInstance = nullptr;
+    RefPtr<JsiGroupJsBridge> groupJsBridge;
+    auto container = AceType::DynamicCast<OHOS::Ace::Platform::AceContainer>(AceEngine::Get().GetContainer(0));
+    if (!container) {
+        LOGE("ProcessJsRequest container is null!");
+        return runtime->NewException();
+    }
+    auto type = container->GetType();
+    if (type == FrontendType::JS) {
+        instance = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+        if (instance == nullptr) {
+            LOGE("invalid args, failed to get JsiEngineInstance from the runtime");
+            return runtime->NewException();
+        }
+        groupJsBridge = AceType::DynamicCast<JsiGroupJsBridge>(instance->GetDelegate()->GetGroupJsBridge());
+    } else if (type == FrontendType::DECLARATIVE_JS) {
+        declarativeInstance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
+        if (declarativeInstance == nullptr) {
+            LOGE("invalid args, failed to get JsiDeclarativeEngineInstance from the runtime");
+            return runtime->NewException();
+        }
+        groupJsBridge =
+            AceType::DynamicCast<JsiGroupJsBridge>(declarativeInstance->GetDelegate()->GetGroupJsBridge());
+    } else {
+        LOGE("Frontend type not supported");
+        return runtime->NewException();
+    }
 
+    if (groupJsBridge == nullptr) {
+        LOGE("invalid args, failed to get GroupJsBridge from the JSContext");
+        return runtime->NewException();
+    }
+
+    // Should have at least 4 parameters
+    if (argv.size() < PLUGIN_REQUEST_MIN_ARGC_NUM) {
+        LOGE("invalid args number:%{public}d", argc);
+        return runtime->NewException();
+    }
+    int32_t callbackId = groupJsBridge->GetPendingCallbackIdAndIncrement();
+    if (!groupJsBridge->SetModuleGroupCallbackFuncs(argv, PLUGIN_REQUEST_ARG_RESOLVE_INDEX,
+        PLUGIN_REQUEST_ARG_REJECT_INDEX, callbackId)) {
+        LOGE("set module callback function failed!");
+        return runtime->NewException();
+    }
+    std::string groupName  = argv[PLUGIN_REQUEST_ARG_GROUP_NAME_INDEX]->ToString(runtime);
+    if (groupName.empty()) {
+        LOGE("invalid paras, groupName:%{private}s", groupName.c_str());
+        return runtime->NewException();
+    }
+    LOGI("send message, groupName: %{private}s, callbackId: %{private}d", groupName.c_str(), callbackId);
+    std::string strFunctionName = argv[PLUGIN_REQUEST_ARG_FUNCTION_NAME_INDEX]->ToString(runtime);
+
+    // In the preview scenario, only the fetch interface is available. If other APIs need to be supported in the future,
+    // adaptation is required.
+    if (strFunctionName != "fetch") {
+        LOGE("unsupported function %{private}s", strFunctionName.c_str());
+        return runtime->NewException();
+    }
+    OHOS::Ace::RequestData requestData;
+    ParseJsDataResult parseJsResult = groupJsBridge->ParseRequestData(argc, argv, requestData, callbackId);
+    if (parseJsResult != ParseJsDataResult::PARSE_JS_SUCCESS) {
+        ProcessParseJsError(parseJsResult, runtime, callbackId);
+        return runtime->NewNull();
+    }
+    if ((type == FrontendType::JS && !instance->CallCurlFunction(requestData, callbackId)) ||
+        (type == FrontendType::DECLARATIVE_JS && !declarativeInstance->CallCurlFunction(requestData, callbackId))) {
+        LOGE("CallPlatformFunction fail");
+        groupJsBridge->TriggerModulePluginGetErrorCallback(callbackId, PLUGIN_REQUEST_FAIL, "send message failed");
+        return runtime->NewNull();
+    }
+    return runtime->NewNull();
+}
+#else
 // function callback for groupObj's function: sendGroupMessage
 shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequest(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
@@ -166,7 +249,7 @@ shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequest(const shared_ptr<JsRuntim
     }
     return res;
 }
-
+#endif
 // function callback for groupObj's function: sendGroupMessageSync
 shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequestSync(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
@@ -488,15 +571,10 @@ void JsiGroupJsBridge::TriggerModulePluginGetErrorCallback(
                 callbackId);
             return;
         }
-
-        std::string emptyReplyWithErrorMessage = std::string("{\"code\":")
-                                                     .append(std::to_string(errorCode))
-                                                     .append(",")
-                                                     .append("\"data\":\"")
-                                                     .append(errorMessage)
-                                                     .append("\"}");
-
-        shared_ptr<JsValue> emptyReplyCallback = runtime_->NewString(emptyReplyWithErrorMessage);
+        auto resultJson = JsonUtil::Create(true);
+        resultJson->Put(std::string("code").c_str(), errorCode);
+        resultJson->Put(std::string("data").c_str(), errorMessage.c_str());
+        shared_ptr<JsValue> emptyReplyCallback = runtime_-> NewString(resultJson->ToString().c_str());
         std::vector<shared_ptr<JsValue>> argv;
         argv.push_back(emptyReplyCallback);
         int32_t len = 1;
@@ -583,12 +661,127 @@ void JsiGroupJsBridge::Destroy()
     moduleCallBackFuncs_.clear();
     runtime_.reset();
 }
-
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-void JsiGroupJsBridge::TriggerModuleJsCallbackPreview(
-    int32_t callbackId, int32_t code, OHOS::Ace::ResponseData responseData)
+void JsiGroupJsBridge::TriggerModuleJsCallbackPreview(int32_t callbackId, int32_t code, ResponseData responseData)
 {
-    LOGE("WAIT FOR IMPLEMENTED");
+    shared_ptr<JsValue> callBackResult = runtime_->NewNull();
+    std::string resultString = responseData.GetResultString()->ToString();
+    code = responseData.GetActionCode();
+    if (!resultString.empty()) {
+        callBackResult = runtime_->NewString(resultString);
+    } else {
+        code = PLUGIN_REQUEST_FAIL;
+        callBackResult = runtime_->NewString(std::string("{\"code\":").append(std::to_string(code)).append(",")
+            .append("\"data\":\"invalid response data\"}"));
+    }
+    CallModuleJsCallback(callbackId, code, callBackResult);
+}
+
+const LinearMapNode<void (*)(const char*, OHOS::Ace::RequestData&)> JsiGroupJsBridge::fetchRequestDataMap1[] = {
+    { "data",
+        [](const char* valStr, OHOS::Ace::RequestData& requestData) { requestData.SetData(valStr); } },
+    { "method",
+        [](const char* valStr, OHOS::Ace::RequestData& requestData) { requestData.SetMethod(valStr); } },
+    { "responseType", [](const char* valStr,
+                            OHOS::Ace::RequestData& requestData) { requestData.SetResponseType(valStr); } },
+    { "url", [](const char* valStr, OHOS::Ace::RequestData& requestData) { requestData.SetUrl(valStr); } },
+};
+
+const LinearMapNode<void (*)(shared_ptr<JsRuntime>, const shared_ptr<JsValue>&, RequestData&)>
+    JsiGroupJsBridge::fetchRequestDataMap2[] = {
+        { "data",
+            [](shared_ptr<JsRuntime> runtime,
+                const shared_ptr<JsValue>& val, OHOS::Ace::RequestData& requestData) {
+                std::string objStr = SerializationObjectToString(runtime, val);
+                if (objStr.empty()) {
+                    return;
+                }
+                requestData.SetData(objStr.c_str());
+            } },
+        { "header",
+            [](shared_ptr<JsRuntime> runtime,
+                const shared_ptr<JsValue>& val, OHOS::Ace::RequestData& requestData) {
+                if (!val->IsObject(runtime)) {
+                    return;
+                }
+                int32_t length = 0;
+                shared_ptr<JsValue> propertyNames;
+                if (val->GetEnumerablePropertyNames(runtime, propertyNames, length)) {
+                    std::map<std::string, std::string> header;
+                    for (int32_t i = 0; i < length; ++i) {
+                        shared_ptr<JsValue> key = propertyNames->GetElement(runtime, i);
+                        if (key->IsString(runtime)) {
+                            shared_ptr<JsValue> item = val->GetProperty(runtime, key);
+                            if (item->IsString(runtime)) {
+                                header[key->ToString(runtime)] = item->ToString(runtime);
+                            }
+                        } else {
+                            LOGW("key is null. Ignoring!");
+                        }
+                    }
+                    requestData.SetHeader(header);
+                }
+            } },
+    };
+
+void JsiGroupJsBridge::GetRequestData(const shared_ptr<JsValue>& valObject, RequestData& requestData)
+{
+    if (!valObject->IsObject(runtime_)) {
+        return;
+    }
+    int32_t len = 0;
+    shared_ptr<JsValue> propertyNames;
+    valObject->GetEnumerablePropertyNames(runtime_, propertyNames, len);
+    for (int32_t i = 0; i < len; ++i) {
+        shared_ptr<JsValue> key = propertyNames->GetElement(runtime_, i);
+        shared_ptr<JsValue> item = valObject->GetProperty(runtime_, key);
+        if (item->IsString(runtime_)) {
+            auto iter = BinarySearchFindIndex(
+                fetchRequestDataMap1, ArraySize(fetchRequestDataMap1), key->ToString(runtime_).c_str());
+            if (iter != -1) {
+                fetchRequestDataMap1[iter].value(item->ToString(runtime_).c_str(), requestData);
+            } else {
+                LOGD("key : %{public}s unsupported. Ignoring!", key->ToString(runtime_).c_str());
+            }
+        } else if (item->IsObject(runtime_)) {
+            auto iter = BinarySearchFindIndex(
+                fetchRequestDataMap2, ArraySize(fetchRequestDataMap2), key->ToString(runtime_).c_str());
+            if (iter != -1) {
+                fetchRequestDataMap2[iter].value(runtime_, item, requestData);
+            } else {
+                LOGD("key : %{public}s unsupported. Ignoring!", key->ToString(runtime_).c_str());
+            }
+        } else {
+            LOGD("key : %{public}s, value of unsupported type. Ignoring!", key->ToString(runtime_).c_str());
+        }
+
+    }
+}
+
+ParseJsDataResult JsiGroupJsBridge::ParseRequestData(
+    int32_t argc, const std::vector<shared_ptr<JsValue>>& argv, OHOS::Ace::RequestData& requestData, int32_t requestId)
+{
+
+    if (argc < PLUGIN_REQUEST_ARG_APP_PARAMS_INDEX) {
+        return ParseJsDataResult::PARSE_JS_SUCCESS;
+    }
+    for (int32_t i = PLUGIN_REQUEST_ARG_APP_PARAMS_INDEX; i < argc; i++) {
+        const shared_ptr<JsValue> val = argv[i];
+        if (val->IsObject(runtime_)) {
+            std::string objStr = SerializationObjectToString(runtime_, val);
+            if (objStr.empty()) {
+                LOGW("Process callNative para is null");
+                return ParseJsDataResult::PARSE_JS_ERR_UNSUPPORTED_TYPE;
+            }
+            GetRequestData(val, requestData);
+        } else if (val->IsUndefined(runtime_)) {
+            LOGD("Process callNative para type:undefined");
+        } else {
+            LOGE("Process callNative para type: unsupported type");
+            return ParseJsDataResult::PARSE_JS_ERR_UNSUPPORTED_TYPE;
+        }
+    }
+    return ParseJsDataResult::PARSE_JS_SUCCESS;
 }
 #endif
 

@@ -84,6 +84,7 @@ void RenderPickerBase::Update(const RefPtr<Component>& component)
     SetInterceptTouchEvent(!data_->GetSubsidiary());
     data_->OnColumnsCreating();
     onCancelCallback_ = AceAsyncEvent<void()>::Create(data_->GetOnCancel(), context_);
+    onJSChangeCallback_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetOnChange(), context_);
     onChangeCallback_ = AceSyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::
         Create(data_->GetOnChange(), context_);
     onColumnChangeCallback_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetOnColumnChange(), context_);
@@ -529,6 +530,10 @@ void RenderPickerBase::HandleFinish(bool success)
     if (success && onChangeCallback_) {
         auto str = data_->GetSelectedObject(false, "");
         onChangeCallback_(std::make_shared<DatePickerChangeEvent>(str));
+    }
+
+    if (success && onJSChangeCallback_) {
+        onJSChangeCallback_(std::string("\"change\",") + data_->GetSelectedObject(false, "") + ",null");
     }
 
     if (!success && onCancelCallback_) {

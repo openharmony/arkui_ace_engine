@@ -344,11 +344,31 @@ public:
         onLongPressId_ = onLongPressId;
     }
 
+    bool HasBackgroundColor() const
+    {
+        return hasBackgroundColor_;
+    }
+
+    void SetHasBackgroundColor(bool hasBackgroundColor)
+    {
+        hasBackgroundColor_ = hasBackgroundColor;
+    }
+
+    void SetEnableDebugBoundary(bool enableDebugBoundary)
+    {
+        enableDebugBoundary_ = enableDebugBoundary;
+    }
+
+    bool GetEnableDebugBoundary()
+    {
+        return enableDebugBoundary_;
+    }
+
 private:
     RefPtr<Decoration> backDecoration_;
     RefPtr<Decoration> frontDecoration_;
     bool decorationUpdateFlag_ = false;
-    HoverAnimationType animationType_ = HoverAnimationType::NONE;
+    HoverAnimationType animationType_ = HoverAnimationType::UNKNOWN;
     OnDragFunc onDragStartId_;
     OnDropFunc onDragEnterId_;
     OnDropFunc onDragMoveId_;
@@ -374,6 +394,8 @@ private:
     TextDirection inspectorDirection_ { TextDirection::LTR };
     RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_ = nullptr;
     EventMarker remoteMessageId_;
+    bool hasBackgroundColor_;
+    bool enableDebugBoundary_ = false;
 };
 
 } // namespace OHOS::Ace

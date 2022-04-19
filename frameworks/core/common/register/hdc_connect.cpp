@@ -33,16 +33,6 @@ std::string ConnectManagement::GetPkgName()
     return pkgName_;
 }
 
-static void PrintMessage(const char *fmt, ...)
-{
-    int ret = 0;
-    va_list ap;
-    va_start(ap, fmt);
-    ret = vfprintf(stdout, fmt, ap);
-    ret = fprintf(stdout, "\n");
-    va_end(ap);
-}
-
 void TryCloseHandle(const uv_handle_t* handle, bool alwaysCallback, uv_close_cb closeCallBack)
 {
     bool hasCallClose = false;
@@ -74,11 +64,11 @@ bool TryCloseLoop(uv_loop_t *ptrLoop, const char *callerName)
     for (closeRetry = 0; closeRetry < maxRetry; ++closeRetry) {
         if (uv_loop_close(ptrLoop) == UV_EBUSY) {
             if (closeRetry > maxRetry) {
-                PrintMessage("%s close busy,try:%d", callerName, closeRetry);
+                LOGE("%{private}s close busy,try:%{private}d", callerName, closeRetry);
             }
 
             if (ptrLoop->active_handles >= maxHandle) {
-                PrintMessage("TryCloseLoop issue");
+                LOGE("TryCloseLoop issue");
             }
             auto clearLoopTask = [](uv_handle_t *handle, void *arg) -> void {
                 TryCloseHandle(handle);
@@ -110,7 +100,6 @@ void FreeInstance()
     uv_stop(&loopMain);
     TryCloseLoop(&loopMain, "Hdcjdwp exit");
     LOGI("jdwp_process exit.");
-    PrintMessage("jdwp_process exit.");
 }
 
 void Stop(int signo)
@@ -130,14 +119,13 @@ void* HdcConnectRun(void* pkgContent)
 {
     uv_loop_init(&loopMain);
     LOGI("jdwp_process start.");
-    PrintMessage("jdwp_process start.");
     if (signal(SIGINT, Stop) == SIG_ERR) {
-        PrintMessage("jdwp_process signal fail.");
+        LOGE("jdwp_process signal fail.");
     }
     std::string pkgName = static_cast<ConnectManagement*>(pkgContent)->GetPkgName();
     clsHdcJdwpSimulator = new (std::nothrow) HdcJdwpSimulator(&loopMain, pkgName);
     if (!clsHdcJdwpSimulator->Connect()) {
-        PrintMessage("Connect fail.");
+        LOGE("Connect fail.");
         return nullptr;
     }
     uv_run(&loopMain, UV_RUN_DEFAULT);

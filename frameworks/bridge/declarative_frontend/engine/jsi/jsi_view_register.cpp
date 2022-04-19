@@ -49,6 +49,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_counter.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_distributed.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
@@ -93,9 +94,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_slider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
-#endif
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 #endif
@@ -153,20 +152,22 @@
 
 namespace OHOS::Ace::Framework {
 
-panda::Local<panda::JSValueRef> JsLoadDocument(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
     LOGI("Load Document start");
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
-    if (!args[0]->IsObject()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsObject()) {
         LOGE("The arg is wrong, value must be object");
         return panda::JSValueRef::Undefined(vm);
     }
 
-    panda::Local<panda::ObjectRef> obj = args[0]->ToObject(vm);
+    panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
     JSView* view = static_cast<JSView*>(obj->GetNativePointerField(0));
 
     auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
@@ -201,17 +202,18 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::EcmaVM* vm, panda::Local<p
     return panda::JSValueRef::Undefined(vm);
 }
 
-panda::Local<panda::JSValueRef> JsDumpMemoryStats(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> JsDumpMemoryStats(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
     LOGD("dumpMemoryStats: Not Implemented for ARK. UnSupported");
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     return panda::JSValueRef::Undefined(vm);
 }
 
-panda::Local<panda::JSValueRef> JsGetI18nResource(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
     LOGD("JsGetI18nResource");
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -220,13 +222,14 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::EcmaVM* vm, panda::Loca
         LOGE("The arg is wrong, it is supposed to have one or two arguments");
         return panda::JSValueRef::Undefined(vm);
     }
-    if (!args[0]->IsString()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsString()) {
         LOGE("The arg is wrong, value must be string");
         return panda::JSValueRef::Undefined(vm);
     }
 
     std::vector<std::string> splitStr;
-    std::string str = args[0]->ToString(vm)->ToString();
+    std::string str = firstArg->ToString(vm)->ToString();
     StringUtils::SplitStr(str, ".", splitStr);
     if (splitStr.size() != 2) {
         LOGE("input string res value must can be split by dot");
@@ -239,8 +242,9 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::EcmaVM* vm, panda::Loca
     auto resultStr = resultStrJson->GetString();
     if (argc == 2) {
         panda::LocalScope scope(vm);
-        if (args[1]->IsArray(vm)) {
-            auto arrayVal = panda::Local<panda::ArrayRef>(args[1]);
+        Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+        if (secondArg->IsArray(vm)) {
+            auto arrayVal = panda::Local<panda::ArrayRef>(secondArg);
             auto len = arrayVal->Length(vm);
             std::vector<std::string> arrayResult;
             for (int32_t i = 0; i < len; i++) {
@@ -253,15 +257,15 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::EcmaVM* vm, panda::Loca
                 arrayResult.emplace_back(itemVal->ToString());
             }
             ReplacePlaceHolderArray(resultStr, arrayResult);
-        } else if (args[1]->IsObject()) {
-            auto value = panda::JSON::Stringify(vm, args[1]);
+        } else if (secondArg->IsObject()) {
+            auto value = panda::JSON::Stringify(vm, secondArg);
             if (value->IsString()) {
                 auto valueStr = panda::Local<panda::StringRef>(value);
                 std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(valueStr->ToString());
                 ReplacePlaceHolder(resultStr, argsPtr);
             }
-        } else if (args[1]->IsNumber()) {
-            double count = args[1]->ToNumber(vm)->Value();
+        } else if (secondArg->IsNumber()) {
+            double count = secondArg->ToNumber(vm)->Value();
             auto pluralChoice = Localization::GetInstance()->PluralRulesFormat(count);
             if (!pluralChoice.empty()) {
                 resultStr = ParserPluralResource(resultStrJson, pluralChoice, str);
@@ -272,20 +276,22 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::EcmaVM* vm, panda::Loca
     return panda::StringRef::NewFromUtf8(vm, resultStr.c_str());
 }
 
-panda::Local<panda::JSValueRef> JsGetMediaResource(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> JsGetMediaResource(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
     LOGD("JsGetMediaResource");
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
-    if (!args[0]->IsString()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsString()) {
         LOGE("The arg is wrong, value must be string");
         return panda::JSValueRef::Undefined(vm);
     }
 
-    std::string targetMediaFileName = args[0]->ToString(vm)->ToString();
+    std::string targetMediaFileName = firstArg->ToString(vm)->ToString();
     std::string filePath = JsiDeclarativeEngineInstance::GetMediaResource(targetMediaFileName);
     return panda::StringRef::NewFromUtf8(vm, filePath.c_str());
 }
@@ -306,9 +312,9 @@ RefPtr<FrontendDelegate> JsGetFrontendDelegate()
     return engineInstance->GetDelegate();
 }
 
-panda::Local<panda::JSValueRef> JsGetInspectorNodes(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> JsGetInspectorNodes(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -323,14 +329,16 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodes(panda::EcmaVM* vm, panda::Lo
     return panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, nodeInfos->ToString().c_str()));
 }
 
-panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
     }
-    if (argc < 1 || !args[0]->IsNumber()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (argc < 1 || !firstArg->IsNumber()) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
@@ -344,14 +352,14 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::EcmaVM* vm, panda:
         LOGE("accessibilityManager is null!");
         return panda::JSValueRef::Undefined(vm);
     }
-    int32_t intValue = args[0]->Int32Value(vm);
+    int32_t intValue = firstArg->Int32Value(vm);
     auto nodeInfo = accessibilityManager->DumpComposedElementToJson(intValue);
     return panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, nodeInfo->ToString().c_str()));
 }
 
-panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -370,14 +378,16 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::EcmaVM* vm, panda::Loc
     return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
 }
 
-panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
     }
-    if (argc < 1 || !args[0]->IsString()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (argc < 1 || !firstArg->IsString()) {
         LOGE("The arg is wrong, must have one string argument");
         return panda::JSValueRef::Undefined(vm);
     }
@@ -392,19 +402,21 @@ panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::EcmaVM* vm, panda::Lo
         return panda::JSValueRef::Undefined(vm);
     }
 
-    std::string key = args[0]->ToString(vm)->ToString();
+    std::string key = firstArg->ToString(vm)->ToString();
     auto resultStr = V2::Inspector::GetInspectorNodeByKey(pipelineContext, key);
     return panda::StringRef::NewFromUtf8(vm, resultStr.c_str());
 }
 
-panda::Local<panda::JSValueRef> JsSendEventByKey(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> JsSendEventByKey(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
     }
-    if (argc < 3 || !args[0]->IsString()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (argc < 3 || !firstArg->IsString()) { // 3: arg numbers
         LOGE("The arg is wrong, must have one string argument");
         return panda::JSValueRef::Undefined(vm);
     }
@@ -419,9 +431,9 @@ panda::Local<panda::JSValueRef> JsSendEventByKey(panda::EcmaVM* vm, panda::Local
         return panda::JSValueRef::Undefined(vm);
     }
 
-    std::string key = args[0]->ToString(vm)->ToString();
-    auto action = args[1]->Int32Value(vm);
-    auto params = args[2]->ToString(vm)->ToString();
+    std::string key = firstArg->ToString(vm)->ToString();
+    auto action = runtimeCallInfo->GetCallArgRef(1)->Int32Value(vm);
+    auto params = runtimeCallInfo->GetCallArgRef(2)->ToString(vm)->ToString();
     auto result = V2::Inspector::SendEventByKey(pipelineContext, key, action, params);
     return panda::BooleanRef::New(vm, result);
 }
@@ -447,14 +459,16 @@ static TouchEvent GetTouchPointFromJS(const JsiObject& value)
     return touchPoint;
 }
 
-panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
     }
-    if (argc < 1 || !args[0]->IsObject()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (argc < 1 || !firstArg->IsObject()) {
         LOGE("The arg is wrong, must have one object argument");
         return panda::JSValueRef::Undefined(vm);
     }
@@ -469,7 +483,7 @@ panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::EcmaVM* vm, panda::Local
         LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
     }
-    JsiObject obj(args[0]);
+    JsiObject obj(firstArg);
     TouchEvent touchPoint = GetTouchPointFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); }, TaskExecutor::TaskType::UI);
@@ -500,14 +514,16 @@ static V2::JsKeyEvent GetKeyEventFromJS(const JsiObject& value)
     return keyEvent;
 }
 
-panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
     }
-    if (argc < 1 || !args[0]->IsObject()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (argc < 1 || !firstArg->IsObject()) {
         LOGE("The arg is wrong, must have one object argument");
         return panda::JSValueRef::Undefined(vm);
     }
@@ -522,7 +538,7 @@ panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::EcmaVM* vm, panda::Local<p
         LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
     }
-    JsiObject obj(args[0]);
+    JsiObject obj(firstArg);
     auto result = V2::Inspector::SendKeyEvent(pipelineContext, GetKeyEventFromJS(obj));
     return panda::BooleanRef::New(vm, result);
 }
@@ -550,14 +566,16 @@ static MouseEvent GetMouseEventFromJS(const JsiObject& value)
     return mouseEvent;
 }
 
-panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
     }
-    if (argc < 1 || !args[0]->IsObject()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (argc < 1 || !firstArg->IsObject()) {
         LOGE("The arg is wrong, must have one object argument");
         return panda::JSValueRef::Undefined(vm);
     }
@@ -572,39 +590,43 @@ panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::EcmaVM* vm, panda::Local
         LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
     }
-    JsiObject obj(args[0]);
+    JsiObject obj(firstArg);
     MouseEvent mouseEvent = GetMouseEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, mouseEvent]() { pipelineContext->OnMouseEvent(mouseEvent); }, TaskExecutor::TaskType::UI);
     return panda::BooleanRef::New(vm, result);
 }
 
-panda::Local<panda::JSValueRef> Vp2Px(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> Vp2Px(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
-    if (!args[0]->IsNumber()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNumber()) {
         LOGE("The arg is wrong, value must be number");
         return panda::JSValueRef::Undefined(vm);
     }
 
-    double vpValue = args[0]->ToNumber(vm)->Value();
+    double vpValue = firstArg->ToNumber(vm)->Value();
     double density = SystemProperties::GetResolution();
     double pxValue = vpValue * density;
     return panda::NumberRef::New(vm, pxValue);
 }
 
-panda::Local<panda::JSValueRef> Px2Vp(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> Px2Vp(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
-    if (!args[0]->IsNumber()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNumber()) {
         LOGE("The arg is wrong, value must be number");
         return panda::JSValueRef::Undefined(vm);
     }
@@ -614,26 +636,28 @@ panda::Local<panda::JSValueRef> Px2Vp(panda::EcmaVM* vm, panda::Local<panda::JSV
         return panda::JSValueRef::Undefined(vm);
     }
 
-    double pxValue = args[0]->ToNumber(vm)->Value();
+    double pxValue = firstArg->ToNumber(vm)->Value();
     double vpValue = pxValue / density;
 
     return panda::NumberRef::New(vm, vpValue);
 }
 
-panda::Local<panda::JSValueRef> Fp2Px(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> Fp2Px(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
-    if (!args[0]->IsNumber()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNumber()) {
         LOGE("The arg is wrong, value must be number");
         return panda::JSValueRef::Undefined(vm);
     }
 
     double density = SystemProperties::GetResolution();
-    double fpValue = args[0]->ToNumber(vm)->Value();
+    double fpValue = firstArg->ToNumber(vm)->Value();
 
     auto container = Container::Current();
     if (!container) {
@@ -649,14 +673,16 @@ panda::Local<panda::JSValueRef> Fp2Px(panda::EcmaVM* vm, panda::Local<panda::JSV
     return panda::NumberRef::New(vm, pxValue);
 }
 
-panda::Local<panda::JSValueRef> Px2Fp(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> Px2Fp(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
-    if (!args[0]->IsNumber()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNumber()) {
         LOGE("The arg is wrong, value must be number");
         return panda::JSValueRef::Undefined(vm);
     }
@@ -666,7 +692,7 @@ panda::Local<panda::JSValueRef> Px2Fp(panda::EcmaVM* vm, panda::Local<panda::JSV
         return panda::JSValueRef::Undefined(vm);
     }
 
-    double pxValue = args[0]->ToNumber(vm)->Value();
+    double pxValue = firstArg->ToNumber(vm)->Value();
     auto container = Container::Current();
     if (!container) {
         LOGW("container is null");
@@ -682,14 +708,16 @@ panda::Local<panda::JSValueRef> Px2Fp(panda::EcmaVM* vm, panda::Local<panda::JSV
     return panda::NumberRef::New(vm, fpValue);
 }
 
-panda::Local<panda::JSValueRef> Lpx2Px(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
-    if (!args[0]->IsNumber()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNumber()) {
         LOGE("The arg is wrong, value must be number");
         return panda::JSValueRef::Undefined(vm);
     }
@@ -702,19 +730,21 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::EcmaVM* vm, panda::Local<panda::JS
     auto pipelineContext = container->GetPipelineContext();
     auto frontend = pipelineContext->GetFrontend();
     auto windowConfig = frontend->GetWindowConfig();
-    double lpxValue = args[0]->ToNumber(vm)->Value();
+    double lpxValue = firstArg->ToNumber(vm)->Value();
     double pxValue = lpxValue * windowConfig.designWidthScale;
     return panda::NumberRef::New(vm, pxValue);
 }
 
-panda::Local<panda::JSValueRef> Px2Lpx(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
-    if (!args[0]->IsNumber()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNumber()) {
         LOGE("The arg is wrong, value must be number");
         return panda::JSValueRef::Undefined(vm);
     }
@@ -727,24 +757,26 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::EcmaVM* vm, panda::Local<panda::JS
     auto pipelineContext = container->GetPipelineContext();
     auto frontend = pipelineContext->GetFrontend();
     auto windowConfig = frontend->GetWindowConfig();
-    double pxValue = args[0]->ToNumber(vm)->Value();
+    double pxValue = firstArg->ToNumber(vm)->Value();
     double lpxValue = pxValue / windowConfig.designWidthScale;
 
     return panda::NumberRef::New(vm, lpxValue);
 }
 
-panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::EcmaVM* vm, panda::Local<panda::JSValueRef> value,
-    const panda::Local<panda::JSValueRef> args[], int32_t argc, void* data)
+panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Exception(vm);
     }
-    if (!args[0]->IsString()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsString()) {
         LOGE("The arg is wrong, value must be number");
         return panda::JSValueRef::Exception(vm);
     }
-    std::string backgroundColorStr = args[0]->ToString(vm)->ToString();
+    std::string backgroundColorStr = firstArg->ToString(vm)->ToString();
     auto container = Container::Current();
     if (!container) {
         LOGW("container is null");
@@ -752,7 +784,7 @@ panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::EcmaVM* vm, panda::
     }
     auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext) {
-        pipelineContext->SetRootBgColor(Color::FromString(backgroundColorStr));
+        pipelineContext->SetAppBgColor(Color::FromString(backgroundColorStr));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -829,11 +861,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextInput", JSTextInput::JSBind },
     { "TextClock", JSTextClock::JSBind },
     { "SideBarContainer", JSSideBar::JSBind },
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     { "QRCode", JSQRCode::JSBind },
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
-#endif
 #endif
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     { "PluginComponent", JSPlugin::JSBind },
@@ -994,43 +1024,43 @@ void JsRegisterViews(BindingTarget globalObj)
     }
     auto vm = runtime->GetEcmaVm();
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadDocument"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadDocument, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadDocument));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "dumpMemoryStats"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsDumpMemoryStats, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsDumpMemoryStats));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "$s"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetI18nResource, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetI18nResource));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "$m"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetMediaResource, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetMediaResource));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorNodes"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorNodes, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorNodes));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorNodeById"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorNodeById, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorNodeById));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorTree"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorTree, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorTree));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorByKey"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorByKey, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorByKey));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendEventByKey"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendEventByKey, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendEventByKey));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendTouchEvent"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendTouchEvent, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendTouchEvent));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendKeyEvent"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendKeyEvent, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendKeyEvent));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendMouseEvent"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendMouseEvent, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendMouseEvent));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "vp2px"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Vp2Px, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Vp2Px));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2vp"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Vp, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Vp));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "fp2px"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Fp2Px, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Fp2Px));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2fp"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Fp, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Fp));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "lpx2px"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Lpx2Px, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Lpx2Px));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2lpx"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAppBgColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetAppBackgroundColor, nullptr));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetAppBackgroundColor));
 
     JSViewAbstract::JSBind();
     JSContainerBase::JSBind();
@@ -1049,6 +1079,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSCustomDialogController::JSBind(globalObj);
     JSShareData::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
+    JSDistributed::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
 
     JSProfiler::JSBind(globalObj);

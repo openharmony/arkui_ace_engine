@@ -50,6 +50,8 @@ constexpr uint8_t TRANSLATE_RATIO = 10;
 constexpr int32_t COMPONENT_CHANGE_END_LISTENER_KEY = 1001;
 constexpr double MIN_SCROLL_OFFSET = 0.5;
 constexpr int32_t DEFAULT_SHOWING_COUNT = 1;
+constexpr int32_t SIZE_RATIO_NORMAL = 2;
+constexpr int32_t SIZE_RATIO_LARGE = 4;
 
 // for watch rotation const param
 constexpr double ROTATION_SENSITIVITY_NORMAL = 1.4;
@@ -189,7 +191,9 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     remoteMessageEvent_ = AceAsyncEvent<void(const std::shared_ptr<ClickInfo>&)>::Create(
         swiper->GetRemoteMessageEventId(), context_);
     RegisterChangeEndListener(COMPONENT_CHANGE_END_LISTENER_KEY, swiper->GetChangeEndListener());
-    if (swiper && swiper_ && (*swiper == *swiper_) && currentIndex_ == static_cast<int32_t>(swiper->GetIndex())) {
+    auto lazyComponent = swiper->GetLazyForEachComponent();
+    if (swiper && swiper_ && (*swiper == *swiper_) &&
+        currentIndex_ == static_cast<int32_t>(swiper->GetIndex()) && lazyComponent) {
         LOGI("swiper not changed");
         swiper_ = swiper;
         return;
@@ -254,7 +258,6 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     showIndicator_ = swiper->IsShowIndicator();
 
     lazyLoadCacheSize_ = swiper->GetCachedSize() * 2 + swiper->GetDisplayCount();
-    auto lazyComponent = swiper->GetLazyForEachComponent();
     UpdateItemCount(lazyComponent ? static_cast<int32_t>(lazyComponent->TotalCount()) : itemCount_);
     ClearItems(lazyComponent, static_cast<int32_t>(swiper->GetIndex()));
 
@@ -386,7 +389,8 @@ void RenderSwiper::PerformLayout()
                               : -swiperHeight_ + prevMargin_ + nextMargin_;
     }
     nextItemOffset_ = -prevItemOffset_;
-    UpdateChildPosition(std::fmod(scrollOffset_, nextItemOffset_), currentIndex_, true);
+    auto childPosition = NearZero(nextItemOffset_) ? nextItemOffset_ : std::fmod(scrollOffset_, nextItemOffset_);
+    UpdateChildPosition(childPosition, currentIndex_, true);
     quickTrunItem_ = false;
 
     // layout indicator, indicator style in tv is different.
@@ -1002,7 +1006,7 @@ void RenderSwiper::StartSpringMotion(double mainPosition, double mainVelocity,
             swiper->UpdateOneItemOpacity(MAX_OPACITY, swiper->currentIndex_);
             swiper->UpdateOneItemOpacity(MAX_OPACITY, swiper->currentIndex_);
             swiper->ExecuteMoveCallback(swiper->currentIndex_);
-            swiper->MarkNeedLayout();
+            swiper->MarkNeedLayout(true);
         }
     });
 }
@@ -1071,7 +1075,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
         end = 0.0;
         needRestore = true;
     }
-    LOGD("translate animation, start=%{public}f, end=%{public}f", start, end);
+    LOGI("translate animation, start=%{public}f, end=%{public}f", start, end);
     translate_ = AceType::MakeRefPtr<CurveAnimation<double>>(start, end, curve_);
     auto weak = AceType::WeakClaim(this);
     translate_->AddListener(Animation<double>::ValueCallback([weak, fromIndex, toIndex, start, end](double value) {
@@ -1105,7 +1109,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
             swiper->UpdateOneItemOpacity(MAX_OPACITY, fromIndex);
             swiper->UpdateOneItemOpacity(MAX_OPACITY, toIndex);
             swiper->ExecuteMoveCallback(swiper->currentIndex_);
-            swiper->MarkNeedLayout();
+            swiper->MarkNeedLayout(true);
         }
     });
 
@@ -1256,12 +1260,16 @@ double RenderSwiper::CalculateEndOffset(int32_t fromIndex, int32_t toIndex, bool
 {
     double end = 0.0;
     auto context = GetContext().Upgrade();
+    double translateRatio = TRANSLATE_RATIO;
+    if (context && context->GetIsDeclarative()) {
+        translateRatio = 1.0;
+    }
     if (fromIndex > toIndex) {
         // default move to back position, if need reverse direction move to front position.
-        end = reverse ? prevItemOffset_ / TRANSLATE_RATIO : nextItemOffset_ / TRANSLATE_RATIO;
+        end = reverse ? prevItemOffset_ / translateRatio : nextItemOffset_ / translateRatio;
     } else {
         // default move to front position, if need reverse direction move to back position.
-        end = reverse ? nextItemOffset_ / TRANSLATE_RATIO : prevItemOffset_ / TRANSLATE_RATIO;
+        end = reverse ? nextItemOffset_ / translateRatio : prevItemOffset_ / translateRatio;
     }
     if (context && context->IsJsCard()) {
         if (loop_) {
@@ -1322,7 +1330,7 @@ void RenderSwiper::DoSwipeToAnimation(int32_t fromIndex, int32_t toIndex, bool r
             swiper->RestoreAutoPlay();
             swiper->FireItemChangedEvent(true);
             swiper->ResetCachedChildren();
-            swiper->MarkNeedLayout();
+            swiper->MarkNeedLayout(true);
         }
     });
     swipeToController_->SetDuration(duration_);
@@ -1540,7 +1548,7 @@ void RenderSwiper::UpdateScrollPosition(double dragDelta)
         UpdateOneItemOpacity(MAX_OPACITY, currentIndex_);
         ExecuteMoveCallback(currentIndex_);
         ResetIndicatorPosition();
-        MarkNeedLayout();
+        MarkNeedLayout(true);
         // drag length is greater than swiper's width, don't need to move position
         LOGD("scroll to next page index[%{public}d] from index[%{public}d], scroll offset:%{public}lf",
             currentIndex_, outItemIndex_, scrollOffset_);
@@ -2039,18 +2047,21 @@ void RenderSwiper::UpdateIndicatorItem(SwiperIndicatorData& indicatorData)
                                        (indicator_->GetHoverSize() - indicator_->GetPressSize()) * zoomDotValue_) / 2.0;
         }
         if (axis_ == Axis::HORIZONTAL) {
-            indicatorData.indicatorItemData[i].height = itemRadius * 2;
-            indicatorData.indicatorItemData[i].width = (i == targetIndex ? itemRadius * 4 : itemRadius * 2);
+            indicatorData.indicatorItemData[i].height = itemRadius * SIZE_RATIO_NORMAL;
+            indicatorData.indicatorItemData[i].width =
+                (i == targetIndex ? itemRadius * SIZE_RATIO_LARGE : itemRadius * SIZE_RATIO_NORMAL);
         } else {
-            indicatorData.indicatorItemData[i].width = itemRadius * 2;
-            indicatorData.indicatorItemData[i].height = (i == targetIndex ? itemRadius * 4 : itemRadius * 2);
+            indicatorData.indicatorItemData[i].width = itemRadius * SIZE_RATIO_NORMAL;
+            indicatorData.indicatorItemData[i].height =
+                (i == targetIndex ? itemRadius * SIZE_RATIO_LARGE : itemRadius * SIZE_RATIO_NORMAL);
         }
         indicatorData.indicatorItemData[i].radius = itemRadius;
 
         centerOffset += paddingStartOffset;
         indicatorData.indicatorItemData[i].center = centerOffset;
         indicatorData.indicatorItemData[i].position = centerOffset -
-            Offset(indicatorData.indicatorItemData[i].width / 2, indicatorData.indicatorItemData[i].height / 2);
+            Offset(indicatorData.indicatorItemData[i].width / SIZE_RATIO_NORMAL,
+                indicatorData.indicatorItemData[i].height / SIZE_RATIO_NORMAL);
         centerOffset += paddingEndOffset;
     }
 }
@@ -2110,6 +2121,12 @@ void RenderSwiper::IndicatorSwipeNext()
 {
     auto toIndex = GetNextIndex();
     StartIndicatorAnimation(currentIndex_, toIndex, currentIndex_ == itemCount_ - 1);
+}
+
+bool RenderSwiper::HandleMouseEvent(const MouseEvent& event)
+{
+    const Point point { event.x, event.y};
+    return MouseHoverTest(point);
 }
 
 bool RenderSwiper::MouseHoverTest(const Point& parentLocalPoint)
@@ -2673,7 +2690,7 @@ void RenderSwiper::FinishAllSwipeAnimation(bool useFinish)
         FireSwiperControllerFinishEvent();
     }
     quickTrunItem_ = true;
-    MarkNeedLayout();
+    MarkNeedLayout(true);
 }
 
 bool RenderSwiper::IsAnimatorStopped() const
@@ -2851,7 +2868,7 @@ void RenderSwiper::StartIndicatorAnimation(int32_t fromIndex, int32_t toIndex, b
             swiper->outItemIndex_ = fromIndex;
             swiper->currentIndex_ = toIndex;
             swiper->UpdateIndicatorSpringStatus(SpringStatus::FOCUS_SWITCH);
-            swiper->MarkNeedLayout();
+            swiper->MarkNeedLayout(true);
         }
     });
     indicatorController_->Play();
@@ -3014,6 +3031,10 @@ void RenderSwiper::LoadLazyItems(bool swipeToNext)
         // not lazy foreach case.
         return;
     }
+    if (static_cast<int32_t>(items_.size()) == itemCount_) {
+        // all item in caches
+        return;
+    }
     if (swipeToNext) {
         if (!loop_) {
             buildChildByIndex_(++cacheEnd_);
@@ -3067,7 +3088,7 @@ void RenderSwiper::OnDataSourceUpdated(int32_t totalCount, int32_t startIndex)
 {
     items_.clear();
     UpdateItemCount(totalCount);
-    MarkNeedLayout();
+    MarkNeedLayout(true);
 }
 
 void RenderSwiper::ClearItems(const RefPtr<Component>& lazyForEachComponent, int32_t index)

@@ -94,6 +94,7 @@ RefPtr<ButtonComponent> DOMButtonUtil::CreateComponentAndSetChildAttr(
     } else {
         component->SetRectRadius(component->GetHeight() / 2);
     }
+    component->SetMouseAnimationType(HoverAnimationType::SCALE);
     SetChildAttr(component, attrs, theme);
     return component;
 }

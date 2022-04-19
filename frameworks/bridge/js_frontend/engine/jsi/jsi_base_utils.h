@@ -67,7 +67,7 @@ private:
     static std::string JsiDumpSourceFile(const std::string& stackStr, const RefPtr<RevSourceMap>& pageMap,
         const RefPtr<RevSourceMap>& appMap, const AceType *data = nullptr);
     static void ExtractEachInfo(const std::string& tempStack, std::vector<std::string>& res);
-    static void GetPosInfo(const std::string& temp, std::string& line, std::string& column);
+    static void GetPosInfo(const std::string& temp, int32_t start, std::string& line, std::string& column);
     static std::string GetSourceInfo(const std::string& line, const std::string& column,
         const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, bool isAppPage, const AceType *data);
     static std::string GetRelativePath(const std::string& sources);

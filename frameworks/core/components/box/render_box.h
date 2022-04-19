@@ -97,6 +97,12 @@ public:
         return frontDecoration_;
     }
 
+    virtual void NeedFocusBorder(bool needFocusBorder)
+    {
+        needFocusBorder_ = needFocusBorder;
+        MarkNeedRender();
+    }
+    
     virtual void SetColor(const Color& color, bool isBackground) // add for animation
     {
         // create decoration automatically while user had not defined
@@ -182,7 +188,6 @@ public:
     void AnimateMouseHoverExit() override;
     bool HandleMouseEvent(const MouseEvent& event) override;
     void HandleMouseHoverEvent(MouseState mouseState) override;
-    WeakPtr<RenderNode> CheckHoverNode() override;
 
     bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
         TouchTestResult& result) override;
@@ -284,7 +289,6 @@ protected:
     RefPtr<KeyframeAnimation<Color>> colorAnimationExit_;
     RefPtr<KeyframeAnimation<float>> scaleAnimationEnter_;
     RefPtr<KeyframeAnimation<float>> scaleAnimationExit_;
-    HoverAnimationType animationType_ = HoverAnimationType::NONE;
     Color hoverColorBegin_ = Color::TRANSPARENT;
     Color hoverColor_ = Color::TRANSPARENT;
     float scale_ = 1.0f;
@@ -292,6 +296,8 @@ protected:
     bool isHoveredBoard = false;
     bool isHoveredScale = false;
     bool isAccessibilityFocus_ = false;
+    bool needFocusBorder_ = false;
+    bool needPaintDebugBoundary_ = false;
 
 private:
     void UpdateBackDecoration(const RefPtr<Decoration>& newDecoration);

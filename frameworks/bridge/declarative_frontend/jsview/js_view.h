@@ -44,6 +44,11 @@ public:
     RefPtr<PageTransitionComponent> BuildPageTransitionComponent();
 
     void MarkNeedUpdate();
+
+    void SyncInstanceId();
+
+    void RestoreInstanceId();
+
     bool NeedsUpdate()
     {
         return needsUpdate_;
@@ -114,6 +119,18 @@ public:
         jsViewFunction_->ExecuteUpdateWithValueParams(jsonData);
     }
 
+    void MarkLazyForEachProcess(const std::string& groudId)
+    {
+        isLazyForEachProcessed_ = true;
+        lazyItemGroupId_ = groudId;
+    }
+
+    void ResetLazyForEachProcess()
+    {
+        isLazyForEachProcessed_ = false;
+        lazyItemGroupId_ = "";
+    }
+
     /**
      * New CustomView child will be added to the map.
      * and it can be reterieved for recycling in next render function
@@ -150,9 +167,14 @@ private:
     // view id for custom view itself
     std::string viewId_;
 
+    int32_t instanceId_ = -1;
+    int32_t restoreInstanceId_ = -1;
+
     WeakPtr<OHOS::Ace::ComposedElement> element_ = nullptr;
     bool needsUpdate_ = false;
     bool isStatic_ = false;
+    bool isLazyForEachProcessed_ = false;
+    std::string lazyItemGroupId_;
 
     RefPtr<ViewFunctions> jsViewFunction_;
 
@@ -161,6 +183,15 @@ private:
     // hold handle to the native and javascript object to keep them alive
     // until they are abandoned
     std::unordered_map<std::string, JSRef<JSObject>> customViewChildren_;
+
+    // hold handle to the native and javascript object to keep them alive
+    // until they are abandoned used by lazyForEach
+    std::unordered_map<std::string, JSRef<JSObject>> customViewChildrenWithLazy_;
+
+    // hold js view ids by lazy item ground.
+    // until they are abandoned used by lazyForEach
+    std::unordered_map<std::string, std::list<std::string>> lazyItemGroups_;
+
     // a set of valid viewids on a renderfuntion excution
     // its cleared after cleaning up the abandoned child.
     std::unordered_set<std::string> lastAccessedViewIds_;

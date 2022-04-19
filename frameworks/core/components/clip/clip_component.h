@@ -73,6 +73,14 @@ public:
         offsetY_ = offsetY;
     }
 
+    void SetClipRadius(const Radius& clipRadius)
+    {
+        topLeftRadius_ = clipRadius;
+        topRightRadius_ = clipRadius;
+        bottomLeftRadius_ = clipRadius;
+        bottomRightRadius_ = clipRadius;
+    }
+
     const Radius& GetTopLeftRadius() const
     {
         return topLeftRadius_;

@@ -21,6 +21,10 @@
 
 #include "core/common/ime/text_selection.h"
 
+#if defined(IOS_PLATFORM)
+#include "core/common/ime/text_compose.h"
+#endif
+
 namespace OHOS::Ace {
 
 class JsonValue;
@@ -50,6 +54,10 @@ struct TextEditingValue {
     void MoveToPosition(int32_t position);
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
+    
+#if defined(IOS_PLATFORM)
+    void UpdateCompose(int32_t start, int32_t end);
+#endif
 
     /**
      * @brief Manipulate the text by [manipulation] func, meanwhile update the selection.
@@ -68,6 +76,10 @@ struct TextEditingValue {
     std::string text;
     std::string hint;
     TextSelection selection;
+
+#if defined(IOS_PLATFORM)
+    TextCompose compose;
+#endif
 };
 
 } // namespace OHOS::Ace
