@@ -16,8 +16,9 @@
 #include "core/components/plugin/plugin_element.h"
 
 #include "flutter/lib/ui/ui_dart_state.h"
+#ifdef OS_ACCOUNT_EXISTS
 #include "os_account_manager.h"
-
+#endif // OS_ACCOUNT_EXISTS
 #include "core/common/plugin_manager.h"
 #include "frameworks/base/utils/string_utils.h"
 #include "frameworks/core/components/plugin/plugin_component.h"
@@ -26,6 +27,24 @@
 #include "frameworks/core/components/plugin/resource/plugin_manager_delegate.h"
 
 namespace OHOS::Ace {
+namespace {
+#ifndef OS_ACCOUNT_EXISTS
+constexpr int32_t DEFAULT_OS_ACCOUNT_ID = 0; // 0 is the default id when there is no os_account part
+#endif // OS_ACCOUNT_EXISTS
+
+ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
+{
+    userIds.clear();
+#ifdef OS_ACCOUNT_EXISTS
+    return AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
+#else // OS_ACCOUNT_EXISTS
+    LOGE("os account part not exists, use default id.");
+    userIds.push_back(DEFAULT_OS_ACCOUNT_ID);
+    return ERR_OK;
+#endif // OS_ACCOUNT_EXISTS
+}
+} // namespace
+
 PluginElement::~PluginElement()
 {
     PluginManager::GetInstance().RemovePluginParentContainer(pluginSubContainerId_);
@@ -322,7 +341,7 @@ std::string PluginElement::GetPackagePathByWant(const WeakPtr<PluginElement>& we
     }
 
     std::vector<int32_t> userIds;
-    ErrCode errCode = AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
+    ErrCode errCode = GetActiveAccountIds(userIds);
     if (errCode != ERR_OK) {
         pluginElement->HandleOnErrorEvent("1", "Query Active OsAccountIds failed!");
         return packagePathStr;
