@@ -1019,7 +1019,7 @@ void JSWeb::OnUrlLoadIntercept(const JSCallbackInfo& args)
         JSRef<JSFunc>::Cast(args[0]), UrlLoadInterceptEventToJSValue);
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
         (const BaseEventInfo* info) -> bool {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
             auto eventInfo = TypeInfoHelper::DynamicCast<UrlLoadInterceptEvent>(info);
             JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
             if (message->IsBoolean()) {
@@ -1081,7 +1081,7 @@ void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
                 LOGW("function is null");
                 return false;
             }
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
             auto eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info);
             JSRef<JSVal> result = func->ExecuteWithValue(*eventInfo);
             if (result->IsBoolean()) {
