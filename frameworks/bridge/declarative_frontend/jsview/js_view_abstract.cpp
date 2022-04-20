@@ -1233,6 +1233,16 @@ void JSViewAbstract::JsEnabled(const JSCallbackInfo& info)
 
     auto rootComponent = ViewStackProcessor::GetInstance()->GetRootComponent();
     rootComponent->SetDisabledStatus(!(info[0]->ToBoolean()));
+
+    if (!(info[0]->ToBoolean())) {
+        auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+        if (!focusComponent) {
+            LOGE("The focusComponent is null");
+            return;
+        } else {
+            focusComponent->SetFocusable(false);
+        }
+    }
 }
 
 void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
