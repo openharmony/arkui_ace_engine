@@ -2503,6 +2503,9 @@ void RenderSwiper::StartZoomInAnimation(bool isMouseHover)
     if (zoomValue_ == ZOOM_MIN) {
         MarkIndicatorPosition(false);
     }
+    if (!zoomInController_) {
+        return;
+    }
     LOGD("startZoomInAnimation zoom[%{public}lf,%{public}lf], opacity[%{public}lf,%{public}lf], duration[%{public}d]",
         zoomValue_, ZOOM_MAX, opacityValue_, OPACITY_MAX, ZOOM_IN_DURATION);
     zoomInAnimation_ = AceType::MakeRefPtr<CurveAnimation<double>>(zoomValue_, ZOOM_MAX, Curves::SHARP);
@@ -2535,6 +2538,9 @@ void RenderSwiper::StartZoomInAnimation(bool isMouseHover)
 void RenderSwiper::StartZoomOutAnimation(bool isMouseHover)
 {
     StopZoomAnimation();
+    if (!zoomOutController_) {
+        return;
+    }
     int duartion = isMouseHover ? ZOOM_OUT_HOVER_DURATION : ZOOM_OUT_DURATION;
     LOGD("StartZoomOutAnimation zoom[%{public}lf,%{public}lf], opacity[%{public}lf,%{public}lf], duration[%{public}d]",
         zoomValue_, ZOOM_MIN, opacityValue_, OPACITY_MIN, duartion);
@@ -2569,6 +2575,9 @@ void RenderSwiper::StartZoomInDotAnimation(int32_t index)
 {
     StopZoomDotAnimation(); // function will reset currentHoverIndex_. set it after stop zoom out dot.
     currentHoverIndex_ = index;
+    if (!zoomInDotController_) {
+        return;
+    }
     LOGD("StartZoomInDotAnimation zoom[%{public}lf, %{public}lf], duration[%{public}d]",
         ZOOM_DOT_MIN, ZOOM_DOT_MAX, ZOOM_IN_DOT_DURATION);
     if (!zoomInDotAnimation_) {
@@ -2590,6 +2599,9 @@ void RenderSwiper::StartZoomInDotAnimation(int32_t index)
 void RenderSwiper::StartZoomOutDotAnimation()
 {
     StopZoomDotAnimation();
+    if (!zoomOutDotController_) {
+        return;
+    }
     LOGD("StartZoomOutDotAnimation zoom[%{public}lf, %{public}lf], duration[%{public}d]",
         ZOOM_DOT_MAX, ZOOM_DOT_MIN, ZOOM_OUT_DOT_DURATION);
     if (!zoomOutDotAnimation_) {
@@ -2616,11 +2628,11 @@ void RenderSwiper::StartZoomOutDotAnimation()
 void RenderSwiper::StopZoomAnimation()
 {
     LOGD("stopZoomAnimation");
-    if (!zoomInController_->IsStopped()) {
+    if (zoomInController_ && !zoomInController_->IsStopped()) {
         zoomInController_->ClearStopListeners();
         zoomInController_->Stop();
     }
-    if (!zoomOutController_->IsStopped()) {
+    if (zoomOutController_ && !zoomOutController_->IsStopped()) {
         zoomOutController_->ClearStopListeners();
         zoomOutController_->Stop();
     }
@@ -2629,11 +2641,11 @@ void RenderSwiper::StopZoomAnimation()
 void RenderSwiper::StopZoomDotAnimation()
 {
     LOGD("StopZoomDotAnimation");
-    if (!zoomInDotController_->IsStopped()) {
+    if (zoomInDotController_ && !zoomInDotController_->IsStopped()) {
         zoomInDotController_->ClearStopListeners();
         zoomInDotController_->Stop();
     }
-    if (!zoomOutDotController_->IsStopped()) {
+    if (zoomOutDotController_ && !zoomOutDotController_->IsStopped()) {
         zoomOutDotController_->ClearStopListeners();
         zoomOutDotController_->Stop();
     }
@@ -2713,17 +2725,24 @@ void RenderSwiper::FireSwiperControllerFinishEvent()
 
 bool RenderSwiper::IsZoomAnimationStopped()
 {
-    return zoomInController_->IsStopped() && zoomOutController_->IsStopped();
+    bool result = true;
+    if (zoomInController_ && !zoomInController_->IsStopped()) {
+        result = false;
+    }
+    if (zoomOutController_ && !zoomOutController_->IsStopped()) {
+        result = false;
+    }
+    return result;
 }
 
 bool RenderSwiper::IsZoomOutAnimationStopped()
 {
-    return zoomOutController_->IsStopped();
+    return zoomOutController_ ? zoomOutController_->IsStopped() : true;
 }
 
 bool RenderSwiper::IsZoomOutDotAnimationStopped()
 {
-    return zoomOutDotController_->IsStopped();
+    return zoomOutDotController_ ? zoomOutDotController_->IsStopped() : true;
 }
 
 void RenderSwiper::UpdateIndicatorLayout()
