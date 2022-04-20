@@ -297,7 +297,7 @@ private:
     void RegisterWorker();
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
-    bool ExecuteAbc(const shared_ptr<JsRuntime> runtime, const std::string fileName);
+    bool ExecuteAbc(const std::string &fileName);
 
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 

@@ -829,8 +829,9 @@ void JsiDeclarativeEngine::RegisterWorker()
     RegisterAssetFunc();
 }
 
-bool JsiDeclarativeEngine::ExecuteAbc(const shared_ptr<JsRuntime> runtime, const std::string fileName)
+bool JsiDeclarativeEngine::ExecuteAbc(const std::string &fileName)
 {
+    auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     std::string basePath = delegate->GetAssetPath(fileName);
@@ -887,10 +888,10 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     if (pos != std::string::npos && pos == url.length() - (sizeof(js_ext) - 1)) {
         std::string urlName = url.substr(0, pos) + bin_ext;
         if (isMainPage) {
-            if (!ExecuteAbc(runtime, "commons.abc")) {
+            if (!ExecuteAbc("commons.abc")) {
                 return;
             }
-            if (!ExecuteAbc(runtime, "vendor.abc")) {
+            if (!ExecuteAbc("vendors.abc")) {
                 return;
             }
             std::string appMap;
@@ -899,13 +900,13 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
             } else {
                 LOGW("app map load failed!");
             }
-            if (!ExecuteAbc(runtime, "app.abc")) {
+            if (!ExecuteAbc("app.abc")) {
                 LOGW("ExecuteJsBin \"app.js\" failed.");
             } else {
                 CallAppFunc("onCreate");
             }
         }
-        if (!ExecuteAbc(runtime, urlName)) {
+        if (!ExecuteAbc(urlName)) {
             return;
         }
     }
