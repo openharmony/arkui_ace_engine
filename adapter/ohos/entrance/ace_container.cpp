@@ -21,6 +21,7 @@
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
+#include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
@@ -160,8 +161,10 @@ void AceContainer::DestroyView()
 {
     ContainerScope scope(instanceId_);
     if (aceView_ != nullptr) {
-        delete aceView_;
-        aceView_ = nullptr;
+        auto flutterAceView = static_cast<FlutterAceView*>(aceView_);
+        if (flutterAceView) {
+            flutterAceView->DecRefCount();
+        }
     }
 }
 

@@ -307,6 +307,9 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatformThread)
 {
     FlutterAceView* aceSurface = new Platform::FlutterAceView(instanceId);
+    if (aceSurface != nullptr) {
+        aceSurface->IncRefCount();
+    }
     flutter::Settings settings;
     settings.instanceId = instanceId;
     settings.platform = flutter::AcePlatform::ACE_PLATFORM_OHOS;
@@ -319,7 +322,8 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
     settings.use_current_event_runner = useCurrentEventRunner;
     LOGI("software render: %{public}s", settings.enable_software_rendering ? "true" : "false");
     LOGI("use platform as ui thread: %{public}s", settings.platform_as_ui_thread ? "true" : "false");
-    settings.idle_notification_callback = [aceSurface](int64_t deadline) {
+    settings.idle_notification_callback = [weak = WeakClaim(aceSurface)](int64_t deadline) {
+        auto aceSurface = weak.Upgrade();
         if (aceSurface != nullptr) {
             aceSurface->ProcessIdleEvent(deadline);
         }
