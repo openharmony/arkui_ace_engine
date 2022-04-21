@@ -29,7 +29,7 @@ template("ace_capability_ohos_source_set") {
       "distributed/storage/distributed_storage.cpp",
       "preference/storage_impl.cpp",
     ]
-    include_dirs = [ "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_preferences/include/" ]
+    include_dirs = [ "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/preferences/include/" ]
     external_deps = [
       "ability_base:want",
       "distributeddataobject:distributeddataobject_impl",

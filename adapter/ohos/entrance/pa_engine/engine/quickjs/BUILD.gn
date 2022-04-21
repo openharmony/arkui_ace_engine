@@ -24,8 +24,8 @@ template("js_pa_engine_qjs") {
     configs = [ "$ace_root:ace_config" ]
 
     include_dirs = [
-      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_dataability/include",
-      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb/include",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability/include",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/rdb/include",
       "//foundation/aafwk/standard/services/common/include",
       "//foundation/aafwk/standard/interfaces/innerkits/want/include",
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/context",
