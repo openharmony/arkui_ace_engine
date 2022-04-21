@@ -253,7 +253,7 @@ public:
 
     bool GetQuickTrunItem() const
     {
-        return quickTrunItem_;
+        return quickTurnItem_;
     }
 
     SwiperIndicatorData& GetSwiperIndicatorData()
