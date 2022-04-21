@@ -283,7 +283,6 @@ RefPtr<DOMNode> JsCommandDomElementCreator::CreateDomElement(const RefPtr<JsAceP
     UpdateForBadge(node);
     UpdateForStepperLabel(node);
     UpdateForInput(node);
-
     node->SetStyle(styles_);
     node->AddEvent(pageId, events_);
     return node;
@@ -608,7 +607,23 @@ void JsCommandUpdateDomElementStyles::Execute(const RefPtr<JsAcePage>& page) con
     if (animationStyles_) {
         node->SetAnimationStyle(*animationStyles_);
     }
-    node->SetStyle(styles_);
+    DisplayType displayType = node->GetDisplay();
+    if (displayType == DisplayType::INLINE) {
+        std::vector < std::pair < std::string, std::string >> stylesTemp;
+        for (int32_t i = 0; i < styles_.size(); i++) {
+            std::string key = styles_[i].first;
+            std::string value = styles_[i].second;
+            if (key == "width" || key == "height" || key.find("margin") != std::string::npos ||
+                key.find("padding") != std::string::npos) {
+                continue;
+            }
+            stylesTemp.emplace_back(key, value);
+        }
+        node->SetStyle(stylesTemp);
+    } else {
+        node->SetStyle(styles_);
+    }
+
     node->GenerateComponentNode();
     page->PushDirtyNode(nodeId_);
 

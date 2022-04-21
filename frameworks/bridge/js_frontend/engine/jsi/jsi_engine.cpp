@@ -493,9 +493,35 @@ void SetDomStyle(
             LOGD("value of unsupported type. Ignoring!");
         }
     }
+
+    bool isIine = false;
+    for (int32_t i = 0; i < styles.size(); i++) {
+        std::string key = styles[i].first;
+        std::string value = styles[i].second;
+        if (key == "display" && value == "inline") {
+            isIine = true;
+            break;
+        }
+    }
+
+    if (isIine) {
+        std::vector < std::pair < std::string, std::string >> stylesFinaly;
+        for (int32_t i = 0; i < styles.size(); i++) {
+            std::string key = styles[i].first;
+            std::string value = styles[i].second;
+            if (key == "width" || key == "height" || key.find("margin") != std::string::npos ||
+                key.find("padding") != std::string::npos) {
+                continue;
+            } else {
+                stylesFinaly.emplace_back(key, value);
+            }
+        }
+        command.SetStyles(std::move(stylesFinaly));
+    } else {
+        command.SetStyles(std::move(styles));
+    }
     auto pipelineContext = GetFrontendDelegate(runtime)->GetPipelineContext();
     command.SetPipelineContext(pipelineContext);
-    command.SetStyles(std::move(styles));
 }
 
 void AddDomEvent(

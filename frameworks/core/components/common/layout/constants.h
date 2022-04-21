@@ -429,6 +429,10 @@ enum class DisplayType {
     FLEX,
     GRID,
     NONE,
+    BLOCK,
+    INLINE,
+    INLINE_BLOCK,
+    INLINE_FLEX
 };
 
 enum class VisibilityType {

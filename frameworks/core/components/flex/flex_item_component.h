@@ -168,6 +168,15 @@ public:
         isHidden_ = isHidden;
     }
 
+    DisplayType GetDisplayType() const
+    {
+        return displayType_;
+    }
+
+    void SetDisplayType(DisplayType displayType)
+    {
+        displayType_ = displayType;
+    }
     void SetGridColumnInfoBuilder(const RefPtr<GridColumnInfo::Builder>& gridColumnInfoBuilder)
     {
         gridColumnInfoBuilder_ = gridColumnInfoBuilder;
@@ -197,6 +206,7 @@ private:
 
     FlexAlign alignSelf_ = FlexAlign::AUTO;
     RefPtr<GridColumnInfo::Builder> gridColumnInfoBuilder_;
+    DisplayType displayType_ = DisplayType::NO_SETTING;
 };
 
 } // namespace OHOS::Ace

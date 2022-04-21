@@ -220,17 +220,52 @@ EdgePx RenderBoxBase::ConvertEdgeToPx(const Edge& edge, bool additional)
     return edgePx;
 }
 
+Edge RenderBoxBase::SetAutoMargin(FlexDirection flexDir, double freeSpace, bool isFirst)
+{
+    Edge margin;
+    if (isFirst) {
+        margin = marginOrigin_;
+    } else {
+        margin = marginBackup_;
+    }
+
+    if (flexDir == FlexDirection::COLUMN) {
+        if (margin.Left().Unit() == DimensionUnit::AUTO && margin.Right().Unit() == DimensionUnit::AUTO) {
+            marginOrigin_.SetLeft(Dimension(freeSpace / TWO_SIDES, DimensionUnit::PX));
+            marginOrigin_.SetRight(Dimension(freeSpace / TWO_SIDES, DimensionUnit::PX));
+        } else if (margin.Left().Unit() == DimensionUnit::AUTO) {
+            marginOrigin_.SetRight(Dimension(ConvertMarginToPx(margin.Right(), false, false)));
+            marginOrigin_.SetLeft(Dimension((freeSpace - marginOrigin_.Right().Value()), DimensionUnit::PX));
+        } else if (margin.Right().Unit() == DimensionUnit::AUTO) {
+            marginOrigin_.SetLeft(Dimension(ConvertMarginToPx(margin.Left(), false, false)));
+            marginOrigin_.SetRight(Dimension((freeSpace - marginOrigin_.Left().Value()), DimensionUnit::PX));
+        }
+    } else {
+        if (margin.Top().Unit() == DimensionUnit::AUTO && margin.Bottom().Unit() == DimensionUnit::AUTO) {
+            marginOrigin_.SetTop(Dimension(freeSpace / TWO_SIDES, DimensionUnit::PX));
+            marginOrigin_.SetBottom(Dimension(freeSpace / TWO_SIDES, DimensionUnit::PX));
+        } else if (margin.Top().Unit() == DimensionUnit::AUTO) {
+            marginOrigin_.SetBottom(Dimension(ConvertMarginToPx(margin.Bottom(), true, false)));
+            marginOrigin_.SetTop(Dimension((freeSpace - marginOrigin_.Bottom().Value()), DimensionUnit::PX));
+        } else if (margin.Bottom().Unit() == DimensionUnit::AUTO) {
+            marginOrigin_.SetTop(Dimension(ConvertMarginToPx(margin.Top(), true, false)));
+            marginOrigin_.SetBottom(Dimension((freeSpace - marginOrigin_.Top().Value()), DimensionUnit::PX));
+        }
+    }
+    return marginOrigin_;
+}
+
 void RenderBoxBase::CalculateAutoMargin()
 {
-    double freeSpace = 0.0;
+    double freeSpace = 0.0, width = 0.0, height = 0.0;
     FlexDirection flexDir = FlexDirection::ROW;
-    if (marginOrigin_.Left().Unit() == DimensionUnit::AUTO || marginOrigin_.Right().Unit() == DimensionUnit::AUTO
-        || marginOrigin_.Top().Unit() == DimensionUnit::AUTO
-        || marginOrigin_.Bottom().Unit() == DimensionUnit::AUTO) {
-        RefPtr<RenderFlex> flexFather;
+    if (marginOrigin_.Left().Unit() == DimensionUnit::AUTO || marginOrigin_.Right().Unit() == DimensionUnit::AUTO ||
+        marginOrigin_.Top().Unit() == DimensionUnit::AUTO || marginOrigin_.Bottom().Unit() == DimensionUnit::AUTO ||
+        marginBackup_.Left().Unit() == DimensionUnit::AUTO || marginBackup_.Right().Unit() == DimensionUnit::AUTO ||
+        marginBackup_.Top().Unit() == DimensionUnit::AUTO || marginBackup_.Bottom().Unit() == DimensionUnit::AUTO) {
         auto parent = GetParent().Upgrade();
         while (parent) {
-            flexFather = AceType::DynamicCast<RenderFlex>(parent);
+            RefPtr<RenderFlex> flexFather = AceType::DynamicCast<RenderFlex>(parent);
             if (flexFather) {
                 flexDir = flexFather->GetDirection();
                 break;
@@ -238,32 +273,38 @@ void RenderBoxBase::CalculateAutoMargin()
             parent = parent->GetParent().Upgrade();
         }
         LayoutParam param = GetLayoutParam();
-        if (flexDir == FlexDirection::ROW) {
-            freeSpace = param.GetMaxSize().Height() - height_.Value();
-            if (marginOrigin_.Top().Unit() == DimensionUnit::AUTO
-                && marginOrigin_.Bottom().Unit() == DimensionUnit::AUTO) {
-                marginOrigin_.SetTop(Dimension(freeSpace / TWO_SIDES, DimensionUnit::PX));
-                marginOrigin_.SetBottom(Dimension(freeSpace / TWO_SIDES, DimensionUnit::PX));
-            } else if (marginOrigin_.Top().Unit() == DimensionUnit::AUTO) {
-                marginOrigin_.SetBottom(Dimension(ConvertMarginToPx(marginOrigin_.Bottom(), true, false)));
-                marginOrigin_.SetTop(Dimension((freeSpace - marginOrigin_.Bottom().Value()), DimensionUnit::PX));
-            } else if (marginOrigin_.Bottom().Unit() == DimensionUnit::AUTO) {
-                marginOrigin_.SetTop(Dimension(ConvertMarginToPx(marginOrigin_.Top(), true, false)));
-                marginOrigin_.SetBottom(Dimension((freeSpace - marginOrigin_.Top().Value()), DimensionUnit::PX));
+        if ((flexDir == FlexDirection::COLUMN ||
+            (flexDir == FlexDirection::ROW && displayType_ == DisplayType::BLOCK)) && width_.Value() == -1.0) {
+            if (childWidth_ != 0.0) {
+                width = childWidth_;
+                freeSpace = param.GetMaxSize().Width() - width;
+                SetAutoMargin(FlexDirection::COLUMN, freeSpace, false);
+            } else {
+                marginBackup_ = marginOrigin_;
+                marginOrigin_.SetLeft(Dimension(0.0, DimensionUnit::PX));
+                marginOrigin_.SetRight(Dimension(0.0, DimensionUnit::PX));
+                needReCalc_ = true;
             }
-        } else if (flexDir == FlexDirection::COLUMN) {
-            freeSpace = param.GetMaxSize().Width() - width_.Value();
-            if (marginOrigin_.Left().Unit() == DimensionUnit::AUTO
-                && marginOrigin_.Right().Unit() == DimensionUnit::AUTO) {
-                marginOrigin_.SetLeft(Dimension(freeSpace / TWO_SIDES, DimensionUnit::PX));
-                marginOrigin_.SetRight(Dimension(freeSpace / TWO_SIDES, DimensionUnit::PX));
-            } else if (marginOrigin_.Left().Unit() == DimensionUnit::AUTO) {
-                marginOrigin_.SetRight(Dimension(ConvertMarginToPx(marginOrigin_.Right(), false, false)));
-                marginOrigin_.SetLeft(Dimension((freeSpace - marginOrigin_.Right().Value()), DimensionUnit::PX));
-            } else if (marginOrigin_.Right().Unit() == DimensionUnit::AUTO) {
-                marginOrigin_.SetLeft(Dimension(ConvertMarginToPx(marginOrigin_.Left(), false, false)));
-                marginOrigin_.SetRight(Dimension((freeSpace - marginOrigin_.Left().Value()), DimensionUnit::PX));
+        } else if ((flexDir == FlexDirection::COLUMN ||
+            (flexDir == FlexDirection::ROW && displayType_ == DisplayType::BLOCK)) && width_.Value() != -1.0) {
+            width = width_.Value();
+            freeSpace = param.GetMaxSize().Width() - width;
+            SetAutoMargin(FlexDirection::COLUMN, freeSpace, true);
+        } else if (flexDir == FlexDirection::ROW && height_.Value() == -1.0) {
+            if (childHeight_ != 0.0) {
+                height = childHeight_;
+                freeSpace = param.GetMaxSize().Height() - height;
+                SetAutoMargin(flexDir, freeSpace, false);
+            } else {
+                marginBackup_ = marginOrigin_;
+                marginOrigin_.SetTop(Dimension(0.0, DimensionUnit::PX));
+                marginOrigin_.SetBottom(Dimension(0.0, DimensionUnit::PX));
+                needReCalc_ = true;
             }
+        } else if (flexDir == FlexDirection::ROW && height_.Value() != -1.0) {
+            height = height_.Value();
+            freeSpace = param.GetMaxSize().Height() - height;
+            SetAutoMargin(flexDir, freeSpace, true);
         }
     }
 }
@@ -499,6 +540,8 @@ void RenderBoxBase::CalculateSelfLayoutSize()
     Size selfMax = selfLayoutParam_.GetMaxSize() - margin_.GetLayoutSize();
     if (!GetChildren().empty()) {
         childSize_ = GetChildren().front()->GetLayoutSize();
+        childWidth_ = childSize_.Width();
+        childHeight_ = childSize_.Height();
     }
     // calculate width
     double width = 0.0;
@@ -621,6 +664,13 @@ void RenderBoxBase::PerformLayout()
     SetChildLayoutParam();
     // third. using layout size of child, calculate layout size of box
     CalculateSelfLayoutSize();
+
+    if (needReCalc_) {
+        needReCalc_ = false;
+        CalculateSelfLayoutParam();
+        SetChildLayoutParam();
+        CalculateSelfLayoutSize();
+    }
     // forth. calculate position of child
     CalculateChildPosition();
 
@@ -639,6 +689,7 @@ void RenderBoxBase::Update(const RefPtr<Component>& component)
     if (box) {
         scrollPage_ = box->GetScrollPage();
 
+        displayType_ = box->GetDisplayType();
         paddingOrigin_ = box->GetPadding();
         marginOrigin_ = box->GetMargin();
         additionalPadding_ = box->GetAdditionalPadding();
@@ -758,6 +809,7 @@ void RenderBoxBase::ClearRenderObject()
     percentFlag_ = 0;
     layoutInBox_ = false;
 
+    displayType_ = DisplayType::NO_SETTING;
     paddingOrigin_ = Edge();
     marginOrigin_ = Edge();
     additionalPadding_ = Edge();

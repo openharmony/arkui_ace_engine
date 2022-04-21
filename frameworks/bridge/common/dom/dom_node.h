@@ -909,6 +909,7 @@ private:
     void TransitionOptionSetKeyframes(TweenOption& tweenOption);
     void SetDisplayStyle();
 
+    void SetDisplayType();
     void UpdateFlexItemComponent();
     void UpdateUiComponents();
     void UpdateBoxComponent();

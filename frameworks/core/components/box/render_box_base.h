@@ -287,6 +287,11 @@ public:
         return rect;
     }
 
+    const  WeakPtr<BoxComponent> GetBoxComponent() const
+    {
+        return boxComponent_;
+    }
+
 protected:
     void ClearRenderObject() override;
     virtual Offset GetBorderOffset() const;
@@ -299,6 +304,7 @@ protected:
     double ConvertVerticalDimensionToPx(CalcDimension dimension, bool defaultZero = false) const;
     void CalculateWidth();
     void CalculateHeight();
+    Edge SetAutoMargin(FlexDirection flexDir, double freeSpace, bool isFirst);
     void CalculateAutoMargin();
     void ConvertMarginPaddingToPx();
     void ConvertConstraintsToPx();
@@ -328,6 +334,7 @@ protected:
     bool layoutInBox_ = false;
     Edge paddingOrigin_;
     Edge marginOrigin_;
+    DisplayType displayType_;
     LayoutCallback layoutCallback_;
     bool useLiteStyle_ = false;
     Overflow overflow_ = Overflow::OBSERVABLE;
@@ -368,6 +375,11 @@ private:
     LayoutParam childLayoutParam_;
     Size childSize_;
     Offset childPosition_;
+
+    bool needReCalc_ = false;
+    Edge marginBackup_;
+    double childWidth_ = 0.0;
+    double childHeight_ = 0.0;
 
     // grid layout
     RefPtr<GridColumnInfo> gridColumnInfo_;

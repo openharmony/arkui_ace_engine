@@ -57,6 +57,7 @@ void RenderFlexItem::Update(const RefPtr<Component>& component)
     maxWidth_ = flexItem->GetMaxWidth();
     maxHeight_ = flexItem->GetMaxHeight();
     isHidden_ = flexItem->IsHidden();
+    displayType_ = flexItem->GetDisplayType();
     MarkNeedLayout();
 }
 

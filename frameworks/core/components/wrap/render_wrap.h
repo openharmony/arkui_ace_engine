@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <list>
 #include <vector>
 
+#include "core/components/box/render_box_base.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/base/render_node.h"
 
@@ -123,6 +124,10 @@ protected:
     bool MaybeRelease() override;
 
 private:
+    void SetDefault(const RefPtr<RenderNode>& item);
+    void AddBlock(int32_t& count, const RefPtr<RenderNode>& item, std::list<RefPtr<RenderNode>>& itemsList,
+        double& currentMainLength, double& currentCrossLength, double& baselineDistance);
+    void CalculateMargin(const RefPtr<RenderNode>& item, bool& beforeIsBlock, double& beforeMarginBottom);
     WrapDirection direction_ = WrapDirection::VERTICAL;
     WrapAlignment alignment_ = WrapAlignment::START;
     WrapAlignment mainAlignment_ = WrapAlignment::START;

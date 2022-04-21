@@ -469,11 +469,36 @@ void SetDomStyle(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementOperat
         JS_FreeCString(ctx, key);
         JS_FreeValue(ctx, val);
     }
+    bool isIine = false;
+    for (int32_t i = 0; i < styles.size(); i++) {
+        std::string key = styles[i].first;
+        std::string value = styles[i].second;
+        if (key == "display" && value == "inline") {
+            isIine = true;
+            break;
+        }
+    }
+
+    if (isIine) {
+        std::vector < std::pair < std::string, std::string >> stylesFinaly;
+        for (int32_t i = 0; i < styles.size(); i++) {
+            std::string key = styles[i].first;
+            std::string value = styles[i].second;
+            if (key == "width" || key == "height" || key.find("margin") != std::string::npos ||
+                key.find("padding") != std::string::npos) {
+                continue;
+            } else {
+                stylesFinaly.emplace_back(key, value);
+            }
+        }
+        command.SetStyles(std::move(stylesFinaly));
+    } else {
+        command.SetStyles(std::move(styles));
+    }
 
     QjsEngineInstance* instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     auto pipelineContext = instance->GetDelegate()->GetPipelineContext();
     command.SetPipelineContext(pipelineContext);
-    command.SetStyles(std::move(styles));
     js_free(ctx, pTab);
 }
 
