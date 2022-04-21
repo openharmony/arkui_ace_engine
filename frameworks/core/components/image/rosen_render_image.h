@@ -120,7 +120,7 @@ private:
 
     sk_sp<SkSVGDOM> skiaDom_;
     RefPtr<SvgDom> svgDom_;
-    sk_sp<SkImage> image_;
+    fml::RefPtr<flutter::CanvasImage> image_;
     bool loadSvgAfterLayout_ = false;
     bool loadSvgOnPaint_ = false; // only load svg trees without box and bind
     SkVector radii_[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };

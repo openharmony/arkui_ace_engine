@@ -199,13 +199,13 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     FlushPostAnimation();
     FlushLayout();
     FlushRender();
-    FlushMessages();
     FlushRenderFinish();
     FlushWindowBlur();
     FlushFocus();
     FireVisibleChangeEvent();
     ProcessPostFlush();
     ClearDeactivateElements();
+    FlushMessages();
 }
 
 void PipelineContext::FlushMessages()

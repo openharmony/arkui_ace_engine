@@ -131,6 +131,8 @@ public:
     bool Dump(const std::vector<std::string>& params) override;
     const void* GetNativeWindowById(uint64_t textureId) override;
 
+    void InitIOManager(RefPtr<TaskExecutor> taskExecutor);
+
 private:
     void NotifySurfaceChanged(int width, int height, WindowSizeChangeReason type)
     {

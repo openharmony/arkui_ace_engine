@@ -39,6 +39,7 @@
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "base/geometry/rect.h"
 #include "base/log/log.h"
+#include "base/log/ace_trace.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
@@ -238,6 +239,7 @@ std::string UIContentImpl::GetContentInfo() const
 
 void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
 {
+    ACE_FUNCTION_TRACE();
     window_ = window;
     startUrl_ = contentInfo;
     if (!window_) {
@@ -266,6 +268,13 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         ImageCache::SetImageCacheFilePath(context->GetCacheDir());
         ImageCache::SetCacheFileInfo();
     });
+
+    std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+        rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
+        rsUiDirector->Init();
+    }
 
     int32_t deviceWidth = 0;
     int32_t deviceHeight = 0;
@@ -477,11 +486,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 
     Ace::Platform::UIEnvCallback callback = nullptr;
 #ifdef ENABLE_ROSEN_BACKEND
-    callback = [window, id = instanceId_, container](const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) {
-        if (SystemProperties::GetRosenBackendEnabled()) {
-            auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-            if (rsUiDirector != nullptr) {
-                rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
+    callback = [window, id = instanceId_, container, flutterAceView, rsUiDirector](
+                    const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) {
+        if (rsUiDirector) {
+            ACE_SCOPED_TRACE("OHOS::Rosen::RSUIDirector::Create()");
                 rsUiDirector->SetUITaskRunner(
                     [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
                         ContainerScope scope(id);
@@ -491,9 +499,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);
                 }
-                rsUiDirector->Init();
+                flutterAceView->InitIOManager(container->GetTaskExecutor());
                 LOGI("UIContent Init Rosen Backend");
-            }
         }
     };
 #endif

@@ -15,12 +15,21 @@
 
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 
+#include <EGL/egl.h>
 #include <algorithm>
 #include <fstream>
 
+#include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/shell/common/shell_io_manager.h"
+#include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "key_event.h"
 #include "pointer_event.h"
 
+#if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
+#include "adapter/ohos/entrance/ace_rosen_sync_task.h"
+#endif
+
+#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -694,6 +703,84 @@ std::unique_ptr<DrawDelegate> FlutterAceView::GetDrawDelegate()
 std::unique_ptr<PlatformWindow> FlutterAceView::GetPlatformWindow()
 {
     return nullptr;
+}
+
+void FlutterAceView::InitIOManager(RefPtr<TaskExecutor> taskExecutor)
+{
+#if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
+    ACE_SCOPED_TRACE("InitIOManager");
+    EGLContext shareContext = nullptr;
+    EGLSurface surface = nullptr;
+    auto callback = [&shareContext, &surface]() {
+        ACE_SCOPED_TRACE("create egl ");
+        EGLContext context = eglGetCurrentContext();
+        if (context == EGL_NO_CONTEXT) {
+            LOGE("eglGetCurrentContext failed errorCode = [%{public}d]", eglGetError());
+            return;
+        }
+        EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        if (display == EGL_NO_DISPLAY) {
+            LOGE("eglGetDisplay failed errorCode = [%{public}d]", eglGetError());
+            return;
+        }
+        EGLint attributes[] = {
+            // clang-format off
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_SURFACE_TYPE,    EGL_WINDOW_BIT,
+        EGL_RED_SIZE,        8,
+        EGL_GREEN_SIZE,      8,
+        EGL_BLUE_SIZE,       8,
+        EGL_ALPHA_SIZE,      8,
+        EGL_DEPTH_SIZE,      0,
+        EGL_STENCIL_SIZE,    0,
+        EGL_NONE,            // termination sentinel
+            // clang-format on
+        };
+        EGLint config_count = 0;
+        EGLConfig egl_config = nullptr;
+        if (eglChooseConfig(display, attributes, &egl_config, 1, &config_count) != EGL_TRUE) {
+            LOGE("Get EGLConfig failed errorCode = [%{public}d]", eglGetError());
+            return;
+        }
+        EGLint contextAttr[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
+        shareContext = eglCreateContext(display, egl_config, context, contextAttr);
+        if (shareContext == EGL_NO_CONTEXT) {
+            LOGE("eglCreateContext failed errorCode = [%{public}d]", eglGetError());
+            return;
+        }
+        const EGLint attribs[] = { EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
+        surface = eglCreatePbufferSurface(display, egl_config, attribs);
+        if (surface == EGL_NO_SURFACE) {
+            LOGE("eglCreatePbufferSurface failed errorCode = [%{public}d]", eglGetError());
+            return;
+        }
+        LOGI("create egl success");
+    };
+    auto task = std::make_shared<AceRosenSyncTask>(std::move(callback));
+    Rosen::RSTransactionProxy::GetInstance()->ExecuteSynchronousTask(task);
+
+    if (shareContext == EGL_NO_CONTEXT || surface == EGL_NO_SURFACE) {
+        LOGW("create egl env failed, image should not upload to gpu.");
+        return;
+    }
+    auto state = flutter::UIDartState::Current()->GetStateById(instanceId_);
+    if (state == nullptr) {
+        LOGE("state is nullptr");
+        return;
+    }
+    fml::WeakPtr<flutter::ShellIOManager> ioManager = state->GetIOManager();
+    taskExecutor->PostSyncTask(
+        [surface, shareContext, ioManager]() {
+            ACE_SCOPED_TRACE("create resource_context ");
+            if (eglMakeCurrent(eglGetDisplay(EGL_DEFAULT_DISPLAY), surface, surface, shareContext) == EGL_TRUE) {
+                sk_sp<GrContext> resource_context = flutter::ShellIOManager::CreateCompatibleResourceLoadingContext(
+                    GrBackend::kOpenGL_GrBackend, flutter::GPUSurfaceGLDelegate::GetDefaultPlatformGLInterface());
+
+                ioManager->NotifyResourceContextAvailable(resource_context);
+            }
+        },
+        TaskExecutor::TaskType::IO);
+#endif
 }
 
 } // namespace OHOS::Ace::Platform
