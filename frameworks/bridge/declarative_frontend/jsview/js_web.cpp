@@ -504,12 +504,12 @@ public:
             for (size_t i = 0; i < array->Length(); i++) {
                 JSRef<JSVal> val = array->GetValueAt(i);
                 if (!val->IsString()) {
-                    LOGW("file selector list is not string at index %{public}d", i);
+                    LOGW("file selector list is not string at index %{public}zu", i);
                     continue;
                 }
                 std::string fileName;
                 if (!ConvertFromJSValue(val, fileName)) {
-                    LOGW("can't convert file name at index %{public}d of JSFileSelectorResult, so skip it.", i);
+                    LOGW("can't convert file name at index %{public}zu of JSFileSelectorResult, so skip it.", i);
                     continue;
                 }
                 fileList.push_back(fileName);
