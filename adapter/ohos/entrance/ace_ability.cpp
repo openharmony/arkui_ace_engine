@@ -302,7 +302,7 @@ void AceAbility::OnStart(const Want& want)
         container->SetPackagePathStr(resPath);
         container->SetBundlePath(abilityContext->GetBundleCodeDir());
         container->SetFilesDataPath(abilityContext->GetFilesDir());
-        if (window->IsDecorEnable() && SystemProperties::GetDeviceType() == DeviceType::TABLET) {
+        if (window->IsDecorEnable()) {
             LOGI("AceAbility: Container modal is enabled.");
             container->SetWindowModal(WindowModal::CONTAINER_MODAL);
         }

@@ -474,7 +474,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetBundlePath(context->GetBundleCodeDir());
     container->SetFilesDataPath(context->GetFilesDir());
 
-    if (window_->IsDecorEnable() && SystemProperties::GetDeviceType() == DeviceType::TABLET) {
+    if (window_->IsDecorEnable()) {
         LOGI("Container modal is enabled.");
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
