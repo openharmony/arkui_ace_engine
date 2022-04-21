@@ -819,7 +819,7 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
     instanceId_ = ContainerScope::CurrentId();
 
     if (softKeyboardEnabled_) {
-        LOGI("RenderTextField::CloseKeyboard: Request open soft keyboard");
+        LOGI("Request open soft keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
         if (textChangeListener_ == nullptr) {
             textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
@@ -863,7 +863,7 @@ bool RenderTextField::CloseKeyboard(bool forceClose)
             StopTwinkling();
         }
         if (HasConnection()) {
-            LOGI("RenderTextField::CloseKeyboard: Request close soft keyboard");
+            LOGI("Request close soft keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
             MiscServices::InputMethodController::GetInstance()->HideTextInput();
 #else
