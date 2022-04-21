@@ -402,7 +402,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("renderMode", &JSImage::SetImageRenderMode, opt);
     JSClass<JSImage>::StaticMethod("objectRepeat", &JSImage::SetImageRepeat, opt);
     JSClass<JSImage>::StaticMethod("interpolation", &JSImage::SetImageInterpolation, opt);
-    JSClass<JSImage>::StaticMethod("borderStyle", &JSViewAbstract::SetBorderStyle, opt);
+    JSClass<JSImage>::StaticMethod("borderStyle", &JSViewAbstract::JsBorderStyle);
     JSClass<JSImage>::StaticMethod("borderColor", &JSViewAbstract::JsBorderColor);
     JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderWidth", &JSViewAbstract::JsBorderWidth);
