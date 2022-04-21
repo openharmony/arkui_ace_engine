@@ -829,14 +829,14 @@ void JsiDeclarativeEngine::RegisterWorker()
     RegisterAssetFunc();
 }
 
-bool JsiDeclarativeEngine::ExecuteAbc(const shared_ptr<JsRuntime> runtime, const std::string fileName)
+bool JsiDeclarativeEngine::ExecuteAbc(const std::string &fileName)
 {
+    auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     std::string basePath = delegate->GetAssetPath(fileName);
     if (!basePath.empty()) {
         std::string abcPath = basePath.append(fileName);
-        LOGD("abcPath is: %{private}s", abcPath.c_str());
         if (!runtime->ExecuteJsBin(abcPath)) {
             LOGE("ExecuteJsBin %{private}s failed.", fileName.c_str());
             return false;
@@ -887,25 +887,44 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     if (pos != std::string::npos && pos == url.length() - (sizeof(js_ext) - 1)) {
         std::string urlName = url.substr(0, pos) + bin_ext;
         if (isMainPage) {
-            if (!ExecuteAbc(runtime, "commons.abc")) {
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+            std::string commonsBasePath = delegate->GetAssetPath("commons.abc");
+            if (!commonsBasePath.empty()) {
+                std::string commonsPath = commonsBasePath.append("commons.abc");
+                if (!runtime->ExecuteJsBin(commonsPath)) {
+                    LOGE("ExecuteJsBin \"commons.js\" failed.");
+                    return;
+                }
+            }
+            std::string vendorsBasePath = delegate->GetAssetPath("vendors.abc");
+            if (!vendorsBasePath.empty()) {
+                std::string vendorsPath = vendorsBasePath.append("vendors.abc");
+                if (!runtime->ExecuteJsBin(vendorsPath)) {
+                    LOGE("ExecuteJsBin \"vendors.js\" failed.");
+                    return;
+                }
+            }
+#else
+            if (!ExecuteAbc("commons.abc")) {
                 return;
             }
-            if (!ExecuteAbc(runtime, "vendor.abc")) {
+            if (!ExecuteAbc("vendor.abc")) {
                 return;
             }
+#endif
             std::string appMap;
             if (delegate->GetAssetContent("app.js.map", appMap)) {
                 page->SetAppMap(appMap);
             } else {
                 LOGW("app map load failed!");
             }
-            if (!ExecuteAbc(runtime, "app.abc")) {
+            if (!ExecuteAbc("app.abc")) {
                 LOGW("ExecuteJsBin \"app.js\" failed.");
             } else {
                 CallAppFunc("onCreate");
             }
         }
-        if (!ExecuteAbc(runtime, urlName)) {
+        if (!ExecuteAbc(urlName)) {
             return;
         }
     }
