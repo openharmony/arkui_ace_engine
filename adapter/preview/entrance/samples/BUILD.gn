@@ -49,6 +49,7 @@ template("ace_test") {
     if (enable_ark_preview) {
       deps += [
         ":copy_ark_shared_library(${current_toolchain})",
+        ":copy_icu_data_resource(${current_toolchain})",
         ":copy_napi_shared_library(${current_toolchain})",
       ]
     } else {
@@ -132,6 +133,10 @@ if (enable_ark_preview) {
     ]
     outputs =
         [ root_build_dir + "/mingw_x86_64/common/common/{{source_file_part}}" ]
+  }
+  ohos_copy("copy_icu_data_resource") {
+    sources = [ "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat" ]
+    outputs = [ root_build_dir + "/mingw_x86_64/common/common/icudt67l.dat" ]
   }
 } else {
   ohos_copy("copy_napi_shared_library_for_test") {

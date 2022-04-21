@@ -175,6 +175,7 @@ private:
     void RegisterWorker();
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
+    bool ExecuteAbc(const std::string &fileName);
     bool CallAppFunc(const std::string& appFuncName);
     bool CallAppFunc(const std::string& appFuncName, std::vector<shared_ptr<JsValue>>& argv);
 
