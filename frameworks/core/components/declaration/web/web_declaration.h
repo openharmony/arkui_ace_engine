@@ -40,6 +40,8 @@ struct WebEvent : Event {
     EventMarker httpErrorEventId;
     EventMarker messageEventId;
     EventMarker downloadStartEventId;
+    EventMarker renderExitedEventId;
+    EventMarker refreshAccessedHistoryId;
 };
 
 struct WebMethod : Method {
@@ -68,7 +70,7 @@ public:
         auto& attribute = static_cast<WebAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
         return attribute.src;
     }
-	
+
     void SetWebData(const std::string& data)
     {
         auto& attribute = MaybeResetAttribute<WebAttribute>(AttributeTag::SPECIALIZED_ATTR);
@@ -223,6 +225,30 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.messageEventId;
+    }
+
+    void SetRenderExitedId(const EventMarker& renderExitedEventId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.renderExitedEventId = renderExitedEventId;
+    }
+
+    const EventMarker& GetRenderExitedId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.renderExitedEventId;
+    }
+
+    void SetRefreshAccessedHistoryId(const EventMarker& refreshAccessedHistoryId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.refreshAccessedHistoryId = refreshAccessedHistoryId;
+    }
+
+    const EventMarker& GetRefreshAccessedHistoryId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.refreshAccessedHistoryId;
     }
 
 protected:
