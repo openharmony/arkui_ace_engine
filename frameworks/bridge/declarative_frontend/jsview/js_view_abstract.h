@@ -100,12 +100,17 @@ public:
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
+    static void ParseBorderColor(std::unique_ptr<JsonValue>& args);
     static void JsPadding(const JSCallbackInfo& info);
     static void JsMargin(const JSCallbackInfo& info);
     static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderWidth(const JSCallbackInfo& info);
+    static void ParseBorderWidth(std::unique_ptr<JsonValue>& args);
     static void JsBorderRadius(const JSCallbackInfo& info);
+    static void ParseBorderRadius(std::unique_ptr<JsonValue>& args);
+    static void JsBorderStyle(const JSCallbackInfo& info);
+    static void ParseBorderStyle(std::unique_ptr<JsonValue>& args);
     static void JsBlur(const JSCallbackInfo& info);
     static void JsColorBlend(const JSCallbackInfo& info);
     static void JsBackdropBlur(const JSCallbackInfo& info);

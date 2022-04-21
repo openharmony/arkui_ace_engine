@@ -72,9 +72,10 @@ void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
                 func->Execute(*keyInfo);
             },
             "onKey", 0);
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-        focusableComponent->SetFocusable(true);
-        focusableComponent->SetOnKeyId(onKeyId);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        if (focusableComponent) {
+            focusableComponent->SetOnKeyId(onKeyId);
+        }
     }
 }
 
@@ -116,8 +117,10 @@ void JSInteractableView::JsOnDelete(const JSCallbackInfo& info)
             ACE_SCORING_EVENT("onDelete");
             func->Execute();
         });
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-        focusableComponent->SetOnDeleteId(onDeleteId);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        if (focusableComponent) {
+            focusableComponent->SetOnDeleteId(onDeleteId);
+        }
     }
 }
 
@@ -142,8 +145,10 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
         }
 
         auto onClickId = GetClickEventMarker(info);
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-        focusableComponent->SetOnClickId(onClickId);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        if (focusableComponent) {
+            focusableComponent->SetOnClickId(onClickId);
+        }
     }
 }
 
