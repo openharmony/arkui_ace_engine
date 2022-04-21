@@ -749,6 +749,13 @@ var HitTestType;
   HitTestType[HitTestType["Unknown"] = 7] = "Unknown";
 })(HitTestType || (HitTestType = {}));
 
+var CacheMode;
+(function (CacheMode) {
+  CacheMode[CacheMode["Default"] = 0] = "Default";
+  CacheMode[CacheMode["None"] = 1] = "None";
+  CacheMode[CacheMode["Online"] = 2] = "Online";
+  CacheMode[CacheMode["Only"] = 3] = "Only";
+})(CacheMode || (CacheMode = {}));
 
 var ProgressType;
 (function (ProgressType) {
