@@ -376,8 +376,10 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
         if (buttonComponent) {
             buttonComponent->SetKeyEnterEventId(clickEventId);
         }
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-        focusableComponent->SetOnClickId(clickEventId);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        if (focusableComponent) {
+            focusableComponent->SetOnClickId(clickEventId);
+        }
     }
 }
 

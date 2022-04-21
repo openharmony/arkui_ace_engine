@@ -242,6 +242,7 @@ bool TextFieldElement::RequestKeyboard(bool needStartTwinkling)
         }
         return true;
     } else {
+        LOGW("Request keyboard failed because the textfield is unfocusable");
         isRequestFocus_ = false;
         return false;
     }

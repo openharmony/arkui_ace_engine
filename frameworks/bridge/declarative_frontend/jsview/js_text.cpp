@@ -389,8 +389,10 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             component->SetOnClick(onClickId);
         }
 
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-        focusableComponent->SetOnClickId(onClickId);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        if (focusableComponent) {
+            focusableComponent->SetOnClickId(onClickId);
+        }
     }
 }
 
