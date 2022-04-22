@@ -224,6 +224,8 @@ public:
 
     void OnInactive() override;
 
+    void OnNewWant(const std::string& data) override;
+
     bool OnStartContinuation() override;
 
     void OnCompleteContinuation(int32_t code) override;

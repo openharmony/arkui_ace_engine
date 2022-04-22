@@ -362,6 +362,25 @@ void AceContainer::OnInactive(int32_t instanceId)
     }, TaskExecutor::TaskType::UI);
 }
 
+void AceContainer::OnNewWant(int32_t instanceId)
+{
+    std::string data = "";
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        LOGE("container is null, OnNewWant failed.");
+        return;
+    }
+
+    ContainerScope scope(instanceId);
+    auto front = container->GetFrontend();
+    if (!front) {
+        LOGE("front is null, OnNewWant failed.");
+        return;
+    }
+
+    front->OnNewWant(data);
+}
+
 bool AceContainer::OnStartContinuation(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
