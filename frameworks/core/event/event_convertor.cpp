@@ -62,6 +62,27 @@ void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>
         }
         current++;
     }
+    UpdateTouchEvent(events);
+}
+
+void UpdateTouchEvent(std::vector<TouchEvent>& events)
+{
+    if (events.empty()) {
+        return;
+    }
+    for (auto& event : events) {
+        TouchPoint touchPoint;
+        touchPoint.size = event.size;
+        touchPoint.id = event.id;
+        touchPoint.force = event.force;
+        touchPoint.downTime = event.time;
+        touchPoint.x = event.x;
+        touchPoint.y = event.y;
+        touchPoint.screenX = event.screenX;
+        touchPoint.screenY = event.screenY;
+        touchPoint.isPressed = (event.type == TouchType::DOWN);
+        event.pointers.emplace_back(std::move(touchPoint));
+    }
 }
 
 void ConvertMouseEvent(const std::vector<uint8_t>& data, MouseEvent& events)
