@@ -65,6 +65,7 @@ public:
     void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override
     {
         HILOG_INFO("UIMgrServiceWindowChangeListener size change");
+        SystemProperties::SetWindowPos(rect.posX_, rect.posY_);
     }
     void OnModeChange(OHOS::Rosen::WindowMode mode) override
     {
