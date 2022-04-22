@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/ace/ace_engine/adapter/preview/build/config_js_engine.gni")
 import("//foundation/ace/ace_engine/build/ace_lib.gni")
 import("//foundation/ace/ace_engine/interfaces/napi/kits/napi_lib.gni")
 
@@ -94,23 +95,54 @@ if (is_standard_system) {
     shared_library_path_uv =
         get_label_info("//third_party/libuv:uv", "root_out_dir")
 
-    deps = [
-      "//foundation/ace/napi:ace_napi",
-      "//foundation/ace/napi:ace_napi_quickjs",
-      "//third_party/libuv:uv",
-    ]
-    if (use_mac) {
-      sources = [
-        "$shared_library_path_napi/ace/napi/libace_napi.dylib",
-        "$shared_library_path_napi/ace/napi/libace_napi_quickjs.dylib",
-        "$shared_library_path_uv/ace/napi/libuv.dylib",
-      ]
+    # ark js engine relvant dynamic library
+    if (enable_ark_preview) {
+      ark_core_shared_library =
+          get_label_info("//ark/runtime_core/libpandabase:libarkbase",
+                         "root_out_dir") + "/ark/ark"
+      ark_js_shared_library =
+          get_label_info("//ark/js_runtime:libark_jsruntime", "root_out_dir") +
+          "/ark/ark_js_runtime"
+      if (use_mingw_win) {
+        sources = [
+          "$ark_core_shared_library/libarkbase.dll",
+          "$ark_core_shared_library/libarkfile.dll",
+          "$ark_core_shared_library/libarkziparchive.dll",
+          "$ark_js_shared_library/libark_jsruntime.dll",
+          "$shared_library_path_napi/ace/napi/libace_napi.dll",
+          "$shared_library_path_napi/ace/napi/libace_napi_ark.dll",
+          "$shared_library_path_uv/ace/napi/libuv.dll",
+          "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat",
+        ]
+        deps = [
+          "$ace_napi:ace_napi",
+          "$ace_napi:ace_napi_ark",
+          "//ark/js_runtime:libark_jsruntime",
+          "//ark/runtime_core/libpandabase:libarkbase",
+          "//ark/runtime_core/libpandafile:libarkfile",
+          "//ark/runtime_core/libziparchive:libarkziparchive",
+          "//third_party/libuv:uv",
+        ]
+      }
     } else {
-      sources = [
-        "$shared_library_path_napi/ace/napi/libace_napi.dll",
-        "$shared_library_path_napi/ace/napi/libace_napi_quickjs.dll",
-        "$shared_library_path_uv/ace/napi/libuv.dll",
+      deps = [
+        "//foundation/ace/napi:ace_napi",
+        "//foundation/ace/napi:ace_napi_quickjs",
+        "//third_party/libuv:uv",
       ]
+      if (use_mac) {
+        sources = [
+          "$shared_library_path_napi/ace/napi/libace_napi.dylib",
+          "$shared_library_path_napi/ace/napi/libace_napi_quickjs.dylib",
+          "$shared_library_path_uv/ace/napi/libuv.dylib",
+        ]
+      } else {
+        sources = [
+          "$shared_library_path_napi/ace/napi/libace_napi.dll",
+          "$shared_library_path_napi/ace/napi/libace_napi_quickjs.dll",
+          "$shared_library_path_uv/ace/napi/libuv.dll",
+        ]
+      }
     }
     outputs = [ target_out_dir + "/previewer/common/bin/{{source_file_part}}" ]
     module_source_dir = target_out_dir + "/previewer/common/bin"

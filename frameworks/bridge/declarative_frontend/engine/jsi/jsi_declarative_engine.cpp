@@ -61,6 +61,8 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+const char COMPONENT_PREVIEW[] = "_preview_";
+const char COMPONENT_PREVIEW_LOAD_DOCUMENT[] = "loadDocument";
 const char COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW[] = "loadDocument(new";
 const char LEFT_PARENTTHESIS[] = "(";
 constexpr int32_t LOAD_DOCUMENT_STR_LENGTH = 16;
@@ -906,9 +908,26 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
                 CallAppFunc("onCreate");
             }
         }
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         if (!ExecuteAbc(urlName)) {
             return;
         }
+#else
+        std::string jsContent;
+        std::string::size_type posPreview = urlName.find(COMPONENT_PREVIEW);
+        if (posPreview != std::string::npos) {
+            std::string::size_type pos = preContent_.find(COMPONENT_PREVIEW_LOAD_DOCUMENT);
+            if (pos != std::string::npos) {
+                LOGE("js file do not have loadDocument,");
+                jsContent = preContent_;
+            }
+        } else {
+            if (!ExecuteAbc(runtime, urlName)) {
+                return;
+            }
+        }
+        preContent_ = jsContent;
+#endif
     }
 }
 

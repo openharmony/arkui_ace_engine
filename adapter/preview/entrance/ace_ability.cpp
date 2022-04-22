@@ -16,6 +16,9 @@
 #include "adapter/preview/entrance/ace_ability.h"
 
 #include <thread>
+#ifdef INIT_ICU_DATA_PATH
+#include "unicode/putil.h"
+#endif
 
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/entrance/ace_container.h"
@@ -175,6 +178,10 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
 
 void AceAbility::InitEnv()
 {
+#ifdef INIT_ICU_DATA_PATH
+    std::string icuPath = ".";
+    u_setDataDirectory(icuPath.c_str());
+#endif
     std::vector<std::string> paths;
     paths.push_back(runArgs_.assetPath);
     std::string appResourcesPath(runArgs_.appResourcesPath);

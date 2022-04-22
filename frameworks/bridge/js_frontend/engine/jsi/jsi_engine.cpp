@@ -55,6 +55,11 @@
 #include "pixel_map_napi.h"
 #endif
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+extern const char _binary_strip_native_min_abc_start[];
+extern const char _binary_strip_native_min_abc_end[];
+#endif
+
 namespace OHOS::Ace::Framework {
 
 #ifdef APP_USE_ARM
@@ -2942,10 +2947,19 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
     RegisterI18nPluralRulesModule();
 
     // load jsfwk
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     if (!runtime_->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
         LOGE("Failed to load js framework!");
         return false;
     }
+#else
+    bool jsfwkResult = runtime_->EvaluateJsCode((uint8_t*)_binary_strip_native_min_abc_start,
+        _binary_strip_native_min_abc_end - _binary_strip_native_min_abc_start);
+    if (!jsfwkResult) {
+        LOGE("Failed to load js framework!");
+        return false;
+    }
+#endif
     LOGD("Load js framework success");
 
     // Init groupJsBridge
@@ -3231,6 +3245,34 @@ void JsiEngine::GetLoadOptions(std::string& optionStr, bool isMainPage, bool has
     optionStr = renderOption->ToString();
 }
 
+bool JsiEngine::ExecuteAbc(const std::string &fileName)
+{
+    auto runtime = engineInstance_->GetJsRuntime();
+    auto delegate = engineInstance_->GetDelegate();
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+    std::string basePath = delegate->GetAssetPath(fileName);
+    if (!basePath.empty()) {
+        std::string abcPath = basePath.append(fileName);
+        if (!runtime->ExecuteJsBin(abcPath)) {
+            LOGE("ExecuteJsBin %{private}s failed.", fileName.c_str());
+            return false;
+        }
+    }
+    return true;
+#else
+    std::vector<uint8_t> content;
+    if (!delegate->GetAssetContent(fileName, content)) {
+        LOGD("GetAssetContent \"%{private}s\" failed.", fileName.c_str());
+        return true;
+    }
+    if (!runtime->EvaluateJsCode(content.data(), content.size())) {
+        LOGE("EvaluateJsCode \"%{private}s\" failed.", fileName.c_str());
+        return false;
+    }
+    return true;
+#endif
+}
+
 void JsiEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
 {
     ACE_SCOPED_TRACE("JsiEngine::LoadJs");
@@ -3260,28 +3302,13 @@ void JsiEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bo
     auto pos = url.rfind(js_ext);
     if (pos != std::string::npos && pos == url.length() - (sizeof(js_ext) - 1)) {
         std::string urlName = url.substr(0, pos) + bin_ext;
-        std::string assetBasePath = delegate->GetAssetPath(urlName);
-        std::string assetPath = assetBasePath.append(urlName);
-        LOGD("assetPath is: %{private}s", assetPath.c_str());
 
         if (isMainPage) {
-            std::string commonsBasePath = delegate->GetAssetPath("commons.abc");
-            if (!commonsBasePath.empty()) {
-                std::string commonsPath = commonsBasePath.append("commons.abc");
-                LOGD("commonsPath is: %{private}s", commonsPath.c_str());
-                if (!runtime->ExecuteJsBin(commonsPath)) {
-                    LOGE("ExecuteJsBin \"commons.js\" failed.");
-                    return;
-                }
+            if (!ExecuteAbc("commons.abc")) {
+                return;
             }
-            std::string vendorsBasePath = delegate->GetAssetPath("vendors.abc");
-            if (!vendorsBasePath.empty()) {
-                std::string vendorsPath = vendorsBasePath.append("vendors.abc");
-                LOGD("vendorsPath is: %{private}s", vendorsPath.c_str());
-                if (!runtime->ExecuteJsBin(vendorsPath)) {
-                    LOGE("ExecuteJsBin \"vendors.js\" failed.");
-                    return;
-                }
+            if (!ExecuteAbc("vendors.abc")) {
+                return;
             }
             std::string appMap;
             if (delegate->GetAssetContent("app.js.map", appMap)) {
@@ -3289,10 +3316,7 @@ void JsiEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bo
             } else {
                 LOGI("app map load failed!");
             }
-            std::string appBasePath = delegate->GetAssetPath("app.abc");
-            std::string appPath = appBasePath.append("app.abc");
-            LOGD("appPath is: %{private}s", appPath.c_str());
-            if (!runtime->ExecuteJsBin(appPath)) {
+            if (!ExecuteAbc("app.abc")) {
                 LOGE("ExecuteJsBin \"app.js\" failed.");
                 return;
             }
@@ -3303,8 +3327,7 @@ void JsiEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bo
                 return;
             }
         }
-        if (!runtime->ExecuteJsBin(assetPath)) {
-            LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
+        if (!ExecuteAbc(urlName)) {
             return;
         }
 
