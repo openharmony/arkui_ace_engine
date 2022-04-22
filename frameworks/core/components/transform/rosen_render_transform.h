@@ -55,6 +55,11 @@ public:
         pendingAppearingTransition_ = true;
     }
 
+    void SetPendingUpdateTransformLayer() override
+    {
+        pendingUpdateTransformLayer_ = true;
+    }
+
 protected:
     void OnRSTransition(TransitionType type) override;
 

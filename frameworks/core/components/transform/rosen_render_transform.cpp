@@ -212,8 +212,6 @@ void RosenRenderTransform::PerformLayout()
     if (auto rsNode = GetRSNode()) {
         SyncOriginToRsNode(rsNode);
     }
-
-    UpdateTransformLayer();
 }
 
 void RosenRenderTransform::OnRSTransition(TransitionType type)
