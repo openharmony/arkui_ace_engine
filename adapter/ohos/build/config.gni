@@ -87,6 +87,10 @@ if (disable_gpu || enable_rosen_backend) {
   defines += [ "GPU_DISABLED" ]
 }
 
+if (disable_gpu) {
+  defines += [ "UPLOAD_GPU_DISABLED" ]
+}
+
 if (form_components_support) {
   defines += [ "FORM_SUPPORTED" ]
 }

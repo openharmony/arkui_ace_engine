@@ -184,6 +184,13 @@ void AceAbility::OnStart(const Want& want)
         ImageCache::SetCacheFileInfo();
     });
     OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
+    std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+        rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
+        rsUiDirector->Init();
+    }
+
     // register surface change callback and window mode change callback
     OHOS::sptr<OHOS::Rosen::IWindowChangeListener> thisAbility(this);
     window->RegisterWindowChangeListener(thisAbility);
@@ -330,23 +337,20 @@ void AceAbility::OnStart(const Want& want)
 
     Ace::Platform::UIEnvCallback callback = nullptr;
 #ifdef ENABLE_ROSEN_BACKEND
-    callback = [window, id = abilityId_](const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
-        if (SystemProperties::GetRosenBackendEnabled()) {
-            auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-            if (rsUiDirector != nullptr) {
-                rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
-                rsUiDirector->SetUITaskRunner(
-                    [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id](
-                        const std::function<void()>& task) {
-                        ContainerScope scope(id);
-                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-                    });
-                if (context != nullptr) {
-                    context->SetRSUIDirector(rsUiDirector);
-                }
-                rsUiDirector->Init();
-                LOGI("Init Rosen Backend");
+    callback = [window, id = abilityId_, flutterAceView, rsUiDirector](
+                    const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
+        if (rsUiDirector) {
+            rsUiDirector->SetUITaskRunner(
+                [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id](
+                    const std::function<void()>& task) {
+                    ContainerScope scope(id);
+                    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                });
+            if (context != nullptr) {
+                context->SetRSUIDirector(rsUiDirector);
             }
+            flutterAceView->InitIOManager(Platform::AceContainer::GetContainer(id)->GetTaskExecutor());
+            LOGI("Init Rosen Backend");
         } else {
             LOGI("not Init Rosen Backend");
         }

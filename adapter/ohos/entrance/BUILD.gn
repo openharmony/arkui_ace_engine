@@ -52,7 +52,10 @@ template("ace_ohos_standard_source_set") {
     configs = [ "$ace_root:ace_config" ]
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
-      configs += [ "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config" ]
+      configs += [
+        "//foundation/graphic/standard/rosen/modules/render_service_base:export_config",
+        "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config",
+      ]
     }
 
     include_dirs = [

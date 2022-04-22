@@ -234,7 +234,7 @@ void RosenRenderImage::ImageDataPaintSuccess(const fml::RefPtr<flutter::CanvasIm
         return;
     }
     UpdateLoadSuccessState();
-    image_ = image->image();
+    image_ = image;
     skiaDom_ = nullptr;
     svgDom_ = nullptr;
     if (imageDataNotReady_) {
@@ -453,7 +453,9 @@ void RosenRenderImage::ProcessPixmapForPaint()
         skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
 #endif
     }
-    image_ = std::move(skImage);
+    auto canvasImage = flutter::CanvasImage::Create();
+    canvasImage->set_image(flutter::SkiaGPUObject<SkImage>(skImage, renderTaskHolder_->unrefQueue));
+    image_ = canvasImage;
     if (!VerifySkImageDataFromPixmap(pixmap)) {
         LOGE("pixmap paint failed due to SkImage data verification fail. rawImageSize: %{public}s",
             rawImageSize_.ToString().c_str());
@@ -601,7 +603,7 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
     ApplyInterpolation(paint);
     sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
     if (image_) {
-        colorSpace = image_->refColorSpace();
+        colorSpace = image_->image()->refColorSpace();
     }
 #ifdef USE_SYSTEM_SKIA
     paint.setColor4f(paint.getColor4f(), colorSpace.get());
@@ -697,7 +699,7 @@ void RosenRenderImage::CanvasDrawImageRect(
     if (GetBackgroundImageFlag()) {
         return;
     }
-    if (!image_) {
+    if (!image_ || !image_->image()) {
         imageDataNotReady_ = true;
         LOGI("image data is not ready, rawImageSize_: %{public}s, image source: %{private}s",
             rawImageSize_.ToString().c_str(), sourceInfo_.ToString().c_str());
@@ -711,7 +713,7 @@ void RosenRenderImage::CanvasDrawImageRect(
     if (GetAdaptiveFrameRectFlag()) {
         recordingCanvas->translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
         Rosen::RsImageInfo rsImageInfo(fitNum, repeatNum, radius, scale_);
-        recordingCanvas->DrawImageWithParm(image_, rsImageInfo, paint);
+        recordingCanvas->DrawImageWithParm(image_->image(), rsImageInfo, paint);
         return;
     }
     bool isLoading = ((imageLoadingStatus_ == ImageLoadingStatus::LOADING) ||
@@ -738,7 +740,7 @@ void RosenRenderImage::CanvasDrawImageRect(
         SkRect::MakeXYWH(realDstRect.Left() - imageRenderPosition_.GetX(),
                          realDstRect.Top() - imageRenderPosition_.GetY(),
                          realDstRect.Width(), realDstRect.Height());
-    canvas->drawImageRect(image_, skSrcRect, skDstRect, &paint);
+    canvas->drawImageRect(image_->image(), skSrcRect, skDstRect, &paint);
     LOGD("dstRect params: %{public}s", realDstRect.ToString().c_str());
     LOGD("scaledSrcRect params: %{public}s", scaledSrcRect.ToString().c_str());
 #endif
@@ -779,14 +781,14 @@ void RosenRenderImage::DrawImageOnCanvas(const Rect& srcRect, const Rect& dstRec
 
     recordingCanvas->save();
     recordingCanvas->concat(sampleMatrix);
-    recordingCanvas->drawImageRect(image_, skSrcRect, skDstRect, &paint, SkCanvas::kFast_SrcRectConstraint);
+    recordingCanvas->drawImageRect(image_->image(), skSrcRect, skDstRect, &paint, SkCanvas::kFast_SrcRectConstraint);
     recordingCanvas->restore();
 #endif
 }
 
 bool RosenRenderImage::VerifySkImageDataFromPixmap(const RefPtr<PixelMap>& pixmap) const
 {
-    if (!image_) {
+    if (!image_ || !image_->image()) {
         LOGE("image data made from pixmap is null");
         return false;
     }
@@ -818,7 +820,7 @@ void RosenRenderImage::PaintBgImage(const std::shared_ptr<RSNode>& rsNode)
     if (!GetBackgroundImageFlag()) {
         return;
     }
-    if (currentDstRectList_.empty() || !image_) {
+    if (currentDstRectList_.empty() || !image_ || !image_->image()) {
         return;
     }
 
@@ -827,7 +829,7 @@ void RosenRenderImage::PaintBgImage(const std::shared_ptr<RSNode>& rsNode)
     }
 #ifdef OHOS_PLATFORM
     auto rosenImage = std::make_shared<Rosen::RSImage>();
-    rosenImage->SetImage(image_);
+    rosenImage->SetImage(image_->image());
     rosenImage->SetImageRepeat(static_cast<int>(imageRepeat_));
     rsNode->SetBgImageWidth(imageRenderSize_.Width());
     rsNode->SetBgImageHeight(imageRenderSize_.Height());
@@ -1164,10 +1166,10 @@ void RosenRenderImage::ClearRenderObject()
 
 bool RosenRenderImage::IsSourceWideGamut() const
 {
-    if (sourceInfo_.IsSvg() || !image_) {
+    if (sourceInfo_.IsSvg() || !image_ || !image_->image()) {
         return false;
     }
-    return ImageProvider::IsWideGamut(image_->refColorSpace());
+    return ImageProvider::IsWideGamut(image_->image()->refColorSpace());
 }
 
 bool RosenRenderImage::RetryLoading()

@@ -260,7 +260,7 @@ void ImageProvider::UploadImageToGPUForRender(
         LOGW("renderTaskHolder has been released.");
         return;
     }
-#if defined(DUMP_DRAW_CMD) || defined(GPU_DISABLED)
+#ifdef UPLOAD_GPU_DISABLED
     // If want to dump draw command or gpu disabled, should use CPU image.
     callback({ image, renderTaskHolder->unrefQueue });
 #else
