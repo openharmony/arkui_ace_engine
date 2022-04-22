@@ -274,6 +274,9 @@ void RenderSlider::Initialize()
 
     touchDetector_ = AceType::MakeRefPtr<RawRecognizer>();
     touchDetector_->SetOnTouchDown([weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
+        if (info.GetTouches().empty()) {
+            return;
+        }
         auto slider = weak.Upgrade();
         if (slider) {
             auto localPosition = info.GetTouches().front().GetLocalLocation();
