@@ -1670,6 +1670,9 @@ void RenderTextField::HandleOnCut()
     if (!clipboard_) {
         return;
     }
+    if (GetEditingValue().GetSelectedText().empty()) {
+        return;
+    }
     clipboard_->SetData(GetEditingValue().GetSelectedText());
     if (onCut_) {
         onCut_(GetEditingValue().GetSelectedText());
@@ -1678,11 +1681,17 @@ void RenderTextField::HandleOnCut()
     value.text = value.GetBeforeSelection() + value.GetAfterSelection();
     value.UpdateSelection(GetEditingValue().selection.GetStart());
     SetEditingValue(std::move(value));
+    if (onChange_) {
+        onChange_(GetEditingValue().text);
+    }
 }
 
 void RenderTextField::HandleOnCopy()
 {
     if (!clipboard_) {
+        return;
+    }
+    if (GetEditingValue().GetSelectedText().empty()) {
         return;
     }
     clipboard_->SetData(GetEditingValue().GetSelectedText());
@@ -1699,6 +1708,9 @@ void RenderTextField::HandleOnPaste()
     }
     auto textSelection = GetEditingValue().selection;
     auto pasteCallback = [weak = WeakClaim(this), textSelection](const std::string& data) {
+        if (data.empty()) {
+            return;
+        }
         auto textfield = weak.Upgrade();
         if (textfield) {
             auto value = textfield->GetEditingValue();
@@ -1708,6 +1720,9 @@ void RenderTextField::HandleOnPaste()
             textfield->SetEditingValue(std::move(value));
             if (textfield->onPaste_) {
                 textfield->onPaste_(data);
+            }
+            if (textfield->onChange_) {
+                textfield->onChange_(textfield->GetEditingValue().text);
             }
         }
     };
