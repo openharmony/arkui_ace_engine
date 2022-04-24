@@ -16,17 +16,17 @@
 abstract class NativeView {
 
   constructor(compilerAssignedUniqueChildId: string, parent?: View) {
-    console.log(`${this.constructor.name}: new instance, child of parent ${parent && parent.id__()}:${parent && parent.constructor.name}`);
+    console.log(`${this.constructor.name}: new instance, child of parent ${parent && parent.id()}:${parent && parent.constructor.name}`);
   }
 
   protected markNeedUpdate(): void {
-    console.log(`${this.id__()}:${this.constructor.name}: markNeedUpdate`);
+    console.log(`${this.id()}:${this.constructor.name}: markNeedUpdate`);
   }
 
-  abstract id__(): void;
+  abstract id(): void;
 
   findChildById(compilerAssignedUniqueChildId: string): View {
-    console.log(`${this.id__()}:${this.constructor.name}: findChildById ${compilerAssignedUniqueChildId}. Will not work!`);
+    console.log(`${this.id()}:${this.constructor.name}: findChildById ${compilerAssignedUniqueChildId}. Will not work!`);
     return undefined;
   }
 

@@ -29,7 +29,7 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   the property.
 */
   aboutToBeDeleted() {
-    this.source_.unlinkSuscriber(this.id__());
+    this.source_.unlinkSuscriber(this.id());
     this.source_ = undefined;
     super.aboutToBeDeleted();
   }
@@ -38,13 +38,13 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   // will call this cb function when property has changed
   // a set (newValue) is not done because get reads through for the source_
   hasChanged(newValue: T): void {
-    console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
+    console.debug(`SynchedPropertySimpleTwoWay[${this.id()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
     this.notifyHasChanged(newValue);
   }
 
   // get 'read through` from the ObservedProperty
   public get(): T {
-    console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: get`)
+    console.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: get`)
     this.notifyPropertyRead();
     return this.source_.get();
   }
@@ -52,11 +52,11 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   // set 'writes through` to the ObservedProperty
   public set(newValue: T): void {
     if (this.source_.get() == newValue) {
-      console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+      console.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
       return;
     }
 
-    console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+    console.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
     // the source_ ObservedProeprty will call: this.hasChanged(newValue);
     this.notifyHasChanged(newValue);
     return this.source_.set(newValue);

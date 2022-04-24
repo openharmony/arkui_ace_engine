@@ -37,7 +37,7 @@ class SynchedPropertyObjectTwoWay<C extends Object>
   */
   aboutToBeDeleted() {
     // unregister from parent of this link
-    this.linkedParentProperty_.unlinkSuscriber(this.id__());
+    this.linkedParentProperty_.unlinkSuscriber(this.id());
 
     // unregister from the ObservedObject
     ObservedObject.removeOwningProperty(this.getObject(), this);
@@ -56,7 +56,7 @@ class SynchedPropertyObjectTwoWay<C extends Object>
   // this object is subscriber to ObservedObject
   // will call this cb function when property has changed
   hasChanged(newValue: C): void {
-    console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
+    console.debug(`SynchedPropertyObjectTwoWay[${this.id()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
     this.notifyHasChanged(this.getObject());
   }
 
@@ -64,18 +64,18 @@ class SynchedPropertyObjectTwoWay<C extends Object>
 
   // get 'read through` from the ObservedProperty
   public get(): C {
-    console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: get`)
+    console.debug(`SynchedPropertyObjectTwoWay[${this.id()}, '${this.info() || "unknown"}']: get`)
     return this.getObject();
   }
 
   // set 'writes through` to the ObservedProperty
   public set(newValue: C): void {
     if (this.getObject() == newValue) {
-      console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+      console.debug(`SynchedPropertyObjectTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
       return;
     }
 
-    console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+    console.debug(`SynchedPropertyObjectTwoWay[${this.id()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
 
     ObservedObject.removeOwningProperty(this.getObject(), this);
     this.setObject(newValue);
