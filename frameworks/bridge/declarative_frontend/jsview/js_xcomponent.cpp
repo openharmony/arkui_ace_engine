@@ -83,6 +83,12 @@ void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
     };
     XComponentClient::GetInstance().RegisterCallback(getXComponentCallback);
 
+    if (!XComponentClient::GetInstance().AddXComponentToXcomponentsMap(xcomponentComponent->GetId(),
+                                                                       xcomponentComponent)) {
+        LOGE("xcomponent create error, id already exsits");
+        return;
+    }
+
     JSRef<JSVal> jsVal;
     XComponentClient::GetInstance().GetJSVal(jsVal);
     args.SetReturnValue(jsVal);

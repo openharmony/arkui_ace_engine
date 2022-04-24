@@ -1783,16 +1783,20 @@ void V8DeclarativeEngine::InitXComponent()
         return;
     }
     ctxXComp_.Reset(isolateXComp_, context);
-    nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
-    nativeXComponent_ = new OH_NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
 }
 
 void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
 {
     CHECK_RUN_ON(JS);
     InitXComponent();
+    if (!OHOS::Ace::Framework::XComponentClient::GetInstance().
+        GetNativeXComponentFromXcomponentsMap(componentId, nativeXComponentImpl_,
+        nativeXComponent_)) {
+        LOGE("InitXComponent nativeXComponent_ fail");
+        return;
+    }
     RefPtr<XComponentComponent> xcomponent;
-    OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponent(xcomponent);
+    OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId, xcomponent);
     if (!xcomponent) {
         LOGE("FireExternalEvent xcomponent is null.");
         return;
