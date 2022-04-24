@@ -28,6 +28,14 @@
 #include "frameworks/core/components/common/painter/flutter_svg_painter.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/src/ports/SkFontMgr_config_parser.h"
+#include "adapter/preview/entrance/editing/text_input_client_mgr.h"
+#include "adapter/preview/entrance/clipboard/clipboard_impl.h"
+#include "adapter/preview/entrance/clipboard/clipboard_proxy_impl.h"
+#include "core/common/clipboard/clipboard_proxy.h"
+
+#ifdef USE_GLFW_WINDOW
+#include "adapter/preview/entrance/editing/text_input_plugin.h"
+#endif
 
 namespace OHOS::Ace::Platform {
 
@@ -171,6 +179,24 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
 
     auto controller = FlutterDesktopCreateWindow(
         runArgs.deviceWidth, runArgs.deviceHeight, runArgs.windowTitle.c_str(), runArgs.onRender);
+#ifdef USE_GLFW_WINDOW
+    std::unique_ptr<TextInputPlugin> textInputPlugin = std::make_unique<TextInputPlugin>();
+    textInputPlugin->RegisterKeyboardHookCallback((KeyboardHookCallback) AceAbility::DispatchKeyEvent);
+    textInputPlugin->RegisterCharHookCallback((CharHookCallback) AceAbility::DispatchInputMethodEvent);
+    FlutterDesktopAddKeyboardHookHandler(controller, std::move(textInputPlugin));
+
+    auto callbackSetClipboardData = [controller](const std::string& data) {
+        FlutterDesktopSetClipboardData(controller, data.c_str());
+    };
+    auto callbackGetClipboardData = [controller]() {
+        return FlutterDesktopGetClipboardData(controller);
+    };
+    ClipboardProxy::GetInstance()->SetDelegate(
+        std::make_unique<ClipboardProxyImpl>(callbackSetClipboardData, callbackGetClipboardData));
+#endif
+    // Initial the proxy of Input method
+    TextInputClientMgr::GetInstance().InitTextInputProxy();
+
     auto aceAbility = std::make_unique<AceAbility>(runArgs);
     aceAbility->SetGlfwWindowController(controller);
     return aceAbility;
@@ -342,6 +368,39 @@ bool AceAbility::DispatchBackPressedEvent()
         backPromise.set_value(canBack);
     }, TaskExecutor::TaskType::PLATFORM);
     return backFuture.get();
+}
+
+bool AceAbility::DispatchInputMethodEvent(unsigned int code_point)
+{
+    return TextInputClientMgr::GetInstance().AddCharacter(static_cast<wchar_t>(code_point));
+}
+
+bool AceAbility::DispatchKeyEvent(const KeyEvent& event)
+{
+    if (TextInputClientMgr::GetInstance().HandleKeyEvent(event)) {
+        LOGI("The event is related to the input component and has been handled successfully.");
+        return true;
+    }
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGE("container is null");
+        return false;
+    }
+
+    auto aceView = container->GetAceView();
+    if (!aceView) {
+        LOGE("aceView is null");
+        return false;
+    }
+
+    bool isHandled;
+    container->GetTaskExecutor()->PostTask(
+        [aceView, event, &isHandled]() {
+            isHandled = aceView->HandleKeyEvent(event);
+        },
+        TaskExecutor::TaskType::UI);
+
+    return isHandled;
 }
 
 void AceAbility::SetConfigChanges(const std::string& configChanges)

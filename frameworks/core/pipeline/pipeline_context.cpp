@@ -1594,7 +1594,6 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
             if (event.action == KeyAction::UP) {
                 SetIsKeyEvent(true);
             }
-            return true;
         } else if (event.code == KeyCode::KEY_ENTER) {
             if (event.action == KeyAction::CLICK) {
                 SetIsKeyEvent(true);

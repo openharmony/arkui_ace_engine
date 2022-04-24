@@ -34,6 +34,12 @@ template("preview_entrance_source") {
       "ace_application_info.cpp",
       "ace_container.cpp",
       "ace_resource_register.cpp",
+      "clipboard/clipboard_impl.cpp",
+      "clipboard/clipboard_proxy_impl.cpp",
+      "editing/text_input_client_mgr.cpp",
+      "editing/text_input_connection_impl.cpp",
+      "editing/text_input_impl.cpp",
+      "editing/text_input_plugin.cpp",
       "flutter_ace_view.cpp",
       "subwindow_preview.cpp",
     ]
@@ -48,13 +54,19 @@ template("preview_entrance_source") {
     if (!is_cross_platform_build) {
       if (platform == "windows") {
         defines -= [ "UNICODE" ]
-        include_dirs = [ "//utils/native/base/include" ]
+        include_dirs = [
+          "//utils/native/base/include",
+          "//third_party/glfw/include",
+        ]
         deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
         cflags_cc += [ "-DNONLS" ]
       }
 
       if (platform == "mac") {
-        include_dirs = [ "//utils/native/base/include" ]
+        include_dirs = [
+          "//utils/native/base/include",
+          "//third_party/glfw/include",
+        ]
         deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
       }
     }

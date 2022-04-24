@@ -22,14 +22,8 @@
 
 #include "adapter/preview/entrance/ace_run_args.h"
 #include "core/event/touch_event.h"
-
-#ifndef ACE_PREVIEW_EXPORT
-#ifdef _WIN32
-#define ACE_PREVIEW_EXPORT __declspec(dllexport)
-#elif defined(__APPLE__)
-#define ACE_PREVIEW_EXPORT __attribute__((visibility("default")))
-#endif
-#endif // ACE_PREVIEW_EXPORT
+#include "core/event/key_event.h"
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace::Platform {
 
@@ -54,7 +48,7 @@ struct SystemParams {
     OHOS::Ace::DeviceOrientation orientation { DeviceOrientation::PORTRAIT };
 };
 
-class ACE_PREVIEW_EXPORT AceAbility {
+class ACE_FORCE_EXPORT_WITH_PREVIEW AceAbility {
 public:
     explicit AceAbility(const AceRunArgs& runArgs);
     ~AceAbility();
@@ -67,6 +61,8 @@ public:
 
     static bool DispatchTouchEvent(const TouchEvent& event);
     static bool DispatchBackPressedEvent();
+    static bool DispatchInputMethodEvent(unsigned int code_point);
+    static bool DispatchKeyEvent(const KeyEvent& keyEvent);
 
     void OnConfigurationChanged(const DeviceConfig& newConfig);
     void SurfaceChanged(

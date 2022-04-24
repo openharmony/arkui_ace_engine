@@ -142,6 +142,9 @@ public:
     // Use to receive event from pc previewer
     bool HandleTouchEvent(const TouchEvent& touchEvent) override;
 
+    // Use to receive event from pc previewer
+    bool HandleKeyEvent(const KeyEvent& keyEvent) override;
+
     ViewType GetViewType() const override
     {
         return AceView::ViewType::SURFACE_VIEW;

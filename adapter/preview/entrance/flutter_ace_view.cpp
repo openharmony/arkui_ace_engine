@@ -172,6 +172,15 @@ bool FlutterAceView::HandleTouchEvent(const TouchEvent& touchEvent)
     return true;
 }
 
+bool FlutterAceView::HandleKeyEvent(const KeyEvent& keyEvent)
+{
+    if (!keyEventCallback_) {
+        return false;
+    }
+
+    return keyEventCallback_(keyEvent);
+}
+
 std::unique_ptr<DrawDelegate> FlutterAceView::GetDrawDelegate()
 {
     auto drawDelegate = std::make_unique<DrawDelegate>();
