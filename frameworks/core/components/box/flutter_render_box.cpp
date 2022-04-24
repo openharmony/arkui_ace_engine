@@ -40,7 +40,7 @@
 #include "core/pipeline/base/scoped_canvas_state.h"
 #include "core/pipeline/layers/flutter_scene_builder.h"
 #include "core/pipeline/layers/picture_layer.h"
-#include "core/components/common/painter/rosen_debug_boundary_painter.h"
+#include "core/components/common/painter/debug_boundary_painter.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -363,9 +363,9 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
             LOGE("Paint canvas is null.");
             return;
         }
-        RosenDebugBoundaryPainter::PaintDebugBoundary(canvas->canvas(), offset, GetLayoutSize());
-        RosenDebugBoundaryPainter::PaintDebugCorner(canvas->canvas(), offset, GetLayoutSize());
-        RosenDebugBoundaryPainter::PaintDebugMargin(canvas->canvas(), offset, GetLayoutSize(), margin_);
+        DebugBoundaryPainter::PaintDebugBoundary(canvas->canvas(), offset, GetLayoutSize());
+        DebugBoundaryPainter::PaintDebugCorner(canvas->canvas(), offset, GetLayoutSize());
+        DebugBoundaryPainter::PaintDebugMargin(canvas->canvas(), offset, GetLayoutSize(), margin_);
     }
     if (isAccessibilityFocus_) {
         PaintAccessibilityFocus(focusRect, context);

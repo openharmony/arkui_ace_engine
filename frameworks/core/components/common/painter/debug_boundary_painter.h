@@ -23,11 +23,12 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
-#include "core/pipeline/base/rosen_render_context.h"
+#include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkPaint.h"
 
 namespace OHOS::Ace {
-class RosenDebugBoundaryPainter : public virtual AceType {
-    DECLARE_ACE_TYPE(RosenDebugBoundaryPainter, AceType);
+class DebugBoundaryPainter : public virtual AceType {
+    DECLARE_ACE_TYPE(DebugBoundaryPainter, AceType);
 public:
     static void PaintDebugBoundary(SkCanvas* canvas, const Offset& offset, const Size& layoutSize);
     static void PaintDebugMargin(SkCanvas* canvas, const Offset& offset, const Size& layoutSize, const EdgePx& margin);
