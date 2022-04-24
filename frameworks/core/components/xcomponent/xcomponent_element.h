@@ -82,7 +82,7 @@ private:
     void CreateSurface();
 
     sptr<OHOS::Surface> producerSurface_ = nullptr;
-    struct NativeWindow * nativeWindow_ = nullptr;
+    struct NativeWindow *nativeWindow_ = nullptr;
 #else
     void OnTextureRefresh();
 #endif

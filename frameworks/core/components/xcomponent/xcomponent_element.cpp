@@ -156,7 +156,7 @@ void XComponentElement::RegisterDispatchEventCallback()
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
-        LOGE("RegisterDispatchTouchEventCallback pipelineContext is null");
+        LOGE("context is nullptr");
         return;
     }
     pipelineContext->SetDispatchTouchEventHandler([weak = WeakClaim(this)](const TouchEvent& event) {
@@ -177,7 +177,7 @@ void XComponentElement::DispatchTouchEvent(const TouchEvent& event)
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
-        LOGE("DispatchTouchEvent pipelineContext is null");
+        LOGE("context is nullptr");
         return;
     }
     auto renderXComponent = AceType::DynamicCast<RenderXComponent>(renderNode_);
@@ -201,7 +201,7 @@ void XComponentElement::DispatchMousehEvent(const MouseEvent& event)
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
-        LOGE("DispatchTouchEvent pipelineContext is null");
+        LOGE("context is nullptr");
         return;
     }
     auto renderXComponent = AceType::DynamicCast<RenderXComponent>(renderNode_);
@@ -394,14 +394,14 @@ void XComponentElement::SetMethodCall()
     if (!xcomponentController_) {
         auto controller = xcomponent_->GetXComponentController();
         if (!controller) {
-            LOGE("There is no controller in xcomponent.");
+            LOGE("invalid controller in xcomponent.");
             return;
         }
         xcomponentController_ = controller;
     }
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("There is no context in xcomponent.");
+        LOGE("context is nullptr");
         return;
     }
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -435,7 +435,7 @@ void XComponentElement::ReleasePlatformResource()
 #else
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("XComponentElement ReleasePlatformResource context null");
+        LOGE("context is nullptr");
         return;
     }
 
@@ -470,7 +470,7 @@ void XComponentElement::OnXComponentSizeInit(int64_t textureId, int32_t textureW
                                   (int)(textureWidth * viewScale), (int)(textureHeight * viewScale));
             xcomponent_->SetNativeWindow(nativeWindow_);
         } else {
-            LOGE("can not create NativeWindow frome surface");
+            LOGE("can not create NativeWindow");
         }
     }
 

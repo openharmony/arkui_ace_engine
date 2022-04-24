@@ -16,7 +16,6 @@
 #include "core/components/xcomponent/render_xcomponent.h"
 
 namespace OHOS::Ace {
-
 void RenderXComponent::PushTask(const TaskFunction& func)
 {
     tasks_.emplace_back(func);
@@ -265,5 +264,4 @@ void RenderXComponent::NativeXComponentOffset(const double&x, const double& y)
         },
         TaskExecutor::TaskType::JS);
 }
-
 } // namespace OHOS::Ace
