@@ -81,7 +81,6 @@ private:
 #ifdef OHOS_STANDARD_SYSTEM
     void CreateSurface();
 
-    static std::unordered_map<std::string, uint64_t> surfaceIdMap_;
     sptr<OHOS::Surface> producerSurface_ = nullptr;
     struct NativeWindow * nativeWindow_ = nullptr;
 #else
