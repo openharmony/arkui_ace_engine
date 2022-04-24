@@ -35,7 +35,7 @@ if (enable_ark_preview) {
     engine_defines = [ "USE_QUICKJS_ENGINE" ]
   }
   js_engines += [ qjs_engine ]
-  xcomponent_components_support = false
+  xcomponent_components_support = true
 }
 
 # windows platform defines and configs

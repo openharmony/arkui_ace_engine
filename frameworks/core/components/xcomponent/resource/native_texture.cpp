@@ -15,10 +15,6 @@
 
 #include "core/components/xcomponent/resource/native_texture.h"
 
-#include <sstream>
-
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 const char TEXTURE_METHOD_REFRESH[] = "markTextureFrameAvailable";
 const char TEXTURE_ID[] = "textureId";
@@ -95,13 +91,28 @@ void NativeTexture::CreateTexture(const std::function<void(int64_t)>& onCreate, 
     }
     hash_ = MakeResourceHash();
 
+    resRegister->RegisterEvent(
+        MakeEventHash(TEXTURE_METHOD_REFRESH), [weak = WeakClaim(this)](const std::string& param) {
+            auto texture = weak.Upgrade();
+            if (texture) {
+                texture->OnRefresh(param);
+            }
+        });
+
     if (onCreate) {
         onCreate(id_);
     }
 }
 
-void NativeTexture::OnSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight,
-                           const std::function<void(std::string&)>& callback)
+void NativeTexture::OnRefresh(const std::string& param)
+{
+    if (onRefreshListener_) {
+        onRefreshListener_();
+    }
+}
+
+void NativeTexture::SetSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight,
+                            const std::function<void(std::string&)>& callback)
 {
     std::stringstream paramStream;
     paramStream << TEXTURE_ID << XCOMPONENT_PARAM_EQUALS << textureId << XCOMPONENT_PARAM_AND

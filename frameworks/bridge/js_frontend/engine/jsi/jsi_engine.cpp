@@ -2185,10 +2185,11 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
             return bridge->GetRenderContext();
         }
         return runtime->NewUndefined();
-#ifdef OHOS_STANDARD_SYSTEM
     } else if (std::strcmp(methodName.c_str(), "getXComponentSurfaceId") == 0) {
         return JsiXComponentBridge::JsGetXComponentSurfaceId(runtime, nodeId);
-#endif
+    } else if (std::strcmp(methodName.c_str(), "setXComponentSurfaceSize") == 0) {
+        JsiXComponentBridge::JsSetXComponentSurfaceSize(runtime, arguments, nodeId);
+        return runtime->NewUndefined();
     }
 
     shared_ptr<JsValue> resultValue = runtime->NewUndefined();

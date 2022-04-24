@@ -56,7 +56,7 @@ void JSXComponentController::GetSurfaceId(const JSCallbackInfo& args)
 {
     if (xcomponentController_) {
         auto surfaceId = xcomponentController_->GetSurfaceId();
-        auto returnValue = JSVal(ToJSValue(std::to_string(surfaceId)));
+        auto returnValue = JSVal(ToJSValue(surfaceId));
         auto returnPtr = JSRef<JSVal>::Make(returnValue);
         args.SetReturnValue(returnPtr);
     }
@@ -70,8 +70,8 @@ void JSXComponentController::SetSurfaceConfig(const JSCallbackInfo& args)
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    int32_t surfaceWidth;
-    int32_t surfaceHeight;
+    uint32_t surfaceWidth;
+    uint32_t surfaceHeight;
     if (!ConvertFromJSValue(obj->GetProperty("surfaceWidth"), surfaceWidth) ||
         !ConvertFromJSValue(obj->GetProperty("surfaceHeight"), surfaceHeight)) {
         LOGW("Failed to parse param 'surfaceWidth' or 'surfaceHeight'");

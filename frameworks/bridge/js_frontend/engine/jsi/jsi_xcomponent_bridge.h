@@ -44,9 +44,9 @@ public:
         return renderContext_;
     }
 
-#ifdef OHOS_STANDARD_SYSTEM
     static shared_ptr<JsValue> JsGetXComponentSurfaceId(const shared_ptr<JsRuntime>& runtime, NodeId nodeId);
-#endif
+    static void JsSetXComponentSurfaceSize(
+        const shared_ptr<JsRuntime>& runtime, const std::string& arguments, NodeId nodeId);
 
 private:
     shared_ptr<JsValue> renderContext_;

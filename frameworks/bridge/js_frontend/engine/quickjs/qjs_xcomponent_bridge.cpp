@@ -124,4 +124,82 @@ void QjsXComponentBridge::HandleContext(JSContext* ctx, NodeId id, const std::st
     hasPluginLoaded_ = true;
     return;
 }
+
+JSValue QjsXComponentBridge::JsGetXComponentSurfaceId(JSContext* ctx, NodeId nodeId)
+{
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (instance == nullptr) {
+        LOGE("JsGetXComponentSurfaceId instance is null");
+        return JS_NULL;
+    }
+    auto page = instance->GetRunningPage();
+    if (!page) {
+        LOGE("JsGetXComponentSurfaceId page is null");
+        return JS_NULL;
+    }
+
+    std::string surfaceId = "";
+    auto task = [nodeId, page, &surfaceId]() {
+        auto domDoc = page->GetDomDocument();
+        if (!domDoc) {
+            return;
+        }
+        auto domXComponent = AceType::DynamicCast<DOMXComponent>(domDoc->GetDOMNodeById(nodeId));
+        if (!domXComponent) {
+            return;
+        }
+        surfaceId = domXComponent->GetSurfaceId();
+    };
+
+    auto delegate = instance->GetDelegate();
+    if (!delegate) {
+        LOGE("JsGetXComponentSurfaceId delegate is null");
+        return JS_NULL;
+    }
+    delegate->PostSyncTaskToPage(task);
+    JSValue result = JS_NewString(ctx, surfaceId.c_str());
+    return result;
+}
+
+void QjsXComponentBridge::JsSetXComponentSurfaceSize(JSContext* ctx, const std::string& args, NodeId nodeId)
+{
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (instance == nullptr) {
+        LOGE("JsSetXComponentSurfaceSize instance is null");
+        return;
+    }
+    auto page = instance->GetRunningPage();
+    if (!page) {
+        LOGE("JsSetXComponentSurfaceSize page is null");
+        return;
+    }
+
+    auto task = [nodeId, page, args]() {
+        auto domDoc = page->GetDomDocument();
+        if (!domDoc) {
+            return;
+        }
+        auto domXComponent = AceType::DynamicCast<DOMXComponent>(domDoc->GetDOMNodeById(nodeId));
+        if (!domXComponent) {
+            return;
+        }
+
+        std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
+        if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() < 1) {
+            LOGE("JsSetXComponentSurfaceSize failed. parse args error");
+            return;
+        }
+        std::unique_ptr<JsonValue> surfaceSizePara = argsValue->GetArrayItem(0);
+        uint32_t surfaceWidth = surfaceSizePara->GetUInt("surfaceWidth", 0);
+        uint32_t surfaceHeight = surfaceSizePara->GetUInt("surfaceHeight", 0);
+        domXComponent->SetSurfaceSize(surfaceWidth, surfaceHeight);
+    };
+
+    auto delegate = instance->GetDelegate();
+    if (!delegate) {
+        LOGE("JsSetXComponentSurfaceSize delegate is null");
+        return;
+    }
+    delegate->PostSyncTaskToPage(task);
+}
 } // namespace OHOS::Ace::Framework

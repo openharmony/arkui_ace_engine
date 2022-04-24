@@ -32,9 +32,8 @@ public:
         return xComponentChild_;
     }
 
-#ifdef OHOS_STANDARD_SYSTEM
-    uint64_t GetSurfaceId() const;
-#endif
+    std::string GetSurfaceId() const;
+    void SetSurfaceSize(uint32_t surfaceWidth, uint32_t surfaceHeight) const;
 
 protected:
     void PrepareSpecializedComponent() override;
