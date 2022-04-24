@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/decoration.h"
+#include "frameworks/bridge/common/dom/dom_xcomponent.h"
 #include "frameworks/bridge/js_frontend/engine/common/base_xcomponent_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
 #include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
@@ -38,6 +39,9 @@ public:
     {
         return renderContext_;
     }
+
+    static JSValue JsGetXComponentSurfaceId(JSContext* ctx, NodeId nodeId);
+    static void JsSetXComponentSurfaceSize(JSContext* ctx, const std::string& args, NodeId nodeId);
 
 private:
     JSValue renderContext_;

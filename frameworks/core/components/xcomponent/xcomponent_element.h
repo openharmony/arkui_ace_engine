@@ -63,6 +63,9 @@ private:
     void ReleasePlatformResource();
     bool IsDeclarativePara();
 
+    void SetMethodCall();
+    void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
+
     std::function<void(const std::string&, const uint32_t)> onSurfaceInit_;
     InitEventCallback onXComponentInit_;
     DestroyEventCallback onXComponentDestroy_;
@@ -73,18 +76,16 @@ private:
     bool hasSendDestroyEvent_ = false;
     bool isExternalResource_ = false;
     RefPtr<NativeTexture> texture_;
+    RefPtr<XComponentController> xcomponentController_;
 
 #ifdef OHOS_STANDARD_SYSTEM
     void CreateSurface();
-    void OnXComponentHiddenChange(bool hidden);
-    void SetMethodCall();
-    void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
 
-    bool onLoadDone_ = false;
     static std::unordered_map<std::string, uint64_t> surfaceIdMap_;
-    RefPtr<XComponentController> xcomponentController_;
     sptr<OHOS::Surface> producerSurface_ = nullptr;
     struct NativeWindow * nativeWindow_ = nullptr;
+#else
+    void OnTextureRefresh();
 #endif
 };
 } // namespace OHOS::Ace

@@ -2596,6 +2596,11 @@ void JsCallComponent(const v8::FunctionCallbackInfo<v8::Value>& args)
             args.GetReturnValue().Set(bridge->GetRenderContext());
             return;
         }
+    } else if (std::strcmp(methodName.c_str(), "getXComponentSurfaceId") == 0) {
+        auto surfaceId = V8XComponentBridge::JsGetXComponentSurfaceId(isolate, nodeId);
+        args.GetReturnValue().Set(surfaceId);
+    } else if (std::strcmp(methodName.c_str(), "setXComponentSurfaceSize") == 0) {
+        V8XComponentBridge::JsSetXComponentSurfaceSize(args, arguments, nodeId);
     } else if (std::strcmp(methodName.c_str(), "toDataURL") == 0) {
         auto bridge = AceType::DynamicCast<V8CanvasBridge>(page->GetBridgeById(nodeId));
         if (bridge) {

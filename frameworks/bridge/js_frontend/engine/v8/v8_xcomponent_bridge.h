@@ -45,6 +45,10 @@ public:
         return renderContext_.Get(isolate_);
     }
 
+    static v8::Local<v8::String> JsGetXComponentSurfaceId(v8::Isolate* isolate, NodeId nodeId);
+    static void JsSetXComponentSurfaceSize(
+        const v8::FunctionCallbackInfo<v8::Value>& args, const std::string& arguments, NodeId nodeId);
+
 private:
     v8::Persistent<v8::Object> renderContext_;
     v8::Persistent<v8::Context> ctx_;

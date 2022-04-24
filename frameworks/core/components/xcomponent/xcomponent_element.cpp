@@ -63,9 +63,7 @@ void XComponentElement::Prepare(const WeakPtr<Element>& parent)
     if (xcomponent_) {
         if (!isExternalResource_) {
             CreatePlatformResource();
-#ifdef OHOS_STANDARD_SYSTEM
             SetMethodCall();
-#endif
         }
     }
     RenderElement::Prepare(parent);
@@ -88,6 +86,16 @@ void XComponentElement::Prepare(const WeakPtr<Element>& parent)
             });
 #ifdef OHOS_STANDARD_SYSTEM
             CreateSurface();
+#else
+            if (!xcomponentController_) {
+                auto controller = xcomponent_->GetXComponentController();
+                if (!controller) {
+                    LOGE("There is no controller in xcomponent.");
+                    return;
+                }
+                xcomponentController_ = controller;
+            }
+            xcomponentController_->surfaceId_ = xcomponent_->GetId();
 #endif
         }
     }
@@ -312,6 +320,7 @@ void XComponentElement::CreatePlatformResource()
             }
         });
     };
+#ifndef OHOS_STANDARD_SYSTEM
     texture_ = AceType::MakeRefPtr<NativeTexture>(context_, errorCallback);
     texture_->Create(
         [weak = WeakClaim(this), errorCallback](int64_t id) mutable {
@@ -329,6 +338,19 @@ void XComponentElement::CreatePlatformResource()
             }
         },
         idStr_);
+
+    if (texture_) {
+        auto onTextureRefresh = [weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostSyncTask([weak] {
+                auto texture = weak.Upgrade();
+                if (texture) {
+                    texture->OnTextureRefresh();
+                }
+            });
+        };
+        texture_->SetRefreshListener(onTextureRefresh);
+    }
+#endif
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -366,8 +388,31 @@ void XComponentElement::CreateSurface()
         }
         xcomponentController_ = controller;
     }
-    xcomponentController_->surfaceId_ = producerSurface_->GetUniqueId();
+    xcomponentController_->surfaceId_ = std::to_string(producerSurface_->GetUniqueId());
 }
+
+void XComponentElement::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
+{
+    if (producerSurface_) {
+        producerSurface_->SetUserData("SURFACE_WIDTH", std::to_string(surfaceWidth));
+        producerSurface_->SetUserData("SURFACE_HEIGHT", std::to_string(surfaceHeight));
+    }
+}
+#else
+void XComponentElement::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
+{
+    if (texture_ && xcomponent_) {
+        texture_->SetSize(xcomponent_->GetTextureId(), surfaceWidth, surfaceHeight);
+    }
+}
+
+void XComponentElement::OnTextureRefresh()
+{
+    if (renderNode_) {
+        renderNode_->MarkNeedRender();
+    }
+}
+#endif
 
 void XComponentElement::SetMethodCall()
 {
@@ -395,15 +440,6 @@ void XComponentElement::SetMethodCall()
         });
     });
 }
-
-void XComponentElement::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
-{
-    if (producerSurface_) {
-        producerSurface_->SetUserData("SURFACE_WIDTH", std::to_string(surfaceWidth));
-        producerSurface_->SetUserData("SURFACE_HEIGHT", std::to_string(surfaceHeight));
-    }
-}
-#endif
 
 void XComponentElement::ReleasePlatformResource()
 {

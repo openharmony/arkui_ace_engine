@@ -91,8 +91,23 @@ void NativeTexture::CreateTexture(const std::function<void(int64_t)>& onCreate, 
     }
     hash_ = MakeResourceHash();
 
+    resRegister->RegisterEvent(
+        MakeEventHash(TEXTURE_METHOD_REFRESH), [weak = WeakClaim(this)](const std::string& param) {
+            auto texture = weak.Upgrade();
+            if (texture) {
+                texture->OnRefresh(param);
+            }
+        });
+
     if (onCreate) {
         onCreate(id_);
+    }
+}
+
+void NativeTexture::OnRefresh(const std::string& param)
+{
+    if (onRefreshListener_) {
+        onRefreshListener_();
     }
 }
 

@@ -1978,6 +1978,11 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
             bridge->HandleContext(ctx, nodeId, args.get());
             return bridge->GetRenderContext();
         }
+    } else if (std::strcmp(methodName.get(), "getXComponentSurfaceId") == 0) {
+        return QjsXComponentBridge::JsGetXComponentSurfaceId(ctx, nodeId);
+    } else if (std::strcmp(methodName.get(), "setXComponentSurfaceSize") == 0) {
+        QjsXComponentBridge::JsSetXComponentSurfaceSize(ctx, args.get(), nodeId);
+        return JS_NULL;
     }
 
     auto resultValue = JSValue();
