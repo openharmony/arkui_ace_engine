@@ -148,6 +148,9 @@ public:
         }
     }
 
+    // It is only used by rosenrendertransform to force conversion in clickspringeffect (avoid checking).
+    virtual void SetPendingUpdateTransformLayer() {}
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
