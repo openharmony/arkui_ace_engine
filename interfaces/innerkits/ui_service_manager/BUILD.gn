@@ -70,7 +70,6 @@ ohos_shared_library("ui_service_mgr") {
 
   external_deps = [
     "ability_runtime:ability_manager",
-    "bundle_framework:appexecfwk_base",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
