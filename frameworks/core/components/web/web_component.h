@@ -357,7 +357,7 @@ public:
     }
     void SetSaveCookieSyncImpl(SaveCookieSyncImpl && saveCookieSyncImpl)
     {
-        saveCookieSyncImpl = saveCookieSyncImpl_;
+        saveCookieSyncImpl_ = saveCookieSyncImpl;
     }
 
     using AddJavascriptInterfaceImpl = std::function<void(
