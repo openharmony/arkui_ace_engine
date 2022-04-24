@@ -23,8 +23,8 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPaint.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPaint.h"
 
 namespace OHOS::Ace {
 class DebugBoundaryPainter : public virtual AceType {
