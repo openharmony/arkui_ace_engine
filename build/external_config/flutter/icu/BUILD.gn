@@ -84,6 +84,9 @@ template("ace_icu_make_data_assembly") {
     if (platform == "windows" || platform == "mac") {
       inputs =
           [ "$flutter_root/skia/third_party/externals/icu/common/icudtl.dat" ]
+    } else if (platform == "android") {
+      inputs =
+          [ "$flutter_root/skia/third_party/externals/icu/android/icudtl.dat" ]
     } else {
       inputs =
           [ "$flutter_root/skia/third_party/externals/icu/flutter/icudtl.dat" ]
