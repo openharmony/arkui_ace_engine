@@ -59,6 +59,10 @@ if (form_components_support) {
   defines += [ "FORM_SUPPORTED" ]
 }
 
+if (xcomponent_components_support) {
+  defines += [ "XCOMPONENT_SUPPORTED" ]
+}
+
 cflags_cc = [
   "-std=c++17",
   "-Wno-thread-safety-attributes",

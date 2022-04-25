@@ -140,7 +140,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef XCOMPONENT_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #endif
