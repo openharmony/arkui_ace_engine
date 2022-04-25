@@ -947,10 +947,14 @@ const TextEditingValue& RenderTextField::GetPreEditingValue() const
     return controller_->GetPreValue();
 }
 
-void RenderTextField::SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent)
+void RenderTextField::SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent, bool isClearRecords)
 {
     if (newValue.text != GetEditingValue().text && needFireChangeEvent) {
         needNotifyChangeEvent_ = true;
+        operationRecords_.push_back(newValue);
+        if (isClearRecords) {
+            inverseOperationRecords_.clear();
+        }
     }
     ChangeCounterStyle(newValue);
     auto context = context_.Upgrade();
@@ -1218,6 +1222,12 @@ bool RenderTextField::OnKeyEvent(const KeyEvent& event)
 
     if (event.action == KeyAction::DOWN) {
         cursorPositionType_ = CursorPositionType::NONE;
+        if (KeyCode::TV_CONTROL_UP <= event.code && event.code <= KeyCode::TV_CONTROL_RIGHT && (
+            event.IsKey({ KeyCode::KEY_SHIFT_LEFT, event.code }) ||
+            event.IsKey({ KeyCode::KEY_SHIFT_RIGHT, event.code }))) {
+            HandleOnSelect(event.code);
+            return true;
+        }
         if (event.code == KeyCode::TV_CONTROL_LEFT) {
             CursorMoveLeft();
             obscureTickPendings_ = 0;
@@ -1236,6 +1246,18 @@ bool RenderTextField::OnKeyEvent(const KeyEvent& event)
         if (event.code == KeyCode::TV_CONTROL_DOWN) {
             CursorMoveDown();
             obscureTickPendings_ = 0;
+            return true;
+        }
+        if (event.code == KeyCode::KEY_FORWARD_DEL) {
+            int32_t startPos = GetEditingValue().selection.GetStart();
+            int32_t endPos = GetEditingValue().selection.GetEnd();
+            Delete(startPos, startPos==endPos ? startPos-1 : endPos);
+            return true;
+        }
+        if (event.code == KeyCode::KEY_DEL) {
+            int32_t startPos = GetEditingValue().selection.GetStart();
+            int32_t endPos = GetEditingValue().selection.GetEnd();
+            Delete(startPos, startPos==endPos ? startPos+1 : endPos);
             return true;
         }
     }
@@ -1665,6 +1687,77 @@ void RenderTextField::SetIsOverlayShowed(bool isOverlayShowed, bool needStartTwi
     }
 }
 
+void RenderTextField::HandleOnSelect(KeyCode keyCode, CursorMoveSkip skip)
+{
+    if (skip != CursorMoveSkip::CHARACTER) {
+        // Not support yet.
+        LOGE("move skip not support character yet");
+        return;
+    }
+
+    isValueFromRemote_ = false;
+    auto value = GetEditingValue();
+    int32_t startPos = value.selection.GetStart();
+    int32_t endPos = value.selection.GetEnd();
+    static bool isForwardSelect;
+    switch (keyCode) {
+        case KeyCode::KEY_DPAD_LEFT:
+            if (startPos == endPos) {
+                isForwardSelect = true;
+            }
+            if (isForwardSelect) {
+                value.UpdateSelection(startPos-1, endPos);
+            } else {
+                value.UpdateSelection(startPos, endPos-1);
+            }
+            break;
+        case KeyCode::KEY_DPAD_RIGHT:
+            if (startPos == endPos) {
+                isForwardSelect = false;
+            }
+            if (isForwardSelect) {
+                value.UpdateSelection(startPos+1, endPos);
+            } else {
+                value.UpdateSelection(startPos, endPos+1);
+            }
+            break;
+        default:
+            LOGI("Currently only left and right selections are supported.");
+            return;
+    }
+
+    SetEditingValue(std::move(value));
+    MarkNeedLayout();
+}
+
+void RenderTextField::HandleOnRevoke()
+{
+    if (operationRecords_.empty()) {
+        return;
+    }
+    inverseOperationRecords_.push_back(GetEditingValue());
+    operationRecords_.pop_back();
+    auto value = operationRecords_.back();
+    operationRecords_.pop_back();
+    isValueFromRemote_ = false;
+    SetEditingValue(std::move(value), true, false);
+    cursorPositionType_ = CursorPositionType::NONE;
+    MarkNeedLayout();
+}
+
+void RenderTextField::HandleOnInverseRevoke()
+{
+    if (inverseOperationRecords_.empty()) {
+        return;
+    }
+    auto value = inverseOperationRecords_.back();
+    inverseOperationRecords_.pop_back();
+    isValueFromRemote_ = false;
+    SetEditingValue(std::move(value), true, false);
+    cursorPositionType_ = CursorPositionType::NONE;
+    MarkNeedLayout();
+}
+
 void RenderTextField::HandleOnCut()
 {
     if (!clipboard_) {
@@ -1778,11 +1871,25 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
 {
     std::string appendElement;
     if (event.action == KeyAction::DOWN) {
-        if (event.IsNumberKey()) {
+        if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_NUMPAD_ENTER) {
+            if (keyboard_ == TextInputType::MULTILINE) {
+                appendElement = "\n";
+            }
+        } else if (event.IsNumberKey()) {
             appendElement = event.ConvertCodeToString();
         } else if (event.IsLetterKey()) {
-            if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
+            if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
+                event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
+                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
+                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
+                event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_Y }) ||
+                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_Y })) {
+                HandleOnInverseRevoke();
+            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_Z }) ||
+                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_Z })) {
+                HandleOnRevoke();
+            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A }) ||
+                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
                 HandleOnCopyAll(nullptr);
             } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
                        event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
@@ -1802,11 +1909,19 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
     if (appendElement.empty()) {
         return false;
     }
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    auto editingValue = GetEditingValue();
+    editingValue.text = editingValue.GetBeforeSelection() + appendElement + editingValue.GetAfterSelection();
+    editingValue.UpdateSelection(
+        std::max(editingValue.selection.GetEnd(), 0) + StringUtils::Str8ToStr16(appendElement).length());
+    SetEditingValue(std::move(editingValue));
+#else
     auto editingValue = std::make_shared<TextEditingValue>();
     editingValue->text = GetEditingValue().GetBeforeSelection() + appendElement + GetEditingValue().GetAfterSelection();
     editingValue->UpdateSelection(
         std::max(GetEditingValue().selection.GetEnd(), 0) + StringUtils::Str8ToStr16(appendElement).length());
     UpdateEditingValue(editingValue);
+#endif
     MarkNeedLayout();
     return true;
 }

@@ -19,16 +19,9 @@
 #include <functional>
 #include <string>
 
+#include "base/utils/macros.h"
 #include "base/utils/device_type.h"
 #include "base/utils/device_config.h"
-
-#ifndef ACE_PREVIEW_EXPORT
-#ifdef _WIN32
-#define ACE_PREVIEW_EXPORT __declspec(dllexport)
-#elif defined(__APPLE__)
-#define ACE_PREVIEW_EXPORT __attribute__((visibility("default")))
-#endif
-#endif // ACE_PREVIEW_EXPORT
 
 namespace OHOS::Ace::Platform {
 
@@ -49,7 +42,7 @@ enum class ProjectModel {
     STAGE,
 };
 
-struct ACE_PREVIEW_EXPORT AceRunArgs {
+struct ACE_FORCE_EXPORT_WITH_PREVIEW AceRunArgs {
     // the adopted project model
     ProjectModel projectModel = ProjectModel::FA;
     // stores routing information
