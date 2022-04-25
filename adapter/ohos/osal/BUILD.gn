@@ -49,6 +49,7 @@ template("ace_osal_ohos_source_set") {
       "log_wrapper.cpp",
       "ressched_report.cpp",
       "system_properties.cpp",
+      "trace_id_impl.cpp",
     ]
 
     public_deps =
@@ -76,7 +77,10 @@ template("ace_osal_ohos_source_set") {
       external_deps += [ "multimedia_image:image" ]
     }
     sources += [ "pixel_map_ohos.cpp" ]
-    external_deps += [ "hisysevent_native:libhisysevent" ]
+    external_deps += [
+      "hisysevent_native:libhisysevent",
+      "hitrace_native:libhitrace",
+    ]
   }
 }
 

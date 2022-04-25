@@ -52,6 +52,7 @@ template("ace_osal_preview_source_set") {
       "ressched_report.cpp",
       "stage_card_parser.cpp",
       "system_properties.cpp",
+      "trace_id_impl.cpp",
     ]
 
     cflags_cc = [
