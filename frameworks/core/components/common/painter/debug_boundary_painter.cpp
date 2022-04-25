@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components/common/painter/rosen_debug_boundary_painter.h"
+#include "core/components/common/painter/debug_boundary_painter.h"
 
 #include <cmath>
 #include <functional>
@@ -21,10 +21,8 @@
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkColorFilter.h"
-#include "render_service_client/core/ui/rs_node.h"
 #include "core/components/common/properties/color.h"
 #include "core/pipeline/base/render_node.h"
-#include "core/pipeline/base/rosen_render_context.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -36,7 +34,7 @@ constexpr uint32_t BOUNDARY_CORNER_COLOR = 0xFF637FFF;
 constexpr uint32_t BOUNDARY_MARGIN_COLOR = 0xB3FFC0CB;
 }
 
-void RosenDebugBoundaryPainter::PaintDebugBoundary(SkCanvas* canvas, const Offset& offset, const Size& layoutSize)
+void DebugBoundaryPainter::PaintDebugBoundary(SkCanvas* canvas, const Offset& offset, const Size& layoutSize)
 {
     SkPaint skpaint;
     auto layoutRect = SkRect::MakeXYWH(offset.GetX(), offset.GetY(), layoutSize.Width(), layoutSize.Height());
@@ -46,7 +44,7 @@ void RosenDebugBoundaryPainter::PaintDebugBoundary(SkCanvas* canvas, const Offse
     canvas->drawRect(layoutRect, skpaint);
 }
 
-void RosenDebugBoundaryPainter::PaintDebugMargin(SkCanvas* canvas, const Offset& offset,
+void DebugBoundaryPainter::PaintDebugMargin(SkCanvas* canvas, const Offset& offset,
     const Size& layoutSize, const EdgePx& margin)
 {
     SkPaint skpaint;
@@ -73,7 +71,7 @@ void RosenDebugBoundaryPainter::PaintDebugMargin(SkCanvas* canvas, const Offset&
     canvas->drawRect(layoutRect, skpaint);
 }
 
-void RosenDebugBoundaryPainter::PaintDebugCorner(SkCanvas* canvas, const Offset& offset, const Size& layoutSize)
+void DebugBoundaryPainter::PaintDebugCorner(SkCanvas* canvas, const Offset& offset, const Size& layoutSize)
 {
     SkPaint skpaint;
     auto startPointX = offset.GetX();

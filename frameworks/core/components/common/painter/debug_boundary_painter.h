@@ -16,18 +16,20 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_ROSEN_DEBUG_BOUNDARY_PAINTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_ROSEN_DEBUG_BOUNDARY_PAINTER_H
 
-#include <math.h>
+#include <cmath>
+
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPaint.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
-#include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
-class RosenDebugBoundaryPainter : public virtual AceType {
-    DECLARE_ACE_TYPE(RosenDebugBoundaryPainter, AceType);
+class DebugBoundaryPainter : public virtual AceType {
+    DECLARE_ACE_TYPE(DebugBoundaryPainter, AceType);
 public:
     static void PaintDebugBoundary(SkCanvas* canvas, const Offset& offset, const Size& layoutSize);
     static void PaintDebugMargin(SkCanvas* canvas, const Offset& offset, const Size& layoutSize, const EdgePx& margin);
