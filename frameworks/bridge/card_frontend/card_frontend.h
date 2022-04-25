@@ -100,6 +100,7 @@ public:
     }
     void OnRemoteTerminated() override {}
     void OnNewRequest(const std::string& data) override {}
+    void OnDialogUpdated(const std::string& data) override {}
     void OnNewWant(const std::string& data) override {}
     void CallRouterBack() override {}
     void OnSurfaceChanged(int32_t width, int32_t height) override;

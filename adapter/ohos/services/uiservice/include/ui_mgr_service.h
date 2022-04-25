@@ -70,6 +70,8 @@ public:
 
     int CancelDialog(int id) override;
 
+    int UpdateDialog(int id, const std::string& data) override;
+
     /**
      * GetEventHandler, get the ui_service manager service's handler.
      *

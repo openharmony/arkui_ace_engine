@@ -32,6 +32,7 @@ UIServiceMgrStub::UIServiceMgrStub()
     requestFuncMap_[RETURN_REQUEST] = &UIServiceMgrStub::ReturnRequestInner;
     requestFuncMap_[SHOW_DIALOG] = &UIServiceMgrStub::ShowDialogInner;
     requestFuncMap_[CANCEL_DIALOG] = &UIServiceMgrStub::CancelDialogInner;
+    requestFuncMap_[UPDATE_DIALOG] = &UIServiceMgrStub::UpdateDialogInner;
 }
 
 UIServiceMgrStub::~UIServiceMgrStub()
@@ -164,6 +165,15 @@ int UIServiceMgrStub::CancelDialogInner(MessageParcel &data, MessageParcel &repl
 {
     int32_t id = data.ReadInt32();
     int32_t result = CancelDialog(id);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int UIServiceMgrStub::UpdateDialogInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t id = data.ReadInt32();
+    std::string updateData = data.ReadString();
+    int32_t result = UpdateDialog(id, updateData);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

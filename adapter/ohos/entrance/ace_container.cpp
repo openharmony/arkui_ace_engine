@@ -480,6 +480,20 @@ void AceContainer::OnNewRequest(int32_t instanceId, const std::string& data)
     }
 }
 
+void AceContainer::OnDialogUpdated(int32_t instanceId, const std::string& data)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        return;
+    }
+
+    ContainerScope scope(instanceId);
+    auto front = container->GetFrontend();
+    if (front) {
+        front->OnDialogUpdated(data);
+    }
+}
+
 void AceContainer::InitializeCallback()
 {
     ACE_FUNCTION_TRACE();

@@ -114,6 +114,7 @@ public:
 
     void OnMemoryLevel(const int32_t level) override {}
     void OnNewRequest(const std::string& data) override;
+    void OnDialogUpdated(const std::string& data) override;
     void OnNewWant(const std::string& data) override {}
     void CallRouterBack() override;
     void SetColorMode(ColorMode colorMode) override;
