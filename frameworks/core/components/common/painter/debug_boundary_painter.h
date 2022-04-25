@@ -16,15 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_ROSEN_DEBUG_BOUNDARY_PAINTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_ROSEN_DEBUG_BOUNDARY_PAINTER_H
 
-#include <math.h>
+#include <cmath>
+
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPaint.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
-#include "include/core/SkCanvas.h"
-#include "include/core/SkPaint.h"
 
 namespace OHOS::Ace {
 class DebugBoundaryPainter : public virtual AceType {
