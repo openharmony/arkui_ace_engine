@@ -555,6 +555,7 @@ void QJSDeclarativeEngine::FireSyncEvent(const std::string& eventId, const std::
 
 void QJSDeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
 {
+#ifdef XCOMPONENT_SUPPORTED
     if (!OHOS::Ace::Framework::XComponentClient::GetInstance().
         GetNativeXComponentFromXcomponentsMap(componentId, nativeXComponentImpl_,
         nativeXComponent_)) {
@@ -630,6 +631,7 @@ void QJSDeclarativeEngine::FireExternalEvent(const std::string& componentId, con
         return;
     }
     delegate->PostSyncTaskToPage(task);
+#endif
 }
 
 void QJSDeclarativeEngine::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher)

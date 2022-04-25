@@ -127,6 +127,7 @@ void QjsXComponentBridge::HandleContext(JSContext* ctx, NodeId id, const std::st
 
 JSValue QjsXComponentBridge::JsGetXComponentSurfaceId(JSContext* ctx, NodeId nodeId)
 {
+#ifdef XCOMPONENT_SUPPORTED
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
         LOGE("JsGetXComponentSurfaceId instance is null");
@@ -159,10 +160,14 @@ JSValue QjsXComponentBridge::JsGetXComponentSurfaceId(JSContext* ctx, NodeId nod
     delegate->PostSyncTaskToPage(task);
     JSValue result = JS_NewString(ctx, surfaceId.c_str());
     return result;
+#else
+    return JS_NULL;
+#endif
 }
 
 void QjsXComponentBridge::JsSetXComponentSurfaceSize(JSContext* ctx, const std::string& args, NodeId nodeId)
 {
+#ifdef XCOMPONENT_SUPPORTED
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
         LOGE("JsSetXComponentSurfaceSize instance is null");
@@ -201,5 +206,6 @@ void QjsXComponentBridge::JsSetXComponentSurfaceSize(JSContext* ctx, const std::
         return;
     }
     delegate->PostSyncTaskToPage(task);
+#endif
 }
 } // namespace OHOS::Ace::Framework
