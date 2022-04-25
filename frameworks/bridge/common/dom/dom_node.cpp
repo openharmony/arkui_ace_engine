@@ -828,10 +828,6 @@ const RefPtr<PageTransitionComponent>& DOMNode::BuildTransitionComponent()
             pageTransitionStyle.transitionEnterOption.SetCurve(Curves::FRICTION);
             pageTransitionStyle.transitionExitOption.SetCurve(Curves::FRICTION);
         }
-        if (SystemProperties::GetRosenBackendEnabled()) {
-            pageTransitionStyle.transitionEnterOption.SetAllowRunningAsynchronously(true);
-            pageTransitionStyle.transitionExitOption.SetAllowRunningAsynchronously(true);
-        }
         transitionComponent_->SetContentTransitionOption(
             pageTransitionStyle.transitionEnterOption, pageTransitionStyle.transitionExitOption);
     }
@@ -1575,9 +1571,6 @@ void DOMNode::UpdateTweenComponent()
             propTransitionComponent_ = AceType::MakeRefPtr<TransitionComponent>(TRANSITION_COMPONENT_PREFIX
                 + std::to_string(nodeId_), tag_);
         }
-        if (SystemProperties::GetRosenBackendEnabled()) {
-            propTransitionOption_.SetAllowRunningAsynchronously(true);
-        }
         propTransitionComponent_->SetTransitionOption(propTransitionOption_);
         transitionStyleUpdated_ = false;
     }
@@ -1619,9 +1612,6 @@ void DOMNode::UpdateTweenComponent()
         if (!tweenComponent_) {
             tweenComponent_ = AceType::MakeRefPtr<TweenComponent>(COMPONENT_PREFIX + std::to_string(nodeId_), tag_);
         }
-        if (SystemProperties::GetRosenBackendEnabled()) {
-            animationStyle.tweenOption.SetAllowRunningAsynchronously(true);
-        }
         tweenComponent_->SetTweenOption(animationStyle.tweenOption);
         tweenComponent_->UpdateAnimationName(animationName_);
         tweenComponent_->SetAnimationOperation(animationStyle.animationOperation);
@@ -1642,9 +1632,6 @@ void DOMNode::UpdateTweenComponent()
                 "FrontendShared" + std::to_string(nodeId_), tag_, shareId_);
             auto& sharedTransitionStyle = static_cast<CommonShareTransitionStyle&>(
                 declaration_->GetStyle(StyleTag::COMMON_SHARE_TRANSITION_STYLE));
-            if (SystemProperties::GetRosenBackendEnabled() && sharedTransitionStyle.IsValid()) {
-                sharedTransitionStyle.sharedTransitionOption.SetAllowRunningAsynchronously(true);
-            }
             if (sharedTransitionStyle.IsValid()) {
                 sharedTransitionComponent_->SetOption(sharedTransitionStyle.sharedTransitionOption);
                 sharedTransitionComponent_->SetEffect(sharedTransitionStyle.sharedEffect);
