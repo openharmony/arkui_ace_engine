@@ -308,17 +308,17 @@ void RenderSwiper::PerformLayout()
     LayoutParam innerLayout = GetLayoutParam();
     Size minSize = GetLayoutParam().GetMinSize();
     Size maxSize = GetLayoutParam().GetMaxSize();
-    Size maxSizeClild = maxSize;
+    Size maxSizeChild = maxSize;
     auto showingCount = swiper_ ? swiper_->GetDisplayCount() : 1;
     double intervalSpace = swiper_ ? NormalizeToPx(swiper_->GetItemSpace()) : 0.0;
     if (axis_ == Axis::HORIZONTAL) {
-        maxSizeClild.SetWidth(
+        maxSizeChild.SetWidth(
             (maxSize.Width() - intervalSpace * (showingCount - 1)) / showingCount - prevMargin_ - nextMargin_);
     } else {
-        maxSizeClild.SetHeight(
+        maxSizeChild.SetHeight(
             (maxSize.Height() - intervalSpace * (showingCount - 1)) / showingCount - prevMargin_ - nextMargin_);
     }
-    innerLayout.SetMaxSize(maxSizeClild);
+    innerLayout.SetMaxSize(maxSizeChild);
 
     bool isLinearLayout = swiper_ ? swiper_->GetDisplayMode() == SwiperDisplayMode::AUTO_LINEAR : false;
     double maxWidth = minSize.Width();

@@ -20,6 +20,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
+#include "base/utils/time_util.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -52,6 +53,10 @@ constexpr double MAX_VELOCITY = 5000.0;
 constexpr double MIN_VELOCITY = -5000.0;
 constexpr double ADJUSTABLE_VELOCITY = 0.0;
 #endif
+#endif
+
+#ifdef OHOS_PLATFORM
+constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
 #endif
 
 } // namespace
@@ -109,7 +114,6 @@ void Scrollable::Initialize(const WeakPtr<PipelineContext>& context)
                 scrollEvent.eventType = "scrollstart";
                 context->SendEventToAccessibility(scrollEvent);
             }
-            scroll->moved_ = false;
             scroll->HandleDragStart(info);
         }
     });
@@ -168,9 +172,11 @@ void Scrollable::HandleTouchDown()
     LOGD("handle touch down");
     isTouching_ = true;
 
+    if (outBoundaryCallback_ && !outBoundaryCallback_()) {
+        return;
+    }
     // If animation still runs, first stop it.
     springController_->Stop();
-
     if (!controller_->IsStopped()) {
         controller_->Stop();
         if (motion_) {
@@ -190,11 +196,12 @@ void Scrollable::HandleTouchUp()
 {
     LOGD("handle touch up");
     isTouching_ = false;
-    if (springController_->IsStopped()) {
-        if (scrollOverCallback_ && outBoundaryCallback_ && outBoundaryCallback_()) {
-            LOGD("need scroll to boundary");
-            ProcessScrollOverCallback(0.0);
-        }
+    if (outBoundaryCallback_ && !outBoundaryCallback_()) {
+        return;
+    }
+    if (springController_->IsStopped() && scrollOverCallback_) {
+        LOGD("need scroll to boundary");
+        ProcessScrollOverCallback(0.0);
     }
 }
 
@@ -210,8 +217,7 @@ bool Scrollable::Idle() const
 
 bool Scrollable::IsStopped() const
 {
-    return (springController_ ? (springController_->IsStopped()) : true) &&
-           (controller_ ? (controller_->IsStopped()) : true);
+    return (!springController_ || (springController_->IsStopped())) && (!controller_ || (controller_->IsStopped()));
 }
 
 void Scrollable::StopScrollable()
@@ -232,8 +238,14 @@ void Scrollable::HandleDragStart(const OHOS::Ace::DragStartInfo& info)
     LOGD("HandleDragStart. LocalLocation: %{public}s, GlobalLocation: %{public}s",
         info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
 #ifdef OHOS_PLATFORM
-    // Increase the cpu frequency when sliding.
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+    // Increase the cpu frequency when sliding start.
+    auto currentTime = GetSysTimestamp();
+    auto increaseCpuTime = currentTime - startIncreaseTime_;
+    if (moved_ == false || increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
+        LOGI("HandleDragStart increase cpu frequency, moved_ = %{public}d", moved_);
+        startIncreaseTime_ = currentTime;
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+    }
 #endif
     UpdateScrollPosition(dragPositionInMainAxis, SCROLL_FROM_START);
     RelatedEventStart();
@@ -248,10 +260,21 @@ void Scrollable::HandleDragUpdate(const DragUpdateInfo& info)
     ACE_FUNCTION_TRACE();
     if (!springController_->IsStopped() || !controller_->IsStopped()) {
         // If animation still runs, first stop it.
+        isDragUpdateStop_ = true;
         controller_->Stop();
         springController_->Stop();
         currentPos_ = 0.0;
     }
+#ifdef OHOS_PLATFORM
+    // Handle the case where you keep sliding past limit time(4s).
+    auto currentTime = GetSysTimestamp();
+    auto increaseCpuTime = currentTime - startIncreaseTime_;
+    if (increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
+        LOGI("HandleDragUpdate increase cpu frequency, moved_ = %{public}d", moved_);
+        startIncreaseTime_ = currentTime;
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+    }
+#endif
     LOGD("handle drag update, offset is %{public}lf", info.GetMainDelta());
     if (RelatedScrollEventPrepare(Offset(0.0, info.GetMainDelta()))) {
         return;
@@ -265,24 +288,19 @@ void Scrollable::HandleDragEnd(const DragEndInfo& info)
 {
     LOGD("handle drag end, position is %{public}lf and %{public}lf, velocity is %{public}lf",
         info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetMainVelocity());
-    controller_->Stop();
-    springController_->Stop();
     controller_->ClearAllListeners();
     springController_->ClearAllListeners();
+    isDragUpdateStop_ = false;
     touchUp_ = false;
     scrollPause_ = false;
-    double correctVelocity = std::clamp(info.GetMainVelocity(), MIN_VELOCITY + slipFactor_,
-        MAX_VELOCITY - slipFactor_);
+    double correctVelocity = std::clamp(info.GetMainVelocity(), MIN_VELOCITY + slipFactor_, MAX_VELOCITY - slipFactor_);
     correctVelocity = correctVelocity * sVelocityScale_;
     currentVelocity_ = correctVelocity;
-#ifdef OHOS_PLATFORM
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
-#endif
     if (dragEndCallback_) {
         dragEndCallback_();
     }
     RelatedEventEnd();
-    bool isOutBoundary = outBoundaryCallback_ ? outBoundaryCallback_() : false;
+    bool isOutBoundary = outBoundaryCallback_ && outBoundaryCallback_();
     if (isOutBoundary && scrollOverCallback_) {
         ProcessScrollOverCallback(correctVelocity);
     } else {
@@ -308,15 +326,7 @@ void Scrollable::HandleDragEnd(const DragEndInfo& info)
         currentVelocity_ = 0.0;
 
         // Starts motion.
-        controller_->ClearStartListeners();
         controller_->ClearStopListeners();
-        controller_->AddStartListener([weak = AceType::WeakClaim(this)]() {
-            auto scroll = weak.Upgrade();
-            if (scroll) {
-                scroll->moved_ = true;
-            }
-        });
-        controller_->PlayMotion(motion_);
         controller_->AddStopListener([weak = AceType::WeakClaim(this)]() {
             auto scroll = weak.Upgrade();
             if (scroll) {
@@ -331,6 +341,8 @@ void Scrollable::HandleDragEnd(const DragEndInfo& info)
                 }
             }
         });
+        controller_->PlayMotion(motion_);
+        moved_ = true;
     }
 }
 
@@ -383,7 +395,14 @@ void Scrollable::StartSpringMotion(
                 scroll->scrollEndCallback_();
             }
             scroll->currentVelocity_ = 0.0;
+            if (scroll->isTouching_ || scroll->isDragUpdateStop_) {
+                return;
+            }
             scroll->moved_ = false;
+#ifdef OHOS_PLATFORM
+            LOGI("springController stop increase cpu frequency");
+            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
             if (scroll->scrollEnd_) {
                 scroll->scrollEnd_();
             }
@@ -411,7 +430,14 @@ void Scrollable::ProcessScrollMotionStop()
         ProcessScrollOverCallback(currentVelocity_);
     } else {
         currentVelocity_ = 0.0;
+        if (isDragUpdateStop_ || isTouching_) {
+            return;
+        }
         moved_ = false;
+#ifdef OHOS_PLATFORM
+        LOGI("controller stop increase cpu frequency");
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
         if (scrollEnd_) {
             scrollEnd_();
         }
