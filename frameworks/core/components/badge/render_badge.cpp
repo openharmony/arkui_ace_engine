@@ -202,4 +202,21 @@ void RenderBadge::UpdateBadgeText()
     }
 }
 
+void RenderBadge::RenderBadgeBoundary(SkCanvas* canvas, const double& startX, const double& startY,
+    const double& width, const double& height)
+{
+    if (SystemProperties::GetDebugBoundaryEnabled()) {
+        if (canvas == nullptr) {
+            LOGE("Paint canvas is null.");
+            return;
+        }
+        Offset boundaryOffset(startX, startY);
+        Size layoutSize;
+        layoutSize.SetWidth(width);
+        layoutSize.SetHeight(height);
+        DebugBoundaryPainter::PaintDebugBoundary(canvas, boundaryOffset, layoutSize);
+        DebugBoundaryPainter::PaintDebugCorner(canvas, boundaryOffset, layoutSize);
+    }
+}
+
 } // namespace OHOS::Ace

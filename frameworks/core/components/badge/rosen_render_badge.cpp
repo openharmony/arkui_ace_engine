@@ -61,16 +61,26 @@ void RosenRenderBadge::DrawCircleBadge(SkCanvas* canvas, const Offset& offset)
     badgeCircleDiameter_ = badge_->IsBadgeCircleSizeDefined() ? (circleSize.IsValid() ? NormalizeToPx(circleSize) : 0)
                                                               : NormalizeToPx(CIRCLE_BADGE_SIZE);
     badgeCircleRadius_ = badgeCircleDiameter_ / 2;
+    double boundaryStartX = 0.0;
+    double boundaryStartY = 0.0;
     rRect.setRectXY(
         SkRect::MakeIWH(badgeCircleDiameter_, badgeCircleDiameter_), badgeCircleRadius_, badgeCircleRadius_);
     if (badgePosition == BadgePosition::RIGHT_TOP) {
         rRect.offset(offset.GetX() + width_ - badgeCircleDiameter_, offset.GetY());
+        boundaryStartX = offset.GetX() + width_ - badgeCircleDiameter_;
+        boundaryStartY = offset.GetY();
     } else if (badgePosition == BadgePosition::RIGHT) {
         rRect.offset(offset.GetX() + width_ - badgeCircleDiameter_, offset.GetY() + height_ / 2 - badgeCircleRadius_);
+        boundaryStartX = offset.GetX() + width_ - badgeCircleDiameter_;
+        boundaryStartY = offset.GetY() + height_ / 2 - badgeCircleRadius_;
     } else {
         rRect.offset(offset.GetX(), offset.GetY() + height_ / 2 - badgeCircleRadius_);
+        boundaryStartX = offset.GetX();
+        boundaryStartY = offset.GetY() + height_ / 2 - badgeCircleRadius_;
     }
     canvas->drawRRect(rRect, paint);
+    RenderBadge::RenderBadgeBoundary(canvas, boundaryStartX, boundaryStartY,
+        badgeCircleDiameter_, badgeCircleDiameter_);
 }
 
 void RosenRenderBadge::DrawNumericalBadge(SkCanvas* canvas, const Offset& offset)
@@ -104,17 +114,26 @@ void RosenRenderBadge::DrawNumericalBadge(SkCanvas* canvas, const Offset& offset
     }
     auto badgePosition = badge_->GetBadgePosition();
     rRect.setRectXY(SkRect::MakeIWH(badgeWidth_, badgeHeight_), badgeCircleRadius_, badgeCircleRadius_);
+    double boundaryStartX = 0.0;
+    double boundaryStartY = 0.0;
     if (badgePosition == BadgePosition::RIGHT_TOP) {
         textInitialOffset_ = Offset(width_ - badgeCircleDiameter_ + NormalizeToPx(2.0_vp), 0 - NormalizeToPx(2.0_vp));
         rRect.offset(offset.GetX() + textInitialOffset_.GetX(), offset.GetY() + textInitialOffset_.GetY());
+        boundaryStartX = offset.GetX() + textInitialOffset_.GetX();
+        boundaryStartY = offset.GetY() + textInitialOffset_.GetY();
     } else if (badgePosition == BadgePosition::RIGHT) {
         textInitialOffset_ = Offset(width_ - badgeCircleDiameter_, height_ / 2 - badgeCircleRadius_);
         rRect.offset(offset.GetX() + textInitialOffset_.GetX(), offset.GetY() + textInitialOffset_.GetY());
+        boundaryStartX = offset.GetX() + textInitialOffset_.GetX();
+        boundaryStartY = offset.GetY() + textInitialOffset_.GetY();
     } else {
         textInitialOffset_ = Offset(0, height_ / 2 - badgeCircleRadius_);
         rRect.offset(offset.GetX(), offset.GetY() + textInitialOffset_.GetY());
+        boundaryStartX = offset.GetX();
+        boundaryStartY = offset.GetY() + textInitialOffset_.GetY();
     }
     canvas->drawRRect(rRect, paint);
+    RenderBadge::RenderBadgeBoundary(canvas, boundaryStartX, boundaryStartY, badgeWidth_, badgeHeight_);
 }
 
 void RosenRenderBadge::DrawBadge(RenderContext& context, const Offset& offset)
