@@ -922,7 +922,7 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
                 jsContent = preContent_;
             }
         } else {
-            if (!ExecuteAbc(runtime, urlName)) {
+            if (!ExecuteAbc(urlName)) {
                 return;
             }
         }

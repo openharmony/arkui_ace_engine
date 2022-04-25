@@ -137,6 +137,11 @@ if (is_standard_system) {
           "$shared_library_path_uv/ace/napi/libuv.dylib",
         ]
       } else {
+        # ark windows compiling check
+        deps += [
+          "$ace_napi:ace_napi_ark",
+          "//ark/js_runtime/ecmascript/js_vm:ark_js_vm",
+        ]
         sources = [
           "$shared_library_path_napi/ace/napi/libace_napi.dll",
           "$shared_library_path_napi/ace/napi/libace_napi_quickjs.dll",
