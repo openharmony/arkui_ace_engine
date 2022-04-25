@@ -292,6 +292,7 @@ void RenderMarquee::PerformLayout()
     LOGD("layoutSize: %{public}s, child: %{public}s", layoutSize.ToString().c_str(),
         childText_->GetLayoutSize().ToString().c_str());
     if (!NeedMarquee()) {
+        Stop();
         childText_->SetPosition(Offset(0.0, 0.0));
         return;
     }
