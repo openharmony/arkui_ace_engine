@@ -1350,7 +1350,7 @@ void JsiDeclarativeEngine::OnNewWant(const std::string& data)
         return;
     }
 
-    shared_ptr<JsValue> object = runtime->NewObject();
+    shared_ptr<JsValue> object = runtime->ParseJson(data);
     std::vector<shared_ptr<JsValue>> argv = { object };
     CallAppFunc("onNewWant", argv);
 }

@@ -362,9 +362,8 @@ void AceContainer::OnInactive(int32_t instanceId)
     }, TaskExecutor::TaskType::UI);
 }
 
-void AceContainer::OnNewWant(int32_t instanceId)
+void AceContainer::OnNewWant(int32_t instanceId, const std::string& data)
 {
-    std::string data = "";
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
         LOGE("container is null, OnNewWant failed.");
