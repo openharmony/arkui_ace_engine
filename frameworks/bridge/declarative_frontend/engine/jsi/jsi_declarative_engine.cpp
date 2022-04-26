@@ -754,17 +754,23 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_, id = instanceId_](bool needSync) {
+    auto&& postTask = [weakDelegate, weakEngine = AceType::WeakClaim(this), id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([nativeEngine, needSync, id]() {
-            ContainerScope scope(id);
+        delegate->PostJsTask([weakEngine, needSync, id]() {
+            auto jsEngine = weakEngine.Upgrade();
+            if (jsEngine == nullptr) {
+                LOGW("jsEngine is nullptr");
+                return;
+            }
+            auto nativeEngine = jsEngine->GetNativeEngine();
             if (nativeEngine == nullptr) {
                 return;
             }
+            ContainerScope scope(id);
             nativeEngine->Loop(LOOP_NOWAIT, needSync);
         });
     };
