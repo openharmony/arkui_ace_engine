@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 
 template("js_pa_engine_qjs") {
   forward_variables_from(invoker, "*")
@@ -35,14 +35,14 @@ template("js_pa_engine_qjs") {
       "//foundation/aafwk/standard/services/abilitymgr/include",
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common",
       "//foundation/aafwk/standard/services/common/include",
-      "//foundation/ace/ace_engine/adapter/ohos/entrance/pa_engine/engine/common",
+      "//foundation/arkui/ace_engine/adapter/ohos/entrance/pa_engine/engine/common",
     ]
     deps = [
       "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
       "//foundation/aafwk/standard/frameworks/kits/appkit:appkit_native",
       "//foundation/aafwk/standard/interfaces/innerkits/base:base",
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common:napi_common",
-      "//foundation/ace/napi:ace_napi",
+      "//foundation/arkui/napi:ace_napi",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
       "//foundation/graphic/standard:libwmclient",
@@ -103,9 +103,9 @@ template("js_pa_engine_qjs") {
     }
 
     if (use_js_debug) {
-      deps += [ "//foundation/ace/napi:ace_napi_quickjs_debug" ]
+      deps += [ "//foundation/arkui/napi:ace_napi_quickjs_debug" ]
     } else {
-      deps += [ "//foundation/ace/napi:ace_napi_quickjs" ]
+      deps += [ "//foundation/arkui/napi:ace_napi_quickjs" ]
     }
   }
 }

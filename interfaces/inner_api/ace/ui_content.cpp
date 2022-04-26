@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "interfaces/innerkits/ace/ui_content.h"
+#include "interfaces/inner_api/ace/ui_content.h"
 
 #include <dlfcn.h>
 

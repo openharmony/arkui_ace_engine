@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_RESOURCE_WEBVIEW_CLIENT_IMPL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_RESOURCE_WEBVIEW_CLIENT_IMPL_H
 
-#include "foundation/ace/ace_engine/frameworks/base/memory/referenced.h"
+#include "foundation/arkui/ace_engine/frameworks/base/memory/referenced.h"
 #include "nweb_handler.h"
 
 #include "base/log/log.h"

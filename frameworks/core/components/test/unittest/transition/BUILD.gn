@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 
 if (is_standard_system) {
   module_output_path = "ace_engine_standard/frameworkbasicability/transition"
@@ -175,7 +175,7 @@ common_module_files = [
   "$ace_root/frameworks/core/components/theme/app_theme.cpp",
   "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
   "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
-  "$root_out_dir/ace/framework/core/components/theme/theme_constants_default.cpp",
+  "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
   "$ace_root/frameworks/core/components/theme/theme_manager.cpp",
   "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
 
@@ -209,14 +209,14 @@ ohos_unittest("TransitionElementTest") {
 
   # add sources only needed by wearable like watch.
   if (is_wearable_product) {
-    sources += [ "$root_out_dir/ace/framework/core/components/theme/theme_constants_watch.cpp" ]
+    sources += [ "$root_out_dir/arkui/framework/core/components/theme/theme_constants_watch.cpp" ]
   }
 
   # add sources needed by phone and TV. wearable like watch do not need them
   if (!is_wearable_product) {
     sources += [
       # theme
-      "$root_out_dir/ace/framework/core/components/theme/theme_constants_tv.cpp",
+      "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
     ]
   }
 
@@ -258,10 +258,10 @@ ohos_unittest("TransitionElementTest") {
     "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
   ]
   if (!is_standard_system) {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_full"
   } else {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_standard"
   }
 }
@@ -274,14 +274,14 @@ ohos_unittest("SharedTransitionElementTest") {
 
   # add sources only needed by wearable like watch.
   if (is_wearable_product) {
-    sources += [ "$root_out_dir/ace/framework/core/components/theme/theme_constants_watch.cpp" ]
+    sources += [ "$root_out_dir/arkui/framework/core/components/theme/theme_constants_watch.cpp" ]
   }
 
   # add sources needed by phone and TV. wearable like watch do not need them
   if (!is_wearable_product) {
     sources += [
       # theme
-      "$root_out_dir/ace/framework/core/components/theme/theme_constants_tv.cpp",
+      "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
     ]
   }
 
@@ -322,7 +322,7 @@ ohos_unittest("SharedTransitionElementTest") {
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
   ]
-  subsystem_name = "ace"
+  subsystem_name = "arkui"
   part_name = "ace_engine_full"
 }
 
@@ -334,14 +334,14 @@ ohos_unittest("TransitionPropertyElementTest") {
 
   # add sources only needed by wearable like watch.
   if (is_wearable_product) {
-    sources += [ "$root_out_dir/ace/framework/core/components/theme/theme_constants_watch.cpp" ]
+    sources += [ "$root_out_dir/arkui/framework/core/components/theme/theme_constants_watch.cpp" ]
   }
 
   # add sources needed by phone and TV. wearable like watch do not need them
   if (!is_wearable_product) {
     sources += [
       # theme
-      "$root_out_dir/ace/framework/core/components/theme/theme_constants_tv.cpp",
+      "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
     ]
   }
 
@@ -369,7 +369,7 @@ ohos_unittest("TransitionPropertyElementTest") {
       "startup_l2:syspara",
     ]
     configs += [ "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config" ]
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_standard"
   } else {
     external_deps = [
@@ -384,7 +384,7 @@ ohos_unittest("TransitionPropertyElementTest") {
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
   ]
-  subsystem_name = "ace"
+  subsystem_name = "arkui"
   part_name = "ace_engine_full"
 }
 

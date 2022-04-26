@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "interfaces/innerkits/ace/declarative_module_preloader.h"
+#include "interfaces/inner_api/ace/declarative_module_preloader.h"
 
 #include <dlfcn.h>
 

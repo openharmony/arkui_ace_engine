@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 
 if (is_standard_system) {
   module_output_path = "ace_engine_standard/backenduicomponent/plugin"
@@ -35,10 +35,10 @@ ohos_unittest("FlutterRenderPluginTest") {
   ]
 
   if (!is_standard_system) {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_full"
   } else {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_standard"
   }
 }
@@ -58,7 +58,7 @@ ohos_unittest("PluginCallBackClientTest") {
     "$ace_root/build:ace_ohos_unittest_base",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
     "//foundation/aafwk/standard/services/abilitymgr:abilityms",
-    "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
+    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
   ]
@@ -71,10 +71,10 @@ ohos_unittest("PluginCallBackClientTest") {
   ]
 
   if (!is_standard_system) {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_full"
   } else {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_standard"
   }
 }
@@ -91,7 +91,7 @@ ohos_unittest("PluginComponentTest") {
     "$ace_root/build:ace_ohos_unittest_base",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
     "//foundation/aafwk/standard/services/abilitymgr:abilityms",
-    "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
+    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
   ]
@@ -104,10 +104,10 @@ ohos_unittest("PluginComponentTest") {
   ]
 
   if (!is_standard_system) {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_full"
   } else {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_standard"
   }
 }
@@ -124,7 +124,7 @@ ohos_unittest("PluginElementTest") {
     "$ace_root/build:ace_ohos_unittest_base",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
     "//foundation/aafwk/standard/services/abilitymgr:abilityms",
-    "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
+    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
   ]
@@ -137,10 +137,10 @@ ohos_unittest("PluginElementTest") {
   ]
 
   if (!is_standard_system) {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_full"
   } else {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_standard"
   }
 }
@@ -159,7 +159,7 @@ ohos_unittest("PluginManagerDelegateTest") {
     "$ace_root/build:ace_ohos_unittest_base",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
     "//foundation/aafwk/standard/services/abilitymgr:abilityms",
-    "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
+    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
   ]
@@ -172,10 +172,10 @@ ohos_unittest("PluginManagerDelegateTest") {
   ]
 
   if (!is_standard_system) {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_full"
   } else {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_standard"
   }
 }
@@ -195,10 +195,10 @@ ohos_unittest("PluginManagerResourceTest") {
   ]
 
   if (!is_standard_system) {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_full"
   } else {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_standard"
   }
 }
@@ -221,10 +221,10 @@ ohos_unittest("PluginSubContainerTest") {
   external_deps = [ "ability_base:want" ]
 
   if (!is_standard_system) {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_full"
   } else {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_standard"
   }
 }
@@ -245,10 +245,10 @@ ohos_unittest("PluginWindowTest") {
   ]
 
   if (!is_standard_system) {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_full"
   } else {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_standard"
   }
 }
@@ -266,10 +266,10 @@ ohos_unittest("RenderPluginTest") {
   ]
 
   if (!is_standard_system) {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_full"
   } else {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_standard"
   }
 }

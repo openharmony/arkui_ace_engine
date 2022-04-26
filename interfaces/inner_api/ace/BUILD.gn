@@ -12,13 +12,13 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 
 config("uicontent_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "${ace_root}/interfaces/frameworks",
-    "${ace_root}/interfaces/innerkits/ace",
+    "${ace_root}/interfaces/inner_api/ace",
   ]
 }
 
@@ -28,10 +28,10 @@ ohos_shared_library("ace_uicontent") {
   configs = [ "$ace_root:ace_config" ]
 
   sources = [
-    "${ace_root}/interfaces/innerkits/ace/declarative_module_preloader.cpp",
-    "${ace_root}/interfaces/innerkits/ace/ui_content.cpp",
+    "${ace_root}/interfaces/inner_api/ace/declarative_module_preloader.cpp",
+    "${ace_root}/interfaces/inner_api/ace/ui_content.cpp",
   ]
 
-  subsystem_name = "ace"
+  subsystem_name = "arkui"
   part_name = ace_engine_part
 }

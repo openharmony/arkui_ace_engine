@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 
 template("pa_backend") {
   forward_variables_from(invoker, "*")
@@ -43,8 +43,8 @@ template("pa_backend") {
       "//foundation/aafwk/standard/interfaces/innerkits/base:base",
       "//foundation/aafwk/standard/interfaces/innerkits/uri:zuri",
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common:napi_common",
-      "//foundation/ace/napi:ace_napi",
-      "//foundation/ace/napi:ace_napi_quickjs",
+      "//foundation/arkui/napi:ace_napi",
+      "//foundation/arkui/napi:ace_napi_quickjs",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
       "//utils/native/base:utils",

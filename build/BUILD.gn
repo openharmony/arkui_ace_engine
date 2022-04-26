@@ -12,8 +12,8 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
-import("//foundation/ace/ace_engine/build/ace_lib.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_lib.gni")
 
 # generate libace_engine and libace_debug targets
 foreach(item, ace_platforms) {
@@ -58,7 +58,7 @@ foreach(item, ace_platforms) {
         ohos_shared_library("libace_debug") {
           deps = [ "$ace_root/build:libace_static_debug_${item.name}" ]
           part_name = ace_engine_part
-          subsystem_name = "ace"
+          subsystem_name = "arkui"
         }
       }
     }
@@ -119,7 +119,7 @@ foreach(item, ace_platforms) {
     ohos_shared_library("libace") {
       deps = [ "$ace_root/build:libace_static_ohos" ]
       part_name = ace_engine_part
-      subsystem_name = "ace"
+      subsystem_name = "arkui"
     }
 
     ohos_source_set("ace_ohos_unittest_base") {

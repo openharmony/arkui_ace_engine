@@ -13,15 +13,15 @@
 
 import("//build/ohos.gni")
 import("//foundation/aafwk/standard/aafwk.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 import(
-    "//foundation/ace/ace_engine/adapter/ohos/services/uiservice/uiservicems.gni")
+    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/uiservicems.gni")
 
 ohos_prebuilt_etc("ui_service.cfg") {
   relative_install_dir = "init"
   source = "ui_service.cfg"
   part_name = ace_engine_part
-  subsystem_name = "ace"
+  subsystem_name = "arkui"
 }
 
 group("uiservice_target") {
@@ -44,7 +44,7 @@ config("uiservicems_config") {
     "//prebuilts/jdk/jdk8/linux-x86/include",
     "//prebuilts/jdk/jdk8/linux-x86/include/linux",
     "//third_party/json/include",
-    "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager/include",
+    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager/include",
     "${innerkits_path}/want/include",
     "//foundation/windowmanager/interfaces/innerkits",
     "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
@@ -79,7 +79,7 @@ template("uiservice_static") {
       "${innerkits_path}/want:want",
       "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
       "//foundation/aafwk/standard/interfaces/innerkits/base:base",
-      "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
+      "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
       "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
@@ -91,7 +91,7 @@ template("uiservice_static") {
       "//utils/native/base:utils",
     ]
 
-    deps += [ "//foundation/ace/ace_engine/adapter/ohos/services/uiservice/dialog_ui/dialog_picker/js:dialog_picker_js_files_etc" ]
+    deps += [ "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/dialog_ui/dialog_picker/js:dialog_picker_js_files_etc" ]
 
     deps += [ "$ace_root/build:libace" ]
 
@@ -135,5 +135,5 @@ foreach(item, ace_platforms) {
 ohos_shared_library("uiservice") {
   deps = [ ":uiservice_static_ohos" ]
   part_name = ace_engine_part
-  subsystem_name = "ace"
+  subsystem_name = "arkui"
 }

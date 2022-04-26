@@ -61,7 +61,7 @@ Note:If the text contains special characters, please escape them according to th
         </policylist>
         <filefilterlist>
             <filefilter name="binaryFileTypePolicyFilter" desc="二进制文件校验策略的过滤条件" >
-                <filteritem type="filepath" name="frameworks/base/resource/binary/mac/.*.o" desc="来源于代码仓foundation/ace/ace_engine/frameworks/base/resource/binary下的svg编译而来。现有的objcopy工具链在mac上不能用，使用开源工具转换成.o。"/>
+                <filteritem type="filepath" name="frameworks/base/resource/binary/mac/.*.o" desc="来源于代码仓foundation/arkui/ace_engine/frameworks/base/resource/binary下的svg编译而来。现有的objcopy工具链在mac上不能用，使用开源工具转换成.o。"/>
                 <filteritem type="filepath" name="adapter/preview/sdk/cacert.pem" desc="三方库libcurl在windows环境下使用的公钥证书文件，由Mozilla的根证书文件解压得到。"/>
                 <filteritem type="filepath" name="frameworks/base/network/cacert.pem" desc="三方库libcur使用的公钥证书文件，curl官网下载得到。"/>
             </filefilter>

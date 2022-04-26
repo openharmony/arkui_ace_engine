@@ -12,9 +12,10 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ace/ace_engine/adapter/preview/build/config_js_engine.gni")
-import("//foundation/ace/ace_engine/build/ace_lib.gni")
-import("//foundation/ace/ace_engine/interfaces/napi/kits/napi_lib.gni")
+import(
+    "//foundation/arkui/ace_engine/adapter/preview/build/config_js_engine.gni")
+import("//foundation/arkui/ace_engine/build/ace_lib.gni")
+import("//foundation/arkui/ace_engine/interfaces/napi/kits/napi_lib.gni")
 
 if (is_standard_system) {
   system_resource_hap_path =
@@ -91,7 +92,7 @@ if (is_standard_system) {
 
   ohos_copy("copy_napi_shared_library") {
     shared_library_path_napi =
-        get_label_info("//foundation/ace/napi:ace_napi", "root_out_dir")
+        get_label_info("//foundation/arkui/napi:ace_napi", "root_out_dir")
     shared_library_path_uv =
         get_label_info("//third_party/libuv:uv", "root_out_dir")
 
@@ -109,9 +110,9 @@ if (is_standard_system) {
           "$ark_core_shared_library/libarkfile.dll",
           "$ark_core_shared_library/libarkziparchive.dll",
           "$ark_js_shared_library/libark_jsruntime.dll",
-          "$shared_library_path_napi/ace/napi/libace_napi.dll",
-          "$shared_library_path_napi/ace/napi/libace_napi_ark.dll",
-          "$shared_library_path_uv/ace/napi/libuv.dll",
+          "$shared_library_path_napi/arkui/napi/libace_napi.dll",
+          "$shared_library_path_napi/arkui/napi/libace_napi_ark.dll",
+          "$shared_library_path_uv/arkui/napi/libuv.dll",
           "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat",
         ]
         deps = [
@@ -126,15 +127,15 @@ if (is_standard_system) {
       }
     } else {
       deps = [
-        "//foundation/ace/napi:ace_napi",
-        "//foundation/ace/napi:ace_napi_quickjs",
+        "//foundation/arkui/napi:ace_napi",
+        "//foundation/arkui/napi:ace_napi_quickjs",
         "//third_party/libuv:uv",
       ]
       if (use_mac) {
         sources = [
-          "$shared_library_path_napi/ace/napi/libace_napi.dylib",
-          "$shared_library_path_napi/ace/napi/libace_napi_quickjs.dylib",
-          "$shared_library_path_uv/ace/napi/libuv.dylib",
+          "$shared_library_path_napi/arkui/napi/libace_napi.dylib",
+          "$shared_library_path_napi/arkui/napi/libace_napi_quickjs.dylib",
+          "$shared_library_path_uv/arkui/napi/libuv.dylib",
         ]
       } else {
         # ark windows compiling check
@@ -143,9 +144,9 @@ if (is_standard_system) {
           "//ark/js_runtime/ecmascript/js_vm:ark_js_vm",
         ]
         sources = [
-          "$shared_library_path_napi/ace/napi/libace_napi.dll",
-          "$shared_library_path_napi/ace/napi/libace_napi_quickjs.dll",
-          "$shared_library_path_uv/ace/napi/libuv.dll",
+          "$shared_library_path_napi/arkui/napi/libace_napi.dll",
+          "$shared_library_path_napi/arkui/napi/libace_napi_quickjs.dll",
+          "$shared_library_path_uv/arkui/napi/libuv.dll",
         ]
       }
     }
@@ -162,9 +163,10 @@ if (is_standard_system) {
                                 "root_out_dir")
       deps += [ "$ace_root/interfaces/napi/kits:${module}" ]
       if (use_mac) {
-        sources += [ "${out_path}/ace/ace_engine_standard/lib${module}.dylib" ]
+        sources +=
+            [ "${out_path}/arkui/ace_engine_standard/lib${module}.dylib" ]
       } else {
-        sources += [ "${out_path}/ace/ace_engine_standard/lib${module}.dll" ]
+        sources += [ "${out_path}/arkui/ace_engine_standard/lib${module}.dll" ]
       }
     }
 
