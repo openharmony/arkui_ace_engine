@@ -123,6 +123,7 @@ protected:
     RefPtr<CheckboxComponent> component_;
     bool isGroup_ = false;
     bool selectAll_ = false;
+    bool isDeclarative_ = false;
     std::function<void(bool)> groupValueChangedListener_;
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> onGroupChange_;
 };

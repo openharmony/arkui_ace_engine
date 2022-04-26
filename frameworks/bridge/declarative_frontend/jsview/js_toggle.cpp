@@ -38,6 +38,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("switchPointColor", &JSToggle::SwitchPointColor);
     
     JSClass<JSToggle>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSToggle>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSToggle>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSToggle>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSToggle>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
@@ -69,6 +70,7 @@ void JSToggle::Create(const JSCallbackInfo& info)
         RefPtr<CheckboxTheme> checkBoxTheme = GetTheme<CheckboxTheme>();
         RefPtr<CheckboxComponent> checkboxComponent = AceType::MakeRefPtr<OHOS::Ace::CheckboxComponent>(checkBoxTheme);
         checkboxComponent->SetValue(isOn);
+        checkboxComponent->SetMouseAnimationType(HoverAnimationType::NONE);
         component = checkboxComponent;
     } else if (toggleType == ToggleType::SWITCH) {
         RefPtr<SwitchTheme> switchTheme = GetTheme<SwitchTheme>();
