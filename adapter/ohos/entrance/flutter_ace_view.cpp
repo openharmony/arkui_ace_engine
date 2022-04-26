@@ -711,6 +711,9 @@ std::unique_ptr<PlatformWindow> FlutterAceView::GetPlatformWindow()
 
 void FlutterAceView::InitIOManager(RefPtr<TaskExecutor> taskExecutor)
 {
+    if (!SystemProperties::GetGpuUploadEnabled()) {
+        return;
+    }
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
     ACE_SCOPED_TRACE("InitIOManager");
     EGLContext shareContext = nullptr;

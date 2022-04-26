@@ -111,6 +111,12 @@ bool IsDebugEnabled()
 {
     return (system::GetParameter("persist.ace.debug.enabled", "0") == "1");
 }
+
+bool IsGpuUploadEnabled()
+{
+    return (system::GetParameter("persist.ace.gpuupload.enabled", "0") == "1" ||
+            system::GetParameter("debug.ace.gpuupload.enabled", "0") == "1");
+}
 } // namespace
 
 bool SystemProperties::IsSyscapExist(const char* cap)
@@ -176,6 +182,7 @@ bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 bool SystemProperties::debugEnabled_ = IsDebugEnabled();
 int32_t SystemProperties::windowPosX_ = 0;
 int32_t SystemProperties::windowPosY_ = 0;
+bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
 
 DeviceType SystemProperties::GetDeviceType()
 {
