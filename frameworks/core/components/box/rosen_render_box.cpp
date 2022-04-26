@@ -906,8 +906,18 @@ void RosenRenderBox::SetBackgroundPosition(const BackgroundImagePosition& positi
         LOGE("set background position to rsNode failed, rsNode is null");
         return;
     }
-    rsNode->SetBgImagePositionX(position.GetSizeValueX());
-    rsNode->SetBgImagePositionY(position.GetSizeValueY());
+    if (position.GetSizeTypeX() == BackgroundImagePositionType::PX) {
+        rsNode->SetBgImagePositionX(position.GetSizeValueX());
+    } else {
+        rsNode->SetBgImagePositionX(position.GetSizeValueX() *
+            (paintSize_.Width() - rsNode->GetStagingProperties().GetBgImageWidth()) / PERCENT_TRANSLATE);
+    }
+    if (position.GetSizeTypeX() == BackgroundImagePositionType::PX) {
+        rsNode->SetBgImagePositionX(position.GetSizeValueX());
+    } else {
+        rsNode->SetBgImagePositionY(position.GetSizeValueY() *
+            (paintSize_.Height() - rsNode->GetStagingProperties().GetBgImageHeight()) / PERCENT_TRANSLATE);
+    }
 }
 
 void RosenRenderBox::SetShadow(const Shadow& shadow)

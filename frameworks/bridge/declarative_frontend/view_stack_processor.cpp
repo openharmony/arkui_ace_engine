@@ -658,6 +658,11 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
                 coverageComponent->AppendChild(menuComponent);
             }
         }
+
+        auto focusableComponent = AceType::DynamicCast<FocusableComponent>(components[idx - 1]);
+        if (focusableComponent) {
+            Component::MergeRSNode(components[idx], focusableComponent);
+        }
     }
 
     auto component = components.front();
