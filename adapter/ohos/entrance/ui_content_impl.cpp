@@ -352,7 +352,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         auto hapInfo = context->GetHapModuleInfo();
         if (hapInfo) {
             pageProfile = hapInfo->pages;
-            const std::string profilePrefix = "@profile:";
+            const std::string profilePrefix = "$profile:";
             if (pageProfile.compare(0, profilePrefix.size(), profilePrefix) == 0) {
                 pageProfile = pageProfile.substr(profilePrefix.length()).append(".json");
             }
