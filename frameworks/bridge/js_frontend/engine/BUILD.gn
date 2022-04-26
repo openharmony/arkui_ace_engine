@@ -43,7 +43,7 @@ template("js_engine") {
       deps += [ "$ace_root/build:libace" ]
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
-        deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
+        deps += [ "$ace_napi:ace_container_scope" ]
       }
     }
   }

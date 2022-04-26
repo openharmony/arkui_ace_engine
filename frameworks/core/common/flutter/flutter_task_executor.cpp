@@ -38,6 +38,7 @@
 #include "base/thread/background_task_executor.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "base/log/trace_id.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -53,10 +54,13 @@ inline std::string GenJsThreadName()
 
 TaskExecutor::Task WrapTaskWithContainer(TaskExecutor::Task&& task, int32_t id)
 {
-    auto wrappedTask = [originTask = std::move(task), id]() {
+    auto wrappedTask = [originTask = std::move(task), id, traceId = TraceId::CreateTraceId()]() {
         ContainerScope scope(id);
+        std::unique_ptr<TraceId> traceIdPtr(traceId);
         if (originTask) {
+            traceIdPtr->SetTraceId();
             originTask();
+            traceIdPtr->ClearTraceId();
         }
     };
     return wrappedTask;
