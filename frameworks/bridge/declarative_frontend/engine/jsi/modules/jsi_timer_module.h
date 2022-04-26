@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_MODULES_JSI_TIMER_MODULE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_MODULES_JSI_TIMER_MODULE_H
 
+#include <mutex>
 #include <string>
 #include <unordered_map>
 
@@ -38,6 +39,7 @@ public:
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JsiTimerModule);
 
+    mutable std::mutex moduleMutex_;
     uint32_t callBackId_ = 0;
     std::unordered_map<uint32_t, shared_ptr<JsValue>> callBackFuncMap_;
     std::unordered_map<uint32_t, std::vector<shared_ptr<JsValue>>> callBackParamsMap_;
