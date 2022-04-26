@@ -86,22 +86,32 @@ public:
         return true;
     }
 
-    bool AddXComponentToXcomponentsMap(const std::string& xcomponentId, const RefPtr<XComponentComponent>& component)
+    void AddXComponentToXcomponentsMap(const std::string& xcomponentId, const RefPtr<XComponentComponent>& component)
     {
-        if (xcomponentsMap_.find(xcomponentId) != xcomponentsMap_.end()) {
-            return false;
+        auto it = xcomponentsMap_.find(xcomponentId);
+        if (it != xcomponentsMap_.end()) {
+            it->second = component;
         }
         xcomponentsMap_.emplace(xcomponentId, component);
-        return true;
     }
 
     void DeleteFromXcomponentsMapById(const std::string& xcomponentId)
     {
-        if (xcomponentsMap_.find(xcomponentId) == xcomponentsMap_.end()) {
+        auto it = xcomponentsMap_.find(xcomponentId);
+        if (it == xcomponentsMap_.end()) {
             return;
         }
-        xcomponentsMap_.erase(xcomponentId);
-        nativeXcomponentsMap_.erase(xcomponentId);
+        xcomponentsMap_.erase(it);
+    }
+
+    void DeleteFromNativeXcomponentsMapById(const std::string& xcomponentId)
+    {
+        auto it = nativeXcomponentsMap_.find(xcomponentId);
+        if (it == nativeXcomponentsMap_.end()) {
+            return;
+        }
+        delete it->second.second;
+        nativeXcomponentsMap_.erase(it);
     }
 
     void SetJSValCallToNull()

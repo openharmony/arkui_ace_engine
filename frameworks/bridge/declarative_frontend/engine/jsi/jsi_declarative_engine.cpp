@@ -682,10 +682,6 @@ void JsiDeclarativeEngine::Destroy()
         delete nativeEngine_;
         nativeEngine_ = nullptr;
     }
-    if (nativeXComponent_) {
-        delete nativeXComponent_;
-        nativeXComponent_ = nullptr;
-    }
 }
 
 bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)

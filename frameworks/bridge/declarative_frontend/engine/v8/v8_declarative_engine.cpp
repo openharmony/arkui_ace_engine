@@ -1052,10 +1052,6 @@ V8DeclarativeEngine::~V8DeclarativeEngine()
 #endif
         delete nativeEngine_;
     }
-    if (nativeXComponent_) {
-        delete nativeXComponent_;
-        nativeXComponent_ = nullptr;
-    }
     if (g_debugger != nullptr) {
         dlclose(g_debugger);
     }

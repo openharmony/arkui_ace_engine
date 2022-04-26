@@ -1601,7 +1601,9 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         }
     }
     rootElement_->HandleSpecifiedKey(event);
-    NotifyDestroyEventDismiss();
+    if (event.code == KeyCode::KEY_BACK) {
+        NotifyDestroyEventDismiss();
+    }
     SetShortcutKey(event);
 
     pressedKeyCodes = event.pressedCodes;

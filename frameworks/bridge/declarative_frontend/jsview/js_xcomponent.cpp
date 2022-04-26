@@ -83,11 +83,7 @@ void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
     };
     XComponentClient::GetInstance().RegisterCallback(getXComponentCallback);
 
-    if (!XComponentClient::GetInstance().AddXComponentToXcomponentsMap(xcomponentComponent->GetId(),
-                                                                       xcomponentComponent)) {
-        LOGE("xcomponent create error, id already exsits");
-        return;
-    }
+    XComponentClient::GetInstance().AddXComponentToXcomponentsMap(xcomponentComponent->GetId(), xcomponentComponent);
 
     JSRef<JSVal> jsVal;
     XComponentClient::GetInstance().GetJSVal(jsVal);
@@ -105,6 +101,10 @@ void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
         LOGE("JSXComponent::JsOnLoad xcomponentComponent is.");
         return;
     }
+
+    XComponentClient::GetInstance().DeleteFromXcomponentsMapById(xcomponentComponent->GetId());
+    XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(xcomponentComponent->GetId());
+
     std::vector<std::string> keys = {"destroy"};
     xcomponentComponent->SetXComponentDestroyEventId(GetEventMarker(args, keys));
 }
