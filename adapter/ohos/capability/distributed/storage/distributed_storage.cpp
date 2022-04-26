@@ -24,9 +24,9 @@
 
 namespace OHOS::Ace {
 
-class DistributedObjectWatch final : public OHOS::ObjectStore::ObjectWatcher {
+class DistributedObjectWatcher final : public OHOS::ObjectStore::ObjectWatcher {
 public:
-    DistributedObjectWatch(const std::string& sessionId, OnDataChangeCallback&& onChange)
+    explicit DistributedObjectWatcher(OnDataChangeCallback&& onChange)
     {
         onChange_ = std::move(onChange);
     }
@@ -93,12 +93,13 @@ DistributedObjectPtr::DistributedObjectPtr(const std::string& sessionId, OnDataC
     }
 
     sessionId_ = sessionId;
-    watcher_ = std::make_shared<DistributedObjectWatch>(sessionId, std::move(onChange));
+    watcher_ = std::make_shared<DistributedObjectWatcher>(std::move(onChange));
     ret = store->Watch(object_, watcher_);
     if (ret != OHOS::ObjectStore::SUCCESS) {
         LOGE("DistributedObjectStore Watch failed!, err=[%{private}u", ret);
     }
     LOGI("DistributedObjectPtr init success[%{public}s]", sessionId_.c_str());
+    invalid_ = false;
 }
 
 DistributedObjectPtr::~DistributedObjectPtr()
@@ -113,14 +114,15 @@ DistributedObjectPtr::~DistributedObjectPtr()
         }
         uint32_t ret = store->UnWatch(object_);
         if (ret != OHOS::ObjectStore::SUCCESS) {
-            LOGE("DistributedObjectStore UnWatch failed!, err=[%{private}u", ret);
+            LOGE("DistributedObjectStore UnWatch failed!, err=[%{private}u]", ret);
         }
         ret = OHOS::ObjectStore::SUCCESS;
         ret = store->DeleteObject(sessionId_);
         if (ret != OHOS::ObjectStore::SUCCESS) {
-            LOGE("DistributedObjectStore DeleteObject failed!, err=[%{private}u", ret);
+            LOGE("DistributedObjectStore DeleteObject failed!, err=[%{private}u]", ret);
         }
     }
+    DistributedStorage::DeleteStorage(sessionId_);
 }
 
 OHOS::ObjectStore::DistributedObject* DistributedObjectPtr::GetRawPtr()
@@ -165,19 +167,30 @@ bool DistributedStorage::Init(std::function<void(const std::string&)>&& notifyCa
 
 void DistributedStorage::SetString(const std::string& key, const std::string& value)
 {
+    if (objectPtr_->IsInvalid()) {
+        LOGE("Set string failed, distributed object is invalid! sessionId=[%{private}s], key=[%{private}s]",
+            sessionId_.c_str(), key.c_str());
+        return;
+    }
+
     auto ret = objectPtr_->GetRawPtr()->PutString(key, value);
     if (ret != OHOS::ObjectStore::SUCCESS) {
-        LOGE("Set string failed! sessionId=[%{private}s], key=[%{private}s], err=[%{private}u", sessionId_.c_str(),
+        LOGE("Set string failed! sessionId=[%{private}s], key=[%{private}s], err=[%{private}u]", sessionId_.c_str(),
             key.c_str(), ret);
     }
 }
 
 std::string DistributedStorage::GetString(const std::string& key)
 {
+    if (objectPtr_->IsInvalid()) {
+        LOGE("Get string failed, distributed object is invalid! sessionId=[%{private}s], key=[%{private}s]",
+            sessionId_.c_str(), key.c_str());
+        return "";
+    }
     std::string value;
     auto ret = objectPtr_->GetRawPtr()->GetString(key, value);
     if (ret != OHOS::ObjectStore::SUCCESS) {
-        LOGE("Get string failed! sessionId=[%{private}s], key=[%{private}s], err=[%{private}u", sessionId_.c_str(),
+        LOGE("Get string failed! sessionId=[%{private}s], key=[%{private}s], err=[%{private}u]", sessionId_.c_str(),
             key.c_str(), ret);
     }
     return value;
@@ -185,18 +198,28 @@ std::string DistributedStorage::GetString(const std::string& key)
 
 void DistributedStorage::SetDouble(const std::string& key, const double value)
 {
+    if (objectPtr_->IsInvalid()) {
+        LOGE("Set double failed, distributed object is invalid! sessionId=[%{private}s], key=[%{private}s]",
+            sessionId_.c_str(), key.c_str());
+        return;
+    }
     auto ret = objectPtr_->GetRawPtr()->PutDouble(key, value);
     if (ret != OHOS::ObjectStore::SUCCESS) {
-        LOGE("Set Double failed! sessionId=[%{private}s], key=[%{private}s], err=[%{private}u", sessionId_.c_str(),
+        LOGE("Set double failed! sessionId=[%{private}s], key=[%{private}s], err=[%{private}u]", sessionId_.c_str(),
             key.c_str(), ret);
     }
 }
 
 bool DistributedStorage::GetDouble(const std::string& key, double& value)
 {
+    if (objectPtr_->IsInvalid()) {
+        LOGE("Get double failed, distributed object is invalid! sessionId=[%{private}s], key=[%{private}s]",
+            sessionId_.c_str(), key.c_str());
+        return false;
+    }
     auto ret = objectPtr_->GetRawPtr()->GetDouble(key, value);
     if (ret != OHOS::ObjectStore::SUCCESS) {
-        LOGE("Get double failed! sessionId=[%{private}s], key=[%{private}s], err=[%{private}u", sessionId_.c_str(),
+        LOGE("Get double failed! sessionId=[%{private}s], key=[%{private}s], err=[%{private}u]", sessionId_.c_str(),
             key.c_str(), ret);
         return false;
     }
@@ -205,18 +228,28 @@ bool DistributedStorage::GetDouble(const std::string& key, double& value)
 
 void DistributedStorage::SetBoolean(const std::string& key, const bool value)
 {
+    if (objectPtr_->IsInvalid()) {
+        LOGE("Set boolean failed, distributed object is invalid! sessionId=[%{private}s], key=[%{private}s]",
+            sessionId_.c_str(), key.c_str());
+        return;
+    }
     auto ret = objectPtr_->GetRawPtr()->PutBoolean(key, value);
     if (ret != OHOS::ObjectStore::SUCCESS) {
-        LOGE("Set Boolean failed! sessionId=[%{private}s], key=[%{private}s], err=[%{private}u", sessionId_.c_str(),
+        LOGE("Set boolean failed! sessionId=[%{private}s], key=[%{private}s], err=[%{private}u]", sessionId_.c_str(),
             key.c_str(), ret);
     }
 }
 
 bool DistributedStorage::GetBoolean(const std::string& key, bool& value)
 {
+    if (objectPtr_->IsInvalid()) {
+        LOGE("Get boolean failed, distributed object is invalid! sessionId=[%{private}s], key=[%{private}s]",
+            sessionId_.c_str(), key.c_str());
+        return false;
+    }
     auto ret = objectPtr_->GetRawPtr()->GetBoolean(key, value);
     if (ret != OHOS::ObjectStore::SUCCESS) {
-        LOGE("Get Boolean failed! sessionId=[%{private}s], key=[%{private}s], err=[%{private}u", sessionId_.c_str(),
+        LOGE("Get boolean failed! sessionId=[%{private}s], key=[%{private}s], err=[%{private}u]", sessionId_.c_str(),
             key.c_str(), ret);
         return false;
     }
@@ -225,11 +258,16 @@ bool DistributedStorage::GetBoolean(const std::string& key, bool& value)
 
 Storage::DataType DistributedStorage::GetDataType(const std::string& key)
 {
+    if (objectPtr_->IsInvalid()) {
+        LOGE("Get type failed! distributed object is invalid! sessionId=[%{private}s], key=[%{private}s]",
+            sessionId_.c_str(), key.c_str());
+        return Storage::DataType::NONE;
+    }
     OHOS::ObjectStore::Type type = OHOS::ObjectStore::Type::TYPE_STRING;
     auto ret = objectPtr_->GetRawPtr()->GetType(key, type);
 
     if (ret != OHOS::ObjectStore::SUCCESS) {
-        LOGE("Get type failed! sessionId=[%{private}s], key=[%{private}s], err=[%{private}u", sessionId_.c_str(),
+        LOGE("Get type failed! sessionId=[%{private}s], key=[%{private}s], err=[%{private}u]", sessionId_.c_str(),
             key.c_str(), ret);
         return Storage::DataType::NONE;
     }
