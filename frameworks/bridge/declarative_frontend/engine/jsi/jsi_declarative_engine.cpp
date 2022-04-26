@@ -1335,6 +1335,20 @@ void JsiDeclarativeEngine::OnInactive()
     CallAppFunc("onInactive");
 }
 
+void JsiDeclarativeEngine::OnNewWant(const std::string& data)
+{
+    LOGI("JsiDeclarativeEngine OnNewWant called.");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnNewWant failed, runtime is null.");
+        return;
+    }
+
+    shared_ptr<JsValue> object = runtime->NewObject();
+    std::vector<shared_ptr<JsValue>> argv = { object };
+    CallAppFunc("onNewWant", argv);
+}
+
 bool JsiDeclarativeEngine::OnStartContinuation()
 {
     LOGI("JsiDeclarativeEngine OnStartContinuation");
