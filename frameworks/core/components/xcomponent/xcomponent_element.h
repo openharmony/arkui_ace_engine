@@ -23,7 +23,7 @@
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "display_type.h"
-#include "foundation/graphic/standard/interfaces/innerkits/surface/window.h"
+#include "foundation/graphic/standard/interfaces/inner_api/surface/window.h"
 #include "foundation/windowmanager/interfaces/innerkits/wm/window.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
