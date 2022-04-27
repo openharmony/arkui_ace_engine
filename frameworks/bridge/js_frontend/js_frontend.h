@@ -213,7 +213,8 @@ public:
 
     void HandleSyncEvent(const EventMarker& eventMarker, const std::string& param, std::string& result) override;
 
-    void HandleSyncEvent(const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId) override;
+    void HandleSyncEvent(const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId,
+        const bool isDestroy) override;
 
 private:
     RefPtr<Framework::FrontendDelegateImpl> delegate_;

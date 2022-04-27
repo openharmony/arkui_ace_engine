@@ -52,8 +52,8 @@ class MockEventHandler : public AceEventHandler {
     void HandleSyncEvent(const EventMarker& eventMarker, const BaseEventInfo& info, bool& result) override {};
     void HandleSyncEvent(const EventMarker& eventMarker, const std::string& param, std::string& result) override {};
     void HandleSyncEvent(const EventMarker& eventMarker, const KeyEvent& keyEvent, bool& result) override {};
-    void HandleSyncEvent(
-        const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId) override {};
+    void HandleSyncEvent(const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId,
+        const bool isDestroy) override {};
 };
 
 class TestGridEventHander : public MockEventHandler {

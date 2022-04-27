@@ -227,7 +227,8 @@ public:
 
     void HandleSyncEvent(const EventMarker& eventMarker, const std::shared_ptr<BaseEventInfo>& info) override;
 
-    void HandleSyncEvent(const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId) override;
+    void HandleSyncEvent(const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId,
+        const bool isDestroy) override;
 
 private:
     RefPtr<Framework::PluginFrontendDelegate> delegate_;

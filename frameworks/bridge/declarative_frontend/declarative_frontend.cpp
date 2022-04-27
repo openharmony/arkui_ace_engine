@@ -446,12 +446,13 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     };
 
     const auto& externalEventCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                            const std::string& componentId, const uint32_t nodeId) {
+                                            const std::string& componentId, const uint32_t nodeId,
+                                            const bool isDestroy) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
         }
-        jsEngine->FireExternalEvent(componentId, nodeId);
+        jsEngine->FireExternalEvent(componentId, nodeId, isDestroy);
     };
 
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarative>(taskExecutor, loadCallback,
@@ -1016,10 +1017,10 @@ void DeclarativeEventHandler::HandleSyncEvent(
 }
 
 void DeclarativeEventHandler::HandleSyncEvent(
-    const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId)
+    const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId, const bool isDestroy)
 {
     if (delegate_) {
-        delegate_->FireExternalEvent(eventMarker.GetData().eventId, componentId, nodeId);
+        delegate_->FireExternalEvent(eventMarker.GetData().eventId, componentId, nodeId, isDestroy);
     }
 }
 

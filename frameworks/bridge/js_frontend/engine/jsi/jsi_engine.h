@@ -131,7 +131,7 @@ public:
 
     void FireSyncEvent(const std::string& eventId, const std::string& param) override;
 
-    void FireExternalEvent(const std::string& componentId, const uint32_t nodeId) override;
+    void FireExternalEvent(const std::string& componentId, const uint32_t nodeId, const bool isDestroy) override;
 
     void TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval) override;
 

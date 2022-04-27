@@ -1029,28 +1029,23 @@ void JsiDeclarativeEngine::FireSyncEvent(const std::string& eventId, const std::
     }
 }
 
-void JsiDeclarativeEngine::InitXComponent()
+void JsiDeclarativeEngine::InitXComponent(const std::string& componentId)
 {
     ACE_DCHECK(engineInstance_);
-
-    nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
-    nativeXComponent_ = new OH_NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
-}
-
-bool JsiDeclarativeEngine::InitXComponent(const std::string& componentId)
-{
-    ACE_DCHECK(engineInstance_);
-    return OHOS::Ace::Framework::XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(
+    OHOS::Ace::Framework::XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(
         componentId, nativeXComponentImpl_, nativeXComponent_);
 }
 
-void JsiDeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
+void JsiDeclarativeEngine::FireExternalEvent(
+    const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     CHECK_RUN_ON(JS);
-    if (!InitXComponent(componentId)) {
-        LOGE("InitXComponent fail");
+    if (isDestroy) {
+        XComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
+        XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(componentId);
         return;
-    };
+    }
+    InitXComponent(componentId);
     RefPtr<XComponentComponent> xcomponent;
     OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId, xcomponent);
     if (!xcomponent) {
