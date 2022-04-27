@@ -423,7 +423,9 @@ void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomV
     }
 #else
     bool isAccessEnable =
-        AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || SystemProperties::GetAccessibilityEnabled();
+        AceApplicationInfo::GetInstance().IsAccessibilityEnabled()
+        || SystemProperties::GetAccessibilityEnabled()
+        || SystemProperties::GetDebugBoundaryEnabled();
     if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component) &&
         !AceType::InstanceOf<TextSpanComponent>(component) && isAccessEnable) {
         GetBoxComponent();

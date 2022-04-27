@@ -19,6 +19,7 @@
 #include "flutter/lib/ui/painting/canvas.h"
 
 #include "core/components/badge/render_badge.h"
+#include "core/components/common/painter/debug_boundary_painter.h"
 
 namespace OHOS::Ace {
 
@@ -38,6 +39,8 @@ private:
     void PaintText(const Offset& textOffset, RenderContext& context) const;
     void DrawCircleBadge(flutter::Canvas& canvas, const Offset& offset);
     void DrawNumericalBadge(flutter::Canvas& canvas, const Offset& offset);
+    void RenderBadgeBoundary(SkCanvas* canvas, const double& startX, const double& startY,
+        const double& width, const double& height);
 
     double badgeCircleDiameter_ = 0.0;
     double badgeCircleRadius_ = 0.0;

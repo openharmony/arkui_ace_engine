@@ -23,7 +23,6 @@
 #include "core/components/text/text_component.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/pipeline/base/render_node.h"
-#include "core/components/common/painter/debug_boundary_painter.h"
 
 namespace OHOS::Ace {
 
@@ -45,9 +44,6 @@ public:
     {
         return badge_;
     }
-
-    void RenderBadgeBoundary(SkCanvas* canvas, const double& startX, const double& startY,
-        const double& width, const double& height);
     
 protected:
     void OnTouchTestHit(

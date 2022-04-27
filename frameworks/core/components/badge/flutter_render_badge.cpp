@@ -80,8 +80,7 @@ void FlutterRenderBadge::DrawCircleBadge(flutter::Canvas& canvas, const Offset& 
         boundaryStartY = offset.GetY() + height_ / 2 - badgeCircleRadius_;
     }
     canvas.drawRRect(rRect, paint, paintData);
-    RenderBadge::RenderBadgeBoundary(canvas.canvas(), boundaryStartX, boundaryStartY,
-        badgeCircleDiameter_, badgeCircleDiameter_);
+    RenderBadgeBoundary(canvas.canvas(), boundaryStartX, boundaryStartY, badgeCircleDiameter_, badgeCircleDiameter_);
 }
 
 void FlutterRenderBadge::DrawNumericalBadge(flutter::Canvas& canvas, const Offset& offset)
@@ -135,7 +134,7 @@ void FlutterRenderBadge::DrawNumericalBadge(flutter::Canvas& canvas, const Offse
         boundaryStartY = offset.GetY() + textInitialOffset_.GetY();
     }
     canvas.drawRRect(rRect, paint, paintData);
-    RenderBadge::RenderBadgeBoundary(canvas.canvas(), boundaryStartX, boundaryStartY, badgeWidth_, badgeHeight_);
+    RenderBadgeBoundary(canvas.canvas(), boundaryStartX, boundaryStartY, badgeWidth_, badgeHeight_);
 }
 
 void FlutterRenderBadge::DrawBadge(RenderContext& context, const Offset& offset)
@@ -176,6 +175,23 @@ Size FlutterRenderBadge::CalculateTextSize(
     renderText->SetTextStyle(textStyle);
     renderText->PerformLayout();
     return renderText->GetLayoutSize();
+}
+
+void FlutterRenderBadge::RenderBadgeBoundary(SkCanvas* canvas, const double& startX, const double& startY,
+    const double& width, const double& height)
+{
+    if (SystemProperties::GetDebugBoundaryEnabled()) {
+        if (canvas == nullptr) {
+            LOGE("Paint canvas is null.");
+            return;
+        }
+        Offset boundaryOffset(startX, startY);
+        Size layoutSize;
+        layoutSize.SetWidth(width);
+        layoutSize.SetHeight(height);
+        DebugBoundaryPainter::PaintDebugBoundary(canvas, boundaryOffset, layoutSize);
+        DebugBoundaryPainter::PaintDebugCorner(canvas, boundaryOffset, layoutSize);
+    }
 }
 
 } // namespace OHOS::Ace
