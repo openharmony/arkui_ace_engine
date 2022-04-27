@@ -40,6 +40,7 @@ public:
     bool GetNavigationHideToolBar() const;
     bool GetHideNavigationBackButton() const;
     bool GetHideNavigationBar() const;
+    std::unique_ptr<JsonValue> GetMenus() const;
 
     AceType::IdType GetTargetTypeId() const override
     {

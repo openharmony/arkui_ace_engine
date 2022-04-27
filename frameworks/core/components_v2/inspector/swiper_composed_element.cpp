@@ -35,7 +35,8 @@ const std::unordered_map<std::string, std::function<std::string(const SwiperComp
     { "disableSwipe", [](const SwiperComposedElement& inspector) { return inspector.GetDisableSwipe(); } },
     { "itemSpace", [](const SwiperComposedElement& inspector) { return inspector.GetItemSpace(); } },
     { "curve", [](const SwiperComposedElement& inspector) { return inspector.GetCurve(); } },
-    { "indicatorStyle", [](const SwiperComposedElement& inspector) { return inspector.GetIndicatorStyle(); } }
+    { "indicatorStyle", [](const SwiperComposedElement& inspector) { return inspector.GetIndicatorStyle(); } },
+    { "cachedCount", [](const SwiperComposedElement& inspector) { return inspector.GetCachedCount(); } },
 };
 
 } // namespace
@@ -237,6 +238,13 @@ RefPtr<RenderSwiper> SwiperComposedElement::GetRenderSwiper() const
         return AceType::DynamicCast<RenderSwiper>(node);
     }
     return nullptr;
+}
+
+std::string SwiperComposedElement::GetCachedCount() const
+{
+    auto renderSwiper = GetRenderSwiper();
+    auto cachedCount = renderSwiper ? renderSwiper->GetCachedCount() : 1;
+    return std::to_string(cachedCount);
 }
 
 void SwiperComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)

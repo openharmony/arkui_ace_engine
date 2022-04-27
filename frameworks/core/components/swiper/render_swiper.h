@@ -299,6 +299,11 @@ public:
         return axis_ == Axis::VERTICAL;
     }
 
+    int32_t GetCachedCount() const
+    {
+        return cachedCount_;
+    }
+
     bool RefuseUpdatePosition(int32_t index);
     void OnPaintFinish() override;
 protected:
@@ -540,6 +545,7 @@ private:
     MainSwiperSize mainSwiperSize_ = MainSwiperSize::MAX;
     double prevMargin_ = 0.0;
     double nextMargin_ = 0.0;
+    int32_t cachedCount_ = -1;
 
     // need timer for auto play
     RefPtr<Scheduler> scheduler_;
