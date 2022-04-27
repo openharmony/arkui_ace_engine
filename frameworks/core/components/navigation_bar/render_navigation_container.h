@@ -73,6 +73,11 @@ public:
         return toolBarItems_;
     }
 
+    const std::list<RefPtr<ToolBarItem>>& GetMenuItems()
+    {
+        return menuItems_;
+    }
+
 private:
     RefPtr<RenderCollapsingNavigationBar> collapsingNavigationBar_;
     std::string title_;
@@ -82,6 +87,7 @@ private:
     bool hideNavigationToolBar_ = false;
     NavigationTitleMode titleMode_ = NavigationTitleMode::MINI;
     std::list<RefPtr<ToolBarItem>> toolBarItems_;
+    std::list<RefPtr<ToolBarItem>> menuItems_;
 };
 
 } // namespace OHOS::Ace

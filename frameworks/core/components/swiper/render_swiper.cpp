@@ -257,7 +257,7 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     animationOpacity_ = swiper->IsAnimationOpacity();
     duration_ = swiper->GetDuration();
     showIndicator_ = swiper->IsShowIndicator();
-
+    cachedCount_ = swiper->GetCachedSize();
     lazyLoadCacheSize_ = swiper->GetCachedSize() * 2 + swiper->GetDisplayCount();
     UpdateItemCount(lazyComponent ? static_cast<int32_t>(lazyComponent->TotalCount()) : itemCount_);
     ClearItems(lazyComponent, static_cast<int32_t>(swiper->GetIndex()));

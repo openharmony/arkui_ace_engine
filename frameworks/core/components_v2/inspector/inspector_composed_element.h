@@ -187,7 +187,8 @@ public:
     double GetSepia() const override;
     double GetGrayScale() const override;
     double GetHueRotate() const override;
-
+    std::string GetColorBlend() const override;
+    
     // shape clip
     std::string GetClip() const override;
     bool GetClipFlag() const;

@@ -111,7 +111,8 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
     { "align", [](const InspectorNode& inspector) { return inspector.GetAlign(); } },
     { "direction", [](const InspectorNode& inspector) { return inspector.GetDirectionStr(); } },
     { "bindPopup", [](const InspectorNode& inspector) { return inspector.GetBindPopup(); } },
-    { "bindContextMenu", [](const InspectorNode& inspector) { return inspector.GetBindContextMenu(); } }
+    { "bindContextMenu", [](const InspectorNode& inspector) { return inspector.GetBindContextMenu(); } },
+    { "colorBlend", [](const InspectorNode& inspector) { return inspector.GetColorBlend(); } },
 };
 
 const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP {
@@ -1397,6 +1398,16 @@ std::string InspectorComposedElement::GetBindContextMenu() const
         }
     }
     return "-";
+}
+
+std::string InspectorComposedElement::GetColorBlend() const
+{
+    auto node = GetRenderBox();
+    if (!node) {
+        return "";
+    }
+    auto colorBlend = node->GetColorBlend();
+    return colorBlend.ColorToString();
 }
 
 void InspectorComposedElement::UpdateEventTarget(BaseEventInfo& info) const

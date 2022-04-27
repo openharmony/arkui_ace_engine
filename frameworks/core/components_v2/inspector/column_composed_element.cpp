@@ -27,6 +27,7 @@ const std::unordered_map<std::string, std::function<std::string(const ColumnComp
     { "alignItems", [](const ColumnComposedElement& inspector) { return inspector.GetAlignContent(); } },
     { "space", [](const ColumnComposedElement& inspector) { return inspector.GetSpace(); } },
     { "selfAlign", [](const ColumnComposedElement& inspector) { return inspector.GetHorizontalAlign(); } },
+    { "justifyContent", [](const ColumnComposedElement& inspector) { return inspector.GetJustifyContent(); } },
 };
 
 }
@@ -106,6 +107,45 @@ std::string ColumnComposedElement::GetHorizontalAlign() const
         }
     }
     return "HorizontalAlign::Center";
+}
+
+std::string ColumnComposedElement::GetJustifyContent() const
+{
+    auto node = GetRenderColumn();
+    if (!node) {
+        return "FlexAlign.Start";
+    }
+    auto flexAlign = node->GetJustifyContent();
+    return ConvertFlexAlignToString(flexAlign);
+}
+
+std::string ColumnComposedElement::ConvertFlexAlignToString(FlexAlign flexAlign) const
+{
+    std::string result = "";
+    switch (flexAlign) {
+        case FlexAlign::FLEX_START:
+            result = "FlexAlign.Start";
+            break;
+        case FlexAlign::FLEX_END:
+            result = "FlexAlign.End";
+            break;
+        case FlexAlign::CENTER:
+            result = "FlexAlign.Center";
+            break;
+        case FlexAlign::SPACE_BETWEEN:
+            result = "FlexAlign.SpaceBetween";
+            break;
+        case FlexAlign::SPACE_AROUND:
+            result = "FlexAlign.SpaceAround";
+            break;
+        case FlexAlign::SPACE_EVENLY:
+            result = "FlexAlign.SpaceEvenly";
+            break;
+        default:
+            result = "FlexAlign.Start";
+            break;
+    }
+    return result;
 }
 
 RefPtr<RenderFlex> ColumnComposedElement::GetRenderColumn() const
