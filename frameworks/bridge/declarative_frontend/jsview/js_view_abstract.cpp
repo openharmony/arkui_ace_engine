@@ -59,8 +59,8 @@ const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))",
 constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
 
-bool CheckJSCallbackInfo(const std::string& callerName, const JSCallbackInfo& info,
-    std::vector<JSCallbackInfoType>& infoTypes)
+bool CheckJSCallbackInfo(
+    const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
 {
     if (info.Length() < 1) {
         LOGE("%{public}s: The arg is supposed to have at least one argument", callerName.c_str());
@@ -103,8 +103,8 @@ bool CheckJSCallbackInfo(const std::string& callerName, const JSCallbackInfo& in
         }
     }
     if (!typeVerified) {
-        LOGE("%{public}s: info[0] is not a [%{public}s]",
-            callerName.c_str(), unrecognizedType.substr(0, unrecognizedType.size()-1).c_str());
+        LOGE("%{public}s: info[0] is not a [%{public}s]", callerName.c_str(),
+            unrecognizedType.substr(0, unrecognizedType.size() - 1).c_str());
     }
     return typeVerified || infoTypes.size() == 0;
 }
@@ -297,8 +297,8 @@ bool ParseMotionPath(const std::unique_ptr<JsonValue>& argsPtrItem, MotionPathOp
     return false;
 }
 
-void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY,
-    const double valueX, const double valueY, BackgroundImagePosition& bgImgPosition)
+void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, const double valueX, const double valueY,
+    BackgroundImagePosition& bgImgPosition)
 {
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     bgImgPosition.SetSizeX(AnimatableDimension(valueX, typeX, option));
@@ -365,18 +365,16 @@ void ReplaceHolder(std::string& originStr, JSRef<JSArray> params, int32_t contai
 
 bool ParseLocationProps(const JSCallbackInfo& info, AnimatableDimension& x, AnimatableDimension& y)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("ParseLocationProps", info, checkList)) {
         return false;
     }
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> xVal = sizeObj->GetProperty("x");
     JSRef<JSVal> yVal = sizeObj->GetProperty("y");
-    if (JSViewAbstract::ParseJsAnimatableDimensionVp(xVal, x) &&
-        JSViewAbstract::ParseJsAnimatableDimensionVp(yVal, y)) {
-        return true;
-    }
-    return false;
+    bool hasX = JSViewAbstract::ParseJsAnimatableDimensionVp(xVal, x);
+    bool hasY = JSViewAbstract::ParseJsAnimatableDimensionVp(yVal, y);
+    return hasX || hasY;
 }
 
 #ifndef WEARABLE_PRODUCT
@@ -390,8 +388,8 @@ void ParseShowObject(
     if (changeEventVal->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-        auto eventMarker = EventMarker(
-            [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+        auto eventMarker =
+            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("Popup.onStateChange");
 
@@ -512,6 +510,7 @@ void ParseCustomPopupParam(
     popupComponent->SetCustomComponent(customComponent);
 
     auto popupParam = popupComponent->GetPopupParam();
+    popupParam->SetUseCustomComponent(true);
     auto placementValue = popupObj->GetProperty("placement");
     if (placementValue->IsNumber()) {
         auto placement = placementValue->ToNumber<int32_t>();
@@ -572,7 +571,7 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 void JSViewAbstract::JsScale(const JSCallbackInfo& info)
 {
     LOGD("JsScale");
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsScale", info, checkList)) {
         return;
     }
@@ -660,12 +659,11 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
     if (!stack->IsVisualStateSet()) {
         display->SetOpacity(opacity, option);
     } else {
-        display->GetStateAttributes()->AddAttribute<AnimatableDouble>(DisplayStateAttribute::OPACITY,
-            AnimatableDouble(opacity, option), stack->GetVisualState());
-        if (!display->GetStateAttributes()->
-            HasAttribute(DisplayStateAttribute::OPACITY, VisualState::NORMAL)) {
-            display->GetStateAttributes()->AddAttribute<AnimatableDouble>(DisplayStateAttribute::OPACITY,
-                AnimatableDouble(display->GetOpacity(), option), VisualState::NORMAL);
+        display->GetStateAttributes()->AddAttribute<AnimatableDouble>(
+            DisplayStateAttribute::OPACITY, AnimatableDouble(opacity, option), stack->GetVisualState());
+        if (!display->GetStateAttributes()->HasAttribute(DisplayStateAttribute::OPACITY, VisualState::NORMAL)) {
+            display->GetStateAttributes()->AddAttribute<AnimatableDouble>(
+                DisplayStateAttribute::OPACITY, AnimatableDouble(display->GetOpacity(), option), VisualState::NORMAL);
         }
     }
 }
@@ -739,7 +737,7 @@ void JSViewAbstract::JsTranslateY(const JSCallbackInfo& info)
 void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
 {
     LOGD("JsRotate");
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsRotate", info, checkList)) {
         return;
     }
@@ -816,7 +814,7 @@ void JSViewAbstract::JsRotateY(const JSCallbackInfo& info)
 void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
 {
     LOGD("JsTransform");
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsTransform", info, checkList)) {
         return;
     }
@@ -866,10 +864,10 @@ void JSViewAbstract::ParseAndSetTransitionOption(std::unique_ptr<JsonValue>& tra
 {
     TransitionType transitionType = ParseTransitionType(transitionArgs->GetString("type", "All"));
     bool hasEffect = false;
-    hasEffect |= ParseAndSetOpacityTransition(transitionArgs, transitionType);
-    hasEffect |= ParseAndSetTranslateTransition(transitionArgs, transitionType);
-    hasEffect |= ParseAndSetScaleTransition(transitionArgs, transitionType);
-    hasEffect |= ParseAndSetRotateTransition(transitionArgs, transitionType);
+    hasEffect = ParseAndSetOpacityTransition(transitionArgs, transitionType) || hasEffect;
+    hasEffect = ParseAndSetTranslateTransition(transitionArgs, transitionType) || hasEffect;
+    hasEffect = ParseAndSetScaleTransition(transitionArgs, transitionType) || hasEffect;
+    hasEffect = ParseAndSetRotateTransition(transitionArgs, transitionType) || hasEffect;
     if (!hasEffect) {
         SetDefaultTransition(transitionType);
     }
@@ -911,12 +909,11 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
     if (!stack->IsVisualStateSet()) {
         box->SetWidth(value, option);
     } else {
-        box->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::WIDTH,
-            AnimatableDimension(value, option), stack->GetVisualState());
-        if (!box->GetStateAttributes()->
-            HasAttribute(BoxStateAttribute::WIDTH, VisualState::NORMAL)) {
-            box->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::WIDTH,
-                AnimatableDimension(box->GetWidth(), option), VisualState::NORMAL);
+        box->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+            BoxStateAttribute::WIDTH, AnimatableDimension(value, option), stack->GetVisualState());
+        if (!box->GetStateAttributes()->HasAttribute(BoxStateAttribute::WIDTH, VisualState::NORMAL)) {
+            box->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+                BoxStateAttribute::WIDTH, AnimatableDimension(box->GetWidth(), option), VisualState::NORMAL);
         }
     }
     return true;
@@ -958,12 +955,11 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
     if (!stack->IsVisualStateSet()) {
         box->SetHeight(value, option);
     } else {
-        box->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::HEIGHT,
-            AnimatableDimension(value, option), stack->GetVisualState());
-        if (!box->GetStateAttributes()->
-            HasAttribute(BoxStateAttribute::HEIGHT, VisualState::NORMAL)) {
-            box->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::HEIGHT,
-                AnimatableDimension(box->GetHeight(), option), VisualState::NORMAL);
+        box->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+            BoxStateAttribute::HEIGHT, AnimatableDimension(value, option), stack->GetVisualState());
+        if (!box->GetStateAttributes()->HasAttribute(BoxStateAttribute::HEIGHT, VisualState::NORMAL)) {
+            box->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+                BoxStateAttribute::HEIGHT, AnimatableDimension(box->GetHeight(), option), VisualState::NORMAL);
         }
     }
     return true;
@@ -1087,7 +1083,7 @@ bool JSViewAbstract::ParseJsResponseRegionArray(const JSRef<JSVal>& jsValue, std
 
 void JSViewAbstract::JsSize(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsSize", info, checkList)) {
         return;
     }
@@ -1099,7 +1095,7 @@ void JSViewAbstract::JsSize(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsConstraintSize", info, checkList)) {
         return;
     }
@@ -1139,7 +1135,7 @@ void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsLayoutPriority(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsLayoutPriority", info, checkList)) {
         return;
     }
@@ -1157,7 +1153,7 @@ void JSViewAbstract::JsLayoutPriority(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsLayoutWeight", info, checkList)) {
         return;
     }
@@ -1175,7 +1171,7 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::NUMBER};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsAlign", info, checkList)) {
         return;
     }
@@ -1234,6 +1230,16 @@ void JSViewAbstract::JsEnabled(const JSCallbackInfo& info)
 
     auto rootComponent = ViewStackProcessor::GetInstance()->GetRootComponent();
     rootComponent->SetDisabledStatus(!(info[0]->ToBoolean()));
+
+    if (!(info[0]->ToBoolean())) {
+        auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+        if (!focusComponent) {
+            LOGE("The focusComponent is null");
+            return;
+        } else {
+            focusComponent->SetFocusable(false);
+        }
+    }
 }
 
 void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
@@ -1248,13 +1254,17 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
         return;
     }
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    if (!boxComponent) {
+        LOGE("boxComponent is null");
+        return;
+    }
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     boxComponent->SetAspectRatio(value, option);
 }
 
 void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::STRING};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
     if (!CheckJSCallbackInfo("JsOverlay", info, checkList)) {
         return;
     }
@@ -1389,7 +1399,7 @@ void JSViewAbstract::JsDisplayPriority(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::STRING};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
     if (!CheckJSCallbackInfo("JsSharedTransition", info, checkList)) {
         return;
     }
@@ -1469,7 +1479,7 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::STRING};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
     if (!CheckJSCallbackInfo("JsGeometryTransition", info, checkList)) {
         return;
     }
@@ -1480,12 +1490,16 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
         return;
     }
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    if (!boxComponent) {
+        LOGE("boxComponent is null");
+        return;
+    }
     boxComponent->SetGeometryTransitionId(id);
 }
 
 void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::NUMBER};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsAlignSelf", info, checkList)) {
         return;
     }
@@ -1494,34 +1508,6 @@ void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)
 
     if (alignVal >= 0 && alignVal <= MAX_ALIGN_VALUE) {
         flexItem->SetAlignSelf((FlexAlign)alignVal);
-    }
-}
-
-void JSViewAbstract::JsBorderColor(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    Color borderColor;
-    if (!ParseJsColor(info[0], borderColor)) {
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto option = stack->GetImplicitAnimationOption();
-    if (!stack->IsVisualStateSet()) {
-        BoxComponentHelper::SetBorderColor(GetBackDecoration(), borderColor, option);
-    } else {
-        auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
-        boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(BoxStateAttribute::BORDER_COLOR,
-            AnimatableColor(borderColor, option), stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->
-            HasAttribute(BoxStateAttribute::BORDER_COLOR, VisualState::NORMAL)) {
-            auto c = BoxComponentHelper::GetBorderColor(GetBackDecoration());
-            boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(BoxStateAttribute::BORDER_COLOR,
-                AnimatableColor(c, option), VisualState::NORMAL);
-        }
     }
 }
 
@@ -1538,17 +1524,20 @@ void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
 
     auto stack = ViewStackProcessor::GetInstance();
     auto boxComponent = stack->GetBoxComponent();
+    if (!boxComponent) {
+        LOGE("boxComponent is null");
+        return;
+    }
     auto option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
         boxComponent->SetColor(backgroundColor, option);
     } else {
-        boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(BoxStateAttribute::COLOR,
-            AnimatableColor(backgroundColor, option), stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->
-            HasAttribute(BoxStateAttribute::COLOR, VisualState::NORMAL)) {
+        boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(
+            BoxStateAttribute::COLOR, AnimatableColor(backgroundColor, option), stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::COLOR, VisualState::NORMAL)) {
             Color c = boxComponent->GetColor();
-            boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(BoxStateAttribute::COLOR,
-                AnimatableColor(c, option), VisualState::NORMAL);
+            boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(
+                BoxStateAttribute::COLOR, AnimatableColor(c, option), VisualState::NORMAL);
         }
     }
 }
@@ -1595,7 +1584,7 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBackgroundImageSize", info, checkList)) {
         return;
     }
@@ -1646,7 +1635,7 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBackgroundImagePosition", info, checkList)) {
         return;
     }
@@ -1664,40 +1653,35 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         int32_t align = info[0]->ToNumber<int32_t>();
         switch (align) {
             case 0:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
-                    0.0, 0.0, bgImgPosition);
+                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, 0.0, 0.0, bgImgPosition);
                 break;
             case 1:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
-                    HALF_DIMENSION, 0.0, bgImgPosition);
+                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, HALF_DIMENSION, 0.0, bgImgPosition);
                 break;
             case 2:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
-                    FULL_DIMENSION, 0.0, bgImgPosition);
+                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, FULL_DIMENSION, 0.0, bgImgPosition);
                 break;
             case 3:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
-                    0.0, HALF_DIMENSION, bgImgPosition);
+                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, 0.0, HALF_DIMENSION, bgImgPosition);
                 break;
             case 4:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
-                    HALF_DIMENSION, HALF_DIMENSION, bgImgPosition);
+                SetBgImgPosition(
+                    DimensionUnit::PERCENT, DimensionUnit::PERCENT, HALF_DIMENSION, HALF_DIMENSION, bgImgPosition);
                 break;
             case 5:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
-                    FULL_DIMENSION, HALF_DIMENSION, bgImgPosition);
+                SetBgImgPosition(
+                    DimensionUnit::PERCENT, DimensionUnit::PERCENT, FULL_DIMENSION, HALF_DIMENSION, bgImgPosition);
                 break;
             case 6:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
-                    0.0, FULL_DIMENSION, bgImgPosition);
+                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, 0.0, FULL_DIMENSION, bgImgPosition);
                 break;
             case 7:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
-                    HALF_DIMENSION, FULL_DIMENSION, bgImgPosition);
+                SetBgImgPosition(
+                    DimensionUnit::PERCENT, DimensionUnit::PERCENT, HALF_DIMENSION, FULL_DIMENSION, bgImgPosition);
                 break;
             case 8:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT,
-                    FULL_DIMENSION, FULL_DIMENSION, bgImgPosition);
+                SetBgImgPosition(
+                    DimensionUnit::PERCENT, DimensionUnit::PERCENT, FULL_DIMENSION, FULL_DIMENSION, bgImgPosition);
                 break;
             default:
                 break;
@@ -1745,7 +1729,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             return;
         }
         auto showDialog = refPtr->GetTargetCallback();
-        showDialog("", info.GetGlobalLocation());
+        showDialog("BindMenu", info.GetGlobalLocation());
     });
     click->SetOnClick(tapGesture);
     auto menuTheme = GetTheme<SelectTheme>();
@@ -1871,7 +1855,7 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
 
 void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorder", info, checkList)) {
         return;
     }
@@ -1885,110 +1869,306 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
-
-    Dimension width;
-    if (argsPtrItem->Contains("width") && ParseJsonDimensionVp(argsPtrItem->GetValue("width"), width)) {
-        if (!stack->IsVisualStateSet()) {
-            BoxComponentHelper::SetBorderWidth(GetBackDecoration(), width, option);
-        } else {
-            boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>
-                (BoxStateAttribute::BORDER_WIDTH, AnimatableDimension(width, option), stack->GetVisualState());
-            if (!boxComponent->GetStateAttributes()->
-                HasAttribute(BoxStateAttribute::BORDER_WIDTH, VisualState::NORMAL)) {
-                boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_WIDTH,
-                    AnimatableDimension(BoxComponentHelper::GetBorderWidth(GetBackDecoration()), option),
-                    VisualState::NORMAL);
-            }
-        }
+    if (!boxComponent) {
+        LOGE("boxComponent is null");
+        return;
     }
-    Color color;
-    if (argsPtrItem->Contains("color") && ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
-        if (!stack->IsVisualStateSet()) {
-            BoxComponentHelper::SetBorderColor(GetBackDecoration(), color, option);
-        } else {
-            boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(BoxStateAttribute::BORDER_COLOR,
-                AnimatableColor(color, option), stack->GetVisualState());
-            if (!boxComponent->GetStateAttributes()->
-                HasAttribute(BoxStateAttribute::BORDER_COLOR, VisualState::NORMAL)) {
-                Color c = BoxComponentHelper::GetBorderColor(GetBackDecoration());
-                boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>
-                    (BoxStateAttribute::BORDER_COLOR, AnimatableColor(c, option), VisualState::NORMAL);
-            }
-        }
+    if (argsPtrItem->Contains("width")) {
+        auto widthArgs = argsPtrItem->GetValue("width");
+        ParseBorderWidth(widthArgs);
     }
-    Dimension radius;
-    if (argsPtrItem->Contains("radius") && ParseJsonDimensionVp(argsPtrItem->GetValue("radius"), radius)) {
-        if (!stack->IsVisualStateSet()) {
-            BoxComponentHelper::SetBorderRadius(GetBackDecoration(), radius, option);
-        } else {
-            boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_RADIUS,
-                AnimatableDimension(radius, option), stack->GetVisualState());
-            if (!boxComponent->GetStateAttributes()->
-                HasAttribute(BoxStateAttribute::BORDER_RADIUS, VisualState::NORMAL)) {
-                boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_RADIUS,
-                    AnimatableDimension(BoxComponentHelper::GetBorderRadius(GetBackDecoration()).GetX(), option),
-                    VisualState::NORMAL);
-            }
-        }
+    if (argsPtrItem->Contains("color")) {
+        auto colorArgs = argsPtrItem->GetValue("color");
+        ParseBorderColor(colorArgs);
+    }
+    if (argsPtrItem->Contains("radius")) {
+        auto radiusArgs = argsPtrItem->GetValue("radius");
+        ParseBorderRadius(radiusArgs);
     }
     if (argsPtrItem->Contains("style")) {
-        auto borderStyle = argsPtrItem->GetInt("style", static_cast<int32_t>(BorderStyle::SOLID));
-        SetBorderStyle(borderStyle);
+        auto styleArgs = argsPtrItem->GetValue("style");
+        ParseBorderStyle(styleArgs);
     }
     info.ReturnSelf();
 }
 
 void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
+        JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsBorderWidth", info, checkList)) {
         return;
     }
-    Dimension borderWidth;
-    if (!ParseJsDimensionVp(info[0], borderWidth)) {
-        return;
+
+    std::unique_ptr<JsonValue> argsPtrItem;
+    if (info[0]->IsObject()) {
+        argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+        if (!argsPtrItem || argsPtrItem->IsNull()) {
+            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+            return;
+        }
+    } else {
+        argsPtrItem = JsonUtil::Create(true);
+        argsPtrItem->Put("left", info[0]->ToString().c_str());
+        argsPtrItem->Put("right", info[0]->ToString().c_str());
+        argsPtrItem->Put("top", info[0]->ToString().c_str());
+        argsPtrItem->Put("bottom", info[0]->ToString().c_str());
+    }
+    ParseBorderWidth(argsPtrItem);
+}
+
+void JSViewAbstract::ParseBorderWidth(std::unique_ptr<JsonValue>& args)
+{
+    Dimension leftDimen;
+    Dimension rightDimen;
+    Dimension topDimen;
+    Dimension bottomDimen;
+    if (args->Contains("left") || args->Contains("right") || args->Contains("top") || args->Contains("bottom")) {
+        leftDimen = BoxComponentHelper::GetBorderLeftWidth(GetBackDecoration());
+        rightDimen = BoxComponentHelper::GetBorderRightWidth(GetBackDecoration());
+        topDimen = BoxComponentHelper::GetBorderTopWidth(GetBackDecoration());
+        bottomDimen = BoxComponentHelper::GetBorderBottomWidth(GetBackDecoration());
+        ParseJsonDimensionVp(args->GetValue("left"), leftDimen);
+        ParseJsonDimensionVp(args->GetValue("right"), rightDimen);
+        ParseJsonDimensionVp(args->GetValue("top"), topDimen);
+        ParseJsonDimensionVp(args->GetValue("bottom"), bottomDimen);
+    } else {
+        Dimension borderWidth;
+        if (!ParseJsonDimensionVp(args, borderWidth)) {
+            return;
+        }
+        leftDimen = borderWidth;
+        rightDimen = borderWidth;
+        topDimen = borderWidth;
+        bottomDimen = borderWidth;
     }
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
-    if (!ViewStackProcessor::GetInstance()->IsVisualStateSet()) {
-        BoxComponentHelper::SetBorderWidth(GetBackDecoration(), borderWidth, option);
+    if (!stack->IsVisualStateSet()) {
+        BoxComponentHelper::SetBorderWidth(GetBackDecoration(), leftDimen, rightDimen, topDimen, bottomDimen, option);
     } else {
         auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
-        boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>
-            (BoxStateAttribute::BORDER_WIDTH, AnimatableDimension(borderWidth, option), stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->
-            HasAttribute(BoxStateAttribute::BORDER_WIDTH, VisualState::NORMAL)) {
-            boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
-                BoxStateAttribute::BORDER_WIDTH,
+        if (!boxComponent) {
+            LOGE("boxComponent is null");
+            return;
+        }
+        boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+            BoxStateAttribute::BORDER_WIDTH, AnimatableDimension(leftDimen, option), stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::BORDER_WIDTH, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_WIDTH,
                 AnimatableDimension(BoxComponentHelper::GetBorderWidth(GetBackDecoration()), option),
                 VisualState::NORMAL);
         }
     }
 }
 
-void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
+void JSViewAbstract::JsBorderColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
+        JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsBorderColor", info, checkList)) {
         return;
     }
-    Dimension borderRadius;
-    if (!ParseJsDimensionVp(info[0], borderRadius)) {
-        return;
+
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    if (info[0]->IsObject()) {
+        argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+        if (!argsPtrItem || argsPtrItem->IsNull()) {
+            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+            return;
+        }
+    } else {
+        argsPtrItem = JsonUtil::Create(true);
+        argsPtrItem->Put("left", info[0]->ToString().c_str());
+        argsPtrItem->Put("right", info[0]->ToString().c_str());
+        argsPtrItem->Put("top", info[0]->ToString().c_str());
+        argsPtrItem->Put("bottom", info[0]->ToString().c_str());
+    }
+    ParseBorderColor(argsPtrItem);
+}
+
+void JSViewAbstract::ParseBorderColor(std::unique_ptr<JsonValue>& args)
+{
+    Color topColor;
+    Color bottomColor;
+    Color leftColor;
+    Color rightColor;
+    if (args->Contains("left") || args->Contains("right") || args->Contains("top") || args->Contains("bottom")) {
+        leftColor = BoxComponentHelper::GetBorderColorLeft(GetBackDecoration());
+        rightColor = BoxComponentHelper::GetBorderColorRight(GetBackDecoration());
+        topColor = BoxComponentHelper::GetBorderColorTop(GetBackDecoration());
+        bottomColor = BoxComponentHelper::GetBorderColorBottom(GetBackDecoration());
+        ParseJsonColor(args->GetValue("left"), leftColor);
+        ParseJsonColor(args->GetValue("right"), rightColor);
+        ParseJsonColor(args->GetValue("top"), topColor);
+        ParseJsonColor(args->GetValue("bottom"), bottomColor);
+    } else {
+        Color borderColor;
+        if (!ParseJsonColor(args, borderColor)) {
+            return;
+        }
+        leftColor = borderColor;
+        rightColor = borderColor;
+        topColor = borderColor;
+        bottomColor = borderColor;
     }
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
-        SetBorderRadius(borderRadius, option);
+        BoxComponentHelper::SetBorderColor(GetBackDecoration(), leftColor, rightColor, topColor, bottomColor, option);
     } else {
         auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
-        boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_RADIUS,
-            AnimatableDimension(borderRadius, option), stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->
-            HasAttribute(BoxStateAttribute::BORDER_RADIUS, VisualState::NORMAL)) {
-            boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_RADIUS,
-            AnimatableDimension(
-                BoxComponentHelper::GetBorderRadius(GetBackDecoration()).GetX(), option), VisualState::NORMAL);
+        if (!boxComponent) {
+            LOGE("boxComponent is null");
+            return;
+        }
+        boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(
+            BoxStateAttribute::BORDER_COLOR, AnimatableColor(leftColor, option), stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::BORDER_COLOR, VisualState::NORMAL)) {
+            auto c = BoxComponentHelper::GetBorderColor(GetBackDecoration());
+            boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(
+                BoxStateAttribute::BORDER_COLOR, AnimatableColor(c, option), VisualState::NORMAL);
+        }
+    }
+}
+
+void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
+        JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsBorderRadius", info, checkList)) {
+        return;
+    }
+
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    if (info[0]->IsObject()) {
+        argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+        if (!argsPtrItem || argsPtrItem->IsNull()) {
+            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+            return;
+        }
+    } else {
+        argsPtrItem = JsonUtil::Create(true);
+        argsPtrItem->Put("topLeft", info[0]->ToString().c_str());
+        argsPtrItem->Put("topRight", info[0]->ToString().c_str());
+        argsPtrItem->Put("bottomLeft", info[0]->ToString().c_str());
+        argsPtrItem->Put("bottomRight", info[0]->ToString().c_str());
+    }
+    ParseBorderRadius(argsPtrItem);
+}
+
+void JSViewAbstract::ParseBorderRadius(std::unique_ptr<JsonValue>& args)
+{
+    Dimension radiusTopLeft;
+    Dimension radiusTopRight;
+    Dimension radiusBottomLeft;
+    Dimension radiusBottomRight;
+    if (args->Contains("topLeft") || args->Contains("topRight") || args->Contains("bottomLeft") ||
+        args->Contains("bottomRight")) {
+        radiusTopLeft = BoxComponentHelper::GetBorderRadiusTopLeft(GetBackDecoration()).GetX();
+        radiusTopRight = BoxComponentHelper::GetBorderRadiusTopRight(GetBackDecoration()).GetX();
+        radiusBottomLeft = BoxComponentHelper::GetBorderRadiusBottomLeft(GetBackDecoration()).GetX();
+        radiusBottomRight = BoxComponentHelper::GetBorderRadiusBottomRight(GetBackDecoration()).GetX();
+        ParseJsonDimensionVp(args->GetValue("topLeft"), radiusTopLeft);
+        ParseJsonDimensionVp(args->GetValue("topRight"), radiusTopRight);
+        ParseJsonDimensionVp(args->GetValue("bottomLeft"), radiusBottomLeft);
+        ParseJsonDimensionVp(args->GetValue("bottomRight"), radiusBottomRight);
+    } else {
+        Dimension borderRadius;
+        if (!ParseJsonDimensionVp(args, borderRadius)) {
+            return;
+        }
+        radiusTopLeft = borderRadius;
+        radiusTopRight = borderRadius;
+        radiusBottomLeft = borderRadius;
+        radiusBottomRight = borderRadius;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    AnimationOption option = stack->GetImplicitAnimationOption();
+    if (!stack->IsVisualStateSet()) {
+        BoxComponentHelper::SetBorderRadius(
+            GetBackDecoration(), radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight, option);
+    } else {
+        auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
+        if (!boxComponent) {
+            LOGE("boxComponent is null");
+            return;
+        }
+        boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+            BoxStateAttribute::BORDER_RADIUS, AnimatableDimension(radiusTopLeft, option), stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::BORDER_RADIUS, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
+                BoxStateAttribute::BORDER_RADIUS, AnimatableDimension(radiusTopLeft, option), VisualState::NORMAL);
+        }
+    }
+}
+
+void JSViewAbstract::JsBorderStyle(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
+        JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsBorderStyle", info, checkList)) {
+        return;
+    }
+
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    if (info[0]->IsObject()) {
+        argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+        if (!argsPtrItem || argsPtrItem->IsNull()) {
+            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+            return;
+        }
+    } else {
+        argsPtrItem = JsonUtil::Create(true);
+        argsPtrItem->Put("left", info[0]->ToString().c_str());
+        argsPtrItem->Put("right", info[0]->ToString().c_str());
+        argsPtrItem->Put("top", info[0]->ToString().c_str());
+        argsPtrItem->Put("bottom", info[0]->ToString().c_str());
+    }
+    ParseBorderStyle(argsPtrItem);
+}
+
+void JSViewAbstract::ParseBorderStyle(std::unique_ptr<JsonValue>& args)
+{
+    BorderStyle styleLeft;
+    BorderStyle styleRight;
+    BorderStyle styleTop;
+    BorderStyle styleBottom;
+    if (args->Contains("left") || args->Contains("right") || args->Contains("top") || args->Contains("bottom")) {
+        styleLeft = static_cast<BorderStyle>(
+            args->GetInt("left", static_cast<int32_t>(BoxComponentHelper::GetBorderStyleLeft(GetBackDecoration()))));
+        styleRight = static_cast<BorderStyle>(
+            args->GetInt("right", static_cast<int32_t>(BoxComponentHelper::GetBorderStyleRight(GetBackDecoration()))));
+        styleTop = static_cast<BorderStyle>(
+            args->GetInt("top", static_cast<int32_t>(BoxComponentHelper::GetBorderStyleTop(GetBackDecoration()))));
+        styleBottom = static_cast<BorderStyle>(args->GetInt(
+            "bottom", static_cast<int32_t>(BoxComponentHelper::GetBorderStyleBottom(GetBackDecoration()))));
+    } else {
+        BorderStyle borderStyle;
+        if (!args->IsNumber()) {
+            return;
+        }
+        borderStyle = static_cast<BorderStyle>(args->GetInt());
+        styleLeft = borderStyle;
+        styleRight = borderStyle;
+        styleTop = borderStyle;
+        styleBottom = borderStyle;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    AnimationOption option = stack->GetImplicitAnimationOption();
+    if (!stack->IsVisualStateSet()) {
+        BoxComponentHelper::SetBorderStyle(GetBackDecoration(), styleLeft, styleRight, styleTop, styleBottom);
+    } else {
+        auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
+        if (!boxComponent) {
+            LOGE("boxComponent is null");
+            return;
+        }
+        boxComponent->GetStateAttributes()->AddAttribute<BorderStyle>(
+            BoxStateAttribute::BORDER_STYLE, styleLeft, stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::BORDER_STYLE, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<BorderStyle>(BoxStateAttribute::BORDER_STYLE,
+                BoxComponentHelper::GetBorderStyle(GetBackDecoration()), VisualState::NORMAL);
         }
     }
 }
@@ -2039,7 +2219,7 @@ void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsWindowBlur", info, checkList)) {
         return;
     }
@@ -2309,7 +2489,7 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
         LOGE("JSImage::Create ParseJsMedia type is wrong");
         return false;
     }
-    LOGE("input value is not string or number, using PixelMap");
+    LOGI("input value is not string or number, using PixelMap");
     return false;
 }
 
@@ -2386,7 +2566,7 @@ bool JSViewAbstract::ParseJsInteger(const JSRef<JSVal>& jsValue, uint32_t& resul
     }
 
     if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        result = themeConstants->GetInt(resId->ToNumber<uint32_t>());
+        result = static_cast<uint32_t>(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
         return true;
     } else {
         return false;
@@ -2503,7 +2683,7 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
 
 std::pair<Dimension, Dimension> JSViewAbstract::ParseSize(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("ParseSize", info, checkList)) {
         return std::pair<Dimension, Dimension>();
     }
@@ -2578,7 +2758,7 @@ void JSViewAbstract::JsUseAlign(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsGridSpan(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::NUMBER};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsGridSpan", info, checkList)) {
         return;
     }
@@ -2629,7 +2809,7 @@ static bool ParseSpanAndOffset(const JSRef<JSVal>& val, uint32_t& span, int32_t&
 
 void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsUseSizeType", info, checkList)) {
         return;
     }
@@ -2683,14 +2863,14 @@ void JSViewAbstract::Pop()
 
 void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::FUNCTION};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
     if (!CheckJSCallbackInfo("JsOnDragStart", info, checkList)) {
         return;
     }
 
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
-                        const RefPtr<DragEvent>& info, const std::string &extraParams) -> DragItemInfo {
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
         DragItemInfo itemInfo;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
 
@@ -2754,13 +2934,13 @@ RefPtr<Component> JSViewAbstract::ParseDragItemComponent(const JSRef<JSVal>& inf
 
 void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::FUNCTION};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
     if (!CheckJSCallbackInfo("JsOnDragEnter", info, checkList)) {
         return;
     }
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
-                            const RefPtr<DragEvent>& info, const std::string &extraParams) {
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragEnter");
         func->Execute(info, extraParams);
@@ -2771,13 +2951,13 @@ void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnDragMove(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::FUNCTION};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
     if (!CheckJSCallbackInfo("JsOnDragMove", info, checkList)) {
         return;
     }
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
-                            const RefPtr<DragEvent>& info, const std::string &extraParams) {
+                            const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragMove");
         func->Execute(info, extraParams);
@@ -2788,13 +2968,13 @@ void JSViewAbstract::JsOnDragMove(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnDragLeave(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::FUNCTION};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
     if (!CheckJSCallbackInfo("JsOnDragLeave", info, checkList)) {
         return;
     }
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
-                            const RefPtr<DragEvent>& info, const std::string &extraParams) {
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragLeave");
         func->Execute(info, extraParams);
@@ -2805,13 +2985,13 @@ void JSViewAbstract::JsOnDragLeave(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::FUNCTION};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
     if (!CheckJSCallbackInfo("JsOnDrop", info, checkList)) {
         return;
     }
     RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
-                        const RefPtr<DragEvent>& info, const std::string &extraParams) {
+                        const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDrop");
         func->Execute(info, extraParams);
@@ -2822,7 +3002,7 @@ void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::FUNCTION};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
     if (!CheckJSCallbackInfo("JsOnAreaChange", info, checkList)) {
         return;
     }
@@ -2835,6 +3015,10 @@ void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
         func->Execute(oldRect, oldOrigin, rect, origin);
     };
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    if (!boxComponent) {
+        LOGE("boxComponent is null");
+        return;
+    }
     boxComponent->GetEventExtensions()->GetOnAreaChangeExtension()->AddOnAreaChangeEvent(
         std::move(onAreaChangeCallback));
 }
@@ -2866,6 +3050,9 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
     if (!popupParam) {
         return;
     }
+
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    popupParam->SetTargetMargin(boxComponent->GetMargin());
 
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     if (!inspector) {
@@ -2969,19 +3156,22 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
         }
     } else {
         auto boxComponent = stack->GetBoxComponent();
-        boxComponent->GetStateAttributes()->AddAttribute<Gradient>
-            (BoxStateAttribute::GRADIENT, lineGradient, stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->
-            HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
-            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(BoxStateAttribute::GRADIENT,
-                GetBackDecoration()->GetGradient(), VisualState::NORMAL);
+        if (!boxComponent) {
+            LOGE("boxComponent is null");
+            return;
+        }
+        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+            BoxStateAttribute::GRADIENT, lineGradient, stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
         }
     }
 }
 
 void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsRadialGradient", info, checkList)) {
         return;
     }
@@ -3037,19 +3227,22 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
         }
     } else {
         auto boxComponent = stack->GetBoxComponent();
-        boxComponent->GetStateAttributes()->AddAttribute<Gradient>
-            (BoxStateAttribute::GRADIENT, radialGradient, stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->
-            HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
-            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(BoxStateAttribute::GRADIENT,
-                GetBackDecoration()->GetGradient(), VisualState::NORMAL);
+        if (!boxComponent) {
+            LOGE("boxComponent is null");
+            return;
+        }
+        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+            BoxStateAttribute::GRADIENT, radialGradient, stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
         }
     }
 }
 
 void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsSweepGradient", info, checkList)) {
         return;
     }
@@ -3118,19 +3311,22 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
         }
     } else {
         auto boxComponent = stack->GetBoxComponent();
-        boxComponent->GetStateAttributes()->AddAttribute<Gradient>
-            (BoxStateAttribute::GRADIENT, sweepGradient, stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->
-            HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
-            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(BoxStateAttribute::GRADIENT,
-                GetBackDecoration()->GetGradient(), VisualState::NORMAL);
+        if (!boxComponent) {
+            LOGE("boxComponent is null");
+            return;
+        }
+        boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+            BoxStateAttribute::GRADIENT, sweepGradient, stack->GetVisualState());
+        if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::GRADIENT, VisualState::NORMAL)) {
+            boxComponent->GetStateAttributes()->AddAttribute<Gradient>(
+                BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
         }
     }
 }
 
 void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsMotionPath", info, checkList)) {
         return;
     }
@@ -3149,7 +3345,7 @@ void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::OBJECT};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsShadow", info, checkList)) {
         return;
     }
@@ -3390,8 +3586,10 @@ void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
             ACE_SCORING_EVENT("onFocusMove");
             func->Execute(info);
         };
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-        focusableComponent->SetOnFocusMove(onFocusMove);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        if (focusableComponent) {
+            focusableComponent->SetOnFocusMove(onFocusMove);
+        }
     }
 }
 
@@ -3404,8 +3602,10 @@ void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
             ACE_SCORING_EVENT("onFocus");
             func->Execute();
         };
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-        focusableComponent->SetOnFocus(onFocus);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        if (focusableComponent) {
+            focusableComponent->SetOnFocus(onFocus);
+        }
     }
 }
 
@@ -3418,8 +3618,10 @@ void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)
             ACE_SCORING_EVENT("onBlur");
             func->Execute();
         };
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-        focusableComponent->SetOnBlur(onBlur_);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        if (focusableComponent) {
+            focusableComponent->SetOnBlur(onBlur_);
+        }
     }
 }
 
@@ -3447,7 +3649,7 @@ void JSViewAbstract::JsRestoreId(int32_t restoreId)
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList {JSCallbackInfoType::STRING};
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
     if (!CheckJSCallbackInfo("JsDebugLine", info, checkList)) {
         return;
     }
@@ -3524,7 +3726,9 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     if (!menuComponent) {
         return;
     }
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
     menuComponent->SetIsContextMenu(true);
+#endif
     int32_t responseType = static_cast<int32_t>(ResponseType::LONGPRESS);
     if (info.Length() == 2 && info[1]->IsNumber()) {
         responseType = info[1]->ToNumber<int32_t>();
@@ -3540,20 +3744,28 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
             }
             if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
                 auto showMenu = refPtr->GetTargetCallback();
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
                 showMenu("", info.GetScreenLocation());
+#else
+                showMenu("", info.GetGlobalLocation());
+#endif
             }
         });
     } else if (responseType == static_cast<int32_t>(ResponseType::LONGPRESS)) {
         auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        RefPtr<Gesture> longGesture =
-            AceType::MakeRefPtr<LongPressGesture>(DEFAULT_LONG_PRESS_FINGER, false, DEFAULT_LONG_PRESS_DURATION);
+        RefPtr<Gesture> longGesture = AceType::MakeRefPtr<LongPressGesture>(
+            DEFAULT_LONG_PRESS_FINGER, false, DEFAULT_LONG_PRESS_DURATION, false, true);
         longGesture->SetOnActionId([weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent)](const GestureEvent& info) {
             auto refPtr = weak.Upgrade();
             if (!refPtr) {
                 return;
             }
             auto showMenu = refPtr->GetTargetCallback();
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
             showMenu("", info.GetScreenLocation());
+#else
+            showMenu("", info.GetGlobalLocation());
+#endif
         });
         box->SetOnLongPress(longGesture);
     } else {
@@ -3631,11 +3843,11 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("backgroundImage", &JSViewAbstract::JsBackgroundImage);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImageSize", &JSViewAbstract::JsBackgroundImageSize);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImagePosition", &JSViewAbstract::JsBackgroundImagePosition);
-    JSClass<JSViewAbstract>::StaticMethod("borderStyle", &JSViewAbstract::SetBorderStyle, opt);
-    JSClass<JSViewAbstract>::StaticMethod("borderColor", &JSViewAbstract::JsBorderColor);
     JSClass<JSViewAbstract>::StaticMethod("border", &JSViewAbstract::JsBorder);
     JSClass<JSViewAbstract>::StaticMethod("borderWidth", &JSViewAbstract::JsBorderWidth);
+    JSClass<JSViewAbstract>::StaticMethod("borderColor", &JSViewAbstract::JsBorderColor);
     JSClass<JSViewAbstract>::StaticMethod("borderRadius", &JSViewAbstract::JsBorderRadius);
+    JSClass<JSViewAbstract>::StaticMethod("borderStyle", &JSViewAbstract::JsBorderStyle);
 
     JSClass<JSViewAbstract>::StaticMethod("scale", &JSViewAbstract::JsScale);
     JSClass<JSViewAbstract>::StaticMethod("scaleX", &JSViewAbstract::JsScaleX);
@@ -3750,35 +3962,6 @@ RefPtr<Decoration> JSViewAbstract::GetBackDecoration()
 void JSViewAbstract::SetBorderRadius(const Dimension& value, const AnimationOption& option)
 {
     BoxComponentHelper::SetBorderRadius(GetBackDecoration(), value, option);
-}
-
-void JSViewAbstract::SetBorderStyle(int32_t style)
-{
-    BorderStyle borderStyle = BorderStyle::SOLID;
-
-    if (static_cast<int32_t>(BorderStyle::SOLID) == style) {
-        borderStyle = BorderStyle::SOLID;
-    } else if (static_cast<int32_t>(BorderStyle::DASHED) == style) {
-        borderStyle = BorderStyle::DASHED;
-    } else if (static_cast<int32_t>(BorderStyle::DOTTED) == style) {
-        borderStyle = BorderStyle::DOTTED;
-    } else {
-        borderStyle = BorderStyle::NONE;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    if (!stack->IsVisualStateSet()) {
-        BoxComponentHelper::SetBorderStyle(GetBackDecoration(), borderStyle);
-    } else {
-        auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
-        boxComponent->GetStateAttributes()->AddAttribute<BorderStyle>
-            (BoxStateAttribute::BORDER_STYLE, borderStyle, stack->GetVisualState());
-        if (!boxComponent->GetStateAttributes()->
-            HasAttribute(BoxStateAttribute::BORDER_STYLE, VisualState::NORMAL)) {
-            boxComponent->GetStateAttributes()->AddAttribute<BorderStyle>(BoxStateAttribute::BORDER_STYLE,
-                BoxComponentHelper::GetBorderStyle(GetBackDecoration()), VisualState::NORMAL);
-        }
-    }
 }
 
 void JSViewAbstract::SetMarginTop(const JSCallbackInfo& info)
@@ -4176,6 +4359,10 @@ void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
         return;
     }
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    if (!boxComponent) {
+        LOGE("boxComponent is null");
+        return;
+    }
     boxComponent->SetMouseAnimationType(static_cast<HoverAnimationType>(info[0]->ToNumber<int32_t>()));
 }
 

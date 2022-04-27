@@ -16,6 +16,9 @@
 #include "adapter/preview/entrance/ace_ability.h"
 
 #include <thread>
+#ifdef INIT_ICU_DATA_PATH
+#include "unicode/putil.h"
+#endif
 
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/entrance/ace_container.h"
@@ -25,6 +28,14 @@
 #include "frameworks/core/components/common/painter/flutter_svg_painter.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/src/ports/SkFontMgr_config_parser.h"
+#include "adapter/preview/entrance/editing/text_input_client_mgr.h"
+#include "adapter/preview/entrance/clipboard/clipboard_impl.h"
+#include "adapter/preview/entrance/clipboard/clipboard_proxy_impl.h"
+#include "core/common/clipboard/clipboard_proxy.h"
+
+#ifdef USE_GLFW_WINDOW
+#include "adapter/preview/entrance/editing/text_input_plugin.h"
+#endif
 
 namespace OHOS::Ace::Platform {
 
@@ -80,7 +91,7 @@ void SetPhysicalDeviceFonts(bool& physicalDeviceFontsEnabled)
 
 void SetFontBasePath(std::string& basePath)
 {
-    LOGI("Physical devices font base path is %s", basePath.c_str());
+    LOGI("Set basic path of physical device font");
     basePath = basePath.append(DELIMITER);
     SkFontMgr_Config_Parser::setFontBasePathCallback(basePath);
 }
@@ -110,13 +121,13 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     });
     if (runArgs_.formsEnabled) {
         LOGI("CreateContainer with JS_CARD frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS_CARD);
+        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS_CARD, runArgs_);
     } else if (runArgs_.aceVersion == AceVersion::ACE_1_0) {
         LOGI("CreateContainer with JS frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS);
+        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS, runArgs_);
     } else if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
         LOGI("CreateContainer with JSDECLARATIVE frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::DECLARATIVE_JS);
+        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::DECLARATIVE_JS, runArgs_);
     } else {
         LOGE("UnKnown frontend type");
     }
@@ -132,7 +143,6 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     resConfig.SetDensity(SystemProperties::GetResolution());
     resConfig.SetDeviceType(SystemProperties::GetDeviceType());
     container->SetResourceConfiguration(resConfig);
-    container->SetPageProfile((runArgs_.projectModel == ProjectModel::STAGE) ? runArgs_.pageProfile + ".json" : "");
 }
 
 AceAbility::~AceAbility()
@@ -169,6 +179,24 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
 
     auto controller = FlutterDesktopCreateWindow(
         runArgs.deviceWidth, runArgs.deviceHeight, runArgs.windowTitle.c_str(), runArgs.onRender);
+#ifdef USE_GLFW_WINDOW
+    std::unique_ptr<TextInputPlugin> textInputPlugin = std::make_unique<TextInputPlugin>();
+    textInputPlugin->RegisterKeyboardHookCallback((KeyboardHookCallback) AceAbility::DispatchKeyEvent);
+    textInputPlugin->RegisterCharHookCallback((CharHookCallback) AceAbility::DispatchInputMethodEvent);
+    FlutterDesktopAddKeyboardHookHandler(controller, std::move(textInputPlugin));
+
+    auto callbackSetClipboardData = [controller](const std::string& data) {
+        FlutterDesktopSetClipboardData(controller, data.c_str());
+    };
+    auto callbackGetClipboardData = [controller]() {
+        return FlutterDesktopGetClipboardData(controller);
+    };
+    ClipboardProxy::GetInstance()->SetDelegate(
+        std::make_unique<ClipboardProxyImpl>(callbackSetClipboardData, callbackGetClipboardData));
+#endif
+    // Initial the proxy of Input method
+    TextInputClientMgr::GetInstance().InitTextInputProxy();
+
     auto aceAbility = std::make_unique<AceAbility>(runArgs);
     aceAbility->SetGlfwWindowController(controller);
     return aceAbility;
@@ -176,18 +204,35 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
 
 void AceAbility::InitEnv()
 {
-    if (runArgs_.projectModel == ProjectModel::STAGE) {
-        std::string appResourcesPath(runArgs_.appResourcesPath);
-        if (!OHOS::Ace::Framework::EndWith(appResourcesPath, DELIMITER)) {
-            appResourcesPath.append(DELIMITER);
-        }
-        AceContainer::AddAssetPath(ACE_INSTANCE_ID,
-            "", { runArgs_.assetPath, appResourcesPath.append(ASSET_PATH_SHARE_STAGE) });
-    } else {
-        AceContainer::AddAssetPath(ACE_INSTANCE_ID,
-            "", { runArgs_.assetPath, GetCustomAssetPath(runArgs_.assetPath).append(ASSET_PATH_SHARE) });
+#ifdef INIT_ICU_DATA_PATH
+    std::string icuPath = ".";
+    u_setDataDirectory(icuPath.c_str());
+#endif
+    std::vector<std::string> paths;
+    paths.push_back(runArgs_.assetPath);
+    std::string appResourcesPath(runArgs_.appResourcesPath);
+    if (!OHOS::Ace::Framework::EndWith(appResourcesPath, DELIMITER)) {
+        appResourcesPath.append(DELIMITER);
     }
+    if (runArgs_.projectModel == ProjectModel::STAGE) {
+        paths.push_back(appResourcesPath + ASSET_PATH_SHARE_STAGE);
+    } else {
+        paths.push_back(GetCustomAssetPath(runArgs_.assetPath) + ASSET_PATH_SHARE);
+    }
+    AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
 
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGE("container is null, initialize the environment failed.");
+        return;
+    }
+    if (runArgs_.projectModel == ProjectModel::STAGE) {
+        if (runArgs_.formsEnabled) {
+            container->SetStageCardConfig(runArgs_.pageProfile, runArgs_.url);
+        } else {
+            container->SetPageProfile((runArgs_.pageProfile.empty() ? "" : runArgs_.pageProfile + ".json"));
+        }
+    }
     AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.systemResourcesPath,
         runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
 
@@ -208,7 +253,6 @@ void AceAbility::InitEnv()
     // Should make it possible to update surface changes by using viewWidth and viewHeight.
     view->NotifySurfaceChanged(runArgs_.deviceWidth, runArgs_.deviceHeight);
     view->NotifyDensityChanged(runArgs_.deviceConfig.density);
-
 }
 
 void AceAbility::Start()
@@ -324,6 +368,39 @@ bool AceAbility::DispatchBackPressedEvent()
         backPromise.set_value(canBack);
     }, TaskExecutor::TaskType::PLATFORM);
     return backFuture.get();
+}
+
+bool AceAbility::DispatchInputMethodEvent(unsigned int code_point)
+{
+    return TextInputClientMgr::GetInstance().AddCharacter(static_cast<wchar_t>(code_point));
+}
+
+bool AceAbility::DispatchKeyEvent(const KeyEvent& event)
+{
+    if (TextInputClientMgr::GetInstance().HandleKeyEvent(event)) {
+        LOGI("The event is related to the input component and has been handled successfully.");
+        return true;
+    }
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGE("container is null");
+        return false;
+    }
+
+    auto aceView = container->GetAceView();
+    if (!aceView) {
+        LOGE("aceView is null");
+        return false;
+    }
+
+    bool isHandled;
+    container->GetTaskExecutor()->PostTask(
+        [aceView, event, &isHandled]() {
+            isHandled = aceView->HandleKeyEvent(event);
+        },
+        TaskExecutor::TaskType::UI);
+
+    return isHandled;
 }
 
 void AceAbility::SetConfigChanges(const std::string& configChanges)
@@ -466,8 +543,8 @@ std::string AceAbility::GetDefaultJSONTree()
 bool AceAbility::OperateComponent(const std::string& attrsJson)
 {
     // fastPreview not support databind
-    if (attrsJson.find("this.") != std::string::npos) {
-        LOGE("fastPreview is not support databind,the attrsJson contains 'this.'");
+    if (attrsJson.find("this.") != std::string::npos || attrsJson.find("$r") != std::string::npos) {
+        LOGE("fastPreview is not support databind,the attrsJson contains 'this.' or '$r'");
         return false;
     }
 
@@ -480,7 +557,8 @@ bool AceAbility::OperateComponent(const std::string& attrsJson)
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     auto taskExecutor = container->GetTaskExecutor();
     taskExecutor->PostTask(
-        [attrsJson] {
+        [attrsJson, instanceId = ACE_INSTANCE_ID] {
+          ContainerScope scope(instanceId);
           bool result = OHOS::Ace::Framework::InspectorClient::GetInstance().OperateComponent(attrsJson);
           if (!result) {
               OHOS::Ace::Framework::InspectorClient::GetInstance().CallFastPreviewErrorCallback(attrsJson);

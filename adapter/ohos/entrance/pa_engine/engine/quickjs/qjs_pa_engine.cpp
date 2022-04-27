@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -594,12 +594,12 @@ inline std::string GetJsStringVal(JSContext* ctx, JSValueConst value)
 
 inline std::string ToJSONStringInt(std::string sKey, std::string sValue)
 {
-    char szDoubleQutoes[] = "\"";
+    char szDoubleQuotes[] = "\"";
     char szColon[] = ":";
     std::string strResult;
-    strResult.append(szDoubleQutoes);
+    strResult.append(szDoubleQuotes);
     strResult.append(sKey);
-    strResult.append(szDoubleQutoes);
+    strResult.append(szDoubleQuotes);
 
     strResult.append(szColon);
     strResult.append(sValue);
@@ -608,17 +608,17 @@ inline std::string ToJSONStringInt(std::string sKey, std::string sValue)
 
 inline std::string ToJSONString(std::string sKey, std::string sValue)
 {
-    char szDoubleQutoes[] = "\"";
+    char szDoubleQuotes[] = "\"";
     char szColon[] = ":";
     std::string strResult;
-    strResult.append(szDoubleQutoes);
+    strResult.append(szDoubleQuotes);
     strResult.append(sKey);
-    strResult.append(szDoubleQutoes);
+    strResult.append(szDoubleQuotes);
 
     strResult.append(szColon);
-    strResult.append(szDoubleQutoes);
+    strResult.append(szDoubleQuotes);
     strResult.append(sValue);
-    strResult.append(szDoubleQutoes);
+    strResult.append(szDoubleQuotes);
     return strResult;
 }
 
@@ -649,7 +649,7 @@ void QjsPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
 
     JS_FreeValue(ctx, CppToJSRet);
 
-    // call onstart
+    // call onStart
     JSValue paObj;
     paObj = Framework::QJSUtils::GetPropertyStr(ctx, globalObj, "pa");
     if (!JS_IsObject(paObj)) {
@@ -701,7 +701,7 @@ void QjsPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
             AppExecFwk::ConvertAbilityInfo(reinterpret_cast<napi_env>(nativeEngine_), abilityInfoInstance);
 
         NativeValue* abilityInfoNative = reinterpret_cast<NativeValue*>(abilityInfoNapi);
-        JSValue abilityInfoJS = (JSValue)*abilityInfoNative;
+        JSValue abilityInfoJS = static_cast<JSValue>(*abilityInfoNative);
         JSValueConst argv[] = { abilityInfoJS };
         retVal = Framework::QJSUtils::Call(ctx, paStartFunc, paObj, countof(argv), argv);
     } else {
@@ -1481,14 +1481,18 @@ void QjsPaEngine::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEven
     return;
 }
 
-void QjsPaEngine::OnAcquireState(const OHOS::AAFwk::Want& want)
+int32_t QjsPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want& want)
 {
-    LOGI("PA: QjsPaEngine OnAcquireState");
+    LOGI("PA: QjsPaEngine OnAcquireFormState");
     JSContext* ctx = engineInstance_->GetQjsContext();
     ACE_DCHECK(ctx);
 
     Framework::QJSHandleScope handleScope(ctx);
-    JSValue paFunc = GetPaFunc("onAcquireState");
+    JSValue paFunc = GetPaFunc("onAcquireFormState");
+    if (JS_IsUndefined(paFunc)) {
+        LOGI("no OnAcquireFormState!");
+        return (int32_t)AppExecFwk::FormState::DEFAULT;
+    }
 
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine_), want);
     NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
@@ -1496,10 +1500,18 @@ void QjsPaEngine::OnAcquireState(const OHOS::AAFwk::Want& want)
     JSValueConst argv[] = { jsWant };
     JSValue retVal = Framework::QJSUtils::Call(ctx, paFunc, JS_UNDEFINED, countof(argv), argv);
     if (JS_IsException(retVal)) {
-        LOGE("PA: OnAcquireState FAILED!");
-        return;
+        LOGE("PA: OnAcquireFormState FAILED!");
+        return (int32_t)AppExecFwk::FormState::DEFAULT;
     }
-    return;
+
+    if (!JS_IsNumber(retVal)) {
+        LOGE("invalid return value!");
+        return (int32_t)AppExecFwk::FormState::DEFAULT;
+    }
+
+    int32_t formState = GetJsInt32Val(ctx, retVal);
+    LOGI("JsiPaEngine OnAcquireFormState, formState: %{public}d", formState);
+    return formState;
 }
 
 void QjsPaEngine::OnCommand(const OHOS::AAFwk::Want &want, int startId)
@@ -1536,4 +1548,4 @@ void QjsPaEngine::OnCommand(const OHOS::AAFwk::Want &want, int startId)
     JS_FreeValue(ctx, retVal);
 }
 
-} // namespace OHOS::Ace::Framework
+} // namespace OHOS::Ace

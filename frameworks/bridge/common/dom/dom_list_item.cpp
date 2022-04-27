@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -348,7 +348,7 @@ void DOMListItem::ResetInitializedStyle()
             if (style.IsValid() && style.padding.IsEffective()) {
                 return;
             }
-            // Add theme padding to item when not set customised padding.
+            // Add theme padding to item when not set customized padding.
             double additionalPadding = itemTheme->GetItemPaddingInPercent();
             boxComponent_->SetPadding(Edge(), Edge(Dimension(additionalPadding, DimensionUnit::PERCENT)));
         }

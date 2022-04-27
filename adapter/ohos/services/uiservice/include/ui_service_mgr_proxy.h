@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,9 +51,12 @@ public:
                            int y,
                            int width,
                            int height,
-                           const sptr<OHOS::Ace::IDialogCallback>& dialogCallback);
+                           const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
+                           int* id = nullptr);
 
     virtual int CancelDialog(int id);
+
+    virtual int UpdateDialog(int id, const std::string& data);
 
 private:
     bool WriteInterfaceToken(MessageParcel& data);

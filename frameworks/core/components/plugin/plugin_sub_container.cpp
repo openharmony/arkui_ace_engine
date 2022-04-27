@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,9 @@
 #include "core/components/plugin/plugin_sub_container.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
+#include "core/common/container_scope.h"
 #include "core/common/plugin_manager.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "frameworks/core/common/flutter/flutter_asset_manager.h"
 #include "frameworks/core/common/flutter/flutter_task_executor.h"
@@ -43,6 +45,8 @@ const char* GetDeclarativeSharedLibrary(bool isArkApp)
 
 void PluginSubContainer::Initialize()
 {
+    ContainerScope scope(instanceId_);
+
     if (!outSidePipelineContext_.Upgrade()) {
         LOGE("no pipeline context for create plugin component container.");
         return;
@@ -83,12 +87,15 @@ void PluginSubContainer::Initialize()
 
     frontend_->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
     frontend_->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+    EngineHelper::AddEngine(instanceId_, jsEngine);
     frontend_->SetJsEngine(jsEngine);
     frontend_->Initialize(FrontendType::JS_PLUGIN, taskExecutor_);
 }
 
 void PluginSubContainer::Destroy()
 {
+    ContainerScope scope(instanceId_);
+
     if (!pipelineContext_) {
         LOGE("no context find for inner plugin");
         return;
@@ -105,27 +112,28 @@ void PluginSubContainer::Destroy()
     }
     assetManager_.Reset();
     pipelineContext_.Reset();
+    EngineHelper::RemoveEngine(instanceId_);
 }
 
 void PluginSubContainer::UpdateRootElmentSize()
 {
     auto pluginComponet = AceType::DynamicCast<PluginComponent>(pluginComponent_);
-    Dimension rootWidht = 0.0_vp;
+    Dimension rootWidth = 0.0_vp;
     Dimension rootHeight = 0.0_vp;
     if (pluginComponet) {
-        rootWidht = pluginComponet->GetWidth();
+        rootWidth = pluginComponet->GetWidth();
         rootHeight = pluginComponet->GetHeight();
     }
 
-    if (rootWidht_ == rootWidht && rootHeight == rootHeight) {
+    if (rootWidth_ == rootWidth && rootHeight_ == rootHeight) {
         LOGE("size not changed, should not change");
         return;
     }
 
-    surfaceWidth_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootWidht);
+    surfaceWidth_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootWidth);
     surfaceHeight_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootHeight);
     if (pipelineContext_) {
-        pipelineContext_->SetRootSize(density_, rootWidht.Value(), rootHeight.Value());
+        pipelineContext_->SetRootSize(density_, rootWidth.Value(), rootHeight.Value());
     }
 }
 
@@ -155,14 +163,20 @@ void PluginSubContainer::UpdateSurfaceSize()
 void PluginSubContainer::RunPlugin(
     const std::string& path, const std::string& module, const std::string& source, const std::string& data)
 {
+    ContainerScope scope(instanceId_);
+
     frontend_->ResetPageLoadState();
     auto flutterAssetManager = SetAssetManager(path, module);
 
     auto&& window = std::make_unique<PluginWindow>(outSidePipelineContext_);
     pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
-        std::move(window), taskExecutor_, assetManager_, frontend_);
+        std::move(window), taskExecutor_, assetManager_,
+        outSidePipelineContext_.Upgrade()->GetPlatformResRegister(),
+        frontend_, instanceId_);
 
     density_ = outSidePipelineContext_.Upgrade()->GetDensity();
+    auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();
+    pipelineContext_->SetEventManager(eventManager);
     UpdateRootElmentSize();
     pipelineContext_->SetIsJsPlugin(true);
 
@@ -204,6 +218,7 @@ void PluginSubContainer::RunPlugin(
     }
     pipelineContext_->SetDrawDelegate(pluginRender->GetDrawDelegate());
 
+    frontend_->SetInstanceName(module);
     frontend_->RunPage(0, source, data);
 }
 
@@ -284,9 +299,12 @@ RefPtr<FlutterAssetManager> PluginSubContainer::SetAssetManager(const std::strin
 
 void PluginSubContainer::UpdatePlugin(const std::string& content)
 {
+    ContainerScope scope(instanceId_);
+
     if (!frontend_) {
         LOGE("update plugin fial due to could not find plugin front end");
         return;
     }
+    frontend_->UpdatePlugin(content);
 }
 } // namespace OHOS::Ace

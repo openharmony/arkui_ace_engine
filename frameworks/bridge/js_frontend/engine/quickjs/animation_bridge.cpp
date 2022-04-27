@@ -254,11 +254,14 @@ JSValue AnimationBridgeUtils::JsAnimationPlayStateSet(JSContext* ctx, JSValueCon
     AnimationOperation operation = AnimationOperation::NONE;
     if (std::strcmp(playState.get(), DOM_ANIMATION_PLAY_STATE_IDLE) == 0) {
         operation = AnimationOperation::CANCEL;
-    } else if (std::strcmp(playState.get(), DOM_ANIMATION_PLAY_STATE_RUNNING) == 0) {
+    } else if (strlen(playState.get()) >= strlen(DOM_ANIMATION_PLAY_STATE_RUNNING) &&
+               std::strcmp(playState.get(), DOM_ANIMATION_PLAY_STATE_RUNNING) == 0) {
         operation = AnimationOperation::PLAY;
-    } else if (std::strcmp(playState.get(), DOM_ANIMATION_PLAY_STATE_PAUSED) == 0) {
+    } else if (strlen(playState.get()) >= strlen(DOM_ANIMATION_PLAY_STATE_PAUSED) &&
+               std::strcmp(playState.get(), DOM_ANIMATION_PLAY_STATE_PAUSED) == 0) {
         operation = AnimationOperation::PAUSE;
-    } else if (std::strcmp(playState.get(), DOM_ANIMATION_PLAY_STATE_FINISHED) == 0) {
+    } else if (strlen(playState.get()) >= strlen(DOM_ANIMATION_PLAY_STATE_FINISHED) &&
+               std::strcmp(playState.get(), DOM_ANIMATION_PLAY_STATE_FINISHED) == 0) {
         operation = AnimationOperation::FINISH;
     } else {
         operation = AnimationOperation::NONE;
@@ -313,9 +316,6 @@ void AnimationBridge::JsCreateAnimation(const RefPtr<JsAcePage>& page, const std
         tweenOption.SetDelay(iterDelay->second);
     }
     tweenOption.SetIteration(iterations);
-    if (SystemProperties::GetRosenBackendEnabled()) {
-        tweenOption.SetAllowRunningAsynchronously(true);
-    }
     if (page == nullptr) {
         LOGE("JsCreateAnimation failed, Page is null.");
         return;

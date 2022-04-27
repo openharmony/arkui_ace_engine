@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -145,7 +145,7 @@ RefPtr<FlexItemComponent> ViewStackProcessor::GetFlexItemComponent()
         return AceType::DynamicCast<FlexItemComponent>(wrappingComponentsMap["flexItem"]);
     }
 
-    RefPtr<FlexItemComponent> flexItem = AceType::MakeRefPtr<OHOS::Ace::FlexItemComponent>(0.0, 1.0, 0.0);
+    RefPtr<FlexItemComponent> flexItem = AceType::MakeRefPtr<OHOS::Ace::FlexItemComponent>(0.0, 0.0, 0.0);
     wrappingComponentsMap.emplace("flexItem", flexItem);
     return flexItem;
 }
@@ -197,6 +197,9 @@ RefPtr<BoxComponent> ViewStackProcessor::GetBoxComponent()
     }
 
     RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<OHOS::Ace::BoxComponent>();
+    if (SystemProperties::GetDebugBoundaryEnabled()) {
+        boxComponent->SetEnableDebugBoundary(true);
+    }
     wrappingComponentsMap.emplace("box", boxComponent);
     return boxComponent;
 }
@@ -326,7 +329,6 @@ RefPtr<FocusableComponent> ViewStackProcessor::GetFocusableComponent(bool create
     }
     if (createIfNotExist) {
         RefPtr<FocusableComponent> focusableComponent = AceType::MakeRefPtr<OHOS::Ace::FocusableComponent>();
-        focusableComponent->SetFocusable(true);
         wrappingComponentsMap.emplace("focusable", focusableComponent);
         return focusableComponent;
     }
@@ -561,7 +563,6 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     if (isItemComponent) {
         itemChildComponent = AceType::DynamicCast<SingleChild>(mainComponent)->GetChild();
         components.emplace_back(mainComponent);
-        Component::MergeRSNode(mainComponent);
     }
 
     auto composedComponent = GetInspectorComposedComponent();
@@ -604,8 +605,11 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     }
 
     if (isItemComponent) {
+        // rsnode merge mark:
+        //    (head)       (tail)      (unchanged)
+        // mainComponent - others - itemChildComponent
+        Component::MergeRSNode(components);
         if (itemChildComponent) {
-            Component::MergeRSNode(components, 1);
             components.emplace_back(itemChildComponent);
         }
     } else if (!components.empty() && (AceType::InstanceOf<TextureComponent>(mainComponent) ||
@@ -614,10 +618,16 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
         AceType::InstanceOf<FormComponent>(mainComponent) ||
         AceType::InstanceOf<WebComponent>(mainComponent) ||
         AceType::InstanceOf<XComponentComponent>(mainComponent))) {
+        // rsnode merge mark:
+        // (head)(tail)  (standalone)
+        //    others  -  mainComponent
         Component::MergeRSNode(components);
         Component::MergeRSNode(mainComponent);
         components.emplace_back(mainComponent);
     } else {
+        // rsnode merge mark:
+        //  (head)      (tail)
+        // (others) - mainComponent
         components.emplace_back(mainComponent);
         Component::MergeRSNode(components);
     }
@@ -647,6 +657,11 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
             if (menuComponent) {
                 coverageComponent->AppendChild(menuComponent);
             }
+        }
+
+        auto focusableComponent = AceType::DynamicCast<FocusableComponent>(components[idx - 1]);
+        if (focusableComponent) {
+            Component::MergeRSNode(components[idx], focusableComponent);
         }
     }
 

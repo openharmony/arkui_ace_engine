@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,7 +52,7 @@ void TabController::SetPageReady(bool ready)
 void TabController::SetIndex(int32_t index)
 {
     if (index_ == index || index < 0) {
-        LOGW("Input index is not valid.");
+        LOGI("SetIndex: Input index is not valid, %{public}d, %{public}d", index_, index);
         return;
     }
     indexDefined_ = true;
@@ -66,10 +66,44 @@ void TabController::SetIndex(int32_t index)
     }
 }
 
+void TabController::SetInitialIndex(int32_t index)
+{
+    if (initialIndex_ == index || index < 0) {
+        LOGI("SetInitialIndex: Input index is not valid, %{public}d, %{public}d", initialIndex_, index);
+        return;
+    }
+    initialIndex_ = index;
+}
+
+void TabController::SetIndexWithoutChangeContent(int32_t index)
+{
+    if (index_ == index || index < 0) {
+        LOGI("SetIndexWithoutChangeContent: Input index is not valid, %{public}d, %{public}d", index_, index);
+        return;
+    }
+    indexDefined_ = true;
+    index_ = index;
+}
+
+void TabController::SetPendingIndex(int32_t index)
+{
+    if (pendingIndex_ == index || index < 0) {
+        LOGI("SetPendingIndex: Input index is not valid, %{public}d, %{public}d", pendingIndex_, index);
+        return;
+    }
+    pendingIndex_ = index;
+    indexDefined_ = false;
+}
+
 void TabController::SetIndexByController(int32_t index, bool blockEvent)
 {
     if (index_ == index || index < 0) {
-        LOGW("Input index is not valid.");
+        LOGI("SetIndexByController: Input index is not valid, %{public}d, %{public}d", index_, index);
+        return;
+    }
+    if (index >= totalCount_) {
+        LOGI("index is large than total, %{public}d, %{public}d", index, totalCount_);
+        SetPendingIndex(index);
         return;
     }
     indexDefined_ = true;
@@ -108,7 +142,7 @@ void TabController::ChangeDispatch(int32_t index)
 void TabController::SetIndexByScrollContent(int32_t index)
 {
     if (index_ == index || index < 0) {
-        LOGW("Input index is not valid.");
+        LOGI("SetIndexByScrollContent: Input index is not valid, %{public}d, %{public}d", index_, index);
         return;
     }
     indexDefined_ = true;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -389,8 +389,10 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             component->SetOnClick(onClickId);
         }
 
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-        focusableComponent->SetOnClickId(onClickId);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        if (focusableComponent) {
+            focusableComponent->SetOnClickId(onClickId);
+        }
     }
 }
 
@@ -452,7 +454,7 @@ void JSText::Create(const JSCallbackInfo& info)
 
     auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponentV2>(data);
     ViewStackProcessor::GetInstance()->Push(textComponent);
-    JSInteractableView::SetFocusable(true);
+    JSInteractableView::SetFocusable(false);
     JSInteractableView::SetFocusNode(false);
 
     // Init text style, allowScale is not supported in declarative.
@@ -460,9 +462,6 @@ void JSText::Create(const JSCallbackInfo& info)
     textStyle.SetAllowScale(false);
     textStyle.SetFontSize(DEFAULT_FONT_SIZE);
     textComponent->SetTextStyle(std::move(textStyle));
-
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    boxComponent->SetMouseAnimationType(HoverAnimationType::NONE);
 }
 
 RefPtr<TextComponentV2> JSText::GetComponent()

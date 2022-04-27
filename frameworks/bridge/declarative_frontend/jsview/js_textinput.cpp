@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,7 +122,9 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("fontStyle", &JSTextInput::SetFontStyle);
     JSClass<JSTextInput>::StaticMethod("fontFamily", &JSTextInput::SetFontFamily);
     JSClass<JSTextInput>::StaticMethod("inputFilter", &JSTextInput::SetInputFilter);
+    // API7 onEditChanged deprecated
     JSClass<JSTextInput>::StaticMethod("onEditChanged", &JSTextInput::SetOnEditChanged);
+    JSClass<JSTextInput>::StaticMethod("onEditChange", &JSTextInput::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onSubmit", &JSTextInput::SetOnSubmit);
     JSClass<JSTextInput>::StaticMethod("onChange", &JSTextInput::SetOnChange);
     JSClass<JSTextInput>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -182,6 +184,8 @@ void JSTextInput::Create(const JSCallbackInfo& info)
     } else {
         LOGI("controller is nullptr");
     }
+    JSInteractableView::SetFocusable(true);
+    JSInteractableView::SetFocusNode(true);
 }
 
 void JSTextInput::SetBackgroundColor(const JSCallbackInfo& info)

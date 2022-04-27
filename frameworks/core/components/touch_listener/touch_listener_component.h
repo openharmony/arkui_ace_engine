@@ -56,6 +56,16 @@ public:
         return eventIds_[action][stage][eventType];
     }
 
+    void SetSwipeEvent(const EventMarker& eventMarker, uint32_t action, uint32_t stage)
+    {
+        swipeIds_[action][stage] = eventMarker;
+    }
+
+    const EventMarker& GetSwipeEvent(uint32_t action, uint32_t stage) const
+    {
+        return swipeIds_[action][stage];
+    }
+
     void SetOnTouchDownId(const EventMarker& onTouchDownId)
     {
         eventIds_[EventAction::ON][EventStage::BUBBLE][EventType::TOUCH_DOWN] = onTouchDownId;
@@ -119,6 +129,7 @@ public:
 
 private:
     EventMarker eventIds_[EventAction::SIZE][EventStage::SIZE][EventType::SIZE];
+    EventMarker swipeIds_[EventAction::SIZE][EventStage::SIZE];
     EventMarker onSwipeId_;
     EventMarker onTouchId_;
 

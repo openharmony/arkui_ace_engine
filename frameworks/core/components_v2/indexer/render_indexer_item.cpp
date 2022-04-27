@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -213,13 +213,14 @@ void RenderIndexerItem::UpdateItemStyle()
         LOGE("Pipeline context upgrade fail!");
         return;
     }
-    if (clicked_) {
+    if (clicked_ || focused_) {
         box->SetColor(selectedBgColor_, true);
         textComponent_->SetTextStyle(activeStyle_);
     } else {
         box->SetColor(Color::TRANSPARENT, true);
         textComponent_->SetTextStyle(normalStyle_);
     }
+    box->NeedFocusBorder(focused_);
     text->Update(textComponent_);
 }
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::V2

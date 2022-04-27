@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -791,6 +791,15 @@ void PluginFrontend::NotifyAppStorage(const std::string& key, const std::string&
     delegate_->NotifyAppStorage(jsEngine_, key, value);
 }
 
+void PluginFrontend::UpdatePlugin(const std::string& content)
+{
+    if (!delegate_) {
+        LOGW("delegate is null, return false");
+        return;
+    }
+    delegate_->UpdatePlugin(content);
+}
+
 void PluginEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)
 {
     std::string param = eventMarker.GetData().GetEventParam();
@@ -902,7 +911,7 @@ void PluginEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const 
             fixParam = fixParam.substr(startPos, endPos - startPos + 1);
         }
         if (delegate_) {
-            delegate_->GetUiTask().PostTask([&eventMarker, fixParam] { eventMarker.CallUiStrFunction(fixParam); });
+            delegate_->GetUiTask().PostTask([eventMarker, fixParam] { eventMarker.CallUiStrFunction(fixParam); });
         }
     } else {
         delegate_->FireAsyncEvent(eventMarker.GetData().eventId, param, "");

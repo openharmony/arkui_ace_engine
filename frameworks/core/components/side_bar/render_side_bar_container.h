@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,11 @@
 #include "core/gestures/click_recognizer.h"
 
 namespace OHOS::Ace {
+
+constexpr Dimension DEFAUTL_MAX_SIDEBAR_WIDTH = 280.0_vp;
+constexpr Dimension DEFAUTL_MIN_SIDEBAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAUTL_SIDEBAR_WIDTH = 200.0_vp;
+
 
 class RenderSideBarContainer : public RenderStack {
     DECLARE_ACE_TYPE(RenderSideBarContainer, RenderStack);
@@ -79,12 +84,10 @@ public:
         return buttonTop_;
     }
 
-
     double GetButtonWidth() const
     {
         return buttonWidth_;
     }
-
 
     double GetButtonHeight() const
     {
@@ -106,7 +109,6 @@ public:
         return maxSidebarWidth_;
     }
 
-
 private:
     void DoSideBarAnimation();
     void SetChildrenStatus() override;
@@ -115,6 +117,8 @@ private:
     void HandleDragEnd();
     void UpdateRenderImage();
     void InitializeDragAndAnimation();
+    void CorrectWidth(const Dimension& width, const Dimension& minWidth, const Dimension& maxWidth);
+    void Initialize();
 
     RefPtr<GestureRecognizer> dragRecognizer_;
     RefPtr<SideBarAnimationController> animationController_;
@@ -132,19 +136,20 @@ private:
     std::string iconShow_;
     std::string iconHidden_;
     std::string iconSwitch_;
-    double buttonLeft_;
-    double buttonTop_;
-    double buttonWidth_;
-    double buttonHeight_;
+    double buttonLeft_ = 16.0;
+    double buttonTop_ = 48.0;
+    double buttonWidth_ = 32.0;
+    double buttonHeight_ = 32.0;
 
-    Dimension sidebarWidth_ = 200.0_vp;
-    Dimension minSidebarWidth_ = 200.0_vp;
-    Dimension maxSidebarWidth_ = 280.0_vp;
+    Dimension sidebarWidth_ = DEFAUTL_SIDEBAR_WIDTH;
+    Dimension minSidebarWidth_ = DEFAUTL_MIN_SIDEBAR_WIDTH;
+    Dimension maxSidebarWidth_ = DEFAUTL_MAX_SIDEBAR_WIDTH;
     Dimension curPosition_ = -sidebarWidth_;
     Dimension preSidebarWidth_;
     Rect exceptRegion_;
+    Dimension customSidebarWidth_;
 };
 
-}
+} // namespace OHOS::Ace
 
-#endif
+#endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_RENDER_SIDE_BAR_CONTAINER_H

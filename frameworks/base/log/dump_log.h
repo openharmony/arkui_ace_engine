@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,11 @@
 
 #include <cstdio>
 #include <memory>
+#include <streambuf>
 #include <sstream>
 #include <vector>
 
+#include "base/log/log.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/singleton.h"
 
@@ -30,24 +32,63 @@ class DumpLog : public Singleton<DumpLog> {
     DECLARE_SINGLETON(DumpLog);
 
 public:
-    using DumpFile = std::unique_ptr<FILE, decltype(&fclose)>;
+    class DumpFileBuf : public std::streambuf {
+    public:
+        DumpFileBuf(FILE* file) : file_(file) {}
+        ~DumpFileBuf()
+        {
+            if (file_ && fclose(file_)) {
+                LOGE("DumpFileBuf close file failed!");
+            }
+        }
 
-    void SetDumpFile(DumpFile&& file)
+        int_type overflow(int_type c) override
+        {
+            if (c != EOF) {
+                if (fwrite(&c, 1, 1, file_) != 1) {
+                    return EOF;
+                }
+            }
+            return c;
+        }
+
+        std::streamsize xsputn(const char* str, std::streamsize num) override
+        {
+            return fwrite(str, 1, num, file_);
+        }
+
+    private:
+        FILE* file_;
+    };
+
+    class DumpFile : public std::ostream {
+    public:
+        DumpFile(FILE* file) : std::ostream(0), buf_(file)
+        {
+            rdbuf(&buf_);
+        }
+    protected:
+        DumpFileBuf buf_;
+    };
+
+    void SetDumpFile(DumpFile* file)
     {
-        dumpFile_ = std::move(file);
+        ostream_.reset(file);
     }
-    const DumpFile& GetDumpFile() const
+
+    void SetDumpFile(std::unique_ptr<std::ostream> file)
     {
-        return dumpFile_;
+        ostream_ = std::move(file);
+    }
+
+    const std::unique_ptr<std::ostream>& GetDumpFile() const
+    {
+        return ostream_;
     }
 
     void Print(int32_t depth, const std::string& className, int32_t childSize);
     void Print(const std::string& content);
     void Print(int32_t depth, const std::string& content);
-
-    void PrintToString(int32_t depth, const std::string& className, int32_t childSize, std::vector<std::string>& info);
-    void PrintToString(const std::string& content, std::vector<std::string>& info);
-    void PrintToString(int32_t depth, const std::string& content, std::vector<std::string>& info);
 
     void Reset();
 
@@ -88,10 +129,11 @@ public:
         description_.push_back(stream.str());
     }
 
-private:
-    DumpFile dumpFile_ { nullptr, &fclose };
-    std::vector<std::string> description_;
+    static const size_t MAX_DUMP_LENGTH = 100000;
 
+private:
+    std::vector<std::string> description_;
+    std::unique_ptr<std::ostream> ostream_ { nullptr };
     ACE_DISALLOW_MOVE(DumpLog);
 };
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,6 +19,7 @@ template("ace_core_source_set") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
 
     # add common source file needed by all product platform here
@@ -325,6 +326,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_v2/list:ace_core_components_list_v2_$platform",
       "$ace_root/frameworks/core/components_v2/pattern_lock:ace_core_components_pattern_lock_$platform",
       "$ace_root/frameworks/core/components_v2/swiper:ace_core_components_swiper_v2_$platform",
+      "$ace_root/frameworks/core/components_v2/tabs:ace_core_components_tabs_v2_$platform",
     ]
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
@@ -339,10 +341,7 @@ template("ace_core_source_set") {
 
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      deps += [
-        "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform",
-        "$ace_root/frameworks/core/components_v2/richtext:ace_core_components_richtext_v2_$platform",
-      ]
+      deps += [ "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform" ]
     }
 
     # xcomponent components supports phone, TV and wearable except PC Preview
@@ -353,14 +352,16 @@ template("ace_core_source_set") {
 
     if (defined(config.form_components_support) &&
         config.form_components_support) {
-      sources += [ "common/form_manager.cpp" ]
-      deps += [ "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform" ]
+      if (!use_mingw_win && !use_mac) {
+        sources += [ "common/form_manager.cpp" ]
+        deps += [ "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform" ]
+      }
     }
 
     if (defined(config.build_container_scope_lib) &&
         config.build_container_scope_lib) {
       sources -= [ "common/container_scope.cpp" ]
-      deps += [ ":ace_container_scope" ]
+      deps += [ "$ace_napi:ace_container_scope" ]
     }
 
     if (defined(config.plugin_components_support) &&
@@ -387,22 +388,6 @@ template("ace_core_source_set") {
     cflags_cc = []
     cflags_cc += invoker.cflags_cc
   }
-}
-
-config("container_scope_config") {
-  visibility = [ ":*" ]
-  include_dirs = [ "$ace_root/frameworks" ]
-}
-
-ohos_shared_library("ace_container_scope") {
-  public_configs = [ ":container_scope_config" ]
-
-  configs = [ "$ace_root:ace_config" ]
-
-  sources = [ "common/container_scope.cpp" ]
-
-  subsystem_name = "ace"
-  part_name = ace_engine_part
 }
 
 foreach(item, ace_platforms) {

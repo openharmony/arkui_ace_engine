@@ -46,6 +46,10 @@ protected:
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
 private:
+    bool IsNotSiblingAddRecognizerToResult() override
+    {
+        return false;
+    }
     void Initialize(const WeakPtr<PipelineContext>& context);
     void AttachToContainer();
     void ScrollBy(double dy, double maxPosition);

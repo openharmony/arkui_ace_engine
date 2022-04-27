@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,7 +71,6 @@ void BoxCreatorTest::TearDown() {}
  * @tc.name: BoxCreator001
  * @tc.desc: Verify BoxCreator can create box with all properties.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
  */
 HWTEST_F(BoxCreatorTest, BoxCreator001, TestSize.Level1)
 {
@@ -129,7 +128,6 @@ HWTEST_F(BoxCreatorTest, BoxCreator001, TestSize.Level1)
  * @tc.name: BoxCreator002
  * @tc.desc: Verify BoxCreator can create box with className only.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTR
  */
 HWTEST_F(BoxCreatorTest, BoxCreator002, TestSize.Level1)
 {

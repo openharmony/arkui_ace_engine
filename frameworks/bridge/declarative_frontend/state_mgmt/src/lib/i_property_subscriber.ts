@@ -23,7 +23,7 @@ type PropertyInfo = string;
 interface IPropertySubscriber {
 
   // globally unique id
-  id__(): number;
+  id(): number;
 
   // inform the subscribed property
   // that the subscriber is about to be deleted

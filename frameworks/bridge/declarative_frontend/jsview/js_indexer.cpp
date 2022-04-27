@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,37 +31,38 @@ const std::vector<V2::AlignStyle> ALIGN_STYLE = { V2::AlignStyle::LEFT, V2::Alig
 void JSIndexer::Create(const JSCallbackInfo& args)
 {
     if (args.Length() >= 1 && args[0]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        auto param = JsonUtil::ParseJsonString(args[0]->ToString());
+        if (!param || param->IsNull()) {
+            LOGE("JSIndexer::Create param is null");
+            return;
+        }
         std::vector<std::string> indexerArray;
 
-        JSRef<JSVal> arrayVal = obj->GetProperty("arrayValue");
-        if (!arrayVal->IsArray()) {
+        auto arrayVal = param->GetValue("arrayValue");
+        if (!arrayVal || !arrayVal->IsArray()) {
             LOGW("info is invalid");
             return;
         }
 
-        JSRef<JSArray> array = JSRef<JSArray>::Cast(arrayVal);
-        int32_t length = array->Length();
+        size_t length = static_cast<uint32_t>(arrayVal->GetArraySize());
         if (length <= 0) {
             LOGE("info is invalid");
             return;
         }
-        for (int32_t i = 0; i < length; i++) {
-            JSRef<JSVal> value = array->GetValueAt(i);
-            std::string tmp;
-            if (ParseJsString(value, tmp)) {
-                indexerArray.emplace_back(tmp);
+        for (size_t i = 0; i < length; i++) {
+            auto value = arrayVal->GetArrayItem(i);
+            if (!value) {
+                return;
             }
+            indexerArray.emplace_back(value->GetString());
         }
 
-        JSRef<JSVal> selectedVal = obj->GetProperty("selected");
-        if (!selectedVal->IsNumber()) {
-            LOGE("info is invalid");
-            return;
-        }
+        auto selectedVal = param->GetInt("selected", 0);
+
         auto indexerComponent =
-            AceType::MakeRefPtr<V2::IndexerComponent>(indexerArray, selectedVal->ToNumber<int32_t>());
+            AceType::MakeRefPtr<V2::IndexerComponent>(indexerArray, selectedVal);
         ViewStackProcessor::GetInstance()->Push(indexerComponent);
+        JSInteractableView::SetFocusable(true);
         JSInteractableView::SetFocusNode(true);
         args.ReturnSelf();
     }
@@ -347,7 +348,9 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSIndexer>::Declare("AlphabetIndexer");
     JSClass<JSIndexer>::StaticMethod("create", &JSIndexer::Create);
+    // API7 onSelected deprecated
     JSClass<JSIndexer>::StaticMethod("onSelected", &JSIndexer::JsOnSelected);
+    JSClass<JSIndexer>::StaticMethod("onSelect", &JSIndexer::JsOnSelected);
     JSClass<JSIndexer>::StaticMethod("color", &JSIndexer::SetColor, opt);
     JSClass<JSIndexer>::StaticMethod("selectedColor", &JSIndexer::SetSelectedColor, opt);
     JSClass<JSIndexer>::StaticMethod("popupColor", &JSIndexer::SetPopupColor, opt);
@@ -360,7 +363,9 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("itemSize", &JSIndexer::SetItemSize, opt);
     JSClass<JSIndexer>::StaticMethod("alignStyle", &JSIndexer::SetAlignStyle, opt);
     JSClass<JSIndexer>::StaticMethod("onRequestPopupData", &JSIndexer::JsOnRequestPopupData, opt);
+    // keep compatible, need remove after
     JSClass<JSIndexer>::StaticMethod("onPopupSelected", &JSIndexer::JsOnPopupSelected, opt);
+    JSClass<JSIndexer>::StaticMethod("onPopupSelect", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSIndexer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSIndexer>::Inherit<JSContainerBase>();

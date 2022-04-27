@@ -16,10 +16,11 @@
 #include "core/components/container_modal/container_modal_element.h"
 
 #include "core/components/box/box_element.h"
+#include "core/components/clip/clip_element.h"
+#include "core/components/clip/render_clip.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/container_modal/render_container_modal.h"
 #include "core/components/flex/flex_element.h"
-#include "core/components/flex/flex_item_element.h"
 #include "core/components/padding/render_padding.h"
 #include "core/gestures/tap_gesture.h"
 
@@ -28,8 +29,12 @@ namespace {
 
 constexpr uint32_t COLUMN_CHILD_NUM = 2;
 constexpr uint32_t SPLIT_BUTTON_POSITION = 2;
-constexpr uint32_t TITLE_POPUP_TIME = 500;     // 500ms
-constexpr double TITLE_POPUP_DISTANCE = 100.0; // 100px
+constexpr uint32_t BLUR_WINDOW_RADIUS = 100;
+constexpr uint32_t TITLE_POPUP_TIME = 200;        // 200ms
+constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0; // 5.0px
+constexpr double MOVE_POPUP_DISTANCE_X = 10.0;    // 10.0px
+constexpr double MOVE_POPUP_DISTANCE_Y = 20.0;    // 20.0px
+constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 
 } // namespace
 
@@ -56,7 +61,13 @@ RefPtr<StackElement> ContainerModalElement::GetStackElement() const
     }
 
     // Get second child : content
-    auto contentBox = AceType::DynamicCast<BoxElement>(column->GetLastChild());
+    auto clip = AceType::DynamicCast<ClipElement>(column->GetLastChild());
+    if (!clip) {
+        LOGE("Get stack element failed, clip element is null!");
+        return {};
+    }
+
+    auto contentBox = AceType::DynamicCast<BoxElement>(clip->GetFirstChild());
     if (!contentBox) {
         LOGE("Get stack element failed, content box element is null!");
         return {};
@@ -111,6 +122,12 @@ void ContainerModalElement::ShowTitle(bool isShow)
         LOGE("ContainerModalElement showTitle failed, container box element is null!");
         return;
     }
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("ContainerModalElement showTitle failed, context is null.");
+        return;
+    }
+    windowMode_ = context->FireWindowGetModeCallBack();
 
     // full screen need to hide border and padding.
     auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
@@ -143,17 +160,18 @@ void ContainerModalElement::ShowTitle(bool isShow)
         return;
     }
 
-    // full screen need to hide border.
-    auto contentRenderBox = AceType::DynamicCast<RenderBox>(column->GetLastChild()->GetRenderNode());
-    if (contentRenderBox) {
-        auto contentDecoration = AceType::MakeRefPtr<Decoration>();
-        contentDecoration->SetBackgroundColor(CONTENT_BACKGROUND_COLOR);
-        if (isShow) {
-            Border contentBorder;
-            contentBorder.SetBorderRadius(Radius(CONTAINER_INNER_RADIUS));
-            contentDecoration->SetBorder(contentBorder);
-        }
-        contentRenderBox->SetBackDecoration(contentDecoration);
+    // full screen need to hide content border radius.
+    auto clip = AceType::DynamicCast<ClipElement>(column->GetLastChild());
+    if (!clip) {
+        LOGE("ContainerModalElement showTitle failed, clip element is null!");
+        return;
+    }
+    if (!contentBox_) {
+        contentBox_ = AceType::DynamicCast<BoxElement>(clip->GetFirstChild());
+    }
+    auto renderClip = AceType::DynamicCast<RenderClip>(clip->GetRenderNode());
+    if (renderClip) {
+        isShow ? renderClip->SetClipRadius(Radius(CONTAINER_INNER_RADIUS)) : renderClip->SetClipRadius(Radius(0.0));
     }
 
     // Get first child : title
@@ -182,8 +200,8 @@ void ContainerModalElement::PerformBuild()
         controller_->SetDuration(TITLE_POPUP_TIME);
         controller_->SetFillMode(FillMode::FORWARDS);
         auto translateY = AceType::MakeRefPtr<CurveAnimation<DimensionOffset>>(
-            DimensionOffset(Dimension(), Dimension(-TITLE_POPUP_DISTANCE)), DimensionOffset(Dimension(), Dimension()),
-            Curves::FRICTION);
+            DimensionOffset(Dimension(), Dimension(-TITLE_POPUP_DISTANCE * density_)),
+            DimensionOffset(Dimension(), Dimension()), Curves::FRICTION);
         TweenOption option;
         option.SetTranslateAnimations(AnimationType::TRANSLATE_Y, translateY);
         auto containerBox = AceType::DynamicCast<BoxElement>(GetFirstChild());
@@ -196,6 +214,17 @@ void ContainerModalElement::PerformBuild()
         if (!stackElement) {
             LOGE("ContainerModalElement PerformBuild failed, stack element is null!");
             return;
+        }
+        auto column = AceType::DynamicCast<ColumnElement>(stackElement->GetFirstChild());
+        if (!column || column->GetChildren().size() != COLUMN_CHILD_NUM) {
+            // column should have 2 children, title and content.
+            LOGE("ContainerModalElement PerformBuild failed, column  element is null or children size error!");
+            return;
+        }
+
+        auto titleDisplay = AceType::DynamicCast<DisplayElement>(column->GetFirstChild());
+        if (titleDisplay) {
+            titleBox_ = AceType::DynamicCast<BoxElement>(titleDisplay->GetFirstChild());
         }
 
         auto tween = AceType::DynamicCast<TweenElement>(stackElement->GetLastChild());
@@ -217,9 +246,9 @@ void ContainerModalElement::PerformBuild()
     }
 
     // The first time it starts up, it needs to hide title if mode as follows.
-    auto mode = context_.Upgrade()->FireWindowGetModeCallBack();
-    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-        mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+    windowMode_ = context_.Upgrade()->FireWindowGetModeCallBack();
+    if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         ShowTitle(false);
     }
 }
@@ -228,18 +257,29 @@ void ContainerModalElement::Update()
 {
     RenderElement::Update();
 
-    const auto container = AceType::DynamicCast<ContainerModalComponent>(component_);
-    if (!container) {
+    containerModalComponent_ = AceType::DynamicCast<ContainerModalComponent>(component_);
+    if (!containerModalComponent_) {
         LOGE("ContainerModalElement update failed, container modal component is null.");
         return;
     }
-    titleChildrenRow_ = container->GetTitleChildrenRow();
-    floatingTitleChildrenRow_ = container->GetFloatingTitleChildrenRow();
-    auto containerBox = AceType::DynamicCast<BoxComponent>(container->GetChild());
+    auto containerBox = AceType::DynamicCast<BoxComponent>(containerModalComponent_->GetChild());
     if (!containerBox) {
         LOGE("ContainerModalElement update failed, container box component is null.");
         return;
     }
+    auto context = context_.Upgrade();
+    if (context) {
+        density_ = (float)context->GetDensity();
+    }
+
+    containerBox->SetOnTouchDownId([week = WeakClaim(this)](const TouchEventInfo& info) {
+        auto containerElement = week.Upgrade();
+        if (containerElement && info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <=
+                                    (TITLE_POPUP_DISTANCE * containerElement->density_)) {
+            containerElement->moveX_ = (float)info.GetChangedTouches().begin()->GetGlobalLocation().GetX();
+            containerElement->moveY_ = (float)info.GetChangedTouches().begin()->GetGlobalLocation().GetY();
+        }
+    });
 
     // touch top to pop-up title bar.
     containerBox->SetOnTouchMoveId([week = WeakClaim(this)](const TouchEventInfo& info) {
@@ -247,7 +287,13 @@ void ContainerModalElement::Update()
         if (!containerElement || !containerElement->CanShowFloatingTitle()) {
             return;
         }
-        if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <= TITLE_POPUP_DISTANCE) {
+        if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() >
+            (TITLE_POPUP_DISTANCE * containerElement->density_)) {
+            return;
+        }
+        auto deltaMoveX = fabs(info.GetChangedTouches().begin()->GetGlobalLocation().GetX() - containerElement->moveX_);
+        auto deltaMoveY = info.GetChangedTouches().begin()->GetGlobalLocation().GetY() - containerElement->moveY_;
+        if (deltaMoveX <= MOVE_POPUP_DISTANCE_X && deltaMoveY >= MOVE_POPUP_DISTANCE_Y) {
             containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
             containerElement->controller_->ClearStopListeners();
             containerElement->controller_->Forward();
@@ -260,12 +306,13 @@ void ContainerModalElement::Update()
         if (!containerElement || info.GetAction() != MouseAction::MOVE) {
             return;
         }
-        if (info.GetLocalLocation().GetY() <= TITLE_POPUP_DISTANCE && containerElement->CanShowFloatingTitle()) {
+        if (info.GetLocalLocation().GetY() <= MOUSE_MOVE_POPUP_DISTANCE && containerElement->CanShowFloatingTitle()) {
             containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
             containerElement->controller_->ClearStopListeners();
             containerElement->controller_->Forward();
         }
-        if (info.GetLocalLocation().GetY() > TITLE_POPUP_DISTANCE && containerElement->CanHideFloatingTitle()) {
+        if (info.GetLocalLocation().GetY() > (TITLE_POPUP_DISTANCE * containerElement->density_) &&
+            containerElement->CanHideFloatingTitle()) {
             containerElement->controller_->AddStopListener([weak] {
                 auto container = weak.Upgrade();
                 container->floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
@@ -292,14 +339,12 @@ void ContainerModalElement::Update()
 
 bool ContainerModalElement::CanShowFloatingTitle()
 {
-    auto context = context_.Upgrade();
-    if (!context || !floatingTitleDisplay_ || !controller_) {
-        LOGI("Show floating title failed, context, floatingTitleDisplay or controller is null.");
+    if (!floatingTitleDisplay_ || !controller_) {
+        LOGI("Show floating title failed, floatingTitleDisplay or controller is null.");
         return false;
     }
-    auto mode = context->FireWindowGetModeCallBack();
-    if (mode != WindowMode::WINDOW_MODE_FULLSCREEN && mode != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
-        mode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+    if (windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN && windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
+        windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         LOGI("Window is not full screen or split screen, can not show floating title.");
         return false;
     }
@@ -323,17 +368,21 @@ bool ContainerModalElement::CanHideFloatingTitle()
     return true;
 }
 
-void ContainerModalElement::ChangeFloatingTitleIcon()
+void ContainerModalElement::ChangeFloatingTitleIcon(bool isFocus)
 {
-    if (!floatingTitleBox_ || !titleChildrenRow_ || !floatingTitleChildrenRow_) {
+    if (!floatingTitleBox_ || !containerModalComponent_) {
         LOGE("ChangeFloatingTitleIcon failed.");
         return;
     }
-    auto context = context_.Upgrade();
-    if (!context) {
-        LOGE("ChangeFloatingTitleIcon failed, context is null.");
+    auto renderFloatingTitleBox = AceType::DynamicCast<RenderBox>(floatingTitleBox_->GetRenderNode());
+    if (!renderFloatingTitleBox) {
+        LOGE("ChangeFloatingTitleIcon failed, render floating title box is null.");
         return;
     }
+    auto backDecoration = renderFloatingTitleBox->GetBackDecoration();
+    backDecoration->SetBackgroundColor(isFocus ? CONTAINER_BACKGROUND_COLOR : CONTAINER_BACKGROUND_COLOR_LOST_FOCUS);
+    renderFloatingTitleBox->SetBackDecoration(backDecoration);
+
     auto rowElement = AceType::DynamicCast<RowElement>(floatingTitleBox_->GetFirstChild());
     if (!rowElement) {
         LOGE("ChangeFloatingTitleIcon failed, row element is null.");
@@ -348,14 +397,96 @@ void ContainerModalElement::ChangeFloatingTitleIcon()
     std::advance(iterator, SPLIT_BUTTON_POSITION);
     auto splitButton = AceType::DynamicCast<RenderPadding>(*iterator);
 
-    auto mode = context->FireWindowGetModeCallBack();
-    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        rowElement->SetUpdateComponent(floatingTitleChildrenRow_);
+    if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        auto floatingTitleChildrenRow = AceType::MakeRefPtr<RowComponent>(
+            FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(true, isFocus));
+        rowElement->SetUpdateComponent(floatingTitleChildrenRow);
         splitButton->SetHidden(false);
     } else {
-        rowElement->SetUpdateComponent(titleChildrenRow_);
+        auto titleChildrenRow = AceType::MakeRefPtr<RowComponent>(
+            FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false, isFocus));
+        rowElement->SetUpdateComponent(titleChildrenRow);
         splitButton->SetHidden(true);
     }
+}
+
+void ContainerModalElement::ChangeTitleIcon(bool isFocus)
+{
+    if (!titleBox_ || !containerModalComponent_) {
+        LOGE("ChangeTitleIcon failed.");
+        return;
+    }
+    auto rowElement = AceType::DynamicCast<RowElement>(titleBox_->GetFirstChild());
+    if (!rowElement) {
+        LOGE("ChangeTitleIcon failed, row element is null.");
+        return;
+    }
+    auto titleChildrenRow = AceType::MakeRefPtr<RowComponent>(
+        FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false, isFocus));
+    rowElement->SetUpdateComponent(titleChildrenRow);
+}
+
+void ContainerModalElement::BlurWindow(bool isBlur)
+{
+    auto containerBox = AceType::DynamicCast<BoxElement>(GetFirstChild());
+    if (!containerBox) {
+        LOGE("ContainerModalElement BlurWindow failed, container box element is null!");
+        return;
+    }
+    auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
+    if (!containerRenderBox) {
+        LOGE("ContainerModalElement BlurWindow failed, container box render is null!");
+        return;
+    }
+    if (isBlur) {
+        auto frontDecoration = AceType::MakeRefPtr<Decoration>();
+        frontDecoration->SetBlurRadius(Dimension(BLUR_WINDOW_RADIUS));
+        containerRenderBox->SetFrontDecoration(frontDecoration);
+    } else {
+        containerRenderBox->SetFrontDecoration(nullptr);
+    }
+}
+
+void ContainerModalElement::WindowFocus(bool isFocus)
+{
+    auto containerBox = AceType::DynamicCast<BoxElement>(GetFirstChild());
+    if (!containerBox) {
+        LOGE("ContainerModalElement WindowFocus failed, container box element is null!");
+        return;
+    }
+
+    auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
+    if (containerRenderBox) {
+        auto containerDecoration = containerRenderBox->GetBackDecoration();
+        containerDecoration->SetBackgroundColor(
+            isFocus ? CONTAINER_BACKGROUND_COLOR : CONTAINER_BACKGROUND_COLOR_LOST_FOCUS);
+        auto border = containerDecoration->GetBorder();
+        border.SetColor(isFocus ? CONTAINER_BORDER_COLOR : CONTAINER_BORDER_COLOR_LOST_FOCUS);
+        containerDecoration->SetBorder(border);
+        containerRenderBox->SetBackDecoration(containerDecoration);
+    }
+    if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        ChangeFloatingTitleIcon(isFocus);
+    } else {
+        ChangeTitleIcon(isFocus);
+    }
+}
+
+void ContainerModalElement::SetAppBgColor(const Color& color)
+{
+    if (!contentBox_) {
+        LOGE("SetAppBgColor failed, contentBox_ is nullptr.");
+        return;
+    }
+    auto renderContentBox = AceType::DynamicCast<RenderBox>(contentBox_->GetRenderNode());
+    if (!renderContentBox) {
+        LOGE("SetAppBgColor failed, renderContentBox is nullptr.");
+        return;
+    }
+    auto backDecoration = renderContentBox->GetBackDecoration();
+    backDecoration->SetBackgroundColor(color);
+    renderContentBox->SetBackDecoration(backDecoration);
 }
 
 } // namespace OHOS::Ace

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -262,7 +262,7 @@ protected:
     // PaintHolder includes fillState, strokeState, globalState and shadow for save
     std::stack<PaintHolder> saveStates_;
 };
-}
+} // namespace OHOS::Ace
 
-#endif
+#endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_OFFSCREEN_CANVAS_H
 

@@ -26,9 +26,11 @@
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/scroll/scroll_fade_effect.h"
 #include "core/components/scroll/scroll_spring_effect.h"
+#include "core/components/text_field/text_field_component.h"
 #include "core/components/video/texture_component.h"
 #include "core/components/web/web_component.h"
 #include "core/components/xcomponent/xcomponent_component.h"
+#include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/dom/dom_div.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -175,6 +177,15 @@ void DOMNode::AddEvent(int32_t pageId, const std::vector<std::string>& events)
         if (!AddSpecializedEvent(pageId, event)) {
             tempEvents.emplace_back(event);
         }
+        if (event == "dragstart") {
+            auto onDragStartId = [](const RefPtr<DragEvent>& info, const std::string &extraParams) -> DragItemInfo {
+                DragItemInfo itemInfo;
+                itemInfo.pixelMap = DOMDocument::pixelMap_;
+                return itemInfo;
+            };
+            boxComponent_->SetOnDragStartId(onDragStartId);
+        }
+
     }
     if (declaration_) {
         declaration_->AddEvent(pageId, GetNodeIdForEvent(), tempEvents);
@@ -817,10 +828,6 @@ const RefPtr<PageTransitionComponent>& DOMNode::BuildTransitionComponent()
             pageTransitionStyle.transitionEnterOption.SetCurve(Curves::FRICTION);
             pageTransitionStyle.transitionExitOption.SetCurve(Curves::FRICTION);
         }
-        if (SystemProperties::GetRosenBackendEnabled()) {
-            pageTransitionStyle.transitionEnterOption.SetAllowRunningAsynchronously(true);
-            pageTransitionStyle.transitionExitOption.SetAllowRunningAsynchronously(true);
-        }
         transitionComponent_->SetContentTransitionOption(
             pageTransitionStyle.transitionEnterOption, pageTransitionStyle.transitionExitOption);
     }
@@ -1266,6 +1273,7 @@ void DOMNode::CompositeComponents()
     auto mainComponent = GetSpecializedComponent();
     if (!components.empty() &&
         (AceType::InstanceOf<TextureComponent>(mainComponent) ||
+        AceType::InstanceOf<TextFieldComponent>(mainComponent) ||
         AceType::InstanceOf<ListComponent>(mainComponent) ||
         AceType::InstanceOf<ListItemComponent>(mainComponent) ||
         AceType::InstanceOf<WebComponent>(mainComponent) ||
@@ -1292,6 +1300,71 @@ void DOMNode::CompositeComponents()
     // final set disabled status.
     if (declaration_ && declaration_->IsDisabled() != rootComponent_->IsDisabledStatus()) {
         rootComponent_->SetDisabledStatus(declaration_->IsDisabled());
+    }
+}
+
+void DOMNode::SetDisplayType()
+{
+    static std::unordered_map<std::string, DisplayType> types = {
+        { DOM_NODE_TAG_DIV, DisplayType::FLEX },
+        { DOM_NODE_TAG_BADGE, DisplayType::BLOCK },
+        { DOM_NODE_TAG_DIALOG, DisplayType::BLOCK },
+        { DOM_NODE_TAG_FORM, DisplayType::BLOCK },
+        { DOM_NODE_TAG_LIST, DisplayType::BLOCK },
+        { DOM_NODE_TAG_LIST_ITEM, DisplayType::BLOCK },
+        { DOM_NODE_TAG_LIST_ITEM_GROUP, DisplayType::BLOCK },
+        { DOM_NODE_TAG_PANEL, DisplayType::BLOCK },
+        { DOM_NODE_TAG_POPUP, DisplayType::BLOCK },
+        { DOM_NODE_TAG_REFRESH, DisplayType::BLOCK },
+        { DOM_NODE_TAG_STACK, DisplayType::BLOCK },
+        { DOM_NODE_TAG_STEPPER, DisplayType::BLOCK },
+        { DOM_NODE_TAG_STEPPER_ITEM, DisplayType::BLOCK },
+        { DOM_NODE_TAG_SWIPER, DisplayType::BLOCK },
+        { DOM_NODE_TAG_TABS, DisplayType::BLOCK },
+        { DOM_NODE_TAG_TAB_BAR, DisplayType::BLOCK },
+        { DOM_NODE_TAG_TAB_CONTENT, DisplayType::BLOCK },
+
+        { DOM_NODE_TAG_BUTTON, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_CHART, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_DIVIDER, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_IMAGE, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_IMAGE_ANIMATOR, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_INPUT, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_LABEL, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_MARQUEE, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_MENU, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_OPTION, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_PICKER_DIALOG, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_PICKER_VIEW, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_PIECE, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_PROGRESS, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_QRCODE, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_RATING, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_RICH_TEXT, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_SEARCH, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_SELECT, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_SLIDER, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_SPAN, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_SWITCH, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_TEXT, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_TEXTAREA, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_TOOL_BAR, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_TOOL_BAR_ITEM, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_TOGGLE, DisplayType::INLINE_BLOCK },
+        { DOM_NODE_TAG_WEB, DisplayType::INLINE_BLOCK },
+    };
+    DisplayType displayType = GetDisplay();
+    if (displayType == DisplayType::NO_SETTING) {
+        auto item = types.find(GetTag());
+        if (item != types.end()) {
+            displayType = item->second;
+        }
+    }
+    if (flexItemComponent_) {
+        flexItemComponent_->SetDisplayType(displayType);
+    }
+    if (boxComponent_) {
+        boxComponent_->SetDisplayType(displayType);
     }
 }
 
@@ -1353,7 +1426,10 @@ void DOMNode::UpdateFlexItemComponent()
         }
     }
     // If set display, this flexItem is ignored.
-    flexItemComponent_->SetIsHidden(GetDisplay() == DisplayType::NONE);
+    if (GetDisplay() == DisplayType::NONE) {
+        flexItemComponent_->SetIsHidden(GetDisplay() == DisplayType::NONE);
+    }
+    SetDisplayType();
 }
 
 void DOMNode::UpdateUiComponents()
@@ -1418,6 +1494,7 @@ void DOMNode::UpdateBoxComponent()
             boxComponent_->SetLayoutInBoxFlag(commonStyle.layoutInBox);
         }
     }
+    SetDisplayType();
 
     if (flexItemComponent_) {
         boxComponent_->SetDeliverMinToChild(false);
@@ -1438,6 +1515,11 @@ void DOMNode::UpdateBoxComponent()
             UpdateBoxBorder(borderStyle.border);
         }
         auto& backDecoration = declaration_->GetBackDecoration();
+        if (!declaration_->HasBackGroundColor() && boxComponent_->GetBackDecoration() &&
+            boxComponent_->HasBackgroundColor()) {
+            backDecoration->SetBackgroundColor(boxComponent_->GetBackDecoration()->GetBackgroundColor());
+        }
+
         auto& backgroundStyle =
             static_cast<CommonBackgroundStyle&>(declaration_->GetStyle(StyleTag::COMMON_BACKGROUND_STYLE));
         if (backgroundStyle.IsValid() && backgroundStyle.gradient.IsValid()) {
@@ -1558,9 +1640,6 @@ void DOMNode::UpdateTweenComponent()
             propTransitionComponent_ = AceType::MakeRefPtr<TransitionComponent>(TRANSITION_COMPONENT_PREFIX
                 + std::to_string(nodeId_), tag_);
         }
-        if (SystemProperties::GetRosenBackendEnabled()) {
-            propTransitionOption_.SetAllowRunningAsynchronously(true);
-        }
         propTransitionComponent_->SetTransitionOption(propTransitionOption_);
         transitionStyleUpdated_ = false;
     }
@@ -1602,9 +1681,6 @@ void DOMNode::UpdateTweenComponent()
         if (!tweenComponent_) {
             tweenComponent_ = AceType::MakeRefPtr<TweenComponent>(COMPONENT_PREFIX + std::to_string(nodeId_), tag_);
         }
-        if (SystemProperties::GetRosenBackendEnabled()) {
-            animationStyle.tweenOption.SetAllowRunningAsynchronously(true);
-        }
         tweenComponent_->SetTweenOption(animationStyle.tweenOption);
         tweenComponent_->UpdateAnimationName(animationName_);
         tweenComponent_->SetAnimationOperation(animationStyle.animationOperation);
@@ -1625,9 +1701,6 @@ void DOMNode::UpdateTweenComponent()
                 "FrontendShared" + std::to_string(nodeId_), tag_, shareId_);
             auto& sharedTransitionStyle = static_cast<CommonShareTransitionStyle&>(
                 declaration_->GetStyle(StyleTag::COMMON_SHARE_TRANSITION_STYLE));
-            if (SystemProperties::GetRosenBackendEnabled() && sharedTransitionStyle.IsValid()) {
-                sharedTransitionStyle.sharedTransitionOption.SetAllowRunningAsynchronously(true);
-            }
             if (sharedTransitionStyle.IsValid()) {
                 sharedTransitionComponent_->SetOption(sharedTransitionStyle.sharedTransitionOption);
                 sharedTransitionComponent_->SetEffect(sharedTransitionStyle.sharedEffect);
@@ -1775,11 +1848,18 @@ void DOMNode::UpdateTouchEventComponent()
     }
 
     auto& swipeEvent = static_cast<CommonSwipeEvent&>(declaration_->GetEvent(EventTag::COMMON_SWIPE_EVENT));
-    if (swipeEvent.IsValid() && !swipeEvent.swipe.eventMarker.IsEmpty()) {
-        if (!touchEventComponent_) {
-            touchEventComponent_ = AceType::MakeRefPtr<TouchListenerComponent>();
+    if (swipeEvent.IsValid()) {
+        for (uint32_t eventAction = 0; eventAction < EventAction::SIZE; eventAction++) {
+            for (uint32_t eventStage = 0; eventStage < EventStage::SIZE; eventStage++) {
+                EventMarker& eventMarker = GetSwipeId(eventAction, eventStage);
+                if (!eventMarker.IsEmpty()) {
+                    if (!touchEventComponent_) {
+                        touchEventComponent_ = AceType::MakeRefPtr<TouchListenerComponent>();
+                    }
+                    touchEventComponent_->SetSwipeEvent(eventMarker, eventAction, eventStage);
+                }
+            }
         }
-        touchEventComponent_->SetOnSwipeId(swipeEvent.swipe.eventMarker);
     }
 
     auto& touchableAttr =
@@ -1868,6 +1948,14 @@ void DOMNode::UpdateGestureEventComponent()
         gestureEventComponent_->SetOnFreeDragStartId(GetDragStartId());
         gestureEventComponent_->SetOnFreeDragUpdateId(GetDragId());
         gestureEventComponent_->SetOnFreeDragEndId(GetDragEndId());
+        auto onDragStartGestureId = []() -> GestureItemInfo {
+            GestureItemInfo itemInfo;
+            itemInfo.pixelMap = DOMDocument::pixelMap_;
+            itemInfo.offsetX = DOMDocument::pixelMapOffsetX_;
+            itemInfo.offsetY = DOMDocument::pixelMapOffsetY_;
+            return itemInfo;
+        };
+        gestureEventComponent_->SetOnDragStartId(onDragStartGestureId);
     }
 }
 

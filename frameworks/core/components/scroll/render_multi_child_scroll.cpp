@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -345,7 +345,7 @@ bool RenderMultiChildScroll::ReachMaxCount() const
 
 void RenderMultiChildScroll::OnPredictLayout(int64_t deadline)
 {
-    int32_t childrenSize = static_cast<uint32_t>(GetChildren().size());
+    int32_t childrenSize = static_cast<int32_t>(GetChildren().size());
     if (currentIndex_ < 0 || currentIndex_ >= childrenSize || childrenSize == 0) {
         LOGE("invalid current index: %{public}d, size is: %{public}d", currentIndex_, childrenSize);
         return;
@@ -525,7 +525,7 @@ bool RenderMultiChildScroll::HandleCrashTop()
     if (scrollVibrate_ && vibrator_) {
         vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH3);
     }
-    if (rotationVibrate_ && IsFromRotate()) {
+    if (rotationVibrate_ && IsFromRotate() && vibrator_) {
         vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH3);
     }
 #endif
@@ -537,7 +537,7 @@ bool RenderMultiChildScroll::HandleCrashBottom()
     if (scrollVibrate_ && vibrator_) {
         vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH3);
     }
-    if (rotationVibrate_ && IsFromRotate()) {
+    if (rotationVibrate_ && IsFromRotate() && vibrator_) {
         vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH3);
     }
 #endif

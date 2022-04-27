@@ -73,11 +73,6 @@ const std::map<bool, std::map<bool, std::map<bool, KeyDirection>>> DIRECTION_MAP
 
 } // namespace
 
-void RenderGridLayout::OnChildAdded(const RefPtr<RenderNode>& renderNode)
-{
-    RenderNode::OnChildAdded(renderNode);
-}
-
 void RenderGridLayout::Update(const RefPtr<Component>& component)
 {
     const RefPtr<GridLayoutComponent> grid = AceType::DynamicCast<GridLayoutComponent>(component);
@@ -845,6 +840,7 @@ void RenderGridLayout::PerformLayout()
     needRestoreScene_ = false;
     isDragChangeLayout_ = false;
     gridMatrix_.clear();
+    itemsInGrid_.clear();
     if (GetChildren().empty()) {
         return;
     }
@@ -924,10 +920,10 @@ void RenderGridLayout::BackGridMatrix()
         gridItemPosition_.clear();
         std::map<int32_t, GridItemIndexPosition> backData;
         ParseRestoreScenePosition(gridMatrixBack_, backData);
-        for (auto iter = backData.begin(); iter != backData.end(); iter++) {
-            if (iter->first >= 0 && iter->first < (int32_t)itemsInGrid_.size()) {
-                auto item = itemsInGrid_[iter->first];
-                gridItemPosition_[iter->first] = Point(item->GetPosition().GetX(), item->GetPosition().GetY());
+        for (auto& iter : backData) {
+            if (iter.first >= 0 && iter.first < (int32_t)itemsInGrid_.size()) {
+                auto item = itemsInGrid_[iter.first];
+                gridItemPosition_[iter.first] = Point(item->GetPosition().GetX(), item->GetPosition().GetY());
             }
         }
     }
@@ -1712,6 +1708,11 @@ void RenderGridLayout::PerformLayoutForEditGrid()
             LOGD("%{public}d %{public}d %{public}d %{public}d", rowIndex, colIndex, itemRowSpan, itemColSpan);
         }
     }
+    auto hiddenItem = dragingItemRenderNode_.Upgrade();
+    if (hiddenItem) {
+        hiddenItem->SetVisible(false);
+        DisableChild(hiddenItem, dragingItemIndex_);
+    }
 }
 
 void RenderGridLayout::PerformLayoutForStaticGrid()
@@ -2133,7 +2134,7 @@ bool RenderGridLayout::MoveItemsBackward(int32_t fromRow, int32_t fromColum, int
     return true;
 }
 
-void RenderGridLayout::UpdateMatrixByIndexStrong(int32_t index, int32_t row, int32_t colum)
+void RenderGridLayout::UpdateMatrixByIndexStrong(int32_t index, int32_t row, int32_t column)
 {
     std::map<int32_t, int32_t> rowMap;
 
@@ -2142,11 +2143,11 @@ void RenderGridLayout::UpdateMatrixByIndexStrong(int32_t index, int32_t row, int
         rowMap = rowIter->second;
     }
 
-    auto indexIter = rowMap.find(colum);
+    auto indexIter = rowMap.find(column);
     if (indexIter != rowMap.end()) {
-        rowMap[colum] = index;
+        rowMap[column] = index;
     } else {
-        rowMap.emplace(std::make_pair(colum, index));
+        rowMap.emplace(std::make_pair(column, index));
     }
 
     gridMatrix_[row] = rowMap;
@@ -2159,13 +2160,13 @@ void RenderGridLayout::UpdateCurInsertPos(int32_t curInsertRow, int32_t curInser
     UpdateMatrixByIndexStrong(CELL_FOR_INSERT, curInsertRowIndex_, curInsertColumnIndex_);
 }
 
-int32_t RenderGridLayout::CalIndexForItemByRowAndColum(int32_t row, int32_t colum)
+int32_t RenderGridLayout::CalIndexForItemByRowAndColum(int32_t row, int32_t column)
 {
     int32_t curRow = 0;
     int32_t curColum = 0;
     int32_t targetIndex = 0;
-    if (row >= 0 && row < rowCount_ && colum >= 0 && colum < colCount_) {
-        while (curRow != row || curColum != colum) {
+    if (row >= 0 && row < rowCount_ && column >= 0 && column < colCount_) {
+        while (curRow != row || curColum != column) {
             GetNextGrid(curRow, curColum);
             if (curRow >= rowCount_ || curColum >= colCount_) {
                 targetIndex = -1;
@@ -2218,21 +2219,21 @@ bool RenderGridLayout::SortCellIndex(
 bool RenderGridLayout::CalTheFirstEmptyCell(int32_t& rowIndex, int32_t& columIndex, bool ignoreInsert)
 {
     int32_t row = 0;
-    int32_t colum = 0;
+    int32_t column = 0;
     int32_t index = -3;
 
-    index = GetIndexByGrid(row, colum);
+    index = GetIndexByGrid(row, column);
 
     while ((-1 != index) && (ignoreInsert || (CELL_FOR_INSERT != index))) {
-        GetNextGrid(row, colum);
-        if (row >= rowCount_ || colum >= colCount_) {
+        GetNextGrid(row, column);
+        if (row >= rowCount_ || column >= colCount_) {
             return false;
         }
-        index = GetIndexByGrid(row, colum);
+        index = GetIndexByGrid(row, column);
     }
 
     rowIndex = row;
-    columIndex = colum;
+    columIndex = column;
     return true;
 }
 

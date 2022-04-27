@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cinttypes>
 
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
@@ -237,7 +238,7 @@ bool FocusNode::OnKeyEvent(const KeyEvent& keyEvent)
         }
         LOGI("FocusNode::OnKeyEvent: Do key callback on %{public}s with key event{ Code(%{public}d), "
              "Action(%{public}d), "
-             "SourceType(%{public}d), DeviceId(%{public}lld), Time(%{public}lld) }. Return: %{public}d",
+             "SourceType(%{public}d), DeviceId(%{public}" PRId64 "), Time(%{public}lld) }. Return: %{public}d",
             AceType::TypeName(this), info->GetKeyCode(), info->GetKeyType(), info->GetSourceDevice(),
             info->GetDeviceId(), info->GetTimeStamp().time_since_epoch().count(), info->IsStopPropagation());
         onKeyEventCallback_(info);
@@ -285,7 +286,8 @@ void FocusNode::OnClick(const KeyEvent& event)
         info->SetSourceDevice(static_cast<SourceType>(event.sourceType));
         info->SetDeviceId(event.deviceId);
         LOGI("FocusNode::OnClick: Do click callback on %{public}s with key event{ Global(%{public}f,%{public}f), "
-             "Local(%{public}f,%{public}f), SourceType(%{public}d), DeviceId(%{public}lld), Time(%{public}lld) }",
+             "Local(%{public}f,%{public}f), SourceType(%{public}d), DeviceId(%{public}" PRId64
+             "), Time(%{public}lld) }",
             AceType::TypeName(this), info->GetGlobalLocation().GetX(), info->GetGlobalLocation().GetY(),
             info->GetLocalLocation().GetX(), info->GetLocalLocation().GetY(), info->GetSourceDevice(),
             info->GetDeviceId(), info->GetTimeStamp().time_since_epoch().count());
@@ -393,12 +395,8 @@ bool FocusGroup::IsFocusable() const
     if (!FocusNode::IsFocusable()) {
         return false;
     }
-    if (focusNodes_.size() > 0) {
-        return std::any_of(focusNodes_.begin(), focusNodes_.end(),
-            [](const RefPtr<FocusNode>& focusNode) { return focusNode->IsFocusable(); });
-    } else {
-        return true;
-    }
+    return std::any_of(focusNodes_.begin(), focusNodes_.end(),
+        [](const RefPtr<FocusNode>& focusNode) { return focusNode->IsFocusable(); });
 }
 
 bool FocusGroup::GoToNextFocus(bool reverse, const Rect& rect)
@@ -468,23 +466,23 @@ bool FocusGroup::OnKeyEvent(const KeyEvent& keyEvent)
     OnFocusMove(keyEvent.code);
     switch (keyEvent.code) {
         case KeyCode::TV_CONTROL_UP:
-            LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'UP' by KeyCode(%{public}d)", keyEvent.code);
+            LOGI("RequestNextFocus 'UP' by KeyCode(%{public}d)", keyEvent.code);
             return RequestNextFocus(true, true, GetRect());
         case KeyCode::TV_CONTROL_DOWN:
-            LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'DOWN' by KeyCode(%{public}d)", keyEvent.code);
+            LOGI("RequestNextFocus 'DOWN' by KeyCode(%{public}d)", keyEvent.code);
             return RequestNextFocus(true, false, GetRect());
         case KeyCode::TV_CONTROL_LEFT:
-            LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'LEFT' by KeyCode(%{public}d)", keyEvent.code);
+            LOGI("RequestNextFocus 'LEFT' by KeyCode(%{public}d)", keyEvent.code);
             return RequestNextFocus(false, !AceApplicationInfo::GetInstance().IsRightToLeft(), GetRect());
         case KeyCode::TV_CONTROL_RIGHT:
-            LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'RIGHT' by KeyCode(%{public}d)", keyEvent.code);
+            LOGI("RequestNextFocus 'RIGHT' by KeyCode(%{public}d)", keyEvent.code);
             return RequestNextFocus(false, AceApplicationInfo::GetInstance().IsRightToLeft(), GetRect());
         case KeyCode::KEY_TAB:
             if (keyEvent.pressedCodes.size() == 1) {
-                LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'TAB' by KeyCode(%{public}d)", keyEvent.code);
+                LOGI("RequestNextFocus 'TAB' by KeyCode(%{public}d)", keyEvent.code);
                 return RequestNextFocus(false, false, GetRect()) || RequestNextFocus(true, false, GetRect());
             } else {
-                LOGI("FocusGroup::OnKeyEvent: RequestNextFocus 'SHIFT-TAB' by KeyCode(%{public}d)", keyEvent.code);
+                LOGI("RequestNextFocus 'SHIFT-TAB' by KeyCode(%{public}d)", keyEvent.code);
                 if (keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB }) ||
                     keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_TAB })) {
                     return RequestNextFocus(false, true, GetRect()) || RequestNextFocus(true, true, GetRect());

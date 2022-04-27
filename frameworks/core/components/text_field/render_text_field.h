@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -317,6 +317,8 @@ public:
         onIsCurrentFocus_ = onIsCurrentFocus;
     }
 
+    int32_t instanceId_ = -1;
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -351,7 +353,7 @@ protected:
     void OnLongPress(const LongPressInfo& longPressInfo);
     bool HandleMouseEvent(const MouseEvent& event) override;
 
-    void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true);
+    void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true, bool isClearRecords = true);
     std::u16string GetTextForDisplay(const std::string& text) const;
 
     void UpdateStartSelection(int32_t end, const Offset& pos, bool isSingleHandle, bool isLongPress);
@@ -379,6 +381,12 @@ protected:
     }
 
     bool ShowCounter() const;
+
+    static bool IsSelectiveDevice()
+    {
+        return (SystemProperties::GetDeviceType() != DeviceType::TV &&
+            SystemProperties::GetDeviceType() != DeviceType::WATCH);
+    }
 
     // Used for compare to the current value and decide whether to UpdateRemoteEditing().
     std::shared_ptr<TextEditingValue> lastKnownRemoteEditingValue_;
@@ -517,6 +525,9 @@ private:
     void UpdatePasswordIcon(const RefPtr<TextFieldComponent>& textField);
     void UpdateOverlay();
     void RegisterFontCallbacks();
+    void HandleOnSelect(KeyCode keyCode, CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
+    void HandleOnRevoke();
+    void HandleOnInverseRevoke();
     void HandleOnCut();
     void HandleOnCopy();
     void HandleOnPaste();
@@ -610,6 +621,8 @@ private:
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<Animator> pressController_;
     RefPtr<Animator> animator_;
+    std::vector<TextEditingValue> operationRecords_;
+    std::vector<TextEditingValue> inverseOperationRecords_;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     bool imeAttached_ = false;
 #endif

@@ -16,6 +16,7 @@
 #include "core/components/box/render_box.h"
 
 #include <algorithm>
+#include <cinttypes>
 #include <cstdint>
 
 #include "base/geometry/offset.h"
@@ -95,11 +96,11 @@ void RenderBox::Update(const RefPtr<Component>& component)
         inspectorDirection_ = box->GetInspectorDirection();
         RenderBoxBase::Update(component);
         UpdateBackDecoration(box->GetBackDecoration());
+        needPaintDebugBoundary_ = box->GetEnableDebugBoundary();
         UpdateFrontDecoration(box->GetFrontDecoration());
         hoverColorBegin_ = box->GetColor();
-        animationType_ = box->GetMouseAnimationType();
-        hoverAnimationType_ = animationType_;
-        isZoom = animationType_ == HoverAnimationType::SCALE;
+        hoverAnimationType_ = box->GetMouseAnimationType();
+        isZoom = hoverAnimationType_ == HoverAnimationType::SCALE;
         MarkNeedLayout();
 
         responseRegion_ = box->GetResponseRegion();
@@ -151,8 +152,8 @@ void RenderBox::Update(const RefPtr<Component>& component)
             onDomDragDrop_ = AceAsyncEvent<void(const DragEndInfo&)>::Create(box->GetOnDomDragDrop(), context_);
         }
         if (!box->GetRemoteMessageEvent().IsEmpty()) {
-            remoteMessageEvent_ = AceAsyncEvent<void(const std::shared_ptr<ClickInfo>&)>::Create(
-                box->GetRemoteMessageEvent(), context_);
+            remoteMessageEvent_ =
+                AceAsyncEvent<void(const std::shared_ptr<ClickInfo>&)>::Create(box->GetRemoteMessageEvent(), context_);
         }
 
         auto context = GetContext().Upgrade();
@@ -171,21 +172,33 @@ void RenderBox::Update(const RefPtr<Component>& component)
             stateAttributeList_ = box->GetStateAttributes();
         }
         OnStatusStyleChanged(disabled_ ? VisualState::DISABLED : VisualState::NORMAL);
+
+        onTouchUpId_ = box->GetOnTouchUpId();
+        onTouchDownId_ = box->GetOnTouchDownId();
+        onTouchMoveId_ = box->GetOnTouchMoveId();
         auto wp = AceType::WeakClaim(this);
         touchRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
-        touchRecognizer_->SetOnTouchDown([wp](const TouchEventInfo&) {
+        touchRecognizer_->SetOnTouchDown([wp](const TouchEventInfo& touchInfo) {
             auto box = wp.Upgrade();
-            if (box) {
-                box->HandleTouchEvent(true);
+            if (!box) {
+                return;
+            }
+            box->HandleTouchEvent(true);
+            if (box->onTouchDownId_) {
+                box->onTouchDownId_(touchInfo);
             }
         });
-        touchRecognizer_->SetOnTouchUp([wp](const TouchEventInfo&) {
+        touchRecognizer_->SetOnTouchUp([wp](const TouchEventInfo& touchInfo) {
             auto box = wp.Upgrade();
-            if (box) {
-                box->HandleTouchEvent(false);
+            if (!box) {
+                return;
+            }
+            box->HandleTouchEvent(false);
+            if (box->onTouchUpId_) {
+                box->onTouchUpId_(touchInfo);
             }
         });
-        touchRecognizer_->SetOnTouchMove(box->GetOnTouchMoveId());
+        touchRecognizer_->SetOnTouchMove(onTouchMoveId_);
     }
     // In each update, the extensions will be updated with new one.
     if (eventExtensions_ && eventExtensions_->HasOnAreaChangeExtension()) {
@@ -228,8 +241,8 @@ void RenderBox::CreateDragDropRecognizer()
     }
 
     auto context = GetContext();
-    auto longPressRecognizer =
-        AceType::MakeRefPtr<OHOS::Ace::LongPressRecognizer>(context, DEFAULT_DURATION, DEFAULT_FINGERS, false);
+    auto longPressRecognizer = AceType::MakeRefPtr<OHOS::Ace::LongPressRecognizer>(
+        context, DEFAULT_DURATION, DEFAULT_FINGERS, false, true, false);
     PanDirection panDirection;
     auto panRecognizer =
         AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(context, DEFAULT_FINGERS, panDirection, DEFAULT_DISTANCE);
@@ -258,11 +271,13 @@ void RenderBox::CreateDragDropRecognizer()
             renderBox->dragWindow_->Destory();
             renderBox->dragWindow_ = nullptr;
         }
-#else
-        auto stackElement = pipelineContext->GetLastStack();
-        stackElement->PopComponent();
-        renderBox->SetPreTargetRenderBox(nullptr);
 #endif
+        if (renderBox->hasDragItem_) {
+            auto stackElement = pipelineContext->GetLastStack();
+            stackElement->PopComponent();
+            renderBox->hasDragItem_ = false;
+        }
+        renderBox->SetPreTargetRenderBox(nullptr);
     });
 
     std::vector<RefPtr<GestureRecognizer>> recognizers { longPressRecognizer, panRecognizer };
@@ -290,7 +305,7 @@ DragItemInfo RenderBox::GenerateDragItemInfo(const RefPtr<PipelineContext>& cont
     selectedItemSize_ = GetLayoutSize();
     auto extraParams = JsonUtil::Create(true);
     SetSelectedIndex(info);
-    if (selectedIndex_  != DEFAULT_INDEX) {
+    if (selectedIndex_ != DEFAULT_INDEX) {
         extraParams->Put("selectedIndex", selectedIndex_);
     }
 
@@ -324,8 +339,8 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
                 auto rect = pipelineContext->GetCurrentWindowRect();
                 dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
                     static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
-                    static_cast<int32_t>(info.GetGlobalPoint().GetY()) + rect.Top(),
-                    dragItemInfo.pixelMap->GetWidth(), dragItemInfo.pixelMap->GetHeight());
+                    static_cast<int32_t>(info.GetGlobalPoint().GetY()) + rect.Top(), dragItemInfo.pixelMap->GetWidth(),
+                    dragItemInfo.pixelMap->GetHeight());
                 dragWindow_->SetOffset(rect.Left(), rect.Top());
                 dragWindow_->DrawPixelMap(dragItemInfo.pixelMap);
             }
@@ -357,14 +372,14 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
 void RenderBox::PanOnActionUpdate(const GestureEvent& info)
 {
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-        if (isDragRenderBox_ && dragWindow_) {
-            int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
-            int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
-            if (dragWindow_) {
-                dragWindow_->MoveTo(x, y);
-            }
-            return;
+    if (isDragRenderBox_ && dragWindow_) {
+        int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
+        int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
+        if (dragWindow_) {
+            dragWindow_->MoveTo(x, y);
         }
+        return;
+    }
 #endif
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
@@ -418,29 +433,29 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
         return;
     }
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-        if (isDragRenderBox_) {
-            isDragRenderBox_ = false;
+    if (isDragRenderBox_) {
+        isDragRenderBox_ = false;
 
-            if (GetOnDrop()) {
-                RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
-                RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
-                event->SetPasteData(pasteData);
-                event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
-                event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+        if (GetOnDrop()) {
+            RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+            RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
+            event->SetPasteData(pasteData);
+            event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+            event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
 
-                auto extraParams = JsonUtil::Create(true);
-                extraParams->Put("selectedIndex", selectedIndex_);
-                extraParams->Put("insertIndex", insertIndex_);
-                (GetOnDrop())(event, extraParams->ToString());
-                pipelineContext->SetInitRenderNode(nullptr);
-            }
+            auto extraParams = JsonUtil::Create(true);
+            extraParams->Put("selectedIndex", selectedIndex_);
+            extraParams->Put("insertIndex", insertIndex_);
+            (GetOnDrop())(event, extraParams->ToString());
+            pipelineContext->SetInitRenderNode(nullptr);
         }
+    }
 
-        if (dragWindow_) {
-            dragWindow_->Destory();
-            dragWindow_ = nullptr;
-            return;
-        }
+    if (dragWindow_) {
+        dragWindow_->Destory();
+        dragWindow_ = nullptr;
+        return;
+    }
 #endif
     RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
     RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
@@ -590,7 +605,6 @@ void RenderBox::UpdateFrontDecoration(const RefPtr<Decoration>& newDecoration)
     frontDecoration_->SetHueRotate(newDecoration->GetHueRotate());
 }
 
-// TODO: OLEG align with state attributes
 void RenderBox::UpdateStyleFromRenderNode(PropertyAnimatableType type)
 {
     // Operator map for styles
@@ -804,7 +818,7 @@ void RenderBox::ClearRenderObject()
     controllerExit_ = nullptr;
     colorAnimationEnter_ = nullptr;
     colorAnimationExit_ = nullptr;
-    animationType_ = HoverAnimationType::NONE;
+    hoverAnimationType_ = HoverAnimationType::UNKNOWN;
     hoverColor_ = Color::TRANSPARENT;
     for (size_t i = 0; i < recognizers_.size(); i++) {
         recognizers_[i] = nullptr;
@@ -881,7 +895,7 @@ void RenderBox::OnMouseHoverEnterAnimation()
         controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
     }
     colorAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-    if (animationType_ == HoverAnimationType::OPACITY) {
+    if (hoverAnimationType_ == HoverAnimationType::OPACITY) {
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
         }
@@ -902,7 +916,7 @@ void RenderBox::OnMouseHoverExitAnimation()
         controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
     }
     colorAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
-    if (animationType_ == HoverAnimationType::OPACITY) {
+    if (hoverAnimationType_ == HoverAnimationType::OPACITY) {
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
         }
@@ -918,11 +932,6 @@ void RenderBox::OnMouseHoverExitAnimation()
     controllerExit_->SetDuration(HOVER_ANIMATION_DURATION);
     controllerExit_->Play();
     controllerExit_->SetFillMode(FillMode::FORWARDS);
-}
-
-WeakPtr<RenderNode> RenderBox::CheckHoverNode()
-{
-    return AceType::WeakClaim<RenderNode>(this);
 }
 
 void RenderBox::CreateFloatAnimation(RefPtr<KeyframeAnimation<float>>& floatAnimation, float beginValue, float endValue)
@@ -978,12 +987,12 @@ void RenderBox::AnimateMouseHoverEnter()
 
 void RenderBox::MouseHoverEnterTest()
 {
-    LOGD("RenderBox::MouseHoverEnterTest in. animationType_ = %{public}d", animationType_);
+    LOGD("RenderBox::MouseHoverEnterTest in. hoverAnimationType_ = %{public}d", hoverAnimationType_);
     ResetController(controllerExit_);
     if (!controllerEnter_) {
         controllerEnter_ = AceType::MakeRefPtr<Animator>(context_);
     }
-    if (animationType_ == HoverAnimationType::SCALE) {
+    if (hoverAnimationType_ == HoverAnimationType::SCALE) {
         if (!scaleAnimationEnter_) {
             scaleAnimationEnter_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
         }
@@ -991,7 +1000,7 @@ void RenderBox::MouseHoverEnterTest()
         controllerEnter_->ClearInterpolators();
         controllerEnter_->AddInterpolator(scaleAnimationEnter_);
         isHoveredScale = true;
-    } else if (animationType_ == HoverAnimationType::BOARD) {
+    } else if (hoverAnimationType_ == HoverAnimationType::BOARD) {
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
         }
@@ -1027,19 +1036,19 @@ void RenderBox::AnimateMouseHoverExit()
 
 void RenderBox::MouseHoverExitTest()
 {
-    LOGD("RenderBox::MouseHoverExitTest in. animationType_ = %{public}d", animationType_);
+    LOGD("RenderBox::MouseHoverExitTest in. hoverAnimationType_ = %{public}d", hoverAnimationType_);
     ResetController(controllerEnter_);
     if (!controllerExit_) {
         controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
     }
-    if (animationType_ == HoverAnimationType::SCALE) {
+    if (hoverAnimationType_ == HoverAnimationType::SCALE) {
         scaleAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<float>>();
         auto begin = scale_;
         CreateFloatAnimation(scaleAnimationExit_, begin, 1.0);
         controllerExit_->ClearInterpolators();
         controllerExit_->AddInterpolator(scaleAnimationExit_);
         isHoveredScale = false;
-    } else if (animationType_ == HoverAnimationType::BOARD) {
+    } else if (hoverAnimationType_ == HoverAnimationType::BOARD) {
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
         }
@@ -1090,7 +1099,7 @@ bool RenderBox::HandleMouseEvent(const MouseEvent& event)
     if (!onMouse_) {
         return false;
     }
-    
+
     MouseInfo info;
     info.SetButton(event.button);
     info.SetAction(event.action);
@@ -1102,7 +1111,7 @@ bool RenderBox::HandleMouseEvent(const MouseEvent& event)
     info.SetSourceDevice(event.sourceType);
     LOGI("RenderBox::HandleMouseEvent: Do mouse callback with mouse event{ Global(%{public}f,%{public}f), "
          "Local(%{public}f,%{public}f)}, Button(%{public}d), Action(%{public}d), Time(%{public}lld), "
-         "DeviceId(%{public}lld, SourceType(%{public}d) }. Return: %{public}d",
+         "DeviceId(%{public}" PRId64 ", SourceType(%{public}d) }. Return: %{public}d",
         info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetLocalLocation().GetX(),
         info.GetLocalLocation().GetY(), info.GetButton(), info.GetAction(),
         info.GetTimeStamp().time_since_epoch().count(), info.GetDeviceId(), info.GetSourceDevice(),
@@ -1513,8 +1522,8 @@ double RenderBox::GetWindowBlurProgress() const
     return 0.0;
 }
 
-bool RenderBox::TouchTest(const Point& globalPoint, const Point& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result)
+bool RenderBox::TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
+    TouchTestResult& result)
 {
     if (recognizerHierarchy_.empty()) {
         return RenderBoxBase::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
@@ -1646,10 +1655,7 @@ void RenderBox::UpdateGestureRecognizerHierarchy(
     if (!success) {
         recognizerHierarchy_.clear();
         for (auto const& level : hierarchy) {
-            recognizerHierarchy_.emplace_back(
-                level.first,
-                std::vector<RefPtr<GestureRecognizer>>()
-                );
+            recognizerHierarchy_.emplace_back(level.first, std::vector<RefPtr<GestureRecognizer>>());
 
             for (auto const& gesture : level.second) {
                 auto recognizer = gesture->CreateRecognizer(context_);
@@ -1712,8 +1718,7 @@ void RenderBox::OnStatusStyleChanged(const VisualState state)
             case BoxStateAttribute::BORDER_WIDTH: {
                 auto widthState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
-                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf",
-                    state, widthState->value_.Value());
+                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf", state, widthState->value_.Value());
                 BoxComponentHelper::SetBorderWidth(GetBackDecoration(), widthState->value_);
             } break;
 
@@ -1727,8 +1732,7 @@ void RenderBox::OnStatusStyleChanged(const VisualState state)
             case BoxStateAttribute::WIDTH: {
                 auto valueState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
-                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf",
-                    state, valueState->value_.Value());
+                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf", state, valueState->value_.Value());
                 width_ = valueState->value_;
             } break;
 
@@ -1752,6 +1756,8 @@ void RenderBox::OnStatusStyleChanged(const VisualState state)
                 LOGD("Setting Gradient state %{public}d", state);
                 GetBackDecoration()->SetGradient(gradientState->value_);
             } break;
+            default:
+                break;
         }
     }
     if (updated) {

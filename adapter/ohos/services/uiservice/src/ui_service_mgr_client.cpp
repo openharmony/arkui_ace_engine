@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -133,7 +133,8 @@ ErrCode UIServiceMgrClient::ShowDialog(const std::string& name,
                                        int y,
                                        int width,
                                        int height,
-                                       DialogCallback callback)
+                                       DialogCallback callback,
+                                       int* id)
 {
     if (remoteObject_ == nullptr) {
         ErrCode err = Connect();
@@ -148,7 +149,7 @@ ErrCode UIServiceMgrClient::ShowDialog(const std::string& name,
         HILOG_ERROR("doms is nullptr");
         return UI_SERVICE_GET_PROXY_FAILED;
     }
-    return doms->ShowDialog(name, params, windowType, x, y, width, height, dialogCallbackStub);
+    return doms->ShowDialog(name, params, windowType, x, y, width, height, dialogCallbackStub, id);
 }
 
 ErrCode UIServiceMgrClient::CancelDialog(int32_t id)
@@ -172,6 +173,29 @@ ErrCode UIServiceMgrClient::CancelDialog(int32_t id)
         return UI_SERVICE_GET_PROXY_FAILED;
     }
     return doms->CancelDialog(id);
+}
+
+ErrCode UIServiceMgrClient::UpdateDialog(int32_t id, const std::string& data)
+{
+    if (id < 0) {
+        HILOG_INFO("invalid parameter");
+        return UI_SERVICE_INVALID_PARAMETER;
+    }
+
+    if (remoteObject_ == nullptr) {
+        ErrCode err = Connect();
+        if (err != ERR_OK) {
+            HILOG_ERROR("%{private}s:fail to connect UIMgrService", __func__);
+            return UI_SERVICE_NOT_CONNECTED;
+        }
+    }
+
+    sptr<IUIServiceMgr> doms = iface_cast<IUIServiceMgr>(remoteObject_);
+    if (doms == nullptr) {
+        HILOG_ERROR("doms is nullptr");
+        return UI_SERVICE_GET_PROXY_FAILED;
+    }
+    return doms->UpdateDialog(id, data);
 }
 
 ErrCode UIServiceMgrClient::ShowAppPickerDialog(

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,10 @@
 
 #include "core/components/plugin/plugin_element.h"
 
+#include "flutter/lib/ui/ui_dart_state.h"
+#ifdef OS_ACCOUNT_EXISTS
+#include "os_account_manager.h"
+#endif // OS_ACCOUNT_EXISTS
 #include "core/common/plugin_manager.h"
 #include "frameworks/base/utils/string_utils.h"
 #include "frameworks/core/components/plugin/plugin_component.h"
@@ -23,8 +27,27 @@
 #include "frameworks/core/components/plugin/resource/plugin_manager_delegate.h"
 
 namespace OHOS::Ace {
+namespace {
+#ifndef OS_ACCOUNT_EXISTS
+constexpr int32_t DEFAULT_OS_ACCOUNT_ID = 0; // 0 is the default id when there is no os_account part
+#endif // OS_ACCOUNT_EXISTS
+
+ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
+{
+    userIds.clear();
+#ifdef OS_ACCOUNT_EXISTS
+    return AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
+#else // OS_ACCOUNT_EXISTS
+    LOGE("os account part not exists, use default id.");
+    userIds.push_back(DEFAULT_OS_ACCOUNT_ID);
+    return ERR_OK;
+#endif // OS_ACCOUNT_EXISTS
+}
+} // namespace
+
 PluginElement::~PluginElement()
 {
+    PluginManager::GetInstance().RemovePluginParentContainer(pluginSubContainerId_);
     pluginManagerBridge_.Reset();
     pluginSubContainer_->Destroy();
     pluginSubContainer_.Reset();
@@ -60,6 +83,7 @@ void PluginElement::Update()
             pluginSubContainer_->UpdateRootElmentSize();
             pluginSubContainer_->UpdateSurfaceSize();
         }
+        pluginSubContainer_->UpdatePlugin(plugin->GetData());
         return;
     }
 
@@ -213,9 +237,6 @@ void PluginElement::RunPluginContainer()
         LOGE("create plugin container fail.");
         return;
     }
-    pluginSubContainer_->Initialize();
-    pluginSubContainer_->SetPluginComponet(component_);
-
     auto plugin = AceType::DynamicCast<PluginComponent>(component_);
     if (!plugin) {
         LOGE("plugin componet is null when try adding nonmatched container to plugin manager.");
@@ -224,6 +245,11 @@ void PluginElement::RunPluginContainer()
 
     pluginSubContainerId_ = PluginManager::GetInstance().GetPluginSubContainerId();
     PluginManager::GetInstance().AddPluginSubContainer(pluginSubContainerId_, pluginSubContainer_);
+    PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, Container::CurrentId());
+    flutter::UIDartState::Current()->AddPluginParentContainer(pluginSubContainerId_, Container::CurrentId());
+    pluginSubContainer_->SetInstanceId(pluginSubContainerId_);
+    pluginSubContainer_->Initialize();
+    pluginSubContainer_->SetPluginComponet(component_);
 
     auto weak = WeakClaim(this);
     auto element = weak.Upgrade();
@@ -237,29 +263,8 @@ void PluginElement::RunPluginContainer()
     }
     pluginNode->SetPluginSubContainer(pluginSubContainer_);
 
-    uiTaskExecutor.PostTask([weak, plugin] {
-        auto pluginElement = weak.Upgrade();
-        if (!pluginElement) {
-            LOGE("pluginElement is nullptr.");
-            pluginElement->HandleOnErrorEvent("1", "pluginElement is nullptr.");
-            return;
-        }
-
-        auto container = pluginElement->GetPluginSubContainer();
-        if (!container) {
-            LOGE("PluginSubContainer is nullptr.");
-            pluginElement->HandleOnErrorEvent("1", "PluginSubContainer is nullptr.");
-            return;
-        }
-
-        RequestPluginInfo info = plugin->GetPluginRequestionInfo();
-        auto packagePathStr = pluginElement->GetPackagePath(weak, info);
-        if (packagePathStr.empty()) {
-            LOGE("package path is empty.");
-            pluginElement->HandleOnErrorEvent("1", "package path is empty.");
-            return;
-        }
-        container->RunPlugin(packagePathStr, info.moduleName, info.source, plugin->GetData());
+    uiTaskExecutor.PostTask([this, weak, plugin] {
+        RunPluginTask(weak, plugin);
     });
 }
 
@@ -335,9 +340,16 @@ std::string PluginElement::GetPackagePathByWant(const WeakPtr<PluginElement>& we
         return packagePathStr;
     }
 
+    std::vector<int32_t> userIds;
+    ErrCode errCode = GetActiveAccountIds(userIds);
+    if (errCode != ERR_OK) {
+        pluginElement->HandleOnErrorEvent("1", "Query Active OsAccountIds failed!");
+        return packagePathStr;
+    }
     if (strList.size() == 1) {
         AppExecFwk::BundleInfo bundleInfo;
-        bool ret = bms->GetBundleInfo(strList[0], AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo);
+        bool ret = bms->GetBundleInfo(strList[0], AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo,
+            userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID);
         if (!ret) {
             LOGE("Bms get bundleName failed!");
             pluginElement->HandleOnErrorEvent("1", "Bms get bundleName failed!");
@@ -349,7 +361,8 @@ std::string PluginElement::GetPackagePathByWant(const WeakPtr<PluginElement>& we
         AppExecFwk::AbilityInfo abilityInfo;
         AppExecFwk::ElementName element("", strList[0], strList[1]);
         want.SetElement(element);
-        bool ret = bms->QueryAbilityInfo(want, abilityInfo);
+        bool ret = bms->QueryAbilityInfo(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT,
+            userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID, abilityInfo);
         if (!ret) {
             LOGE("Bms get abilityInfo failed!");
             pluginElement->HandleOnErrorEvent("1", "Bms get bundleName failed!");
@@ -407,5 +420,31 @@ void PluginElement::SplitString(const std::string& str, char tag, std::vector<st
     if (!subStr.empty()) {
         strList.push_back(subStr);
     }
+}
+
+void PluginElement::RunPluginTask(const WeakPtr<PluginElement>& weak, const RefPtr<PluginComponent>& plugin)
+{
+    auto pluginElement = weak.Upgrade();
+    if (!pluginElement) {
+        LOGE("pluginElement is nullptr.");
+        pluginElement->HandleOnErrorEvent("1", "pluginElement is nullptr.");
+        return;
+    }
+
+    auto container = pluginElement->GetPluginSubContainer();
+    if (!container) {
+        LOGE("PluginSubContainer is nullptr.");
+        pluginElement->HandleOnErrorEvent("1", "PluginSubContainer is nullptr.");
+        return;
+    }
+
+    RequestPluginInfo info = plugin->GetPluginRequestionInfo();
+    auto packagePathStr = pluginElement->GetPackagePath(weak, info);
+    if (packagePathStr.empty()) {
+        LOGE("package path is empty.");
+        pluginElement->HandleOnErrorEvent("1", "package path is empty.");
+        return;
+    }
+    container->RunPlugin(packagePathStr, info.moduleName, info.source, plugin->GetData());
 }
 } // namespace OHOS::Ace

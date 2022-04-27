@@ -48,6 +48,7 @@ void JSHyperlink::Create(const JSCallbackInfo& args)
     }
 
     ViewStackProcessor::GetInstance()->Push(component);
+    JSInteractableView::SetFocusable(false);
     JSInteractableView::SetFocusNode(true);
 }
 

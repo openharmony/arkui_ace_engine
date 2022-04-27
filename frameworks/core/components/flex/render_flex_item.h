@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,10 +144,14 @@ public:
     {
         return mustStretch_;
     }
+    DisplayType GetDisplayType() const
+    {
+        return displayType_;
+    }
 
 protected:
-    virtual void ClearRenderObject() override;
-    virtual bool MaybeRelease() override;
+    void ClearRenderObject() override;
+    bool MaybeRelease() override;
 
 private:
     double flexGrow_ = 0.0;
@@ -163,6 +167,7 @@ private:
     Dimension maxWidth_ = Dimension(Size::INFINITE_SIZE);
     Dimension maxHeight_ = Dimension(Size::INFINITE_SIZE);
     FlexAlign alignSelf_ = FlexAlign::AUTO;
+    DisplayType displayType_ = DisplayType::NO_SETTING;
 };
 
 } // namespace OHOS::Ace

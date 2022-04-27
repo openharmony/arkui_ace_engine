@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_RICH_TEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_RICH_TEXT_H
 
-#include "core/components_v2/richtext/rich_text_component.h"
+#include "core/components/web/web_component.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
 
 namespace OHOS::Ace::Framework {
@@ -38,7 +38,7 @@ protected:
     bool AddSpecializedEvent(int32_t pageId, const std::string& event) override;
 
 private:
-    RefPtr<V2::RichTextComponent> childComponent_;
+    RefPtr<WebComponent> childComponent_;
 };
 
 } // namespace OHOS::Ace::Framework

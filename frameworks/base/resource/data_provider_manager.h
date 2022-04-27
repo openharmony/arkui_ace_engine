@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,7 @@ public:
     ~DataProviderManagerInterface() override = default;
 
     virtual std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) = 0;
+    virtual void* GetDataProviderThumbnailResFromUri(const std::string& uriStr) = 0;
 };
 
 using DataProviderImpl = std::function<std::unique_ptr<DataProviderRes>(const std::string& uriStr)>;
@@ -58,6 +59,10 @@ public:
     ~DataProviderManager() override = default;
 
     std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) override;
+    void* GetDataProviderThumbnailResFromUri(const std::string& uriStr) override
+    {
+        return nullptr;
+    };
 
 private:
     DataProviderImpl platformImpl_;
@@ -73,6 +78,7 @@ public:
     ~DataProviderManagerStandard() override = default;
 
     std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) override;
+    void* GetDataProviderThumbnailResFromUri(const std::string& uriStr) override;
 
     const RefPtr<DataAbilityHelper>& GetDataAbilityHelper()
     {

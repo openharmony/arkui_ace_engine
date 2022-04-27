@@ -184,6 +184,10 @@ void TextFieldElement::OnFocus()
     if (!enabled_) {
         return;
     }
+    auto textField = DynamicCast<RenderTextField>(renderNode_);
+    if (textField) {
+        textField->StartTwinkling();
+    }
     FocusNode::OnFocus();
     renderNode_->ChangeStatus(RenderStatus::FOCUS);
 }
@@ -238,6 +242,7 @@ bool TextFieldElement::RequestKeyboard(bool needStartTwinkling)
         }
         return true;
     } else {
+        LOGW("Request keyboard failed because the textfield is unfocusable");
         isRequestFocus_ = false;
         return false;
     }

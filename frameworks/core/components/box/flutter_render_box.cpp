@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@
 #include "core/pipeline/base/scoped_canvas_state.h"
 #include "core/pipeline/layers/flutter_scene_builder.h"
 #include "core/pipeline/layers/picture_layer.h"
+#include "core/components/common/painter/debug_boundary_painter.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -299,7 +300,7 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
         decorationPainter->SetRenderImage(renderImage_);
     }
 
-    Color bgColor = pipeline->GetRootBgColor();
+    Color bgColor = pipeline->GetAppBgColor();
     if (backDecoration_) {
         flutter::Canvas* canvas = renderContext->GetCanvas();
         if (canvas == nullptr) {
@@ -355,6 +356,16 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
             decorationPainter->PaintColorBlend(
                 outerRRect, canvas->canvas(), frontDecoration_->GetColorBlend(), bgColor);
         }
+    }
+    if (RenderBox::needPaintDebugBoundary_) {
+        flutter::Canvas* canvas = renderContext->GetCanvas();
+        if (canvas == nullptr) {
+            LOGE("Paint canvas is null.");
+            return;
+        }
+        DebugBoundaryPainter::PaintDebugBoundary(canvas->canvas(), offset, GetLayoutSize());
+        DebugBoundaryPainter::PaintDebugCorner(canvas->canvas(), offset, GetLayoutSize());
+        DebugBoundaryPainter::PaintDebugMargin(canvas->canvas(), offset, GetLayoutSize(), margin_);
     }
     if (isAccessibilityFocus_) {
         PaintAccessibilityFocus(focusRect, context);

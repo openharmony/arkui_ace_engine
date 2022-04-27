@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -459,10 +459,13 @@ void BackendDelegateImpl::OnVisibilityChanged(const std::map<int64_t, int32_t>& 
         TaskExecutor::TaskType::JS);
 }
 
-void BackendDelegateImpl::OnAcquireState(const OHOS::AAFwk::Want& want)
+int32_t BackendDelegateImpl::OnAcquireFormState(const OHOS::AAFwk::Want &want)
 {
-    taskExecutor_->PostTask([acquireStateCallback = acquireStateCallback_, want] { acquireStateCallback(want); },
+    auto ret = (int32_t) AppExecFwk::FormState::UNKNOWN;
+    taskExecutor_->PostSyncTask(
+        [acquireStateCallback = acquireStateCallback_, &ret, want] { ret = acquireStateCallback(want); },
         TaskExecutor::TaskType::JS);
+    return ret;
 }
 
 void BackendDelegateImpl::OnCommand(const OHOS::AAFwk::Want &want, int startId)
@@ -524,4 +527,4 @@ bool BackendDelegateImpl::GetResourceData(const std::string& fileUri, std::vecto
     return true;
 }
 
-} // namespace OHOS::Ace::Framework
+} // namespace OHOS::Ace

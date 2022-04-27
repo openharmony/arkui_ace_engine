@@ -20,6 +20,7 @@
 
 #include "core/components/box/render_box.h"
 #include "core/components/display/display_component.h"
+#include "core/components/popup/popup_element_v2.h"
 #include "core/components_v2/inspector/inspector_node.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -212,7 +213,7 @@ public:
     void GetColorsAndRepeating(std::unique_ptr<JsonValue>& resultJson, const Gradient& gradient) const;
 
     // bindpopup
-    virtual std::string GetBindPopup() const override;
+    std::string GetBindPopup() const override;
     virtual AceType::IdType GetTargetTypeId() const
     {
         return AceType::TypeId(this);
@@ -274,6 +275,7 @@ protected:
     RefPtr<AccessibilityNode> GetAccessibilityNode() const;
 
 private:
+    RefPtr<PopupElementV2> GetPopupElement() const;
     bool isRectValid_;
     std::string key_;
 };

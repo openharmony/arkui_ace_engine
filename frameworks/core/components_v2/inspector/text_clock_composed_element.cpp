@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ namespace OHOS::Ace::V2 {
 namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const TextClockComposedElement&)>> CREATE_JSON_MAP {
-    { "hourswest", [](const TextClockComposedElement& inspector) { return inspector.GetHoursWest(); } },
+    { "timeZoneOffset", [](const TextClockComposedElement& inspector) { return inspector.GetTimeZoneOffset(); } },
     { "format", [](const TextClockComposedElement& inspector) { return inspector.GeFormat(); } },
     { "fontColor", [](const TextClockComposedElement& inspector) { return inspector.GetTextFontColor(); } },
     { "fontSize", [](const TextClockComposedElement& inspector) { return inspector.GetTextFontSize(); } },
@@ -40,7 +40,7 @@ const std::unordered_map<std::string, std::function<std::string(const TextClockC
 void TextClockComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
-    DumpLog::GetInstance().AddDesc(std::string("hourswest: ").append(GetHoursWest()));
+    DumpLog::GetInstance().AddDesc(std::string("timeZoneOffset: ").append(GetTimeZoneOffset()));
     DumpLog::GetInstance().AddDesc(std::string("format: ").append(GeFormat()));
     DumpLog::GetInstance().AddDesc(std::string("fontColor: ").append(GetTextFontColor()));
     DumpLog::GetInstance().AddDesc(std::string("fontSize: ").append(GetTextFontSize()));
@@ -58,12 +58,12 @@ std::unique_ptr<JsonValue> TextClockComposedElement::ToJsonObject() const
     return resultJson;
 }
 
-std::string TextClockComposedElement::GetHoursWest() const
+std::string TextClockComposedElement::GetTimeZoneOffset() const
 {
     auto render = GetRenderTextClock();
     if (render) {
-        double hourswest = render->GetHoursWest();
-        return std::to_string(hourswest);
+        double timeZoneOffset = render->GetHoursWest();
+        return std::to_string(timeZoneOffset);
     }
     return "";
 }

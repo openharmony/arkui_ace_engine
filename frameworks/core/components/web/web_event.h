@@ -25,9 +25,22 @@ public:
     ~WebConsoleLog() = default;
 
     virtual int GetLineNumber() = 0;
-    virtual const std::string& GetLog() = 0;
+    virtual std::string GetLog() = 0;
     virtual int GetLogLevel() = 0;
-    virtual const std::string& GetSourceId() = 0;
+    virtual std::string GetSourceId() = 0;
+};
+
+class WebFileSelectorParam : public AceType {
+    DECLARE_ACE_TYPE(WebFileSelectorParam, AceType)
+public:
+    WebFileSelectorParam() = default;
+    ~WebFileSelectorParam() = default;
+
+    virtual std::string GetTitle() = 0;
+    virtual int GetMode() = 0;
+    virtual std::string GetDefaultFileName() = 0;
+    virtual std::vector<std::string> GetAcceptType() = 0;
+    virtual bool IsCapture() = 0; 
 };
 
 class ACE_EXPORT WebError : public AceType {
@@ -85,7 +98,7 @@ public:
 
     const std::string& GetReason() const
     {
-        return encoding_;
+        return reason_;
     }
 
     int32_t GetStatusCode() const
@@ -164,12 +177,22 @@ public:
     virtual void Cancel() = 0;
 };
 
+class ACE_EXPORT FileSelectorResult : public AceType {
+    DECLARE_ACE_TYPE(FileSelectorResult, AceType)
+
+public:
+    FileSelectorResult() = default;
+    ~FileSelectorResult() = default;
+
+    virtual void HandleFileList(std::vector<std::string> fileList) = 0;
+};
+
 class ACE_EXPORT WebDialogEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(WebDialogEvent, BaseEventInfo);
 
 public:
     WebDialogEvent(const std::string& url, const std::string& message, const RefPtr<Result>& result)
-        : BaseEventInfo("WebDialogEvent"), url_(url) {}
+        : BaseEventInfo("WebDialogEvent"), url_(url), message_(message), result_(result) {}
     ~WebDialogEvent() = default;
 
     const std::string& GetUrl() const
@@ -269,6 +292,23 @@ public:
 
 private:
     std::string title_;
+};
+
+class ACE_EXPORT UrlLoadInterceptEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(UrlLoadInterceptEvent, BaseEventInfo);
+
+public:
+    explicit UrlLoadInterceptEvent(const std::string& data) : BaseEventInfo
+        ("UrlLoadInterceptEvent"), data_(data) {}
+    ~UrlLoadInterceptEvent() = default;
+
+    const std::string& GetData() const
+    {
+        return data_;
+    }
+
+private:
+    std::string data_;
 };
 
 class ACE_EXPORT LoadWebGeolocationHideEvent : public BaseEventInfo {
@@ -453,6 +493,74 @@ public:
 
 private:
     RefPtr<WebConsoleLog> message_;
+};
+
+class ACE_EXPORT RenderExitedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(RenderExitedEvent, BaseEventInfo);
+
+public:
+    RenderExitedEvent(int32_t exitedReason) : BaseEventInfo("RenderExitedEvent"), exitedReason_(exitedReason) {}
+    ~RenderExitedEvent() = default;
+
+    int32_t GetExitedReason() const
+    {
+        return exitedReason_;
+    }
+
+private:
+    int32_t exitedReason_;
+};
+
+class ACE_EXPORT RefreshAccessedHistoryEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(RefreshAccessedHistoryEvent, BaseEventInfo);
+
+public:
+    RefreshAccessedHistoryEvent(const std::string& url, bool isRefreshed) :
+                                BaseEventInfo("RefreshAccessedHistoryEvent"),
+                                url_(url),  isRefreshed_(isRefreshed) {}
+
+    ~RefreshAccessedHistoryEvent() = default;
+
+    const std::string& GetVisitedUrl() const
+    {
+        return url_;
+    }
+
+    bool IsRefreshed() const
+    {
+        return isRefreshed_;
+    }
+
+private:
+    std::string url_;
+    bool isRefreshed_;
+};
+
+class ACE_EXPORT FileSelectorEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(FileSelectorEvent, BaseEventInfo);
+
+public:
+    FileSelectorEvent(const RefPtr<WebFileSelectorParam>& param,
+                      const RefPtr<FileSelectorResult>& result)
+        : BaseEventInfo("FileSelectorEvent"), param_(param), result_(result)
+    {
+        LOGI("FileSelectorEvent constructor");
+    }
+    ~FileSelectorEvent() = default;
+
+    const RefPtr<WebFileSelectorParam>& GetParam() const
+    {
+        return param_;
+    }
+
+    const RefPtr<FileSelectorResult>& GetFileSelectorResult() const
+    {
+        return result_;
+    }
+
+private:
+    RefPtr<WebFileSelectorParam> param_;
+    RefPtr<FileSelectorResult> result_;
 };
 } // namespace OHOS::Ace
 

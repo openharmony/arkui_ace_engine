@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -276,20 +276,9 @@ void VideoElement::RegistMediaPlayerEvent()
         });
     };
 
-    auto&& endOfStreamEvent = [videoElement, uiTaskExecutor] {
-        uiTaskExecutor.PostSyncTask([&videoElement] {
-            auto video = videoElement.Upgrade();
-            if (video) {
-                LOGD("OnCompletion");
-                video->OnCompletion();
-            }
-        });
-    };
-
     mediaPlayerCallback_ = std::make_shared<MediaPlayerCallback>(ContainerScope::CurrentId());
     mediaPlayerCallback_->SetPositionUpdatedEvent(positionUpdatedEvent);
     mediaPlayerCallback_->SetStateChangedEvent(stateChangedEvent);
-    mediaPlayerCallback_->SetEndOfStreamEvent(endOfStreamEvent);
     mediaPlayer_->SetPlayerCallback(mediaPlayerCallback_);
 }
 
@@ -1189,6 +1178,8 @@ void VideoElement::OnPlayerStatus(PlaybackStatus status)
                     video->OnPrepared(videoSize.Width(), videoSize.Height(), false, duration, 0, true);
                 }
             });
+    } else if (status == PlaybackStatus::PLAYBACK_COMPLETE) {
+        OnCompletion();
     }
 #endif
 }
@@ -1230,6 +1221,7 @@ void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
 
 void VideoElement::OnCompletion()
 {
+    LOGI("VideoElement::OnCompletion");
     currentPos_ = duration_;
     IntTimeToText(currentPos_, currentPosText_);
 
@@ -1245,7 +1237,7 @@ void VideoElement::OnCompletion()
         } else {
             param = std::string("\"finish\",{").append("}");
         }
-        LOGE("video onFinish event: %s ", param.c_str());
+        LOGI("video onFinish event: %s ", param.c_str());
         onFinish_(param);
     }
 }
@@ -1637,7 +1629,7 @@ void VideoElement::Stop()
 void VideoElement::SetCurrentTime(float currentPos, SeekMode seekMode)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    if (mediaPlayer_ != nullptr && GreatOrEqual(currentPos, 0.0) && LessNotEqual(currentPos, duration_)) {
+    if (mediaPlayer_ != nullptr && GreatOrEqual(currentPos, 0.0) && LessOrEqual(currentPos, duration_)) {
         LOGI("Video Seek");
         mediaPlayer_->Seek(currentPos * MILLISECONDS_TO_SECONDS, ConvertToMediaSeekMode(seekMode));
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,8 @@
 
 #include <cerrno>
 #include <csignal>
-#include <shared_mutex>
-
 #include <pthread.h>
+#include <shared_mutex>
 
 #include "flutter/fml/thread.h"
 
@@ -27,6 +26,7 @@
 #include "base/log/log.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 
@@ -134,7 +134,7 @@ void InitializeGcTrigger()
 
 class ThreadWatcher final : public Referenced {
 public:
-    ThreadWatcher(int32_t instanceId, TaskExecutor::TaskType type);
+    ThreadWatcher(int32_t instanceId, TaskExecutor::TaskType type, bool useUIAsJSThread = false);
     ~ThreadWatcher() override;
 
     void SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor);
@@ -156,7 +156,7 @@ private:
     void DetonatedBomb();
 
     mutable std::shared_mutex mutex_;
-    int32_t instanceId_;
+    int32_t instanceId_ = 0;
     TaskExecutor::TaskType type_;
     std::string threadName_;
     int32_t loopTime_ = 0;
@@ -167,9 +167,11 @@ private:
     std::queue<uint64_t> inputTaskIds_;
     bool canShowDialog_ = true;
     int32_t showDialogCount_ = 0;
+    bool useUIAsJSThread_ = false;
 };
 
-ThreadWatcher::ThreadWatcher(int32_t instanceId, TaskExecutor::TaskType type) : instanceId_(instanceId), type_(type)
+ThreadWatcher::ThreadWatcher(int32_t instanceId, TaskExecutor::TaskType type, bool useUIAsJSThread)
+    : instanceId_(instanceId), type_(type), useUIAsJSThread_(useUIAsJSThread)
 {
     InitThreadName();
     PostTaskToTaskRunner(
@@ -239,7 +241,7 @@ void ThreadWatcher::DetonatedBomb()
 {
     std::shared_lock<std::shared_mutex> lock(mutex_);
     if (inputTaskIds_.empty()) {
-            return;
+        return;
     }
 
     uint64_t currentTime = GetMilliseconds();
@@ -356,8 +358,23 @@ void ThreadWatcher::HiviewReport() const
 
 void ThreadWatcher::RawReport(RawEventType type) const
 {
+    std::string message;
+    if (type == RawEventType::FREEZE &&
+        (type_ == TaskExecutor::TaskType::JS || (useUIAsJSThread_ && (type_ == TaskExecutor::TaskType::UI)))) {
+        auto engine = EngineHelper::GetEngine(instanceId_);
+        message = engine ? engine->GetStacktraceMessage() : "";
+    }
+    int32_t tid = 0;
+    auto taskExecutor = taskExecutor_.Upgrade();
+    if (taskExecutor) {
+        tid = taskExecutor->GetTid(type_);
+    }
+    std::string threadInfo = "Blocked thread id = " + std::to_string(tid) + "\n";
+    threadInfo += "JSVM instance id = " + std::to_string(instanceId_) + "\n";
+    message = threadInfo + message;
     EventReport::ANRRawReport(type, AceApplicationInfo::GetInstance().GetUid(),
-        AceApplicationInfo::GetInstance().GetPackageName(), AceApplicationInfo::GetInstance().GetProcessName());
+        AceApplicationInfo::GetInstance().GetPackageName(), AceApplicationInfo::GetInstance().GetProcessName(),
+        message);
 }
 
 void ThreadWatcher::ShowDialog() const
@@ -412,7 +429,7 @@ void WatchDog::Register(int32_t instanceId, const RefPtr<TaskExecutor>& taskExec
 {
     Watchers watchers = {
         .jsWatcher = AceType::MakeRefPtr<ThreadWatcher>(instanceId, TaskExecutor::TaskType::JS),
-        .uiWatcher = AceType::MakeRefPtr<ThreadWatcher>(instanceId, TaskExecutor::TaskType::UI),
+        .uiWatcher = AceType::MakeRefPtr<ThreadWatcher>(instanceId, TaskExecutor::TaskType::UI, useUIAsJSThread),
     };
     watchers.uiWatcher->SetTaskExecutor(taskExecutor);
     if (!useUIAsJSThread) {

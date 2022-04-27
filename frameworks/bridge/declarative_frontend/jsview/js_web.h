@@ -41,6 +41,8 @@ public:
     static void OnDownloadStart(const JSCallbackInfo& args);
     static void OnErrorReceive(const JSCallbackInfo& args);
     static void OnHttpErrorReceive(const JSCallbackInfo& args);
+    static void OnFileSelectorShow(const JSCallbackInfo& args);
+    static void OnUrlLoadIntercept(const JSCallbackInfo& args);
     static void JsEnabled(bool isJsEnabled);
     static void ContentAccessEnabled(bool isContentAccessEnabled);
     static void FileAccessEnabled(bool isFileAccessEnabled);
@@ -53,9 +55,16 @@ public:
     static void GeolocationAccessEnabled(bool isGeolocationAccessEnabled);
     static void JavaScriptProxy(const JSCallbackInfo& args);
     static void UserAgent(const std::string& userAgent);
+    static void OnRenderExited(const JSCallbackInfo& args);
+    static void OnRefreshAccessedHistory(const JSCallbackInfo& args);
+    static void CacheMode(int32_t cacheMode);
+    static void OverviewModeAccess(bool isOverviewModeAccessEnabled);
+    static void FileFromUrlAccess(bool isFileFromUrlAccessEnabled);
+    static void DatabaseAccess(bool isDatabaseAccessEnabled);
+    static void TextZoomAtio(int32_t textZoomAtioNum);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
 };
-}
+} // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_H

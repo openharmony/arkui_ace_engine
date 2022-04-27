@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ class DropFilterLayer : public OffsetLayer {
     DECLARE_ACE_TYPE(DropFilterLayer, OffsetLayer)
 public:
     DropFilterLayer(fml::RefPtr<flutter::ImageFilter>& imageFilter, double sigmaX, double sigmaY)
-                    : OffsetLayer(0, 0), imageFilter_(imageFilter), sigmaX_(sigmaX), sigmaY_(sigmaY){};
+                    : OffsetLayer(0, 0), imageFilter_(imageFilter), sigmaX_(sigmaX), sigmaY_(sigmaY){}
     ~DropFilterLayer() override = default;
 
     void AddToScene(SceneBuilder& builder, double x, double y) override;

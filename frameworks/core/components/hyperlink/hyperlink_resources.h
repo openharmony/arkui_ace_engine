@@ -29,7 +29,7 @@ class HyperlinkResources : public virtual AceType {
     DECLARE_ACE_TYPE(HyperlinkResources, AceType);
 
 public:
-    HyperlinkResources(const WeakPtr<PipelineContext>& context) : context_(context) {}
+    explicit HyperlinkResources(const WeakPtr<PipelineContext>& context) : context_(context) {}
     ~HyperlinkResources() override;
     std::string CallResRegisterMethod(const std::string& method, const std::string& param);
     void StartAbility(const std::string& address);

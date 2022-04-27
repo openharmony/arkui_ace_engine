@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,22 +22,18 @@ void RenderPlugin::Update(const RefPtr<Component>& component)
 {
     auto plugin = AceType::DynamicCast<PluginComponent>(component);
 
-    Dimension rootWidht = 0.0_vp;
+    Dimension rootWidth = 0.0_vp;
     Dimension rootHeight = 0.0_vp;
     if (plugin) {
-        rootWidht = plugin->GetWidth();
+        rootWidth = plugin->GetWidth();
         rootHeight = plugin->GetHeight();
     }
 
-    if (rootWidht_ == rootWidht && rootHeight_ == rootHeight) {
+    if (rootWidth_ == rootWidth && rootHeight_ == rootHeight) {
         LOGE("same size, not resize render plugin");
         return;
     }
-
-    if (rootWidht.IsValid() && rootHeight.IsValid()) {
-        drawSize_ = Size(NormalizePercentToPx(rootWidht, false), NormalizePercentToPx(rootHeight, true));
-    }
-    rootWidht_ = rootWidht;
+    rootWidth_ = rootWidth;
     rootHeight_ = rootHeight;
 
     MarkNeedLayout();
@@ -49,6 +45,16 @@ void RenderPlugin::PerformLayout()
         return;
     }
 
+    if (rootWidth_.IsValid() && rootHeight_.IsValid()) {
+        drawSize_ = Size(NormalizePercentToPx(rootWidth_, false), NormalizePercentToPx(rootHeight_, true));
+    }
+
+    auto pluginContext = GetSubPipelineContext();
+    auto context = GetContext().Upgrade();
+    if (pluginContext && context) {
+        pluginContext->SetRootSize(context->GetDensity(), drawSize_.Width(), drawSize_.Height());
+    }
+
     SetLayoutSize(drawSize_);
     SetNeedLayout(false);
     MarkNeedRender();
@@ -57,16 +63,20 @@ void RenderPlugin::PerformLayout()
 bool RenderPlugin::TouchTest(const Point& globalPoint,
     const Point& parentLocalPoint, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
+    Point transformPoint = GetTransformPoint(parentLocalPoint);
+    if (!InTouchRectList(transformPoint, GetTouchRectList())) {
+        return false;
+    }
+    auto subContext = GetSubPipelineContext();
+    if (!subContext) {
+        LOGE("subContext is null");
+        return false;
+    }
+    subContext->SetPluginEventOffset(GetGlobalOffset());
+
     auto context = GetContext().Upgrade();
     if (context) {
-        auto pluginContext = GetSubPipelineContext();
-        if (pluginContext) {
-            double x = globalPoint.GetX() - pluginContext->GetPluginEventOffset().GetX();
-            double y = globalPoint.GetY() - pluginContext->GetPluginEventOffset().GetY();
-            if (x <= rootWidht_.Value() && y <= rootHeight_.Value()) {
-                context->SetTouchPipeline(WeakPtr<PipelineContext>(pluginContext));
-            }
-        }
+        context->SetTouchPipeline(WeakPtr<PipelineContext>(subContext));
     }
     return true;
 }

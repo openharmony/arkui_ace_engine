@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_LIST_RENDER_LIST_ITEM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_LIST_RENDER_LIST_ITEM_H
 
+#include "base/geometry/dimension.h"
 #include "core/components_v2/list/list_item_component.h"
 #include "core/gestures/long_press_recognizer.h"
 #include "core/pipeline/base/render_node.h"
@@ -94,6 +95,11 @@ public:
         return isSelected_;
     }
 
+    Dimension GetBorderRadius() const
+    {
+        return borderRadius_;
+    }
+
 private:
     void CreateDeleteButton();
 
@@ -107,6 +113,7 @@ private:
     OnSelectFunc onSelectId_;
     bool selectable_ = true;
     bool isSelected_ = false;
+    Dimension borderRadius_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderListItem);
 };

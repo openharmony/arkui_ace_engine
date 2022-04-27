@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -309,11 +309,6 @@ void RenderButton::DisplayFocusAnimation()
     }
 }
 
-WeakPtr<RenderNode> RenderButton::CheckHoverNode()
-{
-    return AceType::WeakClaim<RenderNode>(this);
-}
-
 void RenderButton::AnimateMouseHoverEnter()
 {
     OnMouseHoverEnterTest();
@@ -324,7 +319,7 @@ void RenderButton::OnMouseHoverEnterTest()
         return;
     }
     ButtonType type = buttonComponent_->GetType();
-    if (isPhone_ && ((type == ButtonType::TEXT) || (type == ButtonType::NORMAL))) {
+    if ((isPhone_ || isTablet_) && ((type == ButtonType::TEXT) || (type == ButtonType::NORMAL))) {
         needHoverColor_ = true;
         MarkNeedRender();
     } else {
@@ -446,8 +441,10 @@ void RenderButton::Update(const RefPtr<Component>& component)
         defaultClickedColor_ = theme->GetClickedColor();
     }
 
+    hoverAnimationType_ = buttonComponent_->GetMouseAnimationType();
     width_ = buttonComponent_->GetWidth();
     height_ = buttonComponent_->GetHeight();
+    buttonComponent_->FitTextHeight(height_);
     layoutFlag_ = button->GetLayoutFlag();
     // No animation happens on first setting, will animate from background color on click
     clickedColor_ = AnimatableColor(button->GetClickedColor());
@@ -456,6 +453,7 @@ void RenderButton::Update(const RefPtr<Component>& component)
     isWatch_ = (SystemProperties::GetDeviceType() == DeviceType::WATCH);
     isTv_ = (SystemProperties::GetDeviceType() == DeviceType::TV);
     isPhone_ = (SystemProperties::GetDeviceType() == DeviceType::PHONE);
+    isTablet_ = (SystemProperties::GetDeviceType() == DeviceType::TABLET);
     auto catchMode =
         buttonComponent_->GetClickedEventId().IsEmpty() || buttonComponent_->GetClickedEventId().GetCatchMode();
     static const int32_t bubbleModeVersion = 6;
@@ -814,7 +812,7 @@ void RenderButton::PlayFocusAnimation(bool isFocus)
         UpdateFocusAnimation(INIT_SCALE);
         return;
     }
-    if (!isOpacityAnimation_) {
+    if (!isOpacityAnimation_ && isTv_) {
         isOpacityAnimation_ = true;
     }
     if (isFocus) {
@@ -869,6 +867,8 @@ void RenderButton::OnStatusStyleChanged(const VisualState state)
                 buttonComponent_->SetWidth(valueState->value_);
                 width_ = valueState->value_;
             } break;
+            default:
+                break;
         }
     }
     MarkNeedLayout();

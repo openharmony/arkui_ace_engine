@@ -30,7 +30,7 @@ void FormManager::AddSubContainer(int64_t formId, const RefPtr<SubContainer>& su
     std::lock_guard<std::mutex> lock(mutex_);
     auto result = subContainerMap_.try_emplace(formId, subContainer);
     if (!result.second) {
-        LOGW("already have subContainer of this instance, formId: %{public}ld", static_cast<long>(formId));
+        LOGW("already have subContainer of this instance");
     }
 }
 

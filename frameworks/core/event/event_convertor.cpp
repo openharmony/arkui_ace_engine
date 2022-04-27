@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,14 +57,40 @@ void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>
                 break;
             case AceActionData::ActionType::UNKNOWN:
                 break;
+            default:
+                break;
         }
         current++;
+    }
+    UpdateTouchEvent(events);
+}
+
+void UpdateTouchEvent(std::vector<TouchEvent>& events)
+{
+    if (events.empty()) {
+        return;
+    }
+    for (auto& event : events) {
+        TouchPoint touchPoint;
+        touchPoint.size = event.size;
+        touchPoint.id = event.id;
+        touchPoint.force = event.force;
+        touchPoint.downTime = event.time;
+        touchPoint.x = event.x;
+        touchPoint.y = event.y;
+        touchPoint.screenX = event.screenX;
+        touchPoint.screenY = event.screenY;
+        touchPoint.isPressed = (event.type == TouchType::DOWN);
+        event.pointers.emplace_back(std::move(touchPoint));
     }
 }
 
 void ConvertMouseEvent(const std::vector<uint8_t>& data, MouseEvent& events)
 {
     const auto* mouseActionData = reinterpret_cast<const AceMouseData*>(data.data());
+    if (!mouseActionData) {
+        return;
+    }
     std::chrono::microseconds micros(mouseActionData->timeStamp);
     TimeStamp time(micros);
     events.x = mouseActionData->physicalX;
@@ -119,7 +145,7 @@ void ConvertMouseEvent(const std::vector<uint8_t>& data, MouseEvent& events)
             events.button = MouseButton::NONE_BUTTON;
             break;
     }
-    events.pressedButtons = static_cast<size_t>(mouseActionData->pressedButtons);
+    events.pressedButtons = static_cast<int32_t>(mouseActionData->pressedButtons);
     events.time = time;
     events.deviceId = mouseActionData->deviceId;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,8 @@
 
 namespace OHOS::Ace::V2 {
 
-class SwiperElement : public RenderElement, public FocusGroup, private V2::ElementProxyHost, public FlushEvent {
-    DECLARE_ACE_TYPE(SwiperElement, RenderElement, FocusGroup);
+class SwiperElement : public RenderElement, public FocusGroup, public FlushEvent, private V2::ElementProxyHost {
+    DECLARE_ACE_TYPE(SwiperElement, RenderElement, FocusGroup, FlushEvent);
 
 public:
     void PerformBuild() override;

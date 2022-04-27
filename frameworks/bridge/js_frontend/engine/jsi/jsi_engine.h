@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,8 +24,8 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_value.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_group_js_bridge.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_utils.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
@@ -36,7 +36,7 @@ public:
         : frontendDelegate_(delegate), instanceId_(instanceId)
     {}
     ~JsiEngineInstance() override;
-
+    static std::map<const std::string, std::string> dataMap_;
     RefPtr<JsAcePage> GetRunningPage() const;
     void SetRunningPage(const RefPtr<JsAcePage>& page);
     RefPtr<JsAcePage> GetStagingPage() const;
@@ -63,26 +63,32 @@ public:
     {
         return frontendDelegate_;
     }
-
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId);
+#endif
+ 
     void SetArkNativeEngine(ArkNativeEngine* nativeEngine)
     {
         nativeEngine_ = nativeEngine;
     }
 
-    ArkNativeEngine* GetArkNativeEngine() const
+    ArkNativeEngine const *  GetArkNativeEngine() const
     {
-        return nativeEngine_;
+        return static_cast<ArkNativeEngine*>(nativeEngine_);
     }
+
+    void RegisterFaPlugin();              // load ReatureAbility plugin
 
 private:
     void RegisterAceModule();             // add ace object to global
     void RegisterConsoleModule();         // add Console object to global
-    void RegisterSyscapModule();         // add Syscap object to global
-    void RegisterDocumentModule();         // add dom object to global
+    void RegisterSyscapModule();          // add Syscap object to global
+    void RegisterDocumentModule();        // add dom object to global
     void RegisterPerfUtilModule();        // add perfutil object to global
     void RegisterHiViewModule();          // add hiView object to global
     void RegisterI18nPluralRulesModule(); // add i18nPluralRules object to global
     void InitGroupJsBridge();
+    bool IsDragEvent(const std::string& param);
 
     int32_t GetInstanceId() const
     {
@@ -96,11 +102,11 @@ private:
     RefPtr<FrontendDelegate> frontendDelegate_;
     int32_t instanceId_ = 0;
     mutable std::mutex mutex_;
-    ArkNativeEngine* nativeEngine_ = nullptr;
     bool isDebugMode_ = true;
 };
 
 class JsiEngine : public JsEngine {
+    DECLARE_ACE_TYPE(JsiEngine, JsEngine);
 public:
     explicit JsiEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~JsiEngine() override;
@@ -147,9 +153,11 @@ public:
 
     void RunGarbageCollection() override;
 
+    std::string GetStacktraceMessage() override;
+
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
-    virtual FrontendDelegate* GetFrontend() override
+    FrontendDelegate* GetFrontend() override
     {
         return AceType::RawPtr(engineInstance_->GetDelegate());
     }
@@ -167,12 +175,12 @@ private:
     void RegisterWorker();
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
+    bool ExecuteAbc(const std::string &fileName);
     bool CallAppFunc(const std::string& appFuncName);
     bool CallAppFunc(const std::string& appFuncName, std::vector<shared_ptr<JsValue>>& argv);
 
     int32_t instanceId_ = 0;
     RefPtr<JsiEngineInstance> engineInstance_;
-    ArkNativeEngine* nativeEngine_ = nullptr;
 };
 } // namespace OHOS::Ace::Framework
 

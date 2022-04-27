@@ -19,6 +19,11 @@
 #include <map>
 #include <string>
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#include "adapter/preview/osal/request_data.h"
+#include "adapter/preview/osal/response_data.h"
+#include "frameworks/base/utils/linear_map.h"
+#endif
 #include "base/memory/ace_type.h"
 #include "base/utils/singleton.h"
 #include "frameworks/bridge/codec/standard_function_codec.h"
@@ -71,6 +76,15 @@ public:
 
     void Destroy() override;
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void TriggerModuleJsCallbackPreview(
+        int32_t callbackId, int32_t code, OHOS::Ace::ResponseData responseData) override;
+    void GetRequestData(const shared_ptr<JsValue>& valObject, OHOS::Ace::RequestData& requestData);
+    ParseJsDataResult ParseRequestData(
+        int32_t argc, const std::vector<shared_ptr<JsValue>>& argv,
+        OHOS::Ace::RequestData& requestData, int32_t requestId);
+#endif
+
 private:
     int32_t GetPendingCallbackIdAndIncrement()
     {
@@ -118,6 +132,11 @@ private:
     std::atomic_int pendingCallbackId_;
 
     shared_ptr<JsRuntime> runtime_;
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    static const LinearMapNode<void (*)(const char*, RequestData&)> fetchRequestDataMap1[];
+    static const LinearMapNode<void (*)(shared_ptr<JsRuntime>,
+        const shared_ptr<JsValue>&, RequestData&)> fetchRequestDataMap2[];
+#endif
 };
 
 } // namespace OHOS::Ace::Framework

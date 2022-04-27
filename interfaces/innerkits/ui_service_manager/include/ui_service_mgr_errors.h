@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@ enum {
     NO_CALLBACK_FOR_KEY,
     UI_SERVICE_INVALID_PARAMETER,
     UI_SERVICE_GET_PROXY_FAILED,
+    UI_SERVICE_CREATE_WINDOW_FAILED,
 };
 }  // namespace Ace
 }  // namespace OHOS

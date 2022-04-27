@@ -296,12 +296,12 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
     };
 
     builder.acquireStateCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                       const OHOS::AAFwk::Want& want) {
+                                       const OHOS::AAFwk::Want& want) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
-            return;
+            return -1;
         }
-        jsBackendEngine->OnAcquireState(want);
+        return jsBackendEngine->OnAcquireFormState(want);
     };
 
     builder.commandApplicationCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
@@ -494,9 +494,9 @@ void PaBackend::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEvents
     delegate_->OnVisibilityChanged(formEventsMap);
 }
 
-void PaBackend::OnAcquireState(const OHOS::AAFwk::Want& want)
+int32_t PaBackend::OnAcquireFormState(const OHOS::AAFwk::Want& want)
 {
-    delegate_->OnAcquireState(want);
+    return delegate_->OnAcquireFormState(want);
 }
 
 sptr<IRemoteObject> PaBackend::OnConnect(const OHOS::AAFwk::Want& want)

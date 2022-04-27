@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,9 +23,11 @@
 
 namespace OHOS::Ace {
 
-void EventManager::TouchTest(
-    const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict)
+void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
+    const TouchRestrict& touchRestrict, bool needAppend)
 {
+    ContainerScope scope(instanceId_);
+
     ACE_FUNCTION_TRACE();
     if (!renderNode) {
         LOGW("renderNode is null.");
@@ -38,11 +40,33 @@ void EventManager::TouchTest(
     const Point point { touchPoint.x, touchPoint.y, touchPoint.sourceType };
     // For root node, the parent local point is the same as global point.
     renderNode->TouchTest(point, point, touchRestrict, hitTestResult);
+    if (needAppend) {
+        TouchTestResult prevHitTestResult = touchTestResults_[touchPoint.id];
+        hitTestResult.splice(hitTestResult.end(), prevHitTestResult);
+    }
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
+}
+
+void EventManager::TouchTest(
+    const AxisEvent& event, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict)
+{
+    ContainerScope scope(instanceId_);
+
+    ACE_FUNCTION_TRACE();
+    if (!renderNode) {
+        LOGW("renderNode is null.");
+        return;
+    }
+    // collect
+    const Point point { event.x, event.y, event.sourceType };
+    // For root node, the parent local point is the same as global point.
+    renderNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_);
 }
 
 bool EventManager::DispatchTouchEvent(const TouchEvent& point)
 {
+    ContainerScope scope(instanceId_);
+
     ACE_FUNCTION_TRACE();
     const auto iter = touchTestResults_.find(point.id);
     if (iter != touchTestResults_.end()) {
@@ -72,6 +96,22 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& point)
     }
     LOGI("the %{public}d touch test result does not exist!", point.id);
     return false;
+}
+
+bool EventManager::DispatchTouchEvent(const AxisEvent& event)
+{
+    ContainerScope scope(instanceId_);
+
+    ACE_FUNCTION_TRACE();
+    for (const auto& entry : axisTouchTestResult_) {
+        if (!entry->HandleEvent(event)) {
+            break;
+        }
+    }
+    if (event.action == AxisAction::END || event.action == AxisAction::NONE) {
+        axisTouchTestResult_.clear();
+    }
+    return true;
 }
 
 bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNode>& focusNode)
@@ -124,9 +164,8 @@ bool EventManager::DispatchMouseEvent(const MouseEvent& event)
             }
         }
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
@@ -162,16 +201,6 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
             }
         }
     }
-    for (const auto& wp : mouseHoverTestResults_) {
-        // get all current hover nodes while it's not in previous hover nodes. Thoes nodes are new hoverd
-        auto it = std::find(mouseHoverTestResultsPre_.begin(), mouseHoverTestResultsPre_.end(), wp);
-        if (it == mouseHoverTestResultsPre_.end()) {
-            auto hoverNode = wp.Upgrade();
-            if (hoverNode) {
-                hoverNode->HandleMouseHoverEvent(MouseState::HOVER);
-            }
-        }
-    }
     for (const auto& wp : mouseHoverTestResultsPre_) {
         // get all previous hover nodes while it's not in current hover nodes. Those nodes exit hoverd
         auto it = std::find(mouseHoverTestResults_.begin(), mouseHoverTestResults_.end(), wp);
@@ -179,6 +208,16 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
             auto hoverNode = wp.Upgrade();
             if (hoverNode) {
                 hoverNode->HandleMouseHoverEvent(MouseState::NONE);
+            }
+        }
+    }
+    for (const auto& wp : mouseHoverTestResults_) {
+        // get all current hover nodes while it's not in previous hover nodes. Thoes nodes are new hoverd
+        auto it = std::find(mouseHoverTestResultsPre_.begin(), mouseHoverTestResultsPre_.end(), wp);
+        if (it == mouseHoverTestResultsPre_.end()) {
+            auto hoverNode = wp.Upgrade();
+            if (hoverNode) {
+                hoverNode->HandleMouseHoverEvent(MouseState::HOVER);
             }
         }
     }
@@ -192,24 +231,10 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& re
         return;
     }
     const Point point { event.x, event.y };
-    AxisDirection direction = AxisDirection::NONE;
-    if (!NearZero(event.verticalAxis)) {
-        if (LessNotEqual(event.verticalAxis, 0.0f)) {
-            direction = AxisDirection::UP;
-        } else {
-            direction = AxisDirection::DOWN;
-        }
-    }
-    if (!NearZero(event.horizontalAxis)) {
-        if (LessNotEqual(event.horizontalAxis, 0.0f)) {
-            direction = AxisDirection::LEFT;
-        } else {
-            direction = AxisDirection::RIGHT;
-        }
-    }
     WeakPtr<RenderNode> axisNode = nullptr;
-    renderNode->AxisDetect(point, point, axisNode, direction);
+    renderNode->AxisDetect(point, point, axisNode, event.GetDirection());
     axisNode_ = axisNode;
+    LOGI("Current axis node is %{public}s", AceType::TypeName(axisNode_.Upgrade()));
 }
 
 bool EventManager::DispatchAxisEvent(const AxisEvent& event)

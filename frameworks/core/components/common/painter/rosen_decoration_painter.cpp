@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,7 @@ namespace {
 
 constexpr int32_t DOUBLE_WIDTH = 2;
 constexpr int32_t DASHED_LINE_LENGTH = 3;
+constexpr int32_t DEL_NUM = 2;
 constexpr float BLUR_SIGMA_SCALE = 0.57735f;
 constexpr float TOP_START = 225.0f;
 constexpr float TOP_END = 270.0f;
@@ -719,10 +720,9 @@ void RosenDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* can
         LOGE("PaintDecoration failed.");
         return;
     }
-    uint32_t borderColor = 0; // transparent
-    uint32_t borderStyle = 0;
-    float borderWidth = 0;
-    float cornerRadius = 0;
+
+    Border borderFour;
+    Rosen::Vector4f cornerRadius;
     if (decoration_) {
         SkPaint paint;
 
@@ -733,18 +733,19 @@ void RosenDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* can
         Border border = decoration_->GetBorder();
         PaintColorAndImage(offset, canvas, paint, context);
         if (border.HasRadius()) {
-            cornerRadius = NormalizeToPx(border.TopLeftRadius().GetX());
+            cornerRadius.SetValues(
+                NormalizeToPx(border.TopLeftRadius().GetX()),
+                NormalizeToPx(border.TopRightRadius().GetX()),
+                NormalizeToPx(border.BottomRightRadius().GetX()),
+                NormalizeToPx(border.BottomLeftRadius().GetX())
+            );
         }
         if (border.HasValue()) {
-            borderColor = border.Top().GetColor().GetValue();
-            borderWidth = border.Top().GetWidth().ConvertToPx(dipScale_);
-            borderStyle = static_cast<uint32_t>(border.Top().GetBorderStyle());
+            borderFour = border;
         }
     }
+    PaintBorder(rsNode, borderFour, dipScale_);
     rsNode->SetCornerRadius(cornerRadius);
-    rsNode->SetBorderColor(borderColor);
-    rsNode->SetBorderWidth(borderWidth);
-    rsNode->SetBorderStyle(borderStyle);
 }
 
 void RosenDecorationPainter::PaintDecoration(
@@ -765,9 +766,7 @@ void RosenDecorationPainter::PaintDecoration(
         Border border = decoration_->GetBorder();
         PaintColorAndImage(offset, canvas, paint, context);
         if (border.HasValue()) {
-            rsNode->SetBorderColor(border.Top().GetColor().GetValue());
-            rsNode->SetBorderWidth(border.Top().GetWidth().ConvertToPx(dipScale_));
-            rsNode->SetBorderStyle(static_cast<uint32_t>(border.Top().GetBorderStyle()));
+            PaintBorder(rsNode, border, dipScale_);
 
             Gradient gradient = decoration_->GetGradientBorderImage();
             if (gradient.IsValid()) {
@@ -1515,6 +1514,8 @@ void RosenDecorationPainter::PaintHueRotate(
                     matrix[1] = matrix[7] = matrix[10] = 1 - N;
                     matrix[18] = 1.0f;
                     break;
+                default:
+                    break;
             }
 #ifdef USE_SYSTEM_SKIA
             auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
@@ -1539,6 +1540,26 @@ void RosenDecorationPainter::PaintBlur(RenderContext& context, const Dimension& 
             rsNode->SetBackgroundFilter(backFilter);
         }
     }
+}
+
+void RosenDecorationPainter::PaintBorder(std::shared_ptr<RSNode>& rsNode, Border& border, double dipScale)
+{
+    if (!rsNode) {
+        return;
+    }
+    AdjustBorderStyle(border);
+    rsNode->SetBorderColor(border.Left().GetColor().GetValue(),
+                           border.Top().GetColor().GetValue(),
+                           border.Right().GetColor().GetValue(),
+                           border.Bottom().GetColor().GetValue());
+    rsNode->SetBorderWidth(border.Left().GetWidth().ConvertToPx(dipScale),
+                           border.Top().GetWidth().ConvertToPx(dipScale),
+                           border.Right().GetWidth().ConvertToPx(dipScale),
+                           border.Bottom().GetWidth().ConvertToPx(dipScale));
+    rsNode->SetBorderStyle(static_cast<uint32_t>(border.Left().GetBorderStyle()),
+                           static_cast<uint32_t>(border.Top().GetBorderStyle()),
+                           static_cast<uint32_t>(border.Right().GetBorderStyle()),
+                           static_cast<uint32_t>(border.Bottom().GetBorderStyle()));
 }
 
 SkRRect RosenDecorationPainter::GetBoxOuterRRect(const Offset& offset)
@@ -1571,7 +1592,10 @@ void RosenDecorationPainter::PaintColorAndImage(
     if (backColor != Color::TRANSPARENT) {
         rsNode->SetBackgroundColor(backColor.GetValue());
         paintBgColor = true;
+    } else {
+        rsNode->SetBackgroundColor(Color::TRANSPARENT.GetValue());
     }
+
     if (animationColor != Color::TRANSPARENT) {
         rsNode->SetBackgroundColor(animationColor.GetValue());
     }
@@ -1809,11 +1833,15 @@ void RosenDecorationPainter::SetBorderStyle(
             if (!NearZero(borderLength)) {
                 double count = borderLength / width;
                 double leftLen = fmod((count - DASHED_LINE_LENGTH), (DASHED_LINE_LENGTH + 1));
+                if (NearZero(count - DASHED_LINE_LENGTH)) {
+                    return;
+                }
                 if (leftLen > DASHED_LINE_LENGTH - 1) {
                     delLen = (DASHED_LINE_LENGTH + 1 - leftLen) * width /
-                             (int32_t)((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1) + 2);
+                             static_cast<int32_t>((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1) + DEL_NUM);
                 } else {
-                    addLen = leftLen * width / (int32_t)((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1));
+                    addLen = leftLen * width /
+                             static_cast<int32_t>((count - DASHED_LINE_LENGTH) / (DASHED_LINE_LENGTH + 1));
                 }
             }
             const float intervals[] = { width * DASHED_LINE_LENGTH - delLen, width + addLen };
@@ -2263,19 +2291,19 @@ bool RosenDecorationPainter::CheckBorderEdgeForRRect(const Border& border)
 void RosenDecorationPainter::AdjustBorderStyle(Border& border)
 {
     // if not set border style use default border style solid
-    if (border.Left().IsValid() && border.Left().GetBorderStyle() == BorderStyle::NONE) {
+    if (border.Left().GetBorderStyle() == BorderStyle::NONE) {
         border.SetLeftStyle(BorderStyle::SOLID);
     }
 
-    if (border.Top().IsValid() && border.Top().GetBorderStyle() == BorderStyle::NONE) {
+    if (border.Top().GetBorderStyle() == BorderStyle::NONE) {
         border.SetTopStyle(BorderStyle::SOLID);
     }
 
-    if (border.Right().IsValid() && border.Right().GetBorderStyle() == BorderStyle::NONE) {
+    if (border.Right().GetBorderStyle() == BorderStyle::NONE) {
         border.SetRightStyle(BorderStyle::SOLID);
     }
 
-    if (border.Bottom().IsValid() && border.Bottom().GetBorderStyle() == BorderStyle::NONE) {
+    if (border.Bottom().GetBorderStyle() == BorderStyle::NONE) {
         border.SetBottomStyle(BorderStyle::SOLID);
     }
 }

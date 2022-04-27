@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,7 +57,9 @@ void JSForm::Create(const JSCallbackInfo& info)
     fomInfo.bundleName = bundle->ToString();
     fomInfo.abilityName = ability->ToString();
     fomInfo.moduleName = module->ToString();
-    fomInfo.dimension = dimension->ToNumber<int32_t>();
+    if (!dimension->IsNull() && !dimension->IsEmpty()) {
+        fomInfo.dimension = dimension->ToNumber<int32_t>();
+    }
     fomInfo.temporary = temporary->ToBoolean();
 
     RefPtr<FormComponent> form = AceType::MakeRefPtr<OHOS::Ace::FormComponent>();

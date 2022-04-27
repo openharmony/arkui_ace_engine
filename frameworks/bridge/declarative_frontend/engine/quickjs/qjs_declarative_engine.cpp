@@ -22,10 +22,13 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
+#include "core/common/ace_view.h"
+#include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_helpers.h"
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
@@ -44,7 +47,7 @@ constexpr int32_t LOAD_DOCUMENT_STR_LENGTH = 16;
 QJSDeclarativeEngine::~QJSDeclarativeEngine()
 {
     if (nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         delete nativeEngine_;
@@ -76,7 +79,7 @@ bool QJSDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         return false;
     }
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
     nativeEngine_->CheckUVLoop();
 #endif
     if (delegate && delegate->GetAssetManager()) {
@@ -233,12 +236,11 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         return;
     }
 
-    JSValue compiled = engineInstance_->CompileSource(url, jsContent.c_str(), jsContent.size());
+    JSValue compiled = engineInstance_->CompileSource(GetInstanceName(), url, jsContent.c_str(), jsContent.size());
     if (JS_IsException(compiled)) {
         LOGE("js compilation failed url=[%{public}s]", url.c_str());
         return;
     }
-    // Todo: check the fail.
     engineInstance_->ExecuteDocumentJS(compiled);
     js_std_loop(engineInstance_->GetQJSContext());
 }
@@ -279,6 +281,7 @@ void QJSDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::s
 #endif
 RefPtr<Component> QJSDeclarativeEngine::GetNewComponentWithJsCode(const std::string& jsCode)
 {
+    ViewStackProcessor::GetInstance()->ClearStack();
     bool result = engineInstance_->InitAceModules(jsCode.c_str(), jsCode.length(), "AddComponent");
     if (!result) {
         LOGE("execute addComponent failed,script=[%{public}s]", jsCode.c_str());
@@ -550,7 +553,86 @@ void QJSDeclarativeEngine::FireSyncEvent(const std::string& eventId, const std::
     LOGW("QJSDeclarativeEngine FireSyncEvent is unusable");
 }
 
-void QJSDeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId) {}
+void QJSDeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
+{
+#ifdef XCOMPONENT_SUPPORTED
+    if (!OHOS::Ace::Framework::XComponentClient::GetInstance().
+        GetNativeXComponentFromXcomponentsMap(componentId, nativeXComponentImpl_,
+        nativeXComponent_)) {
+        LOGE("InitXComponent fail");
+        return;
+    }
+
+    RefPtr<XComponentComponent> xcomponent;
+    OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId, xcomponent);
+    if (!xcomponent) {
+        LOGE("FireExternalEvent xcomponent is null.");
+        return;
+    }
+
+    void* nativeWindow = nullptr;
+#ifdef OHOS_STANDARD_SYSTEM
+    nativeWindow = const_cast<void*>(xcomponent->GetNativeWindow());
+#else
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("FireExternalEvent Current container null");
+        return;
+    }
+    auto nativeView = static_cast<AceView*>(container->GetView());
+    if (!nativeView) {
+        LOGE("FireExternalEvent nativeView null");
+        return;
+    }
+    auto textureId = static_cast<uint64_t>(xcomponent->GetTextureId());
+    LOGE("Kee FireExternalEvent textureId = %{public}d", (int)textureId);
+    nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+#endif
+
+    if (!nativeWindow) {
+        LOGE("FireExternalEvent nativeWindow invalid");
+        return;
+    }
+    nativeXComponentImpl_->SetSurface(nativeWindow);
+    nativeXComponentImpl_->SetXComponentId(xcomponent->GetId());
+
+    auto nativeEngine = static_cast<QuickJSNativeEngine*>(nativeEngine_);
+    if (nativeEngine == nullptr) {
+        LOGE("nativeEngine is null");
+        return;
+    }
+
+    std::string args;
+    auto renderContext = nativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true, args,
+        OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_));
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Make(renderContext);
+    auto getJSValCallback = [obj](JSRef<JSVal>& jsVal) {
+        jsVal = obj;
+        return true;
+    };
+    XComponentClient::GetInstance().RegisterJSValCallback(getJSValCallback);
+
+    auto task = [weak = WeakClaim(this), xcomponent]() {
+        auto pool = xcomponent->GetTaskPool();
+        if (!pool) {
+            return;
+        }
+        auto bridge = weak.Upgrade();
+        if (bridge) {
+            pool->NativeXComponentInit(
+                bridge->nativeXComponent_, AceType::WeakClaim(AceType::RawPtr(bridge->nativeXComponentImpl_)));
+        }
+    };
+
+    auto delegate = engineInstance_->GetDelegate();
+    if (!delegate) {
+        LOGE("Delegate is null");
+        return;
+    }
+    delegate->PostSyncTaskToPage(task);
+#endif
+}
 
 void QJSDeclarativeEngine::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/utils.h"
+#include "core/components/theme/app_theme.h"
 
 #include "hilog_wrapper.h"
 #include "if_system_ability_manager.h"
@@ -64,6 +65,7 @@ public:
     void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override
     {
         HILOG_INFO("UIMgrServiceWindowChangeListener size change");
+        SystemProperties::SetWindowPos(rect.posX_, rect.posY_);
     }
     void OnModeChange(OHOS::Rosen::WindowMode mode) override
     {
@@ -161,6 +163,18 @@ std::shared_ptr<OHOS::AppExecFwk::Ability> UIMgrService::CreateAbility()
     return sharedAbility;
 }
 
+static void SetDialogBackgroundColor(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)
+{
+    auto themeManager = context->GetThemeManager();
+    if (themeManager) {
+        auto appTheme = themeManager->GetTheme<AppTheme>();
+        if (appTheme) {
+            HILOG_INFO("set bg color TRANSPARENT");
+            appTheme->SetBackgroundColor(Color::TRANSPARENT);
+        }
+    }
+}
+
 int UIMgrService::ShowDialog(const std::string& name,
                              const std::string& params,
                              OHOS::Rosen::WindowType windowType,
@@ -168,7 +182,8 @@ int UIMgrService::ShowDialog(const std::string& name,
                              int y,
                              int width,
                              int height,
-                             const sptr<OHOS::Ace::IDialogCallback>& dialogCallback)
+                             const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
+                             int* id)
 {
     HILOG_INFO("Show dialog in service start");
     if (handler_ == nullptr) {
@@ -177,6 +192,9 @@ int UIMgrService::ShowDialog(const std::string& name,
     }
 
     int32_t dialogId = gDialogId.fetch_add(1, std::memory_order_relaxed);
+    if (id != nullptr) {
+        *id = dialogId;
+    }
     HILOG_INFO("Show dialog id: %{public}d", dialogId);
     sptr<OHOS::Rosen::Window> dialogWindow = nullptr;
     auto showDialogCallback = [&]() {
@@ -225,6 +243,8 @@ int UIMgrService::ShowDialog(const std::string& name,
         auto flutterAceView = Ace::Platform::FlutterAceView::CreateView(dialogId, true);
 
         sptr<OHOS::Rosen::WindowOption> option = new OHOS::Rosen::WindowOption();
+        HILOG_INFO("Show dialog: windowConfig: x: %{public}d, y: %{public}d, width: %{public}d, height: %{public}d",
+            x, y, width, height);
         option->SetWindowRect({ x, y, width, height });
         option->SetWindowType(windowType);
         std::string windowName = "system_dialog_window";
@@ -246,13 +266,9 @@ int UIMgrService::ShowDialog(const std::string& name,
         Ace::Platform::FlutterAceView::SurfaceCreated(flutterAceView, dialogWindow);
 
         // set metrics
-        int32_t windowWidth = dialogWindow->GetRect().width_;
-        int32_t windowHeight = dialogWindow->GetRect().height_;
-        HILOG_INFO("Show dialog: windowConfig: width: %{public}d, height: %{public}d", windowWidth, windowHeight);
-
         flutter::ViewportMetrics metrics;
-        metrics.physical_width = windowWidth;
-        metrics.physical_height = windowHeight;
+        metrics.physical_width = width;
+        metrics.physical_height = height;
         metrics.device_pixel_ratio = density_;
         Ace::Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
 
@@ -261,37 +277,42 @@ int UIMgrService::ShowDialog(const std::string& name,
         Ace::Platform::AceContainer::AddAssetPath(dialogId, packagePathStr, assetBasePathStr);
 
         Ace::Platform::UIEnvCallback callback = nullptr;
+        callback =
 #ifdef ENABLE_ROSEN_BACKEND
-        callback = [dialogWindow, listener, dialogId] (
-            const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
-            if (SystemProperties::GetRosenBackendEnabled()) {
-                auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-                if (rsUiDirector != nullptr) {
-                    rsUiDirector->SetRSSurfaceNode(dialogWindow->GetSurfaceNode());
-                    dialogWindow->RegisterWindowChangeListener(listener);
+            [dialogWindow, listener, dialogId] (const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
+                if (SystemProperties::GetRosenBackendEnabled()) {
+                    auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+                    if (rsUiDirector != nullptr) {
+                        rsUiDirector->SetRSSurfaceNode(dialogWindow->GetSurfaceNode());
+                        dialogWindow->RegisterWindowChangeListener(listener);
 
-                    rsUiDirector->SetUITaskRunner(
-                        [taskExecutor = Ace::Platform::AceContainer::GetContainer(dialogId)->GetTaskExecutor()]
-                            (const std::function<void()>& task) {
-                                taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-                            });
-                    if (context != nullptr) {
-                        context->SetRSUIDirector(rsUiDirector);
+                        rsUiDirector->SetUITaskRunner(
+                            [taskExecutor = Ace::Platform::AceContainer::GetContainer(dialogId)->GetTaskExecutor()]
+                                (const std::function<void()>& task) {
+                                    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                                });
+                        if (context != nullptr) {
+                            context->SetRSUIDirector(rsUiDirector);
+                        }
+                        rsUiDirector->Init();
+                        HILOG_INFO("Init Rosen Backend");
                     }
-                    rsUiDirector->Init();
-                    HILOG_INFO("Init Rosen Backend");
+                } else {
+                    HILOG_INFO("not Init Rosen Backend");
                 }
-            } else {
-                HILOG_INFO("not Init Rosen Backend");
+                SetDialogBackgroundColor(context);
+            };
+#else
+            [] (const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) {
+                SetDialogBackgroundColor(context);
             }
-        };
 #endif
 
         // set view
         Ace::Platform::AceContainer::SetView(
-            flutterAceView, density_, windowWidth, windowHeight, dialogWindow->GetWindowId(), callback);
+            flutterAceView, density_, width, height, dialogWindow->GetWindowId(), callback);
         Ace::Platform::AceContainer::SetUIWindow(dialogId, dialogWindow);
-        Ace::Platform::FlutterAceView::SurfaceChanged(flutterAceView, windowWidth, windowHeight, 0);
+        Ace::Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
 
         // run page.
         Ace::Platform::AceContainer::RunPage(
@@ -303,15 +324,21 @@ int UIMgrService::ShowDialog(const std::string& name,
         return UI_SERVICE_POST_TASK_FAILED;
     }
 
+    if (dialogWindow == nullptr) {
+        HILOG_ERROR("No window available");
+        return UI_SERVICE_CREATE_WINDOW_FAILED;
+    }
+
+    dialogWindow->Show();
+    dialogWindow->MoveTo(x, y);
+    dialogWindow->Resize(width, height);
+
     int32_t windowWidth = static_cast<int32_t>(dialogWindow->GetRect().width_);
     int32_t windowHeight = static_cast<int32_t>(dialogWindow->GetRect().height_);
-    int32_t windowx = static_cast<int32_t>(dialogWindow->GetRect().posX_);
-    int32_t windowy = static_cast<int32_t>(dialogWindow->GetRect().posY_);
+    int32_t windowX = static_cast<int32_t>(dialogWindow->GetRect().posX_);
+    int32_t windowY = static_cast<int32_t>(dialogWindow->GetRect().posY_);
     HILOG_INFO("Show dialog: size: width: %{public}d, height: %{public}d, pos: x: %{public}d, y: %{public}d",
-        windowWidth, windowHeight, windowx, windowy);
-    dialogWindow->Show();
-    dialogWindow->MoveTo(windowx, windowy);
-    dialogWindow->Resize(windowWidth, windowHeight);
+        windowWidth, windowHeight, windowX, windowY);
 
     HILOG_INFO("Show dialog in service end");
     return NO_ERROR;
@@ -349,6 +376,24 @@ int UIMgrService::CancelDialog(int id)
     };
 
     if (!handler_->PostTask(cancelDialogCallback)) {
+        return UI_SERVICE_POST_TASK_FAILED;
+    }
+
+    return NO_ERROR;
+}
+
+int UIMgrService::UpdateDialog(int id, const std::string& data)
+{
+    auto updateDialogCallback = [id, data]() {
+        HILOG_INFO("Update dialog id: %{public}d", id);
+        auto container = Platform::AceContainer::GetContainer(id);
+        if (!container) {
+            HILOG_INFO("Container(%{public}d) not found.", id);
+            return;
+        }
+        Platform::AceContainer::OnDialogUpdated(id, data);
+    };
+    if (!handler_->PostTask(updateDialogCallback)) {
         return UI_SERVICE_POST_TASK_FAILED;
     }
 

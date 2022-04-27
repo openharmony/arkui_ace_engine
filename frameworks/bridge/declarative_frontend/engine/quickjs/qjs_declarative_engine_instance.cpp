@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_helpers.h"
@@ -40,18 +41,15 @@
 #endif
 
 extern const char _binary_stateMgmt_js_start[];
-extern const char _binary_contentStorage_js_start[];
 extern const char _binary_jsEnumStyle_js_start[];
 extern const char _binary_jsMockSystemPlugin_js_start[];
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 extern const char* _binary_stateMgmt_js_end;
-extern const char* _binary_contentStorage_js_end;
 extern const char* _binary_jsEnumStyle_js_end;
 extern const char* _binary_jsMockSystemPlugin_js_end;
 #else
 extern const char _binary_stateMgmt_js_end[];
-extern const char _binary_contentStorage_js_end[];
 extern const char _binary_jsEnumStyle_js_end[];
 extern const char _binary_jsMockSystemPlugin_js_end[];
 #endif
@@ -115,6 +113,22 @@ RefPtr<JsAcePage> QJSDeclarativeEngineInstance::GetStagingPage(JSContext* ctx)
         LOGE("QJS context has no ref to engine instance. Failed!");
         return nullptr;
     }
+}
+
+JSContext* QJSDeclarativeEngineInstance::GetCurrentContext()
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    auto qjsEngine = AceType::DynamicCast<QJSDeclarativeEngine>(engine);
+    if (!qjsEngine) {
+        LOGE("qjsEngine is null");
+        return nullptr;
+    }
+    auto engineInstance = qjsEngine->GetEngineInstance();
+    if (engineInstance == nullptr) {
+        LOGE("engineInstance is nullptr");
+        return nullptr;
+    }
+    return engineInstance->GetQJSContext();
 }
 
 void QJSDeclarativeEngineInstance::PushJSCommand(const RefPtr<JsCommand>& jsCommand, bool forcePush) const
@@ -216,20 +230,20 @@ JSValue QJSDeclarativeEngineInstance::eval_binary_buf(JSContext* ctx, const uint
     return JS_EvalFunction(ctx, obj);
 }
 
-JSValue QJSDeclarativeEngineInstance::CompileSource(std::string url, const char* buf, size_t bufSize)
+JSValue QJSDeclarativeEngineInstance::CompileSource(
+    std::string instanceName, std::string url, const char* buf, size_t bufSize)
 {
     LOGD("Compiling file url %s", url.c_str());
 
     ACE_SCOPED_TRACE("Compile JS");
     JSContext* ctx = GetQJSContext();
 
-    std::size_t h1 = std::hash<std::string> {}(url);
-
     // temporary use image cache path to store the snapshot
     std::string separator = "/";
 #if defined(WINDOWS_PLATFORM)
     separator = "\\";
 #endif
+    std::size_t h1 = std::hash<std::string> {}(instanceName + separator + url);
     std::string filename = ImageCache::GetImageCacheFilePath() + separator;
     filename.append(std::to_string(h1));
 
@@ -436,12 +450,8 @@ bool QJSDeclarativeEngineInstance::InitJSEnv(JSRuntime* runtime, JSContext* cont
     // make jsProxy end of '\0'
     std::string jsProxy(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end - _binary_stateMgmt_js_start);
     std::string jsEnum(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end - _binary_jsEnumStyle_js_start);
-    std::string jsContentStorage(_binary_contentStorage_js_start,
-        _binary_contentStorage_js_end - _binary_contentStorage_js_start);
-    
     if (!InitAceModules(jsProxy.c_str(), jsProxy.length(), "stateMgmt.js")
-        || !InitAceModules(jsEnum.c_str(), jsEnum.length(), "jsEnumStyle.js")
-        || !InitAceModules(jsContentStorage.c_str(), jsContentStorage.length(), "contentStorage.js")) {
+        || !InitAceModules(jsEnum.c_str(), jsEnum.length(), "jsEnumStyle.js")) {
         return false;
     }
 

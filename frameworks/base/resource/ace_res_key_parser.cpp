@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,7 +92,7 @@ bool AceResKeyParser::Parse(const std::string& deviceResConfigTag, std::vector<K
         ParseResolution,
         ParseDefaults,
     };
-    const int32_t FUNC_LEN = sizeof(functions) / sizeof(functions[0]);
+    const int32_t FUNC_LEN = static_cast<int32_t>(sizeof(functions) / sizeof(functions[0]));
     if (!keyParts.empty()) {
         if (!ParseMatch(keyParts, keyParams, functions, FUNC_LEN, styleRes)) {
             LOGE("Invalid config:%{public}s", deviceResConfigTag.c_str());
@@ -118,7 +118,7 @@ bool AceResKeyParser::DeclarativeParse(const std::string& deviceResConfigTag, st
         ParseResolution,
         ParseDefaults,
     };
-    const int32_t FUNC_LEN = sizeof(functions) / sizeof(functions[0]);
+    const int32_t FUNC_LEN = static_cast<int32_t>(sizeof(functions) / sizeof(functions[0]));
     if (!reskeyParts.empty()) {
         if (!ParseMatch(reskeyParts, keyParams, functions, FUNC_LEN, true)) {
             LOGE("Invalid config:%{public}s", resConfigTag.c_str());
@@ -285,7 +285,7 @@ bool AceResKeyParser::ParseDefaults(const std::string& key, std::vector<KeyParam
 std::string AceResKeyParser::GetMccByValue(uint32_t value) const
 {
     char mccStr[MAX_MCC_MNC_LEN] = {0};
-    if (sprintf_s(mccStr, MAX_MCC_MNC_LEN, "mcc%03d", value) < 0) {
+    if (sprintf_s(mccStr, MAX_MCC_MNC_LEN, "mcc%03u", value) < 0) {
         LOGE("output mcc exception");
         return "";
     }
@@ -295,7 +295,7 @@ std::string AceResKeyParser::GetMccByValue(uint32_t value) const
 std::string AceResKeyParser::GetMncShortLenByValue(uint32_t value) const
 {
     char mncStr[MAX_MCC_MNC_LEN] = {0};
-    if (sprintf_s(mncStr, MAX_MCC_MNC_LEN, "mnc%02d", value) < 0) {
+    if (sprintf_s(mncStr, MAX_MCC_MNC_LEN, "mnc%02u", value) < 0) {
         LOGE("output mnc short len exception");
         return "";
     }
@@ -305,7 +305,7 @@ std::string AceResKeyParser::GetMncShortLenByValue(uint32_t value) const
 std::string AceResKeyParser::GetMncByValue(uint32_t value) const
 {
     char mncStr[MAX_MCC_MNC_LEN] = {0};
-    if (sprintf_s(mncStr, MAX_MCC_MNC_LEN, "mnc%03d", value) < 0) {
+    if (sprintf_s(mncStr, MAX_MCC_MNC_LEN, "mnc%03u", value) < 0) {
         LOGE("output mnc len exception");
         return "";
     }

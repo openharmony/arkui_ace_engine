@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,15 +17,11 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   implements ISinglePropertyChangeSubscriber<T> {
 
   private source_: ObservedPropertyAbstract<T>;
-  private contentObserver_?: ObservedPropertyAbstract<T>;
 
-  constructor(source: ObservedPropertyAbstract<T>, owningView: IPropertySubscriber, owningViewPropNme: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>) {
+  constructor(source: ObservedPropertyAbstract<T>, owningView: IPropertySubscriber, owningViewPropNme: PropertyInfo) {
     super(owningView, owningViewPropNme);
     this.source_ = source;
     this.source_.subscribeMe(this);
-    if (contentObserver) {
-      this.contentObserver_ = contentObserver;
-    }
   }
 
   /*
@@ -33,7 +29,7 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   the property.
 */
   aboutToBeDeleted() {
-    this.source_.unlinkSuscriber(this.id__());
+    this.source_.unlinkSuscriber(this.id());
     this.source_ = undefined;
     super.aboutToBeDeleted();
   }
@@ -42,33 +38,25 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   // will call this cb function when property has changed
   // a set (newValue) is not done because get reads through for the source_
   hasChanged(newValue: T): void {
-    console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
+    console.debug(`SynchedPropertySimpleTwoWay[${this.id()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
     this.notifyHasChanged(newValue);
   }
 
   // get 'read through` from the ObservedProperty
   public get(): T {
-    console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: get`)
+    console.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: get`)
     this.notifyPropertyRead();
-    if (this.contentObserver_) {
-      return this.contentObserver_.get();
-    }
     return this.source_.get();
   }
 
   // set 'writes through` to the ObservedProperty
   public set(newValue: T): void {
-    if (this.contentObserver_) {
-      this.contentObserver_.set(newValue);
-      return;
-    }
-
     if (this.source_.get() == newValue) {
-      console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+      console.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
       return;
     }
 
-    console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+    console.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
     // the source_ ObservedProeprty will call: this.hasChanged(newValue);
     this.notifyHasChanged(newValue);
     return this.source_.set(newValue);
@@ -81,13 +69,13 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
 * changes.
 */
   public createLink(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T> {
-    return new SynchedPropertySimpleTwoWay(this, subscribeOwner, linkPropName, contentObserver);
+    linkPropName?: PropertyInfo): ObservedPropertyAbstract<T> {
+    return new SynchedPropertySimpleTwoWay(this, subscribeOwner, linkPropName);
   }
 
   public createProp(subscribeOwner?: IPropertySubscriber,
-    propPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T> {
-    return new SynchedPropertySimpleOneWaySubscribing(this, subscribeOwner, propPropName, contentObserver);
+    propPropName?: PropertyInfo): ObservedPropertyAbstract<T> {
+    return new SynchedPropertySimpleOneWaySubscribing(this, subscribeOwner, propPropName);
   }
 
 }

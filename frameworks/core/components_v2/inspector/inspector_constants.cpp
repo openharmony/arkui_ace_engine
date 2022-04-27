@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,6 +164,8 @@ ACE_EXPORT extern const char DIVIDER_ETS_TAG[] = "Divider";
 // checkbox
 const char CHECKBOX_COMPONENT_TAG[] = "CheckboxComponent";
 const char CHECKBOX_ETS_TAG[] = "Toggle";
+ACE_EXPORT extern const char CHECK_BOX_COMPONENT_TAG[] = "Checkbox";
+ACE_EXPORT extern const char CHECK_BOX_ETS_TAG[] = "Checkbox";
 
 // switch
 const char SWITCH_COMPONENT_TAG[] = "SwitchComponent";
@@ -245,7 +247,7 @@ ACE_EXPORT extern const char REFRESH_ETS_TAG[] = "Refresh";
 ACE_EXPORT extern const char DATE_PICKER_COMPONENT_TAG[] = "PickerDateComponent";
 ACE_EXPORT extern const char DATE_PICKER_ETS_TAG[] = "DatePicker";
 ACE_EXPORT extern const char TIME_PICKER_COMPONENT_TAG[] = "PickerTimeComponent";
-ACE_EXPORT extern const char TIME_PICKER_ETS_TAG[] = "DatePicker";
+ACE_EXPORT extern const char TIME_PICKER_ETS_TAG[] = "TimePicker";
 
 // Radio
 ACE_EXPORT extern const char RADIO_COMPONENT_TAG[] = "RadioComponent<VALUE_TYPE>";
@@ -319,5 +321,17 @@ ACE_EXPORT extern const char DATE_PICKER_DIALOG_ETS_TAG[] = "DatePickerDialog";
 // sideBar
 ACE_EXPORT extern const char SIDE_BAR_COMPONENT_TAG[] = "SideBarContainerComponent";
 ACE_EXPORT extern const char SIDE_BAR_ETS_TAG[] = "SideBarContainer";
+
+// loadingProgress
+ACE_EXPORT extern const char LOADING_PROGRESS_COMPONENT_TAG[] = "LoadingProgressComponent";
+ACE_EXPORT extern const char LOADING_PROGRESS_ETS_TAG[] = "LoadingProgress";
+
+// checkboxGroup
+const char CHECKBOXGROUP_COMPONENT_TAG[] = "CheckboxGroupComponent";
+const char CHECKBOXGROUP_ETS_TAG[] = "CheckboxGroup";
+
+// timePickerdialog
+ACE_EXPORT extern const char TIME_PICKER_DIALOG_COMPONENT_TAG[] = "TimePickerDialog";
+ACE_EXPORT extern const char TIME_PICKER_DIALOG_ETS_TAG[] = "TimePickerDialog";
 
 } // namespace OHOS::Ace::V2

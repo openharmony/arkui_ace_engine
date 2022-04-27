@@ -19,6 +19,7 @@ template("ace_osal_ohos_source_set") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
     if (is_standard_system) {
       external_deps = [
@@ -48,6 +49,7 @@ template("ace_osal_ohos_source_set") {
       "log_wrapper.cpp",
       "ressched_report.cpp",
       "system_properties.cpp",
+      "trace_id_impl.cpp",
     ]
 
     public_deps =
@@ -75,7 +77,10 @@ template("ace_osal_ohos_source_set") {
       external_deps += [ "multimedia_image:image" ]
     }
     sources += [ "pixel_map_ohos.cpp" ]
-    external_deps += [ "hisysevent_native:libhisysevent" ]
+    external_deps += [
+      "hisysevent_native:libhisysevent",
+      "hitrace_native:libhitrace",
+    ]
   }
 }
 

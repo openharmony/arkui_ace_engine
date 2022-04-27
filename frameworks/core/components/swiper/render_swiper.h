@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,7 +153,7 @@ public:
 
     Dimension GetItemSpace() const
     {
-        return itemspace_;
+        return itemSpace_;
     }
 
     double GetMainSize(const Size& size) const
@@ -204,7 +204,7 @@ public:
     void ShowPrevious();
     void ShowNext();
 
-    /* indicator animimation begin */
+    /* indicator animation begin */
     // indicator status init
     void InitIndicatorAnimation(const WeakPtr<PipelineContext>& context);
     void CalMaxStretch();
@@ -234,12 +234,12 @@ public:
     bool IsZoomOutAnimationStopped();
     bool IsZoomOutDotAnimationStopped();
 
-    // indicator info update with animimation
+    // indicator info update with animation
     void UpdateIndicatorLayout();
     void UpdateIndicatorOffset(int32_t fromIndex, int32_t toIndex, double value);
-    void UpdateIndicatorHeadPosistion(double offset);
-    void UpdateIndicatorTailPosistion(double offset, double switchOffset = 0.0);
-    void UpdateIndicatorPointPosistion(double offset);
+    void UpdateIndicatorHeadPosition(double offset);
+    void UpdateIndicatorTailPosition(double offset, double switchOffset = 0.0);
+    void UpdateIndicatorPointPosition(double offset);
     void UpdateMaskOpacity(double value);
     void UpdateZoomValue(double value);
     void UpdateZoomDotValue(double value);
@@ -253,7 +253,7 @@ public:
     void ResetIndicatorPosition();
     void ResetHoverZoomDot();
     void MarkIndicatorPosition(bool isZoomMax = true);
-    /* indicator animimation end */
+    /* indicator animation end */
 
     // for lazy for each
     void SetBuildChildByIndex(BuildChildByIndex buildChildByIndex)
@@ -304,6 +304,7 @@ public:
         return cachedCount_;
     }
 
+    bool HandleMouseEvent(const MouseEvent& event) override;
     bool RefuseUpdatePosition(int32_t index);
     void OnPaintFinish() override;
 protected:
@@ -391,7 +392,7 @@ protected:
     // indicator animation flag
     bool isIndicatorAnimationStart_ = false;
     bool isDragStart_ = false;
-    bool quickTrunItem_ = false; // quick trun swipe item
+    bool quickTurnItem_ = false; // quick turn swipe item
     Color fadeColor_ = Color::GRAY;
 
 private:
@@ -539,7 +540,7 @@ private:
     bool disableSwipe_ = false;
     bool disableRotation_ = false;
     bool catchMode_ = true;
-    Dimension itemspace_;
+    Dimension itemSpace_;
     int32_t index_ = 0;
     int32_t swipeToIndex_ = -1;
     MainSwiperSize mainSwiperSize_ = MainSwiperSize::MAX;
@@ -547,7 +548,7 @@ private:
     double nextMargin_ = 0.0;
     int32_t cachedCount_ = -1;
 
-    // need timer for auto play
+    // need timer for autoplay
     RefPtr<Scheduler> scheduler_;
     uint64_t elapsedTime_ = 0; // millisecond.
     uint64_t autoPlayInterval_ = 0;
@@ -557,7 +558,7 @@ private:
     CancelableCallback<void()> rotationTimer_;
     RotationStatus rotationStatus_ = RotationStatus::ROTATION_END;
 
-    // indicator animimation controller and indicator dyanamic info.
+    // indicator animation controller and indicator dynamic info.
     RefPtr<SpringMotion> indicatorSpringMotion_;
     RefPtr<Animation<double>> indicatorAnimation_;
     RefPtr<Animation<double>> zoomInDotAnimation_;
@@ -596,8 +597,6 @@ private:
     int32_t lazyLoadCacheSize_ = 5; // default lazy load cache number: 5
     double dragOffset_ = 0.0;
     int32_t nextIndex_ = 0;
-
-    int32_t showingCount_ = 0;
 
     RefPtr<Curve> curve_;
     std::string curveRender_;

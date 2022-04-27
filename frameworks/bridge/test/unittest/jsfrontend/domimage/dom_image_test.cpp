@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,8 +52,6 @@ void DomImageTest::TearDown() {}
  * @tc.name: SetImageAttributes001
  * @tc.desc: Verify that DomImage can create imageComponent correctly with all attributes set, object-fit is "none".
  * @tc.type: FUNC
- * @tc.require: AR000DD668
- * @tc.author: chenxuankai
  */
 HWTEST_F(DomImageTest, SetImageAttributes001, TestSize.Level1)
 {
@@ -96,8 +94,6 @@ HWTEST_F(DomImageTest, SetImageAttributes001, TestSize.Level1)
  * @tc.name: SetImageAttributes002
  * @tc.desc: Verify that DomImage can create imageComponent correctly width no attribute set.
  * @tc.type: FUNC
- * @tc.require: AR000DD668
- * @tc.author: chenxuankai
  */
 HWTEST_F(DomImageTest, SetImageAttributes002, TestSize.Level1)
 {
@@ -134,8 +130,6 @@ HWTEST_F(DomImageTest, SetImageAttributes002, TestSize.Level1)
  * @tc.name: SetImageAttributes003
  * @tc.desc: Verify that DomImage can create imageComponent correctly when object-fit is "fill".
  * @tc.type: FUNC
- * @tc.require: AR000DD668
- * @tc.author: chenxuankai
  */
 HWTEST_F(DomImageTest, SetImageAttributes003, TestSize.Level1)
 {
@@ -168,8 +162,6 @@ HWTEST_F(DomImageTest, SetImageAttributes003, TestSize.Level1)
  * @tc.name: SetImageAttributes004
  * @tc.desc: Verify that DomImage can create imageComponent correctly when object-fit is "cover".
  * @tc.type: FUNC
- * @tc.require: AR000DD668
- * @tc.author: chenxuankai
  */
 HWTEST_F(DomImageTest, SetImageAttributes004, TestSize.Level1)
 {
@@ -202,8 +194,6 @@ HWTEST_F(DomImageTest, SetImageAttributes004, TestSize.Level1)
  * @tc.name: SetImageAttributes005
  * @tc.desc: Verify that DomImage can create imageComponent correctly when object-fit is "scale-down".
  * @tc.type: FUNC
- * @tc.require: AR000DD668
- * @tc.author: chenxuankai
  */
 HWTEST_F(DomImageTest, SetImageAttributes005, TestSize.Level1)
 {
@@ -235,8 +225,6 @@ HWTEST_F(DomImageTest, SetImageAttributes005, TestSize.Level1)
  * @tc.name: SetImageAttributes006
  * @tc.desc: Verify that DomImage can create imageComponent correctly when object-fit is "contain".
  * @tc.type: FUNC
- * @tc.require: AR000DD668
- * @tc.author: chenxuankai
  */
 HWTEST_F(DomImageTest, SetImageAttributes006, TestSize.Level1)
 {
@@ -269,8 +257,6 @@ HWTEST_F(DomImageTest, SetImageAttributes006, TestSize.Level1)
  * @tc.name: SetImageAttributes007
  * @tc.desc: Verify that DomImage can create imageComponent correctly when object-fit value is invalid.
  * @tc.type: FUNC
- * @tc.require: AR000DD668
- * @tc.author: chenxuankai
  */
 HWTEST_F(DomImageTest, SetImageAttributes007, TestSize.Level1)
 {

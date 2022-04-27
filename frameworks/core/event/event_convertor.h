@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,6 +87,8 @@ struct alignas(8) AceMouseData {
 };
 
 void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>& events);
+
+void UpdateTouchEvent(std::vector<TouchEvent>& events);
 
 void ConvertMouseEvent(const std::vector<uint8_t>& data, MouseEvent& events);
 

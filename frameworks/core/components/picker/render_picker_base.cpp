@@ -14,6 +14,7 @@
  */
 
 #include "core/components/picker/render_picker_base.h"
+#include "core/components/picker/picker_date_component.h"
 
 #include <numeric>
 
@@ -72,12 +73,20 @@ void RenderPickerBase::Update(const RefPtr<Component>& component)
         type_ = "DatePickerType.Date";
     }
 
+    auto datePicker = AceType::DynamicCast<PickerDateComponent>(component);
+    if (datePicker) {
+        startDateSolar_ = datePicker->GetStartDate();
+        endDateSolar_ = datePicker->GetEndDate();
+    }
+
     columnHeight_ = picker->GetColumnHeight();
     data_ = picker;
     SetInterceptTouchEvent(!data_->GetSubsidiary());
     data_->OnColumnsCreating();
     onCancelCallback_ = AceAsyncEvent<void()>::Create(data_->GetOnCancel(), context_);
-    onChangeCallback_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetOnChange(), context_);
+    onJSChangeCallback_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetOnChange(), context_);
+    onChangeCallback_ = AceSyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::
+        Create(data_->GetOnChange(), context_);
     onColumnChangeCallback_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetOnColumnChange(), context_);
     onDialogAccept_ = AceAsyncEvent<void(const std::string&)>::Create(data_->GetDialogAcceptEvent(), context_);
     onDialogCancel_ = AceAsyncEvent<void()>::Create(data_->GetDialogCancelEvent(), context_);
@@ -519,7 +528,12 @@ void RenderPickerBase::HandleFinish(bool success)
     }
 
     if (success && onChangeCallback_) {
-        onChangeCallback_(std::string("\"change\",") + data_->GetSelectedObject(false, "") + ",null");
+        auto str = data_->GetSelectedObject(false, "");
+        onChangeCallback_(std::make_shared<DatePickerChangeEvent>(str));
+    }
+
+    if (success && onJSChangeCallback_) {
+        onJSChangeCallback_(std::string("\"change\",") + data_->GetSelectedObject(false, "") + ",null");
     }
 
     if (!success && onCancelCallback_) {

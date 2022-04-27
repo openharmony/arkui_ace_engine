@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,11 @@
 #include "base/log/log.h"
 #include "native_engine/native_value.h"
 
-#include "frameworks/bridge/declarative_frontend/engine/jsi/ark/ark_js_runtime.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
 namespace OHOS::Ace::Framework {
+
 JsiRef<JsiValue> JsConverter::ConvertNativeValueToJsVal(NativeValue* nativeValue)
 {
     if (!nativeValue || !JsiDeclarativeEngineInstance::GetCurrentRuntime()) {
@@ -34,4 +35,5 @@ JsiRef<JsiValue> JsConverter::ConvertNativeValueToJsVal(NativeValue* nativeValue
     JsiValue jsiValue(localRef);
     return JsiRef<JsiValue>::Make(jsiValue);
 }
+
 } // namespace OHOS::Ace::Framework

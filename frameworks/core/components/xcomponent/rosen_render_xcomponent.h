@@ -44,8 +44,6 @@ public:
     OHOS::sptr<OHOS::Surface> GetSurface();
 #endif
 
-private:
-    bool hasSetDefaultSize_ = false;
 };
 } // namespace OHOS::Ace
 

@@ -29,7 +29,6 @@ public:
     void PerformBuild() override;
 
 private:
-    RefPtr<RenderNode> CreateRenderNode() override;
     void ApplyRenderChild(const RefPtr<RenderElement>& renderChild) override;
 };
 

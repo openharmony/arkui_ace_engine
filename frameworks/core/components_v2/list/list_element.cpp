@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,11 +100,17 @@ bool ListElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect
         return false;
     }
     LOGI("RequestNextFocus vertical:%{public}d reverse:%{public}d.", vertical, reverse);
+    if (!UpdateFocusIndex()) {
+        LOGE("Update focus index failed");
+        return false;
+    }
     bool ret = false;
     while (!ret) {
         int32_t focusIndex = list->RequestNextFocus(vertical, reverse);
+        LOGI("Request next focus index = %{public}d", focusIndex);
         int32_t size = static_cast<int32_t>(GetChildrenList().size());
         if (focusIndex < 0 || focusIndex >= size) {
+            LOGW("Invalid next focus index");
             return false;
         }
         auto iter = GetChildrenList().begin();
@@ -118,6 +124,24 @@ bool ListElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect
         ret = focusNode->RequestFocusImmediately();
     }
     return ret;
+}
+
+bool ListElement::UpdateFocusIndex()
+{
+    RefPtr<RenderList> list = AceType::DynamicCast<RenderList>(renderNode_);
+    if (!list) {
+        LOGE("Render grid is null.");
+        return false;
+    }
+    int32_t index = 0;
+    for (const auto& iter : GetChildrenList()) {
+        if (iter->IsCurrentFocus()) {
+            list->SetFocusIndex(index);
+            return true;
+        }
+        ++index;
+    }
+    return false;
 }
 
 RefPtr<Element> ListElement::OnUpdateElement(const RefPtr<Element>& element, const RefPtr<Component>& component)

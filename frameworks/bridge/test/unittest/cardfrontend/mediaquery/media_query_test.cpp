@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 20212022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,8 +39,6 @@ void MediaQueryTest::TearDown() {}
  * @tc.name: MediaQueryTest001
  * @tc.desc: Verify that media query condition can match right result.
  * @tc.type: FUNC
- * @tc.require: AR000FL26S, AR000FLCEI
- * @tc.author: kouxinxin
  */
 HWTEST_F(MediaQueryTest, MediaQueryTest001, TestSize.Level1)
 {

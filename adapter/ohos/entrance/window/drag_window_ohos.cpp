@@ -101,7 +101,7 @@ RefPtr<DragWindow> DragWindow::CreateDragWindow(
     const std::string& windowName, int32_t x, int32_t y, uint32_t width, uint32_t height)
 {
     OHOS::sptr<OHOS::Rosen::WindowOption> option = new OHOS::Rosen::WindowOption();
-    option->SetWindowRect({ x - width / 2, y - height / 2, width, height });
+    option->SetWindowRect({ x - static_cast<int32_t>(width) / 2, y - static_cast<int32_t>(height) / 2, width, height });
     option->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_DRAGGING_EFFECT);
     option->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING);
     OHOS::sptr<OHOS::Rosen::Window> dragWindow = OHOS::Rosen::Window::Create(windowName, option);
@@ -142,13 +142,13 @@ void DragWindowOhos::MoveTo(int32_t x, int32_t y) const
 void DragWindowOhos::Destory() const
 {
     if (!dragWindow_) {
-        LOGE("DragWindowOhos::Destory, the drag window is null.");
+        LOGE("DragWindowOhos::Destroy, the drag window is null.");
         return;
     }
 
     OHOS::Rosen::WMError ret = dragWindow_->Destroy();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("DragWindow::Destory, drag window destroy failed, ret: %d", ret);
+        LOGE("DragWindow::Destroy, drag window destroy failed, ret: %d", ret);
     }
 }
 

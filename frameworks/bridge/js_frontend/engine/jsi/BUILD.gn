@@ -11,13 +11,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//ark/ts2abc/ts2panda/ts2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/ace/ace_engine/build/ace_gen_obj.gni")
+
+base_output_path = get_label_info(":gen_abc_proxyclass", "target_out_dir")
+abcstrip_native_min_obj_path = base_output_path + "strip.native.min.abc"
+
+ts2abc_gen_abc("gen_strip_native_min_abc") {
+  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  src_js = rebase_path(
+          "$root_out_dir/obj/third_party/jsframework/dist/strip.native.min.js")
+  dst_file = rebase_path(base_output_path + "/strip.native.min.abc")
+
+  in_puts =
+      [ "$root_out_dir/obj/third_party/jsframework/dist/strip.native.min.js" ]
+  out_puts = [ base_output_path + "/strip.native.min.abc" ]
+  extra_dependencies = [ "//third_party/jsframework:gen_snapshot" ]
+}
+
+gen_obj("abc_strip_native_min") {
+  input = base_output_path + "/strip.native.min.abc"
+  abcstripnativemin_obj_path = base_output_path + "/strip_native_min.c"
+  output = abcstripnativemin_obj_path
+  snapshot_dep = [ ":gen_strip_native_min_abc" ]
+}
 
 template("js_engine_ark") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
 
     configs = [
@@ -32,6 +57,7 @@ template("js_engine_ark") {
       "jsi_animation_bridge.cpp",
       "jsi_animator_bridge.cpp",
       "jsi_badge_bridge.cpp",
+      "jsi_base_utils.cpp",
       "jsi_canvas_bridge.cpp",
       "jsi_chart_bridge.cpp",
       "jsi_clock_bridge.cpp",
@@ -44,11 +70,30 @@ template("js_engine_ark") {
       "jsi_list_bridge.cpp",
       "jsi_offscreen_canvas_bridge.cpp",
       "jsi_stepper_bridge.cpp",
-      "jsi_utils.cpp",
       "jsi_xcomponent_bridge.cpp",
     ]
 
-    deps = [ "//third_party/jsframework:ark_build" ]
+    if (defined(config.use_build_in_js_engine) &&
+        config.use_build_in_js_engine) {
+      defines += [ "BUILT_IN_JS_ENGINE" ]
+    }
+
+    deps = []
+    if (defined(config.build_for_preview) && config.build_for_preview) {
+      sources += [ "jsi_utils_windows.cpp" ]
+      deps += [
+        ":gen_obj_src_abc_strip_native_min",
+        "//foundation/ace/napi/native_engine/impl/ark:ace_napi_impl_ark",
+      ]
+    } else {
+      sources += [ "jsi_utils.cpp" ]
+      deps += [ "//third_party/jsframework:ark_build" ]
+      external_deps = [
+        "multimedia_image_standard:image",
+        "multimedia_image_standard:image_native",
+        "napi:ace_napi",
+      ]
+    }
     if (target_cpu == "arm64") {
       defines += [ "APP_USE_ARM64" ]
     } else if (target_cpu == "arm") {
@@ -57,11 +102,6 @@ template("js_engine_ark") {
     deps += [
       "//ark/js_runtime:libark_jsruntime",
       "//foundation/ace/napi:ace_napi_ark",
-    ]
-    external_deps = [
-      "multimedia_image_standard:image",
-      "multimedia_image_standard:image_native",
-      "napi:ace_napi",
     ]
   }
 }

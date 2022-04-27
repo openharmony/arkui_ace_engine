@@ -19,6 +19,7 @@ template("js_engine") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
     deps = []
     configs = [ "$ace_root:ace_config" ]
@@ -42,7 +43,7 @@ template("js_engine") {
       deps += [ "$ace_root/build:libace" ]
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
-        deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
+        deps += [ "$ace_napi:ace_container_scope" ]
       }
     }
   }

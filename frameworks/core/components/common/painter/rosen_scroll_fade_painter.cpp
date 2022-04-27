@@ -23,7 +23,7 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr double WIDTH_TO_HEIGHT_FACTOR = 0.20096; // (3.0 / 4.0) * (2.0 - std::sqrt(3));
-constexpr double PI_OVER_2 = 1.5707963;            // 3.1415926 / 2.0;
+constexpr double QUARTER_CIRCLE = 90.0;            // 3.1415926 / 2.0;
 
 } // namespace
 
@@ -82,7 +82,7 @@ void RosenScrollFadePainter::PaintSide(RenderContext& context, const Size& size,
         case OverScrollDirection::LEFT:
             canvas->save();
             canvas->translate(offset.GetX(), offset.GetY());
-            canvas->rotate(PI_OVER_2);
+            canvas->rotate(QUARTER_CIRCLE);
             canvas->scale(1.0, -1.0);
             Paint(canvas, Size(size.Height(), size.Width()), offset);
             canvas->restore();
@@ -91,7 +91,7 @@ void RosenScrollFadePainter::PaintSide(RenderContext& context, const Size& size,
             canvas->save();
             canvas->translate(offset.GetX(), offset.GetY());
             canvas->translate(size.Width(), 0.0);
-            canvas->rotate(PI_OVER_2);
+            canvas->rotate(QUARTER_CIRCLE);
             Paint(canvas, Size(size.Height(), size.Width()), offset);
             canvas->restore();
             break;

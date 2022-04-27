@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,8 +41,7 @@ void DOMXComponent::PrepareSpecializedComponent()
     xComponentChild_->SetDeclaration(xcomponentDeclaration);
 }
 
-#ifdef OHOS_STANDARD_SYSTEM
-uint64_t DOMXComponent::GetSurfaceId() const
+std::string DOMXComponent::GetSurfaceId() const
 {
     if (!xComponentChild_) {
         LOGE("GetSurfaceId failed, The xComponent is not created.");
@@ -56,5 +55,18 @@ uint64_t DOMXComponent::GetSurfaceId() const
     auto surfaceId = controller->GetSurfaceId();
     return surfaceId;
 }
-#endif
+
+void DOMXComponent::SetSurfaceSize(uint32_t surfaceWidth, uint32_t surfaceHeight) const
+{
+    if (!xComponentChild_) {
+        LOGE("SetSurfaceSize failed, The xComponent is not created.");
+        return;
+    }
+    const auto& controller = xComponentChild_->GetXComponentController();
+    if (!controller) {
+        LOGE("SetSurfaceSize failed, controller is null.");
+        return;
+    }
+    controller->ConfigSurface(surfaceWidth, surfaceHeight);
+}
 } // namespace OHOS::Ace::Framework

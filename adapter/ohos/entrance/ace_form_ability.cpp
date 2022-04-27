@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,7 +109,6 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
             } else {
                 libPath += "/" + nativeLibraryPath;
             }
-            LOGI("napi lib path = %{private}s", libPath.c_str());
             Platform::PaContainer::AddLibPath(instanceId_, libPath);
         }
     }
@@ -140,6 +139,17 @@ void AceFormAbility::OnTriggerEvent(const int64_t formId, const std::string& mes
 {
     LOGI("AceFormAbility::OnTriggerEvent called: %{public}s", std::to_string(formId).c_str());
     Platform::PaContainer::OnTriggerEvent(instanceId_, formId, message);
+}
+
+AppExecFwk::FormState AceFormAbility::OnAcquireFormState(const OHOS::AAFwk::Want &want)
+{
+    LOGI("AceFormAbility::OnAcquireState called");
+    int32_t formState = Platform::PaContainer::OnAcquireFormState(instanceId_, want);
+    if (formState <= (int32_t) AppExecFwk::FormState::UNKNOWN || formState > (int32_t) AppExecFwk::FormState::READY) {
+        return AppExecFwk::FormState::UNKNOWN;
+    } else {
+        return (AppExecFwk::FormState) formState;
+    }
 }
 
 void AceFormAbility::OnUpdate(const int64_t formId)

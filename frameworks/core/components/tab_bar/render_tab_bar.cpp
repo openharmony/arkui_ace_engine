@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,10 +43,7 @@ void RenderTabBar::Update(const RefPtr<Component>& component)
     }
     tabsSize_ = static_cast<int32_t>(tabBar->GetChildren().size());
     auto tabController = tabBar->GetController();
-    if (tabController) {
-        auto index = tabController->GetIndex();
-        index_ = (index >= 0 && index < tabsSize_) ? index : 0;
-    }
+    FlushIndex(tabController);
     if (initialUpdate_) {
         auto barIndicator = tabBar->GetIndicator();
         if (barIndicator) {
@@ -76,6 +73,27 @@ void RenderTabBar::Update(const RefPtr<Component>& component)
     MarkNeedLayout();
 }
 
+void RenderTabBar::FlushIndex(const RefPtr<TabController>& controller)
+{
+    if (!controller) {
+        return;
+    }
+    int32_t index = 0;
+    if (controller->IsIndexDefined()) {
+        index = controller->GetIndex();
+    } else {
+        auto initialIndex = controller->GetInitialIndex();
+        auto pendingIndex = controller->GetPendingIndex();
+        if (initialUpdate_ && pendingIndex < 0) {
+            index = initialIndex < 0 ? 0 : initialIndex;
+        } else {
+            index = pendingIndex < 0 ? 0 : pendingIndex;
+        }
+    }
+    index_ = index < tabsSize_ ? index : tabsSize_ - 1;
+    controller->SetIndexWithoutChangeContent(index_);
+}
+
 void RenderTabBar::PerformLayout()
 {
     tabsSize_ = 0;
@@ -96,8 +114,9 @@ void RenderTabBar::PerformLayout()
     index_ = std::clamp(index_, 0, std::max(0, tabsSize_ - 1));
     if (!IsRightToLeft()) {
         if (tabBarWidth_ > 0 && !NearEqual(tabBarWidth_, GetLayoutParam().GetMaxSize().Width())) {
-            if (!isVertical_ && actualWidth_ > GetLayoutSize().Width() && GreatNotEqual(
-                GetLayoutParam().GetMaxSize().Width(), actualWidth_ - std::abs(scrollableOffset_.GetX()))) {
+            if (!isVertical_ && actualWidth_ > GetLayoutSize().Width() &&
+                GreatNotEqual(
+                    GetLayoutParam().GetMaxSize().Width(), actualWidth_ - std::abs(scrollableOffset_.GetX()))) {
                 scrollableOffset_.SetX(scrollableOffset_.GetX() + GetLayoutParam().GetMaxSize().Width() - tabBarWidth_);
             }
         }
@@ -244,7 +263,7 @@ void RenderTabBar::SetIndex(int32_t index, bool force)
 {
     if (index < 0 || index >= tabsSize_) {
         LOGW("illegal index = %{public}d", index);
-        index = 0;
+        return;
     }
 
     if (index_ != index || force) {
@@ -551,7 +570,8 @@ Offset RenderTabBar::MakeIndicatorOffset(const RefPtr<RenderNode>& item) const
             indicator_->GetLayoutSize(), Alignment::CENTER);
     }
     if (indicatorStyle_ == TabBarIndicatorStyle::DEFAULT &&
-        (!onFocused_ || SystemProperties::GetDeviceType() == DeviceType::PHONE)) {
+        (!onFocused_ || SystemProperties::GetDeviceType() == DeviceType::PHONE ||
+        SystemProperties::GetDeviceType() == DeviceType::TABLET)) {
         Size childSize = GetTabItemChildLayoutSize(item);
         offset +=
             Offset(0.0, childSize.Height() / DOUBLE_FACTOR) + indicatorPadding_.GetOffsetInPx(context->GetDipScale());
@@ -635,8 +655,8 @@ void RenderTabBar::OnPaintFinish()
         double offsetForFocus = NormalizeToPx(OFFSET_FOR_FOCUS);
         Offset offset = Offset(offsetForFocus, offsetForFocus);
         layoutSize -= Size(offsetForFocus * 2.0, offsetForFocus * 2.0);
-        context->ShowFocusAnimation(RRect::MakeRRect(Rect(offset, layoutSize),
-                                        Radius(NormalizeToPx(focusRadiusDimension_))),
+        context->ShowFocusAnimation(
+            RRect::MakeRRect(Rect(offset, layoutSize), Radius(NormalizeToPx(focusRadiusDimension_))),
             focusAnimationColor_, position + offset);
     }
 }

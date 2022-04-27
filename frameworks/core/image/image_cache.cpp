@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -214,18 +214,18 @@ void ImageCache::WriteCacheFile(const std::string& url, const void * const data,
     cacheFileInfo_.emplace_back(cacheNetworkFilePath, size, time(nullptr));
     // check if cache files too big.
     if (cacheFileSize_ > static_cast<int32_t>(cacheFileLimit_)) {
-        int32_t removeCount = cacheFileInfo_.size() * clearCacheFileRatio_;
+        int32_t removeCount = static_cast<int32_t>(cacheFileInfo_.size() * clearCacheFileRatio_);
         int32_t removeSize = 0;
         auto iter = cacheFileInfo_.begin();
         int32_t count = 0;
         while (count < removeCount) {
-            removeSize += iter->fileSize;
+            removeSize += static_cast<int32_t>(iter->fileSize);
             removeVector.push_back(iter->filePath);
             iter++;
             count++;
         }
         cacheFileInfo_.erase(cacheFileInfo_.begin(), iter);
-        cacheFileSize_ -= removeSize;
+        cacheFileSize_ -= static_cast<int32_t>(removeSize);
     }
     // 3. clear files removed from cache list.
     ClearCacheFile(removeVector);

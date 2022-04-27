@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -103,7 +103,7 @@ private:
 class DoubleEvaluator final : public Evaluator<double> {
 public:
     DoubleEvaluator(const RefPtr<MotionPathEvaluator>& evaluator, bool isXAxis)
-        : motionPathEvaluator_(evaluator), isXAxis_(isXAxis) {};
+        : motionPathEvaluator_(evaluator), isXAxis_(isXAxis) {}
     ~DoubleEvaluator() override = default;
 
     double Evaluate(const double& start, const double& end, float fraction) override;
@@ -128,7 +128,7 @@ private:
 // MotionPathEvaluator adapter for rotate
 class RotateEvaluator final : public Evaluator<float> {
 public:
-    explicit RotateEvaluator(const RefPtr<MotionPathEvaluator>& evaluator) : motionPathEvaluator_(evaluator) {};
+    explicit RotateEvaluator(const RefPtr<MotionPathEvaluator>& evaluator) : motionPathEvaluator_(evaluator) {}
     ~RotateEvaluator() override = default;
 
     float Evaluate(const float& start, const float& end, float fraction) override;
@@ -140,7 +140,7 @@ private:
 class TransformOperationsEvaluator final : public Evaluator<TransformOperations> {
 public:
     explicit TransformOperationsEvaluator(const RefPtr<MotionPathEvaluator>& evaluator)
-        : motionPathEvaluator_(evaluator) {};
+        : motionPathEvaluator_(evaluator) {}
     ~TransformOperationsEvaluator() override = default;
 
     TransformOperations Evaluate(

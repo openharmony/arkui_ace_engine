@@ -31,8 +31,16 @@ public:
 
     void Create(const std::function<void(int64_t)>& onCreate, const std::string& idStr);
     void CreateTexture(const std::function<void(int64_t)>& onCreate, const std::string& idStr);
-    void OnSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight,
-                const std::function<void(std::string&)>& callback);
+    void SetSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight,
+                 const std::function<void(std::string&)>& callback = nullptr);
+
+    void SetRefreshListener(RefreshListener&& listener)
+    {
+        onRefreshListener_ = std::move(listener);
+    }
+private:
+    void OnRefresh(const std::string& param);
+    RefreshListener onRefreshListener_;
 };
 } // namespace OHOS::Ace
 

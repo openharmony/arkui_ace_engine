@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,8 +63,6 @@ public:
  * @tc.name: RenderColumnLayout001
  * @tc.desc: Verify the column component with main(start) and cross(start) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTK
- * @tc.author: yangfan
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout001, TestSize.Level1)
 {
@@ -102,8 +100,6 @@ HWTEST_F(RenderColumnTest, RenderColumnLayout001, TestSize.Level1)
  * @tc.name: RenderColumnLayout002
  * @tc.desc: Verify the column component with main(start) and cross(center) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTK
- * @tc.author: yangfan
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout002, TestSize.Level1)
 {
@@ -141,8 +137,6 @@ HWTEST_F(RenderColumnTest, RenderColumnLayout002, TestSize.Level1)
  * @tc.name: RenderColumnLayout003
  * @tc.desc: Verify the column component with main(start) and cross(end) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTK
- * @tc.author: yangfan
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout003, TestSize.Level1)
 {
@@ -180,8 +174,6 @@ HWTEST_F(RenderColumnTest, RenderColumnLayout003, TestSize.Level1)
  * @tc.name: RenderColumnLayout004
  * @tc.desc: Verify the column component with main(start) and cross(stretch) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTK
- * @tc.author: yangfan
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout004, TestSize.Level1)
 {
@@ -222,8 +214,6 @@ HWTEST_F(RenderColumnTest, RenderColumnLayout004, TestSize.Level1)
  * @tc.name: RenderColumnLayout005
  * @tc.desc: Verify the column component with main(center) and cross(start) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTK
- * @tc.author: yangfan
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout005, TestSize.Level1)
 {
@@ -261,8 +251,6 @@ HWTEST_F(RenderColumnTest, RenderColumnLayout005, TestSize.Level1)
  * @tc.name: RenderColumnLayout006
  * @tc.desc: Verify the column component with main(end) and cross(start) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTK
- * @tc.author: yangfan
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout006, TestSize.Level1)
 {
@@ -300,8 +288,6 @@ HWTEST_F(RenderColumnTest, RenderColumnLayout006, TestSize.Level1)
  * @tc.name: RenderColumnLayout007
  * @tc.desc: Verify the column component with main(space-between) and cross(start) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTK
- * @tc.author: yangfan
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout007, TestSize.Level1)
 {
@@ -340,8 +326,6 @@ HWTEST_F(RenderColumnTest, RenderColumnLayout007, TestSize.Level1)
  * @tc.name: RenderColumnLayout008
  * @tc.desc: Verify the column component with main(space-around) and cross(start) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTK
- * @tc.author: yangfan
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout008, TestSize.Level1)
 {
@@ -380,8 +364,6 @@ HWTEST_F(RenderColumnTest, RenderColumnLayout008, TestSize.Level1)
  * @tc.name: RenderColumnLayout009
  * @tc.desc: Verify the column component with main(center) and cross(center) under column component works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTK
- * @tc.author: yangfan
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout009, TestSize.Level1)
 {
@@ -433,8 +415,6 @@ HWTEST_F(RenderColumnTest, RenderColumnLayout009, TestSize.Level1)
  * @tc.name: RenderColumnLayout010
  * @tc.desc: Verify the row component with main(center) and cross(center) under column component works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTK
- * @tc.author: yangfan
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout010, TestSize.Level1)
 {
@@ -486,8 +466,6 @@ HWTEST_F(RenderColumnTest, RenderColumnLayout010, TestSize.Level1)
  * @tc.name: RenderColumnLayout011
  * @tc.desc: Verify the column component with main(space-evenly) and cross(start) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000F3BAQ
- * @tc.author: yangfan
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout011, TestSize.Level1)
 {
@@ -524,8 +502,6 @@ HWTEST_F(RenderColumnTest, RenderColumnLayout011, TestSize.Level1)
  * @tc.name: RenderColumnLayout012
  * @tc.desc: Verify the column component with main(center) and cross(center) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTK
- * @tc.author: wangzezhen
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout012, TestSize.Level1)
 {
@@ -563,8 +539,6 @@ HWTEST_F(RenderColumnTest, RenderColumnLayout012, TestSize.Level1)
  * @tc.name: RenderColumnLayout013
  * @tc.desc: Verify the column component with main(center) and cross(end) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTK
- * @tc.author: wangzezhen
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout013, TestSize.Level1)
 {
@@ -602,8 +576,6 @@ HWTEST_F(RenderColumnTest, RenderColumnLayout013, TestSize.Level1)
  * @tc.name: RenderColumnLayout014
  * @tc.desc: Verify the column component with main(center) and cross(stretch) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTK
- * @tc.author: wangzezhen
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout014, TestSize.Level1)
 {
@@ -644,8 +616,6 @@ HWTEST_F(RenderColumnTest, RenderColumnLayout014, TestSize.Level1)
  * @tc.name: RenderColumnLayout015
  * @tc.desc: Verify the column component with main(end) and cross(center) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTK
- * @tc.author: wangzezhen
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout015, TestSize.Level1)
 {
@@ -683,8 +653,6 @@ HWTEST_F(RenderColumnTest, RenderColumnLayout015, TestSize.Level1)
  * @tc.name: RenderColumnLayout016
  * @tc.desc: Verify the column component with main(end) and cross(end) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTK
- * @tc.author: wangzezhen
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout016, TestSize.Level1)
 {
@@ -722,8 +690,6 @@ HWTEST_F(RenderColumnTest, RenderColumnLayout016, TestSize.Level1)
  * @tc.name: RenderColumnLayout017
  * @tc.desc: Verify the column component with main(end) and cross(stretch) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTK
- * @tc.author: wangzezhen
  */
 HWTEST_F(RenderColumnTest, RenderColumnLayout017, TestSize.Level1)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,79 @@
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+void AddEvent(RefPtr<PickerBaseComponent>& picker, const JSCallbackInfo& info, DatePickerType pickerType)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("DatePicker AddEvent error, info is non-valid");
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto onAccept = paramObject->GetProperty("onAccept");
+    if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
+        auto acceptId =
+            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second"};
+                ACE_SCORING_EVENT("DatePickerDialog.onAccept");
+                func->Execute(keys, info);
+            });
+        picker->SetDialogAcceptEvent(acceptId);
+    }
+    auto onCancel = paramObject->GetProperty("onCancel");
+    if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
+        auto cancelId =
+            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("DatePickerDialog.onCancel");
+                func->Execute();
+            });
+        picker->SetDialogCancelEvent(cancelId);
+    }
+    auto onChange = paramObject->GetProperty("onChange");
+    if (!onChange->IsUndefined() && onChange->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
+        auto changeId =
+            EventMarker([execCtx = info.GetExecutionContext(),
+                type = pickerType, func = std::move(jsFunc)](const std::string& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                std::vector<std::string> keys;
+                if (type == DatePickerType::DATE) {
+                    keys = { "year", "month", "day"};
+                } else {
+                    keys = {"hour", "minute"};
+                }
+                ACE_SCORING_EVENT("DatePickerDialog.onChange");
+                func->Execute(keys, info);
+            });
+        picker->SetDialogChangeEvent(changeId);
+    }
+}
+
+JSRef<JSVal> DatePickerChangeEventToJSValue(const DatePickerChangeEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(eventInfo.GetSelectedStr());
+    if (!argsPtr) {
+        LOGW("selectedStr is not exist.");
+        return JSRef<JSVal>::Cast(obj);
+    }
+    std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
+    for (auto iter = keys.begin(); iter != keys.end(); iter++) {
+        const std::string key = *iter;
+        const auto value = argsPtr->GetValue(key);
+        if (!value || value->ToString().empty()) {
+            LOGI("key[%{public}s] is not exist.", key.c_str());
+            continue;
+        }
+        obj->SetProperty<int32_t>(key.c_str(), value->GetInt());
+    }
+    return JSRef<JSVal>::Cast(obj);
+}
+}
+
 void JSDatePicker::JSBind(BindingTarget globalObj)
 {
     JSClass<JSDatePicker>::Declare("DatePicker");
@@ -32,6 +105,7 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("create", &JSDatePicker::Create, opt);
     JSClass<JSDatePicker>::StaticMethod("lunar", &JSDatePicker::SetLunar);
     JSClass<JSDatePicker>::StaticMethod("onChange", &JSDatePicker::OnChange);
+    // keep compatible, need remove after
     JSClass<JSDatePicker>::StaticMethod("useMilitaryTime", &JSDatePicker::UseMilitaryTime);
     JSClass<JSDatePicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSDatePicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -82,6 +156,7 @@ void JSDatePicker::SetLunar(bool isLunar)
     }
     datePicker->SetShowLunar(isLunar);
 }
+
 void JSDatePicker::UseMilitaryTime(bool isUseMilitaryTime)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
@@ -95,22 +170,21 @@ void JSDatePicker::UseMilitaryTime(bool isUseMilitaryTime)
 
 void JSDatePicker::OnChange(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsFunction()) {
-        LOGE("info[0] is not a function.");
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGI("info not function");
         return;
     }
-    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), DatePickerChangeEventToJSValue);
     auto datePicker = AceType::DynamicCast<PickerBaseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    auto onChangeId =
-        EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+    datePicker->SetOnChange(EventMarker(
+        [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
             ACE_SCORING_EVENT("datePicker.onChange");
-            func->Execute(keys, info);
-        });
-    if (datePicker) {
-        datePicker->SetOnChange(onChangeId);
-    }
+            auto eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
+            func->Execute(*eventInfo);
+        }));
 }
 
 PickerDate JSDatePicker::ParseDate(const JSRef<JSVal>& dateVal)
@@ -237,14 +311,17 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
         pickerType = static_cast<DatePickerType>(type->ToNumber<int32_t>());
     }
 
+    std::string name;
     RefPtr<Component> component;
     switch (pickerType) {
         case DatePickerType::TIME: {
             CreateTimePicker(component, paramObject);
+            name = "TimePickerDialog";
             break;
         }
         case DatePickerType::DATE: {
             CreateDatePicker(component, paramObject);
+            name = "DatePickerDialog";
             break;
         }
         default: {
@@ -258,53 +335,13 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     properties.alignment = DialogAlignment::CENTER;
     properties.customComponent = datePicker;
 
-    AddEvent(datePicker, info);
-    datePicker->SetDialogName("DatePickerDialog");
+    if (pickerType == DatePickerType::DATE) {
+        AddEvent(datePicker, info, DatePickerType::DATE);
+    } else {
+        AddEvent(datePicker, info, DatePickerType::TIME);
+    }
+    datePicker->SetDialogName(name);
     datePicker->OpenDialog(properties);
-}
-
-void JSDatePickerDialog::AddEvent(RefPtr<PickerBaseComponent>& picker, const JSCallbackInfo& info)
-{
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("DatePicker AddEvent error, info is non-valid");
-        return;
-    }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto onAccept = paramObject->GetProperty("onAccept");
-    if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
-        auto acceptId =
-            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second"};
-                ACE_SCORING_EVENT("DatePickerDialog.onAccept");
-                func->Execute(keys, info);
-            });
-        picker->SetDialogAcceptEvent(acceptId);
-    }
-    auto onCancel = paramObject->GetProperty("onCancel");
-    if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
-        auto cancelId =
-            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("DatePickerDialog.onCancel");
-                func->Execute();
-            });
-        picker->SetDialogCancelEvent(cancelId);
-    }
-    auto onChange = paramObject->GetProperty("onChange");
-    if (!onChange->IsUndefined() && onChange->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
-        auto changeId =
-            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second"};
-                ACE_SCORING_EVENT("DatePickerDialog.onChange");
-                func->Execute(keys, info);
-            });
-        picker->SetDialogChangeEvent(changeId);
-    }
 }
 
 void JSDatePickerDialog::CreateDatePicker(RefPtr<Component> &component, const JSRef<JSObject>& paramObj)
@@ -378,6 +415,152 @@ PickerDate JSDatePickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
 }
 
 PickerTime JSDatePickerDialog::ParseTime(const JSRef<JSVal>& timeVal)
+{
+    auto pickerTime = PickerTime();
+    if (!timeVal->IsObject()) {
+        return pickerTime;
+    }
+    auto timeObj = JSRef<JSObject>::Cast(timeVal);
+    auto hourFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getHours"));
+    auto minuteFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getMinutes"));
+    auto secondFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getSeconds"));
+    JSRef<JSVal> hour = hourFunc->Call(timeObj);
+    JSRef<JSVal> minute = minuteFunc->Call(timeObj);
+    JSRef<JSVal> second = secondFunc->Call(timeObj);
+
+    if (hour->IsNumber() && minute->IsNumber() && second->IsNumber()) {
+        pickerTime.SetHour(hour->ToNumber<int32_t>());
+        pickerTime.SetMinute(minute->ToNumber<int32_t>());
+        pickerTime.SetSecond(second->ToNumber<int32_t>());
+    }
+    return pickerTime;
+}
+
+void JSTimePicker::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSTimePicker>::Declare("TimePicker");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSTimePicker>::StaticMethod("create", &JSTimePicker::Create, opt);
+    JSClass<JSTimePicker>::StaticMethod("onChange", &JSDatePicker::OnChange);
+    JSClass<JSTimePicker>::StaticMethod("useMilitaryTime", &JSTimePicker::UseMilitaryTime);
+    JSClass<JSTimePicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSTimePicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSTimePicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSTimePicker>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSTimePicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTimePicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSTimePicker>::Inherit<JSViewAbstract>();
+    JSClass<JSTimePicker>::Bind(globalObj);
+}
+
+void JSTimePicker::Create(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("DatePicker create error, info is non-valid");
+        return;
+    }
+
+    CreateTimePicker(JSRef<JSObject>::Cast(info[0]));
+}
+
+void JSTimePicker::UseMilitaryTime(bool isUseMilitaryTime)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto timePicker = AceType::DynamicCast<PickerTimeComponent>(component);
+    if (!timePicker) {
+        LOGE("PickerTimeComponent is null");
+        return;
+    }
+    timePicker->SetHour24(isUseMilitaryTime);
+}
+
+void JSTimePicker::CreateTimePicker(const JSRef<JSObject>& paramObj)
+{
+    auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
+    auto selectedTime = paramObj->GetProperty("selected");
+    if (selectedTime->IsObject()) {
+        timePicker->SetSelectedTime(ParseTime(selectedTime));
+    }
+    timePicker->SetIsDialog(false);
+    timePicker->SetHasButtons(false);
+
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("timePicker Theme is null");
+        return;
+    }
+
+    timePicker->SetTheme(theme);
+    ViewStackProcessor::GetInstance()->Push(timePicker);
+}
+
+PickerTime JSTimePicker::ParseTime(const JSRef<JSVal>& timeVal)
+{
+    auto pickerTime = PickerTime();
+    if (!timeVal->IsObject()) {
+        return pickerTime;
+    }
+    auto timeObj = JSRef<JSObject>::Cast(timeVal);
+    auto hourFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getHours"));
+    auto minuteFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getMinutes"));
+    auto secondFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getSeconds"));
+    JSRef<JSVal> hour = hourFunc->Call(timeObj);
+    JSRef<JSVal> minute = minuteFunc->Call(timeObj);
+    JSRef<JSVal> second = secondFunc->Call(timeObj);
+
+    if (hour->IsNumber() && minute->IsNumber() && second->IsNumber()) {
+        pickerTime.SetHour(hour->ToNumber<int32_t>());
+        pickerTime.SetMinute(minute->ToNumber<int32_t>());
+        pickerTime.SetSecond(second->ToNumber<int32_t>());
+    }
+    return pickerTime;
+}
+
+void JSTimePickerDialog::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSTimePickerDialog>::Declare("TimePickerDialog");
+    JSClass<JSTimePickerDialog>::StaticMethod("show", &JSTimePickerDialog::Show);
+
+    JSClass<JSTimePickerDialog>::Bind<>(globalObj);
+}
+
+void JSTimePickerDialog::Show(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("DatePicker Show dialog error, info is non-valid");
+        return;
+    }
+
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    RefPtr<Component> component;
+    CreateTimePicker(component, paramObject);
+
+    auto datePicker = AceType::DynamicCast<PickerBaseComponent>(component);
+    DialogProperties properties {};
+    properties.alignment = DialogAlignment::CENTER;
+    properties.customComponent = datePicker;
+
+    AddEvent(datePicker, info, DatePickerType::TIME);
+    datePicker->SetDialogName("TimePickerDialog");
+    datePicker->OpenDialog(properties);
+}
+
+void JSTimePickerDialog::CreateTimePicker(RefPtr<Component> &component, const JSRef<JSObject>& paramObj)
+{
+    auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
+    auto selectedTime = paramObj->GetProperty("selected");
+    auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
+    bool isUseMilitaryTime = useMilitaryTime->ToBoolean();
+    if (selectedTime->IsObject()) {
+        timePicker->SetSelectedTime(ParseTime(selectedTime));
+    }
+    timePicker->SetIsDialog(false);
+    timePicker->SetIsCreateDialogComponent(true);
+    timePicker->SetHour24(isUseMilitaryTime);
+    component = timePicker;
+}
+
+PickerTime JSTimePickerDialog::ParseTime(const JSRef<JSVal>& timeVal)
 {
     auto pickerTime = PickerTime();
     if (!timeVal->IsObject()) {

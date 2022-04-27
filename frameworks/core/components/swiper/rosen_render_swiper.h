@@ -40,8 +40,10 @@ private:
     IndicatorProperties PrepareIndicatorProperties() const;
 
     void DrawIndicator(RenderContext& context, const Offset& offset);
+    void DrawIndicatorHoverBackground(RenderContext& context, const Offset& offset);
     void DrawIndicatorBackground(RenderContext& context, const Offset& offset);
     void DrawIndicatorItems(RenderContext& context, const Offset& offset);
+    void DrawIndicatorFocus(RenderContext& context, const Offset& offset);
 
     void GetRRect(SkRRect& rRect, double& startOffset, double& endOffset, const Offset& offset);
     bool HideIndicatorPoint(int32_t index, const IndicatorOffsetInfo& pointInfo, const Offset& offset);

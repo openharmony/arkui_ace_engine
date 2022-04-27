@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ class ACE_EXPORT PluginSubContainer : public virtual AceType {
 public:
     using OnPluginAcquiredCallback = std::function<void(const size_t)>;
 
-    PluginSubContainer(const WeakPtr<PipelineContext>& context) : outSidePipelineContext_(context) {}
+    explicit PluginSubContainer(const WeakPtr<PipelineContext>& context) : outSidePipelineContext_(context) {}
     ~PluginSubContainer() = default;
 
     void Initialize();
@@ -70,6 +70,11 @@ public:
         allowUpdate_ = update;
     }
 
+    void SetInstanceId(int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    }
+
 private:
     void SetPluginComponentTheme(
         const std::string& path, const RefPtr<FlutterAssetManager>& flutterAssetManager);
@@ -93,7 +98,7 @@ private:
 
     double surfaceWidth_ = 1.0f;
     double surfaceHeight_ = 1.0f;
-    Dimension rootWidht_ = 0.0_vp;
+    Dimension rootWidth_ = 0.0_vp;
     Dimension rootHeight_ = 0.0_vp;
     double density_ = 1.0f;
 };

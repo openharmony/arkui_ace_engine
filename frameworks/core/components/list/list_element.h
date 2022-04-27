@@ -30,7 +30,7 @@ public:
     void PerformBuild() override;
     void Update() override;
 
-    virtual bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
+    bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
 
     void MoveItemToViewPort(double position);
 

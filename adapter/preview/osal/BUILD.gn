@@ -17,6 +17,7 @@ import("//foundation/ace/ace_engine/ace_config.gni")
 template("utilsecurec_source") {
   forward_variables_from(invoker, "*")
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
     sources = [ "//utils/native/base/src/securec/vsnprintf_s_p.c" ]
     if (platform == "windows") {
@@ -38,6 +39,7 @@ template("ace_osal_preview_source_set") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
 
     sources = [
@@ -48,7 +50,9 @@ template("ace_osal_preview_source_set") {
       "log_wrapper.cpp",
       "response_data.cpp",
       "ressched_report.cpp",
+      "stage_card_parser.cpp",
       "system_properties.cpp",
+      "trace_id_impl.cpp",
     ]
 
     cflags_cc = [

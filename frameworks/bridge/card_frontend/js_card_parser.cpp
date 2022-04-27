@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1327,7 +1327,7 @@ void JsCardParser::UpdateDomNode(const RefPtr<Framework::JsAcePage>& page, const
     if (shouldShow && hasShownAttr) {
         attrs.emplace_back(std::make_pair("show", TRUE));
     }
-    ParseAttributes(rootJson, selfId, attrs, (JsCommandDomElementOperator*)ptr, dataJson, propsJson);
+    ParseAttributes(rootJson, selfId, attrs, static_cast<JsCommandDomElementOperator*>(ptr), dataJson, propsJson);
     if (!shouldShow && hasShownAttr) {
         attrs.emplace_back(std::make_pair("show", FALSE));
     }
@@ -1376,8 +1376,8 @@ void JsCardParser::ParseMultiVariable(
     value = "";
     // Splicing Between Variables and constants,like variable = "my name is {{name}}, and i am from {{city}}."
     while (variable.find("{{") != std::string::npos && variable.find("}}") != std::string::npos) {
-        int32_t startPos = static_cast<int32_t>(variable.find("{{"));
-        int32_t endPos = static_cast<int32_t>(variable.find("}}"));
+        auto startPos = variable.find("{{");
+        auto endPos = variable.find("}}");
         if (endPos < startPos) {
             break;
         }
@@ -1562,7 +1562,6 @@ bool JsCardParser::ParseSpecialVariable(std::string& value)
 
 bool JsCardParser::GetVariable(std::string& value, const std::unique_ptr<JsonValue>& dataJson)
 {
-    LOGD("GetVariable value :%{private}s dataJson:%{private}s", value.c_str(), dataJson->ToString().c_str());
     auto key = value;
     if (!repeatJson_->Contains(key) && isRepeat_) {
         return false;
@@ -1571,6 +1570,7 @@ bool JsCardParser::GetVariable(std::string& value, const std::unique_ptr<JsonVal
     if (!dataJson) {
         return false;
     }
+    LOGD("GetVariable value :%{private}s dataJson:%{private}s", value.c_str(), dataJson->ToString().c_str());
     auto dataValue = dataJson->GetValue(key);
     if (isRepeat_) {
         dataValue = repeatJson_->GetValue(key);
@@ -1912,7 +1912,8 @@ void JsCardParser::ProcessRepeatNode(const RefPtr<Framework::JsAcePage>& page,
                 auto nodeId = iter->second.first[i];
                 page->PushCommand(Referenced::MakeRefPtr<JsCommandRemoveDomElement>(nodeId));
             }
-            iter->second.first.erase(iter->second.first.end() - (array.size() - repeatValue->GetArraySize() * factor),
+            iter->second.first.erase(
+                iter->second.first.end() - (array.size() - static_cast<size_t>(repeatValue->GetArraySize() * factor)),
                 iter->second.first.end());
         }
         nodeId_ += iter->second.second;

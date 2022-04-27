@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
             LOGE("text field is null");
             return;
         }
+        ContainerScope scope(client->instanceId_);
         auto value = client->GetEditingValue();
         auto textEditingValue = std::make_shared<TextEditingValue>();
         textEditingValue->text =
@@ -54,6 +55,7 @@ void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
             LOGE("text field is null");
             return;
         }
+        ContainerScope scope(client->instanceId_);
         auto value = client->GetEditingValue();
         auto start = value.selection.GetStart();
         auto end = value.selection.GetEnd();
@@ -80,6 +82,7 @@ void OnTextChangedListenerImpl::DeleteForward(int32_t length)
             LOGE("text field is null");
             return;
         }
+        ContainerScope scope(client->instanceId_);
         auto value = client->GetEditingValue();
         auto start = value.selection.GetStart();
         auto end = value.selection.GetEnd();
@@ -98,6 +101,7 @@ void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
     auto task = [textField = field_, status] {
         auto client = textField.Upgrade();
         if (client) {
+            ContainerScope scope(client->instanceId_);
             client->SetInputMethodStatus(status);
         }
     };
@@ -115,6 +119,9 @@ void OnTextChangedListenerImpl::SendKeyboardInfo(const MiscServices::KeyboardInf
 void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatus status)
 {
     LOGI("[OnTextChangedListenerImpl] HandleKeyboardStatus status: %{public}d", status);
+    if (status == MiscServices::KeyboardStatus::NONE) {
+        return;
+    }
     SetKeyboardStatus(status == MiscServices::KeyboardStatus::SHOW);
 }
 
@@ -126,13 +133,18 @@ void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey func
             LOGE("text field is null");
             return;
         }
-        switch (functionKey) {
-            case MiscServices::FunctionKey::CONFIRM:
-                client->PerformDefaultAction();
+        ContainerScope scope(client->instanceId_);
+        TextInputAction action_ = static_cast<TextInputAction>(functionKey);
+        switch (action_) {
+            case TextInputAction::DONE:
+            case TextInputAction::NEXT:
+            case TextInputAction::SEARCH:
+            case TextInputAction::SEND:
+            case TextInputAction::GO:
+                client->PerformAction(action_);
                 break;
-            case MiscServices::FunctionKey::NONE:
             default:
-                LOGE("FunctionKey is not support: %{public}d", functionKey);
+                LOGE("TextInputAction  is not support: %{public}d", action_);
                 break;
         }
     };
@@ -146,6 +158,7 @@ void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
         if (!client) {
             return;
         }
+        ContainerScope scope(client->instanceId_);
         switch (direction) {
             case MiscServices::Direction::UP:
                 client->CursorMoveUp();

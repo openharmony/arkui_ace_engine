@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 namespace OHOS::Ace {
 
 using CreateFunc = void (*)(void*);
-constexpr char PRE_INIT_ACE_MODULE_FUNC[] = "OHOS_ACE_PreInitAceModule";
+constexpr char PRE_INIT_ACE_MODULE_FUNC[] = "OHOS_ACE_PreloadAceModule";
 
 void InitAceModule(void* runtime)
 {

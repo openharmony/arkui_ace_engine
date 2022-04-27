@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,10 +31,13 @@ class ACE_EXPORT PluginManager final : public Singleton<PluginManager> {
 public:
     void AddPluginSubContainer(int64_t pluginId, const RefPtr<PluginSubContainer>& pluginSubContainer);
     void RemovePluginSubContainer(int64_t pluginId);
+    void AddPluginParentContainer(int64_t pluginId, int32_t pluginParentContainerId);
+    void RemovePluginParentContainer(int64_t pluginId);
     void AddNonmatchedContainer(const std::string& pluginKey, const RefPtr<PluginSubContainer>& pluginSubContainer);
     RefPtr<PluginSubContainer> GetPluginSubContainer(int64_t pluginId);
     RefPtr<PluginSubContainer> MatchPluginSubContainerWithPluginId(int64_t pluginId, const std::string& pluginKey);
     int64_t GetPluginSubContainerId();
+    int64_t GetPluginParentContainerId(int64_t pluginId);
     void SetJsEngineLoader(Framework::JsEngineLoader* jsEngineLoader)
     {
         jsEngineLoader_ = jsEngineLoader;
@@ -63,6 +66,8 @@ private:
     std::map<int64_t, RefPtr<PluginSubContainer>> pluginSubContainerMap_;
     std::mutex nonmatchedContainerMutex_;
     std::unordered_map<std::string, RefPtr<PluginSubContainer>> nonmatchedContainerMap_;
+    std::mutex parentContainerMutex_;
+    std::unordered_map<int64_t, int32_t> parentContainerMap_;
     Framework::JsEngineLoader* jsEngineLoader_ = nullptr;
     void* aceAbility_ = nullptr;
     static std::shared_ptr<PluginUtils> pluginUtils_;

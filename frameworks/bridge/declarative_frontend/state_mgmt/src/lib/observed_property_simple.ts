@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,13 +33,13 @@ class ObservedPropertySimple<T> extends ObservedPropertySimpleAbstract<T>
 
   aboutToBeDeleted(unsubscribeMe?: IPropertySubscriber) {
     if (unsubscribeMe) {
-      this.unlinkSuscriber(unsubscribeMe.id__());
+      this.unlinkSuscriber(unsubscribeMe.id());
     }
     super.aboutToBeDeleted();
   }
 
   hasChanged(newValue: T): void {
-    console.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: hasChanged`);
+    console.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: hasChanged`);
     this.notifyHasChanged(this.wrappedValue_);
   }
 
@@ -49,23 +49,23 @@ class ObservedPropertySimple<T> extends ObservedPropertySimpleAbstract<T>
     and also notify with this.aboutToChange();
   */
   private setValueInternal(newValue: T): void {
-    console.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}'] new value is of simple type`);
+    console.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}'] new value is of simple type`);
     this.wrappedValue_ = newValue;
   }
 
 
   public get(): T {
-    console.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`);
+    console.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`);
     this.notifyPropertyRead();
     return this.wrappedValue_;
   }
 
   public set(newValue: T): void {
     if (this.wrappedValue_ == newValue) {
-      console.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
+      console.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
       return;
     }
-    console.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
+    console.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
     this.setValueInternal(newValue);
     this.notifyHasChanged(newValue);
   }
@@ -77,11 +77,11 @@ class ObservedPropertySimple<T> extends ObservedPropertySimpleAbstract<T>
  * changes.
  */
   public createLink(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T> {
-    return new SynchedPropertySimpleTwoWay(this, subscribeOwner, linkPropName, contentObserver);
+    linkPropName?: PropertyInfo): ObservedPropertyAbstract<T> {
+    return new SynchedPropertySimpleTwoWay(this, subscribeOwner, linkPropName);
   }
   public createProp(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T> {
-    return new SynchedPropertySimpleOneWaySubscribing(this, subscribeOwner, linkPropName, contentObserver);
+    linkPropName?: PropertyInfo): ObservedPropertyAbstract<T> {
+    return new SynchedPropertySimpleOneWaySubscribing(this, subscribeOwner, linkPropName);
   }
 }

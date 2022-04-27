@@ -51,8 +51,6 @@
 
 extern const char _binary_stateMgmt_js_start[];
 extern const char _binary_stateMgmt_js_end[];
-extern const char _binary_contentStorage_js_start[];
-extern const char _binary_contentStorage_js_end[];
 extern const char _binary_jsEnumStyle_js_start[];
 extern const char _binary_jsEnumStyle_js_end[];
 
@@ -508,7 +506,6 @@ void V8DeclarativeEngineInstance::InitJSContext()
     InitJsNativeModuleObject(localContext);
     InitJsExportsUtilObject(localContext);
     InitAceModules(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end, isolate_.Get());
-    InitAceModules(_binary_contentStorage_js_start, _binary_contentStorage_js_end, isolate_.Get());
     InitAceModules(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end, isolate_.Get());
 
     auto groupJsBridge = DynamicCast<V8DeclarativeGroupJsBridge>(frontendDelegate_->GetGroupJsBridge());
@@ -901,7 +898,7 @@ bool V8DeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         new V8NativeEngine(GetPlatform().get(), isolate, engineInstance_->GetContext(), static_cast<void*>(this));
     engineInstance_->SetNativeEngine(nativeEngine_);
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
     nativeEngine_->CheckUVLoop();
 #endif
     if (delegate && delegate->GetAssetManager()) {
@@ -1054,10 +1051,6 @@ V8DeclarativeEngine::~V8DeclarativeEngine()
         nativeEngine_->CancelCheckUVLoop();
 #endif
         delete nativeEngine_;
-    }
-    if (nativeXComponent_) {
-        delete nativeXComponent_;
-        nativeXComponent_ = nullptr;
     }
     if (g_debugger != nullptr) {
         dlclose(g_debugger);
@@ -1786,16 +1779,20 @@ void V8DeclarativeEngine::InitXComponent()
         return;
     }
     ctxXComp_.Reset(isolateXComp_, context);
-    nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
-    nativeXComponent_ = new OH_NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
 }
 
 void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
 {
     CHECK_RUN_ON(JS);
     InitXComponent();
+    if (!OHOS::Ace::Framework::XComponentClient::GetInstance().
+        GetNativeXComponentFromXcomponentsMap(componentId, nativeXComponentImpl_,
+        nativeXComponent_)) {
+        LOGE("InitXComponent nativeXComponent_ fail");
+        return;
+    }
     RefPtr<XComponentComponent> xcomponent;
-    OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponent(xcomponent);
+    OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId, xcomponent);
     if (!xcomponent) {
         LOGE("FireExternalEvent xcomponent is null.");
         return;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,15 +24,13 @@ namespace OHOS::Ace::Framework {
 // NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto PANDA_MAIN_FUNCTION = "_GLOBAL::func_main_0";
 
-Local<JSValueRef> FunctionCallback(EcmaVM *vm, Local<JSValueRef> thisValue,
-                                   const Local<JSValueRef> argument[],  // NOLINT(modernize-avoid-c-arrays)
-                                   int32_t length, void *data)
+Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo *info)
 {
-    auto package = reinterpret_cast<PandaFunctionData *>(data);
+    auto package = reinterpret_cast<PandaFunctionData *>(info->GetData());
     if (package == nullptr) {
-        return JSValueRef::Undefined(vm);
+        return JSValueRef::Undefined(info->GetVM());
     }
-    return package->Callback(thisValue, argument, length);
+    return package->Callback(info);
 }
 
 bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
@@ -40,7 +38,10 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
     LOGI("Ark: create jsvm");
     RuntimeOption option;
     option.SetGcType(RuntimeOption::GC_TYPE::GEN_GC);
+#ifndef WINDOWS_PLATFORM
     option.SetArkProperties(SystemProperties::GetArkProperties());
+    option.SetAsmInterOption(SystemProperties::GetAsmInterOption());
+#endif
     const int64_t poolSize = 0x10000000;  // 256M
     option.SetGcPoolSize(poolSize);
     option.SetLogLevel(RuntimeOption::LOG_LEVEL::ERROR);
@@ -53,11 +54,23 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
     return vm_ != nullptr;
 }
 
+bool ArkJSRuntime::InitializeFromExistVM(EcmaVM* vm)
+{
+    vm_ = vm;
+    usingExistVM_ = true;
+    LOGI("InitializeFromExistVM %{public}p", vm);
+    return vm_ != nullptr;
+}
+
 void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
-        JSNApi::StopDebugger(libPath_.c_str());
-        JSNApi::DestroyJSVM(vm_);
+        if (!usingExistVM_) {
+#ifndef WINDOWS_PLATFORM
+            JSNApi::StopDebugger(vm_);
+#endif
+            JSNApi::DestroyJSVM(vm_);
+        }
         vm_ = nullptr;
     }
     for (auto data : dataList_) {
@@ -90,7 +103,9 @@ bool ArkJSRuntime::ExecuteJsBin(const std::string &fileName)
     JSExecutionScope executionScope(vm_);
     static bool debugFlag = true;
     if (debugFlag && !libPath_.empty()) {
+#ifndef WINDOWS_PLATFORM
         JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_);
+#endif
         debugFlag = false;
     }
     LocalScope scope(vm_);
@@ -172,13 +187,19 @@ shared_ptr<JsValue> ArkJSRuntime::NewFunction(RegisterFunctionType func)
     LocalScope scope(vm_);
     auto data = new PandaFunctionData(shared_from_this(), func);
     dataList_.emplace_back(data);
-    return std::make_shared<ArkJSValue>(shared_from_this(), FunctionRef::New(vm_, FunctionCallback, data));
+    return std::make_shared<ArkJSValue>(shared_from_this(), FunctionRef::New(vm_, FunctionCallback, nullptr, data));
 }
 
 shared_ptr<JsValue> ArkJSRuntime::NewNativePointer(void *ptr)
 {
     LocalScope scope(vm_);
     return std::make_shared<ArkJSValue>(shared_from_this(), NativePointerRef::New(vm_, ptr));
+}
+
+shared_ptr<JsValue> ArkJSRuntime::NewException()
+{
+    LocalScope scope(vm_);
+    return std::make_shared<ArkJSValue>(shared_from_this(), JSValueRef::Exception(vm_));
 }
 
 void ArkJSRuntime::RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback)
@@ -193,7 +214,7 @@ void ArkJSRuntime::HandleUncaughtException()
     if (!exception.IsEmpty() && !exception->IsHole() && uncaughtErrorHandler_ != nullptr) {
         shared_ptr<JsValue> errorPtr =
             std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(shared_from_this(), exception));
-        uncaughtErrorHandler_(errorPtr);
+        uncaughtErrorHandler_(errorPtr, shared_from_this());
     }
 }
 
@@ -203,18 +224,18 @@ void ArkJSRuntime::ExecutePendingJob()
     JSNApi::ExecutePendingJob(vm_);
 }
 
-Local<JSValueRef> PandaFunctionData::Callback(const Local<JSValueRef> &thisValue,
-                                              const Local<JSValueRef> argument[],  // NOLINT(modernize-avoid-c-arrays)
-                                              int32_t length) const
+Local<JSValueRef> PandaFunctionData::Callback(panda::JsiRuntimeCallInfo *info) const
 {
     EscapeLocalScope scope(runtime_->GetEcmaVm());
-    shared_ptr<JsValue> thisPtr = std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(runtime_, thisValue));
+    shared_ptr<JsValue> thisPtr =
+        std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(runtime_, info->GetThisRef()));
 
     std::vector<shared_ptr<JsValue>> argv;
+    uint32_t length = info->GetArgsNumber();
     argv.reserve(length);
-    for (int i = 0; i < length; ++i) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        argv.emplace_back(std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(runtime_, argument[i])));
+    for (uint32_t i = 0; i < length; ++i) {
+        argv.emplace_back(
+            std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(runtime_, info->GetCallArgRef(i))));
     }
     shared_ptr<JsValue> result = func_(runtime_, thisPtr, argv, length);
     return scope.Escape(std::static_pointer_cast<ArkJSValue>(result)->GetValue(runtime_));

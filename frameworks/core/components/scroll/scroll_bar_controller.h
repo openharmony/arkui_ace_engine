@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,7 +105,7 @@ public:
         scroll_ = scroll;
     }
 
-    bool IsActive()
+    bool IsActive() const
     {
         return isActive_;
     }
@@ -135,12 +135,24 @@ public:
         return activeWidth_;
     }
 
+    bool IsPressed() const
+    {
+        return isPressed_;
+    }
+
+    void SetIsHover(bool isHover);
+
 protected:
     virtual bool UpdateScrollPosition(double offset, int32_t source);
 
     virtual void ProcessScrollMotion(double position);
 
     virtual bool CheckScroll();
+
+    // Play grow when hover or pressed, from inactive with to active width.
+    void PlayGrowAnimation();
+    // Play shrink animation when lost hover or pressed state, from active with to inactive width.
+    void PlayShrinkAnimation();
 
     WeakPtr<RenderNode> scroll_;
     ScrollBarPositionCallback callback_;
@@ -160,6 +172,10 @@ protected:
     WeakPtr<PipelineContext> context_;
 
     bool isActive_ = false;
+    // Whether scroll bar is pressed, use different style when pressed.
+    bool isPressed_ = false;
+    // Whether scroll bar is hover.
+    bool isHover_ = false;
     double currentPos_ = 0.0;
     Dimension activeWidth_;
     Dimension inactiveWidth_;

@@ -36,6 +36,13 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("size", &JSToggle::JsSize);
     JSClass<JSToggle>::StaticMethod("padding", &JSToggle::JsPadding);
     JSClass<JSToggle>::StaticMethod("switchPointColor", &JSToggle::SwitchPointColor);
+    
+    JSClass<JSToggle>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSToggle>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSToggle>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSToggle>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSToggle>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSToggle>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSToggle>::Inherit<JSViewAbstract>();
     JSClass<JSToggle>::Bind(globalObj);
 }
@@ -185,7 +192,7 @@ void JSToggle::JsSize(const JSCallbackInfo& info)
 void JSToggle::OnChange(const JSCallbackInfo& args)
 {
     if (JSViewBindEvent(&ToggleComponent::SetOnChange, args) ||
-        JSViewBindEvent(&CheckboxComponent::SetOnChange, args)) {
+        JSViewBindEvent(&CheckableComponent::SetOnChange, args)) {
     } else {
         LOGW("Failed to bind event");
     }

@@ -65,7 +65,6 @@ void QjsXComponentBridge::HandleContext(JSContext* ctx, NodeId id, const std::st
         LOGE("QjsXComponentBridge xcomponent is null.");
         return;
     }
-    auto textureId = static_cast<int64_t>(xcomponent->GetTextureId());
 
     auto container = Container::Current();
     if (!container) {
@@ -77,7 +76,14 @@ void QjsXComponentBridge::HandleContext(JSContext* ctx, NodeId id, const std::st
         LOGE("QjsXComponentBridge nativeView null");
         return;
     }
-    auto nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+
+    void* nativeWindow = nullptr;
+#ifdef OHOS_STANDARD_SYSTEM
+    nativeWindow = const_cast<void*>(xcomponent->GetNativeWindow());
+#else
+    auto textureId = static_cast<int64_t>(xcomponent->GetTextureId());
+    nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+#endif
     if (!nativeWindow) {
         LOGE("QjsXComponentBridge::HandleJsContext nativeWindow invalid");
         return;
@@ -117,5 +123,89 @@ void QjsXComponentBridge::HandleContext(JSContext* ctx, NodeId id, const std::st
 #endif
     hasPluginLoaded_ = true;
     return;
+}
+
+JSValue QjsXComponentBridge::JsGetXComponentSurfaceId(JSContext* ctx, NodeId nodeId)
+{
+#ifdef XCOMPONENT_SUPPORTED
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (instance == nullptr) {
+        LOGE("JsGetXComponentSurfaceId instance is null");
+        return JS_NULL;
+    }
+    auto page = instance->GetRunningPage();
+    if (!page) {
+        LOGE("JsGetXComponentSurfaceId page is null");
+        return JS_NULL;
+    }
+
+    std::string surfaceId = "";
+    auto task = [nodeId, page, &surfaceId]() {
+        auto domDoc = page->GetDomDocument();
+        if (!domDoc) {
+            return;
+        }
+        auto domXComponent = AceType::DynamicCast<DOMXComponent>(domDoc->GetDOMNodeById(nodeId));
+        if (!domXComponent) {
+            return;
+        }
+        surfaceId = domXComponent->GetSurfaceId();
+    };
+
+    auto delegate = instance->GetDelegate();
+    if (!delegate) {
+        LOGE("JsGetXComponentSurfaceId delegate is null");
+        return JS_NULL;
+    }
+    delegate->PostSyncTaskToPage(task);
+    JSValue result = JS_NewString(ctx, surfaceId.c_str());
+    return result;
+#else
+    return JS_NULL;
+#endif
+}
+
+void QjsXComponentBridge::JsSetXComponentSurfaceSize(JSContext* ctx, const std::string& args, NodeId nodeId)
+{
+#ifdef XCOMPONENT_SUPPORTED
+    auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
+    if (instance == nullptr) {
+        LOGE("JsSetXComponentSurfaceSize instance is null");
+        return;
+    }
+    auto page = instance->GetRunningPage();
+    if (!page) {
+        LOGE("JsSetXComponentSurfaceSize page is null");
+        return;
+    }
+
+    auto task = [nodeId, page, args]() {
+        auto domDoc = page->GetDomDocument();
+        if (!domDoc) {
+            return;
+        }
+        auto domXComponent = AceType::DynamicCast<DOMXComponent>(domDoc->GetDOMNodeById(nodeId));
+        if (!domXComponent) {
+            return;
+        }
+
+        std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
+        if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() < 1) {
+            LOGE("JsSetXComponentSurfaceSize failed. parse args error");
+            return;
+        }
+        std::unique_ptr<JsonValue> surfaceSizePara = argsValue->GetArrayItem(0);
+        uint32_t surfaceWidth = surfaceSizePara->GetUInt("surfaceWidth", 0);
+        uint32_t surfaceHeight = surfaceSizePara->GetUInt("surfaceHeight", 0);
+        domXComponent->SetSurfaceSize(surfaceWidth, surfaceHeight);
+    };
+
+    auto delegate = instance->GetDelegate();
+    if (!delegate) {
+        LOGE("JsSetXComponentSurfaceSize delegate is null");
+        return;
+    }
+    delegate->PostSyncTaskToPage(task);
+#endif
 }
 } // namespace OHOS::Ace::Framework

@@ -105,8 +105,8 @@ void SubwindowOhos::InitContainer()
         Platform::FlutterAceView::CreateView(childContainerId_, true, container->GetSettings().usePlatformAsUIThread);
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, window_);
 
-    int32_t width = static_cast<int32_t>(window_->GetRect().width_);
-    int32_t height = static_cast<int32_t>(window_->GetRect().height_);
+    int32_t width = static_cast<int32_t>(window_->GetRequestRect().width_);
+    int32_t height = static_cast<int32_t>(window_->GetRequestRect().height_);
     LOGI("UIContent Initialize: width: %{public}d, height: %{public}d", width, height);
 
     Ace::Platform::UIEnvCallback callback = nullptr;
@@ -183,7 +183,12 @@ void SubwindowOhos::AddMenu(const RefPtr<Component>& newComponent)
         return;
     }
     // Push the component
+    stack->PopMenu();
     stack->PushComponent(newComponent);
+    popup_ = AceType::DynamicCast<SelectPopupComponent>(newComponent);
+    if (!popup_) {
+        LOGE("Add menu failed, this is not a popup component.");
+    }
     LOGI("Subwindow push new component end.");
 }
 
@@ -202,6 +207,7 @@ void SubwindowOhos::ClearMenu()
         LOGE("Get context failed, it is null");
     }
     context->FlushPipelineImmediately();
+    HideWindow();
     LOGI("Subwindow clear menu end.");
 }
 
@@ -215,8 +221,9 @@ void SubwindowOhos::ShowMenu(const RefPtr<Component>& newComponent)
 void SubwindowOhos::CloseMenu()
 {
     LOGI("Close the menu");
-    ClearMenu();
-    HideWindow();
+    if (popup_) {
+        popup_->CloseContextMenu();
+    }
 }
 
 RefPtr<StackElement> SubwindowOhos::GetStack()

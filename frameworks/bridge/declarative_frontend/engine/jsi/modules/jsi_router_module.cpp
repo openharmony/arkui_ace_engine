@@ -24,9 +24,10 @@
 
 namespace OHOS::Ace::Framework {
 
-std::string ParseRouteUrl(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg, const std::string& key)
+std::string DeclarativeParseRouteUrl(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg,
+    const std::string& key)
 {
-    LOGD("ParseRouteUrl");
+    LOGD("DeclarativeParseRouteUrl");
     std::string argStr = arg->GetJsonString(runtime);
     if (argStr.empty()) {
         return argStr;
@@ -37,12 +38,12 @@ std::string ParseRouteUrl(const shared_ptr<JsRuntime>& runtime, const shared_ptr
     if (argsPtr != nullptr && argsPtr->GetValue(key) != nullptr && argsPtr->GetValue(key)->IsString()) {
         pageRoute = argsPtr->GetValue(key)->GetString();
     }
-    LOGD("JsParseRouteUrl pageRoute = %{private}s", pageRoute.c_str());
+    LOGD("JsDeclarativeParseRouteUrl pageRoute = %{private}s", pageRoute.c_str());
 
     return pageRoute;
 }
 
-std::string ParseRouteParams(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg,
+std::string DeclarativeParseRouteParams(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg,
     const std::string& key)
 {
     std::string argStr = arg->GetJsonString(runtime);
@@ -63,8 +64,8 @@ shared_ptr<JsValue> PagePush(const shared_ptr<JsRuntime>& runtime, const shared_
         return runtime->NewNull();
     }
 
-    std::string uri = ParseRouteUrl(runtime, argv[0], ROUTE_KEY_URI);
-    std::string params = ParseRouteParams(runtime, argv[0], ROUTE_KEY_PARAMS);
+    std::string uri = DeclarativeParseRouteUrl(runtime, argv[0], ROUTE_KEY_URI);
+    std::string params = DeclarativeParseRouteParams(runtime, argv[0], ROUTE_KEY_PARAMS);
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate == nullptr) {
         LOGE("get jsi delegate failed");
@@ -84,8 +85,8 @@ shared_ptr<JsValue> PageReplace(const shared_ptr<JsRuntime>& runtime, const shar
         return runtime->NewNull();
     }
 
-    std::string uri = ParseRouteUrl(runtime, argv[0], ROUTE_KEY_URI);
-    std::string params = ParseRouteParams(runtime, argv[0], ROUTE_KEY_PARAMS);
+    std::string uri = DeclarativeParseRouteUrl(runtime, argv[0], ROUTE_KEY_URI);
+    std::string params = DeclarativeParseRouteParams(runtime, argv[0], ROUTE_KEY_PARAMS);
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate == nullptr) {
         LOGE("get jsi delegate failed");
@@ -108,8 +109,8 @@ shared_ptr<JsValue> PageBack(const shared_ptr<JsRuntime>& runtime, const shared_
     std::string uri;
     std::string params;
     if (argc == 1) {
-        uri = ParseRouteUrl(runtime, argv[0], ROUTE_KEY_URI);
-        params = ParseRouteParams(runtime, argv[0], ROUTE_KEY_PARAMS);
+        uri = DeclarativeParseRouteUrl(runtime, argv[0], ROUTE_KEY_URI);
+        params = DeclarativeParseRouteParams(runtime, argv[0], ROUTE_KEY_PARAMS);
     }
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate == nullptr) {

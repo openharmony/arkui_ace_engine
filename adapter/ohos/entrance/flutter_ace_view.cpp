@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,21 @@
 
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 
+#include <EGL/egl.h>
 #include <algorithm>
 #include <fstream>
 
+#include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/shell/common/shell_io_manager.h"
+#include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "key_event.h"
 #include "pointer_event.h"
 
+#if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
+#include "adapter/ohos/entrance/ace_rosen_sync_task.h"
+#endif
+
+#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -208,7 +217,25 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
     LOGI("ConvertMouseEvent: (x,y): (%{public}f,%{public}f). Button: %{public}d. Action: %{public}d. "
          "DeviceType: %{public}d. PressedButton: %{public}d. Time: %{public}lld",
         events.x, events.y, events.button, events.action, events.sourceType, events.pressedButtons,
-        pointerEvent->GetActionTime());
+        (long long)pointerEvent->GetActionTime());
+}
+
+void GetAxisEventAction(int32_t action, AxisEvent& event)
+{
+    switch (action) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN:
+            event.action = AxisAction::BEGIN;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE:
+            event.action = AxisAction::UPDATE;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END:
+            event.action = AxisAction::END;
+            break;
+        default:
+            event.action = AxisAction::NONE;
+            break;
+    }
 }
 
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event)
@@ -225,6 +252,9 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     event.y = item.GetLocalY();
     event.horizontalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
     event.verticalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
+    event.pinchAxisScale = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH);
+    int32_t orgAction = pointerEvent->GetPointerAction();
+    GetAxisEventAction(orgAction, event);
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
 
@@ -232,8 +262,9 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     TimeStamp time(microseconds);
     event.time = time;
     LOGI("ConvertAxisEvent: (x,y): (%{public}f,%{public}f). HorizontalAxis: %{public}f. VerticalAxis: %{public}f. "
-         "DeviceType: %{public}d. Time: %{public}lld",
-        event.x, event.y, event.horizontalAxis, event.verticalAxis, event.sourceType, pointerEvent->GetActionTime());
+         "Action: %{public}d. DeviceType: %{public}d. Time: %{public}lld",
+        event.x, event.y, event.horizontalAxis, event.verticalAxis, event.action, event.sourceType,
+        (long long)pointerEvent->GetActionTime());
 }
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
@@ -285,6 +316,9 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatformThread)
 {
     FlutterAceView* aceSurface = new Platform::FlutterAceView(instanceId);
+    if (aceSurface != nullptr) {
+        aceSurface->IncRefCount();
+    }
     flutter::Settings settings;
     settings.instanceId = instanceId;
     settings.platform = flutter::AcePlatform::ACE_PLATFORM_OHOS;
@@ -297,7 +331,8 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
     settings.use_current_event_runner = useCurrentEventRunner;
     LOGI("software render: %{public}s", settings.enable_software_rendering ? "true" : "false");
     LOGI("use platform as ui thread: %{public}s", settings.platform_as_ui_thread ? "true" : "false");
-    settings.idle_notification_callback = [aceSurface](int64_t deadline) {
+    settings.idle_notification_callback = [weak = WeakClaim(aceSurface)](int64_t deadline) {
+        auto aceSurface = weak.Upgrade();
         if (aceSurface != nullptr) {
             aceSurface->ProcessIdleEvent(deadline);
         }
@@ -311,7 +346,6 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
 
 void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen::Window> window)
 {
-    LOGI(">>> FlutterAceView::SurfaceCreated, pWnd:%{public}p", &(*window));
     if (window == nullptr) {
         LOGE("FlutterAceView::SurfaceCreated, window is nullptr");
         return;
@@ -320,7 +354,7 @@ void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen
         LOGE("FlutterAceView::SurfaceCreated, view is nullptr");
         return;
     }
-
+    LOGI(">>> FlutterAceView::SurfaceCreated, pWnd:%{public}p", &(*window));
     auto platformView = view->GetShellHolder()->GetPlatformView();
     LOGI("FlutterAceView::SurfaceCreated, GetPlatformView");
     if (platformView && !SystemProperties::GetRosenBackendEnabled()) {
@@ -673,6 +707,87 @@ std::unique_ptr<DrawDelegate> FlutterAceView::GetDrawDelegate()
 std::unique_ptr<PlatformWindow> FlutterAceView::GetPlatformWindow()
 {
     return nullptr;
+}
+
+void FlutterAceView::InitIOManager(RefPtr<TaskExecutor> taskExecutor)
+{
+    if (!SystemProperties::GetGpuUploadEnabled()) {
+        return;
+    }
+#if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
+    ACE_SCOPED_TRACE("InitIOManager");
+    EGLContext shareContext = nullptr;
+    EGLSurface surface = nullptr;
+    auto callback = [&shareContext, &surface]() {
+        ACE_SCOPED_TRACE("create egl ");
+        EGLContext context = eglGetCurrentContext();
+        if (context == EGL_NO_CONTEXT) {
+            LOGE("eglGetCurrentContext failed errorCode = [%{public}d]", eglGetError());
+            return;
+        }
+        EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        if (display == EGL_NO_DISPLAY) {
+            LOGE("eglGetDisplay failed errorCode = [%{public}d]", eglGetError());
+            return;
+        }
+        EGLint attributes[] = {
+            // clang-format off
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_SURFACE_TYPE,    EGL_WINDOW_BIT,
+        EGL_RED_SIZE,        8,
+        EGL_GREEN_SIZE,      8,
+        EGL_BLUE_SIZE,       8,
+        EGL_ALPHA_SIZE,      8,
+        EGL_DEPTH_SIZE,      0,
+        EGL_STENCIL_SIZE,    0,
+        EGL_NONE,            // termination sentinel
+            // clang-format on
+        };
+        EGLint config_count = 0;
+        EGLConfig egl_config = nullptr;
+        if (eglChooseConfig(display, attributes, &egl_config, 1, &config_count) != EGL_TRUE) {
+            LOGE("Get EGLConfig failed errorCode = [%{public}d]", eglGetError());
+            return;
+        }
+        EGLint contextAttr[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
+        shareContext = eglCreateContext(display, egl_config, context, contextAttr);
+        if (shareContext == EGL_NO_CONTEXT) {
+            LOGE("eglCreateContext failed errorCode = [%{public}d]", eglGetError());
+            return;
+        }
+        const EGLint attribs[] = { EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
+        surface = eglCreatePbufferSurface(display, egl_config, attribs);
+        if (surface == EGL_NO_SURFACE) {
+            LOGE("eglCreatePbufferSurface failed errorCode = [%{public}d]", eglGetError());
+            return;
+        }
+        LOGI("create egl success");
+    };
+    auto task = std::make_shared<AceRosenSyncTask>(std::move(callback));
+    Rosen::RSTransactionProxy::GetInstance()->ExecuteSynchronousTask(task);
+
+    if (shareContext == EGL_NO_CONTEXT || surface == EGL_NO_SURFACE) {
+        LOGW("create egl env failed, image should not upload to gpu.");
+        return;
+    }
+    auto state = flutter::UIDartState::Current()->GetStateById(instanceId_);
+    if (state == nullptr) {
+        LOGE("state is nullptr");
+        return;
+    }
+    fml::WeakPtr<flutter::ShellIOManager> ioManager = state->GetIOManager();
+    taskExecutor->PostSyncTask(
+        [surface, shareContext, ioManager]() {
+            ACE_SCOPED_TRACE("create resource_context ");
+            if (eglMakeCurrent(eglGetDisplay(EGL_DEFAULT_DISPLAY), surface, surface, shareContext) == EGL_TRUE) {
+                sk_sp<GrContext> resource_context = flutter::ShellIOManager::CreateCompatibleResourceLoadingContext(
+                    GrBackend::kOpenGL_GrBackend, flutter::GPUSurfaceGLDelegate::GetDefaultPlatformGLInterface());
+
+                ioManager->NotifyResourceContextAvailable(resource_context);
+            }
+        },
+        TaskExecutor::TaskType::IO);
+#endif
 }
 
 } // namespace OHOS::Ace::Platform

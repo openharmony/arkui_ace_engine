@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,24 +79,9 @@ void FlutterRenderXComponent::Paint(RenderContext& context, const Offset& offset
         const Size& layout = GetLayoutSize();
         layer_->SetClip(0.0, layout.Width(), 0.0, layout.Height(), Flutter::Clip::NONE);
         AddBackgroundLayer();
-
-        if (!hasSetDefaultSize_) {
-            if (xcomponentSizeChangeEvent_ && (!drawSize_.IsHeightInfinite())) {
-                xcomponentSizeChangeEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
-            }
-            hasSetDefaultSize_ = true;
-        }
         AddTextureLayer();
     }
-#ifdef OHOS_STANDARD_SYSTEM
-    if (!hasSetDefaultSize_) {
-        if (xcomponentSizeChangeEvent_ && (!drawSize_.IsHeightInfinite())) {
-            xcomponentSizeChangeEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
-        }
-        hasSetDefaultSize_ = true;
-    }
-#endif
-    RenderNode::Paint(context, offset);
+    RenderXComponent::Paint(context, offset);
 }
 
 void FlutterRenderXComponent::DumpTree(int32_t depth)

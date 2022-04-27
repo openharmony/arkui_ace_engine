@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -222,10 +222,10 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
         SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]), buttonComponent);
     }
     ViewStackProcessor::GetInstance()->Push(buttonComponent);
+    JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);
 
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    boxComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
+    buttonComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
 }
 
 void JSButton::CreateWithChild(const JSCallbackInfo& info)
@@ -239,7 +239,9 @@ void JSButton::CreateWithChild(const JSCallbackInfo& info)
         SetTypeAndStateEffect(obj, buttonComponent);
     }
     ViewStackProcessor::GetInstance()->Push(buttonComponent);
+    JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);
+    buttonComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
 }
 
 void JSButton::SetDefaultAttributes(const RefPtr<ButtonComponent>& buttonComponent)
@@ -253,6 +255,7 @@ void JSButton::SetDefaultAttributes(const RefPtr<ButtonComponent>& buttonCompone
     buttonComponent->SetHeight(buttonTheme->GetHeight());
     buttonComponent->SetBackgroundColor(buttonTheme->GetBgColor());
     buttonComponent->SetClickedColor(buttonComponent->GetBackgroundColor().BlendColor(buttonTheme->GetClickedColor()));
+    buttonComponent->SetHoverColor(buttonTheme->GetHoverColor());
 }
 
 void JSButton::SetTypeAndStateEffect(const JSRef<JSObject>& obj, const RefPtr<ButtonComponent>& buttonComponent)
@@ -346,6 +349,10 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
             func->Execute(info);
         };
         RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(DEFAULT_TAP_COUNTS, DEFAULT_TAP_FINGERS);
+        if (!tapGesture) {
+            LOGE("tapGesture is null");
+            return;
+        }
         tapGesture->SetOnActionId(clickId);
         auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
         if (tapGesture) {
@@ -369,8 +376,10 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
         if (buttonComponent) {
             buttonComponent->SetKeyEnterEventId(clickEventId);
         }
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-        focusableComponent->SetOnClickId(clickEventId);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        if (focusableComponent) {
+            focusableComponent->SetOnClickId(clickEventId);
+        }
     }
 }
 
@@ -449,6 +458,7 @@ void JSButton::JsHeight(const JSCallbackInfo& info)
     }
     if (!stack->IsVisualStateSet()) {
         buttonComponent->SetHeight(value, option);
+        buttonComponent->SetDeclareHeight(true);
     } else {
         buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
             ButtonStateAttribute::HEIGHT, AnimatableDimension(value, option), stack->GetVisualState());
@@ -499,6 +509,7 @@ void JSButton::JsSize(const JSCallbackInfo& info)
     if (ParseJsDimensionVp(heightValue, height)) {
         if (!stack->IsVisualStateSet()) {
             buttonComponent->SetHeight(height, stack->GetImplicitAnimationOption());
+            buttonComponent->SetDeclareHeight(true);
         } else {
             buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
                 ButtonStateAttribute::HEIGHT, AnimatableDimension(height, option), stack->GetVisualState());

@@ -27,7 +27,6 @@ const char* SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 } // namespace
 
-std::unordered_map<std::string, uint64_t> XComponentElement::surfaceIdMap_;
 #endif
 
 XComponentElement::~XComponentElement()
@@ -59,29 +58,33 @@ void XComponentElement::Prepare(const WeakPtr<Element>& parent)
     xcomponent_ = AceType::DynamicCast<XComponentComponent>(component_);
     InitEvent();
     RegisterSurfaceDestroyEvent();
-    RegisterDispatchTouchEventCallback();
+    RegisterDispatchEventCallback();
+
+    RenderElement::Prepare(parent);
     if (xcomponent_) {
         if (!isExternalResource_) {
             CreatePlatformResource();
-#ifdef OHOS_STANDARD_SYSTEM
-            SetMethodCall();
-#endif
         }
+        SetMethodCall();
     }
-    RenderElement::Prepare(parent);
+
     if (renderNode_) {
         auto renderXComponent = AceType::DynamicCast<RenderXComponent>(renderNode_);
         if (renderXComponent) {
+            renderXComponent->SetXComponentSizeInit(
+                [weak = WeakClaim(this)](int64_t textureId, int32_t width, int32_t height) {
+                    auto xcomponentElement = weak.Upgrade();
+                    if (xcomponentElement) {
+                        xcomponentElement->OnXComponentSizeInit(textureId, width, height);
+                    }
+            });
             renderXComponent->SetXComponentSizeChange(
                 [weak = WeakClaim(this)](int64_t textureId, int32_t width, int32_t height) {
                     auto xcomponentElement = weak.Upgrade();
                     if (xcomponentElement) {
-                        xcomponentElement->OnXComponentSize(textureId, width, height);
+                        xcomponentElement->OnXComponentSizeChange(textureId, width, height);
                     }
             });
-#ifdef OHOS_STANDARD_SYSTEM
-            CreateSurface();
-#endif
         }
     }
 }
@@ -149,11 +152,11 @@ bool XComponentElement::IsDeclarativePara()
     return context->GetIsDeclarative();
 }
 
-void XComponentElement::RegisterDispatchTouchEventCallback()
+void XComponentElement::RegisterDispatchEventCallback()
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
-        LOGE("RegisterDispatchTouchEventCallback pipelineContext is null");
+        LOGE("context is nullptr");
         return;
     }
     pipelineContext->SetDispatchTouchEventHandler([weak = WeakClaim(this)](const TouchEvent& event) {
@@ -162,13 +165,19 @@ void XComponentElement::RegisterDispatchTouchEventCallback()
             element->DispatchTouchEvent(event);
         }
     });
+    pipelineContext->SetDispatchMouseEventHandler([weak = WeakClaim(this)](const MouseEvent& event) {
+        auto element = weak.Upgrade();
+        if (element) {
+            element->DispatchMousehEvent(event);
+        }
+    });
 }
 
 void XComponentElement::DispatchTouchEvent(const TouchEvent& event)
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
-        LOGE("DispatchTouchEvent pipelineContext is null");
+        LOGE("context is nullptr");
         return;
     }
     auto renderXComponent = AceType::DynamicCast<RenderXComponent>(renderNode_);
@@ -185,6 +194,39 @@ void XComponentElement::DispatchTouchEvent(const TouchEvent& event)
         SetTouchEventType(event);
         SetTouchPoint(event);
         renderXComponent->NativeXComponentDispatchTouchEvent(touchEventPoint_);
+    }
+}
+
+void XComponentElement::DispatchMousehEvent(const MouseEvent& event)
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("context is nullptr");
+        return;
+    }
+    auto renderXComponent = AceType::DynamicCast<RenderXComponent>(renderNode_);
+    if (renderXComponent) {
+        mouseEventPoint_.x = event.x;
+        mouseEventPoint_.y = event.y;
+        mouseEventPoint_.z = event.z;
+        mouseEventPoint_.deltaX = event.deltaX;
+        mouseEventPoint_.deltaY = event.deltaY;
+        mouseEventPoint_.deltaZ = event.deltaZ;
+        mouseEventPoint_.scrollX = event.scrollX;
+        mouseEventPoint_.scrollY = event.scrollY;
+        mouseEventPoint_.scrollZ = event.scrollZ;
+        mouseEventPoint_.screenX = event.screenX;
+        mouseEventPoint_.screenY = event.screenY;
+
+        mouseEventPoint_.action = static_cast<OH_NativeXComponent_MouseEventAction>(event.action);
+        mouseEventPoint_.button = static_cast<OH_NativeXComponent_MouseEventButton>(event.button);
+        mouseEventPoint_.pressedButtons = event.pressedButtons;
+        mouseEventPoint_.time = event.time.time_since_epoch().count();
+        mouseEventPoint_.deviceId = event.deviceId;
+        mouseEventPoint_.sourceType = static_cast<OH_NativeXComponent_SourceType>(event.sourceType);
+        mouseEventPoint_.pressedButtons = event.pressedButtons;
+
+        renderXComponent->NativeXComponentDispatchMouseEvent(mouseEventPoint_);
     }
 }
 
@@ -249,6 +291,9 @@ void XComponentElement::SetTouchPoint(const TouchEvent& event)
 void XComponentElement::CreatePlatformResource()
 {
     ReleasePlatformResource();
+#ifdef OHOS_STANDARD_SYSTEM
+    CreateSurface();
+#else
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("XComponentElement CreatePlatformResource context = null");
@@ -265,6 +310,7 @@ void XComponentElement::CreatePlatformResource()
             }
         });
     };
+
     texture_ = AceType::MakeRefPtr<NativeTexture>(context_, errorCallback);
     texture_->Create(
         [weak = WeakClaim(this), errorCallback](int64_t id) mutable {
@@ -282,16 +328,27 @@ void XComponentElement::CreatePlatformResource()
             }
         },
         idStr_);
+
+    if (texture_) {
+        auto onTextureRefresh = [weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostSyncTask([weak] {
+                auto texture = weak.Upgrade();
+                if (texture) {
+                    texture->OnTextureRefresh();
+                }
+            });
+        };
+        texture_->SetRefreshListener(onTextureRefresh);
+    }
+#endif
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
 void XComponentElement::CreateSurface()
 {
-    if (renderNode_) {
-        auto rosenTexture = AceType::DynamicCast<RosenRenderXComponent>(renderNode_);
-        if (rosenTexture) {
-            producerSurface_ = rosenTexture->GetSurface();
-        }
+    auto rosenTexture = AceType::DynamicCast<RosenRenderXComponent>(renderNode_);
+    if (rosenTexture) {
+        producerSurface_ = rosenTexture->GetSurface();
     }
 
     if (producerSurface_ == nullptr) {
@@ -305,13 +362,31 @@ void XComponentElement::CreateSurface()
         LOGE("xcomponent add surface error: %{public}d", ret);
     }
 
-    xcomponentController_->surfaceId_ = producerSurface_->GetUniqueId();
-
     producerSurface_->SetQueueSize(SURFACE_QUEUE_SIZE);
     producerSurface_->SetUserData("SURFACE_STRIDE_ALIGNMENT", SURFACE_STRIDE_ALIGNMENT);
     producerSurface_->SetUserData("SURFACE_FORMAT", std::to_string(PIXEL_FMT_RGBA_8888));
+}
+#else
+void XComponentElement::OnTextureRefresh()
+{
+    if (renderNode_) {
+        renderNode_->MarkNeedRender();
+    }
+}
+#endif
 
-    XComponentElement::surfaceIdMap_.emplace(xcomponent_->GetId(), producerSurface_->GetUniqueId());
+void XComponentElement::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    if (producerSurface_) {
+        producerSurface_->SetUserData("SURFACE_WIDTH", std::to_string(surfaceWidth));
+        producerSurface_->SetUserData("SURFACE_HEIGHT", std::to_string(surfaceHeight));
+    }
+#else
+    if (texture_ && xcomponent_) {
+        texture_->SetSize(xcomponent_->GetTextureId(), surfaceWidth, surfaceHeight);
+    }
+#endif
 }
 
 void XComponentElement::SetMethodCall()
@@ -319,14 +394,14 @@ void XComponentElement::SetMethodCall()
     if (!xcomponentController_) {
         auto controller = xcomponent_->GetXComponentController();
         if (!controller) {
-            LOGE("There is no controller in xcomponent.");
+            LOGE("invalid controller in xcomponent.");
             return;
         }
         xcomponentController_ = controller;
     }
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("There is no context in xcomponent.");
+        LOGE("context is nullptr");
         return;
     }
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -339,20 +414,28 @@ void XComponentElement::SetMethodCall()
             }
         });
     });
-}
 
-void XComponentElement::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
-{
-    producerSurface_->SetUserData("SURFACE_WIDTH", std::to_string(surfaceWidth));
-    producerSurface_->SetUserData("SURFACE_HEIGHT", std::to_string(surfaceHeight));
-}
+#ifdef OHOS_STANDARD_SYSTEM
+    xcomponentController_->surfaceId_ = std::to_string(producerSurface_->GetUniqueId());
+#else
+    xcomponentController_->surfaceId_ = xcomponent_->GetId();
 #endif
+}
 
 void XComponentElement::ReleasePlatformResource()
 {
+#ifdef OHOS_STANDARD_SYSTEM
+    if (producerSurface_) {
+        auto surfaceUtils = SurfaceUtils::GetInstance();
+        auto ret = surfaceUtils->Remove(producerSurface_->GetUniqueId());
+        if (ret != SurfaceError::SURFACE_ERROR_OK) {
+            LOGE("xcomponent remove surface error: %{public}d", ret);
+        }
+    }
+#else
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("XComponentElement ReleasePlatformResource context null");
+        LOGE("context is nullptr");
         return;
     }
 
@@ -367,63 +450,89 @@ void XComponentElement::ReleasePlatformResource()
             texture_.Reset();
         }
     }
-
-#ifdef OHOS_STANDARD_SYSTEM
-    if (!surfaceIdMap_.empty()) {
-        auto surfaceUtils = SurfaceUtils::GetInstance();
-        auto ret = surfaceUtils->Remove(XComponentElement::surfaceIdMap_[xcomponent_->GetId()]);
-        if (ret != SurfaceError::SURFACE_ERROR_OK) {
-            LOGE("xcomponent remove surface error: %{public}d", ret);
-        }
-    }
 #endif
 }
 
-void XComponentElement::OnXComponentSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
+void XComponentElement::OnXComponentSizeInit(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    if (producerSurface_ != nullptr) {
-        if (renderNode_ != nullptr) {
-            auto context = context_.Upgrade();
-            if (context == nullptr) {
-                LOGE("context is nullptr");
-                return;
-            }
+    auto context = context_.Upgrade();
+    if (context == nullptr) {
+        LOGE("context is nullptr");
+        return;
+    }
 
-            float viewScale = context->GetViewScale();
-            auto nativeWindow = CreateNativeWindowFromSurface(&producerSurface_);
-            if (nativeWindow) {
-                NativeWindowHandleOpt(nativeWindow, SET_BUFFER_GEOMETRY,
-                                      (int)(textureWidth * viewScale), (int)(textureHeight * viewScale));
-                xcomponent_->SetNativeWindow(nativeWindow);
-            } else {
-                LOGE("can not create NativeWindow from surface");
-            }
+    if (producerSurface_ != nullptr) {
+        float viewScale = context->GetViewScale();
+        nativeWindow_ = CreateNativeWindowFromSurface(&producerSurface_);
+        if (nativeWindow_) {
+            NativeWindowHandleOpt(nativeWindow_, SET_BUFFER_GEOMETRY,
+                                  (int)(textureWidth * viewScale), (int)(textureHeight * viewScale));
+            xcomponent_->SetNativeWindow(nativeWindow_);
+        } else {
+            LOGE("can not create NativeWindow");
         }
     }
-    std::string str = "";
-    if (!onLoadDone_) {
-        onLoadDone_ = true;
-        this->OnTextureSize(X_INVALID_ID, str);
-    }
-#endif
 
+    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
+                                                         TaskExecutor::TaskType::PLATFORM);
+    platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
+        auto xcomponentElement = weak.Upgrade();
+        if (xcomponentElement) {
+            if (xcomponentElement->xcomponent_) {
+                xcomponentElement->OnSurfaceInit(
+                    xcomponentElement->xcomponent_->GetId(),
+                    xcomponentElement->xcomponent_->GetNodeId());
+                xcomponentElement->OnXComponentInit("");
+            }
+        }
+    });
+#else
     if (texture_) {
-        texture_->OnSize(textureId, textureWidth, textureHeight,
-                         [weak = WeakClaim(this), textureId](std::string& result) {
-                            auto xcomponentElement = weak.Upgrade();
-                            if (xcomponentElement) {
-                                xcomponentElement->OnTextureSize(textureId, result);
-                            }
+        texture_->SetSize(textureId, textureWidth, textureHeight,
+                          [weak = WeakClaim(this), textureId](std::string& result) {
+                                auto xcomponentElement = weak.Upgrade();
+                                if (xcomponentElement) {
+                                    if (xcomponentElement->xcomponent_) {
+                                        xcomponentElement->OnSurfaceInit(
+                                            xcomponentElement->xcomponent_->GetId(),
+                                            xcomponentElement->xcomponent_->GetNodeId());
+                                        xcomponentElement->OnXComponentInit("");
+                                    }
+                                }
         });
     }
+#endif
 }
 
-void XComponentElement::OnTextureSize(int64_t textureId, std::string& result)
+void XComponentElement::OnXComponentSizeChange(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
 {
-    if (xcomponent_) {
-        OnSurfaceInit(xcomponent_->GetId(), xcomponent_->GetNodeId());
-        OnXComponentInit("");
+    auto renderNode = AceType::DynamicCast<RenderXComponent>(renderNode_);
+    if (renderNode != nullptr) {
+#ifdef OHOS_STANDARD_SYSTEM
+        auto context = context_.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return;
+        }
+        float viewScale = context->GetViewScale();
+        if (nativeWindow_) {
+            NativeWindowHandleOpt(nativeWindow_, SET_BUFFER_GEOMETRY,
+                                  (int)(textureWidth * viewScale), (int)(textureHeight * viewScale));
+            renderNode->NativeXComponentChange();
+        } else {
+            LOGE("change nativewindow size failed, nativewindow NULL");
+        }
+#else
+        if (texture_) {
+            texture_->SetSize(textureId, textureWidth, textureHeight,
+                              [renderNode, textureId](std::string& result) {
+                                if (renderNode) {
+                                    renderNode->NativeXComponentChange();
+                                }
+            });
+        }
+#endif
     }
 }
 

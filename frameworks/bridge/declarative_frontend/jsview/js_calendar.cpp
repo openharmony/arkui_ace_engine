@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -174,11 +174,11 @@ void JSCalendar::SetOffDays(int32_t offDays)
         LOGE("component is not valid");
         return;
     }
-    auto bit = 0b1;
+    uint32_t bit = 0b1;
     std::string result;
     const static int32_t dayOfWeek = 7;
     for (auto i = 0; i < dayOfWeek; ++i) {
-        if (bit & offDays) {
+        if (bit & static_cast<uint32_t>(offDays)) {
             result += std::to_string(i);
             result += ",";
         }

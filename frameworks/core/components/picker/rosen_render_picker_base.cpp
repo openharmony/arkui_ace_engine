@@ -108,28 +108,25 @@ void RosenRenderPickerBase::PaintGradient(
     if (NearZero(gradientHeight)) {
         return;
     }
-    if (data_ && data_->GetIsDialog()) {
-        // Paint gradient rect over the picker content.
-        SkPaint paint;
-        SkPoint beginPoint = SkPoint::Make(SkDoubleToScalar(rect.Left()), SkDoubleToScalar(rect.Top()));
-        SkPoint endPoint = SkPoint::Make(SkDoubleToScalar(rect.Left()), SkDoubleToScalar(rect.Bottom()));
-        SkPoint points[2] = { beginPoint, endPoint };
-        auto backDecoration = theme->GetPopupDecoration(false);
-        Color endColor = backDecoration ? backDecoration->GetBackgroundColor() : Color::WHITE;
-        Color middleColor = endColor.ChangeAlpha(0);
-        SkColor colors[] = { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(), endColor.GetValue() };
-        const float stopPositions[] = { 0.0f, gradientHeight / rect.Height(),
-            (rect.Height() - gradientHeight) / rect.Height(), 1.0f };
+    // Paint gradient rect over the picker content.
+    SkPaint paint;
+    SkPoint beginPoint = SkPoint::Make(SkDoubleToScalar(rect.Left()), SkDoubleToScalar(rect.Top()));
+    SkPoint endPoint = SkPoint::Make(SkDoubleToScalar(rect.Left()), SkDoubleToScalar(rect.Bottom()));
+    SkPoint points[2] = { beginPoint, endPoint };
+    auto backDecoration = theme->GetPopupDecoration(false);
+    Color endColor = backDecoration ? backDecoration->GetBackgroundColor() : Color::WHITE;
+    Color middleColor = endColor.ChangeAlpha(0);
+    SkColor colors[] = { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(), endColor.GetValue() };
+    const float stopPositions[] = { 0.0f, gradientHeight / rect.Height(),
+        (rect.Height() - gradientHeight) / rect.Height(), 1.0f };
 #ifdef USE_SYSTEM_SKIA
-        paint.setShader(
-            SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkShader::kClamp_TileMode));
+    paint.setShader(
+        SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkShader::kClamp_TileMode));
 #else
-        paint.setShader(
-            SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkTileMode::kClamp));
+    paint.setShader(
+        SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkTileMode::kClamp));
 #endif
-        canvas->drawRect({rect.Left(), rect.Top(), rect.Right(), rect.Bottom()}, paint);
-        return;
-    }
+    canvas->drawRect({rect.Left(), rect.Top(), rect.Right(), rect.Bottom()}, paint);
 }
 
 } // namespace OHOS::Ace

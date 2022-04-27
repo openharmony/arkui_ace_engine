@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +75,7 @@ public:
     void AnimateMouseHoverExit() override;
 
 protected:
-    virtual bool MaybeRelease() override;
+    bool MaybeRelease() override;
 
     void OnVisibleChanged() override
     {
@@ -175,6 +175,7 @@ private:
     void ImageObjFailed();
 
     void PaintAccessibilityFocus(const SkRect& focusRect, RenderContext& context);
+    void PaintFocus(const SkRect& focusRect, RenderContext& context);
 
     RRect windowBlurRRect_;
     void FetchImageData();
@@ -190,7 +191,7 @@ private:
     RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
 
     UploadSuccessCallback uploadSuccessCallback_;
-    double dipScale_ = 0.;
+    double dipScale_ = 0.0;
 };
 
 } // namespace OHOS::Ace

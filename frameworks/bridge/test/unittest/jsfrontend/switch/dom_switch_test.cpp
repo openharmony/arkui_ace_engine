@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -137,7 +137,6 @@ void DomSwitchTest::TearDown() {}
  * @tc.name: DomSwitchCreatorTest001
  * @tc.desc: Test switch node and child switch component are created as expected.
  * @tc.type: FUNC
- * @tc.require: AR000DD66O
  */
 HWTEST_F(DomSwitchTest, DomSwitchCreatorTest001, TestSize.Level1)
 {
@@ -174,7 +173,6 @@ HWTEST_F(DomSwitchTest, DomSwitchCreatorTest001, TestSize.Level1)
  * @tc.name: DomSwitchCreatorTest002
  * @tc.desc: Test switch node and switch component created successfully with empty input of style and attribute.
  * @tc.type: FUNC
- * @tc.require: AR000DD66O
  */
 HWTEST_F(DomSwitchTest, DomSwitchCreatorTest002, TestSize.Level1)
 {
@@ -201,7 +199,6 @@ HWTEST_F(DomSwitchTest, DomSwitchCreatorTest002, TestSize.Level1)
  * @tc.name: CreateTextSwitchFromDsl001
  * @tc.desc: Test switch node and switch component created successfully with text styles and attributes set.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1R7
  */
 HWTEST_F(DomSwitchTest, CreateTextSwitchFromDsl001, TestSize.Level1)
 {
@@ -238,7 +235,6 @@ HWTEST_F(DomSwitchTest, CreateTextSwitchFromDsl001, TestSize.Level1)
  * @tc.name: CreateTextSwitchFromDsl002
  * @tc.desc: Test switch node and switch component created correctly with no text styles and attributes set.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1R7
  */
 HWTEST_F(DomSwitchTest, CreateTextSwitchFromDsl002, TestSize.Level1)
 {
@@ -276,7 +272,6 @@ HWTEST_F(DomSwitchTest, CreateTextSwitchFromDsl002, TestSize.Level1)
  * @tc.name: CreateTextSwitchFromDsl003
  * @tc.desc: Test switch node and switch component created correctly with invalid text styles and attributes set.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1R7
  */
 HWTEST_F(DomSwitchTest, CreateTextSwitchFromDsl003, TestSize.Level1)
 {
@@ -312,7 +307,6 @@ HWTEST_F(DomSwitchTest, CreateTextSwitchFromDsl003, TestSize.Level1)
  * @tc.name: CreateTextSwitchFromDsl004
  * @tc.desc: Test switch set [showtext] without [texton]/[textoff] can display default texts..
  * @tc.type: FUNC
- * @tc.require: AR000DD66O
  */
 HWTEST_F(DomSwitchTest, CreateTextSwitchFromDsl004, TestSize.Level1)
 {

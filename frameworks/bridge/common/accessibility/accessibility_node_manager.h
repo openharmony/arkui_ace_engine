@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,7 +115,6 @@ public:
     void DumpHandleEvent(const std::vector<std::string>& params) override;
     void DumpProperty(const std::vector<std::string>& params) override;
     void DumpTree(int32_t depth, NodeId nodeID) override;
-    void DumpTree(int32_t depth, NodeId nodeID, std::vector<std::string>& infos) override;
     std::unique_ptr<JsonValue> DumpComposedElementsToJson() const;
     std::unique_ptr<JsonValue> DumpComposedElementToJson(NodeId nodeId);
     void SetCardViewParams(const std::string& key, bool focus) override;

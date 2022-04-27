@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -148,7 +148,7 @@ void RenderCalendar::OnDataChanged(const CalendarDaysOfMonth& daysOfMonth)
             calendarDays_ = daysOfMonth.days;
         }
         // the number of rows will be 5 or 6, and week number height is half of the date number
-        rowCount_ = colCount_ ? daysOfMonth.days.size() / colCount_ : 0;
+        rowCount_ = colCount_ ? static_cast<int32_t>(daysOfMonth.days.size()) / colCount_ : 0;
         UpdateBreakInformation();
         isNeedRepaint_ = true;
         MarkNeedLayout();
@@ -169,7 +169,7 @@ void RenderCalendar::OnDataChanged(const CalendarDaysOfMonth& daysOfMonth)
         OnStatusChanged(RenderStatus::FOCUS);
     }
     // the number of rows will be 5 or 6, and week number height is half of the date number
-    rowCount_ = colCount_ ? daysOfMonth.days.size() / static_cast<double>(colCount_) : 0;
+    rowCount_ = colCount_ ? static_cast<int32_t>(daysOfMonth.days.size()) / colCount_ : 0;
     calendarController_->JumpMonth();
     hasRequestFocus_ = false;
     cardCalendar_ ? MarkNeedLayout() : MarkNeedRender();
@@ -399,8 +399,12 @@ void RenderCalendar::UpdateCardCalendarAttr(CardCalendarAttr&& attr)
     if (!context) {
         return;
     }
+    if (showHoliday_ != attr.showHoliday || showLunar_ != attr.showLunar) {
+        isNeedRepaint_ = true;
+    }
     textDirection_ = attr.textDirection;
     showHoliday_ = attr.showHoliday;
+    showLunar_ = attr.showLunar;
     needSlide_ = attr.needSlide;
     offDays_ = attr.offDays;
     axis_ = attr.axis;

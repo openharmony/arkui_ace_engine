@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,8 +64,6 @@ void DomTextareaTest::TearDown() {}
  * @tc.name: DomTextareaCreatorTest001
  * @tc.desc: Test textarea component are created as default.
  * @tc.type: FUNC
- * @tc.require: AR000DAR18
- * @tc.author: hushilong
  */
 HWTEST_F(DomTextareaTest, DomTextareaCreatorTest001, TestSize.Level1)
 {
@@ -107,8 +105,6 @@ HWTEST_F(DomTextareaTest, DomTextareaCreatorTest001, TestSize.Level1)
  * @tc.name: DomTextareaCreatorTest002
  * @tc.desc: Test textarea component are created with all style and attribute.
  * @tc.type: FUNC
- * @tc.require: AR000DAR18
- * @tc.author: hushilong
  */
 HWTEST_F(DomTextareaTest, DomTextareaCreatorTest002, TestSize.Level1)
 {

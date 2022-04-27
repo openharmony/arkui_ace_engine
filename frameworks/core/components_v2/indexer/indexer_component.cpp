@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -147,8 +147,8 @@ void IndexerComponent::BuildTextItem(const std::u16string& strSection, const std
 
 void IndexerComponent::BuildIndexerItems()
 {
-    int32_t length = labelLocal_.size();
-    if (length <= 0) {
+    uint32_t length = labelLocal_.size();
+    if (length == 0) {
         LOGE("[indexer] invalid section string");
         return;
     }
@@ -156,7 +156,7 @@ void IndexerComponent::BuildIndexerItems()
     BuildBubbleBox();
     itemCount_ = 0;
 
-    for (int32_t i = 0; i < length; ++i) {
+    for (uint32_t i = 0; i < length; ++i) {
         std::u16string strItem = labelLocal_[i];
         BuildTextItem(sectionsLocal_[i], strItem);
     }
@@ -178,4 +178,4 @@ void IndexerComponent::UpdateTextStyle()
         }
     }
 }
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::V2

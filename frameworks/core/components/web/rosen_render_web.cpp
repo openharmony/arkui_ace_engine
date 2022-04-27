@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,15 @@
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
+
+void RosenRenderWeb::Update(const RefPtr<Component>& component)
+{
+    RenderWeb::Update(component);
+
+    if (GetRSNode()) {
+        GetRSNode()->SetBackgroundColor(Color::WHITE.GetValue());
+    }
+}
 
 void RosenRenderWeb::PerformLayout()
 {
@@ -45,7 +54,20 @@ void RosenRenderWeb::OnAttachContext()
 
 void RosenRenderWeb::Paint(RenderContext& context, const Offset& offset)
 {
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("OnAttachContext context null");
+        return;
+    }
+    if (pipelineContext->GetIsDragStart()) {
+        drawSize_ = Size(1.0, 1.0);
+    }
+    if (drawSize_.Width() == Size::INFINITE_SIZE || drawSize_.Height() == Size::INFINITE_SIZE) {
+        LOGE("Web drawSize height or width is invalid");
+        return;
+    }
     if (delegate_) {
+        LOGI("Web paint drawSize width = %{public}f, height = %{public}f", drawSize_.Width(), drawSize_.Height());
         delegate_->Resize(drawSize_.Width(), drawSize_.Height());
         if (!isUrlLoaded_) {
             delegate_->LoadUrl();

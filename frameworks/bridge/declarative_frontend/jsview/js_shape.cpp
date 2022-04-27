@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,7 +164,7 @@ void JSShape::SetStrokeDashArray(const JSCallbackInfo& info)
     }
 
     JSRef<JSArray> array = JSRef<JSArray>::Cast(info[0]);
-    int32_t length = array->Length();
+    int32_t length = static_cast<int32_t>(array->Length());
     if (length <= 0) {
         LOGE("info is invalid");
         return;
@@ -182,7 +182,7 @@ void JSShape::SetStrokeDashArray(const JSCallbackInfo& info)
         return;
     }
     // if odd,add twice
-    if ((length & 1)) {
+    if ((static_cast<uint32_t>(length) & 1)) {
         for (int32_t i = 0; i < length; i++) {
             dashArray.emplace_back(dashArray[i]);
         }

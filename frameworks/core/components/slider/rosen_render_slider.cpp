@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,19 +17,26 @@
 
 #include "core/components/box/render_box.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/slider/render_block.h"
 #include "core/components/tip/render_tip.h"
 #include "core/components/tip/tip_component.h"
 #include "core/components/track/render_track.h"
 #include "core/pipeline/base/rosen_render_context.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace {
 
 namespace {
 
 constexpr Dimension FOCUS_PADDING = 2.0_vp;
+constexpr Dimension FOCUS_BORDER_PADDING = 2.0_vp;
 constexpr double DOUBLE_TO_PERCENT = 100.0;
+constexpr double DOUBLE = 2.0;
+constexpr double BLOCK_OFFSET_PADDING = 8.0;
+constexpr double BLOCK_BORDER_PADDING = 12.0;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
+constexpr uint32_t FOCUS_BORDER_COLOR = 0xFF0A59F7;
 
 } // namespace
 
@@ -77,14 +84,20 @@ void RosenRenderSlider::PerformLayout()
     LOGD("Slider::PerformLayout totalRatio_:%{public}lf, trackLength:%{public}lf", totalRatio_, trackLength_);
     if (direction_ == Axis::VERTICAL) {
         double dxOffset = GetLayoutSize().Width() * HALF;
-        double dyOffset = NormalizeToPx(SLIDER_PADDING_DP) + trackLength_ * totalRatio_;
+        double dyOffset = isReverse_ ? GetLayoutSize().Height() - NormalizeToPx(SLIDER_PADDING_DP) -
+            trackLength_ * totalRatio_ : NormalizeToPx(SLIDER_PADDING_DP) + trackLength_ * totalRatio_;
         ProcessBlock(Offset(dxOffset, dyOffset));
         ProcessTrack(Offset(dxOffset, dyOffset));
         SetTipPosition(dyOffset);
     } else {
-        double dxOffset = (GetTextDirection() == TextDirection::LTR)
-                              ? NormalizeToPx(SLIDER_PADDING_DP) + trackLength_ * totalRatio_
-                              : GetLayoutSize().Width() - NormalizeToPx(SLIDER_PADDING_DP) - trackLength_ * totalRatio_;
+        double dxOffset = 0.0;
+        if ((GetTextDirection() == TextDirection::LTR &&
+            !isReverse_) || (GetTextDirection() == TextDirection::RTL && isReverse_)) {
+            dxOffset = NormalizeToPx(SLIDER_PADDING_DP) + trackLength_ * totalRatio_;
+        } else if ((GetTextDirection() == TextDirection::RTL &&
+            !isReverse_) || (GetTextDirection() == TextDirection::LTR && isReverse_)) {
+            dxOffset = GetLayoutSize().Width() - NormalizeToPx(SLIDER_PADDING_DP) - trackLength_ * totalRatio_;
+        }
         double dyOffset = GetLayoutSize().Height() * HALF;
         ProcessBlock(Offset(dxOffset, dyOffset));
         ProcessTrack(Offset(dxOffset, dyOffset));
@@ -156,6 +169,10 @@ void RosenRenderSlider::ProcessBlock(const Offset& currentPosition)
     blockRenderNode->SetPosition(blockPosition);
     blockRenderNode->SetFocus(GetFocus());
     blockRenderNode->SetRadiusScale(radiusScale_);
+    blockRenderNode->SetMode(GetMode());
+    blockRenderNode->SetPress(GetPress());
+    blockRenderNode->SetHover(GetHover());
+    blockRenderNode->MarkNeedLayout();
 }
 
 void RosenRenderSlider::ProcessTrack(const Offset& currentPosition)
@@ -351,7 +368,74 @@ void RosenRenderSlider::Paint(RenderContext& context, const Offset& offset)
     if ((!showTips_ && tip_) || (tip_ && !isDraging_)) {
         tip_->SetVisible(false);
     }
+    if (GetFocus() && mode_ == SliderMode::INSET) {
+        if (direction_ == Axis::VERTICAL) {
+            PaintVerticalFocus(context, offset);
+        } else {
+            PaintHorizontalFocus(context, offset);
+        }
+    }
     RenderNode::Paint(context, offset);
+}
+
+void RosenRenderSlider::PaintVerticalFocus(RenderContext& context, const Offset& offset)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        LOGE("paint canvas is null");
+        return;
+    }
+    auto block = AceType::DynamicCast<RenderBlock>(block_);
+    if (!block) {
+        return;
+    }
+    const double blockSize = NormalizeToPx(block->GetBlockSize());
+    Size canvasSize = GetLayoutSize();
+    double rrectRadius = blockSize * HALF + BLOCK_BORDER_PADDING;
+    double sliderHeight = canvasSize.Height();
+    double sliderWidth = rrectRadius * DOUBLE;
+    Size sliderSize = Size(sliderWidth, sliderHeight);
+
+    SkPaint paint;
+    paint.setColor(FOCUS_BORDER_COLOR);
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_PADDING));
+    paint.setAntiAlias(true);
+    SkRRect rRect;
+    rRect.setRectXY(SkRect::MakeIWH(sliderSize.Width(), sliderSize.Height()), rrectRadius, rrectRadius);
+
+    rRect.offset(offset.GetX() + rrectRadius - BLOCK_OFFSET_PADDING, offset.GetY());
+    canvas->drawRRect(rRect, paint);
+}
+
+void RosenRenderSlider::PaintHorizontalFocus(RenderContext& context, const Offset& offset)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        LOGE("paint canvas is null");
+        return;
+    }
+    auto block = AceType::DynamicCast<RenderBlock>(block_);
+    if (!block) {
+        return;
+    }
+    const double blockSize = NormalizeToPx(block->GetBlockSize());
+    Size canvasSize = GetLayoutSize();
+    double rrectRadius = blockSize * HALF + BLOCK_BORDER_PADDING;
+    double sliderHeight = rrectRadius * DOUBLE;
+    double sliderWidth = canvasSize.Width();
+    Size sliderSize = Size(sliderWidth, sliderHeight);
+
+    SkPaint paint;
+    paint.setColor(FOCUS_BORDER_COLOR);
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_PADDING));
+    paint.setAntiAlias(true);
+    SkRRect rRect;
+    rRect.setRectXY(SkRect::MakeIWH(sliderSize.Width(), sliderSize.Height()), rrectRadius, rrectRadius);
+
+    rRect.offset(offset.GetX(), offset.GetY() + rrectRadius - BLOCK_OFFSET_PADDING);
+    canvas->drawRRect(rRect, paint);
 }
 
 } // namespace OHOS::Ace

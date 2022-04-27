@@ -30,7 +30,7 @@ using std::shared_ptr;
 using RegisterFunctionType = std::function<shared_ptr<JsValue>(shared_ptr<JsRuntime>, shared_ptr<JsValue>,
                                                                const std::vector<shared_ptr<JsValue>> &, int32_t)>;
 using LOG_PRINT = int (*)(int id, int level, const char *tag, const char *fmt, const char *message);
-using UncaughtExceptionCallback = std::function<void(shared_ptr<JsValue>)>;
+using UncaughtExceptionCallback = std::function<void(shared_ptr<JsValue>, std::shared_ptr<JsRuntime>)>;
 
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
 class JsRuntime {
@@ -67,6 +67,7 @@ public:
     virtual shared_ptr<JsValue> NewArray() = 0;
     virtual shared_ptr<JsValue> NewFunction(RegisterFunctionType func) = 0;
     virtual shared_ptr<JsValue> NewNativePointer(void *ptr) = 0;
+    virtual shared_ptr<JsValue> NewException() = 0;
     virtual void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) = 0;
     virtual void HandleUncaughtException() = 0;
     virtual void ExecutePendingJob() = 0;

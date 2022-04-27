@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,6 +79,7 @@ constexpr int32_t MAX_READ_TEXT_LENGTH = 4096;
 const std::regex URI_PARTTEN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
 
 static int32_t globalNodeId = 100000;
+std::map<const std::string, std::string> dataMap_;
 
 int32_t CallEvalBuf(
     JSContext* ctx, const char* buf, size_t bufLen, const char* filename, int32_t evalFlags, int32_t instanceId)
@@ -232,32 +233,33 @@ bool SetDomAttributes(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementO
             LOGW("key is null. Ignoring!");
             continue;
         }
+        std::string keyString = key;
         JSValue val = JS_GetProperty(ctx, fromMap, pTab[i].atom);
         if (JS_IsString(val) || JS_IsNumber(val) || JS_IsBool(val)) {
             ScopedString styleVal(ctx, val);
             const char* valStr = styleVal.get();
             LOGD("SetDomAttributes: key: %{private}s, attr: %{private}s", key, valStr);
-            if (strcmp(key, DOM_ID) == 0) {
+            if (keyString.compare(DOM_ID) == 0) {
                 command.SetId(valStr);
-            } else if (strcmp(key, DOM_TARGET) == 0) {
+            } else if (keyString.compare(DOM_TARGET) == 0) {
                 command.SetTarget(valStr);
-            } else if (strcmp(key, DOM_SHARE_ID) == 0) {
+            } else if (keyString.compare(DOM_SHARE_ID) == 0) {
                 command.SetShareId(valStr);
             }
             attrs.emplace_back(key, valStr);
-            if (strcmp(key, DOM_SHOW) == 0) {
+            if (keyString.compare(DOM_SHOW) == 0) {
                 hasShowAttr = true;
             }
         } else if (JS_IsArray(ctx, val)) {
-            if (strcmp(key, "datasets") == 0) {
+            if (keyString.compare("datasets") == 0) {
                 auto chartBridge = AceType::MakeRefPtr<ChartBridge>();
                 chartBridge->GetAttrDatasets(ctx, val);
                 command.SetDatasets(chartBridge->GetDatasets());
-            } else if (strcmp(key, "images") == 0) {
+            } else if (keyString.compare("images") == 0) {
                 std::vector<ImageProperties> images;
                 GetAttrImages(ctx, val, images);
                 command.SetImagesAttr(std::move(images));
-            } else if (strcmp(key, "segments") == 0) {
+            } else if (keyString.compare("segments") == 0) {
                 auto chartBridge = AceType::MakeRefPtr<ChartBridge>();
                 chartBridge->ParseAttrSegmentArray(ctx, val);
                 command.SetSegments(chartBridge->GetSegments());
@@ -268,24 +270,24 @@ bool SetDomAttributes(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementO
                 attrs.emplace_back(key, valStr);
             }
         } else if (JS_IsObject(val)) {
-            if (strcmp(key, "options") == 0) {
+            if (keyString.compare("options") == 0) {
                 auto chartBridge = AceType::MakeRefPtr<ChartBridge>();
                 chartBridge->GetAttrOptionsObject(ctx, val);
                 command.SetOptions(chartBridge->GetChartOptions());
-            } else if (strcmp(key, "segments") == 0) {
+            } else if (keyString.compare("segments") == 0) {
                 auto chartBridge = AceType::MakeRefPtr<ChartBridge>();
                 chartBridge->ParseAttrSingleSegment(ctx, val);
                 command.SetSegments(chartBridge->GetSegments());
-            } else if (strcmp(key, DOM_CLOCK_CONFIG) == 0) {
+            } else if (keyString.compare(DOM_CLOCK_CONFIG) == 0) {
                 auto clockBridge = AceType::MakeRefPtr<ClockBridge>();
                 clockBridge->ParseClockConfig(ctx, val);
                 command.SetClockConfig(clockBridge->GetClockConfig());
-            } else if (strcmp(key, DOM_NODE_TAG_LABEL) == 0) {
+            } else if (keyString.compare(DOM_NODE_TAG_LABEL) == 0) {
                 auto stepperBridge = AceType::MakeRefPtr<StepperBridge>();
                 StepperLabels label;
                 stepperBridge->GetAttrLabel(ctx, val, label);
                 command.SetStepperLabel(label);
-            } else if (strcmp(key, DOM_BADGE_CONFIG) == 0) {
+            } else if (keyString.compare(DOM_BADGE_CONFIG) == 0) {
                 auto badgeBridge = AceType::MakeRefPtr<BadgeBridge>();
                 badgeBridge->ParseBadgeConfig(ctx, val);
                 command.SetBadgeConfig(badgeBridge->GetBadgeConfig());
@@ -424,6 +426,7 @@ void SetDomStyle(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementOperat
             LOGW("key is null. Ignoring!");
             continue;
         }
+        std::string keyString = key;
         JSValue val = JS_GetProperty(ctx, fromMap, pTab[i].atom);
         if (JS_IsString(val) || JS_IsNumber(val) || JS_IsBool(val)) {
             ScopedString styleVal(ctx, val);
@@ -431,26 +434,26 @@ void SetDomStyle(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementOperat
             LOGD("SetDomStyle: key: %{private}s, style: %{private}s", key, valStr);
             styles.emplace_back(key, valStr);
         } else if (JS_IsArray(ctx, val)) {
-            if (strcmp(key, DOM_TEXT_FONT_FAMILY) == 0) {
+            if (keyString.compare(DOM_TEXT_FONT_FAMILY) == 0) {
                 // Deal with special case such as fontFamily, suppose all the keys in the array are the same.
                 std::string familyStyle;
                 GetStyleFamilyValue(ctx, val, familyStyle);
                 styles.emplace_back(key, familyStyle);
-            } else if (strcmp(key, DOM_ANIMATION_NAME) == 0) {
+            } else if (keyString.compare(DOM_ANIMATION_NAME) == 0) {
                 // Deal with special case animationName, it different with fontfamily,
                 // the keys in the array are different.
                 std::vector<std::unordered_map<std::string, std::string>> animationStyles;
                 GetStyleAnimationName(ctx, val, animationStyles);
                 command.SetAnimationStyles(std::move(animationStyles));
-            } else if (strcmp(key, DOM_TRANSITION_ENTER) == 0) {
+            } else if (keyString.compare(DOM_TRANSITION_ENTER) == 0) {
                 std::vector<std::unordered_map<std::string, std::string>> transitionEnter;
                 GetStyleAnimationName(ctx, val, transitionEnter);
                 command.SetTransitionEnter(std::move(transitionEnter));
-            } else if (strcmp(key, DOM_TRANSITION_EXIT) == 0) {
+            } else if (keyString.compare(DOM_TRANSITION_EXIT) == 0) {
                 std::vector<std::unordered_map<std::string, std::string>> transitionExit;
                 GetStyleAnimationName(ctx, val, transitionExit);
                 command.SetTransitionExit(std::move(transitionExit));
-            } else if (strcmp(key, DOM_SHARED_TRANSITION_NAME) == 0) {
+            } else if (keyString.compare(DOM_SHARED_TRANSITION_NAME) == 0) {
                 std::vector<std::unordered_map<std::string, std::string>> sharedTransitionName;
                 GetStyleAnimationName(ctx, val, sharedTransitionName);
                 command.SetSharedTransitionName(std::move(sharedTransitionName));
@@ -466,11 +469,36 @@ void SetDomStyle(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementOperat
         JS_FreeCString(ctx, key);
         JS_FreeValue(ctx, val);
     }
+    bool isIine = false;
+    for (int32_t i = 0; i < styles.size(); i++) {
+        std::string key = styles[i].first;
+        std::string value = styles[i].second;
+        if (key == "display" && value == "inline") {
+            isIine = true;
+            break;
+        }
+    }
+
+    if (isIine) {
+        std::vector < std::pair < std::string, std::string >> stylesFinaly;
+        for (int32_t i = 0; i < styles.size(); i++) {
+            std::string key = styles[i].first;
+            std::string value = styles[i].second;
+            if (key == "width" || key == "height" || key.find("margin") != std::string::npos ||
+                key.find("padding") != std::string::npos) {
+                continue;
+            } else {
+                stylesFinaly.emplace_back(key, value);
+            }
+        }
+        command.SetStyles(std::move(stylesFinaly));
+    } else {
+        command.SetStyles(std::move(styles));
+    }
 
     QjsEngineInstance* instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     auto pipelineContext = instance->GetDelegate()->GetPipelineContext();
     command.SetPipelineContext(pipelineContext);
-    command.SetStyles(std::move(styles));
     js_free(ctx, pTab);
 }
 
@@ -926,7 +954,7 @@ JSValue JsHandlePageRoute(JSContext* ctx, JSValueConst argv, const std::string& 
             { ROUTE_PAGE_BACK,
                 [](const std::string& uri, const std::string& params, QjsEngineInstance& instance) {
                     LOGD("JsBackRoute uri = %{private}s", uri.c_str());
-                    instance.GetDelegate()->Back(uri);
+                    instance.GetDelegate()->Back(uri, params);
                     return JS_NULL;
                 } },
             { ROUTE_PAGE_CLEAR,
@@ -1950,6 +1978,11 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
             bridge->HandleContext(ctx, nodeId, args.get());
             return bridge->GetRenderContext();
         }
+    } else if (std::strcmp(methodName.get(), "getXComponentSurfaceId") == 0) {
+        return QjsXComponentBridge::JsGetXComponentSurfaceId(ctx, nodeId);
+    } else if (std::strcmp(methodName.get(), "setXComponentSurfaceSize") == 0) {
+        QjsXComponentBridge::JsSetXComponentSurfaceSize(ctx, args.get(), nodeId);
+        return JS_NULL;
     }
 
     auto resultValue = JSValue();
@@ -1997,7 +2030,8 @@ JSValue JsCallComponent(JSContext* ctx, JSValueConst value, int32_t argc, JSValu
         page->PushCommand(Referenced::MakeRefPtr<JsCommandCallDomElementMethod>(nodeId, methodName.get(), args.get()));
     }
     // focus method should delayed util show attribute update.
-    if (page->CheckPageCreated() && strcmp(DOM_FOCUS, methodName.get()) != 0) {
+    if (page->CheckPageCreated() && strlen(DOM_FOCUS) >= strlen(methodName.get()) &&
+        strcmp(DOM_FOCUS, methodName.get()) != 0) {
         instance->GetDelegate()->TriggerPageUpdate(page->GetPageId(), true);
     }
     return resultValue;
@@ -2457,6 +2491,8 @@ JSValue JsLogPrint(JSContext* ctx, JsLogLevel level, JSValueConst value, int32_t
         case JsLogLevel::ERROR:
             LOGE("ace Log: %{public}s", printLog.c_str());
             break;
+        default:
+            break;
     }
 
     return JS_NULL;
@@ -2494,6 +2530,58 @@ JSValue JsPerfPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCon
     JSValue retString = JS_NewString(ctx, ret.c_str());
 
     return retString;
+}
+
+JSValue AppClearData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    if ((argv == nullptr) || (argc == 0)) {
+        if (dataMap_.size() > 0) {
+            dataMap_.clear();
+            return JS_TRUE;
+        }
+    }
+    if (dataMap_.count(ScopedString::Stringify(ctx, argv[0])) == 1) {
+        dataMap_.erase(ScopedString::Stringify(ctx, argv[0]));
+        return JS_TRUE;
+    }
+    return JS_FALSE;
+}
+
+JSValue AppSetData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    if ((argv == nullptr) || (argc != 2)) {
+        return JS_EXCEPTION;
+    }
+    std::string key = ScopedString::Stringify(ctx, argv[0]);
+    std::string mapValue =  ScopedString::Stringify(ctx, argv[1]);
+    dataMap_[key] = mapValue;
+    return JS_TRUE;
+}
+
+JSValue AppGetData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    if ((argv == nullptr) || (argc == 0)) {
+        return JS_NULL;
+    }
+    std::string key = ScopedString::Stringify(ctx, argv[0]);
+    if (dataMap_.count(key) == 1) {
+        std::string mapValue = dataMap_[key];
+        return QJSUtils::ParseJSON(ctx, mapValue.c_str(), mapValue.length());
+    }
+    return JS_NULL;
+}
+
+JSValue AppSetDataImage(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    auto page = GetStagingPage(ctx);
+    if (page == nullptr) {
+        LOGE("page is nullptr");
+        return JS_EXCEPTION;
+    }
+    if ((argv == nullptr) || (argc != 3)) {
+        return JS_EXCEPTION;
+    }
+    return JS_NULL;
 }
 
 JSValue JsPerfSleep(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
@@ -2925,9 +3013,31 @@ JSValue QjsEngineInstance::FireJsEvent(const std::string& param)
         JS_FreeValue(ctx, globalObj);
         return JS_UNDEFINED;
     }
+    JSValue jsValue = QJSUtils::ParseJSON(ctx, param.c_str(), param.size(), nullptr);
+    if (JS_IsArray(ctx, jsValue)) {
+        JSValue itemVal = JS_GetPropertyUint32(ctx, jsValue, 0);
+        if (JS_IsObject(itemVal)) {
+            JSValue args = JS_GetPropertyStr(ctx, itemVal, "args");
+            if (JS_IsArray(ctx, args)) {
+                JSValue stdDrage = JS_GetPropertyUint32(ctx, args, 1);
+                if (IsDragEvent(ScopedString::Stringify(ctx, stdDrage))) {
+                    JSValue arg2 = JS_GetPropertyUint32(ctx, args, 2);
+                    if (JS_IsObject(arg2)) {
+                        JSValue arg1 = JS_NewObject(ctx);
+                        JS_SetPropertyStr(ctx, arg1, "clearData", JS_NewCFunction(ctx, AppClearData, "clearData", 1));
+                        JS_SetPropertyStr(ctx, arg1, "getData", JS_NewCFunction(ctx, AppGetData, "getData", 1));
+                        JS_SetPropertyStr(ctx, arg1, "setData", JS_NewCFunction(ctx, AppSetData, "setData", 2));
+                        JS_SetPropertyStr(
+                            ctx, arg1, "setDragImage", JS_NewCFunction(ctx, AppSetDataImage, "setDragImage", 3));
+                        JS_SetPropertyStr(ctx, arg2, "dataTransfer", arg1);
+                    }
+                }
+            }
+        }
+    }
     JSValueConst argv[] = {
         QJSUtils::NewString(ctx, std::to_string(runningPage_->GetPageId()).c_str()),
-        QJSUtils::ParseJSON(ctx, param.c_str(), param.size(), nullptr),
+        jsValue,
     };
 
     JSValue retVal = JS_Call(ctx, callJsFunc, globalObj, countof(argv), argv);
@@ -2937,6 +3047,12 @@ JSValue QjsEngineInstance::FireJsEvent(const std::string& param)
 
     // It is up to the caller to check this value. No exception checks here.
     return retVal;
+}
+
+bool QjsEngineInstance::IsDragEvent(const std::string& param)
+{
+    std::string::size_type idx = param.find("drag");
+    return !(idx == std::string::npos);
 }
 
 void QjsEngineInstance::CallJs(const std::string& callbackId, const std::string& args, bool keepAlive, bool isGlobal)
@@ -3133,7 +3249,7 @@ bool QjsEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     bool ret = engineInstance_->InitJsEnv(runtime, context, GetExtraNativeObject());
 
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
     nativeEngine_->CheckUVLoop();
 #endif
     RegisterWorker();
@@ -3225,7 +3341,7 @@ void QjsEngine::RegisterWorker()
 QjsEngine::~QjsEngine()
 {
     if (nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         delete nativeEngine_;

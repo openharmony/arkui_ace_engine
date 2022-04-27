@@ -47,7 +47,7 @@ abstract class ObservedPropertyAbstract<T>  {
     this.id_ = SubscriberManager.Get().MakeId();
     SubscriberManager.Get().add(this);
     if (subscribeMe) {
-      this.subscribers_.add(subscribeMe.id__());
+      this.subscribers_.add(subscribeMe.id());
     }
     if (info) {
       this.info_ = info;
@@ -55,15 +55,20 @@ abstract class ObservedPropertyAbstract<T>  {
   }
 
   aboutToBeDeleted() {
-    SubscriberManager.Get().delete(this.id__())
+    SubscriberManager.Get().delete(this.id())
   }
 
-  id__(): number {
+  id(): number {
     return this.id_;
   }
 
   public info(): PropertyInfo {
     return this.info_;
+  }
+  public setInfo(propName: PropertyInfo) {
+    if (propName && propName != "") {
+      this.info_ = propName;
+    }
   }
 
   public abstract get(): T;
@@ -71,8 +76,8 @@ abstract class ObservedPropertyAbstract<T>  {
 
 
   public subscribeMe(subscriber: ISinglePropertyChangeSubscriber<T>): void {
-    console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: subscribeMe: Property new subscriber '${subscriber.id__()}'`);
-    this.subscribers_.add(subscriber.id__());
+    console.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: subscribeMe: Property new subscriber '${subscriber.id()}'`);
+    this.subscribers_.add(subscriber.id());
   }
 
   /*
@@ -84,7 +89,7 @@ abstract class ObservedPropertyAbstract<T>  {
 
   protected notifyHasChanged(newValue: T) {
     //console.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged to newValue '${JSON.stringify(newValue)}', notifying.`)
-    console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
+    console.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
     var registry: IPropertySubscriberLookup = SubscriberManager.Get();
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = registry!.get(subscribedId)
@@ -96,13 +101,13 @@ abstract class ObservedPropertyAbstract<T>  {
           (subscriber as IMultiPropertiesChangeSubscriber).propertyHasChanged(this.info_);
         }
       } else {
-        console.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+        console.error(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
       }
     });
   }
 
   protected notifyPropertyRead() {
-    console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: propertyRead.`)
+    console.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: propertyRead.`)
     var registry: IPropertySubscriberLookup = SubscriberManager.Get();
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = registry!.get(subscribedId)
@@ -130,9 +135,9 @@ abstract class ObservedPropertyAbstract<T>  {
    * changes.
    */
   public abstract createLink(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T>;
+    linkPropName?: PropertyInfo): ObservedPropertyAbstract<T>;
   public abstract createProp(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T>;
+    linkPropName?: PropertyInfo): ObservedPropertyAbstract<T>;
 
   /**
    * factory function for concrete 'object' or 'simple' ObservedProperty object

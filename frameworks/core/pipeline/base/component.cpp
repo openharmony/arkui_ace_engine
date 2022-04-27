@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,6 @@ int32_t Component::GetRetakeId() const
     return retakeId_;
 }
 
-
 namespace {
 template<typename T>
 inline bool IsRenderComponent(const RefPtr<T>& component)
@@ -52,15 +51,15 @@ inline bool IsRenderComponent(const RefPtr<T>& component)
 }
 } // namespace
 
-void Component::MergeRSNode(const std::vector<RefPtr<Component>>& components, int skip)
+void Component::MergeRSNode(const std::vector<RefPtr<Component>>& components)
 {
     if (components.empty()) {
         return;
     }
     // locate first & last RenderComponent
-    auto head = std::find_if(components.begin() + skip, components.end(), IsRenderComponent<Component>);
-    auto tail = std::find_if(components.rbegin(), components.rend() - skip, IsRenderComponent<Component>);
-    if (head == components.end() || tail == components.rend() - skip) {
+    auto head = std::find_if(components.begin(), components.end(), IsRenderComponent<Component>);
+    auto tail = std::find_if(components.rbegin(), components.rend(), IsRenderComponent<Component>);
+    if (head == components.end() || tail == components.rend()) {
         return;
     }
     (*head)->isHeadComponent_ = true;
@@ -114,6 +113,15 @@ void Component::MergeRSNode(const RefPtr<Component>& standaloneNode)
     }
     standaloneNode->isHeadComponent_ = true;
     standaloneNode->isTailComponent_ = true;
+}
+
+void Component::ExtendRSNode(const RefPtr<Component>& newHead, const RefPtr<Component>& prevHead)
+{
+    if (!newHead || !prevHead) {
+        return;
+    }
+    newHead->isHeadComponent_ = prevHead->isHeadComponent_;
+    prevHead->isHeadComponent_ = false;
 }
 
 } // namespace OHOS::Ace

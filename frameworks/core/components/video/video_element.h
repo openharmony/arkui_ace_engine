@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "core/components/video/media_player_callback.h"
-#include "foundation/multimedia/media_standard/interfaces/innerkits/native/media/include/player.h"
+#include "foundation/multimedia/media_standard/interfaces/inner_api/native/player.h"
 #include "window_manager.h"
 #endif
 

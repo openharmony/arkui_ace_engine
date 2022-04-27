@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <unordered_map>
 
+#include "core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine_instance.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_group_js_bridge.h"
@@ -56,7 +57,7 @@ public:
     void FireExternalEvent(const std::string& componentId, const uint32_t nodeId) override;
 
     // Timer callback
-    virtual void TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval) override;
+    void TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval) override;
 
     void TimerCallJs(const std::string& callbackId, bool isInterval);
 
@@ -96,15 +97,22 @@ public:
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
-    virtual FrontendDelegate* GetFrontend() override
+    FrontendDelegate* GetFrontend() override
     {
         return AceType::RawPtr(engineInstance_->GetDelegate());
     }
 
+    RefPtr<QJSDeclarativeEngineInstance> GetEngineInstance()
+    {
+        return engineInstance_;
+    }
+
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    void ReplaceJSContent(const std::string& url, const std::string componentName);
+    void ReplaceJSContent(const std::string& url, const std::string componentName) override;
 #endif
 
+     RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
+     OH_NativeXComponent *nativeXComponent_ = nullptr;
 private:
     void RegisterWorker();
     void RegisterInitWorkerFunc();

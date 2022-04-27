@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -141,6 +141,9 @@ public:
 
     // Use to receive event from pc previewer
     bool HandleTouchEvent(const TouchEvent& touchEvent) override;
+
+    // Use to receive event from pc previewer
+    bool HandleKeyEvent(const KeyEvent& keyEvent) override;
 
     ViewType GetViewType() const override
     {

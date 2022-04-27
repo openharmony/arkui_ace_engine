@@ -21,7 +21,7 @@
 namespace OHOS::Ace::Framework {
 namespace {
 
-JSRef<JSObject> CreareAreaObject(const Rect& rect, const Offset& origin)
+JSRef<JSObject> CreateAreaObject(const Rect& rect, const Offset& origin)
 {
     JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
     JSRef<JSObject> area = objectTemplate->NewInstance();
@@ -32,8 +32,12 @@ JSRef<JSObject> CreareAreaObject(const Rect& rect, const Offset& origin)
     offset->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
     globalOffset->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX() + origin.GetX()));
     globalOffset->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY() + origin.GetY()));
+    // keep compatible, need remove after
     area->SetPropertyObject("pos", offset);
+    area->SetPropertyObject("position", offset);
+    // keep compatible, need remove after
     area->SetPropertyObject("globalPos", globalOffset);
+    area->SetPropertyObject("globalPosition", globalOffset);
     area->SetProperty<double>("width", SystemProperties::Px2Vp(rect.Width()));
     area->SetProperty<double>("height", SystemProperties::Px2Vp(rect.Height()));
     return area;
@@ -43,8 +47,8 @@ JSRef<JSObject> CreareAreaObject(const Rect& rect, const Offset& origin)
 void JsOnAreaChangeFunction::Execute(
     const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)
 {
-    auto oldArea = CreareAreaObject(oldRect, oldOrigin);
-    auto area = CreareAreaObject(rect, origin);
+    auto oldArea = CreateAreaObject(oldRect, oldOrigin);
+    auto area = CreateAreaObject(rect, origin);
     JSRef<JSVal> params[2];
     params[0] = oldArea;
     params[1] = area;

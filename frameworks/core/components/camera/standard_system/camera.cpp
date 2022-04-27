@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,10 @@
 #include "window_manager.h"
 
 #include "core/image/image_cache.h"
+
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components/video/rosen_render_texture.h"
+#endif
 
 namespace OHOS::Ace {
 namespace {
@@ -69,7 +73,9 @@ constexpr int32_t AUDIO_CHANNEL_COUNT = 2;
 constexpr int32_t AUDIO_SAMPLE_RATE = 48000;
 constexpr int32_t AUDIO_ENCODING_BITRATE = 48000;
 #endif
+#ifndef ENABLE_ROSEN_BACKEND
 constexpr int32_t QUEUE_SIZE = 10;
+#endif
 constexpr double FPS = 30;
 const uid_t CHOWN_OWNER_ID = -1;
 const gid_t CHOWN_GROUP_ID = 1023;
@@ -208,6 +214,18 @@ void CameraCallback::CloseRecorder()
 
 sptr<Surface> CameraCallback::createSubWindowSurface()
 {
+#ifdef ENABLE_ROSEN_BACKEND
+    // create surface for rosen backend.
+    auto renderNode = renderNode_.Upgrade();
+    if (!renderNode) {
+        return nullptr;
+    }
+    auto rosenTexture = AceType::DynamicCast<RosenRenderTexture>(renderNode);
+    if (!rosenTexture) {
+        return nullptr;
+    }
+    previewSurface_ = rosenTexture->GetSurface();
+#else
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("Camera:fail to get context to create Camera");
@@ -249,6 +267,13 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
         });
     }
     previewSurface_ = subwindow_->GetSurface();
+#endif
+
+    if (previewSurface_ == nullptr) {
+        LOGE("create surface fail.");
+        return nullptr;
+    }
+
     previewSurface_->SetUserData(SURFACE_STRIDE_ALIGNMENT, std::to_string(SURFACE_STRIDE_ALIGNMENT_VAL));
 #ifdef PRODUCT_RK
     previewSurface_->SetUserData(SURFACE_FORMAT, std::to_string(PIXEL_FMT_RGBA_8888));
@@ -407,11 +432,13 @@ int32_t CameraCallback::PrepareCamera(bool bIsRecorder)
         return -1;
     }
 
+#ifndef ENABLE_ROSEN_BACKEND
     if (!sizeInitSucceeded_ || !offsetInitSucceeded_) {
         LOGE("Prepare Camera: size or offset is not Init Succeeded and wait, %{public}d, %{public}d.",
             sizeInitSucceeded_, offsetInitSucceeded_);
         return -1;
     }
+#endif
 
     int32_t intResult = 0;
     sptr<OHOS::Surface> surface = nullptr;
@@ -437,6 +464,10 @@ int32_t CameraCallback::PrepareCamera(bool bIsRecorder)
     surface = createSubWindowSurface();
     LOGI("Preview surface width: %{public}d, height: %{public}d", surface->GetDefaultWidth(),
         surface->GetDefaultHeight());
+    if (surface == nullptr) {
+        LOGE("Preview surface is null");
+        return -1;
+    }
 #ifdef PRODUCT_RK
     previewOutput_ = camManagerObj->CreateCustomPreviewOutput(surface, PREVIEW_SURFACE_WIDTH,
                                                               PREVIEW_SURFACE_HEIGHT);
@@ -854,6 +885,7 @@ void Camera::AddRecordListener(RecordListener&& listener)
 
 void Camera::OnCameraSizeChange(double width, double height)
 {
+#ifndef ENABLE_ROSEN_BACKEND
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("Camera::OnCameraSizeChange: context is null.");
@@ -864,10 +896,12 @@ void Camera::OnCameraSizeChange(double width, double height)
     LOGI("Camera::OnCameraSizeChange:viewScale %{public}f .", viewScale);
     cameraCallback_.SetLayoutSize(width, height);
     cameraCallback_.OnCameraSizeChange(width * viewScale, height * viewScale);
+#endif
 }
 
 void Camera::OnCameraOffsetChange(double x, double y)
 {
+#ifndef ENABLE_ROSEN_BACKEND
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("Camera::OnCameraOffsetChange: context is null.");
@@ -878,5 +912,6 @@ void Camera::OnCameraOffsetChange(double x, double y)
     LOGI("Camera::OnCameraOffsetChange:viewScale %{public}f .", viewScale);
     cameraCallback_.SetLayoutOffset(x, y);
     cameraCallback_.OnCameraOffsetChange(x * viewScale, y * viewScale);
+#endif
 }
 } // namespace OHOS::Ace

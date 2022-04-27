@@ -323,7 +323,7 @@ public:
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
-    virtual FrontendDelegate* GetFrontend() override
+    FrontendDelegate* GetFrontend() override
     {
         return AceType::RawPtr(engineInstance_->GetDelegate());
     }
@@ -354,6 +354,7 @@ private:
     void TimerCallJs(const std::string& callbackId, bool isInterval);
 
     void InitXComponent();
+    bool InitXComponent(const std::string& componentId);
 
     RefPtr<V8DeclarativeEngineInstance> engineInstance_;
 

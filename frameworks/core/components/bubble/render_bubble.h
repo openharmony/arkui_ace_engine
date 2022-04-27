@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,6 @@ public:
     bool PopBubble();
     void FirePopEvent();
     bool HandleMouseEvent(const MouseEvent& event) override;
-    WeakPtr<RenderNode> CheckHoverNode() override;
 
 protected:
     enum class ErrorPositionType {
@@ -51,7 +50,7 @@ protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
-    virtual void UpdateBorderRadius() {};
+    virtual void UpdateBorderRadius() {}
     void HandleTouch();
     Offset GetChildPosition(const Size& childSize);
     Offset GetPositionWithPlacement(const Size& childSize, const Offset& topPosition, const Offset& bottomPosition,
@@ -68,6 +67,7 @@ protected:
     // Is there has enough space for showing arrow.
     bool showTopArrow_ = true;
     bool showBottomArrow_ = true;
+    bool useCustom_ = false;
     Edge padding_;
     Edge margin_;
     Border border_;

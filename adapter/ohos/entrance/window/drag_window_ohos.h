@@ -31,7 +31,7 @@
 namespace OHOS::Ace {
 class DragWindowOhos : public DragWindow {
 public:
-    explicit DragWindowOhos(OHOS::sptr<OHOS::Rosen::Window> dragWindow) : dragWindow_(dragWindow) {};
+    explicit DragWindowOhos(OHOS::sptr<OHOS::Rosen::Window> dragWindow) : dragWindow_(dragWindow) {}
     ~DragWindowOhos() = default;
 
     void MoveTo(int32_t x, int32_t y) const override;

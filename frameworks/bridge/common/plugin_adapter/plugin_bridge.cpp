@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,6 +52,16 @@ void PluginBridge::ProcessSystemParam(std::unique_ptr<JsonValue>& infoList)
     if (tmp != SystemProperties::INVALID_PARAM) {
         infoList->Put("deviceType", tmp.c_str());
     }
+
+    tmp = SystemProperties::GetLanguage();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        infoList->Put("language", tmp.c_str());
+    }
+
+    tmp = SystemProperties::GetRegion();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        infoList->Put("region", tmp.c_str());
+    }
 }
 
 std::pair<std::string, bool> PluginBridge::GetDeviceInfo()
@@ -59,13 +69,6 @@ std::pair<std::string, bool> PluginBridge::GetDeviceInfo()
     static constexpr uint8_t paramNumber = 13;
     auto infoList = JsonUtil::Create(true);
     ProcessSystemParam(infoList);
-
-    if (!AceApplicationInfo::GetInstance().GetLanguage().empty()) {
-        infoList->Put("language", AceApplicationInfo::GetInstance().GetLanguage().c_str());
-    }
-    if (!AceApplicationInfo::GetInstance().GetCountryOrRegion().empty()) {
-        infoList->Put("region", AceApplicationInfo::GetInstance().GetCountryOrRegion().c_str());
-    }
 
     auto container = Container::Current();
     int32_t width = container ? container->GetViewWidth() : 0;
@@ -97,4 +100,4 @@ std::pair<std::string, bool> PluginBridge::GetDeviceInfo()
     }
     return std::make_pair<std::string, bool>(infoList->ToString(), std::move(isParamValid));
 }
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::Framework

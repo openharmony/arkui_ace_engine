@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,6 +74,9 @@ RefPtr<ButtonComponent> DOMButtonUtil::CreateComponentAndSetChildAttr(
             backDecoration->SetBorderRadius(Radius(BOX_HOVER_RADIUS));
             boxComponent->SetBackDecoration(backDecoration);
         }
+    } else {
+        LOGE("boxComponent is null");
+        return component;
     }
     if (LessOrEqual(node.GetHeight().Value(), 0.0)) {
         node.SetHeight(theme->GetHeight());
@@ -91,6 +94,7 @@ RefPtr<ButtonComponent> DOMButtonUtil::CreateComponentAndSetChildAttr(
     } else {
         component->SetRectRadius(component->GetHeight() / 2);
     }
+    component->SetMouseAnimationType(HoverAnimationType::SCALE);
     SetChildAttr(component, attrs, theme);
     return component;
 }
@@ -214,18 +218,17 @@ void DOMButtonUtil::SetChildStyle(const RefPtr<BoxComponent>& boxComponent, cons
             paddingStyleOperators[paddingOperator].value(value, node, padding);
         }
     }
-
     auto theme = node.GetTheme<ButtonTheme>();
     if (theme) {
         component->SetDisabledColor(component->GetBackgroundColor().BlendOpacity(theme->GetBgDisabledAlpha()));
         component->SetClickedColor(component->GetBackgroundColor().BlendColor(theme->GetClickedColor()));
+        if (parentStyle.GetFontSize() != theme->GetTextStyle().GetFontSize()) {
+            parentStyle.SetAdaptTextSize(parentStyle.GetFontSize(), parentStyle.GetFontSize());
+        }
     }
     // set text style to Text child
     if (SystemProperties::GetDeviceType() != DeviceType::TV) {
         textChild->SetFocusColor(parentStyle.GetTextColor());
-    }
-    if (parentStyle.GetFontSize() != theme->GetTextStyle().GetFontSize()) {
-        parentStyle.SetAdaptTextSize(parentStyle.GetFontSize(), parentStyle.GetFontSize());
     }
     textChild->SetTextStyle(parentStyle);
 

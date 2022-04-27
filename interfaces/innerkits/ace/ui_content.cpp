@@ -20,7 +20,9 @@
 namespace OHOS::Ace {
 
 using CreateFunc = UIContent* (*)(void*, void*);
+using CreateFunction = UIContent* (*)(void*);
 constexpr char UI_CONTENT_CREATE_FUNC[] = "OHOS_ACE_CreateUIContent";
+constexpr char SUB_WINDOW_UI_CONTENT_CREATE_FUNC[] = "OHOS_ACE_CreateSubWindowUIContent";
 
 UIContent* CreateUIContent(void* context, void* runtime)
 {
@@ -43,10 +45,38 @@ UIContent* CreateUIContent(void* context, void* runtime)
     return content;
 }
 
+UIContent* CreateUIContent(void* ability)
+{
+    void* handle = dlopen("libace.z.so", RTLD_LAZY);
+    if (handle == nullptr) {
+        return nullptr;
+    }
+
+    auto entry = reinterpret_cast<CreateFunction>(dlsym(handle, SUB_WINDOW_UI_CONTENT_CREATE_FUNC));
+    if (entry == nullptr) {
+        dlclose(handle);
+        return nullptr;
+    }
+
+    auto content = entry(ability);
+    if (content == nullptr) {
+        dlclose(handle);
+    }
+
+    return content;
+}
+
 std::unique_ptr<UIContent> UIContent::Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime)
 {
     std::unique_ptr<UIContent> content;
     content.reset(CreateUIContent(reinterpret_cast<void*>(context), reinterpret_cast<void*>(runtime)));
+    return content;
+}
+
+std::unique_ptr<UIContent> UIContent::Create(OHOS::AppExecFwk::Ability* ability)
+{
+    std::unique_ptr<UIContent> content;
+    content.reset(CreateUIContent(reinterpret_cast<void*>(ability)));
     return content;
 }
 

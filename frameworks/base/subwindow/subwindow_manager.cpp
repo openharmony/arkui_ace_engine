@@ -94,15 +94,12 @@ int32_t SubwindowManager::GetParentContainerId(int32_t containerId)
 void SubwindowManager::AddSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow)
 {
     if (!subwindow) {
-        LOGE("Add subwindow failed, the subwndow is null.");
+        LOGE("Add subwindow failed, the subwindow is null.");
         return;
     }
     LOGI("Add subwindow into map, instanceId is %{public}d, subwindow id is %{public}d.", instanceId,
         subwindow->GetSubwindowId());
     std::lock_guard<std::mutex> lock(subwindowMutex_);
-    if (isShow_) {
-        return;
-    }
     auto result = subwindowMap_.try_emplace(instanceId, subwindow);
     if (!result.second) {
         LOGE("Add failed of this instance %{public}d", instanceId);
@@ -159,10 +156,6 @@ const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
 
 void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
 {
-    if (isShow_) {
-        LOGI("Menu is show already, just return.");
-        return;
-    }
     auto containerId = Container::CurrentId();
     auto subwindow = GetSubwindow(containerId);
     if (!subwindow) {
@@ -172,7 +165,6 @@ void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
         AddSubwindow(containerId, subwindow);
     }
     subwindow->ShowMenu(newComponent);
-    isShow_ = true;
 }
 
 void SubwindowManager::CloseMenu()
@@ -180,7 +172,14 @@ void SubwindowManager::CloseMenu()
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
         subwindow->CloseMenu();
-        isShow_ = false;
+    }
+}
+
+void SubwindowManager::ClearMenu()
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        subwindow->ClearMenu();
     }
 }
 

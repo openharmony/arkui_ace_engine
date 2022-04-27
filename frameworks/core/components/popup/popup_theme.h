@@ -24,6 +24,10 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr uint32_t SHOW_TIME = 250; // unit is ms.
+constexpr uint32_t HIDE_TIME = 250; // unit is ms.
+} // namespace
 
 /**
  * PopupTheme defines color and styles of PopupComponent. PopupTheme should be built
@@ -56,6 +60,8 @@ public:
             theme->radius_ = Radius(themeConstants->GetDimension(THEME_POPUP_RADIUS),
                 themeConstants->GetDimension(THEME_POPUP_RADIUS));
             ParsePattern(themeConstants->GetThemeStyle(), theme);
+            theme->showTime_ = SHOW_TIME;
+            theme->hideTime_ = HIDE_TIME;
             return theme;
         }
 
@@ -96,6 +102,16 @@ public:
         return radius_;
     }
 
+    uint32_t GetShowTime() const
+    {
+        return showTime_;
+    }
+
+    uint32_t GetHideTime() const
+    {
+        return hideTime_;
+    }
+
 protected:
     PopupTheme() = default;
 
@@ -105,6 +121,8 @@ private:
     Color backgroundColor_;
     TextStyle textStyle_;
     Radius radius_;
+    uint32_t showTime_ = 0;
+    uint32_t hideTime_ = 0;
 };
 
 } // namespace OHOS::Ace

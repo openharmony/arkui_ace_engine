@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,7 @@ class ACE_EXPORT ComposedComponent : public BaseComposedComponent, public Single
 
 public:
     ComposedComponent(const ComposeId& id, const std::string& name, const RefPtr<Component>& child);
-    ComposedComponent(const ComposeId& id, const std::string& name) : BaseComposedComponent(id, name) {};
+    ComposedComponent(const ComposeId& id, const std::string& name) : BaseComposedComponent(id, name) {}
     ~ComposedComponent() override = default;
 
     RefPtr<Element> CreateElement() override;
@@ -79,8 +79,18 @@ public:
         return false;
     }
 
+    bool GetNeedReserveChild() {
+        return needReserveChild_;
+    }
+
+    void SetNeedReserveChild(bool needReserve) {
+        needReserveChild_ = needReserve;
+    }
+
 private:
     ElementFunction elementFunction_;
+
+    bool needReserveChild_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/gestures/gesture_referee.h"
 
+#include "core/gestures/click_recognizer.h"
 #include "core/gestures/gesture_recognizer.h"
 
 namespace OHOS::Ace {
@@ -118,10 +118,12 @@ void GestureScope::HandleParallelDisposal(const RefPtr<GestureRecognizer>& recog
 
 void GestureScope::HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recognizer)
 {
-    if (CheckNeedBlocked(recognizer)) {
-        LOGI("gesture referee ready to notify block for %{public}s", AceType::TypeName(recognizer));
-        recognizer->SetRefereeState(RefereeState::BLOCKED);
-        return;
+    if (!AceType::InstanceOf<ClickRecognizer>(recognizer)) {
+        if (CheckNeedBlocked(recognizer)) {
+            LOGI("gesture referee ready to notify block for %{public}s", AceType::TypeName(recognizer));
+            recognizer->SetRefereeState(RefereeState::BLOCKED);
+            return;
+        }
     }
 
     LOGI("gesture referee accept %{public}s of id %{public}zu", AceType::TypeName(recognizer), touchId_);

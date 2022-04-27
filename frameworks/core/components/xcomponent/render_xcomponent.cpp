@@ -15,23 +15,7 @@
 
 #include "core/components/xcomponent/render_xcomponent.h"
 
-#include <iomanip>
-#include <sstream>
-
-#include "base/log/log.h"
-#include "core/event/ace_event_helper.h"
-
 namespace OHOS::Ace {
-namespace {
-const char NTC_PARAM_LEFT[] = "left";
-const char NTC_PARAM_TOP[] = "top";
-const char NTC_PARAM_WIDTH[] = "width";
-const char NTC_PARAM_HEIGHT[] = "height";
-const char NTC_METHOD_LAYOUT[] = "layout";
-const char PARAM_CREATE_XCOMPONENT[] = "xcomponent";
-const char PARAM_METHOD_AT[] = "@";
-} // namespace
-
 void RenderXComponent::PushTask(const TaskFunction& func)
 {
     tasks_.emplace_back(func);
@@ -80,37 +64,46 @@ void RenderXComponent::PerformLayout()
     MarkNeedRender();
 }
 
-void RenderXComponent::OnPaintFinish()
+void RenderXComponent::Paint(RenderContext& context, const Offset& offset)
 {
     position_ = GetGlobalOffset();
-    NativeXComponentOffset(position_.GetX(), position_.GetY());
+    if (!isXComponentInit) {
+        prePosition_ = position_;
+        preDrawSize_ = drawSize_;
 
-    auto xcomponent = delegate_->GetXComponent().Upgrade();
-    if (std::strcmp(xcomponent->GetXComponentType().c_str(), "texture") == 0) {
-        return;
+        NativeXComponentOffset(position_.GetX(), position_.GetY());
+
+        if (xcomponentSizeInitEvent_ && (!drawSize_.IsHeightInfinite())) {
+            xcomponentSizeInitEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
+        }
+        isXComponentInit = true;
+    } else {
+        if ((!NearEqual(prePosition_.GetX(), position_.GetX())) ||
+            (!NearEqual(prePosition_.GetY(), position_.GetY()))) {
+            prePosition_ = position_;
+            positionChange_ = true;
+        }
+
+        if ((!NearEqual(preDrawSize_.Width(), drawSize_.Width())) ||
+            (!NearEqual(preDrawSize_.Height(), drawSize_.Height()))) {
+            preDrawSize_ = drawSize_;
+            sizeChange_ = true;
+        }
     }
 
-    CreateXComponentPlatformResource();
-    UpdateXComponentLayout();
-}
-
-void RenderXComponent::CreateXComponentPlatformResource()
-{
-    if ((delegate_) && (!isCreatePlatformResourceSuccess_) && (!drawSize_.IsHeightInfinite())) {
-        // use drawSize to create a native XCOMPONENT resource
-        delegate_->CreatePlatformResource(drawSize_, position_, context_);
-        isCreatePlatformResourceSuccess_ = true;
+    if (positionChange_) {
+        positionChange_ = false;
+        NativeXComponentOffset(position_.GetX(), position_.GetY());
     }
-}
 
-void RenderXComponent::UpdateXComponentLayout()
-{
-    if (delegate_ && (delegate_->GetId() != X_INVALID_ID) &&
-        isCreatePlatformResourceSuccess_ && !drawSize_.IsHeightInfinite()) {
-        CallXComponentLayoutMethod();
+    if (sizeChange_) {
+        sizeChange_ = false;
+        if (xcomponentSizeChangeEvent_ && (!drawSize_.IsHeightInfinite())) {
+            xcomponentSizeChangeEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
+        }
     }
-    prePosition_ = position_;
-    preDrawSize_ = drawSize_;
+
+    RenderNode::Paint(context, offset);
 }
 
 void RenderXComponent::NativeXComponentInit(
@@ -136,6 +129,33 @@ void RenderXComponent::NativeXComponentInit(
                 auto callback = nXCompImpl->GetCallback();
                 if (callback && callback->OnSurfaceCreated != nullptr) {
                     callback->OnSurfaceCreated(nXComp, surface);
+                }
+            } else {
+                LOGE("Native XComponent nullptr");
+            }
+         },
+         TaskExecutor::TaskType::JS);
+}
+
+void RenderXComponent::NativeXComponentChange()
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("PipelineContext is null");
+        return;
+    }
+
+    pipelineContext->GetTaskExecutor()->PostTask(
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_,
+            w = drawSize_.Width(), h = drawSize_.Height()] {
+            auto nXCompImpl = weakNXCompImpl.Upgrade();
+            if (nXComp && nXCompImpl) {
+                nXCompImpl->SetXComponentWidth((int)(w));
+                nXCompImpl->SetXComponentHeight((int)(h));
+                auto surface = const_cast<void*>(nXCompImpl->GetSurface());
+                auto callback = nXCompImpl->GetCallback();
+                if (callback && callback->OnSurfaceChanged!= nullptr) {
+                    callback->OnSurfaceChanged(nXComp, surface);
                 }
             } else {
                 LOGE("Native XComponent nullptr");
@@ -197,6 +217,35 @@ void RenderXComponent::NativeXComponentDispatchTouchEvent(const OH_NativeXCompon
     }
 }
 
+void RenderXComponent::NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent)
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("NativeXComponentDispatchTouchEvent context null");
+        return;
+    }
+    float scale = pipelineContext->GetViewScale();
+    float diffX = mouseEvent.x - position_.GetX() * scale;
+    float diffY = mouseEvent.y - position_.GetY() * scale;
+    if ((diffX >= 0) && (diffX <= drawSize_.Width() * scale) && (diffY >= 0) && (diffY <= drawSize_.Height() * scale)) {
+        pipelineContext->GetTaskExecutor()->PostTask(
+            [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, mouseEvent] {
+                auto nXCompImpl = weakNXCompImpl.Upgrade();
+                if (nXComp != nullptr && nXCompImpl) {
+                    nXCompImpl->SetMouseEvent(mouseEvent);
+                    auto surface = const_cast<void*>(nXCompImpl->GetSurface());
+                    auto callback = nXCompImpl->GetCallback();
+                    if (callback != nullptr && callback->DispatchMouseEvent != nullptr) {
+                        callback->DispatchMouseEvent(nXComp, surface);
+                    }
+                } else {
+                    LOGE("Native XComponent nullptr");
+                }
+            },
+            TaskExecutor::TaskType::JS);
+    }
+}
+
 void RenderXComponent::NativeXComponentOffset(const double&x, const double& y)
 {
     auto pipelineContext = context_.Upgrade();
@@ -214,52 +263,5 @@ void RenderXComponent::NativeXComponentOffset(const double&x, const double& y)
             }
         },
         TaskExecutor::TaskType::JS);
-}
-
-void RenderXComponent::CallXComponentLayoutMethod()
-{
-    auto pipelineContext = context_.Upgrade();
-    if (!pipelineContext) {
-        LOGE("CallXComponentLayoutMethod context null");
-        return;
-    }
-
-    // when left and top remain unchanged, the xcomponent layout will not update.
-    if (NearEqual(prePosition_.GetX(), position_.GetX()) && NearEqual(prePosition_.GetY(), position_.GetY())) {
-        return;
-    }
-
-    std::stringstream paramStream;
-    paramStream << NTC_PARAM_LEFT
-                << XCOMPONENT_PARAM_EQUALS
-                << position_.GetX() * pipelineContext->GetViewScale()
-                << XCOMPONENT_PARAM_AND
-                << NTC_PARAM_TOP
-                << XCOMPONENT_PARAM_EQUALS
-                << position_.GetY() * pipelineContext->GetViewScale()
-                << XCOMPONENT_PARAM_AND
-                << NTC_PARAM_WIDTH
-                << XCOMPONENT_PARAM_EQUALS
-                << drawSize_.Width() * pipelineContext->GetViewScale()
-                << XCOMPONENT_PARAM_AND
-                << NTC_PARAM_HEIGHT
-                << XCOMPONENT_PARAM_EQUALS
-                << drawSize_.Height() * pipelineContext->GetViewScale();
-    std::string param = paramStream.str();
-    if (delegate_) {
-        delegate_->CallResRegisterMethod(MakeMethodHash(NTC_METHOD_LAYOUT), param, nullptr);
-    }
-}
-
-std::string RenderXComponent::MakeMethodHash(const std::string& method) const
-{
-    std::stringstream hashCode;
-    hashCode << PARAM_CREATE_XCOMPONENT << PARAM_METHOD_AT << delegate_->GetId();
-    std::string methodHash = hashCode.str();
-    methodHash += std::string(XCOMPONENT_METHOD);
-    methodHash += std::string(XCOMPONENT_PARAM_EQUALS);
-    methodHash += method;
-    methodHash += std::string(XCOMPONENT_PARAM_BEGIN);
-    return methodHash;
 }
 } // namespace OHOS::Ace

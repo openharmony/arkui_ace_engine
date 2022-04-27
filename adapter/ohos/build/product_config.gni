@@ -11,12 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gpu_block_product_list = [
-  "Hi3516DV300",
-  "ohos-arm64",
-  "rk3566",
-  "rk3568",
-  "watchos",
-]
-
 enable_accessibility_product_list = [ "rk3568" ]
+
+enable_web_product_list = [
+  "rk3568",
+  "m40",
+]

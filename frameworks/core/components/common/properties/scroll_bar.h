@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@ constexpr double DEFAULT_TOPANGLE = 60.0;
 constexpr double DEFAULT_BOTTOMANGLE = 120.0;
 constexpr double DEFAULT_MINANGLE = 10.0;
 constexpr double STRAIGHT_ANGLE = 180.0;
+constexpr Color PRESSED_BLEND_COLOR = Color(0x19000000);
 
 enum class ShapeMode {
     /*
@@ -83,7 +84,7 @@ public:
     ScrollBar() = default;
     explicit ScrollBar(
         DisplayMode displayMode, ShapeMode shapeMode = ShapeMode::RECT, PositionMode positionMode = PositionMode::RIGHT)
-        : displayMode_(displayMode), shapeMode_(shapeMode), positionMode_(positionMode) {};
+        : displayMode_(displayMode), shapeMode_(shapeMode), positionMode_(positionMode) {}
     ~ScrollBar() override = default;
 
     bool InBarRegion(const Point& point) const;
@@ -144,9 +145,9 @@ public:
         foregroundColor_ = foregroundColor;
     }
 
-    const Color& GetForegroundColor() const
+    Color GetForegroundColor() const
     {
-        return foregroundColor_;
+        return IsPressed() ? foregroundColor_.BlendColor(PRESSED_BLEND_COLOR) : foregroundColor_;
     }
 
     double GetTopAngle() const
@@ -297,6 +298,18 @@ public:
     void SetScrollBarController(RefPtr<ScrollBarController> controller)
     {
         barController_ = controller;
+    }
+
+    bool IsPressed() const
+    {
+        return barController_ ?  barController_->IsPressed() : false;
+    }
+
+    void SetIsHover(bool isHover) const
+    {
+        if (barController_) {
+            barController_->SetIsHover(isHover);
+        }
     }
 
 private:

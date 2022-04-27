@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1407,7 +1407,7 @@ void RenderGridScroll::OnPaintFinish()
 
 void RenderGridScroll::OnPredictLayout(int64_t deadline)
 {
-    auto startTime = GetSysTimestamp();  // unit: ns
+    auto startTime = GetSysTimestamp(); // unit: ns
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -1450,36 +1450,16 @@ void RenderGridScroll::OnPredictLayout(int64_t deadline)
     }
 }
 
-bool RenderGridScroll::isScrollable(AxisDirection direction)
+bool RenderGridScroll::IsAxisScrollable(AxisDirection direction)
 {
-    if (isVertical_) {
-        if (direction == AxisDirection::UP && reachHead_) {
-            return false;
-        } else if (direction == AxisDirection::DOWN && reachTail_) {
-            return false;
-        } else if (direction == AxisDirection::NONE) {
-            return false;
-        }
-    } else {
-        if (direction == AxisDirection::LEFT && reachHead_) {
-            return false;
-        } else if (direction == AxisDirection::RIGHT && reachTail_) {
-            return false;
-        } else if (direction == AxisDirection::NONE) {
-            return false;
-        }
-    }
-    return true;
+    return (((AxisEvent::IsDirectionUp(direction) || AxisEvent::IsDirectionLeft(direction)) && !reachHead_) ||
+            ((AxisEvent::IsDirectionLeft(direction) || AxisEvent::IsDirectionRight(direction)) && !reachTail_));
 }
 
 void RenderGridScroll::HandleAxisEvent(const AxisEvent& event)
 {
-    double degree = 0.0f;
-    if (!NearZero(event.horizontalAxis)) {
-        degree = event.horizontalAxis;
-    } else if (!NearZero(event.verticalAxis)) {
-        degree = event.verticalAxis;
-    }
+    double degree =
+        GreatOrEqual(fabs(event.verticalAxis), fabs(event.horizontalAxis)) ? event.verticalAxis : event.horizontalAxis;
     double offset = SystemProperties::Vp2Px(DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP * degree / MOUSE_WHEEL_DEGREES);
     UpdateScrollPosition(-offset, SCROLL_FROM_ROTATE);
 }

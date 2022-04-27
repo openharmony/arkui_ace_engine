@@ -38,6 +38,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_checkbox.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_distributed.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
@@ -191,7 +192,6 @@ void JsLoadDocument(const v8::FunctionCallbackInfo<v8::Value>& args)
 
 void JsDumpMemoryStats(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
-    // TODO: Implement for v8
     LOGD("dumpMemoryStats: Not Implemented for V8. UnSupported");
 }
 
@@ -434,7 +434,10 @@ void Fp2Px(const v8::FunctionCallbackInfo<v8::Value>& args)
         return;
     }
     auto pipelineContext = container->GetPipelineContext();
-    double fontScale = pipelineContext->GetFontScale();
+    double fontScale = 1.0;
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
     double pxValue = fpValue * density * fontScale;
 
     int32_t result = GreatOrEqual(pxValue, 0) ? (pxValue + 0.5) : (pxValue - 0.5);
@@ -468,7 +471,10 @@ void Px2Fp(const v8::FunctionCallbackInfo<v8::Value>& args)
         return;
     }
     auto pipelineContext = container->GetPipelineContext();
-    double fontScale = pipelineContext->GetFontScale();
+    double fontScale = 1.0;
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
     double ratio = density * fontScale;
     double fpValue = pxValue / ratio;
 
@@ -553,7 +559,7 @@ void SetAppBackgroundColor(const v8::FunctionCallbackInfo<v8::Value>& args)
     }
     auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext) {
-        pipelineContext->SetRootBgColor(Color::FromString(backgroundColorStr));
+        pipelineContext->SetAppBgColor(Color::FromString(backgroundColorStr));
     }
 }
 
@@ -614,7 +620,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"TextPicker", JSTextPicker::JSBind},
     {"TextPickerDialog", JSTextPickerDialog::JSBind},
     {"DatePicker", JSDatePicker::JSBind},
+    {"TimePicker", JSTimePicker::JSBind},
     {"DatePickerDialog", JSDatePickerDialog::JSBind},
+    {"TimePickerDialog", JSTimePickerDialog::JSBind},
     {"PageTransitionEnter", JSPageTransition::JSBind},
     {"PageTransitionExit", JSPageTransition::JSBind},
     {"RowSplit", JSRowSplit::JSBind},
@@ -725,7 +733,6 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
 void JsRegisterViews(BindingTarget globalObj)
 {
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    // FIXME These do not belong to views, move somewhere else
     globalObj->Set(v8::String::NewFromUtf8(isolate, "loadDocument").ToLocalChecked(),
         v8::FunctionTemplate::New(isolate, JsLoadDocument));
     globalObj->Set(v8::String::NewFromUtf8(isolate, "dumpMemoryStats").ToLocalChecked(),
@@ -765,6 +772,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSPanHandler::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
+    JSDistributed::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
 
     JSProfiler::JSBind(globalObj);

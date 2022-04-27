@@ -24,7 +24,7 @@ class RenderShadow : public RenderNode {
     DECLARE_ACE_TYPE(RenderShadow, RenderNode);
 
 public:
-    RenderShadow() : RenderNode(true) {};
+    RenderShadow() : RenderNode(true) {}
     ~RenderShadow() override = default;
 
     static RefPtr<RenderNode> Create();

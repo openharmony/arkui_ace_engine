@@ -14,6 +14,7 @@
  */
 
 #include "click_spring_effect.h"
+#include "render_transform.h"
 
 #include <unordered_map>
 
@@ -90,9 +91,16 @@ void ClickSpringEffect::ShowAnimation(TouchType touchType, ClickSpringEffectType
 void ClickSpringEffect::MarkRender()
 {
     auto node = renderNode_.Upgrade();
-    if (node) {
-        node->MarkNeedLayout();
+    if (node == nullptr) {
+        return;
     }
+
+    node->MarkNeedLayout();
+    auto transform = AceType::DynamicCast<RenderTransform>(node);
+    if (transform == nullptr) {
+        return;
+    }
+    transform->SetPendingUpdateTransformLayer();
 }
 
 } // namespace OHOS::Ace

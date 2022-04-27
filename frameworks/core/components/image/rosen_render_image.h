@@ -51,7 +51,7 @@ public:
     }
 
     bool IsSourceWideGamut() const override;
-    virtual bool RetryLoading() override;
+    bool RetryLoading() override;
     static SkColorType PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap);
     static SkAlphaType AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pixmap);
     static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
@@ -116,10 +116,11 @@ private:
     void UpdatePixmap(const RefPtr<PixelMap>& pixmap);
     void UpdateSharedMemoryImage(const RefPtr<PipelineContext>& context);
     void ProcessPixmapForPaint();
+    std::function<void()> GenerateThumbnailLoadTask();
 
     sk_sp<SkSVGDOM> skiaDom_;
     RefPtr<SvgDom> svgDom_;
-    sk_sp<SkImage> image_;
+    fml::RefPtr<flutter::CanvasImage> image_;
     bool loadSvgAfterLayout_ = false;
     bool loadSvgOnPaint_ = false; // only load svg trees without box and bind
     SkVector radii_[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };

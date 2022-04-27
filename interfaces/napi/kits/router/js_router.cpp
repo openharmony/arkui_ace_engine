@@ -83,7 +83,7 @@ static napi_value JSRouterPush(napi_env env, napi_callback_info info)
         napi_get_named_property(env, argv, "url", &uriNApi);
         napi_typeof(env, uriNApi, &valueType);
         if (valueType != napi_string) {
-            LOGE("url is required");
+            LOGE("url is invalid");
             return nullptr;
         }
         napi_get_named_property(env, argv, "params", &params);
@@ -95,7 +95,7 @@ static napi_value JSRouterPush(napi_env env, napi_callback_info info)
     if (valueType == napi_string) {
         ParseUri(env, uriNApi, uriString);
     } else {
-        LOGE("The parameter type is incorrect.");
+        LOGW("The parameter type is incorrect.");
     }
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
@@ -126,7 +126,7 @@ static napi_value JSRouterReplace(napi_env env, napi_callback_info info)
         napi_get_named_property(env, argv, "url", &uriNApi);
         napi_typeof(env, uriNApi, &valueType);
         if (valueType != napi_string) {
-            LOGE("url is required");
+            LOGE("url is invalid");
             return nullptr;
         }
         napi_get_named_property(env, argv, "params", &params);
@@ -138,7 +138,7 @@ static napi_value JSRouterReplace(napi_env env, napi_callback_info info)
     if (valueType == napi_string) {
         ParseUri(env, uriNApi, uriString);
     } else {
-        LOGE("The parameter type is incorrect.");
+        LOGW("The parameter type is incorrect.");
     }
 
     auto delegate = EngineHelper::GetCurrentDelegate();
@@ -163,27 +163,33 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
         LOGE("can not get delegate.");
         return nullptr;
     }
-    std::string uriString;
-    std::string paramsString;
+    std::string uriString = "";
+    std::string paramsString = "";
     napi_value uriNApi = nullptr;
     napi_value params = nullptr;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
     if (valueType == napi_object) {
-        napi_get_named_property(env, argv, "path", &uriNApi);
+        napi_get_named_property(env, argv, "url", &uriNApi);
+        napi_typeof(env, uriNApi, &valueType);
+        if (valueType == napi_undefined) {
+            napi_get_named_property(env, argv, "path", &uriNApi);
+            napi_typeof(env, uriNApi, &valueType);
+        }
+        if (valueType == napi_string) {
+            ParseUri(env, uriNApi, uriString);
+        } else {
+            LOGE("the url and path is all invalid");
+            return nullptr;
+        }
+
         napi_get_named_property(env, argv, "params", &params);
-    }
-    napi_typeof(env, uriNApi, &valueType);
-    if (valueType == napi_string) {
-        ParseUri(env, uriNApi, uriString);
-    } else {
-        LOGE("The parameter type is incorrect.");
-    }
-    napi_typeof(env, params, &valueType);
-    if (valueType == napi_object) {
-        ParseParams(env, params, paramsString);
-    } else {
-        LOGE("The parameter type is incorrect.");
+        napi_typeof(env, params, &valueType);
+        if (valueType == napi_object) {
+            ParseParams(env, params, paramsString);
+        } else {
+            LOGW("The parameter type is incorrect.");
+        }
     }
     delegate->Back(uriString, paramsString);
     return nullptr;
@@ -274,17 +280,10 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
     napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
     auto routerAsyncContext = new RouterAsyncContext();
     routerAsyncContext->env = env;
-
-    napi_value successFunc = nullptr;
-    napi_value failFunc = nullptr;
-    napi_value completeFunc = nullptr;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
     if (valueType == napi_object) {
         napi_get_named_property(env, argv, "message", &routerAsyncContext->message_napi);
-        napi_get_named_property(env, argv, "success", &successFunc);
-        napi_get_named_property(env, argv, "fail", &failFunc);
-        napi_get_named_property(env, argv, "complete", &completeFunc);
         napi_typeof(env, routerAsyncContext->message_napi, &valueType);
         if (valueType == napi_string) {
             auto nativeValue = reinterpret_cast<NativeValue*>(routerAsyncContext->message_napi);
@@ -296,20 +295,8 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
             napi_get_value_string_utf8(env, routerAsyncContext->message_napi, messageChar.get(), len, &ret);
             routerAsyncContext->messageString = messageChar.get();
         } else {
-            routerAsyncContext->fail = "enableAlertBeforeBackPage:massage is null";
-            routerAsyncContext->complete = "enableAlertBeforeBackPage:massage is null";
-        }
-        napi_typeof(env, successFunc, &valueType);
-        if (valueType == napi_function) {
-            napi_create_reference(env, successFunc, 1, &routerAsyncContext->callbackSuccess);
-        }
-        napi_typeof(env, failFunc, &valueType);
-        if (valueType == napi_function) {
-            napi_create_reference(env, failFunc, 1, &routerAsyncContext->callbackFail);
-        }
-        napi_typeof(env, completeFunc, &valueType);
-        if (valueType == napi_function) {
-            napi_create_reference(env, completeFunc, 1, &routerAsyncContext->callbackComplete);
+            LOGE("The message type is incorrect.");
+            return nullptr;
         }
     }
     napi_value resource = nullptr;
@@ -318,66 +305,15 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
         env, nullptr, resource, [](napi_env env, void* data) {},
         [](napi_env env, napi_status status, void* data) {
             RouterAsyncContext* asyncContext = (RouterAsyncContext*)data;
-            napi_value ret;
-            napi_value callback = nullptr;
-            if (!asyncContext->fail.empty()) {
-                if (asyncContext->callbackFail) {
-                    napi_value returnObj = GetReturnObj(env, asyncContext->fail);
-                    napi_get_reference_value(env, asyncContext->callbackFail, &callback);
-                    napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                    napi_delete_reference(env, asyncContext->callbackFail);
-                }
-                if (asyncContext->callbackComplete) {
-                    napi_value returnObj = GetReturnObj(env, asyncContext->complete);
-                    napi_get_reference_value(env, asyncContext->callbackComplete, &callback);
-                    napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                    napi_delete_reference(env, asyncContext->callbackComplete);
-                }
-                napi_delete_async_work(env, asyncContext->work);
-                delete asyncContext;
+            auto callBack = [](int32_t callbackType) {};
+            auto delegate = EngineHelper::GetCurrentDelegate();
+            if (delegate) {
+                delegate->EnableAlertBeforeBackPage(asyncContext->messageString, std::move(callBack));
             } else {
-                auto callBack = [env, asyncContext](int32_t callbackType) {
-                    LOGI("callbask after dialog click, callbackType = %{private}d", callbackType);
-                };
-                auto delegate = EngineHelper::GetCurrentDelegate();
-                napi_value ret;
-                napi_value callback = nullptr;
-                if (delegate) {
-                    delegate->EnableAlertBeforeBackPage(asyncContext->messageString, std::move(callBack));
-                    if (asyncContext->callbackSuccess) {
-                        asyncContext->success = "enableAlertBeforeBackPage:ok";
-                        napi_value returnObj = GetReturnObj(env, asyncContext->success);
-                        napi_get_reference_value(env, asyncContext->callbackSuccess, &callback);
-                        napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                        napi_delete_reference(env, asyncContext->callbackSuccess);
-                    }
-                    if (asyncContext->callbackComplete) {
-                        asyncContext->complete = "enableAlertBeforeBackPage:ok";
-                        napi_value returnObj = GetReturnObj(env, asyncContext->complete);
-                        napi_get_reference_value(env, asyncContext->callbackComplete, &callback);
-                        napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                        napi_delete_reference(env, asyncContext->callbackComplete);
-                    }
-                } else {
-                    LOGE("can not get delegate.");
-                    if (asyncContext->callbackFail) {
-                        asyncContext->fail = "can not get delegate.";
-                        napi_value returnObj = GetReturnObj(env, asyncContext->fail);
-                        napi_get_reference_value(env, asyncContext->callbackFail, &callback);
-                        napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                        napi_delete_reference(env, asyncContext->callbackFail);
-                    }
-                    if (asyncContext->callbackComplete) {
-                        asyncContext->complete = "can not get delegate.";
-                        napi_value returnObj = GetReturnObj(env, asyncContext->complete);
-                        napi_get_reference_value(env, asyncContext->callbackComplete, &callback);
-                        napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                        napi_delete_reference(env, asyncContext->callbackComplete);
-                    }
-                }
-                napi_delete_async_work(env, asyncContext->work);
-                delete asyncContext;
+                LOGE("can not get delegate.");
             }
+            napi_delete_async_work(env, asyncContext->work);
+            delete asyncContext;
         },
         (void*)routerAsyncContext, &routerAsyncContext->work);
     napi_queue_async_work(env, routerAsyncContext->work);
@@ -404,28 +340,6 @@ static napi_value JSRouterDisableAlertBeforeBackPage(napi_env env, napi_callback
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
-    napi_value successFunc = nullptr;
-    napi_value failFunc = nullptr;
-    napi_value completeFunc = nullptr;
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, argv, &valueType);
-    if (valueType == napi_object) {
-        napi_get_named_property(env, argv, "success", &successFunc);
-        napi_get_named_property(env, argv, "fail", &failFunc);
-        napi_get_named_property(env, argv, "complete", &completeFunc);
-        napi_typeof(env, successFunc, &valueType);
-        if (valueType == napi_function) {
-            napi_create_reference(env, successFunc, 1, &disableRouterAsyncContext->callbackSuccess);
-        }
-        napi_typeof(env, failFunc, &valueType);
-        if (valueType == napi_function) {
-            napi_create_reference(env, failFunc, 1, &disableRouterAsyncContext->callbackFail);
-        }
-        napi_typeof(env, completeFunc, &valueType);
-        if (valueType == napi_function) {
-            napi_create_reference(env, completeFunc, 1, &disableRouterAsyncContext->callbackComplete);
-        }
-    }
     napi_value resource = nullptr;
     napi_create_string_utf8(env, "JSRouterDisableAlertBeforeBackPage", NAPI_AUTO_LENGTH, &resource);
     napi_create_async_work(
@@ -437,28 +351,6 @@ static napi_value JSRouterDisableAlertBeforeBackPage(napi_env env, napi_callback
                 delegate->DisableAlertBeforeBackPage();
             } else {
                 LOGE("can not get delegate.");
-            }
-            napi_value ret;
-            napi_value callback = nullptr;
-            asyncContext->success = "disableAlertBeforeBackPage:ok";
-            asyncContext->complete = "disableAlertBeforeBackPage:ok";
-            if (asyncContext->callbackSuccess) {
-                napi_value returnObj = GetReturnObj(env, asyncContext->success);
-                napi_get_reference_value(env, asyncContext->callbackSuccess, &callback);
-                napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                napi_delete_reference(env, asyncContext->callbackSuccess);
-            }
-            if (asyncContext->callbackComplete) {
-                napi_value returnObj = GetReturnObj(env, asyncContext->complete);
-                napi_get_reference_value(env, asyncContext->callbackComplete, &callback);
-                napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                napi_delete_reference(env, asyncContext->callbackComplete);
-            }
-            if (asyncContext->callbackFail) {
-                napi_value returnObj = GetReturnObj(env, asyncContext->fail);
-                napi_get_reference_value(env, asyncContext->callbackFail, &callback);
-                napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
-                napi_delete_reference(env, asyncContext->callbackFail);
             }
             napi_delete_async_work(env, asyncContext->work);
             delete asyncContext;

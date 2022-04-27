@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,15 +65,15 @@ class SubscribableHandler {
   }
 
   addOwningProperty(subscriber: IPropertySubscriber): void {
-    console.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`)
-    this.owningProperties_.add(subscriber.id__());
+    console.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id()}'.`)
+    this.owningProperties_.add(subscriber.id());
   }
 
   /*
       the inverse function of createOneWaySync or createTwoWaySync
     */
   public removeOwningProperty(property: IPropertySubscriber): void {
-    return this.removeOwningPropertyById(property.id__());
+    return this.removeOwningPropertyById(property.id());
   }
 
   public removeOwningPropertyById(subscriberId: number): void {
@@ -124,7 +124,7 @@ class SubscribableHandler {
         }
         console.log(`SubscribableHandler: set property '${property.toString()}' to new value'`);
         target[property] = newValue;
-        this.notifyPropertyHasChanged(property.toString(), newValue); // FIXME PropertyKey.toString
+        this.notifyPropertyHasChanged(property.toString(), newValue);
         return true;
         break;
     }

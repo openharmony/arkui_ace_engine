@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,7 +48,7 @@ int UIServiceMgrProxy::RegisterCallBack(const AAFwk::Want& want, const sptr<IUIS
         HILOG_ERROR("register callback fail, uiService is nullptr");
         return ERR_INVALID_VALUE;
     }
-    if (!data.WriteParcelable(uiService->AsObject())) {
+    if (!data.WriteRemoteObject(uiService->AsObject())) {
         HILOG_ERROR("register callback fail, uiService error");
         return ERR_INVALID_VALUE;
     }
@@ -181,7 +181,8 @@ int UIServiceMgrProxy::ShowDialog(const std::string& name,
                                   int y,
                                   int width,
                                   int height,
-                                  const sptr<OHOS::Ace::IDialogCallback>& dialogCallback)
+                                  const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
+                                  int* id)
 {
     MessageParcel dataParcel;
     MessageParcel reply;
@@ -228,7 +229,7 @@ int UIServiceMgrProxy::ShowDialog(const std::string& name,
         HILOG_ERROR("dialogCallback is nullptr");
         return ERR_INVALID_VALUE;
     }
-    if (!dataParcel.WriteParcelable(dialogCallback->AsObject())) {
+    if (!dataParcel.WriteRemoteObject(dialogCallback->AsObject())) {
         HILOG_ERROR("dialogCallback error");
         return ERR_INVALID_VALUE;
     }
@@ -237,6 +238,10 @@ int UIServiceMgrProxy::ShowDialog(const std::string& name,
     if (error != NO_ERROR) {
         HILOG_ERROR("Request fail, error: %{public}d", error);
         return error;
+    }
+
+    if (id != nullptr) {
+        *id = reply.ReadInt32();
     }
     return reply.ReadInt32();
 }
@@ -257,6 +262,34 @@ int UIServiceMgrProxy::CancelDialog(int id)
     }
 
     int error = Remote()->SendRequest(IUIServiceMgr::CANCEL_DIALOG, dataParcel, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Request fail, error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int UIServiceMgrProxy::UpdateDialog(int id, const std::string& data)
+{
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(dataParcel)) {
+        return UI_SERVICE_PROXY_INNER_ERR;
+    }
+
+    if (!dataParcel.WriteInt32(id)) {
+        HILOG_ERROR("fail to WriteString id");
+        return INVALID_DATA;
+    }
+
+    if (!dataParcel.WriteString(data)) {
+        HILOG_ERROR("fail to WriteString data");
+        return INVALID_DATA;
+    }
+
+    int error = Remote()->SendRequest(IUIServiceMgr::UPDATE_DIALOG, dataParcel, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Request fail, error: %{public}d", error);
         return error;

@@ -47,6 +47,6 @@ private:
     void DeleteChildWithSlot(int32_t slot) override;
 };
 
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_HYPERLINK_COMPOSED_ELEMENT_H

@@ -209,8 +209,9 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineContext>&
             txtStyle.word_spacing = textStyle.GetWordSpacing().Value();
         }
     }
-
-    txtStyle.letter_spacing = pipelineContext->NormalizeToPx(textStyle.GetLetterSpacing());
+    if (pipelineContext) {
+        txtStyle.letter_spacing = pipelineContext->NormalizeToPx(textStyle.GetLetterSpacing());
+    }
     txtStyle.text_baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
     txtStyle.decoration_color = ConvertSkColor(textStyle.GetTextDecorationColor());

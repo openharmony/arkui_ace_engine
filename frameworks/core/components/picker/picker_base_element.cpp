@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,7 @@ void PickerBaseElement::PerformBuild()
             LOGE("can not get accessibility manager or picker is null.");
         }
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-        if (accessibilityManager) {
+        if (accessibilityManager && picker) {
             auto node = accessibilityManager->GetAccessibilityNodeById(picker->GetPickerBaseId());
             auto stack = picker->GetStack();
             if (node && stack) {

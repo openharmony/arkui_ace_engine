@@ -29,7 +29,7 @@ class IndexerElement : public ComponentGroupElement, public FocusNode {
 public:
     void PerformBuild() override;
 
-    virtual bool OnKeyEvent(const KeyEvent& keyEvent) override;
+    bool OnKeyEvent(const KeyEvent& keyEvent) override;
 
 private:
     WeakPtr<RenderIndexerItem> prevFocusedItem_;

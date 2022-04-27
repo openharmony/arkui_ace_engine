@@ -30,7 +30,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_page.h"
 #include "core/components/xcomponent/native_interface_xcomponent_impl.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/ark/include/js_runtime.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
@@ -39,8 +39,7 @@ namespace OHOS::Ace::Framework {
 class JsiDeclarativeEngineInstance final : public AceType, public JsEngineInstance {
     DECLARE_ACE_TYPE(JsiDeclarativeEngineInstance, AceType)
 public:
-    JsiDeclarativeEngineInstance(const RefPtr<FrontendDelegate>& delegate, int32_t instanceId)
-        : frontendDelegate_(delegate), instanceId_(instanceId)
+    JsiDeclarativeEngineInstance(const RefPtr<FrontendDelegate>& delegate) : frontendDelegate_(delegate)
     {}
     ~JsiDeclarativeEngineInstance() override;
 
@@ -68,7 +67,8 @@ public:
     static void PostJsTask(const shared_ptr<JsRuntime>&, std::function<void()>&& task);
     static void TriggerPageUpdate(const shared_ptr<JsRuntime>&);
     static RefPtr<PipelineContext> GetPipelineContext(const shared_ptr<JsRuntime>& runtime);
-    static void PreInitAceModule(void* runtime);
+    static void PreloadAceModule(void* runtime);
+
     WeakPtr<JsMessageDispatcher> GetJsMessageDispatcher() const
     {
         return dispatcher_;
@@ -123,6 +123,24 @@ public:
         isDebugMode_ = isDebugMode;
     }
 
+    void SetRootView(int32_t pageId, panda::Global<panda::ObjectRef> value)
+    {
+        rootViewMap_.emplace(pageId, value);
+    }
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
+    {
+        auto dispatcher = dispatcher_.Upgrade();
+        if (dispatcher) {
+            dispatcher->CallCurlFunction(requestData, callbackId);
+            return true;
+        } else {
+            LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+            return false;
+        }
+    }
+#endif
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global
@@ -130,9 +148,11 @@ private:
     void InitPerfUtilModule(); // add perfutil object to global
     void InitJsExportsUtilObject();
     void InitJsNativeModuleObject();
+    void InitJsContextModuleObject();
     void InitGroupJsBridge();
+    static bool IsPlugin();
 
-    static thread_local std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
+    std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
     static std::map<std::string, std::string> mediaResourceFileMap_;
 
@@ -151,7 +171,6 @@ private:
     shared_ptr<JsRuntime> runtime_;
     RefPtr<FrontendDelegate> frontendDelegate_;
     WeakPtr<JsMessageDispatcher> dispatcher_;
-    int32_t instanceId_ = 0;
     mutable std::mutex mutex_;
     bool isDebugMode_ = true;
     bool usingSharedRuntime_ = false;
@@ -166,10 +185,12 @@ class JsiDeclarativeEngine : public JsEngine {
     DECLARE_ACE_TYPE(JsiDeclarativeEngine, JsEngine)
 public:
     JsiDeclarativeEngine(int32_t instanceId, void* runtime) : instanceId_(instanceId), runtime_(runtime) {}
-    JsiDeclarativeEngine(int32_t instanceId) : instanceId_(instanceId) {}
+    explicit JsiDeclarativeEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~JsiDeclarativeEngine() override;
 
     bool Initialize(const RefPtr<FrontendDelegate>& delegate) override;
+
+    void Destroy() override;
 
     // Load and initialize a JS bundle into the JS Framework
     void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
@@ -203,6 +224,8 @@ public:
 
     void OnInactive() override;
 
+    void OnNewWant(const std::string& data) override;
+
     bool OnStartContinuation() override;
 
     void OnCompleteContinuation(int32_t code) override;
@@ -228,13 +251,15 @@ public:
 
     void RunGarbageCollection() override;
 
-    void SetContentStorage(int32_t instanceId, NativeReference* storage) override;
+    std::string GetStacktraceMessage() override;
+
+    void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
 
     void SetContext(int32_t instanceId, NativeReference* context) override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
-    virtual FrontendDelegate* GetFrontend() override
+    FrontendDelegate* GetFrontend() override
     {
         return AceType::RawPtr(engineInstance_->GetDelegate());
     }
@@ -256,6 +281,10 @@ public:
         return renderContext_;
     }
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void ReplaceJSContent(const std::string& url, const std::string componentName) override;
+#endif
+
 private:
     bool CallAppFunc(const std::string& appFuncName);
 
@@ -266,10 +295,12 @@ private:
     void TimerCallJs(const std::string& callbackId) const;
 
     void InitXComponent();
+    bool InitXComponent(const std::string& componentId);
 
     void RegisterWorker();
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
+    bool ExecuteAbc(const std::string &fileName);
 
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 
@@ -280,6 +311,10 @@ private:
     int32_t instanceId_ = 0;
     void* runtime_ = nullptr;
     shared_ptr<JsValue> renderContext_;
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    std::string preContent_ = "";
+#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };

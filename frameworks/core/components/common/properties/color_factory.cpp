@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,6 @@ namespace OHOS::Ace {
 
 ColorFactory::ColorFactory()
 {
-    // TODO: this part need to change when the various of theme is applied.
     colorMap_["DATA_PANEL_LIGHT_COLOR_1"] =
         std::make_pair<Color, Color>(Color::FromString("#F7CE00"), Color::FromString("#F99B11"));
     colorMap_["DATA_PANEL_LIGHT_COLOR_2"] =

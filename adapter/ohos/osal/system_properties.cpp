@@ -35,6 +35,8 @@ const char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
 const char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 const char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 const char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
+const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
+const char ENABLE_DEBUG_BOUNDARY_FILE_PATH[] = "/etc/enable_paint_boundary";
 
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
@@ -50,6 +52,17 @@ bool IsTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.enabled", "0") == "1" ||
             system::GetParameter("debug.ace.trace.enabled", "0") == "1");
+}
+
+bool IsDebugBoundaryEnabled()
+{
+    if (system::GetParameter("persist.ace.debug.boundary.enabled", "0") == "1") {
+        return true;
+    }
+    if (system::GetParameter("persist.ace.debug.boundary.enabled", "0") == "2") {
+        return false;
+    }
+    return access(ENABLE_DEBUG_BOUNDARY_FILE_PATH, F_OK) == 0;
 }
 
 bool IsRosenBackendEnabled()
@@ -73,6 +86,21 @@ bool IsRosenBackendEnabled()
 #endif
 }
 
+bool IsWindowAnimationEnabled()
+{
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    return false;
+#endif
+#ifdef ENABLE_ROSEN_BACKEND
+    if (access(DISABLE_WINDOW_ANIMATION_PATH, F_OK) == 0) {
+        return false;
+    }
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool IsAccessibilityEnabled()
 {
     return (system::GetParameter("persist.ace.testmode.enabled", "0") == "1" ||
@@ -82,6 +110,12 @@ bool IsAccessibilityEnabled()
 bool IsDebugEnabled()
 {
     return (system::GetParameter("persist.ace.debug.enabled", "0") == "1");
+}
+
+bool IsGpuUploadEnabled()
+{
+    return (system::GetParameter("persist.ace.gpuupload.enabled", "0") == "1" ||
+            system::GetParameter("debug.ace.gpuupload.enabled", "0") == "1");
 }
 } // namespace
 
@@ -102,6 +136,11 @@ void SystemProperties::InitDeviceType(DeviceType)
 int SystemProperties::GetArkProperties()
 {
     return system::GetIntParameter<int>("persist.ark.properties", -1);
+}
+
+std::string SystemProperties::GetAsmInterOption()
+{
+    return system::GetParameter("persist.ark.asminter", "");
 }
 
 bool SystemProperties::IsScoringEnabled(const std::string& name)
@@ -138,9 +177,12 @@ ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
+bool SystemProperties::debugBoundaryEnabled_ = IsDebugBoundaryEnabled();
+bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 bool SystemProperties::debugEnabled_ = IsDebugEnabled();
 int32_t SystemProperties::windowPosX_ = 0;
 int32_t SystemProperties::windowPosY_ = 0;
+bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
 
 DeviceType SystemProperties::GetDeviceType()
 {
@@ -180,17 +222,19 @@ void SystemProperties::InitDeviceInfo(
     resolution_ = resolution;
     deviceWidth_ = deviceWidth;
     deviceHeight_ = deviceHeight;
-    brand_ = system::GetParameter("ro.product.brand", INVALID_PARAM);
-    manufacturer_ = system::GetParameter("ro.product.manufacturer", INVALID_PARAM);
-    model_ = system::GetParameter("ro.product.model", INVALID_PARAM);
-    product_ = system::GetParameter("ro.product.name", INVALID_PARAM);
-    apiVersion_ = system::GetParameter("hw_sc.build.os.apiversion", INVALID_PARAM);
-    releaseType_ = system::GetParameter("hw_sc.build.os.releasetype", INVALID_PARAM);
-    paramDeviceType_ = system::GetParameter("hw_sc.build.os.devicetype", INVALID_PARAM);
+    brand_ = system::GetParameter("const.product.brand", INVALID_PARAM);
+    manufacturer_ = system::GetParameter("const.product.manufacturer", INVALID_PARAM);
+    model_ = system::GetParameter("const.product.model", INVALID_PARAM);
+    product_ = system::GetParameter("const.product.name", INVALID_PARAM);
+    apiVersion_ = system::GetParameter("const.ohos.apiversion", INVALID_PARAM);
+    releaseType_ = system::GetParameter("const.ohos.releasetype", INVALID_PARAM);
+    paramDeviceType_ = system::GetParameter("const.build.characteristics", INVALID_PARAM);
+
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
+    debugBoundaryEnabled_ = IsDebugBoundaryEnabled();
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
@@ -231,5 +275,15 @@ void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
 bool SystemProperties::GetDebugEnabled()
 {
     return debugEnabled_;
+}
+
+std::string SystemProperties::GetLanguage()
+{
+    return system::GetParameter("const.global.language", INVALID_PARAM);
+}
+
+std::string SystemProperties::GetRegion()
+{
+    return system::GetParameter("const.global.region", INVALID_PARAM);
 }
 } // namespace OHOS::Ace

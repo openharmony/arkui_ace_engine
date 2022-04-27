@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -442,7 +442,7 @@ enum class KeyAction : int32_t {
 constexpr int32_t ASCII_START_UPPER_CASE_LETTER = 65;
 constexpr int32_t ASCII_START_LOWER_CASE_LETTER = 97;
 
-const char* KeyToString(int32_t code);
+ACE_FORCE_EXPORT_WITH_PREVIEW const char* KeyToString(int32_t code);
 
 struct KeyEvent final {
     KeyEvent()
@@ -525,7 +525,7 @@ struct KeyEvent final {
     // identify the click event, you can use CLICK event.
     int32_t repeatTime = 0;
     TimeStamp timeStamp;
-    int32_t metaKey;
+    int32_t metaKey = 0;
     int64_t deviceId = 0;
     SourceType sourceType { SourceType::NONE };
 };

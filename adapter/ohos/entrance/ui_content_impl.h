@@ -37,6 +37,7 @@ namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
+    UIContentImpl(OHOS::AppExecFwk::Ability* ability);
     ~UIContentImpl() = default;
 
     // UI content lifecycles
@@ -46,6 +47,7 @@ public:
     void Focus() override;
     void UnFocus() override;
     void Destroy() override;
+    void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
     // distribute
     void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) override;
@@ -61,6 +63,10 @@ public:
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode) override;
 
+    // Window color
+    uint32_t GetBackgroundColor() override;
+    void SetBackgroundColor(uint32_t color) override;
+
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
 private:
@@ -70,11 +76,10 @@ private:
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
-    ViewportConfig config_;
     std::string startUrl_;
     int32_t instanceId_ = -1;
-    bool updateConfig_ = false;
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener_ = nullptr;
+    OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener_ = nullptr;
 };
 
 } // namespace OHOS::Ace

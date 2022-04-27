@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,7 +69,7 @@ Rect RosenRenderTextField::GetInnerRect(const Decoration& decoration, const Rect
     }
     double iconSpacing = iconImage_ ? NormalizeToPx(iconHotZoneSizeInDimension_) : 0.0;
     double passwordIconSpacing =
-        (keyboard_ == TextInputType::VISIBLE_PASSWORD && SystemProperties::GetDeviceType() == DeviceType::PHONE)
+        (keyboard_ == TextInputType::VISIBLE_PASSWORD && IsSelectiveDevice())
             ? NormalizeToPx(iconHotZoneSizeInDimension_)
             : 0.0;
     if (textDirection_ == TextDirection::RTL) {
@@ -226,6 +226,7 @@ void RosenRenderTextField::PaintIcon(const Offset& offset, RenderContext& contex
         } else {
             iconOffset += hotZoneOffset - Offset(iconHotZoneSize_, 0.0);
         }
+        iconImage_->SetAdaptiveFrameRectFlag(false);
         iconImage_->RenderWithContext(context, iconOffset);
     }
 
@@ -249,8 +250,7 @@ void RosenRenderTextField::PaintIcon(const Offset& offset, RenderContext& contex
 
 void RosenRenderTextField::PaintSelection(SkCanvas* canvas) const
 {
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE &&
-        SystemProperties::GetDeviceType() != DeviceType::CAR) {
+    if (!IsSelectiveDevice()) {
         return;
     }
     using namespace Constants;
@@ -451,7 +451,7 @@ Size RosenRenderTextField::Measure()
         if (layoutParamChanged) {
             lastLayoutParam_ = std::make_optional(GetLayoutParam());
         }
-        bool needNotifyChangeEvent = !isValueFromFront_ || (isValueFromFront_ && layoutParamChanged);
+        bool needNotifyChangeEvent = !isValueFromFront_ || layoutParamChanged;
         // If height or lines is changed, make needNotifyChangeEvent_ true to notify change event.
         if (needNotifyChangeEvent && (!NearEqual(textHeight_, textHeight) || textLines_ != textLines)) {
             needNotifyChangeEvent_ = true;
@@ -671,7 +671,7 @@ sk_sp<SkShader> RosenRenderTextField::MakeGradientShader(double shadeWidth) cons
     float pos[] = { 0.0f, posLeft, posRight, 1.0f };
 
     int32_t start = 0;
-    int32_t renderCount = sizeof(pos) / sizeof(pos[0]);
+    int32_t renderCount = static_cast<int32_t>(sizeof(pos) / sizeof(pos[0]));
     int32_t totalCount = renderCount;
     if (!needShadeLeft) {
         start = 2;

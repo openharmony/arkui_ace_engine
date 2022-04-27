@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/gestures/long_press_recognizer.h"
 
+#include "core/event/ace_events.h"
 #include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
@@ -61,10 +62,18 @@ void LongPressRecognizer::OnRejected()
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    if (isDisableMouseLeft_ && event.sourceType == SourceType::MOUSE) {
+        LOGI("mouse left button is disabled for long press recognizer.");
+        return;
+    }
     if (fingers_ > MAX_FINGERS) {
         return;
     }
     LOGD("long press recognizer receives touch down event, begin to detect long press event");
+    int32_t curDuration = duration_;
+    if (isForDrag_ && event.sourceType == SourceType::MOUSE) {
+        curDuration = 0;
+    }
     if ((touchRestrict_.forbiddenType & TouchRestrict::LONG_PRESS) == TouchRestrict::LONG_PRESS) {
         LOGI("the long press is forbidden");
         return;
@@ -75,7 +84,12 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         AddToReferee(event.id, AceType::Claim(this));
         if (pointsCount_ == fingers_) {
             state_ = DetectState::DETECTING;
-            DeadlineTimer(duration_);
+
+            if (useCatchMode_) {
+                DeadlineTimer(curDuration, false);
+            } else {
+                DeadlineTimer(curDuration, true);
+            }
         }
     } else {
         LOGW("the state is not ready for detecting long press gesture, state id %{public}d, id is %{public}d",
@@ -159,17 +173,21 @@ void LongPressRecognizer::HandleOverdueDeadline()
     }
 }
 
-void LongPressRecognizer::DeadlineTimer(int32_t time)
+void LongPressRecognizer::DeadlineTimer(int32_t time, bool isAccept)
 {
     auto context = context_.Upgrade();
     if (!context) {
         LOGI("fail to detect long press gesture due to context is nullptr");
         return;
     }
-    auto&& callback = [weakPtr = AceType::WeakClaim(this)]() {
+    auto&& callback = [weakPtr = AceType::WeakClaim(this), isAccept]() {
         auto refPtr = weakPtr.Upgrade();
         if (refPtr) {
-            refPtr->HandleOverdueDeadline();
+            if (!isAccept) {
+                refPtr->HandleOverdueDeadline();
+            } else {
+                refPtr->OnAccepted();
+            }
         } else {
             LOGI("fail to handle overdue deadline due to context is nullptr");
         }

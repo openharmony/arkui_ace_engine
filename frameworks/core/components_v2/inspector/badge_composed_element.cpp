@@ -79,6 +79,8 @@ std::string BadgeComposedElement::GetBadgePosition(void) const
                 return std::string("BadgePosition.Right");
             case BadgePosition::LEFT:
                 return std::string("BadgePosition.Left");
+            default:
+                break;
         }
     }
     return std::string("-");
@@ -162,4 +164,4 @@ void BadgeComposedElement::DeleteChildWithSlot(int32_t slot)
     LOGD("badge DeleteChildWithSlot");
 }
 
-}
+} // namespace OHOS::Ace::V2

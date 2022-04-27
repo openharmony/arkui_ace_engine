@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ class PopupElement : public ComposedElement {
     DECLARE_ACE_TYPE(PopupElement, ComposedElement);
 
 public:
-    explicit PopupElement(const ComposeId& id) : ComposedElement(id) {};
+    explicit PopupElement(const ComposeId& id) : ComposedElement(id) {}
     ~PopupElement() override = default;
 
     void PerformBuild() override;
@@ -36,6 +36,11 @@ public:
             return popup_->IsShow();
         }
         return false;
+    }
+
+    RefPtr<PopupComponent> GetPopupComponent() const
+    {
+        return popup_;
     }
 
     virtual void OnStateChange(bool isVisible) {}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -108,7 +108,7 @@ void RenderList::Update(const RefPtr<Component>& component)
 
     // Start index should be updated only for the first time
     if (startIndex_ == INITIAL_CHILD_INDEX) {
-        initialIndex_ = component_->GetInitialIndex();
+        initialIndex_ = static_cast<size_t>(component_->GetInitialIndex());
         startIndex_ = initialIndex_ > 0 ? initialIndex_ : 0;
     }
     ApplyRestoreInfo();
@@ -231,8 +231,7 @@ void RenderList::Update(const RefPtr<Component>& component)
         CreateDragDropRecognizer();
     }
 
-
-    isMultiSelectable_  = component_->GetMultiSelectable();
+    isMultiSelectable_ = component_->GetMultiSelectable();
     hasHeight_ = component_->GetHasHeight();
     hasWidth_ = component_->GetHasWidth();
 
@@ -363,6 +362,7 @@ void RenderList::PerformLayout()
     }
 
     realMainSize_ = curMainPos - currentOffset_;
+    isAxisResponse_ = true;
 }
 
 Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutParam)
@@ -1217,7 +1217,7 @@ void RenderList::UpdateAccessibilityAttr()
     auto collectionInfo = accessibilityNode->GetCollectionInfo();
     size_t count = TotalCount() > 0 ? TotalCount() : 1;
     if (vertical_) {
-        collectionInfo.rows = count;
+        collectionInfo.rows = static_cast<int32_t>(count);
         collectionInfo.columns = 1;
     } else {
         collectionInfo.rows = 1;
@@ -1476,6 +1476,7 @@ void RenderList::CreateDragDropRecognizer()
 
             positionedComponent->SetUpdatePositionFuncId(updatePosition);
             stackElement->PushComponent(positionedComponent);
+            renderList->hasDragItem_ = true;
         }
     });
     panRecognizer->SetOnActionUpdate(
@@ -1509,8 +1510,7 @@ void RenderList::CreateDragDropRecognizer()
                     Point point = info.GetGlobalPoint() - targetRenderlist->GetGlobalOffset();
                     auto newListItem = targetRenderlist->FindCurrentListItem(point);
                     if (static_cast<int32_t>(targetRenderlist->GetIndexByListItem(newListItem)) > -1) {
-                        renderList->insertItemIndex_ =
-                            static_cast<int32_t>(targetRenderlist->GetIndexByListItem(newListItem));
+                        renderList->insertItemIndex_ = targetRenderlist->GetIndexByListItem(newListItem);
                     }
                     if (targetRenderlist == renderList) {
                         (targetRenderlist->GetOnItemDragMove())(dragInfo,
@@ -1551,9 +1551,11 @@ void RenderList::CreateDragDropRecognizer()
         ItemDragInfo dragInfo;
         dragInfo.SetX(info.GetGlobalPoint().GetX());
         dragInfo.SetY(info.GetGlobalPoint().GetY());
-
-        auto stackElement = pipelineContext->GetLastStack();
-        stackElement->PopComponent();
+        if (renderList->hasDragItem_) {
+            auto stackElement = pipelineContext->GetLastStack();
+            stackElement->PopComponent();
+            renderList->hasDragItem_ = false;
+        }
 
         ACE_DCHECK(renderList->GetPreTargetRenderList() ==
                    renderList->FindTargetRenderNode<V2::RenderList>(pipelineContext, info));
@@ -1572,7 +1574,7 @@ void RenderList::CreateDragDropRecognizer()
             Point point = info.GetGlobalPoint() - targetRenderlist->GetGlobalOffset();
             auto newListItem = targetRenderlist->FindCurrentListItem(point);
             if (static_cast<int32_t>(targetRenderlist->GetIndexByListItem(newListItem)) > -1) {
-                renderList->insertItemIndex_ = static_cast<int32_t>(targetRenderlist->GetIndexByListItem(newListItem));
+                renderList->insertItemIndex_ = static_cast<size_t>(targetRenderlist->GetIndexByListItem(newListItem));
             }
             if (targetRenderlist == renderList) {
                 (targetRenderlist->GetOnItemDrop())(
@@ -1596,8 +1598,11 @@ void RenderList::CreateDragDropRecognizer()
             return;
         }
 
-        auto stackElement = pipelineContext->GetLastStack();
-        stackElement->PopComponent();
+        if (renderList->hasDragItem_) {
+            auto stackElement = pipelineContext->GetLastStack();
+            stackElement->PopComponent();
+            renderList->hasDragItem_ = false;
+        }
 
         renderList->SetPreTargetRenderList(nullptr);
         renderList->selectedDragItem_->SetHidden(false);
@@ -1670,38 +1675,21 @@ size_t RenderList::CalculateInsertIndex(
     return DEFAULT_INDEX;
 }
 
-bool RenderList::isScrollable(AxisDirection direction)
+bool RenderList::IsAxisScrollable(AxisDirection direction)
 {
-    if (vertical_) {
-        if (direction == AxisDirection::UP && reachStart_) {
-            return false;
-        } else if (direction == AxisDirection::DOWN && reachEnd_) {
-            return false;
-        } else if (direction == AxisDirection::NONE) {
-            return false;
-        }
-    } else {
-        if (direction == AxisDirection::LEFT && reachStart_) {
-            return false;
-        } else if (direction == AxisDirection::RIGHT && reachEnd_) {
-            return false;
-        } else if (direction == AxisDirection::NONE) {
-            return false;
-        }
-    }
-    return true;
+    return (((AxisEvent::IsDirectionUp(direction) || AxisEvent::IsDirectionLeft(direction)) && !reachStart_) ||
+            ((AxisEvent::IsDirectionDown(direction) || AxisEvent::IsDirectionRight(direction)) && !reachEnd_));
 }
 
 void RenderList::HandleAxisEvent(const AxisEvent& event)
 {
-    double degree = 0.0f;
-    if (!NearZero(event.horizontalAxis)) {
-        degree = event.horizontalAxis;
-    } else if (!NearZero(event.verticalAxis)) {
-        degree = event.verticalAxis;
-    }
+    double degree =
+        GreatOrEqual(fabs(event.verticalAxis), fabs(event.horizontalAxis)) ? event.verticalAxis : event.horizontalAxis;
     double offset = SystemProperties::Vp2Px(DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP * degree / MOUSE_WHEEL_DEGREES);
-    UpdateScrollPosition(-offset, SCROLL_FROM_ROTATE);
+    if (isAxisResponse_) {
+        isAxisResponse_ = false;
+        UpdateScrollPosition(-offset, SCROLL_FROM_ROTATE);
+    }
 }
 
 WeakPtr<RenderNode> RenderList::CheckAxisNode()
@@ -1734,6 +1722,9 @@ bool RenderList::HandleMouseEvent(const MouseEvent& event)
                 }
             }
         });
+    } else {
+        LOGE("context is null");
+        return false;
     }
 
     if (context->IsCtrlDown()) {
@@ -1889,8 +1880,8 @@ void RenderList::HandleMouseEventWhenShiftDown(const MouseEvent& event)
     }
 }
 
-void RenderList::MultiSelectAllInRange(const RefPtr<RenderListItem>& firstItem,
-    const RefPtr<RenderListItem>& secondItem)
+void RenderList::MultiSelectAllInRange(
+    const RefPtr<RenderListItem>& firstItem, const RefPtr<RenderListItem>& secondItem)
 {
     ClearMultiSelect();
     if (!firstItem) {
@@ -2039,7 +2030,6 @@ void RenderList::MultiSelectAllWhenCtrlA()
 
 int32_t RenderList::RequestNextFocus(bool vertical, bool reverse)
 {
-    // TODO rightToLeft_ need initial
     bool rightToLeft_ = false;
     int32_t moveStep = DIRECTION_MAP.at(rightToLeft_).at(vertical_).at(vertical).at(reverse);
     if (moveStep == STEP_INVALID) {

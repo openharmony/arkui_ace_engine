@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -243,8 +243,8 @@ bool RenderPatternLock::CheckChoosePoint(int16_t x, int16_t y) const
 bool RenderPatternLock::CheckChoosePointIsLastIndex(int16_t x, int16_t y, int16_t index) const
 {
     if (!choosePoint_.empty() && static_cast<int16_t>(choosePoint_.size()) >= index) {
-        if (choosePoint_.at(choosePoint_.size() - index).GetColumn() == x &&
-            choosePoint_.at(choosePoint_.size() - index).GetRow() == y) {
+        if (choosePoint_.at(choosePoint_.size() - static_cast<uint32_t>(index)).GetColumn() == x &&
+            choosePoint_.at(choosePoint_.size() - static_cast<uint32_t>(index)).GetRow() == y) {
             return true;
         }
     }

@@ -33,15 +33,16 @@ void StepperBridge::GetAttrLabel(JSContext* ctx, JSValueConst valObject, Stepper
             LOGW("key is null. Ignoring!");
             continue;
         }
+        std::string keyString = key;
         JSValue val = JS_GetProperty(ctx, valObject, pTab[i].atom);
         if (JS_IsNumber(val) || JS_IsBool(val) || JS_IsString(val)) {
             ScopedString styleVal(ctx, val);
             const char* valStr = styleVal.get();
-            if (strcmp(key, DOM_STEPPER_LEFT_LABEL) == 0) {
+            if (keyString.compare(DOM_STEPPER_LEFT_LABEL) == 0) {
                 stepperLabel.leftLabel = valStr;
-            } else if (strcmp(key, DOM_STEPPER_RIGHT_LABEL) == 0) {
+            } else if (keyString.compare(DOM_STEPPER_RIGHT_LABEL) == 0) {
                 stepperLabel.rightLabel = valStr;
-            } else if (strcmp(key, DOM_STEPPER_INITIAL_STATUS) == 0) {
+            } else if (keyString.compare(DOM_STEPPER_INITIAL_STATUS) == 0) {
                 stepperLabel.initialStatus = valStr;
             } else {
                 LOGD("key : %{public}s unsupported. Ignoring!", key);

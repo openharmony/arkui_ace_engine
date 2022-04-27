@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,7 +45,7 @@ struct DeviceConfig {
 
 struct DeviceResourceInfo {
     DeviceConfig deviceConfig;
-    std::vector<long long> resourcehandlers;
+    std::vector<int64_t> resourcehandlers;
     std::string packagePath;
     int32_t themeId { -1 };
 };

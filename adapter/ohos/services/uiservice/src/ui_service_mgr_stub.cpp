@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@ UIServiceMgrStub::UIServiceMgrStub()
     requestFuncMap_[RETURN_REQUEST] = &UIServiceMgrStub::ReturnRequestInner;
     requestFuncMap_[SHOW_DIALOG] = &UIServiceMgrStub::ShowDialogInner;
     requestFuncMap_[CANCEL_DIALOG] = &UIServiceMgrStub::CancelDialogInner;
+    requestFuncMap_[UPDATE_DIALOG] = &UIServiceMgrStub::UpdateDialogInner;
 }
 
 UIServiceMgrStub::~UIServiceMgrStub()
@@ -68,7 +69,13 @@ int UIServiceMgrStub::RegisterCallBackInner(MessageParcel& data, MessageParcel& 
         return ERR_INVALID_VALUE;
     }
 
-    auto uiService = iface_cast<IUIService>(data.ReadParcelable<IRemoteObject>());
+    auto object = data.ReadRemoteObject();
+    if (object == nullptr) {
+        HILOG_ERROR("RegisterCallBackInner read remote object failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto uiService = iface_cast<IUIService>(object);
     int32_t result = RegisterCallBack(*want, uiService);
     reply.WriteInt32(result);
     return NO_ERROR;
@@ -141,8 +148,15 @@ int UIServiceMgrStub::ShowDialogInner(MessageParcel &data, MessageParcel &reply)
     int y = data.ReadInt32();
     int width = data.ReadInt32();
     int height = data.ReadInt32();
-    auto dialogCallback = iface_cast<OHOS::Ace::IDialogCallback>(data.ReadParcelable<IRemoteObject>());
-    int32_t result = ShowDialog(name, params, windowType, x, y, width, height, dialogCallback);
+    int id = 0;
+    auto object = data.ReadRemoteObject();
+    if (object == nullptr) {
+        HILOG_ERROR("ShowDialogInner read remote object failed");
+        return ERR_INVALID_VALUE;
+    }
+    auto dialogCallback = iface_cast<OHOS::Ace::IDialogCallback>(object);
+    int32_t result = ShowDialog(name, params, windowType, x, y, width, height, dialogCallback, &id);
+    reply.WriteInt32(id);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -151,6 +165,15 @@ int UIServiceMgrStub::CancelDialogInner(MessageParcel &data, MessageParcel &repl
 {
     int32_t id = data.ReadInt32();
     int32_t result = CancelDialog(id);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int UIServiceMgrStub::UpdateDialogInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t id = data.ReadInt32();
+    std::string updateData = data.ReadString();
+    int32_t result = UpdateDialog(id, updateData);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

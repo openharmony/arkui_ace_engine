@@ -687,16 +687,16 @@ bool PickerDateComponent::GetLunarLeapMonth(uint32_t year, uint32_t& outLeapMont
         return false;
     }
 
-    outLeapMonth = leapMonth;
+    outLeapMonth = static_cast<uint32_t>(leapMonth);
     return true;
 }
 
 uint32_t PickerDateComponent::GetLunarMaxDay(uint32_t year, uint32_t month, bool isLeap) const
 {
     if (isLeap) {
-        return LunarCalculator::GetLunarLeapDays(year);
+        return static_cast<uint32_t>(LunarCalculator::GetLunarLeapDays(year));
     } else {
-        return LunarCalculator::GetLunarMonthDays(year, month);
+        return static_cast<uint32_t>(LunarCalculator::GetLunarMonthDays(year, month));
     }
 }
 
@@ -777,8 +777,35 @@ void PickerDateComponent::LunarColumnsBuilding(const LunarDate& current)
         return;
     }
 
+    auto startYear = startDateLunar_.year;
+    auto endYear = endDateLunar_.year;
+    auto startMonth = startDateLunar_.month;
+    auto endMonth = endDateLunar_.month;
+    auto startDay = startDateLunar_.day;
+    auto endDay = endDateLunar_.day;
+    if (startYear > endYear) {
+        return;
+    }
+    if (startYear == endYear && startMonth > endMonth) {
+        return;
+    }
+    if (startYear == endYear && startMonth == endMonth && startDay > endDay) {
+        return;
+    }
+    uint32_t maxDay = GetLunarMaxDay(current.year, current.month, current.isLeapMonth);
+    if (startYear < endYear) {
+        startMonth = 1;
+        endMonth = 12;
+        startDay = 1;
+        endDay = maxDay;
+    }
+    if (startYear == endYear && startMonth < endMonth) {
+        startDay = 1;
+        endDay = maxDay;
+    }
+
     yearColumn->ClearOption();
-    for (uint32_t index = startDateLunar_.year; index <= endDateLunar_.year; ++index) {
+    for (uint32_t index = startYear; index <= endYear; ++index) {
         if (current.year == index) {
             yearColumn->SetCurrentIndex(yearColumn->GetOptionCount());
         }
@@ -788,8 +815,8 @@ void PickerDateComponent::LunarColumnsBuilding(const LunarDate& current)
     uint32_t lunarLeapMonth = 0;
     bool hasLeapMonth = GetLunarLeapMonth(current.year, lunarLeapMonth);
     monthColumn->ClearOption();
-    // lunar's month start form 1 to 12
-    for (uint32_t index = 1; index <= 12; ++index) {
+    // lunar's month start form startMonth to endMonth
+    for (uint32_t index = startMonth; index <= endMonth; ++index) {
         if (!current.isLeapMonth && current.month == index) {
             monthColumn->SetCurrentIndex(monthColumn->GetOptionCount());
         }
@@ -802,10 +829,10 @@ void PickerDateComponent::LunarColumnsBuilding(const LunarDate& current)
         }
     }
 
-    uint32_t lunarMaxDay = GetLunarMaxDay(current.year, current.month, current.isLeapMonth);
+    
     dayColumn->ClearOption();
-    // lunar's day start from 1
-    for (uint32_t index = 1; index <= lunarMaxDay; ++index) {
+    // lunar's day start from startDay
+    for (uint32_t index = startDay; index <= endDay; ++index) {
         if (current.day == index) {
             dayColumn->SetCurrentIndex(dayColumn->GetOptionCount());
         }

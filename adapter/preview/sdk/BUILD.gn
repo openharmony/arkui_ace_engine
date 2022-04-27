@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,7 +12,9 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/ace/ace_engine/adapter/preview/build/config_js_engine.gni")
 import("//foundation/ace/ace_engine/build/ace_lib.gni")
+import("//foundation/ace/ace_engine/interfaces/napi/kits/napi_lib.gni")
 
 if (is_standard_system) {
   system_resource_hap_path =
@@ -93,23 +95,59 @@ if (is_standard_system) {
     shared_library_path_uv =
         get_label_info("//third_party/libuv:uv", "root_out_dir")
 
-    deps = [
-      "//foundation/ace/napi:ace_napi",
-      "//foundation/ace/napi:ace_napi_quickjs",
-      "//third_party/libuv:uv",
-    ]
-    if (use_mac) {
-      sources = [
-        "$shared_library_path_napi/ace/napi/libace_napi.dylib",
-        "$shared_library_path_napi/ace/napi/libace_napi_quickjs.dylib",
-        "$shared_library_path_uv/ace/napi/libuv.dylib",
-      ]
+    # ark js engine relvant dynamic library
+    if (enable_ark_preview) {
+      ark_core_shared_library =
+          get_label_info("//ark/runtime_core/libpandabase:libarkbase",
+                         "root_out_dir") + "/ark/ark"
+      ark_js_shared_library =
+          get_label_info("//ark/js_runtime:libark_jsruntime", "root_out_dir") +
+          "/ark/ark_js_runtime"
+      if (use_mingw_win) {
+        sources = [
+          "$ark_core_shared_library/libarkbase.dll",
+          "$ark_core_shared_library/libarkfile.dll",
+          "$ark_core_shared_library/libarkziparchive.dll",
+          "$ark_js_shared_library/libark_jsruntime.dll",
+          "$shared_library_path_napi/ace/napi/libace_napi.dll",
+          "$shared_library_path_napi/ace/napi/libace_napi_ark.dll",
+          "$shared_library_path_uv/ace/napi/libuv.dll",
+          "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat",
+        ]
+        deps = [
+          "$ace_napi:ace_napi",
+          "$ace_napi:ace_napi_ark",
+          "//ark/js_runtime:libark_jsruntime",
+          "//ark/runtime_core/libpandabase:libarkbase",
+          "//ark/runtime_core/libpandafile:libarkfile",
+          "//ark/runtime_core/libziparchive:libarkziparchive",
+          "//third_party/libuv:uv",
+        ]
+      }
     } else {
-      sources = [
-        "$shared_library_path_napi/ace/napi/libace_napi.dll",
-        "$shared_library_path_napi/ace/napi/libace_napi_quickjs.dll",
-        "$shared_library_path_uv/ace/napi/libuv.dll",
+      deps = [
+        "//foundation/ace/napi:ace_napi",
+        "//foundation/ace/napi:ace_napi_quickjs",
+        "//third_party/libuv:uv",
       ]
+      if (use_mac) {
+        sources = [
+          "$shared_library_path_napi/ace/napi/libace_napi.dylib",
+          "$shared_library_path_napi/ace/napi/libace_napi_quickjs.dylib",
+          "$shared_library_path_uv/ace/napi/libuv.dylib",
+        ]
+      } else {
+        # ark windows compiling check
+        deps += [
+          "$ace_napi:ace_napi_ark",
+          "//ark/js_runtime/ecmascript/js_vm:ark_js_vm",
+        ]
+        sources = [
+          "$shared_library_path_napi/ace/napi/libace_napi.dll",
+          "$shared_library_path_napi/ace/napi/libace_napi_quickjs.dll",
+          "$shared_library_path_uv/ace/napi/libuv.dll",
+        ]
+      }
     }
     outputs = [ target_out_dir + "/previewer/common/bin/{{source_file_part}}" ]
     module_source_dir = target_out_dir + "/previewer/common/bin"
@@ -117,47 +155,19 @@ if (is_standard_system) {
   }
 
   ohos_copy("copy_napi_modules_shared_library") {
-    mediaquery_path =
-        get_label_info("$ace_root/interfaces/napi/kits/media_query:mediaquery",
-                       "root_out_dir")
-    prompt_path = get_label_info("$ace_root/interfaces/napi/kits/prompt:prompt",
-                                 "root_out_dir")
-    router_path = get_label_info("$ace_root/interfaces/napi/kits/router:router",
-                                 "root_out_dir")
-    configuration_path = get_label_info(
-            "$ace_root/interfaces/napi/kits/configuration:configuration",
-            "root_out_dir")
-    device_path = get_label_info("$ace_root/interfaces/napi/kits/device:device",
-                                 "root_out_dir")
-    grid_path = get_label_info("$ace_root/interfaces/napi/kits/grid:grid",
-                               "root_out_dir")
-    deps = [
-      "$ace_root/interfaces/napi/kits/configuration:configuration",
-      "$ace_root/interfaces/napi/kits/device:device",
-      "$ace_root/interfaces/napi/kits/grid:grid",
-      "$ace_root/interfaces/napi/kits/media_query:mediaquery",
-      "$ace_root/interfaces/napi/kits/prompt:prompt",
-      "$ace_root/interfaces/napi/kits/router:router",
-    ]
-    if (use_mac) {
-      sources = [
-        "$configuration_path/ace/ace_engine_standard/libconfiguration.dylib",
-        "$device_path/ace/ace_engine_standard/libdevice.dylib",
-        "$grid_path/ace/ace_engine_standard/libgrid.dylib",
-        "$mediaquery_path/ace/ace_engine_standard/libmediaquery.dylib",
-        "$prompt_path/ace/ace_engine_standard/libprompt.dylib",
-        "$router_path/ace/ace_engine_standard/librouter.dylib",
-      ]
-    } else {
-      sources = [
-        "$configuration_path/ace/ace_engine_standard/libconfiguration.dll",
-        "$device_path/ace/ace_engine_standard/libdevice.dll",
-        "$grid_path/ace/ace_engine_standard/libgrid.dll",
-        "$mediaquery_path/ace/ace_engine_standard/libmediaquery.dll",
-        "$prompt_path/ace/ace_engine_standard/libprompt.dll",
-        "$router_path/ace/ace_engine_standard/librouter.dll",
-      ]
+    deps = []
+    sources = []
+    foreach(module, common_napi_libs) {
+      out_path = get_label_info("$ace_root/interfaces/napi/kits:${module}",
+                                "root_out_dir")
+      deps += [ "$ace_root/interfaces/napi/kits:${module}" ]
+      if (use_mac) {
+        sources += [ "${out_path}/ace/ace_engine_standard/lib${module}.dylib" ]
+      } else {
+        sources += [ "${out_path}/ace/ace_engine_standard/lib${module}.dll" ]
+      }
     }
+
     outputs =
         [ target_out_dir + "/previewer/common/bin/module/{{source_file_part}}" ]
     module_source_dir = target_out_dir + "/previewer/common/bin/module/"

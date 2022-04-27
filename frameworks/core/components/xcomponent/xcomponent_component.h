@@ -80,7 +80,7 @@ class XComponentController : public virtual AceType {
 public:
     using ConfigSurfaceImpl = std::function<void(uint32_t, uint32_t)>;
 
-    uint64_t GetSurfaceId()
+    std::string GetSurfaceId()
     {
         return surfaceId_;
     }
@@ -108,7 +108,7 @@ public:
         controllers_.emplace_back(xcomponentController);
     }
 
-    uint64_t surfaceId_ = 0;
+    std::string surfaceId_ = "";
 
     void RemoveXComponentController(const RefPtr<XComponentController>& xcomponentController)
     {

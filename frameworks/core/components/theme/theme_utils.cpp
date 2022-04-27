@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -165,14 +165,14 @@ std::string ThemeUtils::ProcessImageSource(const std::string& imageSrc, const Re
         return "";
     }
     if (resId == 0 && !themeConstants->GetResourceIdByName(resName, "media", resId)) {
-        LOGE("get image id failed, imageSrc = %{public}s", imageSrc.c_str());
+        LOGE("get image id failed");
         return "";
     }
 
     std::string imagePath = themeConstants->GetString(resId);
     auto seperatorPos = imagePath.rfind('.');
     if (seperatorPos == std::string::npos) {
-        LOGE("get image(%{public}s) suffix failed", imagePath.c_str());
+        LOGE("get image suffix failed");
         return "";
     }
     // image format suffix, such as ".png",".svg" and so on.
@@ -191,6 +191,7 @@ std::string ThemeUtils::ProcessImageSource(const std::string& imageSrc, const Re
         default:
             LOGW("color mode is undefined");
             colorMode = "undefined";
+            break;
     }
     std::string result = "resource://" + colorMode + "/" + std::to_string(resId) + imageSuffix;
     return result;

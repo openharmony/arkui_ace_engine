@@ -161,6 +161,7 @@ void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)
             children_.erase(it);
         }
     }
+
     OnChildRemoved(child);
     disappearingNodes_.remove(child);
     // check whether child has config transition or will cause child memory leak.
@@ -173,8 +174,9 @@ void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)
         child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId());
     }
 #ifdef ENABLE_ROSEN_BACKEND
-    else if (SystemProperties::GetRosenBackendEnabled() && child->HasDisappearingTransition(child->GetNodeId())) {
-        // if rosen backend is enabled, kick off a disappearing transition
+    // To avoid redundant transition animation, only trigger transition when head render node is removed
+    else if (child->IsHeadRenderNode() && child->HasDisappearingTransition(child->GetNodeId())) {
+        // kick off a disappearing transition
         child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId());
     }
     if (rsNode_ && rsNode_ == child->rsNode_) {
@@ -356,8 +358,6 @@ void RenderNode::DumpTree(int32_t depth)
         DumpLog::GetInstance().AddDesc(std::string("TouchRectList: ").append(touchRectList));
         DumpLog::GetInstance().AddDesc(std::string("DirtyRect: ").append(dirtyRect.ToString()));
         DumpLog::GetInstance().AddDesc(std::string("LayoutParam: ").append(layoutParam_.ToString()));
-        DumpLog::GetInstance().AddDesc(
-            std::string("MouseState: ").append(mouseState_ == MouseState::HOVER ? "HOVER" : "NONE"));
 #ifdef ENABLE_ROSEN_BACKEND
         if (rsNode_) {
             DumpLog::GetInstance().AddDesc(rsNode_->DumpNode(depth));
@@ -369,48 +369,6 @@ void RenderNode::DumpTree(int32_t depth)
 
     for (const auto& item : children) {
         item->DumpTree(depth + 1);
-    }
-}
-
-void RenderNode::DumpTree(int32_t depth, std::vector<std::string>& info)
-{
-    auto accessibilityNode = GetAccessibilityNode().Upgrade();
-    int32_t nodeId = 0;
-    if (accessibilityNode) {
-        nodeId = accessibilityNode->GetNodeId();
-    }
-    const auto& children = GetChildren();
-    {
-        auto dirtyRect = context_.Upgrade()->GetDirtyRect();
-        std::string touchRectList = "[";
-        for (auto& rect : touchRectList_) {
-            touchRectList.append("{").append(rect.ToString()).append("}");
-        }
-        touchRectList.append("]");
-
-        DumpLog::GetInstance().AddDesc(std::string("AccessibilityNodeID: ").append(std::to_string(nodeId)));
-        DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(depth)));
-        DumpLog::GetInstance().AddDesc(
-            std::string("DisappearingNodes: ").append(std::to_string(disappearingNodes_.size())));
-        DumpLog::GetInstance().AddDesc(std::string("GlobalOffset: ").append(GetGlobalOffset().ToString()));
-        DumpLog::GetInstance().AddDesc(std::string("PaintRect: ").append(paintRect_.ToString()));
-        DumpLog::GetInstance().AddDesc(std::string("TouchRect: ").append(touchRect_.ToString()));
-        DumpLog::GetInstance().AddDesc(std::string("TouchRectList: ").append(touchRectList));
-        DumpLog::GetInstance().AddDesc(std::string("DirtyRect: ").append(dirtyRect.ToString()));
-        DumpLog::GetInstance().AddDesc(std::string("LayoutParam: ").append(layoutParam_.ToString()));
-        DumpLog::GetInstance().AddDesc(
-            std::string("MouseState: ").append(mouseState_ == MouseState::HOVER ? "HOVER" : "NONE"));
-#ifdef ENABLE_ROSEN_BACKEND
-        if (rsNode_) {
-            DumpLog::GetInstance().AddDesc(rsNode_->DumpNode(depth));
-        }
-#endif
-        Dump();
-        DumpLog::GetInstance().PrintToString(depth, AceType::TypeName(this), children.size(), info);
-    }
-
-    for (const auto& item : children) {
-        item->DumpTree(depth + 1, info);
     }
 }
 
@@ -769,7 +727,7 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
         }
     }
     auto endSize = result.size();
-    return dispatchSuccess || beforeSize != endSize;
+    return (dispatchSuccess || beforeSize != endSize) && IsNotSiblingAddRecognizerToResult();
 }
 
 RefPtr<RenderNode> RenderNode::FindDropChild(const Point& globalPoint, const Point& parentLocalPoint)
@@ -862,7 +820,10 @@ bool RenderNode::MouseDetect(const Point& globalPoint, const Point& parentLocalP
     for (auto& rect : GetTouchRectList()) {
         if (touchable_ && rect.IsInRegion(transformPoint)) {
             if (!hoverNode.Upgrade()) {
-                hoverNode = CheckHoverNode();
+                if (hoverAnimationType_ != HoverAnimationType::UNKNOWN) {
+                    hoverNode = AceType::WeakClaim<RenderNode>(this);
+                    LOGI("Got hoverEffect node: %{public}s", AceType::TypeName(this));
+                }
             }
             hoverList.emplace_back(AceType::WeakClaim<RenderNode>(this));
             // Calculates the coordinate offset in this node.
@@ -904,7 +865,7 @@ bool RenderNode::AxisDetect(const Point& globalPoint, const Point& parentLocalPo
         if (touchable_ && rect.IsInRegion(transformPoint)) {
             if (!axisNode.Upgrade()) {
                 axisNode = CheckAxisNode();
-                if (axisNode.Upgrade() && !(axisNode.Upgrade()->isScrollable(direction))) {
+                if (axisNode.Upgrade() && !(axisNode.Upgrade()->IsAxisScrollable(direction))) {
                     axisNode = nullptr;
                 }
             }
@@ -1329,6 +1290,9 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
             onLayoutReady_ =
                 AceAsyncEvent<void(const std::string&)>::Create(renderComponent->GetOnLayoutReadyMarker(), context_);
         }
+    } else {
+        LOGE("renderComponent is null");
+        return;
     }
     auto context = context_.Upgrade();
     if (context != nullptr) {
@@ -1612,8 +1576,9 @@ void RenderNode::NotifyTransition(TransitionType type, int32_t nodeId)
         if (GetRSNode() == nullptr) {
             return;
         }
+        // call OnRSTransition for all render_nodes sharing this RSNode
         OnRSTransition(type);
-        if (!isTailRenderNode_) {
+        if (isTailRenderNode_) {
             return;
         }
         for (auto& child : children_) {
@@ -2017,6 +1982,9 @@ void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail)
     if (isHead && !rsNode_) {
         // create RSNode in first node of JSview
         rsNode_ = CreateRSNode();
+    } else if (!isHead && rsNode_) {
+        // destroy unneeded RSNode
+        rsNode_ = nullptr;
     }
 #endif
 }
@@ -2075,7 +2043,7 @@ void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!rsNode_) {
-        LOGW("Parent render_node has no RSNode, creating now.");
+        LOGD("Parent render_node has no RSNode, creating now.");
         SyncRSNodeBoundary(true, true);
     }
     if (IsTailRenderNode()) {

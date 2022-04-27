@@ -30,8 +30,12 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr Dimension INDICATOR_POINT_PADDING_TOP = 9.0_vp;
+constexpr Dimension INDICATOR_PADDING = 2.0_vp;
+constexpr Dimension INDICATOR_PADDING_OFFSET = 4.0_vp;
 constexpr uint32_t GRADIENT_COLOR_SIZE = 3;
 constexpr int32_t INDICATOR_FOCUS_PADDING_START_SIZE = 2;
+constexpr uint32_t INDICATOR_FOCUS_COLOR = 0xff0a59f7;
+constexpr uint32_t INDICATOR_HOVER_COLOR = 0x0c000000;
 
 } // namespace
 
@@ -55,8 +59,8 @@ void RosenRenderSwiper::Paint(RenderContext& context, const Offset& offset)
         LOGD("swiper has not default indicator");
         return;
     }
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-        SystemProperties::GetDeviceType() == DeviceType::CAR) {
+    // indicator style in tv is different.
+    if (SystemProperties::GetDeviceType() != DeviceType::TV) {
         DrawIndicator(context, offset);
     } else {
         if (indicator_->GetIndicatorMask()) {
@@ -355,8 +359,14 @@ void RosenRenderSwiper::DrawIndicator(RenderContext& context, const Offset& offs
             swiperIndicatorData_.textBoxRender->RenderWithContext(context, indicatorPosition_ + offset);
         }
     } else {
-        if (swiperIndicatorData_.isPressed || swiperIndicatorData_.isHovered) {
+        if (swiperIndicatorData_.isPressed) {
             DrawIndicatorBackground(context, offset);
+        } else if (swiperIndicatorData_.isHovered) {
+            DrawIndicatorHoverBackground(context, offset);
+        }
+
+        if (indicatorIsFocus_) {
+            DrawIndicatorFocus(context, offset);
         }
         DrawIndicatorItems(context, offset);
     }
@@ -375,6 +385,65 @@ void RosenRenderSwiper::DrawIndicatorBackground(RenderContext& context, const Of
 
     paint.setColor(swiperIndicatorData_.indicatorPaintData.color.GetValue());
     paint.setAlphaf(opacityValue_);
+    SkRRect rRect;
+    Offset position = swiperIndicatorData_.indicatorPaintData.position;
+    double radius = swiperIndicatorData_.indicatorPaintData.radius;
+    rRect.setRectXY(
+        SkRect::MakeIWH(swiperIndicatorData_.indicatorPaintData.width, swiperIndicatorData_.indicatorPaintData.height),
+        radius, radius);
+    rRect.offset(position.GetX() + offset.GetX(), position.GetY() + offset.GetY());
+    canvas->drawRRect(rRect, paint);
+}
+
+void RosenRenderSwiper::DrawIndicatorFocus(RenderContext& context, const Offset& offset)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+
+    SkPaint inPaint;
+    SkPaint outPaint;
+    inPaint.setAntiAlias(true);
+    outPaint.setAntiAlias(true);
+
+    inPaint.setColor(Color::WHITE.GetValue());
+    outPaint.setColor(INDICATOR_FOCUS_COLOR);
+
+    SkRRect inRrect;
+    SkRRect outRrect;
+    Offset position = swiperIndicatorData_.indicatorPaintData.position;
+    double radius = swiperIndicatorData_.indicatorPaintData.radius;
+    inRrect.setRectXY(
+        SkRect::MakeIWH(swiperIndicatorData_.indicatorPaintData.width, swiperIndicatorData_.indicatorPaintData.height),
+        radius, radius);
+    outRrect.setRectXY(
+        SkRect::MakeIWH(swiperIndicatorData_.indicatorPaintData.width + NormalizeToPx(INDICATOR_PADDING_OFFSET),
+            swiperIndicatorData_.indicatorPaintData.height + NormalizeToPx(INDICATOR_PADDING_OFFSET)),
+        radius + NormalizeToPx(INDICATOR_PADDING), radius + NormalizeToPx(INDICATOR_PADDING));
+
+    inRrect.offset(position.GetX() + offset.GetX(), position.GetY() + offset.GetY());
+    outRrect.offset(position.GetX() + offset.GetX() - NormalizeToPx(INDICATOR_PADDING),
+        position.GetY() + offset.GetY() - NormalizeToPx(INDICATOR_PADDING));
+
+    canvas->drawRRect(outRrect, outPaint);
+    canvas->drawRRect(inRrect, inPaint);
+}
+
+void RosenRenderSwiper::DrawIndicatorHoverBackground(RenderContext& context, const Offset& offset)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+
+    SkPaint paint;
+    paint.setAntiAlias(true);
+
+    paint.setColor(INDICATOR_HOVER_COLOR);
+
     SkRRect rRect;
     Offset position = swiperIndicatorData_.indicatorPaintData.position;
     double radius = swiperIndicatorData_.indicatorPaintData.radius;

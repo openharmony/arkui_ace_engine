@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -234,6 +234,7 @@ public:
     void OnSaveData(std::string& data);
     bool OnRestoreData(const std::string& data);
     void OnNewRequest(const std::string& data);
+    void OnDialogUpdated(const std::string& data);
     void OnMemoryLevel(const int32_t level);
     void OnNewWant(const std::string& data);
     void CallPopPage();
@@ -261,7 +262,7 @@ public:
     // FrontendDelegate overrides.
     void Push(const std::string& uri, const std::string& params) override;
     void Replace(const std::string& uri, const std::string& params) override;
-    void Back(const std::string& uri, const std::string& params = "") override;
+    void Back(const std::string& uri, const std::string& params) override;
     void PostponePageTransition() override;
     void LaunchPageTransition() override;
     void Clear() override;
@@ -418,7 +419,7 @@ private:
     void FlushAnimationTasks();
     void ParseManifest();
 
-    void BackImplement(const std::string& uri);
+    void BackImplement(const std::string& uri, const std::string& params);
 
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;
@@ -427,6 +428,7 @@ private:
     bool isStagingPageExist_ = false;
     std::string mainPagePath_;
     std::string backUri_;
+    std::string backParam_;
     std::vector<PageInfo> pageRouteStack_;
     std::unordered_map<int32_t, RefPtr<JsAcePage>> pageMap_;
     std::unordered_map<int32_t, std::string> pageParamMap_;

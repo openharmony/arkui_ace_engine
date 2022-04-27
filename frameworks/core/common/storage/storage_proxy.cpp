@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,12 +32,26 @@ void StorageProxy::SetDelegate(std::unique_ptr<StorageInterface>&& delegate)
     delegate_ = std::move(delegate);
 }
 
+void StorageProxy::SetDistributedDelegate(std::unique_ptr<StorageInterface>&& delegate)
+{
+    distributedDelegate_ = std::move(delegate);
+}
+
 RefPtr<Storage> StorageProxy::GetStorage(const RefPtr<TaskExecutor>& taskExecutor) const
 {
     if (!delegate_) {
         return nullptr;
     }
     return delegate_->GetStorage(taskExecutor);
+}
+
+RefPtr<Storage> StorageProxy::GetStorage(const std::string& sessionId,
+    std::function<void(const std::string&)>&& notifier, const RefPtr<TaskExecutor>& taskExecutor) const
+{
+    if (!distributedDelegate_) {
+        return nullptr;
+    }
+    return distributedDelegate_->GetStorage(sessionId, std::move(notifier), taskExecutor);
 }
 
 } // namespace OHOS::Ace

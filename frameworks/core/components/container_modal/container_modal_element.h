@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CONTAINER_MODAL_CONTAINER_MODAL_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CONTAINER_MODAL_CONTAINER_MODAL_ELEMENT_H
 
+#include "core/components/container_modal/container_modal_component.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/overlay/overlay_element.h"
 #include "core/components/stage/stage_element.h"
@@ -30,6 +31,9 @@ public:
     RefPtr<OverlayElement> GetOverlayElement() const;
     RefPtr<StageElement> GetStageElement() const;
     void ShowTitle(bool isShow);
+    void BlurWindow(bool isBlur);
+    void WindowFocus(bool isFocus);
+    void SetAppBgColor(const Color& color);
     void Update() override;
     void PerformBuild() override;
 
@@ -37,12 +41,18 @@ private:
     RefPtr<StackElement> GetStackElement() const;
     bool CanShowFloatingTitle();
     bool CanHideFloatingTitle();
-    void ChangeFloatingTitleIcon();
+    void ChangeFloatingTitleIcon(bool isFocus = true);
+    void ChangeTitleIcon(bool isFocus = true);
+    WindowMode windowMode_;
     RefPtr<Animator> controller_;
     RefPtr<RenderDisplay> floatingTitleDisplay_;
     RefPtr<BoxElement> floatingTitleBox_;
-    RefPtr<RowComponent> titleChildrenRow_;
-    RefPtr<RowComponent> floatingTitleChildrenRow_;
+    RefPtr<BoxElement> titleBox_;
+    RefPtr<BoxElement> contentBox_;
+    RefPtr<ContainerModalComponent> containerModalComponent_;
+    float density_ = 1.0f;
+    float moveX_ = 0.0f;
+    float moveY_ = 0.0f;
 };
 
 } // namespace OHOS::Ace

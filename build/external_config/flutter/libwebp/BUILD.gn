@@ -34,6 +34,7 @@ config("ace_libwebp_config") {
 }
 
 ohos_source_set("ace_libwebp") {
+  part_name = ace_engine_part
   license_file = "$flutter_root/skia/third_party/externals/libwebp/COPYING"
   configs = [ ":ace_libwebp_config" ]
   configs += [ "$ace_root/build:reduce_eh_frame_config" ]
@@ -176,6 +177,7 @@ config("ace_libwebp_sse41_config") {
 }
 
 ohos_source_set("ace_libwebp_sse41") {
+  part_name = ace_engine_part
   configs = [ ":ace_libwebp_sse41_config" ]
   configs += [ "$ace_root/build:reduce_eh_frame_config" ]
   sources = [

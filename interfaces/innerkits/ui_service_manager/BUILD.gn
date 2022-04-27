@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,8 +21,6 @@ config("uiservice_manager_public_config") {
     "//utils/native/base/include",
     "//utils/system/safwk/native/include",
     "//foundation/aafwk/standard/frameworks/kits/ability/native/include",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler/include",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include/",
     "//foundation/aafwk/standard/services/uiservicemgr/include",
     "${innerkits_path}/want/include",
@@ -62,8 +60,6 @@ ohos_shared_library("ui_service_mgr") {
 
   deps = [
     "${innerkits_path}/want:want",
-    "//foundation/appexecfwk/standard/common:libappexecfwk_common",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler:libeventhandler",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
@@ -74,9 +70,10 @@ ohos_shared_library("ui_service_mgr") {
 
   external_deps = [
     "ability_runtime:ability_manager",
+    "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
+    "input:libmmi-client",
     "ipc:ipc_core",
-    "multimodalinput_base:libmmi-client",
     "window_manager:libdm",
   ]
 

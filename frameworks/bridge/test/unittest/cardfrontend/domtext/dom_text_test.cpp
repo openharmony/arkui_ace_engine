@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,8 +43,6 @@ void DomCardTextTest::TearDown() {}
  * @tc.name: DomCardTextTest001
  * @tc.desc: Verify that DomText can be created successfully.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBA
- * @tc.author: lixingchi
  */
 HWTEST_F(DomCardTextTest, DomCardTextTest001, TestSize.Level1)
 {
@@ -72,8 +70,6 @@ HWTEST_F(DomCardTextTest, DomCardTextTest001, TestSize.Level1)
  * @tc.name: DomCardTextTest002
  * @tc.desc: Verify that DomText data binding successfully.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBA
- * @tc.author: lixingchi
  */
 HWTEST_F(DomCardTextTest, DomCardTextTest002, TestSize.Level1)
 {
@@ -109,8 +105,6 @@ HWTEST_F(DomCardTextTest, DomCardTextTest002, TestSize.Level1)
  * @tc.name: DomCardTextTest003
  * @tc.desc: Verify that DomText append child successfully.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBA
- * @tc.author: lixingchi
  */
 HWTEST_F(DomCardTextTest, DomCardTextTest003, TestSize.Level1)
 {
@@ -152,8 +146,6 @@ HWTEST_F(DomCardTextTest, DomCardTextTest003, TestSize.Level1)
  * @tc.name: DomCardTextTest004
  * @tc.desc: Verify that DomText styles set successfully.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBA
- * @tc.author: lixingchi
  */
 HWTEST_F(DomCardTextTest, DomCardTextTest004, TestSize.Level1)
 {
@@ -204,8 +196,6 @@ HWTEST_F(DomCardTextTest, DomCardTextTest004, TestSize.Level1)
  * @tc.name: DomCardTextTest005
  * @tc.desc: Verify that DomText event binding successfully.
  * @tc.type: FUNC
- * @tc.require: AR000F2BBA
- * @tc.author: lixingchi
  */
 HWTEST_F(DomCardTextTest, DomCardTextTest005, TestSize.Level1)
 {
@@ -235,5 +225,4 @@ HWTEST_F(DomCardTextTest, DomCardTextTest005, TestSize.Level1)
     EXPECT_TRUE(gestureEventComponent->GetOnClickId().GetData().eventId == DOM_DEFAULT_ROOT_NODE_ID);
     ASSERT_TRUE(CardTestFactory::GetInstance().GetNodeNumber() == 1);
 }
-
 } // namespace OHOS::Ace::Framework

@@ -172,9 +172,18 @@ public:
         return paramDeviceType_;
     }
 
+    static std::string GetLanguage();
+
+    static std::string GetRegion();
+
     static bool GetRosenBackendEnabled()
     {
         return rosenBackendEnabled_;
+    }
+
+    static bool GetDebugBoundaryEnabled()
+    {
+        return debugBoundaryEnabled_;
     }
 
     static bool GetTraceEnabled()
@@ -188,6 +197,11 @@ public:
     }
 
     static bool GetDebugEnabled();
+    
+    static bool GetGpuUploadEnabled()
+    {
+        return gpuUploadEnabled_;
+    }
 
     /*
      * Set device orientation.
@@ -240,6 +254,8 @@ public:
 
     static int GetArkProperties();
 
+    static std::string GetAsmInterOption();
+
     static bool IsScoringEnabled(const std::string& name);
 
     static void SetWindowPos(int32_t x, int32_t y)
@@ -256,6 +272,11 @@ public:
     static int32_t GetWindowPosY()
     {
         return windowPosY_;
+    }
+
+    static bool IsWindowSizeAnimationEnabled()
+    {
+        return windowAnimationEnabled_;
     }
 
 private:
@@ -280,9 +301,12 @@ private:
     static ScreenShape screenShape_;
     static LongScreenType LongScreen_;
     static bool rosenBackendEnabled_;
+    static bool windowAnimationEnabled_;
     static bool debugEnabled_;
     static int32_t windowPosX_;
     static int32_t windowPosY_;
+    static bool debugBoundaryEnabled_;
+    static bool gpuUploadEnabled_;
 };
 
 } // namespace OHOS::Ace

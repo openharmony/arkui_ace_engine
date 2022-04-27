@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -265,10 +265,6 @@ void RenderTextOverlay::UpdateWeakTextField(const RefPtr<TextOverlayComponent>& 
             option.updateOverlayType == UpdateOverlayType::LONG_PRESS) {
             overlay->childRightBoundary_ = 0.0;
         }
-        if (option.startHandleOffset == overlay->startHandleOffset_ &&
-            option.endHandleOffset == overlay->endHandleOffset_) {
-            return;
-        }
         overlay->SetVisible(true);
         overlay->showOption_ = option;
         overlay->startHandleOffset_ = option.startHandleOffset;
@@ -368,6 +364,9 @@ void RenderTextOverlay::PerformLayout()
                 child->SetPosition(
                     Offset(childRightBoundary_ - child->GetLayoutSize().Width(), child->GetPosition().GetY()));
             }
+        } else {
+            LOGE("child is null");
+            return;
         }
         SetLayoutSize(GetLayoutParam().GetMaxSize());
 

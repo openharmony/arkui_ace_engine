@@ -214,6 +214,7 @@ RefPtr<ButtonComponent> TextOverlayComponent::BuildButton(const std::string& dat
     button->SetHoverColor(theme_->GetButtonHoverColor());
     button->SetClickedColor(theme_->GetButtonClickedColor());
     button->SetFocusColor(theme_->GetMenuBackgroundColor());
+    button->SetFocusable(false);
     return button;
 }
 

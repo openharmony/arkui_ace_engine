@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -550,7 +550,7 @@ void RosenRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context,
     auto segment = GetSegments();
     auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
     auto segmentWidthSum = 0.0;
-    for (int i = 0; i < segment.size(); i++) {
+    for (uint32_t i = 0; i < segment.size(); i++) {
         segmentWidthSum += segment[i].GetValue();
     }
     auto segmentSize = 0.0;
@@ -559,8 +559,8 @@ void RosenRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context,
     } else {
         segmentSize = static_cast<double>(segment.size());
     }
-    for (int i = 0; i < segment.size(); i++) {
-        if (segment[i].GetValue() == 0.0) {
+    for (uint32_t i = 0; i < segment.size(); i++) {
+        if (NearEqual(segment[i].GetValue(), 0.0)) {
             segmentSize -= 1;
         }
     }
@@ -573,7 +573,7 @@ void RosenRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context,
     PaintBackground(context, offset, totalWidth, height);
     for (uint32_t i = 0; i < segment.size(); i++) {
         auto segmentWidth = segment[i].GetValue();
-        if (segmentWidth == 0.0) {
+        if (NearEqual(segmentWidth, 0.0)) {
             continue;
         }
         auto segmentStartColor = segment[i].GetStartColor();
@@ -625,7 +625,7 @@ void RosenRenderPercentageDataPanel::Paint(RenderContext& context, const Offset&
         PaintRainbowFilterMask(canvas, factor * animationPercent_, segments, arcData);
     }
     totalValue = totalValue * proportions;
-    for (uint32_t i = segments.size() - 1; i >= 0; i--) {
+    for (int32_t i = static_cast<int32_t>(segments.size()) - 1; i >= 0; i--) {
         const auto& segment = segments[i];
         arcData.startColor = segment.GetStartColor();
         arcData.endColor = segment.GetEndColor();

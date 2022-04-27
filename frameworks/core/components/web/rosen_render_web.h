@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@ public:
     void DumpTree(int32_t depth) override;
 
 #ifdef OHOS_STANDARD_SYSTEM
+    void Update(const RefPtr<Component>& component) override;
     void OnAttachContext() override;
     void Paint(RenderContext& context, const Offset& offset) override;
     void SyncGeometryProperties() override;

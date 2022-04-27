@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,9 +34,9 @@ napi_value AceWrapInt32ToJS(napi_env env, int32_t value);
 int AceUnwrapInt32FromJS(napi_env env, napi_value param, int defaultValue = 0);
 bool AceUnwrapInt32FromJS2(napi_env env, napi_value param, int& value);
 
-napi_value AceWrapLongToJS(napi_env env, long value);
-long AceUnwrapLongFromJS(napi_env env, napi_value param, long defaultValue = 0);
-bool AceUnwrapLongFromJS2(napi_env env, napi_value param, long& value);
+napi_value AceWrapLongToJS(napi_env env, int64_t value);
+int64_t AceUnwrapLongFromJS(napi_env env, napi_value param, int64_t defaultValue = 0);
+bool AceUnwrapLongFromJS2(napi_env env, napi_value param, int64_t& value);
 
 napi_value AceWrapInt64ToJS(napi_env env, int64_t value);
 int64_t AceUnwrapInt64FromJS(napi_env env, napi_value param, int64_t defaultValue = 0);
@@ -57,8 +57,8 @@ bool AceUnwrapStringFromJS2(napi_env env, napi_value param, std::string& value);
 napi_value AceWrapArrayInt32ToJS(napi_env env, const std::vector<int>& value);
 bool AceUnwrapArrayInt32FromJS(napi_env env, napi_value param, std::vector<int>& value);
 
-napi_value AceWrapArrayLongToJS(napi_env env, const std::vector<long>& value);
-bool AceUnwrapArrayLongFromJS(napi_env env, napi_value param, std::vector<long>& value);
+napi_value AceWrapArrayLongToJS(napi_env env, const std::vector<int64_t>& value);
+bool AceUnwrapArrayLongFromJS(napi_env env, napi_value param, std::vector<int64_t>& value);
 
 napi_value AceWrapArrayInt64ToJS(napi_env env, const std::vector<int64_t>& value);
 bool AceUnwrapArrayInt64FromJS(napi_env env, napi_value param, std::vector<int64_t>& value);

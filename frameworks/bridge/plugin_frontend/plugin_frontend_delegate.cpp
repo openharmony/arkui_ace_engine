@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -713,7 +713,7 @@ void PluginFrontendDelegate::Push(const PageTarget& target, const std::string& p
     if (!pagePath.empty()) {
         LoadPage(GenerateNextPageId(), PageTarget(pagePath, target.container), false, params);
     } else {
-        LOGW("this uri not support in route push.");
+        LOGW("[Engine Log] this uri not support in route push.");
     }
 }
 
@@ -728,7 +728,7 @@ void PluginFrontendDelegate::Replace(const PageTarget& target, const std::string
     if (!pagePath.empty()) {
         LoadReplacePage(GenerateNextPageId(), PageTarget(pagePath, target.container), params);
     } else {
-        LOGW("this uri not support in route replace.");
+        LOGW("[Engine Log] this uri not support in route replace.");
     }
 }
 
@@ -783,7 +783,7 @@ void PluginFrontendDelegate::BackWithTarget(const PageTarget& target, const std:
             }
             PopToPage(pagePath);
         } else {
-            LOGW("this uri not support in route Back.");
+            LOGW("[Engine Log] this uri not support in route Back.");
         }
     }
 }
@@ -1088,7 +1088,6 @@ void PluginFrontendDelegate::LoadPage(
     auto document = AceType::MakeRefPtr<DOMDocument>(pageId);
     auto page = AceType::MakeRefPtr<JsAcePage>(pageId, document, target.url, target.container);
     page->SetPageParams(params);
-    page->SetUsePluginComponent(true);
     page->SetPluginComponentJsonData(params);
     page->SetFlushCallback([weak = AceType::WeakClaim(this), isMainPage](const RefPtr<JsAcePage>& acePage) {
         auto delegate = weak.Upgrade();
@@ -1102,7 +1101,7 @@ void PluginFrontendDelegate::LoadPage(
 void PluginFrontendDelegate::LoadJS(
     const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage)
 {
-    taskExecutor_->PostSyncTask(
+    taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), page, url, isMainPage] {
             auto delegate = weak.Upgrade();
             if (!delegate) {
@@ -1260,6 +1259,7 @@ void PluginFrontendDelegate::OnPushPageSuccess(
     std::lock_guard<std::mutex> lock(mutex_);
     AddPageLocked(page);
     pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url});
+    page->FireDeclarativeOnUpdateWithValueParamsCallback(page->GetPluginComponentJsonData());
     if (pageRouteStack_.size() >= MAX_ROUTER_STACK) {
         isRouteStackFull_ = true;
         EventReport::SendPageRouterException(PageRouterExcepType::PAGE_STACK_OVERFLOW_ERR, page->GetUrl());
@@ -1723,5 +1723,14 @@ void PluginFrontendDelegate::AttachPipelineContext(const RefPtr<PipelineContext>
 RefPtr<PipelineContext> PluginFrontendDelegate::GetPipelineContext()
 {
     return pipelineContextHolder_.Get();
+}
+
+void PluginFrontendDelegate::UpdatePlugin(const std::string& content)
+{
+    auto pageId = GetRunningPageId();
+    auto page = GetPage(pageId);
+    if (page) {
+        page->FireDeclarativeOnUpdateWithValueParamsCallback(content);
+    }
 }
 } // namespace OHOS::Ace::Framework

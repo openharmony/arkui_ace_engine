@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,7 +66,7 @@ MappingInfo RevSourceMap::Find(int32_t row, int32_t col)
         .col = afterPos_[res].beforeColumn + 1,
         .sources = sources,
     };
-};
+}
 
 void RevSourceMap::ExtractKeyInfo(const std::string& sourceMap, std::vector<std::string>& sourceKeyInfo)
 {
@@ -125,10 +125,10 @@ void RevSourceMap::Init(const std::string& sourceMap)
     // transform to vector for mapping easily
     mappings_ = HandleMappings(mappings_[0]);
 
-    // the first bit: the column after transfering.
+    // the first bit: the column after transferring.
     // the second bit: the source file.
-    // the third bit: the row before transfering.
-    // the fourth bit: the column before transfering.
+    // the third bit: the row before transferring.
+    // the fourth bit: the column before transferring.
     // the fifth bit: the variable name.
     for (const auto& mapping : mappings_) {
         if (mapping == ";") {
@@ -249,7 +249,7 @@ bool RevSourceMap::VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans
     if (continuation) {
         LOGE("the arg is error");
         return false;
-    };
+    }
     return true;
 };
 

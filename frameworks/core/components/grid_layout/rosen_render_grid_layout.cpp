@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,6 @@ void RosenRenderGridLayout::Update(const RefPtr<Component>& component)
 
 void RosenRenderGridLayout::Paint(RenderContext& context, const Offset& offset)
 {
-    RenderNode::Paint(context, offset);
     for (const auto& child : GetChildren()) {
         auto gridLayoutItem = FindChildOfClass<RenderGridLayoutItem>(child);
         if (gridLayoutItem && gridLayoutItem->IsSelected()) {

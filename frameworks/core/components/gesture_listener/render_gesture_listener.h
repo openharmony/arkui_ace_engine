@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "core/gestures/drag_recognizer.h"
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/pinch_recognizer.h"
+#include "base/window/drag_window.h"
 
 namespace OHOS::Ace {
 
@@ -43,7 +44,7 @@ public:
     void SetOnPinchUpdateCallback(const GestureEventFunc& callback);
     void SetOnPinchEndCallback(const GestureEventFunc& callback);
     void SetOnPinchCancelCallback(const GestureEventNoParameter& callback);
-
+    RefPtr<DragWindow> dragWindow_;
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
@@ -57,6 +58,7 @@ private:
     void SetOnPinchUpdateCallback(const RefPtr<GestureListenerComponent>& component);
     void SetOnPinchEndCallback(const RefPtr<GestureListenerComponent>& component);
     void SetOnPinchCancelCallback(const RefPtr<GestureListenerComponent>& component);
+    void SetDragCallBack(RefPtr<FreeDragRecognizer>& recognizer, RefPtr<GestureListenerComponent> component);
 
     RefPtr<ClickRecognizer> clickRecognizer_;
     RefPtr<ClickRecognizer> doubleClickRecognizer_;

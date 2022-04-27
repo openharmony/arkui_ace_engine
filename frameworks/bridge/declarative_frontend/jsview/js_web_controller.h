@@ -25,7 +25,7 @@
 namespace OHOS::Ace::Framework {
 class JSWebController : public Referenced {
 public:
-    JSWebController() = default;
+    JSWebController();
     ~JSWebController() override = default;
 
     static void JSBind(BindingTarget globalObj);
@@ -39,6 +39,7 @@ public:
     void Refresh(const JSCallbackInfo& args);
     void StopLoading(const JSCallbackInfo& args);
     void GetHitTestResult(const JSCallbackInfo& args);
+    void GetCookieManager(const JSCallbackInfo& args);
     void AddJavascriptInterface(const JSCallbackInfo& args);
     void RemoveJavascriptInterface(const JSCallbackInfo& args);
     void SetJavascriptInterface(const JSCallbackInfo& args);
@@ -53,6 +54,7 @@ public:
     void AccessStep(const JSCallbackInfo& args);
     void AccessBackward(const JSCallbackInfo& args);
     void AccessForward(const JSCallbackInfo& args);
+    void ClearHistory(const JSCallbackInfo& args);
 
     const RefPtr<WebController>& GetController() const
     {
@@ -66,6 +68,7 @@ public:
 
 protected:
     void InitJavascriptInterface();
+    void SetJavascriptCallBackImpl();
     std::shared_ptr<WebJSValue> GetJavaScriptResult(
         const std::string& objectName,
         const std::string& objectMethod,
@@ -75,9 +78,12 @@ private:
     using ObjectClassMap  = std::map<std::string, JSRef<JSObject>>;
     ObjectClassMap objectorMap_;
     bool jsRegisterCallBackInit_ = false;
+    int32_t instanceId_ = -1;
     std::unordered_map<std::string, std::vector<std::string>> methods_;
     RefPtr<WebController> webController_;
     ACE_DISALLOW_COPY_AND_MOVE(JSWebController);
+    JSRef<JSObject> jsWebCookie_;
+    bool jsWebCookieInit_ = false;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_CONTROLLER_H

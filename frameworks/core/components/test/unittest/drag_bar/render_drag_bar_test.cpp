@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,8 +56,6 @@ void RenderDragBarTest::TearDown()
  * @tc.name: RenderDragBarTest001
  * @tc.desc: Verify the prop value for drag_bar.
  * @tc.type: FUNC
- * @tc.require: AR000F3CBQ
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderDragBarTest, RenderDragBarTest001, TestSize.Level1)
 {
@@ -84,8 +82,6 @@ HWTEST_F(RenderDragBarTest, RenderDragBarTest001, TestSize.Level1)
  * @tc.name: RenderDragBarTest002
  * @tc.desc: Verify the touch event for drag_bar.
  * @tc.type: FUNC
- * @tc.require: AR000F3CBR
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderDragBarTest, RenderDragBarTest002, TestSize.Level1)
 {

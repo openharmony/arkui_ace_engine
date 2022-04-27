@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include <unordered_map>
 
 #include "core/event/touch_event.h"
+#include "core/gestures/raw_recognizer.h"
 
 namespace OHOS::Ace {
 
@@ -47,23 +48,31 @@ private:
 };
 
 using SwipeCallback = std::function<void(const SwipeEventInfo&)>;
+using CatchSwipeCallback = std::function<void(const SwipeEventInfo&)>;
 
 class SwipeRecognizer : public TouchEventTarget {
     DECLARE_ACE_TYPE(SwipeRecognizer, TouchEventTarget)
 
 public:
     bool HandleEvent(const TouchEvent& point) override;
+    bool HandleSwipeEvent(const TouchEvent& point, uint32_t stage);
 
     bool DispatchEvent(const TouchEvent& point) override;
 
-    void AddSwipeCallback(const SwipeCallback& swipeCallback)
+    void SetSwipeCallback(const SwipeCallback& eventCallback, uint32_t stage)
     {
-        swipeCallback_ = swipeCallback;
+        swipeCallback_[stage] = eventCallback;
+    }
+
+    void SetCatchEventCallback(const CatchSwipeCallback& eventCallback, uint32_t stage)
+    {
+        swipeCatchCallback_[stage] = eventCallback;
     }
 
 private:
     std::unordered_map<int32_t, std::pair<TouchEvent, bool>> statusMap_;
-    SwipeCallback swipeCallback_;
+    SwipeCallback swipeCallback_[EventStage::SIZE];
+    CatchSwipeCallback swipeCatchCallback_[EventStage::SIZE];
 };
 
 } // namespace OHOS::Ace

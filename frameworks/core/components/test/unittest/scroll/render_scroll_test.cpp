@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -921,7 +921,7 @@ HWTEST_F(RenderScrollTest, RenderScrollRotateTest001, TestSize.Level1)
      * @tc.steps: step3. rotate 10
      * @tc.expected: step3. Current Offset will be (0.0, SCROLL_INITIAL_OFFSET + 10).
      */
-    renderScroll_->HandleRotate(10,true);
+    renderScroll_->HandleRotate(10, true);
     renderScroll_->PerformLayout();
     ASSERT_TRUE(renderScroll_->GetCurrentOffset() == Offset(0.0, SCROLL_INITIAL_OFFSET - 10));
 

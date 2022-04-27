@@ -79,7 +79,7 @@ public:
     void RemoveNode(const RefPtr<DOMNode>& node);
     virtual void Mount(int32_t slot);
     void GenerateComponentNode();
-    virtual void OnPageLoadFinish() {};
+    virtual void OnPageLoadFinish() {}
 
     virtual void SetShowAttr(const std::string& showValue);
 
@@ -180,6 +180,7 @@ public:
 
     void SetOnDoubleClick(const EventMarker& eventMarker)
     {
+        ACE_DCHECK(gestureEventComponent_);
         gestureEventComponent_->SetOnDoubleClickId(eventMarker);
     }
 
@@ -200,6 +201,7 @@ public:
 
     void SetOnLongPress(const EventMarker& eventMarker)
     {
+        ACE_DCHECK(gestureEventComponent_);
         gestureEventComponent_->SetOnLongPressId(eventMarker);
     }
 
@@ -370,7 +372,7 @@ public:
     }
 
     // Initialize node theme style when created.
-    virtual void InitializeStyle() {};
+    virtual void InitializeStyle() {}
 
     void OnActive(bool isActive);
 
@@ -505,7 +507,6 @@ public:
 
     virtual void AdjustSpecialParamInLiteMode() {}
 
-    // TODO delete those method form dom node, use declaration.
     virtual void SetAttr(const std::vector<std::pair<std::string, std::string>>& attrs);
     virtual void SetStyle(const std::vector<std::pair<std::string, std::string>>& styles);
     virtual void AddEvent(int32_t pageId, const std::vector<std::string>& events);
@@ -642,10 +643,10 @@ public:
     }
 
 protected:
-    virtual void OnMounted(const RefPtr<DOMNode>& parentNode) {};
-    virtual void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) {};
-    virtual void OnChildNodeRemoved(const RefPtr<DOMNode>& child) {};
-    virtual void OnSetStyleFinished() {};
+    virtual void OnMounted(const RefPtr<DOMNode>& parentNode) {}
+    virtual void OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot) {}
+    virtual void OnChildNodeRemoved(const RefPtr<DOMNode>& child) {}
+    virtual void OnSetStyleFinished() {}
     // Confirm declaration is exist before call GetClickId and GetLongPressId.
     virtual const EventMarker& GetClickId()
     {
@@ -653,7 +654,7 @@ protected:
         auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
         return gestureEvent.IsValid() ? gestureEvent.click.eventMarker : defaultMarker;
     };
-    const EventMarker& GetDoubleClickId()
+    virtual const EventMarker& GetDoubleClickId()
     {
         static EventMarker defaultMarker;
         auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
@@ -701,7 +702,7 @@ protected:
         auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
         return gestureEvent.IsValid() ? gestureEvent.dragDrop.eventMarker : defaultMarker;
     };
-    const EventMarker& GetLongPressId()
+    virtual const EventMarker& GetLongPressId()
     {
         static EventMarker defaultMarker;
         auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
@@ -731,6 +732,26 @@ protected:
         auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
         return gestureEvent.IsValid() ? gestureEvent.pinchCancel.eventMarker : defaultMarker;
     };
+
+    EventMarker& GetSwipeId(uint32_t action, uint32_t stage)
+    {
+        static EventMarker defaultMarker;
+        if (!declaration_) {
+            return defaultMarker;
+        }
+        auto& swipeEvent = declaration_->MaybeResetEvent<CommonSwipeEvent>(EventTag::COMMON_SWIPE_EVENT);
+        if (!swipeEvent.IsValid()) {
+            return defaultMarker;
+        }
+        if (action == EventAction::ON && stage == EventStage::CAPTURE) {
+            return swipeEvent.captureSwipe.eventMarker;
+        } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE) {
+            return swipeEvent.catchBubbleSwipe.eventMarker;
+        } else if (action == EventAction::ON && stage == EventStage::BUBBLE) {
+            return swipeEvent.swipe.eventMarker;
+        }
+        return defaultMarker;
+    }
 
     // Confirm declaration exist and support raw event before call GetTouchId.
     EventMarker& GetTouchId(uint32_t action, uint32_t stage, uint32_t type)
@@ -784,10 +805,10 @@ protected:
     virtual RefPtr<Component> CompositeSpecializedComponent(const std::vector<RefPtr<SingleChild>>& components);
 
     // Subclasses need to override this interface to update component with declaration.
-    virtual void UpdateSpecializedComponentWithDeclaration() {};
+    virtual void UpdateSpecializedComponentWithDeclaration() {}
 
     // Subclasses need to override this interface to implement the dynamic creation of subclass specialized components.
-    virtual void PrepareSpecializedComponent() {};
+    virtual void PrepareSpecializedComponent() {}
 
     virtual void CompositeComponents();
 
@@ -798,7 +819,7 @@ protected:
     virtual void UpdatePositionAnimations(const RefPtr<Component> componet);
 
     // Subclasses need to override this interface to implement reset initialization style before any frontend style set.
-    virtual void ResetInitializedStyle() {};
+    virtual void ResetInitializedStyle() {}
 
     virtual bool IsLeafNode() const
     {
@@ -823,7 +844,6 @@ protected:
 
     void OnChecked(bool isChecked);
 
-    // TODO delete those method from dom node.
     // Each subclass needs to override this function to obtain the properties. If it returns true, it means that the
     // property has been consumed. If it returns false, it means it is handed over to the parent class.
     virtual bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
@@ -845,7 +865,7 @@ protected:
         return false;
     }
 
-    virtual void CallSpecializedMethod(const std::string& method, const std::string& args) {};
+    virtual void CallSpecializedMethod(const std::string& method, const std::string& args) {}
 
     // When the multi-mode input subscript is set to auto, need to determine whether the current component has the
     // ability to support the subscript.
@@ -889,6 +909,7 @@ private:
     void TransitionOptionSetKeyframes(TweenOption& tweenOption);
     void SetDisplayStyle();
 
+    void SetDisplayType();
     void UpdateFlexItemComponent();
     void UpdateUiComponents();
     void UpdateBoxComponent();

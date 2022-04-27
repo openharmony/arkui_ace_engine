@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,8 +34,7 @@ class UIServiceMgrStub : public IRemoteStub<IUIServiceMgr> {
 public:
     UIServiceMgrStub();
     virtual ~UIServiceMgrStub();
-    virtual int OnRemoteRequest(
-        uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
+    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
     int RegisterCallBackInner(MessageParcel& data, MessageParcel& reply);
@@ -46,6 +45,7 @@ private:
     using RequestFuncType = int (UIServiceMgrStub ::*)(MessageParcel& data, MessageParcel& reply);
     int ShowDialogInner(MessageParcel& data, MessageParcel& reply);
     int CancelDialogInner(MessageParcel& data, MessageParcel& reply);
+    int UpdateDialogInner(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, RequestFuncType> requestFuncMap_;
 };
 }  // namespace Ace

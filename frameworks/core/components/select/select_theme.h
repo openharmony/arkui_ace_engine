@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,10 @@
 
 namespace OHOS::Ace {
 
+constexpr double SELECT_OPTION_LEFT_LENGTH = 16.0;
+constexpr double SELECT_OPTION_TOP_LENGTH = 15.0;
+constexpr double SELECT_OPTION_RIGHT_LENGTH = 16.0;
+constexpr double SELECT_OPTION_BOTTOM_LENGTH = 15.0;
 /**
  * SelectTheme defines color and styles of SelectComponent. SelectTheme should be build
  * using SelectTheme::Builder.
@@ -82,8 +86,8 @@ public:
             theme->titleStyle_.SetFontWeight(FontWeight::W500);
             theme->titleStyle_.SetTextColor(themeConstants->GetColor(THEME_OHOS_COLOR_TEXT_PRIMARY));
             theme->titleStyle_.SetTextDecoration(TextDecoration::NONE);
-            // this is the const padding needed by emui
-            theme->optionPadding_ = Edge(16.0, 15.0, 16.0, 15.0, DimensionUnit::VP);
+            theme->optionPadding_ = Edge(SELECT_OPTION_LEFT_LENGTH, SELECT_OPTION_TOP_LENGTH,
+                SELECT_OPTION_RIGHT_LENGTH, SELECT_OPTION_BOTTOM_LENGTH, DimensionUnit::VP);
             theme->optionInterval_ = theme->isTV_ ? Dimension(6.0, DimensionUnit::VP) : 0.0_vp;
             theme->tvFocusTextColor_ = Color(0xE6000000);
             theme->tvNormalBackColor_ = Color(0x33FFFFFF);

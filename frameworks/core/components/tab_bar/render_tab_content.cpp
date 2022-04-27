@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,15 +35,19 @@ void RenderTabContent::Update(const RefPtr<Component>& component)
         LOGW("tabContent is null");
         return;
     }
-    auto tabController = tabContent->GetController();
-    int32_t count = static_cast<int32_t>(tabContent->GetChildren().size());
-    int32_t tabIndex = tabController ? tabController->GetIndex() : 0;
-    if (count != contentCount_ && tabIndex >= count && tabController) {
-        tabController->ValidateIndex(count - 1);
-        tabIndex = tabController->GetIndex();
+    controller_ = tabContent->GetController();
+    ACE_DCHECK(controller_);
+    auto context = context_.Upgrade();
+    if (context && !context->GetIsDeclarative()) {
+        contentCount_ = (controller_->GetTotalCount() > 0) ? controller_->GetTotalCount() : 0;
+        int32_t tabIndex = controller_ ? controller_->GetIndex() : 0;
+        if (tabIndex >= contentCount_) {
+            controller_->ValidateIndex((contentCount_ - 1 < 0) ? 0 : (contentCount_ - 1));
+            tabIndex = controller_->GetIndex();
+        }
+        currentIndex_ = tabIndex;
     }
-    currentIndex_ = tabIndex;
-    contentCount_ = count;
+
     if (scrollable_ != tabContent->IsScrollable()) {
         if (animator_ && animator_->IsRunning()) {
             animator_->Finish();
@@ -53,7 +57,6 @@ void RenderTabContent::Update(const RefPtr<Component>& component)
     scrollDuration_ = tabContent->GetScrollDuration();
     isVertical_ = tabContent->IsVertical();
     SetTextDirection(tabContent->GetTextDirection());
-    auto context = context_.Upgrade();
     if (context && context->GetIsDeclarative()) {
         onChangeEvent_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             tabContent->GetChangeEventId(), context_);
@@ -64,6 +67,31 @@ void RenderTabContent::Update(const RefPtr<Component>& component)
 
     MarkNeedLayout();
     Initialize(GetContext());
+}
+
+void RenderTabContent::FlushIndex()
+{
+    contentCount_ = controller_->GetTotalCount() > 0 ? controller_->GetTotalCount() : 0;
+    if (contentCount_ <= 0) {
+        currentIndex_ = 0;
+        return;
+    }
+    do {
+        if (controller_->IsIndexDefined()) {
+            currentIndex_ = controller_->GetIndex();
+            break;
+        }
+        auto initialIndex = controller_->GetInitialIndex();
+        auto pendingIndex = controller_->GetPendingIndex();
+        if (useInitialIndex_ && pendingIndex < 0) {
+            currentIndex_ = initialIndex < 0 ? 0 : initialIndex;
+            break;
+        }
+        currentIndex_ = pendingIndex < 0 ? 0 : pendingIndex;
+    } while (false);
+    currentIndex_ = currentIndex_ < contentCount_ ? currentIndex_ : (contentCount_ - 1);
+    controller_->SetIndexWithoutChangeContent(currentIndex_);
+    useInitialIndex_ = false;
 }
 
 void RenderTabContent::Initialize(const WeakPtr<PipelineContext>& context)
@@ -99,10 +127,17 @@ void RenderTabContent::Initialize(const WeakPtr<PipelineContext>& context)
                 tabContent->HandleDragEnd();
             }
         });
+        dragDetector_->SetOnDragCancel([weakContent = AceType::WeakClaim(this)]() {
+            auto tabContent = weakContent.Upgrade();
+            if (tabContent) {
+                tabContent->HandleDragEnd();
+            }
+        });
     } else {
         dragDetector_->SetOnDragStart([](const DragStartInfo& info) {});
         dragDetector_->SetOnDragUpdate([](const DragUpdateInfo& info) {});
         dragDetector_->SetOnDragEnd([](const DragEndInfo& info) {});
+        dragDetector_->SetOnDragCancel([]() {});
     }
 }
 
@@ -117,8 +152,7 @@ void RenderTabContent::FireContentChangeEvent() const
     }
     if (changeEvent_) {
         LOGI("FireChangeEvent, index = %{public}d.", currentIndex_);
-        std::string param =
-            std::string(R"("change",{"index":)").append(std::to_string(currentIndex_).append("},null"));
+        std::string param = std::string(R"("change",{"index":)").append(std::to_string(currentIndex_).append("},null"));
         changeEvent_(param);
     }
 }
@@ -237,7 +271,7 @@ void RenderTabContent::ScrollContents(int32_t newIndex, bool isLinkBar, bool fro
             tabContent->HandleStartListener(newIndex, needChange, isLinkBar);
         }
     });
-    animator_->SetDuration(scrollDuration_);
+    animator_->SetDuration(static_cast<int32_t>(scrollDuration_));
     animator_->AddInterpolator(translate_);
     animator_->Play();
     MarkNeedRender();
@@ -355,7 +389,7 @@ void RenderTabContent::UpdateChildPosition(double offset, int32_t currentIndex, 
     LOGD("UpdateChildPosition start offset = %{public}lf, from = %{public}d, to = %{public}d", offset, currentIndex,
         newIndex);
     if (currentIndex < 0 || currentIndex >= contentCount_) {
-        LOGE("currentIndex out of range, currentIndex is %{public}d", currentIndex);
+        LOGE("currentIndex out of range, currentIndex is %{public}d, %{public}d", currentIndex, contentCount_);
         return;
     }
     const auto& fromItem = contentMap_[currentIndex];
@@ -438,7 +472,7 @@ void RenderTabContent::PerformLayout()
             }
             int32_t index = item.first;
             // make sure the new requested tab start with right position, when in animation
-            if ((!isDragging_ && !isInAnimation_) || (index == requestedIndex_)) {
+            if ((!isDragging_ && !isInAnimation_) || (index == requestedIndex_) || forceUpdate_) {
                 if (index < currentIndex_) {
                     childItem->SetPosition(prevPosition);
                     childItem->SetHidden(true);
@@ -451,6 +485,7 @@ void RenderTabContent::PerformLayout()
                 }
             }
         }
+        forceUpdate_ = false;
         requestedIndex_ = -1;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,267 +13,221 @@
  * limitations under the License.
  */
 
-class AppStorage {
-  private static Instance_: AppStorage = undefined;
+class AppStorage extends LocalStorage {
 
-  // FIXME: Perhaps "GetInstance" would be better name for this
-  // static Get(): AppStorage { return AppStorage.Instance_; }
-  static GetOrCreate(): AppStorage {
+  /** 
+   * ccreate and initialize singleton 
+   * initialzie with all properties and their values that Object.keys(params) returns
+   * Property values must not be undefined.
+   */
+  public static CreateSingleton(initializingPropersties?: Object): void {
     if (!AppStorage.Instance_) {
-      AppStorage.Instance_ = new AppStorage();
+      console.log("Creating AppStorage instance.");
+      AppStorage.Instance_ = new AppStorage(initializingPropersties);
+    } else {
+      console.error("AppStorage.CreateNewInstance(..): instance exists already, internal error!")
     }
-    return AppStorage.Instance_;
   }
 
-  private storage_: Map<string, ObservedPropertyAbstract<any>>;
 
-  static Link<T>(key: string): ObservedPropertyAbstract<T> {
-    return AppStorage.GetOrCreate().link(key);
+  /**
+   * create and return a 'link' (two-way sync) to named property
+   * @param propName name of source property in AppStorage
+   * @param linkUser IPropertySubscriber to be notified when return 'link' changes,
+   *      e.g. a View or PersistentStorage
+   * @param subscribersName the linkUser (subscriber) uses this name for the property 
+   *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
+   * @returns  SynchedPropertyTwoWay{Simple|Object| object with given AppStoage prop as  its source.
+   * return undefiend if named property does not already exist in AppStorage
+   */
+  public static Link<T>(key: string, linkUser?: IPropertySubscriber, subscribersName? : string): ObservedPropertyAbstract<T> {
+    return AppStorage.GetOrCreate().link(key, linkUser, subscribersName);
   }
 
-  static SetAndLink<T>(key: string, defaultValue: T): ObservedPropertyAbstract<T> {
-    return AppStorage.GetOrCreate().setAndLink(key, defaultValue);
+  /**
+   * Like link(), will create and initialize a new source property in AppStorage if missing
+   * @param propName 
+   * @param defaultValue value to be used for initializing if new creating new property in AppStorage
+   * @param linkUser IPropertySubscriber to be notified when return 'link' changes
+   * @param subscribersName the linkUser (subscriber) uses this name for the property 
+   *      this name will be used in propertyChange(propName) callback of IMultiPropertiesChangeSubscriber
+   * @returns 
+   */
+  public static SetAndLink<T>(key: string, defaultValue: T, linkUser?: IPropertySubscriber, subscribersName? : string): ObservedPropertyAbstract<T> {
+    return AppStorage.GetOrCreate().setAndLink(key, defaultValue, linkUser, subscribersName);
   }
 
-  static Prop<T>(key: string): ObservedPropertyAbstract<T> {
-    return AppStorage.GetOrCreate().prop(key);
+  /**
+   * create and return a 'prop', one-way sync from named property to returned object
+   * @param propName name of source property in AppStorage
+   * @param propUser IPropertySubscriber to be notified when return 'prop' changes
+   * @returns  SynchedPropertyOneWaySimple object with given AppStoage prop as its source.
+   * return undefiend if named property does not already exist in AppStorage
+   */
+  public static Prop<T>(propName: string, propUser?: IPropertySubscriber, subscribersName?: string): ObservedPropertyAbstract<T> {
+    return AppStorage.GetOrCreate().prop(propName, propUser, subscribersName);
   }
 
-  static SetAndProp<S>(key: string, defaultValue: S): ObservedPropertyAbstract<S> {
-    return AppStorage.GetOrCreate().setAndProp(key, defaultValue);
+  /**
+   * like prop, will create and initialize a new source property in AppStorage if missing
+   * @param propName 
+   * @param defaultValue value to be used for initializing if new creating new property in AppStorage
+   * @param propUser 
+   * @returns SynchedPropertyOneWaySimple object with given AppStoage prop as its source.
+   */
+   public static SetAndProp<S>(key: string, defaultValue: S, propUser?: IPropertySubscriber, subscribersName? : string): ObservedPropertyAbstract<S> {
+    return AppStorage.GetOrCreate().setAndProp(key, defaultValue, propUser, subscribersName);
   }
 
-  static Has(key: string): boolean {
+
+  /**
+   * return true if prooperty with given name exists
+   * same as Map.has
+   * @param propName 
+   * @returns 
+   */
+   public static Has(key: string): boolean {
     return AppStorage.GetOrCreate().has(key);
   }
 
-  static Get<T>(key: string): T | undefined {
+
+  /**
+     * returns value of given property
+     * return undefined if no property with this name
+     * @param propName 
+     * @returns 
+     */
+   public static Get<T>(key: string): T | undefined {
     return AppStorage.GetOrCreate().get(key);
   }
 
-  static Set<T>(key: string, newValue: T): boolean {
+  /**
+   * Set value of given property
+   * set nothing and return false if property with this name does not exist
+   * or if newValuye is undefined (undefined value is not allowed for state variables)
+   * @param propName 
+   * @param newValue 
+   * @returns 
+   */
+   public static Set<T>(key: string, newValue: T): boolean {
     return AppStorage.GetOrCreate().set(key, newValue);
   }
 
-  // FIXME(cvetan): No mechanism to create "immutable" properties
-  static SetOrCreate<T>(key: string, newValue: T): void {
+  /**
+   * add property if not property with given name
+   * Set value of given property
+   * set nothing and return false if newValuye is undefined 
+   * (undefined value is not allowed for state variables)
+   * @param propName 
+   * @param newValue 
+   * @returns 
+   */
+   public static SetOrCreate<T>(key: string, newValue: T): void {
     AppStorage.GetOrCreate().setOrCreate(key, newValue);
   }
 
-  static Delete(key: string): boolean {
-    return AppStorage.GetOrCreate().delete(key);
-  }
-
-  static Keys(): IterableIterator<string> {
-    return AppStorage.GetOrCreate().keys();
-  }
-
-  static Size(): number {
-    return AppStorage.GetOrCreate().size();
-  }
-
-  static Clear(): boolean {
-    return AppStorage.GetOrCreate().clear();
-  }
-
-  static AboutToBeDeleted(): void {
-    AppStorage.GetOrCreate().aboutToBeDeleted();
-  }
-
-  static NumberOfSubscribersTo(propName: string): number | undefined {
-    return AppStorage.GetOrCreate().numberOfSubscrbersTo(propName);
-  }
-
-  static SubscribeToChangesOf<T>(propName: string, subscriber: ISinglePropertyChangeSubscriber<T>): boolean {
-    return AppStorage.GetOrCreate().subscribeToChangesOf(propName, subscriber);
-  }
-
-  static UnsubscribeFromChangesOf(propName: string, subscriberId: number): boolean {
-    return AppStorage.GetOrCreate().unsubscribeFromChangesOf(propName, subscriberId);
-  }
-
-  static IsMutable(key: string): boolean {
-    // FIXME(cvetan): No mechanism for immutable/mutable properties
-    return true;
-  }
-
-  constructor() {
-    this.storage_ = new Map<string, ObservedPropertyAbstract<any>>();
-  }
-
   /**
-   * App should call this method to order close down app storage before
-   * terminating itself.
-   * Before deleting a prop from app storage all its subscribers need to
-   * unsubscribe from the property.
-   *
-   * @returns true if all properties could be removed from app storage
-   */
-  public aboutToBeDeleted(): boolean {
-    return this.clear();
-  }
-
-  public get<T>(propName: string): T | undefined {
-    var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
-    return (p) ? p.get() : undefined;
-  }
-
-  public set<T>(propName: string, newValue: T): boolean {
-    var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
-    if (p) {
-      p.set(newValue);
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  public setOrCreate<T>(propName: string, newValue: T): void {
-    var p: ObservedPropertyAbstract<T> = this.storage_.get(propName);
-    if (p) {
-      console.log(`AppStorage.setOrCreate(${propName}, ${newValue}) update existing property`);
-      p.set(newValue);
-    } else {
-      console.log(`AppStorage.setOrCreate(${propName}, ${newValue}) create new entry and set value`);
-      const newProp = (typeof newValue === "object") ?
-        new ObservedPropertyObject<T>(newValue, undefined, propName)
-        : new ObservedPropertySimple<T>(newValue, undefined, propName);
-      this.storage_.set(propName, newProp);
-    }
-  }
-
-  public has(propName: string): boolean {
-    console.log(`AppStorage.has(${propName})`);
-    return this.storage_.has(propName);
-  }
-
-
-  /**
-   * Delete poperty from AppStorage
+   * Delete property from StorageBase
    * must only use with caution:
    * Before deleting a prop from app storage all its subscribers need to
    * unsubscribe from the property.
    * This method fails and returns false if given property still has subscribers
-   * Another reason for failing is unkmown property.
+   * Another reason for failing is unknown property.
    *
    * @param propName
    * @returns false if method failed
    */
-  public delete(propName: string): boolean {
-    var p: ObservedPropertyAbstract<any> | undefined = this.storage_.get(propName);
-    if (p) {
-      if (p.numberOfSubscrbers()) {
-        console.error(`Attempt to delete property ${propName} that has ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.`);
-        return false;
-      }
-      p.aboutToBeDeleted();
-      this.storage_.delete(propName);
-      return true;
-    } else {
-      console.warn(`Attempt to delete unknown property ${propName}.`);
-      return false;
-    }
+   public static Delete(key: string): boolean {
+    return AppStorage.GetOrCreate().delete(key);
   }
 
   /**
-   * delete all properties from the AppStorage
-   * precondition is that there are no subscribers anymore
-   * method returns false and deletes no poperties if there is any property
-   * that still has subscribers
+   * return a Map Iterator
+   * same as Map.keys
+   * @param propName 
+   * @returns 
    */
-  protected clear(): boolean {
-    for (let propName of this.keys()) {
-      var p: ObservedPropertyAbstract<any> = this.storage_.get(propName);
-      if (p.numberOfSubscrbers()) {
-        console.error(`AppStorage.deleteAll: Attempt to delete property ${propName} that has ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.`);
-        return false;
-      }
-    }
-    for (let propName of this.keys()) {
-      var p: ObservedPropertyAbstract<any> = this.storage_.get(propName);
-      p.aboutToBeDeleted();
-    }
-    console.error(`AppStorage.deleteAll: success`);
-  }
-
-  public keys(): IterableIterator<string> {
-    return this.storage_.keys();
-  }
-
-  public size(): number {
-    return this.storage_.size;
-  }
-
-  public link<T>(propName: string, linkUser?: IPropertySubscriber, contentObserver?: ObservedPropertyAbstract<T>): ObservedPropertyAbstract<T> | undefined {
-    var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
-    return (p) ? p.createLink(linkUser, propName, contentObserver) : undefined
-  }
-
-  public setAndLink<T>(propName: string, defaultValue: T, linkUser?: IPropertySubscriber): ObservedPropertyAbstract<T> {
-    var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
-    if (!p) {
-      this.setOrCreate(propName, defaultValue);
-    }
-    if (linkUser && (linkUser as View).getContentStorage()) {
-      var contentObserver = (linkUser as View).getContentStorage().setAndLink(propName, defaultValue, linkUser);
-      return this.link(propName, linkUser, contentObserver)
-    }
-    return this.link(propName, linkUser);
-  }
-
-  public prop<S>(propName: string, propUser?: IPropertySubscriber, contentObserver?: ObservedPropertyAbstract<S>): ObservedPropertyAbstract<S> | undefined {
-    var p: ObservedPropertyAbstract<S> | undefined = this.storage_.get(propName);
-    return (p) ? p.createProp(propUser, propName, contentObserver) : undefined
-  }
-
-  public setAndProp<S>(propName: string, defaultValue: S, propUser?: IPropertySubscriber): ObservedPropertyAbstract<S> {
-    var p: ObservedPropertyAbstract<S> | undefined = this.storage_.get(propName);
-
-    if (!p) {
-      if (typeof defaultValue === "boolean" ||
-        typeof defaultValue === "number" || typeof defaultValue === "string") {
-        this.setOrCreate(propName, defaultValue);
-      } else {
-        return undefined;
-      }
-    }
-
-    if (propUser && (propUser as View).getContentStorage()) {
-      var contentObserver = (propUser as View).getContentStorage().setAndProp(propName, defaultValue, propUser);
-      return this.prop(propName, propUser, contentObserver)
-    }
-
-    return this.prop(propName, propUser);
+   public static Keys(): IterableIterator<string> {
+    return AppStorage.GetOrCreate().keys();
   }
 
 
-  public subscribeToChangesOf<T>(propName: string, subscriber: ISinglePropertyChangeSubscriber<T>): boolean {
-    var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
-    if (p) {
-      p.subscribeMe(subscriber);
-      return true;
-    }
-    return false;
+  /**
+   * return number of properties
+   * same as Map.size
+   * @param propName 
+   * @returns 
+   */
+   public static Size(): number {
+    return AppStorage.GetOrCreate().size();
   }
 
-  public unsubscribeFromChangesOf(propName: string, subscriberId: number): boolean {
-    var p: ObservedPropertyAbstract<any> | undefined = this.storage_.get(propName);
-    if (p) {
-      p.unlinkSuscriber(subscriberId);
-      return true;
-    }
-    return false;
+  public static Clear(): boolean {
+    return AppStorage.GetOrCreate().clear();
   }
 
-  /*
-  return number of subscribers to this property
-  mostly useful for unit testin
+  public static AboutToBeDeleted(): void {
+    AppStorage.GetOrCreate().aboutToBeDeleted();
+  }
+
+
+  /** 
+   * return number of subscribers to named property
+   * useful for debug purposes
   */
-  public numberOfSubscrbersTo(propName: string): number | undefined {
-    var p: ObservedPropertyAbstract<any> | undefined = this.storage_.get(propName);
-    if (p) {
-      return p.numberOfSubscrbers();
+   public static NumberOfSubscribersTo(propName: string): number | undefined {
+    return AppStorage.GetOrCreate().numberOfSubscrbersTo(propName);
+  }
+
+
+  /**
+   * Subscribe to value change notifications of named property
+   * Any object implementing ISinglePropertyChangeSubscriber interface 
+   * and registerign itself to SubscriberManager can register
+   * Caution: do remember to unregister, otherwise the property will block 
+   * cleanup, see delete() and clear() 
+   * returns false if named property does not exist
+   * @param propName 
+   * @param subscriber 
+   * @returns 
+   */
+   public static SubscribeToChangesOf<T>(propName: string, subscriber: ISinglePropertyChangeSubscriber<T>): boolean {
+    return AppStorage.GetOrCreate().subscribeToChangesOf(propName, subscriber);
+  }
+
+
+  /**
+   * inverse of subscribeToChangesOf
+   * @param propName 
+   * @param subscriberId 
+   * @returns 
+   */
+   public static UnsubscribeFromChangesOf(propName: string, subscriberId: number): boolean {
+    return AppStorage.GetOrCreate().unsubscribeFromChangesOf(propName, subscriberId);
+  }
+
+  public static IsMutable(key: string): boolean {
+    return true;
+  }
+
+
+  // instance functions below:
+  // Should all be protected, but TS lang does not allow access from static member to protected member
+
+  private static Instance_: AppStorage = undefined;
+
+  private static GetOrCreate(): AppStorage {
+    if (!AppStorage.Instance_) {
+      console.warn("AppStorage instance missing. Use AppStorage.CreateInstance(initObj). Creating instance without any initialization.");
+      AppStorage.Instance_ = new AppStorage({});
     }
-    return undefined;
+    return AppStorage.Instance_;
+  }
+
+  /** singleton class, app can not create instances */
+  protected constructor(initializingProperties: Object) {
+    super(initializingProperties);
   }
 }
+
+

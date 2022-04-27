@@ -176,15 +176,6 @@ void DOMSwitch::PrepareSpecializedComponent()
     if (!textOff_.empty()) {
         switchChild_->SetTextOff(textOff_);
     }
-#ifndef WEARABLE_PRODUCT
-    if (declaration_) {
-        auto& multimodalAttr =
-            static_cast<CommonMultimodalAttribute&>(declaration_->GetAttribute(AttributeTag::COMMON_MULTIMODAL_ATTR));
-        if (multimodalAttr.IsValid() && !multimodalAttr.IsUnavailable() && multimodalAttr.scene == SceneLabel::SWITCH) {
-            switchChild_->SetMultimodalProperties(multimodalAttr);
-        }
-    }
-#endif
     RefPtr<SwitchTheme> theme = GetTheme<SwitchTheme>();
     if (switchChild_->GetShowText()) {
         return;
@@ -195,6 +186,15 @@ void DOMSwitch::PrepareSpecializedComponent()
     if (boxComponent_->GetWidthDimension().Value() < 0.0 && theme) {
         boxComponent_->SetWidth(theme->GetWidth().Value(), theme->GetWidth().Unit());
     }
+#ifndef WEARABLE_PRODUCT
+    if (declaration_) {
+        auto& multimodalAttr =
+            static_cast<CommonMultimodalAttribute&>(declaration_->GetAttribute(AttributeTag::COMMON_MULTIMODAL_ATTR));
+        if (multimodalAttr.IsValid() && !multimodalAttr.IsUnavailable() && multimodalAttr.scene == SceneLabel::SWITCH) {
+            switchChild_->SetMultimodalProperties(multimodalAttr);
+        }
+    }
+#endif
 }
 
 } // namespace OHOS::Ace::Framework

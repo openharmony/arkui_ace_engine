@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -628,7 +628,7 @@ bool MatchResConfig(const AceResConfig& desired, const AceResConfig& supported)
              !IsResolutionMatch(desired, supported));
 }
 
-bool DeclaritiveMatchResConfig(const AceResConfig& desired, const AceResConfig& supported)
+bool DeclarativeMatchResConfig(const AceResConfig& desired, const AceResConfig& supported)
 {
     return !(!IsOrientationMatch(desired, supported) || !IsDeviceTypeMatch(desired, supported));
 }
@@ -875,7 +875,7 @@ void AceResConfig::MatchAndSortDeclarativeResConfigs(const std::set<std::string>
     int32_t candidateConfigSize = static_cast<int32_t>(matchedLocaleConfigs.size());
     std::vector<AceResConfig> matchedResConfigs;
     for (auto i = 0; i < candidateConfigSize; i++) {
-        if (!DeclaritiveMatchResConfig(deviceResConfig, matchedLocaleConfigs[i])) {
+        if (!DeclarativeMatchResConfig(deviceResConfig, matchedLocaleConfigs[i])) {
             continue;
         } else {
             matchedResConfigs.emplace_back(matchedLocaleConfigs[i]);
@@ -883,7 +883,7 @@ void AceResConfig::MatchAndSortDeclarativeResConfigs(const std::set<std::string>
     }
 
     int32_t left = 0;
-    int32_t right = matchedResConfigs.size() - 1;
+    int32_t right = static_cast<int32_t>(matchedResConfigs.size()) - 1;
     SortDeclarativeResConfigs(deviceResConfig, matchedResConfigs, left, right);
     for (const auto& matchedConfig : matchedResConfigs) {
         matchedFoldersList.emplace_back(ConvertDeclarativeResConfigToTag(matchedConfig));

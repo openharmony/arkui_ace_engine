@@ -52,6 +52,7 @@ private:
     void DrawDownloadButton(SkCanvas* canvas, const Offset& offset);
     void DrawButton(SkCanvas* canvas, const Offset& offset);
     void ConvertToSkVector(const std::array<Radius, 4>& radii, SkVector* skRadii);
+    void PaintFocus(RenderContext& context, const Offset& offset);
     uint32_t GetStateColor();
     bool NeedClickedColor(const Color& backgroundColor);
 

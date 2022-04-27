@@ -64,7 +64,13 @@ void RosenRenderSearch::Paint(RenderContext& context, const Offset& offset)
         if (needReverse_) {
             searchBoxOffset_ = searchTextRect_.GetOffset() + Offset(NormalizeToPx(SEARCH_SPACING), 0.0);
         }
-        renderSearchBox_->Paint(context, offset + searchBoxOffset_);
+        auto buttonText = renderSearchBox_->GetFirstChild();
+        if (buttonText) {
+            auto textSize = buttonText->GetLayoutSize();
+            double yOffset = (searchTextRect_.Height() - textSize.Height()) / 2;
+            double xOffset = (searchTextRect_.Width() - textSize.Width()) / 2;
+            buttonText->Paint(context, offset + searchBoxOffset_ + Offset(xOffset, yOffset));
+        }
     }
 
     PaintFocus();

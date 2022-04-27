@@ -56,6 +56,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_counter.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_distributed.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
@@ -138,7 +139,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
+#ifdef XCOMPONENT_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #endif
@@ -188,13 +190,12 @@ static JSValue JsLoadDocument(JSContext* ctx, JSValueConst new_target, int argc,
     page->SetDeclarativeOnPageAppearCallback([view]() { view->FireOnShow(); });
     page->SetDeclarativeOnPageDisAppearCallback([view]() { view->FireOnHide(); });
     page->SetDeclarativeOnPageRefreshCallback([view]() { view->MarkNeedUpdate(); });
-
-    if (page->IsUsePluginComponent()) {
-        LOGI("Load Document UsePluginComponent");
-        if (!page->GetPluginComponentJsonData().empty()) {
-            view->ExecuteUpdateWithValueParams(page->GetPluginComponentJsonData());
-        }
-    }
+    page->SetDeclarativeOnUpdateWithValueParamsCallback(
+        [view](const std::string& params) {
+            if (view && !params.empty()) {
+                view->ExecuteUpdateWithValueParams(params);
+            }
+        });
 
     return JS_UNDEFINED;
 }
@@ -626,7 +627,10 @@ JSValue Fp2Px(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* a
         return JS_ThrowSyntaxError(ctx, "container is null");
     }
     auto pipelineContext = container->GetPipelineContext();
-    double fontScale = pipelineContext->GetFontScale();
+    double fontScale = 1.0;
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
     double pxValue = fpValue * density * fontScale;
 
     int32_t result = GreatOrEqual(pxValue, 0) ? (pxValue + 0.5) : (pxValue - 0.5);
@@ -654,7 +658,10 @@ JSValue Px2Fp(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* a
         return JS_ThrowSyntaxError(ctx, "container is null");
     }
     auto pipelineContext = container->GetPipelineContext();
-    double fontScale = pipelineContext->GetFontScale();
+    double fontScale = 1.0;
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
     double ratio = density * fontScale;
     double fpValue = pxValue / ratio;
 
@@ -737,7 +744,7 @@ JSValue SetAppBackgroundColor(JSContext* ctx, JSValueConst new_target, int argc,
     }
     auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext) {
-        pipelineContext->SetRootBgColor(Color::FromString(backgroundColorStr));
+        pipelineContext->SetAppBgColor(Color::FromString(backgroundColorStr));
     }
     return JS_UNDEFINED;
 }
@@ -824,6 +831,8 @@ void JsRegisterViews(BindingTarget globalObj)
     JSText::JSBind(globalObj);
     JSDatePicker::JSBind(globalObj);
     JSDatePickerDialog::JSBind(globalObj);
+    JSTimePicker::JSBind(globalObj);
+    JSTimePickerDialog::JSBind(globalObj);
     JSSpan::JSBind(globalObj);
     JSButton::JSBind(globalObj);
     JSCanvas::JSBind(globalObj);
@@ -856,6 +865,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSEnvironment::JSBind(globalObj);
     JSViewContext::JSBind(globalObj);
     JSViewStackProcessor::JSBind(globalObj);
+    JSLocalStorage::JSBind(globalObj);
     JSFlexImpl::JSBind(globalObj);
     JSScroll::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
@@ -867,6 +877,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSBlank::JSBind(globalObj);
     JSCalendar::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
+    JSDistributed::JSBind(globalObj);
     JSRadio::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSRenderingContext::JSBind(globalObj);

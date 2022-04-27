@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -299,7 +299,7 @@ std::string ConvertInputTypeToString(AceTextCategory type)
 bool FindFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityNode>& resultNode)
 {
     LOGI("FindFocus nodeId(%{public}d) focus(%{public}d)", node->GetNodeId(), node->GetFocusedState());
-    if (node->GetFocusedState()) {
+    if (node->GetAccessibilityFocusedState()) {
         resultNode = node;
         LOGI("FindFocus nodeId(%{public}d)", resultNode->GetNodeId());
         return true;
@@ -319,28 +319,21 @@ bool FindFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityNode>&
     return false;
 }
 
-bool FindText(const RefPtr<AccessibilityNode>& node, const std::string& text, RefPtr<AccessibilityNode>& resultNode)
+void FindText(
+    const RefPtr<AccessibilityNode>& node, const std::string& text, std::list<RefPtr<AccessibilityNode>>& nodeList)
 {
     LOGI("FindText nodeId(%{public}d)", node->GetNodeId());
-    if ((node->GetText().find(text) != std::string::npos)) {
-        resultNode = node;
-        LOGI("FindText nodeId(%{public}d)", resultNode->GetNodeId());
-        return true;
+    if ((node != nullptr) && (node->GetText().find(text) != std::string::npos)) {
+        LOGI("FindText find nodeId(%{public}d)", node->GetNodeId());
+        nodeList.push_back(node);
     }
     if (!node->GetChildList().empty()) {
-        for (const auto& item : node->GetChildList()) {
-            if (resultNode != nullptr) {
-                return true;
-            }
-            if (FindText(item, text, resultNode)) {
-                LOGI("FindText nodeId:%{public}d", resultNode->GetNodeId());
-                return true;
-            }
+        for (const auto& child : node->GetChildList()) {
+            FindText(child, text, nodeList);
         }
     }
-
-    return false;
 }
+
 } // namespace
 
 JsAccessibilityManager::~JsAccessibilityManager()
@@ -355,7 +348,10 @@ JsAccessibilityManager::~JsAccessibilityManager()
 bool JsAccessibilityManager::SubscribeStateObserver(const int eventType)
 {
     LOGI("JsAccessibilityManager::SubscribeStateObserver");
-    stateObserver_ = std::make_shared<JsAccessibilityStateObserver>();
+    if (!stateObserver_) {
+        stateObserver_ = std::make_shared<JsAccessibilityStateObserver>();
+    }
+
     stateObserver_->SetHandler(WeakClaim(this));
 
     auto instance = AccessibilitySystemAbilityClient::GetInstance();
@@ -371,8 +367,9 @@ bool JsAccessibilityManager::SubscribeStateObserver(const int eventType)
 bool JsAccessibilityManager::UnsubscribeStateObserver(const int eventType)
 {
     LOGI("JsAccessibilityManager::UnsubscribeStateObserver");
-    stateObserver_ = std::make_shared<JsAccessibilityStateObserver>();
-    stateObserver_->SetHandler(WeakClaim(this));
+    if (!stateObserver_) {
+        return false;
+    }
 
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     if (instance == nullptr) {
@@ -390,6 +387,12 @@ void JsAccessibilityManager::InitializeCallback()
     if (IsRegister()) {
         return;
     }
+
+    auto client = AccessibilitySystemAbilityClient::GetInstance();
+    if (!client) {
+        return;
+    }
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(client->IsEnabled());
 
     SubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
 
@@ -485,7 +488,7 @@ void JsAccessibilityManager::UpdateNodeChildIds(const RefPtr<AccessibilityNode>&
     auto rootNodeId = GetRootNodeId();
 
     // get last stack children to barrier free service.
-    if ((node->GetNodeId() == GetRootNodeId() + ROOT_STACK_BASE) && !children.empty()) {
+    if ((node->GetNodeId() == GetRootNodeId() + ROOT_STACK_BASE) && !children.empty() && !IsDeclarative()) {
         auto lastChildNodeId = children.back()->GetNodeId();
         if (isOhosHostCard()) {
             childrenVec.emplace_back(ConvertToCardAccessibilityId(lastChildNodeId, cardId, rootNodeId));
@@ -571,7 +574,7 @@ void JsAccessibilityManager::DumpProperty(const std::vector<std::string>& params
         DumpLog::GetInstance().Print("Error: params length is illegal!");
         return;
     }
-    if (params[0] != DUMP_ORDER) {
+    if (params[0] != DUMP_ORDER && params[0] != DUMP_INSPECTOR) {
         DumpLog::GetInstance().Print("Error: not accessibility dump order!");
         return;
     }
@@ -729,7 +732,7 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessib
 void JsAccessibilityManager::SearchElementInfoByAccessibilityId(
     const long elementId, const int requestId, AccessibilityElementOperatorCallback& callback, const int mode)
 {
-    LOGI("SearchElementInfoByAccessibilityId elementId(%{public}ld)", elementId);
+    LOGI("SearchElementInfoByAccessibilityId elementId(%{public}ld) mode(%{public}d)", elementId, mode);
     auto weak = WeakClaim(this);
     auto jsAccessibilityManager = weak.Upgrade();
     if (!jsAccessibilityManager) {
@@ -757,7 +760,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(
     // parent and me.
     RefPtr<AccessibilityNode> parentNode;
     uint32_t umode = mode;
-    if (umode & PREFETCH_PREDECESSORS) {
+    if (umode & static_cast<uint32_t>(PREFETCH_PREDECESSORS)) {
         if (node->GetParentId() != -1 && node->GetParentId() != DEFAULT_PARENT_ID) {
             auto parentNode = node->GetParentNode();
             UpdateAccessibilityNodeInfo(parentNode, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
@@ -765,7 +768,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(
             infos.push_back(nodeInfo);
 
             // sister/brothers.
-            if (umode & PREFETCH_SIBLINGS) {
+            if (umode & static_cast<uint32_t>(PREFETCH_SIBLINGS)) {
                 auto childs = parentNode->GetChildList();
                 for (const auto& item : node->GetChildList()) {
                     UpdateAccessibilityNodeInfo(item, nodeInfo, jsAccessibilityManager,
@@ -776,7 +779,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(
         }
     }
     // childs.
-    if (mode & PREFETCH_CHILDREN) {
+    if (umode & static_cast<uint32_t>(PREFETCH_CHILDREN)) {
         auto childs = node->GetChildList();
         for (const auto& item : node->GetChildList()) {
             UpdateAccessibilityNodeInfo(item, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
@@ -835,7 +838,6 @@ void JsAccessibilityManager::SearchElementInfosByText(const long elementId, cons
         return;
     }
 
-    AccessibilityElementInfo nodeInfo;
     NodeId nodeId = static_cast<NodeId>(elementId);
     if (elementId == -1) {
         return;
@@ -848,18 +850,19 @@ void JsAccessibilityManager::SearchElementInfosByText(const long elementId, cons
     }
 
     std::list<AccessibilityElementInfo> infos;
-    RefPtr<AccessibilityNode> resultNode = nullptr;
-    bool status = FindText(node, text, resultNode);
-    LOGI("FindText status:%{public}d", status);
-
-    if ((status) && (resultNode != nullptr)) {
-        LOGI("FindText text NodeId:%{public}d", resultNode->GetNodeId());    
-        UpdateAccessibilityNodeInfo(resultNode, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
-            jsAccessibilityManager->GetRootNodeId());
-        infos.push_back(nodeInfo);
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    FindText(node, text, nodeList);
+    if (!nodeList.empty()) {
+        for (const auto& node : nodeList) {
+            LOGI(" FindText end nodeId:%{public}d", node->GetNodeId());
+            AccessibilityElementInfo nodeInfo;
+            UpdateAccessibilityNodeInfo(node, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
+                jsAccessibilityManager->GetRootNodeId());
+            infos.emplace_back(nodeInfo);
+        }
     }
 
-    LOGI("SetSearchElementInfoByTextResult infos.size(%{public}d)", infos.size());
+    LOGI("SetSearchElementInfoByTextResult infos.size(%{public}zu)", infos.size());
     callback.SetSearchElementInfoByTextResult(infos, requestId);
 }
 
@@ -1123,6 +1126,7 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
                 } else {
                     jsAccessibilityManager->DeregisterInteractionOperation();
                 }
+                AceApplicationInfo::GetInstance().SetAccessibilityEnabled(state);
             },
             TaskExecutor::TaskType::UI);
     }
@@ -1159,14 +1163,13 @@ void JsAccessibilityManager::FocusMoveSearch(const long elementId, const int dir
     auto weak = WeakClaim(this);
     auto jsAccessibilityManager = weak.Upgrade();
     AccessibilityElementInfo nodeInfo;
-
     auto node = jsAccessibilityManager->GetAccessibilityNodeFromPage((NodeId)elementId);
-    LOGI("FocusMoveSearch nodeId:%{public}d", node->GetNodeId());
     if (!node) {
         LOGW("AccessibilityNodeInfo can't attach component by Id = %{public}d", (NodeId)elementId);
         callback.SetFocusMoveSearchResult(nodeInfo, requestId);
         return;
     }
+    LOGI("FocusMoveSearch nodeId:%{public}d", node->GetNodeId());
 
     auto context = GetPipelineContext().Upgrade();
     if (!context) {
@@ -1205,8 +1208,9 @@ void JsAccessibilityManager::FocusMoveSearch(const long elementId, const int dir
         default:
             break;
     }
-    LOGI("FocusMoveSearch end nodeId:%{public}d", resultNode->GetNodeId());
+
     if (resultNode) {
+        LOGI("FocusMoveSearch end nodeId:%{public}d", resultNode->GetNodeId());
         jsAccessibilityManager->UpdateNodeChildIds(resultNode);
         UpdateAccessibilityNodeInfo(resultNode, nodeInfo, jsAccessibilityManager, windowId_, rootNode->GetNodeId());
     }
@@ -1512,6 +1516,7 @@ bool JsAccessibilityManager::RequestAccessibilityFocus(const RefPtr<Accessibilit
     ClearCurrentFocus();
     currentFocusNodeId_ = requestNodeId;
     node->SetFocusedState(true);
+    node->SetAccessibilityFocusedState(true);
     LOGI("RequestAccessibilityFocus SetFocusedState true nodeId:%{public}d", node->GetNodeId());
     return node->ActionAccessibilityFocus(true);
 }
@@ -1527,6 +1532,7 @@ bool JsAccessibilityManager::ClearAccessibilityFocus(const RefPtr<AccessibilityN
 
     currentFocusNodeId_ = -1;
     node->SetFocusedState(false);
+    node->SetAccessibilityFocusedState(false);
     return node->ActionAccessibilityFocus(false);
 }
 
@@ -1537,6 +1543,7 @@ bool JsAccessibilityManager::ClearCurrentFocus()
     if (currentFocusNode != nullptr) {
         currentFocusNodeId_ = -1;
         currentFocusNode->SetFocusedState(false);
+        currentFocusNode->SetAccessibilityFocusedState(false);
         LOGI("ClearCurrentFocus SetFocusedState false nodeId:%{public}d", currentFocusNode->GetNodeId());
         return currentFocusNode->ActionAccessibilityFocus(false);
     }

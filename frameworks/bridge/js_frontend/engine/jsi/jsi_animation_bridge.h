@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,7 +106,7 @@ private:
 class JsiAnimationBridgeTaskOperation : public AnimationBridgeTask {
     DECLARE_ACE_TYPE(JsiAnimationBridgeTaskOperation, AnimationBridgeTask)
 public:
-    explicit JsiAnimationBridgeTaskOperation(AnimationOperation operation) : operation_(operation) {};
+    explicit JsiAnimationBridgeTaskOperation(AnimationOperation operation) : operation_(operation) {}
     ~JsiAnimationBridgeTaskOperation() override = default;
     void AnimationBridgeTaskFunc(const RefPtr<JsAcePage>& page, NodeId nodeId) override;
 

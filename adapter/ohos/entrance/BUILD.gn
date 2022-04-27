@@ -19,6 +19,7 @@ template("ace_ohos_standard_source_set") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
 
@@ -51,7 +52,10 @@ template("ace_ohos_standard_source_set") {
     configs = [ "$ace_root:ace_config" ]
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
-      configs += [ "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config" ]
+      configs += [
+        "//foundation/graphic/standard/rosen/modules/render_service_base:export_config",
+        "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config",
+      ]
     }
 
     include_dirs = [
@@ -59,11 +63,12 @@ template("ace_ohos_standard_source_set") {
       "//foundation/aafwk/standard/interfaces/innerkits/runtime/include/",
       "//foundation/ace/napi/interfaces/kits",
       "//foundation/ace/napi/native_engine",
-      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_dataability/include",
-      "//foundation/distributeddatamgr/appdatamgr/interfaces/innerkits/native_rdb/include",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability/include",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/rdb/include",
       "//foundation/windowmanager/interfaces/innerkits",
       "//third_party/node/src",
       "//utils/native/base/include",
+      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/preferences/include/",
     ]
 
     deps = [
@@ -96,6 +101,7 @@ template("ace_ohos_standard_source_set") {
       "ipc:ipc_core",
       "napi:ace_napi",
       "native_appdatamgr:native_dataability",
+      "native_appdatamgr:native_preferences",
       "native_appdatamgr:native_rdb",
     ]
   }

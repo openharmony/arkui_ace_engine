@@ -126,8 +126,6 @@ class RenderGridLayout : public RenderNode {
 public:
     static RefPtr<RenderNode> Create();
 
-    void OnChildAdded(const RefPtr<RenderNode>& renderNode) override;
-
     void Update(const RefPtr<Component>& component) override;
 
     void PerformLayout() override;
@@ -248,7 +246,7 @@ protected:
 
     const RefPtr<RenderGridLayout> GetPreTargetRenderGrid() const
     {
-        return preTargetRenderGrid_;
+        return preTargetRenderGrid_.Upgrade();
     }
 
     void SetMainTargetRenderGrid(const RefPtr<RenderGridLayout>& mainTargetRenderGrid)
@@ -258,7 +256,7 @@ protected:
 
     const RefPtr<RenderGridLayout> GetMainTargetRenderGrid() const
     {
-        return mainTargetRenderGrid_;
+        return mainTargetRenderGrid_.Upgrade();
     }
 
     void SetLongPressPoint(const Point& lastLongPressPoint)
@@ -333,9 +331,9 @@ protected:
 
     // it should be cells which has item in
     bool MoveItemsBackward(int32_t fromRow, int32_t fromColum, int32_t toRow, int32_t toColum);
-    void UpdateMatrixByIndexStrong(int32_t index, int32_t row, int32_t colum);
+    void UpdateMatrixByIndexStrong(int32_t index, int32_t row, int32_t column);
     void UpdateCurInsertPos(int32_t curInsertRow, int32_t curInsertColum);
-    int32_t CalIndexForItemByRowAndColum(int32_t row, int32_t colum);
+    int32_t CalIndexForItemByRowAndColum(int32_t row, int32_t column);
 
     // If the first is equal the second, return true, else return false.
     bool SortCellIndex(int32_t rowFirst, int32_t columFirst, int32_t rowSecond, int32_t columSecond, bool& firstIsPre);
@@ -443,8 +441,8 @@ protected:
     std::map<int32_t, std::map<int32_t, Size>> gridCells_;
 
     RefPtr<GestureRecognizer> dragDropGesture_;
-    RefPtr<RenderGridLayout> preTargetRenderGrid_ = nullptr;
-    RefPtr<RenderGridLayout> mainTargetRenderGrid_ = nullptr;
+    WeakPtr<RenderGridLayout> preTargetRenderGrid_ = nullptr;
+    WeakPtr<RenderGridLayout> mainTargetRenderGrid_ = nullptr;
 
     // The list of renderNodes of items in the grid
     std::vector<RefPtr<RenderNode>> itemsInGrid_;
@@ -531,7 +529,7 @@ protected:
     RefPtr<Animator> flexController_;
     bool supportAnimation_ = false;
     bool dragAnimation_ = false;
-    EdgeEffect edgeEffect_ = EdgeEffect::SPRING;
+    EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     std::atomic<bool> needRunAnimation_;
     std::map<std::string, std::function<void()>> animationFinishedFuncList_;
     std::mutex animationLock_;

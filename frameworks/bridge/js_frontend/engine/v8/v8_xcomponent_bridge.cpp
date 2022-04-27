@@ -120,4 +120,94 @@ void V8XComponentBridge::HandleContext(const v8::Local<v8::Context>& ctx, NodeId
     hasPluginLoaded_ = true;
     return;
 }
+
+v8::Local<v8::String> V8XComponentBridge::JsGetXComponentSurfaceId(v8::Isolate* isolate, NodeId nodeId)
+{
+    if (!isolate) {
+        return v8::Local<v8::String>();
+    }
+    auto page = static_cast<RefPtr<JsAcePage>*>(isolate->GetData(V8EngineInstance::RUNNING_PAGE));
+    if (page == nullptr) {
+        return v8::Local<v8::String>();
+    }
+
+    std::string surfaceId = "";
+    auto task = [nodeId, page, &surfaceId]() {
+        auto domDoc = (*page)->GetDomDocument();
+        if (!domDoc) {
+            return;
+        }
+        auto domXComponent = AceType::DynamicCast<DOMXComponent>(domDoc->GetDOMNodeById(nodeId));
+        if (!domXComponent) {
+            return;
+        }
+        surfaceId = domXComponent->GetSurfaceId();
+    };
+
+    auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
+    if (delegate == nullptr) {
+        return v8::Local<v8::String>();
+    }
+    (*delegate)->PostSyncTaskToPage(task);
+
+    return v8::String::NewFromUtf8(isolate, surfaceId.c_str()).ToLocalChecked();
+}
+
+void V8XComponentBridge::JsSetXComponentSurfaceSize(
+    const v8::FunctionCallbackInfo<v8::Value>& args, const std::string& arguments, NodeId nodeId)
+{
+    v8::Isolate* isolate = args.GetIsolate();
+    if (isolate == nullptr) {
+        LOGE("JsSetXComponentSurfaceSize isolate is null!");
+        return;
+    }
+    v8::HandleScope handleScope(isolate);
+    auto context = isolate->GetCurrentContext();
+    if (context.IsEmpty()) {
+        LOGE("JsSetXComponentSurfaceSize context is empty!");
+        return;
+    }
+    v8::Local<v8::External> data = v8::Local<v8::External>::Cast(args.Data());
+    V8EngineInstance* engineInstance = static_cast<V8EngineInstance*>(data->Value());
+    if (engineInstance == nullptr) {
+        LOGE("JsSetXComponentSurfaceSize engineInstance is null!");
+        return;
+    }
+
+    auto page = static_cast<RefPtr<JsAcePage>*>(isolate->GetData(V8EngineInstance::RUNNING_PAGE));
+    if (page == nullptr) {
+        LOGE("JsSetXComponentSurfaceSize page is null");
+        return;
+    }
+
+    auto task = [nodeId, page, arguments]() {
+        auto domDoc = (*page)->GetDomDocument();
+        if (!domDoc) {
+            LOGE("JsSetXComponentSurfaceSize dom document is null!");
+            return;
+        }
+
+        auto domXComponent = AceType::DynamicCast<DOMXComponent>(domDoc->GetDOMNodeById(nodeId));
+        if (!domXComponent) {
+            return;
+        }
+
+        std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(arguments);
+        if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() < 1) {
+            LOGE("JsSetXComponentSurfaceSize failed. parse args error");
+            return;
+        }
+        std::unique_ptr<JsonValue> surfaceSizePara = argsValue->GetArrayItem(0);
+        uint32_t surfaceWidth = surfaceSizePara->GetUInt("surfaceWidth", 0);
+        uint32_t surfaceHeight = surfaceSizePara->GetUInt("surfaceHeight", 0);
+        domXComponent->SetSurfaceSize(surfaceWidth, surfaceHeight);
+    };
+
+    auto delegate = engineInstance->GetDelegate();
+    if (!delegate) {
+        LOGE("JsSetXComponentSurfaceSize delegate is null");
+        return;
+    }
+    delegate->PostSyncTaskToPage(task);
+}
 } // namespace OHOS::Ace::Framework

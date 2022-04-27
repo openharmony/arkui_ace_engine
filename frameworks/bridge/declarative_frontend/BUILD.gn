@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,6 +20,7 @@ template("declarative_frontend") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
 
@@ -52,30 +53,20 @@ foreach(item, ace_platforms) {
 base_output_path = get_label_info(":gen_js_proxyclass", "target_out_dir")
 jsproxyclass_obj_path = base_output_path + "/js_proxy_class.o"
 jsenumstyle_obj_path = base_output_path + "/js_enum_style.o"
-jscontentstorage_obj_path = base_output_path + "/js_content_storage.o"
 jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
 
 gen_obj("js_proxyclass") {
   input = "engine/stateMgmt.js"
-  if (use_mac || use_mingw_win) {
+  if (use_mac || use_mingw_win || target_os == "ios") {
     jsproxyclass_obj_path = base_output_path + "/js_proxy_class.c"
   }
   output = jsproxyclass_obj_path
   snapshot_dep = []
 }
 
-gen_obj("js_content_storage") {
-  input = "engine/contentStorage.js"
-  if (use_mac || use_mingw_win) {
-    jscontentstorage_obj_path = base_output_path + "/js_content_storage.c"
-  }
-  output = jscontentstorage_obj_path
-  snapshot_dep = []
-}
-
 gen_obj("js_enum_style") {
   input = "engine/jsEnumStyle.js"
-  if (use_mac || use_mingw_win) {
+  if (use_mac || use_mingw_win || target_os == "ios") {
     jsenumstyle_obj_path = base_output_path + "/js_enum_style.c"
   }
   output = jsenumstyle_obj_path
@@ -84,7 +75,7 @@ gen_obj("js_enum_style") {
 
 gen_obj("js_mock_system_plugin") {
   input = "$root_out_dir/obj/third_party/jsframework/dist/jsMockSystemPlugin.js"
-  if (use_mac || use_mingw_win) {
+  if (use_mac || use_mingw_win || target_os == "ios") {
     jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.c"
   }
   output = jsmocksystemplugin_obj_path
@@ -96,9 +87,12 @@ template("declarative_js_engine") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
     if (target_cpu == "arm64") {
-      defines += [ "_ARM64_" ]
+      if (!is_mingw) {
+        defines += [ "_ARM64_" ]
+      }
     }
 
     deps = []
@@ -151,6 +145,7 @@ template("declarative_js_engine") {
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
+      "jsview/js_distributed.cpp",
       "jsview/js_divider.cpp",
       "jsview/js_ellipse.cpp",
       "jsview/js_environment.cpp",
@@ -173,6 +168,7 @@ template("declarative_js_engine") {
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_loading_progress.cpp",
+      "jsview/js_local_storage.cpp",
       "jsview/js_marquee.cpp",
       "jsview/js_matrix2d.cpp",
       "jsview/js_navigation.cpp",
@@ -286,14 +282,13 @@ template("declarative_js_engine") {
       deps += [ "$ace_root/build:libace" ]
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
-        deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
+        deps += [ "$ace_napi:ace_container_scope" ]
       }
     }
 
     deps += [ "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform" ]
 
     deps += [
-      ":gen_obj_src_js_content_storage",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
     ]

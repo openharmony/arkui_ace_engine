@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,7 @@ class SynchedPropertyNesedObject<C extends Object>
   // this object is subscriber to ObservedObject
   // will call this cb function when property has changed
   hasChanged(newValue: C): void {
-    console.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
+    console.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
     this.notifyHasChanged(this.obsObject_);
   }
 
@@ -59,7 +59,7 @@ class SynchedPropertyNesedObject<C extends Object>
 
   // get 'read through` from the ObservedProperty
   public get(): C {
-    console.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: get`)
+    console.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: get`)
     this.notifyPropertyRead();
     return this.obsObject_;
   }
@@ -67,11 +67,11 @@ class SynchedPropertyNesedObject<C extends Object>
   // set 'writes through` to the ObservedProperty
   public set(newValue: C): void {
     if (this.obsObject_ == newValue) {
-      console.debug(`SynchedPropertyNesedObject[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+      console.debug(`SynchedPropertyNesedObject[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
       return;
     }
 
-    console.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+    console.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
 
     // unsubscribe from the old value ObservedObject
     ObservedObject.removeOwningProperty(this.obsObject_, this);
@@ -92,11 +92,11 @@ class SynchedPropertyNesedObject<C extends Object>
  * changes.
  */
   public createLink(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<C>): ObservedPropertyAbstract<C> {
+    linkPropName?: PropertyInfo): ObservedPropertyAbstract<C> {
     throw new Error("Method not supported for property linking to a nested objects.");
   }
   public createProp(subscribeOwner?: IPropertySubscriber,
-    linkPropName?: PropertyInfo, contentObserver?: ObservedPropertyAbstract<C>): ObservedPropertyAbstract<C> {
+    linkPropName?: PropertyInfo): ObservedPropertyAbstract<C> {
     throw new Error("Creating a 'Prop' proerty is unsuppoeted for Object type prperty value.");
   }
 }

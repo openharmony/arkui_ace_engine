@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,7 @@ public:
 
     void LoadPluginJsCode(std::string&& jsCode) const override {}
     void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const override {}
+    std::string GetFormSrcPath(const std::string& uri, const std::string& suffix) const;
 
     // application lifecycle.
     void UpdateState(Frontend::State state) override {}
@@ -99,6 +100,7 @@ public:
     }
     void OnRemoteTerminated() override {}
     void OnNewRequest(const std::string& data) override {}
+    void OnDialogUpdated(const std::string& data) override {}
     void OnNewWant(const std::string& data) override {}
     void CallRouterBack() override {}
     void OnSurfaceChanged(int32_t width, int32_t height) override;
@@ -148,6 +150,26 @@ public:
         cardHapPath_ = path;
     }
 
+    std::string GetFormSrc() const
+    {
+        return formSrc_;
+    }
+
+    void SetFormSrc(std::string formSrc)
+    {
+        formSrc_ = formSrc;
+    }
+
+    WindowConfig& GetCardWindowConfig()
+    {
+        return cardWindowConfig_;
+    }
+
+    void SetCardWindowConfig(WindowConfig cardWindowConfig)
+    {
+        cardWindowConfig_ = cardWindowConfig;
+    }
+
 private:
     void UpdatePageData(const std::string& dataList);
     void LoadPage(const std::string& urlPath, const std::string& params);
@@ -175,6 +197,8 @@ private:
     RefPtr<Framework::CardFrontendDelegate> delegate_;
     Framework::PageIdPool pageIdPool_;
     RefPtr<Framework::JsCardParser> parseJsCard_;
+    std::string formSrc_;
+    WindowConfig cardWindowConfig_;
 };
 
 class CardEventHandler : public AceEventHandler {

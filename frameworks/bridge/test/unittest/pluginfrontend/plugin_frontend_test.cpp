@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,9 +99,9 @@ HWTEST_F(PluginFrontendTest, OnShowTest001, TestSize.Level1)
      */
     auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -153,9 +153,9 @@ HWTEST_F(PluginFrontendTest, OnHideTest001, TestSize.Level1)
      */
     auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -249,9 +249,9 @@ HWTEST_F(PluginFrontendTest, OnActiveTest001, TestSize.Level1)
      */
     auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -305,9 +305,9 @@ HWTEST_F(PluginFrontendTest, OnInactiveTest001, TestSize.Level1)
      */
     auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -422,9 +422,9 @@ HWTEST_F(PluginFrontendTest, OnMemoryLevelTest001, TestSize.Level1)
      */
     auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -883,9 +883,9 @@ HWTEST_F(PluginFrontendTest, NotifyAppStorageTest001, TestSize.Level1)
      */
     auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -1171,9 +1171,9 @@ HWTEST_F(PluginFrontendTest, SendCallbackMessageTest001, TestSize.Level1)
      */
     auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -1225,9 +1225,9 @@ HWTEST_F(PluginFrontendTest, TransferComponentResponseDataTest001, TestSize.Leve
      */
     auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -1282,9 +1282,9 @@ HWTEST_F(PluginFrontendTest, TransferJsResponseDataTest001, TestSize.Level1)
      */
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -1338,9 +1338,9 @@ HWTEST_F(PluginFrontendTest, TransferJsPluginGetErrorTest001, TestSize.Level1)
      */
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -1394,9 +1394,9 @@ HWTEST_F(PluginFrontendTest, TransferJsEventDataTest001, TestSize.Level1)
      */
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -1450,9 +1450,9 @@ HWTEST_F(PluginFrontendTest, LoadPluginJsCodeTest001, TestSize.Level1)
      */
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -1506,9 +1506,9 @@ HWTEST_F(PluginFrontendTest, UpdateStateTest001, TestSize.Level1)
      */
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -1540,9 +1540,9 @@ HWTEST_F(PluginFrontendTest, UpdateStateTest002, TestSize.Level1)
      */
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -1574,9 +1574,9 @@ HWTEST_F(PluginFrontendTest, LoadPluginJsCodeTest003, TestSize.Level1)
      */
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -1608,9 +1608,9 @@ HWTEST_F(PluginFrontendTest, UpdateStateTest004, TestSize.Level1)
      */
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -1684,9 +1684,9 @@ HWTEST_F(PluginFrontendTest, LoadPluginJsByteCodeTest001, TestSize.Level1)
      */
     auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -1742,9 +1742,9 @@ HWTEST_F(PluginFrontendTest, OnWindowDisplayModeChangedTest001, TestSize.Level1)
      */
     auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -1840,9 +1840,9 @@ HWTEST_F(PluginFrontendTest, OnRestoreAbilityStateTest001, TestSize.Level1)
      */
     auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
@@ -1894,9 +1894,9 @@ HWTEST_F(PluginFrontendTest, OnNewWantTest001, TestSize.Level1)
      */
     auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst= std::make_unique<fml::Thread>(THREADFIRST);
+    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird= std::make_unique<fml::Thread>(THREADTHIRD);
+    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
     std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
     fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
     fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();

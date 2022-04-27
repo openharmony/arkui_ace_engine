@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,8 +49,6 @@ void DomPopupTest::TearDown() {}
  * @tc.name: DomPopupCreatorTest001
  * @tc.desc: Test create popup node successfully and popupcomponent create as desire.
  * @tc.type: FUNC
- * @tc.require: AR000DD66M
- * @tc.author: chenbenzhi
  */
 HWTEST_F(DomPopupTest, DomPopupCreatorTest001, TestSize.Level1)
 {
@@ -73,8 +71,6 @@ HWTEST_F(DomPopupTest, DomPopupCreatorTest001, TestSize.Level1)
  * @tc.name: DomPopupTest002
  * @tc.desc: Verify that DomPopup can be set attributes and styles.
  * @tc.type: FUNC
- * @tc.require: AR000DD66M
- * @tc.author: chenbenzhi
  */
 HWTEST_F(DomPopupTest, DomPopupTest002, TestSize.Level1)
 {
@@ -113,8 +109,6 @@ HWTEST_F(DomPopupTest, DomPopupTest002, TestSize.Level1)
  * @tc.name: DomPopupTest003
  * @tc.desc: Test add event to popup component successfully.
  * @tc.type: FUNC
- * @tc.require: AR000DD66M
- * @tc.author: chenbenzhi
  */
 HWTEST_F(DomPopupTest, DomPopupTest003, TestSize.Level1)
 {

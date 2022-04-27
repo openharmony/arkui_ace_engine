@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -171,6 +171,18 @@ public:
         return isInputButton_;
     }
 
+    void SetDeclareHeight(bool declareHeight)
+    {
+        isDeclareHeight_ = declareHeight;
+    }
+
+    bool IsDeclareHeight()
+    {
+        return isDeclareHeight_;
+    }
+
+    void FitTextHeight(AnimatableDimension& height);
+
     uint32_t Compare(const RefPtr<Component>& component) const override;
 
     RefPtr<StateAttributes<ButtonStateAttribute>> GetStateAttributes()
@@ -186,6 +198,15 @@ public:
         return stateAttributeList_ != nullptr;
     }
 
+    HoverAnimationType GetMouseAnimationType() const
+    {
+        return animationType_;
+    }
+    void SetMouseAnimationType(HoverAnimationType animationType)
+    {
+        animationType_ = animationType;
+    }
+
 private:
     RefPtr<ButtonDeclaration> declaration_;
     ButtonType type_ { ButtonType::NORMAL };
@@ -195,11 +216,13 @@ private:
     bool isDeclarative_ = false;
     bool isInputButton_ = false;
     bool isCatchMode_ = true;
+    bool isDeclareHeight_ = false;
     uint32_t layoutFlag_ = 0;
     // for custom button type
     std::array<Radius, 4> radii_ = { Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp) };
     RefPtr<StateAttributes<ButtonStateAttribute>> stateAttributeList_;
     EventMarker keyEnterId_;
+    HoverAnimationType animationType_ = HoverAnimationType::UNKNOWN;
 };
 
 class ButtonBuilder {

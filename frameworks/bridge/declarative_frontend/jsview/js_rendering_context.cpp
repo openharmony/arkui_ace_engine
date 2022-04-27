@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,6 +68,7 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("getImageData", &JSCanvasRenderer::JsGetImageData);
     JSClass<JSRenderingContext>::CustomMethod("getJsonData", &JSCanvasRenderer::JsGetJsonData);
     JSClass<JSRenderingContext>::CustomMethod("getPixelMap", &JSCanvasRenderer::JsGetPixelMap);
+    JSClass<JSRenderingContext>::CustomMethod("drawBitmapMesh", &JSCanvasRenderer::JsDrawBitmapMesh);
 
     JSClass<JSRenderingContext>::CustomProperty("fillStyle", &JSCanvasRenderer::JsGetFillStyle,
                                                 &JSCanvasRenderer::JsSetFillStyle);
@@ -122,6 +123,10 @@ void JSRenderingContext::Constructor(const JSCallbackInfo& args)
         if (args[0]->IsObject()) {
             JSRenderingContextSettings* jsContextSetting
                 = JSRef<JSObject>::Cast(args[0])->Unwrap<JSRenderingContextSettings>();
+            if (jsContextSetting == nullptr) {
+                LOGE("jsContextSetting is null");
+                return;
+            }
             bool anti = jsContextSetting->GetAntialias();
             jsRenderContext->SetAnti(anti);
         }

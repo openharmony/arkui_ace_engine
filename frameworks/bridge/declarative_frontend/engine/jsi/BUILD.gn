@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,7 +19,7 @@ import("//foundation/ace/ace_engine/build/ace_gen_obj.gni")
 base_output_path = get_label_info(":gen_abc_proxyclass", "target_out_dir")
 abcproxyclass_obj_path = base_output_path + "/abc_proxy_class.o"
 abcenumstyle_obj_path = base_output_path + "/abc_enum_style.o"
-abccontentstorage_obj_path = base_output_path + "/abc_content_storage.o"
+jsmocksystemplugin_obj_path = base_output_path + "/abc_js_mock_system_plugin.o"
 
 ts2abc_gen_abc("gen_stateMgmt_abc") {
   extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
@@ -41,19 +41,19 @@ ts2abc_gen_abc("gen_jsEnumStyle_abc") {
   out_puts = [ base_output_path + "/jsEnumStyle.abc" ]
 }
 
-ts2abc_gen_abc("gen_contentStorage_abc") {
+ts2abc_gen_abc("gen_js_mock_system_plugin_abc") {
   extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
   src_js = rebase_path(
-          "//foundation/ace/ace_engine/frameworks/bridge/declarative_frontend/engine/contentStorage.js")
-  dst_file = rebase_path(base_output_path + "/contentStorage.abc")
+          "//foundation/ace/ace_engine/frameworks/bridge/declarative_frontend/engine/quickjs/jsMockSystemPlugin.js")
+  dst_file = rebase_path(base_output_path + "/jsMockSystemPlugin.abc")
 
-  in_puts = [ "//foundation/ace/ace_engine/frameworks/bridge/declarative_frontend/engine/contentStorage.js" ]
-  out_puts = [ base_output_path + "/contentStorage.abc" ]
+  in_puts = [ "//foundation/ace/ace_engine/frameworks/bridge/declarative_frontend/engine/quickjs/jsMockSystemPlugin.js" ]
+  out_puts = [ base_output_path + "/jsMockSystemPlugin.abc" ]
 }
 
 gen_obj("abc_proxyclass") {
   input = base_output_path + "/stateMgmt.abc"
-  if (use_mac) {
+  if (use_mac || use_mingw_win || use_ios) {
     abcproxyclass_obj_path = base_output_path + "/js_proxy_class.c"
   }
   output = abcproxyclass_obj_path
@@ -62,20 +62,27 @@ gen_obj("abc_proxyclass") {
 
 gen_obj("abc_enum_style") {
   input = base_output_path + "/jsEnumStyle.abc"
+  if (use_mac || use_mingw_win) {
+    abcenumstyle_obj_path = base_output_path + "/jsEnumStyle.c"
+  }
   output = abcenumstyle_obj_path
   snapshot_dep = [ ":gen_jsEnumStyle_abc" ]
 }
 
-gen_obj("abc_contentStorage") {
-  input = base_output_path + "/contentStorage.abc"
-  output = abccontentstorage_obj_path
-  snapshot_dep = [ ":gen_contentStorage_abc" ]
+gen_obj("abc_mock_system_plugin") {
+  input = base_output_path + "/jsMockSystemPlugin.abc"
+  if (use_mac || use_mingw_win) {
+    jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.c"
+  }
+  output = jsmocksystemplugin_obj_path
+  snapshot_dep = [ ":gen_js_mock_system_plugin_abc" ]
 }
 
 template("declarative_js_engine_ark") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    part_name = ace_engine_part
     defines += invoker.defines
     if (target_cpu == "arm64") {
       defines += [ "APP_USE_ARM64" ]
@@ -91,17 +98,14 @@ template("declarative_js_engine_ark") {
     public_configs = [ "//ark/js_runtime:ark_jsruntime_public_config" ]
 
     sources = [
-      "ark/ark_js_runtime.cpp",
-      "ark/ark_js_value.cpp",
-      "content_storage_set.cpp",
       "js_converter.cpp",
       "jsi_declarative_engine.cpp",
       "jsi_declarative_group_js_bridge.cpp",
-      "jsi_declarative_utils.cpp",
       "jsi_object_template.cpp",
       "jsi_types.cpp",
       "jsi_view_register.cpp",
       "modules/jsi_app_module.cpp",
+      "modules/jsi_context_module.cpp",
       "modules/jsi_curves_module.cpp",
       "modules/jsi_matrix4_module.cpp",
       "modules/jsi_module_manager.cpp",
@@ -112,19 +116,25 @@ template("declarative_js_engine_ark") {
 
     deps = [ "//ark/js_runtime:libark_jsruntime" ]
 
+    if (!defined(config.build_for_preview) || !config.build_for_preview) {
+      sources += [
+        "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.cpp",
+        "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_value.cpp",
+        "$ace_root/frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.cpp",
+        "jsi_declarative_utils.cpp",
+      ]
+    } else {
+      deps += [ ":gen_obj_src_abc_mock_system_plugin" ]
+    }
+
     # if napi support
     deps += [ "//foundation/ace/napi:ace_napi_ark" ]
     public_deps = [ "//foundation/ace/napi:ace_napi" ]
 
     deps += [
-      ":gen_obj_src_abc_contentStorage",
       ":gen_obj_src_abc_enum_style",
       ":gen_obj_src_abc_proxyclass",
     ]
-
-    deps += [ "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native" ]
-
-    external_deps = [ "ability_runtime:ability_context_native" ]
   }
 }
 

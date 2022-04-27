@@ -66,7 +66,6 @@ void JsiXComponentBridge::HandleContext(const shared_ptr<JsRuntime>& runtime, No
         LOGE("JsiXComponentBridge xcomponent is null.");
         return;
     }
-    auto textureId = static_cast<int64_t>(xcomponent->GetTextureId());
 
     auto container = Container::Current();
     if (!container) {
@@ -78,7 +77,14 @@ void JsiXComponentBridge::HandleContext(const shared_ptr<JsRuntime>& runtime, No
         LOGE("JsiXComponentBridge nativeView null");
         return;
     }
-    auto nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+
+    void* nativeWindow = nullptr;
+#ifdef OHOS_STANDARD_SYSTEM
+    nativeWindow = const_cast<void*>(xcomponent->GetNativeWindow());
+#else
+    auto textureId = static_cast<int64_t>(xcomponent->GetTextureId());
+    nativeWindow = const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+#endif
     if (!nativeWindow) {
         LOGE("JsiXComponentBridge::HandleJsContext nativeWindow invalid");
         return;
@@ -86,7 +92,7 @@ void JsiXComponentBridge::HandleContext(const shared_ptr<JsRuntime>& runtime, No
     nativeXcomponentImpl_->SetSurface(nativeWindow);
     nativeXcomponentImpl_->SetXComponentId(xcomponent->GetId());
 
-    auto nativeEngine = static_cast<ArkNativeEngine*>(engineInstance->GetArkNativeEngine());
+    auto nativeEngine = static_cast<ArkNativeEngine*>(engineInstance->GetNativeEngine());
     if (!nativeEngine) {
         LOGE("NativeEngine is null");
         return;
@@ -135,7 +141,6 @@ void JsiXComponentBridge::HandleContext(const shared_ptr<JsRuntime>& runtime, No
     return;
 }
 
-#ifdef OHOS_STANDARD_SYSTEM
 shared_ptr<JsValue> JsiXComponentBridge::JsGetXComponentSurfaceId(const shared_ptr<JsRuntime>& runtime, NodeId nodeId)
 {
     if (!runtime) {
@@ -152,7 +157,7 @@ shared_ptr<JsValue> JsiXComponentBridge::JsGetXComponentSurfaceId(const shared_p
         LOGE("JsGetXComponentSurfaceId failed. page is null.");
         return runtime->NewUndefined();
     }
-    uint64_t surfaceId = 0;
+    std::string surfaceId = "";
     auto task = [nodeId, page, &surfaceId]() {
         auto domDoc = page->GetDomDocument();
         if (!domDoc) {
@@ -170,7 +175,51 @@ shared_ptr<JsValue> JsiXComponentBridge::JsGetXComponentSurfaceId(const shared_p
         return runtime->NewUndefined();
     }
     delegate->PostSyncTaskToPage(task);
-    return runtime->NewString(std::to_string(surfaceId));
+    return runtime->NewString(surfaceId);
 }
-#endif
+
+void JsiXComponentBridge::JsSetXComponentSurfaceSize(
+    const shared_ptr<JsRuntime>& runtime, const std::string& arguments, NodeId nodeId)
+{
+    if (!runtime) {
+        LOGE("JsSetXComponentSurfaceSize failed. runtime is null.");
+        return;
+    }
+    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
+    if (!engine) {
+        LOGE("JsSetXComponentSurfaceSize failed. engine is null.");
+        return;
+    }
+    auto page = engine->GetRunningPage();
+    if (!page) {
+        LOGE("JsSetXComponentSurfaceSize failed. page is null.");
+        return;
+    }
+    auto task = [nodeId, page, arguments]() {
+        auto domDoc = page->GetDomDocument();
+        if (!domDoc) {
+            return;
+        }
+        auto domXComponent = AceType::DynamicCast<DOMXComponent>(domDoc->GetDOMNodeById(nodeId));
+        if (!domXComponent) {
+            return;
+        }
+
+        std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(arguments);
+        if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() < 1) {
+            LOGE("JsSetXComponentSurfaceSize failed. parse args error");
+            return;
+        }
+        std::unique_ptr<JsonValue> surfaceSizePara = argsValue->GetArrayItem(0);
+        uint32_t surfaceWidth = surfaceSizePara->GetUInt("surfaceWidth", 0);
+        uint32_t surfaceHeight = surfaceSizePara->GetUInt("surfaceHeight", 0);
+        domXComponent->SetSurfaceSize(surfaceWidth, surfaceHeight);
+    };
+    auto delegate = engine->GetFrontendDelegate();
+    if (!delegate) {
+        LOGE("JsSetXComponentSurfaceSize failed. delegate is null.");
+        return;
+    }
+    delegate->PostSyncTaskToPage(task);
+}
 } // namespace OHOS::Ace::Framework

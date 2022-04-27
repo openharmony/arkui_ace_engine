@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "core/event/ace_events.h"
+#include "core/event/axis_event.h"
 
 namespace OHOS::Ace {
 
@@ -136,6 +137,32 @@ struct TouchEvent final {
         });
         return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, (screenX - offsetX) / scale,
             (screenY - offsetY) / scale, type, time, size, force, deviceId, sourceType, temp };
+    }
+
+    TouchEvent UpdatePointers() const
+    {
+        TouchPoint point { .id = id,
+            .x = x,
+            .y = y,
+            .screenX = screenX,
+            .screenY = screenY,
+            .downTime = time,
+            .size = size,
+            .force = force,
+            .isPressed = (type == TouchType::DOWN) };
+        TouchEvent event { .id = id,
+            .x = x,
+            .y = y,
+            .screenX = screenX,
+            .screenY = screenY,
+            .type = type,
+            .time = time,
+            .size = size,
+            .force = force,
+            .deviceId = deviceId,
+            .sourceType = sourceType };
+        event.pointers.emplace_back(std::move(point));
+        return event;
     }
 };
 
@@ -324,6 +351,10 @@ class ACE_EXPORT TouchEventTarget : public virtual AceType {
 public:
     virtual bool DispatchEvent(const TouchEvent& point) = 0;
     virtual bool HandleEvent(const TouchEvent& point) = 0;
+    virtual bool HandleEvent(const AxisEvent& event)
+    {
+        return true;
+    }
 
     void SetTouchRestrict(const TouchRestrict& touchRestrict)
     {

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -41,6 +41,7 @@ use_shared_v8 = true
 enable_dump_drawcmd = false
 use_mingw_win = "${current_os}_${current_cpu}" == "mingw_x86_64"
 use_mac = "${current_os}_${current_cpu}" == "mac_x64"
+use_ios = "${current_os}_${current_cpu}" == "ios_x64"
 
 # Config path
 ace_root = "//foundation/ace/ace_engine"
@@ -72,8 +73,12 @@ if (is_standard_system) {
   objcopy_default = "//prebuilts/clang/ohos/linux-x86_64/llvm/bin/llvm-objcopy"
   node_js_path =
       "//prebuilts/build-tools/common/nodejs/node-v12.18.4-linux-x64/bin/"
-} else if (is_cross_platform_build && defined(aosp_objcopy)) {
-  objcopy_default = aosp_objcopy
+} else if (is_cross_platform_build) {
+  if (host_os == "mac") {
+    objcopy_default = objcopy_clang
+  } else if (defined(aosp_objcopy)) {
+    objcopy_default = aosp_objcopy
+  }
 }
 
 # Config part name
@@ -82,7 +87,11 @@ if (is_standard_system) {
   hilog_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   ark_runtime_path = "//ark/runtime_core"
 } else {
-  ace_engine_part = "ace_engine_full"
+  if (is_cross_platform_build) {
+    ace_engine_part = "ace_engine_cross"
+  } else {
+    ace_engine_part = "ace_engine_full"
+  }
   hilog_deps = [ "hilog:libhilog" ]
   ark_runtime_path = "//ark/runtime"
 }
@@ -118,6 +127,14 @@ if (enable_dump_drawcmd) {
   ace_common_defines += [ "DUMP_DRAW_CMD" ]
 }
 
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.account_os_account_standard)) {
+  os_account_exists = true
+  ace_common_defines += [ "OS_ACCOUNT_EXISTS" ]
+} else {
+  os_account_exists = false
+}
+
 ace_platforms = []
 
 _ace_adapter_dir = rebase_path("$ace_root/adapter", root_build_dir)
@@ -131,8 +148,12 @@ foreach(item, _adapters) {
 
   if (defined(import_var.platforms)) {
     foreach(platform, import_var.platforms) {
-      if (defined(platform.name)) {
-        ace_platforms += [ platform ]
+      if (!is_cross_platform_build || (is_cross_platform_build && defined(
+                                           platform.cross_platform_support) &&
+                                       platform.cross_platform_support)) {
+        if (defined(platform.name)) {
+          ace_platforms += [ platform ]
+        }
       }
     }
   }

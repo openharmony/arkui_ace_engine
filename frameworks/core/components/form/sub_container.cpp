@@ -83,22 +83,22 @@ void SubContainer::Destroy()
 void SubContainer::UpdateRootElmentSize()
 {
     auto formComponet = AceType::DynamicCast<FormComponent>(formComponent_);
-    Dimension rootWidht = 0.0_vp;
+    Dimension rootWidth = 0.0_vp;
     Dimension rootHeight = 0.0_vp;
     if (formComponet) {
-        rootWidht = formComponet->GetWidth();
+        rootWidth = formComponet->GetWidth();
         rootHeight = formComponet->GetHeight();
     }
 
-    if (rootWidht_ == rootWidht && rootHeight == rootHeight) {
+    if (rootWidht_ == rootWidth && rootHeight_ == rootHeight) {
         LOGE("size not changed, should not change");
         return;
     }
 
-    surfaceWidth_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootWidht);
+    surfaceWidth_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootWidth);
     surfaceHeight_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootHeight);
     if (pipelineContext_) {
-        pipelineContext_->SetRootSize(density_, rootWidht.Value(), rootHeight.Value());
+        pipelineContext_->SetRootSize(density_, rootWidth.Value(), rootHeight.Value());
     }
 }
 
@@ -126,7 +126,7 @@ void SubContainer::UpdateSurfaceSize()
 }
 
 void SubContainer::RunCard(const int64_t id, const std::string path, const std::string module, const std::string data,
-    const std::map<std::string, std::pair<int, int32_t>> imageDataMap)
+    const std::map<std::string, std::pair<int, int32_t>> imageDataMap, const std::string formSrc)
 {
     if (id == runningCardId_) {
         LOGE("the card is showing, no need run again");
@@ -138,7 +138,6 @@ void SubContainer::RunCard(const int64_t id, const std::string path, const std::
     }
 
     frontend_->ResetPageLoadState();
-
     LOGI("run card path:%{private}s, module:%{private}s, data:%{private}s", path.c_str(), module.c_str(), data.c_str());
     RefPtr<FlutterAssetManager> flutterAssetManager;
     flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
@@ -150,22 +149,27 @@ void SubContainer::RunCard(const int64_t id, const std::string path, const std::
         auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
         std::string temp1 = "assets/js/" + module + "/";
         std::string temp2 = "assets/js/share/";
+        std::string temp3 = formSrc;
         std::vector<std::string> basePaths;
         basePaths.push_back(temp1);
         basePaths.push_back(temp2);
-
+        basePaths.push_back("./");
+        basePaths.push_back("./js/");
         if (assetProvider->Initialize(path, basePaths)) {
             LOGI("push card asset provider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
         }
     }
-
+    frontend_->SetFormSrc(formSrc);
+    frontend_->SetCardWindowConfig(GetWindowConfig());
     auto&& window = std::make_unique<FormWindow>(outSidePipelineContext_);
 
     pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
         std::move(window), taskExecutor_, assetManager_, nullptr, frontend_, instanceId_);
     ContainerScope scope(instanceId_);
     density_ = outSidePipelineContext_.Upgrade()->GetDensity();
+    auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();
+    pipelineContext_->SetEventManager(eventManager);
     ProcessSharedImage(imageDataMap);
     UpdateRootElmentSize();
     pipelineContext_->SetIsJsCard(true);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,19 @@
 
 #include <algorithm>
 
+#include "base/geometry/animatable_dimension.h"
+#include "base/utils/utils.h"
+#include "core/components/checkable/checkable_theme.h"
+#include "core/components/common/properties/edge.h"
+#include "core/components/flex/render_flex_item.h"
+#include "core/components/image/render_image.h"
+#include "core/components/marquee/render_marquee.h"
+#include "core/components/progress/render_progress.h"
+#include "core/components/search/render_search.h"
+#include "core/components/slider/render_slider.h"
+#include "core/components/text_field/render_text_field.h"
 #include "core/components/wrap/wrap_component.h"
+#include "frameworks/bridge/common/dom/dom_node.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -87,8 +99,27 @@ void RenderWrap::PerformLayout()
         // max baseline of each line
         double baselineDistance = 0.0;
         std::list<RefPtr<RenderNode>> itemsList;
+        bool beforeIsBlock = false;
+        double beforeMarginBottom = 0.0;
+
         for (auto& item : GetChildren()) {
-            item->Layout(layoutParam);
+            auto flexItem = AceType::DynamicCast<RenderFlexItem>(item);
+            if (flexItem &&
+                (flexItem->GetDisplayType() == DisplayType::BLOCK || flexItem->GetDisplayType() == DisplayType::FLEX)) {
+                CalculateMargin(item, beforeIsBlock, beforeMarginBottom);
+                item->Layout(layoutParam);
+                AddBlock(count, item, itemsList, currentMainLength, currentCrossLength, baselineDistance);
+                continue;
+            } else if (flexItem && flexItem->GetDisplayType() == DisplayType::INLINE) {
+                beforeIsBlock = false;
+                beforeMarginBottom = 0.0;
+                SetDefault(item);
+                item->Layout(layoutParam);
+            } else {
+                beforeIsBlock = false;
+                beforeMarginBottom = 0.0;
+                item->Layout(layoutParam);
+            }
 
             if (mainLengthLimit_ >= currentMainLength + GetMainItemLength(item)) {
                 currentMainLength += GetMainItemLength(item);
@@ -121,27 +152,138 @@ void RenderWrap::PerformLayout()
                 count = 1;
             }
         }
-        // Add last content into list
-        currentMainLength -= spacing;
-        if ((direction_ == WrapDirection::HORIZONTAL && !isLeftToRight_) ||
-            (direction_ == WrapDirection::HORIZONTAL_REVERSE && isLeftToRight_) ||
-            (direction_ == WrapDirection::VERTICAL_REVERSE)) {
-            itemsList.reverse();
+        if (count != 0) {
+            // Add last content into list
+            currentMainLength -= spacing;
+            if ((direction_ == WrapDirection::HORIZONTAL && !isLeftToRight_) ||
+                (direction_ == WrapDirection::HORIZONTAL_REVERSE && isLeftToRight_) ||
+                (direction_ == WrapDirection::VERTICAL_REVERSE)) {
+                itemsList.reverse();
+            }
+            auto contentInfo = ContentInfo(currentMainLength, currentCrossLength, count, itemsList);
+            contentInfo.maxBaselineDistance = baselineDistance;
+            contentList_.emplace_back(contentInfo);
+            if ((direction_ == WrapDirection::VERTICAL || direction_ == WrapDirection::VERTICAL_REVERSE) &&
+                !isLeftToRight_) {
+                contentList_.reverse();
+            }
+            totalMainLength_ = std::max(currentMainLength, totalMainLength_);
+            // n contents has n - 1 space
+            totalCrossLength_ += currentCrossLength;
         }
-        auto contentInfo = ContentInfo(currentMainLength, currentCrossLength, count, itemsList);
-        contentInfo.maxBaselineDistance = baselineDistance;
-        contentList_.emplace_back(contentInfo);
-        if ((direction_ == WrapDirection::VERTICAL || direction_ == WrapDirection::VERTICAL_REVERSE) &&
-            !isLeftToRight_) {
-            contentList_.reverse();
-        }
-        totalMainLength_ = std::max(currentMainLength, totalMainLength_);
-        // n contents has n - 1 space
-        totalCrossLength_ += currentCrossLength;
     }
     LayoutWholeWrap();
     SetWrapLayoutSize(mainLengthLimit_, totalCrossLength_);
     contentList_.clear();
+}
+
+void RenderWrap::AddBlock(int32_t& count, const RefPtr<RenderNode>& item, std::list<RefPtr<RenderNode>>& itemsList,
+    double& currentMainLength, double& currentCrossLength, double& baselineDistance)
+{
+    auto contentSpace = NormalizeToPx(contentSpace_);
+    if (count != 0) {
+        auto contentInfo = ContentInfo(currentMainLength, currentCrossLength, count, itemsList);
+        contentInfo.maxBaselineDistance = item->GetBaselineDistance(TextBaseline::ALPHABETIC);
+        contentList_.emplace_back(contentInfo);
+        itemsList.clear();
+        totalCrossLength_ += currentCrossLength + contentSpace;
+    }
+    itemsList.push_back(item);
+    double itemLength = GetMainItemLength(item);
+    currentCrossLength = GetCrossItemLength(item);
+    totalMainLength_ = std::max(itemLength, totalMainLength_);
+    totalCrossLength_ += currentCrossLength + contentSpace;
+    auto contentInfo2 = ContentInfo(itemLength, currentCrossLength, 1, itemsList);
+    contentInfo2.maxBaselineDistance = baselineDistance;
+    contentList_.emplace_back(contentInfo2);
+    itemsList.clear();
+    currentCrossLength = 0.0;
+    count = 0;
+}
+
+void RenderWrap::CalculateMargin(const RefPtr<RenderNode>& item, bool& beforeIsBlock, double& beforeMarginBottom)
+{
+    double currentItemMarginBottom = 0.0;
+    RefPtr<RenderNode> itemNode = item;
+    while (itemNode) {
+        if (itemNode->GetChildren().empty()) {
+            break;
+        }
+        itemNode = itemNode->GetChildren().front();
+        auto itemTemp = AceType::DynamicCast < RenderBoxBase >(itemNode);
+        if (!itemTemp) {
+            continue;
+        }
+        if (!beforeIsBlock) {
+            beforeIsBlock = true;
+            auto setterBottom = DimensionHelper(&Edge::SetBottom, &Edge::Bottom);
+            beforeMarginBottom = itemTemp->GetMargin(setterBottom).Value();
+        } else {
+            auto setterTop = DimensionHelper(&Edge::SetTop, &Edge::Top);
+            auto setterBottom = DimensionHelper(&Edge::SetBottom, &Edge::Bottom);
+            double currentItemMarginTop = itemTemp->GetMargin(setterTop).Value();
+            currentItemMarginBottom =  itemTemp->GetMargin(setterBottom).Value();
+            if (GreatOrEqual(beforeMarginBottom, 0.0) && GreatOrEqual(currentItemMarginTop, 0.0)) {
+                double minMargin = std::min(beforeMarginBottom, currentItemMarginTop);
+                AnimatableDimension distance = AnimatableDimension(currentItemMarginTop - minMargin);
+                auto setter = DimensionHelper(&Edge::SetTop, &Edge::Top);
+                itemTemp->SetMargin(distance, setter);
+                beforeMarginBottom = currentItemMarginBottom;
+                break;
+            }
+        }
+    }
+}
+
+void RenderWrap::SetDefault(const RefPtr<RenderNode>& item)
+{
+    RefPtr<RenderBoxBase> boxItem = nullptr;
+    RefPtr<BoxComponent> boxComponent = nullptr;
+    RefPtr<RenderNode> itemNode = item;
+    while (itemNode) {
+        if (itemNode->GetChildren().empty()) {
+            break;
+        }
+        itemNode = itemNode->GetChildren().front();
+        auto itemTemp = AceType::DynamicCast <RenderBoxBase>(itemNode);
+        if (itemTemp) {
+            boxItem = itemTemp;
+        }
+
+        auto sliderItem = AceType::DynamicCast <RenderSlider>(itemNode);
+        if (sliderItem && boxItem) {
+            boxItem->SetWidth(Dimension(400.0f, DimensionUnit::VP));
+            break;
+        }
+
+        auto progressItem = AceType::DynamicCast <RenderProgress>(itemNode);
+        if (progressItem && boxItem) {
+            boxItem->SetWidth(Dimension(200.0f, DimensionUnit::VP));
+            break;
+        }
+
+        auto imageItem = AceType::DynamicCast <RenderImage>(itemNode);
+        if (imageItem && boxItem) {
+            boxItem->SetWidth(Dimension(200.0f, DimensionUnit::VP));
+            boxItem->SetHeight(Dimension(200.0f, DimensionUnit::VP));
+            break;
+        }
+        auto marqueeItem = AceType::DynamicCast <RenderMarquee>(itemNode);
+        if (marqueeItem && boxItem) {
+            boxItem->SetWidth(Dimension(400.0f, DimensionUnit::VP));
+            break;
+        }
+        auto searchItem = AceType::DynamicCast <RenderSearch>(itemNode);
+        if (searchItem && boxItem) {
+            boxItem->SetWidth(Dimension(400.0f, DimensionUnit::VP));
+            break;
+        }
+        auto textFieldItem = AceType::DynamicCast <RenderTextField>(itemNode);
+        if (textFieldItem && boxItem) {
+            boxItem->SetWidth(Dimension(400.0f, DimensionUnit::VP));
+            break;
+        }
+    };
 }
 
 void RenderWrap::HandleDialogStretch(const LayoutParam& layoutParam)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "core/components/text/text_component.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/gestures/drag_recognizer.h"
+#include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -188,6 +189,21 @@ public:
         return mode_ == SliderMode::INSET && GreatNotEqual(step_, DEFAULT_STEP);
     }
 
+    double GetThickness()
+    {
+        return thickness_;
+    }
+
+    bool GetPress() const
+    {
+        return isPress_;
+    }
+
+    bool GetHover() const
+    {
+        return isHover_;
+    }
+    
 protected:
     static TouchRegionPoint GetTopTouchRegion(const Vertex& center, double width, double height);
     static TouchRegionPoint GetBotTouchRegion(const Vertex& center, double width, double height);
@@ -199,8 +215,9 @@ protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     bool MouseHoverTest(const Point& parentLocalPoint) override;
-    virtual void OnMouseHoverEnterTest() override {}
-    virtual void OnMouseHoverExitTest() override {}
+    void OnMouseHoverEnterTest() override {}
+    void OnMouseHoverExitTest() override {}
+    bool HandleMouseEvent(const MouseEvent& event) override;
 
     void SetOnChange(const std::function<void(double,int)>& value)
     {
@@ -226,6 +243,7 @@ protected:
     void UpdateAccessibilityAttr();
     void InitAccessibilityEventListener();
     void HandleScrollUpdate(double delta);
+    RefPtr<RawRecognizer> touchDetector_;
 
     bool renderWholeNode_ = true;
 
@@ -274,11 +292,14 @@ protected:
 private:
     // Slider render information
     double value_ = DEFAULT_VALUE;
+    double preMovingValue_ = DEFAULT_VALUE;
     std::function<void(const std::string&)> onMoveEnd_;
     std::function<void(const std::string&)> onMoving_;
 
     // focus information
     bool isFocus_ = false;
+    bool isPress_ = false;
+    bool isHover_ = false;
     bool disable_ = false;
 
     double animationEnd_ = 0.0;

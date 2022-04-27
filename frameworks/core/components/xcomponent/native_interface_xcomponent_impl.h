@@ -106,9 +106,19 @@ public:
         touchEvent_ = touchEvent;
     }
 
+    void SetMouseEvent(const OH_NativeXComponent_MouseEvent mouseEvent)
+    {
+        mouseEvent_ = mouseEvent;
+    }
+
     const OH_NativeXComponent_TouchEvent GetTouchEvent() const
     {
         return touchEvent_;
+    }
+
+    const OH_NativeXComponent_MouseEvent GetMouseEvent() const
+    {
+        return mouseEvent_;
     }
 
 private:
@@ -119,18 +129,20 @@ private:
     double x_ = 0.0;
     double y_ = 0.0;
     OH_NativeXComponent_TouchEvent touchEvent_;
+    OH_NativeXComponent_MouseEvent mouseEvent_;
     OH_NativeXComponent_Callback* callback_ = nullptr;
 };
 }
 
 struct OH_NativeXComponent {
-    OH_NativeXComponent(OHOS::Ace::NativeXComponentImpl* xComponentImpl) : xcomponentImpl_(xComponentImpl) {}
+    explicit OH_NativeXComponent(OHOS::Ace::NativeXComponentImpl* xComponentImpl) : xcomponentImpl_(xComponentImpl) {}
     ~OH_NativeXComponent() {}
     int32_t GetXComponentId(char* id, uint64_t* size);
     int32_t GetNativeWindow(void** window);
     int32_t GetXComponentSize(const void* window, uint64_t* width, uint64_t* height);
     int32_t GetXComponentOffset(const void* window, double* x, double* y);
     int32_t GetTouchEvent(const void* window, OH_NativeXComponent_TouchEvent* touchEvent);
+    int32_t GetMouseEvent(const void* window, OH_NativeXComponent_MouseEvent* mouseEvent);
     int32_t RegisterCallback(OH_NativeXComponent_Callback* callback);
 
 private:

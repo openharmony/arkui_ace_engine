@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -107,8 +107,6 @@ void TaskExecutorsTest::GetString(const std::string& task, std::promise<std::str
  * @tc.name: TaskExecutorsTest001
  * @tc.desc: test synchronous and asynchronous execution of the UI thread
  * @tc.type: FUNC
- * @tc.require: AR000DACK5 AR000DACK7
- * @tc.author: jiangyingjie
  */
 HWTEST_F(TaskExecutorsTest, TaskExecutorsTest001, TestSize.Level0)
 {
@@ -141,8 +139,6 @@ HWTEST_F(TaskExecutorsTest, TaskExecutorsTest001, TestSize.Level0)
  * @tc.name: TaskExecutorsTest002
  * @tc.desc: test synchronous and asynchronous execution of the PLATFORM thread
  * @tc.type: FUNC
- * @tc.require: AR000DACK5 AR000DACK7
- * @tc.author: jiangyingjie
  */
 HWTEST_F(TaskExecutorsTest, TaskExecutorsTest002, TestSize.Level0)
 {
@@ -176,8 +172,6 @@ HWTEST_F(TaskExecutorsTest, TaskExecutorsTest002, TestSize.Level0)
  * @tc.name: TaskExecutorsTest003
  * @tc.desc: test synchronous and asynchronous execution of the IO thread
  * @tc.type: FUNC
- * @tc.require: AR000DACK5 AR000DACK7
- * @tc.author: jiangyingjie
  */
 HWTEST_F(TaskExecutorsTest, TaskExecutorsTest003, TestSize.Level0)
 {
@@ -210,8 +204,6 @@ HWTEST_F(TaskExecutorsTest, TaskExecutorsTest003, TestSize.Level0)
  * @tc.name: TaskExecutorsTest004
  * @tc.desc: test synchronous and asynchronous execution of the JS thread
  * @tc.type: FUNC
- * @tc.require: AR000DACK5 AR000DACK7
- * @tc.author: jiangyingjie
  */
 HWTEST_F(TaskExecutorsTest, TaskExecutorsTest004, TestSize.Level0)
 {
@@ -244,8 +236,6 @@ HWTEST_F(TaskExecutorsTest, TaskExecutorsTest004, TestSize.Level0)
  * @tc.name: TaskExecutorsTest005
  * @tc.desc: test synchronous and asynchronous execution of the BACKGROUND thread
  * @tc.type: FUNC
- * @tc.require: AR000DACK5 AR000DACK7 AR000DE7QP
- * @tc.author: jiangyingjie
  */
 HWTEST_F(TaskExecutorsTest, TaskExecutorsTest005, TestSize.Level0)
 {

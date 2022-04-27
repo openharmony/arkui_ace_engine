@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@
 #include "base/log/log.h"
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_utils.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 #include "js_backend_timer_module.h"
 
 extern const char _binary_paMgmt_abc_start[];
@@ -74,145 +74,6 @@ bool UnwrapRawImageDataMap(NativeEngine* engine, NativeValue* argv, std::map<std
         LOGI("%{public}s called. Property value=%{public}d.", __func__, natValue);
     }
     return true;
-}
-
-int PrintLog(int id, int level, const char* tag, const char* fmt, const char* message)
-{
-    switch (JsLogLevel(level - 3)) {
-        case JsLogLevel::INFO:
-            LOGI("%{public}s::%{public}s", tag, message);
-            break;
-        case JsLogLevel::WARNING:
-            LOGW("%{public}s::%{public}s", tag, message);
-            break;
-        case JsLogLevel::ERROR:
-            LOGE("%{public}s::%{public}s", tag, message);
-            break;
-        case JsLogLevel::DEBUG:
-            LOGD("%{public}s::%{public}s", tag, message);
-            break;
-        default:
-            LOGF("%{public}s::%{public}s", tag, message);
-            break;
-    }
-    return 0;
-}
-
-std::string ParseLogContent(const std::vector<std::string>& params)
-{
-    std::string ret;
-    if (params.empty()) {
-        return ret;
-    }
-    std::string formatStr = params[0];
-    uint32_t size = params.size();
-    uint32_t len = formatStr.size();
-    uint32_t pos = 0;
-    uint32_t count = 1;
-    for (; pos < len; ++pos) {
-        if (count >= size) {
-            break;
-        }
-        if (formatStr[pos] == '%') {
-            if (pos + 1 >= len) {
-                break;
-            }
-            switch (formatStr[pos + 1]) {
-                case 's':
-                case 'j':
-                case 'd':
-                case 'O':
-                case 'o':
-                case 'i':
-                case 'f':
-                case 'c':
-                    ret += params[count++];
-                    ++pos;
-                    break;
-                case '%':
-                    ret += formatStr[pos];
-                    ++pos;
-                    break;
-                default:
-                    ret += formatStr[pos];
-                    break;
-            }
-        } else {
-            ret += formatStr[pos];
-        }
-    }
-    if (pos < len) {
-        ret += formatStr.substr(pos, len - pos);
-    }
-    return ret;
-}
-
-std::string GetLogContent(
-    const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    if (argc == 1) {
-        return argv[0]->ToString(runtime);
-    }
-    std::vector<std::string> params;
-    for (int32_t i = 0; i < argc; ++i) {
-        params.emplace_back(argv[i]->ToString(runtime));
-    }
-    return ParseLogContent(params);
-}
-
-shared_ptr<JsValue> AppLogPrint(
-    const shared_ptr<JsRuntime>& runtime, JsLogLevel level, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    // Should have at least 1 parameters.
-    if (argc == 0) {
-        LOGE("the arg is error");
-        return runtime->NewUndefined();
-    }
-    std::string content = GetLogContent(runtime, argv, argc);
-    switch (level) {
-        case JsLogLevel::DEBUG:
-            APP_LOGD("app Log: %{public}s", content.c_str());
-            break;
-        case JsLogLevel::INFO:
-            APP_LOGI("app Log: %{public}s", content.c_str());
-            break;
-        case JsLogLevel::WARNING:
-            APP_LOGW("app Log: %{public}s", content.c_str());
-            break;
-        case JsLogLevel::ERROR:
-            APP_LOGE("app Log: %{public}s", content.c_str());
-            break;
-    }
-
-    return runtime->NewUndefined();
-}
-
-// native implementation for js function: console.debug()
-shared_ptr<JsValue> AppDebugLogPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
-    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    return AppLogPrint(runtime, JsLogLevel::DEBUG, argv, argc);
-}
-
-// native implementation for js function: console.info()
-shared_ptr<JsValue> AppInfoLogPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
-    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    return AppLogPrint(runtime, JsLogLevel::INFO, argv, argc);
-}
-
-// native implementation for js function: console.warn()
-shared_ptr<JsValue> AppWarnLogPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
-    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    return AppLogPrint(runtime, JsLogLevel::WARNING, argv, argc);
-}
-
-// native implementation for js function: console.error()
-shared_ptr<JsValue> AppErrorLogPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
-    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
-{
-    return AppLogPrint(runtime, JsLogLevel::ERROR, argv, argc);
 }
 
 // native implementation for js function: Particle.onCreateFinish()
@@ -306,12 +167,12 @@ shared_ptr<JsValue> AsyncFuncCallBack(const shared_ptr<JsRuntime>& runtime, cons
 
 inline std::string ToJSONStringInt(std::string sKey, std::string sValue)
 {
-    char szDoubleQutoes[] = "\"";
+    char szDoubleQuotes[] = "\"";
     char szColon[] = ":";
     std::string strResult;
-    strResult.append(szDoubleQutoes);
+    strResult.append(szDoubleQuotes);
     strResult.append(sKey);
-    strResult.append(szDoubleQutoes);
+    strResult.append(szDoubleQuotes);
 
     strResult.append(szColon);
     strResult.append(sValue);
@@ -319,15 +180,10 @@ inline std::string ToJSONStringInt(std::string sKey, std::string sValue)
 }
 } // namespace
 
-// -----------------------
-// Start JsiPaEngineInstance
-// -----------------------
 JsiPaEngineInstance::~JsiPaEngineInstance()
 {
     if (runtime_) {
         runtime_->RegisterUncaughtExceptionHandler(nullptr);
-        // reset runtime in utils
-        JsiUtils::SetRuntime(nullptr, runtime_);
         runtime_->Reset();
     }
     runtime_.reset();
@@ -342,77 +198,12 @@ void JsiPaEngineInstance::RegisterConsoleModule()
 
     // app log method
     shared_ptr<JsValue> consoleObj = runtime_->NewObject();
-    consoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(AppDebugLogPrint));
-    consoleObj->SetProperty(runtime_, "debug", runtime_->NewFunction(AppDebugLogPrint));
-    consoleObj->SetProperty(runtime_, "info", runtime_->NewFunction(AppInfoLogPrint));
-    consoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(AppWarnLogPrint));
-    consoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(AppErrorLogPrint));
+    consoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(JsiBaseUtils::AppDebugLogPrint));
+    consoleObj->SetProperty(runtime_, "debug", runtime_->NewFunction(JsiBaseUtils::AppDebugLogPrint));
+    consoleObj->SetProperty(runtime_, "info", runtime_->NewFunction(JsiBaseUtils::AppInfoLogPrint));
+    consoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(JsiBaseUtils::AppWarnLogPrint));
+    consoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(JsiBaseUtils::AppErrorLogPrint));
     global->SetProperty(runtime_, "console", consoleObj);
-}
-
-std::string GetLogContent(NativeEngine* nativeEngine, NativeCallbackInfo* info)
-{
-    std::string content;
-    for (size_t i = 0; i < info->argc; ++i) {
-        if (info->argv[i]->TypeOf() != NATIVE_STRING) {
-            LOGE("argv is not NativeString");
-            continue;
-        }
-        auto nativeString = reinterpret_cast<NativeString*>(info->argv[i]->GetInterface(NativeString::INTERFACE_ID));
-        size_t bufferSize = nativeString->GetLength();
-        size_t strLength = 0;
-        char* buffer = new char[bufferSize + 1] { 0 };
-        nativeString->GetCString(buffer, bufferSize + 1, &strLength);
-        content.append(buffer);
-        delete[] buffer;
-    }
-    return content;
-}
-
-NativeValue* AppLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info, JsLogLevel level)
-{
-    // Should have at least 1 parameters.
-    if (info->argc == 0) {
-        LOGE("the arg is error");
-        return nativeEngine->CreateUndefined();
-    }
-    std::string content = GetLogContent(nativeEngine, info);
-    switch (level) {
-        case JsLogLevel::DEBUG:
-            APP_LOGD("app Log: %{public}s", content.c_str());
-            break;
-        case JsLogLevel::INFO:
-            APP_LOGI("app Log: %{public}s", content.c_str());
-            break;
-        case JsLogLevel::WARNING:
-            APP_LOGW("app Log: %{public}s", content.c_str());
-            break;
-        case JsLogLevel::ERROR:
-            APP_LOGE("app Log: %{public}s", content.c_str());
-            break;
-    }
-
-    return nativeEngine->CreateUndefined();
-}
-
-NativeValue* AppDebugLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
-{
-    return AppLogPrint(nativeEngine, info, JsLogLevel::DEBUG);
-}
-
-NativeValue* AppInfoLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
-{
-    return AppLogPrint(nativeEngine, info, JsLogLevel::INFO);
-}
-
-NativeValue* AppWarnLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
-{
-    return AppLogPrint(nativeEngine, info, JsLogLevel::WARNING);
-}
-
-NativeValue* AppErrorLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
-{
-    return AppLogPrint(nativeEngine, info, JsLogLevel::ERROR);
 }
 
 void JsiPaEngineInstance::RegisterConsoleModule(ArkNativeEngine* engine)
@@ -471,7 +262,6 @@ void JsiPaEngineInstance::EvaluateJsCode()
     ACE_SCOPED_TRACE("JsiPaEngineInstance::EvaluateJsCode");
     LOGD("JsiPaEngineInstance EvaluateJsCode");
 
-    JsiUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_);
     // load jsfwk
     if (!runtime_->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
         LOGE("Failed to load js framework!");
@@ -505,9 +295,6 @@ bool JsiPaEngineInstance::InitJsEnv(bool debuggerMode, const std::unordered_map<
         return false;
     }
 
-    // set new runtime
-    JsiUtils::SetRuntime(runtime_);
-
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     for (const auto& [key, value] : extraNativeObject) {
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
@@ -522,7 +309,7 @@ bool JsiPaEngineInstance::InitJsEnv(bool debuggerMode, const std::unordered_map<
     EvaluateJsCode();
 
     runtime_->SetEmbedderData(this);
-    runtime_->RegisterUncaughtExceptionHandler(JsiUtils::ReportJsErrorEvent);
+    runtime_->RegisterUncaughtExceptionHandler(JsiBaseUtils::ReportJsErrorEvent);
     LOGI("JsiPaEngineInstance InitJsEnv success");
     return true;
 }
@@ -539,7 +326,6 @@ bool JsiPaEngineInstance::FireJsEvent(const std::string& eventStr)
     }
 
     const std::vector<shared_ptr<JsValue>>& argv = { runtime_->ParseJson(eventStr) };
-    JsiUtils::SetCurrentState(JsErrorType::FIRE_EVENT_ERROR, instanceId_);
     func->Call(runtime_, global, argv, argv.size());
     return true;
 }
@@ -627,7 +413,9 @@ JsiPaEngine::~JsiPaEngine()
     UnloadLibrary();
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     if (nativeEngine_ != nullptr) {
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
+#endif
         delete nativeEngine_;
     }
 }
@@ -726,7 +514,9 @@ bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     });
     JsBackendTimerModule::GetInstance()->InitTimerModule(nativeEngine_, delegate);
     SetPostTask(nativeEngine_);
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
+#endif
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetLibPath();
         if (!packagePath.empty()) {
@@ -766,7 +556,6 @@ void JsiPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
     ACE_DCHECK(engineInstance_);
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
-    JsiUtils::SetCurrentState(JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_);
 
     // js file to abc file and execute abc file
     const char js_ext[] = ".js";
@@ -1547,12 +1336,35 @@ void JsiPaEngine::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEven
     CallFunc(func, argv);
 }
 
-void JsiPaEngine::OnAcquireState(const OHOS::AAFwk::Want &want)
+int32_t JsiPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want &want)
 {
-    LOGI("JsiPaEngine OnAcquireState");
+    LOGI("JsiPaEngine OnAcquireFormState");
+    ACE_DCHECK(engineInstance_);
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+
     const std::vector<shared_ptr<JsValue>>& argv = { WantToJsValue(want) };
-    auto func = GetPaFunc("onAcquireState");
-    CallFunc(func, argv);
+    auto func = GetPaFunc("onAcquireFormState");
+
+    if (func == nullptr) {
+        LOGI("no OnAcquireFormState!");
+        return (int32_t)AppExecFwk::FormState::DEFAULT;
+    }
+
+    auto result = CallFunc(func, argv);
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(result);
+    if (arkJSValue->IsException(runtime)) {
+        LOGE("JsiPaEngine CallFunc FAILED!");
+        return (int32_t)AppExecFwk::FormState::DEFAULT;
+    }
+
+    if (!arkJSValue->IsInt32(runtime)) {
+        LOGE("invalid return value!");
+        return (int32_t)AppExecFwk::FormState::DEFAULT;
+    }
+
+    int32_t formState = arkJSValue->ToInt32(runtime);
+    LOGI("JsiPaEngine OnAcquireFormState, formState: %{public}d", formState);
+    return formState;
 }
 
 } // namespace OHOS::Ace

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,9 @@
 
 #include "core/focus/focus_node.h"
 #include "core/pipeline/base/component_group_element.h"
+#include "core/components_v2/indexer/render_indexer.h"
+#include "core/components_v2/indexer/render_indexer_item.h"
+
 
 namespace OHOS::Ace::V2 {
 class IndexerElement : public ComponentGroupElement, public FocusNode {
@@ -25,6 +28,20 @@ class IndexerElement : public ComponentGroupElement, public FocusNode {
 
 public:
     void PerformBuild() override;
+    bool OnKeyEvent(const KeyEvent& keyEvent) override;
+    bool IndexMoveUp();
+    bool IndexMoveDown();
+    bool CanUpdate(const RefPtr<Component>& newComponent) override
+    {
+        auto context = context_.Upgrade();
+        if (context && context->GetIsDeclarative()) {
+            return false;
+        }
+        return true;
+    }
+
+private:
+    WeakPtr<RenderIndexerItem> prevFocusedItem_;
 };
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_INDEXER_ELEMENT_H

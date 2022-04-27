@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,11 @@
 
 namespace OHOS::Ace {
 namespace {
+#ifdef __aarch64__
+    const std::string RES_SCHED_CLIENT_SO = "/system/lib64/libressched_client.z.so";
+#else
     const std::string RES_SCHED_CLIENT_SO = "/system/lib/libressched_client.z.so";
+#endif
 }
 
 ReportDataFunc LoadReportDataFunc()

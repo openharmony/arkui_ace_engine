@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,9 +60,12 @@ public:
                            int y,
                            int width,
                            int height,
-                           const sptr<OHOS::Ace::IDialogCallback>& dialogCallback) = 0;
+                           const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
+                           int* id = nullptr) = 0;
 
     virtual int CancelDialog(int id) = 0;
+
+    virtual int UpdateDialog(int id, const std::string& data) = 0;
 
     enum {
         // ipc id 1-1000 for kit
@@ -75,6 +78,7 @@ public:
         RETURN_REQUEST,
         SHOW_DIALOG,
         CANCEL_DIALOG,
+        UPDATE_DIALOG,
     };
 };
 }  // namespace Ace

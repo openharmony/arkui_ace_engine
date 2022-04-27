@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,8 +45,6 @@ void CardFrontendTest::TearDown() {}
  * @tc.name: CardFrontendTest001
  * @tc.desc: Test data binding.
  * @tc.type: FUNC
- * @tc.require: AR000F2BC2
- * @tc.author: jiangyingjie
  */
 HWTEST_F(CardFrontendTest, CardFrontendTest001, TestSize.Level1)
 {
@@ -101,8 +99,6 @@ HWTEST_F(CardFrontendTest, CardFrontendTest001, TestSize.Level1)
  * @tc.name: CardFrontendTest002
  * @tc.desc: Test data binding.
  * @tc.type: FUNC
- * @tc.require: AR000F2BC2
- * @tc.author: jiangyingjie
  */
 HWTEST_F(CardFrontendTest, CardFrontendTest002, TestSize.Level1)
 {
@@ -154,8 +150,6 @@ HWTEST_F(CardFrontendTest, CardFrontendTest002, TestSize.Level1)
  * @tc.name: CardFrontendTest003
  * @tc.desc: Test data binding.
  * @tc.type: FUNC
- * @tc.require: AR000F2BC2
- * @tc.author: jiangyingjie
  */
 HWTEST_F(CardFrontendTest, CardFrontendTest003, TestSize.Level1)
 {
@@ -199,8 +193,6 @@ HWTEST_F(CardFrontendTest, CardFrontendTest003, TestSize.Level1)
  * @tc.name: CardFrontendTest004
  * @tc.desc: Test condition rendering.
  * @tc.type: FUNC
- * @tc.require: AR000F2BC4
- * @tc.author: jiangyingjie
  */
 HWTEST_F(CardFrontendTest, CardFrontendTest004, TestSize.Level1)
 {
@@ -239,8 +231,6 @@ HWTEST_F(CardFrontendTest, CardFrontendTest004, TestSize.Level1)
  * @tc.name: CardFrontendTest005
  * @tc.desc: Test condition rendering.
  * @tc.type: FUNC
- * @tc.require: AR000F2BC4
- * @tc.author: jiangyingjie
  */
 HWTEST_F(CardFrontendTest, CardFrontendTest005, TestSize.Level1)
 {
@@ -279,8 +269,6 @@ HWTEST_F(CardFrontendTest, CardFrontendTest005, TestSize.Level1)
  * @tc.name: CardFrontendTest006
  * @tc.desc: Test condition rendering.
  * @tc.type: FUNC
- * @tc.require: AR000F2BC4
- * @tc.author: jiangyingjie
  */
 HWTEST_F(CardFrontendTest, CardFrontendTest006, TestSize.Level1)
 {
@@ -319,8 +307,6 @@ HWTEST_F(CardFrontendTest, CardFrontendTest006, TestSize.Level1)
  * @tc.name: CardFrontendTest007
  * @tc.desc: Test condition rendering.
  * @tc.type: FUNC
- * @tc.require: AR000F2BC4
- * @tc.author: jiangyingjie
  */
 HWTEST_F(CardFrontendTest, CardFrontendTest007, TestSize.Level1)
 {
@@ -359,8 +345,6 @@ HWTEST_F(CardFrontendTest, CardFrontendTest007, TestSize.Level1)
  * @tc.name: CardFrontendTest008
  * @tc.desc: Test "repeat" attr: for = "{{list}}".
  * @tc.type: FUNC
- * @tc.require: AR000F2BC4
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendTest008, TestSize.Level1)
 {
@@ -417,8 +401,6 @@ HWTEST_F(CardFrontendTest, CardFrontendTest008, TestSize.Level1)
  * @tc.name: CardFrontendTest009
  * @tc.desc: Test "repeat" attr: for = "value in list".
  * @tc.type: FUNC
- * @tc.require: AR000F2BC4
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendTest009, TestSize.Level1)
 {
@@ -503,8 +485,6 @@ HWTEST_F(CardFrontendTest, CardFrontendTest009, TestSize.Level1)
  * @tc.name: CardFrontendTest010
  * @tc.desc: Test "repeat" attr: for = "(index, item) in list".
  * @tc.type: FUNC
- * @tc.require: AR000F2BC4
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendTest010, TestSize.Level1)
 {
@@ -590,8 +570,6 @@ HWTEST_F(CardFrontendTest, CardFrontendTest010, TestSize.Level1)
  * @tc.name: CardFrontendTest011
  * @tc.desc: Test point operation.
  * @tc.type: FUNC
- * @tc.require: AR000FDGO7
- * @tc.author: jiangyingjie
  */
 HWTEST_F(CardFrontendTest, CardFrontendTest011, TestSize.Level1)
 {
@@ -620,8 +598,6 @@ HWTEST_F(CardFrontendTest, CardFrontendTest011, TestSize.Level1)
  * @tc.name: CardFrontendTest012
  * @tc.desc: Test array operations.
  * @tc.type: FUNC
- * @tc.require: AR000FDGO8
- * @tc.author: jiangyingjie
  */
 HWTEST_F(CardFrontendTest, CardFrontendTest012, TestSize.Level1)
 {
@@ -658,8 +634,6 @@ HWTEST_F(CardFrontendTest, CardFrontendTest012, TestSize.Level1)
  * @tc.name: CardFrontendTest013
  * @tc.desc: Test complex expressions.
  * @tc.type: FUNC
- * @tc.require: AR000FDGO9
- * @tc.author: jiangyingjie
  */
 HWTEST_F(CardFrontendTest, CardFrontendTest013, TestSize.Level1)
 {
@@ -716,8 +690,6 @@ HWTEST_F(CardFrontendTest, CardFrontendTest013, TestSize.Level1)
  * @tc.name: CardFrontendTest014
  * @tc.desc: Test error expression.
  * @tc.type: FUNC
- * @tc.require: AR000FDGO8
- * @tc.author: jiangyingjie
  */
 HWTEST_F(CardFrontendTest, CardFrontendTest014, TestSize.Level1)
 {
@@ -774,8 +746,6 @@ HWTEST_F(CardFrontendTest, CardFrontendTest014, TestSize.Level1)
  * @tc.name: CardFrontendDataBindingTest001
  * @tc.desc: Test data binding for {{key1}}.{{key2}
  * @tc.type: FUNC
- * @tc.require: AR000FLCJU
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest001, TestSize.Level1)
 {
@@ -818,8 +788,6 @@ HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest001, TestSize.Level1)
  * @tc.name: CardFrontendDataBindingTest002
  * @tc.desc: Test data binding for {{key1}}.{{key2}.{{key3}}
  * @tc.type: FUNC
- * @tc.require: AR000FLCJU
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest002, TestSize.Level1)
 {
@@ -862,8 +830,6 @@ HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest002, TestSize.Level1)
  * @tc.name: CardFrontendDataBindingTest003
  * @tc.desc: Test data binding for {{flag1 ? key1 : key2}}.
  * @tc.type: FUNC
- * @tc.require: AR000FLCKP
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest003, TestSize.Level1)
 {
@@ -906,8 +872,6 @@ HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest003, TestSize.Level1)
  * @tc.name: CardFrontendDataBindingTest004
  * @tc.desc: Test data binding for illegal {{flag1 ? key1 : key2}}.
  * @tc.type: FUNC
- * @tc.require: AR000FLCKP
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest004, TestSize.Level1)
 {
@@ -950,8 +914,6 @@ HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest004, TestSize.Level1)
  * @tc.name: CardFrontendDataBindingTest005
  * @tc.desc: Test data binding for {{flag1 && flag2}}.
  * @tc.type: FUNC
- * @tc.require: AR000FLCK0
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest005, TestSize.Level1)
 {
@@ -994,8 +956,6 @@ HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest005, TestSize.Level1)
  * @tc.name: CardFrontendDataBindingTest006
  * @tc.desc: Test data binding for {{flag1 || flag2}}.
  * @tc.type: FUNC
- * @tc.require: AR000FLCK0
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest006, TestSize.Level1)
 {
@@ -1038,8 +998,6 @@ HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest006, TestSize.Level1)
  * @tc.name: CardFrontendDataBindingTest007
  * @tc.desc: Test data binding for {{!flag1}}.
  * @tc.type: FUNC
- * @tc.require: AR000FLCK0
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest007, TestSize.Level1)
 {
@@ -1082,8 +1040,6 @@ HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest007, TestSize.Level1)
  * @tc.name: CardFrontendDataBindingTest008
  * @tc.desc: Test data binding for {{flag1 && flag2 && flag3}} (not support now).
  * @tc.type: FUNC
- * @tc.require: AR000FLCK0
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest008, TestSize.Level1)
 {
@@ -1125,8 +1081,6 @@ HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest008, TestSize.Level1)
  * @tc.name: CardFrontendDataBindingTest009
  * @tc.desc: Test data binding for {{flag1 || flag2 || flag3}} (not support now).
  * @tc.type: FUNC
- * @tc.require: AR000FLCK0
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest009, TestSize.Level1)
 {
@@ -1168,8 +1122,6 @@ HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest009, TestSize.Level1)
  * @tc.name: CardFrontendDataBindingTest010
  * @tc.desc: Test data binding for {{flag1 && flag2 || flag3}} (not support now).
  * @tc.type: FUNC
- * @tc.require: AR000FLCK0
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest010, TestSize.Level1)
 {
@@ -1211,8 +1163,6 @@ HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest010, TestSize.Level1)
  * @tc.name: CardFrontendDataBindingTest011
  * @tc.desc: Test data binding for {{!flag1 && flag2}} (not support now).
  * @tc.type: FUNC
- * @tc.require: AR000FLCK0
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest011, TestSize.Level1)
 {
@@ -1253,8 +1203,6 @@ HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest011, TestSize.Level1)
  * @tc.name: CardFrontendDataBindingTest012
  * @tc.desc: Test data binding for {{!flag1}}.{{!flag2}}.
  * @tc.type: FUNC
- * @tc.require: AR000FLCK0
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest012, TestSize.Level1)
 {
@@ -1297,8 +1245,6 @@ HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest012, TestSize.Level1)
  * @tc.name: CardFrontendDataBindingTest013
  * @tc.desc: Test data binding for {{key1}}.{{!flag1}}.
  * @tc.type: FUNC
- * @tc.require: AR000FLCK0
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest013, TestSize.Level1)
 {
@@ -1339,8 +1285,6 @@ HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest013, TestSize.Level1)
  * @tc.name: CardFrontendDataBindingTest014
  * @tc.desc: Test data binding for constant + variable.
  * @tc.type: FUNC
- * @tc.require: AR000FLCK0
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest014, TestSize.Level1)
 {
@@ -1381,8 +1325,6 @@ HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest014, TestSize.Level1)
  * @tc.name: CardFrontendDataBindingTest015
  * @tc.desc: Test data binding for {{!flag1}}.{{flag2 && flag3}}
  * @tc.type: FUNC
- * @tc.require: AR000FLCK0
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest015, TestSize.Level1)
 {
@@ -1423,8 +1365,6 @@ HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest015, TestSize.Level1)
  * @tc.name: CardFrontendDataBindingTest016
  * @tc.desc: Test data binding for error expression.
  * @tc.type: FUNC
- * @tc.require: SR000FLCGT
- * @tc.author: jiangdayuan
  */
 HWTEST_F(CardFrontendTest, CardFrontendDataBindingTest016, TestSize.Level1)
 {

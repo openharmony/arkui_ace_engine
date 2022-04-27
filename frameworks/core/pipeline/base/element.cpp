@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -179,18 +179,6 @@ void Element::DumpTree(int32_t depth)
 
     for (const auto& item : children_) {
         item->DumpTree(depth + 1);
-    }
-}
-
-void Element::DumpTree(int32_t depth, std::vector<std::string>& info)
-{
-    Dump();
-    DumpLog::GetInstance().AddDesc(std::string("retakeID: ").append(std::to_string(GetRetakeId())));
-    DumpLog::GetInstance().AddDesc(std::string("Active: ").append(IsActive() ? "Y" : "N"));
-    DumpLog::GetInstance().PrintToString(depth, AceType::TypeName(this), children_.size(), info);
-
-    for (const auto& item : children_) {
-        item->DumpTree(depth + 1, info);
     }
 }
 

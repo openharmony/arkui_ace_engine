@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ DECLARE_ACE_TYPE(RenderPlugin, RenderSubContainer);
 public:
     static RefPtr<RenderNode> Create();
 
-    virtual ~RenderPlugin() override = default;
+    ~RenderPlugin() override = default;
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
@@ -55,7 +55,7 @@ public:
     bool TouchTest(const Point& globalPoint,
         const Point& parentLocalPoint, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 private:
-    Dimension rootWidht_ = 0.0_vp;
+    Dimension rootWidth_ = 0.0_vp;
     Dimension rootHeight_ = 0.0_vp;
     Size drawSize_;
     WeakPtr<PluginSubContainer> pluginContainer_;

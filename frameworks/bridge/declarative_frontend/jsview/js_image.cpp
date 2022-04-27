@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -290,10 +290,8 @@ void JSImage::Create(const JSCallbackInfo& info)
     RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(src);
     imageComponent->SetUseSkiaSvg(false);
     ViewStackProcessor::GetInstance()->Push(imageComponent);
-    JSInteractableView::SetFocusable(true);
+    JSInteractableView::SetFocusable(false);
     JSInteractableView::SetFocusNode(false);
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    boxComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
     if (noPixMap) {
         return;
     }
@@ -404,7 +402,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("renderMode", &JSImage::SetImageRenderMode, opt);
     JSClass<JSImage>::StaticMethod("objectRepeat", &JSImage::SetImageRepeat, opt);
     JSClass<JSImage>::StaticMethod("interpolation", &JSImage::SetImageInterpolation, opt);
-    JSClass<JSImage>::StaticMethod("borderStyle", &JSViewAbstract::SetBorderStyle, opt);
+    JSClass<JSImage>::StaticMethod("borderStyle", &JSViewAbstract::JsBorderStyle);
     JSClass<JSImage>::StaticMethod("borderColor", &JSViewAbstract::JsBorderColor);
     JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderWidth", &JSViewAbstract::JsBorderWidth);

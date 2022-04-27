@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,6 +78,7 @@ void SimpleSpringNode::EndToValue(double endValue, double velocity)
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("End to value failed, context is null. index: %{public}d", index_);
+        return;
     }
     SpringNode::EndToValue(endValue, velocity);
     if (isRunning_) {
@@ -91,7 +92,7 @@ void SimpleSpringNode::EndToValue(double endValue, double velocity)
         if (controlNode->IsAnimateToEnd()) {
             startTime_ = context->GetTimeFromExternalTimer() - static_cast<uint64_t>(FRAME_SCHEDULED);
         } else {
-            startTime_ = context->GetTimeFromExternalTimer() - (int64_t)(GetFrameDelta() * FRAME_SCHEDULED);
+            startTime_ = context->GetTimeFromExternalTimer() - static_cast<uint64_t>(GetFrameDelta() * FRAME_SCHEDULED);
         }
         spring_->SetAccuracy(valueAccuracy_);
         spring_->Reset(value_, endValue, velocity_, springProperty_);

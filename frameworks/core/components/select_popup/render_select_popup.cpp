@@ -35,6 +35,7 @@ RenderSelectPopup::RenderSelectPopup()
     rawDetector_->SetOnTouchDown([weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto selectPopup = weak.Upgrade();
         if (selectPopup) {
+            selectPopup->ProcessTouchDown(info);
             selectPopup->HandleRawEvent(info.GetTouches().front().GetLocalLocation());
         }
     });
@@ -260,7 +261,8 @@ void RenderSelectPopup::CreateAnimation()
         return;
     }
     if (selectPopup_) {
-        CreatePopupAnimation(selectPopup_->IsMenu());
+        // When the popup is used for contextmenu, add the animation, the same with menu.
+        CreatePopupAnimation(selectPopup_->IsMenu() || selectPopup_->IsContextMenu());
     }
     animationCreated_ = true;
 }
@@ -305,9 +307,6 @@ void RenderSelectPopup::PerformLayout()
     normalPadding_ = NormalizeToPx(rrectSize_);
     globalRightBottom_ = Offset() + renderRoot_->GetLayoutSize();
     double outPadding = NormalizeToPx(4.0_vp); // the out padding is 4dp from doc.
-    if (isContextMenu_) {
-        outPadding = 0.0;
-    }
     Size totalSize;
     double fixHeight = 0.0;
     if (renderTitleBox_) {
@@ -401,9 +400,16 @@ void RenderSelectPopup::HandleRawEvent(const Offset& clickPosition)
 
 void RenderSelectPopup::ProcessTouchDown(const TouchEventInfo& info)
 {
+    LOGI("ProcessTouchDown");
     auto touches = info.GetTouches();
     if (touches.empty()) {
         LOGE("touch event info is empty.");
+        return;
+    }
+
+    auto clickPosition = touches.front().GetLocalLocation();
+    if (!touchRegion_.ContainsInRegion(clickPosition.GetX(), clickPosition.GetY())) {
+        LOGI("Do not contains the touch region.");
         return;
     }
 
@@ -412,9 +418,16 @@ void RenderSelectPopup::ProcessTouchDown(const TouchEventInfo& info)
 
 void RenderSelectPopup::ProcessTouchUp(const TouchEventInfo& info)
 {
+    LOGI("ProcessTouchUp");
     auto touches = info.GetTouches();
     if (touches.empty()) {
         LOGE("touch event info is empty.");
+        return;
+    }
+
+    auto clickPosition = touches.front().GetLocalLocation();
+    if (!touchRegion_.ContainsInRegion(clickPosition.GetX(), clickPosition.GetY())) {
+        LOGI("Do not contains the touch region.");
         return;
     }
 
@@ -428,14 +441,14 @@ void RenderSelectPopup::ProcessTouchUp(const TouchEventInfo& info)
     }
 
     auto offset = touches.front().GetGlobalLocation();
-    if (!isContextMenu_) {
-        firstFingerUpOffset_ = offset;
-        if ((offset - firstFingerDownOffset_).GetDistance() <= DEFAULT_DISTANCE) {
+    firstFingerUpOffset_ = offset;
+    if ((offset - firstFingerDownOffset_).GetDistance() <= DEFAULT_DISTANCE) {
+        if (isContextMenu_) {
+            selectPopup_->CloseContextMenu();
+        } else {
             selectPopup_->HideDialog(SELECT_INVALID_INDEX);
-            firstFingerDownOffset_ = Offset();
         }
-    } else {
-        HandleRawEvent(offset);
+        firstFingerDownOffset_ = Offset();
     }
 }
 
@@ -451,16 +464,6 @@ void RenderSelectPopup::OnTouchTestHit(
     if (!clickDetector_) {
         clickDetector_ = AceType::MakeRefPtr<ClickRecognizer>();
     }
-
-    rawDetector_->SetOnTouchDown([weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
-        auto ref = weak.Upgrade();
-        if (!ref) {
-            LOGE("renderSelectPopup upgrade fail.");
-            return;
-        }
-
-        ref->ProcessTouchDown(info);
-    });
 
     rawDetector_->SetOnTouchUp([weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
         auto ref = weak.Upgrade();
@@ -563,11 +566,6 @@ bool RenderSelectPopup::ScreenDirectionSwitched()
         selectPopup_->HideDialog(SELECT_INVALID_INDEX);
     }
     return switched;
-}
-
-WeakPtr<RenderNode> RenderSelectPopup::CheckHoverNode()
-{
-    return AceType::WeakClaim<RenderNode>(this);
 }
 
 bool RenderSelectPopup::HandleMouseEvent(const MouseEvent& event)

@@ -25,7 +25,7 @@ class ImageElement : public RenderElement {
     DECLARE_ACE_TYPE(ImageElement, RenderElement);
 
 protected:
-    virtual RefPtr<RenderNode> GetCachedRenderNode() override
+    RefPtr<RenderNode> GetCachedRenderNode() override
     {
         auto context = GetContext().Upgrade();
         if (context) {

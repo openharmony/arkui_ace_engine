@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ namespace V8Utils {
 
 class ScopedString {
 public:
-    ScopedString(v8::Local<v8::Value> str)
+    explicit ScopedString(v8::Local<v8::Value> str)
     {
         auto isolate = v8::Isolate::GetCurrent();
         v8::String::Utf8Value s(isolate, str);
@@ -71,8 +71,6 @@ void GetPosInfo(const std::string& temp, std::string& line, std::string& column)
 std::string GetSourceInfo(const std::string& line, const std::string& column, const RefPtr<RevSourceMap>& pageMap,
     const RefPtr<RevSourceMap>& appMap, bool isAppPage);
 
-// TODO(cvetan): can be done for both engines
-// FIXME(cvetan): I couldn't make it to work with percentage formatting because the compiler complains about using
 // snprintf without a string literal (-Wformat-security)
 template<typename... Args>
 v8::Local<v8::Value> ThrowException(Args... args)

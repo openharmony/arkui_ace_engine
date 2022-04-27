@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ namespace OHOS::Ace::Framework {
 
 class ByteBufferReader final {
 public:
-    explicit ByteBufferReader(const std::vector<uint8_t>& buffer) : buffer_(buffer) {};
+    explicit ByteBufferReader(const std::vector<uint8_t>& buffer) : buffer_(buffer) {}
     ~ByteBufferReader() = default;
 
     bool ReadData(uint8_t& value) const
@@ -86,7 +86,8 @@ private:
     bool ReadArray(T& dst) const
     {
         int32_t length = -1;
-        if (!ReadData(length) || length < 0 || readPos_ + sizeof(typename T::value_type) * length > buffer_.size()) {
+        if (!ReadData(length) || length < 0 ||
+            readPos_ + static_cast<uint32_t>(sizeof(typename T::value_type) * length) > buffer_.size()) {
             LOGW("Could not read array length or array length is invalid");
             return false;
         }
@@ -104,7 +105,7 @@ private:
 
 class ByteBufferWriter final {
 public:
-    ByteBufferWriter(std::vector<uint8_t>& buffer) : buffer_(buffer) {};
+    ByteBufferWriter(std::vector<uint8_t>& buffer) : buffer_(buffer) {}
     ~ByteBufferWriter() = default;
 
     void WriteData(uint8_t value)

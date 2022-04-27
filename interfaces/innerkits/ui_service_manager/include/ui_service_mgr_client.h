@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,9 +57,12 @@ public:
                        int y,
                        int width,
                        int height,
-                       DialogCallback callback);
+                       DialogCallback callback,
+                       int* id = nullptr);
 
     ErrCode CancelDialog(int32_t id);
+
+    ErrCode UpdateDialog(int32_t id, const std::string& data);
 
     ErrCode ShowAppPickerDialog(
         const AAFwk::Want& want, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos, int32_t userId);

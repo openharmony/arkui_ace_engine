@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,7 +69,7 @@ Rect FlutterRenderTextField::GetInnerRect(const Decoration& decoration, const Re
     }
     double iconSpacing = iconImage_ ? NormalizeToPx(iconHotZoneSizeInDimension_) : 0.0;
     double passwordIconSpacing =
-        (keyboard_ == TextInputType::VISIBLE_PASSWORD && SystemProperties::GetDeviceType() == DeviceType::PHONE)
+        (keyboard_ == TextInputType::VISIBLE_PASSWORD && IsSelectiveDevice())
             ? NormalizeToPx(iconHotZoneSizeInDimension_)
             : 0.0;
     if (textDirection_ == TextDirection::RTL) {
@@ -255,8 +255,7 @@ void FlutterRenderTextField::PaintIcon(const Offset& offset, RenderContext& cont
 
 void FlutterRenderTextField::PaintSelection(SkCanvas* canvas) const
 {
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE &&
-        SystemProperties::GetDeviceType() != DeviceType::CAR) {
+    if (!IsSelectiveDevice()) {
         return;
     }
     using namespace Constants;
@@ -454,7 +453,7 @@ Size FlutterRenderTextField::Measure()
         if (layoutParamChanged) {
             lastLayoutParam_ = std::make_optional(GetLayoutParam());
         }
-        bool needNotifyChangeEvent = !isValueFromFront_ || (isValueFromFront_ && layoutParamChanged);
+        bool needNotifyChangeEvent = !isValueFromFront_ || layoutParamChanged;
         // If height or lines is changed, make needNotifyChangeEvent_ true to notify change event.
         if (needNotifyChangeEvent && (!NearEqual(textHeight_, textHeight) || textLines_ != textLines)) {
             needNotifyChangeEvent_ = true;

@@ -13,9 +13,11 @@
 
 import("//build/ohos.gni")
 import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/ace/ace_engine/adapter/preview/build/config_js_engine.gni")
+import("//foundation/ace/ace_engine/interfaces/napi/kits/napi_lib.gni")
 
 config("ace_pc_preview_config") {
-  cflags = [
+  cflags_cc = [
     "-std=c++17",
     "-Wno-c99-designator",
     "-Wno-unknown-warning-option",
@@ -39,12 +41,20 @@ template("ace_test") {
 
     deps = [
       ":copy_napi_modules_shared_library_for_test(${current_toolchain})",
-      ":copy_napi_shared_library_for_test(${current_toolchain})",
       ":copy_resource_dynamic_library(${current_toolchain})",
       "$ace_napi:ace_napi(${current_toolchain})",
       "$ace_napi/sample/native_module_demo:demo(${current_toolchain})",
       "$ace_root/adapter/preview/build:libace_engine_$platform(${current_toolchain})",
     ]
+    if (enable_ark_preview) {
+      deps += [
+        ":copy_ark_shared_library(${current_toolchain})",
+        ":copy_icu_data_resource(${current_toolchain})",
+        ":copy_napi_shared_library(${current_toolchain})",
+      ]
+    } else {
+      deps += [ ":copy_napi_shared_library_for_test(${current_toolchain})" ]
+    }
     if (platform == "windows") {
       libs = [ "pthread" ]
     }
@@ -84,6 +94,102 @@ foreach(item, ace_platforms) {
   }
 }
 
+if (enable_ark_preview) {
+  ohos_copy("copy_ark_shared_library") {
+    sources = []
+    deps = []
+    ark_core_shared_library =
+        get_label_info("//ark/runtime_core/libpandabase:libarkbase",
+                       "root_out_dir") + "/ark/ark"
+    sources += [
+      "$ark_core_shared_library/libarkbase.dll",
+      "$ark_core_shared_library/libarkfile.dll",
+      "$ark_core_shared_library/libarkziparchive.dll",
+    ]
+    deps += [
+      "//ark/runtime_core/libpandabase:libarkbase(${current_toolchain})",
+      "//ark/runtime_core/libpandafile:libarkfile(${current_toolchain})",
+      "//ark/runtime_core/libziparchive:libarkziparchive(${current_toolchain})",
+    ]
+    ark_js_shared_library =
+        get_label_info("//ark/js_runtime:libark_jsruntime", "root_out_dir") +
+        "/ark/ark_js_runtime"
+    sources += [ "$ark_js_shared_library/libark_jsruntime.dll" ]
+    deps += [ "//ark/js_runtime:libark_jsruntime" ]
+    outputs =
+        [ root_build_dir + "/mingw_x86_64/common/common/{{source_file_part}}" ]
+  }
+  ohos_copy("copy_napi_shared_library") {
+    shared_library_path =
+        get_label_info("$ace_napi:ace_napi(${current_toolchain})",
+                       "root_out_dir")
+    sources = [
+      "$shared_library_path/ace/napi/libace_napi.dll",
+      "$shared_library_path/ace/napi/libace_napi_ark.dll",
+    ]
+    deps = [
+      "$ace_napi:ace_napi(${current_toolchain})",
+      "$ace_napi:ace_napi_ark(${current_toolchain})",
+    ]
+    outputs =
+        [ root_build_dir + "/mingw_x86_64/common/common/{{source_file_part}}" ]
+  }
+  ohos_copy("copy_icu_data_resource") {
+    sources = [ "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat" ]
+    outputs = [ root_build_dir + "/mingw_x86_64/common/common/icudt67l.dat" ]
+  }
+} else {
+  ohos_copy("copy_napi_shared_library_for_test") {
+    shared_library_path =
+        get_label_info("$ace_napi:ace_napi(${current_toolchain})",
+                       "root_out_dir")
+    deps = [
+      "$ace_napi:ace_napi(${current_toolchain})",
+      "$ace_napi:ace_napi_quickjs(${current_toolchain})",
+    ]
+    if (use_mac) {
+      sources = [
+        "$shared_library_path/ace/napi/libace_napi.dylib",
+        "$shared_library_path/ace/napi/libace_napi_quickjs.dylib",
+        "$shared_library_path/ace/napi/libuv.dylib",
+      ]
+      outputs =
+          [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
+    } else {
+      sources = [
+        "$shared_library_path/ace/napi/libace_napi.dll",
+        "$shared_library_path/ace/napi/libace_napi_quickjs.dll",
+        "$shared_library_path/ace/napi/libuv.dll",
+      ]
+      outputs = [ root_build_dir +
+                  "/mingw_x86_64/common/common/{{source_file_part}}" ]
+    }
+  }
+}
+
+ohos_copy("copy_napi_modules_shared_library_for_test") {
+  deps = []
+  sources = []
+  foreach(module, common_napi_libs) {
+    out_path = get_label_info("$ace_root/interfaces/napi/kits:${module}",
+                              "root_out_dir")
+    deps += [ "$ace_root/interfaces/napi/kits:${module}" ]
+    if (use_mac) {
+      sources += [ "${out_path}/ace/ace_engine_standard/lib${module}.dylib" ]
+    } else {
+      sources += [ "${out_path}/ace/ace_engine_standard/lib${module}.dll" ]
+    }
+  }
+
+  if (use_mac) {
+    outputs = [ root_build_dir +
+                "/clang_x64/common/common/module/{{source_file_part}}" ]
+  } else {
+    outputs = [ root_build_dir +
+                "/mingw_x86_64/common/common/module/{{source_file_part}}" ]
+  }
+}
+
 ohos_copy("copy_resource_dynamic_library") {
   if (use_mac) {
     if (is_standard_system) {
@@ -115,79 +221,5 @@ ohos_copy("copy_resource_dynamic_library") {
     }
     outputs =
         [ root_build_dir + "/mingw_x86_64/common/common/{{source_file_part}}" ]
-  }
-}
-
-ohos_copy("copy_napi_shared_library_for_test") {
-  shared_library_path =
-      get_label_info("$ace_napi:ace_napi(${current_toolchain})", "root_out_dir")
-  deps = [
-    "$ace_napi:ace_napi(${current_toolchain})",
-    "$ace_napi:ace_napi_quickjs(${current_toolchain})",
-  ]
-  if (use_mac) {
-    sources = [
-      "$shared_library_path/ace/napi/libace_napi.dylib",
-      "$shared_library_path/ace/napi/libace_napi_quickjs.dylib",
-      "$shared_library_path/ace/napi/libuv.dylib",
-    ]
-    outputs =
-        [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
-  } else {
-    sources = [
-      "$shared_library_path/ace/napi/libace_napi.dll",
-      "$shared_library_path/ace/napi/libace_napi_quickjs.dll",
-      "$shared_library_path/ace/napi/libuv.dll",
-    ]
-    outputs =
-        [ root_build_dir + "/mingw_x86_64/common/common/{{source_file_part}}" ]
-  }
-}
-
-ohos_copy("copy_napi_modules_shared_library_for_test") {
-  mediaquery_path =
-      get_label_info("$ace_root/interfaces/napi/kits/media_query:mediaquery",
-                     "root_out_dir")
-  prompt_path = get_label_info("$ace_root/interfaces/napi/kits/prompt:prompt",
-                               "root_out_dir")
-  router_path = get_label_info("$ace_root/interfaces/napi/kits/router:router",
-                               "root_out_dir")
-  configuration_path = get_label_info(
-          "$ace_root/interfaces/napi/kits/configuration:configuration",
-          "root_out_dir")
-  device_path = get_label_info("$ace_root/interfaces/napi/kits/device:device",
-                               "root_out_dir")
-  grid_path =
-      get_label_info("$ace_root/interfaces/napi/kits/grid:grid", "root_out_dir")
-  deps = [
-    "$ace_root/interfaces/napi/kits/configuration:configuration",
-    "$ace_root/interfaces/napi/kits/device:device",
-    "$ace_root/interfaces/napi/kits/grid:grid",
-    "$ace_root/interfaces/napi/kits/media_query:mediaquery",
-    "$ace_root/interfaces/napi/kits/prompt:prompt",
-    "$ace_root/interfaces/napi/kits/router:router",
-  ]
-  if (use_mac) {
-    sources = [
-      "$configuration_path/ace/ace_engine_standard/libconfiguration.dylib",
-      "$device_path/ace/ace_engine_standard/libdevice.dylib",
-      "$grid_path/ace/ace_engine_standard/libgrid.dylib",
-      "$mediaquery_path/ace/ace_engine_standard/libmediaquery.dylib",
-      "$prompt_path/ace/ace_engine_standard/libprompt.dylib",
-      "$router_path/ace/ace_engine_standard/librouter.dylib",
-    ]
-    outputs = [ root_build_dir +
-                "/clang_x64/common/common/module/{{source_file_part}}" ]
-  } else {
-    sources = [
-      "$configuration_path/ace/ace_engine_standard/libconfiguration.dll",
-      "$device_path/ace/ace_engine_standard/libdevice.dll",
-      "$grid_path/ace/ace_engine_standard/libgrid.dll",
-      "$mediaquery_path/ace/ace_engine_standard/libmediaquery.dll",
-      "$prompt_path/ace/ace_engine_standard/libprompt.dll",
-      "$router_path/ace/ace_engine_standard/librouter.dll",
-    ]
-    outputs = [ root_build_dir +
-                "/mingw_x86_64/common/common/module/{{source_file_part}}" ]
   }
 }

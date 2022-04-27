@@ -15,15 +15,17 @@
 
 initTest();
 
+testLocalStorage();
+
 testAppStorage();
 
-testEnvironment();
+testAppStorageArray
 
-testAppStorageArray();
+// testEnvironment(); FIXME issue #I4TC8S
 
 testPersistentStorage();
 
-testViewState();
+ testViewState();
 
 nestedObsObjProps();
 

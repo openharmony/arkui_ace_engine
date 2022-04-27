@@ -271,6 +271,41 @@ void RenderSlider::Initialize()
             }
         });
     }
+
+    touchDetector_ = AceType::MakeRefPtr<RawRecognizer>();
+    touchDetector_->SetOnTouchDown([weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
+        if (info.GetTouches().empty()) {
+            return;
+        }
+        auto slider = weak.Upgrade();
+        if (slider) {
+            auto localPosition = info.GetTouches().front().GetLocalLocation();
+            if (slider->blockTouchRegion_.ContainsInRegion(localPosition.GetX(), localPosition.GetY())) {
+                slider->isPress_ = true;
+                slider->MarkNeedLayout();
+            }
+        }
+    });
+
+    touchDetector_->SetOnTouchUp([weak = AceType::WeakClaim(this)](const TouchEventInfo&) {
+        auto slider = weak.Upgrade();
+        if (slider) {
+            slider->isPress_ = false;
+        }
+    });
+}
+
+bool RenderSlider::HandleMouseEvent(const MouseEvent& event)
+{
+    auto localPosition = event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
+    if (blockTouchRegion_.ContainsInRegion(localPosition.GetX(), localPosition.GetY())) {
+        isHover_ = true;
+        MarkNeedLayout();
+    } else {
+        isHover_ = false;
+        MarkNeedLayout();
+    }
+    return true;
 }
 
 bool RenderSlider::MouseHoverTest(const Point& parentLocalPoint)
@@ -324,8 +359,9 @@ void RenderSlider::FireMovingEvent(SliderEvent mode)
             case SliderEvent::MOVE_MOVING:
                 jsonResult->Put("isEnd", "false");
                 jsonResult->Put("mode", "move");
-                if (onChange_) {
+                if (onChange_ && !NearEqual(value_, preMovingValue_)) {
                     onChange_(value_, static_cast<int>(SliderEvent::MOVE_MOVING));
+                    preMovingValue_ = value_;
                 }
                 break;
             case SliderEvent::MOVE_END:
@@ -356,6 +392,8 @@ void RenderSlider::FireMovingEvent(SliderEvent mode)
                     onChange_(value_, static_cast<int>(SliderEvent::FOCUS));
                 }
                 break;
+            default:
+                break;
         }
         jsonResult->Put("value", value_);
         if (onMoving_) {
@@ -380,10 +418,6 @@ void RenderSlider::HandleClick(const Offset& clickPosition)
         UpdateTouchRegion();
     }
     insideBlockRegion_ = false;
-    if (onChange_) {
-        FireMovingEvent(SliderEvent::MOVE_END);
-        return;
-    }
     FireMovingEvent(SliderEvent::CLICK);
     FireMoveEndEvent();
 }
@@ -518,21 +552,20 @@ void RenderSlider::UpdateBlockPosition(const Offset& touchPosition, bool isClick
             diff = GetLayoutSize().Width() - touchPosition.GetX();
         }
     }
-    double endValue = 0.0;
     double totalRatio = diff / trackLength_;
     if (LessOrEqual(diff, 0.0)) {
-        endValue = min_;
+        value_ = min_;
     } else if (GreatOrEqual(totalRatio, 1.0)) {
-        endValue = max_;
+        value_ = max_;
     } else {
         double stepRatio = step_ / (max_ - min_);
         double endRatio = stepRatio * std::floor((totalRatio + HALF * stepRatio) / stepRatio);
-        endValue = (max_ - min_) * endRatio + min_;
-        if (GreatOrEqual(endValue, max_)) {
-            endValue = max_;
+        value_ = (max_ - min_) * endRatio + min_;
+        if (GreatOrEqual(value_, max_)) {
+            value_ = max_;
         }
     }
-    RestartMoveAnimation(endValue, isClick);
+    RestartMoveAnimation(value_, isClick);
 }
 
 void RenderSlider::UpdateTipText(double value)
@@ -552,8 +585,10 @@ void RenderSlider::OnTouchTestHit(
     if (!isValueError_ && !disable_) {
         dragDetector_->SetCoordinateOffset(coordinateOffset);
         clickDetector_->SetCoordinateOffset(coordinateOffset);
+        touchDetector_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(dragDetector_);
         result.emplace_back(clickDetector_);
+        result.emplace_back(touchDetector_);
     }
 }
 
@@ -668,7 +703,7 @@ void RenderSlider::StartMoveAnimation(double from, double to, bool isClick)
     moveController_->AddStopListener([weak = AceType::WeakClaim(this), isClick]() {
         auto slider = weak.Upgrade();
         if (slider) {
-            slider->SyncValueToComponent(slider->totalRatio_ * (slider->max_ - slider->min_));
+            slider->SyncValueToComponent(slider->totalRatio_ * (slider->max_ - slider->min_) + slider->min_);
             slider->SetTotalRatio(slider->totalRatio_);
             slider->UpdateTouchRegion();
         }

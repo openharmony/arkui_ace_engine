@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,6 @@
  */
 
 type ProvidedVarsMap = Map<string, ObservedPropertyAbstract<any>>;
-type Context = any;
 
 // Nativeview
 // implemented in C++  for release
@@ -32,18 +31,68 @@ abstract class View extends NativeView implements
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: ProvidedVarsMap;
 
+  // my LocalStorge instance, shared with ancestor Views.
+  // create a default instance on demand if none is initialized
+  protected localStoragebackStore_: LocalStorage = undefined;
+  protected get localStorage_() {
+    if (!this.localStoragebackStore_) {
+      console.warn(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
+      this.localStoragebackStore_ = new LocalStorage({ /* emty */ });
+    }
+    return this.localStoragebackStore_;
+  }
+  protected set localStorage_(instance: LocalStorage) {
+    if (!instance) { 
+      // setting to undefined not allowed
+      return;
+    }
+    if (this.localStoragebackStore_) {
+      console.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+    }
+    this.localStoragebackStore_ = instance;
+  }
 
-  constructor(compilerAssignedUniqueChildId: string, parent: View) {
+  /**
+   * Create a View
+   * 
+   * 1. option: top level View, specify
+   *    - compilerAssignedUniqueChildId must specify
+   *    - parent=undefined
+   *    - localStorage  must provide if @LocalSTorageLink/Prop variables are used
+   *      in this View or descendant Views.
+   * 
+   * 2. option: not a top level View
+   *    - compilerAssignedUniqueChildId must specify
+   *    - parent must specify
+   *    - localStorage do not specify, will inherit from parent View.
+   * 
+   * @param compilerAssignedUniqueChildId Tw
+   * @param parent 
+   * @param localStorage 
+   */
+
+  constructor(compilerAssignedUniqueChildId: string, parent: View, localStorage?: LocalStorage) {
     super(compilerAssignedUniqueChildId, parent);
     this.id_ = SubscriberManager.Get().MakeId();
     this.providedVars_ = parent ? new Map(parent.providedVars_)
       : new Map<string, ObservedPropertyAbstract<any>>();
+
+    this.localStoragebackStore_ = undefined;
+    if (parent) {
+      // this View is not a top-level View
+      console.log(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
+      this.localStorage_ = parent.localStorage_;
+    } else if (localStorage) {
+      this.localStorage_ = localStorage;
+      console.log(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
+    }
+
     SubscriberManager.Get().add(this);
     console.debug(`${this.constructor.name}: constructor done`);
   }
 
   // globally unique id, this is different from compilerAssignedUniqueChildId!
-  id__(): number {
+  id(): number {
     return this.id_;
   }
 
@@ -56,6 +105,8 @@ abstract class View extends NativeView implements
 
   propertyHasChanged(info?: PropertyInfo): void {
     if (info) {
+      // need to sync container instanceId to switch instanceId in C++ side.
+      this.syncInstanceId();
       if (this.propsUsedForRender.has(info)) {
         console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View needs update`);
         this.markNeedUpdate();
@@ -67,6 +118,7 @@ abstract class View extends NativeView implements
         console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. calling @Watch function`);
         cb.call(this, info);
       }
+      this.restoreInstanceId();
     } // if info avail.
   }
 
@@ -92,7 +144,6 @@ abstract class View extends NativeView implements
 
   public aboutToContinueRender(): void {
     // do not reset
-    //this.propsUsedForRender = new Set<string>();
     this.isRenderingInProgress = true;
   }
 
@@ -149,12 +200,4 @@ abstract class View extends NativeView implements
 
     return providedVarStore.createLink(this, consumeVarName);
   }
-}
-
-function getContentStorage(view: View) : ContentStorage {
-  return view.getContentStorage();
-}
-
-function getContext(view: View) : Context {
-  return view.getContext();
 }

@@ -295,6 +295,16 @@ public:
         return properties_;
     }
 
+    bool HasStopListenerAdded() const
+    {
+        return hasStopListenerAdded_;
+    }
+
+    void SetHasStopListenerAdded(bool hasStopListenerAdded)
+    {
+        hasStopListenerAdded_ = hasStopListenerAdded;
+    }
+
 protected:
     static int32_t GenerateDialogId();
 
@@ -348,6 +358,7 @@ protected:
     Dimension width_;
     Edge margin_;
     bool isSetMargin_ = false;
+    bool hasStopListenerAdded_ = false;
     // used for inspector node in PC preview
     int32_t customDialogId_ = -1;
 };

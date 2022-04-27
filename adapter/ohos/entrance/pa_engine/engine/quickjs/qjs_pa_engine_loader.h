@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_PA_ENGINE_ENGINE_QUICKJS_QJS_PA_ENGINE_LOADER_H
-#define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_PA_ENGINE_ENGINE_QUICKJS_QJS_PA_ENGINE_LOADER_H
+#ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_PA_ENGINE_ENGINE_QUICK_JS_QJS_PA_ENGINE_LOADER_H
+#define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_PA_ENGINE_ENGINE_QUICK_JS_QJS_PA_ENGINE_LOADER_H
 
 #include "adapter/ohos/entrance/pa_engine/engine/common/js_backend_engine_loader.h"
 #include "base/utils/singleton.h"
@@ -24,9 +24,9 @@ namespace OHOS::Ace {
 class QjsPaEngineLoader : public JsBackendEngineLoader, public Singleton<QjsPaEngineLoader> {
     DECLARE_SINGLETON(QjsPaEngineLoader)
 public:
-    virtual RefPtr<JsBackendEngine> CreateJsBackendEngine(int32_t instanceId) const final;
+    RefPtr<JsBackendEngine> CreateJsBackendEngine(int32_t instanceId) const final;
 };
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_PA_ENGINE_ENGINE_QUICKJS_QJS_PA_ENGINE_LOADER_H
+#endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_PA_ENGINE_ENGINE_QUICK_JS_QJS_PA_ENGINE_LOADER_H

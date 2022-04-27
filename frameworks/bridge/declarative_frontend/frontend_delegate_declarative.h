@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,7 +79,7 @@ public:
     void OnJSCallback(const std::string& callbackId, const std::string& data);
     bool OnPageBackPress();
     void OnBackGround();
-    void OnForground();
+    void OnForeground();
     void OnConfigurationUpdated(const std::string& data);
     void OnSaveAbilityState(std::string& data);
     void OnRestoreAbilityState(const std::string& data);
@@ -282,12 +282,17 @@ private:
 
     int32_t GetRunningPageId() const;
     std::string GetRunningPageUrl() const;
-    int32_t GetPageIdByUrl(const std::string& url, bool isRestore = false);
+    int32_t GetPageIdByUrl(const std::string& url, bool& isRestore);
+    int32_t GetPageIdByUrl(const std::string& url)
+    {
+        bool tmp = false;
+        return GetPageIdByUrl(url, tmp);
+    }
 
     void ResetStagingPage();
     void FlushAnimationTasks();
 
-    static std::atomic<uint64_t> pageIdPool_;
+    std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;
     int32_t pageId_ = -1;
     bool isRouteStackFull_ = false;

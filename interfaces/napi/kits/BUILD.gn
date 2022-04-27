@@ -13,15 +13,27 @@
 
 import("//build/ohos.gni")
 import("//foundation/ace/ace_engine/ace_config.gni")
+import("napi_lib.gni")
+
+common_targets = []
+foreach(module, common_napi_libs) {
+  if (use_mac) {
+    ace_napi_lib(module) {
+      platform = "mac"
+    }
+  } else if (use_mingw_win) {
+    ace_napi_lib(module) {
+      platform = "windows"
+    }
+  } else if (!is_cross_platform_build) {
+    ace_napi_lib(module) {
+      platform = "ohos"
+    }
+  }
+  common_targets += [ ":$module" ]
+}
 
 group("napi_group") {
-  deps = [
-    "$ace_root/interfaces/napi/kits/configuration:configuration",
-    "$ace_root/interfaces/napi/kits/device:device",
-    "$ace_root/interfaces/napi/kits/grid:grid",
-    "$ace_root/interfaces/napi/kits/media_query:mediaquery",
-    "$ace_root/interfaces/napi/kits/plugincomponent:plugincomponent",
-    "$ace_root/interfaces/napi/kits/prompt:prompt",
-    "$ace_root/interfaces/napi/kits/router:router",
-  ]
+  deps = common_targets
+  deps += [ "$ace_root/interfaces/napi/kits/plugincomponent:plugincomponent" ]
 }

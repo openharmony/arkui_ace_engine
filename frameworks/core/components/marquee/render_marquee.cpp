@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,10 @@ bool IsPlayingAnimation(const RefPtr<Animator>& controller)
 
 void RenderMarquee::Start()
 {
+    if (!NeedMarquee()) {
+        LOGD("Needn't marquee");
+        return;
+    }
     LOGD("StartAnimation called.");
     if ((!childText_) || (!controller_)) {
         startAfterLayout_ = true;
@@ -190,7 +194,11 @@ void RenderMarquee::Update(const RefPtr<Component>& component)
     value_ = marquee->GetValue();
     start_ = marquee->GetPlayerStatus();
     auto context = GetContext().Upgrade();
-    if (context && context->UseLiteStyle()) {
+    if (!context) {
+        LOGE("context is null");
+        return;
+    }
+    if (context->UseLiteStyle()) {
         // lite loop time is 1000ms, while default marquee loop is 85ms.
         scrollAmount_ = marquee->GetScrollAmount() * DEFAULT_MARQUEE_SCROLL_DELAY / 1000;
     } else {
@@ -283,15 +291,10 @@ void RenderMarquee::PerformLayout()
     SetLayoutSize(layoutSize);
     LOGD("layoutSize: %{public}s, child: %{public}s", layoutSize.ToString().c_str(),
         childText_->GetLayoutSize().ToString().c_str());
-    const static int32_t PLATFORM_VERSION_SIX = 6;
-    auto context = GetContext().Upgrade();
-    if (context && !context->GetIsDeclarative()) {
-        if (context->GetMinPlatformVersion() >= PLATFORM_VERSION_SIX) {
-            if (childText_->GetLayoutSize().Width() <= layoutSize.Width()) {
-                childText_->SetPosition(Offset(0.0, 0.0));
-                return;
-            }
-        }
+    if (!NeedMarquee()) {
+        Stop();
+        childText_->SetPosition(Offset(0.0, 0.0));
+        return;
     }
     if (lastLayoutSize_ != childText_->GetLayoutSize() && IsPlayingAnimation(controller_)) {
         UpdateAnimation();
@@ -340,6 +343,27 @@ void RenderMarquee::GetMarqueeCallback(const RefPtr<Component>& component)
     if (marquee->GetOnFinish()) {
         onFinishEvent_ = *marquee->GetOnFinish();
     }
+}
+
+bool RenderMarquee::NeedMarquee() const
+{
+    if (!childText_) {
+        return true;
+    }
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        return true;
+    }
+    // Is width of text longer than container.
+    auto needMarquee = (childText_->GetLayoutSize().Width() > GetLayoutSize().Width());
+    if (context->GetIsDeclarative()) {
+        return needMarquee;
+    }
+    const static int32_t PLATFORM_VERSION_SIX = 6;
+    if (context->GetMinPlatformVersion() >= PLATFORM_VERSION_SIX) {
+        return needMarquee;
+    }
+    return true;
 }
 
 } // namespace OHOS::Ace

@@ -72,12 +72,12 @@ public:
         }
     }
 
-    virtual bool IsSupportedRunningAsynchronously() override
+    bool IsSupportedRunningAsynchronously() override
     {
         return isSupportedRunningAsync_;
     }
 
-    virtual bool RunAsync(const WeakPtr<Scheduler>& weakScheduler, const AnimationOption& option,
+    bool RunAsync(const WeakPtr<Scheduler>& weakScheduler, const AnimationOption& option,
         const std::function<void()> prepareCallback = nullptr,
         const std::function<void()> finishCallback = nullptr) override
     {

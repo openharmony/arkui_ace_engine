@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,8 +53,6 @@ void DomDivTest::TearDown() {}
  * @tc.name: DomDivTest001
  * @tc.desc: Verify that DomDiv can be created and appended children.
  * @tc.type: FUNC
- * @tc.require: AR000DD66K
- * @tc.author: liwenzhen
  */
 HWTEST_F(DomDivTest, DomDivTest001, TestSize.Level1)
 {
@@ -88,8 +86,6 @@ HWTEST_F(DomDivTest, DomDivTest001, TestSize.Level1)
  * @tc.name: DomDivTest002
  * @tc.desc: Verify that DomDiv can be set styles.
  * @tc.type: FUNC
- * @tc.require: AR000DD66K
- * @tc.author: liwenzhen
  */
 HWTEST_F(DomDivTest, DomDivTest002, TestSize.Level1)
 {
@@ -134,8 +130,6 @@ HWTEST_F(DomDivTest, DomDivTest002, TestSize.Level1)
  * @tc.name: DomDivTest003
  * @tc.desc: Verify that DomDiv can be set styles as grid.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SM AR000DQ1SN
- * @tc.author: zhongjianfei
  */
 HWTEST_F(DomDivTest, DomDivTest003, TestSize.Level1)
 {

@@ -22,6 +22,7 @@ DeviceType g_deviceType = DeviceType::TV;
 
 bool SystemProperties::traceEnabled_ = false;
 bool SystemProperties::rosenBackendEnabled_ = true;
+bool SystemProperties::windowAnimationEnabled_ = true;
 
 void SystemProperties::InitDeviceType(DeviceType type)
 {

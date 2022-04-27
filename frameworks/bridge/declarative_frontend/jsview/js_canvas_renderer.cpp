@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,10 @@
 
 #include "bridge/declarative_frontend/jsview/js_canvas_renderer.h"
 
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
+#include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 
 #ifdef PIXEL_MAP_SUPPORTED
@@ -630,6 +632,10 @@ void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
 {
     if (info[0]->IsObject()) {
         JSRenderImage* jsImage = JSRef<JSObject>::Cast(info[0])->Unwrap<JSRenderImage>();
+        if (jsImage == nullptr) {
+            LOGE("jsImage is null");
+            return;
+        }
         std::string imageSrc = jsImage->GetSrc();
         double imgWidth = jsImage->GetWidth();
         double imgHeight = jsImage->GetHeight();
@@ -814,13 +820,13 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
         data = pool_->GetImageData(left, top, width, height);
     }
 
-    final_height = data->dirtyHeight;
-    final_width = data->dirtyWidth;
+    final_height = static_cast<uint32_t>(data->dirtyHeight);
+    final_width = static_cast<uint32_t>(data->dirtyWidth);
 
     JSRef<JSArray> colorArray = JSRef<JSArray>::New();
     uint32_t count = 0;
-    for (auto i = 0; i < final_height; i++) {
-        for (auto j = 0; j < final_width; j++) {
+    for (uint32_t i = 0; i < final_height; i++) {
+        for (uint32_t j = 0; j < final_width; j++) {
             int32_t idx = i * data->dirtyWidth + j;
             auto pixel = data->data[idx];
 
@@ -876,8 +882,8 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     } else {
         canvasData = pool_->GetImageData(left, top, width, height);
     }
-    final_height = canvasData->dirtyHeight;
-    final_width = canvasData->dirtyWidth;
+    final_height = static_cast<uint32_t>(canvasData->dirtyHeight);
+    final_width = static_cast<uint32_t>(canvasData->dirtyWidth);
     uint32_t length = final_height * final_width;
     uint32_t* data = new uint32_t[length];
     for (uint32_t i = 0; i < final_height; i++) {
@@ -893,21 +899,19 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
     options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
-    options.size.width = final_width;
-    options.size.height = final_height;
+    options.size.width = static_cast<int32_t>(final_width);
+    options.size.height = static_cast<int32_t>(final_height);
     options.editable = true;
     std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(data, length, options);
     delete[] data;
 
     // 3 pixelmap to NapiValue
-    NativeEngine* nativeEngine = nullptr;
-#ifdef USE_V8_ENGINE
-    nativeEngine = V8DeclarativeEngineInstance::GetNativeEngine();
-#elif USE_QUICKJS_ENGINE
-    nativeEngine = QJSDeclarativeEngineInstance::GetNativeEngine();
-#elif USE_ARK_ENGINE
-    nativeEngine = JsiDeclarativeEngineInstance::GetNativeEngine();
-#endif
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        LOGE("JsGetPixelMap engine is null");
+        return;
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     std::shared_ptr<OHOS::Media::PixelMap> sharedPixelmap(pixelmap.release());
     napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, sharedPixelmap);
@@ -924,6 +928,45 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
 #endif
 
 #endif
+}
+
+void JSCanvasRenderer::JsDrawBitmapMesh(const JSCallbackInfo& info)
+{
+    RefPtr<OffscreenCanvas> offscreenCanvas;
+
+    if (info.Length() != 4) {
+        LOGE("info.Length is not right %{public}d", info.Length());
+        return;
+    }
+
+    if (info[0]->IsObject()) {
+        uint32_t id = 0;
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> jsId = obj->GetProperty("__id");
+        JSViewAbstract::ParseJsInteger(jsId, id);
+        offscreenCanvas = JSOffscreenRenderingContext::GetOffscreenCanvas(id);
+    } else {
+        LOGE("info 0 is not object");
+        return;
+    }
+
+    std::vector<double> mesh;
+    double column;
+    double row;
+    if (!ParseJsDoubleArray(info[1], mesh)) {
+        LOGE("info 1 is not double array");
+        return;
+    }
+    if (!JSViewAbstract::ParseJsDouble(info[2], column)) {
+        LOGE("info 2 is not double");
+        return;
+    }
+    if (!JSViewAbstract::ParseJsDouble(info[3], row)) {
+        LOGE("info 3 is not double");
+        return;
+    }
+
+    pool_->DrawBitmapMesh(offscreenCanvas, mesh, column, row);
 }
 
 void JSCanvasRenderer::JsGetJsonData(const JSCallbackInfo& info)

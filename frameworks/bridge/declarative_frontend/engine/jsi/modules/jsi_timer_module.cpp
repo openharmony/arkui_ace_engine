@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -121,6 +121,7 @@ JsiTimerModule* JsiTimerModule::GetInstance()
 
 uint32_t JsiTimerModule::AddCallBack(const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& params)
 {
+    std::lock_guard<std::mutex> lock(moduleMutex_);
     ++callBackId_;
     callBackFuncMap_[callBackId_] = func;
     callBackParamsMap_[callBackId_] = params;
@@ -129,6 +130,7 @@ uint32_t JsiTimerModule::AddCallBack(const shared_ptr<JsValue>& func, const std:
 
 void JsiTimerModule::RemoveCallBack(uint32_t callBackId)
 {
+    std::lock_guard<std::mutex> lock(moduleMutex_);
     if (callBackFuncMap_.find(callBackId) != callBackFuncMap_.end()) {
         callBackFuncMap_.erase(callBackId);
     }
@@ -140,6 +142,7 @@ void JsiTimerModule::RemoveCallBack(uint32_t callBackId)
 bool JsiTimerModule::GetCallBack(uint32_t callBackId, shared_ptr<JsValue>& func,
     std::vector<shared_ptr<JsValue>>& params)
 {
+    std::lock_guard<std::mutex> lock(moduleMutex_);
     auto iterFunc = callBackFuncMap_.find(callBackId);
     auto iterParams = callBackParamsMap_.find(callBackId);
     if (iterFunc == callBackFuncMap_.end()) {

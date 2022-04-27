@@ -1,17 +1,17 @@
 /*
-* Copyright (c) 2021 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "core/gestures/pinch_recognizer.h"
 
@@ -24,6 +24,7 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr int32_t MAX_PINCH_FINGERS = 5;
+constexpr int32_t AXIS_PINCH_FINGERS = 2;
 
 } // namespace
 
@@ -64,6 +65,19 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
 }
 
+void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
+{
+    LOGD("pinch recognizer receives touch down event, begin to detect pinch event");
+    if (fingers_ != AXIS_PINCH_FINGERS) {
+        return;
+    }
+
+    if (state_ == DetectState::READY) {
+        pinchCenter_ = Offset(event.x, event.y);
+        state_ = DetectState::DETECTING;
+    }
+}
+
 void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch up event");
@@ -85,6 +99,22 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     } else {
         pendingEnd_ = true;
     }
+}
+
+void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
+{
+    LOGD("pinch recognizer receives touch up event");
+    if (fingers_ != AXIS_PINCH_FINGERS) {
+        return;
+    }
+
+    if (state_ != DetectState::DETECTED) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+
+    SendCallbackMsg(onActionEnd_);
+    Reset();
 }
 
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
@@ -116,6 +146,28 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     }
 }
 
+void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
+{
+    LOGD("pinch recognizer receives touch move event");
+    if (fingers_ != AXIS_PINCH_FINGERS) {
+        return;
+    }
+    if (state_ == DetectState::READY) {
+        return;
+    }
+
+    time_ = event.time;
+    if (state_ == DetectState::DETECTING) {
+        scale_ = event.pinchAxisScale;
+        state_ = DetectState::DETECTED;
+        Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+    }
+    if (state_ == DetectState::DETECTED) {
+        scale_ = event.pinchAxisScale;
+        SendCallbackMsg(onActionUpdate_);
+    }
+}
+
 void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch cancel event");
@@ -131,6 +183,12 @@ void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     } else {
         pendingCancel_ = true;
     }
+}
+
+void PinchRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
+{
+    SendCancelMsg();
+    Reset();
 }
 
 double PinchRecognizer::ComputeAverageDeviation()
