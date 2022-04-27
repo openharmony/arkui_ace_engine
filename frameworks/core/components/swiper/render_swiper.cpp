@@ -2895,6 +2895,7 @@ void RenderSwiper::StartIndicatorAnimation(int32_t fromIndex, int32_t toIndex, b
             swiper->isIndicatorAnimationStart_ = false;
             swiper->outItemIndex_ = fromIndex;
             swiper->currentIndex_ = toIndex;
+            swiper->FireItemChangedEvent(true);
             swiper->UpdateIndicatorSpringStatus(SpringStatus::FOCUS_SWITCH);
             swiper->MarkNeedLayout(true);
         }
