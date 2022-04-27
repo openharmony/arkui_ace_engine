@@ -62,7 +62,7 @@ void RosenRenderSvgLine::PaintDirectly(RenderContext& context, const Offset& off
 
     if (NeedTransform()) {
         canvas->save();
-        canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4()));
+        canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
     }
 
     SkPath path;

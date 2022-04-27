@@ -55,7 +55,7 @@ void RosenRenderSvgG::PaintDirectly(RenderContext& context, const Offset& offset
 
     if (NeedTransform()) {
         skCanvas->save();
-        skCanvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4()));
+        skCanvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
     }
 
     RenderSvgBase::PaintDirectly(context, offset);

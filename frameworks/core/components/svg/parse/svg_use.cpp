@@ -48,24 +48,25 @@ RefPtr<RenderNode> SvgUse::CreateRender(
         LOGE("create user render failed, svgContext is null");
         return nullptr;
     }
-    if (component_->GetDeclaration()->GetHref().empty()) {
+    auto& declaration = component_->GetDeclaration();
+    if (declaration->GetHref().empty()) {
         LOGE("href is empty");
         return nullptr;
     }
-    auto refSvgNode = svgContext->GetSvgNodeById(component_->GetDeclaration()->GetHref());
+    auto refSvgNode = svgContext->GetSvgNodeById(declaration->GetHref());
     if (!refSvgNode) {
         LOGE("refSvgNode is null");
         return nullptr;
     }
     component_->Inherit(parent);
-    auto href = component_->GetDeclaration()->GetFillState().GetHref();
+    auto href = declaration->GetFillState().GetHref();
     if (!href.empty()) {
         auto gradient = GetGradient(href);
         if (gradient) {
-            component_->GetDeclaration()->SetGradient(gradient.value());
+            declaration->SetGradient(gradient.value());
         }
     }
-    auto refRenderNode = refSvgNode->CreateRender(layoutParam, component_->GetDeclaration(), useBox);
+    auto refRenderNode = refSvgNode->CreateRender(layoutParam, declaration, useBox);
     if (!refRenderNode) {
         return nullptr;
     }
@@ -78,11 +79,12 @@ RefPtr<RenderNode> SvgUse::CreateRender(
     renderNode->Update(component_);
     renderNode->AddChild(refRenderNode, 0);
     renderNode->Layout(layoutParam);
-    if (!useBox) {
+    if (!useBox || declaration->GetClipPathHref().empty()) {
+        LOGW("use of svg tag skip box create");
         return renderNode;
     }
 
-    auto boxComponent = CreateBoxComponent(layoutParam, component_->GetDeclaration()->GetClipPathHref());
+    auto boxComponent = CreateBoxComponent(layoutParam, declaration->GetClipPathHref());
     auto renderBox = boxComponent->CreateRenderNode();
     renderBox->Attach(context_);
     renderBox->Update(boxComponent);
@@ -97,16 +99,17 @@ SkPath SvgUse::AsPath(const Size& viewPort) const
         LOGE("asPath failed, svgContext is null");
         return SkPath();
     }
-    if (component_->GetDeclaration()->GetHref().empty()) {
+    auto& declaration = component_->GetDeclaration();
+    if (declaration->GetHref().empty()) {
         LOGE("href is empty");
         return SkPath();
     }
-    auto refSvgNode = svgContext->GetSvgNodeById(component_->GetDeclaration()->GetHref());
+    auto refSvgNode = svgContext->GetSvgNodeById(declaration->GetHref());
     if (!refSvgNode) {
         LOGE("refSvgNode is null");
         return SkPath();
     }
-    refSvgNode->Inherit(component_->GetDeclaration());
+    refSvgNode->Inherit(declaration);
     return refSvgNode->AsPath(viewPort);
 }
 
