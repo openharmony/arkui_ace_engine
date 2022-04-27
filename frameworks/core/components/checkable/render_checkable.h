@@ -21,6 +21,7 @@
 #include "core/components/focus_animation/render_focus_animation.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/gestures/drag_recognizer.h"
+#include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -48,9 +49,12 @@ public:
     void PerformLayout() override;
     void OnMouseHoverEnterTest() override;
     void OnMouseHoverExitTest() override;
+    void AnimateMouseHoverEnter() override;
+    void AnimateMouseHoverExit() override;
     virtual void HandleClick();
     void ApplyAspectRatio(Size& drawSize) const;
     void InitClickRecognizer(bool catchMode);
+    void InitTouchRecognizer();
     void AddAccessibilityAction();
     bool GetChecked() const
     {
@@ -75,6 +79,10 @@ public:
     bool IsPhone() const
     {
         return SystemProperties::GetDeviceType() == DeviceType::PHONE;
+    }
+    bool IsTablet() const
+    {
+        return SystemProperties::GetDeviceType() == DeviceType::TABLET;
     }
     bool IsOnHover() const
     {
@@ -140,6 +148,7 @@ protected:
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     RefPtr<DragRecognizer> dragRecognizer_;
     RefPtr<ClickRecognizer> clickRecognizer_;
+    RefPtr<RawRecognizer> touchRecognizer_;
     std::function<void(const std::string&)> changeEvent_;
     std::function<void(const std::string&)> valueChangeEvent_;
     std::function<void()> clickEvent_;
@@ -147,6 +156,8 @@ protected:
     std::function<void(bool)> onChange_;
     std::function<void()> onClick_;
     Size drawSize_;
+    bool isTouch_ = false;
+    bool isHover_ = false;
 };
 
 } // namespace OHOS::Ace

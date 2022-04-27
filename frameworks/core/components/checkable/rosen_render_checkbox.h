@@ -43,6 +43,9 @@ private:
         SkCanvas* canvas, const Offset& origin, const SkPaint& paint, const Size& paintSize) const;
     void DrawAnimationOnToOff(
         SkCanvas* canvas, const Offset& origin, const SkPaint& paint, const SkPaint& shadowPaint) const;
+    void DrawFocusBorder(RenderContext& context, const Offset& offset);
+    void DrawTouchBoard(const Offset& offset, RenderContext& context);
+    void DrawHoverBoard(const Offset& offset, RenderContext& context);
 };
 
 } // namespace OHOS::Ace

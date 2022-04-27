@@ -45,6 +45,7 @@ void RenderCheckable::Update(const RefPtr<Component>& component)
     hotZoneHorizontalPadding_ = checkable->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = checkable->GetHotZoneVerticalPadding();
     disabled_ = checkable->IsDisabled();
+    hoverAnimationType_ = checkable->GetMouseAnimationType();
     auto clickId = checkable->GetClickEvent();
     auto catchMode = true;
     if (!clickId.IsEmpty()) {
@@ -61,6 +62,7 @@ void RenderCheckable::Update(const RefPtr<Component>& component)
     if (checkable->GetOnClick()) {
         onClick_ = *checkable->GetOnClick();
     }
+    InitTouchRecognizer();
     InitClickRecognizer(catchMode);
     AddAccessibilityAction();
     MarkNeedLayout();
@@ -116,6 +118,49 @@ void RenderCheckable::CalculateSize()
     drawSize_ = Size(width, height);
     ApplyAspectRatio(drawSize_);
     paintPosition_ = Alignment::GetAlignPosition(Size(width_, height_), drawSize_, Alignment::CENTER);
+}
+
+void RenderCheckable::InitTouchRecognizer()
+{
+    auto wp = AceType::WeakClaim(this);
+    touchRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
+    touchRecognizer_->SetOnTouchDown([wp](const TouchEventInfo&) {
+        auto renderCheckable = wp.Upgrade();
+        if (renderCheckable) {
+            renderCheckable->isTouch_ = true;
+            renderCheckable->MarkNeedLayout();
+        }
+    });
+    touchRecognizer_->SetOnTouchUp([wp](const TouchEventInfo&) {
+        auto renderCheckable = wp.Upgrade();
+        if (renderCheckable) {
+            renderCheckable->isTouch_ = false;
+            renderCheckable->MarkNeedLayout();
+        }
+    });
+    touchRecognizer_->SetOnTouchCancel([wp](const TouchEventInfo&) {
+        auto renderCheckable = wp.Upgrade();
+        if (renderCheckable) {
+            renderCheckable->isTouch_ = false;
+            renderCheckable->MarkNeedLayout();
+        }
+    });
+    touchRecognizer_->SetOnTouchMove([wp](const TouchEventInfo& info) {
+        auto renderCheckable = wp.Upgrade();
+        if (renderCheckable) {
+            if (info.GetTouches().empty()) {
+                return;
+            }
+            const auto& locationInfo = info.GetTouches().front();
+            double moveDeltaX = locationInfo.GetLocalLocation().GetX();
+            double moveDeltaY = locationInfo.GetLocalLocation().GetY();
+            if ((moveDeltaX < 0 || moveDeltaX > renderCheckable->width_)
+                || (moveDeltaY < 0 || moveDeltaY > renderCheckable->height_)) {
+                renderCheckable->isTouch_ = false;
+                renderCheckable->MarkNeedLayout();
+            }
+        }
+    });
 }
 
 void RenderCheckable::InitClickRecognizer(bool catchMode)
@@ -225,6 +270,22 @@ void RenderCheckable::OnTouchTestHit(
         clickRecognizer_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(clickRecognizer_);
     }
+    if (touchRecognizer_) {
+        touchRecognizer_->SetCoordinateOffset(coordinateOffset);
+        result.emplace_back(touchRecognizer_);
+    }
+}
+
+void RenderCheckable::AnimateMouseHoverEnter()
+{
+    isHover_ = true;
+    MarkNeedLayout();
+}
+
+void RenderCheckable::AnimateMouseHoverExit()
+{
+    isHover_ = false;
+    MarkNeedLayout();
 }
 
 void RenderCheckable::OnMouseHoverEnterTest()
