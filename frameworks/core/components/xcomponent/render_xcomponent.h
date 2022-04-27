@@ -37,7 +37,7 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     void Paint(RenderContext& context, const Offset& offset) override;
-
+    bool HandleMouseEvent(const MouseEvent& event) override;
     void PushTask(const TaskFunction& func);
 
     void SetDelegate(const RefPtr<XComponentDelegate>& delegate)
@@ -62,7 +62,6 @@ public:
     }
 
     void NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent);
-    void NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent);
 
 protected:
     RefPtr<XComponentDelegate> delegate_;

@@ -2364,16 +2364,6 @@ void PipelineContext::NotifyDispatchTouchEventDismiss(const TouchEvent& event) c
     }
 }
 
-void PipelineContext::NotifyDispatchMouseEventDismiss(const MouseEvent& event) const
-{
-    CHECK_RUN_ON(UI);
-    for (auto& iterDispatchMouseEventHander : dispatchMouseEventHandler_) {
-        if (iterDispatchMouseEventHander) {
-            iterDispatchMouseEventHander(event);
-        }
-    }
-}
-
 void PipelineContext::ShowFocusAnimation(
     const RRect& rrect, const Color& color, const Offset& offset, bool isIndented) const
 {

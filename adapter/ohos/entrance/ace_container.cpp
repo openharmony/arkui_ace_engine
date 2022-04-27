@@ -542,7 +542,6 @@ void AceContainer::InitializeCallback()
         context->GetTaskExecutor()->PostTask(
             [context, event]() {
                 context->OnMouseEvent(event);
-                context->NotifyDispatchMouseEventDismiss(event);
             }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
