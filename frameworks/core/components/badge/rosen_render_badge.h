@@ -39,8 +39,7 @@ private:
     void PaintText(const Offset& textOffset, RenderContext& context) const;
     void DrawCircleBadge(SkCanvas* canvas, const Offset& offset);
     void DrawNumericalBadge(SkCanvas* canvas, const Offset& offset);
-    void RenderBadgeBoundary(SkCanvas* canvas, const double& startX, const double& startY,
-        const double& width, const double& height);
+    void RenderBadgeBoundary(SkCanvas* canvas, double startX, double startY, double width, double height);
 
     double badgeCircleDiameter_ = 0.0;
     double badgeCircleRadius_ = 0.0;

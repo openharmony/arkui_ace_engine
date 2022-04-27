@@ -44,7 +44,7 @@ public:
     {
         return badge_;
     }
-    
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;

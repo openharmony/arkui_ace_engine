@@ -177,8 +177,8 @@ Size FlutterRenderBadge::CalculateTextSize(
     return renderText->GetLayoutSize();
 }
 
-void FlutterRenderBadge::RenderBadgeBoundary(SkCanvas* canvas, const double& startX, const double& startY,
-    const double& width, const double& height)
+void FlutterRenderBadge::RenderBadgeBoundary(SkCanvas* canvas, double startX,
+    double startY, double width, double height)
 {
     if (SystemProperties::GetDebugBoundaryEnabled()) {
         if (canvas == nullptr) {
