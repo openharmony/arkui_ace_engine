@@ -3272,6 +3272,7 @@ void PipelineContext::DumpFrontend() const
 {
     auto frontend = weakFrontend_.Upgrade();
     if (frontend) {
+        DumpLog::GetInstance().AddDesc("Components: " + std::to_string(composedElementMap_.size()));
         frontend->DumpFrontend();
     }
 }
