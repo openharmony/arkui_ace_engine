@@ -12,9 +12,10 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
-import("//foundation/ace/ace_engine/adapter/preview/build/config_js_engine.gni")
-import("//foundation/ace/ace_engine/interfaces/napi/kits/napi_lib.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import(
+    "//foundation/arkui/ace_engine/adapter/preview/build/config_js_engine.gni")
+import("//foundation/arkui/ace_engine/interfaces/napi/kits/napi_lib.gni")
 
 config("ace_pc_preview_config") {
   cflags_cc = [
@@ -124,8 +125,8 @@ if (enable_ark_preview) {
         get_label_info("$ace_napi:ace_napi(${current_toolchain})",
                        "root_out_dir")
     sources = [
-      "$shared_library_path/ace/napi/libace_napi.dll",
-      "$shared_library_path/ace/napi/libace_napi_ark.dll",
+      "$shared_library_path/arkui/napi/libace_napi.dll",
+      "$shared_library_path/arkui/napi/libace_napi_ark.dll",
     ]
     deps = [
       "$ace_napi:ace_napi(${current_toolchain})",
@@ -149,17 +150,17 @@ if (enable_ark_preview) {
     ]
     if (use_mac) {
       sources = [
-        "$shared_library_path/ace/napi/libace_napi.dylib",
-        "$shared_library_path/ace/napi/libace_napi_quickjs.dylib",
-        "$shared_library_path/ace/napi/libuv.dylib",
+        "$shared_library_path/arkui/napi/libace_napi.dylib",
+        "$shared_library_path/arkui/napi/libace_napi_quickjs.dylib",
+        "$shared_library_path/arkui/napi/libuv.dylib",
       ]
       outputs =
           [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
     } else {
       sources = [
-        "$shared_library_path/ace/napi/libace_napi.dll",
-        "$shared_library_path/ace/napi/libace_napi_quickjs.dll",
-        "$shared_library_path/ace/napi/libuv.dll",
+        "$shared_library_path/arkui/napi/libace_napi.dll",
+        "$shared_library_path/arkui/napi/libace_napi_quickjs.dll",
+        "$shared_library_path/arkui/napi/libuv.dll",
       ]
       outputs = [ root_build_dir +
                   "/mingw_x86_64/common/common/{{source_file_part}}" ]
@@ -175,9 +176,9 @@ ohos_copy("copy_napi_modules_shared_library_for_test") {
                               "root_out_dir")
     deps += [ "$ace_root/interfaces/napi/kits:${module}" ]
     if (use_mac) {
-      sources += [ "${out_path}/ace/ace_engine_standard/lib${module}.dylib" ]
+      sources += [ "${out_path}/arkui/ace_engine_standard/lib${module}.dylib" ]
     } else {
-      sources += [ "${out_path}/ace/ace_engine_standard/lib${module}.dll" ]
+      sources += [ "${out_path}/arkui/ace_engine_standard/lib${module}.dll" ]
     }
   }
 

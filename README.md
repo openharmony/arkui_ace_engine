@@ -39,10 +39,10 @@ The JS UI framework consists of the application, framework, engine, and porting 
 
 ## Directory Structure<a name="section1791423143211"></a>
 
-The source code of the framework is stored in  **/foundation/ace/ace\_engine**. The following shows the directory structure.
+The source code of the framework is stored in  **/foundation/arkui/ace\_engine**. The following shows the directory structure.
 
 ```
-/foundation/ace/ace_engine
+/foundation/arkui/ace_engine
 ├── adapter                       # Platform adaptation code
 │   ├── common
 │   └── ohos
@@ -94,9 +94,9 @@ JS UI framework provides various UI components with rich functionalities and sty
 
 JS UI framework
 
-**ace\_ace\_engine**
+**arkui\_ace\_engine**
 
 ace\_engine\_lite
 
-ace\_napi
+arkui\_napi
 

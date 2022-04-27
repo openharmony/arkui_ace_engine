@@ -43,19 +43,19 @@ config("uiservice_manager_public_config") {
 
 ohos_shared_library("ui_service_mgr") {
   sources = [
-    "//foundation/ace/ace_engine/adapter/ohos/services/uiservice/src/dialog_callback_proxy.cpp",
-    "//foundation/ace/ace_engine/adapter/ohos/services/uiservice/src/dialog_callback_stub.cpp",
-    "//foundation/ace/ace_engine/adapter/ohos/services/uiservice/src/ui_service_mgr_client.cpp",
-    "//foundation/ace/ace_engine/adapter/ohos/services/uiservice/src/ui_service_mgr_proxy.cpp",
-    "//foundation/ace/ace_engine/adapter/ohos/services/uiservice/src/ui_service_proxy.cpp",
-    "//foundation/ace/ace_engine/adapter/ohos/services/uiservice/src/ui_service_stub.cpp",
+    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/dialog_callback_proxy.cpp",
+    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/dialog_callback_stub.cpp",
+    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_mgr_client.cpp",
+    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_mgr_proxy.cpp",
+    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_proxy.cpp",
+    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_stub.cpp",
   ]
 
   configs = [ "//utils/native/base:utils_config" ]
 
   public_configs = [
     ":uiservice_manager_public_config",
-    "//foundation/ace/ace_engine/adapter/ohos/services/uiservice:uiservicems_config",
+    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:uiservicems_config",
   ]
 
   deps = [
@@ -77,6 +77,6 @@ ohos_shared_library("ui_service_mgr") {
     "window_manager:libdm",
   ]
 
-  subsystem_name = "ace"
+  subsystem_name = "arkui"
   part_name = "ace_engine_standard"
 }

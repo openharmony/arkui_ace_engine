@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 
 module_output_path = "ace_engine_full/backenduicomponent/checkable"
 
@@ -32,10 +32,10 @@ ohos_unittest("CheckableCreatorTest") {
   ]
 
   if (!is_standard_system) {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_full"
   } else {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_standard"
   }
 }
@@ -222,7 +222,7 @@ ohos_unittest("CheckableComponentTest") {
     "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
     "$ace_root/frameworks/core/components/theme/theme_manager.cpp",
     "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
-    "$root_out_dir/ace/framework/core/components/theme/theme_constants_default.cpp",
+    "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
     "render_checkable_test.cpp",
 
     # mock
@@ -236,14 +236,14 @@ ohos_unittest("CheckableComponentTest") {
 
   # add sources only needed by wearable like watch.
   if (is_wearable_product) {
-    sources += [ "$root_out_dir/ace/framework/core/components/theme/theme_constants_watch.cpp" ]
+    sources += [ "$root_out_dir/arkui/framework/core/components/theme/theme_constants_watch.cpp" ]
   }
 
   # add sources needed by phone and TV. wearable like watch do not need them
   if (!is_wearable_product) {
     sources += [
       # theme
-      "$root_out_dir/ace/framework/core/components/theme/theme_constants_tv.cpp",
+      "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
     ]
   }
 
@@ -270,10 +270,10 @@ ohos_unittest("CheckableComponentTest") {
   }
 
   if (!is_standard_system) {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_full"
   } else {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_standard"
   }
 }

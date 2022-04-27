@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 
 module_output_path = "ace_engine_full/graphicalbasicability/pipeline"
 
@@ -21,23 +21,23 @@ ohos_unittest("PipelineContextTest") {
 
   sources = [
     # test file
-    "//foundation/ace/ace_engine/frameworks/core/animation/anticipate_curve.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/animation/cubic_curve.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/animation/curves.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/animation/friction_motion.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/animation/property_animation.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/animation/scroll_motion.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/animation/anticipate_curve.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/animation/cubic_curve.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/animation/curves.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/animation/friction_motion.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/animation/property_animation.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/animation/scroll_motion.cpp",
 
     # accessibility
     "$ace_root/frameworks/core/accessibility/accessibility_node.cpp",
 
     # animation
-    "//foundation/ace/ace_engine/frameworks/core/animation/animatable_data.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/animation/animatable_properties.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/animation/animator.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/animation/scheduler.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/animation/spring_model.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/animation/spring_motion.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/animation/animatable_data.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/animation/animatable_properties.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/animation/animator.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/animation/scheduler.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/animation/spring_model.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/animation/spring_motion.cpp",
 
     #base
     "$ace_root/adapter/ohos/osal/frame_report.cpp",
@@ -61,125 +61,125 @@ ohos_unittest("PipelineContextTest") {
     "$ace_root/frameworks/base/utils/time_util.cpp",
 
     # common
-    "//foundation/ace/ace_engine/frameworks/core/common/ace_application_info.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/common/ace_engine.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/common/clipboard/clipboard_proxy.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/common/container.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/common/container_scope.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/common/event_manager.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/common/flutter/flutter_task_executor.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/common/focus_animation_manager.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/common/font_manager.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/common/thread_checker.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/common/vibrator/vibrator_proxy.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/common/window.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/pipeline/pipeline_context.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/common/ace_application_info.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/common/ace_engine.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/common/clipboard/clipboard_proxy.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/common/container.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/common/container_scope.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/common/event_manager.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/common/flutter/flutter_task_executor.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/common/focus_animation_manager.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/common/font_manager.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/common/thread_checker.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/common/vibrator/vibrator_proxy.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/common/window.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/pipeline/pipeline_context.cpp",
 
     # components
-    "//foundation/ace/ace_engine/frameworks/core/components/box/box_component.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/display/display_component.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/overlay/overlay_component.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/page/page_component.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/root/root_component.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/transform/transform_component.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/tween/tween_component.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/pipeline/base/component.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/pipeline/base/composed_component.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/box/box_component.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/display/display_component.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/overlay/overlay_component.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/page/page_component.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/root/root_component.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/transform/transform_component.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/tween/tween_component.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/pipeline/base/component.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/pipeline/base/composed_component.cpp",
 
     # elements
-    "//foundation/ace/ace_engine/frameworks/core/components/box/box_element.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/bubble/bubble_element.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/display/display_element.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/flex/flex_element.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/page/page_element.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/page_transition/page_transition_component.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/page_transition/page_transition_element.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/root/root_element.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/stack/stack_element.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/stage/stage_element.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/transition/transition_element.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/tween/tween_element.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/pipeline/base/component_group_element.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/pipeline/base/composed_element.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/pipeline/base/element.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/pipeline/base/render_element.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/pipeline/base/sole_child_element.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/box/box_element.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/bubble/bubble_element.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/display/display_element.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/flex/flex_element.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/page/page_element.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/page_transition/page_transition_component.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/page_transition/page_transition_element.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/root/root_element.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/stack/stack_element.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/stage/stage_element.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/transition/transition_element.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/tween/tween_element.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/pipeline/base/component_group_element.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/pipeline/base/composed_element.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/pipeline/base/element.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/pipeline/base/render_element.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/pipeline/base/sole_child_element.cpp",
 
     # others
-    "$root_out_dir/ace/framework/core/components/theme/theme_constants_default.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/theme/app_theme.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/theme/theme_attributes.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/theme/theme_constants.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/theme/theme_manager.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/theme/theme_utils.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/event/back_end_event_manager.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/event/multimodal/multimodal_manager.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/event/multimodal/multimodal_scene.cpp",
+    "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/theme/app_theme.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/theme/theme_attributes.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/theme/theme_constants.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/theme/theme_manager.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/theme/theme_utils.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/event/back_end_event_manager.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/event/multimodal/multimodal_manager.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/event/multimodal/multimodal_scene.cpp",
 
     # focus
-    "//foundation/ace/ace_engine/frameworks/core/focus/focus_node.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/focus/focus_node.cpp",
 
     # gestures
-    "//foundation/ace/ace_engine/frameworks/core/gestures/click_recognizer.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/gestures/drag_recognizer.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/gestures/exclusive_recognizer.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/gestures/gesture_recognizer.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/gestures/gesture_referee.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/gestures/long_press_recognizer.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/gestures/multi_fingers_recognizer.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/gestures/pan_recognizer.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/gestures/parallel_recognizer.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/gestures/raw_recognizer.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/gestures/sequenced_recognizer.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/gestures/swipe_recognizer.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/gestures/timeout_recognizer.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/gestures/velocity_tracker.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/gestures/click_recognizer.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/gestures/drag_recognizer.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/gestures/exclusive_recognizer.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/gestures/gesture_recognizer.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/gestures/gesture_referee.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/gestures/long_press_recognizer.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/gestures/multi_fingers_recognizer.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/gestures/pan_recognizer.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/gestures/parallel_recognizer.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/gestures/raw_recognizer.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/gestures/sequenced_recognizer.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/gestures/swipe_recognizer.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/gestures/timeout_recognizer.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/gestures/velocity_tracker.cpp",
 
     # image
-    "//foundation/ace/ace_engine/frameworks/core/image/flutter_image_cache.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/image/image_cache.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/image/image_source_info.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/image/flutter_image_cache.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/image/image_cache.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/image/image_source_info.cpp",
 
     # layout
-    "//foundation/ace/ace_engine/frameworks/core/components/common/layout/grid_column_info.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/common/layout/grid_container_info.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/common/layout/grid_system_manager.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/layout/grid_column_info.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/layout/grid_container_info.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/layout/grid_system_manager.cpp",
 
     # properties
-    "//foundation/ace/ace_engine/frameworks/core/components/common/painter/flutter_svg_painter.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/common/properties/alignment.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/common/properties/border.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/common/properties/border_edge.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/common/properties/color.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/common/properties/decoration.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/common/properties/edge.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/common/properties/motion_path_evaluator.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/common/properties/page_transition_option.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/common/properties/scroll_bar.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/common/properties/shadow.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/common/properties/text_style.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/painter/flutter_svg_painter.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/alignment.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/border.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/border_edge.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/color.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/decoration.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/edge.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/motion_path_evaluator.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/page_transition_option.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/scroll_bar.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/shadow.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/text_style.cpp",
 
     # rendering
-    "//foundation/ace/ace_engine/frameworks/core/components/box/render_box.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/box/render_box_base.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/bubble/render_bubble.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/display/render_display.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/focus_animation/render_focus_animation.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/proxy/render_proxy.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/refresh/render_refresh.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/root/render_root.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/scroll/render_multi_child_scroll.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/scroll/render_scroll.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/scroll/render_single_child_scroll.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/scroll/scroll_bar_controller.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/stack/render_stack.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/stage/render_stage.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/test/unittest/mock/mock_flutter_font_manager.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/test/unittest/mock/mock_render_node_factory.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/touch_listener/render_touch_listener.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components/transform/render_transform.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/components_v2/list/render_list.cpp",
-    "//foundation/ace/ace_engine/frameworks/core/pipeline/base/render_node.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/box/render_box.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/box/render_box_base.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/bubble/render_bubble.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/display/render_display.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/focus_animation/render_focus_animation.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/proxy/render_proxy.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/refresh/render_refresh.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/root/render_root.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/scroll/render_multi_child_scroll.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/scroll/render_scroll.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/scroll/render_single_child_scroll.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/scroll/scroll_bar_controller.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/stack/render_stack.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/stage/render_stage.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/test/unittest/mock/mock_flutter_font_manager.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/test/unittest/mock/mock_render_node_factory.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/touch_listener/render_touch_listener.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components/transform/render_transform.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_v2/list/render_list.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/pipeline/base/render_node.cpp",
     "pipeline_context_test.cpp",
 
     #mock
@@ -196,14 +196,14 @@ ohos_unittest("PipelineContextTest") {
 
   # add sources only needed by wearable like watch.
   if (is_wearable_product) {
-    sources += [ "$root_out_dir/ace/framework/core/components/theme/theme_constants_watch.cpp" ]
+    sources += [ "$root_out_dir/arkui/framework/core/components/theme/theme_constants_watch.cpp" ]
   }
 
   # add sources needed by phone and TV. wearable like watch do not need them
   if (!is_wearable_product) {
     sources += [
       # theme
-      "$root_out_dir/ace/framework/core/components/theme/theme_constants_tv.cpp",
+      "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
     ]
   }
 
@@ -236,10 +236,10 @@ ohos_unittest("PipelineContextTest") {
   }
 
   if (!is_standard_system) {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_full"
   } else {
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = "ace_engine_standard"
   }
 }

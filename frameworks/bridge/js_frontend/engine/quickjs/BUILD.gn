@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 
 template("js_engine_qjs") {
   forward_variables_from(invoker, "*")
@@ -49,14 +49,14 @@ template("js_engine_qjs") {
 
     if (use_js_debug) {
       deps += [
-        "//foundation/ace/napi:ace_napi_quickjs_debug",
+        "//foundation/arkui/napi:ace_napi_quickjs_debug",
         "//third_party/quickjs:qjs_debugger",
       ]
       defines += [ "ENABLE_JS_DEBUG" ]
       configs += [ "//third_party/quickjs:qjs_debug_config" ]
     } else {
       deps += [
-        "//foundation/ace/napi:ace_napi_quickjs",
+        "//foundation/arkui/napi:ace_napi_quickjs",
         "//third_party/quickjs:qjs",
       ]
     }

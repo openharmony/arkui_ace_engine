@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 
 template("napi_grid_static") {
   forward_variables_from(invoker, "*")
@@ -22,20 +22,20 @@ template("napi_grid_static") {
     cflags_cc += invoker.cflags_cc
 
     include_dirs = [
-      "//foundation/ace",
+      "//foundation/arkui",
       "$ace_root",
       "$ace_root/frameworks",
     ]
 
     sources = [ "js_grid.cpp" ]
 
-    deps = [ "//foundation/ace/napi/:ace_napi" ]
+    deps = [ "//foundation/arkui/napi/:ace_napi" ]
 
     if (defined(config.libace_target)) {
       deps += [ config.libace_target ]
     }
 
-    subsystem_name = "ace"
+    subsystem_name = "arkui"
     part_name = ace_engine_part
   }
 }

@@ -39,10 +39,10 @@ JS UI框架包括应用层（Application）、前端框架层（Framework）、�
 
 ## 目录<a name="section1791423143211"></a>
 
-JS UI开发框架源代码在/foundation/ace/ace\_engine下，目录结构如下图所示：
+JS UI开发框架源代码在/foundation/arkui/ace\_engine下，目录结构如下图所示：
 
 ```
-/foundation/ace/ace_engine
+/foundation/arkui/ace_engine
 ├── adapter                       # 平台适配目录
 │   ├── common
 │   └── ohos
@@ -94,9 +94,9 @@ JS UI框架提供了丰富的、功能强大的UI组件、样式定义，组件�
 
 JS UI框架子系统
 
-**ace\_ace\_engine**
+**arkui\_ace\_engine**
 
 ace\_engine\_lite
 
-ace\_napi
+arkui\_napi
 

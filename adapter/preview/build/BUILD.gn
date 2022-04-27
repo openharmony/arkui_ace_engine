@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ace/ace_engine/build/ace_lib.gni")
+import("//foundation/arkui/ace_engine/build/ace_lib.gni")
 
 # build for preview shared library
 template("libace_engine") {

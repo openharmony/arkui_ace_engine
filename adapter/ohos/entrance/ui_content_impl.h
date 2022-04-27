@@ -17,8 +17,8 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 
 #include "ability_info.h"
-#include "interfaces/innerkits/ace/ui_content.h"
-#include "interfaces/innerkits/ace/viewport_config.h"
+#include "interfaces/inner_api/ace/ui_content.h"
+#include "interfaces/inner_api/ace/viewport_config.h"
 #include "key_event.h"
 #include "native_engine/native_value.h"
 #include "native_engine/native_engine.h"

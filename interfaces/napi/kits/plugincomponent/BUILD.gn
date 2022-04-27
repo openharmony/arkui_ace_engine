@@ -12,18 +12,18 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 
 ohos_shared_library("plugincomponent") {
   include_dirs = [
     "$ace_root",
     "$ace_root/frameworks",
-    "$root_out_dir/ace/framework",
-    "//foundation/ace",
-    "//foundation/ace/ace_engine/frameworks",
+    "$root_out_dir/arkui/framework",
+    "//foundation/arkui",
+    "//foundation/arkui/ace_engine/frameworks",
     "//foundation/aafwk/standard/interfaces/innerkits/want/include",
     "//foundation/aafwk/standard/services/common/include",
-    "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager/include",
+    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager/include",
   ]
 
   sources = [
@@ -39,8 +39,8 @@ ohos_shared_library("plugincomponent") {
     "$ace_root/build:libace_engine_declarative",
     "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
     "//foundation/aafwk/standard/interfaces/innerkits/base:base",
-    "//foundation/ace/ace_engine/interfaces/innerkits/ui_service_manager:ui_service_mgr",
-    "//foundation/ace/napi/:ace_napi",
+    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
+    "//foundation/arkui/napi/:ace_napi",
     "//utils/native/base:utils",
   ]
 
@@ -55,6 +55,6 @@ ohos_shared_library("plugincomponent") {
   ]
 
   relative_install_dir = "module"
-  subsystem_name = "ace"
+  subsystem_name = "arkui"
   part_name = ace_engine_part
 }
