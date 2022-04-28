@@ -35,7 +35,6 @@
 #include "core/components/web/web_component.h"
 #include "core/components/xcomponent/xcomponent_component.h"
 #include "core/components_v2/list/list_item_component.h"
-#include "core/components_v2/water_flow/water_flow_item_component.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/multi_composed_component.h"
 #include "core/pipeline/base/sole_child_component.h"
@@ -559,8 +558,7 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     std::unordered_map<std::string, RefPtr<Component>> videoMap;
 
     bool isItemComponent = AceType::InstanceOf<V2::ListItemComponent>(mainComponent) ||
-                           AceType::InstanceOf<GridLayoutItemComponent>(mainComponent) ||
-                           AceType::InstanceOf<V2::WaterFlowItemComponent>(mainComponent);
+                           AceType::InstanceOf<GridLayoutItemComponent>(mainComponent);
 
     RefPtr<Component> itemChildComponent;
 
@@ -818,7 +816,8 @@ RefPtr<Component> ViewStackProcessor::GetScoringComponent() const
 void ViewStackProcessor::CreateInspectorComposedComponent(const std::string& inspectorTag)
 {
     if (V2::InspectorComposedComponent::HasInspectorFinished(inspectorTag)) {
-        auto composedComponent = AceType::MakeRefPtr<V2::InspectorComposedComponent>(GenerateId(), inspectorTag);
+        auto composedComponent =
+            AceType::MakeRefPtr<V2::InspectorComposedComponent>(GenerateId(), inspectorTag);
         auto& wrappingComponentsMap = componentsStack_.top();
         wrappingComponentsMap.emplace("inspector", composedComponent);
     }

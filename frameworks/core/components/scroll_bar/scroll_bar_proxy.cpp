@@ -19,7 +19,6 @@
 #include "core/components/scroll_bar/render_scroll_bar.h"
 #include "core/components_v2/grid/render_grid_scroll.h"
 #include "core/components_v2/list/render_list.h"
-#include "core/components_v2/water_flow/render_water_flow.h"
 
 namespace OHOS::Ace {
 
@@ -209,7 +208,7 @@ void ScrollBarProxy::StopScrollBarAnimator() const
 bool ScrollBarProxy::CheckScrollable(const RefPtr<RenderNode>& node) const
 {
     return AceType::InstanceOf<RenderScroll>(node) || AceType::InstanceOf<V2::RenderGridScroll>(node) ||
-           AceType::InstanceOf<V2::RenderList>(node) || AceType::InstanceOf<V2::RenderWaterFlow>(node);
+           AceType::InstanceOf<V2::RenderList>(node);
 }
 
 Axis ScrollBarProxy::GetScrollableAxis(const RefPtr<RenderNode>& node) const
@@ -225,10 +224,6 @@ Axis ScrollBarProxy::GetScrollableAxis(const RefPtr<RenderNode>& node) const
     auto renderList = AceType::DynamicCast<V2::RenderList>(node);
     if (renderList) {
         return renderList->GetAxis();
-    }
-    auto renderWaterFlow = AceType::DynamicCast<V2::RenderWaterFlow>(node);
-    if (renderWaterFlow) {
-        return renderWaterFlow->GetAxis();
     }
     return Axis::NONE;
 }
@@ -253,12 +248,6 @@ Size ScrollBarProxy::GetScrollableChildSize(
     if (renderList) {
         scrollBarAxis == Axis::VERTICAL ? result.SetHeight(renderList->GetEstimatedHeight())
                                         : result.SetWidth(renderList->GetEstimatedHeight());
-        return result;
-    }
-    auto renderWaterFlow = AceType::DynamicCast<V2::RenderWaterFlow>(scrollable);
-    if (renderWaterFlow) {
-        scrollBarAxis == Axis::VERTICAL ? result.SetHeight(renderWaterFlow->GetEstimatedHeight())
-                                        : result.SetWidth(renderWaterFlow->GetEstimatedHeight());
         return result;
     }
     return result;
@@ -291,15 +280,6 @@ void ScrollBarProxy::AdjustParam(const RefPtr<RenderNode>& scrollable, Axis scro
                                         : scrollableChildSize.SetWidth(renderList->GetEstimatedHeight());
         scrollableAxis = renderList->GetAxis();
         scrollableChildPosition = renderList->GetLastOffset();
-    }
-
-    auto renderWaterFlow = AceType::DynamicCast<V2::RenderWaterFlow>(scrollable);
-    if (renderWaterFlow) {
-        scrollBarAxis == Axis::VERTICAL ? scrollableChildSize.SetHeight(renderWaterFlow->GetEstimatedHeight())
-                                        : scrollableChildSize.SetWidth(renderWaterFlow->GetEstimatedHeight());
-        scrollableAxis = renderWaterFlow->GetAxis();
-        scrollableChildPosition = renderWaterFlow->GetLastOffset();
-        return;
     }
 }
 
