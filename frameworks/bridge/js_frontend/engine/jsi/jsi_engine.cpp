@@ -690,16 +690,29 @@ std::string GetDeviceInfo()
     infoList->Put("manufacturer", SystemProperties::GetManufacturer().c_str());
     infoList->Put("model", SystemProperties::GetModel().c_str());
     infoList->Put("product", SystemProperties::GetProduct().c_str());
-
-    if (AceApplicationInfo::GetInstance().GetLanguage().empty()) {
-        infoList->Put("language", "N/A");
-    } else {
-        infoList->Put("language", AceApplicationInfo::GetInstance().GetLanguage().c_str());
+    std::string tmp = SystemProperties::GetApiVersion();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        char* tmpEnd = nullptr;
+        infoList->Put(
+            "apiVersion", static_cast<int32_t>(std::strtol(SystemProperties::GetApiVersion().c_str(), &tmpEnd, 10)));
     }
-    if (AceApplicationInfo::GetInstance().GetCountryOrRegion().empty()) {
-        infoList->Put("region", "N/A");
-    } else {
-        infoList->Put("region", AceApplicationInfo::GetInstance().GetCountryOrRegion().c_str());
+    tmp = SystemProperties::GetReleaseType();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        infoList->Put("releaseType", tmp.c_str());
+    }
+    tmp = SystemProperties::GetParamDeviceType();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        infoList->Put("deviceType", tmp.c_str());
+    }
+
+    tmp = SystemProperties::GetLanguage();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        infoList->Put("language", tmp.c_str());
+    }
+
+    tmp = SystemProperties::GetRegion();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        infoList->Put("region", tmp.c_str());
     }
 
     auto container = Container::Current();
