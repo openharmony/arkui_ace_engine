@@ -250,8 +250,8 @@ public:
         bool result = true;
         HandleSyncEvent(eventMarker, *info, result);
     }
-    virtual void HandleSyncEvent(
-        const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId) = 0;
+    virtual void HandleSyncEvent(const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId,
+        const bool isDestroy = false) = 0;
 };
 
 } // namespace OHOS::Ace

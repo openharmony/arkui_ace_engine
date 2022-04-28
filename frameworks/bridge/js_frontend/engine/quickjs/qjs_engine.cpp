@@ -3841,7 +3841,7 @@ void QjsEngine::FireSyncEvent(const std::string& eventId, const std::string& par
     JS_FreeValue(engineInstance_->GetQjsContext(), cppToJsRet);
 }
 
-void QjsEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
+void QjsEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     ACE_DCHECK(engineInstance_);
     auto context = engineInstance_->GetQjsContext();

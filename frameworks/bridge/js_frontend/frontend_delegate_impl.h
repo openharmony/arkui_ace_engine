@@ -37,7 +37,7 @@ namespace OHOS::Ace::Framework {
 using LoadJsCallback = std::function<void(const std::string&, const RefPtr<JsAcePage>&, bool isMainPage)>;
 using JsMessageDispatcherSetterCallback = std::function<void(const RefPtr<JsMessageDispatcher>&)>;
 using EventCallback = std::function<void(const std::string&, const std::string&)>;
-using ExternalEventCallback = std::function<void(const std::string&, const uint32_t&)>;
+using ExternalEventCallback = std::function<void(const std::string&, const uint32_t&, const bool&)>;
 using UpdatePageCallback = std::function<void(const RefPtr<JsAcePage>&)>;
 using ResetStagingPageCallback = std::function<void()>;
 using MediaQueryCallback = std::function<void(const std::string& callbackId, const std::string& args)>;
@@ -257,7 +257,8 @@ public:
     bool FireSyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);
     void FireSyncEvent(
         const std::string& eventId, const std::string& param, const std::string& jsonArgs, std::string& result);
-    void FireExternalEvent(const std::string& eventId, const std::string& componentId, const uint32_t nodeId);
+    void FireExternalEvent(
+        const std::string& eventId, const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
 
     // FrontendDelegate overrides.
     void Push(const std::string& uri, const std::string& params) override;

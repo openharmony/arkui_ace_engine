@@ -261,7 +261,8 @@ public:
         LOGW("card event handler does not support this event type!");
     }
 
-    void HandleSyncEvent(const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId) override
+    void HandleSyncEvent(const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId,
+        const bool isDestroy) override
     {
         LOGW("card event handler does not support this event type!");
     }

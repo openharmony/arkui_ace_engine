@@ -101,10 +101,6 @@ void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
         LOGE("JSXComponent::JsOnLoad xcomponentComponent is.");
         return;
     }
-
-    XComponentClient::GetInstance().DeleteFromXcomponentsMapById(xcomponentComponent->GetId());
-    XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(xcomponentComponent->GetId());
-
     std::vector<std::string> keys = {"destroy"};
     xcomponentComponent->SetXComponentDestroyEventId(GetEventMarker(args, keys));
 }

@@ -1781,16 +1781,17 @@ void V8DeclarativeEngine::InitXComponent()
     ctxXComp_.Reset(isolateXComp_, context);
 }
 
-void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
+void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     CHECK_RUN_ON(JS);
-    InitXComponent();
-    if (!OHOS::Ace::Framework::XComponentClient::GetInstance().
-        GetNativeXComponentFromXcomponentsMap(componentId, nativeXComponentImpl_,
-        nativeXComponent_)) {
-        LOGE("InitXComponent nativeXComponent_ fail");
+    if (isDestroy) {
+        XComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
+        XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(componentId);
         return;
     }
+    InitXComponent();
+    OHOS::Ace::Framework::XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(
+        componentId, nativeXComponentImpl_, nativeXComponent_);
     RefPtr<XComponentComponent> xcomponent;
     OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId, xcomponent);
     if (!xcomponent) {

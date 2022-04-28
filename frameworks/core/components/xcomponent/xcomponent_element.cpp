@@ -96,7 +96,7 @@ void XComponentElement::InitEvent()
         return;
     }
     if (!xcomponent_->GetXComponentInitEventId().IsEmpty()) {
-        onSurfaceInit_ = AceSyncEvent<void(const std::string&, const uint32_t)>::Create(
+        onSurfaceInit_ = AceSyncEvent<void(const std::string&, const uint32_t, const bool)>::Create(
             xcomponent_->GetXComponentInitEventId(), context_);
         onXComponentInit_ =
             AceAsyncEvent<void(const std::string&)>::Create(xcomponent_->GetXComponentInitEventId(), context_);
@@ -131,12 +131,17 @@ void XComponentElement::OnSurfaceDestroyEvent()
         param = std::string("\"destroy\",{").append("}");
     }
     if (!hasSendDestroyEvent_) {
-        if (onXComponentDestroy_) {
-            onXComponentDestroy_(param);
-        }
         auto renderXComponent = AceType::DynamicCast<RenderXComponent>(renderNode_);
         if (renderXComponent) {
             renderXComponent->NativeXComponentDestroy();
+        }
+
+        if (onSurfaceInit_) {
+            onSurfaceInit_(this->xcomponent_->GetId(), this->xcomponent_->GetNodeId(), true);
+        }
+
+        if (onXComponentDestroy_) {
+            onXComponentDestroy_(param);
         }
         hasSendDestroyEvent_ = true;
     }
@@ -555,7 +560,7 @@ void XComponentElement::OnXComponentInit(const std::string& param)
 void XComponentElement::OnSurfaceInit(const std::string& componentId, const uint32_t nodeId)
 {
     if (onSurfaceInit_) {
-        onSurfaceInit_(componentId, nodeId);
+        onSurfaceInit_(componentId, nodeId, false);
     }
 }
 } // namespace OHOS::Ace

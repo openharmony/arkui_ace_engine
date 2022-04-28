@@ -959,7 +959,7 @@ void PluginEventHandler::HandleSyncEvent(const EventMarker& eventMarker, const s
 }
 
 void PluginEventHandler::HandleSyncEvent(
-    const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId)
+    const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId, const bool isDestroy)
 {
     LOGW("js event handler does not support this event type!");
 }

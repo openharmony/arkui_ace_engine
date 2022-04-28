@@ -212,7 +212,7 @@ public:
     // Fire SyncEvent on JS
     void FireSyncEvent(const std::string& eventId, const std::string& param) override;
 
-    void FireExternalEvent(const std::string& componentId, const uint32_t nodeId) override;
+    void FireExternalEvent(const std::string& componentId, const uint32_t nodeId, const bool isDestroy) override;
 
     // Timer callback
     void TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval) override;
@@ -294,8 +294,7 @@ private:
 
     void TimerCallJs(const std::string& callbackId) const;
 
-    void InitXComponent();
-    bool InitXComponent(const std::string& componentId);
+    void InitXComponent(const std::string& componentId);
 
     void RegisterWorker();
     void RegisterInitWorkerFunc();

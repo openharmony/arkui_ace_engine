@@ -3441,7 +3441,7 @@ void JsiEngine::FireSyncEvent(const std::string& eventId, const std::string& par
     }
 }
 
-void JsiEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
+void JsiEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     ACE_DCHECK(engineInstance_);
     auto runtime = engineInstance_->GetJsRuntime();

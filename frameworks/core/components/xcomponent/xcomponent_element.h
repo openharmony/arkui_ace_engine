@@ -66,7 +66,7 @@ private:
     void SetMethodCall();
     void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
 
-    std::function<void(const std::string&, const uint32_t)> onSurfaceInit_;
+    std::function<void(const std::string&, const uint32_t, const bool)> onSurfaceInit_;
     InitEventCallback onXComponentInit_;
     DestroyEventCallback onXComponentDestroy_;
     OH_NativeXComponent_TouchEvent touchEventPoint_;
