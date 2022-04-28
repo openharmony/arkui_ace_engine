@@ -140,8 +140,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_water_flow.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h"
 #ifdef XCOMPONENT_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
@@ -954,9 +952,6 @@ void JsRegisterViews(BindingTarget globalObj)
     JSTextPickerDialog::JSBind(globalObj);
     JSCheckbox::JSBind(globalObj);
     JSCheckboxGroup::JSBind(globalObj);
-    JSWaterFlow::JSBind(globalObj);
-    JSWaterFlowItem::JSBind(globalObj);
-
 
     JSObjectTemplate toggleType;
     toggleType.Constant("Checkbox", 0);
