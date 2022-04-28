@@ -140,6 +140,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_water_flow.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
@@ -926,7 +928,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextTimerController", JSTextTimerController::JSBind },
     { "Checkbox", JSCheckbox::JSBind },
     { "CheckboxGroup", JSCheckboxGroup::JSBind },
-    { "Refresh", JSRefresh::JSBind }
+    { "Refresh", JSRefresh::JSBind },
+    { "WaterFlow", JSWaterFlow::JSBind },
+    { "FlowItem", JSWaterFlowItem::JSBind }
 };
 
 void RegisterAllModule(BindingTarget globalObj)
