@@ -1419,6 +1419,7 @@ private:
     bool isFirstLoaded_ = true;
     bool isDragStart_ = false;
     bool isFirstDrag_ = true;
+    bool isDensityUpdate_ = false;
     uint64_t flushAnimationTimestamp_ = 0;
     TimeProvider timeProvider_;
     OnPageShowCallBack onPageShowCallBack_;
