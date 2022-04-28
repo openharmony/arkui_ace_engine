@@ -500,7 +500,7 @@ void SetDomStyle(
     }
 
     bool isIine = false;
-    for (int32_t i = 0; i < styles.size(); i++) {
+    for (int32_t i = 0; i < static_cast<int32_t>(styles.size()); i++) {
         std::string key = styles[i].first;
         std::string value = styles[i].second;
         if (key == "display" && value == "inline") {
