@@ -85,7 +85,7 @@ template("ace_ohos_standard_source_set") {
     ]
 
     public_deps =
-        [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]
+        [ "//base/global/resource_management/frameworks/resmgr:global_resmgr" ]
 
     external_deps = [
       "ability_base:base",

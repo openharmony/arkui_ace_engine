@@ -59,7 +59,7 @@ template("preview_entrance_source") {
           "//utils/native/base/include",
           "//third_party/glfw/include",
         ]
-        deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
+        deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
         cflags_cc += [ "-DNONLS" ]
       }
 
@@ -68,7 +68,7 @@ template("preview_entrance_source") {
           "//utils/native/base/include",
           "//third_party/glfw/include",
         ]
-        deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
+        deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
       }
     }
   }

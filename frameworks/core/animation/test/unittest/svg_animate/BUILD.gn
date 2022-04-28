@@ -225,7 +225,8 @@ ohos_unittest("SvgAnimateTest") {
     ]
   } else {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-    deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr" ]
+    deps +=
+        [ "//base/global/resource_management/frameworks/resmgr:global_resmgr" ]
   }
 
   if (!is_standard_system) {

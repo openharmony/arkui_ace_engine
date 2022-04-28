@@ -25,16 +25,13 @@ if (is_standard_system) {
       get_label_info("//utils/resources/systemres:systemres_hap",
                      "target_out_dir") + "/resources"
   if (host_os == "mac") {
-    resource_manager_library =
-        get_label_info(
-            "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac",
-            "root_out_dir") +
-        "/global/resmgr_standard/libglobal_resmgr_mac.dylib"
+    resource_manager_library = get_label_info(
+                                   "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
+                                   "root_out_dir") + "/global/resource_management/libglobal_resmgr_mac.dylib"
   } else {
-    resource_manager_library =
-        get_label_info(
-            "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win",
-            "root_out_dir") + "/global/resmgr_standard/libglobal_resmgr_win.dll"
+    resource_manager_library = get_label_info(
+                                   "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
+                                   "root_out_dir") + "/global/resource_management/libglobal_resmgr_win.dll"
   }
 } else {
   system_resource_hap_path =
@@ -178,9 +175,9 @@ if (is_standard_system) {
 
   ohos_copy("copy_resource_dynamic_library_standard") {
     if (host_os == "mac") {
-      deps = [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
+      deps = [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
     } else {
-      deps = [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
+      deps = [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
     }
 
     sources = [ resource_manager_library ]
