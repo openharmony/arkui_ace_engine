@@ -63,6 +63,8 @@ extern const char _binary_strip_native_min_abc_end[];
 
 namespace OHOS::Ace::Framework {
 
+const int SYSTEM_BASE = 10;
+
 #ifdef APP_USE_ARM
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 #else
@@ -778,8 +780,8 @@ std::string GetDeviceInfo()
     std::string tmp = SystemProperties::GetApiVersion();
     if (tmp != SystemProperties::INVALID_PARAM) {
         char* tmpEnd = nullptr;
-        infoList->Put(
-            "apiVersion", static_cast<int32_t>(std::strtol(SystemProperties::GetApiVersion().c_str(), &tmpEnd, 10)));
+        infoList->Put("apiVersion", static_cast<int32_t>(
+	    std::strtol(SystemProperties::GetApiVersion().c_str(), &tmpEnd, SYSTEM_BASE)));
     }
     tmp = SystemProperties::GetReleaseType();
     if (tmp != SystemProperties::INVALID_PARAM) {
@@ -803,19 +805,19 @@ std::string GetDeviceInfo()
     auto container = Container::Current();
     int32_t width = container ? container->GetViewWidth() : 0;
     if (width != 0) {
-        infoList->Put("windowWidth", std::to_string(width).c_str());
+        infoList->Put("windowWidth", width);
     } else {
         infoList->Put("windowWidth", "N/A");
     }
 
     int32_t height = container ? container->GetViewHeight() : 0;
     if (height != 0) {
-        infoList->Put("windowHeight", std::to_string(height).c_str());
+        infoList->Put("windowHeight", height);
     } else {
         infoList->Put("windowHeight", "N/A");
     }
 
-    infoList->Put("screenDensity", std::to_string(SystemProperties::GetResolution()).c_str());
+    infoList->Put("screenDensity", SystemProperties::GetResolution());
 
     bool isRound = SystemProperties::GetIsScreenRound();
     if (isRound) {
