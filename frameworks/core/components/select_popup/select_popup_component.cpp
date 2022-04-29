@@ -310,12 +310,11 @@ bool SelectPopupComponent::Initialize(const RefPtr<AccessibilityManager>& manage
         AceType::MakeRefPtr<ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::FLEX_START, children);
     RefPtr<ScrollComponent> scroll = AceType::MakeRefPtr<ScrollComponent>(column);
     RefPtr<BoxComponent> innerBox = InitializeInnerBox(scroll);
-    RefPtr<Decoration> decoration = AceType::MakeRefPtr<Decoration>();
-    Border border;
-    border.SetBorderRadius(Radius(ROUND_RADIUS_PHONE));
-    decoration->SetBorder(border);
-
-    innerBox->SetBackDecoration(decoration);
+    RefPtr<ClipComponent> innerClip = AceType::MakeRefPtr<ClipComponent>(innerBox);
+    innerClip->SetTopLeftRadius(Radius(ROUND_RADIUS_PHONE));
+    innerClip->SetTopRightRadius(Radius(ROUND_RADIUS_PHONE));
+    innerClip->SetBottomLeftRadius(Radius(ROUND_RADIUS_PHONE));
+    innerClip->SetBottomRightRadius(Radius(ROUND_RADIUS_PHONE));
     RefPtr<BoxComponent> box = AceType::MakeRefPtr<BoxComponent>();
     if (SystemProperties::GetDebugBoundaryEnabled()) {
         box->SetEnableDebugBoundary(true);
