@@ -41,13 +41,19 @@ template("preview_entrance_source") {
     if (!is_cross_platform_build) {
       if (platform == "windows") {
         defines -= [ "UNICODE" ]
-        include_dirs = [ "//utils/native/base/include" ]
+        include_dirs = [
+          "//utils/native/base/include",
+          "//third_party/flutter/glfw/include",
+        ]
         deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
         cflags_cc += [ "-DNONLS" ]
       }
 
       if (platform == "mac") {
-        include_dirs = [ "//utils/native/base/include" ]
+        include_dirs = [
+          "//utils/native/base/include",
+          "//third_party/flutter/glfw/include",
+        ]
         deps += [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
       }
     }
