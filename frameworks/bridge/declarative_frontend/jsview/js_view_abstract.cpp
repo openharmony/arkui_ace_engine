@@ -26,6 +26,11 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "core/components/display/display_component.h"
+#include "core/components/split_container/column_split_component.h"
+#include "core/components/split_container/row_split_component.h"
+#include "core/components/split_container/split_container_component.h"
 #include "core/components_v2/extensions/events/on_area_change_extension.h"
 #ifdef USE_V8_ENGINE
 #include "bridge/declarative_frontend/engine/v8/functions/v8_function.h"
@@ -1335,10 +1340,37 @@ Alignment JSViewAbstract::ParseAlignment(int32_t align)
     return alignment;
 }
 
-void JSViewAbstract::SetVisibility(int value)
+void JSViewAbstract::SetVisibility(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        LOGE("SetVisibility: The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    if (!info[0]->IsNumber()) {
+        LOGE("SetVisibility: The first param type is not number, invalid.");
+        return;
+    }
+
     auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
-    display->SetVisible(VisibleType(value));
+    display->SetVisible(VisibleType(info[0]->ToNumber<int32_t>()));
+
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
+
+        auto eventMarker =
+            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("onVisibilityChange");
+
+                auto param = info->GetType();
+                int32_t newValue = StringToInt(param);
+                JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
+                func->ExecuteJS(1, &newJSVal);
+            });
+
+        display->SetVisibleChangeEvent(eventMarker);
+    }
 }
 
 void JSViewAbstract::JsFlexBasis(const JSCallbackInfo& info)

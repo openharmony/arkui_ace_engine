@@ -37,6 +37,12 @@ void RosenRenderColumnSplit::Paint(RenderContext& context, const Offset& offset)
         if (!item->GetVisible()) {
             continue;
         }
+
+        if (displayNodes_.find(item) == displayNodes_.end() &&
+            disableHideNodes_.find(item) == disableHideNodes_.end()) {
+            continue;
+        }
+        
         context.PaintChild(item, offset);
         if (index != 0) {
             PaintDivider(context, offset + item->GetPosition(), dividerWidth);

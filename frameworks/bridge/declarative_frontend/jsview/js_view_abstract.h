@@ -175,7 +175,7 @@ public:
     static void JsOverlay(const JSCallbackInfo& info);
     static Alignment ParseAlignment(int32_t align);
 
-    static void SetVisibility(int value);
+    static void SetVisibility(const JSCallbackInfo& info);
     static void Pop();
 
     static void JsOnDragStart(const JSCallbackInfo& info);

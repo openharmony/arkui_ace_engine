@@ -22,11 +22,18 @@
 
 namespace OHOS::Ace {
 
+enum class SplitType {
+    ROW_SPLIT,
+    COLUMN_SPLIT,
+};
+
 class ACE_EXPORT SplitContainerComponent : virtual public ComponentGroup {
     DECLARE_ACE_TYPE(SplitContainerComponent, ComponentGroup)
 
 public:
-    explicit SplitContainerComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children) {}
+    SplitContainerComponent(const std::list<RefPtr<Component>>& children, SplitType splitType)
+        : ComponentGroup(children), splitType_(splitType)
+    {}
     ~SplitContainerComponent() override = default;
 
     bool GetResizeable()
@@ -38,8 +45,14 @@ public:
         resizeable_ = resizeable;
     }
 
+    SplitType GetSplitType() const
+    {
+        return splitType_;
+    }
+
 private:
     bool resizeable_ = false;
+    SplitType splitType_ = SplitType::ROW_SPLIT;
 };
 
 } // namespace OHOS::Ace

@@ -26,11 +26,12 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void SetShowControlButton(bool isShow);
     static void OnChange(const JSCallbackInfo& info);
-    static void JsSideBarWidth(double length);
-    static void JsMaxSideBarWidth(double length);
-    static void JsMinSideBarWidth(double length);
+    static void JsSideBarWidth(const JSCallbackInfo& info);
+    static void JsMaxSideBarWidth(const JSCallbackInfo& info);
+    static void JsMinSideBarWidth(const JSCallbackInfo& info);
     static void JsShowSideBar(bool isShow);
     static void JsControlButton(const JSCallbackInfo& info);
+    static void JsAutoHide(bool autoHide);
 };
 
 } // namespace OHOS::Ace::Framework

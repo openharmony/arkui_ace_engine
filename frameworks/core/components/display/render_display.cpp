@@ -236,4 +236,26 @@ void RenderDisplay::OnStatusStyleChanged(VisualState componentState)
     }
 }
 
+void RenderDisplay::OnVisibleChange(VisibleType type)
+{
+    auto display = displayComponent_.Upgrade();
+    if (display && !display->GetVisibleChangeEvent().IsEmpty()) {
+        auto event = AceSyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            display->GetVisibleChangeEvent(), context_);
+        switch (type) {
+            case VisibleType::VISIBLE:
+                event(std::make_shared<BaseEventInfo>("0"));
+                break;
+            case VisibleType::INVISIBLE:
+                event(std::make_shared<BaseEventInfo>("1"));
+                break;
+            case VisibleType::GONE:
+                event(std::make_shared<BaseEventInfo>("2"));
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 } // namespace OHOS::Ace
