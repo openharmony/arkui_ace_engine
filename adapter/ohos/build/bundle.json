@@ -38,7 +38,7 @@
                 "unittest",
                 "resmgr",
                 "graphic",
-                "bytrace_standard",
+                "bytrace",
                 "startup_l2"
             ],
             "third_party": [

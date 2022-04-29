@@ -237,8 +237,8 @@ ohos_unittest("TransitionElementTest") {
 
   if (is_standard_system) {
     external_deps = [
-      "bytrace_standard:bytrace_core",
       "eventhandler:libeventhandler",
+      "hitrace_native:hitrace_meter",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
       "startup_l2:syspara",
@@ -246,8 +246,8 @@ ohos_unittest("TransitionElementTest") {
     configs += [ "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config" ]
   } else {
     external_deps = [
-      "bytrace:bytrace_core",
       "hilog:libhilog",
+      "hitrace_native:hitrace_meter",
       "startup:syspara",
     ]
   }
@@ -302,8 +302,8 @@ ohos_unittest("SharedTransitionElementTest") {
 
   if (is_standard_system) {
     external_deps = [
-      "bytrace_standard:bytrace_core",
       "eventhandler:libeventhandler",
+      "hitrace_native:hitrace_meter",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
       "startup_l2:syspara",
@@ -311,8 +311,8 @@ ohos_unittest("SharedTransitionElementTest") {
     configs += [ "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config" ]
   } else {
     external_deps = [
-      "bytrace:bytrace_core",
       "hilog:libhilog",
+      "hitrace_native:hitrace_meter",
       "startup:syspara",
     ]
   }
@@ -362,8 +362,8 @@ ohos_unittest("TransitionPropertyElementTest") {
 
   if (is_standard_system) {
     external_deps = [
-      "bytrace_standard:bytrace_core",
       "eventhandler:libeventhandler",
+      "hitrace_native:hitrace_meter",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
       "startup_l2:syspara",
@@ -373,8 +373,8 @@ ohos_unittest("TransitionPropertyElementTest") {
     part_name = "ace_engine_standard"
   } else {
     external_deps = [
-      "bytrace:bytrace_core",
       "hilog:libhilog",
+      "hitrace_native:hitrace_meter",
       "startup:syspara",
     ]
   }
