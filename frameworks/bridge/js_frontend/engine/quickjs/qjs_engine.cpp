@@ -481,7 +481,7 @@ void SetDomStyle(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementOperat
 
     if (isIine) {
         std::vector < std::pair < std::string, std::string >> stylesFinaly;
-        for (int32_t i = 0; i < styles.size(); i++) {
+        for (int32_t i = 0; i < static_cast<int32_t>(styles.size()); i++) {
             std::string key = styles[i].first;
             std::string value = styles[i].second;
             if (key == "width" || key == "height" || key.find("margin") != std::string::npos ||
