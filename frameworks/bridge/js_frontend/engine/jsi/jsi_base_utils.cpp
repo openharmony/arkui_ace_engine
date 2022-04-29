@@ -19,6 +19,10 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+const int32_t OFFSET_PREVIEW = 9;
+#endif
+
 namespace OHOS::Ace::Framework {
 std::string JsiBaseUtils::GenerateSummaryBody(std::shared_ptr<JsValue> error, std::shared_ptr<JsRuntime> runtime)
 {
@@ -187,7 +191,11 @@ std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::stri
     if (isAppPage) {
         mapInfo = appMap->Find(StringToInt(line) - offSet, StringToInt(column));
     } else {
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+        mapInfo = pageMap->Find(StringToInt(line) - offSet + OFFSET_PREVIEW, StringToInt(column));
+#else
         mapInfo = pageMap->Find(StringToInt(line) - offSet, StringToInt(column));
+#endif
     }
     if (mapInfo.row == 0 || mapInfo.col == 0) {
         return "";
