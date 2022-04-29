@@ -61,6 +61,15 @@ void FlutterRenderOption::PaintBackground(RenderContext& context, const Offset& 
     canvas->drawPath(path.get(), paint, paintData);
     paint.paint()->setColor(GetEventEffectColor().GetValue());
     canvas->drawPath(path.get(), paint, paintData);
+    if (SystemProperties::GetDebugBoundaryEnabled()) {
+        auto skCanvas = canvas->canvas();
+        if (skCanvas == nullptr) {
+            LOGE("Paint canvas is null.");
+            return;
+        }
+        DebugBoundaryPainter::PaintDebugBoundary(skCanvas, offset, GetLayoutSize());
+        DebugBoundaryPainter::PaintDebugCorner(skCanvas, offset, GetLayoutSize());
+    }
 }
 
 void FlutterRenderOption::PaintLine(RenderContext& context, const Offset& offset)

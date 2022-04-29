@@ -315,8 +315,10 @@ bool SelectPopupComponent::Initialize(const RefPtr<AccessibilityManager>& manage
     innerClip->SetTopRightRadius(Radius(ROUND_RADIUS_PHONE));
     innerClip->SetBottomLeftRadius(Radius(ROUND_RADIUS_PHONE));
     innerClip->SetBottomRightRadius(Radius(ROUND_RADIUS_PHONE));
-
     RefPtr<BoxComponent> box = AceType::MakeRefPtr<BoxComponent>();
+    if (SystemProperties::GetDebugBoundaryEnabled()) {
+        box->SetEnableDebugBoundary(true);
+    }
     box->SetDeliverMinToChild(false);
     if (!IsTV()) {
         RefPtr<Decoration> back = AceType::MakeRefPtr<Decoration>();
@@ -326,7 +328,7 @@ bool SelectPopupComponent::Initialize(const RefPtr<AccessibilityManager>& manage
         box->SetBackDecoration(back);
         box->SetPadding(Edge(IN_OUT_BOX_INTERVAL));
     }
-    box->SetChild(innerClip);
+    box->SetChild(innerBox);
 
     auto tweenId = TweenComponent::AllocTweenComponentId();
     RefPtr<TweenComponent> tween = AceType::MakeRefPtr<TweenComponent>(tweenId, tweenId);

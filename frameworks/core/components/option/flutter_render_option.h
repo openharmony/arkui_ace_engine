@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_OPTION_FLUTTER_RENDER_OPTION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_OPTION_FLUTTER_RENDER_OPTION_H
 
+#include "core/components/common/painter/debug_boundary_painter.h"
 #include "core/components/option/render_option.h"
 
 namespace OHOS::Ace {
