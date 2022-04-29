@@ -62,7 +62,6 @@ void FlutterRenderOption::PaintBackground(RenderContext& context, const Offset& 
     paint.paint()->setColor(GetEventEffectColor().GetValue());
     canvas->drawPath(path.get(), paint, paintData);
     if (SystemProperties::GetDebugBoundaryEnabled()) {
-        // auto skCanvas = AceType::DynamicCast<FlutterRenderContext>(&context)->GetCanvas();
         auto skCanvas = canvas->canvas();
         if (skCanvas == nullptr) {
             LOGE("Paint canvas is null.");
