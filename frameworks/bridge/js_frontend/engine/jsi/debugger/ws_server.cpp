@@ -20,8 +20,14 @@
 #include <sys/types.h>
 
 #include "base/log/log.h"
+thread_local boost::asio::io_context g_ioContext;
 
 namespace OHOS::Ace::Framework {
+
+void DispatchMsgToSocket(int sign)
+{
+    g_ioContext.stop();
+}
 
 void WsServer::RunServer()
 {
@@ -29,13 +35,36 @@ void WsServer::RunServer()
     try {
         boost::asio::io_context ioContext;
         int appPid = getpid();
+        tid_ = pthread_self();
         std::string pidStr = std::to_string(appPid);
-        std::string sockName = '\0' + pidStr + componentName_;
-        LOGI("WsServer RunServer: %{public}d%{public}s", appPid, componentName_.c_str());
+        std::string instanceIdStr("");
+        auto& connectFlag = connectState_;
+        /**
+         * The old version of IDE is not compatible with the new images due to the connect server.
+         * The First instance will use "pid" instead of "pid + instanceId" to avoid this.
+         * If old version of IDE does not get the instanceId by connect server, it can still connect the debug server.
+         */
+        if (instanceId_ != 0) {
+            instanceIdStr = std::to_string(instanceId_);
+        }
+        std::string sockName = '\0' + pidStr + instanceIdStr + componentName_;
+        LOGI("WsServer RunServer: %{public}d%{public}d%{public}s", appPid, instanceId_, componentName_.c_str());
         localSocket::endpoint endPoint(sockName);
-        localSocket::socket socket(ioContext);
-        localSocket::acceptor acceptor(ioContext, endPoint);
-        acceptor.accept(socket);
+        localSocket::socket socket(g_ioContext);
+        localSocket::acceptor acceptor(g_ioContext, endPoint);
+        acceptor.async_accept(socket, [&connectFlag](const boost::system::error_code& error) {
+            if (!error) {
+                connectFlag = true;
+            }
+        });
+        if (signal(SIGURG, &DispatchMsgToSocket) == SIG_ERR) {
+            LOGE("WsServer RunServer: Error exception");
+            return;
+        }
+        g_ioContext.run();
+        if (terminateExecution_ || !connectState_) {
+            return;
+        }
         webSocket_ = std::unique_ptr<websocket::stream<localSocket::socket>>(
             std::make_unique<websocket::stream<localSocket::socket>>(std::move(socket)));
         webSocket_->accept();
@@ -60,6 +89,9 @@ void WsServer::StopServer()
 {
     LOGI("WsServer StopServer");
     terminateExecution_ = true;
+    if (!connectState_) {
+        pthread_kill(tid_, SIGURG);
+    }
 }
 
 void WsServer::SendReply(const std::string& message) const

@@ -29,6 +29,7 @@
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -2927,7 +2928,7 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
     if (debugger_mode) {
         library_path = ARK_DEBUGGER_LIB_PATH;
     }
-    if (!runtime_->Initialize(library_path, isDebugMode_)) {
+    if (!runtime_->Initialize(library_path, isDebugMode_, GetInstanceId())) {
         LOGE("Js Engine initialize runtime failed");
         return false;
     }
@@ -3144,7 +3145,13 @@ void JsiEngine::SetPostTask(NativeEngine* nativeEngine)
 void JsiEngine::RegisterInitWorkerFunc()
 {
     auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
-    auto&& initWorkerFunc = [weakInstance](NativeEngine* nativeEngine) {
+    bool debugVersion = IsDebugVersion();
+    bool debugMode = NeedDebugBreakPoint();
+    std::string libraryPath = "";
+    if (debugVersion) {
+        libraryPath = ARK_DEBUGGER_LIB_PATH;
+    }
+    auto&& initWorkerFunc = [weakInstance, debugMode, libraryPath](NativeEngine* nativeEngine) {
         LOGI("WorkerCore RegisterInitWorkerFunc called");
         if (nativeEngine == nullptr) {
             LOGE("nativeEngine is nullptr");
@@ -3160,6 +3167,9 @@ void JsiEngine::RegisterInitWorkerFunc()
             LOGE("instance is nullptr");
             return;
         }
+        ConnectServerManager::Get().AddInstance(gettid());
+        auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
+        panda::JSNApi::StartDebugger(libraryPath.c_str(), vm, debugMode, gettid());
         instance->RegisterConsoleModule(arkNativeEngine);
         // load jsfwk
         if (!arkNativeEngine->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
@@ -3167,6 +3177,31 @@ void JsiEngine::RegisterInitWorkerFunc()
         }
     };
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
+}
+
+void JsiEngine::RegisterOffWorkerFunc()
+{
+    auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
+    bool debugVersion = IsDebugVersion();
+    auto&& offWorkerFunc = [debugVersion](NativeEngine* nativeEngine) {
+        LOGI("WorkerCore RegisterOffWorkerFunc called");
+        if (!debugVersion) {
+            return;
+        }
+        if (nativeEngine == nullptr) {
+            LOGE("nativeEngine is nullptr");
+            return;
+        }
+        auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
+        if (arkNativeEngine == nullptr) {
+            LOGE("arkNativeEngine is nullptr");
+            return;
+        }
+        ConnectServerManager::Get().RemoveInstance(gettid());
+        auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
+        panda::JSNApi::StopDebugger(vm);
+    };
+    nativeEngine_->SetOffWorkerFunc(offWorkerFunc);
 }
 
 void JsiEngine::RegisterAssetFunc()
@@ -3192,6 +3227,7 @@ void JsiEngine::RegisterAssetFunc()
 void JsiEngine::RegisterWorker()
 {
     RegisterInitWorkerFunc();
+    RegisterOffWorkerFunc();
     RegisterAssetFunc();
 }
 

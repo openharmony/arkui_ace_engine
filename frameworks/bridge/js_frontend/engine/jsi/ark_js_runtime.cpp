@@ -33,7 +33,7 @@ Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo *info)
     return package->Callback(info);
 }
 
-bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
+bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode, int32_t instanceId)
 {
     LOGI("Ark: create jsvm");
     RuntimeOption option;
@@ -49,6 +49,7 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
     option.SetDebuggerLibraryPath(libraryPath);
     libPath_ = libraryPath;
     isDebugMode_ = isDebugMode;
+    instanceId_ = instanceId;
 
     vm_ = JSNApi::CreateJSVM(option);
     return vm_ != nullptr;
@@ -101,12 +102,10 @@ bool ArkJSRuntime::EvaluateJsCode(const uint8_t *buffer, int32_t size)
 bool ArkJSRuntime::ExecuteJsBin(const std::string &fileName)
 {
     JSExecutionScope executionScope(vm_);
-    static bool debugFlag = true;
-    if (debugFlag && !libPath_.empty()) {
+    if (!libPath_.empty()) {
 #ifndef WINDOWS_PLATFORM
-        JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_);
+        JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_);
 #endif
-        debugFlag = false;
     }
     LocalScope scope(vm_);
     bool ret = JSNApi::Execute(vm_, fileName, PANDA_MAIN_FUNCTION);
