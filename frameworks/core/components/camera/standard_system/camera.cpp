@@ -392,11 +392,7 @@ int32_t CameraCallback::PrepareVideo(sptr<OHOS::CameraStandard::CameraManager> c
     }
 
     MakeDir(DEFAULT_CATCH_PATH);
-    ret = recorder_->SetOutputPath(DEFAULT_CATCH_PATH);
-    if (ret != ERR_OK) {
-        LOGE("Camera SetOutputPath failed. ret= %{private}d", ret);
-        return -1;
-    }
+    // need use fd not path
     ret = recorder_->Prepare();
     if (ret != ERR_OK) {
         LOGE("Prepare failed. ret= %{private}d", ret);
