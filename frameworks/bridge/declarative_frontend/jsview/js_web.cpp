@@ -578,6 +578,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("fileFromUrlAccess", &JSWeb::FileFromUrlAccess);
     JSClass<JSWeb>::StaticMethod("databaseAccess", &JSWeb::DatabaseAccess);
     JSClass<JSWeb>::StaticMethod("textZoomAtio", &JSWeb::TextZoomAtio);
+    JSClass<JSWeb>::StaticMethod("webDebuggingAccess", &JSWeb::WebDebuggingAccessEnabled);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -1055,7 +1056,7 @@ JSRef<JSVal> FileSelectorEventToJSValue(const FileSelectorEvent& eventInfo)
     JSRef<JSObject> paramObj = JSClass<JSFileSelectorParam>::NewInstance();
     auto fileSelectorParam = Referenced::Claim(paramObj->Unwrap<JSFileSelectorParam>());
     fileSelectorParam->SetParam(eventInfo);
-    
+
     JSRef<JSObject> resultObj = JSClass<JSFileSelectorResult>::NewInstance();
     auto fileSelectorResult = Referenced::Claim(resultObj->Unwrap<JSFileSelectorResult>());
     fileSelectorResult->SetResult(eventInfo);
@@ -1353,5 +1354,16 @@ void JSWeb::TextZoomAtio(int32_t textZoomAtioNum)
         return;
     }
     webComponent->SetTextZoomAtio(textZoomAtioNum);
+}
+
+void JSWeb::WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetWebDebuggingAccessEnabled(isWebDebuggingAccessEnabled);
 }
 } // namespace OHOS::Ace::Framework
