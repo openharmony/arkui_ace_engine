@@ -406,6 +406,15 @@ void FormManagerDelegate::OnDeathReceived()
         LOGE("relink to form manager fail!!!");
     }
 }
+std::string FormManagerDelegate::WrapAction(const std::string& action)
+{
+    auto eventAction = JsonUtil::ParseJsonString(action);
+    if (!eventAction->Contains("bundleName")) {
+        eventAction->Put("bundleName", wantCache_.GetElement().GetBundleName().c_str());
+    }
+    auto newAction = eventAction->ToString();
+    OHOS::AppExecFwk::FormMgr::GetInstance().UpdateRouterAction(runningCardId_, newAction);
+    return newAction;
+}
 #endif
-
 } // namespace OHOS::Ace

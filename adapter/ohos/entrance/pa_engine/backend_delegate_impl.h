@@ -63,7 +63,7 @@ using TriggerEventCallback = std::function<void(const int64_t formId, const std:
 using UpdateFormCallback = std::function<void(const int64_t formId)>;
 using CastTemptoNormalCallback = std::function<void(const int64_t formId)>;
 using VisibilityChangedCallback = std::function<void(const std::map<int64_t, int32_t>& formEventsMap)>;
-using AcquireStateCallback = std::function<void(const OHOS::AAFwk::Want &want)>;
+using AcquireStateCallback = std::function<int32_t(const OHOS::AAFwk::Want &want)>;
 using CommandCallback = std::function<void(const OHOS::AAFwk::Want &want, int startId)>;
 using CommandApplicationCallback = std::function<void(const std::string& intent, int startId)>;
 
@@ -184,7 +184,7 @@ public:
     void OnUpdate(const int64_t formId);
     void OnCastTemptoNormal(const int64_t formId);
     void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap);
-    void OnAcquireState(const OHOS::AAFwk::Want& want);
+    int32_t OnAcquireFormState(const OHOS::AAFwk::Want& want);
 
 private:
     void LoadPa(const std::string& url, const OHOS::AAFwk::Want& want);

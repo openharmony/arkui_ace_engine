@@ -142,6 +142,17 @@ void AceFormAbility::OnTriggerEvent(const int64_t formId, const std::string& mes
     Platform::PaContainer::OnTriggerEvent(instanceId_, formId, message);
 }
 
+AppExecFwk::FormState AceFormAbility::OnAcquireFormState(const OHOS::AAFwk::Want &want)
+{
+    LOGI("AceFormAbility::OnAcquireState called");
+    int32_t formState = Platform::PaContainer::OnAcquireFormState(instanceId_, want);
+    if (formState <= (int32_t) AppExecFwk::FormState::UNKNOWN || formState > (int32_t) AppExecFwk::FormState::READY) {
+        return AppExecFwk::FormState::UNKNOWN;
+    } else {
+        return (AppExecFwk::FormState) formState;
+    }
+}
+
 void AceFormAbility::OnUpdate(const int64_t formId)
 {
     LOGI("AceFormAbility::OnUpdate called: %{public}s", std::to_string(formId).c_str());

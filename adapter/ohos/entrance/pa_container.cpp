@@ -199,6 +199,29 @@ bool PaContainer::OnTriggerEvent(int32_t instanceId, int64_t formId, const std::
     return true;
 }
 
+int32_t PaContainer::OnAcquireFormState(int32_t instanceId, const OHOS::AAFwk::Want& want)
+{
+    LOGI("PA: PaContainer::OnAcquireFormState start");
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        LOGE("PA: container is nullptr");
+        return -1;
+    }
+    auto aceContainer = AceType::DynamicCast<PaContainer>(container);
+    if (!aceContainer) {
+        LOGE("PA: aceContainer is nullptr");
+        return -1;
+    }
+    auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
+    if (!paBackend) {
+        LOGE("PA: paBackend is nullptr");
+        return -1;
+    }
+    int32_t formState = paBackend->OnAcquireFormState(want);
+    LOGI("PA: PaContainer::OnAcquireFormState end");
+    return formState;
+}
+
 bool PaContainer::OnUpdate(int32_t instanceId, int64_t formId)
 {
     LOGI("PA: PaContainer::OnUpdate start");

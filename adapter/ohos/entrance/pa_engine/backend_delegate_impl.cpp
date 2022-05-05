@@ -459,10 +459,13 @@ void BackendDelegateImpl::OnVisibilityChanged(const std::map<int64_t, int32_t>& 
         TaskExecutor::TaskType::JS);
 }
 
-void BackendDelegateImpl::OnAcquireState(const OHOS::AAFwk::Want& want)
+int32_t BackendDelegateImpl::OnAcquireFormState(const OHOS::AAFwk::Want &want)
 {
-    taskExecutor_->PostTask([acquireStateCallback = acquireStateCallback_, want] { acquireStateCallback(want); },
+    auto ret = (int32_t) AppExecFwk::FormState::UNKNOWN;
+    taskExecutor_->PostSyncTask(
+        [acquireStateCallback = acquireStateCallback_, &ret, want] { ret = acquireStateCallback(want); },
         TaskExecutor::TaskType::JS);
+    return ret;
 }
 
 void BackendDelegateImpl::OnCommand(const OHOS::AAFwk::Want &want, int startId)

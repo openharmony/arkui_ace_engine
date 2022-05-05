@@ -337,7 +337,7 @@ void FormElement::OnActionEvent(const std::string& action) const
         auto context = GetContext().Upgrade();
         if (context) {
             LOGI("send action evetn to ability to process");
-            context->OnActionEvent(action);
+            context->OnActionEvent(formManagerBridge_->WrapAction(action));
         }
 #else
         HandleOnRouterEvent(eventAction);

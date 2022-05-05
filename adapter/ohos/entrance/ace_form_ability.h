@@ -70,6 +70,14 @@ public:
     virtual void OnTriggerEvent(const int64_t formId, const std::string& message) override;
 
     /**
+     * @brief Called to notify the form supplier to acquire form state.
+     *
+     * @param want Indicates the detailed information about the form to be obtained, including
+     *             the bundle name, module name, ability name, form name and form dimension.
+     */
+    virtual AppExecFwk::FormState OnAcquireFormState(const OHOS::AAFwk::Want& want) override;
+
+    /**
      * @brief Called to notify the form provider to update a specified form.
      *
      * @param formId Indicates the ID of the form to update.
