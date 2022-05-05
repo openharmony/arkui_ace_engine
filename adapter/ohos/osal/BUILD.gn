@@ -23,15 +23,15 @@ template("ace_osal_ohos_source_set") {
     defines += invoker.defines
     if (is_standard_system) {
       external_deps = [
-        "bytrace_standard:bytrace_core",
+        "hitrace_native:hitrace_meter",
         "hiviewdfx_hilog_native:libhilog",
         "startup_l2:syspara",
       ]
       configs = [ "$ace_root:ace_config" ]
     } else {
       external_deps = [
-        "bytrace:bytrace_core",
         "hilog:libhilog",
+        "hitrace_native:hitrace_meter",
         "startup:syspara",
       ]
 

@@ -15,7 +15,7 @@
 
 #include "base/log/ace_trace.h"
 
-#include "bytrace.h"
+#include "hitrace_meter.h"
 
 #include "base/log/log.h"
 #include "base/utils/macros.h"
