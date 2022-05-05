@@ -721,6 +721,23 @@ void FrontendDelegateImpl::GetState(int32_t& index, std::string& name, std::stri
     }
 }
 
+size_t FrontendDelegateImpl::GetComponentsCount()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (pageRouteStack_.empty()) {
+        return 0;
+    }
+    auto itPage = pageMap_.find(pageRouteStack_.back().pageId);
+    if (itPage == pageMap_.end()) {
+        return 0;
+    }
+    auto domDoc = itPage->second->GetDomDocument();
+    if (!domDoc) {
+        return 0;
+    }
+    return domDoc->GetComponentsCount();
+}
+
 std::string FrontendDelegateImpl::GetParams()
 {
     if (pageParamMap_.find(pageId_) != pageParamMap_.end()) {

@@ -269,6 +269,7 @@ public:
     void Clear() override;
     int32_t GetStackSize() const override;
     void GetState(int32_t& index, std::string& name, std::string& path) override;
+    size_t GetComponentsCount() override;
     std::string GetParams() override;
     void TriggerPageUpdate(int32_t pageId, bool directExecute = false) override;
 

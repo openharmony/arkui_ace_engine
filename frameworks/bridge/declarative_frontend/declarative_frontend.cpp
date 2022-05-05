@@ -802,6 +802,7 @@ void DeclarativeFrontend::DumpFrontend() const
     delegate_->GetState(routerIndex, routerName, routerPath);
 
     if (DumpLog::GetInstance().GetDumpFile()) {
+        DumpLog::GetInstance().AddDesc("Components: " + std::to_string(delegate_->GetComponentsCount()));
         DumpLog::GetInstance().AddDesc("Path: " + routerPath);
         DumpLog::GetInstance().AddDesc("Length: " + std::to_string(routerIndex));
         DumpLog::GetInstance().Print(0, routerName, 0);
