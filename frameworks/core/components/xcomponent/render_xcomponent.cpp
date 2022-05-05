@@ -217,12 +217,37 @@ void RenderXComponent::NativeXComponentDispatchTouchEvent(const OH_NativeXCompon
     }
 }
 
-void RenderXComponent::NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent)
+bool RenderXComponent::HandleMouseEvent(const MouseEvent& event)
+{
+    OH_NativeXComponent_MouseEvent mouseEventPoint;
+    mouseEventPoint.x = event.x;
+    mouseEventPoint.y = event.y;
+    mouseEventPoint.z = event.z;
+    mouseEventPoint.deltaX = event.deltaX;
+    mouseEventPoint.deltaY = event.deltaY;
+    mouseEventPoint.deltaZ = event.deltaZ;
+    mouseEventPoint.scrollX = event.scrollX;
+    mouseEventPoint.scrollY = event.scrollY;
+    mouseEventPoint.scrollZ = event.scrollZ;
+    mouseEventPoint.screenX = event.screenX;
+    mouseEventPoint.screenY = event.screenY;
+
+    mouseEventPoint.action = static_cast<OH_NativeXComponent_MouseEventAction>(event.action);
+    mouseEventPoint.button = static_cast<OH_NativeXComponent_MouseEventButton>(event.button);
+    mouseEventPoint.pressedButtons = event.pressedButtons;
+    mouseEventPoint.time = event.time.time_since_epoch().count();
+    mouseEventPoint.deviceId = event.deviceId;
+    mouseEventPoint.sourceType = static_cast<OH_NativeXComponent_SourceType>(event.sourceType);
+    mouseEventPoint.pressedButtons = event.pressedButtons;
+    return NativeXComponentDispatchMouseEvent(mouseEventPoint);
+}
+
+bool RenderXComponent::NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent)
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
-        LOGE("NativeXComponentDispatchTouchEvent context null");
-        return;
+        LOGE("NativeXComponentDispatchMouseEvent context null");
+        return false;
     }
     float scale = pipelineContext->GetViewScale();
     float diffX = mouseEvent.x - position_.GetX() * scale;
@@ -244,6 +269,7 @@ void RenderXComponent::NativeXComponentDispatchMouseEvent(const OH_NativeXCompon
             },
             TaskExecutor::TaskType::JS);
     }
+    return true;
 }
 
 void RenderXComponent::NativeXComponentOffset(const double&x, const double& y)
