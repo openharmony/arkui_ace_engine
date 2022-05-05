@@ -56,7 +56,7 @@ build_component("plugin") {
     ]
 
     if (os_account_exists) {
-      external_deps += [ "os_account_standard:os_account_innerkits" ]
+      external_deps += [ "os_account:os_account_innerkits" ]
     }
   }
 }
