@@ -19,6 +19,7 @@
 #include "core/common/frontend.h"
 #include "core/common/text_field_manager.h"
 #include "core/components/transform/transform_element.h"
+#include "core/components_v2/inspector/inspector_composed_element.h"
 
 namespace OHOS::Ace {
 
@@ -151,6 +152,27 @@ void PageElement::Dump()
         std::string retakeId = std::to_string(element->GetRetakeId());
         DumpLog::GetInstance().AddDesc(std::string("RetakeId: ").append(retakeId));
     }
+}
+
+int32_t PageElement::GetComponentsCount()
+{
+    int32_t result = 0;
+    std::queue<RefPtr<Element>> elements;
+    elements.push(AceType::Claim(this));
+    while (!elements.empty()) {
+        auto& element = elements.front();
+        auto inspectorElement = AceType::DynamicCast<V2::InspectorComposedElement>(element);
+        if (inspectorElement != nullptr) {
+            result++;
+        }
+        const auto& children = element->GetChildren();
+        for (const auto& child : children) {
+            elements.push(child);
+        }
+        elements.pop();
+    }
+
+    return result;
 }
 
 } // namespace OHOS::Ace
