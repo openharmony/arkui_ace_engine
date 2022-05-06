@@ -32,4 +32,23 @@ void TabContentItemElement::Update()
     FlexElement::Update();
 }
 
+void TabContentItemElement::PerformBuild()
+{
+    auto component = AceType::DynamicCast<TabContentItemComponent>(component_);
+    if (!component) {
+        LOGE("TabContentItemComponent is null");
+        return;
+    }
+
+    if (!component->HasBuilder()) {
+        // No builder function, continue with old code path
+        ColumnElement::PerformBuild();
+        return;
+    }
+
+    // In new code path we try to execute tab's builder function here
+    auto newComponets = component->ExecuteBuilder();
+    UpdateChild(GetFirstChild(), newComponets);
+}
+
 } // namespace OHOS::Ace::v2
