@@ -322,18 +322,23 @@ std::string PluginElement::GetPackagePathByWant(const WeakPtr<PluginElement>& we
     std::string packagePathStr;
     auto pluginElement = weak.Upgrade();
     if (!pluginElement) {
+        LOGE("pluginElement is nullptr.");
+        pluginElement->HandleOnErrorEvent("1", "pluginElement is nullptr.");
         return packagePathStr;
     }
 
     std::vector<std::string> strList;
     pluginElement->SplitString(info.bundleName, '/', strList);
-    if (strList.empty()) {
-        LOGE("App bundleName or abilityName is empty.");
-        pluginElement->HandleOnErrorEvent("1", "App bundleName is empty.");
+
+    std::vector<int32_t> userIds;
+    ErrCode errCode = GetActiveAccountIds(userIds);
+    if (errCode != ERR_OK) {
+        LOGE("Query Active OsAccountIds failed!");
+        pluginElement->HandleOnErrorEvent("1", "Query Active OsAccountIds failed!");
         return packagePathStr;
     }
     GetModuleNameByWant(weak, info);
-    packagePathStr = GerPackagePathByBms(weak, info, strList);
+    packagePathStr = GerPackagePathByBms(weak, info, strList, userIds);
 
     return packagePathStr;
 }
@@ -342,6 +347,8 @@ void PluginElement::GetModuleNameByWant(const WeakPtr<PluginElement>& weak, Requ
 {
     auto pluginElement = weak.Upgrade();
     if (!pluginElement) {
+        LOGE("pluginElement is nullptr.");
+        pluginElement->HandleOnErrorEvent("1", "pluginElement is nullptr.");
         return;
     }
 
@@ -412,11 +419,13 @@ void PluginElement::RunPluginTask(const WeakPtr<PluginElement>& weak, const RefP
 }
 
 std::string PluginElement::GerPackagePathByBms(
-    const WeakPtr<PluginElement>& weak, RequestPluginInfo& info, const std::vector<std::string>& strList) const
+    const WeakPtr<PluginElement>& weak, RequestPluginInfo& info,
+    const std::vector<std::string>& strList, const std::vector<int32_t>& userIds) const
 {
     std::string packagePathStr;
     auto pluginElement = weak.Upgrade();
     if (!pluginElement) {
+        LOGE("pluginElement is nullptr.");
         return packagePathStr;
     }
     auto bms = PluginComponentManager::GetInstance()->GetBundleManager();
@@ -426,10 +435,9 @@ std::string PluginElement::GerPackagePathByBms(
         return packagePathStr;
     }
 
-    std::vector<int32_t> userIds;
-    ErrCode errCode = GetActiveAccountIds(userIds);
-    if (errCode != ERR_OK) {
-        pluginElement->HandleOnErrorEvent("1", "Query Active OsAccountIds failed!");
+    if (strList.empty()) {
+        LOGE("App bundleName or abilityName is empty.");
+        pluginElement->HandleOnErrorEvent("1", "App bundleName is empty.");
         return packagePathStr;
     }
     if (strList.size() == 1) {

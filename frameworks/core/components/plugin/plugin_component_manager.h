@@ -73,17 +73,13 @@ public:
             return callbackVec_;
         }
 
-        std::mutex& GetMutex()
-        {
-            return mutex_;
-        }
-
         void ResgisterListener(const std::shared_ptr<PluginComponentCallBack>& callback, CallBackType callBackType);
         void OnPushCallBack(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
             const std::string& data, const std::string& extraData) override;
         void OnRequestCallBack(const AAFwk::Want& want, const std::string& name,  const std::string& data) override;
         void OnReturnRequest(const AAFwk::Want& want, const std::string& source,  const std::string& data,
             const std::string& extraData) override;
+        void RequestByJsonPath(const PluginComponentTemplate& pluginTemplate, const std::string& data);
     
     private:
         std::mutex mutex_;

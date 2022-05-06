@@ -62,16 +62,8 @@ int PluginComponentManager::Request(
         GetTemplatePathFromJsonFile(packagePathStr, name, jsonPath, jsonStr);
         pluginTemplate.SetSource(jsonStr);
         pluginTemplate.SetAbility(want.GetElement().GetBundleName() + "/" + want.GetElement().GetAbilityName());
-
-        std::lock_guard<std::mutex> lock(listener_->GetMutex());
-        for (auto iter = listener_->GetPluginComponentCallBack().begin();
-             iter != listener_->GetPluginComponentCallBack().end();) {
-            if (iter->second == CallBackType::RequestCallBack && iter->first != nullptr) {
-                iter->first->OnRequestCallBack(pluginTemplate, data, "{}");
-                listener_->GetPluginComponentCallBack().erase(iter++);
-            } else {
-                iter++;
-            }
+        if (listener_) {
+            listener_->RequestByJsonPath(pluginTemplate, data);
         }
         return 0;
     }
@@ -170,6 +162,20 @@ void PluginComponentManager::UIServiceListener::OnReturnRequest(
             }
             pluginTemplate.SetAbility(want.GetElement().GetBundleName() + "/" + want.GetElement().GetAbilityName());
             iter->first->OnRequestCallBack(pluginTemplate, data, extraData);
+            callbackVec_.erase(iter++);
+        } else {
+            iter++;
+        }
+    }
+}
+
+void PluginComponentManager::UIServiceListener::RequestByJsonPath(
+    const PluginComponentTemplate& pluginTemplate, const std::string& data)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto iter = callbackVec_.begin(); iter != callbackVec_.end();) {
+        if (iter->second == CallBackType::RequestCallBack && iter->first != nullptr) {
+            iter->first->OnRequestCallBack(pluginTemplate, data, "{}");
             callbackVec_.erase(iter++);
         } else {
             iter++;
