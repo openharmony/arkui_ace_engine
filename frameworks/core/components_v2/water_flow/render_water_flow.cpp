@@ -472,8 +472,10 @@ void RenderWaterFlow::InitialFlowProp()
     std::vector<double> cross;
     BuildFlow(cross);
     // Initialize the columnCount and rowCount, default is 1
-    crossCount_ = cross.size();
-    mainCount_ = 0;
+    crossCount_ = static_cast<int32_t>(cross.size());
+    if (crossCount_ < 0) {
+        return;
+    }
     UpdateAccessibilityAttr();
 
     if (!buildChildByIndex_) {
@@ -503,9 +505,8 @@ void RenderWaterFlow::InitialFlowProp()
     }
     startRankItemIndex_ = 0;
     currentItemIndex_ = 0;
-    bool vail = false;
-    SupplyItems(vail, mainCount_ > 0 ? mainCount_ - 1 : 0);
-    startIndex_ = mainCount_ > 0 ? mainCount_ - 1 : 0;
+    SupplyItems(false, mainCount_ > 0 ? mainCount_ - 1 : 0);
+    startIndex_ = (mainCount_ > 0) ? (mainCount_ - 1) : 0;
     if (NearZero(currentOffset_)) {
         needCalculateViewPort_ = true;
     }
@@ -526,7 +527,7 @@ double RenderWaterFlow::BuildLazyFlowLayout(int32_t index, double sizeNeed)
     }
     double size = 0.0;
     int32_t startIndex = index;
-    while (size < sizeNeed) {
+    while (ceil(size) < ceil(sizeNeed)) {
         bool vail = false;
         auto suppleSize = SupplyItems(vail, startIndex);
         if (NearZero(suppleSize)) {
@@ -732,7 +733,7 @@ void RenderWaterFlow::CaculateViewPortSceneOne()
         firstItemOffset_ = 0.0;
     }
     // Move up
-    while (currentOffset_ > 0) {
+    while (ceil(currentOffset_) > 0) {
         if (startIndex_ > 0) {
             currentOffset_ -= GetSize(flowCells_) + mainGap_;
             startIndex_--;
@@ -762,7 +763,7 @@ bool RenderWaterFlow::CaculateViewPortSceneTwo(bool& NeedContinue)
         firstItemOffset_ = 0.0;
     }
     // Move down
-    while (startIndex_ < mainCount_ && (currentOffset_ < 0 || needCalculateViewPort_)) {
+    while (startIndex_ < mainCount_ && (ceil(currentOffset_) < 0 || needCalculateViewPort_)) {
         currentOffset_ += GetSize(flowCells_) + mainGap_;
         startIndex_++;
     }
@@ -788,7 +789,7 @@ bool RenderWaterFlow::CaculateViewPortSceneTwo(bool& NeedContinue)
     blank = blank - firstItemOffset_;
     firstItemOffset_ = 0;
     // Move up
-    while (blank > 0) {
+    while (ceil(blank) > 0) {
         if (startIndex_ == 0 && startRankItemIndex_ > 0) {
             LoadForward();
         }
@@ -846,7 +847,7 @@ bool RenderWaterFlow::CheckMainFull(int32_t mainIndex)
         return false;
     }
 
-    if (mainItor->second.size() < crossCount_) {
+    if (crossCount_ < 0 || (mainItor->second.size() < static_cast<size_t>(crossCount_))) {
         return false;
     }
 
@@ -861,7 +862,7 @@ double RenderWaterFlow::SupplyItems(
     ACE_SCOPED_TRACE("SupplyItems %d", mainIndex);
     auto mainItor = flowMatrix_.find(mainIndex);
     if (mainItor != flowMatrix_.end()) {
-        if (mainItor->second.size() == crossCount_) {
+        if (crossCount_ < 0 || (mainItor->second.size() == static_cast<size_t>(crossCount_))) {
             needRank = false;
         }
     }
@@ -1070,7 +1071,7 @@ void RenderWaterFlow::ClearLayout(int32_t index)
     estimateHeight_ = 0.0;
     if (index > -1) {
         int32_t main = GetItemMainIndex(index);
-        int32_t rows = flowMatrix_.size();
+        size_t rows = flowMatrix_.size();
         DeleteItemsInMarix(rows, index);
         for (auto it = inCache_.begin(); it != inCache_.end();) {
             if (*it >= main) {
@@ -1169,7 +1170,7 @@ bool RenderWaterFlow::CheckEndShowItemPlace(int32_t index)
         if (items == flowMatrix_.end()) {
             return false;
         }
-        if (items->second.size() < crossCount_) {
+        if (crossCount_ < 0 || (items->second.size() < static_cast<size_t>(crossCount_))) {
             return true;
         }
     }
@@ -1752,7 +1753,7 @@ void RenderWaterFlow::OutPutMarix(int32_t rows, bool before)
     }
 }
 
-bool RenderWaterFlow::DeleteItemsInMarix(int32_t rows, int32_t itemIndex)
+bool RenderWaterFlow::DeleteItemsInMarix(size_t rows, int32_t itemIndex)
 {
     bool deleteMainBeDelete = true;
     int32_t main = -1;
@@ -1761,7 +1762,7 @@ bool RenderWaterFlow::DeleteItemsInMarix(int32_t rows, int32_t itemIndex)
         deleteMainBeDelete = false;
         return deleteMainBeDelete;
     }
-    for (int32_t i = 0; i < rows; i++) {
+    for (size_t i = 0; i < rows; i++) {
         auto iter5 = flowMatrix_.find(i);
         if (iter5 == flowMatrix_.end()) {
             continue;
