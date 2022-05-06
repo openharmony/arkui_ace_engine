@@ -26,6 +26,7 @@ struct RequestPluginInfo {
     std::string abilityName;
     std::string moduleName;
     std::string source;
+    std::string moduleResPath;
     int32_t dimension = -1;
     bool allowUpate = true;
     Dimension width;

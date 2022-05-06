@@ -56,6 +56,8 @@ private:
     std::string GetPackagePathByAbsolutePath(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const;
     void GetModuleNameByWant(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const;
     void RunPluginTask(const WeakPtr<PluginElement>& weak, const RefPtr<PluginComponent>& component);
+    std::string GerPackagePathByBms(
+        const WeakPtr<PluginElement>& weak, RequestPluginInfo& info, const std::vector<std::string>& strList) const;
 
 private:
     RefPtr<PluginSubContainer> pluginSubContainer_;

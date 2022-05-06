@@ -64,12 +64,18 @@ public:
         UIServiceListener() = default;
         ~UIServiceListener()
         {
+            std::lock_guard<std::mutex> lock(mutex_);
             callbackVec_.clear();
         };
 
         std::map<std::shared_ptr<PluginComponentCallBack>, CallBackType>& GetPluginComponentCallBack()
         {
             return callbackVec_;
+        }
+
+        std::mutex& GetMutex()
+        {
+            return mutex_;
         }
 
         void ResgisterListener(const std::shared_ptr<PluginComponentCallBack>& callback, CallBackType callBackType);

@@ -56,6 +56,14 @@ struct AceFromJSParam {
     AppExecFwk::PacMap paramList = {};
 };
 
+struct ACERequestCallbackData {
+    std::string sourceName;
+    std::string abilityName;
+    std::string data;
+    std::string extraData;
+    std::string name;
+};
+
 struct ACEAsyncJSCallbackInfo {
     ACECallbackInfo cbInfo = {};
     Ability* ability = nullptr;
@@ -66,6 +74,9 @@ struct ACEAsyncJSCallbackInfo {
     napi_value result = nullptr;
     int error_code = 0;
     AAFwk::Want wantStage = {};
+    napi_value onRequestData = nullptr;
+    bool onRequestCallbackOK = false;
+    ACERequestCallbackData requestCallbackData;
 };
 
 struct ACEAsyncParamEx {
