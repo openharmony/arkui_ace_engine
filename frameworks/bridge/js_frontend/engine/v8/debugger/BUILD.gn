@@ -46,8 +46,6 @@ ohos_shared_library("v8_debugger") {
     external_deps = [ "hilog:libhilog" ]
   }
 
-  deps += [ "//third_party/boost:boost" ]
-
   include_dirs = [
     "$ace_root",
     "$ace_root/frameworks",
