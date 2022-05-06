@@ -128,7 +128,7 @@ if (enable_dump_drawcmd) {
 }
 
 if (!defined(global_parts_info) ||
-    defined(global_parts_info.account_os_account_standard)) {
+    defined(global_parts_info.account_os_account)) {
   os_account_exists = true
   ace_common_defines += [ "OS_ACCOUNT_EXISTS" ]
 } else {
