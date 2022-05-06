@@ -1786,6 +1786,7 @@ void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, cons
     CHECK_RUN_ON(JS);
     if (isDestroy) {
         XComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
+        XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(componentId);
         XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(componentId);
         return;
     }
@@ -1829,8 +1830,15 @@ void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, cons
     renderContextXComp_.Reset(isolateXComp_, renderContext);
     auto objContext = V8Object(renderContext);
     JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
-    auto getJSValCallback = [obj](JSRef<JSVal> &jsVal) {
+    RefPtr<JSXComponentController> controller = OHOS::Ace::Framework::XComponentClient::GetInstance().
+        GetControllerFromJSXComponentControllersMap(componentId);
+    auto weakController = AceType::WeakClaim(AceType::RawPtr(controller));
+    auto getJSValCallback = [obj, weakController](JSRef<JSVal>& jsVal) {
         jsVal = obj;
+        auto jsXComponentController = weakController.Upgrade();
+        if (jsXComponentController) {
+            jsXComponentController->SetXComponentContext(obj);
+        }
         return true;
     };
     XComponentClient::GetInstance().RegisterJSValCallback(getJSValCallback);

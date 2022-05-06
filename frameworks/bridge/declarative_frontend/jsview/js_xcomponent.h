@@ -70,6 +70,15 @@ public:
         component = AceType::DynamicCast<XComponentComponent>(xcomponentsMap_[xcomponentId]);
     }
 
+    RefPtr<JSXComponentController> GetControllerFromJSXComponentControllersMap(const std::string& xcomponentId)
+    {
+        auto iter = jsXComponentControllersMap_.find(xcomponentId);
+        if (iter == jsXComponentControllersMap_.end()) {
+            return nullptr;
+        }
+        return iter->second;
+    }
+
     void GetNativeXComponentFromXcomponentsMap(const std::string& xcomponentId,
         RefPtr<OHOS::Ace::NativeXComponentImpl>& nativeXComponentImpl, OH_NativeXComponent*& nativeXComponent)
     {
@@ -93,6 +102,12 @@ public:
         }
     }
 
+    void AddControllerToJSXComponentControllersMap(const std::string& xcomponentId,
+        JSXComponentController*& controller)
+    {
+        jsXComponentControllersMap_[xcomponentId] = controller;
+    }
+
     void DeleteFromXcomponentsMapById(const std::string& xcomponentId)
     {
         auto it = xcomponentsMap_.find(xcomponentId);
@@ -100,6 +115,11 @@ public:
             return;
         }
         xcomponentsMap_.erase(it);
+    }
+
+    void DeleteControllerFromJSXComponentControllersMap(const std::string& xcomponentId)
+    {
+        jsXComponentControllersMap_.erase(xcomponentId);
     }
 
     void DeleteFromNativeXcomponentsMapById(const std::string& xcomponentId)
@@ -131,6 +151,7 @@ private:
     GetCallback getCallback_ = nullptr;
     GetJSValCallback getJSValCallback_ = nullptr;
     std::unordered_map<std::string, RefPtr<Component>> xcomponentsMap_;
+    std::unordered_map<std::string, RefPtr<JSXComponentController>> jsXComponentControllersMap_;
     std::unordered_map<std::string, std::pair<RefPtr<OHOS::Ace::NativeXComponentImpl>, OH_NativeXComponent*>>
         nativeXcomponentsMap_;
 };
@@ -144,7 +165,6 @@ public:
 
 private:
     static EventMarker GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys);
-    static RefPtr<JSXComponentController> jsXComponentController_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_XCOMPONENT_H
