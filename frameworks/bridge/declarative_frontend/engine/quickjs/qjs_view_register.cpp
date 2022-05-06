@@ -968,9 +968,10 @@ void JsRegisterViews(BindingTarget globalObj)
     JSActionSheet::JSBind(globalObj);
     JSAlertDialog::JSBind(globalObj);
     JSContextMenu::JSBind(globalObj);
+#ifdef ABILITY_COMPONENT_SUPPORTED
     JSAbilityComponent::JSBind(globalObj);
     JSAbilityComponentController::JSBind(globalObj);
-
+#endif
     JSCustomDialogController::JSBind(globalObj);
     JSShareData::JSBind(globalObj);
 

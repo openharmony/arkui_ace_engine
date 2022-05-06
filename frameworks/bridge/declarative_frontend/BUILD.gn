@@ -122,8 +122,6 @@ template("declarative_js_engine") {
       "jsview/action_sheet/js_action_sheet.cpp",
       "jsview/dialog/js_alert_dialog.cpp",
       "jsview/dialog/js_custom_dialog_controller.cpp",
-      "jsview/js_ability_component.cpp",
-      "jsview/js_ability_component_controller.cpp",
       "jsview/js_animator.cpp",
       "jsview/js_badge.cpp",
       "jsview/js_blank.cpp",
@@ -247,6 +245,14 @@ template("declarative_js_engine") {
       sources += [
         "jsview/js_xcomponent.cpp",
         "jsview/js_xcomponent_controller.cpp",
+      ]
+    }
+
+    if (defined(config.enable_ability_component) &&
+        config.enable_ability_component) {
+      sources += [
+        "jsview/js_ability_component.cpp",
+        "jsview/js_ability_component_controller.cpp",
       ]
     }
 
