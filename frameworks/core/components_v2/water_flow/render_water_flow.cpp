@@ -466,7 +466,6 @@ void RenderWaterFlow::InitialFlowProp()
     if (!GetFlowSize() && !updateFlag_) {
         return;
     }
-    ACE_SCOPED_TRACE("InitialFlowProp");
     OnDataSourceUpdated(-1);
     CallGap();
     std::vector<double> cross;
@@ -505,7 +504,8 @@ void RenderWaterFlow::InitialFlowProp()
     }
     startRankItemIndex_ = 0;
     currentItemIndex_ = 0;
-    SupplyItems(false, mainCount_ > 0 ? mainCount_ - 1 : 0);
+    bool vail = false;
+    SupplyItems(vail, ((mainCount_ > 0) ? (mainCount_ - 1) : 0));
     startIndex_ = (mainCount_ > 0) ? (mainCount_ - 1) : 0;
     if (NearZero(currentOffset_)) {
         needCalculateViewPort_ = true;
