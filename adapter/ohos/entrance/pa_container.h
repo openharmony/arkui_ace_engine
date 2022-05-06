@@ -132,6 +132,7 @@ public:
     static bool OnCreate(int32_t instanceId, const OHOS::AAFwk::Want& want);
     static bool OnDelete(int32_t instanceId, int64_t formId);
     static bool OnTriggerEvent(int32_t instanceId, int64_t formId, const std::string& message);
+    static int32_t OnAcquireFormState(int32_t instanceId, const OHOS::AAFwk::Want& want);
     static bool OnUpdate(int32_t instanceId, int64_t formId);
     static bool OnCastTemptoNormal(int32_t instanceId, int64_t formId);
     static bool OnVisibilityChanged(int32_t instanceId, const std::map<int64_t, int32_t>& formEventsMap);

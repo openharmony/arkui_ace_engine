@@ -68,6 +68,7 @@ public:
 
     void OnActionEvent(const std::string& action);
 
+    std::string WrapAction(const std::string& action);
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJsInfo);
     void ProcessFormUninstall(const int64_t formId);
