@@ -507,6 +507,61 @@ void UIContentImpl::Destroy()
     Platform::AceContainer::DestroyContainer(instanceId_);
 }
 
+uint32_t UIContentImpl::GetBackgroundColor()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("GetBackgroundColor failed: container is null. return 0x000000");
+        return 0x000000;
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("GetBackgroundColor failed: taskExecutor is null.");
+        return 0x000000;
+    }
+    ContainerScope scope(instanceId_);
+    uint32_t bgColor = 0x000000;
+    taskExecutor->PostSyncTask([&bgColor, container]() {
+            if (!container) {
+                LOGE("Post sync task GetBackgroundColor failed: container is null. return 0x000000");
+                return;
+            }
+            auto pipelineContext = container->GetPipelineContext();
+            if (!pipelineContext) {
+                LOGE("Post sync task GetBackgroundColor failed: pipeline is null. return 0x000000");
+                return;
+            }
+            bgColor = pipelineContext->GetAppBgColor().GetValue();
+        }, TaskExecutor::TaskType::UI);
+
+    LOGI("UIContentImpl::GetBackgroundColor, value is %{public}u", bgColor);
+    return bgColor;
+}
+
+void UIContentImpl::SetBackgroundColor(uint32_t color)
+{
+    LOGI("UIContentImpl::SetBackgroundColor color is %{public}u", color);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("SetBackgroundColor failed: container is null.");
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("SetBackgroundColor failed: taskExecutor is null.");
+        return;
+    }
+    taskExecutor->PostSyncTask([container, bgColor = color]() {
+        auto pipelineContext = container->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGE("SetBackgroundColor failed, pipeline context is null.");
+            return;
+        }
+        pipelineContext->SetAppBgColor(Color(bgColor));
+    }, TaskExecutor::TaskType::UI);
+}
+
 bool UIContentImpl::ProcessBackPressed()
 {
     LOGI("UIContent ProcessBackPressed");

@@ -98,7 +98,10 @@ RefPtr<Component> ContainerModalComponent::BuildContent()
     Border contentBorder;
     contentBorder.SetBorderRadius(Radius(CONTAINER_INNER_RADIUS));
     auto contentDecoration = AceType::MakeRefPtr<Decoration>();
-    contentDecoration->SetBackgroundColor(CONTENT_BACKGROUND_COLOR);
+    auto context = context_.Upgrade();
+    if (context) {
+        contentDecoration->SetBackgroundColor(context->GetAppBgColor());
+    }
     contentDecoration->SetBorder(contentBorder);
     contentBox->SetBackDecoration(contentDecoration);
 

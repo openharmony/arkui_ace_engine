@@ -144,7 +144,9 @@ void ContainerModalElement::ShowTitle(bool isShow)
         LOGE("ContainerModalElement showTitle failed, column  element is null or children size error!");
         return;
     }
-
+    if (!contentBox_) {
+        contentBox_ = AceType::DynamicCast<BoxElement>(clip->GetFirstChild());
+    }
     // full screen need to hide border.
     auto contentRenderBox = AceType::DynamicCast<RenderBox>(column->GetLastChild()->GetRenderNode());
     if (contentRenderBox) {
@@ -387,4 +389,19 @@ void ContainerModalElement::BlurWindow(bool isBlur)
     }
 }
 
+void ContainerModalElement::SetAppBgColor(const Color& color)
+{
+    if (!contentBox_) {
+        LOGE("SetAppBgColor failed, contentBox_ is nullptr.");
+        return;
+    }
+    auto renderContentBox = AceType::DynamicCast<RenderBox>(contentBox_->GetRenderNode());
+    if (!renderContentBox) {
+        LOGE("SetAppBgColor failed, renderContentBox is nullptr.");
+        return;
+    }
+    auto backDecoration = renderContentBox->GetBackDecoration();
+    backDecoration->SetBackgroundColor(color);
+    renderContentBox->SetBackDecoration(backDecoration);
+}
 } // namespace OHOS::Ace

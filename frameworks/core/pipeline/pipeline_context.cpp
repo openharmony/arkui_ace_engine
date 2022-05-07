@@ -820,6 +820,10 @@ RefPtr<Element> PipelineContext::SetupRootElement()
     }
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
+    auto renderRoot = AceType::DynamicCast<RenderRoot>(rootRenderNode);
+    if (renderRoot) {
+        renderRoot->SetDefaultBgColor(windowModal_ == WindowModal::CONTAINER_MODAL);
+    }
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
         LOGI("rosen ui director call set root.");
@@ -2102,28 +2106,38 @@ void PipelineContext::SetRootRect(double width, double height, double offset) co
     }
 }
 
-void PipelineContext::SetRootBgColor(const Color& color)
+void PipelineContext::SetAppBgColor(const Color& color)
 {
-    rootBgColor_ = color;
+    LOGI("Set bgColor %{public}u", color.GetValue());
+    appBgColor_ = color;
     if (!themeManager_) {
-        LOGE("PipelineContext::SetRootBgColor:themeManager_ is nullptr!");
+        LOGW("themeManager_ is nullptr!");
         return;
     }
     auto appTheme = themeManager_->GetTheme<AppTheme>();
     if (!appTheme) {
-        LOGE("GetTheme failed!");
+        LOGW("appTheme is nullptr!");
+        return;
+    }
+    appTheme->SetBackgroundColor(appBgColor_);
+    if (!rootElement_) {
+        LOGW("rootElement_ is nullptr!");
+        return;
+    }
+    auto renderRoot = DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
+    if (!renderRoot) {
+        LOGW("renderRoot is nullptr!");
         return;
     }
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
-        rootBgColor_ = Color::TRANSPARENT;
-    }
-    appTheme->SetBackgroundColor(rootBgColor_);
-    if (rootElement_) {
-        auto renderRoot = DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
-        if (renderRoot) {
-            renderRoot->SetBgColor(rootBgColor_);
+        auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
+        if (containerModal) {
+            containerModal->SetAppBgColor(appBgColor_);
+            renderRoot->SetBgColor(Color::TRANSPARENT);
+            return;
         }
     }
+    renderRoot->SetBgColor(appBgColor_);
 }
 
 void PipelineContext::Finish(bool autoFinish) const
@@ -2626,7 +2640,7 @@ void PipelineContext::RefreshRootBgColor() const
     }
     const auto& render = AceType::DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
     if (render) {
-        render->SetDefaultBgColor();
+        render->SetDefaultBgColor(windowModal_ == WindowModal::CONTAINER_MODAL);
     }
 }
 

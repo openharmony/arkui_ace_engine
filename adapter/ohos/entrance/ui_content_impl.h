@@ -61,6 +61,10 @@ public:
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode) override;
 
+    // Window color
+    uint32_t GetBackgroundColor() override;
+    void SetBackgroundColor(uint32_t color) override;
+
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
 private:

@@ -757,7 +757,7 @@ panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::EcmaVM* vm, panda::
     }
     auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext) {
-        pipelineContext->SetRootBgColor(Color::FromString(backgroundColorStr));
+        pipelineContext->SetAppBgColor(Color::FromString(backgroundColorStr));
     }
     return panda::JSValueRef::Undefined(vm);
 }
