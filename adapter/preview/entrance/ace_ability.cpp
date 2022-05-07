@@ -25,9 +25,7 @@
 #include "adapter/preview/inspector/inspector_client.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
-#include "frameworks/core/components/common/painter/flutter_svg_painter.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
-#include "third_party/skia/src/ports/SkFontMgr_config_parser.h"
 #include "adapter/preview/entrance/editing/text_input_client_mgr.h"
 #include "adapter/preview/entrance/clipboard/clipboard_impl.h"
 #include "adapter/preview/entrance/clipboard/clipboard_proxy_impl.h"
@@ -87,13 +85,6 @@ void SetPhysicalDeviceFonts(bool& physicalDeviceFontsEnabled)
         LOGI("Use fonts installed on pc.");
     }
     SkFontMgr::setPhysicalDeviceFonts(physicalDeviceFontsEnabled);
-}
-
-void SetFontBasePath(std::string& basePath)
-{
-    LOGI("Set basic path of physical device font");
-    basePath = basePath.append(DELIMITER);
-    SkFontMgr_Config_Parser::setFontBasePathCallback(basePath);
 }
 
 std::string GetCustomAssetPath(std::string assetPath)
@@ -163,19 +154,8 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
     }
 
     AceApplicationInfo::GetInstance().SetLocale(runArgs.language, runArgs.region, runArgs.script, "");
-
     // To check if use physical device fonts. Use Pc font by default.
     SetPhysicalDeviceFonts(runArgs.physicalDeviceFontsEnabled);
-    if (runArgs.physicalDeviceFontsEnabled) {
-        SetFontBasePath(runArgs.fontBasePath);
-    }
-
-    // Initialize FlutterSvgPainter static member variable fontTypeChinese_ and fontTypeNormal_ here
-    // to make sure the font base path is already passed to SkFontMgr_Config_Parser, or previewer will crash.
-    std::string fontTypeChinesePath = runArgs.fontBasePath + "HwChinese-Medium.ttf";
-    std::string fontTypeNormalPath = runArgs.fontBasePath + "DroidSans.ttf";
-    FlutterSvgPainter::fontTypeChinese_ = SkTypeface::MakeFromFile(fontTypeChinesePath.c_str());
-    FlutterSvgPainter::fontTypeNormal_ = SkTypeface::MakeFromFile(fontTypeNormalPath.c_str());
 
     auto controller = FlutterDesktopCreateWindow(
         runArgs.deviceWidth, runArgs.deviceHeight, runArgs.windowTitle.c_str(), runArgs.onRender);

@@ -90,6 +90,16 @@ if (is_standard_system) {
     }
   }
 
+  ohos_copy("copy_ohos_fonts") {
+    sources = [
+      "//foundation/arkui/ace_engine/adapter/preview/sdk/fontconfig.json",
+      "//utils/resources/fonts",
+    ]
+    outputs = [ target_out_dir + "/previewer/common/bin/{{source_file_part}}" ]
+    module_source_dir = target_out_dir + "/previewer/common/bin/"
+    module_install_name = ""
+  }
+
   ohos_copy("copy_napi_shared_library") {
     shared_library_path_napi =
         get_label_info("//foundation/arkui/napi:ace_napi", "root_out_dir")
