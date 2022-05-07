@@ -77,6 +77,8 @@ public:
     {
         JSClass<JSWebCookie>::Declare("WebCookie");
         JSClass<JSWebCookie>::CustomMethod("setCookie", &JSWebCookie::SetCookie);
+        JSClass<JSWebCookie>::CustomMethod("getCookie", &JSWebCookie::GetCookie);
+        JSClass<JSWebCookie>::CustomMethod("deleteEntireCookie", &JSWebCookie::DeleteEntirelyCookie);
         JSClass<JSWebCookie>::CustomMethod("saveCookieSync", &JSWebCookie::SaveCookieSync);
         JSClass<JSWebCookie>::Bind(globalObj, JSWebCookie::Constructor, JSWebCookie::Destructor);
     }
@@ -106,6 +108,29 @@ public:
         auto jsVal = JSVal(ToJSValue(result));
         auto returnValue = JSRef<JSVal>::Make(jsVal);
         args.SetReturnValue(returnValue);
+    }
+
+    void GetCookie(const JSCallbackInfo& args)
+    {
+        if (!manager_) {
+            return;
+        }
+        std::string url;
+        if (args[0]->IsString()) {
+            url = args[0]->ToString();
+        }
+        std::string result = manager_->GetCookie(url);
+        auto jsVal = JSVal(ToJSValue(result));
+        auto returnValue = JSRef<JSVal>::Make(jsVal);
+        args.SetReturnValue(returnValue);
+    }
+
+    void DeleteEntirelyCookie(const JSCallbackInfo& args)
+    {
+        if (!manager_) {
+            return;
+        }
+        manager_->DeleteEntirelyCookie();
     }
 
     void SaveCookieSync(const JSCallbackInfo& args)

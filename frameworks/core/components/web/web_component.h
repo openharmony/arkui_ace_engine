@@ -58,6 +58,8 @@ class WebCookie : public virtual AceType {
 
 public:
     using SetCookieImpl = std::function<bool(const std::string, const std::string)>;
+    using GetCookieImpl = std::function<std::string(const std::string)>;
+    using DeleteEntirelyCookieImpl = std::function<void()>;
     using SaveCookieSyncImpl = std::function<bool()>;
     bool SetCookie(const std::string url, const std::string value)
     {
@@ -65,6 +67,21 @@ public:
             return setCookieImpl_(url, value);
         }
         return false;
+    }
+
+    std::string GetCookie(const std::string url)
+    {
+        if (getCookieImpl_) {
+            return getCookieImpl_(url);
+        }
+        return "";
+    }
+
+    void DeleteEntirelyCookie()
+    {
+        if (deleteEntirelyCookieImpl_) {
+            deleteEntirelyCookieImpl_();
+        }
     }
 
     bool SaveCookieSync()
@@ -80,6 +97,16 @@ public:
         setCookieImpl_ = setCookieImpl;
     }
 
+    void SetGetCookieImpl(GetCookieImpl && getCookieImpl)
+    {
+        getCookieImpl_ = getCookieImpl;
+    }
+
+    void SetDeleteEntirelyCookieImpl(DeleteEntirelyCookieImpl && deleteEntirelyCookieImpl)
+    {
+        deleteEntirelyCookieImpl_ = deleteEntirelyCookieImpl;
+    }
+
     void SetSaveCookieSyncImpl(SaveCookieSyncImpl && saveCookieSyncImpl)
     {
         saveCookieSyncImpl_ = saveCookieSyncImpl;
@@ -87,6 +114,8 @@ public:
 
 private:
     SetCookieImpl setCookieImpl_;
+    GetCookieImpl getCookieImpl_;
+    DeleteEntirelyCookieImpl deleteEntirelyCookieImpl_;
     SaveCookieSyncImpl saveCookieSyncImpl_;
 };
 
@@ -331,6 +360,8 @@ public:
         cookieManager_ = new WebCookie();
         cookieManager_->SetSaveCookieSyncImpl(std::move(saveCookieSyncImpl_));
         cookieManager_->SetSetCookieImpl(std::move(setCookieImpl_));
+        cookieManager_->SetGetCookieImpl(std::move(getCookieImpl_));
+        cookieManager_->SetDeleteEntirelyCookieImpl(std::move(deleteEntirelyCookieImpl_));
         return cookieManager_;
     }
 
@@ -345,6 +376,31 @@ public:
     void SetSetCookieImpl(SetCookieImpl && setCookieImpl)
     {
         setCookieImpl_ = setCookieImpl;
+    }
+
+    using GetCookieImpl = std::function<std::string(const std::string)>;
+    std::string GetCookie(const std::string url)
+    {
+        if (getCookieImpl_) {
+            return getCookieImpl_(url);
+        }
+        return "";
+    }
+    void SetGetCookieImpl(GetCookieImpl && getCookieImpl)
+    {
+        getCookieImpl_ = getCookieImpl;
+    }
+
+    using DeleteEntirelyCookieImpl = std::function<void()>;
+    void DeleteEntirelyCookie()
+    {
+        if (deleteEntirelyCookieImpl_) {
+            deleteEntirelyCookieImpl_();
+        }
+    }
+    void SetDeleteEntirelyCookieImpl(DeleteEntirelyCookieImpl && deleteEntirelyCookieImpl)
+    {
+        deleteEntirelyCookieImpl_ = deleteEntirelyCookieImpl;
     }
 
     using SaveCookieSyncImpl = std::function<bool()>;
@@ -447,6 +503,8 @@ private:
     GetHitTestResultImpl getHitTestResultImpl_;
     SaveCookieSyncImpl saveCookieSyncImpl_;
     SetCookieImpl setCookieImpl_;
+    GetCookieImpl getCookieImpl_;
+    DeleteEntirelyCookieImpl deleteEntirelyCookieImpl_;
     AddJavascriptInterfaceImpl addJavascriptInterfaceImpl_;
     RemoveJavascriptInterfaceImpl removeJavascriptInterfaceImpl_;
     WebViewJavaScriptResultCallBackImpl webViewJavaScriptResultCallBackImpl_;
