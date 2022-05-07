@@ -27,7 +27,7 @@ config("ace_config") {
   if (is_standard_system && !use_mingw_win && !use_mac) {
     include_dirs += [
       "//base/global/resource_management/frameworks/resmgr/include",
-      "//base/global/resource_management/interfaces/innerkits/include",
+      "//base/global/resource_management/interfaces/inner_api/include",
       "$ace_root/adapter/ohos/services/uiservice/include",
     ]
   }
@@ -77,7 +77,7 @@ config("ace_test_config") {
   if (is_standard_system && !use_mingw_win && !use_mac) {
     include_dirs += [
       "//base/global/resource_management/frameworks/resmgr/include",
-      "//base/global/resource_management/interfaces/innerkits/include",
+      "//base/global/resource_management/interfaces/inner_api/include",
     ]
 
     cflags_cc += [
