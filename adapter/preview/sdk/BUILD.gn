@@ -101,6 +101,15 @@ if (is_standard_system) {
       ark_js_shared_library =
           get_label_info("//ark/js_runtime:libark_jsruntime", "root_out_dir") +
           "/ark/ark_js_runtime"
+      deps = [
+        "$ace_napi:ace_napi",
+        "$ace_napi:ace_napi_ark",
+        "//ark/js_runtime:libark_jsruntime",
+        "//ark/runtime_core/libpandabase:libarkbase",
+        "//ark/runtime_core/libpandafile:libarkfile",
+        "//ark/runtime_core/libziparchive:libarkziparchive",
+        "//third_party/libuv:uv",
+      ]
       if (use_mingw_win) {
         sources = [
           "$ark_core_shared_library/libarkbase.dll",
@@ -112,14 +121,16 @@ if (is_standard_system) {
           "$shared_library_path_uv/arkui/napi/libuv.dll",
           "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat",
         ]
-        deps = [
-          "$ace_napi:ace_napi",
-          "$ace_napi:ace_napi_ark",
-          "//ark/js_runtime:libark_jsruntime",
-          "//ark/runtime_core/libpandabase:libarkbase",
-          "//ark/runtime_core/libpandafile:libarkfile",
-          "//ark/runtime_core/libziparchive:libarkziparchive",
-          "//third_party/libuv:uv",
+      } else {
+        sources = [
+          "$ark_core_shared_library/libarkbase.dylib",
+          "$ark_core_shared_library/libarkfile.dylib",
+          "$ark_core_shared_library/libarkziparchive.dylib",
+          "$ark_js_shared_library/libark_jsruntime.dylib",
+          "$shared_library_path_napi/arkui/napi/libace_napi.dylib",
+          "$shared_library_path_napi/arkui/napi/libace_napi_ark.dylib",
+          "$shared_library_path_uv/arkui/napi/libuv.dylib",
+          "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat",
         ]
       }
     } else {

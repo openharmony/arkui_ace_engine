@@ -38,7 +38,7 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode, 
     LOGI("Ark: create jsvm");
     RuntimeOption option;
     option.SetGcType(RuntimeOption::GC_TYPE::GEN_GC);
-#ifndef WINDOWS_PLATFORM
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     option.SetArkProperties(SystemProperties::GetArkProperties());
     option.SetAsmInterOption(SystemProperties::GetAsmInterOption());
 #endif
@@ -67,7 +67,7 @@ void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
         if (!usingExistVM_) {
-#ifndef WINDOWS_PLATFORM
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
             JSNApi::StopDebugger(vm_);
 #endif
             JSNApi::DestroyJSVM(vm_);
@@ -103,7 +103,7 @@ bool ArkJSRuntime::ExecuteJsBin(const std::string &fileName)
 {
     JSExecutionScope executionScope(vm_);
     if (!libPath_.empty()) {
-#ifndef WINDOWS_PLATFORM
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_);
 #endif
     }

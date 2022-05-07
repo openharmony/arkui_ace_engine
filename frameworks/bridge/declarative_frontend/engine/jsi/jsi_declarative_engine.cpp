@@ -804,9 +804,11 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
             LOGE("instance is nullptr");
             return;
         }
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         ConnectServerManager::Get().AddInstance(gettid());
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
         panda::JSNApi::StartDebugger(libraryPath.c_str(), vm, debugMode, gettid());
+#endif
         instance->InitConsoleModule(arkNativeEngine);
 
         std::vector<uint8_t> buffer((uint8_t*)_binary_jsEnumStyle_abc_start, (uint8_t*)_binary_jsEnumStyle_abc_end);
@@ -818,6 +820,7 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
 
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
 void JsiDeclarativeEngine::RegisterOffWorkerFunc()
 {
     auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
@@ -842,6 +845,7 @@ void JsiDeclarativeEngine::RegisterOffWorkerFunc()
     };
     nativeEngine_->SetOffWorkerFunc(offWorkerFunc);
 }
+#endif
 
 void JsiDeclarativeEngine::RegisterAssetFunc()
 {
@@ -866,7 +870,9 @@ void JsiDeclarativeEngine::RegisterAssetFunc()
 void JsiDeclarativeEngine::RegisterWorker()
 {
     RegisterInitWorkerFunc();
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     RegisterOffWorkerFunc();
+#endif
     RegisterAssetFunc();
 }
 
