@@ -697,24 +697,32 @@ std::string GetDeviceInfo()
         char* tmpEnd = nullptr;
         infoList->Put("apiVersion", static_cast<int32_t>(
 	    std::strtol(SystemProperties::GetApiVersion().c_str(), &tmpEnd, SYSTEM_BASE)));
+    } else {
+        infoList->Put("apiVersion", "N/A");
     }
     tmp = SystemProperties::GetReleaseType();
     if (tmp != SystemProperties::INVALID_PARAM) {
         infoList->Put("releaseType", tmp.c_str());
+    } else {
+        infoList->Put("releaseType", "N/A");
     }
     tmp = SystemProperties::GetParamDeviceType();
     if (tmp != SystemProperties::INVALID_PARAM) {
         infoList->Put("deviceType", tmp.c_str());
+    } else {
+        infoList->Put("deviceType", "N/A");
     }
-
     tmp = SystemProperties::GetLanguage();
     if (tmp != SystemProperties::INVALID_PARAM) {
         infoList->Put("language", tmp.c_str());
+    } else {
+        infoList->Put("language", "N/A");
     }
-
     tmp = SystemProperties::GetRegion();
     if (tmp != SystemProperties::INVALID_PARAM) {
         infoList->Put("region", tmp.c_str());
+    } else {
+        infoList->Put("region", "N/A");
     }
 
     auto container = Container::Current();
