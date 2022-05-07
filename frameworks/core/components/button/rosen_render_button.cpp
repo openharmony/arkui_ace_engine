@@ -29,6 +29,8 @@
 namespace OHOS::Ace {
 namespace {
 
+constexpr double HALF = 0.5;
+
 // Definition for arc button of watch which intersected by circle and ellipse.
 constexpr Dimension CIRCLE_DIAMETER = 233.0_vp;
 constexpr Dimension OVAL_WIDTH = 260.0_vp;
@@ -467,9 +469,9 @@ void RosenRenderButton::PaintFocus(RenderContext& context, const Offset& offset)
         return;
     }
     Size canvasSize = GetLayoutSize();
-    double focusBorderHeight = canvasSize.Height() + NormalizeToPx(FOCUS_PADDING * 2);
-    double focusBorderWidth = canvasSize.Width() + NormalizeToPx(FOCUS_PADDING * 2);
-    double focusRadius = focusBorderHeight / 2;
+    double focusBorderHeight = canvasSize.Height() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
+    double focusBorderWidth = canvasSize.Width() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
+    double focusRadius = focusBorderHeight * HALF;
     if (!buttonComponent_) {
         return;
     }
@@ -484,7 +486,8 @@ void RosenRenderButton::PaintFocus(RenderContext& context, const Offset& offset)
     paint.setAntiAlias(true);
     SkRRect rRect;
     rRect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
-    rRect.offset(offset.GetX() - NormalizeToPx(FOCUS_PADDING), offset.GetY() - NormalizeToPx(FOCUS_PADDING));
+    rRect.offset(offset.GetX() - NormalizeToPx(FOCUS_PADDING  + FOCUS_BORDER_WIDTH * HALF),
+        offset.GetY() - NormalizeToPx(FOCUS_PADDING  + FOCUS_BORDER_WIDTH * HALF));
     canvas->drawRRect(rRect, paint);
 }
 

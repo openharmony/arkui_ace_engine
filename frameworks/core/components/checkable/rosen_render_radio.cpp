@@ -22,6 +22,13 @@
 
 namespace OHOS::Ace {
 
+constexpr double HALF = 0.5;
+constexpr Dimension FOCUS_PADDING = 2.0_vp;
+constexpr Dimension FOCUS_BORDER_WIDTH = 2.0_vp;
+constexpr uint32_t FOCUS_BORDER_COLOR = 0xFF0A59F7;
+constexpr uint32_t PRESS_COLOR = 0x19000000;
+constexpr uint32_t HOVER_COLOR = 0x0C000000;
+
 void RosenRenderRadio::Paint(RenderContext& context, const Offset& offset)
 {
     auto paintOffset = offset + paintPosition_;
@@ -30,14 +37,22 @@ void RosenRenderRadio::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint canvas is null");
         return;
     }
-#ifdef OHOS_PLATFORM
-    auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
-    recordingCanvas->MultiplyAlpha(ConfigureOpacity(disabled_));
-#endif
     SkPaint paint;
     paint.setAntiAlias(true);
-    if (IsPhone() && onFocus_) {
-        RequestFocusBorder(paintOffset, drawSize_, drawSize_.Width() / 2.0);
+    if (!isDeclarative_) {
+        if (IsPhone() && onFocus_) {
+            RequestFocusBorder(paintOffset, drawSize_, drawSize_.Width() / 2.0);
+        }
+    } else {
+        if ((IsPhone() || IsTablet()) && onFocus_) {
+            DrawFocusBorder(context, paintOffset);
+        }
+        if ((IsPhone() || IsTablet()) && isTouch_) {
+            DrawTouchBoard(offset, context);
+        }
+        if ((IsPhone() || IsTablet()) && isHover_) {
+            DrawHoverBoard(offset, context);
+        }
     }
     double centerX = outCircleRadius_ + paintOffset.GetX();
     double centerY = outCircleRadius_ + paintOffset.GetY();
@@ -47,6 +62,9 @@ void RosenRenderRadio::Paint(RenderContext& context, const Offset& offset)
             // draw stroke border
             paint.setAntiAlias(true);
             paint.setColor(activeColor_);
+            if (disabled_) {
+                paint.setColor(Color(activeColor_).BlendOpacity(ConfigureOpacity(disabled_)).GetValue());
+            }
             canvas->drawCircle(centerX, centerY, outCircleRadius_ * totalScale_, paint);
 
             // draw shadow
@@ -67,6 +85,9 @@ void RosenRenderRadio::Paint(RenderContext& context, const Offset& offset)
 
             // draw border with unselected color
             paint.setColor(inactiveColor_);
+            if (disabled_) {
+                paint.setColor(Color(inactiveColor_).BlendOpacity(ConfigureOpacity(disabled_)).GetValue());
+            }
             SetStrokeWidth(borderWidth, paint);
             canvas->drawCircle(centerX, centerY, outCircleRadius_ - borderWidth / 2.0, paint);
             break;
@@ -84,6 +105,52 @@ void RosenRenderRadio::Paint(RenderContext& context, const Offset& offset)
             LOGE("unknown ui status");
             break;
     }
+}
+
+void RosenRenderRadio::DrawFocusBorder(RenderContext& context, const Offset& offset)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        return;
+    }
+    double focusBorderWidth = drawSize_.Width() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
+    double focusBorderHeight = drawSize_.Height() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
+    double focusRadius = focusBorderHeight * HALF;
+    SkPaint paint;
+    paint.setColor(FOCUS_BORDER_COLOR);
+    paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setAntiAlias(true);
+    SkRRect rRect;
+    rRect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
+    rRect.offset(offset.GetX() - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF),
+        offset.GetY() - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
+    canvas->drawRRect(rRect, paint);
+}
+
+void RosenRenderRadio::DrawTouchBoard(const Offset& offset, RenderContext& context)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        return;
+    }
+    double dipScale = 1.0;
+    auto pipelineContext = GetContext().Upgrade();
+    if (pipelineContext) {
+        dipScale = pipelineContext->GetDipScale();
+    }
+    RosenUniversalPainter::DrawRRectBackground(canvas, RRect::MakeRRect(Rect(offset.GetX(), offset.GetY(),
+        width_, height_), Radius(height_ * HALF)), PRESS_COLOR, dipScale);
+}
+
+void RosenRenderRadio::DrawHoverBoard(const Offset& offset, RenderContext& context)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        return;
+    }
+    Size hoverSize = Size(width_, height_);
+    RosenUniversalPainter::DrawHoverBackground(canvas, Rect(offset, hoverSize), HOVER_COLOR, height_ * HALF);
 }
 
 } // namespace OHOS::Ace

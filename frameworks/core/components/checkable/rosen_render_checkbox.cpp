@@ -34,13 +34,13 @@ constexpr float CHECK_MARK_MIDDLE_X_POSITION = 0.44f;
 constexpr float CHECK_MARK_MIDDLE_Y_POSITION = 0.68f;
 constexpr float CHECK_MARK_END_X_POSITION = 0.76f;
 constexpr float CHECK_MARK_END_Y_POSITION = 0.33f;
-constexpr float CHECK_MARK_PART_X_POSITION = 0.25f;
-constexpr float CHECK_MARK_PART_Y_POSITION = 0.25f;
+constexpr float CHECK_MARK_PART_START_X_POSITION = 0.20f;
+constexpr float CHECK_MARK_PART_END_Y_POSITION = 0.80f;
+constexpr float CHECK_MARK_PART_Y_POSITION = 0.50f;
 constexpr double CHECK_MARK_LEFT_ANIMATION_PERCENT = 0.45;
 constexpr double CHECK_MARK_RIGHT_ANIMATION_PERCENT = 0.55;
 constexpr double DEFAULT_MAX_CHECKBOX_SHAPE_SCALE = 1.0;
 constexpr double DEFAULT_MIN_CHECKBOX_SHAPE_SCALE = 0.0;
-constexpr double HALF_THE_WIDTH = 0.5;
 constexpr Dimension FOCUS_PADDING = 2.0_vp;
 constexpr Dimension FOCUS_BORDER_WIDTH = 2.0_vp;
 constexpr uint32_t FOCUS_BORDER_COLOR = 0xFF0A59F7;
@@ -58,10 +58,6 @@ void RosenRenderCheckbox::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint canvas is null");
         return;
     }
-#ifdef OHOS_PLATFORM
-    auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
-    recordingCanvas->MultiplyAlpha(ConfigureOpacity(disabled_));
-#endif
     auto paintOffset = offset + paintPosition_;
     if (isDeclarative_) {
         if ((IsPhone() || IsTablet()) && onFocus_) {
@@ -116,8 +112,8 @@ void RosenRenderCheckbox::SetUIStatus(SkCanvas* canvas,
             break;
         }
         case UIStatus::PART: {
-            DrawUnselected(canvas, paintOffset, inactiveColor_, strokePaint);
-            DrawActiveSquare(canvas, paintOffset, strokePaint);
+            DrawActiveBorder(canvas, paintOffset, strokePaint);
+            DrawPartSelect(canvas, paintOffset, strokePaint, shadowPaint);
             break;
         }
         case UIStatus::PART_TO_OFF: {
@@ -154,34 +150,21 @@ void RosenRenderCheckbox::DrawActiveBorder(SkCanvas* canvas, const Offset& paint
     strokePaint.setStrokeCap(SkPaint::kRound_Cap);
 }
 
-void RosenRenderCheckbox::DrawActiveSquare(
-    SkCanvas* canvas, const Offset& paintOffset, SkPaint& strokePaint) const
+void RosenRenderCheckbox::DrawPartSelect(
+    SkCanvas* canvas, const Offset& origin, SkPaint& paint, const SkPaint& shadowPaint) const
 {
-    SkPaint skPaint;
-    skPaint.setAntiAlias(true);
-    skPaint.setColor(activeColor_);
-    DrawSquare(canvas, paintOffset, skPaint, drawSize_ * HALF_THE_WIDTH);
-
-    SetStrokeWidth(NormalizeToPx(checkStroke_), strokePaint);
-    strokePaint.setColor(pointColor_);
-    strokePaint.setStrokeCap(SkPaint::kRound_Cap);
-}
- 
-void RosenRenderCheckbox::DrawSquare(
-    SkCanvas* canvas, const Offset& origin, const SkPaint& paint, const Size& paintSize) const
-{
-    SkRRect rrect;
+    SkPath path;
     double originX = origin.GetX();
     double originY = origin.GetY();
-
     const Offset start =
-        Offset(drawSize_.Width() * CHECK_MARK_PART_X_POSITION, drawSize_.Width() * CHECK_MARK_PART_Y_POSITION);
-    double borderRadius = 0;
-    rrect = SkRRect::MakeRectXY(
-        { originX + start.GetX(), originY + start.GetY(), paintSize.Width() + originX + start.GetX(),
-            paintSize.Height() + originY + start.GetY() },
-        borderRadius, borderRadius);
-    canvas->drawRRect(rrect, paint);
+        Offset(drawSize_.Width() * CHECK_MARK_PART_START_X_POSITION, drawSize_.Width() * CHECK_MARK_PART_Y_POSITION);
+    const Offset end =
+        Offset(drawSize_.Width() * CHECK_MARK_PART_END_Y_POSITION, drawSize_.Width() * CHECK_MARK_PART_Y_POSITION);
+
+    path.moveTo(originX + start.GetX(), originY + start.GetY());
+    path.lineTo(originX + end.GetX(), originY + end.GetY());
+    canvas->drawPath(path, shadowPaint);
+    canvas->drawPath(path, paint);
 }
 
 void RosenRenderCheckbox::DrawUnselected(

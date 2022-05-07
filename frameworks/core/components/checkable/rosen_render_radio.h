@@ -29,6 +29,9 @@ public:
     ~RosenRenderRadio() override = default;
 
     void Paint(RenderContext& context, const Offset& offset) override;
+    void DrawFocusBorder(RenderContext& context, const Offset& offset);
+    void DrawTouchBoard(const Offset& offset, RenderContext& context);
+    void DrawHoverBoard(const Offset& offset, RenderContext& context);
 };
 
 } // namespace OHOS::Ace

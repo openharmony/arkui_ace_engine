@@ -169,9 +169,7 @@ void RosenRenderLinearTrack::PaintSliderSteps(RenderContext& context, const Offs
         skPaint.setStrokeWidth(size);
         skPaint.setStrokeCap(SkPaint::Cap::kRound_Cap);
         SkPath path;
-        while (current < offset.GetY() + trackLength) {
-            // do not draw first mark on track head
-            current += GetSliderSteps();
+        while (LessOrEqual(current, offset.GetY() + trackLength)) {
             double dyOffset = current;
             if (GetSliderMode() == SliderMode::OUTSET) {
                 dyOffset = std::clamp(current, offset.GetY() + size * HALF, offset.GetY() + trackLength - size * HALF);
@@ -180,6 +178,7 @@ void RosenRenderLinearTrack::PaintSliderSteps(RenderContext& context, const Offs
             }
             path.moveTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
             path.lineTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
+            current += GetSliderSteps();
         }
         canvas->drawPath(path, skPaint);
     } else {
@@ -192,9 +191,7 @@ void RosenRenderLinearTrack::PaintSliderSteps(RenderContext& context, const Offs
         skPaint.setStrokeWidth(size);
         skPaint.setStrokeCap(SkPaint::Cap::kRound_Cap);
         SkPath path;
-        while (current < offset.GetX() + trackLength) {
-            // do not draw first mark on track head
-            current += GetSliderSteps();
+        while (LessOrEqual(current, offset.GetY() + trackLength)) {
             double dxOffset = current;
             if (GetSliderMode() == SliderMode::OUTSET) {
                 dxOffset = std::clamp(current, offset.GetX() + size * HALF, offset.GetX() + trackLength - size * HALF);
@@ -203,6 +200,7 @@ void RosenRenderLinearTrack::PaintSliderSteps(RenderContext& context, const Offs
             }
             path.moveTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
             path.lineTo(SkDoubleToScalar(dxOffset), SkDoubleToScalar(dyOffset));
+            current += GetSliderSteps();
         }
         canvas->drawPath(path, skPaint);
     }

@@ -44,8 +44,6 @@ void RenderCheckbox::Update(const RefPtr<Component>& component)
     }
     component_ = checkbox;
 
-    auto context = context_.Upgrade();
-    isDeclarative_ = context->GetIsDeclarative();
     if (isDeclarative_) {
         UpdateGroupStatus();
         component_->SetGroupValue(CHECKABLE_STATUS[static_cast<int32_t>(status_)]);
@@ -153,7 +151,7 @@ void RenderCheckbox::UpdateAccessibilityAttr()
 void RenderCheckbox::HandleClick()
 {
     auto context = context_.Upgrade();
-    if (context->GetIsDeclarative()) {
+    if (isDeclarative_) {
         if (!(component_->GetGroupName().empty())) {
             lastStatus_ = status_;
             auto value = (component_->GetGroupValue() ==

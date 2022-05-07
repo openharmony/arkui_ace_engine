@@ -24,25 +24,25 @@ namespace OHOS::Ace::Framework {
 
 void JSCheckbox::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("checkboxgroup create error, info is not-valid");
-        return;
-    }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto name = paramObject->GetProperty("name");
-    auto group = paramObject->GetProperty("group");
     RefPtr<CheckboxTheme> checkBoxTheme = GetTheme<CheckboxTheme>();
     auto checkboxComponent = AceType::MakeRefPtr<OHOS::Ace::CheckboxComponent>(checkBoxTheme);
-    auto checkboxName = name->ToString();
-    checkboxComponent->SetCheckboxName(checkboxName);
-    if (!group->IsNull()) {
-        auto checkboxGroup = group->ToString();
-        checkboxComponent->SetBelongGroup(checkboxGroup);
-        auto checkboxGroupmap = ViewStackProcessor::GetInstance()->GetCheckboxGroupCompnent();
-        auto item = checkboxGroupmap->find(checkboxGroup);
-        if (item != checkboxGroupmap->end()) {
-            item->second->AddCheckbox(checkboxComponent);
-            checkboxComponent->SetGroup(item->second);
+    if ((info.Length() >= 1) && info[0]->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(info[0]);
+        auto name = paramObject->GetProperty("name");
+        auto group = paramObject->GetProperty("group");
+        if (name->IsString()) {
+            auto checkboxName = name->ToString();
+            checkboxComponent->SetCheckboxName(checkboxName);
+        }
+        if (group->IsString()) {
+            auto checkboxGroup = group->ToString();
+            checkboxComponent->SetBelongGroup(checkboxGroup);
+            auto checkboxGroupmap = ViewStackProcessor::GetInstance()->GetCheckboxGroupCompnent();
+            auto item = checkboxGroupmap->find(checkboxGroup);
+            if (item != checkboxGroupmap->end()) {
+                item->second->AddCheckbox(checkboxComponent);
+                checkboxComponent->SetGroup(item->second);
+            }
         }
     }
     checkboxComponent->SetInspectorTag("Checkbox");

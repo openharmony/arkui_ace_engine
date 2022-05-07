@@ -29,6 +29,11 @@ void RenderCheckable::Update(const RefPtr<Component>& component)
         LOGW("component is null");
         return;
     }
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    isDeclarative_ = context->GetIsDeclarative();
     pointColor_ = checkable->GetPointColor().GetValue();
     activeColor_ = checkable->GetActiveColor().GetValue();
     pointColorInspector_ = checkable->GetPointColor();
@@ -44,7 +49,11 @@ void RenderCheckable::Update(const RefPtr<Component>& component)
     backgroundSolid_ = checkable->IsBackgroundSolid();
     hotZoneHorizontalPadding_ = checkable->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = checkable->GetHotZoneVerticalPadding();
-    disabled_ = checkable->IsDisabled();
+    if (isDeclarative_) {
+        disabled_ = checkable->IsDisabledStatus();
+    } else {
+        disabled_ = checkable->IsDisabled();
+    }
     hoverAnimationType_ = checkable->GetMouseAnimationType();
     auto clickId = checkable->GetClickEvent();
     auto catchMode = true;

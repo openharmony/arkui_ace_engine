@@ -30,11 +30,8 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr Dimension FOCUS_PADDING = 2.0_vp;
-constexpr Dimension FOCUS_BORDER_PADDING = 2.0_vp;
+constexpr Dimension FOCUS_BORDER_WIDTH = 2.0_vp;
 constexpr double DOUBLE_TO_PERCENT = 100.0;
-constexpr double DOUBLE = 2.0;
-constexpr double BLOCK_OFFSET_PADDING = 8.0;
-constexpr double BLOCK_BORDER_PADDING = 12.0;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr uint32_t FOCUS_BORDER_COLOR = 0xFF0A59F7;
 
@@ -168,7 +165,6 @@ void RosenRenderSlider::ProcessBlock(const Offset& currentPosition)
     blockRenderNode->SetLayoutSize(Size(hotRegionWidth, hotRegionHeight));
     blockRenderNode->SetPosition(blockPosition);
     blockRenderNode->SetFocus(GetFocus());
-    blockRenderNode->SetRadiusScale(radiusScale_);
     blockRenderNode->SetMode(GetMode());
     blockRenderNode->SetPress(GetPress());
     blockRenderNode->SetHover(GetHover());
@@ -369,72 +365,49 @@ void RosenRenderSlider::Paint(RenderContext& context, const Offset& offset)
         tip_->SetVisible(false);
     }
     if (GetFocus() && mode_ == SliderMode::INSET) {
-        if (direction_ == Axis::VERTICAL) {
-            PaintVerticalFocus(context, offset);
-        } else {
-            PaintHorizontalFocus(context, offset);
-        }
+        PaintTrackFocus(context, offset);
     }
     RenderNode::Paint(context, offset);
 }
 
-void RosenRenderSlider::PaintVerticalFocus(RenderContext& context, const Offset& offset)
+void RosenRenderSlider::PaintTrackFocus(RenderContext& context, const Offset& offset)
 {
     auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
     if (!canvas) {
-        LOGE("paint canvas is null");
         return;
     }
-    auto block = AceType::DynamicCast<RenderBlock>(block_);
-    if (!block) {
+    auto track = AceType::DynamicCast<RenderTrack>(track_);
+    if (!track) {
         return;
     }
-    const double blockSize = NormalizeToPx(block->GetBlockSize());
-    Size canvasSize = GetLayoutSize();
-    double rrectRadius = blockSize * HALF + BLOCK_BORDER_PADDING;
-    double sliderHeight = canvasSize.Height();
-    double sliderWidth = rrectRadius * DOUBLE;
-    Size sliderSize = Size(sliderWidth, sliderHeight);
-
+    double trackFocusWidth = 0.0;
+    double trackFocusHeight = 0.0;
+    double trackFocusRadius = 0.0;
+    if (direction_ == Axis::VERTICAL) {
+        trackFocusHeight = trackLength_ + track->GetTrackThickness() +
+            NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
+        trackFocusWidth = track->GetTrackThickness() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
+        trackFocusRadius = trackFocusWidth * HALF;
+    } else {
+        trackFocusWidth = trackLength_  + track->GetTrackThickness() +
+            NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
+        trackFocusHeight = track->GetTrackThickness() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
+        trackFocusRadius = trackFocusHeight * HALF;
+    }
     SkPaint paint;
     paint.setColor(FOCUS_BORDER_COLOR);
+    paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
     paint.setStyle(SkPaint::Style::kStroke_Style);
-    paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_PADDING));
     paint.setAntiAlias(true);
     SkRRect rRect;
-    rRect.setRectXY(SkRect::MakeIWH(sliderSize.Width(), sliderSize.Height()), rrectRadius, rrectRadius);
-
-    rRect.offset(offset.GetX() + rrectRadius - BLOCK_OFFSET_PADDING, offset.GetY());
-    canvas->drawRRect(rRect, paint);
-}
-
-void RosenRenderSlider::PaintHorizontalFocus(RenderContext& context, const Offset& offset)
-{
-    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
-    if (!canvas) {
-        LOGE("paint canvas is null");
-        return;
+    rRect.setRectXY(SkRect::MakeIWH(trackFocusWidth, trackFocusHeight), trackFocusRadius, trackFocusRadius);
+    if (direction_ == Axis::VERTICAL) {
+        rRect.offset(offset.GetX() + track->GetTrackThickness() * HALF - NormalizeToPx(FOCUS_PADDING +
+            FOCUS_BORDER_WIDTH * HALF), offset.GetY() + NormalizeToPx(FOCUS_BORDER_WIDTH * HALF * HALF));
+    } else {
+        rRect.offset(offset.GetX() + NormalizeToPx(FOCUS_BORDER_WIDTH * HALF * HALF), offset.GetY() +
+            track->GetTrackThickness() * HALF - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
     }
-    auto block = AceType::DynamicCast<RenderBlock>(block_);
-    if (!block) {
-        return;
-    }
-    const double blockSize = NormalizeToPx(block->GetBlockSize());
-    Size canvasSize = GetLayoutSize();
-    double rrectRadius = blockSize * HALF + BLOCK_BORDER_PADDING;
-    double sliderHeight = rrectRadius * DOUBLE;
-    double sliderWidth = canvasSize.Width();
-    Size sliderSize = Size(sliderWidth, sliderHeight);
-
-    SkPaint paint;
-    paint.setColor(FOCUS_BORDER_COLOR);
-    paint.setStyle(SkPaint::Style::kStroke_Style);
-    paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_PADDING));
-    paint.setAntiAlias(true);
-    SkRRect rRect;
-    rRect.setRectXY(SkRect::MakeIWH(sliderSize.Width(), sliderSize.Height()), rrectRadius, rrectRadius);
-
-    rRect.offset(offset.GetX(), offset.GetY() + rrectRadius - BLOCK_OFFSET_PADDING);
     canvas->drawRRect(rRect, paint);
 }
 
