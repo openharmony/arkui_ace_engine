@@ -26,6 +26,7 @@ template("ace_osal_ohos_source_set") {
         "bytrace_standard:bytrace_core",
         "hiviewdfx_hilog_native:libhilog",
         "startup_l2:syspara",
+        "startup_l2:syspara_watchagent",
       ]
       configs = [ "$ace_root:ace_config" ]
     } else {

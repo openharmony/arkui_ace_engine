@@ -95,6 +95,7 @@ DOMNode::DOMNode(NodeId nodeId, const std::string& nodeName) : nodeId_(nodeId), 
 {
     rootComponent_ = AceType::MakeRefPtr<ComposedComponent>(std::to_string(nodeId), nodeName);
     boxComponent_ = AceType::MakeRefPtr<BoxComponent>();
+    boxComponent_->SetEnableDebugBoundary(true);
     CreateDeclaration(nodeName);
 }
 

@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "base/startup/syspara_lite/interfaces/innerkits/native/syspara/include/parameter.h"
+
 #include "base/utils/resource_configuration.h"
 #include "base/utils/device_type.h"
 #include "base/utils/macros.h"
@@ -273,6 +275,11 @@ public:
     {
         return windowAnimationEnabled_;
     }
+
+    static void UpdateDebugBoundaryEnabled(const char *key, const char *value, void *context)
+    {
+        debugBoundaryEnabled_ = strcmp(value, "1") == 0? true: false;
+    }    
 
 private:
     static bool traceEnabled_;

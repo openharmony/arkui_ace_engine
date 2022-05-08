@@ -197,9 +197,7 @@ RefPtr<BoxComponent> ViewStackProcessor::GetBoxComponent()
     }
 
     RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<OHOS::Ace::BoxComponent>();
-    if (SystemProperties::GetDebugBoundaryEnabled()) {
-        boxComponent->SetEnableDebugBoundary(true);
-    }
+    boxComponent->SetEnableDebugBoundary(true);
     wrappingComponentsMap.emplace("box", boxComponent);
     return boxComponent;
 }
