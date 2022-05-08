@@ -92,7 +92,7 @@ abstract class View extends NativeView implements
   }
 
   // globally unique id, this is different from compilerAssignedUniqueChildId!
-  id(): number {
+  id__(): number {
     return this.id_;
   }
 
