@@ -278,7 +278,11 @@ public:
 
     static void UpdateDebugBoundaryEnabled(const char *key, const char *value, void *context)
     {
-        debugBoundaryEnabled_ = strcmp(value, "1") == 0? true: false;
+        if (strcmp(value, "true") == 0) {
+            debugBoundaryEnabled_ = true;
+        } else if (strcmp(value, "false") == 0) {
+            debugBoundaryEnabled_ = false;
+        }
     }    
 
 private:
