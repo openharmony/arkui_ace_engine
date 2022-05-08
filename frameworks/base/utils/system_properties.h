@@ -283,7 +283,7 @@ public:
         } else if (strcmp(value, "false") == 0) {
             debugBoundaryEnabled_ = false;
         }
-    }    
+    }
 
 private:
     static bool traceEnabled_;
