@@ -279,6 +279,8 @@ public:
         return windowAnimationEnabled_;
     }
 
+    static void UpdateDebugBoundaryEnabled(const char *key, const char *value, void *context);
+
 private:
     static bool traceEnabled_;
     static bool accessibilityEnabled_;

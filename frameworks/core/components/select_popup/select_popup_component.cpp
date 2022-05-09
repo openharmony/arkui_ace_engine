@@ -316,9 +316,7 @@ bool SelectPopupComponent::Initialize(const RefPtr<AccessibilityManager>& manage
     innerClip->SetBottomLeftRadius(Radius(ROUND_RADIUS_PHONE));
     innerClip->SetBottomRightRadius(Radius(ROUND_RADIUS_PHONE));
     RefPtr<BoxComponent> box = AceType::MakeRefPtr<BoxComponent>();
-    if (SystemProperties::GetDebugBoundaryEnabled()) {
-        box->SetEnableDebugBoundary(true);
-    }
+    box->SetEnableDebugBoundary(true);
     box->SetDeliverMinToChild(false);
     if (!IsTV()) {
         RefPtr<Decoration> back = AceType::MakeRefPtr<Decoration>();

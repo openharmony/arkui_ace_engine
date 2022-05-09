@@ -47,10 +47,7 @@ RenderRefresh::RenderRefresh()
     loading_->SetLoadingMode(MODE_DRAG);
 
     loadingBackgroundBoxComponent_ = AceType::MakeRefPtr<BoxComponent>();
-
-    if (SystemProperties::GetDebugBoundaryEnabled()) {
-        loadingBackgroundBoxComponent_->SetEnableDebugBoundary(true);
-    }
+    loadingBackgroundBoxComponent_->SetEnableDebugBoundary(true);
 
     decoration_ = AceType::MakeRefPtr<Decoration>();
     loadingBackgroundBox_ = AceType::DynamicCast<RenderBox>(loadingBackgroundBoxComponent_->CreateRenderNode());
