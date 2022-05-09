@@ -2043,18 +2043,21 @@ void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!rsNode_) {
+        // workaround if parent have no RSNode while it should
         LOGD("Parent render_node has no RSNode, creating now.");
         SyncRSNodeBoundary(true, true);
     }
     if (IsTailRenderNode()) {
         if (!child->GetRSNode()) {
+            // workaround if child have no RSNode while it should
             LOGW("Child render_node has no RSNode, creating now.");
             child->SyncRSNodeBoundary(true, true);
         }
     } else {
-        if (child->rsNode_) {
+        if (child->rsNode_ && rsNode_ != child->rsNode_) {
             LOGE("Overwriting existing RSNode in child, this SHOULD NOT HAPPEN.");
         }
+        // copy parent RSNode to child if they belong to the same JSView
         child->rsNode_ = rsNode_;
     }
 #endif
