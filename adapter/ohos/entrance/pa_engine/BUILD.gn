@@ -54,7 +54,6 @@ template("pa_backend") {
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "eventhandler:libeventhandler",
-      "form_runtime:form_manager",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
       "ipc_js:rpc",
