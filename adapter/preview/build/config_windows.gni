@@ -38,6 +38,8 @@ if (enable_ark_preview) {
   xcomponent_components_support = true
 }
 
+enable_ability_component = false
+
 # windows platform defines and configs
 defines = [
   "WINDOWS_PLATFORM",

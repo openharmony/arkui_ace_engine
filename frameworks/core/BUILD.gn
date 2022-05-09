@@ -351,6 +351,11 @@ template("ace_core_source_set") {
       deps += [ "$ace_root/frameworks/core/components/xcomponent:ace_core_components_xcomponent_$platform" ]
     }
 
+    if (defined(config.enable_ability_component) &&
+        config.enable_ability_component) {
+      deps += [ "$ace_root/frameworks/core/components_v2/ability_component:ace_core_components_ability_v2_$platform" ]
+    }
+
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       if (!use_mingw_win && !use_mac) {
