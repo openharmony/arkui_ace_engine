@@ -119,7 +119,21 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const R
     ExtractEachInfo(tempStack, res);
 
     // collect error info first
-    for (uint32_t i = 1; i < res.size(); i++) {
+    bool needGetErrorPos = false;
+    int32_t errorPos = 0;
+    uint32_t i = 1;
+    std::string codeStart = "SourceCode (";
+    std::string sourceCode = "";
+    if (res.size() > 1) {
+        std::string fristLine = res[1];
+        if (fristLine.find(codeStart, 0) == 0) {
+            uint32_t codeStartLen = codeStart.length();
+            sourceCode = fristLine.substr(codeStartLen, fristLine.length() - codeStartLen - 1);
+            i = 2;  // 2 means Convert from the second line
+            needGetErrorPos = true;
+        }
+    }
+    for (; i < res.size(); i++) {
         std::string temp = res[i];
         int32_t closeBracePos = static_cast<int32_t>(temp.find(closeBrace));
         int32_t openBracePos = static_cast<int32_t>(temp.find(openBrace));
@@ -127,6 +141,10 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const R
         std::string line = "";
         std::string column = "";
         GetPosInfo(temp, closeBracePos, line, column);
+        if (needGetErrorPos) {
+            errorPos = StringToInt(column);
+            needGetErrorPos = false;
+        }
         if (line.empty() || column.empty()) {
             LOGI("the stack without line info");
             break;
@@ -142,7 +160,17 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const R
     if (ans.empty()) {
         return tempStack;
     }
-    ans = res[0] + "\n" + ans;
+    if (sourceCode.empty()) {
+        ans = res[0] + "\n" + ans;
+    } else {
+        sourceCode.push_back('\n');
+        for (int32_t k = 0; k < errorPos - 1; k++) {
+            sourceCode.push_back(' ');
+        }
+        sourceCode.push_back('^');
+        std::string codeBegin = "SourceCode: ";
+        ans = codeBegin + "\n" + sourceCode + "\n" + res[0] + "\n" + ans;
+    }
     return ans;
 }
 
