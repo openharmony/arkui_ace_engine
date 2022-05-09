@@ -627,7 +627,7 @@ bool WebDelegate::SaveCookieSync()
     return false;
 }
 
-bool WebDelegate::SetCookie(const std::string url, const std::string value)
+bool WebDelegate::SetCookie(const std::string& url, const std::string& value)
 {
     if (cookieManager_) {
         return cookieManager_->SetCookie(url, value);
@@ -635,7 +635,7 @@ bool WebDelegate::SetCookie(const std::string url, const std::string value)
     return false;
 }
 
-std::string WebDelegate::GetCookie(const std::string url)
+std::string WebDelegate::GetCookie(const std::string& url)
 {
     if (cookieManager_) {
         return cookieManager_->ReturnCookie(url);
@@ -998,7 +998,7 @@ void WebDelegate::SetWebCallBack()
                 return false;
             });
         webController->SetSetCookieImpl(
-            [weak = WeakClaim(this)](std::string url, std::string value) {
+            [weak = WeakClaim(this)](const std::string& url, const std::string& value) {
                 auto delegate = weak.Upgrade();
                 if (delegate) {
                     return delegate->SetCookie(url, value);
@@ -1006,7 +1006,7 @@ void WebDelegate::SetWebCallBack()
                 return false;
             });
         webController->SetGetCookieImpl(
-            [weak = WeakClaim(this)](std::string url) {
+            [weak = WeakClaim(this)](const std::string& url) {
                 auto delegate = weak.Upgrade();
                 if (delegate) {
                     return delegate->GetCookie(url);

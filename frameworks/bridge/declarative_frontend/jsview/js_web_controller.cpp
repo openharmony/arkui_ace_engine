@@ -115,10 +115,11 @@ public:
         if (!manager_) {
             return;
         }
-        std::string url;
-        if (args[0]->IsString()) {
-            url = args[0]->ToString();
+        if (args.Length() < 1 || !args[0]->IsString()) {
+            LOGW("invalid url params");
+            return;
         }
+        std::string url = args[0]->ToString();
         std::string result = manager_->GetCookie(url);
         auto jsVal = JSVal(ToJSValue(result));
         auto returnValue = JSRef<JSVal>::Make(jsVal);
