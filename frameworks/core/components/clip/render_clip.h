@@ -83,6 +83,15 @@ public:
 
     void Dump() override;
 
+    void SetClipRadius(const Radius& clipRadius)
+    {
+        topLeftRadius_ = clipRadius;
+        topRightRadius_ = clipRadius;
+        bottomLeftRadius_ = clipRadius;
+        bottomRightRadius_ = clipRadius;
+        MarkNeedRender();
+    }
+    
 protected:
     double width_ = 0.0;
     double height_ = 0.0;
