@@ -18,8 +18,8 @@
 #include <algorithm>
 #include <iterator>
 
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components/panel/sliding_panel_component_v2.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -277,8 +277,6 @@ void JSSlidingPanel::JsPanelBorder(const JSCallbackInfo& info)
 void JSSlidingPanel::SetOnSizeChange(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto onSizeChangeFunc = AceType::MakeRefPtr<JsEventFunction<SlidingPanelSizeChangeEvent, 1>>(
-            JSRef<JSFunc>::Cast(args[0]), SlidingPanelSizeChangeEventToJSValue);
         auto onSizeChange = EventMarker(
             [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -294,6 +292,7 @@ void JSSlidingPanel::SetOnSizeChange(const JSCallbackInfo& args)
                     modeStr = "mini";
                 }
                 auto params = ConvertToJSValues(eventInfo->GetWidth(), eventInfo->GetHeight(), modeStr.c_str());
+                ACE_SCORING_EVENT("SlidingPanel.OnSizeChange");
                 func->Call(JSRef<JSObject>(), params.size(), params.data());
             });
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
