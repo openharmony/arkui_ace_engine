@@ -62,15 +62,8 @@ int PluginComponentManager::Request(
         GetTemplatePathFromJsonFile(packagePathStr, name, jsonPath, jsonStr);
         pluginTemplate.SetSource(jsonStr);
         pluginTemplate.SetAbility(want.GetElement().GetBundleName() + "/" + want.GetElement().GetAbilityName());
-
-        for (auto iter = listener_->GetPluginComponentCallBack().begin();
-             iter != listener_->GetPluginComponentCallBack().end();) {
-            if (iter->second == CallBackType::RequestCallBack && iter->first != nullptr) {
-                iter->first->OnRequestCallBack(pluginTemplate, data, "");
-                listener_->GetPluginComponentCallBack().erase(iter++);
-            } else {
-                iter++;
-            }
+        if (listener_) {
+            listener_->RequestByJsonPath(pluginTemplate, data);
         }
         return 0;
     }
@@ -126,6 +119,9 @@ void PluginComponentManager::UIServiceListener::OnPushCallBack(const AAFwk::Want
         std::string jsonStr;
         auto packagePathStr = PluginComponentManager::GetInstance()->GetPackagePath(want);
         PluginComponentManager::GetInstance()->GetTemplatePathFromJsonFile(packagePathStr, name, jsonPath, jsonStr);
+        if (jsonStr.empty()) {
+            jsonStr = "{}";
+        }
         pluginTemplate.SetSource(jsonStr);
     } else {
         pluginTemplate.SetSource(name);
@@ -159,9 +155,27 @@ void PluginComponentManager::UIServiceListener::OnReturnRequest(
     for (auto iter = callbackVec_.begin(); iter != callbackVec_.end();) {
         if (iter->second == CallBackType::RequestCallBack && iter->first != nullptr) {
             PluginComponentTemplate pluginTemplate;
-            pluginTemplate.SetSource(source);
+            if (source.empty()) {
+                pluginTemplate.SetSource("{}");
+            } else {
+                pluginTemplate.SetSource(source);
+            }
             pluginTemplate.SetAbility(want.GetElement().GetBundleName() + "/" + want.GetElement().GetAbilityName());
             iter->first->OnRequestCallBack(pluginTemplate, data, extraData);
+            callbackVec_.erase(iter++);
+        } else {
+            iter++;
+        }
+    }
+}
+
+void PluginComponentManager::UIServiceListener::RequestByJsonPath(
+    const PluginComponentTemplate& pluginTemplate, const std::string& data)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto iter = callbackVec_.begin(); iter != callbackVec_.end();) {
+        if (iter->second == CallBackType::RequestCallBack && iter->first != nullptr) {
+            iter->first->OnRequestCallBack(pluginTemplate, data, "{}");
             callbackVec_.erase(iter++);
         } else {
             iter++;

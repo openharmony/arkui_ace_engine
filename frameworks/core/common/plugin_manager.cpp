@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace {
 std::shared_ptr<PluginUtils> PluginManager::pluginUtils_ = nullptr;
+std::map<int64_t, RefPtr<PluginSubContainer>> PluginManager::pluginSubContainerMap_;
 PluginManager::PluginManager() {}
 
 PluginManager::~PluginManager()
