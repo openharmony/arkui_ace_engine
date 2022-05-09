@@ -233,7 +233,7 @@ protected:
 
     void OutPutMarix(int32_t rows, bool before);
 
-    bool DeleteItemsInMarix(int32_t rows, int32_t itemIndex);
+    bool DeleteItemsInMarix(size_t rows, int32_t itemIndex);
 
     enum class SCROLLABLE : uint32_t {
         NO_SCROLL = 0,
