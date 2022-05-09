@@ -67,7 +67,6 @@ public:
     void AddFormUninstallCallback(const OnFormUninstallCallback& callback);
 
     void OnActionEvent(const std::string& action);
-    std::string WrapAction(const std::string& action);
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJsInfo);
     void ProcessFormUninstall(const int64_t formId);
@@ -84,6 +83,7 @@ private:
     void OnFormAcquired(const std::string& param);
     void OnFormUpdate(const std::string& param);
     void OnFormError(const std::string& param);
+    bool ParseAction(const std::string& action, AAFwk::Want &want);
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
     OnFormUpdateCallbackForJava onFormUpdateCallbackForJava_;
