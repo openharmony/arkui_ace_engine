@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <iterator>
 
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components/panel/sliding_panel_component_v2.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -279,15 +280,21 @@ void JSSlidingPanel::SetOnSizeChange(const JSCallbackInfo& args)
         auto onSizeChangeFunc = AceType::MakeRefPtr<JsEventFunction<SlidingPanelSizeChangeEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), SlidingPanelSizeChangeEventToJSValue);
         auto onSizeChange = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = std::move(onSizeChangeFunc)](const BaseEventInfo* param) {
+            [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto sizeChange = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(param);
-                if (!sizeChange) {
-                    LOGE("HandleSizeChangeEvent, sizeChange == nullptr");
+                auto eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(info);
+                if (!eventInfo) {
                     return;
                 }
-                ACE_SCORING_EVENT("SlidingPanel.OnSizeChange");
-                func->Execute(*sizeChange);
+                std::string modeStr = "half";
+                const PanelMode& mode = eventInfo->GetMode();
+                if (mode == PanelMode::FULL) {
+                    modeStr = "full";
+                } else if (mode == PanelMode::MINI) {
+                    modeStr = "mini";
+                }
+                auto params = ConvertToJSValues(eventInfo->GetWidth(), eventInfo->GetHeight(), modeStr.c_str());
+                func->Call(JSRef<JSObject>(), params.size(), params.data());
             });
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
         auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);

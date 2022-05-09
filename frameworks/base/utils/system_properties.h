@@ -18,8 +18,6 @@
 
 #include <string>
 
-#include "base/startup/syspara_lite/interfaces/innerkits/native/syspara/include/parameter.h"
-
 #include "base/utils/resource_configuration.h"
 #include "base/utils/device_type.h"
 #include "base/utils/macros.h"

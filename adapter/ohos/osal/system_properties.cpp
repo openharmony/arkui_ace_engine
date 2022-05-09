@@ -17,6 +17,7 @@
 
 #include <unistd.h>
 
+#include "parameter.h"
 #include "parameters.h"
 
 #include "base/log/log.h"
