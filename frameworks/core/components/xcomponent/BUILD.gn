@@ -32,15 +32,15 @@ build_component("xcomponent") {
   if (is_standard_system && !use_mingw_win && !use_mac) {
     include_dirs = [
       "//drivers/peripheral/display/interfaces/include",
-      "//foundation/graphic/standard/interfaces/innerkits/wmclient",
-      "//foundation/graphic/standard/interfaces/innerkits/wm",
-      "//foundation/graphic/standard/interfaces/innerkits/surface",
+      "//foundation/graphic/graphic/interfaces/innerkits/wmclient",
+      "//foundation/graphic/graphic/interfaces/innerkits/wm",
+      "//foundation/graphic/graphic/interfaces/innerkits/surface",
     ]
 
     deps = [
-      "//foundation/graphic/standard:libsurface",
-      "//foundation/graphic/standard:libwmclient",
-      "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+      "//foundation/graphic/graphic:libsurface",
+      "//foundation/graphic/graphic:libwmclient",
+      "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
       "//foundation/windowmanager/utils:libwmutil",
       "//foundation/windowmanager/wm:libwm",
     ]

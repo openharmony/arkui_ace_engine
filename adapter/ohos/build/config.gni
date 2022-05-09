@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos/ace/ace_args.gni")
-import("//foundation/graphic/standard/graphic_config.gni")
+import("//foundation/graphic/graphic/graphic_config.gni")
 import("product_config.gni")
 
 defines = [

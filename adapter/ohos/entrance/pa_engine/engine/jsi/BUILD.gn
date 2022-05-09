@@ -75,7 +75,7 @@ template("js_pa_engine_ark") {
       "//foundation/arkui/napi:ace_napi_ark",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-      "//foundation/graphic/standard:libwmclient",
+      "//foundation/graphic/graphic:libwmclient",
       "//utils/native/base:utils",
     ]
     external_deps = [
