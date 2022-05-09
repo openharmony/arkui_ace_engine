@@ -73,6 +73,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         delegate_->UpdateFileFromUrlEnabled(web->GetFileFromUrlAccessEnabled());
         delegate_->UpdateDatabaseEnabled(web->GetDatabaseAccessEnabled());
         delegate_->UpdateTextZoomAtio(web->GetTextZoomAtio());
+        delegate_->UpdateWebDebuggingAccess(web->GetWebDebuggingAccessEnabled());
         auto userAgent = web->GetUserAgent();
         if (!userAgent.empty()) {
             delegate_->UpdateUserAgent(userAgent);

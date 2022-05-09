@@ -795,6 +795,16 @@ public:
         isDatabaseAccessEnabled_ = isEnabled;
     }
 
+    bool GetWebDebuggingAccessEnabled()
+    {
+        return isWebDebuggingAccessEnabled_;
+    }
+
+    void SetWebDebuggingAccessEnabled(bool isEnabled)
+    {
+        isWebDebuggingAccessEnabled_ = isEnabled;
+    }
+
     int32_t GetTextZoomAtio()
     {
         return textZoomAtioNum_;
@@ -925,6 +935,7 @@ private:
     bool isDatabaseAccessEnabled_ = false;
     int32_t textZoomAtioNum_ = default_text_zoom_atio;
     WebCacheMode cacheMode_ = WebCacheMode::DEFAULT;
+    bool isWebDebuggingAccessEnabled_ = false;
 };
 
 } // namespace OHOS::Ace
