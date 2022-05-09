@@ -86,7 +86,7 @@ template("make_skia_deps") {
         ":harfbuzz_config",
       ]
       public_deps =
-          [ "//foundation/graphic/standard/rosen/build/skia:skia_ohos" ]
+          [ "//foundation/graphic/graphic/rosen/build/skia:skia_ohos" ]
     } else if (platform == "ohos" && defined(config.enable_native_view) &&
                config.enable_native_view) {
       public_configs = [
@@ -886,7 +886,7 @@ template("ace_skia_core") {
         ]
       } else {
         if (is_standard_system) {
-          public_deps = [ "//foundation/graphic/standard:libgl" ]
+          public_deps = [ "//foundation/graphic/graphic:libgl" ]
         } else {
           aosp_deps = [
             "shared_library:libEGL",
@@ -1505,7 +1505,7 @@ template("ace_gpu") {
       if (!defined(config.disable_gpu) || !config.disable_gpu) {
         # Ohos or Android platform
         if (is_standard_system) {
-          public_deps = [ "//foundation/graphic/standard:libgl" ]
+          public_deps = [ "//foundation/graphic/graphic:libgl" ]
         } else {
           aosp_deps = [
             "shared_library:libEGL",

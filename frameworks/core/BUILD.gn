@@ -332,7 +332,7 @@ template("ace_core_source_set") {
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       sources += [ "animation/native_curve_helper.cpp" ]
-      deps += [ "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client" ]
+      deps += [ "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client" ]
     }
 
     if (!use_mingw_win && !use_mac && !is_wearable_product &&

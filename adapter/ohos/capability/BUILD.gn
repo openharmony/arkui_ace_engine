@@ -57,7 +57,7 @@ template("ace_capability_ohos_source_set") {
         "utils_base:utils",
         "window_manager:libwindow_extension_client",
       ]
-      deps = [ "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client" ]
+      deps = [ "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client" ]
       sources += [
         "window_connection/window_extension_connection_ohos.cpp",
         "window_connection/window_extension_connection_proxy.cpp",

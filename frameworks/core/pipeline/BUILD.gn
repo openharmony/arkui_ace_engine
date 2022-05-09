@@ -69,7 +69,7 @@ template("ace_core_pipeline_source_set") {
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       sources += [ "base/rosen_render_context.cpp" ]
-      deps += [ "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client" ]
+      deps += [ "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client" ]
     }
 
     if (platform == "ohos" && defined(config.enable_native_view) &&
