@@ -51,6 +51,15 @@ constexpr double FIFTY_PERCENT = 0.5;
 constexpr Dimension OFFSET_FOCUS = 4.0_vp;
 constexpr Dimension DEFLATE_RADIUS_FOCUS = 3.0_vp;
 
+// Whether the system is Mac or not determines which key code is selected.
+#if defined(MAC_PLATFORM)
+#define KEY_META_OR_CTRL_LEFT KeyCode::KEY_META_LEFT
+#define KEY_META_OR_CTRL_RIGHT KeyCode::KEY_META_RIGHT
+#else
+#define KEY_META_OR_CTRL_LEFT KeyCode::KEY_CTRL_LEFT
+#define KEY_META_OR_CTRL_RIGHT KeyCode::KEY_CTRL_RIGHT
+#endif
+
 } // namespace
 
 #if defined(ENABLE_STANDARD_INPUT)
@@ -1216,7 +1225,7 @@ bool RenderTextField::OnKeyEvent(const KeyEvent& event)
     }
     if (event.action == KeyAction::UP &&
         ((event.code == KeyCode::KEY_SHIFT_LEFT || event.code == KeyCode::KEY_SHIFT_RIGHT) ||
-            (event.code == KeyCode::KEY_CTRL_LEFT || event.code == KeyCode::KEY_CTRL_RIGHT))) {
+            (event.code == KEY_META_OR_CTRL_LEFT || event.code == KEY_META_OR_CTRL_RIGHT))) {
         return HandleKeyEvent(event);
     }
 
@@ -1507,12 +1516,10 @@ void RenderTextField::CursorMoveLeft(CursorMoveSkip skip)
         LOGE("move skip not support character yet");
         return;
     }
-    if (GetEditingValue().selection.extentOffset > 0) {
-        isValueFromRemote_ = false;
-        auto value = GetEditingValue();
-        value.MoveLeft();
-        SetEditingValue(std::move(value));
-    }
+    isValueFromRemote_ = false;
+    auto value = GetEditingValue();
+    value.MoveLeft();
+    SetEditingValue(std::move(value));
     cursorPositionType_ = CursorPositionType::NONE;
     MarkNeedLayout();
 }
@@ -1524,14 +1531,10 @@ void RenderTextField::CursorMoveRight(CursorMoveSkip skip)
         LOGE("move skip not support character yet");
         return;
     }
-
-    auto text = GetTextForDisplay(GetEditingValue().text);
-    if (text.length() > static_cast<size_t>(GetEditingValue().selection.extentOffset)) {
-        isValueFromRemote_ = false;
-        auto value = GetEditingValue();
-        value.MoveRight();
-        SetEditingValue(std::move(value));
-    }
+    isValueFromRemote_ = false;
+    auto value = GetEditingValue();
+    value.MoveRight();
+    SetEditingValue(std::move(value));
     cursorPositionType_ = CursorPositionType::NONE;
     MarkNeedLayout();
 }
@@ -1878,27 +1881,27 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
         } else if (event.IsNumberKey()) {
             appendElement = event.ConvertCodeToString();
         } else if (event.IsLetterKey()) {
-            if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_Y }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_Y })) {
+            if (event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
+                event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
+                event.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
+                event.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
+                event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_Y }) ||
+                event.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_Y })) {
                 HandleOnInverseRevoke();
-            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_Z }) ||
-                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_Z })) {
+            } else if (event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_Z }) ||
+                       event.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_Z })) {
                 HandleOnRevoke();
-            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A }) ||
-                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
+            } else if (event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_A }) ||
+                       event.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_A })) {
                 HandleOnCopyAll(nullptr);
-            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
-                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
+            } else if (event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_C }) ||
+                       event.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_C })) {
                 HandleOnCopy();
-            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V }) ||
-                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
+            } else if (event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_V }) ||
+                       event.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_V })) {
                 HandleOnPaste();
-            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_X }) ||
-                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_X })) {
+            } else if (event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_X }) ||
+                       event.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_X })) {
                 HandleOnCut();
             } else {
                 appendElement = event.ConvertCodeToString();
