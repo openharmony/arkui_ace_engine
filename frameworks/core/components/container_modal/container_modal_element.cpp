@@ -16,6 +16,8 @@
 #include "core/components/container_modal/container_modal_element.h"
 
 #include "core/components/box/box_element.h"
+#include "core/components/clip/clip_element.h"
+#include "core/components/clip/render_clip.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/container_modal/render_container_modal.h"
 #include "core/components/flex/flex_element.h"
@@ -58,7 +60,13 @@ RefPtr<StackElement> ContainerModalElement::GetStackElement() const
     }
 
     // Get second child : content
-    auto contentBox = AceType::DynamicCast<BoxElement>(column->GetLastChild());
+    auto clip = AceType::DynamicCast<ClipElement>(column->GetLastChild());
+    if (!clip) {
+        LOGE("Get stack element failed, clip element is null!");
+        return {};
+    }
+
+    auto contentBox = AceType::DynamicCast<BoxElement>(clip->GetFirstChild());
     if (!contentBox) {
         LOGE("Get stack element failed, content box element is null!");
         return {};
@@ -152,6 +160,10 @@ void ContainerModalElement::ShowTitle(bool isShow)
     }
     if (!contentBox_) {
         contentBox_ = AceType::DynamicCast<BoxElement>(clip->GetFirstChild());
+    }
+    auto renderClip = AceType::DynamicCast<RenderClip>(clip->GetRenderNode());
+    if (renderClip) {
+        isShow ? renderClip->SetClipRadius(Radius(CONTAINER_INNER_RADIUS)) : renderClip->SetClipRadius(Radius(0.0));
     }
     // full screen need to hide border.
     auto contentRenderBox = AceType::DynamicCast<RenderBox>(column->GetLastChild()->GetRenderNode());
