@@ -268,13 +268,6 @@ void JSSlidingPanel::SetOnSizeChange(const JSCallbackInfo& args)
                 if (!eventInfo) {
                     return;
                 }
-                // std::string modeStr = "half";
-                // const PanelMode& mode = eventInfo->GetMode();
-                // if (mode == PanelMode::FULL) {
-                //     modeStr = "full";
-                // } else if (mode == PanelMode::MINI) {
-                //     modeStr = "mini";
-                // }
                 auto params = ConvertToJSValues(eventInfo->GetWidth(), eventInfo->GetHeight(), eventInfo->GetMode());
                 ACE_SCORING_EVENT("SlidingPanel.OnSizeChange");
                 func->Call(JSRef<JSObject>(), params.size(), params.data());
