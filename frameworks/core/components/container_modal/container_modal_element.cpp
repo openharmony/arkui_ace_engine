@@ -144,6 +144,12 @@ void ContainerModalElement::ShowTitle(bool isShow)
         LOGE("ContainerModalElement showTitle failed, column  element is null or children size error!");
         return;
     }
+    // full screen need to hide content border radius.
+    auto clip = AceType::DynamicCast<ClipElement>(column->GetLastChild());
+    if (!clip) {
+        LOGE("ContainerModalElement showTitle failed, clip element is null!");
+        return;
+    }
     if (!contentBox_) {
         contentBox_ = AceType::DynamicCast<BoxElement>(clip->GetFirstChild());
     }
