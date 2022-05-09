@@ -224,8 +224,8 @@ private:
     void Zoom(float factor);
     int GetHitTestResult();
     bool SaveCookieSync();
-    bool SetCookie(const std::string url, const std::string value);
-    std::string GetCookie(const std::string url);
+    bool SetCookie(const std::string& url, const std::string& value);
+    std::string GetCookie(const std::string& url);
     void DeleteEntirelyCookie();
     void RegisterOHOSWebEventAndMethord();
     void SetWebCallBack();
