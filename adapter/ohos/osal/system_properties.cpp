@@ -111,6 +111,15 @@ bool SystemProperties::IsSyscapExist(const char* cap)
 #endif
 }
 
+void SystemProperties::UpdateDebugBoundaryEnabled(const char *key, const char *value, void *context)
+{
+    if (strcmp(value, "true") == 0) {
+        debugBoundaryEnabled_ = true;
+    } else if (strcmp(value, "false") == 0) {
+        debugBoundaryEnabled_ = false;
+    }
+}
+
 void SystemProperties::InitDeviceType(DeviceType)
 {
     // Do nothing, no need to store type here, use system property at 'GetDeviceType' instead.

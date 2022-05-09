@@ -276,14 +276,7 @@ public:
         return windowAnimationEnabled_;
     }
 
-    static void UpdateDebugBoundaryEnabled(const char *key, const char *value, void *context)
-    {
-        if (strcmp(value, "true") == 0) {
-            debugBoundaryEnabled_ = true;
-        } else if (strcmp(value, "false") == 0) {
-            debugBoundaryEnabled_ = false;
-        }
-    }
+    static void UpdateDebugBoundaryEnabled(const char *key, const char *value, void *context);
 
 private:
     static bool traceEnabled_;
