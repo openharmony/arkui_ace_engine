@@ -25,22 +25,6 @@
 namespace OHOS::Ace::Framework {
 namespace {
 
-JSRef<JSVal> SlidingPanelSizeChangeEventToJSValue(const SlidingPanelSizeChangeEvent& eventInfo)
-{
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
-    std::string modeStr = "half";
-    const PanelMode& mode = eventInfo.GetMode();
-    if (mode == PanelMode::FULL) {
-        modeStr = "full";
-    } else if (mode == PanelMode::MINI) {
-        modeStr = "mini";
-    }
-    obj->SetProperty<std::string>("mode", modeStr.c_str());
-    obj->SetProperty<double>("width", eventInfo.GetWidth());
-    obj->SetProperty<double>("height", eventInfo.GetHeight());
-    return JSRef<JSVal>::Cast(obj);
-}
-
 } // namespace
 
 void JSSlidingPanel::Create(const JSCallbackInfo& info)
@@ -284,14 +268,14 @@ void JSSlidingPanel::SetOnSizeChange(const JSCallbackInfo& args)
                 if (!eventInfo) {
                     return;
                 }
-                std::string modeStr = "half";
-                const PanelMode& mode = eventInfo->GetMode();
-                if (mode == PanelMode::FULL) {
-                    modeStr = "full";
-                } else if (mode == PanelMode::MINI) {
-                    modeStr = "mini";
-                }
-                auto params = ConvertToJSValues(eventInfo->GetWidth(), eventInfo->GetHeight(), modeStr.c_str());
+                // std::string modeStr = "half";
+                // const PanelMode& mode = eventInfo->GetMode();
+                // if (mode == PanelMode::FULL) {
+                //     modeStr = "full";
+                // } else if (mode == PanelMode::MINI) {
+                //     modeStr = "mini";
+                // }
+                auto params = ConvertToJSValues(eventInfo->GetWidth(), eventInfo->GetHeight(), eventInfo->GetMode());
                 ACE_SCORING_EVENT("SlidingPanel.OnSizeChange");
                 func->Call(JSRef<JSObject>(), params.size(), params.data());
             });
