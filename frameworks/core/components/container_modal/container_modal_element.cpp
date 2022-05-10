@@ -158,24 +158,9 @@ void ContainerModalElement::ShowTitle(bool isShow)
         LOGE("ContainerModalElement showTitle failed, clip element is null!");
         return;
     }
-    if (!contentBox_) {
-        contentBox_ = AceType::DynamicCast<BoxElement>(clip->GetFirstChild());
-    }
     auto renderClip = AceType::DynamicCast<RenderClip>(clip->GetRenderNode());
     if (renderClip) {
         isShow ? renderClip->SetClipRadius(Radius(CONTAINER_INNER_RADIUS)) : renderClip->SetClipRadius(Radius(0.0));
-    }
-    // full screen need to hide border.
-    auto contentRenderBox = AceType::DynamicCast<RenderBox>(column->GetLastChild()->GetRenderNode());
-    if (contentRenderBox) {
-        auto contentDecoration = AceType::MakeRefPtr<Decoration>();
-        contentDecoration->SetBackgroundColor(CONTENT_BACKGROUND_COLOR);
-        if (isShow) {
-            Border contentBorder;
-            contentBorder.SetBorderRadius(Radius(CONTAINER_INNER_RADIUS));
-            contentDecoration->SetBorder(contentBorder);
-        }
-        contentRenderBox->SetBackDecoration(contentDecoration);
     }
 
     // Get first child : title
