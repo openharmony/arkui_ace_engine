@@ -53,7 +53,7 @@ public:
 #if !defined(WINDOWS_PLATFORM)
     bool StartDebugger(const char *libraryPath, EcmaVM *vm) const;
 #endif
-    bool Initialize(const std::string &libraryPath, bool isDebugMode) override;
+    bool Initialize(const std::string &libraryPath, bool isDebugMode, int32_t instanceId) override;
     bool InitializeFromExistVM(EcmaVM* vm);
     void Reset() override;
     void SetLogPrint(LOG_PRINT out) override;
@@ -86,6 +86,7 @@ public:
 
 private:
     EcmaVM *vm_ = nullptr;
+    int32_t instanceId_ = 0;
     std::vector<PandaFunctionData *> dataList_;
     LOG_PRINT print_ { nullptr };
     UncaughtExceptionCallback uncaughtErrorHandler_ { nullptr };

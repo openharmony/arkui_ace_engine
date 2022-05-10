@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace {
 namespace {
-constexpr double BOUNDARY_STROKE_WIDTH = 3.0;
+constexpr double BOUNDARY_STROKE_WIDTH = 1.0;
 constexpr double BOUNDARY_CORNER_LENGTH = 8.0;
 constexpr uint32_t BOUNDARY_COLOR = 0xFFFA2A2D;
 constexpr uint32_t BOUNDARY_CORNER_COLOR = 0xFF007DFF;

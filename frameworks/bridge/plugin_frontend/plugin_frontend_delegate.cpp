@@ -821,6 +821,16 @@ void PluginFrontendDelegate::GetState(int32_t& index, std::string& name, std::st
     }
 }
 
+size_t PluginFrontendDelegate::GetComponentsCount()
+{
+    auto pipelineContext = pipelineContextHolder_.Get();
+    const auto& pageElement = pipelineContext->GetLastPage();
+    if (pageElement) {
+        return pageElement->GetComponentsCount();
+    }
+    return 0;
+}
+
 std::string PluginFrontendDelegate::GetParams()
 {
     if (pageParamMap_.find(pageId_) != pageParamMap_.end()) {

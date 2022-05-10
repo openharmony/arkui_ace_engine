@@ -919,6 +919,16 @@ void FrontendDelegateDeclarative::GetState(int32_t& index, std::string& name, st
     }
 }
 
+size_t FrontendDelegateDeclarative::GetComponentsCount()
+{
+    auto pipelineContext = pipelineContextHolder_.Get();
+    const auto& pageElement = pipelineContext->GetLastPage();
+    if (pageElement) {
+        return pageElement->GetComponentsCount();
+    }
+    return 0;
+}
+
 std::string FrontendDelegateDeclarative::GetParams()
 {
     if (pageParamMap_.find(pageId_) != pageParamMap_.end()) {

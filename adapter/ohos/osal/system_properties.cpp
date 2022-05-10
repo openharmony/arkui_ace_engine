@@ -17,6 +17,7 @@
 
 #include <unistd.h>
 
+#include "parameter.h"
 #include "parameters.h"
 
 #include "base/log/log.h"
@@ -36,7 +37,7 @@ const char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 const char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 const char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
-const char ENABLE_DEBUG_BOUNDARY_FILE_PATH[] = "/etc/enable_paint_boundary";
+const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
@@ -52,17 +53,6 @@ bool IsTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.enabled", "0") == "1" ||
             system::GetParameter("debug.ace.trace.enabled", "0") == "1");
-}
-
-bool IsDebugBoundaryEnabled()
-{
-    if (system::GetParameter("persist.ace.debug.boundary.enabled", "0") == "1") {
-        return true;
-    }
-    if (system::GetParameter("persist.ace.debug.boundary.enabled", "0") == "2") {
-        return false;
-    }
-    return access(ENABLE_DEBUG_BOUNDARY_FILE_PATH, F_OK) == 0;
 }
 
 bool IsRosenBackendEnabled()
@@ -128,6 +118,15 @@ bool SystemProperties::IsSyscapExist(const char* cap)
 #endif
 }
 
+void SystemProperties::UpdateDebugBoundaryEnabled(const char *key, const char *value, void *context)
+{
+    if (strcmp(value, "true") == 0) {
+        debugBoundaryEnabled_ = true;
+    } else if (strcmp(value, "false") == 0) {
+        debugBoundaryEnabled_ = false;
+    }
+}
+
 void SystemProperties::InitDeviceType(DeviceType)
 {
     // Do nothing, no need to store type here, use system property at 'GetDeviceType' instead.
@@ -177,7 +176,7 @@ ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
-bool SystemProperties::debugBoundaryEnabled_ = IsDebugBoundaryEnabled();
+bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 bool SystemProperties::debugEnabled_ = IsDebugEnabled();
 int32_t SystemProperties::windowPosX_ = 0;
@@ -234,7 +233,6 @@ void SystemProperties::InitDeviceInfo(
     traceEnabled_ = IsTraceEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
-    debugBoundaryEnabled_ = IsDebugBoundaryEnabled();
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
@@ -243,6 +241,7 @@ void SystemProperties::InitDeviceInfo(
     }
 
     InitDeviceTypeBySystemProperty();
+    WatchParameter(ENABLE_DEBUG_BOUNDARY_KEY, SystemProperties::UpdateDebugBoundaryEnabled, nullptr);
 }
 
 void SystemProperties::SetDeviceOrientation(int32_t orientation)

@@ -106,9 +106,7 @@ void IndexerComponent::BuildBubbleBox()
     }
     bubbleText_->SetTextStyle(bubbleStyle_);
     bubble->SetChild(bubbleText_);
-    if (SystemProperties::GetDebugBoundaryEnabled()) {
-        bubble->SetEnableDebugBoundary(true);
-    }
+    bubble->SetEnableDebugBoundary(true);
     RefPtr<DisplayComponent> displayComponent = AceType::MakeRefPtr<DisplayComponent>(bubble);
     displayComponent->SetOpacity(ZERO_OPACITY);
 

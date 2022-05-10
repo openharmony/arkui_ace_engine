@@ -60,7 +60,7 @@ VisualState JSViewStackProcessor::StringToVisualState(const std::string& stateSt
     if (stateString == "pressed") {
         return VisualState::PRESSED;
     }
-    if (stateString == "disables") {
+    if (stateString == "disabled") {
         return VisualState::DISABLED;
     }
     if (stateString == "hover") {

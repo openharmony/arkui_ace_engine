@@ -160,8 +160,8 @@ void PluginSubContainer::UpdateSurfaceSize()
         TaskExecutor::TaskType::UI);
 }
 
-void PluginSubContainer::RunPlugin(
-    const std::string& path, const std::string& module, const std::string& source, const std::string& data)
+void PluginSubContainer::RunPlugin(const std::string& path, const std::string& module,
+    const std::string& source, const std::string& moduleResPath, const std::string& data)
 {
     ContainerScope scope(instanceId_);
 
@@ -180,7 +180,7 @@ void PluginSubContainer::RunPlugin(
     UpdateRootElmentSize();
     pipelineContext_->SetIsJsPlugin(true);
 
-    SetPluginComponentTheme(path, flutterAssetManager);
+    SetPluginComponentTheme(moduleResPath, flutterAssetManager);
     SetActionEventHandler();
 
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
@@ -229,7 +229,12 @@ void PluginSubContainer::SetPluginComponentTheme(
     ResourceConfiguration resConfig;
     resConfig.SetDensity(density_);
     pluginResourceInfo.SetThemeId(THEME_ID_DEFAULT);
-    pluginResourceInfo.SetPackagePath(path);
+    auto position = path.rfind('/');
+    if (position == std::string::npos) {
+        pluginResourceInfo.SetPackagePath(path);
+    } else {
+        pluginResourceInfo.SetPackagePath(path.substr(0, position + 1));
+    }
     pluginResourceInfo.SetResourceConfiguration(resConfig);
     pipelineContext_->SetThemeManager(AceType::MakeRefPtr<ThemeManager>());
     auto pluginThemeManager = pipelineContext_->GetThemeManager();

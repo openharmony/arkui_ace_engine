@@ -326,7 +326,7 @@ HWTEST_F(PluginSubContainerTest, PluginSubContaineRunPlugin001, TestSize.Level1)
      * @tc.steps: step4. RunPlugin.
      * @tc.expected: step4. RunPlugin success.
      */
-    pluginSubContainer->RunPlugin(PATH, "newui", "", "data");
+    pluginSubContainer->RunPlugin(PATH, "newui", "", "", "data");
 }
 
 /**
@@ -359,7 +359,7 @@ HWTEST_F(PluginSubContainerTest, PluginSubContaineRunPlugin002, TestSize.Level1)
      * @tc.steps: step4. RunPlugin.
      * @tc.expected: step4. RunPlugin fail.
      */
-    pluginSubContainer->RunPlugin(PATH, "newui", "", "data");
+    pluginSubContainer->RunPlugin(PATH, "newui", "", "", "data");
 }
 
 /**
@@ -397,6 +397,6 @@ HWTEST_F(PluginSubContainerTest, PluginSubContaineRunPlugin003, TestSize.Level1)
      * @tc.steps: step4. RunPlugin.
      * @tc.expected: step4. RunPlugin fail.
      */
-    pluginSubContainer->RunPlugin(PATH, "newui", "", "data");
+    pluginSubContainer->RunPlugin(PATH, "newui", "", "", "data");
 }
 } // namespace OHOS::Ace

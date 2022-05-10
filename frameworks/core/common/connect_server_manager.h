@@ -25,25 +25,23 @@
 
 namespace OHOS::Ace {
 
-class ConnectServerManager {
+class ACE_EXPORT ConnectServerManager {
 public:
     ~ConnectServerManager();
     static ConnectServerManager& Get();
-    void AddInstance(const int32_t instanceId, const std::string instanceName);
-    void RemoveInstance(const int32_t instanceId);
+    void AddInstance(int32_t instanceId, const std::string& instanceName = "PandaDebugger");
+    void RemoveInstance(int32_t instanceId);
 
 private:
     ConnectServerManager();
-    void OpenConnectServerSo();
+    void LoadConnectServerSo();
     void CloseConnectServerSo();
     void StartConnectServer();
     void StopConnectServer();
-    void StartHdcSocket();
-    std::string GetInstanceMapMessage(const char* messageType, const int32_t instanceId);
+    std::string GetInstanceMapMessage(const char* messageType, int32_t instanceId);
 
     mutable std::mutex mutex_;
     bool isDebugVersion_;
-    bool isNeedDebugBreakPoint_;
     void* handlerConnectServerSo_;
     std::string packageName_;
     std::unordered_map<int32_t, std::string> instanceMap_;

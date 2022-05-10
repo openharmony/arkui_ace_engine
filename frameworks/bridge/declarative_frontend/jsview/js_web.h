@@ -62,6 +62,7 @@ public:
     static void FileFromUrlAccess(bool isFileFromUrlAccessEnabled);
     static void DatabaseAccess(bool isDatabaseAccessEnabled);
     static void TextZoomAtio(int32_t textZoomAtioNum);
+    static void WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

@@ -19,26 +19,11 @@
 #include <iterator>
 
 #include "core/components/panel/sliding_panel_component_v2.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
-
-JSRef<JSVal> SlidingPanelSizeChangeEventToJSValue(const SlidingPanelSizeChangeEvent& eventInfo)
-{
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
-    std::string modeStr = "half";
-    const PanelMode& mode = eventInfo.GetMode();
-    if (mode == PanelMode::FULL) {
-        modeStr = "full";
-    } else if (mode == PanelMode::MINI) {
-        modeStr = "mini";
-    }
-    obj->SetProperty<std::string>("mode", modeStr.c_str());
-    obj->SetProperty<double>("width", eventInfo.GetWidth());
-    obj->SetProperty<double>("height", eventInfo.GetHeight());
-    return JSRef<JSVal>::Cast(obj);
-}
 
 } // namespace
 
@@ -276,18 +261,16 @@ void JSSlidingPanel::JsPanelBorder(const JSCallbackInfo& info)
 void JSSlidingPanel::SetOnSizeChange(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto onSizeChangeFunc = AceType::MakeRefPtr<JsEventFunction<SlidingPanelSizeChangeEvent, 1>>(
-            JSRef<JSFunc>::Cast(args[0]), SlidingPanelSizeChangeEventToJSValue);
         auto onSizeChange = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = std::move(onSizeChangeFunc)](const BaseEventInfo* param) {
+            [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto sizeChange = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(param);
-                if (!sizeChange) {
-                    LOGE("HandleSizeChangeEvent, sizeChange == nullptr");
+                auto eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(info);
+                if (!eventInfo) {
                     return;
                 }
+                auto params = ConvertToJSValues(eventInfo->GetWidth(), eventInfo->GetHeight(), eventInfo->GetMode());
                 ACE_SCORING_EVENT("SlidingPanel.OnSizeChange");
-                func->Execute(*sizeChange);
+                func->Call(JSRef<JSObject>(), params.size(), params.data());
             });
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
         auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);

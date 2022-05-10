@@ -51,6 +51,7 @@ template("ace_test") {
       deps += [
         ":copy_ark_shared_library(${current_toolchain})",
         ":copy_icu_data_resource(${current_toolchain})",
+        ":copy_icu_shared_library(${current_toolchain})",
         ":copy_napi_shared_library(${current_toolchain})",
       ]
     } else {
@@ -102,42 +103,93 @@ if (enable_ark_preview) {
     ark_core_shared_library =
         get_label_info("//ark/runtime_core/libpandabase:libarkbase",
                        "root_out_dir") + "/ark/ark"
-    sources += [
-      "$ark_core_shared_library/libarkbase.dll",
-      "$ark_core_shared_library/libarkfile.dll",
-      "$ark_core_shared_library/libarkziparchive.dll",
-    ]
     deps += [
       "//ark/runtime_core/libpandabase:libarkbase(${current_toolchain})",
       "//ark/runtime_core/libpandafile:libarkfile(${current_toolchain})",
       "//ark/runtime_core/libziparchive:libarkziparchive(${current_toolchain})",
     ]
+    if (use_mac) {
+      sources += [
+        "$ark_core_shared_library/libarkbase.dylib",
+        "$ark_core_shared_library/libarkfile.dylib",
+        "$ark_core_shared_library/libarkziparchive.dylib",
+      ]
+      outputs =
+          [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
+    } else {
+      sources += [
+        "$ark_core_shared_library/libarkbase.dll",
+        "$ark_core_shared_library/libarkfile.dll",
+        "$ark_core_shared_library/libarkziparchive.dll",
+      ]
+      outputs = [ root_build_dir +
+                  "/mingw_x86_64/common/common/{{source_file_part}}" ]
+    }
+
     ark_js_shared_library =
         get_label_info("//ark/js_runtime:libark_jsruntime", "root_out_dir") +
         "/ark/ark_js_runtime"
-    sources += [ "$ark_js_shared_library/libark_jsruntime.dll" ]
     deps += [ "//ark/js_runtime:libark_jsruntime" ]
-    outputs =
-        [ root_build_dir + "/mingw_x86_64/common/common/{{source_file_part}}" ]
+    if (use_mac) {
+      sources += [ "$ark_js_shared_library/libark_jsruntime.dylib" ]
+    } else {
+      sources += [ "$ark_js_shared_library/libark_jsruntime.dll" ]
+    }
   }
   ohos_copy("copy_napi_shared_library") {
     shared_library_path =
         get_label_info("$ace_napi:ace_napi(${current_toolchain})",
                        "root_out_dir")
-    sources = [
-      "$shared_library_path/arkui/napi/libace_napi.dll",
-      "$shared_library_path/arkui/napi/libace_napi_ark.dll",
-    ]
     deps = [
       "$ace_napi:ace_napi(${current_toolchain})",
       "$ace_napi:ace_napi_ark(${current_toolchain})",
     ]
-    outputs =
-        [ root_build_dir + "/mingw_x86_64/common/common/{{source_file_part}}" ]
+    if (use_mac) {
+      sources = [
+        "$shared_library_path/arkui/napi/libace_napi.dylib",
+        "$shared_library_path/arkui/napi/libace_napi_ark.dylib",
+      ]
+      outputs =
+          [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
+    } else {
+      sources = [
+        "$shared_library_path/arkui/napi/libace_napi.dll",
+        "$shared_library_path/arkui/napi/libace_napi_ark.dll",
+      ]
+      outputs = [ root_build_dir +
+                  "/mingw_x86_64/common/common/{{source_file_part}}" ]
+    }
+  }
+  ohos_copy("copy_icu_shared_library") {
+    shared_library_path =
+        get_label_info("//third_party/icu/icu4c:shared_icuuc", "root_out_dir")
+    deps = [
+      "//third_party/icu/icu4c:shared_icui18n",
+      "//third_party/icu/icu4c:shared_icuuc",
+    ]
+    if (use_mac) {
+      sources = [
+        "$shared_library_path/thirdparty/icu/libhmicui18n.dylib",
+        "$shared_library_path/thirdparty/icu/libhmicuuc.dylib",
+      ]
+      outputs =
+          [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
+    } else {
+      sources = [
+        "$shared_library_path/thirdparty/icu/libhmicui18n.dll",
+        "$shared_library_path/thirdparty/icu/libhmicuuc.dll",
+      ]
+      outputs = [ root_build_dir +
+                  "/mingw_x86_64/common/common/{{source_file_part}}" ]
+    }
   }
   ohos_copy("copy_icu_data_resource") {
     sources = [ "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat" ]
-    outputs = [ root_build_dir + "/mingw_x86_64/common/common/icudt67l.dat" ]
+    if (use_mac) {
+      outputs = [ root_build_dir + "/clang_x64/common/common/icudt67l.dat" ]
+    } else {
+      outputs = [ root_build_dir + "/mingw_x86_64/common/common/icudt67l.dat" ]
+    }
   }
 } else {
   ohos_copy("copy_napi_shared_library_for_test") {
@@ -195,9 +247,9 @@ ohos_copy("copy_resource_dynamic_library") {
   if (use_mac) {
     if (is_standard_system) {
       resource_manager_library = get_label_info(
-                                     "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac",
-                                     "root_out_dir") + "/global/resmgr_standard/libglobal_resmgr_mac.dylib"
-      deps = [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
+                                     "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
+                                     "root_out_dir") + "/global/resource_management/libglobal_resmgr_mac.dylib"
+      deps = [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
       sources = [ resource_manager_library ]
     } else {
       sources = [
@@ -210,9 +262,9 @@ ohos_copy("copy_resource_dynamic_library") {
   } else {
     if (is_standard_system) {
       resource_manager_library = get_label_info(
-                                     "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win",
-                                     "root_out_dir") + "/global/resmgr_standard/libglobal_resmgr_win.dll"
-      deps = [ "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
+                                     "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
+                                     "root_out_dir") + "/global/resource_management/libglobal_resmgr_win.dll"
+      deps = [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
       sources = [ resource_manager_library ]
     } else {
       sources = [

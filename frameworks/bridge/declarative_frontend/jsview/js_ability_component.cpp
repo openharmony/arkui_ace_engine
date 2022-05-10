@@ -15,7 +15,9 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_ability_component.h"
 
+#include "frameworks/base/json/json_util.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ability_component_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -31,6 +33,8 @@ void JSAbilityComponent::JSBind(BindingTarget globalObj)
     JSClass<JSAbilityComponent>::StaticMethod("onAbilityCreated", &JSAbilityComponent::JsOnAbilityCreated, opt);
     JSClass<JSAbilityComponent>::StaticMethod("onAbilityMoveToFront", &JSAbilityComponent::JsOnAbilityMovedFront, opt);
     JSClass<JSAbilityComponent>::StaticMethod("onAbilityWillRemove", &JSAbilityComponent::JsOnAbilityWillRemove, opt);
+    JSClass<JSAbilityComponent>::StaticMethod("width", &JSAbilityComponent::Width, opt);
+    JSClass<JSAbilityComponent>::StaticMethod("height", &JSAbilityComponent::Height, opt);
     JSClass<JSAbilityComponent>::Inherit<JSViewAbstract>();
     JSClass<JSAbilityComponent>::Bind<>(globalObj);
 }
@@ -40,13 +44,26 @@ void JSAbilityComponent::Create(const JSCallbackInfo& info)
     if (info.Length() != 1 || !info[0]->IsObject()) {
         return;
     }
-    auto component = AceType::MakeRefPtr<OHOS::Ace::AbilityComponent>();
+    RefPtr<AbilityComponent> component;
     auto obj = JSRef<JSObject>::Cast(info[0]);
-
     // Parse want
     JSRef<JSVal> wantValue = obj->GetProperty("want");
     if (wantValue->IsObject()) {
+        component = AceType::MakeRefPtr<OHOS::Ace::AbilityComponent>();
         component->SetWant(wantValue->ToString());
+    } else {
+        RefPtr<V2::AbilityComponent> ability = AceType::MakeRefPtr<OHOS::Ace::V2::AbilityComponent>();
+        auto jsonStr = JsonUtil::Create(true);
+        if (obj->GetProperty("bundleName")->IsNull() || obj->GetProperty("bundleName")->IsUndefined() ||
+            obj->GetProperty("abilityName")->IsNull() || obj->GetProperty("abilityName")->IsUndefined()) {
+            LOGI("bundleName or abilityName is undefined");
+            return;
+        }
+        jsonStr->Put("bundle", obj->GetProperty("bundleName")->ToString().c_str());
+        jsonStr->Put("ability", obj->GetProperty("abilityName")->ToString().c_str());
+        ability->SetWant(jsonStr->ToString());
+        ViewStackProcessor::GetInstance()->Push(ability);
+        return;
     }
 
     // Parse controller
@@ -84,6 +101,32 @@ void JSAbilityComponent::JsOnAbilityMovedFront(const JSCallbackInfo& info)
 void JSAbilityComponent::JsOnAbilityWillRemove(const JSCallbackInfo& info)
 {
     JSViewBindEvent(&AbilityComponent::SetOnAbilityWillRemove, info);
+}
+
+void JSAbilityComponent::Width(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsWidth(info);
+    auto component = AceType::DynamicCast<V2::AbilityComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (component) {
+        Dimension value;
+        if (!ParseJsDimensionVp(info[0], value)) {
+            return;
+        }
+        component->SetWidth(static_cast<float>(value.ConvertToVp()));
+    }
+}
+
+void JSAbilityComponent::Height(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsHeight(info);
+    auto component = AceType::DynamicCast<V2::AbilityComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (component) {
+        Dimension value;
+        if (!ParseJsDimensionVp(info[0], value)) {
+            return;
+        }
+        component->SetHeight(static_cast<float>(value.ConvertToVp()));
+    }
 }
 
 } // namespace OHOS::Ace::Framework

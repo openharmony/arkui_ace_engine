@@ -17,7 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DEBUGGER_CONNECT_INSPECTOR_H
 
 #include <string>
+#include <unordered_map>
 
+#include "frameworks/core/common/debugger/connect_server.h"
 namespace OHOS::Ace {
 #ifdef __cplusplus
 #if __cplusplus
@@ -25,25 +27,34 @@ extern "C" {
 #endif
 #endif /* End of #ifdef __cplusplus */
 
-void StartServer(const std::string& componentName, const bool flagNeedDebugBreakPoint);
-
-void StartUnixSocket(const std::string& componentName);
+void StartServer(const std::string& componentName);
 
 void StopServer(const std::string& componentName);
 
 void SendMessage(const std::string& message);
 
-void AddMessage(const int32_t instanceId, const std::string& message);
+void StoreMessage(int32_t instanceId, const std::string& message);
 
-void RemoveMessage(const int32_t instanceId);
+void RemoveMessage(int32_t instanceId);
 
-bool IsAttachStart();
+bool WaitForDebugger();
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif
 #endif /* End of #ifdef __cplusplus */
+
+class ConnectInspector {
+public:
+    ConnectInspector() = default;
+    ~ConnectInspector() = default;
+
+    std::string componentName_ {};
+    std::unordered_map<int32_t, std::string> infoBuffer_;
+    std::unique_ptr<ConnectServer> connectServer_;
+    volatile bool waitingForDebugger_ = true;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DEBUGGER_CONNECT_INSPECTOR_H

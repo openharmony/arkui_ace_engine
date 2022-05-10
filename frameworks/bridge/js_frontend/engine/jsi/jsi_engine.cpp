@@ -29,6 +29,7 @@
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -61,6 +62,8 @@ extern const char _binary_strip_native_min_abc_end[];
 #endif
 
 namespace OHOS::Ace::Framework {
+
+const int SYSTEM_BASE = 10;
 
 #ifdef APP_USE_ARM
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
@@ -774,34 +777,55 @@ std::string GetDeviceInfo()
     infoList->Put("manufacturer", SystemProperties::GetManufacturer().c_str());
     infoList->Put("model", SystemProperties::GetModel().c_str());
     infoList->Put("product", SystemProperties::GetProduct().c_str());
-
-    if (AceApplicationInfo::GetInstance().GetLanguage().empty()) {
-        infoList->Put("language", "N/A");
+    std::string tmp = SystemProperties::GetApiVersion();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        char* tmpEnd = nullptr;
+        infoList->Put("apiVersion", static_cast<int32_t>(
+	    std::strtol(SystemProperties::GetApiVersion().c_str(), &tmpEnd, SYSTEM_BASE)));
     } else {
-        infoList->Put("language", AceApplicationInfo::GetInstance().GetLanguage().c_str());
+        infoList->Put("apiVersion", "N/A");
     }
-    if (AceApplicationInfo::GetInstance().GetCountryOrRegion().empty()) {
-        infoList->Put("region", "N/A");
+    tmp = SystemProperties::GetReleaseType();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        infoList->Put("releaseType", tmp.c_str());
     } else {
-        infoList->Put("region", AceApplicationInfo::GetInstance().GetCountryOrRegion().c_str());
+        infoList->Put("releaseType", "N/A");
+    }
+    tmp = SystemProperties::GetParamDeviceType();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        infoList->Put("deviceType", tmp.c_str());
+    } else {
+        infoList->Put("deviceType", "N/A");
+    }
+    tmp = SystemProperties::GetLanguage();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        infoList->Put("language", tmp.c_str());
+    } else {
+        infoList->Put("language", "N/A");
+    }
+    tmp = SystemProperties::GetRegion();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        infoList->Put("region", tmp.c_str());
+    } else {
+        infoList->Put("region", "N/A");
     }
 
     auto container = Container::Current();
     int32_t width = container ? container->GetViewWidth() : 0;
     if (width != 0) {
-        infoList->Put("windowWidth", std::to_string(width).c_str());
+        infoList->Put("windowWidth", width);
     } else {
         infoList->Put("windowWidth", "N/A");
     }
 
     int32_t height = container ? container->GetViewHeight() : 0;
     if (height != 0) {
-        infoList->Put("windowHeight", std::to_string(height).c_str());
+        infoList->Put("windowHeight", height);
     } else {
         infoList->Put("windowHeight", "N/A");
     }
 
-    infoList->Put("screenDensity", std::to_string(SystemProperties::GetResolution()).c_str());
+    infoList->Put("screenDensity", SystemProperties::GetResolution());
 
     bool isRound = SystemProperties::GetIsScreenRound();
     if (isRound) {
@@ -2927,7 +2951,7 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
     if (debugger_mode) {
         library_path = ARK_DEBUGGER_LIB_PATH;
     }
-    if (!runtime_->Initialize(library_path, isDebugMode_)) {
+    if (!runtime_->Initialize(library_path, isDebugMode_, GetInstanceId())) {
         LOGE("Js Engine initialize runtime failed");
         return false;
     }
@@ -3144,7 +3168,13 @@ void JsiEngine::SetPostTask(NativeEngine* nativeEngine)
 void JsiEngine::RegisterInitWorkerFunc()
 {
     auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
-    auto&& initWorkerFunc = [weakInstance](NativeEngine* nativeEngine) {
+    bool debugVersion = IsDebugVersion();
+    bool debugMode = NeedDebugBreakPoint();
+    std::string libraryPath = "";
+    if (debugVersion) {
+        libraryPath = ARK_DEBUGGER_LIB_PATH;
+    }
+    auto&& initWorkerFunc = [weakInstance, debugMode, libraryPath](NativeEngine* nativeEngine) {
         LOGI("WorkerCore RegisterInitWorkerFunc called");
         if (nativeEngine == nullptr) {
             LOGE("nativeEngine is nullptr");
@@ -3160,6 +3190,11 @@ void JsiEngine::RegisterInitWorkerFunc()
             LOGE("instance is nullptr");
             return;
         }
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+        ConnectServerManager::Get().AddInstance(gettid());
+        auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
+        panda::JSNApi::StartDebugger(libraryPath.c_str(), vm, debugMode, gettid());
+#endif
         instance->RegisterConsoleModule(arkNativeEngine);
         // load jsfwk
         if (!arkNativeEngine->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
@@ -3168,6 +3203,33 @@ void JsiEngine::RegisterInitWorkerFunc()
     };
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
+
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+void JsiEngine::RegisterOffWorkerFunc()
+{
+    auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
+    bool debugVersion = IsDebugVersion();
+    auto&& offWorkerFunc = [debugVersion](NativeEngine* nativeEngine) {
+        LOGI("WorkerCore RegisterOffWorkerFunc called");
+        if (!debugVersion) {
+            return;
+        }
+        if (nativeEngine == nullptr) {
+            LOGE("nativeEngine is nullptr");
+            return;
+        }
+        auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
+        if (arkNativeEngine == nullptr) {
+            LOGE("arkNativeEngine is nullptr");
+            return;
+        }
+        ConnectServerManager::Get().RemoveInstance(gettid());
+        auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
+        panda::JSNApi::StopDebugger(vm);
+    };
+    nativeEngine_->SetOffWorkerFunc(offWorkerFunc);
+}
+#endif
 
 void JsiEngine::RegisterAssetFunc()
 {
@@ -3192,6 +3254,9 @@ void JsiEngine::RegisterAssetFunc()
 void JsiEngine::RegisterWorker()
 {
     RegisterInitWorkerFunc();
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+    RegisterOffWorkerFunc();
+#endif
     RegisterAssetFunc();
 }
 

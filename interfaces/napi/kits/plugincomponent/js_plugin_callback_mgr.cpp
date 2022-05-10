@@ -30,6 +30,7 @@ JSPluginCallbackMgr::~JSPluginCallbackMgr()
         }
     }
     eventList_.clear();
+    asyncJSCallbackInfo_ = nullptr;
 }
 
 JSPluginCallbackMgr& JSPluginCallbackMgr::Instance(void)
@@ -49,7 +50,7 @@ bool JSPluginCallbackMgr::RegisterOnEvent(napi_env env, CallBackType eventType, 
     }
 
     std::shared_ptr<JSPluginCallback> pPluginComponentCallback =
-        std::make_shared<JSPluginCallback>(eventType, cbInfo);
+        std::make_shared<JSPluginCallback>(eventType, cbInfo, asyncJSCallbackInfo_);
     if (pPluginComponentCallback != nullptr) {
         pPluginComponentCallback->SetWant(want);
         eventList_.insert(std::make_pair(pPluginComponentCallback->GetID(), pPluginComponentCallback));
@@ -75,13 +76,25 @@ bool JSPluginCallbackMgr::RegisterRequestEvent(napi_env env, const AAFwk::Want& 
     }
 
     std::shared_ptr<JSPluginCallback> pPluginComponentCallback =
-        std::make_shared<JSPluginCallback>(CallBackType::RequestCallBack, cbInfo);
+        std::make_shared<JSPluginCallback>(CallBackType::RequestCallBack, cbInfo, asyncJSCallbackInfo_);
     if (pPluginComponentCallback != nullptr) {
         pPluginComponentCallback->SetWant(want);
+        pPluginComponentCallback->SetRequestParam(param);
         eventList_.insert(std::make_pair(pPluginComponentCallback->GetID(), pPluginComponentCallback));
         PluginComponentManager::GetInstance()->RegisterCallBack(want, pPluginComponentCallback,
             CallBackType::RequestCallBack);
         return true;
+    } else {
+        return false;
+    }
+}
+
+bool JSPluginCallbackMgr::RegisterRequestEvent(napi_env env, const AAFwk::Want& want,
+    ACEAsyncJSCallbackInfo* jsCallbackInfo, const std::shared_ptr<AceJSPluginRequestParam>& param)
+{
+    asyncJSCallbackInfo_ = jsCallbackInfo;
+    if (jsCallbackInfo) {
+        return RegisterRequestEvent(env, want, jsCallbackInfo->cbInfo, param);
     } else {
         return false;
     }

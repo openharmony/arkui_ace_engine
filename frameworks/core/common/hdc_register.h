@@ -26,13 +26,13 @@ namespace OHOS::Ace {
 
 class HdcRegister {
 public:
-    HdcRegister();
     ~HdcRegister() = default;
     static HdcRegister& Get();
-    void StartHdcRegister();
-    void StopHdcRegister();
+    void StartHdcRegister(int32_t instanceId);
+    void StopHdcRegister(int32_t instanceId);
 
 private:
+    HdcRegister();
     void LoadRegisterSo();
 
     bool isDebugVersion_;
