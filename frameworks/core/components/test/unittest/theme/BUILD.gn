@@ -96,7 +96,7 @@ ohos_unittest("ThemeManagerTest") {
     external_deps = [
       "hilog:libhilog",
       "resmgr:resourcemanager",
-      "startup:syspara",
+      "init_lite:libbegetutil",
     ]
   } else {
     subsystem_name = "arkui"
@@ -108,7 +108,7 @@ ohos_unittest("ThemeManagerTest") {
     ]
     external_deps = [
       "hiviewdfx_hilog_native:libhilog",
-      "startup_l2:syspara",
+      "init:libbegetutil",
     ]
     configs += [ "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config" ]
   }
@@ -195,14 +195,14 @@ ohos_unittest("ThemeConstantsTest") {
   if (is_standard_system) {
     external_deps = [
       "hiviewdfx_hilog_native:libhilog",
-      "startup_l2:syspara",
+      "init:libbegetutil",
     ]
     deps += [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
     configs += [ "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config" ]
   } else {
     external_deps = [
       "hilog:libhilog",
-      "startup:syspara",
+      "init_lite:libbegetutil",
     ]
   }
 

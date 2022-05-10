@@ -241,14 +241,14 @@ ohos_unittest("TransitionElementTest") {
       "hitrace_native:hitrace_meter",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
-      "startup_l2:syspara",
+      "init:libbegetutil",
     ]
     configs += [ "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config" ]
   } else {
     external_deps = [
       "hilog:libhilog",
       "hitrace_native:hitrace_meter",
-      "startup:syspara",
+      "init_lite:libbegetutil",
     ]
   }
 
@@ -306,14 +306,14 @@ ohos_unittest("SharedTransitionElementTest") {
       "hitrace_native:hitrace_meter",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
-      "startup_l2:syspara",
+      "init:libbegetutil",
     ]
     configs += [ "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config" ]
   } else {
     external_deps = [
       "hilog:libhilog",
       "hitrace_native:hitrace_meter",
-      "startup:syspara",
+      "init_lite:libbegetutil",
     ]
   }
 
@@ -366,7 +366,7 @@ ohos_unittest("TransitionPropertyElementTest") {
       "hitrace_native:hitrace_meter",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
-      "startup_l2:syspara",
+      "init:libbegetutil",
     ]
     configs += [ "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config" ]
     subsystem_name = "arkui"
@@ -375,7 +375,7 @@ ohos_unittest("TransitionPropertyElementTest") {
     external_deps = [
       "hilog:libhilog",
       "hitrace_native:hitrace_meter",
-      "startup:syspara",
+      "init_lite:libbegetutil",
     ]
   }
 
