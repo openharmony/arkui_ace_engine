@@ -77,6 +77,8 @@ napi_value AceStringToKVObject(napi_env env, const std::string& jsonString);
 
 bool AceUnwrapArrayComplexFromJS(napi_env env, napi_value param, ACEComplexArrayData& value);
 
+void AceSetNamedPropertyByString(napi_env env, napi_value jsObject, const char *objName, const char *propName);
+
 bool AceIsSameFuncFromJS(ACECallbackInfo& left, ACECallbackInfo& right);
 /**
  * @brief Indicates the specified attribute exists in the object passed by JS.

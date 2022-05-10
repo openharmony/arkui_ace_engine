@@ -471,6 +471,8 @@ void AceAbility::OnNewWant(const Want& want)
     Ability::OnNewWant(want);
     std::string params = want.GetStringParam(START_PARAMS_KEY);
     Platform::AceContainer::OnNewRequest(abilityId_, params);
+    std::string data = want.ToString();
+    Platform::AceContainer::OnNewWant(abilityId_, data);
     LOGI("AceAbility::OnNewWant called End");
 }
 

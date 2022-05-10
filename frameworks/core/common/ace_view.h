@@ -90,6 +90,11 @@ public:
     {
         return false;
     }
+    // Use to receive key event from pc previewer
+    virtual bool HandleKeyEvent(const KeyEvent& keyEvent)
+    {
+        return false;
+    }
     // Use to get native window handle by texture id
     virtual const void* GetNativeWindowById(uint64_t textureId) = 0;
 

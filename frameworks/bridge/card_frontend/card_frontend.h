@@ -100,6 +100,7 @@ public:
     }
     void OnRemoteTerminated() override {}
     void OnNewRequest(const std::string& data) override {}
+    void OnDialogUpdated(const std::string& data) override {}
     void OnNewWant(const std::string& data) override {}
     void CallRouterBack() override {}
     void OnSurfaceChanged(int32_t width, int32_t height) override;
@@ -260,7 +261,8 @@ public:
         LOGW("card event handler does not support this event type!");
     }
 
-    void HandleSyncEvent(const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId) override
+    void HandleSyncEvent(const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId,
+        const bool isDestroy) override
     {
         LOGW("card event handler does not support this event type!");
     }

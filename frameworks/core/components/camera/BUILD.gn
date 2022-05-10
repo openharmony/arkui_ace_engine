@@ -11,7 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/ace/ace_engine/frameworks/core/components/components.gni")
+import(
+    "//foundation/arkui/ace_engine/frameworks/core/components/components.gni")
+
 config("standard_camera_config") {
   cflags_cc = [ "-Wno-user-defined-warnings" ]
 
@@ -25,10 +27,10 @@ config("standard_camera_config") {
     "//drivers/peripheral/camera/interfaces/include/callback/host/",
     "//drivers/peripheral/camera/interfaces/include/callback/operator/",
     "//drivers/peripheral/camera/interfaces/include/server/",
+    "//drivers/peripheral/camera/interfaces/metadata/include",
     "//drivers/peripheral/codec/interfaces/include",
     "//drivers/peripheral/display/interfaces/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//foundation/multimedia/camera_standard/frameworks/native/metadata/include",
     "//foundation/multimedia/camera_standard/interfaces/inner_api/native/camera/include",
     "//foundation/multimedia/camera_standard/services/camera_service/binder/base/include",
     "//foundation/multimedia/camera_standard/services/camera_service/binder/client/include",
@@ -50,7 +52,7 @@ build_component("camera") {
     sources += [ "standard_system/camera.cpp" ]
 
     deps = [
-      "//foundation/graphic/standard:libwmclient",
+      "//foundation/graphic/graphic:libwmclient",
       "//foundation/multimedia/camera_standard/frameworks/native/camera:camera_framework",
       "//utils/native/base:utils",
     ]

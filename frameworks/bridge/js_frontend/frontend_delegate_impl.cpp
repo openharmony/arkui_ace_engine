@@ -442,6 +442,11 @@ void FrontendDelegateImpl::OnNewRequest(const std::string& data)
     FireSyncEvent("_root", std::string("\"onNewRequest\","), data);
 }
 
+void FrontendDelegateImpl::OnDialogUpdated(const std::string& data)
+{
+    FireSyncEvent("_root", std::string("\"onDialogUpdated\","), data);
+}
+
 void FrontendDelegateImpl::CallPopPage()
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -531,13 +536,13 @@ void FrontendDelegateImpl::FireSyncEvent(
 }
 
 void FrontendDelegateImpl::FireExternalEvent(
-    const std::string& eventId, const std::string& componentId, const uint32_t nodeId)
+    const std::string& eventId, const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     taskExecutor_->PostSyncTask(
-        [weak = AceType::WeakClaim(this), componentId, nodeId] {
+        [weak = AceType::WeakClaim(this), componentId, nodeId, isDestroy] {
             auto delegate = weak.Upgrade();
             if (delegate) {
-                delegate->externalEvent_(componentId, nodeId);
+                delegate->externalEvent_(componentId, nodeId, isDestroy);
             }
         },
         TaskExecutor::TaskType::JS);
@@ -714,6 +719,23 @@ void FrontendDelegateImpl::GetState(int32_t& index, std::string& name, std::stri
         name = url.substr(pos + 1);
         path = url.substr(0, pos + 1);
     }
+}
+
+size_t FrontendDelegateImpl::GetComponentsCount()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (pageRouteStack_.empty()) {
+        return 0;
+    }
+    auto itPage = pageMap_.find(pageRouteStack_.back().pageId);
+    if (itPage == pageMap_.end()) {
+        return 0;
+    }
+    auto domDoc = itPage->second->GetDomDocument();
+    if (!domDoc) {
+        return 0;
+    }
+    return domDoc->GetComponentsCount();
 }
 
 std::string FrontendDelegateImpl::GetParams()

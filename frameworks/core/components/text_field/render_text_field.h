@@ -353,7 +353,7 @@ protected:
     void OnLongPress(const LongPressInfo& longPressInfo);
     bool HandleMouseEvent(const MouseEvent& event) override;
 
-    void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true);
+    void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true, bool isClearRecords = true);
     std::u16string GetTextForDisplay(const std::string& text) const;
 
     void UpdateStartSelection(int32_t end, const Offset& pos, bool isSingleHandle, bool isLongPress);
@@ -525,6 +525,9 @@ private:
     void UpdatePasswordIcon(const RefPtr<TextFieldComponent>& textField);
     void UpdateOverlay();
     void RegisterFontCallbacks();
+    void HandleOnSelect(KeyCode keyCode, CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
+    void HandleOnRevoke();
+    void HandleOnInverseRevoke();
     void HandleOnCut();
     void HandleOnCopy();
     void HandleOnPaste();
@@ -618,6 +621,8 @@ private:
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<Animator> pressController_;
     RefPtr<Animator> animator_;
+    std::vector<TextEditingValue> operationRecords_;
+    std::vector<TextEditingValue> inverseOperationRecords_;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     bool imeAttached_ = false;
 #endif

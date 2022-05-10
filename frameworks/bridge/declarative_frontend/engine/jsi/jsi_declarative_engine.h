@@ -123,6 +123,11 @@ public:
         isDebugMode_ = isDebugMode;
     }
 
+    void SetInstanceId(int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    }
+
     void SetRootView(int32_t pageId, panda::Global<panda::ObjectRef> value)
     {
         rootViewMap_.emplace(pageId, value);
@@ -174,6 +179,7 @@ private:
     mutable std::mutex mutex_;
     bool isDebugMode_ = true;
     bool usingSharedRuntime_ = false;
+    int32_t instanceId_ = 0;
     static bool isModulePreloaded_;
     static bool isModuleInitialized_;
     static shared_ptr<JsRuntime> globalRuntime_;
@@ -212,7 +218,7 @@ public:
     // Fire SyncEvent on JS
     void FireSyncEvent(const std::string& eventId, const std::string& param) override;
 
-    void FireExternalEvent(const std::string& componentId, const uint32_t nodeId) override;
+    void FireExternalEvent(const std::string& componentId, const uint32_t nodeId, const bool isDestroy) override;
 
     // Timer callback
     void TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval) override;
@@ -223,6 +229,8 @@ public:
     void OnActive() override;
 
     void OnInactive() override;
+
+    void OnNewWant(const std::string& data) override;
 
     bool OnStartContinuation() override;
 
@@ -292,11 +300,11 @@ private:
 
     void TimerCallJs(const std::string& callbackId) const;
 
-    void InitXComponent();
-    bool InitXComponent(const std::string& componentId);
+    void InitXComponent(const std::string& componentId);
 
     void RegisterWorker();
     void RegisterInitWorkerFunc();
+    void RegisterOffWorkerFunc();
     void RegisterAssetFunc();
     bool ExecuteAbc(const std::string &fileName);
 

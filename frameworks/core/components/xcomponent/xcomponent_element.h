@@ -23,7 +23,7 @@
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "display_type.h"
-#include "foundation/graphic/standard/interfaces/innerkits/surface/window.h"
+#include "foundation/graphic/graphic/interfaces/inner_api/surface/window.h"
 #include "foundation/windowmanager/interfaces/innerkits/wm/window.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
@@ -55,7 +55,6 @@ private:
     void OnSurfaceInit(const std::string& componentId, const uint32_t nodeId);
     void RegisterDispatchEventCallback();
     void DispatchTouchEvent(const TouchEvent& event);
-    void DispatchMousehEvent(const MouseEvent& event);
     void OnXComponentSizeInit(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
     void OnXComponentSizeChange(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
 
@@ -66,11 +65,10 @@ private:
     void SetMethodCall();
     void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
 
-    std::function<void(const std::string&, const uint32_t)> onSurfaceInit_;
+    std::function<void(const std::string&, const uint32_t, const bool)> onSurfaceInit_;
     InitEventCallback onXComponentInit_;
     DestroyEventCallback onXComponentDestroy_;
     OH_NativeXComponent_TouchEvent touchEventPoint_;
-    OH_NativeXComponent_MouseEvent mouseEventPoint_;
     std::string name_;
     std::string idStr_;
     bool hasSendDestroyEvent_ = false;

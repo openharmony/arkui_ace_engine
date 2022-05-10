@@ -234,6 +234,8 @@ std::string AceUnwrapStringFromJS(napi_env env, napi_value param, const std::str
         return value;
     }
     if (memset_s(buf, size + 1, 0, size + 1) != EOK) {
+        delete[] buf;
+        buf = nullptr;
         return value;
     }
 
@@ -266,6 +268,8 @@ bool AceUnwrapStringFromJS2(napi_env env, napi_value param, std::string& value)
         return false;
     }
     if (memset_s(buf, (size + 1), 0, (size + 1)) != EOK) {
+        delete[] buf;
+        buf = nullptr;
         return false;
     }
 
@@ -699,6 +703,9 @@ bool AceIsSameFuncFromJS(ACECallbackInfo& left, ACECallbackInfo& right)
     if (left.env != right.env) {
         return false;
     }
+    if (left.callback == nullptr && right.callback == nullptr) {
+        return true;
+    }
 
     bool result = false;
     napi_value leftFunc = nullptr;
@@ -921,6 +928,8 @@ ACEAsyncJSCallbackInfo* AceCreateAsyncJSCallbackInfo(napi_env env)
         .ability = ability,
         .asyncWork = nullptr,
         .deferred = nullptr,
+        .onRequestData = nullptr,
+        .onRequestCallbackOK = false,
     };
 
     if (asyncCallbackInfo != nullptr) {
@@ -1167,5 +1176,19 @@ void AceCompletePromiseCallbackWork(napi_env env, napi_status status, void* data
     napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
     delete asyncCallbackInfo;
     asyncCallbackInfo = nullptr;
+}
+
+/**
+ * @brief Set named property to obj by string
+ *
+ * @param jsObject Indicates object passed by JS.
+ * @param propertyName Indicates the name of the object.
+ * @param propName Indicates the name of the property.
+ */
+void AceSetNamedPropertyByString(napi_env env, napi_value jsObject, const char *objName, const char *propName)
+{
+    napi_value prop = nullptr;
+    napi_create_string_utf8(env, objName, NAPI_AUTO_LENGTH, &prop);
+    napi_set_named_property(env, jsObject, propName, prop);
 }
 }  // namespace OHOS::Ace::Napi

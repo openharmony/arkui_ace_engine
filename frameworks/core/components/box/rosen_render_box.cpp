@@ -327,7 +327,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
             RosenDecorationPainter::PaintColorBlend(outerRRect, canvas, frontDecoration_->GetColorBlend(), bgColor);
         }
     }
-    if (RenderBox::needPaintDebugBoundary_) {
+    if (RenderBox::needPaintDebugBoundary_ && SystemProperties::GetDebugBoundaryEnabled()) {
         auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
         if (canvas == nullptr) {
             LOGE("Paint canvas is null.");
@@ -906,8 +906,18 @@ void RosenRenderBox::SetBackgroundPosition(const BackgroundImagePosition& positi
         LOGE("set background position to rsNode failed, rsNode is null");
         return;
     }
-    rsNode->SetBgImagePositionX(position.GetSizeValueX());
-    rsNode->SetBgImagePositionY(position.GetSizeValueY());
+    if (position.GetSizeTypeX() == BackgroundImagePositionType::PX) {
+        rsNode->SetBgImagePositionX(position.GetSizeValueX());
+    } else {
+        rsNode->SetBgImagePositionX(position.GetSizeValueX() *
+            (paintSize_.Width() - rsNode->GetStagingProperties().GetBgImageWidth()) / PERCENT_TRANSLATE);
+    }
+    if (position.GetSizeTypeX() == BackgroundImagePositionType::PX) {
+        rsNode->SetBgImagePositionX(position.GetSizeValueX());
+    } else {
+        rsNode->SetBgImagePositionY(position.GetSizeValueY() *
+            (paintSize_.Height() - rsNode->GetStagingProperties().GetBgImageHeight()) / PERCENT_TRANSLATE);
+    }
 }
 
 void RosenRenderBox::SetShadow(const Shadow& shadow)

@@ -85,6 +85,7 @@ bool SystemProperties::windowAnimationEnabled_ = false;
 int32_t SystemProperties::windowPosX_ = 0;
 int32_t SystemProperties::windowPosY_ = 0;
 bool SystemProperties::debugBoundaryEnabled_ = false;
+bool SystemProperties::gpuUploadEnabled_ = false;
 
 DeviceType SystemProperties::GetDeviceType()
 {

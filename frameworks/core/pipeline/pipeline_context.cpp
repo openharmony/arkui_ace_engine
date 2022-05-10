@@ -1594,7 +1594,6 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
             if (event.action == KeyAction::UP) {
                 SetIsKeyEvent(true);
             }
-            return true;
         } else if (event.code == KeyCode::KEY_ENTER) {
             if (event.action == KeyAction::CLICK) {
                 SetIsKeyEvent(true);
@@ -1602,7 +1601,9 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         }
     }
     rootElement_->HandleSpecifiedKey(event);
-    NotifyDestroyEventDismiss();
+    if (event.code == KeyCode::KEY_BACK) {
+        NotifyDestroyEventDismiss();
+    }
     SetShortcutKey(event);
 
     pressedKeyCodes = event.pressedCodes;
@@ -1979,7 +1980,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     // Refresh the screen when developers customize the resolution and screen density on the PC preview.
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (width_ == width && height_ == height && isSurfaceReady_ && type != WindowSizeChangeReason::DRAG_START &&
-        type != WindowSizeChangeReason::DRAG_END) {
+        type != WindowSizeChangeReason::DRAG_END && !isDensityUpdate_) {
         LOGI("Surface size is same, no need update");
         return;
     }
@@ -2045,6 +2046,7 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
     ACE_SCOPED_TRACE("OnSurfaceDensityChanged(%lf)", density);
     LOGI("OnSurfaceDensityChanged density_(%{public}lf)", density_);
     LOGI("OnSurfaceDensityChanged dipScale_(%{public}lf)", dipScale_);
+    isDensityUpdate_ = density != density_;
     density_ = density;
     if (!NearZero(viewScale_)) {
         LOGI("OnSurfaceDensityChanged viewScale_(%{public}lf)", viewScale_);
@@ -2167,7 +2169,7 @@ void PipelineContext::SetRootRect(double width, double height, double offset) co
     if (!rootNode) {
         return;
     }
-    if (!NearEqual(viewScale_, rootNode->GetScale()) || paintRect != rootNode->GetPaintRect()) {
+    if (!NearEqual(viewScale_, rootNode->GetScale()) || paintRect != rootNode->GetPaintRect() || isDensityUpdate_) {
         if (!NearEqual(viewScale_, rootNode->GetScale())) {
             rootNode->SetReset(true);
         }
@@ -2359,16 +2361,6 @@ void PipelineContext::NotifyDispatchTouchEventDismiss(const TouchEvent& event) c
     for (auto& iterDispatchTouchEventHander : dispatchTouchEventHandler_) {
         if (iterDispatchTouchEventHander) {
             iterDispatchTouchEventHander(event);
-        }
-    }
-}
-
-void PipelineContext::NotifyDispatchMouseEventDismiss(const MouseEvent& event) const
-{
-    CHECK_RUN_ON(UI);
-    for (auto& iterDispatchMouseEventHander : dispatchMouseEventHandler_) {
-        if (iterDispatchMouseEventHander) {
-            iterDispatchMouseEventHander(event);
         }
     }
 }

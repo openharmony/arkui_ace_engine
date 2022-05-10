@@ -32,8 +32,8 @@ public:
     ~PluginSubContainer() = default;
 
     void Initialize();
-    void RunPlugin(
-        const std::string& path, const std::string& module, const std::string& source, const std::string& data);
+    void RunPlugin(const std::string& path, const std::string& module,
+        const std::string& source, const std::string& moduleResPath, const std::string& data);
     void UpdatePlugin(const std::string& content);
     void Destroy();
 

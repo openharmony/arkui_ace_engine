@@ -497,9 +497,14 @@ void RenderGridLayout::InitialGridProp()
     }
     if (NearEqual(rowSize_, Size::INFINITE_SIZE)) {
         rowSize_ = std::accumulate(rows.begin(), rows.end(), (rows.size() - 1) * rowGap_);
+        // This case means grid's height is not set and the layout param is infinite(e.g. in a column)
+        // To protect [rowSize_] being set to the max height of layout param in another instant [PerformLayout],
+        // use [gridHeight_] to record grid's height.
+        gridHeight_ = rowSize_;
     }
     if (NearEqual(colSize_, Size::INFINITE_SIZE)) {
         colSize_ = std::accumulate(cols.begin(), cols.end(), (cols.size() - 1) * colGap_);
+        gridWidth_ = colSize_;
     }
     // Initialize the columnCount and rowCount, default is 1
     colCount_ = cols.size();

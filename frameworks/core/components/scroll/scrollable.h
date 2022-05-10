@@ -281,10 +281,14 @@ private:
     bool isTouching_ = false;
     bool available_ = true;
     bool needCenterFix_ = false;
+    bool isDragUpdateStop_ = false;
     int32_t nodeId_ = 0;
     double slipFactor_ = 0.0;
     static double sFriction_;
     static double sVelocityScale_;
+#ifdef OHOS_PLATFORM
+    int64_t startIncreaseTime_ = 0;
+#endif
 };
 
 } // namespace OHOS::Ace

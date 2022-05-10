@@ -442,7 +442,7 @@ enum class KeyAction : int32_t {
 constexpr int32_t ASCII_START_UPPER_CASE_LETTER = 65;
 constexpr int32_t ASCII_START_LOWER_CASE_LETTER = 97;
 
-const char* KeyToString(int32_t code);
+ACE_FORCE_EXPORT_WITH_PREVIEW const char* KeyToString(int32_t code);
 
 struct KeyEvent final {
     KeyEvent()

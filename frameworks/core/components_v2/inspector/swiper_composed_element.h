@@ -51,6 +51,7 @@ public:
     std::string GetSwiperRight() const;
     std::string GetSwiperBottom() const;
     std::string GetSwiperSize() const;
+    std::string GetCachedCount() const;
 
     AceType::IdType GetTargetTypeId() const override
     {

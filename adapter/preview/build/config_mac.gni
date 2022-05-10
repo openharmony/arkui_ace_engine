@@ -54,9 +54,14 @@ connect_server_support = false
 enable_rosen_backend = false
 enable_standard_input = false
 enable_system_clipboard = false
+enable_ability_component = false
 
 if (form_components_support) {
   defines += [ "FORM_SUPPORTED" ]
+}
+
+if (xcomponent_components_support) {
+  defines += [ "XCOMPONENT_SUPPORTED" ]
 }
 
 cflags_cc = [
@@ -68,10 +73,10 @@ cflags_cc = [
 ]
 
 platform_deps = [
-  "//foundation/ace/ace_engine/adapter/preview/entrance:ace_preview_entrance_mac",
-  "//foundation/ace/ace_engine/adapter/preview/inspector:ace_inspector_mac",
-  "//foundation/ace/ace_engine/adapter/preview/osal:ace_osal_mac",
+  "//foundation/arkui/ace_engine/adapter/preview/entrance:ace_preview_entrance_mac",
+  "//foundation/arkui/ace_engine/adapter/preview/inspector:ace_inspector_mac",
+  "//foundation/arkui/ace_engine/adapter/preview/osal:ace_osal_mac",
 ]
 
 libace_target =
-    "//foundation/ace/ace_engine/adapter/preview/build:libace_engine_mac"
+    "//foundation/arkui/ace_engine/adapter/preview/build:libace_engine_mac"

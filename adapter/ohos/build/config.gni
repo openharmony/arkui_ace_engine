@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos/ace/ace_args.gni")
-import("//foundation/graphic/standard/graphic_config.gni")
+import("//foundation/graphic/graphic/graphic_config.gni")
 import("product_config.gni")
 
 defines = [
@@ -65,13 +65,14 @@ plugin_components_support = true
 xcomponent_components_support = true
 pixel_map_support = true
 js_pa_support = true
-connect_server_support = false
+connect_server_support = true
 hdc_register_support = true
 pa_engine_path = "adapter/ohos/entrance/pa_engine"
 enable_rosen_backend = true
 enable_standard_input = true
 build_container_scope_lib = true
 multiple_window_support = true
+enable_ability_component = true
 
 if (defined(is_experiment_build) && is_experiment_build) {
   web_components_support = true
@@ -81,6 +82,10 @@ if (defined(is_experiment_build) && is_experiment_build) {
 
 if (defined(web_components_support) && web_components_support) {
   defines += [ "WEB_SUPPORTED" ]
+}
+
+if (defined(enable_ability_component) && enable_ability_component) {
+  defines += [ "ABILITY_COMPONENT_SUPPORTED" ]
 }
 
 if (disable_gpu || enable_rosen_backend) {
@@ -125,8 +130,8 @@ cflags_cc = [
 ]
 
 platform_deps = [
-  "//foundation/ace/ace_engine/adapter/ohos/entrance:ace_ohos_standard_entrance",
-  "//foundation/ace/ace_engine/adapter/ohos/osal:ace_osal_ohos",
+  "//foundation/arkui/ace_engine/adapter/ohos/entrance:ace_ohos_standard_entrance",
+  "//foundation/arkui/ace_engine/adapter/ohos/osal:ace_osal_ohos",
 ]
 
-libace_target = "//foundation/ace/ace_engine/build:libace"
+libace_target = "//foundation/arkui/ace_engine/build:libace"

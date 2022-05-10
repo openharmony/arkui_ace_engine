@@ -257,7 +257,7 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     animationOpacity_ = swiper->IsAnimationOpacity();
     duration_ = swiper->GetDuration();
     showIndicator_ = swiper->IsShowIndicator();
-
+    cachedCount_ = swiper->GetCachedSize();
     lazyLoadCacheSize_ = swiper->GetCachedSize() * 2 + swiper->GetDisplayCount();
     UpdateItemCount(lazyComponent ? static_cast<int32_t>(lazyComponent->TotalCount()) : itemCount_);
     ClearItems(lazyComponent, static_cast<int32_t>(swiper->GetIndex()));
@@ -308,17 +308,17 @@ void RenderSwiper::PerformLayout()
     LayoutParam innerLayout = GetLayoutParam();
     Size minSize = GetLayoutParam().GetMinSize();
     Size maxSize = GetLayoutParam().GetMaxSize();
-    Size maxSizeClild = maxSize;
+    Size maxSizeChild = maxSize;
     auto showingCount = swiper_ ? swiper_->GetDisplayCount() : 1;
     double intervalSpace = swiper_ ? NormalizeToPx(swiper_->GetItemSpace()) : 0.0;
     if (axis_ == Axis::HORIZONTAL) {
-        maxSizeClild.SetWidth(
+        maxSizeChild.SetWidth(
             (maxSize.Width() - intervalSpace * (showingCount - 1)) / showingCount - prevMargin_ - nextMargin_);
     } else {
-        maxSizeClild.SetHeight(
+        maxSizeChild.SetHeight(
             (maxSize.Height() - intervalSpace * (showingCount - 1)) / showingCount - prevMargin_ - nextMargin_);
     }
-    innerLayout.SetMaxSize(maxSizeClild);
+    innerLayout.SetMaxSize(maxSizeChild);
 
     bool isLinearLayout = swiper_ ? swiper_->GetDisplayMode() == SwiperDisplayMode::AUTO_LINEAR : false;
     double maxWidth = minSize.Width();
@@ -2895,6 +2895,7 @@ void RenderSwiper::StartIndicatorAnimation(int32_t fromIndex, int32_t toIndex, b
             swiper->isIndicatorAnimationStart_ = false;
             swiper->outItemIndex_ = fromIndex;
             swiper->currentIndex_ = toIndex;
+            swiper->FireItemChangedEvent(true);
             swiper->UpdateIndicatorSpringStatus(SpringStatus::FOCUS_SWITCH);
             swiper->MarkNeedLayout(true);
         }

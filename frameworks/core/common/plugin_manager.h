@@ -63,7 +63,7 @@ public:
 
 private:
     std::mutex mutex_;
-    std::map<int64_t, RefPtr<PluginSubContainer>> pluginSubContainerMap_;
+    static std::map<int64_t, RefPtr<PluginSubContainer>> pluginSubContainerMap_;
     std::mutex nonmatchedContainerMutex_;
     std::unordered_map<std::string, RefPtr<PluginSubContainer>> nonmatchedContainerMap_;
     std::mutex parentContainerMutex_;

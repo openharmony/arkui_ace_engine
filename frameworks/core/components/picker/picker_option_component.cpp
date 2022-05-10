@@ -71,6 +71,8 @@ void PickerOptionComponent::Initialize()
     if (isRtl) {
         boxComponent_->SetAlignment(Alignment::CENTER_RIGHT);
     }
+    boxComponent_->SetEnableDebugBoundary(true);
+
     SetChild(boxComponent_);
 }
 

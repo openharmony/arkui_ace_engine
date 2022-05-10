@@ -16,7 +16,7 @@
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
 
 #include "dm/display_manager.h"
-#include "interfaces/innerkits/ace/viewport_config.h"
+#include "interfaces/inner_api/ace/viewport_config.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"

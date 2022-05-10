@@ -70,38 +70,46 @@ public:
         component = AceType::DynamicCast<XComponentComponent>(xcomponentsMap_[xcomponentId]);
     }
 
-    bool GetNativeXComponentFromXcomponentsMap(const std::string& xcomponentId,
+    void GetNativeXComponentFromXcomponentsMap(const std::string& xcomponentId,
         RefPtr<OHOS::Ace::NativeXComponentImpl>& nativeXComponentImpl, OH_NativeXComponent*& nativeXComponent)
     {
-        if (xcomponentsMap_.find(xcomponentId) == xcomponentsMap_.end()) {
-            return false;
-        }
-        if (nativeXcomponentsMap_.find(xcomponentId) != nativeXcomponentsMap_.end()) {
-            std::tie(nativeXComponentImpl, nativeXComponent) = nativeXcomponentsMap_[xcomponentId];
+        auto it = nativeXcomponentsMap_.find(xcomponentId);
+        if (it != nativeXcomponentsMap_.end()) {
+            std::tie(nativeXComponentImpl, nativeXComponent) = it->second;
         } else {
             nativeXComponentImpl = AceType::MakeRefPtr<NativeXComponentImpl>();
             nativeXComponent = new OH_NativeXComponent(AceType::RawPtr(nativeXComponentImpl));
             nativeXcomponentsMap_.emplace(xcomponentId, std::make_pair(nativeXComponentImpl, nativeXComponent));
         }
-        return true;
     }
 
-    bool AddXComponentToXcomponentsMap(const std::string& xcomponentId, const RefPtr<XComponentComponent>& component)
+    void AddXComponentToXcomponentsMap(const std::string& xcomponentId, const RefPtr<XComponentComponent>& component)
     {
-        if (xcomponentsMap_.find(xcomponentId) != xcomponentsMap_.end()) {
-            return false;
+        auto it = xcomponentsMap_.find(xcomponentId);
+        if (it != xcomponentsMap_.end()) {
+            it->second = component;
+        } else {
+            xcomponentsMap_.emplace(xcomponentId, component);
         }
-        xcomponentsMap_.emplace(xcomponentId, component);
-        return true;
     }
 
     void DeleteFromXcomponentsMapById(const std::string& xcomponentId)
     {
-        if (xcomponentsMap_.find(xcomponentId) == xcomponentsMap_.end()) {
+        auto it = xcomponentsMap_.find(xcomponentId);
+        if (it == xcomponentsMap_.end()) {
             return;
         }
-        xcomponentsMap_.erase(xcomponentId);
-        nativeXcomponentsMap_.erase(xcomponentId);
+        xcomponentsMap_.erase(it);
+    }
+
+    void DeleteFromNativeXcomponentsMapById(const std::string& xcomponentId)
+    {
+        auto it = nativeXcomponentsMap_.find(xcomponentId);
+        if (it == nativeXcomponentsMap_.end()) {
+            return;
+        }
+        delete it->second.second;
+        nativeXcomponentsMap_.erase(it);
     }
 
     void SetJSValCallToNull()

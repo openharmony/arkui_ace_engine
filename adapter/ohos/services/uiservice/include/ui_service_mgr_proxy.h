@@ -56,6 +56,8 @@ public:
 
     virtual int CancelDialog(int id);
 
+    virtual int UpdateDialog(int id, const std::string& data);
+
 private:
     bool WriteInterfaceToken(MessageParcel& data);
 

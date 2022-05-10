@@ -26,6 +26,9 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+#include "core/common/plugin_manager.h"
+#endif
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components/display/display_component.h"
 #include "core/components/split_container/column_split_component.h"
@@ -4366,6 +4369,26 @@ void JSViewAbstract::SetDirection(const std::string& dir)
 
 RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants()
 {
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+    if (Container::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID) {
+        auto pluginContainer = PluginManager::GetInstance().GetPluginSubContainer(Container::CurrentId());
+        if (!pluginContainer) {
+            LOGW("pluginContainer is null");
+            return nullptr;
+        }
+        auto pliginPipelineContext = pluginContainer->GetPipelineContext();
+        if (!pliginPipelineContext) {
+            LOGE("pliginPipelineContext is null!");
+            return nullptr;
+        }
+        auto pluginThemeManager = pliginPipelineContext->GetThemeManager();
+        if (!pluginThemeManager) {
+            LOGE("pluginThemeManager is null!");
+            return nullptr;
+        }
+        return pluginThemeManager->GetThemeConstants();
+    }
+#endif
     auto container = Container::Current();
     if (!container) {
         LOGW("container is null");

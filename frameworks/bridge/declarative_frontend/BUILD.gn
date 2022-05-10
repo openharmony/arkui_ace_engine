@@ -12,8 +12,8 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
-import("//foundation/ace/ace_engine/build/ace_gen_obj.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 # declarative frontend source
 template("declarative_frontend") {
@@ -122,8 +122,6 @@ template("declarative_js_engine") {
       "jsview/action_sheet/js_action_sheet.cpp",
       "jsview/dialog/js_alert_dialog.cpp",
       "jsview/dialog/js_custom_dialog_controller.cpp",
-      "jsview/js_ability_component.cpp",
-      "jsview/js_ability_component_controller.cpp",
       "jsview/js_animator.cpp",
       "jsview/js_badge.cpp",
       "jsview/js_blank.cpp",
@@ -224,6 +222,8 @@ template("declarative_js_engine") {
       "jsview/js_view_context.cpp",
       "jsview/js_view_functions.cpp",
       "jsview/js_view_stack_processor.cpp",
+      "jsview/js_water_flow.cpp",
+      "jsview/js_water_flow_item.cpp",
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
       "sharedata/js_share_data.cpp",
@@ -237,6 +237,7 @@ template("declarative_js_engine") {
         "jsview/js_camera.cpp",
         "jsview/js_piece.cpp",
         "jsview/js_rating.cpp",
+        "jsview/js_remote_window.cpp",
         "jsview/js_video.cpp",
         "jsview/js_video_controller.cpp",
       ]
@@ -247,6 +248,14 @@ template("declarative_js_engine") {
       sources += [
         "jsview/js_xcomponent.cpp",
         "jsview/js_xcomponent_controller.cpp",
+      ]
+    }
+
+    if (defined(config.enable_ability_component) &&
+        config.enable_ability_component) {
+      sources += [
+        "jsview/js_ability_component.cpp",
+        "jsview/js_ability_component_controller.cpp",
       ]
     }
 
@@ -282,7 +291,7 @@ template("declarative_js_engine") {
       deps += [ "$ace_root/build:libace" ]
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
-        deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
+        deps += [ "$ace_napi:ace_container_scope" ]
       }
     }
 
@@ -302,12 +311,14 @@ template("declarative_js_engine") {
           config.plugin_components_support) {
         if (!use_mingw_win && !use_mac) {
           external_deps = [
+            "graphic_standard:window_animation",
             "multimedia_image_standard:image",
             "multimedia_image_standard:image_native",
           ]
         }
       } else {
         external_deps = [
+          "graphic_standard:window_animation",
           "multimedia_image_standard:image",
           "multimedia_image_standard:image_native",
         ]

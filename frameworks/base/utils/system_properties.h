@@ -197,6 +197,11 @@ public:
     }
 
     static bool GetDebugEnabled();
+    
+    static bool GetGpuUploadEnabled()
+    {
+        return gpuUploadEnabled_;
+    }
 
     /*
      * Set device orientation.
@@ -274,6 +279,8 @@ public:
         return windowAnimationEnabled_;
     }
 
+    static void UpdateDebugBoundaryEnabled(const char *key, const char *value, void *context);
+
 private:
     static bool traceEnabled_;
     static bool accessibilityEnabled_;
@@ -301,6 +308,7 @@ private:
     static int32_t windowPosX_;
     static int32_t windowPosY_;
     static bool debugBoundaryEnabled_;
+    static bool gpuUploadEnabled_;
 };
 
 } // namespace OHOS::Ace

@@ -691,13 +691,13 @@ bool FrontendDelegateDeclarative::FireSyncEvent(
 
 
 void FrontendDelegateDeclarative::FireExternalEvent(
-    const std::string& eventId, const std::string& componentId, const uint32_t nodeId)
+    const std::string& eventId, const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     taskExecutor_->PostSyncTask(
-        [weak = AceType::WeakClaim(this), componentId, nodeId] {
+        [weak = AceType::WeakClaim(this), componentId, nodeId, isDestroy] {
             auto delegate = weak.Upgrade();
             if (delegate) {
-                delegate->externalEvent_(componentId, nodeId);
+                delegate->externalEvent_(componentId, nodeId, isDestroy);
             }
         },
         TaskExecutor::TaskType::JS);
@@ -917,6 +917,16 @@ void FrontendDelegateDeclarative::GetState(int32_t& index, std::string& name, st
         name = url.substr(pos + 1);
         path = url.substr(0, pos + 1);
     }
+}
+
+size_t FrontendDelegateDeclarative::GetComponentsCount()
+{
+    auto pipelineContext = pipelineContextHolder_.Get();
+    const auto& pageElement = pipelineContext->GetLastPage();
+    if (pageElement) {
+        return pageElement->GetComponentsCount();
+    }
+    return 0;
 }
 
 std::string FrontendDelegateDeclarative::GetParams()

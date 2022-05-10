@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 
 # ------------------------------------------------
 #      Flutter engine config begin
@@ -443,11 +443,11 @@ template("flutter_engine_shell") {
           "$flutter_root/engine/flutter/shell/platform/ohos/ohos_surface_gl.cc",
         ]
 
-        public_deps = [ "//foundation/graphic/standard:libgl" ]
+        public_deps = [ "//foundation/graphic/graphic:libgl" ]
       }
       deps += [
-        "//foundation/graphic/standard/rosen/modules/composer:libcomposer",
-        "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+        "//foundation/graphic/graphic/rosen/modules/composer:libcomposer",
+        "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
         "//foundation/windowmanager/wm:libwm",
       ]
       external_deps = [

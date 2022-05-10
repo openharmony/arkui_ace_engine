@@ -41,6 +41,13 @@ constexpr double CHECK_MARK_RIGHT_ANIMATION_PERCENT = 0.55;
 constexpr double DEFAULT_MAX_CHECKBOX_SHAPE_SCALE = 1.0;
 constexpr double DEFAULT_MIN_CHECKBOX_SHAPE_SCALE = 0.0;
 constexpr double HALF_THE_WIDTH = 0.5;
+constexpr Dimension FOCUS_PADDING = 2.0_vp;
+constexpr Dimension FOCUS_BORDER_WIDTH = 2.0_vp;
+constexpr uint32_t FOCUS_BORDER_COLOR = 0xFF0A59F7;
+constexpr Dimension PRESS_BORDER_RADIUS = 8.0_vp;
+constexpr Dimension HOVER_BORDER_RADIUS = 8.0_vp;
+constexpr uint32_t PRESS_COLOR = 0x19000000;
+constexpr uint32_t HOVER_COLOR = 0x0C000000;
 
 } // namespace
 
@@ -56,8 +63,20 @@ void RosenRenderCheckbox::Paint(RenderContext& context, const Offset& offset)
     recordingCanvas->MultiplyAlpha(ConfigureOpacity(disabled_));
 #endif
     auto paintOffset = offset + paintPosition_;
-    if (IsPhone() && onFocus_) {
-        RequestFocusBorder(paintOffset, drawSize_, NormalizeToPx(borderRadius_));
+    if (isDeclarative_) {
+        if ((IsPhone() || IsTablet()) && onFocus_) {
+            DrawFocusBorder(context, paintOffset);
+        }
+        if ((IsPhone() || IsTablet()) && isTouch_) {
+            DrawTouchBoard(offset, context);
+        }
+        if ((IsPhone() || IsTablet()) && isHover_) {
+            DrawHoverBoard(offset, context);
+        }
+    } else {
+        if (IsPhone() && onFocus_) {
+            RequestFocusBorder(paintOffset, drawSize_, NormalizeToPx(borderRadius_));
+        }
     }
     SkPaint strokePaint;
     SkPaint shadowPaint;
@@ -292,6 +311,58 @@ void RosenRenderCheckbox::DrawAnimationOnToOff(
     path.lineTo(originX + end.GetX() - deltaX * ratio, originY + end.GetY() + deltaY * ratio);
     canvas->drawPath(path, shadowPaint);
     canvas->drawPath(path, paint);
+}
+
+void RosenRenderCheckbox::DrawFocusBorder(RenderContext& context, const Offset& offset)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        LOGE("paint canvas is null");
+        return;
+    }
+    Size paintSize = drawSize_;
+    double focusBorderHeight = paintSize.Height() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
+    double focusBorderWidth = paintSize.Width() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
+    double focusRadius = NormalizeToPx(borderRadius_ + FOCUS_PADDING);
+
+    SkPaint paint;
+    paint.setColor(FOCUS_BORDER_COLOR);
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
+    paint.setAntiAlias(true);
+    SkRRect rRect;
+    rRect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
+    rRect.offset(offset.GetX() - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH / 2),
+        offset.GetY() - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH / 2));
+    canvas->drawRRect(rRect, paint);
+}
+
+void RosenRenderCheckbox::DrawTouchBoard(const Offset& offset, RenderContext& context)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    double dipScale = 1.0;
+    auto pipelineContext = GetContext().Upgrade();
+    if (pipelineContext) {
+        dipScale = pipelineContext->GetDipScale();
+    }
+    RosenUniversalPainter::DrawRRectBackground(canvas, RRect::MakeRRect(Rect(offset.GetX(), offset.GetY(),
+        width_, height_), Radius(NormalizeToPx(PRESS_BORDER_RADIUS))), PRESS_COLOR, dipScale);
+}
+
+void RosenRenderCheckbox::DrawHoverBoard(const Offset& offset, RenderContext& context)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    Size hoverSize = Size(width_, height_);
+    RosenUniversalPainter::DrawHoverBackground(canvas, Rect(offset, hoverSize), HOVER_COLOR,
+        NormalizeToPx(HOVER_BORDER_RADIUS));
 }
 
 } // namespace OHOS::Ace

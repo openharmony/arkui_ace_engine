@@ -755,6 +755,7 @@ void PluginFrontend::DumpFrontend() const
     delegate_->GetState(routerIndex, routerName, routerPath);
 
     if (DumpLog::GetInstance().GetDumpFile()) {
+        DumpLog::GetInstance().AddDesc("Components: " + std::to_string(delegate_->GetComponentsCount()));
         DumpLog::GetInstance().AddDesc("Path: " + routerPath);
         DumpLog::GetInstance().AddDesc("Length: " + std::to_string(routerIndex));
         DumpLog::GetInstance().Print(0, routerName, 0);
@@ -959,7 +960,7 @@ void PluginEventHandler::HandleSyncEvent(const EventMarker& eventMarker, const s
 }
 
 void PluginEventHandler::HandleSyncEvent(
-    const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId)
+    const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId, const bool isDestroy)
 {
     LOGW("js event handler does not support this event type!");
 }

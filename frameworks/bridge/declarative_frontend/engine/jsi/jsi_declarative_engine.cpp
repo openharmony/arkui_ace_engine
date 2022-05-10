@@ -22,6 +22,7 @@
 #include "base/log/event_report.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_view.h"
+#include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -190,7 +191,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     if (debuggerMode) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    if (!usingSharedRuntime_ && !runtime_->Initialize(libraryPath, isDebugMode_)) {
+    if (!usingSharedRuntime_ && !runtime_->Initialize(libraryPath, isDebugMode_, instanceId_)) {
         LOGE("Js Engine initialize runtime failed");
         return false;
     }
@@ -682,10 +683,6 @@ void JsiDeclarativeEngine::Destroy()
         delete nativeEngine_;
         nativeEngine_ = nullptr;
     }
-    if (nativeXComponent_) {
-        delete nativeXComponent_;
-        nativeXComponent_ = nullptr;
-    }
 }
 
 bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
@@ -715,6 +712,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         }
         nativeEngine_ = nativeArkEngine;
     }
+    engineInstance_->SetInstanceId(instanceId_);
     engineInstance_->SetDebugMode(NeedDebugBreakPoint());
     bool result = engineInstance_->InitJsEnv(IsDebugVersion(), GetExtraNativeObject(), arkRuntime);
     if (!result) {
@@ -758,17 +756,23 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_, id = instanceId_](bool needSync) {
+    auto&& postTask = [weakDelegate, weakEngine = AceType::WeakClaim(this), id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([nativeEngine, needSync, id]() {
-            ContainerScope scope(id);
+        delegate->PostJsTask([weakEngine, needSync, id]() {
+            auto jsEngine = weakEngine.Upgrade();
+            if (jsEngine == nullptr) {
+                LOGW("jsEngine is nullptr");
+                return;
+            }
+            auto nativeEngine = jsEngine->GetNativeEngine();
             if (nativeEngine == nullptr) {
                 return;
             }
+            ContainerScope scope(id);
             nativeEngine->Loop(LOOP_NOWAIT, needSync);
         });
     };
@@ -778,7 +782,13 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
 void JsiDeclarativeEngine::RegisterInitWorkerFunc()
 {
     auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
-    auto&& initWorkerFunc = [weakInstance](NativeEngine* nativeEngine) {
+    bool debugVersion = IsDebugVersion();
+    bool debugMode = NeedDebugBreakPoint();
+    std::string libraryPath = "";
+    if (debugVersion) {
+        libraryPath = ARK_DEBUGGER_LIB_PATH;
+    }
+    auto&& initWorkerFunc = [weakInstance, debugMode, libraryPath](NativeEngine* nativeEngine) {
         LOGI("WorkerCore RegisterInitWorkerFunc called");
         if (nativeEngine == nullptr) {
             LOGE("nativeEngine is nullptr");
@@ -794,6 +804,11 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
             LOGE("instance is nullptr");
             return;
         }
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+        ConnectServerManager::Get().AddInstance(gettid());
+        auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
+        panda::JSNApi::StartDebugger(libraryPath.c_str(), vm, debugMode, gettid());
+#endif
         instance->InitConsoleModule(arkNativeEngine);
 
         std::vector<uint8_t> buffer((uint8_t*)_binary_jsEnumStyle_abc_start, (uint8_t*)_binary_jsEnumStyle_abc_end);
@@ -804,6 +819,33 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
     };
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
+
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+void JsiDeclarativeEngine::RegisterOffWorkerFunc()
+{
+    auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
+    bool debugVersion = IsDebugVersion();
+    auto&& offWorkerFunc = [debugVersion](NativeEngine* nativeEngine) {
+        LOGI("WorkerCore RegisterOffWorkerFunc called");
+        if (!debugVersion) {
+            return;
+        }
+        if (nativeEngine == nullptr) {
+            LOGE("nativeEngine is nullptr");
+            return;
+        }
+        auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
+        if (arkNativeEngine == nullptr) {
+            LOGE("arkNativeEngine is nullptr");
+            return;
+        }
+        ConnectServerManager::Get().RemoveInstance(gettid());
+        auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
+        panda::JSNApi::StopDebugger(vm);
+    };
+    nativeEngine_->SetOffWorkerFunc(offWorkerFunc);
+}
+#endif
 
 void JsiDeclarativeEngine::RegisterAssetFunc()
 {
@@ -828,6 +870,9 @@ void JsiDeclarativeEngine::RegisterAssetFunc()
 void JsiDeclarativeEngine::RegisterWorker()
 {
     RegisterInitWorkerFunc();
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+    RegisterOffWorkerFunc();
+#endif
     RegisterAssetFunc();
 }
 
@@ -922,7 +967,7 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
                 jsContent = preContent_;
             }
         } else {
-            if (!ExecuteAbc(runtime, urlName)) {
+            if (!ExecuteAbc(urlName)) {
                 return;
             }
         }
@@ -1027,28 +1072,23 @@ void JsiDeclarativeEngine::FireSyncEvent(const std::string& eventId, const std::
     }
 }
 
-void JsiDeclarativeEngine::InitXComponent()
+void JsiDeclarativeEngine::InitXComponent(const std::string& componentId)
 {
     ACE_DCHECK(engineInstance_);
-
-    nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
-    nativeXComponent_ = new OH_NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
-}
-
-bool JsiDeclarativeEngine::InitXComponent(const std::string& componentId)
-{
-    ACE_DCHECK(engineInstance_);
-    return OHOS::Ace::Framework::XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(
+    OHOS::Ace::Framework::XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(
         componentId, nativeXComponentImpl_, nativeXComponent_);
 }
 
-void JsiDeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
+void JsiDeclarativeEngine::FireExternalEvent(
+    const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     CHECK_RUN_ON(JS);
-    if (!InitXComponent(componentId)) {
-        LOGE("InitXComponent fail");
+    if (isDestroy) {
+        XComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
+        XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(componentId);
         return;
-    };
+    }
+    InitXComponent(componentId);
     RefPtr<XComponentComponent> xcomponent;
     OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId, xcomponent);
     if (!xcomponent) {
@@ -1337,6 +1377,20 @@ void JsiDeclarativeEngine::OnInactive()
     }
 
     CallAppFunc("onInactive");
+}
+
+void JsiDeclarativeEngine::OnNewWant(const std::string& data)
+{
+    LOGI("JsiDeclarativeEngine OnNewWant called.");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("OnNewWant failed, runtime is null.");
+        return;
+    }
+
+    shared_ptr<JsValue> object = runtime->ParseJson(data);
+    std::vector<shared_ptr<JsValue>> argv = { object };
+    CallAppFunc("onNewWant", argv);
 }
 
 bool JsiDeclarativeEngine::OnStartContinuation()

@@ -26,6 +26,7 @@
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/image/image_component.h"
 #include "core/components/menu/menu_component.h"
+#include "core/components/remote_window/remote_window_component.h"
 #include "core/components/scoring/scoring_component.h"
 #include "core/components/stepper/stepper_item_component_v2.h"
 #include "core/components/text/text_component.h"
@@ -35,6 +36,7 @@
 #include "core/components/web/web_component.h"
 #include "core/components/xcomponent/xcomponent_component.h"
 #include "core/components_v2/list/list_item_component.h"
+#include "core/components_v2/water_flow/water_flow_item_component.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/multi_composed_component.h"
 #include "core/pipeline/base/sole_child_component.h"
@@ -197,9 +199,7 @@ RefPtr<BoxComponent> ViewStackProcessor::GetBoxComponent()
     }
 
     RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<OHOS::Ace::BoxComponent>();
-    if (SystemProperties::GetDebugBoundaryEnabled()) {
-        boxComponent->SetEnableDebugBoundary(true);
-    }
+    boxComponent->SetEnableDebugBoundary(true);
     wrappingComponentsMap.emplace("box", boxComponent);
     return boxComponent;
 }
@@ -423,7 +423,9 @@ void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomV
     }
 #else
     bool isAccessEnable =
-        AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || SystemProperties::GetAccessibilityEnabled();
+        AceApplicationInfo::GetInstance().IsAccessibilityEnabled()
+        || SystemProperties::GetAccessibilityEnabled()
+        || SystemProperties::GetDebugBoundaryEnabled();
     if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component) &&
         !AceType::InstanceOf<TextSpanComponent>(component) && isAccessEnable) {
         GetBoxComponent();
@@ -556,7 +558,8 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     std::unordered_map<std::string, RefPtr<Component>> videoMap;
 
     bool isItemComponent = AceType::InstanceOf<V2::ListItemComponent>(mainComponent) ||
-                           AceType::InstanceOf<GridLayoutItemComponent>(mainComponent);
+                           AceType::InstanceOf<GridLayoutItemComponent>(mainComponent) ||
+                           AceType::InstanceOf<V2::WaterFlowItemComponent>(mainComponent);
 
     RefPtr<Component> itemChildComponent;
 
@@ -605,27 +608,30 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     }
 
     if (isItemComponent) {
-        // rsnode merge mark:
+        // itemComponent is placed before other components, they should share the same RSNode.
+        // we should not touch itemChildComponent as it's already marked.
         //    (head)       (tail)      (unchanged)
         // mainComponent - others - itemChildComponent
         Component::MergeRSNode(components);
         if (itemChildComponent) {
             components.emplace_back(itemChildComponent);
         }
-    } else if (!components.empty() && (AceType::InstanceOf<TextureComponent>(mainComponent) ||
+    } else if (!components.empty() && (
         AceType::InstanceOf<BoxComponent>(mainComponent) ||
-        AceType::InstanceOf<TextFieldComponent>(mainComponent) ||
         AceType::InstanceOf<FormComponent>(mainComponent) ||
+        AceType::InstanceOf<RemoteWindowComponent>(mainComponent) ||
+        AceType::InstanceOf<TextFieldComponent>(mainComponent) ||
+        AceType::InstanceOf<TextureComponent>(mainComponent) ||
         AceType::InstanceOf<WebComponent>(mainComponent) ||
         AceType::InstanceOf<XComponentComponent>(mainComponent))) {
-        // rsnode merge mark:
+        // special types of mainComponent need be marked as standalone.
         // (head)(tail)  (standalone)
         //    others  -  mainComponent
         Component::MergeRSNode(components);
         Component::MergeRSNode(mainComponent);
         components.emplace_back(mainComponent);
     } else {
-        // rsnode merge mark:
+        // by default, mainComponent is placed after other components, they should share the same RSNode.
         //  (head)      (tail)
         // (others) - mainComponent
         components.emplace_back(mainComponent);
@@ -657,6 +663,11 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
             if (menuComponent) {
                 coverageComponent->AppendChild(menuComponent);
             }
+        }
+
+        auto focusableComponent = AceType::DynamicCast<FocusableComponent>(components[idx - 1]);
+        if (focusableComponent) {
+            Component::MergeRSNode(components[idx], focusableComponent);
         }
     }
 
@@ -809,8 +820,7 @@ RefPtr<Component> ViewStackProcessor::GetScoringComponent() const
 void ViewStackProcessor::CreateInspectorComposedComponent(const std::string& inspectorTag)
 {
     if (V2::InspectorComposedComponent::HasInspectorFinished(inspectorTag)) {
-        auto composedComponent =
-            AceType::MakeRefPtr<V2::InspectorComposedComponent>(GenerateId(), inspectorTag);
+        auto composedComponent = AceType::MakeRefPtr<V2::InspectorComposedComponent>(GenerateId(), inspectorTag);
         auto& wrappingComponentsMap = componentsStack_.top();
         wrappingComponentsMap.emplace("inspector", composedComponent);
     }

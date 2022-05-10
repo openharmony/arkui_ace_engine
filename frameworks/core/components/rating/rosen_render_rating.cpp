@@ -56,7 +56,6 @@ void RosenRenderRating::Paint(RenderContext& context, const Offset& offset)
     if ((IsPhone() || IsTablet()) && !isIndicator_) {
         PaintHoverRect(canvas);
     }
-    PaintRatingBar(context, canvas);
     Offset pressstarOffset = Offset(singleWidth_ * pressstarNum_ + imageVerticalOffset, imageVerticalOffset);
     if (!isIndicator_ && (IsTablet() || IsPhone()) && isPress_) {
         Offset animationOffset = pressstarOffset + Offset(offsetDeltaX, offsetDeltaY);
@@ -68,6 +67,7 @@ void RosenRenderRating::Paint(RenderContext& context, const Offset& offset)
         // total width of focus border is twice the width of [focusBorderWidth_], border-width + padding-width
         RequestFocusAnimationForPhone();
     }
+    PaintRatingBar(context, canvas);
 }
 
 void RosenRenderRating::PaintHoverRect(SkCanvas* canvas)
@@ -194,14 +194,13 @@ void RosenRenderRating::PaintPress(
         LOGE("Paint canvas is null");
         return;
     }
-    SkPaint paint;
-    SkRRect rRect;
-    paint.setColor(PRESS_COLOR);
-    paint.setStyle(SkPaint::Style::kFill_Style);
-    paint.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kSolid_SkBlurStyle, 1.0));
-    rRect.setRectXY(SkRect::MakeWH(boardSize.Width(), boardSize.Height()), rRectRadius, rRectRadius);
-    rRect.offset(offset.GetX(), offset.GetY());
-    canvas->drawRRect(rRect, paint);
+    double dipScale = 1.0;
+    auto pipelineContext = GetContext().Upgrade();
+    if (pipelineContext) {
+        dipScale = pipelineContext->GetDipScale();
+    }
+    RosenUniversalPainter::DrawRRectBackground(canvas, RRect::MakeRRect(Rect(offset.GetX(), offset.GetY(),
+        boardSize.Width(), boardSize.Height()), Radius(rRectRadius)), PRESS_COLOR, dipScale);
 }
 
 } // namespace OHOS::Ace

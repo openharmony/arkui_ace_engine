@@ -390,12 +390,6 @@ public:
     }
     void NotifyDispatchTouchEventDismiss(const TouchEvent& event) const;
 
-    using DispatchMouseEventHandler = std::function<void(const MouseEvent& event)>;
-    void SetDispatchMouseEventHandler(DispatchMouseEventHandler&& listener)
-    {
-        dispatchMouseEventHandler_.push_back(std::move(listener));
-    }
-    void NotifyDispatchMouseEventDismiss(const MouseEvent& event) const;
 
     float GetViewScale() const
     {
@@ -1368,7 +1362,6 @@ private:
     std::list<IsPagePathInvalidEventHandler> isPagePathInvalidEventHandler_;
     std::list<DestroyEventHandler> destroyEventHandler_;
     std::list<DispatchTouchEventHandler> dispatchTouchEventHandler_;
-    std::list<DispatchMouseEventHandler> dispatchMouseEventHandler_;
 
     RefPtr<ManagerInterface> textFieldManager_;
     RefPtr<PlatformBridge> messageBridge_;
@@ -1419,6 +1412,7 @@ private:
     bool isFirstLoaded_ = true;
     bool isDragStart_ = false;
     bool isFirstDrag_ = true;
+    bool isDensityUpdate_ = false;
     uint64_t flushAnimationTimestamp_ = 0;
     TimeProvider timeProvider_;
     OnPageShowCallBack onPageShowCallBack_;

@@ -329,12 +329,12 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
     };
 
     builder.externalEventCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                        const std::string& componentId, const uint32_t nodeId) {
+                                        const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
         }
-        jsEngine->FireExternalEvent(componentId, nodeId);
+        jsEngine->FireExternalEvent(componentId, nodeId, isDestroy);
     };
 
     builder.updatePageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
@@ -701,6 +701,13 @@ void JsFrontend::OnNewRequest(const std::string& data)
     }
 }
 
+void JsFrontend::OnDialogUpdated(const std::string& data)
+{
+    if (delegate_) {
+        delegate_->OnDialogUpdated(data);
+    }
+}
+
 void JsFrontend::CallRouterBack()
 {
     if (delegate_) {
@@ -725,6 +732,7 @@ void JsFrontend::DumpFrontend() const
     }
 
     if (DumpLog::GetInstance().GetDumpFile()) {
+        DumpLog::GetInstance().AddDesc("Components: " + std::to_string(delegate_->GetComponentsCount()));
         DumpLog::GetInstance().AddDesc("Path: " + routerPath);
         DumpLog::GetInstance().AddDesc("Length: " + std::to_string(routerIndex));
         DumpLog::GetInstance().Print(0, routerName, 0);
@@ -958,8 +966,8 @@ void JsEventHandler::HandleSyncEvent(const EventMarker& eventMarker, const std::
 }
 
 void JsEventHandler::HandleSyncEvent(
-    const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId)
+    const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId, const bool isDestroy)
 {
-    delegate_->FireExternalEvent(eventMarker.GetData().eventId, componentId, nodeId);
+    delegate_->FireExternalEvent(eventMarker.GetData().eventId, componentId, nodeId, isDestroy);
 }
 } // namespace OHOS::Ace

@@ -124,6 +124,7 @@
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_piece.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_remote_window.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
@@ -140,7 +141,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#include "frameworks/bridge/declarative_frontend/jsview/js_water_flow.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h"
+#ifdef XCOMPONENT_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #endif
@@ -919,6 +922,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSPiece::JSBind(globalObj);
     JSRating::JSBind(globalObj);
     JSRefresh::JSBind(globalObj);
+    JSRemoteWindow::JSBind(globalObj);
     JSCamera::JSBind(globalObj);
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
@@ -952,6 +956,9 @@ void JsRegisterViews(BindingTarget globalObj)
     JSTextPickerDialog::JSBind(globalObj);
     JSCheckbox::JSBind(globalObj);
     JSCheckboxGroup::JSBind(globalObj);
+    JSWaterFlow::JSBind(globalObj);
+    JSWaterFlowItem::JSBind(globalObj);
+
 
     JSObjectTemplate toggleType;
     toggleType.Constant("Checkbox", 0);
@@ -968,9 +975,10 @@ void JsRegisterViews(BindingTarget globalObj)
     JSActionSheet::JSBind(globalObj);
     JSAlertDialog::JSBind(globalObj);
     JSContextMenu::JSBind(globalObj);
+#ifdef ABILITY_COMPONENT_SUPPORTED
     JSAbilityComponent::JSBind(globalObj);
     JSAbilityComponentController::JSBind(globalObj);
-
+#endif
     JSCustomDialogController::JSBind(globalObj);
     JSShareData::JSBind(globalObj);
 

@@ -93,10 +93,11 @@ bool TryCloseLoop(uv_loop_t *ptrLoop, const char *callerName)
 
 void FreeInstance()
 {
-    if (clsHdcJdwpSimulator != nullptr) {
-        delete clsHdcJdwpSimulator;
-        clsHdcJdwpSimulator = nullptr;
+    if (clsHdcJdwpSimulator == nullptr) {
+        return; // if clsHdcJdwpSimulator is nullptr, should return immediately.
     }
+    delete clsHdcJdwpSimulator;
+    clsHdcJdwpSimulator = nullptr;
     uv_stop(&loopMain);
     TryCloseLoop(&loopMain, "Hdcjdwp exit");
     LOGI("jdwp_process exit.");
@@ -134,6 +135,9 @@ void* HdcConnectRun(void* pkgContent)
 
 void StartConnect(const std::string& pkgName)
 {
+    if (clsHdcJdwpSimulator != nullptr) {
+        return;
+    }
     pthread_t tid;
     g_connectManagement = std::make_unique<ConnectManagement>();
     g_connectManagement->SetPkgName(pkgName);

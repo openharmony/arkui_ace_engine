@@ -175,6 +175,29 @@ ErrCode UIServiceMgrClient::CancelDialog(int32_t id)
     return doms->CancelDialog(id);
 }
 
+ErrCode UIServiceMgrClient::UpdateDialog(int32_t id, const std::string& data)
+{
+    if (id < 0) {
+        HILOG_INFO("invalid parameter");
+        return UI_SERVICE_INVALID_PARAMETER;
+    }
+
+    if (remoteObject_ == nullptr) {
+        ErrCode err = Connect();
+        if (err != ERR_OK) {
+            HILOG_ERROR("%{private}s:fail to connect UIMgrService", __func__);
+            return UI_SERVICE_NOT_CONNECTED;
+        }
+    }
+
+    sptr<IUIServiceMgr> doms = iface_cast<IUIServiceMgr>(remoteObject_);
+    if (doms == nullptr) {
+        HILOG_ERROR("doms is nullptr");
+        return UI_SERVICE_GET_PROXY_FAILED;
+    }
+    return doms->UpdateDialog(id, data);
+}
+
 ErrCode UIServiceMgrClient::ShowAppPickerDialog(
     const AAFwk::Want& want, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos, int32_t userId)
 {

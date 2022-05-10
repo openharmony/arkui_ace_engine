@@ -268,5 +268,33 @@ int UIServiceMgrProxy::CancelDialog(int id)
     }
     return reply.ReadInt32();
 }
+
+int UIServiceMgrProxy::UpdateDialog(int id, const std::string& data)
+{
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(dataParcel)) {
+        return UI_SERVICE_PROXY_INNER_ERR;
+    }
+
+    if (!dataParcel.WriteInt32(id)) {
+        HILOG_ERROR("fail to WriteString id");
+        return INVALID_DATA;
+    }
+
+    if (!dataParcel.WriteString(data)) {
+        HILOG_ERROR("fail to WriteString data");
+        return INVALID_DATA;
+    }
+
+    int error = Remote()->SendRequest(IUIServiceMgr::UPDATE_DIALOG, dataParcel, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Request fail, error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
 }  // namespace Ace
 }  // namespace OHOS

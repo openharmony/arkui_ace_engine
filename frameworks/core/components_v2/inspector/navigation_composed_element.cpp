@@ -46,6 +46,11 @@ const std::unordered_map<std::string, std::function<bool(const NavigationCompose
             [](const NavigationComposedElement& inspector) { return inspector.GetNavigationHideToolBar(); } }
     };
 
+using JsonFuncType = std::function<std::unique_ptr<JsonValue>(const NavigationComposedElement&)>;
+const std::unordered_map<std::string, JsonFuncType> CREATE_JSON_VALUE_MAP {
+    { "menus", [](const NavigationComposedElement& inspector) { return inspector.GetMenus(); } }
+};
+
 }
 
 void NavigationComposedElement::Dump()
@@ -75,6 +80,9 @@ std::unique_ptr<JsonValue> NavigationComposedElement::ToJsonObject() const
         resultJson->Put(value.first.c_str(), value.second(*this).c_str());
     }
     for (const auto& value : CREATE_JSON_BOOL_MAP) {
+        resultJson->Put(value.first.c_str(), value.second(*this));
+    }
+    for (const auto& value : CREATE_JSON_VALUE_MAP) {
         resultJson->Put(value.first.c_str(), value.second(*this));
     }
     return resultJson;
@@ -168,6 +176,30 @@ bool NavigationComposedElement::GetNavigationHideToolBar() const
         return false;
     }
     return render->GetHideNavigationToolBar();
+}
+
+std::unique_ptr<JsonValue> NavigationComposedElement::GetMenus() const
+{
+    auto render = GetRenderNavigation();
+    auto menusArray = JsonUtil::CreateArray(false);
+    if (!render) {
+        return menusArray;
+    }
+    auto menuItems = render->GetMenuItems();
+    if (!menuItems.empty()) {
+        std::list<RefPtr<ToolBarItem>>::iterator iter;
+        int32_t i = 0;
+        for (iter = menuItems.begin(); iter != menuItems.end(); ++iter, i++) {
+            auto jsonMenusItem = JsonUtil::CreateArray(false);
+            auto menus = *iter;
+            jsonMenusItem->Put("value", menus->value.c_str());
+            jsonMenusItem->Put("icon", menus->icon.c_str());
+            auto index = std::to_string(i);
+            menusArray->Put(index.c_str(), jsonMenusItem);
+        }
+        return menusArray;
+    }
+    return menusArray;
 }
 
 RefPtr<RenderNavigationContainer> NavigationComposedElement::GetRenderNavigation() const

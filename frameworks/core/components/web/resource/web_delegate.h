@@ -73,7 +73,7 @@ class FileSelectorParamOhos : public WebFileSelectorParam {
 public:
     FileSelectorParamOhos(std::shared_ptr<OHOS::NWeb::NWebFileSelectorParams> param)
         : param_(param) {}
-    
+
     std::string GetTitle() override;
     int GetMode() override;
     std::string GetDefaultFileName() override;
@@ -161,6 +161,7 @@ public:
     void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled);
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
     void UpdateTextZoomAtio(const int32_t& textZoomAtioNum);
+    void UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled);
     void LoadUrl();
     void HandleTouchDown(const int32_t& id, const double& x, const double& y);
     void HandleTouchUp(const int32_t& id, const double& x, const double& y);
@@ -224,7 +225,9 @@ private:
     void Zoom(float factor);
     int GetHitTestResult();
     bool SaveCookieSync();
-    bool SetCookie(const std::string url, const std::string value);
+    bool SetCookie(const std::string& url, const std::string& value);
+    std::string GetCookie(const std::string& url);
+    void DeleteEntirelyCookie();
     void RegisterOHOSWebEventAndMethord();
     void SetWebCallBack();
 

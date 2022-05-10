@@ -29,6 +29,7 @@ constexpr int ACE_ARGS_THREE = 3;
 constexpr int ACE_PARAM0 = 0;
 constexpr int ACE_PARAM1 = 1;
 constexpr int ACE_PARAM2 = 2;
+constexpr int NAPI_ACE_ERR_ERROR = 1;
 
 bool UnwrapStageWantFromJS(napi_env env, napi_value param, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
@@ -141,7 +142,7 @@ bool UnwrapParamForPush(napi_env env, size_t argc, napi_value* argv,
 {
     HILOG_INFO("%{public}s called, argc=%{public}zu", __func__, argc);
     const size_t argcMax = ACE_ARGS_TWO;
-    if (argc != argcMax) {
+    if (argc <= 0 || argc > argcMax) {
         HILOG_INFO("%{public}s called, Params is invalid.", __func__);
         return false;
     }
@@ -151,9 +152,11 @@ bool UnwrapParamForPush(napi_env env, size_t argc, napi_value* argv,
         return false;
     }
 
-    if (!AceCreateAsyncCallback(env, argv[ACE_PARAM1], asyncCallbackInfo)) {
-        HILOG_INFO("%{public}s called, the last parameter is invalid.", __func__);
-        return false;
+    if (argc == argcMax) {
+        if (!AceCreateAsyncCallback(env, argv[ACE_PARAM1], asyncCallbackInfo)) {
+            HILOG_INFO("%{public}s called, the last parameter is invalid.", __func__);
+            return false;
+        }
     }
     return true;
 }
@@ -181,6 +184,26 @@ void JSPushCompleteAsyncCallbackWork(napi_env env, napi_status status, void* dat
     AceCompleteAsyncCallbackWork(env, status, data);
 }
 
+void JSPushCompletePromiseCallbackWork(napi_env env, napi_status status, void* data)
+{
+    HILOG_INFO("%{public}s called.", __func__);
+
+    ACEAsyncJSCallbackInfo* asyncCallbackInfo = (ACEAsyncJSCallbackInfo*)data;
+    if (asyncCallbackInfo == nullptr) {
+        HILOG_INFO("%{public}s called, asyncCallbackInfo is null", __func__);
+        return;
+    }
+
+    PluginComponentManager::GetInstance()->Push(asyncCallbackInfo->jsParamList.want,
+        asyncCallbackInfo->jsParamList.paramList.GetStringValue("name"),
+        asyncCallbackInfo->jsParamList.paramList.GetStringValue("jsonPath"),
+        asyncCallbackInfo->jsParamList.paramList.GetStringValue("data"),
+        asyncCallbackInfo->jsParamList.paramList.GetStringValue("extraData"));
+
+    asyncCallbackInfo->error_code = 0;
+    AceCompletePromiseCallbackWork(env, status, data);
+}
+
 napi_value NAPI_JSPushWrap(napi_env env, napi_callback_info info, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
@@ -205,7 +228,9 @@ napi_value NAPI_JSPushWrap(napi_env env, napi_callback_info info, ACEAsyncJSCall
     } else {
         HILOG_INFO("%{public}s called. promise.", __func__);
         asyncParamEx.resource = "NAPI_JSPushPromise";
-        return nullptr;
+        asyncParamEx.execute = JSPushWork;
+        asyncParamEx.complete = JSPushCompletePromiseCallbackWork;
+        return AceExecutePromiseCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
     }
 }
 
@@ -262,7 +287,7 @@ bool UnwrapParamForRequest(napi_env env, size_t argc, napi_value* argv,
     ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
     HILOG_INFO("%{public}s called, argc=%{public}zu", __func__, argc);
-    if (argc != ACE_ARGS_TWO) {
+    if (argc <= 0 || argc > ACE_ARGS_TWO) {
         HILOG_INFO("%{public}s called, Params is invalid.", __func__);
         return false;
     }
@@ -272,14 +297,21 @@ bool UnwrapParamForRequest(napi_env env, size_t argc, napi_value* argv,
         return false;
     }
 
-    if (!AceCreateAsyncCallback(env, argv[ACE_PARAM1], asyncCallbackInfo)) {
-        HILOG_INFO("%{public}s called, the last parameter is invalid.", __func__);
-        return false;
+    if (argc == ACE_ARGS_TWO) {
+        if (!AceCreateAsyncCallback(env, argv[ACE_PARAM1], asyncCallbackInfo)) {
+            HILOG_INFO("%{public}s called, the last parameter is invalid.", __func__);
+            return false;
+        }
     }
     return true;
 }
 
 void JSRequestWork(napi_env env, void* data)
+{
+    HILOG_INFO("%{public}s called.", __func__);
+}
+
+void JSRequestPromiseWork(napi_env env, void* data)
 {
     HILOG_INFO("%{public}s called.", __func__);
 }
@@ -325,6 +357,112 @@ void AceRequestCompleteAsyncCallbackWork(napi_env env, napi_status status, void*
     AceFreeAsyncJSCallbackInfo(&asyncCallbackInfo);
 }
 
+napi_value MakePluginTemplateObject(napi_env env, const PluginComponentTemplate& pluginTemplate)
+{
+    HILOG_INFO("%{public}s called.", __func__);
+    napi_value jsPluginTemplate = AceCreateJSObject(env);
+    if (jsPluginTemplate != nullptr) {
+        napi_value jsSource = AceWrapStringToJS(env, pluginTemplate.GetSource());
+        napi_value jsAbility = AceWrapStringToJS(env, pluginTemplate.GetAbility());
+
+        AceSetPropertyValueByPropertyName(env, jsPluginTemplate, "source", jsSource);
+        AceSetPropertyValueByPropertyName(env, jsPluginTemplate, "ability", jsAbility);
+    }
+    return jsPluginTemplate;
+}
+
+napi_value MakeCallbackParamForRequest(napi_env env, const PluginComponentTemplate& pluginTemplate,
+    const ACEAsyncJSCallbackInfo* asyncCallbackInfo)
+{
+    HILOG_INFO("%{public}s called.", __func__);
+    napi_value jsObject = AceCreateJSObject(env);
+    if (jsObject == nullptr) {
+        return nullptr;
+    }
+    HILOG_INFO("%{public}s called.   1111", __func__);
+    std::string dataTmp("{}");
+    std::string extraDataTmp("{}");
+    if (!asyncCallbackInfo->requestCallbackData.data.empty()) {
+        dataTmp = asyncCallbackInfo->requestCallbackData.data;
+    }
+    if (!asyncCallbackInfo->requestCallbackData.extraData.empty()) {
+        extraDataTmp = asyncCallbackInfo->requestCallbackData.extraData;
+    }
+
+    napi_value jsPluginTemplate = MakePluginTemplateObject(env, pluginTemplate);
+    napi_value jsData = AceStringToKVObject(env, dataTmp);
+    napi_value jsExtraData = AceStringToKVObject(env, extraDataTmp);
+
+    if (jsData != nullptr) {
+        HILOG_INFO("%{public}s called.   componentTemplate", __func__);
+        AceSetPropertyValueByPropertyName(env, jsObject, "componentTemplate", jsPluginTemplate);
+    }
+    if (jsData != nullptr) {
+        HILOG_INFO("%{public}s called.   data", __func__);
+        AceSetPropertyValueByPropertyName(env, jsObject, "data", jsData);
+    }
+    if (jsExtraData != nullptr) {
+        HILOG_INFO("%{public}s called.   extraData", __func__);
+        AceSetPropertyValueByPropertyName(env, jsObject, "extraData", jsExtraData);
+    }
+    return jsObject;
+}
+
+napi_value TransferRequestCallBackData(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
+{
+    HILOG_INFO("%{public}s called.", __func__);
+    PluginComponentTemplate componentTemplate;
+    componentTemplate.SetSource(asyncCallbackInfo->requestCallbackData.sourceName);
+    componentTemplate.SetAbility(asyncCallbackInfo->requestCallbackData.abilityName);
+    napi_value jsResult = MakeCallbackParamForRequest(env, componentTemplate, asyncCallbackInfo);
+    return jsResult;
+}
+
+void AceRequestPromiseAsyncCallbackWork(napi_env env, napi_status status, void* data)
+{
+    HILOG_INFO("%{public}s called.", __func__);
+    ACEAsyncJSCallbackInfo* asyncCallbackInfo = (ACEAsyncJSCallbackInfo*)data;
+    if (asyncCallbackInfo == nullptr) {
+        HILOG_INFO("%{public}s called, asyncCallbackInfo is null", __func__);
+        return;
+    }
+
+    if (asyncCallbackInfo->ability != nullptr) {
+        std::shared_ptr<AAFwk::Want> pWant = asyncCallbackInfo->ability->GetWant();
+        asyncCallbackInfo->wantStage = *pWant;
+    }
+
+    std::shared_ptr<AceJSPluginRequestParam> param = std::make_shared<AceJSPluginRequestParam>(
+        asyncCallbackInfo->jsParamList.want,
+        asyncCallbackInfo->jsParamList.paramList.GetStringValue("name"),
+        asyncCallbackInfo->jsParamList.paramList.GetStringValue("data"),
+        asyncCallbackInfo->jsParamList.paramList.GetStringValue("jsonPath")
+    );
+    asyncCallbackInfo->onRequestCallbackOK = false;
+    
+    if (param != nullptr) {
+        HILOG_INFO("%{public}s called, pWant = %{public}s:%{public}s",
+            __func__, asyncCallbackInfo->wantStage.GetElement().GetBundleName().c_str(),
+            asyncCallbackInfo->wantStage.GetElement().GetAbilityName().c_str());
+        JSPluginCallbackMgr::Instance().RegisterRequestEvent(env, asyncCallbackInfo->wantStage,
+            asyncCallbackInfo, param);
+    }
+
+    PluginComponentManager::GetInstance()->Request(asyncCallbackInfo->jsParamList.want,
+        asyncCallbackInfo->jsParamList.paramList.GetStringValue("name"),
+        asyncCallbackInfo->jsParamList.paramList.GetStringValue("jsonPath"),
+        asyncCallbackInfo->jsParamList.paramList.GetStringValue("data"));
+
+    if (asyncCallbackInfo->onRequestCallbackOK) {
+        asyncCallbackInfo->error_code = 0;
+        napi_resolve_deferred(env, asyncCallbackInfo->deferred, TransferRequestCallBackData(env, asyncCallbackInfo));
+        AceFreeAsyncJSCallbackInfo(&asyncCallbackInfo);
+    } else {
+        asyncCallbackInfo->error_code = NAPI_ACE_ERR_ERROR;
+        AceCompletePromiseCallbackWork(env, status, data);
+    }
+}
+
 napi_value NAPI_JSRequestWrap(napi_env env, napi_callback_info info, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
@@ -350,7 +488,9 @@ napi_value NAPI_JSRequestWrap(napi_env env, napi_callback_info info, ACEAsyncJSC
     } else {
         HILOG_INFO("%{public}s called. promise.", __func__);
         asyncParamEx.resource = "NAPI_JSRequestPromise";
-        return nullptr;
+        asyncParamEx.execute = JSRequestPromiseWork;
+        asyncParamEx.complete = AceRequestPromiseAsyncCallbackWork;
+        return AceExecutePromiseCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
     }
 }
 
@@ -504,15 +644,136 @@ static napi_value JSOn(napi_env env, napi_callback_info info)
     return rev;
 }
 
-static napi_value PluginComponentExport(napi_env env, napi_value exports)
+
+bool UnwrapParamForOff(napi_env env, size_t argc, napi_value* argv,
+    ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
+    HILOG_INFO("%{public}s called, argc=%{public}zu", __func__, argc);
+
+    if (argc != ACE_ARGS_TWO) {
+        HILOG_INFO("%{public}s called, Params is invalid.", __func__);
+        return false;
+    }
+
+    if (!UnwrapStageWantFromJS(env, argv[ACE_PARAM0], asyncCallbackInfo)) {
+        HILOG_INFO("%{public}s called, the owner want parameter is invalid.", __func__);
+        return false;
+    }
+
+    if (!AceCreateAsyncCallback(env, argv[ACE_PARAM1], asyncCallbackInfo)) {
+        HILOG_INFO("%{public}s called, the second parameter is invalid.", __func__);
+        return false;
+    }
+
+    return true;
+}
+
+void JSOffWork(napi_env env, void* data)
+{
+    HILOG_INFO("%{public}s called.", __func__);
+}
+
+void AceOffCompleteAsyncCallbackWork(napi_env env, napi_status status, void* data)
+{
+    HILOG_INFO("%{public}s called.", __func__);
+
+    ACEAsyncJSCallbackInfo* asyncCallbackInfo = (ACEAsyncJSCallbackInfo*)data;
+    if (asyncCallbackInfo == nullptr) {
+        HILOG_INFO("%{public}s called, asyncCallbackInfo is null", __func__);
+        return;
+    }
+
+    JSPluginCallbackMgr::Instance().UnregisterCallBack(env, asyncCallbackInfo->wantStage);
+    napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
+    AceFreeAsyncJSCallbackInfo(&asyncCallbackInfo);
+}
+
+napi_value NAPI_JSOffWrap(napi_env env, napi_callback_info info, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
+{
+    HILOG_INFO("%{public}s called.", __func__);
+    size_t argc = ACE_ARGS_MAX_COUNT;
+    napi_value args[ACE_ARGS_MAX_COUNT] = {nullptr};
+    napi_value jsthis = 0;
+    void* data = nullptr;
+
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
+
+    if (!UnwrapParamForOff(env, argc, args, asyncCallbackInfo)) {
+        HILOG_INFO("%{public}s called. Invoke UnwrapParamForOff fail", __func__);
+        return nullptr;
+    }
+
+    ACEAsyncParamEx asyncParamEx;
+    if (asyncCallbackInfo->cbInfo.callback != nullptr) {
+        HILOG_INFO("%{public}s called. asyncCallback.", __func__);
+        asyncParamEx.resource = "NAPI_JSOffCallback";
+        asyncParamEx.execute = JSOffWork;
+        asyncParamEx.complete = AceOffCompleteAsyncCallbackWork;
+
+        return AceExecuteAsyncCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
+    } else {
+        HILOG_INFO("%{public}s called. promise.", __func__);
+        asyncParamEx.resource = "NAPI_JSOffPromise";
+        return nullptr;
+    }
+}
+
+static napi_value JSOff(napi_env env, napi_callback_info info)
+{
+    HILOG_INFO("%{public}s called.", __func__);
+
+    ACEAsyncJSCallbackInfo* asyncCallbackInfo = AceCreateAsyncJSCallbackInfo(env);
+    if (asyncCallbackInfo == nullptr) {
+        return AceWrapVoidToJS(env);
+    }
+
+    napi_value rev = NAPI_JSOffWrap(env, info, asyncCallbackInfo);
+    if (rev == nullptr) {
+        AceFreeAsyncJSCallbackInfo(&asyncCallbackInfo);
+        rev = AceWrapVoidToJS(env);
+    }
+    return rev;
+}
+
+napi_value PluginComponentEventTypeInit(napi_env env, napi_value exports)
+{
+    HILOG_INFO("%{public}s, called", __func__);
+
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+
+    AceSetNamedPropertyByString(env, obj, "push", "EVENT_TYPE_PUSH");
+    AceSetNamedPropertyByString(env, obj, "request", "EVENT_TYPE_REQUEST");
+
+    napi_property_descriptor properties[] = {
+        DECLARE_NAPI_PROPERTY("EventType", obj),
+    };
+
+    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(properties) / sizeof(properties[0]), properties));
+    return exports;
+}
+
+napi_value PluginComponentInit(napi_env env, napi_value exports)
+{
+    HILOG_INFO("%{public}s, called", __func__);
+
     napi_property_descriptor properties[] = {
         DECLARE_NAPI_FUNCTION("push", JSPush),
         DECLARE_NAPI_FUNCTION("request", JSRequest),
         DECLARE_NAPI_FUNCTION("on", JSOn),
+        DECLARE_NAPI_FUNCTION("off", JSOff),
     };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(properties) / sizeof(properties[0]), properties));
+    return exports;
+}
+
+static napi_value PluginComponentExport(napi_env env, napi_value exports)
+{
+    HILOG_INFO("%{public}s, called", __func__);
+
+    PluginComponentEventTypeInit(env, exports);
+    PluginComponentInit(env, exports);
     return exports;
 }
 

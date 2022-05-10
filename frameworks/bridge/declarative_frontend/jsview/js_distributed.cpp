@@ -37,9 +37,9 @@ void JSDistributed::JSBind(BindingTarget globalObj)
 void JSDistributed::ConstructorCallback(const JSCallbackInfo& args)
 {
     std::string sessionId;
-    if (args.Length() > 0 && args[0]->IsString() && args[1]->IsObject()) {
+    if (args.Length() > 1 && args[0]->IsString() && args[1]->IsObject()) {
         sessionId = args[0]->ToString();
-        LOGE("sessionId %{public}s", sessionId.c_str());
+        LOGI("sessionId %{public}s", sessionId.c_str());
         auto distributed = Referenced::MakeRefPtr<JSDistributed>(sessionId);
         distributed->IncRefCount();
         distributed->Init(JSRef<JSObject>::Cast(args[1]), sessionId);

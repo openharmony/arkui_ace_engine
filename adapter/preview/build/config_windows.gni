@@ -38,6 +38,8 @@ if (enable_ark_preview) {
   xcomponent_components_support = true
 }
 
+enable_ability_component = false
+
 # windows platform defines and configs
 defines = [
   "WINDOWS_PLATFORM",
@@ -62,6 +64,10 @@ if (form_components_support) {
   defines += [ "FORM_SUPPORTED" ]
 }
 
+if (xcomponent_components_support) {
+  defines += [ "XCOMPONENT_SUPPORTED" ]
+}
+
 cflags_cc = [
   "-std=c++17",
   "-DWINVER=0x0601",
@@ -76,10 +82,10 @@ cflags_cc = [
 ]
 
 platform_deps = [
-  "//foundation/ace/ace_engine/adapter/preview/entrance:ace_preview_entrance_windows",
-  "//foundation/ace/ace_engine/adapter/preview/inspector:ace_inspector_windows",
-  "//foundation/ace/ace_engine/adapter/preview/osal:ace_osal_windows",
+  "//foundation/arkui/ace_engine/adapter/preview/entrance:ace_preview_entrance_windows",
+  "//foundation/arkui/ace_engine/adapter/preview/inspector:ace_inspector_windows",
+  "//foundation/arkui/ace_engine/adapter/preview/osal:ace_osal_windows",
 ]
 
 libace_target =
-    "//foundation/ace/ace_engine/adapter/preview/build:libace_engine_windows"
+    "//foundation/arkui/ace_engine/adapter/preview/build:libace_engine_windows"

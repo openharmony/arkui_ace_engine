@@ -56,6 +56,11 @@ public:
         return (domNode == nullptr) ? nullptr : domNode->GetRootComponent();
     }
 
+    size_t GetComponentsCount() const
+    {
+        return domNodes_.size();
+    }
+
     const RefPtr<StackComponent>& GetRootStackComponent() const
     {
         return rootStackComponent_;

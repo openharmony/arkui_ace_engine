@@ -26,27 +26,24 @@ namespace OHOS::Ace {
 
 namespace {
 
-using StartServer = bool (*)(const std::string& packageName, const bool flagNeedDebugBreakPoint);
-using StartUnixSocket = void (*)(const std::string& packageName);
+using StartServer = bool (*)(const std::string& packageName);
 using SendMessage = void (*)(const std::string& message);
 using StopServer = void (*)(const std::string& packageName);
-using AddMessage = void (*)(const int32_t instanceId, const std::string& message);
-using RemoveMessage = void (*)(const int32_t instanceId);
-using IsAttachStart = bool (*)();
+using StoreMessage = void (*)(int32_t instanceId, const std::string& message);
+using RemoveMessage = void (*)(int32_t instanceId);
+using WaitForDebugger = bool (*)();
 
 } // namespace
 
-ConnectServerManager::ConnectServerManager(): isNeedDebugBreakPoint_(false), handlerConnectServerSo_(nullptr)
+ConnectServerManager::ConnectServerManager(): handlerConnectServerSo_(nullptr)
 {
     isDebugVersion_ = AceApplicationInfo::GetInstance().IsDebugVersion();
     if (!isDebugVersion_) {
         return;
     }
-    isNeedDebugBreakPoint_ = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
     packageName_ = AceApplicationInfo::GetInstance().GetPackageName();
-    OpenConnectServerSo();
+    LoadConnectServerSo();
     StartConnectServer();
-    StartHdcSocket();
 }
 
 ConnectServerManager::~ConnectServerManager()
@@ -64,7 +61,7 @@ ConnectServerManager& ConnectServerManager::Get()
     return connectServerManager;
 }
 
-void ConnectServerManager::OpenConnectServerSo()
+void ConnectServerManager::LoadConnectServerSo()
 {
     const std::string soDir = "libconnectserver_debugger.z.so";
     handlerConnectServerSo_ = dlopen(soDir.c_str(), RTLD_LAZY);
@@ -94,7 +91,7 @@ void ConnectServerManager::StartConnectServer()
         LOGE("startServer = NULL, dlerror = %s", dlerror());
         return;
     }
-    startServer(packageName_, isNeedDebugBreakPoint_);
+    startServer(packageName_);
 }
 
 void ConnectServerManager::StopConnectServer()
@@ -112,24 +109,9 @@ void ConnectServerManager::StopConnectServer()
     stopServer(packageName_);
 }
 
-void ConnectServerManager::StartHdcSocket()
+void ConnectServerManager::AddInstance(int32_t instanceId, const std::string& instanceName)
 {
-    LOGI("Start HDC registration with unix socket");
-    if (handlerConnectServerSo_ == nullptr) {
-        LOGE("handlerConnectServerSo_ is null");
-        return;
-    }
-    StartUnixSocket startUnixSocket = (StartUnixSocket)dlsym(handlerConnectServerSo_, "StartUnixSocket");
-    if (startUnixSocket == nullptr) {
-        LOGE("startUnixSocket = NULL, dlerror = %s", dlerror());
-        return;
-    }
-    startUnixSocket(packageName_);
-}
-
-void ConnectServerManager::AddInstance(const int32_t instanceId, const std::string instanceName)
-{
-    if (!isDebugVersion_) {
+    if (!isDebugVersion_ || handlerConnectServerSo_ == nullptr) {
         return;
     }
     LOGI("AddInstance %{public}d", instanceId);
@@ -144,34 +126,31 @@ void ConnectServerManager::AddInstance(const int32_t instanceId, const std::stri
     // Get the message including information of new instance, which will be send to IDE.
     std::string message = GetInstanceMapMessage("addInstance", instanceId);
 
-    if (handlerConnectServerSo_ == nullptr) {
-        LOGE("handlerConnectServerSo_ is null");
+    WaitForDebugger waitForDebugger = (WaitForDebugger)dlsym(handlerConnectServerSo_, "WaitForDebugger");
+    if (waitForDebugger == nullptr) {
         return;
     }
-    IsAttachStart isAttachStart = (IsAttachStart)dlsym(handlerConnectServerSo_, "IsAttachStart");
-    if (isAttachStart != nullptr) {
-        isNeedDebugBreakPoint_ = isNeedDebugBreakPoint_ || isAttachStart();
-    }
-    if (isNeedDebugBreakPoint_) {
+    if (!waitForDebugger()) { // waitForDebugger : waitForDebugger means the connection state of the connect server
         AceApplicationInfo::GetInstance().SetNeedDebugBreakPoint(true);
         SendMessage sendMessage = (SendMessage)dlsym(handlerConnectServerSo_, "SendMessage");
         if (sendMessage != nullptr) {
-            sendMessage(message);
+            sendMessage(message); // if connected, message will be sent immediately.
         }
-    } else {
-        AddMessage addMessage = (AddMessage)dlsym(handlerConnectServerSo_, "AddMessage");
-        if (addMessage != nullptr) {
-            addMessage(instanceId, message);
+    } else { // if not connected, message will be stored and sent later when "connected" coming.
+        StoreMessage storeMessage = (StoreMessage)dlsym(handlerConnectServerSo_, "StoreMessage");
+        if (storeMessage != nullptr) {
+            storeMessage(instanceId, message);
         }
     }
 }
 
-void ConnectServerManager::RemoveInstance(const int32_t instanceId)
+void ConnectServerManager::RemoveInstance(int32_t instanceId)
 {
-    if (!isDebugVersion_) {
+    if (!isDebugVersion_ || handlerConnectServerSo_ == nullptr) {
         return;
     }
     LOGI("RemoveInstance %{public}d", instanceId);
+
     // Get the message including information of deleted instance, which will be send to IDE.
     std::string message = GetInstanceMapMessage("destroyInstance", instanceId);
     size_t numInstance = 0;
@@ -183,15 +162,11 @@ void ConnectServerManager::RemoveInstance(const int32_t instanceId)
         LOGW("Instance name not found with instance id: %{public}d", instanceId);
     }
 
-    if (handlerConnectServerSo_ == nullptr) {
-        LOGE("handlerConnectServerSo_ is null");
+    WaitForDebugger waitForDebugger = (WaitForDebugger)dlsym(handlerConnectServerSo_, "WaitForDebugger");
+    if (waitForDebugger == nullptr) {
         return;
     }
-    IsAttachStart isAttachStart = (IsAttachStart)dlsym(handlerConnectServerSo_, "IsAttachStart");
-    if (isAttachStart != nullptr) {
-        isNeedDebugBreakPoint_ = isNeedDebugBreakPoint_ || isAttachStart();
-    }
-    if (isNeedDebugBreakPoint_) {
+    if (!waitForDebugger()) {
         SendMessage sendMessage = (SendMessage)dlsym(handlerConnectServerSo_, "SendMessage");
         if (sendMessage != nullptr) {
             sendMessage(message);
@@ -204,7 +179,7 @@ void ConnectServerManager::RemoveInstance(const int32_t instanceId)
     }
 }
 
-std::string ConnectServerManager::GetInstanceMapMessage(const char* messageType, const int32_t instanceId)
+std::string ConnectServerManager::GetInstanceMapMessage(const char* messageType, int32_t instanceId)
 {
     auto message = JsonUtil::Create(true);
     message->Put("type", messageType);

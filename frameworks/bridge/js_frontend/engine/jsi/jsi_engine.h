@@ -66,7 +66,6 @@ public:
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId);
 #endif
- 
     void SetArkNativeEngine(ArkNativeEngine* nativeEngine)
     {
         nativeEngine_ = nativeEngine;
@@ -131,7 +130,7 @@ public:
 
     void FireSyncEvent(const std::string& eventId, const std::string& param) override;
 
-    void FireExternalEvent(const std::string& componentId, const uint32_t nodeId) override;
+    void FireExternalEvent(const std::string& componentId, const uint32_t nodeId, const bool isDestroy) override;
 
     void TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval) override;
 
@@ -174,6 +173,7 @@ private:
     void GetLoadOptions(std::string& optionStr, bool isMainPage, bool hasAppCode);
     void RegisterWorker();
     void RegisterInitWorkerFunc();
+    void RegisterOffWorkerFunc();
     void RegisterAssetFunc();
     bool ExecuteAbc(const std::string &fileName);
     bool CallAppFunc(const std::string& appFuncName);

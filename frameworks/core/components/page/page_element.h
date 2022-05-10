@@ -90,6 +90,7 @@ public:
     void RemoveGeometryTransition(const std::string& id);
     void FinishCreateGeometryTransition(const std::string& id);
     void Dump() override;
+    int32_t GetComponentsCount();
 
 protected:
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;

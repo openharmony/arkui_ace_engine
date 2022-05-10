@@ -61,17 +61,26 @@ void FlutterRenderBadge::DrawCircleBadge(flutter::Canvas& canvas, const Offset& 
     badgeCircleDiameter_ = badge_->IsBadgeCircleSizeDefined() ? (circleSize.IsValid() ? NormalizeToPx(circleSize) : 0)
                                                               : NormalizeToPx(CIRCLE_BADGE_SIZE);
     badgeCircleRadius_ = badgeCircleDiameter_ / 2;
+    double boundaryStartX = 0.0;
+    double boundaryStartY = 0.0;
     rRect.sk_rrect.setRectXY(
         SkRect::MakeIWH(badgeCircleDiameter_, badgeCircleDiameter_), badgeCircleRadius_, badgeCircleRadius_);
     if (badgePosition == BadgePosition::RIGHT_TOP) {
         rRect.sk_rrect.offset(offset.GetX() + width_ - badgeCircleDiameter_, offset.GetY());
+        boundaryStartX = offset.GetX() + width_ - badgeCircleDiameter_;
+        boundaryStartY = offset.GetY();
     } else if (badgePosition == BadgePosition::RIGHT) {
         rRect.sk_rrect.offset(
             offset.GetX() + width_ - badgeCircleDiameter_, offset.GetY() + height_ / 2 - badgeCircleRadius_);
+        boundaryStartX = offset.GetX() + width_ - badgeCircleDiameter_;
+        boundaryStartY = offset.GetY() + height_ / 2 - badgeCircleRadius_;
     } else {
         rRect.sk_rrect.offset(offset.GetX(), offset.GetY() + height_ / 2 - badgeCircleRadius_);
+        boundaryStartX = offset.GetX();
+        boundaryStartY = offset.GetY() + height_ / 2 - badgeCircleRadius_;
     }
     canvas.drawRRect(rRect, paint, paintData);
+    RenderBadgeBoundary(canvas.canvas(), boundaryStartX, boundaryStartY, badgeCircleDiameter_, badgeCircleDiameter_);
 }
 
 void FlutterRenderBadge::DrawNumericalBadge(flutter::Canvas& canvas, const Offset& offset)
@@ -105,18 +114,27 @@ void FlutterRenderBadge::DrawNumericalBadge(flutter::Canvas& canvas, const Offse
         }
     }
     auto badgePosition = badge_->GetBadgePosition();
+    double boundaryStartX = 0.0;
+    double boundaryStartY = 0.0;
     rRect.sk_rrect.setRectXY(SkRect::MakeIWH(badgeWidth_, badgeHeight_), badgeCircleRadius_, badgeCircleRadius_);
     if (badgePosition == BadgePosition::RIGHT_TOP) {
         textInitialOffset_ = Offset(width_ - badgeCircleDiameter_ + NormalizeToPx(2.0_vp), 0 - NormalizeToPx(2.0_vp));
         rRect.sk_rrect.offset(offset.GetX() + textInitialOffset_.GetX(), offset.GetY() + textInitialOffset_.GetY());
+        boundaryStartX = offset.GetX() + textInitialOffset_.GetX();
+        boundaryStartY = offset.GetY() + textInitialOffset_.GetY();
     } else if (badgePosition == BadgePosition::RIGHT) {
         textInitialOffset_ = Offset(width_ - badgeCircleDiameter_, height_ / 2 - badgeCircleRadius_);
         rRect.sk_rrect.offset(offset.GetX() + textInitialOffset_.GetX(), offset.GetY() + textInitialOffset_.GetY());
+        boundaryStartX = offset.GetX() + textInitialOffset_.GetX();
+        boundaryStartY = offset.GetY() + textInitialOffset_.GetY();
     } else {
         textInitialOffset_ = Offset(0, height_ / 2 - badgeCircleRadius_);
         rRect.sk_rrect.offset(offset.GetX(), offset.GetY() + textInitialOffset_.GetY());
+        boundaryStartX = offset.GetX();
+        boundaryStartY = offset.GetY() + textInitialOffset_.GetY();
     }
     canvas.drawRRect(rRect, paint, paintData);
+    RenderBadgeBoundary(canvas.canvas(), boundaryStartX, boundaryStartY, badgeWidth_, badgeHeight_);
 }
 
 void FlutterRenderBadge::DrawBadge(RenderContext& context, const Offset& offset)
@@ -157,6 +175,23 @@ Size FlutterRenderBadge::CalculateTextSize(
     renderText->SetTextStyle(textStyle);
     renderText->PerformLayout();
     return renderText->GetLayoutSize();
+}
+
+void FlutterRenderBadge::RenderBadgeBoundary(SkCanvas* canvas, double startX,
+    double startY, double width, double height)
+{
+    if (SystemProperties::GetDebugBoundaryEnabled()) {
+        if (canvas == nullptr) {
+            LOGE("Paint canvas is null.");
+            return;
+        }
+        Offset boundaryOffset(startX, startY);
+        Size layoutSize;
+        layoutSize.SetWidth(width);
+        layoutSize.SetHeight(height);
+        DebugBoundaryPainter::PaintDebugBoundary(canvas, boundaryOffset, layoutSize);
+        DebugBoundaryPainter::PaintDebugCorner(canvas, boundaryOffset, layoutSize);
+    }
 }
 
 } // namespace OHOS::Ace

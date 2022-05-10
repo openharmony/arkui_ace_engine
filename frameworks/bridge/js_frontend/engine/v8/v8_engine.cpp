@@ -4190,7 +4190,7 @@ void V8Engine::FireSyncEvent(const std::string& eventId, const std::string& para
     }
 }
 
-void V8Engine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
+void V8Engine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     CHECK_RUN_ON(JS);
     ACE_DCHECK(engineInstance_);

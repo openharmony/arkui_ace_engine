@@ -285,6 +285,16 @@ public:
         return borderWidth_;
     }
 
+    HoverAnimationType GetMouseAnimationType() const
+    {
+        return animationType_;
+    }
+
+    void SetMouseAnimationType(HoverAnimationType animationType)
+    {
+        animationType_ = animationType;
+    }
+
     ACE_DEFINE_COMPONENT_EVENT(OnChange, void(bool));
     ACE_DEFINE_COMPONENT_EVENT(OnClick, void());
 
@@ -314,6 +324,7 @@ protected:
     EventMarker domChangeEvent_;
     double aspectRatio_ = 1.0;
     double radioInnerSizeRatio_ = 0.5;
+    HoverAnimationType animationType_ = HoverAnimationType::UNKNOWN;
 };
 
 class ACE_EXPORT CheckboxGroupResult : public BaseEventInfo {

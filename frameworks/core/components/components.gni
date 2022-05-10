@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 
 template("build_component") {
   forward_variables_from(invoker, "*")
@@ -89,7 +89,7 @@ template("build_component") {
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
-        configs += [ "//foundation/graphic/standard/rosen/modules/render_service_client:render_service_client_config" ]
+        configs += [ "//foundation/graphic/graphic/rosen/modules/render_service_client:render_service_client_config" ]
       }
 
       if (defined(config.enable_standard_input) &&

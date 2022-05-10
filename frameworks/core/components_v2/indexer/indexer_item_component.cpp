@@ -28,6 +28,7 @@ RefPtr<RenderNode> IndexerItemComponent::CreateRenderNode()
 void IndexerItemComponent::BuildItem()
 {
     box_ = AceType::MakeRefPtr<BoxComponent>();
+    box_->SetEnableDebugBoundary(true);
     if (rotate_) {
         image_ = AceType::MakeRefPtr<ImageComponent>(InternalResource::ResourceId::INDEXER_ARROW_PNG);
         image_->SetHeight(itemSize_);

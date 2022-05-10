@@ -84,6 +84,7 @@ void RenderNavigationContainer::Update(const RefPtr<Component>& component)
     hideNavigationToolBar_ = declaration->hideToolbar;
     titleMode_ = declaration->titleMode;
     toolBarItems_ = declaration->toolbarItems;
+    menuItems_ = declaration->menuItems;
 }
 
 } // namespace OHOS::Ace

@@ -106,6 +106,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("textAlign", &JSTextArea::SetTextAlign);
     JSClass<JSTextArea>::StaticMethod("caretColor", &JSTextArea::SetCaretColor);
     JSClass<JSTextArea>::StaticMethod("height", &JSTextArea::JsHeight);
+    JSClass<JSTextArea>::StaticMethod("padding", &JSTextArea::JsPadding);
     JSClass<JSTextArea>::StaticMethod("fontSize", &JSTextArea::SetFontSize);
     JSClass<JSTextArea>::StaticMethod("fontColor", &JSTextArea::SetTextColor);
     JSClass<JSTextArea>::StaticMethod("fontWeight", &JSTextArea::SetFontWeight);
@@ -355,6 +356,46 @@ void JSTextArea::JsHeight(const JSCallbackInfo& info)
         return;
     }
     textAreaComponent->SetHeight(value);
+}
+
+void JSTextArea::JsPadding(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
+        LOGE("arg is not a string, number or object.");
+        return;
+    }
+    Edge padding;
+    if (info[0]->IsNumber()) {
+        Dimension edgeValue;
+        if (ParseJsDimensionVp(info[0], edgeValue)) {
+            padding = Edge(edgeValue);
+        }
+    }
+    if (info[0]->IsObject()) {
+        auto object = JsonUtil::ParseJsonString(info[0]->ToString());
+        if (!object) {
+            LOGE("Js Parse object failed. argsPtr is null.");
+            return;
+        }
+        if (object->Contains("top") || object->Contains("bottom") || object->Contains("left") ||
+            object->Contains("right")) {
+            Dimension left = Dimension(0.0, DimensionUnit::VP);
+            Dimension top = Dimension(0.0, DimensionUnit::VP);
+            Dimension right = Dimension(0.0, DimensionUnit::VP);
+            Dimension bottom = Dimension(0.0, DimensionUnit::VP);
+            ParseJsonDimensionVp(object->GetValue("left"), left);
+            ParseJsonDimensionVp(object->GetValue("top"), top);
+            ParseJsonDimensionVp(object->GetValue("right"), right);
+            ParseJsonDimensionVp(object->GetValue("bottom"), bottom);
+            padding = Edge(left, top, right, bottom);
+        }
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
+    if (component) {
+        auto decoration = component->GetDecoration();
+        decoration->SetPadding(padding);
+    }
 }
 
 void JSTextArea::SetFontSize(const JSCallbackInfo& info)

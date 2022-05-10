@@ -101,6 +101,7 @@ public:
     bool OnRestoreData(const std::string& data) override;
     void OnRemoteTerminated() override;
     void OnNewRequest(const std::string& data) override;
+    void OnDialogUpdated(const std::string& data) override {}
     void OnMemoryLevel(const int32_t level) override;
     void SetColorMode(ColorMode colorMode) override;
     void CallRouterBack() override;
@@ -226,7 +227,8 @@ public:
 
     void HandleSyncEvent(const EventMarker& eventMarker, const std::shared_ptr<BaseEventInfo>& info) override;
 
-    void HandleSyncEvent(const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId) override;
+    void HandleSyncEvent(const EventMarker& eventMarker, const std::string& componentId, const int32_t nodeId,
+        const bool isDestroy) override;
 
 private:
     RefPtr<Framework::PluginFrontendDelegate> delegate_;

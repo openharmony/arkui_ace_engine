@@ -100,7 +100,8 @@ public:
     virtual void FireSyncEvent(const std::string& eventId, const std::string& param) = 0;
 
     // Fire external event on JS thread
-    virtual void FireExternalEvent(const std::string& componentId, const uint32_t nodeId) = 0;
+    virtual void FireExternalEvent(
+        const std::string& componentId, const uint32_t nodeId, const bool isDestroy = false) = 0;
 
     // Timer callback on JS
     virtual void TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval) = 0;

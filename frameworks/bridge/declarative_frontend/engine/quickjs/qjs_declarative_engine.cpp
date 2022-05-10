@@ -553,14 +553,17 @@ void QJSDeclarativeEngine::FireSyncEvent(const std::string& eventId, const std::
     LOGW("QJSDeclarativeEngine FireSyncEvent is unusable");
 }
 
-void QJSDeclarativeEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
+void QJSDeclarativeEngine::FireExternalEvent(
+    const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
-    if (!OHOS::Ace::Framework::XComponentClient::GetInstance().
-        GetNativeXComponentFromXcomponentsMap(componentId, nativeXComponentImpl_,
-        nativeXComponent_)) {
-        LOGE("InitXComponent fail");
+#ifdef XCOMPONENT_SUPPORTED
+    if (isDestroy) {
+        XComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
+        XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(componentId);
         return;
     }
+    OHOS::Ace::Framework::XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(
+        componentId, nativeXComponentImpl_, nativeXComponent_);
 
     RefPtr<XComponentComponent> xcomponent;
     OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId, xcomponent);
@@ -630,6 +633,7 @@ void QJSDeclarativeEngine::FireExternalEvent(const std::string& componentId, con
         return;
     }
     delegate->PostSyncTaskToPage(task);
+#endif
 }
 
 void QJSDeclarativeEngine::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher)

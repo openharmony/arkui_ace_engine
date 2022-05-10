@@ -69,6 +69,14 @@ void RosenRenderOption::PaintBackground(RenderContext& context, const Offset& of
     canvas->drawPath(path, paint);
     paint.setColor(GetEventEffectColor().GetValue());
     canvas->drawPath(path, paint);
+    if (SystemProperties::GetDebugBoundaryEnabled()) {
+        if (canvas == nullptr) {
+            LOGE("Paint canvas is null.");
+            return;
+        }
+        DebugBoundaryPainter::PaintDebugBoundary(canvas, offset, GetLayoutSize());
+        DebugBoundaryPainter::PaintDebugCorner(canvas, offset, GetLayoutSize());
+    }
 }
 
 void RosenRenderOption::PaintLine(RenderContext& context, const Offset& offset)

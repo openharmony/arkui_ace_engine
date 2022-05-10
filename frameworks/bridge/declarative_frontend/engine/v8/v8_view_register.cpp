@@ -130,12 +130,15 @@
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_piece.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_remote_window.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_water_flow.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
@@ -633,7 +636,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"ActionSheet", JSActionSheet::JSBind},
     {"AlertDialog", JSAlertDialog::JSBind},
     {"ContextMenu", JSContextMenu::JSBind },
+#ifdef ABILITY_COMPONENT_SUPPORTED
     {"AbilityComponent", JSAbilityComponent::JSBind},
+#endif
     {"TextArea", JSTextArea::JSBind},
     {"TextInput", JSTextInput::JSBind},
     {"TextClock", JSTextClock::JSBind},
@@ -653,6 +658,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"Camera", JSCamera::JSBind},
     {"Piece", JSPiece::JSBind},
     {"Rating", JSRating::JSBind},
+    {"RemoteWindow", JSRemoteWindow::JSBind },
     {"Video", JSVideo::JSBind},
 #endif
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
@@ -696,7 +702,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"TextTimerController", JSTextTimerController::JSBind},
     {"TextClockController", JSTextClockController::JSBind},
     {"Checkbox", JSCheckbox::JSBind},
-    {"CheckboxGroup", JSCheckboxGroup::JSBind}
+    {"CheckboxGroup", JSCheckboxGroup::JSBind},
+    {"WaterFlow", JSWaterFLow::JSBind},
+    {"FlowItem", JSFLowItem::JSBind}
 };
 
 void RegisterAllModule(BindingTarget globalObj)

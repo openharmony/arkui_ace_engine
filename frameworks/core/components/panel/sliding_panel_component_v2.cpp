@@ -85,6 +85,7 @@ void SlidingPanelComponentV2::BuildInnerChild()
     flexItem->SetChild(GetChild());
     column->AppendChild(dragBar);
     column->AppendChild(flexItem);
+    boxForContent->SetEnableDebugBoundary(true);
     boxForContent->SetBackDecoration(backDecoration);
     boxForContent->SetFrontDecoration(frontDecoration);
     boxForContent->SetChild(column);

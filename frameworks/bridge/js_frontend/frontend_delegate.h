@@ -67,6 +67,8 @@ public:
     virtual int32_t GetStackSize() const = 0;
     // Gets current page's states
     virtual void GetState(int32_t& index, std::string& name, std::string& path) = 0;
+    // Gets current page's components count
+    virtual size_t GetComponentsCount() = 0;
     // Gets current page's params
     virtual std::string GetParams()
     {

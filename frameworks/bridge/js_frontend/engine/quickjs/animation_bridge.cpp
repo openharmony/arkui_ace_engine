@@ -316,9 +316,6 @@ void AnimationBridge::JsCreateAnimation(const RefPtr<JsAcePage>& page, const std
         tweenOption.SetDelay(iterDelay->second);
     }
     tweenOption.SetIteration(iterations);
-    if (SystemProperties::GetRosenBackendEnabled()) {
-        tweenOption.SetAllowRunningAsynchronously(true);
-    }
     if (page == nullptr) {
         LOGE("JsCreateAnimation failed, Page is null.");
         return;

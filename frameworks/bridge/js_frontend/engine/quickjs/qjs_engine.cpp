@@ -470,7 +470,7 @@ void SetDomStyle(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementOperat
         JS_FreeValue(ctx, val);
     }
     bool isIine = false;
-    for (int32_t i = 0; i < styles.size(); i++) {
+    for (int32_t i = 0; i < static_cast<int32_t>(styles.size()); i++) {
         std::string key = styles[i].first;
         std::string value = styles[i].second;
         if (key == "display" && value == "inline") {
@@ -481,7 +481,7 @@ void SetDomStyle(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementOperat
 
     if (isIine) {
         std::vector < std::pair < std::string, std::string >> stylesFinaly;
-        for (int32_t i = 0; i < styles.size(); i++) {
+        for (int32_t i = 0; i < static_cast<int32_t>(styles.size()); i++) {
             std::string key = styles[i].first;
             std::string value = styles[i].second;
             if (key == "width" || key == "height" || key.find("margin") != std::string::npos ||
@@ -3841,7 +3841,7 @@ void QjsEngine::FireSyncEvent(const std::string& eventId, const std::string& par
     JS_FreeValue(engineInstance_->GetQjsContext(), cppToJsRet);
 }
 
-void QjsEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId)
+void QjsEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     ACE_DCHECK(engineInstance_);
     auto context = engineInstance_->GetQjsContext();

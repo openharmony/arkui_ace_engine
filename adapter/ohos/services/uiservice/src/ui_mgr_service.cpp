@@ -55,6 +55,7 @@ UIMgrService::UIMgrService()
 
 UIMgrService::~UIMgrService()
 {
+    std::lock_guard<std::mutex> lock(uiMutex_);
     callbackMap_.clear();
 }
 
@@ -382,6 +383,24 @@ int UIMgrService::CancelDialog(int id)
     return NO_ERROR;
 }
 
+int UIMgrService::UpdateDialog(int id, const std::string& data)
+{
+    auto updateDialogCallback = [id, data]() {
+        HILOG_INFO("Update dialog id: %{public}d", id);
+        auto container = Platform::AceContainer::GetContainer(id);
+        if (!container) {
+            HILOG_INFO("Container(%{public}d) not found.", id);
+            return;
+        }
+        Platform::AceContainer::OnDialogUpdated(id, data);
+    };
+    if (!handler_->PostTask(updateDialogCallback)) {
+        return UI_SERVICE_POST_TASK_FAILED;
+    }
+
+    return NO_ERROR;
+}
+
 void UIMgrService::OnStart()
 {
     if (state_ == UIServiceRunningState::STATE_RUNNING) {
@@ -478,6 +497,7 @@ int UIMgrService::Push(const AAFwk::Want& want, const std::string& name,
 {
     HILOG_INFO("UIMgrService::Push called start");
     std::map<std::string, sptr<IUIService>>::iterator iter;
+    std::lock_guard<std::mutex> lock(uiMutex_);
     for (iter = callbackMap_.begin(); iter != callbackMap_.end(); ++iter) {
         sptr<IUIService> uiService = iter->second;
         if (uiService == nullptr) {
@@ -493,6 +513,7 @@ int UIMgrService::Request(const AAFwk::Want& want, const std::string& name, cons
 {
     HILOG_INFO("UIMgrService::Request called start");
     std::map<std::string, sptr<IUIService>>::iterator iter;
+    std::lock_guard<std::mutex> lock(uiMutex_);
     for (iter = callbackMap_.begin(); iter != callbackMap_.end(); ++iter) {
         sptr<IUIService> uiService = iter->second;
         if (uiService == nullptr) {
@@ -527,7 +548,7 @@ std::shared_ptr<EventHandler> UIMgrService::GetEventHandler()
 int UIMgrService::HandleRegister(const AAFwk::Want& want, const sptr<IUIService>& uiService)
 {
     HILOG_INFO("UIMgrService::HandleRegister called start");
-    std::lock_guard<std::mutex> lock_l(uiMutex_);
+    std::lock_guard<std::mutex> lock(uiMutex_);
     std::string keyStr = GetCallBackKeyStr(want);
     HILOG_INFO("UIMgrService::HandleRegister keyStr = %{public}s", keyStr.c_str());
     bool exist = CheckCallBackFromMap(keyStr);
@@ -542,7 +563,7 @@ int UIMgrService::HandleRegister(const AAFwk::Want& want, const sptr<IUIService>
 int UIMgrService::HandleUnregister(const AAFwk::Want& want)
 {
     HILOG_INFO("UIMgrService::HandleUnregister called start");
-    std::lock_guard<std::mutex> lock_l(uiMutex_);
+    std::lock_guard<std::mutex> lock(uiMutex_);
     std::string keyStr = GetCallBackKeyStr(want);
     bool exist = CheckCallBackFromMap(keyStr);
     if (!exist) {
@@ -559,8 +580,7 @@ std::string UIMgrService::GetCallBackKeyStr(const AAFwk::Want& want)
     HILOG_INFO("UIMgrService::GetCallBackKeyStr called start");
     AppExecFwk::ElementName element =  want.GetElement();
     std::string bundleName = element.GetBundleName();
-    std::string abilityName = element.GetAbilityName();
-    std::string keyStr = bundleName + abilityName;
+    std::string keyStr = bundleName;
     HILOG_INFO("UIMgrService::GetCallBackKeyStr called end");
     return keyStr;
 }

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ace/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 
 # ------------------------------------------------
 #      Skia main target config begin
@@ -86,7 +86,7 @@ template("make_skia_deps") {
         ":harfbuzz_config",
       ]
       public_deps =
-          [ "//foundation/graphic/standard/rosen/build/skia:skia_ohos" ]
+          [ "//foundation/graphic/graphic/rosen/build/skia:skia_ohos" ]
     } else if (platform == "ohos" && defined(config.enable_native_view) &&
                config.enable_native_view) {
       public_configs = [
@@ -886,7 +886,7 @@ template("ace_skia_core") {
         ]
       } else {
         if (is_standard_system) {
-          public_deps = [ "//foundation/graphic/standard:libgl" ]
+          public_deps = [ "//foundation/graphic/graphic:libgl" ]
         } else {
           aosp_deps = [
             "shared_library:libEGL",
@@ -1505,7 +1505,7 @@ template("ace_gpu") {
       if (!defined(config.disable_gpu) || !config.disable_gpu) {
         # Ohos or Android platform
         if (is_standard_system) {
-          public_deps = [ "//foundation/graphic/standard:libgl" ]
+          public_deps = [ "//foundation/graphic/graphic:libgl" ]
         } else {
           aosp_deps = [
             "shared_library:libEGL",
@@ -1784,7 +1784,7 @@ ohos_source_set("ace_fontmgr_standard") {
 
 ohos_prebuilt_etc("ace_fontconfig.json") {
   source = "$flutter_root/skia/src/ports/skia_ohos/config/fontconfig.json"
-  subsystem_name = "ace"
+  subsystem_name = "arkui"
   part_name = "ace_engine_standard"
 }
 

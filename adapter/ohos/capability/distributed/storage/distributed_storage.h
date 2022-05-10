@@ -36,11 +36,16 @@ public:
     ~DistributedObjectPtr();
 
     OHOS::ObjectStore::DistributedObject* GetRawPtr();
+    bool IsInvalid() const
+    {
+        return invalid_;
+    }
 
 private:
     std::string sessionId_;
     OHOS::ObjectStore::DistributedObject* object_ = nullptr;
     std::shared_ptr<OHOS::ObjectStore::ObjectWatcher> watcher_;
+    bool invalid_ = true;
 };
 
 class DistributedStorage final : public Storage {

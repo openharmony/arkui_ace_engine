@@ -34,7 +34,7 @@
 
 namespace OHOS::Ace::Framework {
 
-using ExternalEventCallback = std::function<void(const std::string&, const uint32_t&)>;
+using ExternalEventCallback = std::function<void(const std::string&, const uint32_t&, const bool&)>;
 
 class FrontendDelegateDeclarative : public FrontendDelegate {
     DECLARE_ACE_TYPE(FrontendDelegateDeclarative, FrontendDelegate);
@@ -122,7 +122,8 @@ public:
     bool FireSyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);
     void FireSyncEvent(
         const std::string& eventId, const std::string& param, const std::string& jsonArgs, std::string& result);
-    void FireExternalEvent(const std::string& eventId, const std::string& componentId, const uint32_t nodeId);
+    void FireExternalEvent(
+        const std::string& eventId, const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
 
     // FrontendDelegate overrides.
     void Push(const PageTarget& target, const std::string& params);
@@ -136,6 +137,7 @@ public:
     void Clear() override;
     int32_t GetStackSize() const override;
     void GetState(int32_t& index, std::string& name, std::string& path) override;
+    size_t GetComponentsCount() override;
     std::string GetParams() override;
     void TriggerPageUpdate(int32_t pageId, bool directExecute = false) override;
 
