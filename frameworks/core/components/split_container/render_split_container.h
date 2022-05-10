@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SPLIT_CONTAINER_RENDER_SPLIT_CONTAINER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SPLIT_CONTAINER_RENDER_SPLIT_CONTAINER_H
 
+#include "base/memory/referenced.h"
+#include "core/components/flex/render_flex.h"
+#include "core/components/split_container/split_container_component.h"
 #include "core/pipeline/base/render_node.h"
 #include "core/gestures/drag_recognizer.h"
 
@@ -28,7 +31,7 @@ public:
     RenderSplitContainer() = default;
     ~RenderSplitContainer() override = default;
 
-    virtual void LayoutChildren() = 0;
+    void LayoutChildren();
     virtual void HandleDragStart(const Offset& startPoint) = 0;
     virtual void HandleDragUpdate(const Offset& currentPoint) = 0;
     virtual void HandleDragEnd(const Offset& endPoint, double velocity) = 0;
@@ -45,15 +48,24 @@ protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     virtual void ResetComponentMember();
-
-private:
-    void UpdateComponentAttr(const RefPtr<Component>& component);
-
-protected:
     RefPtr<DragRecognizer> dragDetector_;
     bool resizeable_ = false;
     double layoutWidth_ = 0.0;
     double layoutHeight_ = 0.0;
+    std::map<int32_t, std::list<MagicLayoutNode>> magicNodes_;
+    std::set<RefPtr<RenderNode>> displayNodes_;
+    std::set<RefPtr<RenderNode>> disableHideNodes_;
+    std::vector<Rect> splitRects_;
+    std::vector<double> dragSplitOffset_;
+
+private:
+    void UpdateComponentAttr(const RefPtr<Component>& component);
+    void InitProperties();
+    double GetMainSize(const RefPtr<RenderNode>& renderNode) const;
+    double GetMainMinSize(const RefPtr<RenderNode>& renderNode) const;
+    void UpdateDisplayNode();
+
+    SplitType splitType_ = SplitType::ROW_SPLIT;
 };
 
 } // namespace OHOS::Ace

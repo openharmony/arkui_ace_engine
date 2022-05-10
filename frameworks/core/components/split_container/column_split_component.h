@@ -27,7 +27,9 @@ class ACE_EXPORT ColumnSplitComponent : public SplitContainerComponent {
     DECLARE_ACE_TYPE(ColumnSplitComponent, SplitContainerComponent)
 
 public:
-    explicit ColumnSplitComponent(const std::list<RefPtr<Component>>& children) : SplitContainerComponent(children) {}
+    explicit ColumnSplitComponent(const std::list<RefPtr<Component>>& children)
+        : SplitContainerComponent(children, SplitType::COLUMN_SPLIT)
+    {}
     ~ColumnSplitComponent() override = default;
 
     RefPtr<Element> CreateElement() override;

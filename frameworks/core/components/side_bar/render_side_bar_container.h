@@ -43,6 +43,8 @@ public:
     double GetSlidePosition() const;
     bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result) override;
+
+    void PerformLayout() override;
     
     bool GetShowSideBarContainer() const
     {
@@ -119,6 +121,9 @@ private:
     void InitializeDragAndAnimation();
     void CorrectWidth(const Dimension& width, const Dimension& minWidth, const Dimension& maxWidth);
     void Initialize();
+    Dimension ConvertWidthToVp(const Dimension& dimension) const;
+    Dimension ConvertWidthToPercent(const Dimension& dimension) const;
+    void PlaceChildren();
 
     RefPtr<GestureRecognizer> dragRecognizer_;
     RefPtr<SideBarAnimationController> animationController_;
@@ -148,6 +153,7 @@ private:
     Dimension preSidebarWidth_;
     Rect exceptRegion_;
     Dimension customSidebarWidth_;
+    bool autoHide_ = true;
 };
 
 } // namespace OHOS::Ace
