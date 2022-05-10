@@ -158,6 +158,9 @@ void ContainerModalElement::ShowTitle(bool isShow)
         LOGE("ContainerModalElement showTitle failed, clip element is null!");
         return;
     }
+    if (!contentBox_) {
+        contentBox_ = AceType::DynamicCast<BoxElement>(clip->GetFirstChild());
+    }
     auto renderClip = AceType::DynamicCast<RenderClip>(clip->GetRenderNode());
     if (renderClip) {
         isShow ? renderClip->SetClipRadius(Radius(CONTAINER_INNER_RADIUS)) : renderClip->SetClipRadius(Radius(0.0));
