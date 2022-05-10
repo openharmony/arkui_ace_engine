@@ -1184,6 +1184,11 @@ protected:
     }
 
     virtual std::shared_ptr<RSNode> CreateRSNode() const;
+    void SetRSNode(const std::shared_ptr<RSNode>& rsNode)
+    {
+        rsNode_ = rsNode;
+    }
+
     virtual void OnRSTransition(TransitionType type) {}
     // JSview boundary, all nodes in [head, tail] share the same RSNode
     bool IsHeadRenderNode() const

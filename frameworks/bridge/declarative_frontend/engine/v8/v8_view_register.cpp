@@ -130,6 +130,7 @@
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_piece.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_remote_window.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
 #endif
@@ -657,6 +658,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"Camera", JSCamera::JSBind},
     {"Piece", JSPiece::JSBind},
     {"Rating", JSRating::JSBind},
+    {"RemoteWindow", JSRemoteWindow::JSBind },
     {"Video", JSVideo::JSBind},
 #endif
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)

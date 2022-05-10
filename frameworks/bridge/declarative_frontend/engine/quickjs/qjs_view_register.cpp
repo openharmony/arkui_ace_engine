@@ -124,6 +124,7 @@
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_piece.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_remote_window.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
@@ -921,6 +922,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSPiece::JSBind(globalObj);
     JSRating::JSBind(globalObj);
     JSRefresh::JSBind(globalObj);
+    JSRemoteWindow::JSBind(globalObj);
     JSCamera::JSBind(globalObj);
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
