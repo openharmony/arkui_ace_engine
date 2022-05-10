@@ -22,39 +22,10 @@ namespace OHOS::Ace {
 
 namespace {
 
-constexpr double DEFAULT_SPLIT_RESPOND_WIDTH = 25.0;
 constexpr size_t DEFAULT_DRAG_INDEX = -1;
 
 } // namespace
 
-void RenderRowSplit::LayoutChildren()
-{
-    splitRects_.clear();
-    if (dragSplitOffset_.size() == 0) {
-        dragSplitOffset_ = std::vector<double>(GetChildren().size(), 0.0);
-    }
-    Size maxSize = GetLayoutParam().GetMaxSize();
-    layoutHeight_ = maxSize.Height();
-    layoutWidth_ = 0.0;
-    size_t index = 0;
-    double childOffsetX = 0.0;
-    for (const auto& item : GetChildren()) {
-        Offset offset = Offset(childOffsetX, 0);
-        item->SetPosition(offset);
-        item->Layout(GetLayoutParam());
-        childOffsetX += item->GetLayoutSize().Width();
-        layoutWidth_ += item->GetLayoutSize().Width();
-        if (dragSplitOffset_[index] > 0) {
-            childOffsetX += dragSplitOffset_[index];
-        }
-        double posX = childOffsetX > DEFAULT_SPLIT_RESPOND_WIDTH ? (childOffsetX - DEFAULT_SPLIT_RESPOND_WIDTH) : 0.0;
-        splitRects_.push_back(Rect(posX, 0, 2 * DEFAULT_SPLIT_RESPOND_WIDTH + DEFAULT_SPLIT_HEIGHT, maxSize.Height()));
-        childOffsetX += DEFAULT_SPLIT_HEIGHT;
-        layoutWidth_ += DEFAULT_SPLIT_HEIGHT;
-        index++;
-    }
-    layoutWidth_ -= DEFAULT_SPLIT_HEIGHT;
-}
 
 void RenderRowSplit::HandleDragStart(const Offset& startPoint)
 {

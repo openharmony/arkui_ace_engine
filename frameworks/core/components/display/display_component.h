@@ -153,6 +153,16 @@ public:
         return stateAttributeList_ != nullptr;
     }
 
+    const EventMarker& GetVisibleChangeEvent() const
+    {
+        return visibleChangeEvent_;
+    }
+
+    void SetVisibleChangeEvent(const EventMarker& changeEvent)
+    {
+        visibleChangeEvent_ = changeEvent;
+    }
+
 private:
     VisibleType visible_ = VisibleType::VISIBLE;
     Shadow shadow_;
@@ -164,6 +174,7 @@ private:
     bool disableLayer_ = false;
     int32_t duration_ = 0;
     RefPtr<StateAttributes<DisplayStateAttribute>> stateAttributeList_ = nullptr;
+    EventMarker visibleChangeEvent_;
 };
 
 } // namespace OHOS::Ace

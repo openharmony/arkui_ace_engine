@@ -30,16 +30,12 @@ public:
     ~RenderRowSplit() override = default;
 
     static RefPtr<RenderNode> Create();
-    void LayoutChildren() override;
     void HandleDragStart(const Offset& startPoint) override;
     void HandleDragUpdate(const Offset& currentPoint) override;
     void HandleDragEnd(const Offset& endPoint, double velocity) override;
 
 private:
-    Point localPoint_;
     double startX_ = 0.0;
-    std::vector<Rect> splitRects_;
-    std::vector<double> dragSplitOffset_;
     std::size_t dragedSplitIndex_ = -1;
 };
 

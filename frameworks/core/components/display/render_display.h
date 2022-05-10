@@ -44,6 +44,7 @@ public:
             visible_ = type;
             SetVisible(visible_ == VisibleType::VISIBLE);
             MarkNeedLayout();
+            OnVisibleChange(type);
         }
     }
 
@@ -134,6 +135,9 @@ protected:
     RefPtr<CurveAnimation<uint8_t>> appearingAnimation_;
     RefPtr<Animator> animator_;
     RefPtr<StateAttributes<DisplayStateAttribute>> stateAttributeList_;
+
+private:
+    void OnVisibleChange(VisibleType type);
 };
 
 } // namespace OHOS::Ace
