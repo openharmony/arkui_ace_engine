@@ -37,6 +37,8 @@ public:
     std::string GetSpace() const;
     std::string GetHorizontalAlign() const;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
+    std::string GetJustifyContent() const;
+    std::string ConvertFlexAlignToString(FlexAlign flexAlign) const;
     RefPtr<RenderFlex> GetRenderColumn() const;
     void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
     void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
