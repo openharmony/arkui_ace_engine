@@ -74,6 +74,8 @@ public:
         return nativeEngine_;
     }
 
+    void RegisterFaPlugin();              // load ReatureAbility plugin
+
 private:
     void RegisterAceModule();             // add ace object to global
     void RegisterConsoleModule();         // add Console object to global
