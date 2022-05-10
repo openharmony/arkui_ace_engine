@@ -37,6 +37,7 @@ namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
+    UIContentImpl(OHOS::AppExecFwk::Ability* ability);
     ~UIContentImpl() = default;
 
     // UI content lifecycles
