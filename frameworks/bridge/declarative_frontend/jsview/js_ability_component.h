@@ -35,6 +35,8 @@ public:
     static void JsOnAbilityCreated(const JSCallbackInfo& info);
     static void JsOnAbilityMovedFront(const JSCallbackInfo& info);
     static void JsOnAbilityWillRemove(const JSCallbackInfo& info);
+    static void JsOnConnect(const JSCallbackInfo& info);
+    static void JsOnDisconnect(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

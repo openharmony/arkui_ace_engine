@@ -33,6 +33,8 @@ void JSAbilityComponent::JSBind(BindingTarget globalObj)
     JSClass<JSAbilityComponent>::StaticMethod("onAbilityCreated", &JSAbilityComponent::JsOnAbilityCreated, opt);
     JSClass<JSAbilityComponent>::StaticMethod("onAbilityMoveToFront", &JSAbilityComponent::JsOnAbilityMovedFront, opt);
     JSClass<JSAbilityComponent>::StaticMethod("onAbilityWillRemove", &JSAbilityComponent::JsOnAbilityWillRemove, opt);
+    JSClass<JSAbilityComponent>::StaticMethod("onConnect", &JSAbilityComponent::JsOnConnect, opt);
+    JSClass<JSAbilityComponent>::StaticMethod("onDisconnect", &JSAbilityComponent::JsOnDisconnect, opt);
     JSClass<JSAbilityComponent>::StaticMethod("width", &JSAbilityComponent::Width, opt);
     JSClass<JSAbilityComponent>::StaticMethod("height", &JSAbilityComponent::Height, opt);
     JSClass<JSAbilityComponent>::Inherit<JSViewAbstract>();
@@ -86,6 +88,16 @@ void JSAbilityComponent::JsOnReady(const JSCallbackInfo& info)
 void JSAbilityComponent::JsOnDestroy(const JSCallbackInfo& info)
 {
     JSViewBindEvent(&AbilityComponent::SetOnDestroy, info);
+}
+
+void JSAbilityComponent::JsOnConnect(const JSCallbackInfo& info)
+{
+    JSViewBindEvent(&V2::AbilityComponent::SetonConnected, info);
+}
+
+void JSAbilityComponent::JsOnDisconnect(const JSCallbackInfo& info)
+{
+    JSViewBindEvent(&V2::AbilityComponent::SetonDisconnected, info);
 }
 
 void JSAbilityComponent::JsOnAbilityCreated(const JSCallbackInfo& info)
