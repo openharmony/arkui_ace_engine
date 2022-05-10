@@ -189,6 +189,7 @@ ace_skia_common_ccflags = [
   "-Wno-implicit-fallthrough",
   "-fvisibility-inlines-hidden",
   "-Os",
+  "-DSKIA_DLL",
 ]
 
 ace_skia_common_cflags = [
@@ -249,6 +250,7 @@ ace_skia_common_cflags = [
   "-Wno-unused-parameter",
   "-fvisibility=hidden",
   "-Os",
+  "-DSKIA_DLL",
 ]
 
 ace_skia_common_defines = [
