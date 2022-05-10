@@ -31,7 +31,7 @@ namespace OHOS::Ace {
 class AceAbility final : public OHOS::AppExecFwk::Ability,
                          public OHOS::Rosen::IWindowChangeListener,
                          public OHOS::Rosen::IWindowDragListener,
-                         public OHOS::Rosen::IInputEventListener,
+                         public OHOS::Rosen::IOccupiedAreaChangeListener,
                          public OHOS::Rosen::IAceAbilityHandler {
 public:
     AceAbility()
@@ -72,7 +72,7 @@ public:
     void OnModeChange(OHOS::Rosen::WindowMode mode) override;
     // override Rosen::IOccupiedAreaChangeListener virtual callback function
     void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info) override;
-    
+
     // override Rosen::IAceAbilityHandler virtual callback function
     void SetBackgroundColor(uint32_t color) override;
     uint32_t GetBackgroundColor() override;
