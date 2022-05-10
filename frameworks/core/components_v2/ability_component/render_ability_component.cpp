@@ -16,6 +16,7 @@
 #include "core/components_v2/ability_component/render_ability_component.h"
 
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "core/components_v2/ability_component/ability_component.h"
 
 namespace OHOS::Ace::V2 {
@@ -43,15 +44,26 @@ void RenderAbilityComponent::Update(const RefPtr<Component>& component)
 
 void RenderAbilityComponent::PerformLayout()
 {
-    Offset offset = GetGlobalOffset();
     if (currentRect_.GetSize().IsEmpty()) {
         currentRect_.SetSize(GetLayoutParam().GetMaxSize());
     }
-    if (currentRect_.GetOffset() == offset && !needLayout_ && hasConnectionToAbility_) {
+
+    SetLayoutSize(currentRect_.GetSize());
+}
+
+void RenderAbilityComponent::Paint(RenderContext& context, const Offset& offset)
+{
+    Offset globalOffset = GetGlobalOffset();
+    if (currentRect_.GetOffset() == globalOffset && !needLayout_ && hasConnectionToAbility_) {
         return;
     }
-    currentRect_.SetOffset(offset);
-    SetLayoutSize(currentRect_.GetSize());
+
+    auto container = Container::Current();
+    auto parentWindowRect = Rect();
+    if (container && container->GetPipelineContext()) {
+        parentWindowRect = container->GetPipelineContext()->GetCurrentWindowRect();
+    }
+    currentRect_.SetOffset(globalOffset + parentWindowRect.GetOffset());
     if (hasConnectionToAbility_) {
         adapter_->UpdateRect(currentRect_);
         return;

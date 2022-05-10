@@ -33,6 +33,7 @@ public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
+    void Paint(RenderContext &context, const Offset &offset) override;
 
     void FireConnect()
     {
