@@ -31,6 +31,7 @@ public:
     RefPtr<StageElement> GetStageElement() const;
     void ShowTitle(bool isShow);
     void BlurWindow(bool isBlur);
+    void SetAppBgColor(const Color& color);
     void Update() override;
     void PerformBuild() override;
 
@@ -43,6 +44,7 @@ private:
     RefPtr<RenderDisplay> floatingTitleDisplay_;
     RefPtr<BoxElement> floatingTitleBox_;
     RefPtr<RowComponent> titleChildrenRow_;
+    RefPtr<BoxElement> contentBox_;
     RefPtr<RowComponent> floatingTitleChildrenRow_;
     float density_ = 1.0f;
 };

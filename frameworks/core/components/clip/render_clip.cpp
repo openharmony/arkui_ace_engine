@@ -74,7 +74,6 @@ FloatPropertyAnimatable::SetterMap RenderClip::GetFloatPropertySetterMap()
             return;
         }
         clip->SetWidth(value);
-        clip->MarkNeedRender();
     };
     map[PropertyAnimatableType::PROPERTY_HEIGHT] = [weak](float value) {
         auto clip = weak.Upgrade();
@@ -83,7 +82,6 @@ FloatPropertyAnimatable::SetterMap RenderClip::GetFloatPropertySetterMap()
             return;
         }
         clip->SetHeight(value);
-        clip->MarkNeedRender();
     };
     map[PropertyAnimatableType::PROPERTY_OFFSET_X] = [weak](float value) {
         auto clip = weak.Upgrade();
@@ -93,7 +91,6 @@ FloatPropertyAnimatable::SetterMap RenderClip::GetFloatPropertySetterMap()
         }
         clip->SetOffsetX(value);
         clip->UpdateBoxForShadowAnimation();
-        clip->MarkNeedRender();
     };
     map[PropertyAnimatableType::PROPERTY_OFFSET_Y] = [weak](float value) {
         auto clip = weak.Upgrade();
@@ -103,7 +100,6 @@ FloatPropertyAnimatable::SetterMap RenderClip::GetFloatPropertySetterMap()
         }
         clip->SetOffsetY(value);
         clip->UpdateBoxForShadowAnimation();
-        clip->MarkNeedRender();
     };
     map[PropertyAnimatableType::PROPERTY_BORDER_RADIUS] = [weak](float value) {
         auto clip = weak.Upgrade();
@@ -115,7 +111,7 @@ FloatPropertyAnimatable::SetterMap RenderClip::GetFloatPropertySetterMap()
         clip->topRightRadius_ = Radius(value);
         clip->bottomLeftRadius_ = Radius(value);
         clip->bottomRightRadius_ = Radius(value);
-        clip->MarkNeedRender();
+        clip->SetClipRadius(Radius(value));
     };
     return map;
 };

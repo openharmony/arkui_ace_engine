@@ -17,6 +17,7 @@
 
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
+#include "core/components/clip/clip_component.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/container_modal/container_modal_element.h"
 #include "core/components/container_modal/render_container_modal.h"
@@ -95,16 +96,17 @@ RefPtr<Component> ContainerModalComponent::BuildContent()
 {
     auto contentBox = AceType::MakeRefPtr<BoxComponent>();
     contentBox->SetChild(GetChild());
-    Border contentBorder;
-    contentBorder.SetBorderRadius(Radius(CONTAINER_INNER_RADIUS));
     auto contentDecoration = AceType::MakeRefPtr<Decoration>();
-    contentDecoration->SetBackgroundColor(CONTENT_BACKGROUND_COLOR);
-    contentDecoration->SetBorder(contentBorder);
+    auto context = context_.Upgrade();
+    if (context) {
+        contentDecoration->SetBackgroundColor(context->GetAppBgColor());
+    }
     contentBox->SetBackDecoration(contentDecoration);
 
-    // adaptive height
-    contentBox->SetFlexWeight(1.0);
-    return contentBox;
+    auto clip = AceType::MakeRefPtr<ClipComponent>(contentBox);
+    clip->SetClipRadius(Radius(CONTAINER_INNER_RADIUS));
+    clip->SetFlexWeight(1.0);
+    return clip;
 }
 
 RefPtr<ButtonComponent> ContainerModalComponent::BuildControlButton(

@@ -534,6 +534,61 @@ void UIContentImpl::Destroy()
     Platform::AceContainer::DestroyContainer(instanceId_);
 }
 
+uint32_t UIContentImpl::GetBackgroundColor()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("GetBackgroundColor failed: container is null. return 0x000000");
+        return 0x000000;
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("GetBackgroundColor failed: taskExecutor is null.");
+        return 0x000000;
+    }
+    ContainerScope scope(instanceId_);
+    uint32_t bgColor = 0x000000;
+    taskExecutor->PostSyncTask([&bgColor, container]() {
+            if (!container) {
+                LOGE("Post sync task GetBackgroundColor failed: container is null. return 0x000000");
+                return;
+            }
+            auto pipelineContext = container->GetPipelineContext();
+            if (!pipelineContext) {
+                LOGE("Post sync task GetBackgroundColor failed: pipeline is null. return 0x000000");
+                return;
+            }
+            bgColor = pipelineContext->GetAppBgColor().GetValue();
+        }, TaskExecutor::TaskType::UI);
+
+    LOGI("UIContentImpl::GetBackgroundColor, value is %{public}u", bgColor);
+    return bgColor;
+}
+
+void UIContentImpl::SetBackgroundColor(uint32_t color)
+{
+    LOGI("UIContentImpl::SetBackgroundColor color is %{public}u", color);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("SetBackgroundColor failed: container is null.");
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("SetBackgroundColor failed: taskExecutor is null.");
+        return;
+    }
+    taskExecutor->PostSyncTask([container, bgColor = color]() {
+        auto pipelineContext = container->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGE("SetBackgroundColor failed, pipeline context is null.");
+            return;
+        }
+        pipelineContext->SetAppBgColor(Color(bgColor));
+    }, TaskExecutor::TaskType::UI);
+}
+
 bool UIContentImpl::ProcessBackPressed()
 {
     LOGI("UIContent ProcessBackPressed");
@@ -590,7 +645,6 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
 {
     LOGI("UIContent UpdateViewportConfig %{public}s", config.ToString().c_str());
     SystemProperties::SetResolution(config.Density());
-    SystemProperties::SetColorMode(ColorMode::LIGHT);
     SystemProperties::SetDeviceOrientation(config.Height() >= config.Width() ? 0 : 1);
     SystemProperties::SetWindowPos(config.Left(), config.Top());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -603,17 +657,10 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         LOGE("UpdateViewportConfig: taskExecutor is null.");
         return;
     }
-    taskExecutor->PostTask(
-        [config, instanceId = instanceId_, reason]() {
-            auto container = Platform::AceContainer::GetContainer(instanceId);
-            if (!container) {
-                LOGE("container may be destroyed.");
-                return;
-            }
-
+    taskExecutor->PostTask([config, container, reason]() {
             auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
             if (!aceView) {
-                LOGE("aceView is null");
+                LOGE("UpdateViewportConfig: aceView is null.");
                 return;
             }
             flutter::ViewportMetrics metrics;
@@ -623,8 +670,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
             Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
                 static_cast<WindowSizeChangeReason>(reason));
-        },
-        TaskExecutor::TaskType::PLATFORM);
+        }, TaskExecutor::TaskType::PLATFORM);
     config_ = config;
     updateConfig_ = true;
 }
