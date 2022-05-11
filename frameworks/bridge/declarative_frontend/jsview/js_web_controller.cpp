@@ -85,7 +85,7 @@ public:
 
     void SetWebCookie(WebCookie* manager)
     {
-        if (manager) {
+        if (manager != nullptr) {
             manager_ = manager;
         }
     }
@@ -98,9 +98,9 @@ public:
         if (args.Length() >= 2 && args[0]->IsString() && args[1]->IsString()) {
             url = args[0]->ToString();
             value = args[1]->ToString();
-        }
-        if (manager_ != nullptr) {
-            result = manager_->SetCookie(url, value);
+            if (manager_ != nullptr) {
+                result = manager_->SetCookie(url, value);
+            }
         }
         auto jsVal = JSVal(ToJSValue(result));
         auto returnValue = JSRef<JSVal>::Make(jsVal);
@@ -110,7 +110,7 @@ public:
     void GetCookie(const JSCallbackInfo& args)
     {
         std::string result = "";
-        if (manager_ && args.Length() >= 1 && args[0]->IsString()) {
+        if (manager_ != nullptr && args.Length() >= 1 && args[0]->IsString()) {
             std::string url = args[0]->ToString();
             result = manager_->GetCookie(url);
         }
@@ -121,7 +121,7 @@ public:
 
     void DeleteEntirelyCookie(const JSCallbackInfo& args)
     {
-        if (!manager_) {
+        if (manager_ == nullptr) {
             return;
         }
         manager_->DeleteEntirelyCookie();
