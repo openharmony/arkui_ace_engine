@@ -39,6 +39,11 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 
 } // namespace
 
+bool SystemProperties::GetDebugBoundaryEnabled()
+{
+    return false;
+}
+
 void SystemProperties::InitDeviceType(DeviceType type)
 {
     // Properties: "phone", "tv", "tablet", "watch", "car"
