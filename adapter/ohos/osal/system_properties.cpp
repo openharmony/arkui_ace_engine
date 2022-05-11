@@ -36,6 +36,7 @@ const char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 const char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 const char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
+const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
@@ -118,7 +119,7 @@ bool SystemProperties::IsSyscapExist(const char* cap)
 
 bool SystemProperties::GetDebugBoundaryEnabled()
 {
-    return system::GetParameter("persist.ace.debug.boundary.enabled", "false") == "true";
+    return system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
 }
 
 void SystemProperties::InitDeviceType(DeviceType)
