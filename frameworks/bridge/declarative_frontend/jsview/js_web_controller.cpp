@@ -85,26 +85,23 @@ public:
 
     void SetWebCookie(WebCookie* manager)
     {
-        if (manager) {
+        if (manager != nullptr) {
             manager_ = manager;
         }
     }
 
     void SetCookie(const JSCallbackInfo& args)
     {
-        if (!manager_) {
-            return;
-        }
         std::string url;
         std::string value;
         bool result = false;
-        if (args[0]->IsString()) {
+        if (args.Length() >= 2 && args[0]->IsString() && args[1]->IsString()) {
             url = args[0]->ToString();
-        }
-        if (args[1]->IsString()) {
             value = args[1]->ToString();
+            if (manager_ != nullptr) {
+                result = manager_->SetCookie(url, value);
+            }
         }
-        result = manager_->SetCookie(url, value);
         auto jsVal = JSVal(ToJSValue(result));
         auto returnValue = JSRef<JSVal>::Make(jsVal);
         args.SetReturnValue(returnValue);
@@ -112,15 +109,11 @@ public:
 
     void GetCookie(const JSCallbackInfo& args)
     {
-        if (!manager_) {
-            return;
+        std::string result = "";
+        if (manager_ != nullptr && args.Length() >= 1 && args[0]->IsString()) {
+            std::string url = args[0]->ToString();
+            result = manager_->GetCookie(url);
         }
-        if (args.Length() < 1 || !args[0]->IsString()) {
-            LOGW("invalid url params");
-            return;
-        }
-        std::string url = args[0]->ToString();
-        std::string result = manager_->GetCookie(url);
         auto jsVal = JSVal(ToJSValue(result));
         auto returnValue = JSRef<JSVal>::Make(jsVal);
         args.SetReturnValue(returnValue);
@@ -128,7 +121,7 @@ public:
 
     void DeleteEntirelyCookie(const JSCallbackInfo& args)
     {
-        if (!manager_) {
+        if (manager_ == nullptr) {
             return;
         }
         manager_->DeleteEntirelyCookie();
@@ -136,11 +129,10 @@ public:
 
     void SaveCookieSync(const JSCallbackInfo& args)
     {
-        if (!manager_) {
-            return;
-        }
         bool result = false;
-        result = manager_->SaveCookieSync();
+        if (manager_ != nullptr) {
+            result = manager_->SaveCookieSync();
+        }
         auto jsVal = JSVal(ToJSValue(result));
         auto returnValue = JSRef<JSVal>::Make(jsVal);
         args.SetReturnValue(returnValue);
