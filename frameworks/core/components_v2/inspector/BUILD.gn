@@ -51,6 +51,7 @@ build_component("inspector_v2") {
     "navigation_composed_element.cpp",
     "navigator_composed_element.cpp",
     "panel_composed_element.cpp",
+    "pattern_lock_composed_element.cpp",
     "picker_text_dialog_composed_element.cpp",
     "progress_composed_element.cpp",
     "qrcode_composed_element.cpp",
