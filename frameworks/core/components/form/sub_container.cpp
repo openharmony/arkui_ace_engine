@@ -181,6 +181,10 @@ void SubContainer::RunCard(const int64_t id, const std::string path, const std::
     cardResourceInfo.SetPackagePath(path);
     cardResourceInfo.SetResourceConfiguration(resConfig);
     auto cardThemeManager = pipelineContext_->GetThemeManager();
+    if (!cardThemeManager) {
+        cardThemeManager = AceType::MakeRefPtr<ThemeManager>();
+        pipelineContext_->SetThemeManager(cardThemeManager);
+    }
     if (cardThemeManager) {
         // Init resource, load theme map, do not parse yet.
         cardThemeManager->InitResource(cardResourceInfo);
