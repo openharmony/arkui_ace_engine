@@ -635,7 +635,7 @@ bool WebDelegate::SetCookie(const std::string& url, const std::string& value)
     return false;
 }
 
-std::string WebDelegate::GetCookie(const std::string& url)
+std::string WebDelegate::GetCookie(const std::string& url) const
 {
     if (cookieManager_) {
         return cookieManager_->ReturnCookie(url);
