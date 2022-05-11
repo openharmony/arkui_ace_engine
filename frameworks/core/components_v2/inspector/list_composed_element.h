@@ -38,6 +38,8 @@ public:
     std::string GetEdgeEffect() const;
     std::unique_ptr<JsonValue> GetDivider() const;
     std::string GetChainAnimation() const;
+    std::string GetRestoreId() const;
+    std::string GetMultiSelectable() const;
 
     AceType::IdType GetTargetTypeId() const override
     {

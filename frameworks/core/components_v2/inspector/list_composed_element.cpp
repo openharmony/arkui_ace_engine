@@ -29,7 +29,9 @@ const std::unordered_map<std::string, std::function<std::string(const ListCompos
     { "listDirection", [](const ListComposedElement& inspector) { return inspector.GetListDirection(); } },
     { "editMode", [](const ListComposedElement& inspector) { return inspector.GetEditMode(); } },
     { "edgeEffect", [](const ListComposedElement& inspector) { return inspector.GetEdgeEffect(); } },
-    { "chainAnimation", [](const ListComposedElement& inspector) { return inspector.GetChainAnimation(); } }
+    { "chainAnimation", [](const ListComposedElement& inspector) { return inspector.GetChainAnimation(); } },
+    { "restoreId", [](const ListComposedElement& inspector) { return inspector.GetRestoreId(); } },
+    { "multiSelectable ", [](const ListComposedElement& inspector) { return inspector.GetMultiSelectable(); } }
 };
 
 const std::unordered_map<std::string, std::function<std::unique_ptr<JsonValue>(const ListComposedElement&)>>
@@ -114,6 +116,37 @@ std::string ListComposedElement::GetEditMode() const
     auto renderList = AceType::DynamicCast<RenderList>(node);
     if (renderList) {
         return renderList->GetEditable() ? "true" : "false";
+    }
+    return "false";
+}
+
+std::string ListComposedElement::GetRestoreId() const
+{
+    auto node = GetInspectorNode(ListElement::TypeId());
+    if (!node) {
+        return "";
+    }
+    auto renderList = AceType::DynamicCast<RenderList>(node);
+    if (renderList) {
+        std::string res;
+        auto restoreId = renderList->GetRestoreId();
+        if (restoreId >= 0) {
+            res = std::to_string(restoreId);
+        }
+        return res;
+    }
+    return "";
+}
+
+std::string ListComposedElement::GetMultiSelectable() const
+{
+    auto node = GetInspectorNode(ListElement::TypeId());
+    if (!node) {
+        return "false";
+    }
+    auto renderList = AceType::DynamicCast<RenderList>(node);
+    if (renderList) {
+        return renderList->GetMultiSelectable() ? "true" : "false";
     }
     return "false";
 }
