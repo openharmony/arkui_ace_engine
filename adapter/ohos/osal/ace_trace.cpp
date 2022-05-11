@@ -34,12 +34,12 @@ void AceTraceBegin(const char* name)
         return;
     }
     std::string nameStr(name);
-    StartTrace(BYTRACE_TAG_ACE, nameStr);
+    StartTrace(HITRACE_TAG_ACE, nameStr);
 }
 
 void AceTraceEnd()
 {
-    FinishTrace(BYTRACE_TAG_ACE);
+    FinishTrace(HITRACE_TAG_ACE);
 }
 
 } // namespace OHOS::Ace
