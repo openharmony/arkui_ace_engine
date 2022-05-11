@@ -34,6 +34,8 @@ public:
     std::string GetAlignItems() const;
     std::string GetSpace() const;
     std::string GetVerticalAlign() const;
+    std::string GetJustifyContent() const;
+    std::string ConvertFlexAlignToString(FlexAlign flexAlign) const;
     void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
     void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
     void DeleteChildWithSlot(int32_t slot) override;

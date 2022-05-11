@@ -161,7 +161,8 @@ public:
     virtual double GetSepia() const = 0;
     virtual double GetGrayScale() const = 0;
     virtual double GetHueRotate() const = 0;
-
+    virtual std::string GetColorBlend() const = 0;
+    
     // shape clip
     virtual std::string GetClip() const = 0;
     virtual std::unique_ptr<JsonValue> GetMask() const = 0;

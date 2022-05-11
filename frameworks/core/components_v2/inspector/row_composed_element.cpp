@@ -27,6 +27,7 @@ const std::unordered_map<std::string, std::function<std::string(const RowCompose
     { "alignItems", [](const RowComposedElement& inspector) { return inspector.GetAlignItems(); } },
     { "space", [](const RowComposedElement& inspector) { return inspector.GetSpace(); } },
     { "selfAlign", [](const RowComposedElement& inspector) { return inspector.GetVerticalAlign(); } },
+    { "justifyContent", [](const RowComposedElement& inspector) { return inspector.GetJustifyContent(); } },
 };
 
 }
@@ -107,6 +108,49 @@ std::string RowComposedElement::GetVerticalAlign() const
         }
     }
     return "verticalAlign::Center";
+}
+
+std::string RowComposedElement::GetJustifyContent() const
+{
+    auto node = GetInspectorNode(RowElement::TypeId());
+    if (!node) {
+        return "FlexAlign.Start";
+    }
+    auto renderRow = AceType::DynamicCast<RenderFlex>(node);
+    if (!renderRow) {
+        return "FlexAlign.Start";
+    }
+    auto flexAlign = renderRow->GetJustifyContent();
+    return ConvertFlexAlignToString(flexAlign);
+}
+
+std::string RowComposedElement::ConvertFlexAlignToString(FlexAlign flexAlign) const
+{
+    std::string result = "";
+    switch (flexAlign) {
+        case FlexAlign::FLEX_START:
+            result = "FlexAlign.Start";
+            break;
+        case FlexAlign::FLEX_END:
+            result = "FlexAlign.End";
+            break;
+        case FlexAlign::CENTER:
+            result = "FlexAlign.Center";
+            break;
+        case FlexAlign::SPACE_BETWEEN:
+            result = "FlexAlign.SpaceBetween";
+            break;
+        case FlexAlign::SPACE_AROUND:
+            result = "FlexAlign.SpaceAround";
+            break;
+        case FlexAlign::SPACE_EVENLY:
+            result = "FlexAlign.SpaceEvenly";
+            break;
+        default:
+            result = "FlexAlign.Start";
+            break;
+    }
+    return result;
 }
 
 void RowComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
