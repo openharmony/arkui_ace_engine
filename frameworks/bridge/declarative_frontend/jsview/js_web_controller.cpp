@@ -85,7 +85,7 @@ public:
 
     void SetWebCookie(WebCookie* manager)
     {
-        if (manager) {
+        if (manager != nullptr) {
             manager_ = manager;
         }
     }
@@ -100,9 +100,10 @@ public:
         bool result = false;
         if (args[0]->IsString()) {
             url = args[0]->ToString();
-        }
-        if (args[1]->IsString()) {
             value = args[1]->ToString();
+            if (manager_ != nullptr) {
+                result = manager_->SetCookie(url, value);
+            }
         }
         result = manager_->SetCookie(url, value);
         auto jsVal = JSVal(ToJSValue(result));
@@ -112,8 +113,10 @@ public:
 
     void GetCookie(const JSCallbackInfo& args)
     {
-        if (!manager_) {
-            return;
+        std::string result = "";
+        if (manager_ != nullptr && args.Length() >= 1 && args[0]->IsString()) {
+            std::string url = args[0]->ToString();
+            result = manager_->GetCookie(url);
         }
         if (args.Length() < 1 || !args[0]->IsString()) {
             LOGW("invalid url params");
@@ -128,7 +131,7 @@ public:
 
     void DeleteEntirelyCookie(const JSCallbackInfo& args)
     {
-        if (!manager_) {
+        if (manager_ == nullptr) {
             return;
         }
         manager_->DeleteEntirelyCookie();
