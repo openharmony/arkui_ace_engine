@@ -110,7 +110,6 @@ ohos_unittest("ThemeManagerTest") {
       "hiviewdfx_hilog_native:libhilog",
       "init:libbegetutil",
     ]
-    configs += [ "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config" ]
   }
   subsystem_name = "arkui"
   part_name = "ace_engine_full"
@@ -198,7 +197,6 @@ ohos_unittest("ThemeConstantsTest") {
       "init:libbegetutil",
     ]
     deps += [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
-    configs += [ "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara_config" ]
   } else {
     external_deps = [
       "hilog:libhilog",
