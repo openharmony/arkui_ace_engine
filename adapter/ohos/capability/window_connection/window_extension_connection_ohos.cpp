@@ -16,6 +16,7 @@
 
 #include <memory>
 
+#include "common/rs_color.h"
 #include "element_name.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 
@@ -36,16 +37,17 @@ public:
     {
         LOGI("OnWindowReady and ready to connect extension");
         auto nodeStrong = node_.Upgrade();
-        if (!nodeStrong) {
-            LOGI("cannot replace sureface node because the render node is empty");
+        if (!nodeStrong || !rsSurfaceNode) {
+            LOGI("cannot replace sureface node because the render node or surfacenode is empty");
             return;
         }
         rsSurfaceNode->CreateNodeInRenderThread();
         auto rect = nodeStrong->GetPaintRect();
         auto offset = rect.GetOffset();
         auto size = rect.GetSize();
-        rsSurfaceNode->SetFrame(static_cast<float>(offset.GetX()), static_cast<float>(offset.GetY()),
+        rsSurfaceNode->SetBounds(static_cast<float>(offset.GetX()), static_cast<float>(offset.GetY()),
             static_cast<float>(size.Width()), static_cast<float>(size.Height()));
+        rsSurfaceNode->SetBackgroundColor(Color::WHITE.GetValue());
         nodeStrong->SyncRSNode(std::static_pointer_cast<RSNode>(rsSurfaceNode));
         nodeStrong->MarkNeedLayout();
         auto ability = AceType::DynamicCast<V2::RenderAbilityComponent>(nodeStrong);
