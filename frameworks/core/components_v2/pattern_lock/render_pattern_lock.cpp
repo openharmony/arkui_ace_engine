@@ -151,10 +151,10 @@ void RenderPatternLock::UpdateAttr(const RefPtr<Component>& component)
     autoReset_ = patternLockComponent->GetAutoReset();
     callbackForJS_ = AceAsyncEvent<void(const std::shared_ptr<PatternCompleteEvent>&)>::Create(
         patternLockComponent->GetPatternCompleteEvent(), context_);
-    const auto& patternLockController = patternLockComponent->GetPatternLockController();
-    if (patternLockController) {
+    patternLockController_ = patternLockComponent->GetPatternLockController();
+    if (patternLockController_) {
         auto weak = AceType::WeakClaim(this);
-        patternLockController->SetResetImpl([weak]() {
+        patternLockController_->SetResetImpl([weak]() {
             auto patternLock = weak.Upgrade();
             if (patternLock) {
                 patternLock->HandleReset();
