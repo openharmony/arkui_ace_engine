@@ -17,7 +17,6 @@
 
 #include <unistd.h>
 
-#include "parameter.h"
 #include "parameters.h"
 
 #include "base/log/log.h"
@@ -118,13 +117,9 @@ bool SystemProperties::IsSyscapExist(const char* cap)
 #endif
 }
 
-void SystemProperties::UpdateDebugBoundaryEnabled(const char *key, const char *value, void *context)
+bool SystemProperties::GetDebugBoundaryEnabled()
 {
-    if (strcmp(value, "true") == 0) {
-        debugBoundaryEnabled_ = true;
-    } else if (strcmp(value, "false") == 0) {
-        debugBoundaryEnabled_ = false;
-    }
+    return system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
 }
 
 void SystemProperties::InitDeviceType(DeviceType)
@@ -233,6 +228,7 @@ void SystemProperties::InitDeviceInfo(
     traceEnabled_ = IsTraceEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
+    debugBoundaryEnabled_ = system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
@@ -241,7 +237,6 @@ void SystemProperties::InitDeviceInfo(
     }
 
     InitDeviceTypeBySystemProperty();
-    WatchParameter(ENABLE_DEBUG_BOUNDARY_KEY, SystemProperties::UpdateDebugBoundaryEnabled, nullptr);
 }
 
 void SystemProperties::SetDeviceOrientation(int32_t orientation)

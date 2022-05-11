@@ -181,10 +181,7 @@ public:
         return rosenBackendEnabled_;
     }
 
-    static bool GetDebugBoundaryEnabled()
-    {
-        return debugBoundaryEnabled_;
-    }
+    static bool GetDebugBoundaryEnabled();
 
     static bool GetTraceEnabled()
     {
@@ -278,8 +275,6 @@ public:
     {
         return windowAnimationEnabled_;
     }
-
-    static void UpdateDebugBoundaryEnabled(const char *key, const char *value, void *context);
 
 private:
     static bool traceEnabled_;

@@ -87,6 +87,11 @@ int32_t SystemProperties::windowPosY_ = 0;
 bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::gpuUploadEnabled_ = false;
 
+bool SystemProperties::GetDebugBoundaryEnabled()
+{
+    return false;
+}
+
 DeviceType SystemProperties::GetDeviceType()
 {
     return deviceType_;
