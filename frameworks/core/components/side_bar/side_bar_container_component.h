@@ -147,6 +147,16 @@ public:
         return isShow_;
     }
 
+    void SetAutoHide(bool autoHide)
+    {
+        autoHide_ = autoHide;
+    }
+
+    bool GetAutoHide() const
+    {
+        return autoHide_;
+    }
+
 private:
     RefPtr<Component> BuildButton();
 
@@ -158,6 +168,7 @@ private:
     bool isCustomDefineWidth_ = false;
     bool isShow_ = true;
     SideStatus sideStatus_ = SideStatus::AUTO;
+    bool autoHide_ = true;
 };
 
 } // namespace OHOS::Ace

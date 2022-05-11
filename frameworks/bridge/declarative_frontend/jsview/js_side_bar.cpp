@@ -16,12 +16,66 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_side_bar.h"
 
 #include "base/geometry/dimension.h"
+#include "base/log/log.h"
 #include "core/components/button/button_component.h"
 #include "core/components/side_bar/render_side_bar_container.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+enum class WidthType : uint32_t {
+    SIDEBAR_WIDTH = 0,
+    MIN_SIDEBAR_WIDTH,
+    MAX_SIDEBAR_WIDTH,
+};
+
+void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    Dimension value;
+    if (!JSViewAbstract::ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        LOGW("JSSideBar::ParseAndSetWidth info[0] value is less than 0, the default is set to 0.");
+        value.SetValue(0.0);
+    }
+
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::SideBarContainerComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("side bar is null");
+        return;
+    }
+
+    bool isPercentSize = value.Unit() == DimensionUnit::PERCENT;
+    if (isPercentSize) {
+        component->SetIsPercentSize(isPercentSize);
+    }
+
+    switch (widthType) {
+        case WidthType::SIDEBAR_WIDTH:
+            component->SetSideBarWidth(value);
+            break;
+        case WidthType::MIN_SIDEBAR_WIDTH:
+            component->SetSideBarMinWidth(value);
+            break;
+        case WidthType::MAX_SIDEBAR_WIDTH:
+            component->SetSideBarMaxWidth(value);
+            break;
+        default:
+            break;
+    }
+}
+
+} // namespace
+
 void JSSideBar::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -76,6 +130,7 @@ void JSSideBar::JSBind(BindingTarget globalObj)
     JSClass<JSSideBar>::StaticMethod("sideBarWidth", &JSSideBar::JsSideBarWidth);
     JSClass<JSSideBar>::StaticMethod("minSideBarWidth", &JSSideBar::JsMinSideBarWidth);
     JSClass<JSSideBar>::StaticMethod("maxSideBarWidth", &JSSideBar::JsMaxSideBarWidth);
+    JSClass<JSSideBar>::StaticMethod("autoHide", &JSSideBar::JsAutoHide);
     JSClass<JSSideBar>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSideBar>::StaticMethod("width", SetWidth);
     JSClass<JSSideBar>::StaticMethod("height", SetHeight);
@@ -101,37 +156,21 @@ void JSSideBar::OnChange(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
-void JSSideBar::JsSideBarWidth(double length)
+
+
+void JSSideBar::JsSideBarWidth(const JSCallbackInfo& info)
 {
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::SideBarContainerComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("side bar is null");
-        return;
-    }
-    component->SetSideBarWidth(Dimension(length, DimensionUnit::VP));
+    ParseAndSetWidth(info, WidthType::SIDEBAR_WIDTH);
 }
 
-void JSSideBar::JsMaxSideBarWidth(double length)
+void JSSideBar::JsMaxSideBarWidth(const JSCallbackInfo& info)
 {
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::SideBarContainerComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("side bar is null");
-        return;
-    }
-    component->SetSideBarMaxWidth(Dimension(length, DimensionUnit::VP));
+    ParseAndSetWidth(info, WidthType::MAX_SIDEBAR_WIDTH);
 }
 
-void JSSideBar::JsMinSideBarWidth(double length)
+void JSSideBar::JsMinSideBarWidth(const JSCallbackInfo& info)
 {
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::SideBarContainerComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("side bar is null");
-        return;
-    }
-    component->SetSideBarMinWidth(Dimension(length, DimensionUnit::VP));
+    ParseAndSetWidth(info, WidthType::MIN_SIDEBAR_WIDTH);
 }
 
 void JSSideBar::JsShowSideBar(bool isShow)
@@ -197,6 +236,17 @@ void JSSideBar::JsControlButton(const JSCallbackInfo& info)
             }
         }
     }
+}
+
+void JSSideBar::JsAutoHide(bool autoHide)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::SideBarContainerComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("side bar is null");
+        return;
+    }
+    component->SetAutoHide(autoHide);
 }
 
 } // namespace OHOS::Ace::Framework
