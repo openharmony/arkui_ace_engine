@@ -17,7 +17,6 @@
 
 #include <unistd.h>
 
-#include "parameter.h"
 #include "parameters.h"
 
 #include "base/log/log.h"
@@ -37,7 +36,6 @@ const char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 const char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 const char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
-const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
@@ -118,13 +116,9 @@ bool SystemProperties::IsSyscapExist(const char* cap)
 #endif
 }
 
-void SystemProperties::UpdateDebugBoundaryEnabled(const char *key, const char *value, void *context)
+bool SystemProperties::GetDebugBoundaryEnabled()
 {
-    if (strcmp(value, "true") == 0) {
-        debugBoundaryEnabled_ = true;
-    } else if (strcmp(value, "false") == 0) {
-        debugBoundaryEnabled_ = false;
-    }
+    return system::GetParameter("persist.ace.debug.boundary.enabled", "false") == "true";
 }
 
 void SystemProperties::InitDeviceType(DeviceType)
@@ -233,6 +227,7 @@ void SystemProperties::InitDeviceInfo(
     traceEnabled_ = IsTraceEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
+    debugBoundaryEnabled_ = system::GetParameter("persist.ace.debug.boundary.enabled", "false") == "true";
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
@@ -241,7 +236,6 @@ void SystemProperties::InitDeviceInfo(
     }
 
     InitDeviceTypeBySystemProperty();
-    WatchParameter(ENABLE_DEBUG_BOUNDARY_KEY, SystemProperties::UpdateDebugBoundaryEnabled, nullptr);
 }
 
 void SystemProperties::SetDeviceOrientation(int32_t orientation)
