@@ -228,7 +228,7 @@ void SystemProperties::InitDeviceInfo(
     traceEnabled_ = IsTraceEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
-    debugBoundaryEnabled_ = system::GetParameter("persist.ace.debug.boundary.enabled", "false") == "true";
+    debugBoundaryEnabled_ = system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
