@@ -1458,15 +1458,6 @@ bool RenderGridScroll::IsAxisScrollable(AxisDirection direction)
 
 void RenderGridScroll::HandleAxisEvent(const AxisEvent& event)
 {
-    double degree =
-        GreatOrEqual(fabs(event.verticalAxis), fabs(event.horizontalAxis)) ? event.verticalAxis : event.horizontalAxis;
-    double offset = SystemProperties::Vp2Px(DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP * degree / MOUSE_WHEEL_DEGREES);
-    UpdateScrollPosition(-offset, SCROLL_FROM_ROTATE);
-}
-
-WeakPtr<RenderNode> RenderGridScroll::CheckAxisNode()
-{
-    return AceType::WeakClaim<RenderNode>(this);
 }
 
 } // namespace OHOS::Ace::V2
