@@ -95,10 +95,8 @@ public:
         std::string url;
         std::string value;
         bool result = false;
-        if (args[0]->IsString()) {
+        if (args.Length() >= 2 && args[0]->IsString() && args[1]->IsString()) {
             url = args[0]->ToString();
-        }
-        if (args[1]->IsString()) {
             value = args[1]->ToString();
         }
         if (manager_ != nullptr) {
