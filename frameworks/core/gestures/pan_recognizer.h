@@ -126,6 +126,7 @@ private:
     void ChangeFingers(int32_t fingers);
     void ChangeDirection(const PanDirection& direction);
     void ChangeDistance(double distance);
+    double GetMainAxisDelta();
 
     const TouchRestrict& GetTouchRestrict() const
     {
@@ -138,6 +139,10 @@ private:
     std::map<int32_t, TouchEvent> touchPoints_;
     AxisEvent lastAxisEvent_;
     Offset averageDistance_;
+    Offset delta_;
+    double mainDelta_ = 0.0;
+    double speed_ = 0.0;
+    double mainSpeed_ = 0.0;
     TimeStamp time_;
     bool pendingEnd_ = false;
     bool pendingCancel_ = false;
