@@ -43,12 +43,14 @@ void XComponentElement::SetNewComponent(const RefPtr<Component>& newComponent)
     auto xcomponent = AceType::DynamicCast<XComponentComponent>(newComponent);
     if (xcomponent) {
         idStr_ = xcomponent->GetId();
+        name_ = xcomponent->GetName();
+#ifndef OHOS_STANDARD_SYSTEM
         if (texture_) {
+            isExternalResource_ = true;
             xcomponent->SetTextureId(texture_->GetId());
             xcomponent->SetTexture(texture_);
-            isExternalResource_ = true;
         }
-        name_ = xcomponent->GetName();
+#endif
         Element::SetNewComponent(xcomponent);
     }
 }
@@ -259,6 +261,7 @@ void XComponentElement::CreatePlatformResource()
     ReleasePlatformResource();
 #ifdef OHOS_STANDARD_SYSTEM
     CreateSurface();
+    isExternalResource_ = true;
 #else
     auto context = context_.Upgrade();
     if (!context) {
@@ -398,6 +401,7 @@ void XComponentElement::ReleasePlatformResource()
             LOGE("xcomponent remove surface error: %{public}d", ret);
         }
     }
+    isExternalResource_ = false;
 #else
     auto context = context_.Upgrade();
     if (!context) {
@@ -414,6 +418,7 @@ void XComponentElement::ReleasePlatformResource()
                 texture_->Release();
             }
             texture_.Reset();
+            isExternalResource_ = false;
         }
     }
 #endif
