@@ -138,7 +138,7 @@ void CameraElement::Prepare(const WeakPtr<Element>& parent)
 #ifndef OHOS_STANDARD_SYSTEM
         InitDeclarativePara(cameraComponent);
 #endif
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(CAMERA_SUPPORTED)
         textDirection_ = cameraComponent->GetTextDirection();
 #endif
         InitEvent(cameraComponent);

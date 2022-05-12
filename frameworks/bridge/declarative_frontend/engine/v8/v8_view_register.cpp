@@ -139,7 +139,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(XCOMPONENT_SUPPORTED)
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #endif
@@ -661,7 +661,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"RemoteWindow", JSRemoteWindow::JSBind },
     {"Video", JSVideo::JSBind},
 #endif
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(XCOMPONENT_SUPPORTED)
     {"XComponent", JSXComponent::JSBind},
     {"XComponentController", JSXComponentController::JSBind},
 #endif

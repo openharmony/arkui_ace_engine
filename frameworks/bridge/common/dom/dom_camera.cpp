@@ -39,7 +39,7 @@ DOMCamera::DOMCamera(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeI
     cameraComponent_ = AceType::MakeRefPtr<CameraComponent>();
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     if (IsRightToLeft()) {
-        cameraComponent_->SetTextDirection(TextDirection::RTL);
+        cameraComponent_->SetTextDirection(TextDirection::RTL);//
     }
 #endif
 }

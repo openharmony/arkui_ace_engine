@@ -91,7 +91,7 @@ void JSPlugin::JsSize(const JSCallbackInfo& info)
 
 void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PLUGIN_SUPPORTED)
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto plugin = AceType::DynamicCast<PluginComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -110,7 +110,7 @@ void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
 
 void JSPlugin::JsOnError(const JSCallbackInfo& info)
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PLUGIN_SUPPORTED)
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto plugin = AceType::DynamicCast<PluginComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
