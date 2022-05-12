@@ -717,6 +717,11 @@ public:
         return displayIndex_;
     }
 
+    bool GetDisplayIndexSetted() const
+    {
+        return displayIndexSetted_;
+    }
+
     OpacityCallback GetOpacityCallback(int32_t domId);
 
     virtual bool SupportOpacity();
@@ -1292,6 +1297,7 @@ private:
 
     double flexWeight_ = 0.0;
     int32_t displayIndex_ = 1;
+    bool displayIndexSetted_ = false;
 
     double dipScale_ = 0.0;
 
