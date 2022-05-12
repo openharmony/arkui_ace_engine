@@ -833,7 +833,7 @@ public:
         isOverviewModeAccessEnabled_ = isEnabled;
     }
 
-    bool GetFileFromUrlAccessEnabled()
+    bool GetFileFromUrlAccessEnabled() const
     {
         return isFileFromUrlAccessEnabled_;
     }
@@ -843,7 +843,7 @@ public:
         isFileFromUrlAccessEnabled_ = isEnabled;
     }
 
-    bool GetDatabaseAccessEnabled()
+    bool GetDatabaseAccessEnabled() const
     {
         return isDatabaseAccessEnabled_;
     }
@@ -853,7 +853,7 @@ public:
         isDatabaseAccessEnabled_ = isEnabled;
     }
 
-    bool GetWebDebuggingAccessEnabled()
+    bool GetWebDebuggingAccessEnabled() const
     {
         return isWebDebuggingAccessEnabled_;
     }
@@ -863,7 +863,7 @@ public:
         isWebDebuggingAccessEnabled_ = isEnabled;
     }
 
-    int32_t GetTextZoomAtio()
+    int32_t GetTextZoomAtio() const
     {
         return textZoomAtioNum_;
     }

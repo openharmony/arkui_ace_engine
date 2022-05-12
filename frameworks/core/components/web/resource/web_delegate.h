@@ -226,7 +226,7 @@ private:
     int GetHitTestResult();
     bool SaveCookieSync();
     bool SetCookie(const std::string& url, const std::string& value);
-    std::string GetCookie(const std::string& url);
+    std::string GetCookie(const std::string& url) const;
     void DeleteEntirelyCookie();
     void RegisterOHOSWebEventAndMethord();
     void SetWebCallBack();
