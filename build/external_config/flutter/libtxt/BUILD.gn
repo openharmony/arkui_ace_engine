@@ -94,10 +94,16 @@ template("thirdparty_lib_txt") {
     } else if (platform == "windows") {
       sources +=
           [ "$flutter_root/engine/flutter/third_party/txt/src/txt/platform.cc" ]
+      if (is_standard_system) {
+        defines += [ "OHOS_STANDARD_SYSTEM" ]
+      }
     } else if (platform == "mac" || platform == "ios") {
       sources += [
         "$flutter_root/engine/flutter/third_party/txt/src/txt/platform_mac.mm",
       ]
+      if (is_standard_system) {
+        defines += [ "OHOS_STANDARD_SYSTEM" ]
+      }
     } else if (platform == "android") {
       sources += [ "$flutter_root/engine/flutter/third_party/txt/src/txt/platform_android.cc" ]
     }

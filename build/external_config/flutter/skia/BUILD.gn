@@ -1662,37 +1662,60 @@ template("ace_fontmgr") {
     defines += invoker.defines
     defines += ace_skia_common_defines
     cflags_cc += invoker.cflags_cc
+    if (is_standard_system) {
+      defines += [ "OHOS_STANDARD_SYSTEM" ]
+    }
 
     if (platform == "windows") {
       defines -= [
         "UNICODE",
         "NOGDI",
       ]
-      sources = [
-        # Use font installed in windows platform
-        "$flutter_root/skia/src/fonts/SkFontMgr_indirect.cpp",
-        "$flutter_root/skia/src/ports/SkFontHost_win.cpp",
-
-        # Use font in physical device
-        "$flutter_root/skia/src/ports/SkFontMgr_config_parser.cpp",
-        "$flutter_root/skia/src/ports/SkFontMgr_preview.cpp",
-        "$flutter_root/skia/src/ports/SkFontMgr_win_dw.cpp",
-        "$flutter_root/skia/src/ports/SkFontMgr_win_factory.cpp",
-        "$flutter_root/skia/src/ports/SkScalerContext_win_dw.cpp",
-        "$flutter_root/skia/src/ports/SkTypeface_win_dw.cpp",
-      ]
       deps = [ "$ace_root/build/external_config/expat:ace_libexpat" ]
+      if (defined(config.ohos_standard_fontmgr) &&
+          config.ohos_standard_fontmgr) {
+        # Use font installed in windows platform
+        sources = [
+          "$flutter_root/skia/src/fonts/SkFontMgr_indirect.cpp",
+          "$flutter_root/skia/src/ports/SkFontHost_win.cpp",
+          "$flutter_root/skia/src/ports/SkFontMgr_win_dw.cpp",
+          "$flutter_root/skia/src/ports/SkScalerContext_win_dw.cpp",
+          "$flutter_root/skia/src/ports/SkTypeface_win_dw.cpp",
+        ]
 
+        # Use ohos font
+        deps += [ ":ace_fontmgr_standard" ]
+      } else {
+        sources = [
+          # Use font installed in windows platform
+          "$flutter_root/skia/src/fonts/SkFontMgr_indirect.cpp",
+          "$flutter_root/skia/src/ports/SkFontHost_win.cpp",
+
+          # Use hos font
+          "$flutter_root/skia/src/ports/SkFontMgr_config_parser.cpp",
+          "$flutter_root/skia/src/ports/SkFontMgr_preview.cpp",
+          "$flutter_root/skia/src/ports/SkFontMgr_win_dw.cpp",
+          "$flutter_root/skia/src/ports/SkFontMgr_win_factory.cpp",
+          "$flutter_root/skia/src/ports/SkScalerContext_win_dw.cpp",
+          "$flutter_root/skia/src/ports/SkTypeface_win_dw.cpp",
+        ]
+      }
       libs = [
         "//prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/lib/libgdi32.a",
         "//prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/lib/libuuid.a",
       ]
     } else if (platform == "mac") {
-      sources = [
-        "$flutter_root/skia/src/ports/SkFontHost_mac.cpp",
-        "$flutter_root/skia/src/ports/SkFontMgr_config_parser.cpp",
-        "$flutter_root/skia/src/ports/SkFontMgr_preview.cpp",
-      ]
+      if (defined(config.ohos_standard_fontmgr) &&
+          config.ohos_standard_fontmgr) {
+        sources = [ "$flutter_root/skia/src/ports/SkFontHost_mac.cpp" ]
+        deps = [ ":ace_fontmgr_standard" ]
+      } else {
+        sources = [
+          "$flutter_root/skia/src/ports/SkFontHost_mac.cpp",
+          "$flutter_root/skia/src/ports/SkFontMgr_config_parser.cpp",
+          "$flutter_root/skia/src/ports/SkFontMgr_preview.cpp",
+        ]
+      }
     } else {
       # Ohos or Android platform
       if (defined(config.ohos_standard_fontmgr) &&
@@ -1782,6 +1805,13 @@ ohos_source_set("ace_fontmgr_standard") {
   }
 
   defines = [ "SK_BUILD_FONT_MGR_FOR_OHOS" ]
+  if (use_mingw_win) {
+    defines += [ "SK_BUILD_FONT_MGR_FOR_PREVIEW_WIN" ]
+    defines -= [ "SK_BUILD_FONT_MGR_FOR_OHOS" ]
+  } else if (use_mac) {
+    defines += [ "SK_BUILD_FONT_MGR_FOR_PREVIEW_MAC" ]
+    defines -= [ "SK_BUILD_FONT_MGR_FOR_OHOS" ]
+  }
 }
 
 ohos_prebuilt_etc("ace_fontconfig.json") {
