@@ -53,6 +53,7 @@
 #include "core/components_v2/inspector/navigation_composed_element.h"
 #include "core/components_v2/inspector/navigator_composed_element.h"
 #include "core/components_v2/inspector/panel_composed_element.h"
+#include "core/components_v2/inspector/pattern_lock_composed_element.h"
 #include "core/components_v2/inspector/picker_text_dialog_composed_element.h"
 #include "core/components_v2/inspector/progress_composed_element.h"
 #include "core/components_v2/inspector/qrcode_composed_element.h"
@@ -133,6 +134,8 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigatorComposedElement>(id); } },
     { PANEL_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::PanelComposedElement>(id); } },
+    { PATTERN_LOCK_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::PatternLockComposedElement>(id); } },
     { ROW_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::RowComposedElement>(id); } },
     { SHAPE_COMPONENT_TAG,
@@ -264,6 +267,7 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { LIST_ITEM_COMPONENT_TAG, LIST_ITEM_ETS_TAG },
     { NAVIGATOR_COMPONENT_TAG, NAVIGATOR_ETS_TAG },
     { PANEL_COMPONENT_TAG, PANEL_ETS_TAG },
+    { PATTERN_LOCK_COMPONENT_TAG, PATTERN_LOCK_ETS_TAG },
     { ROW_COMPONENT_TAG, ROW_ETS_TAG },
     { IMAGE_ANIMATOR_COMPONENT_TAG, IMAGE_ANIMATOR_ETS_TAG },
     { SHAPE_CONTAINER_COMPONENT_TAG, SHAPE_CONTAINER_ETS_TAG },

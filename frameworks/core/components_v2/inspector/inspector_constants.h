@@ -126,6 +126,10 @@ ACE_EXPORT extern const char NAVIGATOR_ETS_TAG[];
 ACE_EXPORT extern const char PANEL_COMPONENT_TAG[];
 ACE_EXPORT extern const char PANEL_ETS_TAG[];
 
+// pattern-lock
+ACE_EXPORT extern const char PATTERN_LOCK_COMPONENT_TAG[];
+ACE_EXPORT extern const char PATTERN_LOCK_ETS_TAG[];
+
 // row
 ACE_EXPORT extern const char ROW_COMPONENT_TAG[];
 ACE_EXPORT extern const char ROW_ETS_TAG[];
