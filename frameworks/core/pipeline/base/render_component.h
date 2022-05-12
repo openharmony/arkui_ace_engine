@@ -228,6 +228,12 @@ public:
     void SetDisplayIndex(int32_t displayIndex)
     {
         displayIndex_ = displayIndex;
+        displayIndexSetted_ = true;
+    }
+
+    bool GetDisplayIndexSetted() const
+    {
+        return displayIndexSetted_;
     }
 
     MeasureType GetMeasureType() const
@@ -318,6 +324,7 @@ protected:
     PositionParam positionParam_;
     double flexWeight_ = 0.0;
     int32_t displayIndex_ = 1;
+    bool displayIndexSetted_ = false;
     MeasureType measureType_ = MeasureType::PARENT;
     EventMarker onLayoutReady_;
     bool isIgnored_ = false;
