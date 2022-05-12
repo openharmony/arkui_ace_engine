@@ -1284,6 +1284,7 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
         }
         flexWeight_ = renderComponent->GetFlexWeight();
         displayIndex_ = renderComponent->GetDisplayIndex();
+        displayIndexSetted_ = renderComponent->GetDisplayIndexSetted();
         isIgnored_ = renderComponent->IsIgnored();
         interceptTouchEvent_ = renderComponent->InterceptEvent();
         if (renderComponent->IsCustomComponent()) {
