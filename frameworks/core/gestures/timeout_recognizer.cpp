@@ -198,47 +198,6 @@ void TimeoutRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     GetChild()->HandleEvent(event);
 }
 
-void TimeoutRecognizer::HandleTouchDownEvent(const AxisEvent& event)
-{
-    if (!start_) {
-        start_ = event.time;
-        touchIds_.insert(0);
-        GetChild()->HandleEvent(event);
-        return;
-    }
-
-    if (!CheckTimeout(event.time)) {
-        return;
-    }
-}
-
-void TimeoutRecognizer::HandleTouchUpEvent(const AxisEvent& event)
-{
-    if (!CheckTimeout(event.time)) {
-        return;
-    }
-
-    GetChild()->HandleEvent(event);
-}
-
-void TimeoutRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
-{
-    if (!CheckTimeout(event.time)) {
-        return;
-    }
-
-    GetChild()->HandleEvent(event);
-}
-
-void TimeoutRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
-{
-    if (!CheckTimeout(event.time)) {
-        return;
-    }
-
-    GetChild()->HandleEvent(event);
-}
-
 bool TimeoutRecognizer::CheckTimeout(TimeStamp time)
 {
     if (start_ && time > (*start_ + timeout_)) {

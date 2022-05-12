@@ -208,6 +208,8 @@ public:
 
     bool IsAxisScrollable(AxisDirection direction) override;
 
+    WeakPtr<RenderNode> CheckAxisNode() override;
+
     void HandleMouseHoverEvent(const MouseState mouseState) override;
     bool HandleMouseEvent(const MouseEvent& event) override;
 

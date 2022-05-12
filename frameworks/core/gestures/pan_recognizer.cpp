@@ -27,8 +27,6 @@ namespace {
 constexpr int32_t MAX_PAN_FINGERS = 10;
 constexpr double DISTANCE_PER_MOUSE_DEGREE = DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES;
 constexpr int32_t AXIS_PAN_FINGERS = 1;
-constexpr int32_t RATIO_MS_TO_S = 1000;
-constexpr int32_t RATIO_US_TO_MS = 1000;
 
 } // namespace
 
@@ -176,14 +174,8 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         return;
     }
 
-    delta_ = (event.GetOffset() - touchPoints_[event.id].GetOffset()) / touchPoints_.size();
-    mainDelta_ = GetMainAxisDelta();
-    auto timeInterval = event.time - touchPoints_[event.id].time;
-    auto timeIntervalDurationMs =
-        std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, RATIO_US_TO_MS>>>(timeInterval);
-    speed_ = delta_.GetDistance() / timeIntervalDurationMs.count() * RATIO_MS_TO_S;
-    mainSpeed_ = mainDelta_ / timeIntervalDurationMs.count() * RATIO_MS_TO_S;
-    averageDistance_ += delta_;
+    Offset moveDistance = (event.GetOffset() - touchPoints_[event.id].GetOffset()) / touchPoints_.size();
+    averageDistance_ += moveDistance;
     touchPoints_[event.id] = event;
     time_ = event.time;
 
@@ -218,12 +210,9 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         return;
     }
 
-    delta_ = Offset(-event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE,
-        -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
-    mainDelta_ = GetMainAxisDelta();
-    speed_ = 0.0;
-    mainSpeed_ = 0.0;
-    averageDistance_ += delta_;
+    Offset moveDistance = Offset(event.x - lastAxisEvent_.x + event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE,
+        event.y - lastAxisEvent_.y + event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
+    averageDistance_ += moveDistance;
     lastAxisEvent_ = event;
     time_ = event.time;
 
@@ -334,10 +323,6 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         info.SetGlobalPoint(globalPoint_);
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
-        info.SetDelta(delta_);
-        info.SetMainDelta(mainDelta_);
-        info.SetSpeed(speed_);
-        info.SetMainSpeed(mainSpeed_);
         (*callback)(info);
     }
 }
@@ -390,20 +375,6 @@ void PanRecognizer::ChangeDistance(double distance)
             distance_ = distance;
         }
         newDistance_ = distance;
-    }
-}
-
-double PanRecognizer::GetMainAxisDelta()
-{
-    switch (direction_.type) {
-        case PanDirection::ALL:
-            return delta_.GetDistance();
-        case PanDirection::HORIZONTAL:
-            return delta_.GetX();
-        case PanDirection::VERTICAL:
-            return delta_.GetY();
-        default:
-            return 0.0;
     }
 }
 

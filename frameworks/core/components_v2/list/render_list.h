@@ -219,6 +219,8 @@ public:
 
     bool IsAxisScrollable(AxisDirection direction) override;
 
+    WeakPtr<RenderNode> CheckAxisNode() override;
+
     int32_t RequestNextFocus(bool vertical, bool reverse);
 
     std::string ProvideRestoreInfo() override;
@@ -268,7 +270,6 @@ protected:
     void ResetEdgeEffect();
     void SetEdgeEffectAttribute();
     void CalculateMainScrollExtent(double curMainPos, double mainSize);
-    bool GetCurMainPosAndMainSize(double &curMainPos, double &mainSize);
 
     // notify start position in global main axis when drag start
     void ProcessDragStart(double startPosition);

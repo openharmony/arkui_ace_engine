@@ -362,6 +362,7 @@ void RenderList::PerformLayout()
     }
 
     realMainSize_ = curMainPos - currentOffset_;
+    isAxisResponse_ = true;
 }
 
 Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutParam)
@@ -519,44 +520,6 @@ LayoutParam RenderList::MakeInnerLayout()
     return LayoutParam(maxSize, minSize);
 }
 
-bool RenderList::GetCurMainPosAndMainSize(double &curMainPos, double &mainSize)
-{
-    // Check validation of layout size
-    mainSize = ApplyLayoutParam();
-    if (NearZero(mainSize)) {
-        LOGW("Cannot layout using invalid view port");
-        return false;
-    }
-    const auto innerLayout = MakeInnerLayout();
-    curMainPos = LayoutOrRecycleCurrentItems(innerLayout, mainSize);
-    // Try to request new items at end if needed
-    for (size_t newIndex = startIndex_ + items_.size();; ++newIndex) {
-        if (cachedCount_ != 0) {
-            if (endCachedCount_ >= cachedCount_) {
-                break;
-            }
-        } else {
-            if (GreatOrEqual(curMainPos, endMainPos_)) {
-                break;
-            }
-        }
-        auto child = RequestAndLayoutNewItem(newIndex, innerLayout);
-        if (!child) {
-            startIndex_ = std::min(startIndex_, TotalCount());
-            break;
-        }
-        if (GreatOrEqual(curMainPos, mainSize)) {
-            ++endCachedCount_;
-        }
-        curMainPos += GetMainSize(child->GetLayoutSize()) + spaceWidth_;
-    }
-    if (selectedItem_ && selectedItemIndex_ < startIndex_) {
-        curMainPos += GetMainSize(selectedItem_->GetLayoutSize()) + spaceWidth_;
-    }
-    curMainPos -= spaceWidth_;
-    return true;
-}
-
 bool RenderList::UpdateScrollPosition(double offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
@@ -572,12 +535,12 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
     }
 
     if (offset > 0.0) {
-        if (reachStart_ && (!scrollEffect_ || source == SCROLL_FROM_AXIS)) {
+        if (reachStart_ && !scrollEffect_) {
             return false;
         }
         reachEnd_ = false;
     } else {
-        if (reachEnd_ && (!scrollEffect_ || source == SCROLL_FROM_AXIS)) {
+        if (reachEnd_ && !scrollEffect_) {
             return false;
         }
         reachStart_ = false;
@@ -596,16 +559,6 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
             ScrollState(SCROLL_STATE_FLING));
     }
     currentOffset_ += offset;
-    if (source == SCROLL_FROM_AXIS) {
-        double curMainPos = 0.0;
-        double mainSize = 0.0;
-        GetCurMainPosAndMainSize(curMainPos, mainSize);
-        if (currentOffset_ < 0 && curMainPos < mainSize) {
-            currentOffset_ += mainSize - curMainPos;
-        } else if (currentOffset_ > 0) {
-            currentOffset_ = 0;
-        }
-    }
     MarkNeedLayout(true);
     return true;
 }
@@ -1057,6 +1010,10 @@ void RenderList::CalculateMainScrollExtent(double curMainPos, double mainSize)
     isOutOfBoundary_ = LessNotEqual(curMainPos, mainSize) || GreatNotEqual(currentOffset_, 0.0);
     // content length
     mainScrollExtent_ = curMainPos - currentOffset_;
+    // disable scroll when content length less than mainSize
+    if (scrollable_) {
+        scrollable_->MarkAvailable(GreatOrEqual(mainScrollExtent_, mainSize));
+    }
 }
 
 void RenderList::ProcessDragStart(double startPosition)
@@ -1093,7 +1050,6 @@ void RenderList::processDragUpdate(double dragOffset)
 void RenderList::ProcessScrollOverCallback(double velocity)
 {
     if (!chainAnimation_) {
-        LOGD("chain animation is null, no need to handle it.");
         return;
     }
 
@@ -1727,6 +1683,18 @@ bool RenderList::IsAxisScrollable(AxisDirection direction)
 
 void RenderList::HandleAxisEvent(const AxisEvent& event)
 {
+    double degree =
+        GreatOrEqual(fabs(event.verticalAxis), fabs(event.horizontalAxis)) ? event.verticalAxis : event.horizontalAxis;
+    double offset = SystemProperties::Vp2Px(DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP * degree / MOUSE_WHEEL_DEGREES);
+    if (isAxisResponse_) {
+        isAxisResponse_ = false;
+        UpdateScrollPosition(-offset, SCROLL_FROM_ROTATE);
+    }
+}
+
+WeakPtr<RenderNode> RenderList::CheckAxisNode()
+{
+    return AceType::WeakClaim<RenderNode>(this);
 }
 
 bool RenderList::HandleMouseEvent(const MouseEvent& event)

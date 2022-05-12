@@ -21,7 +21,6 @@
 #include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/time_util.h"
-#include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -94,18 +93,17 @@ Scrollable::~Scrollable()
 void Scrollable::Initialize(const WeakPtr<PipelineContext>& context)
 {
     context_ = context;
-    PanDirection panDirection;
     if (axis_ == Axis::VERTICAL) {
-        panDirection.type = PanDirection::VERTICAL;
+        dragRecognizer_ = AceType::MakeRefPtr<VerticalDragRecognizer>();
     } else {
-        panDirection.type = PanDirection::HORIZONTAL;
+        dragRecognizer_ = AceType::MakeRefPtr<HorizontalDragRecognizer>();
     }
-    panRecognizer_ =
-        AceType::MakeRefPtr<PanRecognizer>(context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
 
-    timeoutRecognizer_ = AceType::MakeRefPtr<TimeoutRecognizer>(context, panRecognizer_, SCROLL_TIMEOUT);
+    dragRecognizer_->SetContext(context);
 
-    panRecognizer_->SetOnActionStart([weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
+    timeoutRecognizer_ = AceType::MakeRefPtr<TimeoutRecognizer>(context, dragRecognizer_, SCROLL_TIMEOUT);
+
+    dragRecognizer_->SetOnDragStart([weakScroll = AceType::WeakClaim(this)](const DragStartInfo& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
             // Send event to accessibility when scroll start.
@@ -119,13 +117,13 @@ void Scrollable::Initialize(const WeakPtr<PipelineContext>& context)
             scroll->HandleDragStart(info);
         }
     });
-    panRecognizer_->SetOnActionUpdate([weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
+    dragRecognizer_->SetOnDragUpdate([weakScroll = AceType::WeakClaim(this)](const DragUpdateInfo& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
             scroll->HandleDragUpdate(info);
         }
     });
-    panRecognizer_->SetOnActionEnd([weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
+    dragRecognizer_->SetOnDragEnd([weakScroll = AceType::WeakClaim(this)](const DragEndInfo& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
             scroll->HandleDragEnd(info);
@@ -139,7 +137,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineContext>& context)
             }
         }
     });
-    panRecognizer_->SetOnActionCancel([weakScroll = AceType::WeakClaim(this)]() {
+    dragRecognizer_->SetOnDragCancel([weakScroll = AceType::WeakClaim(this)]() {
         auto scroll = weakScroll.Upgrade();
         if (scroll && scroll->dragCancelCallback_) {
             scroll->dragCancelCallback_();
@@ -232,7 +230,7 @@ void Scrollable::StopScrollable()
     }
 }
 
-void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
+void Scrollable::HandleDragStart(const OHOS::Ace::DragStartInfo& info)
 {
     ACE_FUNCTION_TRACE();
     const auto dragPositionInMainAxis =
@@ -257,7 +255,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     }
 }
 
-void Scrollable::HandleDragUpdate(const GestureEvent& info)
+void Scrollable::HandleDragUpdate(const DragUpdateInfo& info)
 {
     ACE_FUNCTION_TRACE();
     if (!springController_->IsStopped() || !controller_->IsStopped()) {
@@ -281,34 +279,29 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     if (RelatedScrollEventPrepare(Offset(0.0, info.GetMainDelta()))) {
         return;
     }
-    if (info.GetSourceDevice() == SourceType::MOUSE) {
-        if (UpdateScrollPosition(info.GetMainDelta(), SCROLL_FROM_AXIS)) {
-            moved_ = true;
-        }
-    } else {
-        if (UpdateScrollPosition(info.GetMainDelta(), SCROLL_FROM_UPDATE)) {
-            moved_ = true;
-        }
+    if (UpdateScrollPosition(info.GetMainDelta(), SCROLL_FROM_UPDATE)) {
+        moved_ = true;
     }
 }
 
-void Scrollable::HandleDragEnd(const GestureEvent& info)
+void Scrollable::HandleDragEnd(const DragEndInfo& info)
 {
     LOGD("handle drag end, position is %{public}lf and %{public}lf, velocity is %{public}lf",
-        info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetMainSpeed());
+        info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetMainVelocity());
     controller_->ClearAllListeners();
     springController_->ClearAllListeners();
     isDragUpdateStop_ = false;
     touchUp_ = false;
     scrollPause_ = false;
-    double correctVelocity = std::clamp(info.GetMainSpeed(), MIN_VELOCITY + slipFactor_, MAX_VELOCITY - slipFactor_);
+    double correctVelocity = std::clamp(info.GetMainVelocity(), MIN_VELOCITY + slipFactor_, MAX_VELOCITY - slipFactor_);
     correctVelocity = correctVelocity * sVelocityScale_;
     currentVelocity_ = correctVelocity;
     if (dragEndCallback_) {
         dragEndCallback_();
     }
     RelatedEventEnd();
-    if (outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {
+    bool isOutBoundary = outBoundaryCallback_ && outBoundaryCallback_();
+    if (isOutBoundary && scrollOverCallback_) {
         ProcessScrollOverCallback(correctVelocity);
     } else {
         double mainPosition = GetMainOffset(info.GetGlobalLocation());
