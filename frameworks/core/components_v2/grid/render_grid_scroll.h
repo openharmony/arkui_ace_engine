@@ -141,6 +141,8 @@ public:
 
     bool IsAxisScrollable(AxisDirection direction) override;
 
+    WeakPtr<RenderNode> CheckAxisNode() override;
+
 protected:
     int32_t GetItemMainIndex(const RefPtr<RenderNode>& child, bool isMain) const;
     void SetMainSize(Size& dst, const Size& src);
