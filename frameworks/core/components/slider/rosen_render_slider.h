@@ -38,8 +38,7 @@ public:
     void OnMouseHoverEnterTest() override;
     void OnMouseHoverExitTest() override;
     void OnPaintFinish() override;
-    void PaintVerticalFocus(RenderContext& context, const Offset& offset);
-    void PaintHorizontalFocus(RenderContext& context, const Offset& offset);
+    void PaintTrackFocus(RenderContext& context, const Offset& offset);
 
     RefPtr<RenderBlock> GetRenderBlock()
     {

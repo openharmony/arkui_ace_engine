@@ -158,6 +158,7 @@ protected:
     Size drawSize_;
     bool isTouch_ = false;
     bool isHover_ = false;
+    bool isDeclarative_ = false;
 };
 
 } // namespace OHOS::Ace

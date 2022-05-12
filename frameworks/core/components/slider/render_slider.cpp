@@ -291,6 +291,7 @@ void RenderSlider::Initialize()
         auto slider = weak.Upgrade();
         if (slider) {
             slider->isPress_ = false;
+            slider->MarkNeedLayout();
         }
     });
 }

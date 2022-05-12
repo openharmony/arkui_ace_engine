@@ -41,6 +41,7 @@ void JSRadio::Create(const JSCallbackInfo& info)
     auto& radioGroup = (*radioGroupComponent)[radioGroupName];
     radioGroup.SetIsDeclarative(true);
     radioGroup.AddRadio(radioComponent);
+    radioComponent->SetMouseAnimationType(HoverAnimationType::NONE);
     ViewStackProcessor::GetInstance()->Push(radioComponent);
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetDeliverMinToChild(true);

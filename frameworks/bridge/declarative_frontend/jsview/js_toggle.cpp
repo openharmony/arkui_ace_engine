@@ -76,6 +76,7 @@ void JSToggle::Create(const JSCallbackInfo& info)
         RefPtr<SwitchTheme> switchTheme = GetTheme<SwitchTheme>();
         RefPtr<SwitchComponent> switchComponent = AceType::MakeRefPtr<OHOS::Ace::SwitchComponent>(switchTheme);
         switchComponent->SetValue(isOn);
+        switchComponent->SetMouseAnimationType(HoverAnimationType::NONE);
         component = switchComponent;
     } else {
         RefPtr<ToggleTheme> toggleTheme = GetTheme<ToggleTheme>();
@@ -98,10 +99,8 @@ void JSToggle::Create(const JSCallbackInfo& info)
         box->SetHeight(checkBoxTheme->GetHeight() + verticalPadding * 2);
     } else if (toggleType == ToggleType::SWITCH) {
         RefPtr<SwitchTheme> switchTheme = GetTheme<SwitchTheme>();
-        auto horizontalPadding = switchTheme->GetHotZoneHorizontalPadding();
-        auto verticalPadding = switchTheme->GetHotZoneVerticalPadding();
-        box->SetWidth(switchTheme->GetWidth() + horizontalPadding * 2);
-        box->SetHeight(switchTheme->GetHeight() + verticalPadding * 2);
+        box->SetWidth(switchTheme->GetWidth());
+        box->SetHeight(switchTheme->GetHeight());
     } else {
         RefPtr<ToggleTheme> toggleTheme = GetTheme<ToggleTheme>();
         box->SetHeight(toggleTheme->GetHeight().Value(), toggleTheme->GetHeight().Unit());

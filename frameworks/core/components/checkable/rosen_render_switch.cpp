@@ -27,6 +27,15 @@
 
 namespace OHOS::Ace {
 
+constexpr double HALF = 0.5;
+constexpr Dimension FOCUS_PADDING = 2.0_vp;
+constexpr Dimension FOCUS_BORDER_WIDTH = 2.0_vp;
+constexpr Dimension PRESS_BORDER_RADIUS = 8.0_vp;
+constexpr Dimension HOVER_BORDER_RADIUS = 8.0_vp;
+constexpr uint32_t FOCUS_BORDER_COLOR = 0xFF0A59F7;
+constexpr uint32_t PRESS_COLOR = 0x19000000;
+constexpr uint32_t HOVER_COLOR = 0x0C000000;
+
 void RosenRenderSwitch::Paint(RenderContext& context, const Offset& offset)
 {
     auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
@@ -49,8 +58,20 @@ void RosenRenderSwitch::Paint(RenderContext& context, const Offset& offset)
     uint32_t pointColor = 0;
     paintTrackSize_ = switchSize_;
     SetPaintStyle(originX, originY, trackColor, pointColor, trackPaint);
-    if (IsPhone() && onFocus_) {
-        RequestFocusBorder(paintOffset, switchSize_, switchSize_.Height() / 2.0);
+    if (!isDeclarative_) {
+        if (IsPhone() && onFocus_) {
+            RequestFocusBorder(paintOffset, switchSize_, switchSize_.Height() / 2.0);
+        }
+    } else {
+        if ((IsPhone() || IsTablet()) && onFocus_) {
+            PaintFocusBorder(context, paintOffset);
+        }
+        if ((IsPhone() || IsTablet()) && isTouch_) {
+            PaintTouchBoard(offset, context);
+        }
+        if ((IsPhone() || IsTablet()) && isHover_) {
+            PaintHoverBoard(offset, context);
+        }
     }
 
     // paint track rect
@@ -230,6 +251,53 @@ Size RosenRenderSwitch::CalculateTextSize(const std::string& text, RefPtr<Render
     renderText->SetTextData(text);
     renderText->PerformLayout();
     return renderText->GetLayoutSize();
+}
+
+void RosenRenderSwitch::PaintFocusBorder(RenderContext& context, const Offset& offset)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        return;
+    }
+    double focusBorderHeight = switchSize_.Height() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
+    double focusBorderWidth = switchSize_.Width() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
+    double focusRadius = focusBorderHeight * HALF;
+    SkPaint paint;
+    paint.setColor(FOCUS_BORDER_COLOR);
+    paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setAntiAlias(true);
+    SkRRect rRect;
+    rRect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
+    rRect.offset(offset.GetX() - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF),
+        offset.GetY() - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
+    canvas->drawRRect(rRect, paint);
+}
+
+void RosenRenderSwitch::PaintTouchBoard(const Offset& offset, RenderContext& context)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        return;
+    }
+    double dipScale = 1.0;
+    auto pipelineContext = GetContext().Upgrade();
+    if (pipelineContext) {
+        dipScale = pipelineContext->GetDipScale();
+    }
+    RosenUniversalPainter::DrawRRectBackground(canvas, RRect::MakeRRect(Rect(offset.GetX(), offset.GetY(),
+        width_, height_), Radius(NormalizeToPx(PRESS_BORDER_RADIUS))), PRESS_COLOR, dipScale);
+}
+
+void RosenRenderSwitch::PaintHoverBoard(const Offset& offset, RenderContext& context)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        return;
+    }
+    Size hoverSize = Size(width_, height_);
+    RosenUniversalPainter::DrawHoverBackground(canvas, Rect(offset, hoverSize), HOVER_COLOR,
+        NormalizeToPx(HOVER_BORDER_RADIUS));
 }
 
 } // namespace OHOS::Ace

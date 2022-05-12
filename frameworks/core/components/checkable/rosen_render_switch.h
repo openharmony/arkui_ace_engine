@@ -41,6 +41,9 @@ private:
     void PaintCenterPoint(
         SkCanvas* canvas, SkPaint& paint, double pointOriginX, double pointOriginY, uint32_t pointColor) const;
     void PaintTrack(SkCanvas* canvas, SkPaint& trackPaint, double originX, double originY, uint32_t trackColor) const;
+    void PaintFocusBorder(RenderContext& context, const Offset& offset);
+    void PaintTouchBoard(const Offset& offset, RenderContext& context);
+    void PaintHoverBoard(const Offset& offset, RenderContext& context);
 
     Size paintTrackSize_;
 };
