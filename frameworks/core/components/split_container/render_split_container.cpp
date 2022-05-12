@@ -62,7 +62,8 @@ void RenderSplitContainer::InitProperties()
     for (const auto& child : GetChildren()) {
         MagicLayoutNode node;
         node.node = child;
-        auto idx = child->GetDisplayIndex();
+        auto displayIndexSetted = child->GetDisplayIndexSetted();
+        auto idx = displayIndexSetted ? child->GetDisplayIndex() : DISABLE_HIDE;
         if (idx == DISABLE_HIDE) {
             disableHideNodes_.insert(child);
             continue;
