@@ -450,6 +450,16 @@ public:
         return speed_;
     }
 
+    void SetMainSpeed(double mainSpeed)
+    {
+        mainSpeed_ = mainSpeed;
+    }
+
+    double GetMainSpeed() const
+    {
+        return mainSpeed_;
+    }
+
     void SetPressed(bool pressed)
     {
         pressed_ = pressed;
@@ -460,6 +470,26 @@ public:
         return pressed_;
     }
 
+    void SetDelta(const Offset& delta)
+    {
+        delta_ = delta;
+    }
+
+    const Offset& GetDelta() const
+    {
+        return delta_;
+    }
+
+    void SetMainDelta(double mainDelta)
+    {
+        mainDelta_ = mainDelta;
+    }
+
+    double GetMainDelta() const
+    {
+        return mainDelta_;
+    }
+
 private:
     bool repeat_ = false;
     bool pressed_ = false;
@@ -468,6 +498,8 @@ private:
     double scale_ = 1.0;
     double angle_ = 0.0;
     double speed_ = 0.0;
+    double mainSpeed_ = 0.0;
+    double mainDelta_ = 0.0;
     Point globalPoint_;
     // global position at which the touch point contacts the screen.
     Offset globalLocation_;
@@ -476,6 +508,7 @@ private:
     Offset localLocation_;
     Offset screenLocation_;
     Offset pinchCenter_;
+    Offset delta_;
     std::list<FingerInfo> fingerList_;
 };
 

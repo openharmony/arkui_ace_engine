@@ -1095,23 +1095,6 @@ bool RenderScroll::IsAxisScrollable(AxisDirection direction)
 
 void RenderScroll::HandleAxisEvent(const AxisEvent& event)
 {
-    double degree =
-        GreatOrEqual(fabs(event.verticalAxis), fabs(event.horizontalAxis)) ? event.verticalAxis : event.horizontalAxis;
-    double offset = SystemProperties::Vp2Px(DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP * degree / MOUSE_WHEEL_DEGREES);
-    Offset delta;
-    if (axis_ == Axis::VERTICAL) {
-        delta.SetX(0.0);
-        delta.SetY(offset);
-    } else {
-        delta.SetX(offset);
-        delta.SetY(0.0);
-    }
-    UpdateOffset(delta, SCROLL_FROM_ROTATE);
-}
-
-WeakPtr<RenderNode> RenderScroll::CheckAxisNode()
-{
-    return AceType::WeakClaim<RenderNode>(this);
 }
 
 } // namespace OHOS::Ace
