@@ -90,7 +90,7 @@ public:
     FileSelectorResultOhos(std::shared_ptr<OHOS::NWeb::FileSelectorCallback> callback)
         : callback_(callback) {}
 
-    void HandleFileList(std::vector<std::string> result) override;
+    void HandleFileList(std::vector<std::string>& result) override;
 private:
     std::shared_ptr<OHOS::NWeb::FileSelectorCallback> callback_;
 };

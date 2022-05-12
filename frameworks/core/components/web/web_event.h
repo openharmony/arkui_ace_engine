@@ -184,7 +184,7 @@ public:
     FileSelectorResult() = default;
     ~FileSelectorResult() = default;
 
-    virtual void HandleFileList(std::vector<std::string> fileList) = 0;
+    virtual void HandleFileList(std::vector<std::string>& fileList) = 0;
 };
 
 class ACE_EXPORT WebDialogEvent : public BaseEventInfo {

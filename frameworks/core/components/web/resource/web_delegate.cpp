@@ -159,7 +159,7 @@ bool FileSelectorParamOhos::IsCapture()
     return false;
 }
 
-void FileSelectorResultOhos::HandleFileList(std::vector<std::string> result)
+void FileSelectorResultOhos::HandleFileList(std::vector<std::string>& result)
 {
     if (callback_) {
         callback_->OnReceiveValue(result);
