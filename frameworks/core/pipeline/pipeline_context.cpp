@@ -2457,6 +2457,7 @@ void PipelineContext::Destroy()
     nodesToNotifyOnPreDraw_.clear();
     nodesNeedDrawOnPixelMap_.clear();
     layoutTransitionNodeSet_.clear();
+    explicitAnimators_.clear();
     preTargetRenderNode_.Reset();
     imageCache_.Reset();
     fontManager_.Reset();
