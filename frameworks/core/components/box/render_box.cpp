@@ -110,6 +110,7 @@ void RenderBox::Update(const RefPtr<Component>& component)
         if (tapGesture) {
             onClick_ = tapGesture->CreateRecognizer(context_);
             onClick_->SetIsExternalGesture(true);
+            SetAccessibilityClickImpl();
         }
         if (!box->GetRemoteMessageEvent().IsEmpty() && !tapGesture) {
             onClick_ = AceType::MakeRefPtr<ClickRecognizer>();
@@ -232,6 +233,25 @@ void RenderBox::SetAccessibilityFocusImpl()
             accessibilityFocus->HandleAccessibilityFocusEvent(isFocus);
         }
     });
+}
+
+void RenderBox::SetAccessibilityClickImpl()
+{
+    if (AceType::InstanceOf<ClickRecognizer>(onClick_)) {
+        auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(onClick_);
+        auto accessibilityNode = accessibilityNode_.Upgrade();
+        if (accessibilityNode) {
+            auto weakPtr = AceType::WeakClaim(AceType::RawPtr(clickRecognizer));
+            accessibilityNode->AddSupportAction(AceAction::ACTION_CLICK);
+            accessibilityNode->SetClickableState(true);
+            accessibilityNode->SetActionClickImpl([weakPtr]() {
+                auto click = weakPtr.Upgrade();
+                if (click) {
+                    click->OnAccepted();
+                }
+            });
+        }
+    }
 }
 
 void RenderBox::CreateDragDropRecognizer()

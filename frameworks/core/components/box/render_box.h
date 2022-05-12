@@ -311,6 +311,7 @@ private:
     void HandleTouchEvent(bool isTouchDown);
 
     void SetAccessibilityFocusImpl();
+    void SetAccessibilityClickImpl();
 
     std::vector<RefPtr<GestureRecognizer>> recognizers_;
     std::vector<std::pair<GesturePriority, std::vector<RefPtr<GestureRecognizer>>>> recognizerHierarchy_;
