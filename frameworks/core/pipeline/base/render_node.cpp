@@ -1428,6 +1428,7 @@ void RenderNode::ClearRenderObject()
     textDirection_ = TextDirection::LTR;
     onChangeCallback_ = nullptr;
     isPaintGeometryTransition_ = false;
+    displayIndexSetted_ = false;
 }
 
 RRect RenderNode::GetGlobalWindowBlurRRect(std::vector<RRect>& coords) const
