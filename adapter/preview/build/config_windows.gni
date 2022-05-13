@@ -57,6 +57,7 @@ enable_rosen_backend = false
 enable_standard_input = false
 ohos_standard_fontmgr = true
 
+
 cflags_cc = [
   "-std=c++17",
   "-DWINVER=0x0601",

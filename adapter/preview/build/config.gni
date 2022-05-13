@@ -24,6 +24,7 @@ form_components_support = false
 image_components_support = false
 plugin_components_support = false
 select_popup_components_support = false
+
  
 if (defined(camera_components_support) && camera_components_support) {
   defines += [ "CAMERA_SUPPORTED" ]

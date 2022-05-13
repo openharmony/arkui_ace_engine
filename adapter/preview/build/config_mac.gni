@@ -53,6 +53,7 @@ enable_system_clipboard = false
 ohos_standard_fontmgr = true
 enable_ability_component = false
 
+
 cflags_cc = [
   "-std=c++17",
   "-Wno-thread-safety-attributes",

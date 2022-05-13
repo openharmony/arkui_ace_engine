@@ -734,6 +734,7 @@ void CameraElement::UpdataChild(const RefPtr<Component>& childComponent)
 
 void CameraElement::OnError(const std::string& errorcode, const std::string& errormsg)
 {
+    
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     std::string errorDescription = "This component is not supported on PC Preview.";
     UpdataChild(CreateErrorText(errorDescription));

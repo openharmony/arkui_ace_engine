@@ -82,7 +82,7 @@
 #include "frameworks/bridge/common/dom/dom_text.h"
 #include "frameworks/bridge/common/dom/dom_textarea.h"
 #include "frameworks/bridge/common/dom/dom_toggle.h"
-#if !defined(X_COMPONENTS_SUPPORTED)
+#if defined(XCOMPONENT_SUPPORTED)
 #include "frameworks/bridge/common/dom/dom_xcomponent.h"
 #endif
 #ifndef WEARABLE_PRODUCT

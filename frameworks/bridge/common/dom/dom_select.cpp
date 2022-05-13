@@ -39,6 +39,7 @@ DOMSelect::DOMSelect(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeI
     tipText_ = AceType::MakeRefPtr<TextComponent>("");
     selectComponent_->SetTipText(tipText_);
 #if defined(SELECT_SUPPORTED)
+
     selectComponent_->SetNodeId(nodeId);
 #endif
 }
