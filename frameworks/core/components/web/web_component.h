@@ -38,10 +38,85 @@ enum MixedModeContent {
     MIXED_CONTENT_COMPATIBILITY_MODE = 2
 };
 
+enum WebCacheMode {
+    DEFAULT = 0,
+    USE_CACHE_ELSE_NETWORK,
+    USE_NO_CACHE,
+    USE_CACHE_ONLY
+};
+
 enum DialogEventType {
     DIALOG_EVENT_ALERT = 0,
     DIALOG_EVENT_BEFORE_UNLOAD = 1,
     DIALOG_EVENT_CONFIRM = 2
+};
+
+constexpr int default_text_zoom_atio = 100;
+
+class WebCookie : public virtual AceType {
+    DECLARE_ACE_TYPE(WebCookie, AceType);
+
+public:
+    using SetCookieImpl = std::function<bool(const std::string&, const std::string&)>;
+    using GetCookieImpl = std::function<std::string(const std::string&)>;
+    using DeleteEntirelyCookieImpl = std::function<void()>;
+    using SaveCookieSyncImpl = std::function<bool()>;
+    bool SetCookie(const std::string& url, const std::string& value)
+    {
+        if (setCookieImpl_) {
+            return setCookieImpl_(url, value);
+        }
+        return false;
+    }
+
+    std::string GetCookie(const std::string& url)
+    {
+        if (getCookieImpl_) {
+            return getCookieImpl_(url);
+        }
+        return "";
+    }
+
+    void DeleteEntirelyCookie()
+    {
+        if (deleteEntirelyCookieImpl_) {
+            deleteEntirelyCookieImpl_();
+        }
+    }
+
+    bool SaveCookieSync()
+    {
+        if (saveCookieSyncImpl_) {
+            return saveCookieSyncImpl_();
+        }
+        return false;
+    }
+
+    void SetSetCookieImpl(SetCookieImpl&& setCookieImpl)
+    {
+        setCookieImpl_ = setCookieImpl;
+    }
+
+    void SetGetCookieImpl(GetCookieImpl&& getCookieImpl)
+    {
+        getCookieImpl_ = getCookieImpl;
+    }
+
+    void SetDeleteEntirelyCookieImpl(DeleteEntirelyCookieImpl&& deleteEntirelyCookieImpl)
+    {
+        deleteEntirelyCookieImpl_ = deleteEntirelyCookieImpl;
+    }
+
+    void SetSaveCookieSyncImpl(SaveCookieSyncImpl&& saveCookieSyncImpl)
+    {
+        saveCookieSyncImpl_ = saveCookieSyncImpl;
+    }
+
+private:
+    SetCookieImpl setCookieImpl_;
+    GetCookieImpl getCookieImpl_;
+    DeleteEntirelyCookieImpl deleteEntirelyCookieImpl_;
+    SaveCookieSyncImpl saveCookieSyncImpl_;
 };
 
 class WebController : public virtual AceType {
@@ -54,6 +129,7 @@ public:
     using AccessStepImpl = std::function<bool(int32_t)>;
     using BackwardImpl = std::function<void()>;
     using ForwardImpl = std::function<void()>;
+    using ClearHistoryImpl = std::function<void()>;
     void LoadUrl(std::string url, std::map<std::string, std::string>& httpHeaders) const
     {
         if (loadUrlImpl_) {
@@ -101,6 +177,14 @@ public:
         }
     }
 
+    void ClearHistory()
+    {
+        LOGI("Start clear navigation history");
+        if (clearHistoryImpl_) {
+            clearHistoryImpl_();
+        }
+    }
+
     void SetLoadUrlImpl(LoadUrlImpl && loadUrlImpl)
     {
         loadUrlImpl_ = std::move(loadUrlImpl);
@@ -129,6 +213,11 @@ public:
     void SetForwardImpl(ForwardImpl && forwardImpl)
     {
         forwardimpl_ = std::move(forwardImpl);
+    }
+
+    void SetClearHistoryImpl(ClearHistoryImpl && clearHistoryImpl)
+    {
+        clearHistoryImpl_ = std::move(clearHistoryImpl);
     }
 
     using ExecuteTypeScriptImpl = std::function<void(std::string, std::function<void(std::string)>&&)>;
@@ -260,6 +349,73 @@ public:
         getHitTestResultImpl_ = std::move(getHitTestResultImpl);
     }
 
+    WebCookie* GetCookieManager()
+    {
+        if (!saveCookieSyncImpl_ || !setCookieImpl_) {
+            return nullptr;
+        }
+        if (cookieManager_ != nullptr) {
+            return cookieManager_;
+        }
+        cookieManager_ = new WebCookie();
+        cookieManager_->SetSaveCookieSyncImpl(std::move(saveCookieSyncImpl_));
+        cookieManager_->SetSetCookieImpl(std::move(setCookieImpl_));
+        cookieManager_->SetGetCookieImpl(std::move(getCookieImpl_));
+        cookieManager_->SetDeleteEntirelyCookieImpl(std::move(deleteEntirelyCookieImpl_));
+        return cookieManager_;
+    }
+
+    using SetCookieImpl = std::function<bool(const std::string&, const std::string&)>;
+    bool SetCookie(const std::string& url, const std::string& value)
+    {
+        if (setCookieImpl_) {
+            return setCookieImpl_(url, value);
+        }
+        return false;
+    }
+    void SetSetCookieImpl(SetCookieImpl&& setCookieImpl)
+    {
+        setCookieImpl_ = setCookieImpl;
+    }
+
+    using GetCookieImpl = std::function<std::string(const std::string&)>;
+    std::string GetCookie(const std::string& url)
+    {
+        if (getCookieImpl_) {
+            return getCookieImpl_(url);
+        }
+        return "";
+    }
+    void SetGetCookieImpl(GetCookieImpl&& getCookieImpl)
+    {
+        getCookieImpl_ = getCookieImpl;
+    }
+
+    using DeleteEntirelyCookieImpl = std::function<void()>;
+    void DeleteEntirelyCookie()
+    {
+        if (deleteEntirelyCookieImpl_) {
+            deleteEntirelyCookieImpl_();
+        }
+    }
+    void SetDeleteEntirelyCookieImpl(DeleteEntirelyCookieImpl&& deleteEntirelyCookieImpl)
+    {
+        deleteEntirelyCookieImpl_ = deleteEntirelyCookieImpl;
+    }
+
+    using SaveCookieSyncImpl = std::function<bool()>;
+    bool SaveCookieSync()
+    {
+        if (saveCookieSyncImpl_) {
+            return saveCookieSyncImpl_();
+        }
+        return false;
+    }
+    void SetSaveCookieSyncImpl(SaveCookieSyncImpl&& saveCookieSyncImpl)
+    {
+        saveCookieSyncImpl_ = saveCookieSyncImpl;
+    }
+
     using AddJavascriptInterfaceImpl = std::function<void(
         const std::string&,
         const std::vector<std::string>&)>;
@@ -324,14 +480,16 @@ public:
 
 private:
     RefPtr<WebDeclaration> declaration_;
+    WebCookie* cookieManager_ = nullptr;
     LoadUrlImpl loadUrlImpl_;
-    
+
     // Forward and Backward
     AccessBackwardImpl accessBackwardImpl_;
     AccessForwardImpl accessForwardImpl_;
     AccessStepImpl accessStepImpl_;
     BackwardImpl backwardImpl_;
     ForwardImpl forwardimpl_;
+    ClearHistoryImpl clearHistoryImpl_;
 
     ExecuteTypeScriptImpl executeTypeScriptImpl_;
     OnInactiveImpl onInactiveImpl_;
@@ -343,6 +501,10 @@ private:
     RefreshImpl refreshImpl_;
     StopLoadingImpl stopLoadingImpl_;
     GetHitTestResultImpl getHitTestResultImpl_;
+    SaveCookieSyncImpl saveCookieSyncImpl_;
+    SetCookieImpl setCookieImpl_;
+    GetCookieImpl getCookieImpl_;
+    DeleteEntirelyCookieImpl deleteEntirelyCookieImpl_;
     AddJavascriptInterfaceImpl addJavascriptInterfaceImpl_;
     RemoveJavascriptInterfaceImpl removeJavascriptInterfaceImpl_;
     WebViewJavaScriptResultCallBackImpl webViewJavaScriptResultCallBackImpl_;
@@ -386,7 +548,7 @@ public:
     {
         return declaration_->GetWebSrc();
     }
-	
+
     void SetData(const std::string& data)
     {
         declaration_->SetWebData(data);
@@ -476,7 +638,7 @@ public:
     {
         return declaration_->GetDownloadStartEventId();
     }
-    
+
     void SetOnFocusEventId(const EventMarker& onFocusEventId)
     {
         declaration_->SetOnFocusEventId(onFocusEventId);
@@ -515,6 +677,26 @@ public:
     const EventMarker& GetMessageEventId() const
     {
         return declaration_->GetMessageEventId();
+    }
+
+    void SetRenderExitedId(const EventMarker& renderExitedId)
+    {
+        declaration_->SetRenderExitedId(renderExitedId);
+    }
+
+    const EventMarker& GetRenderExitedId() const
+    {
+        return declaration_->GetRenderExitedId();
+    }
+
+    void SetRefreshAccessedHistoryId(const EventMarker& refreshAccessedHistoryId)
+    {
+        declaration_->SetRefreshAccessedHistoryId(refreshAccessedHistoryId);
+    }
+
+    const EventMarker& GetRefreshAccessedHistoryId() const
+    {
+        return declaration_->GetRefreshAccessedHistoryId();
     }
 
     void SetDeclaration(const RefPtr<WebDeclaration>& declaration)
@@ -633,6 +815,64 @@ public:
         isGeolocationAccessEnabled_ = isEnabled;
     }
 
+    WebCacheMode GetCacheMode() {
+        return cacheMode_;
+    }
+
+    void SetCacheMode(WebCacheMode mode) {
+        cacheMode_ = mode;
+    }
+
+    bool GetOverviewModeAccessEnabled() const
+    {
+        return isOverviewModeAccessEnabled_;
+    }
+
+    void SetOverviewModeAccessEnabled(bool isEnabled)
+    {
+        isOverviewModeAccessEnabled_ = isEnabled;
+    }
+
+    bool GetFileFromUrlAccessEnabled() const
+    {
+        return isFileFromUrlAccessEnabled_;
+    }
+
+    void SetFileFromUrlAccessEnabled(bool isEnabled)
+    {
+        isFileFromUrlAccessEnabled_ = isEnabled;
+    }
+
+    bool GetDatabaseAccessEnabled() const
+    {
+        return isDatabaseAccessEnabled_;
+    }
+
+    void SetDatabaseAccessEnabled(bool isEnabled)
+    {
+        isDatabaseAccessEnabled_ = isEnabled;
+    }
+
+    bool GetWebDebuggingAccessEnabled() const
+    {
+        return isWebDebuggingAccessEnabled_;
+    }
+
+    void SetWebDebuggingAccessEnabled(bool isEnabled)
+    {
+        isWebDebuggingAccessEnabled_ = isEnabled;
+    }
+
+    int32_t GetTextZoomAtio() const
+    {
+        return textZoomAtioNum_;
+    }
+
+    void SetTextZoomAtio(int32_t atio)
+    {
+        textZoomAtioNum_ = atio;
+    }
+
     using OnCommonDialogImpl = std::function<bool(const BaseEventInfo* info)>;
     bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType) const
     {
@@ -688,6 +928,40 @@ public:
         focusElement_ = focusElement;
     }
 
+    using OnFileSelectorShowImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnFileSelectorShow(const BaseEventInfo* info) const
+    {
+        if (onFileSelectorShowImpl_) {
+            return onFileSelectorShowImpl_(info);
+        }
+        return false;
+    }
+    void SetOnFileSelectorShow(OnFileSelectorShowImpl && onFileSelectorShowImpl)
+    {
+        if (onFileSelectorShowImpl == nullptr) {
+            return;
+        }
+
+        onFileSelectorShowImpl_ = onFileSelectorShowImpl;
+    }
+
+    using OnUrlLoadInterceptImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnUrlLoadIntercept(const BaseEventInfo* info) const
+    {
+        if (onUrlLoadInterceptImpl_) {
+            return onUrlLoadInterceptImpl_(info);
+        }
+        return false;
+    }
+    void SetOnUrlLoadIntercept(OnUrlLoadInterceptImpl && onUrlLoadInterceptImpl)
+    {
+        if (onUrlLoadInterceptImpl == nullptr) {
+            return;
+        }
+
+        onUrlLoadInterceptImpl_ = onUrlLoadInterceptImpl;
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -699,6 +973,8 @@ private:
     OnCommonDialogImpl onConfirmImpl_;
     OnCommonDialogImpl onBeforeUnloadImpl_;
     OnConsoleImpl consoleImpl_;
+    OnFileSelectorShowImpl onFileSelectorShowImpl_;
+    OnUrlLoadInterceptImpl onUrlLoadInterceptImpl_;
 
     std::string type_;
     bool isJsEnabled_ = true;
@@ -712,7 +988,12 @@ private:
     MixedModeContent mixedContentMode_ = MixedModeContent::MIXED_CONTENT_NEVER_ALLOW;
     bool isZoomAccessEnabled_ = true;
     bool isGeolocationAccessEnabled_ = true;
-
+    bool isOverviewModeAccessEnabled_ = true;
+    bool isFileFromUrlAccessEnabled_ = false;
+    bool isDatabaseAccessEnabled_ = false;
+    int32_t textZoomAtioNum_ = default_text_zoom_atio;
+    WebCacheMode cacheMode_ = WebCacheMode::DEFAULT;
+    bool isWebDebuggingAccessEnabled_ = false;
 };
 
 } // namespace OHOS::Ace

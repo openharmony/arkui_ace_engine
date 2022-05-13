@@ -71,10 +71,93 @@ std::shared_ptr<WebJSValue> ParseValue(
 }
 }
 
+class JSWebCookie : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebCookie>::Declare("WebCookie");
+        JSClass<JSWebCookie>::CustomMethod("setCookie", &JSWebCookie::SetCookie);
+        JSClass<JSWebCookie>::CustomMethod("getCookie", &JSWebCookie::GetCookie);
+        JSClass<JSWebCookie>::CustomMethod("deleteEntireCookie", &JSWebCookie::DeleteEntirelyCookie);
+        JSClass<JSWebCookie>::CustomMethod("saveCookieSync", &JSWebCookie::SaveCookieSync);
+        JSClass<JSWebCookie>::Bind(globalObj, JSWebCookie::Constructor, JSWebCookie::Destructor);
+    }
+
+    void SetWebCookie(WebCookie* manager)
+    {
+        if (manager != nullptr) {
+            manager_ = manager;
+        }
+    }
+
+    void SetCookie(const JSCallbackInfo& args)
+    {
+        std::string url;
+        std::string value;
+        bool result = false;
+        if (args.Length() >= 2 && args[0]->IsString() && args[1]->IsString()) {
+            url = args[0]->ToString();
+            value = args[1]->ToString();
+            if (manager_ != nullptr) {
+                result = manager_->SetCookie(url, value);
+            }
+        }
+        auto jsVal = JSVal(ToJSValue(result));
+        auto returnValue = JSRef<JSVal>::Make(jsVal);
+        args.SetReturnValue(returnValue);
+    }
+
+    void GetCookie(const JSCallbackInfo& args)
+    {
+        std::string result = "";
+        if (manager_ != nullptr && args.Length() >= 1 && args[0]->IsString()) {
+            std::string url = args[0]->ToString();
+            result = manager_->GetCookie(url);
+        }
+        auto jsVal = JSVal(ToJSValue(result));
+        auto returnValue = JSRef<JSVal>::Make(jsVal);
+        args.SetReturnValue(returnValue);
+    }
+
+    void DeleteEntirelyCookie(const JSCallbackInfo& args)
+    {
+        if (manager_ == nullptr) {
+            return;
+        }
+        manager_->DeleteEntirelyCookie();
+    }
+
+    void SaveCookieSync(const JSCallbackInfo& args)
+    {
+        bool result = false;
+        if (manager_ != nullptr) {
+            result = manager_->SaveCookieSync();
+        }
+        auto jsVal = JSVal(ToJSValue(result));
+        auto returnValue = JSRef<JSVal>::Make(jsVal);
+        args.SetReturnValue(returnValue);
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebCookie = Referenced::MakeRefPtr<JSWebCookie>();
+        jsWebCookie->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebCookie));
+    }
+
+    static void Destructor(JSWebCookie* jsWebCookie)
+    {
+        if (jsWebCookie != nullptr) {
+            jsWebCookie->DecRefCount();
+        }
+    }
+    WebCookie* manager_;
+};
+
 JSWebController::JSWebController()
 {
     instanceId_ = Container::CurrentId();
-    LOGI("instanceId_ is %{public}d", instanceId_);
 }
 
 std::shared_ptr<WebJSValue> JSWebController::GetJavaScriptResult(
@@ -125,7 +208,10 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("accessStep", &JSWebController::AccessStep);
     JSClass<JSWebController>::CustomMethod("accessForward", &JSWebController::AccessForward);
     JSClass<JSWebController>::CustomMethod("accessBackward", &JSWebController::AccessBackward);
+    JSClass<JSWebController>::CustomMethod("clearHistory", &JSWebController::ClearHistory);
+    JSClass<JSWebController>::CustomMethod("getCookieManager", &JSWebController::GetCookieManager);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
+    JSWebCookie::JSBind(globalObj);
 }
 
 void JSWebController::Constructor(const JSCallbackInfo& args)
@@ -188,12 +274,12 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
             JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
             std::string key;
             if (!ConvertFromJSValue(obj->GetProperty("headerKey"), key)) {
-                LOGW("can't find key at index %{public}d of additionalHttpHeaders, so skip it.", i);
+                LOGW("can't find key at index %{public}zu of additionalHttpHeaders, so skip it.", i);
                 continue;
             }
             std::string value;
             if (!ConvertFromJSValue(obj->GetProperty("headerValue"), value)) {
-                LOGW("can't find value at index %{public}d of additionalHttpHeaders, so skip it.", i);
+                LOGW("can't find value at index %{public}zu of additionalHttpHeaders, so skip it.", i);
                 continue;
             }
             httpHeaders[key] = value;
@@ -331,6 +417,15 @@ void JSWebController::AccessForward(const JSCallbackInfo& args)
     }
 }
 
+void JSWebController::ClearHistory(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController clear navigation history.");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        webController_->ClearHistory();
+    }
+}
+
 void JSWebController::Refresh(const JSCallbackInfo& args)
 {
     LOGI("JSWebController Refresh");
@@ -357,6 +452,42 @@ void JSWebController::GetHitTestResult(const JSCallbackInfo& args)
         int result = webController_->GetHitTestResult();
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
     }
+}
+
+void JSWebController::GetCookieManager(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController Start GetCookieManager");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        if (!jsWebCookieInit_) {
+            jsWebCookie_ = JSClass<JSWebCookie>::NewInstance();
+            auto jsWebCookieVal = Referenced::Claim(jsWebCookie_->Unwrap<JSWebCookie>());
+            jsWebCookieVal->SetWebCookie(webController_->GetCookieManager());
+            jsWebCookieInit_ = true;
+        }
+        args.SetReturnValue(jsWebCookie_);
+    }
+}
+
+void JSWebController::SetJavascriptCallBackImpl()
+{
+    if (!webController_ || jsRegisterCallBackInit_) {
+        return;
+    }
+
+    LOGI("JSWebController set webview javascript CallBack");
+    jsRegisterCallBackInit_ = true;
+    WebController::JavaScriptCallBackImpl callback =
+        [weak = WeakClaim(this)](
+        const std::string& objectName, const std::string& objectMethod,
+        const std::vector<std::shared_ptr<WebJSValue>>& args) {
+        auto jsWebController = weak.Upgrade();
+        if (jsWebController == nullptr) {
+            return std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
+        }
+        return jsWebController->GetJavaScriptResult(objectName, objectMethod, args);
+    };
+    webController_->SetJavaScriptCallBackImpl(std::move(callback));
 }
 
 void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
