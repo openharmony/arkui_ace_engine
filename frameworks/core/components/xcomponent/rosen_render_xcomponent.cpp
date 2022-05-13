@@ -81,7 +81,9 @@ void RosenRenderXComponent::DumpTree(int32_t depth)
 
 std::shared_ptr<RSNode> RosenRenderXComponent::CreateRSNode() const
 {
-    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = "RosenRenderXComponent"};
+    std::string renderNodeName = "RosenRenderXComponent";
+    std::string surfaceNodeName =  renderNodeName + id_;
+    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName};
     return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
 }
 

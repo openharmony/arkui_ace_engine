@@ -61,6 +61,16 @@ public:
         xcomponentSizeChangeEvent_ = std::move(xcomponentSizeChangeEvent);
     }
 
+    void SetXComponentId(const std::string& id)
+    {
+        id_ = id;
+    }
+
+    const std::string& GetXComponentId() const
+    {
+        return id_;
+    }
+
     void NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent);
     bool NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent);
 
@@ -81,6 +91,7 @@ protected:
     bool isXComponentInit = false;
     bool positionChange_ = false;
     bool sizeChange_ = false;
+    std::string id_;
 
     void NativeXComponentOffset(const double& x, const double& y);
 };

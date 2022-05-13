@@ -41,32 +41,8 @@ XComponentComponent::XComponentComponent(const std::string& type) : type_(type)
 RefPtr<RenderNode> XComponentComponent::CreateRenderNode()
 {
     RefPtr<RenderNode> renderNode = RenderXComponent::Create();
-    delegate_ = AceType::MakeRefPtr<XComponentDelegate>(AceType::WeakClaim<XComponentComponent>(this),
-                                                 renderNode->GetContext(),
-                                                 std::move(errorCallback_), type_);
-    if (createdCallback_ != nullptr) {
-        delegate_->AddCreatedCallback(createdCallback_);
-    }
     auto renderXComponent = AceType::DynamicCast<RenderXComponent>(renderNode);
-    delegate_->AddCreatedCallback([renderXComponent, this]() {
-        if (!renderXComponent) {
-            LOGE("renderXComponent is null");
-            return;
-        }
-        auto pipelineContext = renderXComponent->GetContext().Upgrade();
-        if (!pipelineContext) {
-            LOGE("fail to create Update due to context is null");
-            return;
-        }
-        auto uiTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(),
-                                                       TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([renderXComponent, this] {
-            if (renderXComponent) {
-                renderXComponent->Update(AceType::Claim<Component>(this));
-            }
-        });
-    });
-    renderXComponent->SetDelegate(delegate_);
+    renderXComponent->SetXComponentId(GetId());
     return renderNode;
 }
 
