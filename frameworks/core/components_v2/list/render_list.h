@@ -134,6 +134,16 @@ public:
         itemGenerator_ = std::move(listItemGenerator);
     }
 
+    int32_t GetRestoreId() const
+    {
+        return component_ ? component_->GetRestoreId() : -1;
+    }
+
+    bool GetMultiSelectable() const
+    {
+        return isMultiSelectable_;
+    }
+
     void RemoveAllItems();
 
     void JumpToIndex(int32_t idx, int32_t source);
