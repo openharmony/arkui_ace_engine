@@ -1075,8 +1075,8 @@ void JsiDeclarativeEngine::FireSyncEvent(const std::string& eventId, const std::
 void JsiDeclarativeEngine::InitXComponent(const std::string& componentId)
 {
     ACE_DCHECK(engineInstance_);
-    OHOS::Ace::Framework::XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(
-        componentId, nativeXComponentImpl_, nativeXComponent_);
+    std::tie(nativeXComponentImpl_, nativeXComponent_) =
+        XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(componentId);
 }
 
 void JsiDeclarativeEngine::FireExternalEvent(
@@ -1090,8 +1090,8 @@ void JsiDeclarativeEngine::FireExternalEvent(
         return;
     }
     InitXComponent(componentId);
-    RefPtr<XComponentComponent> xcomponent;
-    OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId, xcomponent);
+    RefPtr<XComponentComponent> xcomponent =
+        XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId);
     if (!xcomponent) {
         LOGE("FireExternalEvent xcomponent is null.");
         return;

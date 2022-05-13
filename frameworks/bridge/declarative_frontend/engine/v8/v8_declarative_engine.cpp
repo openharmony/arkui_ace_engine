@@ -1791,10 +1791,10 @@ void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, cons
         return;
     }
     InitXComponent();
-    OHOS::Ace::Framework::XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(
-        componentId, nativeXComponentImpl_, nativeXComponent_);
-    RefPtr<XComponentComponent> xcomponent;
-    OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId, xcomponent);
+    std::tie(nativeXComponentImpl_, nativeXComponent_) =
+        XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(componentId);
+    RefPtr<XComponentComponent> xcomponent =
+        XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId);
     if (!xcomponent) {
         LOGE("FireExternalEvent xcomponent is null.");
         return;

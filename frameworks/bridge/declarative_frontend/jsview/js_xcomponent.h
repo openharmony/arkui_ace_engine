@@ -28,6 +28,7 @@ class XComponentClient {
 public:
     using GetCallback = std::function<bool(RefPtr<XComponentComponent>& component)>;
     using GetJSValCallback = std::function<bool(JSRef<JSVal>& param)>;
+    using DeleteCallback = std::function<void()>;
     XComponentClient& operator=(const XComponentClient&) = delete;
     XComponentClient(const XComponentClient&) = delete;
     ~XComponentClient() = default;
@@ -62,12 +63,14 @@ public:
         }
     }
 
-    void GetXComponentFromXcomponentsMap(const std::string& xcomponentId, RefPtr<XComponentComponent>& component)
+    RefPtr<XComponentComponent> GetXComponentFromXcomponentsMap(const std::string& xcomponentId)
     {
-        if (xcomponentsMap_.find(xcomponentId) == xcomponentsMap_.end()) {
-            return;
+        auto iter = xcomponentsMap_.find(xcomponentId);
+        if (iter == xcomponentsMap_.end()) {
+            LOGE("xcomponent: %s not exists", xcomponentId.c_str());
+            return nullptr;
         }
-        component = AceType::DynamicCast<XComponentComponent>(xcomponentsMap_[xcomponentId]);
+        return AceType::DynamicCast<XComponentComponent>(iter->second.Upgrade());
     }
 
     RefPtr<JSXComponentController> GetControllerFromJSXComponentControllersMap(const std::string& xcomponentId)
@@ -79,26 +82,28 @@ public:
         return iter->second;
     }
 
-    void GetNativeXComponentFromXcomponentsMap(const std::string& xcomponentId,
-        RefPtr<OHOS::Ace::NativeXComponentImpl>& nativeXComponentImpl, OH_NativeXComponent*& nativeXComponent)
+    std::pair<RefPtr<OHOS::Ace::NativeXComponentImpl>, OH_NativeXComponent*> GetNativeXComponentFromXcomponentsMap(
+        const std::string& xcomponentId)
     {
         auto it = nativeXcomponentsMap_.find(xcomponentId);
         if (it != nativeXcomponentsMap_.end()) {
-            std::tie(nativeXComponentImpl, nativeXComponent) = it->second;
+            return it->second;
         } else {
-            nativeXComponentImpl = AceType::MakeRefPtr<NativeXComponentImpl>();
-            nativeXComponent = new OH_NativeXComponent(AceType::RawPtr(nativeXComponentImpl));
-            nativeXcomponentsMap_.emplace(xcomponentId, std::make_pair(nativeXComponentImpl, nativeXComponent));
+            auto nativeXComponentImpl = AceType::MakeRefPtr<NativeXComponentImpl>();
+            auto nativeXComponent = new OH_NativeXComponent(AceType::RawPtr(nativeXComponentImpl));
+            nativeXcomponentsMap_[xcomponentId] = std::make_pair(nativeXComponentImpl, nativeXComponent);
+            return nativeXcomponentsMap_[xcomponentId];
         }
     }
 
     void AddXComponentToXcomponentsMap(const std::string& xcomponentId, const RefPtr<XComponentComponent>& component)
     {
+        auto weakComponent = AceType::WeakClaim(AceType::RawPtr(component));
         auto it = xcomponentsMap_.find(xcomponentId);
         if (it != xcomponentsMap_.end()) {
-            it->second = component;
+            it->second = weakComponent;
         } else {
-            xcomponentsMap_.emplace(xcomponentId, component);
+            xcomponentsMap_[xcomponentId] = weakComponent;
         }
     }
 
@@ -113,6 +118,10 @@ public:
         auto it = xcomponentsMap_.find(xcomponentId);
         if (it == xcomponentsMap_.end()) {
             return;
+        }
+        auto xcomponent = it->second.Upgrade();
+        if (xcomponent) {
+            xcomponent->SetDeleteCallbackToNull();
         }
         xcomponentsMap_.erase(it);
     }
@@ -150,7 +159,7 @@ private:
     XComponentClient() = default;
     GetCallback getCallback_ = nullptr;
     GetJSValCallback getJSValCallback_ = nullptr;
-    std::unordered_map<std::string, RefPtr<Component>> xcomponentsMap_;
+    std::unordered_map<std::string, WeakPtr<XComponentComponent>> xcomponentsMap_;
     std::unordered_map<std::string, RefPtr<JSXComponentController>> jsXComponentControllersMap_;
     std::unordered_map<std::string, std::pair<RefPtr<OHOS::Ace::NativeXComponentImpl>, OH_NativeXComponent*>>
         nativeXcomponentsMap_;

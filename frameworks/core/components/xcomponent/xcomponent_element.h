@@ -39,6 +39,7 @@ class XComponentElement : public RenderElement {
 public:
     using InitEventCallback = std::function<void(const std::string&)>;
     using DestroyEventCallback = std::function<void(const std::string&)>;
+    using ExternalEventCallback = std::function<void(const std::string&, const uint32_t, const bool)>;
     ~XComponentElement();
     void Prepare(const WeakPtr<Element>& parent) override;
     void SetNewComponent(const RefPtr<Component>& newComponent) override;
@@ -65,7 +66,8 @@ private:
     void SetMethodCall();
     void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
 
-    std::function<void(const std::string&, const uint32_t, const bool)> onSurfaceInit_;
+    ExternalEventCallback onSurfaceInit_;
+    ExternalEventCallback onSurfaceDestroy_;
     InitEventCallback onXComponentInit_;
     DestroyEventCallback onXComponentDestroy_;
     OH_NativeXComponent_TouchEvent touchEventPoint_;
