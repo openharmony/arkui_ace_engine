@@ -21,7 +21,7 @@ template("ace_base_source_set") {
     part_name = ace_engine_part
     defines += invoker.defines
     deps = [
-      "$ace_root/build/external_config/cJSON:third_party_cjson",
+      "$cjson_root:cjson_static",
       "i18n:ace_base_i18n_$platform",
       "resource:ace_resource",
     ]
