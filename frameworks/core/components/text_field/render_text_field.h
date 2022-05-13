@@ -121,6 +121,7 @@ public:
     void Insert(const std::string& text);
     void StartTwinkling();
     void StopTwinkling();
+    void EditingValueFilter(TextEditingValue& result);
 
     void SetInputFilter(const std::string& inputFilter)
     {
@@ -500,8 +501,6 @@ protected:
     std::string iconSrc_;
     std::string showIconSrc_;
     std::string hideIconSrc_;
-    std::string inputCallBackStr_;
-    int32_t inputCallBackStrSize_ = 0;
     RefPtr<RenderImage> iconImage_;
     RefPtr<RenderImage> renderShowIcon_;
     RefPtr<RenderImage> renderHideIcon_;

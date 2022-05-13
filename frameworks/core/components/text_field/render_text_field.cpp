@@ -978,24 +978,7 @@ void RenderTextField::SetEditingValue(TextEditingValue&& newValue, bool needFire
         }
     }
 
-    if (context && context->GetIsDeclarative()) {
-        if (inputFilter_.empty() || newValue.text.empty()) {
-            controller_->SetValue(newValue, needFireChangeEvent);
-        } else {
-            std::regex rw(inputFilter_);
-            if (regex_match(newValue.text.c_str(), rw)) {
-                inputCallBackStrSize_ = static_cast<int32_t>(newValue.text.length());
-                controller_->SetValue(newValue, needFireChangeEvent);
-            } else {
-                inputCallBackStr_ = newValue.text.substr(inputCallBackStrSize_);
-                if (onError_) {
-                    onError_(inputCallBackStr_);
-                }
-            }
-        }
-    } else {
-        controller_->SetValue(newValue, needFireChangeEvent);
-    }
+    controller_->SetValue(newValue, needFireChangeEvent);
     UpdateAccessibilityAttr();
 }
 
@@ -1090,6 +1073,72 @@ void RenderTextField::UpdateFormatters()
     SetEditingValue(std::move(temp));
 }
 
+std::wstring WstringSearch(std::wstring wideText, const std::wregex& regex)
+{
+    std::wstring result;
+    std::wsmatch matchResults;
+    while (std::regex_search(wideText, matchResults, regex)) {
+        for (auto&& mr : matchResults) {
+            result.append(mr);
+        }
+        wideText = matchResults.suffix();
+    }
+    return result;
+}
+
+void RenderTextField::EditingValueFilter(TextEditingValue& result)
+{
+    for (const auto& formatter : textInputFormatters_) {
+        if (formatter) {
+            formatter->Format(GetEditingValue(), result);
+        }
+    }
+
+    if (inputFilter_.empty() || result.text.empty()) {
+        return;
+    }
+
+    std::wregex filterRegex(StringUtils::ToWstring(inputFilter_));
+
+    auto wideText = result.GetWideText();
+    auto wideTextError = std::regex_replace(wideText, filterRegex, L"");
+    if (!wideTextError.empty() && onError_) {
+        onError_(StringUtils::ToString(wideTextError));
+    }
+
+    auto start = result.selection.GetStart();
+    auto end = result.selection.GetEnd();
+    if ((start <= 0) && (end <= 0)) {
+        result.text = StringUtils::ToString(WstringSearch(wideText, filterRegex));
+    } else {
+        std::wstring wstrBeforeSelection;
+        if ((start > 0) && (static_cast<size_t>(start) <= wideText.length())) {
+            wstrBeforeSelection = wideText.substr(0, start);
+            wstrBeforeSelection = WstringSearch(wstrBeforeSelection, filterRegex);
+        }
+        std::wstring wstrInSelection;
+        if (start < end) {
+            wstrInSelection = wideText.substr(start, end - start);
+            wstrInSelection = WstringSearch(wstrInSelection, filterRegex);
+        }
+        std::wstring wstrAfterSelection;
+        size_t lenLeft = wideText.length() - static_cast<size_t>(end);
+        if (lenLeft > 0) {
+            wstrAfterSelection = wideText.substr(end, lenLeft);
+            wstrAfterSelection = WstringSearch(wstrAfterSelection, filterRegex);
+        }
+
+        result.text = StringUtils::ToString(wstrBeforeSelection + wstrInSelection + wstrAfterSelection);
+        if (result.selection.baseOffset > result.selection.extentOffset) {
+            result.selection.Update(static_cast<int32_t>(wstrBeforeSelection.length() + wstrInSelection.length()),
+                                    static_cast<int32_t>(wstrBeforeSelection.length()));
+        } else {
+            result.selection.Update(static_cast<int32_t>(wstrBeforeSelection.length()),
+                                    static_cast<int32_t>(wstrBeforeSelection.length() + wstrInSelection.length()));
+        }
+    }
+}
+
 void RenderTextField::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
 {
     if (!value) {
@@ -1099,38 +1148,35 @@ void RenderTextField::UpdateEditingValue(const std::shared_ptr<TextEditingValue>
 
     lastKnownRemoteEditingValue_ = value;
     lastKnownRemoteEditingValue_->hint = placeholder_;
-    TextEditingValue temp = *lastKnownRemoteEditingValue_;
+    TextEditingValue valueNeedToUpdate = *value;
     if (cursorPositionType_ != CursorPositionType::END ||
-        (temp.selection.baseOffset == temp.selection.extentOffset &&
-            temp.selection.baseOffset != static_cast<int32_t>(temp.GetWideText().length()))) {
+        (valueNeedToUpdate.selection.baseOffset == valueNeedToUpdate.selection.extentOffset &&
+            valueNeedToUpdate.selection.baseOffset != static_cast<int32_t>(valueNeedToUpdate.GetWideText().length()))) {
         cursorPositionType_ = CursorPositionType::NORMAL;
         isValueFromRemote_ = true;
     }
-    ChangeCounterStyle(temp);
-    for (const auto& formatter : textInputFormatters_) {
-        // GetEditingValue() is the old value, and lastKnownRemoteEditingValue_ is the newer.
-        if (formatter) {
-            formatter->Format(GetEditingValue(), temp);
-        }
-    }
+    auto valueBeforeUpdate = GetEditingValue();
 
-    if (obscure_ && (temp.text.length() == GetEditingValue().text.length() + 1)) {
+    ChangeCounterStyle(valueNeedToUpdate);
+
+    EditingValueFilter(valueNeedToUpdate);
+
+    if (obscure_ && (valueNeedToUpdate.text.length() == valueBeforeUpdate.text.length() + 1)) {
         // Reset pending.
         obscureTickPendings_ = OBSCURE_SHOW_TICKS;
     }
 
-    if (temp.text != GetEditingValue().text && needFireChangeEvent) {
+    if (valueNeedToUpdate.text != valueBeforeUpdate.text && needFireChangeEvent) {
         needNotifyChangeEvent_ = true;
     }
 
-    auto editingText = GetEditingValue().text;
-    SetEditingValue(std::move(temp), needFireChangeEvent);
+    SetEditingValue(std::move(valueNeedToUpdate), needFireChangeEvent);
     UpdateRemoteEditingIfNeeded(needFireChangeEvent);
 
     MarkNeedLayout();
 
     // If input or delete text when overlay is showing, pop overlay from stack.
-    if (lastKnownRemoteEditingValue_ && (lastKnownRemoteEditingValue_->text != editingText)) {
+    if (valueNeedToUpdate.text != valueBeforeUpdate.text) {
         if (onValueChange_) {
             onValueChange_();
         }
@@ -1485,11 +1531,7 @@ void RenderTextField::OnValueChanged(bool needFireChangeEvent, bool needFireSele
 {
     isValueFromFront_ = !needFireChangeEvent;
     TextEditingValue temp = GetEditingValue();
-    for (const auto& formatter : textInputFormatters_) {
-        if (formatter) {
-            formatter->Format(GetEditingValue(), temp);
-        }
-    }
+    EditingValueFilter(temp);
     if (cursorPositionType_ == CursorPositionType::NORMAL && temp.selection.GetStart() == temp.selection.GetEnd()) {
         temp.selection.Update(AdjustCursorAndSelection(temp.selection.GetEnd()));
     }
