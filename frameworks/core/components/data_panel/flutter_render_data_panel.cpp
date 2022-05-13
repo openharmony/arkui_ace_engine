@@ -34,7 +34,6 @@ constexpr int32_t CIRCLE_NUMBER = 50;
 constexpr float SHADOW_BLUR_RADIUS = 5.0f;
 constexpr double DIAMETER_TO_THICKNESS_RATIO = 0.12;
 constexpr double FIXED_WIDTH = 1.0;
-constexpr int32_t SEGMENT_MAX_NUMBER = 9;
 
 } // namespace
 
@@ -490,12 +489,8 @@ void FlutterRenderProgressDataPanel::PaintRingProgress(RenderContext& context, c
 }
 
 void FlutterRenderPercentageDataPanel::PaintBackground(
-    RenderContext& context, const Offset& leftTop, double totalWidth, double height)
+    const ScopedCanvas& canvas, const Offset& leftTop, double totalWidth, double height)
 {
-    auto canvas = ScopedCanvas::Create(context);
-    if (!canvas) {
-        return;
-    }
     SkPaint backgroundPaint;
     SkRRect rRect;
     rRect.setRectXY(SkRect::MakeWH(totalWidth, height), height, height);
@@ -509,12 +504,8 @@ void FlutterRenderPercentageDataPanel::PaintBackground(
 }
 
 void FlutterRenderPercentageDataPanel::PaintSpace(
-    RenderContext& context, const Offset& leftTop, double spaceWidth, double xSpace, double height)
+    const ScopedCanvas& canvas, const Offset& leftTop, double spaceWidth, double xSpace, double height)
 {
-    auto canvas = ScopedCanvas::Create(context);
-    if (!canvas) {
-        return;
-    }
     SkPaint segmentPaint;
     SkRect rect = SkRect::MakeXYWH(xSpace, leftTop.GetY(), spaceWidth, height);
     segmentPaint.setColor(Color::WHITE.GetValue());
@@ -523,32 +514,11 @@ void FlutterRenderPercentageDataPanel::PaintSpace(
     canvas->canvas()->drawRect(rect, segmentPaint);
 }
 
-void FlutterRenderPercentageDataPanel::PaintColorSegment(RenderContext& context, const Offset& leftTop,
-    double segmentValue, double xSegment, double height, const Color segmentStartColor, const Color segmentEndColor,
-    bool isFull, bool isStart)
+void FlutterRenderPercentageDataPanel::PaintColorSegment(const ScopedCanvas& canvas, const Offset& leftTop,
+    double segmentValue, double xSegment, double height, const Color& segmentStartColor, const Color& segmentEndColor)
 {
-    auto canvas = ScopedCanvas::Create(context);
-    if (!canvas) {
-        return;
-    }
     SkPaint segmentPaint;
-    SkRect rect;
-    SkRRect rRect;
-    if (isStart && !isFull) {
-        rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue, height + leftTop.GetY());
-        rRect.setRectXY(SkRect::MakeWH(segmentValue + height / 2, height), height, height);
-        rRect.offset(xSegment, leftTop.GetY());
-    } else if (isFull && !isStart) {
-        rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue + xSegment, height + leftTop.GetY());
-        rRect.setRectXY(SkRect::MakeWH(segmentValue + height / 2, height), height, height);
-        rRect.offset(xSegment - height / 2, leftTop.GetY());
-    } else if (isStart && isFull) {
-        rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue + xSegment, height + leftTop.GetY());
-        rRect.setRectXY(SkRect::MakeWH(segmentValue, height), height, height);
-        rRect.offset(leftTop.GetX(), leftTop.GetY());
-    } else if (!isStart && !isFull) {
-        rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue, height);
-    }
+    SkRect rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue, height);
     SkPoint segmentStartPoint;
     segmentStartPoint.set(rect.left(), rect.top());
     SkPoint segmentEndPoint;
@@ -559,9 +529,6 @@ void FlutterRenderPercentageDataPanel::PaintColorSegment(RenderContext& context,
     segmentPaint.setShader(SkGradientShader::MakeLinear(segmentPoint, segmentColor, pos, 2, SkTileMode::kClamp));
     segmentPaint.setStyle(SkPaint::kFill_Style);
     segmentPaint.setAntiAlias(true);
-    if (isStart || isFull) {
-        canvas->canvas()->clipRRect(rRect, true);
-    }
     canvas->canvas()->drawRect(rect, segmentPaint);
 }
 
@@ -571,6 +538,10 @@ void FlutterRenderPercentageDataPanel::PaintLinearProgress(RenderContext& contex
     auto segment = GetSegments();
     auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
     auto segmentWidthSum = 0.0;
+    auto canvas = ScopedCanvas::Create(context);
+    if (!canvas) {
+        return;
+    }
     for (uint32_t i = 0; i < segment.size(); i++) {
         segmentWidthSum += segment[i].GetValue();
     }
@@ -591,39 +562,19 @@ void FlutterRenderPercentageDataPanel::PaintLinearProgress(RenderContext& contex
     }
     auto height = GetLayoutSize().Height();
     auto widthSegment = offset.GetX();
-    bool isStart = true;
-    bool isFull = false;
-    auto valueSum = 0.0;
-    PaintBackground(context, offset, totalWidth, height);
+    PaintBackground(canvas, offset, totalWidth, height);
     for (uint32_t i = 0; i < segment.size(); i++) {
-        if (i == 0 && NearEqual(segment[0].GetValue(), 0.0)) {
-            for (uint32_t j = 0; j < segment.size(); j++) {
-                if (!NearEqual(segment[j].GetValue(), 0.0) && i == 0) {
-                    i = j;
-                }
-            }
-        }
         auto segmentWidth = segment[i].GetValue();
         if (NearEqual(segmentWidth, 0.0)) {
             continue;
         }
-        valueSum += segmentWidth;
-        if (valueSum == GetMaxValue()) {
-            isFull = true;
-        } else {
-            isFull = false;
-        }
         auto segmentStartColor = segment[i].GetStartColor();
         auto segmentEndColor = segment[i].GetEndColor();
-        PaintColorSegment(context, offset, segmentWidth * scaleMaxValue, widthSegment, height, segmentStartColor,
-            segmentEndColor, isFull, isStart);
+        PaintColorSegment(
+            canvas, offset, segmentWidth * scaleMaxValue, widthSegment, height, segmentStartColor, segmentEndColor);
         widthSegment += segment[i].GetValue() * scaleMaxValue;
-        if (isFull && segment.size() == SEGMENT_MAX_NUMBER) {
-            return;
-        }
-        PaintSpace(context, offset, spaceWidth, widthSegment, height);
+        PaintSpace(canvas, offset, spaceWidth, widthSegment, height);
         widthSegment += spaceWidth;
-        isStart = false;
     }
 }
 
