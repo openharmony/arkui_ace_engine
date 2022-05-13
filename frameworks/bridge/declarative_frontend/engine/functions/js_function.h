@@ -35,8 +35,7 @@ public:
     ~JsFunction() override;
     void Execute();
     void Execute(const std::vector<std::string>& keys, const std::string& param);
-    void ExecuteNew(const std::vector<std::string>& keys, const std::string& param,
-        RefPtr<JSXComponentController>& jsXComponentController);
+    void ExecuteNew(const std::vector<std::string>& keys, const std::string& param);
     JSRef<JSVal> ExecuteJS(int argc = 0, JSRef<JSVal>* argv = nullptr);
 
 protected:

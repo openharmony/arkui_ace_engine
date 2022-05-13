@@ -559,6 +559,7 @@ void QJSDeclarativeEngine::FireExternalEvent(
 #ifdef XCOMPONENT_SUPPORTED
     if (isDestroy) {
         XComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
+        XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(componentId);
         XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(componentId);
         return;
     }
@@ -609,8 +610,15 @@ void QJSDeclarativeEngine::FireExternalEvent(
         OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_));
 
     JSRef<JSObject> obj = JSRef<JSObject>::Make(renderContext);
-    auto getJSValCallback = [obj](JSRef<JSVal>& jsVal) {
+    RefPtr<JSXComponentController> controller = OHOS::Ace::Framework::XComponentClient::GetInstance().
+        GetControllerFromJSXComponentControllersMap(componentId);
+    auto weakController = AceType::WeakClaim(AceType::RawPtr(controller));
+    auto getJSValCallback = [obj, weakController](JSRef<JSVal>& jsVal) {
         jsVal = obj;
+        auto jsXComponentController = weakController.Upgrade();
+        if (jsXComponentController) {
+            jsXComponentController->SetXComponentContext(obj);
+        }
         return true;
     };
     XComponentClient::GetInstance().RegisterJSValCallback(getJSValCallback);
