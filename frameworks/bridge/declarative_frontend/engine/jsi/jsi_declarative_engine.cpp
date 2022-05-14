@@ -1316,7 +1316,7 @@ std::string JsiDeclarativeEngine::GetStacktraceMessage()
     arkNativeEngine->ResumeVM();
     if (!getStackSuccess) {
         LOGE("GetStacktraceMessage arkNativeEngine get stack failed");
-        return "";
+        return "JS stacktrace is empty";
     }
 
     auto runningPage = engineInstance_ ? engineInstance_->GetRunningPage() : nullptr;
