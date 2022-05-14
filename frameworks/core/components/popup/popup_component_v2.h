@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_POPUP_POPUP_COMPONENT_V2_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_POPUP_POPUP_COMPONENT_V2_H
 
+#include "core/components/box/box_component.h"
 #include "core/components/popup/popup_component.h"
 #include "core/components/popup/popup_theme.h"
 
@@ -117,6 +118,7 @@ private:
     const RefPtr<Component> CreateButtons();
     const RefPtr<Component> CreateButton(const ButtonProperties& buttonProperties);
     const RefPtr<Component> SetPadding(const RefPtr<Component>& component, const Edge& edge);
+    const RefPtr<BoxComponent> CreateBox(const RefPtr<PopupTheme>& popupTheme);
 
     std::string message_;
     bool hasInitialization_ = false;

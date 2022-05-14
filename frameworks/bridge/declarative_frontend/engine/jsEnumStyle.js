@@ -690,6 +690,10 @@ var Placement;
   Placement[Placement["TopRight"] = 5] = "TopRight";
   Placement[Placement["BottomLeft"] = 6] = "BottomLeft";
   Placement[Placement["BottomRight"] = 7] = "BottomRight";
+  Placement[Placement["LeftTop"] = 8] = "LeftTop";
+  Placement[Placement["LeftBottom"] = 9] = "LeftBottom";
+  Placement[Placement["RightTop"] = 10] = "RightTop";
+  Placement[Placement["RightBottom"] = 11] = "RightBottom";
 }) (Placement || (Placement = {}));
 
 var DialogStatus;
