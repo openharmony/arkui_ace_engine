@@ -1026,7 +1026,6 @@ void RosenRenderBox::SyncDecorationToRSNode()
         return;
     }
     dipScale_ = context->GetDipScale();
-    float shadowRadius = 0;
     Border border;
     Rosen::Vector4f cornerRadius;
     std::shared_ptr<Rosen::RSFilter> backFilter = nullptr;
@@ -1043,13 +1042,7 @@ void RosenRenderBox::SyncDecorationToRSNode()
                 backDecoration_->GetBorder().BottomLeftRadius().GetX().ConvertToPx(dipScale_)
             );
         }
-        if (!backDecoration_->GetShadows().empty()) {
-            shadowRadius = backDecoration_->GetShadows().front().GetBlurRadius();
-            shadowRadius = RosenDecorationPainter::ConvertRadiusToSigma(shadowRadius);
-            rsNode->SetShadowColor(backDecoration_->GetShadows().front().GetColor().GetValue());
-            rsNode->SetShadowOffsetX(backDecoration_->GetShadows().front().GetOffset().GetX());
-            rsNode->SetShadowOffsetY(backDecoration_->GetShadows().front().GetOffset().GetY());
-        }
+        RosenDecorationPainter::PaintBoxShadows(backDecoration_->GetShadows(), rsNode);
         if (backDecoration_->GetBlurRadius().IsValid()) {
             float radius = backDecoration_->GetBlurRadius().ConvertToPx(dipScale_);
             float backblurRadius = RosenDecorationPainter::ConvertRadiusToSigma(radius);
@@ -1080,7 +1073,6 @@ void RosenRenderBox::SyncDecorationToRSNode()
     rsNode->SetForegroundColor(frontDecoration_ ? frontDecoration_->GetBackgroundColor().GetValue() : 0);
     rsNode->SetBackgroundFilter(backFilter);
     rsNode->SetFilter(filter);
-    rsNode->SetShadowRadius(shadowRadius);
 }
 
 void RosenRenderBox::OnAttachContext()
