@@ -26,7 +26,7 @@ template("ace_osal_ohos_source_set") {
         "hitrace_native:hitrace_meter",
         "hiviewdfx_hilog_native:libhilog",
         "init:libbegetutil",
-        "startup_l2:syspara_watchagent",
+        "init:libbeget_proxy",
       ]
       configs = [ "$ace_root:ace_config" ]
     } else {
