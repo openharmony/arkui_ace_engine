@@ -70,6 +70,11 @@ public:
         delegate_ = delegate;
     }
 
+    RefPtr<WebDelegate> GetDelegate()
+    {
+        return delegate_;
+    }
+
 protected:
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebComponent> web_;

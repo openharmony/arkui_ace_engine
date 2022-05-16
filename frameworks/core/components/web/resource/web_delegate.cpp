@@ -1979,6 +1979,15 @@ void WebDelegate::HandleTouchCancel()
         nweb_->OnTouchCancel();
     }
 }
+
+bool WebDelegate::OnKeyEvent(int32_t keyCode, int32_t keyAction)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        return nweb_->SendKeyEvent(keyCode, keyAction);
+    }
+    return false;
+}
 #endif
 
 std::string WebDelegate::GetUrlStringParam(const std::string& param, const std::string& name) const
