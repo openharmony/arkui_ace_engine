@@ -95,8 +95,8 @@ ohos_unittest("ThemeManagerTest") {
     deps += [ "$ace_root/frameworks/base:ace_base_ohos" ]
     external_deps = [
       "hilog:libhilog",
-      "resmgr:resourcemanager",
       "init_lite:libbegetutil",
+      "resmgr:resourcemanager",
     ]
   } else {
     subsystem_name = "arkui"

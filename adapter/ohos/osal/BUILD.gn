@@ -25,8 +25,8 @@ template("ace_osal_ohos_source_set") {
       external_deps = [
         "hitrace_native:hitrace_meter",
         "hiviewdfx_hilog_native:libhilog",
-        "init:libbegetutil",
         "init:libbeget_proxy",
+        "init:libbegetutil",
       ]
       configs = [ "$ace_root:ace_config" ]
     } else {
