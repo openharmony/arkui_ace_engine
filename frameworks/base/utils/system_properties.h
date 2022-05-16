@@ -251,7 +251,9 @@ public:
 
     static int GetArkProperties();
 
-    static std::string GetAsmInterOption();
+    static bool GetAsmInterpreterEnabled();
+
+    static std::string GetAsmOpcodeDisableRange();
 
     static bool IsScoringEnabled(const std::string& name);
 
