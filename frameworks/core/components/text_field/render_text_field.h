@@ -122,6 +122,7 @@ public:
     void StartTwinkling();
     void StopTwinkling();
     void EditingValueFilter(TextEditingValue& result);
+    void PopTextOverlay();
 
     void SetInputFilter(const std::string& inputFilter)
     {
@@ -551,7 +552,6 @@ private:
     void OnOverlayFocusChange(bool isFocus, bool needCloseKeyboard);
     void FireSelectChangeIfNeeded(const TextEditingValue& newValue, bool needFireSelectChangeEvent) const;
     int32_t GetInstanceId() const;
-    void PopTextOverlay();
 
     /**
      * @brief Update remote editing value only if text or selection is changed.
