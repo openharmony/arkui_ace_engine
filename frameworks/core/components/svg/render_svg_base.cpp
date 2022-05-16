@@ -849,6 +849,16 @@ const Matrix4 RenderSvgBase::GetTransformMatrix4()
     return RenderTransform::GetTransformByOffset(transformInfo_->matrix4, GetTransformOffset());
 }
 
+const Matrix4 RenderSvgBase::GetTransformMatrix4Raw()
+{
+    transformInfo_ = SvgTransform::CreateTransformInfo(transform_);
+    if (transformInfo_->hasRotateCenter) {
+        transformInfo_->matrix4 = RenderTransform::GetTransformByOffset(
+            transformInfo_->matrix4, transformInfo_->rotateCenter);
+    }
+    return transformInfo_->matrix4;
+}
+
 const Matrix4 RenderSvgBase::UpdateTransformMatrix4()
 {
     if (transformInfo_ != std::nullopt) {

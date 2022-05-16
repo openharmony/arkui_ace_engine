@@ -187,11 +187,8 @@ void RosenRenderImage::ImageObjReady(const RefPtr<ImageObject>& imageObj)
         if (useSkiaSvg_) {
             skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
         } else {
-            if (directPaint_) {
-                loadSvgOnPaint_ = true;
-            } else {
-                loadSvgAfterLayout_ = true;
-            }
+            CacheSvgImageObject();
+            SyncCreateSvgNodes(false);
         }
         imageSizeForEvent_ = Measure();
         UpdateLoadSuccessState();
@@ -288,16 +285,28 @@ void RosenRenderImage::Update(const RefPtr<Component>& component)
     // curImageSrc represents the picture currently shown and imageSrc represents next picture to be shown
     imageLoadingStatus_ = (sourceInfo_ != curSourceInfo_) ? ImageLoadingStatus::UPDATING : imageLoadingStatus_;
     UpdateRenderAltImage(component);
-    if (proceedPreviousLoading_ && !sourceInfo_.IsSvg() && sourceInfo_.GetSrcType() != SrcType::MEMORY) {
-        LOGI("Proceed previous loading, imageSrc is %{private}s, image loading status: %{public}d",
+    if (proceedPreviousLoading_ && (sourceInfo_.IsSvg() || sourceInfo_.GetSrcType() != SrcType::MEMORY)) {
+        LOGI("Proceed previous loading, imageSrc is %{public}s, image loading status: %{public}d",
             sourceInfo_.ToString().c_str(), imageLoadingStatus_);
         return;
     }
+
     if (sourceInfo_ != curSourceInfo_ && curSourceInfo_.IsValid()) {
         rawImageSize_ = Size();
     } else if (curSourceInfo_.IsValid()) {
         rawImageSize_ = formerRawImageSize_;
     }
+
+    if (sourceInfo_.IsSvg()) {
+        auto imageObject = QueryCacheSvgImageObject();
+        if (imageObject != nullptr) {
+            imageObj_ = imageObject;
+            SyncCreateSvgNodes(true);
+            LOGI("find svg object in object map, image objectdirect:%{public}d", directPaint_);
+            return;
+        }
+    }
+
     FetchImageObject();
 }
 
@@ -472,25 +481,12 @@ void RosenRenderImage::ProcessPixmapForPaint()
 
 void RosenRenderImage::PerformLayoutSvgImage()
 {
-    if (loadSvgAfterLayout_) {
-        if (!GetLayoutSize().IsEmpty()) {
-            // if layout is empty, wait for next layout
-            loadSvgAfterLayout_ = false;
-        }
-
-        auto context = context_.Upgrade();
-        if (!context) {
-            return;
-        }
-        context->GetTaskExecutor()->PostTask(
-            [weak = WeakClaim(this)] {
-                auto image = weak.Upgrade();
-                if (image) {
-                    image->PerformLayoutSvgCustom();
-                    image->MarkNeedRender();
-                }
-            },
-            TaskExecutor::TaskType::UI);
+    if (svgRenderTree_.root) {
+        SvgRadius svgRadius = { topLeftRadius_, topRightRadius_, bottomLeftRadius_, bottomRightRadius_ };
+        svgRenderTree_.containerSize = GetLayoutSize();
+        SvgDom svgDom(context_);
+        svgDom.SetSvgRenderTree(svgRenderTree_);
+        svgDom.UpdateLayout(imageFit_, svgRadius, !directPaint_);
     }
 }
 
@@ -501,26 +497,89 @@ void RosenRenderImage::LayoutImageObject()
     }
 }
 
-void RosenRenderImage::PerformLayoutSvgCustom()
+void RosenRenderImage::SyncCreateSvgNodes(bool isReady)
 {
-    if (imageObj_ && imageObj_->IsSvg()) {
-        auto currentSvgDom = AceType::DynamicCast<SvgImageObject>(imageObj_)->GetSvgDom();
-        if (currentSvgDom) {
-            svgDom_ = currentSvgDom;
-        } else {
-            LOGD("svg dom is nullptr");
-        }
+    auto currentSvgDom = AceType::DynamicCast<SvgImageObject>(imageObj_)->GetSvgDom();
+    if (currentSvgDom == nullptr) {
+        return;
     }
-    if (svgDom_) {
-        svgDom_->SetFinishEvent(svgAnimatorFinishEvent_);
-        svgDom_->SetContainerSize(GetLayoutSize());
-        SvgRadius svgRadius = { topLeftRadius_, topRightRadius_, bottomLeftRadius_, bottomRightRadius_ };
-        svgDom_->CreateRenderNode(imageFit_, svgRadius, !directPaint_);
-        if (svgDom_->GetRootRenderNode() && !directPaint_) {
-            ClearChildren();
-            AddChild(svgDom_->GetRootRenderNode());
-        }
+    svgDom_ = currentSvgDom;
+
+    if (!currentSvgDom->HasAnimate()) {
+        directPaint_ = true;
+        LOGD("svg has not animate tag, can use direct paint.");
     }
+    if (directPaint_ == true && isReady) {
+        // svg imageObject from map buffer, use as directly
+        LOGD("svg is ready, skip create svg nodes.");
+        return;
+    }
+    CreateSvgNodes();
+}
+
+void RosenRenderImage::CreateSvgNodes()
+{
+    if (!svgDom_) {
+        LOGE("svg dom is nullptr");
+        return;
+    }
+    svgDom_->SetFinishEvent(svgAnimatorFinishEvent_);
+    svgDom_->SetContainerSize(GetLayoutSize());
+    SvgRadius svgRadius = { topLeftRadius_, topRightRadius_, bottomLeftRadius_, bottomRightRadius_ };
+    auto svgRenderTree = svgDom_->CreateRenderTree(imageFit_, svgRadius, !directPaint_);
+    if (svgRenderTree.root == nullptr) {
+        svgDom_ = nullptr;
+        LOGE("svgRenderTree create failed");
+        return;
+    }
+    if (!directPaint_) {
+        RebuildSvgRenderTree(svgRenderTree, svgDom_);
+    }
+}
+
+void RosenRenderImage::RebuildSvgRenderTree(const SvgRenderTree& svgRenderTree, const RefPtr<SvgDom>& svgDom)
+{
+    svgRenderTree_ = svgRenderTree;
+    ClearChildren();
+    AddChild(svgRenderTree_.root);
+    MarkNeedRender();
+}
+
+std::string RosenRenderImage::GetSvgImageKey()
+{
+    auto key = sourceInfo_.GetCacheKey();
+    if (sourceInfo_.GetFillColor().has_value()) {
+        key += sourceInfo_.GetFillColor().value().ColorToString();
+    }
+    return key;
+}
+
+void RosenRenderImage::CacheSvgImageObject()
+{
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        LOGE("pipeline context is null!");
+        return;
+    }
+    auto imageCache = context->GetImageCache();
+    if (imageCache) {
+        imageCache->CacheImgObj(GetSvgImageKey(), imageObj_);
+    }
+}
+
+RefPtr<ImageObject> RosenRenderImage::QueryCacheSvgImageObject()
+{
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        LOGE("pipeline context is null!");
+        return nullptr;
+    }
+    auto imageCache = context->GetImageCache();
+    if (imageCache == nullptr) {
+        LOGE("image cached is null!");
+        return nullptr;
+    }
+    return imageCache->GetCacheImgObj(GetSvgImageKey());
 }
 
 void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
@@ -542,6 +601,7 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint canvas is null");
         return;
     }
+
     SkAutoCanvasRestore acr(canvas, true);
     if (!NearZero(rotate_)) {
         Offset center =
@@ -585,15 +645,9 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     if (sourceInfo_.IsSvg()) {
-        if (loadSvgOnPaint_) {
-            loadSvgOnPaint_ = false;
-            // only loud svg render tree without box and will not bind to image node as child.
-            PerformLayoutSvgCustom();
-        }
-
         if (svgDom_) {
             canvas->translate(static_cast<float>(offset.GetX()), static_cast<float>(offset.GetY()));
-            svgDom_->PaintDirectly(context, offset);
+            svgDom_->PaintDirectly(context, offset, imageFit_, GetLayoutSize());
             return;
         }
         DrawSVGImage(offset, canvas);
@@ -1074,8 +1128,8 @@ void RosenRenderImage::DrawSVGImage(const Offset& offset, SkCanvas* canvas)
 
 void RosenRenderImage::DrawSVGImageCustom(RenderContext& context, const Offset& offset)
 {
-    if (svgDom_ && svgDom_->GetRootRenderNode()) {
-        PaintChild(svgDom_->GetRootRenderNode(), context, offset);
+    if (svgRenderTree_.root) {
+        PaintChild(svgRenderTree_.root, context, offset);
     }
 }
 
@@ -1162,6 +1216,7 @@ void RosenRenderImage::ClearRenderObject()
     imageObj_ = nullptr;
     skiaDom_ = nullptr;
     svgDom_ = nullptr;
+    svgRenderTree_.ClearRenderObject();
 }
 
 bool RosenRenderImage::IsSourceWideGamut() const

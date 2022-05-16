@@ -43,6 +43,23 @@ struct SvgRadius {
     }
 };
 
+struct SvgRenderTree {
+    RefPtr<RenderNode> root;
+    RefPtr<RenderNode> clipBox;
+    RefPtr<RenderNode> transform;
+    RefPtr<RenderNode> svgRoot;
+    Size svgSize;
+    Size containerSize;
+    bool svgAnimate;
+
+    void ClearRenderObject()
+    {
+        root = nullptr;
+        clipBox = nullptr;
+        transform = nullptr;
+    }
+};
+
 class SvgDom : public AceType {
     DECLARE_ACE_TYPE(SvgDom, AceType);
 
@@ -53,7 +70,14 @@ public:
         const std::optional<Color>& svgThemeColor);
     bool ParseSvg(SkStream& svgStream);
     void CreateRenderNode(ImageFit imageFit, const SvgRadius& svgRadius, bool useBox = true);
+    void UpdateLayout(ImageFit imageFit, const SvgRadius& svgRadius, bool useBox = true);
     void PaintDirectly(RenderContext& context, const Offset& offset);
+#ifdef ENABLE_ROSEN_BACKEND
+    void PaintDirectly(RenderContext& context, const Offset& offset, ImageFit imageFit, Size layout);
+#endif
+    SvgRenderTree GetSvgRenderTree() const;
+    SvgRenderTree CreateRenderTree(ImageFit imageFit, const SvgRadius& svgRadius, bool useBox = true);
+    void SetSvgRenderTree(const SvgRenderTree& svgRenderTree);
 
     void SetContainerSize(const Size& size)
     {
@@ -80,9 +104,10 @@ public:
         finishEvent_ = finishEvent;
     }
 
-    void SetRootOpacity(int32_t alpha);
-    void SetRootRotate(double rotate);
-    void SetRadius(const SvgRadius& svgRadius);
+    bool HasAnimate() const
+    {
+        return svgAnimate_;
+    }
 
 private:
     void InitAnimatorGroup(const RefPtr<RenderNode>& node);
@@ -114,6 +139,7 @@ private:
     EventMarker finishEvent_;
     std::optional<Color> fillColor_;
     PushAttr attrCallback_;
+    bool svgAnimate_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -46,11 +46,12 @@ RefPtr<RenderNode> SvgSvg::CreateRender(
     const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox)
 {
     component_->Inherit(parent);
-    auto href = component_->GetDeclaration()->GetFillState().GetHref();
+    auto& declaration = component_->GetDeclaration();
+    auto href = declaration->GetFillState().GetHref();
     if (!href.empty()) {
         auto gradient = GetGradient(href);
         if (gradient) {
-            component_->GetDeclaration()->SetGradient(gradient.value());
+            declaration->SetGradient(gradient.value());
         }
     }
     auto renderNode = AceType::DynamicCast<RenderSvg>(component_->CreateRenderNode());
@@ -68,7 +69,7 @@ RefPtr<RenderNode> SvgSvg::CreateRender(
 
     renderNode->Update(component_);
     for (const auto& child : children_) {
-        auto childRender = child->CreateRender(layoutParam, component_->GetDeclaration(), useBox);
+        auto childRender = child->CreateRender(layoutParam, declaration, useBox);
         if (childRender) {
             renderNode->AddChild(childRender, renderNode->GetChildren().size());
             child->Update(childRender);
@@ -76,11 +77,12 @@ RefPtr<RenderNode> SvgSvg::CreateRender(
     }
     renderNode->MarkIsFixSize(true);
     renderNode->Layout(layoutParam);
-    if (!useBox) {
+    if (!useBox || declaration->GetClipPathHref().empty()) {
+        LOGW("svg of svg tag skip box create");
         return renderNode;
     }
 
-    auto boxComponent = CreateBoxComponent(layoutParam, component_->GetDeclaration()->GetClipPathHref());
+    auto boxComponent = CreateBoxComponent(layoutParam, declaration->GetClipPathHref());
     boxComponent->SetWidth(layoutParam.GetMaxSize().Width());
     boxComponent->SetHeight(layoutParam.GetMaxSize().Height());
     boxComponent->SetOverflow(Overflow::FORCE_CLIP);

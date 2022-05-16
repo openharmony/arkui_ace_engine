@@ -110,19 +110,22 @@ private:
     void AddSvgChild();
     void CreateAnimatedPlayer(const RefPtr<ImageProvider>& provider, SkCodec* codecPtr, bool forceResize);
     bool VerifySkImageDataFromPixmap(const RefPtr<PixelMap>& pixmap) const;
-    void PerformLayoutSvgCustom();
+    void CreateSvgNodes();
+    void SyncCreateSvgNodes(bool isReady = false);
+    void RebuildSvgRenderTree(const SvgRenderTree& svgRenderTree, const RefPtr<SvgDom>& svgDom);
     void CancelBackgroundTasks();
     void CacheImageObject();
+    void CacheSvgImageObject();
+    RefPtr<ImageObject> QueryCacheSvgImageObject();
     void UpdatePixmap(const RefPtr<PixelMap>& pixmap);
     void UpdateSharedMemoryImage(const RefPtr<PipelineContext>& context);
     void ProcessPixmapForPaint();
+    std::string GetSvgImageKey();
     std::function<void()> GenerateThumbnailLoadTask();
 
     sk_sp<SkSVGDOM> skiaDom_;
     RefPtr<SvgDom> svgDom_;
     fml::RefPtr<flutter::CanvasImage> image_;
-    bool loadSvgAfterLayout_ = false;
-    bool loadSvgOnPaint_ = false; // only load svg trees without box and bind
     SkVector radii_[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
     Size formerRawImageSize_;
     bool imageDataNotReady_ = false;
@@ -134,6 +137,8 @@ private:
     OnPostBackgroundTask onPostBackgroundTask_;
     RefPtr<ImageObject> imageObj_;
     RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
+
+    SvgRenderTree svgRenderTree_;
 
     CancelableTask fetchImageObjTask_;
     bool backgroundTaskCancled_ = false;

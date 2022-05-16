@@ -42,10 +42,14 @@
 #include "frameworks/core/components/svg/render_svg_base.h"
 #include "frameworks/core/components/transform/transform_component.h"
 
+#ifdef ENABLE_ROSEN_BACKEND
+#include "frameworks/core/components/svg/rosen_render_svg.h"
+#include "frameworks/core/pipeline/base/rosen_render_context.h"
+#endif
+
 #include <queue>
 
 namespace OHOS::Ace {
-
 namespace {
 
 const char DOM_SVG_STYLE[] = "style";
@@ -81,6 +85,25 @@ static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
     { "svg", []() -> RefPtr<SvgNode> { return SvgSvg::Create(); } },
     { "use", []() -> RefPtr<SvgNode> { return SvgUse::Create(); } },
 };
+
+RefPtr<BoxComponent> CreateSvgClipBox(const Size& containerSize, const SvgRadius& svgRadius)
+{
+    auto clipBox = AceType::MakeRefPtr<BoxComponent>();
+    clipBox->SetWidth(containerSize.Width());
+    clipBox->SetHeight(containerSize.Height());
+    clipBox->SetOverflow(Overflow::FORCE_CLIP);
+    if (svgRadius.IsValid()) {
+        RefPtr<Decoration> decoration = AceType::MakeRefPtr<Decoration>();
+        Border border;
+        border.SetTopLeftRadius(svgRadius.topLeft);
+        border.SetTopRightRadius(svgRadius.topRight);
+        border.SetBottomLeftRadius(svgRadius.bottomLeft);
+        border.SetBottomRightRadius(svgRadius.bottomRight);
+        decoration->SetBorder(border);
+        clipBox->SetBackDecoration(decoration);
+    }
+    return clipBox;
+}
 
 SvgDom::SvgDom(const WeakPtr<PipelineContext>& context) : context_(context)
 {
@@ -172,6 +195,9 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
         if (childNode) {
             node->AppendChild(childNode);
         }
+    }
+    if (AceType::InstanceOf<SvgAnimation>(node)) {
+        svgAnimate_ = true;
     }
     return node;
 }
@@ -294,18 +320,62 @@ void SvgDom::PaintDirectly(RenderContext& context, const Offset& offset)
     }
 }
 
+#ifdef ENABLE_ROSEN_BACKEND
+void SvgDom::PaintDirectly(RenderContext& context, const Offset& offset, ImageFit imageFit, Size layout)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    auto svgRoot = AceType::DynamicCast<RosenRenderSvg>(svgRoot_.Upgrade());
+
+    if (!canvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    if (svgRoot == nullptr) {
+        LOGD("paint fail as svg root is null");
+        return;
+    }
+    double scaleX = 1.0;
+    double scaleY = 1.0;
+    double scaleViewBox = 1.0;
+    double tx = 0.0;
+    double ty = 0.0;
+    double half = 0.5;
+    if (!layout.IsEmpty()) {
+        containerSize_ = layout;
+    }
+    if (!containerSize_.IsEmpty() && (svgSize_.IsValid() && !svgSize_.IsInfinite())) {
+        ApplyImageFit(imageFit, scaleX, scaleY);
+    }
+    auto viewBox = svgRoot->GetViewBox();
+    if (viewBox.IsValid()) {
+        if (svgSize_.IsValid() && !svgSize_.IsInfinite()) {
+            scaleViewBox = std::min(svgSize_.Width() / viewBox.Width(), svgSize_.Height() / viewBox.Height());
+            tx = svgSize_.Width() * half - (viewBox.Width() * half + viewBox.Left()) * scaleViewBox;
+            ty = svgSize_.Height() * half - (viewBox.Height() * half + viewBox.Top()) * scaleViewBox;
+        } else if (!containerSize_.IsEmpty()) {
+            scaleViewBox =
+                std::min(containerSize_.Width() / viewBox.Width(), containerSize_.Height() / viewBox.Height());
+            tx = containerSize_.Width() * half - (viewBox.Width() * half + viewBox.Left()) * scaleViewBox;
+            ty = containerSize_.Height() * half - (viewBox.Height() * half + viewBox.Top()) * scaleViewBox;
+        } else {
+            LOGW("PaintDirectly containerSize and svgSize is null");
+        }
+    }
+    canvas->save();
+    canvas->scale(static_cast<float>(scaleX * scaleViewBox), static_cast<float>(scaleY * scaleViewBox));
+    canvas->translate(static_cast<float>(tx), static_cast<float>(ty));
+    svgRoot->PaintDirectly(context, offset);
+    canvas->restore();
+}
+#endif
+
 void SvgDom::CreateRenderNode(ImageFit imageFit, const SvgRadius& svgRadius, bool useBox)
 {
     auto svg = AceType::DynamicCast<SvgSvg>(root_);
     if (svg == nullptr) {
         return;
     }
-    Size size;
-    if (svgSize_.IsValid() && !svgSize_.IsInfinite()) {
-        size = svgSize_;
-    } else {
-        size = containerSize_;
-    }
+    Size size = (svgSize_.IsValid() && !svgSize_.IsInfinite()) ? svgSize_ : containerSize_;
     auto renderSvg = svg->CreateRender(LayoutParam(size, Size(0.0, 0.0)), nullptr, useBox);
     if (renderSvg) {
         InitAnimatorGroup(renderSvg);
@@ -323,20 +393,7 @@ void SvgDom::CreateRenderNode(ImageFit imageFit, const SvgRadius& svgRadius, boo
         svgRoot_ = renderSvg;
         transform_ = renderTransform;
 
-        auto clipBox = AceType::MakeRefPtr<BoxComponent>();
-        clipBox->SetWidth(containerSize_.Width());
-        clipBox->SetHeight(containerSize_.Height());
-        clipBox->SetOverflow(Overflow::FORCE_CLIP);
-        if (svgRadius.IsValid()) {
-            RefPtr<Decoration> decoration = AceType::MakeRefPtr<Decoration>();
-            Border border;
-            border.SetTopLeftRadius(svgRadius.topLeft);
-            border.SetTopRightRadius(svgRadius.topRight);
-            border.SetBottomLeftRadius(svgRadius.bottomLeft);
-            border.SetBottomRightRadius(svgRadius.bottomRight);
-            decoration->SetBorder(border);
-            clipBox->SetBackDecoration(decoration);
-        }
+        auto clipBox = CreateSvgClipBox(containerSize_, svgRadius);
         auto renderBox = clipBox->CreateRenderNode();
         renderBox->Attach(context_);
         SyncRSNode(renderBox);
@@ -357,43 +414,61 @@ void SvgDom::CreateRenderNode(ImageFit imageFit, const SvgRadius& svgRadius, boo
     }
 }
 
-void SvgDom::SetRootOpacity(int32_t alpha)
+void SvgDom::UpdateLayout(ImageFit imageFit, const SvgRadius& svgRadius, bool useBox)
 {
-    auto root = AceType::DynamicCast<FlutterRenderSvg>(svgRoot_.Upgrade());
-    if (root) {
-        root->SetRootOpacity(alpha);
+    if (renderNode_) {
+        auto transform = transform_.Upgrade();
+        if (transform) {
+            double scaleX = 1.0;
+            double scaleY = 1.0;
+            ApplyImageFit(imageFit, scaleX, scaleY);
+            auto transformComponent = AceType::MakeRefPtr<TransformComponent>();
+            transformComponent->Scale(scaleX, scaleY);
+            transform->Update(transformComponent);
+        }
+
+        auto renderClipBox = clipBox_.Upgrade();
+        if (renderClipBox) {
+            auto clipBox = CreateSvgClipBox(containerSize_, svgRadius);
+            renderClipBox->Update(clipBox);
+        }
+
+        auto boxComponent = AceType::MakeRefPtr<BoxComponent>();
+        boxComponent->SetWidth(containerSize_.Width());
+        boxComponent->SetHeight(containerSize_.Height());
+        renderNode_->Update(boxComponent);
+        renderNode_->Layout(LayoutParam(containerSize_, Size(0.0, 0.0)));
     }
 }
 
-void SvgDom::SetRootRotate(double rotate)
+SvgRenderTree SvgDom::GetSvgRenderTree() const
 {
-    auto root = AceType::DynamicCast<FlutterRenderSvg>(svgRoot_.Upgrade());
-    if (root) {
-        root->SetRootRotate(rotate);
-    }
+    return {
+        .root = renderNode_,
+        .clipBox = clipBox_.Upgrade(),
+        .transform = transform_.Upgrade(),
+        .svgRoot = svgRoot_.Upgrade(),
+        .svgSize = svgSize_,
+        .containerSize = containerSize_,
+        .svgAnimate = svgAnimate_
+    };
 }
 
-void SvgDom::SetRadius(const SvgRadius& svgRadius)
+SvgRenderTree SvgDom::CreateRenderTree(ImageFit imageFit, const SvgRadius& svgRadius, bool useBox)
 {
-    if (!svgRadius.IsValid()) {
-        return;
-    }
-    auto clipBox = AceType::DynamicCast<RenderBox>(clipBox_.Upgrade());
-    if (!clipBox) {
-        LOGW("clip box is nullptr");
-        return;
-    }
+    CreateRenderNode(imageFit, svgRadius, useBox);
+    return GetSvgRenderTree();
+}
 
-    Border border;
-    border.SetTopLeftRadius(svgRadius.topLeft);
-    border.SetTopRightRadius(svgRadius.topRight);
-    border.SetBottomLeftRadius(svgRadius.bottomLeft);
-    border.SetBottomRightRadius(svgRadius.bottomRight);
-    auto backDecoration = AceType::MakeRefPtr<Decoration>();
-    if (backDecoration) {
-        backDecoration->SetBorder(border);
-        clipBox->SetBackDecoration(backDecoration);
-    }
+void SvgDom::SetSvgRenderTree(const SvgRenderTree& svgRenderTree)
+{
+    renderNode_ = svgRenderTree.root;
+    clipBox_ = svgRenderTree.clipBox;
+    transform_ = svgRenderTree.transform;
+    svgRoot_ = svgRoot_.Upgrade();
+    svgSize_ = svgRenderTree.svgSize;
+    containerSize_ = svgRenderTree.containerSize;
+    svgAnimate_ = svgRenderTree.svgAnimate;
 }
 
 void SvgDom::ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY)
