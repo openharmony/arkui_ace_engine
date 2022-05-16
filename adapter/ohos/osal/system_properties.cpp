@@ -132,9 +132,14 @@ int SystemProperties::GetArkProperties()
     return system::GetIntParameter<int>("persist.ark.properties", -1);
 }
 
-std::string SystemProperties::GetAsmInterOption()
+bool SystemProperties::GetAsmInterpreterEnabled()
 {
-    return system::GetParameter("persist.ark.asminter", "");
+    return system::GetParameter("persist.ark.asminterpreter", "false") == "true";
+}
+
+std::string SystemProperties::GetAsmOpcodeDisableRange()
+{
+    return system::GetParameter("persist.ark.asmopcodedisablerange", "");
 }
 
 bool SystemProperties::IsScoringEnabled(const std::string& name)
