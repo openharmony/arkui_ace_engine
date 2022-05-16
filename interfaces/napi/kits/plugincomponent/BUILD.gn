@@ -21,7 +21,6 @@ ohos_shared_library("plugincomponent") {
     "$root_out_dir/arkui/framework",
     "//foundation/arkui",
     "//foundation/arkui/ace_engine/frameworks",
-    "//foundation/aafwk/standard/interfaces/innerkits/want/include",
     "//foundation/aafwk/standard/services/common/include",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager/include",
   ]
@@ -38,7 +37,6 @@ ohos_shared_library("plugincomponent") {
     "$ace_root/build:libace",
     "$ace_root/build:libace_engine_declarative",
     "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-    "//foundation/aafwk/standard/interfaces/innerkits/base:base",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//foundation/arkui/napi/:ace_napi",
     "//utils/native/base:utils",

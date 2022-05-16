@@ -26,9 +26,9 @@
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/plugin/plugin_component_template.h"
 #include "core/components/plugin/plugin_component_callback.h"
-#include "ohos/aafwk/content/want.h"
 #include "ui_service_interface.h"
 #include "ui_service_stub.h"
+#include "want.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT PluginComponentManager final {

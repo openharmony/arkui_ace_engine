@@ -15,19 +15,19 @@
 
 #include "js_plugin_want.h"
 
+#include "array_wrapper.h"
+#include "bool_wrapper.h"
+#include "byte_wrapper.h"
+#include "double_wrapper.h"
+#include "float_wrapper.h"
 #include "hilog_wrapper.h"
+#include "int_wrapper.h"
 #include "js_plugin_util.h"
-#include "ohos/aafwk/base/bool_wrapper.h"
-#include "ohos/aafwk/base/byte_wrapper.h"
-#include "ohos/aafwk/base/double_wrapper.h"
-#include "ohos/aafwk/base/float_wrapper.h"
-#include "ohos/aafwk/base/int_wrapper.h"
-#include "ohos/aafwk/base/long_wrapper.h"
-#include "ohos/aafwk/base/short_wrapper.h"
-#include "ohos/aafwk/base/string_wrapper.h"
-#include "ohos/aafwk/base/zchar_wrapper.h"
-#include "ohos/aafwk/content/array_wrapper.h"
-#include "ohos/aafwk/content/want_params_wrapper.h"
+#include "long_wrapper.h"
+#include "short_wrapper.h"
+#include "string_wrapper.h"
+#include "want_params_wrapper.h"
+#include "zchar_wrapper.h"
 
 namespace OHOS::Ace::Napi {
 /**

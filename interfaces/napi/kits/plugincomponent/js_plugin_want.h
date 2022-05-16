@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "js_plugin_data.h"
-#include "ohos/aafwk/content/want_params.h"
+#include "want_params.h"
 
 namespace OHOS::Ace::Napi {
 using namespace OHOS::AAFwk;

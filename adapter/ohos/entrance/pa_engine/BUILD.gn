@@ -27,11 +27,8 @@ template("pa_backend") {
       "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability/include",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/rdb/include",
       "//foundation/aafwk/standard/services/common/include",
-      "//foundation/aafwk/standard/interfaces/innerkits/uri/include",
-      "//foundation/aafwk/standard/interfaces/innerkits/want/include",
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/context",
       "//foundation/aafwk/standard/frameworks/kits/ability/native/include",
-      "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
       "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
       "//foundation/aafwk/standard/services/abilitymgr/include",
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common",
@@ -40,8 +37,6 @@ template("pa_backend") {
     deps = [
       "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
       "//foundation/aafwk/standard/frameworks/kits/appkit:appkit_native",
-      "//foundation/aafwk/standard/interfaces/innerkits/base:base",
-      "//foundation/aafwk/standard/interfaces/innerkits/uri:zuri",
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common:napi_common",
       "//foundation/arkui/napi:ace_napi",
       "//foundation/arkui/napi:ace_napi_quickjs",
@@ -51,6 +46,7 @@ template("pa_backend") {
     ]
     external_deps = [
       "ability_base:want",
+      "ability_base:zuri",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "eventhandler:libeventhandler",
