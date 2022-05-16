@@ -1217,7 +1217,9 @@ void JsiDeclarativeEngine::TimerCallJs(const std::string& callbackId) const
         return;
     }
     auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
-    func->Call(runtime, runtime->GetGlobal(), params, params.size());
+    if (func) {
+        func->Call(runtime, runtime->GetGlobal(), params, params.size());
+    }
 }
 
 void JsiDeclarativeEngine::DestroyPageInstance(int32_t pageId)
