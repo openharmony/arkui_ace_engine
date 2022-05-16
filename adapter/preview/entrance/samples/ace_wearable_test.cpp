@@ -40,15 +40,12 @@ int main(int argc, const char* argv[])
 #ifdef MAC_PLATFORM
     std::string assetPathJs = "/Volumes/SSD2T/daily-test/preview/js/default";
     std::string assetPathEts = "/Volumes/SSD2T/daily-test/preview/js/default_2.0";
-    std::string fontBasePath = "/Volumes/SSD2T/daily-test/preview/js/fonts";
 #else
     std::string assetPathJs = "D:\\Workspace\\preview\\js\\default";
     std::string assetPathEts = "D:\\Workspace\\preview\\js\\default_2.0";
-    std::string fontBasePath = "D:\\Workspace\\preview\\js\\fonts";
 #endif
     OHOS::Ace::Platform::AceRunArgs args = {
         .assetPath = assetPathJs,
-        .fontBasePath = fontBasePath,
         .deviceConfig.density = 2.0,
         .deviceConfig.deviceType = OHOS::Ace::DeviceType::WATCH,
         .windowTitle = "ACE wearable",

@@ -37,6 +37,7 @@ connect_server_support = false
 enable_rosen_backend = false
 enable_standard_input = false
 enable_system_clipboard = false
+ohos_standard_fontmgr = true
 
 if (form_components_support) {
   defines += [ "FORM_SUPPORTED" ]

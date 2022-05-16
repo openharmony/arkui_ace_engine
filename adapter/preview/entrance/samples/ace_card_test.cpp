@@ -45,13 +45,11 @@ int main()
     std::string assetPathJs = "/Volumes/SSD2T/daily-test/preview/js/default_card";
     std::string appResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/AppResources";
     std::string systemResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/SystemResources";
-    std::string fontBasePath = "/Volumes/SSD2T/daily-test/preview/js/fonts";
     constexpr double density = 2;
 #else
     std::string assetPathJs = "D:\\Workspace\\preview\\js\\default_card";
     std::string appResourcesPath = "D:\\Workspace\\preview\\js\\AppResources\\assets\\entry";
     std::string systemResourcesPath = "D:\\Workspace\\preview\\js\\SystemResources\\assets\\entry";
-    std::string fontBasePath = "D:\\Workspace\\preview\\js\\fonts";
     constexpr double density = 1;
 #endif
 
@@ -59,7 +57,6 @@ int main()
         .assetPath = assetPathJs,
         .systemResourcesPath = systemResourcesPath,
         .appResourcesPath = appResourcesPath,
-        .fontBasePath = fontBasePath,
         .deviceConfig.density = density,
         .deviceConfig.colorMode = OHOS::Ace::ColorMode::DARK,
         .windowTitle = "ACE card",

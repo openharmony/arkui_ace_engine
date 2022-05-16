@@ -1,0 +1,62 @@
+{
+  "fontdir": ["fonts"],
+  "generic": [
+    {
+      "family": "HarmonyOS Sans",
+      "alias": [
+        {
+          "HarmonyOS-Sans": 0
+        },
+        {
+          "HarmonyOS-Sans-Light": 100
+        },
+        {
+          "HarmonyOS-Sans-Regular": 400
+        },
+        {
+          "HarmonyOS-Sans-Medium": 700
+        },
+        {
+          "HarmonyOS-Sans-Bold": 900
+        }
+      ],
+      "adjust": [
+        {
+          "weight": 50, "to": 100
+        },
+        {
+          "weight": 80, "to": 400
+        },
+        {
+          "weight": 100, "to": 700
+        },
+        {
+          "weight": 200, "to": 900
+        }
+      ]
+    },
+    {
+      "family": "HarmonyOS Sans Condensed",
+      "alias": [
+        {
+          "HarmonyOS-Sans-Condensed": 0
+        }
+      ]
+    }
+  ],
+  "fallback": [
+    {
+      "": [
+        {
+          "zh-Hans": "HarmonyOS Sans SC"
+        },
+        {
+          "zh-Hant": "HarmonyOS Sans TC"
+        },
+        {
+          "und-Arab": "HarmonyOS Sans Naskh Arabic UI"
+        }
+      ]
+    }
+  ]
+}
