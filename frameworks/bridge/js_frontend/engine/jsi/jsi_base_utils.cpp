@@ -126,8 +126,8 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const R
     std::string sourceCode = "";
     if (res.size() > 1) {
         std::string fristLine = res[1];
-        if (fristLine.find(codeStart, 0) == 0) {
-            uint32_t codeStartLen = codeStart.length();
+        uint32_t codeStartLen = codeStart.length();
+        if (fristLine.substr(0, codeStartLen).compare(codeStart) == 0) {
             sourceCode = fristLine.substr(codeStartLen, fristLine.length() - codeStartLen - 1);
             i = 2;  // 2 means Convert from the second line
             needGetErrorPos = true;
@@ -236,13 +236,21 @@ std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::stri
 
 std::string JsiBaseUtils::GetRelativePath(const std::string& sources)
 {
-    std::size_t pos = sources.find_last_of("/\\");
-    if (pos != std::string::npos) {
-        std::size_t splitPos = sources.substr(0, pos - 1).find_last_of("/\\");
+    std::string temp = sources;
+    std::size_t splitPos = std::string::npos;
+    const static int pathLevel = 3;
+    int i = 0;
+    while (i < pathLevel) {
+        splitPos = temp.find_last_of("/\\");
         if (splitPos != std::string::npos) {
-            std::string shortUrl = "pages" + sources.substr(splitPos);
-            return shortUrl;
+            temp = temp.substr(0, splitPos - 1);
+        } else {
+            break;
         }
+        i++;
+    }
+    if (i == pathLevel) {
+        return sources.substr(splitPos);
     }
     LOGI("The stack path error!");
     return sources;
