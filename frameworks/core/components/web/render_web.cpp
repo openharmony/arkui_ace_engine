@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include "base/log/log.h"
+#include "core/common/manager_interface.h"
 #include "core/components/web/resource/web_resource.h"
 #include "core/event/ace_event_helper.h"
 
@@ -67,6 +68,12 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         delegate_->UpdateSupportZoom(web->GetZoomAccessEnabled());
         delegate_->UpdateDomStorageEnabled(web->GetDomStorageAccessEnabled());
         delegate_->UpdateGeolocationEnabled(web->GetGeolocationAccessEnabled());
+        delegate_->UpdateCacheMode(web->GetCacheMode());
+        delegate_->UpdateOverviewModeEnabled(web->GetOverviewModeAccessEnabled());
+        delegate_->UpdateFileFromUrlEnabled(web->GetFileFromUrlAccessEnabled());
+        delegate_->UpdateDatabaseEnabled(web->GetDatabaseAccessEnabled());
+        delegate_->UpdateTextZoomAtio(web->GetTextZoomAtio());
+        delegate_->UpdateWebDebuggingAccess(web->GetWebDebuggingAccessEnabled());
         auto userAgent = web->GetUserAgent();
         if (!userAgent.empty()) {
             delegate_->UpdateUserAgent(userAgent);

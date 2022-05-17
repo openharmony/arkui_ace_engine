@@ -50,7 +50,7 @@ public:
     explicit WebClientImpl(int32_t instanceId) : instanceId_(instanceId) {}
     ~WebClientImpl() = default;
 
-    void SetNWeb(std::shared_ptr<OHOS::NWeb::NWeb> webview) override;
+    void SetNWeb(std::shared_ptr<OHOS::NWeb::NWeb> nweb) override;
     void OnProxyDied() override;
     void OnRouterPush(const std::string& param) override;
     bool OnConsoleLog(const OHOS::NWeb::NWebConsoleLog& message) override;
@@ -72,16 +72,17 @@ public:
     bool OnConfirmDialogByJS(const std::string &url,
                              const std::string &message,
                              std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
+    bool OnFileSelectorShow(std::shared_ptr<NWeb::FileSelectorCallback> callback,
+                            std::shared_ptr<NWeb::NWebFileSelectorParams> params) override;
 
     void OnFocus() override;
     void OnResourceLoadError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error) override;
     void OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response) override;
-    bool OnHandleInterceptUrlLoading(const std::string& url) override
-    {
-        return false;
-    }
+    void OnRenderExited(OHOS::NWeb::RenderExitReason reason) override;
+    void OnRefreshAccessedHistory(const std::string& url, bool isReload) override;
+    bool OnHandleInterceptUrlLoading(const std::string& url) override;
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
         webDelegate_ = delegate;

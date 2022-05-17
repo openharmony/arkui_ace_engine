@@ -67,15 +67,43 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebJSDialogResult> result_;
 };
 
+class FileSelectorParamOhos : public WebFileSelectorParam {
+    DECLARE_ACE_TYPE(FileSelectorParamOhos, WebFileSelectorParam)
+
+public:
+    explicit FileSelectorParamOhos(std::shared_ptr<OHOS::NWeb::NWebFileSelectorParams> param)
+        : param_(param) {}
+
+    std::string GetTitle() override;
+    int GetMode() override;
+    std::string GetDefaultFileName() override;
+    std::vector<std::string> GetAcceptType() override;
+    bool IsCapture() override;
+private:
+    std::shared_ptr<OHOS::NWeb::NWebFileSelectorParams> param_;
+};
+
+class FileSelectorResultOhos : public FileSelectorResult {
+    DECLARE_ACE_TYPE(FileSelectorResultOhos, FileSelectorResult)
+
+public:
+    explicit FileSelectorResultOhos(std::shared_ptr<OHOS::NWeb::FileSelectorCallback> callback)
+        : callback_(callback) {}
+
+    void HandleFileList(std::vector<std::string>& result) override;
+private:
+    std::shared_ptr<OHOS::NWeb::FileSelectorCallback> callback_;
+};
+
 class WebGeolocationOhos : public WebGeolocation {
     DECLARE_ACE_TYPE(WebGeolocationOhos, WebGeolocation)
 
 public:
     WebGeolocationOhos(OHOS::NWeb::NWebGeolocationCallbackInterface* callback) : geolocationCallback_(callback) {}
-    
+
     void Invoke(const std::string& origin, const bool& allow, const bool& retain) override;
 private:
-    OHOS::NWeb::NWebGeolocationCallbackInterface* geolocationCallback_;
+    std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface> geolocationCallback_;
 };
 
 class WebDelegate : public WebResource {
@@ -128,6 +156,12 @@ public:
     void UpdateSupportZoom(const bool& isZoomAccessEnabled);
     void UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled);
     void UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled);
+    void UpdateCacheMode(const WebCacheMode& mode);
+    void UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled);
+    void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled);
+    void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
+    void UpdateTextZoomAtio(const int32_t& textZoomAtioNum);
+    void UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled);
     void LoadUrl();
     void HandleTouchDown(const int32_t& id, const double& x, const double& y);
     void HandleTouchUp(const int32_t& id, const double& x, const double& y);
@@ -153,6 +187,10 @@ public:
     void OnMessage(const std::string& param);
     bool OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message);
     void OnRouterPush(const std::string& param);
+    void OnRenderExited(OHOS::NWeb::RenderExitReason reason);
+    void OnRefreshAccessedHistory(const std::string& url, bool isRefreshed);
+    bool OnFileSelectorShow(const BaseEventInfo* info);
+    bool OnHandleInterceptUrlLoading(const std::string& url);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -186,12 +224,17 @@ private:
     void OnActive();
     void Zoom(float factor);
     int GetHitTestResult();
+    bool SaveCookieSync();
+    bool SetCookie(const std::string& url, const std::string& value);
+    std::string GetCookie(const std::string& url) const;
+    void DeleteEntirelyCookie();
     void RegisterOHOSWebEventAndMethord();
     void SetWebCallBack();
 
     // Backward and forward
     void Backward();
     void Forward();
+    void ClearHistory();
     bool AccessStep(int32_t step);
     bool AccessBackward();
     bool AccessForward();
@@ -214,7 +257,8 @@ private:
     Method isPagePathInvalidMethod_;
     State state_ {State::WAITINGFORSIZE};
 #ifdef OHOS_STANDARD_SYSTEM
-    std::shared_ptr<OHOS::NWeb::NWeb> webview_;
+    std::shared_ptr<OHOS::NWeb::NWeb> nweb_;
+    OHOS::NWeb::NWebCookieManager* cookieManager_ = nullptr;
     sptr<Rosen::Window> window_;
     bool isCreateWebView_ = false;
 
@@ -229,6 +273,8 @@ private:
     EventCallbackV2 onHttpErrorReceiveV2_;
     EventCallbackV2 onDownloadStartV2_;
     EventCallbackV2 onFocusV2_;
+    EventCallbackV2 onRefreshAccessedHistoryV2_;
+    EventCallbackV2 onRenderExitedV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;

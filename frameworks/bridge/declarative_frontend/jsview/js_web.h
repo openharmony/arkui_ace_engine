@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "core/components/web/web_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
@@ -41,6 +42,8 @@ public:
     static void OnDownloadStart(const JSCallbackInfo& args);
     static void OnErrorReceive(const JSCallbackInfo& args);
     static void OnHttpErrorReceive(const JSCallbackInfo& args);
+    static void OnFileSelectorShow(const JSCallbackInfo& args);
+    static void OnUrlLoadIntercept(const JSCallbackInfo& args);
     static void JsEnabled(bool isJsEnabled);
     static void ContentAccessEnabled(bool isContentAccessEnabled);
     static void FileAccessEnabled(bool isFileAccessEnabled);
@@ -53,9 +56,17 @@ public:
     static void GeolocationAccessEnabled(bool isGeolocationAccessEnabled);
     static void JavaScriptProxy(const JSCallbackInfo& args);
     static void UserAgent(const std::string& userAgent);
+    static void OnRenderExited(const JSCallbackInfo& args);
+    static void OnRefreshAccessedHistory(const JSCallbackInfo& args);
+    static void CacheMode(int32_t cacheMode);
+    static void OverviewModeAccess(bool isOverviewModeAccessEnabled);
+    static void FileFromUrlAccess(bool isFileFromUrlAccessEnabled);
+    static void DatabaseAccess(bool isDatabaseAccessEnabled);
+    static void TextZoomAtio(int32_t textZoomAtioNum);
+    static void WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled);
 
 protected:
-    static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
+    static void OnCommonDialog(const JSCallbackInfo& args, DialogEventType dialogEventType);
 };
-}
+} // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_H
