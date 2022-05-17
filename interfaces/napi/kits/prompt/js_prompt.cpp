@@ -32,7 +32,7 @@ const int SHOW_ACTION_MENU_BUTTON_NUM_MAX = 6;
 
 } // namespace
 
-napi_value GetReturnObj(napi_env env, std::string callbackString)
+napi_value GetReturnObject(napi_env env, std::string callbackString)
 {
     napi_value result = nullptr;
     napi_value returnObj = nullptr;
@@ -450,7 +450,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 napi_value successIndex = nullptr;
                 napi_create_int32(env, successType, &successIndex);
                 asyncContext->callbackSuccessString = "showActionMenu:ok";
-                napi_value indexObj = GetReturnObj(env, asyncContext->callbackSuccessString);
+                napi_value indexObj = GetReturnObject(env, asyncContext->callbackSuccessString);
                 napi_set_named_property(env, indexObj, "index", successIndex);
                 napi_value result[2] = { 0 };
                 napi_create_object(env, &result[1]);
