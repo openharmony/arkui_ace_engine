@@ -579,8 +579,9 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("databaseAccess", &JSWeb::DatabaseAccess);
     JSClass<JSWeb>::StaticMethod("textZoomAtio", &JSWeb::TextZoomAtio);
     JSClass<JSWeb>::StaticMethod("webDebuggingAccess", &JSWeb::WebDebuggingAccessEnabled);
-    JSClass<JSWeb>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSWeb>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSWeb>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSWeb>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
