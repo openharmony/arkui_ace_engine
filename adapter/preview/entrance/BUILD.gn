@@ -41,6 +41,7 @@ template("preview_entrance_source") {
       "editing/text_input_connection_impl.cpp",
       "editing/text_input_impl.cpp",
       "editing/text_input_plugin.cpp",
+      "event_dispatcher.cpp",
       "flutter_ace_view.cpp",
       "subwindow_preview.cpp",
     ]

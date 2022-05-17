@@ -27,7 +27,7 @@ void ClipboardImpl::SetData(const std::string& data)
         [callbackSetClipboardData = callbackSetClipboardData_, data] {
             callbackSetClipboardData(data);
         },
-        TaskExecutor::TaskType::PLATFORM);
+        TaskExecutor::TaskType::UI);
 }
 
 void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callback, bool syncMode)
@@ -40,7 +40,7 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
         [callbackGetClipboardData = callbackGetClipboardData_, callback] {
             callback(callbackGetClipboardData());
         },
-        TaskExecutor::TaskType::PLATFORM);
+        TaskExecutor::TaskType::UI);
 }
 
 void ClipboardImpl::Clear() {}
