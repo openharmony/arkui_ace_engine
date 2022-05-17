@@ -121,6 +121,10 @@ const char NAVIGATOR_ETS_TAG[] = "Navigator";
 const char PANEL_COMPONENT_TAG[] = "SlidingPanelComponentV2";
 const char PANEL_ETS_TAG[] = "Panel";
 
+// pattern-lock
+const char PATTERN_LOCK_COMPONENT_TAG[] = "PatternLockComponent";
+const char PATTERN_LOCK_ETS_TAG[] = "PatternLock";
+
 // row
 const char ROW_COMPONENT_TAG[] = "RowComponent";
 const char ROW_ETS_TAG[] = "Row";

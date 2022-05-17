@@ -39,6 +39,42 @@ public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
+    const Dimension& GetCircleRadius() const
+    {
+        return circleRadius_;
+    }
+    const Dimension& GetSideLength() const
+    {
+        return sideLength_;
+    }
+    const Dimension& GetStrokeWidth() const
+    {
+        return strokeWidth_;
+    }
+    const Color& GetRegularColor() const
+    {
+        return regularColor_;
+    }
+    const Color& GetSelectedColor() const
+    {
+        return selectedColor_;
+    }
+    const Color& GetActiveColor() const
+    {
+        return activeColor_;
+    }
+    const Color& GetPathColor() const
+    {
+        return pathColor_;
+    }
+    bool GetAutoReset() const
+    {
+        return autoReset_;
+    }
+    RefPtr<V2::PatternLockController> GetPatternLockController() const
+    {
+        return patternLockController_;
+    }
 
 protected:
     bool AddChoosePoint(Offset offset, int16_t x, int16_t y);
@@ -76,7 +112,6 @@ protected:
         {
             return code_;
         }
-
     private:
         int16_t column_;
         int16_t row_;
@@ -102,6 +137,7 @@ protected:
     RefPtr<Animator> animator_;
     bool autoReset_ = true;
     int16_t passPointCount_ = 0;
+    RefPtr<V2::PatternLockController> patternLockController_;
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_PATTERN_LOCK_RENDER_PATTERN_LOCK_H
