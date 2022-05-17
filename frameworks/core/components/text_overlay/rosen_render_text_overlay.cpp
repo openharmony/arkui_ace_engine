@@ -175,7 +175,8 @@ void RosenRenderTextOverlay::PaintMagnifier(RenderContext& context)
         SkRect::MakeXYWH(globalX, globalY, NormalizeToPx(MAGNIFIER_WIDTH), NormalizeToPx(MAGNIFIER_WIDTH)),
         NormalizeToPx(MAGNIFIER_WIDTH), NormalizeToPx(MAGNIFIER_WIDTH));
 
-    RosenDecorationPainter::PaintShadow(SkPath().addRRect(rrect), ShadowConfig::DefaultShadowM, canvas);
+    RosenDecorationPainter::PaintShadow(SkPath().addRRect(rrect),
+        ShadowConfig::DefaultShadowM, static_cast<RosenRenderContext*>(&context)->GetRSNode());
 
     SkRRect ScaleRrect =
         SkRRect::MakeRectXY(SkRect::MakeXYWH(globalX * viewScale, globalY * viewScale,

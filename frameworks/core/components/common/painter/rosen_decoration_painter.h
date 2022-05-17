@@ -51,6 +51,8 @@ public:
 
     static void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas);
 
+    static void PaintShadow(const SkPath& path, const Shadow& shadow, const std::shared_ptr<RSNode>& rsNode);
+
     static float ConvertRadiusToSigma(float radius);
 
     static void PaintGrayScale(const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& grayscale,
@@ -75,7 +77,7 @@ public:
 
     void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context);
 
-    void PaintBoxShadows(const SkRRect& rrect, const std::vector<Shadow>& shadows, SkCanvas* canvas);
+    static void PaintBoxShadows(const std::vector<Shadow>& shadows, const std::shared_ptr<RSNode>& rsNode);
 
     void PaintBlur(RenderContext& context, const Dimension& blurRadius);
 
