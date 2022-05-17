@@ -16,9 +16,12 @@
 #include "core/components/slider/rosen_render_circle_block.h"
 
 #include "third_party/skia/include/core/SkMaskFilter.h"
+#include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkRRect.h"
 
 #include "base/utils/system_properties.h"
+#include "core/components/common/painter/rosen_decoration_painter.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
@@ -67,6 +70,8 @@ void RosenRenderCircleBlock::Paint(RenderContext& context, const Offset& offset)
 
     double radius = NormalizeToPx(blockSize_) * HALF * radiusScale_;
 
+    PaintShadow(context, offset, radius);
+
     if (GetFocus() && GetMode() == SliderMode::OUTSET) {
         SkPaint focusPaint;
         focusPaint.setColor(FOCUS_BORDER_COLOR);
@@ -77,11 +82,13 @@ void RosenRenderCircleBlock::Paint(RenderContext& context, const Offset& offset)
         SkPaint blockPaint;
         blockPaint.setColor(SkColorSetARGB(GetBlockColor().GetAlpha(), GetBlockColor().GetRed(),
             GetBlockColor().GetGreen(), GetBlockColor().GetBlue()));
+        blockPaint.setAntiAlias(true);
         canvas->drawCircle(offset.GetX(), offset.GetY(), radius, blockPaint);
     } else {
         SkPaint blockPaint;
         blockPaint.setColor(SkColorSetARGB(GetBlockColor().GetAlpha(), GetBlockColor().GetRed(),
             GetBlockColor().GetGreen(), GetBlockColor().GetBlue()));
+        blockPaint.setAntiAlias(true);
         canvas->drawCircle(offset.GetX(), offset.GetY(), radius, blockPaint);
     }
 
@@ -94,30 +101,14 @@ void RosenRenderCircleBlock::Paint(RenderContext& context, const Offset& offset)
     borderPaint.setAntiAlias(true);
     borderPaint.setStrokeWidth(BORDER_WEIGHT);
     canvas->drawCircle(offset.GetX(), offset.GetY(), radius, borderPaint);
-
-    PaintShadow(canvas, offset, radius);
 }
 
-void RosenRenderCircleBlock::PaintShadow(SkCanvas* skCanvas, const Offset& offset, double radius)
+void RosenRenderCircleBlock::PaintShadow(RenderContext& context, const Offset& offset, double radius)
 {
-    if (!skCanvas) {
-        return;
-    }
     double diameter = radius * 2.0;
-    // Draw block border shadow
-    SkPaint borderShadowPaint;
-    // use this color to reduce the loss at corner.
-    static const uint8_t shadowAlpha = 30;
-    borderShadowPaint.setColor(SkColorSetARGB(shadowAlpha, 0, 0, 0));
-    borderShadowPaint.setStyle(SkPaint::Style::kFill_Style);
-    borderShadowPaint.setAntiAlias(true);
-    borderShadowPaint.setStrokeWidth(BORDER_WEIGHT);
     SkRect rect = SkRect::MakeXYWH(offset.GetX() - radius, offset.GetY() - radius, diameter, diameter);
-    skCanvas->clipRRect(SkRRect::MakeRectXY(rect, radius, radius), SkClipOp::kDifference, true);
-    // Draw first circle for shadow.
-    skCanvas->drawCircle(offset.GetX(), offset.GetY() + BORDER_WEIGHT, radius, borderShadowPaint);
-    // Draw second circle for shadow.
-    skCanvas->drawCircle(offset.GetX(), offset.GetY() + BORDER_WEIGHT * 2.0, radius, borderShadowPaint);
+    RosenDecorationPainter::PaintShadow(SkPath().addRRect(SkRRect::MakeRectXY(rect, radius, radius)),
+        ShadowConfig::DefaultShadowXS, static_cast<RosenRenderContext*>(&context)->GetRSNode());
 }
 
 } // namespace OHOS::Ace

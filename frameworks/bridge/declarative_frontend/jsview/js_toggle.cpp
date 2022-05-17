@@ -71,12 +71,20 @@ void JSToggle::Create(const JSCallbackInfo& info)
         RefPtr<CheckboxComponent> checkboxComponent = AceType::MakeRefPtr<OHOS::Ace::CheckboxComponent>(checkBoxTheme);
         checkboxComponent->SetValue(isOn);
         checkboxComponent->SetMouseAnimationType(HoverAnimationType::NONE);
+        auto horizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
+        auto verticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
+        checkboxComponent->SetWidth(checkBoxTheme->GetWidth() - horizontalPadding * 2);
+        checkboxComponent->SetHeight(checkBoxTheme->GetHeight() - verticalPadding * 2);
         component = checkboxComponent;
     } else if (toggleType == ToggleType::SWITCH) {
         RefPtr<SwitchTheme> switchTheme = GetTheme<SwitchTheme>();
         RefPtr<SwitchComponent> switchComponent = AceType::MakeRefPtr<OHOS::Ace::SwitchComponent>(switchTheme);
         switchComponent->SetValue(isOn);
         switchComponent->SetMouseAnimationType(HoverAnimationType::NONE);
+        auto horizontalPadding = switchTheme->GetHotZoneHorizontalPadding();
+        auto verticalPadding = switchTheme->GetHotZoneVerticalPadding();
+        switchComponent->SetWidth(switchTheme->GetWidth() - horizontalPadding * 2);
+        switchComponent->SetHeight(switchTheme->GetHeight() - verticalPadding * 2);
         component = switchComponent;
     } else {
         RefPtr<ToggleTheme> toggleTheme = GetTheme<ToggleTheme>();
@@ -93,10 +101,8 @@ void JSToggle::Create(const JSCallbackInfo& info)
     box->SetDeliverMinToChild(true);
     if (toggleType == ToggleType::CHECKBOX) {
         RefPtr<CheckboxTheme> checkBoxTheme = GetTheme<CheckboxTheme>();
-        auto horizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
-        auto verticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
-        box->SetWidth(checkBoxTheme->GetWidth() + horizontalPadding * 2);
-        box->SetHeight(checkBoxTheme->GetHeight() + verticalPadding * 2);
+        box->SetWidth(checkBoxTheme->GetWidth());
+        box->SetHeight(checkBoxTheme->GetHeight());
     } else if (toggleType == ToggleType::SWITCH) {
         RefPtr<SwitchTheme> switchTheme = GetTheme<SwitchTheme>();
         box->SetWidth(switchTheme->GetWidth());
@@ -129,7 +135,7 @@ void JSToggle::JsWidth(const JSRef<JSVal>& jsValue)
     auto checkableComponent = AceType::DynamicCast<CheckableComponent>(stack->GetMainComponent());
     if (checkableComponent) {
         padding = checkableComponent->GetHotZoneHorizontalPadding();
-        checkableComponent->SetWidth(value + padding * 2);
+        checkableComponent->SetWidth(value);
         box->SetWidth(value + padding * 2);
     }
 
@@ -162,7 +168,7 @@ void JSToggle::JsHeight(const JSRef<JSVal>& jsValue)
     auto checkableComponent = AceType::DynamicCast<CheckableComponent>(stack->GetMainComponent());
     if (checkableComponent) {
         padding = checkableComponent->GetHotZoneVerticalPadding();
-        checkableComponent->SetHeight(value + padding * 2);
+        checkableComponent->SetHeight(value);
         box->SetHeight(value + padding * 2);
     }
 
@@ -288,10 +294,10 @@ void JSToggle::JsPadding(const JSCallbackInfo& info)
             }
             auto checkableComponent = AceType::DynamicCast<CheckableComponent>(stack->GetMainComponent());
             if (checkableComponent) {
-                auto width = checkableComponent->GetWidth() - checkableComponent->GetHotZoneHorizontalPadding();
-                auto height = checkableComponent->GetHeight() - checkableComponent->GetHotZoneVerticalPadding();
-                checkableComponent->SetHeight(height + topDimen * 2);
-                checkableComponent->SetWidth(width + leftDimen * 2);
+                auto width = checkableComponent->GetWidth();
+                auto height = checkableComponent->GetHeight();
+                checkableComponent->SetHeight(height);
+                checkableComponent->SetWidth(width);
                 box->SetHeight(height + topDimen * 2);
                 box->SetWidth(width + leftDimen * 2);
                 checkableComponent->SetHotZoneVerticalPadding(topDimen);
@@ -306,10 +312,10 @@ void JSToggle::JsPadding(const JSCallbackInfo& info)
     }
     auto checkableComponent = AceType::DynamicCast<CheckableComponent>(stack->GetMainComponent());
     if (checkableComponent) {
-        auto width = checkableComponent->GetWidth() - checkableComponent->GetHotZoneHorizontalPadding();
-        auto height = checkableComponent->GetHeight() - checkableComponent->GetHotZoneVerticalPadding();
-        checkableComponent->SetHeight(height + length * 2);
-        checkableComponent->SetWidth(width + length * 2);
+        auto width = checkableComponent->GetWidth();
+        auto height = checkableComponent->GetHeight();
+        checkableComponent->SetHeight(height);
+        checkableComponent->SetWidth(width);
         box->SetHeight(height + length * 2);
         box->SetWidth(width + length * 2);
         checkableComponent->SetHotZoneVerticalPadding(length);

@@ -52,8 +52,10 @@ void JSCheckbox::Create(const JSCallbackInfo& info)
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     auto horizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
     auto verticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
-    box->SetWidth(checkBoxTheme->GetWidth() + horizontalPadding * 2);
-    box->SetHeight(checkBoxTheme->GetHeight() + verticalPadding * 2);
+    checkboxComponent->SetWidth(checkBoxTheme->GetWidth() - horizontalPadding * 2);
+    checkboxComponent->SetHeight(checkBoxTheme->GetHeight() - verticalPadding * 2);
+    box->SetWidth(checkBoxTheme->GetWidth());
+    box->SetHeight(checkBoxTheme->GetHeight());
 }
 
 void JSCheckbox::JSBind(BindingTarget globalObj)
@@ -119,7 +121,7 @@ void JSCheckbox::JsWidth(const JSRef<JSVal>& jsValue)
     auto checkboxComponent = AceType::DynamicCast<CheckboxComponent>(stack->GetMainComponent());
     if (checkboxComponent) {
         padding = checkboxComponent->GetHotZoneHorizontalPadding();
-        checkboxComponent->SetWidth(value + padding * 2);
+        checkboxComponent->SetWidth(value);
         box->SetWidth(value + padding * 2);
     }
 }
@@ -146,7 +148,7 @@ void JSCheckbox::JsHeight(const JSRef<JSVal>& jsValue)
     auto checkboxComponent = AceType::DynamicCast<CheckboxComponent>(stack->GetMainComponent());
     if (checkboxComponent) {
         padding = checkboxComponent->GetHotZoneVerticalPadding();
-        checkboxComponent->SetHeight(value + padding * 2);
+        checkboxComponent->SetHeight(value);
         box->SetHeight(value + padding * 2);
     }
 }
@@ -226,10 +228,10 @@ void JSCheckbox::JsPadding(const JSCallbackInfo& info)
             }
             auto checkboxComponent = AceType::DynamicCast<CheckboxComponent>(stack->GetMainComponent());
             if (checkboxComponent) {
-                auto width = checkboxComponent->GetWidth() - checkboxComponent->GetHotZoneHorizontalPadding();
-                auto height = checkboxComponent->GetHeight() - checkboxComponent->GetHotZoneVerticalPadding();
-                checkboxComponent->SetHeight(height + topDimen * 2);
-                checkboxComponent->SetWidth(width + leftDimen * 2);
+                auto width = checkboxComponent->GetWidth();
+                auto height = checkboxComponent->GetHeight();
+                checkboxComponent->SetHeight(height);
+                checkboxComponent->SetWidth(width);
                 box->SetHeight(height + topDimen * 2);
                 box->SetWidth(width + leftDimen * 2);
                 checkboxComponent->SetHotZoneVerticalPadding(topDimen);
@@ -244,10 +246,10 @@ void JSCheckbox::JsPadding(const JSCallbackInfo& info)
     }
     auto checkboxComponent = AceType::DynamicCast<CheckboxComponent>(stack->GetMainComponent());
     if (checkboxComponent) {
-        auto width = checkboxComponent->GetWidth() - checkboxComponent->GetHotZoneHorizontalPadding();
-        auto height = checkboxComponent->GetHeight() - checkboxComponent->GetHotZoneVerticalPadding();
-        checkboxComponent->SetHeight(height + length * 2);
-        checkboxComponent->SetWidth(width + length * 2);
+        auto width = checkboxComponent->GetWidth();
+        auto height = checkboxComponent->GetHeight();
+        checkboxComponent->SetHeight(height);
+        checkboxComponent->SetWidth(width);
         box->SetHeight(height + length * 2);
         box->SetWidth(width + length * 2);
         checkboxComponent->SetHotZoneVerticalPadding(length);

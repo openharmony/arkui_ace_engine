@@ -33,7 +33,7 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
 
 private:
-    void PaintShadow(SkCanvas* skCanvas, const Offset& offset, double radius);
+    void PaintShadow(RenderContext& context, const Offset& offset, double radius);
 };
 
 } // namespace OHOS::Ace
