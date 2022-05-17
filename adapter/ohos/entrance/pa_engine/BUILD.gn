@@ -58,8 +58,8 @@ template("pa_backend") {
       "ipc:ipc_core",
       "ipc_js:rpc",
       "napi:ace_napi",
-      "native_appdatamgr:native_dataability",
-      "native_appdatamgr:native_rdb",
+      "dataability:native_dataability",
+      "relational_store:native_rdb",
       "samgr_standard:samgr_proxy",
     ]
 

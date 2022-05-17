@@ -100,9 +100,9 @@ template("ace_ohos_standard_source_set") {
       "form_runtime:form_manager",
       "ipc:ipc_core",
       "napi:ace_napi",
-      "native_appdatamgr:native_dataability",
-      "native_appdatamgr:native_preferences",
-      "native_appdatamgr:native_rdb",
+      "dataability:native_dataability",
+      "preferences:native_preferences",
+      "relational_store:native_rdb",
     ]
   }
 }

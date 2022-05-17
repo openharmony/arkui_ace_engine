@@ -89,8 +89,8 @@ template("js_pa_engine_ark") {
       "ipc:ipc_core",
       "ipc_js:rpc",
       "napi:ace_napi",
-      "native_appdatamgr:native_dataability",
-      "native_appdatamgr:native_rdb",
+      "dataability:native_dataability",
+      "relational_store:native_rdb",
     ]
 
     public_deps =
