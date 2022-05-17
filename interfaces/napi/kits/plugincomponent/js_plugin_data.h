@@ -24,8 +24,8 @@
 #include "napi/native_api.h"
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
-#include "ohos/aafwk/content/pac_map.h"
-#include "ohos/aafwk/content/want.h"
+#include "pac_map.h"
+#include "want.h"
 
 namespace OHOS::Ace::Napi {
 struct ACECallbackInfo {

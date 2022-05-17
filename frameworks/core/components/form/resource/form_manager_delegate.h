@@ -24,7 +24,7 @@
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_js_info.h"
-#include "ohos/aafwk/content/want.h"
+#include "want.h"
 #endif
 
 namespace OHOS::Ace {

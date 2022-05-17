@@ -23,7 +23,7 @@
 #include "core/components/plugin/resource/plugin_request_data.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
-#include "ohos/aafwk/content/want.h"
+#include "want.h"
 #endif
 
 namespace OHOS::Ace {
