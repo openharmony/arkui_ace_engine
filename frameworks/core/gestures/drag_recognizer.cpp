@@ -172,7 +172,6 @@ void DragRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndListFling();
     }
-
     auto& dragInfo = iter->second;
     dragInfo.velocityTracker_.UpdateTouchPoint(event, true);
     if (dragInfo.states_ == DetectState::DETECTED) {
@@ -208,7 +207,9 @@ void DragRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
             endInfo.SetTimeStamp(event.time);
             onDragEndNotifyCall_(event.GetOffset().GetX(), event.GetOffset().GetY(), endInfo);
-            AsyncCallback(onDragEnd_, endInfo);
+            if (onDragEnd_) {
+                AsyncCallback(onDragEnd_, endInfo);
+            }
         }
     } else if (dragInfo.states_ == DetectState::DETECTING) {
         LOGD("this gesture is not drag, try to reject it");
