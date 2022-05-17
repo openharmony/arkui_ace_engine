@@ -491,6 +491,13 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     // set view
     Platform::AceContainer::SetView(flutterAceView, density, 0, 0, window_->GetWindowId(), callback);
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, 0, 0, config_.Orientation());
+    if (isModelJson) {
+        auto pipeline = container->GetPipelineContext();
+        if (pipeline && appInfo) {
+            LOGI("SetMinPlatformVersion code is %{public}d", appInfo->minCompatibleVersionCode);
+            pipeline->SetMinPlatformVersion(appInfo->minCompatibleVersionCode);
+        }
+    }
     if (runtime_) {
         auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
         if (!storage) {
