@@ -1429,6 +1429,10 @@ void JSCanvasRenderer::JsStroke(const JSCallbackInfo& info)
 {
     if (info.Length() == 1) {
         JSPath2D* jsCanvasPath = JSRef<JSObject>::Cast(info[0])->Unwrap<JSPath2D>();
+        if (jsCanvasPath == nullptr) {
+            LOGE("The arg is wrong, it is supposed to have JSPath2D argument");
+            return;
+        }
         auto path = jsCanvasPath->GetCanvasPath2d();
         if (isOffscreen_) {
             offscreenCanvas_->Stroke(path);

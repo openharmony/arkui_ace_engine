@@ -58,6 +58,10 @@ void JSPath2D::JSBind(BindingTarget globalObj)
 void JSPath2D::JsPath2DAddPath(const JSCallbackInfo& info)
 {
     JSPath2D* jsPath2d = JSRef<JSObject>::Cast(info[0])->Unwrap<JSPath2D>();
+    if (jsPath2d == nullptr) {
+        LOGE("The arg is wrong, it is supposed to have JSPath2D argument");
+        return;
+    }
     auto toBeAdd = jsPath2d->GetCanvasPath2d();
     path2d_->AddPath(toBeAdd);
 }

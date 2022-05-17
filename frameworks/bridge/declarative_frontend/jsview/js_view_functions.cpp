@@ -253,8 +253,11 @@ void ViewFunctions::Destroy(JSView* parentCustomView)
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(renderRes);
     if (!obj.IsEmpty()) {
+        // jsRenderResult_ maybe an js exception, not a JSView
         JSView* view = obj->Unwrap<JSView>();
-        view->Destroy(parentCustomView);
+        if (view != nullptr) {
+            view->Destroy(parentCustomView);
+        }
     }
     jsRenderResult_.Reset();
     LOGD("ViewFunctions::Destroy() end");
