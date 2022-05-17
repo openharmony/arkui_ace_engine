@@ -26,14 +26,7 @@
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
-#include "adapter/preview/entrance/editing/text_input_client_mgr.h"
-#include "adapter/preview/entrance/clipboard/clipboard_impl.h"
-#include "adapter/preview/entrance/clipboard/clipboard_proxy_impl.h"
-#include "core/common/clipboard/clipboard_proxy.h"
-
-#ifdef USE_GLFW_WINDOW
-#include "adapter/preview/entrance/editing/text_input_plugin.h"
-#endif
+#include "adapter/preview/entrance/event_dispatcher.h"
 
 namespace OHOS::Ace::Platform {
 
@@ -152,31 +145,13 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
         LOGE("Could not create window; AceDesktopInit failed.");
         return nullptr;
     }
-
     AceApplicationInfo::GetInstance().SetLocale(runArgs.language, runArgs.region, runArgs.script, "");
     // To check if use physical device fonts. Use Pc font by default.
     SetPhysicalDeviceFonts(runArgs.physicalDeviceFontsEnabled);
-
     auto controller = FlutterDesktopCreateWindow(
         runArgs.deviceWidth, runArgs.deviceHeight, runArgs.windowTitle.c_str(), runArgs.onRender);
-#ifdef USE_GLFW_WINDOW
-    std::unique_ptr<TextInputPlugin> textInputPlugin = std::make_unique<TextInputPlugin>();
-    textInputPlugin->RegisterKeyboardHookCallback((KeyboardHookCallback) AceAbility::DispatchKeyEvent);
-    textInputPlugin->RegisterCharHookCallback((CharHookCallback) AceAbility::DispatchInputMethodEvent);
-    FlutterDesktopAddKeyboardHookHandler(controller, std::move(textInputPlugin));
-
-    auto callbackSetClipboardData = [controller](const std::string& data) {
-        FlutterDesktopSetClipboardData(controller, data.c_str());
-    };
-    auto callbackGetClipboardData = [controller]() {
-        return FlutterDesktopGetClipboardData(controller);
-    };
-    ClipboardProxy::GetInstance()->SetDelegate(
-        std::make_unique<ClipboardProxyImpl>(callbackSetClipboardData, callbackGetClipboardData));
-#endif
-    // Initial the proxy of Input method
-    TextInputClientMgr::GetInstance().InitTextInputProxy();
-
+    EventDispatcher::GetInstance().SetGlfwWindowController(controller);
+    EventDispatcher::GetInstance().Initialize();
     auto aceAbility = std::make_unique<AceAbility>(runArgs);
     aceAbility->SetGlfwWindowController(controller);
     return aceAbility;
@@ -226,8 +201,6 @@ void AceAbility::InitEnv()
     }
 
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
-    IdleCallback idleNoticeCallback = [view](int64_t deadline) { view->ProcessIdleEvent(deadline); };
-    FlutterDesktopSetIdleCallback(controller_, idleNoticeCallback);
     OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);
 
     // Should make it possible to update surface changes by using viewWidth and viewHeight.
@@ -296,91 +269,22 @@ void AceAbility::RunEventLoop()
 
 bool AceAbility::DispatchTouchEvent(const TouchEvent& event)
 {
-    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    if (!container) {
-        LOGE("container is null");
-        return false;
-    }
-
-    auto aceView = container->GetAceView();
-    if (!aceView) {
-        LOGE("aceView is null");
-        return false;
-    }
-
-    std::promise<bool> touchPromise;
-    std::future<bool> touchFuture = touchPromise.get_future();
-    container->GetTaskExecutor()->PostTask([aceView, event, &touchPromise]() {
-        bool isHandled = aceView->HandleTouchEvent(event);
-        touchPromise.set_value(isHandled);
-    }, TaskExecutor::TaskType::PLATFORM);
-    return touchFuture.get();
+    return EventDispatcher::GetInstance().DispatchTouchEvent(event);
 }
 
 bool AceAbility::DispatchBackPressedEvent()
 {
-    LOGI("DispatchBackPressedEvent start ");
-    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    if (!container) {
-        return false;
-    }
-
-    auto context = container->GetPipelineContext();
-    if (!context) {
-        return false;
-    }
-
-    std::promise<bool> backPromise;
-    std::future<bool> backFuture = backPromise.get_future();
-    auto weak = AceType::WeakClaim(AceType::RawPtr(context));
-    container->GetTaskExecutor()->PostTask([weak, &backPromise]() {
-        auto context = weak.Upgrade();
-        if (context == nullptr) {
-            LOGW("context is nullptr.");
-            return;
-        }
-        bool canBack = false;
-        if (context->IsLastPage()) {
-            LOGW("Can't back because this is the last page!");
-        } else {
-            canBack = context->CallRouterBackToPopPage();
-        }
-        backPromise.set_value(canBack);
-    }, TaskExecutor::TaskType::PLATFORM);
-    return backFuture.get();
+    return EventDispatcher::GetInstance().DispatchBackPressedEvent();
 }
 
 bool AceAbility::DispatchInputMethodEvent(unsigned int code_point)
 {
-    return TextInputClientMgr::GetInstance().AddCharacter(static_cast<wchar_t>(code_point));
+    return EventDispatcher::GetInstance().DispatchInputMethodEvent(code_point);
 }
 
 bool AceAbility::DispatchKeyEvent(const KeyEvent& event)
 {
-    if (TextInputClientMgr::GetInstance().HandleKeyEvent(event)) {
-        LOGI("The event is related to the input component and has been handled successfully.");
-        return true;
-    }
-    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    if (!container) {
-        LOGE("container is null");
-        return false;
-    }
-
-    auto aceView = container->GetAceView();
-    if (!aceView) {
-        LOGE("aceView is null");
-        return false;
-    }
-
-    bool isHandled;
-    container->GetTaskExecutor()->PostTask(
-        [aceView, event, &isHandled]() {
-            isHandled = aceView->HandleKeyEvent(event);
-        },
-        TaskExecutor::TaskType::UI);
-
-    return isHandled;
+    return EventDispatcher::GetInstance().DispatchKeyEvent(event);
 }
 
 void AceAbility::SetConfigChanges(const std::string& configChanges)
@@ -497,7 +401,7 @@ void AceAbility::LoadDocument(const std::string& url, const std::string& compone
         .deviceType = systemParams.deviceType,
         .colorMode = systemParams.colorMode,
     };
-    OnConfigurationChanged(  deviceConfig);
+    OnConfigurationChanged(deviceConfig);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     if (!container) {
         LOGE("container is null");

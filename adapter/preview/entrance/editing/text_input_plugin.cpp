@@ -63,7 +63,7 @@ const std::map<int, KeyCode> CODE_MAP = {
 
 void TextInputPlugin::KeyboardHook(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (RecognizeKeyEvent(key, action, mods)) {
+    if (keyboardHookCallback_ && RecognizeKeyEvent(key, action, mods)) {
         keyboardHookCallback_(keyEvent_);
     } else {
         LOGW("Unrecognized key type.");
@@ -72,7 +72,9 @@ void TextInputPlugin::KeyboardHook(GLFWwindow* window, int key, int scancode, in
 
 void TextInputPlugin::CharHook(GLFWwindow* window, unsigned int code_point)
 {
-    LOGW("Input method is not currently supported");
+    if (charHookCallback_) {
+        charHookCallback_(code_point);
+    }
 }
 
 void TextInputPlugin::RegisterKeyboardHookCallback(KeyboardHookCallback&& keyboardHookCallback)
