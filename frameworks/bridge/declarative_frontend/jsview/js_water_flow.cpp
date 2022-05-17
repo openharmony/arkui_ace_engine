@@ -31,12 +31,12 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
 {
     LOGI("Create component: WaterFLow");
     if (args.Length() < 1) {
-        LOGE("Arg is wrong, it is supposed to have at least 1 arguments");
+        LOGW("Arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
     if (!args[0]->IsObject()) {
-        LOGE("Arg is not object");
+        LOGW("Arg is not object");
         return;
     }
 
@@ -105,7 +105,7 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
 void JSWaterFlow::SetColumnsGap(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("Arg is wrong, it is supposed to have at least 1 argument");
+        LOGW("Arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Dimension colGap;
@@ -122,7 +122,7 @@ void JSWaterFlow::SetColumnsGap(const JSCallbackInfo& info)
 void JSWaterFlow::SetRowsGap(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("Arg is wrong, it is supposed to have at least 1 argument");
+        LOGW("Arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Dimension rowGap;
