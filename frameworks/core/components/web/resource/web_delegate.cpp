@@ -1982,7 +1982,6 @@ void WebDelegate::HandleTouchCancel()
 
 bool WebDelegate::OnKeyEvent(int32_t keyCode, int32_t keyAction)
 {
-    ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
         return nweb_->SendKeyEvent(keyCode, keyAction);
     }
