@@ -85,7 +85,7 @@ struct ACE_FORCE_EXPORT_WITH_PREVIEW AceRunArgs {
     AceVersion aceVersion = AceVersion::ACE_1_0;
 
     bool formsEnabled = false;
-    bool physicalDeviceFontsEnabled = false;
+    bool physicalDeviceFontsEnabled = true;
 
     SendRenderDataCallback onRender = nullptr;
     SendCurrentRouterCallback onRouterChange = nullptr;
