@@ -32,26 +32,26 @@ namespace OHOS::Ace {
 
 class WebDelegate;
 
-enum MixedModeContent {
+enum class MixedModeContent {
     MIXED_CONTENT_ALWAYS_ALLOW = 0,
     MIXED_CONTENT_NEVER_ALLOW = 1,
     MIXED_CONTENT_COMPATIBILITY_MODE = 2
 };
 
-enum WebCacheMode {
+enum class WebCacheMode {
     DEFAULT = 0,
     USE_CACHE_ELSE_NETWORK,
     USE_NO_CACHE,
     USE_CACHE_ONLY
 };
 
-enum DialogEventType {
+enum class DialogEventType {
     DIALOG_EVENT_ALERT = 0,
     DIALOG_EVENT_BEFORE_UNLOAD = 1,
     DIALOG_EVENT_CONFIRM = 2
 };
 
-constexpr int default_text_zoom_atio = 100;
+constexpr int DEFAULT_TEXT_ZOOM_ATIO = 100;
 
 class WebCookie : public virtual AceType {
     DECLARE_ACE_TYPE(WebCookie, AceType);
@@ -94,22 +94,22 @@ public:
 
     void SetSetCookieImpl(SetCookieImpl&& setCookieImpl)
     {
-        setCookieImpl_ = setCookieImpl;
+        setCookieImpl_ = std::move(setCookieImpl);
     }
 
     void SetGetCookieImpl(GetCookieImpl&& getCookieImpl)
     {
-        getCookieImpl_ = getCookieImpl;
+        getCookieImpl_ = std::move(getCookieImpl);
     }
 
     void SetDeleteEntirelyCookieImpl(DeleteEntirelyCookieImpl&& deleteEntirelyCookieImpl)
     {
-        deleteEntirelyCookieImpl_ = deleteEntirelyCookieImpl;
+        deleteEntirelyCookieImpl_ = std::move(deleteEntirelyCookieImpl);
     }
 
     void SetSaveCookieSyncImpl(SaveCookieSyncImpl&& saveCookieSyncImpl)
     {
-        saveCookieSyncImpl_ = saveCookieSyncImpl;
+        saveCookieSyncImpl_ = std::move(saveCookieSyncImpl);
     }
 
 private:
@@ -355,14 +355,14 @@ public:
             return nullptr;
         }
         if (cookieManager_ != nullptr) {
-            return cookieManager_;
+            return cookieManager_.get();
         }
-        cookieManager_ = new WebCookie();
+        cookieManager_ = std::make_shared<WebCookie>();
         cookieManager_->SetSaveCookieSyncImpl(std::move(saveCookieSyncImpl_));
         cookieManager_->SetSetCookieImpl(std::move(setCookieImpl_));
         cookieManager_->SetGetCookieImpl(std::move(getCookieImpl_));
         cookieManager_->SetDeleteEntirelyCookieImpl(std::move(deleteEntirelyCookieImpl_));
-        return cookieManager_;
+        return cookieManager_.get();
     }
 
     using SetCookieImpl = std::function<bool(const std::string&, const std::string&)>;
@@ -375,7 +375,7 @@ public:
     }
     void SetSetCookieImpl(SetCookieImpl&& setCookieImpl)
     {
-        setCookieImpl_ = setCookieImpl;
+        setCookieImpl_ = std::move(setCookieImpl);
     }
 
     using GetCookieImpl = std::function<std::string(const std::string&)>;
@@ -388,7 +388,7 @@ public:
     }
     void SetGetCookieImpl(GetCookieImpl&& getCookieImpl)
     {
-        getCookieImpl_ = getCookieImpl;
+        getCookieImpl_ = std::move(getCookieImpl);
     }
 
     using DeleteEntirelyCookieImpl = std::function<void()>;
@@ -400,7 +400,7 @@ public:
     }
     void SetDeleteEntirelyCookieImpl(DeleteEntirelyCookieImpl&& deleteEntirelyCookieImpl)
     {
-        deleteEntirelyCookieImpl_ = deleteEntirelyCookieImpl;
+        deleteEntirelyCookieImpl_ = std::move(deleteEntirelyCookieImpl);
     }
 
     using SaveCookieSyncImpl = std::function<bool()>;
@@ -413,7 +413,7 @@ public:
     }
     void SetSaveCookieSyncImpl(SaveCookieSyncImpl&& saveCookieSyncImpl)
     {
-        saveCookieSyncImpl_ = saveCookieSyncImpl;
+        saveCookieSyncImpl_ = std::move(saveCookieSyncImpl);
     }
 
     using AddJavascriptInterfaceImpl = std::function<void(
@@ -480,7 +480,7 @@ public:
 
 private:
     RefPtr<WebDeclaration> declaration_;
-    WebCookie* cookieManager_ = nullptr;
+    std::shared_ptr<WebCookie> cookieManager_ = nullptr;
     LoadUrlImpl loadUrlImpl_;
 
     // Forward and Backward
@@ -815,11 +815,13 @@ public:
         isGeolocationAccessEnabled_ = isEnabled;
     }
 
-    WebCacheMode GetCacheMode() {
+    WebCacheMode GetCacheMode()
+    {
         return cacheMode_;
     }
 
-    void SetCacheMode(WebCacheMode mode) {
+    void SetCacheMode(WebCacheMode mode)
+    {
         cacheMode_ = mode;
     }
 
@@ -942,7 +944,7 @@ public:
             return;
         }
 
-        onFileSelectorShowImpl_ = onFileSelectorShowImpl;
+        onFileSelectorShowImpl_ = std::move(onFileSelectorShowImpl);
     }
 
     using OnUrlLoadInterceptImpl = std::function<bool(const BaseEventInfo* info)>;
@@ -959,7 +961,7 @@ public:
             return;
         }
 
-        onUrlLoadInterceptImpl_ = onUrlLoadInterceptImpl;
+        onUrlLoadInterceptImpl_ = std::move(onUrlLoadInterceptImpl);
     }
 
 private:
@@ -991,7 +993,7 @@ private:
     bool isOverviewModeAccessEnabled_ = true;
     bool isFileFromUrlAccessEnabled_ = false;
     bool isDatabaseAccessEnabled_ = false;
-    int32_t textZoomAtioNum_ = default_text_zoom_atio;
+    int32_t textZoomAtioNum_ = DEFAULT_TEXT_ZOOM_ATIO;
     WebCacheMode cacheMode_ = WebCacheMode::DEFAULT;
     bool isWebDebuggingAccessEnabled_ = false;
 };

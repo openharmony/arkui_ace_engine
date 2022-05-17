@@ -429,35 +429,40 @@ public:
 
     void GetTitle(const JSCallbackInfo& args)
     {
-        auto title = JSVal(ToJSValue(param_->GetTitle()));
+        std::string val = (param_ != nullptr) ? param_->GetTitle() : "";
+        auto title = JSVal(ToJSValue(val));
         auto descriptionRef = JSRef<JSVal>::Make(title);
         args.SetReturnValue(descriptionRef);
     }
 
     void GetMode(const JSCallbackInfo& args)
     {
-        auto mode = JSVal(ToJSValue(param_->GetMode()));
+        int32_t val = (param_ != nullptr) ? param_->GetMode() : 0;
+        auto mode = JSVal(ToJSValue(val));
         auto descriptionRef = JSRef<JSVal>::Make(mode);
         args.SetReturnValue(descriptionRef);
     }
 
     void IsCapture(const JSCallbackInfo& args)
     {
-        auto isCapture = JSVal(ToJSValue(param_->IsCapture()));
+        bool val = (param_ != nullptr) ? param_->IsCapture() : false;
+        auto isCapture = JSVal(ToJSValue(val));
         auto descriptionRef = JSRef<JSVal>::Make(isCapture);
         args.SetReturnValue(descriptionRef);
     }
 
     void GetAcceptType(const JSCallbackInfo& args)
     {
-        auto acceptTypes = param_->GetAcceptType();
         JSRef<JSArray> result = JSRef<JSArray>::New();
-        std::vector<std::string>::iterator iterator;
-        uint32_t index = 0;
-        for (iterator = acceptTypes.begin(); iterator != acceptTypes.end(); ++iterator) {
-            auto valueStr = JSVal(ToJSValue(*iterator));
-            auto value = JSRef<JSVal>::Make(valueStr);
-            result->SetValueAt(index++, value);
+        if (param_ != nullptr) {
+            auto acceptTypes = param_->GetAcceptType();
+            std::vector<std::string>::iterator iterator;
+            uint32_t index = 0;
+            for (iterator = acceptTypes.begin(); iterator != acceptTypes.end(); ++iterator) {
+                auto valueStr = JSVal(ToJSValue(*iterator));
+                auto value = JSRef<JSVal>::Make(valueStr);
+                result->SetValueAt(index++, value);
+            }
         }
         args.SetReturnValue(result);
     }
@@ -746,7 +751,7 @@ void JSWeb::OnConfirm(const JSCallbackInfo& args)
     JSWeb::OnCommonDialog(args, DialogEventType::DIALOG_EVENT_CONFIRM);
 }
 
-void JSWeb::OnCommonDialog(const JSCallbackInfo& args, int dialogEventType)
+void JSWeb::OnCommonDialog(const JSCallbackInfo& args, DialogEventType dialogEventType)
 {
     LOGI("OnCommonDialog, event type is %{public}d", dialogEventType);
     if (!args[0]->IsFunction()) {

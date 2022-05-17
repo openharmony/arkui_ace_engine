@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "core/components/web/web_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
@@ -65,7 +66,7 @@ public:
     static void WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled);
 
 protected:
-    static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
+    static void OnCommonDialog(const JSCallbackInfo& args, DialogEventType dialogEventType);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_H

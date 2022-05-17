@@ -71,7 +71,7 @@ class FileSelectorParamOhos : public WebFileSelectorParam {
     DECLARE_ACE_TYPE(FileSelectorParamOhos, WebFileSelectorParam)
 
 public:
-    FileSelectorParamOhos(std::shared_ptr<OHOS::NWeb::NWebFileSelectorParams> param)
+    explicit FileSelectorParamOhos(std::shared_ptr<OHOS::NWeb::NWebFileSelectorParams> param)
         : param_(param) {}
 
     std::string GetTitle() override;
@@ -87,7 +87,7 @@ class FileSelectorResultOhos : public FileSelectorResult {
     DECLARE_ACE_TYPE(FileSelectorResultOhos, FileSelectorResult)
 
 public:
-    FileSelectorResultOhos(std::shared_ptr<OHOS::NWeb::FileSelectorCallback> callback)
+    explicit FileSelectorResultOhos(std::shared_ptr<OHOS::NWeb::FileSelectorCallback> callback)
         : callback_(callback) {}
 
     void HandleFileList(std::vector<std::string>& result) override;

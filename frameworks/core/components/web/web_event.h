@@ -499,7 +499,7 @@ class ACE_EXPORT RenderExitedEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(RenderExitedEvent, BaseEventInfo);
 
 public:
-    RenderExitedEvent(int32_t exitedReason) : BaseEventInfo("RenderExitedEvent"), exitedReason_(exitedReason) {}
+    explicit RenderExitedEvent(int32_t exitedReason) : BaseEventInfo("RenderExitedEvent"), exitedReason_(exitedReason) {}
     ~RenderExitedEvent() = default;
 
     int32_t GetExitedReason() const
