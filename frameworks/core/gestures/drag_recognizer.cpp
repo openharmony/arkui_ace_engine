@@ -172,7 +172,6 @@ void DragRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndListFling();
     }
-
     auto& dragInfo = iter->second;
     dragInfo.velocityTracker_.UpdateTouchPoint(event, true);
     if (dragInfo.states_ == DetectState::DETECTED) {
