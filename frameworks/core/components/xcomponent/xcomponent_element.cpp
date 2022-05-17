@@ -100,6 +100,8 @@ void XComponentElement::InitEvent()
     if (!xcomponent_->GetXComponentInitEventId().IsEmpty()) {
         onSurfaceInit_ = AceSyncEvent<void(const std::string&, const uint32_t, const bool)>::Create(
             xcomponent_->GetXComponentInitEventId(), context_);
+        onSurfaceDestroy_ = AceSyncEvent<void(const std::string&, const uint32_t, const bool)>::Create(
+            xcomponent_->GetXComponentInitEventId(), context_);
         onXComponentInit_ =
             AceAsyncEvent<void(const std::string&)>::Create(xcomponent_->GetXComponentInitEventId(), context_);
     }
@@ -138,9 +140,22 @@ void XComponentElement::OnSurfaceDestroyEvent()
             renderXComponent->NativeXComponentDestroy();
         }
 
-        if (onSurfaceInit_) {
-            onSurfaceInit_(this->xcomponent_->GetId(), this->xcomponent_->GetNodeId(), true);
+        auto pipelineContext = context_.Upgrade();
+        if (!pipelineContext) {
+            LOGE("pipelineContext is nullptr");
+            return;
         }
+        pipelineContext->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this)] {
+                auto element = weak.Upgrade();
+                if (element) {
+                    if (element->onSurfaceDestroy_) {
+                        element->onSurfaceDestroy_(
+                            element->xcomponent_->GetId(), element->xcomponent_->GetNodeId(), true);
+                    }
+                }
+            },
+            TaskExecutor::TaskType::JS);
 
         if (onXComponentDestroy_) {
             onXComponentDestroy_(param);
@@ -420,6 +435,11 @@ void XComponentElement::ReleasePlatformResource()
             texture_.Reset();
             isExternalResource_ = false;
         }
+    }
+
+    if (xcomponent_) {
+        xcomponent_->SetTextureId(X_INVALID_ID);
+        xcomponent_->SetTexture(nullptr);
     }
 #endif
 }
