@@ -17,7 +17,7 @@
 
 #include "base/log/log.h"
 #include "core/components/web/web_component.h"
-#include "render_web.h"
+#include "core/components/web/render_web.h"
 
 namespace OHOS::Ace {
 
@@ -60,12 +60,12 @@ void WebElement::OnFocus()
 
 bool WebElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
-    auto renderWeb = DynamicCast<RenderWeb>(renderNode_);
+    auto renderWeb = AceType::DynamicCast<RenderWeb>(renderNode_);
     if (!renderWeb) {
         return false;
     }
     if (!renderWeb->GetDelegate()) {
-        LOGE("Delegate_ is nullptr.");
+        LOGE("Delegate is nullptr.");
         return false;
     }
     return renderWeb->GetDelegate()->OnKeyEvent(static_cast<int32_t>(keyEvent.code),
