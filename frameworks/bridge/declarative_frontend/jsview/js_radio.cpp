@@ -44,6 +44,10 @@ void JSRadio::Create(const JSCallbackInfo& info)
     radioComponent->SetMouseAnimationType(HoverAnimationType::NONE);
     ViewStackProcessor::GetInstance()->Push(radioComponent);
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto horizontalPadding = radioTheme->GetHotZoneHorizontalPadding();
+    auto verticalPadding = radioTheme->GetHotZoneVerticalPadding();
+    radioComponent->SetWidth(radioTheme->GetWidth() - horizontalPadding * 2);
+    radioComponent->SetHeight(radioTheme->GetHeight() - verticalPadding * 2);
     box->SetDeliverMinToChild(true);
     box->SetWidth(radioTheme->GetWidth());
     box->SetHeight(radioTheme->GetHeight());
@@ -112,7 +116,7 @@ void JSRadio::JsWidth(const JSRef<JSVal>& jsValue)
     if (radioComponent) {
         Dimension padding;
         padding = radioComponent->GetHotZoneHorizontalPadding();
-        radioComponent->SetWidth(value + padding * 2);
+        radioComponent->SetWidth(value);
         box->SetWidth(value + padding * 2);
     }
 }
@@ -139,7 +143,7 @@ void JSRadio::JsHeight(const JSRef<JSVal>& jsValue)
     auto radioComponent = AceType::DynamicCast<RadioComponent<std::string>>(stack->GetMainComponent());
     if (radioComponent) {
         padding = radioComponent->GetHotZoneVerticalPadding();
-        radioComponent->SetHeight(value + padding * 2);
+        radioComponent->SetHeight(value);
         box->SetHeight(value + padding * 2);
     }
 }
@@ -210,10 +214,10 @@ void JSRadio::SetPadding(const Dimension& topDimen, const Dimension& leftDimen)
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
 
     if (radioComponent) {
-        auto width = radioComponent->GetWidth() - radioComponent->GetHotZoneHorizontalPadding();
-        auto height = radioComponent->GetHeight() - radioComponent->GetHotZoneVerticalPadding();
-        radioComponent->SetHeight(height + topDimen * 2);
-        radioComponent->SetWidth(width + leftDimen * 2);
+        auto width = radioComponent->GetWidth();
+        auto height = radioComponent->GetHeight();
+        radioComponent->SetHeight(height);
+        radioComponent->SetWidth(width);
         box->SetHeight(height + topDimen * 2);
         box->SetWidth(width + leftDimen * 2);
         radioComponent->SetHotZoneVerticalPadding(topDimen);
