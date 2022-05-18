@@ -49,6 +49,9 @@ public:
     const Color& GetFocusColor() const;
     void SetFocusColor(const Color& focusColor);
 
+    const CopyOption& GetCopyOption() const;
+    void SetCopyOption(const CopyOption& copyOption);
+
     bool GetMaxWidthLayout() const;
     void SetMaxWidthLayout(bool isMaxWidthLayout);
 

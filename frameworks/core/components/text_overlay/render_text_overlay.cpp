@@ -151,6 +151,7 @@ void RenderTextOverlay::Update(const RefPtr<Component>& component)
     realTextDirection_ = overlay->GetRealTextDirection();
     BindBackendEvent(overlay);
     UpdateWeakTextField(overlay);
+    UpdateWeakText(overlay);
     MarkNeedLayout();
 }
 
@@ -345,6 +346,88 @@ void RenderTextOverlay::UpdateWeakTextField(const RefPtr<TextOverlayComponent>& 
         }
     };
     renderTextField->SetOnClipRectChanged(onClipRectChanged);
+}
+
+void RenderTextOverlay::UpdateWeakText(const RefPtr<TextOverlayComponent>& overlay)
+{
+    if (!overlay) {
+        return;
+    }
+    weakText_ = overlay->GetWeakText();
+    auto renderText = weakText_.Upgrade();
+    if (!renderText) {
+        return;
+    }
+    auto callback = [weak = WeakClaim(this)](const OverlayShowOption& option) {
+        auto overlay = weak.Upgrade();
+        if (!overlay) {
+            return;
+        }
+        if (option.updateOverlayType == UpdateOverlayType::CLICK ||
+            option.updateOverlayType == UpdateOverlayType::LONG_PRESS) {
+            overlay->childRightBoundary_ = 0.0;
+        }
+        overlay->SetVisible(true);
+        overlay->showOption_ = option;
+        overlay->startHandleOffset_ = option.startHandleOffset;
+        overlay->endHandleOffset_ = option.endHandleOffset;
+        overlay->isSingleHandle_ = option.isSingleHandle;
+        if (option.updateOverlayType == UpdateOverlayType::CLICK) {
+            if (overlay->onRebuild_) {
+                overlay->hasMenu_ = false;
+                overlay->onRebuild_(true, false, false, false, false);
+            }
+        } else if (option.updateOverlayType == UpdateOverlayType::LONG_PRESS) {
+            if (overlay->onRebuild_) {
+                overlay->hasMenu_ = false;
+                overlay->onRebuild_(false, true, false, true, false);
+            }
+        }
+    };
+    renderText->SetUpdateHandlePosition(callback);
+
+    auto callbackDiameter = [weak = WeakClaim(this)](const double& value) {
+        auto overlay = weak.Upgrade();
+        if (!overlay) {
+            LOGE("UpdateWeakText error, overlay is nullptr");
+            return;
+        }
+
+        overlay->SetVisible(true);
+        if (overlay->onRebuild_) {
+            overlay->onRebuild_(overlay->isSingleHandle_, !overlay->isSingleHandle_, overlay->hasMenu_,
+                !overlay->isSingleHandle_, false);
+        }
+        overlay->handleDiameter_ = Dimension(value, DimensionUnit::VP);
+        overlay->handleRadius_ = overlay->handleDiameter_ * FIFTY_PERCENT;
+    };
+    renderText->SetUpdateHandleDiameter(callbackDiameter);
+
+    auto callbackDiameterInner = [weak = WeakClaim(this)](const double& value) {
+        auto overlay = weak.Upgrade();
+        if (!overlay) {
+            LOGE("UpdateWeakText error, overlay is nullptr");
+            return;
+        }
+
+        overlay->SetVisible(true);
+        if (overlay->onRebuild_) {
+            overlay->onRebuild_(overlay->isSingleHandle_, !overlay->isSingleHandle_, overlay->hasMenu_,
+                !overlay->isSingleHandle_, false);
+        }
+        overlay->handleDiameterInner_ = Dimension(value, DimensionUnit::VP);
+        overlay->handleRadiusInner_ = overlay->handleDiameterInner_ * FIFTY_PERCENT;
+    };
+    renderText->SetUpdateHandleDiameterInner(callbackDiameterInner);
+
+    auto onClipRectChanged = [weak = WeakClaim(this)](const Rect& clipRect) {
+        auto overlay = weak.Upgrade();
+        if (overlay && (overlay->clipRect_ != clipRect)) {
+            overlay->clipRect_ = clipRect;
+            overlay->MarkNeedLayout();
+        }
+    };
+    renderText->SetOnClipRectChanged(onClipRectChanged);
 }
 
 void RenderTextOverlay::PerformLayout()
@@ -570,24 +653,33 @@ void RenderTextOverlay::HandleDragStart(const Offset& startOffset)
     childRightBoundary_ = 0.0;
     showOption_.showMenu = true;
     auto textField = weakTextField_.Upgrade();
-    if (!textField) {
-        LOGE("TextField is nullptr");
+    auto text = weakText_.Upgrade();
+    if (!textField && !text) {
+        LOGE("TextField or text is nullptr");
         return;
     }
 
     // Mark start and end index
-    startIndex_ = textField->GetEditingValue().selection.GetStart();
-    endIndex_ = textField->GetEditingValue().selection.GetEnd();
+    if (textField) {
+        startIndex_ = textField->GetEditingValue().selection.GetStart();
+        endIndex_ = textField->GetEditingValue().selection.GetEnd();
+        if (startHandleRegion_.ContainsInRegion(startOffset.GetX(), startOffset.GetY())) {
+            textField->SetInitIndex(endIndex_);
+        } else {
+            textField->SetInitIndex(startIndex_);
+        }
+    } else if (text) {
+        startIndex_ = text->GetTextSelect().GetStart();
+        endIndex_ = text->GetTextSelect().GetEnd();
+    }
 
     // Mark start or end flag and mark the index
     if (startHandleRegion_.ContainsInRegion(startOffset.GetX(), startOffset.GetY())) {
         isStartDrag_ = true;
         isEndDrag_ = false;
-        textField->SetInitIndex(endIndex_);
     } else {
         isStartDrag_ = false;
         isEndDrag_ = endHandleRegion_.ContainsInRegion(startOffset.GetX(), startOffset.GetY());
-        textField->SetInitIndex(startIndex_);
     }
 }
 

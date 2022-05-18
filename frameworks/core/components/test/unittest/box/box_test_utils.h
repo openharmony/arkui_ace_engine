@@ -102,6 +102,21 @@ public:
     {
         return 0;
     }
+
+    void ShowTextOverlay(const Offset& showOffset) override
+    {
+        return;
+    }
+
+    void RegisterCallbacksToOverlay() override
+    {
+        return;
+    }
+
+    Offset GetHandleOffset(int32_t extend) override
+    {
+        return Offset();
+    }
 };
 
 class BoxTestUtils {

@@ -35,6 +35,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/image/render_image.h"
 #include "core/components/text_field/text_field_component.h"
+#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
@@ -55,20 +56,6 @@ class ClickRecognizer;
 class ClickInfo;
 class TextOverlayComponent;
 struct TextEditingValue;
-
-enum class DirectionStatus : uint8_t {
-    LEFT_LEFT = 0, // System direction is LTR, text direction is LTR.
-    LEFT_RIGHT,
-    RIGHT_LEFT,
-    RIGHT_RIGHT,
-};
-
-enum class CursorPositionType {
-    NONE = 0,
-    END,      // end of paragraph
-    BOUNDARY, // boundary of LTR and RTL
-    NORMAL,
-};
 
 // Currently only CHARACTER.
 enum class CursorMoveSkip {

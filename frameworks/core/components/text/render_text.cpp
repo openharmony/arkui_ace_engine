@@ -17,12 +17,19 @@
 
 #include "base/geometry/size.h"
 #include "base/log/dump_log.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/font_manager.h"
 #include "core/components/text/text_component.h"
+#include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
+
+namespace {
+constexpr Dimension CURSOR_WIDTH = 1.5_vp;
+constexpr double HANDLE_HOT_ZONE = 10.0;
+}
 
 RenderText::~RenderText()
 {
@@ -33,6 +40,20 @@ RenderText::~RenderText()
         if (fontManager) {
             fontManager->UnRegisterCallback(AceType::WeakClaim(this));
             fontManager->RemoveVariationNode(WeakClaim(this));
+        }
+    }
+
+    auto textOverlayManager = GetTextOverlayManager(context_);
+    if (textOverlayManager) {
+        auto textOverlayBase = textOverlayManager->GetTextOverlayBase();
+        if (textOverlayBase) {
+            auto targetNode = textOverlayManager->GetTargetNode();
+            if (targetNode == this) {
+                textOverlayManager->PopTextOverlay();
+                textOverlayBase->ChangeSelection(0, 0);
+                textOverlayBase->MarkIsOverlayShowed(false);
+                targetNode->MarkNeedRender();
+            }
         }
     }
 }
@@ -69,10 +90,23 @@ void RenderText::Update(const RefPtr<Component>& component)
     if (textStyle_.IsAllowScale() || textStyle_.GetFontSize().Unit() == DimensionUnit::FP) {
         context->AddFontNode(AceType::WeakClaim(this));
     }
+
+    if (!clipboard_ && context) {
+        clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
+    }
+
+    copyOption_ = text_->GetCopyOption();
+    textForDisplay_ = text_->GetData();
+    defaultTextDirection_ = TextDirection::LTR;
+    realTextDirection_ = defaultTextDirection_;
+    textAffinity_ = TextAffinity::UPSTREAM;
+    textValue_.text = text_->GetData();
+    cursorWidth_ = NormalizeToPx(CURSOR_WIDTH);
 }
 
 void RenderText::OnPaintFinish()
 {
+    UpdateOverlay();
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     UpdateAccessibilityText();
 #endif
@@ -143,6 +177,7 @@ void RenderText::PerformLayout()
             spanChild->Layout(param);
         }
     }
+    textOverlayPaintRect_ = GetPaintRect();
 }
 
 bool RenderText::TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
@@ -180,7 +215,7 @@ bool RenderText::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
         !GetEventMarker(GetTouchPosition(localOffset), GestureType::TOUCH_CANCEL).IsEmpty()) {
         needTouchDetector_ = true;
     }
-    if (!needClickDetector_ && !needLongPressDetector_ && !needTouchDetector_) {
+    if (!needClickDetector_ && !needLongPressDetector_ && !needTouchDetector_ && copyOption_ == CopyOption::NoCopy) {
         return false;
     }
 
@@ -198,6 +233,20 @@ bool RenderText::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
 void RenderText::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
+    if (!textOverlayRecognizer_) {
+        textOverlayRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(context_);
+        textOverlayRecognizer_->SetOnLongPress([weak = WeakClaim(this)](const LongPressInfo& info) {
+            auto client = weak.Upgrade();
+            if (client) {
+                client->OnLongPress(info);
+            }
+        });
+    }
+    textOverlayRecognizer_->SetCoordinateOffset(coordinateOffset);
+    textOverlayRecognizer_->SetTouchRestrict(touchRestrict);
+    textOverlayRecognizer_->SetUseCatchMode(false);
+    result.emplace_back(textOverlayRecognizer_);
+
     if (GetChildren().empty()) {
         return;
     }
@@ -286,6 +335,234 @@ void RenderText::OnTouchTestHit(
         result.emplace_back(longPressRecognizer_);
         needLongPressDetector_ = false;
     }
+}
+
+void RenderText::OnLongPress(const LongPressInfo& longPressInfo)
+{
+    if (longPressInfo.GetSourceDevice() == SourceType::MOUSE) {
+        return;
+    }
+
+    auto textOverlayManager = GetTextOverlayManager(context_);
+    if (textOverlayManager) {
+        auto textOverlayBase = textOverlayManager->GetTextOverlayBase();
+        if (textOverlayBase) {
+            auto targetNode = textOverlayManager->GetTargetNode();
+            if (targetNode) {
+                textOverlayManager->PopTextOverlay();
+                textOverlayBase->ChangeSelection(0, 0);
+                textOverlayBase->MarkIsOverlayShowed(false);
+                targetNode->MarkNeedRender();
+            }
+        }
+        textOverlayManager->SetTextOverlayBase(AceType::WeakClaim(this));
+    }
+
+    Offset longPressPosition = longPressInfo.GetGlobalLocation();
+    InitSelection(longPressPosition, GetGlobalOffset());
+    ShowTextOverlay(longPressPosition);
+}
+
+void RenderText::ShowTextOverlay(const Offset& showOffset)
+{
+    auto selStart = textValue_.selection.GetStart();
+    auto selEnd = textValue_.selection.GetEnd();
+
+    Offset startHandleOffset = GetHandleOffset(selStart);
+    Offset endHandleOffset = GetHandleOffset(selEnd);
+
+    if (isOverlayShowed_ && updateHandlePosition_) {
+        Rect caretStart;
+        bool visible =
+            GetCaretRect(selStart, caretStart, 0.0) ? IsVisible(caretStart + textOffsetForShowCaret_) : false;
+        OverlayShowOption option { .showMenu = isOverlayShowed_,
+            .showStartHandle = visible,
+            .showEndHandle = visible,
+            .isSingleHandle = false,
+            .updateOverlayType = UpdateOverlayType::LONG_PRESS,
+            .startHandleOffset = startHandleOffset,
+            .endHandleOffset = endHandleOffset };
+        updateHandlePosition_(option);
+
+        // When the textOverlay is showed, restart the animation
+        if (!animator_) {
+            LOGE("Show textOverlay error, animator is nullptr");
+            return;
+        }
+        if (!animator_->IsStopped()) {
+            animator_->Stop();
+        }
+        animator_->Play();
+        return;
+    }
+
+    textOverlay_ =
+        AceType::MakeRefPtr<TextOverlayComponent>(GetThemeManager(), context_.Upgrade()->GetAccessibilityManager());
+    textOverlay_->SetWeakText(WeakClaim(this));
+    textOverlay_->SetLineHeight(selectHeight_);
+    textOverlay_->SetClipRect(GetPaintRect() + Size(HANDLE_HOT_ZONE, HANDLE_HOT_ZONE) +
+        GetOffsetToPage() - Offset(HANDLE_HOT_ZONE / 2.0, 0.0));
+    textOverlay_->SetTextDirection(defaultTextDirection_);
+    textOverlay_->SetStartHandleOffset(startHandleOffset);
+    textOverlay_->SetEndHandleOffset(endHandleOffset);
+    textOverlay_->SetContext(context_);
+    // Add the Animation
+    InitAnimation(context_);
+    RegisterCallbacksToOverlay();
+    MarkNeedRender();
+}
+
+void RenderText::RegisterCallbacksToOverlay()
+{
+    if (!textOverlay_) {
+        return;
+    }
+
+    textOverlay_->SetOnCopy([weak = AceType::WeakClaim(this)] {
+        auto text = weak.Upgrade();
+        if (text) {
+            text->HandleOnCopy();
+        }
+    });
+
+    textOverlay_->SetOnCopyAll(
+        [weak = AceType::WeakClaim(this)](const std::function<void(const Offset&, const Offset&)>& callback) {
+            auto text = weak.Upgrade();
+            if (text) {
+                text->HandleOnCopyAll(callback);
+            }
+        });
+
+    textOverlay_->SetOnStartHandleMove(
+        [weak = AceType::WeakClaim(this)](int32_t end, const Offset& startHandleOffset,
+            const std::function<void(const Offset&)>& startCallback, bool isSingleHandle) {
+            auto text = weak.Upgrade();
+            if (text) {
+                text->HandleOnStartHandleMove(end, startHandleOffset, startCallback, isSingleHandle);
+            }
+        });
+
+    textOverlay_->SetOnEndHandleMove([weak = AceType::WeakClaim(this)](int32_t start, const Offset& endHandleOffset,
+                                         const std::function<void(const Offset&)>& endCallback) {
+        auto text = weak.Upgrade();
+        if (text) {
+            text->HandleOnEndHandleMove(start, endHandleOffset, endCallback);
+        }
+    });
+
+    auto callback = [weak = WeakClaim(this), pipelineContext = context_,
+        textOverlay = textOverlay_](const std::string& data) {
+        auto context = pipelineContext.Upgrade();
+        if (!context) {
+            return;
+        }
+        auto textOverlayManager = context->GetTextOverlayManager();
+        if (!textOverlayManager) {
+            return;
+        }
+        textOverlayManager->PushTextOverlayToStack(textOverlay, pipelineContext);
+
+        auto text = weak.Upgrade();
+        if (text) {
+            text->UpdateOverlay();
+        }
+        text->MarkIsOverlayShowed(true);
+    };
+    if (clipboard_) {
+        clipboard_->GetData(callback);
+    }
+}
+
+void RenderText::UpdateOverlay()
+{
+    // When textfield PerformLayout, update overlay.
+    if (isOverlayShowed_ && updateHandlePosition_) {
+        auto selStart = textValue_.selection.GetStart();
+        auto selEnd = textValue_.selection.GetEnd();
+        Rect caretStart;
+        Rect caretEnd;
+        bool startHandleVisible =
+            GetCaretRect(selStart, caretStart, 0.0) ? IsVisible(caretStart + textOffsetForShowCaret_) : false;
+        bool endHandleVisible =
+            (selStart == selEnd)
+                ? startHandleVisible
+                : (GetCaretRect(selEnd, caretEnd, 0.0) ? IsVisible(caretEnd + textOffsetForShowCaret_) : false);
+
+        OverlayShowOption option { .showMenu = isOverlayShowed_,
+            .showStartHandle = startHandleVisible,
+            .showEndHandle = endHandleVisible,
+            .isSingleHandle = false,
+            .updateOverlayType = UpdateOverlayType::SCROLL,
+            .startHandleOffset = GetPositionForExtend(selStart),
+            .endHandleOffset = GetPositionForExtend(selEnd) };
+        updateHandlePosition_(option);
+        if (onClipRectChanged_) {
+            onClipRectChanged_(GetPaintRect() + Size(HANDLE_HOT_ZONE, HANDLE_HOT_ZONE) + GetOffsetToPage() -
+                               Offset(HANDLE_HOT_ZONE / 2.0, 0.0));
+        }
+    }
+}
+
+Offset RenderText::GetPositionForExtend(int32_t extend)
+{
+    if (extend < 0) {
+        extend = 0;
+    }
+    if (static_cast<size_t>(extend) > StringUtils::ToWstring(textValue_.text).length()) {
+        extend = static_cast<int32_t>(StringUtils::ToWstring(textValue_.text).length());
+    }
+    return GetHandleOffset(extend);
+}
+
+void RenderText::HandleOnCopy()
+{
+    if (!clipboard_) {
+        return;
+    }
+    if (textValue_.GetSelectedText().empty()) {
+        return;
+    }
+    clipboard_->SetData(textValue_.GetSelectedText());
+
+    auto textOverlayManager = GetTextOverlayManager(context_);
+    if (textOverlayManager) {
+        textOverlayManager->PopTextOverlay();
+    }
+    isOverlayShowed_ = false;
+    textValue_.UpdateSelection(0, 0);
+    MarkNeedRender();
+}
+
+void RenderText::HandleOnCopyAll(const std::function<void(const Offset&, const Offset&)>& callback)
+{
+    auto textSize = textValue_.GetWideText().length();
+    textValue_.UpdateSelection(0, textSize);
+    if (callback) {
+        callback(GetPositionForExtend(0), GetPositionForExtend(textValue_.GetWideText().length()));
+    }
+    MarkNeedRender();
+}
+
+void RenderText::HandleOnStartHandleMove(int32_t end, const Offset& startHandleOffset,
+    const std::function<void(const Offset&)>& startCallback, bool isSingleHandle)
+{
+    Offset realOffset = startHandleOffset;
+    if (startCallback) {
+        UpdateStartSelection(end, realOffset, GetGlobalOffset());
+        startCallback(GetHandleOffset(textValue_.selection.GetStart()));
+    }
+    MarkNeedRender();
+}
+
+void RenderText::HandleOnEndHandleMove(
+    int32_t start, const Offset& endHandleOffset, const std::function<void(const Offset&)>& endCallback)
+{
+    Offset realOffset = endHandleOffset;
+    if (endCallback) {
+        UpdateEndSelection(start, realOffset, GetGlobalOffset());
+        endCallback(GetHandleOffset(textValue_.selection.GetEnd()));
+    }
+    MarkNeedRender();
 }
 
 void RenderText::FireEvent(const EventMarker& marker)
@@ -451,7 +728,8 @@ void RenderText::CheckIfNeedMeasure()
     if (text_->IsChanged()) {
         needMeasure_ = true;
     }
-    UpdateIfChanged(textDirection_, text_->GetTextDirection());
+    UpdateIfChanged(defaultTextDirection_, text_->GetTextDirection());
+    realTextDirection_ = defaultTextDirection_;
     UpdateIfChanged(textStyle_, text_->GetTextStyle());
     UpdateIfChanged(focusColor_, text_->GetFocusColor());
     UpdateIfChanged(lostFocusColor_, textStyle_.GetTextColor());
@@ -479,7 +757,7 @@ void RenderText::ClearRenderObject()
     LOGD("TextNode ClearRenderObject");
     text_.Reset();
     textStyle_ = TextStyle();
-    textDirection_ = TextDirection::LTR;
+    defaultTextDirection_ = TextDirection::LTR;
     focusColor_ = Color();
     lostFocusColor_ = Color();
     fontScale_ = 1.0;

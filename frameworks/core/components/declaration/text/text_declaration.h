@@ -28,6 +28,7 @@ struct TextSpecializedAttribute : Attribute {
 struct TextSpecializedStyle : Style {
     TextStyle textStyle;
     Color focusColor;
+    CopyOption copyOption;
     bool isMaxWidthLayout = false;
     bool autoMaxLines = false;
 };
@@ -78,6 +79,19 @@ public:
         auto& style = MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
         CheckIsChanged(style.focusColor, focusColor);
         style.focusColor = focusColor;
+    }
+
+    const CopyOption& GetCopyOption() const
+    {
+        auto& style = static_cast<TextSpecializedStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+        return style.copyOption;
+    }
+
+    void SetCopyOption(const CopyOption& copyOption)
+    {
+        auto& style = MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
+        CheckIsChanged(style.copyOption, copyOption);
+        style.copyOption = copyOption;
     }
 
     bool IsMaxWidthLayout() const

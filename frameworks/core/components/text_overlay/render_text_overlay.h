@@ -142,11 +142,13 @@ protected:
     RefPtr<DragRecognizer> dragDetector_;
     RefPtr<RawRecognizer> touchDetector_;
     WeakPtr<RenderTextField> weakTextField_;
+    WeakPtr<RenderText> weakText_;
     RefPtr<Animator> controller_;
     WeakPtr<TextOverlayComponent> overlayComponent_;
 
 private:
     void UpdateWeakTextField(const RefPtr<TextOverlayComponent>& overlay);
+    void UpdateWeakText(const RefPtr<TextOverlayComponent>& overlay);
     void BindBackendEvent(const RefPtr<TextOverlayComponent>& overlay);
     void BindBackendEventV2(const RefPtr<TextOverlayComponent>& overlay);
     void RemoveBackendEvent(const RefPtr<TextOverlayComponent>& overlay);

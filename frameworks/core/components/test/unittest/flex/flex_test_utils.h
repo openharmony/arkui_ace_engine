@@ -73,6 +73,21 @@ public:
 
     double GetBaselineDistance(TextBaseline textBaseline) override;
 
+    void ShowTextOverlay(const Offset& showOffset) override
+    {
+        return;
+    }
+
+    void RegisterCallbacksToOverlay() override
+    {
+        return;
+    }
+
+    Offset GetHandleOffset(int32_t extend) override
+    {
+        return Offset();
+    }
+
 protected:
     Size Measure() override;
 };

@@ -37,6 +37,7 @@ public:
 protected:
     bool MaybeRelease() override;
     void ClearRenderObject() override;
+    Offset GetHandleOffset(int32_t extend) override;
 
 private:
     Size Measure() override;
@@ -58,7 +59,6 @@ private:
     void ChangeDirectionIfNeeded(const std::string& data);
     std::string ApplyWhiteSpace();
     void ApplyIndents(double width);
-    std::unique_ptr<txt::Paragraph> paragraph_;
 
     double paragraphNewWidth_ = 0.0;
     double lastLayoutMaxWidth_ = 0.0;
