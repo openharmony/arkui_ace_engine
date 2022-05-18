@@ -295,13 +295,13 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
 void Scrollable::HandleDragEnd(const GestureEvent& info)
 {
     LOGD("handle drag end, position is %{public}lf and %{public}lf, velocity is %{public}lf",
-        info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetMainSpeed());
+        info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetMainVelocity());
     controller_->ClearAllListeners();
     springController_->ClearAllListeners();
     isDragUpdateStop_ = false;
     touchUp_ = false;
     scrollPause_ = false;
-    double correctVelocity = std::clamp(info.GetMainSpeed(), MIN_VELOCITY + slipFactor_, MAX_VELOCITY - slipFactor_);
+    double correctVelocity = std::clamp(info.GetMainVelocity(), MIN_VELOCITY + slipFactor_, MAX_VELOCITY - slipFactor_);
     correctVelocity = correctVelocity * sVelocityScale_;
     currentVelocity_ = correctVelocity;
     if (dragEndCallback_) {
@@ -311,7 +311,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     if (outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {
         ProcessScrollOverCallback(correctVelocity);
     } else {
-        double mainPosition = GetMainOffset(info.GetGlobalLocation());
+        double mainPosition = GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()));
         LOGD("[scrollMotion]position(%{public}lf), velocity(%{public}lf)", mainPosition, correctVelocity);
         if (motion_) {
             motion_->Reset(sFriction_, mainPosition, correctVelocity);
