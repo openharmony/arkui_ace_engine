@@ -32,6 +32,7 @@ public:
 
     void OnFocus() override;
 
+    bool OnKeyEvent(const KeyEvent& keyEvent) override;
 private:
     std::string webSrc_;
     RefPtr<WebComponent> webComp_;
