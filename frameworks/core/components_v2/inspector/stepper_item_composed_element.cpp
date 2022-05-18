@@ -106,8 +106,6 @@ void StepperItemComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<
         LOGE("get GetStepperItemV2 failed");
         return;
     }
-
-    
     auto child = stepperItemV2->GetFirstChild();
     stepperItemV2->UpdateChildWithSlot(child, newComponent, -1, -1);
     stepperItemV2->MarkDirty();
