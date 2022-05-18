@@ -368,6 +368,11 @@ void RenderBoxBase::CalculateGridLayoutSize()
         edge.second = true;
     }
 
+    auto parent = gridColumnInfo_->GetParent();
+    if (parent) {
+        parent->BuildColumnWidth();
+    }
+
     double defaultWidth = gridColumnInfo_->GetWidth();
     if (NearEqual(defaultWidth, 0.0)) {
         return;
