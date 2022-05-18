@@ -303,6 +303,13 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             AceApplicationInfo::GetInstance().SetLocale((language == nullptr) ? "" : language,
                 (region == nullptr) ? "" : region, (script == nullptr) ? "" : script, "");
         }
+        if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
+            SystemProperties::SetColorMode(ColorMode::DARK);
+            LOGI("UIContent set dark mode");
+        } else {
+            SystemProperties::SetColorMode(ColorMode::LIGHT);
+            LOGI("UIContent set light mode");
+        }
     }
 
     auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
@@ -670,7 +677,49 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         LOGE("UIContent null config");
         return;
     }
-    LOGI("UIContent UpdateConfiguration %{public}s", config->GetName().c_str());
+    auto colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    if (colorMode.empty()) {
+        LOGW("UIContent null config");
+        return;
+    }
+    if (colorMode != OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT &&
+        colorMode != OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_DARK) {
+        LOGE("UIContent invalid color mode: %{public}s", colorMode.c_str());
+        return;
+    }
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("UIContent container is null");
+        return;
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("UIContent is null");
+        return;
+    }
+
+    LOGI("UIContent UpdateConfiguration %{public}s, color mode:%{public}s",
+        config->GetName().c_str(), colorMode.c_str());
+    taskExecutor->PostTask([context = context_, colorMode]() {
+        auto contextConfig = context.lock();
+        if (!contextConfig) {
+            LOGI("UIContent UpdateConfiguration context is null");
+            return;
+        }
+        std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+        auto resourceManager = contextConfig->GetResourceManager();
+        if (resourceManager) {
+            resourceManager->GetResConfig(*resConfig);
+            if (colorMode == OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT) {
+                resConfig->SetColorMode(OHOS::Global::Resource::ColorMode::LIGHT);
+                SystemProperties::SetColorMode(ColorMode::LIGHT);
+            } else {
+                resConfig->SetColorMode(OHOS::Global::Resource::ColorMode::DARK);
+                SystemProperties::SetColorMode(ColorMode::DARK);
+            }
+            resourceManager->UpdateResConfig(*resConfig);
+        }
+        }, TaskExecutor::TaskType::PLATFORM);
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason)
