@@ -51,7 +51,7 @@ private:
     void GetAttrsAndStylesV2(std::unique_ptr<JsonValue>& jsonNode, const RefPtr<AccessibilityNode>& node);
     std::string UpdateNodeRectStrInfo(const RefPtr<AccessibilityNode> node);
     std::string UpdateNodeRectStrInfoV2(const RefPtr<AccessibilityNode> node);
-    std::string ConvertStrToPropertyType(const std::string& typeValue);
+    std::string ConvertStrToPropertyType(std::string& typeValue);
     std::string ConvertPseudoClassStyle(const std::string pseudoClassValue);
 };
 

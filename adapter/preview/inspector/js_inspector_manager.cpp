@@ -393,8 +393,13 @@ std::string JsInspectorManager::UpdateNodeRectStrInfoV2(const RefPtr<Accessibili
     return strRec;
 }
 
-std::string JsInspectorManager::ConvertStrToPropertyType(const std::string& typeValue)
+std::string JsInspectorManager::ConvertStrToPropertyType(std::string& typeValue)
 {
+    if (typeValue == "transitionEnterName") {
+        typeValue = "transitionEnter";
+    } else if (typeValue == "transitionExitName") {
+        typeValue = "transitionExit";
+    }
     std::string dstStr;
     std::regex regex("([A-Z])");
     dstStr = regex_replace(typeValue, regex, "-$1");

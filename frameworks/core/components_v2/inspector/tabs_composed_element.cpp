@@ -33,6 +33,10 @@ const std::unordered_map<std::string, std::function<std::string(const TabsCompos
     { "barHeight", [](const TabsComposedElement& inspector) { return inspector.GetBarHeight(); } },
 };
 
+const std::unordered_map<std::string, std::function<float(const TabsComposedElement&)>> CREATE_JSON_FLOAT_MAP {
+    { "animationDuration", [](const TabsComposedElement& inspector) { return inspector.GetAnimationDuration(); } },
+};
+
 } // namespace
 
 void TabsComposedElement::Dump()
@@ -52,6 +56,9 @@ std::unique_ptr<JsonValue> TabsComposedElement::ToJsonObject() const
     auto resultJson = InspectorComposedElement::ToJsonObject();
     for (const auto& value : CREATE_JSON_MAP) {
         resultJson->Put(value.first.c_str(), value.second(*this).c_str());
+    }
+    for (const auto& value : CREATE_JSON_FLOAT_MAP) {
+        resultJson->Put(value.first.c_str(), value.second(*this));
     }
     return resultJson;
 }
@@ -102,6 +109,13 @@ std::string TabsComposedElement::GetBarHeight() const
     auto renderBox = GetRenderBox(GetRenderTabBar(GetRenderFlex()));
     auto barHeight = renderBox ? renderBox->GetHeight() : 0.0;
     return std::to_string(barHeight);
+}
+
+float TabsComposedElement::GetAnimationDuration() const
+{
+    auto renderTabContent = GetRenderTabContent(GetRenderFlex());
+    auto animationDuration = renderTabContent ? renderTabContent->GetScrollDuration() : 200.0;
+    return animationDuration;
 }
 
 RefPtr<RenderFlex> TabsComposedElement::GetRenderFlex() const
