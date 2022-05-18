@@ -60,8 +60,6 @@ struct ACE_PREVIEW_EXPORT AceRunArgs {
     std::string systemResourcesPath;
     // The absolute path of app resources.
     std::string appResourcesPath;
-    // The absolute base path of system fonts file and fonts config.
-    std::string fontBasePath;
 
     // Indecate light or dark theme.
     uint32_t themeId = THEME_ID_LIGHT;
@@ -94,7 +92,7 @@ struct ACE_PREVIEW_EXPORT AceRunArgs {
     AceVersion aceVersion = AceVersion::ACE_1_0;
 
     bool formsEnabled = false;
-    bool physicalDeviceFontsEnabled = false;
+    bool physicalDeviceFontsEnabled = true;
 
     SendRenderDataCallback onRender = nullptr;
     SendCurrentRouterCallback onRouterChange = nullptr;
