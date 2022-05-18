@@ -62,7 +62,7 @@ void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
         if (!usingExistVM_) {
-            JSNApi::StopDebugger(libPath_.c_str());
+            JSNApi::StopDebugger(vm_);
             JSNApi::DestroyJSVM(vm_);
         }
         vm_ = nullptr;

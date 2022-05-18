@@ -56,12 +56,15 @@ void HdcRegister::LoadRegisterSo()
     }
 }
 
-void HdcRegister::StartHdcRegister()
+void HdcRegister::StartHdcRegister(int32_t instanceId)
 {
     LOGI("Start Hdc Register");
     if (registerHandler_ == nullptr) {
         LOGE("registerHandler_ is null");
         return;
+    }
+    if (instanceId != 0) {
+        return; // Applications and abilities should only call this function once, especially in multi-instance.
     }
     StartRegister startRegister = (StartRegister)dlsym(registerHandler_, "StartConnect");
     if (startRegister == nullptr) {
@@ -71,9 +74,9 @@ void HdcRegister::StartHdcRegister()
     startRegister(pkgName_);
 }
 
-void HdcRegister::StopHdcRegister()
+void HdcRegister::StopHdcRegister(int32_t instanceId)
 {
-    if (!isDebugVersion_) {
+    if (!isDebugVersion_ || instanceId != 0) {
         return;
     }
     LOGI("Stop Hdc Register");
