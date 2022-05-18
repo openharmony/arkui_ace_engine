@@ -16,8 +16,8 @@
 #include "core/components/web/web_element.h"
 
 #include "base/log/log.h"
-#include "core/components/web/web_component.h"
 #include "core/components/web/render_web.h"
+#include "core/components/web/web_component.h"
 
 namespace OHOS::Ace {
 

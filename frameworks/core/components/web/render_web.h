@@ -70,7 +70,7 @@ public:
         delegate_ = delegate;
     }
 
-    RefPtr<WebDelegate> GetDelegate()
+    RefPtr<WebDelegate> GetDelegate() const
     {
         return delegate_;
     }
