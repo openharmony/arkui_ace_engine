@@ -95,12 +95,12 @@ template("ace_ohos_standard_source_set") {
       "ability_runtime:ability_manager",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
+      "dataability:native_dataability",
       "eventhandler:libeventhandler",
       "form_runtime:fmskit_native",
       "form_runtime:form_manager",
       "ipc:ipc_core",
       "napi:ace_napi",
-      "dataability:native_dataability",
       "preferences:native_preferences",
       "relational_store:native_rdb",
     ]
