@@ -134,13 +134,19 @@ class ACE_EXPORT XComponentComponent : public RenderComponent {
 public:
     using CreatedCallback = std::function<void()>;
     using ReleasedCallback = std::function<void(bool)>;
+    using DeleteCallback = std::function<void()>;
     using ErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using MethodCall = std::function<void(const std::string&)>;
     using Method = std::string;
 
     XComponentComponent() = default;
     explicit XComponentComponent(const std::string& type);
-    ~XComponentComponent() override = default;
+    ~XComponentComponent() override
+    {
+        if (deleteCallback_) {
+            deleteCallback_();
+        }
+    }
 
     RefPtr<RenderNode> CreateRenderNode() override;
     RefPtr<Element> CreateElement() override;
@@ -267,6 +273,16 @@ public:
         xcomponentController_ = xcomponentController;
     }
 
+    void RegisterDeleteCallback(DeleteCallback&& callback)
+    {
+        deleteCallback_ = std::move(callback);
+    }
+
+    void SetDeleteCallbackToNull()
+    {
+        deleteCallback_ = nullptr;
+    }
+
 #ifdef OHOS_STANDARD_SYSTEM
     void SetNativeWindow(void* nativeWindow)
     {
@@ -283,8 +299,8 @@ private:
     RefPtr<XComponentDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
     ReleasedCallback releasedCallback_ = nullptr;
+    DeleteCallback deleteCallback_ = nullptr;
     ErrorCallback errorCallback_ = nullptr;
-    RefPtr<XComponentDelegate> delegate_;
     RefPtr<XComponentTaskPool> pool_;
     RefPtr<XComponentController> xcomponentController_;
     std::string type_;

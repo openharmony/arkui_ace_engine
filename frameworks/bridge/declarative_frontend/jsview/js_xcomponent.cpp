@@ -53,6 +53,14 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     xcomponentComponent->SetXComponentType(type->ToString());
     xcomponentComponent->SetLibraryName(libraryname->ToString());
 
+    XComponentClient::GetInstance().AddXComponentToXcomponentsMap(xcomponentComponent->GetId(), xcomponentComponent);
+    auto deleteCallback = [xcId = id->ToString()]() {
+        XComponentClient::GetInstance().DeleteFromXcomponentsMapById(xcId);
+        XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(xcId);
+        XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(xcId);
+    };
+    xcomponentComponent->RegisterDeleteCallback(deleteCallback);
+
     auto controllerObj = paramObject->GetProperty("controller");
     if (controllerObj->IsObject()) {
         auto jsXComponentController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSXComponentController>();
@@ -82,8 +90,6 @@ void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
         return true;
     };
     XComponentClient::GetInstance().RegisterCallback(getXComponentCallback);
-
-    XComponentClient::GetInstance().AddXComponentToXcomponentsMap(xcomponentComponent->GetId(), xcomponentComponent);
 
     JSRef<JSVal> jsVal;
     XComponentClient::GetInstance().GetJSVal(jsVal);

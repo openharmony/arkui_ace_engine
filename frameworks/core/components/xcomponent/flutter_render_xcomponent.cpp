@@ -80,8 +80,10 @@ void FlutterRenderXComponent::Paint(RenderContext& context, const Offset& offset
         layer_->SetClip(0.0, layout.Width(), 0.0, layout.Height(), Flutter::Clip::NONE);
         AddBackgroundLayer();
         AddTextureLayer();
+        RenderXComponent::Paint(context, offset);
+    } else {
+        RenderNode::Paint(context, offset);
     }
-    RenderXComponent::Paint(context, offset);
 }
 
 void FlutterRenderXComponent::DumpTree(int32_t depth)

@@ -563,11 +563,11 @@ void QJSDeclarativeEngine::FireExternalEvent(
         XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(componentId);
         return;
     }
-    OHOS::Ace::Framework::XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(
-        componentId, nativeXComponentImpl_, nativeXComponent_);
+    std::tie(nativeXComponentImpl_, nativeXComponent_) =
+        XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(componentId);
 
-    RefPtr<XComponentComponent> xcomponent;
-    OHOS::Ace::Framework::XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId, xcomponent);
+    RefPtr<XComponentComponent> xcomponent =
+        XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId);
     if (!xcomponent) {
         LOGE("FireExternalEvent xcomponent is null.");
         return;
