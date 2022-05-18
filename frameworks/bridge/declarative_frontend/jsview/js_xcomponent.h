@@ -98,12 +98,9 @@ public:
 
     void AddXComponentToXcomponentsMap(const std::string& xcomponentId, const RefPtr<XComponentComponent>& component)
     {
-        auto weakComponent = AceType::WeakClaim(AceType::RawPtr(component));
-        auto it = xcomponentsMap_.find(xcomponentId);
-        if (it != xcomponentsMap_.end()) {
-            it->second = weakComponent;
-        } else {
-            xcomponentsMap_[xcomponentId] = weakComponent;
+        auto result = xcomponentsMap_.try_emplace(xcomponentId, component);
+        if (!result.second) {
+            result.first->second = component;
         }
     }
 
