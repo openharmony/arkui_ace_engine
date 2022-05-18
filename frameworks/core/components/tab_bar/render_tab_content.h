@@ -119,6 +119,11 @@ public:
         return scrollable_;
     }
 
+    float GetScrollDuration() const
+    {
+        return scrollDuration_;
+    }
+
 private:
     // for handle scroll tabContent
     void OnTouchTestHit(
