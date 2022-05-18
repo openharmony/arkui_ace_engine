@@ -579,6 +579,9 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("databaseAccess", &JSWeb::DatabaseAccess);
     JSClass<JSWeb>::StaticMethod("textZoomAtio", &JSWeb::TextZoomAtio);
     JSClass<JSWeb>::StaticMethod("webDebuggingAccess", &JSWeb::WebDebuggingAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSWeb>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSWeb>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -728,7 +731,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         webComponent->SetWebController(controller->GetController());
     }
     ViewStackProcessor::GetInstance()->Push(webComponent);
-    JSInteractableView::SetFocusable(false);
+    JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);
 }
 
