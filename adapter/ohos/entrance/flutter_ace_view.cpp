@@ -171,6 +171,21 @@ void GetMouseEventButton(int32_t button, MouseEvent& events)
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_MIDDLE:
             events.button = MouseButton::MIDDLE_BUTTON;
             break;
+        case OHOS::MMI::PointerEvent::MOUSE_BUTTON_BACK:
+            events.button = MouseButton::BACK_BUTTON;
+            break;
+        case OHOS::MMI::PointerEvent::MOUSE_BUTTON_FORWARD:
+            events.button = MouseButton::FORWARD_BUTTON;
+            break;
+        case OHOS::MMI::PointerEvent::MOUSE_BUTTON_SIDE:
+            events.button = MouseButton::SIDE_BUTTON;
+            break;
+        case OHOS::MMI::PointerEvent::MOUSE_BUTTON_EXTRA:
+            events.button = MouseButton::EXTRA_BUTTON;
+            break;
+        case OHOS::MMI::PointerEvent::MOUSE_BUTTON_TASK:
+            events.button = MouseButton::TASK_BUTTON;
+            break;
         default:
             events.button = MouseButton::NONE_BUTTON;
             break;

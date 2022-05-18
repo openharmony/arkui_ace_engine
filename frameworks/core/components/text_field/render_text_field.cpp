@@ -2130,7 +2130,10 @@ void RenderTextField::ChangeBorderToErrorStyle()
     } else {
         errorBorder = Border(errorBorderEdge);
     }
-    errorBorder.SetBorderRadius(decoration_->GetBorder().TopLeftRadius());
+    errorBorder.SetTopLeftRadius(decoration_->GetBorder().TopLeftRadius());
+    errorBorder.SetTopRightRadius(decoration_->GetBorder().TopRightRadius());
+    errorBorder.SetBottomLeftRadius(decoration_->GetBorder().BottomLeftRadius());
+    errorBorder.SetBottomRightRadius(decoration_->GetBorder().BottomRightRadius());
     decoration_->SetBorder(errorBorder);
 }
 

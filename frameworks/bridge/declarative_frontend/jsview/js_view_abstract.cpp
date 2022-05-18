@@ -1892,37 +1892,25 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorder", info, checkList)) {
+        LOGE("args is not a object. %s", info[0]->ToString().c_str());
         return;
     }
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-        info.ReturnSelf();
-        return;
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    auto valueWidth = object->GetProperty("width");
+    if (!valueWidth->IsUndefined()) {
+        ParseBorderWidth(valueWidth);
     }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    AnimationOption option = stack->GetImplicitAnimationOption();
-    auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
-    if (!boxComponent) {
-        LOGE("boxComponent is null");
-        return;
+    auto valueColor = object->GetProperty("color");
+    if (!valueColor->IsUndefined()) {
+        ParseBorderColor(valueColor);
     }
-    if (argsPtrItem->Contains("width")) {
-        auto widthArgs = argsPtrItem->GetValue("width");
-        ParseBorderWidth(widthArgs);
+    auto valueRadius = object->GetProperty("radius");
+    if (!valueRadius->IsUndefined()) {
+        ParseBorderRadius(valueRadius);
     }
-    if (argsPtrItem->Contains("color")) {
-        auto colorArgs = argsPtrItem->GetValue("color");
-        ParseBorderColor(colorArgs);
-    }
-    if (argsPtrItem->Contains("radius")) {
-        auto radiusArgs = argsPtrItem->GetValue("radius");
-        ParseBorderRadius(radiusArgs);
-    }
-    if (argsPtrItem->Contains("style")) {
-        auto styleArgs = argsPtrItem->GetValue("style");
-        ParseBorderStyle(styleArgs);
+    auto valueStyle = object->GetProperty("style");
+    if (!valueStyle->IsUndefined()) {
+        ParseBorderStyle(valueStyle);
     }
     info.ReturnSelf();
 }
@@ -1932,44 +1920,35 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorderWidth", info, checkList)) {
+        LOGE("args need a string or number or object");
         return;
     }
-
-    std::unique_ptr<JsonValue> argsPtrItem;
-    if (info[0]->IsObject()) {
-        argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (!argsPtrItem || argsPtrItem->IsNull()) {
-            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-            return;
-        }
-    } else {
-        argsPtrItem = JsonUtil::Create(true);
-        argsPtrItem->Put("left", info[0]->ToString().c_str());
-        argsPtrItem->Put("right", info[0]->ToString().c_str());
-        argsPtrItem->Put("top", info[0]->ToString().c_str());
-        argsPtrItem->Put("bottom", info[0]->ToString().c_str());
-    }
-    ParseBorderWidth(argsPtrItem);
+    ParseBorderWidth(info[0]);
 }
 
-void JSViewAbstract::ParseBorderWidth(std::unique_ptr<JsonValue>& args)
+void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args, RefPtr<Decoration> decoration)
 {
-    Dimension leftDimen;
-    Dimension rightDimen;
-    Dimension topDimen;
-    Dimension bottomDimen;
-    if (args->Contains("left") || args->Contains("right") || args->Contains("top") || args->Contains("bottom")) {
-        leftDimen = BoxComponentHelper::GetBorderLeftWidth(GetBackDecoration());
-        rightDimen = BoxComponentHelper::GetBorderRightWidth(GetBackDecoration());
-        topDimen = BoxComponentHelper::GetBorderTopWidth(GetBackDecoration());
-        bottomDimen = BoxComponentHelper::GetBorderBottomWidth(GetBackDecoration());
-        ParseJsonDimensionVp(args->GetValue("left"), leftDimen);
-        ParseJsonDimensionVp(args->GetValue("right"), rightDimen);
-        ParseJsonDimensionVp(args->GetValue("top"), topDimen);
-        ParseJsonDimensionVp(args->GetValue("bottom"), bottomDimen);
+    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
+        return;
+    }
+    if (!decoration) {
+        decoration = GetBackDecoration();
+    }
+    Dimension leftDimen = BoxComponentHelper::GetBorderLeftWidth(decoration);
+    Dimension rightDimen = BoxComponentHelper::GetBorderRightWidth(decoration);
+    Dimension topDimen = BoxComponentHelper::GetBorderTopWidth(decoration);
+    Dimension bottomDimen = BoxComponentHelper::GetBorderBottomWidth(decoration);
+    if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        ParseJsDimensionVp(object->GetProperty("left"), leftDimen);
+        ParseJsDimensionVp(object->GetProperty("right"), rightDimen);
+        ParseJsDimensionVp(object->GetProperty("top"), topDimen);
+        ParseJsDimensionVp(object->GetProperty("bottom"), bottomDimen);
     } else {
         Dimension borderWidth;
-        if (!ParseJsonDimensionVp(args, borderWidth)) {
+        if (!ParseJsDimensionVp(args, borderWidth)) {
+            LOGE("parse to dimension VP failed!");
             return;
         }
         leftDimen = borderWidth;
@@ -1977,10 +1956,11 @@ void JSViewAbstract::ParseBorderWidth(std::unique_ptr<JsonValue>& args)
         topDimen = borderWidth;
         bottomDimen = borderWidth;
     }
+
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
-        BoxComponentHelper::SetBorderWidth(GetBackDecoration(), leftDimen, rightDimen, topDimen, bottomDimen, option);
+        BoxComponentHelper::SetBorderWidth(decoration, leftDimen, rightDimen, topDimen, bottomDimen, option);
     } else {
         auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
         if (!boxComponent) {
@@ -1991,8 +1971,7 @@ void JSViewAbstract::ParseBorderWidth(std::unique_ptr<JsonValue>& args)
             BoxStateAttribute::BORDER_WIDTH, AnimatableDimension(leftDimen, option), stack->GetVisualState());
         if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::BORDER_WIDTH, VisualState::NORMAL)) {
             boxComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(BoxStateAttribute::BORDER_WIDTH,
-                AnimatableDimension(BoxComponentHelper::GetBorderWidth(GetBackDecoration()), option),
-                VisualState::NORMAL);
+                AnimatableDimension(BoxComponentHelper::GetBorderWidth(decoration), option), VisualState::NORMAL);
         }
     }
 }
@@ -2002,44 +1981,35 @@ void JSViewAbstract::JsBorderColor(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorderColor", info, checkList)) {
+        LOGE("args need a string or number or object");
         return;
     }
-
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (info[0]->IsObject()) {
-        argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (!argsPtrItem || argsPtrItem->IsNull()) {
-            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-            return;
-        }
-    } else {
-        argsPtrItem = JsonUtil::Create(true);
-        argsPtrItem->Put("left", info[0]->ToString().c_str());
-        argsPtrItem->Put("right", info[0]->ToString().c_str());
-        argsPtrItem->Put("top", info[0]->ToString().c_str());
-        argsPtrItem->Put("bottom", info[0]->ToString().c_str());
-    }
-    ParseBorderColor(argsPtrItem);
+    ParseBorderColor(info[0]);
 }
 
-void JSViewAbstract::ParseBorderColor(std::unique_ptr<JsonValue>& args)
+void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoration> decoration)
 {
-    Color topColor;
-    Color bottomColor;
-    Color leftColor;
-    Color rightColor;
-    if (args->Contains("left") || args->Contains("right") || args->Contains("top") || args->Contains("bottom")) {
-        leftColor = BoxComponentHelper::GetBorderColorLeft(GetBackDecoration());
-        rightColor = BoxComponentHelper::GetBorderColorRight(GetBackDecoration());
-        topColor = BoxComponentHelper::GetBorderColorTop(GetBackDecoration());
-        bottomColor = BoxComponentHelper::GetBorderColorBottom(GetBackDecoration());
-        ParseJsonColor(args->GetValue("left"), leftColor);
-        ParseJsonColor(args->GetValue("right"), rightColor);
-        ParseJsonColor(args->GetValue("top"), topColor);
-        ParseJsonColor(args->GetValue("bottom"), bottomColor);
+    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
+        return;
+    }
+    if (!decoration) {
+        decoration = GetBackDecoration();
+    }
+    Color leftColor = BoxComponentHelper::GetBorderColorTop(decoration);
+    Color rightColor = BoxComponentHelper::GetBorderColorBottom(decoration);
+    Color topColor = BoxComponentHelper::GetBorderColorLeft(decoration);
+    Color bottomColor = BoxComponentHelper::GetBorderColorRight(decoration);
+    if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        ParseJsColor(object->GetProperty("left"), leftColor);
+        ParseJsColor(object->GetProperty("right"), rightColor);
+        ParseJsColor(object->GetProperty("top"), topColor);
+        ParseJsColor(object->GetProperty("bottom"), bottomColor);
     } else {
         Color borderColor;
-        if (!ParseJsonColor(args, borderColor)) {
+        if (!ParseJsColor(args, borderColor)) {
+            LOGE("parse to color failed!");
             return;
         }
         leftColor = borderColor;
@@ -2047,10 +2017,11 @@ void JSViewAbstract::ParseBorderColor(std::unique_ptr<JsonValue>& args)
         topColor = borderColor;
         bottomColor = borderColor;
     }
+
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
-        BoxComponentHelper::SetBorderColor(GetBackDecoration(), leftColor, rightColor, topColor, bottomColor, option);
+        BoxComponentHelper::SetBorderColor(decoration, leftColor, rightColor, topColor, bottomColor, option);
     } else {
         auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
         if (!boxComponent) {
@@ -2060,7 +2031,7 @@ void JSViewAbstract::ParseBorderColor(std::unique_ptr<JsonValue>& args)
         boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(
             BoxStateAttribute::BORDER_COLOR, AnimatableColor(leftColor, option), stack->GetVisualState());
         if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::BORDER_COLOR, VisualState::NORMAL)) {
-            auto c = BoxComponentHelper::GetBorderColor(GetBackDecoration());
+            auto c = BoxComponentHelper::GetBorderColor(decoration);
             boxComponent->GetStateAttributes()->AddAttribute<AnimatableColor>(
                 BoxStateAttribute::BORDER_COLOR, AnimatableColor(c, option), VisualState::NORMAL);
         }
@@ -2072,45 +2043,35 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorderRadius", info, checkList)) {
+        LOGE("args need a string or number or object");
         return;
     }
-
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (info[0]->IsObject()) {
-        argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (!argsPtrItem || argsPtrItem->IsNull()) {
-            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-            return;
-        }
-    } else {
-        argsPtrItem = JsonUtil::Create(true);
-        argsPtrItem->Put("topLeft", info[0]->ToString().c_str());
-        argsPtrItem->Put("topRight", info[0]->ToString().c_str());
-        argsPtrItem->Put("bottomLeft", info[0]->ToString().c_str());
-        argsPtrItem->Put("bottomRight", info[0]->ToString().c_str());
-    }
-    ParseBorderRadius(argsPtrItem);
+    ParseBorderRadius(info[0]);
 }
 
-void JSViewAbstract::ParseBorderRadius(std::unique_ptr<JsonValue>& args)
+void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, RefPtr<Decoration> decoration)
 {
-    Dimension radiusTopLeft;
-    Dimension radiusTopRight;
-    Dimension radiusBottomLeft;
-    Dimension radiusBottomRight;
-    if (args->Contains("topLeft") || args->Contains("topRight") || args->Contains("bottomLeft") ||
-        args->Contains("bottomRight")) {
-        radiusTopLeft = BoxComponentHelper::GetBorderRadiusTopLeft(GetBackDecoration()).GetX();
-        radiusTopRight = BoxComponentHelper::GetBorderRadiusTopRight(GetBackDecoration()).GetX();
-        radiusBottomLeft = BoxComponentHelper::GetBorderRadiusBottomLeft(GetBackDecoration()).GetX();
-        radiusBottomRight = BoxComponentHelper::GetBorderRadiusBottomRight(GetBackDecoration()).GetX();
-        ParseJsonDimensionVp(args->GetValue("topLeft"), radiusTopLeft);
-        ParseJsonDimensionVp(args->GetValue("topRight"), radiusTopRight);
-        ParseJsonDimensionVp(args->GetValue("bottomLeft"), radiusBottomLeft);
-        ParseJsonDimensionVp(args->GetValue("bottomRight"), radiusBottomRight);
+    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
+        return;
+    }
+    if (!decoration) {
+        decoration = GetBackDecoration();
+    }
+    Dimension radiusTopLeft = BoxComponentHelper::GetBorderRadiusTopLeft(decoration).GetX();
+    Dimension radiusTopRight = BoxComponentHelper::GetBorderRadiusTopRight(decoration).GetX();
+    Dimension radiusBottomLeft = BoxComponentHelper::GetBorderRadiusBottomLeft(decoration).GetX();
+    Dimension radiusBottomRight = BoxComponentHelper::GetBorderRadiusBottomRight(decoration).GetX();
+    if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        ParseJsDimensionVp(object->GetProperty("topLeft"), radiusTopLeft);
+        ParseJsDimensionVp(object->GetProperty("topRight"), radiusTopRight);
+        ParseJsDimensionVp(object->GetProperty("bottomLeft"), radiusBottomLeft);
+        ParseJsDimensionVp(object->GetProperty("bottomRight"), radiusBottomRight);
     } else {
         Dimension borderRadius;
-        if (!ParseJsonDimensionVp(args, borderRadius)) {
+        if (!ParseJsDimensionVp(args, borderRadius)) {
+            LOGE("parse to dimension VP failed!");
             return;
         }
         radiusTopLeft = borderRadius;
@@ -2118,11 +2079,12 @@ void JSViewAbstract::ParseBorderRadius(std::unique_ptr<JsonValue>& args)
         radiusBottomLeft = borderRadius;
         radiusBottomRight = borderRadius;
     }
+
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
         BoxComponentHelper::SetBorderRadius(
-            GetBackDecoration(), radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight, option);
+            decoration, radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight, option);
     } else {
         auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
         if (!boxComponent) {
@@ -2143,56 +2105,55 @@ void JSViewAbstract::JsBorderStyle(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorderStyle", info, checkList)) {
+        LOGE("args need a string or number or object");
         return;
     }
-
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (info[0]->IsObject()) {
-        argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (!argsPtrItem || argsPtrItem->IsNull()) {
-            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-            return;
-        }
-    } else {
-        argsPtrItem = JsonUtil::Create(true);
-        argsPtrItem->Put("left", info[0]->ToString().c_str());
-        argsPtrItem->Put("right", info[0]->ToString().c_str());
-        argsPtrItem->Put("top", info[0]->ToString().c_str());
-        argsPtrItem->Put("bottom", info[0]->ToString().c_str());
-    }
-    ParseBorderStyle(argsPtrItem);
+    ParseBorderStyle(info[0]);
 }
 
-void JSViewAbstract::ParseBorderStyle(std::unique_ptr<JsonValue>& args)
+void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args, RefPtr<Decoration> decoration)
 {
-    BorderStyle styleLeft;
-    BorderStyle styleRight;
-    BorderStyle styleTop;
-    BorderStyle styleBottom;
-    if (args->Contains("left") || args->Contains("right") || args->Contains("top") || args->Contains("bottom")) {
-        styleLeft = static_cast<BorderStyle>(
-            args->GetInt("left", static_cast<int32_t>(BoxComponentHelper::GetBorderStyleLeft(GetBackDecoration()))));
-        styleRight = static_cast<BorderStyle>(
-            args->GetInt("right", static_cast<int32_t>(BoxComponentHelper::GetBorderStyleRight(GetBackDecoration()))));
-        styleTop = static_cast<BorderStyle>(
-            args->GetInt("top", static_cast<int32_t>(BoxComponentHelper::GetBorderStyleTop(GetBackDecoration()))));
-        styleBottom = static_cast<BorderStyle>(args->GetInt(
-            "bottom", static_cast<int32_t>(BoxComponentHelper::GetBorderStyleBottom(GetBackDecoration()))));
-    } else {
-        BorderStyle borderStyle;
-        if (!args->IsNumber()) {
-            return;
+    if (!args->IsObject() && !args->IsNumber()) {
+        LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
+        return;
+    }
+    if (!decoration) {
+        decoration = GetBackDecoration();
+    }
+    BorderStyle styleLeft = BoxComponentHelper::GetBorderStyleLeft(decoration);
+    BorderStyle styleRight = BoxComponentHelper::GetBorderStyleRight(decoration);
+    BorderStyle styleTop = BoxComponentHelper::GetBorderStyleTop(decoration);
+    BorderStyle styleBottom = BoxComponentHelper::GetBorderStyleBottom(decoration);
+    if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        auto leftValue = object->GetProperty("left");
+        if (!leftValue->IsUndefined() && leftValue->IsNumber()) {
+            styleLeft = static_cast<BorderStyle>(leftValue->ToNumber<int32_t>());
         }
-        borderStyle = static_cast<BorderStyle>(args->GetInt());
+        auto rightValue = object->GetProperty("right");
+        if (!rightValue->IsUndefined() && rightValue->IsNumber()) {
+            styleRight = static_cast<BorderStyle>(rightValue->ToNumber<int32_t>());
+        }
+        auto topValue = object->GetProperty("top");
+        if (!topValue->IsUndefined() && topValue->IsNumber()) {
+            styleTop = static_cast<BorderStyle>(topValue->ToNumber<int32_t>());
+        }
+        auto bottomValue = object->GetProperty("bottom");
+        if (!bottomValue->IsUndefined() && bottomValue->IsNumber()) {
+            styleBottom = static_cast<BorderStyle>(bottomValue->ToNumber<int32_t>());
+        }
+    } else {
+        auto borderStyle = static_cast<BorderStyle>(args->ToNumber<int32_t>());
         styleLeft = borderStyle;
         styleRight = borderStyle;
         styleTop = borderStyle;
         styleBottom = borderStyle;
     }
+
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
-        BoxComponentHelper::SetBorderStyle(GetBackDecoration(), styleLeft, styleRight, styleTop, styleBottom);
+        BoxComponentHelper::SetBorderStyle(decoration, styleLeft, styleRight, styleTop, styleBottom);
     } else {
         auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
         if (!boxComponent) {
@@ -2202,8 +2163,8 @@ void JSViewAbstract::ParseBorderStyle(std::unique_ptr<JsonValue>& args)
         boxComponent->GetStateAttributes()->AddAttribute<BorderStyle>(
             BoxStateAttribute::BORDER_STYLE, styleLeft, stack->GetVisualState());
         if (!boxComponent->GetStateAttributes()->HasAttribute(BoxStateAttribute::BORDER_STYLE, VisualState::NORMAL)) {
-            boxComponent->GetStateAttributes()->AddAttribute<BorderStyle>(BoxStateAttribute::BORDER_STYLE,
-                BoxComponentHelper::GetBorderStyle(GetBackDecoration()), VisualState::NORMAL);
+            boxComponent->GetStateAttributes()->AddAttribute<BorderStyle>(
+                BoxStateAttribute::BORDER_STYLE, BoxComponentHelper::GetBorderStyle(decoration), VisualState::NORMAL);
         }
     }
 }

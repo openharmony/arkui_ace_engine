@@ -203,6 +203,7 @@ void TextFieldElement::OnBlur()
     auto textField = DynamicCast<RenderTextField>(renderNode_);
     if (textField) {
         textField->StopTwinkling();
+        textField->PopTextOverlay();
     }
     CloseKeyboard();
     FocusNode::OnBlur();
