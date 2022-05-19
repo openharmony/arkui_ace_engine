@@ -59,8 +59,8 @@ template("ace_ohos_standard_source_set") {
     }
 
     include_dirs = [
+      "$aafwk_inner_api_path/runtime/include/",
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/featureAbility",
-      "//foundation/aafwk/standard/interfaces/innerkits/runtime/include/",
       "//foundation/arkui/napi/interfaces/kits",
       "//foundation/arkui/napi/native_engine",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability/include",
@@ -72,10 +72,10 @@ template("ace_ohos_standard_source_set") {
     ]
 
     deps = [
+      "$aafwk_kits_path/ability/native:abilitykit_native",
       "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
       "$ace_flutter_engine_root/skia:ace_skia_$platform",
       "$ace_root/adapter/ohos/capability:ace_capability_ohos",
-      "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
       "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",

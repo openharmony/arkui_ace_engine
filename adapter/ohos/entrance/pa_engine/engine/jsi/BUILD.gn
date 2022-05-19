@@ -52,21 +52,20 @@ template("js_pa_engine_ark") {
     ]
 
     include_dirs = [
+      "$aafwk_inner_api_path/ability_manager/include",
+      "$aafwk_kits_path/ability/native/include",
+      "$aafwk_services_path/common/include",
+      "$aafwk_services_path/abilitymgr/include",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability/include",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/rdb/include",
-      "//foundation/aafwk/standard/services/common/include",
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/context",
-      "//foundation/aafwk/standard/frameworks/kits/ability/native/include",
-      "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
-      "//foundation/aafwk/standard/services/abilitymgr/include",
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common",
-      "//foundation/aafwk/standard/services/common/include",
       "//foundation/arkui/ace_engine/adapter/ohos/entrance/pa_engine/engine/common",
     ]
     deps = [
+      "$aafwk_kits_path/ability/native:abilitykit_native",
+      "$aafwk_kits_path/appkit:appkit_native",
       "//ark/js_runtime:libark_jsruntime",
-      "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-      "//foundation/aafwk/standard/frameworks/kits/appkit:appkit_native",
       "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common:napi_common",
       "//foundation/arkui/napi:ace_napi",
       "//foundation/arkui/napi:ace_napi_ark",

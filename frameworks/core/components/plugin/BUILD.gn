@@ -37,9 +37,9 @@ build_component("plugin") {
     ]
 
     deps = [
-      "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-      "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
-      "//foundation/aafwk/standard/services/abilitymgr:abilityms",
+      "$aafwk_inner_api_path/ability_manager:ability_manager",
+      "$aafwk_kits_path/ability/native:abilitykit_native",
+      "$aafwk_services_path/abilitymgr:abilityms",
       "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",

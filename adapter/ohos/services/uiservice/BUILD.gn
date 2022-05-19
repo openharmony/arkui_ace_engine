@@ -37,8 +37,8 @@ group("unittest") {
 config("uiservicems_config") {
   include_dirs = [
     "include/",
-    "${innerkits_path}/base/include",
-    "${services_path}/common/include",
+    "$aafwk_inner_api_path/base/include",
+    "$aafwk_services_path/common/include",
     "//utils/native/base/include",
     "//utils/system/safwk/native/include",
     "//prebuilts/jdk/jdk8/linux-x86/include",
@@ -75,7 +75,7 @@ template("uiservice_static") {
     ]
 
     deps = [
-      "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
+      "$aafwk_kits_path/ability/native:abilitykit_native",
       "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",

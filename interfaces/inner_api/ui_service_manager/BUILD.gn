@@ -18,21 +18,21 @@ config("uiservice_manager_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "include/",
-    "//utils/native/base/include",
-    "//utils/system/safwk/native/include",
-    "//foundation/aafwk/standard/frameworks/kits/ability/native/include",
-    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include/",
-    "//foundation/aafwk/standard/services/uiservicemgr/include",
+    "//drivers/peripheral/base",
     "//foundation/graphic/graphic/rosen/modules/render_service_client/core",
     "//foundation/graphic/graphic/interfaces/innerkits/surface",
     "//foundation/graphic/graphic/interfaces/innerkits/common",
     "//foundation/graphic/graphic/utils/buffer_handle/export",
     "//foundation/graphic/graphic/rosen/modules/render_service_base/include",
-    "//drivers/peripheral/base",
+    "$innerkits_path/ability_manager/include/",
+    "$kits_path/ability/native/include",
+    "$services_path/uiservicemgr/include",
     "//third_party/icu/icu4c/source/common",
     "//third_party/icu/icu4c/source/i18n",
     "//third_party/icu/icu4c/source/ohos",
     "//third_party/icu/icu4c/source",
+    "//utils/native/base/include",
+    "//utils/system/safwk/native/include",
   ]
   cflags = []
   if (target_cpu == "arm") {
