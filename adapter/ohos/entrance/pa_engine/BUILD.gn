@@ -49,13 +49,13 @@ template("pa_backend") {
       "ability_base:zuri",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
+      "dataability:native_dataability",
       "eventhandler:libeventhandler",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
       "ipc_js:rpc",
       "napi:ace_napi",
-      "native_appdatamgr:native_dataability",
-      "native_appdatamgr:native_rdb",
+      "relational_store:native_rdb",
       "samgr_standard:samgr_proxy",
     ]
 
