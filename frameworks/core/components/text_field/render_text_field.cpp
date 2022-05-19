@@ -15,9 +15,11 @@
 
 #include "core/components/text_field/render_text_field.h"
 
+#include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/utils.h"
 #include "core/animation/curve_animation.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/font_manager.h"
@@ -343,6 +345,7 @@ void RenderTextField::PerformLayout()
         const auto& child = GetChildren().front();
         child->Layout(innerLayout);
     }
+    ApplyAspectRatio();
     SetLayoutSize(GetLayoutParam().Constrain(Measure()));
     UpdateFocusAnimation();
 
@@ -2243,6 +2246,20 @@ void RenderTextField::ApplyRestoreInfo()
     UpdateSelection(jsonStart->GetInt(), jsonEnd->GetInt());
     StartTwinkling();
     SetRestoreInfo("");
+}
+
+void RenderTextField::ApplyAspectRatio()
+{
+    auto parent = GetParent().Upgrade();
+    while (parent) {
+        auto renderBox = DynamicCast<RenderBox>(parent);
+        if (renderBox && !NearZero(renderBox->GetAspectRatio()) &&
+            GetLayoutParam().GetMaxSize().IsValid() && !GetLayoutParam().GetMaxSize().IsInfinite()) {
+            height_ = Dimension(GetLayoutParam().GetMaxSize().Height());
+            break;
+        }
+        parent = parent->GetParent().Upgrade();
+    }
 }
 
 } // namespace OHOS::Ace
