@@ -552,6 +552,7 @@ private:
     void OnOverlayFocusChange(bool isFocus, bool needCloseKeyboard);
     void FireSelectChangeIfNeeded(const TextEditingValue& newValue, bool needFireSelectChangeEvent) const;
     int32_t GetInstanceId() const;
+    void ApplyAspectRatio(); // If aspect ratio is setted, height will follow box parent.
 
     /**
      * @brief Update remote editing value only if text or selection is changed.
