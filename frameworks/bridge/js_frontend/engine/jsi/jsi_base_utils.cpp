@@ -58,8 +58,8 @@ std::string JsiBaseUtils::GenerateSummaryBody(std::shared_ptr<JsValue> error, st
     summaryBody.append(messageStr).append("\n");
 
     shared_ptr<JsValue> stack = error->GetProperty(runtime, "stack");
-    std::string stackStr = stack->ToString(runtime);
-    summaryBody.append("Stacktrace:\n");
+    std::string stackStr = "Stacktrace:\n";
+    stackStr.append(stack->ToString(runtime));
 
     if (pageMap || appMap) {
         std::string tempStack = JsiDumpSourceFile(stackStr, pageMap, appMap);
@@ -103,6 +103,8 @@ std::string JsiBaseUtils::TransSourceStack(RefPtr<JsAcePage> runningPage, const 
 std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const RefPtr<RevSourceMap>& pageMap,
     const RefPtr<RevSourceMap>& appMap)
 {
+    const std::string closeBrace = ")";
+    const std::string openBrace = "(";
     std::string ans = "";
     std::string tempStack = stackStr;
     int32_t appFlag = static_cast<int32_t>(tempStack.find("app_.js"));
@@ -113,12 +115,14 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const R
     ExtractEachInfo(tempStack, res);
 
     // collect error info first
-    ans = ans + res[0] + "\n";
     for (uint32_t i = 1; i < res.size(); i++) {
         std::string temp = res[i];
+        int32_t closeBracePos = temp.find(closeBrace);
+        int32_t openBracePos = temp.find(openBrace);
+
         std::string line = "";
         std::string column = "";
-        GetPosInfo(temp, line, column);
+        GetPosInfo(temp, closeBracePos, line, column);
         if (line.empty() || column.empty()) {
             LOGI("the stack without line info");
             break;
@@ -128,12 +132,13 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const R
         if (sourceInfo.empty()) {
             break;
         }
-        temp = "at " + sourceInfo;
+        temp.replace(openBracePos, closeBracePos - openBracePos + 1, sourceInfo);
         ans = ans + temp + "\n";
     }
     if (ans.empty()) {
         return tempStack;
     }
+    ans = res[0] + "\n" + ans;
     return ans;
 }
 
@@ -148,24 +153,23 @@ void JsiBaseUtils::ExtractEachInfo(const std::string& tempStack, std::vector<std
             tempStr += tempStack[i];
         }
     }
-    res.push_back(tempStr);
+    if (!tempStr.empty()) {
+        res.push_back(tempStr);
+    }
 }
 
-void JsiBaseUtils::GetPosInfo(const std::string& temp, std::string& line, std::string& column)
+void JsiBaseUtils::GetPosInfo(const std::string& temp, int32_t start, std::string& line, std::string& column)
 {
     // 0 for colum, 1 for row
     int32_t flag = 0;
     // find line, column
-    for (int32_t i = static_cast<int32_t>(temp.length()) - 1; i > 0; i--) {
+    for (int32_t i = start - 1; i > 0; i--) {
         if (temp[i] == ':') {
             flag += 1;
             continue;
         }
-        // some stack line may end with ")"
         if (flag == 0) {
-            if (temp[i] >= '0' && temp[i] <= '9') {
-                column = temp[i] + column;
-            }
+            column = temp[i] + column;
         } else if (flag == 1) {
             line = temp[i] + line;
         } else {
@@ -196,13 +200,21 @@ std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::stri
 
 std::string JsiBaseUtils::GetRelativePath(const std::string& sources)
 {
-    std::size_t pos = sources.find_last_of("/\\");
-    if (pos != std::string::npos) {
-        std::size_t splitPos = sources.substr(0, pos - 1).find_last_of("/\\");
+    std::string temp = sources;
+    std::size_t splitPos = std::string::npos;
+    const static int pathLevel = 3;
+    int i = 0;
+    while (i < pathLevel) {
+        splitPos = temp.find_last_of("/\\");
         if (splitPos != std::string::npos) {
-            std::string shortUrl = "pages" + sources.substr(splitPos);
-            return shortUrl;
+            temp = temp.substr(0, splitPos - 1);
+        } else {
+            break;
         }
+        i++;
+    }
+    if (i == pathLevel) {
+        return sources.substr(splitPos);
     }
     LOGI("The stack path error!");
     return sources;
