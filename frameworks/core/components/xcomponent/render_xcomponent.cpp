@@ -217,28 +217,38 @@ void RenderXComponent::NativeXComponentDispatchTouchEvent(const OH_NativeXCompon
     }
 }
 
+void RenderXComponent::HandleMouseHoverEvent(MouseState mouseState)
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("NativeXComponentDispatchMouseEvent context null");
+    }
+    pipelineContext->GetTaskExecutor()->PostTask(
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, mouseState] {
+            auto nXCompImpl = weakNXCompImpl.Upgrade();
+            if (nXComp != nullptr && nXCompImpl) {
+                bool isHover = static_cast<int>(mouseState);
+                auto callback = nXCompImpl->GetCallback();
+                if (callback != nullptr && callback->DispatchMouseEvent != nullptr) {
+                    callback->DispatchHoverEvent(nXComp, isHover);
+                }
+            } else {
+                LOGE("Native XComponent nullptr");
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
 bool RenderXComponent::HandleMouseEvent(const MouseEvent& event)
 {
     OH_NativeXComponent_MouseEvent mouseEventPoint;
-    mouseEventPoint.x = event.x;
-    mouseEventPoint.y = event.y;
-    mouseEventPoint.z = event.z;
-    mouseEventPoint.deltaX = event.deltaX;
-    mouseEventPoint.deltaY = event.deltaY;
-    mouseEventPoint.deltaZ = event.deltaZ;
-    mouseEventPoint.scrollX = event.scrollX;
-    mouseEventPoint.scrollY = event.scrollY;
-    mouseEventPoint.scrollZ = event.scrollZ;
-    mouseEventPoint.screenX = event.screenX;
-    mouseEventPoint.screenY = event.screenY;
-
+    mouseEventPoint.x = event.GetOffset().GetX() - GetCoordinatePoint().GetX();
+    mouseEventPoint.y = event.GetOffset().GetY() - GetCoordinatePoint().GetY();
+    mouseEventPoint.screenX = event.GetOffset().GetX();
+    mouseEventPoint.screenY = event.GetOffset().GetY();
     mouseEventPoint.action = static_cast<OH_NativeXComponent_MouseEventAction>(event.action);
     mouseEventPoint.button = static_cast<OH_NativeXComponent_MouseEventButton>(event.button);
-    mouseEventPoint.pressedButtons = event.pressedButtons;
-    mouseEventPoint.time = event.time.time_since_epoch().count();
-    mouseEventPoint.deviceId = event.deviceId;
-    mouseEventPoint.sourceType = static_cast<OH_NativeXComponent_SourceType>(event.sourceType);
-    mouseEventPoint.pressedButtons = event.pressedButtons;
+    mouseEventPoint.timestamp = event.time.time_since_epoch().count();
     return NativeXComponentDispatchMouseEvent(mouseEventPoint);
 }
 
