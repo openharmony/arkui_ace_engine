@@ -16,6 +16,7 @@
 #include "interfaces/inner_api/ace/ui_content.h"
 
 #include <dlfcn.h>
+#include <vector>
 
 namespace OHOS::Ace {
 
@@ -78,6 +79,14 @@ std::unique_ptr<UIContent> UIContent::Create(OHOS::AppExecFwk::Ability* ability)
     std::unique_ptr<UIContent> content;
     content.reset(CreateUIContent(reinterpret_cast<void*>(ability)));
     return content;
+}
+
+void UIContent::ShowDumpHelp(std::vector<std::string>& info)
+{
+    info.emplace_back(" -element              |show element tree");
+    info.emplace_back(" -render               |show render tree");
+    info.emplace_back(" -inspector            |show inspector tree");
+    info.emplace_back(" -frontend             |show path and components count of current page");
 }
 
 } // namespace OHOS::Ace

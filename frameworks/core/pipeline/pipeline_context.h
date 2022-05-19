@@ -161,7 +161,7 @@ public:
 
     void NotifyAppStorage(const std::string& key, const std::string& value);
 
-    void Dump(const std::vector<std::string>& params) const;
+    bool Dump(const std::vector<std::string>& params) const;
 
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
 

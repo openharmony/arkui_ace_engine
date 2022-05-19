@@ -129,6 +129,8 @@ public:
         description_.push_back(stream.str());
     }
 
+    static void ShowDumpHelp(std::vector<std::string>& info);
+
     static const size_t MAX_DUMP_LENGTH = 100000;
 
 private:

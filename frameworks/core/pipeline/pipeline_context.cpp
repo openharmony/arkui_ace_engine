@@ -897,11 +897,11 @@ RefPtr<Element> PipelineContext::SetupSubRootElement()
     return rootElement_;
 }
 
-void PipelineContext::Dump(const std::vector<std::string>& params) const
+bool PipelineContext::Dump(const std::vector<std::string>& params) const
 {
     if (params.empty()) {
         LOGW("params is empty now, it's illegal!");
-        return;
+        return false;
     }
 
     if (params[0] == "-element") {
@@ -957,15 +957,18 @@ void PipelineContext::Dump(const std::vector<std::string>& params) const
             AceApplicationInfo::GetInstance().GetPackageName(), "js crash reason", "js crash summary");
     } else {
         DumpLog::GetInstance().Print("Error: Unsupported dump params!");
+        return false;
     }
+    return true;
 }
 
 void PipelineContext::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+    bool result = false;
     if (!SystemProperties::GetDebugEnabled()) {
         std::unique_ptr<std::ostream> ss = std::make_unique<std::ostringstream>();
         DumpLog::GetInstance().SetDumpFile(std::move(ss));
-        Dump(params);
+        result = Dump(params);
         auto& result = DumpLog::GetInstance().GetDumpFile();
         auto o = static_cast<std::ostringstream*>(result.get());
         info.emplace_back(o->str().substr(0, DumpLog::MAX_DUMP_LENGTH));
@@ -974,9 +977,12 @@ void PipelineContext::DumpInfo(const std::vector<std::string>& params, std::vect
         auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
         std::unique_ptr<std::ostream> ss = std::make_unique<std::ofstream>(dumpFilePath);
         DumpLog::GetInstance().SetDumpFile(std::move(ss));
-        Dump(params);
+        result = Dump(params);
         info.emplace_back("dumpFilePath: " + dumpFilePath);
         DumpLog::GetInstance().Reset();
+    }
+    if (!result) {
+        DumpLog::ShowDumpHelp(info);
     }
 }
 
