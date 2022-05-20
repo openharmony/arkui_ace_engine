@@ -27,7 +27,8 @@ RefPtr<RenderNode> RenderNavigationContainer::Create()
 void RenderNavigationContainer::PerformLayout()
 {
     auto layoutParam = GetLayoutParam();
-    double usedHeight = collapsingNavigationBar_ ? collapsingNavigationBar_->GetPositionY() : 0.0;
+    double usedHeight = (titleMode_ == NavigationTitleMode::FREE && collapsingNavigationBar_)
+        ? collapsingNavigationBar_->GetPositionY() : 0.0;
     double maxWidth = layoutParam.GetMaxSize().Width();
     double maxHeight = layoutParam.GetMaxSize().Height();
     for (const auto& child : GetChildren()) {
