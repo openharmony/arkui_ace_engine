@@ -15,7 +15,9 @@
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include <dlfcn.h>
+#ifdef ENABLE_ROSEN_BACKEND
 #include "rs_window_animation_target.h"
+#endif
 #endif
 
 #include "base/image/pixel_map.h"
@@ -72,6 +74,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
 
 Rosen::RSWindowAnimationTarget* CreateRSWindowAnimationTargetFromNapiValue(JSRef<JSVal> obj)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     if (!obj->IsObject()) {
         LOGE("info[0] is not an object when try CreatePixelMapFromNapiValue");
         return nullptr;
@@ -106,6 +109,9 @@ Rosen::RSWindowAnimationTarget* CreateRSWindowAnimationTargetFromNapiValue(JSRef
     }
 
     return object ? static_cast<Rosen::RSWindowAnimationTarget*>(object->GetNativePointer()) : nullptr;
+#else
+    return nullptr;
+#endif
 }
 #endif
 } // namespace OHOS::Ace::Framework

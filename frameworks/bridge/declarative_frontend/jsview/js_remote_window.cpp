@@ -15,7 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_remote_window.h"
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef ENABLE_ROSEN_BACKEND
 #include <rs_window_animation_target.h>
 #endif
 
@@ -35,7 +35,7 @@ void JSRemoteWindow::Create(const JSCallbackInfo& info)
         return;
     }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#ifdef ENABLE_ROSEN_BACKEND
     auto obj = CreateRSWindowAnimationTargetFromNapiValue(info[0]);
     if (obj) {
         specializedComponent->SetRSNode(obj->surfaceNode_);
