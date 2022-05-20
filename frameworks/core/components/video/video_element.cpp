@@ -1669,8 +1669,9 @@ void VideoElement::FullScreen()
                         LOGE("VideoElement::FullScreen: is InspectorComposedComponent");
                         return;
                     }
-                    stackElement->PushComponent(AceType::MakeRefPtr<ComposedComponent>(composedComponent->GetId(),
-                        composedComponent->GetName() + "fullscreen", composedComponent->GetChild()));
+                    stackElement->PushComponent(AceType::MakeRefPtr<ComposedComponent>(
+                        composedComponent->GetId() + "fullscreen", composedComponent->GetName() + "fullscreen",
+                        composedComponent->GetChild()));
                 }
                 isFullScreen_ = true;
                 currentPlatformVersion_ = context->GetMinPlatformVersion();
