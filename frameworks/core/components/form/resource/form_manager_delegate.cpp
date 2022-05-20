@@ -283,6 +283,37 @@ void FormManagerDelegate::AddFormUninstallCallback(const OnFormUninstallCallback
     onFormUninstallCallback_ = callback;
 }
 
+bool FormManagerDelegate::ParseAction(const std::string &action, AAFwk::Want &want)
+{
+    auto eventAction = JsonUtil::ParseJsonString(action);
+    auto bundleName = eventAction->GetValue("bundleName");
+    auto abilityName = eventAction->GetValue("abilityName");
+    auto params = eventAction->GetValue("params");
+    auto bundle = bundleName->GetString();
+    auto ability = abilityName->GetString();
+    LOGI("bundle:%{public}s ability:%{public}s, params:%{public}s", bundle.c_str(), ability.c_str(),
+        params->GetString().c_str());
+    if (bundle.empty()) {
+        bundle = wantCache_.GetElement().GetBundleName();
+    }
+    if (ability.empty()) {
+        LOGE("action ability is empty");
+        return false;
+    }
+
+    want.SetElementName(bundle, ability);
+    if (params->IsValid()) {
+        auto child = params->GetChild();
+        while (child->IsValid()) {
+            auto key = child->GetKey();
+            auto value = child->GetString();
+            want.SetParam(key, value);
+            child = child->GetNext();
+        }
+    }
+    return true;
+}
+
 void FormManagerDelegate::OnActionEvent(const std::string& action)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
@@ -303,6 +334,16 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     }
 
 #ifdef OHOS_STANDARD_SYSTEM
+    if (type == "router") {
+        AAFwk::Want want;
+        if (!ParseAction(action, want)) {
+            LOGE("Failed to parse want");
+        } else {
+            AppExecFwk::FormMgr::GetInstance().RouterEvent(runningCardId_, want);
+        }
+        return;
+    }
+
     AAFwk::Want want;
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, (long)runningCardId_);
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_MESSAGE_KEY, action);
@@ -405,16 +446,6 @@ void FormManagerDelegate::OnDeathReceived()
     if (ret != 0) {
         LOGE("relink to form manager fail!!!");
     }
-}
-std::string FormManagerDelegate::WrapAction(const std::string& action)
-{
-    auto eventAction = JsonUtil::ParseJsonString(action);
-    if (!eventAction->Contains("bundleName")) {
-        eventAction->Put("bundleName", wantCache_.GetElement().GetBundleName().c_str());
-    }
-    auto newAction = eventAction->ToString();
-    OHOS::AppExecFwk::FormMgr::GetInstance().UpdateRouterAction(runningCardId_, newAction);
-    return newAction;
 }
 #endif
 } // namespace OHOS::Ace
