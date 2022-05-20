@@ -751,6 +751,7 @@ void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID)
     DumpLog::GetInstance().AddDesc("width: " + std::to_string(node->GetWidth()));
     DumpLog::GetInstance().AddDesc("height: " + std::to_string(node->GetHeight()));
     DumpLog::GetInstance().AddDesc("visible: " + std::to_string(node->GetShown() && node->GetVisible()));
+    DumpLog::GetInstance().AddDesc("clickable: " + std::to_string(node->GetClickableState()));
     DumpLog::GetInstance().Print(depth, node->GetTag(), node->GetChildList().size());
     for (const auto& item : node->GetChildList()) {
         DumpTree(depth + 1, item->GetNodeId());
