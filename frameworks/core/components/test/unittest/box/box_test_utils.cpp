@@ -16,6 +16,7 @@
 #include "core/components/test/unittest/box/box_test_utils.h"
 
 #include "core/components/text/text_component.h"
+#include "core/components/text_overlay/text_overlay_component.h"
 
 namespace OHOS::Ace {
 namespace {

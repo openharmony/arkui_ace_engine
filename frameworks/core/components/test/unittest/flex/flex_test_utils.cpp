@@ -19,6 +19,7 @@
 #include "core/components/flex/flex_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/text/text_component.h"
+#include "core/components/text_overlay/text_overlay_component.h"
 
 namespace OHOS::Ace {
 namespace {

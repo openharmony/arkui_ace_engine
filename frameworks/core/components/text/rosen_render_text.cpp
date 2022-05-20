@@ -122,6 +122,8 @@ void RosenRenderText::Paint(RenderContext& context, const Offset& offset)
         default:
             break;
     }
+
+    PaintSelection(canvas);
     paragraph_->Paint(canvas, newX, newY);
 }
 
@@ -458,7 +460,7 @@ bool RosenRenderText::UpdateParagraph()
         ChangeDirectionIfNeeded(data);
     }
     std::string displayData = ApplyWhiteSpace();
-    style.text_direction = ConvertTxtTextDirection(textDirection_);
+    style.text_direction = ConvertTxtTextDirection(defaultTextDirection_);
     style.text_align = ConvertTxtTextAlign(textAlign);
     style.max_lines = textStyle_.GetMaxLines();
     style.locale = Localization::GetInstance()->GetFontLocale();
@@ -481,6 +483,7 @@ bool RosenRenderText::UpdateParagraph()
         return false;
     }
     builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    std::string textValue = "";
 
     txt::TextStyle txtStyle;
     ConvertTxtStyle(textStyle_, context_, txtStyle);
@@ -491,9 +494,11 @@ bool RosenRenderText::UpdateParagraph()
         for (const auto& child : children) {
             auto textSpan = AceType::DynamicCast<RosenRenderTextSpan>(child);
             if (textSpan) {
-                textSpan->UpdateText(*builder, touchRegions_);
+                textSpan->UpdateText(*builder, touchRegions_, textValue);
             }
         }
+        textValue_.text = textValue;
+        textForDisplay_ = textValue;
     } else {
         StringUtils::TransfromStrCase(displayData, (int32_t)textStyle_.GetTextCase());
         builder->AddText(StringUtils::Str8ToStr16(displayData));
@@ -547,14 +552,14 @@ void RosenRenderText::ChangeDirectionIfNeeded(const std::string& data)
     auto showingTextForWString = StringUtils::ToWstring(data);
     for (const auto& charOfShowingText : showingTextForWString) {
         if (u_charDirection(charOfShowingText) == UCharDirection::U_LEFT_TO_RIGHT) {
-            textDirection_ = TextDirection::LTR;
+            defaultTextDirection_ = TextDirection::LTR;
             break;
         } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT) {
-            textDirection_ = TextDirection::RTL;
+            defaultTextDirection_ = TextDirection::RTL;
             break;
         } else if (!IsCompatibleVersion() &&
                    u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT_ARABIC) {
-            textDirection_ = TextDirection::RTL;
+            defaultTextDirection_ = TextDirection::RTL;
             break;
         }
     }
@@ -580,6 +585,16 @@ void RosenRenderText::ClearRenderObject()
     lastLayoutMinWidth_ = 0.0;
     lastLayoutMaxHeight_ = 0.0;
     lastLayoutMinHeight_ = 0.0;
+}
+
+Offset RosenRenderText::GetHandleOffset(int32_t extend)
+{
+    Rect result;
+    GetCaretRect(extend, result);
+    selectHeight_ = result.Bottom() - result.Top();
+    Offset handleLocalOffset = Offset((result.Left() + result.Right()) / 2.0, result.Bottom());
+    Offset handleOffset = handleLocalOffset + GetPaintRect().GetOffset() + GetOffsetToPage() + textOffsetForShowCaret_;
+    return handleOffset;
 }
 
 } // namespace OHOS::Ace

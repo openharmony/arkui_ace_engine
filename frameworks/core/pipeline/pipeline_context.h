@@ -48,6 +48,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/page/page_component.h"
+#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/event/event_trigger.h"
 #include "core/gestures/gesture_info.h"
@@ -1075,6 +1076,16 @@ public:
         return eventManager_;
     }
 
+    void SetTextOverlayManager(const RefPtr<TextOverlayManager>& textOverlayManager)
+    {
+        textOverlayManager_ = textOverlayManager;
+    }
+
+    RefPtr<TextOverlayManager> GetTextOverlayManager() const
+    {
+        return textOverlayManager_;
+    }
+
     void SubscribeCtrlA(SubscribeCtrlACallback callback)
     {
         subscribeCtrlA_ = callback;
@@ -1351,6 +1362,7 @@ private:
     RefPtr<SharedTransitionController> sharedTransitionController_;
     RefPtr<CardTransitionController> cardTransitionController_;
     RefPtr<EventManager> eventManager_;
+    RefPtr<TextOverlayManager> textOverlayManager_;
     EventTrigger eventTrigger_;
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;

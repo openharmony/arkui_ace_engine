@@ -111,6 +111,16 @@ void TextComponent::SetFocusColor(const Color& focusColor)
     declaration_->SetFocusColor(focusColor);
 }
 
+const CopyOption& TextComponent::GetCopyOption() const
+{
+    return declaration_->GetCopyOption();
+}
+
+void TextComponent::SetCopyOption(const CopyOption& copyOption)
+{
+    declaration_->SetCopyOption(copyOption);
+}
+
 bool TextComponent::GetMaxWidthLayout() const
 {
     return declaration_->IsMaxWidthLayout();

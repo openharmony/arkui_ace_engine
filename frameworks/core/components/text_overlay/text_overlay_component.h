@@ -60,6 +60,9 @@ public:
     void SetWeakTextField(const WeakPtr<RenderTextField>& weakTextField);
     const WeakPtr<RenderTextField>& GetWeakTextField() const;
 
+    void SetWeakText(const WeakPtr<RenderText>& weakText);
+    const WeakPtr<RenderText>& GetWeakText() const;
+
     bool HasMoreButton() const;
 
     void SetIsPassword(bool isPassword);
@@ -162,6 +165,7 @@ private:
 
     WeakPtr<PipelineContext> context_;
     WeakPtr<RenderTextField> weakTextField_;
+    WeakPtr<RenderText> weakText_;
     RefPtr<TextOverlayTheme> theme_;
     RefPtr<SelectPopupComponent> menu_;
     RefPtr<ThemeManager> themeManager_;

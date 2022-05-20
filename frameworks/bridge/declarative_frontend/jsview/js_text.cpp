@@ -437,6 +437,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSText>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSText>::StaticMethod("remoteMessage", &JSText::JsRemoteMessage);
+    JSClass<JSText>::StaticMethod("clipBoard", &JSText::SetCopyOption);
     JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
@@ -472,6 +473,22 @@ RefPtr<TextComponentV2> JSText::GetComponent()
     }
     auto component = AceType::DynamicCast<TextComponentV2>(stack->GetMainComponent());
     return component;
+}
+
+void JSText::SetCopyOption(int32_t value)
+{
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+
+    if ((value >= static_cast<int32_t>(CopyOption::NoCopy)) &&
+        (value <= static_cast<int32_t>(CopyOption::Distributed))) {
+        component->SetCopyOption(static_cast<CopyOption>(value));
+    } else {
+        LOGE("invalid value for copyOption");
+    }
 }
 
 } // namespace OHOS::Ace::Framework

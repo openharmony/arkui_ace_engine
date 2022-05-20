@@ -640,6 +640,16 @@ const WeakPtr<RenderTextField>& TextOverlayComponent::GetWeakTextField() const
     return weakTextField_;
 }
 
+void TextOverlayComponent::SetWeakText(const WeakPtr<RenderText>& weakText)
+{
+    weakText_ = weakText;
+}
+
+const WeakPtr<RenderText>& TextOverlayComponent::GetWeakText() const
+{
+    return weakText_;
+}
+
 void TextOverlayComponent::SetRealTextDirection(TextDirection realTextDirection)
 {
     realTextDirection_ = realTextDirection;

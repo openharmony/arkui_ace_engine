@@ -32,8 +32,8 @@ public:
     ~FlutterRenderTextSpan() override = default;
 
     // Called by parent to add text with style to builder.
-    void UpdateText(
-        txt::ParagraphBuilder& builder, std::map<int32_t, std::map<GestureType, EventMarker>>& touchRegions);
+    void UpdateText(txt::ParagraphBuilder& builder,
+        std::map<int32_t, std::map<GestureType, EventMarker>>& touchRegions, std::string& textValue);
 
 private:
     void UpdateTouchRegions(std::map<int32_t, std::map<GestureType, EventMarker>>& touchRegions);

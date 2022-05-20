@@ -452,7 +452,7 @@ bool FlutterRenderText::UpdateParagraph()
         ChangeDirectionIfNeeded(data);
     }
     std::string displayData = ApplyWhiteSpace();
-    style.text_direction = ConvertTxtTextDirection(textDirection_);
+    style.text_direction = ConvertTxtTextDirection(defaultTextDirection_);
     style.text_align = ConvertTxtTextAlign(textAlign);
     style.max_lines = textStyle_.GetMaxLines();
     style.locale = Localization::GetInstance()->GetFontLocale();
@@ -475,6 +475,7 @@ bool FlutterRenderText::UpdateParagraph()
         return false;
     }
     builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    std::string textValue = "";
 
     txt::TextStyle txtStyle;
     ConvertTxtStyle(textStyle_, context_, txtStyle);
@@ -485,7 +486,7 @@ bool FlutterRenderText::UpdateParagraph()
         for (const auto& child : children) {
             auto textSpan = AceType::DynamicCast<FlutterRenderTextSpan>(child);
             if (textSpan) {
-                textSpan->UpdateText(*builder, touchRegions_);
+                textSpan->UpdateText(*builder, touchRegions_, textValue);
             }
         }
     } else {
@@ -541,14 +542,14 @@ void FlutterRenderText::ChangeDirectionIfNeeded(const std::string& data)
     auto showingTextForWString = StringUtils::ToWstring(data);
     for (const auto& charOfShowingText : showingTextForWString) {
         if (u_charDirection(charOfShowingText) == UCharDirection::U_LEFT_TO_RIGHT) {
-            textDirection_ = TextDirection::LTR;
+            defaultTextDirection_ = TextDirection::LTR;
             break;
         } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT) {
-            textDirection_ = TextDirection::RTL;
+            defaultTextDirection_ = TextDirection::RTL;
             break;
         } else if (!IsCompatibleVersion() &&
                    u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT_ARABIC) {
-            textDirection_ = TextDirection::RTL;
+            defaultTextDirection_ = TextDirection::RTL;
             break;
         }
     }
@@ -574,6 +575,16 @@ void FlutterRenderText::ClearRenderObject()
     lastLayoutMinWidth_ = 0.0;
     lastLayoutMaxHeight_ = 0.0;
     lastLayoutMinHeight_ = 0.0;
+}
+
+Offset FlutterRenderText::GetHandleOffset(int32_t extend)
+{
+    Rect result;
+    GetCaretRect(extend, result);
+    selectHeight_ = result.Bottom() - result.Top();
+    Offset handleLocalOffset = Offset((result.Left() + result.Right()) / 2.0, result.Bottom());
+    Offset handleOffset = handleLocalOffset + GetPaintRect().GetOffset() + GetOffsetToPage() + textOffsetForShowCaret_;
+    return handleOffset;
 }
 
 } // namespace OHOS::Ace
