@@ -76,13 +76,15 @@ std::string ListItemComposedElement::GetEditable() const
     if (renderListItem) {
         auto editMode = renderListItem->GetEditMode();
         if (editMode == EditMode::NONE) {
-            return "false";
+            return "EditMode.None";
         } else if (editMode == EditMode::MOVABLE) {
             return "EditMode.Movable";
         } else if (editMode == EditMode::DELETABLE) {
             return "EditMode.Deletable";
         } else if (editMode == (EditMode::DELETABLE | EditMode::MOVABLE)) {
             return "true";
+        } else if (editMode == EditMode::FALSE) {
+            return "false";
         }
     }
     return "false";

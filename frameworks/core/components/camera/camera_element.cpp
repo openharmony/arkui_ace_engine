@@ -138,7 +138,7 @@ void CameraElement::Prepare(const WeakPtr<Element>& parent)
 #ifndef OHOS_STANDARD_SYSTEM
         InitDeclarativePara(cameraComponent);
 #endif
-#if defined(CAMERA_SUPPORTED)
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
         textDirection_ = cameraComponent->GetTextDirection();
 #endif
         InitEvent(cameraComponent);
@@ -734,7 +734,6 @@ void CameraElement::UpdataChild(const RefPtr<Component>& childComponent)
 
 void CameraElement::OnError(const std::string& errorcode, const std::string& errormsg)
 {
-    
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     std::string errorDescription = "This component is not supported on PC Preview.";
     UpdataChild(CreateErrorText(errorDescription));

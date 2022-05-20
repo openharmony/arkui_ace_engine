@@ -33,7 +33,6 @@ constexpr uint32_t SELECT_ITSELF_TEXT_LINES = 1;
 
 SelectComponent::SelectComponent() : SoleChildComponent()
 {
-    
     popup_ = AceType::MakeRefPtr<SelectPopupComponent>();
     // the round radius is half of height which is 40dp.
     border_.SetBorderRadius(Radius(20.0_vp));
@@ -45,7 +44,7 @@ void SelectComponent::InitTheme(const RefPtr<ThemeManager>& themeManager)
         return;
     }
     popup_->InitTheme(themeManager);
-#if defined(SELECT_POPUP_SUPPORTED)
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     popup_->SetSelectPopupId(GetNodeId());
 #endif
     auto selectTheme = themeManager->GetTheme<SelectTheme>();
