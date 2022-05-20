@@ -170,6 +170,7 @@ private:
     void GetLoadOptions(std::string& optionStr, bool isMainPage, bool hasAppCode);
     void RegisterWorker();
     void RegisterInitWorkerFunc();
+    void RegisterOffWorkerFunc();
     void RegisterAssetFunc();
     bool CallAppFunc(const std::string& appFuncName);
     bool CallAppFunc(const std::string& appFuncName, std::vector<shared_ptr<JsValue>>& argv);

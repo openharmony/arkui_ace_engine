@@ -33,7 +33,7 @@ Local<JSValueRef> FunctionCallback(EcmaVM *vm, Local<JSValueRef> thisValue,
     return package->Callback(thisValue, argument, length);
 }
 
-bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
+bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode, int32_t instanceId)
 {
     RuntimeOption option;
     option.SetGcType(RuntimeOption::GC_TYPE::GEN_GC);
@@ -45,6 +45,7 @@ bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode)
     option.SetDebuggerLibraryPath(libraryPath);
     libPath_ = libraryPath;
     isDebugMode_ = isDebugMode;
+    instanceId_ = instanceId;
 
     vm_ = JSNApi::CreateJSVM(option);
     return vm_ != nullptr;
@@ -62,7 +63,7 @@ void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
         if (!usingExistVM_) {
-            JSNApi::StopDebugger(libPath_.c_str());
+            JSNApi::StopDebugger(vm_);
             JSNApi::DestroyJSVM(vm_);
         }
         vm_ = nullptr;
@@ -95,10 +96,8 @@ bool ArkJSRuntime::EvaluateJsCode(const uint8_t *buffer, int32_t size)
 bool ArkJSRuntime::ExecuteJsBin(const std::string &fileName)
 {
     JSExecutionScope executionScope(vm_);
-    static bool debugFlag = true;
-    if (debugFlag && !libPath_.empty()) {
-        JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_);
-        debugFlag = false;
+    if (!libPath_.empty()) {
+        JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_);
     }
     LocalScope scope(vm_);
     bool ret = JSNApi::Execute(vm_, fileName, PANDA_MAIN_FUNCTION);

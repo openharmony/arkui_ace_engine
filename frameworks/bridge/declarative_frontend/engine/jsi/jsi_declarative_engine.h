@@ -122,6 +122,11 @@ public:
         isDebugMode_ = isDebugMode;
     }
 
+    void SetInstanceId(int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    }
+
     void SetRootView(int32_t pageId, panda::Global<panda::ObjectRef> value)
     {
         rootViewMap_.emplace(pageId, value);
@@ -158,6 +163,7 @@ private:
     mutable std::mutex mutex_;
     bool isDebugMode_ = true;
     bool usingSharedRuntime_ = false;
+    int32_t instanceId_ = 0;
     static bool isModulePreloaded_;
     static bool isModuleInitialized_;
     static shared_ptr<JsRuntime> globalRuntime_;
@@ -276,6 +282,7 @@ private:
 
     void RegisterWorker();
     void RegisterInitWorkerFunc();
+    void RegisterOffWorkerFunc();
     void RegisterAssetFunc();
 
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
