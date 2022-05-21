@@ -1939,22 +1939,33 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args, RefPtr<Decoratio
     Dimension rightDimen = BoxComponentHelper::GetBorderRightWidth(decoration);
     Dimension topDimen = BoxComponentHelper::GetBorderTopWidth(decoration);
     Dimension bottomDimen = BoxComponentHelper::GetBorderBottomWidth(decoration);
-    if (args->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        ParseJsDimensionVp(object->GetProperty("left"), leftDimen);
-        ParseJsDimensionVp(object->GetProperty("right"), rightDimen);
-        ParseJsDimensionVp(object->GetProperty("top"), topDimen);
-        ParseJsDimensionVp(object->GetProperty("bottom"), bottomDimen);
-    } else {
-        Dimension borderWidth;
-        if (!ParseJsDimensionVp(args, borderWidth)) {
-            LOGE("parse to dimension VP failed!");
-            return;
-        }
+    Dimension borderWidth;
+    if (ParseJsDimensionVp(args, borderWidth)) {
         leftDimen = borderWidth;
         rightDimen = borderWidth;
         topDimen = borderWidth;
         bottomDimen = borderWidth;
+    } else if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        auto valueLeft = object->GetProperty("left");
+        if (!valueLeft->IsUndefined()) {
+            ParseJsDimensionVp(valueLeft, leftDimen);
+        }
+        auto valueRight = object->GetProperty("right");
+        if (!valueRight->IsUndefined()) {
+            ParseJsDimensionVp(valueRight, rightDimen);
+        }
+        auto valueTop = object->GetProperty("top");
+        if (!valueTop->IsUndefined()) {
+            ParseJsDimensionVp(valueTop, topDimen);
+        }
+        auto valueBottom = object->GetProperty("bottom");
+        if (!valueBottom->IsUndefined()) {
+            ParseJsDimensionVp(valueBottom, bottomDimen);
+        }
+    } else {
+        LOGE("args format error. %{public}s", args->ToString().c_str());
+        return;
     }
 
     auto stack = ViewStackProcessor::GetInstance();
@@ -2000,22 +2011,33 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoratio
     Color rightColor = BoxComponentHelper::GetBorderColorBottom(decoration);
     Color topColor = BoxComponentHelper::GetBorderColorLeft(decoration);
     Color bottomColor = BoxComponentHelper::GetBorderColorRight(decoration);
-    if (args->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        ParseJsColor(object->GetProperty("left"), leftColor);
-        ParseJsColor(object->GetProperty("right"), rightColor);
-        ParseJsColor(object->GetProperty("top"), topColor);
-        ParseJsColor(object->GetProperty("bottom"), bottomColor);
-    } else {
-        Color borderColor;
-        if (!ParseJsColor(args, borderColor)) {
-            LOGE("parse to color failed!");
-            return;
-        }
+    Color borderColor;
+    if (ParseJsColor(args, borderColor)) {
         leftColor = borderColor;
         rightColor = borderColor;
         topColor = borderColor;
         bottomColor = borderColor;
+    } else if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        auto valueLeft = object->GetProperty("left");
+        if (!valueLeft->IsUndefined()) {
+            ParseJsColor(valueLeft, leftColor);
+        }
+        auto valueRight = object->GetProperty("right");
+        if (!valueRight->IsUndefined()) {
+            ParseJsColor(valueRight, rightColor);
+        }
+        auto valueTop = object->GetProperty("top");
+        if (!valueTop->IsUndefined()) {
+            ParseJsColor(valueTop, topColor);
+        }
+        auto valueBottom = object->GetProperty("bottom");
+        if (!valueBottom->IsUndefined()) {
+            ParseJsColor(valueBottom, bottomColor);
+        }
+    } else {
+        LOGE("args format error. %{public}s", args->ToString().c_str());
+        return;
     }
 
     auto stack = ViewStackProcessor::GetInstance();
@@ -2062,22 +2084,33 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, RefPtr<Decorati
     Dimension radiusTopRight = BoxComponentHelper::GetBorderRadiusTopRight(decoration).GetX();
     Dimension radiusBottomLeft = BoxComponentHelper::GetBorderRadiusBottomLeft(decoration).GetX();
     Dimension radiusBottomRight = BoxComponentHelper::GetBorderRadiusBottomRight(decoration).GetX();
-    if (args->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        ParseJsDimensionVp(object->GetProperty("topLeft"), radiusTopLeft);
-        ParseJsDimensionVp(object->GetProperty("topRight"), radiusTopRight);
-        ParseJsDimensionVp(object->GetProperty("bottomLeft"), radiusBottomLeft);
-        ParseJsDimensionVp(object->GetProperty("bottomRight"), radiusBottomRight);
-    } else {
-        Dimension borderRadius;
-        if (!ParseJsDimensionVp(args, borderRadius)) {
-            LOGE("parse to dimension VP failed!");
-            return;
-        }
+    Dimension borderRadius;
+    if (ParseJsDimensionVp(args, borderRadius)) {
         radiusTopLeft = borderRadius;
         radiusTopRight = borderRadius;
         radiusBottomLeft = borderRadius;
         radiusBottomRight = borderRadius;
+    } else if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        auto valueTopLeft = object->GetProperty("topLeft");
+        if (!valueTopLeft->IsUndefined()) {
+            ParseJsDimensionVp(valueTopLeft, radiusTopLeft);
+        }
+        auto valueTopRight = object->GetProperty("topRight");
+        if (!valueTopRight->IsUndefined()) {
+            ParseJsDimensionVp(valueTopRight, radiusTopRight);
+        }
+        auto valueBottomLeft = object->GetProperty("bottomLeft");
+        if (!valueBottomLeft->IsUndefined()) {
+            ParseJsDimensionVp(valueBottomLeft, radiusBottomLeft);
+        }
+        auto valueBottomRight = object->GetProperty("bottomRight");
+        if (!valueBottomRight->IsUndefined()) {
+            ParseJsDimensionVp(valueBottomRight, radiusBottomRight);
+        }
+    } else {
+        LOGE("args format error. %{public}s", args->ToString().c_str());
+        return;
     }
 
     auto stack = ViewStackProcessor::GetInstance();
