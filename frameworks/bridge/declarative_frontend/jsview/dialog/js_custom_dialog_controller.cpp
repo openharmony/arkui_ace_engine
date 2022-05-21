@@ -18,6 +18,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -308,6 +309,7 @@ void JSCustomDialogController::CloseDialog()
 void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 {
     LOGD("JSCustomDialogController(JsOpenDialog)");
+    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     // Cannot reuse component because might depend on state
     if (customDialog_) {
         customDialog_ = nullptr;
@@ -334,6 +336,7 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
 {
     LOGD("JSCustomDialogController(JsCloseDialog)");
+    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     CloseDialog();
 }
 
