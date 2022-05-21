@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_PA_ENGINE_ENGINE_COMMON_JS_BACKEND_TIMER_MODULE_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_PA_ENGINE_ENGINE_COMMON_JS_BACKEND_TIMER_MODULE_H
 
+#include <mutex>
 #include <unordered_map>
 
 #include "adapter/ohos/entrance/pa_engine/backend_delegate.h"
@@ -26,7 +27,6 @@ namespace OHOS::Ace {
 struct TimerCallbackNode {
     std::shared_ptr<NativeReference> func;
     std::vector<std::shared_ptr<NativeReference>> params;
-    CancelableCallback<void()> callback;
 };
 
 class JsBackendTimerModule final {
@@ -42,14 +42,16 @@ public:
     bool GetCallBackById(uint32_t callbackId, std::shared_ptr<NativeReference>& func,
         std::vector<std::shared_ptr<NativeReference>>& params);
     void TimerCallback(uint32_t callbackId, int64_t delayTime, bool isInterval);
-    void PostTimerCallback(uint32_t callbackId, int64_t delayTime, bool isInterval);
+    void PostTimerCallback(uint32_t callbackId, int64_t delayTime, bool isInterval, bool isFirst);
     void RemoveTimerCallback(uint32_t callbackId);
 
 private:
     NativeEngine* nativeEngine_ = nullptr;
     RefPtr<BackendDelegate> delegate_;
+    std::mutex mutex_;
     uint32_t callbackId_ = 0;
     std::unordered_map<uint32_t, TimerCallbackNode> callbackNodeMap_;
+    std::unordered_map<uint32_t, CancelableCallback<void()>> timeoutTaskMap_;
 };
 } // namespace OHOS::Ace
 
