@@ -30,6 +30,18 @@ RefPtr<Container> Container::Current()
     return AceEngine::Get().GetContainer(ContainerScope::CurrentId());
 }
 
+RefPtr<Container> Container::GetActive()
+{
+    RefPtr<Container> activeContainer;
+    AceEngine::Get().NotifyContainers([&activeContainer](const RefPtr<Container>& container) {
+        auto front = container->GetFrontend();
+        if (front && front->IsForeground()) {
+            activeContainer = container;
+        }
+    });
+    return activeContainer;
+}
+
 RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
 {
     auto curContainer = Current();
