@@ -128,6 +128,7 @@ void RenderListItem::SetEditMode(bool editMode)
     }
 
     if (editMode_) {
+        SyncRSNodeBoundary(true, true);
         AddChild(button_);
     } else {
         RemoveChild(button_);
