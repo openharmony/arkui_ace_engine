@@ -50,7 +50,7 @@ NativeValue* SetCallbackTimer(NativeEngine& engine, NativeCallbackInfo& info, bo
     uint32_t callbackId = JsBackendTimerModule::GetInstance()->AddCallBack(func, params);
 
     // Post task
-    JsBackendTimerModule::GetInstance()->PostTimerCallback(callbackId, delayTime, isInterval);
+    JsBackendTimerModule::GetInstance()->PostTimerCallback(callbackId, delayTime, isInterval, true);
 
     return engine.CreateNumber(callbackId);
 }
@@ -120,17 +120,21 @@ void JsBackendTimerModule::TimerCallback(uint32_t callbackId, int64_t delayTime,
     nativeEngine_->CallFunction(nativeEngine_->CreateUndefined(), func->Get(), argc.data(), argc.size());
 
     if (isInterval) {
-        PostTimerCallback(callbackId, delayTime, isInterval);
+        PostTimerCallback(callbackId, delayTime, isInterval, false);
     } else {
         RemoveTimerCallback(callbackId);
     }
 }
 
-void JsBackendTimerModule::PostTimerCallback(uint32_t callbackId, int64_t delayTime, bool isInterval)
+void JsBackendTimerModule::PostTimerCallback(uint32_t callbackId, int64_t delayTime, bool isInterval, bool isFirst)
 {
-    auto taskNode = callbackNodeMap_.find(callbackId);
-    if (taskNode == callbackNodeMap_.end()) {
-        LOGE("Post timer callback failed, callbackId %{public}u not found.", callbackId);
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!isFirst) {
+        auto taskNode = timeoutTaskMap_.find(callbackId);
+        if (taskNode == timeoutTaskMap_.end()) {
+            LOGE("Post timer callback failed, callbackId %{public}u not found.", callbackId);
+            return;
+        }
     }
 
     // CancelableCallback class can only be executed once.
@@ -138,26 +142,32 @@ void JsBackendTimerModule::PostTimerCallback(uint32_t callbackId, int64_t delayT
     cancelableTimer.Reset([callbackId, delayTime, isInterval] {
         JsBackendTimerModule::GetInstance()->TimerCallback(callbackId, delayTime, isInterval);
     });
-    taskNode->second.callback = cancelableTimer;
+    auto result = timeoutTaskMap_.try_emplace(callbackId, cancelableTimer);
+    if (!result.second) {
+        result.first->second = cancelableTimer;
+    }
 
     delegate_->PostDelayedJsTask(cancelableTimer, delayTime);
 }
 
 void JsBackendTimerModule::RemoveTimerCallback(uint32_t callbackId)
 {
-    auto taskNode = callbackNodeMap_.find(callbackId);
-    if (taskNode == callbackNodeMap_.end()) {
-        LOGE("Remove timer callback failed, callbackId %{public}u not found.", callbackId);
-        return;
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (callbackNodeMap_.find(callbackId) != callbackNodeMap_.end()) {
+        callbackNodeMap_.erase(callbackId);
     }
 
-    taskNode->second.callback.Cancel();
-    callbackNodeMap_.erase(taskNode);
+    auto timeoutNode = timeoutTaskMap_.find(callbackId);
+    if (timeoutNode != timeoutTaskMap_.end()) {
+        timeoutNode->second.Cancel();
+        timeoutTaskMap_.erase(callbackId);
+    }
 }
 
 uint32_t JsBackendTimerModule::AddCallBack(const std::shared_ptr<NativeReference>& func,
     const std::vector<std::shared_ptr<NativeReference>>& params)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     ++callbackId_;
     callbackNodeMap_[callbackId_].func = func;
     callbackNodeMap_[callbackId_].params = params;
@@ -167,6 +177,7 @@ uint32_t JsBackendTimerModule::AddCallBack(const std::shared_ptr<NativeReference
 bool JsBackendTimerModule::GetCallBackById(uint32_t callbackId, std::shared_ptr<NativeReference>& func,
     std::vector<std::shared_ptr<NativeReference>>& params)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     auto taskNode = callbackNodeMap_.find(callbackId);
     if (taskNode == callbackNodeMap_.end()) {
         LOGE("Get callback failed, callbackId %{public}u not found.", callbackId);
