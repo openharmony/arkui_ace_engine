@@ -117,7 +117,12 @@ void ToastComponent::BuildPackageBox(const RefPtr<PipelineContext>& context, con
         constraints.SetMaxSize(Size(Size::INFINITE_SIZE, Size::INFINITE_SIZE));
         baseBox->SetConstraints(constraints);
     } else {
-        baseBox->SetGridLayoutInfo(GridSystemManager::GetInstance().GetInfoByType(GridColumnType::TOAST));
+        auto gridColumnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::TOAST);
+        auto parent = gridColumnInfo->GetParent();
+        if (parent) {
+            parent->BuildColumnWidth();
+        }
+        baseBox->SetGridLayoutInfo(gridColumnInfo);
     }
     // baseBox set child
     if (deviceType == DeviceType::WATCH) {
