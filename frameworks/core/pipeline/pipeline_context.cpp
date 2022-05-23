@@ -1843,7 +1843,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-        rsUIDirector_->SetTimeStamp(nanoTimestamp);
+        std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
+            ? AceApplicationInfo::GetInstance().GetPackageName()
+            : AceApplicationInfo::GetInstance().GetProcessName();
+        rsUIDirector_->SetTimeStamp(nanoTimestamp, abilityName);
     }
 #endif
     if (isSurfaceReady_) {
