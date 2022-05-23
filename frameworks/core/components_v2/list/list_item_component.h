@@ -36,6 +36,7 @@ struct EditMode {
         NONE = 0,
         DELETABLE = (1 << 0),
         MOVABLE = (1 << 1),
+        FALSE = (1 << 2), // this enum value [FALSE] is added for inspector use, it works as [NONE]
     };
 };
 
