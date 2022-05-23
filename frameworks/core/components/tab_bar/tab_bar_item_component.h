@@ -32,6 +32,7 @@ public:
     RefPtr<Element> CreateElement() override;
     RefPtr<RenderNode> CreateRenderNode() override;
     void UpdateStyle(const TextStyle& textStyle, const Color& color);
+    static RefPtr<Component> BuildWithTextIcon(const std::string& textStr, const std::string& iconUri);
 
 private:
     RefPtr<TextComponent> text_;

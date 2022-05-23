@@ -17,15 +17,10 @@
 
 #include "base/log/ace_trace.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "frameworks/core/components/padding/padding_component.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
 
-constexpr Dimension DEFAULT_SMALL_TEXT_FONT_SIZE = 10.0_fp;
-constexpr Dimension DEFAULT_SMALL_IMAGE_WIDTH = 24.0_vp;
-constexpr Dimension DEFAULT_SMALL_IMAGE_HEIGHT = 26.0_vp;
-constexpr Dimension DEFAULT_SINGLE_TEXT_FONT_SIZE = 16.0_fp;
 constexpr char DEFAULT_TAB_BAR_NAME[] = "TabBar";
 
 } // namespace
@@ -72,30 +67,24 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     std::string infoStr;
     if (ParseJsString(info[0], infoStr)) {
         auto textVal = infoStr.empty() ? DEFAULT_TAB_BAR_NAME : infoStr;
-        auto text = CreateTabBarLabelComponent(tabContentItemComponent, textVal);
-        auto defaultTabChild = tabBar->GetChildren().back();
-        tabBar->RemoveChildDirectly(defaultTabChild);
-        tabBar->AppendChild(text);
-        return;
-    }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> builderFuncParam = paramObject->GetProperty("builder");
-    JSRef<JSVal> textParam = paramObject->GetProperty("text");
-    JSRef<JSVal> iconParam = paramObject->GetProperty("icon");
-    auto isTextEmpty = textParam->IsEmpty() || textParam->IsUndefined() || textParam->IsNull();
-    auto isIconEmpty = iconParam->IsEmpty() || iconParam->IsUndefined() || iconParam->IsNull();
-    if (builderFuncParam->IsFunction()) {
-        tabBarChild = ProcessTabBarBuilderFunction(tabContentItemComponent, builderFuncParam);
-        // for custom build, no need for indicator.
-        tabBar->ResetIndicator();
-        tabBar->SetAlignment(Alignment::TOP_LEFT);
-    } else if (!isTextEmpty && !isIconEmpty) {
-        tabBarChild = ProcessTabBarTextIconPair(tabContentItemComponent, textParam, iconParam);
-    } else if (!isTextEmpty && isIconEmpty) {
-        tabBarChild = ProcessTabBarLabel(tabContentItemComponent, textParam);
+        tabBarChild = CreateTabBarLabelComponent(tabContentItemComponent, textVal);
     } else {
-        LOGE("invalid parameters: expecting either builder func, text & icon pair, or label");
-        return;
+        auto paramObject = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> builderFuncParam = paramObject->GetProperty("builder");
+        JSRef<JSVal> textParam = paramObject->GetProperty("text");
+        JSRef<JSVal> iconParam = paramObject->GetProperty("icon");
+        auto isTextEmpty = textParam->IsEmpty() || textParam->IsUndefined() || textParam->IsNull();
+        auto isIconEmpty = iconParam->IsEmpty() || iconParam->IsUndefined() || iconParam->IsNull();
+        if (builderFuncParam->IsFunction()) {
+            tabBarChild = ProcessTabBarBuilderFunction(tabContentItemComponent, builderFuncParam);
+            // for custom build, no need for indicator.
+            tabBar->ResetIndicator();
+            tabBar->SetAlignment(Alignment::TOP_LEFT);
+        } else if (!isTextEmpty && !isIconEmpty) {
+            tabBarChild = ProcessTabBarTextIconPair(tabContentItemComponent, textParam, iconParam);
+        } else if (!isTextEmpty && isIconEmpty) {
+            tabBarChild = ProcessTabBarLabel(tabContentItemComponent, textParam);
+        }
     }
     auto defaultTabChild = tabBar->GetChildren().back();
     tabBar->RemoveChildDirectly(defaultTabChild);
@@ -114,21 +103,14 @@ RefPtr<Component> JSTabContent::ProcessTabBarBuilderFunction(
     return builderGeneratedRootComponent;
 }
 
-RefPtr<TextComponent> JSTabContent::CreateTabBarLabelComponent(
+RefPtr<Component> JSTabContent::CreateTabBarLabelComponent(
     RefPtr<V2::TabContentItemComponent>& tabContent, const std::string& labelStr)
 {
     tabContent->SetBarText(labelStr);
-    auto text = AceType::MakeRefPtr<TextComponent>(labelStr);
-    auto textStyle = text->GetTextStyle();
-    textStyle.SetFontSize(DEFAULT_SINGLE_TEXT_FONT_SIZE);
-    textStyle.SetMaxLines(1);
-    textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
-    text->SetTextStyle(textStyle);
-    text->SetAutoMaxLines(false);
-    return text;
+    return TabBarItemComponent::BuildWithTextIcon(labelStr, std::string());
 }
 
-RefPtr<TextComponent> JSTabContent::ProcessTabBarLabel(
+RefPtr<Component> JSTabContent::ProcessTabBarLabel(
     RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSVal> labelVal)
 {
     std::string textStr;
@@ -150,26 +132,8 @@ RefPtr<Component> JSTabContent::ProcessTabBarTextIconPair(
         textStr = DEFAULT_TAB_BAR_NAME;
     }
     tabContent->SetBarText(textStr);
-    auto imageComponent = AceType::MakeRefPtr<ImageComponent>(iconUri);
-    auto box = AceType::MakeRefPtr<BoxComponent>();
-    auto padding = AceType::MakeRefPtr<PaddingComponent>();
-    padding->SetPadding(Edge(0, 0, 0, 2, DimensionUnit::VP));
-    padding->SetChild(imageComponent);
-    box->SetChild(padding);
-    box->SetWidth(DEFAULT_SMALL_IMAGE_WIDTH);
-    box->SetHeight(DEFAULT_SMALL_IMAGE_HEIGHT);
-    auto textComponent = AceType::MakeRefPtr<TextComponent>(textStr);
-    auto textStyle = textComponent->GetTextStyle();
-    textStyle.SetFontSize(DEFAULT_SMALL_TEXT_FONT_SIZE);
-    textStyle.SetMaxLines(1);
-    textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
-    textComponent->SetTextStyle(textStyle);
-    std::list<RefPtr<Component>> children;
-    children.emplace_back(box);
-    children.emplace_back(textComponent);
-    auto columnComponent = AceType::MakeRefPtr<ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, children);
-    columnComponent->SetMainAxisSize(MainAxisSize::MIN);
-    return columnComponent;
+
+    return TabBarItemComponent::BuildWithTextIcon(textStr, iconUri);
 }
 
 void JSTabContent::JSBind(BindingTarget globalObj)
