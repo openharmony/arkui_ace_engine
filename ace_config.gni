@@ -52,6 +52,10 @@ if (!defined(aosp_libs_dir)) {
 }
 libs_root = "${aosp_libs_dir}/sdk"
 
+aafwk_inner_api_path = "//foundation/aafwk/standard/interfaces/innerkits"
+aafwk_inner_kits_path = "//foundation/aafwk/standard/interfaces/kits"
+aafwk_kits_path = "//foundation/aafwk/standard/frameworks/kits"
+aafwk_services_path = "//foundation/aafwk/standard/services"
 flutter_root = "//third_party/flutter"
 ace_flutter_engine_root = "$flutter_root/build"
 expat_root = "//third_party/expat"
