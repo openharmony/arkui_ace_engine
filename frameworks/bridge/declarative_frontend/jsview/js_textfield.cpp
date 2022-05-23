@@ -604,11 +604,11 @@ void JSTextField::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
             Border border;
             border.SetBorderRadius(textFieldTheme->GetBorderRadius());
             boxDecoration->SetBorder(border);
-        } else {
-            boxDecoration = AceType::MakeRefPtr<Decoration>();
-            boxDecoration->SetBorderRadius(textFieldTheme->GetBorderRadius());
-            boxComponent->SetBackDecoration(boxDecoration);
         }
+    } else {
+        boxDecoration = AceType::MakeRefPtr<Decoration>();
+        boxDecoration->SetBorderRadius(textFieldTheme->GetBorderRadius());
+        boxComponent->SetBackDecoration(boxDecoration);
     }
 }
 

@@ -163,6 +163,7 @@ void JSTextInput::Create(const JSCallbackInfo& info)
     if (boxComponent->GetBackDecoration()) {
         boxBorder = boxComponent->GetBackDecoration()->GetBorder();
     }
+    boxComponent->SetMouseAnimationType(HoverAnimationType::BOARD);
     JSTextField::UpdateDecoration(boxComponent, textInputComponent, boxBorder, theme);
 
     if (info.Length() < 1 || !info[0]->IsObject()) {
