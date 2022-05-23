@@ -18,6 +18,7 @@
 #include "core/components/search/search_component.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/text_field_component.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -190,7 +191,7 @@ void PrepareSpecializedComponent(OHOS::Ace::RefPtr<OHOS::Ace::SearchComponent>& 
 
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
 
-    boxComponent->SetMouseAnimationType(HoverAnimationType::OPACITY);
+    boxComponent->SetMouseAnimationType(HoverAnimationType::BOARD);
     if (boxComponent->GetBackDecoration()) {
         boxBorder = boxComponent->GetBackDecoration()->GetBorder();
     }
@@ -227,7 +228,11 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("textFont", &JSSearch::SetTextFont, opt);
     JSClass<JSSearch>::StaticMethod("onSubmit", &JSSearch::OnSubmit, opt);
     JSClass<JSSearch>::StaticMethod("onChange", &JSSearch::OnChange, opt);
-
+    JSClass<JSSearch>::StaticMethod("border", &JSTextField::JsBorder);
+    JSClass<JSSearch>::StaticMethod("borderWidth", &JSTextField::JsBorderWidth);
+    JSClass<JSSearch>::StaticMethod("borderColor", &JSTextField::JsBorderColor);
+    JSClass<JSSearch>::StaticMethod("borderStyle", &JSTextField::JsBorderStyle);
+    JSClass<JSSearch>::StaticMethod("borderRadius", &JSTextField::JsBorderRadius);
     JSClass<JSSearch>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSearch>::StaticMethod("height", &JSSearch::SetHeight);
     JSClass<JSSearch>::StaticMethod("width", &JSViewAbstract::JsWidth);

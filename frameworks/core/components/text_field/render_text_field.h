@@ -308,6 +308,8 @@ public:
 
     int32_t instanceId_ = -1;
 
+    bool hasFocus_ = false;
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -554,7 +556,6 @@ private:
     bool isOverlayFocus_ = false;
     bool isShiftDown_ = false;
     bool isCtrlDown_ = false;
-    bool hasFocus_ = false;
     double fontScale_ = 1.0;
     bool isSingleHandle_ = false;
     bool hasTextOverlayPushed_ = false;
