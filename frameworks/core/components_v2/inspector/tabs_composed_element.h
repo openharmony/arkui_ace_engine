@@ -43,6 +43,7 @@ public:
     std::string GetBarMode() const;
     std::string GetBarWidth() const;
     std::string GetBarHeight() const;
+    float GetAnimationDuration() const;
 
     AceType::IdType GetTargetTypeId() const override
     {
