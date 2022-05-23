@@ -43,6 +43,8 @@ void RosenRenderSwitch::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint canvas is null");
         return;
     }
+    SkAutoCanvasRestore acr(canvas, true);
+    canvas->clipRect(SkRect::MakeWH(GetLayoutSize().Width(), GetLayoutSize().Height()));
     Offset paintOffset = offset + paintPosition_;
     SkPaint trackPaint;
     SkPaint paint;
