@@ -24,6 +24,7 @@
 #include "base/utils/macros.h"
 #include "core/components/ifelse/if_else_component.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
+#include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/composed_component.h"
 
@@ -45,10 +46,11 @@ public:
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
         auto composedComponent = AceType::DynamicCast<ComposedComponent>(component);
+        auto inspectorComposedComponent = AceType::DynamicCast<InspectorComposedComponent>(component);
         SetComposedId(composedComponent ? composedComponent->GetId() : "");
 
         component_ = component;
-        while (composedComponent && !composedComponent->HasElementFunction()) {
+        while (composedComponent && !composedComponent->HasElementFunction() && !inspectorComposedComponent) {
             component_ = composedComponent->GetChild();
             composedComponent = AceType::DynamicCast<ComposedComponent>(component_);
         }
