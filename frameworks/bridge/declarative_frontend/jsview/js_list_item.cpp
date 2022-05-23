@@ -52,7 +52,7 @@ void JSListItem::SetEditable(const JSCallbackInfo& args)
 
         if (args[0]->IsBoolean()) {
             uint32_t value =
-                args[0]->ToBoolean() ? V2::EditMode::DELETABLE | V2::EditMode::MOVABLE : V2::EditMode::NONE;
+                args[0]->ToBoolean() ? V2::EditMode::DELETABLE | V2::EditMode::MOVABLE : V2::EditMode::FALSE;
             JSViewSetProperty(&V2::ListItemComponent::SetEditMode, value);
             break;
         }
