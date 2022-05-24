@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,24 +22,11 @@
 #include "third_party/skia/include/effects/SkGradientShader.h"
 
 #include "core/components/common/painter/rosen_decoration_painter.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/shadow_config.h"
-#include "core/pipeline/base/rosen_render_context.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
-namespace {
-
-constexpr Dimension BEZIER_WIDTH_HALF = 16.0_vp;
-constexpr Dimension BEZIER_HORIZON_OFFSET_FIRST = 1.3_vp;
-constexpr Dimension BEZIER_HORIZON_OFFSET_SECOND = 3.2_vp;
-constexpr Dimension BEZIER_HORIZON_OFFSET_THIRD = 6.6_vp;
-constexpr Dimension BEZIER_HORIZON_OFFSET_FOURTH = 16.0_vp;
-constexpr Dimension BEZIER_VERTICAL_OFFSET_FIRST = 0.1_vp;
-constexpr Dimension BEZIER_VERTICAL_OFFSET_SECOND = 3.0_vp;
-constexpr Dimension BEZIER_VERTICAL_OFFSET_THIRD = 8.0_vp;
-
-} // namespace
-
 
 SkCanvas* RosenRenderBubble::GetSkCanvas(RenderContext& context)
 {
@@ -114,20 +101,44 @@ void RosenRenderBubble::PaintBubble(RenderContext& context)
     SkPaint paint;
     paint.setAntiAlias(true);
     paint.setColor(backgroundColor_.GetValue());
-    switch (arrowPlacement_) {
-        case Placement::TOP:
-            showTopArrow_ ? PaintTopBubble(skCanvas, paint) : PaintDefaultBubble(skCanvas, paint);
-            break;
-        case Placement::BOTTOM:
-            showBottomArrow_ ? PaintBottomBubble(skCanvas, paint) : PaintDefaultBubble(skCanvas, paint);
-            break;
-        default:
-            PaintDefaultBubble(skCanvas, paint);
-            break;
+
+    if (!useCustom_) {
+        switch (arrowPlacement_) {
+            case Placement::TOP:
+                showTopArrow_ ? PaintTopBubble(skCanvas, paint) : PaintDefaultBubble(skCanvas, paint);
+                break;
+            case Placement::BOTTOM:
+                showBottomArrow_ ? PaintBottomBubble(skCanvas, paint) : PaintDefaultBubble(skCanvas, paint);
+                break;
+            default:
+                break;
+        }
+
+        return;
+    }
+
+    if (enableArrow_ && showCustomArrow_) {
+        PaintBubbleWithArrow(skCanvas, paint);
+    } else {
+        PaintDefaultBubble(skCanvas, paint);
     }
 }
 
-void RosenRenderBubble::PaintTopBubble(SkCanvas* skCanvas, SkPaint paint)
+
+
+void RosenRenderBubble::PaintBubbleWithArrow(SkCanvas* skCanvas, const SkPaint& paint)
+{
+    if (skCanvas == nullptr) {
+        return;
+    }
+
+    BuildCompletePath(path_);
+    RosenDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
+    skCanvas->drawPath(path_, paint);
+    skCanvas->clipPath(path_, SkClipOp::kIntersect);
+}
+
+void RosenRenderBubble::PaintTopBubble(SkCanvas* skCanvas, const SkPaint& paint)
 {
     if (skCanvas == nullptr) {
         return;
@@ -184,12 +195,12 @@ void RosenRenderBubble::PaintTopBubble(SkCanvas* skCanvas, SkPaint paint)
         arrowPosition_.GetY() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST), arrowPosition_.GetX() + arrowOffset,
         arrowPosition_.GetY());
     path_.close();
-    PaintShadow(skCanvas);
+    RosenDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
     skCanvas->drawPath(path_, paint);
     skCanvas->clipPath(path_, SkClipOp::kIntersect);
 }
 
-void RosenRenderBubble::PaintBottomBubble(SkCanvas* skCanvas, SkPaint paint)
+void RosenRenderBubble::PaintBottomBubble(SkCanvas* skCanvas, const SkPaint& paint)
 {
     if (skCanvas == nullptr) {
         return;
@@ -245,34 +256,20 @@ void RosenRenderBubble::PaintBottomBubble(SkCanvas* skCanvas, SkPaint paint)
         arrowPosition_.GetY() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST), arrowPosition_.GetX() + arrowOffset,
         arrowPosition_.GetY());
     path_.close();
-    PaintShadow(skCanvas);
+    RosenDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
     skCanvas->drawPath(path_, paint);
     skCanvas->clipPath(path_, SkClipOp::kIntersect);
 }
 
-void RosenRenderBubble::PaintDefaultBubble(SkCanvas* skCanvas, SkPaint paint)
+void RosenRenderBubble::PaintDefaultBubble(SkCanvas* skCanvas, const SkPaint& paint)
 {
     if (skCanvas == nullptr) {
         return;
     }
     rrect_ = MakeRRect();
-    PaintShadow(skCanvas);
+    RosenDecorationPainter::PaintShadow(SkPath().addRRect(rrect_), ShadowConfig::DefaultShadowM, skCanvas);
     skCanvas->drawRRect(rrect_, paint);
     skCanvas->clipRRect(rrect_, SkClipOp::kIntersect);
-}
-
-void RosenRenderBubble::PaintShadow(SkCanvas* skCanvas)
-{
-    if (skCanvas == nullptr) {
-        LOGE("Paint shadow failed, skCanvas is null.");
-        return;
-    }
-
-    if ((arrowPlacement_ == Placement::TOP || arrowPlacement_ == Placement::BOTTOM) && !path_.isEmpty()) {
-        RosenDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
-    } else {
-        RosenDecorationPainter::PaintShadow(SkPath().addRRect(rrect_), ShadowConfig::DefaultShadowM, skCanvas);
-    }
 }
 
 void RosenRenderBubble::PaintBorder(RenderContext& context)

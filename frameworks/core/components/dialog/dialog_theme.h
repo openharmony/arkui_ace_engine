@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,9 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr Dimension DEFAULT_RADIUS = 16.0_vp;
+} // namespace
 
 /**
  * DialogTheme defines color and styles of DialogComponent. DialogTheme should be built
@@ -47,8 +50,7 @@ public:
                 return theme;
             }
             // init theme from global data
-            theme->radius_ = Radius(
-                themeConstants->GetDimension(THEME_DIALOG_RADIUS), themeConstants->GetDimension(THEME_DIALOG_RADIUS));
+            theme->radius_ = Radius(DEFAULT_RADIUS, DEFAULT_RADIUS);
             theme->backgroundColor_ = themeConstants->GetColor(THEME_DIALOG_BACKGROUND_COLOR);
             theme->titleTextStyle_.SetTextColor(themeConstants->GetColor(THEME_DIALOG_TITLE_TEXT_COLOR));
             theme->titleTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_DIALOG_TITLE_TEXT_FONTSIZE));
@@ -140,7 +142,7 @@ public:
             auto defaultPadding = dialogPattern->GetAttr<Dimension>(DIALOG_CONTENT_TOP_PADDING, 0.0_vp);
             auto titlePadding = dialogPattern->GetAttr<Dimension>(DIALOG_TITLE_TOP_PADDING, 0.0_vp);
             auto actionsTopPadding = dialogPattern->GetAttr<Dimension>(DIALOG_ACTIONS_TOP_PADDING, 0.0_vp);
-            theme->radius_ = Radius(themeStyle->GetAttr<Dimension>(THEME_ATTR_DIALOG_RADIUS, 0.0_vp));
+            theme->radius_ = Radius(DEFAULT_RADIUS);
             theme->titleAdjustPadding_ = Edge(defaultPadding, titlePadding, defaultPadding, titlePadding);
             theme->titleDefaultPadding_ = Edge(defaultPadding, titlePadding, defaultPadding, titlePadding);
             theme->defaultPadding_ = Edge(defaultPadding, defaultPadding, defaultPadding, defaultPadding);

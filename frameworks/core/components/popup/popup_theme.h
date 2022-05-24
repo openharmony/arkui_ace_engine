@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_POPUP_POPUP_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_POPUP_POPUP_THEME_H
 
+#include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/text_style.h"
@@ -27,6 +28,8 @@ namespace OHOS::Ace {
 namespace {
 constexpr uint32_t SHOW_TIME = 250; // unit is ms.
 constexpr uint32_t HIDE_TIME = 250; // unit is ms.
+constexpr Dimension TARGET_SPACE = 8.0_vp;
+constexpr double DEFAULT_OPACITY = 0.95;
 } // namespace
 
 /**
@@ -54,7 +57,8 @@ public:
                 themeConstants->GetDimension(THEME_POPUP_PADDING_HORIZONTAL),
                 themeConstants->GetDimension(THEME_POPUP_PADDING_VERTICAL));
             theme->maskColor_ = themeConstants->GetColor(THEME_POPUP_MASK_COLOR);
-            theme->backgroundColor_ = themeConstants->GetColor(THEME_POPUP_BACKGROUND_COLOR);
+            theme->backgroundColor_ =
+                themeConstants->GetColor(THEME_POPUP_BACKGROUND_COLOR).ChangeOpacity(DEFAULT_OPACITY);
             theme->textStyle_.SetTextColor(themeConstants->GetColor(THEME_POPUP_TEXT_COLOR));
             theme->textStyle_.SetFontSize(themeConstants->GetDimension(THEME_POPUP_TEXT_FONTSIZE));
             theme->radius_ = Radius(themeConstants->GetDimension(THEME_POPUP_RADIUS),
@@ -62,6 +66,7 @@ public:
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             theme->showTime_ = SHOW_TIME;
             theme->hideTime_ = HIDE_TIME;
+            theme->targetSpace_ = TARGET_SPACE;
             return theme;
         }
 
@@ -112,6 +117,11 @@ public:
         return hideTime_;
     }
 
+    const Dimension& GetTargetSpace() const
+    {
+        return targetSpace_;
+    }
+
 protected:
     PopupTheme() = default;
 
@@ -123,6 +133,7 @@ private:
     Radius radius_;
     uint32_t showTime_ = 0;
     uint32_t hideTime_ = 0;
+    Dimension targetSpace_;
 };
 
 } // namespace OHOS::Ace

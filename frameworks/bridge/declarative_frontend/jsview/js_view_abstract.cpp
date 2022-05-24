@@ -387,7 +387,8 @@ bool ParseLocationProps(const JSCallbackInfo& info, AnimatableDimension& x, Anim
 
 #ifndef WEARABLE_PRODUCT
 const std::vector<Placement> PLACEMENT = { Placement::LEFT, Placement::RIGHT, Placement::TOP, Placement::BOTTOM,
-    Placement::TOP_LEFT, Placement::TOP_RIGHT, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT };
+    Placement::TOP_LEFT, Placement::TOP_RIGHT, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT, Placement::LEFT_TOP,
+    Placement::LEFT_BOTTOM, Placement::RIGHT_TOP, Placement::RIGHT_BOTTOM };
 
 void ParseShowObject(
     const JSCallbackInfo& info, const JSRef<JSObject>& showObj, const RefPtr<PopupComponentV2>& popupComponent)

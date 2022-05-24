@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_POPUP_POPUP_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_POPUP_POPUP_COMPONENT_H
 
+#include "base/geometry/dimension.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
@@ -187,6 +188,16 @@ public:
         useCustom_ = useCustom;
     }
 
+    const Dimension& GetTargetSpace() const
+    {
+        return targetSpace_;
+    }
+
+    void SetTargetSpace(const Dimension& targetSpace)
+    {
+        targetSpace_ = targetSpace;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -204,6 +215,7 @@ private:
     Border border_;
     Dimension arrowOffset_;
     ComposeId targetId_;
+    Dimension targetSpace_;
 };
 
 class PopupController : public virtual AceType {
