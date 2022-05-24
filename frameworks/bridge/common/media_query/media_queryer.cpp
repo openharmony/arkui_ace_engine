@@ -206,7 +206,12 @@ const MediaQueryerRule DEVICE_TYPE_RULE(
     std::regex("\\(device-type:([a-z]+)\\)"),
     [](const std::smatch& matchResults, const MediaFeature& mediaFeature, MediaError& failReason) {
         static constexpr int32_t CONDITION_VALUE = 1;
-        return matchResults[CONDITION_VALUE] == mediaFeature->GetString("device-type", "");
+        auto matchDeviceType = mediaFeature->GetString("device-type", "");
+        if (matchResults[CONDITION_VALUE] == "default") {
+            return matchDeviceType == "phone";
+        } else {
+            return matchResults[CONDITION_VALUE] == matchDeviceType;
+        }
     },
     2);
 
