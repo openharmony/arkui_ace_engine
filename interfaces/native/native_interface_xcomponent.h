@@ -142,11 +142,7 @@ typedef struct OH_NativeXComponent OH_NativeXComponent;
 typedef struct OH_NativeXComponent_Callback {
     /** Called when the surface is created. */
     void (*OnSurfaceCreated)(OH_NativeXComponent* component, void* window);
-    /**
-     * Called when the surface is changed.\n
-     * This API is defined but not implemented in OpenHarmony 3.1 Release. It will be available for use in\n
-     * OpenHarmony 3.1 MR.
-     */
+    /** Called when the surface is changed. */
     void (*OnSurfaceChanged)(OH_NativeXComponent* component, void* window);
     /** Called when the surface is destroyed. */
     void (*OnSurfaceDestroyed)(OH_NativeXComponent* component, void* window);

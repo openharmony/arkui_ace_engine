@@ -39,6 +39,7 @@ class XComponentElement : public RenderElement {
 public:
     using InitEventCallback = std::function<void(const std::string&)>;
     using DestroyEventCallback = std::function<void(const std::string&)>;
+    using ExternalEventCallback = std::function<void(const std::string&, const uint32_t)>;
     ~XComponentElement();
     void Prepare(const WeakPtr<Element>& parent) override;
     void SetNewComponent(const RefPtr<Component>& newComponent) override;
@@ -55,14 +56,17 @@ private:
     void OnSurfaceInit(const std::string& componentId, const uint32_t nodeId);
     void RegisterDispatchTouchEventCallback();
     void DispatchTouchEvent(const TouchEvent& event);
-    void OnXComponentSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
-    void OnTextureSize(int64_t textureId, const std::string& result);
+    void OnXComponentSizeInit(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
+    void OnXComponentSizeChange(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
 
     void CreatePlatformResource();
     void ReleasePlatformResource();
     bool IsDeclarativePara();
 
-    std::function<void(const std::string&, const uint32_t)> onSurfaceInit_;
+    void SetMethodCall();
+    void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
+
+    ExternalEventCallback onSurfaceInit_;
     InitEventCallback onXComponentInit_;
     DestroyEventCallback onXComponentDestroy_;
     OH_NativeXComponent_TouchEvent touchEventPoint_;
@@ -71,17 +75,15 @@ private:
     bool hasSendDestroyEvent_ = false;
     bool isExternalResource_ = false;
     RefPtr<NativeTexture> texture_;
+    RefPtr<XComponentController> xcomponentController_;
 
 #ifdef OHOS_STANDARD_SYSTEM
     void CreateSurface();
-    void OnXComponentHiddenChange(bool hidden);
-    void SetMethodCall();
-    void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
 
-    bool onLoadDone_ = false;
-    static std::unordered_map<std::string, uint64_t> surfaceIdMap_;
-    RefPtr<XComponentController> xcomponentController_;
     sptr<OHOS::Surface> producerSurface_ = nullptr;
+    struct NativeWindow *nativeWindow_ = nullptr;
+#else
+    void OnTextureRefresh();
 #endif
 };
 } // namespace OHOS::Ace
