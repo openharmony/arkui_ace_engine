@@ -704,7 +704,8 @@ RefPtr<AccessibilityNodeManager> AccessibilityNodeManager::Create()
 }
 
 void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessibilityId(
-    const int32_t elementId, const int32_t requestId, AccessibilityElementOperatorCallback& callback, const int32_t mode)
+    const int32_t elementId, const int32_t requestId,
+    AccessibilityElementOperatorCallback& callback, const int32_t mode)
 {
     LOGI("JsAccessibilityManager::SearchElementInfoByAccessibilityId elementId(%{public}d)", elementId);
     auto jsAccessibilityManager = GetHandler().Upgrade();
@@ -730,7 +731,8 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessib
 }
 
 void JsAccessibilityManager::SearchElementInfoByAccessibilityId(
-    const int32_t elementId, const int32_t requestId, AccessibilityElementOperatorCallback& callback, const int32_t mode)
+    const int32_t elementId, const int32_t requestId,
+    AccessibilityElementOperatorCallback& callback, const int32_t mode)
 {
     LOGI("SearchElementInfoByAccessibilityId elementId(%{public}d) mode(%{public}d)", elementId, mode);
     auto weak = WeakClaim(this);
