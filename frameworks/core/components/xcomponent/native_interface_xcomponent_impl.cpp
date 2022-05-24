@@ -114,3 +114,12 @@ int32_t OH_NativeXComponent::RegisterCallback(OH_NativeXComponent_Callback* call
     xcomponentImpl_->SetCallback(callback);
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
+
+int32_t OH_NativeXComponent::RegisterMouseEventCallback(OH_NativeXComponent_MouseEvent_Callback* callback)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetMouseEventCallback(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}

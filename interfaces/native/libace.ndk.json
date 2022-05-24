@@ -20,7 +20,11 @@
         "name": "OH_NativeXComponent_GetXComponentOffset"
     },
     {
-        "first_introduced": "8",
+        "first_introduced": "9",
         "name": "OH_NativeXComponent_GetMouseEvent"
+    },
+    {
+        "first_introduced": "9",
+        "name": "OH_NativeXComponent_RegisterMouseEventCallback"
     }
 ]
