@@ -73,8 +73,9 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
         return SrcType::MEMORY;
     } else if (head == "resource") {
         return SrcType::RESOURCE;
-    } else if (head == "dataability") {
-        if (IsUriOfDataAbilityEncoded(uri, "^dataability://.*?/media/.*/thumbnail/.*$")) {
+    } else if (head == "dataability" || head == "datashare") {
+        if (IsUriOfDataAbilityEncoded(uri, "^dataability://.*?/media/.*/thumbnail/.*$") ||
+            IsUriOfDataAbilityEncoded(uri, "^datashare://.*?/media/.*/thumbnail/.*$")) {
             return SrcType::DATA_ABILITY_DECODED;
         }
         return SrcType::DATA_ABILITY;
