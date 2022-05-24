@@ -62,8 +62,9 @@ void TextFieldElement::Update()
     enabled_ = textField->IsEnabled();
 
     // If auto focus, request keyboard immediately.
-    if (textField->GetAutoFocus()) {
+    if (textField->GetAutoFocus() && isFirstLoad_) {
         RequestKeyboard(true);
+        isFirstLoad_ = false;
     }
 
     auto context = context_.Upgrade();
