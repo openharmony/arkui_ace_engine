@@ -1083,8 +1083,7 @@ int JsAccessibilityManager::RegisterInteractionOperation(const int windowId)
 
     interactionOperation_ = std::make_shared<JsInteractionOperation>();
     interactionOperation_->SetHandler(WeakClaim(this));
-    int32_t userId = AceApplicationInfo::GetInstance().GetUserId();
-    int retReg = instance->RegisterElementOperator(windowId, interactionOperation_, userId);
+    int retReg = instance->RegisterElementOperator(windowId, interactionOperation_);
     LOGI("RegisterInteractionOperation end windowId:%{public}d, ret:%{public}d", windowId, retReg);
     Register(!retReg);
 
