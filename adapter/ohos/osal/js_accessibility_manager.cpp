@@ -935,7 +935,7 @@ void JsAccessibilityManager::JsInteractionOperation::ExecuteAction(const int32_t
     const std::map<std::string, std::string> &actionArguments, const int32_t requestId,
     AccessibilityElementOperatorCallback& callback)
 {
-    LOGI("JsAccessibilityManager::ExecuteAction, id:%{public}d, action:%{public}d, request:%{public}d.", 
+    LOGI("JsAccessibilityManager::ExecuteAction, id:%{public}d, action:%{public}d, request:%{public}d.",
         elementId, action, requestId);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     if (!jsAccessibilityManager) {
