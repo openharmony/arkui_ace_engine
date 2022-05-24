@@ -353,20 +353,22 @@ void RenderSwiper::PerformLayout()
             continue;
         }
         childItem->Layout(innerLayout);
-        if (showingCount == DEFAULT_SHOWING_COUNT) {
-            maxWidth = std::max(maxWidth, childItem->GetLayoutSize().Width());
-            maxHeight = std::max(maxHeight, childItem->GetLayoutSize().Height());
-        }
+        maxWidth = std::max(maxWidth, childItem->GetLayoutSize().Width());
+        maxHeight = std::max(maxHeight, childItem->GetLayoutSize().Height());
     }
 
-    if (mainSwiperSize_ == MainSwiperSize::AUTO) {
-        if (maxSize.IsInfinite()) {
-            SetLayoutSize(Size(maxWidth, maxHeight));
+    Size size = Size(maxWidth, maxHeight);
+    if (showingCount > DEFAULT_SHOWING_COUNT) {
+        if (axis_ == Axis::HORIZONTAL) {
+            size.SetWidth(maxSize.Width());
         } else {
-            SetLayoutSize(maxSize);
+            size.SetHeight(maxSize.Height());
         }
+    }
+    if (mainSwiperSize_ == MainSwiperSize::AUTO) {
+        SetLayoutSize(maxSize.IsInfinite() ? size : maxSize);
     } else {
-        SetLayoutSize((isLinearLayout || (showingCount > DEFAULT_SHOWING_COUNT)) ? maxSize : Size(maxWidth, maxHeight));
+        SetLayoutSize(isLinearLayout ? maxSize : size);
     }
 
     Size layoutSize = GetLayoutSize();
