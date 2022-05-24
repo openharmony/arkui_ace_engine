@@ -1788,6 +1788,9 @@ void RenderTextField::HandleOnRevoke()
     SetEditingValue(std::move(value), true, false);
     cursorPositionType_ = CursorPositionType::NONE;
     MarkNeedLayout();
+    if (onChange_) {
+        onChange_(GetEditingValue().text);
+    }
 }
 
 void RenderTextField::HandleOnInverseRevoke()
@@ -1801,6 +1804,9 @@ void RenderTextField::HandleOnInverseRevoke()
     SetEditingValue(std::move(value), true, false);
     cursorPositionType_ = CursorPositionType::NONE;
     MarkNeedLayout();
+    if (onChange_) {
+        onChange_(GetEditingValue().text);
+    }
 }
 
 void RenderTextField::HandleOnCut()
@@ -1954,19 +1960,12 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
     if (appendElement.empty()) {
         return false;
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    auto editingValue = GetEditingValue();
-    editingValue.text = editingValue.GetBeforeSelection() + appendElement + editingValue.GetAfterSelection();
-    editingValue.UpdateSelection(
-        std::max(editingValue.selection.GetEnd(), 0) + StringUtils::Str8ToStr16(appendElement).length());
-    SetEditingValue(std::move(editingValue));
-#else
+
     auto editingValue = std::make_shared<TextEditingValue>();
     editingValue->text = GetEditingValue().GetBeforeSelection() + appendElement + GetEditingValue().GetAfterSelection();
     editingValue->UpdateSelection(
         std::max(GetEditingValue().selection.GetEnd(), 0) + StringUtils::Str8ToStr16(appendElement).length());
     UpdateEditingValue(editingValue);
-#endif
     MarkNeedLayout();
     return true;
 }
@@ -2201,6 +2200,9 @@ void RenderTextField::Delete(int32_t start, int32_t end)
     SetEditingValue(std::move(value));
     if (onValueChange_) {
         onValueChange_();
+    }
+    if (onChange_) {
+        onChange_(GetEditingValue().text);
     }
 }
 
