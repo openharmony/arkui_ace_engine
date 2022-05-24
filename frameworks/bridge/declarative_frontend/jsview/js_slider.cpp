@@ -46,10 +46,10 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::Bind(globalObj);
 }
 
-double GetStep(double step, double max)
+double GetStep(double step, double max, double min)
 {
-    if (step < 1 || step > max) {
-        step = 1;
+    if (LessOrEqual(step, 0.0) || step > max - min) {
+        step = max - min;
     }
     return step;
 }
@@ -113,7 +113,7 @@ void JSSlider::Create(const JSCallbackInfo& info)
         max = 100;
     }
 
-    step = GetStep(step, max - min);
+    step = GetStep(step, max, min);
 
     value = GetValue(value, max, min);
 
