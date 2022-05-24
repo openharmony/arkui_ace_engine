@@ -49,6 +49,7 @@ private:
     bool editingMode_ = false;
     bool isNextAction_ = false;
     bool isRequestFocus_ = false;
+    bool isFirstLoad_ = true;
     int32_t callbackId_ = 0;
 };
 
