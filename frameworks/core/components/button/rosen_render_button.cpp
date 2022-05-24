@@ -111,10 +111,10 @@ void RosenRenderButton::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     DrawButton(canvas, offset);
-    RenderNode::Paint(context, offset);
     if (isFocus_ && (isTablet_ || isPhone_)) {
         PaintFocus(context, offset);
     }
+    RenderNode::Paint(context, offset);
 }
 
 void RosenRenderButton::PaintButtonAnimation()
@@ -486,8 +486,8 @@ void RosenRenderButton::PaintFocus(RenderContext& context, const Offset& offset)
     paint.setAntiAlias(true);
     SkRRect rRect;
     rRect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
-    rRect.offset(offset.GetX() - NormalizeToPx(FOCUS_PADDING  + FOCUS_BORDER_WIDTH * HALF),
-        offset.GetY() - NormalizeToPx(FOCUS_PADDING  + FOCUS_BORDER_WIDTH * HALF));
+    rRect.offset(- NormalizeToPx(FOCUS_PADDING  + FOCUS_BORDER_WIDTH * HALF),
+        - NormalizeToPx(FOCUS_PADDING  + FOCUS_BORDER_WIDTH * HALF));
     canvas->drawRRect(rRect, paint);
 }
 
