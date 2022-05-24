@@ -36,16 +36,11 @@ public:
     void SetCurrentConnection(const RefPtr<TextInputConnection>& currentConnection);
     bool IsCurrentConnection(const TextInputConnection* connection) const;
     bool AddCharacter(const wchar_t wideChar);
-    bool HandleKeyEvent(const KeyEvent& event);
 
 private:
-    // Process all printable characters. If the input method is used, this function is invalid.
-    bool HandleTextKeyEvent(const KeyEvent& event);
     bool PerformAction(const TextInputAction action);
     bool UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true);
     int32_t clientId_;
-    bool enableCapsLock_;
-    bool enableNumLock_;
     TextEditingValue textEditingValue_;
     RefPtr<TextInputConnection> currentConnection_;
 };
