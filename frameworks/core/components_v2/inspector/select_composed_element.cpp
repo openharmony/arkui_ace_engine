@@ -77,10 +77,10 @@ std::string SelectComposedElement::GetOptions() const
     auto popup = selectComponent->GetSelectPopupComponent();
     if (popup) {
         auto vectorValue = popup->GetSelectOptions();
-        auto jsonOptions = JsonUtil::CreateArray(false);
+        auto jsonOptions = JsonUtil::CreateArray(true);
         for (size_t i = 0; i < vectorValue.size(); i++) {
             if (vectorValue[i] && vectorValue[i]->GetIcon()) {
-                auto temp = JsonUtil::Create(false);
+                auto temp = JsonUtil::Create(true);
                 temp->Put("value", vectorValue[i]->GetValue().c_str());
                 temp->Put("icon", vectorValue[i]->GetIcon()->GetSrc().c_str());
                 auto index = std::to_string(i);

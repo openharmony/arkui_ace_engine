@@ -113,6 +113,9 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
     { "bindPopup", [](const InspectorNode& inspector) { return inspector.GetBindPopup(); } },
     { "bindContextMenu", [](const InspectorNode& inspector) { return inspector.GetBindContextMenu(); } },
     { "colorBlend", [](const InspectorNode& inspector) { return inspector.GetColorBlend(); } },
+    { "backgroundImageSize", [](const InspectorNode& inspector) { return inspector.GetBackgroundImageSize(); } },
+    { "backgroundImagePosition",
+        [](const InspectorNode& inspector) { return inspector.GetBackgroundImagePosition(); } },
 };
 
 const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP {
@@ -140,13 +143,11 @@ const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_
     { "windowBlur", [](const InspectorNode& inspector) { return inspector.GetWindowBlur(); } },
     { "shadow", [](const InspectorNode& inspector) { return inspector.GetShadow(); } },
     { "position", [](const InspectorNode& inspector) { return inspector.GetPosition(); } },
+
     { "offset", [](const InspectorNode& inspector) { return inspector.GetOffset(); } },
     { "padding", [](const InspectorNode& inspector) { return inspector.GetPadding(); } },
     { "margin", [](const InspectorNode& inspector) { return inspector.GetAllMargin(); } },
     { "size", [](const InspectorNode& inspector) { return inspector.GetSize(); } },
-    { "backgroundImageSize", [](const InspectorNode& inspector) { return inspector.GetBackgroundImageSize(); } },
-    { "backgroundImagePosition",
-        [](const InspectorNode& inspector) { return inspector.GetBackgroundImagePosition(); } },
     { "useSizeType", [](const InspectorNode& inspector) { return inspector.GetUseSizeType(); } },
     { "rotate", [](const InspectorNode& inspector) { return inspector.GetRotate(); } },
     { "scale", [](const InspectorNode& inspector) { return inspector.GetScale(); } },
@@ -390,7 +391,7 @@ std::string InspectorComposedElement::GetHeight() const
 
 std::unique_ptr<JsonValue> InspectorComposedElement::GetSize() const
 {
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("width", GetWidth().c_str());
     jsonValue->Put("height", GetHeight().c_str());
     return jsonValue;
@@ -399,16 +400,14 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetSize() const
 std::unique_ptr<JsonValue> InspectorComposedElement::GetPadding() const
 {
     auto render = GetRenderBox();
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     if (render) {
         auto top = render->GetPadding(DimensionHelper(&Edge::SetTop, &Edge::Top));
         auto right = render->GetPadding(DimensionHelper(&Edge::SetRight, &Edge::Right));
         auto bottom = render->GetPadding(DimensionHelper(&Edge::SetBottom, &Edge::Bottom));
         auto left = render->GetPadding(DimensionHelper(&Edge::SetLeft, &Edge::Left));
         if (top == right && right == bottom && bottom == left) {
-            auto temp = JsonUtil::Create(false);
-            temp->Put("padding", top.ToString().c_str());
-            jsonValue = temp->GetValue("padding");
+            jsonValue->Put("padding", top.ToString().c_str());
         } else {
             jsonValue->Put("top", top.ToString().c_str());
             jsonValue->Put("right", right.ToString().c_str());
@@ -423,16 +422,14 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetPadding() const
 std::unique_ptr<JsonValue> InspectorComposedElement::GetAllMargin() const
 {
     auto render = GetRenderBox();
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     if (render) {
         auto top = render->GetMargin(DimensionHelper(&Edge::SetTop, &Edge::Top));
         auto right = render->GetMargin(DimensionHelper(&Edge::SetRight, &Edge::Right));
         auto bottom = render->GetMargin(DimensionHelper(&Edge::SetBottom, &Edge::Bottom));
         auto left = render->GetMargin(DimensionHelper(&Edge::SetLeft, &Edge::Left));
         if (top == right && right == bottom && bottom == left) {
-            auto temp = JsonUtil::Create(false);
-            temp->Put("margin", top.ToString().c_str());
-            jsonValue = temp->GetValue("margin");
+            jsonValue->Put("margin", top.ToString().c_str());
         } else {
             jsonValue->Put("top", top.ToString().c_str());
             jsonValue->Put("right", right.ToString().c_str());
@@ -468,7 +465,7 @@ std::string InspectorComposedElement::GetConstraintSize() const
     if (render) {
         layoutParam = render->GetConstraints();
     }
-    auto jsonStr = JsonUtil::Create(false);
+    auto jsonStr = JsonUtil::Create(true);
     Dimension minWidth = Dimension(SystemProperties::Px2Vp(layoutParam.GetMinSize().Width()), DimensionUnit::VP);
     Dimension minHeight = Dimension(SystemProperties::Px2Vp(layoutParam.GetMinSize().Height()), DimensionUnit::VP);
     Dimension maxWidth = Dimension(SystemProperties::Px2Vp(layoutParam.GetMaxSize().Width()), DimensionUnit::VP);
@@ -548,7 +545,7 @@ std::string InspectorComposedElement::GetBorderRadius() const
 
 std::unique_ptr<JsonValue> InspectorComposedElement::GetUnifyBorder() const
 {
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("width", GetBorderWidth().c_str());
     jsonValue->Put("color", GetBorderColor().c_str());
     jsonValue->Put("radius", GetBorderRadius().c_str());
@@ -558,7 +555,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetUnifyBorder() const
 
 std::unique_ptr<JsonValue> InspectorComposedElement::GetPosition() const
 {
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     auto node = GetInspectorNode(FlexItemElement::TypeId());
     if (!node) {
         jsonValue->Put("x", "0.0px");
@@ -581,7 +578,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetPosition() const
 
 std::unique_ptr<JsonValue> InspectorComposedElement::GetMarkAnchor() const
 {
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     auto node = GetInspectorNode(FlexItemElement::TypeId());
     if (!node) {
         jsonValue->Put("x", "0.0px");
@@ -601,7 +598,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetMarkAnchor() const
 
 std::unique_ptr<JsonValue> InspectorComposedElement::GetOffset() const
 {
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     auto node = GetInspectorNode(FlexItemElement::TypeId());
     if (!node) {
         jsonValue->Put("x", "0.0px");
@@ -780,7 +777,7 @@ std::string InspectorComposedElement::GetBackgroundImage() const
 
 std::string InspectorComposedElement::GetBackgroundColor() const
 {
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     auto backDecoration = GetBackDecoration();
     if (!backDecoration) {
         return "NONE";
@@ -789,59 +786,59 @@ std::string InspectorComposedElement::GetBackgroundColor() const
     return color.ColorToString();
 }
 
-std::unique_ptr<JsonValue> InspectorComposedElement::GetBackgroundImageSize() const
+std::string InspectorComposedElement::GetBackgroundImageSize() const
 {
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     auto backDecoration = GetBackDecoration();
     if (!backDecoration) {
         jsonValue->Put("width", "ImageSize.Auto");
-        return jsonValue->GetValue("width");
+        return jsonValue->ToString();
     }
     auto image = backDecoration->GetImage();
     if (!image) {
         jsonValue->Put("width", "ImageSize.Auto");
-        return jsonValue->GetValue("width");
+        return jsonValue->ToString();
     }
     auto widthType = image->GetImageSize().GetSizeTypeX();
     if (widthType == BackgroundImageSizeType::CONTAIN) {
         jsonValue->Put("width", "ImageSize.Contain");
-        return jsonValue->GetValue("width");
+        return jsonValue->ToString();
     } else if (widthType == BackgroundImageSizeType::COVER) {
         jsonValue->Put("width", "ImageSize.Cover");
-        return jsonValue->GetValue("width");
+        return jsonValue->ToString();
     } else if (widthType == BackgroundImageSizeType::AUTO) {
         jsonValue->Put("width", "ImageSize.Auto");
-        return jsonValue->GetValue("width");
+        return jsonValue->ToString();
     }
 
     Dimension width = Dimension((image->GetImageSize().GetSizeValueX()), DimensionUnit::VP);
     Dimension height = Dimension((image->GetImageSize().GetSizeValueY()), DimensionUnit::VP);
     jsonValue->Put("width", width.ToString().c_str());
     jsonValue->Put("height", height.ToString().c_str());
-    return jsonValue;
+    return jsonValue->ToString();
 }
 
-std::unique_ptr<JsonValue> InspectorComposedElement::GetBackgroundImagePosition() const
+std::string InspectorComposedElement::GetBackgroundImagePosition() const
 {
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     auto backDecoration = GetBackDecoration();
     if (!backDecoration) {
         jsonValue->Put("x", 0.0);
         jsonValue->Put("y", 0.0);
-        return jsonValue;
+        return jsonValue->ToString();
     }
     auto image = backDecoration->GetImage();
     if (!image) {
         jsonValue->Put("x", 0.0);
         jsonValue->Put("y", 0.0);
-        return jsonValue;
+        return jsonValue->ToString();
     }
     if (image->GetImagePosition().GetSizeTypeX() == BackgroundImagePositionType::PX) {
         auto width = image->GetImagePosition().GetSizeValueX();
         auto height = image->GetImagePosition().GetSizeValueY();
         jsonValue->Put("x", width);
         jsonValue->Put("y", height);
-        return jsonValue;
+        return jsonValue->ToString();
     } else {
         auto width = image->GetImagePosition().GetSizeValueX();
         auto height = image->GetImagePosition().GetSizeValueY();
@@ -849,41 +846,32 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetBackgroundImagePosition(
     }
 }
 
-std::unique_ptr<JsonValue> InspectorComposedElement::GetAlignmentType(double width, double height) const
+std::string InspectorComposedElement::GetAlignmentType(double width, double height) const
 {
-    auto jsonValue = JsonUtil::Create(false);
-    if (width == 0) {
-        if (height == 0) {
-            jsonValue->Put("x", "Alignment.TopStart");
-            return jsonValue->GetValue("x");
-        } else if (height == 50) {
-            jsonValue->Put("x", "Alignment.Start");
-            return jsonValue->GetValue("x");
+    auto jsonValue = JsonUtil::Create(true);
+    if (NearZero(width)) {
+        if (NearZero(height)) {
+            return "Alignment.TopStart";
+        } else if (NearEqual(height, 50.0)) { // Determine whether the vertical element is centered
+            return "Alignment.Start";
         } else {
-            jsonValue->Put("x", "Alignment.BottomStart");
-            return jsonValue->GetValue("x");
+            return "Alignment.BottomStart";
         }
-    } else if (width == 50) {
-        if (height == 0) {
-            jsonValue->Put("x", "Alignment.Top");
-            return jsonValue->GetValue("x");
-        } else if (height == 50) {
-            jsonValue->Put("x", "Alignment.Center");
-            return jsonValue->GetValue("x");
+    } else if (NearEqual(width, 50.0)) { // Judge whether the horizontal element is centered
+        if (NearZero(height)) {
+            return "Alignment.Top";
+        } else if (NearEqual(height, 50)) {
+            return "Alignment.Center";
         } else {
-            jsonValue->Put("x", "Alignment.Bottom");
-            return jsonValue->GetValue("x");
+            return "Alignment.Bottom";
         }
     } else {
-        if (height == 0) {
-            jsonValue->Put("x", "Alignment.TopEnd");
-            return jsonValue->GetValue("x");
-        } else if (height == 50) {
-            jsonValue->Put("x", "Alignment.End");
-            return jsonValue->GetValue("x");
+        if (NearZero(height)) {
+            return "Alignment.TopEnd";
+        } else if (NearEqual(height, 50.0)) {
+            return "Alignment.BottomEnd";
         } else {
-            jsonValue->Put("x", "Alignment.BottomEnd");
-            return jsonValue->GetValue("x");
+            return "Alignment.BottomEnd";
         }
     }
 }
@@ -930,7 +918,7 @@ std::string InspectorComposedElement::GetClip() const
         return "false";
     }
     auto clipPath = render->GetClipPath();
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     if (clipPath && clipPath->GetBasicShape()) {
         int32_t shapeType = static_cast<int32_t>(clipPath->GetBasicShape()->GetBasicShapeType());
         int32_t size = static_cast<int32_t>(sizeof(BASIC_SHAPE_TYPE) / sizeof(BASIC_SHAPE_TYPE[0]));
@@ -991,7 +979,7 @@ DimensionOffset InspectorComposedElement::GetOriginPoint() const
 std::unique_ptr<JsonValue> InspectorComposedElement::GetRotate() const
 {
     auto render = AceType::DynamicCast<RenderTransform>(GetInspectorNode(TransformElement::TypeId()));
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     if (!render) {
         return jsonValue;
     }
@@ -1013,7 +1001,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetRotate() const
 std::unique_ptr<JsonValue> InspectorComposedElement::GetScale() const
 {
     auto render = AceType::DynamicCast<RenderTransform>(GetInspectorNode(TransformElement::TypeId()));
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     if (!render) {
         return jsonValue;
     }
@@ -1034,7 +1022,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetScale() const
 std::unique_ptr<JsonValue> InspectorComposedElement::GetTransform() const
 {
     auto render = AceType::DynamicCast<RenderTransform>(GetInspectorNode(TransformElement::TypeId()));
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     if (!render) {
         return jsonValue;
     }
@@ -1057,7 +1045,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetTransform() const
 std::unique_ptr<JsonValue> InspectorComposedElement::GetTranslate() const
 {
     auto render = AceType::DynamicCast<RenderTransform>(GetInspectorNode(TransformElement::TypeId()));
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     if (!render) {
         return jsonValue;
     }
@@ -1157,7 +1145,7 @@ double InspectorComposedElement::GetHueRotate() const
 std::unique_ptr<JsonValue> InspectorComposedElement::GetWindowBlur() const
 {
     auto render = AceType::DynamicCast<RenderBox>(GetInspectorNode(BoxElement::TypeId()));
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     if (!render) {
         return jsonValue;
     }
@@ -1170,7 +1158,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetWindowBlur() const
 std::unique_ptr<JsonValue> InspectorComposedElement::GetShadow() const
 {
     auto render = AceType::DynamicCast<RenderBox>(GetInspectorNode(BoxElement::TypeId()));
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     if (!render) {
         return jsonValue;
     }
@@ -1184,7 +1172,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetShadow() const
 
 std::unique_ptr<JsonValue> InspectorComposedElement::GetOverlay() const
 {
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     // Since CoverageComponent is inherited from ComponentGroup, but Coverage does not have Element,
     // ComponentGroupElement is called.
     auto coverage = GetInspectorElement<RenderCoverage>(ComponentGroupElement::TypeId());
@@ -1194,7 +1182,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetOverlay() const
     }
     auto title = coverage->GetTextVal();
     auto alignment = coverage->GetAlignment();
-    auto jsonAlign = JsonUtil::Create(false);
+    auto jsonAlign = JsonUtil::Create(true);
     if (alignment == Alignment::TOP_LEFT) {
         jsonAlign->Put("align", "Alignment.TopStart");
     } else if (alignment == Alignment::TOP_CENTER) {
@@ -1214,7 +1202,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetOverlay() const
     } else {
         jsonAlign->Put("align", "Alignment.Center");
     }
-    auto offsetJson = JsonUtil::Create(false);
+    auto offsetJson = JsonUtil::Create(true);
     offsetJson->Put("x", coverage->GetX().ToString().c_str());
     offsetJson->Put("y", coverage->GetY().ToString().c_str());
     jsonAlign->Put("offset", offsetJson);
@@ -1226,7 +1214,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetOverlay() const
 std::unique_ptr<JsonValue> InspectorComposedElement::GetMask() const
 {
     auto render = GetRenderBox();
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     if (!render) {
         return jsonValue;
     }
@@ -1279,13 +1267,13 @@ int32_t InspectorComposedElement::GetGridOffset() const
 std::unique_ptr<JsonValue> InspectorComposedElement::GetUseSizeType() const
 {
     auto columnInfo = GetGridColumnInfo();
-    auto jsonRoot = JsonUtil::Create(false);
+    auto jsonRoot = JsonUtil::Create(true);
     if (!columnInfo) {
         return jsonRoot;
     }
     int32_t index = static_cast<int32_t>(GridSizeType::XS);
     for (; index < static_cast<int32_t>(GridSizeType::XL); index++) {
-        auto jsonValue = JsonUtil::Create(false);
+        auto jsonValue = JsonUtil::Create(true);
         GridSizeType type = static_cast<GridSizeType>(index);
         jsonValue->Put("span", static_cast<int32_t>(columnInfo->GetColumns(type)));
         jsonValue->Put("offset", columnInfo->GetOffset(type));
@@ -1297,7 +1285,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetUseSizeType() const
 std::unique_ptr<JsonValue> InspectorComposedElement::GetUseAlign() const
 {
     auto render = GetRenderBox();
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     if (!render) {
         return jsonValue;
     }
@@ -1308,7 +1296,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetUseAlign() const
 
 std::string InspectorComposedElement::GetBindPopup() const
 {
-    auto resultJson = JsonUtil::Create(false);
+    auto resultJson = JsonUtil::Create(true);
     auto coverageElement = GetContentElement<ComponentGroupElement>(ComponentGroupElement::TypeId(), false);
     RefPtr<PopupElementV2> popupElement = nullptr;
     if (coverageElement) {
@@ -1327,12 +1315,12 @@ std::string InspectorComposedElement::GetBindPopup() const
     } else {
         show = "false";
     }
-    auto popupJson = JsonUtil::Create(false);
+    auto popupJson = JsonUtil::Create(true);
     popupJson->Put("message", popupElement->GetMessage().c_str());
     popupJson->Put("placementOnTop", popupElement->GetPlacementOnTop());
-    auto primaryButtonJson = JsonUtil::Create(false);
+    auto primaryButtonJson = JsonUtil::Create(true);
     primaryButtonJson->Put("value", popupElement->GetPrimaryButtonValue().c_str());
-    auto secondaryButtonJson = JsonUtil::Create(false);
+    auto secondaryButtonJson = JsonUtil::Create(true);
     secondaryButtonJson->Put("value", popupElement->GetSecondaryButtonValue().c_str());
 
     popupJson->Put("primaryButton", primaryButtonJson);
@@ -1397,10 +1385,10 @@ std::pair<Rect, Offset> InspectorComposedElement::GetCurrentRectAndOrigin() cons
 void InspectorComposedElement::GetColorsAndRepeating(
     std::unique_ptr<JsonValue>& resultJson, const Gradient& gradient) const
 {
-    auto jsoncolorArray = JsonUtil::CreateArray(false);
+    auto jsoncolorArray = JsonUtil::CreateArray(true);
     auto colors = gradient.GetColors();
     for (size_t i = 0; i < colors.size(); ++i) {
-        auto temp = JsonUtil::CreateArray(false);
+        auto temp = JsonUtil::CreateArray(true);
         auto value = std::to_string(colors[i].GetDimension().Value() / 100.0);
         auto color = colors[i].GetColor().ColorToString();
         temp->Put("0", color.c_str());
@@ -1415,7 +1403,7 @@ void InspectorComposedElement::GetColorsAndRepeating(
 
 std::unique_ptr<JsonValue> InspectorComposedElement::GetLinearGradient() const
 {
-    auto resultJson = JsonUtil::Create(false);
+    auto resultJson = JsonUtil::Create(true);
     auto node = GetRenderBox();
     if (!node) {
         return resultJson;
@@ -1464,7 +1452,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetLinearGradient() const
 
 std::unique_ptr<JsonValue> InspectorComposedElement::GetSweepGradient() const
 {
-    auto resultJson = JsonUtil::Create(false);
+    auto resultJson = JsonUtil::Create(true);
     auto node = GetRenderBox();
     if (!node) {
         return resultJson;
@@ -1478,7 +1466,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetSweepGradient() const
         auto radialCenterX = sweepGradient.GetSweepGradient().centerX;
         auto radialCenterY = sweepGradient.GetSweepGradient().centerY;
         if (radialCenterX && radialCenterY) {
-            auto jsPoint = JsonUtil::CreateArray(false);
+            auto jsPoint = JsonUtil::CreateArray(true);
             jsPoint->Put("0", radialCenterX->ToString().c_str());
             jsPoint->Put("1", radialCenterY->ToString().c_str());
             resultJson->Put("center", jsPoint);
@@ -1500,7 +1488,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetSweepGradient() const
 
 std::unique_ptr<JsonValue> InspectorComposedElement::GetRadialGradient() const
 {
-    auto resultJson = JsonUtil::Create(false);
+    auto resultJson = JsonUtil::Create(true);
     auto node = GetRenderBox();
     if (!node) {
         return resultJson;
@@ -1515,7 +1503,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetRadialGradient() const
         auto radialCenterX = radialGradient.GetRadialGradient().radialCenterX;
         auto radialCenterY = radialGradient.GetRadialGradient().radialCenterY;
         if (radialCenterX && radialCenterY) {
-            auto jsPoint = JsonUtil::CreateArray(false);
+            auto jsPoint = JsonUtil::CreateArray(true);
             jsPoint->Put("0", radialCenterX->ToString().c_str());
             jsPoint->Put("1", radialCenterY->ToString().c_str());
             resultJson->Put("center", jsPoint);

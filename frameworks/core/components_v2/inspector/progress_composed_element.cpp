@@ -60,7 +60,7 @@ std::unique_ptr<JsonValue> ProgressComposedElement::ToJsonObject() const
 
 std::string ProgressComposedElement::ProgressOptions() const
 {
-    auto JsonValue = JsonUtil::Create(false);
+    auto JsonValue = JsonUtil::Create(true);
     JsonValue->Put("value", GetValue().c_str());
     JsonValue->Put("total", GetTotal().c_str());
     JsonValue->Put("type", GetTypeProgress().c_str());

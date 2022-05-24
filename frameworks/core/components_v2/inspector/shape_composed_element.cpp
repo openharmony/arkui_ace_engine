@@ -183,7 +183,7 @@ std::string ShapeComposedElement::GetStrokeDashOffset() const
 std::unique_ptr<JsonValue> ShapeComposedElement::GetStrokeDashArray() const
 {
     auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
-    auto jsonDashArray = JsonUtil::CreateArray(false);
+    auto jsonDashArray = JsonUtil::CreateArray(true);
     if (render) {
         std::vector<Dimension> array = render->GetStrokeState().GetStrokeDashArray();
         for (size_t i = 0; i < array.size(); i++) {
@@ -255,7 +255,7 @@ std::unique_ptr<JsonValue> ShapeComposedElement::GetRadiusArray() const
         render->GetBottomRightRadius()
     };
     for (size_t i = 0; i < rads.size(); i++) {
-        auto jsonObject = JsonUtil::CreateArray(false);
+        auto jsonObject = JsonUtil::CreateArray(true);
         jsonObject->Put("0", rads[i].GetX().Value());
         jsonObject->Put("1", rads[i].GetY().Value());
         auto index = std::to_string(i);
@@ -330,7 +330,7 @@ std::unique_ptr<JsonValue> ShapeComposedElement::GetRadiusWidthArray() const
 std::unique_ptr<JsonValue> ShapeComposedElement::GetStartPointArray() const
 {
     auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
-    auto startPointArray = JsonUtil::CreateArray(false);
+    auto startPointArray = JsonUtil::CreateArray(true);
     if (!render) {
         startPointArray->Put("0", 0);
         startPointArray->Put("1", 0);
@@ -345,7 +345,7 @@ std::unique_ptr<JsonValue> ShapeComposedElement::GetStartPointArray() const
 std::unique_ptr<JsonValue> ShapeComposedElement::GetEndPointArray() const
 {
     auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
-    auto endPointArray = JsonUtil::CreateArray(false);
+    auto endPointArray = JsonUtil::CreateArray(true);
     if (!render) {
         endPointArray->Put("0", 0);
         endPointArray->Put("1", 0);
@@ -360,13 +360,13 @@ std::unique_ptr<JsonValue> ShapeComposedElement::GetEndPointArray() const
 std::unique_ptr<JsonValue> ShapeComposedElement::GetPointsArray() const
 {
     auto render = GetContentRender<RenderShape>(ShapeElement::TypeId());
-    auto pointsArray = JsonUtil::CreateArray(false);
+    auto pointsArray = JsonUtil::CreateArray(true);
     if (!render) {
         return pointsArray;
     }
     std::vector<ShapePoint> points = render->GetPoints();
     for (size_t i = 0; i < points.size(); i++) {
-        auto pointsObject = JsonUtil::CreateArray(false);
+        auto pointsObject = JsonUtil::CreateArray(true);
         pointsObject->Put("0", points[i].first.Value());
         pointsObject->Put("1", points[i].second.Value());
         auto index = std::to_string(i);

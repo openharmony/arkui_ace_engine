@@ -74,7 +74,6 @@ void NavigationComposedElement::Dump()
 
 std::unique_ptr<JsonValue> NavigationComposedElement::ToJsonObject() const
 {
-    LOGI("raul ToJsonObject11");
     auto resultJson = InspectorComposedElement::ToJsonObject();
     for (const auto& value : CREATE_JSON_STRING_MAP) {
         resultJson->Put(value.first.c_str(), value.second(*this).c_str());
@@ -115,11 +114,11 @@ std::string NavigationComposedElement::GetNavigationToolBar() const
     }
     auto toolBarItem = render->GetToolBarItems();
     if (!toolBarItem.empty()) {
-        auto jsonOptions = JsonUtil::CreateArray(false);
+        auto jsonOptions = JsonUtil::CreateArray(true);
         std::list<RefPtr<ToolBarItem>>::iterator iter;
         int32_t i = 0;
         for (iter = toolBarItem.begin(); iter != toolBarItem.end(); ++iter, i++) {
-            auto jsonToolBarItem = JsonUtil::CreateArray(false);
+            auto jsonToolBarItem = JsonUtil::CreateArray(true);
             auto toolBarItem_ = *iter;
             jsonToolBarItem->Put("value", toolBarItem_->value.c_str());
             jsonToolBarItem->Put("icon", toolBarItem_->icon.c_str());
@@ -181,7 +180,7 @@ bool NavigationComposedElement::GetNavigationHideToolBar() const
 std::unique_ptr<JsonValue> NavigationComposedElement::GetMenus() const
 {
     auto render = GetRenderNavigation();
-    auto menusArray = JsonUtil::CreateArray(false);
+    auto menusArray = JsonUtil::CreateArray(true);
     if (!render) {
         return menusArray;
     }
@@ -190,7 +189,7 @@ std::unique_ptr<JsonValue> NavigationComposedElement::GetMenus() const
         std::list<RefPtr<ToolBarItem>>::iterator iter;
         int32_t i = 0;
         for (iter = menuItems.begin(); iter != menuItems.end(); ++iter, i++) {
-            auto jsonMenusItem = JsonUtil::CreateArray(false);
+            auto jsonMenusItem = JsonUtil::CreateArray(true);
             auto menus = *iter;
             jsonMenusItem->Put("value", menus->value.c_str());
             jsonMenusItem->Put("icon", menus->icon.c_str());

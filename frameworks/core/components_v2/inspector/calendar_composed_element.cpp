@@ -222,7 +222,7 @@ std::unique_ptr<JsonValue> CalendarComposedElement::ConvertThemeToDayStyle(const
     Dimension underscoreYAxisOffset = theme.underscoreYAxisOffset;
     Dimension scheduleMarkerXAxisOffset = theme.scheduleMarkerXAxisOffset;
     Dimension scheduleMarkerYAxisOffset = theme.scheduleMarkerYAxisOffset;
-    auto dayStyle = JsonUtil::Create(false);
+    auto dayStyle = JsonUtil::Create(true);
     dayStyle->Put("dayColor", ConvertColorToString(dayColor).c_str());
     dayStyle->Put("lunarColor", ConvertColorToString(lunarColor).c_str());
     dayStyle->Put("markLunarColor", ConvertColorToString(markLunarColor).c_str());
@@ -247,7 +247,7 @@ std::unique_ptr<JsonValue> CalendarComposedElement::ConvertThemeToNonCurrentDayS
     Color nonCurrentMonthLunarColor = theme.nonCurrentMonthLunarColor;
     Color nonCurrentMonthWorkDayMarkColor = theme.nonCurrentMonthWorkDayMarkColor;
     Color nonCurrentMonthOffDayMarkColor = theme.nonCurrentMonthOffDayMarkColor;
-    auto nonCurrentDayStyle = JsonUtil::Create(false);
+    auto nonCurrentDayStyle = JsonUtil::Create(true);
     nonCurrentDayStyle->Put("nonCurrentMonthDayColor", ConvertColorToString(nonCurrentMonthDayColor).c_str());
     nonCurrentDayStyle->Put("nonCurrentMonthLunarColor", ConvertColorToString(nonCurrentMonthLunarColor).c_str());
     nonCurrentDayStyle->Put(
@@ -280,7 +280,7 @@ std::unique_ptr<JsonValue> CalendarComposedElement::ConvertThemeToWeekStyle(cons
     Dimension weekHeight = theme.weekHeight;
     Dimension weekWidth = theme.weekWidth;
     Dimension weekAndDayRowSpace = theme.weekAndDayRowSpace;
-    auto weekStyle = JsonUtil::Create(false);
+    auto weekStyle = JsonUtil::Create(true);
     weekStyle->Put("weekColor", ConvertColorToString(weekColor).c_str());
     weekStyle->Put("weekendDayColor", ConvertColorToString(weekendDayColor).c_str());
     weekStyle->Put("weekendLunarColor", ConvertColorToString(weekendLunarColor).c_str());
@@ -301,7 +301,7 @@ std::unique_ptr<JsonValue> CalendarComposedElement::ConvertThemeToWorkStateStyle
     Dimension workStateWidth = theme.workStateWidth;
     Dimension workStateHorizontalMovingDistance = theme.workStateHorizontalMovingDistance;
     Dimension workStateVerticalMovingDistance = theme.workStateVerticalMovingDistance;
-    auto workStateStyle = JsonUtil::Create(false);
+    auto workStateStyle = JsonUtil::Create(true);
     workStateStyle->Put("workDayMarkColor", ConvertColorToString(workDayMarkColor).c_str());
     workStateStyle->Put("offDayMarkColor", ConvertColorToString(offDayMarkColor).c_str());
     workStateStyle->Put("workDayMarkSize", std::to_string(workDayMarkSize.Value()).c_str());
