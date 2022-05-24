@@ -17,7 +17,7 @@ class SubscriberManager {
     constructor() {
         this.subscriberById_ = new Map();
         this.nextFreeId_ = 0;
-        console.debug("SubscriberManager has been created.");
+        aceConsole.debug("SubscriberManager has been created.");
     }
     static Get() { return SubscriberManager.INSTANCE_; }
     has(id) {
@@ -47,11 +47,11 @@ class SubscriberManager {
      * for debug purposes dump all known subscriber's info to comsole
      */
     dumpSubscriberInfo() {
-        console.debug("Dump of SubscriberManager +++ (sart)");
+        aceConsole.debug("Dump of SubscriberManager +++ (sart)");
         for (let [id, subscriber] of this.subscriberById_) {
-            console.debug(`Id: ${id} -> ${subscriber['info'] ? subscriber['info']() : 'unknown'}`);
+            aceConsole.debug(`Id: ${id} -> ${subscriber['info'] ? subscriber['info']() : 'unknown'}`);
         }
-        console.debug("Dump of SubscriberManager +++ (end)");
+        aceConsole.debug("Dump of SubscriberManager +++ (end)");
     }
     MakeId() {
         return this.nextFreeId_++;
@@ -116,7 +116,7 @@ class SubscribaleAbstract {
      */
     constructor() {
         this.owningProperties_ = new Set();
-        console.debug(`SubscribaleAbstract: construcstor done`);
+        aceConsole.debug(`SubscribaleAbstract: construcstor done`);
     }
     /**
     * A subsclass must call this function whenever one of its properties has
@@ -125,7 +125,7 @@ class SubscribaleAbstract {
      * @param newValue the property value after the change
      */
     notifyPropertyHasChanged(propName, newValue) {
-        console.debug(`SubscribaleAbstract: notifyPropertyHasChanged '${propName}'.`);
+        aceConsole.debug(`SubscribaleAbstract: notifyPropertyHasChanged '${propName}'.`);
         var registry = SubscriberManager.Get();
         this.owningProperties_.forEach((subscribedId) => {
             var owningProperty = registry.get(subscribedId);
@@ -138,7 +138,7 @@ class SubscribaleAbstract {
                 }
             }
             else {
-                console.error(`SubscribaleAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+                aceConsole.error(`SubscribaleAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
             }
         });
     }
@@ -150,7 +150,7 @@ class SubscribaleAbstract {
      * and/or IMultiPropertiesChangeSubscriber interfaces
      */
     addOwningProperty(subscriber) {
-        console.debug(`SubscribaleAbstract: addOwningProperty: subscriber '${subscriber.id()}'.`);
+        aceConsole.debug(`SubscribaleAbstract: addOwningProperty: subscriber '${subscriber.id()}'.`);
         this.owningProperties_.add(subscriber.id());
     }
     /**
@@ -164,7 +164,7 @@ class SubscribaleAbstract {
         return this.removeOwningPropertyById(property.id());
     }
     removeOwningPropertyById(subscriberId) {
-        console.debug(`SubscribaleAbstract: removeOwningProperty '${subscriberId}'.`);
+        aceConsole.debug(`SubscribaleAbstract: removeOwningProperty '${subscriberId}'.`);
         this.owningProperties_.delete(subscriberId);
     }
 }
@@ -200,7 +200,7 @@ function Observed(target) {
     var original = target;
     // the new constructor behaviour
     var f = function (...args) {
-        console.log(`New ${original.name}, gets wrapped inside ObservableObject proxy.`);
+        aceConsole.log(`New ${original.name}, gets wrapped inside ObservableObject proxy.`);
         return new ObservedObject(new original(...args), undefined);
     };
     Object.setPrototypeOf(f, Object.getPrototypeOf(original));
@@ -213,10 +213,10 @@ class SubscribableHandler {
         if (owningProperty) {
             this.addOwningProperty(owningProperty);
         }
-        console.debug(`SubscribableHandler: construcstor done`);
+        aceConsole.debug(`SubscribableHandler: construcstor done`);
     }
     addOwningProperty(subscriber) {
-        console.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id()}'.`);
+        aceConsole.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id()}'.`);
         this.owningProperties_.add(subscriber.id());
     }
     /*
@@ -226,11 +226,11 @@ class SubscribableHandler {
         return this.removeOwningPropertyById(property.id());
     }
     removeOwningPropertyById(subscriberId) {
-        console.debug(`SubscribableHandler: removeOwningProperty '${subscriberId}'.`);
+        aceConsole.debug(`SubscribableHandler: removeOwningProperty '${subscriberId}'.`);
         this.owningProperties_.delete(subscriberId);
     }
     notifyPropertyHasChanged(propName, newValue) {
-        console.debug(`SubscribableHandler: notifyPropertyHasChanged '${propName}'.`);
+        aceConsole.debug(`SubscribableHandler: notifyPropertyHasChanged '${propName}'.`);
         var registry = SubscriberManager.Get();
         this.owningProperties_.forEach((subscribedId) => {
             var owningProperty = registry.get(subscribedId);
@@ -243,12 +243,12 @@ class SubscribableHandler {
                 }
             }
             else {
-                console.error(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+                aceConsole.error(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
             }
         });
     }
     get(target, property) {
-        console.error(`SubscribableHandler: get '${property.toString()}'.`);
+        aceConsole.error(`SubscribableHandler: get '${property.toString()}'.`);
         return (property === SubscribableHandler.IS_OBSERVED_OBJECT) ? true :
             (property === SubscribableHandler.RAW_OBJECT) ? target : target[property];
     }
@@ -268,7 +268,7 @@ class SubscribableHandler {
                 if (target[property] == newValue) {
                     return true;
                 }
-                console.log(`SubscribableHandler: set property '${property.toString()}' to new value'`);
+                aceConsole.log(`SubscribableHandler: set property '${property.toString()}' to new value'`);
                 target[property] = newValue;
                 this.notifyPropertyHasChanged(property.toString(), newValue); // FIXME PropertyKey.toString
                 return true;
@@ -352,7 +352,7 @@ class ObservedObject extends ExtendableProxy {
         let handler = new SubscribableHandler(objectOwningProperty);
         super(obj, handler);
         if (ObservedObject.IsObservedObject(obj)) {
-            console.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
+            aceConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
         }
     } // end of constructor
 }
@@ -420,7 +420,7 @@ class ObservedPropertyAbstract {
         }
     }
     subscribeMe(subscriber) {
-        console.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: subscribeMe: Property new subscriber '${subscriber.id()}'`);
+        aceConsole.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: subscribeMe: Property new subscriber '${subscriber.id()}'`);
         this.subscribers_.add(subscriber.id());
     }
     /*
@@ -430,8 +430,8 @@ class ObservedPropertyAbstract {
         this.subscribers_.delete(subscriberId);
     }
     notifyHasChanged(newValue) {
-        //console.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged to newValue '${JSON.stringify(newValue)}', notifying.`)
-        console.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
+        //aceConsole.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged to newValue '${JSON.stringify(newValue)}', notifying.`)
+        aceConsole.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
         var registry = SubscriberManager.Get();
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = registry.get(subscribedId);
@@ -444,12 +444,12 @@ class ObservedPropertyAbstract {
                 }
             }
             else {
-                console.error(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+                aceConsole.error(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
             }
         });
     }
     notifyPropertyRead() {
-        console.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: propertyRead.`);
+        aceConsole.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: propertyRead.`);
         var registry = SubscriberManager.Get();
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = registry.get(subscribedId);
@@ -545,7 +545,7 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
     // It is NOT called when
     //    thisProp.aObsObj = new ClassA
     hasChanged(newValue) {
-        console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: hasChanged`);
+        aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: hasChanged`);
         this.notifyHasChanged(this.wrappedValue_);
     }
     unsubscribeFromOwningProperty() {
@@ -565,37 +565,37 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
     */
     setValueInternal(newValue) {
         if (typeof newValue !== 'object') {
-            console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
+            aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
             return false;
         }
         this.unsubscribeFromOwningProperty();
         if (ObservedObject.IsObservedObject(newValue)) {
-            console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}'] new value is an ObservedObject already`);
+            aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}'] new value is an ObservedObject already`);
             ObservedObject.addOwningProperty(newValue, this);
             this.wrappedValue_ = newValue;
         }
         else if (newValue instanceof SubscribaleAbstract) {
-            console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}'] new value is an SubscribaleAbstract, subscribiung to it.`);
+            aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}'] new value is an SubscribaleAbstract, subscribiung to it.`);
             this.wrappedValue_ = newValue;
             this.wrappedValue_.addOwningProperty(this);
         }
         else {
-            console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}'] new value is an Object, needs to be wrapped in an ObservedObject.`);
+            aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}'] new value is an Object, needs to be wrapped in an ObservedObject.`);
             this.wrappedValue_ = ObservedObject.createNew(newValue, this);
         }
         return true;
     }
     get() {
-        console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: get`);
+        aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: get`);
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
     set(newValue) {
         if (this.wrappedValue_ == newValue) {
-            console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
+            aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
             return;
         }
-        console.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: set, changed`);
+        aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: set, changed`);
         this.setValueInternal(newValue);
         this.notifyHasChanged(newValue);
     }
@@ -665,7 +665,7 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
         super.aboutToBeDeleted();
     }
     hasChanged(newValue) {
-        console.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: hasChanged`);
+        aceConsole.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: hasChanged`);
         this.notifyHasChanged(this.wrappedValue_);
     }
     /*
@@ -674,20 +674,20 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
       and also notify with this.aboutToChange();
     */
     setValueInternal(newValue) {
-        console.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}'] new value is of simple type`);
+        aceConsole.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}'] new value is of simple type`);
         this.wrappedValue_ = newValue;
     }
     get() {
-        console.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`);
+        aceConsole.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`);
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
     set(newValue) {
         if (this.wrappedValue_ == newValue) {
-            console.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
+            aceConsole.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
             return;
         }
-        console.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
+        aceConsole.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
         this.setValueInternal(newValue);
         this.notifyHasChanged(newValue);
     }
@@ -748,21 +748,21 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
     // this object is subscriber to ObservedObject
     // will call this cb function when property has changed
     hasChanged(newValue) {
-        console.debug(`SynchedPropertyObjectTwoWay[${this.id()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`);
+        aceConsole.debug(`SynchedPropertyObjectTwoWay[${this.id()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`);
         this.notifyHasChanged(this.getObject());
     }
     // get 'read through` from the ObservedProperty
     get() {
-        console.debug(`SynchedPropertyObjectTwoWay[${this.id()}, '${this.info() || "unknown"}']: get`);
+        aceConsole.debug(`SynchedPropertyObjectTwoWay[${this.id()}, '${this.info() || "unknown"}']: get`);
         return this.getObject();
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
         if (this.getObject() == newValue) {
-            console.debug(`SynchedPropertyObjectTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+            aceConsole.debug(`SynchedPropertyObjectTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
             return;
         }
-        console.debug(`SynchedPropertyObjectTwoWay[${this.id()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+        aceConsole.debug(`SynchedPropertyObjectTwoWay[${this.id()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
         ObservedObject.removeOwningProperty(this.getObject(), this);
         this.setObject(newValue);
         ObservedObject.addOwningProperty(this.getObject(), this);
@@ -823,22 +823,22 @@ class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
     // this object is subscriber to ObservedObject
     // will call this cb function when property has changed
     hasChanged(newValue) {
-        console.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`);
+        aceConsole.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`);
         this.notifyHasChanged(this.obsObject_);
     }
     // get 'read through` from the ObservedProperty
     get() {
-        console.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: get`);
+        aceConsole.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: get`);
         this.notifyPropertyRead();
         return this.obsObject_;
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
         if (this.obsObject_ == newValue) {
-            console.debug(`SynchedPropertyNesedObject[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+            aceConsole.debug(`SynchedPropertyNesedObject[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
             return;
         }
-        console.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+        aceConsole.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
         // unsubscribe from the old value ObservedObject
         ObservedObject.removeOwningProperty(this.obsObject_, this);
         this.obsObject_ = newValue;
@@ -890,16 +890,16 @@ class SynchedPropertySimpleOneWay extends ObservedPropertySimpleAbstract {
     }
     // get 'read through` from the ObservedProperty
     get() {
-        console.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: get returns '${this.wrappedValue_}'`);
+        aceConsole.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: get returns '${this.wrappedValue_}'`);
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
     set(newValue) {
         if (this.wrappedValue_ == newValue) {
-            console.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value '${this.wrappedValue_}'- ignoring.`);
+            aceConsole.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value '${this.wrappedValue_}'- ignoring.`);
             return;
         }
-        console.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
+        aceConsole.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
         this.wrappedValue_ = newValue;
         this.notifyHasChanged(newValue);
     }
@@ -933,7 +933,7 @@ class SynchedPropertySimpleOneWaySubscribing extends SynchedPropertySimpleOneWay
         super.aboutToBeDeleted();
     }
     hasChanged(newValue) {
-        console.debug(`SynchedPropertySimpleOneWaySubscribing[${this.id()}, '${this.info() || "unknown"}']: source property hasChanged'.`);
+        aceConsole.debug(`SynchedPropertySimpleOneWaySubscribing[${this.id()}, '${this.info() || "unknown"}']: source property hasChanged'.`);
         this.set(newValue);
     }
     /**
@@ -982,22 +982,22 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     // will call this cb function when property has changed
     // a set (newValue) is not done because get reads through for the source_
     hasChanged(newValue) {
-        console.debug(`SynchedPropertySimpleTwoWay[${this.id()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`);
+        aceConsole.debug(`SynchedPropertySimpleTwoWay[${this.id()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`);
         this.notifyHasChanged(newValue);
     }
     // get 'read through` from the ObservedProperty
     get() {
-        console.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: get`);
+        aceConsole.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: get`);
         this.notifyPropertyRead();
         return this.source_.get();
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
         if (this.source_.get() == newValue) {
-            console.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+            aceConsole.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
             return;
         }
-        console.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+        aceConsole.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
         // the source_ ObservedProeprty will call: this.hasChanged(newValue);
         this.notifyHasChanged(newValue);
         return this.source_.set(newValue);
@@ -1062,7 +1062,7 @@ class LocalStorage extends NativeLocalStorage {
      */
     constructor(initializingProperties = {}) {
         super();
-        console.log(`${this.constructor.name} constructor: initializing with Object: ${JSON.stringify(initializingProperties)} .`);
+        aceConsole.log(`${this.constructor.name} constructor: initializing with Object: ${JSON.stringify(initializingProperties)} .`);
         this.storage_ = new Map();
         Object.keys(initializingProperties).filter((propName) => initializingProperties[propName] != undefined).forEach((propName) => this.addNewPropertyInternal(propName, initializingProperties[propName]));
     }
@@ -1127,12 +1127,12 @@ class LocalStorage extends NativeLocalStorage {
      */
     set(propName, newValue) {
         if (newValue == undefined) {
-            console.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
+            aceConsole.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
             return false;
         }
         var p = this.storage_.get(propName);
         if (p == undefined) {
-            console.warn(`${this.constructor.name}: set: no property ${propName} error.`);
+            aceConsole.warn(`${this.constructor.name}: set: no property ${propName} error.`);
             return false;
         }
         p.set(newValue);
@@ -1149,16 +1149,16 @@ class LocalStorage extends NativeLocalStorage {
      */
     setOrCreate(propName, newValue) {
         if (newValue == undefined) {
-            console.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
+            aceConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
             return false;
         }
         var p = this.storage_.get(propName);
         if (p) {
-            console.log(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) update existing property`);
+            aceConsole.log(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) update existing property`);
             p.set(newValue);
         }
         else {
-            console.log(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) create new entry and set value`);
+            aceConsole.log(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) create new entry and set value`);
             this.addNewPropertyInternal(propName, newValue);
         }
         return true;
@@ -1187,7 +1187,7 @@ class LocalStorage extends NativeLocalStorage {
     link(propName, linkUser, subscribersName) {
         var p = this.storage_.get(propName);
         if (p == undefined) {
-            console.warn(`${this.constructor.name}: link: no property ${propName} error.`);
+            aceConsole.warn(`${this.constructor.name}: link: no property ${propName} error.`);
             return undefined;
         }
         let linkResult = p.createLink(linkUser, propName);
@@ -1222,7 +1222,7 @@ class LocalStorage extends NativeLocalStorage {
     prop(propName, propUser, subscribersName) {
         var p = this.storage_.get(propName);
         if (p == undefined) {
-            console.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
+            aceConsole.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
             return undefined;
         }
         let propResult = p.createProp(propUser, propName);
@@ -1266,7 +1266,7 @@ class LocalStorage extends NativeLocalStorage {
         var p = this.storage_.get(propName);
         if (p) {
             if (p.numberOfSubscrbers()) {
-                console.error(`${this.constructor.name}: Attempt to delete property ${propName} that has \
+                aceConsole.error(`${this.constructor.name}: Attempt to delete property ${propName} that has \
           ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.`);
                 return false;
             }
@@ -1275,7 +1275,7 @@ class LocalStorage extends NativeLocalStorage {
             return true;
         }
         else {
-            console.warn(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
+            aceConsole.warn(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
             return false;
         }
     }
@@ -1289,7 +1289,7 @@ class LocalStorage extends NativeLocalStorage {
         for (let propName of this.keys()) {
             var p = this.storage_.get(propName);
             if (p.numberOfSubscrbers()) {
-                console.error(`${this.constructor.name}.deleteAll: Attempt to delete property ${propName} that \
+                aceConsole.error(`${this.constructor.name}.deleteAll: Attempt to delete property ${propName} that \
           has ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.`);
                 return false;
             }
@@ -1298,7 +1298,7 @@ class LocalStorage extends NativeLocalStorage {
             var p = this.storage_.get(propName);
             p.aboutToBeDeleted();
         }
-        console.log(`${this.constructor.name}.deleteAll: success`);
+        aceConsole.log(`${this.constructor.name}.deleteAll: success`);
     }
     /**
      * Subscribe to value change notifications of named property
@@ -1371,11 +1371,11 @@ class AppStorage extends LocalStorage {
      */
     static CreateSingleton(initializingPropersties) {
         if (!AppStorage.Instance_) {
-            console.log("Creating AppStorage instance.");
+            aceConsole.log("Creating AppStorage instance.");
             AppStorage.Instance_ = new AppStorage(initializingPropersties);
         }
         else {
-            console.error("AppStorage.CreateNewInstance(..): instance exists already, internal error!");
+            aceConsole.error("AppStorage.CreateNewInstance(..): instance exists already, internal error!");
         }
     }
     /**
@@ -1538,7 +1538,7 @@ class AppStorage extends LocalStorage {
     }
     static GetOrCreate() {
         if (!AppStorage.Instance_) {
-            console.warn("AppStorage instance missing. Use AppStorage.CreateInstance(initObj). Creating instance without any initialization.");
+            aceConsole.warn("AppStorage instance missing. Use AppStorage.CreateInstance(initObj). Creating instance without any initialization.");
             AppStorage.Instance_ = new AppStorage({});
         }
         return AppStorage.Instance_;
@@ -1614,7 +1614,7 @@ class LocalStorageLookup {
     // internals =======================================================================
     static GetOrCreateSingleton() {
         if (!LocalStorageLookup.INSTANCE_) {
-            console.log("Creating LocalStorageLookup singleton");
+            aceConsole.log("Creating LocalStorageLookup singleton");
             LocalStorageLookup.INSTANCE_ = new LocalStorageLookup();
         }
         return LocalStorageLookup.INSTANCE_;
@@ -1628,7 +1628,7 @@ class LocalStorageLookup {
     delete(path) {
         let stor = this.get(path);
         if (!stor) {
-            console.warn(`LocalStorageLookup: Attempt to delete non-existing LocalStorage with path ${path}`);
+            aceConsole.warn(`LocalStorageLookup: Attempt to delete non-existing LocalStorage with path ${path}`);
             return false;
         }
         const canDelete = stor.aboutToBeDeleted();
@@ -1637,14 +1637,14 @@ class LocalStorageLookup {
             return true;
         }
         else {
-            console.warn(`LocalStorageLookup: Attempt to delete LocalStorage with path 
+            aceConsole.warn(`LocalStorageLookup: Attempt to delete LocalStorage with path 
                ${path}, still has subscribers. Can not delete!`);
             return false;
         }
     }
     add(path, existingStorage) {
         if (this.has(path)) {
-            console.error(`LocalStorageLookup: Add LocalStorge instance with path '${path}' exists already. Failing to add.`);
+            aceConsole.error(`LocalStorageLookup: Add LocalStorge instance with path '${path}' exists already. Failing to add.`);
             return false;
         }
         this.mapByPath_.set(path, existingStorage);
@@ -1653,10 +1653,10 @@ class LocalStorageLookup {
     getOrCreate(path, initializingProperties) {
         let stor = this.get(path);
         if (stor) {
-            console.log(`LocalStorageLookup: GetOrCreateNew returning exisitng LocalStorage with path '${path}' .`);
+            aceConsole.log(`LocalStorageLookup: GetOrCreateNew returning exisitng LocalStorage with path '${path}' .`);
             return stor;
         }
-        console.log(`LocalStorageLookup: GetOrCreateNew creating new LocalStorage with path '${path}' .`);
+        aceConsole.log(`LocalStorageLookup: GetOrCreateNew creating new LocalStorage with path '${path}' .`);
         stor = new LocalStorage(initializingProperties);
         this.mapByPath_.set(path, stor);
         return stor;
@@ -1713,19 +1713,19 @@ class View extends NativeView {
         this.localStoragebackStore_ = undefined;
         if (parent) {
             // this View is not a top-level View
-            console.log(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
+            aceConsole.log(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
             this.localStorage_ = parent.localStorage_;
         }
         else if (localStorage) {
             this.localStorage_ = localStorage;
-            console.log(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
+            aceConsole.log(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
         }
         SubscriberManager.Get().add(this);
-        console.debug(`${this.constructor.name}: constructor done`);
+        aceConsole.debug(`${this.constructor.name}: constructor done`);
     }
     get localStorage_() {
         if (!this.localStoragebackStore_) {
-            console.warn(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
+            aceConsole.warn(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
             this.localStoragebackStore_ = new LocalStorage({ /* emty */});
         }
         return this.localStoragebackStore_;
@@ -1736,7 +1736,7 @@ class View extends NativeView {
             return;
         }
         if (this.localStoragebackStore_) {
-            console.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+            aceConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
         }
         this.localStoragebackStore_ = instance;
     }
@@ -1749,22 +1749,22 @@ class View extends NativeView {
             // need to sync container instanceId to switch instanceId in C++ side.
             this.syncInstanceId();
             if (this.propsUsedForRender.has(info)) {
-                console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View needs update`);
+                aceConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View needs update`);
                 this.markNeedUpdate();
             }
             else {
-                console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View does NOT need update`);
+                aceConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View does NOT need update`);
             }
             let cb = this.watchedProps.get(info);
             if (cb) {
-                console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. calling @Watch function`);
+                aceConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. calling @Watch function`);
                 cb.call(this, info);
             }
             this.restoreInstanceId();
         } // if info avail.
     }
     propertyRead(info) {
-        console.debug(`${this.constructor.name}: propertyRead ['${info || "unknowm"}'].`);
+        aceConsole.debug(`${this.constructor.name}: propertyRead ['${info || "unknowm"}'].`);
         if (info && (info != "unknown") && this.isRenderingInProgress) {
             this.propsUsedForRender.add(info);
         }
@@ -1774,7 +1774,7 @@ class View extends NativeView {
         return this.propsUsedForRender;
     }
     aboutToRender() {
-        console.log(`${this.constructor.name}: aboutToRender`);
+        aceConsole.log(`${this.constructor.name}: aboutToRender`);
         // reset
         this.propsUsedForRender = new Set();
         this.isRenderingInProgress = true;
@@ -1785,7 +1785,7 @@ class View extends NativeView {
     }
     onRenderDone() {
         this.isRenderingInProgress = false;
-        console.log(`${this.constructor.name}: onRenderDone: render performed get access to these properties: ${JSON.stringify(Array.from(this.propsUsedForRender))}.`);
+        aceConsole.log(`${this.constructor.name}: onRenderDone: render performed get access to these properties: ${JSON.stringify(Array.from(this.propsUsedForRender))}.`);
     }
     /**
      * Function to be called from the constructor of the sub component
@@ -1899,7 +1899,7 @@ class PersistentStorage {
     persistProp(propName, defaultValue) {
         if (this.persistProp1(propName, defaultValue)) {
             // persist new prop
-            console.debug(`PersistentStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
+            aceConsole.debug(`PersistentStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
             PersistentStorage.Storage_.set(propName, this.links_.get(propName).get());
         }
     }
@@ -1907,23 +1907,23 @@ class PersistentStorage {
     // does everything except writing prop to disk
     persistProp1(propName, defaultValue) {
         if (defaultValue == null || defaultValue == undefined) {
-            console.error(`PersistentStorage: persistProp for ${propName} called with 'null' or 'undefined' default value!`);
+            aceConsole.error(`PersistentStorage: persistProp for ${propName} called with 'null' or 'undefined' default value!`);
             return false;
         }
         if (this.links_.get(propName)) {
-            console.warn(`PersistentStorage: persistProp: ${propName} is already persisted`);
+            aceConsole.warn(`PersistentStorage: persistProp: ${propName} is already persisted`);
             return false;
         }
         let link = AppStorage.Link(propName, this);
         if (link) {
-            console.debug(`PersistentStorage: persistProp ${propName} in AppStorage, using that`);
+            aceConsole.debug(`PersistentStorage: persistProp ${propName} in AppStorage, using that`);
             this.links_.set(propName, link);
         }
         else {
             let newValue = PersistentStorage.Storage_.get(propName);
             let returnValue;
             if (!newValue) {
-                console.debug(`PersistentStorage: no entry for ${propName}, will initialize with default value`);
+                aceConsole.debug(`PersistentStorage: no entry for ${propName}, will initialize with default value`);
                 returnValue = defaultValue;
             }
             else {
@@ -1931,7 +1931,7 @@ class PersistentStorage {
             }
             link = AppStorage.SetAndLink(propName, returnValue, this);
             this.links_.set(propName, link);
-            console.debug(`PersistentStorage: created new persistent prop for ${propName}`);
+            aceConsole.debug(`PersistentStorage: created new persistent prop for ${propName}`);
         }
         return true;
     }
@@ -1945,27 +1945,27 @@ class PersistentStorage {
             link.aboutToBeDeleted();
             this.links_.delete(propName);
             PersistentStorage.Storage_.delete(propName);
-            console.debug(`PersistentStorage: deleteProp: no longer persisting '${propName}'.`);
+            aceConsole.debug(`PersistentStorage: deleteProp: no longer persisting '${propName}'.`);
         }
         else {
-            console.warn(`PersistentStorage: '${propName}' is not a persisted property warning.`);
+            aceConsole.warn(`PersistentStorage: '${propName}' is not a persisted property warning.`);
         }
     }
     write() {
         this.links_.forEach((link, propName, map) => {
-            console.debug(`PersistentStorage: writing ${propName} to storage`);
+            aceConsole.debug(`PersistentStorage: writing ${propName} to storage`);
             PersistentStorage.Storage_.set(propName, link.get());
         });
     }
     propertyHasChanged(info) {
-        console.debug("PersistentStorage: property changed");
+        aceConsole.debug("PersistentStorage: property changed");
         this.write();
     }
     // public required by the interface, use the static method instead!
     aboutToBeDeleted() {
-        console.debug("PersistentStorage: about to be deleted");
+        aceConsole.debug("PersistentStorage: about to be deleted");
         this.links_.forEach((val, key, map) => {
-            console.debug(`PersistentStorage: removing ${key}`);
+            aceConsole.debug(`PersistentStorage: removing ${key}`);
             val.aboutToBeDeleted();
         });
         this.links_.clear();
@@ -1985,7 +1985,7 @@ class PersistentStorage {
     * @param key property that has changed
     */
     static NotifyHasChanged(propName) {
-        console.debug(`PersistentStorage: force writing '${propName}'-
+        aceConsole.debug(`PersistentStorage: force writing '${propName}'-
         '${PersistentStorage.GetOrCreate().links_.get(propName)}' to storage`);
         PersistentStorage.Storage_.set(propName, PersistentStorage.GetOrCreate().links_.get(propName).get());
     }
@@ -2013,7 +2013,7 @@ class DistributedStorage {
     }
     distributeProp(propName, defaultValue) {
         if (this.link(propName, defaultValue)) {
-            console.debug(`DistributedStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
+            aceConsole.debug(`DistributedStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
         }
     }
     distributeProps(properties) {
@@ -2021,16 +2021,16 @@ class DistributedStorage {
     }
     link(propName, defaultValue) {
         if (defaultValue == null || defaultValue == undefined) {
-            console.error(`DistributedStorage: linkProp for ${propName} called with 'null' or 'undefined' default value!`);
+            aceConsole.error(`DistributedStorage: linkProp for ${propName} called with 'null' or 'undefined' default value!`);
             return false;
         }
         if (this.links_.get(propName)) {
-            console.warn(`DistributedStorage: linkProp: ${propName} is already exist`);
+            aceConsole.warn(`DistributedStorage: linkProp: ${propName} is already exist`);
             return false;
         }
         let link = AppStorage.GetOrCreate().link(propName, this);
         if (link) {
-            console.debug(`DistributedStorage: linkProp ${propName} in AppStorage, using that`);
+            aceConsole.debug(`DistributedStorage: linkProp ${propName} in AppStorage, using that`);
             this.links_.set(propName, link);
             this.setDistributedProp(propName, defaultValue);
         }
@@ -2039,7 +2039,7 @@ class DistributedStorage {
             if (this.aviliable_) {
                 let newValue = this.getDistributedProp(propName);
                 if (newValue == null) {
-                    console.debug(`DistributedStorage: no entry for ${propName}, will initialize with default value`);
+                    aceConsole.debug(`DistributedStorage: no entry for ${propName}, will initialize with default value`);
                     this.setDistributedProp(propName, defaultValue);
                 }
                 else {
@@ -2048,7 +2048,7 @@ class DistributedStorage {
             }
             link = AppStorage.GetOrCreate().setAndLink(propName, returnValue, this);
             this.links_.set(propName, link);
-            console.debug(`DistributedStorage: created new linkProp prop for ${propName}`);
+            aceConsole.debug(`DistributedStorage: created new linkProp prop for ${propName}`);
         }
         return true;
     }
@@ -2062,21 +2062,21 @@ class DistributedStorage {
             }
         }
         else {
-            console.warn(`DistributedStorage: '${propName}' is not a distributed property warning.`);
+            aceConsole.warn(`DistributedStorage: '${propName}' is not a distributed property warning.`);
         }
     }
     write(key) {
         let link = this.links_.get(key);
         if (link) {
-            console.info(`DistributedStorage: write ${key}-${JSON.stringify(link.get())} `);
+            aceConsole.info(`DistributedStorage: write ${key}-${JSON.stringify(link.get())} `);
             this.setDistributedProp(key, link.get())
         }
     }
     // public required by the interface, use the static method instead!
     aboutToBeDeleted() {
-        console.debug("DistributedStorage: about to be deleted");
+        aceConsole.debug("DistributedStorage: about to be deleted");
         this.links_.forEach((val, key, map) => {
-            console.debug(`DistributedStorage: removing ${key}`);
+            aceConsole.debug(`DistributedStorage: removing ${key}`);
             val.aboutToBeDeleted();
         });
         this.links_.clear();
@@ -2086,19 +2086,19 @@ class DistributedStorage {
         return this.id_;
     }
     propertyHasChanged(info) {
-        console.info(`DistributedStorage: property changed info:${JSON.stringify(info)} `);
+        aceConsole.info(`DistributedStorage: property changed info:${JSON.stringify(info)} `);
         this.write(info);
     }
     onDataOnChange(propName) {
         let link = this.links_.get(propName);
         let newValue = this.getDistributedProp(propName);
         if (link && newValue != null) {
-            console.info(`DistributedStorage: dataOnChange[${propName}-${newValue}]`);
+            aceConsole.info(`DistributedStorage: dataOnChange[${propName}-${newValue}]`);
             link.set(newValue)
         }
     }
     onConnected(status) {
-        console.info(`DistributedStorage onConnected: status = ${status}`);
+        aceConsole.info(`DistributedStorage onConnected: status = ${status}`);
         if (!this.aviliable_) {
             this.syncProp();
             this.aviliable_ = true;
@@ -2119,7 +2119,7 @@ class DistributedStorage {
     }
     setDistributedProp(key, value) {
         if (!this.aviliable_) {
-            console.warn(`DistributedStorage is not aviliable`);
+            aceConsole.warn(`DistributedStorage is not aviliable`);
             return;
         }
         if (typeof value == 'object') {
@@ -2191,7 +2191,7 @@ class Environment {
     envProp(key, value) {
         let prop = AppStorage.Prop(key);
         if (prop) {
-            console.warn(`Environment: envProp '${key}': Property already exists in AppStorage. Not using environment property.`);
+            aceConsole.warn(`Environment: envProp '${key}': Property already exists in AppStorage. Not using environment property.`);
             return false;
         }
         let tmp;
@@ -2219,12 +2219,12 @@ class Environment {
         }
         prop = AppStorage.SetAndProp(key, tmp);
         this.props_.set(key, prop);
-        console.debug(`Environment: envProp for '${key}' done.`);
+        aceConsole.debug(`Environment: envProp for '${key}' done.`);
     }
     envProps(properties) {
         properties.forEach(property => {
             this.envProp(property.key, property.defaultValue);
-            console.debug(`Environment: envProps for '${property.key}' done.`);
+            aceConsole.debug(`Environment: envProps for '${property.key}' done.`);
         });
     }
     keys() {
@@ -2240,10 +2240,10 @@ class Environment {
     onValueChanged(key, value) {
         let ok = AppStorage.Set(key, value);
         if (ok) {
-            console.debug(`Environment: onValueChanged: ${key} changed to ${value}`);
+            aceConsole.debug(`Environment: onValueChanged: ${key} changed to ${value}`);
         }
         else {
-            console.warn(`Environment: onValueChanged: error changing ${key}! See results above.`);
+            aceConsole.warn(`Environment: onValueChanged: error changing ${key}! See results above.`);
         }
     }
     aboutToBeDeleted() {
@@ -2282,5 +2282,5 @@ Environment.Instance_ = undefined;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-console.debug("ACE State Mgmt init ...");
+aceConsole.debug("ACE State Mgmt init ...");
 PersistentStorage.ConfigureBackend(new Storage());
