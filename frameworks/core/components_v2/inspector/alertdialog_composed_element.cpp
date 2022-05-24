@@ -55,7 +55,7 @@ RefPtr<RenderDialog> AlertDialogComposedElement::GetRenderDialog() const
 std::string AlertDialogComposedElement::Show() const
 {
     auto jsonArray = JsonUtil::CreateArray(true);
-    auto item = JsonUtil::Create(false);
+    auto item = JsonUtil::Create(true);
     item->Put("title", GetTitle().c_str());
     item->Put("message", GetMessage().c_str());
     item->Put("autoCancel", GetAutoCancel().c_str());
@@ -100,10 +100,10 @@ std::unique_ptr<JsonValue> AlertDialogComposedElement::GetConfirm() const
 {
     auto renderDialog = GetRenderDialog();
     auto confirm = renderDialog->GetDialogProperties().buttons;
-    auto jsonArray = JsonUtil::CreateArray(false);
+    auto jsonArray = JsonUtil::CreateArray(true);
     if (confirm.empty()) {
         for (const auto &dialog : confirm) {
-            auto item = JsonUtil::Create(false);
+            auto item = JsonUtil::Create(true);
             item->Put("value", dialog.text.c_str());
             item->Put("fontColor", dialog.textColor.c_str());
             item->Put("backgroundColor", ConvertColorToString(dialog.bgColor).c_str());
@@ -125,7 +125,7 @@ std::unique_ptr<JsonValue> AlertDialogComposedElement::GetDialogOffset() const
 {
     auto renderDialog = GetRenderDialog();
     auto dialogoffset = renderDialog->GetDialogProperties().offset;
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("dX", dialogoffset.GetX().Value());
     jsonValue->Put("dY", dialogoffset.GetY().Value());
     return jsonValue;
@@ -143,10 +143,10 @@ std::unique_ptr<JsonValue> AlertDialogComposedElement::GetPrimaryButton() const
 {
     auto renderDialog = GetRenderDialog();
     auto primary = renderDialog->GetDialogProperties().buttons;
-    auto jsonArray = JsonUtil::CreateArray(false);
+    auto jsonArray = JsonUtil::CreateArray(true);
     if (primary.empty()) {
         for (const auto &dialog : primary) {
-            auto item = JsonUtil::Create(false);
+            auto item = JsonUtil::Create(true);
             item->Put("value", dialog.text.c_str());
             item->Put("fontColor", dialog.textColor.c_str());
             item->Put("backgroundColor", ConvertColorToString(dialog.bgColor).c_str());
@@ -161,10 +161,10 @@ std::unique_ptr<JsonValue> AlertDialogComposedElement::GetSecondaryButton() cons
 {
     auto renderDialog = GetRenderDialog();
     auto secondary = renderDialog->GetDialogProperties().buttons;
-    auto jsonArray = JsonUtil::CreateArray(false);
+    auto jsonArray = JsonUtil::CreateArray(true);
     if (secondary.empty()) {
         for (const auto &dialog : secondary) {
-            auto item = JsonUtil::Create(false);
+            auto item = JsonUtil::Create(true);
             item->Put("value", dialog.text.c_str());
             item->Put("fontColor", dialog.textColor.c_str());
             item->Put("backgroundColor", ConvertColorToString(dialog.bgColor).c_str());

@@ -79,15 +79,15 @@ std::string SideBarComposedElement::GetStyle() const
 std::string SideBarComposedElement::GetControlButton() const
 {
     auto render = GetRenderSideBar();
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     if (render) {
-        auto jsonControl = JsonUtil::Create(false);
+        auto jsonControl = JsonUtil::Create(true);
         jsonControl->Put("left", std::to_string(render->GetButtonLeft()).c_str());
         jsonControl->Put("top", std::to_string(render->GetButtonTop()).c_str());
         jsonControl->Put("width", std::to_string(render->GetButtonWidth()).c_str());
         jsonControl->Put("height", std::to_string(render->GetButtonHeight()).c_str());
 
-        auto jsonIcon = JsonUtil::Create(false);
+        auto jsonIcon = JsonUtil::Create(true);
         jsonIcon->Put("shown", render->GetShowIcon().c_str());
         jsonIcon->Put("hidden", render->GetHiddenIcon().c_str());
         jsonIcon->Put("switching", render->GetSwitchIcon().c_str());
