@@ -19,7 +19,6 @@
 #include <cstdint>
 
 #include "ashmem.h"
-
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "frameworks/core/common/flutter/flutter_asset_manager.h"
 #include "frameworks/core/common/flutter/flutter_task_executor.h"
@@ -126,7 +125,7 @@ void SubContainer::UpdateSurfaceSize()
 }
 
 void SubContainer::RunCard(const int64_t id, const std::string path, const std::string module, const std::string data,
-    const std::map<std::string, std::pair<int, int32_t>> imageDataMap, const std::string formSrc)
+    const std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap, const std::string formSrc)
 {
     if (id == runningCardId_) {
         LOGE("the card is showing, no need run again");
@@ -262,7 +261,7 @@ void SubContainer::RunCard(const int64_t id, const std::string path, const std::
     frontend_->RunPage(0, "", data);
 }
 
-void SubContainer::ProcessSharedImage(const std::map<std::string, std::pair<int, int32_t>> imageDataMap)
+void SubContainer::ProcessSharedImage(const std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap)
 {
     std::vector<std::string> picNameArray;
     std::vector<int> fileDescriptorArray;
@@ -270,8 +269,8 @@ void SubContainer::ProcessSharedImage(const std::map<std::string, std::pair<int,
     if (!imageDataMap.empty()) {
         for (auto& imageData : imageDataMap) {
             picNameArray.push_back(imageData.first);
-            fileDescriptorArray.push_back(imageData.second.first);
-            byteLenArray.push_back(imageData.second.second);
+            fileDescriptorArray.push_back(imageData.second->GetAshmemFd());
+            byteLenArray.push_back(imageData.second->GetAshmemSize());
         }
         GetNamesOfSharedImage(picNameArray);
         UpdateSharedImage(picNameArray, byteLenArray, fileDescriptorArray);
@@ -377,7 +376,7 @@ void SubContainer::GetImageDataFromAshmem(
 }
 
 void SubContainer::UpdateCard(const std::string content,
-    const std::map<std::string, std::pair<int, int32_t>> imageDataMap)
+    const std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap)
 {
     if (!frontend_) {
         LOGE("update card fial due to could not find card front end");

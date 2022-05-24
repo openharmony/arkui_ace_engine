@@ -240,7 +240,7 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
         int32_t instanceID = context->GetInstanceId();
         formManagerBridge_->AddFormAcquireCallback(
             [weak = WeakClaim(this), instanceID](int64_t id, std::string path, std::string module, std::string data,
-                std::map<std::string, std::pair<int, int32_t>> imageDataMap, AppExecFwk::FormJsInfo formJsInfo) {
+                std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap, AppExecFwk::FormJsInfo formJsInfo) {
                 ContainerScope scope(instanceID);
                 auto element = weak.Upgrade();
                 auto uiTaskExecutor = SingleTaskExecutor::Make(
@@ -259,7 +259,7 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                 });
             });
         formManagerBridge_->AddFormUpdateCallback([weak = WeakClaim(this), instanceID](int64_t id, std::string data,
-                                                      std::map<std::string, std::pair<int, int32_t>> imageDataMap) {
+            std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap) {
             ContainerScope scope(instanceID);
             auto element = weak.Upgrade();
             auto uiTaskExecutor = SingleTaskExecutor::Make(
