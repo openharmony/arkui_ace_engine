@@ -1072,6 +1072,15 @@ void RenderGridScroll::CalculateWholeSize(double drawLength)
     }
 }
 
+void RenderGridScroll::ScrollPage(bool reverse, bool smooth)
+{
+    if (reverse) {
+        UpdateScrollPosition(-component_->GetHeight(), SCROLL_FROM_JUMP);
+    } else {
+        UpdateScrollPosition(component_->GetHeight(), SCROLL_FROM_JUMP);
+    }
+}
+
 double RenderGridScroll::GetEstimatedHeight()
 {
     if (reachTail_) {
@@ -1085,8 +1094,8 @@ double RenderGridScroll::GetEstimatedHeight()
 
 void RenderGridScroll::InitScrollBar(const RefPtr<Component>& component)
 {
-    const RefPtr<GridLayoutComponent> grid = AceType::DynamicCast<GridLayoutComponent>(component);
-    if (!grid) {
+    component_ = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (!component_) {
         LOGE("RenderGridLayout update failed.");
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
@@ -1099,14 +1108,14 @@ void RenderGridScroll::InitScrollBar(const RefPtr<Component>& component)
         scrollBar_->Reset();
     } else {
         RefPtr<GridScrollController> controller = AceType::MakeRefPtr<GridScrollController>();
-        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(grid->GetScrollBar(), theme->GetShapeMode());
+        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(component_->GetScrollBar(), theme->GetShapeMode());
         scrollBar_->SetScrollBarController(controller);
     }
     // set the scroll bar style
     scrollBar_->SetReservedHeight(theme->GetReservedHeight());
     scrollBar_->SetMinHeight(theme->GetMinHeight());
     scrollBar_->SetMinDynamicHeight(theme->GetMinDynamicHeight());
-    auto& scrollBarColor = grid->GetScrollBarColor();
+    auto& scrollBarColor = component_->GetScrollBarColor();
     if (!scrollBarColor.empty()) {
         scrollBarColor_ = Color::FromString(scrollBarColor);
     } else {
@@ -1116,8 +1125,8 @@ void RenderGridScroll::InitScrollBar(const RefPtr<Component>& component)
     scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
     scrollBar_->SetPadding(theme->GetPadding());
     scrollBar_->SetScrollable(true);
-    if (!grid->GetScrollBarWidth().empty()) {
-        const auto& width = StringUtils::StringToDimension(grid->GetScrollBarWidth());
+    if (!component_->GetScrollBarWidth().empty()) {
+        const auto& width = StringUtils::StringToDimension(component_->GetScrollBarWidth());
         scrollBar_->SetInactiveWidth(width);
         scrollBar_->SetNormalWidth(width);
         scrollBar_->SetActiveWidth(width);
