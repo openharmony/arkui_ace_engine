@@ -228,8 +228,8 @@ void RenderXComponent::HandleMouseHoverEvent(MouseState mouseState)
             auto nXCompImpl = weakNXCompImpl.Upgrade();
             if (nXComp != nullptr && nXCompImpl) {
                 bool isHover = static_cast<int>(mouseState);
-                auto callback = nXCompImpl->GetCallback();
-                if (callback != nullptr && callback->DispatchMouseEvent != nullptr) {
+                auto callback = nXCompImpl->GetMouseEventCallback();
+                if (callback != nullptr && callback->DispatchHoverEvent != nullptr) {
                     callback->DispatchHoverEvent(nXComp, isHover);
                 }
             } else {
@@ -269,7 +269,7 @@ bool RenderXComponent::NativeXComponentDispatchMouseEvent(const OH_NativeXCompon
                 if (nXComp != nullptr && nXCompImpl) {
                     nXCompImpl->SetMouseEvent(mouseEvent);
                     auto surface = const_cast<void*>(nXCompImpl->GetSurface());
-                    auto callback = nXCompImpl->GetCallback();
+                    auto callback = nXCompImpl->GetMouseEventCallback();
                     if (callback != nullptr && callback->DispatchMouseEvent != nullptr) {
                         callback->DispatchMouseEvent(nXComp, surface);
                     }

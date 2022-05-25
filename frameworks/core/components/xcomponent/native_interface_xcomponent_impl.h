@@ -101,6 +101,16 @@ public:
         return callback_;
     }
 
+    void SetMouseEventCallback(OH_NativeXComponent_MouseEvent_Callback* callback)
+    {
+        mouseEventCallback_ = callback;
+    }
+
+    const OH_NativeXComponent_MouseEvent_Callback* GetMouseEventCallback() const
+    {
+        return mouseEventCallback_;
+    }
+
     void SetTouchEvent(const OH_NativeXComponent_TouchEvent touchEvent)
     {
         touchEvent_ = touchEvent;
@@ -131,6 +141,7 @@ private:
     OH_NativeXComponent_TouchEvent touchEvent_;
     OH_NativeXComponent_MouseEvent mouseEvent_;
     OH_NativeXComponent_Callback* callback_ = nullptr;
+    OH_NativeXComponent_MouseEvent_Callback* mouseEventCallback_ = nullptr;
 };
 }
 
@@ -144,6 +155,7 @@ struct OH_NativeXComponent {
     int32_t GetTouchEvent(const void* window, OH_NativeXComponent_TouchEvent* touchEvent);
     int32_t GetMouseEvent(const void* window, OH_NativeXComponent_MouseEvent* mouseEvent);
     int32_t RegisterCallback(OH_NativeXComponent_Callback* callback);
+    int32_t RegisterMouseEventCallback(OH_NativeXComponent_MouseEvent_Callback* callback);
 
 private:
     OHOS::Ace::NativeXComponentImpl* xcomponentImpl_ = nullptr;
