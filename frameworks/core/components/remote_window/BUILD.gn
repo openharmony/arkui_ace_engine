@@ -29,7 +29,7 @@ build_component("remote_window") {
       "//foundation/multimedia/media_standard/interfaces/inner_api/native",
     ]
 
-    deps = [ "//foundation/graphic/graphic:libwmclient" ]
+    deps = [ "//foundation/graphic/graphic_2d:libwmclient" ]
 
     external_deps = [ "ipc:ipc_core" ]
   }

@@ -79,7 +79,7 @@ template("uiservice_static") {
       "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-      "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
+      "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
       "//foundation/windowmanager/wm:libwm",
