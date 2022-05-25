@@ -71,6 +71,7 @@ public:
     virtual void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) = 0;
     virtual void HandleUncaughtException() = 0;
     virtual void ExecutePendingJob() = 0;
+    virtual void DumpHeapSnapshot(bool isPrivate) {}
 
     // Set c++ data to js environment.
     void SetEmbedderData(void *data)

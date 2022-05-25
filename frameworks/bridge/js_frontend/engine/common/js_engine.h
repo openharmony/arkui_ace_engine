@@ -160,6 +160,8 @@ public:
 
     virtual void RunGarbageCollection() = 0;
 
+    virtual void DumpHeapSnapshot(bool isPrivate) {}
+
     virtual std::string GetStacktraceMessage()
     {
         return "";

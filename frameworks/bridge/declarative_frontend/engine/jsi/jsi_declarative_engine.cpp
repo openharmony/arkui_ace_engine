@@ -1305,6 +1305,13 @@ void JsiDeclarativeEngine::RunGarbageCollection()
     }
 }
 
+void JsiDeclarativeEngine::DumpHeapSnapshot(bool isPrivate)
+{
+    if (engineInstance_ && engineInstance_->GetJsRuntime()) {
+        engineInstance_->GetJsRuntime()->DumpHeapSnapshot(isPrivate);
+    }
+}
+
 std::string JsiDeclarativeEngine::GetStacktraceMessage()
 {
     auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);

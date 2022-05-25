@@ -152,6 +152,8 @@ public:
 
     void RunGarbageCollection() override;
 
+    void DumpHeapSnapshot(bool isPrivate) override;
+
     std::string GetStacktraceMessage() override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;

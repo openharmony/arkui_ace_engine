@@ -40,6 +40,7 @@
 #include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/frontend.h"
 #include "core/common/plugin_manager.h"
@@ -182,6 +183,7 @@ void AceAbility::OnStart(const Want& want)
         AceApplicationInfo::GetInstance().SetDataFileDirPath(abilityContext->GetFilesDir());
         ImageCache::SetImageCacheFilePath(abilityContext->GetCacheDir());
         ImageCache::SetCacheFileInfo();
+        AceEngine::InitJsDumpHeadSignal();
     });
     OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;

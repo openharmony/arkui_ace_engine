@@ -120,6 +120,7 @@ public:
 
     void DumpFrontend() const override;
     void TriggerGarbageCollection() override;
+    void DumpHeapSnapshot(bool isPrivate) override;
     void SetColorMode(ColorMode colorMode) override;
     void RebuildAllPages() override;
     void NotifyAppStorage(const std::string& key, const std::string& value) override;

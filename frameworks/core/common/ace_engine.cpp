@@ -34,6 +34,24 @@ namespace {
 
 std::unique_ptr<AceEngine> g_aceEngine;
 
+constexpr int SIGNAL_JS_HEAP = 37;
+constexpr int SIGNAL_JS_HEAP_PRIV = 38;
+
+void HandleSignal(int signo)
+{
+    LOGI("HandleSignal signal: %{public}d", signo);
+    switch (signo) {
+        case SIGNAL_JS_HEAP:
+            AceEngine::Get().DumpJsHeap(false);
+            break;
+        case SIGNAL_JS_HEAP_PRIV:
+            AceEngine::Get().DumpJsHeap(true);
+            break;
+        default:
+            break;
+    }
+}
+
 }
 
 AceEngine::AceEngine()
@@ -48,6 +66,12 @@ AceEngine& AceEngine::Get()
         g_aceEngine.reset(new AceEngine());
     }
     return *g_aceEngine;
+}
+
+void AceEngine::InitJsDumpHeadSignal()
+{
+    signal(SIGNAL_JS_HEAP, HandleSignal);
+    signal(SIGNAL_JS_HEAP_PRIV, HandleSignal);
 }
 
 void AceEngine::AddContainer(int32_t instanceId, const RefPtr<Container>& container)
@@ -167,6 +191,18 @@ void AceEngine::NotifyContainers(const std::function<void(const RefPtr<Container
     std::lock_guard<std::mutex> lock(mutex_);
     for (const auto& [first, second] : containerMap_) {
         callback(second);
+    }
+}
+
+void AceEngine::DumpJsHeap(bool isPrivate) const
+{
+    std::unordered_map<int32_t, RefPtr<Container>> copied;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        copied = containerMap_;
+    }
+    for (const auto& container : copied) {
+        container.second->DumpHeapSnapshot(isPrivate);
     }
 }
 
