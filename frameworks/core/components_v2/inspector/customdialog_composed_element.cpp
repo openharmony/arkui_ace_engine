@@ -56,7 +56,7 @@ RefPtr<RenderDialog> CustomDialogComposedElement::GetRenderDialog() const
 std::string CustomDialogComposedElement::Open() const
 {
     auto jsonArray = JsonUtil::CreateArray(true);
-    auto item = JsonUtil::Create(false);
+    auto item = JsonUtil::Create(true);
     item->Put("autoCancel", GetAutoCancel().c_str());
     item->Put("alignment", GetAlignment().c_str());
     item->Put("offset", GetDialogOffset());
@@ -85,7 +85,7 @@ std::unique_ptr<JsonValue> CustomDialogComposedElement::GetDialogOffset() const
 {
     auto renderDialog = GetRenderDialog();
     auto dialogoffset = renderDialog->GetDialogProperties().offset;
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("dX", dialogoffset.GetX().Value());
     jsonValue->Put("dY", dialogoffset.GetY().Value());
     return jsonValue;

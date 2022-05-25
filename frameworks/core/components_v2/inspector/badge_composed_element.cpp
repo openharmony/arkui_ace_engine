@@ -94,7 +94,7 @@ std::string BadgeComposedElement::GetLabel(void) const
 std::string BadgeComposedElement::GetStyle() const
 {
     auto render = GetRenderBadge();
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     if (render) {
         auto style = render->GetBadgeComponent();
         if (style) {

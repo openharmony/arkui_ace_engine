@@ -57,7 +57,7 @@ RefPtr<RenderDialog> ActionSheetDialogComposedElement::GetRenderDialog() const
 std::string ActionSheetDialogComposedElement::Show() const
 {
     auto jsonArray = JsonUtil::CreateArray(true);
-    auto item = JsonUtil::Create(false);
+    auto item = JsonUtil::Create(true);
     item->Put("title", GetTitle().c_str());
     item->Put("message", GetMessage().c_str());
     item->Put("autoCancel", GetAutoCancel().c_str());
@@ -100,10 +100,10 @@ std::unique_ptr<JsonValue> ActionSheetDialogComposedElement::GetConfirm() const
 {
     auto renderDialog = GetRenderDialog();
     auto confirm = renderDialog->GetDialogProperties().buttons;
-    auto jsonArray = JsonUtil::CreateArray(false);
+    auto jsonArray = JsonUtil::CreateArray(true);
     if (confirm.empty()) {
         for (const auto &dialog : confirm) {
-            auto item = JsonUtil::Create(false);
+            auto item = JsonUtil::Create(true);
             item->Put("value", dialog.text.c_str());
             item->Put("fontColor", dialog.textColor.c_str());
             item->Put("backgroundColor", ConvertColorToString(dialog.bgColor).c_str());
@@ -125,7 +125,7 @@ std::unique_ptr<JsonValue> ActionSheetDialogComposedElement::GetDialogOffset() c
 {
     auto renderDialog = GetRenderDialog();
     auto dialogoffset = renderDialog->GetDialogProperties().offset;
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("dX", dialogoffset.GetX().Value());
     jsonValue->Put("dY", dialogoffset.GetY().Value());
     return jsonValue;
@@ -172,10 +172,10 @@ std::unique_ptr<JsonValue> ActionSheetDialogComposedElement::GetSheets() const
 {
     auto renderDialog = GetRenderDialog();
     auto actionsheet = renderDialog->GetDialogProperties().sheetsInfo;
-    auto jsonArray = JsonUtil::CreateArray(false);
+    auto jsonArray = JsonUtil::CreateArray(true);
     if (actionsheet.empty()) {
         for (const auto &sheet : actionsheet) {
-            auto item = JsonUtil::Create(false);
+            auto item = JsonUtil::Create(true);
             item->Put("title", sheet.title.c_str());
             item->Put("icon", sheet.icon.c_str());
             jsonArray->Put(item);
