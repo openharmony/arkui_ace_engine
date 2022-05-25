@@ -45,8 +45,8 @@ std::unique_ptr<JsonValue> DatePickerDialogComposedElement::ToJsonObject() const
 
 std::string DatePickerDialogComposedElement::GetShow() const
 {
-    auto jsonValue = JsonUtil::Create(false);
-    auto jsonShow = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
+    auto jsonShow = JsonUtil::Create(true);
     jsonValue->Put("lunar", GetLunar().c_str());
     jsonValue->Put("start", GetStart().c_str());
     jsonValue->Put("end", GetEnd().c_str());

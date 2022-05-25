@@ -153,7 +153,7 @@ std::string ListComposedElement::GetMultiSelectable() const
 
 std::unique_ptr<JsonValue> ListComposedElement::GetDivider() const
 {
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     do {
         auto node = GetInspectorNode(ListElement::TypeId());
         if (!node) {

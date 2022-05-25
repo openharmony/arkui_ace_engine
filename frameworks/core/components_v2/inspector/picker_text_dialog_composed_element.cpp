@@ -44,8 +44,8 @@ std::unique_ptr<JsonValue> PickerTextDialogComposedElement::ToJsonObject() const
 
 std::string PickerTextDialogComposedElement::GetShow() const
 {
-    auto jsonValue = JsonUtil::Create(false);
-    auto jsonShow = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
+    auto jsonShow = JsonUtil::Create(true);
     jsonValue->Put("range", GetRange());
     jsonValue->Put("selected", GetSelected().c_str());
     jsonValue->Put("defaultPickerItemHeight", GetDefaultPickerItemHeight().c_str());
@@ -74,7 +74,7 @@ std::string PickerTextDialogComposedElement::GetSelected() const
 std::unique_ptr<JsonValue> PickerTextDialogComposedElement::GetRange() const
 {
     auto render = GetRenderPickerBase();
-    auto jsonRange = JsonUtil::CreateArray(false);
+    auto jsonRange = JsonUtil::CreateArray(true);
     if (render) {
         auto range = render->GetRange();
         for (size_t i = 0; i < range.size(); i++) {

@@ -150,9 +150,9 @@ public:
     RefPtr<Decoration> GetBackDecoration() const override;
     std::string GetBackgroundImage() const override;
     std::string GetBackgroundColor() const override;
-    std::unique_ptr<JsonValue> GetBackgroundImageSize() const override;
-    std::unique_ptr<JsonValue> GetBackgroundImagePosition() const override;
-    std::unique_ptr<JsonValue> GetAlignmentType(double width, double height) const override;
+    std::string GetBackgroundImageSize() const override;
+    std::string GetBackgroundImagePosition() const override;
+    std::string GetAlignmentType(double width, double height) const override;
 
     // front decoration settings
     RefPtr<Decoration> GetFrontDecoration() const override;
