@@ -158,6 +158,8 @@ public:
 
     void TriggerGarbageCollection() override;
 
+    void DumpHeapSnapshot(bool isPrivate) override;
+
     void SetLocalStorage(NativeReference* storage, NativeReference* context);
 
     void OnFinish()

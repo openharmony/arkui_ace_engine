@@ -19,11 +19,12 @@
 #include <memory>
 
 #include "ecmascript/napi/include/jsnapi.h"
+
 #include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 
 namespace panda::ecmascript {
 class EcmaVM;
-}  // namespace panda::ecmascript
+} // namespace panda::ecmascript
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 namespace OHOS::Ace::Framework {
@@ -51,15 +52,15 @@ class PandaFunctionData;
 class ArkJSRuntime final : public JsRuntime, public std::enable_shared_from_this<ArkJSRuntime> {
 public:
 #if !defined(WINDOWS_PLATFORM)
-    bool StartDebugger(const char *libraryPath, EcmaVM *vm) const;
+    bool StartDebugger(const char* libraryPath, EcmaVM* vm) const;
 #endif
-    bool Initialize(const std::string &libraryPath, bool isDebugMode, int32_t instanceId) override;
+    bool Initialize(const std::string& libraryPath, bool isDebugMode, int32_t instanceId) override;
     bool InitializeFromExistVM(EcmaVM* vm);
     void Reset() override;
     void SetLogPrint(LOG_PRINT out) override;
-    shared_ptr<JsValue> EvaluateJsCode(const std::string &src) override;
-    bool EvaluateJsCode(const uint8_t *buffer, int32_t size) override;
-    bool ExecuteJsBin(const std::string &fileName) override;
+    shared_ptr<JsValue> EvaluateJsCode(const std::string& src) override;
+    bool EvaluateJsCode(const uint8_t* buffer, int32_t size) override;
+    bool ExecuteJsBin(const std::string& fileName) override;
     shared_ptr<JsValue> GetGlobal() override;
     void RunGC() override;
 
@@ -68,26 +69,27 @@ public:
     shared_ptr<JsValue> NewBoolean(bool value) override;
     shared_ptr<JsValue> NewNull() override;
     shared_ptr<JsValue> NewUndefined() override;
-    shared_ptr<JsValue> NewString(const std::string &str) override;
-    shared_ptr<JsValue> ParseJson(const std::string &str) override;
+    shared_ptr<JsValue> NewString(const std::string& str) override;
+    shared_ptr<JsValue> ParseJson(const std::string& str) override;
     shared_ptr<JsValue> NewObject() override;
     shared_ptr<JsValue> NewArray() override;
     shared_ptr<JsValue> NewFunction(RegisterFunctionType func) override;
-    shared_ptr<JsValue> NewNativePointer(void *ptr) override;
+    shared_ptr<JsValue> NewNativePointer(void* ptr) override;
     shared_ptr<JsValue> NewException() override;
     void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) override;
     void HandleUncaughtException() override;
     void ExecutePendingJob() override;
+    void DumpHeapSnapshot(bool isPrivate) override;
 
-    const EcmaVM *GetEcmaVm() const
+    const EcmaVM* GetEcmaVm() const
     {
         return vm_;
     }
 
 private:
-    EcmaVM *vm_ = nullptr;
+    EcmaVM* vm_ = nullptr;
     int32_t instanceId_ = 0;
-    std::vector<PandaFunctionData *> dataList_;
+    std::vector<PandaFunctionData*> dataList_;
     LOG_PRINT print_ { nullptr };
     UncaughtExceptionCallback uncaughtErrorHandler_ { nullptr };
     std::string libPath_ {};
@@ -99,8 +101,7 @@ class PandaFunctionData {
 public:
     PandaFunctionData(shared_ptr<ArkJSRuntime> runtime, RegisterFunctionType func)
         : runtime_(std::move(runtime)), func_(std::move(func))
-    {
-    }
+    {}
 
     ~PandaFunctionData() = default;
 
@@ -108,10 +109,10 @@ public:
     NO_MOVE_SEMANTIC(PandaFunctionData);
 
 private:
-    Local<JSValueRef> Callback(panda::JsiRuntimeCallInfo *info) const;
+    Local<JSValueRef> Callback(panda::JsiRuntimeCallInfo* info) const;
     shared_ptr<ArkJSRuntime> runtime_;
     RegisterFunctionType func_;
-    friend Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo *info);
+    friend Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo* info);
 };
-}  // namespace OHOS::Ace::Framework
-#endif  // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_RUNTIME_H
+} // namespace OHOS::Ace::Framework
+#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_RUNTIME_H

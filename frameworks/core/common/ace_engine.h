@@ -43,7 +43,9 @@ public:
     void BuriedBomb(int32_t instanceId, uint64_t bombId);
     void DefusingBomb(int32_t instanceId);
     static AceEngine& Get();
+    static void InitJsDumpHeadSignal();
     void Dump(const std::vector<std::string>& params) const;
+    void DumpJsHeap(bool isPrivate) const;
 
     void TriggerGarbageCollection();
     void NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback);

@@ -746,6 +746,13 @@ void JsFrontend::TriggerGarbageCollection()
     }
 }
 
+void JsFrontend::DumpHeapSnapshot(bool isPrivate)
+{
+    if (jsEngine_) {
+        jsEngine_->DumpHeapSnapshot(isPrivate);
+    }
+}
+
 void JsFrontend::RebuildAllPages()
 {
     if (delegate_) {

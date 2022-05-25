@@ -818,6 +818,18 @@ void AceContainer::TriggerGarbageCollection()
         TaskExecutor::TaskType::JS);
 }
 
+void AceContainer::DumpHeapSnapshot(bool isPrivate)
+{
+    taskExecutor_->PostTask(
+        [isPrivate, frontend = WeakPtr<Frontend>(frontend_)] {
+            auto sp = frontend.Upgrade();
+            if (sp) {
+                sp->DumpHeapSnapshot(isPrivate);
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
 void AceContainer::SetLocalStorage(NativeReference* storage, NativeReference* context)
 {
     ContainerScope scope(instanceId_);

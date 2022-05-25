@@ -88,6 +88,8 @@ public:
     // Trigger garbage collection
     virtual void TriggerGarbageCollection() {}
 
+    virtual void DumpHeapSnapshot(bool isPrivate) {}
+
     virtual void NotifyFontNodes() {}
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}

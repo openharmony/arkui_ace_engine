@@ -257,6 +257,8 @@ public:
 
     void RunGarbageCollection() override;
 
+    void DumpHeapSnapshot(bool isPrivate) override;
+
     std::string GetStacktraceMessage() override;
 
     void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
