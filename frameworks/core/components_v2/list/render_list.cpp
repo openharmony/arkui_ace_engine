@@ -151,7 +151,7 @@ void RenderList::Update(const RefPtr<Component>& component)
                     return false;
                 }
             }
-            renderList->processDragUpdate(renderList->GetMainAxis(delta));
+            renderList->ProcessDragUpdate(renderList->GetMainAxis(delta));
 
             // Stop animator of scroll bar.
             auto scrollBarProxy = renderList->scrollBarProxy_;
@@ -170,12 +170,16 @@ void RenderList::Update(const RefPtr<Component>& component)
         });
         scrollable_->SetScrollEndCallback([weak = AceType::WeakClaim(this)]() {
             auto list = weak.Upgrade();
-            if (list) {
-                auto proxy = list->scrollBarProxy_;
-                if (proxy) {
-                    proxy->StartScrollBarAnimator();
-                }
+            if (!list) {
+                LOGW("render list Upgrade fail in scroll end callback");
+                return;
             }
+            auto proxy = list->scrollBarProxy_;
+            if (proxy) {
+                proxy->StartScrollBarAnimator();
+            }
+            list->listEventFlags_[ListEvents::SCROLL_STOP] = true;
+            list->HandleListEvent();
         });
         if (vertical_) {
             scrollable_->InitRelatedParent(GetParent());
@@ -255,6 +259,13 @@ void RenderList::InitScrollBarProxy()
     scrollBarProxy_->RegisterScrollableNode({ AceType::WeakClaim(this), callback });
 }
 
+bool RenderList::IsReachStart()
+{
+    bool scrollUpToReachStart = GreatNotEqual(prevOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
+    bool scrollDownToReachStart = LessNotEqual(prevOffset_, 0.0) && GreatOrEqual(currentOffset_, 0.0);
+    return scrollUpToReachStart || scrollDownToReachStart;
+}
+
 void RenderList::PerformLayout()
 {
     UpdateAccessibilityAttr();
@@ -330,6 +341,9 @@ void RenderList::PerformLayout()
         currentOffset_ -= GetMainSize(child->GetLayoutSize()) + spaceWidth_;
     }
 
+    if (IsReachStart()) {
+        listEventFlags_[ListEvents::REACH_START] = true;
+    }
     // Check if reach the start of list
     reachStart_ = GreatOrEqual(currentOffset_, 0.0);
     if (noEdgeEffect && reachStart_) {
@@ -337,6 +351,12 @@ void RenderList::PerformLayout()
         currentOffset_ = 0;
     }
 
+    bool scrollDownToReachEnd = LessNotEqual(prevMainPos_, mainSize) && GreatOrEqual(curMainPos, mainSize);
+    bool scrollUpToReachEnd = GreatNotEqual(prevMainPos_, mainSize) && LessOrEqual(curMainPos, mainSize);
+    // verify layout size to avoid trigger reach_end event at first [PerformLayout] when layout size is zero
+    if ((scrollDownToReachEnd || scrollUpToReachEnd) && GetLayoutSize().IsValid()) {
+        listEventFlags_[ListEvents::REACH_END] = true;
+    }
     if (!fixedMainSize_) {
         fixedMainSize_ = !(reachStart_ && reachEnd_);
     }
@@ -362,6 +382,32 @@ void RenderList::PerformLayout()
     }
 
     realMainSize_ = curMainPos - currentOffset_;
+    HandleListEvent();
+    prevOffset_ = currentOffset_;
+    prevMainPos_ = curMainPos;
+}
+
+#define CASE_OF_LIST_EVENT_WITH_NO_PARAM(eventNumber, callback)        \
+    case ListEvents::eventNumber:                                      \
+        if (event.second) {                                            \
+            ResumeEventCallback(component_, &ListComponent::callback); \
+            LOGD("list event %{public}s triggered.", #eventNumber);    \
+            event.second = false;                                      \
+        }                                                              \
+        break;
+
+void RenderList::HandleListEvent()
+{
+    for (auto& event : listEventFlags_) {
+        switch (event.first) {
+            CASE_OF_LIST_EVENT_WITH_NO_PARAM(SCROLL_STOP, GetOnScrollStop);
+            CASE_OF_LIST_EVENT_WITH_NO_PARAM(REACH_START, GetOnReachStart);
+            CASE_OF_LIST_EVENT_WITH_NO_PARAM(REACH_END, GetOnReachEnd);
+            default:
+                LOGW("This event does not handle in here, please check. event number: %{public}d", event.first);
+                break;
+        }
+    }
 }
 
 Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutParam)
@@ -559,6 +605,7 @@ bool RenderList::GetCurMainPosAndMainSize(double &curMainPos, double &mainSize)
 
 bool RenderList::UpdateScrollPosition(double offset, int32_t source)
 {
+    prevOffset_ = currentOffset_;
     if (source == SCROLL_FROM_START) {
         return true;
     }
@@ -1077,7 +1124,7 @@ void RenderList::ProcessDragStart(double startPosition)
     dragStartIndexPending_ = index;
 }
 
-void RenderList::processDragUpdate(double dragOffset)
+void RenderList::ProcessDragUpdate(double dragOffset)
 {
     if (!chainAnimation_) {
         return;
@@ -1091,7 +1138,7 @@ void RenderList::processDragUpdate(double dragOffset)
     double delta = FlushChainAnimation();
     currentOffset_ += delta;
     if (!NearZero(delta)) {
-        LOGE("processDragUpdate delta = %lf currentOffset_ = %lf", delta, currentOffset_);
+        LOGE("ProcessDragUpdate delta = %lf currentOffset_ = %lf", delta, currentOffset_);
     }
 }
 
