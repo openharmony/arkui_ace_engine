@@ -74,7 +74,7 @@ std::unique_ptr<JsonValue> SwiperComposedElement::ToJsonObject() const
 
 std::string SwiperComposedElement::GetIndicatorStyle() const
 {
-    auto jsonValue = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("left", GetSwiperLeft().c_str());
     jsonValue->Put("top", GetSwiperTop().c_str());
     jsonValue->Put("right", GetSwiperRight().c_str());
