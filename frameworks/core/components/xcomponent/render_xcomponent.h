@@ -50,12 +50,12 @@ public:
     void NativeXComponentChange();
     void NativeXComponentDestroy();
 
-    void SetXComponentSizeInit(XComponentSizeInitEvent &&xcomponentSizeInitEvent)
+    void SetXComponentSizeInit(XComponentSizeInitEvent&& xcomponentSizeInitEvent)
     {
         xcomponentSizeInitEvent_ = std::move(xcomponentSizeInitEvent);
     }
 
-    void SetXComponentSizeChange(XComponentSizeChangeEvent &&xcomponentSizeChangeEvent)
+    void SetXComponentSizeChange(XComponentSizeChangeEvent&& xcomponentSizeChangeEvent)
     {
         xcomponentSizeChangeEvent_ = std::move(xcomponentSizeChangeEvent);
     }

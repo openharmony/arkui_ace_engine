@@ -425,7 +425,8 @@ void XComponentElement::OnXComponentSizeInit(int64_t textureId, int32_t textureW
         nativeWindow_ = CreateNativeWindowFromSurface(&producerSurface_);
         if (nativeWindow_) {
             NativeWindowHandleOpt(nativeWindow_, SET_BUFFER_GEOMETRY,
-                                  (int)(textureWidth * viewScale), (int)(textureHeight * viewScale));
+                                  static_cast<int32_t>(textureWidth * viewScale),
+                                  static_cast<int32_t>(textureHeight * viewScale));
             xcomponent_->SetNativeWindow(nativeWindow_);
         } else {
             LOGE("can not create NativeWindow");
@@ -476,7 +477,8 @@ void XComponentElement::OnXComponentSizeChange(int64_t textureId, int32_t textur
         float viewScale = context->GetViewScale();
         if (nativeWindow_) {
             NativeWindowHandleOpt(nativeWindow_, SET_BUFFER_GEOMETRY,
-                                  (int)(textureWidth * viewScale), (int)(textureHeight * viewScale));
+                                  static_cast<int32_t>(textureWidth * viewScale),
+                                  static_cast<int32_t>(textureHeight * viewScale));
             renderNode->NativeXComponentChange();
         } else {
             LOGE("change nativewindow size failed, nativewindow NULL");

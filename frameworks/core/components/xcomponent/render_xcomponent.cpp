@@ -120,11 +120,11 @@ void RenderXComponent::NativeXComponentInit(
 
     pipelineContext->GetTaskExecutor()->PostTask(
         [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_,
-            w = drawSize_.Width(), h = drawSize_.Height()] {
+            width = drawSize_.Width(), height = drawSize_.Height()] {
             auto nXCompImpl = weakNXCompImpl.Upgrade();
             if (nXComp && nXCompImpl) {
-                nXCompImpl->SetXComponentWidth((int)(w));
-                nXCompImpl->SetXComponentHeight((int)(h));
+                nXCompImpl->SetXComponentWidth(static_cast<int32_t>(width));
+                nXCompImpl->SetXComponentHeight(static_cast<int32_t>(height));
                 auto surface = const_cast<void*>(nXCompImpl->GetSurface());
                 auto callback = nXCompImpl->GetCallback();
                 if (callback && callback->OnSurfaceCreated != nullptr) {
@@ -147,11 +147,11 @@ void RenderXComponent::NativeXComponentChange()
 
     pipelineContext->GetTaskExecutor()->PostTask(
         [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_,
-            w = drawSize_.Width(), h = drawSize_.Height()] {
+            width = drawSize_.Width(), height = drawSize_.Height()] {
             auto nXCompImpl = weakNXCompImpl.Upgrade();
             if (nXComp && nXCompImpl) {
-                nXCompImpl->SetXComponentWidth((int)(w));
-                nXCompImpl->SetXComponentHeight((int)(h));
+                nXCompImpl->SetXComponentWidth(static_cast<int32_t>(width));
+                nXCompImpl->SetXComponentHeight(static_cast<int32_t>(height));
                 auto surface = const_cast<void*>(nXCompImpl->GetSurface());
                 auto callback = nXCompImpl->GetCallback();
                 if (callback && callback->OnSurfaceChanged!= nullptr) {
