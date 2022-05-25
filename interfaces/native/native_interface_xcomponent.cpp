@@ -77,6 +77,15 @@ int32_t OH_NativeXComponent_RegisterCallback(OH_NativeXComponent* component, OH_
     return component->RegisterCallback(callback);
 }
 
+int32_t OH_NativeXComponent_RegisterMouseEventCallback(
+    OH_NativeXComponent* component, OH_NativeXComponent_MouseEvent_Callback* callback)
+{
+    if ((component == nullptr) || (callback == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->RegisterMouseEventCallback(callback);
+}
+
 #ifdef __cplusplus
 };
 #endif
