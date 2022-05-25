@@ -37,10 +37,10 @@ public:
         = std::function<void(int64_t, const std::string&, const std::string&, const std::string&)>;
     using OnFormUpdateCallbackForJava = std::function<void(int64_t, const std::string&)>;
     using OnFormAcquiredCallback
-        = std::function<void(int64_t, const std::string&, const std::string&,
-         const std::string&, const std::map<std::string, std::pair<int, int32_t>>&, const AppExecFwk::FormJsInfo&)>;
+        = std::function<void(int64_t, const std::string&, const std::string&, const std::string&,
+        const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&, const AppExecFwk::FormJsInfo&)>;
     using OnFormUpdateCallback = std::function<void(int64_t, const std::string&,
-        const std::map<std::string, std::pair<int, int32_t>>&)>;
+        const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using OnFormUninstallCallback = std::function<void(int64_t)>;
 

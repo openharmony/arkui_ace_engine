@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FORM_SUB_CONTAINER_H
 
 #include "ashmem.h"
-
+#include "form_ashmem.h"
 #include "base/thread/task_executor.h"
 #include "core/common/frontend.h"
 #include "frameworks/bridge/card_frontend/card_frontend.h"
@@ -38,15 +38,15 @@ public:
 
     void Initialize();
     void RunCard(const int64_t id, const std::string path, const std::string module, const std::string data,
-        std::map<std::string, std::pair<int, int32_t>> imageDataMap, const std::string formSrc);
-    void UpdateCard(const std::string content, std::map<std::string, std::pair<int, int32_t>> imageDataMap);
+        std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap, const std::string formSrc);
+    void UpdateCard(const std::string content, std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap);
     void Destroy();
     void GetNamesOfSharedImage(std::vector<std::string>& picNameArray);
     void UpdateSharedImage(std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray,
         std::vector<int32_t>& fileDescriptorArray);
     void GetImageDataFromAshmem(
         const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineContext>& pipelineContext, int len);
-    void ProcessSharedImage(const std::map<std::string, std::pair<int, int32_t>> imageDataMap);
+    void ProcessSharedImage(const std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap);
 
     void SetFormElement(const WeakPtr<Element>& element)
     {
