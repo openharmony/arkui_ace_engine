@@ -34,6 +34,14 @@ namespace OHOS::Ace::V2 {
 
 using UpdateBuilderFunc = std::function<void(const Dimension&, const Dimension&)>;
 
+enum class ListEvents {
+    NONE = 0,
+    SCROLL,
+    SCROLL_STOP,
+    REACH_START,
+    REACH_END,
+};
+
 class ListItemGenerator : virtual public Referenced {
 public:
     static constexpr size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
@@ -279,7 +287,7 @@ protected:
     // notify start position in global main axis when drag start
     void ProcessDragStart(double startPosition);
     // notify drag offset in global main axis
-    void processDragUpdate(double dragOffset);
+    void ProcessDragUpdate(double dragOffset);
     // notify scroll over
     void ProcessScrollOverCallback(double velocity);
     void InitChainAnimation(int32_t nodeCount);
@@ -308,6 +316,8 @@ protected:
     double startMainPos_ = 0.0;
     double endMainPos_ = 0.0;
     double currentOffset_ = 0.0;
+    double prevOffset_ = 0.0;
+    double prevMainPos_ = 0.0;
     double mainScrollExtent_ = 0.0;
 
     bool reachStart_ = false;
@@ -364,6 +374,8 @@ protected:
     int32_t focusIndex_ = 0;
 
 private:
+    bool IsReachStart();
+    void HandleListEvent();
     bool ActionByScroll(bool forward, ScrollEventBack scrollEventBack);
     void ModifyActionScroll();
     void InitScrollBarProxy();
@@ -416,6 +428,7 @@ private:
 
     bool hasDragItem_ = false;
 
+    std::map<ListEvents, bool> listEventFlags_;
     ACE_DISALLOW_COPY_AND_MOVE(RenderList);
 };
 
