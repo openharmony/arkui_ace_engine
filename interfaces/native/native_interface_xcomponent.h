@@ -70,12 +70,25 @@ enum OH_NativeXComponent_TouchEventType {
     OH_NATIVEXCOMPONENT_UNKNOWN,
 };
 
+/**
+ * @brief Represents the mouse event action.
+ *
+ * @since 9
+ * @version 1.0
+ */
 enum OH_NativeXComponent_MouseEventAction {
-    OH_NATIVEXCOMPONENT_NONE = 0,
-    OH_NATIVEXCOMPONENT_PRESS,
-    OH_NATIVEXCOMPONENT_RELEASE,
+    OH_NATIVEXCOMPONENT_MOUSE_NONE = 0,
+    OH_NATIVEXCOMPONENT_MOUSE_PRESS,
+    OH_NATIVEXCOMPONENT_MOUSE_RELEASE,
+    OH_NATIVEXCOMPONENT_MOUSE_MOVE,
 };
 
+/**
+ * @brief Represents the mouse event button.
+ *
+ * @since 9
+ * @version 1.0
+ */
 enum OH_NativeXComponent_MouseEventButton {
     OH_NATIVEXCOMPONENT_NONE_BUTTON = 0,
     OH_NATIVEXCOMPONENT_LEFT_BUTTON = 1,
@@ -140,7 +153,12 @@ struct OH_NativeXComponent_TouchEvent {
     uint32_t numPoints = 0;
 };
 
-// Represents the mouse point information.
+/**
+ * @brief Represents the mouse event information.
+ *
+ * @since 9
+ * @version 1.0
+ */
 struct OH_NativeXComponent_MouseEvent {
     /** X coordinate of the mouse point relative to the left edge of the element to mouse. */
     float x = 0.0;
@@ -150,8 +168,11 @@ struct OH_NativeXComponent_MouseEvent {
     float screenX = 0.0;
     /** Y coordinate of the mouse point relative to the upper edge of the screen. */
     float screenY = 0.0;
+    /** Timestamp of the current mouse event. */
     int64_t timestamp = 0;
-    OH_NativeXComponent_MouseEventAction action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_NONE;
+    /** Mouse event action. */
+    OH_NativeXComponent_MouseEventAction action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_NONE;
+    /** Mouse event button. */
     OH_NativeXComponent_MouseEventButton button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_NONE_BUTTON;
 };
 
@@ -182,11 +203,20 @@ typedef struct OH_NativeXComponent_Callback {
     void (*OnSurfaceDestroyed)(OH_NativeXComponent* component, void* window);
     /** Called when a touch event is triggered. */
     void (*DispatchTouchEvent)(OH_NativeXComponent* component, void* window);
+} OH_NativeXComponent_Callback;
+
+/**
+ * @brief Registers the mouse event callbacks.
+ *
+ * @since 9
+ * @version 1.0
+ */
+typedef struct OH_NativeXComponent_MouseEvent_Callback {
     /** Called when a mouse event is triggered. */
     void (*DispatchMouseEvent)(OH_NativeXComponent* component, void* window);
     /** Called when a hover event is triggered. */
     void (*DispatchHoverEvent)(OH_NativeXComponent* component, bool& isHover);
-} OH_NativeXComponent_Callback;
+} OH_NativeXComponent_MouseEvent_Callback;
 
 /**
  * @brief Obtains the ID of the ArkUI XComponent.
@@ -251,7 +281,7 @@ int32_t OH_NativeXComponent_GetTouchEvent(
  * @param window Indicates the native window handler.
  * @param mouseEvent Indicates the pointer to the current mouse event.
  * @return Returns the status code of the execution.
- * @since 8
+ * @since 9
  * @version 1.0
  */
 int32_t OH_NativeXComponent_GetMouseEvent(
@@ -267,6 +297,18 @@ int32_t OH_NativeXComponent_GetMouseEvent(
  * @version 1.0
  */
 int32_t OH_NativeXComponent_RegisterCallback(OH_NativeXComponent* component, OH_NativeXComponent_Callback* callback);
+
+/**
+ * @brief Registers a callback for this <b>OH_NativeXComponent</b> instance.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param callback Indicates the pointer to a mouse event callback.
+ * @return Returns the status code of the execution.
+ * @since 9
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_RegisterMouseEventCallback(
+    OH_NativeXComponent* component, OH_NativeXComponent_MouseEvent_Callback* callback);
 
 #ifdef __cplusplus
 };
