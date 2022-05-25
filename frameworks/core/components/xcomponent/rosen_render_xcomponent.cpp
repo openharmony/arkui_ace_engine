@@ -41,15 +41,7 @@ void RosenRenderXComponent::Update(const RefPtr<Component>& component)
 void RosenRenderXComponent::Paint(RenderContext& context, const Offset& offset)
 {
     SyncGeometryProperties();
-#ifdef OHOS_STANDARD_SYSTEM
-    if (!hasSetDefaultSize_) {
-        if (xcomponentSizeChangeEvent_ && !drawSize_.IsHeightInfinite()) {
-            xcomponentSizeChangeEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
-        }
-        hasSetDefaultSize_ = true;
-    }
-#endif
-    RenderNode::Paint(context, offset);
+    RenderXComponent::Paint(context, offset);
 }
 
 void RosenRenderXComponent::SyncGeometryProperties()
@@ -89,7 +81,9 @@ void RosenRenderXComponent::DumpTree(int32_t depth)
 
 std::shared_ptr<RSNode> RosenRenderXComponent::CreateRSNode() const
 {
-    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = "RosenRenderXComponent"};
+    std::string renderNodeName = "RosenRenderXComponent";
+    std::string surfaceNodeName =  renderNodeName + id_;
+    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName};
     return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
 }
 

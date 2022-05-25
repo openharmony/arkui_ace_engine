@@ -27,6 +27,7 @@ class RenderXComponent : public RenderNode {
     DECLARE_ACE_TYPE(RenderXComponent, RenderNode);
 
 public:
+    using XComponentSizeInitEvent = std::function<void(int64_t, int32_t, int32_t)>;
     using XComponentSizeChangeEvent = std::function<void(int64_t, int32_t, int32_t)>;
     static RefPtr<RenderNode> Create();
 
@@ -34,7 +35,7 @@ public:
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
-    void OnPaintFinish() override;
+    void Paint(RenderContext& context, const Offset& offset) override;
 
     void PushTask(const TaskFunction& func);
 
@@ -43,21 +44,30 @@ public:
         delegate_ = delegate;
     }
 
-    enum class State: char {
-        UNINITIALIZED,
-        RESIZING,
-        READY,
-    };
-
     void NativeXComponentInit(
         OH_NativeXComponent* nativeXComponent,
         WeakPtr<NativeXComponentImpl> nativeXComponentImpl);
-
+    void NativeXComponentChange();
     void NativeXComponentDestroy();
 
-    void SetXComponentSizeChange(XComponentSizeChangeEvent &&xcomponentSizeChangeEvent)
+    void SetXComponentSizeInit(XComponentSizeInitEvent&& xcomponentSizeInitEvent)
+    {
+        xcomponentSizeInitEvent_ = std::move(xcomponentSizeInitEvent);
+    }
+
+    void SetXComponentSizeChange(XComponentSizeChangeEvent&& xcomponentSizeChangeEvent)
     {
         xcomponentSizeChangeEvent_ = std::move(xcomponentSizeChangeEvent);
+    }
+
+    void SetXComponentId(const std::string& id)
+    {
+        id_ = id;
+    }
+
+    const std::string& GetXComponentId() const
+    {
+        return id_;
     }
 
     void NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent);
@@ -68,6 +78,7 @@ protected:
     std::list<TaskFunction> tasks_;
     OH_NativeXComponent* nativeXComponent_ = nullptr;
     WeakPtr<NativeXComponentImpl> nativeXComponentImpl_;
+    XComponentSizeInitEvent xcomponentSizeInitEvent_;
     XComponentSizeChangeEvent xcomponentSizeChangeEvent_;
 
     Offset position_;
@@ -75,15 +86,12 @@ protected:
     Offset prePosition_;
     Size preDrawSize_;
     int64_t textureId_ = -1;
+    bool isXComponentInit = false;
+    bool positionChange_ = false;
+    bool sizeChange_ = false;
+    std::string id_;
 
-private:
-    void CreateXComponentPlatformResource();
-    void UpdateXComponentLayout();
-    void CallXComponentLayoutMethod();
     void NativeXComponentOffset(const double& x, const double& y);
-    std::string MakeMethodHash(const std::string& method) const;
-    bool isCreatePlatformResourceSuccess_ = false;
-    State state_ = State::UNINITIALIZED;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_XCOMPONENT_RENDER_XCOMPONENT_H

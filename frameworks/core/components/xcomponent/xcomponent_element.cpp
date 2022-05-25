@@ -27,7 +27,6 @@ const char* SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 } // namespace
 
-std::unordered_map<std::string, uint64_t> XComponentElement::surfaceIdMap_;
 #endif
 
 XComponentElement::~XComponentElement()
@@ -44,12 +43,14 @@ void XComponentElement::SetNewComponent(const RefPtr<Component>& newComponent)
     auto xcomponent = AceType::DynamicCast<XComponentComponent>(newComponent);
     if (xcomponent) {
         idStr_ = xcomponent->GetId();
+        name_ = xcomponent->GetName();
+#ifndef OHOS_STANDARD_SYSTEM
         if (texture_) {
+            isExternalResource_ = true;
             xcomponent->SetTextureId(texture_->GetId());
             xcomponent->SetTexture(texture_);
-            isExternalResource_ = true;
         }
-        name_ = xcomponent->GetName();
+#endif
         Element::SetNewComponent(xcomponent);
     }
 }
@@ -60,28 +61,31 @@ void XComponentElement::Prepare(const WeakPtr<Element>& parent)
     InitEvent();
     RegisterSurfaceDestroyEvent();
     RegisterDispatchTouchEventCallback();
+    RenderElement::Prepare(parent);
     if (xcomponent_) {
         if (!isExternalResource_) {
             CreatePlatformResource();
-#ifdef OHOS_STANDARD_SYSTEM
-            SetMethodCall();
-#endif
         }
+        SetMethodCall();
     }
-    RenderElement::Prepare(parent);
+
     if (renderNode_) {
         auto renderXComponent = AceType::DynamicCast<RenderXComponent>(renderNode_);
         if (renderXComponent) {
+            renderXComponent->SetXComponentSizeInit(
+                [weak = WeakClaim(this)](int64_t textureId, int32_t width, int32_t height) {
+                    auto xcomponentElement = weak.Upgrade();
+                    if (xcomponentElement) {
+                        xcomponentElement->OnXComponentSizeInit(textureId, width, height);
+                    }
+            });
             renderXComponent->SetXComponentSizeChange(
                 [weak = WeakClaim(this)](int64_t textureId, int32_t width, int32_t height) {
                     auto xcomponentElement = weak.Upgrade();
                     if (xcomponentElement) {
-                        xcomponentElement->OnXComponentSize(textureId, width, height);
+                        xcomponentElement->OnXComponentSizeChange(textureId, width, height);
                     }
             });
-#ifdef OHOS_STANDARD_SYSTEM
-            CreateSurface();
-#endif
         }
     }
 }
@@ -128,12 +132,13 @@ void XComponentElement::OnSurfaceDestroyEvent()
         param = std::string("\"destroy\",{").append("}");
     }
     if (!hasSendDestroyEvent_) {
-        if (onXComponentDestroy_) {
-            onXComponentDestroy_(param);
-        }
         auto renderXComponent = AceType::DynamicCast<RenderXComponent>(renderNode_);
         if (renderXComponent) {
             renderXComponent->NativeXComponentDestroy();
+        }
+
+        if (onXComponentDestroy_) {
+            onXComponentDestroy_(param);
         }
         hasSendDestroyEvent_ = true;
     }
@@ -249,6 +254,10 @@ void XComponentElement::SetTouchPoint(const TouchEvent& event)
 void XComponentElement::CreatePlatformResource()
 {
     ReleasePlatformResource();
+#ifdef OHOS_STANDARD_SYSTEM
+    CreateSurface();
+    isExternalResource_ = true;
+#else
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("XComponentElement CreatePlatformResource context = null");
@@ -265,6 +274,7 @@ void XComponentElement::CreatePlatformResource()
             }
         });
     };
+
     texture_ = AceType::MakeRefPtr<NativeTexture>(context_, errorCallback);
     texture_->Create(
         [weak = WeakClaim(this), errorCallback](int64_t id) mutable {
@@ -282,16 +292,15 @@ void XComponentElement::CreatePlatformResource()
             }
         },
         idStr_);
+#endif
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
 void XComponentElement::CreateSurface()
 {
-    if (renderNode_) {
-        auto rosenTexture = AceType::DynamicCast<RosenRenderXComponent>(renderNode_);
-        if (rosenTexture) {
-            producerSurface_ = rosenTexture->GetSurface();
-        }
+    auto rosenTexture = AceType::DynamicCast<RosenRenderXComponent>(renderNode_);
+    if (rosenTexture) {
+        producerSurface_ = rosenTexture->GetSurface();
     }
 
     if (producerSurface_ == nullptr) {
@@ -309,8 +318,6 @@ void XComponentElement::CreateSurface()
     producerSurface_->SetUserData("SURFACE_STRIDE_ALIGNMENT", SURFACE_STRIDE_ALIGNMENT);
     producerSurface_->SetUserData("SURFACE_FORMAT", std::to_string(PIXEL_FMT_RGBA_8888));
 
-    XComponentElement::surfaceIdMap_.emplace(xcomponent_->GetId(), producerSurface_->GetUniqueId());
-
     if (!xcomponentController_) {
         auto controller = xcomponent_->GetXComponentController();
         if (!controller) {
@@ -321,6 +328,14 @@ void XComponentElement::CreateSurface()
     }
     xcomponentController_->surfaceId_ = producerSurface_->GetUniqueId();
 }
+#else
+void XComponentElement::OnTextureRefresh()
+{
+    if (renderNode_) {
+        renderNode_->MarkNeedRender();
+    }
+}
+#endif
 
 void XComponentElement::SetMethodCall()
 {
@@ -356,10 +371,20 @@ void XComponentElement::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHei
         producerSurface_->SetUserData("SURFACE_HEIGHT", std::to_string(surfaceHeight));
     }
 }
-#endif
+
 
 void XComponentElement::ReleasePlatformResource()
 {
+#ifdef OHOS_STANDARD_SYSTEM
+    if (producerSurface_) {
+        auto surfaceUtils = SurfaceUtils::GetInstance();
+        auto ret = surfaceUtils->Remove(producerSurface_->GetUniqueId());
+        if (ret != SurfaceError::SURFACE_ERROR_OK) {
+            LOGE("xcomponent remove surface error: %{public}d", ret);
+        }
+    }
+    isExternalResource_ = false;
+#else
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("XComponentElement ReleasePlatformResource context null");
@@ -375,21 +400,18 @@ void XComponentElement::ReleasePlatformResource()
                 texture_->Release();
             }
             texture_.Reset();
+            isExternalResource_ = false;
         }
     }
 
-#ifdef OHOS_STANDARD_SYSTEM
-    if (producerSurface_) {
-        auto surfaceUtils = SurfaceUtils::GetInstance();
-        auto ret = surfaceUtils->Remove(producerSurface_->GetUniqueId());
-        if (ret != SurfaceError::SURFACE_ERROR_OK) {
-            LOGE("xcomponent remove surface error: %{public}d", ret);
-        }
+    if (xcomponent_) {
+        xcomponent_->SetTextureId(X_INVALID_ID);
+        xcomponent_->SetTexture(nullptr);
     }
 #endif
 }
 
-void XComponentElement::OnXComponentSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
+void XComponentElement::OnXComponentSizeInit(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto context = context_.Upgrade();
@@ -399,48 +421,78 @@ void XComponentElement::OnXComponentSize(int64_t textureId, int32_t textureWidth
     }
 
     if (producerSurface_ != nullptr) {
-        if (renderNode_ != nullptr) {
-            float viewScale = context->GetViewScale();
-            auto nativeWindow = CreateNativeWindowFromSurface(&producerSurface_);
-            if (nativeWindow) {
-                NativeWindowHandleOpt(nativeWindow, SET_BUFFER_GEOMETRY,
-                                      (int)(textureWidth * viewScale), (int)(textureHeight * viewScale));
-                xcomponent_->SetNativeWindow(nativeWindow);
-            } else {
-                LOGE("can not create NativeWindow frome surface");
-            }
+        float viewScale = context->GetViewScale();
+        nativeWindow_ = CreateNativeWindowFromSurface(&producerSurface_);
+        if (nativeWindow_) {
+            NativeWindowHandleOpt(nativeWindow_, SET_BUFFER_GEOMETRY,
+                                  static_cast<int32_t>(textureWidth * viewScale),
+                                  static_cast<int32_t>(textureHeight * viewScale));
+            xcomponent_->SetNativeWindow(nativeWindow_);
+        } else {
+            LOGE("can not create NativeWindow");
         }
     }
-    if (!onLoadDone_) {
-        onLoadDone_ = true;
-        auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
-                                                             TaskExecutor::TaskType::PLATFORM);
 
-        platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
-            auto xcomponentElement = weak.Upgrade();
-            if (xcomponentElement) {
-                xcomponentElement->OnTextureSize(X_INVALID_ID, "");
+    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
+                                                         TaskExecutor::TaskType::PLATFORM);
+    platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
+        auto xcomponentElement = weak.Upgrade();
+        if (xcomponentElement) {
+            if (xcomponentElement->xcomponent_) {
+                xcomponentElement->OnSurfaceInit(
+                    xcomponentElement->xcomponent_->GetId(),
+                    xcomponentElement->xcomponent_->GetNodeId());
+                xcomponentElement->OnXComponentInit("");
             }
-        });
-    }
+        }
+    });
 #else
     if (texture_) {
-        texture_->OnSize(textureId, textureWidth, textureHeight,
-                         [weak = WeakClaim(this), textureId](std::string& result) {
-                            auto xcomponentElement = weak.Upgrade();
-                            if (xcomponentElement) {
-                                xcomponentElement->OnTextureSize(textureId, result);
-                            }
+        texture_->SetSize(textureId, textureWidth, textureHeight,
+                          [weak = WeakClaim(this), textureId](std::string& result) {
+                                auto xcomponentElement = weak.Upgrade();
+                                if (xcomponentElement) {
+                                    if (xcomponentElement->xcomponent_) {
+                                        xcomponentElement->OnSurfaceInit(
+                                            xcomponentElement->xcomponent_->GetId(),
+                                            xcomponentElement->xcomponent_->GetNodeId());
+                                        xcomponentElement->OnXComponentInit("");
+                                    }
+                                }
         });
     }
 #endif
 }
 
-void XComponentElement::OnTextureSize(int64_t textureId, const std::string& result)
+void XComponentElement::OnXComponentSizeChange(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
 {
-    if (xcomponent_) {
-        OnSurfaceInit(xcomponent_->GetId(), xcomponent_->GetNodeId());
-        OnXComponentInit("");
+    auto renderNode = AceType::DynamicCast<RenderXComponent>(renderNode_);
+    if (renderNode != nullptr) {
+#ifdef OHOS_STANDARD_SYSTEM
+        auto context = context_.Upgrade();
+        if (context == nullptr) {
+            LOGE("context is nullptr");
+            return;
+        }
+        float viewScale = context->GetViewScale();
+        if (nativeWindow_) {
+            NativeWindowHandleOpt(nativeWindow_, SET_BUFFER_GEOMETRY,
+                                  static_cast<int32_t>(textureWidth * viewScale),
+                                  static_cast<int32_t>(textureHeight * viewScale));
+            renderNode->NativeXComponentChange();
+        } else {
+            LOGE("change nativewindow size failed, nativewindow NULL");
+        }
+#else
+        if (texture_) {
+            texture_->SetSize(textureId, textureWidth, textureHeight,
+                              [renderNode, textureId](std::string& result) {
+                                if (renderNode) {
+                                    renderNode->NativeXComponentChange();
+                                }
+            });
+        }
+#endif
     }
 }
 

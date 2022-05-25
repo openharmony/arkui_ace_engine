@@ -46,7 +46,6 @@ private:
     void DrawBackground();
     void PerformLayout() override;
 
-    bool hasSetDefaultSize_ = false;
 };
 } // namespace OHOS::Ace
 
