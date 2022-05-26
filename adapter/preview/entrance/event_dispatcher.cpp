@@ -189,7 +189,6 @@ void EventDispatcher::Initialize()
 
 void EventDispatcher::DispatchIdleEvent(int64_t deadline)
 {
-    LOGI("Dispatch idle event");
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     if (!container) {
         LOGE("container is null");
@@ -295,14 +294,7 @@ bool EventDispatcher::DispatchKeyEvent(const KeyEvent& event)
         return false;
     }
 
-    bool isHandled;
-    container->GetTaskExecutor()->PostTask(
-        [aceView, event, &isHandled]() {
-            isHandled = aceView->HandleKeyEvent(event);
-        },
-        TaskExecutor::TaskType::UI);
-
-    return isHandled;
+    return aceView->HandleKeyEvent(event);
 }
 
 void EventDispatcher::RegisterCallbackGetCapsLockStatus(CallbackGetKeyboardStatus callback)
