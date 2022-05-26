@@ -15,6 +15,7 @@
 
 #include "core/components/web/render_web.h"
 
+#include <cinttypes>
 #include <iomanip>
 #include <sstream>
 
@@ -58,6 +59,9 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         LOGE("WebComponent is null");
         return;
     }
+
+    onMouse_ = web->GetOnMouseEventCallback();
+
     web_ = web;
     if (delegate_) {
         delegate_->UpdateJavaScriptEnabled(web->GetJsEnabled());
@@ -80,6 +84,33 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         }
     }
     MarkNeedLayout();
+}
+
+bool RenderWeb::HandleMouseEvent(const MouseEvent& event)
+{
+    if (!onMouse_) {
+        LOGW("RenderWeb::HandleMouseEvent, Mouse Event is null");
+        return false;
+    }
+
+    MouseInfo info;
+    info.SetButton(event.button);
+    info.SetAction(event.action);
+    info.SetGlobalLocation(event.GetOffset());
+    info.SetLocalLocation(event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY()));
+    info.SetScreenLocation(event.GetScreenOffset());
+    info.SetTimeStamp(event.time);
+    info.SetDeviceId(event.deviceId);
+    info.SetSourceDevice(event.sourceType);
+    LOGD("RenderWeb::HandleMouseEvent: Do mouse callback with mouse event{ Global(%{public}f,%{public}f), "
+         "Local(%{public}f,%{public}f)}, Button(%{public}d), Action(%{public}d), Time(%{public}lld), "
+         "DeviceId(%{public}" PRId64 ", SourceType(%{public}d) }. Return: %{public}d",
+        info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetLocalLocation().GetX(),
+        info.GetLocalLocation().GetY(), info.GetButton(), info.GetAction(),
+        info.GetTimeStamp().time_since_epoch().count(), info.GetDeviceId(), info.GetSourceDevice(),
+        info.IsStopPropagation());
+    onMouse_(info);
+    return info.IsStopPropagation();
 }
 
 void RenderWeb::PerformLayout()

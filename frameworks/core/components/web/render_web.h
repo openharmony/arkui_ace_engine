@@ -46,6 +46,7 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     void OnAttachContext() override;
+    bool HandleMouseEvent(const MouseEvent& event) override;
 
 #ifdef OHOS_STANDARD_SYSTEM
     void OnAppShow() override
@@ -92,6 +93,7 @@ private:
     void OnTouchTestHit(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& result) override;
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
+    OnMouseCallback onMouse_;
 #endif
 
     Offset position_;

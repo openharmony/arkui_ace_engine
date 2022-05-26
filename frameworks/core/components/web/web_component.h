@@ -31,6 +31,7 @@
 namespace OHOS::Ace {
 
 class WebDelegate;
+using OnMouseCallback = std::function<void(MouseInfo& info)>;
 
 enum MixedModeContent {
     MIXED_CONTENT_ALWAYS_ALLOW = 0,
@@ -962,6 +963,16 @@ public:
         onUrlLoadInterceptImpl_ = onUrlLoadInterceptImpl;
     }
 
+    void SetOnMouseEventCallback(const OnMouseCallback& onMouseId)
+    {
+        onMouseEvent_ = onMouseId;
+    }
+
+    OnMouseCallback GetOnMouseEventCallback() const
+    {
+        return onMouseEvent_;
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -994,6 +1005,7 @@ private:
     int32_t textZoomAtioNum_ = default_text_zoom_atio;
     WebCacheMode cacheMode_ = WebCacheMode::DEFAULT;
     bool isWebDebuggingAccessEnabled_ = false;
+    OnMouseCallback onMouseEvent_;
 };
 
 } // namespace OHOS::Ace

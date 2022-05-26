@@ -63,6 +63,7 @@ public:
     static void DatabaseAccess(bool isDatabaseAccessEnabled);
     static void TextZoomAtio(int32_t textZoomAtioNum);
     static void WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled);
+    static void OnMouse(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
