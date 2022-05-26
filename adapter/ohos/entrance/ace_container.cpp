@@ -650,6 +650,8 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     }
     HdcRegister::Get().StopHdcRegister(instanceId);
     container->Destroy();
+    // unregister watchdog before stop thread to avoid UI_BLOCK report
+    AceEngine::Get().UnRegisterFromWatchDog(instanceId);
     auto taskExecutor = container->GetTaskExecutor();
     if (taskExecutor) {
         taskExecutor->PostSyncTask([] { LOGI("Wait UI thread..."); }, TaskExecutor::TaskType::UI);

@@ -373,6 +373,8 @@ void AceContainer::DestroyContainer(int32_t instanceId)
         return;
     }
     container->Destroy();
+    // unregister watchdog before stop thread to avoid UI_BLOCK report
+    AceEngine::Get().UnRegisterFromWatchDog(instanceId);
     auto taskExecutor = container->GetTaskExecutor();
     if (taskExecutor) {
         taskExecutor->PostSyncTask([] { LOGI("Wait UI thread..."); }, TaskExecutor::TaskType::UI);
@@ -823,5 +825,4 @@ void AceContainer::LoadDocument(const std::string& url, const std::string& compo
         },
         TaskExecutor::TaskType::JS);
 }
-
 } // namespace OHOS::Ace::Platform
