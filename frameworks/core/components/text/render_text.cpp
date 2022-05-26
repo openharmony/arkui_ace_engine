@@ -785,6 +785,11 @@ RefPtr<Component> RenderText::GetComponent()
     return text_;
 }
 
+std::string RenderText::GetSelectedContent() const
+{
+    return textValue_.GetSelectedText();
+}
+
 void RenderText::Dump()
 {
     DumpLog::GetInstance().AddDesc(std::string("FontColor: ").append(textStyle_.GetTextColor().ColorToString()));

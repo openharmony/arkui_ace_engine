@@ -161,7 +161,7 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     eventManager_ = AceType::MakeRefPtr<EventManager>();
     UpdateFontWeightScale();
     eventManager_->SetInstanceId(instanceId);
-    textOverlayManager_ = AceType::MakeRefPtr<TextOverlayManager>();
+    textOverlayManager_ = AceType::MakeRefPtr<TextOverlayManager>(WeakClaim(this));
 }
 
 PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
@@ -187,7 +187,7 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     fontManager_ = FontManager::Create();
     renderFactory_ = AceType::MakeRefPtr<FlutterRenderFactory>();
     UpdateFontWeightScale();
-    textOverlayManager_ = AceType::MakeRefPtr<TextOverlayManager>();
+    textOverlayManager_ = AceType::MakeRefPtr<TextOverlayManager>(WeakClaim(this));
 }
 
 PipelineContext::~PipelineContext()
@@ -1649,6 +1649,10 @@ void PipelineContext::SetShortcutKey(const KeyEvent& event)
             MarkIsKeyboardA(true);
             if (subscribeCtrlA_) {
                 subscribeCtrlA_();
+            }
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_C)) {
+            if (textOverlayManager_) {
+                textOverlayManager_->HandleCtrlC();
             }
         }
     } else if (event.action == KeyAction::UP) {

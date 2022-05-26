@@ -424,6 +424,13 @@ RefPtr<TextOverlayManager> TextOverlayBase::GetTextOverlayManager(const WeakPtr<
     return context->GetTextOverlayManager();
 }
 
+TextOverlayManager::TextOverlayManager(const WeakPtr<PipelineContext>& context)
+{
+    context_ = context;
+}
+
+TextOverlayManager::~TextOverlayManager() = default;
+
 const RefPtr<RenderNode> TextOverlayManager::GetTargetNode() const
 {
     auto textOverlayBase = textOverlayBase_.Upgrade();
@@ -468,6 +475,26 @@ void TextOverlayManager::PushTextOverlayToStack(const RefPtr<TextOverlayComponen
 
     lastStack->PushComponent(textOverlay, false);
     stackElement_ = WeakClaim(RawPtr(lastStack));
+}
+
+void TextOverlayManager::HandleCtrlC() const
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("get context fail");
+        return;
+    }
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
+    if (!clipboard) {
+        LOGE("get clipboard fail");
+        return;
+    }
+    auto textOverlayBase = textOverlayBase_.Upgrade();
+    if (!textOverlayBase) {
+        LOGE("get textOverlayBase fail");
+        return;
+    }
+    clipboard->SetData(textOverlayBase->GetSelectedContent());
 }
 
 } // namespace OHOS::Ace
