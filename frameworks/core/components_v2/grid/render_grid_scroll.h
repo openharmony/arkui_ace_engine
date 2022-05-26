@@ -117,7 +117,7 @@ public:
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve);
     Offset CurrentOffset();
     void ScrollToEdge(ScrollEdgeType edgeType, bool smooth);
-
+    void ScrollPage(bool reverse, bool smooth);
     Axis GetAxis() const
     {
         return useScrollable_ == SCROLLABLE::VERTICAL ? Axis::VERTICAL : Axis::HORIZONTAL;
