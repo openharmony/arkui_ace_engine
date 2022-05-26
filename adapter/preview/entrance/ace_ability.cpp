@@ -343,11 +343,6 @@ void AceAbility::SurfaceChanged(
         LOGE("container is null, SurfaceChanged failed.");
         return;
     }
-    auto resConfig = container->GetResourceConfiguration();
-    resConfig.SetOrientation(SystemProperties::GetDevcieOrientation());
-    resConfig.SetDensity(SystemProperties::GetResolution());
-    resConfig.SetDeviceType(SystemProperties::GetDeviceType());
-    container->SetResourceConfiguration(resConfig);
 
     auto viewPtr = container->GetAceView();
     if (viewPtr == nullptr) {
@@ -367,6 +362,10 @@ void AceAbility::SurfaceChanged(
         TaskExecutor::TaskType::PLATFORM);
     SystemProperties::InitDeviceInfo(
         width, height, orientation == DeviceOrientation::PORTRAIT ? 0 : 1, resolution, runArgs_.isRound);
+    DeviceConfig deviceConfig = runArgs_.deviceConfig;
+    deviceConfig.orientation = orientation;
+    deviceConfig.density = resolution;
+    container->UpdateDeviceConfig(deviceConfig);
     viewPtr->NotifyDensityChanged(resolution);
     viewPtr->NotifySurfaceChanged(width, height);
     if ((orientation != runArgs_.deviceConfig.orientation && configChanges_.watchOrientation) ||
