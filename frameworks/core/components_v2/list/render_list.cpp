@@ -24,6 +24,7 @@
 #include "core/components/scroll/scroll_spring_effect.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components_v2/list/list_component.h"
+#include "core/components_v2/list/list_scroll_bar_controller.h"
 #include "core/event/axis_event.h"
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/pan_recognizer.h"
@@ -100,6 +101,7 @@ void RenderList::Update(const RefPtr<Component>& component)
 {
     component_ = AceType::DynamicCast<ListComponent>(component);
     ACE_DCHECK(component_);
+    InitScrollBar();
 
     RemoveAllItems();
 
@@ -267,6 +269,68 @@ bool RenderList::IsReachStart()
     return scrollUpToReachStart || scrollDownToReachStart;
 }
 
+void RenderList::InitScrollBar()
+{
+    if (scrollBar_) {
+        scrollBar_->Reset();
+        return;
+    }
+    if (!component_) {
+        return;
+    }
+    const RefPtr<ScrollBarTheme> theme = GetTheme<ScrollBarTheme>();
+    if (!theme) {
+        return;
+    }
+
+    scrollBar_ = AceType::MakeRefPtr<ScrollBar>(component_->GetScrollBar(), theme->GetShapeMode());
+    RefPtr<ListScrollBarController> controller = AceType::MakeRefPtr<ListScrollBarController>();
+    scrollBar_->SetScrollBarController(controller);
+
+    // set the scroll bar style
+    scrollBar_->SetReservedHeight(theme->GetReservedHeight());
+    scrollBar_->SetMinHeight(theme->GetMinHeight());
+    scrollBar_->SetMinDynamicHeight(theme->GetMinDynamicHeight());
+    scrollBar_->SetForegroundColor(theme->GetForegroundColor());
+    scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
+    scrollBar_->SetPadding(theme->GetPadding());
+    scrollBar_->SetScrollable(true);
+    scrollBar_->SetInactiveWidth(theme->GetNormalWidth());
+    scrollBar_->SetNormalWidth(theme->GetNormalWidth());
+    scrollBar_->SetActiveWidth(theme->GetActiveWidth());
+    scrollBar_->SetTouchWidth(theme->GetTouchWidth());
+    scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
+    SetScrollBarCallback();
+}
+
+void RenderList::SetScrollBarCallback()
+{
+    if (!scrollBar_ || !scrollBar_->NeedScrollBar()) {
+        return;
+    }
+    auto&& scrollCallback = [weakList = AceType::WeakClaim(this)](double value, int32_t source) {
+        auto list = weakList.Upgrade();
+        if (!list) {
+            LOGE("render list is released");
+            return false;
+        }
+        return list->UpdateScrollPosition(value, source);
+    };
+    auto&& barEndCallback = [weakList = AceType::WeakClaim(this)](int32_t value) {
+        auto list = weakList.Upgrade();
+        if (!list) {
+            LOGE("render list is released.");
+            return;
+        }
+        list->scrollBarOpacity_ = value;
+        list->MarkNeedRender();
+    };
+    auto&& scrollEndCallback = []() {
+        // nothing to do
+    };
+    scrollBar_->SetCallBack(scrollCallback, barEndCallback, scrollEndCallback);
+}
+
 void RenderList::PerformLayout()
 {
     UpdateAccessibilityAttr();
@@ -279,7 +343,6 @@ void RenderList::PerformLayout()
 
     const auto innerLayout = MakeInnerLayout();
     double curMainPos = LayoutOrRecycleCurrentItems(innerLayout, mainSize);
-
     // Try to request new items at end if needed
     for (size_t newIndex = startIndex_ + items_.size();; ++newIndex) {
         if (cachedCount_ != 0) {
@@ -580,6 +643,10 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
         return true;
     }
 
+    if (scrollBar_ && scrollBar_->NeedScrollBar()) {
+        scrollBar_->SetActive(SCROLL_FROM_CHILD != source);
+    }
+
     if (reachStart_ && reachEnd_) {
         return false;
     }
@@ -642,8 +709,12 @@ void RenderList::OnTouchTestHit(
     if (!scrollable_ || !scrollable_->Available()) {
         return;
     }
-
-    scrollable_->SetCoordinateOffset(coordinateOffset);
+    if (scrollBar_ && scrollBar_->InBarRegion(globalPoint_ - coordinateOffset)) {
+        scrollBar_->AddScrollBarController(coordinateOffset, result);
+    } else {
+        scrollable_->SetCoordinateOffset(coordinateOffset);
+    }
+    result.emplace_back(scrollable_);
 }
 
 double RenderList::ApplyLayoutParam()
@@ -728,8 +799,8 @@ double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, d
         for (auto it = items_.begin(); it != items_.end(); ++curIndex) {
             if (startCachedCount_ > cachedCount_) {
                 const auto& child = *(it);
-                double mainSize = GetMainSize(child->GetLayoutSize());
-                curMainPosForRecycle += mainSize + spaceWidth_;
+                double childSize = GetMainSize(child->GetLayoutSize());
+                curMainPosForRecycle += childSize + spaceWidth_;
                 currentOffset_ = curMainPosForRecycle;
                 startIndex_ = curIndex + 1;
 
@@ -748,8 +819,8 @@ double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, d
             const auto& child = *(it);
             if (LessOrEqual(curMainPos, endMainPos_)) {
                 child->Layout(layoutParam);
-                double mainSize = GetMainSize(child->GetLayoutSize());
-                curMainPos += mainSize + spaceWidth_;
+                double childSize = GetMainSize(child->GetLayoutSize());
+                curMainPos += childSize + spaceWidth_;
                 if (GreatOrEqual(curMainPos, startMainPos_)) {
                     ++it;
                     continue;
@@ -1063,6 +1134,22 @@ void RenderList::CalculateMainScrollExtent(double curMainPos, double mainSize)
     // disable scroll when content length less than mainSize
     if (scrollable_) {
         scrollable_->MarkAvailable(GreatOrEqual(mainScrollExtent_, mainSize));
+    }
+    if (GetChildren().empty()) {
+        return;
+    }
+    Size itemSize; // Calculate all children layout size.
+    for (const auto& child : GetChildren()) {
+        itemSize += child->GetLayoutSize();
+    }
+    auto averageItemHeight = GetMainSize(itemSize) / GetChildren().size() + spaceWidth_;
+    estimatedHeight_ = averageItemHeight * TotalCount();
+    lastOffset_ = startIndex_ * averageItemHeight - currentOffset_;
+    if (estimatedHeight_ <= GetMainSize(GetLayoutSize()) && scrollBar_) {
+        LOGD("SetScrollable false, do not show scroll bar.");
+        scrollBar_->SetScrollable(false);
+    } else {
+        scrollBar_->SetScrollable(true);
     }
 }
 

@@ -16,6 +16,7 @@
 #include "core/components_v2/list/flutter_render_list.h"
 
 #include "base/utils/utils.h"
+#include "core/components/common/painter/flutter_scroll_bar_painter.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 
 namespace OHOS::Ace::V2 {
@@ -113,6 +114,34 @@ void FlutterRenderList::Paint(RenderContext& context, const Offset& offset)
     // Notify scroll bar to update.
     if (scrollBarProxy_) {
         scrollBarProxy_->NotifyScrollBar(AceType::WeakClaim(this));
+    }
+
+    // paint scrollBar
+    if (scrollBar_ && scrollBar_->NeedPaint()) {
+        bool needPaint = false;
+        if (scrollBar_->GetFirstLoad() || scrollBar_->IsActive() || scrollBar_->GetDisplayMode() == DisplayMode::ON) {
+            scrollBarOpacity_ = UINT8_MAX;
+            needPaint = true;
+        } else {
+            if (scrollBarOpacity_ != 0) {
+                needPaint = true;
+            }
+        }
+        if (needPaint) {
+            scrollBar_->UpdateScrollBarRegion(offset, GetLayoutSize(), GetLastOffset(), GetEstimatedHeight());
+            RefPtr<FlutterScrollBarPainter> scrollBarPainter = AceType::MakeRefPtr<FlutterScrollBarPainter>();
+            const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+            flutter::Canvas* canvas = renderContext->GetCanvas();
+            if (!canvas) {
+                return;
+            }
+            scrollBarPainter->PaintBar(
+                canvas, offset, GetPaintRect(), scrollBar_, GetGlobalOffset(), scrollBarOpacity_);
+            if (scrollBar_->GetFirstLoad()) {
+                scrollBar_->SetFirstLoad(false);
+                scrollBar_->HandleScrollBarEnd();
+            }
+        }
     }
 }
 
