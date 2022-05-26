@@ -22,9 +22,9 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -1374,7 +1374,7 @@ void JSWeb::WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled)
 void JSWeb::OnMouse(const JSCallbackInfo& args)
 {
     LOGI("JSWeb OnMouse");
-    if (!args[0]->IsFunction()) {
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
         LOGE("Param is invalid, it is not a function");
         return;
     }

@@ -15,9 +15,9 @@
 
 #include "core/components/web/render_web.h"
 
+#include <cinttypes>
 #include <iomanip>
 #include <sstream>
-#include <cinttypes>
 
 #include "base/log/log.h"
 #include "core/common/manager_interface.h"
