@@ -1388,6 +1388,6 @@ void JSWeb::OnMouse(const JSCallbackInfo& args)
     };
 
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    webComponent->SetOnMouseId(onMouseId);
+    webComponent->SetOnMouseEventCallback(onMouseId);
 }
 } // namespace OHOS::Ace::Framework

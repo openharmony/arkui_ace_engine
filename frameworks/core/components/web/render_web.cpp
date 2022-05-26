@@ -60,7 +60,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         return;
     }
 
-    onMouse_ = web->GetOnMouseId();
+    onMouse_ = web->GetOnMouseEventCallback();
 
     web_ = web;
     if (delegate_) {
@@ -89,7 +89,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
 bool RenderWeb::HandleMouseEvent(const MouseEvent& event)
 {
     if (!onMouse_) {
-        LOGI("RenderWeb::HandleMouseEvent, Mouse Event is null");
+        LOGW("RenderWeb::HandleMouseEvent, Mouse Event is null");
         return false;
     }
 
@@ -102,7 +102,7 @@ bool RenderWeb::HandleMouseEvent(const MouseEvent& event)
     info.SetTimeStamp(event.time);
     info.SetDeviceId(event.deviceId);
     info.SetSourceDevice(event.sourceType);
-    LOGI("RenderWeb::HandleMouseEvent: Do mouse callback with mouse event{ Global(%{public}f,%{public}f), "
+    LOGD("RenderWeb::HandleMouseEvent: Do mouse callback with mouse event{ Global(%{public}f,%{public}f), "
          "Local(%{public}f,%{public}f)}, Button(%{public}d), Action(%{public}d), Time(%{public}lld), "
          "DeviceId(%{public}" PRId64 ", SourceType(%{public}d) }. Return: %{public}d",
         info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetLocalLocation().GetX(),

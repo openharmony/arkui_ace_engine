@@ -963,14 +963,14 @@ public:
         onUrlLoadInterceptImpl_ = onUrlLoadInterceptImpl;
     }
 
-    void SetOnMouseId(const OnMouseCallback& onMouseId)
+    void SetOnMouseEventCallback(const OnMouseCallback& onMouseId)
     {
-        onMouseId_ = onMouseId;
+        onMouseEvent_ = onMouseId;
     }
 
-    OnMouseCallback GetOnMouseId() const
+    OnMouseCallback GetOnMouseEventCallback() const
     {
-        return onMouseId_;
+        return onMouseEvent_;
     }
 
 private:
@@ -1005,7 +1005,7 @@ private:
     int32_t textZoomAtioNum_ = default_text_zoom_atio;
     WebCacheMode cacheMode_ = WebCacheMode::DEFAULT;
     bool isWebDebuggingAccessEnabled_ = false;
-    OnMouseCallback onMouseId_;
+    OnMouseCallback onMouseEvent_;
 };
 
 } // namespace OHOS::Ace
