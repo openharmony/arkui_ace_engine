@@ -337,8 +337,9 @@ bool ThreadWatcher::IsThreadStuck()
             if (AceEngine::Get().GetContainer(instanceId_) != nullptr) {
                 abilityName = AceEngine::Get().GetContainer(instanceId_)->GetHostClassName();
             }
-            LOGE("thread stuck, ability: %{public}s, instanceId: %{public}d, thread: %{public}s", abilityName.c_str(),
-                instanceId_, threadName_.c_str());
+            LOGE("thread stuck, ability: %{public}s, instanceId: %{public}d, thread: %{public}s, looptime: %{public}d, "
+                 "checktime: %{public}d",
+                abilityName.c_str(), instanceId_, threadName_.c_str(), loopTime_, threadTag_);
             res = true;
         }
     }
@@ -408,6 +409,8 @@ void ThreadWatcher::TagIncrease()
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
     ++threadTag_;
+    LOGD("thread check, instanceId: %{public}d, thread: %{public}s, looptime: %{public}d, "
+         "checktime: %{public}d", instanceId_, threadName_.c_str(), loopTime_, threadTag_);
 }
 
 WatchDog::WatchDog()
