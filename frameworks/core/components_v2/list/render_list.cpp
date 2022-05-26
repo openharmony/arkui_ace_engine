@@ -616,7 +616,11 @@ bool RenderList::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     if (GetVisible() && fixedMainSize_ && scrollable_ && scrollable_->Available()) {
         result.emplace_back(scrollable_);
     }
-
+    // when click point is in sticky item, consume the touch event to avoid clicking on the list item underneath.
+    if (currentStickyItem_ && currentStickyItem_->GetPaintRect().IsInRegion(parentLocalPoint)) {
+        currentStickyItem_->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+        return true;
+    }
     return RenderNode::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
 }
 
