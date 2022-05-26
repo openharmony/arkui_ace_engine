@@ -24,6 +24,7 @@
 #include "core/components/web/web_event.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -581,7 +582,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("webDebuggingAccess", &JSWeb::WebDebuggingAccessEnabled);
     JSClass<JSWeb>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSWeb>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSWeb>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSWeb>::StaticMethod("onMouse", &JSWeb::OnMouse);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -1368,5 +1369,25 @@ void JSWeb::WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled)
         return;
     }
     webComponent->SetWebDebuggingAccessEnabled(isWebDebuggingAccessEnabled);
+}
+
+void JSWeb::OnMouse(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnMouse");
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+
+    RefPtr<JsClickFunction> jsOnMouseFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args[0]));
+    auto onMouseId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnMouseFunc)](
+                            MouseInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onMouse");
+        func->Execute(info);
+    };
+
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnMouseId(onMouseId);
 }
 } // namespace OHOS::Ace::Framework
