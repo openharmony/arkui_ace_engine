@@ -60,7 +60,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         return;
     }
 
-    onMouse_ web->GetOnMouseId();
+    onMouse_ = web->GetOnMouseId();
 
     web_ = web;
     if (delegate_) {
