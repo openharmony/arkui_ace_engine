@@ -116,6 +116,8 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
     { "backgroundImageSize", [](const InspectorNode& inspector) { return inspector.GetBackgroundImageSize(); } },
     { "backgroundImagePosition",
         [](const InspectorNode& inspector) { return inspector.GetBackgroundImagePosition(); } },
+    { "padding", [](const InspectorNode& inspector) { return inspector.GetPadding(); } },
+    { "margin", [](const InspectorNode& inspector) { return inspector.GetAllMargin(); } },
 };
 
 const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP {
@@ -145,8 +147,6 @@ const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_
     { "position", [](const InspectorNode& inspector) { return inspector.GetPosition(); } },
 
     { "offset", [](const InspectorNode& inspector) { return inspector.GetOffset(); } },
-    { "padding", [](const InspectorNode& inspector) { return inspector.GetPadding(); } },
-    { "margin", [](const InspectorNode& inspector) { return inspector.GetAllMargin(); } },
     { "size", [](const InspectorNode& inspector) { return inspector.GetSize(); } },
     { "useSizeType", [](const InspectorNode& inspector) { return inspector.GetUseSizeType(); } },
     { "rotate", [](const InspectorNode& inspector) { return inspector.GetRotate(); } },
@@ -438,48 +438,48 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetSize() const
     return jsonValue;
 }
 
-std::unique_ptr<JsonValue> InspectorComposedElement::GetPadding() const
+std::string InspectorComposedElement::GetPadding() const
 {
     auto render = GetRenderBox();
-    auto jsonValue = JsonUtil::Create(true);
     if (render) {
         auto top = render->GetPadding(DimensionHelper(&Edge::SetTop, &Edge::Top));
         auto right = render->GetPadding(DimensionHelper(&Edge::SetRight, &Edge::Right));
         auto bottom = render->GetPadding(DimensionHelper(&Edge::SetBottom, &Edge::Bottom));
         auto left = render->GetPadding(DimensionHelper(&Edge::SetLeft, &Edge::Left));
         if (top == right && right == bottom && bottom == left) {
-            jsonValue->Put("padding", top.ToString().c_str());
+            return top.ToString();
         } else {
+            auto jsonValue = JsonUtil::Create(true);
             jsonValue->Put("top", top.ToString().c_str());
             jsonValue->Put("right", right.ToString().c_str());
             jsonValue->Put("bottom", bottom.ToString().c_str());
             jsonValue->Put("left", left.ToString().c_str());
+            return jsonValue->ToString();
         }
-        return jsonValue;
     }
-    return jsonValue;
+    return "0.0";
 }
 
-std::unique_ptr<JsonValue> InspectorComposedElement::GetAllMargin() const
+std::string InspectorComposedElement::GetAllMargin() const
 {
     auto render = GetRenderBox();
-    auto jsonValue = JsonUtil::Create(true);
     if (render) {
         auto top = render->GetMargin(DimensionHelper(&Edge::SetTop, &Edge::Top));
         auto right = render->GetMargin(DimensionHelper(&Edge::SetRight, &Edge::Right));
         auto bottom = render->GetMargin(DimensionHelper(&Edge::SetBottom, &Edge::Bottom));
         auto left = render->GetMargin(DimensionHelper(&Edge::SetLeft, &Edge::Left));
         if (top == right && right == bottom && bottom == left) {
-            jsonValue->Put("margin", top.ToString().c_str());
+            return top.ToString().c_str();
         } else {
+            auto jsonValue = JsonUtil::Create(true);
             jsonValue->Put("top", top.ToString().c_str());
             jsonValue->Put("right", right.ToString().c_str());
             jsonValue->Put("bottom", bottom.ToString().c_str());
             jsonValue->Put("left", left.ToString().c_str());
+            return jsonValue->ToString();
         }
-        return jsonValue;
     }
-    return jsonValue;
+    return "0.0";
 }
 
 Dimension InspectorComposedElement::GetMargin(OHOS::Ace::AnimatableType type) const
@@ -829,29 +829,23 @@ std::string InspectorComposedElement::GetBackgroundColor() const
 
 std::string InspectorComposedElement::GetBackgroundImageSize() const
 {
-    auto jsonValue = JsonUtil::Create(true);
     auto backDecoration = GetBackDecoration();
     if (!backDecoration) {
-        jsonValue->Put("width", "ImageSize.Auto");
-        return jsonValue->ToString();
+        return "ImageSize.Auto";
     }
     auto image = backDecoration->GetImage();
     if (!image) {
-        jsonValue->Put("width", "ImageSize.Auto");
-        return jsonValue->ToString();
+        return "ImageSize.Auto";
     }
     auto widthType = image->GetImageSize().GetSizeTypeX();
     if (widthType == BackgroundImageSizeType::CONTAIN) {
-        jsonValue->Put("width", "ImageSize.Contain");
-        return jsonValue->ToString();
+        return "ImageSize.Contain";
     } else if (widthType == BackgroundImageSizeType::COVER) {
-        jsonValue->Put("width", "ImageSize.Cover");
-        return jsonValue->ToString();
+        return "ImageSize.Cover";
     } else if (widthType == BackgroundImageSizeType::AUTO) {
-        jsonValue->Put("width", "ImageSize.Auto");
-        return jsonValue->ToString();
+        return "ImageSize.Auto";
     }
-
+    auto jsonValue = JsonUtil::Create(true);
     Dimension width = Dimension((image->GetImageSize().GetSizeValueX()), DimensionUnit::VP);
     Dimension height = Dimension((image->GetImageSize().GetSizeValueY()), DimensionUnit::VP);
     jsonValue->Put("width", width.ToString().c_str());
