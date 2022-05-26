@@ -15,9 +15,6 @@
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #include <dlfcn.h>
-#ifdef ENABLE_ROSEN_BACKEND
-#include "rs_window_animation_target.h"
-#endif
 #endif
 
 #include "base/image/pixel_map.h"
@@ -72,16 +69,16 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
     return PixelMap::CreatePixelMap(pixmapPtrAddr);
 }
 
-Rosen::RSWindowAnimationTarget* CreateRSWindowAnimationTargetFromNapiValue(JSRef<JSVal> obj)
+const std::shared_ptr<Rosen::RSSurfaceNode>& CreateRSSurfaceNodeFromNapiValue(JSRef<JSVal> obj)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!obj->IsObject()) {
-        LOGE("info[0] is not an object when try CreatePixelMapFromNapiValue");
+        LOGE("info[0] is not an object when try CreateRSSurfaceNodeFromNapiValue");
         return nullptr;
     }
     auto engine = EngineHelper::GetCurrentEngine();
     if (!engine) {
-        LOGE("CreatePixelMapFromNapiValue engine is null");
+        LOGE("CreateRSSurfaceNodeFromNapiValue engine is null");
         return nullptr;
     }
     auto nativeEngine = engine->GetNativeEngine();
@@ -98,17 +95,20 @@ Rosen::RSWindowAnimationTarget* CreateRSWindowAnimationTargetFromNapiValue(JSRef
 #endif
     JSValueWrapper valueWrapper = value;
     NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
-    if (nativeValue== nullptr) {
+    if (nativeValue == nullptr) {
         LOGE("nativeValue is nullptr.");
         return nullptr;
     }
     NativeObject* object = static_cast<NativeObject*>(nativeValue->GetInterface(NativeObject::INTERFACE_ID));
-
     if (object == nullptr) {
-        LOGE("nativeValue is nullptr.");
+        return nullptr;
     }
 
-    return object ? static_cast<Rosen::RSWindowAnimationTarget*>(object->GetNativePointer()) : nullptr;
+    auto nodePtr = static_cast<std::shared_ptr<Rosen::RSSurfaceNode>*>(object->GetNativePointer());
+    if (nodePtr == nullptr) {
+        return nullptr;
+    }
+    return *nodePtr;
 #else
     return nullptr;
 #endif

@@ -312,14 +312,12 @@ template("declarative_js_engine") {
           config.plugin_components_support) {
         if (!use_mingw_win && !use_mac) {
           external_deps = [
-            "graphic_standard:window_animation",
             "multimedia_image_standard:image",
             "multimedia_image_standard:image_native",
           ]
         }
       } else {
         external_deps = [
-          "graphic_standard:window_animation",
           "multimedia_image_standard:image",
           "multimedia_image_standard:image_native",
         ]

@@ -15,9 +15,7 @@
 
 #include "core/components/remote_window/rosen_render_remote_window.h"
 
-#ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_surface_node.h"
-#endif
 
 namespace OHOS::Ace {
 void RosenRenderRemoteWindow::Update(const RefPtr<Component>& component)
@@ -29,14 +27,12 @@ void RosenRenderRemoteWindow::Update(const RefPtr<Component>& component)
         return;
     }
 
-#ifdef ENABLE_ROSEN_BACKEND
-    auto surfaceNode = Rosen::RSBaseNode::ReinterpretCast<Rosen::RSSurfaceNode>(remoteWindowComponent->GetRSNode());
+    auto surfaceNode = remoteWindowComponent->GetRSSurfaceNode();
     // update RSNode if needed
     if (surfaceNode != nullptr && surfaceNode != GetRSNode()) {
         SetRSNode(surfaceNode);
         // create corresponding RSRenderNode in Render Thread
         surfaceNode->CreateNodeInRenderThread(true);
     }
-#endif
 }
 } // namespace OHOS::Ace

@@ -20,8 +20,9 @@
 
 namespace OHOS {
 namespace Rosen {
-class RSNode;
+class RSSurfaceNode;
 }
+
 namespace Ace {
 class ACE_EXPORT RemoteWindowComponent : public RenderComponent {
     DECLARE_ACE_TYPE(RemoteWindowComponent, RenderComponent);
@@ -32,18 +33,18 @@ public:
     RefPtr<Element> CreateElement() override;
     RefPtr<RenderNode> CreateRenderNode() override;
 
-    void SetRSNode(const std::shared_ptr<Rosen::RSNode> rsNode)
+    void SetRSSurfaceNode(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
     {
-        rsNode_ = rsNode;
+        surfaceNode_ = surfaceNode;
     }
 
-    const std::shared_ptr<Rosen::RSNode>& GetRSNode() const
+    const std::shared_ptr<Rosen::RSSurfaceNode>& GetRSSurfaceNode() const
     {
-        return rsNode_;
+        return surfaceNode_;
     }
 
 private:
-    std::shared_ptr<Rosen::RSNode> rsNode_;
+    std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode_;
 };
 } // namespace Ace
 } // namespace OHOS
