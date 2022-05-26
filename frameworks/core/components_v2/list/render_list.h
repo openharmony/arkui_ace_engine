@@ -163,14 +163,24 @@ public:
         return component_;
     }
 
-    Offset GetLastOffset() const
+    Offset GetCurrentOffset() const
     {
         return vertical_ ? Offset(0.0, -currentOffset_) : Offset(-currentOffset_, 0.0);
     }
 
-    double GetEstimatedHeight() const
+    double GetRealMainSize() const
     {
         return realMainSize_;
+    }
+
+    double GetEstimatedHeight() const
+    {
+        return estimatedHeight_;
+    }
+
+    Offset GetLastOffset() const
+    {
+        return vertical_ ? Offset(0.0, lastOffset_) : Offset(lastOffset_, 0.0);
     }
 
     Dimension GetListSpace() const
@@ -317,6 +327,7 @@ protected:
     std::list<RefPtr<RenderListItem>> items_;
 
     double spaceWidth_ = 0.0;
+    double lastOffset_ = 0.0;
     double startMainPos_ = 0.0;
     double endMainPos_ = 0.0;
     double currentOffset_ = 0.0;
@@ -350,7 +361,8 @@ protected:
     WeakPtr<ListItemGenerator> itemGenerator_;
     RefPtr<Scrollable> scrollable_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
-    RefPtr<ScrollBarProxy> scrollBarProxy_;
+    RefPtr<ScrollBarProxy> scrollBarProxy_; // user defined scroll bar
+    RefPtr<ScrollBar> scrollBar_;           // system defined scroll bar
 
     size_t currentStickyIndex_ = INITIAL_CHILD_INDEX;
     RefPtr<RenderListItem> currentStickyItem_;
@@ -374,8 +386,10 @@ protected:
     Offset mouseStartOffset_;
     Offset mouseEndOffset_;
     int32_t focusIndex_ = 0;
+    int32_t scrollBarOpacity_ = 0;
     double prevOffset_ = 0.0;
     double prevMainPos_ = 0.0;
+    double estimatedHeight_ = 0.0;
 
 private:
     bool IsReachStart();
@@ -383,6 +397,8 @@ private:
     bool ActionByScroll(bool forward, ScrollEventBack scrollEventBack);
     void ModifyActionScroll();
     void InitScrollBarProxy();
+    void InitScrollBar();
+    void SetScrollBarCallback();
     Dimension listSpace_;
     double realMainSize_ = 0.0; // Real size of main axis.
     size_t startCachedCount_ = 0;
