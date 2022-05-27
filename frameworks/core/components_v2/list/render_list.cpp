@@ -1584,6 +1584,10 @@ void RenderList::CreateDragDropRecognizer()
                 return;
             }
 
+            if (!listItem->IsMovable()) {
+                LOGI("This list item is not movable.");
+                return;
+            }
             renderList->selectedDragItem_ = listItem;
             renderList->selectedItemIndex_ = renderList->GetIndexByListItem(listItem);
             renderList->selectedDragItem_->SetHidden(true);
@@ -1684,6 +1688,9 @@ void RenderList::CreateDragDropRecognizer()
             LOGE("RenderList is null.");
             return;
         }
+        if (!renderList->selectedDragItem_ || !renderList->selectedDragItem_->IsMovable()) {
+            return;
+        }
 
         ItemDragInfo dragInfo;
         dragInfo.SetX(info.GetGlobalPoint().GetX());
@@ -1714,10 +1721,15 @@ void RenderList::CreateDragDropRecognizer()
                 renderList->insertItemIndex_ = static_cast<size_t>(targetRenderlist->GetIndexByListItem(newListItem));
             }
             if (targetRenderlist == renderList) {
-                (targetRenderlist->GetOnItemDrop())(
-                    dragInfo, static_cast<int32_t>(renderList->selectedItemIndex_), renderList->insertItemIndex_, true);
+                int32_t from = static_cast<int32_t>(renderList->selectedItemIndex_);
+                int32_t to = static_cast<int32_t>(renderList->insertItemIndex_);
+                auto moveRes = ResumeEventCallback(
+                    renderList->component_, &ListComponent::GetOnItemMove, true, from, to);
+                (targetRenderlist->GetOnItemDrop())(dragInfo, from, to, moveRes);
+                renderList->MarkNeedLayout();
             } else {
                 (targetRenderlist->GetOnItemDrop())(dragInfo, -1, renderList->insertItemIndex_, true);
+                targetRenderlist->MarkNeedLayout();
             }
         }
         renderList->SetPreTargetRenderList(nullptr);
@@ -1732,6 +1744,9 @@ void RenderList::CreateDragDropRecognizer()
         auto renderList = weakRenderList.Upgrade();
         if (!renderList) {
             LOGE("RenderList is null.");
+            return;
+        }
+        if (!renderList->selectedDragItem_ || !renderList->selectedDragItem_->IsMovable()) {
             return;
         }
 
