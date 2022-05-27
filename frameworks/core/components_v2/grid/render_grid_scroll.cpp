@@ -203,7 +203,6 @@ void RenderGridScroll::OnTouchTestHit(
     } else {
         scrollable_->SetCoordinateOffset(coordinateOffset);
         scrollable_->SetDragTouchRestrict(touchRestrict);
-        result.emplace_back(scrollable_);
     }
     result.emplace_back(scrollable_);
 }
@@ -1084,7 +1083,7 @@ void RenderGridScroll::ScrollPage(bool reverse, bool smooth)
 double RenderGridScroll::GetEstimatedHeight()
 {
     if (reachTail_) {
-        // reach the end og grid, update the total scroll bar length
+        // reach the end of grid, update the total scroll bar length
         estimateHeight_ = scrollBarExtent_;
     } else {
         estimateHeight_ = std::max(estimateHeight_, scrollBarExtent_);
@@ -1094,6 +1093,10 @@ double RenderGridScroll::GetEstimatedHeight()
 
 void RenderGridScroll::InitScrollBar(const RefPtr<Component>& component)
 {
+    if (scrollBar_) {
+        scrollBar_->Reset();
+        return;
+    }
     const RefPtr<GridLayoutComponent> grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (!grid) {
         LOGE("RenderGridLayout update failed.");
@@ -1104,13 +1107,10 @@ void RenderGridScroll::InitScrollBar(const RefPtr<Component>& component)
     if (!theme) {
         return;
     }
-    if (scrollBar_) {
-        scrollBar_->Reset();
-    } else {
-        RefPtr<GridScrollController> controller = AceType::MakeRefPtr<GridScrollController>();
-        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(grid->GetScrollBar(), theme->GetShapeMode());
-        scrollBar_->SetScrollBarController(controller);
-    }
+    RefPtr<GridScrollController> controller = AceType::MakeRefPtr<GridScrollController>();
+    scrollBar_ = AceType::MakeRefPtr<ScrollBar>(grid->GetScrollBar(), theme->GetShapeMode());
+    scrollBar_->SetScrollBarController(controller);
+
     // set the scroll bar style
     scrollBar_->SetReservedHeight(theme->GetReservedHeight());
     scrollBar_->SetMinHeight(theme->GetMinHeight());
@@ -1170,7 +1170,7 @@ void RenderGridScroll::SetScrollBarCallback()
             return;
         }
         grid->scrollBarOpacity_ = value;
-        grid->MarkNeedLayout(true);
+        grid->MarkNeedRender();
     };
     auto&& scrollEndCallback = [weakGrid = AceType::WeakClaim(this)]() {
         auto grid = weakGrid.Upgrade();
