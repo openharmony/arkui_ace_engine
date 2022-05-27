@@ -20,6 +20,7 @@
 
 #include "core/common/container.h"
 #include "core/components/dialog/dialog_component.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -86,6 +87,7 @@ ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
 void JSActionSheet::Show(const JSCallbackInfo& args)
 {
     LOGD("show ActionSheet");
+    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!args[0]->IsObject()) {
         LOGE("args is not an object, can't show ActionSheet.");
         return;

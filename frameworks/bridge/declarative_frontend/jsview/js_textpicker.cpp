@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_textpicker.h"
 
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -148,6 +149,7 @@ void JSTextPickerDialog::JSBind(BindingTarget globalObj)
 
 void JSTextPickerDialog::Show(const JSCallbackInfo& info)
 {
+    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("TextPicker create error, info is non-valid");
         return;
