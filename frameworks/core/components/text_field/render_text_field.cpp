@@ -343,6 +343,7 @@ void RenderTextField::PerformLayout()
         const auto& child = GetChildren().front();
         child->Layout(innerLayout);
     }
+    ApplyAspectRatio();
     SetLayoutSize(GetLayoutParam().Constrain(Measure()));
     UpdateFocusAnimation();
 
@@ -2240,6 +2241,20 @@ void RenderTextField::ApplyRestoreInfo()
     UpdateSelection(jsonStart->GetInt(), jsonEnd->GetInt());
     StartTwinkling();
     SetRestoreInfo("");
+}
+
+void RenderTextField::ApplyAspectRatio()
+{
+    auto parent = GetParent().Upgrade();
+    while (parent) {
+        auto renderBox = DynamicCast<RenderBox>(parent);
+        if (renderBox && !NearZero(renderBox->GetAspectRatio()) &&
+            GetLayoutParam().GetMaxSize().IsValid() && !GetLayoutParam().GetMaxSize().IsInfinite()) {
+            height_ = Dimension(GetLayoutParam().GetMaxSize().Height());
+            break;
+        }
+        parent = parent->GetParent().Upgrade();
+    }
 }
 
 } // namespace OHOS::Ace
