@@ -85,9 +85,9 @@ public:
     virtual std::string GetWidth() const = 0;
     virtual std::string GetHeight() const = 0;
     virtual std::unique_ptr<JsonValue> GetSize() const = 0;
-    virtual std::unique_ptr<JsonValue> GetPadding() const = 0;
+    virtual std::string GetPadding() const = 0;
     virtual Dimension GetMargin(OHOS::Ace::AnimatableType type) const = 0;
-    virtual std::unique_ptr<JsonValue> GetAllMargin() const = 0;
+    virtual std::string GetAllMargin() const = 0;
     virtual std::string GetConstraintSize() const = 0;
     virtual int32_t GetLayoutPriority() const = 0;
     virtual int32_t GetLayoutWeight() const = 0;
