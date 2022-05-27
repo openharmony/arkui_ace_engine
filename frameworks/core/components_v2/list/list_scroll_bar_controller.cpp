@@ -38,7 +38,7 @@ bool ListScrollBarController::UpdateScrollPosition(const double offset, int32_t 
         return true;
     }
     auto list = AceType::DynamicCast<RenderList>(scroll_.Upgrade());
-    if (!list || NearZero(list->GetEstimatedHeight())) {
+    if (!list) {
         return true;
     }
     double height = list->GetLayoutSize().Height();
