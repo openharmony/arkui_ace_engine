@@ -43,7 +43,7 @@ bool ListScrollBarController::UpdateScrollPosition(const double offset, int32_t 
     }
     double height = list->GetLayoutSize().Height();
     double estimateHeight = list->GetEstimatedHeight();
-    if (NearZero(estimatedHeight) || NearZero(height)) {
+    if (NearZero(estimateHeight) || NearZero(height)) {
         return true;
     }
     double activeHeight = height * height / estimateHeight;
