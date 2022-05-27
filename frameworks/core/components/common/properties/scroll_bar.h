@@ -297,7 +297,7 @@ public:
 
     void SetScrollBarController(RefPtr<ScrollBarController> controller)
     {
-        barController_ = controller;
+        barController_ = std::move(controller);
     }
 
     bool IsPressed() const
