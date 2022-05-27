@@ -25,6 +25,8 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
+    static void SetTarget(const std::string& value);
+    static void SetType(int32_t value);
     static void SetActive(bool active);
     static void SetParams(const JSCallbackInfo& args);
     static void JsWidth(const JSCallbackInfo& info);
