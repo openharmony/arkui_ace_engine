@@ -51,12 +51,31 @@ void JSNavigator::Create(const JSCallbackInfo& info)
     ViewStackProcessor::GetInstance()->Push(navigatorComponent);
 }
 
+void JSNavigator::SetTarget(const std::string& value)
+{
+    auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    navigator->SetUri(value);
+}
+
+void JSNavigator::SetType(int32_t value)
+{
+    auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    NavigatorType navigatorType = NavigatorType(value);
+    if (navigatorType == NavigatorType::DEFAULT) {
+        navigator->SetType(NavigatorType::PUSH);
+    } else {
+        navigator->SetType(navigatorType);
+    }
+}
+
 void JSNavigator::JSBind(BindingTarget globalObj)
 {
     JSClass<JSNavigator>::Declare("Navigator");
 
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSNavigator>::StaticMethod("create", &JSNavigator::Create, opt);
+    JSClass<JSNavigator>::StaticMethod("target", &JSNavigator::SetTarget, opt);
+    JSClass<JSNavigator>::StaticMethod("type", &JSNavigator::SetType, opt);
     JSClass<JSNavigator>::StaticMethod("active", &JSNavigator::SetActive, opt);
     JSClass<JSNavigator>::StaticMethod("params", &JSNavigator::SetParams, opt);
     JSClass<JSNavigator>::StaticMethod("width", &JSNavigator::JsWidth);
