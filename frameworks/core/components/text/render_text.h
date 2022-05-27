@@ -107,6 +107,8 @@ public:
         return textValue_.selection;
     }
 
+    std::string GetSelectedContent() const override;
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;

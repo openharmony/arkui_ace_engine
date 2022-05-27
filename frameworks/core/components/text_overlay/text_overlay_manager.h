@@ -127,6 +127,7 @@ public:
     virtual void ShowTextOverlay(const Offset& showOffset) = 0;
     virtual void RegisterCallbacksToOverlay() = 0;
     virtual Offset GetHandleOffset(int32_t extend) = 0;
+    virtual std::string GetSelectedContent() const = 0;
     RefPtr<TextOverlayManager> GetTextOverlayManager(const WeakPtr<PipelineContext>& pipelineContext);
 
 protected:
@@ -171,12 +172,13 @@ private:
     int32_t GetGraphemeClusterLength(int32_t extend, bool isPrefix) const;
 };
 
+class PipelineContext;
 class TextOverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(TextOverlayManager, AceType);
 
 public:
-    TextOverlayManager() = default;
-    ~TextOverlayManager() override = default;
+    explicit TextOverlayManager(const WeakPtr<PipelineContext>& context);
+    ~TextOverlayManager() override;
 
     void SetTextOverlayBase(const WeakPtr<TextOverlayBase>& textOverlayBase)
     {
@@ -197,9 +199,12 @@ public:
     void PushTextOverlayToStack(const RefPtr<TextOverlayComponent>& textOverlay,
         const WeakPtr<PipelineContext>& context);
 
+    void HandleCtrlC() const;
+
 private:
     WeakPtr<TextOverlayBase> textOverlayBase_;
     WeakPtr<StackElement> stackElement_;
+    WeakPtr<PipelineContext> context_;
 };
 
 } // namespace OHOS::Ace
