@@ -587,6 +587,14 @@ void PickerBaseComponent::InitializeLunar(
         display->SetChild(lunarRow);
         outChildren.emplace_back(display);
     }
+
+    if (GetSubsidiary() && GetMasterHasLunar()) {
+        RefPtr<BoxComponent> spaceBox = AceType::MakeRefPtr<BoxComponent>();
+        spaceBox->SetWidth(theme_->GetButtonTopPadding().Value(), theme_->GetButtonTopPadding().Unit());
+        spaceBox->SetHeight(theme_->GetButtonTopPadding().Value() + theme_->GetLunarHeight().Value(),
+            theme_->GetButtonTopPadding().Unit());
+        outChildren.emplace_back(spaceBox);
+    }
 }
 
 void PickerBaseComponent::InitializeButtons(
