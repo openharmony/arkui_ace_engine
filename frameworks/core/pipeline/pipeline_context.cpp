@@ -283,21 +283,23 @@ void PipelineContext::FlushFocus()
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
-    if (dirtyFocusNode_) {
-        dirtyFocusNode_->RequestFocusImmediately();
-        dirtyFocusNode_.Reset();
-        dirtyFocusScope_.Reset();
-        return;
-    }
+    if (isKeyTabDown_) {
+        if (dirtyFocusNode_) {
+            dirtyFocusNode_->RequestFocusImmediately();
+            dirtyFocusNode_.Reset();
+            dirtyFocusScope_.Reset();
+            return;
+        }
 
-    if (dirtyFocusScope_) {
-        dirtyFocusScope_->RequestFocusImmediately();
-        dirtyFocusScope_.Reset();
-        return;
-    }
+        if (dirtyFocusScope_) {
+            dirtyFocusScope_->RequestFocusImmediately();
+            dirtyFocusScope_.Reset();
+            return;
+        }
 
-    if (rootElement_ && !rootElement_->IsCurrentFocus()) {
-        rootElement_->RequestFocusImmediately();
+        if (rootElement_ && !rootElement_->IsCurrentFocus()) {
+            rootElement_->RequestFocusImmediately();
+        }
     }
 
     if (GetIsDeclarative()) {
@@ -1624,6 +1626,11 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         }
     }
 
+    if (event.code == KeyCode::KEY_TAB && !isKeyTabDown_) {
+        isKeyTabDown_ = true;
+        FlushFocus();
+        return true;
+    }
     return eventManager_->DispatchKeyEvent(event, rootElement_);
 }
 
@@ -2743,6 +2750,7 @@ void PipelineContext::SetOnPageShow(OnPageShowCallBack&& onPageShowCallBack)
 void PipelineContext::OnPageShow()
 {
     CHECK_RUN_ON(UI);
+    isKeyTabDown_ = false;
     if (onPageShowCallBack_) {
         onPageShowCallBack_();
     }
