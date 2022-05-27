@@ -17,10 +17,21 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
 
 namespace OHOS::Ace {
 std::shared_mutex EngineHelper::mutex_;
 std::unordered_map<int32_t, WeakPtr<Framework::JsEngine>> EngineHelper::engineWeakMap_;
+
+ScopedDelegate::ScopedDelegate(Framework::FrontendDelegate* delegate, int32_t id)
+    : delegate_(delegate), scope_(new ContainerScope(id))
+{}
+
+ScopedDelegate::~ScopedDelegate()
+{
+    delete scope_;
+    scope_ = nullptr;
+}
 
 void EngineHelper::AddEngine(int32_t id, WeakPtr<Framework::JsEngine> engine)
 {
@@ -52,13 +63,19 @@ RefPtr<Framework::JsEngine> EngineHelper::GetCurrentEngine()
     return GetEngine(Container::CurrentId());
 }
 
-Framework::FrontendDelegate* EngineHelper::GetCurrentDelegate()
+ScopedDelegate EngineHelper::GetCurrentDelegate()
 {
     auto engine = GetCurrentEngine();
     if (engine) {
-        return engine->GetFrontend();
+        return ScopedDelegate(engine->GetFrontend(), Container::CurrentId());
     }
-    return nullptr;
+    LOGW("Can't find current engine, using active one");
+    auto container = Container::GetActive();
+    if (!container) {
+        return ScopedDelegate(nullptr, -1);
+    }
+    engine = GetEngine(container->GetInstanceId());
+    return ScopedDelegate(engine ? engine->GetFrontend() : nullptr, container->GetInstanceId());
 }
 
 } // namespace OHOS::Ace

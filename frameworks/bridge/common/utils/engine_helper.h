@@ -27,6 +27,32 @@
 
 namespace OHOS::Ace {
 
+class ContainerScope;
+class ACE_EXPORT_WITH_PREVIEW ScopedDelegate final {
+public:
+    ScopedDelegate(Framework::FrontendDelegate* delegate, int32_t id);
+    ~ScopedDelegate();
+
+    Framework::FrontendDelegate* operator->() const
+    {
+        return delegate_;
+    }
+
+    bool operator==(std::nullptr_t) const
+    {
+        return delegate_ == nullptr;
+    }
+
+    operator bool() const
+    {
+        return delegate_ != nullptr;
+    }
+
+private:
+    Framework::FrontendDelegate* delegate_;
+    ContainerScope* scope_;
+};
+
 class ACE_EXPORT_WITH_PREVIEW EngineHelper final {
 public:
     static void AddEngine(int32_t id, WeakPtr<Framework::JsEngine> engine);
@@ -37,7 +63,7 @@ public:
 
     static RefPtr<Framework::JsEngine> GetCurrentEngine();
 
-    static Framework::FrontendDelegate* GetCurrentDelegate();
+    static ScopedDelegate GetCurrentDelegate();
 
 private:
     static std::unordered_map<int32_t, WeakPtr<Framework::JsEngine>> engineWeakMap_;

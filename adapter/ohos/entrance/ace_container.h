@@ -59,7 +59,7 @@ public:
         if (aceView_) {
             return aceView_->GetInstanceId();
         }
-        return 0;
+        return -1;
     }
 
     RefPtr<Frontend> GetFrontend() const override
