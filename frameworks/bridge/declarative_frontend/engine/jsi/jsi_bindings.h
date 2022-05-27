@@ -28,7 +28,8 @@ std::tuple<Types...> ToTuple(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
     int index = 0;
     return {
-        OHOS::Ace::Framework::JsiValueConvertor::fromJsiValue<Types>(runtimeCallInfo->GetCallArgRef(index++))...,
+        OHOS::Ace::Framework::JsiValueConvertor::fromJsiValue<Types>(
+            runtimeCallInfo->GetVM(), runtimeCallInfo->GetCallArgRef(index++))...,
     };
 }
 

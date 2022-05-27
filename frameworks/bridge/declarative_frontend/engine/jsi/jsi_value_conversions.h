@@ -43,13 +43,11 @@ bool Validate(panda::Local<panda::JSValueRef> val)
 }
 
 template<typename T>
-T fromJsiValue(panda::Local<panda::JSValueRef> val)
+T fromJsiValue(const EcmaVM* vm, Local<panda::JSValueRef> val)
 {
     static_assert(!std::is_const_v<T> && !std::is_reference_v<T>, //
         "Cannot convert values to reference or cv-qualified types!");
 
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    auto vm = runtime->GetEcmaVm();
     if constexpr (std::is_integral<T>::value && std::is_signed<T>::value && !std::is_same<T, bool>::value) {
         return val->Int32Value(vm);
     } else if constexpr (std::is_unsigned_v<T>) {
@@ -66,10 +64,8 @@ T fromJsiValue(panda::Local<panda::JSValueRef> val)
 }
 
 template<typename T>
-panda::Local<panda::JSValueRef> toJsiValue(T val)
+panda::Local<panda::JSValueRef> toJsiValueWithVM(const EcmaVM* vm, T val)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    auto vm = runtime->GetEcmaVm();
     if constexpr (std::is_integral<T>::value && std::is_signed<T>::value && !std::is_same<T, bool>::value) {
         return panda::IntegerRef::New(vm, val);
     } else if constexpr (std::is_unsigned_v<T>) {
@@ -85,6 +81,14 @@ panda::Local<panda::JSValueRef> toJsiValue(T val)
     }
 
     return panda::JSValueRef::Exception(vm);
+}
+
+template<typename T>
+panda::Local<panda::JSValueRef> toJsiValue(T val)
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    auto vm = runtime->GetEcmaVm();
+    return toJsiValueWithVM(vm, val);
 }
 
 } // namespace JsiValueConvertor
