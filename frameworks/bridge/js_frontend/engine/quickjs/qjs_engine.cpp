@@ -3844,6 +3844,9 @@ void QjsEngine::FireSyncEvent(const std::string& eventId, const std::string& par
 void QjsEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     ACE_DCHECK(engineInstance_);
+    if (isDestroy) {
+        return;
+    }
     auto context = engineInstance_->GetQjsContext();
 
     auto page = engineInstance_->GetRunningPage();
