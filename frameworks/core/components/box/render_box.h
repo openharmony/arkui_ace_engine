@@ -353,6 +353,7 @@ private:
     RefPtr<DragWindow> dragWindow_;
     bool isDragRenderBox_ = false;
     bool hasDragItem_ = false;
+    bool enableDragStart_ = true;
 }; // class RenderBox
 } // namespace OHOS::Ace
 

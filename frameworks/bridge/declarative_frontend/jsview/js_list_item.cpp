@@ -61,6 +61,11 @@ void JSListItem::SetEditable(const JSCallbackInfo& args)
         if (args[0]->IsNumber()) {
             uint32_t value = args[0]->ToNumber<uint32_t>();
             JSViewSetProperty(&V2::ListItemComponent::SetEditMode, value);
+            if (V2::EditMode::MOVABLE != value) {
+                auto stack = ViewStackProcessor::GetInstance();
+                auto box = stack->GetBoxComponent();
+                box->SetEnableDragStart(false);
+            }
             break;
         }
 
