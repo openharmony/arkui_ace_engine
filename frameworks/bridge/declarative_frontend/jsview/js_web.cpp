@@ -559,7 +559,6 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("javaScriptAccess", &JSWeb::JsEnabled);
     JSClass<JSWeb>::StaticMethod("fileExtendAccess", &JSWeb::ContentAccessEnabled);
     JSClass<JSWeb>::StaticMethod("fileAccess", &JSWeb::FileAccessEnabled);
-    JSClass<JSWeb>::StaticMethod("onFocus", &JSWeb::OnFocus);
     JSClass<JSWeb>::StaticMethod("onDownloadStart", &JSWeb::OnDownloadStart);
     JSClass<JSWeb>::StaticMethod("onErrorReceive", &JSWeb::OnErrorReceive);
     JSClass<JSWeb>::StaticMethod("onHttpErrorReceive", &JSWeb::OnHttpErrorReceive);
@@ -583,6 +582,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSWeb>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSWeb>::StaticMethod("onMouse", &JSWeb::OnMouse);
+    JSClass<JSWeb>::StaticMethod("onResourceLoad", &JSWeb::OnResourceLoad);
+    JSClass<JSWeb>::StaticMethod("onScaleChange", &JSWeb::OnScaleChange);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -688,11 +689,6 @@ JSRef<JSVal> DownloadStartEventToJSValue(const DownloadStartEvent& eventInfo)
 JSRef<JSVal> LoadWebRequestFocusEventToJSValue(const LoadWebRequestFocusEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetRequestFocus()));
-}
-
-JSRef<JSVal> LoadWebOnFocusEventToJSValue(const LoadWebOnFocusEvent& eventInfo)
-{
-    return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetOnFocus()));
 }
 
 void JSWeb::Create(const JSCallbackInfo& info)
@@ -1036,23 +1032,6 @@ void JSWeb::OnUrlLoadIntercept(const JSCallbackInfo& args)
     webComponent->SetOnUrlLoadIntercept(std::move(jsCallback));
 }
 
-void JSWeb::OnFocus(const JSCallbackInfo& args)
-{
-    if (!args[0]->IsFunction()) {
-        return;
-    }
-    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebOnFocusEvent, 1>>(
-        JSRef<JSFunc>::Cast(args[0]), LoadWebOnFocusEventToJSValue);
-    auto eventMarker =
-        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebOnFocusEvent>(info);
-            func->Execute(*eventInfo);
-        });
-    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    webComponent->SetOnFocusEventId(eventMarker);
-}
-
 JSRef<JSVal> FileSelectorEventToJSValue(const FileSelectorEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -1389,5 +1368,57 @@ void JSWeb::OnMouse(const JSCallbackInfo& args)
 
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetOnMouseEventCallback(onMouseId);
+}
+
+JSRef<JSVal> ResourceLoadEventToJSValue(const ResourceLoadEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("url", eventInfo.GetOnResourceLoadUrl());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnResourceLoad(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnRefreshAccessedHistory");
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ResourceLoadEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ResourceLoadEventToJSValue);
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<ResourceLoadEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetResourceLoadId(eventMarker);
+}
+
+JSRef<JSVal> ScaleChangeEventToJSValue(const ScaleChangeEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("oldScale", eventInfo.GetOnScaleChangeOldScale());
+    obj->SetProperty("newScale", eventInfo.GetOnScaleChangeNewScale());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnScaleChange(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ScaleChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ScaleChangeEventToJSValue);
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<ScaleChangeEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetScaleChangeId(eventMarker);
 }
 } // namespace OHOS::Ace::Framework

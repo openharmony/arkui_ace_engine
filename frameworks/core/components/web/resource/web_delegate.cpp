@@ -840,8 +840,6 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
             webComponent_->GetGeolocationHideEventId(), pipelineContext);
         onGeolocationShowV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             webComponent_->GetGeolocationShowEventId(), pipelineContext);
-        onFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webComponent_->GetOnFocusEventId(), pipelineContext);
         onRequestFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             webComponent_->GetRequestFocusEventId(), pipelineContext);
         onErrorReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
@@ -854,6 +852,10 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
             webComponent_->GetRenderExitedId(), pipelineContext);
         onRefreshAccessedHistoryV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             webComponent_->GetRefreshAccessedHistoryId(), pipelineContext);
+        onResourceLoadV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webComponent_->GetResourceLoadId(), pipelineContext);
+        onScaleChangeV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webComponent_->GetScaleChangeId(), pipelineContext);
     }
 }
 
@@ -1072,15 +1074,6 @@ void WebDelegate::SetWebCallBack()
                     auto delegate = weak.Upgrade();
                     if (delegate) {
                         delegate->Zoom(factor);
-                    }
-                });
-            });
-        webController->SetOnFocusImpl(
-            [weak = WeakClaim(this), uiTaskExecutor]() {
-                uiTaskExecutor.PostTask([weak]() {
-                    auto delegate = weak.Upgrade();
-                    if (delegate) {
-                        delegate->OnFocus();
                     }
                 });
             });
@@ -1582,13 +1575,6 @@ void WebDelegate::Zoom(float factor)
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void WebDelegate::OnFocus()
-{
-    if (onFocusV2_) {
-        onFocusV2_(std::make_shared<LoadWebOnFocusEvent>(""));
-    }
-}
-
 sptr<OHOS::Rosen::Window> WebDelegate::CreateWindow()
 {
     auto context = context_.Upgrade();
@@ -1947,6 +1933,20 @@ bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
     return webComponent_->OnUrlLoadIntercept(param.get());
 }
 
+void WebDelegate::OnResourceLoad(const std::string& url)
+{
+    if (onResourceLoadV2_) {
+        onResourceLoadV2_(std::make_shared<ResourceLoadEvent>(url));
+    }
+}
+
+void WebDelegate::OnScaleChange(float oldScaleFactor, float newScaleFactor)
+{
+    if (onScaleChangeV2_) {
+        onScaleChangeV2_(std::make_shared<ScaleChangeEvent>(oldScaleFactor, newScaleFactor));
+    }
+}
+
 #ifdef OHOS_STANDARD_SYSTEM
 void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const double& y)
 {
@@ -1986,6 +1986,22 @@ bool WebDelegate::OnKeyEvent(int32_t keyCode, int32_t keyAction)
         return nweb_->SendKeyEvent(keyCode, keyAction);
     }
     return false;
+}
+
+void WebDelegate::OnFocus()
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->OnFocus();
+    }
+}
+
+void WebDelegate::OnBlur()
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->OnBlur();
+    }
 }
 #endif
 

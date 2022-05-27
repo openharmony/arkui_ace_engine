@@ -40,7 +40,7 @@ public:
     virtual int GetMode() = 0;
     virtual std::string GetDefaultFileName() = 0;
     virtual std::vector<std::string> GetAcceptType() = 0;
-    virtual bool IsCapture() = 0; 
+    virtual bool IsCapture() = 0;
 };
 
 class ACE_EXPORT WebError : public AceType {
@@ -561,6 +561,44 @@ public:
 private:
     RefPtr<WebFileSelectorParam> param_;
     RefPtr<FileSelectorResult> result_;
+};
+
+class ACE_EXPORT ResourceLoadEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ResourceLoadEvent, BaseEventInfo);
+
+public:
+    explicit ResourceLoadEvent(const std::string& url) : BaseEventInfo
+        ("ResourceLoadEvent"), loadUrl_(url) {}
+    ~ResourceLoadEvent() = default;
+
+    const std::string& GetOnResourceLoadUrl() const
+    {
+        return loadUrl_;
+    }
+private:
+    std::string loadUrl_;
+};
+
+class ACE_EXPORT ScaleChangeEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ScaleChangeEvent, BaseEventInfo);
+
+public:
+    ScaleChangeEvent(float oldScale, float newScale) : BaseEventInfo
+        ("ScaleChangeEvent"), oldScale_(oldScale), newScale_(newScale) {}
+    ~ScaleChangeEvent() = default;
+
+    float GetOnScaleChangeOldScale() const
+    {
+        return oldScale_;
+    }
+
+    float GetOnScaleChangeNewScale() const
+    {
+        return newScale_;
+    }
+private:
+    float oldScale_ = 0.0f;
+    float newScale_ = 0.0f;
 };
 } // namespace OHOS::Ace
 

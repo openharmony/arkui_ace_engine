@@ -64,6 +64,8 @@ public:
     static void TextZoomAtio(int32_t textZoomAtioNum);
     static void WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled);
     static void OnMouse(const JSCallbackInfo& args);
+    static void OnResourceLoad(const JSCallbackInfo& args);
+    static void OnScaleChange(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
