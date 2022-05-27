@@ -334,6 +334,16 @@ public:
         hasBackgroundColor_ = hasBackgroundColor;
     }
 
+    void SetEnableDragStart(bool enableDragStart)
+    {
+        enableDragStart_ = enableDragStart;
+    }
+
+    bool GetEnableDragStart() const
+    {
+        return enableDragStart_;
+    }
+
 private:
     RefPtr<Decoration> backDecoration_;
     RefPtr<Decoration> frontDecoration_;
@@ -363,6 +373,7 @@ private:
     RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_ = nullptr;
     EventMarker remoteMessageId_;
     bool hasBackgroundColor_;
+    bool enableDragStart_ = true;
 };
 
 } // namespace OHOS::Ace
