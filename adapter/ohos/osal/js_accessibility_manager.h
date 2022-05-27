@@ -74,16 +74,16 @@ public:
     virtual void DeregisterInteractionOperation();
     virtual bool SendAccessibilitySyncEvent(const AccessibilityEvent& accessibilityEvent);
 
-    void SearchElementInfoByAccessibilityId(const long elementId, const int requestId,
-        Accessibility::AccessibilityElementOperatorCallback& callback, const int mode);
-    void SearchElementInfosByText(const long elementId, const std::string& text, const int requestId,
+    void SearchElementInfoByAccessibilityId(const int32_t elementId, const int32_t requestId,
+        Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode);
+    void SearchElementInfosByText(const int32_t elementId, const std::string& text, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback);
-    void FindFocusedElementInfo(const long elementId, const int focusType, const int requestId,
+    void FindFocusedElementInfo(const int32_t elementId, const int32_t focusType, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback);
-    void FocusMoveSearch(const long elementId, const int direction, const int requestId,
+    void FocusMoveSearch(const int32_t elementId, const int32_t direction, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback);
-    void ExecuteAction(const long accessibilityId, const Accessibility::ActionType& action,
-        const std::map<std::string, std::string> actionArguments, const int requestId,
+    void ExecuteAction(const int32_t accessibilityId, const Accessibility::ActionType& action,
+        const std::map<std::string, std::string> actionArguments, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback);
     bool ClearCurrentFocus();
 
@@ -94,16 +94,16 @@ private:
     public:
         virtual ~JsInteractionOperation() = default;
         // Accessibility override.
-        void SearchElementInfoByAccessibilityId(const long elementId, const int requestId,
-            Accessibility::AccessibilityElementOperatorCallback& callback, const int mode) override;
-        void SearchElementInfosByText(const long elementId, const std::string& text, const int requestId,
+        void SearchElementInfoByAccessibilityId(const int32_t elementId, const int32_t requestId,
+            Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode) override;
+        void SearchElementInfosByText(const int32_t elementId, const std::string& text, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback) override;
-        void FindFocusedElementInfo(const long elementId, const int focusType, const int requestId,
+        void FindFocusedElementInfo(const int32_t elementId, const int32_t focusType, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback) override;
-        void FocusMoveSearch(const long elementId, const int direction, const int requestId,
+        void FocusMoveSearch(const int32_t elementId, const int32_t direction, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback) override;
-        void ExecuteAction(const long elementId, const int action,
-            const std::map<std::string, std::string> actionArguments, const int requestId,
+        void ExecuteAction(const int32_t elementId, const int32_t action,
+            const std::map<std::string, std::string> &actionArguments, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback) override;
         void ClearFocus() override;
         void OutsideTouch() override;
