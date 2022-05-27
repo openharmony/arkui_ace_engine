@@ -100,6 +100,10 @@ public:
     {
         auto result = xcomponentsMap_.try_emplace(xcomponentId, component);
         if (!result.second) {
+            auto oldXcomponent = result.first->second.Upgrade();
+            if (oldXcomponent) {
+                oldXcomponent->SetDeleteCallbackToNull();
+            }
             result.first->second = component;
         }
     }
@@ -134,7 +138,10 @@ public:
         if (it == nativeXcomponentsMap_.end()) {
             return;
         }
-        delete it->second.second;
+        if (it->second.second) {
+            delete it->second.second;
+            it->second.second = nullptr;
+        }
         nativeXcomponentsMap_.erase(it);
     }
 
