@@ -111,9 +111,9 @@ public:
     std::string GetWidth() const override;
     std::string GetHeight() const override;
     std::unique_ptr<JsonValue> GetSize() const override;
-    std::unique_ptr<JsonValue> GetPadding() const override;
+    std::string GetPadding() const override;
     Dimension GetMargin(OHOS::Ace::AnimatableType type) const override;
-    std::unique_ptr<JsonValue> GetAllMargin() const override;
+    std::string GetAllMargin() const override;
     std::string GetConstraintSize() const override;
     int32_t GetLayoutPriority() const override;
     int32_t GetLayoutWeight() const override;
