@@ -27,8 +27,6 @@ namespace {
 constexpr int32_t MAX_PAN_FINGERS = 10;
 constexpr double DISTANCE_PER_MOUSE_DEGREE = DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES;
 constexpr int32_t AXIS_PAN_FINGERS = 1;
-constexpr int32_t RATIO_MS_TO_S = 1000;
-constexpr int32_t RATIO_US_TO_MS = 1000;
 
 } // namespace
 
@@ -74,6 +72,8 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     if (state_ == DetectState::READY) {
         AddToReferee(event.id, AceType::Claim(this));
         if (static_cast<int32_t>(refereePointers_.size()) == fingers_) {
+            velocityTracker_.Reset();
+            velocityTracker_.UpdateTouchPoint(event);
             state_ = DetectState::DETECTING;
         }
     }
@@ -81,7 +81,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
-    LOGD("pan recognizer receives touch down event, begin to detect pan event");
+    LOGD("pan recognizer receives axis start event, begin to detect pan event");
     if (fingers_ != AXIS_PAN_FINGERS) {
         return;
     }
@@ -109,6 +109,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
     globalPoint_ = Point(event.x, event.y);
     touchPoints_.erase(itr);
+    velocityTracker_.UpdateTouchPoint(event, true);
 
     if (state_ == DetectState::READY) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -146,7 +147,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    LOGD("pan recognizer receives touch up event");
+    LOGD("pan recognizer receives axis end event");
     if (fingers_ != AXIS_PAN_FINGERS) {
         return;
     }
@@ -157,7 +158,7 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
         return;
     }
 
-    SendCallbackMsg(onActionEnd_);
+    SendCallbackMsg(onActionEnd_, false);
     Reset();
     pendingEnd_ = true; // TODO: Need confirm
 }
@@ -178,11 +179,7 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
     delta_ = (event.GetOffset() - touchPoints_[event.id].GetOffset()) / touchPoints_.size();
     mainDelta_ = GetMainAxisDelta();
-    auto timeInterval = event.time - touchPoints_[event.id].time;
-    auto timeIntervalDurationMs =
-        std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, RATIO_US_TO_MS>>>(timeInterval);
-    speed_ = delta_.GetDistance() / timeIntervalDurationMs.count() * RATIO_MS_TO_S;
-    mainSpeed_ = mainDelta_ / timeIntervalDurationMs.count() * RATIO_MS_TO_S;
+    velocityTracker_.UpdateTouchPoint(event);
     averageDistance_ += delta_;
     touchPoints_[event.id] = event;
     time_ = event.time;
@@ -208,7 +205,7 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
-    LOGD("pan recognizer receives touch move event");
+    LOGD("pan recognizer receives axis update event");
     if (fingers_ != AXIS_PAN_FINGERS) {
         return;
     }
@@ -221,8 +218,6 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     delta_ = Offset(-event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE,
         -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
     mainDelta_ = GetMainAxisDelta();
-    speed_ = 0.0;
-    mainSpeed_ = 0.0;
     averageDistance_ += delta_;
     lastAxisEvent_ = event;
     time_ = event.time;
@@ -243,7 +238,7 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
             averageDistance_.SetX(0.0);
         }
 
-        SendCallbackMsg(onActionUpdate_);
+        SendCallbackMsg(onActionUpdate_, false);
     }
 }
 
@@ -324,7 +319,7 @@ void PanRecognizer::Reset()
     pendingCancel_ = false;
 }
 
-void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
+void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isTouchEvent)
 {
     if (callback && *callback) {
         GestureEvent info;
@@ -336,8 +331,13 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         info.SetSourceDevice(deviceType_);
         info.SetDelta(delta_);
         info.SetMainDelta(mainDelta_);
-        info.SetSpeed(speed_);
-        info.SetMainSpeed(mainSpeed_);
+        if (isTouchEvent) {
+            info.SetVelocity(velocityTracker_.GetVelocity());
+            info.SetMainVelocity(velocityTracker_.GetMainAxisVelocity());
+        } else {
+            info.SetVelocity(Velocity());
+            info.SetMainVelocity(0.0);
+        }
         (*callback)(info);
     }
 }

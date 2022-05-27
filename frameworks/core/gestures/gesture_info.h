@@ -29,6 +29,8 @@
 #include "base/utils/event_callback.h"
 #include "base/utils/macros.h"
 #include "base/utils/type_definition.h"
+#include "core/gestures/velocity.h"
+#include "core/gestures/velocity_tracker.h"
 #include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
@@ -460,6 +462,26 @@ public:
         return mainSpeed_;
     }
 
+    void SetVelocity(const Velocity& velocity)
+    {
+        velocity_ = velocity;
+    }
+
+    const Velocity& GetVelocity() const
+    {
+        return velocity_;
+    }
+
+    void SetMainVelocity(double mainVelocity)
+    {
+        mainVelocity_ = mainVelocity;
+    }
+
+    double GetMainVelocity() const
+    {
+        return mainVelocity_;
+    }
+
     void SetPressed(bool pressed)
     {
         pressed_ = pressed;
@@ -497,6 +519,8 @@ private:
     double offsetY_ = 0.0;
     double scale_ = 1.0;
     double angle_ = 0.0;
+    Velocity velocity_;
+    double mainVelocity_ = 0.0;
     double speed_ = 0.0;
     double mainSpeed_ = 0.0;
     double mainDelta_ = 0.0;
