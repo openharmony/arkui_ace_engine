@@ -2165,7 +2165,7 @@ bool RenderSwiper::MouseHoverTest(const Point& parentLocalPoint)
     }
 
     // get absolute position
-    Point hoverPoint = parentLocalPoint + GetGlobalOffset();
+    Point hoverPoint = parentLocalPoint;
     GetIndicatorCurrentRect(swiperIndicatorData_);
     if (indicatorRect_.IsInRegion(hoverPoint)) {
         if (autoPlay_ && scheduler_ && scheduler_->IsActive()) {
