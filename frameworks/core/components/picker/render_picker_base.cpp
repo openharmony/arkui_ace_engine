@@ -797,4 +797,22 @@ void RenderPickerBase::ClearRenders()
     lunarText_ = nullptr;
 }
 
+void RenderPickerBase::InitializeSelectedOption(const RefPtr<RenderPickerColumn>& pickerColumn)
+{
+    for (const auto& option : pickerColumn->GetOptions()) {
+        if (!option->GetSelected()) {
+            continue;
+        }
+
+        auto focusRenderBox = option->GetRenderBox();
+        if (!focusRenderBox) {
+            break;
+        }
+
+        focusBoxSize_ = focusRenderBox->GetLayoutSize();
+        focusBoxOffset_ = focusRenderBox->GetGlobalOffset() - GetGlobalOffset();
+        break;
+    }
+}
+
 } // namespace OHOS::Ace

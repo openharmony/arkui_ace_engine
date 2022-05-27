@@ -67,7 +67,7 @@ void RenderPickerOption::Update(const RefPtr<Component>& component)
         pressDecoration_->SetBackgroundColor(theme->GetPressColor());
     }
     if (hoverDecoration_) {
-        hoverDecoration_->SetBackgroundColor(theme->GetHoverColor());
+        hoverDecoration_->SetBackgroundColor(HOVER_COLOR);
     }
     optionSize_ = theme->GetOptionSize(option->GetSelected());
     if (!NearZero(NormalizeToPx(option->GetFixHeight()))) {
@@ -195,7 +195,6 @@ bool RenderPickerOption::ResetHoverAnimation(bool isEnter)
         ResetMouseController();
     }
 
-    auto hoverColor = theme->GetHoverColor();
     Color bgColor = GetEventEffectColor();
     if (selectedDecoration_) {
         bgColor = selectedDecoration_->GetBackgroundColor();
@@ -203,12 +202,12 @@ bool RenderPickerOption::ResetHoverAnimation(bool isEnter)
     RefPtr<KeyframeAnimation<Color>> animation = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
     if (isEnter) {
         // hover enter
-        CreateMouseAnimation(animation, bgColor, bgColor.BlendColor(hoverColor));
+        CreateMouseAnimation(animation, bgColor, bgColor.BlendColor(HOVER_COLOR));
         animation->SetCurve(Curves::FRICTION);
     } else {
         // from hover to normal
         CreateMouseAnimation(animation, GetEventEffectColor(), bgColor);
-        if (GetEventEffectColor() == bgColor.BlendColor(hoverColor)) {
+        if (GetEventEffectColor() == bgColor.BlendColor(HOVER_COLOR)) {
             animation->SetCurve(Curves::FRICTION);
         } else {
             animation->SetCurve(Curves::FAST_OUT_SLOW_IN);
@@ -231,7 +230,6 @@ bool RenderPickerOption::ResetPressAnimation(bool isDown)
         ResetMouseController();
     }
 
-    auto hoverColor = theme->GetHoverColor();
     auto pressColor = theme->GetPressColor();
     Color bgColor = GetEventEffectColor();
     if (selectedDecoration_) {
@@ -250,7 +248,7 @@ bool RenderPickerOption::ResetPressAnimation(bool isDown)
     } else {
         if (mouseState_ == MouseState::HOVER) {
             // from press to hover
-            CreateMouseAnimation(animation, GetEventEffectColor(), bgColor.BlendColor(hoverColor));
+            CreateMouseAnimation(animation, GetEventEffectColor(), bgColor.BlendColor(HOVER_COLOR));
         } else {
             // from press to normal
             CreateMouseAnimation(animation, GetEventEffectColor(), bgColor);
@@ -518,6 +516,15 @@ void RenderPickerOption::ClearRenders()
 {
     renderText_ = nullptr;
     renderBox_ = nullptr;
+}
+
+void RenderPickerOption::HandleMouseHoverEvent(MouseState mouseState)
+{
+    if (mouseState == MouseState::HOVER) {
+        OnMouseHoverEnterTest();
+    } else {
+        OnMouseHoverExitTest();
+    }
 }
 
 } // namespace OHOS::Ace

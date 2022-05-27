@@ -142,6 +142,10 @@ protected:
         onTextChange_ = value;
     }
 
+    void InitializeSelectedOption(const RefPtr<RenderPickerColumn>& pickerColumn);
+    Size focusBoxSize_;
+    Offset focusBoxOffset_;
+
     RefPtr<PickerBaseComponent> data_;
     std::vector<RefPtr<RenderPickerColumn>> columns_;
     RefPtr<RenderBox> box_;
