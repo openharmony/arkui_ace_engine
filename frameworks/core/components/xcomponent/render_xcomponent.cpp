@@ -246,8 +246,41 @@ bool RenderXComponent::HandleMouseEvent(const MouseEvent& event)
     mouseEventPoint.y = event.GetOffset().GetY() - GetCoordinatePoint().GetY();
     mouseEventPoint.screenX = event.GetOffset().GetX();
     mouseEventPoint.screenY = event.GetOffset().GetY();
-    mouseEventPoint.action = static_cast<OH_NativeXComponent_MouseEventAction>(event.action);
-    mouseEventPoint.button = static_cast<OH_NativeXComponent_MouseEventButton>(event.button);
+    switch (event.action) {
+        case MouseAction::PRESS:
+            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_PRESS;
+            break;
+        case MouseAction::RELEASE:
+            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_RELEASE;
+            break;
+        case MouseAction::MOVE:
+            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_MOVE;
+            break;
+        default:
+            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_NONE;
+            break;
+    }
+    switch (event.button) {
+        case MouseButton::LEFT_BUTTON:
+            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_LEFT_BUTTON;
+            break;
+        case MouseButton::RIGHT_BUTTON:
+            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_RIGHT_BUTTON;
+            break;
+        case MouseButton::MIDDLE_BUTTON:
+            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_MIDDLE_BUTTON;
+            break;
+        case MouseButton::BACK_BUTTON:
+            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_BACK_BUTTON;
+            break;
+        case MouseButton::FORWARD_BUTTON:
+            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_FORWARD_BUTTON;
+            break;
+        default:
+            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_NONE_BUTTON;
+            break;
+    }
+
     mouseEventPoint.timestamp = event.time.time_since_epoch().count();
     return NativeXComponentDispatchMouseEvent(mouseEventPoint);
 }
