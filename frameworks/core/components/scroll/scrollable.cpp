@@ -19,6 +19,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "base/log/frame_report.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/time_util.h"
 #include "core/event/ace_events.h"
@@ -247,6 +248,9 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
         LOGI("HandleDragStart increase cpu frequency, moved_ = %{public}d", moved_);
         startIncreaseTime_ = currentTime;
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().BeginListFling();
+        }
     }
 #endif
     UpdateScrollPosition(dragPositionInMainAxis, SCROLL_FROM_START);
@@ -275,6 +279,9 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
         LOGI("HandleDragUpdate increase cpu frequency, moved_ = %{public}d", moved_);
         startIncreaseTime_ = currentTime;
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().BeginListFling();
+        }
     }
 #endif
     LOGD("handle drag update, offset is %{public}lf", info.GetMainDelta());
@@ -409,6 +416,9 @@ void Scrollable::StartSpringMotion(
 #ifdef OHOS_PLATFORM
             LOGI("springController stop increase cpu frequency");
             ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+            if (FrameReport::GetInstance().GetEnable()) {
+                FrameReport::GetInstance().EndListFling();
+            }
 #endif
             if (scroll->scrollEnd_) {
                 scroll->scrollEnd_();
@@ -444,6 +454,9 @@ void Scrollable::ProcessScrollMotionStop()
 #ifdef OHOS_PLATFORM
         LOGI("controller stop increase cpu frequency");
         ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().EndListFling();
+        }
 #endif
         if (scrollEnd_) {
             scrollEnd_();
