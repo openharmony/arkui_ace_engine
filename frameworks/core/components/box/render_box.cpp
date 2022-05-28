@@ -136,6 +136,7 @@ void RenderBox::Update(const RefPtr<Component>& component)
         onDragMove_ = box->GetOnDragMoveId();
         onDragLeave_ = box->GetOnDragLeaveId();
         onDrop_ = box->GetOnDropId();
+        enableDragStart_ = box->GetEnableDragStart();
         if (onDragStart_) {
             CreateDragDropRecognizer();
         }
@@ -334,6 +335,10 @@ DragItemInfo RenderBox::GenerateDragItemInfo(const RefPtr<PipelineContext>& cont
 
 void RenderBox::PanOnActionStart(const GestureEvent& info)
 {
+    if (!enableDragStart_) {
+        LOGI("drag start is disabled.");
+        return;
+    }
     if (onDragStart_) {
         auto pipelineContext = context_.Upgrade();
         if (!pipelineContext) {

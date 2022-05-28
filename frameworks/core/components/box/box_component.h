@@ -364,6 +364,16 @@ public:
         return enableDebugBoundary_;
     }
 
+    void SetEnableDragStart(bool enableDragStart)
+    {
+        enableDragStart_ = enableDragStart;
+    }
+
+    bool GetEnableDragStart() const
+    {
+        return enableDragStart_;
+    }
+
 private:
     RefPtr<Decoration> backDecoration_;
     RefPtr<Decoration> frontDecoration_;
@@ -396,6 +406,7 @@ private:
     EventMarker remoteMessageId_;
     bool hasBackgroundColor_;
     bool enableDebugBoundary_ = false;
+    bool enableDragStart_ = true;
 };
 
 } // namespace OHOS::Ace
