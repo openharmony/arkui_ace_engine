@@ -19,10 +19,10 @@ import("//foundation/arkui/ace_engine/interfaces/napi/kits/napi_lib.gni")
 
 if (is_standard_system) {
   system_resource_hap_path =
-      get_label_info("//utils/resources/systemres:systemres_hap",
+      get_label_info("//utils/system_resources/systemres:systemres_hap",
                      "target_out_dir") + "/SystemResources.hap"
   system_resource_path =
-      get_label_info("//utils/resources/systemres:systemres_hap",
+      get_label_info("//utils/system_resources/systemres:systemres_hap",
                      "target_out_dir") + "/resources"
   if (host_os == "mac") {
     resource_manager_library = get_label_info(
@@ -35,16 +35,17 @@ if (is_standard_system) {
   }
 } else {
   system_resource_hap_path =
-      get_label_info("//utils/resources/systemres:systemres_hap",
+      get_label_info("//utils/system_resources/systemres:systemres_hap",
                      "target_gen_dir") + "/SystemResources.hap"
   system_resource_path =
-      get_label_info("//utils/resources/systemres:systemres_hap",
+      get_label_info("//utils/system_resources/systemres:systemres_hap",
                      "target_gen_dir") + "/resources"
 }
 
 action("get_system_resource") {
   script = "get_system_resources.sh"
-  deps = [ "//utils/resources/systemres:systemres_hap($current_toolchain)" ]
+  deps =
+      [ "//utils/system_resources/systemres:systemres_hap($current_toolchain)" ]
   args = [
     rebase_path(system_resource_hap_path),
     rebase_path(system_resource_path),
@@ -90,7 +91,7 @@ if (is_standard_system) {
   ohos_copy("copy_ohos_fonts") {
     sources = [
       "//foundation/arkui/ace_engine/adapter/preview/sdk/fontconfig.json",
-      "//utils/resources/fonts",
+      "//utils/system_resources/fonts",
     ]
     outputs = [ target_out_dir + "/previewer/common/bin/{{source_file_part}}" ]
     module_source_dir = target_out_dir + "/previewer/common/bin/"
