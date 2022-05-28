@@ -262,6 +262,8 @@ public:
         return windowName_;
     }
 
+    void SetWindowPos(int32_t left, int32_t top);
+
     void SetIsSubContainer(bool isSubContainer)
     {
         isSubContainer_ = isSubContainer;

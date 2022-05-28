@@ -63,15 +63,22 @@ static std::atomic<int32_t> gDialogId = 0;
 
 class UIMgrServiceWindowChangeListener : public Rosen::IWindowChangeListener {
 public:
+    explicit UIMgrServiceWindowChangeListener(RefPtr<Platform::AceContainer> container)
+    {
+        container_ = container;
+    }
     void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override
     {
         HILOG_INFO("UIMgrServiceWindowChangeListener size change");
-        SystemProperties::SetWindowPos(rect.posX_, rect.posY_);
+        container_->SetWindowPos(rect.posX_, rect.posY_);
     }
     void OnModeChange(OHOS::Rosen::WindowMode mode) override
     {
         HILOG_INFO("UIMgrServiceWindowChangeListener mode change");
     }
+
+private:
+    RefPtr<Platform::AceContainer> container_;
 };
 
 class UIMgrServiceInputEventConsumer : public MMI::IInputEventConsumer {
@@ -257,7 +264,7 @@ int UIMgrService::ShowDialog(const std::string& name,
         }
 
         // register surface change callback
-        OHOS::sptr<OHOS::Rosen::IWindowChangeListener> listener = new UIMgrServiceWindowChangeListener();
+        OHOS::sptr<OHOS::Rosen::IWindowChangeListener> listener = new UIMgrServiceWindowChangeListener(container);
         dialogWindow->RegisterWindowChangeListener(listener);
 
         std::shared_ptr<MMI::IInputEventConsumer> inputEventListener =
@@ -285,7 +292,7 @@ int UIMgrService::ShowDialog(const std::string& name,
                     auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
                     if (rsUiDirector != nullptr) {
                         rsUiDirector->SetRSSurfaceNode(dialogWindow->GetSurfaceNode());
-                        dialogWindow->RegisterWindowChangeListener(listener);
+                        dialogWindow->RegisterWindowChangeListener(listener);// 重复注册？
 
                         rsUiDirector->SetUITaskRunner(
                             [taskExecutor = Ace::Platform::AceContainer::GetContainer(dialogId)->GetTaskExecutor()]
@@ -314,7 +321,8 @@ int UIMgrService::ShowDialog(const std::string& name,
             flutterAceView, density_, width, height, dialogWindow->GetWindowId(), callback);
         Ace::Platform::AceContainer::SetUIWindow(dialogId, dialogWindow);
         Ace::Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
-
+        container->SetWindowPos(x, y);
+        HILOG_INFO("SetWindowPos in ui service");
         // run page.
         Ace::Platform::AceContainer::RunPage(
             dialogId, Ace::Platform::AceContainer::GetContainer(dialogId)->GeneratePageId(), "", params);
