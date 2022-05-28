@@ -280,6 +280,9 @@ void RenderFlex::PerformLayoutInWeightMode()
         LOGW("not supported infinite size");
         return;
     }
+    if (!relativeNodes_.empty()) {
+        maxMainSize -= GetSpace() * (relativeNodes_.size() - 1);
+    }
     BaselineProperties baselineProperties;
     LayoutParam innerLayout;
     double allocatedSize = allocatedSize_;
