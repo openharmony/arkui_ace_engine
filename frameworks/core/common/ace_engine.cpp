@@ -95,9 +95,6 @@ void AceEngine::RemoveContainer(int32_t instanceId)
     if (num == 0) {
         LOGW("container not found with instance id: %{public}d", instanceId);
     }
-    if (watchDog_) {
-        watchDog_->Unregister(instanceId);
-    }
 }
 
 void AceEngine::Dump(const std::vector<std::string>& params) const
@@ -138,6 +135,13 @@ void AceEngine::RegisterToWatchDog(int32_t instanceId, const RefPtr<TaskExecutor
 {
     if (watchDog_) {
         watchDog_->Register(instanceId, taskExecutor, useUIAsJSThread);
+    }
+}
+
+void AceEngine::UnRegisterFromWatchDog(int32_t instanceId)
+{
+    if (watchDog_) {
+        watchDog_->Unregister(instanceId);
     }
 }
 
