@@ -4198,6 +4198,9 @@ void V8Engine::FireExternalEvent(const std::string& componentId, const uint32_t 
     ACE_DCHECK(isolate);
     v8::Isolate::Scope isolateScope(isolate);
     v8::HandleScope handleScope(isolate);
+    if (isDestroy) {
+        return;
+    }
     auto context = isolate->GetCurrentContext();
     if (context.IsEmpty()) {
         LOGE("FireExternalEvent context is empty");

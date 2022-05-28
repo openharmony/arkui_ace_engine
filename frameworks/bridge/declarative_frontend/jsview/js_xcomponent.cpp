@@ -57,7 +57,6 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     auto deleteCallback = [xcId = id->ToString()]() {
         XComponentClient::GetInstance().DeleteFromXcomponentsMapById(xcId);
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(xcId);
-        XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(xcId);
     };
     xcomponentComponent->RegisterDeleteCallback(deleteCallback);
 
