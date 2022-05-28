@@ -48,6 +48,13 @@ const char ATTRS_COMMON_ENABLE[] = "enable";
 // zindex
 const char ATTRS_COMMON_ZINDEX[] = "zIndex";
 
+// root view
+const char ROOT_ETS_TAG[] = "root";
+// page view
+const char PAGE_ETS_TAG[] = "page";
+// js custom view
+const char JS_VIEW_ETS_TAG[] = "JsView";
+
 // column
 const char COLUMN_COMPONENT_TAG[] = "ColumnComponent";
 const char COLUMN_ETS_TAG[] = "Column";

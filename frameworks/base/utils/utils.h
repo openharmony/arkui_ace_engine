@@ -19,6 +19,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <stdint.h>
 
 namespace OHOS::Ace {
 
@@ -37,55 +38,148 @@ T ConvertIntToEnum(int32_t index, const T (&values)[N], T defaultValue)
     return defaultValue;
 }
 
-inline bool NearEqual(const double left, const double right, const double epsilon)
+template<typename T>
+class Epsilon {
+public:
+    inline static T Value();
+};
+
+template<>
+inline float Epsilon<float>::Value()
 {
-    return (std::abs(left - right) <= epsilon);
+    static constexpr float epsilon = 0.0001F;
+    return epsilon;
 }
 
-inline bool NearZero(const double value, const double epsilon)
+template<>
+inline double Epsilon<double>::Value()
 {
-    return NearEqual(value, 0.0, epsilon);
+    static constexpr double epsilon = 0.000001;
+    return epsilon;
 }
 
-inline bool NearEqual(const double left, const double right)
+template<>
+inline int32_t Epsilon<int32_t>::Value()
 {
-    static constexpr double epsilon = 0.000001f;
-    return NearEqual(left, right, epsilon);
+    return 0;
 }
 
-inline bool NearZero(const double left)
+template<>
+inline uint32_t Epsilon<uint32_t>::Value()
 {
-    static constexpr double epsilon = 0.000001f;
-    return NearZero(left, epsilon);
+    return 0;
 }
 
-inline bool LessOrEqual(double left, double right)
+template<typename T>
+inline bool NearEqual(T left, T right, T epsilon)
 {
-    static constexpr double epsilon = 0.000001f;
-    return (left - right) < epsilon;
+    return ((left - right) <= epsilon) && ((left - right) >= -epsilon);
 }
 
-inline bool LessNotEqual(double left, double right)
+template<typename T>
+inline bool NearZero(T value, T epsilon)
 {
-    static constexpr double epsilon = -0.000001f;
-    return (left - right) < epsilon;
+    return NearEqual(value, static_cast<T>(0), epsilon);
 }
 
-inline bool GreatOrEqual(double left, double right)
+template<typename T>
+inline bool NearEqual(T left, T right)
 {
-    static constexpr double epsilon = -0.000001f;
-    return (left - right) > epsilon;
+    return NearEqual(left, right, Epsilon<T>::Value());
 }
 
-inline bool GreatNotEqual(double left, double right)
+inline bool NearEqual(double left, float right)
 {
-    static constexpr double epsilon = 0.000001f;
-    return (left - right) > epsilon;
+    return NearEqual(left, static_cast<double>(right));
+}
+
+inline bool NearEqual(float left, double right)
+{
+    return NearEqual(left, static_cast<float>(right));
+}
+
+template<typename T>
+inline bool NearZero(T left)
+{
+    return NearZero(left, Epsilon<T>::Value());
+}
+
+template<typename T>
+inline bool LessNotEqual(T left, T right)
+{
+    return (left - right) < -Epsilon<T>::Value();
+}
+
+inline bool LessNotEqual(double left, int32_t right)
+{
+    return LessNotEqual(left, static_cast<double>(right));
+}
+
+template<typename T>
+inline bool LessOrEqual(T left, T right)
+{
+    return LessNotEqual(left, right) || NearEqual(left, right);
+}
+
+inline bool LessOrEqual(float left, double right)
+{
+    return LessNotEqual(left, static_cast<float>(right)) || NearEqual(left, static_cast<float>(right));
+}
+
+template<typename T>
+inline bool GreatNotEqual(T left, T right)
+{
+    return (left - right) > Epsilon<T>::Value();
+}
+
+inline bool GreatNotEqual(float left, double right)
+{
+    return GreatNotEqual(left, static_cast<float>(right));
+}
+
+inline bool GreatNotEqual(double left, float right)
+{
+    return GreatNotEqual(left, static_cast<double>(right));
+}
+
+template<typename T>
+inline bool GreatOrEqual(T left, T right)
+{
+    return GreatNotEqual(left, right) || NearEqual(left, right);
+}
+
+inline bool GreatOrEqual(float left, double right)
+{
+    return GreatNotEqual(left, static_cast<float>(right)) || NearEqual(left, static_cast<float>(right));
+}
+
+template<typename T>
+inline bool Negative(T value)
+{
+    return LessNotEqual(value, static_cast<T>(0));
+}
+
+template<typename T>
+inline bool NonNegative(T value)
+{
+    return GreatOrEqual(value, static_cast<T>(0));
+}
+
+template<typename T>
+inline bool Positive(T value)
+{
+    return GreatNotEqual(value, static_cast<T>(0));
+}
+
+template<typename T>
+inline bool NonPositive(T value)
+{
+    return LessOrEqual(value, static_cast<T>(0));
 }
 
 inline double Round(double rawNum)
 {
-    static constexpr double epsilon = 0.000001f;
+    static constexpr double epsilon = 0.000001;
     return std::round(rawNum + epsilon);
 }
 

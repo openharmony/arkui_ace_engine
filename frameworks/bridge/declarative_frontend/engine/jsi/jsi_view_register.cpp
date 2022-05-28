@@ -91,10 +91,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_progress.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_slider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 #endif
@@ -155,7 +155,7 @@
 
 namespace OHOS::Ace::Framework {
 
-panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     LOGI("Load Document start");
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -178,41 +178,44 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo *runtim
     JsiDeclarativeEngineInstance::RootViewHandle(obj);
 
     LOGI("Load Document setting root view, page[%{public}d]", page->GetPageId());
-    auto rootComponent = view->CreateComponent();
-    std::list<RefPtr<Component>> stackChildren;
-    stackChildren.emplace_back(rootComponent);
-    auto rootStackComponent = AceType::MakeRefPtr<StackComponent>(
-        Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, stackChildren);
-    rootStackComponent->SetMainStackSize(MainStackSize::MAX);
-    auto rootComposed = AceType::MakeRefPtr<ComposedComponent>("0", "root");
-    rootComposed->SetChild(rootStackComponent);
-    page->SetRootComponent(rootComposed);
-
-    page->SetPageTransition(view->BuildPageTransitionComponent());
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto pageRootNode = view->CreateNode();
+        page->SetRootNode(pageRootNode);
+    } else {
+        auto rootComponent = view->CreateComponent();
+        std::list<RefPtr<Component>> stackChildren;
+        stackChildren.emplace_back(rootComponent);
+        auto rootStackComponent = AceType::MakeRefPtr<StackComponent>(
+            Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, stackChildren);
+        rootStackComponent->SetMainStackSize(MainStackSize::MAX);
+        auto rootComposed = AceType::MakeRefPtr<ComposedComponent>("0", "root");
+        rootComposed->SetChild(rootStackComponent);
+        page->SetRootComponent(rootComposed);
+        page->SetPageTransition(view->BuildPageTransitionComponent());
+    }
     // We are done, tell to the JSAgePage
     page->SetPageCreated();
     page->SetDeclarativeOnPageAppearCallback([view]() { view->FireOnShow(); });
     page->SetDeclarativeOnPageDisAppearCallback([view]() { view->FireOnHide(); });
     page->SetDeclarativeOnBackPressCallback([view]() { return view->FireOnBackPress(); });
     page->SetDeclarativeOnPageRefreshCallback([view]() { view->MarkNeedUpdate(); });
-    page->SetDeclarativeOnUpdateWithValueParamsCallback(
-        [view](const std::string& params) {
-            if (view && !params.empty()) {
-                view->ExecuteUpdateWithValueParams(params);
-            }
-        });
+    page->SetDeclarativeOnUpdateWithValueParamsCallback([view](const std::string& params) {
+        if (view && !params.empty()) {
+            view->ExecuteUpdateWithValueParams(params);
+        }
+    });
 
     return panda::JSValueRef::Undefined(vm);
 }
 
-panda::Local<panda::JSValueRef> JsDumpMemoryStats(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsDumpMemoryStats(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     LOGD("dumpMemoryStats: Not Implemented for ARK. UnSupported");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     return panda::JSValueRef::Undefined(vm);
 }
 
-panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     LOGD("JsGetI18nResource");
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -279,7 +282,7 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo *run
     return panda::StringRef::NewFromUtf8(vm, resultStr.c_str());
 }
 
-panda::Local<panda::JSValueRef> JsGetMediaResource(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsGetMediaResource(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     LOGD("JsGetMediaResource");
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -315,7 +318,7 @@ RefPtr<FrontendDelegate> JsGetFrontendDelegate()
     return engineInstance->GetDelegate();
 }
 
-panda::Local<panda::JSValueRef> JsGetInspectorNodes(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsGetInspectorNodes(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     if (vm == nullptr) {
@@ -332,7 +335,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodes(panda::JsiRuntimeCallInfo *r
     return panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, nodeInfos->ToString().c_str()));
 }
 
-panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     size_t argc = runtimeCallInfo->GetArgsNumber();
@@ -360,7 +363,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::JsiRuntimeCallInfo
     return panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, nodeInfo->ToString().c_str()));
 }
 
-panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     if (vm == nullptr) {
@@ -381,7 +384,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo *ru
     return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
 }
 
-panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     size_t argc = runtimeCallInfo->GetArgsNumber();
@@ -410,7 +413,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo *r
     return panda::StringRef::NewFromUtf8(vm, resultStr.c_str());
 }
 
-panda::Local<panda::JSValueRef> JsSendEventByKey(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsSendEventByKey(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     size_t argc = runtimeCallInfo->GetArgsNumber();
@@ -462,7 +465,7 @@ static TouchEvent GetTouchPointFromJS(const JsiObject& value)
     return touchPoint;
 }
 
-panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     size_t argc = runtimeCallInfo->GetArgsNumber();
@@ -517,7 +520,7 @@ static V2::JsKeyEvent GetKeyEventFromJS(const JsiObject& value)
     return keyEvent;
 }
 
-panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     size_t argc = runtimeCallInfo->GetArgsNumber();
@@ -569,7 +572,7 @@ static MouseEvent GetMouseEventFromJS(const JsiObject& value)
     return mouseEvent;
 }
 
-panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     size_t argc = runtimeCallInfo->GetArgsNumber();
@@ -600,7 +603,7 @@ panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo *runt
     return panda::BooleanRef::New(vm, result);
 }
 
-panda::Local<panda::JSValueRef> Vp2Px(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> Vp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     size_t argc = runtimeCallInfo->GetArgsNumber();
@@ -620,7 +623,7 @@ panda::Local<panda::JSValueRef> Vp2Px(panda::JsiRuntimeCallInfo *runtimeCallInfo
     return panda::NumberRef::New(vm, pxValue);
 }
 
-panda::Local<panda::JSValueRef> Px2Vp(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> Px2Vp(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     size_t argc = runtimeCallInfo->GetArgsNumber();
@@ -645,7 +648,7 @@ panda::Local<panda::JSValueRef> Px2Vp(panda::JsiRuntimeCallInfo *runtimeCallInfo
     return panda::NumberRef::New(vm, vpValue);
 }
 
-panda::Local<panda::JSValueRef> Fp2Px(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> Fp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     size_t argc = runtimeCallInfo->GetArgsNumber();
@@ -676,7 +679,7 @@ panda::Local<panda::JSValueRef> Fp2Px(panda::JsiRuntimeCallInfo *runtimeCallInfo
     return panda::NumberRef::New(vm, pxValue);
 }
 
-panda::Local<panda::JSValueRef> Px2Fp(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> Px2Fp(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     size_t argc = runtimeCallInfo->GetArgsNumber();
@@ -711,7 +714,7 @@ panda::Local<panda::JSValueRef> Px2Fp(panda::JsiRuntimeCallInfo *runtimeCallInfo
     return panda::NumberRef::New(vm, fpValue);
 }
 
-panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     size_t argc = runtimeCallInfo->GetArgsNumber();
@@ -738,7 +741,7 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo *runtimeCallInf
     return panda::NumberRef::New(vm, pxValue);
 }
 
-panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     size_t argc = runtimeCallInfo->GetArgsNumber();
@@ -766,7 +769,7 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo *runtimeCallInf
     return panda::NumberRef::New(vm, lpxValue);
 }
 
-panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     size_t argc = runtimeCallInfo->GetArgsNumber();
@@ -792,81 +795,37 @@ panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::JsiRuntimeCallInfo 
     return panda::JSValueRef::Undefined(vm);
 }
 
-static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
-    { "Flex", JSFlexImpl::JSBind },
-    { "Text", JSText::JSBind },
-    { "Animator", JSAnimator::JSBind },
-    { "SpringProp", JSAnimator::JSBind },
-    { "SpringMotion", JSAnimator::JSBind },
-    { "ScrollMotion", JSAnimator::JSBind },
-    { "Animator", JSAnimator::JSBind },
-    { "Span", JSSpan::JSBind },
-    { "Button", JSButton::JSBind },
-    { "Canvas", JSCanvas::JSBind },
-    { "LazyForEach", JSLazyForEach::JSBind },
-    { "List", JSList::JSBind },
-    { "ListItem", JSListItem::JSBind },
-    { "LoadingProgress", JSLoadingProgress::JSBind },
-    { "Image", JSImage::JSBind },
-    { "ImageAnimator", JSImageAnimator::JSBind },
-    { "Counter", JSCounter::JSBind },
-    { "Progress", JSProgress::JSBind },
-    { "Column", JSColumn::JSBind },
-    { "Row", JSRow::JSBind },
-    { "Grid", JSGrid::JSBind },
-    { "GridItem", JSGridItem::JSBind },
-    { "GridContainer", JSGridContainer::JSBind },
-    { "Slider", JSSlider::JSBind },
-    { "Stack", JSStack::JSBind },
-    { "ForEach", JSForEach::JSBind },
-    { "Divider", JSDivider::JSBind },
-    { "Swiper", JSSwiper::JSBind },
-    { "Panel", JSSlidingPanel::JSBind },
-    { "Navigation", JSNavigation::JSBind },
-    { "Navigator", JSNavigator::JSBind },
-    { "ColumnSplit", JSColumnSplit::JSBind },
-    { "If", JSIfElse::JSBind },
-    { "Scroll", JSScroll::JSBind },
-    { "ScrollBar", JSScrollBar::JSBind },
-    {"Stepper", JSStepper::JSBind },
-    {"StepperItem", JSStepperItem::JSBind },
-    { "Toggle", JSToggle::JSBind },
-    { "Blank", JSBlank::JSBind },
-    { "Calendar", JSCalendar::JSBind },
-    { "Rect", JSRect::JSBind },
-    { "Shape", JSShape::JSBind },
-    { "Path", JSPath::JSBind },
-    { "Circle", JSCircle::JSBind },
-    { "Line", JSLine::JSBind },
-    { "Polygon", JSPolygon::JSBind },
-    { "Polyline", JSPolyline::JSBind },
-    { "Ellipse", JSEllipse::JSBind },
-    { "Tabs", JSTabs::JSBind },
-    { "TabContent", JSTabContent::JSBind },
-    { "TextPicker", JSTextPicker::JSBind },
-    { "TimePicker", JSTimePicker::JSBind },
-    { "TextPickerDialog", JSTextPickerDialog::JSBind },
-    { "TimePickerDialog", JSTimePickerDialog::JSBind },
-    { "DatePicker", JSDatePicker::JSBind },
-    { "DatePickerDialog", JSDatePickerDialog::JSBind },
-    { "PageTransitionEnter", JSPageTransition::JSBind },
-    { "PageTransitionExit", JSPageTransition::JSBind },
-    { "RowSplit", JSRowSplit::JSBind },
-    { "ColumnSplit", JSColumnSplit::JSBind },
-    { "AlphabetIndexer", JSIndexer::JSBind },
-    { "Hyperlink", JSHyperlink::JSBind },
-    { "Radio", JSRadio::JSBind },
-    { "ActionSheet", JSActionSheet::JSBind },
-    { "AlertDialog", JSAlertDialog::JSBind },
-    { "ContextMenu", JSContextMenu::JSBind },
+static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = { { "Flex",
+                                                                                                   JSFlexImpl::JSBind },
+    { "Text", JSText::JSBind }, { "Animator", JSAnimator::JSBind }, { "SpringProp", JSAnimator::JSBind },
+    { "SpringMotion", JSAnimator::JSBind }, { "ScrollMotion", JSAnimator::JSBind }, { "Animator", JSAnimator::JSBind },
+    { "Span", JSSpan::JSBind }, { "Button", JSButton::JSBind }, { "Canvas", JSCanvas::JSBind },
+    { "LazyForEach", JSLazyForEach::JSBind }, { "List", JSList::JSBind }, { "ListItem", JSListItem::JSBind },
+    { "LoadingProgress", JSLoadingProgress::JSBind }, { "Image", JSImage::JSBind },
+    { "ImageAnimator", JSImageAnimator::JSBind }, { "Counter", JSCounter::JSBind }, { "Progress", JSProgress::JSBind },
+    { "Column", JSColumn::JSBind }, { "Row", JSRow::JSBind }, { "Grid", JSGrid::JSBind },
+    { "GridItem", JSGridItem::JSBind }, { "GridContainer", JSGridContainer::JSBind }, { "Slider", JSSlider::JSBind },
+    { "Stack", JSStack::JSBind }, { "ForEach", JSForEach::JSBind }, { "Divider", JSDivider::JSBind },
+    { "Swiper", JSSwiper::JSBind }, { "Panel", JSSlidingPanel::JSBind }, { "Navigation", JSNavigation::JSBind },
+    { "Navigator", JSNavigator::JSBind }, { "ColumnSplit", JSColumnSplit::JSBind }, { "If", JSIfElse::JSBind },
+    { "Scroll", JSScroll::JSBind }, { "ScrollBar", JSScrollBar::JSBind }, { "Stepper", JSStepper::JSBind },
+    { "StepperItem", JSStepperItem::JSBind }, { "Toggle", JSToggle::JSBind }, { "Blank", JSBlank::JSBind },
+    { "Calendar", JSCalendar::JSBind }, { "Rect", JSRect::JSBind }, { "Shape", JSShape::JSBind },
+    { "Path", JSPath::JSBind }, { "Circle", JSCircle::JSBind }, { "Line", JSLine::JSBind },
+    { "Polygon", JSPolygon::JSBind }, { "Polyline", JSPolyline::JSBind }, { "Ellipse", JSEllipse::JSBind },
+    { "Tabs", JSTabs::JSBind }, { "TabContent", JSTabContent::JSBind }, { "TextPicker", JSTextPicker::JSBind },
+    { "TimePicker", JSTimePicker::JSBind }, { "TextPickerDialog", JSTextPickerDialog::JSBind },
+    { "TimePickerDialog", JSTimePickerDialog::JSBind }, { "DatePicker", JSDatePicker::JSBind },
+    { "DatePickerDialog", JSDatePickerDialog::JSBind }, { "PageTransitionEnter", JSPageTransition::JSBind },
+    { "PageTransitionExit", JSPageTransition::JSBind }, { "RowSplit", JSRowSplit::JSBind },
+    { "ColumnSplit", JSColumnSplit::JSBind }, { "AlphabetIndexer", JSIndexer::JSBind },
+    { "Hyperlink", JSHyperlink::JSBind }, { "Radio", JSRadio::JSBind }, { "ActionSheet", JSActionSheet::JSBind },
+    { "AlertDialog", JSAlertDialog::JSBind }, { "ContextMenu", JSContextMenu::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
 #endif
-    { "TextArea", JSTextArea::JSBind },
-    { "TextInput", JSTextInput::JSBind },
-    { "TextClock", JSTextClock::JSBind },
-    { "SideBarContainer", JSSideBar::JSBind },
-    { "QRCode", JSQRCode::JSBind },
+    { "TextArea", JSTextArea::JSBind }, { "TextInput", JSTextInput::JSBind }, { "TextClock", JSTextClock::JSBind },
+    { "SideBarContainer", JSSideBar::JSBind }, { "QRCode", JSQRCode::JSBind },
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
 #endif
@@ -875,67 +834,38 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #ifdef WEB_SUPPORTED
-    { "RichText", JSRichText::JSBind },
-    { "Web", JSWeb::JSBind },
-    { "WebController", JSWebController::JSBind },
+    { "RichText", JSRichText::JSBind }, { "Web", JSWeb::JSBind }, { "WebController", JSWebController::JSBind },
 #endif
 #endif
 #ifndef WEARABLE_PRODUCT
-    { "Camera", JSCamera::JSBind },
-    { "Piece", JSPiece::JSBind },
-    { "Rating", JSRating::JSBind },
-    { "RemoteWindow", JSRemoteWindow::JSBind },
-    { "Video", JSVideo::JSBind },
+    { "Camera", JSCamera::JSBind }, { "Piece", JSPiece::JSBind }, { "Rating", JSRating::JSBind },
+    { "RemoteWindow", JSRemoteWindow::JSBind }, { "Video", JSVideo::JSBind },
 #endif
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-    { "XComponent", JSXComponent::JSBind },
-    { "XComponentController", JSXComponentController::JSBind },
+    { "XComponent", JSXComponent::JSBind }, { "XComponentController", JSXComponentController::JSBind },
 #endif
-    { "DataPanel", JSDataPanel::JSBind },
-    { "Badge", JSBadge::JSBind },
-    { "Gauge", JSGauge::JSBind },
-    { "Marquee", JSMarquee::JSBind },
-    { "Gesture", JSGesture::JSBind },
-    { "TapGesture", JSGesture::JSBind },
-    { "LongPressGesture", JSGesture::JSBind },
-    { "PanGesture", JSGesture::JSBind },
-    { "SwipeGesture", JSGesture::JSBind },
-    { "PinchGesture", JSGesture::JSBind },
-    { "RotationGesture", JSGesture::JSBind },
-    { "GestureGroup", JSGesture::JSBind },
-    { "PanGestureOption", JSPanGestureOption::JSBind },
-    { "CustomDialogController", JSCustomDialogController::JSBind },
-    { "Scroller", JSScroller::JSBind },
-    { "SwiperController", JSSwiperController::JSBind },
-    { "TabsController", JSTabsController::JSBind },
-    { "CalendarController", JSCalendarController::JSBind },
+    { "DataPanel", JSDataPanel::JSBind }, { "Badge", JSBadge::JSBind }, { "Gauge", JSGauge::JSBind },
+    { "Marquee", JSMarquee::JSBind }, { "Gesture", JSGesture::JSBind }, { "TapGesture", JSGesture::JSBind },
+    { "LongPressGesture", JSGesture::JSBind }, { "PanGesture", JSGesture::JSBind },
+    { "SwipeGesture", JSGesture::JSBind }, { "PinchGesture", JSGesture::JSBind },
+    { "RotationGesture", JSGesture::JSBind }, { "GestureGroup", JSGesture::JSBind },
+    { "PanGestureOption", JSPanGestureOption::JSBind }, { "CustomDialogController", JSCustomDialogController::JSBind },
+    { "Scroller", JSScroller::JSBind }, { "SwiperController", JSSwiperController::JSBind },
+    { "TabsController", JSTabsController::JSBind }, { "CalendarController", JSCalendarController::JSBind },
     { "AbilityController", JSAbilityComponentController::JSBind },
-    { "CanvasRenderingContext2D", JSRenderingContext::JSBind},
-    { "OffscreenCanvasRenderingContext2D", JSOffscreenRenderingContext::JSBind},
-    { "CanvasGradient", JSCanvasGradient::JSBind},
-    { "ImageBitmap", JSRenderImage::JSBind},
-    { "ImageData", JSCanvasImageData::JSBind},
-    { "Path2D", JSPath2D::JSBind},
-    { "RenderingContextSettings", JSRenderingContextSettings::JSBind},
-    { "VideoController", JSVideoController::JSBind },
-    { "Search", JSSearch::JSBind },
-    { "Select", JSSelect::JSBind },
-    { "SearchController", JSSearchController::JSBind },
-    { "TextClockController", JSTextClockController::JSBind },
-    { "Sheet", JSSheet::JSBind },
-    { "JSClipboard", JSClipboard::JSBind },
-    { "PatternLock", JSPatternLock::JSBind },
-    { "PatternLockController", JSPatternLockController::JSBind },
-    { "TextTimer", JSTextTimer::JSBind },
-    { "TextAreaController", JSTextAreaController::JSBind },
-    { "TextInputController", JSTextInputController::JSBind },
-    { "TextTimerController", JSTextTimerController::JSBind },
-    { "Checkbox", JSCheckbox::JSBind },
-    { "CheckboxGroup", JSCheckboxGroup::JSBind },
-    { "Refresh", JSRefresh::JSBind },
-    { "WaterFlow", JSWaterFlow::JSBind },
-    { "FlowItem", JSWaterFlowItem::JSBind }
-};
+    { "CanvasRenderingContext2D", JSRenderingContext::JSBind },
+    { "OffscreenCanvasRenderingContext2D", JSOffscreenRenderingContext::JSBind },
+    { "CanvasGradient", JSCanvasGradient::JSBind }, { "ImageBitmap", JSRenderImage::JSBind },
+    { "ImageData", JSCanvasImageData::JSBind }, { "Path2D", JSPath2D::JSBind },
+    { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
+    { "VideoController", JSVideoController::JSBind }, { "Search", JSSearch::JSBind }, { "Select", JSSelect::JSBind },
+    { "SearchController", JSSearchController::JSBind }, { "TextClockController", JSTextClockController::JSBind },
+    { "Sheet", JSSheet::JSBind }, { "JSClipboard", JSClipboard::JSBind }, { "PatternLock", JSPatternLock::JSBind },
+    { "PatternLockController", JSPatternLockController::JSBind }, { "TextTimer", JSTextTimer::JSBind },
+    { "TextAreaController", JSTextAreaController::JSBind }, { "TextInputController", JSTextInputController::JSBind },
+    { "TextTimerController", JSTextTimerController::JSBind }, { "Checkbox", JSCheckbox::JSBind },
+    { "CheckboxGroup", JSCheckboxGroup::JSBind }, { "Refresh", JSRefresh::JSBind },
+    { "WaterFlow", JSWaterFlow::JSBind }, { "FlowItem", JSWaterFlowItem::JSBind } };
 
 void RegisterAllModule(BindingTarget globalObj)
 {
@@ -1055,14 +985,14 @@ void JsRegisterViews(BindingTarget globalObj)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendKeyEvent));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendMouseEvent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendMouseEvent));
-    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "vp2px"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Vp2Px));
-    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2vp"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Vp));
-    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "fp2px"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Fp2Px));
-    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2fp"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Fp));
+    globalObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "vp2px"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Vp2Px));
+    globalObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "px2vp"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Vp));
+    globalObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "fp2px"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Fp2Px));
+    globalObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "px2fp"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Fp));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "lpx2px"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Lpx2Px));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2lpx"),
@@ -1105,28 +1035,28 @@ void JsRegisterViews(BindingTarget globalObj)
     JSObjectTemplate toggleType;
     toggleType.Constant("Checkbox", 0);
     toggleType.Constant("Switch", 1);
-    toggleType.Constant("Button", 2);  // 2 means index of constant
+    toggleType.Constant("Button", 2); // 2 means index of constant
 
     JSObjectTemplate refreshStatus;
     refreshStatus.Constant("Inactive", 0);
     refreshStatus.Constant("Drag", 1);
     refreshStatus.Constant("OverDrag", 2);
     refreshStatus.Constant("Refresh", 3); // 3 means index of constant
-    refreshStatus.Constant("Done", 4); // 4 means index of constant
+    refreshStatus.Constant("Done", 4);    // 4 means index of constant
 
     JSObjectTemplate mainAxisAlign;
     mainAxisAlign.Constant("Start", 1);
-    mainAxisAlign.Constant("Center", 2);  // 2 means index of constant
-    mainAxisAlign.Constant("End", 3);  // 3 means index of constant
-    mainAxisAlign.Constant("SpaceBetween", 6);  // 6 means index of constant
+    mainAxisAlign.Constant("Center", 2);       // 2 means index of constant
+    mainAxisAlign.Constant("End", 3);          // 3 means index of constant
+    mainAxisAlign.Constant("SpaceBetween", 6); // 6 means index of constant
     mainAxisAlign.Constant("SpaceAround", 7);  // 7 means index of constant
 
     JSObjectTemplate crossAxisAlign;
     crossAxisAlign.Constant("Start", 1);
 
     crossAxisAlign.Constant("Center", 2);  // 2 means index of constant
-    crossAxisAlign.Constant("End", 3);  // 3 means index of constant
-    crossAxisAlign.Constant("Stretch", 4);  // 4 means index of constant
+    crossAxisAlign.Constant("End", 3);     // 3 means index of constant
+    crossAxisAlign.Constant("Stretch", 4); // 4 means index of constant
 
     JSObjectTemplate direction;
     direction.Constant("Horizontal", 0);
@@ -1134,21 +1064,21 @@ void JsRegisterViews(BindingTarget globalObj)
 
     JSObjectTemplate loadingProgressStyle;
     loadingProgressStyle.Constant("Default", 1);
-    loadingProgressStyle.Constant("Circular", 2);  // 2 means index of constant
+    loadingProgressStyle.Constant("Circular", 2); // 2 means index of constant
     loadingProgressStyle.Constant("Orbital", 3);  // 3 means index of constant
 
     JSObjectTemplate progressStyle;
     progressStyle.Constant("Linear", 0);
-    progressStyle.Constant("Ring", 1);  // 1 means index of constant
-    progressStyle.Constant("Eclipse", 2);  // 2 means index of constant
-    progressStyle.Constant("ScaleRing", 3);  // 3 means index of constant
-    progressStyle.Constant("Capsule", 4);  // 4 means index of constant
+    progressStyle.Constant("Ring", 1);      // 1 means index of constant
+    progressStyle.Constant("Eclipse", 2);   // 2 means index of constant
+    progressStyle.Constant("ScaleRing", 3); // 3 means index of constant
+    progressStyle.Constant("Capsule", 4);   // 4 means index of constant
 
     JSObjectTemplate stackFit;
     stackFit.Constant("Keep", 0);
     stackFit.Constant("Stretch", 1);
-    stackFit.Constant("Inherit", 2);  // 2 means index of constant
-    stackFit.Constant("FirstChild", 3);  // 3 means index of constant
+    stackFit.Constant("Inherit", 2);    // 2 means index of constant
+    stackFit.Constant("FirstChild", 3); // 3 means index of constant
 
     JSObjectTemplate overflow;
     overflow.Constant("Clip", 0);
@@ -1157,12 +1087,12 @@ void JsRegisterViews(BindingTarget globalObj)
     JSObjectTemplate alignment;
     alignment.Constant("TopLeft", 0);
     alignment.Constant("TopCenter", 1);
-    alignment.Constant("TopRight", 2);   // 2 means index of constant
-    alignment.Constant("CenterLeft", 3);  // 3 means index of constant
-    alignment.Constant("Center", 4);  // 4 means index of constant
+    alignment.Constant("TopRight", 2);     // 2 means index of constant
+    alignment.Constant("CenterLeft", 3);   // 3 means index of constant
+    alignment.Constant("Center", 4);       // 4 means index of constant
     alignment.Constant("CenterRight", 5);  // 5 means index of constant
-    alignment.Constant("BottomLeft", 6);  // 6 means index of constant
-    alignment.Constant("BottomCenter", 7);  // 7 means index of constant
+    alignment.Constant("BottomLeft", 6);   // 6 means index of constant
+    alignment.Constant("BottomCenter", 7); // 7 means index of constant
     alignment.Constant("BottomRight", 8);  // 8 means index of constant
 
     JSObjectTemplate sliderStyle;
@@ -1172,12 +1102,12 @@ void JsRegisterViews(BindingTarget globalObj)
     JSObjectTemplate sliderChangeMode;
     sliderChangeMode.Constant("Begin", 0);
     sliderChangeMode.Constant("Moving", 1);
-    sliderChangeMode.Constant("End", 2);  // 2 means index of constant
+    sliderChangeMode.Constant("End", 2); // 2 means index of constant
 
     JSObjectTemplate pickerStyle;
     pickerStyle.Constant("Inline", 0);
     pickerStyle.Constant("Block", 1);
-    pickerStyle.Constant("Fade", 2);  // 2 means index of constant
+    pickerStyle.Constant("Fade", 2); // 2 means index of constant
 
     JSObjectTemplate buttonType;
     buttonType.Constant("Normal", (int)ButtonType::NORMAL);

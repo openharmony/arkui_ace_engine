@@ -658,7 +658,7 @@ bool RenderNode::MarkNeedRenderSpecial()
 
 void RenderNode::MarkNeedRender(bool overlay)
 {
-    if (!needRender_) {
+    if (!isRenderDirtyMarked_) {
         SetNeedRender(true);
         if (IsRepaintBoundary()) {
             auto pipelineContext = context_.Upgrade();
@@ -1415,7 +1415,7 @@ void RenderNode::ClearRenderObject()
     disappearingNodes_.clear();
     parent_ = nullptr;
     depth_ = 0;
-    needRender_ = false;
+    isRenderDirtyMarked_ = false;
     needLayout_ = false;
     visible_ = true;
     hidden_ = false;

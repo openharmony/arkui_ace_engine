@@ -347,14 +347,14 @@ public:
 
     void SetNeedRender(bool needRender)
     {
-        needRender_ = needRender;
+        isRenderDirtyMarked_ = needRender;
     }
 
     void MarkNeedRender(bool overlay = false);
 
     bool NeedRender() const
     {
-        return needRender_;
+        return isRenderDirtyMarked_;
     }
 
     void SetDepth(int32_t depth);
@@ -1285,7 +1285,7 @@ private:
     Rect paintRect_;
     WeakPtr<RenderNode> parent_;
     int32_t depth_ = 0;
-    bool needRender_ = false;
+    bool isRenderDirtyMarked_ = false;
     bool needLayout_ = false;
     bool visible_ = true;
     bool takeBoundary_ = false;

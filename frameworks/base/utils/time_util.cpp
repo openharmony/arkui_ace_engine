@@ -90,13 +90,14 @@ TimeOfNow GetTimeOfNow(double hoursWest)
 bool IsHoursWestValid(double& hoursWest)
 {
     // valid hoursWest is within [-14, 12]
-    bool isValid = GreatOrEqual(hoursWest, HOURS_WEST_LOWER_LIMIT) && LessOrEqual(hoursWest, HOURS_WEST_UPPER_LIMIT);
+    bool isValid = GreatOrEqual(hoursWest, static_cast<double>(HOURS_WEST_LOWER_LIMIT)) &&
+                   LessOrEqual(hoursWest, static_cast<double>(HOURS_WEST_UPPER_LIMIT));
     if (!isValid) {
         return false;
     }
     // Theoretically, the time zone range should be [-12, +12], but some countries and regions that cross the
     // International Date Line use -13(UTC+13) and -14(UTC+14) to keep the whole country or region at the same date.
-    bool isSpecialTimeZone = LessNotEqual(hoursWest, HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT);
+    bool isSpecialTimeZone = LessNotEqual(hoursWest, static_cast<double>(HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT));
     if (isSpecialTimeZone) {
         hoursWest += TWENTY_FOUR_HOUR_BASE;
     }
@@ -105,8 +106,8 @@ bool IsHoursWestValid(double& hoursWest)
 
 bool IsDayTime(const TimeOfNow& timeOfNow)
 {
-    return GreatOrEqual(timeOfNow.hour24_, DAY_TIME_LOWER_LIMIT) &&
-           LessNotEqual(timeOfNow.hour24_, DAY_TIME_UPPER_LIMIT);
+    return GreatOrEqual(timeOfNow.hour24_, static_cast<double>(DAY_TIME_LOWER_LIMIT)) &&
+           LessNotEqual(timeOfNow.hour24_, static_cast<double>(DAY_TIME_UPPER_LIMIT));
 }
 
 } // namespace OHOS::Ace

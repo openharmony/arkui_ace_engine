@@ -584,7 +584,7 @@ JSValue Vp2Px(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* a
     double density = SystemProperties::GetResolution();
     double pxValue = vpValue * density;
 
-    int32_t result = GreatOrEqual(pxValue, 0) ? (pxValue + 0.5) : (pxValue - 0.5);
+    int32_t result = GreatOrEqual(pxValue, 0.0) ? (pxValue + 0.5) : (pxValue - 0.5);
     JSValue pxQJSValue = JS_NewInt32(ctx, result);
     return pxQJSValue;
 }
@@ -636,7 +636,7 @@ JSValue Fp2Px(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* a
     }
     double pxValue = fpValue * density * fontScale;
 
-    int32_t result = GreatOrEqual(pxValue, 0) ? (pxValue + 0.5) : (pxValue - 0.5);
+    int32_t result = GreatOrEqual(pxValue, 0.0) ? (pxValue + 0.5) : (pxValue - 0.5);
     JSValue pxQJSValue = JS_NewInt32(ctx, result);
     return pxQJSValue;
 }
@@ -695,7 +695,7 @@ JSValue Lpx2Px(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* 
     auto& windowConfig = frontend->GetWindowConfig();
     double pxValue = lpxValue * windowConfig.designWidthScale;
 
-    int32_t result = GreatOrEqual(pxValue, 0) ? (pxValue + 0.5) : (pxValue - 0.5);
+    int32_t result = GreatOrEqual(pxValue, 0.0) ? (pxValue + 0.5) : (pxValue - 0.5);
     JSValue lpxQJSValue = JS_NewInt32(ctx, result);
     return lpxQJSValue;
 }

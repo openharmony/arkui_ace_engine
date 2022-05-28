@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/size.h"
 #include "base/utils/macros.h"
@@ -51,6 +53,8 @@ public:
     }
 
     static const Offset GetAlignPosition(const Size& parentSize, const Size& childSize, const Alignment& alignment);
+    static NG::OffsetF GetAlignPosition(
+        const NG::SizeF& parentSize, const NG::SizeF& childSize, const Alignment& alignment);
     static const Alignment TOP_LEFT;
     static const Alignment TOP_CENTER;
     static const Alignment TOP_RIGHT;

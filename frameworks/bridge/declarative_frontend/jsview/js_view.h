@@ -18,6 +18,8 @@
 
 #include <list>
 
+#include "core/components_ng/base/composed_node.h"
+#include "core/components_ng/base/element_node.h"
 #include "core/pipeline/base/composed_component.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -42,6 +44,9 @@ public:
     void Destroy(JSView* parentCustomView);
     RefPtr<Component> CreateComponent();
     RefPtr<PageTransitionComponent> BuildPageTransitionComponent();
+
+    NG::ComposedNode::RenderResult InternalRender();
+    RefPtr<NG::ElementNode> CreateNode();
 
     void MarkNeedUpdate();
 
@@ -171,6 +176,7 @@ private:
     int32_t restoreInstanceId_ = -1;
 
     WeakPtr<OHOS::Ace::ComposedElement> element_ = nullptr;
+    WeakPtr<NG::ComposedNode> node_ = nullptr;
     bool needsUpdate_ = false;
     bool isStatic_ = false;
     bool isLazyForEachProcessed_ = false;

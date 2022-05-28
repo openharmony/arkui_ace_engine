@@ -17,6 +17,7 @@
 
 #include "base/log/ace_trace.h"
 #include "core/components/wrap/wrap_component.h"
+#include "core/components_ng/pattern/linear_layout/column_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -24,6 +25,10 @@ std::string JSColumn::inspectorTag_ = "";
 
 void JSColumn::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ColumnView::Create();
+        return;
+    }
     std::list<RefPtr<Component>> children;
     RefPtr<ColumnComponent> columnComponent =
         AceType::MakeRefPtr<OHOS::Ace::ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, children);
@@ -76,6 +81,21 @@ void JSColumn::ClearInspectorTag()
     inspectorTag_.clear();
 }
 
+void JSColumn::SetAlignItems(int32_t value)
+{
+    if ((value == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
+        (value == static_cast<int32_t>(FlexAlign::FLEX_END)) || (value == static_cast<int32_t>(FlexAlign::CENTER)) ||
+        (value == static_cast<int32_t>(FlexAlign::STRETCH))) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ColumnView::AlignItems(static_cast<FlexAlign>(value));
+            return;
+        }
+        JSFlex::SetAlignItems(value);
+    } else {
+        // FIXME: we have a design issue here, setters return void, can not signal error to JS
+        LOGE("invalid value for justifyContent");
+    }
+}
 
 void HorizontalAlignDeclaration::ConstructorCallback(const JSCallbackInfo& args)
 {
@@ -105,7 +125,7 @@ void JSColumn::JSBind(BindingTarget globalObj)
     JSClass<JSColumn>::StaticMethod("fillParent", &JSFlex::SetFillParent, opt);
     JSClass<JSColumn>::StaticMethod("wrapContent", &JSFlex::SetWrapContent, opt);
     JSClass<JSColumn>::StaticMethod("justifyContent", &JSFlex::SetJustifyContent, opt);
-    JSClass<JSColumn>::StaticMethod("alignItems", &JSFlex::SetAlignItems, opt);
+    JSClass<JSColumn>::StaticMethod("alignItems", &JSColumn::SetAlignItems, opt);
     JSClass<JSColumn>::StaticMethod("alignContent", &JSFlex::SetAlignContent, opt);
     JSClass<JSColumn>::StaticMethod("height", &JSFlex::JsHeight, opt);
     JSClass<JSColumn>::StaticMethod("width", &JSFlex::JsWidth, opt);

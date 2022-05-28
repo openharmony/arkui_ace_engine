@@ -149,19 +149,23 @@ public:
         return settings_;
     }
 
-    void SetBundlePath(const std::string& path) {
+    void SetBundlePath(const std::string& path)
+    {
         bundlePath_ = path;
     }
 
-    const std::string& GetBundlePath() const {
+    const std::string& GetBundlePath() const
+    {
         return bundlePath_;
     }
 
-    void SetFilesDataPath(const std::string& path) {
+    void SetFilesDataPath(const std::string& path)
+    {
         filesDataPath_ = path;
     }
 
-    const std::string& GetFilesDataPath() const {
+    const std::string& GetFilesDataPath() const
+    {
         return filesDataPath_;
     }
 
@@ -175,10 +179,27 @@ public:
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static void UpdateCurrent(int32_t id);
 
+    void SetUseNewPipeline()
+    {
+        useNewPipeline_ = true;
+    }
+
+    static bool IsCurrentUseNewPipeline()
+    {
+        auto container = Current();
+        return container ? container->useNewPipeline_ : false;
+    }
+
+    bool IsUseNewPipeline() const
+    {
+        return useNewPipeline_;
+    }
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;
     std::string cardHapPath_;
+    bool useNewPipeline_ = false;
 
 private:
     std::string moduleName_;

@@ -212,6 +212,7 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 
 void PipelineContext::FlushMessages()
 {
+    LOGE("FlushMessages");
     ACE_FUNCTION_TRACK();
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
@@ -783,7 +784,7 @@ void PipelineContext::SetClipHole(double left, double top, double width, double 
     transparentHole_.SetHeight(height);
 }
 
-RefPtr<Element> PipelineContext::SetupRootElement()
+void PipelineContext::SetupRootElement()
 {
     CHECK_RUN_ON(UI);
     RefPtr<StageComponent> rootStage = AceType::MakeRefPtr<StageComponent>(std::list<RefPtr<Component>>());
@@ -828,7 +829,7 @@ RefPtr<Element> PipelineContext::SetupRootElement()
     if (!rootElement_) {
         LOGE("SetupRootElement failed!");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
-        return RefPtr<Element>();
+        return;
     }
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
@@ -853,7 +854,6 @@ RefPtr<Element> PipelineContext::SetupRootElement()
 
     requestedRenderNode_.Reset();
     LOGI("SetupRootElement success!");
-    return rootElement_;
 }
 
 RefPtr<Element> PipelineContext::SetupSubRootElement()
@@ -1848,8 +1848,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
         std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
-            ? AceApplicationInfo::GetInstance().GetPackageName()
-            : AceApplicationInfo::GetInstance().GetProcessName();
+                                      ? AceApplicationInfo::GetInstance().GetPackageName()
+                                      : AceApplicationInfo::GetInstance().GetProcessName();
         rsUIDirector_->SetTimeStamp(nanoTimestamp, abilityName);
     }
 #endif
@@ -2038,6 +2038,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
             transitionElement->InitTransitionClip();
         }
     }
+    LOGI("Surface size changed SetRootSizeWithWidthHeight, [%{public}d * %{public}d]", width, height);
 #ifdef ENABLE_ROSEN_BACKEND
     WindowSizeChangeAnimate(width, height, type);
 #else
@@ -2140,10 +2141,10 @@ void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height, 
     }
     if (GetIsDeclarative()) {
         viewScale_ = DEFAULT_VIEW_SCALE;
-        designWidthScale_ = static_cast<double>(width) / windowConfig.designWidth;
+        designWidthScale_ = static_cast<float>(width) / windowConfig.designWidth;
         windowConfig.designWidthScale = designWidthScale_;
     } else {
-        viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
+        viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<float>(width) / windowConfig.designWidth;
         if (NearZero(viewScale_)) {
             LOGE("the view scale is zero");
             return;
@@ -2228,7 +2229,6 @@ void PipelineContext::SetAppBgColor(const Color& color)
         }
     }
     renderRoot->SetBgColor(appBgColor_);
-
 }
 
 void PipelineContext::Finish(bool autoFinish) const
@@ -3660,19 +3660,19 @@ void PipelineContext::RemoveTouchPipeline(WeakPtr<PipelineContext> context)
     }
 }
 
-void PipelineContext::PostAsyncEvent(TaskExecutor::Task&& task)
+void PipelineContext::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type)
 {
     if (taskExecutor_) {
-        taskExecutor_->PostTask(std::move(task), TaskExecutor::TaskType::UI);
+        taskExecutor_->PostTask(std::move(task), type);
     } else {
         LOGE("the task executor is nullptr");
     }
 }
 
-void PipelineContext::PostAsyncEvent(const TaskExecutor::Task& task)
+void PipelineContext::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type)
 {
     if (taskExecutor_) {
-        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+        taskExecutor_->PostTask(task, type);
     } else {
         LOGE("the task executor is nullptr");
     }

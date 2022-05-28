@@ -590,7 +590,7 @@ void RenderButton::SetProgress(uint32_t progress)
         return;
     }
     needUpdateAnimation_ = false;
-    if (!NearEqual(progress, previousValue_)) {
+    if (!NearEqual(static_cast<double>(progress), previousValue_)) {
         animationDuring_ = std::chrono::steady_clock::now() - previousUpdateTime_;
         percentChange_ = progress - previousValue_;
         previousValue_ = progress;

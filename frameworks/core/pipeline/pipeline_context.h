@@ -100,7 +100,7 @@ struct WindowBlurInfo {
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 using SubscribeCtrlACallback = std::function<void()>;
 
-class ACE_EXPORT PipelineContext final : public AceType {
+class ACE_EXPORT PipelineContext : public AceType {
     DECLARE_ACE_TYPE(PipelineContext, AceType);
 
 public:
@@ -120,7 +120,7 @@ public:
 
     ~PipelineContext() override;
 
-    RefPtr<Element> SetupRootElement();
+    virtual void SetupRootElement();
 
     // This is used for subwindow, when the subwindow is created,a new subrootElement will be built
     RefPtr<Element> SetupSubRootElement();
@@ -265,9 +265,9 @@ public:
         eventTrigger_.TriggerSyncEvent(marker, std::forward<Args>(args)...);
     }
 
-    void PostAsyncEvent(TaskExecutor::Task&& task);
+    void PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
-    void PostAsyncEvent(const TaskExecutor::Task& task);
+    void PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED);
@@ -391,7 +391,6 @@ public:
     }
     void NotifyDispatchTouchEventDismiss(const TouchEvent& event) const;
 
-
     float GetViewScale() const
     {
         return viewScale_;
@@ -401,6 +400,18 @@ public:
     double GetDipScale() const
     {
         return dipScale_;
+    }
+
+    // Get the widnow design scale used to covert lpx to logic px.
+    double GetLogicScale() const
+    {
+        return designWidthScale_;
+    }
+
+    // Get the font scale used to covert fp to logic px.
+    double GetFontUnitScale() const
+    {
+        return dipScale_ * fontScale_;
     }
 
     double GetRootHeight() const
@@ -1248,13 +1259,21 @@ public:
         return isDragStart_;
     }
 
+protected:
+    virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
+    virtual void SetRootRect(double width, double height, double offset = 0.0) const;
+    virtual void FlushPipelineWithoutAnimation();
+    void FlushMessages();
+
+    std::unique_ptr<Window> window_;
+    std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
+    RefPtr<ThemeManager> themeManager_;
+    bool hasIdleTasks_ = false;
+
 private:
-    void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
-    void FlushPipelineWithoutAnimation();
     void FlushLayout();
     void FlushGeometryProperties();
     void FlushRender();
-    void FlushMessages();
     void FlushRenderFinish();
     void FireVisibleChangeEvent();
     void FlushPredictLayout(int64_t deadline);
@@ -1264,7 +1283,6 @@ private:
     void ProcessPreFlush();
     void ProcessPostFlush();
     void SetRootSizeWithWidthHeight(int32_t width, int32_t height, int32_t offset = 0);
-    void SetRootRect(double width, double height, double offset = 0.0) const;
     void FlushBuildAndLayoutBeforeSurfaceReady();
     void FlushAnimationTasks();
     void DumpAccessibility(const std::vector<std::string>& params) const;
@@ -1320,7 +1338,6 @@ private:
     std::list<RefPtr<FlushEvent>> postFlushListeners_;
     std::list<RefPtr<FlushEvent>> postAnimationFlushListeners_;
     std::list<RefPtr<FlushEvent>> preFlushListeners_;
-    std::unique_ptr<Window> window_;
     RefPtr<FocusAnimationManager> focusAnimationManager_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
@@ -1332,7 +1349,6 @@ private:
     WeakPtr<Frontend> weakFrontend_;
     RefPtr<ImageCache> imageCache_;
     RefPtr<FontManager> fontManager_;
-    RefPtr<ThemeManager> themeManager_;
     RefPtr<SharedImageManager> sharedImageManager_;
     std::list<std::function<void()>> buildAfterCallback_;
     RefPtr<RenderFactory> renderFactory_;
@@ -1413,7 +1429,6 @@ private:
     double rootWidth_ = 0.0;
     bool needForcedRefresh_ = false;
     bool isFlushingAnimation_ = false;
-    bool hasIdleTasks_ = false;
     bool isMoving_ = false;
     std::atomic<bool> onShow_ = true;
     bool isKeyEvent_ = false;
@@ -1468,7 +1483,6 @@ private:
     Offset pluginEventOffset_ { 0, 0 };
 
     bool isRebuildFinished_ = false;
-    std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
 
     std::function<void(const std::string&)> onVsyncProfiler_;
 

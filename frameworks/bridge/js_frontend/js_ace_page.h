@@ -16,10 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_JS_ACE_PAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_JS_ACE_PAGE_H
 
+#include <functional>
 #include <mutex>
 #include <string>
 #include <unordered_set>
-#include <functional>
 #include <vector>
 
 #include "base/utils/macros.h"
@@ -29,6 +29,7 @@
 #include "core/components/checkable/radio_group_component.h"
 #include "core/components/page/page_target.h"
 #include "core/components/page_transition/page_transition_component.h"
+#include "core/components_ng/base/element_node.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/utils/source_map.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -265,6 +266,16 @@ public:
         component_ = component;
     }
 
+    void SetRootNode(const RefPtr<NG::ElementNode>& node)
+    {
+        pageRootNode_ = node;
+    }
+
+    const RefPtr<NG::ElementNode>& GetRootNode() const
+    {
+        return pageRootNode_;
+    }
+
     void SetPageMap(const std::string& pageMap)
     {
         pageMap_ = AceType::MakeRefPtr<RevSourceMap>();
@@ -366,6 +377,7 @@ private:
     WeakPtr<PipelineContext> pipelineContext_;
     RefPtr<PageTransitionComponent> pageTransition_;
     RefPtr<Component> component_;
+    RefPtr<NG::ElementNode> pageRootNode_;
     RefPtr<DOMDocument> domDoc_;
     std::string url_;
     WeakPtr<StageElement> container_;

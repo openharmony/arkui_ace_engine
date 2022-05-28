@@ -49,6 +49,21 @@ const Offset Alignment::GetAlignPosition(const Size& parentSize, const Size& chi
     return offset;
 }
 
+NG::OffsetF Alignment::GetAlignPosition(
+    const NG::SizeF& parentSize, const NG::SizeF& childSize, const Alignment& alignment)
+{
+    NG::OffsetF translateF;
+    if (GreatOrEqual(parentSize.Width(), childSize.Width())) {
+        translateF.SetX(
+            (1.0f + static_cast<float>(alignment.GetHorizontal())) * (parentSize.Width() - childSize.Width()) / 2.0f);
+    }
+    if (GreatOrEqual(parentSize.Height(), childSize.Height())) {
+        translateF.SetY(
+            (1.0f + static_cast<float>(alignment.GetVertical())) * (parentSize.Height() - childSize.Height()) / 2.0f);
+    }
+    return translateF;
+}
+
 std::string Alignment::GetAlignmentStr(TextDirection direction) const
 {
     std::string result = "";

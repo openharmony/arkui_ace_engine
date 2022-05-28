@@ -42,6 +42,7 @@
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/pipeline/pipeline_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/card_frontend/card_frontend.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
@@ -321,14 +322,16 @@ void AceContainer::OnActive(int32_t instanceId)
         return;
     }
 
-    taskExecutor->PostTask([container]() {
-        auto pipelineContext = container->GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("pipeline context is null, OnActive failed.");
-            return;
-        }
-        pipelineContext->WindowFocus(true);
-    }, TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(
+        [container]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (!pipelineContext) {
+                LOGE("pipeline context is null, OnActive failed.");
+                return;
+            }
+            pipelineContext->WindowFocus(true);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::OnInactive(int32_t instanceId)
@@ -352,15 +355,17 @@ void AceContainer::OnInactive(int32_t instanceId)
         return;
     }
 
-    taskExecutor->PostTask([container]() {
-        auto pipelineContext = container->GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("pipeline context is null, OnInactive failed.");
-            return;
-        }
-        pipelineContext->WindowFocus(false);
-        pipelineContext->RootLostFocus();
-    }, TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(
+        [container]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (!pipelineContext) {
+                LOGE("pipeline context is null, OnInactive failed.");
+                return;
+            }
+            pipelineContext->WindowFocus(false);
+            pipelineContext->RootLostFocus();
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::OnNewWant(int32_t instanceId, const std::string& data)
@@ -541,9 +546,7 @@ void AceContainer::InitializeCallback()
     auto&& mouseEventCallback = [context = pipelineContext_, id = instanceId_](const MouseEvent& event) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event]() {
-                context->OnMouseEvent(event);
-            }, TaskExecutor::TaskType::UI);
+            [context, event]() { context->OnMouseEvent(event); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
 
@@ -659,12 +662,14 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     }
     container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
     if (taskExecutor) {
-        taskExecutor->PostTask([instanceId] {
-            LOGI("Remove on Platform thread...");
-            EngineHelper::RemoveEngine(instanceId);
-            AceEngine::Get().RemoveContainer(instanceId);
-            ConnectServerManager::Get().RemoveInstance(instanceId);
-        }, TaskExecutor::TaskType::PLATFORM);
+        taskExecutor->PostTask(
+            [instanceId] {
+                LOGI("Remove on Platform thread...");
+                EngineHelper::RemoveEngine(instanceId);
+                AceEngine::Get().RemoveContainer(instanceId);
+                ConnectServerManager::Get().RemoveInstance(instanceId);
+            },
+            TaskExecutor::TaskType::PLATFORM);
     }
 }
 
@@ -930,8 +935,13 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         aceView_->SetCreateTime(createTime_);
     }
     resRegister_ = aceView_->GetPlatformResRegister();
-    pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
-        std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+    if (useNewPipeline_) {
+        pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
+            std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+    } else {
+        pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
+            std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+    }
     pipelineContext_->SetRootSize(density, width, height);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());

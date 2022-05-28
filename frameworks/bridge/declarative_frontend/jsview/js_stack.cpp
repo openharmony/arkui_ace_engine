@@ -16,6 +16,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
 
 #include "base/log/ace_trace.h"
+#include "core/common/container.h"
+#include "core/components_ng/pattern/stack/stack_view.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -194,6 +196,11 @@ void JSStack::Create(const JSCallbackInfo& info)
             alignment = (value >= 0 && value < static_cast<int>(ALIGNMENT_ARR.size())) ? ALIGNMENT_ARR[value]
                                                                                        : Alignment::CENTER;
         }
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::StackView::Create(alignment);
+        return;
     }
 
     std::list<RefPtr<Component>> children;

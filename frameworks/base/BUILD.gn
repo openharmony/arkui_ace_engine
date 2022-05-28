@@ -50,6 +50,7 @@ template("ace_base_source_set") {
       "utils/base_id.cpp",
       "utils/date_util.cpp",
       "utils/resource_configuration.cpp",
+      "utils/string_expression.cpp",
       "utils/string_utils.cpp",
       "utils/time_util.cpp",
     ]

@@ -83,8 +83,8 @@ Matrix4 Matrix4::CreateSkew(double x, double y)
 Matrix4 Matrix4::CreatePerspective(double distance)
 {
     auto result = CreateIdentity();
-    if (GreatNotEqual(distance, 0.0f)) {
-        result.matrix4x4_[2][3] = -1.0f / distance;
+    if (GreatNotEqual(distance, 0.0)) {
+        result.matrix4x4_[2][3] = -1.0 / distance;
     }
     return result;
 }
