@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/aafwk/standard/aafwk.gni")
+import("//foundation/ability/ability_runtime/aafwk.gni")
 
 config("uiservice_manager_public_config") {
   visibility = [ ":*" ]
