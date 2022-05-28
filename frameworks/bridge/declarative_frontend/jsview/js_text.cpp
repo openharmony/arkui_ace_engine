@@ -475,20 +475,26 @@ RefPtr<TextComponentV2> JSText::GetComponent()
     return component;
 }
 
-void JSText::SetCopyOption(int32_t value)
+void JSText::SetCopyOption(const JSCallbackInfo& info)
 {
+    if (info.Length() == 0) {
+        return;
+    }
     auto component = GetComponent();
     if (!component) {
         LOGE("component is not valid");
         return;
     }
-
-    if ((value >= static_cast<int32_t>(CopyOption::NoCopy)) &&
-        (value <= static_cast<int32_t>(CopyOption::Distributed))) {
-        component->SetCopyOption(static_cast<CopyOption>(value));
-    } else {
-        LOGE("invalid value for copyOption");
+    auto enable = false;
+    auto copyOption = CopyOption::NoCopy;
+    if (info[0]->IsBoolean()) {
+        enable = info[0]->ToBoolean();
+        copyOption = enable ? CopyOption::Distributed : CopyOption::NoCopy;
+    } else if (info[0]->IsNumber()) {
+        auto emunNumber = info[0]->ToNumber<int>() + 1;
+        copyOption = static_cast<CopyOption>(emunNumber);
     }
+    component->SetCopyOption(copyOption);
 }
 
 } // namespace OHOS::Ace::Framework

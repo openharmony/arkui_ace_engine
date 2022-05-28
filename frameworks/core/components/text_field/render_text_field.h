@@ -22,6 +22,7 @@
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
 #include "base/geometry/size.h"
+#include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
@@ -88,7 +89,7 @@ public:
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling = false);
     bool CloseKeyboard(bool forceClose = false);
     void ShowError(const std::string& errorText, bool resetToStart = true);
-    void ShowTextOverlay(const Offset& showOffset, bool isSingleHandle);
+    void ShowTextOverlay(const Offset& showOffset, bool isSingleHandle, bool isUsingMouse = false);
     void SetOnValueChange(const std::function<void()>& onValueChange);
     const std::function<void()>& GetOnValueChange() const;
     void SetOnKeyboardClose(const std::function<void(bool)>& onKeyboardClose);

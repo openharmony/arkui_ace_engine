@@ -101,6 +101,8 @@ public:
 
     void OnLongPress(const LongPressInfo& longPressInfo);
     void ShowTextOverlay(const Offset& showOffset) override;
+    void ShowTextOverlay(const Offset& showOffset, bool isUsingMouse);
+    bool HandleMouseEvent(const MouseEvent& event) override;
     void RegisterCallbacksToOverlay() override;
     const TextSelection GetTextSelect() const
     {

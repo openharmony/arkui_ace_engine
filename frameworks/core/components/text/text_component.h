@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -68,6 +69,7 @@ public:
     Dimension GetDeclarationHeight() const;
 
     void SetRemoteMessageEvent(const EventMarker& eventId);
+
 private:
     RefPtr<TextDeclaration> declaration_;
 };

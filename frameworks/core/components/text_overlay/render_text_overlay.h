@@ -202,6 +202,8 @@ private:
 
     std::function<void(bool, bool)> onFocusChange_;
     std::function<void(bool, bool, bool, bool, bool)> onRebuild_;
+
+    bool isUsingMouse_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -31,11 +31,6 @@ const uint32_t TEST_OPTION_COUNT = 10u;
 
 } // namespace
 
-RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t instanceId)
-{
-    return nullptr;
-}
-
 class MenuComponentTest : public testing::Test {
 public:
     static void SetUpTestCase() {}

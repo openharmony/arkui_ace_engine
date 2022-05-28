@@ -116,10 +116,6 @@ RefPtr<RenderContext> RenderContext::Create()
     return AceType::MakeRefPtr<MockRenderContext>();
 }
 
-RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t instanceId)
-{
-    return nullptr;
-}
 
 class TweenTestUtils {
 public:

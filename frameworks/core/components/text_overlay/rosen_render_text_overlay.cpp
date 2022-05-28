@@ -252,17 +252,14 @@ bool RosenRenderTextOverlay::CheckNeedPaintMore()
 {
     auto overlay = overlayComponent_.Upgrade();
     if (overlay && !overlay->HasMoreButton()) {
-        LOGD("not has a more button");
         return false;
     }
 
     if (isDragging_) {
-        LOGD("handle is in dragging");
         return false;
     }
 
     if (hasPoped_ || GetChildren().empty()) {
-        LOGD("overlay has been poped");
         RestoreMoreButtonStyle();
         return false;
     }
