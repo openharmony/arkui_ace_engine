@@ -127,6 +127,7 @@ const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP {
     { "focusable", [](const InspectorNode& inspector) { return inspector.GetFocusable(); } },
     { "scrollable", [](const InspectorNode& inspector) { return inspector.GetScrollable(); } },
     { "long-clickable", [](const InspectorNode& inspector) { return inspector.GetLongClickable(); } },
+    { "touchable", [](const InspectorNode& inspector) { return inspector.GetTouchable(); } },
     { "selected", [](const InspectorNode& inspector) { return inspector.IsSelected(); } },
     { "password", [](const InspectorNode& inspector) { return inspector.IsPassword(); } },
     { "checked", [](const InspectorNode& inspector) { return inspector.IsChecked(); } },
@@ -1599,6 +1600,14 @@ bool InspectorComposedElement::GetLongClickable() const
         return false;
     }
     return node->GetLongClickableState();
+}
+bool InspectorComposedElement::GetTouchable() const
+{
+    auto render = GetRenderBox();
+    if (!render) {
+        return false;
+    }
+    return render->IsTouchable();
 }
 bool InspectorComposedElement::IsSelected() const
 {
