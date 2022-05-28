@@ -40,6 +40,7 @@ public:
     void RemoveContainer(int32_t instanceId);
     RefPtr<Container> GetContainer(int32_t instanceId);
     void RegisterToWatchDog(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor, bool useUIAsJSThread = false);
+    void UnRegisterFromWatchDog(int32_t instanceId);
     void BuriedBomb(int32_t instanceId, uint64_t bombId);
     void DefusingBomb(int32_t instanceId);
     static AceEngine& Get();
