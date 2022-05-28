@@ -262,6 +262,7 @@ public:
     bool GetFocusable() const override;
     bool GetScrollable() const override;
     bool GetLongClickable() const override;
+    bool GetTouchable() const override;
     bool IsSelected() const override;
     bool IsPassword() const override;
     bool IsChecked() const override;
