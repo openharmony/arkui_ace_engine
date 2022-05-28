@@ -32,6 +32,8 @@ public:
 
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
+    std::string GetToggleType() const;
+    std::string GetChecked() const;
     std::string GetCheckBoxName() const;
     std::string GetCheckBoxGroup() const;
     std::string GetSelectedColor() const;
