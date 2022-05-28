@@ -132,6 +132,18 @@ int SystemProperties::GetArkProperties()
     return system::GetIntParameter<int>("persist.ark.properties", -1);
 }
 
+size_t SystemProperties::GetGcThreadNum()
+{
+    size_t defaultGcThreadNums = 7;
+    return system::GetUintParameter<size_t>("persist.ark.gcthreads", defaultGcThreadNums);
+}
+
+size_t SystemProperties::GetLongPauseTime()
+{
+    size_t defaultLongPauseTime = 40; // 40ms
+    return system::GetUintParameter<size_t>("persist.ark.longpausetime", defaultLongPauseTime);
+}
+
 bool SystemProperties::GetAsmInterpreterEnabled()
 {
     return system::GetParameter("persist.ark.asminterpreter", "false") == "true";
