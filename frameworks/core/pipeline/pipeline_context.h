@@ -1475,6 +1475,7 @@ private:
     bool isShiftDown_ = false;
     bool isCtrlDown_ = false;
     bool isKeyboardA_ = false;
+    bool isTabKeyPressed_ = false;
     SubscribeCtrlACallback subscribeCtrlA_;
 
     int32_t appLabelId_ = 0;
