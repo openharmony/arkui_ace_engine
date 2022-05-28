@@ -243,7 +243,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     // Increase the cpu frequency when sliding start.
     auto currentTime = GetSysTimestamp();
     auto increaseCpuTime = currentTime - startIncreaseTime_;
-    if (moved_ == false || increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
+    if (!moved_ || increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
         LOGI("HandleDragStart increase cpu frequency, moved_ = %{public}d", moved_);
         startIncreaseTime_ = currentTime;
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
@@ -281,15 +281,8 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     if (RelatedScrollEventPrepare(Offset(0.0, info.GetMainDelta()))) {
         return;
     }
-    if (info.GetSourceDevice() == SourceType::MOUSE) {
-        if (UpdateScrollPosition(info.GetMainDelta(), SCROLL_FROM_AXIS)) {
-            moved_ = true;
-        }
-    } else {
-        if (UpdateScrollPosition(info.GetMainDelta(), SCROLL_FROM_UPDATE)) {
-            moved_ = true;
-        }
-    }
+    auto source = info.GetSourceDevice() == SourceType::MOUSE ? SCROLL_FROM_AXIS : SCROLL_FROM_UPDATE;
+    moved_ = UpdateScrollPosition(info.GetMainDelta(), source);
 }
 
 void Scrollable::HandleDragEnd(const GestureEvent& info)
@@ -349,7 +342,6 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
             }
         });
         controller_->PlayMotion(motion_);
-        moved_ = true;
     }
 }
 
@@ -437,7 +429,7 @@ void Scrollable::ProcessScrollMotionStop()
         ProcessScrollOverCallback(currentVelocity_);
     } else {
         currentVelocity_ = 0.0;
-        if (isDragUpdateStop_ || isTouching_) {
+        if (isDragUpdateStop_) {
             return;
         }
         moved_ = false;
