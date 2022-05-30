@@ -579,6 +579,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("databaseAccess", &JSWeb::DatabaseAccess);
     JSClass<JSWeb>::StaticMethod("textZoomAtio", &JSWeb::TextZoomAtio);
     JSClass<JSWeb>::StaticMethod("webDebuggingAccess", &JSWeb::WebDebuggingAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("initialScale", &JSWeb::InitialScale);
+    JSClass<JSWeb>::StaticMethod("backgroundColor", &JSWeb::BackgroundColor);
     JSClass<JSWeb>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSWeb>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSWeb>::StaticMethod("onMouse", &JSWeb::OnMouse);
@@ -1420,5 +1422,35 @@ void JSWeb::OnScaleChange(const JSCallbackInfo& args)
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetScaleChangeId(eventMarker);
+}
+
+void JSWeb::BackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Color backgroundColor;
+    if (!ParseJsColor(info[0], backgroundColor)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetBackgroundColor(backgroundColor.GetValue());
+}
+
+void JSWeb::InitialScale(float scale)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetInitialScale(scale);
 }
 } // namespace OHOS::Ace::Framework

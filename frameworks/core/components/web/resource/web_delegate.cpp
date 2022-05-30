@@ -351,6 +351,28 @@ bool WebDelegate::AccessStep(int32_t step)
     return false;
 }
 
+void WebDelegate::BackOrForward(int32_t step)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("Get context failed, it is null.");
+        return;
+    }
+
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), step] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                LOGE("Get delegate failed, it is null.");
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->NavigateBackOrForward(step);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 bool WebDelegate::AccessBackward()
 {
     auto delegate = WeakClaim(this).Upgrade();
@@ -617,6 +639,30 @@ int WebDelegate::GetHitTestResult()
         }
     }
     return static_cast<int>(webHitType);
+}
+
+int WebDelegate::GetContentHeight()
+{
+    if (nweb_) {
+        return nweb_->ContentHeight();
+    }
+    return 0;
+}
+
+int WebDelegate::GetWebId()
+{
+    if (nweb_) {
+        return nweb_->GetWebId();
+    }
+    return -1;
+}
+
+std::string WebDelegate::GetTitle()
+{
+    if (nweb_) {
+        return nweb_->Title();
+    }
+    return "";
 }
 
 bool WebDelegate::SaveCookieSync()
@@ -932,6 +978,12 @@ void WebDelegate::SetWebCallBack()
             }
             return false;
         });
+        webController->SetBackOrForwardImpl([weak = WeakClaim(this)](int32_t step) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->BackOrForward(step);
+            }
+        });
         webController->SetAccessBackwardImpl([weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             if (delegate) {
@@ -990,6 +1042,30 @@ void WebDelegate::SetWebCallBack()
                     return delegate->GetHitTestResult();
                 }
                 return 0;
+            });
+        webController->SetGetContentHeightImpl(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    return delegate->GetContentHeight();
+                }
+                return 0;
+            });
+        webController->SetGetWebIdImpl(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    return delegate->GetWebId();
+                }
+                return -1;
+            });
+        webController->SetGetTitleImpl(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    return delegate->GetTitle();
+                }
+                return std::string();
             });
         webController->SetSaveCookieSyncImpl(
             [weak = WeakClaim(this)]() {
@@ -1074,6 +1150,24 @@ void WebDelegate::SetWebCallBack()
                     auto delegate = weak.Upgrade();
                     if (delegate) {
                         delegate->Zoom(factor);
+                    }
+                });
+            });
+        webController->SetZoomInImpl(
+            [weak = WeakClaim(this), uiTaskExecutor]() {
+                uiTaskExecutor.PostTask([weak]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->ZoomIn();
+                    }
+                });
+            });
+        webController->SetZoomOutImpl(
+            [weak = WeakClaim(this), uiTaskExecutor]() {
+                uiTaskExecutor.PostTask([weak]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        delegate->ZoomOut();
                     }
                 });
             });
@@ -1242,6 +1336,40 @@ void WebDelegate::UpdateUserAgent(const std::string& userAgent)
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
                 setting->PutUserAgent(userAgent);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateBackgroundColor(const int backgroundColor)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), backgroundColor]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                delegate->nweb_->PutBackgroundColor(backgroundColor);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateInitialScale(float scale)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), scale]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                delegate->nweb_->InitialScale(scale);
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -1570,6 +1698,48 @@ void WebDelegate::Zoom(float factor)
             }
             if (delegate->nweb_) {
                 delegate->nweb_->Zoom(factor);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::ZoomIn()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                LOGE("Get delegate failed, it is null.");
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->ZoomIn();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::ZoomOut()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                LOGE("Get delegate failed, it is null.");
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->ZoomOut();
             }
         },
         TaskExecutor::TaskType::PLATFORM);

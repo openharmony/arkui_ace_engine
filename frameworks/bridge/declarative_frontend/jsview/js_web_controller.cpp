@@ -211,6 +211,12 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("accessBackward", &JSWebController::AccessBackward);
     JSClass<JSWebController>::CustomMethod("clearHistory", &JSWebController::ClearHistory);
     JSClass<JSWebController>::CustomMethod("getCookieManager", &JSWebController::GetCookieManager);
+    JSClass<JSWebController>::CustomMethod("backOrForward", &JSWebController::BackOrForward);
+    JSClass<JSWebController>::CustomMethod("zoomIn", &JSWebController::ZoomIn);
+    JSClass<JSWebController>::CustomMethod("zoomOut", &JSWebController::ZoomOut);
+    JSClass<JSWebController>::CustomMethod("getContentHeight", &JSWebController::GetContentHeight);
+    JSClass<JSWebController>::CustomMethod("getTitle", &JSWebController::GetTitle);
+    JSClass<JSWebController>::CustomMethod("getWebId", &JSWebController::GetWebId);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
     JSWebCookie::JSBind(globalObj);
 }
@@ -463,6 +469,70 @@ void JSWebController::GetCookieManager(const JSCallbackInfo& args)
             jsWebCookieInit_ = true;
         }
         args.SetReturnValue(jsWebCookie_);
+    }
+}
+
+void JSWebController::BackOrForward(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController BackOrForward");
+    ContainerScope scope(instanceId_);
+    int32_t step = 0;
+    if (args.Length() < 1 || !ConvertFromJSValue(args[0], step)) {
+        LOGE("BackOrForward parameter is invalid.");
+        return;
+    }
+    if (webController_) {
+        webController_->BackOrForward(step);
+    }
+}
+
+void JSWebController::ZoomIn(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController ZoomIn");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        bool result = webController_->ZoomIn();
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+    }
+}
+
+void JSWebController::ZoomOut(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController ZoomOut");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        bool result = webController_->ZoomOut();
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+    }
+}
+
+void JSWebController::GetContentHeight(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController GetContentHeight");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        int result = webController_->GetContentHeight();
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+    }
+}
+
+void JSWebController::GetTitle(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController GetTitle");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        std::string result = webController_->GetTitle();
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+    }
+}
+
+void JSWebController::GetWebId(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController GetWebId");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        int result = webController_->GetWebId();
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
     }
 }
 

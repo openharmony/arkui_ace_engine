@@ -128,6 +128,7 @@ public:
     using AccessBackwardImpl = std::function<bool()>;
     using AccessForwardImpl = std::function<bool()>;
     using AccessStepImpl = std::function<bool(int32_t)>;
+    using BackOrForwardImpl = std::function<void(int32_t)>;
     using BackwardImpl = std::function<void()>;
     using ForwardImpl = std::function<void()>;
     using ClearHistoryImpl = std::function<void()>;
@@ -144,6 +145,13 @@ public:
             return accessStepImpl_(step);
         }
         return false;
+    }
+
+    void BackOrForward(int32_t step)
+    {
+        if (backOrForwardImpl_) {
+            return backOrForwardImpl_(step);
+        }
     }
 
     bool AccessBackward()
@@ -204,6 +212,11 @@ public:
     void SetAccessStepImpl(AccessStepImpl && accessStepImpl)
     {
         accessStepImpl_ = std::move(accessStepImpl);
+    }
+
+    void SetBackOrForwardImpl(BackOrForwardImpl && backOrForwardImpl)
+    {
+        backOrForwardImpl_ = std::move(backOrForwardImpl);
     }
 
     void SetBackwardImpl(BackwardImpl && backwardImpl)
@@ -294,9 +307,39 @@ public:
         }
     }
 
-    void SetZoomImpl(ZoomImpl && zoomImpl)
+    void SetZoomImpl(ZoomImpl&& zoomImpl)
     {
         zoomImpl_ = std::move(zoomImpl);
+    }
+
+    using ZoomInImpl = std::function<void()>;
+    bool ZoomIn() const
+    {
+        if (zoomInImpl_) {
+            zoomInImpl_();
+            return true;
+        }
+        return false;
+    }
+
+    void SetZoomInImpl(ZoomInImpl&& zoomInImpl)
+    {
+        zoomInImpl_ = std::move(zoomInImpl);
+    }
+
+    using ZoomOutImpl = std::function<void()>;
+    bool ZoomOut() const
+    {
+        if (zoomOutImpl_) {
+            zoomOutImpl_();
+            return true;
+        }
+        return false;
+    }
+
+    void SetZoomOutImpl(ZoomOutImpl&& zoomOutImpl)
+    {
+        zoomOutImpl_ = std::move(zoomOutImpl);
     }
 
     using RefreshImpl = std::function<void()>;
@@ -351,6 +394,45 @@ public:
         cookieManager_->SetGetCookieImpl(std::move(getCookieImpl_));
         cookieManager_->SetDeleteEntirelyCookieImpl(std::move(deleteEntirelyCookieImpl_));
         return cookieManager_;
+    }
+
+    using GetContentHeightImpl = std::function<int()>;
+    int GetContentHeight()
+    {
+        if (getContentHeightImpl_) {
+            return getContentHeightImpl_();
+        }
+        return 0;
+    }
+    void SetGetContentHeightImpl(GetContentHeightImpl&& getContentHeightImpl)
+    {
+        getContentHeightImpl_ = getContentHeightImpl;
+    }
+
+    using GetWebIdImpl = std::function<int()>;
+    int GetWebId()
+    {
+        if (getWebIdImpl_) {
+            return getWebIdImpl_();
+        }
+        return -1;
+    }
+    void SetGetWebIdImpl(GetWebIdImpl&& getWebIdImpl)
+    {
+        getWebIdImpl_ = getWebIdImpl;
+    }
+
+    using GetTitleImpl = std::function<std::string()>;
+    std::string GetTitle()
+    {
+        if (getTitleImpl_) {
+            return getTitleImpl_();
+        }
+        return "";
+    }
+    void SetGetTitleImpl(GetTitleImpl&& getTitleImpl)
+    {
+        getTitleImpl_ = getTitleImpl;
     }
 
     using SetCookieImpl = std::function<bool(const std::string&, const std::string&)>;
@@ -475,6 +557,7 @@ private:
     AccessBackwardImpl accessBackwardImpl_;
     AccessForwardImpl accessForwardImpl_;
     AccessStepImpl accessStepImpl_;
+    BackOrForwardImpl backOrForwardImpl_;
     BackwardImpl backwardImpl_;
     ForwardImpl forwardimpl_;
     ClearHistoryImpl clearHistoryImpl_;
@@ -483,11 +566,16 @@ private:
     OnInactiveImpl onInactiveImpl_;
     OnActiveImpl onActiveImpl_;
     ZoomImpl zoomImpl_;
+    ZoomInImpl zoomInImpl_;
+    ZoomOutImpl zoomOutImpl_;
     LoadDataWithBaseUrlImpl loadDataWithBaseUrlImpl_;
     InitJavascriptInterface initJavascriptInterface_;
     RefreshImpl refreshImpl_;
     StopLoadingImpl stopLoadingImpl_;
     GetHitTestResultImpl getHitTestResultImpl_;
+    GetContentHeightImpl getContentHeightImpl_;
+    GetWebIdImpl getWebIdImpl_;
+    GetTitleImpl getTitleImpl_;
     SaveCookieSyncImpl saveCookieSyncImpl_;
     SetCookieImpl setCookieImpl_;
     GetCookieImpl getCookieImpl_;
@@ -496,6 +584,10 @@ private:
     RemoveJavascriptInterfaceImpl removeJavascriptInterfaceImpl_;
     WebViewJavaScriptResultCallBackImpl webViewJavaScriptResultCallBackImpl_;
     RequestFocusImpl requestFocusImpl_;
+    float initialScale_;
+    bool isInitialScaleSet_ = false;
+    int32_t backgroundColor_;
+    bool isBackgroundColor_ = false;
 };
 
 // A component can show HTML5 webpages.
@@ -858,6 +950,38 @@ public:
     void SetWebDebuggingAccessEnabled(bool isEnabled)
     {
         isWebDebuggingAccessEnabled_ = isEnabled;
+    }
+
+    bool GetIsInitialScaleSet() const
+    {
+        return isInitialScaleSet_;
+    }
+
+    float GetInitialScale() const
+    {
+        return initialScale_;
+    }
+
+    void SetInitialScale(float scale)
+    {
+        initialScale_ = scale;
+        isInitialScaleSet_ = true;
+    }
+
+    bool GetBackgroundColorEnabled() const
+    {
+        return isBackgroundColor_;
+    }
+
+    int32_t GetBackgroundColor() const
+    {
+        return backgroundColor_;
+    }
+
+    void SetBackgroundColor(int32_t backgroundColor)
+    {
+        backgroundColor_ = backgroundColor;
+        isBackgroundColor_ = true;
     }
 
     int32_t GetTextZoomAtio() const
