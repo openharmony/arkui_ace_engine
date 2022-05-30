@@ -360,10 +360,26 @@ void RenderText::OnLongPress(const LongPressInfo& longPressInfo)
 
     Offset longPressPosition = longPressInfo.GetGlobalLocation();
     InitSelection(longPressPosition, GetGlobalOffset());
-    ShowTextOverlay(longPressPosition);
+    ShowTextOverlay(longPressPosition, false);
+}
+
+bool RenderText::HandleMouseEvent(const MouseEvent& event)
+{
+    if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
+        Offset rightClickOffset = event.GetOffset();
+        ShowTextOverlay(rightClickOffset, true);
+        return true;
+    }
+
+    return false;
 }
 
 void RenderText::ShowTextOverlay(const Offset& showOffset)
+{
+    ShowTextOverlay(showOffset, false);
+}
+
+void RenderText::ShowTextOverlay(const Offset& showOffset, bool isUsingMouse)
 {
     auto selStart = textValue_.selection.GetStart();
     auto selEnd = textValue_.selection.GetEnd();
@@ -406,6 +422,7 @@ void RenderText::ShowTextOverlay(const Offset& showOffset)
     textOverlay_->SetStartHandleOffset(startHandleOffset);
     textOverlay_->SetEndHandleOffset(endHandleOffset);
     textOverlay_->SetContext(context_);
+    textOverlay_->SetisUsingMouse(isUsingMouse);
     // Add the Animation
     InitAnimation(context_);
     RegisterCallbacksToOverlay();

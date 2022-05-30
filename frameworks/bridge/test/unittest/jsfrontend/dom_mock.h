@@ -22,14 +22,6 @@
 #include "core/common/window.h"
 #include "core/pipeline/pipeline_context.h"
 
-namespace OHOS::Ace {
-
-RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t instanceId)
-{
-    return nullptr;
-}
-
-} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 
 class MockPlatformWindow : public PlatformWindow {
@@ -127,8 +119,8 @@ public:
     void OnCompleteContinuation(int32_t code) override {}
     void OnMemoryLevel(const int32_t level) override {}
     void OnSaveData(std::string& data) override {}
-    void OnSaveAbilityState (std::string& data) override {}
-    void OnRestoreAbilityState (const std::string& data) override {}
+    void OnSaveAbilityState(std::string& data) override {}
+    void OnRestoreAbilityState(const std::string& data) override {}
     void OnRemoteTerminated() override {}
     void OnNewRequest(const std::string& data) override {}
     void OnDialogUpdated(const std::string& data) override {}

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_SUBWINDOW_SUBWINDOW_H
 
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace {

@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve_animation.h"
@@ -396,7 +397,7 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
 
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         Offset rightClickOffset = event.GetOffset();
-        ShowTextOverlay(rightClickOffset, false);
+        ShowTextOverlay(rightClickOffset, false, true);
     }
 
     return true;
@@ -613,7 +614,7 @@ void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
     ShowTextOverlay(longPressPosition, false);
 }
 
-void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHandle)
+void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHandle, bool isUsingMouse)
 {
     if (!isVisible_) {
         return;
@@ -681,6 +682,7 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
     textOverlay_->SetShareButtonMarker(onShare_);
     textOverlay_->SetSearchButtonMarker(onSearch_);
     textOverlay_->SetContext(context_);
+    textOverlay_->SetisUsingMouse(isUsingMouse);
     // Add the Animation
     InitAnimation();
 
@@ -809,6 +811,7 @@ void RenderTextField::PushTextOverlayToStack()
         LOGE("TextOverlay is null");
         return;
     }
+
     hasTextOverlayPushed_ = true;
     auto lastStack = GetLastStack();
     if (!lastStack) {
@@ -819,6 +822,15 @@ void RenderTextField::PushTextOverlayToStack()
     lastStack->PushComponent(textOverlay_, false);
     stackElement_ = WeakClaim(RawPtr(lastStack));
     MarkNeedRender();
+}
+
+void RenderTextField::PopTextOverlay()
+{
+    const auto& stackElement = stackElement_.Upgrade();
+    if (stackElement) {
+        stackElement->PopTextOverlay();
+    }
+    isOverlayShowed_ = false;
 }
 
 bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling)
@@ -1134,10 +1146,10 @@ void RenderTextField::EditingValueFilter(TextEditingValue& result)
         result.text = StringUtils::ToString(wstrBeforeSelection + wstrInSelection + wstrAfterSelection);
         if (result.selection.baseOffset > result.selection.extentOffset) {
             result.selection.Update(static_cast<int32_t>(wstrBeforeSelection.length() + wstrInSelection.length()),
-                                    static_cast<int32_t>(wstrBeforeSelection.length()));
+                static_cast<int32_t>(wstrBeforeSelection.length()));
         } else {
             result.selection.Update(static_cast<int32_t>(wstrBeforeSelection.length()),
-                                    static_cast<int32_t>(wstrBeforeSelection.length() + wstrInSelection.length()));
+                static_cast<int32_t>(wstrBeforeSelection.length() + wstrInSelection.length()));
         }
     }
 }
@@ -1280,9 +1292,9 @@ bool RenderTextField::OnKeyEvent(const KeyEvent& event)
 
     if (event.action == KeyAction::DOWN) {
         cursorPositionType_ = CursorPositionType::NONE;
-        if (KeyCode::TV_CONTROL_UP <= event.code && event.code <= KeyCode::TV_CONTROL_RIGHT && (
-            event.IsKey({ KeyCode::KEY_SHIFT_LEFT, event.code }) ||
-            event.IsKey({ KeyCode::KEY_SHIFT_RIGHT, event.code }))) {
+        if (KeyCode::TV_CONTROL_UP <= event.code && event.code <= KeyCode::TV_CONTROL_RIGHT &&
+            (event.IsKey({ KeyCode::KEY_SHIFT_LEFT, event.code }) ||
+                event.IsKey({ KeyCode::KEY_SHIFT_RIGHT, event.code }))) {
             HandleOnSelect(event.code);
             return true;
         }
@@ -1309,13 +1321,13 @@ bool RenderTextField::OnKeyEvent(const KeyEvent& event)
         if (event.code == KeyCode::KEY_FORWARD_DEL) {
             int32_t startPos = GetEditingValue().selection.GetStart();
             int32_t endPos = GetEditingValue().selection.GetEnd();
-            Delete(startPos, startPos==endPos ? startPos-1 : endPos);
+            Delete(startPos, startPos == endPos ? startPos - 1 : endPos);
             return true;
         }
         if (event.code == KeyCode::KEY_DEL) {
             int32_t startPos = GetEditingValue().selection.GetStart();
             int32_t endPos = GetEditingValue().selection.GetEnd();
-            Delete(startPos, startPos==endPos ? startPos+1 : endPos);
+            Delete(startPos, startPos == endPos ? startPos + 1 : endPos);
             return true;
         }
     }
@@ -1754,9 +1766,9 @@ void RenderTextField::HandleOnSelect(KeyCode keyCode, CursorMoveSkip skip)
                 isForwardSelect = true;
             }
             if (isForwardSelect) {
-                value.UpdateSelection(startPos-1, endPos);
+                value.UpdateSelection(startPos - 1, endPos);
             } else {
-                value.UpdateSelection(startPos, endPos-1);
+                value.UpdateSelection(startPos, endPos - 1);
             }
             break;
         case KeyCode::KEY_DPAD_RIGHT:
@@ -1764,9 +1776,9 @@ void RenderTextField::HandleOnSelect(KeyCode keyCode, CursorMoveSkip skip)
                 isForwardSelect = false;
             }
             if (isForwardSelect) {
-                value.UpdateSelection(startPos+1, endPos);
+                value.UpdateSelection(startPos + 1, endPos);
             } else {
-                value.UpdateSelection(startPos, endPos+1);
+                value.UpdateSelection(startPos, endPos + 1);
             }
             break;
         default:
@@ -2212,15 +2224,6 @@ void RenderTextField::Delete(int32_t start, int32_t end)
     }
 }
 
-void RenderTextField::PopTextOverlay()
-{
-    const auto& stackElement = stackElement_.Upgrade();
-    if (stackElement) {
-        stackElement->PopTextOverlay();
-    }
-    isOverlayShowed_ = false;
-}
-
 std::string RenderTextField::ProvideRestoreInfo()
 {
     if (!onIsCurrentFocus_ || !onIsCurrentFocus_()) {
@@ -2255,8 +2258,8 @@ void RenderTextField::ApplyAspectRatio()
     auto parent = GetParent().Upgrade();
     while (parent) {
         auto renderBox = DynamicCast<RenderBox>(parent);
-        if (renderBox && !NearZero(renderBox->GetAspectRatio()) &&
-            GetLayoutParam().GetMaxSize().IsValid() && !GetLayoutParam().GetMaxSize().IsInfinite()) {
+        if (renderBox && !NearZero(renderBox->GetAspectRatio()) && GetLayoutParam().GetMaxSize().IsValid() &&
+            !GetLayoutParam().GetMaxSize().IsInfinite()) {
             height_ = Dimension(GetLayoutParam().GetMaxSize().Height());
             break;
         }

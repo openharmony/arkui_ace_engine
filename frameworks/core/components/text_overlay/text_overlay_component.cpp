@@ -23,6 +23,7 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/focus_collaboration/focus_collaboration_component.h"
+#include "core/components/image/image_component.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/text/text_component.h"
 #include "core/components/text_overlay/render_text_overlay.h"
@@ -98,9 +99,13 @@ RefPtr<Component> TextOverlayComponent::BuildChild(
     }
     column->SetMainAxisSize(MainAxisSize::MIN);
 
+    if (!isUsingMouse_) {
+        column->AppendChild(BuildToolBar(isSingleHandle, hasToolBar, hasMenu, hasIcon, hasAnimation));
+    } else {
+        column->AppendChild(BuildMenu());
+    }
     // Add toolbar.
-    column->AppendChild(BuildToolBar(isSingleHandle, hasToolBar, hasMenu, hasIcon, hasAnimation));
-    if (hasMenu) {
+    if (hasMenu && !isUsingMouse_) {
         // Add menu.
         column->AppendChild(BuildMenu());
     } else {
@@ -225,6 +230,10 @@ RefPtr<ButtonComponent> TextOverlayComponent::BuildMoreIconButton(bool hasMenu)
     }
 
     std::list<RefPtr<Component>> children;
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        children.emplace_back(AceType::MakeRefPtr<ImageComponent>(InternalResource::ResourceId::IC_MORE));
+    }
     auto button = AceType::MakeRefPtr<ButtonComponent>(children);
     button->SetIsInnerBorder(true);
     button->SetClickedEventId(moreButtonMarker_);
@@ -269,52 +278,74 @@ RefPtr<Component> TextOverlayComponent::BuildAnimation(const RefPtr<Component>& 
     return box;
 }
 
-RefPtr<Component> TextOverlayComponent::BuildMenu()
+void TextOverlayComponent::BuildMenuForDeclative(bool isSingleHandle)
+{
+    if (onCut_ && !isSingleHandle) {
+        auto optionComponent = BuildMenuOption(
+            "", InternalResource::ResourceId::NO_ID, Localization::GetInstance()->GetEntryLetters(BUTTON_CUT), false);
+        optionComponent->SetClickEvent(cutButtonMarker_);
+        menu_->AppendSelectOption(optionComponent);
+    }
+    if (onCopy_ && !isSingleHandle) {
+        auto optionComponent = BuildMenuOption(
+            "", InternalResource::ResourceId::NO_ID, Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), false);
+        optionComponent->SetClickEvent(copyButtonMarker_);
+        menu_->AppendSelectOption(optionComponent);
+    }
+
+    if (onPaste_) {
+        auto optionComponent = BuildMenuOption(
+            "", InternalResource::ResourceId::NO_ID, Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE), false);
+        optionComponent->SetClickEvent(pasteButtonMarker_);
+        menu_->AppendSelectOption(optionComponent);
+    }
+    if (onCopyAll_) {
+        auto optionComponent = BuildMenuOption("", InternalResource::ResourceId::NO_ID,
+            Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL), false);
+        optionComponent->SetClickEvent(copyAllButtonMarker_);
+        menu_->AppendSelectOption(optionComponent);
+    }
+}
+
+RefPtr<Component> TextOverlayComponent::BuildMenu(bool isSingleHandle)
 {
     if (!menu_) {
         menu_ = AceType::MakeRefPtr<SelectPopupComponent>();
         menu_->ClearAllOptions();
-
-        if (!shareButtonMarker_.IsEmpty()) {
-            auto optionComponent = BuildMenuOption("", InternalResource::ResourceId::SHARE_SVG,
-                Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE), true);
-            const auto& shareButtonMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
-            optionComponent->SetClickEvent(shareButtonMarker);
-            BackEndEventManager<void()>::GetInstance().BindBackendEvent(shareButtonMarker, [weak = WeakClaim(this)]() {
-                auto overlay = weak.Upgrade();
-                if (overlay) {
-                    overlay->OnToolBarButtonClick(overlay->shareButtonMarker_, OVERLAY_SHARE);
-                }
-            });
-            menu_->AppendSelectOption(optionComponent);
+        auto context = context_.Upgrade();
+        if (context && context->GetIsDeclarative() && isUsingMouse_) {
+            BuildMenuForDeclative(isSingleHandle);
+        } else {
+            if (!shareButtonMarker_.IsEmpty()) {
+                auto optionComponent = BuildMenuOption("", InternalResource::ResourceId::SHARE_SVG,
+                    Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE), true);
+                const auto& shareButtonMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
+                optionComponent->SetClickEvent(shareButtonMarker);
+                BackEndEventManager<void()>::GetInstance().BindBackendEvent(
+                    shareButtonMarker, [weak = WeakClaim(this)]() {
+                        auto overlay = weak.Upgrade();
+                        if (overlay) {
+                            overlay->OnToolBarButtonClick(overlay->shareButtonMarker_, OVERLAY_SHARE);
+                        }
+                    });
+                menu_->AppendSelectOption(optionComponent);
+            }
+            if (!searchButtonMarker_.IsEmpty()) {
+                auto optionComponent = BuildMenuOption("", InternalResource::ResourceId::SEARCH_SVG,
+                    Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH), true);
+                const auto& searchButtonMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
+                optionComponent->SetClickEvent(searchButtonMarker);
+                BackEndEventManager<void()>::GetInstance().BindBackendEvent(
+                    searchButtonMarker, [weak = WeakClaim(this)]() {
+                        auto overlay = weak.Upgrade();
+                        if (overlay) {
+                            overlay->OnToolBarButtonClick(overlay->searchButtonMarker_, OVERLAY_SEARCH);
+                        }
+                    });
+                menu_->AppendSelectOption(optionComponent);
+            }
         }
-        if (!searchButtonMarker_.IsEmpty()) {
-            auto optionComponent = BuildMenuOption("", InternalResource::ResourceId::SEARCH_SVG,
-                Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH), true);
-            const auto& searchButtonMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
-            optionComponent->SetClickEvent(searchButtonMarker);
-            BackEndEventManager<void()>::GetInstance().BindBackendEvent(searchButtonMarker, [weak = WeakClaim(this)]() {
-                auto overlay = weak.Upgrade();
-                if (overlay) {
-                    overlay->OnToolBarButtonClick(overlay->searchButtonMarker_, OVERLAY_SEARCH);
-                }
-            });
-            menu_->AppendSelectOption(optionComponent);
-        }
-
-        int32_t index = 0;
-        for (const auto& option : options_) {
-            auto optionComponent =
-                BuildMenuOption(option.image, InternalResource::ResourceId::NO_ID, option.text, false);
-            EventMarker clickEvent = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
-            optionComponent->SetClickEvent(clickEvent);
-            BackEndEventManager<void()>::GetInstance().BindBackendEvent(clickEvent, [weak = WeakClaim(this), index]() {
-                auto overlay = weak.Upgrade();
-                overlay->OnOptionClick(index);
-            });
-            menu_->AppendSelectOption(optionComponent);
-            ++index;
-        }
+        AddOptionForMenu();
         menu_->SetIsFullScreen(false);
         menu_->InitTheme(themeManager_);
         menu_->Initialize(accessibilityManager_.Upgrade());
@@ -324,6 +355,22 @@ RefPtr<Component> TextOverlayComponent::BuildMenu()
     box->SetChild(menu_);
     box->SetMargin(Edge(0.0_vp, OVERLAY_MARGIN_BOTTOM, 0.0_vp, 0.0_vp));
     return box;
+}
+
+void TextOverlayComponent::AddOptionForMenu()
+{
+    int32_t index = 0;
+    for (const auto& option : options_) {
+        auto optionComponent = BuildMenuOption(option.image, InternalResource::ResourceId::NO_ID, option.text, false);
+        EventMarker clickEvent = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
+        optionComponent->SetClickEvent(clickEvent);
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(clickEvent, [weak = WeakClaim(this), index]() {
+            auto overlay = weak.Upgrade();
+            overlay->OnOptionClick(index);
+        });
+        menu_->AppendSelectOption(optionComponent);
+        ++index;
+    }
 }
 
 RefPtr<OptionComponent> TextOverlayComponent::BuildMenuOption(

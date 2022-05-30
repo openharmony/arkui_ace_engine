@@ -204,7 +204,7 @@ inline RefPtr<Element> Element::DoUpdateChildWithNewComponent(
 RefPtr<Element> Element::UpdateChildWithSlot(
     const RefPtr<Element>& child, const RefPtr<Component>& newComponent, int32_t slot, int32_t renderSlot)
 {
-    LOGD("%{public}p->%{public}s::UpdateChildWithSlot(%{public}s, %{public}s, %{public}d, %{public}d)",
+    LOGI("%{public}p->%{public}s::UpdateChildWithSlot(%{public}s, %{public}s, %{public}d, %{public}d)",
         this, AceType::TypeName(this), AceType::TypeName(child), AceType::TypeName(newComponent), slot, renderSlot);
 
     // Considering 4 cases:
@@ -225,7 +225,6 @@ RefPtr<Element> Element::UpdateChildWithSlot(
     auto context = context_.Upgrade();
     if (!child->CanUpdate(newComponent)) {
         // Can not update
-
         auto needRebuildFocusElement = AceType::DynamicCast<Element>(GetFocusScope());
         if (context && needRebuildFocusElement) {
             context->AddNeedRebuildFocusElement(needRebuildFocusElement);

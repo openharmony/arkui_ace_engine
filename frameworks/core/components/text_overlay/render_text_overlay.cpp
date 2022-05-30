@@ -149,6 +149,7 @@ void RenderTextOverlay::Update(const RefPtr<Component>& component)
     clipRect_ = overlay->GetClipRect();
     textDirection_ = overlay->GetTextDirection();
     realTextDirection_ = overlay->GetRealTextDirection();
+    isUsingMouse_ = overlay->GetisUsingMouse();
     BindBackendEvent(overlay);
     UpdateWeakTextField(overlay);
     UpdateWeakText(overlay);
@@ -158,7 +159,7 @@ void RenderTextOverlay::Update(const RefPtr<Component>& component)
 void RenderTextOverlay::BindBackendEvent(const RefPtr<TextOverlayComponent>& overlay)
 {
     auto context = context_.Upgrade();
-    if (context->GetIsDeclarative()) {
+    if (context && context->GetIsDeclarative() && !isUsingMouse_) {
         BindBackendEventV2(overlay);
     } else {
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
@@ -192,15 +193,14 @@ void RenderTextOverlay::BindBackendEvent(const RefPtr<TextOverlayComponent>& ove
                     overlay->HandleCopyAll();
                 }
             });
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(
+            overlay->GetMoreButtonMarker(), [weak = WeakClaim(this)]() {
+                auto overlay = weak.Upgrade();
+                if (overlay) {
+                    overlay->HandleMoreButtonClick();
+                }
+            });
     }
-
-    BackEndEventManager<void()>::GetInstance().BindBackendEvent(
-        overlay->GetMoreButtonMarker(), [weak = WeakClaim(this)]() {
-            auto overlay = weak.Upgrade();
-            if (overlay) {
-                overlay->HandleMoreButtonClick();
-            }
-        });
 }
 
 void RenderTextOverlay::BindBackendEventV2(const RefPtr<TextOverlayComponent>& overlay)
@@ -236,15 +236,36 @@ void RenderTextOverlay::BindBackendEventV2(const RefPtr<TextOverlayComponent>& o
                 overlay->HandleCopyAll();
             }
         });
+    BackEndEventManager<void(const ClickInfo& info)>::GetInstance().BindBackendEvent(
+        overlay->GetMoreButtonMarker(), [weak = WeakClaim(this)](const ClickInfo& info) {
+            auto overlay = weak.Upgrade();
+            if (overlay) {
+                overlay->HandleMoreButtonClick();
+            }
+        });
 }
 
 void RenderTextOverlay::RemoveBackendEvent(const RefPtr<TextOverlayComponent>& overlay)
 {
-    BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetCutButtonMarker());
-    BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetCopyButtonMarker());
-    BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetPasteButtonMarker());
-    BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetCopyAllButtonMarker());
-    BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetMoreButtonMarker());
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative() && !isUsingMouse_) {
+        BackEndEventManager<void(const ClickInfo& info)>::GetInstance().RemoveBackEndEvent(
+            overlay->GetCutButtonMarker());
+        BackEndEventManager<void(const ClickInfo& info)>::GetInstance().RemoveBackEndEvent(
+            overlay->GetCopyButtonMarker());
+        BackEndEventManager<void(const ClickInfo& info)>::GetInstance().RemoveBackEndEvent(
+            overlay->GetPasteButtonMarker());
+        BackEndEventManager<void(const ClickInfo& info)>::GetInstance().RemoveBackEndEvent(
+            overlay->GetCopyAllButtonMarker());
+        BackEndEventManager<void(const ClickInfo& info)>::GetInstance().RemoveBackEndEvent(
+            overlay->GetMoreButtonMarker());
+    } else {
+        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetCutButtonMarker());
+        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetCopyButtonMarker());
+        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetPasteButtonMarker());
+        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetCopyAllButtonMarker());
+        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetMoreButtonMarker());
+    }
 }
 
 void RenderTextOverlay::UpdateWeakTextField(const RefPtr<TextOverlayComponent>& overlay)
@@ -516,7 +537,7 @@ Offset RenderTextOverlay::ComputeChildPosition(const RefPtr<RenderNode>& child)
     if (LessOrEqual(childPosition.GetX(), 0.0)) {
         childPosition.SetX(DEFAULT_SPACING);
     } else if (GreatOrEqual(
-        childPosition.GetX() + child->GetLayoutSize().Width(), GetLayoutParam().GetMaxSize().Width())) {
+                   childPosition.GetX() + child->GetLayoutSize().Width(), GetLayoutParam().GetMaxSize().Width())) {
         childPosition.SetX(GetLayoutParam().GetMaxSize().Width() - child->GetLayoutSize().Width() - DEFAULT_SPACING);
     }
     if (LessNotEqual(childPosition.GetY(), 0.0)) {
@@ -770,15 +791,18 @@ void RenderTextOverlay::HandleMoreButtonClick()
     if (!isAnimationStopped_) {
         return;
     }
-
     hasMenu_ = !hasMenu_;
+    auto context = GetContext().Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        onRebuild_(isSingleHandle_, true, true, true, false);
+        return;
+    }
     isAnimationStarted_ = false;
     isAnimationStopped_ = false;
     if (onRebuild_) {
         animateUntilPaint_ = hasMenu_;
         onRebuild_(isSingleHandle_, true, true, true, true);
     }
-
     if (!animateUntilPaint_) {
         startAnimation_(tweenOptionIn_, innerTweenOptionIn_, isSingleHandle_, true);
         StartMoreAnimation(reverse_);
@@ -930,6 +954,14 @@ void RenderTextOverlay::BuildAndStartMoreButtonAnimation()
         auto textMore = more.Upgrade();
         if (textMore) {
             textMore->reverse_ = (!textMore->reverse_);
+            textMore->renderMenu_->SetIsWattingForAnimationStart(false);
+        }
+    });
+    controller_->AddStartListener([more = AceType::WeakClaim(this)]() {
+        auto textMore = more.Upgrade();
+        if (textMore) {
+            textMore->reverse_ = (!textMore->reverse_);
+            textMore->renderMenu_->SetIsWattingForAnimationStart(true);
         }
     });
     controller_->AddInterpolator(strokeWidthAnimation);
