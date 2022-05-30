@@ -257,22 +257,6 @@ public:
 
     static bool IsScoringEnabled(const std::string& name);
 
-    static void SetWindowPos(int32_t x, int32_t y)
-    {
-        windowPosX_ = x;
-        windowPosY_ = y;
-    }
-
-    static int32_t GetWindowPosX()
-    {
-        return windowPosX_;
-    }
-
-    static int32_t GetWindowPosY()
-    {
-        return windowPosY_;
-    }
-
     static bool IsWindowSizeAnimationEnabled()
     {
         return windowAnimationEnabled_;
@@ -302,8 +286,6 @@ private:
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
-    static int32_t windowPosX_;
-    static int32_t windowPosY_;
     static bool debugBoundaryEnabled_;
     static bool gpuUploadEnabled_;
 };

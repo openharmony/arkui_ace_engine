@@ -179,8 +179,6 @@ bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
 bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 bool SystemProperties::debugEnabled_ = IsDebugEnabled();
-int32_t SystemProperties::windowPosX_ = 0;
-int32_t SystemProperties::windowPosY_ = 0;
 bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
 
 DeviceType SystemProperties::GetDeviceType()

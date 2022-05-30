@@ -124,6 +124,16 @@ public:
 
     void UpdateEventTarget(NodeId id, BaseEventInfo& info) override;
 
+    void SetWindowPos(int32_t left, int32_t top) override;
+    int32_t GetWindowLeft()
+    {
+        return windowLeft_;
+    }
+    int32_t GetWindowTop()
+    {
+        return windowTop_;
+    }
+
     bool IsDeclarative();
 
 protected:
@@ -140,6 +150,8 @@ protected:
     Offset cardOffset_;
     int32_t cardId_ = 0;
     bool isOhosHostCard_ = false;
+    int32_t windowLeft_ = 0;
+    int32_t windowTop_ = 0;
 
 private:
     RefPtr<AccessibilityNode> CreateCommonAccessibilityNode(
