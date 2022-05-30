@@ -25,11 +25,11 @@
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 namespace OHOS::Rosen {
-    struct RSWindowAnimationTarget;
+class RSSurfaceNode;
 }
 namespace OHOS::Ace::Framework {
     RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj);
-    Rosen::RSWindowAnimationTarget* CreateRSWindowAnimationTargetFromNapiValue(JSRef<JSVal> obj);
+    const std::shared_ptr<Rosen::RSSurfaceNode>& CreateRSSurfaceNodeFromNapiValue(JSRef<JSVal> obj);
 } // namespace OHOS::Ace::Framework
 #endif
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UTILS_H
