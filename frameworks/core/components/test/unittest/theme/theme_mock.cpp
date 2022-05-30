@@ -215,6 +215,10 @@ bool PipelineContext::CloseImplicitAnimation()
     return true;
 }
 
+void PipelineContext::PrepareOpenImplicitAnimation() {}
+
+void PipelineContext::PrepareCloseImplicitAnimation() {}
+
 bool PipelineContext::GetIsDeclarative() const
 {
     return true;
