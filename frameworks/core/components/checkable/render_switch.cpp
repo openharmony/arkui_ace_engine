@@ -96,6 +96,7 @@ void RenderSwitch::Update(const RefPtr<Component>& component)
         SubscribeMultiModal();
     }
 #endif
+    SetAccessibilityClickImpl();
 }
 
 void RenderSwitch::UpdateAccessibilityAttr()
@@ -253,6 +254,10 @@ void RenderSwitch::HandleDragEnd(const OHOS::Ace::Offset& updatePoint)
     UpdateUIStatus();
     if (onChange_ && isNeedCallback) {
         onChange_(checked_);
+    }
+    auto accessibilityNode = accessibilityNode_.Upgrade();
+    if (accessibilityNode) {
+        accessibilityNode->SetCheckedState(checked_);
     }
     MarkNeedRender();
 }
@@ -490,6 +495,23 @@ void RenderSwitch::InitCurrentPointPosition()
     } else {
         currentPointOriginX_ =
             oldChecked_ ? (switchSize_.Width() - pointPadding - rawPointSize_.Width()) : pointPadding;
+    }
+}
+
+void RenderSwitch::SetAccessibilityClickImpl()
+{
+    auto accessibilityNode = accessibilityNode_.Upgrade();
+    if (accessibilityNode) {
+        auto weakPtr = AceType::WeakClaim(AceType::RawPtr(clickRecognizer_));
+        accessibilityNode->AddSupportAction(AceAction::ACTION_CLICK);
+        accessibilityNode->SetClickableState(true);
+        accessibilityNode->SetCheckableState(true);
+        accessibilityNode->SetActionClickImpl([weakPtr]() {
+            auto click = weakPtr.Upgrade();
+            if (click) {
+                click->OnAccepted();
+            }
+        });
     }
 }
 

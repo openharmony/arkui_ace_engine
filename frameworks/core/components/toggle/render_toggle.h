@@ -89,6 +89,7 @@ protected:
 private:
     void ResetController(RefPtr<Animator>& controller);
     void CreateFloatAnimation(RefPtr<KeyframeAnimation<float>>& floatAnimation, float beginValue, float endValue);
+    void SetAccessibilityClickImpl();
 };
 
 } // namespace OHOS::Ace
