@@ -361,6 +361,7 @@ template("ace_core_source_set") {
       if (!use_mingw_win && !use_mac) {
         sources += [ "common/form_manager.cpp" ]
         deps += [ "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform" ]
+        external_deps = [ "form_runtime:form_manager" ]
       }
     }
 
