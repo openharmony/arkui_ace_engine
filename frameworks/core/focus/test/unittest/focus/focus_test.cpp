@@ -187,6 +187,10 @@ bool PipelineContext::CloseImplicitAnimation()
     return true;
 }
 
+void PipelineContext::PrepareOpenImplicitAnimation() {}
+
+void PipelineContext::PrepareCloseImplicitAnimation() {}
+
 void PipelineContext::AddGeometryChangedNode(const RefPtr<RenderNode>& renderNode) {}
 
 void PipelineContext::ForceLayoutForImplicitAnimation() {}

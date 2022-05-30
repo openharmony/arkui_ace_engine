@@ -756,8 +756,12 @@ public:
     bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
         const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr);
 
+    void PrepareOpenImplicitAnimation();
+
     void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
         const std::function<void()>& finishCallBack = nullptr);
+
+    void PrepareCloseImplicitAnimation();
 
     bool CloseImplicitAnimation();
 

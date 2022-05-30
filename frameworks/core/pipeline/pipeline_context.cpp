@@ -3329,6 +3329,20 @@ bool PipelineContext::Animate(const AnimationOption& option, const RefPtr<Curve>
     return CloseImplicitAnimation();
 }
 
+void PipelineContext::PrepareOpenImplicitAnimation()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!SystemProperties::GetRosenBackendEnabled()) {
+        LOGE("rosen backend is disabled");
+        return;
+    }
+
+    // initialize false for implicit animation layout pending flag
+    pendingImplicitLayout_.push(false);
+    FlushLayout();
+#endif
+}
+
 void PipelineContext::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
 {
@@ -3367,6 +3381,27 @@ void PipelineContext::OpenImplicitAnimation(
                                   option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
     timingProtocol.SetFillMode(static_cast<Rosen::FillMode>(option.GetFillMode()));
     RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), wrapFinishCallback);
+#endif
+}
+
+void PipelineContext::PrepareCloseImplicitAnimation()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!SystemProperties::GetRosenBackendEnabled()) {
+        LOGE("rosen backend is disabled!");
+        return;
+    }
+
+    if (pendingImplicitLayout_.empty()) {
+        LOGE("close implicit animation failed, need to open implicit animation first!");
+        return;
+    }
+
+    // layout the views immediately to animate all related views, if layout updates are pending in the animation closure
+    if (pendingImplicitLayout_.top()) {
+        FlushLayout();
+    }
+    pendingImplicitLayout_.pop();
 #endif
 }
 
