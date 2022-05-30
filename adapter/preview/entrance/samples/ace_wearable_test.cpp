@@ -53,6 +53,7 @@ int main(int argc, const char* argv[])
         .deviceWidth = 466,
         .deviceHeight = 466,
         .onRender = std::move(renderCallback),
+        .physicalDeviceFontsEnabled = false,
     };
 
     if (argc == MAX_ARGS_COUNT && !std::strcmp(argv[1], ACE_VERSION_2)) {
