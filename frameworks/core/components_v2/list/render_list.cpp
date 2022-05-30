@@ -1514,6 +1514,14 @@ void RenderList::CreateDragDropRecognizer()
 
     auto longPressRecognizer =
         AceType::MakeRefPtr<OHOS::Ace::LongPressRecognizer>(context_, DEFAULT_DURATION, DEFAULT_FINGERS, false);
+    longPressRecognizer->SetOnAction([weakRenderList = AceType::WeakClaim(this)](const GestureEvent& info) {
+        auto renderList = weakRenderList.Upgrade();
+        if (!renderList) {
+            LOGE("LongPress action RenderList is null.");
+            return;
+        }
+        renderList->scrollable_->MarkAvailable(false);
+    });
     PanDirection panDirection;
     auto panRecognizer =
         AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(context_, DEFAULT_FINGERS, panDirection, DEFAULT_DISTANCE);
@@ -1680,6 +1688,7 @@ void RenderList::CreateDragDropRecognizer()
             }
         }
         renderList->SetPreTargetRenderList(nullptr);
+        renderList->scrollable_->MarkAvailable(true);
     });
     panRecognizer->SetOnActionCancel([weakRenderList = AceType::WeakClaim(this), context = context_]() {
         auto pipelineContext = context.Upgrade();
@@ -1702,6 +1711,7 @@ void RenderList::CreateDragDropRecognizer()
 
         renderList->SetPreTargetRenderList(nullptr);
         renderList->selectedDragItem_->SetHidden(false);
+        renderList->scrollable_->MarkAvailable(true);
         renderList->MarkNeedLayout();
     });
     std::vector<RefPtr<GestureRecognizer>> recognizers { longPressRecognizer, panRecognizer };
