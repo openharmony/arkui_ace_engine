@@ -692,34 +692,31 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         LOGE("UIContent container is null");
         return;
     }
-    auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("UIContent is null");
-        return;
-    }
 
     LOGI("UIContent UpdateConfiguration %{public}s, color mode:%{public}s",
         config->GetName().c_str(), colorMode.c_str());
-    taskExecutor->PostTask([context = context_, colorMode]() {
-        auto contextConfig = context.lock();
-        if (!contextConfig) {
-            LOGI("UIContent UpdateConfiguration context is null");
-            return;
-        }
-        std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
-        auto resourceManager = contextConfig->GetResourceManager();
-        if (resourceManager) {
-            resourceManager->GetResConfig(*resConfig);
-            if (colorMode == OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT) {
-                resConfig->SetColorMode(OHOS::Global::Resource::ColorMode::LIGHT);
-                SystemProperties::SetColorMode(ColorMode::LIGHT);
-            } else {
-                resConfig->SetColorMode(OHOS::Global::Resource::ColorMode::DARK);
-                SystemProperties::SetColorMode(ColorMode::DARK);
-            }
-            resourceManager->UpdateResConfig(*resConfig);
-        }
-        }, TaskExecutor::TaskType::PLATFORM);
+    auto pipline = container->GetPipelineContext();
+    if (!pipline) {
+        LOGE("UIContent pipline is null");
+        return;
+    }
+    auto themeManager = pipline->GetThemeManager();
+    if (!themeManager) {
+        LOGE("UIContent themeManager is null");
+        return;
+    }
+    auto resConfig = container->GetResourceConfiguration();
+    if (colorMode == OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT) {
+        SystemProperties::SetColorMode(ColorMode::LIGHT);
+        container->SetColorScheme(ColorScheme::SCHEME_LIGHT);
+        resConfig.SetColorMode(ColorMode::LIGHT);
+    } else {
+        SystemProperties::SetColorMode(ColorMode::DARK);
+        container->SetColorScheme(ColorScheme::SCHEME_DARK);
+        resConfig.SetColorMode(ColorMode::DARK);
+    }
+    container->SetResourceConfiguration(resConfig);
+    themeManager->UpdateConfig(resConfig);
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason)
