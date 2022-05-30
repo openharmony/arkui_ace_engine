@@ -1638,21 +1638,25 @@ void RenderBox::OnTouchTestHierarchy(const Offset& coordinateOffset, const Touch
 void RenderBox::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
+    if (touchRecognizer_) {
+        touchRecognizer_->SetCoordinateOffset(coordinateOffset);
+        result.emplace_back(touchRecognizer_);
+        MarkIsNotSiblingAddRecognizerToResult(false);
+    }
     if (onClick_) {
         onClick_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(onClick_);
+        MarkIsNotSiblingAddRecognizerToResult(true);
     }
     if (onLongPress_) {
         onLongPress_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(onLongPress_);
+        MarkIsNotSiblingAddRecognizerToResult(true);
     }
     if (dragDropGesture_) {
         dragDropGesture_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(dragDropGesture_);
-    }
-    if (touchRecognizer_) {
-        touchRecognizer_->SetCoordinateOffset(coordinateOffset);
-        result.emplace_back(touchRecognizer_);
+        MarkIsNotSiblingAddRecognizerToResult(true);
     }
 }
 

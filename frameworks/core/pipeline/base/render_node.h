@@ -281,7 +281,12 @@ public:
 
     virtual bool IsNotSiblingAddRecognizerToResult()
     {
-        return true;
+        return isNotSiblingAddRecognizerToResult_;
+    }
+
+    void MarkIsNotSiblingAddRecognizerToResult(bool isNotSiblingAddRecognizerToResult)
+    {
+        isNotSiblingAddRecognizerToResult_ = isNotSiblingAddRecognizerToResult;
     }
 
     virtual Point GetTransformPoint(const Point& point)
@@ -1331,6 +1336,7 @@ private:
     bool isPaintOutOfParent_ = false;
 
     std::string restoreInfo_;
+    bool isNotSiblingAddRecognizerToResult_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderNode);
 };

@@ -437,7 +437,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSText>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSText>::StaticMethod("remoteMessage", &JSText::JsRemoteMessage);
-    JSClass<JSText>::StaticMethod("clipBoard", &JSText::SetCopyOption);
+    JSClass<JSText>::StaticMethod("copyOption", &JSText::SetCopyOption);
     JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
