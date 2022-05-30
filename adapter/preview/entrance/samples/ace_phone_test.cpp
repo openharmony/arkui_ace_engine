@@ -71,6 +71,7 @@ int main(int argc, const char* argv[])
         .deviceHeight = 750,
         .onRender = std::move(renderCallback),
         .onRouterChange = std::move(pageCallback),
+        .physicalDeviceFontsEnabled = false,
     };
 
     if (argc == MAX_ARGS_COUNT) {
