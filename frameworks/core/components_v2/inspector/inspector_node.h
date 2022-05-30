@@ -200,6 +200,7 @@ public:
     virtual bool GetFocusable() const = 0;
     virtual bool GetScrollable() const = 0;
     virtual bool GetLongClickable() const = 0;
+    virtual bool GetTouchable() const = 0;
     virtual bool IsSelected() const = 0;
     virtual bool IsPassword() const = 0;
     virtual bool IsChecked() const = 0;
