@@ -584,10 +584,6 @@ private:
     RemoveJavascriptInterfaceImpl removeJavascriptInterfaceImpl_;
     WebViewJavaScriptResultCallBackImpl webViewJavaScriptResultCallBackImpl_;
     RequestFocusImpl requestFocusImpl_;
-    float initialScale_;
-    bool isInitialScaleSet_ = false;
-    int32_t backgroundColor_;
-    bool isBackgroundColor_ = false;
 };
 
 // A component can show HTML5 webpages.
@@ -1126,6 +1122,10 @@ private:
     WebCacheMode cacheMode_ = WebCacheMode::DEFAULT;
     bool isWebDebuggingAccessEnabled_ = false;
     OnMouseCallback onMouseEvent_;
+    float initialScale_;
+    bool isInitialScaleSet_ = false;
+    int32_t backgroundColor_;
+    bool isBackgroundColor_ = false;
 };
 
 } // namespace OHOS::Ace
