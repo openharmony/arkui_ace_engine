@@ -168,6 +168,8 @@ public:
     void HandleTouchMove(const int32_t& id, const double& x, const double& y);
     void HandleTouchCancel();
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
+    void OnFocus();
+    void OnBlur();
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -192,6 +194,8 @@ public:
     void OnRefreshAccessedHistory(const std::string& url, bool isRefreshed);
     bool OnFileSelectorShow(const BaseEventInfo* info);
     bool OnHandleInterceptUrlLoading(const std::string& url);
+    void OnResourceLoad(const std::string& url);
+    void OnScaleChange(float oldScaleFactor, float newScaleFactor);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -220,7 +224,6 @@ private:
     void RemoveJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
     void SetWebViewJavaScriptResultCallBack(const WebController::JavaScriptCallBackImpl&& javaScriptCallBackImpl);
     void RequestFocus();
-    void OnFocus();
     void OnInactive();
     void OnActive();
     void Zoom(float factor);
@@ -273,9 +276,10 @@ private:
     EventCallbackV2 onErrorReceiveV2_;
     EventCallbackV2 onHttpErrorReceiveV2_;
     EventCallbackV2 onDownloadStartV2_;
-    EventCallbackV2 onFocusV2_;
     EventCallbackV2 onRefreshAccessedHistoryV2_;
     EventCallbackV2 onRenderExitedV2_;
+    EventCallbackV2 onResourceLoadV2_;
+    EventCallbackV2 onScaleChangeV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;

@@ -48,14 +48,32 @@ void WebElement::Update()
 
 void WebElement::OnFocus()
 {
-    FocusNode::OnFocus();
     LOGI("web element onfocus");
-    if (webComp_) {
-        auto controller = webComp_->GetController();
-        if (controller) {
-            controller->OnFocus();
-        }
+    auto renderWeb = AceType::DynamicCast<RenderWeb>(renderNode_);
+    if (!renderWeb) {
+        return;
     }
+    if (!renderWeb->GetDelegate()) {
+        LOGE("Delegate is nullptr.");
+        return;
+    }
+    renderWeb->GetDelegate()->OnFocus();
+    FocusNode::OnFocus();
+}
+
+void WebElement::OnBlur()
+{
+    LOGI("web element onblur");
+    auto renderWeb = AceType::DynamicCast<RenderWeb>(renderNode_);
+    if (!renderWeb) {
+        return;
+    }
+    if (!renderWeb->GetDelegate()) {
+        LOGE("Delegate is nullptr.");
+        return;
+    }
+    renderWeb->GetDelegate()->OnBlur();
+    FocusNode::OnBlur();
 }
 
 bool WebElement::OnKeyEvent(const KeyEvent& keyEvent)

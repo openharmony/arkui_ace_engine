@@ -35,13 +35,14 @@ struct WebEvent : Event {
     EventMarker geolocationHideEventId;
     EventMarker geolocationShowEventId;
     EventMarker requestFocusEventId;
-    EventMarker onFocusEventId;
     EventMarker pageErrorEventId;
     EventMarker httpErrorEventId;
     EventMarker messageEventId;
     EventMarker downloadStartEventId;
     EventMarker renderExitedEventId;
     EventMarker refreshAccessedHistoryId;
+    EventMarker resourceLoadId;
+    EventMarker scaleChangeId;
 };
 
 struct WebMethod : Method {
@@ -179,18 +180,6 @@ public:
         return event.requestFocusEventId;
     }
 
-    void SetOnFocusEventId(const EventMarker& onFocusEventId)
-    {
-        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
-        event.onFocusEventId = onFocusEventId;
-    }
-
-    const EventMarker& GetOnFocusEventId() const
-    {
-        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
-        return event.onFocusEventId;
-    }
-
     void SetPageErrorEventId(const EventMarker& pageErrorEventId)
     {
         auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
@@ -249,6 +238,30 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.refreshAccessedHistoryId;
+    }
+
+    void SetResourceLoadId(const EventMarker& resourceLoadId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.resourceLoadId = resourceLoadId;
+    }
+
+    const EventMarker& GetResourceLoadId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.resourceLoadId;
+    }
+
+    void SetScaleChangeId(const EventMarker& scaleChangeId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.scaleChangeId = scaleChangeId;
+    }
+
+    const EventMarker& GetScaleChangeId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.scaleChangeId;
     }
 
 protected:

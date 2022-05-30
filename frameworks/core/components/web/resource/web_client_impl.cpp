@@ -288,4 +288,24 @@ bool WebClientImpl::OnFileSelectorShow(
     LOGI("OnFileSelectorShow result:%{public}d", jsResult);
     return jsResult;
 }
+
+void WebClientImpl::OnResource(const std::string& url)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnResourceLoad(url);
+}
+
+void WebClientImpl::OnScaleChanged(float oldScaleFactor, float newScaleFactor)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnScaleChange(oldScaleFactor, newScaleFactor);
+}
 } // namespace OHOS::Ace

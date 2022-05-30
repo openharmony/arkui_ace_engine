@@ -299,19 +299,6 @@ public:
         zoomImpl_ = std::move(zoomImpl);
     }
 
-    using OnFocusImpl = std::function<void()>;
-    void OnFocus() const
-    {
-        if (onFocusImpl_) {
-            onFocusImpl_();
-        }
-    }
-
-    void SetOnFocusImpl(OnFocusImpl && onFocusImpl)
-    {
-        onFocusImpl_ = std::move(onFocusImpl);
-    }
-
     using RefreshImpl = std::function<void()>;
     void Refresh() const
     {
@@ -495,7 +482,6 @@ private:
     ExecuteTypeScriptImpl executeTypeScriptImpl_;
     OnInactiveImpl onInactiveImpl_;
     OnActiveImpl onActiveImpl_;
-    OnFocusImpl onFocusImpl_;
     ZoomImpl zoomImpl_;
     LoadDataWithBaseUrlImpl loadDataWithBaseUrlImpl_;
     InitJavascriptInterface initJavascriptInterface_;
@@ -640,16 +626,6 @@ public:
         return declaration_->GetDownloadStartEventId();
     }
 
-    void SetOnFocusEventId(const EventMarker& onFocusEventId)
-    {
-        declaration_->SetOnFocusEventId(onFocusEventId);
-    }
-
-    const EventMarker& GetOnFocusEventId() const
-    {
-        return declaration_->GetOnFocusEventId();
-    }
-
     void SetPageErrorEventId(const EventMarker& pageErrorEventId)
     {
         declaration_->SetPageErrorEventId(pageErrorEventId);
@@ -698,6 +674,26 @@ public:
     const EventMarker& GetRefreshAccessedHistoryId() const
     {
         return declaration_->GetRefreshAccessedHistoryId();
+    }
+
+    void SetResourceLoadId(const EventMarker& resourceLoadId)
+    {
+        declaration_->SetResourceLoadId(resourceLoadId);
+    }
+
+    const EventMarker& GetResourceLoadId() const
+    {
+        return declaration_->GetResourceLoadId();
+    }
+
+    void SetScaleChangeId(const EventMarker& scaleChangeId)
+    {
+        declaration_->SetScaleChangeId(scaleChangeId);
+    }
+
+    const EventMarker& GetScaleChangeId() const
+    {
+        return declaration_->GetScaleChangeId();
     }
 
     void SetDeclaration(const RefPtr<WebDeclaration>& declaration)

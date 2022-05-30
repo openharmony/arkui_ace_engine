@@ -83,6 +83,8 @@ public:
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason) override;
     void OnRefreshAccessedHistory(const std::string& url, bool isReload) override;
     bool OnHandleInterceptUrlLoading(const std::string& url) override;
+    void OnResource(const std::string& url) override;
+    void OnScaleChanged(float oldScaleFactor, float newScaleFactor) override;
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
         webDelegate_ = delegate;
