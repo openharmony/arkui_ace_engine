@@ -125,6 +125,9 @@ protected:
     bool selectAll_ = false;
     std::function<void(bool)> groupValueChangedListener_;
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> onGroupChange_;
+
+private:
+    void SetAccessibilityClickImpl();
 };
 
 } // namespace OHOS::Ace

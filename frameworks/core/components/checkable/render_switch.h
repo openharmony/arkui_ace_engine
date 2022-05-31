@@ -98,6 +98,9 @@ protected:
     RefPtr<CurveAnimation<double>> translate_;
     bool isSwitchDuringAnimation_ = false;
     RefPtr<SwitchComponent> component_;
+
+private:
+    void SetAccessibilityClickImpl();
 };
 
 } // namespace OHOS::Ace

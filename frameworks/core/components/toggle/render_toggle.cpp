@@ -74,6 +74,10 @@ void RenderToggle::HandleClickEvent()
     if (onChangeToggle_) {
         onChangeToggle_(!checkValue);
     }
+    auto accessibilityNode = accessibilityNode_.Upgrade();
+    if (accessibilityNode) {
+        accessibilityNode->SetCheckedState(!checkValue);
+    }
 }
 
 void RenderToggle::HandleTouchEvent(bool touched)
@@ -236,6 +240,7 @@ void RenderToggle::Update(const RefPtr<Component>& component)
     if (toggleComponent_->GetOnChange()) {
         onChangeToggle_ = *toggleComponent_->GetOnChange();
     }
+    SetAccessibilityClickImpl();
     MarkNeedLayout();
 }
 
@@ -265,6 +270,23 @@ void RenderToggle::PerformLayout()
     toggleSize_ = GetLayoutSize();
     if (child) {
         child->SetPosition(Alignment::GetAlignPosition(GetLayoutSize(), child->GetLayoutSize(), Alignment::CENTER));
+    }
+}
+
+void RenderToggle::SetAccessibilityClickImpl()
+{
+    auto accessibilityNode = accessibilityNode_.Upgrade();
+    if (accessibilityNode) {
+        auto weakPtr = AceType::WeakClaim(AceType::RawPtr(clickRecognizer_));
+        accessibilityNode->AddSupportAction(AceAction::ACTION_CLICK);
+        accessibilityNode->SetClickableState(true);
+        accessibilityNode->SetCheckableState(true);
+        accessibilityNode->SetActionClickImpl([weakPtr]() {
+            auto click = weakPtr.Upgrade();
+            if (click) {
+                click->OnAccepted();
+            }
+        });
     }
 }
 
