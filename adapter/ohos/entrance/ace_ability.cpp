@@ -586,12 +586,12 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeCha
     LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d",
         rect.width_, rect.height_, rect.posX_, rect.posY_);
     SystemProperties::SetDeviceOrientation(rect.height_ >= rect.width_ ? 0 : 1);
-    SystemProperties::SetWindowPos(rect.posX_, rect.posY_);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
         LOGE("OnSizeChange: container is null.");
         return;
     }
+    container->SetWindowPos(rect.posX_, rect.posY_);
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("OnSizeChange: taskExecutor is null.");

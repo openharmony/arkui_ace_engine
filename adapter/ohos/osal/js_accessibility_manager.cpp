@@ -139,8 +139,8 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     const RefPtr<JsAccessibilityManager>& manager, int windowId, NodeId rootId)
 {
     LOGI("UpdateAccessibilityNodeInfo nodeId:%{public}d", node->GetNodeId());
-    int leftTopX = static_cast<int>(node->GetLeft()) + SystemProperties::GetWindowPosX();
-    int leftTopY = static_cast<int>(node->GetTop()) + SystemProperties::GetWindowPosY();
+    int leftTopX = static_cast<int>(node->GetLeft()) + manager->GetWindowLeft();
+    int leftTopY = static_cast<int>(node->GetTop()) + manager->GetWindowTop();
     int rightBottomX = leftTopX + static_cast<int>(node->GetWidth());
     int rightBottomY = leftTopY + static_cast<int>(node->GetHeight());
     if (manager->isOhosHostCard()) {

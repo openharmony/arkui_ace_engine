@@ -1151,6 +1151,18 @@ std::string AceContainer::GetContentInfo(int32_t instanceId)
     }
 }
 
+void AceContainer::SetWindowPos(int32_t left, int32_t top)
+{
+    if (!frontend_) {
+        return;
+    }
+    auto accessibilityManager = frontend_->GetAccessibilityManager();
+    if (!accessibilityManager) {
+        return;
+    }
+    accessibilityManager->SetWindowPos(left, top);
+}
+
 void AceContainer::InitializeSubContainer(int32_t parentContainerId)
 {
     auto taskExec = AceEngine::Get().GetContainer(parentContainerId)->GetTaskExecutor();

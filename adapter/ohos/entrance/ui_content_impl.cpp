@@ -724,12 +724,12 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     LOGI("UIContent UpdateViewportConfig %{public}s", config.ToString().c_str());
     SystemProperties::SetResolution(config.Density());
     SystemProperties::SetDeviceOrientation(config.Height() >= config.Width() ? 0 : 1);
-    SystemProperties::SetWindowPos(config.Left(), config.Top());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (!container) {
         LOGE("UpdateViewportConfig: container is null.");
         return;
     }
+    container->SetWindowPos(config.Left(), config.Top());
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("UpdateViewportConfig: taskExecutor is null.");
