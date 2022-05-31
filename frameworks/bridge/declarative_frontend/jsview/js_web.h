@@ -66,6 +66,8 @@ public:
     static void OnMouse(const JSCallbackInfo& args);
     static void OnResourceLoad(const JSCallbackInfo& args);
     static void OnScaleChange(const JSCallbackInfo& args);
+    static void BackgroundColor(const JSCallbackInfo& info);
+    static void InitialScale(float scale);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

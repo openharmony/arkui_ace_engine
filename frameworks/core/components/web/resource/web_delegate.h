@@ -148,6 +148,8 @@ public:
     void HideWebView();
     void Resize(const double& width, const double& height);
     void UpdateUserAgent(const std::string& userAgent);
+    void UpdateBackgroundColor(const int backgroundColor);
+    void UpdateInitialScale(float scale);
     void UpdateJavaScriptEnabled(const bool& isJsEnabled);
     void UpdateAllowFileAccess(const bool& isFileAccessEnabled);
     void UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled);
@@ -227,7 +229,12 @@ private:
     void OnInactive();
     void OnActive();
     void Zoom(float factor);
+    void ZoomIn();
+    void ZoomOut();
     int GetHitTestResult();
+    int GetContentHeight();
+    int GetWebId();
+    std::string GetTitle();
     bool SaveCookieSync();
     bool SetCookie(const std::string& url, const std::string& value);
     std::string GetCookie(const std::string& url) const;
@@ -240,6 +247,7 @@ private:
     void Forward();
     void ClearHistory();
     bool AccessStep(int32_t step);
+    void BackOrForward(int32_t step);
     bool AccessBackward();
     bool AccessForward();
 #if defined(ENABLE_ROSEN_BACKEND)

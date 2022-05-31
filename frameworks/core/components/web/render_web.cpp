@@ -82,6 +82,12 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         if (!userAgent.empty()) {
             delegate_->UpdateUserAgent(userAgent);
         }
+        if (web->GetBackgroundColorEnabled()) {
+            delegate_->UpdateBackgroundColor(web->GetBackgroundColor());
+        }
+        if (web->GetIsInitialScaleSet()) {
+            delegate_->UpdateInitialScale(web->GetInitialScale());
+        }
     }
     MarkNeedLayout();
 }
