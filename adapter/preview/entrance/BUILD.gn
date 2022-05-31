@@ -40,7 +40,6 @@ template("preview_entrance_source") {
       "editing/text_input_client_mgr.cpp",
       "editing/text_input_connection_impl.cpp",
       "editing/text_input_impl.cpp",
-      "editing/text_input_plugin.cpp",
       "event_dispatcher.cpp",
       "flutter_ace_view.cpp",
       "subwindow_preview.cpp",
@@ -56,19 +55,13 @@ template("preview_entrance_source") {
     if (!is_cross_platform_build) {
       if (platform == "windows") {
         defines -= [ "UNICODE" ]
-        include_dirs = [
-          "//utils/native/base/include",
-          "//third_party/flutter/glfw/include",
-        ]
+        include_dirs = [ "//utils/native/base/include" ]
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
         cflags_cc += [ "-DNONLS" ]
       }
 
       if (platform == "mac") {
-        include_dirs = [
-          "//utils/native/base/include",
-          "//third_party/flutter/glfw/include",
-        ]
+        include_dirs = [ "//utils/native/base/include" ]
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
       }
     }

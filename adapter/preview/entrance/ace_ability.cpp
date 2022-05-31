@@ -267,26 +267,6 @@ void AceAbility::RunEventLoop()
     controller_ = nullptr;
 }
 
-bool AceAbility::DispatchTouchEvent(const TouchEvent& event)
-{
-    return EventDispatcher::GetInstance().DispatchTouchEvent(event);
-}
-
-bool AceAbility::DispatchBackPressedEvent()
-{
-    return EventDispatcher::GetInstance().DispatchBackPressedEvent();
-}
-
-bool AceAbility::DispatchInputMethodEvent(unsigned int code_point)
-{
-    return EventDispatcher::GetInstance().DispatchInputMethodEvent(code_point);
-}
-
-bool AceAbility::DispatchKeyEvent(const KeyEvent& event)
-{
-    return EventDispatcher::GetInstance().DispatchKeyEvent(event);
-}
-
 void AceAbility::SetConfigChanges(const std::string& configChanges)
 {
     if (configChanges == "") {

@@ -13,41 +13,32 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ADAPTER_PREVIEW_ENTRANCE_EDITING_TEXT_INPUT_PLUGIN_H
-#define FOUNDATION_ACE_ADAPTER_PREVIEW_ENTRANCE_EDITING_TEXT_INPUT_PLUGIN_H
+#ifndef FOUNDATION_ACE_ADAPTER_PREVIEW_ENTRANCE_SAMPLES_KEY_INPUT_HANDLER_H
+#define FOUNDATION_ACE_ADAPTER_PREVIEW_ENTRANCE_SAMPLES_KEY_INPUT_HANDLER_H
 
-#include "flutter/shell/platform/glfw/keyboard_hook_handler.h"
 #include "core/event/key_event.h"
+#include "flutter/shell/platform/glfw/public/flutter_glfw.h"
+#include "flutter/shell/platform/glfw/keyboard_hook_handler.h"
 
 namespace OHOS::Ace::Platform {
 
-using KeyboardHookCallback = std::function<bool(const KeyEvent& keyEvent)>;
-using CharHookCallback = std::function<bool(unsigned int code_point)>;
-
-class TextInputPlugin : public flutter::KeyboardHookHandler {
+class KeyInputHandler : public flutter::KeyboardHookHandler {
 public:
-    TextInputPlugin() = default;
-    ~TextInputPlugin() override = default;
+    KeyInputHandler() = default;
+    ~KeyInputHandler() override = default;
 
+    static void InitialTextInputCallback(FlutterDesktopWindowControllerRef controller);
     // A function for hooking into keyboard input.
     void KeyboardHook(GLFWwindow* window, int key, int scancode, int action, int mods) override;
 
     // A function for hooking into unicode code point input.
     void CharHook(GLFWwindow* window, unsigned int code_point) override;
 
-    // Register the dispatch function of the keyboard event
-    void RegisterKeyboardHookCallback(KeyboardHookCallback&& keyboardHookCallback);
-
-    // Register the dispatch function of the input method event
-    void RegisterCharHookCallback(CharHookCallback&& charHookCallback);
-
 private:
     bool RecognizeKeyEvent(int key, int action, int mods);
     KeyEvent keyEvent_;
-    CharHookCallback charHookCallback_;
-    KeyboardHookCallback keyboardHookCallback_;
 };
 
 } // namespace OHOS::Ace::Platform
 
-#endif // FOUNDATION_ACE_ADAPTER_PREVIEW_ENTRANCE_EDITING_TEXT_INPUT_PLUGIN_H
+#endif // FOUNDATION_ACE_ADAPTER_PREVIEW_ENTRANCE_SAMPLES_KEY_INPUT_HANDLER_H

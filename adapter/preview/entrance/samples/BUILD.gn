@@ -22,13 +22,17 @@ config("ace_pc_preview_config") {
     "-std=c++17",
     "-Wno-c99-designator",
     "-Wno-unknown-warning-option",
+    "-Wno-thread-safety-attributes",
   ]
+
   include_dirs = [
     "$ace_root",
     "$ace_root/frameworks",
     "$flutter_root/engine",
     "$flutter_root/engine/flutter/shell/platform/common/cpp/public",
     "$flutter_root/engine/ace_adapter/flutter/shell/platform/glfw/public",
+    "$flutter_root/skia",
+    "$flutter_root/glfw/include",
   ]
 }
 
@@ -36,9 +40,14 @@ template("ace_test") {
   forward_variables_from(invoker, "*")
   ohos_executable(target_name) {
     defines += invoker.defines
+    defines += [ "USE_GLFW_WINDOW" ]
     configs = [ ":ace_pc_preview_config" ]
 
-    sources = [ "ace_${device}_test.cpp" ]
+    sources = [
+      "ace_${device}_test.cpp",
+      "key_input_handler.cpp",
+      "touch_event_handler.cpp",
+    ]
 
     deps = [
       ":copy_napi_modules_shared_library_for_test(${current_toolchain})",
