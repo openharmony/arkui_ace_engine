@@ -132,17 +132,16 @@ void ContainerModalElement::ShowTitle(bool isShow)
     // full screen need to hide border and padding.
     auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
     if (containerRenderBox) {
-        auto containerDecoration = AceType::MakeRefPtr<Decoration>();
+        auto containerDecoration = containerRenderBox->GetBackDecoration();
         Edge padding = Edge();
+        Border outerBorder = Border();
         if (isShow) {
-            Border outerBorder;
             outerBorder.SetBorderRadius(Radius(CONTAINER_OUTER_RADIUS));
             outerBorder.SetColor(CONTAINER_BORDER_COLOR);
             outerBorder.SetWidth(CONTAINER_BORDER_WIDTH);
-            containerDecoration->SetBackgroundColor(CONTAINER_BACKGROUND_COLOR);
-            containerDecoration->SetBorder(outerBorder);
             padding = Edge(CONTENT_PADDING, Dimension(0.0), CONTENT_PADDING, CONTENT_PADDING);
         }
+        containerDecoration->SetBorder(outerBorder);
         containerRenderBox->SetBackDecoration(containerDecoration);
         containerRenderBox->SetPadding(padding);
     }
