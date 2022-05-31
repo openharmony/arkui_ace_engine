@@ -163,12 +163,12 @@ public:
 
     const RefPtr<SelectPopupComponent>& GetMenu() const;
 
-    void SetisUsingMouse(bool isUsingMouse)
+    void SetIsUsingMouse(bool isUsingMouse)
     {
         isUsingMouse_ = isUsingMouse;
     }
 
-    bool GetisUsingMouse() const
+    bool GetIsUsingMouse() const
     {
         return isUsingMouse_;
     }

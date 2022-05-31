@@ -391,7 +391,11 @@ RefPtr<OptionComponent> TextOverlayComponent::BuildMenuOption(
             image->SetImageFill(imageFill_);
         }
     }
-    optionComponent->SetIcon(image);
+    if (!isUsingMouse_) {
+        optionComponent->SetIcon(image);
+    } else {
+        optionComponent->SetNeedDrawDividerLine(false);
+    }
     auto textComponent = AceType::MakeRefPtr<TextComponent>(text);
     optionComponent->SetText(textComponent);
     optionComponent->SetValue(text);
