@@ -190,6 +190,7 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
             state_ = DetectState::DETECTED;
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         } else if (result == GestureAcceptResult::REJECT) {
+            LOGW("pan recognizer reject");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     } else if (state_ == DetectState::DETECTED && refereeState_ == RefereeState::SUCCEED) {
@@ -199,6 +200,7 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
             averageDistance_.SetX(0.0);
         }
 
+        LOGD("pan recognizer detected successful");
         SendCallbackMsg(onActionUpdate_);
     }
 }

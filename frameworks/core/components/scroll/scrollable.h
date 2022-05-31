@@ -103,9 +103,7 @@ public:
 
     void SetCoordinateOffset(const Offset& offset) const
     {
-        if (timeoutRecognizer_) {
-            timeoutRecognizer_->SetCoordinateOffset(offset);
-        } else if (panRecognizer_) {
+        if (panRecognizer_) {
             panRecognizer_->SetCoordinateOffset(offset);
         }
 
@@ -145,8 +143,11 @@ public:
     }
     bool HandleEvent(const TouchEvent& event) override
     {
-        if (timeoutRecognizer_) {
-            timeoutRecognizer_->HandleEvent(event);
+        if (!available_) {
+            return true;
+        }
+        if (panRecognizer_) {
+            panRecognizer_->HandleEvent(event);
         }
         if (rawRecognizer_) {
             return rawRecognizer_->HandleEvent(event);
@@ -155,8 +156,8 @@ public:
     }
     bool HandleEvent(const AxisEvent& event) override
     {
-        if (timeoutRecognizer_) {
-            return timeoutRecognizer_->HandleEvent(event);
+        if (panRecognizer_) {
+            return panRecognizer_->HandleEvent(event);
         }
         return false;
     }
@@ -255,6 +256,11 @@ public:
 
     static const RefPtr<SpringProperty>& GetDefaultOverSpringProperty();
 
+    RefPtr<PanRecognizer> GetPanRecognizer() const
+    {
+        return panRecognizer_;
+    }
+
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
@@ -272,7 +278,6 @@ private:
     DragCancelRefreshCallback dragCancelCallback_;
     WatchFixCallback watchFixCallback_;
     Axis axis_;
-    RefPtr<TimeoutRecognizer> timeoutRecognizer_;
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<Animator> controller_;

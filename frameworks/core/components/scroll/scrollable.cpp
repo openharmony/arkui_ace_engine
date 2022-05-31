@@ -33,7 +33,6 @@ constexpr double SPRING_SCROLL_DAMPING = 15.55635;
 constexpr double MAX_FRICTION = 0.766;
 const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
     AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
-constexpr std::chrono::milliseconds SCROLL_TIMEOUT = std::chrono::milliseconds(200);
 #ifdef PRODUCT_RK
 constexpr double FRICTION = 0.6;
 constexpr double VELOCITY_SCALE = 1.0;
@@ -103,8 +102,6 @@ void Scrollable::Initialize(const WeakPtr<PipelineContext>& context)
     }
     panRecognizer_ =
         AceType::MakeRefPtr<PanRecognizer>(context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
-
-    timeoutRecognizer_ = AceType::MakeRefPtr<TimeoutRecognizer>(context, panRecognizer_, SCROLL_TIMEOUT);
 
     panRecognizer_->SetOnActionStart([weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
