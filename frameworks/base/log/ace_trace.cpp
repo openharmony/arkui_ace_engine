@@ -62,4 +62,21 @@ AceScopedTrace::~AceScopedTrace()
     }
 }
 
+AceScopedTraceFlag::AceScopedTraceFlag(bool flag, const char* format, ...)
+{
+    if (flag && AceTraceEnabled()) {
+        va_list args;
+        va_start(args, format);
+        flagTraceEnabled_ = AceTraceBeginWithArgv(format, args);
+        va_end(args);
+    }
+}
+
+AceScopedTraceFlag::~AceScopedTraceFlag()
+{
+    if (flagTraceEnabled_) {
+        AceTraceEnd();
+    }
+}
+
 } // namespace OHOS::Ace

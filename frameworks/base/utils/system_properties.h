@@ -188,6 +188,11 @@ public:
         return traceEnabled_;
     }
 
+    static bool GetSvgTraceEnabled()
+    {
+        return svgTraceEnable_;
+    }
+
     static bool GetAccessibilityEnabled()
     {
         return accessibilityEnabled_;
@@ -280,6 +285,7 @@ public:
 
 private:
     static bool traceEnabled_;
+    static bool svgTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
     static int32_t deviceWidth_;

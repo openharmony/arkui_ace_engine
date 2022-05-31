@@ -21,8 +21,11 @@
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/system_properties.h"
 
 #define ACE_SCOPED_TRACE(fmt, ...) AceScopedTrace aceScopedTrace(fmt, ##__VA_ARGS__)
+#define ACE_SVG_SCOPED_TRACE(fmt, ...) \
+    AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetSvgTraceEnabled(), fmt, ##__VA_ARGS__)
 #ifdef ACE_DEBUG
 #define ACE_DEBUG_SCOPED_TRACE(fmt, ...) AceScopedTrace aceScopedTrace(fmt, ##__VA_ARGS__)
 #else
@@ -48,6 +51,17 @@ public:
 
 private:
     bool traceEnabled_ { false };
+};
+
+class ACE_EXPORT AceScopedTraceFlag final {
+public:
+    explicit AceScopedTraceFlag(bool flag, const char* format, ...) __attribute__((__format__(printf, 3, 4)));
+    ~AceScopedTraceFlag();
+
+    ACE_DISALLOW_COPY_AND_MOVE(AceScopedTraceFlag);
+
+private:
+    bool flagTraceEnabled_ { false };
 };
 
 } // namespace OHOS::Ace
