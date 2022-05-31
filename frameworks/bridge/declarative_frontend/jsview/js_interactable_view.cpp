@@ -72,7 +72,7 @@ void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
                 func->Execute(*keyInfo);
             },
             "onKey", 0);
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
         if (focusableComponent) {
             focusableComponent->SetOnKeyId(onKeyId);
         }

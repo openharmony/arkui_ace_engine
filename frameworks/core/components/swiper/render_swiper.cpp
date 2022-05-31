@@ -2140,7 +2140,8 @@ void RenderSwiper::IndicatorSwipeNext()
 bool RenderSwiper::HandleMouseEvent(const MouseEvent& event)
 {
     const Point point { event.x, event.y};
-    return MouseHoverTest(point);
+    MouseHoverTest(point);
+    return false;
 }
 
 bool RenderSwiper::MouseHoverTest(const Point& parentLocalPoint)
