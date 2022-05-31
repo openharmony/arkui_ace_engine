@@ -134,8 +134,8 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineContext>& context, const
     runningCardId_ = formJsInfo.formId;
     if (info.id == formJsInfo.formId) {
         LOGI("Added form already exist, trigger FormUpdate immediately.");
+        ProcessFormUpdate(formJsInfo);
     }
-    ProcessFormUpdate(formJsInfo);
 #else
     if (state_ == State::CREATED) {
         hash_ = MakeResourceHash();

@@ -293,7 +293,7 @@ void FlutterRenderImage::Update(const RefPtr<Component>& component)
     // curImageSrc represents the picture currently shown and imageSrc represents next picture to be shown
     imageLoadingStatus_ = (sourceInfo_ != curSourceInfo_) ? ImageLoadingStatus::UPDATING : imageLoadingStatus_;
     UpdateRenderAltImage(component);
-    if (proceedPreviousLoading_ && !sourceInfo_.IsSvg() && sourceInfo_.GetSrcType() != SrcType::MEMORY) {
+    if (proceedPreviousLoading_ && !sourceInfo_.IsSvg()) {
         LOGI("Proceed previous loading, imageSrc is %{private}s, image loading status: %{public}d",
             sourceInfo_.ToString().c_str(), imageLoadingStatus_);
         return;
