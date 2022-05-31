@@ -91,8 +91,7 @@ class Base64ImageLoader final : public ImageLoader {
 public:
     Base64ImageLoader() = default;
     ~Base64ImageLoader() override = default;
-    static std::string GetBase64ImageCode(const std::string& uri, size_t& imagSize);
-    static size_t GetBase64ImageSize(const std::string& code);
+    static std::string_view GetBase64ImageCode(const std::string& uri);
     sk_sp<SkData> LoadImageData(
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context = nullptr) override;
 };
