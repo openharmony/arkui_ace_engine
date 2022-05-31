@@ -400,7 +400,7 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
         ShowTextOverlay(rightClickOffset, false, true);
     }
 
-    return true;
+    return false;
 }
 
 void RenderTextField::OnTouchTestHit(

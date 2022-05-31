@@ -1252,6 +1252,11 @@ public:
         return isDragStart_;
     }
 
+    bool GetIsTabKeyPressed() const
+    {
+        return isTabKeyPressed_;
+    }
+
 private:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     void FlushPipelineWithoutAnimation();
