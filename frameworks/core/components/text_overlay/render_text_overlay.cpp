@@ -149,7 +149,7 @@ void RenderTextOverlay::Update(const RefPtr<Component>& component)
     clipRect_ = overlay->GetClipRect();
     textDirection_ = overlay->GetTextDirection();
     realTextDirection_ = overlay->GetRealTextDirection();
-    isUsingMouse_ = overlay->GetisUsingMouse();
+    isUsingMouse_ = overlay->GetIsUsingMouse();
     BindBackendEvent(overlay);
     UpdateWeakTextField(overlay);
     UpdateWeakText(overlay);

@@ -331,7 +331,8 @@ void RenderOption::UpdateOthersStatus()
     }
     backColor_ = isTv_ ? Color(0x33FFFFFF) : data_->GetBackgroundColor();
     auto upOption = GetUpOption();
-    needLine_ = (!(data_->GetFocused() && pipe->IsKeyEvent()) && upOption && upOption->IsNormalStatus());
+    needLine_ = (!(data_->GetFocused() && pipe->IsKeyEvent()) && upOption && upOption->IsNormalStatus()) &&
+        needDrawDividerLine_;
     UpdateNormalText();
     MarkNeedRender();
 }
@@ -560,6 +561,7 @@ void RenderOption::Update(const RefPtr<Component>& component)
     clickedColor_ = theme->GetClickedColor();
     hoveredColor_ = theme->GetHoverColor();
     onClickEvent_ = AceAsyncEvent<void()>::Create(data_->GetClickEvent(), context_);
+    needDrawDividerLine_ = data_->GetNeedDrawDividerLine();
     UpdateStatus();
     MarkNeedLayout();
 }

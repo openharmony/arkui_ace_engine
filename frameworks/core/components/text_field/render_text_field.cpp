@@ -682,7 +682,7 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
     textOverlay_->SetShareButtonMarker(onShare_);
     textOverlay_->SetSearchButtonMarker(onSearch_);
     textOverlay_->SetContext(context_);
-    textOverlay_->SetisUsingMouse(isUsingMouse);
+    textOverlay_->SetIsUsingMouse(isUsingMouse);
     // Add the Animation
     InitAnimation();
 

@@ -422,7 +422,7 @@ void RenderText::ShowTextOverlay(const Offset& showOffset, bool isUsingMouse)
     textOverlay_->SetStartHandleOffset(startHandleOffset);
     textOverlay_->SetEndHandleOffset(endHandleOffset);
     textOverlay_->SetContext(context_);
-    textOverlay_->SetisUsingMouse(isUsingMouse);
+    textOverlay_->SetIsUsingMouse(isUsingMouse);
     // Add the Animation
     InitAnimation(context_);
     RegisterCallbacksToOverlay();
