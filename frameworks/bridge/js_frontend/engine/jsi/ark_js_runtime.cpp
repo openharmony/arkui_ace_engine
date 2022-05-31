@@ -43,12 +43,15 @@ bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, 
     option.SetGcType(RuntimeOption::GC_TYPE::GEN_GC);
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     option.SetArkProperties(SystemProperties::GetArkProperties());
+    option.SetGcThreadNum(SystemProperties::GetGcThreadNum());
+    option.SetLongPauseTime(SystemProperties::GetLongPauseTime());
     option.SetEnableAsmInterpreter(SystemProperties::GetAsmInterpreterEnabled());
     option.SetAsmOpcodeDisableRange(SystemProperties::GetAsmOpcodeDisableRange());
+    LOGI("ArkJSRuntime::Initialize ark properties = %{public}d", SystemProperties::GetArkProperties());
 #endif
     const int64_t poolSize = 0x10000000; // 256M
     option.SetGcPoolSize(poolSize);
-    option.SetLogLevel(RuntimeOption::LOG_LEVEL::ERROR);
+    option.SetLogLevel(RuntimeOption::LOG_LEVEL::INFO);
     option.SetLogBufPrint(print_);
     option.SetDebuggerLibraryPath(libraryPath);
     libPath_ = libraryPath;

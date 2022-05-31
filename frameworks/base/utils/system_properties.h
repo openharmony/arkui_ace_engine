@@ -251,6 +251,10 @@ public:
 
     static int GetArkProperties();
 
+    static size_t GetGcThreadNum();
+
+    static size_t GetLongPauseTime();
+
     static bool GetAsmInterpreterEnabled();
 
     static std::string GetAsmOpcodeDisableRange();
