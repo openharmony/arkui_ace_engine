@@ -40,6 +40,8 @@ namespace {
 
 constexpr int32_t DOUBLE_WIDTH = 2;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
+constexpr float EXTRA_WIDTH = 1.5f;
+constexpr float EXTRA_CLIP_WIDTH = 20.0f;
 constexpr float SCALE_DEFAULT = 1.0f;
 constexpr float SCALE_CHANGED = 1.05f;
 const Color BOARD_CHANGED = Color::FromRGBO(0, 0, 0, 0.05);
@@ -333,9 +335,13 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
             LOGE("Paint canvas is null.");
             return;
         }
-        DebugBoundaryPainter::PaintDebugBoundary(canvas, offset, GetLayoutSize());
-        DebugBoundaryPainter::PaintDebugCorner(canvas, offset, GetLayoutSize());
-        DebugBoundaryPainter::PaintDebugMargin(canvas, offset, GetLayoutSize(), RenderBoxBase::margin_);
+        SkAutoCanvasRestore acr(canvas, true);
+        auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
+        recordingCanvas->ClipOutsetRect(EXTRA_CLIP_WIDTH, EXTRA_CLIP_WIDTH);
+        auto size = GetLayoutSize() + Size(EXTRA_WIDTH, EXTRA_WIDTH);
+        DebugBoundaryPainter::PaintDebugBoundary(canvas, offset, size);
+        DebugBoundaryPainter::PaintDebugCorner(canvas, offset, size);
+        DebugBoundaryPainter::PaintDebugMargin(canvas, offset, size, RenderBoxBase::margin_);
     }
     if (isAccessibilityFocus_) {
         PaintAccessibilityFocus(focusRect, context);
