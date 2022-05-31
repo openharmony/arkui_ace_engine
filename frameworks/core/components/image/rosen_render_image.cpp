@@ -23,6 +23,7 @@
 #include "third_party/skia/include/core/SkShader.h"
 
 #include "base/image/pixel_map.h"
+#include "base/log/ace_trace.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -482,6 +483,7 @@ void RosenRenderImage::ProcessPixmapForPaint()
 void RosenRenderImage::PerformLayoutSvgImage()
 {
     if (svgRenderTree_.root) {
+        ACE_SVG_SCOPED_TRACE("RosenRenderImage::PerformLayoutSvgImage");
         SvgRadius svgRadius = { topLeftRadius_, topRightRadius_, bottomLeftRadius_, bottomRightRadius_ };
         svgRenderTree_.containerSize = GetLayoutSize();
         SvgDom svgDom(context_);
@@ -523,6 +525,7 @@ void RosenRenderImage::CreateSvgNodes()
         LOGE("svg dom is nullptr");
         return;
     }
+    ACE_SVG_SCOPED_TRACE("RosenRenderImage::CreateSvgNodes");
     svgDom_->SetFinishEvent(svgAnimatorFinishEvent_);
     svgDom_->SetContainerSize(GetLayoutSize());
     SvgRadius svgRadius = { topLeftRadius_, topRightRadius_, bottomLeftRadius_, bottomRightRadius_ };

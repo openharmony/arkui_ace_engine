@@ -54,6 +54,11 @@ bool IsTraceEnabled()
             system::GetParameter("debug.ace.trace.enabled", "0") == "1");
 }
 
+bool IsSvgTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.svg.enabled", "0") == "1");
+}
+
 bool IsRosenBackendEnabled()
 {
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
@@ -168,6 +173,7 @@ bool SystemProperties::IsScoringEnabled(const std::string& name)
 }
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
+bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 int32_t SystemProperties::deviceWidth_ = 0;
@@ -243,6 +249,7 @@ void SystemProperties::InitDeviceInfo(
 
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();
+    svgTraceEnable_ = IsSvgTraceEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
     debugBoundaryEnabled_ = system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
