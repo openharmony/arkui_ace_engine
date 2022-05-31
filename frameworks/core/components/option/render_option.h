@@ -126,6 +126,7 @@ protected:
     double maxWidth_ = Size::INFINITE_SIZE;
     bool focusJumped_ = false;
     bool needLine_ = true;
+    bool needDrawDividerLine_ = true;
     Color backColor_ = Color::TRANSPARENT;
     Color clickedColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
