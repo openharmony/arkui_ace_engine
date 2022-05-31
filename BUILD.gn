@@ -50,11 +50,13 @@ config("ace_config") {
     "-fvisibility=hidden",
     "-fdata-sections",
     "-ffunction-sections",
+    "-Wno-non-c-typedef-for-linkage",
     "-Os",
   ]
 
   cflags_cc = [
     "-fvisibility-inlines-hidden",
+    "-Wno-non-c-typedef-for-linkage",
     "-Os",
   ]
 
