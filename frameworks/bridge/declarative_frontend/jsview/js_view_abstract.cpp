@@ -3637,7 +3637,7 @@ void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
             ACE_SCORING_EVENT("onFocus");
             func->Execute();
         };
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
         if (focusableComponent) {
             focusableComponent->SetOnFocus(onFocus);
         }
@@ -3653,7 +3653,7 @@ void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)
             ACE_SCORING_EVENT("onBlur");
             func->Execute();
         };
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
         if (focusableComponent) {
             focusableComponent->SetOnBlur(onBlur_);
         }
@@ -3779,6 +3779,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
             }
             if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
                 auto showMenu = refPtr->GetTargetCallback();
+                info.SetStopPropagation(true);
 #if defined(MULTIPLE_WINDOW_SUPPORTED)
                 showMenu("", info.GetScreenLocation());
 #else
