@@ -40,7 +40,7 @@ public:
     void StopLoading(const JSCallbackInfo& args);
     void GetHitTestResult(const JSCallbackInfo& args);
     void GetCookieManager(const JSCallbackInfo& args);
-    void GetContentHeight(const JSCallbackInfo& args);
+    void GetPageHeight(const JSCallbackInfo& args);
     void GetTitle(const JSCallbackInfo& args);
     void GetWebId(const JSCallbackInfo& args);
     void AddJavascriptInterface(const JSCallbackInfo& args);
