@@ -47,6 +47,37 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNo
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
 }
 
+void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager)
+{
+    if (touchPoint.type != TouchType::DOWN) {
+        return;
+    }
+    const Point point { touchPoint.x, touchPoint.y, touchPoint.sourceType };
+    if (!textOverlayManager) {
+        return;
+    }
+    auto textOverlayBase = textOverlayManager->GetTextOverlayBase();
+    if (!textOverlayBase) {
+        return;
+    }
+    auto targetNode = textOverlayManager->GetTargetNode();
+    if (!targetNode) {
+        return;
+    }
+    for (auto& rect : textOverlayBase->GetSelectedRect()) {
+        if (rect.IsInRegion(point)) {
+            inSelectedRect_ = true;
+        }
+    }
+    if (!inSelectedRect_) {
+        textOverlayManager->PopTextOverlay();
+        textOverlayBase->ChangeSelection(0, 0);
+        textOverlayBase->MarkIsOverlayShowed(false);
+        targetNode->MarkNeedRender();
+    }
+    inSelectedRect_ = false;
+}
+
 void EventManager::TouchTest(
     const AxisEvent& event, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict)
 {

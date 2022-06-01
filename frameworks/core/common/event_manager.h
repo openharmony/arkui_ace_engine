@@ -31,6 +31,7 @@ namespace OHOS::Ace {
 
 class RenderNode;
 class Element;
+class TextOverlayManager;
 using MouseHoverTestList = std::list<WeakPtr<RenderNode>>;
 
 class EventManager : public virtual AceType {
@@ -71,6 +72,7 @@ public:
     {
         return instanceId_;
     }
+    void HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager);
 
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
@@ -82,6 +84,7 @@ private:
     WeakPtr<RenderNode> mouseHoverNode_;
     WeakPtr<RenderNode> axisNode_;
     int32_t instanceId_ = 0;
+    bool inSelectedRect_ = false;
 };
 
 } // namespace OHOS::Ace
