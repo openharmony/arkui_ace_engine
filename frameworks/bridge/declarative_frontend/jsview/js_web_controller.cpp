@@ -214,7 +214,7 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("backOrForward", &JSWebController::BackOrForward);
     JSClass<JSWebController>::CustomMethod("zoomIn", &JSWebController::ZoomIn);
     JSClass<JSWebController>::CustomMethod("zoomOut", &JSWebController::ZoomOut);
-    JSClass<JSWebController>::CustomMethod("getContentHeight", &JSWebController::GetContentHeight);
+    JSClass<JSWebController>::CustomMethod("getPageHeight", &JSWebController::GetPageHeight);
     JSClass<JSWebController>::CustomMethod("getTitle", &JSWebController::GetTitle);
     JSClass<JSWebController>::CustomMethod("getWebId", &JSWebController::GetWebId);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
@@ -506,12 +506,12 @@ void JSWebController::ZoomOut(const JSCallbackInfo& args)
     }
 }
 
-void JSWebController::GetContentHeight(const JSCallbackInfo& args)
+void JSWebController::GetPageHeight(const JSCallbackInfo& args)
 {
-    LOGI("JSWebController GetContentHeight");
+    LOGI("JSWebController GetPageHeight");
     ContainerScope scope(instanceId_);
     if (webController_) {
-        int result = webController_->GetContentHeight();
+        int result = webController_->GetPageHeight();
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
     }
 }

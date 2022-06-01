@@ -641,7 +641,7 @@ int WebDelegate::GetHitTestResult()
     return static_cast<int>(webHitType);
 }
 
-int WebDelegate::GetContentHeight()
+int WebDelegate::GetPageHeight()
 {
     if (nweb_) {
         return nweb_->ContentHeight();
@@ -1043,11 +1043,11 @@ void WebDelegate::SetWebCallBack()
                 }
                 return 0;
             });
-        webController->SetGetContentHeightImpl(
+        webController->SetGetPageHeightImpl(
             [weak = WeakClaim(this)]() {
                 auto delegate = weak.Upgrade();
                 if (delegate) {
-                    return delegate->GetContentHeight();
+                    return delegate->GetPageHeight();
                 }
                 return 0;
             });
@@ -1155,21 +1155,25 @@ void WebDelegate::SetWebCallBack()
             });
         webController->SetZoomInImpl(
             [weak = WeakClaim(this), uiTaskExecutor]() {
-                uiTaskExecutor.PostTask([weak]() {
+                bool result = false;
+                uiTaskExecutor.PostSyncTask([weak, &result]() {
                     auto delegate = weak.Upgrade();
                     if (delegate) {
-                        delegate->ZoomIn();
+                        result = delegate->ZoomIn();
                     }
                 });
+                return result;
             });
         webController->SetZoomOutImpl(
             [weak = WeakClaim(this), uiTaskExecutor]() {
-                uiTaskExecutor.PostTask([weak]() {
+                bool result = false;
+                uiTaskExecutor.PostSyncTask([weak, &result]() {
                     auto delegate = weak.Upgrade();
                     if (delegate) {
-                        delegate->ZoomOut();
+                        result = delegate->ZoomOut();
                     }
                 });
+                return result;
             });
         webController->SetRequestFocusImpl(
             [weak = WeakClaim(this), uiTaskExecutor]() {
@@ -1703,46 +1707,48 @@ void WebDelegate::Zoom(float factor)
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void WebDelegate::ZoomIn()
+bool WebDelegate::ZoomIn()
 {
     auto context = context_.Upgrade();
     if (!context) {
-        return;
+        return false;
     }
-
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this)]() {
+    bool result = false;
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), &result]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 LOGE("Get delegate failed, it is null.");
                 return;
             }
             if (delegate->nweb_) {
-                delegate->nweb_->ZoomIn();
+                result = delegate->nweb_->ZoomIn();
             }
         },
         TaskExecutor::TaskType::PLATFORM);
+    return result;
 }
 
-void WebDelegate::ZoomOut()
+bool WebDelegate::ZoomOut()
 {
     auto context = context_.Upgrade();
     if (!context) {
-        return;
+        return false;
     }
-
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this)]() {
+    bool result = false;
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), &result]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 LOGE("Get delegate failed, it is null.");
                 return;
             }
             if (delegate->nweb_) {
-                delegate->nweb_->ZoomOut();
+                result = delegate->nweb_->ZoomOut();
             }
         },
         TaskExecutor::TaskType::PLATFORM);
+    return result;
 }
 
 sptr<OHOS::Rosen::Window> WebDelegate::CreateWindow()
