@@ -132,6 +132,8 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     focusTextColor_ = textField->GetFocusTextColor();
     selectedColor_ = textField->GetSelectedColor();
     pressColor_ = textField->GetPressColor();
+    hoverColor_ = textField->GetHoverColor();
+    hoverAnimationType_ = textField->GetHoverAnimationType();
     decoration_ = textField->GetDecoration();
     inactiveBgColor_ = textField->GetBgColor();
     if (decoration_ && (decoration_->GetImage() || decoration_->GetGradient().IsValid())) {
@@ -491,6 +493,9 @@ void RenderTextField::StartPressAnimation(bool pressDown)
     if (pressController_->IsRunning()) {
         pressController_->Stop();
     }
+    if (hoverController_->IsRunning()) {
+        hoverController_->Stop();
+    }
     pressController_->ClearInterpolators();
     RefPtr<KeyframeAnimation<Color>> animation = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
     if (pressDown) {
@@ -502,6 +507,40 @@ void RenderTextField::StartPressAnimation(bool pressDown)
     pressController_->SetDuration(PRESS_DURATION);
     pressController_->SetFillMode(FillMode::FORWARDS);
     pressController_->Forward();
+}
+
+void RenderTextField::StartHoverAnimation(bool isHovered)
+{
+    if (pressController_ && pressController_->IsRunning()) {
+        return;
+    }
+    if (!hoverController_) {
+        hoverController_ = AceType::MakeRefPtr<Animator>(context_);
+    }
+    if (hoverController_->IsRunning()) {
+        hoverController_->Stop();
+    }
+    hoverController_->ClearInterpolators();
+    RefPtr<KeyframeAnimation<Color>> animation = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
+    if (isHovered) {
+        CreateMouseAnimation(animation, GetEventEffectColor(), hoverColor_);
+    } else {
+        CreateMouseAnimation(animation, GetEventEffectColor(), Color::TRANSPARENT);
+    }
+    hoverController_->AddInterpolator(animation);
+    hoverController_->SetDuration(HOVER_DURATION);
+    hoverController_->SetFillMode(FillMode::FORWARDS);
+    hoverController_->Forward();
+}
+
+void RenderTextField::AnimateMouseHoverEnter()
+{
+    StartHoverAnimation(true);
+}
+
+void RenderTextField::AnimateMouseHoverExit()
+{
+    StartHoverAnimation(false);
 }
 
 void RenderTextField::OnClick(const ClickInfo& clickInfo)

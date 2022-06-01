@@ -343,6 +343,8 @@ protected:
     void OnDoubleClick(const ClickInfo& clickInfo);
     void OnLongPress(const LongPressInfo& longPressInfo);
     bool HandleMouseEvent(const MouseEvent& event) override;
+    void AnimateMouseHoverEnter() override;
+    void AnimateMouseHoverExit() override;
 
     void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true, bool isClearRecords = true);
     std::u16string GetTextForDisplay(const std::string& text) const;
@@ -503,6 +505,7 @@ protected:
 private:
     void SetCallback(const RefPtr<TextFieldComponent>& textField);
     void StartPressAnimation(bool isPressDown);
+    void StartHoverAnimation(bool isHovered);
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
     void CursorMoveOnClick(const Offset& offset);
@@ -561,6 +564,7 @@ private:
     bool hasTextOverlayPushed_ = false;
     bool softKeyboardEnabled_ = true;
     Color pressColor_;
+    Color hoverColor_;
     TextSelection selection_; // Selection from custom.
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     std::function<void()> onValueChange_;
@@ -608,6 +612,7 @@ private:
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<Animator> pressController_;
+    RefPtr<Animator> hoverController_;
     RefPtr<Animator> animator_;
     std::vector<TextEditingValue> operationRecords_;
     std::vector<TextEditingValue> inverseOperationRecords_;

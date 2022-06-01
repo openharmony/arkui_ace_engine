@@ -653,6 +653,16 @@ const TextStyle& TextFieldComponent::GetOverCountStyleOuter() const
     return declaration_->GetOverCountStyleOuter();
 }
 
+void TextFieldComponent::SetHoverAnimationType(HoverAnimationType animationType)
+{
+    declaration_->SetHoverAnimationType(animationType);
+}
+
+HoverAnimationType TextFieldComponent::GetHoverAnimationType() const
+{
+    return declaration_->GetHoverAnimationType();
+}
+
 const TextSelection& TextFieldComponent::GetSelection() const
 {
     return declaration_->GetSelection();
