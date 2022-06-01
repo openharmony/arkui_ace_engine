@@ -49,6 +49,7 @@ public:
     static void JsBorderColor(const JSCallbackInfo& info);
     static void JsBorderStyle(const JSCallbackInfo& info);
     static void JsBorderRadius(const JSCallbackInfo& info);
+    static void JsHoverEffect(const JSCallbackInfo& info);
     static void SetOnEditChanged(const JSCallbackInfo& info);
     static void SetOnSubmit(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);

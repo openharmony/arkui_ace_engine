@@ -523,6 +523,18 @@ void JSTextField::JsBorderRadius(const JSCallbackInfo& info)
     }
 }
 
+void JSTextField::JsHoverEffect(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsNumber()) {
+        LOGE("info[0] is not a number");
+        return;
+    }
+    auto component = AceType::DynamicCast<TextFieldComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (component) {
+        component->SetHoverAnimationType(static_cast<HoverAnimationType>(info[0]->ToNumber<int32_t>()));
+    }
+}
+
 void JSTextField::SetOnEditChanged(const JSCallbackInfo& info)
 {
     if (!JSViewBindEvent(&TextFieldComponent::SetOnEditChanged, info)) {

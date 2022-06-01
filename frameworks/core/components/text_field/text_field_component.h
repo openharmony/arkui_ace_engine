@@ -215,6 +215,9 @@ public:
     void SetOverCountStyleOuter(const TextStyle& overCountStyleOuter);
     const TextStyle& GetOverCountStyleOuter() const;
 
+    void SetHoverAnimationType(HoverAnimationType animationType);
+    HoverAnimationType GetHoverAnimationType() const;
+
     const TextSelection& GetSelection() const;
     void SetSelectedStart(int32_t selectedStart);
     void SetSelectedEnd(int32_t selectedEnd);

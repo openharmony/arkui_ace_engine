@@ -128,6 +128,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("inputFilter", &JSTextField::SetInputFilter);
     JSClass<JSTextInput>::StaticMethod("showPasswordIcon", &JSTextField::SetShowPasswordIcon);
     JSClass<JSTextInput>::StaticMethod("textAlign", &JSTextField::SetTextAlign);
+    JSClass<JSTextInput>::StaticMethod("hoverEffect", &JSTextField::JsHoverEffect);
     // API7 onEditChanged deprecated
     JSClass<JSTextInput>::StaticMethod("onEditChanged", &JSTextField::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onEditChange", &JSTextField::SetOnEditChanged);
@@ -155,6 +156,7 @@ void JSTextInput::Create(const JSCallbackInfo& info)
     textInputComponent->SetTextInputType(TextInputType::TEXT);
     textInputComponent->SetAction(TextInputAction::DONE);
     textInputComponent->SetInspectorTag("TextInput");
+    textInputComponent->SetHoverAnimationType(HoverAnimationType::BOARD);
     ViewStackProcessor::GetInstance()->Push(textInputComponent);
     InitDefaultStyle();
     Border boxBorder;
@@ -163,7 +165,6 @@ void JSTextInput::Create(const JSCallbackInfo& info)
     if (boxComponent->GetBackDecoration()) {
         boxBorder = boxComponent->GetBackDecoration()->GetBorder();
     }
-    boxComponent->SetMouseAnimationType(HoverAnimationType::BOARD);
     JSTextField::UpdateDecoration(boxComponent, textInputComponent, boxBorder, theme);
 
     if (info.Length() < 1 || !info[0]->IsObject()) {

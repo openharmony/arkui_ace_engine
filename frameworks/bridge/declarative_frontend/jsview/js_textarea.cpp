@@ -119,6 +119,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("fontStyle", &JSTextField::SetFontStyle);
     JSClass<JSTextArea>::StaticMethod("fontFamily", &JSTextField::SetFontFamily);
     JSClass<JSTextArea>::StaticMethod("inputFilter", &JSTextField::SetInputFilter);
+    JSClass<JSTextArea>::StaticMethod("hoverEffect", &JSTextField::JsHoverEffect);
     JSClass<JSTextArea>::StaticMethod("onChange", &JSTextField::SetOnChange);
     JSClass<JSTextArea>::StaticMethod("onCopy", &JSTextField::SetOnCopy);
     JSClass<JSTextArea>::StaticMethod("onCut", &JSTextField::SetOnCut);
@@ -139,6 +140,7 @@ void JSTextArea::Create(const JSCallbackInfo& info)
     RefPtr<TextFieldComponent> textAreaComponent = AceType::MakeRefPtr<TextFieldComponent>();
     textAreaComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     textAreaComponent->SetTextInputType(TextInputType::MULTILINE);
+    textAreaComponent->SetHoverAnimationType(HoverAnimationType::BOARD);
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
 
     ViewStackProcessor::GetInstance()->Push(textAreaComponent);
@@ -149,7 +151,6 @@ void JSTextArea::Create(const JSCallbackInfo& info)
     if (boxComponent->GetBackDecoration()) {
         boxBorder = boxComponent->GetBackDecoration()->GetBorder();
     }
-    boxComponent->SetMouseAnimationType(HoverAnimationType::BOARD);
     JSTextField::UpdateDecoration(boxComponent, textAreaComponent, boxBorder, theme);
 
     if (info.Length() < 1 || !info[0]->IsObject()) {
