@@ -52,15 +52,21 @@ float Animator::GetDurationScale()
 }
 
 // Public Functions.
-Animator::Animator()
+Animator::Animator(const char* name)
 {
     controllerId_ = AllocControllerId();
+    if (name != nullptr) {
+        animatorName_ = name;
+    }
 }
 
-Animator::Animator(const WeakPtr<PipelineContext>& context)
+Animator::Animator(const WeakPtr<PipelineContext>& context, const char* name)
 {
     controllerId_ = AllocControllerId();
     AttachScheduler(context);
+    if (name != nullptr) {
+        animatorName_ = name;
+    }
 }
 
 Animator::~Animator()
@@ -418,6 +424,7 @@ void Animator::Pause()
         scheduler_->Stop();
     }
     status_ = Status::PAUSED;
+    asyncTrace_ = nullptr;
     StatusListenable::NotifyPauseListener();
     for (auto& controller : proxyControllers_) {
         controller->Pause();
@@ -440,6 +447,7 @@ void Animator::Resume()
         scheduler_->Start();
     }
     status_ = Status::RUNNING;
+    asyncTrace_ = std::make_shared<AceAsyncScopedTrace>(animatorName_);
     isResume_ = true;
     StatusListenable::NotifyResumeListener();
     for (auto& controller : proxyControllers_) {
@@ -468,6 +476,7 @@ void Animator::Stop()
         scheduler_->Stop();
     }
     status_ = Status::STOPPED;
+    asyncTrace_ = nullptr;
     StatusListenable::NotifyStopListener();
     for (auto& controller : proxyControllers_) {
         controller->Stop();
@@ -661,6 +670,7 @@ void Animator::StartInner(bool alwaysNotify)
     }
     StatusListenable::NotifyStartListener();
     status_ = Status::RUNNING;
+    asyncTrace_ = std::make_shared<AceAsyncScopedTrace>(animatorName_);
     isCurDirection_ = GetInitAnimationDirection();
     for (auto& controller : proxyControllers_) {
         controller->StartInner(alwaysNotify);
