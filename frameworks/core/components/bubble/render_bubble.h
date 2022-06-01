@@ -65,7 +65,7 @@ protected:
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
     virtual void UpdateBorderRadius() {}
-    void HandleTouch();
+    void HandleTouch(const Offset& clickPosition);
     Offset GetChildPosition(const Size& childSize);
     Offset GetPositionWithPlacement(const Size& childSize, const Offset& topPosition, const Offset& bottomPosition,
         const Offset& topArrowPosition, const Offset& bottomArrowPosition);
@@ -116,6 +116,8 @@ private:
     void InitTargetSizeAndPosition();
     void UpdateCustomChildPosition();
     void GenerateChildPosition(const Size& childSize);
+    void UpdateTouchRegion();
+    TouchRegion touchRegion_;
 };
 
 } // namespace OHOS::Ace

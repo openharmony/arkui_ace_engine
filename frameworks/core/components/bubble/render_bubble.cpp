@@ -23,8 +23,10 @@
 #include "core/components/box/box_component.h"
 #include "core/components/box/render_box.h"
 #include "core/components/bubble/bubble_element.h"
+#include "core/components/slider/render_slider.h"
 #include "core/components/stack/stack_element.h"
 #include "core/event/ace_event_helper.h"
+#include "core/pipeline/base/component.h"
 #include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace {
@@ -47,9 +49,14 @@ RenderBubble::RenderBubble()
 {
     rawDetector_ = AceType::MakeRefPtr<RawRecognizer>();
     rawDetector_->SetOnTouchDown([weak = WeakClaim(this)](const TouchEventInfo& info) {
+        if (info.GetTouches().empty()) {
+            LOGE("RenderBubble touch event info is empty!");
+            return;
+        }
+
         auto bubble = weak.Upgrade();
         if (bubble) {
-            bubble->HandleTouch();
+            bubble->HandleTouch(info.GetTouches().front().GetLocalLocation());
         }
     });
 }
@@ -65,6 +72,7 @@ void RenderBubble::Update(const RefPtr<Component>& component)
     if (!bubble->GetPopupParam()) {
         return;
     }
+    hoverAnimationType_ = HoverAnimationType::NONE;
     bubbleComponent_ = bubble;
     maskColor_ = bubble->GetPopupParam()->GetMaskColor();
     backgroundColor_ = bubble->GetPopupParam()->GetBackgroundColor();
@@ -168,6 +176,7 @@ void RenderBubble::PerformLayout()
         childOffset_ = GetChildPosition(childSize_);
         if (useCustom_) {
             UpdateCustomChildPosition();
+            UpdateTouchRegion();
         }
         child->SetPosition(childOffset_);
         UpdateAccessibilityInfo(childSize_, childOffset_);
@@ -218,6 +227,55 @@ void RenderBubble::UpdateCustomChildPosition()
         default:
             break;
     }
+}
+
+void RenderBubble::UpdateTouchRegion()
+{
+    Offset topLeft;
+    Offset bottomRight;
+    switch (arrowPlacement_) {
+        case Placement::TOP:
+        case Placement::TOP_LEFT:
+        case Placement::TOP_RIGHT:
+            topLeft = childOffset_;
+            bottomRight = Offset(0.0, NormalizeToPx(targetSpace_)) + childSize_;
+            if (showCustomArrow_) {
+                bottomRight += Offset(0.0, NormalizeToPx(ARROW_HEIGHT));
+            }
+            break;
+        case Placement::BOTTOM:
+        case Placement::BOTTOM_LEFT:
+        case Placement::BOTTOM_RIGHT:
+            topLeft = childOffset_ + Offset(0.0, -NormalizeToPx(targetSpace_));
+            bottomRight = Offset(0.0, NormalizeToPx(targetSpace_)) + childSize_;
+            if (showCustomArrow_) {
+                topLeft += Offset(0.0, -NormalizeToPx(ARROW_HEIGHT));
+                bottomRight += Offset(0.0, NormalizeToPx(ARROW_HEIGHT));
+            }
+            break;
+        case Placement::LEFT:
+        case Placement::LEFT_TOP:
+        case Placement::LEFT_BOTTOM:
+            topLeft = childOffset_;
+            bottomRight = Offset(NormalizeToPx(targetSpace_), 0.0) + childSize_;
+            if (showCustomArrow_) {
+                bottomRight += Offset(NormalizeToPx(ARROW_HEIGHT), 0.0);
+            }
+            break;
+        case Placement::RIGHT:
+        case Placement::RIGHT_TOP:
+        case Placement::RIGHT_BOTTOM:
+            topLeft = childOffset_ + Offset(-NormalizeToPx(targetSpace_), 0.0);
+            bottomRight = Offset(NormalizeToPx(targetSpace_), 0.0) + childSize_;
+            if (showCustomArrow_) {
+                topLeft += Offset(-NormalizeToPx(ARROW_HEIGHT), 0.0);
+                bottomRight += Offset(NormalizeToPx(ARROW_HEIGHT), 0.0);
+            }
+            break;
+        default:
+            break;
+    }
+    touchRegion_ = TouchRegion(topLeft, topLeft + bottomRight);
 }
 
 void RenderBubble::InitTargetSizeAndPosition()
@@ -448,11 +506,17 @@ void RenderBubble::OnHiddenChanged(bool hidden)
     }
 }
 
-void RenderBubble::HandleTouch()
+void RenderBubble::HandleTouch(const Offset& clickPosition)
 {
     if (!bubbleComponent_ || !bubbleComponent_->GetPopupParam()) {
         return;
     }
+
+    if (touchRegion_.ContainsInRegion(clickPosition.GetX(), clickPosition.GetY())) {
+        LOGI("Contains the touch region.");
+        return;
+    }
+
     if (!bubbleComponent_->GetPopupParam()->HasAction()) {
         PopBubble();
         UpdateAccessibilityInfo(Size(), Offset());
@@ -515,7 +579,7 @@ bool RenderBubble::HandleMouseEvent(const MouseEvent& event)
 {
     if (event.button != MouseButton::NONE_BUTTON && event.button != MouseButton::LEFT_BUTTON &&
         event.action == MouseAction::PRESS) {
-        HandleTouch();
+        HandleTouch(event.GetOffset());
     }
     return true;
 }
