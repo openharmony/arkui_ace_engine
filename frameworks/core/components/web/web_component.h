@@ -312,12 +312,11 @@ public:
         zoomImpl_ = std::move(zoomImpl);
     }
 
-    using ZoomInImpl = std::function<void()>;
+    using ZoomInImpl = std::function<bool()>;
     bool ZoomIn() const
     {
         if (zoomInImpl_) {
-            zoomInImpl_();
-            return true;
+            return zoomInImpl_();
         }
         return false;
     }
@@ -327,12 +326,11 @@ public:
         zoomInImpl_ = std::move(zoomInImpl);
     }
 
-    using ZoomOutImpl = std::function<void()>;
+    using ZoomOutImpl = std::function<bool()>;
     bool ZoomOut() const
     {
         if (zoomOutImpl_) {
-            zoomOutImpl_();
-            return true;
+            return zoomOutImpl_();
         }
         return false;
     }
@@ -396,17 +394,17 @@ public:
         return cookieManager_;
     }
 
-    using GetContentHeightImpl = std::function<int()>;
-    int GetContentHeight()
+    using GetPageHeightImpl = std::function<int()>;
+    int GetPageHeight()
     {
-        if (getContentHeightImpl_) {
-            return getContentHeightImpl_();
+        if (getPageHeightImpl_) {
+            return getPageHeightImpl_();
         }
         return 0;
     }
-    void SetGetContentHeightImpl(GetContentHeightImpl&& getContentHeightImpl)
+    void SetGetPageHeightImpl(GetPageHeightImpl&& getPageHeightImpl)
     {
-        getContentHeightImpl_ = getContentHeightImpl;
+        getPageHeightImpl_ = getPageHeightImpl;
     }
 
     using GetWebIdImpl = std::function<int()>;
@@ -573,7 +571,7 @@ private:
     RefreshImpl refreshImpl_;
     StopLoadingImpl stopLoadingImpl_;
     GetHitTestResultImpl getHitTestResultImpl_;
-    GetContentHeightImpl getContentHeightImpl_;
+    GetPageHeightImpl getPageHeightImpl_;
     GetWebIdImpl getWebIdImpl_;
     GetTitleImpl getTitleImpl_;
     SaveCookieSyncImpl saveCookieSyncImpl_;
