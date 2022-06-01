@@ -55,6 +55,8 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->jsBuilderFunction_ =
                 AceType::MakeRefPtr<JsFunction>(ownerObj, JSRef<JSFunc>::Cast(builderCallback));
         } else {
+            delete instance;
+            instance = nullptr;
             LOGE("JSCustomDialogController invalid builder function argument");
             return;
         }

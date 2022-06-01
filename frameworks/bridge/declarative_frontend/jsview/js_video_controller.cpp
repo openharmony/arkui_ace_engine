@@ -51,8 +51,8 @@ void JSVideoController::Constructor(const JSCallbackInfo& args)
 void JSVideoController::Destructor(JSVideoController* videoController)
 {
     if (videoController) {
-        videoController->DecRefCount();
         const auto& controller = videoController->GetController();
+        videoController->DecRefCount();
         if (controller) {
             controller->Clear();
         }

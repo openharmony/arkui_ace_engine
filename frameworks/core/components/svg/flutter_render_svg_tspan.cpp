@@ -157,10 +157,9 @@ double FlutterRenderSvgTspan::OnDrawTextPath(RenderContext& context, const PathO
 
 double FlutterRenderSvgTspan::OnMeasureTextPathBounds(const PathOffset& pathOffset, Rect& bounds)
 {
-    double offset = pathOffset.current;
     SvgTextInfo svgTextInfo = { fillState_, strokeState_, textStyle_, textData_, opacity_ };
     PathDrawInfo pathDrawInfo = { pathOffset.path, pathOffset.current, rotate_ };
-    offset = FlutterSvgPainter::MeasureTextPathBounds(svgTextInfo, pathDrawInfo, bounds);
+    double offset = FlutterSvgPainter::MeasureTextPathBounds(svgTextInfo, pathDrawInfo, bounds);
     return offset;
 }
 

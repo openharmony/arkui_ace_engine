@@ -39,7 +39,6 @@ constexpr int SIGNAL_JS_HEAP_PRIV = 38;
 
 void HandleSignal(int signo)
 {
-    LOGI("HandleSignal signal: %{public}d", signo);
     switch (signo) {
         case SIGNAL_JS_HEAP:
             AceEngine::Get().DumpJsHeap(false);

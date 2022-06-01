@@ -2057,13 +2057,12 @@ void RenderTextField::UpdateDirectionStatus()
 void RenderTextField::UpdateStartSelection(int32_t end, const Offset& pos, bool isSingleHandle, bool isLongPress)
 {
     int32_t extend = GetCursorPositionForClick(pos);
-    int32_t extendEnd = GetEditingValue().selection.GetEnd();
     if (isLongPress) {
         // Use custom selection if exist, otherwise select content near finger.
         if (selection_.IsValid()) {
             UpdateSelection(selection_.baseOffset, selection_.extentOffset);
         } else {
-            extendEnd = extend + GetGraphemeClusterLength(extend, false);
+            int32_t extendEnd = extend + GetGraphemeClusterLength(extend, false);
             UpdateSelection(extend, extendEnd);
         }
         return;

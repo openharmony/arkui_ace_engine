@@ -44,8 +44,8 @@ void JSXComponentController::Constructor(const JSCallbackInfo& args)
 void JSXComponentController::Destructor(JSXComponentController* xcomponentController)
 {
     if (xcomponentController) {
-        xcomponentController->DecRefCount();
         const auto& controller = xcomponentController->GetController();
+        xcomponentController->DecRefCount();
         if (controller) {
             controller->Clear();
         }

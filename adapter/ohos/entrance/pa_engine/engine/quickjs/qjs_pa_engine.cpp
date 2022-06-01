@@ -291,10 +291,7 @@ bool InitJsContext(JSContext* ctx, size_t maxStackSize, int32_t instanceId,
     // Inject pa native functions module
     InitPaModules(ctx);
 
-    JSValue globalObj, perfUtil;
-    globalObj = JS_GetGlobalObject(ctx);
-    perfUtil = JS_NewObject(ctx);
-
+    JSValue globalObj = JS_GetGlobalObject(ctx);
     InitJsConsoleObject(ctx, globalObj);
 
     for (const auto& [key, value] : extraNativeObject) {

@@ -907,7 +907,6 @@ void JsAccessibilityManager::FindFocusedElementInfo(const int32_t elementId,
     AccessibilityElementInfo nodeInfo;
     NodeId nodeId = static_cast<NodeId>(elementId);
     if (elementId == -1) {
-        nodeId = jsAccessibilityManager->GetRootNodeId();
         nodeId = 0;
     }
 
