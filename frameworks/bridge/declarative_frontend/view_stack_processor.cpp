@@ -145,7 +145,7 @@ RefPtr<FlexItemComponent> ViewStackProcessor::GetFlexItemComponent()
         return AceType::DynamicCast<FlexItemComponent>(wrappingComponentsMap["flexItem"]);
     }
 
-    RefPtr<FlexItemComponent> flexItem = AceType::MakeRefPtr<OHOS::Ace::FlexItemComponent>(0.0, 1.0, 0.0);
+    RefPtr<FlexItemComponent> flexItem = AceType::MakeRefPtr<OHOS::Ace::FlexItemComponent>(0.0, 0.0, 0.0);
     wrappingComponentsMap.emplace("flexItem", flexItem);
     return flexItem;
 }
