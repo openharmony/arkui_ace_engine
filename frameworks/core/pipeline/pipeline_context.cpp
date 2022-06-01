@@ -1554,6 +1554,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         scalePoint.type);
     if (scalePoint.type == TouchType::DOWN) {
         LOGD("receive touch down event, first use touch test to collect touch event target");
+        eventManager_->HandleGlobalEvent(scalePoint, textOverlayManager_);
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         auto frontEnd = GetFrontend();
         if (frontEnd && (frontEnd->GetType() == FrontendType::JS_CARD)) {

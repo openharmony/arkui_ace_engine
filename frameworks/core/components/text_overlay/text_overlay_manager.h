@@ -111,16 +111,20 @@ public:
         isOverlayShowed_ = isOverlayShowed;
     }
 
-    bool IsOverlayShowed()
+    bool IsOverlayShowed() const
     {
         return isOverlayShowed_;
     }
 
-    void ChangeSelection(int32_t start, int32_t end);
+    const std::vector<Rect>& GetSelectedRect() const
+    {
+        return selectedRect_;
+    }
 
+    void ChangeSelection(int32_t start, int32_t end);
     void InitAnimation(const WeakPtr<PipelineContext>& pipelineContext);
     bool GetCaretRect(int32_t extent, Rect& caretRect, double caretHeightOffset = 0.0) const;
-    void PaintSelection(SkCanvas* canvas) const;
+    void PaintSelection(SkCanvas* canvas, const Offset& globalOffset);
     virtual void InitSelection(const Offset& pos, const Offset& globalOffset);
     virtual void UpdateStartSelection(int32_t end, const Offset& pos, const Offset& globalOffset);
     virtual void UpdateEndSelection(int32_t start, const Offset& pos, const Offset& globalOffset);
@@ -160,6 +164,7 @@ protected:
     std::function<void(const double&)> updateHandleDiameterInner_;
     std::function<void(const Rect&)> onClipRectChanged_;
     RefPtr<TextOverlayComponent> textOverlay_;
+    std::vector<Rect> selectedRect_;
 
 private:
     Offset MakeEmptyOffset() const;

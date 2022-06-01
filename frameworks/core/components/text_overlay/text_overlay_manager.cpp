@@ -352,8 +352,9 @@ void TextOverlayBase::InitAnimation(const WeakPtr<PipelineContext>& pipelineCont
     animator_->Play();
 }
 
-void TextOverlayBase::PaintSelection(SkCanvas* canvas) const
+void TextOverlayBase::PaintSelection(SkCanvas* canvas, const Offset& globalOffset)
 {
+    selectedRect_.clear();
     if (!IsSelectiveDevice()) {
         return;
     }
@@ -376,7 +377,8 @@ void TextOverlayBase::PaintSelection(SkCanvas* canvas) const
     paint.setColor(selectedColor_.GetValue());
     Offset effectiveOffset = textOverlayPaintRect_.GetOffset() + textOffsetForShowCaret_;
     for (const auto& box : boxes) {
-        const auto& selectionRect = ConvertSkRect(box.rect) + effectiveOffset;
+        auto selectionRect = ConvertSkRect(box.rect) + effectiveOffset;
+        selectedRect_.emplace_back(selectionRect + globalOffset);
         if (box.direction == txt::TextDirection::ltr) {
             canvas->drawRect(SkRect::MakeLTRB(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(),
                                  selectionRect.Bottom()),

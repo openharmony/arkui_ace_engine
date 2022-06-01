@@ -123,7 +123,7 @@ void RosenRenderText::Paint(RenderContext& context, const Offset& offset)
             break;
     }
 
-    PaintSelection(canvas);
+    PaintSelection(canvas, GetGlobalOffset());
     paragraph_->Paint(canvas, newX, newY);
 }
 
