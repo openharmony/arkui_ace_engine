@@ -137,6 +137,7 @@ bool RenderTouchListener::HandleEvent(const TouchEvent& point)
 
 bool RenderTouchListener::TriggerTouchCallBack(const TouchEvent& changedPoint)
 {
+    LOGI("Trigger touch callback");
     if (!onTouchEventCallback_) {
         return true;
     }
