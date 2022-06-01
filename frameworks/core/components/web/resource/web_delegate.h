@@ -229,10 +229,10 @@ private:
     void OnInactive();
     void OnActive();
     void Zoom(float factor);
-    void ZoomIn();
-    void ZoomOut();
+    bool ZoomIn();
+    bool ZoomOut();
     int GetHitTestResult();
-    int GetContentHeight();
+    int GetPageHeight();
     int GetWebId();
     std::string GetTitle();
     bool SaveCookieSync();
