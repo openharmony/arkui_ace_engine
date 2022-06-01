@@ -296,7 +296,7 @@ void JSImage::Create(const JSCallbackInfo& info)
         return;
     }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if defined(IMAGE_SUPPORTED)
     imageComponent->SetPixmap(CreatePixelMapFromNapiValue(info[0]));
 #endif
 }
