@@ -365,6 +365,9 @@ void RenderText::OnLongPress(const LongPressInfo& longPressInfo)
 
 bool RenderText::HandleMouseEvent(const MouseEvent& event)
 {
+    if (copyOption_ == CopyOption::NoCopy) {
+        return false;
+    }
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         Offset rightClickOffset = event.GetOffset();
         ShowTextOverlay(rightClickOffset, true);
