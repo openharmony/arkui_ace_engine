@@ -73,7 +73,6 @@ enable_standard_input = true
 build_container_scope_lib = true
 multiple_window_support = true
 enable_ability_component = true
-video_components_support = true
 
 if (defined(is_experiment_build) && is_experiment_build) {
   web_components_support = true
@@ -83,10 +82,6 @@ if (defined(is_experiment_build) && is_experiment_build) {
 
 if (defined(web_components_support) && web_components_support) {
   defines += [ "WEB_SUPPORTED" ]
-}
-
-if (defined(video_components_support) && video_components_support) {
-  defines += [ "VIDEO_SUPPORTED" ]
 }
 
 if (defined(enable_ability_component) && enable_ability_component) {

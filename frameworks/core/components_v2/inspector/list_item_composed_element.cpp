@@ -83,7 +83,7 @@ std::string ListItemComposedElement::GetEditable() const
             return "EditMode.Deletable";
         } else if (editMode == (EditMode::DELETABLE | EditMode::MOVABLE)) {
             return "true";
-        } else if (editMode == EditMode::SHAM) {
+        } else if (editMode == EditMode::FALSE) {
             return "false";
         }
     }
