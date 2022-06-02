@@ -22,16 +22,15 @@
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/window/window.h"
 
-#include "base/utils/macros.h"
-#include "base/utils/noncopyable.h"
+#include "core/components/font/font_collection.h"
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT RosenFontCollection : public NonCopyable {
+class ACE_EXPORT RosenFontCollection : public FontCollection {
 public:
     static RosenFontCollection& GetInstance();
 
-    std::shared_ptr<txt::FontCollection> GetFontCollection();
+    std::shared_ptr<txt::FontCollection> GetFontCollection() override;
 
     void LoadFontFromList(const uint8_t* fontData, size_t length, std::string familyName);
 
