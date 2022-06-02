@@ -815,10 +815,12 @@ void RenderButton::PlayFocusAnimation(bool isFocus)
     if (!isOpacityAnimation_ && isTv_) {
         isOpacityAnimation_ = true;
     }
-    if (isFocus) {
-        PlayAnimation(INIT_SCALE, TV_EXPAND_SCALE, TV_FOCUS_SCALE_DURATION);
-    } else {
-        PlayAnimation(TV_EXPAND_SCALE, INIT_SCALE, TV_FOCUS_SCALE_DURATION);
+    if (isTv_) {
+        if (isFocus) {
+            PlayAnimation(INIT_SCALE, TV_EXPAND_SCALE, TV_FOCUS_SCALE_DURATION);
+        } else {
+            PlayAnimation(TV_EXPAND_SCALE, INIT_SCALE, TV_FOCUS_SCALE_DURATION);
+        }
     }
 }
 
