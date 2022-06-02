@@ -64,7 +64,7 @@ void JSVideo::Create(const JSCallbackInfo& info)
         auto noPixMap = ParseJsMedia(previewUriValue, previewUri);
         videoComponent->SetPoster(previewUri);
         if (!noPixMap) {
-#if defined(VIDEO_SUPPORTED)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
             auto pixelMap = CreatePixelMapFromNapiValue(previewUriValue);
             if (pixelMap) {
                 RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(previewUri);

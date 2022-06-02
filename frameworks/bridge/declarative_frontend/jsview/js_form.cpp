@@ -112,7 +112,7 @@ void JSForm::SetSize(const JSCallbackInfo& info)
             height = StringUtils::StringToDimension(heightValue->ToString(), true);
         }
     }
-#if defined(FORM_SUPPORTED)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (form) {
         form->SetCardSize(width.IsValid() ? width : 0.0_vp, height.IsValid() ? height : 0.0_vp);
@@ -132,7 +132,7 @@ void JSForm::SetSize(const JSCallbackInfo& info)
 
 void JSForm::SetDimension(int32_t value)
 {
-#if defined(FORM_SUPPORTED)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (form) {
         form->SetDimension(value);
@@ -142,7 +142,7 @@ void JSForm::SetDimension(int32_t value)
 
 void JSForm::AllowUpdate(const JSCallbackInfo& info)
 {
-#if defined(FORM_SUPPORTED)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         auto allowUpdate = info[0]->ToBoolean();
         auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -165,7 +165,7 @@ void JSForm::SetVisibility(const JSCallbackInfo& info)
 
 void JSForm::SetModuleName(const JSCallbackInfo& info)
 {
-#if defined(FORM_SUPPORTED)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (info.Length() > 0 && info[0]->IsString()) {
         auto moduleName = info[0]->ToString();
         auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -178,7 +178,7 @@ void JSForm::SetModuleName(const JSCallbackInfo& info)
 
 void JSForm::JsOnAcquired(const JSCallbackInfo& info)
 {
-#if defined(FORM_SUPPORTED)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -198,7 +198,7 @@ void JSForm::JsOnAcquired(const JSCallbackInfo& info)
 
 void JSForm::JsOnError(const JSCallbackInfo& info)
 {
-#if defined(FORM_SUPPORTED)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -219,7 +219,7 @@ void JSForm::JsOnError(const JSCallbackInfo& info)
 
 void JSForm::JsOnUninstall(const JSCallbackInfo& info)
 {
-#if defined(FORM_SUPPORTED)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -240,7 +240,7 @@ void JSForm::JsOnUninstall(const JSCallbackInfo& info)
 
 void JSForm::JsOnRouter(const JSCallbackInfo& info)
 {
-#if defined(FORM_SUPPORTED)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
