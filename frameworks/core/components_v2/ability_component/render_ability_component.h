@@ -28,12 +28,21 @@ class RenderAbilityComponent : public RenderNode {
     DECLARE_ACE_TYPE(V2::RenderAbilityComponent, RenderNode);
 
 public:
-    ~RenderAbilityComponent() override = default;
+    ~RenderAbilityComponent() override;
 
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     void Paint(RenderContext &context, const Offset &offset) override;
+    void OnAppShow() override
+    {
+        adapter_->Show();
+    }
+
+    void OnAppHide() override
+    {
+        adapter_->Hide();
+    }
 
     void FireConnect()
     {

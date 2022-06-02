@@ -20,6 +20,12 @@
 #include "core/components_v2/ability_component/ability_component.h"
 
 namespace OHOS::Ace::V2 {
+
+RenderAbilityComponent::~RenderAbilityComponent()
+{
+    adapter_->RemoveExtension();
+}
+
 RefPtr<RenderNode> RenderAbilityComponent::Create()
 {
     return AceType::MakeRefPtr<RenderAbilityComponent>();

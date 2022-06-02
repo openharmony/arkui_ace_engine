@@ -113,9 +113,32 @@ void WindowExtensionConnectionAdapterOhos::ConnectExtension(
 void WindowExtensionConnectionAdapterOhos::RemoveExtension()
 {
     if (windowExtension_) {
-        LOGI("no implement for remove");
+        LOGI("remove extension");
+        windowExtension_->DisconnectExtension();
     } else {
         LOGI("ability doesn't connect to window extension. remove extension fail");
+    }
+}
+
+void WindowExtensionConnectionAdapterOhos::Show()
+{
+    LOGI("show WindowExtensionConnectionAdapterOhos");
+    if (windowExtension_) {
+        windowExtension_->Show();
+        LOGI("no implement for remove");
+    } else {
+        LOGI("ability doesn't connect to window extension. show extension fail");
+    }
+}
+
+void WindowExtensionConnectionAdapterOhos::Hide()
+{
+    LOGI("hide WindowExtensionConnectionAdapterOhos");
+    if (windowExtension_) {
+        windowExtension_->Hide();
+        LOGI("no implement for remove");
+    } else {
+        LOGI("ability doesn't connect to window extension. show extension fail");
     }
 }
 
