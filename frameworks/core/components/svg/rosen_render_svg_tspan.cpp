@@ -140,10 +140,9 @@ double RosenRenderSvgTspan::OnDrawTextPath(RenderContext& context, const PathOff
 
 double RosenRenderSvgTspan::OnMeasureTextPathBounds(const PathOffset& pathOffset, Rect& bounds)
 {
-    double offset = pathOffset.current;
     SvgTextInfo svgTextInfo = { fillState_, strokeState_, textStyle_, textData_, opacity_ };
     PathDrawInfo pathDrawInfo = { pathOffset.path, pathOffset.current, rotate_ };
-    offset = RosenSvgPainter::MeasureTextPathBounds(svgTextInfo, pathDrawInfo, bounds);
+    double offset = RosenSvgPainter::MeasureTextPathBounds(svgTextInfo, pathDrawInfo, bounds);
     return offset;
 }
 

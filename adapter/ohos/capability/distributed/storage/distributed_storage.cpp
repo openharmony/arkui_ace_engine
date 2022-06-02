@@ -116,7 +116,6 @@ DistributedObjectPtr::~DistributedObjectPtr()
         if (ret != OHOS::ObjectStore::SUCCESS) {
             LOGE("DistributedObjectStore UnWatch failed!, err=[%{private}u]", ret);
         }
-        ret = OHOS::ObjectStore::SUCCESS;
         ret = store->DeleteObject(sessionId_);
         if (ret != OHOS::ObjectStore::SUCCESS) {
             LOGE("DistributedObjectStore DeleteObject failed!, err=[%{private}u]", ret);

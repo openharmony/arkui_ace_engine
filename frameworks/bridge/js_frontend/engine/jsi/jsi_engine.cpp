@@ -109,6 +109,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtim
     PixelMapNapiEntry pixelMapNapiEntry = JsEngine::GetPixelMapNapiEntry();
     if (!pixelMapNapiEntry) {
         LOGE("pixelMapNapiEntry is null");
+        return nullptr;
     }
     void* pixmapPtrAddr = pixelMapNapiEntry(
         reinterpret_cast<napi_env>(nativeEngine), reinterpret_cast<napi_value>(nativeValue));

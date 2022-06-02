@@ -256,6 +256,8 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         } else if (valueType == napi_function) {
             napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
         } else {
+            delete asyncContext;
+            asyncContext = nullptr;
             NAPI_ASSERT(env, false, "type mismatch");
         }
     }
@@ -430,6 +432,8 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         } else if (valueType == napi_function) {
             napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
         } else {
+            delete asyncContext;
+            asyncContext = nullptr;
             NAPI_ASSERT(env, false, "type mismatch");
         }
     }

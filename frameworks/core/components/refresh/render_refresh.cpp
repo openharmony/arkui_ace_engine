@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -378,7 +378,6 @@ RefreshStatus RenderRefresh::GetNextStatus()
                 break;
             }
             // No break here, continue next case
-            nextStatus = RefreshStatus::DRAG;
             FirePullDownEvent(PULL_DOWN_START);
             [[fallthrough]];
         case RefreshStatus::DRAG:
@@ -401,7 +400,6 @@ RefreshStatus RenderRefresh::GetNextStatus()
                 break;
             }
             // No break here, continue get next status.
-            nextStatus = RefreshStatus::REFRESH;
             [[fallthrough]];
         case RefreshStatus::REFRESH:
             if (!refreshing_) {

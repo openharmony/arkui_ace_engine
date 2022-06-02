@@ -122,7 +122,6 @@ void RenderStack::DetermineStackSize(bool hasNonPositioned)
     double height = GetLayoutParam().GetMinSize().Height();
     double maxX = 0.0;
     double maxY = 0.0;
-    double lastChildWidth = width;
     double lastChildHeight = height;
     for (const auto& item : GetChildren()) {
         if (item->GetIsPercentSize()) {
@@ -134,7 +133,6 @@ void RenderStack::DetermineStackSize(bool hasNonPositioned)
             GetLayoutParam().GetMaxSize().Height());
         width = std::max(width, constrainedWidth);
         height = std::max(height, constrainedHeight);
-        lastChildWidth = constrainedWidth;
         lastChildHeight = constrainedHeight;
         maxX = std::max(maxX, item->GetLayoutSize().Width() + NormalizePercentToPx(item->GetLeft(), false));
         maxY = std::max(maxY, item->GetLayoutSize().Height() + NormalizePercentToPx(item->GetTop(), true));
@@ -148,7 +146,6 @@ void RenderStack::DetermineStackSize(bool hasNonPositioned)
                     GetLayoutParam().GetMinSize().Height(), GetLayoutParam().GetMaxSize().Height());
                 width = std::max(width, constrainedWidth);
                 height = std::max(height, constrainedHeight);
-                lastChildWidth = constrainedWidth;
                 lastChildHeight = constrainedHeight;
                 maxX = std::max(maxX, item->GetLayoutSize().Width() + NormalizePercentToPx(item->GetLeft(), false));
                 maxY = std::max(maxY, item->GetLayoutSize().Height() + NormalizePercentToPx(item->GetTop(), true));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,8 +42,8 @@ void FlutterRenderSwitch::Paint(RenderContext& context, const Offset& offset)
     double pointOriginX = paintOffset.GetX() + currentPointOriginX_;
     double pointOriginY = paintOffset.GetY() + NormalizeToPx(pointPadding_);
 
-    uint32_t trackColor;
-    uint32_t pointColor;
+    uint32_t trackColor = activeColor_;
+    uint32_t pointColor = pointColor_;
     paintTrackSize_ = switchSize_;
     SetPaintStyle(originX, originY, trackColor, pointColor, trackPaint);
     if (IsPhone() && onFocus_) {

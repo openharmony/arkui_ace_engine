@@ -2537,8 +2537,8 @@ JSValue AppClearData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCo
     if ((argv == nullptr) || (argc == 0)) {
         if (dataMap_.size() > 0) {
             dataMap_.clear();
-            return JS_TRUE;
         }
+        return JS_TRUE;
     }
     if (dataMap_.count(ScopedString::Stringify(ctx, argv[0])) == 1) {
         dataMap_.erase(ScopedString::Stringify(ctx, argv[0]));
