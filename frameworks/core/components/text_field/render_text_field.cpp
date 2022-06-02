@@ -493,7 +493,7 @@ void RenderTextField::StartPressAnimation(bool pressDown)
     if (pressController_->IsRunning()) {
         pressController_->Stop();
     }
-    if (hoverController_->IsRunning()) {
+    if (hoverController_ && hoverController_->IsRunning()) {
         hoverController_->Stop();
     }
     pressController_->ClearInterpolators();
