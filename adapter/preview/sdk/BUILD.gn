@@ -229,7 +229,7 @@ if (is_standard_system) {
 
   if (use_mingw_win) {
     ohos_copy("copy_preview_curl_cacert") {
-      sources = [ "./cacert.pem" ]
+      sources = [ "//third_party/curl/cacert.pem" ]
       outputs = [ target_out_dir + "/previewer/resources/cacert.pem" ]
       module_source_dir = target_out_dir + "/previewer/resources"
       module_install_name = ""
