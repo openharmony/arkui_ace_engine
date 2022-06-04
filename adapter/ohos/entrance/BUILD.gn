@@ -60,7 +60,7 @@ template("ace_ohos_standard_source_set") {
 
     include_dirs = [
       "$aafwk_inner_api_path/runtime/include/",
-      "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/featureAbility",
+      "//foundation/ability/ability_runtime/interfaces/kits/napi/aafwk/featureAbility",
       "//foundation/arkui/napi/interfaces/kits",
       "//foundation/arkui/napi/native_engine",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability/include",
