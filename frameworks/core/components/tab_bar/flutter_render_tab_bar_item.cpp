@@ -62,7 +62,7 @@ void FlutterRenderTabBarItem::Paint(RenderContext& context, const Offset& offset
         return;
     }
     decorationPainter->PaintDecoration(offset, canvas->canvas(), context);
-        if (RenderTabBarItem::needPaintDebugBoundary_ && SystemProperties::GetDebugBoundaryEnabled()) {
+    if (RenderTabBarItem::needPaintDebugBoundary_ && SystemProperties::GetDebugBoundaryEnabled()) {
         flutter::Canvas* canvas = renderContext->GetCanvas();
         if (canvas == nullptr) {
             LOGE("Paint canvas is null.");
