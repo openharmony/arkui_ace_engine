@@ -27,6 +27,7 @@ namespace OHOS::Ace {
 struct TimerCallbackNode {
     std::shared_ptr<NativeReference> func;
     std::vector<std::shared_ptr<NativeReference>> params;
+    NativeEngine* engine;
 };
 
 class JsBackendTimerModule final {
@@ -38,20 +39,22 @@ public:
     void InitTimerModule(NativeEngine* engine, const RefPtr<BackendDelegate>& delegate);
 
     uint32_t AddCallBack(const std::shared_ptr<NativeReference>& func,
-        const std::vector<std::shared_ptr<NativeReference>>& params);
+        const std::vector<std::shared_ptr<NativeReference>>& params, NativeEngine* engine);
     bool GetCallBackById(uint32_t callbackId, std::shared_ptr<NativeReference>& func,
-        std::vector<std::shared_ptr<NativeReference>>& params);
+        std::vector<std::shared_ptr<NativeReference>>& params, NativeEngine** engine);
     void TimerCallback(uint32_t callbackId, int64_t delayTime, bool isInterval);
-    void PostTimerCallback(uint32_t callbackId, int64_t delayTime, bool isInterval, bool isFirst);
+    void PostTimerCallback(uint32_t callbackId, int64_t delayTime, bool isInterval, bool isFirst, NativeEngine* engine);
     void RemoveTimerCallback(uint32_t callbackId);
 
 private:
-    NativeEngine* nativeEngine_ = nullptr;
-    RefPtr<BackendDelegate> delegate_;
+    void AddDelegate(NativeEngine* engine, const RefPtr<BackendDelegate>& delegate);
+    RefPtr<BackendDelegate> GetDelegateWithoutLock(NativeEngine* engine);
+
     std::mutex mutex_;
     uint32_t callbackId_ = 0;
     std::unordered_map<uint32_t, TimerCallbackNode> callbackNodeMap_;
     std::unordered_map<uint32_t, CancelableCallback<void()>> timeoutTaskMap_;
+    std::unordered_map<NativeEngine*, RefPtr<BackendDelegate>> delegateMap_;
 };
 } // namespace OHOS::Ace
 
