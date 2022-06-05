@@ -57,6 +57,7 @@ public:
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
     static void SetOnClick(const JSCallbackInfo& info);
+    static void SetCopyOption(const JSCallbackInfo& info);
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,
         const Border& boxBorder, const RefPtr<TextFieldTheme>& textFieldTheme);
 };

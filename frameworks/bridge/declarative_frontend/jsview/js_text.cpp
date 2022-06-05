@@ -485,15 +485,15 @@ void JSText::SetCopyOption(const JSCallbackInfo& info)
         LOGE("component is not valid");
         return;
     }
-    auto enable = false;
     auto copyOption = CopyOption::NoCopy;
     if (info[0]->IsBoolean()) {
-        enable = info[0]->ToBoolean();
+        auto enable = info[0]->ToBoolean();
         copyOption = enable ? CopyOption::Distributed : CopyOption::NoCopy;
     } else if (info[0]->IsNumber()) {
         auto emunNumber = info[0]->ToNumber<int>() + 1;
         copyOption = static_cast<CopyOption>(emunNumber);
     }
+    LOGI("copy option: %{public}d", copyOption);
     component->SetCopyOption(copyOption);
 }
 

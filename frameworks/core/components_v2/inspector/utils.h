@@ -21,6 +21,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/align_declaration.h"
+#include "core/components/text_overlay/text_overlay_manager.h"
 
 namespace OHOS::Ace::V2 {
 
@@ -323,6 +324,19 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
 
         auto index = BinarySearchFindIndex(fontWeightTable, ArraySize(fontWeightTable), fontWeight);
         return index < 0 ? "FontWeight.Normal" : fontWeightTable[index].value;
+    }
+
+    inline std::string ConvertWrapCopyOptionToStirng(CopyOption copyOption)
+    {
+        static const LinearEnumMapNode<CopyOption, std::string> copyOptionTable[] = {
+            { CopyOption::NoCopy, "CopyOption::NoCopy" },
+            { CopyOption::InApp, "CopyOption:InApp" },
+            { CopyOption::Local, "CopyOption:Local" },
+            { CopyOption::Distributed, "CopyOption:Distributed" },
+        };
+
+        auto index = BinarySearchFindIndex(copyOptionTable, ArraySize(copyOptionTable), copyOption);
+        return index < 0 ? "CopyOption::NoCopy" : copyOptionTable[index].value;
     }
 
     inline std::string ConvertColorToString(Color color)

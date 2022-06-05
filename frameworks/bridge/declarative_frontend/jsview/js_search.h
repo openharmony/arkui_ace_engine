@@ -37,6 +37,7 @@ public:
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
+    static void SetCopyOption(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {
