@@ -47,10 +47,10 @@ NativeValue* SetCallbackTimer(NativeEngine& engine, NativeCallbackInfo& info, bo
     }
 
     // Get callbackId
-    uint32_t callbackId = JsBackendTimerModule::GetInstance()->AddCallBack(func, params);
+    uint32_t callbackId = JsBackendTimerModule::GetInstance()->AddCallBack(func, params, &engine);
 
     // Post task
-    JsBackendTimerModule::GetInstance()->PostTimerCallback(callbackId, delayTime, isInterval, true);
+    JsBackendTimerModule::GetInstance()->PostTimerCallback(callbackId, delayTime, isInterval, true, &engine);
 
     return engine.CreateNumber(callbackId);
 }
@@ -101,13 +101,15 @@ NativeValue* ClearTimeoutOrInterval(NativeEngine* engine, NativeCallbackInfo* in
 
 void JsBackendTimerModule::TimerCallback(uint32_t callbackId, int64_t delayTime, bool isInterval)
 {
-    if (!nativeEngine_) {
-        LOGE("nativeEngine_ is nullptr.");
-    }
-
     std::shared_ptr<NativeReference> func;
     std::vector<std::shared_ptr<NativeReference>> params;
-    if (!GetCallBackById(callbackId, func, params)) {
+    NativeEngine* engine = nullptr;
+    if (!GetCallBackById(callbackId, func, params, &engine)) {
+        return;
+    }
+
+    if (!engine) {
+        LOGE("engine is nullptr.");
         return;
     }
 
@@ -117,16 +119,17 @@ void JsBackendTimerModule::TimerCallback(uint32_t callbackId, int64_t delayTime,
         argc.emplace_back(arg->Get());
     }
 
-    nativeEngine_->CallFunction(nativeEngine_->CreateUndefined(), func->Get(), argc.data(), argc.size());
+    engine->CallFunction(engine->CreateUndefined(), func->Get(), argc.data(), argc.size());
 
     if (isInterval) {
-        PostTimerCallback(callbackId, delayTime, isInterval, false);
+        PostTimerCallback(callbackId, delayTime, isInterval, false, engine);
     } else {
         RemoveTimerCallback(callbackId);
     }
 }
 
-void JsBackendTimerModule::PostTimerCallback(uint32_t callbackId, int64_t delayTime, bool isInterval, bool isFirst)
+void JsBackendTimerModule::PostTimerCallback(uint32_t callbackId, int64_t delayTime, bool isInterval, bool isFirst,
+    NativeEngine* engine)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (!isFirst) {
@@ -147,7 +150,10 @@ void JsBackendTimerModule::PostTimerCallback(uint32_t callbackId, int64_t delayT
         result.first->second = cancelableTimer;
     }
 
-    delegate_->PostDelayedJsTask(cancelableTimer, delayTime);
+    RefPtr<BackendDelegate> delegate = GetDelegateWithoutLock(engine);
+    if (delegate) {
+        delegate->PostDelayedJsTask(cancelableTimer, delayTime);
+    }
 }
 
 void JsBackendTimerModule::RemoveTimerCallback(uint32_t callbackId)
@@ -165,17 +171,18 @@ void JsBackendTimerModule::RemoveTimerCallback(uint32_t callbackId)
 }
 
 uint32_t JsBackendTimerModule::AddCallBack(const std::shared_ptr<NativeReference>& func,
-    const std::vector<std::shared_ptr<NativeReference>>& params)
+    const std::vector<std::shared_ptr<NativeReference>>& params, NativeEngine* engine)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     ++callbackId_;
     callbackNodeMap_[callbackId_].func = func;
     callbackNodeMap_[callbackId_].params = params;
+    callbackNodeMap_[callbackId_].engine = engine;
     return callbackId_;
 }
 
 bool JsBackendTimerModule::GetCallBackById(uint32_t callbackId, std::shared_ptr<NativeReference>& func,
-    std::vector<std::shared_ptr<NativeReference>>& params)
+    std::vector<std::shared_ptr<NativeReference>>& params, NativeEngine** engine)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     auto taskNode = callbackNodeMap_.find(callbackId);
@@ -186,6 +193,7 @@ bool JsBackendTimerModule::GetCallBackById(uint32_t callbackId, std::shared_ptr<
 
     func = taskNode->second.func;
     params = taskNode->second.params;
+    *engine = taskNode->second.engine;
     return true;
 }
 
@@ -195,6 +203,23 @@ JsBackendTimerModule* JsBackendTimerModule::GetInstance()
     return &instance;
 }
 
+RefPtr<BackendDelegate> JsBackendTimerModule::GetDelegateWithoutLock(NativeEngine* engine)
+{
+    auto delegateNode = delegateMap_.find(engine);
+    if (delegateNode == delegateMap_.end()) {
+        LOGE("Get delegate failed.");
+        return nullptr;
+    }
+
+    return delegateNode->second;
+}
+
+void JsBackendTimerModule::AddDelegate(NativeEngine* engine, const RefPtr<BackendDelegate>& delegate)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    delegateMap_[engine] = delegate;
+}
+
 void JsBackendTimerModule::InitTimerModule(NativeEngine* engine, const RefPtr<BackendDelegate>& delegate)
 {
     if (engine == nullptr || delegate == nullptr) {
@@ -202,10 +227,9 @@ void JsBackendTimerModule::InitTimerModule(NativeEngine* engine, const RefPtr<Ba
         return;
     }
 
-    nativeEngine_ = engine;
-    delegate_ = delegate;
+    AddDelegate(engine, delegate);
 
-    NativeObject* globalObject = ConvertNativeValueTo<NativeObject>(nativeEngine_->GetGlobal());
+    NativeObject* globalObject = ConvertNativeValueTo<NativeObject>(engine->GetGlobal());
     if (!globalObject) {
         LOGE("Failed to get global object.");
         return;
