@@ -59,7 +59,14 @@ public:
     RefPtr<RenderNode> CreateRenderNode() override
     {
         auto tabBarItemComponent = AceType::DynamicCast<TabBarItemComponent>(component_);
-        return tabBarItemComponent ? tabBarItemComponent->CreateRenderNode() : nullptr;
+        if (!tabBarItemComponent) {
+            return nullptr;
+        }
+        auto renderTabBarItem = AceType::DynamicCast<RenderTabBarItem>(tabBarItemComponent->CreateRenderNode());
+        if (tabBarItemComponent->GetEnableDebugBoundary()) {
+            renderTabBarItem->SetEnableDebugBoundary(true);
+        }
+        return renderTabBarItem;
     }
 };
 

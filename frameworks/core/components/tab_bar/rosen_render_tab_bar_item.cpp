@@ -48,6 +48,16 @@ void RosenRenderTabBarItem::Paint(RenderContext& context, const Offset& offset)
 
     rsNode->SetForegroundColor(Color::BLACK.BlendOpacity(hoverOpacity_).GetValue());
     rsNode->SetCornerRadius(Dimension(CLICKED_RADIUS, DimensionUnit::VP).ConvertToPx(dipScale));
+    if (RenderTabBarItem::needPaintDebugBoundary_ && SystemProperties::GetDebugBoundaryEnabled()) {
+        auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+        if (canvas == nullptr) {
+            LOGE("Paint canvas is null.");
+            return;
+        }
+        DebugBoundaryPainter::PaintDebugBoundary(canvas, offset, GetLayoutSize());
+        DebugBoundaryPainter::PaintDebugCorner(canvas, offset, GetLayoutSize());
+        DebugBoundaryPainter::PaintDebugMargin(canvas, offset, GetLayoutSize(), RenderBoxBase::margin_);
+    }
 }
 
 } // namespace OHOS::Ace

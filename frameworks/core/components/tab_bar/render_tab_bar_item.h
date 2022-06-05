@@ -42,6 +42,11 @@ public:
         return touching_;
     }
 
+    void SetEnableDebugBoundary(bool needEnable)
+    {
+        needPaintDebugBoundary_ = needEnable;
+    }
+
 protected:
     RenderTabBarItem();
     void OnTouchTestHit(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -52,6 +57,7 @@ protected:
 
     bool onHover_ = false;
     double hoverOpacity_ = 0.0;
+    bool needPaintDebugBoundary_ = false;
 
 private:
     void HandleTouchDown();

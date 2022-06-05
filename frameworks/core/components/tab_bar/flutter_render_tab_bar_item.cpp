@@ -15,6 +15,7 @@
 
 #include "core/components/tab_bar/flutter_render_tab_bar_item.h"
 
+#include "core/components/common/painter/debug_boundary_painter.h"
 #include "core/components/common/painter/flutter_decoration_painter.h"
 #include "core/pipeline/base/flutter_render_context.h"
 
@@ -61,6 +62,16 @@ void FlutterRenderTabBarItem::Paint(RenderContext& context, const Offset& offset
         return;
     }
     decorationPainter->PaintDecoration(offset, canvas->canvas(), context);
+        if (RenderTabBarItem::needPaintDebugBoundary_ && SystemProperties::GetDebugBoundaryEnabled()) {
+        flutter::Canvas* canvas = renderContext->GetCanvas();
+        if (canvas == nullptr) {
+            LOGE("Paint canvas is null.");
+            return;
+        }
+        DebugBoundaryPainter::PaintDebugBoundary(canvas->canvas(), offset, GetLayoutSize());
+        DebugBoundaryPainter::PaintDebugCorner(canvas->canvas(), offset, GetLayoutSize());
+        DebugBoundaryPainter::PaintDebugMargin(canvas->canvas(), offset, GetLayoutSize(), margin_);
+    }
 }
 
 } // namespace OHOS::Ace

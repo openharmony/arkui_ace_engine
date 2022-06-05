@@ -145,6 +145,7 @@ void TabBarComponent::BuildItems(std::list<RefPtr<TabBarItemComponent>>& items)
                 box->UpdateStyle(inactiveTextStyle_, inactiveColor_);
             }
         }
+        box->SetEnableDebugBoundary(true);
         box->SetPadding(labelPadding_);
         if (mode_ == TabBarMode::FIXED) {
             box->SetFlex(BoxFlex::FLEX_XY);
