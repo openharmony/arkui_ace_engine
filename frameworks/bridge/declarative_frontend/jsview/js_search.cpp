@@ -244,6 +244,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onCopy", &JSSearch::SetOnCopy);
     JSClass<JSSearch>::StaticMethod("onCut", &JSSearch::SetOnCut);
     JSClass<JSSearch>::StaticMethod("onPaste", &JSSearch::SetOnPaste);
+    JSClass<JSSearch>::StaticMethod("copyOption", &JSSearch::SetCopyOption);
     JSClass<JSSearch>::Inherit<JSViewAbstract>();
     JSClass<JSSearch>::Bind(globalObj);
 }
@@ -495,6 +496,23 @@ void JSSearch::SetOnPaste(const JSCallbackInfo& info)
         LOGW("Failed(OnPaste) to bind event");
     }
     info.ReturnSelf();
+}
+
+void JSSearch::SetCopyOption(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        return;
+    }
+    auto copyOption = CopyOption::NoCopy;
+    if (info[0]->IsBoolean()) {
+        auto enable = info[0]->ToBoolean();
+        copyOption = enable ? CopyOption::Distributed : CopyOption::NoCopy;
+    } else if (info[0]->IsNumber()) {
+        auto emunNumber = info[0]->ToNumber<int>() + 1;
+        copyOption = static_cast<CopyOption>(emunNumber);
+    }
+    LOGI("copy option: %{public}d", copyOption);
+    JSViewSetProperty(&TextFieldComponent::SetCopyOption, copyOption);
 }
 
 void JSSearchController::JSBind(BindingTarget globalObj)

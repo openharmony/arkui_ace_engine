@@ -821,6 +821,7 @@ void RenderText::Dump()
         fontFamilies += ",";
     }
     DumpLog::GetInstance().AddDesc(std::string("FontFamily: ").append(fontFamilies));
+    DumpLog::GetInstance().AddDesc(std::string("CopyOption: ").append(V2::ConvertWrapCopyOptionToStirng(copyOption_)));
 }
 
 } // namespace OHOS::Ace

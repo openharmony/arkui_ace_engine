@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
+#include "base/log/dump_log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
@@ -28,6 +29,7 @@
 #include "core/components/text/text_utils.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components/text_overlay/text_overlay_element.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/event/ace_event_helper.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
@@ -124,6 +126,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         maxLength_ = textField->GetMaxLength();
     }
 
+    copyOption_ = textField->GetCopyOption();
     selection_ = textField->GetSelection();
     placeholder_ = textField->GetPlaceholder();
     inputFilter_ = textField->GetInputFilter();
@@ -1871,7 +1874,9 @@ void RenderTextField::HandleOnCut()
     if (GetEditingValue().GetSelectedText().empty()) {
         return;
     }
-    clipboard_->SetData(GetEditingValue().GetSelectedText());
+    if (copyOption_ != CopyOption::NoCopy) {
+        clipboard_->SetData(GetEditingValue().GetSelectedText());
+    }
     if (onCut_) {
         onCut_(GetEditingValue().GetSelectedText());
     }
@@ -1892,7 +1897,9 @@ void RenderTextField::HandleOnCopy()
     if (GetEditingValue().GetSelectedText().empty()) {
         return;
     }
-    clipboard_->SetData(GetEditingValue().GetSelectedText());
+    if (copyOption_ != CopyOption::NoCopy) {
+        clipboard_->SetData(GetEditingValue().GetSelectedText());
+    }
     if (onCopy_) {
         onCopy_(GetEditingValue().GetSelectedText());
     }
@@ -2303,6 +2310,11 @@ void RenderTextField::ApplyAspectRatio()
         }
         parent = parent->GetParent().Upgrade();
     }
+}
+
+void RenderTextField::Dump()
+{
+    DumpLog::GetInstance().AddDesc(std::string("CopyOption: ").append(V2::ConvertWrapCopyOptionToStirng(copyOption_)));
 }
 
 } // namespace OHOS::Ace

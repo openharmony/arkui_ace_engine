@@ -84,6 +84,7 @@ public:
     void OnStatusChanged(RenderStatus renderStatus) override;
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
     void OnPaintFinish() override;
+    void Dump() override;
 
     bool OnKeyEvent(const KeyEvent& event);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling = false);
@@ -568,6 +569,7 @@ private:
     Color hoverColor_;
     TextSelection selection_; // Selection from custom.
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
+    CopyOption copyOption_ = CopyOption::Distributed;
     std::function<void()> onValueChange_;
     std::function<void(bool)> onKeyboardClose_;
     std::function<void(const Rect&)> onClipRectChanged_;
