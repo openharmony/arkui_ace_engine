@@ -3617,7 +3617,7 @@ std::string JsiEngine::GetStacktraceMessage()
     }
     std::string stack;
     arkNativeEngine->SuspendVM();
-    bool getStackSuccess = arkNativeEngine->BuildNativeAndJsBackStackTrace(stack);
+    bool getStackSuccess = arkNativeEngine->BuildJsStackTrace(stack);
     arkNativeEngine->ResumeVM();
     if (!getStackSuccess) {
         LOGE("GetStacktraceMessage arkNativeEngine get stack failed");
