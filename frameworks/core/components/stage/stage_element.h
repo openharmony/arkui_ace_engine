@@ -37,7 +37,7 @@ public:
     void PopToPage(int32_t pageId);
     void RestorePopPage(const RefPtr<Component>& newComponent);
     virtual void Replace(const RefPtr<Component>& newComponent);
-    bool ClearOffStage();
+    bool ClearOffStage(const std::function<void()>& listener);
     bool CanPopPage();
     bool CanPushPage();
     bool CanReplacePage();
@@ -91,7 +91,12 @@ private:
     // Only after PerformBuild can we determine if there is a shared element transition.
     void OnPostFlush() override;
     void MakeTopPageTouchable();
+
     void RestorePop();
+    void AddListenerForClear(const std::function<void()>& listener)
+    {
+        clearListener_ = listener;
+    }
 
     StackOperation operation_ { StackOperation::NONE };
     StackOperation pendingOperation_ { StackOperation::NONE };
@@ -102,6 +107,8 @@ private:
     RefPtr<Animator> controllerOut_; // Controller for transition out.
     int32_t directedPageId_ = 0;
     bool isWaitingForBuild_ = false;
+
+    std::function<void()> clearListener_ = nullptr;
 };
 
 class SectionStageElement : public StageElement {

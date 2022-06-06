@@ -1285,11 +1285,11 @@ void PipelineContext::ReplacePage(const RefPtr<PageComponent>& pageComponent)
     ReplacePage(pageComponent, nullptr);
 }
 
-bool PipelineContext::ClearInvisiblePages()
+bool PipelineContext::ClearInvisiblePages(const std::function<void()>& listener)
 {
     LOGD("ClearInvisiblePageComponents");
     auto stageElement = GetStageElement();
-    return stageElement && stageElement->ClearOffStage();
+    return stageElement && stageElement->ClearOffStage(listener);
 }
 
 void PipelineContext::ExitAnimation()

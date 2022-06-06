@@ -156,7 +156,7 @@ public:
 
     bool CanReplacePage();
 
-    bool ClearInvisiblePages();
+    bool ClearInvisiblePages(const std::function<void()>& listener = nullptr);
 
     bool CallRouterBackToPopPage();
 
