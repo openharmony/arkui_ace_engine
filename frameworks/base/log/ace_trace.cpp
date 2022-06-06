@@ -98,11 +98,10 @@ std::string ACE_EXPORT AceAsyncTraceBeginWithArgs(int32_t taskId, char* format, 
     return name;
 }
 
-int32_t AceAsyncScopedTrace::id_ = 0;
+std::atomic<std::int32_t> AceAsyncScopedTrace::id_ = 0;
 
-AceAsyncScopedTrace::AceAsyncScopedTrace(const char* format, ...)
+AceAsyncScopedTrace::AceAsyncScopedTrace(const char* format, ...) : asyncTraceEnabled_(AceTraceEnabled())
 {
-    asyncTraceEnabled_ = true;
     taskId_ = id_++;
     if (asyncTraceEnabled_) {
         va_list args;

@@ -447,7 +447,7 @@ void Animator::Resume()
         scheduler_->Start();
     }
     status_ = Status::RUNNING;
-    asyncTrace_ = std::make_shared<AceAsyncScopedTrace>(animatorName_);
+    asyncTrace_ = std::make_shared<AceAsyncScopedTrace>(animatorName_.c_str());
     isResume_ = true;
     StatusListenable::NotifyResumeListener();
     for (auto& controller : proxyControllers_) {
@@ -670,7 +670,7 @@ void Animator::StartInner(bool alwaysNotify)
     }
     StatusListenable::NotifyStartListener();
     status_ = Status::RUNNING;
-    asyncTrace_ = std::make_shared<AceAsyncScopedTrace>(animatorName_);
+    asyncTrace_ = std::make_shared<AceAsyncScopedTrace>(animatorName_.c_str());
     isCurDirection_ = GetInitAnimationDirection();
     for (auto& controller : proxyControllers_) {
         controller->StartInner(alwaysNotify);

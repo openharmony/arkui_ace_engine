@@ -205,7 +205,7 @@ private:
     float tempo_ = 1.0f;
     bool isBothBackwards = false;
     std::shared_ptr<AceAsyncScopedTrace> asyncTrace_;
-    const char* animatorName_ = "Animation";
+    std::string animatorName_ = "Animator";
 };
 
 } // namespace OHOS::Ace

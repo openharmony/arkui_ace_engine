@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_ACE_TRACE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_ACE_TRACE_H
 
+#include <atomic>
 #include <cstdarg>
 #include <cstdio>
 #include <memory>
@@ -82,7 +83,7 @@ private:
     bool asyncTraceEnabled_ { false };
     std::string name_;
     int32_t taskId_;
-    static int32_t id_;
+    static std::atomic<std::int32_t> id_;
 };
 
 } // namespace OHOS::Ace
