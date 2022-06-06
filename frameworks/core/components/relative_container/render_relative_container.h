@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_RELATIVE_CONTAINER_RENDER_RELATIVE_CONTAINER_H
 
 #include <typeinfo>
+
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/flex/flex_item_component.h"

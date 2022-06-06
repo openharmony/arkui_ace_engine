@@ -159,7 +159,7 @@ public:
         return alignRules_;
     }
 
-    void SetId(const std::string id)
+    void SetId(const std::string& id)
     {
         id_ = id;
     }
