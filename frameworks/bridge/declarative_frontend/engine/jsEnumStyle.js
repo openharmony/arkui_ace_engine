@@ -786,3 +786,10 @@ var CopyOption;
   CopyOption[CopyOption["LocalDevice"] = 1] = "LocalDevice";
   CopyOption[CopyOption["CrossDevice"] = 2] = "CrossDevice";
 })(CopyOption || (CopyOption = {}));
+
+var ListItemAlign;
+(function (ListItemAlign) {
+  ListItemAlign[ListItemAlign["Start"] = 0] = "Start";
+  ListItemAlign[ListItemAlign["Center"] = 1] = "Center";
+  ListItemAlign[ListItemAlign["End"] = 2] = "End";
+})(ListItemAlign || (ListItemAlign = {}));

@@ -141,6 +141,7 @@ public:
     static bool ParseJsDimensionFp(const JSRef<JSVal>& jsValue, Dimension& result);
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, Dimension& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
+    static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
 

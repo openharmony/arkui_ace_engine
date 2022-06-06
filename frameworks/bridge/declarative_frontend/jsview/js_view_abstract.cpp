@@ -2364,6 +2364,36 @@ bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
     return true;
 }
 
+bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
+{
+    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
+        LOGE("arg is not Number, String or Object.");
+        return false;
+    }
+    if (jsValue->IsNumber()) {
+        result = jsValue->ToNumber<int32_t>();
+        return true;
+    }
+    if (jsValue->IsString()) {
+        result = StringUtils::StringToInt(jsValue->ToString());
+        return true;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> resId = jsObj->GetProperty("id");
+    if (!resId->IsNumber()) {
+        LOGW("resId is not number");
+        return false;
+    }
+
+    auto themeConstants = GetThemeConstants();
+    if (!themeConstants) {
+        LOGW("themeConstants is nullptr");
+        return false;
+    }
+    result = themeConstants->GetInt(resId->ToNumber<uint32_t>());
+    return true;
+}
+
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
 {
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {

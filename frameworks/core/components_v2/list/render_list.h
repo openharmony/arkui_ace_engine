@@ -42,6 +42,12 @@ enum class ListEvents {
     REACH_END,
 };
 
+enum class ItemPositionState {
+    AHEAD_OF_VIEWPORT = 0,
+    IN_VIEWPORT,
+    BEHIND_VIEWPORT,
+};
+
 class ListItemGenerator : virtual public Referenced {
 public:
     static constexpr size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
@@ -316,6 +322,12 @@ protected:
     {
         return chainProperty_;
     }
+    void CalculateLanes();
+    ItemPositionState GetItemPositionState(double curMainPos, double lastItemMainSize);
+    double GetLaneLengthInPx(const Dimension& length);
+    double CalculateLaneCrossOffset(double crossSize, double childCrossSize);
+    void RequestNewItemsAtEnd(double& curMainPos, double mainSize, const LayoutParam& innerLayout);
+    void RequestNewItemsAtStart(const LayoutParam& innerLayout);
 
     RefPtr<ListComponent> component_;
 
@@ -392,6 +404,9 @@ protected:
     double estimatedHeight_ = 0.0;
 
 private:
+    int32_t lanes_ = -1;
+    double minLaneLength_ = -1.0; // in vertical list, [minLaneLength_] means the minimum width of a lane
+    double maxLaneLength_ = -1.0; // in vertical list, [maxLaneLength_] means the maximum width of a lane
     bool IsReachStart();
     void HandleListEvent();
     bool ActionByScroll(bool forward, ScrollEventBack scrollEventBack);
