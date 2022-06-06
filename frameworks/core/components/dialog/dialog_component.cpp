@@ -53,6 +53,7 @@ constexpr double PHONE_ENTER_CURVE_X1 = 0.60;
 constexpr double PHONE_ENTER_CURVE_Y1 = 1.0;
 constexpr double PHONE_OPACITY_MIDDLE_IN = 0.375;
 constexpr Dimension CAR_TITLE_MIN_HEIGHT = 64.0_vp;
+constexpr int32_t PLATFORM_VERSION_EIGHT = 8;
 
 } // namespace
 
@@ -261,6 +262,10 @@ void DialogComponent::BuildTitle(const RefPtr<ColumnComponent>& column)
         row = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, rowChildren);
     } else {
         row = AceType::MakeRefPtr<RowComponent>(FlexAlign::CENTER, FlexAlign::CENTER, rowChildren);
+    }
+    auto pipeline = context_.Upgrade();
+    if (pipeline && pipeline->GetMinPlatformVersion() > PLATFORM_VERSION_EIGHT) {
+        row = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, rowChildren);
     }
     row->SetStretchToParent(true);
     if (SystemProperties::GetDeviceType() == DeviceType::CAR) {
