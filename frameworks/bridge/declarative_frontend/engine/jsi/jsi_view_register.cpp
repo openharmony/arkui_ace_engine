@@ -91,6 +91,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_progress.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_slider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
@@ -934,7 +935,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "CheckboxGroup", JSCheckboxGroup::JSBind },
     { "Refresh", JSRefresh::JSBind },
     { "WaterFlow", JSWaterFlow::JSBind },
-    { "FlowItem", JSWaterFlowItem::JSBind }
+    { "FlowItem", JSWaterFlowItem::JSBind },
+    { "RelativeContainer", JSRelativeContainer::JSBind }
 };
 
 void RegisterAllModule(BindingTarget globalObj)

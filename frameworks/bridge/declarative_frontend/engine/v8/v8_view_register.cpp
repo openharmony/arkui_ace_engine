@@ -102,6 +102,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
@@ -704,7 +705,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"Checkbox", JSCheckbox::JSBind},
     {"CheckboxGroup", JSCheckboxGroup::JSBind},
     {"WaterFlow", JSWaterFLow::JSBind},
-    {"FlowItem", JSFLowItem::JSBind}
+    {"FlowItem", JSFLowItem::JSBind},
+    {"RelativeContainer", JSRelativeContainer::JSBind},
 };
 
 void RegisterAllModule(BindingTarget globalObj)

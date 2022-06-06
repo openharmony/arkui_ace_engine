@@ -149,6 +149,46 @@ public:
         return displayType_;
     }
 
+    void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules)
+    {
+        alignRules_ = alignRules;
+    }
+
+    const std::map<AlignDirection, AlignRule>& GetAlignRules() const
+    {
+        return alignRules_;
+    }
+
+    void SetId(const std::string id)
+    {
+        id_ = id;
+    }
+
+    const std::string& GetId() const
+    {
+        return id_;
+    }
+
+    void SetAligned(const AlignDirection& alignDirection);
+
+    bool GetTwoHorizontalDirectionAligned() const
+    {
+        return (relativeLeftAligned_ && relativeRightAligned_) || (relativeRightAligned_ && relativeMiddleAligned_) ||
+            (relativeLeftAligned_ && relativeMiddleAligned_);
+    }
+
+    bool GetTwoVerticalDirectionAligned() const
+    {
+        return (relativeTopAligned_ && relativeCenterAligned_) || (relativeBottomAligned_ && relativeCenterAligned_) ||
+            (relativeTopAligned_ && relativeBottomAligned_);
+    }
+
+    bool GetAligned(AlignDirection& alignDirection);
+
+    double GetAlignValue(AlignDirection& alignDirection);
+
+    void SetAlignValue(AlignDirection& alignDirection, double value);
+
 protected:
     void ClearRenderObject() override;
     bool MaybeRelease() override;
@@ -168,6 +208,20 @@ private:
     Dimension maxHeight_ = Dimension(Size::INFINITE_SIZE);
     FlexAlign alignSelf_ = FlexAlign::AUTO;
     DisplayType displayType_ = DisplayType::NO_SETTING;
+    std::map<AlignDirection, AlignRule> alignRules_;
+    bool relativeLeftAligned_ = false;
+    bool relativeRightAligned_ = false;
+    bool relativeMiddleAligned_ = false;
+    bool relativeTopAligned_ = false;
+    bool relativeBottomAligned_ = false;
+    bool relativeCenterAligned_ = false;
+    double relativeLeft_ = 0.0;
+    double relativeRight_ = 0.0;
+    double relativeMiddle_ = 0.0;
+    double relativeTop_ = 0.0;
+    double relativeBottom_ = 0.0;
+    double relativeCenter_ = 0.0;
+    std::string id_;
 };
 
 } // namespace OHOS::Ace

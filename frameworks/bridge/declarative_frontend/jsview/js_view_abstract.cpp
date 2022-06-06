@@ -44,6 +44,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/components/box/box_component_helper.h"
 #include "core/components/common/layout/align_declaration.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/menu/menu_component.h"
 #include "core/components/option/option_component.h"
@@ -3666,6 +3667,11 @@ void JSViewAbstract::JsKey(const std::string& key)
     if (component) {
         component->SetInspectorKey(key);
     }
+    
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    if (flexItem) {
+        flexItem->SetInspectorKey(key);
+    }
 }
 
 void JSViewAbstract::JsId(const std::string& id)
@@ -3970,6 +3976,44 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("accessibilityDescription", &JSViewAbstract::JsAccessibilityDescription);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityImportance", &JSViewAbstract::JsAccessibilityImportance);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibility", &JSInteractableView::JsOnAccessibility);
+    JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
+}
+
+void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        LOGE("arg is not Object or String.");
+        return;
+    }
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+
+    JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(info[0]);
+    if (valueObj->IsEmpty()) {
+        LOGE("Align rule is empty");
+        return;
+    }
+    const char* keys[] = { "left", "middle", "right", "top", "center", "bottom" };
+    std::map<AlignDirection, AlignRule> alignRules;
+    for (uint32_t i = 0; i < sizeof(keys) / sizeof(const char*); i++) {
+        auto rule = valueObj->GetProperty(keys[i]);
+        if (rule->IsObject()) {
+            JSRef<JSObject> val = JSRef<JSObject>::Cast(rule);
+            JSRef<JSVal> align = val->GetProperty("align");
+            AlignRule alignRule;
+            alignRule.anchor = val->GetProperty("anchor")->ToString();
+            if (i < DIRECTION_RANGE) {
+                alignRule.horizontal = static_cast<HorizontalAlign>(val->GetProperty("align")->ToNumber<int32_t>());
+            } else {
+                alignRule.vertical = static_cast<VerticalAlign>(val->GetProperty("align")->ToNumber<int32_t>());
+            }
+            alignRules[static_cast<AlignDirection>(i)] = alignRule;
+        }
+    }
+    flexItem->SetAlignRules(alignRules);
 }
 
 RefPtr<Decoration> JSViewAbstract::GetFrontDecoration()

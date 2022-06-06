@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FLEX_FLEX_ITEM_COMPONENT_H
 
 #include "core/components/common/layout/grid_column_info.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/flex/flex_item_element.h"
 #include "core/components/flex/render_flex_item.h"
 #include "core/pipeline/base/sole_child_component.h"
@@ -190,6 +191,16 @@ public:
             return nullptr;
         }
     }
+    void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules)
+    {
+        alignRules_ = alignRules;
+    }
+
+    const std::map<AlignDirection, AlignRule>& GetAlignRules() const
+    {
+        return alignRules_;
+    }
+
 private:
     double flexGrow_ = 0.0;
     double flexShrink_ = 0.0;
@@ -207,6 +218,7 @@ private:
     FlexAlign alignSelf_ = FlexAlign::AUTO;
     RefPtr<GridColumnInfo::Builder> gridColumnInfoBuilder_;
     DisplayType displayType_ = DisplayType::NO_SETTING;
+    std::map<AlignDirection, AlignRule> alignRules_;
 };
 
 } // namespace OHOS::Ace
