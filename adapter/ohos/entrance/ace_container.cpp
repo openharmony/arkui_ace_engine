@@ -166,6 +166,7 @@ void AceContainer::DestroyView()
         if (flutterAceView) {
             flutterAceView->DecRefCount();
         }
+        aceView_ = nullptr;
     }
 }
 
