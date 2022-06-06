@@ -42,11 +42,6 @@ void AceTraceEnd()
     FinishTrace(HITRACE_TAG_ACE);
 }
 
-bool AceAsyncTraceEnabled()
-{
-    return true;
-}
-
 void AceAsyncTraceBegin(int32_t taskId, const char* name)
 {
     if (name == nullptr) {
