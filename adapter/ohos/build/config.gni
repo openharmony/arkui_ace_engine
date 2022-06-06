@@ -73,6 +73,16 @@ enable_standard_input = true
 build_container_scope_lib = true
 multiple_window_support = true
 enable_ability_component = true
+video_components_support = true
+image_components_support = true
+
+if (defined(image_components_support) && image_components_support) {
+  defines += [ "IMAGE_SUPPORTED" ]
+}
+
+if (defined(video_components_support) && video_components_support) {
+  defines += [ "VIDEO_SUPPORTED" ]
+}
 
 if (defined(is_experiment_build) && is_experiment_build) {
   web_components_support = true
