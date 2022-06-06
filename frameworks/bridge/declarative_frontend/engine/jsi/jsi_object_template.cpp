@@ -21,19 +21,12 @@ JsiObjectTemplate::JsiObjectTemplate()
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = runtime->GetEcmaVm();
-    proto_.FreeGlobalHandleAddr();
-    proto_ = panda::Global<panda::ObjectRef>(runtime->GetEcmaVm(), panda::ObjectRef::New(vm));
-}
-
-JsiObjectTemplate::~JsiObjectTemplate()
-{
-    proto_.FreeGlobalHandleAddr();
+    proto_ = panda::CopyableGlobal<panda::ObjectRef>(runtime->GetEcmaVm(), panda::ObjectRef::New(vm));
 }
 
 panda::Local<panda::ObjectRef> JsiObjectTemplate::operator*() const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    return proto_.ToLocal(runtime->GetEcmaVm());
+    return proto_.ToLocal();
 }
 
 panda::Local<panda::ObjectRef> JsiObjectTemplate::NewInstance() const

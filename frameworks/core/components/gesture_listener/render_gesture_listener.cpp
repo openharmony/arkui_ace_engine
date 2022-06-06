@@ -288,7 +288,7 @@ void RenderGestureListener::SetRemoteMessageCallback(const RefPtr<GestureListene
 {
     const auto& remoteMessageId = component->GetRemoteMessageId();
     if (remoteMessageId.IsEmpty()) {
-        LOGE("RenderGestureListener::SetRemoteMessageCallback remoteMessageId IsEmpty");
+        LOGD("RenderGestureListener::SetRemoteMessageCallback remoteMessageId IsEmpty");
         return;
     }
     SetRemoteMessageCallback(AceAsyncEvent<void(const ClickInfo&)>::Create(remoteMessageId, context_));

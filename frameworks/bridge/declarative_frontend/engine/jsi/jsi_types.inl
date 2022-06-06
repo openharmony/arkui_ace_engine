@@ -21,67 +21,51 @@
 namespace OHOS::Ace::Framework {
 
 template<typename T>
-JsiType<T>::JsiType()
-{}
-
-template<typename T>
 JsiType<T>::JsiType(panda::Local<T> val)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), val);
+    if (!val.IsEmpty()) {
+        auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+        handle_ = panda::CopyableGlobal(runtime->GetEcmaVm(), val);
+    }
 }
 
 template<typename T>
 template<typename S>
 JsiType<T>::JsiType(panda::Local<S> val)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), val);
+    if (!val.IsEmpty()) {
+        auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+        handle_ = panda::CopyableGlobal(runtime->GetEcmaVm(), val);
+    }
 }
 
 template<typename T>
-JsiType<T>::JsiType(panda::Global<T> other)
+JsiType<T>::JsiType(const panda::CopyableGlobal<T>& other) : handle_(other)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), other);
 }
 
 template<typename T>
-JsiType<T>::JsiType(const JsiType<T>& rhs)
+JsiType<T>::JsiType(const JsiType<T>& rhs) : handle_(rhs.handle_)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_);
 }
 
 template<typename T>
-JsiType<T>::JsiType(JsiType<T>&& rhs)
+JsiType<T>::JsiType(JsiType<T>&& rhs) : handle_(std::move(rhs.handle_))
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_);
-    rhs.handle_.FreeGlobalHandleAddr();
 }
 
 template<typename T>
 JsiType<T>& JsiType<T>::operator=(const JsiType<T>& rhs)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_);
+    handle_ = rhs.handle_;
     return *this;
 }
 
 template<typename T>
 JsiType<T>& JsiType<T>::operator=(JsiType<T>&& rhs)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    handle_ = Global<T>(runtime->GetEcmaVm(), rhs.handle_);
-    rhs.handle_.FreeGlobalHandleAddr();
+    handle_ = std::move(rhs.handle_);
     return *this;
-}
-
-template<typename T>
-JsiType<T>::~JsiType()
-{
-    handle_.FreeGlobalHandleAddr();
 }
 
 template<typename T>
@@ -93,10 +77,21 @@ void JsiType<T>::SetWeak()
 }
 
 template<typename T>
-panda::Local<T> JsiType<T>::GetHandle() const
+const EcmaVM* JsiType<T>::GetEcmaVM() const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    return handle_.ToLocal(runtime->GetEcmaVm());
+    return handle_.GetEcmaVM();
+}
+
+template<typename T>
+const panda::CopyableGlobal<T>& JsiType<T>::GetHandle() const
+{
+    return handle_;
+}
+
+template<typename T>
+panda::Local<T> JsiType<T>::GetLocalHandle() const
+{
+    return handle_.ToLocal();
 }
 
 template<typename T>
@@ -108,25 +103,25 @@ bool JsiType<T>::IsEmpty() const
 template<typename T>
 bool JsiType<T>::IsWeak() const
 {
-     return handle_.IsWeak();
+    return handle_.IsWeak();
 }
 
 template<typename T>
 void JsiType<T>::Reset()
 {
-    handle_.FreeGlobalHandleAddr();
+    handle_.Reset();
 }
 
 template<typename T>
-panda::Local<T> JsiType<T>::operator->() const
+const panda::CopyableGlobal<T>& JsiType<T>::operator->() const
 {
-    return GetHandle();
+    return handle_;
 }
 
 template<typename T>
-JsiType<T>::operator panda::Local<T>() const
+JsiType<T>::operator panda::CopyableGlobal<T>() const
 {
-    return GetHandle();
+    return handle_;
 }
 
 template<typename T>
@@ -139,7 +134,7 @@ JsiType<T> JsiType<T>::New()
 template<typename T>
 T JsiValue::ToNumber() const
 {
-    return JsiValueConvertor::fromJsiValue<T>(GetHandle());
+    return JsiValueConvertor::fromJsiValue<T>(GetEcmaVM(), GetLocalHandle());
 }
 
 template<typename T>
@@ -160,9 +155,8 @@ void JsiObject::Wrap(T* data) const
 template<typename T>
 void JsiObject::SetProperty(const char* prop, T value) const
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    auto stringRef = panda::StringRef::NewFromUtf8(runtime->GetEcmaVm(), prop);
-    GetHandle()->Set(runtime->GetEcmaVm(), stringRef, JsiValueConvertor::toJsiValue<T>(value));
+    auto stringRef = panda::StringRef::NewFromUtf8(GetEcmaVM(), prop);
+    GetHandle()->Set(GetEcmaVM(), stringRef, JsiValueConvertor::toJsiValueWithVM<T>(GetEcmaVM(), value));
 }
 
 template<typename T>
@@ -174,7 +168,7 @@ void JsiCallbackInfo::SetReturnValue(T* instance) const
 template<typename T>
 void JsiCallbackInfo::SetReturnValue(JsiRef<T> val) const
 {
-    retVal_ = panda::Global<panda::JSValueRef>(info_->GetVM(), val.Get().GetHandle());
+    retVal_ = panda::CopyableGlobal<panda::JSValueRef>(val.Get().GetHandle());
 }
 
 template<typename... Args>
@@ -232,5 +226,4 @@ void JsiException::ThrowEvalError(const char* format, Args... args)
     auto vm = runtime->GetEcmaVm();
     panda::JSNApi::ThrowException(vm, panda::Exception::EvalError(vm, panda::StringRef::NewFromUtf8(vm, str.c_str())));
 }
-
 } // namespace OHOS::Ace::Framework
