@@ -311,6 +311,7 @@ public:
     int32_t instanceId_ = -1;
 
     bool hasFocus_ = false;
+    void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true, bool isClearRecords = true);
 
 protected:
     // Describe where caret is and how tall visually.
@@ -348,7 +349,6 @@ protected:
     void AnimateMouseHoverEnter() override;
     void AnimateMouseHoverExit() override;
 
-    void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true, bool isClearRecords = true);
     std::u16string GetTextForDisplay(const std::string& text) const;
 
     void UpdateStartSelection(int32_t end, const Offset& pos, bool isSingleHandle, bool isLongPress);

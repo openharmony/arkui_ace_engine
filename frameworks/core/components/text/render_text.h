@@ -18,6 +18,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/common/clipboard/clipboard.h"
+#include "core/components/box/drag_drop_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
@@ -35,8 +36,8 @@ namespace OHOS::Ace {
 
 class TextComponent;
 
-class RenderText : public RenderNode, public TextOverlayBase {
-    DECLARE_ACE_TYPE(RenderText, RenderNode, TextOverlayBase);
+class RenderText : public RenderNode, public TextOverlayBase, public DragDropEvent {
+    DECLARE_ACE_TYPE(RenderText, RenderNode, TextOverlayBase, DragDropEvent);
 
 public:
     ~RenderText() override;
@@ -110,6 +111,30 @@ public:
     }
 
     std::string GetSelectedContent() const override;
+    const TextEditingValue GetTextValue() const
+    {
+        return textValue_;
+    }
+
+    const Offset& GetStartOffset() const
+    {
+        return startOffset_;
+    }
+
+    void SetStartOffset(const Offset& startOffset)
+    {
+        startOffset_ = startOffset;
+    }
+
+    const Offset& GetEndOffset() const
+    {
+        return endOffset_;
+    }
+
+    void SetEndOffset(const Offset& endOffset)
+    {
+        endOffset_ = endOffset;
+    }
 
 protected:
     void OnTouchTestHit(
@@ -160,6 +185,15 @@ private:
         const std::function<void(const Offset&)>& startCallback, bool isSingleHandle = false);
     void HandleOnEndHandleMove(
         int32_t start, const Offset& endHandleOffset, const std::function<void(const Offset&)>& endCallback);
+    void HideTextOverlay();
+    void UpdateTextOverlay();
+    // Drag event
+    void PanOnActionStart(const GestureEvent& info) override;
+    void PanOnActionUpdate(const GestureEvent& info) override;
+    void PanOnActionEnd(const GestureEvent& info) override;
+    void PanOnActionCancel() override;
+    DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info) override;
+    void CreateSelectRecognizer();
 
     bool needClickDetector_ = false;
     bool needLongPressDetector_ = false;
@@ -169,8 +203,12 @@ private:
     RefPtr<ClickRecognizer> clickDetector_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<LongPressRecognizer> textOverlayRecognizer_;
+    RefPtr<ClickRecognizer> hideTextOverlayRecognizer_;
+    RefPtr<PanRecognizer> selectRecognizer_;
     RefPtr<Clipboard> clipboard_;
     CopyOption copyOption_ = CopyOption::NoCopy;
+    Offset startOffset_;
+    Offset endOffset_;
 };
 
 } // namespace OHOS::Ace

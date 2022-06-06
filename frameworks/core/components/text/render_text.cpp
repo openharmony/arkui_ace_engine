@@ -19,7 +19,9 @@
 #include "base/log/dump_log.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/font_manager.h"
+#include "core/components/gesture_listener/gesture_listener_component.h"
 #include "core/components/text/text_component.h"
+#include "core/components/text_field/render_text_field.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/event/ace_event_helper.h"
@@ -102,6 +104,16 @@ void RenderText::Update(const RefPtr<Component>& component)
     textAffinity_ = TextAffinity::UPSTREAM;
     textValue_.text = text_->GetData();
     cursorWidth_ = NormalizeToPx(CURSOR_WIDTH);
+    
+    onDragStart_ = text_->GetOnDragStartId();
+    onDragEnter_ = text_->GetOnDragEnterId();
+    onDragMove_ = text_->GetOnDragMoveId();
+    onDragLeave_ = text_->GetOnDragLeaveId();
+    onDrop_ = text_->GetOnDropId();
+    if (onDragStart_) {
+        CreateDragDropRecognizer(context_);
+        CreateSelectRecognizer();
+    }
 }
 
 void RenderText::OnPaintFinish()
@@ -215,7 +227,8 @@ bool RenderText::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
         !GetEventMarker(GetTouchPosition(localOffset), GestureType::TOUCH_CANCEL).IsEmpty()) {
         needTouchDetector_ = true;
     }
-    if (!needClickDetector_ && !needLongPressDetector_ && !needTouchDetector_ && copyOption_ == CopyOption::NoCopy) {
+    if (!needClickDetector_ && !needLongPressDetector_ && !needTouchDetector_ &&
+        copyOption_ == CopyOption::NoCopy && !onDragStart_) {
         return false;
     }
 
@@ -233,19 +246,52 @@ bool RenderText::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
 void RenderText::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    if (!textOverlayRecognizer_) {
-        textOverlayRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(context_);
-        textOverlayRecognizer_->SetOnLongPress([weak = WeakClaim(this)](const LongPressInfo& info) {
-            auto client = weak.Upgrade();
-            if (client) {
-                client->OnLongPress(info);
-            }
-        });
+    if (copyOption_ != CopyOption::NoCopy) {
+        if (!textOverlayRecognizer_) {
+            textOverlayRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(context_);
+            textOverlayRecognizer_->SetOnLongPress([weak = WeakClaim(this)](const LongPressInfo& info) {
+                auto client = weak.Upgrade();
+                if (client) {
+                    client->OnLongPress(info);
+                }
+            });
+        }
+        textOverlayRecognizer_->SetCoordinateOffset(coordinateOffset);
+        textOverlayRecognizer_->SetTouchRestrict(touchRestrict);
+        textOverlayRecognizer_->SetUseCatchMode(false);
+        result.emplace_back(textOverlayRecognizer_);
     }
-    textOverlayRecognizer_->SetCoordinateOffset(coordinateOffset);
-    textOverlayRecognizer_->SetTouchRestrict(touchRestrict);
-    textOverlayRecognizer_->SetUseCatchMode(false);
-    result.emplace_back(textOverlayRecognizer_);
+
+    if (onDragStart_) {
+        if (!hideTextOverlayRecognizer_) {
+            hideTextOverlayRecognizer_ = AceType::MakeRefPtr<ClickRecognizer>();
+            hideTextOverlayRecognizer_->SetOnClick([weak = WeakClaim(this)](const ClickInfo& info) {
+                auto text = weak.Upgrade();
+                if (text && info.GetSourceDevice() == SourceType::MOUSE) {
+                    text->HideTextOverlay();
+                }
+            });
+        }
+        hideTextOverlayRecognizer_->SetCoordinateOffset(coordinateOffset);
+        hideTextOverlayRecognizer_->SetTouchRestrict(touchRestrict);
+        result.emplace_back(hideTextOverlayRecognizer_);
+
+        if (touchRestrict.sourceType == SourceType::MOUSE) {
+            Offset offset(globalPoint_.GetX(), globalPoint_.GetY());
+            if (IsSelectedText(offset, GetGlobalOffset())) {
+                result.emplace_back(dragDropGesture_);
+            } else {
+                result.emplace_back(selectRecognizer_);
+            }
+        } else {
+            auto renderText = AceType::Claim(this);
+            if (renderText) {
+                SetStartOffset(GetHandleOffset(0));
+                SetEndOffset(GetHandleOffset(textValue_.GetWideText().length()));
+            }
+            result.emplace_back(dragDropGesture_);
+        }
+    }
 
     if (GetChildren().empty()) {
         return;
@@ -334,6 +380,45 @@ void RenderText::OnTouchTestHit(
         longPressRecognizer_->SetTouchRestrict(touchRestrict);
         result.emplace_back(longPressRecognizer_);
         needLongPressDetector_ = false;
+    }
+}
+
+void RenderText::HideTextOverlay()
+{
+    auto textOverlayManager = GetTextOverlayManager(context_);
+    if (!textOverlayManager) {
+        return;
+    }
+
+    auto textOverlayBase = textOverlayManager->GetTextOverlayBase();
+    if (!textOverlayBase) {
+        return;
+    }
+
+    auto targetNode = textOverlayManager->GetTargetNode();
+    if (targetNode == this) {
+        textOverlayManager->PopTextOverlay();
+        textOverlayBase->ChangeSelection(0, 0);
+        textOverlayBase->MarkIsOverlayShowed(false);
+        targetNode->MarkNeedRender();
+    }
+}
+
+void RenderText::UpdateTextOverlay()
+{
+    auto textOverlayManager = GetTextOverlayManager(context_);
+    if (!textOverlayManager) {
+        return;
+    }
+
+    auto textOverlayBase = textOverlayManager->GetTextOverlayBase();
+    if (!textOverlayBase) {
+        return;
+    }
+
+    auto targetNode = textOverlayManager->GetTargetNode();
+    if (targetNode == this) {
+        targetNode->MarkNeedRender();
     }
 }
 
@@ -822,6 +907,270 @@ void RenderText::Dump()
     }
     DumpLog::GetInstance().AddDesc(std::string("FontFamily: ").append(fontFamilies));
     DumpLog::GetInstance().AddDesc(std::string("CopyOption: ").append(V2::ConvertWrapCopyOptionToStirng(copyOption_)));
+}
+
+DragItemInfo RenderText::GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info)
+{
+    RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+    event->SetX(context->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+    event->SetY(context->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+    selectedItemSize_ = GetLayoutSize();
+    auto extraParams = JsonUtil::Create(true);
+
+    return onDragStart_(event, extraParams->ToString());
+}
+
+void RenderText::PanOnActionStart(const GestureEvent& info)
+{
+    if (!onDragStart_) {
+        return;
+    }
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+
+    auto dragItemInfo = GenerateDragItemInfo(pipelineContext, info);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (!dragItemInfo.pixelMap && !dragItemInfo.customComponent) {
+        auto initRenderNode = AceType::Claim(this);
+        isDragDropNode_ = true;
+        pipelineContext->SetInitRenderNode(initRenderNode);
+
+        AddDataToClipboard(pipelineContext, dragItemInfo.extraInfo, textValue_.GetSelectedText(), "");
+        if (!dragWindow_) {
+            auto rect = pipelineContext->GetCurrentWindowRect();
+            dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
+                static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
+                static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Top(), GetPaintRect().Width(),
+                GetPaintRect().Height());
+            dragWindow_->SetOffset(rect.Left(), rect.Top());
+            dragWindow_->DrawText(paragraph_, GetPaintRect().GetOffset(), initRenderNode);
+        }
+        return;
+    }
+
+    if (dragItemInfo.pixelMap) {
+        auto initRenderNode = AceType::Claim(this);
+        isDragDropNode_ = true;
+        pipelineContext->SetInitRenderNode(initRenderNode);
+
+        AddDataToClipboard(pipelineContext, dragItemInfo.extraInfo, textValue_.GetSelectedText(), "");
+        if (!dragWindow_) {
+            auto rect = pipelineContext->GetCurrentWindowRect();
+            dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
+                static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
+                static_cast<int32_t>(info.GetGlobalPoint().GetY()) + rect.Top(), dragItemInfo.pixelMap->GetWidth(),
+                dragItemInfo.pixelMap->GetHeight());
+            dragWindow_->SetOffset(rect.Left(), rect.Top());
+            dragWindow_->DrawPixelMap(dragItemInfo.pixelMap);
+        }
+        return;
+    }
+#endif
+    if (!dragItemInfo.customComponent) {
+        LOGW("the drag custom component is null");
+        return;
+    }
+
+    hasDragItem_ = true;
+    auto positionedComponent = AceType::MakeRefPtr<PositionedComponent>(dragItemInfo.customComponent);
+    positionedComponent->SetTop(Dimension(GetGlobalOffset().GetY()));
+    positionedComponent->SetLeft(Dimension(GetGlobalOffset().GetX()));
+    SetLocalPoint(info.GetGlobalPoint() - GetGlobalOffset());
+    auto updatePosition = [renderBox = AceType::Claim(this)](
+                                const std::function<void(const Dimension&, const Dimension&)>& func) {
+        if (!renderBox) {
+            return;
+        }
+        renderBox->SetUpdateBuilderFuncId(func);
+    };
+    positionedComponent->SetUpdatePositionFuncId(updatePosition);
+    auto stackElement = pipelineContext->GetLastStack();
+    stackElement->PushComponent(positionedComponent);
+}
+
+void RenderText::PanOnActionUpdate(const GestureEvent& info)
+{
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (isDragDropNode_ && dragWindow_) {
+        int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
+        int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
+        if (dragWindow_) {
+            dragWindow_->MoveTo(x, y);
+        }
+        return;
+    }
+#endif
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+
+    RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+    event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+    event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+
+    Offset offset = info.GetGlobalPoint() - GetLocalPoint();
+    if (GetUpdateBuilderFuncId()) {
+        GetUpdateBuilderFuncId()(Dimension(offset.GetX()), Dimension(offset.GetY()));
+    }
+
+    auto extraParams = JsonUtil::Create(true);
+    auto targetDragDropNode = FindDragDropNode(pipelineContext, info);
+    auto preDragDropNode = GetPreDragDropNode();
+    if (preDragDropNode == targetDragDropNode) {
+        if (targetDragDropNode && targetDragDropNode->GetOnDragMove()) {
+            (targetDragDropNode->GetOnDragMove())(event, extraParams->ToString());
+        }
+        return;
+    }
+    if (preDragDropNode && preDragDropNode->GetOnDragLeave()) {
+        (preDragDropNode->GetOnDragLeave())(event, extraParams->ToString());
+    }
+    if (targetDragDropNode && targetDragDropNode->GetOnDragEnter()) {
+        (targetDragDropNode->GetOnDragEnter())(event, extraParams->ToString());
+    }
+    SetPreDragDropNode(targetDragDropNode);
+}
+
+void RenderText::PanOnActionEnd(const GestureEvent& info)
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (isDragDropNode_) {
+        isDragDropNode_ = false;
+
+        if (GetOnDrop()) {
+            RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+            RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
+            event->SetPasteData(pasteData);
+            event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+            event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+
+            auto extraParams = JsonUtil::Create(true);
+            (GetOnDrop())(event, extraParams->ToString());
+            pipelineContext->SetInitRenderNode(nullptr);
+        }
+
+        auto textfield = FindTargetRenderNode<RenderTextField>(context_.Upgrade(), info);
+        if (textfield) {
+            auto value = textfield->GetEditingValue();
+            value.Append(textValue_.GetSelectedText());
+            textfield->SetEditingValue(std::move(value));
+        }
+    }
+
+    if (dragWindow_) {
+        dragWindow_->Destory();
+        dragWindow_ = nullptr;
+        return;
+    }
+#endif
+    RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+    RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
+    event->SetPasteData(pasteData);
+    event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+    event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+
+    Offset offset = info.GetGlobalPoint() - GetLocalPoint();
+    if (GetUpdateBuilderFuncId()) {
+        GetUpdateBuilderFuncId()(Dimension(offset.GetX()), Dimension(offset.GetY()));
+    }
+    if (hasDragItem_) {
+        auto stackElement = pipelineContext->GetLastStack();
+        stackElement->PopComponent();
+    }
+    hasDragItem_ = false;
+
+    ACE_DCHECK(GetPreDragDropNode() == FindTargetRenderNode<DragDropEvent>(pipelineContext, info));
+    auto targetDragDropNode = GetPreDragDropNode();
+    if (!targetDragDropNode) {
+        return;
+    }
+    if (targetDragDropNode->GetOnDrop()) {
+        auto extraParams = JsonUtil::Create(true);
+        (targetDragDropNode->GetOnDrop())(event, extraParams->ToString());
+    }
+    SetPreDragDropNode(nullptr);
+}
+
+void RenderText::PanOnActionCancel()
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (isDragDropNode_) {
+        isDragDropNode_ = false;
+    }
+
+    if (dragWindow_) {
+        dragWindow_->Destory();
+        dragWindow_ = nullptr;
+    }
+#endif
+    if (hasDragItem_) {
+        auto stackElement = pipelineContext->GetLastStack();
+        stackElement->PopComponent();
+        hasDragItem_ = false;
+    }
+    SetPreDragDropNode(nullptr);
+}
+
+void RenderText::CreateSelectRecognizer()
+{
+    if (selectRecognizer_) {
+        return;
+    }
+
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    PanDirection panDirection;
+    selectRecognizer_ =
+        AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(context, 1, panDirection, 0);
+    selectRecognizer_->SetOnActionStart([weak = WeakClaim(this), context = context_](const GestureEvent& info) {
+        if (info.GetSourceDevice() != SourceType::MOUSE) {
+            return;
+        }
+
+        auto text = weak.Upgrade();
+        if (text) {
+            text->HideTextOverlay();
+            auto textOverlayManager = text->GetTextOverlayManager(context);
+            if (textOverlayManager) {
+                textOverlayManager->SetTextOverlayBase(weak);
+            }
+            Offset offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY());
+            text->InitSelection(offset, text->GetGlobalOffset());
+        }
+    });
+    selectRecognizer_->SetOnActionUpdate([weak = WeakClaim(this), context = context_](const GestureEvent& info) {
+        if (info.GetSourceDevice() != SourceType::MOUSE) {
+            return;
+        }
+
+        auto text = weak.Upgrade();
+        if (text) {
+            Offset offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY());
+            text->UpdateEndSelection(text->GetTextSelect().baseOffset, offset, text->GetGlobalOffset());
+            text->SetStartOffset(text->GetHandleOffset(text->GetTextSelect().GetStart()));
+            text->SetEndOffset(text->GetHandleOffset(text->GetTextSelect().GetEnd()));
+            text->UpdateTextOverlay();
+        }
+    });
 }
 
 } // namespace OHOS::Ace

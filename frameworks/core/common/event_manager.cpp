@@ -64,6 +64,11 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
     if (!targetNode) {
         return;
     }
+    for (auto& rect : textOverlayManager->GetTextOverlayRect()) {
+        if (rect.IsInRegion(point)) {
+            inSelectedRect_ = true;
+        }
+    }
     for (auto& rect : textOverlayBase->GetSelectedRect()) {
         if (rect.IsInRegion(point)) {
             inSelectedRect_ = true;

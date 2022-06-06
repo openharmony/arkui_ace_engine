@@ -52,6 +52,7 @@ struct TouchRestrict final {
     {
         forbiddenType |= gestureType;
     }
+    SourceType sourceType = SourceType::NONE;
 };
 
 struct TouchPoint final {

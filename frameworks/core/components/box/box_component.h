@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_BOX_COMPONENT_H
 
 #include "core/components/box/box_base_component.h"
+#include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/animatable_color.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
@@ -25,17 +26,7 @@
 #include "core/gestures/raw_recognizer.h"
 
 namespace OHOS::Ace {
-/**
- * @brief Used for drag event info.
- */
-struct DragItemInfo {
-    RefPtr<Component> customComponent;
-    RefPtr<PixelMap> pixelMap;
-    std::string extraInfo;
-};
 
-using OnDragFunc = std::function<DragItemInfo(const RefPtr<DragEvent>&, const std::string&)>;
-using OnDropFunc = std::function<void(const RefPtr<DragEvent>&, const std::string&)>;
 using OnHoverCallback = std::function<void(bool)>;
 using OnMouseCallback = std::function<void(MouseInfo& info)>;
 
@@ -274,7 +265,7 @@ public:
         return stateAttributeList_ != nullptr;
     }
 
-    OnDragFunc GetOnDragStartId() const
+    const OnDragFunc& GetOnDragStartId() const
     {
         return onDragStartId_;
     }
@@ -284,7 +275,7 @@ public:
         onDragStartId_ = onDragStartId;
     }
 
-    OnDropFunc GetOnDragEnterId() const
+    const OnDropFunc& GetOnDragEnterId() const
     {
         return onDragEnterId_;
     }
@@ -294,7 +285,7 @@ public:
         onDragEnterId_ = onDragEnterId;
     }
 
-    OnDropFunc GetOnDragMoveId() const
+    const OnDropFunc& GetOnDragMoveId() const
     {
         return onDragMoveId_;
     }
@@ -304,7 +295,7 @@ public:
         onDragMoveId_ = onDragMoveId;
     }
 
-    OnDropFunc GetOnDragLeaveId() const
+    const OnDropFunc& GetOnDragLeaveId() const
     {
         return onDragLeaveId_;
     }
@@ -314,7 +305,7 @@ public:
         onDragLeaveId_ = onDragLeaveId;
     }
 
-    OnDropFunc GetOnDropId() const
+    const OnDropFunc& GetOnDropId() const
     {
         return onDropId_;
     }
@@ -379,11 +370,6 @@ private:
     RefPtr<Decoration> frontDecoration_;
     bool decorationUpdateFlag_ = false;
     HoverAnimationType animationType_ = HoverAnimationType::UNKNOWN;
-    OnDragFunc onDragStartId_;
-    OnDropFunc onDragEnterId_;
-    OnDropFunc onDragMoveId_;
-    OnDropFunc onDragLeaveId_;
-    OnDropFunc onDropId_;
     OnHoverCallback onHoverId_;
     OnMouseCallback onMouseId_;
     OnTouchEventCallback onTouchMoveId_;
@@ -407,6 +393,11 @@ private:
     bool hasBackgroundColor_;
     bool enableDebugBoundary_ = false;
     bool enableDragStart_ = true;
+    OnDragFunc onDragStartId_;
+    OnDropFunc onDragEnterId_;
+    OnDropFunc onDragMoveId_;
+    OnDropFunc onDragLeaveId_;
+    OnDropFunc onDropId_;
 };
 
 } // namespace OHOS::Ace

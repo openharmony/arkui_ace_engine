@@ -69,6 +69,11 @@ public:
     static void SetBorderRadius(const Dimension& value);
     static void JsOpacity(const JSCallbackInfo& info);
     static void JsTransition(const JSCallbackInfo& info);
+    static void JsOnDragStart(const JSCallbackInfo& info);
+    static void JsOnDragEnter(const JSCallbackInfo& info);
+    static void JsOnDragMove(const JSCallbackInfo& info);
+    static void JsOnDragLeave(const JSCallbackInfo& info);
+    static void JsOnDrop(const JSCallbackInfo& info);
 
 protected:
     /**
