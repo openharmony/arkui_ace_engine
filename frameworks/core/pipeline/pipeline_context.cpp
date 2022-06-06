@@ -1635,10 +1635,9 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         }
     }
 
-    if (event.code == KeyCode::KEY_TAB && !isTabKeyPressed_) {
+    if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN && !isTabKeyPressed_) {
         isTabKeyPressed_ = true;
         FlushFocus();
-        return true;
     }
     return eventManager_->DispatchKeyEvent(event, rootElement_);
 }
@@ -2767,6 +2766,7 @@ void PipelineContext::OnPageShow()
 {
     CHECK_RUN_ON(UI);
     isTabKeyPressed_ = false;
+    eventManager_->SetIsTabNodesCollected(false);
     if (onPageShowCallBack_) {
         onPageShowCallBack_();
     }

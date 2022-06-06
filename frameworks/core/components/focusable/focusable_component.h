@@ -188,6 +188,16 @@ public:
         deleteDisabled_ = deleteDisabled;
     }
 
+    int32_t GetTabIndex() const
+    {
+        return tabIndex_;
+    }
+
+    void SetTabIndex(int32_t tabIndex)
+    {
+        tabIndex_ = tabIndex;
+    }
+
 private:
     EventMarker onClickId_;
     EventMarker onFocusId_;
@@ -208,6 +218,8 @@ private:
     std::function<void(int)> onFocusMove_;
     std::function<void()> onFocus_;
     std::function<void()> onBlur_;
+
+    int32_t tabIndex_ = 0;
 };
 
 } // namespace OHOS::Ace

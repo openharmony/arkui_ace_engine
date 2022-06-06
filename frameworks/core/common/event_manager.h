@@ -74,6 +74,23 @@ public:
     }
     void HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager);
 
+    std::list<std::pair<int32_t, WeakPtr<FocusNode>>>& GetTabIndexNodes()
+    {
+        return tabIndexNodes_;
+    }
+
+    void SetTabIndexNodes(std::list<std::pair<int32_t, WeakPtr<FocusNode>>>& tabIndexNodes)
+    {
+        tabIndexNodes_ = std::move(tabIndexNodes);
+    }
+
+    void SetIsTabNodesCollected(bool isTabNodesCollected)
+    {
+        isTabNodesCollected_ = isTabNodesCollected;
+    }
+
+    void CollectTabIndexNodes(const RefPtr<FocusNode>& rootNode);
+
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
@@ -83,6 +100,11 @@ private:
     WeakPtr<RenderNode> mouseHoverNodePre_;
     WeakPtr<RenderNode> mouseHoverNode_;
     WeakPtr<RenderNode> axisNode_;
+    bool isTabNodesCollected_ = false;
+    bool isLastInTabNodes_ = false;
+    int32_t tabPressedIndex_ = -1;
+    std::list<std::pair<int32_t, WeakPtr<FocusNode>>> tabIndexNodes_;
+    WeakPtr<FocusNode> firstZeroNode_;
     int32_t instanceId_ = 0;
     bool inSelectedRect_ = false;
 };

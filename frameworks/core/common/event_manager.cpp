@@ -17,6 +17,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
+#include "core/event/key_event.h"
 #include "core/gestures/gesture_referee.h"
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/base/render_node.h"
@@ -145,6 +146,30 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
     return true;
 }
 
+void EventManager::CollectTabIndexNodes(const RefPtr<FocusNode>& rootNode)
+{
+    if (!rootNode) {
+        LOGE("param is null.");
+        return;
+    }
+    RefPtr<FocusGroup> rootScope = AceType::DynamicCast<FocusGroup>(rootNode);
+    if (rootScope) {
+        auto children = rootScope->GetChildrenList();
+        if (children.size() == 1 && !AceType::DynamicCast<FocusGroup>(children.front())) {
+            if (rootScope->GetTabIndex() > 0) {
+                tabIndexNodes_.emplace_back(rootScope->GetTabIndex(), WeakClaim(AceType::RawPtr(rootScope)));
+            }
+            return;
+        }
+        for (auto& child : children) {
+            CollectTabIndexNodes(child);
+        }
+    }
+    if (rootNode->GetTabIndex() > 0) {
+        tabIndexNodes_.emplace_back(rootNode->GetTabIndex(), WeakClaim(AceType::RawPtr(rootNode)));
+    }
+}
+
 bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNode>& focusNode)
 {
     if (!focusNode) {
@@ -153,8 +178,49 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
     }
     LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
         event.action, event.repeatTime);
+    int32_t tabStep = 0;
+    if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN) {
+        tabIndexNodes_.clear();
+        CollectTabIndexNodes(focusNode);
+        tabIndexNodes_.sort(
+            [](std::pair<int32_t, WeakPtr<FocusNode>>& a, std::pair<int32_t, WeakPtr<FocusNode>>& b) {
+                return a.first < b.first;
+            }
+        );
+        if (!isTabNodesCollected_) {
+            isTabNodesCollected_ = true;
+            tabPressedIndex_ = -1;
+        }
+        if (event.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB }) ||
+                event.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_TAB })) {
+            LOGI("RequestNextFocus by 'SHIFT-TAB'");
+            tabStep = -1;
+            --tabPressedIndex_;
+        } else {
+            LOGI("RequestNextFocus by 'TAB'");
+            tabStep = 1;
+            ++tabPressedIndex_;
+        }
+        if (0 <= tabPressedIndex_ && tabPressedIndex_ < static_cast<int32_t>(tabIndexNodes_.size())) {
+            auto iter = tabIndexNodes_.begin();
+            std::advance(iter, tabPressedIndex_);
+            if (iter == tabIndexNodes_.end()) {
+                LOGE("Tab node index is out of boundary");
+                return false;
+            }
+            auto nodeNeedToFocus = (*iter).second.Upgrade();
+            if (!nodeNeedToFocus) {
+                LOGE("Tab focus node is null");
+                return false;
+            }
+            nodeNeedToFocus->RequestFocusImmediately();
+            isLastInTabNodes_ = true;
+            return true;
+        }
+    }
     if (!focusNode->HandleKeyEvent(event)) {
         LOGD("use platform to handle this event");
+        tabPressedIndex_ -= tabStep;
         return false;
     }
     return true;

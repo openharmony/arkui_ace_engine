@@ -3660,6 +3660,19 @@ void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)
     }
 }
 
+void JSViewAbstract::JsTabIndex(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsNumber()) {
+        LOGE("Param is wrong, it is supposed to be a number");
+        return;
+    }
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
+    if (focusableComponent) {
+        focusableComponent->SetFocusable(true);
+        focusableComponent->SetTabIndex(info[0]->ToNumber<int32_t>());
+    }
+}
+
 void JSViewAbstract::JsKey(const std::string& key)
 {
     auto component = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
@@ -3945,6 +3958,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("onFocusMove", &JSViewAbstract::JsOnFocusMove);
     JSClass<JSViewAbstract>::StaticMethod("onFocus", &JSViewAbstract::JsOnFocus);
     JSClass<JSViewAbstract>::StaticMethod("onBlur", &JSViewAbstract::JsOnBlur);
+    JSClass<JSViewAbstract>::StaticMethod("tabIndex", &JSViewAbstract::JsTabIndex);
     JSClass<JSViewAbstract>::StaticMethod("brightness", &JSViewAbstract::JsBrightness);
     JSClass<JSViewAbstract>::StaticMethod("contrast", &JSViewAbstract::JsContrast);
     JSClass<JSViewAbstract>::StaticMethod("saturate", &JSViewAbstract::JsSaturate);
