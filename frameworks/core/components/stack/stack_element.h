@@ -36,6 +36,7 @@ class ACE_EXPORT StackElement : public ComponentGroupElement, public FocusGroup 
         PANEL_POP,
         DIRECT_POP,
         MENU_POP,
+        VIDEO_POP,
     };
 
     struct ToastInfo {
@@ -67,6 +68,7 @@ public:
     void PopTextOverlay();
     void PopPopup(const ComposeId& id);
     void PopMenu();
+    void PopVideo();
     void PopInstant();
     void PushInstant(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     virtual bool isPageElement()
@@ -90,6 +92,7 @@ private:
     void PerformPopTextOverlay();
     void PerformPopPopup(const ComposeId& id);
     void PerformPopMenu();
+    void PerformPopVideo();
     void PerformDirectPop();
     void PerformPopupChild();
     void EnableTouchEventAndRequestFocus();

@@ -29,6 +29,7 @@
 #include "core/components/text_overlay/text_overlay_element.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
+#include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace {
 
@@ -135,6 +136,13 @@ void StackElement::PopMenu()
     MarkDirty();
 }
 
+void StackElement::PopVideo()
+{
+    PopupComponentInfo popComponentInfo = { -1, "-1", Operation::VIDEO_POP, nullptr };
+    popupComponentInfos_.emplace_back(popComponentInfo);
+    MarkDirty();
+}
+
 void StackElement::PopInstant()
 {
     auto child = children_.end();
@@ -181,6 +189,9 @@ void StackElement::PerformPopupChild(PopupComponentInfo& popupComponentInfo)
             break;
         case Operation::MENU_POP:
             PerformPopMenu();
+            break;
+        case Operation::VIDEO_POP:
+            PerformPopVideo();
             break;
         case Operation::DIRECT_POP:
             PerformDirectPop();
@@ -371,6 +382,18 @@ void StackElement::PerformPopMenu()
     }
     if (IsFocusable()) {
         RequestFocus();
+    }
+    EnableTouchEventAndRequestFocus();
+}
+
+void StackElement::PerformPopVideo()
+{
+    for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
+        auto element = DynamicCast<ComposedElement>(*iter);
+        if (element && element->GetName() == "fullscreen") {
+            UpdateChild(*iter, nullptr);
+            break;
+        }
     }
     EnableTouchEventAndRequestFocus();
 }
