@@ -63,7 +63,7 @@ public:
             return nullptr;
         }
         auto renderTabBarItem = AceType::DynamicCast<RenderTabBarItem>(tabBarItemComponent->CreateRenderNode());
-        if (tabBarItemComponent->GetEnableDebugBoundary()) {
+        if (renderTabBarItem && tabBarItemComponent->GetEnableDebugBoundary()) {
             renderTabBarItem->SetEnableDebugBoundary(true);
         }
         return renderTabBarItem;
