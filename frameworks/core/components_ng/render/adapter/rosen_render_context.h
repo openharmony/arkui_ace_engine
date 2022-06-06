@@ -25,6 +25,7 @@
 
 namespace OHOS::Ace::NG {
 class RosenRenderContext : public RenderContext {
+    DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
     RosenRenderContext() = default;
     ~RosenRenderContext() override;

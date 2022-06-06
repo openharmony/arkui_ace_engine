@@ -21,6 +21,7 @@
 namespace OHOS::Ace::NG {
 // BoxLayout is the class for box type measure, layout.
 class BoxLayoutAlgorithm : public LayoutAlgorithm {
+    DECLARE_ACE_TYPE(BoxLayoutAlgorithm, LayoutAlgorithm)
 public:
     BoxLayoutAlgorithm() = default;
     ~BoxLayoutAlgorithm() override = default;

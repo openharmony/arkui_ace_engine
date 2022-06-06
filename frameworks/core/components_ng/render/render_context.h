@@ -28,7 +28,7 @@ class FrameNode;
 
 // RenderContext is used for render node to paint.
 class RenderContext : public virtual AceType {
-    DECLARE_ACE_TYPE(V2::RenderContext, AceType)
+    DECLARE_ACE_TYPE(NG::RenderContext, AceType)
 
 public:
     ~RenderContext() override = default;
