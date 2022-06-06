@@ -22,6 +22,7 @@
 #include "base/resource/internal_resource.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+#include "core/components/box/drag_drop_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border.h"
@@ -96,6 +97,56 @@ public:
 
     static RefPtr<ImageComponent> MakeFromOtherWithoutSourceAndEvent(const RefPtr<ImageComponent>& other);
 
+    const OnDragFunc& GetOnDragStartId() const
+    {
+        return onDragStartId_;
+    }
+
+    void SetOnDragStartId(const OnDragFunc& onDragStartId)
+    {
+        onDragStartId_ = onDragStartId;
+    }
+
+    const OnDropFunc& GetOnDragEnterId() const
+    {
+        return onDragEnterId_;
+    }
+
+    void SetOnDragEnterId(const OnDropFunc& onDragEnterId)
+    {
+        onDragEnterId_ = onDragEnterId;
+    }
+
+    const OnDropFunc& GetOnDragMoveId() const
+    {
+        return onDragMoveId_;
+    }
+
+    void SetOnDragMoveId(const OnDropFunc& onDragMoveId)
+    {
+        onDragMoveId_ = onDragMoveId;
+    }
+
+    const OnDropFunc& GetOnDragLeaveId() const
+    {
+        return onDragLeaveId_;
+    }
+
+    void SetOnDragLeaveId(const OnDropFunc& onDragLeaveId)
+    {
+        onDragLeaveId_ = onDragLeaveId;
+    }
+
+    const OnDropFunc& GetOnDropId() const
+    {
+        return onDropId_;
+    }
+
+    void SetOnDropId(const OnDropFunc& onDropId)
+    {
+        onDropId_ = onDropId;
+    }
+
 private:
     std::string src_;
     std::string alt_;
@@ -124,6 +175,11 @@ private:
     std::pair<Dimension, Dimension> imageSourceSize_ = std::pair<Dimension, Dimension>(Dimension(-1), Dimension(-1));
     RefPtr<PixelMap> pixmap_ = nullptr;
     bool syncMode_ = false;
+    OnDragFunc onDragStartId_;
+    OnDropFunc onDragEnterId_;
+    OnDropFunc onDragMoveId_;
+    OnDropFunc onDragLeaveId_;
+    OnDropFunc onDropId_;
 };
 
 } // namespace OHOS::Ace

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_RENDER_IMAGE_H
 
 #include "base/resource/internal_resource.h"
+#include "core/components/box/drag_drop_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border.h"
@@ -36,8 +37,8 @@ enum class ImageLoadingStatus {
     LOAD_FAIL,
 };
 
-class RenderImage : public RenderNode {
-    DECLARE_ACE_TYPE(RenderImage, RenderNode);
+class RenderImage : public RenderNode, public DragDropEvent {
+    DECLARE_ACE_TYPE(RenderImage, RenderNode, DragDropEvent);
 
 public:
     static RefPtr<RenderNode> Create();
@@ -246,6 +247,10 @@ public:
         return border_;
     }
 
+    virtual void* GetSkImage() {
+        return nullptr;
+    }
+
 protected:
     void ApplyImageFit(Rect& srcRect, Rect& dstRect);
     void ApplyContain(Rect& srcRect, Rect& dstRect, const Size& rawPicSize, const Size& imageComponentSize);
@@ -257,6 +262,15 @@ protected:
     void SetRadius(const Border& border);
     void CalculateResizeTarget();
     bool NeedResize() const;
+
+    // Drag event
+    void OnTouchTestHit(
+        const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
+    void PanOnActionStart(const GestureEvent& info) override;
+    void PanOnActionUpdate(const GestureEvent& info) override;
+    void PanOnActionEnd(const GestureEvent& info) override;
+    void PanOnActionCancel() override;
+    DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info) override;
 
     // background image
     void PerformLayoutBgImage();

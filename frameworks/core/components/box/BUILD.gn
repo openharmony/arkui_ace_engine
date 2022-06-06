@@ -18,6 +18,7 @@ build_component("box") {
   sources = [
     "box_component.cpp",
     "box_element.cpp",
+    "drag_drop_event.cpp",
     "flutter_mask_painter.cpp",
     "flutter_render_box.cpp",
     "mask_creator.cpp",

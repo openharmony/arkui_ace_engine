@@ -15,6 +15,8 @@
 
 #include "core/components/text_overlay/render_text_overlay.h"
 
+#include "base/geometry/rect.h"
+#include "core/animation/scheduler.h"
 #include "core/components/focus_collaboration/render_focus_collaboration.h"
 #include "core/components/stack/stack_element.h"
 
@@ -510,6 +512,16 @@ void RenderTextOverlay::PerformLayout()
     }
 
     InitAnimation();
+
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        return;
+    }
+    Rect textOverlayRect(GetGlobalOffset(), GetLayoutSize());
+    auto textOverlayManager = context->GetTextOverlayManager();
+    if (textOverlayManager) {
+        textOverlayManager->SetTextOverlayRect(textOverlayRect);
+    }
 }
 
 Offset RenderTextOverlay::ComputeChildPosition(const RefPtr<RenderNode>& child)

@@ -29,6 +29,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
+#include "core/components/box/drag_drop_event.h"
 #include "core/components/box/render_box.h"
 #include "core/components/common/properties/motion_path_evaluator.h"
 #include "core/components/common/properties/motion_path_option.h"
@@ -757,8 +758,8 @@ RefPtr<RenderNode> RenderNode::FindDropChild(const Point& globalPoint, const Poi
     for (auto& rect : GetTouchRectList()) {
         if (touchable_ && rect.IsInRegion(transformPoint)) {
             RefPtr<RenderNode> renderNode = AceType::Claim<RenderNode>(this);
-            auto renderBox = AceType::DynamicCast<RenderBox>(renderNode);
-            if (renderBox && renderBox->GetOnDrop()) {
+            auto targetDropNode = AceType::DynamicCast<DragDropEvent>(renderNode);
+            if (targetDropNode && targetDropNode->GetOnDrop()) {
                 return renderNode;
             }
         }

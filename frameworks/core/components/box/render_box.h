@@ -32,11 +32,10 @@
 
 namespace OHOS::Ace {
 
-using UpdateBuilderFunc = std::function<void(const Dimension&, const Dimension&)>;
 constexpr int32_t MAX_GESTURE_SIZE = 3;
 
-class ACE_EXPORT RenderBox : public RenderBoxBase {
-    DECLARE_ACE_TYPE(RenderBox, RenderBoxBase);
+class ACE_EXPORT RenderBox : public RenderBoxBase, public DragDropEvent {
+    DECLARE_ACE_TYPE(RenderBox, RenderBoxBase, DragDropEvent);
 
 public:
     static RefPtr<RenderNode> Create();
@@ -198,58 +197,8 @@ public:
     void OnTouchTestHierarchy(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
         const std::vector<RefPtr<GestureRecognizer>>& innerRecognizers, TouchTestResult& result);
 
-    const OnDropFunc& GetOnDragEnter() const
-    {
-        return onDragEnter_;
-    }
-
-    const OnDropFunc& GetOnDragMove() const
-    {
-        return onDragMove_;
-    }
-
-    const OnDropFunc& GetOnDragLeave() const
-    {
-        return onDragLeave_;
-    }
-
-    const OnDropFunc& GetOnDrop() const
-    {
-        return onDrop_;
-    }
-
     void AddRecognizerToResult(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result);
-
-    void SetLocalPoint(const Point& localPoint)
-    {
-        localPoint_ = localPoint;
-    }
-
-    const Point& GetLocalPoint() const
-    {
-        return localPoint_;
-    }
-
-    const UpdateBuilderFunc& GetUpdateBuilderFuncId() const
-    {
-        return updateBuilder_;
-    }
-
-    void SetUpdateBuilderFuncId(const UpdateBuilderFunc& updateBuilder)
-    {
-        updateBuilder_ = updateBuilder;
-    }
-
-    void SetPreTargetRenderBox(const RefPtr<RenderBox>& preTargetRenderBox)
-    {
-        preTargetRenderBox_ = preTargetRenderBox;
-    }
-
-    const RefPtr<RenderBox> GetPreTargetRenderBox() const
-    {
-        return preTargetRenderBox_;
-    }
 
     const OnMouseCallback& GetOnMouseId() const
     {
@@ -261,9 +210,9 @@ public:
         return onLongPressId_;
     }
 
-    DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info);
-    void AddDataToClipboard(const RefPtr<PipelineContext>& context, const std::string& extraInfo);
-    RefPtr<RenderBox> FindTargetRenderBox(const RefPtr<PipelineContext> context, const GestureEvent& info);
+    DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info) override;
+    void AddDataToClipboard(const RefPtr<PipelineContext>& context, const std::string& extraInfo,
+        const std::string& selectedText, const std::string& imageSrc) override;
 
     void ResetController(RefPtr<Animator>& controller);
     void CreateColorAnimation(
@@ -326,33 +275,18 @@ private:
     TextDirection inspectorDirection_ { TextDirection::LTR };
 
     // Drag event
-    void CreateDragDropRecognizer();
-    void PanOnActionStart(const GestureEvent& info);
-    void PanOnActionUpdate(const GestureEvent& info);
-    void PanOnActionEnd(const GestureEvent& info);
+    void PanOnActionStart(const GestureEvent& info) override;
+    void PanOnActionUpdate(const GestureEvent& info) override;
+    void PanOnActionEnd(const GestureEvent& info) override;
+    void PanOnActionCancel() override;
     void SetSelectedIndex(const GestureEvent& info);
-    void SetInsertIndex(const RefPtr<RenderBox>& targetRenderBox, const GestureEvent& info);
-    RefPtr<GestureRecognizer> dragDropGesture_;
-    OnDragFunc onDragStart_;
-    OnDropFunc onDragEnter_;
-    OnDropFunc onDragMove_;
-    OnDropFunc onDragLeave_;
-    OnDropFunc onDrop_;
+    void SetInsertIndex(const RefPtr<DragDropEvent>& targetDragDropNode, const GestureEvent& info);
     OnTouchEventCallback onTouchUpId_;
     OnTouchEventCallback onTouchDownId_;
     OnTouchEventCallback onTouchMoveId_;
-    Point localPoint_;
-    UpdateBuilderFunc updateBuilder_;
-    RefPtr<RenderBox> preTargetRenderBox_;
-    RefPtr<RenderBox> initialRenderBox_;
-    Size selectedItemSize_;
     size_t selectedIndex_ = DEFAULT_INDEX;
     size_t insertIndex_ = DEFAULT_INDEX;
     std::function<void(const std::shared_ptr<ClickInfo>&)> remoteMessageEvent_;
-
-    RefPtr<DragWindow> dragWindow_;
-    bool isDragRenderBox_ = false;
-    bool hasDragItem_ = false;
     bool enableDragStart_ = true;
 }; // class RenderBox
 } // namespace OHOS::Ace
