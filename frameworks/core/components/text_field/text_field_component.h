@@ -288,7 +288,7 @@ public:
 
     ACE_DEFINE_COMPONENT_EVENT(OnClick, void(const ClickInfo& clickInfo));
 
-    ACE_DEFINE_COMPONENT_PROP(CopyOption, CopyOption);
+    ACE_DEFINE_COMPONENT_PROP(CopyOption, CopyOption, CopyOption::Distributed);
 
 private:
     RefPtr<TextFieldDeclaration> declaration_;
