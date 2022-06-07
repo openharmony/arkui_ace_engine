@@ -224,7 +224,9 @@ void RenderSwitch::PerformLayout()
     double widthOverflow = layoutSize.Width() - switchSize_.Width();
     paintPosition_ = Alignment::GetAlignPosition(layoutSize, switchSize_, Alignment::CENTER) +
                      Offset(widthOverflow > 0.0 ? 0.0 : widthOverflow - NormalizeToPx(hotZoneHorizontalPadding_), 0.0);
-    InitCurrentPointPosition();
+    if (!isDraging) {
+        InitCurrentPointPosition();
+    }
     UpdateAccessibilityPosition();
 }
 
@@ -244,15 +246,16 @@ void RenderSwitch::HandleDragEnd(const OHOS::Ace::Offset& updatePoint)
 {
     OnDrag(updatePoint);
     dragStartPosition_ = 0.0;
-    if (changeEvent_ && (oldChecked_ != checked_)) {
+    isDraging = false;
+    bool isNeedCallback = (oldChecked_ != checked_);
+    if (isNeedCallback && changeEvent_) {
         std::string res = checked_ ? "true" : "false";
         changeEvent_(std::string("\"change\",{\"checked\":").append(res.append("},null")));
     }
-    bool isNeedCallback = (oldChecked_ != checked_);
     oldChecked_ = checked_;
     InitCurrentPointPosition();
     UpdateUIStatus();
-    if (onChange_ && isNeedCallback) {
+    if (isNeedCallback && onChange_) {
         onChange_(checked_);
     }
     auto accessibilityNode = accessibilityNode_.Upgrade();
@@ -291,6 +294,7 @@ void RenderSwitch::UpdateRenderText(const RefPtr<SwitchComponent>& switchCompone
 
 void RenderSwitch::OnDrag(const Offset& updatePoint)
 {
+    isDraging = true;
     InitCurrentPointPosition();
     auto pointPadding = NormalizeToPx(pointPadding_);
     double pointTrackLength = switchSize_.Width() - rawPointSize_.Width() - pointPadding * 2;
