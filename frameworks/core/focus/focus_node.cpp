@@ -118,6 +118,12 @@ bool FocusNode::RequestFocusImmediately()
         if (context && context->IsJsCard()) {
             return false;
         }
+        auto parent = GetParent().Upgrade();
+        if (context && context->GetIsFocusingByTab()) {
+            if ((tabIndex_ != 0) || (parent && parent->tabIndex_ != 0)) {
+                return false;
+            }
+        }
     }
     if (IsCurrentFocus()) {
         return true;
@@ -477,17 +483,32 @@ bool FocusGroup::OnKeyEvent(const KeyEvent& keyEvent)
         case KeyCode::TV_CONTROL_RIGHT:
             LOGI("RequestNextFocus 'RIGHT' by KeyCode(%{public}d)", keyEvent.code);
             return RequestNextFocus(false, AceApplicationInfo::GetInstance().IsRightToLeft(), GetRect());
-        case KeyCode::KEY_TAB:
+        case KeyCode::KEY_TAB: {
+            auto element = AceType::DynamicCast<Element>(this);
+            if (!element) {
+                return false;
+            }
+            auto context = element->GetContext().Upgrade();
+            if (!context) {
+                return false;
+            }
+            bool ret = false;
             if (keyEvent.pressedCodes.size() == 1) {
                 LOGI("RequestNextFocus 'TAB' by KeyCode(%{public}d)", keyEvent.code);
-                return RequestNextFocus(false, false, GetRect()) || RequestNextFocus(true, false, GetRect());
+                context->SetIsFocusingByTab(true);
+                ret = RequestNextFocus(false, false, GetRect()) || RequestNextFocus(true, false, GetRect());
+                context->SetIsFocusingByTab(false);
             } else {
                 LOGI("RequestNextFocus 'SHIFT-TAB' by KeyCode(%{public}d)", keyEvent.code);
                 if (keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB }) ||
                     keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_TAB })) {
-                    return RequestNextFocus(false, true, GetRect()) || RequestNextFocus(true, true, GetRect());
+                    context->SetIsFocusingByTab(true);
+                    ret = RequestNextFocus(false, true, GetRect()) || RequestNextFocus(true, true, GetRect());
+                    context->SetIsFocusingByTab(false);
                 }
             }
+            return ret;
+        }
         default:
             return false;
     }
