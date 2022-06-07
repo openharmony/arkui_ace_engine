@@ -24,6 +24,9 @@ ohos_unittest("ThemeManagerTest") {
   module_out_path = module_output_path
 
   sources = [
+    #base
+    "$ace_root/frameworks/base/log/ace_trace.cpp",
+
     # properties
     "$ace_root/frameworks/core/components/common/properties/border.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
