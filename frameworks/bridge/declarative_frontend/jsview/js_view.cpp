@@ -426,6 +426,8 @@ std::string JSView::AddChildById(const std::string& viewId, const JSRef<JSObject
 
 void JSView::RemoveChildGroupById(const std::string& viewId)
 {
+    // js runtime may be released
+    CHECK_JAVASCRIPT_SCOPE_AND_RETURN;
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     LOGD("RemoveChildGroupById in lazy for each case: %{public}s", viewId.c_str());
     auto iter = lazyItemGroups_.find(viewId);
