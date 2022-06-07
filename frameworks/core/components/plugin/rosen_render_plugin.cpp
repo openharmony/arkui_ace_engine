@@ -32,6 +32,9 @@ std::unique_ptr<DrawDelegate> RosenRenderPlugin::GetDrawDelegate()
             SyncRSNodeBoundary(true, true);
         }
         auto rsNode = GetRSNode();
+        if (node) {
+            node->SetBackgroundColor(Color::TRANSPARENT.GetValue());
+        }
         rsNode->AddChild(node, -1);
 
         MarkNeedLayout(true, true);

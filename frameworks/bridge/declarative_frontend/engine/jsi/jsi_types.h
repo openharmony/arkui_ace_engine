@@ -35,13 +35,13 @@ using JsiFunctionCallback = panda::Local<panda::JSValueRef> (*)(panda::JsiRuntim
 template<typename T>
 class JsiType {
 public:
-    JsiType();
+    JsiType() = default;
     JsiType(const JsiType& rhs);
     JsiType(JsiType&& rhs);
-    virtual ~JsiType();
+    virtual ~JsiType() = default;
 
     explicit JsiType(panda::Local<T> val);
-    explicit JsiType(panda::Global<T> other);
+    explicit JsiType(const panda::CopyableGlobal<T>& other);
 
     template<typename S>
     explicit JsiType(panda::Local<S> val);
@@ -57,20 +57,24 @@ public:
     static JsiType<T> New();
 
     void SetWeak();
-    panda::Local<T> GetHandle() const;
-    panda::Local<T> operator->() const;
+    const panda::CopyableGlobal<T>& GetHandle() const;
+    const panda::CopyableGlobal<T>& operator->() const;
+    Local<T> GetLocalHandle() const;
     bool IsEmpty() const;
     bool IsWeak() const;
     void Reset();
-    operator panda::Local<T>() const;
+    operator panda::CopyableGlobal<T>() const;
+
+    const EcmaVM* GetEcmaVM() const;
 
 private:
-    panda::Global<T> handle_;
+    panda::CopyableGlobal<T> handle_;
 };
 
 class JsiValue : public JsiType<panda::JSValueRef> {
 public:
     JsiValue() = default;
+    explicit JsiValue(const panda::CopyableGlobal<panda::JSValueRef>& val);
     explicit JsiValue(panda::Local<panda::JSValueRef> val);
     ~JsiValue() override = default;
 
@@ -100,6 +104,7 @@ class JsiArray : public JsiType<panda::ArrayRef> {
 public:
     JsiArray();
     explicit JsiArray(panda::Local<panda::ArrayRef> val);
+    explicit JsiArray(const panda::CopyableGlobal<panda::ArrayRef>& val);
     ~JsiArray() override = default;
     JsiRef<JsiValue> GetValueAt(size_t index) const;
     void SetValueAt(size_t index, JsiRef<JsiValue> value) const;
@@ -116,6 +121,7 @@ class JsiObject : public JsiType<panda::ObjectRef> {
 public:
     JsiObject();
     explicit JsiObject(panda::Local<panda::ObjectRef> val);
+    explicit JsiObject(const panda::CopyableGlobal<panda::ObjectRef>& val);
     bool IsUndefined() const;
     ~JsiObject() override = default;
     enum InternalFieldIndex { INSTANCE = 0 };
@@ -146,6 +152,7 @@ class JsiFunction : public JsiType<panda::FunctionRef> {
 public:
     JsiFunction();
     explicit JsiFunction(panda::Local<panda::FunctionRef> val);
+    explicit JsiFunction(const panda::CopyableGlobal<panda::FunctionRef>& val);
     ~JsiFunction() override = default;
 
     JsiRef<JsiValue> Call(JsiRef<JsiValue> thisVal, int argc = 0, JsiRef<JsiValue> argv[] = nullptr) const;
@@ -158,6 +165,7 @@ class JsiObjTemplate : public JsiObject {
 public:
     JsiObjTemplate() = default;
     explicit JsiObjTemplate(panda::Local<panda::ObjectRef> val);
+    explicit JsiObjTemplate(const panda::CopyableGlobal<panda::ObjectRef>& val);
     ~JsiObjTemplate() override = default;
 
     void SetInternalFieldCount(int32_t count) const;
@@ -174,7 +182,7 @@ struct JsiExecutionContext {
 class JsiCallbackInfo {
 public:
     JsiCallbackInfo(panda::JsiRuntimeCallInfo* info);
-    ~JsiCallbackInfo();
+    ~JsiCallbackInfo() = default;
     JsiCallbackInfo(const JsiCallbackInfo&) = delete;
     JsiCallbackInfo& operator=(const JsiCallbackInfo&) = delete;
 
@@ -190,7 +198,7 @@ public:
 
     void ReturnSelf() const;
 
-    std::variant<void*, panda::Global<panda::JSValueRef>> GetReturnValue()
+    std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> GetReturnValue()
     {
         return retVal_;
     }
@@ -203,7 +211,7 @@ public:
 private:
     panda::JsiRuntimeCallInfo* info_ = nullptr;
 
-    mutable std::variant<void*, panda::Global<panda::JSValueRef>> retVal_;
+    mutable std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> retVal_;
 };
 
 class JsiGCMarkCallbackInfo {

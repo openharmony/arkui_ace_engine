@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_COMPONENT_CALLBACK_H
 
 #include "core/components/plugin/plugin_component_template.h"
-#include "ohos/aafwk/content/want.h"
+#include "want.h"
 
 namespace OHOS::Ace {
 enum class CallBackType {

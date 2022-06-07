@@ -61,6 +61,7 @@ class ACE_EXPORT UIContent {
 public:
     static std::unique_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime);
     static std::unique_ptr<UIContent> Create(OHOS::AppExecFwk::Ability* ability);
+    static void ShowDumpHelp(std::vector<std::string>& info);
 
     virtual ~UIContent() = default;
 

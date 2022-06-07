@@ -38,17 +38,46 @@ bool RenderPickerBase::TouchTest(const Point& globalPoint, const Point& parentLo
     if (lunarText_) {
         Rect rect(lunarText_->GetGlobalOffset(), lunarText_->GetLayoutSize());
         if (rect.IsInRegion(globalPoint) && switch_ && switch_->GetParent().Upgrade()) {
-            auto parent = switch_->GetParent().Upgrade();
-            Point global;
-            Point local;
-            auto size = switch_->GetLayoutSize();
-            global = global + switch_->GetGlobalOffset() + Offset(size.Width() / 2, size.Height() / 2);
-            local = global - parent->GetGlobalOffset();
-            return switch_->TouchTest(global, local, touchRestrict, result);
+            return onChildTouchTest(switch_, touchRestrict, result);
+        }
+    }
+
+    if (data_->GetSubsidiary()) {
+        if (ok_) {
+            Rect rect(ok_->GetGlobalOffset(), ok_->GetLayoutSize());
+            if (rect.IsInRegion(globalPoint) && ok_->GetParent().Upgrade()) {
+                return onChildTouchTest(ok_, touchRestrict, result);
+            }
+        }
+
+        if (cancel_) {
+            Rect rect(cancel_->GetGlobalOffset(), cancel_->GetLayoutSize());
+            if (rect.IsInRegion(globalPoint) && cancel_->GetParent().Upgrade()) {
+                return onChildTouchTest(cancel_, touchRestrict, result);
+            }
+        }
+
+        if (columnParent_) {
+            Rect rect(columnParent_->GetGlobalOffset(), columnParent_->GetLayoutSize());
+            if (!rect.IsInRegion(globalPoint)) {
+                return false;
+            }
         }
     }
 
     return RenderNode::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+}
+
+bool RenderPickerBase::onChildTouchTest(
+    const RefPtr<RenderNode>& child, const TouchRestrict& touchRestrict, TouchTestResult& result)
+{
+    auto parent = child->GetParent().Upgrade();
+    Point global;
+    Point local;
+    auto size = child->GetLayoutSize();
+    global = global + child->GetGlobalOffset() + Offset(size.Width() / 2.0, size.Height() / 2.0);
+    local = global - parent->GetGlobalOffset();
+    return child->TouchTest(global, local, touchRestrict, result);
 }
 
 void RenderPickerBase::Update(const RefPtr<Component>& component)
@@ -339,6 +368,9 @@ void RenderPickerBase::LayoutBoxes()
         outBox_->SetPosition(Offset(x, y));
         outBox_->Layout(layout);
         double boxY = NormalizeToPx(theme->GetButtonHeight() + theme->GetButtonTopPadding());
+        if (data_->GetMasterHasLunar()) {
+            boxY += NormalizeToPx(theme->GetLunarHeight() + theme->GetButtonTopPadding());
+        }
         box_->SetPosition(Offset(0.0, boxY));
         layout.SetFixedSize(innerSize);
         box_->Layout(layout);

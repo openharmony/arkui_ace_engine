@@ -45,7 +45,6 @@ int main(int argc, const char* argv[])
     std::string appResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/AppResources";
     std::string appResourcesPathStage = "/Volumes/SSD2T/daily-test/preview/js/default_stage";
     std::string systemResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/SystemResources";
-    std::string fontBasePath = "/Volumes/SSD2T/daily-test/preview/js/fonts";
 #else
     std::string assetPathJs = "D:\\Workspace\\preview\\js\\default";
     std::string assetPathEts = "D:\\Workspace\\preview\\js\\default_2.0";
@@ -53,13 +52,11 @@ int main(int argc, const char* argv[])
     std::string appResourcesPath = "D:\\Workspace\\preview\\js\\AppResources\\assets\\entry";
     std::string appResourcesPathStage = "D:\\Workspace\\preview\\js\\default_stage";
     std::string systemResourcesPath = "D:\\Workspace\\preview\\js\\SystemResources\\assets\\entry";
-    std::string fontBasePath = "D:\\Workspace\\preview\\js\\fonts";
 #endif
     OHOS::Ace::Platform::AceRunArgs args = {
         .assetPath = assetPathJs,
         .systemResourcesPath = systemResourcesPath,
         .appResourcesPath = appResourcesPath,
-        .fontBasePath = fontBasePath,
         .deviceConfig.orientation = OHOS::Ace::DeviceOrientation::LANDSCAPE,
         .deviceConfig.density = 1,
         .deviceConfig.deviceType = OHOS::Ace::DeviceType::CAR,
@@ -67,6 +64,7 @@ int main(int argc, const char* argv[])
         .deviceWidth = 1280,
         .deviceHeight = 800,
         .onRender = std::move(renderCallback),
+        .physicalDeviceFontsEnabled = false,
     };
 
     if (argc == MAX_ARGS_COUNT) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,10 +42,10 @@ private:
     void UpdateBorderRadius() override;
     void PaintMask(RenderContext& context);
     void PaintBubble(RenderContext& context);
-    void PaintTopBubble(SkCanvas* skCanvas, SkPaint paint);
-    void PaintBottomBubble(SkCanvas* skCanvas, SkPaint paint);
-    void PaintDefaultBubble(SkCanvas* skCanvas, SkPaint paint);
-    void PaintShadow(SkCanvas* skCanvas);
+    void PaintTopBubble(SkCanvas* skCanvas, const SkPaint& paint);
+    void PaintBottomBubble(SkCanvas* skCanvas, const SkPaint& paint);
+    void PaintBubbleWithArrow(SkCanvas* skCanvas, const SkPaint& paint);
+    void PaintDefaultBubble(SkCanvas* skCanvas, const SkPaint& paint);
     void PaintBorder(RenderContext& context);
     SkCanvas* GetSkCanvas(RenderContext& context);
 };

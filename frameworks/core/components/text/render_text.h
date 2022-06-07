@@ -17,10 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_RENDER_TEXT_H
 
 #include "base/geometry/dimension.h"
+#include "core/common/clipboard/clipboard.h"
+#include "core/components/box/drag_drop_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_component.h"
+#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components/text_span/render_text_span.h"
 #include "core/components/text_span/text_span_component.h"
 #include "core/gestures/click_recognizer.h"
@@ -33,8 +36,8 @@ namespace OHOS::Ace {
 
 class TextComponent;
 
-class RenderText : public RenderNode {
-    DECLARE_ACE_TYPE(RenderText, RenderNode);
+class RenderText : public RenderNode, public TextOverlayBase, public DragDropEvent {
+    DECLARE_ACE_TYPE(RenderText, RenderNode, TextOverlayBase, DragDropEvent);
 
 public:
     ~RenderText() override;
@@ -97,6 +100,42 @@ public:
         return paragraphHeight_;
     }
 
+    void OnLongPress(const LongPressInfo& longPressInfo);
+    void ShowTextOverlay(const Offset& showOffset) override;
+    void ShowTextOverlay(const Offset& showOffset, bool isUsingMouse);
+    bool HandleMouseEvent(const MouseEvent& event) override;
+    void RegisterCallbacksToOverlay() override;
+    const TextSelection GetTextSelect() const
+    {
+        return textValue_.selection;
+    }
+
+    std::string GetSelectedContent() const override;
+    const TextEditingValue GetTextValue() const
+    {
+        return textValue_;
+    }
+
+    const Offset& GetStartOffset() const
+    {
+        return startOffset_;
+    }
+
+    void SetStartOffset(const Offset& startOffset)
+    {
+        startOffset_ = startOffset;
+    }
+
+    const Offset& GetEndOffset() const
+    {
+        return endOffset_;
+    }
+
+    void SetEndOffset(const Offset& endOffset)
+    {
+        endOffset_ = endOffset;
+    }
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
@@ -118,7 +157,6 @@ protected:
     void CheckIfNeedMeasure();
     void ClearRenderObject() override;
     TextStyle textStyle_;
-    TextDirection textDirection_ = TextDirection::LTR;
     Color focusColor_;
     Color lostFocusColor_;
     double fontScale_ = 1.0;
@@ -139,6 +177,23 @@ private:
     void HandleLongPress(const Offset& longPressPosition);
     EventMarker GetEventMarker(int32_t position, GestureType type);
     void FireEvent(const EventMarker& marker);
+    void UpdateOverlay();
+    Offset GetPositionForExtend(int32_t extend);
+    void HandleOnCopy();
+    void HandleOnCopyAll(const std::function<void(const Offset&, const Offset&)>& callback);
+    void HandleOnStartHandleMove(int32_t end, const Offset& startHandleOffset,
+        const std::function<void(const Offset&)>& startCallback, bool isSingleHandle = false);
+    void HandleOnEndHandleMove(
+        int32_t start, const Offset& endHandleOffset, const std::function<void(const Offset&)>& endCallback);
+    void HideTextOverlay();
+    void UpdateTextOverlay();
+    // Drag event
+    void PanOnActionStart(const GestureEvent& info) override;
+    void PanOnActionUpdate(const GestureEvent& info) override;
+    void PanOnActionEnd(const GestureEvent& info) override;
+    void PanOnActionCancel() override;
+    DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info) override;
+    void CreateSelectRecognizer();
 
     bool needClickDetector_ = false;
     bool needLongPressDetector_ = false;
@@ -147,6 +202,13 @@ private:
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<ClickRecognizer> clickDetector_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
+    RefPtr<LongPressRecognizer> textOverlayRecognizer_;
+    RefPtr<ClickRecognizer> hideTextOverlayRecognizer_;
+    RefPtr<PanRecognizer> selectRecognizer_;
+    RefPtr<Clipboard> clipboard_;
+    CopyOption copyOption_ = CopyOption::NoCopy;
+    Offset startOffset_;
+    Offset endOffset_;
 };
 
 } // namespace OHOS::Ace

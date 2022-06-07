@@ -26,6 +26,7 @@
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/image/image_component.h"
 #include "core/components/menu/menu_component.h"
+#include "core/components/remote_window/remote_window_component.h"
 #include "core/components/scoring/scoring_component.h"
 #include "core/components/stepper/stepper_item_component_v2.h"
 #include "core/components/text/text_component.h"
@@ -198,9 +199,7 @@ RefPtr<BoxComponent> ViewStackProcessor::GetBoxComponent()
     }
 
     RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<OHOS::Ace::BoxComponent>();
-    if (SystemProperties::GetDebugBoundaryEnabled()) {
-        boxComponent->SetEnableDebugBoundary(true);
-    }
+    boxComponent->SetEnableDebugBoundary(true);
     wrappingComponentsMap.emplace("box", boxComponent);
     return boxComponent;
 }
@@ -609,27 +608,30 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     }
 
     if (isItemComponent) {
-        // rsnode merge mark:
+        // itemComponent is placed before other components, they should share the same RSNode.
+        // we should not touch itemChildComponent as it's already marked.
         //    (head)       (tail)      (unchanged)
         // mainComponent - others - itemChildComponent
         Component::MergeRSNode(components);
         if (itemChildComponent) {
             components.emplace_back(itemChildComponent);
         }
-    } else if (!components.empty() && (AceType::InstanceOf<TextureComponent>(mainComponent) ||
+    } else if (!components.empty() && (
         AceType::InstanceOf<BoxComponent>(mainComponent) ||
-        AceType::InstanceOf<TextFieldComponent>(mainComponent) ||
         AceType::InstanceOf<FormComponent>(mainComponent) ||
+        AceType::InstanceOf<RemoteWindowComponent>(mainComponent) ||
+        AceType::InstanceOf<TextFieldComponent>(mainComponent) ||
+        AceType::InstanceOf<TextureComponent>(mainComponent) ||
         AceType::InstanceOf<WebComponent>(mainComponent) ||
         AceType::InstanceOf<XComponentComponent>(mainComponent))) {
-        // rsnode merge mark:
+        // special types of mainComponent need be marked as standalone.
         // (head)(tail)  (standalone)
         //    others  -  mainComponent
         Component::MergeRSNode(components);
         Component::MergeRSNode(mainComponent);
         components.emplace_back(mainComponent);
     } else {
-        // rsnode merge mark:
+        // by default, mainComponent is placed after other components, they should share the same RSNode.
         //  (head)      (tail)
         // (others) - mainComponent
         components.emplace_back(mainComponent);

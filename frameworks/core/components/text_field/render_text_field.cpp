@@ -15,9 +15,13 @@
 
 #include "core/components/text_field/render_text_field.h"
 
+#include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
+#include "base/log/dump_log.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/utils.h"
 #include "core/animation/curve_animation.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/font_manager.h"
@@ -25,6 +29,7 @@
 #include "core/components/text/text_utils.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components/text_overlay/text_overlay_element.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/event/ace_event_helper.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
@@ -50,6 +55,15 @@ constexpr double FIFTY_PERCENT = 0.5;
 
 constexpr Dimension OFFSET_FOCUS = 4.0_vp;
 constexpr Dimension DEFLATE_RADIUS_FOCUS = 3.0_vp;
+
+// Whether the system is Mac or not determines which key code is selected.
+#if defined(MAC_PLATFORM)
+#define KEY_META_OR_CTRL_LEFT KeyCode::KEY_META_LEFT
+#define KEY_META_OR_CTRL_RIGHT KeyCode::KEY_META_RIGHT
+#else
+#define KEY_META_OR_CTRL_LEFT KeyCode::KEY_CTRL_LEFT
+#define KEY_META_OR_CTRL_RIGHT KeyCode::KEY_CTRL_RIGHT
+#endif
 
 } // namespace
 
@@ -112,6 +126,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         maxLength_ = textField->GetMaxLength();
     }
 
+    copyOption_ = textField->GetCopyOption();
     selection_ = textField->GetSelection();
     placeholder_ = textField->GetPlaceholder();
     inputFilter_ = textField->GetInputFilter();
@@ -121,6 +136,8 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     focusTextColor_ = textField->GetFocusTextColor();
     selectedColor_ = textField->GetSelectedColor();
     pressColor_ = textField->GetPressColor();
+    hoverColor_ = textField->GetHoverColor();
+    hoverAnimationType_ = textField->GetHoverAnimationType();
     decoration_ = textField->GetDecoration();
     inactiveBgColor_ = textField->GetBgColor();
     if (decoration_ && (decoration_->GetImage() || decoration_->GetGradient().IsValid())) {
@@ -334,6 +351,7 @@ void RenderTextField::PerformLayout()
         const auto& child = GetChildren().front();
         child->Layout(innerLayout);
     }
+    ApplyAspectRatio();
     SetLayoutSize(GetLayoutParam().Constrain(Measure()));
     UpdateFocusAnimation();
 
@@ -384,10 +402,10 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
 
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         Offset rightClickOffset = event.GetOffset();
-        ShowTextOverlay(rightClickOffset, false);
+        ShowTextOverlay(rightClickOffset, false, true);
     }
 
-    return true;
+    return false;
 }
 
 void RenderTextField::OnTouchTestHit(
@@ -479,6 +497,9 @@ void RenderTextField::StartPressAnimation(bool pressDown)
     if (pressController_->IsRunning()) {
         pressController_->Stop();
     }
+    if (hoverController_ && hoverController_->IsRunning()) {
+        hoverController_->Stop();
+    }
     pressController_->ClearInterpolators();
     RefPtr<KeyframeAnimation<Color>> animation = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
     if (pressDown) {
@@ -490,6 +511,40 @@ void RenderTextField::StartPressAnimation(bool pressDown)
     pressController_->SetDuration(PRESS_DURATION);
     pressController_->SetFillMode(FillMode::FORWARDS);
     pressController_->Forward();
+}
+
+void RenderTextField::StartHoverAnimation(bool isHovered)
+{
+    if (pressController_ && pressController_->IsRunning()) {
+        return;
+    }
+    if (!hoverController_) {
+        hoverController_ = AceType::MakeRefPtr<Animator>(context_);
+    }
+    if (hoverController_->IsRunning()) {
+        hoverController_->Stop();
+    }
+    hoverController_->ClearInterpolators();
+    RefPtr<KeyframeAnimation<Color>> animation = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
+    if (isHovered) {
+        CreateMouseAnimation(animation, GetEventEffectColor(), hoverColor_);
+    } else {
+        CreateMouseAnimation(animation, GetEventEffectColor(), Color::TRANSPARENT);
+    }
+    hoverController_->AddInterpolator(animation);
+    hoverController_->SetDuration(HOVER_DURATION);
+    hoverController_->SetFillMode(FillMode::FORWARDS);
+    hoverController_->Forward();
+}
+
+void RenderTextField::AnimateMouseHoverEnter()
+{
+    StartHoverAnimation(true);
+}
+
+void RenderTextField::AnimateMouseHoverExit()
+{
+    StartHoverAnimation(false);
 }
 
 void RenderTextField::OnClick(const ClickInfo& clickInfo)
@@ -601,7 +656,7 @@ void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
     ShowTextOverlay(longPressPosition, false);
 }
 
-void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHandle)
+void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHandle, bool isUsingMouse)
 {
     if (!isVisible_) {
         return;
@@ -669,6 +724,7 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
     textOverlay_->SetShareButtonMarker(onShare_);
     textOverlay_->SetSearchButtonMarker(onSearch_);
     textOverlay_->SetContext(context_);
+    textOverlay_->SetIsUsingMouse(isUsingMouse);
     // Add the Animation
     InitAnimation();
 
@@ -797,6 +853,7 @@ void RenderTextField::PushTextOverlayToStack()
         LOGE("TextOverlay is null");
         return;
     }
+
     hasTextOverlayPushed_ = true;
     auto lastStack = GetLastStack();
     if (!lastStack) {
@@ -807,6 +864,15 @@ void RenderTextField::PushTextOverlayToStack()
     lastStack->PushComponent(textOverlay_, false);
     stackElement_ = WeakClaim(RawPtr(lastStack));
     MarkNeedRender();
+}
+
+void RenderTextField::PopTextOverlay()
+{
+    const auto& stackElement = stackElement_.Upgrade();
+    if (stackElement) {
+        stackElement->PopTextOverlay();
+    }
+    isOverlayShowed_ = false;
 }
 
 bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling)
@@ -969,24 +1035,7 @@ void RenderTextField::SetEditingValue(TextEditingValue&& newValue, bool needFire
         }
     }
 
-    if (context && context->GetIsDeclarative()) {
-        if (inputFilter_.empty() || newValue.text.empty()) {
-            controller_->SetValue(newValue, needFireChangeEvent);
-        } else {
-            std::regex rw(inputFilter_);
-            if (regex_match(newValue.text.c_str(), rw)) {
-                inputCallBackStrSize_ = static_cast<int32_t>(newValue.text.length());
-                controller_->SetValue(newValue, needFireChangeEvent);
-            } else {
-                inputCallBackStr_ = newValue.text.substr(inputCallBackStrSize_);
-                if (onError_) {
-                    onError_(inputCallBackStr_);
-                }
-            }
-        }
-    } else {
-        controller_->SetValue(newValue, needFireChangeEvent);
-    }
+    controller_->SetValue(newValue, needFireChangeEvent);
     UpdateAccessibilityAttr();
 }
 
@@ -1081,6 +1130,72 @@ void RenderTextField::UpdateFormatters()
     SetEditingValue(std::move(temp));
 }
 
+std::wstring WstringSearch(std::wstring wideText, const std::wregex& regex)
+{
+    std::wstring result;
+    std::wsmatch matchResults;
+    while (std::regex_search(wideText, matchResults, regex)) {
+        for (auto&& mr : matchResults) {
+            result.append(mr);
+        }
+        wideText = matchResults.suffix();
+    }
+    return result;
+}
+
+void RenderTextField::EditingValueFilter(TextEditingValue& result)
+{
+    for (const auto& formatter : textInputFormatters_) {
+        if (formatter) {
+            formatter->Format(GetEditingValue(), result);
+        }
+    }
+
+    if (inputFilter_.empty() || result.text.empty()) {
+        return;
+    }
+
+    std::wregex filterRegex(StringUtils::ToWstring(inputFilter_));
+
+    auto wideText = result.GetWideText();
+    auto wideTextError = std::regex_replace(wideText, filterRegex, L"");
+    if (!wideTextError.empty() && onError_) {
+        onError_(StringUtils::ToString(wideTextError));
+    }
+
+    auto start = result.selection.GetStart();
+    auto end = result.selection.GetEnd();
+    if ((start <= 0) && (end <= 0)) {
+        result.text = StringUtils::ToString(WstringSearch(wideText, filterRegex));
+    } else {
+        std::wstring wstrBeforeSelection;
+        if ((start > 0) && (static_cast<size_t>(start) <= wideText.length())) {
+            wstrBeforeSelection = wideText.substr(0, start);
+            wstrBeforeSelection = WstringSearch(wstrBeforeSelection, filterRegex);
+        }
+        std::wstring wstrInSelection;
+        if (start < end) {
+            wstrInSelection = wideText.substr(start, end - start);
+            wstrInSelection = WstringSearch(wstrInSelection, filterRegex);
+        }
+        std::wstring wstrAfterSelection;
+        size_t lenLeft = wideText.length() - static_cast<size_t>(end);
+        if (lenLeft > 0) {
+            wstrAfterSelection = wideText.substr(end, lenLeft);
+            wstrAfterSelection = WstringSearch(wstrAfterSelection, filterRegex);
+        }
+
+        result.text = StringUtils::ToString(wstrBeforeSelection + wstrInSelection + wstrAfterSelection);
+        if (result.selection.baseOffset > result.selection.extentOffset) {
+            result.selection.Update(static_cast<int32_t>(wstrBeforeSelection.length() + wstrInSelection.length()),
+                static_cast<int32_t>(wstrBeforeSelection.length()));
+        } else {
+            result.selection.Update(static_cast<int32_t>(wstrBeforeSelection.length()),
+                static_cast<int32_t>(wstrBeforeSelection.length() + wstrInSelection.length()));
+        }
+    }
+}
+
 void RenderTextField::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
 {
     if (!value) {
@@ -1090,38 +1205,35 @@ void RenderTextField::UpdateEditingValue(const std::shared_ptr<TextEditingValue>
 
     lastKnownRemoteEditingValue_ = value;
     lastKnownRemoteEditingValue_->hint = placeholder_;
-    TextEditingValue temp = *lastKnownRemoteEditingValue_;
+    TextEditingValue valueNeedToUpdate = *value;
     if (cursorPositionType_ != CursorPositionType::END ||
-        (temp.selection.baseOffset == temp.selection.extentOffset &&
-            temp.selection.baseOffset != static_cast<int32_t>(temp.GetWideText().length()))) {
+        (valueNeedToUpdate.selection.baseOffset == valueNeedToUpdate.selection.extentOffset &&
+            valueNeedToUpdate.selection.baseOffset != static_cast<int32_t>(valueNeedToUpdate.GetWideText().length()))) {
         cursorPositionType_ = CursorPositionType::NORMAL;
         isValueFromRemote_ = true;
     }
-    ChangeCounterStyle(temp);
-    for (const auto& formatter : textInputFormatters_) {
-        // GetEditingValue() is the old value, and lastKnownRemoteEditingValue_ is the newer.
-        if (formatter) {
-            formatter->Format(GetEditingValue(), temp);
-        }
-    }
+    auto valueBeforeUpdate = GetEditingValue();
 
-    if (obscure_ && (temp.text.length() == GetEditingValue().text.length() + 1)) {
+    ChangeCounterStyle(valueNeedToUpdate);
+
+    EditingValueFilter(valueNeedToUpdate);
+
+    if (obscure_ && (valueNeedToUpdate.text.length() == valueBeforeUpdate.text.length() + 1)) {
         // Reset pending.
         obscureTickPendings_ = OBSCURE_SHOW_TICKS;
     }
 
-    if (temp.text != GetEditingValue().text && needFireChangeEvent) {
+    if (valueNeedToUpdate.text != valueBeforeUpdate.text && needFireChangeEvent) {
         needNotifyChangeEvent_ = true;
     }
 
-    auto editingText = GetEditingValue().text;
-    SetEditingValue(std::move(temp), needFireChangeEvent);
+    SetEditingValue(std::move(valueNeedToUpdate), needFireChangeEvent);
     UpdateRemoteEditingIfNeeded(needFireChangeEvent);
 
     MarkNeedLayout();
 
     // If input or delete text when overlay is showing, pop overlay from stack.
-    if (lastKnownRemoteEditingValue_ && (lastKnownRemoteEditingValue_->text != editingText)) {
+    if (valueNeedToUpdate.text != valueBeforeUpdate.text) {
         if (onValueChange_) {
             onValueChange_();
         }
@@ -1216,15 +1328,15 @@ bool RenderTextField::OnKeyEvent(const KeyEvent& event)
     }
     if (event.action == KeyAction::UP &&
         ((event.code == KeyCode::KEY_SHIFT_LEFT || event.code == KeyCode::KEY_SHIFT_RIGHT) ||
-            (event.code == KeyCode::KEY_CTRL_LEFT || event.code == KeyCode::KEY_CTRL_RIGHT))) {
+            (event.code == KEY_META_OR_CTRL_LEFT || event.code == KEY_META_OR_CTRL_RIGHT))) {
         return HandleKeyEvent(event);
     }
 
     if (event.action == KeyAction::DOWN) {
         cursorPositionType_ = CursorPositionType::NONE;
-        if (KeyCode::TV_CONTROL_UP <= event.code && event.code <= KeyCode::TV_CONTROL_RIGHT && (
-            event.IsKey({ KeyCode::KEY_SHIFT_LEFT, event.code }) ||
-            event.IsKey({ KeyCode::KEY_SHIFT_RIGHT, event.code }))) {
+        if (KeyCode::TV_CONTROL_UP <= event.code && event.code <= KeyCode::TV_CONTROL_RIGHT &&
+            (event.IsKey({ KeyCode::KEY_SHIFT_LEFT, event.code }) ||
+                event.IsKey({ KeyCode::KEY_SHIFT_RIGHT, event.code }))) {
             HandleOnSelect(event.code);
             return true;
         }
@@ -1251,13 +1363,13 @@ bool RenderTextField::OnKeyEvent(const KeyEvent& event)
         if (event.code == KeyCode::KEY_FORWARD_DEL) {
             int32_t startPos = GetEditingValue().selection.GetStart();
             int32_t endPos = GetEditingValue().selection.GetEnd();
-            Delete(startPos, startPos==endPos ? startPos-1 : endPos);
+            Delete(startPos, startPos == endPos ? startPos - 1 : endPos);
             return true;
         }
         if (event.code == KeyCode::KEY_DEL) {
             int32_t startPos = GetEditingValue().selection.GetStart();
             int32_t endPos = GetEditingValue().selection.GetEnd();
-            Delete(startPos, startPos==endPos ? startPos+1 : endPos);
+            Delete(startPos, startPos == endPos ? startPos + 1 : endPos);
             return true;
         }
     }
@@ -1476,11 +1588,7 @@ void RenderTextField::OnValueChanged(bool needFireChangeEvent, bool needFireSele
 {
     isValueFromFront_ = !needFireChangeEvent;
     TextEditingValue temp = GetEditingValue();
-    for (const auto& formatter : textInputFormatters_) {
-        if (formatter) {
-            formatter->Format(GetEditingValue(), temp);
-        }
-    }
+    EditingValueFilter(temp);
     if (cursorPositionType_ == CursorPositionType::NORMAL && temp.selection.GetStart() == temp.selection.GetEnd()) {
         temp.selection.Update(AdjustCursorAndSelection(temp.selection.GetEnd()));
     }
@@ -1507,12 +1615,10 @@ void RenderTextField::CursorMoveLeft(CursorMoveSkip skip)
         LOGE("move skip not support character yet");
         return;
     }
-    if (GetEditingValue().selection.extentOffset > 0) {
-        isValueFromRemote_ = false;
-        auto value = GetEditingValue();
-        value.MoveLeft();
-        SetEditingValue(std::move(value));
-    }
+    isValueFromRemote_ = false;
+    auto value = GetEditingValue();
+    value.MoveLeft();
+    SetEditingValue(std::move(value));
     cursorPositionType_ = CursorPositionType::NONE;
     MarkNeedLayout();
 }
@@ -1524,14 +1630,10 @@ void RenderTextField::CursorMoveRight(CursorMoveSkip skip)
         LOGE("move skip not support character yet");
         return;
     }
-
-    auto text = GetTextForDisplay(GetEditingValue().text);
-    if (text.length() > static_cast<size_t>(GetEditingValue().selection.extentOffset)) {
-        isValueFromRemote_ = false;
-        auto value = GetEditingValue();
-        value.MoveRight();
-        SetEditingValue(std::move(value));
-    }
+    isValueFromRemote_ = false;
+    auto value = GetEditingValue();
+    value.MoveRight();
+    SetEditingValue(std::move(value));
     cursorPositionType_ = CursorPositionType::NONE;
     MarkNeedLayout();
 }
@@ -1706,9 +1808,9 @@ void RenderTextField::HandleOnSelect(KeyCode keyCode, CursorMoveSkip skip)
                 isForwardSelect = true;
             }
             if (isForwardSelect) {
-                value.UpdateSelection(startPos-1, endPos);
+                value.UpdateSelection(startPos - 1, endPos);
             } else {
-                value.UpdateSelection(startPos, endPos-1);
+                value.UpdateSelection(startPos, endPos - 1);
             }
             break;
         case KeyCode::KEY_DPAD_RIGHT:
@@ -1716,9 +1818,9 @@ void RenderTextField::HandleOnSelect(KeyCode keyCode, CursorMoveSkip skip)
                 isForwardSelect = false;
             }
             if (isForwardSelect) {
-                value.UpdateSelection(startPos+1, endPos);
+                value.UpdateSelection(startPos + 1, endPos);
             } else {
-                value.UpdateSelection(startPos, endPos+1);
+                value.UpdateSelection(startPos, endPos + 1);
             }
             break;
         default:
@@ -1743,6 +1845,9 @@ void RenderTextField::HandleOnRevoke()
     SetEditingValue(std::move(value), true, false);
     cursorPositionType_ = CursorPositionType::NONE;
     MarkNeedLayout();
+    if (onChange_) {
+        onChange_(GetEditingValue().text);
+    }
 }
 
 void RenderTextField::HandleOnInverseRevoke()
@@ -1756,6 +1861,9 @@ void RenderTextField::HandleOnInverseRevoke()
     SetEditingValue(std::move(value), true, false);
     cursorPositionType_ = CursorPositionType::NONE;
     MarkNeedLayout();
+    if (onChange_) {
+        onChange_(GetEditingValue().text);
+    }
 }
 
 void RenderTextField::HandleOnCut()
@@ -1766,7 +1874,9 @@ void RenderTextField::HandleOnCut()
     if (GetEditingValue().GetSelectedText().empty()) {
         return;
     }
-    clipboard_->SetData(GetEditingValue().GetSelectedText());
+    if (copyOption_ != CopyOption::NoCopy) {
+        clipboard_->SetData(GetEditingValue().GetSelectedText());
+    }
     if (onCut_) {
         onCut_(GetEditingValue().GetSelectedText());
     }
@@ -1787,7 +1897,9 @@ void RenderTextField::HandleOnCopy()
     if (GetEditingValue().GetSelectedText().empty()) {
         return;
     }
-    clipboard_->SetData(GetEditingValue().GetSelectedText());
+    if (copyOption_ != CopyOption::NoCopy) {
+        clipboard_->SetData(GetEditingValue().GetSelectedText());
+    }
     if (onCopy_) {
         onCopy_(GetEditingValue().GetSelectedText());
     }
@@ -1878,27 +1990,27 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
         } else if (event.IsNumberKey()) {
             appendElement = event.ConvertCodeToString();
         } else if (event.IsLetterKey()) {
-            if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_Y }) ||
-                event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_Y })) {
+            if (event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
+                event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
+                event.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
+                event.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
+                event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_Y }) ||
+                event.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_Y })) {
                 HandleOnInverseRevoke();
-            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_Z }) ||
-                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_Z })) {
+            } else if (event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_Z }) ||
+                       event.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_Z })) {
                 HandleOnRevoke();
-            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A }) ||
-                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
+            } else if (event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_A }) ||
+                       event.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_A })) {
                 HandleOnCopyAll(nullptr);
-            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
-                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
+            } else if (event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_C }) ||
+                       event.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_C })) {
                 HandleOnCopy();
-            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V }) ||
-                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
+            } else if (event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_V }) ||
+                       event.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_V })) {
                 HandleOnPaste();
-            } else if (event.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_X }) ||
-                       event.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_X })) {
+            } else if (event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_X }) ||
+                       event.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_X })) {
                 HandleOnCut();
             } else {
                 appendElement = event.ConvertCodeToString();
@@ -1909,19 +2021,12 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
     if (appendElement.empty()) {
         return false;
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    auto editingValue = GetEditingValue();
-    editingValue.text = editingValue.GetBeforeSelection() + appendElement + editingValue.GetAfterSelection();
-    editingValue.UpdateSelection(
-        std::max(editingValue.selection.GetEnd(), 0) + StringUtils::Str8ToStr16(appendElement).length());
-    SetEditingValue(std::move(editingValue));
-#else
+
     auto editingValue = std::make_shared<TextEditingValue>();
     editingValue->text = GetEditingValue().GetBeforeSelection() + appendElement + GetEditingValue().GetAfterSelection();
     editingValue->UpdateSelection(
         std::max(GetEditingValue().selection.GetEnd(), 0) + StringUtils::Str8ToStr16(appendElement).length());
     UpdateEditingValue(editingValue);
-#endif
     MarkNeedLayout();
     return true;
 }
@@ -1998,13 +2103,12 @@ void RenderTextField::UpdateDirectionStatus()
 void RenderTextField::UpdateStartSelection(int32_t end, const Offset& pos, bool isSingleHandle, bool isLongPress)
 {
     int32_t extend = GetCursorPositionForClick(pos);
-    int32_t extendEnd = GetEditingValue().selection.GetEnd();
     if (isLongPress) {
         // Use custom selection if exist, otherwise select content near finger.
         if (selection_.IsValid()) {
             UpdateSelection(selection_.baseOffset, selection_.extentOffset);
         } else {
-            extendEnd = extend + GetGraphemeClusterLength(extend, false);
+            int32_t extendEnd = extend + GetGraphemeClusterLength(extend, false);
             UpdateSelection(extend, extendEnd);
         }
         return;
@@ -2085,7 +2189,10 @@ void RenderTextField::ChangeBorderToErrorStyle()
     } else {
         errorBorder = Border(errorBorderEdge);
     }
-    errorBorder.SetBorderRadius(decoration_->GetBorder().TopLeftRadius());
+    errorBorder.SetTopLeftRadius(decoration_->GetBorder().TopLeftRadius());
+    errorBorder.SetTopRightRadius(decoration_->GetBorder().TopRightRadius());
+    errorBorder.SetBottomLeftRadius(decoration_->GetBorder().BottomLeftRadius());
+    errorBorder.SetBottomRightRadius(decoration_->GetBorder().BottomRightRadius());
     decoration_->SetBorder(errorBorder);
 }
 
@@ -2157,15 +2264,9 @@ void RenderTextField::Delete(int32_t start, int32_t end)
     if (onValueChange_) {
         onValueChange_();
     }
-}
-
-void RenderTextField::PopTextOverlay()
-{
-    const auto& stackElement = stackElement_.Upgrade();
-    if (stackElement) {
-        stackElement->PopTextOverlay();
+    if (onChange_) {
+        onChange_(GetEditingValue().text);
     }
-    isOverlayShowed_ = false;
 }
 
 std::string RenderTextField::ProvideRestoreInfo()
@@ -2195,6 +2296,25 @@ void RenderTextField::ApplyRestoreInfo()
     UpdateSelection(jsonStart->GetInt(), jsonEnd->GetInt());
     StartTwinkling();
     SetRestoreInfo("");
+}
+
+void RenderTextField::ApplyAspectRatio()
+{
+    auto parent = GetParent().Upgrade();
+    while (parent) {
+        auto renderBox = DynamicCast<RenderBox>(parent);
+        if (renderBox && !NearZero(renderBox->GetAspectRatio()) && GetLayoutParam().GetMaxSize().IsValid() &&
+            !GetLayoutParam().GetMaxSize().IsInfinite()) {
+            height_ = Dimension(GetLayoutParam().GetMaxSize().Height());
+            break;
+        }
+        parent = parent->GetParent().Upgrade();
+    }
+}
+
+void RenderTextField::Dump()
+{
+    DumpLog::GetInstance().AddDesc(std::string("CopyOption: ").append(V2::ConvertWrapCopyOptionToStirng(copyOption_)));
 }
 
 } // namespace OHOS::Ace

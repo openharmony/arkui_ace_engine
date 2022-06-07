@@ -18,7 +18,9 @@
 
 #include <string>
 
+#include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "core/components/box/drag_drop_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
@@ -49,6 +51,9 @@ public:
     const Color& GetFocusColor() const;
     void SetFocusColor(const Color& focusColor);
 
+    const CopyOption& GetCopyOption() const;
+    void SetCopyOption(const CopyOption& copyOption);
+
     bool GetMaxWidthLayout() const;
     void SetMaxWidthLayout(bool isMaxWidthLayout);
 
@@ -65,8 +70,64 @@ public:
     Dimension GetDeclarationHeight() const;
 
     void SetRemoteMessageEvent(const EventMarker& eventId);
+
+    const OnDragFunc& GetOnDragStartId() const
+    {
+        return onDragStartId_;
+    }
+
+    void SetOnDragStartId(const OnDragFunc& onDragStartId)
+    {
+        onDragStartId_ = onDragStartId;
+    }
+
+    const OnDropFunc& GetOnDragEnterId() const
+    {
+        return onDragEnterId_;
+    }
+
+    void SetOnDragEnterId(const OnDropFunc& onDragEnterId)
+    {
+        onDragEnterId_ = onDragEnterId;
+    }
+
+    const OnDropFunc& GetOnDragMoveId() const
+    {
+        return onDragMoveId_;
+    }
+
+    void SetOnDragMoveId(const OnDropFunc& onDragMoveId)
+    {
+        onDragMoveId_ = onDragMoveId;
+    }
+
+    const OnDropFunc& GetOnDragLeaveId() const
+    {
+        return onDragLeaveId_;
+    }
+
+    void SetOnDragLeaveId(const OnDropFunc& onDragLeaveId)
+    {
+        onDragLeaveId_ = onDragLeaveId;
+    }
+
+    const OnDropFunc& GetOnDropId() const
+    {
+        return onDropId_;
+    }
+
+    void SetOnDropId(const OnDropFunc& onDropId)
+    {
+        onDropId_ = onDropId;
+    }
+
 private:
     RefPtr<TextDeclaration> declaration_;
+    OnDragFunc onDragStartId_;
+    OnDropFunc onDragEnterId_;
+    OnDropFunc onDragMoveId_;
+    OnDropFunc onDragLeaveId_;
+    OnDropFunc onDropId_;
 };
 
 } // namespace OHOS::Ace

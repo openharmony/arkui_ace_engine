@@ -20,6 +20,8 @@
 #include "base/utils/utils.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
+#include "core/components/positioned/positioned_component.h"
+#include "core/components/stack/stack_element.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
@@ -84,6 +86,16 @@ void RenderImage::Update(const RefPtr<Component>& component)
         inComingSource.SetFillColor(fillColor.value());
     }
     border_ = image->GetBorder();
+
+    onDragStart_ = image->GetOnDragStartId();
+    onDragEnter_ = image->GetOnDragEnterId();
+    onDragMove_ = image->GetOnDragMoveId();
+    onDragLeave_ = image->GetOnDragLeaveId();
+    onDrop_ = image->GetOnDropId();
+    if (onDragStart_) {
+        CreateDragDropRecognizer(context_);
+    }
+
     // this value is used for update frequency with same image source info.
     LOGD("sourceInfo %{public}s", sourceInfo_.ToString().c_str());
     LOGD("inComingSource %{public}s", inComingSource.ToString().c_str());
@@ -655,6 +667,227 @@ void RenderImage::PrintImageLog(const Size& srcSize, const BackgroundImageSize& 
 void RenderImage::Dump()
 {
     DumpLog::GetInstance().AddDesc(std::string("UsingWideGamut: ").append(IsSourceWideGamut() ? "true" : "false"));
+}
+
+void RenderImage::OnTouchTestHit(
+    const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
+{
+    if (dragDropGesture_) {
+        result.emplace_back(dragDropGesture_);
+    }
+}
+
+DragItemInfo RenderImage::GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info)
+{
+    RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+    event->SetX(context->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+    event->SetY(context->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+    selectedItemSize_ = GetLayoutSize();
+    auto extraParams = JsonUtil::Create(true);
+
+    return onDragStart_(event, extraParams->ToString());
+}
+
+void RenderImage::PanOnActionStart(const GestureEvent& info)
+{
+    if (!onDragStart_) {
+        return;
+    }
+
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+
+    auto dragItemInfo = GenerateDragItemInfo(pipelineContext, info);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (!dragItemInfo.pixelMap && !dragItemInfo.customComponent) {
+        auto initRenderNode = AceType::Claim(this);
+        isDragDropNode_ = true;
+        pipelineContext->SetInitRenderNode(initRenderNode);
+
+        AddDataToClipboard(pipelineContext, dragItemInfo.extraInfo, "", GetImageSrc());
+        if (!dragWindow_) {
+            auto rect = pipelineContext->GetCurrentWindowRect();
+            dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
+                static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
+                static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Top(), initRenderNode->GetPaintRect().Width(),
+                initRenderNode->GetPaintRect().Height());
+            dragWindow_->SetOffset(rect.Left(), rect.Top());
+            auto image = initRenderNode->GetSkImage();
+            dragWindow_->DrawImage(image);
+        }
+        return;
+    }
+
+    if (dragItemInfo.pixelMap) {
+        auto initRenderNode = AceType::Claim(this);
+        isDragDropNode_ = true;
+        pipelineContext->SetInitRenderNode(initRenderNode);
+
+        AddDataToClipboard(pipelineContext, dragItemInfo.extraInfo, "", GetImageSrc());
+        if (!dragWindow_) {
+            auto rect = pipelineContext->GetCurrentWindowRect();
+            dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
+                static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
+                static_cast<int32_t>(info.GetGlobalPoint().GetY()) + rect.Top(), dragItemInfo.pixelMap->GetWidth(),
+                dragItemInfo.pixelMap->GetHeight());
+            dragWindow_->SetOffset(rect.Left(), rect.Top());
+            dragWindow_->DrawPixelMap(dragItemInfo.pixelMap);
+        }
+        return;
+    }
+#endif
+    if (!dragItemInfo.customComponent) {
+        LOGW("the drag custom component is null");
+        return;
+    }
+
+    hasDragItem_ = true;
+    auto positionedComponent = AceType::MakeRefPtr<PositionedComponent>(dragItemInfo.customComponent);
+    positionedComponent->SetTop(Dimension(GetGlobalOffset().GetY()));
+    positionedComponent->SetLeft(Dimension(GetGlobalOffset().GetX()));
+    SetLocalPoint(info.GetGlobalPoint() - GetGlobalOffset());
+    auto updatePosition = [renderBox = AceType::Claim(this)](
+                                const std::function<void(const Dimension&, const Dimension&)>& func) {
+        if (!renderBox) {
+            return;
+        }
+        renderBox->SetUpdateBuilderFuncId(func);
+    };
+    positionedComponent->SetUpdatePositionFuncId(updatePosition);
+    auto stackElement = pipelineContext->GetLastStack();
+    stackElement->PushComponent(positionedComponent);
+}
+
+void RenderImage::PanOnActionUpdate(const GestureEvent& info)
+{
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (isDragDropNode_ && dragWindow_) {
+        int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
+        int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
+        if (dragWindow_) {
+            dragWindow_->MoveTo(x, y);
+        }
+        return;
+    }
+#endif
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+
+    RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+    event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+    event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+
+    Offset offset = info.GetGlobalPoint() - GetLocalPoint();
+    if (GetUpdateBuilderFuncId()) {
+        GetUpdateBuilderFuncId()(Dimension(offset.GetX()), Dimension(offset.GetY()));
+    }
+
+    auto extraParams = JsonUtil::Create(true);
+    auto targetDragDropNode = FindDragDropNode(pipelineContext, info);
+    auto preDragDropNode = GetPreDragDropNode();
+    if (preDragDropNode == targetDragDropNode) {
+        if (targetDragDropNode && targetDragDropNode->GetOnDragMove()) {
+            (targetDragDropNode->GetOnDragMove())(event, extraParams->ToString());
+        }
+        return;
+    }
+    if (preDragDropNode && preDragDropNode->GetOnDragLeave()) {
+        (preDragDropNode->GetOnDragLeave())(event, extraParams->ToString());
+    }
+    if (targetDragDropNode && targetDragDropNode->GetOnDragEnter()) {
+        (targetDragDropNode->GetOnDragEnter())(event, extraParams->ToString());
+    }
+    SetPreDragDropNode(targetDragDropNode);
+}
+
+void RenderImage::PanOnActionEnd(const GestureEvent& info)
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (isDragDropNode_) {
+        isDragDropNode_ = false;
+
+        if (GetOnDrop()) {
+            RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+            RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
+            event->SetPasteData(pasteData);
+            event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+            event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+
+            auto extraParams = JsonUtil::Create(true);
+            (GetOnDrop())(event, extraParams->ToString());
+            pipelineContext->SetInitRenderNode(nullptr);
+        }
+    }
+
+    if (dragWindow_) {
+        dragWindow_->Destory();
+        dragWindow_ = nullptr;
+        return;
+    }
+#endif
+    RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+    RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
+    event->SetPasteData(pasteData);
+    event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+    event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+
+    Offset offset = info.GetGlobalPoint() - GetLocalPoint();
+    if (GetUpdateBuilderFuncId()) {
+        GetUpdateBuilderFuncId()(Dimension(offset.GetX()), Dimension(offset.GetY()));
+    }
+    if (hasDragItem_) {
+        auto stackElement = pipelineContext->GetLastStack();
+        stackElement->PopComponent();
+    }
+    hasDragItem_ = false;
+
+    ACE_DCHECK(GetPreDragDropNode() == FindTargetRenderNode<DragDropEvent>(pipelineContext, info));
+    auto targetDragDropNode = GetPreDragDropNode();
+    if (!targetDragDropNode) {
+        return;
+    }
+    if (targetDragDropNode->GetOnDrop()) {
+        auto extraParams = JsonUtil::Create(true);
+        (targetDragDropNode->GetOnDrop())(event, extraParams->ToString());
+    }
+    SetPreDragDropNode(nullptr);
+}
+
+void RenderImage::PanOnActionCancel()
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (isDragDropNode_) {
+        isDragDropNode_ = false;
+    }
+
+    if (dragWindow_) {
+        dragWindow_->Destory();
+        dragWindow_ = nullptr;
+    }
+#endif
+    if (hasDragItem_) {
+        auto stackElement = pipelineContext->GetLastStack();
+        stackElement->PopComponent();
+        hasDragItem_ = false;
+    }
+    SetPreDragDropNode(nullptr);
 }
 
 } // namespace OHOS::Ace

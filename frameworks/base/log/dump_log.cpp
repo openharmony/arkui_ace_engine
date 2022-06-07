@@ -77,4 +77,12 @@ void DumpLog::Reset()
     ostream_.reset();
 }
 
+void DumpLog::ShowDumpHelp(std::vector<std::string>& info)
+{
+    info.emplace_back(" -element                       |show element tree");
+    info.emplace_back(" -render                        |show render tree");
+    info.emplace_back(" -inspector                     |show inspector tree");
+    info.emplace_back(" -frontend                      |show path and components count of current page");
+}
+
 } // namespace OHOS::Ace

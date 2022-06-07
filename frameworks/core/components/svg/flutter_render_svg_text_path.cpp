@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -142,10 +142,9 @@ double FlutterRenderSvgTextPath::OnDrawTextPath(RenderContext& context, const Pa
 
 double FlutterRenderSvgTextPath::OnMeasureTextPathBounds(const PathOffset& pathOffset, Rect& bounds)
 {
-    double offset = pathOffset.current;
     SvgTextInfo svgTextInfo = { fillState_, strokeState_, textStyle_, textData_, opacity_ };
     PathDrawInfo pathDrawInfo = { pathOffset.path, pathOffset.current, 0.0 };
-    offset = FlutterSvgPainter::MeasureTextPathBounds(svgTextInfo, pathDrawInfo, bounds);
+    double offset = FlutterSvgPainter::MeasureTextPathBounds(svgTextInfo, pathDrawInfo, bounds);
     return offset;
 }
 

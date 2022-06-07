@@ -87,6 +87,7 @@ void RenderCheckbox::Update(const RefPtr<Component>& component)
     }
     UpdateUIStatus();
     UpdateAccessibilityAttr();
+    SetAccessibilityClickImpl();
 }
 
 
@@ -177,6 +178,10 @@ void RenderCheckbox::HandleClick()
     MarkNeedRender();
     if (controller_) {
         controller_->Play();
+    }
+    auto accessibilityNode = accessibilityNode_.Upgrade();
+    if (accessibilityNode) {
+        accessibilityNode->SetCheckedState(checked_);
     }
 }
 
@@ -283,6 +288,23 @@ void RenderCheckbox::OnAnimationStop()
     // after the animation stopped,we need to update the check status
     RenderCheckable::HandleClick();
     UpdateAccessibilityAttr();
+}
+
+void RenderCheckbox::SetAccessibilityClickImpl()
+{
+    auto accessibilityNode = accessibilityNode_.Upgrade();
+    if (accessibilityNode) {
+        auto weakPtr = AceType::WeakClaim(AceType::RawPtr(clickRecognizer_));
+        accessibilityNode->AddSupportAction(AceAction::ACTION_CLICK);
+        accessibilityNode->SetClickableState(true);
+        accessibilityNode->SetCheckableState(true);
+        accessibilityNode->SetActionClickImpl([weakPtr]() {
+            auto click = weakPtr.Upgrade();
+            if (click) {
+                click->OnAccepted();
+            }
+        });
+    }
 }
 
 } // namespace OHOS::Ace

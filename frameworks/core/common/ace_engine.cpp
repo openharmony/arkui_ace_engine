@@ -34,6 +34,23 @@ namespace {
 
 std::unique_ptr<AceEngine> g_aceEngine;
 
+constexpr int SIGNAL_JS_HEAP = 37;
+constexpr int SIGNAL_JS_HEAP_PRIV = 38;
+
+void HandleSignal(int signo)
+{
+    switch (signo) {
+        case SIGNAL_JS_HEAP:
+            AceEngine::Get().DumpJsHeap(false);
+            break;
+        case SIGNAL_JS_HEAP_PRIV:
+            AceEngine::Get().DumpJsHeap(true);
+            break;
+        default:
+            break;
+    }
+}
+
 }
 
 AceEngine::AceEngine()
@@ -50,10 +67,16 @@ AceEngine& AceEngine::Get()
     return *g_aceEngine;
 }
 
+void AceEngine::InitJsDumpHeadSignal()
+{
+    signal(SIGNAL_JS_HEAP, HandleSignal);
+    signal(SIGNAL_JS_HEAP_PRIV, HandleSignal);
+}
+
 void AceEngine::AddContainer(int32_t instanceId, const RefPtr<Container>& container)
 {
     LOGI("AddContainer %{public}d", instanceId);
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::unique_lock<std::shared_mutex> lock(mutex_);
     const auto result = containerMap_.try_emplace(instanceId, container);
     if (!result.second) {
         LOGW("already have container of this instance id: %{public}d", instanceId);
@@ -65,14 +88,11 @@ void AceEngine::RemoveContainer(int32_t instanceId)
     LOGI("RemoveContainer %{public}d", instanceId);
     size_t num = 0;
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::unique_lock<std::shared_mutex> lock(mutex_);
         num = containerMap_.erase(instanceId);
     }
     if (num == 0) {
         LOGW("container not found with instance id: %{public}d", instanceId);
-    }
-    if (watchDog_) {
-        watchDog_->Unregister(instanceId);
     }
 }
 
@@ -80,7 +100,7 @@ void AceEngine::Dump(const std::vector<std::string>& params) const
 {
     std::unordered_map<int32_t, RefPtr<Container>> copied;
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::shared_lock<std::shared_mutex> lock(mutex_);
         copied = containerMap_;
     }
     for (const auto& container : copied) {
@@ -101,7 +121,7 @@ RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
         instanceId = PluginManager::GetInstance().GetPluginParentContainerId(instanceId);
     }
 #endif
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::shared_lock<std::shared_mutex> lock(mutex_);
     auto container = containerMap_.find(instanceId);
     if (container != containerMap_.end()) {
         return container->second;
@@ -114,6 +134,13 @@ void AceEngine::RegisterToWatchDog(int32_t instanceId, const RefPtr<TaskExecutor
 {
     if (watchDog_) {
         watchDog_->Register(instanceId, taskExecutor, useUIAsJSThread);
+    }
+}
+
+void AceEngine::UnRegisterFromWatchDog(int32_t instanceId)
+{
+    if (watchDog_) {
+        watchDog_->Unregister(instanceId);
     }
 }
 
@@ -135,7 +162,7 @@ void AceEngine::TriggerGarbageCollection()
 {
     std::unordered_map<int32_t, RefPtr<Container>> copied;
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::shared_lock<std::shared_mutex> lock(mutex_);
         if (containerMap_.empty()) {
             return;
         }
@@ -164,9 +191,21 @@ void AceEngine::NotifyContainers(const std::function<void(const RefPtr<Container
     if (!callback) {
         return;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::shared_lock<std::shared_mutex> lock(mutex_);
     for (const auto& [first, second] : containerMap_) {
         callback(second);
+    }
+}
+
+void AceEngine::DumpJsHeap(bool isPrivate) const
+{
+    std::unordered_map<int32_t, RefPtr<Container>> copied;
+    {
+        std::shared_lock<std::shared_mutex> lock(mutex_);
+        copied = containerMap_;
+    }
+    for (const auto& container : copied) {
+        container.second->DumpHeapSnapshot(isPrivate);
     }
 }
 

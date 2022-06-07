@@ -46,11 +46,12 @@ RefPtr<RenderNode> SvgG::CreateRender(
     const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox)
 {
     component_->Inherit(parent);
-    auto href = component_->GetDeclaration()->GetFillState().GetHref();
+    auto& declaration = component_->GetDeclaration();
+    auto href = declaration->GetFillState().GetHref();
     if (!href.empty()) {
         auto gradient = GetGradient(href);
         if (gradient) {
-            component_->GetDeclaration()->SetGradient(gradient.value());
+            declaration->SetGradient(gradient.value());
         }
     }
     auto renderNode = AceType::DynamicCast<RenderSvgG>(component_->CreateRenderNode());
@@ -61,17 +62,18 @@ RefPtr<RenderNode> SvgG::CreateRender(
     renderNode->Attach(context_);
     renderNode->Update(component_);
     for (auto child : children_) {
-        auto childRender = child->CreateRender(layoutParam, component_->GetDeclaration(), useBox);
+        auto childRender = child->CreateRender(layoutParam, declaration, useBox);
         if (childRender) {
             renderNode->AddChild(childRender, renderNode->GetChildren().size());
         }
     }
     renderNode->Layout(layoutParam);
-    if (!useBox) {
+    if (!useBox || declaration->GetClipPathHref().empty()) {
+        LOGW("g tag skip box create");
         return renderNode;
     }
 
-    auto boxComponent = CreateBoxComponent(layoutParam, component_->GetDeclaration()->GetClipPathHref());
+    auto boxComponent = CreateBoxComponent(layoutParam, declaration->GetClipPathHref());
     auto renderBox = boxComponent->CreateRenderNode();
     renderBox->Attach(context_);
     renderBox->Update(boxComponent);

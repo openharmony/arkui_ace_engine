@@ -135,8 +135,8 @@ bool WaterFlowElement::RequestNextFocus(bool vertical, bool reverse, const Rect&
     bool ret = false;
     while (!ret) {
         int32_t focusIndex = waterFlow->RequestNextFocus(vertical, reverse);
-        int32_t size = GetChildrenList().size();
-        if (focusIndex < 0 || focusIndex >= size) {
+        size_t size = GetChildrenList().size();
+        if (focusIndex < 0 || static_cast<size_t>(focusIndex) >= size) {
             return false;
         }
         auto iter = GetChildrenList().begin();

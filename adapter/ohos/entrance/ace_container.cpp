@@ -166,6 +166,7 @@ void AceContainer::DestroyView()
         if (flutterAceView) {
             flutterAceView->DecRefCount();
         }
+        aceView_ = nullptr;
     }
 }
 
@@ -543,7 +544,6 @@ void AceContainer::InitializeCallback()
         context->GetTaskExecutor()->PostTask(
             [context, event]() {
                 context->OnMouseEvent(event);
-                context->NotifyDispatchMouseEventDismiss(event);
             }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
@@ -651,6 +651,8 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     }
     HdcRegister::Get().StopHdcRegister(instanceId);
     container->Destroy();
+    // unregister watchdog before stop thread to avoid UI_BLOCK report
+    AceEngine::Get().UnRegisterFromWatchDog(instanceId);
     auto taskExecutor = container->GetTaskExecutor();
     if (taskExecutor) {
         taskExecutor->PostSyncTask([] { LOGI("Wait UI thread..."); }, TaskExecutor::TaskType::UI);
@@ -815,6 +817,18 @@ void AceContainer::TriggerGarbageCollection()
                 sp->TriggerGarbageCollection();
             }
             PurgeMallocCache();
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void AceContainer::DumpHeapSnapshot(bool isPrivate)
+{
+    taskExecutor_->PostTask(
+        [isPrivate, frontend = WeakPtr<Frontend>(frontend_)] {
+            auto sp = frontend.Upgrade();
+            if (sp) {
+                sp->DumpHeapSnapshot(isPrivate);
+            }
         },
         TaskExecutor::TaskType::JS);
 }
@@ -1136,6 +1150,18 @@ std::string AceContainer::GetContentInfo(int32_t instanceId)
     } else {
         return "";
     }
+}
+
+void AceContainer::SetWindowPos(int32_t left, int32_t top)
+{
+    if (!frontend_) {
+        return;
+    }
+    auto accessibilityManager = frontend_->GetAccessibilityManager();
+    if (!accessibilityManager) {
+        return;
+    }
+    accessibilityManager->SetWindowPos(left, top);
 }
 
 void AceContainer::InitializeSubContainer(int32_t parentContainerId)

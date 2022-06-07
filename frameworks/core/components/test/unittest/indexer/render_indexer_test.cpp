@@ -23,6 +23,7 @@
 #include "core/components/list/list_item_component.h"
 #include "core/components/test/unittest/indexer/indexer_test_utils.h"
 #include "core/components/test/unittest/mock/mock_render_common.h"
+#include "core/components/text_overlay/text_overlay_component.h"
 
 using namespace testing;
 using namespace testing::ext;

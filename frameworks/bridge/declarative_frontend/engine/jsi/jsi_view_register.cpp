@@ -24,8 +24,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
+#ifdef ABILITY_COMPONENT_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_ability_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ability_component_controller.h"
+#endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_animator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_badge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_blank.h"
@@ -58,12 +60,10 @@
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
 #endif
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #ifdef WEB_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_richtext.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
-#endif
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_gesture.h"
@@ -91,6 +91,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_progress.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_slider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
@@ -134,6 +135,7 @@
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_piece.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_remote_window.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
 #endif
@@ -142,7 +144,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if defined(XCOMPONENT_SUPPORTED)
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #endif
@@ -858,7 +860,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ActionSheet", JSActionSheet::JSBind },
     { "AlertDialog", JSAlertDialog::JSBind },
     { "ContextMenu", JSContextMenu::JSBind },
+#ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
+#endif
     { "TextArea", JSTextArea::JSBind },
     { "TextInput", JSTextInput::JSBind },
     { "TextClock", JSTextClock::JSBind },
@@ -870,20 +874,19 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     { "PluginComponent", JSPlugin::JSBind },
 #endif
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #ifdef WEB_SUPPORTED
     { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
 #endif
-#endif
 #ifndef WEARABLE_PRODUCT
     { "Camera", JSCamera::JSBind },
     { "Piece", JSPiece::JSBind },
     { "Rating", JSRating::JSBind },
+    { "RemoteWindow", JSRemoteWindow::JSBind },
     { "Video", JSVideo::JSBind },
 #endif
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if defined(XCOMPONENT_SUPPORTED)
     { "XComponent", JSXComponent::JSBind },
     { "XComponentController", JSXComponentController::JSBind },
 #endif
@@ -905,7 +908,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "SwiperController", JSSwiperController::JSBind },
     { "TabsController", JSTabsController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
+#ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityController", JSAbilityComponentController::JSBind },
+#endif
     { "CanvasRenderingContext2D", JSRenderingContext::JSBind},
     { "OffscreenCanvasRenderingContext2D", JSOffscreenRenderingContext::JSBind},
     { "CanvasGradient", JSCanvasGradient::JSBind},
@@ -930,7 +935,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "CheckboxGroup", JSCheckboxGroup::JSBind },
     { "Refresh", JSRefresh::JSBind },
     { "WaterFlow", JSWaterFlow::JSBind },
-    { "FlowItem", JSWaterFlowItem::JSBind }
+    { "FlowItem", JSWaterFlowItem::JSBind },
+    { "RelativeContainer", JSRelativeContainer::JSBind }
 };
 
 void RegisterAllModule(BindingTarget globalObj)
@@ -947,17 +953,17 @@ void RegisterAllModule(BindingTarget globalObj)
     JSCanvasImageData::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
+#ifdef ABILITY_COMPONENT_SUPPORTED
     JSAbilityComponentController::JSBind(globalObj);
+#endif
     JSVideoController::JSBind(globalObj);
     JSTextInputController::JSBind(globalObj);
     JSTextAreaController::JSBind(globalObj);
     JSSearchController::JSBind(globalObj);
     JSTextClockController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #ifdef WEB_SUPPORTED
     JSWebController::JSBind(globalObj);
-#endif
 #endif
     for (auto& iter : bindFuncs) {
         iter.second(globalObj);
@@ -978,7 +984,9 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
     } else if ((*func).first == "Calendar") {
         JSCalendarController::JSBind(globalObj);
     } else if ((*func).first == "AbilityComponent") {
+#ifdef ABILITY_COMPONENT_SUPPORTED
         JSAbilityComponentController::JSBind(globalObj);
+#endif
     } else if ((*func).first == "Video") {
         JSVideoController::JSBind(globalObj);
     } else if ((*func).first == "Grid") {
@@ -994,10 +1002,8 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
     } else if ((*func).first == "Search") {
         JSSearchController::JSBind(globalObj);
     } else if ((*func).first == "Web") {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #ifdef WEB_SUPPORTED
         JSWebController::JSBind(globalObj);
-#endif
 #endif
     }
 

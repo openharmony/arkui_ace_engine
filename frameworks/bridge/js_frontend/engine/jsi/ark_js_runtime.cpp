@@ -13,38 +13,45 @@
  * limitations under the License.
  */
 
-#include "frameworks/base/log/log_wrapper.h"
-#include "frameworks/base/utils/system_properties.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 
+#include "ecmascript/napi/include/dfx_jsnapi.h"
+
+#include "frameworks/base/log/log_wrapper.h"
+#include "frameworks/base/utils/system_properties.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 namespace OHOS::Ace::Framework {
 // NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto PANDA_MAIN_FUNCTION = "_GLOBAL::func_main_0";
+constexpr int32_t FORMAT_JSON = 1;
 
-Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo *info)
+Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo* info)
 {
-    auto package = reinterpret_cast<PandaFunctionData *>(info->GetData());
+    auto package = reinterpret_cast<PandaFunctionData*>(info->GetData());
     if (package == nullptr) {
         return JSValueRef::Undefined(info->GetVM());
     }
     return package->Callback(info);
 }
 
-bool ArkJSRuntime::Initialize(const std::string &libraryPath, bool isDebugMode, int32_t instanceId)
+bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, int32_t instanceId)
 {
     LOGI("Ark: create jsvm");
     RuntimeOption option;
     option.SetGcType(RuntimeOption::GC_TYPE::GEN_GC);
-#ifndef WINDOWS_PLATFORM
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     option.SetArkProperties(SystemProperties::GetArkProperties());
-    option.SetAsmInterOption(SystemProperties::GetAsmInterOption());
+    option.SetGcThreadNum(SystemProperties::GetGcThreadNum());
+    option.SetLongPauseTime(SystemProperties::GetLongPauseTime());
+    option.SetEnableAsmInterpreter(SystemProperties::GetAsmInterpreterEnabled());
+    option.SetAsmOpcodeDisableRange(SystemProperties::GetAsmOpcodeDisableRange());
+    LOGI("ArkJSRuntime::Initialize ark properties = %{public}d", SystemProperties::GetArkProperties());
 #endif
-    const int64_t poolSize = 0x10000000;  // 256M
+    const int64_t poolSize = 0x10000000; // 256M
     option.SetGcPoolSize(poolSize);
-    option.SetLogLevel(RuntimeOption::LOG_LEVEL::ERROR);
+    option.SetLogLevel(RuntimeOption::LOG_LEVEL::INFO);
     option.SetLogBufPrint(print_);
     option.SetDebuggerLibraryPath(libraryPath);
     libPath_ = libraryPath;
@@ -67,7 +74,7 @@ void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
         if (!usingExistVM_) {
-#ifndef WINDOWS_PLATFORM
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
             JSNApi::StopDebugger(vm_);
 #endif
             JSNApi::DestroyJSVM(vm_);
@@ -85,12 +92,12 @@ void ArkJSRuntime::SetLogPrint(LOG_PRINT out)
     print_ = out;
 }
 
-shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::string &src)
+shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::string& src)
 {
     return NewUndefined();
 }
 
-bool ArkJSRuntime::EvaluateJsCode(const uint8_t *buffer, int32_t size)
+bool ArkJSRuntime::EvaluateJsCode(const uint8_t* buffer, int32_t size)
 {
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
@@ -99,11 +106,11 @@ bool ArkJSRuntime::EvaluateJsCode(const uint8_t *buffer, int32_t size)
     return ret;
 }
 
-bool ArkJSRuntime::ExecuteJsBin(const std::string &fileName)
+bool ArkJSRuntime::ExecuteJsBin(const std::string& fileName)
 {
     JSExecutionScope executionScope(vm_);
     if (!libPath_.empty()) {
-#ifndef WINDOWS_PLATFORM
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_);
 #endif
     }
@@ -156,13 +163,13 @@ shared_ptr<JsValue> ArkJSRuntime::NewUndefined()
     return std::make_shared<ArkJSValue>(shared_from_this(), JSValueRef::Undefined(vm_));
 }
 
-shared_ptr<JsValue> ArkJSRuntime::NewString(const std::string &str)
+shared_ptr<JsValue> ArkJSRuntime::NewString(const std::string& str)
 {
     LocalScope scope(vm_);
     return std::make_shared<ArkJSValue>(shared_from_this(), StringRef::NewFromUtf8(vm_, str.c_str()));
 }
 
-shared_ptr<JsValue> ArkJSRuntime::ParseJson(const std::string &str)
+shared_ptr<JsValue> ArkJSRuntime::ParseJson(const std::string& str)
 {
     LocalScope scope(vm_);
     Local<StringRef> string = StringRef::NewFromUtf8(vm_, str.c_str());
@@ -189,7 +196,7 @@ shared_ptr<JsValue> ArkJSRuntime::NewFunction(RegisterFunctionType func)
     return std::make_shared<ArkJSValue>(shared_from_this(), FunctionRef::New(vm_, FunctionCallback, nullptr, data));
 }
 
-shared_ptr<JsValue> ArkJSRuntime::NewNativePointer(void *ptr)
+shared_ptr<JsValue> ArkJSRuntime::NewNativePointer(void* ptr)
 {
     LocalScope scope(vm_);
     return std::make_shared<ArkJSValue>(shared_from_this(), NativePointerRef::New(vm_, ptr));
@@ -223,7 +230,16 @@ void ArkJSRuntime::ExecutePendingJob()
     JSNApi::ExecutePendingJob(vm_);
 }
 
-Local<JSValueRef> PandaFunctionData::Callback(panda::JsiRuntimeCallInfo *info) const
+void ArkJSRuntime::DumpHeapSnapshot(bool isPrivate)
+{
+    if (vm_ == nullptr) {
+        LOGW("vm_ is nullptr.");
+    }
+    LocalScope scope(vm_);
+    panda::DFXJSNApi::DumpHeapSnapshot(vm_, FORMAT_JSON, true, isPrivate);
+}
+
+Local<JSValueRef> PandaFunctionData::Callback(panda::JsiRuntimeCallInfo* info) const
 {
     EscapeLocalScope scope(runtime_->GetEcmaVm());
     shared_ptr<JsValue> thisPtr =
@@ -239,4 +255,5 @@ Local<JSValueRef> PandaFunctionData::Callback(panda::JsiRuntimeCallInfo *info) c
     shared_ptr<JsValue> result = func_(runtime_, thisPtr, argv, length);
     return scope.Escape(std::static_pointer_cast<ArkJSValue>(result)->GetValue(runtime_));
 }
-}  // namespace OHOS::Ace::Framework
+
+} // namespace OHOS::Ace::Framework

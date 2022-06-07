@@ -37,7 +37,7 @@ build_component("video") {
       "//foundation/multimedia/media_standard/interfaces/inner_api/native",
     ]
 
-    deps = [ "//foundation/graphic/standard:libwmclient" ]
+    deps = [ "//foundation/graphic/graphic_2d:libwmclient" ]
 
     external_deps = [ "ipc:ipc_core" ]
   }

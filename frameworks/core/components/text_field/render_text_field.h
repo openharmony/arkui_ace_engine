@@ -22,6 +22,7 @@
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
 #include "base/geometry/size.h"
+#include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
@@ -35,6 +36,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/image/render_image.h"
 #include "core/components/text_field/text_field_component.h"
+#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
@@ -55,20 +57,6 @@ class ClickRecognizer;
 class ClickInfo;
 class TextOverlayComponent;
 struct TextEditingValue;
-
-enum class DirectionStatus : uint8_t {
-    LEFT_LEFT = 0, // System direction is LTR, text direction is LTR.
-    LEFT_RIGHT,
-    RIGHT_LEFT,
-    RIGHT_RIGHT,
-};
-
-enum class CursorPositionType {
-    NONE = 0,
-    END,      // end of paragraph
-    BOUNDARY, // boundary of LTR and RTL
-    NORMAL,
-};
 
 // Currently only CHARACTER.
 enum class CursorMoveSkip {
@@ -96,12 +84,13 @@ public:
     void OnStatusChanged(RenderStatus renderStatus) override;
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
     void OnPaintFinish() override;
+    void Dump() override;
 
     bool OnKeyEvent(const KeyEvent& event);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling = false);
     bool CloseKeyboard(bool forceClose = false);
     void ShowError(const std::string& errorText, bool resetToStart = true);
-    void ShowTextOverlay(const Offset& showOffset, bool isSingleHandle);
+    void ShowTextOverlay(const Offset& showOffset, bool isSingleHandle, bool isUsingMouse = false);
     void SetOnValueChange(const std::function<void()>& onValueChange);
     const std::function<void()>& GetOnValueChange() const;
     void SetOnKeyboardClose(const std::function<void(bool)>& onKeyboardClose);
@@ -121,6 +110,8 @@ public:
     void Insert(const std::string& text);
     void StartTwinkling();
     void StopTwinkling();
+    void EditingValueFilter(TextEditingValue& result);
+    void PopTextOverlay();
 
     void SetInputFilter(const std::string& inputFilter)
     {
@@ -319,6 +310,9 @@ public:
 
     int32_t instanceId_ = -1;
 
+    bool hasFocus_ = false;
+    void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true, bool isClearRecords = true);
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -352,8 +346,9 @@ protected:
     void OnDoubleClick(const ClickInfo& clickInfo);
     void OnLongPress(const LongPressInfo& longPressInfo);
     bool HandleMouseEvent(const MouseEvent& event) override;
+    void AnimateMouseHoverEnter() override;
+    void AnimateMouseHoverExit() override;
 
-    void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true, bool isClearRecords = true);
     std::u16string GetTextForDisplay(const std::string& text) const;
 
     void UpdateStartSelection(int32_t end, const Offset& pos, bool isSingleHandle, bool isLongPress);
@@ -500,8 +495,6 @@ protected:
     std::string iconSrc_;
     std::string showIconSrc_;
     std::string hideIconSrc_;
-    std::string inputCallBackStr_;
-    int32_t inputCallBackStrSize_ = 0;
     RefPtr<RenderImage> iconImage_;
     RefPtr<RenderImage> renderShowIcon_;
     RefPtr<RenderImage> renderHideIcon_;
@@ -514,6 +507,7 @@ protected:
 private:
     void SetCallback(const RefPtr<TextFieldComponent>& textField);
     void StartPressAnimation(bool isPressDown);
+    void StartHoverAnimation(bool isHovered);
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
     void CursorMoveOnClick(const Offset& offset);
@@ -552,7 +546,7 @@ private:
     void OnOverlayFocusChange(bool isFocus, bool needCloseKeyboard);
     void FireSelectChangeIfNeeded(const TextEditingValue& newValue, bool needFireSelectChangeEvent) const;
     int32_t GetInstanceId() const;
-    void PopTextOverlay();
+    void ApplyAspectRatio(); // If aspect ratio is setted, height will follow box parent.
 
     /**
      * @brief Update remote editing value only if text or selection is changed.
@@ -567,14 +561,15 @@ private:
     bool isOverlayFocus_ = false;
     bool isShiftDown_ = false;
     bool isCtrlDown_ = false;
-    bool hasFocus_ = false;
     double fontScale_ = 1.0;
     bool isSingleHandle_ = false;
     bool hasTextOverlayPushed_ = false;
     bool softKeyboardEnabled_ = true;
     Color pressColor_;
+    Color hoverColor_;
     TextSelection selection_; // Selection from custom.
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
+    CopyOption copyOption_ = CopyOption::Distributed;
     std::function<void()> onValueChange_;
     std::function<void(bool)> onKeyboardClose_;
     std::function<void(const Rect&)> onClipRectChanged_;
@@ -620,6 +615,7 @@ private:
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<Animator> pressController_;
+    RefPtr<Animator> hoverController_;
     RefPtr<Animator> animator_;
     std::vector<TextEditingValue> operationRecords_;
     std::vector<TextEditingValue> inverseOperationRecords_;

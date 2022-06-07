@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 
+#include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/properties/animation_option.h"
 
@@ -174,12 +175,47 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     AnimationOption option = CreateAnimation(animationArgs);
     if (SystemProperties::GetRosenBackendEnabled()) {
         LOGD("RSAnimationInfo: Begin JSAnimateTo");
-        pipelineContext->FlushBuild();
+        auto triggerId = Container::CurrentId();
+        AceEngine::Get().NotifyContainers([triggerId, option](const RefPtr<Container>& container) {
+            auto context = container->GetPipelineContext();
+            if (!context) {
+                // pa container do not have pipeline context.
+                return;
+            }
+            auto frontendType = context->GetFrontendType();
+            if (frontendType != FrontendType::DECLARATIVE_JS && frontendType != FrontendType::JS_PLUGIN) {
+                LOGW("Not compatible frontType(%{public}d) for declarative. containerId: %{public}d", frontendType,
+                    container->GetInstanceId());
+            }
+            ContainerScope scope(container->GetInstanceId());
+            context->FlushBuild();
+            if (context->GetInstanceId() == triggerId) {
+                return;
+            }
+            context->PrepareOpenImplicitAnimation();
+        });
         pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
         // Execute the function.
         JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
         jsAnimateToFunc->Call(info[1]);
-        pipelineContext->FlushBuild();
+        AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
+            auto context = container->GetPipelineContext();
+            if (!context) {
+                // pa container do not have pipeline context.
+                return;
+            }
+            auto frontendType = context->GetFrontendType();
+            if (frontendType != FrontendType::DECLARATIVE_JS && frontendType != FrontendType::JS_PLUGIN) {
+                LOGW("Not compatible frontType(%{public}d) for declarative. containerId: %{public}d", frontendType,
+                    container->GetInstanceId());
+            }
+            ContainerScope scope(container->GetInstanceId());
+            context->FlushBuild();
+            if (context->GetInstanceId() == triggerId) {
+                return;
+            }
+            context->PrepareCloseImplicitAnimation();
+        });
         pipelineContext->CloseImplicitAnimation();
         LOGD("RSAnimationInfo: End JSAnimateTo");
     } else {

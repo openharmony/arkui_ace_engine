@@ -386,6 +386,15 @@ public:
         selectedBackgroundColor_ = backgroundColor;
     }
 
+    bool GetNeedDrawDividerLine() const
+    {
+        return needDrawDividerLine_;
+    }
+    void SetNeedDrawDividerLine(bool needDrawLine)
+    {
+        needDrawDividerLine_ = needDrawLine;
+    }
+
 private:
     // used for inspector node in PC preview
     const std::vector<std::pair<std::string, std::string>> GetAttr()
@@ -434,6 +443,7 @@ private:
     bool disabled_ = false;
     bool visible_ = true;
     bool focusable_ = true;
+    bool needDrawDividerLine_ = true;
 };
 
 } // namespace OHOS::Ace

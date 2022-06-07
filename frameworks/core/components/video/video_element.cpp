@@ -899,6 +899,9 @@ void VideoElement::InitListener()
     auto videoElement = WeakClaim(this);
     if (!isExternalResource_) {
         auto onTextureRefresh = [videoElement, uiTaskExecutor]() {
+            if (!videoElement.Upgrade()) {
+                return;
+            }
             uiTaskExecutor.PostSyncTask([&videoElement] {
                 auto video = videoElement.Upgrade();
                 if (video) {
@@ -911,6 +914,9 @@ void VideoElement::InitListener()
 
     auto onPrepared = [videoElement, uiTaskExecutor](uint32_t width, uint32_t height, bool isPlaying, uint32_t duration,
                           uint32_t currentPos, bool needFireEvent) {
+        if (!videoElement.Upgrade()) {
+            return;
+        }
         uiTaskExecutor.PostSyncTask([&videoElement, width, height, isPlaying, duration, currentPos, needFireEvent] {
             auto video = videoElement.Upgrade();
             if (video) {
@@ -920,6 +926,9 @@ void VideoElement::InitListener()
     };
 
     auto onPlayerStatus = [videoElement, uiTaskExecutor](bool isPlaying) {
+        if (!videoElement.Upgrade()) {
+            return;
+        }
         uiTaskExecutor.PostSyncTask([&videoElement, isPlaying] {
             auto video = videoElement.Upgrade();
             if (video) {
@@ -929,6 +938,9 @@ void VideoElement::InitListener()
     };
 
     auto onCurrentTimeChange = [videoElement, uiTaskExecutor](uint32_t currentPos) {
+        if (!videoElement.Upgrade()) {
+            return;
+        }
         uiTaskExecutor.PostSyncTask([&videoElement, currentPos] {
             auto video = videoElement.Upgrade();
             if (video) {
@@ -938,6 +950,9 @@ void VideoElement::InitListener()
     };
 
     auto onCompletion = [videoElement, uiTaskExecutor] {
+        if (!videoElement.Upgrade()) {
+            return;
+        }
         uiTaskExecutor.PostSyncTask([&videoElement] {
             auto video = videoElement.Upgrade();
             if (video) {
@@ -1669,8 +1684,9 @@ void VideoElement::FullScreen()
                         LOGE("VideoElement::FullScreen: is InspectorComposedComponent");
                         return;
                     }
-                    stackElement->PushComponent(AceType::MakeRefPtr<ComposedComponent>(composedComponent->GetId(),
-                        composedComponent->GetName() + "fullscreen", composedComponent->GetChild()));
+                    stackElement->PushComponent(AceType::MakeRefPtr<ComposedComponent>(
+                        composedComponent->GetId() + "fullscreen", composedComponent->GetName() + "fullscreen",
+                        composedComponent->GetChild()));
                 }
                 isFullScreen_ = true;
                 currentPlatformVersion_ = context->GetMinPlatformVersion();
@@ -1713,7 +1729,11 @@ void VideoElement::ExitFullScreen()
         if (!stackElement) {
             return;
         }
-        stackElement->PopComponent();
+        if (IsDeclarativePara()) {
+            stackElement->PopVideo();
+        } else {
+            stackElement->PopComponent();
+        }
         currentPlatformVersion_ = context->GetMinPlatformVersion();
         if (player_ && currentPlatformVersion_ > COMPATIBLE_VERSION) {
 #ifndef OHOS_STANDARD_SYSTEM

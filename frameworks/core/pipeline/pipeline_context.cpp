@@ -161,6 +161,7 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     eventManager_ = AceType::MakeRefPtr<EventManager>();
     UpdateFontWeightScale();
     eventManager_->SetInstanceId(instanceId);
+    textOverlayManager_ = AceType::MakeRefPtr<TextOverlayManager>(WeakClaim(this));
 }
 
 PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
@@ -186,6 +187,7 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     fontManager_ = FontManager::Create();
     renderFactory_ = AceType::MakeRefPtr<FlutterRenderFactory>();
     UpdateFontWeightScale();
+    textOverlayManager_ = AceType::MakeRefPtr<TextOverlayManager>(WeakClaim(this));
 }
 
 PipelineContext::~PipelineContext()
@@ -283,21 +285,23 @@ void PipelineContext::FlushFocus()
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
-    if (dirtyFocusNode_) {
-        dirtyFocusNode_->RequestFocusImmediately();
-        dirtyFocusNode_.Reset();
-        dirtyFocusScope_.Reset();
-        return;
-    }
+    if (isTabKeyPressed_) {
+        if (dirtyFocusNode_) {
+            dirtyFocusNode_->RequestFocusImmediately();
+            dirtyFocusNode_.Reset();
+            dirtyFocusScope_.Reset();
+            return;
+        }
 
-    if (dirtyFocusScope_) {
-        dirtyFocusScope_->RequestFocusImmediately();
-        dirtyFocusScope_.Reset();
-        return;
-    }
+        if (dirtyFocusScope_) {
+            dirtyFocusScope_->RequestFocusImmediately();
+            dirtyFocusScope_.Reset();
+            return;
+        }
 
-    if (rootElement_ && !rootElement_->IsCurrentFocus()) {
-        rootElement_->RequestFocusImmediately();
+        if (rootElement_ && !rootElement_->IsCurrentFocus()) {
+            rootElement_->RequestFocusImmediately();
+        }
     }
 
     if (GetIsDeclarative()) {
@@ -897,11 +901,11 @@ RefPtr<Element> PipelineContext::SetupSubRootElement()
     return rootElement_;
 }
 
-void PipelineContext::Dump(const std::vector<std::string>& params) const
+bool PipelineContext::Dump(const std::vector<std::string>& params) const
 {
     if (params.empty()) {
         LOGW("params is empty now, it's illegal!");
-        return;
+        return false;
     }
 
     if (params[0] == "-element") {
@@ -957,15 +961,18 @@ void PipelineContext::Dump(const std::vector<std::string>& params) const
             AceApplicationInfo::GetInstance().GetPackageName(), "js crash reason", "js crash summary");
     } else {
         DumpLog::GetInstance().Print("Error: Unsupported dump params!");
+        return false;
     }
+    return true;
 }
 
 void PipelineContext::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+    bool result = false;
     if (!SystemProperties::GetDebugEnabled()) {
         std::unique_ptr<std::ostream> ss = std::make_unique<std::ostringstream>();
         DumpLog::GetInstance().SetDumpFile(std::move(ss));
-        Dump(params);
+        result = Dump(params);
         auto& result = DumpLog::GetInstance().GetDumpFile();
         auto o = static_cast<std::ostringstream*>(result.get());
         info.emplace_back(o->str().substr(0, DumpLog::MAX_DUMP_LENGTH));
@@ -974,9 +981,12 @@ void PipelineContext::DumpInfo(const std::vector<std::string>& params, std::vect
         auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
         std::unique_ptr<std::ostream> ss = std::make_unique<std::ofstream>(dumpFilePath);
         DumpLog::GetInstance().SetDumpFile(std::move(ss));
-        Dump(params);
+        result = Dump(params);
         info.emplace_back("dumpFilePath: " + dumpFilePath);
         DumpLog::GetInstance().Reset();
+    }
+    if (!result) {
+        DumpLog::ShowDumpHelp(info);
     }
 }
 
@@ -1275,11 +1285,11 @@ void PipelineContext::ReplacePage(const RefPtr<PageComponent>& pageComponent)
     ReplacePage(pageComponent, nullptr);
 }
 
-bool PipelineContext::ClearInvisiblePages()
+bool PipelineContext::ClearInvisiblePages(const std::function<void()>& listener)
 {
     LOGD("ClearInvisiblePageComponents");
     auto stageElement = GetStageElement();
-    return stageElement && stageElement->ClearOffStage();
+    return stageElement && stageElement->ClearOffStage(listener);
 }
 
 void PipelineContext::ExitAnimation()
@@ -1544,7 +1554,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         scalePoint.type);
     if (scalePoint.type == TouchType::DOWN) {
         LOGD("receive touch down event, first use touch test to collect touch event target");
+        eventManager_->HandleGlobalEvent(scalePoint, textOverlayManager_);
         TouchRestrict touchRestrict { TouchRestrict::NONE };
+        touchRestrict.sourceType = point.sourceType;
         auto frontEnd = GetFrontend();
         if (frontEnd && (frontEnd->GetType() == FrontendType::JS_CARD)) {
             touchRestrict.UpdateForbiddenType(TouchRestrict::LONG_PRESS);
@@ -1624,6 +1636,10 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         }
     }
 
+    if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN && !isTabKeyPressed_) {
+        isTabKeyPressed_ = true;
+        FlushFocus();
+    }
     return eventManager_->DispatchKeyEvent(event, rootElement_);
 }
 
@@ -1641,6 +1657,10 @@ void PipelineContext::SetShortcutKey(const KeyEvent& event)
             MarkIsKeyboardA(true);
             if (subscribeCtrlA_) {
                 subscribeCtrlA_();
+            }
+        } else if (codeValue == static_cast<int32_t>(KeyCode::KEY_C)) {
+            if (textOverlayManager_) {
+                textOverlayManager_->HandleCtrlC();
             }
         }
     } else if (event.action == KeyAction::UP) {
@@ -1835,7 +1855,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-        rsUIDirector_->SetTimeStamp(nanoTimestamp);
+        std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
+            ? AceApplicationInfo::GetInstance().GetPackageName()
+            : AceApplicationInfo::GetInstance().GetProcessName();
+        rsUIDirector_->SetTimeStamp(nanoTimestamp, abilityName);
     }
 #endif
     if (isSurfaceReady_) {
@@ -2365,16 +2388,6 @@ void PipelineContext::NotifyDispatchTouchEventDismiss(const TouchEvent& event) c
     }
 }
 
-void PipelineContext::NotifyDispatchMouseEventDismiss(const MouseEvent& event) const
-{
-    CHECK_RUN_ON(UI);
-    for (auto& iterDispatchMouseEventHander : dispatchMouseEventHandler_) {
-        if (iterDispatchMouseEventHander) {
-            iterDispatchMouseEventHander(event);
-        }
-    }
-}
-
 void PipelineContext::ShowFocusAnimation(
     const RRect& rrect, const Color& color, const Offset& offset, bool isIndented) const
 {
@@ -2467,6 +2480,7 @@ void PipelineContext::Destroy()
     nodesToNotifyOnPreDraw_.clear();
     nodesNeedDrawOnPixelMap_.clear();
     layoutTransitionNodeSet_.clear();
+    explicitAnimators_.clear();
     preTargetRenderNode_.Reset();
     imageCache_.Reset();
     fontManager_.Reset();
@@ -2752,6 +2766,8 @@ void PipelineContext::SetOnPageShow(OnPageShowCallBack&& onPageShowCallBack)
 void PipelineContext::OnPageShow()
 {
     CHECK_RUN_ON(UI);
+    isTabKeyPressed_ = false;
+    eventManager_->SetIsTabNodesCollected(false);
     if (onPageShowCallBack_) {
         onPageShowCallBack_();
     }
@@ -3315,6 +3331,20 @@ bool PipelineContext::Animate(const AnimationOption& option, const RefPtr<Curve>
     return CloseImplicitAnimation();
 }
 
+void PipelineContext::PrepareOpenImplicitAnimation()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!SystemProperties::GetRosenBackendEnabled()) {
+        LOGE("rosen backend is disabled");
+        return;
+    }
+
+    // initialize false for implicit animation layout pending flag
+    pendingImplicitLayout_.push(false);
+    FlushLayout();
+#endif
+}
+
 void PipelineContext::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
 {
@@ -3353,6 +3383,27 @@ void PipelineContext::OpenImplicitAnimation(
                                   option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
     timingProtocol.SetFillMode(static_cast<Rosen::FillMode>(option.GetFillMode()));
     RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), wrapFinishCallback);
+#endif
+}
+
+void PipelineContext::PrepareCloseImplicitAnimation()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!SystemProperties::GetRosenBackendEnabled()) {
+        LOGE("rosen backend is disabled!");
+        return;
+    }
+
+    if (pendingImplicitLayout_.empty()) {
+        LOGE("close implicit animation failed, need to open implicit animation first!");
+        return;
+    }
+
+    // layout the views immediately to animate all related views, if layout updates are pending in the animation closure
+    if (pendingImplicitLayout_.top()) {
+        FlushLayout();
+    }
+    pendingImplicitLayout_.pop();
 #endif
 }
 

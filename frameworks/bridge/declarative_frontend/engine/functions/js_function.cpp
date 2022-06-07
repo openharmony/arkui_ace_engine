@@ -75,14 +75,10 @@ void JsFunction::Execute(const std::vector<std::string>& keys, const std::string
     JsFunction::ExecuteJS(1, &paramObj);
 }
 
-void JsFunction::ExecuteNew(const std::vector<std::string>& keys, const std::string& param,
-    RefPtr<JSXComponentController>& jsXComponentController)
+void JsFunction::ExecuteNew(const std::vector<std::string>& keys, const std::string& param)
 {
     JSRef<JSVal> jsVal;
     XComponentClient::GetInstance().GetJSVal(jsVal);
-    if (jsXComponentController) {
-        jsXComponentController->SetXComponentContext(jsVal);
-    }
     JsFunction::ExecuteJS(1, &jsVal);
 }
 

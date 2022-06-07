@@ -137,6 +137,7 @@ protected:
 
     std::tuple<const Matrix4, float, float> GetRawTransformInfo();
     const Matrix4 GetTransformMatrix4();
+    const Matrix4 GetTransformMatrix4Raw(); // for directly paint
     const Matrix4 UpdateTransformMatrix4();
 
     void AddComponentHrefToRoot(const std::string& id, const RefPtr<Component>& component);

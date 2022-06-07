@@ -31,6 +31,7 @@
 namespace OHOS::Ace {
 
 class WebDelegate;
+using OnMouseCallback = std::function<void(MouseInfo& info)>;
 
 enum MixedModeContent {
     MIXED_CONTENT_ALWAYS_ALLOW = 0,
@@ -57,14 +58,31 @@ class WebCookie : public virtual AceType {
     DECLARE_ACE_TYPE(WebCookie, AceType);
 
 public:
-    using SetCookieImpl = std::function<bool(const std::string, const std::string)>;
+    using SetCookieImpl = std::function<bool(const std::string&, const std::string&)>;
+    using GetCookieImpl = std::function<std::string(const std::string&)>;
+    using DeleteEntirelyCookieImpl = std::function<void()>;
     using SaveCookieSyncImpl = std::function<bool()>;
-    bool SetCookie(const std::string url, const std::string value)
+    bool SetCookie(const std::string& url, const std::string& value)
     {
         if (setCookieImpl_) {
             return setCookieImpl_(url, value);
         }
         return false;
+    }
+
+    std::string GetCookie(const std::string& url)
+    {
+        if (getCookieImpl_) {
+            return getCookieImpl_(url);
+        }
+        return "";
+    }
+
+    void DeleteEntirelyCookie()
+    {
+        if (deleteEntirelyCookieImpl_) {
+            deleteEntirelyCookieImpl_();
+        }
     }
 
     bool SaveCookieSync()
@@ -75,18 +93,30 @@ public:
         return false;
     }
 
-    void SetSetCookieImpl(SetCookieImpl && setCookieImpl)
+    void SetSetCookieImpl(SetCookieImpl&& setCookieImpl)
     {
         setCookieImpl_ = setCookieImpl;
     }
 
-    void SetSaveCookieSyncImpl(SaveCookieSyncImpl && saveCookieSyncImpl)
+    void SetGetCookieImpl(GetCookieImpl&& getCookieImpl)
+    {
+        getCookieImpl_ = getCookieImpl;
+    }
+
+    void SetDeleteEntirelyCookieImpl(DeleteEntirelyCookieImpl&& deleteEntirelyCookieImpl)
+    {
+        deleteEntirelyCookieImpl_ = deleteEntirelyCookieImpl;
+    }
+
+    void SetSaveCookieSyncImpl(SaveCookieSyncImpl&& saveCookieSyncImpl)
     {
         saveCookieSyncImpl_ = saveCookieSyncImpl;
     }
 
 private:
     SetCookieImpl setCookieImpl_;
+    GetCookieImpl getCookieImpl_;
+    DeleteEntirelyCookieImpl deleteEntirelyCookieImpl_;
     SaveCookieSyncImpl saveCookieSyncImpl_;
 };
 
@@ -98,6 +128,7 @@ public:
     using AccessBackwardImpl = std::function<bool()>;
     using AccessForwardImpl = std::function<bool()>;
     using AccessStepImpl = std::function<bool(int32_t)>;
+    using BackOrForwardImpl = std::function<void(int32_t)>;
     using BackwardImpl = std::function<void()>;
     using ForwardImpl = std::function<void()>;
     using ClearHistoryImpl = std::function<void()>;
@@ -114,6 +145,13 @@ public:
             return accessStepImpl_(step);
         }
         return false;
+    }
+
+    void BackOrForward(int32_t step)
+    {
+        if (backOrForwardImpl_) {
+            return backOrForwardImpl_(step);
+        }
     }
 
     bool AccessBackward()
@@ -174,6 +212,11 @@ public:
     void SetAccessStepImpl(AccessStepImpl && accessStepImpl)
     {
         accessStepImpl_ = std::move(accessStepImpl);
+    }
+
+    void SetBackOrForwardImpl(BackOrForwardImpl && backOrForwardImpl)
+    {
+        backOrForwardImpl_ = std::move(backOrForwardImpl);
     }
 
     void SetBackwardImpl(BackwardImpl && backwardImpl)
@@ -264,22 +307,37 @@ public:
         }
     }
 
-    void SetZoomImpl(ZoomImpl && zoomImpl)
+    void SetZoomImpl(ZoomImpl&& zoomImpl)
     {
         zoomImpl_ = std::move(zoomImpl);
     }
 
-    using OnFocusImpl = std::function<void()>;
-    void OnFocus() const
+    using ZoomInImpl = std::function<bool()>;
+    bool ZoomIn() const
     {
-        if (onFocusImpl_) {
-            onFocusImpl_();
+        if (zoomInImpl_) {
+            return zoomInImpl_();
         }
+        return false;
     }
 
-    void SetOnFocusImpl(OnFocusImpl && onFocusImpl)
+    void SetZoomInImpl(ZoomInImpl&& zoomInImpl)
     {
-        onFocusImpl_ = std::move(onFocusImpl);
+        zoomInImpl_ = std::move(zoomInImpl);
+    }
+
+    using ZoomOutImpl = std::function<bool()>;
+    bool ZoomOut() const
+    {
+        if (zoomOutImpl_) {
+            return zoomOutImpl_();
+        }
+        return false;
+    }
+
+    void SetZoomOutImpl(ZoomOutImpl&& zoomOutImpl)
+    {
+        zoomOutImpl_ = std::move(zoomOutImpl);
     }
 
     using RefreshImpl = std::function<void()>;
@@ -331,20 +389,86 @@ public:
         cookieManager_ = new WebCookie();
         cookieManager_->SetSaveCookieSyncImpl(std::move(saveCookieSyncImpl_));
         cookieManager_->SetSetCookieImpl(std::move(setCookieImpl_));
+        cookieManager_->SetGetCookieImpl(std::move(getCookieImpl_));
+        cookieManager_->SetDeleteEntirelyCookieImpl(std::move(deleteEntirelyCookieImpl_));
         return cookieManager_;
     }
 
-    using SetCookieImpl = std::function<bool(const std::string, const std::string)>;
-    bool SetCookie(const std::string url, const std::string value)
+    using GetPageHeightImpl = std::function<int()>;
+    int GetPageHeight()
+    {
+        if (getPageHeightImpl_) {
+            return getPageHeightImpl_();
+        }
+        return 0;
+    }
+    void SetGetPageHeightImpl(GetPageHeightImpl&& getPageHeightImpl)
+    {
+        getPageHeightImpl_ = getPageHeightImpl;
+    }
+
+    using GetWebIdImpl = std::function<int()>;
+    int GetWebId()
+    {
+        if (getWebIdImpl_) {
+            return getWebIdImpl_();
+        }
+        return -1;
+    }
+    void SetGetWebIdImpl(GetWebIdImpl&& getWebIdImpl)
+    {
+        getWebIdImpl_ = getWebIdImpl;
+    }
+
+    using GetTitleImpl = std::function<std::string()>;
+    std::string GetTitle()
+    {
+        if (getTitleImpl_) {
+            return getTitleImpl_();
+        }
+        return "";
+    }
+    void SetGetTitleImpl(GetTitleImpl&& getTitleImpl)
+    {
+        getTitleImpl_ = getTitleImpl;
+    }
+
+    using SetCookieImpl = std::function<bool(const std::string&, const std::string&)>;
+    bool SetCookie(const std::string& url, const std::string& value)
     {
         if (setCookieImpl_) {
             return setCookieImpl_(url, value);
         }
         return false;
     }
-    void SetSetCookieImpl(SetCookieImpl && setCookieImpl)
+    void SetSetCookieImpl(SetCookieImpl&& setCookieImpl)
     {
         setCookieImpl_ = setCookieImpl;
+    }
+
+    using GetCookieImpl = std::function<std::string(const std::string&)>;
+    std::string GetCookie(const std::string& url)
+    {
+        if (getCookieImpl_) {
+            return getCookieImpl_(url);
+        }
+        return "";
+    }
+    void SetGetCookieImpl(GetCookieImpl&& getCookieImpl)
+    {
+        getCookieImpl_ = getCookieImpl;
+    }
+
+    using DeleteEntirelyCookieImpl = std::function<void()>;
+    void DeleteEntirelyCookie()
+    {
+        if (deleteEntirelyCookieImpl_) {
+            deleteEntirelyCookieImpl_();
+        }
+    }
+    void SetDeleteEntirelyCookieImpl(DeleteEntirelyCookieImpl&& deleteEntirelyCookieImpl)
+    {
+        deleteEntirelyCookieImpl_ = deleteEntirelyCookieImpl;
     }
 
     using SaveCookieSyncImpl = std::function<bool()>;
@@ -355,7 +479,7 @@ public:
         }
         return false;
     }
-    void SetSaveCookieSyncImpl(SaveCookieSyncImpl && saveCookieSyncImpl)
+    void SetSaveCookieSyncImpl(SaveCookieSyncImpl&& saveCookieSyncImpl)
     {
         saveCookieSyncImpl_ = saveCookieSyncImpl;
     }
@@ -431,6 +555,7 @@ private:
     AccessBackwardImpl accessBackwardImpl_;
     AccessForwardImpl accessForwardImpl_;
     AccessStepImpl accessStepImpl_;
+    BackOrForwardImpl backOrForwardImpl_;
     BackwardImpl backwardImpl_;
     ForwardImpl forwardimpl_;
     ClearHistoryImpl clearHistoryImpl_;
@@ -438,15 +563,21 @@ private:
     ExecuteTypeScriptImpl executeTypeScriptImpl_;
     OnInactiveImpl onInactiveImpl_;
     OnActiveImpl onActiveImpl_;
-    OnFocusImpl onFocusImpl_;
     ZoomImpl zoomImpl_;
+    ZoomInImpl zoomInImpl_;
+    ZoomOutImpl zoomOutImpl_;
     LoadDataWithBaseUrlImpl loadDataWithBaseUrlImpl_;
     InitJavascriptInterface initJavascriptInterface_;
     RefreshImpl refreshImpl_;
     StopLoadingImpl stopLoadingImpl_;
     GetHitTestResultImpl getHitTestResultImpl_;
+    GetPageHeightImpl getPageHeightImpl_;
+    GetWebIdImpl getWebIdImpl_;
+    GetTitleImpl getTitleImpl_;
     SaveCookieSyncImpl saveCookieSyncImpl_;
     SetCookieImpl setCookieImpl_;
+    GetCookieImpl getCookieImpl_;
+    DeleteEntirelyCookieImpl deleteEntirelyCookieImpl_;
     AddJavascriptInterfaceImpl addJavascriptInterfaceImpl_;
     RemoveJavascriptInterfaceImpl removeJavascriptInterfaceImpl_;
     WebViewJavaScriptResultCallBackImpl webViewJavaScriptResultCallBackImpl_;
@@ -581,16 +712,6 @@ public:
         return declaration_->GetDownloadStartEventId();
     }
 
-    void SetOnFocusEventId(const EventMarker& onFocusEventId)
-    {
-        declaration_->SetOnFocusEventId(onFocusEventId);
-    }
-
-    const EventMarker& GetOnFocusEventId() const
-    {
-        return declaration_->GetOnFocusEventId();
-    }
-
     void SetPageErrorEventId(const EventMarker& pageErrorEventId)
     {
         declaration_->SetPageErrorEventId(pageErrorEventId);
@@ -639,6 +760,26 @@ public:
     const EventMarker& GetRefreshAccessedHistoryId() const
     {
         return declaration_->GetRefreshAccessedHistoryId();
+    }
+
+    void SetResourceLoadId(const EventMarker& resourceLoadId)
+    {
+        declaration_->SetResourceLoadId(resourceLoadId);
+    }
+
+    const EventMarker& GetResourceLoadId() const
+    {
+        return declaration_->GetResourceLoadId();
+    }
+
+    void SetScaleChangeId(const EventMarker& scaleChangeId)
+    {
+        declaration_->SetScaleChangeId(scaleChangeId);
+    }
+
+    const EventMarker& GetScaleChangeId() const
+    {
+        return declaration_->GetScaleChangeId();
     }
 
     void SetDeclaration(const RefPtr<WebDeclaration>& declaration)
@@ -775,7 +916,7 @@ public:
         isOverviewModeAccessEnabled_ = isEnabled;
     }
 
-    bool GetFileFromUrlAccessEnabled()
+    bool GetFileFromUrlAccessEnabled() const
     {
         return isFileFromUrlAccessEnabled_;
     }
@@ -785,7 +926,7 @@ public:
         isFileFromUrlAccessEnabled_ = isEnabled;
     }
 
-    bool GetDatabaseAccessEnabled()
+    bool GetDatabaseAccessEnabled() const
     {
         return isDatabaseAccessEnabled_;
     }
@@ -795,7 +936,49 @@ public:
         isDatabaseAccessEnabled_ = isEnabled;
     }
 
-    int32_t GetTextZoomAtio()
+    bool GetWebDebuggingAccessEnabled() const
+    {
+        return isWebDebuggingAccessEnabled_;
+    }
+
+    void SetWebDebuggingAccessEnabled(bool isEnabled)
+    {
+        isWebDebuggingAccessEnabled_ = isEnabled;
+    }
+
+    bool GetIsInitialScaleSet() const
+    {
+        return isInitialScaleSet_;
+    }
+
+    float GetInitialScale() const
+    {
+        return initialScale_;
+    }
+
+    void SetInitialScale(float scale)
+    {
+        initialScale_ = scale;
+        isInitialScaleSet_ = true;
+    }
+
+    bool GetBackgroundColorEnabled() const
+    {
+        return isBackgroundColor_;
+    }
+
+    int32_t GetBackgroundColor() const
+    {
+        return backgroundColor_;
+    }
+
+    void SetBackgroundColor(int32_t backgroundColor)
+    {
+        backgroundColor_ = backgroundColor;
+        isBackgroundColor_ = true;
+    }
+
+    int32_t GetTextZoomAtio() const
     {
         return textZoomAtioNum_;
     }
@@ -894,6 +1077,16 @@ public:
         onUrlLoadInterceptImpl_ = onUrlLoadInterceptImpl;
     }
 
+    void SetOnMouseEventCallback(const OnMouseCallback& onMouseId)
+    {
+        onMouseEvent_ = onMouseId;
+    }
+
+    OnMouseCallback GetOnMouseEventCallback() const
+    {
+        return onMouseEvent_;
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -925,6 +1118,12 @@ private:
     bool isDatabaseAccessEnabled_ = false;
     int32_t textZoomAtioNum_ = default_text_zoom_atio;
     WebCacheMode cacheMode_ = WebCacheMode::DEFAULT;
+    bool isWebDebuggingAccessEnabled_ = false;
+    OnMouseCallback onMouseEvent_;
+    float initialScale_;
+    bool isInitialScaleSet_ = false;
+    int32_t backgroundColor_;
+    bool isBackgroundColor_ = false;
 };
 
 } // namespace OHOS::Ace

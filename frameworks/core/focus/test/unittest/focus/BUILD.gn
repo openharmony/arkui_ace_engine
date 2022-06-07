@@ -78,7 +78,7 @@ ohos_unittest("FocusTest") {
   ]
 
   deps = [
-    "$ace_root/build/external_config/cJSON:third_party_cjson",
+    "$cjson_root:cjson_static",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]

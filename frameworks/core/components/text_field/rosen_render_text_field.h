@@ -113,8 +113,10 @@ private:
     void PaintTextAndPlaceholder(SkCanvas* canvas) const;
     void PaintErrorText(SkCanvas* canvas) const;
     void PaintCountText(SkCanvas* canvas) const;
-    void PaintOverlayForHoverAndPress(SkCanvas* canvas) const;
+    void PaintOverlayForHoverAndPress(const Offset& offset, SkCanvas* canvas) const;
     void PaintTextField(const Offset& offset, RenderContext& context, SkCanvas* canvas, bool isMagnifier = false);
+    SkVector GetSkRadii(const Radius& radius) const;
+    void PaintFocus(const Offset& offset, const Size& widthHeight, RenderContext& context);
 
     std::unique_ptr<txt::Paragraph> paragraph_;
     std::unique_ptr<txt::Paragraph> errorParagraph_;

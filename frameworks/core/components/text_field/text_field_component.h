@@ -29,6 +29,7 @@
 #include "core/components/declaration/textfield/textfield_declaration.h"
 #include "core/components/image/image_component.h"
 #include "core/components/text_field/text_field_controller.h"
+#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/base/render_component.h"
 #include "frameworks/bridge/common/dom/dom_input.h"
@@ -215,6 +216,9 @@ public:
     void SetOverCountStyleOuter(const TextStyle& overCountStyleOuter);
     const TextStyle& GetOverCountStyleOuter() const;
 
+    void SetHoverAnimationType(HoverAnimationType animationType);
+    HoverAnimationType GetHoverAnimationType() const;
+
     const TextSelection& GetSelection() const;
     void SetSelectedStart(int32_t selectedStart);
     void SetSelectedEnd(int32_t selectedEnd);
@@ -283,6 +287,8 @@ public:
     ACE_DEFINE_COMPONENT_EVENT(OnPaste, void(std::string));
 
     ACE_DEFINE_COMPONENT_EVENT(OnClick, void(const ClickInfo& clickInfo));
+
+    ACE_DEFINE_COMPONENT_PROP(CopyOption, CopyOption, CopyOption::Distributed);
 
 private:
     RefPtr<TextFieldDeclaration> declaration_;

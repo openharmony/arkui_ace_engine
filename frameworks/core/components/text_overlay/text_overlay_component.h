@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_OVERLAY_TEXT_OVERLAY_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_OVERLAY_TEXT_OVERLAY_COMPONENT_H
 
+#include "base/memory/referenced.h"
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
 #include "core/components/menu/menu_component.h"
@@ -59,6 +60,9 @@ public:
 
     void SetWeakTextField(const WeakPtr<RenderTextField>& weakTextField);
     const WeakPtr<RenderTextField>& GetWeakTextField() const;
+
+    void SetWeakText(const WeakPtr<RenderText>& weakText);
+    const WeakPtr<RenderText>& GetWeakText() const;
 
     bool HasMoreButton() const;
 
@@ -147,12 +151,32 @@ public:
     void SetShowOption(const TweenOption& tweenOption);
     void SetHideOption(const TweenOption& tweenOption);
 
+    void BuildMenuForDeclative(bool isSingleHandle);
+    void AddOptionForMenu();
+
+    void FirePopOverlay()
+    {
+        if (popOverlay_) {
+            popOverlay_();
+        }
+    }
+
     const RefPtr<SelectPopupComponent>& GetMenu() const;
+
+    void SetIsUsingMouse(bool isUsingMouse)
+    {
+        isUsingMouse_ = isUsingMouse;
+    }
+
+    bool GetIsUsingMouse() const
+    {
+        return isUsingMouse_;
+    }
 
 private:
     RefPtr<ButtonComponent> BuildButton(const std::string& data, const EventMarker& onClick);
     RefPtr<ButtonComponent> BuildMoreIconButton(bool hasMenu);
-    RefPtr<Component> BuildMenu();
+    RefPtr<Component> BuildMenu(bool isSingleHandle = false);
     RefPtr<OptionComponent> BuildMenuOption(const std::string& imageSrc, InternalResource::ResourceId resourceId,
         const std::string& text, bool useResource);
     RefPtr<Component> BuildAnimation(const RefPtr<Component>& child, bool hasAnimation);
@@ -162,6 +186,7 @@ private:
 
     WeakPtr<PipelineContext> context_;
     WeakPtr<RenderTextField> weakTextField_;
+    WeakPtr<RenderText> weakText_;
     RefPtr<TextOverlayTheme> theme_;
     RefPtr<SelectPopupComponent> menu_;
     RefPtr<ThemeManager> themeManager_;
@@ -204,6 +229,7 @@ private:
     EventMarker moreButtonMarker_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
 
     std::vector<InputOption> options_; // Options for menu.
+    bool isUsingMouse_ = false;
 };
 
 } // namespace OHOS::Ace

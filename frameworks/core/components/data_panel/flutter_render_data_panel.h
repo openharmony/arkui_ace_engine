@@ -54,10 +54,10 @@ class FlutterRenderPercentageDataPanel : public RenderPercentageDataPanel {
 public:
     void Paint(RenderContext& context, const Offset& offset) override;
     void PaintLinearProgress(RenderContext& context, const Offset& offset);
-    void PaintColorSegment(RenderContext& context, const Offset& leftTop, double segmentValue, double widthSegment,
-        double height, const Color segmentStartColor, const Color segmentEndColor, bool isFull, bool isStart);
-    void PaintSpace(RenderContext& context, const Offset& leftTop, double spaceWidth, double xSpace, double height);
-    void PaintBackground(RenderContext& context, const Offset& leftTop, double totalWidth, double height);
+    void PaintColorSegment(const ScopedCanvas& canvas, const Offset& leftTop, double segmentValue, double widthSegment,
+        double height, const Color& segmentStartColor, const Color& segmentEndColor);
+    void PaintSpace(const ScopedCanvas& canvas, const Offset& leftTop, double spaceWidth, double xSpace, double height);
+    void PaintBackground(const ScopedCanvas& canvas, const Offset& leftTop, double totalWidth, double height);
 };
 
 } // namespace OHOS::Ace

@@ -29,67 +29,6 @@
 #include "core/pipeline/layers/flutter_scene_builder.h"
 
 namespace OHOS::Ace::Platform {
-namespace {
-constexpr int32_t DEFAULT_ACTION_ID = 0;
-
-TouchPoint ConvertTouchPoint(flutter::PointerData* pointerItem)
-{
-    TouchPoint touchPoint;
-    // just get the max of width and height
-    touchPoint.size = pointerItem->size; 
-    touchPoint.id = pointerItem->device;
-    touchPoint.force = pointerItem->pressure;
-    touchPoint.x = pointerItem->physical_x;
-    touchPoint.y = pointerItem->physical_y;
-    touchPoint.screenX = pointerItem->physical_x;
-    touchPoint.screenY = pointerItem->physical_y;
-    return touchPoint;
-}
-
-void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>& events)
-{
-    const auto* origin = reinterpret_cast<const flutter::PointerData*>(data.data());
-    size_t size = data.size() / sizeof(flutter::PointerData);
-    auto current = const_cast<flutter::PointerData*>(origin);
-    auto end = current + size;
-
-    while (current < end) {
-        std::chrono::microseconds micros(current->time_stamp);
-        TimeStamp time(micros);
-        TouchEvent point {
-            static_cast<int32_t>(DEFAULT_ACTION_ID), static_cast<float>(current->physical_x),
-            static_cast<float>(current->physical_y), static_cast<float>(current->physical_x),
-            static_cast<float>(current->physical_y), TouchType::UNKNOWN, time, current->size,
-            static_cast<float>(current->pressure), static_cast<int64_t>(current->device)
-        };
-        point.pointers.emplace_back(ConvertTouchPoint(current));
-        switch (current->change) {
-            case flutter::PointerData::Change::kCancel:
-                point.type = TouchType::CANCEL;
-                events.push_back(point);
-                break;
-            case flutter::PointerData::Change::kAdd:
-            case flutter::PointerData::Change::kRemove:
-            case flutter::PointerData::Change::kHover:
-                break;
-            case flutter::PointerData::Change::kDown:
-                point.type = TouchType::DOWN;
-                events.push_back(point);
-                break;
-            case flutter::PointerData::Change::kMove:
-                point.type = TouchType::MOVE;
-                events.push_back(point);
-                break;
-            case flutter::PointerData::Change::kUp:
-                point.type = TouchType::UP;
-                events.push_back(point);
-                break;
-        }
-        current++;
-    }
-}
-
-} // namespace
 
 void FlutterAceView::RegisterTouchEventCallback(TouchEventCallback&& callback)
 {
@@ -135,24 +74,6 @@ void FlutterAceView::ProcessIdleEvent(int64_t deadline)
     if (idleCallback_) {
         idleCallback_(deadline);
     }
-}
-
-bool FlutterAceView::HandleTouchEvent(const std::vector<uint8_t>& data)
-{
-    std::vector<TouchEvent> touchEvents;
-    ConvertTouchEvent(data, touchEvents);
-    for (const auto& point : touchEvents) {
-        LOGD("HandleTouchEvent point.x: %lf, point.y: %lf, point.size: %lf", point.x, point.y, point.size);
-        if (point.type == TouchType::UNKNOWN) {
-            LOGW("Unknown event.");
-            continue;
-        }
-        if (touchEventCallback_) {
-            touchEventCallback_(point);
-        }
-    }
-
-    return true;
 }
 
 bool FlutterAceView::HandleTouchEvent(const TouchEvent& touchEvent)

@@ -22,41 +22,10 @@ namespace OHOS::Ace {
 
 namespace {
 
-constexpr double DEFAULT_SPLIT_RESPOND_WIDTH = 25.0;
 constexpr size_t DEFAULT_DRAG_INDEX = -1;
 
 } // namespace
 
-void RenderColumnSplit::LayoutChildren()
-{
-    splitRects_.clear();
-    if (dragSplitOffset_.size() == 0) {
-        dragSplitOffset_ = std::vector<double>(GetChildren().size(), 0.0);
-    }
-    Size maxSize = GetLayoutParam().GetMaxSize();
-    layoutWidth_ = maxSize.Width();
-    layoutHeight_ = 0.0;
-    size_t index = 0;
-    double childOffsetY = 0.0;
-    for (const auto& item : GetChildren()) {
-        Offset offset = Offset(0, childOffsetY);
-        item->Layout(GetLayoutParam());
-        item->SetPosition(offset);
-
-        // calc drag offset
-        childOffsetY += item->GetLayoutSize().Height();
-        layoutHeight_ += item->GetLayoutSize().Height();
-        if (dragSplitOffset_[index] > 0) {
-            childOffsetY += dragSplitOffset_[index];
-        }
-        double posY = childOffsetY > DEFAULT_SPLIT_RESPOND_WIDTH ? (childOffsetY - DEFAULT_SPLIT_RESPOND_WIDTH) : 0.0;
-        splitRects_.push_back(Rect(0, posY, maxSize.Width(), 2 * DEFAULT_SPLIT_RESPOND_WIDTH + DEFAULT_SPLIT_HEIGHT));
-        childOffsetY += DEFAULT_SPLIT_HEIGHT;
-        layoutHeight_ += DEFAULT_SPLIT_HEIGHT;
-        index++;
-    }
-    layoutHeight_ -= DEFAULT_SPLIT_HEIGHT;
-}
 
 void RenderColumnSplit::HandleDragStart(const Offset& startPoint)
 {

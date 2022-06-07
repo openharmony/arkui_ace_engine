@@ -52,8 +52,16 @@ if (!defined(aosp_libs_dir)) {
 }
 libs_root = "${aosp_libs_dir}/sdk"
 
-ace_flutter_engine_root = "$ace_root/build/external_config/flutter"
+aafwk_inner_api_path =
+    "//foundation/ability/ability_runtime/interfaces/inner_api"
+aafwk_inner_kits_path = "//foundation/ability/ability_runtime/interfaces/kits"
+aafwk_kits_path = "//foundation/ability/ability_runtime/frameworks/kits"
+aafwk_services_path = "//foundation/ability/ability_runtime/services"
 flutter_root = "//third_party/flutter"
+ace_flutter_engine_root = "$flutter_root/build"
+expat_root = "//third_party/expat"
+cjson_root = "//third_party/cJSON"
+jsoncpp_root = "//third_party/jsoncpp"
 v8_root = "//third_party/v8"
 ark_tools_root = "//prebuilts/ace-toolkit/ace-loader/panda"
 node_js_path = "//prebuilts/ace-toolkit/nodejs/node-v12.18.4-linux-x64/bin/"

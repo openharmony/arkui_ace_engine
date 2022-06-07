@@ -175,7 +175,8 @@ void RosenRenderTextOverlay::PaintMagnifier(RenderContext& context)
         SkRect::MakeXYWH(globalX, globalY, NormalizeToPx(MAGNIFIER_WIDTH), NormalizeToPx(MAGNIFIER_WIDTH)),
         NormalizeToPx(MAGNIFIER_WIDTH), NormalizeToPx(MAGNIFIER_WIDTH));
 
-    RosenDecorationPainter::PaintShadow(SkPath().addRRect(rrect), ShadowConfig::DefaultShadowM, canvas);
+    RosenDecorationPainter::PaintShadow(SkPath().addRRect(rrect),
+        ShadowConfig::DefaultShadowM, static_cast<RosenRenderContext*>(&context)->GetRSNode());
 
     SkRRect ScaleRrect =
         SkRRect::MakeRectXY(SkRect::MakeXYWH(globalX * viewScale, globalY * viewScale,
@@ -251,17 +252,14 @@ bool RosenRenderTextOverlay::CheckNeedPaintMore()
 {
     auto overlay = overlayComponent_.Upgrade();
     if (overlay && !overlay->HasMoreButton()) {
-        LOGD("not has a more button");
         return false;
     }
 
     if (isDragging_) {
-        LOGD("handle is in dragging");
         return false;
     }
 
     if (hasPoped_ || GetChildren().empty()) {
-        LOGD("overlay has been poped");
         RestoreMoreButtonStyle();
         return false;
     }

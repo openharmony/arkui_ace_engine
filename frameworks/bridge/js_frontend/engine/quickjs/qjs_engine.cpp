@@ -2537,8 +2537,8 @@ JSValue AppClearData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCo
     if ((argv == nullptr) || (argc == 0)) {
         if (dataMap_.size() > 0) {
             dataMap_.clear();
-            return JS_TRUE;
         }
+        return JS_TRUE;
     }
     if (dataMap_.count(ScopedString::Stringify(ctx, argv[0])) == 1) {
         dataMap_.erase(ScopedString::Stringify(ctx, argv[0]));
@@ -3844,6 +3844,9 @@ void QjsEngine::FireSyncEvent(const std::string& eventId, const std::string& par
 void QjsEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     ACE_DCHECK(engineInstance_);
+    if (isDestroy) {
+        return;
+    }
     auto context = engineInstance_->GetQjsContext();
 
     auto page = engineInstance_->GetRunningPage();

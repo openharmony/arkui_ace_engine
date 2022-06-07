@@ -136,9 +136,6 @@ public:
         }
     }
 
-    // Use to receive event from glfw window
-    bool HandleTouchEvent(const std::vector<uint8_t>& data) override;
-
     // Use to receive event from pc previewer
     bool HandleTouchEvent(const TouchEvent& touchEvent) override;
 

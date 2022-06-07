@@ -23,9 +23,13 @@
 #include "native_engine/native_engine.h"
 #endif
 
-namespace OHOS::Ace::Framework {
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+namespace OHOS::Rosen {
+class RSSurfaceNode;
+}
+namespace OHOS::Ace::Framework {
     RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj);
-#endif
+    const std::shared_ptr<Rosen::RSSurfaceNode> CreateRSSurfaceNodeFromNapiValue(JSRef<JSVal> obj);
 } // namespace OHOS::Ace::Framework
+#endif
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UTILS_H

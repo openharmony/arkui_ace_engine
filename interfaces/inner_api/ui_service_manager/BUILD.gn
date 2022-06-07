@@ -12,28 +12,27 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/aafwk/standard/aafwk.gni")
+import("//foundation/ability/ability_runtime/aafwk.gni")
 
 config("uiservice_manager_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "include/",
-    "//utils/native/base/include",
-    "//utils/system/safwk/native/include",
-    "//foundation/aafwk/standard/frameworks/kits/ability/native/include",
-    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include/",
-    "//foundation/aafwk/standard/services/uiservicemgr/include",
-    "${innerkits_path}/want/include",
-    "//foundation/graphic/standard/rosen/modules/render_service_client/core",
-    "//foundation/graphic/standard/interfaces/innerkits/surface",
-    "//foundation/graphic/standard/interfaces/innerkits/common",
-    "//foundation/graphic/standard/utils/buffer_handle/export",
-    "//foundation/graphic/standard/rosen/modules/render_service_base/include",
     "//drivers/peripheral/base",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client/core",
+    "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
+    "//foundation/graphic/graphic_2d/interfaces/innerkits/common",
+    "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
+    "$innerkits_path/ability_manager/include/",
+    "$kits_path/ability/native/include",
+    "$services_path/uiservicemgr/include",
     "//third_party/icu/icu4c/source/common",
     "//third_party/icu/icu4c/source/i18n",
     "//third_party/icu/icu4c/source/ohos",
     "//third_party/icu/icu4c/source",
+    "//utils/native/base/include",
+    "//utils/system/safwk/native/include",
   ]
   cflags = []
   if (target_cpu == "arm") {
@@ -59,7 +58,6 @@ ohos_shared_library("ui_service_mgr") {
   ]
 
   deps = [
-    "${innerkits_path}/want:want",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
@@ -69,6 +67,7 @@ ohos_shared_library("ui_service_mgr") {
   ]
 
   external_deps = [
+    "ability_base:want",
     "ability_runtime:ability_manager",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",

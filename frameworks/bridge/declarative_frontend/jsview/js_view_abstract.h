@@ -100,17 +100,17 @@ public:
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
-    static void ParseBorderColor(std::unique_ptr<JsonValue>& args);
+    static void ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoration> decoration = nullptr);
     static void JsPadding(const JSCallbackInfo& info);
     static void JsMargin(const JSCallbackInfo& info);
     static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderWidth(const JSCallbackInfo& info);
-    static void ParseBorderWidth(std::unique_ptr<JsonValue>& args);
+    static void ParseBorderWidth(const JSRef<JSVal>& args, RefPtr<Decoration> decoration = nullptr);
     static void JsBorderRadius(const JSCallbackInfo& info);
-    static void ParseBorderRadius(std::unique_ptr<JsonValue>& args);
+    static void ParseBorderRadius(const JSRef<JSVal>& args, RefPtr<Decoration> decoration = nullptr);
     static void JsBorderStyle(const JSCallbackInfo& info);
-    static void ParseBorderStyle(std::unique_ptr<JsonValue>& args);
+    static void ParseBorderStyle(const JSRef<JSVal>& args, RefPtr<Decoration> decoration = nullptr);
     static void JsBlur(const JSCallbackInfo& info);
     static void JsColorBlend(const JSCallbackInfo& info);
     static void JsBackdropBlur(const JSCallbackInfo& info);
@@ -174,8 +174,9 @@ public:
     static void JsAspectRatio(const JSCallbackInfo& info);
     static void JsOverlay(const JSCallbackInfo& info);
     static Alignment ParseAlignment(int32_t align);
+    static void JsAlignRules(const JSCallbackInfo& info);
 
-    static void SetVisibility(int value);
+    static void SetVisibility(const JSCallbackInfo& info);
     static void Pop();
 
     static void JsOnDragStart(const JSCallbackInfo& info);
@@ -209,6 +210,7 @@ public:
     static void JsOnFocusMove(const JSCallbackInfo& args);
     static void JsOnFocus(const JSCallbackInfo& args);
     static void JsOnBlur(const JSCallbackInfo& args);
+    static void JsTabIndex(const JSCallbackInfo& info);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     static void JsDebugLine(const JSCallbackInfo& info);
 #endif

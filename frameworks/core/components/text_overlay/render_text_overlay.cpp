@@ -15,6 +15,8 @@
 
 #include "core/components/text_overlay/render_text_overlay.h"
 
+#include "base/geometry/rect.h"
+#include "core/animation/scheduler.h"
 #include "core/components/focus_collaboration/render_focus_collaboration.h"
 #include "core/components/stack/stack_element.h"
 
@@ -149,15 +151,17 @@ void RenderTextOverlay::Update(const RefPtr<Component>& component)
     clipRect_ = overlay->GetClipRect();
     textDirection_ = overlay->GetTextDirection();
     realTextDirection_ = overlay->GetRealTextDirection();
+    isUsingMouse_ = overlay->GetIsUsingMouse();
     BindBackendEvent(overlay);
     UpdateWeakTextField(overlay);
+    UpdateWeakText(overlay);
     MarkNeedLayout();
 }
 
 void RenderTextOverlay::BindBackendEvent(const RefPtr<TextOverlayComponent>& overlay)
 {
     auto context = context_.Upgrade();
-    if (context->GetIsDeclarative()) {
+    if (context && context->GetIsDeclarative() && !isUsingMouse_) {
         BindBackendEventV2(overlay);
     } else {
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
@@ -191,15 +195,14 @@ void RenderTextOverlay::BindBackendEvent(const RefPtr<TextOverlayComponent>& ove
                     overlay->HandleCopyAll();
                 }
             });
+        BackEndEventManager<void()>::GetInstance().BindBackendEvent(
+            overlay->GetMoreButtonMarker(), [weak = WeakClaim(this)]() {
+                auto overlay = weak.Upgrade();
+                if (overlay) {
+                    overlay->HandleMoreButtonClick();
+                }
+            });
     }
-
-    BackEndEventManager<void()>::GetInstance().BindBackendEvent(
-        overlay->GetMoreButtonMarker(), [weak = WeakClaim(this)]() {
-            auto overlay = weak.Upgrade();
-            if (overlay) {
-                overlay->HandleMoreButtonClick();
-            }
-        });
 }
 
 void RenderTextOverlay::BindBackendEventV2(const RefPtr<TextOverlayComponent>& overlay)
@@ -235,15 +238,36 @@ void RenderTextOverlay::BindBackendEventV2(const RefPtr<TextOverlayComponent>& o
                 overlay->HandleCopyAll();
             }
         });
+    BackEndEventManager<void(const ClickInfo& info)>::GetInstance().BindBackendEvent(
+        overlay->GetMoreButtonMarker(), [weak = WeakClaim(this)](const ClickInfo& info) {
+            auto overlay = weak.Upgrade();
+            if (overlay) {
+                overlay->HandleMoreButtonClick();
+            }
+        });
 }
 
 void RenderTextOverlay::RemoveBackendEvent(const RefPtr<TextOverlayComponent>& overlay)
 {
-    BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetCutButtonMarker());
-    BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetCopyButtonMarker());
-    BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetPasteButtonMarker());
-    BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetCopyAllButtonMarker());
-    BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetMoreButtonMarker());
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative() && !isUsingMouse_) {
+        BackEndEventManager<void(const ClickInfo& info)>::GetInstance().RemoveBackEndEvent(
+            overlay->GetCutButtonMarker());
+        BackEndEventManager<void(const ClickInfo& info)>::GetInstance().RemoveBackEndEvent(
+            overlay->GetCopyButtonMarker());
+        BackEndEventManager<void(const ClickInfo& info)>::GetInstance().RemoveBackEndEvent(
+            overlay->GetPasteButtonMarker());
+        BackEndEventManager<void(const ClickInfo& info)>::GetInstance().RemoveBackEndEvent(
+            overlay->GetCopyAllButtonMarker());
+        BackEndEventManager<void(const ClickInfo& info)>::GetInstance().RemoveBackEndEvent(
+            overlay->GetMoreButtonMarker());
+    } else {
+        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetCutButtonMarker());
+        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetCopyButtonMarker());
+        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetPasteButtonMarker());
+        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetCopyAllButtonMarker());
+        BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(overlay->GetMoreButtonMarker());
+    }
 }
 
 void RenderTextOverlay::UpdateWeakTextField(const RefPtr<TextOverlayComponent>& overlay)
@@ -347,6 +371,88 @@ void RenderTextOverlay::UpdateWeakTextField(const RefPtr<TextOverlayComponent>& 
     renderTextField->SetOnClipRectChanged(onClipRectChanged);
 }
 
+void RenderTextOverlay::UpdateWeakText(const RefPtr<TextOverlayComponent>& overlay)
+{
+    if (!overlay) {
+        return;
+    }
+    weakText_ = overlay->GetWeakText();
+    auto renderText = weakText_.Upgrade();
+    if (!renderText) {
+        return;
+    }
+    auto callback = [weak = WeakClaim(this)](const OverlayShowOption& option) {
+        auto overlay = weak.Upgrade();
+        if (!overlay) {
+            return;
+        }
+        if (option.updateOverlayType == UpdateOverlayType::CLICK ||
+            option.updateOverlayType == UpdateOverlayType::LONG_PRESS) {
+            overlay->childRightBoundary_ = 0.0;
+        }
+        overlay->SetVisible(true);
+        overlay->showOption_ = option;
+        overlay->startHandleOffset_ = option.startHandleOffset;
+        overlay->endHandleOffset_ = option.endHandleOffset;
+        overlay->isSingleHandle_ = option.isSingleHandle;
+        if (option.updateOverlayType == UpdateOverlayType::CLICK) {
+            if (overlay->onRebuild_) {
+                overlay->hasMenu_ = false;
+                overlay->onRebuild_(true, false, false, false, false);
+            }
+        } else if (option.updateOverlayType == UpdateOverlayType::LONG_PRESS) {
+            if (overlay->onRebuild_) {
+                overlay->hasMenu_ = false;
+                overlay->onRebuild_(false, true, false, true, false);
+            }
+        }
+    };
+    renderText->SetUpdateHandlePosition(callback);
+
+    auto callbackDiameter = [weak = WeakClaim(this)](const double& value) {
+        auto overlay = weak.Upgrade();
+        if (!overlay) {
+            LOGE("UpdateWeakText error, overlay is nullptr");
+            return;
+        }
+
+        overlay->SetVisible(true);
+        if (overlay->onRebuild_) {
+            overlay->onRebuild_(overlay->isSingleHandle_, !overlay->isSingleHandle_, overlay->hasMenu_,
+                !overlay->isSingleHandle_, false);
+        }
+        overlay->handleDiameter_ = Dimension(value, DimensionUnit::VP);
+        overlay->handleRadius_ = overlay->handleDiameter_ * FIFTY_PERCENT;
+    };
+    renderText->SetUpdateHandleDiameter(callbackDiameter);
+
+    auto callbackDiameterInner = [weak = WeakClaim(this)](const double& value) {
+        auto overlay = weak.Upgrade();
+        if (!overlay) {
+            LOGE("UpdateWeakText error, overlay is nullptr");
+            return;
+        }
+
+        overlay->SetVisible(true);
+        if (overlay->onRebuild_) {
+            overlay->onRebuild_(overlay->isSingleHandle_, !overlay->isSingleHandle_, overlay->hasMenu_,
+                !overlay->isSingleHandle_, false);
+        }
+        overlay->handleDiameterInner_ = Dimension(value, DimensionUnit::VP);
+        overlay->handleRadiusInner_ = overlay->handleDiameterInner_ * FIFTY_PERCENT;
+    };
+    renderText->SetUpdateHandleDiameterInner(callbackDiameterInner);
+
+    auto onClipRectChanged = [weak = WeakClaim(this)](const Rect& clipRect) {
+        auto overlay = weak.Upgrade();
+        if (overlay && (overlay->clipRect_ != clipRect)) {
+            overlay->clipRect_ = clipRect;
+            overlay->MarkNeedLayout();
+        }
+    };
+    renderText->SetOnClipRectChanged(onClipRectChanged);
+}
+
 void RenderTextOverlay::PerformLayout()
 {
     double handleRadius = NormalizeToPx(handleRadius_);
@@ -406,6 +512,36 @@ void RenderTextOverlay::PerformLayout()
     }
 
     InitAnimation();
+
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        return;
+    }
+    if (!GetChildren().empty()) {
+        const auto& child = GetChildren().front();
+        if (!child) {
+            LOGE("child is null");
+            return;
+        }
+        Rect textOverlayRect(child->GetGlobalOffset(), child->GetLayoutSize());
+        auto startHandleOffset = startHandleOffset_ + Offset(-hotZoneRadius, -lineHeight_ - hotZoneDiameter);
+        auto startHandlebottomRightPoint = startHandleOffset_ + Offset(hotZoneRadius, -lineHeight_);
+        Rect startHandleRect(startHandleOffset.GetX(), startHandleOffset.GetY(),
+            startHandlebottomRightPoint.GetX() - startHandleOffset.GetX(),
+            startHandlebottomRightPoint.GetY() - startHandleOffset.GetY());
+        auto endHandleOffset = endHandleOffset_ + Offset(-hotZoneRadius, 0.0);
+        auto endHandlebottomRightPoint = endHandleOffset_ + Offset(hotZoneRadius, hotZoneDiameter);
+        Rect endHandleRect(endHandleOffset.GetX(), endHandleOffset.GetY(),
+            endHandlebottomRightPoint.GetX() - endHandleOffset.GetX(),
+            endHandlebottomRightPoint.GetY() - endHandleOffset.GetY());
+        auto textOverlayManager = context->GetTextOverlayManager();
+        if (textOverlayManager) {
+            textOverlayManager->ClearTextOverlayRect();
+            textOverlayManager->AddTextOverlayRect(textOverlayRect);
+            textOverlayManager->AddTextOverlayRect(startHandleRect);
+            textOverlayManager->AddTextOverlayRect(endHandleRect);
+        }
+    }
 }
 
 Offset RenderTextOverlay::ComputeChildPosition(const RefPtr<RenderNode>& child)
@@ -433,7 +569,7 @@ Offset RenderTextOverlay::ComputeChildPosition(const RefPtr<RenderNode>& child)
     if (LessOrEqual(childPosition.GetX(), 0.0)) {
         childPosition.SetX(DEFAULT_SPACING);
     } else if (GreatOrEqual(
-        childPosition.GetX() + child->GetLayoutSize().Width(), GetLayoutParam().GetMaxSize().Width())) {
+                   childPosition.GetX() + child->GetLayoutSize().Width(), GetLayoutParam().GetMaxSize().Width())) {
         childPosition.SetX(GetLayoutParam().GetMaxSize().Width() - child->GetLayoutSize().Width() - DEFAULT_SPACING);
     }
     if (LessNotEqual(childPosition.GetY(), 0.0)) {
@@ -570,24 +706,33 @@ void RenderTextOverlay::HandleDragStart(const Offset& startOffset)
     childRightBoundary_ = 0.0;
     showOption_.showMenu = true;
     auto textField = weakTextField_.Upgrade();
-    if (!textField) {
-        LOGE("TextField is nullptr");
+    auto text = weakText_.Upgrade();
+    if (!textField && !text) {
+        LOGE("TextField or text is nullptr");
         return;
     }
 
     // Mark start and end index
-    startIndex_ = textField->GetEditingValue().selection.GetStart();
-    endIndex_ = textField->GetEditingValue().selection.GetEnd();
+    if (textField) {
+        startIndex_ = textField->GetEditingValue().selection.GetStart();
+        endIndex_ = textField->GetEditingValue().selection.GetEnd();
+        if (startHandleRegion_.ContainsInRegion(startOffset.GetX(), startOffset.GetY())) {
+            textField->SetInitIndex(endIndex_);
+        } else {
+            textField->SetInitIndex(startIndex_);
+        }
+    } else if (text) {
+        startIndex_ = text->GetTextSelect().GetStart();
+        endIndex_ = text->GetTextSelect().GetEnd();
+    }
 
     // Mark start or end flag and mark the index
     if (startHandleRegion_.ContainsInRegion(startOffset.GetX(), startOffset.GetY())) {
         isStartDrag_ = true;
         isEndDrag_ = false;
-        textField->SetInitIndex(endIndex_);
     } else {
         isStartDrag_ = false;
         isEndDrag_ = endHandleRegion_.ContainsInRegion(startOffset.GetX(), startOffset.GetY());
-        textField->SetInitIndex(startIndex_);
     }
 }
 
@@ -678,15 +823,18 @@ void RenderTextOverlay::HandleMoreButtonClick()
     if (!isAnimationStopped_) {
         return;
     }
-
     hasMenu_ = !hasMenu_;
+    auto context = GetContext().Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        onRebuild_(isSingleHandle_, true, true, true, false);
+        return;
+    }
     isAnimationStarted_ = false;
     isAnimationStopped_ = false;
     if (onRebuild_) {
         animateUntilPaint_ = hasMenu_;
         onRebuild_(isSingleHandle_, true, true, true, true);
     }
-
     if (!animateUntilPaint_) {
         startAnimation_(tweenOptionIn_, innerTweenOptionIn_, isSingleHandle_, true);
         StartMoreAnimation(reverse_);
@@ -838,6 +986,14 @@ void RenderTextOverlay::BuildAndStartMoreButtonAnimation()
         auto textMore = more.Upgrade();
         if (textMore) {
             textMore->reverse_ = (!textMore->reverse_);
+            textMore->renderMenu_->SetIsWattingForAnimationStart(false);
+        }
+    });
+    controller_->AddStartListener([more = AceType::WeakClaim(this)]() {
+        auto textMore = more.Upgrade();
+        if (textMore) {
+            textMore->reverse_ = (!textMore->reverse_);
+            textMore->renderMenu_->SetIsWattingForAnimationStart(true);
         }
     });
     controller_->AddInterpolator(strokeWidthAnimation);

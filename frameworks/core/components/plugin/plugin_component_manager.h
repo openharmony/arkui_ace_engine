@@ -26,9 +26,9 @@
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/plugin/plugin_component_template.h"
 #include "core/components/plugin/plugin_component_callback.h"
-#include "ohos/aafwk/content/want.h"
 #include "ui_service_interface.h"
 #include "ui_service_stub.h"
+#include "want.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT PluginComponentManager final {
@@ -64,6 +64,7 @@ public:
         UIServiceListener() = default;
         ~UIServiceListener()
         {
+            std::lock_guard<std::mutex> lock(mutex_);
             callbackVec_.clear();
         };
 
@@ -78,6 +79,7 @@ public:
         void OnRequestCallBack(const AAFwk::Want& want, const std::string& name,  const std::string& data) override;
         void OnReturnRequest(const AAFwk::Want& want, const std::string& source,  const std::string& data,
             const std::string& extraData) override;
+        void RequestByJsonPath(const PluginComponentTemplate& pluginTemplate, const std::string& data);
     
     private:
         std::mutex mutex_;

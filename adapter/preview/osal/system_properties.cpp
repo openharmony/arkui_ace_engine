@@ -72,7 +72,7 @@ std::string SystemProperties::brand_ = UNDEFINED_PARAM;
 std::string SystemProperties::manufacturer_ = UNDEFINED_PARAM;
 std::string SystemProperties::model_ = UNDEFINED_PARAM;
 std::string SystemProperties::product_ = UNDEFINED_PARAM;
-std::string SystemProperties::apiVersion_ = "8";
+std::string SystemProperties::apiVersion_ = "9";
 std::string SystemProperties::releaseType_ = UNDEFINED_PARAM;
 std::string SystemProperties::paramDeviceType_ = UNDEFINED_PARAM;
 int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
@@ -82,10 +82,13 @@ ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::rosenBackendEnabled_ = false;
 bool SystemProperties::windowAnimationEnabled_ = false;
-int32_t SystemProperties::windowPosX_ = 0;
-int32_t SystemProperties::windowPosY_ = 0;
 bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::gpuUploadEnabled_ = false;
+
+bool SystemProperties::GetDebugBoundaryEnabled()
+{
+    return false;
+}
 
 DeviceType SystemProperties::GetDeviceType()
 {

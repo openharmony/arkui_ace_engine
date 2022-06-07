@@ -43,11 +43,12 @@ RefPtr<RenderNode> SvgRect::CreateRender(
     const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox)
 {
     component_->Inherit(parent);
-    auto href = component_->GetDeclaration()->GetFillState().GetHref();
+    auto& declaration = component_->GetDeclaration();
+    auto href = declaration->GetFillState().GetHref();
     if (!href.empty()) {
         auto gradient = GetGradient(href);
         if (gradient) {
-            component_->GetDeclaration()->SetGradient(gradient.value());
+            declaration->SetGradient(gradient.value());
         }
     }
     auto renderNode = AceType::DynamicCast<RenderSvgRect>(component_->CreateRenderNode());
@@ -57,11 +58,12 @@ RefPtr<RenderNode> SvgRect::CreateRender(
     }
     renderNode->Attach(context_);
     renderNode->Update(component_);
-    if (!useBox) {
+    if (!useBox || declaration->GetClipPathHref().empty()) {
+        LOGW("rect of svg tag skip box create");
         return renderNode;
     }
 
-    auto boxComponent = CreateBoxComponent(layoutParam, component_->GetDeclaration()->GetClipPathHref());
+    auto boxComponent = CreateBoxComponent(layoutParam, declaration->GetClipPathHref());
     auto renderBox = boxComponent->CreateRenderNode();
     renderBox->Attach(context_);
     renderBox->Update(boxComponent);

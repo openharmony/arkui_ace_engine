@@ -100,6 +100,8 @@ protected:
     RefPtr<SwitchComponent> component_;
 
     bool isDraging = false;
+private:
+    void SetAccessibilityClickImpl();
 };
 
 } // namespace OHOS::Ace

@@ -49,7 +49,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
 #elif USE_QUICKJS_ENGINE
     JSValue value = obj.Get().GetHandle();
 #elif USE_ARK_ENGINE
-    panda::Local<JsiValue> value = obj.Get().GetHandle();
+    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
     JSValueWrapper valueWrapper = value;
     NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
@@ -67,6 +67,51 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
         return nullptr;
     }
     return PixelMap::CreatePixelMap(pixmapPtrAddr);
+}
+
+const std::shared_ptr<Rosen::RSSurfaceNode> CreateRSSurfaceNodeFromNapiValue(JSRef<JSVal> obj)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!obj->IsObject()) {
+        LOGE("info[0] is not an object when try CreateRSSurfaceNodeFromNapiValue");
+        return nullptr;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        LOGE("CreateRSSurfaceNodeFromNapiValue engine is null");
+        return nullptr;
+    }
+    auto nativeEngine = engine->GetNativeEngine();
+    if (nativeEngine == nullptr) {
+        LOGE("nativeEngine is nullptr.");
+        return nullptr;
+    }
+#ifdef USE_V8_ENGINE
+    v8::Local<v8::Value> value = obj->operator v8::Local<v8::Value>();
+#elif USE_QUICKJS_ENGINE
+    JSValue value = obj.Get().GetHandle();
+#elif USE_ARK_ENGINE
+    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
+#endif
+    JSValueWrapper valueWrapper = value;
+    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+    if (nativeValue == nullptr) {
+        LOGE("nativeValue is nullptr.");
+        return nullptr;
+    }
+    NativeObject* object = static_cast<NativeObject*>(nativeValue->GetInterface(NativeObject::INTERFACE_ID));
+    if (object == nullptr) {
+        return nullptr;
+    }
+
+    auto nodePtr = static_cast<std::shared_ptr<Rosen::RSSurfaceNode>*>(object->GetNativePointer());
+    if (nodePtr == nullptr) {
+        return nullptr;
+    }
+    return *nodePtr;
+#else
+    return nullptr;
+#endif
 }
 #endif
 } // namespace OHOS::Ace::Framework

@@ -63,6 +63,8 @@ extern const char _binary_strip_native_min_abc_end[];
 
 namespace OHOS::Ace::Framework {
 
+const int SYSTEM_BASE = 10;
+
 #ifdef APP_USE_ARM
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 #else
@@ -107,6 +109,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtim
     PixelMapNapiEntry pixelMapNapiEntry = JsEngine::GetPixelMapNapiEntry();
     if (!pixelMapNapiEntry) {
         LOGE("pixelMapNapiEntry is null");
+        return nullptr;
     }
     void* pixmapPtrAddr = pixelMapNapiEntry(
         reinterpret_cast<napi_env>(nativeEngine), reinterpret_cast<napi_value>(nativeValue));
@@ -775,34 +778,55 @@ std::string GetDeviceInfo()
     infoList->Put("manufacturer", SystemProperties::GetManufacturer().c_str());
     infoList->Put("model", SystemProperties::GetModel().c_str());
     infoList->Put("product", SystemProperties::GetProduct().c_str());
-
-    if (AceApplicationInfo::GetInstance().GetLanguage().empty()) {
-        infoList->Put("language", "N/A");
+    std::string tmp = SystemProperties::GetApiVersion();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        char* tmpEnd = nullptr;
+        infoList->Put("apiVersion", static_cast<int32_t>(
+	    std::strtol(SystemProperties::GetApiVersion().c_str(), &tmpEnd, SYSTEM_BASE)));
     } else {
-        infoList->Put("language", AceApplicationInfo::GetInstance().GetLanguage().c_str());
+        infoList->Put("apiVersion", "N/A");
     }
-    if (AceApplicationInfo::GetInstance().GetCountryOrRegion().empty()) {
-        infoList->Put("region", "N/A");
+    tmp = SystemProperties::GetReleaseType();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        infoList->Put("releaseType", tmp.c_str());
     } else {
-        infoList->Put("region", AceApplicationInfo::GetInstance().GetCountryOrRegion().c_str());
+        infoList->Put("releaseType", "N/A");
+    }
+    tmp = SystemProperties::GetParamDeviceType();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        infoList->Put("deviceType", tmp.c_str());
+    } else {
+        infoList->Put("deviceType", "N/A");
+    }
+    tmp = SystemProperties::GetLanguage();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        infoList->Put("language", tmp.c_str());
+    } else {
+        infoList->Put("language", "N/A");
+    }
+    tmp = SystemProperties::GetRegion();
+    if (tmp != SystemProperties::INVALID_PARAM) {
+        infoList->Put("region", tmp.c_str());
+    } else {
+        infoList->Put("region", "N/A");
     }
 
     auto container = Container::Current();
     int32_t width = container ? container->GetViewWidth() : 0;
     if (width != 0) {
-        infoList->Put("windowWidth", std::to_string(width).c_str());
+        infoList->Put("windowWidth", width);
     } else {
         infoList->Put("windowWidth", "N/A");
     }
 
     int32_t height = container ? container->GetViewHeight() : 0;
     if (height != 0) {
-        infoList->Put("windowHeight", std::to_string(height).c_str());
+        infoList->Put("windowHeight", height);
     } else {
         infoList->Put("windowHeight", "N/A");
     }
 
-    infoList->Put("screenDensity", std::to_string(SystemProperties::GetResolution()).c_str());
+    infoList->Put("screenDensity", SystemProperties::GetResolution());
 
     bool isRound = SystemProperties::GetIsScreenRound();
     if (isRound) {
@@ -3167,9 +3191,11 @@ void JsiEngine::RegisterInitWorkerFunc()
             LOGE("instance is nullptr");
             return;
         }
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         ConnectServerManager::Get().AddInstance(gettid());
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
         panda::JSNApi::StartDebugger(libraryPath.c_str(), vm, debugMode, gettid());
+#endif
         instance->RegisterConsoleModule(arkNativeEngine);
         // load jsfwk
         if (!arkNativeEngine->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
@@ -3179,6 +3205,7 @@ void JsiEngine::RegisterInitWorkerFunc()
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
 
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
 void JsiEngine::RegisterOffWorkerFunc()
 {
     auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
@@ -3203,6 +3230,7 @@ void JsiEngine::RegisterOffWorkerFunc()
     };
     nativeEngine_->SetOffWorkerFunc(offWorkerFunc);
 }
+#endif
 
 void JsiEngine::RegisterAssetFunc()
 {
@@ -3227,7 +3255,9 @@ void JsiEngine::RegisterAssetFunc()
 void JsiEngine::RegisterWorker()
 {
     RegisterInitWorkerFunc();
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     RegisterOffWorkerFunc();
+#endif
     RegisterAssetFunc();
 }
 
@@ -3480,6 +3510,9 @@ void JsiEngine::FireSyncEvent(const std::string& eventId, const std::string& par
 void JsiEngine::FireExternalEvent(const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     ACE_DCHECK(engineInstance_);
+    if (isDestroy) {
+        return;
+    }
     auto runtime = engineInstance_->GetJsRuntime();
     auto page = GetRunningPage(runtime);
     if (page == nullptr) {
@@ -3568,6 +3601,13 @@ void JsiEngine::RunGarbageCollection()
     }
 }
 
+void JsiEngine::DumpHeapSnapshot(bool isPrivate)
+{
+    if (engineInstance_ && engineInstance_->GetJsRuntime()) {
+        engineInstance_->GetJsRuntime()->DumpHeapSnapshot(isPrivate);
+    }
+}
+
 std::string JsiEngine::GetStacktraceMessage()
 {
     auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
@@ -3581,7 +3621,7 @@ std::string JsiEngine::GetStacktraceMessage()
     arkNativeEngine->ResumeVM();
     if (!getStackSuccess) {
         LOGE("GetStacktraceMessage arkNativeEngine get stack failed");
-        return "";
+        return "JS stacktrace is empty";
     }
 
     auto runningPage = engineInstance_ ? engineInstance_->GetRunningPage() : nullptr;

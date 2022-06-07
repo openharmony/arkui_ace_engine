@@ -179,6 +179,8 @@ private:
     void SetTriangleHandler();
     void HandleTriangleClick(bool value);
 
+    bool onChildTouchTest(const RefPtr<RenderNode>& child, const TouchRestrict& touchRestrict, TouchTestResult& result);
+
     enum DialogStatus {
         ACCEPT = 0,
         CANCEL,

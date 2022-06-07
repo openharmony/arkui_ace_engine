@@ -39,7 +39,5 @@ ohos_unittest("RenderWaterFlowTest") {
 
 group("unittest") {
   testonly = true
-  deps = []
-
   deps = [ ":RenderWaterFlowTest" ]
 }

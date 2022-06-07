@@ -55,6 +55,11 @@ public:
         return children_;
     }
 
+    auto GetSizeOfChildren() const
+    {
+        return children_.size();
+    }
+
     void ClearChildren()
     {
         for (const auto& child : children_) {

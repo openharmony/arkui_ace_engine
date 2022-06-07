@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
 
@@ -414,9 +415,9 @@ public:
     static void JSBind(BindingTarget globalObj)
     {
         JSClass<JSFileSelectorParam>::Declare("FileSelectorParam");
-        JSClass<JSFileSelectorParam>::CustomMethod("title", &JSFileSelectorParam::GetTitle);
-        JSClass<JSFileSelectorParam>::CustomMethod("mode", &JSFileSelectorParam::GetMode);
-        JSClass<JSFileSelectorParam>::CustomMethod("acceptType", &JSFileSelectorParam::GetAcceptType);
+        JSClass<JSFileSelectorParam>::CustomMethod("getTitle", &JSFileSelectorParam::GetTitle);
+        JSClass<JSFileSelectorParam>::CustomMethod("getMode", &JSFileSelectorParam::GetMode);
+        JSClass<JSFileSelectorParam>::CustomMethod("getAcceptType", &JSFileSelectorParam::GetAcceptType);
         JSClass<JSFileSelectorParam>::CustomMethod("isCapture", &JSFileSelectorParam::IsCapture);
         JSClass<JSFileSelectorParam>::Bind(
             globalObj, &JSFileSelectorParam::Constructor, &JSFileSelectorParam::Destructor);
@@ -554,11 +555,10 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onGeolocationHide", &JSWeb::OnGeolocationHide);
     JSClass<JSWeb>::StaticMethod("onGeolocationShow", &JSWeb::OnGeolocationShow);
     JSClass<JSWeb>::StaticMethod("onRequestSelected", &JSWeb::OnRequestFocus);
-    JSClass<JSWeb>::StaticMethod("onFileSelectorShow", &JSWeb::OnFileSelectorShow);
+    JSClass<JSWeb>::StaticMethod("onShowFileSelector", &JSWeb::OnFileSelectorShow);
     JSClass<JSWeb>::StaticMethod("javaScriptAccess", &JSWeb::JsEnabled);
     JSClass<JSWeb>::StaticMethod("fileExtendAccess", &JSWeb::ContentAccessEnabled);
     JSClass<JSWeb>::StaticMethod("fileAccess", &JSWeb::FileAccessEnabled);
-    JSClass<JSWeb>::StaticMethod("onFocus", &JSWeb::OnFocus);
     JSClass<JSWeb>::StaticMethod("onDownloadStart", &JSWeb::OnDownloadStart);
     JSClass<JSWeb>::StaticMethod("onErrorReceive", &JSWeb::OnErrorReceive);
     JSClass<JSWeb>::StaticMethod("onHttpErrorReceive", &JSWeb::OnHttpErrorReceive);
@@ -578,6 +578,14 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("fileFromUrlAccess", &JSWeb::FileFromUrlAccess);
     JSClass<JSWeb>::StaticMethod("databaseAccess", &JSWeb::DatabaseAccess);
     JSClass<JSWeb>::StaticMethod("textZoomAtio", &JSWeb::TextZoomAtio);
+    JSClass<JSWeb>::StaticMethod("webDebuggingAccess", &JSWeb::WebDebuggingAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("initialScale", &JSWeb::InitialScale);
+    JSClass<JSWeb>::StaticMethod("backgroundColor", &JSWeb::BackgroundColor);
+    JSClass<JSWeb>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSWeb>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSWeb>::StaticMethod("onMouse", &JSWeb::OnMouse);
+    JSClass<JSWeb>::StaticMethod("onResourceLoad", &JSWeb::OnResourceLoad);
+    JSClass<JSWeb>::StaticMethod("onScaleChange", &JSWeb::OnScaleChange);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -685,11 +693,6 @@ JSRef<JSVal> LoadWebRequestFocusEventToJSValue(const LoadWebRequestFocusEvent& e
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetRequestFocus()));
 }
 
-JSRef<JSVal> LoadWebOnFocusEventToJSValue(const LoadWebOnFocusEvent& eventInfo)
-{
-    return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetOnFocus()));
-}
-
 void JSWeb::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
@@ -727,7 +730,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         webComponent->SetWebController(controller->GetController());
     }
     ViewStackProcessor::GetInstance()->Push(webComponent);
-    JSInteractableView::SetFocusable(false);
+    JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);
 }
 
@@ -1031,23 +1034,6 @@ void JSWeb::OnUrlLoadIntercept(const JSCallbackInfo& args)
     webComponent->SetOnUrlLoadIntercept(std::move(jsCallback));
 }
 
-void JSWeb::OnFocus(const JSCallbackInfo& args)
-{
-    if (!args[0]->IsFunction()) {
-        return;
-    }
-    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebOnFocusEvent, 1>>(
-        JSRef<JSFunc>::Cast(args[0]), LoadWebOnFocusEventToJSValue);
-    auto eventMarker =
-        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebOnFocusEvent>(info);
-            func->Execute(*eventInfo);
-        });
-    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    webComponent->SetOnFocusEventId(eventMarker);
-}
-
 JSRef<JSVal> FileSelectorEventToJSValue(const FileSelectorEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -1055,7 +1041,7 @@ JSRef<JSVal> FileSelectorEventToJSValue(const FileSelectorEvent& eventInfo)
     JSRef<JSObject> paramObj = JSClass<JSFileSelectorParam>::NewInstance();
     auto fileSelectorParam = Referenced::Claim(paramObj->Unwrap<JSFileSelectorParam>());
     fileSelectorParam->SetParam(eventInfo);
-    
+
     JSRef<JSObject> resultObj = JSClass<JSFileSelectorResult>::NewInstance();
     auto fileSelectorResult = Referenced::Claim(resultObj->Unwrap<JSFileSelectorResult>());
     fileSelectorResult->SetResult(eventInfo);
@@ -1353,5 +1339,118 @@ void JSWeb::TextZoomAtio(int32_t textZoomAtioNum)
         return;
     }
     webComponent->SetTextZoomAtio(textZoomAtioNum);
+}
+
+void JSWeb::WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetWebDebuggingAccessEnabled(isWebDebuggingAccessEnabled);
+}
+
+void JSWeb::OnMouse(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnMouse");
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+
+    RefPtr<JsClickFunction> jsOnMouseFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args[0]));
+    auto onMouseId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnMouseFunc)](
+                            MouseInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onMouse");
+        func->Execute(info);
+    };
+
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnMouseEventCallback(onMouseId);
+}
+
+JSRef<JSVal> ResourceLoadEventToJSValue(const ResourceLoadEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("url", eventInfo.GetOnResourceLoadUrl());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnResourceLoad(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnRefreshAccessedHistory");
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ResourceLoadEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ResourceLoadEventToJSValue);
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<ResourceLoadEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetResourceLoadId(eventMarker);
+}
+
+JSRef<JSVal> ScaleChangeEventToJSValue(const ScaleChangeEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("oldScale", eventInfo.GetOnScaleChangeOldScale());
+    obj->SetProperty("newScale", eventInfo.GetOnScaleChangeNewScale());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnScaleChange(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ScaleChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ScaleChangeEventToJSValue);
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<ScaleChangeEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetScaleChangeId(eventMarker);
+}
+
+void JSWeb::BackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Color backgroundColor;
+    if (!ParseJsColor(info[0], backgroundColor)) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetBackgroundColor(backgroundColor.GetValue());
+}
+
+void JSWeb::InitialScale(float scale)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetInitialScale(scale);
 }
 } // namespace OHOS::Ace::Framework

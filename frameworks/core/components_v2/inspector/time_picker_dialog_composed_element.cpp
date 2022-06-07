@@ -46,8 +46,8 @@ std::unique_ptr<JsonValue> TimePickerDialogComposedElement::ToJsonObject() const
 
 std::string TimePickerDialogComposedElement::GetShow() const
 {
-    auto jsonValue = JsonUtil::Create(false);
-    auto jsonShow = JsonUtil::Create(false);
+    auto jsonValue = JsonUtil::Create(true);
+    auto jsonShow = JsonUtil::Create(true);
     jsonValue->Put("selected", GetSelected().c_str());
     jsonValue->Put("useMilitaryTime", GetUseMilitaryTime().c_str());
     jsonShow->Put("show", jsonValue);

@@ -816,6 +816,13 @@ void DeclarativeFrontend::TriggerGarbageCollection()
     }
 }
 
+void DeclarativeFrontend::DumpHeapSnapshot(bool isPrivate)
+{
+    if (jsEngine_) {
+        jsEngine_->DumpHeapSnapshot(isPrivate);
+    }
+}
+
 void DeclarativeFrontend::SetColorMode(ColorMode colorMode)
 {
     if (delegate_) {

@@ -18,6 +18,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/pipeline/base/component_group.h"
 #include "core/focus/focus_node.h"
 #include "core/pipeline/base/component_group_element.h"
 
@@ -30,6 +31,15 @@ public:
     void Update() override;
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
     bool AcceptFocusByRectOfLastFocus(const Rect& rect) override;
+    bool CanUpdate(const RefPtr<Component>& newComponent) override
+    {
+        // The raw ptr is persistent during app process.
+        auto flexComponent = AceType::DynamicCast<ComponentGroup>(newComponent);
+        if (!flexComponent) {
+            return false;
+        }
+        return GetChildren().size() == flexComponent->GetSizeOfChildren();
+    }
 
 protected:
     RefPtr<RenderNode> GetCachedRenderNode() override

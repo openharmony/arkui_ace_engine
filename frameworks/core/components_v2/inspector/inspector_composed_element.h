@@ -111,9 +111,9 @@ public:
     std::string GetWidth() const override;
     std::string GetHeight() const override;
     std::unique_ptr<JsonValue> GetSize() const override;
-    std::unique_ptr<JsonValue> GetPadding() const override;
+    std::string GetPadding() const override;
     Dimension GetMargin(OHOS::Ace::AnimatableType type) const override;
-    std::unique_ptr<JsonValue> GetAllMargin() const override;
+    std::string GetAllMargin() const override;
     std::string GetConstraintSize() const override;
     int32_t GetLayoutPriority() const override;
     int32_t GetLayoutWeight() const override;
@@ -150,9 +150,9 @@ public:
     RefPtr<Decoration> GetBackDecoration() const override;
     std::string GetBackgroundImage() const override;
     std::string GetBackgroundColor() const override;
-    std::unique_ptr<JsonValue> GetBackgroundImageSize() const override;
-    std::unique_ptr<JsonValue> GetBackgroundImagePosition() const override;
-    std::unique_ptr<JsonValue> GetAlignmentType(double width, double height) const override;
+    std::string GetBackgroundImageSize() const override;
+    std::string GetBackgroundImagePosition() const override;
+    std::string GetAlignmentType(double width, double height) const override;
 
     // front decoration settings
     RefPtr<Decoration> GetFrontDecoration() const override;
@@ -262,6 +262,7 @@ public:
     bool GetFocusable() const override;
     bool GetScrollable() const override;
     bool GetLongClickable() const override;
+    bool GetTouchable() const override;
     bool IsSelected() const override;
     bool IsPassword() const override;
     bool IsChecked() const override;

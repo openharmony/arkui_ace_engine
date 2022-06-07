@@ -72,6 +72,7 @@ struct TextEditingValue {
 
     // Delete text of start to end.
     void Delete(int32_t start, int32_t end);
+    void Append(const std::string& newText);
 
     std::string text;
     std::string hint;

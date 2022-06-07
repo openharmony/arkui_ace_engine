@@ -15,6 +15,7 @@
 
 #include "flutter_render_text.h"
 #include "rosen_render_text.h"
+#include "core/components/text_overlay/text_overlay_component.h"
 
 namespace OHOS::Ace {
 RefPtr<RenderNode> RenderText::Create()

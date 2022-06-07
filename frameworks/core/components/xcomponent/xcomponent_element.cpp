@@ -43,12 +43,14 @@ void XComponentElement::SetNewComponent(const RefPtr<Component>& newComponent)
     auto xcomponent = AceType::DynamicCast<XComponentComponent>(newComponent);
     if (xcomponent) {
         idStr_ = xcomponent->GetId();
+        name_ = xcomponent->GetName();
+#ifndef OHOS_STANDARD_SYSTEM
         if (texture_) {
+            isExternalResource_ = true;
             xcomponent->SetTextureId(texture_->GetId());
             xcomponent->SetTexture(texture_);
-            isExternalResource_ = true;
         }
-        name_ = xcomponent->GetName();
+#endif
         Element::SetNewComponent(xcomponent);
     }
 }
@@ -98,6 +100,8 @@ void XComponentElement::InitEvent()
     if (!xcomponent_->GetXComponentInitEventId().IsEmpty()) {
         onSurfaceInit_ = AceSyncEvent<void(const std::string&, const uint32_t, const bool)>::Create(
             xcomponent_->GetXComponentInitEventId(), context_);
+        onSurfaceDestroy_ = AceSyncEvent<void(const std::string&, const uint32_t, const bool)>::Create(
+            xcomponent_->GetXComponentInitEventId(), context_);
         onXComponentInit_ =
             AceAsyncEvent<void(const std::string&)>::Create(xcomponent_->GetXComponentInitEventId(), context_);
     }
@@ -136,9 +140,22 @@ void XComponentElement::OnSurfaceDestroyEvent()
             renderXComponent->NativeXComponentDestroy();
         }
 
-        if (onSurfaceInit_) {
-            onSurfaceInit_(this->xcomponent_->GetId(), this->xcomponent_->GetNodeId(), true);
+        auto pipelineContext = context_.Upgrade();
+        if (!pipelineContext) {
+            LOGE("pipelineContext is nullptr");
+            return;
         }
+        pipelineContext->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this)] {
+                auto element = weak.Upgrade();
+                if (element) {
+                    if (element->onSurfaceDestroy_) {
+                        element->onSurfaceDestroy_(
+                            element->xcomponent_->GetId(), element->xcomponent_->GetNodeId(), true);
+                    }
+                }
+            },
+            TaskExecutor::TaskType::JS);
 
         if (onXComponentDestroy_) {
             onXComponentDestroy_(param);
@@ -170,12 +187,6 @@ void XComponentElement::RegisterDispatchEventCallback()
             element->DispatchTouchEvent(event);
         }
     });
-    pipelineContext->SetDispatchMouseEventHandler([weak = WeakClaim(this)](const MouseEvent& event) {
-        auto element = weak.Upgrade();
-        if (element) {
-            element->DispatchMousehEvent(event);
-        }
-    });
 }
 
 void XComponentElement::DispatchTouchEvent(const TouchEvent& event)
@@ -199,39 +210,6 @@ void XComponentElement::DispatchTouchEvent(const TouchEvent& event)
         SetTouchEventType(event);
         SetTouchPoint(event);
         renderXComponent->NativeXComponentDispatchTouchEvent(touchEventPoint_);
-    }
-}
-
-void XComponentElement::DispatchMousehEvent(const MouseEvent& event)
-{
-    auto pipelineContext = context_.Upgrade();
-    if (!pipelineContext) {
-        LOGE("context is nullptr");
-        return;
-    }
-    auto renderXComponent = AceType::DynamicCast<RenderXComponent>(renderNode_);
-    if (renderXComponent) {
-        mouseEventPoint_.x = event.x;
-        mouseEventPoint_.y = event.y;
-        mouseEventPoint_.z = event.z;
-        mouseEventPoint_.deltaX = event.deltaX;
-        mouseEventPoint_.deltaY = event.deltaY;
-        mouseEventPoint_.deltaZ = event.deltaZ;
-        mouseEventPoint_.scrollX = event.scrollX;
-        mouseEventPoint_.scrollY = event.scrollY;
-        mouseEventPoint_.scrollZ = event.scrollZ;
-        mouseEventPoint_.screenX = event.screenX;
-        mouseEventPoint_.screenY = event.screenY;
-
-        mouseEventPoint_.action = static_cast<OH_NativeXComponent_MouseEventAction>(event.action);
-        mouseEventPoint_.button = static_cast<OH_NativeXComponent_MouseEventButton>(event.button);
-        mouseEventPoint_.pressedButtons = event.pressedButtons;
-        mouseEventPoint_.time = event.time.time_since_epoch().count();
-        mouseEventPoint_.deviceId = event.deviceId;
-        mouseEventPoint_.sourceType = static_cast<OH_NativeXComponent_SourceType>(event.sourceType);
-        mouseEventPoint_.pressedButtons = event.pressedButtons;
-
-        renderXComponent->NativeXComponentDispatchMouseEvent(mouseEventPoint_);
     }
 }
 
@@ -298,6 +276,7 @@ void XComponentElement::CreatePlatformResource()
     ReleasePlatformResource();
 #ifdef OHOS_STANDARD_SYSTEM
     CreateSurface();
+    isExternalResource_ = true;
 #else
     auto context = context_.Upgrade();
     if (!context) {
@@ -437,6 +416,7 @@ void XComponentElement::ReleasePlatformResource()
             LOGE("xcomponent remove surface error: %{public}d", ret);
         }
     }
+    isExternalResource_ = false;
 #else
     auto context = context_.Upgrade();
     if (!context) {
@@ -453,7 +433,13 @@ void XComponentElement::ReleasePlatformResource()
                 texture_->Release();
             }
             texture_.Reset();
+            isExternalResource_ = false;
         }
+    }
+
+    if (xcomponent_) {
+        xcomponent_->SetTextureId(X_INVALID_ID);
+        xcomponent_->SetTexture(nullptr);
     }
 #endif
 }

@@ -128,9 +128,9 @@ std::string ImageAnimatorComposedElement::GetImages() const
 {
     auto element = GetContentElement<ImageAnimatorElement>(ImageAnimatorElement::TypeId());
     if (element) {
-        auto jsonArray = JsonUtil::CreateArray(false);
+        auto jsonArray = JsonUtil::CreateArray(true);
         for (const auto& image : element->GetImages()) {
-            auto item = JsonUtil::Create(false);
+            auto item = JsonUtil::Create(true);
             item->Put("src", image.src.c_str());
             item->Put("left", image.left.ToString().c_str());
             item->Put("top", image.top.ToString().c_str());

@@ -137,6 +137,7 @@ bool RenderTouchListener::HandleEvent(const TouchEvent& point)
 
 bool RenderTouchListener::TriggerTouchCallBack(const TouchEvent& changedPoint)
 {
+    LOGI("Trigger touch callback");
     if (!onTouchEventCallback_) {
         return true;
     }
@@ -166,6 +167,7 @@ bool RenderTouchListener::TriggerTouchCallBack(const TouchEvent& changedPoint)
         info.SetTouchType(pointPair.second.type);
         event->AddTouchLocationInfo(std::move(info));
     }
+    event->SetSourceDevice(changedPoint.sourceType);
     onTouchEventCallback_(event);
     LOGD("IsStopPropagation = %{public}d", event->IsStopPropagation());
     return event->IsStopPropagation() ? false : true;

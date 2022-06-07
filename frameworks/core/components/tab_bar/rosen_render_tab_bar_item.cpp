@@ -17,6 +17,7 @@
 
 #include "render_service_client/core/ui/rs_node.h"
 
+#include "core/components/common/painter/debug_boundary_painter.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
@@ -48,6 +49,16 @@ void RosenRenderTabBarItem::Paint(RenderContext& context, const Offset& offset)
 
     rsNode->SetForegroundColor(Color::BLACK.BlendOpacity(hoverOpacity_).GetValue());
     rsNode->SetCornerRadius(Dimension(CLICKED_RADIUS, DimensionUnit::VP).ConvertToPx(dipScale));
+    if (RenderTabBarItem::needPaintDebugBoundary_ && SystemProperties::GetDebugBoundaryEnabled()) {
+        auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+        if (canvas == nullptr) {
+            LOGE("Paint canvas is null.");
+            return;
+        }
+        DebugBoundaryPainter::PaintDebugBoundary(canvas, offset, GetLayoutSize());
+        DebugBoundaryPainter::PaintDebugCorner(canvas, offset, GetLayoutSize());
+        DebugBoundaryPainter::PaintDebugMargin(canvas, offset, GetLayoutSize(), RenderBoxBase::margin_);
+    }
 }
 
 } // namespace OHOS::Ace

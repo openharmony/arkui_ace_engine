@@ -18,6 +18,7 @@
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "core/pipeline/base/rosen_render_context.h"
+#include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components/transform/rosen_render_transform.h"
 
 namespace OHOS::Ace {
@@ -40,6 +41,36 @@ void RosenRenderSvgUse::Paint(RenderContext& context, const Offset& offset)
     }
 
     RenderNode::Paint(context, offset);
+}
+
+void RosenRenderSvgUse::PaintDirectly(RenderContext& context, const Offset& offset)
+{
+    const auto renderContext = static_cast<RosenRenderContext*>(&context);
+    auto skCanvas = renderContext->GetCanvas();
+    if (!skCanvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+
+    bool translateXY = GreatNotEqual(x_.Value(), 0.0) || GreatNotEqual(y_.Value(), 0.0);
+    if (translateXY) {
+        skCanvas->save();
+        skCanvas->translate(
+            ConvertDimensionToPx(x_, LengthType::HORIZONTAL), ConvertDimensionToPx(y_, LengthType::VERTICAL));
+    }
+    if (NeedTransform()) {
+        skCanvas->save();
+        skCanvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
+    }
+
+    RenderSvgBase::PaintDirectly(context, offset);
+
+    if (NeedTransform()) {
+        skCanvas->restore();
+    }
+    if (translateXY) {
+        skCanvas->restore();
+    }
 }
 
 } // namespace OHOS::Ace

@@ -217,12 +217,47 @@ void RenderXComponent::NativeXComponentDispatchTouchEvent(const OH_NativeXCompon
     }
 }
 
-void RenderXComponent::NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent)
+void RenderXComponent::HandleMouseHoverEvent(MouseState mouseState)
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
-        LOGE("NativeXComponentDispatchTouchEvent context null");
-        return;
+        LOGE("NativeXComponentDispatchMouseEvent context null");
+    }
+    pipelineContext->GetTaskExecutor()->PostTask(
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, mouseState] {
+            auto nXCompImpl = weakNXCompImpl.Upgrade();
+            if (nXComp != nullptr && nXCompImpl) {
+                bool isHover = static_cast<int>(mouseState);
+                auto callback = nXCompImpl->GetMouseEventCallback();
+                if (callback != nullptr && callback->DispatchHoverEvent != nullptr) {
+                    callback->DispatchHoverEvent(nXComp, isHover);
+                }
+            } else {
+                LOGE("Native XComponent nullptr");
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+bool RenderXComponent::HandleMouseEvent(const MouseEvent& event)
+{
+    OH_NativeXComponent_MouseEvent mouseEventPoint;
+    mouseEventPoint.x = event.GetOffset().GetX() - GetCoordinatePoint().GetX();
+    mouseEventPoint.y = event.GetOffset().GetY() - GetCoordinatePoint().GetY();
+    mouseEventPoint.screenX = event.GetOffset().GetX();
+    mouseEventPoint.screenY = event.GetOffset().GetY();
+    mouseEventPoint.action = static_cast<OH_NativeXComponent_MouseEventAction>(event.action);
+    mouseEventPoint.button = static_cast<OH_NativeXComponent_MouseEventButton>(event.button);
+    mouseEventPoint.timestamp = event.time.time_since_epoch().count();
+    return NativeXComponentDispatchMouseEvent(mouseEventPoint);
+}
+
+bool RenderXComponent::NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent)
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("NativeXComponentDispatchMouseEvent context null");
+        return false;
     }
     float scale = pipelineContext->GetViewScale();
     float diffX = mouseEvent.x - position_.GetX() * scale;
@@ -234,7 +269,7 @@ void RenderXComponent::NativeXComponentDispatchMouseEvent(const OH_NativeXCompon
                 if (nXComp != nullptr && nXCompImpl) {
                     nXCompImpl->SetMouseEvent(mouseEvent);
                     auto surface = const_cast<void*>(nXCompImpl->GetSurface());
-                    auto callback = nXCompImpl->GetCallback();
+                    auto callback = nXCompImpl->GetMouseEventCallback();
                     if (callback != nullptr && callback->DispatchMouseEvent != nullptr) {
                         callback->DispatchMouseEvent(nXComp, surface);
                     }
@@ -244,6 +279,7 @@ void RenderXComponent::NativeXComponentDispatchMouseEvent(const OH_NativeXCompon
             },
             TaskExecutor::TaskType::JS);
     }
+    return true;
 }
 
 void RenderXComponent::NativeXComponentOffset(const double&x, const double& y)

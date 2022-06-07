@@ -25,6 +25,7 @@ class RosenRenderSvgUse : public RenderSvgUse {
 
 public:
     void Paint(RenderContext& context, const Offset& offset) override;
+    void PaintDirectly(RenderContext& context, const Offset& offset) override;
 
 private:
 };

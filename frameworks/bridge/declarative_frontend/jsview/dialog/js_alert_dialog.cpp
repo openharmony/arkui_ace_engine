@@ -21,6 +21,7 @@
 
 #include "core/common/container.h"
 #include "core/components/dialog/dialog_component.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -83,6 +84,7 @@ void ParseButtonObj(
 
 void JSAlertDialog::Show(const JSCallbackInfo& args)
 {
+    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     DialogProperties properties { .type = DialogType::ALERT_DIALOG };
     if (args[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(args[0]);

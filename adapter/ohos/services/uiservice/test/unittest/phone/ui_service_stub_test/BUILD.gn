@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/aafwk/standard/aafwk.gni")
+import("//foundation/ability/ability_runtime/aafwk.gni")
 
 module_output_path = "ui_service/ui_service"
 
@@ -29,7 +29,6 @@ ohos_unittest("ui_service_stub_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${innerkits_path}/want:want",
     "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:uiservice",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//third_party/googletest:gmock_main",
@@ -38,6 +37,7 @@ ohos_unittest("ui_service_stub_test") {
   ]
 
   external_deps = [
+    "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",

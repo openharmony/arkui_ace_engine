@@ -73,7 +73,7 @@ class FileSelectorParamOhos : public WebFileSelectorParam {
 public:
     FileSelectorParamOhos(std::shared_ptr<OHOS::NWeb::NWebFileSelectorParams> param)
         : param_(param) {}
-    
+
     std::string GetTitle() override;
     int GetMode() override;
     std::string GetDefaultFileName() override;
@@ -90,7 +90,7 @@ public:
     FileSelectorResultOhos(std::shared_ptr<OHOS::NWeb::FileSelectorCallback> callback)
         : callback_(callback) {}
 
-    void HandleFileList(std::vector<std::string> result) override;
+    void HandleFileList(std::vector<std::string>& result) override;
 private:
     std::shared_ptr<OHOS::NWeb::FileSelectorCallback> callback_;
 };
@@ -148,6 +148,8 @@ public:
     void HideWebView();
     void Resize(const double& width, const double& height);
     void UpdateUserAgent(const std::string& userAgent);
+    void UpdateBackgroundColor(const int backgroundColor);
+    void UpdateInitialScale(float scale);
     void UpdateJavaScriptEnabled(const bool& isJsEnabled);
     void UpdateAllowFileAccess(const bool& isFileAccessEnabled);
     void UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled);
@@ -161,11 +163,15 @@ public:
     void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled);
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
     void UpdateTextZoomAtio(const int32_t& textZoomAtioNum);
+    void UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled);
     void LoadUrl();
     void HandleTouchDown(const int32_t& id, const double& x, const double& y);
     void HandleTouchUp(const int32_t& id, const double& x, const double& y);
     void HandleTouchMove(const int32_t& id, const double& x, const double& y);
     void HandleTouchCancel();
+    bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
+    void OnFocus();
+    void OnBlur();
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -190,6 +196,8 @@ public:
     void OnRefreshAccessedHistory(const std::string& url, bool isRefreshed);
     bool OnFileSelectorShow(const BaseEventInfo* info);
     bool OnHandleInterceptUrlLoading(const std::string& url);
+    void OnResourceLoad(const std::string& url);
+    void OnScaleChange(float oldScaleFactor, float newScaleFactor);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -218,13 +226,19 @@ private:
     void RemoveJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
     void SetWebViewJavaScriptResultCallBack(const WebController::JavaScriptCallBackImpl&& javaScriptCallBackImpl);
     void RequestFocus();
-    void OnFocus();
     void OnInactive();
     void OnActive();
     void Zoom(float factor);
+    bool ZoomIn();
+    bool ZoomOut();
     int GetHitTestResult();
+    int GetPageHeight();
+    int GetWebId();
+    std::string GetTitle();
     bool SaveCookieSync();
-    bool SetCookie(const std::string url, const std::string value);
+    bool SetCookie(const std::string& url, const std::string& value);
+    std::string GetCookie(const std::string& url) const;
+    void DeleteEntirelyCookie();
     void RegisterOHOSWebEventAndMethord();
     void SetWebCallBack();
 
@@ -233,6 +247,7 @@ private:
     void Forward();
     void ClearHistory();
     bool AccessStep(int32_t step);
+    void BackOrForward(int32_t step);
     bool AccessBackward();
     bool AccessForward();
 #if defined(ENABLE_ROSEN_BACKEND)
@@ -269,9 +284,10 @@ private:
     EventCallbackV2 onErrorReceiveV2_;
     EventCallbackV2 onHttpErrorReceiveV2_;
     EventCallbackV2 onDownloadStartV2_;
-    EventCallbackV2 onFocusV2_;
     EventCallbackV2 onRefreshAccessedHistoryV2_;
     EventCallbackV2 onRenderExitedV2_;
+    EventCallbackV2 onResourceLoadV2_;
+    EventCallbackV2 onScaleChangeV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;

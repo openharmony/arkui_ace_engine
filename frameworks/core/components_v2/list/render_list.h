@@ -34,6 +34,14 @@ namespace OHOS::Ace::V2 {
 
 using UpdateBuilderFunc = std::function<void(const Dimension&, const Dimension&)>;
 
+enum class ListEvents {
+    NONE = 0,
+    SCROLL,
+    SCROLL_STOP,
+    REACH_START,
+    REACH_END,
+};
+
 class ListItemGenerator : virtual public Referenced {
 public:
     static constexpr size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
@@ -134,6 +142,16 @@ public:
         itemGenerator_ = std::move(listItemGenerator);
     }
 
+    int32_t GetRestoreId() const
+    {
+        return component_ ? component_->GetRestoreId() : -1;
+    }
+
+    bool GetMultiSelectable() const
+    {
+        return isMultiSelectable_;
+    }
+
     void RemoveAllItems();
 
     void JumpToIndex(int32_t idx, int32_t source);
@@ -145,14 +163,24 @@ public:
         return component_;
     }
 
-    Offset GetLastOffset() const
+    Offset GetCurrentOffset() const
     {
         return vertical_ ? Offset(0.0, -currentOffset_) : Offset(-currentOffset_, 0.0);
     }
 
-    double GetEstimatedHeight() const
+    double GetRealMainSize() const
     {
         return realMainSize_;
+    }
+
+    double GetEstimatedHeight() const
+    {
+        return estimatedHeight_;
+    }
+
+    Offset GetLastOffset() const
+    {
+        return vertical_ ? Offset(0.0, lastOffset_) : Offset(lastOffset_, 0.0);
     }
 
     Dimension GetListSpace() const
@@ -219,8 +247,6 @@ public:
 
     bool IsAxisScrollable(AxisDirection direction) override;
 
-    WeakPtr<RenderNode> CheckAxisNode() override;
-
     int32_t RequestNextFocus(bool vertical, bool reverse);
 
     std::string ProvideRestoreInfo() override;
@@ -270,11 +296,12 @@ protected:
     void ResetEdgeEffect();
     void SetEdgeEffectAttribute();
     void CalculateMainScrollExtent(double curMainPos, double mainSize);
+    bool GetCurMainPosAndMainSize(double &curMainPos, double &mainSize);
 
     // notify start position in global main axis when drag start
     void ProcessDragStart(double startPosition);
     // notify drag offset in global main axis
-    void processDragUpdate(double dragOffset);
+    void ProcessDragUpdate(double dragOffset);
     // notify scroll over
     void ProcessScrollOverCallback(double velocity);
     void InitChainAnimation(int32_t nodeCount);
@@ -300,6 +327,7 @@ protected:
     std::list<RefPtr<RenderListItem>> items_;
 
     double spaceWidth_ = 0.0;
+    double lastOffset_ = 0.0;
     double startMainPos_ = 0.0;
     double endMainPos_ = 0.0;
     double currentOffset_ = 0.0;
@@ -333,7 +361,8 @@ protected:
     WeakPtr<ListItemGenerator> itemGenerator_;
     RefPtr<Scrollable> scrollable_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
-    RefPtr<ScrollBarProxy> scrollBarProxy_;
+    RefPtr<ScrollBarProxy> scrollBarProxy_; // user defined scroll bar
+    RefPtr<ScrollBar> scrollBar_;           // system defined scroll bar
 
     size_t currentStickyIndex_ = INITIAL_CHILD_INDEX;
     RefPtr<RenderListItem> currentStickyItem_;
@@ -357,11 +386,19 @@ protected:
     Offset mouseStartOffset_;
     Offset mouseEndOffset_;
     int32_t focusIndex_ = 0;
+    int32_t scrollBarOpacity_ = 0;
+    double prevOffset_ = 0.0;
+    double prevMainPos_ = 0.0;
+    double estimatedHeight_ = 0.0;
 
 private:
+    bool IsReachStart();
+    void HandleListEvent();
     bool ActionByScroll(bool forward, ScrollEventBack scrollEventBack);
     void ModifyActionScroll();
     void InitScrollBarProxy();
+    void InitScrollBar();
+    void SetScrollBarCallback();
     Dimension listSpace_;
     double realMainSize_ = 0.0; // Real size of main axis.
     size_t startCachedCount_ = 0;
@@ -409,6 +446,7 @@ private:
     void ApplyRestoreInfo();
 
     bool hasDragItem_ = false;
+    std::map<ListEvents, bool> listEventFlags_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderList);
 };

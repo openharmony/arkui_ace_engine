@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -170,7 +170,7 @@ void RosenRenderLinearTrack::PaintSliderSteps(RenderContext& context, const Offs
         skPaint.setStrokeCap(SkPaint::Cap::kRound_Cap);
         SkPath path;
         while (LessOrEqual(current, offset.GetY() + trackLength)) {
-            double dyOffset = current;
+            double dyOffset;
             if (GetSliderMode() == SliderMode::OUTSET) {
                 dyOffset = std::clamp(current, offset.GetY() + size * HALF, offset.GetY() + trackLength - size * HALF);
             } else {
@@ -192,7 +192,7 @@ void RosenRenderLinearTrack::PaintSliderSteps(RenderContext& context, const Offs
         skPaint.setStrokeCap(SkPaint::Cap::kRound_Cap);
         SkPath path;
         while (LessOrEqual(current, offset.GetY() + trackLength)) {
-            double dxOffset = current;
+            double dxOffset;
             if (GetSliderMode() == SliderMode::OUTSET) {
                 dxOffset = std::clamp(current, offset.GetX() + size * HALF, offset.GetX() + trackLength - size * HALF);
             } else {

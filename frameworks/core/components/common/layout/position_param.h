@@ -21,6 +21,7 @@
 
 namespace OHOS::Ace {
 
+constexpr int32_t DIRECTION_RANGE = 3;
 struct PositionParam {
     std::pair<AnimatableDimension, bool> left = { AnimatableDimension(0.0, DimensionUnit::PX), false };
     std::pair<AnimatableDimension, bool> right = { AnimatableDimension(0.0, DimensionUnit::PX), false };
@@ -28,6 +29,22 @@ struct PositionParam {
     std::pair<AnimatableDimension, bool> bottom = { AnimatableDimension(0.0, DimensionUnit::PX), false };
     std::pair<Dimension, Dimension> anchor = {0.0_px, 0.0_px};
     PositionType type = PositionType::RELATIVE;
+};
+
+enum class AlignDirection {
+    LEFT,
+    MIDDLE,
+    RIGHT,
+    TOP,
+    CENTER,
+    BOTTOM,
+};
+struct AlignRule {
+    std::string anchor;
+    union {
+        HorizontalAlign horizontal;
+        VerticalAlign vertical;
+    };
 };
 
 } // namespace OHOS::Ace

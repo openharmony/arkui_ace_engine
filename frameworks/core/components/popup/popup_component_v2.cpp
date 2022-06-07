@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,12 @@
 
 #include "core/components/popup/popup_component_v2.h"
 
+#include "base/geometry/dimension.h"
 #include "core/components/align/align_component.h"
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
 #include "core/components/button/button_theme.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/popup/popup_element_v2.h"
@@ -67,29 +69,8 @@ void PopupComponentV2::Initialization(const RefPtr<ThemeManager>& themeManager, 
         child = CreateMessage();
     }
 
-    auto box = AceType::MakeRefPtr<BoxComponent>();
-    auto decoration = box->GetBackDecoration();
-    if (!decoration) {
-        decoration = AceType::MakeRefPtr<Decoration>();
-        box->SetBackDecoration(decoration);
-    }
-    decoration->SetBorderRadius(popupTheme->GetRadius());
-    if (!customComponent_) {
-        auto padding = popupTheme->GetPadding();
-        box->SetPadding(padding);
-        GetPopupParam()->SetPadding(padding);
-    }
+    auto box = CreateBox(popupTheme);
     box->SetChild(child);
-    GetPopupParam()->SetBorder(decoration->GetBorder());
-    if (!GetPopupParam()->IsMaskColorSetted()) {
-        GetPopupParam()->SetMaskColor(popupTheme->GetMaskColor());
-    }
-    if (!GetPopupParam()->IsBackgroundColorSetted()) {
-        GetPopupParam()->SetBackgroundColor(popupTheme->GetBackgroundColor());
-    }
-    if (placementOnTop_) {
-        GetPopupParam()->SetPlacement(Placement::TOP);
-    }
     SetChild(box);
     hasInitialization_ = true;
 }
@@ -176,6 +157,41 @@ const RefPtr<Component> PopupComponentV2::SetPadding(const RefPtr<Component>& co
     paddingComponent->SetPadding(edge);
     paddingComponent->SetChild(component);
     return paddingComponent;
+}
+
+const RefPtr<BoxComponent> PopupComponentV2::CreateBox(const RefPtr<PopupTheme>& popupTheme)
+{
+    auto box = AceType::MakeRefPtr<BoxComponent>();
+    auto decoration = box->GetBackDecoration();
+    if (!decoration) {
+        decoration = AceType::MakeRefPtr<Decoration>();
+        box->SetBackDecoration(decoration);
+    }
+    decoration->SetBorderRadius(popupTheme->GetRadius());
+
+    if (!customComponent_) {
+        auto padding = popupTheme->GetPadding();
+        box->SetPadding(padding);
+        GetPopupParam()->SetPadding(padding);
+    }
+
+    GetPopupParam()->SetBorder(decoration->GetBorder());
+    GetPopupParam()->SetTargetSpace(popupTheme->GetTargetSpace());
+    if (!GetPopupParam()->IsMaskColorSetted()) {
+        GetPopupParam()->SetMaskColor(popupTheme->GetMaskColor());
+    }
+    if (!GetPopupParam()->IsBackgroundColorSetted()) {
+        GetPopupParam()->SetBackgroundColor(popupTheme->GetBackgroundColor());
+    }
+    if (placementOnTop_) {
+        GetPopupParam()->SetPlacement(Placement::TOP);
+    }
+
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::BUBBLE_TYPE);
+    double maxWidth = columnInfo->GetWidth(GridSystemManager::GetInstance().GetCurrentGridInfo().maxColumns);
+    box->SetMaxWidth(Dimension(maxWidth, DimensionUnit::PX));
+
+    return box;
 }
 
 } // namespace OHOS::Ace

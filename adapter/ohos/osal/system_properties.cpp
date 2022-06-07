@@ -36,7 +36,7 @@ const char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 const char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 const char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
-const char ENABLE_DEBUG_BOUNDARY_FILE_PATH[] = "/etc/enable_paint_boundary";
+const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
@@ -54,15 +54,9 @@ bool IsTraceEnabled()
             system::GetParameter("debug.ace.trace.enabled", "0") == "1");
 }
 
-bool IsDebugBoundaryEnabled()
+bool IsSvgTraceEnabled()
 {
-    if (system::GetParameter("persist.ace.debug.boundary.enabled", "0") == "1") {
-        return true;
-    }
-    if (system::GetParameter("persist.ace.debug.boundary.enabled", "0") == "2") {
-        return false;
-    }
-    return access(ENABLE_DEBUG_BOUNDARY_FILE_PATH, F_OK) == 0;
+    return (system::GetParameter("persist.ace.trace.svg.enabled", "0") == "1");
 }
 
 bool IsRosenBackendEnabled()
@@ -128,6 +122,11 @@ bool SystemProperties::IsSyscapExist(const char* cap)
 #endif
 }
 
+bool SystemProperties::GetDebugBoundaryEnabled()
+{
+    return system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
+}
+
 void SystemProperties::InitDeviceType(DeviceType)
 {
     // Do nothing, no need to store type here, use system property at 'GetDeviceType' instead.
@@ -138,9 +137,26 @@ int SystemProperties::GetArkProperties()
     return system::GetIntParameter<int>("persist.ark.properties", -1);
 }
 
-std::string SystemProperties::GetAsmInterOption()
+size_t SystemProperties::GetGcThreadNum()
 {
-    return system::GetParameter("persist.ark.asminter", "");
+    size_t defaultGcThreadNums = 7;
+    return system::GetUintParameter<size_t>("persist.ark.gcthreads", defaultGcThreadNums);
+}
+
+size_t SystemProperties::GetLongPauseTime()
+{
+    size_t defaultLongPauseTime = 40; // 40ms
+    return system::GetUintParameter<size_t>("persist.ark.longpausetime", defaultLongPauseTime);
+}
+
+bool SystemProperties::GetAsmInterpreterEnabled()
+{
+    return system::GetParameter("persist.ark.asminterpreter", "false") == "true";
+}
+
+std::string SystemProperties::GetAsmOpcodeDisableRange()
+{
+    return system::GetParameter("persist.ark.asmopcodedisablerange", "");
 }
 
 bool SystemProperties::IsScoringEnabled(const std::string& name)
@@ -157,6 +173,7 @@ bool SystemProperties::IsScoringEnabled(const std::string& name)
 }
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
+bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 int32_t SystemProperties::deviceWidth_ = 0;
@@ -177,11 +194,9 @@ ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
-bool SystemProperties::debugBoundaryEnabled_ = IsDebugBoundaryEnabled();
+bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 bool SystemProperties::debugEnabled_ = IsDebugEnabled();
-int32_t SystemProperties::windowPosX_ = 0;
-int32_t SystemProperties::windowPosY_ = 0;
 bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
 
 DeviceType SystemProperties::GetDeviceType()
@@ -232,9 +247,10 @@ void SystemProperties::InitDeviceInfo(
 
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();
+    svgTraceEnable_ = IsSvgTraceEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
-    debugBoundaryEnabled_ = IsDebugBoundaryEnabled();
+    debugBoundaryEnabled_ = system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;

@@ -104,6 +104,11 @@ public:
         return !!pageTransitionFunction_;
     }
 
+    const std::string& GetName() const
+    {
+        return name_;
+    }
+
 protected:
     virtual RefPtr<Component> BuildChild();
     void Apply(const RefPtr<Element>& child) override;

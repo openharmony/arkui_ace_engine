@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("config_js_engine.gni")
+import("preview_common.gni")
 
 # js engine common configs
 js_engines = []
@@ -26,7 +27,6 @@ if (enable_ark_preview) {
   }
   js_engines += [ ark_engine ]
   build_for_preview = true
-  xcomponent_components_support = true
   use_external_icu = "shared"
 } else {
   qjs_engine = {
@@ -35,33 +35,14 @@ if (enable_ark_preview) {
     engine_defines = [ "USE_QUICKJS_ENGINE" ]
   }
   js_engines += [ qjs_engine ]
-  xcomponent_components_support = true
 }
 
 # windows platform defines and configs
-defines = [
+defines += [
   "MAC_PLATFORM",
   "UNICODE",
   "SK_BUILD_FONT_MGR_FOR_PREVIEW_MAC",
 ]
-use_curl_download = true
-accessibility_support = true
-rich_components_support = true
-advance_components_support = false
-form_components_support = true
-plugin_components_support = false
-connect_server_support = false
-enable_rosen_backend = false
-enable_standard_input = false
-enable_system_clipboard = false
-
-if (form_components_support) {
-  defines += [ "FORM_SUPPORTED" ]
-}
-
-if (xcomponent_components_support) {
-  defines += [ "XCOMPONENT_SUPPORTED" ]
-}
 
 cflags_cc = [
   "-std=c++17",

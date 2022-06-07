@@ -88,6 +88,8 @@ public:
     // Trigger garbage collection
     virtual void TriggerGarbageCollection() {}
 
+    virtual void DumpHeapSnapshot(bool isPrivate) {}
+
     virtual void NotifyFontNodes() {}
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
@@ -169,6 +171,7 @@ public:
 
     static int32_t CurrentId();
     static RefPtr<Container> Current();
+    static RefPtr<Container> GetActive();
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static void UpdateCurrent(int32_t id);
 

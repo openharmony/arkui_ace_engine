@@ -2117,15 +2117,13 @@ void RosenDecorationPainter::PaintBorderWithLine(
 }
 
 // Add for box-shadow, otherwise using PaintShadow().
-void RosenDecorationPainter::PaintBoxShadows(const SkRRect& rrect, const std::vector<Shadow>& shadows, SkCanvas* canvas)
+void RosenDecorationPainter::PaintBoxShadows(
+    const std::vector<Shadow>& shadows, const std::shared_ptr<RSNode>& rsNode)
 {
-    if (!canvas) {
-        LOGE("PaintBoxShadows failed, canvas is null.");
+    if (!rsNode) {
+        LOGE("PaintBoxShadows failed, rsNode is null.");
         return;
     }
-    canvas->save();
-    // The location of the component itself does not draw a shadow
-    canvas->clipRRect(rrect, SkClipOp::kDifference, true);
 
     if (!shadows.empty()) {
         for (const auto& shadow : shadows) {
@@ -2133,35 +2131,31 @@ void RosenDecorationPainter::PaintBoxShadows(const SkRRect& rrect, const std::ve
                 LOGW("The current shadow is not drawn if the shadow is invalid.");
                 continue;
             }
-            if (shadow.GetHardwareAcceleration()) {
-                // Do not support blurRadius and spreadRadius to paint shadow, use elevation.
-                PaintShadow(SkPath().addRRect(rrect), shadow, canvas);
-            } else {
-                SkRRect shadowRRect = rrect;
-                // Keep the original rounded corners.
-                SkVector fRadii[4] = { rrect.radii(SkRRect::kUpperLeft_Corner),
-                    rrect.radii(SkRRect::kUpperRight_Corner), rrect.radii(SkRRect::kLowerRight_Corner),
-                    rrect.radii(SkRRect::kLowerLeft_Corner) };
-
-                SkScalar left = rrect.rect().left();
-                SkScalar top = rrect.rect().top();
-                auto width = rrect.width() + DOUBLE_WIDTH * shadow.GetSpreadRadius();
-                auto height = rrect.height() + DOUBLE_WIDTH * shadow.GetSpreadRadius();
-                SkRect skRect {};
-                skRect.setXYWH(left + SkDoubleToScalar(shadow.GetOffset().GetX() - shadow.GetSpreadRadius()),
-                    top + SkDoubleToScalar(shadow.GetOffset().GetY() - shadow.GetSpreadRadius()),
-                    SkDoubleToScalar(width > 0.0 ? width : 0.0), SkDoubleToScalar(height > 0.0 ? height : 0.0));
-                shadowRRect.setRectRadii(skRect, fRadii);
-                SkPaint paint;
-                paint.setColor(shadow.GetColor().GetValue());
-                paint.setAntiAlias(true);
-                paint.setMaskFilter(SkMaskFilter::MakeBlur(
-                    SkBlurStyle::kNormal_SkBlurStyle, ConvertRadiusToSigma(shadow.GetBlurRadius())));
-                canvas->drawRRect(shadowRRect, paint);
-            }
+            PaintShadow(SkPath(), shadow, rsNode);
         }
+    } else {
+        rsNode->SetShadowRadius(0.f);
+        rsNode->SetShadowElevation(0.f);
     }
-    canvas->restore();
+}
+
+void RosenDecorationPainter::PaintShadow(
+    const SkPath& path, const Shadow& shadow, const std::shared_ptr<RSNode>& rsNode)
+{
+    if (!rsNode || !shadow.IsValid()) {
+        return;
+    }
+    if (!path.isEmpty()) {
+        rsNode->SetShadowPath(Rosen::RSPath::CreateRSPath(path));
+    }
+    rsNode->SetShadowColor(shadow.GetColor().GetValue());
+    rsNode->SetShadowOffsetX(shadow.GetOffset().GetX());
+    rsNode->SetShadowOffsetY(shadow.GetOffset().GetY());
+    if (shadow.GetHardwareAcceleration()) {
+        rsNode->SetShadowElevation(shadow.GetElevation());
+    } else {
+        rsNode->SetShadowRadius(ConvertRadiusToSigma(shadow.GetBlurRadius()));
+    }
 }
 
 void RosenDecorationPainter::PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas)

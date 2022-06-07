@@ -77,44 +77,62 @@ public:
     {
         JSClass<JSWebCookie>::Declare("WebCookie");
         JSClass<JSWebCookie>::CustomMethod("setCookie", &JSWebCookie::SetCookie);
+        JSClass<JSWebCookie>::CustomMethod("getCookie", &JSWebCookie::GetCookie);
+        JSClass<JSWebCookie>::CustomMethod("deleteEntireCookie", &JSWebCookie::DeleteEntirelyCookie);
         JSClass<JSWebCookie>::CustomMethod("saveCookieSync", &JSWebCookie::SaveCookieSync);
         JSClass<JSWebCookie>::Bind(globalObj, JSWebCookie::Constructor, JSWebCookie::Destructor);
     }
 
     void SetWebCookie(WebCookie* manager)
     {
-        if (manager) {
+        if (manager != nullptr) {
             manager_ = manager;
         }
     }
 
     void SetCookie(const JSCallbackInfo& args)
     {
-        if (!manager_) {
-            return;
-        }
         std::string url;
         std::string value;
         bool result = false;
-        if (args[0]->IsString()) {
+        if (args.Length() >= 2 && args[0]->IsString() && args[1]->IsString()) {
             url = args[0]->ToString();
-        }
-        if (args[1]->IsString()) {
             value = args[1]->ToString();
+            if (manager_ != nullptr) {
+                result = manager_->SetCookie(url, value);
+            }
         }
-        result = manager_->SetCookie(url, value);
         auto jsVal = JSVal(ToJSValue(result));
         auto returnValue = JSRef<JSVal>::Make(jsVal);
         args.SetReturnValue(returnValue);
     }
 
-    void SaveCookieSync(const JSCallbackInfo& args)
+    void GetCookie(const JSCallbackInfo& args)
     {
-        if (!manager_) {
+        std::string result = "";
+        if (manager_ != nullptr && args.Length() >= 1 && args[0]->IsString()) {
+            std::string url = args[0]->ToString();
+            result = manager_->GetCookie(url);
+        }
+        auto jsVal = JSVal(ToJSValue(result));
+        auto returnValue = JSRef<JSVal>::Make(jsVal);
+        args.SetReturnValue(returnValue);
+    }
+
+    void DeleteEntirelyCookie(const JSCallbackInfo& args)
+    {
+        if (manager_ == nullptr) {
             return;
         }
+        manager_->DeleteEntirelyCookie();
+    }
+
+    void SaveCookieSync(const JSCallbackInfo& args)
+    {
         bool result = false;
-        result = manager_->SaveCookieSync();
+        if (manager_ != nullptr) {
+            result = manager_->SaveCookieSync();
+        }
         auto jsVal = JSVal(ToJSValue(result));
         auto returnValue = JSRef<JSVal>::Make(jsVal);
         args.SetReturnValue(returnValue);
@@ -193,6 +211,12 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("accessBackward", &JSWebController::AccessBackward);
     JSClass<JSWebController>::CustomMethod("clearHistory", &JSWebController::ClearHistory);
     JSClass<JSWebController>::CustomMethod("getCookieManager", &JSWebController::GetCookieManager);
+    JSClass<JSWebController>::CustomMethod("backOrForward", &JSWebController::BackOrForward);
+    JSClass<JSWebController>::CustomMethod("zoomIn", &JSWebController::ZoomIn);
+    JSClass<JSWebController>::CustomMethod("zoomOut", &JSWebController::ZoomOut);
+    JSClass<JSWebController>::CustomMethod("getPageHeight", &JSWebController::GetPageHeight);
+    JSClass<JSWebController>::CustomMethod("getTitle", &JSWebController::GetTitle);
+    JSClass<JSWebController>::CustomMethod("getWebId", &JSWebController::GetWebId);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
     JSWebCookie::JSBind(globalObj);
 }
@@ -445,6 +469,70 @@ void JSWebController::GetCookieManager(const JSCallbackInfo& args)
             jsWebCookieInit_ = true;
         }
         args.SetReturnValue(jsWebCookie_);
+    }
+}
+
+void JSWebController::BackOrForward(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController BackOrForward");
+    ContainerScope scope(instanceId_);
+    int32_t step = 0;
+    if (args.Length() < 1 || !ConvertFromJSValue(args[0], step)) {
+        LOGE("BackOrForward parameter is invalid.");
+        return;
+    }
+    if (webController_) {
+        webController_->BackOrForward(step);
+    }
+}
+
+void JSWebController::ZoomIn(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController ZoomIn");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        bool result = webController_->ZoomIn();
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+    }
+}
+
+void JSWebController::ZoomOut(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController ZoomOut");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        bool result = webController_->ZoomOut();
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+    }
+}
+
+void JSWebController::GetPageHeight(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController GetPageHeight");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        int result = webController_->GetPageHeight();
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+    }
+}
+
+void JSWebController::GetTitle(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController GetTitle");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        std::string result = webController_->GetTitle();
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+    }
+}
+
+void JSWebController::GetWebId(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController GetWebId");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        int result = webController_->GetWebId();
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
     }
 }
 

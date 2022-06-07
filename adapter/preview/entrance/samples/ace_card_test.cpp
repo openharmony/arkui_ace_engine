@@ -49,7 +49,6 @@ int main(int argc, const char* argv[])
     std::string appResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/AppResources";
     std::string appResourcesPathStage = "/Volumes/SSD2T/daily-test/preview/js/default_card_stage";
     std::string systemResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/SystemResources";
-    std::string fontBasePath = "/Volumes/SSD2T/daily-test/preview/js/fonts";
     constexpr double density = 2;
 #else
     std::string assetPathJs = "D:\\Workspace\\preview\\js\\default_card";
@@ -57,7 +56,6 @@ int main(int argc, const char* argv[])
     std::string appResourcesPath = "D:\\Workspace\\preview\\js\\AppResources\\assets\\entry";
     std::string appResourcesPathStage = "D:\\Workspace\\preview\\js\\default_card_stage";
     std::string systemResourcesPath = "D:\\Workspace\\preview\\js\\SystemResources\\assets\\entry";
-    std::string fontBasePath = "D:\\Workspace\\preview\\js\\fonts";
     constexpr double density = 1;
 #endif
     std::string pageProfile = "form_config";
@@ -68,7 +66,6 @@ int main(int argc, const char* argv[])
         .assetPath = assetPathJs,
         .systemResourcesPath = systemResourcesPath,
         .appResourcesPath = appResourcesPath,
-        .fontBasePath = fontBasePath,
         .deviceConfig.density = density,
         .deviceConfig.colorMode = OHOS::Ace::ColorMode::DARK,
         .windowTitle = "ACE card",
@@ -76,6 +73,7 @@ int main(int argc, const char* argv[])
         .deviceHeight = CARD_DEFAULT_HEIGHT,
         .formsEnabled = true,
         .onRender = std::move(renderCallback),
+        .physicalDeviceFontsEnabled = false,
     };
     if (argc == MAX_ARGS_COUNT && !std::strcmp(argv[1], MODEL_STAGE)) {
         args.assetPath = assetPathEtsStage;

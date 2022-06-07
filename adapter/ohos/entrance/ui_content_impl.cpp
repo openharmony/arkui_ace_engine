@@ -220,7 +220,10 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
 
 void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
 {
-    CommonInitialize(window, contentInfo, storage);
+    if (instanceId_ == -1) {
+        LOGI("UIContentImpl::Restore new migration, will initialize");
+        CommonInitialize(window, contentInfo, storage);
+    }
     startUrl_ = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo);
     if (startUrl_.empty()) {
         LOGW("UIContent Restore start url is empty");
@@ -302,6 +305,13 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             auto script = localeInfo->getScript();
             AceApplicationInfo::GetInstance().SetLocale((language == nullptr) ? "" : language,
                 (region == nullptr) ? "" : region, (script == nullptr) ? "" : script, "");
+        }
+        if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
+            SystemProperties::SetColorMode(ColorMode::DARK);
+            LOGI("UIContent set dark mode");
+        } else {
+            SystemProperties::SetColorMode(ColorMode::LIGHT);
+            LOGI("UIContent set light mode");
         }
     }
 
@@ -670,7 +680,46 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         LOGE("UIContent null config");
         return;
     }
-    LOGI("UIContent UpdateConfiguration %{public}s", config->GetName().c_str());
+    auto colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    if (colorMode.empty()) {
+        LOGW("UIContent null config");
+        return;
+    }
+    if (colorMode != OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT &&
+        colorMode != OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_DARK) {
+        LOGE("UIContent invalid color mode: %{public}s", colorMode.c_str());
+        return;
+    }
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("UIContent container is null");
+        return;
+    }
+
+    LOGI("UIContent UpdateConfiguration %{public}s, color mode:%{public}s",
+        config->GetName().c_str(), colorMode.c_str());
+    auto pipline = container->GetPipelineContext();
+    if (!pipline) {
+        LOGE("UIContent pipline is null");
+        return;
+    }
+    auto themeManager = pipline->GetThemeManager();
+    if (!themeManager) {
+        LOGE("UIContent themeManager is null");
+        return;
+    }
+    auto resConfig = container->GetResourceConfiguration();
+    if (colorMode == OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT) {
+        SystemProperties::SetColorMode(ColorMode::LIGHT);
+        container->SetColorScheme(ColorScheme::SCHEME_LIGHT);
+        resConfig.SetColorMode(ColorMode::LIGHT);
+    } else {
+        SystemProperties::SetColorMode(ColorMode::DARK);
+        container->SetColorScheme(ColorScheme::SCHEME_DARK);
+        resConfig.SetColorMode(ColorMode::DARK);
+    }
+    container->SetResourceConfiguration(resConfig);
+    themeManager->UpdateConfig(resConfig);
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason)
@@ -678,12 +727,12 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     LOGI("UIContent UpdateViewportConfig %{public}s", config.ToString().c_str());
     SystemProperties::SetResolution(config.Density());
     SystemProperties::SetDeviceOrientation(config.Height() >= config.Width() ? 0 : 1);
-    SystemProperties::SetWindowPos(config.Left(), config.Top());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (!container) {
         LOGE("UpdateViewportConfig: container is null.");
         return;
     }
+    container->SetWindowPos(config.Left(), config.Top());
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("UpdateViewportConfig: taskExecutor is null.");

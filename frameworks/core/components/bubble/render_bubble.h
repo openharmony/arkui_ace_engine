@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "include/core/SkPath.h"
+#include "base/geometry/dimension.h"
 #include "core/components/bubble/bubble_component.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/slider/render_slider.h"
@@ -23,6 +25,18 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BUBBLE_RENDER_BUBBLE_H
 
 namespace OHOS::Ace {
+namespace {
+
+constexpr Dimension BEZIER_WIDTH_HALF = 16.0_vp;
+constexpr Dimension BEZIER_HORIZON_OFFSET_FIRST = 1.3_vp;
+constexpr Dimension BEZIER_HORIZON_OFFSET_SECOND = 3.2_vp;
+constexpr Dimension BEZIER_HORIZON_OFFSET_THIRD = 6.6_vp;
+constexpr Dimension BEZIER_HORIZON_OFFSET_FOURTH = 16.0_vp;
+constexpr Dimension BEZIER_VERTICAL_OFFSET_FIRST = 0.1_vp;
+constexpr Dimension BEZIER_VERTICAL_OFFSET_SECOND = 3.0_vp;
+constexpr Dimension BEZIER_VERTICAL_OFFSET_THIRD = 8.0_vp;
+
+} // namespace
 
 class RenderBubble : public RenderNode {
     DECLARE_ACE_TYPE(RenderBubble, RenderNode);
@@ -51,7 +65,7 @@ protected:
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
     virtual void UpdateBorderRadius() {}
-    void HandleTouch();
+    void HandleTouch(const Offset& clickPosition);
     Offset GetChildPosition(const Size& childSize);
     Offset GetPositionWithPlacement(const Size& childSize, const Offset& topPosition, const Offset& bottomPosition,
         const Offset& topArrowPosition, const Offset& bottomArrowPosition);
@@ -59,6 +73,13 @@ protected:
     ErrorPositionType GetErrorPositionType(const Offset& childOffset, const Size& childSize);
     void UpdateAccessibilityInfo(Size size, Offset offset);
     void InitAccessibilityEventListener();
+    double GetArrowOffset();
+    void BuildCornerPath(SkPath& path, Placement placement, double radius);
+    void BuildTopLinePath(SkPath& path, double arrowOffset, double radius);
+    void BuildRightLinePath(SkPath& path, double arrowOffset, double radius);
+    void BuildBottomLinePath(SkPath& path, double arrowOffset, double radius);
+    void BuildLeftLinePath(SkPath& path, double arrowOffset, double radius);
+    void BuildCompletePath(SkPath& path);
 
     static const Dimension BUBBLE_SPACING;
 
@@ -67,6 +88,7 @@ protected:
     // Is there has enough space for showing arrow.
     bool showTopArrow_ = true;
     bool showBottomArrow_ = true;
+    bool showCustomArrow_ = false;
     bool useCustom_ = false;
     Edge padding_;
     Edge margin_;
@@ -86,11 +108,16 @@ protected:
     RefPtr<RawRecognizer> rawDetector_;
     RefPtr<BubbleComponent> bubbleComponent_;
     WeakPtr<StackElement> weakStack_;
+    Dimension targetSpace_;
 
 private:
     void InitArrowState();
     // Get size and position of target by targetId.
     void InitTargetSizeAndPosition();
+    void UpdateCustomChildPosition();
+    void GenerateChildPosition(const Size& childSize);
+    void UpdateTouchRegion();
+    TouchRegion touchRegion_;
 };
 
 } // namespace OHOS::Ace

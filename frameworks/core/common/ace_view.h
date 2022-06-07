@@ -80,11 +80,6 @@ public:
 
     virtual bool Dump(const std::vector<std::string>& params) = 0;
 
-    // Use to receive event from glfw window
-    virtual bool HandleTouchEvent(const std::vector<uint8_t>& data)
-    {
-        return false;
-    }
     // Use to receive event from pc previewer
     virtual bool HandleTouchEvent(const TouchEvent& touchEvent)
     {

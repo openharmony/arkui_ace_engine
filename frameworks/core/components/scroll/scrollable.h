@@ -21,8 +21,9 @@
 #include "core/animation/animator.h"
 #include "core/animation/friction_motion.h"
 #include "core/animation/scroll_motion.h"
+#include "core/event/axis_event.h"
 #include "core/event/touch_event.h"
-#include "core/gestures/drag_recognizer.h"
+#include "core/gestures/pan_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/gestures/timeout_recognizer.h"
 #include "core/pipeline/base/related_node.h"
@@ -41,6 +42,7 @@ constexpr int32_t SCROLL_FROM_FOCUS_JUMP = 7;
 constexpr int32_t SCROLL_FROM_ROTATE = 8;
 constexpr int32_t SCROLL_FROM_INDEXER = 9;
 constexpr int32_t SCROLL_FROM_START = 10; // from drag start
+constexpr int32_t SCROLL_FROM_AXIS = 11;
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEventCallback = std::function<void()>;
@@ -101,10 +103,8 @@ public:
 
     void SetCoordinateOffset(const Offset& offset) const
     {
-        if (timeoutRecognizer_) {
-            timeoutRecognizer_->SetCoordinateOffset(offset);
-        } else if (dragRecognizer_) {
-            dragRecognizer_->SetCoordinateOffset(offset);
+        if (panRecognizer_) {
+            panRecognizer_->SetCoordinateOffset(offset);
         }
 
         if (rawRecognizer_) {
@@ -114,8 +114,8 @@ public:
 
     void SetDragTouchRestrict(const TouchRestrict& touchRestrict)
     {
-        if (dragRecognizer_) {
-            dragRecognizer_->SetTouchRestrict(touchRestrict);
+        if (panRecognizer_) {
+            panRecognizer_->SetTouchRestrict(touchRestrict);
         }
     }
 
@@ -131,9 +131,9 @@ public:
 
     void HandleTouchDown();
     void HandleTouchUp();
-    void HandleDragStart(const DragStartInfo& info);
-    void HandleDragUpdate(const DragUpdateInfo& info);
-    void HandleDragEnd(const DragEndInfo& info);
+    void HandleDragStart(const GestureEvent& info);
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd(const GestureEvent& info);
 
     void ProcessScrollMotionStop();
 
@@ -143,13 +143,23 @@ public:
     }
     bool HandleEvent(const TouchEvent& event) override
     {
-        if (timeoutRecognizer_) {
-            timeoutRecognizer_->HandleEvent(event);
+        if (!available_) {
+            return true;
+        }
+        if (panRecognizer_) {
+            panRecognizer_->HandleEvent(event);
         }
         if (rawRecognizer_) {
             return rawRecognizer_->HandleEvent(event);
         }
         return true;
+    }
+    bool HandleEvent(const AxisEvent& event) override
+    {
+        if (panRecognizer_) {
+            return panRecognizer_->HandleEvent(event);
+        }
+        return false;
     }
 
     void SetScrollEnd(const ScrollEventCallback& scrollEnd)
@@ -246,6 +256,11 @@ public:
 
     static const RefPtr<SpringProperty>& GetDefaultOverSpringProperty();
 
+    RefPtr<PanRecognizer> GetPanRecognizer() const
+    {
+        return panRecognizer_;
+    }
+
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
@@ -263,8 +278,7 @@ private:
     DragCancelRefreshCallback dragCancelCallback_;
     WatchFixCallback watchFixCallback_;
     Axis axis_;
-    RefPtr<TimeoutRecognizer> timeoutRecognizer_;
-    RefPtr<DragRecognizer> dragRecognizer_;
+    RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<Animator> controller_;
     RefPtr<Animator> springController_;

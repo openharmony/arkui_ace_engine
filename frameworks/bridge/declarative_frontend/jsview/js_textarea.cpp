@@ -13,18 +13,19 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/js_textarea.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 
 #include <vector>
 
-#include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
-#include "bridge/declarative_frontend/engine/functions/js_function.h"
-#include "bridge/declarative_frontend/jsview/js_container_base.h"
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -100,20 +101,29 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::Declare("TextArea");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSTextArea>::StaticMethod("create", &JSTextArea::Create, opt);
-    JSClass<JSTextArea>::StaticMethod("placeholderColor", &JSTextArea::SetPlaceholderColor);
-    JSClass<JSTextArea>::StaticMethod("placeholderFont", &JSTextArea::SetPlaceholderFont);
-    JSClass<JSTextArea>::StaticMethod("backgroundColor", &JSTextArea::SetBackgroundColor);
-    JSClass<JSTextArea>::StaticMethod("textAlign", &JSTextArea::SetTextAlign);
-    JSClass<JSTextArea>::StaticMethod("caretColor", &JSTextArea::SetCaretColor);
-    JSClass<JSTextArea>::StaticMethod("height", &JSTextArea::JsHeight);
-    JSClass<JSTextArea>::StaticMethod("padding", &JSTextArea::JsPadding);
-    JSClass<JSTextArea>::StaticMethod("fontSize", &JSTextArea::SetFontSize);
-    JSClass<JSTextArea>::StaticMethod("fontColor", &JSTextArea::SetTextColor);
-    JSClass<JSTextArea>::StaticMethod("fontWeight", &JSTextArea::SetFontWeight);
-    JSClass<JSTextArea>::StaticMethod("fontStyle", &JSTextArea::SetFontStyle);
-    JSClass<JSTextArea>::StaticMethod("fontFamily", &JSTextArea::SetFontFamily);
-    JSClass<JSTextArea>::StaticMethod("inputFilter", &JSTextArea::SetInputFilter);
-    JSClass<JSTextArea>::StaticMethod("onChange", &JSTextArea::SetOnChange);
+    JSClass<JSTextArea>::StaticMethod("placeholderColor", &JSTextField::SetPlaceholderColor);
+    JSClass<JSTextArea>::StaticMethod("placeholderFont", &JSTextField::SetPlaceholderFont);
+    JSClass<JSTextArea>::StaticMethod("backgroundColor", &JSTextField::SetBackgroundColor);
+    JSClass<JSTextArea>::StaticMethod("textAlign", &JSTextField::SetTextAlign);
+    JSClass<JSTextArea>::StaticMethod("caretColor", &JSTextField::SetCaretColor);
+    JSClass<JSTextArea>::StaticMethod("height", &JSTextField::JsHeight);
+    JSClass<JSTextArea>::StaticMethod("padding", &JSTextField::JsPadding);
+    JSClass<JSTextArea>::StaticMethod("border", &JSTextField::JsBorder);
+    JSClass<JSTextArea>::StaticMethod("borderWidth", &JSTextField::JsBorderWidth);
+    JSClass<JSTextArea>::StaticMethod("borderColor", &JSTextField::JsBorderColor);
+    JSClass<JSTextArea>::StaticMethod("borderStyle", &JSTextField::JsBorderStyle);
+    JSClass<JSTextArea>::StaticMethod("borderRadius", &JSTextField::JsBorderRadius);
+    JSClass<JSTextArea>::StaticMethod("fontSize", &JSTextField::SetFontSize);
+    JSClass<JSTextArea>::StaticMethod("fontColor", &JSTextField::SetTextColor);
+    JSClass<JSTextArea>::StaticMethod("fontWeight", &JSTextField::SetFontWeight);
+    JSClass<JSTextArea>::StaticMethod("fontStyle", &JSTextField::SetFontStyle);
+    JSClass<JSTextArea>::StaticMethod("fontFamily", &JSTextField::SetFontFamily);
+    JSClass<JSTextArea>::StaticMethod("inputFilter", &JSTextField::SetInputFilter);
+    JSClass<JSTextArea>::StaticMethod("hoverEffect", &JSTextField::JsHoverEffect);
+    JSClass<JSTextArea>::StaticMethod("onChange", &JSTextField::SetOnChange);
+    JSClass<JSTextArea>::StaticMethod("onCopy", &JSTextField::SetOnCopy);
+    JSClass<JSTextArea>::StaticMethod("onCut", &JSTextField::SetOnCut);
+    JSClass<JSTextArea>::StaticMethod("onPaste", &JSTextField::SetOnPaste);
     JSClass<JSTextArea>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextArea>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSTextArea>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -121,44 +131,9 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTextArea>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTextArea>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSTextArea>::StaticMethod("onCopy", &JSTextArea::SetOnCopy);
-    JSClass<JSTextArea>::StaticMethod("onCut", &JSTextArea::SetOnCut);
-    JSClass<JSTextArea>::StaticMethod("onPaste", &JSTextArea::SetOnPaste);
+    JSClass<JSTextArea>::StaticMethod("copyOption", &JSTextField::SetCopyOption);
     JSClass<JSTextArea>::Inherit<JSViewAbstract>();
     JSClass<JSTextArea>::Bind(globalObj);
-}
-
-void JSTextArea::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
-    const RefPtr<TextFieldComponent>& component, const Border& boxBorder,
-    const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme)
-{
-    RefPtr<Decoration> decoration = component->GetDecoration();
-    RefPtr<Decoration> boxDecoration = boxComponent->GetBackDecoration();
-    if (!decoration) {
-        decoration = AceType::MakeRefPtr<Decoration>();
-    }
-    if (boxDecoration) {
-        Border border = decoration->GetBorder();
-        border.SetLeftEdge(boxBorder.Left());
-        border.SetRightEdge(boxBorder.Right());
-        border.SetTopEdge(boxBorder.Top());
-        border.SetBottomEdge(boxBorder.Bottom());
-        border.SetBorderRadius(textFieldTheme->GetBorderRadius());
-        decoration->SetBorder(border);
-        component->SetOriginBorder(decoration->GetBorder());
-
-        if (boxDecoration->GetImage() || boxDecoration->GetGradient().IsValid()) {
-            // clear box properties except background image and radius.
-            boxDecoration->SetBackgroundColor(Color::TRANSPARENT);
-            Border border;
-            border.SetBorderRadius(textFieldTheme->GetBorderRadius());
-            boxDecoration->SetBorder(border);
-        } else {
-            boxDecoration = AceType::MakeRefPtr<Decoration>();
-            boxDecoration->SetBorderRadius(textFieldTheme->GetBorderRadius());
-            boxComponent->SetBackDecoration(boxDecoration);
-        }
-    }
 }
 
 void JSTextArea::Create(const JSCallbackInfo& info)
@@ -166,6 +141,7 @@ void JSTextArea::Create(const JSCallbackInfo& info)
     RefPtr<TextFieldComponent> textAreaComponent = AceType::MakeRefPtr<TextFieldComponent>();
     textAreaComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     textAreaComponent->SetTextInputType(TextInputType::MULTILINE);
+    textAreaComponent->SetHoverAnimationType(HoverAnimationType::BOARD);
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
 
     ViewStackProcessor::GetInstance()->Push(textAreaComponent);
@@ -176,7 +152,7 @@ void JSTextArea::Create(const JSCallbackInfo& info)
     if (boxComponent->GetBackDecoration()) {
         boxBorder = boxComponent->GetBackDecoration()->GetBorder();
     }
-    UpdateDecoration(boxComponent, textAreaComponent, boxBorder, theme);
+    JSTextField::UpdateDecoration(boxComponent, textAreaComponent, boxBorder, theme);
 
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("textarea create error, info is non-valid");
@@ -201,365 +177,6 @@ void JSTextArea::Create(const JSCallbackInfo& info)
     } else {
         LOGI("controller is nullptr");
     }
-}
-
-void JSTextArea::SetBackgroundColor(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg(SetBackgroundColor) is wrong, it is supposed to have atleast 1 argument");
-        return;
-    }
-
-    Color backgroundColor;
-    if (!ParseJsColor(info[0], backgroundColor)) {
-        LOGE("the info[0] is null");
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (component) {
-        component->SetBgColor(backgroundColor);
-    } else {
-        LOGE("The component(SetPlaceholderColor) is null");
-    }
-}
-
-void JSTextArea::SetPlaceholderColor(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg(SetPlaceholderColor) is wrong, it is supposed to have atleast 1 argument");
-        return;
-    }
-
-    Color placeholderColor;
-    if (!ParseJsColor(info[0], placeholderColor)) {
-        LOGE("the info[0] is null");
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (component) {
-        component->SetPlaceholderColor(placeholderColor);
-        component->SetFocusPlaceholderColor(placeholderColor);
-    } else {
-        LOGE("The component(SetPlaceholderColor) is null");
-    }
-}
-
-void JSTextArea::SetPlaceholderFont(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("PlaceholderFont create error, info is non-valid");
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("The component(SetPlaceholderFont) is null");
-        return;
-    }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-
-    auto fontSize = paramObject->GetProperty("size");
-    TextStyle textStyle = component->GetPlaceHoldStyle();
-
-    if (!fontSize->IsNull()) {
-        Dimension size;
-        ParseJsDimensionFp(fontSize, size);
-        textStyle.SetFontSize(size);
-    }
-
-    std::string weight;
-    auto fontWeight = paramObject->GetProperty("weight");
-    if (!fontWeight->IsNull()) {
-        if (fontWeight->IsNumber()) {
-            weight = std::to_string(fontWeight->ToNumber<int32_t>());
-        } else {
-            ParseJsString(fontWeight, weight);
-        }
-        textStyle.SetFontWeight(ConvertStrToFontWeight(weight));
-    }
-
-    auto fontFamily = paramObject->GetProperty("family");
-    if (!fontFamily->IsNull()) {
-        std::vector<std::string> fontFamilies;
-        if (ParseJsFontFamilies(fontFamily, fontFamilies)) {
-            textStyle.SetFontFamilies(fontFamilies);
-        }
-    }
-
-    auto style = paramObject->GetProperty("style");
-    if (!style->IsNull()) {
-        FontStyle fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
-        textStyle.SetFontStyle(fontStyle);
-    }
-    component->SetPlaceHoldStyle(textStyle);
-}
-
-void JSTextArea::SetTextAlign(int32_t value)
-{
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("textAlign component is not valid");
-        return;
-    }
-
-    if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
-        component->SetTextAlign(TEXT_ALIGNS[value]);
-    } else {
-        LOGE("the value is error");
-    }
-}
-
-void JSTextArea::SetCaretColor(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg(SetCareColor) is wrong, it is supposed to have atleast 1 argument");
-        return;
-    }
-
-    Color color;
-    if (!ParseJsColor(info[0], color)) {
-        LOGE("info[0] is null");
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (component) {
-        component->SetCursorColor(color);
-    } else {
-        LOGE("The component(SetCaretColor) is null");
-    }
-}
-
-void JSTextArea::JsHeight(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-    Dimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        return;
-    }
-    if (LessNotEqual(value.Value(), 0.0)) {
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto textAreaComponent = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
-    if (!textAreaComponent) {
-        LOGE("JSTextArea set height failed, textAreaComponent is null.");
-        return;
-    }
-    textAreaComponent->SetHeight(value);
-}
-
-void JSTextArea::JsPadding(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
-        LOGE("arg is not a string, number or object.");
-        return;
-    }
-    Edge padding;
-    if (info[0]->IsNumber()) {
-        Dimension edgeValue;
-        if (ParseJsDimensionVp(info[0], edgeValue)) {
-            padding = Edge(edgeValue);
-        }
-    }
-    if (info[0]->IsObject()) {
-        auto object = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (!object) {
-            LOGE("Js Parse object failed. argsPtr is null.");
-            return;
-        }
-        if (object->Contains("top") || object->Contains("bottom") || object->Contains("left") ||
-            object->Contains("right")) {
-            Dimension left = Dimension(0.0, DimensionUnit::VP);
-            Dimension top = Dimension(0.0, DimensionUnit::VP);
-            Dimension right = Dimension(0.0, DimensionUnit::VP);
-            Dimension bottom = Dimension(0.0, DimensionUnit::VP);
-            ParseJsonDimensionVp(object->GetValue("left"), left);
-            ParseJsonDimensionVp(object->GetValue("top"), top);
-            ParseJsonDimensionVp(object->GetValue("right"), right);
-            ParseJsonDimensionVp(object->GetValue("bottom"), bottom);
-            padding = Edge(left, top, right, bottom);
-        }
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
-    if (component) {
-        auto decoration = component->GetDecoration();
-        decoration->SetPadding(padding);
-    }
-}
-
-void JSTextArea::SetFontSize(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    Dimension fontSize;
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetEditingStyle();
-    textStyle.SetFontSize(fontSize);
-    component->SetEditingStyle(textStyle);
-}
-
-void JSTextArea::SetTextColor(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    Color textColor;
-    if (!ParseJsColor(info[0], textColor)) {
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetEditingStyle();
-    textStyle.SetTextColor(textColor);
-    component->SetEditingStyle(textStyle);
-}
-
-void JSTextArea::SetFontWeight(const std::string& value)
-{
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetEditingStyle();
-    textStyle.SetFontWeight(ConvertStrToFontWeight(value));
-    component->SetEditingStyle(textStyle);
-}
-
-void JSTextArea::SetFontStyle(int32_t value)
-{
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
-        auto textStyle = component->GetEditingStyle();
-        textStyle.SetFontStyle(FONT_STYLES[value]);
-        component->SetEditingStyle(textStyle);
-    } else {
-        LOGE("TextArea fontStyle(%d) illegal value", value);
-    }
-}
-
-void JSTextArea::SetFontFamily(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    std::vector<std::string> fontFamilies;
-    if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        LOGE("Parse FontFamilies failed");
-        return;
-    }
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetEditingStyle();
-    textStyle.SetFontFamilies(fontFamilies);
-    component->SetEditingStyle(textStyle);
-}
-
-void JSTextArea::SetInputFilter(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-
-    std::string inputFilter;
-    if (!ParseJsString(info[0], inputFilter)) {
-        LOGE("Parse inputFilter failed");
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    component->SetInputFilter(inputFilter);
-
-    if (info[1]->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(info[1]));
-        auto resultId =
-            [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                func->Execute(info);
-            };
-        component->SetOnError(resultId);
-    }
-}
-
-void JSTextArea::SetOnChange(const JSCallbackInfo& info)
-{
-    if (!JSViewBindEvent(&TextFieldComponent::SetOnChange, info)) {
-        LOGW("Failed(OnChange) to bind event");
-    }
-    info.ReturnSelf();
-}
-
-void JSTextArea::SetOnCopy(const JSCallbackInfo& info)
-{
-    if (!JSViewBindEvent(&TextFieldComponent::SetOnCopy, info)) {
-        LOGW("Failed(OnCopy) to bind event");
-    }
-    info.ReturnSelf();
-}
-
-void JSTextArea::SetOnCut(const JSCallbackInfo& info)
-{
-    if (!JSViewBindEvent(&TextFieldComponent::SetOnCut, info)) {
-        LOGW("Failed(OnCut) to bind event");
-    }
-    info.ReturnSelf();
-}
-
-void JSTextArea::SetOnPaste(const JSCallbackInfo& info)
-{
-    if (!JSViewBindEvent(&TextFieldComponent::SetOnPaste, info)) {
-        LOGW("Failed(OnPaste) to bind event");
-    }
-    info.ReturnSelf();
 }
 
 void JSTextAreaController::JSBind(BindingTarget globalObj)

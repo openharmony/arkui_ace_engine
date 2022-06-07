@@ -85,9 +85,9 @@ public:
     virtual std::string GetWidth() const = 0;
     virtual std::string GetHeight() const = 0;
     virtual std::unique_ptr<JsonValue> GetSize() const = 0;
-    virtual std::unique_ptr<JsonValue> GetPadding() const = 0;
+    virtual std::string GetPadding() const = 0;
     virtual Dimension GetMargin(OHOS::Ace::AnimatableType type) const = 0;
-    virtual std::unique_ptr<JsonValue> GetAllMargin() const = 0;
+    virtual std::string GetAllMargin() const = 0;
     virtual std::string GetConstraintSize() const = 0;
     virtual int32_t GetLayoutPriority() const = 0;
     virtual int32_t GetLayoutWeight() const = 0;
@@ -124,9 +124,9 @@ public:
     virtual RefPtr<Decoration> GetBackDecoration() const = 0;
     virtual std::string GetBackgroundImage() const = 0;
     virtual std::string GetBackgroundColor() const = 0;
-    virtual std::unique_ptr<JsonValue> GetBackgroundImageSize() const = 0;
-    virtual std::unique_ptr<JsonValue> GetBackgroundImagePosition() const = 0;
-    virtual std::unique_ptr<JsonValue> GetAlignmentType(double width, double height) const = 0;
+    virtual std::string GetBackgroundImageSize() const = 0;
+    virtual std::string GetBackgroundImagePosition() const = 0;
+    virtual std::string GetAlignmentType(double width, double height) const = 0;
 
     // front decoration settings
     virtual RefPtr<Decoration> GetFrontDecoration() const = 0;
@@ -200,6 +200,7 @@ public:
     virtual bool GetFocusable() const = 0;
     virtual bool GetScrollable() const = 0;
     virtual bool GetLongClickable() const = 0;
+    virtual bool GetTouchable() const = 0;
     virtual bool IsSelected() const = 0;
     virtual bool IsPassword() const = 0;
     virtual bool IsChecked() const = 0;

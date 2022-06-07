@@ -159,7 +159,7 @@ bool FileSelectorParamOhos::IsCapture()
     return false;
 }
 
-void FileSelectorResultOhos::HandleFileList(std::vector<std::string> result)
+void FileSelectorResultOhos::HandleFileList(std::vector<std::string>& result)
 {
     if (callback_) {
         callback_->OnReceiveValue(result);
@@ -349,6 +349,28 @@ bool WebDelegate::AccessStep(int32_t step)
         return delegate->nweb_->CanNavigateBackOrForward(step);
     }
     return false;
+}
+
+void WebDelegate::BackOrForward(int32_t step)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("Get context failed, it is null.");
+        return;
+    }
+
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), step] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                LOGE("Get delegate failed, it is null.");
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->NavigateBackOrForward(step);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 
 bool WebDelegate::AccessBackward()
@@ -619,6 +641,30 @@ int WebDelegate::GetHitTestResult()
     return static_cast<int>(webHitType);
 }
 
+int WebDelegate::GetPageHeight()
+{
+    if (nweb_) {
+        return nweb_->ContentHeight();
+    }
+    return 0;
+}
+
+int WebDelegate::GetWebId()
+{
+    if (nweb_) {
+        return nweb_->GetWebId();
+    }
+    return -1;
+}
+
+std::string WebDelegate::GetTitle()
+{
+    if (nweb_) {
+        return nweb_->Title();
+    }
+    return "";
+}
+
 bool WebDelegate::SaveCookieSync()
 {
     if (cookieManager_) {
@@ -627,12 +673,27 @@ bool WebDelegate::SaveCookieSync()
     return false;
 }
 
-bool WebDelegate::SetCookie(const std::string url, const std::string value)
+bool WebDelegate::SetCookie(const std::string& url, const std::string& value)
 {
     if (cookieManager_) {
         return cookieManager_->SetCookie(url, value);
     }
     return false;
+}
+
+std::string WebDelegate::GetCookie(const std::string& url) const
+{
+    if (cookieManager_) {
+        return cookieManager_->ReturnCookie(url);
+    }
+    return "";
+}
+
+void WebDelegate::DeleteEntirelyCookie()
+{
+    if (cookieManager_) {
+        cookieManager_->DeleteCookieEntirely(nullptr);
+    }
 }
 
 void WebDelegate::CreatePluginResource(
@@ -825,8 +886,6 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
             webComponent_->GetGeolocationHideEventId(), pipelineContext);
         onGeolocationShowV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             webComponent_->GetGeolocationShowEventId(), pipelineContext);
-        onFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webComponent_->GetOnFocusEventId(), pipelineContext);
         onRequestFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             webComponent_->GetRequestFocusEventId(), pipelineContext);
         onErrorReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
@@ -839,6 +898,10 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
             webComponent_->GetRenderExitedId(), pipelineContext);
         onRefreshAccessedHistoryV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             webComponent_->GetRefreshAccessedHistoryId(), pipelineContext);
+        onResourceLoadV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webComponent_->GetResourceLoadId(), pipelineContext);
+        onScaleChangeV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webComponent_->GetScaleChangeId(), pipelineContext);
     }
 }
 
@@ -915,6 +978,12 @@ void WebDelegate::SetWebCallBack()
             }
             return false;
         });
+        webController->SetBackOrForwardImpl([weak = WeakClaim(this)](int32_t step) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->BackOrForward(step);
+            }
+        });
         webController->SetAccessBackwardImpl([weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             if (delegate) {
@@ -974,6 +1043,30 @@ void WebDelegate::SetWebCallBack()
                 }
                 return 0;
             });
+        webController->SetGetPageHeightImpl(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    return delegate->GetPageHeight();
+                }
+                return 0;
+            });
+        webController->SetGetWebIdImpl(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    return delegate->GetWebId();
+                }
+                return -1;
+            });
+        webController->SetGetTitleImpl(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    return delegate->GetTitle();
+                }
+                return std::string();
+            });
         webController->SetSaveCookieSyncImpl(
             [weak = WeakClaim(this)]() {
                 auto delegate = weak.Upgrade();
@@ -983,12 +1076,27 @@ void WebDelegate::SetWebCallBack()
                 return false;
             });
         webController->SetSetCookieImpl(
-            [weak = WeakClaim(this)](std::string url, std::string value) {
+            [weak = WeakClaim(this)](const std::string& url, const std::string& value) {
                 auto delegate = weak.Upgrade();
                 if (delegate) {
                     return delegate->SetCookie(url, value);
                 }
                 return false;
+            });
+        webController->SetGetCookieImpl(
+            [weak = WeakClaim(this)](const std::string& url) {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    return delegate->GetCookie(url);
+                }
+                return std::string();
+            });
+        webController->SetDeleteEntirelyCookieImpl(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->DeleteEntirelyCookie();
+                }
             });
         webController->SetWebViewJavaScriptResultCallBackImpl([weak = WeakClaim(this), uiTaskExecutor](
             WebController::JavaScriptCallBackImpl&& javaScriptCallBackImpl) {
@@ -1045,14 +1153,27 @@ void WebDelegate::SetWebCallBack()
                     }
                 });
             });
-        webController->SetOnFocusImpl(
+        webController->SetZoomInImpl(
             [weak = WeakClaim(this), uiTaskExecutor]() {
-                uiTaskExecutor.PostTask([weak]() {
+                bool result = false;
+                uiTaskExecutor.PostSyncTask([weak, &result]() {
                     auto delegate = weak.Upgrade();
                     if (delegate) {
-                        delegate->OnFocus();
+                        result = delegate->ZoomIn();
                     }
                 });
+                return result;
+            });
+        webController->SetZoomOutImpl(
+            [weak = WeakClaim(this), uiTaskExecutor]() {
+                bool result = false;
+                uiTaskExecutor.PostSyncTask([weak, &result]() {
+                    auto delegate = weak.Upgrade();
+                    if (delegate) {
+                        result = delegate->ZoomOut();
+                    }
+                });
+                return result;
             });
         webController->SetRequestFocusImpl(
             [weak = WeakClaim(this), uiTaskExecutor]() {
@@ -1201,6 +1322,7 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             setting->PutEnableRawFileAccessFromFileURLs(component->GetFileFromUrlAccessEnabled());
             setting->PutDatabaseAllowed(component->GetDatabaseAccessEnabled());
             setting->PutZoomingForTextFactor(component->GetTextZoomAtio());
+            setting->PutWebDebuggingAccess(component->GetWebDebuggingAccessEnabled());
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -1218,6 +1340,40 @@ void WebDelegate::UpdateUserAgent(const std::string& userAgent)
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
                 setting->PutUserAgent(userAgent);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateBackgroundColor(const int backgroundColor)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), backgroundColor]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                delegate->nweb_->PutBackgroundColor(backgroundColor);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateInitialScale(float scale)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), scale]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                delegate->nweb_->InitialScale(scale);
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -1459,6 +1615,23 @@ void WebDelegate::UpdateTextZoomAtio(const int32_t& textZoomAtioNum)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isWebDebuggingAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                setting->PutWebDebuggingAccess(isWebDebuggingAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::LoadUrl()
 {
     auto context = context_.Upgrade();
@@ -1534,11 +1707,48 @@ void WebDelegate::Zoom(float factor)
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void WebDelegate::OnFocus()
+bool WebDelegate::ZoomIn()
 {
-    if (onFocusV2_) {
-        onFocusV2_(std::make_shared<LoadWebOnFocusEvent>(""));
+    auto context = context_.Upgrade();
+    if (!context) {
+        return false;
     }
+    bool result = false;
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), &result]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                LOGE("Get delegate failed, it is null.");
+                return;
+            }
+            if (delegate->nweb_) {
+                result = delegate->nweb_->ZoomIn();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+    return result;
+}
+
+bool WebDelegate::ZoomOut()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return false;
+    }
+    bool result = false;
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), &result]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                LOGE("Get delegate failed, it is null.");
+                return;
+            }
+            if (delegate->nweb_) {
+                result = delegate->nweb_->ZoomOut();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+    return result;
 }
 
 sptr<OHOS::Rosen::Window> WebDelegate::CreateWindow()
@@ -1899,6 +2109,20 @@ bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
     return webComponent_->OnUrlLoadIntercept(param.get());
 }
 
+void WebDelegate::OnResourceLoad(const std::string& url)
+{
+    if (onResourceLoadV2_) {
+        onResourceLoadV2_(std::make_shared<ResourceLoadEvent>(url));
+    }
+}
+
+void WebDelegate::OnScaleChange(float oldScaleFactor, float newScaleFactor)
+{
+    if (onScaleChangeV2_) {
+        onScaleChangeV2_(std::make_shared<ScaleChangeEvent>(oldScaleFactor, newScaleFactor));
+    }
+}
+
 #ifdef OHOS_STANDARD_SYSTEM
 void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const double& y)
 {
@@ -1929,6 +2153,30 @@ void WebDelegate::HandleTouchCancel()
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
         nweb_->OnTouchCancel();
+    }
+}
+
+bool WebDelegate::OnKeyEvent(int32_t keyCode, int32_t keyAction)
+{
+    if (nweb_) {
+        return nweb_->SendKeyEvent(keyCode, keyAction);
+    }
+    return false;
+}
+
+void WebDelegate::OnFocus()
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->OnFocus();
+    }
+}
+
+void WebDelegate::OnBlur()
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->OnBlur();
     }
 }
 #endif

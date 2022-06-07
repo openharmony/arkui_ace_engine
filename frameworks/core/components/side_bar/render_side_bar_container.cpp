@@ -19,7 +19,9 @@
 #include "base/geometry/offset.h"
 #include "base/geometry/size.h"
 #include "base/log/ace_trace.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/components/box/render_box.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/layout_param.h"
@@ -51,29 +53,51 @@ RefPtr<RenderNode> RenderSideBarContainer::Create()
 
 void RenderSideBarContainer::CorrectWidth(const Dimension& width, const Dimension& minWidth, const Dimension& maxWidth)
 {
-    if (minWidth > maxWidth) {
+    if (ConvertWidthToVp(minWidth) > ConvertWidthToVp(maxWidth)) {
         LOGE("the minSideBarWidth or maxSideBarWidth is illegal, use default value");
     } else {
         minSidebarWidth_ = minWidth;
         maxSidebarWidth_ = maxWidth;
     }
 
-    if (width < minSidebarWidth_) {
+    if (ConvertWidthToVp(width) < ConvertWidthToVp(minSidebarWidth_)) {
+        if (sideBar_->GetSideBarWidth().Unit() == DimensionUnit::PERCENT) {
+            sidebarWidth_ = ConvertWidthToPercent(minSidebarWidth_);
+            return;
+        }
+
         sidebarWidth_ = minSidebarWidth_;
         return;
     }
 
-    if (width > maxSidebarWidth_) {
+    if (ConvertWidthToVp(width) > ConvertWidthToVp(maxSidebarWidth_)) {
+        if (sideBar_->GetSideBarWidth().Unit() == DimensionUnit::PERCENT) {
+            sidebarWidth_ = ConvertWidthToPercent(maxSidebarWidth_);
+            return;
+        }
+
         sidebarWidth_ = maxSidebarWidth_;
         return;
     }
+
+    if (sideBar_->GetSideBarWidth().Unit() == DimensionUnit::PERCENT) {
+        sidebarWidth_ = ConvertWidthToPercent(width);
+        return;
+    }
+
     sidebarWidth_ = width;
 }
 
 void RenderSideBarContainer::Initialize()
 {
     customSidebarWidth_ = sideBar_->GetSideBarWidth();
-    CorrectWidth(sideBar_->GetSideBarWidth(), sideBar_->GetSideBarMinWidth(), sideBar_->GetSideBarMaxWidth());
+    sidebarWidth_ = sideBar_->GetSideBarWidth();
+    if (sideBar_->GetSideBarMinWidth() > sideBar_->GetSideBarMaxWidth()) {
+        LOGW("the minSideBarWidth or maxSideBarWidth is illegal, use default value");
+    } else {
+        minSidebarWidth_ = sideBar_->GetSideBarMinWidth();
+        maxSidebarWidth_ = sideBar_->GetSideBarMaxWidth();
+    }
     status_ = sideBar_->GetSideBarStatus();
     pendingStatus_ = status_;
     curPosition_ = -sidebarWidth_;
@@ -88,8 +112,8 @@ void RenderSideBarContainer::Update(const RefPtr<Component>& component)
         return;
     }
 
-    if ((sideBar_->GetIsShow() && status_ != SideStatus::SHOW) ||
-        (!sideBar_->GetIsShow() && status_ == SideStatus::SHOW)) {
+    if ((sideBar_->GetIsShow() && status_ != SideStatus::SHOW && showSideBar_ != sideBar_->GetIsShow()) ||
+        (!sideBar_->GetIsShow() && status_ == SideStatus::SHOW && showSideBar_ != sideBar_->GetIsShow())) {
         DoSideBarAnimation();
     }
     showSideBar_ = sideBar_->GetIsShow();
@@ -106,6 +130,7 @@ void RenderSideBarContainer::Update(const RefPtr<Component>& component)
     iconHidden_ = sideBar_->GetHiddenIcon();
     iconSwitch_ = sideBar_->GetSwitchIcon();
     showControlButton_ = sideBar_->GetShowControlButton();
+    autoHide_ = sideBar_->GetAutoHide();
 
     exceptRegion_.SetRect(SystemProperties::Vp2Px(sideBar_->GetButtonLeft()),
         SystemProperties::Vp2Px(sideBar_->GetButtonTop()), SystemProperties::Vp2Px(sideBar_->GetButtonWidth()),
@@ -115,7 +140,9 @@ void RenderSideBarContainer::Update(const RefPtr<Component>& component)
         Initialize();
     } else {
         auto width = sidebarWidth_;
-        if (sideBar_->IsSideBarwidthDefined() && customSidebarWidth_ != sideBar_->GetSideBarWidth()) {
+        auto customSidebarWidthVP = ConvertWidthToVp(customSidebarWidth_);
+        auto sidebarWidthVP = ConvertWidthToVp(sideBar_->GetSideBarWidth());
+        if (sideBar_->IsSideBarwidthDefined() && customSidebarWidthVP != sidebarWidthVP) {
             customSidebarWidth_ = sideBar_->GetSideBarWidth();
             width = customSidebarWidth_;
         }
@@ -190,7 +217,7 @@ void RenderSideBarContainer::UpdateElementPosition(double offset)
 
 double RenderSideBarContainer::GetSidebarWidth() const
 {
-    return sidebarWidth_.ConvertToPx();
+    return ConvertWidthToVp(sidebarWidth_).ConvertToPx();
 }
 
 double RenderSideBarContainer::GetSlidePosition() const
@@ -205,9 +232,10 @@ bool RenderSideBarContainer::TouchTest(const Point& globalPoint, const Point& pa
         return false;
     }
 
+    auto sidebarWidthVp = ConvertWidthToVp(sidebarWidth_);
     auto paintRect = GetPaintRect();
     auto exceptRegion = Rect(paintRect.GetOffset() + exceptRegion_.GetOffset(), exceptRegion_.GetSize());
-    auto dragRect = Rect(paintRect.GetOffset() + Offset((sidebarWidth_ - DEFAULT_DRAG_REGION).ConvertToPx(), 0),
+    auto dragRect = Rect(paintRect.GetOffset() + Offset((sidebarWidthVp - DEFAULT_DRAG_REGION).ConvertToPx(), 0),
         Size(2 * DEFAULT_DRAG_REGION.ConvertToPx(), paintRect.Height()));
     auto touchRect = GetTransformRect(dragRect);
     auto point = GetTransformPoint(parentLocalPoint);
@@ -258,48 +286,136 @@ void RenderSideBarContainer::DoSideBarAnimation()
     UpdateRenderImage();
 }
 
-void RenderSideBarContainer::SetChildrenStatus()
+Dimension RenderSideBarContainer::ConvertWidthToVp(const Dimension& width) const
 {
+    if (width.Unit() == DimensionUnit::PERCENT) {
+        auto layoutSize = GetLayoutSize();
+        double value = SystemProperties::Px2Vp(width.Value() * layoutSize.Width());
+        return Dimension(value, DimensionUnit::VP);
+    }
+
+    return Dimension(width.ConvertToVp(), DimensionUnit::VP);
+}
+
+Dimension RenderSideBarContainer::ConvertWidthToPercent(const Dimension& width) const
+{
+    if (width.Unit() == DimensionUnit::PERCENT) {
+        return width;
+    }
+
+    auto percentValue = 0.0;
+    if (!NearZero(GetLayoutSize().Width())) {
+        percentValue = width.Value() / GetLayoutSize().Width();
+    }
+
+    return Dimension(percentValue, DimensionUnit::PERCENT);
+}
+
+void RenderSideBarContainer::PerformLayout()
+{
+    Size maxSize = GetLayoutParam().GetMaxSize();
     auto children = GetChildren();
+    if (children.empty()) {
+        LOGD("RenderSideBarContainer: No child in SideBarContainer. Use max size of LayoutParam.");
+        SetLayoutSize(maxSize);
+        return;
+    }
+
     if (children.size() < DEFAULT_MIX_CHILDREN_SIZE) {
         return;
     }
 
+    if (sideBar_->GetSideBarWidth().Unit() == DimensionUnit::PERCENT &&
+        sidebarWidth_.Unit() != DimensionUnit::PERCENT) {
+        CorrectWidth(sideBar_->GetSideBarWidth(), minSidebarWidth_, maxSidebarWidth_);
+    }
+
     auto begin = children.begin();
-    RefPtr<RenderNode>& content = *begin;
-    RefPtr<RenderNode>& sideBar = *(++begin);
-    RefPtr<RenderNode>& imageBox = *(++begin);
+    RefPtr<RenderNode>& imageBox = *(++(++begin));
+    LayoutParam innerLayout;
+    innerLayout.SetMaxSize(GetLayoutParam().GetMaxSize());
+    imageBox->Layout(innerLayout);
     auto box = imageBox->GetFirstChild();
     renderImage_ = box ? box->GetFirstChild() : nullptr;
 
-    static Dimension miniWidthToHide = 520.0_vp;
-    auto layoutSize = GetLayoutSize();
+    DetermineStackSize(true);
+
+    auto layoutParam = GetLayoutParam();
+    layoutParam.SetMaxSize(GetLayoutSize());
+    SetLayoutParam(layoutParam);
+
+    for (const auto& item : children) {
+        if (item->GetIsPercentSize()) {
+            innerLayout.SetMaxSize(GetLayoutSize());
+            item->Layout(innerLayout);
+        }
+    }
+
+    SetChildrenStatus();
+    PlaceChildren();
+}
+
+void RenderSideBarContainer::PlaceChildren()
+{
+    for (const auto& item : GetChildren()) {
+        auto positionedItem = AceType::DynamicCast<RenderPositioned>(item);
+        if (!positionedItem) {
+            if (item->GetPositionType() == PositionType::ABSOLUTE) {
+                auto itemOffset = PositionLayoutUtils::GetAbsoluteOffset(Claim(this), item);
+                item->SetAbsolutePosition(itemOffset);
+                continue;
+            }
+            item->SetPosition(GetNonPositionedChildOffset(item->GetLayoutSize()));
+            continue;
+        }
+        Offset offset = GetPositionedChildOffset(positionedItem);
+        positionedItem->SetPosition(offset);
+    }
+}
+
+void RenderSideBarContainer::SetChildrenStatus()
+{
+    auto children = GetChildren();
+    auto begin = children.begin();
+    RefPtr<RenderNode>& content = *begin;
+    RefPtr<RenderNode>& sideBar = *(++begin);
+
     if (status_ == SideStatus::SHOW) {
         curPosition_ = 0.0_vp;
+
+        if (ConvertWidthToVp(sidebarWidth_) < ConvertWidthToVp(minSidebarWidth_) && autoHide_) {
+            DoSideBarAnimation();
+        }
     }
-    auto autoHide = GetLayoutSize().Width() <= miniWidthToHide.ConvertToPx();
+
+    static Dimension miniWidthToHide = 520.0_vp;
+    auto layoutSize = GetLayoutSize();
+    auto sideBarWidthVP = ConvertWidthToVp(sidebarWidth_);
+    auto autoHide = layoutSize.Width() <= miniWidthToHide.ConvertToPx();
     if (status_ == SideStatus::HIDDEN) {
-        curPosition_ = -sidebarWidth_;
+        curPosition_ = -sideBarWidthVP;
     }
     if (status_ == SideStatus::AUTO) {
         if (autoHide) {
-            curPosition_ = -sidebarWidth_;
+            curPosition_ = -sideBarWidthVP;
             status_ = SideStatus::HIDDEN;
         } else {
             curPosition_ = 0.0_vp;
             status_ = SideStatus::SHOW;
         }
     }
+
+    auto curPositionVP = ConvertWidthToVp(curPosition_);
     if (sideBar_->GetSideBarContainerType() == SideBarContainerType::EMBED) {
-        content->SetLeft(sidebarWidth_ + curPosition_);
-        auto fixedSize = layoutSize.MinusWidth((sidebarWidth_ + curPosition_).ConvertToPx());
-        content->Layout(LayoutParam(fixedSize, fixedSize));
+        content->SetLeft(sideBarWidthVP + curPositionVP);
+        auto fixedSize = layoutSize.MinusWidth((sideBarWidthVP + curPositionVP).ConvertToPx());
+        content->Layout(LayoutParam(fixedSize, Size()));
     } else {
         content->SetLeft(Dimension(0));
-        content->Layout(LayoutParam(layoutSize, layoutSize));
+        content->Layout(LayoutParam(layoutSize, Size()));
     }
-    sideBar->SetLeft(curPosition_);
-    auto fixedSize = Size(sidebarWidth_.ConvertToPx(), layoutSize.Height());
+    sideBar->SetLeft(curPositionVP);
+    auto fixedSize = Size(sideBarWidthVP.ConvertToPx(), layoutSize.Height());
     sideBar->Layout(LayoutParam(fixedSize, fixedSize));
     MarkNeedRender();
 }
@@ -346,11 +462,16 @@ void RenderSideBarContainer::HandleDragUpdate(double xOffset)
     if (status_ != SideStatus::SHOW) {
         return;
     }
-    auto sideBarLine = preSidebarWidth_.ConvertToPx() + xOffset;
-    auto minValue = minSidebarWidth_.ConvertToPx();
-    auto maxValue = maxSidebarWidth_.ConvertToPx();
+    auto sideBarLine = ConvertWidthToVp(preSidebarWidth_).ConvertToPx() + xOffset;
+    auto minValue = ConvertWidthToVp(minSidebarWidth_).ConvertToPx();
+    auto maxValue = ConvertWidthToVp(maxSidebarWidth_).ConvertToPx();
     if (sideBarLine > minValue && sideBarLine < maxValue) {
-        sidebarWidth_ = Dimension(SystemProperties::Px2Vp(sideBarLine), DimensionUnit::VP);
+        if (sidebarWidth_.Unit() == DimensionUnit::PERCENT) {
+            sidebarWidth_ = ConvertWidthToPercent(Dimension(SystemProperties::Px2Vp(sideBarLine), DimensionUnit::VP));
+        } else {
+            sidebarWidth_ = Dimension(SystemProperties::Px2Vp(sideBarLine), DimensionUnit::VP);
+        }
+
         SetChildrenStatus();
         return;
     }
@@ -365,7 +486,9 @@ void RenderSideBarContainer::HandleDragUpdate(double xOffset)
         return;
     }
     sidebarWidth_ = minSidebarWidth_;
-    DoSideBarAnimation();
+    if (autoHide_) {
+        DoSideBarAnimation();
+    }
 }
 
 void RenderSideBarContainer::HandleDragStart()

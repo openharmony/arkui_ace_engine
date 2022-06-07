@@ -37,7 +37,8 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     void Paint(RenderContext& context, const Offset& offset) override;
-
+    bool HandleMouseEvent(const MouseEvent& event) override;
+    void HandleMouseHoverEvent(MouseState mouseState) override;
     void PushTask(const TaskFunction& func);
 
     void SetDelegate(const RefPtr<XComponentDelegate>& delegate)
@@ -61,8 +62,18 @@ public:
         xcomponentSizeChangeEvent_ = std::move(xcomponentSizeChangeEvent);
     }
 
+    void SetXComponentId(const std::string& id)
+    {
+        id_ = id;
+    }
+
+    const std::string& GetXComponentId() const
+    {
+        return id_;
+    }
+
     void NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent);
-    void NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent);
+    bool NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent);
 
 protected:
     RefPtr<XComponentDelegate> delegate_;
@@ -81,6 +92,7 @@ protected:
     bool isXComponentInit = false;
     bool positionChange_ = false;
     bool sizeChange_ = false;
+    std::string id_;
 
     void NativeXComponentOffset(const double& x, const double& y);
 };

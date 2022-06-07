@@ -153,14 +153,16 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
 
 void JSOffscreenRenderingContext::Destructor(JSOffscreenRenderingContext* context)
 {
+    uint32_t contextId;
     if (context != nullptr) {
+        contextId = context->GetId();
         context->DecRefCount();
     } else {
         LOGE("comtext is null");
         return;
     }
     std::lock_guard<std::mutex> lock(mutex_);
-    offscreenCanvasMap_.erase(context->GetId());
+    offscreenCanvasMap_.erase(contextId);
 }
 
 void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& info)

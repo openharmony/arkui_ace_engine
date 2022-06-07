@@ -29,6 +29,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
+#include "core/components/box/drag_drop_event.h"
 #include "core/components/box/render_box.h"
 #include "core/components/common/properties/motion_path_evaluator.h"
 #include "core/components/common/properties/motion_path_option.h"
@@ -757,8 +758,8 @@ RefPtr<RenderNode> RenderNode::FindDropChild(const Point& globalPoint, const Poi
     for (auto& rect : GetTouchRectList()) {
         if (touchable_ && rect.IsInRegion(transformPoint)) {
             RefPtr<RenderNode> renderNode = AceType::Claim<RenderNode>(this);
-            auto renderBox = AceType::DynamicCast<RenderBox>(renderNode);
-            if (renderBox && renderBox->GetOnDrop()) {
+            auto targetDropNode = AceType::DynamicCast<DragDropEvent>(renderNode);
+            if (targetDropNode && targetDropNode->GetOnDrop()) {
                 return renderNode;
             }
         }
@@ -1284,6 +1285,7 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
         }
         flexWeight_ = renderComponent->GetFlexWeight();
         displayIndex_ = renderComponent->GetDisplayIndex();
+        displayIndexSetted_ = renderComponent->GetDisplayIndexSetted();
         isIgnored_ = renderComponent->IsIgnored();
         interceptTouchEvent_ = renderComponent->InterceptEvent();
         if (renderComponent->IsCustomComponent()) {
@@ -1427,6 +1429,7 @@ void RenderNode::ClearRenderObject()
     textDirection_ = TextDirection::LTR;
     onChangeCallback_ = nullptr;
     isPaintGeometryTransition_ = false;
+    displayIndexSetted_ = false;
 }
 
 RRect RenderNode::GetGlobalWindowBlurRRect(std::vector<RRect>& coords) const
@@ -2043,18 +2046,21 @@ void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!rsNode_) {
+        // workaround if parent have no RSNode while it should
         LOGD("Parent render_node has no RSNode, creating now.");
         SyncRSNodeBoundary(true, true);
     }
     if (IsTailRenderNode()) {
         if (!child->GetRSNode()) {
+            // workaround if child have no RSNode while it should
             LOGW("Child render_node has no RSNode, creating now.");
             child->SyncRSNodeBoundary(true, true);
         }
     } else {
-        if (child->rsNode_) {
+        if (child->rsNode_ && rsNode_ != child->rsNode_) {
             LOGE("Overwriting existing RSNode in child, this SHOULD NOT HAPPEN.");
         }
+        // copy parent RSNode to child if they belong to the same JSView
         child->rsNode_ = rsNode_;
     }
 #endif

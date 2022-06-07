@@ -48,6 +48,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/page/page_component.h"
+#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/event/event_trigger.h"
 #include "core/gestures/gesture_info.h"
@@ -155,13 +156,13 @@ public:
 
     bool CanReplacePage();
 
-    bool ClearInvisiblePages();
+    bool ClearInvisiblePages(const std::function<void()>& listener = nullptr);
 
     bool CallRouterBackToPopPage();
 
     void NotifyAppStorage(const std::string& key, const std::string& value);
 
-    void Dump(const std::vector<std::string>& params) const;
+    bool Dump(const std::vector<std::string>& params) const;
 
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
 
@@ -390,12 +391,6 @@ public:
     }
     void NotifyDispatchTouchEventDismiss(const TouchEvent& event) const;
 
-    using DispatchMouseEventHandler = std::function<void(const MouseEvent& event)>;
-    void SetDispatchMouseEventHandler(DispatchMouseEventHandler&& listener)
-    {
-        dispatchMouseEventHandler_.push_back(std::move(listener));
-    }
-    void NotifyDispatchMouseEventDismiss(const MouseEvent& event) const;
 
     float GetViewScale() const
     {
@@ -761,8 +756,12 @@ public:
     bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
         const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr);
 
+    void PrepareOpenImplicitAnimation();
+
     void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
         const std::function<void()>& finishCallBack = nullptr);
+
+    void PrepareCloseImplicitAnimation();
 
     bool CloseImplicitAnimation();
 
@@ -1081,6 +1080,16 @@ public:
         return eventManager_;
     }
 
+    void SetTextOverlayManager(const RefPtr<TextOverlayManager>& textOverlayManager)
+    {
+        textOverlayManager_ = textOverlayManager;
+    }
+
+    RefPtr<TextOverlayManager> GetTextOverlayManager() const
+    {
+        return textOverlayManager_;
+    }
+
     void SubscribeCtrlA(SubscribeCtrlACallback callback)
     {
         subscribeCtrlA_ = callback;
@@ -1243,6 +1252,11 @@ public:
         return isDragStart_;
     }
 
+    bool GetIsTabKeyPressed() const
+    {
+        return isTabKeyPressed_;
+    }
+
 private:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     void FlushPipelineWithoutAnimation();
@@ -1357,6 +1371,7 @@ private:
     RefPtr<SharedTransitionController> sharedTransitionController_;
     RefPtr<CardTransitionController> cardTransitionController_;
     RefPtr<EventManager> eventManager_;
+    RefPtr<TextOverlayManager> textOverlayManager_;
     EventTrigger eventTrigger_;
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;
@@ -1368,7 +1383,6 @@ private:
     std::list<IsPagePathInvalidEventHandler> isPagePathInvalidEventHandler_;
     std::list<DestroyEventHandler> destroyEventHandler_;
     std::list<DispatchTouchEventHandler> dispatchTouchEventHandler_;
-    std::list<DispatchMouseEventHandler> dispatchMouseEventHandler_;
 
     RefPtr<ManagerInterface> textFieldManager_;
     RefPtr<PlatformBridge> messageBridge_;
@@ -1470,6 +1484,7 @@ private:
     bool isShiftDown_ = false;
     bool isCtrlDown_ = false;
     bool isKeyboardA_ = false;
+    bool isTabKeyPressed_ = false;
     SubscribeCtrlACallback subscribeCtrlA_;
 
     int32_t appLabelId_ = 0;

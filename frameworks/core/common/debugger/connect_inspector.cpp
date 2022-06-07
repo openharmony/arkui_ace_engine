@@ -40,11 +40,11 @@ void OnMessage(const std::string& message)
 
     std::string checkMessage = "connected";
     if (message.find(checkMessage, 0) != std::string::npos) {
-        LOGI("Find the targeted string: %{private}s", message.c_str());
-        if (g_inspector != nullptr) {
+        LOGI("Find the target string: %{private}s", message.c_str());
+        if (g_inspector != nullptr && g_inspector->connectServer_ != nullptr) {
             g_inspector->waitingForDebugger_ = false;
             for (auto &info : g_inspector->infoBuffer_) {
-                SendMessage(info.second);
+                g_inspector->connectServer_->SendMessage(info.second);
             }
         }
     }

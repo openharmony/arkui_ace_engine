@@ -18,6 +18,7 @@
 
 #include <list>
 
+#include "base/log/ace_trace.h"
 #include "base/utils/macros.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/interpolator.h"
@@ -49,9 +50,9 @@ public:
     // But only one type will be played at a time. When playing one, the other's setting will be cleared.
     // 1. Interpolator: Play/Reverse/Stop/Finish will work
     // 2. Motion: PlayMotion will work
-    explicit Animator(const WeakPtr<PipelineContext>& context);
+    Animator(const WeakPtr<PipelineContext>& context, const char* name = nullptr);
 
-    Animator();
+    Animator(const char* name = nullptr);
 
     ~Animator() override;
 
@@ -203,6 +204,8 @@ private:
     static float scale_;
     float tempo_ = 1.0f;
     bool isBothBackwards = false;
+    std::shared_ptr<AceAsyncScopedTrace> asyncTrace_;
+    std::string animatorName_ = "Animator";
 };
 
 } // namespace OHOS::Ace

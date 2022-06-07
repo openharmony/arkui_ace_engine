@@ -122,8 +122,6 @@ template("declarative_js_engine") {
       "jsview/action_sheet/js_action_sheet.cpp",
       "jsview/dialog/js_alert_dialog.cpp",
       "jsview/dialog/js_custom_dialog_controller.cpp",
-      "jsview/js_ability_component.cpp",
-      "jsview/js_ability_component_controller.cpp",
       "jsview/js_animator.cpp",
       "jsview/js_badge.cpp",
       "jsview/js_blank.cpp",
@@ -187,6 +185,7 @@ template("declarative_js_engine") {
       "jsview/js_radio.cpp",
       "jsview/js_rect.cpp",
       "jsview/js_refresh.cpp",
+      "jsview/js_relative_container.cpp",
       "jsview/js_render_image.cpp",
       "jsview/js_rendering_context.cpp",
       "jsview/js_rendering_context_settings.cpp",
@@ -213,6 +212,7 @@ template("declarative_js_engine") {
       "jsview/js_text.cpp",
       "jsview/js_text_clock.cpp",
       "jsview/js_textarea.cpp",
+      "jsview/js_textfield.cpp",
       "jsview/js_textinput.cpp",
       "jsview/js_textpicker.cpp",
       "jsview/js_texttimer.cpp",
@@ -239,6 +239,7 @@ template("declarative_js_engine") {
         "jsview/js_camera.cpp",
         "jsview/js_piece.cpp",
         "jsview/js_rating.cpp",
+        "jsview/js_remote_window.cpp",
         "jsview/js_video.cpp",
         "jsview/js_video_controller.cpp",
       ]
@@ -249,6 +250,14 @@ template("declarative_js_engine") {
       sources += [
         "jsview/js_xcomponent.cpp",
         "jsview/js_xcomponent_controller.cpp",
+      ]
+    }
+
+    if (defined(config.enable_ability_component) &&
+        config.enable_ability_component) {
+      sources += [
+        "jsview/js_ability_component.cpp",
+        "jsview/js_ability_component_controller.cpp",
       ]
     }
 

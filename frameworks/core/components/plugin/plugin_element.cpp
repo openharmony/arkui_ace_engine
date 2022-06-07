@@ -322,55 +322,23 @@ std::string PluginElement::GetPackagePathByWant(const WeakPtr<PluginElement>& we
     std::string packagePathStr;
     auto pluginElement = weak.Upgrade();
     if (!pluginElement) {
+        LOGE("pluginElement is nullptr.");
+        pluginElement->HandleOnErrorEvent("1", "pluginElement is nullptr.");
         return packagePathStr;
     }
 
     std::vector<std::string> strList;
     pluginElement->SplitString(info.bundleName, '/', strList);
-    if (strList.empty()) {
-        LOGE("App bundleName or abilityName is empty.");
-        pluginElement->HandleOnErrorEvent("1", "App bundleName is empty");
-        return packagePathStr;
-    }
-
-    auto bms = PluginComponentManager::GetInstance()->GetBundleManager();
-    if (!bms) {
-        LOGE("Bms bundleManager is nullptr.");
-        pluginElement->HandleOnErrorEvent("1", "Bms bundleManager is nullptr.");
-        return packagePathStr;
-    }
 
     std::vector<int32_t> userIds;
     ErrCode errCode = GetActiveAccountIds(userIds);
     if (errCode != ERR_OK) {
+        LOGE("Query Active OsAccountIds failed!");
         pluginElement->HandleOnErrorEvent("1", "Query Active OsAccountIds failed!");
         return packagePathStr;
     }
-    if (strList.size() == 1) {
-        AppExecFwk::BundleInfo bundleInfo;
-        bool ret = bms->GetBundleInfo(strList[0], AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo,
-            userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID);
-        if (!ret) {
-            LOGE("Bms get bundleName failed!");
-            pluginElement->HandleOnErrorEvent("1", "Bms get bundleName failed!");
-            return packagePathStr;
-        }
-        packagePathStr = bundleInfo.applicationInfo.entryDir + "/";
-    } else {
-        AAFwk::Want want;
-        AppExecFwk::AbilityInfo abilityInfo;
-        AppExecFwk::ElementName element("", strList[0], strList[1]);
-        want.SetElement(element);
-        bool ret = bms->QueryAbilityInfo(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT,
-            userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID, abilityInfo);
-        if (!ret) {
-            LOGE("Bms get abilityInfo failed!");
-            pluginElement->HandleOnErrorEvent("1", "Bms get bundleName failed!");
-            return packagePathStr;
-        }
-        packagePathStr = abilityInfo.applicationInfo.codePath + "/" + abilityInfo.package + "/";
-    }
     GetModuleNameByWant(weak, info);
+    packagePathStr = GerPackagePathByBms(weak, info, strList, userIds);
 
     return packagePathStr;
 }
@@ -379,6 +347,8 @@ void PluginElement::GetModuleNameByWant(const WeakPtr<PluginElement>& weak, Requ
 {
     auto pluginElement = weak.Upgrade();
     if (!pluginElement) {
+        LOGE("pluginElement is nullptr.");
+        pluginElement->HandleOnErrorEvent("1", "pluginElement is nullptr.");
         return;
     }
 
@@ -445,6 +415,63 @@ void PluginElement::RunPluginTask(const WeakPtr<PluginElement>& weak, const RefP
         pluginElement->HandleOnErrorEvent("1", "package path is empty.");
         return;
     }
-    container->RunPlugin(packagePathStr, info.moduleName, info.source, plugin->GetData());
+    container->RunPlugin(packagePathStr, info.moduleName, info.source, info.moduleResPath, plugin->GetData());
+}
+
+std::string PluginElement::GerPackagePathByBms(
+    const WeakPtr<PluginElement>& weak, RequestPluginInfo& info,
+    const std::vector<std::string>& strList, const std::vector<int32_t>& userIds) const
+{
+    std::string packagePathStr;
+    auto pluginElement = weak.Upgrade();
+    if (!pluginElement) {
+        LOGE("pluginElement is nullptr.");
+        return packagePathStr;
+    }
+    auto bms = PluginComponentManager::GetInstance()->GetBundleManager();
+    if (!bms) {
+        LOGE("Bms bundleManager is nullptr.");
+        pluginElement->HandleOnErrorEvent("1", "Bms bundleManager is nullptr.");
+        return packagePathStr;
+    }
+
+    if (strList.empty()) {
+        LOGE("App bundleName or abilityName is empty.");
+        pluginElement->HandleOnErrorEvent("1", "App bundleName is empty.");
+        return packagePathStr;
+    }
+    if (strList.size() == 1) {
+        AppExecFwk::BundleInfo bundleInfo;
+        bool ret = bms->GetBundleInfo(strList[0], AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo,
+            userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID);
+        if (!ret) {
+            LOGE("Bms get bundleName failed!");
+            pluginElement->HandleOnErrorEvent("1", "Bms get bundleName failed!");
+            return packagePathStr;
+        }
+        if (bundleInfo.moduleResPaths.size() == 1) {
+            info.moduleResPath = bundleInfo.moduleResPaths[0];
+        } else {
+            LOGE("Bms moduleResPaths is empty.");
+            pluginElement->HandleOnErrorEvent("1", "Bms moduleResPaths is empty.");
+            return packagePathStr;
+        }
+        packagePathStr = bundleInfo.applicationInfo.entryDir + "/";
+    } else {
+        AAFwk::Want want;
+        AppExecFwk::AbilityInfo abilityInfo;
+        AppExecFwk::ElementName element("", strList[0], strList[1]);
+        want.SetElement(element);
+        bool ret = bms->QueryAbilityInfo(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT,
+            userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID, abilityInfo);
+        if (!ret) {
+            LOGE("Bms get abilityInfo failed!");
+            pluginElement->HandleOnErrorEvent("1", "Bms get bundleName failed!");
+            return packagePathStr;
+        }
+        packagePathStr = abilityInfo.applicationInfo.codePath + "/" + abilityInfo.package + "/";
+        info.moduleResPath = abilityInfo.resourcePath;
+    }
+    return packagePathStr;
 }
 } // namespace OHOS::Ace

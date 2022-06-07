@@ -40,6 +40,8 @@ namespace {
 
 constexpr int32_t DOUBLE_WIDTH = 2;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
+constexpr float EXTRA_WIDTH = 1.5f;
+constexpr float EXTRA_CLIP_WIDTH = 20.0f;
 constexpr float SCALE_DEFAULT = 1.0f;
 constexpr float SCALE_CHANGED = 1.05f;
 const Color BOARD_CHANGED = Color::FromRGBO(0, 0, 0, 0.05);
@@ -327,15 +329,19 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
             RosenDecorationPainter::PaintColorBlend(outerRRect, canvas, frontDecoration_->GetColorBlend(), bgColor);
         }
     }
-    if (RenderBox::needPaintDebugBoundary_) {
+    if (RenderBox::needPaintDebugBoundary_ && SystemProperties::GetDebugBoundaryEnabled()) {
         auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
         if (canvas == nullptr) {
             LOGE("Paint canvas is null.");
             return;
         }
-        DebugBoundaryPainter::PaintDebugBoundary(canvas, offset, GetLayoutSize());
-        DebugBoundaryPainter::PaintDebugCorner(canvas, offset, GetLayoutSize());
-        DebugBoundaryPainter::PaintDebugMargin(canvas, offset, GetLayoutSize(), RenderBoxBase::margin_);
+        SkAutoCanvasRestore acr(canvas, true);
+        auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
+        recordingCanvas->ClipOutsetRect(EXTRA_CLIP_WIDTH, EXTRA_CLIP_WIDTH);
+        auto size = GetLayoutSize() + Size(EXTRA_WIDTH, EXTRA_WIDTH);
+        DebugBoundaryPainter::PaintDebugBoundary(canvas, offset, size);
+        DebugBoundaryPainter::PaintDebugCorner(canvas, offset, size);
+        DebugBoundaryPainter::PaintDebugMargin(canvas, offset, size, RenderBoxBase::margin_);
     }
     if (isAccessibilityFocus_) {
         PaintAccessibilityFocus(focusRect, context);
@@ -1026,7 +1032,6 @@ void RosenRenderBox::SyncDecorationToRSNode()
         return;
     }
     dipScale_ = context->GetDipScale();
-    float shadowRadius = 0;
     Border border;
     Rosen::Vector4f cornerRadius;
     std::shared_ptr<Rosen::RSFilter> backFilter = nullptr;
@@ -1043,13 +1048,7 @@ void RosenRenderBox::SyncDecorationToRSNode()
                 backDecoration_->GetBorder().BottomLeftRadius().GetX().ConvertToPx(dipScale_)
             );
         }
-        if (!backDecoration_->GetShadows().empty()) {
-            shadowRadius = backDecoration_->GetShadows().front().GetBlurRadius();
-            shadowRadius = RosenDecorationPainter::ConvertRadiusToSigma(shadowRadius);
-            rsNode->SetShadowColor(backDecoration_->GetShadows().front().GetColor().GetValue());
-            rsNode->SetShadowOffsetX(backDecoration_->GetShadows().front().GetOffset().GetX());
-            rsNode->SetShadowOffsetY(backDecoration_->GetShadows().front().GetOffset().GetY());
-        }
+        RosenDecorationPainter::PaintBoxShadows(backDecoration_->GetShadows(), rsNode);
         if (backDecoration_->GetBlurRadius().IsValid()) {
             float radius = backDecoration_->GetBlurRadius().ConvertToPx(dipScale_);
             float backblurRadius = RosenDecorationPainter::ConvertRadiusToSigma(radius);
@@ -1080,7 +1079,6 @@ void RosenRenderBox::SyncDecorationToRSNode()
     rsNode->SetForegroundColor(frontDecoration_ ? frontDecoration_->GetBackgroundColor().GetValue() : 0);
     rsNode->SetBackgroundFilter(backFilter);
     rsNode->SetFilter(filter);
-    rsNode->SetShadowRadius(shadowRadius);
 }
 
 void RosenRenderBox::OnAttachContext()

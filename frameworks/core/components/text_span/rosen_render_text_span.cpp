@@ -21,8 +21,8 @@
 
 namespace OHOS::Ace {
 
-void RosenRenderTextSpan::UpdateText(
-    txt::ParagraphBuilder& builder, std::map<int32_t, std::map<GestureType, EventMarker>>& touchRegions)
+void RosenRenderTextSpan::UpdateText(txt::ParagraphBuilder& builder,
+    std::map<int32_t, std::map<GestureType, EventMarker>>& touchRegions, std::string& textValue)
 {
     if (!spanComponent_) {
         return;
@@ -42,10 +42,11 @@ void RosenRenderTextSpan::UpdateText(
     auto displayText = spanComponent_->GetSpanData();
     StringUtils::TransfromStrCase(displayText, (int32_t)spanStyle_.GetTextCase());
     builder.AddText(StringUtils::Str8ToStr16(displayText));
+    textValue.append(displayText);
     for (const auto& child : GetChildren()) {
         auto rosenRenderTextSpan = AceType::DynamicCast<RosenRenderTextSpan>(child);
         if (rosenRenderTextSpan) {
-            rosenRenderTextSpan->UpdateText(builder, touchRegions);
+            rosenRenderTextSpan->UpdateText(builder, touchRegions, textValue);
         }
     }
     if (spanComponent_->HasNewStyle()) {

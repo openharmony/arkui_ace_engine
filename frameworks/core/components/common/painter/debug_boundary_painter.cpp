@@ -27,7 +27,9 @@
 
 namespace OHOS::Ace {
 namespace {
-constexpr double BOUNDARY_STROKE_WIDTH = 3.0;
+constexpr double BOUNDARY_STROKE_WIDTH = 1.0;
+// offset to show right and bottom boundary for some components when paint exceed layout and cliped
+constexpr double HALF_STROKE_WIDTH_OFFSET = 0.5;
 constexpr double BOUNDARY_CORNER_LENGTH = 8.0;
 constexpr uint32_t BOUNDARY_COLOR = 0xFFFA2A2D;
 constexpr uint32_t BOUNDARY_CORNER_COLOR = 0xFF007DFF;
@@ -37,7 +39,8 @@ constexpr uint32_t BOUNDARY_MARGIN_COLOR = 0x3FFF00AA;
 void DebugBoundaryPainter::PaintDebugBoundary(SkCanvas* canvas, const Offset& offset, const Size& layoutSize)
 {
     SkPaint skpaint;
-    auto layoutRect = SkRect::MakeXYWH(offset.GetX(), offset.GetY(), layoutSize.Width(), layoutSize.Height());
+    auto layoutRect = SkRect::MakeXYWH(offset.GetX(), offset.GetY(),
+        layoutSize.Width() - HALF_STROKE_WIDTH_OFFSET, layoutSize.Height() - HALF_STROKE_WIDTH_OFFSET);
     skpaint.setColor(BOUNDARY_COLOR);
     skpaint.setStyle(SkPaint::Style::kStroke_Style);
     skpaint.setStrokeWidth(BOUNDARY_STROKE_WIDTH);
@@ -84,16 +87,23 @@ void DebugBoundaryPainter::PaintDebugCorner(SkCanvas* canvas, const Offset& offs
     canvas->drawLine(startPointX, startPointY,
         startPointX, startPointY + BOUNDARY_CORNER_LENGTH, skpaint);
     canvas->drawLine(startPointX + layoutSize.Width() - BOUNDARY_CORNER_LENGTH, startPointY,
-        startPointX + layoutSize.Width(), startPointY, skpaint);
-    canvas->drawLine(startPointX + layoutSize.Width(), startPointY,
-        startPointX + layoutSize.Width(), startPointY + BOUNDARY_CORNER_LENGTH, skpaint);
-    canvas->drawLine(startPointX, startPointY + layoutSize.Height(),
-        startPointX + BOUNDARY_CORNER_LENGTH, startPointY + layoutSize.Height(), skpaint);
-    canvas->drawLine(startPointX, startPointY + layoutSize.Height() - BOUNDARY_CORNER_LENGTH,
-        startPointX, startPointY + layoutSize.Height(), skpaint);
-    canvas->drawLine(startPointX + layoutSize.Width() - BOUNDARY_CORNER_LENGTH, startPointY + layoutSize.Height(),
-        startPointX + layoutSize.Width(), startPointY + layoutSize.Height(), skpaint);
-    canvas->drawLine(startPointX + layoutSize.Width(), startPointY + layoutSize.Height() - BOUNDARY_CORNER_LENGTH,
-        startPointX + layoutSize.Width(), startPointY + layoutSize.Height(), skpaint);
+        startPointX + layoutSize.Width() - HALF_STROKE_WIDTH_OFFSET, startPointY, skpaint);
+    canvas->drawLine(startPointX + layoutSize.Width() - HALF_STROKE_WIDTH_OFFSET, startPointY,
+        startPointX + layoutSize.Width() - HALF_STROKE_WIDTH_OFFSET,
+        startPointY + BOUNDARY_CORNER_LENGTH, skpaint);
+    canvas->drawLine(startPointX, startPointY + layoutSize.Height() - HALF_STROKE_WIDTH_OFFSET,
+        startPointX + BOUNDARY_CORNER_LENGTH,
+        startPointY + layoutSize.Height() - HALF_STROKE_WIDTH_OFFSET, skpaint);
+    canvas->drawLine(startPointX,
+        startPointY + layoutSize.Height() - BOUNDARY_CORNER_LENGTH - HALF_STROKE_WIDTH_OFFSET,
+        startPointX, startPointY + layoutSize.Height() - HALF_STROKE_WIDTH_OFFSET, skpaint);
+    canvas->drawLine(startPointX + layoutSize.Width() - BOUNDARY_CORNER_LENGTH - HALF_STROKE_WIDTH_OFFSET,
+        startPointY + layoutSize.Height() - HALF_STROKE_WIDTH_OFFSET,
+        startPointX + layoutSize.Width() - HALF_STROKE_WIDTH_OFFSET,
+        startPointY + layoutSize.Height() - HALF_STROKE_WIDTH_OFFSET, skpaint);
+    canvas->drawLine(startPointX + layoutSize.Width() - HALF_STROKE_WIDTH_OFFSET,
+        startPointY + layoutSize.Height() - BOUNDARY_CORNER_LENGTH,
+        startPointX + layoutSize.Width() - HALF_STROKE_WIDTH_OFFSET,
+        startPointY + layoutSize.Height(), skpaint);
 }
 }

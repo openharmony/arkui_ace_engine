@@ -55,6 +55,7 @@ UIMgrService::UIMgrService()
 
 UIMgrService::~UIMgrService()
 {
+    std::lock_guard<std::mutex> lock(uiMutex_);
     callbackMap_.clear();
 }
 
@@ -62,15 +63,25 @@ static std::atomic<int32_t> gDialogId = 0;
 
 class UIMgrServiceWindowChangeListener : public Rosen::IWindowChangeListener {
 public:
+    explicit UIMgrServiceWindowChangeListener(WeakPtr<Platform::AceContainer> container)
+    {
+        container_ = container;
+    }
     void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override
     {
         HILOG_INFO("UIMgrServiceWindowChangeListener size change");
-        SystemProperties::SetWindowPos(rect.posX_, rect.posY_);
+        auto container = container_.Upgrade();
+        if (container) {
+            container->SetWindowPos(rect.posX_, rect.posY_);
+        }
     }
     void OnModeChange(OHOS::Rosen::WindowMode mode) override
     {
         HILOG_INFO("UIMgrServiceWindowChangeListener mode change");
     }
+
+private:
+    WeakPtr<Platform::AceContainer> container_;
 };
 
 class UIMgrServiceInputEventConsumer : public MMI::IInputEventConsumer {
@@ -256,7 +267,8 @@ int UIMgrService::ShowDialog(const std::string& name,
         }
 
         // register surface change callback
-        OHOS::sptr<OHOS::Rosen::IWindowChangeListener> listener = new UIMgrServiceWindowChangeListener();
+        OHOS::sptr<OHOS::Rosen::IWindowChangeListener> listener =
+            new UIMgrServiceWindowChangeListener(AceType::WeakClaim(AceType::RawPtr(container)));
         dialogWindow->RegisterWindowChangeListener(listener);
 
         std::shared_ptr<MMI::IInputEventConsumer> inputEventListener =
@@ -313,6 +325,7 @@ int UIMgrService::ShowDialog(const std::string& name,
             flutterAceView, density_, width, height, dialogWindow->GetWindowId(), callback);
         Ace::Platform::AceContainer::SetUIWindow(dialogId, dialogWindow);
         Ace::Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
+        container->SetWindowPos(x, y);
 
         // run page.
         Ace::Platform::AceContainer::RunPage(
@@ -496,6 +509,7 @@ int UIMgrService::Push(const AAFwk::Want& want, const std::string& name,
 {
     HILOG_INFO("UIMgrService::Push called start");
     std::map<std::string, sptr<IUIService>>::iterator iter;
+    std::lock_guard<std::mutex> lock(uiMutex_);
     for (iter = callbackMap_.begin(); iter != callbackMap_.end(); ++iter) {
         sptr<IUIService> uiService = iter->second;
         if (uiService == nullptr) {
@@ -511,6 +525,7 @@ int UIMgrService::Request(const AAFwk::Want& want, const std::string& name, cons
 {
     HILOG_INFO("UIMgrService::Request called start");
     std::map<std::string, sptr<IUIService>>::iterator iter;
+    std::lock_guard<std::mutex> lock(uiMutex_);
     for (iter = callbackMap_.begin(); iter != callbackMap_.end(); ++iter) {
         sptr<IUIService> uiService = iter->second;
         if (uiService == nullptr) {
@@ -545,7 +560,7 @@ std::shared_ptr<EventHandler> UIMgrService::GetEventHandler()
 int UIMgrService::HandleRegister(const AAFwk::Want& want, const sptr<IUIService>& uiService)
 {
     HILOG_INFO("UIMgrService::HandleRegister called start");
-    std::lock_guard<std::mutex> lock_l(uiMutex_);
+    std::lock_guard<std::mutex> lock(uiMutex_);
     std::string keyStr = GetCallBackKeyStr(want);
     HILOG_INFO("UIMgrService::HandleRegister keyStr = %{public}s", keyStr.c_str());
     bool exist = CheckCallBackFromMap(keyStr);
@@ -560,7 +575,7 @@ int UIMgrService::HandleRegister(const AAFwk::Want& want, const sptr<IUIService>
 int UIMgrService::HandleUnregister(const AAFwk::Want& want)
 {
     HILOG_INFO("UIMgrService::HandleUnregister called start");
-    std::lock_guard<std::mutex> lock_l(uiMutex_);
+    std::lock_guard<std::mutex> lock(uiMutex_);
     std::string keyStr = GetCallBackKeyStr(want);
     bool exist = CheckCallBackFromMap(keyStr);
     if (!exist) {
@@ -577,8 +592,7 @@ std::string UIMgrService::GetCallBackKeyStr(const AAFwk::Want& want)
     HILOG_INFO("UIMgrService::GetCallBackKeyStr called start");
     AppExecFwk::ElementName element =  want.GetElement();
     std::string bundleName = element.GetBundleName();
-    std::string abilityName = element.GetAbilityName();
-    std::string keyStr = bundleName + abilityName;
+    std::string keyStr = bundleName;
     HILOG_INFO("UIMgrService::GetCallBackKeyStr called end");
     return keyStr;
 }

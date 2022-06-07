@@ -22,8 +22,6 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
-RefPtr<JSXComponentController> JSXComponent::jsXComponentController_ = nullptr;
-
 void JSXComponent::JSBind(BindingTarget globalObj)
 {
     JSClass<JSXComponent>::Declare("XComponent");
@@ -55,11 +53,20 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     xcomponentComponent->SetXComponentType(type->ToString());
     xcomponentComponent->SetLibraryName(libraryname->ToString());
 
+    XComponentClient::GetInstance().AddXComponentToXcomponentsMap(xcomponentComponent->GetId(), xcomponentComponent);
+    auto deleteCallback = [xcId = id->ToString()]() {
+        XComponentClient::GetInstance().DeleteFromXcomponentsMapById(xcId);
+        XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(xcId);
+    };
+    xcomponentComponent->RegisterDeleteCallback(deleteCallback);
+
     auto controllerObj = paramObject->GetProperty("controller");
     if (controllerObj->IsObject()) {
-        jsXComponentController_ = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSXComponentController>();
-        if (jsXComponentController_) {
-            xcomponentComponent->SetXComponentController(jsXComponentController_->GetController());
+        auto jsXComponentController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSXComponentController>();
+        if (jsXComponentController) {
+            xcomponentComponent->SetXComponentController(jsXComponentController->GetController());
+            XComponentClient::GetInstance().AddControllerToJSXComponentControllersMap(xcomponentComponent->GetId(),
+                jsXComponentController);
         }
     }
 
@@ -82,8 +89,6 @@ void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
         return true;
     };
     XComponentClient::GetInstance().RegisterCallback(getXComponentCallback);
-
-    XComponentClient::GetInstance().AddXComponentToXcomponentsMap(xcomponentComponent->GetId(), xcomponentComponent);
 
     JSRef<JSVal> jsVal;
     XComponentClient::GetInstance().GetJSVal(jsVal);
@@ -120,7 +125,7 @@ EventMarker JSXComponent::GetEventMarker(const JSCallbackInfo& info, const std::
             // load callback method, need to return a napi instance
             if (posLoad != std::string::npos) {
                 ACE_SCORING_EVENT("XComponent.onLoad");
-                func->ExecuteNew(keys, param, jsXComponentController_);
+                func->ExecuteNew(keys, param);
             } else {
                 ACE_SCORING_EVENT("XComponent.onLoad");
                 func->Execute(keys, param);

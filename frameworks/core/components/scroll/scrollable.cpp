@@ -19,8 +19,10 @@
 
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "base/log/frame_report.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/time_util.h"
+#include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -31,7 +33,6 @@ constexpr double SPRING_SCROLL_DAMPING = 15.55635;
 constexpr double MAX_FRICTION = 0.766;
 const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
     AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
-constexpr std::chrono::milliseconds SCROLL_TIMEOUT = std::chrono::milliseconds(200);
 #ifdef PRODUCT_RK
 constexpr double FRICTION = 0.6;
 constexpr double VELOCITY_SCALE = 1.0;
@@ -93,17 +94,16 @@ Scrollable::~Scrollable()
 void Scrollable::Initialize(const WeakPtr<PipelineContext>& context)
 {
     context_ = context;
+    PanDirection panDirection;
     if (axis_ == Axis::VERTICAL) {
-        dragRecognizer_ = AceType::MakeRefPtr<VerticalDragRecognizer>();
+        panDirection.type = PanDirection::VERTICAL;
     } else {
-        dragRecognizer_ = AceType::MakeRefPtr<HorizontalDragRecognizer>();
+        panDirection.type = PanDirection::HORIZONTAL;
     }
+    panRecognizer_ =
+        AceType::MakeRefPtr<PanRecognizer>(context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
 
-    dragRecognizer_->SetContext(context);
-
-    timeoutRecognizer_ = AceType::MakeRefPtr<TimeoutRecognizer>(context, dragRecognizer_, SCROLL_TIMEOUT);
-
-    dragRecognizer_->SetOnDragStart([weakScroll = AceType::WeakClaim(this)](const DragStartInfo& info) {
+    panRecognizer_->SetOnActionStart([weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
             // Send event to accessibility when scroll start.
@@ -117,13 +117,13 @@ void Scrollable::Initialize(const WeakPtr<PipelineContext>& context)
             scroll->HandleDragStart(info);
         }
     });
-    dragRecognizer_->SetOnDragUpdate([weakScroll = AceType::WeakClaim(this)](const DragUpdateInfo& info) {
+    panRecognizer_->SetOnActionUpdate([weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
             scroll->HandleDragUpdate(info);
         }
     });
-    dragRecognizer_->SetOnDragEnd([weakScroll = AceType::WeakClaim(this)](const DragEndInfo& info) {
+    panRecognizer_->SetOnActionEnd([weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
             scroll->HandleDragEnd(info);
@@ -137,7 +137,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineContext>& context)
             }
         }
     });
-    dragRecognizer_->SetOnDragCancel([weakScroll = AceType::WeakClaim(this)]() {
+    panRecognizer_->SetOnActionCancel([weakScroll = AceType::WeakClaim(this)]() {
         auto scroll = weakScroll.Upgrade();
         if (scroll && scroll->dragCancelCallback_) {
             scroll->dragCancelCallback_();
@@ -230,7 +230,7 @@ void Scrollable::StopScrollable()
     }
 }
 
-void Scrollable::HandleDragStart(const OHOS::Ace::DragStartInfo& info)
+void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
 {
     ACE_FUNCTION_TRACE();
     const auto dragPositionInMainAxis =
@@ -241,10 +241,13 @@ void Scrollable::HandleDragStart(const OHOS::Ace::DragStartInfo& info)
     // Increase the cpu frequency when sliding start.
     auto currentTime = GetSysTimestamp();
     auto increaseCpuTime = currentTime - startIncreaseTime_;
-    if (moved_ == false || increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
+    if (!moved_ || increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
         LOGI("HandleDragStart increase cpu frequency, moved_ = %{public}d", moved_);
         startIncreaseTime_ = currentTime;
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().BeginListFling();
+        }
     }
 #endif
     UpdateScrollPosition(dragPositionInMainAxis, SCROLL_FROM_START);
@@ -255,7 +258,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::DragStartInfo& info)
     }
 }
 
-void Scrollable::HandleDragUpdate(const DragUpdateInfo& info)
+void Scrollable::HandleDragUpdate(const GestureEvent& info)
 {
     ACE_FUNCTION_TRACE();
     if (!springController_->IsStopped() || !controller_->IsStopped()) {
@@ -273,21 +276,23 @@ void Scrollable::HandleDragUpdate(const DragUpdateInfo& info)
         LOGI("HandleDragUpdate increase cpu frequency, moved_ = %{public}d", moved_);
         startIncreaseTime_ = currentTime;
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().BeginListFling();
+        }
     }
 #endif
     LOGD("handle drag update, offset is %{public}lf", info.GetMainDelta());
     if (RelatedScrollEventPrepare(Offset(0.0, info.GetMainDelta()))) {
         return;
     }
-    if (UpdateScrollPosition(info.GetMainDelta(), SCROLL_FROM_UPDATE)) {
-        moved_ = true;
-    }
+    auto source = info.GetSourceDevice() == SourceType::MOUSE ? SCROLL_FROM_AXIS : SCROLL_FROM_UPDATE;
+    moved_ = UpdateScrollPosition(info.GetMainDelta(), source);
 }
 
-void Scrollable::HandleDragEnd(const DragEndInfo& info)
+void Scrollable::HandleDragEnd(const GestureEvent& info)
 {
     LOGD("handle drag end, position is %{public}lf and %{public}lf, velocity is %{public}lf",
-        info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetMainVelocity());
+        info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetMainVelocity());
     controller_->ClearAllListeners();
     springController_->ClearAllListeners();
     isDragUpdateStop_ = false;
@@ -300,11 +305,10 @@ void Scrollable::HandleDragEnd(const DragEndInfo& info)
         dragEndCallback_();
     }
     RelatedEventEnd();
-    bool isOutBoundary = outBoundaryCallback_ && outBoundaryCallback_();
-    if (isOutBoundary && scrollOverCallback_) {
+    if (outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {
         ProcessScrollOverCallback(correctVelocity);
     } else {
-        double mainPosition = GetMainOffset(info.GetGlobalLocation());
+        double mainPosition = GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()));
         LOGD("[scrollMotion]position(%{public}lf), velocity(%{public}lf)", mainPosition, correctVelocity);
         if (motion_) {
             motion_->Reset(sFriction_, mainPosition, correctVelocity);
@@ -342,7 +346,6 @@ void Scrollable::HandleDragEnd(const DragEndInfo& info)
             }
         });
         controller_->PlayMotion(motion_);
-        moved_ = true;
     }
 }
 
@@ -402,6 +405,9 @@ void Scrollable::StartSpringMotion(
 #ifdef OHOS_PLATFORM
             LOGI("springController stop increase cpu frequency");
             ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+            if (FrameReport::GetInstance().GetEnable()) {
+                FrameReport::GetInstance().EndListFling();
+            }
 #endif
             if (scroll->scrollEnd_) {
                 scroll->scrollEnd_();
@@ -430,13 +436,16 @@ void Scrollable::ProcessScrollMotionStop()
         ProcessScrollOverCallback(currentVelocity_);
     } else {
         currentVelocity_ = 0.0;
-        if (isDragUpdateStop_ || isTouching_) {
+        if (isDragUpdateStop_) {
             return;
         }
         moved_ = false;
 #ifdef OHOS_PLATFORM
         LOGI("controller stop increase cpu frequency");
         ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().EndListFling();
+        }
 #endif
         if (scrollEnd_) {
             scrollEnd_();

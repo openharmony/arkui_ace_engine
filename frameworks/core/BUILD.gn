@@ -276,6 +276,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/proxy:ace_core_components_proxy_$platform",
       "$ace_root/frameworks/core/components/qrcode:ace_core_components_qrcode_$platform",
       "$ace_root/frameworks/core/components/refresh:ace_core_components_refresh_$platform",
+      "$ace_root/frameworks/core/components/relative_container:ace_core_components_relative_container_$platform",
       "$ace_root/frameworks/core/components/root:ace_core_components_root_$platform",
       "$ace_root/frameworks/core/components/scoring:ace_core_components_scoring_$platform",
       "$ace_root/frameworks/core/components/scroll:ace_core_components_scroll_$platform",
@@ -332,7 +333,7 @@ template("ace_core_source_set") {
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       sources += [ "animation/native_curve_helper.cpp" ]
-      deps += [ "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client" ]
+      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
     }
 
     if (!use_mingw_win && !use_mac && !is_wearable_product &&
@@ -351,11 +352,17 @@ template("ace_core_source_set") {
       deps += [ "$ace_root/frameworks/core/components/xcomponent:ace_core_components_xcomponent_$platform" ]
     }
 
+    if (defined(config.enable_ability_component) &&
+        config.enable_ability_component) {
+      deps += [ "$ace_root/frameworks/core/components_v2/ability_component:ace_core_components_ability_v2_$platform" ]
+    }
+
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       if (!use_mingw_win && !use_mac) {
         sources += [ "common/form_manager.cpp" ]
         deps += [ "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform" ]
+        external_deps = [ "form_runtime:form_manager" ]
       }
     }
 
@@ -380,6 +387,7 @@ template("ace_core_source_set") {
         "$ace_root/frameworks/core/components/piece:ace_core_components_piece_$platform",
         "$ace_root/frameworks/core/components/popup:ace_core_components_popup_$platform",
         "$ace_root/frameworks/core/components/rating:ace_core_components_rating_$platform",
+        "$ace_root/frameworks/core/components/remote_window:ace_core_components_remote_window_$platform",
         "$ace_root/frameworks/core/components/select:ace_core_components_select_$platform",
         "$ace_root/frameworks/core/components/tool_bar:ace_core_components_tool_bar_$platform",
         "$ace_root/frameworks/core/components/video:ace_core_components_video_$platform",

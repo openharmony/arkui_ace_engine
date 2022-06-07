@@ -175,6 +175,8 @@ public:
 
     virtual void TriggerGarbageCollection() {}
 
+    virtual void DumpHeapSnapshot(bool isPrivate) {}
+
     virtual void RebuildAllPages() {}
 
     virtual void SetColorMode(ColorMode colorMode) {}

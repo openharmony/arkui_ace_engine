@@ -24,6 +24,7 @@
 #include "core/components/scroll/scroll_spring_effect.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components_v2/list/list_component.h"
+#include "core/components_v2/list/list_scroll_bar_controller.h"
 #include "core/event/axis_event.h"
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/pan_recognizer.h"
@@ -100,6 +101,7 @@ void RenderList::Update(const RefPtr<Component>& component)
 {
     component_ = AceType::DynamicCast<ListComponent>(component);
     ACE_DCHECK(component_);
+    InitScrollBar();
 
     RemoveAllItems();
 
@@ -151,7 +153,7 @@ void RenderList::Update(const RefPtr<Component>& component)
                     return false;
                 }
             }
-            renderList->processDragUpdate(renderList->GetMainAxis(delta));
+            renderList->ProcessDragUpdate(renderList->GetMainAxis(delta));
 
             // Stop animator of scroll bar.
             auto scrollBarProxy = renderList->scrollBarProxy_;
@@ -170,12 +172,16 @@ void RenderList::Update(const RefPtr<Component>& component)
         });
         scrollable_->SetScrollEndCallback([weak = AceType::WeakClaim(this)]() {
             auto list = weak.Upgrade();
-            if (list) {
-                auto proxy = list->scrollBarProxy_;
-                if (proxy) {
-                    proxy->StartScrollBarAnimator();
-                }
+            if (!list) {
+                LOGW("render list Upgrade fail in scroll end callback");
+                return;
             }
+            auto proxy = list->scrollBarProxy_;
+            if (proxy) {
+                proxy->StartScrollBarAnimator();
+            }
+            list->listEventFlags_[ListEvents::SCROLL_STOP] = true;
+            list->HandleListEvent();
         });
         if (vertical_) {
             scrollable_->InitRelatedParent(GetParent());
@@ -255,6 +261,75 @@ void RenderList::InitScrollBarProxy()
     scrollBarProxy_->RegisterScrollableNode({ AceType::WeakClaim(this), callback });
 }
 
+bool RenderList::IsReachStart()
+{
+    bool scrollUpToReachStart = GreatNotEqual(prevOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
+    bool scrollDownToReachStart = LessNotEqual(prevOffset_, 0.0) && GreatOrEqual(currentOffset_, 0.0);
+    return scrollUpToReachStart || scrollDownToReachStart;
+}
+
+void RenderList::InitScrollBar()
+{
+    if (scrollBar_) {
+        scrollBar_->Reset();
+        return;
+    }
+    if (!component_) {
+        return;
+    }
+    const RefPtr<ScrollBarTheme> theme = GetTheme<ScrollBarTheme>();
+    if (!theme) {
+        return;
+    }
+
+    scrollBar_ = AceType::MakeRefPtr<ScrollBar>(component_->GetScrollBar(), theme->GetShapeMode());
+    RefPtr<ListScrollBarController> controller = AceType::MakeRefPtr<ListScrollBarController>();
+    scrollBar_->SetScrollBarController(controller);
+
+    // set the scroll bar style
+    scrollBar_->SetReservedHeight(theme->GetReservedHeight());
+    scrollBar_->SetMinHeight(theme->GetMinHeight());
+    scrollBar_->SetMinDynamicHeight(theme->GetMinDynamicHeight());
+    scrollBar_->SetForegroundColor(theme->GetForegroundColor());
+    scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
+    scrollBar_->SetPadding(theme->GetPadding());
+    scrollBar_->SetScrollable(true);
+    scrollBar_->SetInactiveWidth(theme->GetNormalWidth());
+    scrollBar_->SetNormalWidth(theme->GetNormalWidth());
+    scrollBar_->SetActiveWidth(theme->GetActiveWidth());
+    scrollBar_->SetTouchWidth(theme->GetTouchWidth());
+    scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
+    SetScrollBarCallback();
+}
+
+void RenderList::SetScrollBarCallback()
+{
+    if (!scrollBar_ || !scrollBar_->NeedScrollBar()) {
+        return;
+    }
+    auto&& scrollCallback = [weakList = AceType::WeakClaim(this)](double value, int32_t source) {
+        auto list = weakList.Upgrade();
+        if (!list) {
+            LOGE("render list is released");
+            return false;
+        }
+        return list->UpdateScrollPosition(value, source);
+    };
+    auto&& barEndCallback = [weakList = AceType::WeakClaim(this)](int32_t value) {
+        auto list = weakList.Upgrade();
+        if (!list) {
+            LOGE("render list is released.");
+            return;
+        }
+        list->scrollBarOpacity_ = value;
+        list->MarkNeedRender();
+    };
+    auto&& scrollEndCallback = []() {
+        // nothing to do
+    };
+    scrollBar_->SetCallBack(scrollCallback, barEndCallback, scrollEndCallback);
+}
+
 void RenderList::PerformLayout()
 {
     UpdateAccessibilityAttr();
@@ -267,7 +342,6 @@ void RenderList::PerformLayout()
 
     const auto innerLayout = MakeInnerLayout();
     double curMainPos = LayoutOrRecycleCurrentItems(innerLayout, mainSize);
-
     // Try to request new items at end if needed
     for (size_t newIndex = startIndex_ + items_.size();; ++newIndex) {
         if (cachedCount_ != 0) {
@@ -330,6 +404,9 @@ void RenderList::PerformLayout()
         currentOffset_ -= GetMainSize(child->GetLayoutSize()) + spaceWidth_;
     }
 
+    if (IsReachStart()) {
+        listEventFlags_[ListEvents::REACH_START] = true;
+    }
     // Check if reach the start of list
     reachStart_ = GreatOrEqual(currentOffset_, 0.0);
     if (noEdgeEffect && reachStart_) {
@@ -337,6 +414,12 @@ void RenderList::PerformLayout()
         currentOffset_ = 0;
     }
 
+    bool scrollDownToReachEnd = LessNotEqual(prevMainPos_, mainSize) && GreatOrEqual(curMainPos, mainSize);
+    bool scrollUpToReachEnd = GreatNotEqual(prevMainPos_, mainSize) && LessOrEqual(curMainPos, mainSize);
+    // verify layout size to avoid trigger reach_end event at first [PerformLayout] when layout size is zero
+    if ((scrollDownToReachEnd || scrollUpToReachEnd) && GetLayoutSize().IsValid()) {
+        listEventFlags_[ListEvents::REACH_END] = true;
+    }
     if (!fixedMainSize_) {
         fixedMainSize_ = !(reachStart_ && reachEnd_);
     }
@@ -347,7 +430,6 @@ void RenderList::PerformLayout()
     auto layoutSize = SetItemsPosition(mainSize, innerLayout);
 
     // Set layout size of list component itself
-
     if ((hasHeight_ && vertical_) || (hasWidth_ && !vertical_)) {
         SetLayoutSize(GetLayoutParam().GetMaxSize());
     } else {
@@ -362,7 +444,32 @@ void RenderList::PerformLayout()
     }
 
     realMainSize_ = curMainPos - currentOffset_;
-    isAxisResponse_ = true;
+    HandleListEvent();
+    prevOffset_ = currentOffset_;
+    prevMainPos_ = curMainPos;
+}
+
+#define CASE_OF_LIST_EVENT_WITH_NO_PARAM(eventNumber, callback)        \
+    case ListEvents::eventNumber:                                      \
+        if (event.second) {                                            \
+            ResumeEventCallback(component_, &ListComponent::callback); \
+            LOGD("list event %{public}s triggered.", #eventNumber);    \
+            event.second = false;                                      \
+        }                                                              \
+        break;
+
+void RenderList::HandleListEvent()
+{
+    for (auto& event : listEventFlags_) {
+        switch (event.first) {
+            CASE_OF_LIST_EVENT_WITH_NO_PARAM(SCROLL_STOP, GetOnScrollStop);
+            CASE_OF_LIST_EVENT_WITH_NO_PARAM(REACH_START, GetOnReachStart);
+            CASE_OF_LIST_EVENT_WITH_NO_PARAM(REACH_END, GetOnReachEnd);
+            default:
+                LOGW("This event does not handle in here, please check. event number: %{public}d", event.first);
+                break;
+        }
+    }
 }
 
 Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutParam)
@@ -520,8 +627,47 @@ LayoutParam RenderList::MakeInnerLayout()
     return LayoutParam(maxSize, minSize);
 }
 
+bool RenderList::GetCurMainPosAndMainSize(double& curMainPos, double& mainSize)
+{
+    // Check validation of layout size
+    mainSize = ApplyLayoutParam();
+    if (NearZero(mainSize)) {
+        LOGW("Cannot layout using invalid view port");
+        return false;
+    }
+    const auto innerLayout = MakeInnerLayout();
+    curMainPos = LayoutOrRecycleCurrentItems(innerLayout, mainSize);
+    // Try to request new items at end if needed
+    for (size_t newIndex = startIndex_ + items_.size();; ++newIndex) {
+        if (cachedCount_ != 0) {
+            if (endCachedCount_ >= cachedCount_) {
+                break;
+            }
+        } else {
+            if (GreatOrEqual(curMainPos, endMainPos_)) {
+                break;
+            }
+        }
+        auto child = RequestAndLayoutNewItem(newIndex, innerLayout);
+        if (!child) {
+            startIndex_ = std::min(startIndex_, TotalCount());
+            break;
+        }
+        if (GreatOrEqual(curMainPos, mainSize)) {
+            ++endCachedCount_;
+        }
+        curMainPos += GetMainSize(child->GetLayoutSize()) + spaceWidth_;
+    }
+    if (selectedItem_ && selectedItemIndex_ < startIndex_) {
+        curMainPos += GetMainSize(selectedItem_->GetLayoutSize()) + spaceWidth_;
+    }
+    curMainPos -= spaceWidth_;
+    return true;
+}
+
 bool RenderList::UpdateScrollPosition(double offset, int32_t source)
 {
+    prevOffset_ = currentOffset_;
     if (source == SCROLL_FROM_START) {
         return true;
     }
@@ -530,17 +676,21 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
         return true;
     }
 
+    if (scrollBar_ && scrollBar_->NeedScrollBar()) {
+        scrollBar_->SetActive(SCROLL_FROM_CHILD != source);
+    }
+
     if (reachStart_ && reachEnd_) {
         return false;
     }
 
     if (offset > 0.0) {
-        if (reachStart_ && !scrollEffect_) {
+        if (reachStart_ && (!scrollEffect_ || source == SCROLL_FROM_AXIS)) {
             return false;
         }
         reachEnd_ = false;
     } else {
-        if (reachEnd_ && !scrollEffect_) {
+        if (reachEnd_ && (!scrollEffect_ || source == SCROLL_FROM_AXIS)) {
             return false;
         }
         reachStart_ = false;
@@ -559,6 +709,16 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
             ScrollState(SCROLL_STATE_FLING));
     }
     currentOffset_ += offset;
+    if (source == SCROLL_FROM_AXIS) {
+        double curMainPos = 0.0;
+        double mainSize = 0.0;
+        GetCurMainPosAndMainSize(curMainPos, mainSize);
+        if (currentOffset_ < 0 && curMainPos < mainSize) {
+            currentOffset_ += mainSize - curMainPos;
+        } else if (currentOffset_ > 0) {
+            currentOffset_ = 0;
+        }
+    }
     MarkNeedLayout(true);
     return true;
 }
@@ -568,6 +728,11 @@ bool RenderList::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
 {
     if (GetVisible() && fixedMainSize_ && scrollable_ && scrollable_->Available()) {
         result.emplace_back(scrollable_);
+    }
+    // when click point is in sticky item, consume the touch event to avoid clicking on the list item underneath.
+    if (currentStickyItem_ && currentStickyItem_->GetPaintRect().IsInRegion(parentLocalPoint)) {
+        currentStickyItem_->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+        return true;
     }
 
     return RenderNode::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
@@ -592,8 +757,12 @@ void RenderList::OnTouchTestHit(
     if (!scrollable_ || !scrollable_->Available()) {
         return;
     }
-
-    scrollable_->SetCoordinateOffset(coordinateOffset);
+    if (scrollBar_ && scrollBar_->InBarRegion(globalPoint_ - coordinateOffset)) {
+        scrollBar_->AddScrollBarController(coordinateOffset, result);
+    } else {
+        scrollable_->SetCoordinateOffset(coordinateOffset);
+    }
+    result.emplace_back(scrollable_);
 }
 
 double RenderList::ApplyLayoutParam()
@@ -678,8 +847,8 @@ double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, d
         for (auto it = items_.begin(); it != items_.end(); ++curIndex) {
             if (startCachedCount_ > cachedCount_) {
                 const auto& child = *(it);
-                double mainSize = GetMainSize(child->GetLayoutSize());
-                curMainPosForRecycle += mainSize + spaceWidth_;
+                double childSize = GetMainSize(child->GetLayoutSize());
+                curMainPosForRecycle += childSize + spaceWidth_;
                 currentOffset_ = curMainPosForRecycle;
                 startIndex_ = curIndex + 1;
 
@@ -698,8 +867,8 @@ double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, d
             const auto& child = *(it);
             if (LessOrEqual(curMainPos, endMainPos_)) {
                 child->Layout(layoutParam);
-                double mainSize = GetMainSize(child->GetLayoutSize());
-                curMainPos += mainSize + spaceWidth_;
+                double childSize = GetMainSize(child->GetLayoutSize());
+                curMainPos += childSize + spaceWidth_;
                 if (GreatOrEqual(curMainPos, startMainPos_)) {
                     ++it;
                     continue;
@@ -1010,9 +1179,21 @@ void RenderList::CalculateMainScrollExtent(double curMainPos, double mainSize)
     isOutOfBoundary_ = LessNotEqual(curMainPos, mainSize) || GreatNotEqual(currentOffset_, 0.0);
     // content length
     mainScrollExtent_ = curMainPos - currentOffset_;
-    // disable scroll when content length less than mainSize
-    if (scrollable_) {
-        scrollable_->MarkAvailable(GreatOrEqual(mainScrollExtent_, mainSize));
+    if (GetChildren().empty()) {
+        return;
+    }
+    Size itemSize; // Calculate all children layout size.
+    for (const auto& child : GetChildren()) {
+        itemSize += child->GetLayoutSize();
+    }
+    auto averageItemHeight = GetMainSize(itemSize) / GetChildren().size() + spaceWidth_;
+    estimatedHeight_ = averageItemHeight * TotalCount();
+    lastOffset_ = startIndex_ * averageItemHeight - currentOffset_;
+    if (estimatedHeight_ <= GetMainSize(GetLayoutSize()) && scrollBar_) {
+        LOGD("SetScrollable false, do not show scroll bar.");
+        scrollBar_->SetScrollable(false);
+    } else {
+        scrollBar_->SetScrollable(true);
     }
 }
 
@@ -1029,7 +1210,7 @@ void RenderList::ProcessDragStart(double startPosition)
     dragStartIndexPending_ = index;
 }
 
-void RenderList::processDragUpdate(double dragOffset)
+void RenderList::ProcessDragUpdate(double dragOffset)
 {
     if (!chainAnimation_) {
         return;
@@ -1043,13 +1224,14 @@ void RenderList::processDragUpdate(double dragOffset)
     double delta = FlushChainAnimation();
     currentOffset_ += delta;
     if (!NearZero(delta)) {
-        LOGE("processDragUpdate delta = %lf currentOffset_ = %lf", delta, currentOffset_);
+        LOGE("ProcessDragUpdate delta = %lf currentOffset_ = %lf", delta, currentOffset_);
     }
 }
 
 void RenderList::ProcessScrollOverCallback(double velocity)
 {
     if (!chainAnimation_) {
+        LOGD("chain animation is null, no need to handle it.");
         return;
     }
 
@@ -1418,6 +1600,14 @@ void RenderList::CreateDragDropRecognizer()
 
     auto longPressRecognizer =
         AceType::MakeRefPtr<OHOS::Ace::LongPressRecognizer>(context_, DEFAULT_DURATION, DEFAULT_FINGERS, false);
+    longPressRecognizer->SetOnAction([weakRenderList = AceType::WeakClaim(this)](const GestureEvent& info) {
+        auto renderList = weakRenderList.Upgrade();
+        if (!renderList) {
+            LOGE("LongPress action RenderList is null.");
+            return;
+        }
+        renderList->scrollable_->MarkAvailable(false);
+    });
     PanDirection panDirection;
     auto panRecognizer =
         AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(context_, DEFAULT_FINGERS, panDirection, DEFAULT_DISTANCE);
@@ -1447,6 +1637,10 @@ void RenderList::CreateDragDropRecognizer()
                 return;
             }
 
+            if (!listItem->IsMovable()) {
+                LOGI("This list item is not movable.");
+                return;
+            }
             renderList->selectedDragItem_ = listItem;
             renderList->selectedItemIndex_ = renderList->GetIndexByListItem(listItem);
             renderList->selectedDragItem_->SetHidden(true);
@@ -1547,6 +1741,9 @@ void RenderList::CreateDragDropRecognizer()
             LOGE("RenderList is null.");
             return;
         }
+        if (!renderList->selectedDragItem_ || !renderList->selectedDragItem_->IsMovable()) {
+            return;
+        }
 
         ItemDragInfo dragInfo;
         dragInfo.SetX(info.GetGlobalPoint().GetX());
@@ -1577,13 +1774,19 @@ void RenderList::CreateDragDropRecognizer()
                 renderList->insertItemIndex_ = static_cast<size_t>(targetRenderlist->GetIndexByListItem(newListItem));
             }
             if (targetRenderlist == renderList) {
-                (targetRenderlist->GetOnItemDrop())(
-                    dragInfo, static_cast<int32_t>(renderList->selectedItemIndex_), renderList->insertItemIndex_, true);
+                int32_t from = static_cast<int32_t>(renderList->selectedItemIndex_);
+                int32_t to = static_cast<int32_t>(renderList->insertItemIndex_);
+                auto moveRes = ResumeEventCallback(
+                    renderList->component_, &ListComponent::GetOnItemMove, true, from, to);
+                (targetRenderlist->GetOnItemDrop())(dragInfo, from, to, moveRes);
+                renderList->MarkNeedLayout();
             } else {
                 (targetRenderlist->GetOnItemDrop())(dragInfo, -1, renderList->insertItemIndex_, true);
+                targetRenderlist->MarkNeedLayout();
             }
         }
         renderList->SetPreTargetRenderList(nullptr);
+        renderList->scrollable_->MarkAvailable(true);
     });
     panRecognizer->SetOnActionCancel([weakRenderList = AceType::WeakClaim(this), context = context_]() {
         auto pipelineContext = context.Upgrade();
@@ -1597,6 +1800,9 @@ void RenderList::CreateDragDropRecognizer()
             LOGE("RenderList is null.");
             return;
         }
+        if (!renderList->selectedDragItem_ || !renderList->selectedDragItem_->IsMovable()) {
+            return;
+        }
 
         if (renderList->hasDragItem_) {
             auto stackElement = pipelineContext->GetLastStack();
@@ -1606,6 +1812,7 @@ void RenderList::CreateDragDropRecognizer()
 
         renderList->SetPreTargetRenderList(nullptr);
         renderList->selectedDragItem_->SetHidden(false);
+        renderList->scrollable_->MarkAvailable(true);
         renderList->MarkNeedLayout();
     });
     std::vector<RefPtr<GestureRecognizer>> recognizers { longPressRecognizer, panRecognizer };
@@ -1681,21 +1888,7 @@ bool RenderList::IsAxisScrollable(AxisDirection direction)
             ((AxisEvent::IsDirectionDown(direction) || AxisEvent::IsDirectionRight(direction)) && !reachEnd_));
 }
 
-void RenderList::HandleAxisEvent(const AxisEvent& event)
-{
-    double degree =
-        GreatOrEqual(fabs(event.verticalAxis), fabs(event.horizontalAxis)) ? event.verticalAxis : event.horizontalAxis;
-    double offset = SystemProperties::Vp2Px(DP_PER_LINE_DESKTOP * LINE_NUMBER_DESKTOP * degree / MOUSE_WHEEL_DEGREES);
-    if (isAxisResponse_) {
-        isAxisResponse_ = false;
-        UpdateScrollPosition(-offset, SCROLL_FROM_ROTATE);
-    }
-}
-
-WeakPtr<RenderNode> RenderList::CheckAxisNode()
-{
-    return AceType::WeakClaim<RenderNode>(this);
-}
+void RenderList::HandleAxisEvent(const AxisEvent& event) {}
 
 bool RenderList::HandleMouseEvent(const MouseEvent& event)
 {

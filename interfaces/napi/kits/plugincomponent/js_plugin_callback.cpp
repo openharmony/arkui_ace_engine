@@ -49,7 +49,8 @@ bool AceJSPluginRequestParam::operator!=(const AceJSPluginRequestParam& param) c
 }
 
 JSPluginCallback::JSPluginCallback(CallBackType eventType,
-    ACECallbackInfo& cbInfo) : eventType_(eventType)
+    ACECallbackInfo& cbInfo, ACEAsyncJSCallbackInfo* jsCallbackInfo) : eventType_(eventType),
+    asyncJSCallbackInfo_(jsCallbackInfo)
 {
     uuid_++;
     cbInfo_.env = cbInfo.env;
@@ -71,6 +72,7 @@ void JSPluginCallback::DestroyAllResource(void)
     }
     cbInfo_.env = nullptr;
     cbInfo_.callback = nullptr;
+    asyncJSCallbackInfo_ = nullptr;
 }
 
 void JSPluginCallback::SetWant(const AAFwk::Want& want)
@@ -189,11 +191,6 @@ void JSPluginCallback::OnPushEventInner(const OnPluginUvWorkData* workData)
     componentTemplate.SetSource(workData->sourceName);
     componentTemplate.SetAbility(workData->abilityName);
 
-    napi_open_handle_scope(cbInfo_.env, &scope);
-    if (scope == nullptr) {
-        napi_close_handle_scope(cbInfo_.env, scope);
-        return;
-    }
     callbackParam[ACE_PARAM0] = AceWrapWant(cbInfo_.env, workData->want);
     callbackParam[ACE_PARAM1] = MakePluginTemplateObject(componentTemplate);
     callbackParam[ACE_PARAM2] = AceStringToKVObject(cbInfo_.env, dataTmp);
@@ -220,7 +217,30 @@ void JSPluginCallback::OnPushEvent(const AAFwk::Want& want,
     uvWorkData_.abilityName = pluginTemplate.GetAbility();
     uvWorkData_.data = data;
     uvWorkData_.extraData = extraData;
-    OnPushEventInner(&uvWorkData_);
+
+    uv_loop_s* loop = nullptr;
+    napi_get_uv_event_loop(cbInfo_.env, &loop);
+    uv_work_t* work = new uv_work_t;
+    work->data = (void*)this;
+    int rev = uv_queue_work(
+        loop, work, [](uv_work_t* work) {},
+        [](uv_work_t* work, int status) {
+            if (work == nullptr) {
+                return;
+            }
+            JSPluginCallback* context = (JSPluginCallback*)work->data;
+            if (context) {
+                context->OnPushEventInner(&context->uvWorkData_);
+            }
+            delete work;
+            work = nullptr;
+        });
+    if (rev != 0) {
+        if (work != nullptr) {
+            delete work;
+            work = nullptr;
+        }
+    }
 }
 
 void JSPluginCallback::OnRequestEventInner(const OnPluginUvWorkData* workData)
@@ -271,6 +291,7 @@ void JSPluginCallback::OnRequestEvent(const AAFwk::Want& want, const std::string
 
 void JSPluginCallback::OnRequestCallBackInner(const OnPluginUvWorkData* workData)
 {
+    HILOG_INFO("%{public}s called.", __func__);
     napi_value jsCallback = nullptr;
     napi_value undefined = nullptr;
     napi_value jsResult = nullptr;
@@ -283,15 +304,16 @@ void JSPluginCallback::OnRequestCallBackInner(const OnPluginUvWorkData* workData
     PluginComponentTemplate componentTemplate;
     componentTemplate.SetSource(workData->sourceName);
     componentTemplate.SetAbility(workData->abilityName);
-    napi_value callbackParam[ACE_ARGS_TWO] = {nullptr};
 
-    callbackParam[ACE_PARAM0] = AceGetCallbackErrorValue(cbInfo_.env, 0);
-    callbackParam[ACE_PARAM1] = MakeCallbackParamForRequest(componentTemplate, workData->data,
-        workData->extraData);
-
-    napi_get_undefined(cbInfo_.env, &undefined);
-    napi_get_reference_value(cbInfo_.env, cbInfo_.callback, &jsCallback);
-    napi_call_function(cbInfo_.env, undefined, jsCallback, ACE_ARGS_TWO, callbackParam, &jsResult);
+    if (cbInfo_.callback != nullptr) {
+        napi_value callbackParam[ACE_ARGS_TWO] = {nullptr};
+        callbackParam[ACE_PARAM0] = AceGetCallbackErrorValue(cbInfo_.env, 0);
+        callbackParam[ACE_PARAM1] = MakeCallbackParamForRequest(componentTemplate, workData->data,
+            workData->extraData);
+        napi_get_undefined(cbInfo_.env, &undefined);
+        napi_get_reference_value(cbInfo_.env, cbInfo_.callback, &jsCallback);
+        napi_call_function(cbInfo_.env, undefined, jsCallback, ACE_ARGS_TWO, callbackParam, &jsResult);
+    }
     napi_close_handle_scope(cbInfo_.env, scope);
 }
 
@@ -300,17 +322,27 @@ void JSPluginCallback::OnRequestCallBack(const PluginComponentTemplate& pluginTe
 {
     HILOG_INFO("%{public}s called.", __func__);
     JSPluginCallbackMgr::Instance().UnRegisterEvent(GetID());
-    if (cbInfo_.env == nullptr || cbInfo_.callback == nullptr) {
+    if (cbInfo_.env == nullptr) {
         HILOG_INFO("%{public}s called, env or callback is null.", __func__);
         return;
     }
 
-    uvWorkData_.that = (void *)this;
-    uvWorkData_.sourceName = pluginTemplate.GetSource();
-    uvWorkData_.abilityName = pluginTemplate.GetAbility();
-    uvWorkData_.data = data;
-    uvWorkData_.extraData = extraData;
-    OnRequestCallBackInner(&uvWorkData_);
+    if (cbInfo_.callback != nullptr) {
+        uvWorkData_.that = (void *)this;
+        uvWorkData_.sourceName = pluginTemplate.GetSource();
+        uvWorkData_.abilityName = pluginTemplate.GetAbility();
+        uvWorkData_.data = data;
+        uvWorkData_.extraData = extraData;
+        OnRequestCallBackInner(&uvWorkData_);
+    } else {
+        if (asyncJSCallbackInfo_) {
+            asyncJSCallbackInfo_->requestCallbackData.sourceName = pluginTemplate.GetSource();
+            asyncJSCallbackInfo_->requestCallbackData.abilityName = pluginTemplate.GetAbility();
+            asyncJSCallbackInfo_->requestCallbackData.data = data;
+            asyncJSCallbackInfo_->requestCallbackData.extraData = extraData;
+            asyncJSCallbackInfo_->onRequestCallbackOK = true;
+        }
+    }
 }
 
 bool JSPluginCallback::OnEventStrictEquals(CallBackType eventType, const AAFwk::Want& want,

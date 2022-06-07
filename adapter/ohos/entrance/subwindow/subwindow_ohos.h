@@ -48,7 +48,6 @@ private:
     void AddMenu(const RefPtr<Component>& newComponent);
     void ShowWindow();
     void HideWindow();
-
     static int32_t id_;
     int32_t windowId_ = 0;
     int32_t parentContainerId_ = -1;

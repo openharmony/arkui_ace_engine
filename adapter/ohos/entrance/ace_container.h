@@ -59,7 +59,7 @@ public:
         if (aceView_) {
             return aceView_->GetInstanceId();
         }
-        return 0;
+        return -1;
     }
 
     RefPtr<Frontend> GetFrontend() const override
@@ -157,6 +157,8 @@ public:
     bool Dump(const std::vector<std::string>& params) override;
 
     void TriggerGarbageCollection() override;
+
+    void DumpHeapSnapshot(bool isPrivate) override;
 
     void SetLocalStorage(NativeReference* storage, NativeReference* context);
 
@@ -259,6 +261,8 @@ public:
     {
         return windowName_;
     }
+
+    void SetWindowPos(int32_t left, int32_t top);
 
     void SetIsSubContainer(bool isSubContainer)
     {

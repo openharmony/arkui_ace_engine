@@ -630,6 +630,7 @@ var InputType;
 (function (InputType) {
   InputType[InputType["Normal"] = 0] = "Normal";
   InputType[InputType["Number"] = 2] = "Number";
+  InputType[InputType["Phone"] = 3] = "Phone";
   InputType[InputType["Email"] = 5] = "Email";
   InputType[InputType["Password"] = 7] = "Password";
 })(InputType || (InputType = {}));
@@ -690,6 +691,10 @@ var Placement;
   Placement[Placement["TopRight"] = 5] = "TopRight";
   Placement[Placement["BottomLeft"] = 6] = "BottomLeft";
   Placement[Placement["BottomRight"] = 7] = "BottomRight";
+  Placement[Placement["LeftTop"] = 8] = "LeftTop";
+  Placement[Placement["LeftBottom"] = 9] = "LeftBottom";
+  Placement[Placement["RightTop"] = 10] = "RightTop";
+  Placement[Placement["RightBottom"] = 11] = "RightBottom";
 }) (Placement || (Placement = {}));
 
 var DialogStatus;
@@ -774,3 +779,10 @@ var MessageLevel
   MessageLevel[MessageLevel["Error"] = 4] = "Error";
   MessageLevel[MessageLevel["Log"] = 5] = "Log";
 })(MessageLevel || (MessageLevel = {}));
+
+var CopyOption;
+(function (CopyOption) {
+  CopyOption[CopyOption["InApp"] = 0] = "InApp";
+  CopyOption[CopyOption["LocalDevice"] = 1] = "LocalDevice";
+  CopyOption[CopyOption["CrossDevice"] = 2] = "CrossDevice";
+})(CopyOption || (CopyOption = {}));

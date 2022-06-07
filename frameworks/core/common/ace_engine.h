@@ -40,10 +40,13 @@ public:
     void RemoveContainer(int32_t instanceId);
     RefPtr<Container> GetContainer(int32_t instanceId);
     void RegisterToWatchDog(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor, bool useUIAsJSThread = false);
+    void UnRegisterFromWatchDog(int32_t instanceId);
     void BuriedBomb(int32_t instanceId, uint64_t bombId);
     void DefusingBomb(int32_t instanceId);
     static AceEngine& Get();
+    static void InitJsDumpHeadSignal();
     void Dump(const std::vector<std::string>& params) const;
+    void DumpJsHeap(bool isPrivate) const;
 
     void TriggerGarbageCollection();
     void NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback);
@@ -51,7 +54,7 @@ public:
 private:
     AceEngine();
 
-    mutable std::mutex mutex_;
+    mutable std::shared_mutex mutex_;
     std::unordered_map<int32_t, RefPtr<Container>> containerMap_;
     RefPtr<WatchDog> watchDog_;
 

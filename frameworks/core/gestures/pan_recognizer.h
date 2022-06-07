@@ -37,6 +37,11 @@ public:
         newFingers_ = fingers_;
         newDistance_ = distance_;
         newDirection_ = direction_;
+        if ((direction_.type & PanDirection::VERTICAL) == 0) {
+            velocityTracker_ = VelocityTracker(Axis::HORIZONTAL);
+        } else if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
+            velocityTracker_ = VelocityTracker(Axis::VERTICAL);
+        }
     }
     PanRecognizer(const WeakPtr<PipelineContext>& context, RefPtr<PanGestureOption> panGestureOption)
         : panGestureOption_(panGestureOption)
@@ -122,10 +127,11 @@ private:
     bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
     GestureAcceptResult IsPanGestureAccept() const;
     void Reset();
-    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isTouchEvent = true);
     void ChangeFingers(int32_t fingers);
     void ChangeDirection(const PanDirection& direction);
     void ChangeDistance(double distance);
+    double GetMainAxisDelta();
 
     const TouchRestrict& GetTouchRestrict() const
     {
@@ -138,6 +144,9 @@ private:
     std::map<int32_t, TouchEvent> touchPoints_;
     AxisEvent lastAxisEvent_;
     Offset averageDistance_;
+    Offset delta_;
+    double mainDelta_ = 0.0;
+    VelocityTracker velocityTracker_;
     TimeStamp time_;
     bool pendingEnd_ = false;
     bool pendingCancel_ = false;

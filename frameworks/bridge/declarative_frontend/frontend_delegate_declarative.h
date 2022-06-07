@@ -36,6 +36,19 @@ namespace OHOS::Ace::Framework {
 
 using ExternalEventCallback = std::function<void(const std::string&, const uint32_t&, const bool&)>;
 
+enum class RouterAction {
+    PUSH = 0,
+    REPLACE,
+    BACK,
+    CLEAR,
+};
+
+struct RouterTask {
+    RouterAction action = RouterAction::PUSH;
+    std::string url;
+    std::string params;
+};
+
 class FrontendDelegateDeclarative : public FrontendDelegate {
     DECLARE_ACE_TYPE(FrontendDelegateDeclarative, FrontendDelegate);
 
@@ -260,6 +273,8 @@ private:
     void PopPage();
     void RestorePopPage(const RefPtr<JsAcePage>& page, const std::string& url);
 
+    void PushPageTransitionListener(const TransitionEvent& event, const RefPtr<JsAcePage>& page);
+
     void PopPageTransitionListener(const TransitionEvent& event, int32_t destroyPageId);
 
     void PopToPageTransitionListener(
@@ -293,6 +308,10 @@ private:
 
     void ResetStagingPage();
     void FlushAnimationTasks();
+
+    void BackCheckAlert(const std::string& uri, const std::string& params);
+    void ProcessRouterTask();
+    void AddRouterTask(const RouterTask& task);
 
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;
@@ -349,6 +368,9 @@ private:
     std::unordered_map<std::string, CancelableCallback<void()>> animationFrameTaskMap_;
 
     mutable std::mutex mutex_;
+
+    std::queue<RouterTask> routerQueue_;
+    mutable std::mutex routerQueueMutex_;
 };
 
 } // namespace OHOS::Ace::Framework

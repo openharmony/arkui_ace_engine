@@ -40,6 +40,7 @@
 #include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/frontend.h"
 #include "core/common/plugin_manager.h"
@@ -182,6 +183,7 @@ void AceAbility::OnStart(const Want& want)
         AceApplicationInfo::GetInstance().SetDataFileDirPath(abilityContext->GetFilesDir());
         ImageCache::SetImageCacheFilePath(abilityContext->GetCacheDir());
         ImageCache::SetCacheFileInfo();
+        AceEngine::InitJsDumpHeadSignal();
     });
     OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
@@ -584,12 +586,12 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeCha
     LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d",
         rect.width_, rect.height_, rect.posX_, rect.posY_);
     SystemProperties::SetDeviceOrientation(rect.height_ >= rect.width_ ? 0 : 1);
-    SystemProperties::SetWindowPos(rect.posX_, rect.posY_);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
         LOGE("OnSizeChange: container is null.");
         return;
     }
+    container->SetWindowPos(rect.posX_, rect.posY_);
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("OnSizeChange: taskExecutor is null.");

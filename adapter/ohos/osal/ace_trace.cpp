@@ -34,12 +34,29 @@ void AceTraceBegin(const char* name)
         return;
     }
     std::string nameStr(name);
-    StartTrace(BYTRACE_TAG_ACE, nameStr);
+    StartTrace(HITRACE_TAG_ACE, nameStr);
 }
 
 void AceTraceEnd()
 {
-    FinishTrace(BYTRACE_TAG_ACE);
+    FinishTrace(HITRACE_TAG_ACE);
 }
 
+void AceAsyncTraceBegin(int32_t taskId, const char* name)
+{
+    if (name == nullptr) {
+        return;
+    }
+    std::string nameStr(name);
+    StartAsyncTrace(HITRACE_TAG_ACE, nameStr, taskId);
+}
+
+void AceAsyncTraceEnd(int32_t taskId, const char* name)
+{
+    if (name == nullptr) {
+        return;
+    }
+    std::string nameStr(name);
+    FinishAsyncTrace(HITRACE_TAG_ACE, nameStr, taskId);
+}
 } // namespace OHOS::Ace

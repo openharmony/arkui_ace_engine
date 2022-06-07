@@ -55,7 +55,7 @@ public:
 
 class JSPluginCallback : public PluginComponentCallBack {
 public:
-    JSPluginCallback(CallBackType eventType, ACECallbackInfo& cbInfo);
+    JSPluginCallback(CallBackType eventType, ACECallbackInfo& cbInfo, ACEAsyncJSCallbackInfo* jsCallbackInfo);
     virtual ~JSPluginCallback();
     void SetWant(const AAFwk::Want& want);
     AAFwk::Want& GetWant();
@@ -87,6 +87,7 @@ private:
     std::shared_ptr<AceJSPluginRequestParam> requestParam_ = nullptr;
     static std::atomic_size_t uuid_;
     OnPluginUvWorkData uvWorkData_;
+    ACEAsyncJSCallbackInfo *asyncJSCallbackInfo_ = nullptr;
 };
 }  // namespace OHOS::Ace::Napi
 #endif  // OHOS_NAPI_ACE_PLUGIN_CALLBACK_H

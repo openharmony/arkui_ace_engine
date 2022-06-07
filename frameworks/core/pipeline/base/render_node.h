@@ -281,7 +281,12 @@ public:
 
     virtual bool IsNotSiblingAddRecognizerToResult()
     {
-        return true;
+        return isNotSiblingAddRecognizerToResult_;
+    }
+
+    void MarkIsNotSiblingAddRecognizerToResult(bool isNotSiblingAddRecognizerToResult)
+    {
+        isNotSiblingAddRecognizerToResult_ = isNotSiblingAddRecognizerToResult;
     }
 
     virtual Point GetTransformPoint(const Point& point)
@@ -715,6 +720,11 @@ public:
     int32_t GetDisplayIndex() const
     {
         return displayIndex_;
+    }
+
+    bool GetDisplayIndexSetted() const
+    {
+        return displayIndexSetted_;
     }
 
     OpacityCallback GetOpacityCallback(int32_t domId);
@@ -1184,6 +1194,11 @@ protected:
     }
 
     virtual std::shared_ptr<RSNode> CreateRSNode() const;
+    void SetRSNode(const std::shared_ptr<RSNode>& rsNode)
+    {
+        rsNode_ = rsNode;
+    }
+
     virtual void OnRSTransition(TransitionType type) {}
     // JSview boundary, all nodes in [head, tail] share the same RSNode
     bool IsHeadRenderNode() const
@@ -1287,6 +1302,7 @@ private:
 
     double flexWeight_ = 0.0;
     int32_t displayIndex_ = 1;
+    bool displayIndexSetted_ = false;
 
     double dipScale_ = 0.0;
 
@@ -1320,6 +1336,7 @@ private:
     bool isPaintOutOfParent_ = false;
 
     std::string restoreInfo_;
+    bool isNotSiblingAddRecognizerToResult_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderNode);
 };

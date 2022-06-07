@@ -117,7 +117,7 @@ public:
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve);
     Offset CurrentOffset();
     void ScrollToEdge(ScrollEdgeType edgeType, bool smooth);
-
+    void ScrollPage(bool reverse, bool smooth);
     Axis GetAxis() const
     {
         return useScrollable_ == SCROLLABLE::VERTICAL ? Axis::VERTICAL : Axis::HORIZONTAL;
@@ -140,8 +140,6 @@ public:
     void HandleAxisEvent(const AxisEvent& event) override;
 
     bool IsAxisScrollable(AxisDirection direction) override;
-
-    WeakPtr<RenderNode> CheckAxisNode() override;
 
 protected:
     int32_t GetItemMainIndex(const RefPtr<RenderNode>& child, bool isMain) const;

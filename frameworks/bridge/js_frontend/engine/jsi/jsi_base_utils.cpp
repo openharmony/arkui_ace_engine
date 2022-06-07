@@ -119,7 +119,21 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const R
     ExtractEachInfo(tempStack, res);
 
     // collect error info first
-    for (uint32_t i = 1; i < res.size(); i++) {
+    bool needGetErrorPos = false;
+    int32_t errorPos = 0;
+    uint32_t i = 1;
+    std::string codeStart = "SourceCode (";
+    std::string sourceCode = "";
+    if (res.size() > 1) {
+        std::string fristLine = res[1];
+        uint32_t codeStartLen = codeStart.length();
+        if (fristLine.substr(0, codeStartLen).compare(codeStart) == 0) {
+            sourceCode = fristLine.substr(codeStartLen, fristLine.length() - codeStartLen - 1);
+            i = 2;  // 2 means Convert from the second line
+            needGetErrorPos = true;
+        }
+    }
+    for (; i < res.size(); i++) {
         std::string temp = res[i];
         int32_t closeBracePos = static_cast<int32_t>(temp.find(closeBrace));
         int32_t openBracePos = static_cast<int32_t>(temp.find(openBrace));
@@ -127,6 +141,10 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const R
         std::string line = "";
         std::string column = "";
         GetPosInfo(temp, closeBracePos, line, column);
+        if (needGetErrorPos) {
+            errorPos = StringToInt(column);
+            needGetErrorPos = false;
+        }
         if (line.empty() || column.empty()) {
             LOGI("the stack without line info");
             break;
@@ -142,7 +160,17 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const R
     if (ans.empty()) {
         return tempStack;
     }
-    ans = res[0] + "\n" + ans;
+    if (sourceCode.empty()) {
+        ans = res[0] + "\n" + ans;
+    } else {
+        sourceCode.push_back('\n');
+        for (int32_t k = 0; k < errorPos - 1; k++) {
+            sourceCode.push_back(' ');
+        }
+        sourceCode.push_back('^');
+        std::string codeBegin = "SourceCode: ";
+        ans = codeBegin + "\n" + sourceCode + "\n" + res[0] + "\n" + ans;
+    }
     return ans;
 }
 
@@ -208,13 +236,21 @@ std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::stri
 
 std::string JsiBaseUtils::GetRelativePath(const std::string& sources)
 {
-    std::size_t pos = sources.find_last_of("/\\");
-    if (pos != std::string::npos) {
-        std::size_t splitPos = sources.substr(0, pos - 1).find_last_of("/\\");
+    std::string temp = sources;
+    std::size_t splitPos = std::string::npos;
+    const static int pathLevel = 3;
+    int i = 0;
+    while (i < pathLevel) {
+        splitPos = temp.find_last_of("/\\");
         if (splitPos != std::string::npos) {
-            std::string shortUrl = "pages" + sources.substr(splitPos);
-            return shortUrl;
+            temp = temp.substr(0, splitPos - 1);
+        } else {
+            break;
         }
+        i++;
+    }
+    if (i == pathLevel) {
+        return sources.substr(splitPos);
     }
     LOGI("The stack path error!");
     return sources;

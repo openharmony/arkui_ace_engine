@@ -15,14 +15,16 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 
-#include "core/common/container.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/subwindow/subwindow.h"
+#include "base/subwindow/subwindow_manager.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSContextMenu::Close(const JSCallbackInfo& args)
 {
+    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
 #if defined(MULTIPLE_WINDOW_SUPPORTED)
     SubwindowManager::GetInstance()->CloseMenu();
 #else

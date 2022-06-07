@@ -181,14 +181,16 @@ public:
         return rosenBackendEnabled_;
     }
 
-    static bool GetDebugBoundaryEnabled()
-    {
-        return debugBoundaryEnabled_;
-    }
+    static bool GetDebugBoundaryEnabled();
 
     static bool GetTraceEnabled()
     {
         return traceEnabled_;
+    }
+
+    static bool GetSvgTraceEnabled()
+    {
+        return svgTraceEnable_;
     }
 
     static bool GetAccessibilityEnabled()
@@ -254,25 +256,15 @@ public:
 
     static int GetArkProperties();
 
-    static std::string GetAsmInterOption();
+    static size_t GetGcThreadNum();
+
+    static size_t GetLongPauseTime();
+
+    static bool GetAsmInterpreterEnabled();
+
+    static std::string GetAsmOpcodeDisableRange();
 
     static bool IsScoringEnabled(const std::string& name);
-
-    static void SetWindowPos(int32_t x, int32_t y)
-    {
-        windowPosX_ = x;
-        windowPosY_ = y;
-    }
-
-    static int32_t GetWindowPosX()
-    {
-        return windowPosX_;
-    }
-
-    static int32_t GetWindowPosY()
-    {
-        return windowPosY_;
-    }
 
     static bool IsWindowSizeAnimationEnabled()
     {
@@ -281,6 +273,7 @@ public:
 
 private:
     static bool traceEnabled_;
+    static bool svgTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
     static int32_t deviceWidth_;
@@ -303,8 +296,6 @@ private:
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
-    static int32_t windowPosX_;
-    static int32_t windowPosY_;
     static bool debugBoundaryEnabled_;
     static bool gpuUploadEnabled_;
 };

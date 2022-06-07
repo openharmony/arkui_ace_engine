@@ -40,17 +40,23 @@ public:
     void StopLoading(const JSCallbackInfo& args);
     void GetHitTestResult(const JSCallbackInfo& args);
     void GetCookieManager(const JSCallbackInfo& args);
+    void GetPageHeight(const JSCallbackInfo& args);
+    void GetTitle(const JSCallbackInfo& args);
+    void GetWebId(const JSCallbackInfo& args);
     void AddJavascriptInterface(const JSCallbackInfo& args);
     void RemoveJavascriptInterface(const JSCallbackInfo& args);
     void SetJavascriptInterface(const JSCallbackInfo& args);
     void OnInactive(const JSCallbackInfo& args);
     void OnActive(const JSCallbackInfo& args);
     void Zoom(const JSCallbackInfo& args);
+    void ZoomIn(const JSCallbackInfo& args);
+    void ZoomOut(const JSCallbackInfo& args);
     void RequestFocus(const JSCallbackInfo& args);
 
     // Backward and Forward for web page
     void Backward(const JSCallbackInfo& args);
     void Forward(const JSCallbackInfo& args);
+    void BackOrForward(const JSCallbackInfo& args);
     void AccessStep(const JSCallbackInfo& args);
     void AccessBackward(const JSCallbackInfo& args);
     void AccessForward(const JSCallbackInfo& args);

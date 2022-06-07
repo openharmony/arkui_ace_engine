@@ -31,6 +31,7 @@
 
 namespace OHOS::Ace::Framework {
 class JsiEngineInstance final : public AceType, public JsEngineInstance {
+    DECLARE_ACE_TYPE(JsiEngineInstance, AceType)
 public:
     explicit JsiEngineInstance(const RefPtr<FrontendDelegate>& delegate, int32_t instanceId)
         : frontendDelegate_(delegate), instanceId_(instanceId)
@@ -151,6 +152,8 @@ public:
     bool OnRestoreData(const std::string& data) override;
 
     void RunGarbageCollection() override;
+
+    void DumpHeapSnapshot(bool isPrivate) override;
 
     std::string GetStacktraceMessage() override;
 

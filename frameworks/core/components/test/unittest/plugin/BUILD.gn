@@ -54,10 +54,10 @@ ohos_unittest("PluginCallBackClientTest") {
   configs = [ "$ace_root:ace_test_config" ]
 
   deps = [
+    "$aafwk_inner_api_path/ability_manager:ability_manager",
+    "$aafwk_services_path/abilitymgr:abilityms",
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
-    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
-    "//foundation/aafwk/standard/services/abilitymgr:abilityms",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
@@ -87,10 +87,10 @@ ohos_unittest("PluginComponentTest") {
   configs = [ "$ace_root:ace_test_config" ]
 
   deps = [
+    "$aafwk_inner_api_path/ability_manager:ability_manager",
+    "$aafwk_services_path/abilitymgr:abilityms",
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
-    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
-    "//foundation/aafwk/standard/services/abilitymgr:abilityms",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
@@ -120,10 +120,10 @@ ohos_unittest("PluginElementTest") {
   configs = [ "$ace_root:ace_test_config" ]
 
   deps = [
+    "$aafwk_inner_api_path/ability_manager:ability_manager",
+    "$aafwk_services_path/abilitymgr:abilityms",
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
-    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
-    "//foundation/aafwk/standard/services/abilitymgr:abilityms",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
@@ -155,10 +155,10 @@ ohos_unittest("PluginManagerDelegateTest") {
   configs = [ "$ace_root:ace_test_config" ]
 
   deps = [
+    "$aafwk_inner_api_path/ability_manager:ability_manager",
+    "$aafwk_services_path/abilitymgr:abilityms",
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
-    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
-    "//foundation/aafwk/standard/services/abilitymgr:abilityms",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",

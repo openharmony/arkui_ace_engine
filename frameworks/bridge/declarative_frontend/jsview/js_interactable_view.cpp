@@ -46,6 +46,7 @@ void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
         RefPtr<JsTouchFunction> jsOnTouchFunc = AceType::MakeRefPtr<JsTouchFunction>(JSRef<JSFunc>::Cast(args[0]));
         auto onTouchId = EventMarker(
             [execCtx = args.GetExecutionContext(), func = std::move(jsOnTouchFunc), impl](BaseEventInfo* info) {
+                LOGI("OnTouch event is triggered");
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 if (impl) {
                     impl->UpdateEventInfo(*info);
@@ -72,7 +73,7 @@ void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
                 func->Execute(*keyInfo);
             },
             "onKey", 0);
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
         if (focusableComponent) {
             focusableComponent->SetOnKeyId(onKeyId);
         }
