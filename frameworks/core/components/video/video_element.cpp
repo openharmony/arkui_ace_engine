@@ -328,7 +328,8 @@ void VideoElement::PreparePlayer()
 
     int32_t fd = -1;
     // SetSource by fd.
-    if (StringUtils::StartWith(filePath, "dataability://")) {
+    if (StringUtils::StartWith(filePath, "dataability://") ||
+        StringUtils::StartWith(filePath, "datashare://")) {
         auto context = context_.Upgrade();
         if (!context) {
             LOGE("get context fail");
