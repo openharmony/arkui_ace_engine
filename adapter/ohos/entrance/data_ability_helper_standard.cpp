@@ -19,8 +19,10 @@
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 
 #include "data_ability_helper.h"
-
+#include "datashare_helper.h"
 #include "pixel_map.h"
+
+#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -87,6 +89,7 @@ DataAbilityHelperStandard::DataAbilityHelperStandard(const std::shared_ptr<OHOS:
 #endif
     } else {
         dataAbilityHelper_ = AppExecFwk::DataAbilityHelper::Creator(context);
+        dataShareHelper_ = DataShare::DataShareHelper::Creator(context, "");
     }
 }
  
@@ -108,6 +111,17 @@ void* DataAbilityHelperStandard::QueryThumbnailResFromDataAbility(const std::str
 int32_t DataAbilityHelperStandard::OpenFile(const std::string& uriStr, const std::string& mode)
 {
     LOGD("DataAbilityHelperStandard::OpenFile start uri: %{private}s, mode: %{private}s", uriStr.c_str(), mode.c_str());
+    if (StringUtils::StartWith(uriStr, "dataability://")) {
+        return OpenFileWithDataAbility(uriStr, mode);
+    } else if (StringUtils::StartWith(uriStr, "datashare://")) {
+        return OpenFileWithDataShare(uriStr, mode);
+    }
+    LOGE("DataAbilityHelperStandard::OpenFile uri is not support.");
+    return -1;
+}
+
+int32_t DataAbilityHelperStandard::OpenFileWithDataAbility(const std::string& uriStr, const std::string& mode)
+{
     Uri uri = Uri(uriStr);
     if (useStageModel_ && !dataAbilityHelper_) {
         uri_ = std::make_shared<Uri>(uriStr);
@@ -118,6 +132,20 @@ int32_t DataAbilityHelperStandard::OpenFile(const std::string& uriStr, const std
         return dataAbilityHelper_->OpenFile(uri, mode);
     }
     LOGE("DataAbilityHelperStandard::OpenFile fail, data ability helper is not exist.");
+    return -1;
+}
+
+int32_t DataAbilityHelperStandard::OpenFileWithDataShare(const std::string& uriStr, const std::string& mode)
+{
+    if (useStageModel_ && !dataShareHelper_) {
+        dataShareHelper_ = DataShare::DataShareHelper::Creator(runtimeContext_.lock(), uriStr);
+    }
+
+    if (dataShareHelper_) {
+        Uri uri = Uri(uriStr);
+        return dataShareHelper_->OpenFile(uri, mode);
+    }
+    LOGE("DataAbilityHelperStandard::OpenFile fail, data share helper is not exist.");
     return -1;
 }
 

@@ -29,6 +29,10 @@ namespace OHOS::AbilityRuntime {
     class Context;
 }
 
+namespace OHOS::DataShare {
+    class DataShareHelper;
+}
+
 namespace OHOS {
     class Uri;
 }
@@ -48,7 +52,11 @@ public:
     void* QueryThumbnailResFromDataAbility(const std::string& uri) override;
 
 private:
+    int32_t OpenFileWithDataAbility(const std::string& uriStr, const std::string& mode);
+    int32_t OpenFileWithDataShare(const std::string& uriStr, const std::string& mode);
+
     bool useStageModel_ = false;
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper_;
     std::shared_ptr<AppExecFwk::DataAbilityHelper> dataAbilityHelper_;
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext_;
     std::shared_ptr<OHOS::Uri> uri_;
