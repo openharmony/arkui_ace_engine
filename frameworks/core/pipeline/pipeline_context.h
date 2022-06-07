@@ -45,6 +45,7 @@
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/window_animation_config.h"
+#include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/page/page_component.h"
@@ -947,8 +948,8 @@ public:
     void StartSystemDrag(const std::string& str, const RefPtr<PixelMap>& pixmap);
     void InitDragListener();
     void OnDragEvent(int32_t x, int32_t y, DragEventAction action);
-    void SetPreTargetRenderNode(const RefPtr<RenderNode>& preTargetRenderNode);
-    const RefPtr<RenderNode> GetPreTargetRenderNode() const;
+    void SetPreTargetRenderNode(const RefPtr<DragDropEvent>& preDragDropNode);
+    const RefPtr<DragDropEvent>& GetPreTargetRenderNode() const;
     void SetInitRenderNode(const RefPtr<RenderNode>& initRenderNode);
     const RefPtr<RenderNode>& GetInitRenderNode() const;
 
@@ -1405,7 +1406,7 @@ private:
     std::function<void()> queryIfWindowInScreenCallback_;
     std::atomic<bool> isWindowInScreen_ = true;
 
-    RefPtr<RenderNode> preTargetRenderNode_;
+    RefPtr<DragDropEvent> preTargetRenderNode_;
 
     bool isRightToLeft_ = false;
     bool isSurfaceReady_ = false;
