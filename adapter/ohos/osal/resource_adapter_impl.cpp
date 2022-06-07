@@ -16,8 +16,23 @@
 #include "adapter/ohos/osal/resource_adapter_impl.h"
 
 #include "adapter/ohos/osal/resource_convertor.h"
+#include "adapter/ohos/osal/resource_theme_style.h"
+#include "core/components/theme/theme_attributes.h"
 
 namespace OHOS::Ace {
+namespace {
+
+constexpr uint32_t OHOS_THEME_ID = 125829872; // ohos_theme
+
+void CheckThemeId(int32_t& themeId)
+{
+    if (themeId >= 0) {
+        return;
+    }
+    themeId = OHOS_THEME_ID;
+}
+
+} // namespace
 
 RefPtr<ResourceAdapter> ResourceAdapter::Create()
 {
@@ -45,6 +60,48 @@ void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
     LOGI("UpdateConfig ori=%{public}d, dpi=%{public}d, device=%{public}d",
         resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType());
     resourceManager_->UpdateResConfig(*resConfig);
+}
+
+RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)
+{
+    static const std::map<std::string, std::string> patterns = {
+        { THEME_PATTERN_BUTTON, "ohos_button_pattern" },
+        { THEME_PATTERN_CHECKBOX, "ohos_checkbox_pattern" },
+        { THEME_PATTERN_DATA_PANEL, "ohos_data_panel_pattern" },
+        { THEME_PATTERN_RADIO, "ohos_radio_pattern" },
+        { THEME_PATTERN_SWIPER, "ohos_swiper_pattern" },
+        { THEME_PATTERN_SWITCH, "ohos_switch_pattern" },
+        { THEME_PATTERN_TOOLBAR, "ohos_toolbar_pattern" },
+        { THEME_PATTERN_TOGGLE, "ohos_toggle_pattern" },
+        { THEME_PATTERN_TOAST, "ohos_toast_pattern" },
+        { THEME_DIALOG_TOGGLE, "ohos_dialog_pattern" },
+        { THEME_PATTERN_DRAG_BAR, "ohos_drag_bar_pattern" },
+        { THEME_PATTERN_SEMI_MODAL, "ohos_semi_modal_pattern" }
+    };
+
+    CheckThemeId(themeId);
+    auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
+    auto ret = resourceManager_->GetThemeById(themeId, theme->rawAttrs_);
+    for (auto& [key, value]: patterns) {
+        ResourceThemeStyle::RawAttrMap attrMap;
+        ret = resourceManager_->GetPatternByName(value.c_str(), attrMap);
+        LOGD("theme pattern[%{public}s, %{public}s], attr size=%{public}zu",
+            key.c_str(), value.c_str(), attrMap.size());
+        if (attrMap.empty()) {
+            continue;
+        }
+        theme->patternAttrs_[key] = attrMap;
+    }
+    LOGI("theme themeId=%{public}d, ret=%{public}d, attr size=%{public}zu, pattern size=%{public}zu",
+        themeId, ret, theme->rawAttrs_.size(), theme->patternAttrs_.size());
+    if (theme->patternAttrs_.empty() && theme->rawAttrs_.empty()) {
+        LOGW("theme resource get failed, use default theme config.");
+        return nullptr;
+    }
+
+    theme->ParseContent();
+    theme->patternAttrs_.clear();
+    return theme;
 }
 
 Color ResourceAdapterImpl::GetColor(uint32_t resId)

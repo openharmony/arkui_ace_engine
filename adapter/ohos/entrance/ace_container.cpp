@@ -1031,8 +1031,11 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         themeManager->InitResource(resourceInfo_);
         taskExecutor_->PostTask(
             [themeManager, assetManager = assetManager_, colorScheme = colorScheme_] {
+                ACE_SCOPED_TRACE("OHOS::LoadThemes()");
+                LOGI("UIContent load theme");
                 themeManager->SetColorScheme(colorScheme);
                 themeManager->LoadCustomTheme(assetManager);
+                themeManager->LoadResourceThemes();
             },
             TaskExecutor::TaskType::UI);
     }

@@ -62,6 +62,11 @@ void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
     resourceManager_->UpdateResConfig(*resConfig);
 }
 
+RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)
+{
+    return nullptr;
+};
+
 Color ResourceAdapterImpl::GetColor(uint32_t resId)
 {
     uint32_t result = 0;
