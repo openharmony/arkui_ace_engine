@@ -69,7 +69,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
     return PixelMap::CreatePixelMap(pixmapPtrAddr);
 }
 
-const std::shared_ptr<Rosen::RSSurfaceNode>& CreateRSSurfaceNodeFromNapiValue(JSRef<JSVal> obj)
+const std::shared_ptr<Rosen::RSSurfaceNode> CreateRSSurfaceNodeFromNapiValue(JSRef<JSVal> obj)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!obj->IsObject()) {
