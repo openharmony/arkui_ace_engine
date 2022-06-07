@@ -98,6 +98,8 @@ protected:
     RefPtr<CurveAnimation<double>> translate_;
     bool isSwitchDuringAnimation_ = false;
     RefPtr<SwitchComponent> component_;
+
+    bool isDraging = false;
 };
 
 } // namespace OHOS::Ace
