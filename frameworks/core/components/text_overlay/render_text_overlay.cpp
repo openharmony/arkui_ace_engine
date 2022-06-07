@@ -517,10 +517,30 @@ void RenderTextOverlay::PerformLayout()
     if (!context) {
         return;
     }
-    Rect textOverlayRect(GetGlobalOffset(), GetLayoutSize());
-    auto textOverlayManager = context->GetTextOverlayManager();
-    if (textOverlayManager) {
-        textOverlayManager->SetTextOverlayRect(textOverlayRect);
+    if (!GetChildren().empty()) {
+        const auto& child = GetChildren().front();
+        if (!child) {
+            LOGE("child is null");
+            return;
+        }
+        Rect textOverlayRect(child->GetGlobalOffset(), child->GetLayoutSize());
+        auto startHandleOffset = startHandleOffset_ + Offset(-hotZoneRadius, -lineHeight_ - hotZoneDiameter);
+        auto startHandlebottomRightPoint = startHandleOffset_ + Offset(hotZoneRadius, -lineHeight_);
+        Rect startHandleRect(startHandleOffset.GetX(), startHandleOffset.GetY(),
+            startHandlebottomRightPoint.GetX() - startHandleOffset.GetX(),
+            startHandlebottomRightPoint.GetY() - startHandleOffset.GetY());
+        auto endHandleOffset = endHandleOffset_ + Offset(-hotZoneRadius, 0.0);
+        auto endHandlebottomRightPoint = endHandleOffset_ + Offset(hotZoneRadius, hotZoneDiameter);
+        Rect endHandleRect(endHandleOffset.GetX(), endHandleOffset.GetY(),
+            endHandlebottomRightPoint.GetX() - endHandleOffset.GetX(),
+            endHandlebottomRightPoint.GetY() - endHandleOffset.GetY());
+        auto textOverlayManager = context->GetTextOverlayManager();
+        if (textOverlayManager) {
+            textOverlayManager->ClearTextOverlayRect();
+            textOverlayManager->AddTextOverlayRect(textOverlayRect);
+            textOverlayManager->AddTextOverlayRect(startHandleRect);
+            textOverlayManager->AddTextOverlayRect(endHandleRect);
+        }
     }
 }
 
