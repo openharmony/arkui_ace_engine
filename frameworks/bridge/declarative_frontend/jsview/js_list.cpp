@@ -31,6 +31,8 @@ using ThisComponent = V2::ListComponent;
 constexpr DisplayMode DISPLAY_MODE_TABLE[] = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
 constexpr EdgeEffect EDGE_EFFECT_TABLE[] = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
 constexpr Axis DIRECTION_TABLE[] = { Axis::VERTICAL, Axis::HORIZONTAL };
+constexpr V2::ListItemAlign LIST_ITEM_ALIGN_TABLE[] =
+    { V2::ListItemAlign::START, V2::ListItemAlign::CENTER, V2::ListItemAlign::END };
 
 } // namespace
 
@@ -117,6 +119,49 @@ void JSList::JsHeight(const JSCallbackInfo& info)
     JSViewSetProperty(&V2::ListComponent::SetHasHeight, true);
 }
 
+void JSList::SetListItemAlign(int32_t itemAlignment)
+{
+    JSViewSetProperty(
+        &V2::ListComponent::SetListItemAlign, itemAlignment, LIST_ITEM_ALIGN_TABLE, V2::ListItemAlign::CENTER);
+}
+
+void JSList::SetLanes(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto listComponent = AceType::DynamicCast<V2::ListComponent>(component);
+    if (!listComponent) {
+        LOGE("list component is null while trying set lanes");
+        return;
+    }
+    int32_t laneNum = 0;
+    if (ParseJsInt32(info[0], laneNum)) {
+        // when [lanes] is set, [laneConstrain_] of list component will be reset to std::nullopt
+        listComponent->SetLanes(laneNum);
+        return;
+    }
+    LOGI("lanes is not number, parse lane length contrain.");
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    auto minLengthParam = jsObj->GetProperty("minLength");
+    auto maxLengthParam = jsObj->GetProperty("maxLength");
+    if (minLengthParam->IsNull() || maxLengthParam->IsNull()) {
+        LOGW("minLength and maxLength are not both set");
+        return;
+    }
+    Dimension minLengthValue;
+    Dimension maxLengthValue;
+    if (!ParseJsDimensionVp(minLengthParam, minLengthValue) ||
+        !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
+        LOGW("minLength param or maxLength param is invalid");
+        return;
+    }
+    listComponent->SetLaneConstrain(minLengthValue, maxLengthValue);
+}
+
+
 void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
@@ -132,6 +177,8 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("cachedCount", &JSList::SetCachedCount);
     JSClass<JSList>::StaticMethod("chainAnimation", &JSList::SetChainAnimation);
     JSClass<JSList>::StaticMethod("multiSelectable", &JSList::SetMultiSelectable);
+    JSClass<JSList>::StaticMethod("alignListItem", &JSList::SetListItemAlign);
+    JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);
 
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);

@@ -99,8 +99,16 @@ public:
     {
         return borderRadius_;
     }
-
+    void SetIndex(int index)
+    {
+        index_ = index;
+    }
+    int GetIndex() const
+    {
+        return index_;
+    }
 private:
+    int index_ = -1;
     void CreateDeleteButton();
 
     RefPtr<ListItemComponent> component_;

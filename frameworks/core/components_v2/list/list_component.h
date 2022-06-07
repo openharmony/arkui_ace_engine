@@ -43,6 +43,23 @@ enum class ScrollState {
     FLING,
 };
 
+enum class ListItemAlign {
+    /*
+     * display list item at start of cross axis.
+     */
+    START = 0,
+
+    /*
+     * display list item at center of cross axis.
+     */
+    CENTER,
+
+    /*
+     * display list item at center of cross axis.
+     */
+    END,
+};
+
 using OnItemDragStartFunc = std::function<RefPtr<Component>(const ItemDragInfo&, int32_t)>;
 using OnItemDragEnterFunc = std::function<void(const ItemDragInfo&)>;
 using OnItemDragMoveFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t)>;
@@ -142,6 +159,46 @@ public:
         onItemDropId_ = onItemDropId;
     }
 
+    void ResetLaneContrain()
+    {
+        laneContrain_ = std::nullopt;
+    }
+
+    void SetLaneConstrain(const Dimension& minLength, const Dimension& maxLength)
+    {
+        laneContrain_.emplace(minLength, maxLength);
+    }
+
+    const std::optional<std::pair<Dimension, Dimension>>& GetLaneConstrain() const
+    {
+        return laneContrain_;
+    }
+
+    void SetLanes(int32_t lanes)
+    {
+        ResetLaneContrain();
+        if (lanes <= 0) {
+            lanes_ = 1;
+            return;
+        }
+        lanes_ = lanes;
+    }
+
+    int32_t GetLanes() const
+    {
+        return lanes_;
+    }
+
+    void SetListItemAlign(ListItemAlign listItemAlign)
+    {
+        listItemAlign_ = listItemAlign;
+    }
+
+    ListItemAlign GetAlignListItemAlign() const
+    {
+        return listItemAlign_;
+    }
+
 private:
     std::unique_ptr<ItemDivider> itemDivider_;
 
@@ -150,6 +207,9 @@ private:
     OnItemDragMoveFunc onItemDragMoveId_;
     OnItemDragLeaveFunc onItemDragLeaveId_;
     OnItemDropFunc onItemDropId_;
+    ListItemAlign listItemAlign_ { ListItemAlign::CENTER };
+    std::optional<std::pair<Dimension, Dimension>> laneContrain_;
+    int32_t lanes_ { -1 };
 
     ACE_DISALLOW_COPY_AND_MOVE(ListComponent);
 };
