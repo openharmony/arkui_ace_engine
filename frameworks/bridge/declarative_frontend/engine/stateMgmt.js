@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,12 +12,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 class SubscriberManager {
     constructor() {
         this.subscriberById_ = new Map();
         this.nextFreeId_ = 0;
-        aceConsole.debug("SubscriberManager has been created.");
+        /* console.debug("SubscriberManager has been created."); */
     }
     static Get() { return SubscriberManager.INSTANCE_; }
     has(id) {
@@ -30,10 +57,10 @@ class SubscriberManager {
         return this.subscriberById_.delete(id);
     }
     add(newSubsriber) {
-        if (this.has(newSubsriber.id())) {
+        if (this.has(newSubsriber.id__())) {
             return false;
         }
-        this.subscriberById_.set(newSubsriber.id(), newSubsriber);
+        this.subscriberById_.set(newSubsriber.id__(), newSubsriber);
         return true;
     }
     /**
@@ -47,11 +74,11 @@ class SubscriberManager {
      * for debug purposes dump all known subscriber's info to comsole
      */
     dumpSubscriberInfo() {
-        aceConsole.debug("Dump of SubscriberManager +++ (sart)");
+        /* console.debug("Dump of SubscriberManager +++ (sart)"); */
         for (let [id, subscriber] of this.subscriberById_) {
-            aceConsole.debug(`Id: ${id} -> ${subscriber['info'] ? subscriber['info']() : 'unknown'}`);
+            /* console.debug(`Id: ${id} -> ${subscriber['info'] ? subscriber['info']() : 'unknown'}`); */
         }
-        aceConsole.debug("Dump of SubscriberManager +++ (end)");
+        /* console.debug("Dump of SubscriberManager +++ (end)"); */
     }
     MakeId() {
         return this.nextFreeId_++;
@@ -59,7 +86,7 @@ class SubscriberManager {
 }
 SubscriberManager.INSTANCE_ = new SubscriberManager();
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,7 +111,7 @@ SubscriberManager.INSTANCE_ = new SubscriberManager();
  * decorated variables to share the same instance to a SubscribaleAbstract
  * object. Each such decorated variable implementation makes its own
  * subscription to the SubscribaleAbstract object. Hence, when both variables
- * have unsubscribed the SubscribaleAbstract may do its own de-initilization.,
+ * have unsubscribed the SubscribaleAbstract may do its own de-initilialization.,
  * e.g. release held external resources.
  *
  * How to extend:
@@ -116,7 +143,7 @@ class SubscribaleAbstract {
      */
     constructor() {
         this.owningProperties_ = new Set();
-        aceConsole.debug(`SubscribaleAbstract: construcstor done`);
+        /* console.debug(`SubscribaleAbstract: construcstor done`); */
     }
     /**
     * A subsclass must call this function whenever one of its properties has
@@ -125,7 +152,7 @@ class SubscribaleAbstract {
      * @param newValue the property value after the change
      */
     notifyPropertyHasChanged(propName, newValue) {
-        aceConsole.debug(`SubscribaleAbstract: notifyPropertyHasChanged '${propName}'.`);
+        /* console.debug(`SubscribaleAbstract: notifyPropertyHasChanged '${propName}'.`); */
         var registry = SubscriberManager.Get();
         this.owningProperties_.forEach((subscribedId) => {
             var owningProperty = registry.get(subscribedId);
@@ -138,7 +165,7 @@ class SubscribaleAbstract {
                 }
             }
             else {
-                aceConsole.error(`SubscribaleAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+                console.error(`SubscribaleAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
             }
         });
     }
@@ -150,8 +177,8 @@ class SubscribaleAbstract {
      * and/or IMultiPropertiesChangeSubscriber interfaces
      */
     addOwningProperty(subscriber) {
-        aceConsole.debug(`SubscribaleAbstract: addOwningProperty: subscriber '${subscriber.id()}'.`);
-        this.owningProperties_.add(subscriber.id());
+        /* console.debug(`SubscribaleAbstract: addOwningProperty: subscriber '${subscriber.id__()}'.`); */
+        this.owningProperties_.add(subscriber.id__());
     }
     /**
      * Method used by the framework to ubsubscribing decorated variables
@@ -161,15 +188,15 @@ class SubscribaleAbstract {
      * and/or IMultiPropertiesChangeSubscriber interfaces
      */
     removeOwningProperty(property) {
-        return this.removeOwningPropertyById(property.id());
+        return this.removeOwningPropertyById(property.id__());
     }
     removeOwningPropertyById(subscriberId) {
-        aceConsole.debug(`SubscribaleAbstract: removeOwningProperty '${subscriberId}'.`);
+        /* console.debug(`SubscribaleAbstract: removeOwningProperty '${subscriberId}'.`); */
         this.owningProperties_.delete(subscriberId);
     }
 }
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -200,7 +227,7 @@ function Observed(target) {
     var original = target;
     // the new constructor behaviour
     var f = function (...args) {
-        aceConsole.log(`New ${original.name}, gets wrapped inside ObservableObject proxy.`);
+        /* console.log(`New ${original.name}, gets wrapped inside ObservableObject proxy.`); */
         return new ObservedObject(new original(...args), undefined);
     };
     Object.setPrototypeOf(f, Object.getPrototypeOf(original));
@@ -213,24 +240,24 @@ class SubscribableHandler {
         if (owningProperty) {
             this.addOwningProperty(owningProperty);
         }
-        aceConsole.debug(`SubscribableHandler: construcstor done`);
+        /* console.debug(`SubscribableHandler: construcstor done`); */
     }
     addOwningProperty(subscriber) {
-        aceConsole.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id()}'.`);
-        this.owningProperties_.add(subscriber.id());
+        /* console.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`); */
+        this.owningProperties_.add(subscriber.id__());
     }
     /*
         the inverse function of createOneWaySync or createTwoWaySync
       */
     removeOwningProperty(property) {
-        return this.removeOwningPropertyById(property.id());
+        return this.removeOwningPropertyById(property.id__());
     }
     removeOwningPropertyById(subscriberId) {
-        aceConsole.debug(`SubscribableHandler: removeOwningProperty '${subscriberId}'.`);
+        /* console.debug(`SubscribableHandler: removeOwningProperty '${subscriberId}'.`); */
         this.owningProperties_.delete(subscriberId);
     }
     notifyPropertyHasChanged(propName, newValue) {
-        aceConsole.debug(`SubscribableHandler: notifyPropertyHasChanged '${propName}'.`);
+        /* console.debug(`SubscribableHandler: notifyPropertyHasChanged '${propName}'.`); */
         var registry = SubscriberManager.Get();
         this.owningProperties_.forEach((subscribedId) => {
             var owningProperty = registry.get(subscribedId);
@@ -243,12 +270,12 @@ class SubscribableHandler {
                 }
             }
             else {
-                aceConsole.error(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+                console.error(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
             }
         });
     }
     get(target, property) {
-        aceConsole.error(`SubscribableHandler: get '${property.toString()}'.`);
+        console.error(`SubscribableHandler: get '${property.toString()}'.`);
         return (property === SubscribableHandler.IS_OBSERVED_OBJECT) ? true :
             (property === SubscribableHandler.RAW_OBJECT) ? target : target[property];
     }
@@ -268,9 +295,9 @@ class SubscribableHandler {
                 if (target[property] == newValue) {
                     return true;
                 }
-                aceConsole.log(`SubscribableHandler: set property '${property.toString()}' to new value'`);
+                /* console.log(`SubscribableHandler: set property '${property.toString()}' to new value'`); */
                 target[property] = newValue;
-                this.notifyPropertyHasChanged(property.toString(), newValue); // FIXME PropertyKey.toString
+                this.notifyPropertyHasChanged(property.toString(), newValue);
                 return true;
                 break;
         }
@@ -352,7 +379,7 @@ class ObservedObject extends ExtendableProxy {
         let handler = new SubscribableHandler(objectOwningProperty);
         super(obj, handler);
         if (ObservedObject.IsObservedObject(obj)) {
-            aceConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
+            console.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
         }
     } // end of constructor
 }
@@ -399,16 +426,16 @@ class ObservedPropertyAbstract {
         this.id_ = SubscriberManager.Get().MakeId();
         SubscriberManager.Get().add(this);
         if (subscribeMe) {
-            this.subscribers_.add(subscribeMe.id());
+            this.subscribers_.add(subscribeMe.id__());
         }
         if (info) {
             this.info_ = info;
         }
     }
     aboutToBeDeleted() {
-        SubscriberManager.Get().delete(this.id());
+        SubscriberManager.Get().delete(this.id__());
     }
-    id() {
+    id__() {
         return this.id_;
     }
     info() {
@@ -420,8 +447,8 @@ class ObservedPropertyAbstract {
         }
     }
     subscribeMe(subscriber) {
-        aceConsole.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: subscribeMe: Property new subscriber '${subscriber.id()}'`);
-        this.subscribers_.add(subscriber.id());
+        /* console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: subscribeMe: Property new subscriber '${subscriber.id__()}'`); */
+        this.subscribers_.add(subscriber.id__());
     }
     /*
       the inverse function of createOneWaySync or createTwoWaySync
@@ -430,8 +457,7 @@ class ObservedPropertyAbstract {
         this.subscribers_.delete(subscriberId);
     }
     notifyHasChanged(newValue) {
-        //aceConsole.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged to newValue '${JSON.stringify(newValue)}', notifying.`)
-        aceConsole.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
+        ///* console.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged to newValue '${JSON.stringify(newValue)}', notifying.`); *//* console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`); */
         var registry = SubscriberManager.Get();
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = registry.get(subscribedId);
@@ -444,12 +470,12 @@ class ObservedPropertyAbstract {
                 }
             }
             else {
-                aceConsole.error(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+                console.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
             }
         });
     }
     notifyPropertyRead() {
-        aceConsole.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: propertyRead.`);
+        /* console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: propertyRead.`); */
         var registry = SubscriberManager.Get();
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = registry.get(subscribedId);
@@ -507,7 +533,7 @@ class ObservedPropertyObjectAbstract extends ObservedPropertyAbstract {
     }
 }
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -533,11 +559,10 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
     aboutToBeDeleted(unsubscribeMe) {
         this.unsubscribeFromOwningProperty();
         if (unsubscribeMe) {
-            this.unlinkSuscriber(unsubscribeMe.id());
+            this.unlinkSuscriber(unsubscribeMe.id__());
         }
         super.aboutToBeDeleted();
     }
-    // FIXME
     // notification from ObservedObject value one of its
     // props has chnaged. Implies the ObservedProperty has changed
     // Note: this function gets called when in this case:
@@ -545,7 +570,7 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
     // It is NOT called when
     //    thisProp.aObsObj = new ClassA
     hasChanged(newValue) {
-        aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: hasChanged`);
+        /* console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: hasChanged`); */
         this.notifyHasChanged(this.wrappedValue_);
     }
     unsubscribeFromOwningProperty() {
@@ -565,37 +590,37 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
     */
     setValueInternal(newValue) {
         if (typeof newValue !== 'object') {
-            aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
+            /* console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`); */
             return false;
         }
         this.unsubscribeFromOwningProperty();
         if (ObservedObject.IsObservedObject(newValue)) {
-            aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}'] new value is an ObservedObject already`);
+            /* console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an ObservedObject already`); */
             ObservedObject.addOwningProperty(newValue, this);
             this.wrappedValue_ = newValue;
         }
         else if (newValue instanceof SubscribaleAbstract) {
-            aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}'] new value is an SubscribaleAbstract, subscribiung to it.`);
+            /* console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an SubscribaleAbstract, subscribiung to it.`); */
             this.wrappedValue_ = newValue;
             this.wrappedValue_.addOwningProperty(this);
         }
         else {
-            aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}'] new value is an Object, needs to be wrapped in an ObservedObject.`);
+            /* console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an Object, needs to be wrapped in an ObservedObject.`); */
             this.wrappedValue_ = ObservedObject.createNew(newValue, this);
         }
         return true;
     }
     get() {
-        aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: get`);
+        /* console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: get`); */
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
     set(newValue) {
         if (this.wrappedValue_ == newValue) {
-            aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
+            /* console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`); */
             return;
         }
-        aceConsole.debug(`ObservedPropertyObject[${this.id()}, '${this.info() || "unknown"}']: set, changed`);
+        /* console.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: set, changed`); */
         this.setValueInternal(newValue);
         this.notifyHasChanged(newValue);
     }
@@ -632,7 +657,7 @@ class ObservedPropertySimpleAbstract extends ObservedPropertyAbstract {
     }
 }
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -660,12 +685,12 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
     }
     aboutToBeDeleted(unsubscribeMe) {
         if (unsubscribeMe) {
-            this.unlinkSuscriber(unsubscribeMe.id());
+            this.unlinkSuscriber(unsubscribeMe.id__());
         }
         super.aboutToBeDeleted();
     }
     hasChanged(newValue) {
-        aceConsole.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: hasChanged`);
+        /* console.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: hasChanged`); */
         this.notifyHasChanged(this.wrappedValue_);
     }
     /*
@@ -674,20 +699,20 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
       and also notify with this.aboutToChange();
     */
     setValueInternal(newValue) {
-        aceConsole.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}'] new value is of simple type`);
+        /* console.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}'] new value is of simple type`); */
         this.wrappedValue_ = newValue;
     }
     get() {
-        aceConsole.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`);
+        /* console.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`); */
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
     set(newValue) {
         if (this.wrappedValue_ == newValue) {
-            aceConsole.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
+            /* console.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`); */
             return;
         }
-        aceConsole.debug(`ObservedPropertySimple[${this.id()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
+        /* console.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`); */
         this.setValueInternal(newValue);
         this.notifyHasChanged(newValue);
     }
@@ -733,7 +758,7 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
     */
     aboutToBeDeleted() {
         // unregister from parent of this link
-        this.linkedParentProperty_.unlinkSuscriber(this.id());
+        this.linkedParentProperty_.unlinkSuscriber(this.id__());
         // unregister from the ObservedObject
         ObservedObject.removeOwningProperty(this.getObject(), this);
         super.aboutToBeDeleted();
@@ -748,21 +773,21 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
     // this object is subscriber to ObservedObject
     // will call this cb function when property has changed
     hasChanged(newValue) {
-        aceConsole.debug(`SynchedPropertyObjectTwoWay[${this.id()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`);
+        /* console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`); */
         this.notifyHasChanged(this.getObject());
     }
     // get 'read through` from the ObservedProperty
     get() {
-        aceConsole.debug(`SynchedPropertyObjectTwoWay[${this.id()}, '${this.info() || "unknown"}']: get`);
+        /* console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: get`); */
         return this.getObject();
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
         if (this.getObject() == newValue) {
-            aceConsole.debug(`SynchedPropertyObjectTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+            /* console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`); */
             return;
         }
-        aceConsole.debug(`SynchedPropertyObjectTwoWay[${this.id()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+        /* console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`); */
         ObservedObject.removeOwningProperty(this.getObject(), this);
         this.setObject(newValue);
         ObservedObject.addOwningProperty(this.getObject(), this);
@@ -782,7 +807,7 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
     }
 }
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -823,22 +848,22 @@ class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
     // this object is subscriber to ObservedObject
     // will call this cb function when property has changed
     hasChanged(newValue) {
-        aceConsole.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`);
+        /* console.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`); */
         this.notifyHasChanged(this.obsObject_);
     }
     // get 'read through` from the ObservedProperty
     get() {
-        aceConsole.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: get`);
+        /* console.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: get`); */
         this.notifyPropertyRead();
         return this.obsObject_;
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
         if (this.obsObject_ == newValue) {
-            aceConsole.debug(`SynchedPropertyNesedObject[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+            /* console.debug(`SynchedPropertyNesedObject[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`); */
             return;
         }
-        aceConsole.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+        /* console.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`); */
         // unsubscribe from the old value ObservedObject
         ObservedObject.removeOwningProperty(this.obsObject_, this);
         this.obsObject_ = newValue;
@@ -861,7 +886,7 @@ class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
     }
 }
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -877,7 +902,6 @@ class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
 class SynchedPropertySimpleOneWay extends ObservedPropertySimpleAbstract {
     constructor(value, subscribeMe, info) {
         super(subscribeMe, info);
-        // TODO prop is only supported for simple types
         // add a test here that T is a simple type
         this.wrappedValue_ = value;
     }
@@ -890,16 +914,16 @@ class SynchedPropertySimpleOneWay extends ObservedPropertySimpleAbstract {
     }
     // get 'read through` from the ObservedProperty
     get() {
-        aceConsole.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: get returns '${this.wrappedValue_}'`);
+        /* console.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || "unknown"}']: get returns '${this.wrappedValue_}'`); */
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
     set(newValue) {
         if (this.wrappedValue_ == newValue) {
-            aceConsole.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: set with unchanged value '${this.wrappedValue_}'- ignoring.`);
+            /* console.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value '${this.wrappedValue_}'- ignoring.`); */
             return;
         }
-        aceConsole.debug(`SynchedPropertySimpleOneWay[${this.id()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
+        /* console.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`); */
         this.wrappedValue_ = newValue;
         this.notifyHasChanged(newValue);
     }
@@ -929,11 +953,11 @@ class SynchedPropertySimpleOneWaySubscribing extends SynchedPropertySimpleOneWay
     }
     aboutToBeDeleted() {
         // unregister from parent of this prop
-        this.linkedParentProperty_.unlinkSuscriber(this.id());
+        this.linkedParentProperty_.unlinkSuscriber(this.id__());
         super.aboutToBeDeleted();
     }
     hasChanged(newValue) {
-        aceConsole.debug(`SynchedPropertySimpleOneWaySubscribing[${this.id()}, '${this.info() || "unknown"}']: source property hasChanged'.`);
+        /* console.debug(`SynchedPropertySimpleOneWaySubscribing[${this.id__()}, '${this.info() || "unknown"}']: source property hasChanged'.`); */
         this.set(newValue);
     }
     /**
@@ -950,7 +974,7 @@ class SynchedPropertySimpleOneWaySubscribing extends SynchedPropertySimpleOneWay
     }
 }
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -974,7 +998,7 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     the property.
   */
     aboutToBeDeleted() {
-        this.source_.unlinkSuscriber(this.id());
+        this.source_.unlinkSuscriber(this.id__());
         this.source_ = undefined;
         super.aboutToBeDeleted();
     }
@@ -982,22 +1006,22 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     // will call this cb function when property has changed
     // a set (newValue) is not done because get reads through for the source_
     hasChanged(newValue) {
-        aceConsole.debug(`SynchedPropertySimpleTwoWay[${this.id()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`);
+        /* console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`); */
         this.notifyHasChanged(newValue);
     }
     // get 'read through` from the ObservedProperty
     get() {
-        aceConsole.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: get`);
+        /* console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: get`); */
         this.notifyPropertyRead();
         return this.source_.get();
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
         if (this.source_.get() == newValue) {
-            aceConsole.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+            /* console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`); */
             return;
         }
-        aceConsole.debug(`SynchedPropertySimpleTwoWay[${this.id()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+        /* console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`); */
         // the source_ ObservedProeprty will call: this.hasChanged(newValue);
         this.notifyHasChanged(newValue);
         return this.source_.set(newValue);
@@ -1062,7 +1086,7 @@ class LocalStorage extends NativeLocalStorage {
      */
     constructor(initializingProperties = {}) {
         super();
-        aceConsole.log(`${this.constructor.name} constructor: initializing with Object: ${JSON.stringify(initializingProperties)} .`);
+        /* console.log(`${this.constructor.name} constructor: initializing with Object: ${JSON.stringify(initializingProperties)} .`); */
         this.storage_ = new Map();
         Object.keys(initializingProperties).filter((propName) => initializingProperties[propName] != undefined).forEach((propName) => this.addNewPropertyInternal(propName, initializingProperties[propName]));
     }
@@ -1127,12 +1151,12 @@ class LocalStorage extends NativeLocalStorage {
      */
     set(propName, newValue) {
         if (newValue == undefined) {
-            aceConsole.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
+            console.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
             return false;
         }
         var p = this.storage_.get(propName);
         if (p == undefined) {
-            aceConsole.warn(`${this.constructor.name}: set: no property ${propName} error.`);
+            console.warn(`${this.constructor.name}: set: no property ${propName} error.`);
             return false;
         }
         p.set(newValue);
@@ -1149,16 +1173,16 @@ class LocalStorage extends NativeLocalStorage {
      */
     setOrCreate(propName, newValue) {
         if (newValue == undefined) {
-            aceConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
+            console.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
             return false;
         }
         var p = this.storage_.get(propName);
         if (p) {
-            aceConsole.log(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) update existing property`);
+            /* console.log(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) update existing property`); */
             p.set(newValue);
         }
         else {
-            aceConsole.log(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) create new entry and set value`);
+            /* console.log(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) create new entry and set value`); */
             this.addNewPropertyInternal(propName, newValue);
         }
         return true;
@@ -1187,7 +1211,7 @@ class LocalStorage extends NativeLocalStorage {
     link(propName, linkUser, subscribersName) {
         var p = this.storage_.get(propName);
         if (p == undefined) {
-            aceConsole.warn(`${this.constructor.name}: link: no property ${propName} error.`);
+            console.warn(`${this.constructor.name}: link: no property ${propName} error.`);
             return undefined;
         }
         let linkResult = p.createLink(linkUser, propName);
@@ -1222,7 +1246,7 @@ class LocalStorage extends NativeLocalStorage {
     prop(propName, propUser, subscribersName) {
         var p = this.storage_.get(propName);
         if (p == undefined) {
-            aceConsole.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
+            console.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
             return undefined;
         }
         let propResult = p.createProp(propUser, propName);
@@ -1266,7 +1290,7 @@ class LocalStorage extends NativeLocalStorage {
         var p = this.storage_.get(propName);
         if (p) {
             if (p.numberOfSubscrbers()) {
-                aceConsole.error(`${this.constructor.name}: Attempt to delete property ${propName} that has \
+                console.error(`${this.constructor.name}: Attempt to delete property ${propName} that has \
           ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.`);
                 return false;
             }
@@ -1275,7 +1299,7 @@ class LocalStorage extends NativeLocalStorage {
             return true;
         }
         else {
-            aceConsole.warn(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
+            console.warn(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
             return false;
         }
     }
@@ -1289,7 +1313,7 @@ class LocalStorage extends NativeLocalStorage {
         for (let propName of this.keys()) {
             var p = this.storage_.get(propName);
             if (p.numberOfSubscrbers()) {
-                aceConsole.error(`${this.constructor.name}.deleteAll: Attempt to delete property ${propName} that \
+                console.error(`${this.constructor.name}.deleteAll: Attempt to delete property ${propName} that \
           has ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.`);
                 return false;
             }
@@ -1298,7 +1322,7 @@ class LocalStorage extends NativeLocalStorage {
             var p = this.storage_.get(propName);
             p.aboutToBeDeleted();
         }
-        aceConsole.log(`${this.constructor.name}.deleteAll: success`);
+        /* console.log(`${this.constructor.name}.deleteAll: success`); */
     }
     /**
      * Subscribe to value change notifications of named property
@@ -1346,7 +1370,7 @@ class LocalStorage extends NativeLocalStorage {
     }
 }
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1371,11 +1395,11 @@ class AppStorage extends LocalStorage {
      */
     static CreateSingleton(initializingPropersties) {
         if (!AppStorage.Instance_) {
-            aceConsole.log("Creating AppStorage instance.");
+            /* console.log("Creating AppStorage instance."); */
             AppStorage.Instance_ = new AppStorage(initializingPropersties);
         }
         else {
-            aceConsole.error("AppStorage.CreateNewInstance(..): instance exists already, internal error!");
+            console.error("AppStorage.CreateNewInstance(..): instance exists already, internal error!");
         }
     }
     /**
@@ -1470,7 +1494,7 @@ class AppStorage extends LocalStorage {
      * Before deleting a prop from app storage all its subscribers need to
      * unsubscribe from the property.
      * This method fails and returns false if given property still has subscribers
-     * Another reason for failing is unkmown property.
+     * Another reason for failing is unknown property.
      *
      * @param propName
      * @returns false if method failed
@@ -1533,12 +1557,11 @@ class AppStorage extends LocalStorage {
         return AppStorage.GetOrCreate().unsubscribeFromChangesOf(propName, subscriberId);
     }
     static IsMutable(key) {
-        // FIXME(cvetan): No mechanism for immutable/mutable properties
         return true;
     }
     static GetOrCreate() {
         if (!AppStorage.Instance_) {
-            aceConsole.warn("AppStorage instance missing. Use AppStorage.CreateInstance(initObj). Creating instance without any initialization.");
+            console.warn("AppStorage instance missing. Use AppStorage.CreateInstance(initObj). Creating instance without any initialization.");
             AppStorage.Instance_ = new AppStorage({});
         }
         return AppStorage.Instance_;
@@ -1548,123 +1571,7 @@ class AppStorage extends LocalStorage {
 // Should all be protected, but TS lang does not allow access from static member to protected member
 AppStorage.Instance_ = undefined;
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-class LocalStorageLookup {
-    constructor() {
-        this.mapByPath_ = new Map();
-    }
-    /**
-     * Factory method for creating a new LocalStorageInstance
-     * creates and initializes a new instance if 'path' is unused.
-     * otherwise returns existing instance (no re-initialization)
-    *
-    *  Initialization of a new instance:
-    *  Initialzies the new instance with all properties and their values that Object.keys(params) returns
-     * Property values must not be undefined.
-   */
-    static GetOrCreate(path, initializingProperties = {}) {
-        return LocalStorageLookup.GetOrCreateSingleton().getOrCreate(path, initializingProperties);
-    }
-    /**
-     * Add an existing instance of LocalStorage
-     * Assign it and map it eother under stated path, or the path property of the LocalStorage instance
-     * @param existingStorage
-     * @path path
-     * @returns true if successfully added, return s false and does nothing if
-     * LocalStorage instance with chosen path already in LocalStorageLookup
-     */
-    static Add(path, existingStorage) {
-        return LocalStorageLookup.GetOrCreateSingleton().add(path, existingStorage);
-    }
-    /**
-     * Orderly delete a LocalStorge instance before its owning Ability, View, or service UI goes out of scope.
-     * Precondition for deleting a LocalStorqge instance is that it ni longer contains any proeprties with
-     * any subscribers left.  If even a single property with one or more subscribers exists the storage object
-     * will remain untouched and Delete() returns false
-     */
-    static Delete(path) {
-        return LocalStorageLookup.GetOrCreateSingleton().delete(path);
-    }
-    /**
-     * chk LocalStorage object with given path is known
-     * same as Map.has
-    */
-    static Has(path) {
-        return LocalStorageLookup.GetOrCreateSingleton().has(path);
-    }
-    /**
-     * retrieve LocalStorge by path
-     * zame as Map.get
-    */
-    static Get(path) {
-        return LocalStorageLookup.GetOrCreateSingleton().get(path);
-    }
-    // internals =======================================================================
-    static GetOrCreateSingleton() {
-        if (!LocalStorageLookup.INSTANCE_) {
-            aceConsole.log("Creating LocalStorageLookup singleton");
-            LocalStorageLookup.INSTANCE_ = new LocalStorageLookup();
-        }
-        return LocalStorageLookup.INSTANCE_;
-    }
-    has(path) {
-        return this.mapByPath_.has(path);
-    }
-    get(path) {
-        return this.mapByPath_.get(path);
-    }
-    delete(path) {
-        let stor = this.get(path);
-        if (!stor) {
-            aceConsole.warn(`LocalStorageLookup: Attempt to delete non-existing LocalStorage with path ${path}`);
-            return false;
-        }
-        const canDelete = stor.aboutToBeDeleted();
-        if (canDelete) {
-            this.mapByPath_.delete(path);
-            return true;
-        }
-        else {
-            aceConsole.warn(`LocalStorageLookup: Attempt to delete LocalStorage with path 
-               ${path}, still has subscribers. Can not delete!`);
-            return false;
-        }
-    }
-    add(path, existingStorage) {
-        if (this.has(path)) {
-            aceConsole.error(`LocalStorageLookup: Add LocalStorge instance with path '${path}' exists already. Failing to add.`);
-            return false;
-        }
-        this.mapByPath_.set(path, existingStorage);
-        return true;
-    }
-    getOrCreate(path, initializingProperties) {
-        let stor = this.get(path);
-        if (stor) {
-            aceConsole.log(`LocalStorageLookup: GetOrCreateNew returning exisitng LocalStorage with path '${path}' .`);
-            return stor;
-        }
-        aceConsole.log(`LocalStorageLookup: GetOrCreateNew creating new LocalStorage with path '${path}' .`);
-        stor = new LocalStorage(initializingProperties);
-        this.mapByPath_.set(path, stor);
-        return stor;
-    }
-}
-LocalStorageLookup.INSTANCE_ = undefined;
-/*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1713,19 +1620,19 @@ class View extends NativeView {
         this.localStoragebackStore_ = undefined;
         if (parent) {
             // this View is not a top-level View
-            aceConsole.log(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
+            /* console.log(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`); */
             this.localStorage_ = parent.localStorage_;
         }
         else if (localStorage) {
             this.localStorage_ = localStorage;
-            aceConsole.log(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
+            /* console.log(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`); */
         }
         SubscriberManager.Get().add(this);
-        aceConsole.debug(`${this.constructor.name}: constructor done`);
+        /* console.debug(`${this.constructor.name}: constructor done`); */
     }
     get localStorage_() {
         if (!this.localStoragebackStore_) {
-            aceConsole.warn(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
+            console.warn(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
             this.localStoragebackStore_ = new LocalStorage({ /* emty */});
         }
         return this.localStoragebackStore_;
@@ -1736,35 +1643,41 @@ class View extends NativeView {
             return;
         }
         if (this.localStoragebackStore_) {
-            aceConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+            console.error(`${this.constructor.name} is setting LocalStorage instance twice`);
         }
         this.localStoragebackStore_ = instance;
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
-    id() {
+    id__() {
         return this.id_;
+    }
+    // temporary function, do not use, it will be removed soon!
+    // prupsoe is to allow eDSL transpiler to fix a bug that 
+    // relies on this method
+    id() {
+        return this.id__();
     }
     propertyHasChanged(info) {
         if (info) {
             // need to sync container instanceId to switch instanceId in C++ side.
             this.syncInstanceId();
             if (this.propsUsedForRender.has(info)) {
-                aceConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View needs update`);
+                /* console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View needs update`); */
                 this.markNeedUpdate();
             }
             else {
-                aceConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View does NOT need update`);
+                /* console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View does NOT need update`); */
             }
             let cb = this.watchedProps.get(info);
             if (cb) {
-                aceConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. calling @Watch function`);
+                /* console.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. calling @Watch function`); */
                 cb.call(this, info);
             }
             this.restoreInstanceId();
         } // if info avail.
     }
     propertyRead(info) {
-        aceConsole.debug(`${this.constructor.name}: propertyRead ['${info || "unknowm"}'].`);
+        /* console.debug(`${this.constructor.name}: propertyRead ['${info || "unknowm"}'].`); */
         if (info && (info != "unknown") && this.isRenderingInProgress) {
             this.propsUsedForRender.add(info);
         }
@@ -1774,7 +1687,7 @@ class View extends NativeView {
         return this.propsUsedForRender;
     }
     aboutToRender() {
-        aceConsole.log(`${this.constructor.name}: aboutToRender`);
+        /* console.log(`${this.constructor.name}: aboutToRender`); */
         // reset
         this.propsUsedForRender = new Set();
         this.isRenderingInProgress = true;
@@ -1785,7 +1698,7 @@ class View extends NativeView {
     }
     onRenderDone() {
         this.isRenderingInProgress = false;
-        aceConsole.log(`${this.constructor.name}: onRenderDone: render performed get access to these properties: ${JSON.stringify(Array.from(this.propsUsedForRender))}.`);
+        /* console.log(`${this.constructor.name}: onRenderDone: render performed get access to these properties: ${JSON.stringify(Array.from(this.propsUsedForRender))}.`); */
     }
     /**
      * Function to be called from the constructor of the sub component
@@ -1899,7 +1812,7 @@ class PersistentStorage {
     persistProp(propName, defaultValue) {
         if (this.persistProp1(propName, defaultValue)) {
             // persist new prop
-            aceConsole.debug(`PersistentStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
+            /* console.debug(`PersistentStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`); */
             PersistentStorage.Storage_.set(propName, this.links_.get(propName).get());
         }
     }
@@ -1907,23 +1820,23 @@ class PersistentStorage {
     // does everything except writing prop to disk
     persistProp1(propName, defaultValue) {
         if (defaultValue == null || defaultValue == undefined) {
-            aceConsole.error(`PersistentStorage: persistProp for ${propName} called with 'null' or 'undefined' default value!`);
+            console.error(`PersistentStorage: persistProp for ${propName} called with 'null' or 'undefined' default value!`);
             return false;
         }
         if (this.links_.get(propName)) {
-            aceConsole.warn(`PersistentStorage: persistProp: ${propName} is already persisted`);
+            console.warn(`PersistentStorage: persistProp: ${propName} is already persisted`);
             return false;
         }
         let link = AppStorage.Link(propName, this);
         if (link) {
-            aceConsole.debug(`PersistentStorage: persistProp ${propName} in AppStorage, using that`);
+            /* console.debug(`PersistentStorage: persistProp ${propName} in AppStorage, using that`); */
             this.links_.set(propName, link);
         }
         else {
             let newValue = PersistentStorage.Storage_.get(propName);
             let returnValue;
             if (!newValue) {
-                aceConsole.debug(`PersistentStorage: no entry for ${propName}, will initialize with default value`);
+                /* console.debug(`PersistentStorage: no entry for ${propName}, will initialize with default value`); */
                 returnValue = defaultValue;
             }
             else {
@@ -1931,7 +1844,7 @@ class PersistentStorage {
             }
             link = AppStorage.SetAndLink(propName, returnValue, this);
             this.links_.set(propName, link);
-            aceConsole.debug(`PersistentStorage: created new persistent prop for ${propName}`);
+            /* console.debug(`PersistentStorage: created new persistent prop for ${propName}`); */
         }
         return true;
     }
@@ -1945,34 +1858,34 @@ class PersistentStorage {
             link.aboutToBeDeleted();
             this.links_.delete(propName);
             PersistentStorage.Storage_.delete(propName);
-            aceConsole.debug(`PersistentStorage: deleteProp: no longer persisting '${propName}'.`);
+            /* console.debug(`PersistentStorage: deleteProp: no longer persisting '${propName}'.`); */
         }
         else {
-            aceConsole.warn(`PersistentStorage: '${propName}' is not a persisted property warning.`);
+            console.warn(`PersistentStorage: '${propName}' is not a persisted property warning.`);
         }
     }
     write() {
         this.links_.forEach((link, propName, map) => {
-            aceConsole.debug(`PersistentStorage: writing ${propName} to storage`);
+            /* console.debug(`PersistentStorage: writing ${propName} to storage`); */
             PersistentStorage.Storage_.set(propName, link.get());
         });
     }
     propertyHasChanged(info) {
-        aceConsole.debug("PersistentStorage: property changed");
+        /* console.debug("PersistentStorage: property changed"); */
         this.write();
     }
     // public required by the interface, use the static method instead!
     aboutToBeDeleted() {
-        aceConsole.debug("PersistentStorage: about to be deleted");
+        /* console.debug("PersistentStorage: about to be deleted"); */
         this.links_.forEach((val, key, map) => {
-            aceConsole.debug(`PersistentStorage: removing ${key}`);
+            /* console.debug(`PersistentStorage: removing ${key}`); */
             val.aboutToBeDeleted();
         });
         this.links_.clear();
-        SubscriberManager.Get().delete(this.id());
+        SubscriberManager.Get().delete(this.id__());
         PersistentStorage.Storage_.clear();
     }
-    id() {
+    id__() {
         return this.id_;
     }
     /**
@@ -1985,21 +1898,34 @@ class PersistentStorage {
     * @param key property that has changed
     */
     static NotifyHasChanged(propName) {
-        aceConsole.debug(`PersistentStorage: force writing '${propName}'-
-        '${PersistentStorage.GetOrCreate().links_.get(propName)}' to storage`);
+        /* console.debug(`PersistentStorage: force writing '${propName}'-
+        '${PersistentStorage.GetOrCreate().links_.get(propName)}' to storage`); */
         PersistentStorage.Storage_.set(propName, PersistentStorage.GetOrCreate().links_.get(propName).get());
     }
 }
 PersistentStorage.Instance_ = undefined;
-
+;
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 class DistributedStorage {
-    constructor(sessionId, statusNotifier) {
+    constructor(sessionId, notifier) {
         this.links_ = new Map();
         this.id_ = SubscriberManager.Get().MakeId();
         SubscriberManager.Get().add(this);
         this.aviliable_ = false;
-        this.storage_ = new DistributedObject(sessionId, this);
-        this.notifier_ = statusNotifier;
+        this.notifier_ = notifier;
     }
     keys() {
         let result = [];
@@ -2013,7 +1939,7 @@ class DistributedStorage {
     }
     distributeProp(propName, defaultValue) {
         if (this.link(propName, defaultValue)) {
-            aceConsole.debug(`DistributedStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
+            /* console.debug(`DistributedStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`); */
         }
     }
     distributeProps(properties) {
@@ -2021,16 +1947,16 @@ class DistributedStorage {
     }
     link(propName, defaultValue) {
         if (defaultValue == null || defaultValue == undefined) {
-            aceConsole.error(`DistributedStorage: linkProp for ${propName} called with 'null' or 'undefined' default value!`);
+            console.error(`DistributedStorage: linkProp for ${propName} called with 'null' or 'undefined' default value!`);
             return false;
         }
         if (this.links_.get(propName)) {
-            aceConsole.warn(`DistributedStorage: linkProp: ${propName} is already exist`);
+            console.warn(`DistributedStorage: linkProp: ${propName} is already exist`);
             return false;
         }
-        let link = AppStorage.GetOrCreate().link(propName, this);
+        let link = AppStorage.Link(propName, this);
         if (link) {
-            aceConsole.debug(`DistributedStorage: linkProp ${propName} in AppStorage, using that`);
+            /* console.debug(`DistributedStorage: linkProp ${propName} in AppStorage, using that`); */
             this.links_.set(propName, link);
             this.setDistributedProp(propName, defaultValue);
         }
@@ -2039,16 +1965,16 @@ class DistributedStorage {
             if (this.aviliable_) {
                 let newValue = this.getDistributedProp(propName);
                 if (newValue == null) {
-                    aceConsole.debug(`DistributedStorage: no entry for ${propName}, will initialize with default value`);
+                    /* console.debug(`DistributedStorage: no entry for ${propName}, will initialize with default value`); */
                     this.setDistributedProp(propName, defaultValue);
                 }
                 else {
                     returnValue = newValue;
                 }
             }
-            link = AppStorage.GetOrCreate().setAndLink(propName, returnValue, this);
+            link = AppStorage.SetAndLink(propName, returnValue, this);
             this.links_.set(propName, link);
-            aceConsole.debug(`DistributedStorage: created new linkProp prop for ${propName}`);
+            /* console.debug(`DistributedStorage: created new linkProp prop for ${propName}`); */
         }
         return true;
     }
@@ -2062,21 +1988,20 @@ class DistributedStorage {
             }
         }
         else {
-            aceConsole.warn(`DistributedStorage: '${propName}' is not a distributed property warning.`);
+            console.warn(`DistributedStorage: '${propName}' is not a distributed property warning.`);
         }
     }
     write(key) {
         let link = this.links_.get(key);
         if (link) {
-            aceConsole.info(`DistributedStorage: write ${key}-${JSON.stringify(link.get())} `);
-            this.setDistributedProp(key, link.get())
+            this.setDistributedProp(key, link.get());
         }
     }
     // public required by the interface, use the static method instead!
     aboutToBeDeleted() {
-        aceConsole.debug("DistributedStorage: about to be deleted");
+        /* console.debug("DistributedStorage: about to be deleted"); */
         this.links_.forEach((val, key, map) => {
-            aceConsole.debug(`DistributedStorage: removing ${key}`);
+            /* console.debug(`DistributedStorage: removing ${key}`); */
             val.aboutToBeDeleted();
         });
         this.links_.clear();
@@ -2086,19 +2011,19 @@ class DistributedStorage {
         return this.id_;
     }
     propertyHasChanged(info) {
-        aceConsole.info(`DistributedStorage: property changed info:${JSON.stringify(info)} `);
+        /* console.debug("DistributedStorage: property changed"); */
         this.write(info);
     }
     onDataOnChange(propName) {
         let link = this.links_.get(propName);
         let newValue = this.getDistributedProp(propName);
         if (link && newValue != null) {
-            aceConsole.info(`DistributedStorage: dataOnChange[${propName}-${newValue}]`);
-            link.set(newValue)
+            /* console.info(`DistributedStorage: dataOnChange[${propName}-${newValue}]`); */
+            link.set(newValue);
         }
     }
     onConnected(status) {
-        aceConsole.info(`DistributedStorage onConnected: status = ${status}`);
+        /* console.info(`DistributedStorage onConnected: status = ${status}`); */
         if (!this.aviliable_) {
             this.syncProp();
             this.aviliable_ = true;
@@ -2112,16 +2037,18 @@ class DistributedStorage {
             let newValue = this.getDistributedProp(key);
             if (newValue == null) {
                 this.setDistributedProp(key, val.get());
-            } else {
+            }
+            else {
                 val.set(newValue);
             }
         });
     }
     setDistributedProp(key, value) {
         if (!this.aviliable_) {
-            aceConsole.warn(`DistributedStorage is not aviliable`);
+            console.warn(`DistributedStorage is not aviliable`);
             return;
         }
+        console.error(`DistributedStorage value is object ${key}-${JSON.stringify(value)}`);
         if (typeof value == 'object') {
             this.storage_.set(key, JSON.stringify(value));
             return;
@@ -2142,6 +2069,7 @@ class DistributedStorage {
         return value;
     }
 }
+;
 /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -2191,7 +2119,7 @@ class Environment {
     envProp(key, value) {
         let prop = AppStorage.Prop(key);
         if (prop) {
-            aceConsole.warn(`Environment: envProp '${key}': Property already exists in AppStorage. Not using environment property.`);
+            console.warn(`Environment: envProp '${key}': Property already exists in AppStorage. Not using environment property.`);
             return false;
         }
         let tmp;
@@ -2219,12 +2147,12 @@ class Environment {
         }
         prop = AppStorage.SetAndProp(key, tmp);
         this.props_.set(key, prop);
-        aceConsole.debug(`Environment: envProp for '${key}' done.`);
+        /* console.debug(`Environment: envProp for '${key}' done.`); */
     }
     envProps(properties) {
         properties.forEach(property => {
             this.envProp(property.key, property.defaultValue);
-            aceConsole.debug(`Environment: envProps for '${property.key}' done.`);
+            /* console.debug(`Environment: envProps for '${property.key}' done.`); */
         });
     }
     keys() {
@@ -2240,10 +2168,10 @@ class Environment {
     onValueChanged(key, value) {
         let ok = AppStorage.Set(key, value);
         if (ok) {
-            aceConsole.debug(`Environment: onValueChanged: ${key} changed to ${value}`);
+            /* console.debug(`Environment: onValueChanged: ${key} changed to ${value}`); */
         }
         else {
-            aceConsole.warn(`Environment: onValueChanged: error changing ${key}! See results above.`);
+            console.warn(`Environment: onValueChanged: error changing ${key}! See results above.`);
         }
     }
     aboutToBeDeleted() {
@@ -2282,5 +2210,5 @@ Environment.Instance_ = undefined;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-aceConsole.debug("ACE State Mgmt init ...");
-PersistentStorage.ConfigureBackend(new Storage());
+/* console.debug("ACE State Mgmt init ..."); */
+
