@@ -2016,6 +2016,15 @@ std::string FrontendDelegateDeclarative::RestoreRouterStack(const std::string& c
         LOGW("restore stack size is invalid");
         return "";
     }
+    if (pageRouteStack_.size() > 0) {
+        LOGI("RestoreRouterStack cleaning old pages");
+        for (const auto& info : pageRouteStack_) {
+            OnPageDestroy(info.pageId);
+            pageMap_.erase(info.pageId);
+            pageParamMap_.erase(info.pageId);
+        }
+    }
+    pageRouteStack_.clear();
     for (int32_t index = 0; index < stackSize - 1; ++index) {
         std::string url = routerStack->GetArrayItem(index)->ToString();
         // remove 2 useless character, as "XXX" to XXX
