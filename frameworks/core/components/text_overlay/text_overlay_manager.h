@@ -210,9 +210,14 @@ public:
         return textOverlayRect_;
     }
 
-    void SetTextOverlayRect(const Rect& textOverlayRect)
+    void AddTextOverlayRect(const Rect& textOverlayRect)
     {
         textOverlayRect_.emplace_back(textOverlayRect);
+    }
+
+    void ClearTextOverlayRect()
+    {
+        textOverlayRect_.clear();
     }
 
     const RefPtr<RenderNode> GetTargetNode() const;
